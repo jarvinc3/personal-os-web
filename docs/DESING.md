@@ -22,7 +22,7 @@ Sleek UI/UX design emphasizes a modern, minimalist aesthetic ("less is more") fo
 
 - Visual style: modern, minimal, clean
 - Typography scale: desktop-first expressive scale | Fonts: primary=Inter, display=Inter, mono=JetBrains Mono | weights=100, 200, 300, 400, 500, 600, 700, 800, 900
-- Color palette: primary, neutral, success, warning, danger | Tokens: primary=#3B82F6, secondary=#8B5CF6, success=#16A34A, warning=#D97706, danger=#DC2626, surface=#FFFFFF, text=#111827
+- Color palette: primary, neutral, success, warning, danger | Tokens: primary=#D6C5B3, secondary=#78716C, success=#16A34A, warning=#D97706, danger=#DC2626, surface=#FFFFFF, text=#1C1917
 - Spacing scale: 8pt baseline grid
 
 ## Accessibility
@@ -98,14 +98,14 @@ When generating design-system guidance, use this structure:
 name: Sleek
 
 colors:
-  primary: "#3B82F6"
-  secondary: "#8B5CF6"
+  primary: "#D6C5B3"
+  secondary: "#78716C"
   success: "#16A34A"
   warning: "#D97706"
   danger: "#DC2626"
   surface: "#FFFFFF"
-  text: "#111827"
-  neutral: "#FFFFFF"
+  text: "#1C1917"
+  neutral: "#FAF9F6"
 
 typography:
   h1:
@@ -147,11 +147,11 @@ Modern minimalist aesthetic with clean lines, intentional color palette, subtle 
 
 ## Colors
 
-- **Primary (#3B82F6):** Token from style foundations.
-- **Secondary (#8B5CF6):** Token from style foundations.
+- **Primary (#D6C5B3):** Warm beige, representing natural sand/beige tones.
+- **Secondary (#78716C):** Warm stone grey, for low-mid contrast elements.
 - **Success (#16A34A):** Token from style foundations.
 - **Warning (#D97706):** Token from style foundations.
 - **Danger (#DC2626):** Token from style foundations.
-- **Surface (#FFFFFF):** Token from style foundations.
-- **Text (#111827):** Token from style foundations.
-- **Neutral (#FFFFFF):** Derived from the surface token for official format compatibility.
+- **Surface (#FFFFFF):** Card surface.
+- **Text (#1C1917):** Deep warm charcoal text.
+- **Neutral (#FAF9F6):** Warm cream background.
