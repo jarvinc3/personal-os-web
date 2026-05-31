@@ -172,7 +172,11 @@ export default function TermsPage() {
 
         <Section title="9. Terminación del servicio">
           <p>
-            Puedes eliminar tu cuenta en cualquier momento desde la aplicación.
+            Puedes solicitar la eliminación de tu cuenta en cualquier momento desde{" "}
+            <a href="/delete-account" className="text-primary hover:underline">
+              personal-os.app/delete-account
+            </a>
+            .
             Nos reservamos el derecho de suspender o eliminar cuentas que violen
             estos términos, con o sin previo aviso.
           </p>

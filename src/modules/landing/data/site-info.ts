@@ -186,6 +186,7 @@ export const landingContent = {
         links: [
           { href: "/privacy", label: "Política de privacidad" },
           { href: "/terms", label: "Términos y condiciones" },
+          { href: "/delete-account", label: "Eliminar cuenta" },
         ],
       },
     ],

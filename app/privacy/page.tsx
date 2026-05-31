@@ -182,7 +182,11 @@ export default function PrivacyPage() {
               </li>
             </ul>
             <p>
-              Para ejercer estos derechos, contacta a{" "}
+              Para eliminar tu cuenta y los datos asociados, consulta la página{" "}
+              <a href="/delete-account" className="text-primary hover:underline">
+                Eliminar cuenta
+              </a>
+              . Para otros derechos, contacta a{" "}
               <a
                 href="mailto:privacidad@personal-os.app"
                 className="text-primary hover:underline"
