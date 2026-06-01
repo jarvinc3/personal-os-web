@@ -3,6 +3,7 @@ import { IBM_Plex_Mono } from "next/font/google";
 
 import { siteInfo } from "@/src/modules/landing/data/site-info";
 import { Toaster } from "@/src/shared/components/ui/sonner";
+import { appAssets } from "@/src/shared/constants/app-assets";
 import { cn } from "@/src/shared/lib/utils";
 import { ThemeProvider } from "@/src/shared/providers/theme-provider";
 import "./globals.css";
@@ -44,6 +45,13 @@ export const metadata: Metadata = {
   robots: {
     index: true,
     follow: true,
+  },
+  icons: {
+    icon: [
+      { url: appAssets.favicon96, sizes: "96x96", type: "image/png" },
+      { url: appAssets.faviconIco },
+    ],
+    apple: appAssets.appleTouchIcon,
   },
 };
 

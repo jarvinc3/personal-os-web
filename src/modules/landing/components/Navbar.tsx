@@ -4,6 +4,8 @@ import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
+import { AppLogo } from "@/src/shared/components/brand/app-logo";
+
 import { landingContent } from "../data/site-info";
 
 export function Navbar() {
@@ -29,9 +31,10 @@ export function Navbar() {
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
         {/* Logo */}
         <Link href="/" className="group flex items-center gap-2.5">
-          <div className="relative flex h-8 w-8 items-center justify-center rounded-xl border-2 border-text bg-primary shadow-[2px_2px_0px_0px_#111827] transition-transform duration-200 group-hover:translate-x-0.5 group-hover:translate-y-0.5 group-hover:shadow-none">
-            <span className="text-sm font-bold text-primary-foreground">P</span>
-          </div>
+          <AppLogo
+            size="sm"
+            className="transition-transform duration-200 group-hover:translate-x-0.5 group-hover:translate-y-0.5"
+          />
           <span className="text-sm font-semibold tracking-tight">
             {landingContent.nav.logoText}
           </span>

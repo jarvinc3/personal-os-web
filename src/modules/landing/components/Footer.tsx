@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { AppLogo } from "@/src/shared/components/brand/app-logo";
 import { landingContent, siteInfo } from "../data/site-info";
 
 export function Footer() {
@@ -13,11 +14,10 @@ export function Footer() {
           {/* Brand column */}
           <div className="md:col-span-2">
             <Link href="/" className="group mb-4 flex items-center gap-2.5">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl border-2 border-text bg-primary shadow-[2px_2px_0px_0px_#111827] transition-transform duration-200 group-hover:translate-x-0.5 group-hover:translate-y-0.5 group-hover:shadow-none">
-                <span className="text-base font-bold text-primary-foreground">
-                  P
-                </span>
-              </div>
+              <AppLogo
+                size="md"
+                className="transition-transform duration-200 group-hover:translate-x-0.5 group-hover:translate-y-0.5"
+              />
               <span className="text-base font-semibold tracking-tight">
                 {siteInfo.name}
               </span>

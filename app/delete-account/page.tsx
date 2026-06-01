@@ -54,6 +54,10 @@ export default function DeleteAccountPage() {
         <div className="prose-landing">
           <Section title="Cómo solicitar la eliminación">
             <p>
+              Si tienes una cuenta con email y contraseña, también puedes eliminarla desde la
+              app en <strong className="text-foreground">Ajustes → Zona de peligro → Eliminar cuenta</strong>.
+            </p>
+            <p>
               Si tienes una cuenta en <strong className="text-foreground">Personal OS</strong>,
               puedes solicitar en cualquier momento que eliminemos tu cuenta y los datos
               asociados. Sigue estos pasos:
