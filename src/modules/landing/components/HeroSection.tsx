@@ -1,5 +1,6 @@
 "use client";
 
+import { APP_ROUTES } from "@/src/shared/constants/app-routes";
 import { motion } from "motion/react";
 import Link from "next/link";
 import { landingContent } from "../data/site-info";
@@ -97,6 +98,21 @@ export function HeroSection() {
             {landingContent.hero.secondaryCta}
           </Link>
         </motion.div>
+
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+          className="mt-4 text-sm text-muted-foreground"
+        >
+          ¿Ya tienes cuenta?{" "}
+          <Link
+            href={APP_ROUTES.auth.login}
+            className="font-medium text-foreground underline-offset-4 hover:underline"
+          >
+            Iniciar sesión
+          </Link>
+        </motion.p>
 
         {/* Stats row */}
         <motion.div

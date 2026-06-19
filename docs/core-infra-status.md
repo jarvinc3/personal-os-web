@@ -2,6 +2,8 @@
 
 Documento de estado para dejar trazabilidad de lo implementado en frontend (`personal-os-app`) y definir los siguientes pasos para cerrar core/infra antes de construir los modulos de producto (finanzas, agenda, proyectos, etc.).
 
+> **Nota:** Este documento describe principalmente el cliente React Native (`personal-os-app`). Para el estado de **Fase 1 web** (`personal-os-web`: auth + settings), ver [`docs/modules/auth.md`](./modules/auth.md) y la app en `/login`, `/home`, `/settings`.
+
 ---
 
 ## 1) Estado actual (implementado)

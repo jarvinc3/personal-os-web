@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import { AppLogo } from "@/src/shared/components/brand/app-logo";
+import { APP_ROUTES } from "@/src/shared/constants/app-routes";
 
 import { landingContent } from "../data/site-info";
 
@@ -56,6 +57,12 @@ export function Navbar() {
         {/* CTA */}
         <div className="hidden items-center gap-3 md:flex">
           <Link
+            href={APP_ROUTES.auth.login}
+            className="rounded-xl border-2 border-text bg-white px-4 py-2 text-sm font-bold text-text shadow-[2px_2px_0px_0px_#111827] transition-all duration-200 hover:translate-x-px hover:translate-y-px hover:shadow-[1px_1px_0px_0px_#111827]"
+          >
+            Iniciar sesión
+          </Link>
+          <Link
             href="/#waitlist"
             className="group relative overflow-hidden rounded-xl border-2 border-text bg-primary px-4 py-2 text-sm font-bold text-primary-foreground shadow-[4px_4px_0px_0px_#111827] transition-all duration-200 hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_#111827] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none"
           >
@@ -102,6 +109,13 @@ export function Navbar() {
                   {link.label}
                 </Link>
               ))}
+              <Link
+                href={APP_ROUTES.auth.login}
+                onClick={() => setMobileOpen(false)}
+                className="rounded-lg px-3 py-2.5 text-sm font-bold text-foreground transition-colors hover:bg-white/5"
+              >
+                Iniciar sesión
+              </Link>
               <Link
                 href="/#waitlist"
                 onClick={() => setMobileOpen(false)}

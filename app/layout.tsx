@@ -6,6 +6,7 @@ import { Toaster } from "@/src/shared/components/ui/sonner";
 import { TooltipProvider } from "@/src/shared/components/ui/tooltip";
 import { appAssets } from "@/src/shared/constants/app-assets";
 import { cn } from "@/src/shared/lib/utils";
+import { AuthBootstrapProvider } from "@/src/shared/providers/auth-bootstrap-provider";
 import { QueryProvider } from "@/src/shared/providers/query-provider";
 import { ThemeProvider } from "@/src/shared/providers/theme-provider";
 import "./globals.css";
@@ -74,12 +75,14 @@ export default function RootLayout({
     >
       <body>
         <QueryProvider>
-          <TooltipProvider>
-            <ThemeProvider defaultTheme="light">
-              <Toaster position="top-center" richColors />
-              {children}
-            </ThemeProvider>
-          </TooltipProvider>
+          <AuthBootstrapProvider>
+            <TooltipProvider>
+              <ThemeProvider defaultTheme="light">
+                <Toaster position="top-center" richColors />
+                {children}
+              </ThemeProvider>
+            </TooltipProvider>
+          </AuthBootstrapProvider>
         </QueryProvider>
       </body>
     </html>
