@@ -188,7 +188,7 @@ Responsive typography:
 ```html
 <div class="bg-blue-500">Blue background</div>
 <div class="bg-gray-100">Light gray background</div>
-<div class="bg-linear-to-r from-blue-500 to-purple-600">
+<div class="bg-gradient-to-r from-blue-500 to-purple-600">
   Gradient background
 </div>
 ```
@@ -213,10 +213,10 @@ Responsive typography:
 
 ## Responsive Breakpoints Reference
 
-| Prefix | Min Width | CSS Equivalent               |
-| ------ | --------- | ---------------------------- |
-| `sm:`  | 640px     | `@media (min-width: 640px)`  |
-| `md:`  | 768px     | `@media (min-width: 768px)`  |
-| `lg:`  | 1024px    | `@media (min-width: 1024px)` |
-| `xl:`  | 1280px    | `@media (min-width: 1280px)` |
-| `2xl:` | 1536px    | `@media (min-width: 1536px)` |
+| Prefix | Min Width | CSS Equivalent |
+|--------|-----------|----------------|
+| `sm:` | 640px | `@media (min-width: 640px)` |
+| `md:` | 768px | `@media (min-width: 768px)` |
+| `lg:` | 1024px | `@media (min-width: 1024px)` |
+| `xl:` | 1280px | `@media (min-width: 1280px)` |
+| `2xl:` | 1536px | `@media (min-width: 1536px)` |

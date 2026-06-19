@@ -19,20 +19,13 @@ Iconografía neumórfica de Personal OS (módulos: finanzas, calendario, tareas,
 | `icon-light.png` | 1024×1024 | Icono claro — drawer, pantalla de auth (`getAppIconSource` en modo light).  |
 | `icon-dark.png`  | 1254×1254 | Icono oscuro — mismo arte en gris oscuro (`getAppIconSource` en modo dark). |
 
-## Web / PWA (export estático)
+## Otros (uso en la app)
 
-| Archivo                | Tamaño  | Rol                                                  |
-| ---------------------- | ------- | ---------------------------------------------------- |
-| `apple-touch-icon.png` | 180×180 | “Añadir a pantalla de inicio” en iOS Safari.         |
-| `icon-192x192.png`     | 192×192 | Manifest PWA / Android web (si se configura aparte). |
-| `favicon.svg`          | vector  | Fuente escalable; no usada por Expo por defecto.     |
-
-## Otros / no usados en `app.json`
-
-| Archivo       | Notas                                                                                  |
-| ------------- | -------------------------------------------------------------------------------------- |
-| `icon-x2.png` | Export grande (~1254px) con fondo oscuro; reserva o marketing. No enlazar en prebuild. |
-| `images/*`    | Ilustraciones de bienvenida y banners; solo UI, no iconos de sistema.                  |
+| Archivo       | Notas                                                                                          |
+| ------------- | ---------------------------------------------------------------------------------------------- |
+| `icon-x2.png` | Export grande (~1254px) con fondo oscuro; reserva o marketing. No enlazar en prebuild.         |
+| `images/*`    | Ilustraciones de bienvenida; solo UI, no iconos de sistema.                                    |
+| `banners/*`   | Banners mensuales del timeline de transacciones (`banner-enero.png` … `banner-diciembre.png`). |
 
 ## Reglas Expo
 

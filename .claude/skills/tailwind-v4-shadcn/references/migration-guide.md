@@ -15,16 +15,16 @@ This guide helps you migrate from hardcoded Tailwind colors (`bg-blue-600`) to s
 
 ## Semantic Color Mapping
 
-| Hardcoded Color                 | CSS Variable                          | Use Case                                |
-| ------------------------------- | ------------------------------------- | --------------------------------------- |
-| `bg-red-*` / `text-red-*`       | `bg-destructive` / `text-destructive` | Critical issues, errors, delete actions |
-| `bg-green-*` / `text-green-*`   | `bg-success` / `text-success`         | Success states, positive metrics        |
-| `bg-yellow-*` / `text-yellow-*` | `bg-warning` / `text-warning`         | Warnings, moderate issues               |
-| `bg-blue-*` / `text-blue-*`     | `bg-info` or `bg-primary`             | Info boxes, primary actions             |
-| `bg-gray-*` / `text-gray-*`     | `bg-muted` / `text-muted-foreground`  | Backgrounds, secondary text             |
-| `bg-purple-*`                   | `bg-info`                             | Remove - use blue instead               |
-| `bg-orange-*`                   | `bg-warning`                          | Remove - use yellow instead             |
-| `bg-emerald-*`                  | `bg-success`                          | Remove - use green instead              |
+| Hardcoded Color | CSS Variable | Use Case |
+|----------------|--------------|----------|
+| `bg-red-*` / `text-red-*` | `bg-destructive` / `text-destructive` | Critical issues, errors, delete actions |
+| `bg-green-*` / `text-green-*` | `bg-success` / `text-success` | Success states, positive metrics |
+| `bg-yellow-*` / `text-yellow-*` | `bg-warning` / `text-warning` | Warnings, moderate issues |
+| `bg-blue-*` / `text-blue-*` | `bg-info` or `bg-primary` | Info boxes, primary actions |
+| `bg-gray-*` / `text-gray-*` | `bg-muted` / `text-muted-foreground` | Backgrounds, secondary text |
+| `bg-purple-*` | `bg-info` | Remove - use blue instead |
+| `bg-orange-*` | `bg-warning` | Remove - use yellow instead |
+| `bg-emerald-*` | `bg-success` | Remove - use green instead |
 
 ---
 
@@ -92,12 +92,12 @@ This guide helps you migrate from hardcoded Tailwind colors (`bg-blue-600`) to s
 
 ❌ **Before:**
 ```tsx
-<div className="bg-linear-to-r from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20">
+<div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20">
 ```
 
 ✅ **After:**
 ```tsx
-<div className="bg-linear-to-r from-success/10 to-success/20">
+<div className="bg-gradient-to-r from-success/10 to-success/20">
 ```
 
 ---

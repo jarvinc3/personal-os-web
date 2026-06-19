@@ -6,7 +6,7 @@ import { landingContent } from "../data/site-info";
 
 export function HeroSection() {
   return (
-    <section className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-6 pb-20 pt-24">
+    <section className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-4 pb-20 pt-24">
       {/* Background decorations */}
       <div className="pointer-events-none absolute inset-0 -z-10 bg-surface">
         {/* Playful grid overlay */}
@@ -26,10 +26,10 @@ export function HeroSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="mb-8 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-sm text-primary"
+          className="mb-8 inline-flex items-center gap-2 rounded-full border border-primary/75 bg-primary/10 px-4 py-1.5 text-sm text-primary"
         >
           <span className="relative flex h-2 w-2">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary" />
             <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
           </span>
           {landingContent.hero.badge}
@@ -40,7 +40,7 @@ export function HeroSection() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1 }}
-          className="text-5xl font-bold tracking-tight sm:text-6xl md:text-7xl lg:text-8xl"
+          className="text-4xl font-bold tracking-tight sm:text-6xl md:text-7xl lg:text-8xl"
         >
           {landingContent.hero.titleStart}{" "}
           <span className="relative inline-block px-2">

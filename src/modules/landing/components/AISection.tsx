@@ -145,6 +145,7 @@ export function AISection() {
                     />
                     <button
                       type="button"
+                      title="Send message"
                       className="flex h-8 w-8 items-center justify-center rounded-lg border-2 border-text bg-primary text-primary-foreground shadow-[1px_1px_0px_0px_#111827] transition-colors hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none"
                     >
                       <svg
