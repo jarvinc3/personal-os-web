@@ -1,7 +1,7 @@
 'use client';
 
+import { getSupabaseBrowserClient } from '@/src/config/supabase/client';
 import { Button } from '@/src/shared/components/ui/button';
-import { getSupabaseBrowserClient } from '@/src/shared/config/supabase/client';
 import { APP_ROUTES } from '@/src/shared/constants/app-routes';
 import { appToast } from '@/src/shared/lib/app-toast';
 import { MailIcon } from 'lucide-react';
@@ -48,9 +48,9 @@ export default function VerifyEmailPage() {
   }, [email]);
 
   return (
-    <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center gap-6 px-6 py-12">
-      <div className="flex flex-col items-center gap-4 text-center">
-        <div className="rounded-full bg-muted p-4">
+    <div className="flex flex-col flex-1 gap-6 justify-center px-6 py-12 mx-auto w-full max-w-md">
+      <div className="flex flex-col gap-4 items-center text-center">
+        <div className="p-4 rounded-full bg-muted">
           <MailIcon className="size-10 text-primary" />
         </div>
         <h1 className="text-2xl font-semibold">Verifica tu correo</h1>

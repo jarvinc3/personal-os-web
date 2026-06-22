@@ -1,9 +1,9 @@
 "use client"
 
-import { Switch as SwitchPrimitive } from "radix-ui"
-import * as React from "react"
+import { Switch as SwitchPrimitive } from "radix-ui";
+import * as React from "react";
 
-import { cn } from '@/src/shared/lib/utils'
+import { cn } from '@/src/shared/lib/utils';
 
 function Switch({
   className,
@@ -30,5 +30,5 @@ function Switch({
   )
 }
 
-export { Switch }
+export { Switch };
 

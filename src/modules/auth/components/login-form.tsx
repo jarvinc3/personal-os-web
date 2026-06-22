@@ -1,9 +1,10 @@
 'use client';
 
 import type { LoginPayload } from '@/src/modules/auth/types/auth.types';
-import { FormTextField } from '@/src/shared/components/form-blocks';
+import { FormTextField } from '@/src/shared/components/layout/form-blocks';
 import { Alert, AlertDescription, AlertTitle } from '@/src/shared/components/ui/alert';
 import { FieldGroup } from '@/src/shared/components/ui/field';
+import { cn } from '@/src/shared/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AlertCircleIcon } from 'lucide-react';
 import { forwardRef, useImperativeHandle } from 'react';
@@ -57,7 +58,7 @@ export const LoginForm = forwardRef<LoginFormHandle, LoginFormProps>(function Lo
   }));
 
   return (
-    <div className={isPending ? 'pointer-events-none opacity-80' : undefined}>
+    <div className={cn(isPending ? 'opacity-80 pointer-events-none' : '', 'w-full max-w-sm')}>
       <FieldGroup className="gap-4">
         <Controller
           control={control}

@@ -13,7 +13,7 @@ import {
   CardTitle,
 } from '@/src/shared/components/ui/card';
 import { APP_ROUTES } from '@/src/shared/constants/app-routes';
-import { ChevronRight, Settings } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
@@ -37,25 +37,22 @@ export default function HomePage() {
   }
 
   return (
-    <div className="mx-auto flex max-w-2xl flex-col gap-6">
-      <div className="flex flex-col gap-1">
-        <p className="text-sm text-muted-foreground">Hola,</p>
-        <p className="text-2xl font-semibold">{displayName}</p>
-      </div>
-
+    <div className="flex flex-col gap-6 p-4 pb-16 mx-auto max-w-2xl md:px-6">
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <Settings className="size-5 text-muted-foreground" />
-            Ajustes
+          <CardTitle>
+            <p className="text-sm text-muted-foreground">Hola, <span className="text-xl font-semibold text-foreground">{displayName}</span></p>
           </CardTitle>
           <CardDescription>
-            Configura tu cuenta, preferencias, módulos y notificaciones.
+            Bienvenido a Personal OS.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">
             Personaliza tu experiencia en Personal OS desde un solo lugar.
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Configura tu cuenta, preferencias, módulos y notificaciones.
           </p>
         </CardContent>
         <CardFooter>

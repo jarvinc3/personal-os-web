@@ -9,8 +9,8 @@ import {
 } from '@/src/modules/settings/lib/auth-providers';
 import { setPendingAccountDeletion } from '@/src/modules/settings/lib/pending-account-deletion';
 import type { SettingsSheetProps } from '@/src/modules/settings/types/sheet.types';
-import { AppSheet } from '@/src/shared/components/app-sheet';
-import { FormSection, FormTextField } from '@/src/shared/components/form-blocks';
+import { BottomSheet } from '@/src/shared/components/layout/bottom-sheet';
+import { FormSection, FormTextField } from '@/src/shared/components/layout/form-blocks';
 import { Alert, AlertDescription, AlertTitle } from '@/src/shared/components/ui/alert';
 import {
   AlertDialog,
@@ -96,34 +96,35 @@ export function DeleteAccountSheet({ open, onOpenChange, email }: DeleteAccountS
 
   return (
     <>
-      <AppSheet
+      <BottomSheet
         open={open}
         onOpenChange={handleOpenChange}
         title="Eliminar cuenta"
         description="Esta acción es permanente e irreversible."
-        footer={
-          canDeleteInApp ? (
+        actions={{
+          delete: canDeleteInApp && (
             <Button
               variant="destructive"
-              className="w-full"
+              className="flex-1"
               disabled={!password.trim() || deleteAccountMutation.isPending}
               onClick={handleContinue}
             >
               {deleteAccountMutation.isPending ? <Spinner data-icon="inline-start" /> : null}
               Continuar
             </Button>
-          ) : isGoogleOnly ? (
+          ),
+          submit: isGoogleOnly && (
             <Button
               variant="destructive"
-              className="w-full"
+              className="flex-1"
               disabled={loginWithGoogleMutation.isPending}
               onClick={handleGoogleReauth}
             >
               {loginWithGoogleMutation.isPending ? <Spinner data-icon="inline-start" /> : null}
-              Confirmar con Google
+              {loginWithGoogleMutation.isPending ? 'Confirmando con Google...' : 'Confirmar con Google'}
             </Button>
-          ) : undefined
-        }
+          )
+        }}
       >
         <FormSection title="Se eliminará" icon={AlertTriangle}>
           <ul className="flex flex-col gap-2">
@@ -169,7 +170,7 @@ export function DeleteAccountSheet({ open, onOpenChange, email }: DeleteAccountS
             </div>
           </FormSection>
         ) : null}
-      </AppSheet>
+      </BottomSheet>
 
       <AlertDialog open={alertOpen} onOpenChange={setAlertOpen}>
         <AlertDialogContent>

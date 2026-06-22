@@ -1,4 +1,4 @@
-import { updateSession } from '@/src/shared/config/supabase/proxy';
+import { updateSession } from '@/src/config/supabase/proxy';
 import { APP_ROUTES } from '@/src/shared/constants/app-routes';
 import { type NextRequest, NextResponse } from 'next/server';
 

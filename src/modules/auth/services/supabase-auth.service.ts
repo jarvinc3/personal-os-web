@@ -1,3 +1,4 @@
+import { getSupabaseBrowserClient } from '@/src/config/supabase/client';
 import type { IAuthService } from '@/src/modules/auth/types/auth-provider.interface';
 import type {
   AuthSession,
@@ -5,7 +6,6 @@ import type {
   LoginPayload,
   RegisterPayload,
 } from '@/src/modules/auth/types/auth.types';
-import { getSupabaseBrowserClient } from '@/src/shared/config/supabase/client';
 import { APP_ROUTES } from '@/src/shared/constants/app-routes';
 import type { AuthError, Session, User } from '@supabase/supabase-js';
 

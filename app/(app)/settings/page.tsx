@@ -14,46 +14,30 @@ import { EditQuietHoursSheet } from '@/src/modules/settings/components/sheets/ed
 import { EditSubscriptionsSheet } from '@/src/modules/settings/components/sheets/edit-subscriptions-sheet';
 import { EditThemeSheet } from '@/src/modules/settings/components/sheets/edit-theme-sheet';
 import {
-  ACCOUNT_ROW_ICONS,
-  AI_DEFAULT_PROVIDER_LABEL,
-  AI_ROW_ICONS,
-  AI_TONE_LABELS,
-  APPEARANCE_ROW_ICONS,
-  DANGER_ROW_ICONS,
-  NOTIFICATION_ROW_ICONS,
-  PRIVACY_ROW_ICONS,
-  QUIET_HOURS_ROW_ICONS,
-  THEME_OPTION_LABELS,
+  getAiToneLabel,
+  getThemeOptionLabel,
+  SETTINGS_REGISTRY,
 } from '@/src/modules/settings/constants/settings-metadata';
+import { useModuleSheetNav } from '@/src/modules/settings/hooks/use-module-sheet-nav';
 import { useProfile } from '@/src/modules/settings/hooks/use-profile';
 import { getSettingValue } from '@/src/modules/settings/lib/settings-value';
-import type { ModuleSlug } from '@/src/modules/settings/types/module-config.types';
 import type { ThemeValue } from '@/src/modules/settings/types/profile.types';
 import { LoadingView } from '@/src/shared/components/layout/loading-view';
-import { SettingsRow } from '@/src/shared/components/layout/settings-row';
-import { SettingsSection } from '@/src/shared/components/layout/settings-section';
+import { SettingsRow, SettingsSection } from '@/src/shared/components/layout/settings-section';
 import { Avatar, AvatarFallback, AvatarImage } from '@/src/shared/components/ui/avatar';
 import { Button } from '@/src/shared/components/ui/button';
 import { Spinner } from '@/src/shared/components/ui/spinner';
 import { APP_ROUTES } from '@/src/shared/constants/app-routes';
+import { useSheetParam } from '@/src/shared/hooks/use-sheet-params';
 import { appToast } from '@/src/shared/lib/app-toast';
 import { formatTimeRange } from '@/src/shared/lib/date-format';
-import { LogOut, RefreshCw } from 'lucide-react';
+import { Edit, LogOut, RefreshCw } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
-const APP_VERSION = process.env.NEXT_PUBLIC_APP_VERSION ?? '1.3.2';
+const APP_VERSION = process.env.NEXT_PUBLIC_APP_VERSION ?? '1.0.0';
 const APP_ENV = process.env.NODE_ENV === 'development' ? 'development' : (process.env.NEXT_PUBLIC_ENV ?? 'preview');
-
-type SheetKey =
-  | 'account'
-  | 'deleteAccount'
-  | 'theme'
-  | 'ai'
-  | 'aiProvider'
-  | 'quietHours'
-  | ModuleSlug;
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -61,7 +45,14 @@ export default function SettingsPage() {
   const { isAuthenticated, isLoading, user } = useAuthGuard();
   const { logoutMutation } = useAuth();
   const { profileQuery, preferences, updatePreferences } = useProfile();
-  const [openSheet, setOpenSheet] = useState<SheetKey | null>(null);
+
+  const { open: openAccountSheet, setOpen: setOpenAccountSheet } = useSheetParam('account-sheet');
+  const { open: openDeleteAccountSheet, setOpen: setOpenDeleteAccountSheet } = useSheetParam('delete-account-sheet');
+  const { open: openThemeSheet, setOpen: setOpenThemeSheet } = useSheetParam('theme-sheet');
+  const { open: openAISheet, setOpen: setOpenAISheet } = useSheetParam('ai-sheet');
+  const { open: openAIProviderSheet, setOpen: setOpenAIProviderSheet } = useSheetParam('ai-provider-sheet');
+  const { open: openQuietHoursSheet, setOpen: setOpenQuietHoursSheet } = useSheetParam('quiet-hours-sheet');
+  const { openModule, isOpen, setModuleOpen } = useModuleSheetNav();
 
   const profile = profileQuery.data;
   const displayName = profile?.fullName ?? user?.fullName ?? 'Usuario';
@@ -94,29 +85,40 @@ export default function SettingsPage() {
     [updatePreferences],
   );
 
-  const setSheetOpen = (key: SheetKey) => (open: boolean) => {
-    setOpenSheet(open ? key : null);
-  };
-
   if (isLoading || !isAuthenticated || !user) {
     return <LoadingView variant="screen" />;
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 pb-10">
-      <div className="flex flex-col items-center gap-2 pt-4">
-        <div className="relative">
-          <Avatar className="size-[72px] border border-border bg-muted">
+    <div className="flex flex-col gap-6 p-4 pb-10 mx-auto w-full max-w-2xl md:px-6">
+      <div className="flex gap-2 items-center py-4">
+        <div className="relative" onClick={() => setOpenAccountSheet(true)}>
+          <Avatar className="size-20 md:size-24">
             {profile?.avatarUrl ? <AvatarImage src={profile.avatarUrl} alt={displayName} /> : null}
-            <AvatarFallback className="text-xl font-semibold">
+            <AvatarFallback className="text-base font-semibold">
               {displayName.slice(0, 2).toUpperCase()}
             </AvatarFallback>
           </Avatar>
           <Button
+            size="icon"
+            type="button"
+            variant="secondary"
+            className="absolute top-0 right-0 bg-muted"
+            aria-label="Editar perfil"
+            disabled={profileQuery.isFetching}
+          >
+            <Edit className="size-3.5 text-foreground" />
+          </Button>
+        </div>
+        <div className="flex justify-between w-full">
+          <div className="flex-1">
+            <p className="text-xl font-semibold">{displayName}</p>
+            <p className="text-sm text-muted-foreground">{displayEmail}</p>
+          </div>
+          <Button
             type="button"
             variant="outline"
             size="icon"
-            className="absolute -right-1 -top-1 size-8 rounded-full"
             disabled={profileQuery.isFetching}
             onClick={() => void profileQuery.refetch()}
             aria-label="Actualizar perfil"
@@ -128,48 +130,44 @@ export default function SettingsPage() {
             )}
           </Button>
         </div>
-        <div className="flex flex-col items-center">
-          <p className="text-2xl font-semibold">{displayName}</p>
-          <p className="text-sm text-muted-foreground">{displayEmail}</p>
-        </div>
       </div>
 
       <SettingsSection title="Cuenta">
         <SettingsRow
           label="Perfil"
           value={displayName}
-          onPress={() => setOpenSheet('account')}
+          onPress={() => setOpenAccountSheet(true)}
           isLast
-          {...ACCOUNT_ROW_ICONS.fullName}
+          {...SETTINGS_REGISTRY.account.rows.fullName}
         />
       </SettingsSection>
 
       <SettingsSection title="Apariencia">
         <SettingsRow
           label="Tema"
-          value={THEME_OPTION_LABELS[themeValue]}
-          onPress={() => setOpenSheet('theme')}
+          value={getThemeOptionLabel(themeValue)}
+          onPress={() => setOpenThemeSheet(true)}
           isLast
-          {...APPEARANCE_ROW_ICONS.theme}
+          {...SETTINGS_REGISTRY.appearance.rows.theme}
         />
       </SettingsSection>
 
       <SettingsSection title="Módulos" bare>
-        <ModuleSettingsRows onOpenModule={(slug) => setOpenSheet(slug)} />
+        <ModuleSettingsRows onOpenModule={openModule} />
       </SettingsSection>
 
       <SettingsSection title="Inteligencia artificial">
         <SettingsRow
           label="Tono de respuesta"
-          value={AI_TONE_LABELS[preferences.ai.tone]}
-          onPress={() => setOpenSheet('ai')}
-          {...AI_ROW_ICONS.tone}
+          value={getAiToneLabel(preferences.ai.tone)}
+          onPress={() => setOpenAISheet(true)}
+          {...SETTINGS_REGISTRY.ai.rows.tone}
         />
         <SettingsRow
           label="Proveedor por defecto"
-          value={preferences.ai.defaultProvider ?? AI_DEFAULT_PROVIDER_LABEL}
-          onPress={() => setOpenSheet('aiProvider')}
-          {...AI_ROW_ICONS.defaultProvider}
+          value={preferences.ai.defaultProvider ?? SETTINGS_REGISTRY.ai.defaultProviderLabel}
+          onPress={() => setOpenAIProviderSheet(true)}
+          {...SETTINGS_REGISTRY.ai.rows.defaultProvider}
         />
         <SettingsRow
           label="Insights proactivos"
@@ -180,7 +178,7 @@ export default function SettingsPage() {
               'Insights proactivos actualizados.',
             )
           }
-          {...AI_ROW_ICONS.proactiveInsights}
+          {...SETTINGS_REGISTRY.ai.rows.proactiveInsights}
         />
         <SettingsRow
           label="Confirmar antes de actuar"
@@ -192,7 +190,7 @@ export default function SettingsPage() {
             )
           }
           isLast
-          {...AI_ROW_ICONS.confirmBeforeActions}
+          {...SETTINGS_REGISTRY.ai.rows.confirmBeforeActions}
         />
       </SettingsSection>
 
@@ -211,7 +209,7 @@ export default function SettingsPage() {
               'Preferencia de push actualizada.',
             )
           }
-          {...NOTIFICATION_ROW_ICONS.push}
+          {...SETTINGS_REGISTRY.notifications.rows.push}
         />
         <SettingsRow
           label="Email"
@@ -227,7 +225,7 @@ export default function SettingsPage() {
               'Preferencia de email actualizada.',
             )
           }
-          {...NOTIFICATION_ROW_ICONS.email}
+          {...SETTINGS_REGISTRY.notifications.rows.email}
         />
         <SettingsRow
           label="In-App"
@@ -243,7 +241,7 @@ export default function SettingsPage() {
               'Preferencia in-app actualizada.',
             )
           }
-          {...NOTIFICATION_ROW_ICONS.inApp}
+          {...SETTINGS_REGISTRY.notifications.rows.inApp}
         />
         <SettingsRow
           label="Horario silencioso"
@@ -259,14 +257,14 @@ export default function SettingsPage() {
               'Horario silencioso actualizado.',
             )
           }
-          {...QUIET_HOURS_ROW_ICONS.enabled}
+          {...SETTINGS_REGISTRY.notifications.rows.quietHoursEnabled}
         />
         <SettingsRow
           label="Rango horario"
           value={formatTimeRange(quietHours.start, quietHours.end)}
-          onPress={() => setOpenSheet('quietHours')}
+          onPress={() => setOpenQuietHoursSheet(true)}
           disabled={!quietHours.enabled}
-          {...QUIET_HOURS_ROW_ICONS.schedule}
+          {...SETTINGS_REGISTRY.notifications.rows.quietHoursSchedule}
         />
         <SettingsRow
           label="Permisos de notificaciones"
@@ -274,7 +272,7 @@ export default function SettingsPage() {
           disabled
           showChevron={false}
           isLast
-          {...NOTIFICATION_ROW_ICONS.devicePush}
+          {...SETTINGS_REGISTRY.notifications.rows.devicePush}
         />
       </SettingsSection>
 
@@ -288,7 +286,7 @@ export default function SettingsPage() {
               'Preferencia de analíticas actualizada.',
             )
           }
-          {...PRIVACY_ROW_ICONS.analytics}
+          {...SETTINGS_REGISTRY.privacy.rows.analytics}
         />
         <SettingsRow
           label="Reportes de fallos"
@@ -300,7 +298,7 @@ export default function SettingsPage() {
             )
           }
           isLast
-          {...PRIVACY_ROW_ICONS.crashReports}
+          {...SETTINGS_REGISTRY.privacy.rows.crashReports}
         />
       </SettingsSection>
 
@@ -308,10 +306,10 @@ export default function SettingsPage() {
         <SettingsRow
           label="Eliminar cuenta"
           destructive
-          onPress={() => setOpenSheet('deleteAccount')}
+          onPress={() => setOpenDeleteAccountSheet(true)}
           showChevron
           isLast
-          {...DANGER_ROW_ICONS.deleteAccount}
+          {...SETTINGS_REGISTRY.danger.rows.deleteAccount}
         />
       </SettingsSection>
 
@@ -326,33 +324,22 @@ export default function SettingsPage() {
         />
       </SettingsSection>
 
-      <div className="flex flex-col items-center justify-center gap-1 pb-4">
+      <div className="flex flex-col gap-1 justify-center items-center pb-4">
         <p className="text-xs text-muted-foreground">Entorno {APP_ENV}</p>
         <p className="text-xs text-muted-foreground">Versión {APP_VERSION}</p>
       </div>
 
-      <EditAccountSheet
-        open={openSheet === 'account'}
-        onOpenChange={setSheetOpen('account')}
-        email={displayEmail}
-      />
-      <DeleteAccountSheet
-        open={openSheet === 'deleteAccount'}
-        onOpenChange={setSheetOpen('deleteAccount')}
-        email={displayEmail}
-      />
-      <EditThemeSheet open={openSheet === 'theme'} onOpenChange={setSheetOpen('theme')} />
-      <EditAISheet open={openSheet === 'ai'} onOpenChange={setSheetOpen('ai')} />
-      <EditAIProviderSheet open={openSheet === 'aiProvider'} onOpenChange={setSheetOpen('aiProvider')} />
-      <EditQuietHoursSheet open={openSheet === 'quietHours'} onOpenChange={setSheetOpen('quietHours')} />
-      <EditFinanceSheet open={openSheet === 'finance'} onOpenChange={setSheetOpen('finance')} />
-      <EditAgendaSheet open={openSheet === 'agenda'} onOpenChange={setSheetOpen('agenda')} />
-      <EditProjectsSheet open={openSheet === 'projects'} onOpenChange={setSheetOpen('projects')} />
-      <EditSubscriptionsSheet
-        open={openSheet === 'subscriptions'}
-        onOpenChange={setSheetOpen('subscriptions')}
-      />
-      <EditHealthSheet open={openSheet === 'health'} onOpenChange={setSheetOpen('health')} />
+      <EditAccountSheet open={openAccountSheet} onOpenChange={setOpenAccountSheet} email={displayEmail} />
+      <DeleteAccountSheet open={openDeleteAccountSheet} onOpenChange={setOpenDeleteAccountSheet} email={displayEmail} />
+      <EditThemeSheet open={openThemeSheet} onOpenChange={setOpenThemeSheet} />
+      <EditAISheet open={openAISheet} onOpenChange={setOpenAISheet} />
+      <EditAIProviderSheet open={openAIProviderSheet} onOpenChange={setOpenAIProviderSheet} />
+      <EditQuietHoursSheet open={openQuietHoursSheet} onOpenChange={setOpenQuietHoursSheet} />
+      <EditFinanceSheet open={isOpen('finance')} onOpenChange={(open) => setModuleOpen('finance', open)} />
+      <EditAgendaSheet open={isOpen('agenda')} onOpenChange={(open) => setModuleOpen('agenda', open)} />
+      <EditProjectsSheet open={isOpen('projects')} onOpenChange={(open) => setModuleOpen('projects', open)} />
+      <EditSubscriptionsSheet open={isOpen('subscriptions')} onOpenChange={(open) => setModuleOpen('subscriptions', open)} />
+      <EditHealthSheet open={isOpen('health')} onOpenChange={(open) => setModuleOpen('health', open)} />
     </div>
   );
 }

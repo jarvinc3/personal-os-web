@@ -18,7 +18,7 @@ export function ModulesSection() {
     <section id="modules" className="relative px-6 py-24">
       {/* Simple decorative line */}
       <div className="absolute top-0 left-0 w-full">
-        <div className="mx-auto h-px w-96 max-w-full bg-border" />
+        <div className="mx-auto w-96 max-w-full h-px bg-border" />
       </div>
 
       <div className="mx-auto max-w-7xl">
@@ -75,8 +75,8 @@ export function ModulesSection() {
                       : "border-text bg-white shadow-[2px_2px_0px_0px_#111827] hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
                     }`}
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
+                  <div className="flex justify-between items-center">
+                    <div className="flex gap-3 items-center">
                       <span className="text-2xl">{module.icon}</span>
                       <div>
                         <p className="text-sm font-semibold">{module.name}</p>
@@ -108,7 +108,7 @@ export function ModulesSection() {
                 className={`overflow-hidden rounded-3xl border-2 border-text ${activeModule.bgColor} p-8 shadow-[8px_8px_0px_0px_#111827]`}
               >
                 {/* Module header */}
-                <div className="mb-6 flex items-start justify-between">
+                <div className="flex justify-between items-start mb-6">
                   <div>
                     <span className="text-4xl">{activeModule.icon}</span>
                     <h3 className={`mt-3 text-2xl font-bold ${activeModule.color}`}>{activeModule.name}</h3>
@@ -120,7 +120,7 @@ export function ModulesSection() {
 
                 {/* Features list */}
                 <div className="space-y-2.5">
-                  <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                  <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground">
                     Características
                   </p>
                   {activeModule.features.map((feature) => (

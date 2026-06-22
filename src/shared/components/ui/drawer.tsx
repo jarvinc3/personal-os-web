@@ -1,9 +1,9 @@
 "use client"
 
-import * as React from "react"
-import { Drawer as DrawerPrimitive } from "vaul"
+import * as React from "react";
+import { Drawer as DrawerPrimitive } from "vaul";
 
-import { cn } from '@/src/shared/lib/utils'
+import { cn } from '@/src/shared/lib/utils';
 
 function Drawer({
   ...props
@@ -85,7 +85,7 @@ function DrawerFooter({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="drawer-footer"
-      className={cn("mt-auto flex flex-col gap-2 p-4", className)}
+      className={cn("flex flex-col gap-2 p-4 mt-auto", className)}
       {...props}
     />
   )
@@ -120,5 +120,5 @@ function DrawerDescription({
 export {
   Drawer, DrawerClose,
   DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerOverlay, DrawerPortal, DrawerTitle, DrawerTrigger
-}
+};
 

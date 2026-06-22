@@ -1,4 +1,4 @@
-import { getSupabaseBrowserClient } from '@/src/shared/config/supabase/client';
+import { getSupabaseBrowserClient } from '@/src/config/supabase/client';
 
 export type AuthProviderKind = 'email' | 'google' | 'unknown';
 

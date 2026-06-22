@@ -1,4 +1,4 @@
-import { ApiError } from '@/src/shared/config/api-client.utils';
+import { ApiError } from '@/src/config/api-client.utils';
 
 export function logApiError(error: unknown, context?: string) {
   if (process.env.NODE_ENV !== 'development') {

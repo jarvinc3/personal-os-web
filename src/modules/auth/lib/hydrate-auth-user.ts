@@ -1,6 +1,6 @@
+import { ApiError, apiGet } from '@/src/config/api-client';
 import type { AuthUser } from '@/src/modules/auth/types/auth.types';
 import type { UserProfile } from '@/src/modules/settings/types/profile.types';
-import { ApiError, apiGet } from '@/src/shared/config/api-client';
 import { API_ENDPOINTS } from '@/src/shared/constants/api-endpoints';
 
 export const PROFILE_QUERY_KEY = ['profile', 'me'] as const;

@@ -1,3 +1,4 @@
+import { queryClient } from '@/src/config/query-client';
 import {
   BackendProfileUnavailableError,
   hydrateAuthUser,
@@ -9,7 +10,6 @@ import {
   mapSupabaseUser,
 } from '@/src/modules/auth/services/supabase-auth.service';
 import type { AuthUser } from '@/src/modules/auth/types/auth.types';
-import { queryClient } from '@/src/shared/config/query-client';
 import { useAppStore } from '@/src/shared/store/app-store';
 import type { Session } from '@supabase/supabase-js';
 

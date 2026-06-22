@@ -1,12 +1,12 @@
 'use client';
 
+import { queryClient } from '@/src/config/query-client';
+import { getSupabaseBrowserClient } from '@/src/config/supabase/client';
 import { establishAuthenticatedSession } from '@/src/modules/auth/lib/establish-auth-session';
 import { PROFILE_QUERY_KEY } from '@/src/modules/auth/lib/hydrate-auth-user';
 import {
   mapSupabaseSession,
 } from '@/src/modules/auth/services/supabase-auth.service';
-import { queryClient } from '@/src/shared/config/query-client';
-import { getSupabaseBrowserClient } from '@/src/shared/config/supabase/client';
 import { authEvents } from '@/src/shared/events/auth-events';
 import { useAppStore } from '@/src/shared/store/app-store';
 import type { Session } from '@supabase/supabase-js';

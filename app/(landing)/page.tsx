@@ -1,10 +1,8 @@
-import { Navbar } from "@/src/modules/landing/components/Navbar";
-import { HeroSection } from "@/src/modules/landing/components/HeroSection";
-import { FeaturesSection } from "@/src/modules/landing/components/FeaturesSection";
-import { ModulesSection } from "@/src/modules/landing/components/ModulesSection";
 import { AISection } from "@/src/modules/landing/components/AISection";
+import { FeaturesSection } from "@/src/modules/landing/components/FeaturesSection";
+import { HeroSection } from "@/src/modules/landing/components/HeroSection";
+import { ModulesSection } from "@/src/modules/landing/components/ModulesSection";
 import { WaitlistSection } from "@/src/modules/landing/components/WaitlistSection";
-import { Footer } from "@/src/modules/landing/components/Footer";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -15,16 +13,12 @@ export const metadata: Metadata = {
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen">
-      <Navbar />
-      <main>
-        <HeroSection />
-        <FeaturesSection />
-        <ModulesSection />
-        <AISection />
-        <WaitlistSection />
-      </main>
-      <Footer />
-    </div>
+    <main>
+      <HeroSection />
+      <FeaturesSection />
+      <ModulesSection />
+      <AISection />
+      <WaitlistSection />
+    </main>
   );
 }

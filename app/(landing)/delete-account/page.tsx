@@ -1,5 +1,3 @@
-import { Footer } from "@/src/modules/landing/components/Footer";
-import { Navbar } from "@/src/modules/landing/components/Navbar";
 import { PageHeader } from "@/src/modules/landing/components/PageHeader";
 import { siteInfo } from "@/src/modules/landing/data/site-info";
 import type { Metadata } from "next";
@@ -38,8 +36,7 @@ export default function DeleteAccountPage() {
   const deleteRequestHref = `mailto:${siteInfo.privacyEmail}?subject=${deleteRequestSubject}&body=${deleteRequestBody}`;
 
   return (
-    <div className="min-h-screen">
-      <Navbar />
+    <div>
       <PageHeader
         label="Legal"
         title="Eliminar tu cuenta"
@@ -177,8 +174,6 @@ export default function DeleteAccountPage() {
           </Section>
         </div>
       </main>
-
-      <Footer />
     </div>
   );
 }

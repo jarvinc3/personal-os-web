@@ -1,4 +1,4 @@
-import { createSupabaseServerClient } from '@/src/shared/config/supabase/server';
+import { createSupabaseServerClient } from '@/src/config/supabase/server';
 import { APP_ROUTES } from '@/src/shared/constants/app-routes';
 import { NextResponse } from 'next/server';
 

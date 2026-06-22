@@ -14,9 +14,9 @@ export function PageHeader({
   breadcrumb,
 }: PageHeaderProps) {
   return (
-    <div className="relative overflow-hidden border-b-2 border-text bg-white">
+    <div className="overflow-hidden relative bg-white border-b-2 border-text">
       {/* Background decoration */}
-      <div className="pointer-events-none absolute inset-0 -z-10 bg-surface">
+      <div className="absolute inset-0 pointer-events-none -z-10 bg-surface">
         <div
           className="absolute inset-0 opacity-[0.05]"
           style={{
@@ -27,15 +27,15 @@ export function PageHeader({
         />
       </div>
 
-      <div className="relative mx-auto max-w-4xl px-6 py-20 pt-32 text-center">
+      <div className="relative px-6 py-20 pt-32 mx-auto max-w-4xl text-center">
         {/* Breadcrumb */}
         {breadcrumb && (
-          <nav className="mb-6 flex items-center justify-center gap-2 text-xs text-muted-foreground">
+          <nav className="flex gap-2 justify-center items-center mb-6 text-xs text-muted-foreground">
             <Link href="/" className="transition-colors hover:text-foreground">
               Personal OS
             </Link>
             {breadcrumb.map((crumb, i) => (
-              <span key={i} className="flex items-center gap-2">
+              <span key={i} className="flex gap-2 items-center">
                 <span>/</span>
                 {i === breadcrumb.length - 1 ? (
                   <span className="text-foreground">{crumb.label}</span>

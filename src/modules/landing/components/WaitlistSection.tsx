@@ -20,10 +20,10 @@ export function WaitlistSection() {
   };
 
   return (
-    <section id="waitlist" className="relative overflow-hidden px-6 py-24">
+    <section id="waitlist" className="overflow-hidden relative px-6 py-24">
       {/* Background decorations */}
-      <div className="pointer-events-none absolute inset-0 -z-10 bg-surface">
-        <div className="mx-auto h-px w-full max-w-7xl bg-border" />
+      <div className="absolute inset-0 pointer-events-none -z-10 bg-surface">
+        <div className="mx-auto w-full max-w-7xl h-px bg-border" />
       </div>
 
       <div className="relative mx-auto max-w-2xl text-center">
@@ -36,7 +36,7 @@ export function WaitlistSection() {
           {/* Badge */}
           <span className="mb-4 inline-flex items-center gap-1.5 rounded-full border-2 border-text bg-accent px-3 py-1 text-xs font-bold text-primary shadow-[2px_2px_0px_0px_#111827]">
             <span className="relative flex h-1.5 w-1.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
+              <span className="inline-flex absolute w-full h-full rounded-full opacity-75 animate-ping bg-primary" />
               <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-primary" />
             </span>
             {landingContent.waitlist.badge}
@@ -61,13 +61,13 @@ export function WaitlistSection() {
               <p className="font-bold text-success">
                 {landingContent.waitlist.successTitle}
               </p>
-              <p className="text-sm font-medium text-text mt-1">
+              <p className="mt-1 text-sm font-medium text-text">
                 {landingContent.waitlist.successMessage}
               </p>
             </motion.div>
           ) : (
             <form onSubmit={handleSubmit} className="mt-8">
-              <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row">
+                <div className="flex flex-col gap-3 items-center mt-8 sm:flex-row">
                 <input
                   type="email"
                   value={email}
@@ -82,9 +82,9 @@ export function WaitlistSection() {
                   className="group relative flex w-full items-center justify-center overflow-hidden rounded-xl border-2 border-text bg-primary px-6 py-3 text-sm font-bold text-primary-foreground shadow-[4px_4px_0px_0px_#111827] transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_#111827] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none sm:w-auto disabled:opacity-70 disabled:hover:translate-x-0 disabled:hover:translate-y-0 disabled:hover:shadow-[4px_4px_0px_0px_#111827]"
                 >
                   {loading ? (
-                    <span className="flex items-center gap-2">
+                      <span className="flex gap-2 items-center">
                       <svg
-                        className="h-4 w-4 animate-spin"
+                          className="w-4 h-4 animate-spin"
                         viewBox="0 0 24 24"
                         fill="none"
                       >
@@ -109,14 +109,14 @@ export function WaitlistSection() {
                   )}
                 </button>
               </div>
-              <p className="mt-4 text-xs font-medium text-muted-foreground text-center">
+                <p className="mt-4 text-xs font-medium text-center text-muted-foreground">
                 {landingContent.waitlist.footerNote}
               </p>
             </form>
           )}
 
           {/* Social proof */}
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-6 border-t border-border pt-8">
+          <div className="flex flex-wrap gap-6 justify-center items-center pt-8 mt-8 border-t border-border">
             {landingContent.waitlist.trustBadges.map((item) => (
               <div
                 key={item.text}

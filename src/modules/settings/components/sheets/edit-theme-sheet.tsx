@@ -1,24 +1,25 @@
 'use client';
 
-import {
-  SETTINGS_SECTION_ACCENTS,
-  THEME_OPTIONS,
-} from '@/src/modules/settings/constants/settings-metadata';
+import { SETTINGS_REGISTRY } from '@/src/modules/settings/constants/settings-metadata';
 import { useProfile } from '@/src/modules/settings/hooks/use-profile';
 import { getSettingValue, patchSettingValue } from '@/src/modules/settings/lib/settings-value';
 import type { ThemeValue } from '@/src/modules/settings/types/profile.types';
 import type { SettingsSheetProps } from '@/src/modules/settings/types/sheet.types';
-import { AppSheet, AppSheetFooter } from '@/src/shared/components/app-sheet';
-import { FormSection, OptionRow } from '@/src/shared/components/form-blocks';
+import { BottomSheet } from '@/src/shared/components/layout/bottom-sheet';
+import { FormSection, OptionRow } from '@/src/shared/components/layout/form-blocks';
+import { Button } from '@/src/shared/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/src/shared/components/ui/radio-group';
+import { Spinner } from '@/src/shared/components/ui/spinner';
 import { appToast } from '@/src/shared/lib/app-toast';
 import { Palette } from 'lucide-react';
 import { useTheme } from 'next-themes';
+import { useRouter } from 'next/navigation';
 import { useCallback, useRef, useState } from 'react';
 
 export function EditThemeSheet({ open, onOpenChange }: SettingsSheetProps) {
   const { preferences, updatePreferences, updateProfileMutation } = useProfile();
   const { setTheme } = useTheme();
+  const router = useRouter();
   const currentTheme = getSettingValue<ThemeValue>(preferences.theme);
   const [themeValue, setThemeValue] = useState<ThemeValue>(currentTheme);
   const initialThemeRef = useRef<ThemeValue>(currentTheme);
@@ -74,27 +75,40 @@ export function EditThemeSheet({ open, onOpenChange }: SettingsSheetProps) {
   };
 
   return (
-    <AppSheet
+    <BottomSheet
       open={open}
       onOpenChange={handleOpenChange}
       title="Apariencia"
       description={preferences.theme.fieldGuide}
-      footer={
-        <AppSheetFooter
-          isPending={updateProfileMutation.isPending}
-          disabled={!isDirty}
-          onSave={() => void handleSave()}
-          onCancel={() => onOpenChange(false)}
-        />
-      }
+      actions={{
+        close: (
+          <Button
+            variant="outline"
+            className="flex-1"
+            onClick={() => router.back()}
+          >
+            Cancelar
+          </Button>
+        ),
+        submit: (
+          <Button
+            className="flex-1"
+            disabled={!isDirty || updateProfileMutation.isPending}
+            onClick={handleSave}
+          >
+            {updateProfileMutation.isPending ? <Spinner data-icon="inline-start" /> : null}
+            {updateProfileMutation.isPending ? 'Guardando...' : 'Guardar'}
+          </Button>
+        ),
+      }}
     >
       <FormSection title="Tema" icon={Palette}>
         <RadioGroup value={themeValue} onValueChange={(v) => handleThemeChange(v as ThemeValue)}>
-          {THEME_OPTIONS.map((option) => (
+          {SETTINGS_REGISTRY.appearance.themeOptions.map((option) => (
             <OptionRow
               key={option.value}
               icon={option.icon}
-              iconColor={SETTINGS_SECTION_ACCENTS.appearance}
+              iconColor={SETTINGS_REGISTRY.appearance.accent}
               label={option.label}
               description={option.description}
               selected={themeValue === option.value}
@@ -104,6 +118,6 @@ export function EditThemeSheet({ open, onOpenChange }: SettingsSheetProps) {
           ))}
         </RadioGroup>
       </FormSection>
-    </AppSheet>
+    </BottomSheet>
   );
 }

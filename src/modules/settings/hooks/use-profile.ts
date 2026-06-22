@@ -1,5 +1,6 @@
 'use client';
 
+import { ApiError, apiGet, apiPatch } from '@/src/config/api-client';
 import { mergeAuthUserWithProfile, PROFILE_QUERY_KEY } from '@/src/modules/auth/lib/hydrate-auth-user';
 import { DEFAULT_USER_PREFERENCES } from '@/src/modules/settings/constants/user-settings-defaults';
 import { normalizeUserPreferences } from '@/src/modules/settings/lib/normalize-preferences';
@@ -10,7 +11,6 @@ import type {
   UserPreferences,
   UserProfile,
 } from '@/src/modules/settings/types/profile.types';
-import { ApiError, apiGet, apiPatch } from '@/src/shared/config/api-client';
 import { API_ENDPOINTS } from '@/src/shared/constants/api-endpoints';
 import { appToast } from '@/src/shared/lib/app-toast';
 import { useAppStore } from '@/src/shared/store/app-store';

@@ -1,6 +1,6 @@
 'use client';
 
-import { apiGet } from '@/src/shared/config/api-client';
+import { apiGet } from '@/src/config/api-client';
 import { API_ENDPOINTS } from '@/src/shared/constants/api-endpoints';
 import { useQuery } from '@tanstack/react-query';
 

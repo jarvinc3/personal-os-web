@@ -1,6 +1,5 @@
 'use client';
 
-import { Field, FieldError, FieldLabel } from '@/src/shared/components/ui/field';
 import { Input } from '@/src/shared/components/ui/input';
 import {
   NativeSelect,
@@ -8,8 +7,10 @@ import {
 } from '@/src/shared/components/ui/native-select';
 import { Switch } from '@/src/shared/components/ui/switch';
 import { cn } from '@/src/shared/lib/utils';
-import type { LucideIcon } from 'lucide-react';
-import type { ReactNode } from 'react';
+import { type LucideIcon } from 'lucide-react';
+import { HTMLInputTypeAttribute, useId, type ReactNode } from 'react';
+
+import { Field, FieldContent, FieldDescription, FieldError, FieldLabel, FieldTitle } from '@/src/shared/components/ui/field';
 
 type FormSectionProps = {
   title?: string;
@@ -18,16 +19,23 @@ type FormSectionProps = {
   children: ReactNode;
 };
 
-export function FormSection({ title, children, right }: FormSectionProps) {
+export function FormSection({ title, children, right, icon: Icon }: FormSectionProps) {
   return (
     <div className="rounded-2xl border border-border bg-card">
-      {title ? (
+      {title && (
         <div className="flex flex-row items-center justify-between px-3 pb-1.5 pt-3">
-          <span className="text-sm font-medium text-muted-foreground">{title}</span>
-          {right}
+          <div className="flex gap-2 items-center">
+            {Icon && <Icon className="size-4 text-muted-foreground" />}
+            <span className="text-sm font-medium text-muted-foreground">{title}</span>
+          </div>
+          {right && (
+            <div className="flex-row gap-2 items-center">
+              {right}
+            </div>
+          )}
         </div>
-      ) : null}
-      <div className="flex flex-col gap-3 rounded-2xl border border-border bg-background px-3 py-4">
+      )}
+      <div className="flex flex-col gap-3 px-3 py-4 rounded-2xl border border-border bg-background">
         {children}
       </div>
     </div>
@@ -43,10 +51,18 @@ type SelectFieldProps = {
 };
 
 export function SelectField({ label, value, onChange, options, disabled }: SelectFieldProps) {
+  const selectId = useId();
+  const labelId = useId();
+
   return (
     <Field>
-      <FieldLabel>{label}</FieldLabel>
+      <FieldLabel id={labelId} htmlFor={selectId}>
+        {label}
+      </FieldLabel>
       <NativeSelect
+        id={selectId}
+        aria-labelledby={labelId}
+        title={label}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         disabled={disabled}
@@ -57,37 +73,6 @@ export function SelectField({ label, value, onChange, options, disabled }: Selec
           </NativeSelectOption>
         ))}
       </NativeSelect>
-    </Field>
-  );
-}
-
-type DateFieldProps = {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  onBlur?: () => void;
-  placeholder?: string;
-  disabled?: boolean;
-};
-
-export function DateField({
-  label,
-  value,
-  onChange,
-  onBlur,
-  placeholder,
-  disabled,
-}: DateFieldProps) {
-  return (
-    <Field>
-      <FieldLabel>{label}</FieldLabel>
-      <Input
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        onBlur={onBlur}
-        placeholder={placeholder}
-        disabled={disabled}
-      />
     </Field>
   );
 }
@@ -112,30 +97,27 @@ export function OptionRow({
   iconColor,
 }: OptionRowProps) {
   return (
-    <button
-      type="button"
+    <FieldLabel
       onClick={onPress}
       className={cn(
-        'flex w-full flex-row items-center gap-3 rounded-xl border px-3 py-3 text-left transition-colors',
-        selected ? 'border-primary bg-primary/5' : 'border-border bg-card',
+        'flex flex-row gap-3 items-center px-3 py-3 w-full text-left rounded-xl border cursor-pointer hover:bg-card/70 active:bg-muted/80 active:scale-[0.99] transition-all duration-100 ease-in-out',
+        selected ? 'border-primary bg-card/50' : 'border-border bg-card',
       )}
     >
-      {Icon ? (
+      {Icon && (
         <div
-          className="flex size-9 shrink-0 items-center justify-center rounded-md"
+          className="flex justify-center items-center rounded-md size-9 shrink-0"
           style={{ backgroundColor: iconColor ? `${iconColor}1a` : undefined }}
         >
           <Icon className="size-[18px]" style={{ color: iconColor }} />
         </div>
-      ) : null}
-      <div className="min-w-0 flex-1">
-        <p className="text-sm font-medium text-foreground">{label}</p>
-        {description ? (
-          <p className="text-xs text-muted-foreground">{description}</p>
-        ) : null}
-      </div>
+      )}
+      <FieldContent>
+        <FieldTitle>{label}</FieldTitle>
+        <FieldDescription>{description}</FieldDescription>
+      </FieldContent>
       {trailing}
-    </button>
+    </FieldLabel>
   );
 }
 
@@ -167,7 +149,7 @@ export function SelectionGrid<T>({
             type="button"
             onClick={() => onValueChange(itemValue)}
             className={cn(
-              'aspect-square overflow-hidden rounded-xl border-2',
+              'overflow-hidden rounded-xl border-2 aspect-square',
               selected ? 'border-primary' : 'border-transparent',
             )}
           >
@@ -188,8 +170,9 @@ type FormTextFieldProps = {
   disabled?: boolean;
   error?: string;
   invalid?: boolean;
-  type?: 'text' | 'password' | 'email';
+  type?: HTMLInputTypeAttribute;
   autoComplete?: string;
+  icon?: LucideIcon;
 };
 
 export function FormTextField({
@@ -203,22 +186,31 @@ export function FormTextField({
   invalid,
   type = 'text',
   autoComplete,
+  icon: Icon
 }: FormTextFieldProps) {
   const hasError = invalid ?? Boolean(error);
 
   return (
     <Field data-invalid={hasError ? true : undefined}>
       {label ? <FieldLabel>{label}</FieldLabel> : null}
-      <Input
-        type={type}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        onBlur={onBlur}
-        placeholder={placeholder}
-        disabled={disabled}
-        autoComplete={autoComplete}
-        aria-invalid={hasError || undefined}
-      />
+      <div className="flex relative flex-row gap-2 items-center">
+        {Icon && (
+          <div className="absolute left-3 top-1/2 -translate-y-1/2">
+            <Icon className="size-[18px]" />
+          </div>
+        )}
+        <Input
+          className={cn(Icon && "pl-9")}
+          type={type}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          onBlur={onBlur}
+          placeholder={placeholder}
+          disabled={disabled}
+          autoComplete={autoComplete}
+          aria-invalid={hasError || undefined}
+        />
+      </div>
       {error ? <FieldError>{error}</FieldError> : null}
     </Field>
   );
@@ -240,8 +232,8 @@ export function SwitchFieldRow({
   disabled,
 }: SwitchFieldRowProps) {
   return (
-    <div className="flex flex-row items-center justify-between gap-3 rounded-xl border border-border/60 bg-card px-4 py-3">
-      <div className="min-w-0 flex-1">
+    <div className="flex flex-row gap-3 justify-between items-center px-4 py-3 rounded-xl border border-border/60 bg-card">
+      <div className="flex-1 min-w-0">
         <p className="text-sm font-medium text-foreground">{label}</p>
         {description ? <p className="text-xs text-muted-foreground">{description}</p> : null}
       </div>

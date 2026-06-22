@@ -1,10 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { motion } from "motion/react";
-import { Navbar } from "@/src/modules/landing/components/Navbar";
-import { Footer } from "@/src/modules/landing/components/Footer";
 import { PageHeader } from "@/src/modules/landing/components/PageHeader";
+import { motion } from "motion/react";
+import { useState } from "react";
 
 const contactReasons = [
   "Pregunta general",
@@ -43,8 +41,7 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="min-h-screen">
-      <Navbar />
+    <div>
       <PageHeader
         label="Soporte"
         title="Contáctanos"
@@ -261,8 +258,6 @@ export default function ContactPage() {
           </div>
         </div>
       </main>
-
-      <Footer />
     </div>
   );
 }

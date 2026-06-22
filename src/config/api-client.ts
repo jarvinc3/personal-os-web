@@ -5,13 +5,12 @@ import {
   isTransientError,
   mapStatusToError,
   sleep,
-} from '@/src/shared/config/api-client.utils';
-import { getSupabaseBrowserClient } from '@/src/shared/config/supabase/client';
+} from '@/src/config/api-client.utils';
+import { getSupabaseBrowserClient } from '@/src/config/supabase/client';
 import { API_BASE_URL } from '@/src/shared/constants/api-endpoints';
 import { authEvents } from '@/src/shared/events/auth-events';
 import { logApiError } from '@/src/shared/lib/log-api-error';
-
-export { ApiError } from '@/src/shared/config/api-client.utils';
+export { ApiError } from '@/src/config/api-client.utils';
 
 type ApiEnvelope<T> = {
   data: T;

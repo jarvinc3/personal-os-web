@@ -5,13 +5,16 @@ import { useProfile } from '@/src/modules/settings/hooks/use-profile';
 import { useProfileSheetFormSync } from '@/src/modules/settings/hooks/use-profile-sheet';
 import type { UpdateProfilePayload } from '@/src/modules/settings/types/profile.types';
 import type { SettingsSheetProps } from '@/src/modules/settings/types/sheet.types';
-import { AppSheet, AppSheetFooter } from '@/src/shared/components/app-sheet';
-import { FormSection, FormTextField, SelectionGrid } from '@/src/shared/components/form-blocks';
+import { BottomSheet } from '@/src/shared/components/layout/bottom-sheet';
+import { FormSection, FormTextField, SelectionGrid } from '@/src/shared/components/layout/form-blocks';
+import { Button } from '@/src/shared/components/ui/button';
+import { Spinner } from '@/src/shared/components/ui/spinner';
 import { appToast } from '@/src/shared/lib/app-toast';
 import { createSheetSubmit } from '@/src/shared/lib/sheet-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Contact, Contact2 } from 'lucide-react';
+import { Contact, Contact2, UserIcon } from 'lucide-react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -28,6 +31,7 @@ type EditAccountSheetProps = SettingsSheetProps & {
 
 export function EditAccountSheet({ open, onOpenChange, email }: EditAccountSheetProps) {
   const { profileQuery, updateProfileMutation } = useProfile();
+  const router = useRouter();
 
   const savedFullName = profileQuery.data?.fullName ?? '';
   const savedAvatarUrl = profileQuery.data?.avatarUrl ?? '';
@@ -44,6 +48,7 @@ export function EditAccountSheet({ open, onOpenChange, email }: EditAccountSheet
   });
 
   const formValues = useMemo(() => ({ fullName: savedFullName }), [savedFullName]);
+
   useProfileSheetFormSync(open, reset, formValues);
 
   const handleOpenChange = (nextOpen: boolean) => {
@@ -82,19 +87,33 @@ export function EditAccountSheet({ open, onOpenChange, email }: EditAccountSheet
   });
 
   return (
-    <AppSheet
+    <BottomSheet
       open={open}
       onOpenChange={handleOpenChange}
       title="Cuenta"
       description="Nombre y avatar de tu perfil."
-      className="sm:max-w-lg"
-      footer={
-        <AppSheetFooter
-          isPending={updateProfileMutation.isPending}
-          disabled={!canSave}
-          onSave={onSubmit}
-          onCancel={() => onOpenChange(false)}
-        />
+      actions={
+        {
+          close: (
+            <Button
+              variant="outline"
+              className="flex-1"
+              onClick={() => router.back()}
+            >
+              Cancelar
+            </Button>
+          ),
+          submit: (
+            <Button
+              disabled={!canSave || updateProfileMutation.isPending}
+              className="flex-1"
+              onClick={onSubmit}
+            >
+              {updateProfileMutation.isPending ? <Spinner data-icon="inline-start" /> : null}
+              {updateProfileMutation.isPending ? 'Guardando...' : 'Guardar'}
+            </Button>
+          ),
+        }
       }
     >
       <FormSection title="Nombre completo" icon={Contact}>
@@ -103,6 +122,7 @@ export function EditAccountSheet({ open, onOpenChange, email }: EditAccountSheet
           name="fullName"
           render={({ field }) => (
             <FormTextField
+              icon={UserIcon}
               autoComplete="name"
               placeholder="¿Cómo te llamas?"
               value={field.value}
@@ -113,7 +133,7 @@ export function EditAccountSheet({ open, onOpenChange, email }: EditAccountSheet
             />
           )}
         />
-        <div className="rounded-2xl bg-muted px-4 py-3">
+        <div className="px-4 py-3 rounded-2xl bg-muted">
           <p className="text-xs text-muted-foreground">Correo</p>
           <p className="mt-1 text-sm text-muted-foreground">{email}</p>
         </div>
@@ -132,12 +152,12 @@ export function EditAccountSheet({ open, onOpenChange, email }: EditAccountSheet
               alt="Opción de avatar"
               width={80}
               height={80}
-              className="size-full object-cover"
+              className="object-cover size-full"
               unoptimized
             />
           )}
         />
       </FormSection>
-    </AppSheet>
+    </BottomSheet>
   );
 }

@@ -1,13 +1,21 @@
 'use client';
 
 import { PendingAccountDeletionHandler } from '@/src/modules/settings/components/pending-account-deletion-handler';
-import { AppShell } from '@/src/shared/components/layout/app-sidebar';
+import { AppHeader } from '@/src/shared/components/layout/app-header';
+import { AppSidebar } from '@/src/shared/components/layout/app-sidebar';
+import { SidebarInset, SidebarProvider } from '@/src/shared/components/ui/sidebar';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
-    <AppShell>
-      <PendingAccountDeletionHandler />
-      {children}
-    </AppShell>
+    <SidebarProvider>
+      <AppSidebar />
+      <SidebarInset>
+        <AppHeader />
+        <main className="overflow-auto flex-1">
+          <PendingAccountDeletionHandler />
+          {children}
+        </main>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }

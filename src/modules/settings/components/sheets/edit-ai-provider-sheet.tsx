@@ -1,25 +1,24 @@
 'use client';
 
-import {
-  AI_DEFAULT_PROVIDER_LABEL,
-  AI_PROVIDER_SHEET_ICONS,
-  SETTINGS_SECTION_ACCENTS,
-} from '@/src/modules/settings/constants/settings-metadata';
+import { SETTINGS_REGISTRY } from '@/src/modules/settings/constants/settings-metadata';
 import { useAiProviders } from '@/src/modules/settings/hooks/use-ai-providers';
 import { useProfile } from '@/src/modules/settings/hooks/use-profile';
 import type { SettingsSheetProps } from '@/src/modules/settings/types/sheet.types';
-import { AppSheet, AppSheetFooter } from '@/src/shared/components/app-sheet';
-import { FormSection, OptionRow } from '@/src/shared/components/form-blocks';
+import { BottomSheet } from '@/src/shared/components/layout/bottom-sheet';
+import { FormSection, OptionRow } from '@/src/shared/components/layout/form-blocks';
+import { Button } from '@/src/shared/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/src/shared/components/ui/radio-group';
 import { Spinner } from '@/src/shared/components/ui/spinner';
 import { appToast } from '@/src/shared/lib/app-toast';
 import { BrainCogIcon } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 export function EditAIProviderSheet({ open, onOpenChange }: SettingsSheetProps) {
   const { preferences, updatePreferences, updateProfileMutation } = useProfile();
   const providersQuery = useAiProviders();
   const [provider, setProvider] = useState<string | null>(preferences.ai.defaultProvider);
+  const router = useRouter();
 
   const isDirty = provider !== preferences.ai.defaultProvider;
 
@@ -42,19 +41,32 @@ export function EditAIProviderSheet({ open, onOpenChange }: SettingsSheetProps) 
   const providers = providersQuery.data?.providers ?? [];
 
   return (
-    <AppSheet
+    <BottomSheet
       open={open}
       onOpenChange={handleOpenChange}
       title="Proveedor"
       description="Proveedor por defecto para las respuestas de IA."
-      footer={
-        <AppSheetFooter
-          isPending={updateProfileMutation.isPending}
-          disabled={!isDirty}
-          onSave={() => void handleSave()}
-          onCancel={() => onOpenChange(false)}
-        />
-      }
+      actions={{
+        close: (
+          <Button
+            variant="outline"
+            className="flex-1"
+            onClick={() => router.back()}
+          >
+            Cancelar
+          </Button>
+        ),
+        submit: (
+          <Button
+            disabled={!isDirty || updateProfileMutation.isPending}
+            className="flex-1"
+            onClick={handleSave}
+          >
+            {updateProfileMutation.isPending ? <Spinner data-icon="inline-start" /> : null}
+            {updateProfileMutation.isPending ? 'Guardando...' : 'Guardar'}
+          </Button>
+        ),
+      }}
     >
       <FormSection title="Proveedor por defecto" icon={BrainCogIcon}>
         {providersQuery.isLoading ? (
@@ -68,9 +80,9 @@ export function EditAIProviderSheet({ open, onOpenChange }: SettingsSheetProps) 
           >
             <div className="flex flex-col gap-2">
               <OptionRow
-                icon={AI_PROVIDER_SHEET_ICONS.automatic.icon}
-                iconColor={SETTINGS_SECTION_ACCENTS.ai}
-                label={AI_DEFAULT_PROVIDER_LABEL}
+                  icon={SETTINGS_REGISTRY.ai.rows.providerOption.icon}
+                  iconColor={SETTINGS_REGISTRY.ai.accent}
+                  label={SETTINGS_REGISTRY.ai.defaultProviderLabel}
                 description="Round-robin entre proveedores configurados"
                 selected={provider === null}
                 onPress={() => setProvider(null)}
@@ -79,8 +91,8 @@ export function EditAIProviderSheet({ open, onOpenChange }: SettingsSheetProps) 
               {providers.map((item) => (
                 <OptionRow
                   key={item.name}
-                  icon={AI_PROVIDER_SHEET_ICONS.provider.icon}
-                  iconColor={SETTINGS_SECTION_ACCENTS.ai}
+                  icon={SETTINGS_REGISTRY.ai.rows.providerOption.icon}
+                  iconColor={SETTINGS_REGISTRY.ai.accent}
                   label={item.name}
                   description={item.model}
                   selected={provider === item.name}
@@ -97,6 +109,6 @@ export function EditAIProviderSheet({ open, onOpenChange }: SettingsSheetProps) 
           </p>
         ) : null}
       </FormSection>
-    </AppSheet>
+    </BottomSheet>
   );
 }

@@ -1,5 +1,6 @@
 'use client';
 
+import { apiPatch } from '@/src/config/api-client';
 import { mergeAuthUserWithProfile, PROFILE_QUERY_KEY } from '@/src/modules/auth/lib/hydrate-auth-user';
 import { useProfile } from '@/src/modules/settings/hooks/use-profile';
 import {
@@ -14,7 +15,6 @@ import type {
   UserModuleEntry,
 } from '@/src/modules/settings/types/module-config.types';
 import type { UserProfile } from '@/src/modules/settings/types/profile.types';
-import { apiPatch } from '@/src/shared/config/api-client';
 import { API_ENDPOINTS } from '@/src/shared/constants/api-endpoints';
 import { appToast } from '@/src/shared/lib/app-toast';
 import { useAppStore } from '@/src/shared/store/app-store';

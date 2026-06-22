@@ -9,7 +9,7 @@ export function FeaturesSection() {
     <section id="features" className="relative px-6 py-24">
       {/* Simple decorative line */}
       <div className="absolute top-0 left-0 w-full">
-        <div className="mx-auto h-px w-96 max-w-full bg-border" />
+        <div className="mx-auto w-96 max-w-full h-px bg-border" />
       </div>
 
       <div className="mx-auto max-w-7xl">

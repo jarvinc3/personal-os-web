@@ -1,23 +1,22 @@
 'use client';
 
 import { ModuleSheetEnableRow } from '@/src/modules/settings/components/profile-ui';
-import {
-  FINANCE_NOTIFICATION_ROWS,
-  MODULE_ACCENTS,
-} from '@/src/modules/settings/constants/settings-metadata';
 import { useModuleSheetEnable } from '@/src/modules/settings/hooks/use-module-sheet-enable';
 import { useProfileSheetFormSync } from '@/src/modules/settings/hooks/use-profile-sheet';
 import { useUserModuleConfig } from '@/src/modules/settings/hooks/use-user-module-config';
 import type { FinanceModuleConfig } from '@/src/modules/settings/types/module-config.types';
 import type { SettingsSheetProps } from '@/src/modules/settings/types/sheet.types';
-import { AppSheet, AppSheetFooter } from '@/src/shared/components/app-sheet';
+import { BottomSheet } from '@/src/shared/components/layout/bottom-sheet';
 import {
   FormSection,
   FormTextField,
   OptionRow,
   SwitchFieldRow,
-} from '@/src/shared/components/form-blocks';
+} from '@/src/shared/components/layout/form-blocks';
+import { Button } from '@/src/shared/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/src/shared/components/ui/radio-group';
+import { Spinner } from '@/src/shared/components/ui/spinner';
+import { getModule } from '@/src/shared/constants/module-registry';
 import { appToast } from '@/src/shared/lib/app-toast';
 import { createSheetSubmit } from '@/src/shared/lib/sheet-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -31,6 +30,7 @@ import {
   ScanEyeIcon,
   Tags
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useEffect, useMemo } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -52,7 +52,16 @@ const schema = z.object({
 });
 
 type FormValues = z.infer<typeof schema>;
-const MODULE_ACCENT = MODULE_ACCENTS.finance;
+const MODULE_ACCENT = getModule('finance').accent;
+
+const FINANCE_NOTIFICATION_ROWS = [
+  { key: 'budgetAlerts', label: 'Alertas de presupuesto' },
+  { key: 'aiSuggestions', label: 'Sugerencias de IA' },
+  { key: 'transactionDetected', label: 'Transacciones detectadas' },
+  { key: 'monthlyReport', label: 'Reporte mensual' },
+  { key: 'cardDueDate', label: 'Vencimiento de tarjetas' },
+  { key: 'unusualExpense', label: 'Gastos inusuales' },
+] as const satisfies readonly { key: keyof FinanceModuleConfig['notifications']; label: string }[];
 
 const WEEK_OPTIONS = [
   { value: '1', label: 'Lunes', description: 'Semana laboral estándar.' },
@@ -90,6 +99,7 @@ function configToFormValues(config: FinanceModuleConfig): FormValues {
 export function EditFinanceSheet({ open, onOpenChange }: SettingsSheetProps) {
   const { config, updateConfig, updateMutation } = useUserModuleConfig('finance');
   const moduleEnable = useModuleSheetEnable('finance');
+  const router = useRouter();
 
   const {
     control,
@@ -138,20 +148,32 @@ export function EditFinanceSheet({ open, onOpenChange }: SettingsSheetProps) {
   });
 
   return (
-    <AppSheet
+    <BottomSheet
       open={open}
       onOpenChange={onOpenChange}
       title="Finanzas"
       description={config.fieldGuide}
-      className="sm:max-w-lg"
-      footer={
-        <AppSheetFooter
-          isPending={updateMutation.isPending}
-          disabled={moduleEnable.state !== 'unconfigured' && !isDirty && !moduleEnable.isEnabledDirty}
-          onSave={onSubmit}
-          onCancel={() => onOpenChange(false)}
-        />
-      }
+      actions={{
+        close: (
+          <Button
+            variant="outline"
+            className="flex-1"
+            onClick={() => router.back()}
+          >
+            Cancelar
+          </Button>
+        ),
+        submit: (
+          <Button
+            disabled={!isDirty || updateMutation.isPending}
+            className="flex-1"
+            onClick={onSubmit}
+          >
+            {updateMutation.isPending ? <Spinner data-icon="inline-start" /> : null}
+            {updateMutation.isPending ? 'Guardando...' : 'Guardar'}
+          </Button>
+        ),
+      }}
     >
       <ModuleSheetEnableRow
         state={moduleEnable.state}
@@ -261,6 +283,6 @@ export function EditFinanceSheet({ open, onOpenChange }: SettingsSheetProps) {
           />
         ))}
       </FormSection>
-    </AppSheet>
+    </BottomSheet>
   );
 }

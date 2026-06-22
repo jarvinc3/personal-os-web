@@ -1,4 +1,4 @@
-export { API_BASE_URL } from '@/src/shared/config/api-base-url';
+export { API_BASE_URL } from '@/src/config/api-base-url';
 
 export const API_ENDPOINTS = {
   HEALTH: '/health',

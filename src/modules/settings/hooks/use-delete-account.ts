@@ -1,11 +1,11 @@
 'use client';
 
+import { apiDelete } from '@/src/config/api-client';
+import { getSupabaseBrowserClient } from '@/src/config/supabase/client';
 import {
   AuthServiceError,
   supabaseAuthService,
 } from '@/src/modules/auth/services/supabase-auth.service';
-import { apiDelete } from '@/src/shared/config/api-client';
-import { getSupabaseBrowserClient } from '@/src/shared/config/supabase/client';
 import { API_ENDPOINTS } from '@/src/shared/constants/api-endpoints';
 import { APP_ROUTES } from '@/src/shared/constants/app-routes';
 import { appToast } from '@/src/shared/lib/app-toast';

@@ -1,7 +1,7 @@
 'use client';
 
 import type { RegisterPayload } from '@/src/modules/auth/types/auth.types';
-import { FormTextField } from '@/src/shared/components/form-blocks';
+import { FormTextField } from '@/src/shared/components/layout/form-blocks';
 import { Alert, AlertDescription, AlertTitle } from '@/src/shared/components/ui/alert';
 import { FieldGroup } from '@/src/shared/components/ui/field';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -66,7 +66,7 @@ export const RegisterForm = forwardRef<RegisterFormHandle, RegisterFormProps>(
     }));
 
     return (
-      <div className={isPending ? 'pointer-events-none opacity-80' : undefined}>
+      <div className={isPending ? 'opacity-80 pointer-events-none' : undefined}>
         <FieldGroup className="gap-4">
           <Controller
             control={control}

@@ -1,11 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { motion, AnimatePresence } from "motion/react";
-import { Navbar } from "@/src/modules/landing/components/Navbar";
-import { Footer } from "@/src/modules/landing/components/Footer";
 import { PageHeader } from "@/src/modules/landing/components/PageHeader";
-import { faqItems, faqCategories } from "@/src/modules/landing/data/faq-data";
+import { faqCategories, faqItems } from "@/src/modules/landing/data/faq-data";
+import { AnimatePresence, motion } from "motion/react";
+import { useState } from "react";
 
 function FAQItem({
   question,
@@ -26,9 +24,10 @@ function FAQItem({
       className="overflow-hidden rounded-2xl border border-white/10 bg-white/5 transition-colors hover:border-white/20"
     >
       <button
+        type="button"
+        title={open ? "Cerrar" : "Abrir"}
         onClick={() => setOpen(!open)}
         className="flex w-full items-center justify-between gap-4 px-6 py-5 text-left"
-        aria-expanded={open}
       >
         <span className="text-sm font-medium leading-relaxed">{question}</span>
         <span
@@ -76,8 +75,7 @@ export default function FAQPage() {
   );
 
   return (
-    <div className="min-h-screen">
-      <Navbar />
+    <div>
       <PageHeader
         label="Soporte"
         title="Preguntas frecuentes"
@@ -139,8 +137,6 @@ export default function FAQPage() {
           </a>
         </div>
       </main>
-
-      <Footer />
     </div>
   );
 }

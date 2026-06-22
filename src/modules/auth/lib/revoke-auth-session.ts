@@ -1,6 +1,6 @@
+import { queryClient } from '@/src/config/query-client';
+import { getSupabaseBrowserClient } from '@/src/config/supabase/client';
 import { PROFILE_QUERY_KEY } from '@/src/modules/auth/lib/hydrate-auth-user';
-import { queryClient } from '@/src/shared/config/query-client';
-import { getSupabaseBrowserClient } from '@/src/shared/config/supabase/client';
 import { useAppStore } from '@/src/shared/store/app-store';
 import { toast } from 'sonner';
 
