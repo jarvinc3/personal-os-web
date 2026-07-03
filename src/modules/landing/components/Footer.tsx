@@ -5,11 +5,11 @@ import { landingContent, siteInfo } from "../data/site-info";
 
 export function Footer() {
   return (
-    <footer className="relative mt-32 border-t-2 border-text bg-white">
+    <footer className="relative mt-32 bg-white border-t-2 border-text">
       {/* Background decoration */}
-      <div className="pointer-events-none absolute inset-x-0 -top-40 h-40 bg-transparent" />
+      <div className="absolute inset-x-0 -top-40 h-40 bg-transparent pointer-events-none" />
 
-      <div className="mx-auto max-w-7xl px-6 py-16">
+      <div className="px-6 py-16 mx-auto max-w-7xl">
         <div className="grid grid-cols-1 gap-12 md:grid-cols-5">
           {/* Brand column */}
           <div className="md:col-span-2">
@@ -25,10 +25,10 @@ export function Footer() {
             <p className="mb-6 max-w-xs text-sm leading-relaxed text-muted-foreground">
               {landingContent.footer.description}
             </p>
-            <div className="flex items-center gap-3">
+            <div className="flex gap-3 items-center">
               <a
                 href={`mailto:${siteInfo.email}`}
-                className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                className="text-sm transition-colors text-muted-foreground hover:text-foreground"
               >
                 {siteInfo.email}
               </a>
@@ -38,7 +38,7 @@ export function Footer() {
           {/* Links columns */}
           {landingContent.footer.columns.map((column) => (
             <div key={column.title}>
-              <h3 className="mb-4 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+              <h3 className="mb-4 text-xs font-semibold tracking-widest uppercase text-muted-foreground">
                 {column.title}
               </h3>
               <ul className="space-y-3">
@@ -46,7 +46,7 @@ export function Footer() {
                   <li key={link.href}>
                     <Link
                       href={link.href}
-                      className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                      className="text-sm transition-colors text-muted-foreground hover:text-foreground"
                     >
                       {link.label}
                     </Link>
@@ -58,14 +58,14 @@ export function Footer() {
         </div>
 
         {/* Bottom bar */}
-        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t-2 border-text pt-8 sm:flex-row">
+        <div className="flex flex-col gap-4 justify-between items-center pt-8 mt-12 border-t-2 border-text sm:flex-row">
           <p className="text-xs font-bold text-text">
             {siteInfo.copyright}
           </p>
-          <div className="flex items-center gap-2">
+          <div className="flex gap-2 items-center">
             <span className="inline-flex items-center gap-1.5 rounded-full border-2 border-success bg-success/10 px-2.5 py-1 text-xs font-bold text-success shadow-[2px_2px_0px_0px_var(--color-success)]">
               <span className="relative flex h-1.5 w-1.5">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-75" />
+                <span className="inline-flex absolute w-full h-full rounded-full opacity-75 animate-ping bg-success" />
                 <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-success" />
               </span>
               {siteInfo.statusBadge}

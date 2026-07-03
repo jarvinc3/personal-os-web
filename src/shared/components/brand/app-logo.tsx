@@ -4,8 +4,10 @@ import { appAssets } from "@/src/shared/constants/app-assets";
 import { cn } from "@/src/shared/lib/utils";
 
 const sizes = {
-  sm: { className: "size-8", px: 32 },
+  xs: { className: "size-6", px: 20 },
+  sm: { className: "size-8", px: 28 },
   md: { className: "size-9", px: 36 },
+  lg: { className: "size-10", px: 44 },
 } as const;
 
 type AppLogoProps = {
@@ -19,7 +21,7 @@ export function AppLogo({ size = "sm", className }: AppLogoProps) {
   return (
     <span
       className={cn(
-        "relative shrink-0 overflow-hidden rounded-xl",
+        "overflow-hidden relative rounded-xl shrink-0",
         sizeClass,
         className,
       )}
@@ -29,7 +31,7 @@ export function AppLogo({ size = "sm", className }: AppLogoProps) {
         alt=""
         width={px}
         height={px}
-        className="size-full object-cover dark:hidden"
+        className="object-cover size-full dark:hidden"
         priority={size === "sm"}
       />
       <Image
@@ -37,7 +39,7 @@ export function AppLogo({ size = "sm", className }: AppLogoProps) {
         alt=""
         width={px}
         height={px}
-        className="hidden size-full object-cover dark:block"
+        className="hidden object-cover size-full dark:block"
       />
     </span>
   );

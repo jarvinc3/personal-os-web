@@ -1,5 +1,3 @@
-import { Footer } from "@/src/modules/landing/components/Footer";
-import { Navbar } from "@/src/modules/landing/components/Navbar";
 import { PageHeader } from "@/src/modules/landing/components/PageHeader";
 import type { Metadata } from "next";
 
@@ -28,8 +26,7 @@ function Section({
 
 export default function TermsPage() {
   return (
-    <div className="min-h-screen">
-      <Navbar />
+    <div>
       <PageHeader
         label="Legal"
         title="Términos y condiciones"
@@ -216,8 +213,6 @@ export default function TermsPage() {
           </p>
         </Section>
       </main>
-
-      <Footer />
     </div>
   );
 }
