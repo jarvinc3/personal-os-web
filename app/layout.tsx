@@ -1,28 +1,29 @@
-import type { Metadata } from "next";
-import { IBM_Plex_Mono } from "next/font/google";
+import type { Metadata } from "next"
+import { IBM_Plex_Mono } from "next/font/google"
 
-import { siteInfo } from "@/src/modules/landing/data/site-info";
-import { AuthBootstrapProvider } from "@/src/providers/auth-bootstrap-provider";
-import { QueryProvider } from "@/src/providers/query-provider";
-import { ThemeProvider } from "@/src/providers/theme-provider";
-import { Toaster } from "@/src/shared/components/ui/sonner";
-import { TooltipProvider } from "@/src/shared/components/ui/tooltip";
-import { appAssets } from "@/src/shared/constants/app-assets";
-import { cn } from "@/src/shared/lib/utils";
+import { siteInfo } from "@/src/modules/landing/data/site-info"
+import { AuthBootstrapProvider } from "@/src/providers/auth-bootstrap-provider"
+import { QueryProvider } from "@/src/providers/query-provider"
+import { ThemeProvider } from "@/src/providers/theme-provider"
+import { Toaster } from "@/src/shared/components/ui/sonner"
+import { TooltipProvider } from "@/src/shared/components/ui/tooltip"
+import { appAssets } from "@/src/shared/constants/app-assets"
+import { cn } from "@/src/shared/lib/utils"
+import { Analytics } from "@vercel/analytics/next"
 
-import "./globals.css";
+import "./globals.css"
 
 const ibmPlexMono = IBM_Plex_Mono({
   weight: ["100", "200", "300", "400", "500", "600", "700"],
   subsets: ["latin"],
   variable: "--font-sans", // Use for main text to override sans
-});
+})
 
 const ibmPlexMonoMono = IBM_Plex_Mono({
   weight: ["100", "200", "300", "400", "500", "600", "700"],
   subsets: ["latin"],
   variable: "--font-mono",
-});
+})
 
 export const metadata: Metadata = {
   title: {
@@ -57,12 +58,12 @@ export const metadata: Metadata = {
     ],
     apple: appAssets.appleTouchIcon,
   },
-};
+}
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: React.ReactNode
 }>) {
   return (
     <html
@@ -71,7 +72,7 @@ export default function RootLayout({
       className={cn(
         "min-h-screen bg-background font-sans antialiased",
         ibmPlexMono.variable,
-        ibmPlexMonoMono.variable,
+        ibmPlexMonoMono.variable
       )}
     >
       <body>
@@ -85,7 +86,8 @@ export default function RootLayout({
             </TooltipProvider>
           </AuthBootstrapProvider>
         </QueryProvider>
+        <Analytics />
       </body>
     </html>
-  );
+  )
 }
