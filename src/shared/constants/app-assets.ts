@@ -5,8 +5,8 @@ export const appAssets = {
   favicon96: '/assets/favicon-96x96.png',
   faviconIco: '/assets/favicon.ico',
   appleTouchIcon: '/assets/apple-touch-icon.png',
-  welcomeIllustrationLight: '/assets/images/welcome-ilustration-light.png',
-  welcomeIllustrationDark: '/assets/images/welcome-ilustration-dark.png',
+  welcomeIllustrationLight: '/images/welcome-ilustration-light.png',
+  welcomeIllustrationDark: '/images/welcome-ilustration-dark.png',
 } as const;
 
 export function getAppIconPath(theme: 'light' | 'dark' | 'system' | undefined): string {

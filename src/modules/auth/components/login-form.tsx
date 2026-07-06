@@ -1,19 +1,19 @@
 "use client"
 
-import type { LoginPayload } from "@/src/modules/auth/types/auth.types"
-import { FormTextField } from "@/src/shared/components/layout/form-blocks"
+import type { LoginPayload } from "@/src/modules/auth/types/auth.types";
+import { FormTextField } from "@/src/shared/components/layout/form-blocks";
 import {
   Alert,
   AlertDescription,
   AlertTitle,
-} from "@/src/shared/components/ui/alert"
-import { FieldGroup } from "@/src/shared/components/ui/field"
-import { cn } from "@/src/shared/lib/utils"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { AlertCircleIcon } from "lucide-react"
-import { forwardRef, useImperativeHandle } from "react"
-import { Controller, useForm } from "react-hook-form"
-import { z } from "zod"
+} from "@/src/shared/components/ui/alert";
+import { FieldGroup } from "@/src/shared/components/ui/field";
+import { cn } from "@/src/shared/lib/utils";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { AlertCircleIcon } from "lucide-react";
+import { forwardRef, useImperativeHandle, useRef } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { z } from "zod";
 
 const loginSchema = z.object({
   email: z.string().trim().email("Ingresa un email valido"),
@@ -38,6 +38,7 @@ type LoginFormProps = {
 
 export const LoginForm = forwardRef<LoginFormHandle, LoginFormProps>(
   function LoginForm({ isPending, error, onSubmit }, ref) {
+    const passwordInputRef = useRef<HTMLInputElement>(null)
     const {
       control,
       handleSubmit,
@@ -62,7 +63,7 @@ export const LoginForm = forwardRef<LoginFormHandle, LoginFormProps>(
     return (
       <div
         className={cn(
-          isPending ? "pointer-events-none opacity-80" : "",
+          isPending ? "opacity-80 pointer-events-none" : "",
           "w-full max-w-sm"
         )}
       >
@@ -79,6 +80,12 @@ export const LoginForm = forwardRef<LoginFormHandle, LoginFormProps>(
                 value={field.value}
                 onChange={field.onChange}
                 onBlur={field.onBlur}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    event.preventDefault()
+                    passwordInputRef.current?.focus()
+                  }
+                }}
                 disabled={isPending}
                 error={errors.email?.message}
                 invalid={Boolean(errors.email)}
@@ -94,9 +101,16 @@ export const LoginForm = forwardRef<LoginFormHandle, LoginFormProps>(
                 type="password"
                 autoComplete="current-password"
                 placeholder="Mín. 8 caracteres, 1 mayúscula y 1 número"
+                inputRef={passwordInputRef}
                 value={field.value}
                 onChange={field.onChange}
                 onBlur={field.onBlur}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    event.preventDefault()
+                    void submitForm()
+                  }
+                }}
                 disabled={isPending}
                 error={errors.password?.message}
                 invalid={Boolean(errors.password)}

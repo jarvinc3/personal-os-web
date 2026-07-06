@@ -12,6 +12,7 @@ import {
   supabaseAuthService,
 } from '@/src/modules/auth/services/supabase-auth.service';
 import type { LoginPayload, RegisterPayload } from '@/src/modules/auth/types/auth.types';
+import { deactivatePushTokenIfPresent } from '@/src/modules/notifications/lib/deactivate-web-push-token';
 import { APP_ROUTES, authVerifyEmailHref } from '@/src/shared/constants/app-routes';
 import { useAppStore } from '@/src/shared/store/app-store';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -85,7 +86,10 @@ export function useAuth() {
   });
 
   const logoutMutation = useMutation({
-    mutationFn: () => supabaseAuthService.logout(),
+    mutationFn: async () => {
+      await deactivatePushTokenIfPresent();
+      await supabaseAuthService.logout();
+    },
     onSuccess: async () => {
       clearAuthState();
       toast.success('Sesión cerrada');

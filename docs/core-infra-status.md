@@ -39,12 +39,14 @@ Documento de estado para dejar trazabilidad de lo implementado en frontend (`per
 - `use-profile` migrado a backend (`GET /users/me`, `PATCH /users/me`).
 - Tipos de perfil alineados a modelo `User` backend.
 
-## Notificaciones/push token
+## Notificaciones/push token (web)
 
-- Hook `usePushToken` implementado para registrar token en `POST /notifications/push-tokens`.
-- Registro condicionado a `preferences.notifications.channels.push`; desactivación al apagar push o logout.
-- Guard para Expo Go (evita crash): no intenta push remoto cuando `Constants.appOwnership === 'expo'`.
-- Integrado en `AppProviders` (`AppQueryEffects` dentro de `QueryClientProvider`).
+- Web Push con service worker (`public/sw.js`) y suscripción VAPID.
+- Hook `usePushToken` registra token en `POST /notifications/push-tokens` cuando push está activo y el permiso del navegador es `granted`.
+- `DevicePushSettingsRow` en Ajustes e inbox para activar permisos del navegador (gesto explícito).
+- Desactivación al apagar push o logout (`deactivatePushTokenIfPresent`).
+- Integrado en `AppEffectsProvider` junto a sockets de notificaciones e IA.
+- Variables: `NEXT_PUBLIC_VAPID_PUBLIC_KEY` (web), `VAPID_*` (backend).
 
 ## Centro de notificaciones (in-app)
 

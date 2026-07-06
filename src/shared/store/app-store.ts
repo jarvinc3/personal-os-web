@@ -5,9 +5,11 @@ type AppState = {
   bootstrapped: boolean;
   session: AuthSession | null;
   user: AuthUser | null;
+  pushToken: string | null;
   setBootstrapped: (value: boolean) => void;
   setAuthState: (payload: { session: AuthSession | null; user: AuthUser | null }) => void;
   updateAuthUser: (user: AuthUser) => void;
+  setPushToken: (token: string | null) => void;
   clearAuthState: () => void;
 };
 
@@ -15,8 +17,10 @@ export const useAppStore = create<AppState>((set) => ({
   bootstrapped: false,
   session: null,
   user: null,
+  pushToken: null,
   setBootstrapped: (value) => set({ bootstrapped: value }),
   setAuthState: ({ session, user }) => set({ session, user }),
   updateAuthUser: (user) => set({ user }),
-  clearAuthState: () => set({ session: null, user: null }),
+  setPushToken: (token) => set({ pushToken: token }),
+  clearAuthState: () => set({ session: null, user: null, pushToken: null }),
 }));

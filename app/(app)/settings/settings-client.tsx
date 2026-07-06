@@ -1,47 +1,49 @@
 "use client"
 
-import { useAuth, useAuthGuard } from "@/src/modules/auth"
-import { ModuleSettingsRows } from "@/src/modules/settings/components/profile-ui"
-import { DeleteAccountSheet } from "@/src/modules/settings/components/sheets/delete-account-sheet"
-import { EditAccountSheet } from "@/src/modules/settings/components/sheets/edit-account-sheet"
-import { EditAgendaSheet } from "@/src/modules/settings/components/sheets/edit-agenda-sheet"
-import { EditAIProviderSheet } from "@/src/modules/settings/components/sheets/edit-ai-provider-sheet"
-import { EditAISheet } from "@/src/modules/settings/components/sheets/edit-ai-sheet"
-import { EditFinanceSheet } from "@/src/modules/settings/components/sheets/edit-finance-sheet"
-import { EditHealthSheet } from "@/src/modules/settings/components/sheets/edit-health-sheet"
-import { EditProjectsSheet } from "@/src/modules/settings/components/sheets/edit-projects-sheet"
-import { EditQuietHoursSheet } from "@/src/modules/settings/components/sheets/edit-quiet-hours-sheet"
-import { EditSubscriptionsSheet } from "@/src/modules/settings/components/sheets/edit-subscriptions-sheet"
-import { EditThemeSheet } from "@/src/modules/settings/components/sheets/edit-theme-sheet"
+import { useAuth, useAuthGuard } from "@/src/modules/auth";
+import { DevicePushSettingsRow } from "@/src/modules/notifications/components/device-push-settings-row";
+import { deactivatePushTokenIfPresent } from "@/src/modules/notifications/lib/deactivate-web-push-token";
+import { ModuleSettingsRows } from "@/src/modules/settings/components/profile-ui";
+import { DeleteAccountSheet } from "@/src/modules/settings/components/sheets/delete-account-sheet";
+import { EditAccountSheet } from "@/src/modules/settings/components/sheets/edit-account-sheet";
+import { EditAgendaSheet } from "@/src/modules/settings/components/sheets/edit-agenda-sheet";
+import { EditAIProviderSheet } from "@/src/modules/settings/components/sheets/edit-ai-provider-sheet";
+import { EditAISheet } from "@/src/modules/settings/components/sheets/edit-ai-sheet";
+import { EditFinanceSheet } from "@/src/modules/settings/components/sheets/edit-finance-sheet";
+import { EditHealthSheet } from "@/src/modules/settings/components/sheets/edit-health-sheet";
+import { EditProjectsSheet } from "@/src/modules/settings/components/sheets/edit-projects-sheet";
+import { EditQuietHoursSheet } from "@/src/modules/settings/components/sheets/edit-quiet-hours-sheet";
+import { EditSubscriptionsSheet } from "@/src/modules/settings/components/sheets/edit-subscriptions-sheet";
+import { EditThemeSheet } from "@/src/modules/settings/components/sheets/edit-theme-sheet";
 import {
-    getAiToneLabel,
-    getThemeOptionLabel,
-    SETTINGS_REGISTRY,
-} from "@/src/modules/settings/constants/settings-metadata"
-import { useModuleSheetNav } from "@/src/modules/settings/hooks/use-module-sheet-nav"
-import { useProfile } from "@/src/modules/settings/hooks/use-profile"
-import { getSettingValue } from "@/src/modules/settings/lib/settings-value"
-import type { ThemeValue } from "@/src/modules/settings/types/profile.types"
-import { LoadingView } from "@/src/shared/components/layout/loading-view"
+  getAiToneLabel,
+  getThemeOptionLabel,
+  SETTINGS_REGISTRY,
+} from "@/src/modules/settings/constants/settings-metadata";
+import { useModuleSheetNav } from "@/src/modules/settings/hooks/use-module-sheet-nav";
+import { useProfile } from "@/src/modules/settings/hooks/use-profile";
+import { getSettingValue } from "@/src/modules/settings/lib/settings-value";
+import type { ThemeValue } from "@/src/modules/settings/types/profile.types";
+import { LoadingView } from "@/src/shared/components/layout/loading-view";
 import {
-    SettingsRow,
-    SettingsSection,
-} from "@/src/shared/components/layout/settings-section"
+  SettingsRow,
+  SettingsSection,
+} from "@/src/shared/components/layout/settings-section";
 import {
-    Avatar,
-    AvatarFallback,
-    AvatarImage,
-} from "@/src/shared/components/ui/avatar"
-import { Button } from "@/src/shared/components/ui/button"
-import { Spinner } from "@/src/shared/components/ui/spinner"
-import { APP_ROUTES } from "@/src/shared/constants/app-routes"
-import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
-import { appToast } from "@/src/shared/lib/app-toast"
-import { formatTimeRange } from "@/src/shared/lib/date-format"
-import { Edit, LogOut, RefreshCw } from "lucide-react"
-import { useTheme } from "next-themes"
-import { useRouter } from "next/navigation"
-import { useCallback, useEffect, useRef } from "react"
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/src/shared/components/ui/avatar";
+import { Button } from "@/src/shared/components/ui/button";
+import { Spinner } from "@/src/shared/components/ui/spinner";
+import { APP_ROUTES } from "@/src/shared/constants/app-routes";
+import { useSheetParam } from "@/src/shared/hooks/use-sheet-params";
+import { appToast } from "@/src/shared/lib/app-toast";
+import { formatTimeRange } from "@/src/shared/lib/date-format";
+import { Edit, LogOut, RefreshCw } from "lucide-react";
+import { useTheme } from "next-themes";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useRef } from "react";
 
 const APP_VERSION = process.env.NEXT_PUBLIC_APP_VERSION ?? "1.0.0"
 const APP_ENV =
@@ -222,7 +224,10 @@ export default function SettingsPage() {
         <SettingsRow
           label="Push"
           switchValue={preferences.notifications.channels.push}
-          onSwitchChange={(checked) =>
+          onSwitchChange={(checked) => {
+            if (!checked) {
+              void deactivatePushTokenIfPresent()
+            }
             void handlePreferenceToggle(
               {
                 notifications: {
@@ -235,7 +240,7 @@ export default function SettingsPage() {
               },
               "Preferencia de push actualizada."
             )
-          }
+          }}
           {...SETTINGS_REGISTRY.notifications.rows.push}
         />
         <SettingsRow
@@ -299,14 +304,7 @@ export default function SettingsPage() {
           disabled={!quietHours.enabled}
           {...SETTINGS_REGISTRY.notifications.rows.quietHoursSchedule}
         />
-        <SettingsRow
-          label="Permisos de notificaciones"
-          value="No disponible en web"
-          disabled
-          showChevron={false}
-          isLast
-          {...SETTINGS_REGISTRY.notifications.rows.devicePush}
-        />
+        <DevicePushSettingsRow isLast />
       </SettingsSection>
 
       <SettingsSection title="Privacidad">

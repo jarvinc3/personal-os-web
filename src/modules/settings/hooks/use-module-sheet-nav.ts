@@ -1,6 +1,7 @@
 import { MODULE_SHEET_PARAM_KEYS } from '@/src/modules/settings/constants/module-sheet-keys';
 import type { ModuleSlug } from '@/src/modules/settings/types/module-config.types';
 import { MODULE_SLUGS_ORDER } from '@/src/shared/constants/module-registry';
+import { navigateSheetUrl } from '@/src/shared/hooks/use-sheet-params';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useMemo } from 'react';
 
@@ -17,16 +18,13 @@ export function useModuleSheetNav() {
 
   const setModuleOpen = useCallback(
     (slug: ModuleSlug, open: boolean) => {
-      const next = new URLSearchParams(searchParams.toString());
-
-      if (open) {
-        next.set('sheet', MODULE_SHEET_PARAM_KEYS[slug]);
-      } else {
-        next.delete('sheet');
-      }
-
-      const qs = next.toString();
-      router.push(qs ? `${pathname}?${qs}` : pathname);
+      navigateSheetUrl(
+        router,
+        pathname,
+        searchParams,
+        MODULE_SHEET_PARAM_KEYS[slug],
+        open,
+      );
     },
     [searchParams, router, pathname],
   );

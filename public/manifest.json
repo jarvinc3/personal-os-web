@@ -1,0 +1,57 @@
+{
+  "name": "Personal OS",
+  "short_name": "P-OS",
+  "description": "Personal OS centraliza y automatiza la gestión de tus finanzas, agenda, proyectos, salud y suscripciones en una sola app potenciada por inteligencia artificial.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1C1917",
+  "theme_color": "#1C1917",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/assets/icon.png",
+      "sizes": "1073x1073",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": [
+    "personal",
+    "os",
+    "operating",
+    "system",
+    "life",
+    "business",
+    "projects",
+    "tasks",
+    "notes",
+    "contacts",
+    "calendar",
+    "email",
+    "documents",
+    "files"
+  ],
+  "screenshots": [
+    {
+      "src": "/images/app-banner-v1.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ],
+  "lang": "es-DO",
+  "dir": "ltr"
+}

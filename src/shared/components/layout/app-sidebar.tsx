@@ -58,6 +58,7 @@ export function AppSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton
               size="md"
+              onClick={() => router.push(APP_ROUTES.app.chat)}
             >
               <SparklesIcon className="text-destructive" size={16} />
               Agente IA
