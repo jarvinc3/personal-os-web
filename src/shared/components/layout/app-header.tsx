@@ -1,8 +1,13 @@
-'use client';
+"use client"
 
-import { useAuth } from '@/src/modules/auth';
-import { NotificationBell } from '@/src/modules/notifications/components/notification-bell';
-import { Avatar, AvatarFallback, AvatarImage } from '@/src/shared/components/ui/avatar';
+import { useAuth } from "@/src/modules/auth"
+import { NotificationBell } from "@/src/modules/notifications/components/notification-bell"
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/src/shared/components/ui/avatar"
+import { Button } from "@/src/shared/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,134 +16,268 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/src/shared/components/ui/dropdown-menu';
-import { Separator } from '@/src/shared/components/ui/separator';
-import {
-  SidebarTrigger
-} from '@/src/shared/components/ui/sidebar';
-import { APP_ROUTES } from '@/src/shared/constants/app-routes';
-import { useScrollDirection } from '@/src/shared/hooks/use-scroll-direction';
-import { cn } from '@/src/shared/lib/utils';
-import { useAppStore } from '@/src/shared/store/app-store';
-import { BellIcon, LogOutIcon, SettingsIcon } from 'lucide-react';
-import { usePathname, useRouter } from 'next/navigation';
+} from "@/src/shared/components/ui/dropdown-menu"
+import { Separator } from "@/src/shared/components/ui/separator"
+import { SidebarTrigger } from "@/src/shared/components/ui/sidebar"
+import { APP_ROUTES } from "@/src/shared/constants/app-routes"
+import { useHeaderContext } from "@/src/shared/context/header-context"
+import { useScrollDirection } from "@/src/shared/hooks/use-scroll-direction"
+import { cn } from "@/src/shared/lib/utils"
+import { useAppStore } from "@/src/shared/store/app-store"
+import { ArrowLeftIcon, BellIcon, LogOutIcon, SettingsIcon } from "lucide-react"
+import { usePathname, useRouter } from "next/navigation"
+import type { ReactNode } from "react"
 
 const PAGE_TITLES: Record<string, string> = {
-  [APP_ROUTES.app.home]: 'Inicio',
-  [APP_ROUTES.app.settings]: 'Ajustes',
-  [APP_ROUTES.app.chat]: 'Agente IA',
-  [APP_ROUTES.app.notifications]: 'Notificaciones',
-};
+  [APP_ROUTES.app.home]: "Inicio",
+  [APP_ROUTES.app.settings]: "Ajustes",
+  [APP_ROUTES.app.chat]: "Agente IA",
+  [APP_ROUTES.app.notifications]: "Notificaciones",
+}
 
 function resolvePageTitle(pathname: string): string {
   if (PAGE_TITLES[pathname]) {
-    return PAGE_TITLES[pathname];
+    return PAGE_TITLES[pathname]
   }
   if (pathname.startsWith(APP_ROUTES.app.settings)) {
-    return 'Ajustes';
+    return "Ajustes"
   }
   if (pathname.startsWith(APP_ROUTES.app.chat)) {
-    return 'Agente IA';
+    return "Agente IA"
   }
   if (pathname.startsWith(APP_ROUTES.app.notifications)) {
-    return 'Notificaciones';
+    return "Notificaciones"
   }
-  return 'Personal OS';
+  return "Personal OS"
+}
+
+function HeaderBackButton({ onBack }: { onBack: () => void }) {
+  return (
+    <Button
+      variant="ghost"
+      size="icon"
+      className="-ml-1 size-8"
+      onClick={onBack}
+      aria-label="Volver"
+    >
+      <ArrowLeftIcon />
+    </Button>
+  )
+}
+
+function HeaderUserMenu() {
+  const pathname = usePathname()
+  const router = useRouter()
+  const user = useAppStore((state) => state.user)
+  const { logoutMutation } = useAuth()
+
+  const displayName = user?.fullName ?? "Usuario"
+  const email = user?.email ?? ""
+  const avatarUrl = user?.profile?.avatarUrl ?? user?.avatarUrl
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="size-8 rounded-lg p-0"
+          aria-label="Menú de usuario"
+        >
+          <Avatar className="size-8 rounded-lg">
+            <AvatarImage src={avatarUrl} alt={displayName} />
+            <AvatarFallback className="rounded-lg">
+              {displayName.slice(0, 2).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        className="min-w-56"
+        side="bottom"
+        align="end"
+        sideOffset={4}
+      >
+        <DropdownMenuGroup>
+          <DropdownMenuLabel className="p-0 font-normal">
+            <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+              <Avatar className="size-8 rounded-lg">
+                {avatarUrl ? (
+                  <AvatarImage src={avatarUrl} alt={displayName} />
+                ) : null}
+                <AvatarFallback className="rounded-lg">
+                  {displayName.slice(0, 2).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <div className="grid flex-1 text-left text-sm leading-tight">
+                <span className="truncate font-medium">{displayName}</span>
+                <span className="truncate text-xs text-muted-foreground">
+                  {email}
+                </span>
+              </div>
+            </div>
+          </DropdownMenuLabel>
+        </DropdownMenuGroup>
+        <DropdownMenuSeparator />
+        <DropdownMenuGroup className="flex flex-col gap-2">
+          <DropdownMenuItem
+            onClick={() => router.push(APP_ROUTES.app.notifications)}
+          >
+            <BellIcon />
+            Notificaciones
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            active={pathname === APP_ROUTES.app.settings}
+            onClick={() => router.push(APP_ROUTES.app.settings)}
+          >
+            <SettingsIcon />
+            Configuración
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          className="text-destructive"
+          onClick={() => logoutMutation.mutate()}
+        >
+          <LogOutIcon />
+          Cerrar sesión
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
+}
+
+function HeaderTitle({
+  title,
+  subtitle,
+  centered = false,
+}: {
+  title: ReactNode
+  subtitle?: ReactNode
+  centered?: boolean
+}) {
+  if (subtitle) {
+    return (
+      <div
+        className={cn("flex flex-col", centered && "items-center text-center")}
+      >
+        <p className="text-sm text-muted-foreground">{subtitle}</p>
+        <div className="text-xl font-semibold">{title}</div>
+      </div>
+    )
+  }
+
+  return (
+    <div
+      className={cn(
+        "text-lg font-bold tracking-tight md:text-xl",
+        centered && "text-center"
+      )}
+    >
+      {title}
+    </div>
+  )
+}
+
+function PrimaryHeader({
+  title,
+  actions,
+  showSidebarTrigger,
+  showNotificationBell,
+  showUserMenu,
+}: {
+  title: ReactNode
+  actions?: ReactNode
+  showSidebarTrigger: boolean
+  showNotificationBell: boolean
+  showUserMenu: boolean
+}) {
+  return (
+    <div className="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">
+      {showSidebarTrigger ? (
+        <>
+          <SidebarTrigger className="-ml-1" />
+          <Separator
+            orientation="vertical"
+            className="mx-2 h-4 data-vertical:self-auto"
+          />
+        </>
+      ) : null}
+      <div className="flex min-w-0 flex-1 flex-col">{title}</div>
+      {actions ? (
+        <div className="flex shrink-0 items-center gap-1">{actions}</div>
+      ) : null}
+      {showNotificationBell ? <NotificationBell /> : null}
+      {showUserMenu ? <HeaderUserMenu /> : null}
+    </div>
+  )
+}
+
+function SecondaryHeader({
+  title,
+  actions,
+  onBack,
+}: {
+  title: ReactNode
+  actions?: ReactNode
+  onBack: () => void
+}) {
+  return (
+    <div className="grid w-full grid-cols-[auto_1fr_auto] items-center gap-2 px-4 lg:px-6">
+      <HeaderBackButton onBack={onBack} />
+      <div className="min-w-0 justify-self-center">
+        <HeaderTitle title={title} centered />
+      </div>
+      <div className="flex items-center justify-end">
+        {actions ?? <span className="size-8" aria-hidden="true" />}
+      </div>
+    </div>
+  )
 }
 
 export function AppHeader() {
-  const pathname = usePathname();
-  const title = resolvePageTitle(pathname);
-  const user = useAppStore((state) => state.user);
-  const { logoutMutation } = useAuth();
-  const { hidden } = useScrollDirection();
-  const router = useRouter();
+  const pathname = usePathname()
+  const router = useRouter()
+  const { config } = useHeaderContext()
+  const { hidden } = useScrollDirection()
 
-  const displayName = user?.fullName ?? 'Usuario';
-  const email = user?.email ?? '';
-  const avatarUrl = user?.profile?.avatarUrl ?? user?.avatarUrl;
-  const isHomePage = pathname === APP_ROUTES.app.home;
+  const fallbackTitle = resolvePageTitle(pathname)
+  const title = config.title ?? fallbackTitle
+  const scrollHidden = config.scrollHide && hidden
+
+  const handleBack = config.onBack ?? (() => router.back())
 
   return (
     <header
+      data-header-variant={config.variant}
       className={cn(
-        "sticky top-0 z-40 flex py-2.5 shrink-0 items-center gap-2 bg-background/80 backdrop-blur-lg transition-transform duration-300 ease-in-out group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)",
-        hidden && "-translate-y-full",
+        "sticky top-0 z-40 flex h-(--header-height) shrink-0 items-center gap-2 bg-background/80 py-2.5 backdrop-blur-lg transition-transform duration-300 ease-in-out",
+        scrollHidden && "-translate-y-full"
       )}
     >
-      <div className="flex gap-1 items-center px-4 w-full lg:gap-2 lg:px-6">
-        <SidebarTrigger className="-ml-1" />
-        <Separator
-          orientation="vertical"
-          className="mx-2 h-4 data-vertical:self-auto"
+      {config.variant === "secondary" ? (
+        <SecondaryHeader
+          title={title}
+          actions={config.actions}
+          onBack={handleBack}
         />
-        <div className="flex flex-col flex-1">
-          {isHomePage ? (
-            <div>
-              <p className="text-sm text-muted-foreground">Hola,</p>
-              <p className="text-xl font-semibold">{displayName}</p>
-            </div>
-          ) : (
-            <h1 className="text-lg font-bold tracking-tight md:text-xl">{title}</h1>
-          )}
-        </div>
-        <NotificationBell />
-        <DropdownMenu>
-          <DropdownMenuTrigger>
-            <Avatar className="rounded-lg size-8">
-              <AvatarImage src={avatarUrl} alt={displayName} />
-              <AvatarFallback className="rounded-lg">
-                {displayName.slice(0, 2).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            className="min-w-56"
-            side="bottom"
-            align="end"
-            sideOffset={4}
-          >
-            <DropdownMenuGroup>
-              <DropdownMenuLabel className="p-0 font-normal">
-                <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                  <Avatar className="rounded-lg size-8">
-                    {avatarUrl ? <AvatarImage src={avatarUrl} alt={displayName} /> : null}
-                    <AvatarFallback className="rounded-lg">
-                      {displayName.slice(0, 2).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="grid flex-1 text-sm leading-tight text-left">
-                    <span className="font-medium truncate">{displayName}</span>
-                    <span className="text-xs truncate text-muted-foreground">{email}</span>
-                  </div>
-                </div>
-              </DropdownMenuLabel>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup className="flex flex-col gap-2">
-              <DropdownMenuItem onClick={() => router.push(APP_ROUTES.app.notifications)}>
-                <BellIcon />
-                Notificaciones
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                active={pathname === APP_ROUTES.app.settings}
-                onClick={() => router.push(APP_ROUTES.app.settings)}
-              >
-                <SettingsIcon />
-                Configuración
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              className="text-destructive"
-              onClick={() => logoutMutation.mutate()}
-            >
-              <LogOutIcon />
-              Cerrar sesión
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+      ) : (
+        <PrimaryHeader
+          title={
+            config.subtitle ? (
+              <HeaderTitle title={title} subtitle={config.subtitle} />
+            ) : typeof title === "string" ? (
+              <HeaderTitle title={title} />
+            ) : (
+              title
+            )
+          }
+          actions={config.actions}
+          showSidebarTrigger={config.showSidebarTrigger}
+          showNotificationBell={config.showNotificationBell}
+          showUserMenu={config.showUserMenu}
+        />
+      )}
     </header>
-  );
+  )
 }
