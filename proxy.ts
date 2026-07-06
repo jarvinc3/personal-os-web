@@ -3,7 +3,12 @@ import { APP_ROUTES } from '@/src/shared/constants/app-routes';
 import { type NextRequest, NextResponse } from 'next/server';
 
 function isProtectedAppPath(pathname: string): boolean {
-  return pathname === APP_ROUTES.app.home || pathname.startsWith(APP_ROUTES.app.settings);
+  return (
+    pathname === APP_ROUTES.app.home ||
+    pathname.startsWith(APP_ROUTES.app.settings) ||
+    pathname.startsWith(APP_ROUTES.app.chat) ||
+    pathname.startsWith(APP_ROUTES.app.notifications)
+  );
 }
 
 export async function proxy(request: NextRequest) {

@@ -1,6 +1,7 @@
 'use client';
 
 import { useAuth } from '@/src/modules/auth';
+import { NotificationBell } from '@/src/modules/notifications/components/notification-bell';
 import { Avatar, AvatarFallback, AvatarImage } from '@/src/shared/components/ui/avatar';
 import {
   DropdownMenu,
@@ -25,6 +26,8 @@ import { usePathname, useRouter } from 'next/navigation';
 const PAGE_TITLES: Record<string, string> = {
   [APP_ROUTES.app.home]: 'Inicio',
   [APP_ROUTES.app.settings]: 'Ajustes',
+  [APP_ROUTES.app.chat]: 'Agente IA',
+  [APP_ROUTES.app.notifications]: 'Notificaciones',
 };
 
 function resolvePageTitle(pathname: string): string {
@@ -33,6 +36,12 @@ function resolvePageTitle(pathname: string): string {
   }
   if (pathname.startsWith(APP_ROUTES.app.settings)) {
     return 'Ajustes';
+  }
+  if (pathname.startsWith(APP_ROUTES.app.chat)) {
+    return 'Agente IA';
+  }
+  if (pathname.startsWith(APP_ROUTES.app.notifications)) {
+    return 'Notificaciones';
   }
   return 'Personal OS';
 }
@@ -73,6 +82,7 @@ export function AppHeader() {
             <h1 className="text-lg font-bold tracking-tight md:text-xl">{title}</h1>
           )}
         </div>
+        <NotificationBell />
         <DropdownMenu>
           <DropdownMenuTrigger>
             <Avatar className="rounded-lg size-8">
@@ -106,7 +116,7 @@ export function AppHeader() {
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup className="flex flex-col gap-2">
-              <DropdownMenuItem onClick={() => { }}>
+              <DropdownMenuItem onClick={() => router.push(APP_ROUTES.app.notifications)}>
                 <BellIcon />
                 Notificaciones
               </DropdownMenuItem>

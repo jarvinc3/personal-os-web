@@ -1,29 +1,32 @@
 "use client"
 
-import { useAuth, useAuthGuard } from "@/src/modules/auth"
-import { AuthFormFooter } from "@/src/modules/auth/components/auth-form-footer"
+import { useAuth, useAuthGuard } from "@/src/modules/auth";
+import { AuthFormFooter } from "@/src/modules/auth/components/auth-form-footer";
 import {
     LoginForm,
     type LoginFormHandle,
-} from "@/src/modules/auth/components/login-form"
+} from "@/src/modules/auth/components/login-form";
 import {
     RegisterForm,
     type RegisterFormHandle,
-} from "@/src/modules/auth/components/register-form"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
-import { LoadingView } from "@/src/shared/components/layout/loading-view"
-import { Button } from "@/src/shared/components/ui/button"
+} from "@/src/modules/auth/components/register-form";
+import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet";
+import { LoadingView } from "@/src/shared/components/layout/loading-view";
+import { Button } from "@/src/shared/components/ui/button";
 import {
     getAppIconPath,
     getWelcomeIllustrationPath,
-} from "@/src/shared/constants/app-assets"
-import { APP_ROUTES } from "@/src/shared/constants/app-routes"
-import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
-import { ArrowRight } from "lucide-react"
-import { useTheme } from "next-themes"
-import Image from "next/image"
-import { useRouter } from "next/navigation"
-import { useEffect, useRef } from "react"
+} from "@/src/shared/constants/app-assets";
+import { APP_ROUTES } from "@/src/shared/constants/app-routes";
+import { useIsMobile } from "@/src/shared/hooks/use-mobile";
+import { useSheetParam } from "@/src/shared/hooks/use-sheet-params";
+import { ArrowRight } from "lucide-react";
+import { useTheme } from "next-themes";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+
+type AuthMode = "login" | "register"
 
 function WelcomePagination() {
   return (
@@ -37,11 +40,15 @@ function WelcomePagination() {
 
 export default function LoginPage() {
   const router = useRouter()
+  const isMobile = useIsMobile()
   const { isAuthenticated, isLoading } = useAuthGuard()
   const { resolvedTheme } = useTheme()
   const { loginMutation, loginWithGoogleMutation, registerMutation } = useAuth()
-  const loginFormRef = useRef<LoginFormHandle>(null)
-  const registerFormRef = useRef<RegisterFormHandle>(null)
+  const [authMode, setAuthMode] = useState<AuthMode>("login")
+  const desktopLoginFormRef = useRef<LoginFormHandle>(null)
+  const desktopRegisterFormRef = useRef<RegisterFormHandle>(null)
+  const sheetLoginFormRef = useRef<LoginFormHandle>(null)
+  const sheetRegisterFormRef = useRef<RegisterFormHandle>(null)
 
   const themeKey = resolvedTheme === "dark" ? "dark" : "light"
   const appIcon = getAppIconPath(themeKey)
@@ -85,25 +92,51 @@ export default function LoginPage() {
 
       <div className="flex flex-1 flex-col md:flex-row">
         <div className="hidden flex-1 flex-col items-center justify-center gap-4 p-4 md:flex">
-          <LoginForm
-            ref={loginFormRef}
-            error={loginMutation.error}
-            isPending={loginMutation.isPending}
-            onSubmit={async (payload) => {
-              await loginMutation.mutateAsync(payload)
-            }}
-          />
-          <AuthFormFooter
-            isGooglePending={loginWithGoogleMutation.isPending}
-            isPrimaryPending={loginMutation.isPending}
-            primaryLabel="Iniciar sesión"
-            primaryPendingLabel="Ingresando..."
-            switchAction="Regístrate"
-            switchPrompt="¿No tienes una cuenta?"
-            onGooglePress={() => loginWithGoogleMutation.mutate(undefined)}
-            onPrimaryPress={() => loginFormRef.current?.submit()}
-            onSwitchPress={() => setOpenRegisterSheet(true)}
-          />
+          {authMode === "login" ? (
+            <>
+              <LoginForm
+                ref={desktopLoginFormRef}
+                error={loginMutation.error}
+                isPending={loginMutation.isPending}
+                onSubmit={async (payload) => {
+                  await loginMutation.mutateAsync(payload)
+                }}
+              />
+              <AuthFormFooter
+                isGooglePending={loginWithGoogleMutation.isPending}
+                isPrimaryPending={loginMutation.isPending}
+                primaryLabel="Iniciar sesión"
+                primaryPendingLabel="Ingresando..."
+                switchAction="Regístrate"
+                switchPrompt="¿No tienes una cuenta?"
+                onGooglePress={() => loginWithGoogleMutation.mutate(undefined)}
+                onPrimaryPress={() => desktopLoginFormRef.current?.submit()}
+                onSwitchPress={() => setAuthMode("register")}
+              />
+            </>
+          ) : (
+            <>
+              <RegisterForm
+                ref={desktopRegisterFormRef}
+                error={registerMutation.error}
+                isPending={registerMutation.isPending}
+                onSubmit={async (payload) => {
+                  await registerMutation.mutateAsync(payload)
+                }}
+              />
+              <AuthFormFooter
+                isGooglePending={loginWithGoogleMutation.isPending}
+                isPrimaryPending={registerMutation.isPending}
+                primaryLabel="Crear cuenta"
+                primaryPendingLabel="Creando cuenta..."
+                switchAction="Iniciar sesión"
+                switchPrompt="¿Ya tienes una cuenta?"
+                onGooglePress={() => loginWithGoogleMutation.mutate(undefined)}
+                onPrimaryPress={() => desktopRegisterFormRef.current?.submit()}
+                onSwitchPress={() => setAuthMode("login")}
+              />
+            </>
+          )}
         </div>
 
         <div className="flex flex-1 flex-col">
@@ -130,7 +163,7 @@ export default function LoginPage() {
               <Button
                 type="button"
                 aria-label="Iniciar sesión"
-                className="rounded-full p-6"
+                className="rounded-full p-6 md:hidden"
                 size="icon-lg"
                 onClick={() => {
                   setOpenLoginSheet(true)
@@ -143,59 +176,63 @@ export default function LoginPage() {
         </div>
       </div>
 
-      <BottomSheet
-        title="Iniciar sesión"
-        description="Accede con email o Google."
-        open={openLoginSheet}
-        onOpenChange={setOpenLoginSheet}
-      >
-        <LoginForm
-          ref={loginFormRef}
-          error={loginMutation.error}
-          isPending={loginMutation.isPending}
-          onSubmit={async (payload) => {
-            await loginMutation.mutateAsync(payload)
-          }}
-        />
-        <AuthFormFooter
-          isGooglePending={loginWithGoogleMutation.isPending}
-          isPrimaryPending={loginMutation.isPending}
-          primaryLabel="Iniciar sesión"
-          primaryPendingLabel="Ingresando..."
-          switchAction="Regístrate"
-          switchPrompt="¿No tienes una cuenta?"
-          onGooglePress={() => loginWithGoogleMutation.mutate(undefined)}
-          onPrimaryPress={() => loginFormRef.current?.submit()}
-          onSwitchPress={() => setOpenRegisterSheet(true)}
-        />
-      </BottomSheet>
+      {isMobile ? (
+        <>
+          <BottomSheet
+            title="Iniciar sesión"
+            description="Accede con email o Google."
+            open={openLoginSheet}
+            onOpenChange={setOpenLoginSheet}
+          >
+            <LoginForm
+              ref={sheetLoginFormRef}
+              error={loginMutation.error}
+              isPending={loginMutation.isPending}
+              onSubmit={async (payload) => {
+                await loginMutation.mutateAsync(payload)
+              }}
+            />
+            <AuthFormFooter
+              isGooglePending={loginWithGoogleMutation.isPending}
+              isPrimaryPending={loginMutation.isPending}
+              primaryLabel="Iniciar sesión"
+              primaryPendingLabel="Ingresando..."
+              switchAction="Regístrate"
+              switchPrompt="¿No tienes una cuenta?"
+              onGooglePress={() => loginWithGoogleMutation.mutate(undefined)}
+              onPrimaryPress={() => sheetLoginFormRef.current?.submit()}
+              onSwitchPress={() => setOpenRegisterSheet(true)}
+            />
+          </BottomSheet>
 
-      <BottomSheet
-        title="Crear cuenta"
-        description="Regístrate para empezar."
-        open={openRegisterSheet}
-        onOpenChange={setOpenRegisterSheet}
-      >
-        <RegisterForm
-          ref={registerFormRef}
-          error={registerMutation.error}
-          isPending={registerMutation.isPending}
-          onSubmit={async (payload) => {
-            await registerMutation.mutateAsync(payload)
-          }}
-        />
-        <AuthFormFooter
-          isGooglePending={loginWithGoogleMutation.isPending}
-          isPrimaryPending={registerMutation.isPending}
-          primaryLabel="Crear cuenta"
-          primaryPendingLabel="Creando cuenta..."
-          switchAction="Iniciar sesión"
-          switchPrompt="¿Ya tienes una cuenta?"
-          onGooglePress={() => loginWithGoogleMutation.mutate(undefined)}
-          onPrimaryPress={() => registerFormRef.current?.submit()}
-          onSwitchPress={() => setOpenLoginSheet(true)}
-        />
-      </BottomSheet>
+          <BottomSheet
+            title="Crear cuenta"
+            description="Regístrate para empezar."
+            open={openRegisterSheet}
+            onOpenChange={setOpenRegisterSheet}
+          >
+            <RegisterForm
+              ref={sheetRegisterFormRef}
+              error={registerMutation.error}
+              isPending={registerMutation.isPending}
+              onSubmit={async (payload) => {
+                await registerMutation.mutateAsync(payload)
+              }}
+            />
+            <AuthFormFooter
+              isGooglePending={loginWithGoogleMutation.isPending}
+              isPrimaryPending={registerMutation.isPending}
+              primaryLabel="Crear cuenta"
+              primaryPendingLabel="Creando cuenta..."
+              switchAction="Iniciar sesión"
+              switchPrompt="¿Ya tienes una cuenta?"
+              onGooglePress={() => loginWithGoogleMutation.mutate(undefined)}
+              onPrimaryPress={() => sheetRegisterFormRef.current?.submit()}
+              onSwitchPress={() => setOpenLoginSheet(true)}
+            />
+          </BottomSheet>
+        </>
+      ) : null}
     </div>
   )
 }

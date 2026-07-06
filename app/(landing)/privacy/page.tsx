@@ -225,10 +225,10 @@ export default function PrivacyPage() {
               </li>
               <li>
                 <strong className="text-foreground">
-                  Expo / FCM
+                  Expo / FCM / Web Push
                 </strong>{" "}
-                — Notificaciones push. Solo se almacena el token del dispositivo,
-                no datos de contenido.
+                — Notificaciones push en móvil y navegador. Solo se almacena el
+                token o suscripción del dispositivo, no datos de contenido.
               </li>
             </ul>
           </Section>

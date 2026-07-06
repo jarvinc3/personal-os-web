@@ -8,7 +8,13 @@ import {
 import { Switch } from '@/src/shared/components/ui/switch';
 import { cn } from '@/src/shared/lib/utils';
 import { type LucideIcon } from 'lucide-react';
-import { HTMLInputTypeAttribute, useId, type ReactNode } from 'react';
+import {
+  useId,
+  type HTMLInputTypeAttribute,
+  type KeyboardEventHandler,
+  type ReactNode,
+  type Ref,
+} from 'react';
 
 import { Field, FieldContent, FieldDescription, FieldError, FieldLabel, FieldTitle } from '@/src/shared/components/ui/field';
 
@@ -166,6 +172,7 @@ type FormTextFieldProps = {
   value: string;
   onChange: (value: string) => void;
   onBlur?: () => void;
+  onKeyDown?: KeyboardEventHandler<HTMLInputElement>;
   placeholder?: string;
   disabled?: boolean;
   error?: string;
@@ -173,6 +180,7 @@ type FormTextFieldProps = {
   type?: HTMLInputTypeAttribute;
   autoComplete?: string;
   icon?: LucideIcon;
+  inputRef?: Ref<HTMLInputElement>;
 };
 
 export function FormTextField({
@@ -180,13 +188,15 @@ export function FormTextField({
   value,
   onChange,
   onBlur,
+  onKeyDown,
   placeholder,
   disabled,
   error,
   invalid,
   type = 'text',
   autoComplete,
-  icon: Icon
+  icon: Icon,
+  inputRef,
 }: FormTextFieldProps) {
   const hasError = invalid ?? Boolean(error);
 
@@ -200,11 +210,13 @@ export function FormTextField({
           </div>
         )}
         <Input
+          ref={inputRef}
           className={cn(Icon && "pl-9")}
           type={type}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onBlur={onBlur}
+          onKeyDown={onKeyDown}
           placeholder={placeholder}
           disabled={disabled}
           autoComplete={autoComplete}

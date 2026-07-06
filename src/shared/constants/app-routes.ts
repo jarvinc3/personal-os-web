@@ -8,6 +8,8 @@ export const APP_ROUTES = {
   app: {
     home: '/home',
     settings: '/settings',
+    chat: '/chat',
+    notifications: '/notifications',
   },
 } as const;
 
