@@ -1,7 +1,6 @@
 export { DevicePushSettingsRow } from '@/src/modules/notifications/components/device-push-settings-row';
 export { NotificationBell } from '@/src/modules/notifications/components/notification-bell';
 export { NotificationRow } from '@/src/modules/notifications/components/notification-row';
-export { NotificationsClient } from '@/src/modules/notifications/components/notifications-client';
 export { useMarkAllNotificationsRead, useMarkNotificationRead } from '@/src/modules/notifications/hooks/use-mark-notification-read';
 export { useNotificationPreferences } from '@/src/modules/notifications/hooks/use-notification-preferences';
 export { NOTIFICATIONS_QUERY_KEY, useNotifications } from '@/src/modules/notifications/hooks/use-notifications';
@@ -14,4 +13,6 @@ export { deactivatePushTokenIfPresent } from '@/src/modules/notifications/lib/de
 export { registerWebPushTokenWithApi } from '@/src/modules/notifications/lib/register-web-push-token';
 export { showInAppNotificationToast } from '@/src/modules/notifications/lib/show-in-app-notification-toast';
 export { isWebPushSupported } from '@/src/modules/notifications/lib/web-push-support';
+export { NotificationsClient } from '@/src/modules/notifications/pages/notifications-client';
 export type * from '@/src/modules/notifications/types/notification.types';
+

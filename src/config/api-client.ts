@@ -1,10 +1,10 @@
 import {
-  ApiError,
-  ApiErrorBody,
-  isApiEnvelope,
-  isTransientError,
-  mapStatusToError,
-  sleep,
+    ApiError,
+    ApiErrorBody,
+    isApiEnvelope,
+    isTransientError,
+    mapStatusToError,
+    sleep,
 } from '@/src/config/api-client.utils';
 import { getSupabaseBrowserClient } from '@/src/config/supabase/client';
 import { API_BASE_URL } from '@/src/shared/constants/api-endpoints';
@@ -47,6 +47,11 @@ async function resolveAccessToken(): Promise<string | null> {
   }
 
   const { data, error } = await supabase.auth.refreshSession();
+  if (error?.code === 'refresh_token_not_found') {
+    await supabase.auth.signOut({ scope: 'local' });
+    return null;
+  }
+
   if (error || !data.session?.access_token) {
     return session.access_token;
   }

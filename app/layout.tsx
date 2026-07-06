@@ -1,18 +1,18 @@
-import type { Metadata } from "next";
-import { IBM_Plex_Mono } from "next/font/google";
+import type { Metadata, Viewport } from "next"
+import { IBM_Plex_Mono } from "next/font/google"
 
-import { siteInfo } from "@/src/modules/landing/data/site-info";
-import { AppEffectsProvider } from "@/src/providers/app-effects-provider";
-import { AuthBootstrapProvider } from "@/src/providers/auth-bootstrap-provider";
-import { QueryProvider } from "@/src/providers/query-provider";
-import { ThemeProvider } from "@/src/providers/theme-provider";
-import { Toaster } from "@/src/shared/components/ui/sonner";
-import { TooltipProvider } from "@/src/shared/components/ui/tooltip";
-import { appAssets } from "@/src/shared/constants/app-assets";
-import { cn } from "@/src/shared/lib/utils";
-import { Analytics } from "@vercel/analytics/next";
+import { siteInfo } from "@/src/modules/landing/data/site-info"
+import { AppEffectsProvider } from "@/src/providers/app-effects-provider"
+import { AuthBootstrapProvider } from "@/src/providers/auth-bootstrap-provider"
+import { QueryProvider } from "@/src/providers/query-provider"
+import { ThemeProvider } from "@/src/providers/theme-provider"
+import { Toaster } from "@/src/shared/components/ui/sonner"
+import { TooltipProvider } from "@/src/shared/components/ui/tooltip"
+import { appAssets } from "@/src/shared/constants/app-assets"
+import { cn } from "@/src/shared/lib/utils"
+import { Analytics } from "@vercel/analytics/next"
 
-import "./globals.css";
+import "./globals.css"
 
 const ibmPlexMono = IBM_Plex_Mono({
   weight: ["100", "200", "300", "400", "500", "600", "700"],
@@ -49,8 +49,9 @@ export const metadata: Metadata = {
     email: false,
     date: false,
   },
-  themeColor: "#1C1917",
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"),
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+  ),
   openGraph: {
     type: "website",
     locale: "es_DO",
@@ -71,11 +72,11 @@ export const metadata: Metadata = {
   alternates: {
     canonical: siteInfo.url,
     languages: {
-      "es": `${siteInfo.url}/es`,
-      "en": `${siteInfo.url}/en`,
+      es: `${siteInfo.url}/es`,
+      en: `${siteInfo.url}/en`,
     },
     media: {
-      "image": `${siteInfo.url}/images/app-banner-v1.png`,
+      image: `${siteInfo.url}/images/app-banner-v1.png`,
     },
   },
   icons: {
@@ -85,6 +86,10 @@ export const metadata: Metadata = {
     ],
     apple: appAssets.appleTouchIcon,
   },
+}
+
+export const viewport: Viewport = {
+  themeColor: "#1C1917",
 }
 
 export default function RootLayout({
