@@ -36,6 +36,7 @@ export function SettingsSection({
 type SettingsRowProps = {
   label: string;
   value?: string;
+  accentColor?: string;
   onPress?: () => void;
   showChevron?: boolean;
   destructive?: boolean;
@@ -50,6 +51,7 @@ type SettingsRowProps = {
 export function SettingsRow({
   label,
   value,
+  accentColor,
   onPress,
   showChevron,
   destructive = false,
@@ -68,13 +70,16 @@ export function SettingsRow({
     disabled && 'opacity-50',
   );
 
+  console.log(accentColor);
+
   const content = (
     <div className="flex flex-row gap-3 justify-between items-center w-full">
       {Icon && (
         <div
           className={cn("flex justify-center items-center rounded-md size-9 shrink-0 bg-muted")}
+          style={{ backgroundColor: accentColor + '20' }}
         >
-          <Icon className={cn("size-[18px]", destructive && 'text-destructive')} />
+          <Icon className={cn("size-[18px]", destructive && 'text-destructive')} color={accentColor} />
         </div>
       )}
       <div className="flex flex-col flex-1 gap-1 justify-start text-left md:flex-row md:items-center md:justify-between md:gap-3">

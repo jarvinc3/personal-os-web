@@ -111,8 +111,8 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 p-4 pb-10 md:px-6">
-      <div className="flex items-center gap-2 py-4">
+    <div className="flex flex-col gap-6 p-4 pb-10 mx-auto w-full max-w-2xl md:px-6">
+      <div className="flex gap-2 items-center py-4">
         <div className="relative" onClick={() => setOpenAccountSheet(true)}>
           <Avatar className="size-20 md:size-24">
             {profile?.avatarUrl ? (
@@ -133,7 +133,7 @@ export default function SettingsPage() {
             <Edit className="size-3.5 text-foreground" />
           </Button>
         </div>
-        <div className="flex w-full justify-between">
+        <div className="flex justify-between w-full">
           <div className="flex-1">
             <p className="text-xl font-semibold">{displayName}</p>
             <p className="text-sm text-muted-foreground">{displayEmail}</p>
@@ -161,6 +161,7 @@ export default function SettingsPage() {
           value={displayName}
           onPress={() => setOpenAccountSheet(true)}
           isLast
+          accentColor={SETTINGS_REGISTRY.account.accent}
           {...SETTINGS_REGISTRY.account.rows.fullName}
         />
       </SettingsSection>
@@ -171,6 +172,7 @@ export default function SettingsPage() {
           value={getThemeOptionLabel(themeValue)}
           onPress={() => setOpenThemeSheet(true)}
           isLast
+          accentColor={SETTINGS_REGISTRY.appearance.accent}
           {...SETTINGS_REGISTRY.appearance.rows.theme}
         />
       </SettingsSection>
@@ -184,6 +186,7 @@ export default function SettingsPage() {
           label="Tono de respuesta"
           value={getAiToneLabel(preferences.ai.tone)}
           onPress={() => setOpenAISheet(true)}
+          accentColor={SETTINGS_REGISTRY.ai.accent}
           {...SETTINGS_REGISTRY.ai.rows.tone}
         />
         <SettingsRow
@@ -193,6 +196,7 @@ export default function SettingsPage() {
             SETTINGS_REGISTRY.ai.defaultProviderLabel
           }
           onPress={() => setOpenAIProviderSheet(true)}
+          accentColor={SETTINGS_REGISTRY.ai.accent}
           {...SETTINGS_REGISTRY.ai.rows.defaultProvider}
         />
         <SettingsRow
@@ -204,6 +208,7 @@ export default function SettingsPage() {
               "Insights proactivos actualizados."
             )
           }
+          accentColor={SETTINGS_REGISTRY.ai.accent}
           {...SETTINGS_REGISTRY.ai.rows.proactiveInsights}
         />
         <SettingsRow
@@ -216,6 +221,7 @@ export default function SettingsPage() {
             )
           }
           isLast
+          accentColor={SETTINGS_REGISTRY.ai.accent}
           {...SETTINGS_REGISTRY.ai.rows.confirmBeforeActions}
         />
       </SettingsSection>
@@ -241,6 +247,7 @@ export default function SettingsPage() {
               "Preferencia de push actualizada."
             )
           }}
+          accentColor={SETTINGS_REGISTRY.notifications.accent}
           {...SETTINGS_REGISTRY.notifications.rows.push}
         />
         <SettingsRow
@@ -260,6 +267,7 @@ export default function SettingsPage() {
               "Preferencia de email actualizada."
             )
           }
+          accentColor={SETTINGS_REGISTRY.notifications.accent}
           {...SETTINGS_REGISTRY.notifications.rows.email}
         />
         <SettingsRow
@@ -279,6 +287,7 @@ export default function SettingsPage() {
               "Preferencia in-app actualizada."
             )
           }
+          accentColor={SETTINGS_REGISTRY.notifications.accent}
           {...SETTINGS_REGISTRY.notifications.rows.inApp}
         />
         <SettingsRow
@@ -295,6 +304,7 @@ export default function SettingsPage() {
               "Horario silencioso actualizado."
             )
           }
+          accentColor={SETTINGS_REGISTRY.notifications.accent}
           {...SETTINGS_REGISTRY.notifications.rows.quietHoursEnabled}
         />
         <SettingsRow
@@ -302,9 +312,14 @@ export default function SettingsPage() {
           value={formatTimeRange(quietHours.start, quietHours.end)}
           onPress={() => setOpenQuietHoursSheet(true)}
           disabled={!quietHours.enabled}
+          accentColor={SETTINGS_REGISTRY.notifications.accent}
           {...SETTINGS_REGISTRY.notifications.rows.quietHoursSchedule}
         />
-        <DevicePushSettingsRow isLast />
+        <DevicePushSettingsRow
+          isLast
+          accentColor={SETTINGS_REGISTRY.notifications.accent}
+          {...SETTINGS_REGISTRY.notifications.rows.devicePush}
+        />
       </SettingsSection>
 
       <SettingsSection title="Privacidad">
@@ -319,6 +334,7 @@ export default function SettingsPage() {
               "Preferencia de analíticas actualizada."
             )
           }
+          accentColor={SETTINGS_REGISTRY.privacy.accent}
           {...SETTINGS_REGISTRY.privacy.rows.analytics}
         />
         <SettingsRow
@@ -336,18 +352,20 @@ export default function SettingsPage() {
             )
           }
           isLast
+          accentColor={SETTINGS_REGISTRY.privacy.accent}
           {...SETTINGS_REGISTRY.privacy.rows.crashReports}
         />
       </SettingsSection>
 
-      <SettingsSection title="Zona de peligro">
+      <SettingsSection title="Información">
         <SettingsRow
-          label="Eliminar cuenta"
-          destructive
-          onPress={() => setOpenDeleteAccountSheet(true)}
-          showChevron
-          isLast
-          {...SETTINGS_REGISTRY.danger.rows.deleteAccount}
+          label="Landing page"
+          value="Activada"
+          onPress={() => {
+            router.push(APP_ROUTES.marketing.landing)
+          }}
+          accentColor={SETTINGS_REGISTRY.marketing.accent}
+          {...SETTINGS_REGISTRY.marketing.rows.landingPage}
         />
       </SettingsSection>
 
@@ -362,7 +380,7 @@ export default function SettingsPage() {
         />
       </SettingsSection>
 
-      <div className="flex flex-col items-center justify-center gap-1 pb-4">
+      <div className="flex flex-col gap-1 justify-center items-center pb-4">
         <p className="text-xs text-muted-foreground">Entorno {APP_ENV}</p>
         <p className="text-xs text-muted-foreground">Versión {APP_VERSION}</p>
       </div>
@@ -377,8 +395,14 @@ export default function SettingsPage() {
         onOpenChange={setOpenDeleteAccountSheet}
         email={displayEmail}
       />
-      <EditThemeSheet open={openThemeSheet} onOpenChange={setOpenThemeSheet} />
-      <EditAISheet open={openAISheet} onOpenChange={setOpenAISheet} />
+      <EditThemeSheet
+        open={openThemeSheet}
+        onOpenChange={setOpenThemeSheet}
+      />
+      <EditAISheet
+        open={openAISheet}
+        onOpenChange={setOpenAISheet}
+      />
       <EditAIProviderSheet
         open={openAIProviderSheet}
         onOpenChange={setOpenAIProviderSheet}

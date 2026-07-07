@@ -7,6 +7,7 @@ import {
   ChartBarIcon,
   ClockFading,
   Cpu,
+  Globe,
   Image,
   Mail,
   Monitor,
@@ -132,6 +133,9 @@ export const SETTINGS_REGISTRY = {
   privacy: createSection('#64748B', {
     analytics: ChartBarIcon,
     crashReports: ShieldCheck,
+  }),
+  marketing: createSection('#037cff', {
+    landingPage: Globe,
   }),
   danger: createSection('#EF4444', {
     deleteAccount: Trash2,

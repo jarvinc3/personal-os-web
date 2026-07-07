@@ -8,9 +8,10 @@ import { useCallback } from 'react';
 
 type DevicePushSettingsRowProps = {
   isLast?: boolean;
+  accentColor?: string;
 };
 
-export function DevicePushSettingsRow({ isLast }: DevicePushSettingsRowProps) {
+export function DevicePushSettingsRow({ isLast, accentColor }: DevicePushSettingsRowProps) {
   const {
     permissionStatus,
     pushToken,
@@ -127,6 +128,7 @@ export function DevicePushSettingsRow({ isLast }: DevicePushSettingsRowProps) {
       showChevron={pushDeviceRow.showChevron}
       onPress={pushDeviceRow.onPress}
       isLast={isLast}
+      accentColor={accentColor}
       {...SETTINGS_REGISTRY.notifications.rows.devicePush}
     />
   );
