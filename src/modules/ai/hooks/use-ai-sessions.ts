@@ -55,7 +55,8 @@ export function useDeleteAiSession() {
 
   return useMutation({
     mutationFn: (sessionId: string) => apiDelete(API_ENDPOINTS.AI.SESSION(sessionId)),
-    onSuccess: async () => {
+    onSuccess: async (_data, sessionId) => {
+      queryClient.removeQueries({ queryKey: ['ai', 'session', sessionId] });
       await queryClient.invalidateQueries({ queryKey: AI_SESSIONS_QUERY_KEY });
     },
   });

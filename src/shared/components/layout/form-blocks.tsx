@@ -2,9 +2,14 @@
 
 import { Input } from '@/src/shared/components/ui/input';
 import {
-  NativeSelect,
-  NativeSelectOption,
-} from '@/src/shared/components/ui/native-select';
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/src/shared/components/ui/select";
 import { Switch } from '@/src/shared/components/ui/switch';
 import { cn } from '@/src/shared/lib/utils';
 import { type LucideIcon } from 'lucide-react';
@@ -65,20 +70,21 @@ export function SelectField({ label, value, onChange, options, disabled }: Selec
       <FieldLabel id={labelId} htmlFor={selectId}>
         {label}
       </FieldLabel>
-      <NativeSelect
-        id={selectId}
-        aria-labelledby={labelId}
-        title={label}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        disabled={disabled}
-      >
-        {options.map((opt) => (
-          <NativeSelectOption key={opt.value} value={opt.value}>
-            {opt.label}
-          </NativeSelectOption>
-        ))}
-      </NativeSelect>
+      <Select value={value} onValueChange={(value) => onChange(value ?? '')} disabled={disabled}>
+        <SelectTrigger className="w-auto max-w-full text-lg font-bold tracking-tight capitalize bg-transparent border-none cursor-pointer">
+          <SelectValue placeholder={label} />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectGroup>
+            <SelectLabel>{label}</SelectLabel>
+            {options.map((item) => (
+              <SelectItem key={item.value} value={item.value}>
+                {item.label}
+              </SelectItem>
+            ))}
+          </SelectGroup>
+        </SelectContent>
+      </Select>
     </Field>
   );
 }

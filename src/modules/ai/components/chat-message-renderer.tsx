@@ -2,6 +2,7 @@
 
 import { ChatActionCard } from '@/src/modules/ai/components/chat-action-card';
 import { ChatMarkdownBlock } from '@/src/modules/ai/components/chat-markdown-block';
+import { resolveMessageBlocks } from '@/src/modules/ai/lib/resolve-message-blocks';
 import type { AiActionSummary, ChatBlock, ChatRole } from '@/src/modules/ai/types/chat.types';
 import { cn } from '@/src/shared/lib/utils';
 
@@ -13,6 +14,9 @@ type ChatMessageRendererProps = {
   moduleLabel?: string;
   provider?: string;
   model?: string;
+  sessionId?: string | null;
+  streamingStatus?: string;
+  onActionUpdated?: (action: AiActionSummary) => void;
 };
 
 export function ChatMessageRenderer({
@@ -23,14 +27,13 @@ export function ChatMessageRenderer({
   moduleLabel,
   provider,
   model,
+  sessionId,
+  streamingStatus,
+  onActionUpdated,
 }: ChatMessageRendererProps) {
   const isUser = role === 'user';
-  const resolvedBlocks: ChatBlock[] =
-    blocks ??
-    [
-      { type: 'markdown', content },
-      ...(actions ?? []).map((action) => ({ type: 'action' as const, action })),
-    ];
+  const hasContent = content.trim().length > 0;
+  const resolvedBlocks = resolveMessageBlocks(content, blocks, actions);
 
   return (
     <div
@@ -38,7 +41,7 @@ export function ChatMessageRenderer({
         'my-1.5 flex flex-col gap-1 p-3',
         isUser
           ? 'ml-auto max-w-[88%] rounded-xl rounded-br-none bg-primary text-primary-foreground'
-          : 'mr-auto max-w-[88%] rounded-xl rounded-bl-none text-foreground',
+          : 'mr-auto w-full max-w-[88%] rounded-xl rounded-bl-none text-foreground',
       )}
     >
       {resolvedBlocks.map((block, index) => {
@@ -53,13 +56,20 @@ export function ChatMessageRenderer({
         }
         if (block.type === 'action') {
           return (
-            <div key={block.action.id} className="-mx-1 mt-2">
-              <ChatActionCard action={block.action} />
+            <div key={block.action.id} className="-mx-1 mt-2 w-full min-w-0">
+              <ChatActionCard
+                action={block.action}
+                sessionId={sessionId}
+                onActionUpdated={onActionUpdated}
+              />
             </div>
           );
         }
         return null;
       })}
+      {!isUser && !hasContent && streamingStatus ? (
+        <p className="text-sm italic text-muted-foreground">{streamingStatus}…</p>
+      ) : null}
       {!isUser && (moduleLabel || (provider && model)) ? (
         <span className="mt-2 inline-flex w-fit rounded-md bg-muted px-2 py-1 text-[11px] text-muted-foreground">
           {moduleLabel ? moduleLabel : null}

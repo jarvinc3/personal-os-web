@@ -1,13 +1,13 @@
 "use client"
 
-import { useAuth } from "@/src/modules/auth"
-import { NotificationBell } from "@/src/modules/notifications/components/notification-bell"
+import { useAuth } from "@/src/modules/auth";
+import { useNotificationPreferences, useUnreadNotificationCount } from "@/src/modules/notifications";
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
-} from "@/src/shared/components/ui/avatar"
-import { Button } from "@/src/shared/components/ui/button"
+} from "@/src/shared/components/ui/avatar";
+import { Button } from "@/src/shared/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,17 +16,17 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/src/shared/components/ui/dropdown-menu"
-import { Separator } from "@/src/shared/components/ui/separator"
-import { SidebarTrigger } from "@/src/shared/components/ui/sidebar"
-import { APP_ROUTES } from "@/src/shared/constants/app-routes"
-import { useHeaderContext } from "@/src/shared/context/header-context"
-import { useScrollDirection } from "@/src/shared/hooks/use-scroll-direction"
-import { cn } from "@/src/shared/lib/utils"
-import { useAppStore } from "@/src/shared/store/app-store"
-import { ArrowLeftIcon, BellIcon, LogOutIcon, SettingsIcon } from "lucide-react"
-import { usePathname, useRouter } from "next/navigation"
-import type { ReactNode } from "react"
+} from "@/src/shared/components/ui/dropdown-menu";
+import { Separator } from "@/src/shared/components/ui/separator";
+import { SidebarTrigger } from "@/src/shared/components/ui/sidebar";
+import { APP_ROUTES } from "@/src/shared/constants/app-routes";
+import { useHeaderContext } from "@/src/shared/context/header-context";
+import { useScrollDirection } from "@/src/shared/hooks/use-scroll-direction";
+import { cn } from "@/src/shared/lib/utils";
+import { useAppStore } from "@/src/shared/store/app-store";
+import { BellIcon, ChevronLeftIcon, LogOutIcon, SettingsIcon } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import type { ReactNode } from "react";
 
 const PAGE_TITLES: Record<string, string> = {
   [APP_ROUTES.app.home]: "Inicio",
@@ -56,13 +56,41 @@ function HeaderBackButton({ onBack }: { onBack: () => void }) {
     <Button
       variant="ghost"
       size="icon"
-      className="-ml-1 size-8"
+      className="rounded-full size-9"
       onClick={onBack}
       aria-label="Volver"
     >
-      <ArrowLeftIcon />
+      <ChevronLeftIcon />
     </Button>
   )
+}
+
+function NotificationBell() {
+  const router = useRouter();
+  const { isInAppEnabled } = useNotificationPreferences();
+  const unreadQuery = useUnreadNotificationCount();
+  const unreadCount = isInAppEnabled ? (unreadQuery.data?.count ?? 0) : 0;
+
+  return (
+    <Button
+      variant="outline"
+      size="icon"
+      className="relative rounded-full shrink-0 size-9 mr-1"
+      onClick={() => router.push(APP_ROUTES.app.notifications)}
+      aria-label="Centro de notificaciones"
+    >
+      <BellIcon />
+      {unreadCount > 0 ? (
+        <span
+          className={cn(
+            'flex absolute -top-1 -right-1 justify-center items-center px-1 h-4 font-medium text-white rounded-full min-w-4 bg-destructive text-[10px]',
+          )}
+        >
+          {unreadCount > 9 ? '9+' : String(unreadCount)}
+        </span>
+      ) : null}
+    </Button>
+  );
 }
 
 function HeaderUserMenu() {
@@ -81,10 +109,10 @@ function HeaderUserMenu() {
         <Button
           variant="ghost"
           size="icon"
-          className="size-8 rounded-lg p-0"
+          className="rounded-full"
           aria-label="Menú de usuario"
         >
-          <Avatar className="size-8 rounded-lg">
+          <Avatar className="rounded-full size-9">
             <AvatarImage src={avatarUrl} alt={displayName} />
             <AvatarFallback className="rounded-lg">
               {displayName.slice(0, 2).toUpperCase()}
@@ -101,7 +129,7 @@ function HeaderUserMenu() {
         <DropdownMenuGroup>
           <DropdownMenuLabel className="p-0 font-normal">
             <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-              <Avatar className="size-8 rounded-lg">
+              <Avatar className="rounded-lg size-8">
                 {avatarUrl ? (
                   <AvatarImage src={avatarUrl} alt={displayName} />
                 ) : null}
@@ -109,9 +137,9 @@ function HeaderUserMenu() {
                   {displayName.slice(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{displayName}</span>
-                <span className="truncate text-xs text-muted-foreground">
+              <div className="grid flex-1 text-sm leading-tight text-left">
+                <span className="font-medium truncate">{displayName}</span>
+                <span className="text-xs truncate text-muted-foreground">
                   {email}
                 </span>
               </div>
@@ -193,19 +221,19 @@ function PrimaryHeader({
   showUserMenu: boolean
 }) {
   return (
-    <div className="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">
+    <div className="flex gap-1 items-center px-4 w-full s lg:px-6">
       {showSidebarTrigger ? (
         <>
-          <SidebarTrigger className="-ml-1" />
+          <SidebarTrigger />
           <Separator
             orientation="vertical"
             className="mx-2 h-4 data-vertical:self-auto"
           />
         </>
       ) : null}
-      <div className="flex min-w-0 flex-1 flex-col">{title}</div>
+      <div className="flex flex-col flex-1 min-w-0">{title}</div>
       {actions ? (
-        <div className="flex shrink-0 items-center gap-1">{actions}</div>
+        <div className="flex gap-2 items-center shrink-0 mr-1">{actions}</div>
       ) : null}
       {showNotificationBell ? <NotificationBell /> : null}
       {showUserMenu ? <HeaderUserMenu /> : null}
@@ -225,10 +253,10 @@ function SecondaryHeader({
   return (
     <div className="grid w-full grid-cols-[auto_1fr_auto] items-center gap-2 px-4 lg:px-6">
       <HeaderBackButton onBack={onBack} />
-      <div className="min-w-0 justify-self-center">
+      <div className="justify-self-center min-w-0">
         <HeaderTitle title={title} centered />
       </div>
-      <div className="flex items-center justify-end">
+      <div className="flex justify-end items-center">
         {actions ?? <span className="size-8" aria-hidden="true" />}
       </div>
     </div>

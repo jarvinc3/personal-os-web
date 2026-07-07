@@ -70,8 +70,6 @@ export function SettingsRow({
     disabled && 'opacity-50',
   );
 
-  console.log(accentColor);
-
   const content = (
     <div className="flex flex-row gap-3 justify-between items-center w-full">
       {Icon && (

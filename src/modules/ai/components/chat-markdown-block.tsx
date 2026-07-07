@@ -91,7 +91,7 @@ function renderInline(text: string, keyPrefix: string): ReactNode[] {
       return (
         <code
           key={`${keyPrefix}-${partIndex}`}
-          className="rounded bg-muted px-1 font-mono text-xs"
+          className="px-1 font-mono text-xs rounded bg-muted"
         >
           {part.slice(1, -1)}
         </code>
@@ -185,55 +185,47 @@ function renderTable(
   const bodyRows = rows.slice(1);
   const headerBg = variant === 'user' ? 'bg-primary-foreground/10' : 'bg-muted';
   const borderClass = variant === 'user' ? 'border-primary-foreground/20' : 'border-border';
-  const cellWidth = 112;
-
-  const table = (
-    <div className={cn('overflow-hidden rounded-md border', borderClass)}>
-      <div className={cn('flex flex-row', headerBg)}>
-        {Array.from({ length: columnCount }, (_, columnIndex) => (
-          <div
-            key={`${keyPrefix}-h-${columnIndex}`}
-            style={{ width: cellWidth }}
-            className={cn('border-r px-2 py-1.5', borderClass)}
-          >
-            <p className={cn('text-xs font-semibold', textClass)}>
-              {renderInline(headerRow[columnIndex] ?? '', `${keyPrefix}-h-${columnIndex}`)}
-            </p>
-          </div>
-        ))}
-      </div>
-      {bodyRows.map((row, rowIndex) => (
-        <div key={`${keyPrefix}-r-${rowIndex}`} className="flex flex-row">
-          {Array.from({ length: columnCount }, (_, columnIndex) => (
-            <div
-              key={`${keyPrefix}-r-${rowIndex}-c-${columnIndex}`}
-              style={{ width: cellWidth }}
-              className={cn('border-r border-t px-2 py-1.5', borderClass)}
-            >
-              <p className={cn('text-xs', textClass)}>
-                {renderInline(
-                  row[columnIndex] ?? '',
-                  `${keyPrefix}-r-${rowIndex}-c-${columnIndex}`,
-                )}
-              </p>
-            </div>
-          ))}
-        </div>
-      ))}
-    </div>
-  );
-
-  if (columnCount <= 2) {
-    return (
-      <div key={keyPrefix} className="my-1 self-start">
-        {table}
-      </div>
-    );
-  }
 
   return (
-    <div key={keyPrefix} className="my-1 self-start overflow-x-auto">
-      {table}
+    <div key={keyPrefix} className="overflow-x-auto my-1 w-full min-w-0 max-w-full">
+      <table className={cn('w-full min-w-full text-xs border-collapse', borderClass)}>
+        <thead className={headerBg}>
+          <tr>
+            {Array.from({ length: columnCount }, (_, columnIndex) => (
+              <th
+                key={`${keyPrefix}-h-${columnIndex}`}
+                className={cn(
+                  'border px-2 py-1.5 text-left font-semibold align-top',
+                  borderClass,
+                )}
+              >
+                <span className={cn('block whitespace-normal wrap-break-word', textClass)}>
+                  {renderInline(headerRow[columnIndex] ?? '', `${keyPrefix}-h-${columnIndex}`)}
+                </span>
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {bodyRows.map((row, rowIndex) => (
+            <tr key={`${keyPrefix}-r-${rowIndex}`}>
+              {Array.from({ length: columnCount }, (_, columnIndex) => (
+                <td
+                  key={`${keyPrefix}-r-${rowIndex}-c-${columnIndex}`}
+                  className={cn('border px-2 py-1.5 align-top', borderClass)}
+                >
+                  <span className={cn('block whitespace-normal wrap-break-word', textClass)}>
+                    {renderInline(
+                      row[columnIndex] ?? '',
+                      `${keyPrefix}-r-${rowIndex}-c-${columnIndex}`,
+                    )}
+                  </span>
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
@@ -243,7 +235,7 @@ export function ChatMarkdownBlock({ content, variant = 'assistant' }: ChatMarkdo
   const textClass = variant === 'user' ? 'text-primary-foreground' : 'text-foreground';
 
   return (
-    <div className="flex flex-col gap-1">
+    <div className="flex flex-col gap-1 w-full min-w-0">
       {segments.map((segment, segmentIndex) => {
         if (segment.type === 'table') {
           return renderTable(

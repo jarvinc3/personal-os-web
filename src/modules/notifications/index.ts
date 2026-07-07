@@ -1,5 +1,4 @@
 export { DevicePushSettingsRow } from '@/src/modules/notifications/components/device-push-settings-row';
-export { NotificationBell } from '@/src/modules/notifications/components/notification-bell';
 export { NotificationRow } from '@/src/modules/notifications/components/notification-row';
 export { useMarkAllNotificationsRead, useMarkNotificationRead } from '@/src/modules/notifications/hooks/use-mark-notification-read';
 export { useNotificationPreferences } from '@/src/modules/notifications/hooks/use-notification-preferences';

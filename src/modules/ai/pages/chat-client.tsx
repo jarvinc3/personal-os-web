@@ -1,41 +1,45 @@
 "use client"
 
-import { ChatEmptySuggestions } from "@/src/modules/ai/components/chat-empty-suggestions"
-import { ChatInput } from "@/src/modules/ai/components/chat-input"
-import { ChatMessageRenderer } from "@/src/modules/ai/components/chat-message-renderer"
-import { ChatModuleSelect } from "@/src/modules/ai/components/chat-module-select"
-import { ChatSessionSheet } from "@/src/modules/ai/components/chat-session-sheet"
-import { useAiChat } from "@/src/modules/ai/hooks/use-ai-chat"
+import { ChatEmptySuggestions } from "@/src/modules/ai/components/chat-empty-suggestions";
+import { ChatInput } from "@/src/modules/ai/components/chat-input";
+import { ChatMessageRenderer } from "@/src/modules/ai/components/chat-message-renderer";
+import { ChatSessionSheet } from "@/src/modules/ai/components/chat-session-sheet";
+import { useAiChat } from "@/src/modules/ai/hooks/use-ai-chat";
 import {
   useAiSession,
   useCreateAiSession,
-} from "@/src/modules/ai/hooks/use-ai-sessions"
+} from "@/src/modules/ai/hooks/use-ai-sessions";
 import {
+  getUiMessageKey,
+  mergeSessionMessages,
+  type UiMessage,
+} from "@/src/modules/ai/lib/merge-session-messages";
+import {
+  CHAT_MODULE_OPTIONS,
   parseModuleChatSlug,
   type AiActionSummary,
   type AiSessionSummary,
-  type ChatBlock,
-  type ChatMessage,
   type ModuleChatSlug,
-} from "@/src/modules/ai/types/chat.types"
-import { useAuthGuard } from "@/src/modules/auth"
-import { LoadingView } from "@/src/shared/components/layout/loading-view"
-import { Button } from "@/src/shared/components/ui/button"
-import { APP_ROUTES } from "@/src/shared/constants/app-routes"
-import { usePageHeader } from "@/src/shared/hooks/use-page-header"
-import { appToast } from "@/src/shared/lib/app-toast"
-import { HistoryIcon, PlusIcon } from "lucide-react"
-import { useRouter, useSearchParams } from "next/navigation"
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-
-type UiMessage = ChatMessage & {
-  id: string
-  blocks?: ChatBlock[]
-  actions?: AiActionSummary[]
-  moduleLabel?: string
-  provider?: string
-  model?: string
-}
+} from "@/src/modules/ai/types/chat.types";
+import { useAuthGuard } from "@/src/modules/auth";
+import { LoadingView } from "@/src/shared/components/layout/loading-view";
+import { Button } from "@/src/shared/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/src/shared/components/ui/select";
+import { APP_ROUTES } from "@/src/shared/constants/app-routes";
+import { usePageHeader } from "@/src/shared/hooks/use-page-header";
+import { appToast } from "@/src/shared/lib/app-toast";
+import { HistoryIcon, PlusCircleIcon } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { v4 as uuidv4 } from "uuid";
 
 function parseModuleParam(value: string | null): ModuleChatSlug {
   return parseModuleChatSlug(value)
@@ -70,6 +74,8 @@ export function ChatClient() {
   )
   const promptSentRef = useRef(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const streamFrameRef = useRef<number | null>(null)
+  const pendingStreamContentRef = useRef<string | null>(null)
 
   const syncModuleContext = useCallback(
     (slug: ModuleChatSlug) => {
@@ -95,14 +101,11 @@ export function ChatClient() {
 
   useEffect(() => {
     const fromParams = parseSessionIdParam(searchParams.get("sessionId"))
-    if (fromParams === sessionId) {
-      return
-    }
     setSessionId(fromParams)
-    if (!fromParams) {
+    if (!fromParams && !isSendingRef.current) {
       setLocalMessages([])
     }
-  }, [searchParams, sessionId])
+  }, [searchParams])
 
   useEffect(() => {
     const moduleParam = searchParams.get("module")
@@ -115,37 +118,21 @@ export function ChatClient() {
     if (isSendingRef.current || !sessionQuery.data?.messages) {
       return
     }
-    const mapped: UiMessage[] = sessionQuery.data.messages
-      .filter(
-        (m) =>
-          (m.role === "user" || m.role === "assistant") &&
-          m.content.trim().length > 0
-      )
-      .map((m) => ({
-        id: m.id,
-        role: m.role,
-        content: m.content,
-        actions: m.metadata.actions as AiActionSummary[] | undefined,
-        blocks: m.metadata.blocks as ChatBlock[] | undefined,
-        moduleLabel:
-          typeof m.metadata.moduleLabel === "string"
-            ? m.metadata.moduleLabel
-            : undefined,
-        provider:
-          typeof m.metadata.provider === "string"
-            ? m.metadata.provider
-            : undefined,
-        model:
-          typeof m.metadata.model === "string" ? m.metadata.model : undefined,
-      }))
-    if (sessionQuery.data.moduleSlug) {
-      syncModuleContext(parseModuleChatSlug(sessionQuery.data.moduleSlug))
+
+    const sessionModule = sessionQuery.data.moduleSlug
+      ? parseModuleChatSlug(sessionQuery.data.moduleSlug)
+      : null
+    if (sessionModule && sessionModule !== moduleSlug) {
+      setModuleSlug(sessionModule)
     }
-    setLocalMessages(mapped)
+
+    setLocalMessages((prev) =>
+      mergeSessionMessages(prev, sessionQuery.data.messages)
+    )
   }, [
     sessionQuery.data?.messages,
     sessionQuery.data?.moduleSlug,
-    syncModuleContext,
+    moduleSlug,
   ])
 
   const displayMessages = useMemo(() => localMessages, [localMessages])
@@ -160,35 +147,68 @@ export function ChatClient() {
       module?: ModuleChatSlug
       prompt?: string
     }) => {
-      const params = new URLSearchParams(searchParams.toString())
-      if (patch.module !== undefined) {
-        params.set("module", patch.module)
+      const params = new URLSearchParams()
+      const moduleValue = patch.module ?? moduleSlug
+      params.set("module", moduleValue)
+
+      if (patch.sessionId) {
+        params.set("sessionId", patch.sessionId)
       }
-      if (patch.sessionId !== undefined) {
-        if (patch.sessionId) {
-          params.set("sessionId", patch.sessionId)
-        } else {
-          params.delete("sessionId")
-        }
+
+      if (patch.prompt) {
+        params.set("prompt", patch.prompt)
       }
-      if (patch.prompt !== undefined) {
-        if (patch.prompt) {
-          params.set("prompt", patch.prompt)
-        } else {
-          params.delete("prompt")
-        }
-      }
+
       router.replace(`${APP_ROUTES.app.chat}?${params.toString()}`)
     },
-    [router, searchParams]
+    [router, moduleSlug]
   )
 
   const handleNewChat = useCallback(() => {
+    isSendingRef.current = false
+    promptSentRef.current = false
+    pendingPromptRef.current = null
+    pendingStreamContentRef.current = null
+    if (streamFrameRef.current !== null) {
+      cancelAnimationFrame(streamFrameRef.current)
+      streamFrameRef.current = null
+    }
     setSessionId(null)
     setLocalMessages([])
     setDraft("")
-    updateUrlParams({ sessionId: null, module: moduleSlug, prompt: "" })
-  }, [moduleSlug, updateUrlParams])
+    const params = new URLSearchParams()
+    params.set("module", moduleSlug)
+    router.replace(`${APP_ROUTES.app.chat}?${params.toString()}`)
+  }, [moduleSlug, router])
+
+  const handleActionUpdated = useCallback((updatedAction: AiActionSummary) => {
+    setLocalMessages((prev) =>
+      prev.map((message) => {
+        const hasAction =
+          message.actions?.some((action) => action.id === updatedAction.id) ||
+          message.blocks?.some(
+            (block) =>
+              block.type === "action" && block.action.id === updatedAction.id
+          )
+
+        if (!hasAction) {
+          return message
+        }
+
+        return {
+          ...message,
+          actions: message.actions?.map((action) =>
+            action.id === updatedAction.id ? updatedAction : action
+          ),
+          blocks: message.blocks?.map((block) =>
+            block.type === "action" && block.action.id === updatedAction.id
+              ? { ...block, action: updatedAction }
+              : block
+          ),
+        }
+      })
+    )
+  }, [])
 
   const handleSelectSession = (session: AiSessionSummary) => {
     setSessionId(session.id)
@@ -210,14 +230,63 @@ export function ChatClient() {
   const sendMessage = useCallback(
     async (textOverride?: string) => {
       const text = (textOverride ?? draft).trim()
-      if (!text || chatMutation.isPending || createSessionMutation.isPending) {
+      if (
+        !text ||
+        isSendingRef.current ||
+        chatMutation.isPending ||
+        createSessionMutation.isPending
+      ) {
         return
       }
 
       isSendingRef.current = true
 
       let activeSessionId = sessionId
-      let assistantId: string | undefined
+      const clientMessageId = uuidv4()
+      const userMessage: UiMessage = {
+        id: `local-user-${clientMessageId}`,
+        role: "user",
+        content: text,
+        clientMessageId,
+      }
+      const assistantId = `local-assistant-${clientMessageId}`
+
+      if (!textOverride) {
+        setDraft("")
+      }
+
+      setLocalMessages((prev) => [
+        ...prev,
+        userMessage,
+        {
+          id: assistantId,
+          role: "assistant",
+          content: "",
+          clientMessageId,
+        },
+      ])
+
+      const flushStreamContent = (content: string) => {
+        pendingStreamContentRef.current = content
+        if (streamFrameRef.current !== null) {
+          return
+        }
+        streamFrameRef.current = requestAnimationFrame(() => {
+          streamFrameRef.current = null
+          const nextContent = pendingStreamContentRef.current
+          if (nextContent === null) {
+            return
+          }
+          setLocalMessages((prev) =>
+            prev.map((m) =>
+              m.id === assistantId
+                ? { ...m, content: nextContent, streamingStatus: undefined }
+                : m
+            )
+          )
+          scrollToEnd()
+        })
+      }
 
       try {
         if (!activeSessionId) {
@@ -229,28 +298,10 @@ export function ChatClient() {
           updateUrlParams({ sessionId: activeSessionId, module: moduleSlug })
         }
 
-        const userMessage: UiMessage = {
-          id: `local-user-${Date.now()}`,
-          role: "user",
-          content: text,
-        }
-
-        if (!textOverride) {
-          setDraft("")
-        }
-
-        setLocalMessages((prev) => [...prev, userMessage])
-
-        const newAssistantId = `local-assistant-${Date.now()}`
-        assistantId = newAssistantId
-        setLocalMessages((prev) => [
-          ...prev,
-          { id: newAssistantId, role: "assistant", content: "" },
-        ])
-
         const response = await chatMutation.mutateAsync({
           sessionId: activeSessionId,
           messages: [{ role: "user", content: text }],
+          clientMessageId,
           onStreamStart: (meta) => {
             setSessionId(meta.sessionId)
             if (meta.moduleSlug) {
@@ -260,11 +311,11 @@ export function ChatClient() {
               prev.map((m) =>
                 m.id === assistantId
                   ? {
-                      ...m,
-                      moduleLabel: meta.moduleLabel,
-                      provider: meta.provider,
-                      model: meta.model,
-                    }
+                    ...m,
+                    moduleLabel: meta.moduleLabel,
+                    provider: meta.provider,
+                    model: meta.model,
+                  }
                   : m
               )
             )
@@ -273,38 +324,56 @@ export function ChatClient() {
           onStreamStatus: (message) => {
             setLocalMessages((prev) =>
               prev.map((m) =>
-                m.id === assistantId ? { ...m, content: message } : m
+                m.id === assistantId
+                  ? { ...m, streamingStatus: message }
+                  : m
               )
             )
           },
           onStreamChunk: (content) => {
-            setLocalMessages((prev) =>
-              prev.map((m) => (m.id === assistantId ? { ...m, content } : m))
-            )
-            scrollToEnd()
+            flushStreamContent(content)
           },
         })
 
+        if (streamFrameRef.current !== null) {
+          cancelAnimationFrame(streamFrameRef.current)
+          streamFrameRef.current = null
+        }
+        pendingStreamContentRef.current = null
+
         setSessionId(response.sessionId)
         setLocalMessages((prev) =>
-          prev.map((m) =>
-            m.id === assistantId
-              ? {
-                  ...m,
-                  content: response.content,
-                  actions: response.actions,
-                  blocks: response.blocks,
-                  moduleLabel: response.moduleLabel,
-                  provider: response.provider,
-                  model: response.model,
-                }
-              : m
-          )
+          prev.map((m) => {
+            if (m.clientMessageId !== clientMessageId || m.role !== "assistant") {
+              return m
+            }
+
+            const nextContent =
+              response.content.trim().length >= m.content.trim().length
+                ? response.content
+                : m.content
+
+            return {
+              ...m,
+              content: nextContent,
+              actions: response.actions,
+              blocks: response.blocks,
+              moduleLabel: response.moduleLabel,
+              provider: response.provider,
+              model: response.model,
+              streamingStatus: undefined,
+            }
+          })
         )
       } catch (error) {
-        if (assistantId) {
-          setLocalMessages((prev) => prev.filter((m) => m.id !== assistantId))
+        if (streamFrameRef.current !== null) {
+          cancelAnimationFrame(streamFrameRef.current)
+          streamFrameRef.current = null
         }
+        pendingStreamContentRef.current = null
+        setLocalMessages((prev) =>
+          prev.filter((m) => m.clientMessageId !== clientMessageId)
+        )
         appToast.error({
           text1: "No se pudo enviar el mensaje",
           text2: error instanceof Error ? error.message : "Error desconocido",
@@ -358,14 +427,23 @@ export function ChatClient() {
 
   const headerTitle = useMemo(
     () => (
-      <ChatModuleSelect
-        variant="header"
-        value={moduleSlug}
-        disabled={chatMutation.isPending}
-        onChange={handleModuleChange}
-      />
+      <Select value={moduleSlug} onValueChange={(value) => handleModuleChange(value as ModuleChatSlug)}>
+        <SelectTrigger className="text-lg font-bold tracking-tight capitalize bg-transparent border-none cursor-pointer w-fit">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent className="min-w-48">
+          <SelectGroup>
+            <SelectLabel>Contexto del agente</SelectLabel>
+            {CHAT_MODULE_OPTIONS.map((item) => (
+              <SelectItem key={item.slug} value={item.slug}>
+                {item.label}
+              </SelectItem>
+            ))}
+          </SelectGroup>
+        </SelectContent>
+      </Select>
     ),
-    [moduleSlug, chatMutation.isPending, handleModuleChange]
+    [moduleSlug, handleModuleChange]
   )
 
   const headerActions = useMemo(
@@ -373,19 +451,21 @@ export function ChatClient() {
       <>
         <Button
           variant="outline"
-          size="icon-sm"
+          size="icon"
           onClick={() => setSessionsOpen(true)}
           aria-label="Historial de conversaciones"
+          className="rounded-full size-9"
         >
           <HistoryIcon />
         </Button>
         <Button
           variant="outline"
-          size="icon-sm"
+          size="icon"
           onClick={() => void handleNewChat()}
           aria-label="Nueva conversación"
+          className="rounded-full size-9"
         >
-          <PlusIcon />
+          <PlusCircleIcon />
         </Button>
       </>
     ),
@@ -417,7 +497,7 @@ export function ChatClient() {
 
   return (
     <div className="flex h-[calc(100dvh-var(--header-height))] flex-col">
-      <div className="flex-1 overflow-y-auto px-3 py-2">
+      <div className="overflow-y-auto scrollbar-hide flex-1 px-3 py-2">
         {displayMessages.length === 0 ? (
           <ChatEmptySuggestions
             moduleSlug={moduleSlug}
@@ -428,14 +508,17 @@ export function ChatClient() {
           <div className="flex flex-col">
             {displayMessages.map((item) => (
               <ChatMessageRenderer
-                key={item.id}
+                key={getUiMessageKey(item)}
                 role={item.role}
-                content={item.content || "…"}
+                content={item.content || ""}
                 blocks={item.blocks}
                 actions={item.actions}
                 moduleLabel={item.moduleLabel}
                 provider={item.provider}
                 model={item.model}
+                sessionId={sessionId}
+                streamingStatus={item.streamingStatus}
+                onActionUpdated={handleActionUpdated}
               />
             ))}
             <div ref={messagesEndRef} />

@@ -84,6 +84,7 @@ export type AiSessionMessage = {
   id: string;
   role: ChatRole;
   content: string;
+  clientMessageId?: string | null;
   metadata: Record<string, unknown>;
   createdAt: string;
 };
