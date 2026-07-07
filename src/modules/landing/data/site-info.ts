@@ -48,9 +48,9 @@ export const landingContent = {
     cta: "Unirse a la lista",
     mobileCta: "Unirse a la lista de espera",
     links: [
-      { href: "/#features", label: "Características" },
-      { href: "/#modules", label: "Módulos" },
-      { href: "/#ai", label: "IA" },
+      { href: "/landing#features", label: "Características" },
+      { href: "/landing#modules", label: "Módulos" },
+      { href: "/landing#ai", label: "IA" },
       { href: "/faq", label: "FAQ" },
       { href: "/contact", label: "Contacto" },
     ],
@@ -189,10 +189,10 @@ export const landingContent = {
       {
         title: "Producto",
         links: [
-          { href: "/#features", label: "Características" },
-          { href: "/#modules", label: "Módulos" },
-          { href: "/#ai", label: "Agente IA" },
-          { href: "/#waitlist", label: "Lista de espera" },
+          { href: "/landing#features", label: "Características" },
+          { href: "/landing#modules", label: "Módulos" },
+          { href: "/landing#ai", label: "Agente IA" },
+          { href: "/landing#waitlist", label: "Lista de espera" },
         ],
       },
       {

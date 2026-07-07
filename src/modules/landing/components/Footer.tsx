@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { AppLogo } from "@/src/shared/components/brand/app-logo";
+import { APP_ROUTES } from "@/src/shared/constants/app-routes";
 import { landingContent, siteInfo } from "../data/site-info";
 
 export function Footer() {
@@ -13,7 +14,7 @@ export function Footer() {
         <div className="grid grid-cols-1 gap-12 md:grid-cols-5">
           {/* Brand column */}
           <div className="md:col-span-2">
-            <Link href="/" className="group mb-4 flex items-center gap-2.5">
+            <Link href={APP_ROUTES.marketing.landing} className="group mb-4 flex items-center gap-2.5">
               <AppLogo
                 size="md"
                 className="transition-transform duration-200 group-hover:translate-x-0.5 group-hover:translate-y-0.5"

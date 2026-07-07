@@ -66,6 +66,7 @@ async function chatViaJson(
     for (let i = 0; i < response.content.length; i += 20) {
       accumulated += response.content.slice(i, i + 20);
       input.onStreamChunk(accumulated);
+      await new Promise((resolve) => setTimeout(resolve, 16));
     }
   }
 
@@ -120,17 +121,28 @@ export function useAiChat(onModuleContext?: (slug: ModuleChatSlug, label: string
               input.onStreamChunk?.(aggregated);
             }
             if (event.type === 'done') {
+              const markdownContent =
+                aggregated ||
+                event.blocks?.find((block) => block.type === 'markdown')?.content ||
+                '';
+              const blocks = event.blocks?.length
+                ? event.blocks.map((block) =>
+                  block.type === 'markdown'
+                    ? { ...block, content: markdownContent }
+                    : block,
+                )
+                : [{ type: 'markdown' as const, content: markdownContent }];
               completedResponse = {
                 sessionId: event.sessionId,
                 provider: event.provider,
                 model: event.model,
                 moduleSlug: parseModuleChatSlug(event.moduleSlug),
                 moduleLabel: event.moduleLabel ?? 'General',
-                content: aggregated,
+                content: markdownContent,
                 requiresConfirmation: event.requiresConfirmation,
                 actions: event.actions,
                 sideEffects: event.sideEffects,
-                blocks: event.blocks,
+                blocks,
               };
             }
             if (event.type === 'error') {
@@ -181,14 +193,11 @@ export function useAiChat(onModuleContext?: (slug: ModuleChatSlug, label: string
         throw error;
       }
     },
-    onSuccess: async (_data, variables) => {
+    onSuccess: async (response) => {
       await queryClient.invalidateQueries({ queryKey: AI_SESSIONS_QUERY_KEY });
-      const sid = _data.sessionId ?? variables.sessionId;
-      if (sid) {
-        await queryClient.invalidateQueries({
-          queryKey: ['ai', 'session', sid],
-        });
-      }
+      await queryClient.invalidateQueries({
+        queryKey: ['ai', 'session', response.sessionId],
+      });
     },
   });
 }

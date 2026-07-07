@@ -1,5 +1,8 @@
 export const APP_ROUTES = {
-  root: '/home',
+  root: '/',
+  marketing: {
+    landing: '/landing',
+  },
   auth: {
     login: '/login',
     verifyEmail: '/verify-email',

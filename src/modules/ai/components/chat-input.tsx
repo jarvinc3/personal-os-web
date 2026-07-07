@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/src/shared/components/ui/button';
-import { cn } from '@/src/shared/lib/utils';
+import { Textarea } from '@/src/shared/components/ui/textarea';
 import { SendIcon } from 'lucide-react';
 import { type KeyboardEvent } from 'react';
 
@@ -23,22 +23,21 @@ export function ChatInput({ value, onChange, onSend, disabled }: ChatInputProps)
   };
 
   return (
-    <div className="flex flex-row items-end gap-2 border-t border-border bg-background px-3 py-2 pb-4">
-      <textarea
+    <div className="flex flex-row items-end gap-0.5 px-3 py-2 pb-4 border-t border-border bg-background">
+      <Textarea
         placeholder="Escribe un mensaje..."
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onKeyDown={handleKeyDown}
         disabled={disabled}
         rows={1}
-        className={cn(
-          'field-sizing-content max-h-32 min-h-8 w-full resize-none rounded-lg border border-input bg-transparent px-2.5 py-2 text-base outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm',
-        )}
+        className="overflow-y-auto min-h-10 p-3 max-h-32 rounded-4xl scrollbar-hide"
       />
       <Button
         size="icon"
         disabled={disabled || !value.trim()}
         onClick={onSend}
+        className="rounded-full size-10"
         aria-label="Enviar mensaje"
       >
         <SendIcon />

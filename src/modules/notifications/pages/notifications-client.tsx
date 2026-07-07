@@ -1,42 +1,42 @@
 "use client"
 
-import { useAuthGuard } from "@/src/modules/auth"
-import { DevicePushSettingsRow } from "@/src/modules/notifications/components/device-push-settings-row"
-import { NotificationRow } from "@/src/modules/notifications/components/notification-row"
+import { useAuthGuard } from "@/src/modules/auth";
+import { DevicePushSettingsRow } from "@/src/modules/notifications/components/device-push-settings-row";
+import { NotificationRow } from "@/src/modules/notifications/components/notification-row";
 import {
   useMarkAllNotificationsRead,
   useMarkNotificationRead,
-} from "@/src/modules/notifications/hooks/use-mark-notification-read"
-import { useNotificationPreferences } from "@/src/modules/notifications/hooks/use-notification-preferences"
-import { useNotifications } from "@/src/modules/notifications/hooks/use-notifications"
-import { deactivatePushTokenIfPresent } from "@/src/modules/notifications/lib/deactivate-web-push-token"
-import { groupNotificationsByDate } from "@/src/modules/notifications/lib/group-notifications-by-date"
-import { EditQuietHoursSheet } from "@/src/modules/settings/components/sheets/edit-quiet-hours-sheet"
-import { SETTINGS_REGISTRY } from "@/src/modules/settings/constants/settings-metadata"
-import { useProfile } from "@/src/modules/settings/hooks/use-profile"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
-import { LoadingView } from "@/src/shared/components/layout/loading-view"
+} from "@/src/modules/notifications/hooks/use-mark-notification-read";
+import { useNotificationPreferences } from "@/src/modules/notifications/hooks/use-notification-preferences";
+import { useNotifications } from "@/src/modules/notifications/hooks/use-notifications";
+import { deactivatePushTokenIfPresent } from "@/src/modules/notifications/lib/deactivate-web-push-token";
+import { groupNotificationsByDate } from "@/src/modules/notifications/lib/group-notifications-by-date";
+import { EditQuietHoursSheet } from "@/src/modules/settings/components/sheets/edit-quiet-hours-sheet";
+import { SETTINGS_REGISTRY } from "@/src/modules/settings/constants/settings-metadata";
+import { useProfile } from "@/src/modules/settings/hooks/use-profile";
+import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet";
+import { LoadingView } from "@/src/shared/components/layout/loading-view";
 import {
   SettingsRow,
   SettingsSection,
-} from "@/src/shared/components/layout/settings-section"
-import { Button } from "@/src/shared/components/ui/button"
+} from "@/src/shared/components/layout/settings-section";
+import { Button } from "@/src/shared/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/src/shared/components/ui/dropdown-menu"
-import { Separator } from "@/src/shared/components/ui/separator"
-import { Spinner } from "@/src/shared/components/ui/spinner"
-import { APP_ROUTES } from "@/src/shared/constants/app-routes"
-import { usePageHeader } from "@/src/shared/hooks/use-page-header"
-import { appToast } from "@/src/shared/lib/app-toast"
-import { formatTimeRange } from "@/src/shared/lib/date-format"
-import { CheckCheckIcon, MoreVerticalIcon, SettingsIcon } from "lucide-react"
-import Link from "next/link"
-import { useCallback, useMemo, useState } from "react"
+} from "@/src/shared/components/ui/dropdown-menu";
+import { Separator } from "@/src/shared/components/ui/separator";
+import { Spinner } from "@/src/shared/components/ui/spinner";
+import { APP_ROUTES } from "@/src/shared/constants/app-routes";
+import { usePageHeader } from "@/src/shared/hooks/use-page-header";
+import { appToast } from "@/src/shared/lib/app-toast";
+import { formatTimeRange } from "@/src/shared/lib/date-format";
+import { BellDot, CheckCheckIcon, MoreVerticalIcon } from "lucide-react";
+import Link from "next/link";
+import { useCallback, useMemo, useState } from "react";
 
 export function NotificationsClient() {
   const { isAuthenticated, isLoading } = useAuthGuard()
@@ -84,23 +84,24 @@ export function NotificationsClient() {
           <Button
             variant="ghost"
             size="icon"
+            className="rounded-full size-9"
             aria-label="Opciones de notificaciones"
           >
             <MoreVerticalIcon />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="min-w-56">
-          <DropdownMenuGroup>
+          <DropdownMenuGroup className="space-y-1">
             <DropdownMenuItem
               disabled={isMarkAllPending || sections.length === 0}
               onClick={handleMarkAllRead}
             >
               <CheckCheckIcon />
-              Marcar todas como leídas
+              Marcar como leídas
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => setPrefsOpen(true)}>
-              <SettingsIcon />
-              Configuración de notificaciones
+              <BellDot />
+              Configuración
             </DropdownMenuItem>
           </DropdownMenuGroup>
         </DropdownMenuContent>
@@ -124,8 +125,8 @@ export function NotificationsClient() {
 
   if (!isInAppEnabled) {
     return (
-      <div className="mx-auto flex max-w-2xl flex-col gap-4 p-4 pb-16 md:px-6">
-        <div className="flex flex-col items-center justify-center gap-4 px-6 py-16">
+      <div className="flex flex-col gap-4 p-4 pb-16 mx-auto max-w-2xl md:px-6">
+        <div className="flex flex-col gap-4 justify-center items-center px-6 py-16">
           <p className="text-center text-muted-foreground">
             Las notificaciones in-app están desactivadas en tus preferencias.
           </p>
@@ -146,7 +147,7 @@ export function NotificationsClient() {
 
   if (notificationsQuery.isLoading) {
     return (
-      <div className="mx-auto flex max-w-2xl flex-col gap-4 p-4 pb-16 md:px-6">
+      <div className="flex flex-col gap-4 p-4 pb-16 mx-auto max-w-2xl md:px-6">
         <LoadingView />
         <NotificationPreferencesSheet
           open={prefsOpen}
@@ -160,7 +161,7 @@ export function NotificationsClient() {
   }
 
   return (
-    <div className="mx-auto flex max-w-2xl flex-col gap-4 p-4 pb-16 md:px-6">
+    <div className="flex flex-col gap-4 p-4 pb-16 mx-auto max-w-2xl md:px-6">
       {notificationsQuery.isRefetching ? (
         <div className="flex justify-center py-2">
           <Spinner />

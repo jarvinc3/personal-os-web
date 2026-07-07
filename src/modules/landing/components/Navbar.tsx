@@ -31,7 +31,7 @@ export function Navbar() {
     >
       <div className="flex justify-between items-center px-6 mx-auto max-w-7xl h-16">
         {/* Logo */}
-        <Link href="/" className="group flex items-center gap-2.5">
+        <Link href={APP_ROUTES.marketing.landing} className="group flex items-center gap-2.5">
           <AppLogo
             size="sm"
             className="transition-transform duration-200 group-hover:translate-x-0.5 group-hover:translate-y-0.5"
@@ -63,7 +63,7 @@ export function Navbar() {
             Iniciar sesión
           </Link>
           <Link
-            href="/#waitlist"
+            href={`${APP_ROUTES.marketing.landing}#waitlist`}
             className="group relative overflow-hidden rounded-xl border-2 border-text bg-primary px-4 py-2 text-sm font-bold text-primary-foreground shadow-[4px_4px_0px_0px_#111827] transition-all duration-200 hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_#111827] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none"
           >
             <span className="relative z-10">{landingContent.nav.cta}</span>
@@ -117,7 +117,7 @@ export function Navbar() {
                 Iniciar sesión
               </Link>
               <Link
-                href="/#waitlist"
+                href={`${APP_ROUTES.marketing.landing}#waitlist`}
                 onClick={() => setMobileOpen(false)}
                 className="mt-2 rounded-xl border-2 border-text bg-primary px-4 py-2.5 text-center text-sm font-bold text-primary-foreground shadow-[2px_2px_0px_0px_#111827]"
               >

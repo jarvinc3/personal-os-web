@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     "Centraliza y automatiza la gestión de tus finanzas, agenda, proyectos, salud y suscripciones en una sola app potenciada por inteligencia artificial.",
 };
 
-export default function HomePage() {
+export default function LandingPage() {
   return (
     <main>
       <HeroSection />

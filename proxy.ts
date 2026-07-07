@@ -15,6 +15,14 @@ export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const { response, user } = await updateSession(request);
 
+  if (pathname === APP_ROUTES.root) {
+    const url = request.nextUrl.clone();
+    url.pathname = user
+      ? APP_ROUTES.app.home
+      : APP_ROUTES.marketing.landing;
+    return NextResponse.redirect(url);
+  }
+
   if (pathname === APP_ROUTES.auth.login && user) {
     const url = request.nextUrl.clone();
     url.pathname = APP_ROUTES.app.home;

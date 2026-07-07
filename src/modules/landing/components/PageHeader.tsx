@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { APP_ROUTES } from "@/src/shared/constants/app-routes";
+
 interface PageHeaderProps {
   label?: string;
   title: string;
@@ -31,7 +33,7 @@ export function PageHeader({
         {/* Breadcrumb */}
         {breadcrumb && (
           <nav className="flex gap-2 justify-center items-center mb-6 text-xs text-muted-foreground">
-            <Link href="/" className="transition-colors hover:text-foreground">
+            <Link href={APP_ROUTES.marketing.landing} className="transition-colors hover:text-foreground">
               Personal OS
             </Link>
             {breadcrumb.map((crumb, i) => (

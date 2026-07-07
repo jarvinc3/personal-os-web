@@ -1,6 +1,6 @@
 {
   "name": "Personal OS",
-  "short_name": "P-OS",
+  "short_name": "Personal OS",
   "description": "Personal OS centraliza y automatiza la gestión de tus finanzas, agenda, proyectos, salud y suscripciones en una sola app potenciada por inteligencia artificial.",
   "start_url": "/",
   "display": "standalone",
