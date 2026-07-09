@@ -4,8 +4,8 @@
   "description": "Personal OS centraliza y automatiza la gestión de tus finanzas, agenda, proyectos, salud y suscripciones en una sola app potenciada por inteligencia artificial.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#1C1917",
-  "theme_color": "#1C1917",
+  "background_color": "#131313",
+  "theme_color": "#131313",
   "orientation": "portrait-primary",
   "scope": "/",
   "icons": [

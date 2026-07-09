@@ -1,30 +1,30 @@
 "use client"
 
-import { useAuth, useAuthGuard } from "@/src/modules/auth";
-import { AuthFormFooter } from "@/src/modules/auth/components/auth-form-footer";
+import { useAuth, useAuthGuard } from "@/src/modules/auth"
+import { AuthFormFooter } from "@/src/modules/auth/components/auth-form-footer"
 import {
-    LoginForm,
-    type LoginFormHandle,
-} from "@/src/modules/auth/components/login-form";
+  LoginForm,
+  type LoginFormHandle,
+} from "@/src/modules/auth/components/login-form"
 import {
-    RegisterForm,
-    type RegisterFormHandle,
-} from "@/src/modules/auth/components/register-form";
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet";
-import { LoadingView } from "@/src/shared/components/layout/loading-view";
-import { Button } from "@/src/shared/components/ui/button";
+  RegisterForm,
+  type RegisterFormHandle,
+} from "@/src/modules/auth/components/register-form"
+import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+import { LoadingView } from "@/src/shared/components/layout/loading-view"
+import { Button } from "@/src/shared/components/ui/button"
 import {
-    getAppIconPath,
-    getWelcomeIllustrationPath,
-} from "@/src/shared/constants/app-assets";
-import { APP_ROUTES } from "@/src/shared/constants/app-routes";
-import { useIsMobile } from "@/src/shared/hooks/use-mobile";
-import { useSheetParam } from "@/src/shared/hooks/use-sheet-params";
-import { ArrowRight } from "lucide-react";
-import { useTheme } from "next-themes";
-import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+  getAppIconPath,
+  getWelcomeIllustrationPath,
+} from "@/src/shared/constants/app-assets"
+import { APP_ROUTES } from "@/src/shared/constants/app-routes"
+import { useIsMobile } from "@/src/shared/hooks/use-mobile"
+import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
+import { ArrowRight } from "lucide-react"
+import { useTheme } from "next-themes"
+import Image from "next/image"
+import { useRouter } from "next/navigation"
+import { useEffect, useRef, useState } from "react"
 
 type AuthMode = "login" | "register"
 
@@ -81,7 +81,7 @@ export default function LoginPage() {
           alt="Logo de Personal OS"
           width={40}
           height={40}
-          className="size-10 rounded-md"
+          className="h-auto w-auto rounded-md"
           priority
         />
         <div className="flex-1">
@@ -146,7 +146,7 @@ export default function LoginPage() {
               alt="Ilustración de bienvenida"
               width={650}
               height={300}
-              className="object-contain"
+              className="h-auto w-auto object-contain"
               priority
             />
           </div>
