@@ -14,7 +14,7 @@ import {
 } from "@/src/shared/components/ui/card"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
-import { ChevronRight } from "lucide-react"
+import { ChevronRight, Monitor } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useEffect } from "react"
@@ -71,6 +71,32 @@ export function HomeClient() {
           <Button asChild className="w-full sm:w-auto">
             <Link href={APP_ROUTES.app.settings}>
               Ir a Ajustes
+              <ChevronRight className="size-4" />
+            </Link>
+          </Button>
+        </CardFooter>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Monitor className="size-4 text-muted-foreground" aria-hidden />
+            Keep Awake
+          </CardTitle>
+          <CardDescription>
+            Mantén la pantalla despierta con Wake Lock y un miniplayer flotante.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground">
+            Ideal para presentaciones, lectura o trabajo sin que el equipo se
+            suspenda. El cronómetro vive solo en el Picture-in-Picture.
+          </p>
+        </CardContent>
+        <CardFooter>
+          <Button asChild variant="outline" className="w-full sm:w-auto">
+            <Link href={APP_ROUTES.app.keepAwake}>
+              Abrir Keep Awake
               <ChevronRight className="size-4" />
             </Link>
           </Button>

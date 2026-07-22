@@ -1,34 +1,42 @@
-'use client';
+"use client"
 
-import { Home, LandmarkIcon, LogOutIcon, LucideIcon, Settings, SparklesIcon } from 'lucide-react';
-import { usePathname, useRouter } from 'next/navigation';
-
-import { useAuth } from '@/src/modules/auth';
 import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem
-} from '@/src/shared/components/ui/sidebar';
-import { APP_ROUTES } from '@/src/shared/constants/app-routes';
-import Image from 'next/image';
-import { appAssets } from '../../constants/app-assets';
-import { Separator } from '../ui/separator';
+    Home,
+    LandmarkIcon,
+    LogOutIcon,
+    LucideIcon,
+    Monitor,
+    Settings,
+    SparklesIcon,
+} from "lucide-react"
+import { usePathname, useRouter } from "next/navigation"
+
+import { useAuth } from "@/src/modules/auth"
+import {
+    Sidebar,
+    SidebarContent,
+    SidebarFooter,
+    SidebarGroup,
+    SidebarGroupContent,
+    SidebarGroupLabel,
+    SidebarHeader,
+    SidebarMenu,
+    SidebarMenuButton,
+    SidebarMenuItem,
+} from "@/src/shared/components/ui/sidebar"
+import { APP_ROUTES } from "@/src/shared/constants/app-routes"
+import Image from "next/image"
+import { appAssets } from "../../constants/app-assets"
+import { Separator } from "../ui/separator"
 
 const navItems = [
-  { title: 'Inicio', url: APP_ROUTES.app.home, icon: Home },
-  { title: 'Ajustes', url: APP_ROUTES.app.settings, icon: Settings },
-];
+  { title: "Inicio", url: APP_ROUTES.app.home, icon: Home },
+  { title: "Ajustes", url: APP_ROUTES.app.settings, icon: Settings },
+]
 
 export function AppSidebar() {
-  const router = useRouter();
-  const { logoutMutation } = useAuth();
+  const router = useRouter()
+  const { logoutMutation } = useAuth()
 
   return (
     <Sidebar variant="sidebar" collapsible="icon">
@@ -51,7 +59,17 @@ export function AppSidebar() {
       <SidebarContent>
         <NavMain groupLabel="Menú principal" items={navItems} />
         <Separator />
-        <NavMain groupLabel="Aplicaciones" items={[{ title: 'Finanzas', url: '', icon: LandmarkIcon }]} />
+        <NavMain
+          groupLabel="Aplicaciones"
+          items={[
+            {
+              title: "Keep Awake",
+              url: APP_ROUTES.app.keepAwake,
+              icon: Monitor,
+            },
+            { title: "Finanzas", url: "", icon: LandmarkIcon },
+          ]}
+        />
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>
@@ -82,28 +100,26 @@ export function AppSidebar() {
         </SidebarMenu>
       </SidebarFooter>
     </Sidebar>
-  );
+  )
 }
 
 function NavMain({
   groupLabel,
   items,
 }: {
-  groupLabel: string;
+  groupLabel: string
   items: {
-    title: string;
-    url: string;
-    icon?: LucideIcon;
-  }[];
+    title: string
+    url: string
+    icon?: LucideIcon
+  }[]
 }) {
-  const pathname = usePathname();
-  const router = useRouter();
+  const pathname = usePathname()
+  const router = useRouter()
 
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>
-        {groupLabel}
-      </SidebarGroupLabel>
+      <SidebarGroupLabel>{groupLabel}</SidebarGroupLabel>
       <SidebarGroupContent>
         <SidebarMenu>
           {items.map((item) => (
@@ -121,5 +137,5 @@ function NavMain({
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>
-  );
+  )
 }
