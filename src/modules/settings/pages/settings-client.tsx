@@ -1,49 +1,49 @@
 "use client"
 
-import { useAuth, useAuthGuard } from "@/src/modules/auth";
-import { DevicePushSettingsRow } from "@/src/modules/notifications/components/device-push-settings-row";
-import { deactivatePushTokenIfPresent } from "@/src/modules/notifications/lib/deactivate-web-push-token";
-import { ModuleSettingsRows } from "@/src/modules/settings/components/profile-ui";
-import { DeleteAccountSheet } from "@/src/modules/settings/components/sheets/delete-account-sheet";
-import { EditAccountSheet } from "@/src/modules/settings/components/sheets/edit-account-sheet";
-import { EditAgendaSheet } from "@/src/modules/settings/components/sheets/edit-agenda-sheet";
-import { EditAIProviderSheet } from "@/src/modules/settings/components/sheets/edit-ai-provider-sheet";
-import { EditAISheet } from "@/src/modules/settings/components/sheets/edit-ai-sheet";
-import { EditFinanceSheet } from "@/src/modules/settings/components/sheets/edit-finance-sheet";
-import { EditHealthSheet } from "@/src/modules/settings/components/sheets/edit-health-sheet";
-import { EditProjectsSheet } from "@/src/modules/settings/components/sheets/edit-projects-sheet";
-import { EditQuietHoursSheet } from "@/src/modules/settings/components/sheets/edit-quiet-hours-sheet";
-import { EditSubscriptionsSheet } from "@/src/modules/settings/components/sheets/edit-subscriptions-sheet";
-import { EditThemeSheet } from "@/src/modules/settings/components/sheets/edit-theme-sheet";
+import { useAuth, useAuthGuard } from "@/src/modules/auth"
+import { DevicePushSettingsRow } from "@/src/modules/notifications/components/device-push-settings-row"
+import { deactivatePushTokenIfPresent } from "@/src/modules/notifications/lib/deactivate-web-push-token"
+import { ModuleSettingsRows } from "@/src/modules/settings/components/profile-ui"
+import { DeleteAccountSheet } from "@/src/modules/settings/components/sheets/delete-account-sheet"
+import { EditAccountSheet } from "@/src/modules/settings/components/sheets/edit-account-sheet"
+import { EditAgendaSheet } from "@/src/modules/settings/components/sheets/edit-agenda-sheet"
+import { EditAIProviderSheet } from "@/src/modules/settings/components/sheets/edit-ai-provider-sheet"
+import { EditAISheet } from "@/src/modules/settings/components/sheets/edit-ai-sheet"
+import { EditFinanceSheet } from "@/src/modules/settings/components/sheets/edit-finance-sheet"
+import { EditHealthSheet } from "@/src/modules/settings/components/sheets/edit-health-sheet"
+import { EditProjectsSheet } from "@/src/modules/settings/components/sheets/edit-projects-sheet"
+import { EditQuietHoursSheet } from "@/src/modules/settings/components/sheets/edit-quiet-hours-sheet"
+import { EditSubscriptionsSheet } from "@/src/modules/settings/components/sheets/edit-subscriptions-sheet"
+import { EditThemeSheet } from "@/src/modules/settings/components/sheets/edit-theme-sheet"
 import {
   getAiToneLabel,
   getThemeOptionLabel,
   SETTINGS_REGISTRY,
-} from "@/src/modules/settings/constants/settings-metadata";
-import { useModuleSheetNav } from "@/src/modules/settings/hooks/use-module-sheet-nav";
-import { useProfile } from "@/src/modules/settings/hooks/use-profile";
-import { getSettingValue } from "@/src/modules/settings/lib/settings-value";
-import type { ThemeValue } from "@/src/modules/settings/types/profile.types";
-import { LoadingView } from "@/src/shared/components/layout/loading-view";
+} from "@/src/modules/settings/constants/settings-metadata"
+import { useModuleSheetNav } from "@/src/modules/settings/hooks/use-module-sheet-nav"
+import { useProfile } from "@/src/modules/settings/hooks/use-profile"
+import { getSettingValue } from "@/src/modules/settings/lib/settings-value"
+import type { ThemeValue } from "@/src/modules/settings/types/profile.types"
+import { LoadingView } from "@/src/shared/components/layout/loading-view"
 import {
   SettingsRow,
   SettingsSection,
-} from "@/src/shared/components/layout/settings-section";
+} from "@/src/shared/components/layout/settings-section"
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
-} from "@/src/shared/components/ui/avatar";
-import { Button } from "@/src/shared/components/ui/button";
-import { Spinner } from "@/src/shared/components/ui/spinner";
-import { APP_ROUTES } from "@/src/shared/constants/app-routes";
-import { useSheetParam } from "@/src/shared/hooks/use-sheet-params";
-import { appToast } from "@/src/shared/lib/app-toast";
-import { formatTimeRange } from "@/src/shared/lib/date-format";
-import { Edit, LogOut, RefreshCw } from "lucide-react";
-import { useTheme } from "next-themes";
-import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef } from "react";
+} from "@/src/shared/components/ui/avatar"
+import { Button } from "@/src/shared/components/ui/button"
+import { Spinner } from "@/src/shared/components/ui/spinner"
+import { APP_ROUTES } from "@/src/shared/constants/app-routes"
+import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
+import { appToast } from "@/src/shared/lib/app-toast"
+import { formatTimeRange } from "@/src/shared/lib/date-format"
+import { Edit, LogOut, RefreshCw } from "lucide-react"
+import { useTheme } from "next-themes"
+import { useRouter } from "next/navigation"
+import { useCallback, useEffect, useRef } from "react"
 
 const APP_VERSION = process.env.NEXT_PUBLIC_APP_VERSION ?? "1.0.0"
 const APP_ENV =
@@ -111,8 +111,8 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6 p-4 pb-10 mx-auto w-full max-w-2xl md:px-6">
-      <div className="flex gap-2 items-center py-4">
+    <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 p-4 pb-10 md:px-6">
+      <div className="flex items-center gap-2 py-4">
         <div className="relative" onClick={() => setOpenAccountSheet(true)}>
           <Avatar className="size-20 md:size-24">
             {profile?.avatarUrl ? (
@@ -133,7 +133,7 @@ export default function SettingsPage() {
             <Edit className="size-3.5 text-foreground" />
           </Button>
         </div>
-        <div className="flex justify-between w-full">
+        <div className="flex w-full justify-between">
           <div className="flex-1">
             <p className="text-xl font-semibold">{displayName}</p>
             <p className="text-sm text-muted-foreground">{displayEmail}</p>
@@ -360,12 +360,20 @@ export default function SettingsPage() {
       <SettingsSection title="Información">
         <SettingsRow
           label="Landing page"
-          value="Activada"
-          onPress={() => {
-            router.push(APP_ROUTES.marketing.landing)
-          }}
+          link
+          onPress={() => router.push(APP_ROUTES.marketing.landing)}
           accentColor={SETTINGS_REGISTRY.marketing.accent}
           {...SETTINGS_REGISTRY.marketing.rows.landingPage}
+        />
+      </SettingsSection>
+
+      <SettingsSection title="Zona de Peligro">
+        <SettingsRow
+          label="Borrar cuenta"
+          destructive
+          onPress={() => setOpenDeleteAccountSheet(true)}
+          accentColor={SETTINGS_REGISTRY.danger.accent}
+          {...SETTINGS_REGISTRY.danger.rows.deleteAccount}
         />
       </SettingsSection>
 
@@ -380,7 +388,7 @@ export default function SettingsPage() {
         />
       </SettingsSection>
 
-      <div className="flex flex-col gap-1 justify-center items-center pb-4">
+      <div className="flex flex-col items-center justify-center gap-1 pb-4">
         <p className="text-xs text-muted-foreground">Entorno {APP_ENV}</p>
         <p className="text-xs text-muted-foreground">Versión {APP_VERSION}</p>
       </div>
@@ -395,14 +403,8 @@ export default function SettingsPage() {
         onOpenChange={setOpenDeleteAccountSheet}
         email={displayEmail}
       />
-      <EditThemeSheet
-        open={openThemeSheet}
-        onOpenChange={setOpenThemeSheet}
-      />
-      <EditAISheet
-        open={openAISheet}
-        onOpenChange={setOpenAISheet}
-      />
+      <EditThemeSheet open={openThemeSheet} onOpenChange={setOpenThemeSheet} />
+      <EditAISheet open={openAISheet} onOpenChange={setOpenAISheet} />
       <EditAIProviderSheet
         open={openAIProviderSheet}
         onOpenChange={setOpenAIProviderSheet}

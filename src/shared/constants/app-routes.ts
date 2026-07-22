@@ -13,6 +13,7 @@ export const APP_ROUTES = {
     settings: '/settings',
     chat: '/chat',
     notifications: '/notifications',
+    keepAwake: '/keep-awake',
   },
 } as const;
 

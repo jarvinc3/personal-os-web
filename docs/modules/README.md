@@ -8,6 +8,7 @@ Documentation for each functional area of the React Native client (`personal-os-
 | Settings      | `settings.md`      | `(app)/settings`      | `users`          |
 | AI Agent      | `ai.md`            | `(app)/chat`          | `ai-agent`       |
 | Notifications | `notifications.md` | `(app)/notifications` | `notifications`  |
+| Keep Awake    | `keep-awake.md`    | `(app)/keep-awake`    | — (client-only)  |
 | Finance       | `finance.md`       | `(app)/finance/*`     | `finance`        |
 
 ## Planned modules (settings UI only)

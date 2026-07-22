@@ -1,38 +1,47 @@
 "use client"
 
-import { useAuth } from "@/src/modules/auth";
-import { useNotificationPreferences, useUnreadNotificationCount } from "@/src/modules/notifications";
+import { useAuth } from "@/src/modules/auth"
 import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/src/shared/components/ui/avatar";
-import { Button } from "@/src/shared/components/ui/button";
+    useNotificationPreferences,
+    useUnreadNotificationCount,
+} from "@/src/modules/notifications"
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/src/shared/components/ui/dropdown-menu";
-import { Separator } from "@/src/shared/components/ui/separator";
-import { SidebarTrigger } from "@/src/shared/components/ui/sidebar";
-import { APP_ROUTES } from "@/src/shared/constants/app-routes";
-import { useHeaderContext } from "@/src/shared/context/header-context";
-import { useScrollDirection } from "@/src/shared/hooks/use-scroll-direction";
-import { cn } from "@/src/shared/lib/utils";
-import { useAppStore } from "@/src/shared/store/app-store";
-import { BellIcon, ChevronLeftIcon, LogOutIcon, SettingsIcon } from "lucide-react";
-import { usePathname, useRouter } from "next/navigation";
-import type { ReactNode } from "react";
+    Avatar,
+    AvatarFallback,
+    AvatarImage,
+} from "@/src/shared/components/ui/avatar"
+import { Button } from "@/src/shared/components/ui/button"
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuGroup,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/src/shared/components/ui/dropdown-menu"
+import { Separator } from "@/src/shared/components/ui/separator"
+import { SidebarTrigger } from "@/src/shared/components/ui/sidebar"
+import { APP_ROUTES } from "@/src/shared/constants/app-routes"
+import { useHeaderContext } from "@/src/shared/context/header-context"
+import { useScrollDirection } from "@/src/shared/hooks/use-scroll-direction"
+import { cn } from "@/src/shared/lib/utils"
+import { useAppStore } from "@/src/shared/store/app-store"
+import {
+    BellIcon,
+    ChevronLeftIcon,
+    LogOutIcon,
+    SettingsIcon,
+} from "lucide-react"
+import { usePathname, useRouter } from "next/navigation"
+import type { ReactNode } from "react"
 
 const PAGE_TITLES: Record<string, string> = {
   [APP_ROUTES.app.home]: "Inicio",
   [APP_ROUTES.app.settings]: "Ajustes",
   [APP_ROUTES.app.chat]: "Agente IA",
   [APP_ROUTES.app.notifications]: "Notificaciones",
+  [APP_ROUTES.app.keepAwake]: "Keep Awake",
 }
 
 function resolvePageTitle(pathname: string): string {
@@ -48,6 +57,9 @@ function resolvePageTitle(pathname: string): string {
   if (pathname.startsWith(APP_ROUTES.app.notifications)) {
     return "Notificaciones"
   }
+  if (pathname.startsWith(APP_ROUTES.app.keepAwake)) {
+    return "Keep Awake"
+  }
   return "Personal OS"
 }
 
@@ -56,7 +68,7 @@ function HeaderBackButton({ onBack }: { onBack: () => void }) {
     <Button
       variant="ghost"
       size="icon"
-      className="rounded-full size-9"
+      className="size-9 rounded-full"
       onClick={onBack}
       aria-label="Volver"
     >
@@ -66,16 +78,16 @@ function HeaderBackButton({ onBack }: { onBack: () => void }) {
 }
 
 function NotificationBell() {
-  const router = useRouter();
-  const { isInAppEnabled } = useNotificationPreferences();
-  const unreadQuery = useUnreadNotificationCount();
-  const unreadCount = isInAppEnabled ? (unreadQuery.data?.count ?? 0) : 0;
+  const router = useRouter()
+  const { isInAppEnabled } = useNotificationPreferences()
+  const unreadQuery = useUnreadNotificationCount()
+  const unreadCount = isInAppEnabled ? (unreadQuery.data?.count ?? 0) : 0
 
   return (
     <Button
       variant="outline"
       size="icon"
-      className="relative rounded-full shrink-0 size-9 mr-1"
+      className="relative mr-1 size-9 shrink-0 rounded-full"
       onClick={() => router.push(APP_ROUTES.app.notifications)}
       aria-label="Centro de notificaciones"
     >
@@ -83,14 +95,14 @@ function NotificationBell() {
       {unreadCount > 0 ? (
         <span
           className={cn(
-            'flex absolute -top-1 -right-1 justify-center items-center px-1 h-4 font-medium text-white rounded-full min-w-4 bg-destructive text-[10px]',
+            "absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-medium text-white"
           )}
         >
-          {unreadCount > 9 ? '9+' : String(unreadCount)}
+          {unreadCount > 9 ? "9+" : String(unreadCount)}
         </span>
       ) : null}
     </Button>
-  );
+  )
 }
 
 function HeaderUserMenu() {
@@ -112,7 +124,7 @@ function HeaderUserMenu() {
           className="rounded-full"
           aria-label="Menú de usuario"
         >
-          <Avatar className="rounded-full size-9">
+          <Avatar className="size-9 rounded-full">
             <AvatarImage src={avatarUrl} alt={displayName} />
             <AvatarFallback className="rounded-lg">
               {displayName.slice(0, 2).toUpperCase()}
@@ -129,7 +141,7 @@ function HeaderUserMenu() {
         <DropdownMenuGroup>
           <DropdownMenuLabel className="p-0 font-normal">
             <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-              <Avatar className="rounded-lg size-8">
+              <Avatar className="size-8 rounded-lg">
                 {avatarUrl ? (
                   <AvatarImage src={avatarUrl} alt={displayName} />
                 ) : null}
@@ -137,9 +149,9 @@ function HeaderUserMenu() {
                   {displayName.slice(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
-              <div className="grid flex-1 text-sm leading-tight text-left">
-                <span className="font-medium truncate">{displayName}</span>
-                <span className="text-xs truncate text-muted-foreground">
+              <div className="grid flex-1 text-left text-sm leading-tight">
+                <span className="truncate font-medium">{displayName}</span>
+                <span className="truncate text-xs text-muted-foreground">
                   {email}
                 </span>
               </div>
@@ -221,7 +233,7 @@ function PrimaryHeader({
   showUserMenu: boolean
 }) {
   return (
-    <div className="flex gap-1 items-center px-4 w-full s lg:px-6">
+    <div className="s flex w-full items-center gap-1 px-4 lg:px-6">
       {showSidebarTrigger ? (
         <>
           <SidebarTrigger />
@@ -231,9 +243,9 @@ function PrimaryHeader({
           />
         </>
       ) : null}
-      <div className="flex flex-col flex-1 min-w-0">{title}</div>
+      <div className="flex min-w-0 flex-1 flex-col">{title}</div>
       {actions ? (
-        <div className="flex gap-2 items-center shrink-0 mr-1">{actions}</div>
+        <div className="mr-1 flex shrink-0 items-center gap-2">{actions}</div>
       ) : null}
       {showNotificationBell ? <NotificationBell /> : null}
       {showUserMenu ? <HeaderUserMenu /> : null}
@@ -253,10 +265,10 @@ function SecondaryHeader({
   return (
     <div className="grid w-full grid-cols-[auto_1fr_auto] items-center gap-2 px-4 lg:px-6">
       <HeaderBackButton onBack={onBack} />
-      <div className="justify-self-center min-w-0">
+      <div className="min-w-0 justify-self-center">
         <HeaderTitle title={title} centered />
       </div>
-      <div className="flex justify-end items-center">
+      <div className="flex items-center justify-end">
         {actions ?? <span className="size-8" aria-hidden="true" />}
       </div>
     </div>
