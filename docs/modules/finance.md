@@ -1,10 +1,21 @@
-# Finance Module (App)
+# Finance Module
+
+> **Status en personal-os-web:** la UI de Finanzas (rutas `(app)/finance/*`, hooks, sheets) **aún no está implementada** en este repo web. Lo que sí existe: config del módulo en Ajustes (`FinanceModuleConfig`), rutas HTTP en `API_ENDPOINTS.FINANCE`, y chat con `moduleSlug=finance`.
+>
+> El documento de abajo describe el contrato del backend y el cliente móvil aspiracional. Fuente de verdad del esquema: `personal-os-back/prisma/schema.prisma` y `personal-os-back/docs/modules/finance.md`.
+
+## Modelo canónico (backend)
+
+- **Cuentas (`fin_accounts`)**: `CHECKING` | `SAVINGS` | `CASH` | `INVESTMENT` — sin `credit_card` ni días de corte.
+- **Tarjetas (`fin_cards` + `fin_card_balances`)**: crédito multi-moneda; débito con cuenta subyacente obligatoria.
+- **Transacciones**: exactamente un destino — `accountId` **o** `cardId`.
+- **Gmail**: la fuente puede enlazar cuenta o tarjeta.
 
 ## Purpose
 
-Mobile client for the Personal OS finance backend: day-to-day money management (accounts, transactions, budgets) and optional **Gmail bank-email import** for Dominican institutions (BHD, Popular, Qik). The module lives under the main app drawer as **Finanzas** and uses TanStack Query for server state.
+Client for Personal OS finance: day-to-day money management (accounts, cards, transactions, budgets) and optional **Gmail bank-email import**. On mobile this lives under the main drawer as **Finanzas**; on web, use chat tools and Ajustes until the finance UI ships.
 
-Backend contract and data model: `personal-os-back/docs/modules/finance.md`.
+Backend contract: `personal-os-back/docs/modules/finance.md`.
 
 ## Navigation
 

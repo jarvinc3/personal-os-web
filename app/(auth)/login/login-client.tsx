@@ -74,7 +74,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex h-screen flex-col bg-background">
+    <div className="flex h-screen flex-col">
       <nav className="flex flex-row items-center gap-3 p-4">
         <Image
           src={appIcon}
@@ -90,7 +90,7 @@ export default function LoginPage() {
         </div>
       </nav>
 
-      <div className="flex flex-1 flex-col md:flex-row">
+      <div className="flex min-h-0 flex-1 flex-col md:flex-row">
         <div className="hidden flex-1 flex-col items-center justify-center gap-4 p-4 md:flex">
           {authMode === "login" ? (
             <>
@@ -139,19 +139,20 @@ export default function LoginPage() {
           )}
         </div>
 
-        <div className="flex flex-1 flex-col">
-          <div className="flex flex-1 items-center justify-center">
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+          <div className="flex min-h-0 flex-1 items-center justify-center p-4 sm:p-6 md:p-4">
             <Image
               src={welcomeIllustration}
               alt="Ilustración de bienvenida"
               width={650}
               height={300}
-              className="h-auto w-auto object-contain"
+              sizes="(max-width: 767px) calc(100vw - 2rem), 50vw"
+              className="h-auto max-h-full w-auto max-w-full object-contain"
               priority
             />
           </div>
 
-          <div className="flex flex-col gap-10 px-8">
+          <div className="flex shrink-0 flex-col gap-10 px-8">
             <h1 className="text-4xl leading-[1.05] font-bold tracking-tight text-foreground">
               Mantén tu
               <br />

@@ -1,16 +1,18 @@
-const DEFAULT_API_BASE_URL = 'http://localhost:3100/api';
-
 function normalizeBaseUrl(url: string): string {
   return url.replace(/\/$/, '');
 }
 
 export function resolveApiBaseUrl(): string {
-  const configured = process.env.NEXT_PUBLIC_API_URL?.trim() || DEFAULT_API_BASE_URL;
-  return normalizeBaseUrl(configured);
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL?.trim();
+  const apiPrefix = process.env.NEXT_PUBLIC_API_PREFIX?.trim();
+
+  if (!apiUrl) {
+    throw new Error('NEXT_PUBLIC_API_URL is not set');
+  }
+
+  return normalizeBaseUrl(
+    `${apiUrl}${apiPrefix ? `/${apiPrefix.replace(/^\/+/, '')}` : ''}`,
+  );
 }
 
 export const API_BASE_URL = resolveApiBaseUrl();
-
-if (process.env.NODE_ENV === 'development') {
-  console.debug('[API] Base URL:', API_BASE_URL);
-}

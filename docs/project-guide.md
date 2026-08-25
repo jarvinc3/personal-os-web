@@ -105,13 +105,13 @@ Gmail/IMAP → EmailService → TransactionParserService
 
 ### Módulos planificados
 
-| Módulo                      | Prefijo DB | Estado      | Prioridad |
-| --------------------------- | ---------- | ----------- | --------- |
-| Finanzas personales         | `fin_`     | 🟡 En diseño | 1         |
-| Suscripciones personales    | `sub_`     | ⚪ Pendiente | 2         |
-| Agenda personal             | `agn_`     | ⚪ Pendiente | 3         |
-| Administración de proyectos | `prj_`     | ⚪ Pendiente | 4         |
-| Salud y alimentación        | `hlth_`    | ⚪ Pendiente | 5         |
+| Módulo                      | Prefijo DB | Estado       | Prioridad  |
+| --------------------------- | ---------- | -----------  | ---------  |
+| Finanzas personales         | `fin_`     | 🟡 En diseño | 1          |
+| Suscripciones personales    | `sub_`     | ⚪ Pendiente | 2          |
+| Agenda personal             | `agn_`     | ⚪ Pendiente | 3          |
+| Administración de proyectos | `prj_`     | ⚪ Pendiente | 4          |
+| Salud y alimentación        | `hlth_`    | ⚪ Pendiente | 5          |
 
 ### Integraciones entre módulos (planificadas)
 
@@ -316,67 +316,62 @@ Registro de auditoría de acciones ejecutadas por el agente.
 
 ## 8. Modelo de datos — Módulo de finanzas
 
-Todas las tablas llevan el prefijo `fin`_.
+Todas las tablas llevan el prefijo `fin_`. Fuente de verdad ejecutable: **personal-os-back** (`prisma/schema.prisma`).
+
+**Separación cuentas vs tarjetas:**
+
+- `fin_accounts` = solo efectivo/ahorro/inversión (`CHECKING`, `SAVINGS`, `CASH`, `INVESTMENT`). Sin límites de crédito ni fechas de corte.
+- `fin_cards` + `fin_card_balances` = tarjetas. Crédito multi-moneda en balances; débito requiere cuenta subyacente.
+- `fin_transactions` apunta a **exactamente uno** de `account_id` o `card_id`.
 
 ### `fin_accounts`
 
-Representa cualquier instrumento financiero del usuario.
+| Campo            | Tipo            | Descripción                                    |
+| ---------------- | --------------- | ---------------------------------------------- |
+| `id`             | text PK         | UUID text                                      |
+| `user_id`        | text FK → users | —                                              |
+| `institution_id` | text FK?        | `fin_institutions`                             |
+| `name`           | text            | Ej: `Cuenta Banreservas`                       |
+| `type`           | enum            | `CHECKING`, `SAVINGS`, `CASH`, `INVESTMENT`    |
+| `institution`    | text?           | Label legacy / display                         |
+| `currency`       | text            | ISO 4217 (`DOP`, `USD`)                        |
+| `balance`        | decimal(15,2)   | Cache del ledger CONFIRMED                     |
+| `is_active`      | boolean         | Soft-delete                                    |
+| `created_at`     | timestamptz     | —                                              |
+| `updated_at`     | timestamptz     | —                                              |
 
-| Campo                   | Tipo            | Descripción                                           |
-| ----------------------- | --------------- | ----------------------------------------------------- |
-| `id`                    | uuid PK         | —                                                     |
-| `user_id`               | uuid FK → users | —                                                     |
-| `name`                  | string          | Ej: `Visa BHD`, `Cuenta Banreservas`                  |
-| `type`                  | string          | `credit_card`                                         |
-| `institution`           | string          | Nombre del banco o institución                        |
-| `currency`              | string          | Moneda base de la cuenta (ISO 4217, ej: `DOP`, `USD`) |
-| `balance`               | decimal         | Balance actual                                        |
-| `credit_limit`          | decimal         | Límite de crédito (solo tarjetas)                     |
-| `statement_closing_day` | date            | Día de cierre del estado de cuenta                    |
-| `payment_due_day`       | date            | Día límite de pago                                    |
-| `is_active`             | boolean         | Si la cuenta está activa                              |
-| `created_at`            | timestamp       | —                                                     |
+### `fin_cards` / `fin_card_balances`
+
+| Campo (card) | Descripción |
+| ------------------- | ----------- |
+| `type` | `CREDIT` \| `DEBIT` |
+| `account_id` | Requerido si `DEBIT`; null si `CREDIT` |
+| `last_four` | 4 dígitos opcionales |
+| `statement_closing_day` / `payment_due_day` | 1–31 en tarjeta |
+| balances | `(card_id, currency)` único; `balance` + `credit_limit` opcional |
 
 ### `fin_email_sources`
 
-Configuración de buzones de email vinculados a una cuenta bancaria.
-
-| Campo            | Tipo                   | Descripción                         |
-| ---------------- | ---------------------- | ----------------------------------- |
-| `id`             | uuid PK                | —                                   |
-| `user_id`        | uuid FK → users        | —                                   |
-| `account_id`     | uuid FK → fin_accounts | Cuenta bancaria asociada            |
-| `provider`       | string                 | `gmail`                             |
-| `email_address`  | string                 | Dirección de email del buzón        |
-| `bank_domain`    | string                 | Ej: `banreservas.com`, `bhd.com.do` |
-| `access_token`   | text                   | Token OAuth2 (encriptado)           |
-| `refresh_token`  | text                   | Refresh token OAuth2 (encriptado)   |
-| `last_synced_at` | timestamp              | Última sincronización exitosa       |
-| `is_active`      | boolean                | —                                   |
+| Campo        | Descripción                |
+| ------------ | -----------                |
+| `account_id` | Opcional — destino cuenta  |
+| `card_id`    | Opcional — destino tarjeta |
+| —            | Como máximo uno de los dos |
 
 ### `fin_transactions`
 
-| Campo                  | Tipo                     | Descripción                                   |
-| ---------------------- | ------------------------ | --------------------------------------------- |
-| `id`                   | uuid PK                  | —                                             |
-| `account_id`           | uuid FK → fin_accounts   | —                                             |
-| `user_id`              | uuid FK → users          | Denormalizado para queries rápidas            |
-| `category_id`          | uuid FK → fin_categories | —                                             |
-| `email_message_id`     | string                   | ID del email origen (para deduplicación)      |
-| `type`                 | string                   | `debit`                                       |
-| `amount`               | decimal                  | Monto en la moneda original de la transacción |
-| `amount_base_currency` | decimal                  | Monto convertido a la moneda base del usuario |
-| `currency`             | string                   | Moneda de la transacción (ISO 4217)           |
-| `exchange_rate`        | decimal                  | Tasa de cambio usada (si aplica)              |
-| `merchant`             | string                   | Nombre del comercio                           |
-| `description`          | text                     | Descripción completa                          |
-| `transaction_date`     | date                     | Fecha de la transacción                       |
-| `status`               | string                   | `pending`                                     |
-| `is_recurring`         | boolean                  | Si la IA detectó que es recurrente            |
-| `ai_metadata`          | jsonb                    | Análisis y etiquetas del agente IA            |
-| `created_at`           | timestamp                | —                                             |
+| Campo | Descripción |
+| ------------- | ----------- |
+| `account_id` | XOR con `card_id` (CHECK + API) |
+| `card_id` | XOR con `account_id` |
+| `type` | `DEBIT`, `CREDIT`, `TRANSFER` (transfer = pares enlazados) |
+| `status` | `PENDING`, `CONFIRMED`, `CANCELLED` |
+| `source` | `MANUAL`, `EMAIL`, `AI` |
+| `currency` | ISO 4217 |
+| `email_message_id` | unique, import Gmail |
 
-> **Nota multi-moneda:** siempre guardar `amount` en la moneda original + `amount_base_currency` en la moneda base del usuario + `exchange_rate` del momento. Esto permite reportes consistentes sin perder el dato original.
+> **Ledger:** solo `CONFIRMED` mueve saldos. Crédito actualiza `fin_card_balances`; débito de tarjeta actualiza la cuenta subyacente; cuenta bancaria actualiza `fin_accounts.balance`.
+> **Nota multi-moneda:** always guardar `amount` + `amount_base_currency` + `exchange_rate`.
 
 ### `fin_categories`
 
