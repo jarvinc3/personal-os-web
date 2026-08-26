@@ -138,7 +138,6 @@ Query keys are colocated in each hook file; invalidation runs after successful m
 - `shared/lib/dismiss-bottom-sheet.ts`
 - `shared/components/charts/spending-bar-chart.tsx` (`victory-native`, drill-down to Movimientos)
 - `shared/components/charts/spending-line-chart.tsx` (income vs expenses over time)
-- `hooks/use-migrate-category-icons.ts` (one-time Lucide → emoji migration via API)
 
 Barrel: `modules/finance/components/index.ts`.
 
