@@ -1,15 +1,15 @@
 # App Modules — Index
 
-Documentation for each functional area of the React Native client (`personal-os-app`).
+Documentation for each functional area of **personal-os-web**. Some files still describe the React Native client (`personal-os-app`); prefer the backend docs when the web UI is not built yet.
 
-| Module        | Doc file           | Route(s)              | Backend module   |
-| ------------- | ------------------ | --------------------- | ---------------- |
-| Auth          | `auth.md`          | `(auth)/*`            | `auth`, Supabase |
-| Settings      | `settings.md`      | `(app)/settings`      | `users`          |
-| AI Agent      | `ai.md`            | `(app)/chat`          | `ai-agent`       |
-| Notifications | `notifications.md` | `(app)/notifications` | `notifications`  |
-| Keep Awake    | `keep-awake.md`    | `(app)/keep-awake`    | — (client-only)  |
-| Finance       | `finance.md`       | `(app)/finance/*`     | `finance`        |
+| Module        | Doc file           | Route(s)                         | Backend module   |
+| ------------- | ------------------ | -------------------------------- | ---------------- |
+| Auth          | `auth.md`          | `/login`, `/verify-email`, `/auth/callback` | `auth`, Supabase |
+| Settings      | `settings.md`      | `/settings`                      | `users`          |
+| AI Agent      | `ai.md`            | `/chat`                          | `ai-agent`       |
+| Notifications | `notifications.md` | `/notifications`                 | `notifications`  |
+| Keep Awake    | `keep-awake.md`    | `/keep-awake`                    | — (client-only)  |
+| Finance       | `finance.md`       | **not routed** (settings + chat) | `finance`        |
 
 ## Planned modules (settings UI only)
 
