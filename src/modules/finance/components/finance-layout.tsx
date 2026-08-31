@@ -1,10 +1,21 @@
 "use client"
 
 import { FINANCE_NAV_ITEMS } from "@/src/modules/finance/constants/nav"
+import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { cn } from "@/src/shared/lib/utils"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import type { ReactNode } from "react"
+
+function isNavCurrent(pathname: string, href: string): boolean {
+  if (pathname === href) {
+    return true
+  }
+  if (href === APP_ROUTES.app.finance) {
+    return false
+  }
+  return pathname.startsWith(`${href}/`)
+}
 
 export function FinanceLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname()
@@ -27,7 +38,7 @@ export function FinanceLayout({ children }: { children: ReactNode }) {
             )
           }
 
-          const isCurrent = pathname === item.href || pathname.startsWith(`${item.href}/`)
+          const isCurrent = isNavCurrent(pathname, item.href)
 
           return (
             <Link
