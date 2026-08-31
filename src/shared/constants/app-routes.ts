@@ -14,6 +14,12 @@ export const APP_ROUTES = {
     chat: '/chat',
     notifications: '/notifications',
     keepAwake: '/keep-awake',
+    finance: '/finance',
+    financeAccounts: '/finance/accounts',
+    financeTransactions: '/finance/transactions',
+    financeBudgets: '/finance/budgets',
+    financePlanning: '/finance/planning',
+    financeSync: '/finance/sync',
   },
 } as const;
 

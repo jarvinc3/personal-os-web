@@ -9,7 +9,7 @@ Documentation for each functional area of **personal-os-web**. Some files still 
 | AI Agent      | `ai.md`            | `/chat`                          | `ai-agent`       |
 | Notifications | `notifications.md` | `/notifications`                 | `notifications`  |
 | Keep Awake    | `keep-awake.md`    | `/keep-awake`                    | — (client-only)  |
-| Finance       | `finance.md`       | **not routed** (settings + chat) | `finance`        |
+| Finance       | `finance.md`       | `/finance` (shell; hijos aún no) | `finance`        |
 
 ## Planned modules (settings UI only)
 
