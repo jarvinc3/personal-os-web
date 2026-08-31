@@ -67,7 +67,7 @@ export function AppSidebar() {
               url: APP_ROUTES.app.keepAwake,
               icon: Monitor,
             },
-            { title: "Finanzas", url: "", icon: LandmarkIcon },
+            { title: "Finanzas", url: APP_ROUTES.app.finance, icon: LandmarkIcon },
           ]}
         />
       </SidebarContent>
@@ -125,7 +125,9 @@ function NavMain({
           {items.map((item) => (
             <SidebarMenuItem key={item.title}>
               <SidebarMenuButton
-                isActive={pathname === item.url}
+                isActive={
+                  pathname === item.url || pathname.startsWith(`${item.url}/`)
+                }
                 onClick={() => router.push(item.url)}
                 size="md"
               >
