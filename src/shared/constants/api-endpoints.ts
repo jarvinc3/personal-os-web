@@ -43,6 +43,7 @@ export const API_ENDPOINTS = {
     TRANSFERS: '/finance/transfers',
     TRANSACTION: (id: string) => `/finance/transactions/${id}`,
     TRANSACTION_CONFIRM: (id: string) => `/finance/transactions/${id}/confirm`,
+    TRANSACTION_REVERSE: (id: string) => `/finance/transactions/${id}/reverse`,
     CATEGORIES: '/finance/categories',
     CATEGORY: (id: string) => `/finance/categories/${id}`,
     BUDGETS: '/finance/budgets',

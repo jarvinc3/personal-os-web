@@ -2,15 +2,44 @@
 
 ## Status
 
-Finance **screens are not implemented** in `personal-os-web`. There is no `/finance` route, no hooks, and no sheets.
+Shell of `/finance` is in `personal-os-web` (#14). There is no dashboard, catalog, or ledger UI yet.
 
 What exists today:
 
+- Route `/finance` with module gate (`useFinanceEnabled`) — disabled/unconfigured shows CTA to Settings (`?sheet=finance-sheet`) and **does not** call `/finance/*`
+- Desktop sub-nav (Resumen ready; other sections listed, not linked until their tickets)
+- Money helpers `parseFinanceMoney` / `formatFinanceMoney` (`src/modules/finance/lib/money.ts`)
+- REST path constants including `TRANSACTION_REVERSE`
 - Module toggle and config in Settings (`EditFinanceSheet`, slug `finance`)
-- Path constants in `src/shared/constants/api-endpoints.ts` (`API_ENDPOINTS.FINANCE`) — unused by UI
 - Chat with `moduleSlug=finance` (backend tools; subset of REST)
 
-Do **not** copy the mobile tab layout (`Resumen` / `Movimientos` / …) into this repo. When web UI is built, design for the browser and follow the backend contract.
+Do **not** copy the mobile tab layout (`Resumen` / `Movimientos` / …) into this repo. Sub-nav is desktop (horizontal), compact scroll on narrow viewports.
+
+Point the client at the API **develop** branch (money-as-string, reverse, OAuth `returnTo`).
+
+## Routes
+
+| Path | Ticket | Notes |
+| --- | --- | --- |
+| `/finance` | #14 | Shell + empty resumen |
+| `/finance/accounts` | #15 | not routed yet |
+| `/finance/transactions` | #18 / #19 | not routed yet |
+| `/finance/budgets` | #20 | not routed yet |
+| `/finance/planning` | #21 | not routed yet |
+| `/finance/sync` | #22 | not routed yet |
+
+## Money and list shapes
+
+`api-client` already unwraps `{ data, meta }`. Hooks should type the inner payload.
+
+- Read money: decimal **strings**. Write bodies: **numbers** (`parseFinanceMoney`; never send `NaN`).
+- Paginated: `GET /finance/transactions`, `GET /finance/budgets` → `{ items, pagination }`
+- Arrays: accounts, cards, institutions, categories, savings-goals, loans, receivables, email sources
+- Analytics: summary object; spending-over-time `{ points }`; spending-by-category and budget-status arrays
+
+UI copy “Completado” = enum `CONFIRMED` (no `COMPLETED`).
+
+Charts (dashboard, #17): `src/shared/components/ui/chart.tsx` + `recharts`. The shell empty state does **not** mount `ChartContainer`.
 
 ## Source of truth
 
@@ -22,9 +51,7 @@ AI tools (not equivalent to REST): [`personal-os-back/docs/ai-tools/finance-tool
 
 ## Gmail OAuth (web)
 
-The API already supports a web return after Google consent (`returnTo` whose origin is in `CORS_ORIGIN`, plus optional `accountId` **xor** `cardId`). There is still **no** finance Gmail UI on web to start that flow.
-
-Until a screen exists, connecting a bank mailbox is mobile or a manual API call.
+The API already supports a web return after Google consent (`returnTo` whose origin is in `CORS_ORIGIN`, plus optional `accountId` **xor** `cardId`). There is still **no** finance Gmail UI on web to start that flow (`#22`). Local origin: `NEXT_PUBLIC_URL=http://localhost:3000` (not Vite 5173).
 
 ## Related
 
