@@ -1,3 +1,9 @@
+import type {
+  FinanceAccountType,
+  FinanceCardNetwork,
+  FinanceCardType,
+} from "@/src/modules/finance/constants/catalog"
+
 export const FINANCE_TRANSACTION_TYPES = ["DEBIT", "CREDIT", "TRANSFER"] as const
 export type FinanceTransactionType = (typeof FINANCE_TRANSACTION_TYPES)[number]
 
@@ -69,22 +75,49 @@ export type FinanceSpendingBucket = {
 
 export type FinanceAccount = {
   id: string
+  institutionId: string | null
+  institution: string | null
+  institutionName: string | null
   name: string
-  type: string
+  type: FinanceAccountType
   currency: string
   balance: string
+  color: string | null
   isActive: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+export type FinanceCardBalance = {
+  id: string
+  currency: string
+  balance: string
+  creditLimit: string | null
 }
 
 export type FinanceCard = {
   id: string
+  institutionId: string
+  institutionName: string
+  accountId: string | null
+  accountName: string | null
   name: string
+  type: FinanceCardType
+  network: FinanceCardNetwork | null
+  lastFour: string | null
+  statementClosingDay: number | null
+  paymentDueDay: number | null
+  color: string | null
   isActive: boolean
+  balances: FinanceCardBalance[]
 }
 
 export type FinanceInstitution = {
   id: string
   name: string
+  color: string | null
+  logoUrl: string | null
+  country: string | null
   isActive: boolean
 }
 

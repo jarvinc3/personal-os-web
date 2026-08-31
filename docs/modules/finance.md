@@ -2,12 +2,13 @@
 
 ## Status
 
-Shell of `/finance` is in `personal-os-web` (#14). There is no dashboard, catalog, or ledger UI yet.
+Shell of `/finance` (#14) and catalog `/finance/accounts` (#15) are in `personal-os-web`. There is no dashboard or ledger UI yet.
 
 What exists today:
 
 - Route `/finance` with module gate (`useFinanceEnabled`) — disabled/unconfigured shows CTA to Settings (`?sheet=finance-sheet`) and **does not** call `/finance/*`
-- Desktop sub-nav (Resumen ready; other sections listed, not linked until their tickets)
+- `/finance/accounts`: instituciones, cuentas y tarjetas (arrays, no paginados). Alta de cuenta **sin** `balance`. Archivo: cuenta `PATCH isActive: false`; institución/tarjeta `DELETE`. Saldos de tarjeta: `POST /finance/cards/:id/balances` (números).
+- Desktop sub-nav (Resumen y Cuentas listos; el resto visible sin 404 hasta sus tickets)
 - Money helpers `parseFinanceMoney` / `formatFinanceMoney` (`src/modules/finance/lib/money.ts`)
 - REST path constants including `TRANSACTION_REVERSE`
 - Module toggle and config in Settings (`EditFinanceSheet`, slug `finance`)
@@ -22,7 +23,7 @@ Point the client at the API **develop** branch (money-as-string, reverse, OAuth 
 | Path | Ticket | Notes |
 | --- | --- | --- |
 | `/finance` | #14 | Shell + empty resumen |
-| `/finance/accounts` | #15 | not routed yet |
+| `/finance/accounts` | #15 | instituciones, cuentas, tarjetas |
 | `/finance/transactions` | #18 / #19 | not routed yet |
 | `/finance/budgets` | #20 | not routed yet |
 | `/finance/planning` | #21 | not routed yet |

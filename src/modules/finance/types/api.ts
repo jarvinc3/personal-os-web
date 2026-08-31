@@ -24,3 +24,10 @@ export type FinancePaginated<T> = {
 }
 
 export const FINANCE_QUERY_KEY = ["finance"] as const
+
+export const FINANCE_INSTITUTIONS_QUERY_KEY = [
+  ...FINANCE_QUERY_KEY,
+  "institutions",
+] as const
+export const FINANCE_ACCOUNTS_QUERY_KEY = [...FINANCE_QUERY_KEY, "accounts"] as const
+export const FINANCE_CARDS_QUERY_KEY = [...FINANCE_QUERY_KEY, "cards"] as const
