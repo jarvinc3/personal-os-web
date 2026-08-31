@@ -31,3 +31,7 @@ export const FINANCE_INSTITUTIONS_QUERY_KEY = [
 ] as const
 export const FINANCE_ACCOUNTS_QUERY_KEY = [...FINANCE_QUERY_KEY, "accounts"] as const
 export const FINANCE_CARDS_QUERY_KEY = [...FINANCE_QUERY_KEY, "cards"] as const
+export const FINANCE_CATEGORIES_QUERY_KEY = [
+  ...FINANCE_QUERY_KEY,
+  "categories",
+] as const

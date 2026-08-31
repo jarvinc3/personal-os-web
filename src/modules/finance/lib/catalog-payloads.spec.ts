@@ -5,6 +5,7 @@ import {
   buildCardBalanceBody,
   buildCreateAccountBody,
   buildCreateCardBody,
+  buildCreateCategoryBody,
 } from "./catalog-payloads.ts"
 
 describe("buildCreateAccountBody", () => {
@@ -97,5 +98,26 @@ describe("buildCardBalanceBody", () => {
     assert.equal(result.ok, false)
     if (result.ok) return
     assert.equal(result.error, "Saldo inválido")
+  })
+})
+
+describe("buildCreateCategoryBody", () => {
+  it("sends the emoji icon string on create", () => {
+    const result = buildCreateCategoryBody({
+      name: " Mercado ",
+      icon: "🛒",
+      parentId: "__none__",
+    })
+    assert.equal(result.ok, true)
+    if (!result.ok) return
+    assert.deepEqual(result.body, { name: "Mercado", icon: "🛒" })
+  })
+
+  it("rejects Lucide-style keys instead of sending them as icon", () => {
+    const result = buildCreateCategoryBody({
+      name: "Cart",
+      icon: "shopping-cart",
+    })
+    assert.equal(result.ok, false)
   })
 })

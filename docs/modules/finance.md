@@ -7,7 +7,7 @@ Shell of `/finance` (#14) and catalog `/finance/accounts` (#15) are in `personal
 What exists today:
 
 - Route `/finance` with module gate (`useFinanceEnabled`) — disabled/unconfigured shows CTA to Settings (`?sheet=finance-sheet`) and **does not** call `/finance/*`
-- `/finance/accounts`: instituciones, cuentas y tarjetas (arrays, no paginados). Alta de cuenta **sin** `balance`. Archivo: cuenta `PATCH isActive: false`; institución/tarjeta `DELETE`. Saldos de tarjeta: `POST /finance/cards/:id/balances` (números).
+- `/finance/accounts`: instituciones, cuentas, tarjetas y **categorías** (arrays). Alta de cuenta **sin** `balance`. Archivo: cuenta `PATCH isActive: false`; institución/tarjeta `DELETE`. Saldos de tarjeta: `POST /finance/cards/:id/balances` (números). Categorías: `icon` es emoji; DELETE de system → 404 del API.
 - Desktop sub-nav (Resumen y Cuentas listos; el resto visible sin 404 hasta sus tickets)
 - Money helpers `parseFinanceMoney` / `formatFinanceMoney` (`src/modules/finance/lib/money.ts`)
 - REST path constants including `TRANSACTION_REVERSE`
@@ -23,7 +23,7 @@ Point the client at the API **develop** branch (money-as-string, reverse, OAuth 
 | Path | Ticket | Notes |
 | --- | --- | --- |
 | `/finance` | #14 | Shell + empty resumen |
-| `/finance/accounts` | #15 | instituciones, cuentas, tarjetas |
+| `/finance/accounts` | #15 / #16 | instituciones, cuentas, tarjetas, categorías |
 | `/finance/transactions` | #18 / #19 | not routed yet |
 | `/finance/budgets` | #20 | not routed yet |
 | `/finance/planning` | #21 | not routed yet |
