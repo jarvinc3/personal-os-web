@@ -40,6 +40,13 @@ export type CardBalanceBody = {
   creditLimit?: number
 }
 
+export type CreateCategoryBody = {
+  name: string
+  icon?: string
+  color?: string
+  parentId?: string
+}
+
 export type PayloadResult<T> =
   | { ok: true; body: T }
   | { ok: false; error: string }
@@ -203,6 +210,36 @@ export function buildCardBalanceBody(input: {
     }
     body.creditLimit = creditLimit
   }
+
+  return { ok: true, body }
+}
+
+const LUCIDE_KEY = /^[a-z][a-z0-9-]*$/i
+
+export function buildCreateCategoryBody(input: {
+  name: string
+  icon?: string
+  color?: string
+  parentId?: string
+}): PayloadResult<CreateCategoryBody> {
+  const name = input.name.trim()
+  if (!name) {
+    return { ok: false, error: "Nombre obligatorio" }
+  }
+
+  const icon = optionalTrimmed(input.icon)
+  if (!icon) {
+    return { ok: false, error: "El icono debe ser un emoji" }
+  }
+  if (LUCIDE_KEY.test(icon)) {
+    return { ok: false, error: "Usa un emoji (por ejemplo 🛒), no una key Lucide" }
+  }
+
+  const body: CreateCategoryBody = { name, icon }
+  const color = optionalTrimmed(input.color)
+  if (color) body.color = color
+  const parentId = optionalId(input.parentId)
+  if (parentId) body.parentId = parentId
 
   return { ok: true, body }
 }

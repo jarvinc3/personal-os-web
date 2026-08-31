@@ -4,6 +4,7 @@ import { AccountSheet } from "@/src/modules/finance/components/account-sheet"
 import { CardBalanceSheet } from "@/src/modules/finance/components/card-balance-sheet"
 import { CardSheet } from "@/src/modules/finance/components/card-sheet"
 import { FinanceAuthenticatedPage } from "@/src/modules/finance/components/finance-authenticated-page"
+import { FinanceCategoriesSection } from "@/src/modules/finance/components/finance-categories-section"
 import { InstitutionSheet } from "@/src/modules/finance/components/institution-sheet"
 import {
   FINANCE_ACCOUNT_TYPE_LABEL,
@@ -213,6 +214,8 @@ function FinanceAccountsCatalog() {
           ))
         )}
       </SettingsSection>
+
+      <FinanceCategoriesSection enabled={isEnabled} />
 
       <InstitutionSheet
         open={sheet.kind === "institution"}
