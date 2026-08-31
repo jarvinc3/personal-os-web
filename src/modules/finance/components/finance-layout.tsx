@@ -13,7 +13,7 @@ export function FinanceLayout({ children }: { children: ReactNode }) {
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 p-4 pb-16 md:px-6">
       <nav
         aria-label="Secciones de Finanzas"
-        className="flex gap-1 overflow-x-auto border-b border-border pb-px [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="flex gap-1 overflow-x-auto border-b border-border pb-px [-ms-overflow-style:none] scrollbar-none [&::-webkit-scrollbar]:hidden"
       >
         {FINANCE_NAV_ITEMS.map((item) => {
           if (!item.ready) {
