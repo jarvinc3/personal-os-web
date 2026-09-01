@@ -1,7 +1,7 @@
 "use client"
 
 import { useAuthGuard } from "@/src/modules/auth"
-import { FinanceLayout } from "@/src/modules/finance/components/finance-layout"
+import { FinanceLayout } from "@/src/modules/finance/components/layout/finance-layout"
 import { useFinanceEnabled } from "@/src/modules/finance/hooks/use-finance-enabled"
 import { MODULE_SHEET_PARAM_KEYS } from "@/src/modules/settings/constants/module-sheet-keys"
 import { LoadingView } from "@/src/shared/components/layout/loading-view"

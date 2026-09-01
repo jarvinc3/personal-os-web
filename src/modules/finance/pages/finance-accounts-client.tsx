@@ -1,11 +1,11 @@
 "use client"
 
-import { AccountSheet } from "@/src/modules/finance/components/account-sheet"
-import { CardBalanceSheet } from "@/src/modules/finance/components/card-balance-sheet"
-import { CardSheet } from "@/src/modules/finance/components/card-sheet"
-import { FinanceAuthenticatedPage } from "@/src/modules/finance/components/finance-authenticated-page"
-import { FinanceCategoriesSection } from "@/src/modules/finance/components/finance-categories-section"
-import { InstitutionSheet } from "@/src/modules/finance/components/institution-sheet"
+import { AccountSheet } from "@/src/modules/finance/components/catalog/account-sheet"
+import { CardBalanceSheet } from "@/src/modules/finance/components/catalog/card-balance-sheet"
+import { CardSheet } from "@/src/modules/finance/components/catalog/card-sheet"
+import { FinanceCategoriesSection } from "@/src/modules/finance/components/catalog/finance-categories-section"
+import { InstitutionSheet } from "@/src/modules/finance/components/catalog/institution-sheet"
+import { FinanceAuthenticatedPage } from "@/src/modules/finance/components/layout/finance-authenticated-page"
 import {
   FINANCE_ACCOUNT_TYPE_LABEL,
   FINANCE_CARD_TYPE_LABEL,

@@ -1,7 +1,13 @@
-export { FinanceAuthenticatedPage } from "@/src/modules/finance/components/finance-authenticated-page"
-export { FinanceLayout } from "@/src/modules/finance/components/finance-layout"
+export { FinanceAuthenticatedPage } from "@/src/modules/finance/components/layout/finance-authenticated-page"
+export { FinanceLayout } from "@/src/modules/finance/components/layout/finance-layout"
 export { FINANCE_NAV_ITEMS } from "@/src/modules/finance/constants/nav"
 export { useAccounts } from "@/src/modules/finance/hooks/use-accounts"
+export {
+  useAnalyticsSummary,
+  useBudgetStatus,
+  useSpendingByCategory,
+  useSpendingOverTime,
+} from "@/src/modules/finance/hooks/use-analytics"
 export { useCards } from "@/src/modules/finance/hooks/use-cards"
 export { useCategories } from "@/src/modules/finance/hooks/use-categories"
 export { useFinanceEnabled } from "@/src/modules/finance/hooks/use-finance-enabled"
@@ -11,6 +17,7 @@ export { FinanceAccountsClient } from "@/src/modules/finance/pages/finance-accou
 export { FinanceShellClient } from "@/src/modules/finance/pages/finance-shell-client"
 export {
   FINANCE_ACCOUNTS_QUERY_KEY,
+  FINANCE_ANALYTICS_QUERY_KEY,
   FINANCE_CARDS_QUERY_KEY,
   FINANCE_CATEGORIES_QUERY_KEY,
   FINANCE_INSTITUTIONS_QUERY_KEY,

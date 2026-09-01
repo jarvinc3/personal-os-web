@@ -137,3 +137,16 @@ export type FinanceBudget = {
   pctUsed: number
   alertThresholdPct: number | null
 }
+
+export type FinanceBudgetStatus = {
+  id: string
+  categoryId: string
+  category: string
+  periodType: string
+  periodStart: string
+  periodEnd: string
+  amountLimit: string
+  amountSpent: string
+  pctUsed: number
+  threshold: number
+}
