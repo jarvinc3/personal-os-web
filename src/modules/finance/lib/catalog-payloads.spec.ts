@@ -14,7 +14,7 @@ describe("buildCreateAccountBody", () => {
       name: " Nómina ",
       type: "CHECKING",
       currency: "dop",
-      institutionId: "__none__",
+      institutionId: "inst-1",
       color: " #22c55e ",
     })
     assert.equal(result.ok, true)
@@ -24,17 +24,32 @@ describe("buildCreateAccountBody", () => {
     assert.deepEqual(result.body, {
       name: "Nómina",
       type: "CHECKING",
+      institutionId: "inst-1",
       currency: "DOP",
       color: "#22c55e",
     })
   })
 
-  it("sends institutionId when selected and not free-text institution", () => {
+  it("rejects accounts without an institution", () => {
+    const none = buildCreateAccountBody({
+      name: "Ahorros",
+      type: "SAVINGS",
+      institutionId: "__none__",
+    })
+    assert.equal(none.ok, false)
+
+    const missing = buildCreateAccountBody({
+      name: "Ahorros",
+      type: "SAVINGS",
+    })
+    assert.equal(missing.ok, false)
+  })
+
+  it("sends institutionId and never a free-text institution name", () => {
     const result = buildCreateAccountBody({
       name: "Ahorros",
       type: "SAVINGS",
       institutionId: "inst-1",
-      institution: "should-not-send",
     })
     assert.equal(result.ok, true)
     if (!result.ok) return

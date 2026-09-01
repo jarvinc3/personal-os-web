@@ -5,7 +5,8 @@ import { useAiProviders } from '@/src/modules/settings/hooks/use-ai-providers';
 import { useProfile } from '@/src/modules/settings/hooks/use-profile';
 import type { SettingsSheetProps } from '@/src/modules/settings/types/sheet.types';
 import { BottomSheet } from '@/src/shared/components/layout/bottom-sheet';
-import { FormSection, OptionRow } from '@/src/shared/components/layout/form-blocks';
+import { OptionRow } from '@/src/shared/components/layout/form-blocks';
+import { SummarySection } from '@/src/shared/components/layout/summary';
 import { Button } from '@/src/shared/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/src/shared/components/ui/radio-group';
 import { Spinner } from '@/src/shared/components/ui/spinner';
@@ -68,7 +69,7 @@ export function EditAIProviderSheet({ open, onOpenChange }: SettingsSheetProps) 
         ),
       }}
     >
-      <FormSection title="Proveedor por defecto" icon={BrainCogIcon}>
+      <SummarySection title="Proveedor por defecto" icon={BrainCogIcon}>
         {providersQuery.isLoading ? (
           <div className="flex justify-center py-8">
             <Spinner />
@@ -108,7 +109,7 @@ export function EditAIProviderSheet({ open, onOpenChange }: SettingsSheetProps) 
             No hay proveedores configurados en el servidor.
           </p>
         ) : null}
-      </FormSection>
+      </SummarySection>
     </BottomSheet>
   );
 }

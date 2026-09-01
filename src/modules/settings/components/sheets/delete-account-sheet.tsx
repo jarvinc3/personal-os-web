@@ -10,7 +10,8 @@ import {
 import { setPendingAccountDeletion } from '@/src/modules/settings/lib/pending-account-deletion';
 import type { SettingsSheetProps } from '@/src/modules/settings/types/sheet.types';
 import { BottomSheet } from '@/src/shared/components/layout/bottom-sheet';
-import { FormSection, FormTextField } from '@/src/shared/components/layout/form-blocks';
+import { FormTextField } from '@/src/shared/components/layout/form-blocks';
+import { SummarySection } from '@/src/shared/components/layout/summary';
 import { Alert, AlertDescription, AlertTitle } from '@/src/shared/components/ui/alert';
 import {
   AlertDialog,
@@ -126,7 +127,7 @@ export function DeleteAccountSheet({ open, onOpenChange, email }: DeleteAccountS
           )
         }}
       >
-        <FormSection title="Se eliminará" icon={AlertTriangle}>
+        <SummarySection title="Se eliminará" icon={AlertTriangle}>
           <ul className="flex flex-col gap-2">
             {DELETED_DATA_ITEMS.map((item) => (
               <li key={item} className="text-sm leading-relaxed text-muted-foreground">
@@ -134,7 +135,7 @@ export function DeleteAccountSheet({ open, onOpenChange, email }: DeleteAccountS
               </li>
             ))}
           </ul>
-        </FormSection>
+        </SummarySection>
 
         {isLoadingProviders ? (
           <div className="flex justify-center py-6">
@@ -154,7 +155,7 @@ export function DeleteAccountSheet({ open, onOpenChange, email }: DeleteAccountS
         ) : null}
 
         {!isLoadingProviders && canDeleteInApp ? (
-          <FormSection title="Confirma tu contraseña" icon={KeyRound}>
+          <SummarySection title="Confirma tu contraseña" icon={KeyRound}>
             <FormTextField
               label="Contraseña"
               type="password"
@@ -168,7 +169,7 @@ export function DeleteAccountSheet({ open, onOpenChange, email }: DeleteAccountS
               <p className="text-xs text-muted-foreground">Cuenta</p>
               <p className="mt-1 text-sm text-muted-foreground">{email}</p>
             </div>
-          </FormSection>
+          </SummarySection>
         ) : null}
       </BottomSheet>
 

@@ -1,5 +1,6 @@
 "use client"
 
+import { CurrencySelectField } from "@/src/modules/finance/components/catalog/currency-select-field"
 import { ModuleSheetEnableRow } from "@/src/modules/settings/components/profile-ui"
 import { useModuleSheetEnable } from "@/src/modules/settings/hooks/use-module-sheet-enable"
 import { useProfileSheetFormSync } from "@/src/modules/settings/hooks/use-profile-sheet"
@@ -7,17 +8,10 @@ import { useUserModuleConfig } from "@/src/modules/settings/hooks/use-user-modul
 import type { FinanceModuleConfig } from "@/src/modules/settings/types/module-config.types"
 import type { SettingsSheetProps } from "@/src/modules/settings/types/sheet.types"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
-import {
-    FormSection,
-    FormTextField,
-    OptionRow,
-    SwitchFieldRow,
-} from "@/src/shared/components/layout/form-blocks"
-import { Button } from "@/src/shared/components/ui/button"
-import {
-    RadioGroup,
-    RadioGroupItem,
-} from "@/src/shared/components/ui/radio-group"
+import { OptionRow, SwitchFieldRow } from "@/src/shared/components/layout/form-blocks";
+import { SummarySection } from "@/src/shared/components/layout/summary";
+import { Button } from "@/src/shared/components/ui/button";
+import { RadioGroup, RadioGroupItem } from "@/src/shared/components/ui/radio-group";
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { getModule } from "@/src/shared/constants/module-registry"
 import { appToast } from "@/src/shared/lib/app-toast"
@@ -113,7 +107,7 @@ export function EditFinanceSheet({ open, onOpenChange }: SettingsSheetProps) {
     handleSubmit,
     reset,
     setValue,
-    formState: { errors, isDirty },
+    formState: { isDirty },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: configToFormValues(config),
@@ -201,23 +195,22 @@ export function EditFinanceSheet({ open, onOpenChange }: SettingsSheetProps) {
         onEnabledChange={moduleEnable.handleEnabledChange}
         disabled={updateMutation.isPending}
       />
-      <FormSection title="Moneda base" icon={DollarSign}>
+      <SummarySection title="Moneda base" icon={DollarSign}>
         <Controller
           control={control}
           name="baseCurrency"
           render={({ field }) => (
-            <FormTextField
-              placeholder="DOP"
+            <CurrencySelectField
               value={field.value}
               onChange={field.onChange}
-              onBlur={field.onBlur}
+              enabled={open}
+              extraCodes={[config.baseCurrency]}
               disabled={updateMutation.isPending}
-              error={errors.baseCurrency?.message}
             />
           )}
         />
-      </FormSection>
-      <FormSection title="Inicio de semana" icon={CalendarCog}>
+      </SummarySection>
+      <SummarySection title="Inicio de semana" icon={CalendarCog}>
         <RadioGroup
           value={weekStartsOn}
           onValueChange={(v) =>
@@ -239,8 +232,8 @@ export function EditFinanceSheet({ open, onOpenChange }: SettingsSheetProps) {
             />
           ))}
         </RadioGroup>
-      </FormSection>
-      <FormSection title="Período del panel" icon={ChartBarIcon}>
+      </SummarySection>
+      <SummarySection title="Período del panel" icon={ChartBarIcon}>
         <RadioGroup
           value={dashboardPeriod}
           onValueChange={(v) =>
@@ -268,8 +261,8 @@ export function EditFinanceSheet({ open, onOpenChange }: SettingsSheetProps) {
             />
           ))}
         </RadioGroup>
-      </FormSection>
-      <FormSection title="Visualización" icon={ScanEyeIcon}>
+      </SummarySection>
+        <SummarySection title="Visualización" icon={ScanEyeIcon}>
         <Controller
           control={control}
           name="showCents"
@@ -292,8 +285,8 @@ export function EditFinanceSheet({ open, onOpenChange }: SettingsSheetProps) {
             />
           )}
         />
-      </FormSection>
-      <FormSection title="Sincronización de email" icon={Mail}>
+      </SummarySection>
+      <SummarySection title="Sincronización de email" icon={Mail}>
         <Controller
           control={control}
           name="emailSyncEnabled"
@@ -316,8 +309,8 @@ export function EditFinanceSheet({ open, onOpenChange }: SettingsSheetProps) {
             />
           )}
         />
-      </FormSection>
-      <FormSection title="Alertas del módulo" icon={Tags}>
+      </SummarySection>
+      <SummarySection title="Alertas del módulo" icon={Tags}>
         {FINANCE_NOTIFICATION_ROWS.map((row) => (
           <Controller
             key={row.key}
@@ -332,7 +325,7 @@ export function EditFinanceSheet({ open, onOpenChange }: SettingsSheetProps) {
             )}
           />
         ))}
-      </FormSection>
+      </SummarySection>
     </BottomSheet>
   )
 }

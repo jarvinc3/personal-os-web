@@ -1,16 +1,19 @@
 "use client"
 
+import { CurrencySelectField } from "@/src/modules/finance/components/catalog/currency-select-field"
 import { useUpdateCardBalance } from "@/src/modules/finance/hooks/use-cards"
 import { buildCardBalanceBody } from "@/src/modules/finance/lib/catalog-payloads"
 import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
 import type { FinanceCard } from "@/src/modules/finance/types/entities"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
 import { FormTextField } from "@/src/shared/components/layout/form-blocks"
+import { SummarySection } from "@/src/shared/components/layout/summary"
 import { Button } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { WalletIcon } from "lucide-react"
 import { useEffect, useMemo } from "react"
 import { Controller, useForm } from "react-hook-form"
 import { z } from "zod"
@@ -111,50 +114,51 @@ export function CardBalanceSheet({
         ),
       }}
     >
-      <Controller
-        control={control}
-        name="currency"
-        render={({ field }) => (
-          <FormTextField
-            label="Moneda"
-            value={field.value}
-            onChange={field.onChange}
-            onBlur={field.onBlur}
-            error={errors.currency?.message}
-            placeholder="DOP"
-          />
-        )}
-      />
-      <Controller
-        control={control}
-        name="balance"
-        render={({ field }) => (
-          <FormTextField
-            label="Saldo"
-            value={field.value}
-            onChange={field.onChange}
-            onBlur={field.onBlur}
-            error={errors.balance?.message}
-            placeholder="0.00"
-          />
-        )}
-      />
-      {card?.type === "CREDIT" ? (
+      <SummarySection title="Saldo" icon={WalletIcon}>
         <Controller
           control={control}
-          name="creditLimit"
+          name="currency"
           render={({ field }) => (
-            <FormTextField
-              label="Límite de crédito (opcional)"
+            <CurrencySelectField
+              label="Moneda"
               value={field.value}
               onChange={field.onChange}
-              onBlur={field.onBlur}
-              error={errors.creditLimit?.message}
-              placeholder="50000"
+              enabled={open}
+              extraCodes={[defaultCurrency]}
             />
           )}
         />
-      ) : null}
+        <Controller
+          control={control}
+          name="balance"
+          render={({ field }) => (
+            <FormTextField
+              label="Saldo"
+              value={field.value}
+              onChange={field.onChange}
+              onBlur={field.onBlur}
+              error={errors.balance?.message}
+              placeholder="0.00"
+            />
+          )}
+        />
+        {card?.type === "CREDIT" ? (
+          <Controller
+            control={control}
+            name="creditLimit"
+            render={({ field }) => (
+              <FormTextField
+                label="Límite de crédito"
+                value={field.value}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+                error={errors.creditLimit?.message}
+                placeholder="50000"
+              />
+            )}
+          />
+        ) : null}
+      </SummarySection>
     </BottomSheet>
   )
 }

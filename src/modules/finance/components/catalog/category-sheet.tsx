@@ -14,11 +14,13 @@ import {
   FormTextField,
   SelectField,
 } from "@/src/shared/components/layout/form-blocks"
+import { SummarySection } from "@/src/shared/components/layout/summary"
 import { Button } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { Palette, TagsIcon } from "lucide-react"
 import { useEffect, useMemo } from "react"
 import { Controller, useForm } from "react-hook-form"
 import { z } from "zod"
@@ -142,11 +144,11 @@ export function CategorySheet({
       }
       description={
         isSystem
-          ? "Las categorías del sistema no se pueden borrar. Si lo intentas, el API responde 404 (Category not found), no 403."
-          : "El icono es un emoji persistido. No hay migración Lucide."
+          ? "Esta categoría viene con el sistema. No se puede editar ni eliminar."
+          : "Usa un emoji como icono."
       }
       actions={{
-        delete: isEdit ? (
+        delete: isEdit && !isSystem ? (
           <Button
             variant="destructive"
             disabled={isPending}
@@ -172,64 +174,68 @@ export function CategorySheet({
         ),
       }}
     >
-      <Controller
-        control={control}
-        name="name"
-        render={({ field }) => (
-          <FormTextField
-            label="Nombre"
-            value={field.value}
-            onChange={field.onChange}
-            onBlur={field.onBlur}
-            error={errors.name?.message}
-            placeholder="Supermercado"
-            disabled={isSystem}
-          />
-        )}
-      />
-      <Controller
-        control={control}
-        name="icon"
-        render={({ field }) => (
-          <FormTextField
-            label="Emoji"
-            value={field.value}
-            onChange={field.onChange}
-            onBlur={field.onBlur}
-            error={errors.icon?.message}
-            placeholder="🛒"
-            disabled={isSystem}
-          />
-        )}
-      />
-      <Controller
-        control={control}
-        name="parentId"
-        render={({ field }) => (
-          <SelectField
-            label="Categoría padre"
-            value={field.value}
-            onChange={field.onChange}
-            options={parentOptions}
-            disabled={isSystem}
-          />
-        )}
-      />
-      <Controller
-        control={control}
-        name="color"
-        render={({ field }) => (
-          <FormTextField
-            label="Color (opcional)"
-            value={field.value}
-            onChange={field.onChange}
-            onBlur={field.onBlur}
-            error={errors.color?.message}
-            placeholder="#22c55e"
-            disabled={isSystem}
-          />
-        )}
-      />
+      <SummarySection title="Categoría" icon={TagsIcon}>
+        <Controller
+          control={control}
+          name="name"
+          render={({ field }) => (
+            <FormTextField
+              label="Nombre"
+              value={field.value}
+              onChange={field.onChange}
+              onBlur={field.onBlur}
+              error={errors.name?.message}
+              placeholder="Supermercado"
+              disabled={isSystem}
+            />
+          )}
+        />
+        <Controller
+          control={control}
+          name="icon"
+          render={({ field }) => (
+            <FormTextField
+              label="Emoji"
+              value={field.value}
+              onChange={field.onChange}
+              onBlur={field.onBlur}
+              error={errors.icon?.message}
+              placeholder="🛒"
+              disabled={isSystem}
+            />
+          )}
+        />
+        <Controller
+          control={control}
+          name="parentId"
+          render={({ field }) => (
+            <SelectField
+              label="Categoría padre"
+              value={field.value}
+              onChange={field.onChange}
+              options={parentOptions}
+              disabled={isSystem}
+            />
+          )}
+        />
+      </SummarySection>
+      <SummarySection title="Apariencia" icon={Palette}>
+        <Controller
+          control={control}
+          name="color"
+          render={({ field }) => (
+            <FormTextField
+              label="Color"
+              value={field.value}
+              onChange={field.onChange}
+              onBlur={field.onBlur}
+              error={errors.color?.message}
+              placeholder="#22c55e"
+              disabled={isSystem}
+            />
+          )}
+        />
+      </SummarySection>
     </BottomSheet>
   )
 }

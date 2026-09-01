@@ -9,9 +9,8 @@ const CATALOG_NONE = "__none__"
 export type CreateAccountBody = {
   name: string
   type: FinanceAccountType
+  institutionId: string
   currency?: string
-  institutionId?: string
-  institution?: string
   color?: string
 }
 
@@ -69,7 +68,6 @@ export function buildCreateAccountBody(input: {
   type: FinanceAccountType
   currency?: string
   institutionId?: string
-  institution?: string
   color?: string
 }): PayloadResult<CreateAccountBody> {
   const name = input.name.trim()
@@ -77,24 +75,20 @@ export function buildCreateAccountBody(input: {
     return { ok: false, error: "Nombre obligatorio" }
   }
 
+  const institutionId = optionalId(input.institutionId)
+  if (!institutionId) {
+    return { ok: false, error: "La cuenta necesita una institución" }
+  }
+
   const body: CreateAccountBody = {
     name,
     type: input.type,
+    institutionId,
   }
 
   const currency = optionalTrimmed(input.currency)?.toUpperCase()
   if (currency) {
     body.currency = currency
-  }
-
-  const institutionId = optionalId(input.institutionId)
-  if (institutionId) {
-    body.institutionId = institutionId
-  } else {
-    const institution = optionalTrimmed(input.institution)
-    if (institution) {
-      body.institution = institution
-    }
   }
 
   const color = optionalTrimmed(input.color)

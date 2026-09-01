@@ -75,8 +75,7 @@ export type FinanceSpendingBucket = {
 
 export type FinanceAccount = {
   id: string
-  institutionId: string | null
-  institution: string | null
+  institutionId: string
   institutionName: string | null
   name: string
   type: FinanceAccountType

@@ -6,27 +6,20 @@ import { useProfileSheetFormSync } from "@/src/modules/settings/hooks/use-profil
 import { useUserModuleConfig } from "@/src/modules/settings/hooks/use-user-module-config"
 import type { SettingsSheetProps } from "@/src/modules/settings/types/sheet.types"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
-import {
-    FormSection,
-    FormTextField,
-    OptionRow,
-    SwitchFieldRow,
-} from "@/src/shared/components/layout/form-blocks"
-import { Button } from "@/src/shared/components/ui/button"
-import {
-    RadioGroup,
-    RadioGroupItem,
-} from "@/src/shared/components/ui/radio-group"
-import { Spinner } from "@/src/shared/components/ui/spinner"
-import { getModule } from "@/src/shared/constants/module-registry"
-import { appToast } from "@/src/shared/lib/app-toast"
-import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { BadgeDollarSign, Bell, Layers, Wallet } from "lucide-react"
-import { useRouter } from "next/navigation"
-import { useEffect, useMemo } from "react"
-import { Controller, useForm, useWatch } from "react-hook-form"
-import { z } from "zod"
+import { FormTextField, OptionRow, SwitchFieldRow } from "@/src/shared/components/layout/form-blocks";
+import { SummarySection } from "@/src/shared/components/layout/summary";
+import { Button } from "@/src/shared/components/ui/button";
+import { RadioGroup, RadioGroupItem } from "@/src/shared/components/ui/radio-group";
+import { Spinner } from "@/src/shared/components/ui/spinner";
+import { getModule } from "@/src/shared/constants/module-registry";
+import { appToast } from "@/src/shared/lib/app-toast";
+import { createSheetSubmit } from "@/src/shared/lib/sheet-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { BadgeDollarSign, Bell, Layers, Wallet } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect, useMemo } from "react";
+import { Controller, useForm, useWatch } from "react-hook-form";
+import { z } from "zod";
 
 const MODULE_ACCENT = getModule("subscriptions").accent
 
@@ -149,7 +142,7 @@ export function EditSubscriptionsSheet({
         disabled={updateMutation.isPending}
       />
 
-      <FormSection title="Moneda" icon={BadgeDollarSign}>
+      <SummarySection title="Moneda" icon={BadgeDollarSign}>
         <Controller
           control={control}
           name="defaultCurrency"
@@ -163,9 +156,9 @@ export function EditSubscriptionsSheet({
             />
           )}
         />
-      </FormSection>
+      </SummarySection>
 
-      <FormSection title="Agrupar por" icon={Layers}>
+      <SummarySection title="Agrupar por" icon={Layers}>
         <RadioGroup
           value={groupBy}
           onValueChange={(v) =>
@@ -186,9 +179,9 @@ export function EditSubscriptionsSheet({
             />
           ))}
         </RadioGroup>
-      </FormSection>
+      </SummarySection>
 
-      <FormSection title="Notificaciones" icon={Bell}>
+      <SummarySection title="Notificaciones" icon={Bell}>
         <Controller
           control={control}
           name="renewalReminders"
@@ -211,7 +204,7 @@ export function EditSubscriptionsSheet({
             />
           )}
         />
-      </FormSection>
+      </SummarySection>
     </BottomSheet>
   )
 }

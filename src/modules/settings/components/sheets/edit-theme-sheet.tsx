@@ -6,7 +6,8 @@ import { getSettingValue, patchSettingValue } from '@/src/modules/settings/lib/s
 import type { ThemeValue } from '@/src/modules/settings/types/profile.types';
 import type { SettingsSheetProps } from '@/src/modules/settings/types/sheet.types';
 import { BottomSheet } from '@/src/shared/components/layout/bottom-sheet';
-import { FormSection, OptionRow } from '@/src/shared/components/layout/form-blocks';
+import { OptionRow } from '@/src/shared/components/layout/form-blocks';
+import { SummarySection } from '@/src/shared/components/layout/summary';
 import { Button } from '@/src/shared/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/src/shared/components/ui/radio-group';
 import { Spinner } from '@/src/shared/components/ui/spinner';
@@ -102,7 +103,7 @@ export function EditThemeSheet({ open, onOpenChange }: SettingsSheetProps) {
         ),
       }}
     >
-      <FormSection title="Tema" icon={Palette}>
+      <SummarySection title="Tema" icon={Palette}>
         <RadioGroup value={themeValue} onValueChange={(v) => handleThemeChange(v as ThemeValue)}>
           {SETTINGS_REGISTRY.appearance.themeOptions.map((option) => (
             <OptionRow
@@ -117,7 +118,7 @@ export function EditThemeSheet({ open, onOpenChange }: SettingsSheetProps) {
             />
           ))}
         </RadioGroup>
-      </FormSection>
+      </SummarySection>
     </BottomSheet>
   );
 }
