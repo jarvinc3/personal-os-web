@@ -1,6 +1,6 @@
 "use client"
 
-import { CategorySheet } from "@/src/modules/finance/components/category-sheet"
+import { CategorySheet } from "@/src/modules/finance/components/catalog/category-sheet"
 import { useCategories } from "@/src/modules/finance/hooks/use-categories"
 import { groupCategoriesByParent } from "@/src/modules/finance/lib/category-tree"
 import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"

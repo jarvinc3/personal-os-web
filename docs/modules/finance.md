@@ -2,11 +2,13 @@
 
 ## Status
 
-Shell of `/finance` (#14) and catalog `/finance/accounts` (#15) are in `personal-os-web`. There is no dashboard or ledger UI yet.
+Shell of `/finance` (#14), catalog `/finance/accounts` (#15–#16) and the dashboard resumen (#17) are in `personal-os-web`. Ledger UI is not built yet.
 
 What exists today:
 
 - Route `/finance` with module gate (`useFinanceEnabled`) — disabled/unconfigured shows CTA to Settings (`?sheet=finance-sheet`) and **does not** call `/finance/*`
+- `/finance` dashboard: `analytics/summary`, spending-by-category, spending-over-time (`points`), budget-status. Charts via `ChartContainer` + Recharts (`src/shared/components/ui/chart.tsx`). `baseCurrency` comes from the summary payload.
+- UI under `src/modules/finance/components/`: `layout/` (shell + gate), `catalog/` (instituciones, cuentas, tarjetas, categorías), `dashboard/` (resumen y charts)
 - `/finance/accounts`: instituciones, cuentas, tarjetas y **categorías** (arrays). Alta de cuenta **sin** `balance`. Archivo: cuenta `PATCH isActive: false`; institución/tarjeta `DELETE`. Saldos de tarjeta: `POST /finance/cards/:id/balances` (números). Categorías: `icon` es emoji; DELETE de system → 404 del API.
 - Desktop sub-nav (Resumen y Cuentas listos; el resto visible sin 404 hasta sus tickets)
 - Money helpers `parseFinanceMoney` / `formatFinanceMoney` (`src/modules/finance/lib/money.ts`)
@@ -22,7 +24,7 @@ Point the client at the API **develop** branch (money-as-string, reverse, OAuth 
 
 | Path | Ticket | Notes |
 | --- | --- | --- |
-| `/finance` | #14 | Shell + empty resumen |
+| `/finance` | #14 / #17 | Shell + dashboard analytics |
 | `/finance/accounts` | #15 / #16 | instituciones, cuentas, tarjetas, categorías |
 | `/finance/transactions` | #18 / #19 | not routed yet |
 | `/finance/budgets` | #20 | not routed yet |
