@@ -2,16 +2,17 @@
 
 ## Status
 
-Shell of `/finance` (#14), catalog `/finance/accounts` (#15–#16), dashboard resumen (#17), paginated ledger (#18) and capture/confirm/reverse/transfers (#19) are in `personal-os-web`.
+Shell of `/finance` (#14), catalog `/finance/accounts` (#15–#16), dashboard resumen (#17), paginated ledger (#18), capture/confirm/reverse/transfers (#19) and paginated budgets (#20) are in `personal-os-web`.
 
 What exists today:
 
 - Route `/finance` with module gate (`useFinanceEnabled`) — disabled/unconfigured shows CTA to Settings (`?sheet=finance-sheet`) and **does not** call `/finance/*`
 - `/finance` dashboard: `analytics/summary`, spending-by-category, spending-over-time (`points`), budget-status. Charts via `ChartContainer` + Recharts (`src/shared/components/ui/chart.tsx`). `baseCurrency` comes from the summary payload.
-- UI under `src/modules/finance/components/`: `layout/` (shell + gate), `catalog/` (instituciones, cuentas, tarjetas, categorías), `dashboard/` (resumen y charts), `transactions/` (listado, detalle, captura y transferencias)
+- UI under `src/modules/finance/components/`: `layout/` (shell + gate), `catalog/` (instituciones, cuentas, tarjetas, categorías), `dashboard/` (resumen y charts), `transactions/` (listado, detalle, captura y transferencias), `budgets/` (listado paginado y sheet)
 - `/finance/accounts`: instituciones, cuentas, tarjetas y **categorías** (arrays). Alta de cuenta **sin** `balance`. Archivo: cuenta `PATCH isActive: false`; institución/tarjeta `DELETE`. Saldos de tarjeta: `POST /finance/cards/:id/balances` (números). Categorías: `icon` es emoji; DELETE de system → 404 del API.
 - `/finance/transactions`: `GET` paginado `{ items, pagination }` (default `page=1` `limit=20`). Filtros del DTO: fechas, cuenta, tarjeta, tipo, status. Detalle `GET :id`. Create DEBIT/CREDIT (`POST /transactions`), transfers (`POST /transfers`, never `type: TRANSFER` on create), PATCH, confirm, reverse, DELETE.
-- Desktop sub-nav (Resumen, Cuentas y Movimientos listos; el resto visible sin 404 hasta sus tickets)
+- `/finance/budgets`: `GET` paginado `{ items, pagination }` (default `page=1` `limit=20`). CRUD. `amountLimit`/`amountSpent` strings; `alertThresholdPct` number. `pctUsed` se calcula en cliente. No usa `list_budgets` del Facade.
+- Desktop sub-nav (Resumen, Cuentas, Movimientos y Presupuestos listos; planificación y sync visibles sin 404 hasta sus tickets)
 - Money helpers `parseFinanceMoney` / `formatFinanceMoney` (`src/modules/finance/lib/money.ts`). Write payloads (`ledger-payloads.ts`) send amounts as JSON **numbers**.
 - REST path constants including `TRANSACTION_REVERSE` and `TRANSFERS`
 - Module toggle and config in Settings (`EditFinanceSheet`, slug `finance`)
@@ -28,7 +29,7 @@ Point the client at the API **develop** branch (money-as-string, reverse, OAuth 
 | `/finance` | #14 / #17 | Shell + dashboard analytics |
 | `/finance/accounts` | #15 / #16 | instituciones, cuentas, tarjetas, categorías |
 | `/finance/transactions` | #18 / #19 | listado paginado + detalle + captura, confirm, reverse y transfers |
-| `/finance/budgets` | #20 | not routed yet |
+| `/finance/budgets` | #20 | listado paginado + CRUD |
 | `/finance/planning` | #21 | not routed yet |
 | `/finance/sync` | #22 | not routed yet |
 
