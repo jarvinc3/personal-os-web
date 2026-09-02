@@ -7,6 +7,12 @@ import type {
 export const FINANCE_TRANSACTION_TYPES = ["DEBIT", "CREDIT", "TRANSFER"] as const
 export type FinanceTransactionType = (typeof FINANCE_TRANSACTION_TYPES)[number]
 
+export const FINANCE_TRANSACTION_TYPE_LABEL: Record<FinanceTransactionType, string> = {
+  DEBIT: "Gasto",
+  CREDIT: "Ingreso",
+  TRANSFER: "Transferencia",
+}
+
 export const FINANCE_TRANSACTION_STATUSES = [
   "PENDING",
   "CONFIRMED",
@@ -32,12 +38,17 @@ export type FinanceTransaction = {
   amount: string
   currency: string
   ledgerAmount: string
-  ledgerCurrency: string
+  ledgerCurrency: string | null
   amountBaseCurrency: string
   exchangeRate: string | null
   accountId: string | null
+  accountName: string | null
   cardId: string | null
+  cardName: string | null
   categoryId: string | null
+  merchant: string | null
+  notes: string | null
+  source: string | null
   transactionDate: string
   description: string | null
   transferGroupId: string | null

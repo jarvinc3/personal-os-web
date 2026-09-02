@@ -40,3 +40,7 @@ export const FINANCE_CATEGORIES_QUERY_KEY = [
   "categories",
 ] as const
 export const FINANCE_ANALYTICS_QUERY_KEY = [...FINANCE_QUERY_KEY, "analytics"] as const
+export const FINANCE_TRANSACTIONS_QUERY_KEY = [
+  ...FINANCE_QUERY_KEY,
+  "transactions",
+] as const
