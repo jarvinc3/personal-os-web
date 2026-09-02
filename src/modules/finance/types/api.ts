@@ -44,3 +44,4 @@ export const FINANCE_TRANSACTIONS_QUERY_KEY = [
   ...FINANCE_QUERY_KEY,
   "transactions",
 ] as const
+export const FINANCE_BUDGETS_QUERY_KEY = [...FINANCE_QUERY_KEY, "budgets"] as const

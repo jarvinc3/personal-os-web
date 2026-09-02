@@ -146,12 +146,32 @@ export type FinanceCategory = {
   isSystem: boolean
 }
 
+export const FINANCE_BUDGET_PERIODS = ["MONTHLY", "BIWEEKLY", "CUSTOM"] as const
+export type FinanceBudgetPeriod = (typeof FINANCE_BUDGET_PERIODS)[number]
+
+export const FINANCE_BUDGET_PERIOD_LABEL: Record<FinanceBudgetPeriod, string> = {
+  MONTHLY: "Mensual",
+  BIWEEKLY: "Quincenal",
+  CUSTOM: "Personalizado",
+}
+
+export type FinanceBudgetCategory = {
+  id: string
+  name: string
+  icon: string | null
+  color: string | null
+}
+
 export type FinanceBudget = {
   id: string
+  categoryId: string
+  category?: FinanceBudgetCategory | null
+  periodType: FinanceBudgetPeriod
+  periodStart: string
+  periodEnd: string
   amountLimit: string
   amountSpent: string
-  pctUsed: number
-  alertThresholdPct: number | null
+  alertThresholdPct: number
 }
 
 export type FinanceBudgetStatus = {

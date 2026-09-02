@@ -10,16 +10,19 @@ export {
 } from "@/src/modules/finance/hooks/use-analytics"
 export { useCards } from "@/src/modules/finance/hooks/use-cards"
 export { useCategories } from "@/src/modules/finance/hooks/use-categories"
+export { useBudgets } from "@/src/modules/finance/hooks/use-budgets"
 export { useFinanceEnabled } from "@/src/modules/finance/hooks/use-finance-enabled"
 export { useInstitutions } from "@/src/modules/finance/hooks/use-institutions"
 export { useTransactions } from "@/src/modules/finance/hooks/use-transactions"
 export { formatFinanceMoney, parseFinanceMoney } from "@/src/modules/finance/lib/money"
 export { FinanceAccountsClient } from "@/src/modules/finance/pages/finance-accounts"
+export { FinanceBudgetsClient } from "@/src/modules/finance/pages/finance-budgets"
 export { FinanceShellClient } from "@/src/modules/finance/pages/finance-shell-client"
 export { FinanceTransactionsClient } from "@/src/modules/finance/pages/finance-transactions"
 export {
   FINANCE_ACCOUNTS_QUERY_KEY,
   FINANCE_ANALYTICS_QUERY_KEY,
+  FINANCE_BUDGETS_QUERY_KEY,
   FINANCE_CARDS_QUERY_KEY,
   FINANCE_CATEGORIES_QUERY_KEY,
   FINANCE_INSTITUTIONS_QUERY_KEY,
