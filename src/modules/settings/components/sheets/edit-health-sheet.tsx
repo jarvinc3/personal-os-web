@@ -6,26 +6,20 @@ import { useProfileSheetFormSync } from "@/src/modules/settings/hooks/use-profil
 import { useUserModuleConfig } from "@/src/modules/settings/hooks/use-user-module-config"
 import type { SettingsSheetProps } from "@/src/modules/settings/types/sheet.types"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
-import {
-    FormSection,
-    OptionRow,
-    SwitchFieldRow,
-} from "@/src/shared/components/layout/form-blocks"
-import { Button } from "@/src/shared/components/ui/button"
-import {
-    RadioGroup,
-    RadioGroupItem,
-} from "@/src/shared/components/ui/radio-group"
+import { OptionRow, SwitchFieldRow } from "@/src/shared/components/layout/form-blocks";
+import { SummarySection } from "@/src/shared/components/layout/summary";
+import { Button } from "@/src/shared/components/ui/button";
+import { RadioGroup, RadioGroupItem } from "@/src/shared/components/ui/radio-group";
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { getModule } from "@/src/shared/constants/module-registry"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { HeartPulse, Ruler } from "lucide-react"
-import { useRouter } from "next/navigation"
-import { useEffect, useMemo } from "react"
-import { Controller, useForm, useWatch } from "react-hook-form"
-import { z } from "zod"
+import { HeartPulse, Ruler } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect, useMemo } from "react";
+import { Controller, useForm, useWatch } from "react-hook-form";
+import { z } from "zod";
 
 const MODULE_ACCENT = getModule("health").accent
 
@@ -142,7 +136,7 @@ export function EditHealthSheet({ open, onOpenChange }: SettingsSheetProps) {
         disabled={updateMutation.isPending}
       />
 
-      <FormSection title="Unidades" icon={Ruler}>
+      <SummarySection title="Unidades" icon={Ruler}>
         <RadioGroup
           value={units}
           onValueChange={(v) =>
@@ -166,9 +160,9 @@ export function EditHealthSheet({ open, onOpenChange }: SettingsSheetProps) {
             trailing={<RadioGroupItem value="imperial" />}
           />
         </RadioGroup>
-      </FormSection>
+      </SummarySection>
 
-      <FormSection title="Preferencias" icon={HeartPulse}>
+      <SummarySection title="Preferencias" icon={HeartPulse}>
         <Controller
           control={control}
           name="hideSensitiveMetrics"
@@ -202,7 +196,7 @@ export function EditHealthSheet({ open, onOpenChange }: SettingsSheetProps) {
             />
           )}
         />
-      </FormSection>
+      </SummarySection>
     </BottomSheet>
   )
 }

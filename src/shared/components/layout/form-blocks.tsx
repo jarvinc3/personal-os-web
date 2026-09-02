@@ -23,38 +23,8 @@ import {
 
 import { Field, FieldContent, FieldDescription, FieldError, FieldLabel, FieldTitle } from '@/src/shared/components/ui/field';
 
-type FormSectionProps = {
-  title?: string;
-  icon?: LucideIcon;
-  right?: ReactNode;
-  children: ReactNode;
-};
-
-export function FormSection({ title, children, right, icon: Icon }: FormSectionProps) {
-  return (
-    <div className="rounded-2xl border border-border bg-card">
-      {title && (
-        <div className="flex flex-row items-center justify-between px-3 pb-1.5 pt-3">
-          <div className="flex gap-2 items-center">
-            {Icon && <Icon className="size-4 text-muted-foreground" />}
-            <span className="text-sm font-medium text-muted-foreground">{title}</span>
-          </div>
-          {right && (
-            <div className="flex-row gap-2 items-center">
-              {right}
-            </div>
-          )}
-        </div>
-      )}
-      <div className="flex flex-col gap-3 px-3 py-4 rounded-2xl border border-border bg-background">
-        {children}
-      </div>
-    </div>
-  );
-}
-
 type SelectFieldProps = {
-  label: string;
+  label?: string;
   value: string;
   onChange: (value: string) => void;
   options: { value: string; label: string }[];
@@ -67,16 +37,26 @@ export function SelectField({ label, value, onChange, options, disabled }: Selec
 
   return (
     <Field>
-      <FieldLabel id={labelId} htmlFor={selectId}>
-        {label}
-      </FieldLabel>
-      <Select value={value} onValueChange={(value) => onChange(value ?? '')} disabled={disabled}>
-        <SelectTrigger className="w-auto max-w-full text-lg font-bold tracking-tight capitalize bg-transparent border-none cursor-pointer">
-          <SelectValue placeholder={label} />
+      {label ? (
+        <FieldLabel id={labelId} htmlFor={selectId}>
+          {label}
+        </FieldLabel>
+      ) : null}
+      <Select
+        value={value}
+        onValueChange={(next) => onChange(next ?? '')}
+        disabled={disabled}
+        items={options}
+        modal={false}
+      >
+        <SelectTrigger className="w-full max-w-full text-lg font-bold tracking-tight cursor-pointer">
+          <SelectValue placeholder={label}>
+            {options.find((item) => item.value === value)?.label}
+          </SelectValue>
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent alignItemWithTrigger={false} side="bottom">
           <SelectGroup>
-            <SelectLabel>{label}</SelectLabel>
+            {label ? <SelectLabel>{label}</SelectLabel> : null}
             {options.map((item) => (
               <SelectItem key={item.value} value={item.value}>
                 {item.label}
@@ -250,7 +230,7 @@ export function SwitchFieldRow({
   disabled,
 }: SwitchFieldRowProps) {
   return (
-    <div className="flex flex-row gap-3 justify-between items-center px-4 py-3 rounded-xl border border-border/60 bg-card">
+    <div className="flex flex-row gap-3 justify-between items-center px-4 py-3 rounded-full border border-border/60 bg-card">
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium text-foreground">{label}</p>
         {description ? <p className="text-xs text-muted-foreground">{description}</p> : null}

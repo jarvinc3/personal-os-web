@@ -5,7 +5,8 @@ import { useProfile } from '@/src/modules/settings/hooks/use-profile';
 import type { AIPreferences } from '@/src/modules/settings/types/profile.types';
 import type { SettingsSheetProps } from '@/src/modules/settings/types/sheet.types';
 import { BottomSheet } from '@/src/shared/components/layout/bottom-sheet';
-import { FormSection, OptionRow } from '@/src/shared/components/layout/form-blocks';
+import { OptionRow } from '@/src/shared/components/layout/form-blocks';
+import { SummarySection } from '@/src/shared/components/layout/summary';
 import { Button } from '@/src/shared/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/src/shared/components/ui/radio-group';
 import { Spinner } from '@/src/shared/components/ui/spinner';
@@ -65,7 +66,7 @@ export function EditAISheet({ open, onOpenChange }: SettingsSheetProps) {
         ),
       }}
     >
-      <FormSection title="Tono de respuesta" icon={BrainCogIcon}>
+      <SummarySection title="Tono de respuesta" icon={BrainCogIcon}>
         <RadioGroup value={tone} onValueChange={(v) => setTone(v as AIPreferences['tone'])}>
           {SETTINGS_REGISTRY.ai.toneOptions.map((option) => (
             <OptionRow
@@ -80,7 +81,7 @@ export function EditAISheet({ open, onOpenChange }: SettingsSheetProps) {
             />
           ))}
         </RadioGroup>
-      </FormSection>
+      </SummarySection>
     </BottomSheet>
   );
 }

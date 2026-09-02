@@ -6,26 +6,20 @@ import { useProfileSheetFormSync } from "@/src/modules/settings/hooks/use-profil
 import { useUserModuleConfig } from "@/src/modules/settings/hooks/use-user-module-config"
 import type { SettingsSheetProps } from "@/src/modules/settings/types/sheet.types"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
-import {
-    FormSection,
-    OptionRow,
-    SwitchFieldRow,
-} from "@/src/shared/components/layout/form-blocks"
-import { Button } from "@/src/shared/components/ui/button"
-import {
-    RadioGroup,
-    RadioGroupItem,
-} from "@/src/shared/components/ui/radio-group"
+import { OptionRow, SwitchFieldRow } from "@/src/shared/components/layout/form-blocks";
+import { SummarySection } from "@/src/shared/components/layout/summary";
+import { Button } from "@/src/shared/components/ui/button";
+import { RadioGroup, RadioGroupItem } from "@/src/shared/components/ui/radio-group";
 import { Spinner } from "@/src/shared/components/ui/spinner"
-import { getModule } from "@/src/shared/constants/module-registry"
-import { appToast } from "@/src/shared/lib/app-toast"
-import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { BriefcaseBusiness, Columns3, LayoutGrid } from "lucide-react"
-import { useRouter } from "next/navigation"
-import { useEffect, useMemo } from "react"
-import { Controller, useForm, useWatch } from "react-hook-form"
-import { z } from "zod"
+import { getModule } from "@/src/shared/constants/module-registry";
+import { appToast } from "@/src/shared/lib/app-toast";
+import { createSheetSubmit } from "@/src/shared/lib/sheet-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { BriefcaseBusiness, Columns3, LayoutGrid } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect, useMemo } from "react";
+import { Controller, useForm, useWatch } from "react-hook-form";
+import { z } from "zod";
 
 const MODULE_ACCENT = getModule("projects").accent
 
@@ -143,7 +137,7 @@ export function EditProjectsSheet({ open, onOpenChange }: SettingsSheetProps) {
         disabled={updateMutation.isPending}
       />
 
-      <FormSection title="Vista por defecto" icon={Columns3}>
+      <SummarySection title="Vista por defecto" icon={Columns3}>
         <RadioGroup
           value={defaultView}
           onValueChange={(v) =>
@@ -164,9 +158,9 @@ export function EditProjectsSheet({ open, onOpenChange }: SettingsSheetProps) {
             />
           ))}
         </RadioGroup>
-      </FormSection>
+      </SummarySection>
 
-      <FormSection title="Preferencias" icon={BriefcaseBusiness}>
+      <SummarySection title="Preferencias" icon={BriefcaseBusiness}>
         <Controller
           control={control}
           name="showArchived"
@@ -200,7 +194,7 @@ export function EditProjectsSheet({ open, onOpenChange }: SettingsSheetProps) {
             />
           )}
         />
-      </FormSection>
+      </SummarySection>
     </BottomSheet>
   )
 }

@@ -75,8 +75,7 @@ export type FinanceSpendingBucket = {
 
 export type FinanceAccount = {
   id: string
-  institutionId: string | null
-  institution: string | null
+  institutionId: string
   institutionName: string | null
   name: string
   type: FinanceAccountType
@@ -136,4 +135,17 @@ export type FinanceBudget = {
   amountSpent: string
   pctUsed: number
   alertThresholdPct: number | null
+}
+
+export type FinanceBudgetStatus = {
+  id: string
+  categoryId: string
+  category: string
+  periodType: string
+  periodStart: string
+  periodEnd: string
+  amountLimit: string
+  amountSpent: string
+  pctUsed: number
+  threshold: number
 }

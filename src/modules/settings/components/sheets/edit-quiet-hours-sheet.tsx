@@ -3,7 +3,8 @@
 import { useProfile } from '@/src/modules/settings/hooks/use-profile';
 import type { SettingsSheetProps } from '@/src/modules/settings/types/sheet.types';
 import { BottomSheet } from '@/src/shared/components/layout/bottom-sheet';
-import { FormSection, FormTextField } from '@/src/shared/components/layout/form-blocks';
+import { FormTextField } from '@/src/shared/components/layout/form-blocks';
+import { SummarySection } from '@/src/shared/components/layout/summary';
 import { Button } from '@/src/shared/components/ui/button';
 import { Spinner } from '@/src/shared/components/ui/spinner';
 import { appToast } from '@/src/shared/lib/app-toast';
@@ -87,7 +88,7 @@ export function EditQuietHoursSheet({ open, onOpenChange }: SettingsSheetProps) 
         ),
       }}
     >
-      <FormSection title="Horario" icon={ClockFadingIcon}>
+      <SummarySection title="Horario" icon={ClockFadingIcon}>
         <FormTextField
           label="Inicio"
           type="time"
@@ -102,7 +103,7 @@ export function EditQuietHoursSheet({ open, onOpenChange }: SettingsSheetProps) 
           onChange={setEnd}
           disabled={updateProfileMutation.isPending}
         />
-      </FormSection>
+      </SummarySection>
     </BottomSheet>
   );
 }

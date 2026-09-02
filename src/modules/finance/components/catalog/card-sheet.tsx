@@ -1,5 +1,6 @@
 "use client"
 
+import { CurrencySelectField } from "@/src/modules/finance/components/catalog/currency-select-field"
 import {
   CATALOG_NONE,
   FINANCE_CARD_NETWORK_LABEL,
@@ -28,11 +29,19 @@ import {
   FormTextField,
   SelectField,
 } from "@/src/shared/components/layout/form-blocks"
+import { SummarySection } from "@/src/shared/components/layout/summary"
 import { Button } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
 import { zodResolver } from "@hookform/resolvers/zod"
+import {
+  Building2Icon,
+  CalendarDays,
+  CreditCardIcon,
+  DollarSign,
+  Palette,
+} from "lucide-react"
 import { useEffect, useMemo } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import { z } from "zod"
@@ -129,6 +138,7 @@ export function CardSheet({
     { value: CATALOG_NONE, label: "Sin cuenta" },
     ...accounts.map((item) => ({ value: item.id, label: item.name })),
   ]
+  const hasInstitutions = institutionOptions.length > 0
 
   const {
     control,
@@ -212,6 +222,11 @@ export function CardSheet({
       open={open}
       onOpenChange={onOpenChange}
       title={isEdit ? "Editar tarjeta" : "Nueva tarjeta"}
+      description={
+        hasInstitutions
+          ? undefined
+          : "Crea una institución en Cuentas antes de agregar una tarjeta."
+      }
       actions={{
         delete: isEdit ? (
           <Button
@@ -232,150 +247,166 @@ export function CardSheet({
           </Button>
         ),
         submit: (
-          <Button disabled={isPending} className="flex-1" onClick={onSubmit}>
+          <Button
+            disabled={isPending || (!isEdit && !hasInstitutions)}
+            className="flex-1"
+            onClick={onSubmit}
+          >
             {isPending ? <Spinner data-icon="inline-start" /> : null}
             Guardar
           </Button>
         ),
       }}
     >
-      <Controller
-        control={control}
-        name="name"
-        render={({ field }) => (
-          <FormTextField
-            label="Nombre"
-            value={field.value}
-            onChange={field.onChange}
-            onBlur={field.onBlur}
-            error={errors.name?.message}
-            placeholder="Visa principal"
-          />
-        )}
-      />
-      <Controller
-        control={control}
-        name="type"
-        render={({ field }) => (
-          <SelectField
-            label="Tipo"
-            value={field.value}
-            onChange={field.onChange}
-            options={TYPE_OPTIONS}
-          />
-        )}
-      />
-      <Controller
-        control={control}
-        name="institutionId"
-        render={({ field }) => (
-          <SelectField
-            label="Institución"
-            value={field.value || (institutionOptions[0]?.value ?? "")}
-            onChange={field.onChange}
-            options={
-              institutionOptions.length > 0
-                ? institutionOptions
-                : [{ value: CATALOG_NONE, label: "Crea una institución primero" }]
-            }
-            disabled={institutionOptions.length === 0}
-          />
-        )}
-      />
-      {cardType === "DEBIT" ? (
+      <SummarySection title="Vínculos" icon={Building2Icon}>
         <Controller
           control={control}
-          name="accountId"
+          name="institutionId"
           render={({ field }) => (
             <SelectField
-              label="Cuenta asociada"
-              value={field.value}
+              label="Institución"
+              value={field.value || (institutionOptions[0]?.value ?? "")}
               onChange={field.onChange}
-              options={accountOptions}
+              options={
+                hasInstitutions
+                  ? institutionOptions
+                  : [{ value: CATALOG_NONE, label: "Crea una institución primero" }]
+              }
+              disabled={!hasInstitutions}
             />
           )}
         />
-      ) : null}
-      <Controller
-        control={control}
-        name="network"
-        render={({ field }) => (
-          <SelectField
-            label="Red"
-            value={field.value}
-            onChange={field.onChange}
-            options={NETWORK_OPTIONS}
+        {cardType === "DEBIT" ? (
+          <Controller
+            control={control}
+            name="accountId"
+            render={({ field }) => (
+              <SelectField
+                label="Cuenta asociada"
+                value={field.value}
+                onChange={field.onChange}
+                options={accountOptions}
+              />
+            )}
           />
-        )}
-      />
-      <Controller
-        control={control}
-        name="lastFour"
-        render={({ field }) => (
-          <FormTextField
-            label="Últimos 4 (opcional)"
-            value={field.value}
-            onChange={field.onChange}
-            onBlur={field.onBlur}
-            error={errors.lastFour?.message}
-            placeholder="1234"
-          />
-        )}
-      />
-      <Controller
-        control={control}
-        name="statementClosingDay"
-        render={({ field }) => (
-          <FormTextField
-            label="Cierre de estado (día)"
-            value={field.value}
-            onChange={field.onChange}
-            onBlur={field.onBlur}
-            error={errors.statementClosingDay?.message}
-            placeholder="15"
-          />
-        )}
-      />
-      <Controller
-        control={control}
-        name="paymentDueDay"
-        render={({ field }) => (
-          <FormTextField
-            label="Vencimiento (día)"
-            value={field.value}
-            onChange={field.onChange}
-            onBlur={field.onBlur}
-            error={errors.paymentDueDay?.message}
-            placeholder="25"
-          />
-        )}
-      />
-      <Controller
-        control={control}
-        name="color"
-        render={({ field }) => (
-          <FormTextField
-            label="Color (opcional)"
-            value={field.value}
-            onChange={field.onChange}
-            onBlur={field.onBlur}
-            error={errors.color?.message}
-            placeholder="#22c55e"
-          />
-        )}
-      />
+        ) : null}
+      </SummarySection>
+
+      <SummarySection title="Tarjeta" icon={CreditCardIcon}>
+        <Controller
+          control={control}
+          name="name"
+          render={({ field }) => (
+            <FormTextField
+              label="Nombre"
+              value={field.value}
+              onChange={field.onChange}
+              onBlur={field.onBlur}
+              error={errors.name?.message}
+              placeholder="Visa principal"
+            />
+          )}
+        />
+        <Controller
+          control={control}
+          name="type"
+          render={({ field }) => (
+            <SelectField
+              label="Tipo"
+              value={field.value}
+              onChange={field.onChange}
+              options={TYPE_OPTIONS}
+            />
+          )}
+        />
+        <Controller
+          control={control}
+          name="network"
+          render={({ field }) => (
+            <SelectField
+              label="Red"
+              value={field.value}
+              onChange={field.onChange}
+              options={NETWORK_OPTIONS}
+            />
+          )}
+        />
+        <Controller
+          control={control}
+          name="lastFour"
+          render={({ field }) => (
+            <FormTextField
+              label="Últimos 4"
+              value={field.value}
+              onChange={field.onChange}
+              onBlur={field.onBlur}
+              error={errors.lastFour?.message}
+              placeholder="1234"
+            />
+          )}
+        />
+      </SummarySection>
+
+      <SummarySection title="Ciclo de facturación" icon={CalendarDays}>
+        <Controller
+          control={control}
+          name="statementClosingDay"
+          render={({ field }) => (
+            <FormTextField
+              label="Cierre de estado (día)"
+              value={field.value}
+              onChange={field.onChange}
+              onBlur={field.onBlur}
+              error={errors.statementClosingDay?.message}
+              placeholder="15"
+            />
+          )}
+        />
+        <Controller
+          control={control}
+          name="paymentDueDay"
+          render={({ field }) => (
+            <FormTextField
+              label="Vencimiento (día)"
+              value={field.value}
+              onChange={field.onChange}
+              onBlur={field.onBlur}
+              error={errors.paymentDueDay?.message}
+              placeholder="25"
+            />
+          )}
+        />
+      </SummarySection>
+
+      <SummarySection title="Apariencia" icon={Palette}>
+        <Controller
+          control={control}
+          name="color"
+          render={({ field }) => (
+            <FormTextField
+              label="Color"
+              value={field.value}
+              onChange={field.onChange}
+              onBlur={field.onBlur}
+              error={errors.color?.message}
+              placeholder="#22c55e"
+            />
+          )}
+        />
+      </SummarySection>
+
       {!isEdit ? (
-        <>
+        <SummarySection title="Saldo inicial" icon={DollarSign}>
           <Controller
             control={control}
             name="balanceCurrency"
             render={({ field }) => (
-              <FormTextField
-                label="Moneda del saldo"
+              <CurrencySelectField
+                label="Moneda"
                 value={field.value}
                 onChange={field.onChange}
-                onBlur={field.onBlur}
-                placeholder={defaultCurrency}
+                enabled={open}
+                extraCodes={[defaultCurrency]}
               />
             )}
           />
@@ -384,7 +415,7 @@ export function CardSheet({
             name="balance"
             render={({ field }) => (
               <FormTextField
-                label="Saldo inicial (opcional)"
+                label="Saldo"
                 value={field.value}
                 onChange={field.onChange}
                 onBlur={field.onBlur}
@@ -398,7 +429,7 @@ export function CardSheet({
               name="creditLimit"
               render={({ field }) => (
                 <FormTextField
-                  label="Límite de crédito (opcional)"
+                  label="Límite de crédito"
                   value={field.value}
                   onChange={field.onChange}
                   onBlur={field.onBlur}
@@ -407,16 +438,18 @@ export function CardSheet({
               )}
             />
           ) : null}
-        </>
+        </SummarySection>
       ) : card ? (
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => onUpdateBalance(card)}
-        >
-          Actualizar saldo
-        </Button>
-      ) : null}
+        <SummarySection title="Saldo" icon={DollarSign}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => onUpdateBalance(card)}
+          >
+            Actualizar saldo
+          </Button>
+        </SummarySection>
+      ) : null} 
     </BottomSheet>
   )
 }

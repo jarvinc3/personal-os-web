@@ -6,7 +6,8 @@ import { useProfileSheetFormSync } from '@/src/modules/settings/hooks/use-profil
 import type { UpdateProfilePayload } from '@/src/modules/settings/types/profile.types';
 import type { SettingsSheetProps } from '@/src/modules/settings/types/sheet.types';
 import { BottomSheet } from '@/src/shared/components/layout/bottom-sheet';
-import { FormSection, FormTextField, SelectionGrid } from '@/src/shared/components/layout/form-blocks';
+import { FormTextField, SelectionGrid } from '@/src/shared/components/layout/form-blocks';
+import { SummarySection } from '@/src/shared/components/layout/summary';
 import { Button } from '@/src/shared/components/ui/button';
 import { Spinner } from '@/src/shared/components/ui/spinner';
 import { appToast } from '@/src/shared/lib/app-toast';
@@ -116,7 +117,7 @@ export function EditAccountSheet({ open, onOpenChange, email }: EditAccountSheet
         }
       }
     >
-      <FormSection title="Nombre completo" icon={Contact}>
+      <SummarySection title="Nombre completo" icon={Contact}>
         <Controller
           control={control}
           name="fullName"
@@ -137,9 +138,9 @@ export function EditAccountSheet({ open, onOpenChange, email }: EditAccountSheet
           <p className="text-xs text-muted-foreground">Correo</p>
           <p className="mt-1 text-sm text-muted-foreground">{email}</p>
         </div>
-      </FormSection>
+      </SummarySection>
 
-      <FormSection title="Avatar" icon={Contact2}>
+      <SummarySection title="Avatar" icon={Contact2}>
         <SelectionGrid
           items={AVATAR_OPTIONS}
           value={selectedAvatarUrl}
@@ -157,7 +158,7 @@ export function EditAccountSheet({ open, onOpenChange, email }: EditAccountSheet
             />
           )}
         />
-      </FormSection>
+      </SummarySection>
     </BottomSheet>
   );
 }

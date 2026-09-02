@@ -9,9 +9,8 @@ const CATALOG_NONE = "__none__"
 export type CreateAccountBody = {
   name: string
   type: FinanceAccountType
+  institutionId: string
   currency?: string
-  institutionId?: string
-  institution?: string
   color?: string
 }
 
@@ -40,6 +39,13 @@ export type CardBalanceBody = {
   creditLimit?: number
 }
 
+export type CreateCategoryBody = {
+  name: string
+  icon?: string
+  color?: string
+  parentId?: string
+}
+
 export type PayloadResult<T> =
   | { ok: true; body: T }
   | { ok: false; error: string }
@@ -62,7 +68,6 @@ export function buildCreateAccountBody(input: {
   type: FinanceAccountType
   currency?: string
   institutionId?: string
-  institution?: string
   color?: string
 }): PayloadResult<CreateAccountBody> {
   const name = input.name.trim()
@@ -70,24 +75,20 @@ export function buildCreateAccountBody(input: {
     return { ok: false, error: "Nombre obligatorio" }
   }
 
+  const institutionId = optionalId(input.institutionId)
+  if (!institutionId) {
+    return { ok: false, error: "La cuenta necesita una institución" }
+  }
+
   const body: CreateAccountBody = {
     name,
     type: input.type,
+    institutionId,
   }
 
   const currency = optionalTrimmed(input.currency)?.toUpperCase()
   if (currency) {
     body.currency = currency
-  }
-
-  const institutionId = optionalId(input.institutionId)
-  if (institutionId) {
-    body.institutionId = institutionId
-  } else {
-    const institution = optionalTrimmed(input.institution)
-    if (institution) {
-      body.institution = institution
-    }
   }
 
   const color = optionalTrimmed(input.color)
@@ -203,6 +204,36 @@ export function buildCardBalanceBody(input: {
     }
     body.creditLimit = creditLimit
   }
+
+  return { ok: true, body }
+}
+
+const LUCIDE_KEY = /^[a-z][a-z0-9-]*$/i
+
+export function buildCreateCategoryBody(input: {
+  name: string
+  icon?: string
+  color?: string
+  parentId?: string
+}): PayloadResult<CreateCategoryBody> {
+  const name = input.name.trim()
+  if (!name) {
+    return { ok: false, error: "Nombre obligatorio" }
+  }
+
+  const icon = optionalTrimmed(input.icon)
+  if (!icon) {
+    return { ok: false, error: "El icono debe ser un emoji" }
+  }
+  if (LUCIDE_KEY.test(icon)) {
+    return { ok: false, error: "Usa un emoji (por ejemplo 🛒), no una key Lucide" }
+  }
+
+  const body: CreateCategoryBody = { name, icon }
+  const color = optionalTrimmed(input.color)
+  if (color) body.color = color
+  const parentId = optionalId(input.parentId)
+  if (parentId) body.parentId = parentId
 
   return { ok: true, body }
 }

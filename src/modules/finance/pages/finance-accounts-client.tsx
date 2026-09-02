@@ -1,10 +1,11 @@
 "use client"
 
-import { AccountSheet } from "@/src/modules/finance/components/account-sheet"
-import { CardBalanceSheet } from "@/src/modules/finance/components/card-balance-sheet"
-import { CardSheet } from "@/src/modules/finance/components/card-sheet"
-import { FinanceAuthenticatedPage } from "@/src/modules/finance/components/finance-authenticated-page"
-import { InstitutionSheet } from "@/src/modules/finance/components/institution-sheet"
+import { AccountSheet } from "@/src/modules/finance/components/catalog/account-sheet"
+import { CardBalanceSheet } from "@/src/modules/finance/components/catalog/card-balance-sheet"
+import { CardSheet } from "@/src/modules/finance/components/catalog/card-sheet"
+import { FinanceCategoriesSection } from "@/src/modules/finance/components/catalog/finance-categories-section"
+import { InstitutionSheet } from "@/src/modules/finance/components/catalog/institution-sheet"
+import { FinanceAuthenticatedPage } from "@/src/modules/finance/components/layout/finance-authenticated-page"
 import {
   FINANCE_ACCOUNT_TYPE_LABEL,
   FINANCE_CARD_TYPE_LABEL,
@@ -22,8 +23,8 @@ import type {
 } from "@/src/modules/finance/types/entities"
 import {
   SettingsRow,
-  SettingsSection,
 } from "@/src/shared/components/layout/settings-section"
+import { SummarySection } from "@/src/shared/components/layout/summary"
 import { Button } from "@/src/shared/components/ui/button"
 import {
   Empty,
@@ -84,119 +85,42 @@ function FinanceAccountsCatalog() {
         <p className="text-sm text-destructive">{errorMessage}</p>
       ) : null}
 
-      <SettingsSection
-        title="Cuentas"
-        description="El saldo inicial es 0. No se envía en el alta."
-      >
-        <div className="flex justify-end border-b border-border/60 p-2">
+      {/* Institutions */}
+      <SummarySection
+        title="Instituciones"
+        icon={Building2Icon}
+        right={
           <Button
             size="sm"
-            variant="outline"
-            onClick={() => setSheet({ kind: "account", item: null })}
-          >
-            <PlusIcon />
-            Crear cuenta
-          </Button>
-        </div>
-        {accountsQuery.isPending ? (
-          <div className="flex justify-center p-6">
-            <Spinner />
-          </div>
-        ) : accountsEmpty ? (
-          <Empty className="py-8">
-            <EmptyHeader>
-              <EmptyMedia variant="icon">
-                <LandmarkIcon />
-              </EmptyMedia>
-              <EmptyTitle>Aún no hay cuentas</EmptyTitle>
-              <EmptyDescription>
-                Crea la primera para registrar movimientos después.
-              </EmptyDescription>
-            </EmptyHeader>
-            <EmptyContent>
-              <Button onClick={() => setSheet({ kind: "account", item: null })}>
-                Crear cuenta
-              </Button>
-            </EmptyContent>
-          </Empty>
-        ) : (
-          accounts.map((account, index) => (
-            <SettingsRow
-              key={account.id}
-              label={account.name}
-              value={`${FINANCE_ACCOUNT_TYPE_LABEL[account.type]} · ${formatFinanceMoney(account.balance, { currency: account.currency, showCents: display.showCents, compactNumbers: display.compactNumbers })}`}
-              accentColor={account.color ?? undefined}
-              icon={LandmarkIcon}
-              onPress={() => setSheet({ kind: "account", item: account })}
-              isLast={index === accounts.length - 1}
-            />
-          ))
-        )}
-      </SettingsSection>
-
-      <SettingsSection title="Tarjetas">
-        <div className="flex justify-end border-b border-border/60 p-2">
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => setSheet({ kind: "card", item: null })}
-          >
-            <PlusIcon />
-            Crear tarjeta
-          </Button>
-        </div>
-        {cardsQuery.isPending ? (
-          <div className="flex justify-center p-6">
-            <Spinner />
-          </div>
-        ) : cards.length === 0 ? (
-          <p className="p-4 text-sm text-muted-foreground">
-            No hay tarjetas activas.
-          </p>
-        ) : (
-          cards.map((card, index) => {
-            const primary = card.balances[0]
-            const amount = primary
-              ? formatFinanceMoney(primary.balance, {
-                  currency: primary.currency,
-                  showCents: display.showCents,
-                  compactNumbers: display.compactNumbers,
-                })
-              : "Sin saldo"
-            return (
-              <SettingsRow
-                key={card.id}
-                label={card.name}
-                value={`${FINANCE_CARD_TYPE_LABEL[card.type]} · ${amount}`}
-                accentColor={card.color ?? undefined}
-                icon={CreditCardIcon}
-                onPress={() => setSheet({ kind: "card", item: card })}
-                isLast={index === cards.length - 1}
-              />
-            )
-          })
-        )}
-      </SettingsSection>
-
-      <SettingsSection title="Instituciones">
-        <div className="flex justify-end border-b border-border/60 p-2">
-          <Button
-            size="sm"
-            variant="outline"
+            variant="ghost"
             onClick={() => setSheet({ kind: "institution", item: null })}
           >
             <PlusIcon />
             Crear institución
           </Button>
-        </div>
+        }
+      >
         {institutionsQuery.isPending ? (
           <div className="flex justify-center p-6">
             <Spinner />
           </div>
         ) : institutions.length === 0 ? (
-          <p className="p-4 text-sm text-muted-foreground">
-            No hay instituciones. Créala antes de una tarjeta.
-          </p>
+          <Empty className="py-8">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <Building2Icon />
+              </EmptyMedia>
+              <EmptyTitle>Aún no hay instituciones</EmptyTitle>
+              <EmptyDescription>
+                Agrégala antes de crear una cuenta o una tarjeta.
+              </EmptyDescription>
+            </EmptyHeader>
+            <EmptyContent>
+              <Button onClick={() => setSheet({ kind: "institution", item: null })}>
+                Crear institución
+              </Button>
+            </EmptyContent>
+          </Empty>
         ) : (
           institutions.map((institution, index) => (
             <SettingsRow
@@ -212,7 +136,127 @@ function FinanceAccountsCatalog() {
             />
           ))
         )}
-      </SettingsSection>
+      </SummarySection>
+
+      {/* Accounts */}
+      <SummarySection
+        title="Cuentas"
+        icon={LandmarkIcon}
+        right={
+          <Button
+            size="sm"
+            variant="ghost"
+            disabled={institutions.length === 0}
+            onClick={() => setSheet({ kind: "account", item: null })}
+          >
+            <PlusIcon />
+            Crear cuenta
+          </Button>
+        }
+      >
+        {accountsQuery.isPending ? (
+          <div className="flex justify-center p-6">
+            <Spinner />
+          </div>
+        ) : accountsEmpty ? (
+          <Empty className="py-8">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <LandmarkIcon />
+              </EmptyMedia>
+              <EmptyTitle>Aún no hay cuentas</EmptyTitle>
+              <EmptyDescription>
+                {institutions.length === 0
+                  ? "Crea una institución bancaria primero. Luego puedes agregar la cuenta."
+                  : "Crea la primera para registrar movimientos después."}
+              </EmptyDescription>
+            </EmptyHeader>
+            <EmptyContent>
+              {institutions.length === 0 ? (
+                <Button onClick={() => setSheet({ kind: "institution", item: null })}>
+                  Crear institución
+                </Button>
+              ) : (
+                <Button onClick={() => setSheet({ kind: "account", item: null })}>
+                  Crear cuenta
+                </Button>
+              )}
+            </EmptyContent>
+          </Empty>
+        ) : (
+          accounts.map((account, index) => (
+            <SettingsRow
+              key={account.id}
+              label={account.name}
+              value={`${FINANCE_ACCOUNT_TYPE_LABEL[account.type]} · ${formatFinanceMoney(account.balance, { currency: account.currency, showCents: display.showCents, compactNumbers: display.compactNumbers })}`}
+              accentColor={account.color ?? undefined}
+              icon={LandmarkIcon}
+              onPress={() => setSheet({ kind: "account", item: account })}
+              isLast={index === accounts.length - 1}
+            />
+          ))
+        )}
+      </SummarySection>
+
+      {/* Cards */}
+      <SummarySection
+        title="Tarjetas"
+        icon={CreditCardIcon}
+        right={
+          <Button
+            size="sm"
+            variant="ghost"
+            disabled={institutions.length === 0}
+            onClick={() => setSheet({ kind: "card", item: null })}
+          >
+            <PlusIcon />
+            Crear tarjeta
+          </Button>
+        }
+      >
+        {cardsQuery.isPending ? (
+          <div className="flex justify-center p-6">
+            <Spinner />
+          </div>
+        ) : cards.length === 0 ? (
+          <Empty className="py-8">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <CreditCardIcon />
+              </EmptyMedia>
+              <EmptyTitle>Aún no hay tarjetas</EmptyTitle>
+              <EmptyDescription>
+                Crea una institución primero. Luego puedes agregar crédito o
+                débito.
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
+        ) : (
+          cards.map((card, index) => {
+            const primary = card.balances[0]
+            const amount = primary
+              ? formatFinanceMoney(primary.balance, {
+                currency: primary.currency,
+                showCents: display.showCents,
+                compactNumbers: display.compactNumbers,
+              })
+              : "Sin saldo"
+            return (
+              <SettingsRow
+                key={card.id}
+                label={card.name}
+                value={`${FINANCE_CARD_TYPE_LABEL[card.type]} · ${amount}`}
+                accentColor={card.color ?? undefined}
+                icon={CreditCardIcon}
+                onPress={() => setSheet({ kind: "card", item: card })}
+                isLast={index === cards.length - 1}
+              />
+            )
+          })
+        )}
+      </SummarySection>
+
+      <FinanceCategoriesSection enabled={isEnabled} />
 
       <InstitutionSheet
         open={sheet.kind === "institution"}

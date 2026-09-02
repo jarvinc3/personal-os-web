@@ -7,16 +7,10 @@ import { useUserModuleConfig } from "@/src/modules/settings/hooks/use-user-modul
 import type { AgendaModuleConfig } from "@/src/modules/settings/types/module-config.types"
 import type { SettingsSheetProps } from "@/src/modules/settings/types/sheet.types"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
-import {
-    FormSection,
-    OptionRow,
-    SwitchFieldRow,
-} from "@/src/shared/components/layout/form-blocks"
-import { Button } from "@/src/shared/components/ui/button"
-import {
-    RadioGroup,
-    RadioGroupItem,
-} from "@/src/shared/components/ui/radio-group"
+import { OptionRow, SwitchFieldRow } from "@/src/shared/components/layout/form-blocks";
+import { SummarySection } from "@/src/shared/components/layout/summary";
+import { Button } from "@/src/shared/components/ui/button";
+import { RadioGroup, RadioGroupItem } from "@/src/shared/components/ui/radio-group";
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { getModule } from "@/src/shared/constants/module-registry"
 import { appToast } from "@/src/shared/lib/app-toast"
@@ -158,7 +152,7 @@ export function EditAgendaSheet({ open, onOpenChange }: SettingsSheetProps) {
         onEnabledChange={moduleEnable.handleEnabledChange}
         disabled={updateMutation.isPending}
       />
-      <FormSection title="Vista por defecto" icon={CalendarCog}>
+      <SummarySection title="Vista por defecto" icon={CalendarCog}>
         <RadioGroup
           value={defaultView}
           onValueChange={(v) =>
@@ -181,8 +175,8 @@ export function EditAgendaSheet({ open, onOpenChange }: SettingsSheetProps) {
             />
           ))}
         </RadioGroup>
-      </FormSection>
-      <FormSection title="Semana inicia" icon={CalendarCog}>
+      </SummarySection>
+      <SummarySection title="Semana inicia" icon={CalendarCog}>
         <RadioGroup
           value={weekStartsOn}
           onValueChange={(v) =>
@@ -206,8 +200,8 @@ export function EditAgendaSheet({ open, onOpenChange }: SettingsSheetProps) {
             trailing={<RadioGroupItem value="0" />}
           />
         </RadioGroup>
-      </FormSection>
-      <FormSection title="Preferencias" icon={Briefcase}>
+      </SummarySection>
+      <SummarySection title="Preferencias" icon={Briefcase}>
         <Controller
           control={control}
           name="workingHoursEnabled"
@@ -241,7 +235,7 @@ export function EditAgendaSheet({ open, onOpenChange }: SettingsSheetProps) {
             />
           )}
         />
-      </FormSection>
+      </SummarySection>
     </BottomSheet>
   )
 }

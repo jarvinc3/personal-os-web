@@ -10,11 +10,13 @@ import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
 import type { FinanceInstitution } from "@/src/modules/finance/types/entities"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
 import { FormTextField } from "@/src/shared/components/layout/form-blocks"
+import { SummarySection } from "@/src/shared/components/layout/summary"
 import { Button } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { Building2Icon, Palette } from "lucide-react"
 import { useEffect, useMemo } from "react"
 import { Controller, useForm } from "react-hook-form"
 import { z } from "zod"
@@ -142,48 +144,52 @@ export function InstitutionSheet({
         ),
       }}
     >
-      <Controller
-        control={control}
-        name="name"
-        render={({ field }) => (
-          <FormTextField
-            label="Nombre"
-            value={field.value}
-            onChange={field.onChange}
-            onBlur={field.onBlur}
-            error={errors.name?.message}
-            placeholder="Banco, fintech…"
-          />
-        )}
-      />
-      <Controller
-        control={control}
-        name="country"
-        render={({ field }) => (
-          <FormTextField
-            label="País (ISO-2)"
-            value={field.value}
-            onChange={field.onChange}
-            onBlur={field.onBlur}
-            error={errors.country?.message}
-            placeholder="DO"
-          />
-        )}
-      />
-      <Controller
-        control={control}
-        name="color"
-        render={({ field }) => (
-          <FormTextField
-            label="Color (opcional)"
-            value={field.value}
-            onChange={field.onChange}
-            onBlur={field.onBlur}
-            error={errors.color?.message}
-            placeholder="#22c55e"
-          />
-        )}
-      />
+      <SummarySection title="Institución" icon={Building2Icon}>
+        <Controller
+          control={control}
+          name="name"
+          render={({ field }) => (
+            <FormTextField
+              label="Nombre"
+              value={field.value}
+              onChange={field.onChange}
+              onBlur={field.onBlur}
+              error={errors.name?.message}
+              placeholder="Banco, fintech…"
+            />
+          )}
+        />
+        <Controller
+          control={control}
+          name="country"
+          render={({ field }) => (
+            <FormTextField
+              label="País (ISO-2)"
+              value={field.value}
+              onChange={field.onChange}
+              onBlur={field.onBlur}
+              error={errors.country?.message}
+              placeholder="DO"
+            />
+          )}
+        />
+      </SummarySection>
+      <SummarySection title="Apariencia" icon={Palette}>
+        <Controller
+          control={control}
+          name="color"
+          render={({ field }) => (
+            <FormTextField
+              label="Color"
+              value={field.value}
+              onChange={field.onChange}
+              onBlur={field.onBlur}
+              error={errors.color?.message}
+              placeholder="#22c55e"
+            />
+          )}
+        />
+      </SummarySection>
     </BottomSheet>
   )
 }
