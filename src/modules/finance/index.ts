@@ -12,9 +12,11 @@ export { useCards } from "@/src/modules/finance/hooks/use-cards"
 export { useCategories } from "@/src/modules/finance/hooks/use-categories"
 export { useFinanceEnabled } from "@/src/modules/finance/hooks/use-finance-enabled"
 export { useInstitutions } from "@/src/modules/finance/hooks/use-institutions"
+export { useTransactions } from "@/src/modules/finance/hooks/use-transactions"
 export { formatFinanceMoney, parseFinanceMoney } from "@/src/modules/finance/lib/money"
 export { FinanceAccountsClient } from "@/src/modules/finance/pages/finance-accounts"
 export { FinanceShellClient } from "@/src/modules/finance/pages/finance-shell-client"
+export { FinanceTransactionsClient } from "@/src/modules/finance/pages/finance-transactions"
 export {
   FINANCE_ACCOUNTS_QUERY_KEY,
   FINANCE_ANALYTICS_QUERY_KEY,
@@ -22,6 +24,7 @@ export {
   FINANCE_CATEGORIES_QUERY_KEY,
   FINANCE_INSTITUTIONS_QUERY_KEY,
   FINANCE_QUERY_KEY,
+  FINANCE_TRANSACTIONS_QUERY_KEY,
 } from "@/src/modules/finance/types/api"
 export type * from "@/src/modules/finance/types/api"
 export type * from "@/src/modules/finance/types/entities"
