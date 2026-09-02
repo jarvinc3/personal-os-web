@@ -4,7 +4,11 @@ import {
   urlBase64ToUint8Array,
 } from '@/src/modules/notifications/lib/push-subscription';
 import { registerServiceWorker } from '@/src/modules/notifications/lib/register-service-worker';
-import { getNotificationPermission, isWebPushSupported } from '@/src/modules/notifications/lib/web-push-support';
+import {
+  getNotificationPermission,
+  isPushServiceUnavailableError,
+  isWebPushSupported,
+} from '@/src/modules/notifications/lib/web-push-support';
 import { API_ENDPOINTS } from '@/src/shared/constants/api-endpoints';
 
 type RegisterWebPushTokenPayload = {
@@ -21,6 +25,7 @@ export type RegisterWebPushTokenResult =
     | 'permission-denied'
     | 'vapid-not-configured'
     | 'service-worker-unavailable'
+    | 'push-service-unavailable'
     | 'unknown';
   };
 
@@ -43,17 +48,17 @@ export async function registerWebPushTokenWithApi(): Promise<RegisterWebPushToke
     return { ok: false, reason: 'service-worker-unavailable' };
   }
 
-  let subscription = await registration.pushManager.getSubscription();
-  if (!subscription) {
-    subscription = await registration.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(vapidPublicKey) as BufferSource,
-    });
-  }
-
-  const token = serializePushSubscription(subscription);
-
   try {
+    let subscription = await registration.pushManager.getSubscription();
+    if (!subscription) {
+      subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(vapidPublicKey) as BufferSource,
+      });
+    }
+
+    const token = serializePushSubscription(subscription);
+
     await apiPost(
       API_ENDPOINTS.NOTIFICATIONS.PUSH_TOKENS,
       {
@@ -62,9 +67,13 @@ export async function registerWebPushTokenWithApi(): Promise<RegisterWebPushToke
       } satisfies RegisterWebPushTokenPayload,
       { suppressUnauthorizedEvent: true },
     );
-  } catch {
+
+    return { ok: true, token };
+  } catch (error) {
+    if (isPushServiceUnavailableError(error)) {
+      return { ok: false, reason: 'push-service-unavailable' };
+    }
+
     return { ok: false, reason: 'unknown' };
   }
-
-  return { ok: true, token };
 }

@@ -21,12 +21,13 @@ export function usePushToken() {
       return;
     }
 
-    void registerServiceWorker().then(() =>
-      registerWebPushTokenWithApi().then((result) => {
+    void registerServiceWorker()
+      .then(() => registerWebPushTokenWithApi())
+      .then((result) => {
         if (result.ok) {
           setPushToken(result.token);
         }
-      }),
-    );
+      })
+      .catch(() => undefined);
   }, [isAuthenticated, isPushEnabled, setPushToken]);
 }

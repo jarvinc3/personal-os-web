@@ -40,3 +40,21 @@ export const FINANCE_CATEGORIES_QUERY_KEY = [
   "categories",
 ] as const
 export const FINANCE_ANALYTICS_QUERY_KEY = [...FINANCE_QUERY_KEY, "analytics"] as const
+export const FINANCE_TRANSACTIONS_QUERY_KEY = [
+  ...FINANCE_QUERY_KEY,
+  "transactions",
+] as const
+export const FINANCE_BUDGETS_QUERY_KEY = [...FINANCE_QUERY_KEY, "budgets"] as const
+export const FINANCE_SAVINGS_GOALS_QUERY_KEY = [
+  ...FINANCE_QUERY_KEY,
+  "savings-goals",
+] as const
+export const FINANCE_LOANS_QUERY_KEY = [...FINANCE_QUERY_KEY, "loans"] as const
+export const FINANCE_RECEIVABLES_QUERY_KEY = [
+  ...FINANCE_QUERY_KEY,
+  "receivables",
+] as const
+export const FINANCE_EMAIL_SOURCES_QUERY_KEY = [
+  ...FINANCE_QUERY_KEY,
+  "email-sources",
+] as const

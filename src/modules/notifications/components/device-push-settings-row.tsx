@@ -46,6 +46,14 @@ export function DevicePushSettingsRow({ isLast, accentColor }: DevicePushSetting
         return;
       }
 
+      if (result.reason === 'push-service-unavailable') {
+        appToast.warning({
+          text1: 'Push no disponible',
+          text2: 'Este navegador no tiene servicio de notificaciones push.',
+        });
+        return;
+      }
+
       if (result.reason === 'unsupported') {
         appToast.error({
           text1: 'No compatible',
@@ -84,6 +92,14 @@ export function DevicePushSettingsRow({ isLast, accentColor }: DevicePushSetting
             text2: 'Configura las claves VAPID en backend y frontend.',
           });
         },
+      };
+    }
+    if (permissionStatus === 'granted' && registrationError === 'push-service-unavailable') {
+      return {
+        value: 'Servicio push no disponible',
+        disabled: true,
+        showChevron: false,
+        onPress: undefined,
       };
     }
     if (permissionStatus === 'granted' && !pushToken) {

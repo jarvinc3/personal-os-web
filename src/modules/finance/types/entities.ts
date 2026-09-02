@@ -7,6 +7,12 @@ import type {
 export const FINANCE_TRANSACTION_TYPES = ["DEBIT", "CREDIT", "TRANSFER"] as const
 export type FinanceTransactionType = (typeof FINANCE_TRANSACTION_TYPES)[number]
 
+export const FINANCE_TRANSACTION_TYPE_LABEL: Record<FinanceTransactionType, string> = {
+  DEBIT: "Gasto",
+  CREDIT: "Ingreso",
+  TRANSFER: "Transferencia",
+}
+
 export const FINANCE_TRANSACTION_STATUSES = [
   "PENDING",
   "CONFIRMED",
@@ -32,15 +38,26 @@ export type FinanceTransaction = {
   amount: string
   currency: string
   ledgerAmount: string
-  ledgerCurrency: string
+  ledgerCurrency: string | null
   amountBaseCurrency: string
   exchangeRate: string | null
   accountId: string | null
+  accountName: string | null
   cardId: string | null
+  cardName: string | null
   categoryId: string | null
+  merchant: string | null
+  notes: string | null
+  source: string | null
   transactionDate: string
   description: string | null
   transferGroupId: string | null
+}
+
+export type FinanceTransferResult = {
+  transferGroupId: string
+  debit: FinanceTransaction
+  credit: FinanceTransaction
 }
 
 export type FinanceAnalyticsSummary = {
@@ -129,12 +146,32 @@ export type FinanceCategory = {
   isSystem: boolean
 }
 
+export const FINANCE_BUDGET_PERIODS = ["MONTHLY", "BIWEEKLY", "CUSTOM"] as const
+export type FinanceBudgetPeriod = (typeof FINANCE_BUDGET_PERIODS)[number]
+
+export const FINANCE_BUDGET_PERIOD_LABEL: Record<FinanceBudgetPeriod, string> = {
+  MONTHLY: "Mensual",
+  BIWEEKLY: "Quincenal",
+  CUSTOM: "Personalizado",
+}
+
+export type FinanceBudgetCategory = {
+  id: string
+  name: string
+  icon: string | null
+  color: string | null
+}
+
 export type FinanceBudget = {
   id: string
+  categoryId: string
+  category?: FinanceBudgetCategory | null
+  periodType: FinanceBudgetPeriod
+  periodStart: string
+  periodEnd: string
   amountLimit: string
   amountSpent: string
-  pctUsed: number
-  alertThresholdPct: number | null
+  alertThresholdPct: number
 }
 
 export type FinanceBudgetStatus = {
@@ -148,4 +185,106 @@ export type FinanceBudgetStatus = {
   amountSpent: string
   pctUsed: number
   threshold: number
+}
+
+export type FinanceSavingsGoal = {
+  id: string
+  name: string
+  description: string | null
+  targetAmount: string
+  currentAmount: string
+  currency: string
+  targetDate: string | null
+  isCompleted: boolean
+  completedAt: string | null
+}
+
+export const FINANCE_INSTALLMENT_FREQS = [
+  "WEEKLY",
+  "BIWEEKLY",
+  "MONTHLY",
+] as const
+export type FinanceInstallmentFreq = (typeof FINANCE_INSTALLMENT_FREQS)[number]
+
+export const FINANCE_INSTALLMENT_FREQ_LABEL: Record<FinanceInstallmentFreq, string> = {
+  WEEKLY: "Semanal",
+  BIWEEKLY: "Quincenal",
+  MONTHLY: "Mensual",
+}
+
+export type FinanceLoan = {
+  id: string
+  accountId: string | null
+  account?: { id: string; name: string } | null
+  lenderName: string
+  originalAmount: string
+  currentBalance: string
+  currency: string
+  installmentAmount: string
+  installmentFreq: FinanceInstallmentFreq
+  totalInstallments: number
+  paidInstallments: number
+  nextDueDate: string
+  /** Fraction 0–1 as a decimal string, e.g. `"0.12"` = 12%. Null means not provided. */
+  interestRate: string | null
+  notes: string | null
+  isActive: boolean
+}
+
+export const FINANCE_RECEIVABLE_STATUSES = [
+  "PENDING",
+  "PARTIAL",
+  "PAID",
+  "CANCELLED",
+] as const
+export type FinanceReceivableStatus = (typeof FINANCE_RECEIVABLE_STATUSES)[number]
+
+export const FINANCE_RECEIVABLE_STATUS_LABEL: Record<
+  FinanceReceivableStatus,
+  string
+> = {
+  PENDING: "Pendiente",
+  PARTIAL: "Parcial",
+  PAID: "Pagado",
+  CANCELLED: "Cancelado",
+}
+
+export type FinanceReceivable = {
+  id: string
+  debtorName: string
+  description: string | null
+  amount: string
+  paidAmount: string
+  currency: string
+  dueDate: string | null
+  status: FinanceReceivableStatus
+}
+
+export type FinanceEmailSyncLog = {
+  id: string
+  status: string
+  error: string | null
+  emailsScanned: number
+  transactionsNew: number
+  startedAt: string
+  completedAt: string | null
+}
+
+export type FinanceEmailSource = {
+  id: string
+  emailAddress: string
+  bankDomain: string
+  label: string | null
+  accountId: string | null
+  cardId: string | null
+  provider: string
+  isActive: boolean
+  lastSyncedAt: string | null
+  createdAt: string
+  logs: FinanceEmailSyncLog[]
+}
+
+export type FinanceEmailSyncTrigger = {
+  queued: boolean
+  reason?: string
 }
