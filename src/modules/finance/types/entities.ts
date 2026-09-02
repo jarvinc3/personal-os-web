@@ -54,6 +54,12 @@ export type FinanceTransaction = {
   transferGroupId: string | null
 }
 
+export type FinanceTransferResult = {
+  transferGroupId: string
+  debit: FinanceTransaction
+  credit: FinanceTransaction
+}
+
 export type FinanceAnalyticsSummary = {
   baseCurrency: string
   netWorth: string
