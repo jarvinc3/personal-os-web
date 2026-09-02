@@ -186,3 +186,76 @@ export type FinanceBudgetStatus = {
   pctUsed: number
   threshold: number
 }
+
+export type FinanceSavingsGoal = {
+  id: string
+  name: string
+  description: string | null
+  targetAmount: string
+  currentAmount: string
+  currency: string
+  targetDate: string | null
+  isCompleted: boolean
+  completedAt: string | null
+}
+
+export const FINANCE_INSTALLMENT_FREQS = [
+  "WEEKLY",
+  "BIWEEKLY",
+  "MONTHLY",
+] as const
+export type FinanceInstallmentFreq = (typeof FINANCE_INSTALLMENT_FREQS)[number]
+
+export const FINANCE_INSTALLMENT_FREQ_LABEL: Record<FinanceInstallmentFreq, string> = {
+  WEEKLY: "Semanal",
+  BIWEEKLY: "Quincenal",
+  MONTHLY: "Mensual",
+}
+
+export type FinanceLoan = {
+  id: string
+  accountId: string | null
+  account?: { id: string; name: string } | null
+  lenderName: string
+  originalAmount: string
+  currentBalance: string
+  currency: string
+  installmentAmount: string
+  installmentFreq: FinanceInstallmentFreq
+  totalInstallments: number
+  paidInstallments: number
+  nextDueDate: string
+  /** Fraction 0–1 as a decimal string, e.g. `"0.12"` = 12%. Null means not provided. */
+  interestRate: string | null
+  notes: string | null
+  isActive: boolean
+}
+
+export const FINANCE_RECEIVABLE_STATUSES = [
+  "PENDING",
+  "PARTIAL",
+  "PAID",
+  "CANCELLED",
+] as const
+export type FinanceReceivableStatus = (typeof FINANCE_RECEIVABLE_STATUSES)[number]
+
+export const FINANCE_RECEIVABLE_STATUS_LABEL: Record<
+  FinanceReceivableStatus,
+  string
+> = {
+  PENDING: "Pendiente",
+  PARTIAL: "Parcial",
+  PAID: "Pagado",
+  CANCELLED: "Cancelado",
+}
+
+export type FinanceReceivable = {
+  id: string
+  debtorName: string
+  description: string | null
+  amount: string
+  paidAmount: string
+  currency: string
+  dueDate: string | null
+  status: FinanceReceivableStatus
+}
