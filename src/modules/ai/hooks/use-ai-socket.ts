@@ -4,7 +4,7 @@ import { getSupabaseBrowserClient } from '@/src/config/supabase/client';
 import { AI_SESSIONS_QUERY_KEY } from '@/src/modules/ai/hooks/use-ai-sessions';
 import { useAiSideEffects } from '@/src/modules/ai/hooks/use-ai-side-effects';
 import type { AiResponseWsPayload } from '@/src/modules/ai/types/chat.types';
-import { API_BASE_URL } from '@/src/shared/constants/api-endpoints';
+import { resolveNotificationsSocketUrl } from '@/src/modules/notifications/lib/notifications-socket-url';
 import { appToast } from '@/src/shared/lib/app-toast';
 import { useAppStore } from '@/src/shared/store/app-store';
 import { useQueryClient } from '@tanstack/react-query';
@@ -12,18 +12,16 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useRef } from 'react';
 import { io, type Socket } from 'socket.io-client';
 
-function resolveSocketUrl(): string {
-  return API_BASE_URL.replace(/\/api\/?$/, '');
-}
-
 function isChatRoute(pathname: string): boolean {
   return pathname.includes('/chat');
 }
 
 export function useAiSocket() {
-  const session = useAppStore((state) => state.session);
+  const sessionUserId = useAppStore((state) => state.session?.userId ?? null);
+  const sessionToken = useAppStore((state) => state.session?.token ?? null);
   const queryClient = useQueryClient();
   const applySideEffects = useAiSideEffects();
+  const applySideEffectsRef = useRef(applySideEffects);
   const pathname = usePathname();
   const pathnameRef = useRef(pathname);
   const socketRef = useRef<Socket | null>(null);
@@ -33,13 +31,25 @@ export function useAiSocket() {
   }, [pathname]);
 
   useEffect(() => {
-    if (!session) {
+    applySideEffectsRef.current = applySideEffects;
+  }, [applySideEffects]);
+
+  useEffect(() => {
+    const socket = socketRef.current;
+    if (socket && sessionToken) {
+      socket.auth = { token: sessionToken };
+    }
+  }, [sessionToken]);
+
+  useEffect(() => {
+    if (!sessionUserId) {
       socketRef.current?.disconnect();
       socketRef.current = null;
       return;
     }
 
     let cancelled = false;
+    let socket: Socket | null = null;
 
     void (async () => {
       const {
@@ -50,14 +60,14 @@ export function useAiSocket() {
         return;
       }
 
-      const socket = io(`${resolveSocketUrl()}/notifications`, {
+      socket = io(`${resolveNotificationsSocketUrl()}/notifications`, {
         auth: { token },
         transports: ['websocket'],
       });
 
       socket.on('ai.response', (payload: AiResponseWsPayload) => {
         if (payload.sideEffects?.length) {
-          void applySideEffects(payload.sideEffects);
+          void applySideEffectsRef.current(payload.sideEffects);
         }
 
         if (payload.type === 'insight' && payload.content && !isChatRoute(pathnameRef.current)) {
@@ -85,8 +95,8 @@ export function useAiSocket() {
 
     return () => {
       cancelled = true;
-      socketRef.current?.disconnect();
+      socket?.disconnect();
       socketRef.current = null;
     };
-  }, [session, queryClient, applySideEffects]);
+  }, [sessionUserId, queryClient]);
 }

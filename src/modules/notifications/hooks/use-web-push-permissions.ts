@@ -24,6 +24,7 @@ export type RequestWebPushPermissionResult =
     | 'permission-denied'
     | 'vapid-not-configured'
     | 'service-worker-unavailable'
+    | 'push-service-unavailable'
     | 'unknown';
   };
 
@@ -34,7 +35,7 @@ export function useWebPushPermissions() {
     useState<WebPushPermissionStatus>('default');
   const [isRequesting, setIsRequesting] = useState(false);
   const [registrationError, setRegistrationError] = useState<
-    'vapid-not-configured' | 'unknown' | null
+    'vapid-not-configured' | 'push-service-unavailable' | 'unknown' | null
   >(null);
 
   const refreshStatus = useCallback(() => {
@@ -83,6 +84,8 @@ export function useWebPushPermissions() {
 
       if (result.reason === 'vapid-not-configured') {
         setRegistrationError('vapid-not-configured');
+      } else if (result.reason === 'push-service-unavailable') {
+        setRegistrationError('push-service-unavailable');
       } else if (result.reason === 'unknown') {
         setRegistrationError('unknown');
       }
