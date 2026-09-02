@@ -11,6 +11,7 @@ export {
 export { useCards } from "@/src/modules/finance/hooks/use-cards"
 export { useCategories } from "@/src/modules/finance/hooks/use-categories"
 export { useBudgets } from "@/src/modules/finance/hooks/use-budgets"
+export { useEmailSources } from "@/src/modules/finance/hooks/use-email-sources"
 export { useFinanceEnabled } from "@/src/modules/finance/hooks/use-finance-enabled"
 export { useInstitutions } from "@/src/modules/finance/hooks/use-institutions"
 export { useLoans } from "@/src/modules/finance/hooks/use-loans"
@@ -22,6 +23,7 @@ export { FinanceAccountsClient } from "@/src/modules/finance/pages/finance-accou
 export { FinanceBudgetsClient } from "@/src/modules/finance/pages/finance-budgets"
 export { FinancePlanningClient } from "@/src/modules/finance/pages/finance-planning"
 export { FinanceShellClient } from "@/src/modules/finance/pages/finance-shell-client"
+export { FinanceSyncClient } from "@/src/modules/finance/pages/finance-sync"
 export { FinanceTransactionsClient } from "@/src/modules/finance/pages/finance-transactions"
 export {
   FINANCE_ACCOUNTS_QUERY_KEY,
@@ -29,6 +31,7 @@ export {
   FINANCE_BUDGETS_QUERY_KEY,
   FINANCE_CARDS_QUERY_KEY,
   FINANCE_CATEGORIES_QUERY_KEY,
+  FINANCE_EMAIL_SOURCES_QUERY_KEY,
   FINANCE_INSTITUTIONS_QUERY_KEY,
   FINANCE_LOANS_QUERY_KEY,
   FINANCE_QUERY_KEY,

@@ -6,7 +6,7 @@ export const FINANCE_NAV_ITEMS = [
   { label: "Movimientos", href: APP_ROUTES.app.financeTransactions, ready: true },
   { label: "Presupuestos", href: APP_ROUTES.app.financeBudgets, ready: true },
   { label: "Planificación", href: APP_ROUTES.app.financePlanning, ready: true },
-  { label: "Sincronizar", href: APP_ROUTES.app.finance, ready: false },
+  { label: "Sincronizar", href: APP_ROUTES.app.financeSync, ready: true },
 ] as const
 
 export { FINANCE_QUERY_KEY } from "@/src/modules/finance/types/api"

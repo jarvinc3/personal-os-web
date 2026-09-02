@@ -259,3 +259,32 @@ export type FinanceReceivable = {
   dueDate: string | null
   status: FinanceReceivableStatus
 }
+
+export type FinanceEmailSyncLog = {
+  id: string
+  status: string
+  error: string | null
+  emailsScanned: number
+  transactionsNew: number
+  startedAt: string
+  completedAt: string | null
+}
+
+export type FinanceEmailSource = {
+  id: string
+  emailAddress: string
+  bankDomain: string
+  label: string | null
+  accountId: string | null
+  cardId: string | null
+  provider: string
+  isActive: boolean
+  lastSyncedAt: string | null
+  createdAt: string
+  logs: FinanceEmailSyncLog[]
+}
+
+export type FinanceEmailSyncTrigger = {
+  queued: boolean
+  reason?: string
+}
