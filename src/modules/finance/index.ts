@@ -13,7 +13,7 @@ export { useCategories } from "@/src/modules/finance/hooks/use-categories"
 export { useFinanceEnabled } from "@/src/modules/finance/hooks/use-finance-enabled"
 export { useInstitutions } from "@/src/modules/finance/hooks/use-institutions"
 export { formatFinanceMoney, parseFinanceMoney } from "@/src/modules/finance/lib/money"
-export { FinanceAccountsClient } from "@/src/modules/finance/pages/finance-accounts-client"
+export { FinanceAccountsClient } from "@/src/modules/finance/pages/finance-accounts"
 export { FinanceShellClient } from "@/src/modules/finance/pages/finance-shell-client"
 export {
   FINANCE_ACCOUNTS_QUERY_KEY,
