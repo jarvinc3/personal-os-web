@@ -2,7 +2,7 @@
 
 ## Status
 
-Shell of `/finance` (#14), catalog `/finance/accounts` (#15–#16), dashboard resumen (#17), paginated ledger (#18), capture/confirm/reverse/transfers (#19), paginated budgets (#20), planning (#21) and Gmail sync (#22) are in `personal-os-web`.
+Shell of `/finance` (#14), catalog `/finance/accounts` (#15–#16), dashboard resumen (#17), paginated ledger (#18), capture/confirm/reverse/transfers (#19), paginated budgets (#20), planning (#21), Gmail sync (#22) and the Inicio shortcut plus landing `coming_soon` (#23) are in `personal-os-web`.
 
 What exists today:
 
@@ -19,6 +19,7 @@ What exists today:
 - REST path constants including `TRANSACTION_REVERSE` and `TRANSFERS`
 - Module toggle and config in Settings (`EditFinanceSheet`, slug `finance`)
 - Chat with `moduleSlug=finance` (backend tools; subset of REST)
+- Authenticated Inicio (`/home`) has a Finanzas shortcut (`APP_ROUTES.app.finance`) next to Keep Awake. Disabled module still opens `/finance` (shell gate, not 404). Landing `modules-data.ts` uses `coming_soon` until tracker #13 marks `available`.
 
 Do **not** copy the mobile tab layout (`Resumen` / `Movimientos` / …) into this repo. Sub-nav is desktop (horizontal), compact scroll on narrow viewports.
 

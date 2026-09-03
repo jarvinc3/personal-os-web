@@ -14,7 +14,7 @@ import {
 } from "@/src/shared/components/ui/card"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
-import { ChevronRight, Monitor } from "lucide-react"
+import { ChevronRight, Landmark, Monitor } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useEffect } from "react"
@@ -97,6 +97,32 @@ export function HomeClient() {
           <Button asChild variant="outline" className="w-full sm:w-auto">
             <Link href={APP_ROUTES.app.keepAwake}>
               Abrir Keep Awake
+              <ChevronRight className="size-4" />
+            </Link>
+          </Button>
+        </CardFooter>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Landmark className="size-4 text-muted-foreground" aria-hidden />
+            Finanzas
+          </CardTitle>
+          <CardDescription>
+            Gestiona cuentas y movimientos desde el módulo de finanzas.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground">
+            Abre el resumen, cuentas, presupuestos y planificación. Si el
+            módulo está apagado, Finanzas te lleva a activarlo en Ajustes.
+          </p>
+        </CardContent>
+        <CardFooter>
+          <Button asChild variant="outline" className="w-full sm:w-auto">
+            <Link href={APP_ROUTES.app.finance}>
+              Abrir Finanzas
               <ChevronRight className="size-4" />
             </Link>
           </Button>
