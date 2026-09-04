@@ -130,20 +130,11 @@ export function CardSheet({
     archiveMutation.isPending ||
     balanceMutation.isPending
 
-  const institutionOptions = institutions.map((item) => ({
-    value: item.id,
-    label: item.name,
-  }))
-  const accountOptions = [
-    { value: CATALOG_NONE, label: "Sin cuenta" },
-    ...accounts.map((item) => ({ value: item.id, label: item.name })),
-  ]
-  const hasInstitutions = institutionOptions.length > 0
-
   const {
     control,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -151,12 +142,41 @@ export function CardSheet({
   })
 
   const cardType = useWatch({ control, name: "type" })
+  const selectedInstitutionId = useWatch({ control, name: "institutionId" })
+  const selectedAccountId = useWatch({ control, name: "accountId" })
+
+  const institutionOptions = institutions.map((item) => ({
+    value: item.id,
+    label: item.name,
+  }))
+  const institutionAccounts = accounts.filter(
+    (item) => item.isActive && item.institutionId === selectedInstitutionId,
+  )
+  const accountOptions = [
+    { value: CATALOG_NONE, label: "Sin cuenta" },
+    ...institutionAccounts.map((item) => ({ value: item.id, label: item.name })),
+  ]
+  const hasInstitutions = institutionOptions.length > 0
 
   useEffect(() => {
     if (open) {
       reset(toFormValues(card, defaultCurrency, institutions[0]?.id ?? ""))
     }
   }, [open, card, defaultCurrency, institutions, reset])
+
+  useEffect(() => {
+    if (
+      selectedAccountId !== CATALOG_NONE &&
+      !accounts.some(
+        (item) =>
+          item.id === selectedAccountId &&
+          item.isActive &&
+          item.institutionId === selectedInstitutionId,
+      )
+    ) {
+      setValue("accountId", CATALOG_NONE)
+    }
+  }, [accounts, selectedAccountId, selectedInstitutionId, setValue])
 
   const submitForm = useMemo(
     () => createSheetSubmit(handleSubmit),

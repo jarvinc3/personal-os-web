@@ -9,6 +9,7 @@ export function useFinanceEnabled() {
     config,
     state,
     isEnabled: isModuleEnabled,
+    emailSyncEnabled: isModuleEnabled && config.emailSync.enabled,
     isProfileLoading: profileQuery.isLoading,
   }
 }

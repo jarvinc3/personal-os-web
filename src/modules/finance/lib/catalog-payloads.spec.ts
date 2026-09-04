@@ -30,7 +30,7 @@ describe("buildCreateAccountBody", () => {
     })
   })
 
-  it("rejects accounts without an institution", () => {
+  it("rejects non-CASH accounts without an institution", () => {
     const none = buildCreateAccountBody({
       name: "Ahorros",
       type: "SAVINGS",
@@ -43,6 +43,16 @@ describe("buildCreateAccountBody", () => {
       type: "SAVINGS",
     })
     assert.equal(missing.ok, false)
+  })
+
+  it("allows CASH without an institution", () => {
+    const result = buildCreateAccountBody({
+      name: "Efectivo",
+      type: "CASH",
+    })
+    assert.equal(result.ok, true)
+    if (!result.ok) return
+    assert.equal("institutionId" in result.body, false)
   })
 
   it("sends institutionId and never a free-text institution name", () => {

@@ -6,7 +6,7 @@ import type {
   CreateCardBody,
 } from "@/src/modules/finance/lib/catalog-payloads"
 import { FINANCE_CARDS_QUERY_KEY } from "@/src/modules/finance/types/api"
-import type { FinanceCard } from "@/src/modules/finance/types/entities"
+import type { FinanceCard, FinanceCardBalance } from "@/src/modules/finance/types/entities"
 import { API_ENDPOINTS } from "@/src/shared/constants/api-endpoints"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
@@ -54,7 +54,7 @@ export function useUpdateCardBalance() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: ({ id, body }: { id: string; body: CardBalanceBody }) =>
-      apiPost<FinanceCard>(API_ENDPOINTS.FINANCE.CARD_BALANCES(id), body),
+      apiPost<FinanceCardBalance>(API_ENDPOINTS.FINANCE.CARD_BALANCES(id), body),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: FINANCE_CARDS_QUERY_KEY })
     },

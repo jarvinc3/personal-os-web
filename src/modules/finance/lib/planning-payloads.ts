@@ -1,3 +1,4 @@
+import { CATALOG_NONE } from "../constants/catalog.ts"
 import { percentToRateFraction } from "./interest-rate.ts"
 import { parseFinanceMoney } from "./money.ts"
 
@@ -7,7 +8,6 @@ export type LoanInstallmentFreq = (typeof INSTALLMENT_FREQS)[number]
 const RECEIVABLE_STATUSES = ["PENDING", "PARTIAL", "PAID", "CANCELLED"] as const
 export type ReceivableStatus = (typeof RECEIVABLE_STATUSES)[number]
 
-const CATALOG_NONE = "__none__"
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/
 
 export type PayloadResult<T> =
@@ -32,6 +32,7 @@ export type CreateLoanBody = {
   totalInstallments: number
   nextDueDate: string
   paidInstallments?: number
+  institutionId?: string
   accountId?: string
   currency?: string
   interestRate?: number | null
@@ -151,6 +152,7 @@ export function buildLoanBody(
     totalInstallments: string
     nextDueDate: string
     paidInstallments?: string
+    institutionId?: string
     accountId?: string
     currency?: string
     interestRatePercent?: string
@@ -198,6 +200,7 @@ export function buildLoanBody(
   if (!rate.ok) return rate
 
   const accountId = optionalId(input.accountId)
+  const institutionId = optionalId(input.institutionId)
   const currency = optionalTrimmed(input.currency)?.toUpperCase()
   const notes = optionalTrimmed(input.notes)
 
@@ -210,6 +213,7 @@ export function buildLoanBody(
     totalInstallments: totalInstallments.body,
     nextDueDate: nextDue.body,
     ...(paidInstallments !== undefined ? { paidInstallments } : {}),
+    ...(institutionId ? { institutionId } : {}),
     ...(accountId ? { accountId } : {}),
     ...(currency ? { currency } : {}),
     ...(notes ? { notes } : {}),

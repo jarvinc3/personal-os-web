@@ -36,6 +36,7 @@ import {
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
 import { Spinner } from "@/src/shared/components/ui/spinner"
+import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { Building2Icon, CreditCardIcon, LandmarkIcon, PlusIcon } from "lucide-react"
 import { useMemo, useState } from "react"
 
@@ -259,7 +260,10 @@ function FinanceAccountsCatalog() {
 
       <FinanceCategoriesSection enabled={isEnabled} />
 
-      <FinanceSyncList enabled={isEnabled} />
+      <FinanceSyncList
+        enabled={isEnabled}
+        oauthNextPath={APP_ROUTES.app.financeAccounts}
+      />
 
       <InstitutionSheet
         open={sheet.kind === "institution"}

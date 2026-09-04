@@ -3,14 +3,9 @@
 import { CATALOG_NONE } from "@/src/modules/finance/constants/catalog"
 import { useStartGmailOAuth } from "@/src/modules/finance/hooks/use-gmail-oauth"
 import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
-import {
-  buildLedgerTargetOptions,
-  splitLedgerTarget,
-} from "@/src/modules/finance/lib/ledger-payloads"
-import type {
-  FinanceAccount,
-  FinanceCard,
-} from "@/src/modules/finance/types/entities"
+import type { GmailOAuthNextPath } from "@/src/modules/finance/lib/gmail-oauth"
+import type { FinanceInstitution } from "@/src/modules/finance/types/entities"
+import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
 import {
   FormTextField,
@@ -28,7 +23,7 @@ import { Controller, useForm } from "react-hook-form"
 import { z } from "zod"
 
 const schema = z.object({
-  target: z.string().min(1, "Elige una cuenta o una tarjeta"),
+  institutionId: z.string().min(1, "Elige una institución"),
   bankDomain: z.string().max(150),
   label: z.string().max(120),
 })
@@ -38,22 +33,23 @@ type FormValues = z.infer<typeof schema>
 type ConnectGmailSheetProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
-  accounts: FinanceAccount[]
-  cards: FinanceCard[]
+  institutions: FinanceInstitution[]
+  nextPath?: GmailOAuthNextPath
+  emailSyncEnabled: boolean
 }
 
 export function ConnectGmailSheet({
   open,
   onOpenChange,
-  accounts,
-  cards,
+  institutions,
+  nextPath = APP_ROUTES.app.financeSync,
+  emailSyncEnabled,
 }: ConnectGmailSheetProps) {
   const startOAuth = useStartGmailOAuth()
-  const hasTargets = accounts.length > 0 || cards.length > 0
-  const targetOptions = useMemo(
-    () => buildLedgerTargetOptions(accounts, cards),
-    [accounts, cards],
-  )
+  const institutionOptions = institutions
+    .filter((item) => item.isActive)
+    .map((item) => ({ value: item.id, label: item.name }))
+  const hasInstitutions = institutionOptions.length > 0
 
   const {
     control,
@@ -63,21 +59,23 @@ export function ConnectGmailSheet({
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
-      target: CATALOG_NONE,
+      institutionId: institutionOptions[0]?.value ?? CATALOG_NONE,
       bankDomain: "bhd.com.do",
       label: "",
     },
   })
 
+  const defaultInstitutionId = institutions.find((item) => item.isActive)?.id ?? CATALOG_NONE
+
   useEffect(() => {
     if (open) {
       reset({
-        target: CATALOG_NONE,
+        institutionId: defaultInstitutionId,
         bankDomain: "bhd.com.do",
         label: "",
       })
     }
-  }, [open, reset])
+  }, [open, reset, defaultInstitutionId])
 
   const submitForm = useMemo(
     () => createSheetSubmit(handleSubmit),
@@ -85,12 +83,19 @@ export function ConnectGmailSheet({
   )
 
   const onSubmit = submitForm(async (values) => {
-    const target = splitLedgerTarget(values.target)
+    if (!emailSyncEnabled) {
+      appToast.error({
+        text1: "Sincronización de correo desactivada",
+        text2: "Actívala en Ajustes → Finanzas.",
+      })
+      return
+    }
     try {
       await startOAuth.mutateAsync({
-        ...target,
+        institutionId: values.institutionId,
         bankDomain: values.bankDomain,
         label: values.label,
+        nextPath,
       })
     } catch (error) {
       appToast.error({ text1: financeErrorMessage(error) })
@@ -102,7 +107,7 @@ export function ConnectGmailSheet({
       open={open}
       onOpenChange={onOpenChange}
       title="Conectar Gmail"
-      description="Solo lectura (gmail.readonly). Eliges cuenta o tarjeta, no ambas. Vuelves a esta app, no a un deep link de móvil."
+      description="Solo lectura (gmail.readonly). Eliges la institución del banco. Vuelves a esta app, no a un deep link de móvil."
       actions={{
         close: (
           <Button
@@ -117,7 +122,7 @@ export function ConnectGmailSheet({
         submit: (
           <Button
             type="button"
-            disabled={startOAuth.isPending || !hasTargets}
+            disabled={startOAuth.isPending || !hasInstitutions || !emailSyncEnabled}
             className="flex-1"
             onClick={onSubmit}
           >
@@ -130,25 +135,33 @@ export function ConnectGmailSheet({
       }}
     >
       <SummarySection title="Origen" icon={MailIcon}>
+        {!emailSyncEnabled ? (
+          <p className="text-sm text-destructive">
+            Activa la sincronización de correo en Ajustes antes de conectar
+            Gmail.
+          </p>
+        ) : null}
         <Controller
           control={control}
-          name="target"
+          name="institutionId"
           render={({ field }) => (
             <SelectField
-              label="Cuenta o tarjeta"
+              label="Institución"
               value={field.value}
               onChange={field.onChange}
               options={
-                hasTargets
-                  ? targetOptions
-                  : [{ value: "", label: "Crea una cuenta o tarjeta primero" }]
+                hasInstitutions
+                  ? institutionOptions
+                  : [{ value: "", label: "Crea una institución primero" }]
               }
-              disabled={!hasTargets}
+              disabled={!hasInstitutions}
             />
           )}
         />
-        {errors.target?.message ? (
-          <p className="text-sm text-destructive">{errors.target.message}</p>
+        {errors.institutionId?.message ? (
+          <p className="text-sm text-destructive">
+            {errors.institutionId.message}
+          </p>
         ) : null}
         <Controller
           control={control}

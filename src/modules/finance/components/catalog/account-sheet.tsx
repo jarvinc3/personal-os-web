@@ -2,6 +2,7 @@
 
 import { CurrencySelectField } from "@/src/modules/finance/components/catalog/currency-select-field"
 import {
+  CATALOG_NONE,
   FINANCE_ACCOUNT_TYPE_LABEL,
   FINANCE_ACCOUNT_TYPES,
 } from "@/src/modules/finance/constants/catalog"
@@ -29,16 +30,29 @@ import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { DollarSign, LandmarkIcon, Palette } from "lucide-react"
 import { useEffect, useMemo } from "react"
-import { Controller, useForm } from "react-hook-form"
+import { Controller, useForm, useWatch } from "react-hook-form"
 import { z } from "zod"
 
-const schema = z.object({
-  name: z.string().trim().min(1, "Nombre obligatorio").max(120),
-  type: z.enum(FINANCE_ACCOUNT_TYPES),
-  currency: z.string().trim().min(3, "Moneda obligatoria").max(3),
-  institutionId: z.string().min(1, "La cuenta necesita una institución"),
-  color: z.string().trim().max(20),
-})
+const schema = z
+  .object({
+    name: z.string().trim().min(1, "Nombre obligatorio").max(120),
+    type: z.enum(FINANCE_ACCOUNT_TYPES),
+    currency: z.string().trim().min(3, "Moneda obligatoria").max(3),
+    institutionId: z.string(),
+    color: z.string().trim().max(20),
+  })
+  .superRefine((values, ctx) => {
+    if (
+      values.type !== "CASH" &&
+      (!values.institutionId || values.institutionId === CATALOG_NONE)
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["institutionId"],
+        message: "La cuenta necesita una institución",
+      })
+    }
+  })
 
 type FormValues = z.infer<typeof schema>
 
@@ -56,7 +70,9 @@ function toFormValues(
     name: account?.name ?? "",
     type: account?.type ?? "CHECKING",
     currency: account?.currency ?? defaultCurrency,
-    institutionId: account?.institutionId ?? defaultInstitutionId,
+    institutionId:
+      account?.institutionId ??
+      (account?.type === "CASH" ? CATALOG_NONE : defaultInstitutionId),
     color: account?.color ?? "",
   }
 }
@@ -86,10 +102,13 @@ export function AccountSheet({
     archiveMutation.isPending
 
   const institutionOptions = useMemo(
-    () => institutions.map((item) => ({ value: item.id, label: item.name })),
+    () => [
+      { value: CATALOG_NONE, label: "Sin institución" },
+      ...institutions.map((item) => ({ value: item.id, label: item.name })),
+    ],
     [institutions],
   )
-  const hasInstitutions = institutionOptions.length > 0
+  const hasInstitutions = institutions.length > 0
 
   const {
     control,
@@ -101,14 +120,20 @@ export function AccountSheet({
     defaultValues: toFormValues(
       account,
       defaultCurrency,
-      institutions[0]?.id ?? "",
+      institutions[0]?.id ?? CATALOG_NONE,
     ),
   })
+
+  const accountType = useWatch({ control, name: "type" })
 
   useEffect(() => {
     if (open) {
       reset(
-        toFormValues(account, defaultCurrency, institutions[0]?.id ?? ""),
+        toFormValues(
+          account,
+          defaultCurrency,
+          institutions[0]?.id ?? CATALOG_NONE,
+        ),
       )
     }
   }, [open, account, defaultCurrency, institutions, reset])
@@ -228,18 +253,27 @@ export function AccountSheet({
           name="institutionId"
           render={({ field }) => (
             <SelectField
-              label="Institución"
+              label={
+                accountType === "CASH"
+                  ? "Institución (opcional)"
+                  : "Institución"
+              }
               value={field.value}
               onChange={field.onChange}
               options={
-                hasInstitutions
+                hasInstitutions || accountType === "CASH"
                   ? institutionOptions
-                  : [{ value: "", label: "Crea una institución primero" }]
+                  : [{ value: CATALOG_NONE, label: "Crea una institución primero" }]
               }
-              disabled={!hasInstitutions}
+              disabled={!hasInstitutions && accountType !== "CASH"}
             />
           )}
         />
+        {errors.institutionId?.message ? (
+          <p className="text-sm text-destructive">
+            {errors.institutionId.message}
+          </p>
+        ) : null}
       </SummarySection>
       <SummarySection title="Moneda" icon={DollarSign}>
         <Controller

@@ -92,7 +92,7 @@ export type FinanceSpendingBucket = {
 
 export type FinanceAccount = {
   id: string
-  institutionId: string
+  institutionId: string | null
   institutionName: string | null
   name: string
   type: FinanceAccountType
@@ -214,6 +214,8 @@ export const FINANCE_INSTALLMENT_FREQ_LABEL: Record<FinanceInstallmentFreq, stri
 
 export type FinanceLoan = {
   id: string
+  institutionId: string | null
+  institution?: { id: string; name: string } | null
   accountId: string | null
   account?: { id: string; name: string } | null
   lenderName: string
@@ -272,16 +274,42 @@ export type FinanceEmailSyncLog = {
 
 export type FinanceEmailSource = {
   id: string
+  connectionId: string
+  institutionId: string
+  institutionName: string | null
   emailAddress: string
   bankDomain: string
   label: string | null
-  accountId: string | null
-  cardId: string | null
   provider: string
   isActive: boolean
   lastSyncedAt: string | null
   createdAt: string
   logs: FinanceEmailSyncLog[]
+}
+
+export type FinancePendingEmailMessage = {
+  id: string
+  sourceId: string
+  gmailMessageId: string
+  institutionId: string
+  institutionName: string
+  emailAddress: string
+  instrumentHint: string | null
+  lastFourHint: string | null
+  extractedPayload: {
+    amount?: number
+    currency?: string
+    merchant?: string | null
+    description?: string
+    type?: string
+  } | null
+  reason: string | null
+  createdAt: string
+}
+
+export type FinanceEmailAssignResult = {
+  assigned: boolean
+  transactionId?: string
 }
 
 export type FinanceEmailSyncTrigger = {
