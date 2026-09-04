@@ -70,7 +70,7 @@ export const RegisterForm = forwardRef<RegisterFormHandle, RegisterFormProps>(
       <div
         className={cn(
           isPending ? "opacity-80 pointer-events-none" : "",
-          "w-full max-w-sm"
+          "w-full md:max-w-sm"
         )}>
         <FieldGroup className="gap-4">
           <Controller
@@ -90,6 +90,7 @@ export const RegisterForm = forwardRef<RegisterFormHandle, RegisterFormProps>(
               />
             )}
           />
+
           <Controller
             control={control}
             name="email"
@@ -108,6 +109,7 @@ export const RegisterForm = forwardRef<RegisterFormHandle, RegisterFormProps>(
               />
             )}
           />
+
           <Controller
             control={control}
             name="password"
@@ -127,6 +129,7 @@ export const RegisterForm = forwardRef<RegisterFormHandle, RegisterFormProps>(
               />
             )}
           />
+
           <Controller
             control={control}
             name="confirmPassword"

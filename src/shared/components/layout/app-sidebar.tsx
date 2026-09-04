@@ -26,6 +26,7 @@ import { isModuleSectionActive } from "@/src/shared/lib/module-nav-active"
 import { cn } from "@/src/shared/lib/utils"
 import type { ModuleNavItem } from "@/src/shared/types/module-nav"
 import {
+  BellIcon,
   ChevronRight,
   Home,
   LogOutIcon,
@@ -37,17 +38,51 @@ import {
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { appAssets } from "../../constants/app-assets"
+import { useState } from "react"
+import { getAppIconPath } from "../../constants/app-assets"
 import { Separator } from "../ui/separator"
+import { useTheme } from "next-themes"
 
-const navItems = [
-  { title: "Inicio", url: APP_ROUTES.app.home, icon: Home },
-  { title: "Ajustes", url: APP_ROUTES.app.settings, icon: Settings },
-]
+const navItems = {
+  main: [
+    {
+      title: "Inicio",
+      url: APP_ROUTES.app.home,
+      icon: Home,
+    },
+    {
+      title: "Ajustes",
+      url: APP_ROUTES.app.settings,
+      icon: Settings,
+    },
+  ],
+  applications: [
+    {
+      title: "Keep Awake",
+      url: APP_ROUTES.app.keepAwake,
+      icon: Monitor,
+    },
+    {
+      title: FINANCE_APP_NAV.label,
+      url: FINANCE_APP_NAV.rootHref,
+      icon: FINANCE_APP_NAV.icon,
+      items: FINANCE_APP_NAV.items,
+    },
+  ],
+  notifications: [
+    {
+      title: "Notificaciones",
+      url: APP_ROUTES.app.notifications,
+      icon: BellIcon,
+    },
+  ],
+}
 
 export function AppSidebar() {
   const router = useRouter()
   const { logoutMutation } = useAuth()
+  const { resolvedTheme } = useTheme()
+  const appIcon = getAppIconPath(resolvedTheme)
 
   return (
     <Sidebar variant="sidebar" collapsible="icon">
@@ -56,7 +91,7 @@ export function AppSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton onClick={() => router.push(APP_ROUTES.app.home)}>
               <Image
-                src={appAssets.iconLight}
+                src={appIcon}
                 alt="Personal OS"
                 width={24}
                 height={24}
@@ -67,26 +102,13 @@ export function AppSidebar() {
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
+
       <SidebarContent>
-        <NavMain groupLabel="Menú principal" items={navItems} />
-        <Separator />
-        <NavMain
-          groupLabel="Aplicaciones"
-          items={[
-            {
-              title: "Keep Awake",
-              url: APP_ROUTES.app.keepAwake,
-              icon: Monitor,
-            },
-            {
-              title: FINANCE_APP_NAV.label,
-              url: FINANCE_APP_NAV.rootHref,
-              icon: FINANCE_APP_NAV.icon,
-              items: FINANCE_APP_NAV.items,
-            },
-          ]}
-        />
+        <NavMain groupLabel="Menú principal" items={navItems.main} />
+
+        <NavMain groupLabel="Aplicaciones" items={navItems.applications} />
       </SidebarContent>
+
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
@@ -163,45 +185,69 @@ function NavMain({
             }
 
             return (
-              <SidebarMenuItem key={item.title}>
-                <Collapsible open={isUnderRoot}>
-                  <SidebarMenuButton
-                    isActive={isUnderRoot}
-                    onClick={() => router.push(item.url)}
-                    size="md"
-                    aria-expanded={isUnderRoot}
-                  >
-                    {item.icon && <item.icon />}
-                    <span>{item.title}</span>
-                    <ChevronRight
-                      className={cn(
-                        "ml-auto size-4 transition-transform group-data-[collapsible=icon]:hidden",
-                        isUnderRoot && "rotate-90",
-                      )}
-                    />
-                  </SidebarMenuButton>
-                  <CollapsibleContent>
-                    <SidebarMenuSub>
-                      {sections.map((section) => (
-                        <SidebarMenuSubItem key={section.href}>
-                          <SidebarMenuSubButton
-                            asChild
-                            isActive={isModuleSectionActive(section, pathname)}
-                          >
-                            <Link href={section.href}>
-                              <span>{section.label}</span>
-                            </Link>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                      ))}
-                    </SidebarMenuSub>
-                  </CollapsibleContent>
-                </Collapsible>
-              </SidebarMenuItem>
+              <NavMainCollapsibleItem
+                key={`${item.title}-${isUnderRoot}`}
+                item={item}
+                pathname={pathname}
+                isUnderRoot={isUnderRoot}
+              />
             )
           })}
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>
+  )
+}
+
+function NavMainCollapsibleItem({
+  item,
+  pathname,
+  isUnderRoot,
+}: {
+  item: NavMainItem
+  pathname: string
+  isUnderRoot: boolean
+}) {
+  const [isOpen, setIsOpen] = useState(isUnderRoot)
+  const sections = item.items ?? []
+
+  return (
+    <SidebarMenuItem>
+      <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+        <SidebarMenuButton
+          isActive={isUnderRoot}
+          closeSidebarOnClick={false}
+          size="md"
+          aria-expanded={isOpen}
+          onClick={() => setIsOpen((open) => !open)}
+        >
+          {item.icon && <item.icon />}
+          <span>{item.title}</span>
+          <ChevronRight
+            className={cn(
+              "ml-auto size-4 transition-transform group-data-[collapsible=icon]:hidden",
+              isOpen && "rotate-90"
+            )}
+          />
+        </SidebarMenuButton>
+        <CollapsibleContent>
+          <SidebarMenuSub>
+            {sections.map((section) => (
+              <SidebarMenuSubItem key={section.href}>
+                <SidebarMenuSubButton
+                  asChild
+                  isActive={isModuleSectionActive(section, pathname)}
+                >
+                  <Link href={section.href}>
+                    {section.icon && <section.icon />}
+                    <span>{section.label}</span>
+                  </Link>
+                </SidebarMenuSubButton>
+              </SidebarMenuSubItem>
+            ))}
+          </SidebarMenuSub>
+        </CollapsibleContent>
+      </Collapsible>
+    </SidebarMenuItem>
   )
 }

@@ -64,7 +64,7 @@ export const LoginForm = forwardRef<LoginFormHandle, LoginFormProps>(
       <div
         className={cn(
           isPending ? "opacity-80 pointer-events-none" : "",
-          "w-full max-w-sm"
+          "w-full md:max-w-sm"
         )}
       >
         <FieldGroup className="gap-4">
@@ -92,6 +92,7 @@ export const LoginForm = forwardRef<LoginFormHandle, LoginFormProps>(
               />
             )}
           />
+
           <Controller
             control={control}
             name="password"

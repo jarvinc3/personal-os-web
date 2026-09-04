@@ -49,10 +49,8 @@ export default function LoginPage() {
   const desktopRegisterFormRef = useRef<RegisterFormHandle>(null)
   const sheetLoginFormRef = useRef<LoginFormHandle>(null)
   const sheetRegisterFormRef = useRef<RegisterFormHandle>(null)
-
-  const themeKey = resolvedTheme === "dark" ? "dark" : "light"
-  const appIcon = getAppIconPath(themeKey)
-  const welcomeIllustration = getWelcomeIllustrationPath(themeKey)
+  const appIcon = getAppIconPath(resolvedTheme)
+  const welcomeIllustration = getWelcomeIllustrationPath(resolvedTheme)
 
   const { open: openLoginSheet, setOpen: setOpenLoginSheet } =
     useSheetParam("login-sheet")
