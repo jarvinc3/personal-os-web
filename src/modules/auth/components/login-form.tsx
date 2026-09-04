@@ -99,6 +99,7 @@ export const LoginForm = forwardRef<LoginFormHandle, LoginFormProps>(
               <FormTextField
                 label="Contraseña"
                 type="password"
+                revealable
                 autoComplete="current-password"
                 placeholder="Mín. 8 caracteres, 1 mayúscula y 1 número"
                 inputRef={passwordInputRef}

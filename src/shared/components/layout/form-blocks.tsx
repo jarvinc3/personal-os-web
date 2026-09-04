@@ -10,11 +10,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/src/shared/components/ui/select";
+import { Button } from '@/src/shared/components/ui/button';
 import { Switch } from '@/src/shared/components/ui/switch';
 import { cn } from '@/src/shared/lib/utils';
-import { type LucideIcon } from 'lucide-react';
+import { Eye, EyeOff, type LucideIcon } from 'lucide-react';
 import {
   useId,
+  useState,
   type HTMLInputTypeAttribute,
   type KeyboardEventHandler,
   type ReactNode,
@@ -101,7 +103,7 @@ export function OptionRow({
           className="flex justify-center items-center rounded-md size-9 shrink-0"
           style={{ backgroundColor: iconColor ? `${iconColor}1a` : undefined }}
         >
-          <Icon className="size-[18px]" style={{ color: iconColor }} />
+          <Icon className="size-4.5" style={{ color: iconColor }} />
         </div>
       )}
       <FieldContent>
@@ -167,6 +169,7 @@ type FormTextFieldProps = {
   autoComplete?: string;
   icon?: LucideIcon;
   inputRef?: Ref<HTMLInputElement>;
+  revealable?: boolean;
 };
 
 export function FormTextField({
@@ -183,8 +186,12 @@ export function FormTextField({
   autoComplete,
   icon: Icon,
   inputRef,
+  revealable = false,
 }: FormTextFieldProps) {
   const hasError = invalid ?? Boolean(error);
+  const [revealed, setRevealed] = useState(false);
+  const canReveal = revealable && type === 'password';
+  const inputType = canReveal && revealed ? 'text' : type;
 
   return (
     <Field data-invalid={hasError ? true : undefined}>
@@ -192,13 +199,13 @@ export function FormTextField({
       <div className="flex relative flex-row gap-2 items-center">
         {Icon && (
           <div className="absolute left-3 top-1/2 -translate-y-1/2">
-            <Icon className="size-[18px]" />
+            <Icon className="size-4.5" />
           </div>
         )}
         <Input
           ref={inputRef}
-          className={cn(Icon && "pl-9")}
-          type={type}
+          className={cn(Icon && "pl-9", canReveal && "pr-10")}
+          type={inputType}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onBlur={onBlur}
@@ -208,6 +215,20 @@ export function FormTextField({
           autoComplete={autoComplete}
           aria-invalid={hasError || undefined}
         />
+        {canReveal ? (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-xs"
+            className="absolute right-1 top-1/2 -translate-y-1/2 text-muted-foreground"
+            aria-label={revealed ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+            aria-pressed={revealed}
+            disabled={disabled}
+            onClick={() => setRevealed((current) => !current)}
+          >
+            {revealed ? <EyeOff /> : <Eye />}
+          </Button>
+        ) : null}
       </div>
       {error ? <FieldError>{error}</FieldError> : null}
     </Field>

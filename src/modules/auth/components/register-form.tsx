@@ -115,6 +115,7 @@ export const RegisterForm = forwardRef<RegisterFormHandle, RegisterFormProps>(
               <FormTextField
                 label="Contraseña"
                 type="password"
+                revealable
                 autoComplete="new-password"
                 placeholder="Mín. 8 caracteres, 1 mayúscula y 1 número"
                 value={field.value}
@@ -133,6 +134,7 @@ export const RegisterForm = forwardRef<RegisterFormHandle, RegisterFormProps>(
               <FormTextField
                 label="Confirmar contraseña"
                 type="password"
+                revealable
                 autoComplete="new-password"
                 placeholder="Repite tu contraseña"
                 value={field.value}
