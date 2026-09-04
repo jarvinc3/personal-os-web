@@ -54,7 +54,7 @@ export function AuthFormFooter({
         {isGooglePending ? (
           <Spinner data-icon="inline-start" />
         ) : (
-          <ExternalLink className="size-[18px]" />
+          <ExternalLink className="size-4.5" />
         )}
         {isGooglePending ? "Conectando..." : "Continuar con Google"}
       </Button>

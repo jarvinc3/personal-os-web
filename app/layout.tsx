@@ -110,14 +110,14 @@ export default function RootLayout({
       <body>
         <QueryProvider>
           <AuthBootstrapProvider>
-            <AppEffectsProvider>
-              <TooltipProvider>
-                <ThemeProvider defaultTheme="light">
+            <ThemeProvider defaultTheme="light">
+              <AppEffectsProvider>
+                <TooltipProvider>
                   <Toaster position="top-center" richColors />
                   {children}
-                </ThemeProvider>
-              </TooltipProvider>
-            </AppEffectsProvider>
+                </TooltipProvider>
+              </AppEffectsProvider>
+            </ThemeProvider>
           </AuthBootstrapProvider>
         </QueryProvider>
         <Analytics />

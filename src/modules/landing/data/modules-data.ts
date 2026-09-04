@@ -18,7 +18,7 @@ export const appModules: AppModule[] = [
     icon: "💳",
     color: "text-emerald-700",
     bgColor: "bg-emerald-50 border-emerald-200",
-    status: "in_design",
+    status: "available",
     features: [
       "Lectura automática de emails bancarios",
       "Categorización inteligente con IA",

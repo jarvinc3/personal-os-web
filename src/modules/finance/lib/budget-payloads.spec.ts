@@ -58,6 +58,25 @@ describe("buildCreateBudgetBody", () => {
       false,
     )
   })
+
+  it("rejects alert thresholds outside the 0 to 100 range", () => {
+    const baseInput = {
+      categoryId: "cat-1",
+      periodType: "MONTHLY",
+      periodStart: "2026-09-01",
+      periodEnd: "2026-09-30",
+      amountLimit: "1290",
+    }
+
+    assert.deepEqual(
+      buildCreateBudgetBody({ ...baseInput, alertThresholdPct: "1200" }),
+      { ok: false, error: "El umbral debe estar entre 0 y 100" },
+    )
+    assert.deepEqual(
+      buildCreateBudgetBody({ ...baseInput, alertThresholdPct: "-1" }),
+      { ok: false, error: "El umbral debe estar entre 0 y 100" },
+    )
+  })
 })
 
 describe("budgetPctUsed", () => {

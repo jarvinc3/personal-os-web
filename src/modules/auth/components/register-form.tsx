@@ -70,7 +70,7 @@ export const RegisterForm = forwardRef<RegisterFormHandle, RegisterFormProps>(
       <div
         className={cn(
           isPending ? "opacity-80 pointer-events-none" : "",
-          "w-full max-w-sm"
+          "w-full md:max-w-sm"
         )}>
         <FieldGroup className="gap-4">
           <Controller
@@ -90,6 +90,7 @@ export const RegisterForm = forwardRef<RegisterFormHandle, RegisterFormProps>(
               />
             )}
           />
+
           <Controller
             control={control}
             name="email"
@@ -108,6 +109,7 @@ export const RegisterForm = forwardRef<RegisterFormHandle, RegisterFormProps>(
               />
             )}
           />
+
           <Controller
             control={control}
             name="password"
@@ -115,6 +117,7 @@ export const RegisterForm = forwardRef<RegisterFormHandle, RegisterFormProps>(
               <FormTextField
                 label="Contraseña"
                 type="password"
+                revealable
                 autoComplete="new-password"
                 placeholder="Mín. 8 caracteres, 1 mayúscula y 1 número"
                 value={field.value}
@@ -126,6 +129,7 @@ export const RegisterForm = forwardRef<RegisterFormHandle, RegisterFormProps>(
               />
             )}
           />
+
           <Controller
             control={control}
             name="confirmPassword"
@@ -133,6 +137,7 @@ export const RegisterForm = forwardRef<RegisterFormHandle, RegisterFormProps>(
               <FormTextField
                 label="Confirmar contraseña"
                 type="password"
+                revealable
                 autoComplete="new-password"
                 placeholder="Repite tu contraseña"
                 value={field.value}

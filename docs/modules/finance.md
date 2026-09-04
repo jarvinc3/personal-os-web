@@ -2,25 +2,26 @@
 
 ## Status
 
-Shell of `/finance` (#14), catalog `/finance/accounts` (#15–#16), dashboard resumen (#17), paginated ledger (#18), capture/confirm/reverse/transfers (#19), paginated budgets (#20), planning (#21) and Gmail sync (#22) are in `personal-os-web`.
+Shell of `/finance` (#14), catalog `/finance/accounts` (#15–#16), dashboard resumen (#17), paginated ledger (#18), capture/confirm/reverse/transfers (#19), paginated budgets (#20), planning (#21), Gmail sync (#22), Inicio shortcut (#23) and landing `available` (#13) are in `personal-os-web`.
 
 What exists today:
 
 - Route `/finance` with module gate (`useFinanceEnabled`) — disabled/unconfigured shows CTA to Settings (`?sheet=finance-sheet`) and **does not** call `/finance/*`
 - `/finance` dashboard: `analytics/summary`, spending-by-category, spending-over-time (`points`), budget-status. Charts via `ChartContainer` + Recharts (`src/shared/components/ui/chart.tsx`). `baseCurrency` comes from the summary payload.
 - UI under `src/modules/finance/components/`: `layout/` (shell + gate), `catalog/` (instituciones, cuentas, tarjetas, categorías), `dashboard/` (resumen y charts), `transactions/` (listado, detalle, captura y transferencias), `budgets/` (listado paginado y sheet), `planning/` (ahorros, préstamos, cobros), `sync/` (Gmail OAuth y sources)
-- `/finance/accounts`: instituciones, cuentas, tarjetas y **categorías** (arrays). Alta de cuenta **sin** `balance`. Archivo: cuenta `PATCH isActive: false`; institución/tarjeta `DELETE`. Saldos de tarjeta: `POST /finance/cards/:id/balances` (números). Categorías: `icon` es emoji; DELETE de system → 404 del API.
+- `/finance/accounts`: instituciones, cuentas, tarjetas, **categorías** y **fuentes Gmail** (`FinanceSyncList`). Alta de cuenta **sin** `balance`. Archivo: cuenta `PATCH isActive: false`; institución/tarjeta `DELETE`. Saldos de tarjeta: `POST /finance/cards/:id/balances` (números). Categorías: `icon` es emoji; DELETE de system → 404 del API.
 - `/finance/transactions`: `GET` paginado `{ items, pagination }` (default `page=1` `limit=20`). Filtros del DTO: fechas, cuenta, tarjeta, tipo, status. Detalle `GET :id`. Create DEBIT/CREDIT (`POST /transactions`), transfers (`POST /transfers`, never `type: TRANSFER` on create), PATCH, confirm, reverse, DELETE.
 - `/finance/budgets`: `GET` paginado `{ items, pagination }` (default `page=1` `limit=20`). CRUD. `amountLimit`/`amountSpent` strings; `alertThresholdPct` number. `pctUsed` se calcula en cliente. No usa `list_budgets` del Facade.
 - `/finance/planning`: arrays (no paginado). Ahorros (`isCompleted` del API). Préstamos: tasa UI `%` → API fracción `0.12`; archivo `DELETE` / `PATCH isActive: false`. Cobros: sin DELETE (`CANCELLED`); `PAID` sin `paidAmount` lo completa el API.
-- `/finance/sync`: OAuth Gmail web (`returnTo` desde `NEXT_PUBLIC_URL`, origin `http://localhost:3000`, nunca Vite `:5173`). `accountId` xor `cardId`. Sources array. POST sync muestra `queued: false` + `reason` si no hay Redis. Callback de Google es el del **API** (`@Public()`).
-- Desktop sub-nav (Resumen, Cuentas, Movimientos, Presupuestos, Planificación y Sincronizar listos)
+- `/finance/sync` y `/finance/sync/oauth` se conservan para OAuth/bookmarks. La UI de sources vive también en Cuentas; el tabBar **no** incluye Sincronizar.
+- Chrome de módulo (compartido, no solo Finanzas): mobile `ModuleTabBar` (5 ítems) + desktop hijos colapsables en el sidebar bajo Finanzas. Keep Awake sigue siendo una hoja.
 - Money helpers `parseFinanceMoney` / `formatFinanceMoney` (`src/modules/finance/lib/money.ts`). Write payloads (`ledger-payloads.ts`) send amounts as JSON **numbers**.
 - REST path constants including `TRANSACTION_REVERSE` and `TRANSFERS`
 - Module toggle and config in Settings (`EditFinanceSheet`, slug `finance`)
 - Chat with `moduleSlug=finance` (backend tools; subset of REST)
+- Authenticated Inicio (`/home`) has a Finanzas shortcut (`APP_ROUTES.app.finance`) next to Keep Awake. Disabled module still opens `/finance` (shell gate, not 404). Landing `modules-data.ts` marks finance `available`.
 
-Do **not** copy the mobile tab layout (`Resumen` / `Movimientos` / …) into this repo. Sub-nav is desktop (horizontal), compact scroll on narrow viewports.
+The next life-module should register `ModuleAppNav` + wrap pages with `ModuleSectionLayout`. Do **not** copy a finance-only tab bar.
 
 Point the client at the API **develop** branch (money-as-string, reverse, OAuth `returnTo`).
 
@@ -29,11 +30,11 @@ Point the client at the API **develop** branch (money-as-string, reverse, OAuth 
 | Path | Ticket | Notes |
 | --- | --- | --- |
 | `/finance` | #14 / #17 | Shell + dashboard analytics |
-| `/finance/accounts` | #15 / #16 | instituciones, cuentas, tarjetas, categorías |
+| `/finance/accounts` | #15 / #16 | instituciones, cuentas, tarjetas, categorías, Gmail sources |
 | `/finance/transactions` | #18 / #19 | listado paginado + detalle + captura, confirm, reverse y transfers |
 | `/finance/budgets` | #20 | listado paginado + CRUD |
 | `/finance/planning` | #21 | ahorros, préstamos, cobros (arrays) |
-| `/finance/sync` | #22 | Gmail OAuth web + sources + trigger sync |
+| `/finance/sync` | #22 | Gmail OAuth web + sources + trigger sync (también embebido en Cuentas) |
 
 ## Money and list shapes
 

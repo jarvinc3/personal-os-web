@@ -9,7 +9,7 @@ Documentation for each functional area of **personal-os-web**. Some files still 
 | AI Agent      | `ai.md`            | `/chat`                                     | `ai-agent`                  |
 | Notifications | `notifications.md` | `/notifications`                            | `notifications`             |
 | Keep Awake    | `keep-awake.md`    | `/keep-awake`                               | — (client-only)             |
-| Finance       | `finance.md`       | `/finance`, `/finance/accounts`, `/finance/transactions` | `finance`                   |
+| Finance       | `finance.md`       | `/finance`, `/finance/accounts`, `/finance/transactions`, `/finance/budgets`, `/finance/planning`, `/finance/sync` | `finance`                   |
 
 ## Planned modules (settings UI only)
 
@@ -19,6 +19,8 @@ These have config sheets in Settings but no dedicated app routes yet:
 - Projects (`EditProjectsSheet`)
 - Health (`EditHealthSheet`)
 - Subscriptions (`EditSubscriptionsSheet`)
+
+When a module gains app routes, register `ModuleAppNav` (`items` = secciones) and wrap pages with `ModuleSectionLayout`. Default chrome is a mobile `ModuleTabBar` plus collapsible sidebar children on desktop. A leaf (Keep Awake) has no `items` and stays a flat sidebar row.
 
 ## Cross-cutting docs
 

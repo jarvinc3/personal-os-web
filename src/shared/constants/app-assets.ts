@@ -9,14 +9,14 @@ export const appAssets = {
   welcomeIllustrationDark: '/images/welcome-ilustration-dark.png',
 } as const;
 
-export function getAppIconPath(theme: 'light' | 'dark' | 'system' | undefined): string {
+export function getAppIconPath(theme: string | undefined): string {
   if (theme === 'dark') {
     return appAssets.iconDark;
   }
   return appAssets.iconLight;
 }
 
-export function getWelcomeIllustrationPath(theme: 'light' | 'dark' | 'system' | undefined): string {
+export function getWelcomeIllustrationPath(theme: string | undefined): string {
   if (theme === 'dark') {
     return appAssets.welcomeIllustrationDark;
   }
