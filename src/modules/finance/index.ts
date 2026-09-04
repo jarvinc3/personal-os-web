@@ -1,6 +1,6 @@
 export { FinanceAuthenticatedPage } from "@/src/modules/finance/components/layout/finance-authenticated-page"
 export { FinanceLayout } from "@/src/modules/finance/components/layout/finance-layout"
-export { FINANCE_NAV_ITEMS } from "@/src/modules/finance/constants/nav"
+export { FINANCE_APP_NAV, FINANCE_NAV_ITEMS } from "@/src/modules/finance/constants/nav"
 export { useAccounts } from "@/src/modules/finance/hooks/use-accounts"
 export {
   useAnalyticsSummary,

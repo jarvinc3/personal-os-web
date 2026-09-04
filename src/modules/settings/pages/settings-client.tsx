@@ -41,9 +41,8 @@ import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { formatTimeRange } from "@/src/shared/lib/date-format"
 import { Edit, LogOut, RefreshCw } from "lucide-react"
-import { useTheme } from "next-themes"
 import { useRouter } from "next/navigation"
-import { useCallback, useEffect, useRef } from "react"
+import { useCallback, useEffect } from "react"
 
 const APP_VERSION = process.env.NEXT_PUBLIC_APP_VERSION ?? "1.0.0"
 const APP_ENV =
@@ -53,7 +52,6 @@ const APP_ENV =
 
 export default function SettingsPage() {
   const router = useRouter()
-  const { setTheme } = useTheme()
   const { isAuthenticated, isLoading, user } = useAuthGuard()
   const { logoutMutation } = useAuth()
   const { profileQuery, preferences, updatePreferences } = useProfile()
@@ -75,7 +73,6 @@ export default function SettingsPage() {
   const profile = profileQuery.data
   const displayName = profile?.fullName ?? user?.fullName ?? "Usuario"
   const displayEmail = profile?.email ?? user?.email ?? ""
-  const appliedThemeRef = useRef<string | null>(null)
   const themeValue = getSettingValue<ThemeValue>(preferences.theme)
   const quietHours = preferences.notifications.quietHours
 
@@ -84,12 +81,6 @@ export default function SettingsPage() {
       router.replace(APP_ROUTES.auth.login)
     }
   }, [isAuthenticated, isLoading, router])
-
-  useEffect(() => {
-    if (!themeValue || appliedThemeRef.current === themeValue) return
-    appliedThemeRef.current = themeValue
-    setTheme(themeValue === "system" ? "system" : themeValue)
-  }, [themeValue, setTheme])
 
   const handlePreferenceToggle = useCallback(
     async (

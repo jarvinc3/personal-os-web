@@ -6,6 +6,7 @@ import { CardSheet } from "@/src/modules/finance/components/catalog/card-sheet"
 import { FinanceCategoriesSection } from "@/src/modules/finance/components/catalog/finance-categories-section"
 import { InstitutionSheet } from "@/src/modules/finance/components/catalog/institution-sheet"
 import { FinanceAuthenticatedPage } from "@/src/modules/finance/components/layout/finance-authenticated-page"
+import { FinanceSyncList } from "@/src/modules/finance/components/sync/finance-sync"
 import {
   FINANCE_ACCOUNT_TYPE_LABEL,
   FINANCE_CARD_TYPE_LABEL,
@@ -257,6 +258,8 @@ function FinanceAccountsCatalog() {
       </SummarySection>
 
       <FinanceCategoriesSection enabled={isEnabled} />
+
+      <FinanceSyncList enabled={isEnabled} />
 
       <InstitutionSheet
         open={sheet.kind === "institution"}

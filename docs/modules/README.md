@@ -20,6 +20,8 @@ These have config sheets in Settings but no dedicated app routes yet:
 - Health (`EditHealthSheet`)
 - Subscriptions (`EditSubscriptionsSheet`)
 
+When a module gains app routes, register `ModuleAppNav` (`items` = secciones) and wrap pages with `ModuleSectionLayout`. Default chrome is a mobile `ModuleTabBar` plus collapsible sidebar children on desktop. A leaf (Keep Awake) has no `items` and stays a flat sidebar row.
+
 ## Cross-cutting docs
 
 - `project-guide.md` — architecture and data model
