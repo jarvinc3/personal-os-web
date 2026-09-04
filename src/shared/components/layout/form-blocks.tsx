@@ -103,7 +103,7 @@ export function OptionRow({
           className="flex justify-center items-center rounded-md size-9 shrink-0"
           style={{ backgroundColor: iconColor ? `${iconColor}1a` : undefined }}
         >
-          <Icon className="size-[18px]" style={{ color: iconColor }} />
+          <Icon className="size-4.5" style={{ color: iconColor }} />
         </div>
       )}
       <FieldContent>
@@ -199,7 +199,7 @@ export function FormTextField({
       <div className="flex relative flex-row gap-2 items-center">
         {Icon && (
           <div className="absolute left-3 top-1/2 -translate-y-1/2">
-            <Icon className="size-[18px]" />
+            <Icon className="size-4.5" />
           </div>
         )}
         <Input
