@@ -105,6 +105,9 @@ export function buildCreateBudgetBody(input: {
     if (!Number.isFinite(alertThresholdPct)) {
       return { ok: false, error: "Umbral inválido" }
     }
+    if (alertThresholdPct < 0 || alertThresholdPct > 100) {
+      return { ok: false, error: "El umbral debe estar entre 0 y 100" }
+    }
     body.alertThresholdPct = alertThresholdPct
   }
   return { ok: true, body }
