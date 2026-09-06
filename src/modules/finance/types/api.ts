@@ -58,3 +58,7 @@ export const FINANCE_EMAIL_SOURCES_QUERY_KEY = [
   ...FINANCE_QUERY_KEY,
   "email-sources",
 ] as const
+export const FINANCE_EMAIL_PENDING_QUERY_KEY = [
+  ...FINANCE_QUERY_KEY,
+  "email-pending",
+] as const

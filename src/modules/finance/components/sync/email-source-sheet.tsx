@@ -8,15 +8,9 @@ import {
 } from "@/src/modules/finance/hooks/use-email-sources"
 import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
 import { syncFailureReason } from "@/src/modules/finance/lib/gmail-oauth"
-import {
-  buildLedgerTargetOptions,
-  encodeLedgerTarget,
-  splitLedgerTarget,
-} from "@/src/modules/finance/lib/ledger-payloads"
 import type {
-  FinanceAccount,
-  FinanceCard,
   FinanceEmailSource,
+  FinanceInstitution,
 } from "@/src/modules/finance/types/entities"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
 import {
@@ -35,7 +29,7 @@ import { Controller, useForm } from "react-hook-form"
 import { z } from "zod"
 
 const schema = z.object({
-  target: z.string().min(1, "Elige una cuenta o una tarjeta"),
+  institutionId: z.string().min(1, "Elige una institución"),
   bankDomain: z.string().trim().min(1, "Dominio obligatorio").max(150),
   label: z.string().max(120),
 })
@@ -43,13 +37,8 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>
 
 function toFormValues(source: FinanceEmailSource | null): FormValues {
-  const target = source?.accountId
-    ? encodeLedgerTarget("account", source.accountId)
-    : source?.cardId
-      ? encodeLedgerTarget("card", source.cardId)
-      : CATALOG_NONE
   return {
-    target,
+    institutionId: source?.institutionId ?? CATALOG_NONE,
     bankDomain: source?.bankDomain ?? "",
     label: source?.label ?? "",
   }
@@ -59,16 +48,16 @@ type EmailSourceSheetProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
   source: FinanceEmailSource | null
-  accounts: FinanceAccount[]
-  cards: FinanceCard[]
+  institutions: FinanceInstitution[]
+  emailSyncEnabled: boolean
 }
 
 export function EmailSourceSheet({
   open,
   onOpenChange,
   source,
-  accounts,
-  cards,
+  institutions,
+  emailSyncEnabled,
 }: EmailSourceSheetProps) {
   const updateMutation = useUpdateEmailSource()
   const disconnectMutation = useDisconnectEmailSource()
@@ -77,10 +66,9 @@ export function EmailSourceSheet({
     updateMutation.isPending ||
     disconnectMutation.isPending ||
     syncMutation.isPending
-  const targetOptions = useMemo(
-    () => buildLedgerTargetOptions(accounts, cards),
-    [accounts, cards],
-  )
+  const institutionOptions = institutions
+    .filter((item) => item.isActive)
+    .map((item) => ({ value: item.id, label: item.name }))
 
   const {
     control,
@@ -103,16 +91,11 @@ export function EmailSourceSheet({
 
   const onSubmit = submitForm(async (values) => {
     if (!source) return
-    const target = splitLedgerTarget(values.target)
-    if (target.accountId && target.cardId) {
-      appToast.error({ text1: "Elige una cuenta o una tarjeta, no ambas" })
-      return
-    }
     try {
       await updateMutation.mutateAsync({
         id: source.id,
         body: {
-          ...target,
+          institutionId: values.institutionId,
           bankDomain: values.bankDomain,
           label: values.label || undefined,
         },
@@ -126,6 +109,13 @@ export function EmailSourceSheet({
 
   async function onSync() {
     if (!source) return
+    if (!emailSyncEnabled) {
+      appToast.error({
+        text1: "Sincronización de correo desactivada",
+        text2: "Actívala en Ajustes → Finanzas.",
+      })
+      return
+    }
     try {
       const result = await syncMutation.mutateAsync(source.id)
       const reason = syncFailureReason(result)
@@ -157,7 +147,7 @@ export function EmailSourceSheet({
       open={open}
       onOpenChange={onOpenChange}
       title="Fuente de Gmail"
-      description={source?.emailAddress ?? "Edita dominio y destino."}
+      description={source?.emailAddress ?? "Edita dominio e institución."}
       actions={{
         delete: source ? (
           <Button
@@ -192,12 +182,12 @@ export function EmailSourceSheet({
         ),
       }}
     >
-      <SummarySection title="Destino" icon={MailIcon}>
+      <SummarySection title="Institución" icon={MailIcon}>
         {source ? (
           <Button
             type="button"
             variant="secondary"
-            disabled={isPending}
+            disabled={isPending || !source.isActive || !emailSyncEnabled}
             onClick={() => void onSync()}
           >
             Sincronizar ahora
@@ -205,18 +195,20 @@ export function EmailSourceSheet({
         ) : null}
         <Controller
           control={control}
-          name="target"
+          name="institutionId"
           render={({ field }) => (
             <SelectField
-              label="Cuenta o tarjeta"
+              label="Institución"
               value={field.value}
               onChange={field.onChange}
-              options={targetOptions}
+              options={institutionOptions}
             />
           )}
         />
-        {errors.target?.message ? (
-          <p className="text-sm text-destructive">{errors.target.message}</p>
+        {errors.institutionId?.message ? (
+          <p className="text-sm text-destructive">
+            {errors.institutionId.message}
+          </p>
         ) : null}
         <Controller
           control={control}

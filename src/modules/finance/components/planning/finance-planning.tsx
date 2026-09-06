@@ -4,6 +4,7 @@ import { LoanSheet } from "@/src/modules/finance/components/planning/loan-sheet"
 import { ReceivableSheet } from "@/src/modules/finance/components/planning/receivable-sheet"
 import { SavingsGoalSheet } from "@/src/modules/finance/components/planning/savings-goal-sheet"
 import { useAccounts } from "@/src/modules/finance/hooks/use-accounts"
+import { useInstitutions } from "@/src/modules/finance/hooks/use-institutions"
 import { useLoans } from "@/src/modules/finance/hooks/use-loans"
 import { useReceivables } from "@/src/modules/finance/hooks/use-receivables"
 import { useSavingsGoals } from "@/src/modules/finance/hooks/use-savings-goals"
@@ -98,11 +99,13 @@ export function FinancePlanningList({
 }: FinancePlanningListProps) {
   const [sheet, setSheet] = useState<SheetState>({ kind: "none" })
   const accountsQuery = useAccounts(enabled)
+  const institutionsQuery = useInstitutions(enabled)
   const savingsQuery = useSavingsGoals(enabled)
   const loansQuery = useLoans(enabled)
   const receivablesQuery = useReceivables(enabled)
 
   const accounts = accountsQuery.data ?? []
+  const institutions = institutionsQuery.data ?? []
   const savings = savingsQuery.data ?? []
   const loans = loansQuery.data ?? []
   const receivables = receivablesQuery.data ?? []
@@ -293,6 +296,7 @@ export function FinancePlanningList({
         }}
         loan={sheet.kind === "loan" ? sheet.item : null}
         accounts={accounts}
+        institutions={institutions}
         defaultCurrency={defaultCurrency}
       />
       <ReceivableSheet

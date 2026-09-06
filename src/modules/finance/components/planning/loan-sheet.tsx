@@ -14,6 +14,7 @@ import { buildLoanBody } from "@/src/modules/finance/lib/planning-payloads"
 import type {
   FinanceAccount,
   FinanceInstallmentFreq,
+  FinanceInstitution,
   FinanceLoan,
 } from "@/src/modules/finance/types/entities"
 import {
@@ -33,11 +34,12 @@ import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { LandmarkIcon } from "lucide-react"
 import { useEffect, useMemo } from "react"
-import { Controller, useForm } from "react-hook-form"
+import { Controller, useForm, useWatch } from "react-hook-form"
 import { z } from "zod"
 
 const schema = z.object({
   lenderName: z.string().trim().min(1, "Prestamista obligatorio").max(120),
+  institutionId: z.string(),
   accountId: z.string(),
   originalAmount: z.string().trim().min(1, "Monto original obligatorio"),
   currentBalance: z.string().trim().min(1, "Saldo obligatorio"),
@@ -71,6 +73,7 @@ function toFormValues(
 ): FormValues {
   return {
     lenderName: loan?.lenderName ?? "",
+    institutionId: loan?.institutionId ?? CATALOG_NONE,
     accountId: loan?.accountId ?? CATALOG_NONE,
     originalAmount: loan?.originalAmount ?? "",
     currentBalance: loan?.currentBalance ?? "",
@@ -90,6 +93,7 @@ type LoanSheetProps = {
   onOpenChange: (open: boolean) => void
   loan: FinanceLoan | null
   accounts: FinanceAccount[]
+  institutions: FinanceInstitution[]
   defaultCurrency: string
 }
 
@@ -98,6 +102,7 @@ export function LoanSheet({
   onOpenChange,
   loan,
   accounts,
+  institutions,
   defaultCurrency,
 }: LoanSheetProps) {
   const isEdit = Boolean(loan)
@@ -109,29 +114,65 @@ export function LoanSheet({
     updateMutation.isPending ||
     archiveMutation.isPending
 
-  const accountOptions = useMemo(
-    () => [
-      { value: CATALOG_NONE, label: "Sin cuenta" },
-      ...accounts.map((item) => ({ value: item.id, label: item.name })),
-    ],
-    [accounts],
-  )
-
   const {
     control,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: toFormValues(loan, defaultCurrency),
   })
 
+  const selectedInstitutionId = useWatch({ control, name: "institutionId" })
+  const selectedAccountId = useWatch({ control, name: "accountId" })
+
+  const institutionOptions = useMemo(
+    () => [
+      { value: CATALOG_NONE, label: "Prestamista externo" },
+      ...institutions.map((item) => ({ value: item.id, label: item.name })),
+    ],
+    [institutions],
+  )
+
+  const institutionAccounts = accounts.filter(
+    (item) =>
+      item.isActive &&
+      (selectedInstitutionId === CATALOG_NONE ||
+        item.institutionId === selectedInstitutionId),
+  )
+  const accountOptions = useMemo(
+    () => [
+      { value: CATALOG_NONE, label: "Sin cuenta de pago" },
+      ...institutionAccounts.map((item) => ({
+        value: item.id,
+        label: item.name,
+      })),
+    ],
+    [institutionAccounts],
+  )
+
   useEffect(() => {
     if (open) {
       reset(toFormValues(loan, defaultCurrency))
     }
   }, [open, loan, defaultCurrency, reset])
+
+  useEffect(() => {
+    if (
+      selectedAccountId !== CATALOG_NONE &&
+      !accounts.some(
+        (item) =>
+          item.id === selectedAccountId &&
+          item.isActive &&
+          (selectedInstitutionId === CATALOG_NONE ||
+            item.institutionId === selectedInstitutionId),
+      )
+    ) {
+      setValue("accountId", CATALOG_NONE)
+    }
+  }, [accounts, selectedAccountId, selectedInstitutionId, setValue])
 
   const submitForm = useMemo(
     () => createSheetSubmit(handleSubmit),
@@ -232,10 +273,22 @@ export function LoanSheet({
         />
         <Controller
           control={control}
+          name="institutionId"
+          render={({ field }) => (
+            <SelectField
+              label="Institución (si está en el catálogo)"
+              value={field.value}
+              onChange={field.onChange}
+              options={institutionOptions}
+            />
+          )}
+        />
+        <Controller
+          control={control}
           name="accountId"
           render={({ field }) => (
             <SelectField
-              label="Cuenta (opcional)"
+              label="Cuenta de pago (opcional)"
               value={field.value}
               onChange={field.onChange}
               options={accountOptions}
