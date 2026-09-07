@@ -5,8 +5,14 @@ import {
   institutionInitials,
   type InstitutionStackItem,
 } from "@/src/modules/finance/lib/institution-stack";
-import type { FinanceMoneyDisplay } from "@/src/modules/finance/lib/money";
-import { formatFinanceMoney } from "@/src/modules/finance/lib/money";
+import {
+  formatFinanceMoney,
+  type FinanceMoneyDisplay,
+} from "@/src/modules/finance/lib/money";
+import {
+  classifyWalletGesture,
+  resetWalletGestureOffset,
+} from "@/src/modules/finance/lib/wallet-gesture";
 import { cn } from "@/src/shared/lib/utils";
 import { motion } from "framer-motion";
 import { Building2Icon } from "lucide-react";
@@ -14,7 +20,6 @@ import { useRef, useState } from "react";
 
 const FALLBACK_INSTITUTION_COLOR = "#1B4332"
 const FALLBACK_CASH_COLOR = "#334155"
-const DRAG_CLICK_SUPPRESS_PX = 8
 
 type InstitutionSwapStackProps = {
   items: InstitutionStackItem[]
@@ -147,7 +152,7 @@ function InstitutionWalletCard({
   onCycle,
   onPress,
 }: InstitutionWalletCardProps) {
-  const suppressClickRef = useRef(false)
+  const offsetYRef = useRef(resetWalletGestureOffset())
 
   return (
     <motion.button
@@ -156,19 +161,23 @@ function InstitutionWalletCard({
       dragConstraints={{ top: -180, bottom: 0 }}
       dragElastic={0.5}
       dragSnapToOrigin
+      onPointerDown={() => {
+        offsetYRef.current = resetWalletGestureOffset()
+      }}
+      onDrag={(_event, info) => {
+        offsetYRef.current = info.offset.y
+      }}
       onDragEnd={(_event, info) => {
-        if (Math.abs(info.offset.y) > DRAG_CLICK_SUPPRESS_PX) {
-          suppressClickRef.current = true
+        offsetYRef.current = info.offset.y
+        if (classifyWalletGesture(info.offset.y) === "cycle") {
+          onCycle?.()
         }
-        if (info.offset.y < -70) onCycle?.()
       }}
       whileTap={{ scale: 0.985 }}
       onClick={() => {
-        if (suppressClickRef.current) {
-          suppressClickRef.current = false
-          return
+        if (classifyWalletGesture(offsetYRef.current) === "press") {
+          onPress?.()
         }
-        onPress?.()
       }}
       className="relative flex h-95 w-full cursor-pointer flex-col justify-between rounded-3xl p-6 text-left"
       style={{ backgroundColor: color }}

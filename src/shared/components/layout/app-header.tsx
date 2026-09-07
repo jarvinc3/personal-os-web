@@ -24,7 +24,7 @@ import { Separator } from "@/src/shared/components/ui/separator"
 import { SidebarTrigger } from "@/src/shared/components/ui/sidebar"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { useHeaderContext } from "@/src/shared/context/header-context"
-import { useScrollDirection } from "@/src/shared/hooks/use-scroll-direction"
+import { accentSurfaceGradient } from "@/src/shared/lib/accent-gradient"
 import { cn } from "@/src/shared/lib/utils"
 import { useAppStore } from "@/src/shared/store/app-store"
 import {
@@ -305,11 +305,9 @@ export function AppHeader() {
   const pathname = usePathname()
   const router = useRouter()
   const { config } = useHeaderContext()
-  const { hidden } = useScrollDirection()
 
   const fallbackTitle = resolvePageTitle(pathname)
   const title = config.title ?? fallbackTitle
-  const scrollHidden = config.scrollHide && hidden
 
   const handleBack = config.onBack ?? (() => router.back())
 
@@ -320,13 +318,16 @@ export function AppHeader() {
     <header
       data-header-variant={config.variant}
       className={cn(
-        "sticky top-0 z-40 flex h-(--header-height) shrink-0 items-center gap-2 py-2.5 transition-transform duration-300 ease-in-out",
+        "sticky top-0 z-40 flex h-(--header-height) shrink-0 items-center gap-2 py-2.5",
         accentColor
           ? "text-white backdrop-blur-none"
           : "bg-background/80 backdrop-blur-lg",
-        scrollHidden && "-translate-y-full"
       )}
-      style={accentColor ? { backgroundColor: accentColor } : undefined}
+      style={
+        accentColor
+          ? { backgroundImage: accentSurfaceGradient(accentColor) }
+          : undefined
+      }
     >
       {config.variant === "secondary" ? (
         <SecondaryHeader

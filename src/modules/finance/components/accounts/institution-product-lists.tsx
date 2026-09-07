@@ -124,13 +124,6 @@ export function CardProductRow({
   display,
   onPress,
 }: CardProductRowProps) {
-  const primary = card.balances[0]
-  const amount = primary
-    ? formatFinanceMoney(primary.balance, {
-      ...display,
-      currency: primary.currency,
-    })
-    : "Sin saldo"
   const network = card.network
     ? FINANCE_CARD_NETWORK_LABEL[card.network]
     : null
@@ -154,11 +147,22 @@ export function CardProductRow({
         •••• {card.lastFour ?? "····"}
       </p>
       <div className="flex items-end justify-between gap-3">
-        <div>
+        <div className="min-w-0">
           <p className="text-[10px] uppercase tracking-[0.14em] text-white/55">
             Balance
           </p>
-          <p className="text-xl font-bold tabular-nums">{amount}</p>
+          {card.balances.length === 0 ? (
+            <p className="text-xl font-bold tabular-nums">Sin saldo</p>
+          ) : (
+            card.balances.map((item) => (
+              <p key={item.id} className="text-xl font-bold tabular-nums">
+                {formatFinanceMoney(item.balance, {
+                  ...display,
+                  currency: item.currency,
+                })}
+              </p>
+            ))
+          )}
         </div>
         <p className="truncate text-sm text-white/75">{card.name}</p>
       </div>

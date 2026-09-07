@@ -21,7 +21,6 @@ export type PageHeaderConfig = {
   showNotificationBell?: boolean
   showUserMenu?: boolean
   onBack?: () => void
-  scrollHide?: boolean
 }
 
 export type ResolvedPageHeaderConfig = {
@@ -34,7 +33,6 @@ export type ResolvedPageHeaderConfig = {
   showNotificationBell: boolean
   showUserMenu: boolean
   onBack?: () => void
-  scrollHide: boolean
 }
 
 const DEFAULT_CONFIG: ResolvedPageHeaderConfig = {
@@ -42,7 +40,6 @@ const DEFAULT_CONFIG: ResolvedPageHeaderConfig = {
   showSidebarTrigger: true,
   showNotificationBell: true,
   showUserMenu: true,
-  scrollHide: true,
 }
 
 function resolveConfig(config: PageHeaderConfig): ResolvedPageHeaderConfig {
@@ -59,7 +56,6 @@ function resolveConfig(config: PageHeaderConfig): ResolvedPageHeaderConfig {
     showNotificationBell: config.showNotificationBell ?? !isSecondary,
     showUserMenu: config.showUserMenu ?? !isSecondary,
     onBack: config.onBack,
-    scrollHide: config.scrollHide ?? true,
   }
 }
 
@@ -87,8 +83,7 @@ export function HeaderProvider({ children }: { children: ReactNode }) {
         prev.showSidebarTrigger === resolved.showSidebarTrigger &&
         prev.showNotificationBell === resolved.showNotificationBell &&
         prev.showUserMenu === resolved.showUserMenu &&
-        prev.onBack === resolved.onBack &&
-        prev.scrollHide === resolved.scrollHide
+        prev.onBack === resolved.onBack
       ) {
         return prev
       }

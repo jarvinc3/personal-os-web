@@ -209,6 +209,92 @@ export function buildCardBalanceBody(input: {
   return { ok: true, body }
 }
 
+export type CardBalanceInput = {
+  currency: string
+  balance: string
+  creditLimit?: string
+}
+
+function isEmptyBalanceRow(input: CardBalanceInput): boolean {
+  return (
+    optionalTrimmed(input.balance) === undefined &&
+    optionalTrimmed(input.creditLimit) === undefined
+  )
+}
+
+export function buildCardBalanceBodies(
+  inputs: CardBalanceInput[],
+): PayloadResult<CardBalanceBody[]> {
+  const bodies: CardBalanceBody[] = []
+  const seen = new Set<string>()
+
+  for (const input of inputs) {
+    if (isEmptyBalanceRow(input)) continue
+
+    const parsed = buildCardBalanceBody(input)
+    if (!parsed.ok) return parsed
+
+    if (seen.has(parsed.body.currency)) {
+      return { ok: false, error: "Cada moneda solo puede usarse una vez" }
+    }
+    seen.add(parsed.body.currency)
+    bodies.push(parsed.body)
+  }
+
+  return { ok: true, body: bodies }
+}
+
+const FALLBACK_CURRENCIES = ["USD", "DOP", "EUR"]
+
+export function nextUnusedCurrency(
+  used: string[],
+  preferred: string,
+): string {
+  const taken = new Set(
+    used.map((code) => code.trim().toUpperCase()).filter(Boolean),
+  )
+  const candidates = [preferred, ...FALLBACK_CURRENCIES]
+  for (const candidate of candidates) {
+    const code = candidate.trim().toUpperCase()
+    if (code && !taken.has(code)) {
+      return code
+    }
+  }
+  return preferred.trim().toUpperCase() || "USD"
+}
+
+export function cardBalanceSaveMessage(input: {
+  created: boolean
+  total: number
+  failedCurrencies: string[]
+}): { kind: "success" | "error"; text1: string; text2?: string } {
+  if (input.failedCurrencies.length === 0) {
+    return {
+      kind: "success",
+      text1: input.created ? "Tarjeta creada" : "Saldo actualizado",
+    }
+  }
+
+  const failed = input.failedCurrencies.join(" · ")
+  if (input.failedCurrencies.length < input.total) {
+    return {
+      kind: "error",
+      text1: input.created
+        ? "Tarjeta creada, pero algunos saldos no se guardaron"
+        : "Algunos saldos no se guardaron",
+      text2: failed,
+    }
+  }
+
+  return {
+    kind: "error",
+    text1: input.created
+      ? "Tarjeta creada, pero no se guardaron los saldos"
+      : "No se pudieron guardar los saldos",
+    text2: failed,
+  }
+}
+
 const LUCIDE_KEY = /^[a-z][a-z0-9-]*$/i
 
 export function buildCreateCategoryBody(input: {

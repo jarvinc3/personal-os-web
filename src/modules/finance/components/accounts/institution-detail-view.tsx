@@ -38,6 +38,7 @@ import { SettingsRow } from "@/src/shared/components/layout/settings-section";
 import { Button } from "@/src/shared/components/ui/button";
 import { APP_ROUTES } from "@/src/shared/constants/app-routes";
 import { usePageHeader } from "@/src/shared/hooks/use-page-header";
+import { accentSurfaceGradient } from "@/src/shared/lib/accent-gradient";
 import {
   Building2Icon,
   CreditCardIcon,
@@ -148,7 +149,6 @@ function InstitutionDetailView({ institutionId }: InstitutionDetailClientProps) 
       onBack: handleBack,
       actions: headerActions,
       accentColor: accent,
-      scrollHide: false,
     },
     [handleBack, institution?.id, institution?.name, accent, headerActions],
   )
@@ -220,7 +220,7 @@ function InstitutionDetailView({ institutionId }: InstitutionDetailClientProps) 
         <div
           className="px-4 pb-10 pt-6 text-white md:px-6"
           style={{
-            background: `linear-gradient(160deg, ${accent} 0%, #0b1220 100%)`,
+            background: accentSurfaceGradient(accent),
           }}
         >
           <div className="flex items-start gap-3">

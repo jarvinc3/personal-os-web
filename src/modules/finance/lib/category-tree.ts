@@ -3,6 +3,10 @@ export type CategoryLike = {
   parentId: string | null
 }
 
+export function isFinanceCategoryEditable(category: { isSystem: boolean }): boolean {
+  return !category.isSystem
+}
+
 export type CategoryGroup<T extends CategoryLike> = {
   category: T
   children: T[]

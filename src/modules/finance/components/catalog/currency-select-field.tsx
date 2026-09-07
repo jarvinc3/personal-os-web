@@ -9,6 +9,7 @@ type CurrencySelectFieldProps = {
   onChange: (value: string) => void
   enabled: boolean
   extraCodes?: string[]
+  excludeCodes?: string[]
   disabled?: boolean
   label?: string
 }
@@ -18,6 +19,7 @@ export function CurrencySelectField({
   onChange,
   enabled,
   extraCodes = [],
+  excludeCodes = [],
   disabled,
   label,
 }: CurrencySelectFieldProps) {
@@ -31,8 +33,16 @@ export function CurrencySelectField({
       if (code) codes.add(code)
     }
     if (value) codes.add(value)
-    return [...codes].sort().map((code) => ({ value: code, label: code }))
-  }, [query.data, extraCodes, value])
+    const excluded = new Set(
+      excludeCodes
+        .map((code) => code.trim().toUpperCase())
+        .filter((code) => code && code !== value.trim().toUpperCase()),
+    )
+    return [...codes]
+      .filter((code) => !excluded.has(code.toUpperCase()))
+      .sort()
+      .map((code) => ({ value: code, label: code }))
+  }, [query.data, extraCodes, excludeCodes, value])
 
   return (
     <SelectField

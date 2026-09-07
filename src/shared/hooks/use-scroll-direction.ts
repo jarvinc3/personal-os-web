@@ -6,7 +6,7 @@ type ScrollDirection = 'up' | 'down'
 
 const THRESHOLD = 10
 
-export function useScrollDirection() {
+export function useScrollDirection(element: HTMLElement | null = null) {
   const [direction, setDirection] = useState<ScrollDirection>('up')
   const [atTop, setAtTop] = useState(true)
   const lastY = useRef(0)
@@ -14,12 +14,16 @@ export function useScrollDirection() {
   useEffect(() => {
     let ticking = false
 
+    function getY() {
+      return element ? element.scrollTop : window.scrollY
+    }
+
     function onScroll() {
       if (ticking) return
       ticking = true
 
       requestAnimationFrame(() => {
-        const y = window.scrollY
+        const y = getY()
         setAtTop(y < 10)
 
         if (Math.abs(y - lastY.current) > THRESHOLD) {
@@ -31,9 +35,14 @@ export function useScrollDirection() {
       })
     }
 
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
+    lastY.current = getY()
+    setAtTop(lastY.current < 10)
+    setDirection('up')
+
+    const target: EventTarget = element ?? window
+    target.addEventListener('scroll', onScroll, { passive: true })
+    return () => target.removeEventListener('scroll', onScroll)
+  }, [element])
 
   const hidden = direction === 'down' && !atTop
 

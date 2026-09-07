@@ -8,19 +8,25 @@ import {
   SidebarProvider,
 } from "@/src/shared/components/ui/sidebar"
 import { HeaderProvider } from "@/src/shared/context/header-context"
+import { ScrollChromeProvider } from "@/src/shared/context/scroll-chrome-context"
+import { useState } from "react"
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
+  const [scrollElement, setScrollElement] = useState<HTMLElement | null>(null)
+
   return (
     <SidebarProvider>
       <AppSidebar />
       <HeaderProvider>
-        <SidebarInset>
-          <AppHeader />
-          <main className="flex-1 overflow-auto">
-            <PendingAccountDeletionHandler />
-            {children}
-          </main>
-        </SidebarInset>
+        <ScrollChromeProvider scrollElement={scrollElement}>
+          <SidebarInset>
+            <AppHeader />
+            <main ref={setScrollElement} className="flex-1 overflow-auto">
+              <PendingAccountDeletionHandler />
+              {children}
+            </main>
+          </SidebarInset>
+        </ScrollChromeProvider>
       </HeaderProvider>
     </SidebarProvider>
   )

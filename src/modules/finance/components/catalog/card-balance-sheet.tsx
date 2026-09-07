@@ -2,7 +2,10 @@
 
 import { CurrencySelectField } from "@/src/modules/finance/components/catalog/currency-select-field";
 import { useUpdateCardBalance } from "@/src/modules/finance/hooks/use-cards";
-import { buildCardBalanceBody } from "@/src/modules/finance/lib/catalog-payloads";
+import {
+  buildCardBalanceBody,
+  nextUnusedCurrency,
+} from "@/src/modules/finance/lib/catalog-payloads";
 import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error";
 import type { FinanceCard } from "@/src/modules/finance/types/entities";
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet";
@@ -12,9 +15,10 @@ import { Spinner } from "@/src/shared/components/ui/spinner";
 import { SummarySection } from "@/src/shared/components/ui/summary";
 import { appToast } from "@/src/shared/lib/app-toast";
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form";
+import { cn } from "@/src/shared/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { WalletIcon } from "lucide-react";
-import { useEffect, useMemo } from "react";
+import { PlusIcon, WalletIcon } from "lucide-react";
+import { useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -26,13 +30,30 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>
 
-function toFormValues(card: FinanceCard | null, defaultCurrency: string): FormValues {
-  const primary = card?.balances[0]
+type BalanceMode =
+  | { kind: "edit"; currency: string }
+  | { kind: "add"; currency: string }
+
+function toFormValues(
+  card: FinanceCard | null,
+  mode: BalanceMode,
+): FormValues {
+  const existing = card?.balances.find(
+    (item) => item.currency === mode.currency,
+  )
   return {
-    currency: primary?.currency ?? defaultCurrency,
-    balance: primary?.balance ?? "",
-    creditLimit: primary?.creditLimit ?? "",
+    currency: existing?.currency ?? mode.currency,
+    balance: existing?.balance ?? "",
+    creditLimit: existing?.creditLimit ?? "",
   }
+}
+
+function initialMode(card: FinanceCard | null, defaultCurrency: string): BalanceMode {
+  const primary = card?.balances[0]
+  if (primary) {
+    return { kind: "edit", currency: primary.currency }
+  }
+  return { kind: "add", currency: defaultCurrency }
 }
 
 type CardBalanceSheetProps = {
@@ -48,7 +69,28 @@ export function CardBalanceSheet({
   card,
   defaultCurrency,
 }: CardBalanceSheetProps) {
+  return (
+    <CardBalanceSheetForm
+      key={`${open ? "open" : "closed"}:${card?.id ?? "none"}`}
+      open={open}
+      onOpenChange={onOpenChange}
+      card={card}
+      defaultCurrency={defaultCurrency}
+    />
+  )
+}
+
+function CardBalanceSheetForm({
+  open,
+  onOpenChange,
+  card,
+  defaultCurrency,
+}: CardBalanceSheetProps) {
   const mutation = useUpdateCardBalance()
+  const [mode, setMode] = useState<BalanceMode>(() =>
+    initialMode(card, defaultCurrency),
+  )
+  const existingCurrencies = (card?.balances ?? []).map((item) => item.currency)
   const {
     control,
     handleSubmit,
@@ -56,14 +98,23 @@ export function CardBalanceSheet({
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: toFormValues(card, defaultCurrency),
+    defaultValues: toFormValues(card, mode),
   })
 
-  useEffect(() => {
-    if (open) {
-      reset(toFormValues(card, defaultCurrency))
+  function selectExisting(currency: string) {
+    const nextMode: BalanceMode = { kind: "edit", currency }
+    setMode(nextMode)
+    reset(toFormValues(card, nextMode))
+  }
+
+  function startAdd() {
+    const nextMode: BalanceMode = {
+      kind: "add",
+      currency: nextUnusedCurrency(existingCurrencies, defaultCurrency),
     }
-  }, [open, card, defaultCurrency, reset])
+    setMode(nextMode)
+    reset(toFormValues(card, nextMode))
+  }
 
   const submitForm = useMemo(
     () => createSheetSubmit(handleSubmit),
@@ -72,6 +123,15 @@ export function CardBalanceSheet({
 
   const onSubmit = submitForm(async (values) => {
     if (!card) return
+    if (
+      mode.kind === "add" &&
+      existingCurrencies.some(
+        (code) => code.toUpperCase() === values.currency.toUpperCase(),
+      )
+    ) {
+      appToast.error({ text1: "Cada moneda solo puede usarse una vez" })
+      return
+    }
     const payload = buildCardBalanceBody(values)
     if (!payload.ok) {
       appToast.error({ text1: payload.error })
@@ -79,19 +139,24 @@ export function CardBalanceSheet({
     }
     try {
       await mutation.mutateAsync({ id: card.id, body: payload.body })
-      appToast.success({ text1: "Saldo actualizado" })
+      appToast.success({
+        text1:
+          mode.kind === "add" ? "Moneda agregada" : "Saldo actualizado",
+      })
       onOpenChange(false)
     } catch (error) {
       appToast.error({ text1: financeErrorMessage(error) })
     }
   })
 
+  const isAdding = mode.kind === "add"
+
   return (
     <BottomSheet
       open={open}
       onOpenChange={onOpenChange}
-      title={card ? `Saldo · ${card.name}` : "Saldo de tarjeta"}
-      description="El API espera números en el body. Un saldo inválido no se envía."
+      title={card ? `Saldos · ${card.name}` : "Saldos de tarjeta"}
+      description="Puedes actualizar un saldo existente o agregar otra moneda. El API espera números en el body."
       actions={{
         close: (
           <Button
@@ -114,7 +179,35 @@ export function CardBalanceSheet({
         ),
       }}
     >
-      <SummarySection title="Saldo" icon={WalletIcon}>
+      <SummarySection title="Monedas" icon={WalletIcon}>
+        {(card?.balances ?? []).map((item) => (
+          <button
+            key={item.id}
+            type="button"
+            onClick={() => selectExisting(item.currency)}
+            className={cn(
+              "flex w-full items-center justify-between rounded-xl border px-3 py-2 text-left text-sm",
+              !isAdding && mode.currency === item.currency
+                ? "border-primary bg-primary/10"
+                : "border-border bg-card",
+            )}
+          >
+            <span className="font-medium">{item.currency}</span>
+            <span className="tabular-nums text-muted-foreground">
+              {item.balance}
+            </span>
+          </button>
+        ))}
+        <Button type="button" variant="outline" onClick={startAdd}>
+          <PlusIcon />
+          Agregar moneda
+        </Button>
+      </SummarySection>
+
+      <SummarySection
+        title={isAdding ? "Nueva moneda" : `Editar ${mode.currency}`}
+        icon={WalletIcon}
+      >
         <Controller
           control={control}
           name="currency"
@@ -124,7 +217,9 @@ export function CardBalanceSheet({
               value={field.value}
               onChange={field.onChange}
               enabled={open}
-              extraCodes={[defaultCurrency]}
+              extraCodes={[defaultCurrency, field.value]}
+              excludeCodes={isAdding ? existingCurrencies : []}
+              disabled={!isAdding}
             />
           )}
         />
