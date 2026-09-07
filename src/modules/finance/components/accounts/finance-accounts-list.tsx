@@ -29,7 +29,7 @@ import {
 } from "@/src/shared/components/ui/empty";
 import { Spinner } from "@/src/shared/components/ui/spinner";
 import { APP_ROUTES } from "@/src/shared/constants/app-routes";
-import { Building2Icon, TagsIcon } from "lucide-react";
+import { Building2Icon, PlusIcon, TagsIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 
@@ -171,6 +171,16 @@ export function FinanceAccountsList({
           isLast
         />
       </SettingsSection>
+
+      <Button
+        type="button"
+        size="icon-lg"
+        aria-label="Nueva institución"
+        className="fixed right-4 z-50 size-14 rounded-full shadow-xl bottom-[calc(6rem+env(safe-area-inset-bottom))] md:bottom-8"
+        onClick={() => setSheet({ kind: "institution", item: null })}
+      >
+        <PlusIcon className="size-6" />
+      </Button>
 
       <InstitutionSheet
         open={sheet.kind === "institution"}

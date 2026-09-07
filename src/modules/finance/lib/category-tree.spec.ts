@@ -1,7 +1,10 @@
 import assert from "node:assert/strict"
 import { describe, it } from "node:test"
 
-import { groupCategoriesByParent } from "./category-tree.ts"
+import {
+  groupCategoriesByParent,
+  isFinanceCategoryEditable,
+} from "./category-tree.ts"
 
 describe("groupCategoriesByParent", () => {
   it("groups a flat list by parentId without needing a nested payload", () => {
@@ -26,5 +29,12 @@ describe("groupCategoriesByParent", () => {
     assert.equal(grouped.length, 1)
     assert.equal(grouped[0]?.category.id, "orphan")
     assert.deepEqual(grouped[0]?.children, [])
+  })
+})
+
+describe("isFinanceCategoryEditable", () => {
+  it("allows custom categories and blocks system ones", () => {
+    assert.equal(isFinanceCategoryEditable({ isSystem: false }), true)
+    assert.equal(isFinanceCategoryEditable({ isSystem: true }), false)
   })
 })

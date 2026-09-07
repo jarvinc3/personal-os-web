@@ -2,10 +2,13 @@ import assert from "node:assert/strict"
 import { describe, it } from "node:test"
 
 import {
+  buildCardBalanceBodies,
   buildCardBalanceBody,
   buildCreateAccountBody,
   buildCreateCardBody,
   buildCreateCategoryBody,
+  cardBalanceSaveMessage,
+  nextUnusedCurrency,
 } from "./catalog-payloads.ts"
 
 describe("buildCreateAccountBody", () => {
@@ -123,6 +126,72 @@ describe("buildCardBalanceBody", () => {
     assert.equal(result.ok, false)
     if (result.ok) return
     assert.equal(result.error, "Saldo inválido")
+  })
+})
+
+describe("buildCardBalanceBodies", () => {
+  it("skips empty rows and builds multiple balances", () => {
+    const result = buildCardBalanceBodies([
+      { currency: "dop", balance: "100", creditLimit: "50000" },
+      { currency: "usd", balance: "25.5", creditLimit: "" },
+      { currency: "EUR", balance: "", creditLimit: "" },
+    ])
+    assert.equal(result.ok, true)
+    if (!result.ok) return
+    assert.deepEqual(result.body, [
+      { currency: "DOP", balance: 100, creditLimit: 50000 },
+      { currency: "USD", balance: 25.5 },
+    ])
+  })
+
+  it("rejects duplicate currencies", () => {
+    const result = buildCardBalanceBodies([
+      { currency: "USD", balance: "10" },
+      { currency: "usd", balance: "20" },
+    ])
+    assert.equal(result.ok, false)
+    if (result.ok) return
+    assert.equal(result.error, "Cada moneda solo puede usarse una vez")
+  })
+
+  it("rejects an invalid balance in any filled row", () => {
+    const result = buildCardBalanceBodies([
+      { currency: "DOP", balance: "10" },
+      { currency: "USD", balance: "abc" },
+    ])
+    assert.equal(result.ok, false)
+    if (result.ok) return
+    assert.equal(result.error, "Saldo inválido")
+  })
+})
+
+describe("nextUnusedCurrency", () => {
+  it("keeps the preferred currency when it is free", () => {
+    assert.equal(nextUnusedCurrency(["EUR"], "DOP"), "DOP")
+  })
+
+  it("falls back to USD when the preferred currency is taken", () => {
+    assert.equal(nextUnusedCurrency(["DOP"], "DOP"), "USD")
+  })
+})
+
+describe("cardBalanceSaveMessage", () => {
+  it("reports a full success after creating the card", () => {
+    assert.deepEqual(
+      cardBalanceSaveMessage({ created: true, total: 2, failedCurrencies: [] }),
+      { kind: "success", text1: "Tarjeta creada" },
+    )
+  })
+
+  it("keeps the created card visible when some balances fail", () => {
+    const result = cardBalanceSaveMessage({
+      created: true,
+      total: 2,
+      failedCurrencies: ["USD"],
+    })
+    assert.equal(result.kind, "error")
+    assert.match(result.text1, /Tarjeta creada/)
+    assert.match(result.text2 ?? "", /USD/)
   })
 })
 

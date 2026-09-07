@@ -29,7 +29,6 @@ function FinanceCategoriesView() {
       variant: "secondary",
       title: "Categorías",
       onBack: handleBack,
-      scrollHide: false,
     },
     [handleBack],
   )

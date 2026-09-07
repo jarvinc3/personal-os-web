@@ -5,6 +5,7 @@ import { useCategories } from "@/src/modules/finance/hooks/use-categories";
 import {
   type CategoryGroup,
   groupCategoriesByParent,
+  isFinanceCategoryEditable,
 } from "@/src/modules/finance/lib/category-tree";
 import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error";
 import type { FinanceCategory } from "@/src/modules/finance/types/entities";
@@ -45,6 +46,7 @@ function CategoryRow({
   isLast?: boolean
   onEdit?: (category: FinanceCategory) => void
 }) {
+  const canEdit = onEdit && isFinanceCategoryEditable(category)
   return (
     <SettingsRow
       label={categoryLabel(category)}
@@ -52,8 +54,8 @@ function CategoryRow({
       accentColor={category.color ?? undefined}
       icon={TagsIcon}
       isLast={isLast}
-      onPress={onEdit ? () => onEdit(category) : undefined}
-      showChevron={Boolean(onEdit)}
+      onPress={canEdit ? () => onEdit?.(category) : undefined}
+      showChevron={Boolean(canEdit)}
     />
   )
 }
@@ -66,6 +68,7 @@ function CategoryGroupBlock({
   onEdit?: (category: FinanceCategory) => void
 }) {
   const { category, children } = group
+  const canEditParent = onEdit && isFinanceCategoryEditable(category)
 
   if (children.length === 0) {
     return <CategoryRow category={category} isLast onEdit={onEdit} />
@@ -81,7 +84,7 @@ function CategoryGroupBlock({
             accentColor={category.color ?? undefined}
             icon={TagsIcon}
             isLast
-            onPress={onEdit ? () => onEdit(category) : undefined}
+            onPress={canEditParent ? () => onEdit?.(category) : undefined}
             showChevron={false}
           />
         </div>

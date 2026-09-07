@@ -15,8 +15,10 @@ import {
   useUpdateCardBalance,
 } from "@/src/modules/finance/hooks/use-cards";
 import {
-  buildCardBalanceBody,
+  buildCardBalanceBodies,
   buildCreateCardBody,
+  cardBalanceSaveMessage,
+  nextUnusedCurrency,
 } from "@/src/modules/finance/lib/catalog-payloads";
 import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error";
 import type {
@@ -43,8 +45,14 @@ import {
   Palette,
 } from "lucide-react";
 import { useEffect, useMemo } from "react";
-import { Controller, useForm, useWatch } from "react-hook-form";
+import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
+
+const balanceRowSchema = z.object({
+  currency: z.string().trim().min(3, "Moneda obligatoria").max(3),
+  balance: z.string().trim(),
+  creditLimit: z.string().trim(),
+})
 
 const schema = z.object({
   name: z.string().trim().min(1, "Nombre obligatorio").max(120),
@@ -56,9 +64,7 @@ const schema = z.object({
   statementClosingDay: z.string().trim(),
   paymentDueDay: z.string().trim(),
   color: z.string().trim().max(20),
-  balance: z.string().trim(),
-  creditLimit: z.string().trim(),
-  balanceCurrency: z.string().trim(),
+  balances: z.array(balanceRowSchema),
 })
 
 type FormValues = z.infer<typeof schema>
@@ -76,12 +82,15 @@ const NETWORK_OPTIONS = [
   })),
 ]
 
+function emptyBalanceRow(currency: string) {
+  return { currency, balance: "", creditLimit: "" }
+}
+
 function toFormValues(
   card: FinanceCard | null,
   defaultCurrency: string,
   defaultInstitutionId: string,
 ): FormValues {
-  const primary = card?.balances[0]
   return {
     name: card?.name ?? "",
     type: card?.type ?? "CREDIT",
@@ -94,9 +103,7 @@ function toFormValues(
       : "",
     paymentDueDay: card?.paymentDueDay ? String(card.paymentDueDay) : "",
     color: card?.color ?? "",
-    balance: "",
-    creditLimit: "",
-    balanceCurrency: primary?.currency ?? defaultCurrency,
+    balances: [emptyBalanceRow(card?.balances[0]?.currency ?? defaultCurrency)],
   }
 }
 
@@ -150,9 +157,19 @@ export function CardSheet({
     ),
   })
 
+  const {
+    fields: balanceFields,
+    append: appendBalance,
+    remove: removeBalance,
+  } = useFieldArray({
+    control,
+    name: "balances",
+  })
+
   const cardType = useWatch({ control, name: "type" })
   const selectedInstitutionId = useWatch({ control, name: "institutionId" })
   const selectedAccountId = useWatch({ control, name: "accountId" })
+  const watchedBalances = useWatch({ control, name: "balances" })
 
   const institutionOptions = institutions.map((item) => ({
     value: item.id,
@@ -201,20 +218,12 @@ export function CardSheet({
       return
     }
 
-    const wantsBalance =
-      values.balance.trim() !== "" || values.creditLimit.trim() !== ""
-    let balanceBody = null
-    if (wantsBalance) {
-      const parsed = buildCardBalanceBody({
-        currency: values.balanceCurrency || defaultCurrency,
-        balance: values.balance.trim() === "" ? "0" : values.balance,
-        creditLimit: values.creditLimit,
-      })
-      if (!parsed.ok) {
-        appToast.error({ text1: parsed.error })
-        return
-      }
-      balanceBody = parsed.body
+    const balancesPayload = card
+      ? { ok: true as const, body: [] }
+      : buildCardBalanceBodies(values.balances)
+    if (!balancesPayload.ok) {
+      appToast.error({ text1: balancesPayload.error })
+      return
     }
 
     try {
@@ -223,13 +232,28 @@ export function CardSheet({
         appToast.success({ text1: "Tarjeta actualizada" })
       } else {
         const created = await createMutation.mutateAsync(payload.body)
-        if (balanceBody) {
-          await balanceMutation.mutateAsync({
-            id: created.id,
-            body: balanceBody,
-          })
+        const failedCurrencies: string[] = []
+        for (const body of balancesPayload.body) {
+          try {
+            await balanceMutation.mutateAsync({
+              id: created.id,
+              body,
+            })
+          } catch (error) {
+            failedCurrencies.push(
+              `${body.currency}: ${financeErrorMessage(error)}`,
+            )
+          }
         }
-        appToast.success({ text1: "Tarjeta creada" })
+        const message = cardBalanceSaveMessage({
+          created: true,
+          total: balancesPayload.body.length,
+          failedCurrencies,
+        })
+        appToast[message.kind]({
+          text1: message.text1,
+          text2: message.text2,
+        })
       }
       onOpenChange(false)
     } catch (error) {
@@ -427,48 +451,85 @@ export function CardSheet({
       </SummarySection>
 
       {!isEdit ? (
-        <SummarySection title="Saldo inicial" icon={DollarSign}>
-          <Controller
-            control={control}
-            name="balanceCurrency"
-            render={({ field }) => (
-              <CurrencySelectField
-                label="Moneda"
-                value={field.value}
-                onChange={field.onChange}
-                enabled={open}
-                extraCodes={[defaultCurrency]}
-              />
-            )}
-          />
-          <Controller
-            control={control}
-            name="balance"
-            render={({ field }) => (
-              <FormTextField
-                label="Saldo"
-                value={field.value}
-                onChange={field.onChange}
-                onBlur={field.onBlur}
-                placeholder="0.00"
-              />
-            )}
-          />
-          {cardType === "CREDIT" ? (
-            <Controller
-              control={control}
-              name="creditLimit"
-              render={({ field }) => (
-                <FormTextField
-                  label="Límite de crédito"
-                  value={field.value}
-                  onChange={field.onChange}
-                  onBlur={field.onBlur}
-                  placeholder="50000"
+        <SummarySection title="Saldos iniciales" icon={DollarSign}>
+          {balanceFields.map((field, index) => {
+            const usedCurrencies = (watchedBalances ?? [])
+              .map((row, rowIndex) =>
+                rowIndex === index ? "" : row.currency,
+              )
+              .filter(Boolean)
+            return (
+              <div key={field.id} className="flex flex-col gap-3">
+                <Controller
+                  control={control}
+                  name={`balances.${index}.currency`}
+                  render={({ field: currencyField }) => (
+                    <CurrencySelectField
+                      label="Moneda"
+                      value={currencyField.value}
+                      onChange={currencyField.onChange}
+                      enabled={open}
+                      extraCodes={[defaultCurrency, currencyField.value]}
+                      excludeCodes={usedCurrencies}
+                    />
+                  )}
                 />
-              )}
-            />
-          ) : null}
+                <Controller
+                  control={control}
+                  name={`balances.${index}.balance`}
+                  render={({ field: balanceField }) => (
+                    <FormTextField
+                      label="Saldo"
+                      value={balanceField.value}
+                      onChange={balanceField.onChange}
+                      onBlur={balanceField.onBlur}
+                      placeholder="0.00"
+                    />
+                  )}
+                />
+                {cardType === "CREDIT" ? (
+                  <Controller
+                    control={control}
+                    name={`balances.${index}.creditLimit`}
+                    render={({ field: limitField }) => (
+                      <FormTextField
+                        label="Límite de crédito"
+                        value={limitField.value}
+                        onChange={limitField.onChange}
+                        onBlur={limitField.onBlur}
+                        placeholder="50000"
+                      />
+                    )}
+                  />
+                ) : null}
+                {balanceFields.length > 1 ? (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={() => removeBalance(index)}
+                  >
+                    Quitar moneda
+                  </Button>
+                ) : null}
+              </div>
+            )
+          })}
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() =>
+              appendBalance(
+                emptyBalanceRow(
+                  nextUnusedCurrency(
+                    (watchedBalances ?? []).map((row) => row.currency),
+                    defaultCurrency,
+                  ),
+                ),
+              )
+            }
+          >
+            Agregar moneda
+          </Button>
         </SummarySection>
       ) : card ? (
         <SummarySection title="Saldo" icon={DollarSign}>
@@ -480,7 +541,7 @@ export function CardSheet({
             Actualizar saldo
           </Button>
         </SummarySection>
-      ) : null} 
+      ) : null}
     </BottomSheet>
   )
 }
