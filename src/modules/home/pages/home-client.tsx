@@ -1,23 +1,16 @@
 "use client"
 
-import { useAuthGuard } from "@/src/modules/auth"
-import { useProfile } from "@/src/modules/settings/hooks/use-profile"
-import { LoadingView } from "@/src/shared/components/layout/loading-view"
-import { Button } from "@/src/shared/components/ui/button"
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardFooter,
-    CardHeader,
-    CardTitle,
-} from "@/src/shared/components/ui/card"
-import { APP_ROUTES } from "@/src/shared/constants/app-routes"
-import { usePageHeader } from "@/src/shared/hooks/use-page-header"
-import { ChevronRight, Landmark, Monitor } from "lucide-react"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { useEffect } from "react"
+import { useAuthGuard } from "@/src/modules/auth";
+import { useProfile } from "@/src/modules/settings/hooks/use-profile";
+import { LoadingView } from "@/src/shared/components/layout/loading-view";
+import { Button } from "@/src/shared/components/ui/button";
+import { SummarySection } from "@/src/shared/components/ui/summary";
+import { APP_ROUTES } from "@/src/shared/constants/app-routes";
+import { usePageHeader } from "@/src/shared/hooks/use-page-header";
+import { BellRing, Brain, ChevronRight, Landmark, Monitor, Settings, UserIcon } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export function HomeClient() {
   const router = useRouter()
@@ -46,88 +39,76 @@ export function HomeClient() {
   }
 
   return (
-    <div className="mx-auto flex max-w-2xl flex-col gap-6 p-4 pb-16 md:px-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>
-            <p className="text-sm text-muted-foreground">
-              Hola,{" "}
-              <span className="text-xl font-semibold text-foreground">
-                {displayName}
-              </span>
-            </p>
-          </CardTitle>
-          <CardDescription>Bienvenido a Personal OS.</CardDescription>
-        </CardHeader>
-        <CardContent>
+    <div className="flex flex-col gap-6 p-4 pb-16 mx-auto max-w-2xl md:px-6">
+      <SummarySection title={`Hola, ${displayName}`} icon={UserIcon}>
+        <div className="flex flex-col gap-2">
           <p className="text-sm text-muted-foreground">
             Personaliza tu experiencia en Personal OS desde un solo lugar.
           </p>
           <p className="text-sm text-muted-foreground">
-            Configura tu cuenta, preferencias, módulos y notificaciones.
+            Accede al agente IA, ajustes, módulos y notificaciones.
           </p>
-        </CardContent>
-        <CardFooter>
-          <Button asChild className="w-full sm:w-auto">
+        </div>
+        <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
+          <Button variant="outline" asChild>
+            <Link href={APP_ROUTES.app.notifications}>
+              <BellRing className="size-4" />
+              Notificaciones
+              <ChevronRight className="size-4" />
+            </Link>
+          </Button>
+          <Button variant="outline" asChild>
+            <Link href={APP_ROUTES.app.chat}>
+              <Brain className="size-4" />
+              Agente IA
+              <ChevronRight className="size-4" />
+            </Link>
+          </Button>
+          <Button variant="outline" asChild>
             <Link href={APP_ROUTES.app.settings}>
-              Ir a Ajustes
+              <Settings className="size-4" />
+              Configuración
               <ChevronRight className="size-4" />
             </Link>
           </Button>
-        </CardFooter>
-      </Card>
+        </div>
+      </SummarySection>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
-            <Monitor className="size-4 text-muted-foreground" aria-hidden />
-            Keep Awake
-          </CardTitle>
-          <CardDescription>
-            Mantén la pantalla despierta con Wake Lock y un miniplayer flotante.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+      <SummarySection title="Finanzas" icon={Landmark}>
+        <div className="flex flex-col gap-2">
           <p className="text-sm text-muted-foreground">
-            Ideal para presentaciones, lectura o trabajo sin que el equipo se
-            suspenda. El cronómetro vive solo en el Picture-in-Picture.
-          </p>
-        </CardContent>
-        <CardFooter>
-          <Button asChild variant="outline" className="w-full sm:w-auto">
-            <Link href={APP_ROUTES.app.keepAwake}>
-              Abrir Keep Awake
-              <ChevronRight className="size-4" />
-            </Link>
-          </Button>
-        </CardFooter>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
-            <Landmark className="size-4 text-muted-foreground" aria-hidden />
-            Finanzas
-          </CardTitle>
-          <CardDescription>
             Gestiona cuentas y movimientos desde el módulo de finanzas.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+          </p>
           <p className="text-sm text-muted-foreground">
             Abre el resumen, cuentas, presupuestos y planificación. Si el
             módulo está apagado, Finanzas te lleva a activarlo en Ajustes.
           </p>
-        </CardContent>
-        <CardFooter>
-          <Button asChild variant="outline" className="w-full sm:w-auto">
-            <Link href={APP_ROUTES.app.finance}>
-              Abrir Finanzas
-              <ChevronRight className="size-4" />
-            </Link>
-          </Button>
-        </CardFooter>
-      </Card>
+        </div>
+        <Button asChild variant="outline" className="w-full sm:w-auto">
+          <Link href={APP_ROUTES.app.finance}>
+            Abrir Finanzas
+            <ChevronRight className="size-4" />
+          </Link>
+        </Button>
+      </SummarySection>
+
+      <SummarySection title="Keep Awake" icon={Monitor}>
+        <div className="flex flex-col gap-2">
+          <p className="text-sm text-muted-foreground">
+            Mantén la pantalla despierta con Wake Lock y un miniplayer flotante.
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Ideal para presentaciones, lectura o trabajo sin que el equipo se
+            suspenda.
+          </p>
+        </div>
+        <Button asChild variant="outline" className="w-full sm:w-auto">
+          <Link href={APP_ROUTES.app.keepAwake}>
+            Abrir Keep Awake
+            <ChevronRight className="size-4" />
+          </Link>
+        </Button>
+      </SummarySection>
     </div>
   )
 }

@@ -1,5 +1,6 @@
 'use client';
 
+import { Button } from '@/src/shared/components/ui/button';
 import { Input } from '@/src/shared/components/ui/input';
 import {
   Select,
@@ -10,7 +11,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/src/shared/components/ui/select";
-import { Button } from '@/src/shared/components/ui/button';
 import { Switch } from '@/src/shared/components/ui/switch';
 import { cn } from '@/src/shared/lib/utils';
 import { Eye, EyeOff, type LucideIcon } from 'lucide-react';
@@ -51,7 +51,7 @@ export function SelectField({ label, value, onChange, options, disabled }: Selec
         items={options}
         modal={false}
       >
-        <SelectTrigger className="w-full max-w-full text-lg font-bold tracking-tight cursor-pointer">
+        <SelectTrigger className="w-full max-w-full cursor-pointer">
           <SelectValue placeholder={label}>
             {options.find((item) => item.value === value)?.label}
           </SelectValue>

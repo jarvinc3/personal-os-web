@@ -1,7 +1,11 @@
 "use client"
 
-import { FINANCE_APP_NAV } from "@/src/modules/finance/constants/nav"
-import { useAuth } from "@/src/modules/auth"
+import { useAuth } from "@/src/modules/auth";
+import { FINANCE_APP_NAV } from "@/src/modules/finance/constants/nav";
+import {
+  Collapsible,
+  CollapsibleContent,
+} from "@/src/shared/components/ui/collapsible";
 import {
   Sidebar,
   SidebarContent,
@@ -16,15 +20,11 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
-} from "@/src/shared/components/ui/sidebar"
-import {
-  Collapsible,
-  CollapsibleContent,
-} from "@/src/shared/components/ui/collapsible"
-import { APP_ROUTES } from "@/src/shared/constants/app-routes"
-import { isModuleSectionActive } from "@/src/shared/lib/module-nav-active"
-import { cn } from "@/src/shared/lib/utils"
-import type { ModuleNavItem } from "@/src/shared/types/module-nav"
+} from "@/src/shared/components/ui/sidebar";
+import { APP_ROUTES } from "@/src/shared/constants/app-routes";
+import { isModuleSectionActive } from "@/src/shared/lib/module-nav-active";
+import { cn } from "@/src/shared/lib/utils";
+import type { ModuleNavItem } from "@/src/shared/types/module-nav";
 import {
   BellIcon,
   ChevronRight,
@@ -34,14 +34,12 @@ import {
   Monitor,
   Settings,
   SparklesIcon,
-} from "lucide-react"
-import Image from "next/image"
-import Link from "next/link"
-import { usePathname, useRouter } from "next/navigation"
-import { useState } from "react"
-import { getAppIconPath } from "../../constants/app-assets"
-import { Separator } from "../ui/separator"
-import { useTheme } from "next-themes"
+} from "lucide-react";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { useState } from "react";
+import { AppLogo } from "../brand/app-logo";
+import { Separator } from "../ui/separator";
 
 const navItems = {
   main: [
@@ -58,15 +56,15 @@ const navItems = {
   ],
   applications: [
     {
-      title: "Keep Awake",
-      url: APP_ROUTES.app.keepAwake,
-      icon: Monitor,
-    },
-    {
       title: FINANCE_APP_NAV.label,
       url: FINANCE_APP_NAV.rootHref,
       icon: FINANCE_APP_NAV.icon,
       items: FINANCE_APP_NAV.items,
+    },
+    {
+      title: "Keep Awake",
+      url: APP_ROUTES.app.keepAwake,
+      icon: Monitor,
     },
   ],
   notifications: [
@@ -81,8 +79,6 @@ const navItems = {
 export function AppSidebar() {
   const router = useRouter()
   const { logoutMutation } = useAuth()
-  const { resolvedTheme } = useTheme()
-  const appIcon = getAppIconPath(resolvedTheme)
 
   return (
     <Sidebar variant="sidebar" collapsible="icon">
@@ -90,13 +86,7 @@ export function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton onClick={() => router.push(APP_ROUTES.app.home)}>
-              <Image
-                src={appIcon}
-                alt="Personal OS"
-                width={24}
-                height={24}
-                className="rounded"
-              />
+              <AppLogo size="xs" className="rounded" />
               <span className="text-base font-semibold">Personal OS</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -140,7 +130,6 @@ export function AppSidebar() {
     </Sidebar>
   )
 }
-
 type NavMainItem = {
   title: string
   url: string

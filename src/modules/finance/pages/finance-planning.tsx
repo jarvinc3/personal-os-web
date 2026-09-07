@@ -1,8 +1,8 @@
 "use client"
 
-import { FinanceAuthenticatedPage } from "@/src/modules/finance/components/layout/finance-authenticated-page"
-import { FinancePlanningList } from "@/src/modules/finance/components/planning/finance-planning"
-import { useFinanceEnabled } from "@/src/modules/finance/hooks/use-finance-enabled"
+import { FinanceAuthenticatedPage } from "@/src/modules/finance/components/layout/finance-authenticated-page";
+import { FinancePlanningList } from "@/src/modules/finance/components/planning/finance-planning";
+import { useFinanceEnabled } from "@/src/modules/finance/hooks/use-finance-enabled";
 
 export function FinancePlanningClient() {
   return (

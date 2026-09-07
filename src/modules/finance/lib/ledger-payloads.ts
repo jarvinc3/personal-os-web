@@ -1,6 +1,5 @@
+import { CATALOG_NONE } from "../constants/catalog.ts"
 import { parseFinanceMoney } from "./money.ts"
-
-const NONE = "__none__"
 
 export type CreateTransactionBody = {
   accountId?: string
@@ -40,7 +39,7 @@ function optionalTrimmed(value: string | undefined): string | undefined {
 
 function optionalId(value: string | undefined): string | undefined {
   const trimmed = optionalTrimmed(value)
-  if (!trimmed || trimmed === NONE) {
+  if (!trimmed || trimmed === CATALOG_NONE) {
     return undefined
   }
   return trimmed
@@ -58,7 +57,7 @@ export function splitLedgerTarget(value: string | undefined): {
   cardId?: string
 } {
   const trimmed = optionalTrimmed(value)
-  if (!trimmed || trimmed === NONE) {
+  if (!trimmed || trimmed === CATALOG_NONE) {
     return {}
   }
   if (trimmed.startsWith("account:")) {
@@ -77,7 +76,7 @@ export function buildLedgerTargetOptions(
   cards: { id: string; name: string }[],
 ): { value: string; label: string }[] {
   return [
-    { value: NONE, label: "Elige cuenta o tarjeta" },
+    { value: CATALOG_NONE, label: "Elige cuenta o tarjeta" },
     ...accounts.map((account) => ({
       value: encodeLedgerTarget("account", account.id),
       label: `Cuenta · ${account.name}`,

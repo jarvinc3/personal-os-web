@@ -46,6 +46,18 @@ describe("buildLoanBody", () => {
     const result = buildLoanBody({ ...base, originalAmount: "abc" })
     assert.equal(result.ok, false)
   })
+
+  it("sends catalog institution and payment account ids", () => {
+    const result = buildLoanBody({
+      ...base,
+      institutionId: "inst-1",
+      accountId: "acc-1",
+    })
+    assert.equal(result.ok, true)
+    if (!result.ok) return
+    assert.equal(result.body.institutionId, "inst-1")
+    assert.equal(result.body.accountId, "acc-1")
+  })
 })
 
 describe("buildCreateReceivableBody", () => {

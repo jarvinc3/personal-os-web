@@ -1,44 +1,58 @@
 "use client"
 
-import { CurrencySelectField } from "@/src/modules/finance/components/catalog/currency-select-field"
+import { CurrencySelectField } from "@/src/modules/finance/components/catalog/currency-select-field";
 import {
+  CATALOG_NONE,
   FINANCE_ACCOUNT_TYPE_LABEL,
   FINANCE_ACCOUNT_TYPES,
-} from "@/src/modules/finance/constants/catalog"
+} from "@/src/modules/finance/constants/catalog";
 import {
   useArchiveAccount,
   useCreateAccount,
   useUpdateAccount,
-} from "@/src/modules/finance/hooks/use-accounts"
-import { buildCreateAccountBody } from "@/src/modules/finance/lib/catalog-payloads"
-import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
+} from "@/src/modules/finance/hooks/use-accounts";
+import { buildCreateAccountBody } from "@/src/modules/finance/lib/catalog-payloads";
+import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error";
 import type {
   FinanceAccount,
   FinanceInstitution,
-} from "@/src/modules/finance/types/entities"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+} from "@/src/modules/finance/types/entities";
+import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet";
 import {
   FormTextField,
   SelectField,
-} from "@/src/shared/components/layout/form-blocks"
-import { SummarySection } from "@/src/shared/components/layout/summary"
-import { Button } from "@/src/shared/components/ui/button"
-import { Spinner } from "@/src/shared/components/ui/spinner"
-import { appToast } from "@/src/shared/lib/app-toast"
-import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { DollarSign, LandmarkIcon, Palette } from "lucide-react"
-import { useEffect, useMemo } from "react"
-import { Controller, useForm } from "react-hook-form"
-import { z } from "zod"
+} from "@/src/shared/components/layout/form-blocks";
+import { Button } from "@/src/shared/components/ui/button";
+import { Spinner } from "@/src/shared/components/ui/spinner";
+import { SummarySection } from "@/src/shared/components/ui/summary";
+import { appToast } from "@/src/shared/lib/app-toast";
+import { createSheetSubmit } from "@/src/shared/lib/sheet-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { DollarSign, LandmarkIcon, Palette } from "lucide-react";
+import { useEffect, useMemo } from "react";
+import { Controller, useForm, useWatch } from "react-hook-form";
+import { z } from "zod";
 
-const schema = z.object({
-  name: z.string().trim().min(1, "Nombre obligatorio").max(120),
-  type: z.enum(FINANCE_ACCOUNT_TYPES),
-  currency: z.string().trim().min(3, "Moneda obligatoria").max(3),
-  institutionId: z.string().min(1, "La cuenta necesita una institución"),
-  color: z.string().trim().max(20),
-})
+const schema = z
+  .object({
+    name: z.string().trim().min(1, "Nombre obligatorio").max(120),
+    type: z.enum(FINANCE_ACCOUNT_TYPES),
+    currency: z.string().trim().min(3, "Moneda obligatoria").max(3),
+    institutionId: z.string(),
+    color: z.string().trim().max(20),
+  })
+  .superRefine((values, ctx) => {
+    if (
+      values.type !== "CASH" &&
+      (!values.institutionId || values.institutionId === CATALOG_NONE)
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["institutionId"],
+        message: "La cuenta necesita una institución",
+      })
+    }
+  })
 
 type FormValues = z.infer<typeof schema>
 
@@ -56,7 +70,9 @@ function toFormValues(
     name: account?.name ?? "",
     type: account?.type ?? "CHECKING",
     currency: account?.currency ?? defaultCurrency,
-    institutionId: account?.institutionId ?? defaultInstitutionId,
+    institutionId:
+      account?.institutionId ??
+      (account?.type === "CASH" ? CATALOG_NONE : defaultInstitutionId),
     color: account?.color ?? "",
   }
 }
@@ -67,6 +83,7 @@ type AccountSheetProps = {
   account: FinanceAccount | null
   institutions: FinanceInstitution[]
   defaultCurrency: string
+  defaultInstitutionId?: string
 }
 
 export function AccountSheet({
@@ -75,6 +92,7 @@ export function AccountSheet({
   account,
   institutions,
   defaultCurrency,
+  defaultInstitutionId,
 }: AccountSheetProps) {
   const isEdit = Boolean(account)
   const createMutation = useCreateAccount()
@@ -86,10 +104,15 @@ export function AccountSheet({
     archiveMutation.isPending
 
   const institutionOptions = useMemo(
-    () => institutions.map((item) => ({ value: item.id, label: item.name })),
+    () => [
+      { value: CATALOG_NONE, label: "Sin institución" },
+      ...institutions.map((item) => ({ value: item.id, label: item.name })),
+    ],
     [institutions],
   )
-  const hasInstitutions = institutionOptions.length > 0
+  const hasInstitutions = institutions.length > 0
+  const resolvedDefaultInstitutionId =
+    defaultInstitutionId ?? institutions[0]?.id ?? CATALOG_NONE
 
   const {
     control,
@@ -101,17 +124,23 @@ export function AccountSheet({
     defaultValues: toFormValues(
       account,
       defaultCurrency,
-      institutions[0]?.id ?? "",
+      resolvedDefaultInstitutionId,
     ),
   })
+
+  const accountType = useWatch({ control, name: "type" })
 
   useEffect(() => {
     if (open) {
       reset(
-        toFormValues(account, defaultCurrency, institutions[0]?.id ?? ""),
+        toFormValues(
+          account,
+          defaultCurrency,
+          resolvedDefaultInstitutionId,
+        ),
       )
     }
-  }, [open, account, defaultCurrency, institutions, reset])
+  }, [open, account, defaultCurrency, resolvedDefaultInstitutionId, reset])
 
   const submitForm = useMemo(
     () => createSheetSubmit(handleSubmit),
@@ -228,18 +257,27 @@ export function AccountSheet({
           name="institutionId"
           render={({ field }) => (
             <SelectField
-              label="Institución"
+              label={
+                accountType === "CASH"
+                  ? "Institución (opcional)"
+                  : "Institución"
+              }
               value={field.value}
               onChange={field.onChange}
               options={
-                hasInstitutions
+                hasInstitutions || accountType === "CASH"
                   ? institutionOptions
-                  : [{ value: "", label: "Crea una institución primero" }]
+                  : [{ value: CATALOG_NONE, label: "Crea una institución primero" }]
               }
-              disabled={!hasInstitutions}
+              disabled={!hasInstitutions && accountType !== "CASH"}
             />
           )}
         />
+        {errors.institutionId?.message ? (
+          <p className="text-sm text-destructive">
+            {errors.institutionId.message}
+          </p>
+        ) : null}
       </SummarySection>
       <SummarySection title="Moneda" icon={DollarSign}>
         <Controller

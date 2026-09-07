@@ -15,7 +15,13 @@ export const APP_ROUTES = {
     notifications: '/notifications',
     keepAwake: '/keep-awake',
     finance: '/finance',
+    financeStatistics: '/finance/statistics',
     financeAccounts: '/finance/accounts',
+    financeCategories: '/finance/accounts/categories',
+    financeInstitution: (institutionId: string) =>
+      `/finance/accounts/institutions/${institutionId}`,
+    financeCashAccount: (accountId: string) =>
+      `/finance/accounts/cash/${accountId}`,
     financeTransactions: '/finance/transactions',
     financeBudgets: '/finance/budgets',
     financePlanning: '/finance/planning',

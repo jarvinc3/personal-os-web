@@ -1,15 +1,14 @@
+import { CATALOG_NONE } from "../constants/catalog.ts"
 import { parseFinanceMoney } from "./money.ts"
 
 type FinanceAccountType = "CHECKING" | "SAVINGS" | "CASH" | "INVESTMENT"
 type FinanceCardType = "CREDIT" | "DEBIT"
 type FinanceCardNetwork = "VISA" | "MASTERCARD" | "AMEX" | "DISCOVER" | "OTHER"
 
-const CATALOG_NONE = "__none__"
-
 export type CreateAccountBody = {
   name: string
   type: FinanceAccountType
-  institutionId: string
+  institutionId?: string
   currency?: string
   color?: string
 }
@@ -76,14 +75,16 @@ export function buildCreateAccountBody(input: {
   }
 
   const institutionId = optionalId(input.institutionId)
-  if (!institutionId) {
+  if (input.type !== "CASH" && !institutionId) {
     return { ok: false, error: "La cuenta necesita una institución" }
   }
 
   const body: CreateAccountBody = {
     name,
     type: input.type,
-    institutionId,
+  }
+  if (institutionId) {
+    body.institutionId = institutionId
   }
 
   const currency = optionalTrimmed(input.currency)?.toUpperCase()

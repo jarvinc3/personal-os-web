@@ -1,9 +1,10 @@
-import type { FinancePaginated } from "../types/api.ts"
+import type { FinancePaginated } from "../types/api.ts";
 import type {
   FinanceTransaction,
   FinanceTransactionStatus,
   FinanceTransactionType,
-} from "../types/entities.ts"
+} from "../types/entities.ts";
+import { parseFinanceMoney } from "./money.ts";
 
 export const FINANCE_TX_FILTER_ALL = "__all__" as const
 export const FINANCE_TX_PAGE_SIZE = 20
@@ -89,4 +90,19 @@ export function formatTransactionDate(value: string): string {
     month: "short",
     day: "numeric",
   })
+}
+
+export function visibleTransactionTotals(
+  items: Pick<FinanceTransaction, "type" | "amount">[],
+): { income: number; expenses: number } {
+  return items.reduce(
+    (totals, item) => {
+      const amount = parseFinanceMoney(item.amount)
+      if (amount === null) return totals
+      if (item.type === "CREDIT") totals.income += amount
+      if (item.type === "DEBIT") totals.expenses += amount
+      return totals
+    },
+    { income: 0, expenses: 0 },
+  )
 }

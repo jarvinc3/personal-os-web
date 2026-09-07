@@ -1,39 +1,40 @@
 "use client"
 
-import { BudgetSheet } from "@/src/modules/finance/components/budgets/budget-sheet"
-import { useBudgets } from "@/src/modules/finance/hooks/use-budgets"
-import { useCategories } from "@/src/modules/finance/hooks/use-categories"
-import { budgetPctUsed } from "@/src/modules/finance/lib/budget-payloads"
+import { BudgetSheet } from "@/src/modules/finance/components/budgets/budget-sheet";
+import { useBudgets } from "@/src/modules/finance/hooks/use-budgets";
+import { useCategories } from "@/src/modules/finance/hooks/use-categories";
+import { budgetPctUsed } from "@/src/modules/finance/lib/budget-payloads";
 import {
   budgetsFromPayload,
   FINANCE_BUDGET_PAGE_SIZE,
   formatBudgetPeriodDate,
-} from "@/src/modules/finance/lib/budgets-query"
-import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
-import type { FinanceMoneyDisplay } from "@/src/modules/finance/lib/money"
-import { formatFinanceMoney } from "@/src/modules/finance/lib/money"
+} from "@/src/modules/finance/lib/budgets-query";
+import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error";
+import type { FinanceMoneyDisplay } from "@/src/modules/finance/lib/money";
+import { formatFinanceMoney } from "@/src/modules/finance/lib/money";
 import {
   FINANCE_BUDGET_PERIOD_LABEL,
   type FinanceBudget,
-} from "@/src/modules/finance/types/entities"
-import { SettingsRow } from "@/src/shared/components/layout/settings-section"
-import { SummarySection } from "@/src/shared/components/layout/summary"
-import { Button } from "@/src/shared/components/ui/button"
+} from "@/src/modules/finance/types/entities";
+import { SettingsRow } from "@/src/shared/components/layout/settings-section";
+import { Button } from "@/src/shared/components/ui/button";
 import {
   Empty,
   EmptyDescription,
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
-} from "@/src/shared/components/ui/empty"
-import { Spinner } from "@/src/shared/components/ui/spinner"
+} from "@/src/shared/components/ui/empty";
+import { Separator } from "@/src/shared/components/ui/separator";
+import { Spinner } from "@/src/shared/components/ui/spinner";
+import { SummarySection } from "@/src/shared/components/ui/summary";
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
   PiggyBankIcon,
   PlusIcon,
-} from "lucide-react"
-import { useState } from "react"
+} from "lucide-react";
+import { useState } from "react";
 
 type FinanceBudgetsListProps = {
   enabled: boolean
@@ -41,16 +42,23 @@ type FinanceBudgetsListProps = {
 }
 
 function categoryLabel(budget: FinanceBudget): string {
-  return budget.category?.name ?? "Categoría"
+  const name = budget.category?.name ?? "Categoría"
+  return `${budget.category?.icon ? `${budget.category.icon} ` : ""}${name}`
 }
 
-function BudgetUsageBar({ pct }: { pct: number }) {
+function BudgetUsageBar({
+  pct,
+  color,
+}: {
+  pct: number
+  color?: string | null
+}) {
   const width = Math.min(100, Math.max(0, pct))
   return (
-    <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+    <div className="overflow-hidden w-full h-2 rounded-full bg-muted">
       <div
         className="h-full rounded-full bg-primary"
-        style={{ width: `${width}%` }}
+        style={{ width: `${width}%`, backgroundColor: color ?? undefined }}
       />
     </div>
   )
@@ -75,24 +83,28 @@ export function FinanceBudgetsList({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-wrap gap-2">
-        <Button
-          type="button"
-          disabled={!enabled || !hasCategories}
-          onClick={() => setCreateOpen(true)}
-        >
-          <PlusIcon />
-          Crear presupuesto
-        </Button>
-      </div>
-
       {listQuery.isError ? (
         <p className="text-sm text-destructive">
           {financeErrorMessage(listQuery.error)}
         </p>
       ) : null}
 
-      <SummarySection title="Presupuestos" icon={PiggyBankIcon}>
+      <SummarySection
+        title="Presupuestos"
+        icon={PiggyBankIcon}
+        right={
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            disabled={!enabled || !hasCategories}
+            onClick={() => setCreateOpen(true)}
+          >
+            <PlusIcon />
+            Crear presupuesto
+          </Button>
+        }
+      >
         {listQuery.isPending && !listQuery.data ? (
           <div className="flex justify-center p-6">
             <Spinner />
@@ -123,44 +135,49 @@ export function FinanceBudgetsList({
               <div key={budget.id} className="flex flex-col gap-2">
                 <SettingsRow
                   label={categoryLabel(budget)}
-                  value={`${period} · ${range} · ${spent} / ${limit} · ${pctLabel}`}
+                  description={`${period} · ${range}`}
+                  value={`${spent} / ${limit} · ${pctLabel}`}
                   onPress={() => setEditing(budget)}
                   isLast={index === items.length - 1}
                 />
-                {pct !== null ? <BudgetUsageBar pct={pct} /> : null}
+                {pct !== null ? (
+                  <BudgetUsageBar pct={pct} color={budget.category?.color} />
+                ) : null}
               </div>
             )
           })
         )}
-      </SummarySection>
 
-      {listQuery.isSuccess ? (
-        <div className="flex items-center justify-between gap-3">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            disabled={page <= 1 || listQuery.isPending}
-            onClick={() => setPage((current) => Math.max(1, current - 1))}
-          >
-            <ChevronLeftIcon />
-            Anterior
-          </Button>
-          <p className="text-sm text-muted-foreground">
-            Página {pagination.page} de {pagination.totalPages}
-          </p>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            disabled={page >= pagination.totalPages || listQuery.isPending}
-            onClick={() => setPage((current) => current + 1)}
-          >
-            Siguiente
-            <ChevronRightIcon />
-          </Button>
-        </div>
-      ) : null}
+        <Separator />
+
+        {listQuery.isSuccess ? (
+          <div className="flex gap-3 justify-between items-center">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={page <= 1 || listQuery.isPending}
+              onClick={() => setPage((current) => Math.max(1, current - 1))}
+            >
+              <ChevronLeftIcon />
+              Anterior
+            </Button>
+            <p className="text-sm text-muted-foreground">
+              Página {pagination.page} de {pagination.totalPages}
+            </p>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={page >= pagination.totalPages || listQuery.isPending}
+              onClick={() => setPage((current) => current + 1)}
+            >
+              Siguiente
+              <ChevronRightIcon />
+            </Button>
+          </div>
+        ) : null}
+      </SummarySection>
 
       <BudgetSheet
         open={createOpen || Boolean(editing)}

@@ -1,7 +1,10 @@
 "use client"
 
 import { FinanceAuthenticatedPage } from "@/src/modules/finance/components/layout/finance-authenticated-page"
-import { parseOAuthSuccessParam } from "@/src/modules/finance/lib/gmail-oauth"
+import {
+  parseOAuthNextPath,
+  parseOAuthSuccessParam,
+} from "@/src/modules/finance/lib/gmail-oauth"
 import { Button } from "@/src/shared/components/ui/button"
 import {
   Empty,
@@ -27,7 +30,12 @@ export function FinanceSyncOAuthClient() {
 function FinanceSyncOAuthResult() {
   const searchParams = useSearchParams()
   const state = parseOAuthSuccessParam(searchParams.get("success"))
+  const next = parseOAuthNextPath(searchParams.get("next"))
   const failed = state === "error" || state === "none"
+  const nextLabel =
+    next === APP_ROUTES.app.financeAccounts ? "Ir a Cuentas" : "Ir a Sincronizar"
+  const href =
+    state === "ok" ? `${next}?success=true` : next
 
   return (
     <Empty className="py-12">
@@ -40,21 +48,13 @@ function FinanceSyncOAuthResult() {
         </EmptyTitle>
         <EmptyDescription>
           {failed
-            ? "Google no autorizó la cuenta o el retorno falló. No se importó nada. Vuelve a intentarlo desde Sincronizar."
-            : "La cuenta quedó vinculada. Revisa el destino y lanza un sync cuando quieras."}
+            ? "Google no autorizó la cuenta o el retorno falló. No se importó nada. Vuelve a intentarlo."
+            : "La cuenta quedó vinculada a la institución. Lanza un sync cuando quieras."}
         </EmptyDescription>
       </EmptyHeader>
       <EmptyContent>
         <Button asChild>
-          <Link
-            href={
-              state === "ok"
-                ? `${APP_ROUTES.app.financeSync}?success=true`
-                : APP_ROUTES.app.financeSync
-            }
-          >
-            Ir a Sincronizar
-          </Link>
+          <Link href={href}>{nextLabel}</Link>
         </Button>
       </EmptyContent>
     </Empty>

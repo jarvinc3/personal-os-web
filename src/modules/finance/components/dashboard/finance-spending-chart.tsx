@@ -1,16 +1,16 @@
 "use client"
 
-import { mapSpendingBucketsToChart } from "@/src/modules/finance/lib/chart-series"
-import type { FinanceMoneyDisplay } from "@/src/modules/finance/lib/money"
-import { formatFinanceMoney } from "@/src/modules/finance/lib/money"
-import type { FinanceSpendingBucket } from "@/src/modules/finance/types/entities"
+import { mapSpendingBucketsToChart } from "@/src/modules/finance/lib/chart-series";
+import type { FinanceMoneyDisplay } from "@/src/modules/finance/lib/money";
+import { formatFinanceMoney } from "@/src/modules/finance/lib/money";
+import type { FinanceSpendingBucket } from "@/src/modules/finance/types/entities";
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
   type ChartConfig,
-} from "@/src/shared/components/ui/chart"
-import { Bar, BarChart, CartesianGrid, Cell, XAxis, YAxis } from "recharts"
+} from "@/src/shared/components/ui/chart";
+import { Bar, BarChart, CartesianGrid, Cell, XAxis, YAxis } from "recharts";
 
 type FinanceSpendingChartProps = {
   buckets: FinanceSpendingBucket[]
@@ -34,32 +34,29 @@ export function FinanceSpendingChart({
   }
 
   return (
-    <section className="flex flex-col gap-3">
-      <h2 className="text-sm font-medium">Gasto por categoría</h2>
-      <ChartContainer config={chartConfig} className="aspect-[4/3] w-full">
-        <BarChart data={data} margin={{ left: 8, right: 8 }}>
-          <CartesianGrid vertical={false} />
-          <XAxis dataKey="label" tickLine={false} axisLine={false} interval={0} />
-          <YAxis hide />
-          <ChartTooltip
-            content={
-              <ChartTooltipContent
-                formatter={(value) =>
-                  formatFinanceMoney(
-                    typeof value === "number" ? value : String(value),
-                    display,
-                  )
-                }
-              />
-            }
-          />
-          <Bar dataKey="total" radius={4}>
-            {data.map((row) => (
-              <Cell key={row.key} fill={row.fill} />
-            ))}
-          </Bar>
-        </BarChart>
-      </ChartContainer>
-    </section>
+    <ChartContainer config={chartConfig} className="w-full aspect-4/3">
+      <BarChart data={data} margin={{ left: 8, right: 8 }}>
+        <CartesianGrid vertical={false} />
+        <XAxis dataKey="label" tickLine={false} axisLine={false} interval={0} />
+        <YAxis hide />
+        <ChartTooltip
+          content={
+            <ChartTooltipContent
+              formatter={(value) =>
+                formatFinanceMoney(
+                  typeof value === "number" ? value : String(value),
+                  display,
+                )
+              }
+            />
+          }
+        />
+        <Bar dataKey="total" radius={4}>
+          {data.map((row) => (
+            <Cell key={row.key} fill={row.fill} />
+          ))}
+        </Bar>
+      </BarChart>
+    </ChartContainer>
   )
 }

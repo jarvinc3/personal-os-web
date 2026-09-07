@@ -1,7 +1,7 @@
-import { Switch } from "@/src/shared/components/ui/switch"
-import { cn } from "@/src/shared/lib/utils"
-import { ChevronRight, ExternalLink, type LucideIcon } from "lucide-react"
-import type { ReactNode } from "react"
+import { Switch } from "@/src/shared/components/ui/switch";
+import { cn } from "@/src/shared/lib/utils";
+import { ChevronRight, ExternalLink, type LucideIcon } from "lucide-react";
+import type { ReactNode } from "react";
 
 type SettingsSectionProps = {
   title: string
@@ -21,7 +21,7 @@ export function SettingsSection({
   return (
     <section className={cn("flex flex-col gap-2", className)}>
       <div className="flex flex-col gap-0.5 px-1">
-        <h2 className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+        <h2 className="text-xs font-medium tracking-wide uppercase text-muted-foreground">
           {title}
         </h2>
         {description ? (
@@ -41,6 +41,7 @@ export function SettingsSection({
 
 type SettingsRowProps = {
   label: string
+  description?: string
   value?: string
   accentColor?: string
   onPress?: () => void
@@ -57,6 +58,7 @@ type SettingsRowProps = {
 
 export function SettingsRow({
   label,
+  description,
   value,
   accentColor,
   onPress,
@@ -80,21 +82,21 @@ export function SettingsRow({
   )
 
   const content = (
-    <div className="flex w-full flex-row items-center justify-between gap-3">
+    <div className="flex flex-row gap-3 justify-between items-center w-full">
       {Icon && (
         <div
           className={cn(
-            "flex size-9 shrink-0 items-center justify-center rounded-md bg-muted"
+            "flex justify-center items-center rounded-md size-9 shrink-0 bg-muted"
           )}
           style={{ backgroundColor: accentColor + "20" }}
         >
           <Icon
-            className={cn("size-[18px]", destructive && "text-destructive")}
+            className={cn("size-4.5", destructive && "text-destructive")}
             color={accentColor}
           />
         </div>
       )}
-      <div className="flex flex-1 flex-col justify-start gap-1 text-left md:flex-row md:items-center md:justify-between md:gap-3">
+      <div className="flex flex-col flex-1 gap-1 justify-start text-left md:flex-row md:items-center md:justify-between md:gap-3">
         <span
           className={cn(
             "text-sm md:text-base",
@@ -103,6 +105,9 @@ export function SettingsRow({
         >
           {label}
         </span>
+        {description && (
+          <span className="text-xs text-muted-foreground">{description}</span>
+        )}
         {value && (
           <span className="max-w-[90%] truncate text-xs text-muted-foreground md:text-right">
             {value}
@@ -118,10 +123,10 @@ export function SettingsRow({
         />
       )}
       {showChevronIcon && !hasSwitch && (
-        <ChevronRight className="size-[18px] text-muted-foreground" />
+        <ChevronRight className="size-4.5 text-muted-foreground" />
       )}
       {link && !hasSwitch && (
-        <ExternalLink className="size-[18px] text-muted-foreground" />
+        <ExternalLink className="size-4.5 text-muted-foreground" />
       )}
     </div>
   )

@@ -1,43 +1,45 @@
 "use client"
 
-import { CurrencySelectField } from "@/src/modules/finance/components/catalog/currency-select-field"
-import { CATALOG_NONE } from "@/src/modules/finance/constants/catalog"
+import { CurrencySelectField } from "@/src/modules/finance/components/catalog/currency-select-field";
+import { CATALOG_NONE } from "@/src/modules/finance/constants/catalog";
 import {
   useArchiveLoan,
   useCreateLoan,
   useUpdateLoan,
-} from "@/src/modules/finance/hooks/use-loans"
-import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
-import { rateFractionToPercent } from "@/src/modules/finance/lib/interest-rate"
-import { formatPlanningDate } from "@/src/modules/finance/lib/planning-lists"
-import { buildLoanBody } from "@/src/modules/finance/lib/planning-payloads"
+} from "@/src/modules/finance/hooks/use-loans";
+import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error";
+import { rateFractionToPercent } from "@/src/modules/finance/lib/interest-rate";
+import { formatPlanningDate } from "@/src/modules/finance/lib/planning-lists";
+import { buildLoanBody } from "@/src/modules/finance/lib/planning-payloads";
 import type {
   FinanceAccount,
   FinanceInstallmentFreq,
+  FinanceInstitution,
   FinanceLoan,
-} from "@/src/modules/finance/types/entities"
+} from "@/src/modules/finance/types/entities";
 import {
   FINANCE_INSTALLMENT_FREQ_LABEL,
   FINANCE_INSTALLMENT_FREQS,
-} from "@/src/modules/finance/types/entities"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+} from "@/src/modules/finance/types/entities";
+import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet";
 import {
   FormTextField,
   SelectField,
-} from "@/src/shared/components/layout/form-blocks"
-import { SummarySection } from "@/src/shared/components/layout/summary"
-import { Button } from "@/src/shared/components/ui/button"
-import { Spinner } from "@/src/shared/components/ui/spinner"
-import { appToast } from "@/src/shared/lib/app-toast"
-import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { LandmarkIcon } from "lucide-react"
-import { useEffect, useMemo } from "react"
-import { Controller, useForm } from "react-hook-form"
-import { z } from "zod"
+} from "@/src/shared/components/layout/form-blocks";
+import { Button } from "@/src/shared/components/ui/button";
+import { Spinner } from "@/src/shared/components/ui/spinner";
+import { SummarySection } from "@/src/shared/components/ui/summary";
+import { appToast } from "@/src/shared/lib/app-toast";
+import { createSheetSubmit } from "@/src/shared/lib/sheet-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { LandmarkIcon } from "lucide-react";
+import { useEffect, useMemo } from "react";
+import { Controller, useForm, useWatch } from "react-hook-form";
+import { z } from "zod";
 
 const schema = z.object({
   lenderName: z.string().trim().min(1, "Prestamista obligatorio").max(120),
+  institutionId: z.string(),
   accountId: z.string(),
   originalAmount: z.string().trim().min(1, "Monto original obligatorio"),
   currentBalance: z.string().trim().min(1, "Saldo obligatorio"),
@@ -68,9 +70,11 @@ function todayInput(): string {
 function toFormValues(
   loan: FinanceLoan | null,
   defaultCurrency: string,
+  defaultInstitutionId: string = CATALOG_NONE,
 ): FormValues {
   return {
     lenderName: loan?.lenderName ?? "",
+    institutionId: loan?.institutionId ?? defaultInstitutionId,
     accountId: loan?.accountId ?? CATALOG_NONE,
     originalAmount: loan?.originalAmount ?? "",
     currentBalance: loan?.currentBalance ?? "",
@@ -90,7 +94,9 @@ type LoanSheetProps = {
   onOpenChange: (open: boolean) => void
   loan: FinanceLoan | null
   accounts: FinanceAccount[]
+  institutions: FinanceInstitution[]
   defaultCurrency: string
+  defaultInstitutionId?: string
 }
 
 export function LoanSheet({
@@ -98,7 +104,9 @@ export function LoanSheet({
   onOpenChange,
   loan,
   accounts,
+  institutions,
   defaultCurrency,
+  defaultInstitutionId,
 }: LoanSheetProps) {
   const isEdit = Boolean(loan)
   const createMutation = useCreateLoan()
@@ -109,29 +117,74 @@ export function LoanSheet({
     updateMutation.isPending ||
     archiveMutation.isPending
 
-  const accountOptions = useMemo(
-    () => [
-      { value: CATALOG_NONE, label: "Sin cuenta" },
-      ...accounts.map((item) => ({ value: item.id, label: item.name })),
-    ],
-    [accounts],
-  )
+  const resolvedDefaultInstitutionId =
+    defaultInstitutionId ?? CATALOG_NONE
 
   const {
     control,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: toFormValues(loan, defaultCurrency),
+    defaultValues: toFormValues(
+      loan,
+      defaultCurrency,
+      resolvedDefaultInstitutionId,
+    ),
   })
+
+  const selectedInstitutionId = useWatch({ control, name: "institutionId" })
+  const selectedAccountId = useWatch({ control, name: "accountId" })
+
+  const institutionOptions = useMemo(
+    () => [
+      { value: CATALOG_NONE, label: "Prestamista externo" },
+      ...institutions.map((item) => ({ value: item.id, label: item.name })),
+    ],
+    [institutions],
+  )
+
+  const institutionAccounts = accounts.filter(
+    (item) =>
+      item.isActive &&
+      (selectedInstitutionId === CATALOG_NONE ||
+        item.institutionId === selectedInstitutionId),
+  )
+  const accountOptions = useMemo(
+    () => [
+      { value: CATALOG_NONE, label: "Sin cuenta de pago" },
+      ...institutionAccounts.map((item) => ({
+        value: item.id,
+        label: item.name,
+      })),
+    ],
+    [institutionAccounts],
+  )
 
   useEffect(() => {
     if (open) {
-      reset(toFormValues(loan, defaultCurrency))
+      reset(
+        toFormValues(loan, defaultCurrency, resolvedDefaultInstitutionId),
+      )
     }
-  }, [open, loan, defaultCurrency, reset])
+  }, [open, loan, defaultCurrency, resolvedDefaultInstitutionId, reset])
+
+  useEffect(() => {
+    if (
+      selectedAccountId !== CATALOG_NONE &&
+      !accounts.some(
+        (item) =>
+          item.id === selectedAccountId &&
+          item.isActive &&
+          (selectedInstitutionId === CATALOG_NONE ||
+            item.institutionId === selectedInstitutionId),
+      )
+    ) {
+      setValue("accountId", CATALOG_NONE)
+    }
+  }, [accounts, selectedAccountId, selectedInstitutionId, setValue])
 
   const submitForm = useMemo(
     () => createSheetSubmit(handleSubmit),
@@ -232,10 +285,22 @@ export function LoanSheet({
         />
         <Controller
           control={control}
+          name="institutionId"
+          render={({ field }) => (
+            <SelectField
+              label="Institución (si está en el catálogo)"
+              value={field.value}
+              onChange={field.onChange}
+              options={institutionOptions}
+            />
+          )}
+        />
+        <Controller
+          control={control}
           name="accountId"
           render={({ field }) => (
             <SelectField
-              label="Cuenta (opcional)"
+              label="Cuenta de pago (opcional)"
               value={field.value}
               onChange={field.onChange}
               options={accountOptions}

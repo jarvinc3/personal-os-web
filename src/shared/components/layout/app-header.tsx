@@ -67,12 +67,18 @@ function resolvePageTitle(pathname: string): string {
   return "Personal OS"
 }
 
-function HeaderBackButton({ onBack }: { onBack: () => void }) {
+function HeaderBackButton({
+  onBack,
+  className,
+}: {
+  onBack: () => void
+  className?: string
+}) {
   return (
     <Button
       variant="ghost"
       size="icon"
-      className="size-9 rounded-full"
+      className={cn("size-9 rounded-full", className)}
       onClick={onBack}
       aria-label="Volver"
     >
@@ -261,18 +267,34 @@ function SecondaryHeader({
   title,
   actions,
   onBack,
+  tinted,
 }: {
   title: ReactNode
   actions?: ReactNode
   onBack: () => void
+  tinted?: boolean
 }) {
   return (
-    <div className="grid w-full grid-cols-[auto_1fr_auto] items-center gap-2 px-4 lg:px-6">
-      <HeaderBackButton onBack={onBack} />
+    <div
+      className={cn(
+        "grid w-full grid-cols-[auto_1fr_auto] items-center gap-2 px-4 lg:px-6",
+        tinted && "text-white",
+      )}
+    >
+      <HeaderBackButton
+        onBack={onBack}
+        className={tinted ? "text-white hover:bg-white/15 hover:text-white" : undefined}
+      />
       <div className="min-w-0 justify-self-center">
         <HeaderTitle title={title} centered />
       </div>
-      <div className="flex items-center justify-end">
+      <div
+        className={cn(
+          "flex items-center justify-end",
+          tinted &&
+            "[&_button]:text-white [&_button]:hover:bg-white/15 [&_button]:hover:text-white",
+        )}
+      >
         {actions ?? <span className="size-8" aria-hidden="true" />}
       </div>
     </div>
@@ -291,19 +313,27 @@ export function AppHeader() {
 
   const handleBack = config.onBack ?? (() => router.back())
 
+  const accentColor =
+    config.variant === "secondary" ? config.accentColor : undefined
+
   return (
     <header
       data-header-variant={config.variant}
       className={cn(
-        "sticky top-0 z-40 flex h-(--header-height) shrink-0 items-center gap-2 bg-background/80 py-2.5 backdrop-blur-lg transition-transform duration-300 ease-in-out",
+        "sticky top-0 z-40 flex h-(--header-height) shrink-0 items-center gap-2 py-2.5 transition-transform duration-300 ease-in-out",
+        accentColor
+          ? "text-white backdrop-blur-none"
+          : "bg-background/80 backdrop-blur-lg",
         scrollHidden && "-translate-y-full"
       )}
+      style={accentColor ? { backgroundColor: accentColor } : undefined}
     >
       {config.variant === "secondary" ? (
         <SecondaryHeader
           title={title}
           actions={config.actions}
           onBack={handleBack}
+          tinted={Boolean(accentColor)}
         />
       ) : (
         <PrimaryHeader

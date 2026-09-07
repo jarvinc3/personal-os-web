@@ -16,6 +16,7 @@ export type PageHeaderConfig = {
   title?: ReactNode
   subtitle?: ReactNode
   actions?: ReactNode
+  accentColor?: string
   showSidebarTrigger?: boolean
   showNotificationBell?: boolean
   showUserMenu?: boolean
@@ -28,6 +29,7 @@ export type ResolvedPageHeaderConfig = {
   title?: ReactNode
   subtitle?: ReactNode
   actions?: ReactNode
+  accentColor?: string
   showSidebarTrigger: boolean
   showNotificationBell: boolean
   showUserMenu: boolean
@@ -52,6 +54,7 @@ function resolveConfig(config: PageHeaderConfig): ResolvedPageHeaderConfig {
     title: config.title,
     subtitle: config.subtitle,
     actions: config.actions,
+    accentColor: config.accentColor,
     showSidebarTrigger: config.showSidebarTrigger ?? !isSecondary,
     showNotificationBell: config.showNotificationBell ?? !isSecondary,
     showUserMenu: config.showUserMenu ?? !isSecondary,
@@ -80,6 +83,7 @@ export function HeaderProvider({ children }: { children: ReactNode }) {
         prev.title === resolved.title &&
         prev.subtitle === resolved.subtitle &&
         prev.actions === resolved.actions &&
+        prev.accentColor === resolved.accentColor &&
         prev.showSidebarTrigger === resolved.showSidebarTrigger &&
         prev.showNotificationBell === resolved.showNotificationBell &&
         prev.showUserMenu === resolved.showUserMenu &&

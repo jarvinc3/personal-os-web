@@ -330,10 +330,9 @@ Todas las tablas llevan el prefijo `fin_`. Fuente de verdad ejecutable: **person
 | ---------------- | --------------- | ---------------------------------------------- |
 | `id`             | text PK         | UUID text                                      |
 | `user_id`        | text FK → users | —                                              |
-| `institution_id` | text FK?        | `fin_institutions`                             |
+| `institution_id` | text FK?        | Requerido salvo `CASH`                         |
 | `name`           | text            | Ej: `Cuenta Banreservas`                       |
 | `type`           | enum            | `CHECKING`, `SAVINGS`, `CASH`, `INVESTMENT`    |
-| `institution`    | text?           | Label legacy / display                         |
 | `currency`       | text            | ISO 4217 (`DOP`, `USD`)                        |
 | `balance`        | decimal(15,2)   | Cache del ledger CONFIRMED                     |
 | `is_active`      | boolean         | Soft-delete                                    |
@@ -346,17 +345,20 @@ Todas las tablas llevan el prefijo `fin_`. Fuente de verdad ejecutable: **person
 | ------------------- | ----------- |
 | `type` | `CREDIT` \| `DEBIT` |
 | `account_id` | Requerido si `DEBIT`; null si `CREDIT` |
-| `last_four` | 4 dígitos opcionales |
+| `last_four` | 4 dígitos opcionales (solo tarjetas; débito o crédito) |
 | `statement_closing_day` / `payment_due_day` | 1–31 en tarjeta |
 | balances | `(card_id, currency)` único; `balance` + `credit_limit` opcional |
 
-### `fin_email_sources`
+### `fin_email_connections` / `fin_email_sources`
 
-| Campo        | Descripción                |
-| ------------ | -----------                |
-| `account_id` | Opcional — destino cuenta  |
-| `card_id`    | Opcional — destino tarjeta |
-| —            | Como máximo uno de los dos |
+| Tabla | Rol |
+| ----- | --- |
+| `fin_email_connections` | Credenciales OAuth por `(user_id, provider, email_address)` |
+| `fin_email_sources` | Filtro `connection_id` + **`institution_id`** + `bank_domain`. No es destino de ledger. |
+
+### `fin_email_messages`
+
+Outcome por `(source_id, gmail_message_id)`: `IMPORTED`, `SKIPPED_NOT_TX`, `FAILED_NON_RETRYABLE`, `PENDING_ASSIGNMENT`. Payload extraído + hints de instrumento/últimos 4.
 
 ### `fin_transactions`
 
@@ -365,10 +367,10 @@ Todas las tablas llevan el prefijo `fin_`. Fuente de verdad ejecutable: **person
 | `account_id` | XOR con `card_id` (CHECK + API) |
 | `card_id` | XOR con `account_id` |
 | `type` | `DEBIT`, `CREDIT`, `TRANSFER` (transfer = pares enlazados) |
-| `status` | `PENDING`, `CONFIRMED`, `CANCELLED` |
+| `status` | `PENDING`, `CONFIRMED`, `DECLINED`, `CANCELLED`, `REVERSED` |
 | `source` | `MANUAL`, `EMAIL`, `AI` |
 | `currency` | ISO 4217 |
-| `email_message_id` | unique, import Gmail |
+| `email_message_id` | FK única opcional a `fin_email_messages.id`. El id Gmail vive en `fin_email_messages.gmail_message_id`. |
 
 > **Ledger:** solo `CONFIRMED` mueve saldos. Crédito actualiza `fin_card_balances`; débito de tarjeta actualiza la cuenta subyacente; cuenta bancaria actualiza `fin_accounts.balance`.
 > **Nota multi-moneda:** always guardar `amount` + `amount_base_currency` + `exchange_rate`.
@@ -389,20 +391,19 @@ Categorías jerárquicas (self-referencial, soporta subcategorías).
 
 ### `fin_budgets`
 
-Presupuestos mensuales por categoría.
+Presupuestos por categoría y periodo (`period_type` + `period_start` / `period_end`). No hay columnas `year`/`month`.
 
 | Campo                  | Tipo                     | Descripción                                      |
 | ---------------------- | ------------------------ | ------------------------------------------------ |
-| `id`                   | uuid PK                  | —                                                |
-| `user_id`              | uuid FK → users          | —                                                |
-| `category_id`          | uuid FK → fin_categories | —                                                |
-| `year`                 | int                      | Año del presupuesto                              |
-| `month`                | int                      | Mes del presupuesto (1–12)                       |
+| `id`                   | text PK                  | UUID text                                        |
+| `user_id`              | text FK → users          | —                                                |
+| `category_id`          | text FK → fin_categories | —                                                |
+| `period_type`          | enum                     | `MONTHLY`, `BIWEEKLY`, `CUSTOM`                  |
+| `period_start`         | date                     | Inicio del periodo                               |
+| `period_end`           | date                     | Fin del periodo                                  |
 | `amount_limit`         | decimal                  | Límite del presupuesto                           |
-| `amount_spent`         | decimal                  | Gasto acumulado (actualizado en tiempo real)     |
-| `alert_threshold_pct`  | decimal                  | % del límite que dispara alerta (ej: 0.80 = 80%) |
-| `ai_suggestion_status` | string                   | `suggested`                                      |
-| `created_at`           | timestamp                | —                                                |
+| `amount_spent`         | decimal                  | Gasto acumulado (ledger CONFIRMED)               |
+| `alert_threshold_pct`  | decimal                  | % del límite que dispara alerta (80 = 80%)       |
 
 ### `fin_budget_alerts`
 
@@ -452,37 +453,37 @@ Histórico de tasas de cambio para reportes precisos.
 ### Flujo completo
 
 ```md
-1. Usuario conecta Gmail vía OAuth2 (scope: gmail.readonly)
-2. Cron job cada 6 horas por usuario activo
-3. Fetch emails filtrados por dominio bancario
-4. Parser intenta regex por banco conocido
-5. Si falla regex → fallback a Ai Agent
-6. Transacción guardada con email_message_id (deduplicación)
-7. Notificación in-app + push al usuario
+1. Usuario conecta Gmail vía OAuth2 (scope: gmail.readonly) eligiendo una **institución**
+2. Credenciales en `fin_email_connections`; fuente = conexión + institución + dominio
+3. Job de sync lista correos `from:{bankDomain}`
+4. Extractor LLM (sin parsers regex por banco) devuelve movimiento + hints de cuenta/tarjeta
+5. Resolver busca destinos **activos** del usuario en esa institución
+6. Match único → transacción; 0 o varios → `PENDING_ASSIGNMENT` (cola de revisión, sin ledger)
+7. Notificación in-app + push al completar el lote de sync
 ```
 
 ### Estrategia de parsing
 
-| Estrategia      | Cuándo                                                  | Costo         |
-| --------------- | ------------------------------------------------------- | ------------- |
-| Regex por banco | Bancos con formato conocido (Banreservas, BHD, Popular) | $0            |
-| Ai Agent        | Bancos desconocidos o formato cambiado                  | ~$0.003/email |
+| Estrategia | Cuándo | Costo |
+| ---------- | ------ | ----- |
+| Ai Agent   | Todo movimiento bancario por email | ~$0.003/email |
+
+No hay parser regex por banco. El HTML/cuerpo se trata como datos no confiables.
 
 ### Seguridad
 
-- Los `access_token` y `refresh_token` se guardan **encriptados** en la DB (AES-256).
+- Los `access_token` y `refresh_token` se guardan **encriptados** en `fin_email_connections` (AES-256).
 - Scope OAuth2 solicitado: **solo lectura** (`gmail.readonly`).
 - Nunca se almacenan contraseñas de email.
-- El `email_message_id` previene procesar el mismo email dos veces.
+- Deduplicación por `(source_id, gmail_message_id)` en `fin_email_messages`. La transacción apunta a esa fila (`email_message_id`), no duplica el id de Gmail.
+- `emailSync.enabled` (config del módulo) debe estar en true para conectar o sincronizar.
 
 ### Costo operativo estimado (uso personal)
 
 | Componente                  | Costo mensual estimado       |
 | --------------------------- | ---------------------------- |
 | Gmail API                   | $0 (dentro del free tier)    |
-| IMAP                        | $0                           |
-| Ai Agent (parsing fallback) | ~$0.30 (worst case, 100% IA) |
-| Ai Agent (uso típico)       | ~$0.05 (mayoría por regex)   |
+| Ai Agent (extracción)       | ~$0.30 (worst case, 100% IA) |
 
 ---
 
