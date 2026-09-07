@@ -1,29 +1,29 @@
 "use client"
 
-import { CATALOG_NONE } from "@/src/modules/finance/constants/catalog"
+import { CATALOG_NONE } from "@/src/modules/finance/constants/catalog";
 import {
   useCreateCategory,
   useDeleteCategory,
   useUpdateCategory,
-} from "@/src/modules/finance/hooks/use-categories"
-import { buildCreateCategoryBody } from "@/src/modules/finance/lib/catalog-payloads"
-import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
-import type { FinanceCategory } from "@/src/modules/finance/types/entities"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+} from "@/src/modules/finance/hooks/use-categories";
+import { buildCreateCategoryBody } from "@/src/modules/finance/lib/catalog-payloads";
+import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error";
+import type { FinanceCategory } from "@/src/modules/finance/types/entities";
+import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet";
 import {
   FormTextField,
   SelectField,
-} from "@/src/shared/components/layout/form-blocks"
-import { SummarySection } from "@/src/shared/components/layout/summary"
-import { Button } from "@/src/shared/components/ui/button"
-import { Spinner } from "@/src/shared/components/ui/spinner"
-import { appToast } from "@/src/shared/lib/app-toast"
-import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { Palette, TagsIcon } from "lucide-react"
-import { useEffect, useMemo } from "react"
-import { Controller, useForm } from "react-hook-form"
-import { z } from "zod"
+} from "@/src/shared/components/layout/form-blocks";
+import { Button } from "@/src/shared/components/ui/button";
+import { Spinner } from "@/src/shared/components/ui/spinner";
+import { SummarySection } from "@/src/shared/components/ui/summary";
+import { appToast } from "@/src/shared/lib/app-toast";
+import { createSheetSubmit } from "@/src/shared/lib/sheet-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Palette, TagsIcon } from "lucide-react";
+import { useEffect, useMemo } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { z } from "zod";
 
 const schema = z.object({
   name: z.string().trim().min(1, "Nombre obligatorio").max(80),

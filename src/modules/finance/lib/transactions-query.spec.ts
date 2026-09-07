@@ -1,10 +1,11 @@
-import assert from "node:assert/strict"
-import { describe, it } from "node:test"
+import assert from "node:assert/strict";
+import { describe, it } from "node:test";
 
 import {
   buildTransactionsSearchParams,
   transactionsFromPayload,
-} from "./transactions-query.ts"
+  visibleTransactionTotals,
+} from "./transactions-query.ts";
 
 describe("buildTransactionsSearchParams", () => {
   it("sends page and the DTO filters, omitting empty sentinels", () => {
@@ -31,6 +32,15 @@ describe("buildTransactionsSearchParams", () => {
     assert.equal(params.has("search"), false)
     assert.equal(params.has("categoryId"), false)
   })
+
+  it("includes a trimmed search term", () => {
+    const qs = buildTransactionsSearchParams({
+      page: 1,
+      limit: 20,
+      search: "  supermercado  ",
+    })
+    assert.equal(new URLSearchParams(qs).get("search"), "supermercado")
+  })
 })
 
 describe("transactionsFromPayload", () => {
@@ -51,5 +61,18 @@ describe("transactionsFromPayload", () => {
       data: { items: [{ id: "hidden" }], pagination: { page: 1 } },
     })
     assert.deepEqual(nestedData.items, [])
+  })
+})
+
+describe("visibleTransactionTotals", () => {
+  it("splits CREDIT into income and DEBIT into expenses, ignoring transfers", () => {
+    const totals = visibleTransactionTotals([
+      { type: "CREDIT", amount: "10.00" },
+      { type: "DEBIT", amount: "3.25" },
+      { type: "DEBIT", amount: "10.00" },
+      { type: "TRANSFER", amount: "50.00" },
+    ])
+    assert.equal(totals.income, 10)
+    assert.equal(totals.expenses, 13.25)
   })
 })

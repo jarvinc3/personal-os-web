@@ -10,18 +10,15 @@ import {
   RegisterForm,
   type RegisterFormHandle,
 } from "@/src/modules/auth/components/register-form"
+import { AppLogo } from "@/src/shared/components/brand/app-logo"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
 import { LoadingView } from "@/src/shared/components/layout/loading-view"
 import { Button } from "@/src/shared/components/ui/button"
-import {
-  getAppIconPath,
-  getWelcomeIllustrationPath,
-} from "@/src/shared/constants/app-assets"
+import { appAssets } from "@/src/shared/constants/app-assets"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { useIsMobile } from "@/src/shared/hooks/use-mobile"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { ArrowRight } from "lucide-react"
-import { useTheme } from "next-themes"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useEffect, useRef, useState } from "react"
@@ -42,15 +39,12 @@ export default function LoginPage() {
   const router = useRouter()
   const isMobile = useIsMobile()
   const { isAuthenticated, isLoading } = useAuthGuard()
-  const { resolvedTheme } = useTheme()
   const { loginMutation, loginWithGoogleMutation, registerMutation } = useAuth()
   const [authMode, setAuthMode] = useState<AuthMode>("login")
   const desktopLoginFormRef = useRef<LoginFormHandle>(null)
   const desktopRegisterFormRef = useRef<RegisterFormHandle>(null)
   const sheetLoginFormRef = useRef<LoginFormHandle>(null)
   const sheetRegisterFormRef = useRef<RegisterFormHandle>(null)
-  const appIcon = getAppIconPath(resolvedTheme)
-  const welcomeIllustration = getWelcomeIllustrationPath(resolvedTheme)
 
   const { open: openLoginSheet, setOpen: setOpenLoginSheet } =
     useSheetParam("login-sheet")
@@ -74,14 +68,7 @@ export default function LoginPage() {
   return (
     <div className="flex h-screen flex-col">
       <nav className="flex flex-row items-center gap-3 p-4">
-        <Image
-          src={appIcon}
-          alt="Logo de Personal OS"
-          width={40}
-          height={40}
-          className="h-auto w-auto rounded-md"
-          priority
-        />
+        <AppLogo size="lg" className="rounded-md" priority />
         <div className="flex-1">
           <p className="text-base font-bold text-foreground">Personal OS</p>
           <p className="text-xs text-muted-foreground">Tu espacio personal</p>
@@ -140,12 +127,22 @@ export default function LoginPage() {
         <div className="flex min-h-0 min-w-0 flex-1 flex-col">
           <div className="flex min-h-0 flex-1 items-center justify-center p-4 sm:p-6 md:p-4">
             <Image
-              src={welcomeIllustration}
+              src={appAssets.welcomeIllustrationLight}
               alt="Ilustración de bienvenida"
               width={650}
               height={300}
               sizes="(max-width: 767px) calc(100vw - 2rem), 50vw"
-              className="h-auto max-h-full w-auto max-w-full object-contain"
+              className="h-auto max-h-full w-auto max-w-full object-contain dark:hidden"
+              priority
+            />
+            <Image
+              src={appAssets.welcomeIllustrationDark}
+              alt=""
+              aria-hidden
+              width={650}
+              height={300}
+              sizes="(max-width: 767px) calc(100vw - 2rem), 50vw"
+              className="hidden h-auto max-h-full w-auto max-w-full object-contain dark:block"
               priority
             />
           </div>

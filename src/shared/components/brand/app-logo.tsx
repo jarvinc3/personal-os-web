@@ -13,10 +13,12 @@ const sizes = {
 type AppLogoProps = {
   size?: keyof typeof sizes;
   className?: string;
+  priority?: boolean;
 };
 
-export function AppLogo({ size = "sm", className }: AppLogoProps) {
+export function AppLogo({ size = "sm", className, priority }: AppLogoProps) {
   const { className: sizeClass, px } = sizes[size];
+  const shouldPrioritize = priority ?? size === "sm";
 
   return (
     <span
@@ -32,7 +34,7 @@ export function AppLogo({ size = "sm", className }: AppLogoProps) {
         width={px}
         height={px}
         className="object-cover size-full dark:hidden"
-        priority={size === "sm"}
+        priority={shouldPrioritize}
       />
       <Image
         src={appAssets.iconDark}
@@ -40,6 +42,7 @@ export function AppLogo({ size = "sm", className }: AppLogoProps) {
         width={px}
         height={px}
         className="hidden object-cover size-full dark:block"
+        priority={shouldPrioritize}
       />
     </span>
   );

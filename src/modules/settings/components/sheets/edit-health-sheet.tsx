@@ -1,20 +1,20 @@
 "use client"
 
-import { ModuleSheetEnableRow } from "@/src/modules/settings/components/profile-ui"
-import { useModuleSheetEnable } from "@/src/modules/settings/hooks/use-module-sheet-enable"
-import { useProfileSheetFormSync } from "@/src/modules/settings/hooks/use-profile-sheet"
-import { useUserModuleConfig } from "@/src/modules/settings/hooks/use-user-module-config"
-import type { SettingsSheetProps } from "@/src/modules/settings/types/sheet.types"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+import { ModuleSheetEnableRow } from "@/src/modules/settings/components/profile-ui";
+import { useModuleSheetEnable } from "@/src/modules/settings/hooks/use-module-sheet-enable";
+import { useProfileSheetFormSync } from "@/src/modules/settings/hooks/use-profile-sheet";
+import { useUserModuleConfig } from "@/src/modules/settings/hooks/use-user-module-config";
+import type { SettingsSheetProps } from "@/src/modules/settings/types/sheet.types";
+import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet";
 import { OptionRow, SwitchFieldRow } from "@/src/shared/components/layout/form-blocks";
-import { SummarySection } from "@/src/shared/components/layout/summary";
 import { Button } from "@/src/shared/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/src/shared/components/ui/radio-group";
-import { Spinner } from "@/src/shared/components/ui/spinner"
-import { getModule } from "@/src/shared/constants/module-registry"
-import { appToast } from "@/src/shared/lib/app-toast"
-import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
-import { zodResolver } from "@hookform/resolvers/zod"
+import { Spinner } from "@/src/shared/components/ui/spinner";
+import { SummarySection } from "@/src/shared/components/ui/summary";
+import { getModule } from "@/src/shared/constants/module-registry";
+import { appToast } from "@/src/shared/lib/app-toast";
+import { createSheetSubmit } from "@/src/shared/lib/sheet-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { HeartPulse, Ruler } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo } from "react";

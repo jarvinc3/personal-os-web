@@ -1,36 +1,36 @@
 "use client"
 
-import { CurrencySelectField } from "@/src/modules/finance/components/catalog/currency-select-field"
+import { CurrencySelectField } from "@/src/modules/finance/components/catalog/currency-select-field";
 import {
   useCreateReceivable,
   useUpdateReceivable,
-} from "@/src/modules/finance/hooks/use-receivables"
-import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
-import { formatPlanningDate } from "@/src/modules/finance/lib/planning-lists"
-import { buildCreateReceivableBody } from "@/src/modules/finance/lib/planning-payloads"
+} from "@/src/modules/finance/hooks/use-receivables";
+import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error";
+import { formatPlanningDate } from "@/src/modules/finance/lib/planning-lists";
+import { buildCreateReceivableBody } from "@/src/modules/finance/lib/planning-payloads";
 import type {
   FinanceReceivable,
   FinanceReceivableStatus,
-} from "@/src/modules/finance/types/entities"
+} from "@/src/modules/finance/types/entities";
 import {
   FINANCE_RECEIVABLE_STATUS_LABEL,
   FINANCE_RECEIVABLE_STATUSES,
-} from "@/src/modules/finance/types/entities"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+} from "@/src/modules/finance/types/entities";
+import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet";
 import {
   FormTextField,
   SelectField,
-} from "@/src/shared/components/layout/form-blocks"
-import { SummarySection } from "@/src/shared/components/layout/summary"
-import { Button } from "@/src/shared/components/ui/button"
-import { Spinner } from "@/src/shared/components/ui/spinner"
-import { appToast } from "@/src/shared/lib/app-toast"
-import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { HandshakeIcon } from "lucide-react"
-import { useEffect, useMemo } from "react"
-import { Controller, useForm } from "react-hook-form"
-import { z } from "zod"
+} from "@/src/shared/components/layout/form-blocks";
+import { Button } from "@/src/shared/components/ui/button";
+import { Spinner } from "@/src/shared/components/ui/spinner";
+import { SummarySection } from "@/src/shared/components/ui/summary";
+import { appToast } from "@/src/shared/lib/app-toast";
+import { createSheetSubmit } from "@/src/shared/lib/sheet-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { HandshakeIcon } from "lucide-react";
+import { useEffect, useMemo } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { z } from "zod";
 
 const schema = z.object({
   debtorName: z.string().trim().min(1, "Deudor obligatorio").max(120),

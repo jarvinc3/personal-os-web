@@ -1,32 +1,32 @@
 "use client"
 
-import { CATALOG_NONE } from "@/src/modules/finance/constants/catalog"
+import { CATALOG_NONE } from "@/src/modules/finance/constants/catalog";
 import {
   useAssignPendingEmail,
   useRetryPendingEmail,
-} from "@/src/modules/finance/hooks/use-email-sources"
-import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
+} from "@/src/modules/finance/hooks/use-email-sources";
+import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error";
 import {
   buildLedgerTargetOptions,
   splitLedgerTarget,
-} from "@/src/modules/finance/lib/ledger-payloads"
+} from "@/src/modules/finance/lib/ledger-payloads";
 import type {
   FinanceAccount,
   FinanceCard,
   FinancePendingEmailMessage,
-} from "@/src/modules/finance/types/entities"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
-import { SelectField } from "@/src/shared/components/layout/form-blocks"
-import { SummarySection } from "@/src/shared/components/layout/summary"
-import { Button } from "@/src/shared/components/ui/button"
-import { Spinner } from "@/src/shared/components/ui/spinner"
-import { appToast } from "@/src/shared/lib/app-toast"
-import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { InboxIcon } from "lucide-react"
-import { useEffect, useMemo } from "react"
-import { Controller, useForm } from "react-hook-form"
-import { z } from "zod"
+} from "@/src/modules/finance/types/entities";
+import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet";
+import { SelectField } from "@/src/shared/components/layout/form-blocks";
+import { Button } from "@/src/shared/components/ui/button";
+import { Spinner } from "@/src/shared/components/ui/spinner";
+import { SummarySection } from "@/src/shared/components/ui/summary";
+import { appToast } from "@/src/shared/lib/app-toast";
+import { createSheetSubmit } from "@/src/shared/lib/sheet-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { InboxIcon } from "lucide-react";
+import { useEffect, useMemo } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { z } from "zod";
 
 const schema = z.object({
   target: z.string().min(1, "Elige una cuenta o una tarjeta"),

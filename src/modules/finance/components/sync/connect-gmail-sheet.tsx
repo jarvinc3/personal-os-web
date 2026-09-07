@@ -1,26 +1,26 @@
 "use client"
 
-import { CATALOG_NONE } from "@/src/modules/finance/constants/catalog"
-import { useStartGmailOAuth } from "@/src/modules/finance/hooks/use-gmail-oauth"
-import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
-import type { GmailOAuthNextPath } from "@/src/modules/finance/lib/gmail-oauth"
-import type { FinanceInstitution } from "@/src/modules/finance/types/entities"
-import { APP_ROUTES } from "@/src/shared/constants/app-routes"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+import { CATALOG_NONE } from "@/src/modules/finance/constants/catalog";
+import { useStartGmailOAuth } from "@/src/modules/finance/hooks/use-gmail-oauth";
+import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error";
+import type { GmailOAuthNextPath } from "@/src/modules/finance/lib/gmail-oauth";
+import type { FinanceInstitution } from "@/src/modules/finance/types/entities";
+import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet";
 import {
   FormTextField,
   SelectField,
-} from "@/src/shared/components/layout/form-blocks"
-import { SummarySection } from "@/src/shared/components/layout/summary"
-import { Button } from "@/src/shared/components/ui/button"
-import { Spinner } from "@/src/shared/components/ui/spinner"
-import { appToast } from "@/src/shared/lib/app-toast"
-import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { MailIcon } from "lucide-react"
-import { useEffect, useMemo } from "react"
-import { Controller, useForm } from "react-hook-form"
-import { z } from "zod"
+} from "@/src/shared/components/layout/form-blocks";
+import { Button } from "@/src/shared/components/ui/button";
+import { Spinner } from "@/src/shared/components/ui/spinner";
+import { SummarySection } from "@/src/shared/components/ui/summary";
+import { APP_ROUTES } from "@/src/shared/constants/app-routes";
+import { appToast } from "@/src/shared/lib/app-toast";
+import { createSheetSubmit } from "@/src/shared/lib/sheet-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { MailIcon } from "lucide-react";
+import { useEffect, useMemo } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { z } from "zod";
 
 const schema = z.object({
   institutionId: z.string().min(1, "Elige una institución"),

@@ -7,9 +7,9 @@ import type { UpdateProfilePayload } from '@/src/modules/settings/types/profile.
 import type { SettingsSheetProps } from '@/src/modules/settings/types/sheet.types';
 import { BottomSheet } from '@/src/shared/components/layout/bottom-sheet';
 import { FormTextField, SelectionGrid } from '@/src/shared/components/layout/form-blocks';
-import { SummarySection } from '@/src/shared/components/layout/summary';
 import { Button } from '@/src/shared/components/ui/button';
 import { Spinner } from '@/src/shared/components/ui/spinner';
+import { SummarySection } from '@/src/shared/components/ui/summary';
 import { appToast } from '@/src/shared/lib/app-toast';
 import { createSheetSubmit } from '@/src/shared/lib/sheet-form';
 import { zodResolver } from '@hookform/resolvers/zod';

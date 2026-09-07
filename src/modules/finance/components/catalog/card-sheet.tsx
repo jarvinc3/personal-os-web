@@ -1,50 +1,50 @@
 "use client"
 
-import { CurrencySelectField } from "@/src/modules/finance/components/catalog/currency-select-field"
+import { CurrencySelectField } from "@/src/modules/finance/components/catalog/currency-select-field";
 import {
   CATALOG_NONE,
   FINANCE_CARD_NETWORK_LABEL,
   FINANCE_CARD_NETWORKS,
   FINANCE_CARD_TYPE_LABEL,
   FINANCE_CARD_TYPES,
-} from "@/src/modules/finance/constants/catalog"
+} from "@/src/modules/finance/constants/catalog";
 import {
   useArchiveCard,
   useCreateCard,
   useUpdateCard,
   useUpdateCardBalance,
-} from "@/src/modules/finance/hooks/use-cards"
+} from "@/src/modules/finance/hooks/use-cards";
 import {
   buildCardBalanceBody,
   buildCreateCardBody,
-} from "@/src/modules/finance/lib/catalog-payloads"
-import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
+} from "@/src/modules/finance/lib/catalog-payloads";
+import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error";
 import type {
   FinanceAccount,
   FinanceCard,
   FinanceInstitution,
-} from "@/src/modules/finance/types/entities"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+} from "@/src/modules/finance/types/entities";
+import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet";
 import {
   FormTextField,
   SelectField,
-} from "@/src/shared/components/layout/form-blocks"
-import { SummarySection } from "@/src/shared/components/layout/summary"
-import { Button } from "@/src/shared/components/ui/button"
-import { Spinner } from "@/src/shared/components/ui/spinner"
-import { appToast } from "@/src/shared/lib/app-toast"
-import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
-import { zodResolver } from "@hookform/resolvers/zod"
+} from "@/src/shared/components/layout/form-blocks";
+import { Button } from "@/src/shared/components/ui/button";
+import { Spinner } from "@/src/shared/components/ui/spinner";
+import { SummarySection } from "@/src/shared/components/ui/summary";
+import { appToast } from "@/src/shared/lib/app-toast";
+import { createSheetSubmit } from "@/src/shared/lib/sheet-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Building2Icon,
   CalendarDays,
   CreditCardIcon,
   DollarSign,
   Palette,
-} from "lucide-react"
-import { useEffect, useMemo } from "react"
-import { Controller, useForm, useWatch } from "react-hook-form"
-import { z } from "zod"
+} from "lucide-react";
+import { useEffect, useMemo } from "react";
+import { Controller, useForm, useWatch } from "react-hook-form";
+import { z } from "zod";
 
 const schema = z.object({
   name: z.string().trim().min(1, "Nombre obligatorio").max(120),
@@ -107,6 +107,7 @@ type CardSheetProps = {
   institutions: FinanceInstitution[]
   accounts: FinanceAccount[]
   defaultCurrency: string
+  defaultInstitutionId?: string
   onUpdateBalance: (card: FinanceCard) => void
 }
 
@@ -117,6 +118,7 @@ export function CardSheet({
   institutions,
   accounts,
   defaultCurrency,
+  defaultInstitutionId,
   onUpdateBalance,
 }: CardSheetProps) {
   const isEdit = Boolean(card)
@@ -130,6 +132,9 @@ export function CardSheet({
     archiveMutation.isPending ||
     balanceMutation.isPending
 
+  const resolvedDefaultInstitutionId =
+    defaultInstitutionId ?? institutions[0]?.id ?? ""
+
   const {
     control,
     handleSubmit,
@@ -138,7 +143,11 @@ export function CardSheet({
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: toFormValues(card, defaultCurrency, institutions[0]?.id ?? ""),
+    defaultValues: toFormValues(
+      card,
+      defaultCurrency,
+      resolvedDefaultInstitutionId,
+    ),
   })
 
   const cardType = useWatch({ control, name: "type" })
@@ -160,9 +169,11 @@ export function CardSheet({
 
   useEffect(() => {
     if (open) {
-      reset(toFormValues(card, defaultCurrency, institutions[0]?.id ?? ""))
+      reset(
+        toFormValues(card, defaultCurrency, resolvedDefaultInstitutionId),
+      )
     }
-  }, [open, card, defaultCurrency, institutions, reset])
+  }, [open, card, defaultCurrency, resolvedDefaultInstitutionId, reset])
 
   useEffect(() => {
     if (

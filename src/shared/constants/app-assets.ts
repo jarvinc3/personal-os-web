@@ -8,17 +8,3 @@ export const appAssets = {
   welcomeIllustrationLight: '/images/welcome-ilustration-light.png',
   welcomeIllustrationDark: '/images/welcome-ilustration-dark.png',
 } as const;
-
-export function getAppIconPath(theme: string | undefined): string {
-  if (theme === 'dark') {
-    return appAssets.iconDark;
-  }
-  return appAssets.iconLight;
-}
-
-export function getWelcomeIllustrationPath(theme: string | undefined): string {
-  if (theme === 'dark') {
-    return appAssets.welcomeIllustrationDark;
-  }
-  return appAssets.welcomeIllustrationLight;
-}

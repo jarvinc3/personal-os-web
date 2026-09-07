@@ -11,7 +11,6 @@ import { setPendingAccountDeletion } from '@/src/modules/settings/lib/pending-ac
 import type { SettingsSheetProps } from '@/src/modules/settings/types/sheet.types';
 import { BottomSheet } from '@/src/shared/components/layout/bottom-sheet';
 import { FormTextField } from '@/src/shared/components/layout/form-blocks';
-import { SummarySection } from '@/src/shared/components/layout/summary';
 import { Alert, AlertDescription, AlertTitle } from '@/src/shared/components/ui/alert';
 import {
   AlertDialog,
@@ -25,6 +24,7 @@ import {
 } from '@/src/shared/components/ui/alert-dialog';
 import { Button } from '@/src/shared/components/ui/button';
 import { Spinner } from '@/src/shared/components/ui/spinner';
+import { SummarySection } from '@/src/shared/components/ui/summary';
 import { APP_ROUTES } from '@/src/shared/constants/app-routes';
 import { AlertTriangle, KeyRound } from 'lucide-react';
 import { useCallback, useState } from 'react';
@@ -165,7 +165,7 @@ export function DeleteAccountSheet({ open, onOpenChange, email }: DeleteAccountS
               onChange={setPassword}
               disabled={deleteAccountMutation.isPending}
             />
-            <div className="rounded-2xl bg-muted px-4 py-3">
+            <div className="px-4 py-3 rounded-2xl bg-muted">
               <p className="text-xs text-muted-foreground">Cuenta</p>
               <p className="mt-1 text-sm text-muted-foreground">{email}</p>
             </div>

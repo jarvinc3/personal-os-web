@@ -2,7 +2,7 @@ import type {
   FinanceAccountType,
   FinanceCardNetwork,
   FinanceCardType,
-} from "@/src/modules/finance/constants/catalog"
+} from "@/src/modules/finance/constants/catalog";
 
 export const FINANCE_TRANSACTION_TYPES = ["DEBIT", "CREDIT", "TRANSFER"] as const
 export type FinanceTransactionType = (typeof FINANCE_TRANSACTION_TYPES)[number]
@@ -178,6 +178,8 @@ export type FinanceBudgetStatus = {
   id: string
   categoryId: string
   category: string
+  color: string | null
+  icon: string | null
   periodType: string
   periodStart: string
   periodEnd: string

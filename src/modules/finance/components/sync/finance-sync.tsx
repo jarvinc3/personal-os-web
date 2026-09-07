@@ -1,28 +1,27 @@
 "use client"
 
-import { AssignEmailMessageSheet } from "@/src/modules/finance/components/sync/assign-email-message-sheet"
-import { ConnectGmailSheet } from "@/src/modules/finance/components/sync/connect-gmail-sheet"
-import { EmailSourceSheet } from "@/src/modules/finance/components/sync/email-source-sheet"
-import { useAccounts } from "@/src/modules/finance/hooks/use-accounts"
-import { useCards } from "@/src/modules/finance/hooks/use-cards"
+import { AssignEmailMessageSheet } from "@/src/modules/finance/components/sync/assign-email-message-sheet";
+import { ConnectGmailSheet } from "@/src/modules/finance/components/sync/connect-gmail-sheet";
+import { EmailSourceSheet } from "@/src/modules/finance/components/sync/email-source-sheet";
+import { useAccounts } from "@/src/modules/finance/hooks/use-accounts";
+import { useCards } from "@/src/modules/finance/hooks/use-cards";
 import {
   useEmailSources,
   usePendingEmailMessages,
-} from "@/src/modules/finance/hooks/use-email-sources"
-import { useFinanceEnabled } from "@/src/modules/finance/hooks/use-finance-enabled"
-import { useInstitutions } from "@/src/modules/finance/hooks/use-institutions"
-import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
+} from "@/src/modules/finance/hooks/use-email-sources";
+import { useFinanceEnabled } from "@/src/modules/finance/hooks/use-finance-enabled";
+import { useInstitutions } from "@/src/modules/finance/hooks/use-institutions";
+import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error";
 import {
   parseOAuthSuccessParam,
   type GmailOAuthNextPath,
-} from "@/src/modules/finance/lib/gmail-oauth"
+} from "@/src/modules/finance/lib/gmail-oauth";
 import type {
   FinanceEmailSource,
   FinancePendingEmailMessage,
-} from "@/src/modules/finance/types/entities"
-import { SettingsRow } from "@/src/shared/components/layout/settings-section"
-import { SummarySection } from "@/src/shared/components/layout/summary"
-import { Button } from "@/src/shared/components/ui/button"
+} from "@/src/modules/finance/types/entities";
+import { SettingsRow } from "@/src/shared/components/layout/settings-section";
+import { Button } from "@/src/shared/components/ui/button";
 import {
   Empty,
   EmptyContent,
@@ -30,13 +29,14 @@ import {
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
-} from "@/src/shared/components/ui/empty"
-import { Spinner } from "@/src/shared/components/ui/spinner"
-import { APP_ROUTES } from "@/src/shared/constants/app-routes"
-import { InboxIcon, MailIcon, PlusIcon } from "lucide-react"
-import Link from "next/link"
-import { useSearchParams } from "next/navigation"
-import { useState } from "react"
+} from "@/src/shared/components/ui/empty";
+import { Spinner } from "@/src/shared/components/ui/spinner";
+import { SummarySection } from "@/src/shared/components/ui/summary";
+import { APP_ROUTES } from "@/src/shared/constants/app-routes";
+import { InboxIcon, MailIcon, PlusIcon } from "lucide-react";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { useState } from "react";
 
 type FinanceSyncListProps = {
   enabled: boolean
@@ -99,12 +99,12 @@ export function FinanceSyncList({
   return (
     <>
       {oauthState === "error" ? (
-        <p className="rounded-xl border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
+        <p className="p-3 text-sm rounded-xl border border-destructive/40 bg-destructive/10 text-destructive">
           No se pudo conectar Gmail. Vuelve a intentar; no se importó nada.
         </p>
       ) : null}
       {oauthState === "ok" ? (
-        <p className="rounded-xl border border-border bg-card p-3 text-sm">
+        <p className="p-3 text-sm rounded-xl border border-border bg-card">
           Gmail quedó conectado a la institución. Lanza un sync cuando quieras.
         </p>
       ) : null}

@@ -1,51 +1,39 @@
 "use client"
 
-import { ApiError } from "@/src/config/api-client"
-import { FinanceBudgetStatusChart } from "@/src/modules/finance/components/dashboard/finance-budget-status"
-import { FinanceOverTimeChart } from "@/src/modules/finance/components/dashboard/finance-over-time-chart"
-import { FinanceSpendingChart } from "@/src/modules/finance/components/dashboard/finance-spending-chart"
-import { FinanceSummaryStats } from "@/src/modules/finance/components/dashboard/finance-summary-stats"
+import { useAccounts } from "@/src/modules/finance/hooks/use-accounts";
+import { useAnalyticsSummary } from "@/src/modules/finance/hooks/use-analytics";
+import { useCategories } from "@/src/modules/finance/hooks/use-categories";
+import { useFinanceEnabled } from "@/src/modules/finance/hooks/use-finance-enabled";
+import { useTransactions } from "@/src/modules/finance/hooks/use-transactions";
+import { financeDashboardRange } from "@/src/modules/finance/lib/dashboard-period";
+import { deriveFrequentExpenses } from "@/src/modules/finance/lib/finance-home";
 import {
-  useAnalyticsSummary,
-  useBudgetStatus,
-  useSpendingByCategory,
-  useSpendingOverTime,
-} from "@/src/modules/finance/hooks/use-analytics"
-import { useFinanceEnabled } from "@/src/modules/finance/hooks/use-finance-enabled"
+  formatFinanceMoney,
+  parseFinanceMoney,
+} from "@/src/modules/finance/lib/money";
+import { Button } from "@/src/shared/components/ui/button";
+import { SummarySection } from "@/src/shared/components/ui/summary";
+import { APP_ROUTES } from "@/src/shared/constants/app-routes";
 import {
-  FINANCE_DASHBOARD_PERIOD_OPTIONS,
-  financeDashboardRange,
-  type FinanceDashboardPeriod,
-} from "@/src/modules/finance/lib/dashboard-period"
-import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
-import { parseFinanceMoney } from "@/src/modules/finance/lib/money"
-import { SelectField } from "@/src/shared/components/layout/form-blocks"
+  ArrowRight,
+  BarChart3Icon,
+} from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useCallback, useMemo, useState } from "react";
+import { FinanceHomeHero } from "./finance-home-hero";
 import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "@/src/shared/components/ui/empty"
-import { Spinner } from "@/src/shared/components/ui/spinner"
-import { LandmarkIcon } from "lucide-react"
-import { useMemo, useState } from "react"
-
-function summaryErrorCopy(error: unknown): string {
-  if (error instanceof ApiError && error.status === 400) {
-    return `${error.message} No se inventa un tipo de cambio. Revisa las tasas FX o el periodo.`
-  }
-  return financeErrorMessage(error)
-}
+  FrequentExpensesSection,
+  RecentTransactionsSection,
+} from "./finance-home-sections";
 
 export function FinanceOverview() {
+  const router = useRouter()
   const { isEnabled, config } = useFinanceEnabled()
-  const [period, setPeriod] = useState<FinanceDashboardPeriod>(
-    config.dashboardPeriod,
-  )
+  const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null)
   const range = useMemo(
-    () => financeDashboardRange(period, config.weekStartsOn),
-    [period, config.weekStartsOn],
+    () => financeDashboardRange(config.dashboardPeriod, config.weekStartsOn),
+    [config.dashboardPeriod, config.weekStartsOn],
   )
   const display = {
     currency: config.baseCurrency,
@@ -54,108 +42,129 @@ export function FinanceOverview() {
   }
 
   const summaryQuery = useAnalyticsSummary(isEnabled, range)
-  const spendingQuery = useSpendingByCategory(isEnabled, range)
-  const overTimeQuery = useSpendingOverTime(isEnabled, range)
-  const budgetsQuery = useBudgetStatus(isEnabled)
+  const accountsQuery = useAccounts(isEnabled)
+  const pendingTransactionsQuery = useTransactions(isEnabled, {
+    status: "PENDING",
+    limit: 50,
+    page: 1,
+  })
+  const recentTransactionsQuery = useTransactions(isEnabled, {
+    limit: 5,
+    page: 1,
+  })
+  const frequentTransactionsQuery = useTransactions(isEnabled, {
+    status: "CONFIRMED",
+    limit: 30,
+    page: 1,
+  })
+  const categoriesQuery = useCategories(isEnabled)
 
   const moneyDisplay = {
     ...display,
     currency: summaryQuery.data?.baseCurrency ?? display.currency,
   }
 
-  const buckets = Array.isArray(spendingQuery.data) ? spendingQuery.data : []
-  const hasSpending = buckets.some((bucket) => {
-    const total = parseFinanceMoney(bucket.total)
-    return total !== null && total !== 0
+  const accounts = useMemo(
+    () => (accountsQuery.data ?? []).filter((account) => account.isActive),
+    [accountsQuery.data],
+  )
+  const selectedAccount = useMemo(
+    () => accounts.find((account) => account.id === selectedAccountId) ?? null,
+    [accounts, selectedAccountId],
+  )
+  const homeBalance = selectedAccount
+    ? {
+      label: `Saldo de ${selectedAccount.name}`,
+      amount: selectedAccount.balance,
+      currency: selectedAccount.currency,
+    }
+    : {
+      label: "Patrimonio neto",
+      amount: summaryQuery.data?.netWorth,
+      currency: moneyDisplay.currency,
+    }
+  const balanceFormatted = formatFinanceMoney(homeBalance.amount, {
+    ...display,
+    currency: homeBalance.currency,
   })
-  const points = overTimeQuery.data?.points
-  const hasSeries =
-    Array.isArray(points) &&
-    points.some((point) => {
-      const expenses = parseFinanceMoney(point.expenses)
-      const income = parseFinanceMoney(point.income)
-      return (
-        (expenses !== null && expenses !== 0) ||
-        (income !== null && income !== 0)
-      )
-    })
-  const budgets = Array.isArray(budgetsQuery.data)
-    ? budgetsQuery.data.filter((row) => Number.isFinite(row.pctUsed))
-    : []
-  const chartsSettled =
-    !spendingQuery.isPending &&
-    !overTimeQuery.isPending &&
-    !budgetsQuery.isPending
-  const chartsEmpty =
-    chartsSettled &&
-    !spendingQuery.isError &&
-    !overTimeQuery.isError &&
-    !budgetsQuery.isError &&
-    !hasSpending &&
-    !hasSeries &&
-    budgets.length === 0
+  const pendingHold = (pendingTransactionsQuery.data?.items ?? []).reduce(
+    (sum, transaction) =>
+      sum + (parseFinanceMoney(transaction.amountBaseCurrency) ?? 0),
+    0,
+  )
+  const pendingHoldLabel =
+    pendingHold > 0
+      ? `Retenido ${formatFinanceMoney(pendingHold, moneyDisplay)}`
+      : undefined
+  const cashFlowLabel = summaryQuery.data
+    ? `Flujo ${formatFinanceMoney(summaryQuery.data.cashFlow, moneyDisplay)}`
+    : undefined
+  const recentTransactions = recentTransactionsQuery.data?.items ?? []
+  const frequentExpenses = useMemo(
+    () =>
+      deriveFrequentExpenses(
+        frequentTransactionsQuery.data?.items ?? [],
+        categoriesQuery.data ?? [],
+      ),
+    [frequentTransactionsQuery.data?.items, categoriesQuery.data],
+  )
 
-  const summaryPending = summaryQuery.isPending && !summaryQuery.data
+  const cycleAccount = useCallback(() => {
+    setSelectedAccountId((currentId) => {
+      if (accounts.length === 0) return null
+      if (!currentId) return accounts[0]?.id ?? null
+      const currentIndex = accounts.findIndex((account) => account.id === currentId)
+      if (currentIndex < 0) return accounts[0]?.id ?? null
+      return currentIndex === accounts.length - 1
+        ? null
+        : accounts[currentIndex + 1]?.id ?? null
+    })
+  }, [accounts])
+  const goToTransactions = useCallback(() => {
+    router.push(APP_ROUTES.app.financeTransactions)
+  }, [router])
 
   return (
     <div className="flex flex-col gap-8">
-      <SelectField
-        label="Periodo"
-        value={period}
-        onChange={(value) => setPeriod(value as FinanceDashboardPeriod)}
-        options={[...FINANCE_DASHBOARD_PERIOD_OPTIONS]}
+      <FinanceHomeHero
+        balanceLabel={homeBalance.label}
+        balanceAmount={balanceFormatted}
+        pendingHoldLabel={pendingHoldLabel}
+        cashFlowLabel={cashFlowLabel}
+        onAccountPress={cycleAccount}
+        onSendPress={goToTransactions}
+        onReceivePress={goToTransactions}
       />
 
-      {summaryPending ? (
-        <div className="flex justify-center py-12">
-          <Spinner />
-        </div>
-      ) : summaryQuery.isError ? (
-        <p className="text-sm text-destructive">{summaryErrorCopy(summaryQuery.error)}</p>
-      ) : summaryQuery.data ? (
-        <FinanceSummaryStats summary={summaryQuery.data} display={moneyDisplay} />
-      ) : null}
+      <FrequentExpensesSection
+        expenses={frequentExpenses}
+        query={frequentTransactionsQuery}
+      />
 
-      {chartsEmpty && summaryQuery.isSuccess ? (
-        <Empty>
-          <EmptyHeader>
-            <EmptyMedia variant="icon">
-              <LandmarkIcon />
-            </EmptyMedia>
-            <EmptyTitle>Todavía no hay movimiento</EmptyTitle>
-            <EmptyDescription>
-              Cuando haya transacciones confirmadas verás gasto por categoría y
-              la serie en el tiempo. Los totales de arriba ya usan la moneda
-              base del API.
-            </EmptyDescription>
-          </EmptyHeader>
-        </Empty>
-      ) : null}
+      <RecentTransactionsSection
+        transactions={recentTransactions}
+        categories={categoriesQuery.data ?? []}
+        display={display}
+        query={recentTransactionsQuery}
+      />
 
-      {spendingQuery.isError ? (
-        <p className="text-sm text-destructive">
-          {financeErrorMessage(spendingQuery.error)}
+      <SummarySection
+        title="Estadísticas"
+        icon={BarChart3Icon}
+        right={
+          <Button asChild variant="ghost" size="sm">
+            <Link href={APP_ROUTES.app.financeStatistics}>
+              Ver estadísticas
+              <ArrowRight size={12} className="text-muted-foreground" />
+            </Link>
+          </Button>
+        }
+      >
+        <p className="text-sm text-muted-foreground">
+          Consulta el resumen financiero, los gastos por categoría, la evolución
+          en el tiempo y el estado de tus presupuestos.
         </p>
-      ) : hasSpending ? (
-        <FinanceSpendingChart buckets={buckets} display={moneyDisplay} />
-      ) : null}
-      {overTimeQuery.isError ? (
-        <p className="text-sm text-destructive">
-          {financeErrorMessage(overTimeQuery.error)}
-        </p>
-      ) : hasSeries ? (
-        <FinanceOverTimeChart
-          series={overTimeQuery.data}
-          display={moneyDisplay}
-        />
-      ) : null}
-      {budgetsQuery.isError ? (
-        <p className="text-sm text-destructive">
-          {financeErrorMessage(budgetsQuery.error)}
-        </p>
-      ) : budgets.length > 0 ? (
-        <FinanceBudgetStatusChart rows={budgets} display={moneyDisplay} />
-      ) : null}
+      </SummarySection>
     </div>
   )
 }

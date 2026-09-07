@@ -1,37 +1,37 @@
 "use client"
 
-import { CurrencySelectField } from "@/src/modules/finance/components/catalog/currency-select-field"
+import { CurrencySelectField } from "@/src/modules/finance/components/catalog/currency-select-field";
 import {
   CATALOG_NONE,
   FINANCE_ACCOUNT_TYPE_LABEL,
   FINANCE_ACCOUNT_TYPES,
-} from "@/src/modules/finance/constants/catalog"
+} from "@/src/modules/finance/constants/catalog";
 import {
   useArchiveAccount,
   useCreateAccount,
   useUpdateAccount,
-} from "@/src/modules/finance/hooks/use-accounts"
-import { buildCreateAccountBody } from "@/src/modules/finance/lib/catalog-payloads"
-import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
+} from "@/src/modules/finance/hooks/use-accounts";
+import { buildCreateAccountBody } from "@/src/modules/finance/lib/catalog-payloads";
+import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error";
 import type {
   FinanceAccount,
   FinanceInstitution,
-} from "@/src/modules/finance/types/entities"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+} from "@/src/modules/finance/types/entities";
+import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet";
 import {
   FormTextField,
   SelectField,
-} from "@/src/shared/components/layout/form-blocks"
-import { SummarySection } from "@/src/shared/components/layout/summary"
-import { Button } from "@/src/shared/components/ui/button"
-import { Spinner } from "@/src/shared/components/ui/spinner"
-import { appToast } from "@/src/shared/lib/app-toast"
-import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { DollarSign, LandmarkIcon, Palette } from "lucide-react"
-import { useEffect, useMemo } from "react"
-import { Controller, useForm, useWatch } from "react-hook-form"
-import { z } from "zod"
+} from "@/src/shared/components/layout/form-blocks";
+import { Button } from "@/src/shared/components/ui/button";
+import { Spinner } from "@/src/shared/components/ui/spinner";
+import { SummarySection } from "@/src/shared/components/ui/summary";
+import { appToast } from "@/src/shared/lib/app-toast";
+import { createSheetSubmit } from "@/src/shared/lib/sheet-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { DollarSign, LandmarkIcon, Palette } from "lucide-react";
+import { useEffect, useMemo } from "react";
+import { Controller, useForm, useWatch } from "react-hook-form";
+import { z } from "zod";
 
 const schema = z
   .object({
@@ -83,6 +83,7 @@ type AccountSheetProps = {
   account: FinanceAccount | null
   institutions: FinanceInstitution[]
   defaultCurrency: string
+  defaultInstitutionId?: string
 }
 
 export function AccountSheet({
@@ -91,6 +92,7 @@ export function AccountSheet({
   account,
   institutions,
   defaultCurrency,
+  defaultInstitutionId,
 }: AccountSheetProps) {
   const isEdit = Boolean(account)
   const createMutation = useCreateAccount()
@@ -109,6 +111,8 @@ export function AccountSheet({
     [institutions],
   )
   const hasInstitutions = institutions.length > 0
+  const resolvedDefaultInstitutionId =
+    defaultInstitutionId ?? institutions[0]?.id ?? CATALOG_NONE
 
   const {
     control,
@@ -120,7 +124,7 @@ export function AccountSheet({
     defaultValues: toFormValues(
       account,
       defaultCurrency,
-      institutions[0]?.id ?? CATALOG_NONE,
+      resolvedDefaultInstitutionId,
     ),
   })
 
@@ -132,11 +136,11 @@ export function AccountSheet({
         toFormValues(
           account,
           defaultCurrency,
-          institutions[0]?.id ?? CATALOG_NONE,
+          resolvedDefaultInstitutionId,
         ),
       )
     }
-  }, [open, account, defaultCurrency, institutions, reset])
+  }, [open, account, defaultCurrency, resolvedDefaultInstitutionId, reset])
 
   const submitForm = useMemo(
     () => createSheetSubmit(handleSubmit),
