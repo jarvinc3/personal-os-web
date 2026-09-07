@@ -10,7 +10,7 @@ describe("budget list uses REST pagination, not chat Facade", () => {
   it("does not call list_budgets or FinanceFacade from the budgets screen", () => {
     const files = [
       "hooks/use-budgets.ts",
-      "pages/finance-budgets.tsx",
+      "components/planning/finance-planning.tsx",
       "components/budgets/finance-budgets-list.tsx",
     ]
     for (const relative of files) {
