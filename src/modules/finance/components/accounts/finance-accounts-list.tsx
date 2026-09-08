@@ -1,7 +1,8 @@
 "use client"
 
 import { InstitutionSwapStack } from "@/src/modules/finance/components/accounts/institution-swap-stack";
-import { InstitutionSheet } from "@/src/modules/finance/components/catalog/institution-sheet";
+import { InstitutionSheet } from "@/src/modules/finance/components/accounts/institution-sheet";
+import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/constants/sheet-keys";
 import { useAccounts } from "@/src/modules/finance/hooks/use-accounts";
 import { useAnalyticsSummary } from "@/src/modules/finance/hooks/use-analytics";
 import { useCards } from "@/src/modules/finance/hooks/use-cards";
@@ -13,7 +14,6 @@ import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error";
 import { buildInstitutionStackItems } from "@/src/modules/finance/lib/institution-stack";
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/lib/money";
 import { formatFinanceMoney } from "@/src/modules/finance/lib/money";
-import type { FinanceInstitution } from "@/src/modules/finance/types/entities";
 import {
   SettingsRow,
   SettingsSection,
@@ -29,13 +29,10 @@ import {
 } from "@/src/shared/components/ui/empty";
 import { Spinner } from "@/src/shared/components/ui/spinner";
 import { APP_ROUTES } from "@/src/shared/constants/app-routes";
+import { useSheetParam } from "@/src/shared/hooks/use-sheet-params";
 import { Building2Icon, PlusIcon, TagsIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
-
-type SheetState =
-  | { kind: "none" }
-  | { kind: "institution"; item: FinanceInstitution | null }
+import { useMemo } from "react";
 
 type FinanceAccountsListProps = {
   enabled: boolean
@@ -58,7 +55,8 @@ export function FinanceAccountsList({
   const cardsQuery = useCards(enabled)
   const loansQuery = useLoans(enabled)
   const summaryQuery = useAnalyticsSummary(enabled, range)
-  const [sheet, setSheet] = useState<SheetState>({ kind: "none" })
+  const { open: openInstitutionSheet, setOpen: setOpenInstitutionSheet } =
+    useSheetParam(FINANCE_SHEET_KEYS.institution)
 
   const stackItems = useMemo(
     () =>
@@ -103,10 +101,6 @@ export function FinanceAccountsList({
     cardsQuery.isPending ||
     loansQuery.isPending
 
-  function closeSheet() {
-    setSheet({ kind: "none" })
-  }
-
   return (
     <>
       {errorMessage ? (
@@ -140,9 +134,7 @@ export function FinanceAccountsList({
               </EmptyDescription>
             </EmptyHeader>
             <EmptyContent>
-              <Button
-                onClick={() => setSheet({ kind: "institution", item: null })}
-              >
+              <Button onClick={() => setOpenInstitutionSheet(true, null)}>
                 Crear institución
               </Button>
             </EmptyContent>
@@ -177,17 +169,15 @@ export function FinanceAccountsList({
         size="icon-lg"
         aria-label="Nueva institución"
         className="fixed right-4 z-50 size-14 rounded-full shadow-xl bottom-[calc(6rem+env(safe-area-inset-bottom))] md:bottom-8"
-        onClick={() => setSheet({ kind: "institution", item: null })}
+        onClick={() => setOpenInstitutionSheet(true, null)}
       >
         <PlusIcon className="size-6" />
       </Button>
 
       <InstitutionSheet
-        open={sheet.kind === "institution"}
-        onOpenChange={(open) => {
-          if (!open) closeSheet()
-        }}
-        institution={sheet.kind === "institution" ? sheet.item : null}
+        open={openInstitutionSheet}
+        onOpenChange={setOpenInstitutionSheet}
+        institution={null}
       />
     </>
   )

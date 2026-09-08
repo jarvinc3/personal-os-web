@@ -1,8 +1,10 @@
 "use client"
 
 import { BudgetSheet } from "@/src/modules/finance/components/budgets/budget-sheet";
-import { useBudgets } from "@/src/modules/finance/hooks/use-budgets";
+import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/constants/sheet-keys";
+import { useBudget, useBudgets } from "@/src/modules/finance/hooks/use-budgets";
 import { useCategories } from "@/src/modules/finance/hooks/use-categories";
+import { useSheetQueryEntity } from "@/src/modules/finance/hooks/use-sheet-entity";
 import { budgetPctUsed } from "@/src/modules/finance/lib/budget-payloads";
 import {
   budgetsFromPayload,
@@ -28,6 +30,7 @@ import {
 import { Separator } from "@/src/shared/components/ui/separator";
 import { Spinner } from "@/src/shared/components/ui/spinner";
 import { SummarySection } from "@/src/shared/components/ui/summary";
+import { useSheetParam } from "@/src/shared/hooks/use-sheet-params";
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -69,8 +72,11 @@ export function FinanceBudgetsList({
   display,
 }: FinanceBudgetsListProps) {
   const [page, setPage] = useState(1)
-  const [createOpen, setCreateOpen] = useState(false)
-  const [editing, setEditing] = useState<FinanceBudget | null>(null)
+  const {
+    open: openBudgetSheet,
+    sheetId: budgetSheetId,
+    setOpen: setOpenBudgetSheet,
+  } = useSheetParam(FINANCE_SHEET_KEYS.budget)
   const categoriesQuery = useCategories(enabled)
   const categories = categoriesQuery.data ?? []
   const listQuery = useBudgets(enabled, {
@@ -80,6 +86,21 @@ export function FinanceBudgetsList({
   const listed = budgetsFromPayload(listQuery.data)
   const { items, pagination } = listed
   const hasCategories = categories.length > 0
+  const listedEditing = budgetSheetId
+    ? (items.find((budget) => budget.id === budgetSheetId) ?? null)
+    : null
+  const budgetQuery = useBudget(
+    enabled && openBudgetSheet && Boolean(budgetSheetId) && !listedEditing,
+    budgetSheetId,
+  )
+  const editing = useSheetQueryEntity(
+    openBudgetSheet,
+    budgetSheetId,
+    listedEditing
+      ? { data: listedEditing, isPending: false, isError: false }
+      : budgetQuery,
+    setOpenBudgetSheet,
+  )
 
   return (
     <div className="flex flex-col gap-6">
@@ -98,7 +119,7 @@ export function FinanceBudgetsList({
             variant="ghost"
             size="sm"
             disabled={!enabled || !hasCategories}
-            onClick={() => setCreateOpen(true)}
+            onClick={() => setOpenBudgetSheet(true, null)}
           >
             <PlusIcon />
             Crear presupuesto
@@ -137,7 +158,7 @@ export function FinanceBudgetsList({
                   label={categoryLabel(budget)}
                   description={`${period} · ${range}`}
                   value={`${spent} / ${limit} · ${pctLabel}`}
-                  onPress={() => setEditing(budget)}
+                  onPress={() => setOpenBudgetSheet(true, budget.id)}
                   isLast={index === items.length - 1}
                 />
                 {pct !== null ? (
@@ -180,13 +201,8 @@ export function FinanceBudgetsList({
       </SummarySection>
 
       <BudgetSheet
-        open={createOpen || Boolean(editing)}
-        onOpenChange={(open) => {
-          if (!open) {
-            setCreateOpen(false)
-            setEditing(null)
-          }
-        }}
+        open={openBudgetSheet && (!budgetSheetId || Boolean(editing))}
+        onOpenChange={setOpenBudgetSheet}
         budget={editing}
         categories={categories}
       />

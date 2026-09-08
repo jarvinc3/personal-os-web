@@ -9,9 +9,14 @@ import {
 } from "@/src/modules/finance/components/transactions/transaction-filters-sheet";
 import { TransactionSheet } from "@/src/modules/finance/components/transactions/transaction-sheet";
 import { TransferSheet } from "@/src/modules/finance/components/transactions/transfer-sheet";
+import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/constants/sheet-keys";
 import { useAccounts } from "@/src/modules/finance/hooks/use-accounts";
 import { useCards } from "@/src/modules/finance/hooks/use-cards";
-import { useTransactions } from "@/src/modules/finance/hooks/use-transactions";
+import { useSheetQueryEntity } from "@/src/modules/finance/hooks/use-sheet-entity";
+import {
+  useTransaction,
+  useTransactions,
+} from "@/src/modules/finance/hooks/use-transactions";
 import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error";
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/lib/money";
 import { formatFinanceMoney } from "@/src/modules/finance/lib/money";
@@ -28,7 +33,6 @@ import {
   FINANCE_TRANSACTION_STATUSES,
   FINANCE_TRANSACTION_TYPE_LABEL,
   FINANCE_TRANSACTION_TYPES,
-  type FinanceTransaction,
   type FinanceTransactionStatus,
   type FinanceTransactionType,
 } from "@/src/modules/finance/types/entities";
@@ -45,6 +49,7 @@ import {
 } from "@/src/shared/components/ui/empty";
 import { Spinner } from "@/src/shared/components/ui/spinner";
 import { SummarySection } from "@/src/shared/components/ui/summary";
+import { useSheetParam } from "@/src/shared/hooks/use-sheet-params";
 import {
   ArrowLeftRightIcon,
   ChevronLeftIcon,
@@ -71,11 +76,20 @@ export function FinanceTransactionsList({
   const [filters, setFilters] = useState<TransactionFilterState>(
     INITIAL_TRANSACTION_FILTERS,
   )
-  const [filterOpen, setFilterOpen] = useState(false)
-  const [selectedId, setSelectedId] = useState<string | null>(null)
-  const [createOpen, setCreateOpen] = useState(false)
-  const [transferOpen, setTransferOpen] = useState(false)
-  const [editing, setEditing] = useState<FinanceTransaction | null>(null)
+  const { open: openFilterSheet, setOpen: setOpenFilterSheet } =
+    useSheetParam(FINANCE_SHEET_KEYS.transactionFilters)
+  const {
+    open: openDetailSheet,
+    sheetId: detailSheetId,
+    setOpen: setOpenDetailSheet,
+  } = useSheetParam(FINANCE_SHEET_KEYS.transactionDetail)
+  const {
+    open: openTransactionSheet,
+    sheetId: transactionSheetId,
+    setOpen: setOpenTransactionSheet,
+  } = useSheetParam(FINANCE_SHEET_KEYS.transaction)
+  const { open: openTransferSheet, setOpen: setOpenTransferSheet } =
+    useSheetParam(FINANCE_SHEET_KEYS.transfer)
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -84,6 +98,12 @@ export function FinanceTransactionsList({
     }, SEARCH_DEBOUNCE_MS)
     return () => window.clearTimeout(timer)
   }, [search])
+
+  useEffect(() => {
+    if (openDetailSheet && !detailSheetId) {
+      setOpenDetailSheet(false)
+    }
+  }, [openDetailSheet, detailSheetId, setOpenDetailSheet])
 
   const accountsQuery = useAccounts(enabled)
   const cardsQuery = useCards(enabled)
@@ -121,6 +141,16 @@ export function FinanceTransactionsList({
   const listed = transactionsFromPayload(listQuery.data)
   const { items, pagination } = listed
   const totals = useMemo(() => visibleTransactionTotals(items), [items])
+  const editingQuery = useTransaction(
+    enabled && openTransactionSheet && Boolean(transactionSheetId),
+    transactionSheetId,
+  )
+  const editing = useSheetQueryEntity(
+    openTransactionSheet,
+    transactionSheetId,
+    editingQuery,
+    setOpenTransactionSheet,
+  )
 
   const accountOptions = [
     { value: FINANCE_TX_FILTER_ALL, label: "Todas las cuentas" },
@@ -163,7 +193,7 @@ export function FinanceTransactionsList({
         onSearchChange={setSearch}
         searchPlaceholder="Buscar comercio o descripción..."
         activeFilterCount={countActiveTransactionFilters(filters)}
-        onFilterPress={() => setFilterOpen(true)}
+        onFilterPress={() => setOpenFilterSheet(true)}
       />
 
       <div className="flex flex-col gap-1 p-3 rounded-xl border border-border bg-card">
@@ -221,7 +251,7 @@ export function FinanceTransactionsList({
                   ...display,
                   currency: tx.currency,
                 })}`}
-                onPress={() => setSelectedId(tx.id)}
+                onPress={() => setOpenDetailSheet(true, tx.id)}
                 isLast={index === items.length - 1}
               />
             )
@@ -261,29 +291,29 @@ export function FinanceTransactionsList({
         {
           icon: <MinusIcon />,
           label: "Gasto",
-          onClick: () => setCreateOpen(true),
+          onClick: () => setOpenTransactionSheet(true, null),
           disabled: !enabled || !hasTargets,
           color: "bg-destructive",
         },
         {
           icon: <PlusIcon />,
           label: "Ingreso",
-          onClick: () => setCreateOpen(true),
+          onClick: () => setOpenTransactionSheet(true, null),
           disabled: !enabled || !hasTargets,
           color: "bg-success",
         },
         {
           icon: <ArrowLeftRightIcon />,
           label: "Transferir",
-          onClick: () => setTransferOpen(true),
+          onClick: () => setOpenTransferSheet(true),
           disabled: !enabled || !canTransfer,
           color: "bg-blue-500",
         },
       ]} />
 
       <TransactionFiltersSheet
-        open={filterOpen}
-        onOpenChange={setFilterOpen}
+        open={openFilterSheet}
+        onOpenChange={setOpenFilterSheet}
         filters={filters}
         onApply={applyFilters}
         accountOptions={accountOptions}
@@ -293,27 +323,22 @@ export function FinanceTransactionsList({
       />
 
       <TransactionDetailSheet
-        open={Boolean(selectedId)}
-        onOpenChange={(open) => {
-          if (!open) setSelectedId(null)
-        }}
-        transactionId={selectedId}
+        open={openDetailSheet && Boolean(detailSheetId)}
+        onOpenChange={setOpenDetailSheet}
+        transactionId={detailSheetId}
         enabled={enabled}
         display={display}
         onEdit={(transaction) => {
-          setSelectedId(null)
-          setEditing(transaction)
+          setOpenTransactionSheet(true, transaction.id)
         }}
       />
 
       <TransactionSheet
-        open={createOpen || Boolean(editing)}
-        onOpenChange={(open) => {
-          if (!open) {
-            setCreateOpen(false)
-            setEditing(null)
-          }
-        }}
+        open={
+          openTransactionSheet &&
+          (!transactionSheetId || Boolean(editing))
+        }
+        onOpenChange={setOpenTransactionSheet}
         transaction={editing}
         accounts={accounts}
         cards={cards}
@@ -322,8 +347,8 @@ export function FinanceTransactionsList({
       />
 
       <TransferSheet
-        open={transferOpen}
-        onOpenChange={setTransferOpen}
+        open={openTransferSheet}
+        onOpenChange={setOpenTransferSheet}
         accounts={accounts}
         cards={cards}
         defaultCurrency={display.currency}

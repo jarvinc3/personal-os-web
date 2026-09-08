@@ -3,11 +3,13 @@
 import { LoanSheet } from "@/src/modules/finance/components/planning/loan-sheet";
 import { ReceivableSheet } from "@/src/modules/finance/components/planning/receivable-sheet";
 import { SavingsGoalSheet } from "@/src/modules/finance/components/planning/savings-goal-sheet";
+import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/constants/sheet-keys";
 import { useAccounts } from "@/src/modules/finance/hooks/use-accounts";
 import { useInstitutions } from "@/src/modules/finance/hooks/use-institutions";
 import { useLoans } from "@/src/modules/finance/hooks/use-loans";
 import { useReceivables } from "@/src/modules/finance/hooks/use-receivables";
 import { useSavingsGoals } from "@/src/modules/finance/hooks/use-savings-goals";
+import { useSheetListEntity } from "@/src/modules/finance/hooks/use-sheet-entity";
 import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error";
 import { formatRatePercentLabel } from "@/src/modules/finance/lib/interest-rate";
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/lib/money";
@@ -31,20 +33,15 @@ import {
 } from "@/src/shared/components/ui/empty";
 import { Spinner } from "@/src/shared/components/ui/spinner";
 import { SummarySection } from "@/src/shared/components/ui/summary";
+import { useSheetParam } from "@/src/shared/hooks/use-sheet-params";
 import {
   HandshakeIcon,
   LandmarkIcon,
   PiggyBankIcon,
   PlusIcon,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { FinanceBudgetsList } from "../budgets/finance-budgets-list";
-
-type SheetState =
-  | { kind: "none" }
-  | { kind: "savings"; item: FinanceSavingsGoal | null }
-  | { kind: "loan"; item: FinanceLoan | null }
-  | { kind: "receivable"; item: FinanceReceivable | null }
 
 type FinancePlanningListProps = {
   enabled: boolean
@@ -98,7 +95,15 @@ export function FinancePlanningList({
   display,
   defaultCurrency,
 }: FinancePlanningListProps) {
-  const [sheet, setSheet] = useState<SheetState>({ kind: "none" })
+  const { open: openSavingsSheet, sheetId: savingsSheetId, setOpen: setOpenSavingsSheet } =
+    useSheetParam(FINANCE_SHEET_KEYS.savings)
+  const { open: openLoanSheet, sheetId: loanSheetId, setOpen: setOpenLoanSheet } =
+    useSheetParam(FINANCE_SHEET_KEYS.loan)
+  const {
+    open: openReceivableSheet,
+    sheetId: receivableSheetId,
+    setOpen: setOpenReceivableSheet,
+  } = useSheetParam(FINANCE_SHEET_KEYS.receivable)
   const accountsQuery = useAccounts(enabled)
   const institutionsQuery = useInstitutions(enabled)
   const savingsQuery = useSavingsGoals(enabled)
@@ -117,9 +122,27 @@ export function FinancePlanningList({
     return error ? financeErrorMessage(error) : null
   }, [savingsQuery.error, loansQuery.error, receivablesQuery.error])
 
-  function closeSheet() {
-    setSheet({ kind: "none" })
-  }
+  const editingGoal = useSheetListEntity(
+    openSavingsSheet,
+    savingsSheetId,
+    savingsQuery.data,
+    savingsQuery.isPending,
+    setOpenSavingsSheet,
+  )
+  const editingLoan = useSheetListEntity(
+    openLoanSheet,
+    loanSheetId,
+    loansQuery.data,
+    loansQuery.isPending,
+    setOpenLoanSheet,
+  )
+  const editingReceivable = useSheetListEntity(
+    openReceivableSheet,
+    receivableSheetId,
+    receivablesQuery.data,
+    receivablesQuery.isPending,
+    setOpenReceivableSheet,
+  )
 
   return (
     <>
@@ -135,7 +158,7 @@ export function FinancePlanningList({
             size="sm"
             variant="ghost"
             disabled={!enabled}
-            onClick={() => setSheet({ kind: "savings", item: null })}
+            onClick={() => setOpenSavingsSheet(true, null)}
           >
             <PlusIcon />
             Crear meta
@@ -158,7 +181,7 @@ export function FinancePlanningList({
               </EmptyDescription>
             </EmptyHeader>
             <EmptyContent>
-              <Button onClick={() => setSheet({ kind: "savings", item: null })}>
+              <Button onClick={() => setOpenSavingsSheet(true, null)}>
                 Crear meta
               </Button>
             </EmptyContent>
@@ -173,7 +196,7 @@ export function FinancePlanningList({
                 currency: goal.currency,
               })}
               icon={PiggyBankIcon}
-              onPress={() => setSheet({ kind: "savings", item: goal })}
+              onPress={() => setOpenSavingsSheet(true, goal.id)}
               isLast={index === savings.length - 1}
             />
           ))
@@ -188,7 +211,7 @@ export function FinancePlanningList({
             size="sm"
             variant="ghost"
             disabled={!enabled}
-            onClick={() => setSheet({ kind: "loan", item: null })}
+            onClick={() => setOpenLoanSheet(true, null)}
           >
             <PlusIcon />
             Crear préstamo
@@ -211,7 +234,7 @@ export function FinancePlanningList({
               </EmptyDescription>
             </EmptyHeader>
             <EmptyContent>
-              <Button onClick={() => setSheet({ kind: "loan", item: null })}>
+              <Button onClick={() => setOpenLoanSheet(true, null)}>
                 Crear préstamo
               </Button>
             </EmptyContent>
@@ -223,7 +246,7 @@ export function FinancePlanningList({
               label={loan.lenderName}
               value={loanRowValue(loan, display)}
               icon={LandmarkIcon}
-              onPress={() => setSheet({ kind: "loan", item: loan })}
+              onPress={() => setOpenLoanSheet(true, loan.id)}
               isLast={index === loans.length - 1}
             />
           ))
@@ -238,7 +261,7 @@ export function FinancePlanningList({
             size="sm"
             variant="ghost"
             disabled={!enabled}
-            onClick={() => setSheet({ kind: "receivable", item: null })}
+            onClick={() => setOpenReceivableSheet(true, null)}
           >
             <PlusIcon />
             Crear cobro
@@ -262,7 +285,7 @@ export function FinancePlanningList({
             </EmptyHeader>
             <EmptyContent>
               <Button
-                onClick={() => setSheet({ kind: "receivable", item: null })}
+                onClick={() => setOpenReceivableSheet(true, null)}
               >
                 Crear cobro
               </Button>
@@ -275,7 +298,7 @@ export function FinancePlanningList({
               label={item.debtorName}
               value={receivableRowValue(item, display)}
               icon={HandshakeIcon}
-              onPress={() => setSheet({ kind: "receivable", item })}
+              onPress={() => setOpenReceivableSheet(true, item.id)}
               isLast={index === receivables.length - 1}
             />
           ))
@@ -288,31 +311,28 @@ export function FinancePlanningList({
       />
 
       <SavingsGoalSheet
-        open={sheet.kind === "savings"}
-        onOpenChange={(open) => {
-          if (!open) closeSheet()
-        }}
-        goal={sheet.kind === "savings" ? sheet.item : null}
+        open={openSavingsSheet && (!savingsSheetId || Boolean(editingGoal))}
+        onOpenChange={setOpenSavingsSheet}
+        goal={editingGoal}
         defaultCurrency={defaultCurrency}
       />
 
       <LoanSheet
-        open={sheet.kind === "loan"}
-        onOpenChange={(open) => {
-          if (!open) closeSheet()
-        }}
-        loan={sheet.kind === "loan" ? sheet.item : null}
+        open={openLoanSheet && (!loanSheetId || Boolean(editingLoan))}
+        onOpenChange={setOpenLoanSheet}
+        loan={editingLoan}
         accounts={accounts}
         institutions={institutions}
         defaultCurrency={defaultCurrency}
       />
 
       <ReceivableSheet
-        open={sheet.kind === "receivable"}
-        onOpenChange={(open) => {
-          if (!open) closeSheet()
-        }}
-        receivable={sheet.kind === "receivable" ? sheet.item : null}
+        open={
+          openReceivableSheet &&
+          (!receivableSheetId || Boolean(editingReceivable))
+        }
+        onOpenChange={setOpenReceivableSheet}
+        receivable={editingReceivable}
         defaultCurrency={defaultCurrency}
       />
     </>

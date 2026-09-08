@@ -15,6 +15,8 @@ import {
   SelectField,
 } from "@/src/shared/components/layout/form-blocks";
 import { Button } from "@/src/shared/components/ui/button";
+import { ColorPickerSwatch } from "@/src/shared/components/ui/color-picker";
+import { Label } from "@/src/shared/components/ui/label";
 import { Spinner } from "@/src/shared/components/ui/spinner";
 import { SummarySection } from "@/src/shared/components/ui/summary";
 import { appToast } from "@/src/shared/lib/app-toast";
@@ -224,15 +226,16 @@ export function CategorySheet({
           control={control}
           name="color"
           render={({ field }) => (
-            <FormTextField
-              label="Color"
-              value={field.value}
-              onChange={field.onChange}
-              onBlur={field.onBlur}
-              error={errors.color?.message}
-              placeholder="#22c55e"
-              disabled={isSystem}
-            />
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="category-color">Color</Label>
+              <ColorPickerSwatch
+                id="category-color"
+                variant="button"
+                value={field.value}
+                onChange={field.onChange}
+                disabled={isSystem}
+              />
+            </div>
           )}
         />
       </SummarySection>

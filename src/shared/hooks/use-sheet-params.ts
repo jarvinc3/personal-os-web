@@ -1,6 +1,12 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect } from "react";
 
+import {
+  resolveSheetNavigation,
+  SHEET_ID_QUERY_KEY,
+  SHEET_QUERY_KEY,
+} from "@/src/shared/lib/sheet-navigation";
+
 const sheetPushedByPath = new Map<string, boolean>();
 
 function markSheetPushed(pathname: string) {
@@ -18,45 +24,34 @@ function wasSheetPushed(pathname: string) {
 function navigateSheetUrl(
   router: ReturnType<typeof useRouter>,
   pathname: string,
-  searchParams: URLSearchParams,
+  searchParams: { get(name: string): string | null; toString(): string },
   sheetKey: string,
   open: boolean,
+  id?: string | null,
 ) {
-  const currentSheet = searchParams.get("sheet");
+  const decision = resolveSheetNavigation({
+    pathname,
+    searchParams,
+    key: sheetKey,
+    open,
+    id,
+    wasPushed: wasSheetPushed(pathname),
+  });
 
-  if (open) {
-    if (currentSheet === sheetKey) {
+  switch (decision.action) {
+    case "noop":
       return;
-    }
-
-    const next = new URLSearchParams(searchParams.toString());
-    next.set("sheet", sheetKey);
-    const url = `${pathname}?${next.toString()}`;
-
-    if (currentSheet === null) {
+    case "push":
       markSheetPushed(pathname);
-      router.push(url);
-    } else {
-      router.replace(url);
-    }
-
-    return;
+      router.push(decision.url);
+      return;
+    case "replace":
+      router.replace(decision.url);
+      return;
+    case "back":
+      clearSheetPushed(pathname);
+      router.back();
   }
-
-  if (currentSheet !== sheetKey) {
-    return;
-  }
-
-  if (wasSheetPushed(pathname)) {
-    clearSheetPushed(pathname);
-    router.back();
-    return;
-  }
-
-  const next = new URLSearchParams(searchParams.toString());
-  next.delete("sheet");
-  const qs = next.toString();
-  router.replace(qs ? `${pathname}?${qs}` : pathname);
 }
 
 export function useSheetParam(key: string) {
@@ -64,22 +59,24 @@ export function useSheetParam(key: string) {
   const router = useRouter();
   const pathname = usePathname();
 
-  const open = searchParams.get("sheet") === key;
+  const open = searchParams.get(SHEET_QUERY_KEY) === key;
+  const sheetId = open ? searchParams.get(SHEET_ID_QUERY_KEY) : null;
 
   useEffect(() => {
-    if (!open) {
+    if (searchParams.get(SHEET_QUERY_KEY) === null) {
       clearSheetPushed(pathname);
     }
-  }, [open, pathname]);
+  }, [searchParams, pathname]);
 
   const setOpen = useCallback(
-    (value: boolean) => {
-      navigateSheetUrl(router, pathname, searchParams, key, value);
+    (value: boolean, id?: string | null) => {
+      navigateSheetUrl(router, pathname, searchParams, key, value, id);
     },
     [searchParams, key, router, pathname],
   );
 
-  return { open, setOpen };
+  return { open, sheetId, setOpen };
 }
 
 export { navigateSheetUrl };
+export { SHEET_ID_QUERY_KEY, SHEET_QUERY_KEY } from "@/src/shared/lib/sheet-navigation";

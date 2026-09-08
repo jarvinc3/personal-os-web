@@ -110,7 +110,7 @@ export function FrequentExpensesSection({
                 />
               </span>
               <span className="w-full truncate text-xs text-foreground">
-                {expense.label}
+                {expense.categoryName}
               </span>
             </Link>
           ))}

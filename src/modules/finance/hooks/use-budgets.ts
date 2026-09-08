@@ -32,6 +32,14 @@ export function useBudgets(enabled: boolean, query: FinanceBudgetsQuery) {
   })
 }
 
+export function useBudget(enabled: boolean, id: string | null) {
+  return useQuery({
+    queryKey: [...FINANCE_BUDGETS_QUERY_KEY, "detail", id],
+    queryFn: () => apiGet<FinanceBudget>(API_ENDPOINTS.FINANCE.BUDGET(id!)),
+    enabled: enabled && Boolean(id),
+  })
+}
+
 export function useCreateBudget() {
   const queryClient = useQueryClient()
   return useMutation({

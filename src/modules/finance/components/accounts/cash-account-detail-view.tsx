@@ -3,22 +3,23 @@
 import { AccountSheet } from "@/src/modules/finance/components/catalog/account-sheet";
 import { FinanceAuthenticatedPage } from "@/src/modules/finance/components/layout/finance-authenticated-page";
 import { FINANCE_ACCOUNT_TYPE_LABEL } from "@/src/modules/finance/constants/catalog";
+import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/constants/sheet-keys";
 import { useAccounts } from "@/src/modules/finance/hooks/use-accounts";
 import { useFinanceEnabled } from "@/src/modules/finance/hooks/use-finance-enabled";
 import { useInstitutions } from "@/src/modules/finance/hooks/use-institutions";
 import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error";
 import { formatFinanceMoney } from "@/src/modules/finance/lib/money";
-import type { FinanceAccount } from "@/src/modules/finance/types/entities";
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet";
 import { LoadingView } from "@/src/shared/components/layout/loading-view";
 import { SettingsRow } from "@/src/shared/components/layout/settings-section";
 import { Button } from "@/src/shared/components/ui/button";
 import { APP_ROUTES } from "@/src/shared/constants/app-routes";
 import { usePageHeader } from "@/src/shared/hooks/use-page-header";
+import { useSheetParam } from "@/src/shared/hooks/use-sheet-params";
 import { accentSurfaceGradient } from "@/src/shared/lib/accent-gradient";
 import { MoreVerticalIcon, PencilIcon, WalletIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 
 const FALLBACK_COLOR = "#334155"
 
@@ -47,8 +48,10 @@ function CashAccountDetailView({ accountId }: CashAccountDetailClientProps) {
 
   const accountsQuery = useAccounts(isEnabled)
   const institutionsQuery = useInstitutions(isEnabled)
-  const [sheetOpen, setSheetOpen] = useState(false)
-  const [menuOpen, setMenuOpen] = useState(false)
+  const { open: openAccountSheet, setOpen: setOpenAccountSheet } =
+    useSheetParam(FINANCE_SHEET_KEYS.account)
+  const { open: openOptionsSheet, setOpen: setOpenOptionsSheet } =
+    useSheetParam(FINANCE_SHEET_KEYS.cashAccountOptions)
 
   const account =
     (accountsQuery.data ?? []).find((item) => item.id === accountId) ?? null
@@ -59,7 +62,10 @@ function CashAccountDetailView({ accountId }: CashAccountDetailClientProps) {
     router.push(APP_ROUTES.app.financeAccounts)
   }, [router])
 
-  const openMenu = useCallback(() => setMenuOpen(true), [setMenuOpen])
+  const openMenu = useCallback(
+    () => setOpenOptionsSheet(true),
+    [setOpenOptionsSheet],
+  )
 
   const headerActions = useMemo(
     () => (
@@ -148,7 +154,7 @@ function CashAccountDetailView({ accountId }: CashAccountDetailClientProps) {
           <Button
             variant="outline"
             className="w-full"
-            onClick={() => setSheetOpen(true)}
+            onClick={() => setOpenAccountSheet(true)}
           >
             <PencilIcon />
             Editar cuenta
@@ -157,8 +163,8 @@ function CashAccountDetailView({ accountId }: CashAccountDetailClientProps) {
       </div>
 
       <BottomSheet
-        open={menuOpen}
-        onOpenChange={setMenuOpen}
+        open={openOptionsSheet}
+        onOpenChange={setOpenOptionsSheet}
         title="Opciones"
         description={account.name}
       >
@@ -166,19 +172,16 @@ function CashAccountDetailView({ accountId }: CashAccountDetailClientProps) {
           <SettingsRow
             label="Editar cuenta"
             icon={PencilIcon}
-            onPress={() => {
-              setMenuOpen(false)
-              setSheetOpen(true)
-            }}
+            onPress={() => setOpenAccountSheet(true)}
             isLast
           />
         </div>
       </BottomSheet>
 
       <AccountSheet
-        open={sheetOpen}
-        onOpenChange={setSheetOpen}
-        account={account as FinanceAccount}
+        open={openAccountSheet}
+        onOpenChange={setOpenAccountSheet}
+        account={account}
         institutions={institutions}
         defaultCurrency={config.baseCurrency}
       />
