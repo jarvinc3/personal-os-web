@@ -8,6 +8,7 @@ const DEFAULT_EXPENSE_COLOR = "#64748B"
 export type FinanceFrequentExpense = {
   key: string
   label: string
+  categoryName: string
   initials: string
   color: string
   icon?: string
@@ -72,6 +73,7 @@ export function deriveFrequentExpenses(
       return {
         key,
         label: value.label,
+        categoryName: category?.name ?? parent?.name ?? "Sin categoría",
         initials: initialsFromLabel(value.label),
         color:
           category?.color?.trim() ||

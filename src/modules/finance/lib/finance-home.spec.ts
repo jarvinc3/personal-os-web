@@ -66,6 +66,7 @@ describe("deriveFrequentExpenses", () => {
       {
         key: "mercado",
         label: "Mercado",
+        categoryName: "Comida",
         initials: "ME",
         color: "#ff0000",
         icon: "🍽️",
@@ -74,6 +75,7 @@ describe("deriveFrequentExpenses", () => {
       {
         key: "café",
         label: "Café",
+        categoryName: "Sin categoría",
         initials: "CA",
         color: "#64748B",
         icon: undefined,

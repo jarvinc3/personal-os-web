@@ -7,6 +7,13 @@ import {
   CollapsibleContent,
 } from "@/src/shared/components/ui/collapsible";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "@/src/shared/components/ui/dropdown-menu";
+import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
@@ -20,6 +27,7 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
+  useSidebar,
 } from "@/src/shared/components/ui/sidebar";
 import { APP_ROUTES } from "@/src/shared/constants/app-routes";
 import { isModuleSectionActive } from "@/src/shared/lib/module-nav-active";
@@ -199,6 +207,48 @@ function NavMainCollapsibleItem({
 }) {
   const [isOpen, setIsOpen] = useState(isUnderRoot)
   const sections = item.items ?? []
+  const { isMobile, state } = useSidebar()
+  const showSectionsMenu = !isMobile && state === "collapsed"
+
+  if (showSectionsMenu) {
+    return (
+      <SidebarMenuItem>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <SidebarMenuButton
+              isActive={isUnderRoot}
+              closeSidebarOnClick={false}
+              size="md"
+              aria-label={item.title}
+            >
+              {item.icon && <item.icon />}
+              <span>{item.title}</span>
+            </SidebarMenuButton>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            side="right"
+            align="start"
+            sideOffset={8}
+            className="min-w-48"
+          >
+            <DropdownMenuLabel>{item.title}</DropdownMenuLabel>
+            {sections.map((section) => (
+              <DropdownMenuItem
+                key={section.href}
+                asChild
+                active={isModuleSectionActive(section, pathname)}
+              >
+                <Link href={section.href}>
+                  {section.icon && <section.icon />}
+                  <span>{section.label}</span>
+                </Link>
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </SidebarMenuItem>
+    )
+  }
 
   return (
     <SidebarMenuItem>

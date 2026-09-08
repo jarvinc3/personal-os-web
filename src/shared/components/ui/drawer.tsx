@@ -5,14 +5,15 @@ import { Drawer as DrawerPrimitive } from "vaul";
 
 import { cn } from '@/src/shared/lib/utils';
 
-function isSelectPortaledEvent(event: { target: EventTarget | null }) {
+function isNestedPortaledEvent(event: { target: EventTarget | null }) {
   const target = event.target
   if (!(target instanceof Element)) {
     return false
   }
   return Boolean(
     target.closest('[data-slot="select-content"]') ||
-      target.closest('[data-slot="select-positioner"]'),
+      target.closest('[data-slot="select-positioner"]') ||
+      target.closest('[data-slot="popover-content"]'),
   )
 }
 
@@ -73,13 +74,13 @@ function DrawerContent({
           className
         )}
         onPointerDownOutside={(event) => {
-          if (isSelectPortaledEvent(event)) {
+          if (isNestedPortaledEvent(event)) {
             event.preventDefault()
           }
           onPointerDownOutside?.(event)
         }}
         onInteractOutside={(event) => {
-          if (isSelectPortaledEvent(event)) {
+          if (isNestedPortaledEvent(event)) {
             event.preventDefault()
           }
           onInteractOutside?.(event)

@@ -7,18 +7,15 @@ import { useFinanceEnabled } from "@/src/modules/finance/hooks/use-finance-enabl
 import { useTransactions } from "@/src/modules/finance/hooks/use-transactions";
 import { financeDashboardRange } from "@/src/modules/finance/lib/dashboard-period";
 import { deriveFrequentExpenses } from "@/src/modules/finance/lib/finance-home";
+import type { FinanceTransactionType } from "@/src/modules/finance/types/entities";
 import {
   formatFinanceMoney,
   parseFinanceMoney,
 } from "@/src/modules/finance/lib/money";
-import { Button } from "@/src/shared/components/ui/button";
-import { SummarySection } from "@/src/shared/components/ui/summary";
 import { APP_ROUTES } from "@/src/shared/constants/app-routes";
 import {
-  ArrowRight,
   BarChart3Icon,
 } from "lucide-react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
 import { FinanceHomeHero } from "./finance-home-hero";
@@ -26,11 +23,18 @@ import {
   FrequentExpensesSection,
   RecentTransactionsSection,
 } from "./finance-home-sections";
+import { SettingsRow, SettingsSection } from "@/src/shared/components/layout/settings-section";
+import ExpenseIncomeForm from "../transactions/expense-income-form";
+
+type QuickTransactionType = Exclude<FinanceTransactionType, "TRANSFER">
 
 export function FinanceOverview() {
   const router = useRouter()
   const { isEnabled, config } = useFinanceEnabled()
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null)
+  const [quickTransactionType, setQuickTransactionType] =
+    useState<QuickTransactionType>("DEBIT")
+  const [quickTransactionOpen, setQuickTransactionOpen] = useState(false)
   const range = useMemo(
     () => financeDashboardRange(config.dashboardPeriod, config.weekStartsOn),
     [config.dashboardPeriod, config.weekStartsOn],
@@ -94,11 +98,9 @@ export function FinanceOverview() {
   )
   const pendingHoldLabel =
     pendingHold > 0
-      ? `Retenido ${formatFinanceMoney(pendingHold, moneyDisplay)}`
-      : undefined
+      ? `Retenido ${formatFinanceMoney(pendingHold, moneyDisplay)}` : undefined;
   const cashFlowLabel = summaryQuery.data
-    ? `Flujo ${formatFinanceMoney(summaryQuery.data.cashFlow, moneyDisplay)}`
-    : undefined
+    ? `Flujo ${formatFinanceMoney(summaryQuery.data.cashFlow, moneyDisplay)}` : undefined;
   const recentTransactions = recentTransactionsQuery.data?.items ?? []
   const frequentExpenses = useMemo(
     () =>
@@ -132,8 +134,23 @@ export function FinanceOverview() {
         pendingHoldLabel={pendingHoldLabel}
         cashFlowLabel={cashFlowLabel}
         onAccountPress={cycleAccount}
-        onSendPress={goToTransactions}
-        onReceivePress={goToTransactions}
+        onSendPress={() => {
+          setQuickTransactionType("DEBIT")
+          setQuickTransactionOpen(true)
+        }}
+        onReceivePress={() => {
+          setQuickTransactionType("CREDIT")
+          setQuickTransactionOpen(true)
+        }}
+        onTransferPress={goToTransactions}
+      />
+
+      <ExpenseIncomeForm
+        type={quickTransactionType}
+        open={quickTransactionOpen}
+        onOpenChange={setQuickTransactionOpen}
+        enabled={isEnabled}
+        defaultCurrency={display.currency}
       />
 
       <FrequentExpensesSection
@@ -148,23 +165,15 @@ export function FinanceOverview() {
         query={recentTransactionsQuery}
       />
 
-      <SummarySection
-        title="Estadísticas"
-        icon={BarChart3Icon}
-        right={
-          <Button asChild variant="ghost" size="sm">
-            <Link href={APP_ROUTES.app.financeStatistics}>
-              Ver estadísticas
-              <ArrowRight size={12} className="text-muted-foreground" />
-            </Link>
-          </Button>
-        }
-      >
-        <p className="text-sm text-muted-foreground">
-          Consulta el resumen financiero, los gastos por categoría, la evolución
-          en el tiempo y el estado de tus presupuestos.
-        </p>
-      </SummarySection>
+      <SettingsSection title="Atajos">
+        <SettingsRow
+          label="Estadísticas"
+          description="Graficos de resumenes financieros"
+          icon={BarChart3Icon}
+          onPress={() => router.push(APP_ROUTES.app.financeStatistics)}
+          isLast
+        />
+      </SettingsSection>
     </div>
   )
 }

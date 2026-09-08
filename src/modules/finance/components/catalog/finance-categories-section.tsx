@@ -1,7 +1,9 @@
 "use client"
 
 import { CategorySheet } from "@/src/modules/finance/components/catalog/category-sheet";
+import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/constants/sheet-keys";
 import { useCategories } from "@/src/modules/finance/hooks/use-categories";
+import { useSheetListEntity } from "@/src/modules/finance/hooks/use-sheet-entity";
 import {
   type CategoryGroup,
   groupCategoriesByParent,
@@ -18,8 +20,9 @@ import {
 } from "@/src/shared/components/ui/collapsible";
 import { Spinner } from "@/src/shared/components/ui/spinner";
 import { SummarySection } from "@/src/shared/components/ui/summary";
+import { useSheetParam } from "@/src/shared/hooks/use-sheet-params";
 import { ChevronDownIcon, PlusIcon, TagsIcon } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 
 type CategoriesSectionProps = {
   enabled: boolean
@@ -123,17 +126,29 @@ export function FinanceCategoriesSection({
     () => groupCategoriesByParent(categoriesQuery.data ?? []),
     [categoriesQuery.data],
   )
-  const [editing, setEditing] = useState<FinanceCategory | null | undefined>(
-    undefined,
+  const {
+    open: openCategorySheet,
+    sheetId: categorySheetId,
+    setOpen: setOpenCategorySheet,
+  } = useSheetParam(FINANCE_SHEET_KEYS.category)
+  const editing = useSheetListEntity(
+    openCategorySheet,
+    categorySheetId,
+    categoriesQuery.data,
+    categoriesQuery.isPending,
+    setOpenCategorySheet,
   )
-  const sheetOpen = editing !== undefined
 
   const errorMessage = categoriesQuery.error
     ? financeErrorMessage(categoriesQuery.error)
     : null
 
   const createButton = (
-    <Button size="sm" variant="ghost" onClick={() => setEditing(null)}>
+    <Button
+      size="sm"
+      variant="ghost"
+      onClick={() => setOpenCategorySheet(true, null)}
+    >
       <PlusIcon />
       Crear categoría
     </Button>
@@ -157,7 +172,11 @@ export function FinanceCategoriesSection({
           <CategoryGroupBlock
             key={group.category.id}
             group={group}
-            onEdit={editable ? (category) => setEditing(category) : undefined}
+            onEdit={
+              editable
+                ? (category) => setOpenCategorySheet(true, category.id)
+                : undefined
+            }
           />
         ))
       )}
@@ -180,11 +199,11 @@ export function FinanceCategoriesSection({
       )}
 
       <CategorySheet
-        open={sheetOpen}
-        onOpenChange={(open) => {
-          if (!open) setEditing(undefined)
-        }}
-        category={editing ?? null}
+        open={
+          openCategorySheet && (!categorySheetId || Boolean(editing))
+        }
+        onOpenChange={setOpenCategorySheet}
+        category={editing}
         categories={categories}
       />
     </>

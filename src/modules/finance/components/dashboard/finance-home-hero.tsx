@@ -10,6 +10,7 @@ type FinanceHomeHeroProps = {
   onAccountPress?: () => void;
   onSendPress?: () => void;
   onReceivePress?: () => void;
+  onTransferPress?: () => void;
   className?: string;
 };
 
@@ -42,6 +43,7 @@ export function FinanceHomeHero({
   onAccountPress,
   onSendPress,
   onReceivePress,
+  onTransferPress,
   className,
 }: FinanceHomeHeroProps) {
   return (
@@ -93,7 +95,7 @@ export function FinanceHomeHero({
           </Button>
           <Button
             variant="outline"
-            onClick={onReceivePress}
+            onClick={onTransferPress}
             className="flex-1 rounded-none rounded-r-2xl"
           >
             <ArrowRightLeftIcon className="text-foreground" />

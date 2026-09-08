@@ -11,14 +11,16 @@ import {
 import { AccountSheet } from "@/src/modules/finance/components/catalog/account-sheet";
 import { CardBalanceSheet } from "@/src/modules/finance/components/catalog/card-balance-sheet";
 import { CardSheet } from "@/src/modules/finance/components/catalog/card-sheet";
-import { InstitutionSheet } from "@/src/modules/finance/components/catalog/institution-sheet";
+import { InstitutionSheet } from "@/src/modules/finance/components/accounts/institution-sheet";
 import { FinanceAuthenticatedPage } from "@/src/modules/finance/components/layout/finance-authenticated-page";
 import { LoanSheet } from "@/src/modules/finance/components/planning/loan-sheet";
+import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/constants/sheet-keys";
 import { useAccounts } from "@/src/modules/finance/hooks/use-accounts";
 import { useCards } from "@/src/modules/finance/hooks/use-cards";
 import { useFinanceEnabled } from "@/src/modules/finance/hooks/use-finance-enabled";
 import { useInstitutions } from "@/src/modules/finance/hooks/use-institutions";
 import { useLoans } from "@/src/modules/finance/hooks/use-loans";
+import { useSheetListEntity } from "@/src/modules/finance/hooks/use-sheet-entity";
 import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error";
 import {
   buildInstitutionStackItems,
@@ -26,18 +28,13 @@ import {
   institutionInitials,
 } from "@/src/modules/finance/lib/institution-stack";
 import { formatFinanceMoney } from "@/src/modules/finance/lib/money";
-import type {
-  FinanceAccount,
-  FinanceCard,
-  FinanceInstitution,
-  FinanceLoan,
-} from "@/src/modules/finance/types/entities";
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet";
 import { LoadingView } from "@/src/shared/components/layout/loading-view";
 import { SettingsRow } from "@/src/shared/components/layout/settings-section";
 import { Button } from "@/src/shared/components/ui/button";
 import { APP_ROUTES } from "@/src/shared/constants/app-routes";
 import { usePageHeader } from "@/src/shared/hooks/use-page-header";
+import { useSheetParam } from "@/src/shared/hooks/use-sheet-params";
 import { accentSurfaceGradient } from "@/src/shared/lib/accent-gradient";
 import {
   Building2Icon,
@@ -52,14 +49,6 @@ import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
 
 const FALLBACK_COLOR = "#1B4332"
-
-type SheetState =
-  | { kind: "none" }
-  | { kind: "institution"; item: FinanceInstitution | null }
-  | { kind: "account"; item: FinanceAccount | null }
-  | { kind: "card"; item: FinanceCard | null }
-  | { kind: "card-balance"; item: FinanceCard }
-  | { kind: "loan"; item: FinanceLoan | null }
 
 type InstitutionDetailClientProps = {
   institutionId: string
@@ -90,8 +79,18 @@ function InstitutionDetailView({ institutionId }: InstitutionDetailClientProps) 
   const loansQuery = useLoans(isEnabled)
 
   const [tab, setTab] = useState<InstitutionDetailTab>("accounts")
-  const [sheet, setSheet] = useState<SheetState>({ kind: "none" })
-  const [menuOpen, setMenuOpen] = useState(false)
+  const { open: openOptionsSheet, setOpen: setOpenOptionsSheet } =
+    useSheetParam(FINANCE_SHEET_KEYS.institutionOptions)
+  const { open: openInstitutionSheet, sheetId: institutionSheetId, setOpen: setOpenInstitutionSheet } =
+    useSheetParam(FINANCE_SHEET_KEYS.institution)
+  const { open: openAccountSheet, sheetId: accountSheetId, setOpen: setOpenAccountSheet } =
+    useSheetParam(FINANCE_SHEET_KEYS.account)
+  const { open: openCardSheet, sheetId: cardSheetId, setOpen: setOpenCardSheet } =
+    useSheetParam(FINANCE_SHEET_KEYS.card)
+  const { open: openCardBalanceSheet, sheetId: cardBalanceSheetId, setOpen: setOpenCardBalanceSheet } =
+    useSheetParam(FINANCE_SHEET_KEYS.cardBalance)
+  const { open: openLoanSheet, sheetId: loanSheetId, setOpen: setOpenLoanSheet } =
+    useSheetParam(FINANCE_SHEET_KEYS.loan)
 
   const institutions = institutionsQuery.data ?? []
   const accounts = accountsQuery.data ?? []
@@ -125,7 +124,10 @@ function InstitutionDetailView({ institutionId }: InstitutionDetailClientProps) 
     router.push(APP_ROUTES.app.financeAccounts)
   }, [router])
 
-  const openMenu = useCallback(() => setMenuOpen(true), [setMenuOpen])
+  const openMenu = useCallback(
+    () => setOpenOptionsSheet(true),
+    [setOpenOptionsSheet],
+  )
 
   const headerActions = useMemo(
     () => (
@@ -165,14 +167,42 @@ function InstitutionDetailView({ institutionId }: InstitutionDetailClientProps) 
     cardsQuery.error ??
     loansQuery.error
 
-  function closeSheet() {
-    setSheet({ kind: "none" })
-  }
-
-  function runMenuAction(action: () => void) {
-    setMenuOpen(false)
-    action()
-  }
+  const editingInstitution = useSheetListEntity(
+    openInstitutionSheet,
+    institutionSheetId,
+    institutionsQuery.data,
+    institutionsQuery.isPending,
+    setOpenInstitutionSheet,
+  )
+  const editingAccount = useSheetListEntity(
+    openAccountSheet,
+    accountSheetId,
+    accountsQuery.data,
+    accountsQuery.isPending,
+    setOpenAccountSheet,
+  )
+  const editingCard = useSheetListEntity(
+    openCardSheet,
+    cardSheetId,
+    cardsQuery.data,
+    cardsQuery.isPending,
+    setOpenCardSheet,
+  )
+  const balancingCard = useSheetListEntity(
+    openCardBalanceSheet,
+    cardBalanceSheetId,
+    cardsQuery.data,
+    cardsQuery.isPending,
+    setOpenCardBalanceSheet,
+    true,
+  )
+  const editingLoan = useSheetListEntity(
+    openLoanSheet,
+    loanSheetId,
+    loansQuery.data,
+    loansQuery.isPending,
+    setOpenLoanSheet,
+  )
 
   if (isLoading && !institution) {
     return <LoadingView />
@@ -253,7 +283,7 @@ function InstitutionDetailView({ institutionId }: InstitutionDetailClientProps) 
               institutionAccounts.length === 0 ? (
                 <InstitutionProductEmpty
                   tab="accounts"
-                  onCreate={() => setSheet({ kind: "account", item: null })}
+                  onCreate={() => setOpenAccountSheet(true, null)}
                 />
               ) : (
                 institutionAccounts.map((account) => (
@@ -261,7 +291,7 @@ function InstitutionDetailView({ institutionId }: InstitutionDetailClientProps) 
                     key={account.id}
                     account={account}
                     display={display}
-                    onPress={() => setSheet({ kind: "account", item: account })}
+                    onPress={() => setOpenAccountSheet(true, account.id)}
                   />
                 ))
               )
@@ -271,7 +301,7 @@ function InstitutionDetailView({ institutionId }: InstitutionDetailClientProps) 
               institutionCards.length === 0 ? (
                 <InstitutionProductEmpty
                   tab="cards"
-                  onCreate={() => setSheet({ kind: "card", item: null })}
+                  onCreate={() => setOpenCardSheet(true, null)}
                 />
               ) : (
                 institutionCards.map((card) => (
@@ -279,7 +309,7 @@ function InstitutionDetailView({ institutionId }: InstitutionDetailClientProps) 
                     key={card.id}
                     card={card}
                     display={display}
-                    onPress={() => setSheet({ kind: "card", item: card })}
+                    onPress={() => setOpenCardSheet(true, card.id)}
                   />
                 ))
               )
@@ -289,7 +319,7 @@ function InstitutionDetailView({ institutionId }: InstitutionDetailClientProps) 
               institutionLoans.length === 0 ? (
                 <InstitutionProductEmpty
                   tab="loans"
-                  onCreate={() => setSheet({ kind: "loan", item: null })}
+                  onCreate={() => setOpenLoanSheet(true, null)}
                 />
               ) : (
                 institutionLoans.map((loan) => (
@@ -297,7 +327,7 @@ function InstitutionDetailView({ institutionId }: InstitutionDetailClientProps) 
                     key={loan.id}
                     loan={loan}
                     display={display}
-                    onPress={() => setSheet({ kind: "loan", item: loan })}
+                    onPress={() => setOpenLoanSheet(true, loan.id)}
                   />
                 ))
               )
@@ -307,8 +337,8 @@ function InstitutionDetailView({ institutionId }: InstitutionDetailClientProps) 
       </div>
 
       <BottomSheet
-        open={menuOpen}
-        onOpenChange={setMenuOpen}
+        open={openOptionsSheet}
+        onOpenChange={setOpenOptionsSheet}
         title="Opciones"
         description={institution.name}
       >
@@ -316,92 +346,75 @@ function InstitutionDetailView({ institutionId }: InstitutionDetailClientProps) 
           <SettingsRow
             label="Editar institución"
             icon={PencilIcon}
-            onPress={() =>
-              runMenuAction(() =>
-                setSheet({ kind: "institution", item: institution }),
-              )
-            }
+            onPress={() => setOpenInstitutionSheet(true, institution.id)}
           />
           <SettingsRow
             label="Nueva cuenta"
             icon={LandmarkIcon}
-            onPress={() =>
-              runMenuAction(() => setSheet({ kind: "account", item: null }))
-            }
+            onPress={() => setOpenAccountSheet(true, null)}
           />
           <SettingsRow
             label="Nueva tarjeta"
             icon={CreditCardIcon}
-            onPress={() =>
-              runMenuAction(() => setSheet({ kind: "card", item: null }))
-            }
+            onPress={() => setOpenCardSheet(true, null)}
           />
           <SettingsRow
             label="Nuevo préstamo"
             icon={HandCoinsIcon}
-            onPress={() =>
-              runMenuAction(() => setSheet({ kind: "loan", item: null }))
-            }
+            onPress={() => setOpenLoanSheet(true, null)}
           />
           <SettingsRow
             label="Sincronización"
             description="Conecta bancos y proveedores"
             icon={RefreshCwIcon}
-            onPress={() =>
-              runMenuAction(() => router.push(APP_ROUTES.app.financeSync))
-            }
+            onPress={() => router.push(APP_ROUTES.app.financeSync)}
             isLast
           />
         </div>
       </BottomSheet>
 
       <InstitutionSheet
-        open={sheet.kind === "institution"}
-        onOpenChange={(open) => {
-          if (!open) closeSheet()
-        }}
-        institution={sheet.kind === "institution" ? sheet.item : null}
+        open={
+          openInstitutionSheet &&
+          (!institutionSheetId || Boolean(editingInstitution))
+        }
+        onOpenChange={setOpenInstitutionSheet}
+        institution={
+          editingInstitution ?? (!institutionSheetId ? institution : null)
+        }
       />
 
       <AccountSheet
-        open={sheet.kind === "account"}
-        onOpenChange={(open) => {
-          if (!open) closeSheet()
-        }}
-        account={sheet.kind === "account" ? sheet.item : null}
+        open={openAccountSheet && (!accountSheetId || Boolean(editingAccount))}
+        onOpenChange={setOpenAccountSheet}
+        account={editingAccount}
         institutions={institutions}
         defaultCurrency={config.baseCurrency}
         defaultInstitutionId={institutionId}
       />
 
       <CardSheet
-        open={sheet.kind === "card"}
-        onOpenChange={(open) => {
-          if (!open) closeSheet()
-        }}
-        card={sheet.kind === "card" ? sheet.item : null}
+        open={openCardSheet && (!cardSheetId || Boolean(editingCard))}
+        onOpenChange={setOpenCardSheet}
+        card={editingCard}
         institutions={institutions}
         accounts={accounts}
         defaultCurrency={config.baseCurrency}
         defaultInstitutionId={institutionId}
-        onUpdateBalance={(item) => setSheet({ kind: "card-balance", item })}
+        onUpdateBalance={(item) => setOpenCardBalanceSheet(true, item.id)}
       />
 
       <CardBalanceSheet
-        open={sheet.kind === "card-balance"}
-        onOpenChange={(open) => {
-          if (!open) closeSheet()
-        }}
-        card={sheet.kind === "card-balance" ? sheet.item : null}
+        open={openCardBalanceSheet && Boolean(balancingCard)}
+        onOpenChange={setOpenCardBalanceSheet}
+        card={balancingCard}
         defaultCurrency={config.baseCurrency}
       />
 
       <LoanSheet
-        open={sheet.kind === "loan"}
-        onOpenChange={(open) => {
-          if (!open) closeSheet()
-        }}
-        loan={sheet.kind === "loan" ? sheet.item : null}
+        open={openLoanSheet && (!loanSheetId || Boolean(editingLoan))}
+        onOpenChange={setOpenLoanSheet}
+        loan={editingLoan}
         accounts={accounts}
         institutions={institutions}
         defaultCurrency={config.baseCurrency}
