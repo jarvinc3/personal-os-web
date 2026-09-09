@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next"
-import { IBM_Plex_Mono } from "next/font/google"
+import { IBM_Plex_Mono, Noto_Sans, Geist } from "next/font/google"
 
 import { siteInfo } from "@/src/modules/landing/data/site-info"
 import { AppEffectsProvider } from "@/src/providers/app-effects-provider"
@@ -14,11 +14,9 @@ import { Analytics } from "@vercel/analytics/next"
 
 import "./globals.css"
 
-const ibmPlexMono = IBM_Plex_Mono({
-  weight: ["100", "200", "300", "400", "500", "600", "700"],
-  subsets: ["latin"],
-  variable: "--font-sans", // Use for main text to override sans
-})
+const geistHeading = Geist({subsets:['latin'],variable:'--font-heading'});
+
+const notoSans = Noto_Sans({subsets:['latin'],variable:'--font-sans'})
 
 const ibmPlexMonoMono = IBM_Plex_Mono({
   weight: ["100", "200", "300", "400", "500", "600", "700"],
@@ -102,10 +100,9 @@ export default function RootLayout({
       lang="es"
       suppressHydrationWarning
       className={cn(
-        "min-h-screen bg-background font-sans antialiased",
-        ibmPlexMono.variable,
-        ibmPlexMonoMono.variable
-      )}
+              "min-h-screen bg-background font-sans antialiased",
+              ibmPlexMonoMono.variable
+            , "font-sans", notoSans.variable, geistHeading.variable)}
     >
       <body>
         <QueryProvider>

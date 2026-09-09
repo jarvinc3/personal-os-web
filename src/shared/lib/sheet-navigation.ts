@@ -12,6 +12,68 @@ export type SheetNavResult =
   | { action: "replace"; url: string }
   | { action: "back" }
 
+export type SheetSearchSnapshot = {
+  sheetKey: string | null
+  sheetId: string | null
+}
+
+export type SheetParamView = {
+  open: boolean
+  sheetId: string | null
+}
+
+export type OptimisticSheetParam = SheetParamView & {
+  from: SheetSearchSnapshot
+}
+
+export function readSheetSearch(
+  searchParams: SearchParamsLike
+): SheetSearchSnapshot {
+  return {
+    sheetKey: searchParams.get(SHEET_QUERY_KEY),
+    sheetId: searchParams.get(SHEET_ID_QUERY_KEY),
+  }
+}
+
+export function sheetViewForKey(
+  snapshot: SheetSearchSnapshot,
+  key: string
+): SheetParamView {
+  const open = snapshot.sheetKey === key
+  return { open, sheetId: open ? snapshot.sheetId : null }
+}
+
+export function mergeOptimisticSheetParam(
+  key: string,
+  url: SheetSearchSnapshot,
+  optimistic: OptimisticSheetParam | null
+): SheetParamView & { dropOptimistic: boolean } {
+  const urlView = sheetViewForKey(url, key)
+  if (!optimistic) {
+    return { ...urlView, dropOptimistic: false }
+  }
+
+  const optimisticView: SheetParamView = {
+    open: optimistic.open,
+    sheetId: optimistic.sheetId,
+  }
+  const urlMatchesTarget =
+    urlView.open === optimisticView.open &&
+    (urlView.sheetId ?? null) === (optimisticView.sheetId ?? null)
+  if (urlMatchesTarget) {
+    return { ...urlView, dropOptimistic: true }
+  }
+
+  const urlStillAtFrom =
+    url.sheetKey === optimistic.from.sheetKey &&
+    (url.sheetId ?? null) === (optimistic.from.sheetId ?? null)
+  if (urlStillAtFrom) {
+    return { ...optimisticView, dropOptimistic: false }
+  }
+
+  return { ...urlView, dropOptimistic: true }
+}
+
 function toUrl(pathname: string, params: URLSearchParams) {
   const qs = params.toString()
   return qs ? `${pathname}?${qs}` : pathname
@@ -24,7 +86,7 @@ function cloneParams(searchParams: SearchParamsLike) {
 function writeSheet(
   params: URLSearchParams,
   key: string,
-  id: string | null | undefined,
+  id: string | null | undefined
 ) {
   params.set(SHEET_QUERY_KEY, key)
   if (id) {

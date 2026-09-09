@@ -1,39 +1,39 @@
 "use client"
 
-import { CurrencySelectField } from "@/src/modules/finance/components/catalog/currency-select-field";
-import { CATALOG_NONE } from "@/src/modules/finance/constants/catalog";
-import { useCategories } from "@/src/modules/finance/hooks/use-categories";
+import { CurrencySelectField } from "@/src/modules/finance/components/catalog/currency-select-field"
+import { CATALOG_NONE } from "@/src/modules/finance/constants/catalog"
+import { useCategories } from "@/src/modules/finance/hooks/use-categories"
 import {
   useCreateTransaction,
   useUpdateTransaction,
-} from "@/src/modules/finance/hooks/use-transactions";
-import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error";
+} from "@/src/modules/finance/hooks/use-transactions"
+import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
 import {
   buildCreateTransactionBody,
   buildLedgerTargetOptions,
   encodeLedgerTarget,
   splitLedgerTarget,
-} from "@/src/modules/finance/lib/ledger-payloads";
+} from "@/src/modules/finance/lib/ledger-payloads"
 import type {
   FinanceAccount,
   FinanceCard,
   FinanceTransaction,
-} from "@/src/modules/finance/types/entities";
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet";
+} from "@/src/modules/finance/types/entities"
+import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
 import {
   FormTextField,
   SelectField,
-} from "@/src/shared/components/layout/form-blocks";
-import { Button } from "@/src/shared/components/ui/button";
-import { Spinner } from "@/src/shared/components/ui/spinner";
-import { SummarySection } from "@/src/shared/components/ui/summary";
-import { appToast } from "@/src/shared/lib/app-toast";
-import { createSheetSubmit } from "@/src/shared/lib/sheet-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeftRightIcon, DollarSign, StickyNoteIcon } from "lucide-react";
-import { useEffect, useMemo } from "react";
-import { Controller, useForm, useWatch } from "react-hook-form";
-import { z } from "zod";
+} from "@/src/shared/components/layout/form-blocks"
+import { Button } from "@/src/shared/components/ui/button"
+import { Spinner } from "@/src/shared/components/ui/spinner"
+import { SummarySection } from "@/src/shared/components/ui/summary"
+import { appToast } from "@/src/shared/lib/app-toast"
+import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { ArrowLeftRightIcon, DollarSign, StickyNoteIcon } from "lucide-react"
+import { useEffect, useMemo } from "react"
+import { Controller, useForm, useWatch } from "react-hook-form"
+import { z } from "zod"
 
 const schema = z.object({
   type: z.enum(["DEBIT", "CREDIT"]),
@@ -80,7 +80,7 @@ function destinationFromTransaction(tx: FinanceTransaction | null): string {
 function toFormValues(
   tx: FinanceTransaction | null,
   defaultCurrency: string,
-  defaultDestination: string,
+  defaultDestination: string
 ): FormValues {
   return {
     type: tx?.type === "CREDIT" ? "CREDIT" : "DEBIT",
@@ -100,7 +100,7 @@ function currencyForTarget(
   destination: string,
   accounts: FinanceAccount[],
   cards: FinanceCard[],
-  fallback: string,
+  fallback: string
 ): string {
   const target = splitLedgerTarget(destination)
   const account = accounts.find((item) => item.id === target.accountId)
@@ -119,6 +119,7 @@ type TransactionSheetProps = {
   cards: FinanceCard[]
   defaultCurrency: string
   enabled: boolean
+  pending?: boolean
 }
 
 export function TransactionSheet({
@@ -129,6 +130,7 @@ export function TransactionSheet({
   cards,
   defaultCurrency,
   enabled,
+  pending = false,
 }: TransactionSheetProps) {
   const isEdit = Boolean(transaction)
   const createMutation = useCreateTransaction()
@@ -139,7 +141,7 @@ export function TransactionSheet({
 
   const destinationOptions = useMemo(
     () => buildLedgerTargetOptions(accounts, cards),
-    [accounts, cards],
+    [accounts, cards]
   )
   const defaultDestination = destinationOptions[1]?.value ?? CATALOG_NONE
   const categoryOptions = useMemo(
@@ -150,7 +152,7 @@ export function TransactionSheet({
         label: `${category.icon ? `${category.icon} ` : ""}${category.name}`,
       })),
     ],
-    [categoriesQuery.data],
+    [categoriesQuery.data]
   )
 
   const {
@@ -161,7 +163,11 @@ export function TransactionSheet({
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: toFormValues(transaction, defaultCurrency, defaultDestination),
+    defaultValues: toFormValues(
+      transaction,
+      defaultCurrency,
+      defaultDestination
+    ),
   })
 
   const destination = useWatch({ control, name: "destination" })
@@ -176,13 +182,21 @@ export function TransactionSheet({
     if (!open || transaction) return
     setValue(
       "currency",
-      currencyForTarget(destination, accounts, cards, defaultCurrency),
+      currencyForTarget(destination, accounts, cards, defaultCurrency)
     )
-  }, [open, transaction, destination, accounts, cards, defaultCurrency, setValue])
+  }, [
+    open,
+    transaction,
+    destination,
+    accounts,
+    cards,
+    defaultCurrency,
+    setValue,
+  ])
 
   const submitForm = useMemo(
     () => createSheetSubmit(handleSubmit),
-    [handleSubmit],
+    [handleSubmit]
   )
 
   const onSubmit = submitForm(async (values) => {
@@ -217,6 +231,7 @@ export function TransactionSheet({
     <BottomSheet
       open={open}
       onOpenChange={onOpenChange}
+      pending={pending}
       title={isEdit ? "Editar movimiento" : "Nuevo movimiento"}
       description={
         hasTargets

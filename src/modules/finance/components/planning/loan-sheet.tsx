@@ -1,41 +1,41 @@
 "use client"
 
-import { CurrencySelectField } from "@/src/modules/finance/components/catalog/currency-select-field";
-import { CATALOG_NONE } from "@/src/modules/finance/constants/catalog";
+import { CurrencySelectField } from "@/src/modules/finance/components/catalog/currency-select-field"
+import { CATALOG_NONE } from "@/src/modules/finance/constants/catalog"
 import {
   useArchiveLoan,
   useCreateLoan,
   useUpdateLoan,
-} from "@/src/modules/finance/hooks/use-loans";
-import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error";
-import { rateFractionToPercent } from "@/src/modules/finance/lib/interest-rate";
-import { formatPlanningDate } from "@/src/modules/finance/lib/planning-lists";
-import { buildLoanBody } from "@/src/modules/finance/lib/planning-payloads";
+} from "@/src/modules/finance/hooks/use-loans"
+import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
+import { rateFractionToPercent } from "@/src/modules/finance/lib/interest-rate"
+import { formatPlanningDate } from "@/src/modules/finance/lib/planning-lists"
+import { buildLoanBody } from "@/src/modules/finance/lib/planning-payloads"
 import type {
   FinanceAccount,
   FinanceInstallmentFreq,
   FinanceInstitution,
   FinanceLoan,
-} from "@/src/modules/finance/types/entities";
+} from "@/src/modules/finance/types/entities"
 import {
   FINANCE_INSTALLMENT_FREQ_LABEL,
   FINANCE_INSTALLMENT_FREQS,
-} from "@/src/modules/finance/types/entities";
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet";
+} from "@/src/modules/finance/types/entities"
+import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
 import {
   FormTextField,
   SelectField,
-} from "@/src/shared/components/layout/form-blocks";
-import { Button } from "@/src/shared/components/ui/button";
-import { Spinner } from "@/src/shared/components/ui/spinner";
-import { SummarySection } from "@/src/shared/components/ui/summary";
-import { appToast } from "@/src/shared/lib/app-toast";
-import { createSheetSubmit } from "@/src/shared/lib/sheet-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { LandmarkIcon } from "lucide-react";
-import { useEffect, useMemo } from "react";
-import { Controller, useForm, useWatch } from "react-hook-form";
-import { z } from "zod";
+} from "@/src/shared/components/layout/form-blocks"
+import { Button } from "@/src/shared/components/ui/button"
+import { Spinner } from "@/src/shared/components/ui/spinner"
+import { SummarySection } from "@/src/shared/components/ui/summary"
+import { appToast } from "@/src/shared/lib/app-toast"
+import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { LandmarkIcon } from "lucide-react"
+import { useEffect, useMemo } from "react"
+import { Controller, useForm, useWatch } from "react-hook-form"
+import { z } from "zod"
 
 const schema = z.object({
   lenderName: z.string().trim().min(1, "Prestamista obligatorio").max(120),
@@ -70,7 +70,7 @@ function todayInput(): string {
 function toFormValues(
   loan: FinanceLoan | null,
   defaultCurrency: string,
-  defaultInstitutionId: string = CATALOG_NONE,
+  defaultInstitutionId: string = CATALOG_NONE
 ): FormValues {
   return {
     lenderName: loan?.lenderName ?? "",
@@ -97,6 +97,7 @@ type LoanSheetProps = {
   institutions: FinanceInstitution[]
   defaultCurrency: string
   defaultInstitutionId?: string
+  pending?: boolean
 }
 
 export function LoanSheet({
@@ -107,6 +108,7 @@ export function LoanSheet({
   institutions,
   defaultCurrency,
   defaultInstitutionId,
+  pending = false,
 }: LoanSheetProps) {
   const isEdit = Boolean(loan)
   const createMutation = useCreateLoan()
@@ -117,8 +119,7 @@ export function LoanSheet({
     updateMutation.isPending ||
     archiveMutation.isPending
 
-  const resolvedDefaultInstitutionId =
-    defaultInstitutionId ?? CATALOG_NONE
+  const resolvedDefaultInstitutionId = defaultInstitutionId ?? CATALOG_NONE
 
   const {
     control,
@@ -131,7 +132,7 @@ export function LoanSheet({
     defaultValues: toFormValues(
       loan,
       defaultCurrency,
-      resolvedDefaultInstitutionId,
+      resolvedDefaultInstitutionId
     ),
   })
 
@@ -143,14 +144,14 @@ export function LoanSheet({
       { value: CATALOG_NONE, label: "Prestamista externo" },
       ...institutions.map((item) => ({ value: item.id, label: item.name })),
     ],
-    [institutions],
+    [institutions]
   )
 
   const institutionAccounts = accounts.filter(
     (item) =>
       item.isActive &&
       (selectedInstitutionId === CATALOG_NONE ||
-        item.institutionId === selectedInstitutionId),
+        item.institutionId === selectedInstitutionId)
   )
   const accountOptions = useMemo(
     () => [
@@ -160,14 +161,12 @@ export function LoanSheet({
         label: item.name,
       })),
     ],
-    [institutionAccounts],
+    [institutionAccounts]
   )
 
   useEffect(() => {
     if (open) {
-      reset(
-        toFormValues(loan, defaultCurrency, resolvedDefaultInstitutionId),
-      )
+      reset(toFormValues(loan, defaultCurrency, resolvedDefaultInstitutionId))
     }
   }, [open, loan, defaultCurrency, resolvedDefaultInstitutionId, reset])
 
@@ -179,7 +178,7 @@ export function LoanSheet({
           item.id === selectedAccountId &&
           item.isActive &&
           (selectedInstitutionId === CATALOG_NONE ||
-            item.institutionId === selectedInstitutionId),
+            item.institutionId === selectedInstitutionId)
       )
     ) {
       setValue("accountId", CATALOG_NONE)
@@ -188,7 +187,7 @@ export function LoanSheet({
 
   const submitForm = useMemo(
     () => createSheetSubmit(handleSubmit),
-    [handleSubmit],
+    [handleSubmit]
   )
 
   const onSubmit = submitForm(async (values) => {
@@ -197,7 +196,7 @@ export function LoanSheet({
         ...values,
         interestRatePercent: values.interestRatePercent,
       },
-      { isUpdate: isEdit },
+      { isUpdate: isEdit }
     )
     if (!payload.ok) {
       appToast.error({ text1: payload.error })
@@ -232,6 +231,7 @@ export function LoanSheet({
     <BottomSheet
       open={open}
       onOpenChange={onOpenChange}
+      pending={pending}
       title={isEdit ? "Editar préstamo" : "Nuevo préstamo"}
       description="12% se envía como 0.12. La tasa no es un entero de porcentaje."
       actions={{
@@ -414,7 +414,8 @@ export function LoanSheet({
                 placeholder="12"
               />
               <p className="text-xs text-muted-foreground">
-                12% se envía como 0.12. Vacío = sin tasa (no es lo mismo que 0%).
+                12% se envía como 0.12. Vacío = sin tasa (no es lo mismo que
+                0%).
               </p>
             </div>
           )}

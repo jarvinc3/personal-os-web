@@ -1,27 +1,27 @@
 "use client"
 
-import { CurrencySelectField } from "@/src/modules/finance/components/catalog/currency-select-field";
+import { CurrencySelectField } from "@/src/modules/finance/components/catalog/currency-select-field"
 import {
   useCreateSavingsGoal,
   useDeleteSavingsGoal,
   useUpdateSavingsGoal,
-} from "@/src/modules/finance/hooks/use-savings-goals";
-import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error";
-import { formatPlanningDate } from "@/src/modules/finance/lib/planning-lists";
-import { buildCreateSavingsGoalBody } from "@/src/modules/finance/lib/planning-payloads";
-import type { FinanceSavingsGoal } from "@/src/modules/finance/types/entities";
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet";
-import { FormTextField } from "@/src/shared/components/layout/form-blocks";
-import { Button } from "@/src/shared/components/ui/button";
-import { Spinner } from "@/src/shared/components/ui/spinner";
-import { SummarySection } from "@/src/shared/components/ui/summary";
-import { appToast } from "@/src/shared/lib/app-toast";
-import { createSheetSubmit } from "@/src/shared/lib/sheet-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { PiggyBankIcon } from "lucide-react";
-import { useEffect, useMemo } from "react";
-import { Controller, useForm } from "react-hook-form";
-import { z } from "zod";
+} from "@/src/modules/finance/hooks/use-savings-goals"
+import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
+import { formatPlanningDate } from "@/src/modules/finance/lib/planning-lists"
+import { buildCreateSavingsGoalBody } from "@/src/modules/finance/lib/planning-payloads"
+import type { FinanceSavingsGoal } from "@/src/modules/finance/types/entities"
+import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+import { FormTextField } from "@/src/shared/components/layout/form-blocks"
+import { Button } from "@/src/shared/components/ui/button"
+import { Spinner } from "@/src/shared/components/ui/spinner"
+import { SummarySection } from "@/src/shared/components/ui/summary"
+import { appToast } from "@/src/shared/lib/app-toast"
+import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { PiggyBankIcon } from "lucide-react"
+import { useEffect, useMemo } from "react"
+import { Controller, useForm } from "react-hook-form"
+import { z } from "zod"
 
 const schema = z.object({
   name: z.string().trim().min(1, "Nombre obligatorio").max(120),
@@ -36,7 +36,7 @@ type FormValues = z.infer<typeof schema>
 
 function toFormValues(
   goal: FinanceSavingsGoal | null,
-  defaultCurrency: string,
+  defaultCurrency: string
 ): FormValues {
   return {
     name: goal?.name ?? "",
@@ -53,6 +53,7 @@ type SavingsGoalSheetProps = {
   onOpenChange: (open: boolean) => void
   goal: FinanceSavingsGoal | null
   defaultCurrency: string
+  pending?: boolean
 }
 
 export function SavingsGoalSheet({
@@ -60,6 +61,7 @@ export function SavingsGoalSheet({
   onOpenChange,
   goal,
   defaultCurrency,
+  pending = false,
 }: SavingsGoalSheetProps) {
   const isEdit = Boolean(goal)
   const createMutation = useCreateSavingsGoal()
@@ -88,7 +90,7 @@ export function SavingsGoalSheet({
 
   const submitForm = useMemo(
     () => createSheetSubmit(handleSubmit),
-    [handleSubmit],
+    [handleSubmit]
   )
 
   const onSubmit = submitForm(async (values) => {
@@ -128,6 +130,7 @@ export function SavingsGoalSheet({
     <BottomSheet
       open={open}
       onOpenChange={onOpenChange}
+      pending={pending}
       title={isEdit ? "Editar meta" : "Nueva meta"}
       description="El estado Completada lo marca el API cuando lo ahorrado alcanza la meta."
       actions={{

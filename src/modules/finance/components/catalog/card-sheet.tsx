@@ -1,54 +1,54 @@
 "use client"
 
-import { CurrencySelectField } from "@/src/modules/finance/components/catalog/currency-select-field";
+import { CurrencySelectField } from "@/src/modules/finance/components/catalog/currency-select-field"
 import {
   CATALOG_NONE,
   FINANCE_CARD_NETWORK_LABEL,
   FINANCE_CARD_NETWORKS,
   FINANCE_CARD_TYPE_LABEL,
   FINANCE_CARD_TYPES,
-} from "@/src/modules/finance/constants/catalog";
+} from "@/src/modules/finance/constants/catalog"
 import {
   useArchiveCard,
   useCreateCard,
   useUpdateCard,
   useUpdateCardBalance,
-} from "@/src/modules/finance/hooks/use-cards";
+} from "@/src/modules/finance/hooks/use-cards"
 import {
   buildCardBalanceBodies,
   buildCreateCardBody,
   cardBalanceSaveMessage,
   nextUnusedCurrency,
-} from "@/src/modules/finance/lib/catalog-payloads";
-import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error";
+} from "@/src/modules/finance/lib/catalog-payloads"
+import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
 import type {
   FinanceAccount,
   FinanceCard,
   FinanceInstitution,
-} from "@/src/modules/finance/types/entities";
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet";
+} from "@/src/modules/finance/types/entities"
+import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
 import {
   FormTextField,
   SelectField,
-} from "@/src/shared/components/layout/form-blocks";
-import { Button } from "@/src/shared/components/ui/button";
-import { ColorPickerSwatch } from "@/src/shared/components/ui/color-picker";
-import { Label } from "@/src/shared/components/ui/label";
-import { Spinner } from "@/src/shared/components/ui/spinner";
-import { SummarySection } from "@/src/shared/components/ui/summary";
-import { appToast } from "@/src/shared/lib/app-toast";
-import { createSheetSubmit } from "@/src/shared/lib/sheet-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+} from "@/src/shared/components/layout/form-blocks"
+import { Button } from "@/src/shared/components/ui/button"
+import { ColorPickerSwatch } from "@/src/shared/components/ui/color-picker"
+import { Label } from "@/src/shared/components/ui/label"
+import { Spinner } from "@/src/shared/components/ui/spinner"
+import { SummarySection } from "@/src/shared/components/ui/summary"
+import { appToast } from "@/src/shared/lib/app-toast"
+import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
+import { zodResolver } from "@hookform/resolvers/zod"
 import {
   Building2Icon,
   CalendarDays,
   CreditCardIcon,
   DollarSign,
   Palette,
-} from "lucide-react";
-import { useEffect, useMemo } from "react";
-import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
-import { z } from "zod";
+} from "lucide-react"
+import { useEffect, useMemo } from "react"
+import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form"
+import { z } from "zod"
 
 const balanceRowSchema = z.object({
   currency: z.string().trim().min(3, "Moneda obligatoria").max(3),
@@ -91,7 +91,7 @@ function emptyBalanceRow(currency: string) {
 function toFormValues(
   card: FinanceCard | null,
   defaultCurrency: string,
-  defaultInstitutionId: string,
+  defaultInstitutionId: string
 ): FormValues {
   return {
     name: card?.name ?? "",
@@ -118,6 +118,7 @@ type CardSheetProps = {
   defaultCurrency: string
   defaultInstitutionId?: string
   onUpdateBalance: (card: FinanceCard) => void
+  pending?: boolean
 }
 
 export function CardSheet({
@@ -129,6 +130,7 @@ export function CardSheet({
   defaultCurrency,
   defaultInstitutionId,
   onUpdateBalance,
+  pending = false,
 }: CardSheetProps) {
   const isEdit = Boolean(card)
   const createMutation = useCreateCard()
@@ -155,7 +157,7 @@ export function CardSheet({
     defaultValues: toFormValues(
       card,
       defaultCurrency,
-      resolvedDefaultInstitutionId,
+      resolvedDefaultInstitutionId
     ),
   })
 
@@ -178,19 +180,20 @@ export function CardSheet({
     label: item.name,
   }))
   const institutionAccounts = accounts.filter(
-    (item) => item.isActive && item.institutionId === selectedInstitutionId,
+    (item) => item.isActive && item.institutionId === selectedInstitutionId
   )
   const accountOptions = [
     { value: CATALOG_NONE, label: "Sin cuenta" },
-    ...institutionAccounts.map((item) => ({ value: item.id, label: item.name })),
+    ...institutionAccounts.map((item) => ({
+      value: item.id,
+      label: item.name,
+    })),
   ]
   const hasInstitutions = institutionOptions.length > 0
 
   useEffect(() => {
     if (open) {
-      reset(
-        toFormValues(card, defaultCurrency, resolvedDefaultInstitutionId),
-      )
+      reset(toFormValues(card, defaultCurrency, resolvedDefaultInstitutionId))
     }
   }, [open, card, defaultCurrency, resolvedDefaultInstitutionId, reset])
 
@@ -201,7 +204,7 @@ export function CardSheet({
         (item) =>
           item.id === selectedAccountId &&
           item.isActive &&
-          item.institutionId === selectedInstitutionId,
+          item.institutionId === selectedInstitutionId
       )
     ) {
       setValue("accountId", CATALOG_NONE)
@@ -210,7 +213,7 @@ export function CardSheet({
 
   const submitForm = useMemo(
     () => createSheetSubmit(handleSubmit),
-    [handleSubmit],
+    [handleSubmit]
   )
 
   const onSubmit = submitForm(async (values) => {
@@ -243,7 +246,7 @@ export function CardSheet({
             })
           } catch (error) {
             failedCurrencies.push(
-              `${body.currency}: ${financeErrorMessage(error)}`,
+              `${body.currency}: ${financeErrorMessage(error)}`
             )
           }
         }
@@ -278,6 +281,7 @@ export function CardSheet({
     <BottomSheet
       open={open}
       onOpenChange={onOpenChange}
+      pending={pending}
       title={isEdit ? "Editar tarjeta" : "Nueva tarjeta"}
       description={
         hasInstitutions
@@ -327,7 +331,12 @@ export function CardSheet({
               options={
                 hasInstitutions
                   ? institutionOptions
-                  : [{ value: CATALOG_NONE, label: "Crea una institución primero" }]
+                  : [
+                      {
+                        value: CATALOG_NONE,
+                        label: "Crea una institución primero",
+                      },
+                    ]
               }
               disabled={!hasInstitutions}
             />
@@ -457,9 +466,7 @@ export function CardSheet({
         <SummarySection title="Saldos iniciales" icon={DollarSign}>
           {balanceFields.map((field, index) => {
             const usedCurrencies = (watchedBalances ?? [])
-              .map((row, rowIndex) =>
-                rowIndex === index ? "" : row.currency,
-              )
+              .map((row, rowIndex) => (rowIndex === index ? "" : row.currency))
               .filter(Boolean)
             return (
               <div key={field.id} className="flex flex-col gap-3">
@@ -525,9 +532,9 @@ export function CardSheet({
                 emptyBalanceRow(
                   nextUnusedCurrency(
                     (watchedBalances ?? []).map((row) => row.currency),
-                    defaultCurrency,
-                  ),
-                ),
+                    defaultCurrency
+                  )
+                )
               )
             }
           >

@@ -1,40 +1,41 @@
 "use client"
 
-import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error";
-import type { FinanceFrequentExpense } from "@/src/modules/finance/lib/finance-home";
+import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
+import type { FinanceFrequentExpense } from "@/src/modules/finance/lib/finance-home"
 import {
   formatFinanceMoney,
   parseFinanceMoney,
   type FinanceMoneyDisplay,
-} from "@/src/modules/finance/lib/money";
-import { formatTransactionDate } from "@/src/modules/finance/lib/transactions-query";
+} from "@/src/modules/finance/lib/money"
+import { formatTransactionDate } from "@/src/modules/finance/lib/transactions-query"
 import {
   FINANCE_TRANSACTION_STATUS_LABEL,
   type FinanceCategory,
   type FinanceTransaction,
-} from "@/src/modules/finance/types/entities";
-import { Button } from "@/src/shared/components/ui/button";
+} from "@/src/modules/finance/types/entities"
+import { Button } from "@/src/shared/components/ui/button"
 import {
   Empty,
   EmptyDescription,
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
-} from "@/src/shared/components/ui/empty";
-import { Spinner } from "@/src/shared/components/ui/spinner";
-import { SummarySection } from "@/src/shared/components/ui/summary";
-import { APP_ROUTES } from "@/src/shared/constants/app-routes";
-import { cn } from "@/src/shared/lib/utils";
+} from "@/src/shared/components/ui/empty"
+import { Spinner } from "@/src/shared/components/ui/spinner"
+import { SummaryItem, SummarySection } from "@/src/shared/components/ui/summary"
+import { APP_ROUTES } from "@/src/shared/constants/app-routes"
+import { cn } from "@/src/shared/lib/utils"
 import {
-  ArrowDownLeft,
-  ArrowLeftRight,
+  ArrowDownLeftIcon,
+  ArrowLeftRightIcon,
   ArrowRight,
   ArrowUpDown,
   ArrowUpRight,
+  ArrowUpRightIcon,
   LandmarkIcon,
   Plus,
-} from "lucide-react";
-import Link from "next/link";
+} from "lucide-react"
+import Link from "next/link"
 
 type QueryState = {
   isPending: boolean
@@ -129,12 +130,12 @@ type RecentTransactionsSectionProps = {
 
 function signedAmount(
   transaction: FinanceTransaction,
-  display: FinanceMoneyDisplay,
+  display: FinanceMoneyDisplay
 ): string {
   const parsed = parseFinanceMoney(transaction.amount)
   const formatted = formatFinanceMoney(
     parsed === null ? null : Math.abs(parsed),
-    { ...display, currency: transaction.currency },
+    { ...display, currency: transaction.currency }
   )
   if (transaction.type === "DEBIT") return `− ${formatted}`
   if (transaction.type === "CREDIT") return `+ ${formatted}`
@@ -148,7 +149,7 @@ export function RecentTransactionsSection({
   query,
 }: RecentTransactionsSectionProps) {
   const categoryById = new Map(
-    categories.map((category) => [category.id, category] as const),
+    categories.map((category) => [category.id, category] as const)
   )
 
   return (
@@ -198,12 +199,6 @@ export function RecentTransactionsSection({
             const icon = category?.icon?.trim() || parent?.icon?.trim()
             const color =
               category?.color?.trim() || parent?.color?.trim() || "#64748B"
-            const TypeIcon =
-              transaction.type === "DEBIT"
-                ? ArrowDownLeft
-                : transaction.type === "CREDIT"
-                  ? ArrowUpRight
-                  : ArrowLeftRight
             const title =
               transaction.merchant ??
               transaction.description ??
@@ -211,47 +206,37 @@ export function RecentTransactionsSection({
               "Movimiento"
 
             return (
-              <Link
+              <SummaryItem
                 key={transaction.id}
                 href={APP_ROUTES.app.financeTransactions}
-                className={cn(
-                  "flex items-center gap-3 py-3 transition-colors hover:bg-muted/50",
-                  index < transactions.length - 1 &&
-                  "border-b border-border/60",
-                )}
-              >
-                <span
-                  className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted"
-                  style={{
-                    backgroundColor: `color-mix(in srgb, ${color} 18%, transparent)`,
-                  }}
-                >
-                  {icon ? (
+                title={title}
+                description={`${formatTransactionDate(transaction.transactionDate)} · ${FINANCE_TRANSACTION_STATUS_LABEL[transaction.status]}`}
+                leading={
+                  icon ? (
                     <span>{icon}</span>
                   ) : (
-                    <TypeIcon className="size-5" style={{ color }} />
-                  )}
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate text-sm font-medium">
-                    {title}
+                    transaction.type === "DEBIT" ? (
+                      <ArrowDownLeftIcon className="size-5 text-destructive" />
+                    ) : transaction.type === "CREDIT" ? (
+                      <ArrowUpRightIcon className="size-5 text-success" />
+                    ) : transaction.type === "TRANSFER" ? (
+                      <ArrowLeftRightIcon className="size-5 text-info" />
+                    ) : null
+                  )
+                }
+                accentColor={color}
+                value={
+                  <span
+                    className={cn(
+                      transaction.type === "DEBIT" && "text-destructive",
+                      transaction.type === "CREDIT" && "text-success"
+                    )}
+                  >
+                    {signedAmount(transaction, display)}
                   </span>
-                  <span className="block truncate text-xs text-muted-foreground">
-                    {formatTransactionDate(transaction.transactionDate)}
-                    {" · "}
-                    {FINANCE_TRANSACTION_STATUS_LABEL[transaction.status]}
-                  </span>
-                </span>
-                <span
-                  className={cn(
-                    "shrink-0 text-sm font-semibold tabular-nums",
-                    transaction.type === "DEBIT" && "text-destructive",
-                    transaction.type === "CREDIT" && "text-success",
-                  )}
-                >
-                  {signedAmount(transaction, display)}
-                </span>
-              </Link>
+                }
+                isLast={index === transactions.length - 1}
+              />
             )
           })}
         </div>

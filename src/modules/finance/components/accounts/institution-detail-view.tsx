@@ -7,35 +7,34 @@ import {
   InstitutionProductEmpty,
   LoanProductRow,
   type InstitutionDetailTab,
-} from "@/src/modules/finance/components/accounts/institution-product-lists";
-import { AccountSheet } from "@/src/modules/finance/components/catalog/account-sheet";
-import { CardBalanceSheet } from "@/src/modules/finance/components/catalog/card-balance-sheet";
-import { CardSheet } from "@/src/modules/finance/components/catalog/card-sheet";
-import { InstitutionSheet } from "@/src/modules/finance/components/accounts/institution-sheet";
-import { FinanceAuthenticatedPage } from "@/src/modules/finance/components/layout/finance-authenticated-page";
-import { LoanSheet } from "@/src/modules/finance/components/planning/loan-sheet";
-import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/constants/sheet-keys";
-import { useAccounts } from "@/src/modules/finance/hooks/use-accounts";
-import { useCards } from "@/src/modules/finance/hooks/use-cards";
-import { useFinanceEnabled } from "@/src/modules/finance/hooks/use-finance-enabled";
-import { useInstitutions } from "@/src/modules/finance/hooks/use-institutions";
-import { useLoans } from "@/src/modules/finance/hooks/use-loans";
-import { useSheetListEntity } from "@/src/modules/finance/hooks/use-sheet-entity";
-import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error";
+} from "@/src/modules/finance/components/accounts/institution-product-lists"
+import { AccountSheet } from "@/src/modules/finance/components/catalog/account-sheet"
+import { CardBalanceSheet } from "@/src/modules/finance/components/catalog/card-balance-sheet"
+import { CardSheet } from "@/src/modules/finance/components/catalog/card-sheet"
+import { InstitutionSheet } from "@/src/modules/finance/components/accounts/institution-sheet"
+import { FinanceAuthenticatedPage } from "@/src/modules/finance/components/layout/finance-authenticated-page"
+import { LoanSheet } from "@/src/modules/finance/components/planning/loan-sheet"
+import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/constants/sheet-keys"
+import { useAccounts } from "@/src/modules/finance/hooks/use-accounts"
+import { useCards } from "@/src/modules/finance/hooks/use-cards"
+import { useFinanceEnabled } from "@/src/modules/finance/hooks/use-finance-enabled"
+import { useInstitutions } from "@/src/modules/finance/hooks/use-institutions"
+import { useLoans } from "@/src/modules/finance/hooks/use-loans"
+import { useSheetListEntity } from "@/src/modules/finance/hooks/use-sheet-entity"
+import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
 import {
   buildInstitutionStackItems,
   formatProductCounts,
   institutionInitials,
-} from "@/src/modules/finance/lib/institution-stack";
-import { formatFinanceMoney } from "@/src/modules/finance/lib/money";
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet";
-import { LoadingView } from "@/src/shared/components/layout/loading-view";
-import { SettingsRow } from "@/src/shared/components/layout/settings-section";
-import { Button } from "@/src/shared/components/ui/button";
-import { APP_ROUTES } from "@/src/shared/constants/app-routes";
-import { usePageHeader } from "@/src/shared/hooks/use-page-header";
-import { useSheetParam } from "@/src/shared/hooks/use-sheet-params";
-import { accentSurfaceGradient } from "@/src/shared/lib/accent-gradient";
+} from "@/src/modules/finance/lib/institution-stack"
+import { formatFinanceMoney } from "@/src/modules/finance/lib/money"
+import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+import { LoadingView } from "@/src/shared/components/layout/loading-view"
+import { Button } from "@/src/shared/components/ui/button"
+import { SummaryItem } from "@/src/shared/components/ui/summary"
+import { APP_ROUTES } from "@/src/shared/constants/app-routes"
+import { usePageHeader } from "@/src/shared/hooks/use-page-header"
+import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import {
   Building2Icon,
   CreditCardIcon,
@@ -44,9 +43,9 @@ import {
   MoreVerticalIcon,
   PencilIcon,
   RefreshCwIcon,
-} from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useCallback, useMemo, useState } from "react";
+} from "lucide-react"
+import { useRouter } from "next/navigation"
+import { useCallback, useMemo, useState } from "react"
 
 const FALLBACK_COLOR = "#1B4332"
 
@@ -64,7 +63,9 @@ export function InstitutionDetailClient({
   )
 }
 
-function InstitutionDetailView({ institutionId }: InstitutionDetailClientProps) {
+function InstitutionDetailView({
+  institutionId,
+}: InstitutionDetailClientProps) {
   const router = useRouter()
   const { isEnabled, config } = useFinanceEnabled()
   const display = {
@@ -81,16 +82,31 @@ function InstitutionDetailView({ institutionId }: InstitutionDetailClientProps) 
   const [tab, setTab] = useState<InstitutionDetailTab>("accounts")
   const { open: openOptionsSheet, setOpen: setOpenOptionsSheet } =
     useSheetParam(FINANCE_SHEET_KEYS.institutionOptions)
-  const { open: openInstitutionSheet, sheetId: institutionSheetId, setOpen: setOpenInstitutionSheet } =
-    useSheetParam(FINANCE_SHEET_KEYS.institution)
-  const { open: openAccountSheet, sheetId: accountSheetId, setOpen: setOpenAccountSheet } =
-    useSheetParam(FINANCE_SHEET_KEYS.account)
-  const { open: openCardSheet, sheetId: cardSheetId, setOpen: setOpenCardSheet } =
-    useSheetParam(FINANCE_SHEET_KEYS.card)
-  const { open: openCardBalanceSheet, sheetId: cardBalanceSheetId, setOpen: setOpenCardBalanceSheet } =
-    useSheetParam(FINANCE_SHEET_KEYS.cardBalance)
-  const { open: openLoanSheet, sheetId: loanSheetId, setOpen: setOpenLoanSheet } =
-    useSheetParam(FINANCE_SHEET_KEYS.loan)
+  const {
+    open: openInstitutionSheet,
+    sheetId: institutionSheetId,
+    setOpen: setOpenInstitutionSheet,
+  } = useSheetParam(FINANCE_SHEET_KEYS.institution)
+  const {
+    open: openAccountSheet,
+    sheetId: accountSheetId,
+    setOpen: setOpenAccountSheet,
+  } = useSheetParam(FINANCE_SHEET_KEYS.account)
+  const {
+    open: openCardSheet,
+    sheetId: cardSheetId,
+    setOpen: setOpenCardSheet,
+  } = useSheetParam(FINANCE_SHEET_KEYS.card)
+  const {
+    open: openCardBalanceSheet,
+    sheetId: cardBalanceSheetId,
+    setOpen: setOpenCardBalanceSheet,
+  } = useSheetParam(FINANCE_SHEET_KEYS.cardBalance)
+  const {
+    open: openLoanSheet,
+    sheetId: loanSheetId,
+    setOpen: setOpenLoanSheet,
+  } = useSheetParam(FINANCE_SHEET_KEYS.loan)
 
   const institutions = institutionsQuery.data ?? []
   const accounts = accountsQuery.data ?? []
@@ -103,7 +119,7 @@ function InstitutionDetailView({ institutionId }: InstitutionDetailClientProps) 
       loans: loansQuery.data ?? [],
     })
     return items.find(
-      (item) => item.kind === "institution" && item.id === institutionId,
+      (item) => item.kind === "institution" && item.id === institutionId
     )
   }, [
     institutionsQuery.data,
@@ -126,22 +142,22 @@ function InstitutionDetailView({ institutionId }: InstitutionDetailClientProps) 
 
   const openMenu = useCallback(
     () => setOpenOptionsSheet(true),
-    [setOpenOptionsSheet],
+    [setOpenOptionsSheet]
   )
 
   const headerActions = useMemo(
     () => (
       <Button
-        variant="ghost"
+        variant="outline"
         size="icon"
         className="size-9 rounded-full"
         aria-label="Opciones de la institución"
         onClick={openMenu}
       >
-        <MoreVerticalIcon />
+        <MoreVerticalIcon className="size-4.5" />
       </Button>
     ),
-    [openMenu],
+    [openMenu]
   )
 
   usePageHeader(
@@ -152,7 +168,7 @@ function InstitutionDetailView({ institutionId }: InstitutionDetailClientProps) 
       actions: headerActions,
       accentColor: accent,
     },
-    [handleBack, institution?.id, institution?.name, accent, headerActions],
+    [handleBack, institution?.id, institution?.name, accent, headerActions]
   )
 
   const isLoading =
@@ -172,21 +188,21 @@ function InstitutionDetailView({ institutionId }: InstitutionDetailClientProps) 
     institutionSheetId,
     institutionsQuery.data,
     institutionsQuery.isPending,
-    setOpenInstitutionSheet,
+    setOpenInstitutionSheet
   )
   const editingAccount = useSheetListEntity(
     openAccountSheet,
     accountSheetId,
     accountsQuery.data,
     accountsQuery.isPending,
-    setOpenAccountSheet,
+    setOpenAccountSheet
   )
   const editingCard = useSheetListEntity(
     openCardSheet,
     cardSheetId,
     cardsQuery.data,
     cardsQuery.isPending,
-    setOpenCardSheet,
+    setOpenCardSheet
   )
   const balancingCard = useSheetListEntity(
     openCardBalanceSheet,
@@ -194,14 +210,14 @@ function InstitutionDetailView({ institutionId }: InstitutionDetailClientProps) 
     cardsQuery.data,
     cardsQuery.isPending,
     setOpenCardBalanceSheet,
-    true,
+    true
   )
   const editingLoan = useSheetListEntity(
     openLoanSheet,
     loanSheetId,
     loansQuery.data,
     loansQuery.isPending,
-    setOpenLoanSheet,
+    setOpenLoanSheet
   )
 
   if (isLoading && !institution) {
@@ -248,9 +264,9 @@ function InstitutionDetailView({ institutionId }: InstitutionDetailClientProps) 
 
       <div className="-mx-4 -mt-4 overflow-hidden md:-mx-6">
         <div
-          className="px-4 pb-10 pt-6 text-white md:px-6"
+          className="px-4 pt-6 pb-10 text-white md:px-6"
           style={{
-            background: accentSurfaceGradient(accent),
+            background: accent,
           }}
         >
           <div className="flex items-start gap-3">
@@ -271,7 +287,7 @@ function InstitutionDetailView({ institutionId }: InstitutionDetailClientProps) 
           </p>
         </div>
 
-        <div className="-mt-4 rounded-t-3xl bg-background px-4 pb-8 pt-4 md:px-6">
+        <div className="-mt-4 rounded-t-3xl bg-background px-4 pt-4 pb-8 md:px-6">
           <InstitutionDetailTabs
             value={tab}
             onChange={setTab}
@@ -343,50 +359,55 @@ function InstitutionDetailView({ institutionId }: InstitutionDetailClientProps) 
         description={institution.name}
       >
         <div className="overflow-hidden rounded-2xl border border-border bg-card">
-          <SettingsRow
-            label="Editar institución"
+          <SummaryItem
+            title="Editar institución"
             icon={PencilIcon}
             onPress={() => setOpenInstitutionSheet(true, institution.id)}
+            className="px-3"
           />
-          <SettingsRow
-            label="Nueva cuenta"
+          <SummaryItem
+            title="Nueva cuenta"
             icon={LandmarkIcon}
             onPress={() => setOpenAccountSheet(true, null)}
+            className="px-3"
           />
-          <SettingsRow
-            label="Nueva tarjeta"
+          <SummaryItem
+            title="Nueva tarjeta"
             icon={CreditCardIcon}
             onPress={() => setOpenCardSheet(true, null)}
+            className="px-3"
           />
-          <SettingsRow
-            label="Nuevo préstamo"
+          <SummaryItem
+            title="Nuevo préstamo"
             icon={HandCoinsIcon}
             onPress={() => setOpenLoanSheet(true, null)}
+            className="px-3"
           />
-          <SettingsRow
-            label="Sincronización"
+          <SummaryItem
+            title="Sincronización"
             description="Conecta bancos y proveedores"
             icon={RefreshCwIcon}
-            onPress={() => router.push(APP_ROUTES.app.financeSync)}
+            href={APP_ROUTES.app.financeSync}
+            showChevron
             isLast
+            className="px-3"
           />
         </div>
       </BottomSheet>
 
       <InstitutionSheet
-        open={
-          openInstitutionSheet &&
-          (!institutionSheetId || Boolean(editingInstitution))
-        }
+        open={openInstitutionSheet}
         onOpenChange={setOpenInstitutionSheet}
+        pending={Boolean(institutionSheetId) && !editingInstitution}
         institution={
           editingInstitution ?? (!institutionSheetId ? institution : null)
         }
       />
 
       <AccountSheet
-        open={openAccountSheet && (!accountSheetId || Boolean(editingAccount))}
+        open={openAccountSheet}
         onOpenChange={setOpenAccountSheet}
+        pending={Boolean(accountSheetId) && !editingAccount}
         account={editingAccount}
         institutions={institutions}
         defaultCurrency={config.baseCurrency}
@@ -394,8 +415,9 @@ function InstitutionDetailView({ institutionId }: InstitutionDetailClientProps) 
       />
 
       <CardSheet
-        open={openCardSheet && (!cardSheetId || Boolean(editingCard))}
+        open={openCardSheet}
         onOpenChange={setOpenCardSheet}
+        pending={Boolean(cardSheetId) && !editingCard}
         card={editingCard}
         institutions={institutions}
         accounts={accounts}
@@ -405,15 +427,17 @@ function InstitutionDetailView({ institutionId }: InstitutionDetailClientProps) 
       />
 
       <CardBalanceSheet
-        open={openCardBalanceSheet && Boolean(balancingCard)}
+        open={openCardBalanceSheet}
         onOpenChange={setOpenCardBalanceSheet}
+        pending={Boolean(cardBalanceSheetId) && !balancingCard}
         card={balancingCard}
         defaultCurrency={config.baseCurrency}
       />
 
       <LoanSheet
-        open={openLoanSheet && (!loanSheetId || Boolean(editingLoan))}
+        open={openLoanSheet}
         onOpenChange={setOpenLoanSheet}
+        pending={Boolean(loanSheetId) && !editingLoan}
         loan={editingLoan}
         accounts={accounts}
         institutions={institutions}

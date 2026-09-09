@@ -1,28 +1,27 @@
 "use client"
 
-import { CategorySheet } from "@/src/modules/finance/components/catalog/category-sheet";
-import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/constants/sheet-keys";
-import { useCategories } from "@/src/modules/finance/hooks/use-categories";
-import { useSheetListEntity } from "@/src/modules/finance/hooks/use-sheet-entity";
+import { CategorySheet } from "@/src/modules/finance/components/catalog/category-sheet"
+import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/constants/sheet-keys"
+import { useCategories } from "@/src/modules/finance/hooks/use-categories"
+import { useSheetListEntity } from "@/src/modules/finance/hooks/use-sheet-entity"
 import {
   type CategoryGroup,
   groupCategoriesByParent,
   isFinanceCategoryEditable,
-} from "@/src/modules/finance/lib/category-tree";
-import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error";
-import type { FinanceCategory } from "@/src/modules/finance/types/entities";
-import { SettingsRow } from "@/src/shared/components/layout/settings-section";
-import { Button } from "@/src/shared/components/ui/button";
+} from "@/src/modules/finance/lib/category-tree"
+import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
+import type { FinanceCategory } from "@/src/modules/finance/types/entities"
+import { Button } from "@/src/shared/components/ui/button"
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@/src/shared/components/ui/collapsible";
-import { Spinner } from "@/src/shared/components/ui/spinner";
-import { SummarySection } from "@/src/shared/components/ui/summary";
-import { useSheetParam } from "@/src/shared/hooks/use-sheet-params";
-import { ChevronDownIcon, PlusIcon, TagsIcon } from "lucide-react";
-import { useMemo } from "react";
+} from "@/src/shared/components/ui/collapsible"
+import { Spinner } from "@/src/shared/components/ui/spinner"
+import { SummaryItem, SummarySection } from "@/src/shared/components/ui/summary"
+import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
+import { ChevronDownIcon, PlusIcon, TagsIcon } from "lucide-react"
+import { useMemo } from "react"
 
 type CategoriesSectionProps = {
   enabled: boolean
@@ -51,8 +50,8 @@ function CategoryRow({
 }) {
   const canEdit = onEdit && isFinanceCategoryEditable(category)
   return (
-    <SettingsRow
-      label={categoryLabel(category)}
+    <SummaryItem
+      title={categoryLabel(category)}
       value={categoryValue(category)}
       accentColor={category.color ?? undefined}
       icon={TagsIcon}
@@ -81,8 +80,8 @@ function CategoryGroupBlock({
     <Collapsible className="group/category">
       <div className="flex items-stretch border-b border-border/60 last:border-b-0">
         <div className="min-w-0 flex-1">
-          <SettingsRow
-            label={categoryLabel(category)}
+          <SummaryItem
+            title={categoryLabel(category)}
             value={categoryValue(category)}
             accentColor={category.color ?? undefined}
             icon={TagsIcon}
@@ -124,7 +123,7 @@ export function FinanceCategoriesSection({
   const categories = categoriesQuery.data ?? []
   const groups = useMemo(
     () => groupCategoriesByParent(categoriesQuery.data ?? []),
-    [categoriesQuery.data],
+    [categoriesQuery.data]
   )
   const {
     open: openCategorySheet,
@@ -136,7 +135,7 @@ export function FinanceCategoriesSection({
     categorySheetId,
     categoriesQuery.data,
     categoriesQuery.isPending,
-    setOpenCategorySheet,
+    setOpenCategorySheet
   )
 
   const errorMessage = categoriesQuery.error
@@ -195,14 +194,13 @@ export function FinanceCategoriesSection({
       ) : (
         <SummarySection title="Categorías" icon={TagsIcon} right={createButton}>
           {body}
-          </SummarySection>
+        </SummarySection>
       )}
 
       <CategorySheet
-        open={
-          openCategorySheet && (!categorySheetId || Boolean(editing))
-        }
+        open={openCategorySheet}
         onOpenChange={setOpenCategorySheet}
+        pending={Boolean(categorySheetId) && !editing}
         category={editing}
         categories={categories}
       />

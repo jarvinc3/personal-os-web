@@ -1,43 +1,44 @@
 "use client"
 
-import { useAccounts } from "@/src/modules/finance/hooks/use-accounts";
-import { useAnalyticsSummary } from "@/src/modules/finance/hooks/use-analytics";
-import { useCategories } from "@/src/modules/finance/hooks/use-categories";
-import { useFinanceEnabled } from "@/src/modules/finance/hooks/use-finance-enabled";
-import { useTransactions } from "@/src/modules/finance/hooks/use-transactions";
-import { financeDashboardRange } from "@/src/modules/finance/lib/dashboard-period";
-import { deriveFrequentExpenses } from "@/src/modules/finance/lib/finance-home";
-import type { FinanceTransactionType } from "@/src/modules/finance/types/entities";
+import { useAccounts } from "@/src/modules/finance/hooks/use-accounts"
+import { useAnalyticsSummary } from "@/src/modules/finance/hooks/use-analytics"
+import { useCategories } from "@/src/modules/finance/hooks/use-categories"
+import { useFinanceEnabled } from "@/src/modules/finance/hooks/use-finance-enabled"
+import { useTransactions } from "@/src/modules/finance/hooks/use-transactions"
+import { financeDashboardRange } from "@/src/modules/finance/lib/dashboard-period"
+import { deriveFrequentExpenses } from "@/src/modules/finance/lib/finance-home"
+import type { FinanceTransactionType } from "@/src/modules/finance/types/entities"
 import {
   formatFinanceMoney,
   parseFinanceMoney,
-} from "@/src/modules/finance/lib/money";
-import { APP_ROUTES } from "@/src/shared/constants/app-routes";
-import {
-  BarChart3Icon,
-} from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useCallback, useMemo, useState } from "react";
-import { FinanceHomeHero } from "./finance-home-hero";
+} from "@/src/modules/finance/lib/money"
+import { APP_ROUTES } from "@/src/shared/constants/app-routes"
+import { BarChart3Icon } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { useCallback, useMemo, useState } from "react"
+import { FinanceHomeHero } from "./finance-home-hero"
 import {
   FrequentExpensesSection,
   RecentTransactionsSection,
-} from "./finance-home-sections";
-import { SettingsRow, SettingsSection } from "@/src/shared/components/layout/settings-section";
-import ExpenseIncomeForm from "../transactions/expense-income-form";
+} from "./finance-home-sections"
+import { SettingsSection } from "@/src/shared/components/layout/settings-section"
+import { SummaryItem } from "@/src/shared/components/ui/summary"
+import ExpenseIncomeForm from "../transactions/expense-income-form"
 
 type QuickTransactionType = Exclude<FinanceTransactionType, "TRANSFER">
 
 export function FinanceOverview() {
   const router = useRouter()
   const { isEnabled, config } = useFinanceEnabled()
-  const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null)
+  const [selectedAccountId, setSelectedAccountId] = useState<string | null>(
+    null
+  )
   const [quickTransactionType, setQuickTransactionType] =
     useState<QuickTransactionType>("DEBIT")
   const [quickTransactionOpen, setQuickTransactionOpen] = useState(false)
   const range = useMemo(
     () => financeDashboardRange(config.dashboardPeriod, config.weekStartsOn),
-    [config.dashboardPeriod, config.weekStartsOn],
+    [config.dashboardPeriod, config.weekStartsOn]
   )
   const display = {
     currency: config.baseCurrency,
@@ -70,23 +71,23 @@ export function FinanceOverview() {
 
   const accounts = useMemo(
     () => (accountsQuery.data ?? []).filter((account) => account.isActive),
-    [accountsQuery.data],
+    [accountsQuery.data]
   )
   const selectedAccount = useMemo(
     () => accounts.find((account) => account.id === selectedAccountId) ?? null,
-    [accounts, selectedAccountId],
+    [accounts, selectedAccountId]
   )
   const homeBalance = selectedAccount
     ? {
-      label: `Saldo de ${selectedAccount.name}`,
-      amount: selectedAccount.balance,
-      currency: selectedAccount.currency,
-    }
+        label: `Saldo de ${selectedAccount.name}`,
+        amount: selectedAccount.balance,
+        currency: selectedAccount.currency,
+      }
     : {
-      label: "Patrimonio neto",
-      amount: summaryQuery.data?.netWorth,
-      currency: moneyDisplay.currency,
-    }
+        label: "Patrimonio neto",
+        amount: summaryQuery.data?.netWorth,
+        currency: moneyDisplay.currency,
+      }
   const balanceFormatted = formatFinanceMoney(homeBalance.amount, {
     ...display,
     currency: homeBalance.currency,
@@ -94,32 +95,36 @@ export function FinanceOverview() {
   const pendingHold = (pendingTransactionsQuery.data?.items ?? []).reduce(
     (sum, transaction) =>
       sum + (parseFinanceMoney(transaction.amountBaseCurrency) ?? 0),
-    0,
+    0
   )
   const pendingHoldLabel =
     pendingHold > 0
-      ? `Retenido ${formatFinanceMoney(pendingHold, moneyDisplay)}` : undefined;
+      ? `Retenido ${formatFinanceMoney(pendingHold, moneyDisplay)}`
+      : undefined
   const cashFlowLabel = summaryQuery.data
-    ? `Flujo ${formatFinanceMoney(summaryQuery.data.cashFlow, moneyDisplay)}` : undefined;
+    ? `Flujo ${formatFinanceMoney(summaryQuery.data.cashFlow, moneyDisplay)}`
+    : undefined
   const recentTransactions = recentTransactionsQuery.data?.items ?? []
   const frequentExpenses = useMemo(
     () =>
       deriveFrequentExpenses(
         frequentTransactionsQuery.data?.items ?? [],
-        categoriesQuery.data ?? [],
+        categoriesQuery.data ?? []
       ),
-    [frequentTransactionsQuery.data?.items, categoriesQuery.data],
+    [frequentTransactionsQuery.data?.items, categoriesQuery.data]
   )
 
   const cycleAccount = useCallback(() => {
     setSelectedAccountId((currentId) => {
       if (accounts.length === 0) return null
       if (!currentId) return accounts[0]?.id ?? null
-      const currentIndex = accounts.findIndex((account) => account.id === currentId)
+      const currentIndex = accounts.findIndex(
+        (account) => account.id === currentId
+      )
       if (currentIndex < 0) return accounts[0]?.id ?? null
       return currentIndex === accounts.length - 1
         ? null
-        : accounts[currentIndex + 1]?.id ?? null
+        : (accounts[currentIndex + 1]?.id ?? null)
     })
   }, [accounts])
   const goToTransactions = useCallback(() => {
@@ -166,12 +171,14 @@ export function FinanceOverview() {
       />
 
       <SettingsSection title="Atajos">
-        <SettingsRow
-          label="Estadísticas"
+        <SummaryItem
+          title="Estadísticas"
           description="Graficos de resumenes financieros"
           icon={BarChart3Icon}
-          onPress={() => router.push(APP_ROUTES.app.financeStatistics)}
+          href={APP_ROUTES.app.financeStatistics}
+          showChevron
           isLast
+          className="px-3"
         />
       </SettingsSection>
     </div>

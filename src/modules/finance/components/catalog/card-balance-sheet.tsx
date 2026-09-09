@@ -1,26 +1,26 @@
 "use client"
 
-import { CurrencySelectField } from "@/src/modules/finance/components/catalog/currency-select-field";
-import { useUpdateCardBalance } from "@/src/modules/finance/hooks/use-cards";
+import { CurrencySelectField } from "@/src/modules/finance/components/catalog/currency-select-field"
+import { useUpdateCardBalance } from "@/src/modules/finance/hooks/use-cards"
 import {
   buildCardBalanceBody,
   nextUnusedCurrency,
-} from "@/src/modules/finance/lib/catalog-payloads";
-import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error";
-import type { FinanceCard } from "@/src/modules/finance/types/entities";
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet";
-import { FormTextField } from "@/src/shared/components/layout/form-blocks";
-import { Button } from "@/src/shared/components/ui/button";
-import { Spinner } from "@/src/shared/components/ui/spinner";
-import { SummarySection } from "@/src/shared/components/ui/summary";
-import { appToast } from "@/src/shared/lib/app-toast";
-import { createSheetSubmit } from "@/src/shared/lib/sheet-form";
-import { cn } from "@/src/shared/lib/utils";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { PlusIcon, WalletIcon } from "lucide-react";
-import { useMemo, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
-import { z } from "zod";
+} from "@/src/modules/finance/lib/catalog-payloads"
+import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
+import type { FinanceCard } from "@/src/modules/finance/types/entities"
+import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+import { FormTextField } from "@/src/shared/components/layout/form-blocks"
+import { Button } from "@/src/shared/components/ui/button"
+import { Spinner } from "@/src/shared/components/ui/spinner"
+import { SummarySection } from "@/src/shared/components/ui/summary"
+import { appToast } from "@/src/shared/lib/app-toast"
+import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
+import { cn } from "@/src/shared/lib/utils"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { PlusIcon, WalletIcon } from "lucide-react"
+import { useMemo, useState } from "react"
+import { Controller, useForm } from "react-hook-form"
+import { z } from "zod"
 
 const schema = z.object({
   currency: z.string().trim().min(3, "Moneda obligatoria").max(3),
@@ -31,15 +31,11 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>
 
 type BalanceMode =
-  | { kind: "edit"; currency: string }
-  | { kind: "add"; currency: string }
+  { kind: "edit"; currency: string } | { kind: "add"; currency: string }
 
-function toFormValues(
-  card: FinanceCard | null,
-  mode: BalanceMode,
-): FormValues {
+function toFormValues(card: FinanceCard | null, mode: BalanceMode): FormValues {
   const existing = card?.balances.find(
-    (item) => item.currency === mode.currency,
+    (item) => item.currency === mode.currency
   )
   return {
     currency: existing?.currency ?? mode.currency,
@@ -48,7 +44,10 @@ function toFormValues(
   }
 }
 
-function initialMode(card: FinanceCard | null, defaultCurrency: string): BalanceMode {
+function initialMode(
+  card: FinanceCard | null,
+  defaultCurrency: string
+): BalanceMode {
   const primary = card?.balances[0]
   if (primary) {
     return { kind: "edit", currency: primary.currency }
@@ -61,6 +60,7 @@ type CardBalanceSheetProps = {
   onOpenChange: (open: boolean) => void
   card: FinanceCard | null
   defaultCurrency: string
+  pending?: boolean
 }
 
 export function CardBalanceSheet({
@@ -68,6 +68,7 @@ export function CardBalanceSheet({
   onOpenChange,
   card,
   defaultCurrency,
+  pending = false,
 }: CardBalanceSheetProps) {
   return (
     <CardBalanceSheetForm
@@ -76,6 +77,7 @@ export function CardBalanceSheet({
       onOpenChange={onOpenChange}
       card={card}
       defaultCurrency={defaultCurrency}
+      pending={pending}
     />
   )
 }
@@ -85,10 +87,11 @@ function CardBalanceSheetForm({
   onOpenChange,
   card,
   defaultCurrency,
+  pending = false,
 }: CardBalanceSheetProps) {
   const mutation = useUpdateCardBalance()
   const [mode, setMode] = useState<BalanceMode>(() =>
-    initialMode(card, defaultCurrency),
+    initialMode(card, defaultCurrency)
   )
   const existingCurrencies = (card?.balances ?? []).map((item) => item.currency)
   const {
@@ -118,7 +121,7 @@ function CardBalanceSheetForm({
 
   const submitForm = useMemo(
     () => createSheetSubmit(handleSubmit),
-    [handleSubmit],
+    [handleSubmit]
   )
 
   const onSubmit = submitForm(async (values) => {
@@ -126,7 +129,7 @@ function CardBalanceSheetForm({
     if (
       mode.kind === "add" &&
       existingCurrencies.some(
-        (code) => code.toUpperCase() === values.currency.toUpperCase(),
+        (code) => code.toUpperCase() === values.currency.toUpperCase()
       )
     ) {
       appToast.error({ text1: "Cada moneda solo puede usarse una vez" })
@@ -140,8 +143,7 @@ function CardBalanceSheetForm({
     try {
       await mutation.mutateAsync({ id: card.id, body: payload.body })
       appToast.success({
-        text1:
-          mode.kind === "add" ? "Moneda agregada" : "Saldo actualizado",
+        text1: mode.kind === "add" ? "Moneda agregada" : "Saldo actualizado",
       })
       onOpenChange(false)
     } catch (error) {
@@ -155,6 +157,7 @@ function CardBalanceSheetForm({
     <BottomSheet
       open={open}
       onOpenChange={onOpenChange}
+      pending={pending}
       title={card ? `Saldos · ${card.name}` : "Saldos de tarjeta"}
       description="Puedes actualizar un saldo existente o agregar otra moneda. El API espera números en el body."
       actions={{
@@ -189,11 +192,11 @@ function CardBalanceSheetForm({
               "flex w-full items-center justify-between rounded-xl border px-3 py-2 text-left text-sm",
               !isAdding && mode.currency === item.currency
                 ? "border-primary bg-primary/10"
-                : "border-border bg-card",
+                : "border-border bg-card"
             )}
           >
             <span className="font-medium">{item.currency}</span>
-            <span className="tabular-nums text-muted-foreground">
+            <span className="text-muted-foreground tabular-nums">
               {item.balance}
             </span>
           </button>

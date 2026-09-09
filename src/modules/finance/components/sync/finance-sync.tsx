@@ -1,29 +1,28 @@
 "use client"
 
-import { AssignEmailMessageSheet } from "@/src/modules/finance/components/sync/assign-email-message-sheet";
-import { ConnectGmailSheet } from "@/src/modules/finance/components/sync/connect-gmail-sheet";
-import { EmailSourceSheet } from "@/src/modules/finance/components/sync/email-source-sheet";
-import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/constants/sheet-keys";
-import { useAccounts } from "@/src/modules/finance/hooks/use-accounts";
-import { useCards } from "@/src/modules/finance/hooks/use-cards";
+import { AssignEmailMessageSheet } from "@/src/modules/finance/components/sync/assign-email-message-sheet"
+import { ConnectGmailSheet } from "@/src/modules/finance/components/sync/connect-gmail-sheet"
+import { EmailSourceSheet } from "@/src/modules/finance/components/sync/email-source-sheet"
+import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/constants/sheet-keys"
+import { useAccounts } from "@/src/modules/finance/hooks/use-accounts"
+import { useCards } from "@/src/modules/finance/hooks/use-cards"
 import {
   useEmailSources,
   usePendingEmailMessages,
-} from "@/src/modules/finance/hooks/use-email-sources";
-import { useFinanceEnabled } from "@/src/modules/finance/hooks/use-finance-enabled";
-import { useInstitutions } from "@/src/modules/finance/hooks/use-institutions";
-import { useSheetListEntity } from "@/src/modules/finance/hooks/use-sheet-entity";
-import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error";
+} from "@/src/modules/finance/hooks/use-email-sources"
+import { useFinanceEnabled } from "@/src/modules/finance/hooks/use-finance-enabled"
+import { useInstitutions } from "@/src/modules/finance/hooks/use-institutions"
+import { useSheetListEntity } from "@/src/modules/finance/hooks/use-sheet-entity"
+import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
 import {
   parseOAuthSuccessParam,
   type GmailOAuthNextPath,
-} from "@/src/modules/finance/lib/gmail-oauth";
+} from "@/src/modules/finance/lib/gmail-oauth"
 import type {
   FinanceEmailSource,
   FinancePendingEmailMessage,
-} from "@/src/modules/finance/types/entities";
-import { SettingsRow } from "@/src/shared/components/layout/settings-section";
-import { Button } from "@/src/shared/components/ui/button";
+} from "@/src/modules/finance/types/entities"
+import { Button } from "@/src/shared/components/ui/button"
 import {
   Empty,
   EmptyContent,
@@ -31,14 +30,14 @@ import {
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
-} from "@/src/shared/components/ui/empty";
-import { Spinner } from "@/src/shared/components/ui/spinner";
-import { SummarySection } from "@/src/shared/components/ui/summary";
-import { APP_ROUTES } from "@/src/shared/constants/app-routes";
-import { useSheetParam } from "@/src/shared/hooks/use-sheet-params";
-import { InboxIcon, MailIcon, PlusIcon } from "lucide-react";
-import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+} from "@/src/shared/components/ui/empty"
+import { Spinner } from "@/src/shared/components/ui/spinner"
+import { SummaryItem, SummarySection } from "@/src/shared/components/ui/summary"
+import { APP_ROUTES } from "@/src/shared/constants/app-routes"
+import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
+import { InboxIcon, MailIcon, PlusIcon } from "lucide-react"
+import Link from "next/link"
+import { useSearchParams } from "next/navigation"
 
 type FinanceSyncListProps = {
   enabled: boolean
@@ -111,7 +110,7 @@ export function FinanceSyncList({
     sourcesQuery.data,
     sourcesQuery.isPending,
     setOpenSourceSheet,
-    true,
+    true
   )
   const assigning = useSheetListEntity(
     openAssignSheet,
@@ -119,18 +118,18 @@ export function FinanceSyncList({
     pendingQuery.data,
     pendingQuery.isPending,
     setOpenAssignSheet,
-    true,
+    true
   )
 
   return (
     <>
       {oauthState === "error" ? (
-        <p className="p-3 text-sm rounded-xl border border-destructive/40 bg-destructive/10 text-destructive">
+        <p className="rounded-xl border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
           No se pudo conectar Gmail. Vuelve a intentar; no se importó nada.
         </p>
       ) : null}
       {oauthState === "ok" ? (
-        <p className="p-3 text-sm rounded-xl border border-border bg-card">
+        <p className="rounded-xl border border-border bg-card p-3 text-sm">
           Gmail quedó conectado a la institución. Lanza un sync cuando quieras.
         </p>
       ) : null}
@@ -139,10 +138,7 @@ export function FinanceSyncList({
         <p className="text-sm text-destructive">{errorMessage}</p>
       ) : null}
 
-      <SummarySection
-        title="Movimientos por asignar"
-        icon={InboxIcon}
-      >
+      <SummarySection title="Movimientos por asignar" icon={InboxIcon}>
         {pendingQuery.isPending && !pendingQuery.data ? (
           <div className="flex justify-center p-6">
             <Spinner />
@@ -153,9 +149,11 @@ export function FinanceSyncList({
           </p>
         ) : (
           pending.map((message, index) => (
-            <SettingsRow
+            <SummaryItem
               key={message.id}
-              label={message.extractedPayload?.merchant ?? message.gmailMessageId}
+              title={
+                message.extractedPayload?.merchant ?? message.gmailMessageId
+              }
               value={pendingRowValue(message)}
               icon={InboxIcon}
               onPress={() => setOpenAssignSheet(true, message.id)}
@@ -212,7 +210,9 @@ export function FinanceSyncList({
                 </Button>
               ) : (
                 <Button asChild>
-                  <Link href={APP_ROUTES.app.financeAccounts}>Ir a Cuentas</Link>
+                  <Link href={APP_ROUTES.app.financeAccounts}>
+                    Ir a Cuentas
+                  </Link>
                 </Button>
               )}
             </EmptyContent>
@@ -220,8 +220,8 @@ export function FinanceSyncList({
         ) : (
           visibleSources.map((source, index) => (
             <div key={source.id}>
-              <SettingsRow
-                label={source.label || source.emailAddress}
+              <SummaryItem
+                title={source.label || source.emailAddress}
                 value={sourceRowValue(source)}
                 icon={MailIcon}
                 onPress={() => setOpenSourceSheet(true, source.id)}
@@ -247,15 +247,17 @@ export function FinanceSyncList({
         emailSyncEnabled={emailSyncEnabled}
       />
       <EmailSourceSheet
-        open={openSourceSheet && Boolean(editing)}
+        open={openSourceSheet}
         onOpenChange={setOpenSourceSheet}
+        pending={Boolean(sourceSheetId) && !editing}
         source={editing}
         institutions={institutions}
         emailSyncEnabled={emailSyncEnabled}
       />
       <AssignEmailMessageSheet
-        open={openAssignSheet && Boolean(assigning)}
+        open={openAssignSheet}
         onOpenChange={setOpenAssignSheet}
+        pending={Boolean(assignSheetId) && !assigning}
         message={assigning}
         accounts={accounts}
         cards={cards}

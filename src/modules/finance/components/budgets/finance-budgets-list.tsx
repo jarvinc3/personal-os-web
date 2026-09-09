@@ -1,43 +1,42 @@
 "use client"
 
-import { BudgetSheet } from "@/src/modules/finance/components/budgets/budget-sheet";
-import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/constants/sheet-keys";
-import { useBudget, useBudgets } from "@/src/modules/finance/hooks/use-budgets";
-import { useCategories } from "@/src/modules/finance/hooks/use-categories";
-import { useSheetQueryEntity } from "@/src/modules/finance/hooks/use-sheet-entity";
-import { budgetPctUsed } from "@/src/modules/finance/lib/budget-payloads";
+import { BudgetSheet } from "@/src/modules/finance/components/budgets/budget-sheet"
+import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/constants/sheet-keys"
+import { useBudget, useBudgets } from "@/src/modules/finance/hooks/use-budgets"
+import { useCategories } from "@/src/modules/finance/hooks/use-categories"
+import { useSheetQueryEntity } from "@/src/modules/finance/hooks/use-sheet-entity"
+import { budgetPctUsed } from "@/src/modules/finance/lib/budget-payloads"
 import {
   budgetsFromPayload,
   FINANCE_BUDGET_PAGE_SIZE,
   formatBudgetPeriodDate,
-} from "@/src/modules/finance/lib/budgets-query";
-import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error";
-import type { FinanceMoneyDisplay } from "@/src/modules/finance/lib/money";
-import { formatFinanceMoney } from "@/src/modules/finance/lib/money";
+} from "@/src/modules/finance/lib/budgets-query"
+import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
+import type { FinanceMoneyDisplay } from "@/src/modules/finance/lib/money"
+import { formatFinanceMoney } from "@/src/modules/finance/lib/money"
 import {
   FINANCE_BUDGET_PERIOD_LABEL,
   type FinanceBudget,
-} from "@/src/modules/finance/types/entities";
-import { SettingsRow } from "@/src/shared/components/layout/settings-section";
-import { Button } from "@/src/shared/components/ui/button";
+} from "@/src/modules/finance/types/entities"
+import { Button } from "@/src/shared/components/ui/button"
 import {
   Empty,
   EmptyDescription,
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
-} from "@/src/shared/components/ui/empty";
-import { Separator } from "@/src/shared/components/ui/separator";
-import { Spinner } from "@/src/shared/components/ui/spinner";
-import { SummarySection } from "@/src/shared/components/ui/summary";
-import { useSheetParam } from "@/src/shared/hooks/use-sheet-params";
+} from "@/src/shared/components/ui/empty"
+import { Separator } from "@/src/shared/components/ui/separator"
+import { Spinner } from "@/src/shared/components/ui/spinner"
+import { SummaryItem, SummarySection } from "@/src/shared/components/ui/summary"
+import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
   PiggyBankIcon,
   PlusIcon,
-} from "lucide-react";
-import { useState } from "react";
+} from "lucide-react"
+import { useState } from "react"
 
 type FinanceBudgetsListProps = {
   enabled: boolean
@@ -58,7 +57,7 @@ function BudgetUsageBar({
 }) {
   const width = Math.min(100, Math.max(0, pct))
   return (
-    <div className="overflow-hidden w-full h-2 rounded-full bg-muted">
+    <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
       <div
         className="h-full rounded-full bg-primary"
         style={{ width: `${width}%`, backgroundColor: color ?? undefined }}
@@ -91,7 +90,7 @@ export function FinanceBudgetsList({
     : null
   const budgetQuery = useBudget(
     enabled && openBudgetSheet && Boolean(budgetSheetId) && !listedEditing,
-    budgetSheetId,
+    budgetSheetId
   )
   const editing = useSheetQueryEntity(
     openBudgetSheet,
@@ -99,7 +98,7 @@ export function FinanceBudgetsList({
     listedEditing
       ? { data: listedEditing, isPending: false, isError: false }
       : budgetQuery,
-    setOpenBudgetSheet,
+    setOpenBudgetSheet
   )
 
   return (
@@ -147,15 +146,16 @@ export function FinanceBudgetsList({
           items.map((budget, index) => {
             const pct = budgetPctUsed(budget.amountSpent, budget.amountLimit)
             const period =
-              FINANCE_BUDGET_PERIOD_LABEL[budget.periodType] ?? budget.periodType
+              FINANCE_BUDGET_PERIOD_LABEL[budget.periodType] ??
+              budget.periodType
             const range = `${formatBudgetPeriodDate(budget.periodStart)} – ${formatBudgetPeriodDate(budget.periodEnd)}`
             const spent = formatFinanceMoney(budget.amountSpent, display)
             const limit = formatFinanceMoney(budget.amountLimit, display)
             const pctLabel = pct === null ? "—" : `${pct.toFixed(0)}%`
             return (
               <div key={budget.id} className="flex flex-col gap-2">
-                <SettingsRow
-                  label={categoryLabel(budget)}
+                <SummaryItem
+                  title={categoryLabel(budget)}
                   description={`${period} · ${range}`}
                   value={`${spent} / ${limit} · ${pctLabel}`}
                   onPress={() => setOpenBudgetSheet(true, budget.id)}
@@ -172,7 +172,7 @@ export function FinanceBudgetsList({
         <Separator />
 
         {listQuery.isSuccess ? (
-          <div className="flex gap-3 justify-between items-center">
+          <div className="flex items-center justify-between gap-3">
             <Button
               type="button"
               variant="outline"
@@ -201,8 +201,9 @@ export function FinanceBudgetsList({
       </SummarySection>
 
       <BudgetSheet
-        open={openBudgetSheet && (!budgetSheetId || Boolean(editing))}
+        open={openBudgetSheet}
         onOpenChange={setOpenBudgetSheet}
+        pending={Boolean(budgetSheetId) && !editing}
         budget={editing}
         categories={categories}
       />

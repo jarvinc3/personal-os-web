@@ -1,24 +1,26 @@
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import { useCallback, useEffect, useMemo, useState } from "react"
 
 import {
+  mergeOptimisticSheetParam,
+  readSheetSearch,
   resolveSheetNavigation,
-  SHEET_ID_QUERY_KEY,
+  type OptimisticSheetParam,
   SHEET_QUERY_KEY,
-} from "@/src/shared/lib/sheet-navigation";
+} from "@/src/shared/lib/sheet-navigation"
 
-const sheetPushedByPath = new Map<string, boolean>();
+const sheetPushedByPath = new Map<string, boolean>()
 
 function markSheetPushed(pathname: string) {
-  sheetPushedByPath.set(pathname, true);
+  sheetPushedByPath.set(pathname, true)
 }
 
 function clearSheetPushed(pathname: string) {
-  sheetPushedByPath.delete(pathname);
+  sheetPushedByPath.delete(pathname)
 }
 
 function wasSheetPushed(pathname: string) {
-  return sheetPushedByPath.get(pathname) === true;
+  return sheetPushedByPath.get(pathname) === true
 }
 
 function navigateSheetUrl(
@@ -27,7 +29,7 @@ function navigateSheetUrl(
   searchParams: { get(name: string): string | null; toString(): string },
   sheetKey: string,
   open: boolean,
-  id?: string | null,
+  id?: string | null
 ) {
   const decision = resolveSheetNavigation({
     pathname,
@@ -36,47 +38,67 @@ function navigateSheetUrl(
     open,
     id,
     wasPushed: wasSheetPushed(pathname),
-  });
+  })
 
   switch (decision.action) {
     case "noop":
-      return;
+      return
     case "push":
-      markSheetPushed(pathname);
-      router.push(decision.url);
-      return;
+      markSheetPushed(pathname)
+      router.push(decision.url)
+      return
     case "replace":
-      router.replace(decision.url);
-      return;
+      router.replace(decision.url)
+      return
     case "back":
-      clearSheetPushed(pathname);
-      router.back();
+      clearSheetPushed(pathname)
+      router.back()
   }
 }
 
 export function useSheetParam(key: string) {
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const pathname = usePathname();
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const pathname = usePathname()
+  const [optimistic, setOptimistic] = useState<OptimisticSheetParam | null>(
+    null
+  )
 
-  const open = searchParams.get(SHEET_QUERY_KEY) === key;
-  const sheetId = open ? searchParams.get(SHEET_ID_QUERY_KEY) : null;
+  const url = useMemo(() => readSheetSearch(searchParams), [searchParams])
+  const merged = useMemo(
+    () => mergeOptimisticSheetParam(key, url, optimistic),
+    [key, url, optimistic]
+  )
+
+  if (optimistic !== null && merged.dropOptimistic) {
+    setOptimistic(null)
+  }
 
   useEffect(() => {
     if (searchParams.get(SHEET_QUERY_KEY) === null) {
-      clearSheetPushed(pathname);
+      clearSheetPushed(pathname)
     }
-  }, [searchParams, pathname]);
+  }, [searchParams, pathname])
 
   const setOpen = useCallback(
     (value: boolean, id?: string | null) => {
-      navigateSheetUrl(router, pathname, searchParams, key, value, id);
+      const from = readSheetSearch(searchParams)
+      const current = mergeOptimisticSheetParam(key, from, optimistic)
+      setOptimistic({
+        open: value,
+        sheetId: id === undefined ? current.sheetId : id,
+        from,
+      })
+      navigateSheetUrl(router, pathname, searchParams, key, value, id)
     },
-    [searchParams, key, router, pathname],
-  );
+    [searchParams, key, router, pathname, optimistic]
+  )
 
-  return { open, sheetId, setOpen };
+  return { open: merged.open, sheetId: merged.sheetId, setOpen }
 }
 
-export { navigateSheetUrl };
-export { SHEET_ID_QUERY_KEY, SHEET_QUERY_KEY } from "@/src/shared/lib/sheet-navigation";
+export { navigateSheetUrl }
+export {
+  SHEET_ID_QUERY_KEY,
+  SHEET_QUERY_KEY,
+} from "@/src/shared/lib/sheet-navigation"
