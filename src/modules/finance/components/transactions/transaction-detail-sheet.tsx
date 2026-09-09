@@ -17,9 +17,10 @@ import {
   type FinanceTransactionType,
 } from "@/src/modules/finance/types/entities"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
-import { SettingsRow, SettingsSection } from "@/src/shared/components/layout/settings-section"
+import { SettingsSection } from "@/src/shared/components/layout/settings-section"
 import { Button } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
+import { SummaryItem } from "@/src/shared/components/ui/summary"
 import { appToast } from "@/src/shared/lib/app-toast"
 
 type TransactionDetailSheetProps = {
@@ -92,7 +93,7 @@ export function TransactionDetailSheet({
   async function onDelete() {
     if (!tx) return
     const confirmed = window.confirm(
-      "¿Eliminar este movimiento? No se puede deshacer.",
+      "¿Eliminar este movimiento? No se puede deshacer."
     )
     if (!confirmed) return
     try {
@@ -153,50 +154,63 @@ export function TransactionDetailSheet({
       ) : tx ? (
         <>
           <SettingsSection title="Detalle">
-            <SettingsRow
-              label="Monto"
+            <SummaryItem
+              title="Monto"
               value={formatFinanceMoney(tx.amount, {
                 ...display,
                 currency: tx.currency,
               })}
               isLast={false}
+              className="px-3"
             />
-            <SettingsRow
-              label="En moneda base"
+            <SummaryItem
+              title="En moneda base"
               value={formatFinanceMoney(tx.amountBaseCurrency, display)}
               isLast={false}
+              className="px-3"
             />
-            <SettingsRow label="Tipo" value={typeLabel(tx.type)} isLast={false} />
-            <SettingsRow
-              label="Estado"
+            <SummaryItem
+              title="Tipo"
+              value={typeLabel(tx.type)}
+              isLast={false}
+              className="px-3"
+            />
+            <SummaryItem
+              title="Estado"
               value={FINANCE_TRANSACTION_STATUS_LABEL[tx.status] ?? tx.status}
               isLast={false}
+              className="px-3"
             />
-            <SettingsRow
-              label="Cuenta"
+            <SummaryItem
+              title="Cuenta"
               value={tx.accountName ?? "—"}
               isLast={false}
+              className="px-3"
             />
-            <SettingsRow
-              label="Tarjeta"
+            <SummaryItem
+              title="Tarjeta"
               value={tx.cardName ?? "—"}
               isLast={false}
+              className="px-3"
             />
-            <SettingsRow
-              label="Comercio"
+            <SummaryItem
+              title="Comercio"
               value={tx.merchant ?? "—"}
               isLast={false}
+              className="px-3"
             />
-            <SettingsRow
-              label="Descripción"
+            <SummaryItem
+              title="Descripción"
               value={tx.description ?? "—"}
               isLast={!tx.transferGroupId}
+              className="px-3"
             />
             {tx.transferGroupId ? (
-              <SettingsRow
-                label="Grupo de transferencia"
+              <SummaryItem
+                title="Grupo de transferencia"
                 value={tx.transferGroupId}
                 isLast
+                className="px-3"
               />
             ) : null}
           </SettingsSection>

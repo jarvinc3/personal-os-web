@@ -1,25 +1,25 @@
 "use client"
 
-import { AccountSheet } from "@/src/modules/finance/components/catalog/account-sheet";
-import { FinanceAuthenticatedPage } from "@/src/modules/finance/components/layout/finance-authenticated-page";
-import { FINANCE_ACCOUNT_TYPE_LABEL } from "@/src/modules/finance/constants/catalog";
-import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/constants/sheet-keys";
-import { useAccounts } from "@/src/modules/finance/hooks/use-accounts";
-import { useFinanceEnabled } from "@/src/modules/finance/hooks/use-finance-enabled";
-import { useInstitutions } from "@/src/modules/finance/hooks/use-institutions";
-import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error";
-import { formatFinanceMoney } from "@/src/modules/finance/lib/money";
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet";
-import { LoadingView } from "@/src/shared/components/layout/loading-view";
-import { SettingsRow } from "@/src/shared/components/layout/settings-section";
-import { Button } from "@/src/shared/components/ui/button";
-import { APP_ROUTES } from "@/src/shared/constants/app-routes";
-import { usePageHeader } from "@/src/shared/hooks/use-page-header";
-import { useSheetParam } from "@/src/shared/hooks/use-sheet-params";
-import { accentSurfaceGradient } from "@/src/shared/lib/accent-gradient";
-import { MoreVerticalIcon, PencilIcon, WalletIcon } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useCallback, useMemo } from "react";
+import { AccountSheet } from "@/src/modules/finance/components/catalog/account-sheet"
+import { FinanceAuthenticatedPage } from "@/src/modules/finance/components/layout/finance-authenticated-page"
+import { FINANCE_ACCOUNT_TYPE_LABEL } from "@/src/modules/finance/constants/catalog"
+import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/constants/sheet-keys"
+import { useAccounts } from "@/src/modules/finance/hooks/use-accounts"
+import { useFinanceEnabled } from "@/src/modules/finance/hooks/use-finance-enabled"
+import { useInstitutions } from "@/src/modules/finance/hooks/use-institutions"
+import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
+import { formatFinanceMoney } from "@/src/modules/finance/lib/money"
+import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+import { LoadingView } from "@/src/shared/components/layout/loading-view"
+import { Button } from "@/src/shared/components/ui/button"
+import { SummaryItem } from "@/src/shared/components/ui/summary"
+import { APP_ROUTES } from "@/src/shared/constants/app-routes"
+import { usePageHeader } from "@/src/shared/hooks/use-page-header"
+import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
+import { accentSurfaceGradient } from "@/src/shared/lib/accent-gradient"
+import { MoreVerticalIcon, PencilIcon, WalletIcon } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { useCallback, useMemo } from "react"
 
 const FALLBACK_COLOR = "#334155"
 
@@ -64,7 +64,7 @@ function CashAccountDetailView({ accountId }: CashAccountDetailClientProps) {
 
   const openMenu = useCallback(
     () => setOpenOptionsSheet(true),
-    [setOpenOptionsSheet],
+    [setOpenOptionsSheet]
   )
 
   const headerActions = useMemo(
@@ -79,7 +79,7 @@ function CashAccountDetailView({ accountId }: CashAccountDetailClientProps) {
         <MoreVerticalIcon />
       </Button>
     ),
-    [openMenu],
+    [openMenu]
   )
 
   usePageHeader(
@@ -90,7 +90,7 @@ function CashAccountDetailView({ accountId }: CashAccountDetailClientProps) {
       actions: headerActions,
       accentColor: accent,
     },
-    [account?.id, account?.name, accent, handleBack, headerActions],
+    [account?.id, account?.name, accent, handleBack, headerActions]
   )
 
   if (accountsQuery.isPending && !account) {
@@ -124,7 +124,7 @@ function CashAccountDetailView({ accountId }: CashAccountDetailClientProps) {
 
       <div className="-mx-4 -mt-4 overflow-hidden md:-mx-6">
         <div
-          className="px-4 pb-10 pt-6 text-white md:px-6"
+          className="px-4 pt-6 pb-10 text-white md:px-6"
           style={{
             background: accentSurfaceGradient(accent),
           }}
@@ -150,7 +150,7 @@ function CashAccountDetailView({ accountId }: CashAccountDetailClientProps) {
           </p>
         </div>
 
-        <div className="-mt-4 rounded-t-3xl bg-background px-4 pb-8 pt-6 md:px-6">
+        <div className="-mt-4 rounded-t-3xl bg-background px-4 pt-6 pb-8 md:px-6">
           <Button
             variant="outline"
             className="w-full"
@@ -169,11 +169,12 @@ function CashAccountDetailView({ accountId }: CashAccountDetailClientProps) {
         description={account.name}
       >
         <div className="overflow-hidden rounded-2xl border border-border bg-card">
-          <SettingsRow
-            label="Editar cuenta"
+          <SummaryItem
+            title="Editar cuenta"
             icon={PencilIcon}
             onPress={() => setOpenAccountSheet(true)}
             isLast
+            className="px-3"
           />
         </div>
       </BottomSheet>

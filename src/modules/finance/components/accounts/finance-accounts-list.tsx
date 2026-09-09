@@ -1,24 +1,21 @@
 "use client"
 
-import { InstitutionSwapStack } from "@/src/modules/finance/components/accounts/institution-swap-stack";
-import { InstitutionSheet } from "@/src/modules/finance/components/accounts/institution-sheet";
-import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/constants/sheet-keys";
-import { useAccounts } from "@/src/modules/finance/hooks/use-accounts";
-import { useAnalyticsSummary } from "@/src/modules/finance/hooks/use-analytics";
-import { useCards } from "@/src/modules/finance/hooks/use-cards";
-import { useFinanceEnabled } from "@/src/modules/finance/hooks/use-finance-enabled";
-import { useInstitutions } from "@/src/modules/finance/hooks/use-institutions";
-import { useLoans } from "@/src/modules/finance/hooks/use-loans";
-import { financeDashboardRange } from "@/src/modules/finance/lib/dashboard-period";
-import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error";
-import { buildInstitutionStackItems } from "@/src/modules/finance/lib/institution-stack";
-import type { FinanceMoneyDisplay } from "@/src/modules/finance/lib/money";
-import { formatFinanceMoney } from "@/src/modules/finance/lib/money";
-import {
-  SettingsRow,
-  SettingsSection,
-} from "@/src/shared/components/layout/settings-section";
-import { Button } from "@/src/shared/components/ui/button";
+import { InstitutionSwapStack } from "@/src/modules/finance/components/accounts/institution-swap-stack"
+import { InstitutionSheet } from "@/src/modules/finance/components/accounts/institution-sheet"
+import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/constants/sheet-keys"
+import { useAccounts } from "@/src/modules/finance/hooks/use-accounts"
+import { useAnalyticsSummary } from "@/src/modules/finance/hooks/use-analytics"
+import { useCards } from "@/src/modules/finance/hooks/use-cards"
+import { useFinanceEnabled } from "@/src/modules/finance/hooks/use-finance-enabled"
+import { useInstitutions } from "@/src/modules/finance/hooks/use-institutions"
+import { useLoans } from "@/src/modules/finance/hooks/use-loans"
+import { financeDashboardRange } from "@/src/modules/finance/lib/dashboard-period"
+import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
+import { buildInstitutionStackItems } from "@/src/modules/finance/lib/institution-stack"
+import type { FinanceMoneyDisplay } from "@/src/modules/finance/lib/money"
+import { formatFinanceMoney } from "@/src/modules/finance/lib/money"
+import { SettingsSection } from "@/src/shared/components/layout/settings-section"
+import { Button } from "@/src/shared/components/ui/button"
 import {
   Empty,
   EmptyContent,
@@ -26,13 +23,14 @@ import {
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
-} from "@/src/shared/components/ui/empty";
-import { Spinner } from "@/src/shared/components/ui/spinner";
-import { APP_ROUTES } from "@/src/shared/constants/app-routes";
-import { useSheetParam } from "@/src/shared/hooks/use-sheet-params";
-import { Building2Icon, PlusIcon, TagsIcon } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useMemo } from "react";
+} from "@/src/shared/components/ui/empty"
+import { Spinner } from "@/src/shared/components/ui/spinner"
+import { SummaryItem } from "@/src/shared/components/ui/summary"
+import { APP_ROUTES } from "@/src/shared/constants/app-routes"
+import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
+import { Building2Icon, PlusIcon, TagsIcon } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { useMemo } from "react"
 
 type FinanceAccountsListProps = {
   enabled: boolean
@@ -48,7 +46,7 @@ export function FinanceAccountsList({
   const { config } = useFinanceEnabled()
   const range = useMemo(
     () => financeDashboardRange(config.dashboardPeriod, config.weekStartsOn),
-    [config.dashboardPeriod, config.weekStartsOn],
+    [config.dashboardPeriod, config.weekStartsOn]
   )
   const institutionsQuery = useInstitutions(enabled)
   const accountsQuery = useAccounts(enabled)
@@ -71,14 +69,14 @@ export function FinanceAccountsList({
       accountsQuery.data,
       cardsQuery.data,
       loansQuery.data,
-    ],
+    ]
   )
 
   const netWorthLabel = summaryQuery.data
     ? formatFinanceMoney(summaryQuery.data.netWorth, {
-      ...display,
-      currency: summaryQuery.data.baseCurrency ?? display.currency,
-    })
+        ...display,
+        currency: summaryQuery.data.baseCurrency ?? display.currency,
+      })
     : "—"
 
   const errorMessage = useMemo(() => {
@@ -108,10 +106,10 @@ export function FinanceAccountsList({
       ) : null}
 
       <div className="flex flex-col items-center gap-1 px-2 pb-2">
-        <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
+        <p className="text-[11px] font-medium tracking-[0.16em] text-muted-foreground uppercase">
           Balance total
         </p>
-        <p className="text-3xl font-bold tracking-tight tabular-nums text-foreground">
+        <p className="text-3xl font-bold tracking-tight text-foreground tabular-nums">
           {summaryQuery.isPending && !summaryQuery.data ? "…" : netWorthLabel}
         </p>
       </div>
@@ -155,12 +153,14 @@ export function FinanceAccountsList({
       </div>
 
       <SettingsSection title="Atajos">
-        <SettingsRow
-          label="Categorías"
+        <SummaryItem
+          title="Categorías"
           description="Organiza gastos e ingresos"
           icon={TagsIcon}
-          onPress={() => router.push(APP_ROUTES.app.financeCategories)}
+          href={APP_ROUTES.app.financeCategories}
+          showChevron
           isLast
+          className="px-3"
         />
       </SettingsSection>
 
@@ -168,7 +168,7 @@ export function FinanceAccountsList({
         type="button"
         size="icon-lg"
         aria-label="Nueva institución"
-        className="fixed right-4 z-50 size-14 rounded-full shadow-xl bottom-[calc(6rem+env(safe-area-inset-bottom))] md:bottom-8"
+        className="fixed right-4 bottom-[calc(6rem+env(safe-area-inset-bottom))] z-50 size-14 rounded-full shadow-xl md:bottom-8"
         onClick={() => setOpenInstitutionSheet(true, null)}
       >
         <PlusIcon className="size-6" />

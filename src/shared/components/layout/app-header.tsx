@@ -24,7 +24,6 @@ import { Separator } from "@/src/shared/components/ui/separator"
 import { SidebarTrigger } from "@/src/shared/components/ui/sidebar"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { useHeaderContext } from "@/src/shared/context/header-context"
-import { accentSurfaceGradient } from "@/src/shared/lib/accent-gradient"
 import { cn } from "@/src/shared/lib/utils"
 import { useAppStore } from "@/src/shared/store/app-store"
 import {
@@ -76,13 +75,13 @@ function HeaderBackButton({
 }) {
   return (
     <Button
-      variant="ghost"
+      variant="outline"
       size="icon"
       className={cn("size-9 rounded-full", className)}
       onClick={onBack}
       aria-label="Volver"
     >
-      <ChevronLeftIcon />
+      <ChevronLeftIcon className="size-4.5" />
     </Button>
   )
 }
@@ -325,7 +324,7 @@ export function AppHeader() {
       )}
       style={
         accentColor
-          ? { backgroundImage: accentSurfaceGradient(accentColor) }
+          ? { background: accentColor }
           : undefined
       }
     >

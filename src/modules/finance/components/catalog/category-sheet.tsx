@@ -1,31 +1,31 @@
 "use client"
 
-import { CATALOG_NONE } from "@/src/modules/finance/constants/catalog";
+import { CATALOG_NONE } from "@/src/modules/finance/constants/catalog"
 import {
   useCreateCategory,
   useDeleteCategory,
   useUpdateCategory,
-} from "@/src/modules/finance/hooks/use-categories";
-import { buildCreateCategoryBody } from "@/src/modules/finance/lib/catalog-payloads";
-import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error";
-import type { FinanceCategory } from "@/src/modules/finance/types/entities";
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet";
+} from "@/src/modules/finance/hooks/use-categories"
+import { buildCreateCategoryBody } from "@/src/modules/finance/lib/catalog-payloads"
+import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
+import type { FinanceCategory } from "@/src/modules/finance/types/entities"
+import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
 import {
   FormTextField,
   SelectField,
-} from "@/src/shared/components/layout/form-blocks";
-import { Button } from "@/src/shared/components/ui/button";
-import { ColorPickerSwatch } from "@/src/shared/components/ui/color-picker";
-import { Label } from "@/src/shared/components/ui/label";
-import { Spinner } from "@/src/shared/components/ui/spinner";
-import { SummarySection } from "@/src/shared/components/ui/summary";
-import { appToast } from "@/src/shared/lib/app-toast";
-import { createSheetSubmit } from "@/src/shared/lib/sheet-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Palette, TagsIcon } from "lucide-react";
-import { useEffect, useMemo } from "react";
-import { Controller, useForm } from "react-hook-form";
-import { z } from "zod";
+} from "@/src/shared/components/layout/form-blocks"
+import { Button } from "@/src/shared/components/ui/button"
+import { ColorPickerSwatch } from "@/src/shared/components/ui/color-picker"
+import { Label } from "@/src/shared/components/ui/label"
+import { Spinner } from "@/src/shared/components/ui/spinner"
+import { SummarySection } from "@/src/shared/components/ui/summary"
+import { appToast } from "@/src/shared/lib/app-toast"
+import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { Palette, TagsIcon } from "lucide-react"
+import { useEffect, useMemo } from "react"
+import { Controller, useForm } from "react-hook-form"
+import { z } from "zod"
 
 const schema = z.object({
   name: z.string().trim().min(1, "Nombre obligatorio").max(80),
@@ -50,6 +50,7 @@ type CategorySheetProps = {
   onOpenChange: (open: boolean) => void
   category: FinanceCategory | null
   categories: FinanceCategory[]
+  pending?: boolean
 }
 
 export function CategorySheet({
@@ -57,6 +58,7 @@ export function CategorySheet({
   onOpenChange,
   category,
   categories,
+  pending = false,
 }: CategorySheetProps) {
   const isEdit = Boolean(category)
   const isSystem = Boolean(category?.isSystem)
@@ -78,7 +80,7 @@ export function CategorySheet({
           label: `${item.icon ? `${item.icon} ` : ""}${item.name}`,
         })),
     ],
-    [categories, category?.id],
+    [categories, category?.id]
   )
 
   const {
@@ -99,7 +101,7 @@ export function CategorySheet({
 
   const submitForm = useMemo(
     () => createSheetSubmit(handleSubmit),
-    [handleSubmit],
+    [handleSubmit]
   )
 
   const onSubmit = submitForm(async (values) => {
@@ -110,7 +112,10 @@ export function CategorySheet({
     }
     try {
       if (category) {
-        await updateMutation.mutateAsync({ id: category.id, body: payload.body })
+        await updateMutation.mutateAsync({
+          id: category.id,
+          body: payload.body,
+        })
         appToast.success({ text1: "Categoría actualizada" })
       } else {
         await createMutation.mutateAsync(payload.body)
@@ -137,6 +142,7 @@ export function CategorySheet({
     <BottomSheet
       open={open}
       onOpenChange={onOpenChange}
+      pending={pending}
       title={
         isEdit
           ? isSystem
@@ -150,15 +156,16 @@ export function CategorySheet({
           : "Usa un emoji como icono."
       }
       actions={{
-        delete: isEdit && !isSystem ? (
-          <Button
-            variant="destructive"
-            disabled={isPending}
-            onClick={() => void onDelete()}
-          >
-            Eliminar
-          </Button>
-        ) : undefined,
+        delete:
+          isEdit && !isSystem ? (
+            <Button
+              variant="destructive"
+              disabled={isPending}
+              onClick={() => void onDelete()}
+            >
+              Eliminar
+            </Button>
+          ) : undefined,
         close: (
           <Button
             variant="outline"

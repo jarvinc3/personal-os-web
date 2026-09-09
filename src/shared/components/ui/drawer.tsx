@@ -1,9 +1,9 @@
 "use client"
 
-import * as React from "react";
-import { Drawer as DrawerPrimitive } from "vaul";
+import * as React from "react"
+import { Drawer as DrawerPrimitive } from "vaul"
 
-import { cn } from '@/src/shared/lib/utils';
+import { cn } from "@/src/shared/lib/utils"
 
 function isNestedPortaledEvent(event: { target: EventTarget | null }) {
   const target = event.target
@@ -12,8 +12,8 @@ function isNestedPortaledEvent(event: { target: EventTarget | null }) {
   }
   return Boolean(
     target.closest('[data-slot="select-content"]') ||
-      target.closest('[data-slot="select-positioner"]') ||
-      target.closest('[data-slot="popover-content"]'),
+    target.closest('[data-slot="select-positioner"]') ||
+    target.closest('[data-slot="popover-content"]')
   )
 }
 
@@ -70,7 +70,7 @@ function DrawerContent({
       <DrawerPrimitive.Content
         data-slot="drawer-content"
         className={cn(
-          "group/drawer-content fixed z-50 flex h-auto flex-col bg-background text-sm data-[vaul-drawer-direction=bottom]:inset-x-0 data-[vaul-drawer-direction=bottom]:bottom-0 data-[vaul-drawer-direction=bottom]:mt-24 data-[vaul-drawer-direction=bottom]:max-h-[93vh] data-[vaul-drawer-direction=bottom]:rounded-t-xl data-[vaul-drawer-direction=bottom]:border-t data-[vaul-drawer-direction=left]:inset-y-0 data-[vaul-drawer-direction=left]:left-0 data-[vaul-drawer-direction=left]:w-3/4 data-[vaul-drawer-direction=left]:rounded-r-xl data-[vaul-drawer-direction=left]:border-r data-[vaul-drawer-direction=right]:inset-y-0 data-[vaul-drawer-direction=right]:right-0 data-[vaul-drawer-direction=right]:w-3/4 data-[vaul-drawer-direction=right]:rounded-l-xl data-[vaul-drawer-direction=right]:border-l data-[vaul-drawer-direction=top]:inset-x-0 data-[vaul-drawer-direction=top]:top-0 data-[vaul-drawer-direction=top]:mb-24 data-[vaul-drawer-direction=top]:max-h-[80vh] data-[vaul-drawer-direction=top]:rounded-b-xl data-[vaul-drawer-direction=top]:border-b data-[vaul-drawer-direction=left]:sm:max-w-sm data-[vaul-drawer-direction=right]:sm:max-w-sm",
+          "group/drawer-content fixed z-50 flex h-auto flex-col bg-background text-sm duration-300 data-[vaul-drawer-direction=bottom]:inset-x-0 data-[vaul-drawer-direction=bottom]:bottom-0 data-[vaul-drawer-direction=bottom]:mt-24 data-[vaul-drawer-direction=bottom]:max-h-[93vh] data-[vaul-drawer-direction=bottom]:rounded-t-xl data-[vaul-drawer-direction=bottom]:border-t data-[vaul-drawer-direction=left]:inset-y-0 data-[vaul-drawer-direction=left]:left-0 data-[vaul-drawer-direction=left]:w-3/4 data-[vaul-drawer-direction=left]:rounded-r-xl data-[vaul-drawer-direction=left]:border-r data-[vaul-drawer-direction=right]:inset-y-0 data-[vaul-drawer-direction=right]:right-0 data-[vaul-drawer-direction=right]:w-3/4 data-[vaul-drawer-direction=right]:rounded-l-xl data-[vaul-drawer-direction=right]:border-l data-[vaul-drawer-direction=top]:inset-x-0 data-[vaul-drawer-direction=top]:top-0 data-[vaul-drawer-direction=top]:mb-24 data-[vaul-drawer-direction=top]:max-h-[80vh] data-[vaul-drawer-direction=top]:rounded-b-xl data-[vaul-drawer-direction=top]:border-b data-[vaul-drawer-direction=left]:sm:max-w-sm data-[vaul-drawer-direction=right]:sm:max-w-sm data-open:animate-in data-[vaul-drawer-direction=bottom]:data-open:slide-in-from-bottom data-[vaul-drawer-direction=left]:data-open:slide-in-from-left data-[vaul-drawer-direction=right]:data-open:slide-in-from-right data-[vaul-drawer-direction=top]:data-open:slide-in-from-top data-closed:animate-out data-[vaul-drawer-direction=bottom]:data-closed:slide-out-to-bottom data-[vaul-drawer-direction=left]:data-closed:slide-out-to-left data-[vaul-drawer-direction=right]:data-closed:slide-out-to-right data-[vaul-drawer-direction=top]:data-closed:slide-out-to-top",
           className
         )}
         onPointerDownOutside={(event) => {
@@ -111,7 +111,7 @@ function DrawerFooter({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="drawer-footer"
-      className={cn("flex flex-col gap-2 p-3 mt-auto", className)}
+      className={cn("mt-auto flex flex-col gap-2 p-3", className)}
       {...props}
     />
   )
@@ -144,7 +144,14 @@ function DrawerDescription({
 }
 
 export {
-  Drawer, DrawerClose,
-  DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerOverlay, DrawerPortal, DrawerTitle, DrawerTrigger
-};
-
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerOverlay,
+  DrawerPortal,
+  DrawerTitle,
+  DrawerTrigger,
+}

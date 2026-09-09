@@ -1,28 +1,30 @@
 "use client"
 
-import { LoanSheet } from "@/src/modules/finance/components/planning/loan-sheet";
-import { ReceivableSheet } from "@/src/modules/finance/components/planning/receivable-sheet";
-import { SavingsGoalSheet } from "@/src/modules/finance/components/planning/savings-goal-sheet";
-import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/constants/sheet-keys";
-import { useAccounts } from "@/src/modules/finance/hooks/use-accounts";
-import { useInstitutions } from "@/src/modules/finance/hooks/use-institutions";
-import { useLoans } from "@/src/modules/finance/hooks/use-loans";
-import { useReceivables } from "@/src/modules/finance/hooks/use-receivables";
-import { useSavingsGoals } from "@/src/modules/finance/hooks/use-savings-goals";
-import { useSheetListEntity } from "@/src/modules/finance/hooks/use-sheet-entity";
-import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error";
-import { formatRatePercentLabel } from "@/src/modules/finance/lib/interest-rate";
-import type { FinanceMoneyDisplay } from "@/src/modules/finance/lib/money";
-import { formatFinanceMoney, parseFinanceMoney } from "@/src/modules/finance/lib/money";
-import { formatPlanningDate } from "@/src/modules/finance/lib/planning-lists";
+import { LoanSheet } from "@/src/modules/finance/components/planning/loan-sheet"
+import { ReceivableSheet } from "@/src/modules/finance/components/planning/receivable-sheet"
+import { SavingsGoalSheet } from "@/src/modules/finance/components/planning/savings-goal-sheet"
+import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/constants/sheet-keys"
+import { useAccounts } from "@/src/modules/finance/hooks/use-accounts"
+import { useInstitutions } from "@/src/modules/finance/hooks/use-institutions"
+import { useLoans } from "@/src/modules/finance/hooks/use-loans"
+import { useReceivables } from "@/src/modules/finance/hooks/use-receivables"
+import { useSavingsGoals } from "@/src/modules/finance/hooks/use-savings-goals"
+import { useSheetListEntity } from "@/src/modules/finance/hooks/use-sheet-entity"
+import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
+import { formatRatePercentLabel } from "@/src/modules/finance/lib/interest-rate"
+import type { FinanceMoneyDisplay } from "@/src/modules/finance/lib/money"
+import {
+  formatFinanceMoney,
+  parseFinanceMoney,
+} from "@/src/modules/finance/lib/money"
+import { formatPlanningDate } from "@/src/modules/finance/lib/planning-lists"
 import type {
   FinanceLoan,
   FinanceReceivable,
   FinanceSavingsGoal,
-} from "@/src/modules/finance/types/entities";
-import { FINANCE_RECEIVABLE_STATUS_LABEL } from "@/src/modules/finance/types/entities";
-import { SettingsRow } from "@/src/shared/components/layout/settings-section";
-import { Button } from "@/src/shared/components/ui/button";
+} from "@/src/modules/finance/types/entities"
+import { FINANCE_RECEIVABLE_STATUS_LABEL } from "@/src/modules/finance/types/entities"
+import { Button } from "@/src/shared/components/ui/button"
 import {
   Empty,
   EmptyContent,
@@ -30,18 +32,18 @@ import {
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
-} from "@/src/shared/components/ui/empty";
-import { Spinner } from "@/src/shared/components/ui/spinner";
-import { SummarySection } from "@/src/shared/components/ui/summary";
-import { useSheetParam } from "@/src/shared/hooks/use-sheet-params";
+} from "@/src/shared/components/ui/empty"
+import { Spinner } from "@/src/shared/components/ui/spinner"
+import { SummaryItem, SummarySection } from "@/src/shared/components/ui/summary"
+import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import {
   HandshakeIcon,
   LandmarkIcon,
   PiggyBankIcon,
   PlusIcon,
-} from "lucide-react";
-import { useMemo } from "react";
-import { FinanceBudgetsList } from "../budgets/finance-budgets-list";
+} from "lucide-react"
+import { useMemo } from "react"
+import { FinanceBudgetsList } from "../budgets/finance-budgets-list"
 
 type FinancePlanningListProps = {
   enabled: boolean
@@ -51,7 +53,7 @@ type FinancePlanningListProps = {
 
 function savingsRowValue(
   goal: FinanceSavingsGoal,
-  display: FinanceMoneyDisplay,
+  display: FinanceMoneyDisplay
 ): string {
   const current = formatFinanceMoney(goal.currentAmount, display)
   const target = formatFinanceMoney(goal.targetAmount, display)
@@ -71,7 +73,7 @@ function loanRowValue(loan: FinanceLoan, display: FinanceMoneyDisplay): string {
 
 function receivableRowValue(
   item: FinanceReceivable,
-  display: FinanceMoneyDisplay,
+  display: FinanceMoneyDisplay
 ): string {
   const amount = formatFinanceMoney(item.amount, {
     ...display,
@@ -82,9 +84,9 @@ function receivableRowValue(
   const remaining =
     paid !== null && total !== null
       ? formatFinanceMoney(total - paid, {
-        ...display,
-        currency: item.currency,
-      })
+          ...display,
+          currency: item.currency,
+        })
       : "—"
   const status = FINANCE_RECEIVABLE_STATUS_LABEL[item.status] ?? item.status
   return `${amount} · ${status} · resta ${remaining}`
@@ -95,10 +97,16 @@ export function FinancePlanningList({
   display,
   defaultCurrency,
 }: FinancePlanningListProps) {
-  const { open: openSavingsSheet, sheetId: savingsSheetId, setOpen: setOpenSavingsSheet } =
-    useSheetParam(FINANCE_SHEET_KEYS.savings)
-  const { open: openLoanSheet, sheetId: loanSheetId, setOpen: setOpenLoanSheet } =
-    useSheetParam(FINANCE_SHEET_KEYS.loan)
+  const {
+    open: openSavingsSheet,
+    sheetId: savingsSheetId,
+    setOpen: setOpenSavingsSheet,
+  } = useSheetParam(FINANCE_SHEET_KEYS.savings)
+  const {
+    open: openLoanSheet,
+    sheetId: loanSheetId,
+    setOpen: setOpenLoanSheet,
+  } = useSheetParam(FINANCE_SHEET_KEYS.loan)
   const {
     open: openReceivableSheet,
     sheetId: receivableSheetId,
@@ -127,21 +135,21 @@ export function FinancePlanningList({
     savingsSheetId,
     savingsQuery.data,
     savingsQuery.isPending,
-    setOpenSavingsSheet,
+    setOpenSavingsSheet
   )
   const editingLoan = useSheetListEntity(
     openLoanSheet,
     loanSheetId,
     loansQuery.data,
     loansQuery.isPending,
-    setOpenLoanSheet,
+    setOpenLoanSheet
   )
   const editingReceivable = useSheetListEntity(
     openReceivableSheet,
     receivableSheetId,
     receivablesQuery.data,
     receivablesQuery.isPending,
-    setOpenReceivableSheet,
+    setOpenReceivableSheet
   )
 
   return (
@@ -188,9 +196,9 @@ export function FinancePlanningList({
           </Empty>
         ) : (
           savings.map((goal, index) => (
-            <SettingsRow
+            <SummaryItem
               key={goal.id}
-              label={goal.name}
+              title={goal.name}
               value={savingsRowValue(goal, {
                 ...display,
                 currency: goal.currency,
@@ -241,9 +249,9 @@ export function FinancePlanningList({
           </Empty>
         ) : (
           loans.map((loan, index) => (
-            <SettingsRow
+            <SummaryItem
               key={loan.id}
-              label={loan.lenderName}
+              title={loan.lenderName}
               value={loanRowValue(loan, display)}
               icon={LandmarkIcon}
               onPress={() => setOpenLoanSheet(true, loan.id)}
@@ -284,18 +292,16 @@ export function FinancePlanningList({
               </EmptyDescription>
             </EmptyHeader>
             <EmptyContent>
-              <Button
-                onClick={() => setOpenReceivableSheet(true, null)}
-              >
+              <Button onClick={() => setOpenReceivableSheet(true, null)}>
                 Crear cobro
               </Button>
             </EmptyContent>
           </Empty>
         ) : (
           receivables.map((item, index) => (
-            <SettingsRow
+            <SummaryItem
               key={item.id}
-              label={item.debtorName}
+              title={item.debtorName}
               value={receivableRowValue(item, display)}
               icon={HandshakeIcon}
               onPress={() => setOpenReceivableSheet(true, item.id)}
@@ -305,21 +311,20 @@ export function FinancePlanningList({
         )}
       </SummarySection>
 
-      <FinanceBudgetsList
-        enabled={enabled}
-        display={display}
-      />
+      <FinanceBudgetsList enabled={enabled} display={display} />
 
       <SavingsGoalSheet
-        open={openSavingsSheet && (!savingsSheetId || Boolean(editingGoal))}
+        open={openSavingsSheet}
         onOpenChange={setOpenSavingsSheet}
+        pending={Boolean(savingsSheetId) && !editingGoal}
         goal={editingGoal}
         defaultCurrency={defaultCurrency}
       />
 
       <LoanSheet
-        open={openLoanSheet && (!loanSheetId || Boolean(editingLoan))}
+        open={openLoanSheet}
         onOpenChange={setOpenLoanSheet}
+        pending={Boolean(loanSheetId) && !editingLoan}
         loan={editingLoan}
         accounts={accounts}
         institutions={institutions}
@@ -327,11 +332,9 @@ export function FinancePlanningList({
       />
 
       <ReceivableSheet
-        open={
-          openReceivableSheet &&
-          (!receivableSheetId || Boolean(editingReceivable))
-        }
+        open={openReceivableSheet}
         onOpenChange={setOpenReceivableSheet}
+        pending={Boolean(receivableSheetId) && !editingReceivable}
         receivable={editingReceivable}
         defaultCurrency={defaultCurrency}
       />

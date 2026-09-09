@@ -1,25 +1,25 @@
 "use client"
 
-import { TransactionDetailSheet } from "@/src/modules/finance/components/transactions/transaction-detail-sheet";
+import { TransactionDetailSheet } from "@/src/modules/finance/components/transactions/transaction-detail-sheet"
 import {
   countActiveTransactionFilters,
   INITIAL_TRANSACTION_FILTERS,
   TransactionFiltersSheet,
   type TransactionFilterState,
-} from "@/src/modules/finance/components/transactions/transaction-filters-sheet";
-import { TransactionSheet } from "@/src/modules/finance/components/transactions/transaction-sheet";
-import { TransferSheet } from "@/src/modules/finance/components/transactions/transfer-sheet";
-import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/constants/sheet-keys";
-import { useAccounts } from "@/src/modules/finance/hooks/use-accounts";
-import { useCards } from "@/src/modules/finance/hooks/use-cards";
-import { useSheetQueryEntity } from "@/src/modules/finance/hooks/use-sheet-entity";
+} from "@/src/modules/finance/components/transactions/transaction-filters-sheet"
+import { TransactionSheet } from "@/src/modules/finance/components/transactions/transaction-sheet"
+import { TransferSheet } from "@/src/modules/finance/components/transactions/transfer-sheet"
+import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/constants/sheet-keys"
+import { useAccounts } from "@/src/modules/finance/hooks/use-accounts"
+import { useCards } from "@/src/modules/finance/hooks/use-cards"
+import { useSheetQueryEntity } from "@/src/modules/finance/hooks/use-sheet-entity"
 import {
   useTransaction,
   useTransactions,
-} from "@/src/modules/finance/hooks/use-transactions";
-import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error";
-import type { FinanceMoneyDisplay } from "@/src/modules/finance/lib/money";
-import { formatFinanceMoney } from "@/src/modules/finance/lib/money";
+} from "@/src/modules/finance/hooks/use-transactions"
+import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
+import type { FinanceMoneyDisplay } from "@/src/modules/finance/lib/money"
+import { formatFinanceMoney } from "@/src/modules/finance/lib/money"
 import {
   FINANCE_TX_FILTER_ALL,
   FINANCE_TX_PAGE_SIZE,
@@ -27,7 +27,7 @@ import {
   transactionsFromPayload,
   visibleTransactionTotals,
   type FinanceTransactionsQuery,
-} from "@/src/modules/finance/lib/transactions-query";
+} from "@/src/modules/finance/lib/transactions-query"
 import {
   FINANCE_TRANSACTION_STATUS_LABEL,
   FINANCE_TRANSACTION_STATUSES,
@@ -35,29 +35,32 @@ import {
   FINANCE_TRANSACTION_TYPES,
   type FinanceTransactionStatus,
   type FinanceTransactionType,
-} from "@/src/modules/finance/types/entities";
-import { ExpandableFab } from "@/src/shared/components/layout/expandable-fab";
-import { FilterSearchToolbar } from "@/src/shared/components/layout/filters";
-import { SettingsRow } from "@/src/shared/components/layout/settings-section";
-import { Button } from "@/src/shared/components/ui/button";
+} from "@/src/modules/finance/types/entities"
+import { ExpandableFab } from "@/src/shared/components/layout/expandable-fab"
+import { FilterSearchToolbar } from "@/src/shared/components/layout/filters"
+import { Button } from "@/src/shared/components/ui/button"
 import {
   Empty,
   EmptyDescription,
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
-} from "@/src/shared/components/ui/empty";
-import { Spinner } from "@/src/shared/components/ui/spinner";
-import { SummarySection } from "@/src/shared/components/ui/summary";
-import { useSheetParam } from "@/src/shared/hooks/use-sheet-params";
+} from "@/src/shared/components/ui/empty"
+import { Spinner } from "@/src/shared/components/ui/spinner"
+import { SummaryItem, SummarySection } from "@/src/shared/components/ui/summary"
+import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
+import { cn } from "@/src/shared/lib/utils"
 import {
+  ArrowDownLeftIcon,
   ArrowLeftRightIcon,
+  ArrowRightLeftIcon,
+  ArrowUpRightIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
   MinusIcon,
   PlusIcon,
-} from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+} from "lucide-react"
+import { useEffect, useMemo, useState } from "react"
 
 type FinanceTransactionsListProps = {
   enabled: boolean
@@ -74,10 +77,11 @@ export function FinanceTransactionsList({
   const [search, setSearch] = useState("")
   const [debouncedSearch, setDebouncedSearch] = useState("")
   const [filters, setFilters] = useState<TransactionFilterState>(
-    INITIAL_TRANSACTION_FILTERS,
+    INITIAL_TRANSACTION_FILTERS
   )
-  const { open: openFilterSheet, setOpen: setOpenFilterSheet } =
-    useSheetParam(FINANCE_SHEET_KEYS.transactionFilters)
+  const { open: openFilterSheet, setOpen: setOpenFilterSheet } = useSheetParam(
+    FINANCE_SHEET_KEYS.transactionFilters
+  )
   const {
     open: openDetailSheet,
     sheetId: detailSheetId,
@@ -134,7 +138,7 @@ export function FinanceTransactionsList({
           : (filters.status as FinanceTransactionStatus),
       search: debouncedSearch || undefined,
     }),
-    [page, filters, debouncedSearch],
+    [page, filters, debouncedSearch]
   )
 
   const listQuery = useTransactions(enabled, query)
@@ -143,13 +147,13 @@ export function FinanceTransactionsList({
   const totals = useMemo(() => visibleTransactionTotals(items), [items])
   const editingQuery = useTransaction(
     enabled && openTransactionSheet && Boolean(transactionSheetId),
-    transactionSheetId,
+    transactionSheetId
   )
   const editing = useSheetQueryEntity(
     openTransactionSheet,
     transactionSheetId,
     editingQuery,
-    setOpenTransactionSheet,
+    setOpenTransactionSheet
   )
 
   const accountOptions = [
@@ -196,16 +200,20 @@ export function FinanceTransactionsList({
         onFilterPress={() => setOpenFilterSheet(true)}
       />
 
-      <div className="flex flex-col gap-1 p-3 rounded-xl border border-border bg-card">
-        <div className="flex flex-row justify-between items-center">
-          <p className="text-sm text-muted-foreground">Total movimientos visibles</p>
-          <p className="text-xs text-muted-foreground">{items.length} registros</p>
+      <div className="flex flex-col gap-1 rounded-xl border border-border bg-card p-3">
+        <div className="flex flex-row items-center justify-between">
+          <p className="text-sm text-muted-foreground">
+            Total movimientos visibles
+          </p>
+          <p className="text-xs text-muted-foreground">
+            {items.length} registros
+          </p>
         </div>
-        <div className="flex flex-row justify-between items-center">
-          <p className="text-sm tabular-nums text-success">
+        <div className="flex flex-row items-center justify-between">
+          <p className="text-sm text-success tabular-nums">
             ↑ {formatFinanceMoney(totals.income, display)}
           </p>
-          <p className="text-sm tabular-nums text-destructive">
+          <p className="text-sm text-destructive tabular-nums">
             ↓ {formatFinanceMoney(totals.expenses, display)}
           </p>
         </div>
@@ -230,27 +238,47 @@ export function FinanceTransactionsList({
               </EmptyMedia>
               <EmptyTitle>No hay movimientos</EmptyTitle>
               <EmptyDescription>
-                Crea un movimiento o una transferencia para empezar. Prueba
-                otro periodo si ya tienes filtros activos.
+                Crea un movimiento o una transferencia para empezar. Prueba otro
+                periodo si ya tienes filtros activos.
               </EmptyDescription>
             </EmptyHeader>
           </Empty>
         ) : (
           items.map((tx, index) => {
-            const party = tx.merchant ?? tx.description ?? tx.accountName ?? "Movimiento"
+            const party =
+              tx.merchant ?? tx.description ?? tx.accountName ?? "Movimiento"
             const meta = [
               formatTransactionDate(tx.transactionDate),
               FINANCE_TRANSACTION_TYPE_LABEL[tx.type] ?? tx.type,
               FINANCE_TRANSACTION_STATUS_LABEL[tx.status] ?? tx.status,
             ].join(" · ")
             return (
-              <SettingsRow
+              <SummaryItem
                 key={tx.id}
-                label={party}
-                value={`${meta} · ${formatFinanceMoney(tx.amount, {
-                  ...display,
-                  currency: tx.currency,
-                })}`}
+                title={party}
+                description={meta}
+                leading={
+                  tx.type === "DEBIT" ? (
+                    <ArrowDownLeftIcon className="size-5 text-destructive" />
+                  ) : tx.type === "CREDIT" ? (
+                    <ArrowUpRightIcon className="size-5 text-success" />
+                  ) : tx.type === "TRANSFER" ? (
+                    <ArrowRightLeftIcon className="text-info size-5" />
+                  ) : null
+                }
+                value={
+                  <span
+                    className={cn(
+                      tx.type === "DEBIT" && "text-destructive",
+                      tx.type === "CREDIT" && "text-success"
+                    )}
+                  >
+                    {formatFinanceMoney(tx.amount, {
+                      ...display,
+                      currency: tx.currency,
+                    })}
+                  </span>
+                }
                 onPress={() => setOpenDetailSheet(true, tx.id)}
                 isLast={index === items.length - 1}
               />
@@ -260,7 +288,7 @@ export function FinanceTransactionsList({
       </SummarySection>
 
       {listQuery.isSuccess ? (
-        <div className="flex gap-3 justify-between items-center">
+        <div className="flex items-center justify-between gap-3">
           <Button
             type="button"
             variant="outline"
@@ -287,29 +315,31 @@ export function FinanceTransactionsList({
         </div>
       ) : null}
 
-      <ExpandableFab actions={[
-        {
-          icon: <MinusIcon />,
-          label: "Gasto",
-          onClick: () => setOpenTransactionSheet(true, null),
-          disabled: !enabled || !hasTargets,
-          color: "bg-destructive",
-        },
-        {
-          icon: <PlusIcon />,
-          label: "Ingreso",
-          onClick: () => setOpenTransactionSheet(true, null),
-          disabled: !enabled || !hasTargets,
-          color: "bg-success",
-        },
-        {
-          icon: <ArrowLeftRightIcon />,
-          label: "Transferir",
-          onClick: () => setOpenTransferSheet(true),
-          disabled: !enabled || !canTransfer,
-          color: "bg-blue-500",
-        },
-      ]} />
+      <ExpandableFab
+        actions={[
+          {
+            icon: <MinusIcon />,
+            label: "Gasto",
+            onClick: () => setOpenTransactionSheet(true, null),
+            disabled: !enabled || !hasTargets,
+            color: "bg-destructive",
+          },
+          {
+            icon: <PlusIcon />,
+            label: "Ingreso",
+            onClick: () => setOpenTransactionSheet(true, null),
+            disabled: !enabled || !hasTargets,
+            color: "bg-success",
+          },
+          {
+            icon: <ArrowLeftRightIcon />,
+            label: "Transferir",
+            onClick: () => setOpenTransferSheet(true),
+            disabled: !enabled || !canTransfer,
+            color: "bg-blue-500",
+          },
+        ]}
+      />
 
       <TransactionFiltersSheet
         open={openFilterSheet}
@@ -323,7 +353,7 @@ export function FinanceTransactionsList({
       />
 
       <TransactionDetailSheet
-        open={openDetailSheet && Boolean(detailSheetId)}
+        open={openDetailSheet}
         onOpenChange={setOpenDetailSheet}
         transactionId={detailSheetId}
         enabled={enabled}
@@ -334,11 +364,9 @@ export function FinanceTransactionsList({
       />
 
       <TransactionSheet
-        open={
-          openTransactionSheet &&
-          (!transactionSheetId || Boolean(editing))
-        }
+        open={openTransactionSheet}
         onOpenChange={setOpenTransactionSheet}
+        pending={Boolean(transactionSheetId) && !editing}
         transaction={editing}
         accounts={accounts}
         cards={cards}

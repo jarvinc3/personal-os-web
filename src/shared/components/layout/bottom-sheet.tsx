@@ -6,17 +6,19 @@ import {
   DrawerDescription,
   DrawerFooter,
   DrawerHeader,
-  DrawerTitle
-} from "@/src/shared/components/ui/drawer";
-import { useIsMobile } from "@/src/shared/hooks/use-mobile";
-import { cn } from "@/src/shared/lib/utils";
-import type { ReactNode } from "react";
+  DrawerTitle,
+} from "@/src/shared/components/ui/drawer"
+import { Spinner } from "@/src/shared/components/ui/spinner"
+import { useIsMobile } from "@/src/shared/hooks/use-mobile"
+import { cn } from "@/src/shared/lib/utils"
+import type { ReactNode } from "react"
 
 interface BottomSheetProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   title: string
   description?: string
+  pending?: boolean
   children: ReactNode
   actions?: {
     delete?: ReactNode
@@ -30,6 +32,7 @@ export function BottomSheet({
   onOpenChange,
   title,
   description,
+  pending = false,
   children,
   actions,
 }: BottomSheetProps) {
@@ -39,21 +42,30 @@ export function BottomSheet({
     <Drawer direction={side} open={open} onOpenChange={onOpenChange}>
       <DrawerContent>
         <DrawerHeader className="border-b">
-          <DrawerTitle>{title}</DrawerTitle>
+          <DrawerTitle>{pending ? "Cargando" : title}</DrawerTitle>
           <DrawerDescription
-            className={cn("text-muted-foreground", description ? "":"hidden")}
+            className={cn(
+              "text-muted-foreground",
+              !pending && description ? "" : "hidden"
+            )}
           >
             {description}
           </DrawerDescription>
         </DrawerHeader>
         <div
           data-vaul-no-drag=""
-          className="flex overflow-y-auto flex-col gap-4 p-4 scrollbar-hide"
+          className="scrollbar-hide flex flex-col gap-4 overflow-y-auto p-4"
         >
-          {children}
+          {pending ? (
+            <div className="flex justify-center py-12">
+              <Spinner />
+            </div>
+          ) : (
+            children
+          )}
         </div>
-        {actions && (
-          <DrawerFooter className="flex flex-row gap-2 justify-end w-full border-t">
+        {actions && !pending && (
+          <DrawerFooter className="flex w-full flex-row justify-end gap-2 border-t">
             {actions?.delete && actions?.delete}
             {actions?.close && actions?.close}
             {actions?.submit && actions?.submit}

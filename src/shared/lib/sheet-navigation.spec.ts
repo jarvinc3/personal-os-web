@@ -1,7 +1,10 @@
 import assert from "node:assert/strict"
 import { describe, it } from "node:test"
 
-import { resolveSheetNavigation } from "./sheet-navigation.ts"
+import {
+  mergeOptimisticSheetParam,
+  resolveSheetNavigation,
+} from "./sheet-navigation.ts"
 
 const path = "/finance/accounts"
 
@@ -157,6 +160,73 @@ describe("resolveSheetNavigation", () => {
     assert.deepEqual(result, {
       action: "push",
       url: "/finance/sync?success=true&sheet=email-source-sheet&sheetId=src-1",
+    })
+  })
+})
+
+describe("mergeOptimisticSheetParam", () => {
+  const key = "card-sheet"
+  const closed = { sheetKey: null, sheetId: null }
+  const openCard = { sheetKey: key, sheetId: "c-1" }
+
+  it("uses the URL when there is no optimistic state", () => {
+    const result = mergeOptimisticSheetParam(key, openCard, null)
+    assert.deepEqual(result, {
+      open: true,
+      sheetId: "c-1",
+      dropOptimistic: false,
+    })
+  })
+
+  it("keeps the optimistic open view until the URL catches up", () => {
+    const result = mergeOptimisticSheetParam(key, closed, {
+      open: true,
+      sheetId: "c-1",
+      from: closed,
+    })
+    assert.deepEqual(result, {
+      open: true,
+      sheetId: "c-1",
+      dropOptimistic: false,
+    })
+  })
+
+  it("drops optimistic state once the URL matches the target", () => {
+    const result = mergeOptimisticSheetParam(key, openCard, {
+      open: true,
+      sheetId: "c-1",
+      from: closed,
+    })
+    assert.deepEqual(result, {
+      open: true,
+      sheetId: "c-1",
+      dropOptimistic: true,
+    })
+  })
+
+  it("closes immediately while the URL still shows the previous sheet", () => {
+    const result = mergeOptimisticSheetParam(key, openCard, {
+      open: false,
+      sheetId: "c-1",
+      from: openCard,
+    })
+    assert.deepEqual(result, {
+      open: false,
+      sheetId: "c-1",
+      dropOptimistic: false,
+    })
+  })
+
+  it("yields to the URL after back or another sheet", () => {
+    const result = mergeOptimisticSheetParam(key, closed, {
+      open: true,
+      sheetId: "c-1",
+      from: openCard,
+    })
+    assert.deepEqual(result, {
+      open: false,
+      sheetId: null,
+      dropOptimistic: true,
     })
   })
 })

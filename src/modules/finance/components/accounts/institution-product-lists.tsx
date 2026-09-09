@@ -4,15 +4,15 @@ import {
   FINANCE_ACCOUNT_TYPE_LABEL,
   FINANCE_CARD_NETWORK_LABEL,
   FINANCE_CARD_TYPE_LABEL,
-} from "@/src/modules/finance/constants/catalog";
-import type { FinanceMoneyDisplay } from "@/src/modules/finance/lib/money";
-import { formatFinanceMoney } from "@/src/modules/finance/lib/money";
+} from "@/src/modules/finance/constants/catalog"
+import type { FinanceMoneyDisplay } from "@/src/modules/finance/lib/money"
+import { formatFinanceMoney } from "@/src/modules/finance/lib/money"
 import type {
   FinanceAccount,
   FinanceCard,
   FinanceLoan,
-} from "@/src/modules/finance/types/entities";
-import { Button } from "@/src/shared/components/ui/button";
+} from "@/src/modules/finance/types/entities"
+import { Button } from "@/src/shared/components/ui/button"
 import {
   Empty,
   EmptyContent,
@@ -20,20 +20,21 @@ import {
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
-} from "@/src/shared/components/ui/empty";
+} from "@/src/shared/components/ui/empty"
+import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "@/src/shared/components/ui/tabs";
+} from "@/src/shared/components/ui/tabs"
 import {
   CreditCardIcon,
   HandCoinsIcon,
   LandmarkIcon,
   PiggyBankIcon,
   PlusIcon,
-} from "lucide-react";
+} from "lucide-react"
 
 export type InstitutionDetailTab = "accounts" | "cards" | "loans"
 
@@ -92,7 +93,10 @@ export function AccountProductRow({
     <button
       type="button"
       onClick={onPress}
-      className="flex w-full items-center gap-3 rounded-2xl border border-border bg-card p-4 text-left transition-colors hover:bg-muted/40"
+      className={cn(
+        "flex w-full items-center gap-3 rounded-2xl border border-border bg-card p-4 text-left hover:bg-muted/40",
+        PRESSABLE_CLASS
+      )}
     >
       <div className="flex size-11 items-center justify-center rounded-full bg-muted">
         <Icon className="size-5 text-muted-foreground" />
@@ -103,7 +107,7 @@ export function AccountProductRow({
           {FINANCE_ACCOUNT_TYPE_LABEL[account.type]} · {account.currency}
         </p>
       </div>
-      <p className="shrink-0 font-semibold tabular-nums text-foreground">
+      <p className="shrink-0 font-semibold text-foreground tabular-nums">
         {formatFinanceMoney(account.balance, {
           ...display,
           currency: account.currency,
@@ -124,15 +128,16 @@ export function CardProductRow({
   display,
   onPress,
 }: CardProductRowProps) {
-  const network = card.network
-    ? FINANCE_CARD_NETWORK_LABEL[card.network]
-    : null
+  const network = card.network ? FINANCE_CARD_NETWORK_LABEL[card.network] : null
 
   return (
     <button
       type="button"
       onClick={onPress}
-      className="flex w-full flex-col gap-4 rounded-2xl bg-zinc-900 p-4 text-left text-white transition-opacity hover:opacity-95"
+      className={cn(
+        "flex w-full flex-col gap-4 rounded-2xl bg-zinc-900 p-4 text-left text-white hover:opacity-95",
+        PRESSABLE_CLASS
+      )}
       style={card.color ? { backgroundColor: card.color } : undefined}
     >
       <div className="flex items-center justify-between gap-3">
@@ -148,7 +153,7 @@ export function CardProductRow({
       </p>
       <div className="flex items-end justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-[10px] uppercase tracking-[0.14em] text-white/55">
+          <p className="text-[10px] tracking-[0.14em] text-white/55 uppercase">
             Balance
           </p>
           {card.balances.length === 0 ? (
@@ -185,18 +190,23 @@ export function LoanProductRow({
     <button
       type="button"
       onClick={onPress}
-      className="flex w-full items-center gap-3 rounded-2xl border border-border bg-card p-4 text-left transition-colors hover:bg-muted/40"
+      className={cn(
+        "flex w-full items-center gap-3 rounded-2xl border border-border bg-card p-4 text-left hover:bg-muted/40",
+        PRESSABLE_CLASS
+      )}
     >
       <div className="flex size-11 items-center justify-center rounded-full bg-muted">
         <HandCoinsIcon className="size-5 text-muted-foreground" />
       </div>
       <div className="min-w-0 flex-1">
-        <p className="truncate font-semibold text-foreground">{loan.lenderName}</p>
+        <p className="truncate font-semibold text-foreground">
+          {loan.lenderName}
+        </p>
         <p className="text-sm text-muted-foreground">
           {loan.paidInstallments}/{loan.totalInstallments} cuotas
         </p>
       </div>
-      <p className="shrink-0 font-semibold tabular-nums text-foreground">
+      <p className="shrink-0 font-semibold text-foreground tabular-nums">
         {formatFinanceMoney(loan.currentBalance, {
           ...display,
           currency: loan.currency,

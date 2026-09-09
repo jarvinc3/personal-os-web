@@ -1,32 +1,32 @@
 "use client"
 
-import { CATALOG_NONE } from "@/src/modules/finance/constants/catalog";
+import { CATALOG_NONE } from "@/src/modules/finance/constants/catalog"
 import {
   useAssignPendingEmail,
   useRetryPendingEmail,
-} from "@/src/modules/finance/hooks/use-email-sources";
-import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error";
+} from "@/src/modules/finance/hooks/use-email-sources"
+import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
 import {
   buildLedgerTargetOptions,
   splitLedgerTarget,
-} from "@/src/modules/finance/lib/ledger-payloads";
+} from "@/src/modules/finance/lib/ledger-payloads"
 import type {
   FinanceAccount,
   FinanceCard,
   FinancePendingEmailMessage,
-} from "@/src/modules/finance/types/entities";
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet";
-import { SelectField } from "@/src/shared/components/layout/form-blocks";
-import { Button } from "@/src/shared/components/ui/button";
-import { Spinner } from "@/src/shared/components/ui/spinner";
-import { SummarySection } from "@/src/shared/components/ui/summary";
-import { appToast } from "@/src/shared/lib/app-toast";
-import { createSheetSubmit } from "@/src/shared/lib/sheet-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { InboxIcon } from "lucide-react";
-import { useEffect, useMemo } from "react";
-import { Controller, useForm } from "react-hook-form";
-import { z } from "zod";
+} from "@/src/modules/finance/types/entities"
+import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+import { SelectField } from "@/src/shared/components/layout/form-blocks"
+import { Button } from "@/src/shared/components/ui/button"
+import { Spinner } from "@/src/shared/components/ui/spinner"
+import { SummarySection } from "@/src/shared/components/ui/summary"
+import { appToast } from "@/src/shared/lib/app-toast"
+import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { InboxIcon } from "lucide-react"
+import { useEffect, useMemo } from "react"
+import { Controller, useForm } from "react-hook-form"
+import { z } from "zod"
 
 const schema = z.object({
   target: z.string().min(1, "Elige una cuenta o una tarjeta"),
@@ -40,6 +40,7 @@ type AssignEmailMessageSheetProps = {
   message: FinancePendingEmailMessage | null
   accounts: FinanceAccount[]
   cards: FinanceCard[]
+  pending?: boolean
 }
 
 export function AssignEmailMessageSheet({
@@ -48,6 +49,7 @@ export function AssignEmailMessageSheet({
   message,
   accounts,
   cards,
+  pending = false,
 }: AssignEmailMessageSheetProps) {
   const assignMutation = useAssignPendingEmail()
   const retryMutation = useRetryPendingEmail()
@@ -56,20 +58,20 @@ export function AssignEmailMessageSheet({
   const institutionAccounts = useMemo(
     () =>
       accounts.filter(
-        (item) => item.isActive && item.institutionId === message?.institutionId,
+        (item) => item.isActive && item.institutionId === message?.institutionId
       ),
-    [accounts, message?.institutionId],
+    [accounts, message?.institutionId]
   )
   const institutionCards = useMemo(
     () =>
       cards.filter(
-        (item) => item.isActive && item.institutionId === message?.institutionId,
+        (item) => item.isActive && item.institutionId === message?.institutionId
       ),
-    [cards, message?.institutionId],
+    [cards, message?.institutionId]
   )
   const targetOptions = useMemo(
     () => buildLedgerTargetOptions(institutionAccounts, institutionCards),
-    [institutionAccounts, institutionCards],
+    [institutionAccounts, institutionCards]
   )
 
   const {
@@ -88,7 +90,7 @@ export function AssignEmailMessageSheet({
 
   const submitForm = useMemo(
     () => createSheetSubmit(handleSubmit),
-    [handleSubmit],
+    [handleSubmit]
   )
 
   const extracted = message?.extractedPayload
@@ -102,7 +104,7 @@ export function AssignEmailMessageSheet({
       ]
         .filter(Boolean)
         .join(" · ")
-    : message?.reason ?? "Sin extracto"
+    : (message?.reason ?? "Sin extracto")
 
   const onSubmit = submitForm(async (values) => {
     if (!message) return
@@ -142,6 +144,7 @@ export function AssignEmailMessageSheet({
     <BottomSheet
       open={open}
       onOpenChange={onOpenChange}
+      pending={pending}
       title="Asignar movimiento"
       description={
         message

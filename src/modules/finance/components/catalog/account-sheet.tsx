@@ -1,39 +1,39 @@
 "use client"
 
-import { CurrencySelectField } from "@/src/modules/finance/components/catalog/currency-select-field";
+import { CurrencySelectField } from "@/src/modules/finance/components/catalog/currency-select-field"
 import {
   CATALOG_NONE,
   FINANCE_ACCOUNT_TYPE_LABEL,
   FINANCE_ACCOUNT_TYPES,
-} from "@/src/modules/finance/constants/catalog";
+} from "@/src/modules/finance/constants/catalog"
 import {
   useArchiveAccount,
   useCreateAccount,
   useUpdateAccount,
-} from "@/src/modules/finance/hooks/use-accounts";
-import { buildCreateAccountBody } from "@/src/modules/finance/lib/catalog-payloads";
-import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error";
+} from "@/src/modules/finance/hooks/use-accounts"
+import { buildCreateAccountBody } from "@/src/modules/finance/lib/catalog-payloads"
+import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
 import type {
   FinanceAccount,
   FinanceInstitution,
-} from "@/src/modules/finance/types/entities";
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet";
+} from "@/src/modules/finance/types/entities"
+import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
 import {
   FormTextField,
   SelectField,
-} from "@/src/shared/components/layout/form-blocks";
-import { Button } from "@/src/shared/components/ui/button";
-import { ColorPickerSwatch } from "@/src/shared/components/ui/color-picker";
-import { Label } from "@/src/shared/components/ui/label";
-import { Spinner } from "@/src/shared/components/ui/spinner";
-import { SummarySection } from "@/src/shared/components/ui/summary";
-import { appToast } from "@/src/shared/lib/app-toast";
-import { createSheetSubmit } from "@/src/shared/lib/sheet-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { DollarSign, LandmarkIcon, Palette } from "lucide-react";
-import { useEffect, useMemo } from "react";
-import { Controller, useForm, useWatch } from "react-hook-form";
-import { z } from "zod";
+} from "@/src/shared/components/layout/form-blocks"
+import { Button } from "@/src/shared/components/ui/button"
+import { ColorPickerSwatch } from "@/src/shared/components/ui/color-picker"
+import { Label } from "@/src/shared/components/ui/label"
+import { Spinner } from "@/src/shared/components/ui/spinner"
+import { SummarySection } from "@/src/shared/components/ui/summary"
+import { appToast } from "@/src/shared/lib/app-toast"
+import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { DollarSign, LandmarkIcon, Palette } from "lucide-react"
+import { useEffect, useMemo } from "react"
+import { Controller, useForm, useWatch } from "react-hook-form"
+import { z } from "zod"
 
 const schema = z
   .object({
@@ -66,7 +66,7 @@ const TYPE_OPTIONS = FINANCE_ACCOUNT_TYPES.map((value) => ({
 function toFormValues(
   account: FinanceAccount | null,
   defaultCurrency: string,
-  defaultInstitutionId: string,
+  defaultInstitutionId: string
 ): FormValues {
   return {
     name: account?.name ?? "",
@@ -86,6 +86,7 @@ type AccountSheetProps = {
   institutions: FinanceInstitution[]
   defaultCurrency: string
   defaultInstitutionId?: string
+  pending?: boolean
 }
 
 export function AccountSheet({
@@ -95,6 +96,7 @@ export function AccountSheet({
   institutions,
   defaultCurrency,
   defaultInstitutionId,
+  pending = false,
 }: AccountSheetProps) {
   const isEdit = Boolean(account)
   const createMutation = useCreateAccount()
@@ -110,7 +112,7 @@ export function AccountSheet({
       { value: CATALOG_NONE, label: "Sin institución" },
       ...institutions.map((item) => ({ value: item.id, label: item.name })),
     ],
-    [institutions],
+    [institutions]
   )
   const hasInstitutions = institutions.length > 0
   const resolvedDefaultInstitutionId =
@@ -126,7 +128,7 @@ export function AccountSheet({
     defaultValues: toFormValues(
       account,
       defaultCurrency,
-      resolvedDefaultInstitutionId,
+      resolvedDefaultInstitutionId
     ),
   })
 
@@ -135,18 +137,14 @@ export function AccountSheet({
   useEffect(() => {
     if (open) {
       reset(
-        toFormValues(
-          account,
-          defaultCurrency,
-          resolvedDefaultInstitutionId,
-        ),
+        toFormValues(account, defaultCurrency, resolvedDefaultInstitutionId)
       )
     }
   }, [open, account, defaultCurrency, resolvedDefaultInstitutionId, reset])
 
   const submitForm = useMemo(
     () => createSheetSubmit(handleSubmit),
-    [handleSubmit],
+    [handleSubmit]
   )
 
   const onSubmit = submitForm(async (values) => {
@@ -190,6 +188,7 @@ export function AccountSheet({
     <BottomSheet
       open={open}
       onOpenChange={onOpenChange}
+      pending={pending}
       title={isEdit ? "Editar cuenta" : "Nueva cuenta"}
       description={
         hasInstitutions
@@ -269,7 +268,12 @@ export function AccountSheet({
               options={
                 hasInstitutions || accountType === "CASH"
                   ? institutionOptions
-                  : [{ value: CATALOG_NONE, label: "Crea una institución primero" }]
+                  : [
+                      {
+                        value: CATALOG_NONE,
+                        label: "Crea una institución primero",
+                      },
+                    ]
               }
               disabled={!hasInstitutions && accountType !== "CASH"}
             />
