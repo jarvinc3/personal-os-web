@@ -1,5 +1,6 @@
 "use client"
 
+import { KeepAwakeProvider } from "@/src/modules/keep-awake/context/keep-awake-context"
 import { PendingAccountDeletionHandler } from "@/src/modules/settings/components/pending-account-deletion-handler"
 import { AppHeader } from "@/src/shared/components/layout/app-header"
 import { AppSidebar } from "@/src/shared/components/layout/app-sidebar"
@@ -22,8 +23,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <SidebarInset>
             <AppHeader />
             <main ref={setScrollElement} className="flex-1 overflow-auto">
-              <PendingAccountDeletionHandler />
-              {children}
+              <KeepAwakeProvider>
+                <PendingAccountDeletionHandler />
+                {children}
+              </KeepAwakeProvider>
             </main>
           </SidebarInset>
         </ScrollChromeProvider>
