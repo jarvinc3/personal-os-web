@@ -1,14 +1,37 @@
 "use client"
 
-import { KEEP_AWAKE_STORAGE_KEY } from "@/src/modules/keep-awake/constants/storage"
 import {
-    getPipMountNode,
-    isDocumentPipSupported,
-    isWakeLockSupported,
-    openDocumentPip,
-    watchVisibility,
+  KEEP_AWAKE_CHANNEL_NAME,
+  KEEP_AWAKE_STORAGE_KEY,
+  parseSessionRecord,
+} from "@/src/modules/keep-awake/lib/session-storage"
+import {
+  deriveKeepAwakePhase,
+  getTimerDisplay,
+  INITIAL_KEEP_AWAKE_SESSION,
+  type KeepAwakePhase,
+  type KeepAwakeSessionState,
+  type TimerDisplay,
+} from "@/src/modules/keep-awake/lib/session-status"
+import {
+  classifyWakeLockError,
+  wakeLockFailureMessage,
+} from "@/src/modules/keep-awake/lib/wake-lock-error"
+import {
+  createWakeLockSession,
+  type ActivateOptions,
+  type WakeLockHandle,
+  type WakeLockSession,
+} from "@/src/modules/keep-awake/lib/wake-lock-session"
+import {
+  getPipMountNode,
+  isDocumentPipSupported,
+  isWakeLockSupported,
+  openDocumentPip,
+  watchVisibility,
 } from "@/src/modules/keep-awake/lib/document-pip"
-import { elapsedSecondsSince } from "@/src/modules/keep-awake/lib/format-elapsed"
+import { durationMsFromMinutes, KEEP_AWAKE_PREFS_KEY, parsePrefs } from "@/src/modules/keep-awake/lib/prefs"
+import { formatElapsed, sessionElapsedSeconds, sessionRemainingSeconds } from "@/src/modules/keep-awake/lib/format-elapsed"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { useEffect, useRef, useState, useSyncExternalStore } from "react"
 
@@ -26,10 +49,73 @@ function getServerSupportSnapshot() {
   return false
 }
 
-export function useWakeLock() {
-  const [active, setActive] = useState(false)
-  const [startTimestamp, setStartTimestamp] = useState<number | null>(null)
-  const [elapsedSeconds, setElapsedSeconds] = useState(0)
+function createOwnerId() {
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
+    return crypto.randomUUID()
+  }
+  return `tab-${Math.random().toString(36).slice(2)}`
+}
+
+function wrapSentinel(sentinel: WakeLockSentinel): WakeLockHandle {
+  return {
+    get released() {
+      return sentinel.released
+    },
+    release: () => sentinel.release(),
+    addEventListener: (type, listener) => {
+      sentinel.addEventListener(type, listener)
+    },
+    removeEventListener: (type, listener) => {
+      sentinel.removeEventListener(type, listener)
+    },
+  }
+}
+
+function durationFromPrefs(): ActivateOptions | undefined {
+  if (typeof window === "undefined") return undefined
+  const prefs = parsePrefs(window.localStorage.getItem(KEEP_AWAKE_PREFS_KEY))
+  if (prefs.timerMode !== "countdown") return undefined
+  return { durationMs: durationMsFromMinutes(prefs.durationMinutes) }
+}
+
+function toastWakeLockFailure(
+  error: unknown,
+  fallback?: ReturnType<WakeLockSession["getLastFailure"]>
+) {
+  const kind = fallback ?? classifyWakeLockError(error)
+  const copy = wakeLockFailureMessage(kind ?? "unknown")
+  appToast.error({ text1: copy.title, text2: copy.description })
+}
+
+export type UseWakeLockResult = {
+  phase: KeepAwakePhase
+  active: boolean
+  lockHeld: boolean
+  elapsedSeconds: number
+  remainingSeconds: number
+  startTimestamp: number | null
+  endsAt: number | null
+  timerDisplay: TimerDisplay
+  pipOpen: boolean
+  pipMount: HTMLElement | null
+  supportsPip: boolean
+  supportsWakeLock: boolean
+  activate: (options?: ActivateOptions) => Promise<void>
+  deactivate: () => Promise<void>
+  end: () => Promise<void>
+  toggle: (options?: ActivateOptions) => Promise<void>
+  copyElapsed: () => Promise<void>
+  openPip: () => Promise<void>
+  focusPip: () => void
+  closePip: () => void
+  openOrFocusPip: () => Promise<void>
+}
+
+export function useWakeLock(): UseWakeLockResult {
+  const [sessionState, setSessionState] = useState<KeepAwakeSessionState>(
+    INITIAL_KEEP_AWAKE_SESSION
+  )
+  const [, setElapsedTick] = useState(0)
   const [pipOpen, setPipOpen] = useState(false)
   const [pipMount, setPipMount] = useState<HTMLElement | null>(null)
 
@@ -44,131 +130,202 @@ export function useWakeLock() {
     getServerSupportSnapshot
   )
 
-  const wakeLockRef = useRef<WakeLockSentinel | null>(null)
+  const ownerIdRef = useRef<string | null>(null)
+  const sessionRef = useRef<WakeLockSession | null>(null)
   const pipWindowRef = useRef<Window | null>(null)
-  const activeRef = useRef(false)
+
+  if (ownerIdRef.current === null) {
+    ownerIdRef.current = createOwnerId()
+  }
 
   useEffect(() => {
-    activeRef.current = active
-  }, [active])
+    const ownerId = ownerIdRef.current ?? createOwnerId()
+    ownerIdRef.current = ownerId
 
-  function currentNav(): Navigator {
-    const pip = pipWindowRef.current
-    if (pip && !pip.closed) return pip.navigator
-    return navigator
-  }
+    const currentNav = (): Navigator => {
+      const pip = pipWindowRef.current
+      if (pip && !pip.closed) return pip.navigator
+      return navigator
+    }
 
-  function attachReleaseHandler(sentinel: WakeLockSentinel) {
-    sentinel.addEventListener("release", () => {
-      if (activeRef.current) {
-        wakeLockRef.current = null
+    const channel =
+      typeof BroadcastChannel !== "undefined"
+        ? new BroadcastChannel(KEEP_AWAKE_CHANNEL_NAME)
+        : null
+
+    const session = createWakeLockSession({
+      ownerId,
+      isSupported: () => isWakeLockSupported(currentNav()),
+      requestWakeLock: async () => {
+        const nav = currentNav()
+        if (!isWakeLockSupported(nav)) {
+          throw Object.assign(new Error("Wake Lock is not supported"), {
+            name: "NotSupportedError",
+          })
+        }
+        const sentinel = await nav.wakeLock.request("screen")
+        return wrapSentinel(sentinel)
+      },
+      storage: window.localStorage,
+      broadcast: (message) => channel?.postMessage(message),
+      onChange: setSessionState,
+    })
+    sessionRef.current = session
+
+    const restoreTimer = window.setTimeout(() => {
+      void session.restoreIfNeeded()
+    }, 0)
+
+    const unwatch = watchVisibility(document, () => {
+      if (session.getState().sessionRequested) {
+        void session.stopIfCountdownElapsed().then(() => {
+          if (session.getState().sessionRequested) {
+            void session.tryReacquire()
+          }
+        })
+      } else {
+        void session.restoreIfNeeded()
       }
     })
-  }
 
-  async function tryReacquire(nav: Navigator = currentNav()) {
-    if (!activeRef.current || wakeLockRef.current !== null) return
-    if (!isWakeLockSupported(nav)) return
-    try {
-      const sentinel = await nav.wakeLock.request("screen")
-      wakeLockRef.current = sentinel
-      attachReleaseHandler(sentinel)
-    } catch {
-      /* retry on next visibilitychange */
+    const onChannelMessage = (event: MessageEvent) => {
+      void session.handleRemoteMessage(event.data)
     }
-  }
+    channel?.addEventListener("message", onChannelMessage)
 
-  function markActive(ts: number) {
-    activeRef.current = true
-    setActive(true)
-    setStartTimestamp(ts)
-    setElapsedSeconds(elapsedSecondsSince(ts))
-  }
-
-  function markInactive() {
-    activeRef.current = false
-    setActive(false)
-    setStartTimestamp(null)
-    setElapsedSeconds(0)
-  }
-
-  async function activate() {
-    const nav = currentNav()
-    if (!isWakeLockSupported(nav)) {
-      appToast.error({
-        text1: "No disponible",
-        text2: "Este navegador no soporta Wake Lock API.",
+    const onStorage = (event: StorageEvent) => {
+      if (event.key !== KEEP_AWAKE_STORAGE_KEY) return
+      if (event.newValue === null) {
+        void session.handleRemoteMessage({ type: "stop", ownerId: "remote" })
+        return
+      }
+      const record = parseSessionRecord(event.newValue)
+      if (!record) return
+      void session.handleRemoteMessage({
+        type: "claim",
+        ownerId: record.ownerId || "remote",
+        startTimestamp: record.startTimestamp,
       })
+    }
+    window.addEventListener("storage", onStorage)
+
+    return () => {
+      window.clearTimeout(restoreTimer)
+      unwatch()
+      channel?.removeEventListener("message", onChannelMessage)
+      channel?.close()
+      window.removeEventListener("storage", onStorage)
+      if (pipWindowRef.current && !pipWindowRef.current.closed) {
+        pipWindowRef.current.close()
+      }
+      pipWindowRef.current = null
+      sessionRef.current = null
+      void session.dispose()
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!sessionState.sessionRequested || sessionState.startTimestamp === null) {
       return
     }
 
+    const id = window.setInterval(() => {
+      setElapsedTick((tick) => tick + 1)
+      const session = sessionRef.current
+      if (!session) return
+      const wasRequested = session.getState().sessionRequested
+      void session.stopIfCountdownElapsed().then(() => {
+        if (wasRequested && !session.getState().sessionRequested) {
+          appToast.info({
+            text1: "Temporizador terminado",
+            text2: "La pantalla ya puede apagarse.",
+          })
+        }
+      })
+    }, 1000)
+    return () => window.clearInterval(id)
+  }, [
+    sessionState.sessionRequested,
+    sessionState.startTimestamp,
+    sessionState.endsAt,
+  ])
+
+  const elapsedSeconds = sessionElapsedSeconds(sessionState)
+  const remainingSeconds = sessionRemainingSeconds(sessionState)
+  const timerDisplay = getTimerDisplay({
+    endsAt: sessionState.endsAt,
+    elapsedSeconds,
+    remainingSeconds,
+  })
+
+  const phase = deriveKeepAwakePhase({
+    supportsWakeLock,
+    sessionRequested: sessionState.sessionRequested,
+    lockHeld: sessionState.lockHeld,
+    pending: sessionState.pending,
+    userPaused: sessionState.userPaused,
+  })
+
+  const activate = async (options?: ActivateOptions) => {
+    const session = sessionRef.current
+    if (!session) return
+    if (!supportsWakeLock) {
+      toastWakeLockFailure(null, "unsupported")
+      return
+    }
     try {
-      const sentinel = await nav.wakeLock.request("screen")
-      wakeLockRef.current = sentinel
-      const ts = Date.now()
-      localStorage.setItem(KEEP_AWAKE_STORAGE_KEY, String(ts))
-      markActive(ts)
-      attachReleaseHandler(sentinel)
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "No se pudo activar"
-      appToast.error({ text1: "Error", text2: message })
+      await session.activate(options ?? durationFromPrefs())
+    } catch (error) {
+      toastWakeLockFailure(error, session.getLastFailure())
     }
   }
 
-  async function deactivate() {
-    if (wakeLockRef.current) {
-      try {
-        await wakeLockRef.current.release()
-      } catch {
-        /* already released */
-      }
-      wakeLockRef.current = null
-    }
-    localStorage.removeItem(KEEP_AWAKE_STORAGE_KEY)
-    markInactive()
+  const end = async () => {
+    await sessionRef.current?.end()
   }
 
-  async function toggle() {
-    if (activeRef.current) {
-      await deactivate()
-    } else {
-      await activate()
-    }
+  const deactivate = async () => {
+    await end()
   }
 
-  async function restoreIfNeeded() {
-    const saved = localStorage.getItem(KEEP_AWAKE_STORAGE_KEY)
-    if (!saved || activeRef.current) return
-
-    const ts = Number(saved)
-    if (!Number.isFinite(ts)) return
-
+  const toggle = async (options?: ActivateOptions) => {
+    const session = sessionRef.current
+    if (!session) return
+    if (!supportsWakeLock && !session.getState().sessionRequested) {
+      toastWakeLockFailure(null, "unsupported")
+      return
+    }
     try {
-      const nav = currentNav()
-      if (!isWakeLockSupported(nav)) return
-      const sentinel = await nav.wakeLock.request("screen")
-      wakeLockRef.current = sentinel
-      activeRef.current = true
-      setActive(true)
-      setStartTimestamp(ts)
-      setElapsedSeconds(elapsedSecondsSince(ts))
-      attachReleaseHandler(sentinel)
+      await session.toggle(options ?? durationFromPrefs())
+    } catch (error) {
+      toastWakeLockFailure(error, session.getLastFailure())
+    }
+  }
+
+  const copyElapsed = async () => {
+    const text = formatElapsed(elapsedSeconds)
+    try {
+      await navigator.clipboard.writeText(text)
+      appToast.success({ text1: "Duración copiada", text2: text })
     } catch {
-      /* tab not visible yet — key kept for visibilitychange retry */
+      appToast.error({ text1: "No se pudo copiar", text2: text })
     }
   }
 
-  async function openPip() {
+  const openPip = async () => {
     if (!isDocumentPipSupported()) {
       appToast.warning({
         text1: "Miniplayer no disponible",
         text2:
-          "Usa Chrome, Edge o Firefox recientes, o abre esta pestaña en una ventana aparte.",
+          "Document Picture-in-Picture no está disponible en este navegador. El bloqueo sigue funcionando en esta pestaña.",
       })
       return
     }
 
-    if (pipWindowRef.current && !pipWindowRef.current.closed) return
+    if (pipWindowRef.current && !pipWindowRef.current.closed) {
+      pipWindowRef.current.focus()
+      return
+    }
 
     try {
       const pipWindow = await openDocumentPip()
@@ -176,23 +333,17 @@ export function useWakeLock() {
       setPipMount(getPipMountNode(pipWindow))
       setPipOpen(true)
 
-      if (activeRef.current) {
-        if (wakeLockRef.current) {
-          try {
-            await wakeLockRef.current.release()
-          } catch {
-            /* ignore */
-          }
-          wakeLockRef.current = null
-        }
-        await tryReacquire(pipWindow.navigator)
+      const session = sessionRef.current
+      if (session?.getState().sessionRequested && !session.getState().userPaused) {
+        await session.releaseHeldLock()
+        await session.tryReacquire()
       }
 
       const unwatch = watchVisibility(pipWindow.document, () => {
-        if (activeRef.current) {
-          void tryReacquire(pipWindow.navigator)
+        if (sessionRef.current?.getState().sessionRequested) {
+          void sessionRef.current.tryReacquire()
         } else {
-          void restoreIfNeeded()
+          void sessionRef.current?.restoreIfNeeded()
         }
       })
 
@@ -202,12 +353,9 @@ export function useWakeLock() {
         setPipMount(null)
         setPipOpen(false)
 
-        if (activeRef.current) {
-          if (wakeLockRef.current) {
-            void wakeLockRef.current.release().catch(() => {})
-            wakeLockRef.current = null
-          }
-          void tryReacquire(navigator)
+        const current = sessionRef.current
+        if (current?.getState().sessionRequested && !current.getState().userPaused) {
+          void current.releaseHeldLock().then(() => current.tryReacquire())
         }
       })
     } catch (err) {
@@ -216,50 +364,45 @@ export function useWakeLock() {
     }
   }
 
-  useEffect(() => {
-    // Defer restore so setState runs outside the effect body (react-hooks/set-state-in-effect).
-    const restoreTimer = window.setTimeout(() => {
-      void restoreIfNeeded()
-    }, 0)
-
-    const unwatch = watchVisibility(document, () => {
-      if (activeRef.current) {
-        void tryReacquire(navigator)
-      } else {
-        void restoreIfNeeded()
-      }
-    })
-
-    return () => {
-      window.clearTimeout(restoreTimer)
-      unwatch()
-      if (wakeLockRef.current) {
-        void wakeLockRef.current.release().catch(() => {})
-        wakeLockRef.current = null
-      }
+  const focusPip = () => {
+    if (pipWindowRef.current && !pipWindowRef.current.closed) {
+      pipWindowRef.current.focus()
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- mount-only bootstrap
-  }, [])
+  }
 
-  useEffect(() => {
-    if (!active || startTimestamp === null) return
+  const closePip = () => {
+    pipWindowRef.current?.close()
+  }
 
-    const id = window.setInterval(() => {
-      setElapsedSeconds(elapsedSecondsSince(startTimestamp))
-    }, 1000)
-    return () => window.clearInterval(id)
-  }, [active, startTimestamp])
+  const openOrFocusPip = async () => {
+    if (pipWindowRef.current && !pipWindowRef.current.closed) {
+      focusPip()
+      return
+    }
+    await openPip()
+  }
 
   return {
-    active,
+    phase,
+    active: sessionState.sessionRequested,
+    lockHeld: sessionState.lockHeld,
     elapsedSeconds,
+    remainingSeconds,
+    startTimestamp: sessionState.startTimestamp,
+    endsAt: sessionState.endsAt,
+    timerDisplay,
     pipOpen,
     pipMount,
     supportsPip,
     supportsWakeLock,
     activate,
     deactivate,
+    end,
     toggle,
+    copyElapsed,
     openPip,
+    focusPip,
+    closePip,
+    openOrFocusPip,
   }
 }
