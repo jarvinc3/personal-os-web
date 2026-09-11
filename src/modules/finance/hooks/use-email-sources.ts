@@ -1,6 +1,7 @@
 "use client"
 
 import { apiDelete, apiGet, apiPatch, apiPost } from "@/src/config/api-client"
+import { invalidateFinancePositions } from "@/src/modules/finance/hooks/use-balance-sheet"
 import { asFinanceArray } from "@/src/modules/finance/lib/planning-lists"
 import {
   FINANCE_EMAIL_PENDING_QUERY_KEY,
@@ -22,6 +23,27 @@ function invalidate(queryClient: ReturnType<typeof useQueryClient>) {
   void queryClient.invalidateQueries({
     queryKey: FINANCE_EMAIL_PENDING_QUERY_KEY,
   })
+}
+
+function importedFromEmail(
+  result: FinanceEmailAssignResult | FinancePendingEmailMessage,
+): result is FinanceEmailAssignResult {
+  return (
+    "assigned" in result &&
+    result.assigned === true &&
+    typeof result.transactionId === "string" &&
+    result.transactionId.length > 0
+  )
+}
+
+function invalidateEmailResult(
+  queryClient: ReturnType<typeof useQueryClient>,
+  result: FinanceEmailAssignResult | FinancePendingEmailMessage,
+) {
+  invalidate(queryClient)
+  if (importedFromEmail(result)) {
+    invalidateFinancePositions(queryClient)
+  }
 }
 
 export type UpdateEmailSourceBody = {
@@ -98,7 +120,7 @@ export function useAssignPendingEmail() {
         API_ENDPOINTS.FINANCE.EMAIL_PENDING_ASSIGN(id),
         body,
       ),
-    onSuccess: () => invalidate(queryClient),
+    onSuccess: (result) => invalidateEmailResult(queryClient, result),
   })
 }
 
@@ -109,6 +131,6 @@ export function useRetryPendingEmail() {
       apiPost<FinanceEmailAssignResult | FinancePendingEmailMessage>(
         API_ENDPOINTS.FINANCE.EMAIL_PENDING_RETRY(id),
       ),
-    onSuccess: () => invalidate(queryClient),
+    onSuccess: (result) => invalidateEmailResult(queryClient, result),
   })
 }

@@ -2,11 +2,11 @@
 
 import {
   formatProductCounts,
+  formatStackItemBalance,
   institutionInitials,
   type InstitutionStackItem,
 } from "@/src/modules/finance/lib/institution-stack";
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/lib/money";
-import { formatFinanceMoney } from "@/src/modules/finance/lib/money";
 import { cn } from "@/src/shared/lib/utils";
 import { WalletIcon } from "lucide-react";
 import type { CSSProperties } from "react";
@@ -58,7 +58,7 @@ export function CatalogStackCard({
   const subtitle = isInstitution
     ? formatProductCounts(item.counts)
     : "Efectivo sin institución"
-  const balance = formatFinanceMoney(item.consolidatedBalance, display)
+  const balance = formatStackItemBalance(item, display)
 
   const content = (
     <>

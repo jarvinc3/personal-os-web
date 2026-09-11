@@ -4,7 +4,7 @@
  * Paginated `{ items, pagination }` — GET /finance/transactions, GET /finance/budgets
  * Array — accounts, cards, institutions, categories, savings-goals, loans,
  *   receivables, email-sync/sources, spending-by-category, budget-status
- * Object — analytics/summary
+ * Object — analytics/summary, balance-sheet
  * `{ points }` — analytics/spending-over-time
  *
  * Money fields on **read** are decimal strings. Write DTOs stay numbers.
@@ -40,6 +40,10 @@ export const FINANCE_CATEGORIES_QUERY_KEY = [
   "categories",
 ] as const
 export const FINANCE_ANALYTICS_QUERY_KEY = [...FINANCE_QUERY_KEY, "analytics"] as const
+export const FINANCE_BALANCE_SHEET_QUERY_KEY = [
+  ...FINANCE_QUERY_KEY,
+  "balance-sheet",
+] as const
 export const FINANCE_TRANSACTIONS_QUERY_KEY = [
   ...FINANCE_QUERY_KEY,
   "transactions",

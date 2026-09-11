@@ -1,6 +1,11 @@
-import { parseFinanceMoney } from "./money.ts"
+import {
+  formatFinanceMoney,
+  type FinanceMoneyDisplay,
+} from "./money.ts"
 import type {
   FinanceAccount,
+  FinanceBalanceSheetIssue,
+  FinanceBalanceSheetStatus,
   FinanceCard,
   FinanceInstitution,
   FinanceLoan,
@@ -18,7 +23,9 @@ export type InstitutionStackItem =
       id: string
       institution: FinanceInstitution
       counts: InstitutionStackCounts
-      consolidatedBalance: number
+      status: FinanceBalanceSheetStatus
+      netWorth: string | null
+      issues: FinanceBalanceSheetIssue[]
       accounts: FinanceAccount[]
       cards: FinanceCard[]
       loans: FinanceLoan[]
@@ -27,14 +34,14 @@ export type InstitutionStackItem =
       kind: "cash"
       id: string
       account: FinanceAccount
-      consolidatedBalance: number
+      balance: string
     }
 
-function sumBalances(values: Array<string | null | undefined>): number {
-  return values.reduce((total, value) => {
-    const parsed = parseFinanceMoney(value)
-    return total + (parsed ?? 0)
-  }, 0)
+export type InstitutionBalancePosition = {
+  institutionId: string
+  status: FinanceBalanceSheetStatus
+  netWorth: string | null
+  issues: FinanceBalanceSheetIssue[]
 }
 
 export function institutionInitials(name: string): string {
@@ -53,19 +60,20 @@ export function formatProductCounts(counts: InstitutionStackCounts): string {
   return `${counts.accounts} cuentas · ${counts.cards} tarjetas · ${counts.loans} préstamos`
 }
 
-export function computeInstitutionConsolidatedBalance(input: {
-  accounts: FinanceAccount[]
-  cards: FinanceCard[]
-  loans: FinanceLoan[]
-}): number {
-  const accountTotal = sumBalances(input.accounts.map((item) => item.balance))
-  const creditDebt = sumBalances(
-    input.cards
-      .filter((card) => card.type === "CREDIT")
-      .flatMap((card) => card.balances.map((balance) => balance.balance)),
-  )
-  const loanDebt = sumBalances(input.loans.map((loan) => loan.currentBalance))
-  return accountTotal - creditDebt - loanDebt
+export function formatStackItemBalance(
+  item: InstitutionStackItem,
+  display: FinanceMoneyDisplay,
+): string {
+  if (item.kind === "cash") {
+    return formatFinanceMoney(item.balance, {
+      ...display,
+      currency: item.account.currency,
+    })
+  }
+  if (item.status !== "COMPLETE" || item.netWorth === null) {
+    return "Balance incompleto"
+  }
+  return formatFinanceMoney(item.netWorth, display)
 }
 
 export function buildInstitutionStackItems(input: {
@@ -73,11 +81,15 @@ export function buildInstitutionStackItems(input: {
   accounts: FinanceAccount[]
   cards: FinanceCard[]
   loans: FinanceLoan[]
+  positions?: InstitutionBalancePosition[]
 }): InstitutionStackItem[] {
   const activeInstitutions = input.institutions.filter((item) => item.isActive)
   const activeAccounts = input.accounts.filter((item) => item.isActive)
   const activeCards = input.cards.filter((item) => item.isActive)
   const activeLoans = input.loans.filter((item) => item.isActive)
+  const positionsById = new Map(
+    (input.positions ?? []).map((position) => [position.institutionId, position]),
+  )
 
   const institutionItems: InstitutionStackItem[] = activeInstitutions.map(
     (institution) => {
@@ -90,6 +102,7 @@ export function buildInstitutionStackItems(input: {
       const loans = activeLoans.filter(
         (loan) => loan.institutionId === institution.id,
       )
+      const position = positionsById.get(institution.id)
       return {
         kind: "institution",
         id: institution.id,
@@ -102,11 +115,9 @@ export function buildInstitutionStackItems(input: {
           cards: cards.length,
           loans: loans.length,
         },
-        consolidatedBalance: computeInstitutionConsolidatedBalance({
-          accounts,
-          cards,
-          loans,
-        }),
+        status: position?.status ?? "INCOMPLETE",
+        netWorth: position?.netWorth ?? null,
+        issues: position?.issues ?? [],
       }
     },
   )
@@ -117,7 +128,7 @@ export function buildInstitutionStackItems(input: {
       kind: "cash" as const,
       id: account.id,
       account,
-      consolidatedBalance: parseFinanceMoney(account.balance) ?? 0,
+      balance: account.balance,
     }))
 
   return [...institutionItems, ...cashItems]

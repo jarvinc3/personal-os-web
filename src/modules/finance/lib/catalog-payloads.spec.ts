@@ -127,6 +127,16 @@ describe("buildCardBalanceBody", () => {
     if (result.ok) return
     assert.equal(result.error, "Saldo inválido")
   })
+
+  it("requires a credit limit when asked", () => {
+    const result = buildCardBalanceBody(
+      { currency: "DOP", balance: "42000" },
+      { requireCreditLimit: true },
+    )
+    assert.equal(result.ok, false)
+    if (result.ok) return
+    assert.equal(result.error, "Límite de crédito obligatorio")
+  })
 })
 
 describe("buildCardBalanceBodies", () => {
@@ -142,6 +152,19 @@ describe("buildCardBalanceBodies", () => {
       { currency: "DOP", balance: 100, creditLimit: 50000 },
       { currency: "USD", balance: 25.5 },
     ])
+  })
+
+  it("requires a credit limit on filled CREDIT rows", () => {
+    const result = buildCardBalanceBodies(
+      [
+        { currency: "dop", balance: "100", creditLimit: "50000" },
+        { currency: "usd", balance: "25.5", creditLimit: "" },
+      ],
+      { requireCreditLimit: true },
+    )
+    assert.equal(result.ok, false)
+    if (result.ok) return
+    assert.equal(result.error, "Límite de crédito obligatorio")
   })
 
   it("rejects duplicate currencies", () => {

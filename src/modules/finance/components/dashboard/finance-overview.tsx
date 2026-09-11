@@ -2,6 +2,7 @@
 
 import { useAccounts } from "@/src/modules/finance/hooks/use-accounts"
 import { useAnalyticsSummary } from "@/src/modules/finance/hooks/use-analytics"
+import { useBalanceSheet } from "@/src/modules/finance/hooks/use-balance-sheet"
 import { useCategories } from "@/src/modules/finance/hooks/use-categories"
 import { useFinanceEnabled } from "@/src/modules/finance/hooks/use-finance-enabled"
 import { useTransactions } from "@/src/modules/finance/hooks/use-transactions"
@@ -47,6 +48,7 @@ export function FinanceOverview() {
   }
 
   const summaryQuery = useAnalyticsSummary(isEnabled, range)
+  const balanceSheetQuery = useBalanceSheet(isEnabled)
   const accountsQuery = useAccounts(isEnabled)
   const pendingTransactionsQuery = useTransactions(isEnabled, {
     status: "PENDING",
@@ -66,32 +68,43 @@ export function FinanceOverview() {
 
   const moneyDisplay = {
     ...display,
-    currency: summaryQuery.data?.baseCurrency ?? display.currency,
+    currency:
+      balanceSheetQuery.data?.baseCurrency ??
+      summaryQuery.data?.baseCurrency ??
+      display.currency,
   }
 
   const accounts = useMemo(
-    () => (accountsQuery.data ?? []).filter((account) => account.isActive),
+    () =>
+      (accountsQuery.data ?? []).filter((account) => {
+        if (!account.isActive) return false
+        const balance = parseFinanceMoney(account.balance)
+        return balance !== null && balance !== 0
+      }),
     [accountsQuery.data]
   )
   const selectedAccount = useMemo(
     () => accounts.find((account) => account.id === selectedAccountId) ?? null,
     [accounts, selectedAccountId]
   )
+  const global = balanceSheetQuery.data?.global
   const homeBalance = selectedAccount
     ? {
         label: `Saldo de ${selectedAccount.name}`,
-        amount: selectedAccount.balance,
-        currency: selectedAccount.currency,
+        amount: formatFinanceMoney(selectedAccount.balance, {
+          ...display,
+          currency: selectedAccount.currency,
+        }),
       }
     : {
         label: "Patrimonio neto",
-        amount: summaryQuery.data?.netWorth,
-        currency: moneyDisplay.currency,
+        amount:
+          balanceSheetQuery.isPending && !balanceSheetQuery.data
+            ? "…"
+            : global?.status === "COMPLETE"
+              ? formatFinanceMoney(global.netWorth, moneyDisplay)
+              : "Balance incompleto",
       }
-  const balanceFormatted = formatFinanceMoney(homeBalance.amount, {
-    ...display,
-    currency: homeBalance.currency,
-  })
   const pendingHold = (pendingTransactionsQuery.data?.items ?? []).reduce(
     (sum, transaction) =>
       sum + (parseFinanceMoney(transaction.amountBaseCurrency) ?? 0),
@@ -135,7 +148,7 @@ export function FinanceOverview() {
     <div className="flex flex-col gap-8">
       <FinanceHomeHero
         balanceLabel={homeBalance.label}
-        balanceAmount={balanceFormatted}
+        balanceAmount={homeBalance.amount}
         pendingHoldLabel={pendingHoldLabel}
         cashFlowLabel={cashFlowLabel}
         onAccountPress={cycleAccount}

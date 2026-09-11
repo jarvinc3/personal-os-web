@@ -16,6 +16,7 @@ import { FinanceAuthenticatedPage } from "@/src/modules/finance/components/layou
 import { LoanSheet } from "@/src/modules/finance/components/planning/loan-sheet"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/constants/sheet-keys"
 import { useAccounts } from "@/src/modules/finance/hooks/use-accounts"
+import { useBalanceSheet } from "@/src/modules/finance/hooks/use-balance-sheet"
 import { useCards } from "@/src/modules/finance/hooks/use-cards"
 import { useFinanceEnabled } from "@/src/modules/finance/hooks/use-finance-enabled"
 import { useInstitutions } from "@/src/modules/finance/hooks/use-institutions"
@@ -25,9 +26,9 @@ import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
 import {
   buildInstitutionStackItems,
   formatProductCounts,
+  formatStackItemBalance,
   institutionInitials,
 } from "@/src/modules/finance/lib/institution-stack"
-import { formatFinanceMoney } from "@/src/modules/finance/lib/money"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
 import { LoadingView } from "@/src/shared/components/layout/loading-view"
 import { Button } from "@/src/shared/components/ui/button"
@@ -78,6 +79,7 @@ function InstitutionDetailView({
   const accountsQuery = useAccounts(isEnabled)
   const cardsQuery = useCards(isEnabled)
   const loansQuery = useLoans(isEnabled)
+  const balanceSheetQuery = useBalanceSheet(isEnabled)
 
   const [tab, setTab] = useState<InstitutionDetailTab>("accounts")
   const { open: openOptionsSheet, setOpen: setOpenOptionsSheet } =
@@ -111,12 +113,18 @@ function InstitutionDetailView({
   const institutions = institutionsQuery.data ?? []
   const accounts = accountsQuery.data ?? []
 
+  const moneyDisplay = {
+    ...display,
+    currency: balanceSheetQuery.data?.baseCurrency ?? display.currency,
+  }
+
   const stackItem = useMemo(() => {
     const items = buildInstitutionStackItems({
       institutions: institutionsQuery.data ?? [],
       accounts: accountsQuery.data ?? [],
       cards: cardsQuery.data ?? [],
       loans: loansQuery.data ?? [],
+      positions: balanceSheetQuery.data?.institutions,
     })
     return items.find(
       (item) => item.kind === "institution" && item.id === institutionId
@@ -126,6 +134,7 @@ function InstitutionDetailView({
     accountsQuery.data,
     cardsQuery.data,
     loansQuery.data,
+    balanceSheetQuery.data?.institutions,
     institutionId,
   ])
 
@@ -175,13 +184,15 @@ function InstitutionDetailView({
     institutionsQuery.isPending ||
     accountsQuery.isPending ||
     cardsQuery.isPending ||
-    loansQuery.isPending
+    loansQuery.isPending ||
+    (balanceSheetQuery.isPending && !balanceSheetQuery.data)
 
   const error =
     institutionsQuery.error ??
     accountsQuery.error ??
     cardsQuery.error ??
-    loansQuery.error
+    loansQuery.error ??
+    balanceSheetQuery.error
 
   const editingInstitution = useSheetListEntity(
     openInstitutionSheet,
@@ -245,8 +256,17 @@ function InstitutionDetailView({
     stackItem?.kind === "institution"
       ? stackItem.counts
       : { accounts: 0, cards: 0, loans: 0 }
-  const balance =
-    stackItem?.kind === "institution" ? stackItem.consolidatedBalance : 0
+  const balanceLabel =
+    stackItem?.kind === "institution"
+      ? formatStackItemBalance(stackItem, moneyDisplay)
+      : "—"
+  const incompleteIssue =
+    stackItem?.kind === "institution"
+      ? stackItem.issues.find((issue) => issue.code === "MISSING_CREDIT_LIMIT")
+      : undefined
+  const incompleteCard = incompleteIssue
+    ? (cardsQuery.data ?? []).find((card) => card.id === incompleteIssue.cardId)
+    : undefined
   const institutionAccounts =
     stackItem?.kind === "institution" ? stackItem.accounts : []
   const institutionCards =
@@ -283,8 +303,18 @@ function InstitutionDetailView({
             </div>
           </div>
           <p className="mt-8 text-3xl font-bold tracking-tight tabular-nums">
-            {formatFinanceMoney(balance, display)}
+            {balanceLabel}
           </p>
+          {incompleteCard ? (
+            <Button
+              type="button"
+              variant="secondary"
+              className="mt-4 bg-white/15 text-white hover:bg-white/25"
+              onClick={() => setOpenCardBalanceSheet(true, incompleteCard.id)}
+            >
+              Completar límite de {incompleteCard.name}
+            </Button>
+          ) : null}
         </div>
 
         <div className="-mt-4 rounded-t-3xl bg-background px-4 pt-4 pb-8 md:px-6">

@@ -9,6 +9,12 @@ import { FINANCE_CARDS_QUERY_KEY } from "@/src/modules/finance/types/api"
 import type { FinanceCard, FinanceCardBalance } from "@/src/modules/finance/types/entities"
 import { API_ENDPOINTS } from "@/src/shared/constants/api-endpoints"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { invalidateFinanceBalanceSheet } from "@/src/modules/finance/hooks/use-balance-sheet"
+
+function invalidateCards(queryClient: ReturnType<typeof useQueryClient>) {
+  void queryClient.invalidateQueries({ queryKey: FINANCE_CARDS_QUERY_KEY })
+  invalidateFinanceBalanceSheet(queryClient)
+}
 
 export function useCards(enabled: boolean) {
   return useQuery({
@@ -24,7 +30,7 @@ export function useCreateCard() {
     mutationFn: (body: CreateCardBody) =>
       apiPost<FinanceCard>(API_ENDPOINTS.FINANCE.CARDS, body),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: FINANCE_CARDS_QUERY_KEY })
+      invalidateCards(queryClient)
     },
   })
 }
@@ -35,7 +41,7 @@ export function useUpdateCard() {
     mutationFn: ({ id, body }: { id: string; body: Record<string, unknown> }) =>
       apiPatch<FinanceCard>(API_ENDPOINTS.FINANCE.CARD(id), body),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: FINANCE_CARDS_QUERY_KEY })
+      invalidateCards(queryClient)
     },
   })
 }
@@ -45,7 +51,7 @@ export function useArchiveCard() {
   return useMutation({
     mutationFn: (id: string) => apiDelete(API_ENDPOINTS.FINANCE.CARD(id)),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: FINANCE_CARDS_QUERY_KEY })
+      invalidateCards(queryClient)
     },
   })
 }
@@ -56,7 +62,7 @@ export function useUpdateCardBalance() {
     mutationFn: ({ id, body }: { id: string; body: CardBalanceBody }) =>
       apiPost<FinanceCardBalance>(API_ENDPOINTS.FINANCE.CARD_BALANCES(id), body),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: FINANCE_CARDS_QUERY_KEY })
+      invalidateCards(queryClient)
     },
   })
 }

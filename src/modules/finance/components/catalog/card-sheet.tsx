@@ -56,18 +56,32 @@ const balanceRowSchema = z.object({
   creditLimit: z.string().trim(),
 })
 
-const schema = z.object({
-  name: z.string().trim().min(1, "Nombre obligatorio").max(120),
-  type: z.enum(FINANCE_CARD_TYPES),
-  institutionId: z.string().min(1, "Institución obligatoria"),
-  accountId: z.string(),
-  network: z.string(),
-  lastFour: z.string().trim().max(4),
-  statementClosingDay: z.string().trim(),
-  paymentDueDay: z.string().trim(),
-  color: z.string().trim().max(20),
-  balances: z.array(balanceRowSchema),
-})
+const schema = z
+  .object({
+    name: z.string().trim().min(1, "Nombre obligatorio").max(120),
+    type: z.enum(FINANCE_CARD_TYPES),
+    institutionId: z.string().min(1, "Institución obligatoria"),
+    accountId: z.string(),
+    network: z.string(),
+    lastFour: z.string().trim().max(4),
+    statementClosingDay: z.string().trim(),
+    paymentDueDay: z.string().trim(),
+    color: z.string().trim().max(20),
+    balances: z.array(balanceRowSchema),
+  })
+  .superRefine((values, ctx) => {
+    if (values.type !== "CREDIT") return
+    values.balances.forEach((row, index) => {
+      const filled = row.balance.trim().length > 0 || row.creditLimit.trim().length > 0
+      if (filled && row.creditLimit.trim().length === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["balances", index, "creditLimit"],
+          message: "Límite de crédito obligatorio",
+        })
+      }
+    })
+  })
 
 type FormValues = z.infer<typeof schema>
 
@@ -225,7 +239,9 @@ export function CardSheet({
 
     const balancesPayload = card
       ? { ok: true as const, body: [] }
-      : buildCardBalanceBodies(values.balances)
+      : buildCardBalanceBodies(values.balances, {
+          requireCreditLimit: values.type === "CREDIT",
+        })
     if (!balancesPayload.ok) {
       appToast.error({ text1: balancesPayload.error })
       return
@@ -489,7 +505,7 @@ export function CardSheet({
                   name={`balances.${index}.balance`}
                   render={({ field: balanceField }) => (
                     <FormTextField
-                      label="Saldo"
+                      label={cardType === "CREDIT" ? "Balance disponible" : "Saldo"}
                       value={balanceField.value}
                       onChange={balanceField.onChange}
                       onBlur={balanceField.onBlur}
@@ -507,6 +523,7 @@ export function CardSheet({
                         value={limitField.value}
                         onChange={limitField.onChange}
                         onBlur={limitField.onBlur}
+                        error={errors.balances?.[index]?.creditLimit?.message}
                         placeholder="50000"
                       />
                     )}

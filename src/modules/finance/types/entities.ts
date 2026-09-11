@@ -62,14 +62,45 @@ export type FinanceTransferResult = {
 
 export type FinanceAnalyticsSummary = {
   baseCurrency: string
-  netWorth: string
+  netWorth: string | null
   cashFlow: string
+  balanceStatus: FinanceBalanceSheetStatus
+  balanceIssues: FinanceBalanceSheetIssue[]
   totals: {
     accountBalance: string
-    cardDebt: string
+    cardDebt: string | null
     income: string
     expenses: string
   }
+}
+
+export type FinanceBalanceSheetStatus = "COMPLETE" | "INCOMPLETE"
+
+export type FinanceBalanceSheetIssue = {
+  code: "MISSING_CREDIT_LIMIT"
+  cardId: string
+  currency: string
+}
+
+export type FinanceBalanceSheetSlice = {
+  status: FinanceBalanceSheetStatus
+  assets: { accounts: string }
+  liabilities: {
+    creditCards: string | null
+    loans: string
+  }
+  totalAssets: string
+  totalLiabilities: string | null
+  netWorth: string | null
+  issues: FinanceBalanceSheetIssue[]
+}
+
+export type FinanceBalanceSheet = {
+  asOf: string
+  rateDate: string
+  baseCurrency: string
+  global: FinanceBalanceSheetSlice
+  institutions: Array<FinanceBalanceSheetSlice & { institutionId: string }>
 }
 
 export type FinanceSpendingPoint = {

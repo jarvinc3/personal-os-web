@@ -181,11 +181,14 @@ export function buildCreateCardBody(input: {
   return { ok: true, body }
 }
 
-export function buildCardBalanceBody(input: {
-  currency: string
-  balance: string
-  creditLimit?: string
-}): PayloadResult<CardBalanceBody> {
+export function buildCardBalanceBody(
+  input: {
+    currency: string
+    balance: string
+    creditLimit?: string
+  },
+  options?: { requireCreditLimit?: boolean },
+): PayloadResult<CardBalanceBody> {
   const currency = optionalTrimmed(input.currency)?.toUpperCase()
   if (!currency) {
     return { ok: false, error: "Moneda obligatoria" }
@@ -198,6 +201,9 @@ export function buildCardBalanceBody(input: {
 
   const body: CardBalanceBody = { currency, balance }
   const limitRaw = optionalTrimmed(input.creditLimit)
+  if (options?.requireCreditLimit && !limitRaw) {
+    return { ok: false, error: "Límite de crédito obligatorio" }
+  }
   if (limitRaw) {
     const creditLimit = parseFinanceMoney(limitRaw)
     if (creditLimit === null) {
@@ -224,6 +230,7 @@ function isEmptyBalanceRow(input: CardBalanceInput): boolean {
 
 export function buildCardBalanceBodies(
   inputs: CardBalanceInput[],
+  options?: { requireCreditLimit?: boolean },
 ): PayloadResult<CardBalanceBody[]> {
   const bodies: CardBalanceBody[] = []
   const seen = new Set<string>()
@@ -231,7 +238,7 @@ export function buildCardBalanceBodies(
   for (const input of inputs) {
     if (isEmptyBalanceRow(input)) continue
 
-    const parsed = buildCardBalanceBody(input)
+    const parsed = buildCardBalanceBody(input, options)
     if (!parsed.ok) return parsed
 
     if (seen.has(parsed.body.currency)) {

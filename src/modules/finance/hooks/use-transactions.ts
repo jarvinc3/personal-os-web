@@ -9,10 +9,8 @@ import {
   buildTransactionsSearchParams,
   type FinanceTransactionsQuery,
 } from "@/src/modules/finance/lib/transactions-query"
+import { invalidateFinancePositions } from "@/src/modules/finance/hooks/use-balance-sheet"
 import {
-  FINANCE_ACCOUNTS_QUERY_KEY,
-  FINANCE_ANALYTICS_QUERY_KEY,
-  FINANCE_CARDS_QUERY_KEY,
   FINANCE_TRANSACTIONS_QUERY_KEY,
   type FinancePaginated,
 } from "@/src/modules/finance/types/api"
@@ -28,10 +26,7 @@ import {
 } from "@tanstack/react-query"
 
 function invalidateLedger(queryClient: ReturnType<typeof useQueryClient>) {
-  void queryClient.invalidateQueries({ queryKey: FINANCE_TRANSACTIONS_QUERY_KEY })
-  void queryClient.invalidateQueries({ queryKey: FINANCE_ANALYTICS_QUERY_KEY })
-  void queryClient.invalidateQueries({ queryKey: FINANCE_ACCOUNTS_QUERY_KEY })
-  void queryClient.invalidateQueries({ queryKey: FINANCE_CARDS_QUERY_KEY })
+  invalidateFinancePositions(queryClient)
 }
 
 export function useTransactions(

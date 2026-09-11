@@ -22,13 +22,17 @@ import { useMemo, useState } from "react"
 import { Controller, useForm } from "react-hook-form"
 import { z } from "zod"
 
-const schema = z.object({
-  currency: z.string().trim().min(3, "Moneda obligatoria").max(3),
-  balance: z.string().trim().min(1, "Saldo obligatorio"),
-  creditLimit: z.string().trim(),
-})
+function createBalanceSchema(requireCreditLimit: boolean) {
+  return z.object({
+    currency: z.string().trim().min(3, "Moneda obligatoria").max(3),
+    balance: z.string().trim().min(1, "Saldo obligatorio"),
+    creditLimit: requireCreditLimit
+      ? z.string().trim().min(1, "Límite de crédito obligatorio")
+      : z.string().trim(),
+  })
+}
 
-type FormValues = z.infer<typeof schema>
+type FormValues = z.infer<ReturnType<typeof createBalanceSchema>>
 
 type BalanceMode =
   { kind: "edit"; currency: string } | { kind: "add"; currency: string }
@@ -100,7 +104,7 @@ function CardBalanceSheetForm({
     reset,
     formState: { errors },
   } = useForm<FormValues>({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(createBalanceSchema(card?.type === "CREDIT")),
     defaultValues: toFormValues(card, mode),
   })
 
@@ -135,7 +139,9 @@ function CardBalanceSheetForm({
       appToast.error({ text1: "Cada moneda solo puede usarse una vez" })
       return
     }
-    const payload = buildCardBalanceBody(values)
+    const payload = buildCardBalanceBody(values, {
+      requireCreditLimit: card.type === "CREDIT",
+    })
     if (!payload.ok) {
       appToast.error({ text1: payload.error })
       return
@@ -231,7 +237,7 @@ function CardBalanceSheetForm({
           name="balance"
           render={({ field }) => (
             <FormTextField
-              label="Saldo"
+              label={card?.type === "CREDIT" ? "Balance disponible" : "Saldo"}
               value={field.value}
               onChange={field.onChange}
               onBlur={field.onBlur}

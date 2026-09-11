@@ -4,12 +4,10 @@ import { InstitutionSwapStack } from "@/src/modules/finance/components/accounts/
 import { InstitutionSheet } from "@/src/modules/finance/components/accounts/institution-sheet"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/constants/sheet-keys"
 import { useAccounts } from "@/src/modules/finance/hooks/use-accounts"
-import { useAnalyticsSummary } from "@/src/modules/finance/hooks/use-analytics"
+import { useBalanceSheet } from "@/src/modules/finance/hooks/use-balance-sheet"
 import { useCards } from "@/src/modules/finance/hooks/use-cards"
-import { useFinanceEnabled } from "@/src/modules/finance/hooks/use-finance-enabled"
 import { useInstitutions } from "@/src/modules/finance/hooks/use-institutions"
 import { useLoans } from "@/src/modules/finance/hooks/use-loans"
-import { financeDashboardRange } from "@/src/modules/finance/lib/dashboard-period"
 import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
 import { buildInstitutionStackItems } from "@/src/modules/finance/lib/institution-stack"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/lib/money"
@@ -43,18 +41,18 @@ export function FinanceAccountsList({
   display,
 }: FinanceAccountsListProps) {
   const router = useRouter()
-  const { config } = useFinanceEnabled()
-  const range = useMemo(
-    () => financeDashboardRange(config.dashboardPeriod, config.weekStartsOn),
-    [config.dashboardPeriod, config.weekStartsOn]
-  )
   const institutionsQuery = useInstitutions(enabled)
   const accountsQuery = useAccounts(enabled)
   const cardsQuery = useCards(enabled)
   const loansQuery = useLoans(enabled)
-  const summaryQuery = useAnalyticsSummary(enabled, range)
+  const balanceSheetQuery = useBalanceSheet(enabled)
   const { open: openInstitutionSheet, setOpen: setOpenInstitutionSheet } =
     useSheetParam(FINANCE_SHEET_KEYS.institution)
+
+  const moneyDisplay = {
+    ...display,
+    currency: balanceSheetQuery.data?.baseCurrency ?? display.currency,
+  }
 
   const stackItems = useMemo(
     () =>
@@ -63,41 +61,47 @@ export function FinanceAccountsList({
         accounts: accountsQuery.data ?? [],
         cards: cardsQuery.data ?? [],
         loans: loansQuery.data ?? [],
+        positions: balanceSheetQuery.data?.institutions,
       }),
     [
       institutionsQuery.data,
       accountsQuery.data,
       cardsQuery.data,
       loansQuery.data,
+      balanceSheetQuery.data?.institutions,
     ]
   )
 
-  const netWorthLabel = summaryQuery.data
-    ? formatFinanceMoney(summaryQuery.data.netWorth, {
-        ...display,
-        currency: summaryQuery.data.baseCurrency ?? display.currency,
-      })
-    : "—"
+  const global = balanceSheetQuery.data?.global
+  const netWorthLabel =
+    global?.status === "COMPLETE"
+      ? formatFinanceMoney(global.netWorth, moneyDisplay)
+      : global
+        ? "Balance incompleto"
+        : "—"
 
   const errorMessage = useMemo(() => {
     const error =
       institutionsQuery.error ??
       accountsQuery.error ??
       cardsQuery.error ??
-      loansQuery.error
+      loansQuery.error ??
+      balanceSheetQuery.error
     return error ? financeErrorMessage(error) : null
   }, [
     institutionsQuery.error,
     accountsQuery.error,
     cardsQuery.error,
     loansQuery.error,
+    balanceSheetQuery.error,
   ])
 
   const stackPending =
     institutionsQuery.isPending ||
     accountsQuery.isPending ||
     cardsQuery.isPending ||
-    loansQuery.isPending
+    loansQuery.isPending ||
+    (balanceSheetQuery.isPending && !balanceSheetQuery.data)
 
   return (
     <>
@@ -110,7 +114,9 @@ export function FinanceAccountsList({
           Balance total
         </p>
         <p className="text-3xl font-bold tracking-tight text-foreground tabular-nums">
-          {summaryQuery.isPending && !summaryQuery.data ? "…" : netWorthLabel}
+          {balanceSheetQuery.isPending && !balanceSheetQuery.data
+            ? "…"
+            : netWorthLabel}
         </p>
       </div>
 
@@ -140,7 +146,7 @@ export function FinanceAccountsList({
         ) : (
           <InstitutionSwapStack
             items={stackItems}
-            display={display}
+            display={moneyDisplay}
             onSelect={(item) => {
               if (item.kind === "institution") {
                 router.push(APP_ROUTES.app.financeInstitution(item.id))

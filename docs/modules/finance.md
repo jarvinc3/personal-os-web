@@ -7,9 +7,9 @@ Shell of `/finance` (#14), catalog `/finance/accounts` (#15–#16), dashboard re
 What exists today:
 
 - Route `/finance` with module gate (`useFinanceEnabled`) — disabled/unconfigured shows CTA to Settings (`?sheet=finance-sheet`) and **does not** call `/finance/*`
-- `/finance` dashboard: `analytics/summary`, spending-by-category, spending-over-time (`points`), budget-status. Charts via `ChartContainer` + Recharts (`src/shared/components/ui/chart.tsx`). `baseCurrency` comes from the summary payload.
+- `/finance` dashboard: `GET /finance/balance-sheet` for current net worth; `analytics/summary` for period cash flow, spending-by-category, spending-over-time (`points`), budget-status. Charts via `ChartContainer` + Recharts (`src/shared/components/ui/chart.tsx`). `baseCurrency` comes from the balance-sheet payload.
 - UI under `src/modules/finance/components/`: `layout/` (shell + gate), `catalog/` (instituciones, cuentas, tarjetas, categorías), `dashboard/` (resumen y charts), `transactions/` (listado, detalle, captura y transferencias), `budgets/` (listado paginado y sheet), `planning/` (ahorros, préstamos, cobros), `sync/` (Gmail OAuth y sources)
-- `/finance/accounts`: instituciones, cuentas, tarjetas, **categorías** y **fuentes Gmail** (`FinanceSyncList`). Cuentas `CHECKING`/`SAVINGS`/`INVESTMENT` exigen institución; `CASH` puede omitirla. Alta de cuenta **sin** `balance`. Archivo: cuenta `PATCH isActive: false`; institución/tarjeta `DELETE` (archivar institución es 409 si quedan dependencias activas; el error trae `details.dependents`). Saldos de tarjeta: `POST /finance/cards/:id/balances` (números; respuesta de balance, no la tarjeta). Categorías: `icon` es emoji; DELETE de system → 404 del API.
+- `/finance/accounts`: instituciones, cuentas, tarjetas, **categorías** y **fuentes Gmail** (`FinanceSyncList`). El total global y cada balance institucional salen de `GET /finance/balance-sheet` (no se suman monedas en el cliente). Cuentas `CHECKING`/`SAVINGS`/`INVESTMENT` exigen institución; `CASH` puede omitirla. Alta de cuenta **sin** `balance`. Archivo: cuenta `PATCH isActive: false`; institución/tarjeta `DELETE` (archivar institución es 409 si quedan dependencias activas; el error trae `details.dependents`). Saldos de tarjeta: `POST /finance/cards/:id/balances` (números; respuesta de balance, no la tarjeta). En tarjetas `CREDIT`, el campo es **Balance disponible** y **Límite de crédito** es obligatorio. Categorías: `icon` es emoji; DELETE de system → 404 del API.
 - `/finance/planning`: arrays (no paginado). Ahorros (`isCompleted` del API). Préstamos: institución de catálogo opcional + `lenderName`; `accountId` es la cuenta de pago; tasa UI `%` → API fracción `0.12`; archivo `DELETE` / `PATCH isActive: false`. Cobros: sin DELETE (`CANCELLED`); `PAID` sin `paidAmount` lo completa el API.
 - `/finance/sync` y `/finance/sync/oauth` se conservan para OAuth/bookmarks. La UI de sources y la cola **Movimientos por asignar** viven en Sync (y sources también en Cuentas). `emailSync.enabled` (Ajustes) bloquea conectar/sincronizar. El tabBar **no** incluye Sincronizar.
 - `/finance/transactions`: `GET` paginado `{ items, pagination }` (default `page=1` `limit=20`). Filtros del DTO: fechas, cuenta, tarjeta, tipo, status. Detalle `GET :id`. Create DEBIT/CREDIT (`POST /transactions`), transfers (`POST /transfers`, never `type: TRANSFER` on create), PATCH, confirm, reverse, DELETE.
@@ -46,9 +46,12 @@ Point the client at the API **develop** branch (money-as-string, reverse, OAuth 
 - Loan `interestRate`: read string|null (`"0.12"` = 12%); write number 0–1. UI percent field. Null ≠ 0.
 - Paginated: `GET /finance/transactions`, `GET /finance/budgets` → `{ items, pagination }`
 - Arrays: accounts, cards, institutions, categories, savings-goals, loans, receivables, email sources, pending email assignments
-- Analytics: summary object; spending-over-time `{ points }`; spending-by-category and budget-status arrays
+- Analytics: summary object (cash-flow of the selected period plus compatibility `netWorth`); spending-over-time `{ points }`; spending-by-category and budget-status arrays
+- Balance sheet: `GET /finance/balance-sheet` current snapshot (`global` + `institutions[]`). Period selectors never change it. Incomplete credit limits yield `status: INCOMPLETE` and hide net worth.
 
 UI copy “Completado” = enum `CONFIRMED` (no `COMPLETED`).
+
+`FinCardBalance.balance` is **available credit**, not debt. Dashboard, Accounts, Institution Detail and Statistics share the same query key (`FINANCE_BALANCE_SHEET_QUERY_KEY`). Mutations of accounts, cards, loans, institutions, confirmed transactions, and email assign/retry that create a transaction invalidate that key.
 
 Charts (dashboard, #17): `src/shared/components/ui/chart.tsx` + `recharts`. The shell empty state does **not** mount `ChartContainer`.
 
