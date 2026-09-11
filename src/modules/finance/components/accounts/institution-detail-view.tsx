@@ -441,6 +441,7 @@ function InstitutionDetailView({
         account={editingAccount}
         institutions={institutions}
         defaultCurrency={config.baseCurrency}
+        display={display}
         defaultInstitutionId={institutionId}
       />
 
@@ -462,6 +463,7 @@ function InstitutionDetailView({
         pending={Boolean(cardBalanceSheetId) && !balancingCard}
         card={balancingCard}
         defaultCurrency={config.baseCurrency}
+        display={display}
       />
 
       <LoanSheet

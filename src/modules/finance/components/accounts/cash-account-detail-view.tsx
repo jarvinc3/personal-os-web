@@ -185,6 +185,7 @@ function CashAccountDetailView({ accountId }: CashAccountDetailClientProps) {
         account={account}
         institutions={institutions}
         defaultCurrency={config.baseCurrency}
+        display={display}
       />
     </>
   )

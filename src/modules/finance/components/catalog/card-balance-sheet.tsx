@@ -7,6 +7,10 @@ import {
   nextUnusedCurrency,
 } from "@/src/modules/finance/lib/catalog-payloads"
 import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
+import {
+  formatFinanceMoney,
+  type FinanceMoneyDisplay,
+} from "@/src/modules/finance/lib/money"
 import type { FinanceCard } from "@/src/modules/finance/types/entities"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
 import { FormTextField } from "@/src/shared/components/layout/form-blocks"
@@ -64,6 +68,7 @@ type CardBalanceSheetProps = {
   onOpenChange: (open: boolean) => void
   card: FinanceCard | null
   defaultCurrency: string
+  display: FinanceMoneyDisplay
   pending?: boolean
 }
 
@@ -72,6 +77,7 @@ export function CardBalanceSheet({
   onOpenChange,
   card,
   defaultCurrency,
+  display,
   pending = false,
 }: CardBalanceSheetProps) {
   return (
@@ -81,6 +87,7 @@ export function CardBalanceSheet({
       onOpenChange={onOpenChange}
       card={card}
       defaultCurrency={defaultCurrency}
+      display={display}
       pending={pending}
     />
   )
@@ -91,6 +98,7 @@ function CardBalanceSheetForm({
   onOpenChange,
   card,
   defaultCurrency,
+  display,
   pending = false,
 }: CardBalanceSheetProps) {
   const mutation = useUpdateCardBalance()
@@ -203,7 +211,10 @@ function CardBalanceSheetForm({
           >
             <span className="font-medium">{item.currency}</span>
             <span className="text-muted-foreground tabular-nums">
-              {item.balance}
+              {formatFinanceMoney(item.balance, {
+                ...display,
+                currency: item.currency,
+              })}
             </span>
           </button>
         ))}

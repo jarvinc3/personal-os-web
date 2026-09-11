@@ -13,6 +13,10 @@ import {
 } from "@/src/modules/finance/hooks/use-accounts"
 import { buildCreateAccountBody } from "@/src/modules/finance/lib/catalog-payloads"
 import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
+import {
+  formatFinanceMoney,
+  type FinanceMoneyDisplay,
+} from "@/src/modules/finance/lib/money"
 import type {
   FinanceAccount,
   FinanceInstitution,
@@ -85,6 +89,7 @@ type AccountSheetProps = {
   account: FinanceAccount | null
   institutions: FinanceInstitution[]
   defaultCurrency: string
+  display: FinanceMoneyDisplay
   defaultInstitutionId?: string
   pending?: boolean
 }
@@ -95,6 +100,7 @@ export function AccountSheet({
   account,
   institutions,
   defaultCurrency,
+  display,
   defaultInstitutionId,
   pending = false,
 }: AccountSheetProps) {
@@ -164,7 +170,10 @@ export function AccountSheet({
         const created = await createMutation.mutateAsync(payload.body)
         appToast.success({
           text1: "Cuenta creada",
-          text2: `El saldo arranca en ${created.balance}.`,
+          text2: `El saldo arranca en ${formatFinanceMoney(created.balance, {
+            ...display,
+            currency: created.currency,
+          })}.`,
         })
       }
       onOpenChange(false)
