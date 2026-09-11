@@ -8,6 +8,7 @@ export {
   useSpendingByCategory,
   useSpendingOverTime
 } from "@/src/modules/finance/hooks/use-analytics";
+export { useBalanceSheet } from "@/src/modules/finance/hooks/use-balance-sheet";
 export { useBudgets } from "@/src/modules/finance/hooks/use-budgets";
 export { useCards } from "@/src/modules/finance/hooks/use-cards";
 export { useCategories } from "@/src/modules/finance/hooks/use-categories";
@@ -30,6 +31,7 @@ export type * from "@/src/modules/finance/types/api";
 export {
   FINANCE_ACCOUNTS_QUERY_KEY,
   FINANCE_ANALYTICS_QUERY_KEY,
+  FINANCE_BALANCE_SHEET_QUERY_KEY,
   FINANCE_BUDGETS_QUERY_KEY,
   FINANCE_CARDS_QUERY_KEY,
   FINANCE_CATEGORIES_QUERY_KEY,

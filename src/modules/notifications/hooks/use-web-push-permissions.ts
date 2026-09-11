@@ -57,6 +57,8 @@ export function useWebPushPermissions() {
   }, []);
 
   useEffect(() => {
+    // Notification.permission is browser state and must be read after hydration.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     refreshStatus();
   }, [refreshStatus, pushToken]);
 

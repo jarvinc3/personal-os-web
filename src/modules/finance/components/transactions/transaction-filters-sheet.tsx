@@ -1,11 +1,9 @@
 "use client"
 
+import { FinanceDateField } from "@/src/modules/finance/components/forms/finance-date-field";
 import { FINANCE_TX_FILTER_ALL } from "@/src/modules/finance/lib/transactions-query";
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet";
-import {
-  FormTextField,
-  SelectField,
-} from "@/src/shared/components/layout/form-blocks";
+import { SelectField } from "@/src/shared/components/layout/form-blocks";
 import { Button } from "@/src/shared/components/ui/button";
 import { SummarySection } from "@/src/shared/components/ui/summary";
 import { SlidersHorizontal } from "lucide-react";
@@ -115,17 +113,17 @@ export function TransactionFiltersSheet({
       }}
     >
       <SummarySection title="Criterios" icon={SlidersHorizontal}>
-        <FormTextField
+        <FinanceDateField
           label="Desde"
-          type="date"
           value={draft.dateFrom}
           onChange={(value) => updateDraft("dateFrom", value)}
+          optional
         />
-        <FormTextField
+        <FinanceDateField
           label="Hasta"
-          type="date"
           value={draft.dateTo}
           onChange={(value) => updateDraft("dateTo", value)}
+          optional
         />
         <SelectField
           label="Cuenta"

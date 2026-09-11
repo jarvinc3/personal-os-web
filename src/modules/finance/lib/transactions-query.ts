@@ -92,11 +92,33 @@ export function formatTransactionDate(value: string): string {
   })
 }
 
+export function isTransferTransaction(
+  item: Pick<FinanceTransaction, "type" | "transferGroupId">,
+): boolean {
+  return item.type === "TRANSFER" || Boolean(item.transferGroupId)
+}
+
+export function transferDirectionLabel(
+  item: Pick<
+    FinanceTransaction,
+    | "accountName"
+    | "cardName"
+    | "transferToAccountName"
+    | "transferToCardName"
+  >,
+): string {
+  const origin = item.accountName ?? item.cardName ?? "Origen"
+  const destination =
+    item.transferToAccountName ?? item.transferToCardName ?? "Destino"
+  return `${origin} → ${destination}`
+}
+
 export function visibleTransactionTotals(
-  items: Pick<FinanceTransaction, "type" | "amount">[],
+  items: Pick<FinanceTransaction, "type" | "amount" | "transferGroupId">[],
 ): { income: number; expenses: number } {
   return items.reduce(
     (totals, item) => {
+      if (isTransferTransaction(item)) return totals
       const amount = parseFinanceMoney(item.amount)
       if (amount === null) return totals
       if (item.type === "CREDIT") totals.income += amount

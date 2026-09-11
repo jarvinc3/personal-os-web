@@ -3,6 +3,7 @@ import { describe, it } from "node:test";
 
 import {
   buildTransactionsSearchParams,
+  transferDirectionLabel,
   transactionsFromPayload,
   visibleTransactionTotals,
 } from "./transactions-query.ts";
@@ -67,12 +68,27 @@ describe("transactionsFromPayload", () => {
 describe("visibleTransactionTotals", () => {
   it("splits CREDIT into income and DEBIT into expenses, ignoring transfers", () => {
     const totals = visibleTransactionTotals([
-      { type: "CREDIT", amount: "10.00" },
-      { type: "DEBIT", amount: "3.25" },
-      { type: "DEBIT", amount: "10.00" },
-      { type: "TRANSFER", amount: "50.00" },
+      { type: "CREDIT", amount: "10.00", transferGroupId: null },
+      { type: "DEBIT", amount: "3.25", transferGroupId: null },
+      { type: "DEBIT", amount: "10.00", transferGroupId: null },
+      { type: "TRANSFER", amount: "50.00", transferGroupId: "grp-1" },
+      { type: "DEBIT", amount: "100.00", transferGroupId: "grp-2" },
     ])
     assert.equal(totals.income, 10)
     assert.equal(totals.expenses, 13.25)
+  })
+})
+
+describe("transferDirectionLabel", () => {
+  it("joins origin and destination names", () => {
+    assert.equal(
+      transferDirectionLabel({
+        accountName: "Nómina",
+        cardName: null,
+        transferToAccountName: "Ahorros",
+        transferToCardName: null,
+      }),
+      "Nómina → Ahorros",
+    )
   })
 })

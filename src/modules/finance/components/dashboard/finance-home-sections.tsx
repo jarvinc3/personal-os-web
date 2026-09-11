@@ -7,7 +7,11 @@ import {
   parseFinanceMoney,
   type FinanceMoneyDisplay,
 } from "@/src/modules/finance/lib/money"
-import { formatTransactionDate } from "@/src/modules/finance/lib/transactions-query"
+import {
+  formatTransactionDate,
+  isTransferTransaction,
+  transferDirectionLabel,
+} from "@/src/modules/finance/lib/transactions-query"
 import {
   FINANCE_TRANSACTION_STATUS_LABEL,
   type FinanceCategory,
@@ -137,6 +141,7 @@ function signedAmount(
     parsed === null ? null : Math.abs(parsed),
     { ...display, currency: transaction.currency }
   )
+  if (isTransferTransaction(transaction)) return formatted
   if (transaction.type === "DEBIT") return `− ${formatted}`
   if (transaction.type === "CREDIT") return `+ ${formatted}`
   return formatted
@@ -190,20 +195,25 @@ export function RecentTransactionsSection({
       ) : (
         <div className="flex flex-col">
           {transactions.map((transaction, index) => {
+            const isTransfer = isTransferTransaction(transaction)
             const category = transaction.categoryId
               ? categoryById.get(transaction.categoryId)
               : undefined
             const parent = category?.parentId
               ? categoryById.get(category.parentId)
               : undefined
-            const icon = category?.icon?.trim() || parent?.icon?.trim()
-            const color =
-              category?.color?.trim() || parent?.color?.trim() || "#64748B"
-            const title =
-              transaction.merchant ??
-              transaction.description ??
-              transaction.accountName ??
-              "Movimiento"
+            const icon = isTransfer
+              ? undefined
+              : category?.icon?.trim() || parent?.icon?.trim()
+            const color = isTransfer
+              ? "#3B82F6"
+              : category?.color?.trim() || parent?.color?.trim() || "#64748B"
+            const title = isTransfer
+              ? transferDirectionLabel(transaction)
+              : (transaction.merchant ??
+                transaction.description ??
+                transaction.accountName ??
+                "Movimiento")
 
             return (
               <SummaryItem
@@ -214,22 +224,24 @@ export function RecentTransactionsSection({
                 leading={
                   icon ? (
                     <span>{icon}</span>
-                  ) : (
-                    transaction.type === "DEBIT" ? (
-                      <ArrowDownLeftIcon className="size-5 text-destructive" />
-                    ) : transaction.type === "CREDIT" ? (
-                      <ArrowUpRightIcon className="size-5 text-success" />
-                    ) : transaction.type === "TRANSFER" ? (
-                      <ArrowLeftRightIcon className="size-5 text-info" />
-                    ) : null
-                  )
+                  ) : isTransfer ? (
+                    <ArrowLeftRightIcon className="size-5 text-info" />
+                  ) : transaction.type === "DEBIT" ? (
+                    <ArrowDownLeftIcon className="size-5 text-destructive" />
+                  ) : transaction.type === "CREDIT" ? (
+                    <ArrowUpRightIcon className="size-5 text-success" />
+                  ) : null
                 }
                 accentColor={color}
                 value={
                   <span
                     className={cn(
-                      transaction.type === "DEBIT" && "text-destructive",
-                      transaction.type === "CREDIT" && "text-success"
+                      !isTransfer &&
+                        transaction.type === "DEBIT" &&
+                        "text-destructive",
+                      !isTransfer &&
+                        transaction.type === "CREDIT" &&
+                        "text-success"
                     )}
                   >
                     {signedAmount(transaction, display)}

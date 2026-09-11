@@ -18,6 +18,10 @@ import {
   parseOAuthSuccessParam,
   type GmailOAuthNextPath,
 } from "@/src/modules/finance/lib/gmail-oauth"
+import {
+  formatFinanceMoney,
+  type FinanceMoneyDisplay,
+} from "@/src/modules/finance/lib/money"
 import type {
   FinanceEmailSource,
   FinancePendingEmailMessage,
@@ -53,11 +57,17 @@ function sourceRowValue(source: FinanceEmailSource): string {
   return `${source.bankDomain} · ${status} · ${synced}`
 }
 
-function pendingRowValue(message: FinancePendingEmailMessage): string {
+function pendingRowValue(
+  message: FinancePendingEmailMessage,
+  display: FinanceMoneyDisplay,
+): string {
   const payload = message.extractedPayload
   const amount =
     payload?.amount != null
-      ? `${payload.amount} ${payload.currency ?? ""}`.trim()
+      ? formatFinanceMoney(payload.amount, {
+          ...display,
+          currency: payload.currency ?? display.currency,
+        })
       : message.lastFourHint
         ? `****${message.lastFourHint}`
         : "Sin monto"
@@ -70,7 +80,12 @@ export function FinanceSyncList({
 }: FinanceSyncListProps) {
   const searchParams = useSearchParams()
   const oauthState = parseOAuthSuccessParam(searchParams.get("success"))
-  const { emailSyncEnabled } = useFinanceEnabled()
+  const { emailSyncEnabled, config } = useFinanceEnabled()
+  const display = {
+    currency: config.baseCurrency,
+    showCents: config.display.showCents,
+    compactNumbers: config.display.compactNumbers,
+  }
   const { open: openConnectSheet, setOpen: setOpenConnectSheet } =
     useSheetParam(FINANCE_SHEET_KEYS.connectGmail)
   const {
@@ -154,7 +169,7 @@ export function FinanceSyncList({
               title={
                 message.extractedPayload?.merchant ?? message.gmailMessageId
               }
-              value={pendingRowValue(message)}
+              value={pendingRowValue(message, display)}
               icon={InboxIcon}
               onPress={() => setOpenAssignSheet(true, message.id)}
               isLast={index === pending.length - 1}
@@ -261,6 +276,7 @@ export function FinanceSyncList({
         message={assigning}
         accounts={accounts}
         cards={cards}
+        display={display}
       />
     </>
   )

@@ -9,6 +9,7 @@ import { buildCreateInstitutionBody } from "@/src/modules/finance/lib/catalog-pa
 import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
 import type { FinanceInstitution } from "@/src/modules/finance/types/entities"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+import { FinancePreviewRow } from "@/src/modules/finance/components/forms/finance-form-blocks"
 import { FormTextField } from "@/src/shared/components/layout/form-blocks"
 import { Button } from "@/src/shared/components/ui/button"
 import { ColorPickerSwatch } from "@/src/shared/components/ui/color-picker"
@@ -20,7 +21,7 @@ import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Building2Icon, Palette } from "lucide-react"
 import { useEffect, useMemo } from "react"
-import { Controller, useForm } from "react-hook-form"
+import { Controller, useForm, useWatch } from "react-hook-form"
 import { z } from "zod"
 
 const schema = z.object({
@@ -70,6 +71,9 @@ export function InstitutionSheet({
     resolver: zodResolver(schema),
     defaultValues: toFormValues(institution),
   })
+  const institutionName = useWatch({ control, name: "name" })
+  const institutionColor = useWatch({ control, name: "color" })
+  const institutionCountry = useWatch({ control, name: "country" })
 
   useEffect(() => {
     if (open) {
@@ -150,6 +154,12 @@ export function InstitutionSheet({
       }}
     >
       <SummarySection title="Institución" icon={Building2Icon}>
+        <FinancePreviewRow
+          icon={Building2Icon}
+          title={institutionName.trim() || "Nueva institución"}
+          description={institutionCountry.trim() || "País"}
+          accentColor={institutionColor || undefined}
+        />
         <Controller
           control={control}
           name="name"

@@ -1,5 +1,6 @@
 "use client"
 
+import { FinancePreviewRow } from "@/src/modules/finance/components/forms/finance-form-blocks"
 import { CATALOG_NONE } from "@/src/modules/finance/constants/catalog"
 import {
   useCreateCategory,
@@ -24,7 +25,7 @@ import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Palette, TagsIcon } from "lucide-react"
 import { useEffect, useMemo } from "react"
-import { Controller, useForm } from "react-hook-form"
+import { Controller, useForm, useWatch } from "react-hook-form"
 import { z } from "zod"
 
 const schema = z.object({
@@ -92,6 +93,9 @@ export function CategorySheet({
     resolver: zodResolver(schema),
     defaultValues: toFormValues(category),
   })
+  const categoryName = useWatch({ control, name: "name" })
+  const categoryIcon = useWatch({ control, name: "icon" })
+  const categoryColor = useWatch({ control, name: "color" })
 
   useEffect(() => {
     if (open) {
@@ -184,6 +188,12 @@ export function CategorySheet({
       }}
     >
       <SummarySection title="Categoría" icon={TagsIcon}>
+        <FinancePreviewRow
+          icon={TagsIcon}
+          title={`${categoryIcon.trim() ? `${categoryIcon.trim()} ` : ""}${categoryName.trim() || "Nueva categoría"}`}
+          description="Usa un emoji como icono"
+          accentColor={categoryColor || undefined}
+        />
         <Controller
           control={control}
           name="name"

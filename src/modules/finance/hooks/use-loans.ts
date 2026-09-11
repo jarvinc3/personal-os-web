@@ -7,9 +7,11 @@ import { FINANCE_LOANS_QUERY_KEY } from "@/src/modules/finance/types/api"
 import type { FinanceLoan } from "@/src/modules/finance/types/entities"
 import { API_ENDPOINTS } from "@/src/shared/constants/api-endpoints"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { invalidateFinanceBalanceSheet } from "@/src/modules/finance/hooks/use-balance-sheet"
 
 function invalidate(queryClient: ReturnType<typeof useQueryClient>) {
   void queryClient.invalidateQueries({ queryKey: FINANCE_LOANS_QUERY_KEY })
+  invalidateFinanceBalanceSheet(queryClient)
 }
 
 export function useLoans(enabled: boolean) {

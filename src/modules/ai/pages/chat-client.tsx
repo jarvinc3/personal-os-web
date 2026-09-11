@@ -101,6 +101,8 @@ export function ChatClient() {
 
   useEffect(() => {
     const fromParams = parseSessionIdParam(searchParams.get("sessionId"))
+    // URL navigation is an external source that must reset the optimistic chat state.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSessionId(fromParams)
     if (!fromParams && !isSendingRef.current) {
       setLocalMessages([])
@@ -110,6 +112,8 @@ export function ChatClient() {
   useEffect(() => {
     const moduleParam = searchParams.get("module")
     if (moduleParam) {
+      // Keep local selection aligned with browser back/forward navigation.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setModuleSlug(parseModuleParam(moduleParam))
     }
   }, [searchParams])
@@ -123,6 +127,8 @@ export function ChatClient() {
       ? parseModuleChatSlug(sessionQuery.data.moduleSlug)
       : null
     if (sessionModule && sessionModule !== moduleSlug) {
+      // The persisted session context is authoritative after the query resolves.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setModuleSlug(sessionModule)
     }
 

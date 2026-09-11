@@ -9,7 +9,11 @@ import {
 import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/lib/money"
 import { formatFinanceMoney } from "@/src/modules/finance/lib/money"
-import { formatTransactionDate } from "@/src/modules/finance/lib/transactions-query"
+import {
+  formatTransactionDate,
+  isTransferTransaction,
+  transferDirectionLabel,
+} from "@/src/modules/finance/lib/transactions-query"
 import {
   FINANCE_TRANSACTION_STATUS_LABEL,
   FINANCE_TRANSACTION_TYPE_LABEL,
@@ -40,6 +44,7 @@ function typeLabel(type: string): string {
 }
 
 function canEdit(tx: FinanceTransaction): boolean {
+  if (isTransferTransaction(tx)) return false
   return tx.type === "DEBIT" || tx.type === "CREDIT"
 }
 
@@ -109,7 +114,7 @@ export function TransactionDetailSheet({
     <BottomSheet
       open={open}
       onOpenChange={onOpenChange}
-      title="Movimiento"
+      title={tx && isTransferTransaction(tx) ? "Transferencia" : "Movimiento"}
       description={tx ? formatTransactionDate(tx.transactionDate) : undefined}
       actions={{
         delete: tx ? (
@@ -181,18 +186,45 @@ export function TransactionDetailSheet({
               isLast={false}
               className="px-3"
             />
-            <SummaryItem
-              title="Cuenta"
-              value={tx.accountName ?? "—"}
-              isLast={false}
-              className="px-3"
-            />
-            <SummaryItem
-              title="Tarjeta"
-              value={tx.cardName ?? "—"}
-              isLast={false}
-              className="px-3"
-            />
+            {isTransferTransaction(tx) ? (
+              <>
+                <SummaryItem
+                  title="Origen"
+                  value={tx.accountName ?? tx.cardName ?? "—"}
+                  isLast={false}
+                  className="px-3"
+                />
+                <SummaryItem
+                  title="Destino"
+                  value={
+                    tx.transferToAccountName ?? tx.transferToCardName ?? "—"
+                  }
+                  isLast={false}
+                  className="px-3"
+                />
+                <SummaryItem
+                  title="Ruta"
+                  value={transferDirectionLabel(tx)}
+                  isLast={false}
+                  className="px-3"
+                />
+              </>
+            ) : (
+              <>
+                <SummaryItem
+                  title="Cuenta"
+                  value={tx.accountName ?? "—"}
+                  isLast={false}
+                  className="px-3"
+                />
+                <SummaryItem
+                  title="Tarjeta"
+                  value={tx.cardName ?? "—"}
+                  isLast={false}
+                  className="px-3"
+                />
+              </>
+            )}
             <SummaryItem
               title="Comercio"
               value={tx.merchant ?? "—"}
@@ -202,17 +234,9 @@ export function TransactionDetailSheet({
             <SummaryItem
               title="Descripción"
               value={tx.description ?? "—"}
-              isLast={!tx.transferGroupId}
+              isLast
               className="px-3"
             />
-            {tx.transferGroupId ? (
-              <SummaryItem
-                title="Grupo de transferencia"
-                value={tx.transferGroupId}
-                isLast
-                className="px-3"
-              />
-            ) : null}
           </SettingsSection>
           {canConfirm(tx) || canReverse(tx) ? (
             <div className="flex flex-col gap-2 sm:flex-row">

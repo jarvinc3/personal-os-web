@@ -3,8 +3,8 @@ import { describe, it } from "node:test"
 
 import {
   buildInstitutionStackItems,
-  computeInstitutionConsolidatedBalance,
   formatProductCounts,
+  formatStackItemBalance,
   institutionInitials,
 } from "./institution-stack.ts"
 import type {
@@ -13,6 +13,12 @@ import type {
   FinanceInstitution,
   FinanceLoan,
 } from "../types/entities.ts"
+
+const display = {
+  currency: "DOP",
+  showCents: false,
+  compactNumbers: false,
+}
 
 function account(
   partial: Partial<FinanceAccount> & Pick<FinanceAccount, "id" | "name">,
@@ -90,39 +96,6 @@ describe("formatProductCounts", () => {
   })
 })
 
-describe("computeInstitutionConsolidatedBalance", () => {
-  it("sums accounts and subtracts credit cards and loans, not debit", () => {
-    const total = computeInstitutionConsolidatedBalance({
-      accounts: [
-        account({ id: "a1", name: "Main", balance: "100000" }),
-        account({ id: "a2", name: "Savings", balance: "50000" }),
-      ],
-      cards: [
-        card({
-          id: "c1",
-          name: "Gold",
-          institutionId: "i1",
-          type: "CREDIT",
-          balances: [
-            { id: "b1", currency: "DOP", balance: "18500", creditLimit: null },
-          ],
-        }),
-        card({
-          id: "c2",
-          name: "Debit",
-          institutionId: "i1",
-          type: "DEBIT",
-          balances: [
-            { id: "b2", currency: "DOP", balance: "99999", creditLimit: null },
-          ],
-        }),
-      ],
-      loans: [loan({ id: "l1", lenderName: "Auto", currentBalance: "13500" })],
-    })
-    assert.equal(total, 100000 + 50000 - 18500 - 13500)
-  })
-})
-
 describe("buildInstitutionStackItems", () => {
   const institutions: FinanceInstitution[] = [
     {
@@ -143,7 +116,7 @@ describe("buildInstitutionStackItems", () => {
     },
   ]
 
-  it("builds institution cards then unlinked cash accounts", () => {
+  it("attaches API net worth without summing local balances", () => {
     const items = buildInstitutionStackItems({
       institutions,
       accounts: [
@@ -178,7 +151,15 @@ describe("buildInstitutionStackItems", () => {
           ],
         }),
       ],
-      loans: [],
+      loans: [loan({ id: "l1", lenderName: "Auto", institutionId: "i1", currentBalance: "13500" })],
+      positions: [
+        {
+          institutionId: "i1",
+          status: "COMPLETE",
+          netWorth: "-8549.27",
+          issues: [],
+        },
+      ],
     })
 
     assert.equal(items.length, 2)
@@ -186,12 +167,67 @@ describe("buildInstitutionStackItems", () => {
     if (items[0]?.kind === "institution") {
       assert.equal(items[0].counts.accounts, 2)
       assert.equal(items[0].counts.cards, 1)
-      assert.equal(items[0].consolidatedBalance, 84500 + 50 - 18500)
+      assert.equal(items[0].counts.loans, 1)
+      assert.equal(items[0].status, "COMPLETE")
+      assert.equal(items[0].netWorth, "-8549.27")
     }
     assert.equal(items[1]?.kind, "cash")
     if (items[1]?.kind === "cash") {
       assert.equal(items[1].account.name, "Billetera")
-      assert.equal(items[1].consolidatedBalance, 1200)
+      assert.equal(items[1].balance, "1200")
     }
+  })
+
+  it("marks institutions incomplete when the snapshot has no position", () => {
+    const items = buildInstitutionStackItems({
+      institutions,
+      accounts: [
+        account({
+          id: "a1",
+          name: "Cuenta Principal",
+          institutionId: "i1",
+          balance: "84500",
+        }),
+      ],
+      cards: [],
+      loans: [],
+    })
+
+    assert.equal(items[0]?.kind, "institution")
+    if (items[0]?.kind === "institution") {
+      assert.equal(items[0].status, "INCOMPLETE")
+      assert.equal(items[0].netWorth, null)
+    }
+  })
+})
+
+describe("formatStackItemBalance", () => {
+  it("hides incomplete net worth", () => {
+    const items = buildInstitutionStackItems({
+      institutions: [
+        {
+          id: "i1",
+          name: "BHD",
+          color: null,
+          logoUrl: null,
+          country: "DO",
+          isActive: true,
+        },
+      ],
+      accounts: [],
+      cards: [],
+      loans: [],
+      positions: [
+        {
+          institutionId: "i1",
+          status: "INCOMPLETE",
+          netWorth: null,
+          issues: [{ code: "MISSING_CREDIT_LIMIT", cardId: "c1", currency: "DOP" }],
+        },
+      ],
+    })
+    assert.equal(items[0]?.kind, "institution")
+    if (items[0]?.kind !== "institution") return
+    assert.equal(formatStackItemBalance(items[0], display), "Balance incompleto")
   })
 })

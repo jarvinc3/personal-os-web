@@ -1,6 +1,10 @@
 "use client"
 
-import { CurrencySelectField } from "@/src/modules/finance/components/catalog/currency-select-field"
+import { FinanceCurrencyPills } from "@/src/modules/finance/components/forms/finance-currency-pills"
+import {
+  FinancePreviewRow,
+  FinanceSegmentedControl,
+} from "@/src/modules/finance/components/forms/finance-form-blocks"
 import {
   CATALOG_NONE,
   FINANCE_CARD_NETWORK_LABEL,
@@ -20,6 +24,7 @@ import {
   cardBalanceSaveMessage,
   nextUnusedCurrency,
 } from "@/src/modules/finance/lib/catalog-payloads"
+import { buildFinanceCurrencyOptions } from "@/src/modules/finance/lib/finance-currency"
 import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
 import type {
   FinanceAccount,
@@ -76,13 +81,10 @@ const TYPE_OPTIONS = FINANCE_CARD_TYPES.map((value) => ({
   label: FINANCE_CARD_TYPE_LABEL[value],
 }))
 
-const NETWORK_OPTIONS = [
-  { value: CATALOG_NONE, label: "Sin red" },
-  ...FINANCE_CARD_NETWORKS.map((value) => ({
-    value,
-    label: FINANCE_CARD_NETWORK_LABEL[value],
-  })),
-]
+const NETWORK_OPTIONS = FINANCE_CARD_NETWORKS.map((value) => ({
+  value,
+  label: FINANCE_CARD_NETWORK_LABEL[value],
+}))
 
 function emptyBalanceRow(currency: string) {
   return { currency, balance: "", creditLimit: "" }
@@ -98,7 +100,7 @@ function toFormValues(
     type: card?.type ?? "CREDIT",
     institutionId: card?.institutionId ?? defaultInstitutionId,
     accountId: card?.accountId ?? CATALOG_NONE,
-    network: card?.network ?? CATALOG_NONE,
+    network: card?.network ?? "VISA",
     lastFour: card?.lastFour ?? "",
     statementClosingDay: card?.statementClosingDay
       ? String(card.statementClosingDay)
@@ -174,6 +176,10 @@ export function CardSheet({
   const selectedInstitutionId = useWatch({ control, name: "institutionId" })
   const selectedAccountId = useWatch({ control, name: "accountId" })
   const watchedBalances = useWatch({ control, name: "balances" })
+  const cardName = useWatch({ control, name: "name" })
+  const cardNetwork = useWatch({ control, name: "network" })
+  const cardColor = useWatch({ control, name: "color" })
+  const lastFour = useWatch({ control, name: "lastFour" })
 
   const institutionOptions = institutions.map((item) => ({
     value: item.id,
@@ -190,6 +196,11 @@ export function CardSheet({
     })),
   ]
   const hasInstitutions = institutionOptions.length > 0
+  const allowedCurrencies = buildFinanceCurrencyOptions(defaultCurrency)
+  const usedCurrencies = (watchedBalances ?? []).map((row) => row.currency)
+  const canAddCurrency = allowedCurrencies.some(
+    (code) => !usedCurrencies.some((used) => used.toUpperCase() === code)
+  )
 
   useEffect(() => {
     if (open) {
@@ -277,6 +288,13 @@ export function CardSheet({
     }
   }
 
+  const networkLabel =
+    cardNetwork && cardNetwork !== CATALOG_NONE
+      ? (FINANCE_CARD_NETWORK_LABEL[
+          cardNetwork as keyof typeof FINANCE_CARD_NETWORK_LABEL
+        ] ?? cardNetwork)
+      : "Sin red"
+
   return (
     <BottomSheet
       open={open}
@@ -359,6 +377,12 @@ export function CardSheet({
       </SummarySection>
 
       <SummarySection title="Tarjeta" icon={CreditCardIcon}>
+        <FinancePreviewRow
+          icon={CreditCardIcon}
+          title={cardName.trim() || "Nueva tarjeta"}
+          description={`${FINANCE_CARD_TYPE_LABEL[cardType]} · ${networkLabel}${lastFour ? ` · •••• ${lastFour}` : ""}`}
+          accentColor={cardColor || undefined}
+        />
         <Controller
           control={control}
           name="name"
@@ -377,7 +401,7 @@ export function CardSheet({
           control={control}
           name="type"
           render={({ field }) => (
-            <SelectField
+            <FinanceSegmentedControl
               label="Tipo"
               value={field.value}
               onChange={field.onChange}
@@ -389,9 +413,9 @@ export function CardSheet({
           control={control}
           name="network"
           render={({ field }) => (
-            <SelectField
+            <FinanceSegmentedControl
               label="Red"
-              value={field.value}
+              value={field.value === CATALOG_NONE ? "VISA" : field.value}
               onChange={field.onChange}
               options={NETWORK_OPTIONS}
             />
@@ -465,7 +489,7 @@ export function CardSheet({
       {!isEdit ? (
         <SummarySection title="Saldos iniciales" icon={DollarSign}>
           {balanceFields.map((field, index) => {
-            const usedCurrencies = (watchedBalances ?? [])
+            const usedByOthers = (watchedBalances ?? [])
               .map((row, rowIndex) => (rowIndex === index ? "" : row.currency))
               .filter(Boolean)
             return (
@@ -474,13 +498,13 @@ export function CardSheet({
                   control={control}
                   name={`balances.${index}.currency`}
                   render={({ field: currencyField }) => (
-                    <CurrencySelectField
+                    <FinanceCurrencyPills
                       label="Moneda"
                       value={currencyField.value}
                       onChange={currencyField.onChange}
-                      enabled={open}
+                      baseCurrency={defaultCurrency}
                       extraCodes={[defaultCurrency, currencyField.value]}
-                      excludeCodes={usedCurrencies}
+                      excludeCodes={usedByOthers}
                     />
                   )}
                 />
@@ -524,22 +548,24 @@ export function CardSheet({
               </div>
             )
           })}
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() =>
-              appendBalance(
-                emptyBalanceRow(
-                  nextUnusedCurrency(
-                    (watchedBalances ?? []).map((row) => row.currency),
-                    defaultCurrency
+          {canAddCurrency ? (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() =>
+                appendBalance(
+                  emptyBalanceRow(
+                    nextUnusedCurrency(
+                      (watchedBalances ?? []).map((row) => row.currency),
+                      defaultCurrency
+                    )
                   )
                 )
-              )
-            }
-          >
-            Agregar moneda
-          </Button>
+              }
+            >
+              Agregar moneda
+            </Button>
+          ) : null}
         </SummarySection>
       ) : card ? (
         <SummarySection title="Saldo" icon={DollarSign}>

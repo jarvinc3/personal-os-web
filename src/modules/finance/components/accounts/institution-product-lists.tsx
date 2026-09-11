@@ -154,7 +154,7 @@ export function CardProductRow({
       <div className="flex items-end justify-between gap-3">
         <div className="min-w-0">
           <p className="text-[10px] tracking-[0.14em] text-white/55 uppercase">
-            Balance
+            {card.type === "CREDIT" ? "Balance disponible" : "Saldo"}
           </p>
           {card.balances.length === 0 ? (
             <p className="text-xl font-bold tabular-nums">Sin saldo</p>

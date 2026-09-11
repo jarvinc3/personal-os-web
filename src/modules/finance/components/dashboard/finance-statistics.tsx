@@ -11,6 +11,7 @@ import {
   useSpendingByCategory,
   useSpendingOverTime,
 } from "@/src/modules/finance/hooks/use-analytics";
+import { useBalanceSheet } from "@/src/modules/finance/hooks/use-balance-sheet";
 import { useFinanceEnabled } from "@/src/modules/finance/hooks/use-finance-enabled";
 import {
   FINANCE_DASHBOARD_PERIOD_OPTIONS,
@@ -55,12 +56,16 @@ export function FinanceStatistics() {
   }
 
   const summaryQuery = useAnalyticsSummary(isEnabled, range)
+  const balanceSheetQuery = useBalanceSheet(isEnabled)
   const spendingQuery = useSpendingByCategory(isEnabled, range)
   const overTimeQuery = useSpendingOverTime(isEnabled, range)
   const budgetsQuery = useBudgetStatus(isEnabled)
   const moneyDisplay = {
     ...display,
-    currency: summaryQuery.data?.baseCurrency ?? display.currency,
+    currency:
+      balanceSheetQuery.data?.baseCurrency ??
+      summaryQuery.data?.baseCurrency ??
+      display.currency,
   }
 
   const buckets = Array.isArray(spendingQuery.data) ? spendingQuery.data : []
@@ -82,19 +87,32 @@ export function FinanceStatistics() {
   const budgets = Array.isArray(budgetsQuery.data)
     ? budgetsQuery.data.filter((row) => Number.isFinite(row.pctUsed))
     : []
-  const chartsSettled =
-    !spendingQuery.isPending &&
-    !overTimeQuery.isPending &&
-    !budgetsQuery.isPending
-  const chartsEmpty =
-    chartsSettled &&
-    !spendingQuery.isError &&
-    !overTimeQuery.isError &&
-    !budgetsQuery.isError &&
-    !hasSpending &&
-    !hasSeries &&
-    budgets.length === 0
-  const summaryPending = summaryQuery.isPending && !summaryQuery.data
+  const summaryPending = balanceSheetQuery.isPending && !balanceSheetQuery.data
+  const summaryError = balanceSheetQuery.error
+  const summaryStats = balanceSheetQuery.data
+    ? [
+      {
+        key: "accountBalance",
+        label: "Cuentas",
+        value: balanceSheetQuery.data.global.assets.accounts,
+      },
+      {
+        key: "cardDebt",
+        label: "Deuda tarjetas",
+        value: balanceSheetQuery.data.global.liabilities.creditCards,
+      },
+      {
+        key: "income",
+        label: "Ingresos",
+        value: summaryQuery.data?.totals.income ?? null,
+      },
+      {
+        key: "expenses",
+        label: "Gastos",
+        value: summaryQuery.data?.totals.expenses ?? null,
+      },
+    ]
+    : null
 
   return (
     <div className="flex flex-col gap-4">
@@ -113,32 +131,24 @@ export function FinanceStatistics() {
           <div className="flex justify-center py-12">
             <Spinner />
           </div>
-        ) : summaryQuery.isError ? (
+        ) : summaryError ? (
           <p className="text-sm text-destructive">
-            {summaryErrorCopy(summaryQuery.error)}
+            {summaryErrorCopy(summaryError)}
           </p>
-        ) : summaryQuery.data ? (
-          <FinanceSummaryStats
-            summary={summaryQuery.data}
-            display={moneyDisplay}
-          />
+        ) : summaryStats ? (
+          <>
+            <FinanceSummaryStats
+              stats={summaryStats}
+              display={moneyDisplay}
+            />
+            {summaryQuery.isError ? (
+              <p className="text-sm text-destructive">
+                {summaryErrorCopy(summaryQuery.error)}
+              </p>
+            ) : null}
+          </>
         ) : null}
       </SummarySection>
-
-      {chartsEmpty && summaryQuery.isSuccess ? (
-        <Empty>
-          <EmptyHeader>
-            <EmptyMedia variant="icon">
-              <LandmarkIcon />
-            </EmptyMedia>
-            <EmptyTitle>Todavía no hay movimiento</EmptyTitle>
-            <EmptyDescription>
-              Cuando haya transacciones confirmadas verás gasto por categoría y
-              la serie en el tiempo. Los totales usan la moneda base del API.
-            </EmptyDescription>
-          </EmptyHeader>
-        </Empty>
-      ) : null}
 
       <SummarySection
         title="Gastos por categoría"
@@ -151,7 +161,19 @@ export function FinanceStatistics() {
           </p>
         ) : hasSpending ? (
           <FinanceSpendingChart buckets={buckets} display={moneyDisplay} />
-        ) : null}
+        ) : (
+          <Empty>
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <BarChart3Icon />
+              </EmptyMedia>
+              <EmptyTitle>Todavía no hay gastos</EmptyTitle>
+              <EmptyDescription>
+                Cuando haya transacciones confirmadas verás gasto por categoría.
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
+        )}
       </SummarySection>
 
       <SummarySection
@@ -168,7 +190,19 @@ export function FinanceStatistics() {
             series={overTimeQuery.data}
             display={moneyDisplay}
           />
-        ) : null}
+        ) : (
+          <Empty>
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <BarChart3Icon />
+              </EmptyMedia>
+              <EmptyTitle>Todavía no hay gastos</EmptyTitle>
+              <EmptyDescription>
+                Cuando haya transacciones confirmadas verás la serie en el tiempo.
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
+        )}
       </SummarySection>
 
       <SummarySection
@@ -182,7 +216,19 @@ export function FinanceStatistics() {
           </p>
         ) : budgets.length > 0 ? (
           <FinanceBudgetStatusChart rows={budgets} display={moneyDisplay} />
-        ) : null}
+        ) : (
+          <Empty>
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <BarChart3Icon />
+              </EmptyMedia>
+              <EmptyTitle>Todavía no hay presupuestos</EmptyTitle>
+              <EmptyDescription>
+                Cuando haya transacciones confirmadas verás el estado de los presupuestos.
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
+        )}
       </SummarySection>
     </div>
   )

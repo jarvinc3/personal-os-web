@@ -1,6 +1,13 @@
 "use client"
 
-import { CurrencySelectField } from "@/src/modules/finance/components/catalog/currency-select-field"
+import { FinanceCurrencyPills } from "@/src/modules/finance/components/forms/finance-currency-pills"
+import { FinanceDateField } from "@/src/modules/finance/components/forms/finance-date-field"
+import {
+  FinanceAmountField,
+  FinanceDetailsDisclosure,
+  FinanceHelpText,
+  FinanceSegmentedControl,
+} from "@/src/modules/finance/components/forms/finance-form-blocks"
 import { CATALOG_NONE } from "@/src/modules/finance/constants/catalog"
 import {
   useArchiveLoan,
@@ -9,6 +16,7 @@ import {
 } from "@/src/modules/finance/hooks/use-loans"
 import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
 import { rateFractionToPercent } from "@/src/modules/finance/lib/interest-rate"
+import { todayDateInput } from "@/src/modules/finance/lib/ledger-form"
 import { formatPlanningDate } from "@/src/modules/finance/lib/planning-lists"
 import { buildLoanBody } from "@/src/modules/finance/lib/planning-payloads"
 import type {
@@ -32,7 +40,7 @@ import { SummarySection } from "@/src/shared/components/ui/summary"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { LandmarkIcon } from "lucide-react"
+import { CalendarIcon, LandmarkIcon, WalletIcon } from "lucide-react"
 import { useEffect, useMemo } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import { z } from "zod"
@@ -60,13 +68,6 @@ const FREQ_OPTIONS = FINANCE_INSTALLMENT_FREQS.map((value) => ({
   label: FINANCE_INSTALLMENT_FREQ_LABEL[value],
 }))
 
-function todayInput(): string {
-  const now = new Date()
-  const month = String(now.getMonth() + 1).padStart(2, "0")
-  const day = String(now.getDate()).padStart(2, "0")
-  return `${now.getFullYear()}-${month}-${day}`
-}
-
 function toFormValues(
   loan: FinanceLoan | null,
   defaultCurrency: string,
@@ -82,7 +83,7 @@ function toFormValues(
     installmentFreq: loan?.installmentFreq ?? "MONTHLY",
     totalInstallments: loan ? String(loan.totalInstallments) : "",
     paidInstallments: loan ? String(loan.paidInstallments) : "0",
-    nextDueDate: formatPlanningDate(loan?.nextDueDate) || todayInput(),
+    nextDueDate: formatPlanningDate(loan?.nextDueDate) || todayDateInput(),
     interestRatePercent: rateFractionToPercent(loan?.interestRate) ?? "",
     notes: loan?.notes ?? "",
     currency: loan?.currency ?? defaultCurrency,
@@ -309,9 +310,24 @@ export function LoanSheet({
         />
         <Controller
           control={control}
+          name="currency"
+          render={({ field }) => (
+            <FinanceCurrencyPills
+              value={field.value}
+              onChange={field.onChange}
+              baseCurrency={defaultCurrency}
+              extraCodes={[defaultCurrency, loan?.currency ?? ""]}
+            />
+          )}
+        />
+      </SummarySection>
+
+      <SummarySection title="Montos" icon={WalletIcon}>
+        <Controller
+          control={control}
           name="originalAmount"
           render={({ field }) => (
-            <FormTextField
+            <FinanceAmountField
               label="Monto original"
               value={field.value}
               onChange={field.onChange}
@@ -346,11 +362,14 @@ export function LoanSheet({
             />
           )}
         />
+      </SummarySection>
+
+      <SummarySection title="Calendario" icon={CalendarIcon}>
         <Controller
           control={control}
           name="installmentFreq"
           render={({ field }) => (
-            <SelectField
+            <FinanceSegmentedControl
               label="Frecuencia"
               value={field.value}
               onChange={(value) =>
@@ -390,16 +409,17 @@ export function LoanSheet({
           control={control}
           name="nextDueDate"
           render={({ field }) => (
-            <FormTextField
+            <FinanceDateField
               label="Próximo vencimiento"
-              type="date"
               value={field.value}
               onChange={field.onChange}
-              onBlur={field.onBlur}
               error={errors.nextDueDate?.message}
             />
           )}
         />
+      </SummarySection>
+
+      <FinanceDetailsDisclosure>
         <Controller
           control={control}
           name="interestRatePercent"
@@ -413,10 +433,10 @@ export function LoanSheet({
                 error={errors.interestRatePercent?.message}
                 placeholder="12"
               />
-              <p className="text-xs text-muted-foreground">
+              <FinanceHelpText>
                 12% se envía como 0.12. Vacío = sin tasa (no es lo mismo que
                 0%).
-              </p>
+              </FinanceHelpText>
             </div>
           )}
         />
@@ -433,19 +453,7 @@ export function LoanSheet({
             />
           )}
         />
-        <Controller
-          control={control}
-          name="currency"
-          render={({ field }) => (
-            <CurrencySelectField
-              value={field.value}
-              onChange={field.onChange}
-              enabled={open}
-              extraCodes={[defaultCurrency]}
-            />
-          )}
-        />
-      </SummarySection>
+      </FinanceDetailsDisclosure>
     </BottomSheet>
   )
 }

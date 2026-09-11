@@ -38,22 +38,57 @@ describe("parseFinanceMoney", () => {
 })
 
 describe("formatFinanceMoney", () => {
-  it("formats a money string with cents", () => {
-    const formatted = formatFinanceMoney("145.63", {
-      currency: "DOP",
-      showCents: true,
-      compactNumbers: false,
-    })
-    assert.match(formatted, /145/)
-    assert.match(formatted, /63/)
+  it("formats DOP with its ISO code and dollar symbol", () => {
+    assert.equal(
+      formatFinanceMoney("78224.48", {
+        currency: "DOP",
+        showCents: true,
+        compactNumbers: false,
+      }),
+      "DOP $78,224.48",
+    )
   })
 
-  it("does not treat invalid input as NaN in the output", () => {
-    const formatted = formatFinanceMoney("nope", {
+  it("normalizes USD and omits cents when configured", () => {
+    assert.equal(
+      formatFinanceMoney("510", {
+        currency: "usd",
+        showCents: false,
+        compactNumbers: false,
+      }),
+      "USD $510",
+    )
+  })
+
+  it("uses the real narrow symbol for non-dollar currencies", () => {
+    assert.equal(
+      formatFinanceMoney("1000", {
+        currency: "EUR",
+        showCents: false,
+        compactNumbers: false,
+      }),
+      "EUR €1,000",
+    )
+  })
+
+  it("keeps compact number preferences", () => {
+    assert.equal(
+      formatFinanceMoney("1200", {
+        currency: "DOP",
+        showCents: false,
+        compactNumbers: true,
+      }),
+      "DOP $1K",
+    )
+  })
+
+  it("returns an em dash for invalid amounts or currencies", () => {
+    const display = {
       currency: "USD",
       showCents: true,
       compactNumbers: false,
-    })
-    assert.equal(formatted.includes("NaN"), false)
+    }
+    assert.equal(formatFinanceMoney("nope", display), "—")
+    assert.equal(formatFinanceMoney("10", { ...display, currency: "" }), "—")
   })
 })

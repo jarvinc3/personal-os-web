@@ -24,7 +24,9 @@ import {
   FINANCE_TX_FILTER_ALL,
   FINANCE_TX_PAGE_SIZE,
   formatTransactionDate,
+  isTransferTransaction,
   transactionsFromPayload,
+  transferDirectionLabel,
   visibleTransactionTotals,
   type FinanceTransactionsQuery,
 } from "@/src/modules/finance/lib/transactions-query"
@@ -245,8 +247,10 @@ export function FinanceTransactionsList({
           </Empty>
         ) : (
           items.map((tx, index) => {
-            const party =
-              tx.merchant ?? tx.description ?? tx.accountName ?? "Movimiento"
+            const isTransfer = isTransferTransaction(tx)
+            const party = isTransfer
+              ? transferDirectionLabel(tx)
+              : (tx.merchant ?? tx.description ?? tx.accountName ?? "Movimiento")
             const meta = [
               formatTransactionDate(tx.transactionDate),
               FINANCE_TRANSACTION_TYPE_LABEL[tx.type] ?? tx.type,
@@ -258,19 +262,19 @@ export function FinanceTransactionsList({
                 title={party}
                 description={meta}
                 leading={
-                  tx.type === "DEBIT" ? (
+                  tx.type === "DEBIT" && !isTransfer ? (
                     <ArrowDownLeftIcon className="size-5 text-destructive" />
-                  ) : tx.type === "CREDIT" ? (
+                  ) : tx.type === "CREDIT" && !isTransfer ? (
                     <ArrowUpRightIcon className="size-5 text-success" />
-                  ) : tx.type === "TRANSFER" ? (
+                  ) : isTransfer ? (
                     <ArrowRightLeftIcon className="text-info size-5" />
                   ) : null
                 }
                 value={
                   <span
                     className={cn(
-                      tx.type === "DEBIT" && "text-destructive",
-                      tx.type === "CREDIT" && "text-success"
+                      !isTransfer && tx.type === "DEBIT" && "text-destructive",
+                      !isTransfer && tx.type === "CREDIT" && "text-success"
                     )}
                   >
                     {formatFinanceMoney(tx.amount, {

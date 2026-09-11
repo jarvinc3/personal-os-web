@@ -1,6 +1,13 @@
 "use client"
 
-import { CurrencySelectField } from "@/src/modules/finance/components/catalog/currency-select-field"
+import { FinanceCurrencyPills } from "@/src/modules/finance/components/forms/finance-currency-pills"
+import { FinanceDateField } from "@/src/modules/finance/components/forms/finance-date-field"
+import {
+  FinanceAmountField,
+  FinanceDetailsDisclosure,
+  FinanceHelpText,
+  FinanceSegmentedControl,
+} from "@/src/modules/finance/components/forms/finance-form-blocks"
 import {
   useCreateReceivable,
   useUpdateReceivable,
@@ -17,17 +24,14 @@ import {
   FINANCE_RECEIVABLE_STATUSES,
 } from "@/src/modules/finance/types/entities"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
-import {
-  FormTextField,
-  SelectField,
-} from "@/src/shared/components/layout/form-blocks"
+import { FormTextField } from "@/src/shared/components/layout/form-blocks"
 import { Button } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { SummarySection } from "@/src/shared/components/ui/summary"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { HandshakeIcon } from "lucide-react"
+import { CalendarIcon, HandshakeIcon, WalletIcon } from "lucide-react"
 import { useEffect, useMemo } from "react"
 import { Controller, useForm } from "react-hook-form"
 import { z } from "zod"
@@ -229,22 +233,38 @@ export function ReceivableSheet({
         />
         <Controller
           control={control}
-          name="description"
+          name="status"
           render={({ field }) => (
-            <FormTextField
-              label="Descripción"
+            <FinanceSegmentedControl
+              label="Estado"
               value={field.value}
-              onChange={field.onChange}
-              onBlur={field.onBlur}
+              onChange={(value) =>
+                field.onChange(value as FinanceReceivableStatus)
+              }
+              options={STATUS_OPTIONS}
             />
           )}
         />
         <Controller
           control={control}
+          name="currency"
+          render={({ field }) => (
+            <FinanceCurrencyPills
+              value={field.value}
+              onChange={field.onChange}
+              baseCurrency={defaultCurrency}
+              extraCodes={[defaultCurrency, receivable?.currency ?? ""]}
+            />
+          )}
+        />
+      </SummarySection>
+
+      <SummarySection title="Montos" icon={WalletIcon}>
+        <Controller
+          control={control}
           name="amount"
           render={({ field }) => (
-            <FormTextField
-              label="Monto"
+            <FinanceAmountField
               value={field.value}
               onChange={field.onChange}
               onBlur={field.onBlur}
@@ -265,53 +285,44 @@ export function ReceivableSheet({
                 error={errors.paidAmount?.message}
                 placeholder="Vacío si Pagado (el API completa)"
               />
-              <p className="text-xs text-muted-foreground">
+              <FinanceHelpText>
                 Si supera el monto, el API responde 400. Cancelado admite cobro
                 parcial.
-              </p>
+              </FinanceHelpText>
             </div>
           )}
         />
-        <Controller
-          control={control}
-          name="status"
-          render={({ field }) => (
-            <SelectField
-              label="Estado"
-              value={field.value}
-              onChange={(value) =>
-                field.onChange(value as FinanceReceivableStatus)
-              }
-              options={STATUS_OPTIONS}
-            />
-          )}
-        />
+      </SummarySection>
+
+      <SummarySection title="Fecha" icon={CalendarIcon}>
         <Controller
           control={control}
           name="dueDate"
           render={({ field }) => (
-            <FormTextField
+            <FinanceDateField
               label="Vencimiento"
-              type="date"
+              value={field.value}
+              onChange={field.onChange}
+              optional
+            />
+          )}
+        />
+      </SummarySection>
+
+      <FinanceDetailsDisclosure>
+        <Controller
+          control={control}
+          name="description"
+          render={({ field }) => (
+            <FormTextField
+              label="Descripción"
               value={field.value}
               onChange={field.onChange}
               onBlur={field.onBlur}
             />
           )}
         />
-        <Controller
-          control={control}
-          name="currency"
-          render={({ field }) => (
-            <CurrencySelectField
-              value={field.value}
-              onChange={field.onChange}
-              enabled={open}
-              extraCodes={[defaultCurrency]}
-            />
-          )}
-        />
-      </SummarySection>
+      </FinanceDetailsDisclosure>
     </BottomSheet>
   )
 }

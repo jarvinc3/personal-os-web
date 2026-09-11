@@ -10,6 +10,10 @@ import {
   buildLedgerTargetOptions,
   splitLedgerTarget,
 } from "@/src/modules/finance/lib/ledger-payloads"
+import {
+  formatFinanceMoney,
+  type FinanceMoneyDisplay,
+} from "@/src/modules/finance/lib/money"
 import type {
   FinanceAccount,
   FinanceCard,
@@ -40,6 +44,7 @@ type AssignEmailMessageSheetProps = {
   message: FinancePendingEmailMessage | null
   accounts: FinanceAccount[]
   cards: FinanceCard[]
+  display: FinanceMoneyDisplay
   pending?: boolean
 }
 
@@ -49,6 +54,7 @@ export function AssignEmailMessageSheet({
   message,
   accounts,
   cards,
+  display,
   pending = false,
 }: AssignEmailMessageSheetProps) {
   const assignMutation = useAssignPendingEmail()
@@ -98,7 +104,10 @@ export function AssignEmailMessageSheet({
     ? [
         extracted.type,
         extracted.amount != null
-          ? `${extracted.amount} ${extracted.currency ?? ""}`.trim()
+          ? formatFinanceMoney(extracted.amount, {
+              ...display,
+              currency: extracted.currency ?? display.currency,
+            })
           : null,
         extracted.merchant,
       ]

@@ -1,12 +1,17 @@
 "use client"
 
-import { CurrencySelectField } from "@/src/modules/finance/components/catalog/currency-select-field"
+import { FinanceCurrencyPills } from "@/src/modules/finance/components/forms/finance-currency-pills"
 import { useUpdateCardBalance } from "@/src/modules/finance/hooks/use-cards"
 import {
   buildCardBalanceBody,
   nextUnusedCurrency,
 } from "@/src/modules/finance/lib/catalog-payloads"
+import { buildFinanceCurrencyOptions } from "@/src/modules/finance/lib/finance-currency"
 import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
+import {
+  formatFinanceMoney,
+  type FinanceMoneyDisplay,
+} from "@/src/modules/finance/lib/money"
 import type { FinanceCard } from "@/src/modules/finance/types/entities"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
 import { FormTextField } from "@/src/shared/components/layout/form-blocks"
@@ -60,6 +65,7 @@ type CardBalanceSheetProps = {
   onOpenChange: (open: boolean) => void
   card: FinanceCard | null
   defaultCurrency: string
+  display?: FinanceMoneyDisplay
   pending?: boolean
 }
 
@@ -68,6 +74,7 @@ export function CardBalanceSheet({
   onOpenChange,
   card,
   defaultCurrency,
+  display,
   pending = false,
 }: CardBalanceSheetProps) {
   return (
@@ -77,6 +84,7 @@ export function CardBalanceSheet({
       onOpenChange={onOpenChange}
       card={card}
       defaultCurrency={defaultCurrency}
+      display={display}
       pending={pending}
     />
   )
@@ -87,6 +95,7 @@ function CardBalanceSheetForm({
   onOpenChange,
   card,
   defaultCurrency,
+  display,
   pending = false,
 }: CardBalanceSheetProps) {
   const mutation = useUpdateCardBalance()
@@ -94,6 +103,11 @@ function CardBalanceSheetForm({
     initialMode(card, defaultCurrency)
   )
   const existingCurrencies = (card?.balances ?? []).map((item) => item.currency)
+  const allowedCurrencies = buildFinanceCurrencyOptions(defaultCurrency)
+  const canAddCurrency = allowedCurrencies.some(
+    (code) =>
+      !existingCurrencies.some((used) => used.toUpperCase() === code)
+  )
   const {
     control,
     handleSubmit,
@@ -197,14 +211,20 @@ function CardBalanceSheetForm({
           >
             <span className="font-medium">{item.currency}</span>
             <span className="text-muted-foreground tabular-nums">
-              {item.balance}
+              {formatFinanceMoney(item.balance, {
+                currency: item.currency,
+                showCents: display?.showCents ?? true,
+                compactNumbers: display?.compactNumbers ?? false,
+              })}
             </span>
           </button>
         ))}
-        <Button type="button" variant="outline" onClick={startAdd}>
-          <PlusIcon />
-          Agregar moneda
-        </Button>
+        {canAddCurrency ? (
+          <Button type="button" variant="outline" onClick={startAdd}>
+            <PlusIcon />
+            Agregar moneda
+          </Button>
+        ) : null}
       </SummarySection>
 
       <SummarySection
@@ -215,11 +235,11 @@ function CardBalanceSheetForm({
           control={control}
           name="currency"
           render={({ field }) => (
-            <CurrencySelectField
+            <FinanceCurrencyPills
               label="Moneda"
               value={field.value}
               onChange={field.onChange}
-              enabled={open}
+              baseCurrency={defaultCurrency}
               extraCodes={[defaultCurrency, field.value]}
               excludeCodes={isAdding ? existingCurrencies : []}
               disabled={!isAdding}

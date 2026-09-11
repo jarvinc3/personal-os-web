@@ -65,6 +65,7 @@ export const API_ENDPOINTS = {
     ANALYTICS_SPENDING_BY_CATEGORY: '/finance/analytics/spending-by-category',
     ANALYTICS_BUDGET_STATUS: '/finance/analytics/budget-status',
     ANALYTICS_SPENDING_OVER_TIME: '/finance/analytics/spending-over-time',
+    BALANCE_SHEET: '/finance/balance-sheet',
     OAUTH_GOOGLE_URL: '/finance/email-sync/oauth/google/url',
     OAUTH_GOOGLE_CALLBACK: '/finance/email-sync/oauth/google/callback',
   },

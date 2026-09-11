@@ -9,6 +9,13 @@ import {
 import type { FinanceAccount } from "@/src/modules/finance/types/entities"
 import { API_ENDPOINTS } from "@/src/shared/constants/api-endpoints"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { invalidateFinanceBalanceSheet } from "@/src/modules/finance/hooks/use-balance-sheet"
+
+function invalidateAccounts(queryClient: ReturnType<typeof useQueryClient>) {
+  void queryClient.invalidateQueries({ queryKey: FINANCE_ACCOUNTS_QUERY_KEY })
+  void queryClient.invalidateQueries({ queryKey: FINANCE_CARDS_QUERY_KEY })
+  invalidateFinanceBalanceSheet(queryClient)
+}
 
 export function useAccounts(enabled: boolean) {
   return useQuery({
@@ -24,8 +31,7 @@ export function useCreateAccount() {
     mutationFn: (body: CreateAccountBody) =>
       apiPost<FinanceAccount>(API_ENDPOINTS.FINANCE.ACCOUNTS, body),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: FINANCE_ACCOUNTS_QUERY_KEY })
-      void queryClient.invalidateQueries({ queryKey: FINANCE_CARDS_QUERY_KEY })
+      invalidateAccounts(queryClient)
     },
   })
 }
@@ -41,8 +47,7 @@ export function useUpdateAccount() {
       body: Record<string, unknown>
     }) => apiPatch<FinanceAccount>(API_ENDPOINTS.FINANCE.ACCOUNT(id), body),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: FINANCE_ACCOUNTS_QUERY_KEY })
-      void queryClient.invalidateQueries({ queryKey: FINANCE_CARDS_QUERY_KEY })
+      invalidateAccounts(queryClient)
     },
   })
 }
@@ -55,8 +60,7 @@ export function useArchiveAccount() {
         isActive: false,
       }),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: FINANCE_ACCOUNTS_QUERY_KEY })
-      void queryClient.invalidateQueries({ queryKey: FINANCE_CARDS_QUERY_KEY })
+      invalidateAccounts(queryClient)
     },
   })
 }

@@ -2,11 +2,11 @@
 
 import {
   formatProductCounts,
+  formatStackItemBalance,
   institutionInitials,
   type InstitutionStackItem,
 } from "@/src/modules/finance/lib/institution-stack";
 import {
-  formatFinanceMoney,
   type FinanceMoneyDisplay,
 } from "@/src/modules/finance/lib/money";
 import {
@@ -50,7 +50,7 @@ function toWalletCard(
       color: item.institution.color ?? FALLBACK_INSTITUTION_COLOR,
       productSummary: formatProductCounts(item.counts),
       balanceLabel: "Balance consolidado",
-      balanceAmount: formatFinanceMoney(item.consolidatedBalance, display),
+      balanceAmount: formatStackItemBalance(item, display),
     }
   }
 
@@ -61,10 +61,7 @@ function toWalletCard(
     color: item.account.color ?? FALLBACK_CASH_COLOR,
     productSummary: "Efectivo sin institución",
     balanceLabel: "Saldo",
-    balanceAmount: formatFinanceMoney(item.consolidatedBalance, {
-      ...display,
-      currency: item.account.currency,
-    }),
+    balanceAmount: formatStackItemBalance(item, display),
   }
 }
 
