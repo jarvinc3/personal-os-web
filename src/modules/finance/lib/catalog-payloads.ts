@@ -1,4 +1,5 @@
 import { CATALOG_NONE } from "../constants/catalog.ts"
+import { FINANCE_QUICK_CURRENCIES } from "./finance-currency.ts"
 import { parseFinanceMoney } from "./money.ts"
 
 type FinanceAccountType = "CHECKING" | "SAVINGS" | "CASH" | "INVESTMENT"
@@ -251,7 +252,7 @@ export function buildCardBalanceBodies(
   return { ok: true, body: bodies }
 }
 
-const FALLBACK_CURRENCIES = ["USD", "DOP", "EUR"]
+const FALLBACK_CURRENCIES = [...FINANCE_QUICK_CURRENCIES]
 
 export function nextUnusedCurrency(
   used: string[],

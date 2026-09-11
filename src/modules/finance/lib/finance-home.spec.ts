@@ -31,6 +31,10 @@ function transaction(
     transactionDate: "2026-09-06T12:00:00.000Z",
     description: null,
     transferGroupId: null,
+    transferToAccountId: null,
+    transferToAccountName: null,
+    transferToCardId: null,
+    transferToCardName: null,
     ...overrides,
   }
 }
@@ -58,6 +62,18 @@ describe("deriveFrequentExpenses", () => {
           status: "PENDING",
         }),
         transaction({ id: "5", merchant: "Nómina", type: "CREDIT" }),
+        transaction({
+          id: "6",
+          merchant: "Transferencia",
+          type: "TRANSFER",
+          transferGroupId: "grp-1",
+        }),
+        transaction({
+          id: "7",
+          merchant: "Piernas",
+          type: "DEBIT",
+          transferGroupId: "grp-2",
+        }),
       ],
       categories,
     )

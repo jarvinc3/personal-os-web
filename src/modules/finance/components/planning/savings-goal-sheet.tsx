@@ -1,6 +1,12 @@
 "use client"
 
-import { CurrencySelectField } from "@/src/modules/finance/components/catalog/currency-select-field"
+import { FinanceCurrencyPills } from "@/src/modules/finance/components/forms/finance-currency-pills"
+import { FinanceDateField } from "@/src/modules/finance/components/forms/finance-date-field"
+import {
+  FinanceAmountField,
+  FinanceDetailsDisclosure,
+  FinanceHelpText,
+} from "@/src/modules/finance/components/forms/finance-form-blocks"
 import {
   useCreateSavingsGoal,
   useDeleteSavingsGoal,
@@ -18,7 +24,7 @@ import { SummarySection } from "@/src/shared/components/ui/summary"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { PiggyBankIcon } from "lucide-react"
+import { PiggyBankIcon, TargetIcon } from "lucide-react"
 import { useEffect, useMemo } from "react"
 import { Controller, useForm } from "react-hook-form"
 import { z } from "zod"
@@ -169,12 +175,12 @@ export function SavingsGoalSheet({
     >
       <SummarySection title="Ahorro" icon={PiggyBankIcon}>
         {goal ? (
-          <p className="text-sm text-muted-foreground">
+          <FinanceHelpText>
             {goal.isCompleted ? "Completada" : "En curso"}
             {goal.isCompleted && goal.completedAt
               ? ` · ${formatPlanningDate(goal.completedAt)}`
               : ""}
-          </p>
+          </FinanceHelpText>
         ) : null}
         <Controller
           control={control}
@@ -192,22 +198,24 @@ export function SavingsGoalSheet({
         />
         <Controller
           control={control}
-          name="description"
+          name="currency"
           render={({ field }) => (
-            <FormTextField
-              label="Descripción"
+            <FinanceCurrencyPills
               value={field.value}
               onChange={field.onChange}
-              onBlur={field.onBlur}
-              error={errors.description?.message}
+              baseCurrency={defaultCurrency}
+              extraCodes={[defaultCurrency, goal?.currency ?? ""]}
             />
           )}
         />
+      </SummarySection>
+
+      <SummarySection title="Progreso" icon={TargetIcon}>
         <Controller
           control={control}
           name="targetAmount"
           render={({ field }) => (
-            <FormTextField
+            <FinanceAmountField
               label="Meta"
               value={field.value}
               onChange={field.onChange}
@@ -235,28 +243,31 @@ export function SavingsGoalSheet({
           control={control}
           name="targetDate"
           render={({ field }) => (
-            <FormTextField
+            <FinanceDateField
               label="Fecha objetivo"
-              type="date"
               value={field.value}
               onChange={field.onChange}
-              onBlur={field.onBlur}
-            />
-          )}
-        />
-        <Controller
-          control={control}
-          name="currency"
-          render={({ field }) => (
-            <CurrencySelectField
-              value={field.value}
-              onChange={field.onChange}
-              enabled={open}
-              extraCodes={[defaultCurrency]}
+              optional
             />
           )}
         />
       </SummarySection>
+
+      <FinanceDetailsDisclosure>
+        <Controller
+          control={control}
+          name="description"
+          render={({ field }) => (
+            <FormTextField
+              label="Descripción"
+              value={field.value}
+              onChange={field.onChange}
+              onBlur={field.onBlur}
+              error={errors.description?.message}
+            />
+          )}
+        />
+      </FinanceDetailsDisclosure>
     </BottomSheet>
   )
 }

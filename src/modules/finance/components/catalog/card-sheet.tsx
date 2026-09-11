@@ -1,6 +1,10 @@
 "use client"
 
-import { CurrencySelectField } from "@/src/modules/finance/components/catalog/currency-select-field"
+import { FinanceCurrencyPills } from "@/src/modules/finance/components/forms/finance-currency-pills"
+import {
+  FinancePreviewRow,
+  FinanceSegmentedControl,
+} from "@/src/modules/finance/components/forms/finance-form-blocks"
 import {
   CATALOG_NONE,
   FINANCE_CARD_NETWORK_LABEL,
@@ -20,6 +24,7 @@ import {
   cardBalanceSaveMessage,
   nextUnusedCurrency,
 } from "@/src/modules/finance/lib/catalog-payloads"
+import { buildFinanceCurrencyOptions } from "@/src/modules/finance/lib/finance-currency"
 import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
 import type {
   FinanceAccount,
@@ -56,32 +61,18 @@ const balanceRowSchema = z.object({
   creditLimit: z.string().trim(),
 })
 
-const schema = z
-  .object({
-    name: z.string().trim().min(1, "Nombre obligatorio").max(120),
-    type: z.enum(FINANCE_CARD_TYPES),
-    institutionId: z.string().min(1, "Institución obligatoria"),
-    accountId: z.string(),
-    network: z.string(),
-    lastFour: z.string().trim().max(4),
-    statementClosingDay: z.string().trim(),
-    paymentDueDay: z.string().trim(),
-    color: z.string().trim().max(20),
-    balances: z.array(balanceRowSchema),
-  })
-  .superRefine((values, ctx) => {
-    if (values.type !== "CREDIT") return
-    values.balances.forEach((row, index) => {
-      const filled = row.balance.trim().length > 0 || row.creditLimit.trim().length > 0
-      if (filled && row.creditLimit.trim().length === 0) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ["balances", index, "creditLimit"],
-          message: "Límite de crédito obligatorio",
-        })
-      }
-    })
-  })
+const schema = z.object({
+  name: z.string().trim().min(1, "Nombre obligatorio").max(120),
+  type: z.enum(FINANCE_CARD_TYPES),
+  institutionId: z.string().min(1, "Institución obligatoria"),
+  accountId: z.string(),
+  network: z.string(),
+  lastFour: z.string().trim().max(4),
+  statementClosingDay: z.string().trim(),
+  paymentDueDay: z.string().trim(),
+  color: z.string().trim().max(20),
+  balances: z.array(balanceRowSchema),
+})
 
 type FormValues = z.infer<typeof schema>
 
@@ -90,13 +81,10 @@ const TYPE_OPTIONS = FINANCE_CARD_TYPES.map((value) => ({
   label: FINANCE_CARD_TYPE_LABEL[value],
 }))
 
-const NETWORK_OPTIONS = [
-  { value: CATALOG_NONE, label: "Sin red" },
-  ...FINANCE_CARD_NETWORKS.map((value) => ({
-    value,
-    label: FINANCE_CARD_NETWORK_LABEL[value],
-  })),
-]
+const NETWORK_OPTIONS = FINANCE_CARD_NETWORKS.map((value) => ({
+  value,
+  label: FINANCE_CARD_NETWORK_LABEL[value],
+}))
 
 function emptyBalanceRow(currency: string) {
   return { currency, balance: "", creditLimit: "" }
@@ -112,7 +100,7 @@ function toFormValues(
     type: card?.type ?? "CREDIT",
     institutionId: card?.institutionId ?? defaultInstitutionId,
     accountId: card?.accountId ?? CATALOG_NONE,
-    network: card?.network ?? CATALOG_NONE,
+    network: card?.network ?? "VISA",
     lastFour: card?.lastFour ?? "",
     statementClosingDay: card?.statementClosingDay
       ? String(card.statementClosingDay)
@@ -188,6 +176,10 @@ export function CardSheet({
   const selectedInstitutionId = useWatch({ control, name: "institutionId" })
   const selectedAccountId = useWatch({ control, name: "accountId" })
   const watchedBalances = useWatch({ control, name: "balances" })
+  const cardName = useWatch({ control, name: "name" })
+  const cardNetwork = useWatch({ control, name: "network" })
+  const cardColor = useWatch({ control, name: "color" })
+  const lastFour = useWatch({ control, name: "lastFour" })
 
   const institutionOptions = institutions.map((item) => ({
     value: item.id,
@@ -204,6 +196,11 @@ export function CardSheet({
     })),
   ]
   const hasInstitutions = institutionOptions.length > 0
+  const allowedCurrencies = buildFinanceCurrencyOptions(defaultCurrency)
+  const usedCurrencies = (watchedBalances ?? []).map((row) => row.currency)
+  const canAddCurrency = allowedCurrencies.some(
+    (code) => !usedCurrencies.some((used) => used.toUpperCase() === code)
+  )
 
   useEffect(() => {
     if (open) {
@@ -239,9 +236,7 @@ export function CardSheet({
 
     const balancesPayload = card
       ? { ok: true as const, body: [] }
-      : buildCardBalanceBodies(values.balances, {
-          requireCreditLimit: values.type === "CREDIT",
-        })
+      : buildCardBalanceBodies(values.balances)
     if (!balancesPayload.ok) {
       appToast.error({ text1: balancesPayload.error })
       return
@@ -292,6 +287,13 @@ export function CardSheet({
       appToast.error({ text1: financeErrorMessage(error) })
     }
   }
+
+  const networkLabel =
+    cardNetwork && cardNetwork !== CATALOG_NONE
+      ? (FINANCE_CARD_NETWORK_LABEL[
+          cardNetwork as keyof typeof FINANCE_CARD_NETWORK_LABEL
+        ] ?? cardNetwork)
+      : "Sin red"
 
   return (
     <BottomSheet
@@ -375,6 +377,12 @@ export function CardSheet({
       </SummarySection>
 
       <SummarySection title="Tarjeta" icon={CreditCardIcon}>
+        <FinancePreviewRow
+          icon={CreditCardIcon}
+          title={cardName.trim() || "Nueva tarjeta"}
+          description={`${FINANCE_CARD_TYPE_LABEL[cardType]} · ${networkLabel}${lastFour ? ` · •••• ${lastFour}` : ""}`}
+          accentColor={cardColor || undefined}
+        />
         <Controller
           control={control}
           name="name"
@@ -393,7 +401,7 @@ export function CardSheet({
           control={control}
           name="type"
           render={({ field }) => (
-            <SelectField
+            <FinanceSegmentedControl
               label="Tipo"
               value={field.value}
               onChange={field.onChange}
@@ -405,9 +413,9 @@ export function CardSheet({
           control={control}
           name="network"
           render={({ field }) => (
-            <SelectField
+            <FinanceSegmentedControl
               label="Red"
-              value={field.value}
+              value={field.value === CATALOG_NONE ? "VISA" : field.value}
               onChange={field.onChange}
               options={NETWORK_OPTIONS}
             />
@@ -481,7 +489,7 @@ export function CardSheet({
       {!isEdit ? (
         <SummarySection title="Saldos iniciales" icon={DollarSign}>
           {balanceFields.map((field, index) => {
-            const usedCurrencies = (watchedBalances ?? [])
+            const usedByOthers = (watchedBalances ?? [])
               .map((row, rowIndex) => (rowIndex === index ? "" : row.currency))
               .filter(Boolean)
             return (
@@ -490,13 +498,13 @@ export function CardSheet({
                   control={control}
                   name={`balances.${index}.currency`}
                   render={({ field: currencyField }) => (
-                    <CurrencySelectField
+                    <FinanceCurrencyPills
                       label="Moneda"
                       value={currencyField.value}
                       onChange={currencyField.onChange}
-                      enabled={open}
+                      baseCurrency={defaultCurrency}
                       extraCodes={[defaultCurrency, currencyField.value]}
-                      excludeCodes={usedCurrencies}
+                      excludeCodes={usedByOthers}
                     />
                   )}
                 />
@@ -505,7 +513,7 @@ export function CardSheet({
                   name={`balances.${index}.balance`}
                   render={({ field: balanceField }) => (
                     <FormTextField
-                      label={cardType === "CREDIT" ? "Balance disponible" : "Saldo"}
+                      label="Saldo"
                       value={balanceField.value}
                       onChange={balanceField.onChange}
                       onBlur={balanceField.onBlur}
@@ -523,7 +531,6 @@ export function CardSheet({
                         value={limitField.value}
                         onChange={limitField.onChange}
                         onBlur={limitField.onBlur}
-                        error={errors.balances?.[index]?.creditLimit?.message}
                         placeholder="50000"
                       />
                     )}
@@ -541,22 +548,24 @@ export function CardSheet({
               </div>
             )
           })}
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() =>
-              appendBalance(
-                emptyBalanceRow(
-                  nextUnusedCurrency(
-                    (watchedBalances ?? []).map((row) => row.currency),
-                    defaultCurrency
+          {canAddCurrency ? (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() =>
+                appendBalance(
+                  emptyBalanceRow(
+                    nextUnusedCurrency(
+                      (watchedBalances ?? []).map((row) => row.currency),
+                      defaultCurrency
+                    )
                   )
                 )
-              )
-            }
-          >
-            Agregar moneda
-          </Button>
+              }
+            >
+              Agregar moneda
+            </Button>
+          ) : null}
         </SummarySection>
       ) : card ? (
         <SummarySection title="Saldo" icon={DollarSign}>

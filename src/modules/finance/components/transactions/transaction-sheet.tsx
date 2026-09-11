@@ -1,6 +1,12 @@
 "use client"
 
-import { CurrencySelectField } from "@/src/modules/finance/components/catalog/currency-select-field"
+import { FinanceCurrencyPills } from "@/src/modules/finance/components/forms/finance-currency-pills"
+import { FinanceDateField } from "@/src/modules/finance/components/forms/finance-date-field"
+import {
+  FinanceAmountField,
+  FinanceDetailsDisclosure,
+  FinanceSegmentedControl,
+} from "@/src/modules/finance/components/forms/finance-form-blocks"
 import { CATALOG_NONE } from "@/src/modules/finance/constants/catalog"
 import { useCategories } from "@/src/modules/finance/hooks/use-categories"
 import {
@@ -8,6 +14,11 @@ import {
   useUpdateTransaction,
 } from "@/src/modules/finance/hooks/use-transactions"
 import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
+import {
+  currencyForTarget,
+  sliceDateInput,
+  todayDateInput,
+} from "@/src/modules/finance/lib/ledger-form"
 import {
   buildCreateTransactionBody,
   buildLedgerTargetOptions,
@@ -30,7 +41,7 @@ import { SummarySection } from "@/src/shared/components/ui/summary"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { ArrowLeftRightIcon, DollarSign, StickyNoteIcon } from "lucide-react"
+import { ArrowLeftRightIcon, StickyNoteIcon } from "lucide-react"
 import { useEffect, useMemo } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import { z } from "zod"
@@ -51,25 +62,13 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>
 
 const TYPE_OPTIONS = [
-  { value: "DEBIT", label: "Gasto" },
-  { value: "CREDIT", label: "Ingreso" },
+  { value: "DEBIT" as const, label: "Gasto" },
+  { value: "CREDIT" as const, label: "Ingreso" },
 ]
 const STATUS_OPTIONS = [
-  { value: "CONFIRMED", label: "Completado" },
-  { value: "PENDING", label: "Pendiente" },
+  { value: "CONFIRMED" as const, label: "Completado" },
+  { value: "PENDING" as const, label: "Pendiente" },
 ]
-
-function todayDateInput(): string {
-  const now = new Date()
-  const month = String(now.getMonth() + 1).padStart(2, "0")
-  const day = String(now.getDate()).padStart(2, "0")
-  return `${now.getFullYear()}-${month}-${day}`
-}
-
-function dateInputValue(value: string | undefined): string {
-  if (!value) return todayDateInput()
-  return value.slice(0, 10)
-}
 
 function destinationFromTransaction(tx: FinanceTransaction | null): string {
   if (tx?.cardId) return encodeLedgerTarget("card", tx.cardId)
@@ -86,7 +85,7 @@ function toFormValues(
     type: tx?.type === "CREDIT" ? "CREDIT" : "DEBIT",
     amount: tx?.amount ?? "",
     currency: tx?.currency ?? defaultCurrency,
-    transactionDate: dateInputValue(tx?.transactionDate),
+    transactionDate: sliceDateInput(tx?.transactionDate, todayDateInput()),
     destination: tx ? destinationFromTransaction(tx) : defaultDestination,
     categoryId: tx?.categoryId ?? CATALOG_NONE,
     status: tx?.status === "PENDING" ? "PENDING" : "CONFIRMED",
@@ -94,21 +93,6 @@ function toFormValues(
     description: tx?.description ?? "",
     notes: tx?.notes ?? "",
   }
-}
-
-function currencyForTarget(
-  destination: string,
-  accounts: FinanceAccount[],
-  cards: FinanceCard[],
-  fallback: string
-): string {
-  const target = splitLedgerTarget(destination)
-  const account = accounts.find((item) => item.id === target.accountId)
-  if (account?.currency) return account.currency
-  const card = cards.find((item) => item.id === target.cardId)
-  const cardCurrency = card?.balances[0]?.currency
-  if (cardCurrency) return cardCurrency
-  return fallback
 }
 
 type TransactionSheetProps = {
@@ -133,6 +117,8 @@ export function TransactionSheet({
   pending = false,
 }: TransactionSheetProps) {
   const isEdit = Boolean(transaction)
+  const isTransferLeg =
+    Boolean(transaction?.transferGroupId) || transaction?.type === "TRANSFER"
   const createMutation = useCreateTransaction()
   const updateMutation = useUpdateTransaction()
   const categoriesQuery = useCategories(enabled && open)
@@ -171,6 +157,7 @@ export function TransactionSheet({
   })
 
   const destination = useWatch({ control, name: "destination" })
+  const type = useWatch({ control, name: "type" })
 
   useEffect(() => {
     if (open) {
@@ -200,6 +187,7 @@ export function TransactionSheet({
   )
 
   const onSubmit = submitForm(async (values) => {
+    if (isTransferLeg) return
     const target = splitLedgerTarget(values.destination)
     const payload = buildCreateTransactionBody({
       ...values,
@@ -227,6 +215,13 @@ export function TransactionSheet({
     }
   })
 
+  const cta =
+    isEdit
+      ? "Guardar"
+      : type === "CREDIT"
+        ? "Registrar ingreso"
+        : "Registrar gasto"
+
   return (
     <BottomSheet
       open={open}
@@ -234,9 +229,11 @@ export function TransactionSheet({
       pending={pending}
       title={isEdit ? "Editar movimiento" : "Nuevo movimiento"}
       description={
-        hasTargets
-          ? "Registra un gasto o un ingreso. Las transferencias van en Transferir."
-          : "Crea una cuenta o una tarjeta antes de registrar un movimiento."
+        isTransferLeg
+          ? "Las transferencias no se editan por pierna. Elimínalas o confírmalas desde el detalle."
+          : hasTargets
+            ? "Registra un gasto o un ingreso. Las transferencias van en Transferir."
+            : "Crea una cuenta o una tarjeta antes de registrar un movimiento."
       }
       actions={{
         close: (
@@ -249,7 +246,7 @@ export function TransactionSheet({
             Cancelar
           </Button>
         ),
-        submit: (
+        submit: isTransferLeg ? undefined : (
           <Button
             type="button"
             disabled={isPending || (!isEdit && !hasTargets)}
@@ -257,21 +254,22 @@ export function TransactionSheet({
             onClick={onSubmit}
           >
             {isPending ? <Spinner data-icon="inline-start" /> : null}
-            Guardar
+            {cta}
           </Button>
         ),
       }}
     >
-      <SummarySection title="Movimiento" icon={ArrowLeftRightIcon}>
+      <SummarySection title="Importe" icon={ArrowLeftRightIcon}>
         <Controller
           control={control}
           name="type"
           render={({ field }) => (
-            <SelectField
+            <FinanceSegmentedControl
               label="Tipo"
               value={field.value}
               onChange={field.onChange}
               options={TYPE_OPTIONS}
+              disabled={isTransferLeg}
             />
           )}
         />
@@ -279,27 +277,40 @@ export function TransactionSheet({
           control={control}
           name="amount"
           render={({ field }) => (
-            <FormTextField
-              label="Monto"
+            <FinanceAmountField
               value={field.value}
               onChange={field.onChange}
               onBlur={field.onBlur}
               error={errors.amount?.message}
-              placeholder="1.50"
             />
           )}
         />
         <Controller
           control={control}
-          name="transactionDate"
+          name="currency"
           render={({ field }) => (
-            <FormTextField
-              label="Fecha"
-              type="date"
+            <FinanceCurrencyPills
               value={field.value}
               onChange={field.onChange}
-              onBlur={field.onBlur}
+              baseCurrency={defaultCurrency}
+              extraCodes={[defaultCurrency, transaction?.currency ?? ""]}
+              disabled={isTransferLeg}
+            />
+          )}
+        />
+      </SummarySection>
+
+      <SummarySection title="Movimiento" icon={StickyNoteIcon}>
+        <Controller
+          control={control}
+          name="transactionDate"
+          render={({ field }) => (
+            <FinanceDateField
+              label="Fecha"
+              value={field.value}
+              onChange={field.onChange}
               error={errors.transactionDate?.message}
+              disabled={isTransferLeg}
             />
           )}
         />
@@ -312,7 +323,7 @@ export function TransactionSheet({
               value={field.value}
               onChange={field.onChange}
               options={destinationOptions}
-              disabled={!hasTargets}
+              disabled={!hasTargets || isTransferLeg}
             />
           )}
         />
@@ -320,11 +331,12 @@ export function TransactionSheet({
           control={control}
           name="status"
           render={({ field }) => (
-            <SelectField
+            <FinanceSegmentedControl
               label="Estado"
               value={field.value}
               onChange={field.onChange}
               options={STATUS_OPTIONS}
+              disabled={isTransferLeg}
             />
           )}
         />
@@ -337,27 +349,13 @@ export function TransactionSheet({
               value={field.value}
               onChange={field.onChange}
               options={categoryOptions}
+              disabled={isTransferLeg}
             />
           )}
         />
       </SummarySection>
 
-      <SummarySection title="Moneda" icon={DollarSign}>
-        <Controller
-          control={control}
-          name="currency"
-          render={({ field }) => (
-            <CurrencySelectField
-              value={field.value}
-              onChange={field.onChange}
-              enabled={open}
-              extraCodes={[defaultCurrency]}
-            />
-          )}
-        />
-      </SummarySection>
-
-      <SummarySection title="Detalle" icon={StickyNoteIcon}>
+      <FinanceDetailsDisclosure defaultOpen={isEdit}>
         <Controller
           control={control}
           name="merchant"
@@ -369,6 +367,7 @@ export function TransactionSheet({
               onBlur={field.onBlur}
               error={errors.merchant?.message}
               placeholder="Supermercado"
+              disabled={isTransferLeg}
             />
           )}
         />
@@ -381,6 +380,7 @@ export function TransactionSheet({
               value={field.value}
               onChange={field.onChange}
               onBlur={field.onBlur}
+              disabled={isTransferLeg}
             />
           )}
         />
@@ -393,10 +393,11 @@ export function TransactionSheet({
               value={field.value}
               onChange={field.onChange}
               onBlur={field.onBlur}
+              disabled={isTransferLeg}
             />
           )}
         />
-      </SummarySection>
+      </FinanceDetailsDisclosure>
     </BottomSheet>
   )
 }

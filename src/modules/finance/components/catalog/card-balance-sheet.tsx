@@ -1,11 +1,12 @@
 "use client"
 
-import { CurrencySelectField } from "@/src/modules/finance/components/catalog/currency-select-field"
+import { FinanceCurrencyPills } from "@/src/modules/finance/components/forms/finance-currency-pills"
 import { useUpdateCardBalance } from "@/src/modules/finance/hooks/use-cards"
 import {
   buildCardBalanceBody,
   nextUnusedCurrency,
 } from "@/src/modules/finance/lib/catalog-payloads"
+import { buildFinanceCurrencyOptions } from "@/src/modules/finance/lib/finance-currency"
 import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
 import {
   formatFinanceMoney,
@@ -26,17 +27,13 @@ import { useMemo, useState } from "react"
 import { Controller, useForm } from "react-hook-form"
 import { z } from "zod"
 
-function createBalanceSchema(requireCreditLimit: boolean) {
-  return z.object({
-    currency: z.string().trim().min(3, "Moneda obligatoria").max(3),
-    balance: z.string().trim().min(1, "Saldo obligatorio"),
-    creditLimit: requireCreditLimit
-      ? z.string().trim().min(1, "Límite de crédito obligatorio")
-      : z.string().trim(),
-  })
-}
+const schema = z.object({
+  currency: z.string().trim().min(3, "Moneda obligatoria").max(3),
+  balance: z.string().trim().min(1, "Saldo obligatorio"),
+  creditLimit: z.string().trim(),
+})
 
-type FormValues = z.infer<ReturnType<typeof createBalanceSchema>>
+type FormValues = z.infer<typeof schema>
 
 type BalanceMode =
   { kind: "edit"; currency: string } | { kind: "add"; currency: string }
@@ -68,7 +65,7 @@ type CardBalanceSheetProps = {
   onOpenChange: (open: boolean) => void
   card: FinanceCard | null
   defaultCurrency: string
-  display: FinanceMoneyDisplay
+  display?: FinanceMoneyDisplay
   pending?: boolean
 }
 
@@ -106,13 +103,18 @@ function CardBalanceSheetForm({
     initialMode(card, defaultCurrency)
   )
   const existingCurrencies = (card?.balances ?? []).map((item) => item.currency)
+  const allowedCurrencies = buildFinanceCurrencyOptions(defaultCurrency)
+  const canAddCurrency = allowedCurrencies.some(
+    (code) =>
+      !existingCurrencies.some((used) => used.toUpperCase() === code)
+  )
   const {
     control,
     handleSubmit,
     reset,
     formState: { errors },
   } = useForm<FormValues>({
-    resolver: zodResolver(createBalanceSchema(card?.type === "CREDIT")),
+    resolver: zodResolver(schema),
     defaultValues: toFormValues(card, mode),
   })
 
@@ -147,9 +149,7 @@ function CardBalanceSheetForm({
       appToast.error({ text1: "Cada moneda solo puede usarse una vez" })
       return
     }
-    const payload = buildCardBalanceBody(values, {
-      requireCreditLimit: card.type === "CREDIT",
-    })
+    const payload = buildCardBalanceBody(values)
     if (!payload.ok) {
       appToast.error({ text1: payload.error })
       return
@@ -212,16 +212,19 @@ function CardBalanceSheetForm({
             <span className="font-medium">{item.currency}</span>
             <span className="text-muted-foreground tabular-nums">
               {formatFinanceMoney(item.balance, {
-                ...display,
                 currency: item.currency,
+                showCents: display?.showCents ?? true,
+                compactNumbers: display?.compactNumbers ?? false,
               })}
             </span>
           </button>
         ))}
-        <Button type="button" variant="outline" onClick={startAdd}>
-          <PlusIcon />
-          Agregar moneda
-        </Button>
+        {canAddCurrency ? (
+          <Button type="button" variant="outline" onClick={startAdd}>
+            <PlusIcon />
+            Agregar moneda
+          </Button>
+        ) : null}
       </SummarySection>
 
       <SummarySection
@@ -232,11 +235,11 @@ function CardBalanceSheetForm({
           control={control}
           name="currency"
           render={({ field }) => (
-            <CurrencySelectField
+            <FinanceCurrencyPills
               label="Moneda"
               value={field.value}
               onChange={field.onChange}
-              enabled={open}
+              baseCurrency={defaultCurrency}
               extraCodes={[defaultCurrency, field.value]}
               excludeCodes={isAdding ? existingCurrencies : []}
               disabled={!isAdding}
@@ -248,7 +251,7 @@ function CardBalanceSheetForm({
           name="balance"
           render={({ field }) => (
             <FormTextField
-              label={card?.type === "CREDIT" ? "Balance disponible" : "Saldo"}
+              label="Saldo"
               value={field.value}
               onChange={field.onChange}
               onBlur={field.onBlur}

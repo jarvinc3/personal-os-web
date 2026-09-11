@@ -52,6 +52,10 @@ export type FinanceTransaction = {
   transactionDate: string
   description: string | null
   transferGroupId: string | null
+  transferToAccountId: string | null
+  transferToAccountName: string | null
+  transferToCardId: string | null
+  transferToCardName: string | null
 }
 
 export type FinanceTransferResult = {

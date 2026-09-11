@@ -1,6 +1,10 @@
 "use client"
 
-import { CurrencySelectField } from "@/src/modules/finance/components/catalog/currency-select-field"
+import { FinanceCurrencyPills } from "@/src/modules/finance/components/forms/finance-currency-pills"
+import {
+  FinancePreviewRow,
+  FinanceSegmentedControl,
+} from "@/src/modules/finance/components/forms/finance-form-blocks"
 import {
   CATALOG_NONE,
   FINANCE_ACCOUNT_TYPE_LABEL,
@@ -34,7 +38,7 @@ import { SummarySection } from "@/src/shared/components/ui/summary"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { DollarSign, LandmarkIcon, Palette } from "lucide-react"
+import { LandmarkIcon, Palette } from "lucide-react"
 import { useEffect, useMemo } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import { z } from "zod"
@@ -89,7 +93,7 @@ type AccountSheetProps = {
   account: FinanceAccount | null
   institutions: FinanceInstitution[]
   defaultCurrency: string
-  display: FinanceMoneyDisplay
+  display?: FinanceMoneyDisplay
   defaultInstitutionId?: string
   pending?: boolean
 }
@@ -139,6 +143,9 @@ export function AccountSheet({
   })
 
   const accountType = useWatch({ control, name: "type" })
+  const accountName = useWatch({ control, name: "name" })
+  const accountColor = useWatch({ control, name: "color" })
+  const accountCurrency = useWatch({ control, name: "currency" })
 
   useEffect(() => {
     if (open) {
@@ -171,8 +178,9 @@ export function AccountSheet({
         appToast.success({
           text1: "Cuenta creada",
           text2: `El saldo arranca en ${formatFinanceMoney(created.balance, {
-            ...display,
             currency: created.currency,
+            showCents: display?.showCents ?? true,
+            compactNumbers: display?.compactNumbers ?? false,
           })}.`,
         })
       }
@@ -236,6 +244,12 @@ export function AccountSheet({
       }}
     >
       <SummarySection title="Cuenta" icon={LandmarkIcon}>
+        <FinancePreviewRow
+          icon={LandmarkIcon}
+          title={accountName.trim() || "Nueva cuenta"}
+          description={`${FINANCE_ACCOUNT_TYPE_LABEL[accountType]} · ${accountCurrency}`}
+          accentColor={accountColor || undefined}
+        />
         <Controller
           control={control}
           name="name"
@@ -254,7 +268,7 @@ export function AccountSheet({
           control={control}
           name="type"
           render={({ field }) => (
-            <SelectField
+            <FinanceSegmentedControl
               label="Tipo"
               value={field.value}
               onChange={field.onChange}
@@ -293,17 +307,15 @@ export function AccountSheet({
             {errors.institutionId.message}
           </p>
         ) : null}
-      </SummarySection>
-      <SummarySection title="Moneda" icon={DollarSign}>
         <Controller
           control={control}
           name="currency"
           render={({ field }) => (
-            <CurrencySelectField
+            <FinanceCurrencyPills
               value={field.value}
               onChange={field.onChange}
-              enabled={open}
-              extraCodes={[defaultCurrency]}
+              baseCurrency={defaultCurrency}
+              extraCodes={[defaultCurrency, account?.currency ?? ""]}
             />
           )}
         />

@@ -36,6 +36,9 @@ export function deriveFrequentExpenses(
   >()
 
   for (const transaction of transactions) {
+    if (transaction.transferGroupId || transaction.type === "TRANSFER") {
+      continue
+    }
     if (transaction.type !== "DEBIT" || transaction.status !== "CONFIRMED") {
       continue
     }

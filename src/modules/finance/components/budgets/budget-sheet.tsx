@@ -1,5 +1,11 @@
 "use client"
 
+import { FinanceDateField, formatFinanceDateLabel } from "@/src/modules/finance/components/forms/finance-date-field"
+import {
+  FinanceAmountField,
+  FinanceHelpText,
+  FinanceSegmentedControl,
+} from "@/src/modules/finance/components/forms/finance-form-blocks"
 import {
   useCreateBudget,
   useDeleteBudget,
@@ -110,6 +116,9 @@ export function BudgetSheet({
   })
 
   const periodType = useWatch({ control, name: "periodType" })
+  const periodStart = useWatch({ control, name: "periodStart" })
+  const periodEnd = useWatch({ control, name: "periodEnd" })
+  const isCustom = periodType === "CUSTOM"
 
   useEffect(() => {
     if (open) {
@@ -231,7 +240,7 @@ export function BudgetSheet({
           control={control}
           name="amountLimit"
           render={({ field }) => (
-            <FormTextField
+            <FinanceAmountField
               label="Tope"
               value={field.value}
               onChange={field.onChange}
@@ -259,7 +268,7 @@ export function BudgetSheet({
           control={control}
           name="periodType"
           render={({ field }) => (
-            <SelectField
+            <FinanceSegmentedControl
               label="Tipo"
               value={field.value}
               onChange={(value) => field.onChange(value as FinanceBudgetPeriod)}
@@ -267,32 +276,37 @@ export function BudgetSheet({
             />
           )}
         />
-        <Controller
-          control={control}
-          name="periodStart"
-          render={({ field }) => (
-            <FormTextField
-              label="Desde"
-              type="date"
-              value={field.value}
-              onChange={field.onChange}
-              onBlur={field.onBlur}
+        {isCustom ? (
+          <>
+            <Controller
+              control={control}
+              name="periodStart"
+              render={({ field }) => (
+                <FinanceDateField
+                  label="Desde"
+                  value={field.value}
+                  onChange={field.onChange}
+                />
+              )}
             />
-          )}
-        />
-        <Controller
-          control={control}
-          name="periodEnd"
-          render={({ field }) => (
-            <FormTextField
-              label="Hasta"
-              type="date"
-              value={field.value}
-              onChange={field.onChange}
-              onBlur={field.onBlur}
+            <Controller
+              control={control}
+              name="periodEnd"
+              render={({ field }) => (
+                <FinanceDateField
+                  label="Hasta"
+                  value={field.value}
+                  onChange={field.onChange}
+                />
+              )}
             />
-          )}
-        />
+          </>
+        ) : (
+          <FinanceHelpText>
+            {formatFinanceDateLabel(periodStart)} —{" "}
+            {formatFinanceDateLabel(periodEnd)}
+          </FinanceHelpText>
+        )}
       </SummarySection>
     </BottomSheet>
   )

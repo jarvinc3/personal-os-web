@@ -1,70 +1,66 @@
 "use client"
 
-import { CurrencySelectField } from "@/src/modules/finance/components/catalog/currency-select-field";
-import { CATALOG_NONE } from "@/src/modules/finance/constants/catalog";
-import { useCreateTransfer } from "@/src/modules/finance/hooks/use-transactions";
-import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error";
+import { FinanceCurrencyPills } from "@/src/modules/finance/components/forms/finance-currency-pills"
+import { FinanceDateField } from "@/src/modules/finance/components/forms/finance-date-field"
+import {
+  FinanceAmountField,
+  FinanceDetailsDisclosure,
+  FinanceHelpText,
+  FinancePreviewRow,
+  FinanceSegmentedControl,
+} from "@/src/modules/finance/components/forms/finance-form-blocks"
+import { CATALOG_NONE } from "@/src/modules/finance/constants/catalog"
+import { useCreateTransfer } from "@/src/modules/finance/hooks/use-transactions"
+import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
+import {
+  currencyForTarget,
+  ledgerTargetLabel,
+  todayDateInput,
+} from "@/src/modules/finance/lib/ledger-form"
 import {
   buildCreateTransferBody,
   buildLedgerTargetOptions,
   splitLedgerTarget,
-} from "@/src/modules/finance/lib/ledger-payloads";
-import type { FinanceAccount, FinanceCard } from "@/src/modules/finance/types/entities";
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet";
+} from "@/src/modules/finance/lib/ledger-payloads"
+import type { FinanceAccount, FinanceCard } from "@/src/modules/finance/types/entities"
+import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
 import {
   FormTextField,
   SelectField,
-} from "@/src/shared/components/layout/form-blocks";
-import { Button } from "@/src/shared/components/ui/button";
-import { Spinner } from "@/src/shared/components/ui/spinner";
-import { SummarySection } from "@/src/shared/components/ui/summary";
-import { appToast } from "@/src/shared/lib/app-toast";
-import { createSheetSubmit } from "@/src/shared/lib/sheet-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeftRightIcon, DollarSign } from "lucide-react";
-import { useEffect, useMemo } from "react";
-import { Controller, useForm, useWatch } from "react-hook-form";
-import { z } from "zod";
+} from "@/src/shared/components/layout/form-blocks"
+import { Button } from "@/src/shared/components/ui/button"
+import { Spinner } from "@/src/shared/components/ui/spinner"
+import { SummarySection } from "@/src/shared/components/ui/summary"
+import { appToast } from "@/src/shared/lib/app-toast"
+import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { ArrowLeftRightIcon, ArrowRightIcon } from "lucide-react"
+import { useEffect, useMemo } from "react"
+import { Controller, useForm, useWatch } from "react-hook-form"
+import { z } from "zod"
 
-const schema = z.object({
-  amount: z.string().trim().min(1, "Monto obligatorio"),
-  currency: z.string().trim().min(3, "Moneda obligatoria").max(3),
-  transactionDate: z.string().trim().min(1, "Fecha obligatoria"),
-  fromTarget: z.string().min(1, "Elige origen"),
-  toTarget: z.string().min(1, "Elige destino"),
-  status: z.enum(["PENDING", "CONFIRMED"]),
-  description: z.string(),
-  notes: z.string(),
-})
+const schema = z
+  .object({
+    amount: z.string().trim().min(1, "Monto obligatorio"),
+    currency: z.string().trim().min(3, "Moneda obligatoria").max(3),
+    transactionDate: z.string().trim().min(1, "Fecha obligatoria"),
+    fromTarget: z.string().min(1, "Elige origen"),
+    toTarget: z.string().min(1, "Elige destino"),
+    status: z.enum(["PENDING", "CONFIRMED"]),
+    description: z.string(),
+    notes: z.string(),
+  })
+  .refine((values) => values.fromTarget !== values.toTarget, {
+    path: ["toTarget"],
+    message: "Origen y destino tienen que ser distintos",
+  })
 
 type FormValues = z.infer<typeof schema>
 
 const STATUS_OPTIONS = [
-  { value: "CONFIRMED", label: "Completado" },
-  { value: "PENDING", label: "Pendiente" },
+  { value: "CONFIRMED" as const, label: "Completado" },
+  { value: "PENDING" as const, label: "Pendiente" },
 ]
-
-function todayDateInput(): string {
-  const now = new Date()
-  const month = String(now.getMonth() + 1).padStart(2, "0")
-  const day = String(now.getDate()).padStart(2, "0")
-  return `${now.getFullYear()}-${month}-${day}`
-}
-
-function currencyForTarget(
-  destination: string,
-  accounts: FinanceAccount[],
-  cards: FinanceCard[],
-  fallback: string,
-): string {
-  const target = splitLedgerTarget(destination)
-  const account = accounts.find((item) => item.id === target.accountId)
-  if (account?.currency) return account.currency
-  const card = cards.find((item) => item.id === target.cardId)
-  const cardCurrency = card?.balances[0]?.currency
-  if (cardCurrency) return cardCurrency
-  return fallback
-}
 
 type TransferSheetProps = {
   open: boolean
@@ -95,6 +91,7 @@ export function TransferSheet({
     handleSubmit,
     reset,
     setValue,
+    formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -110,6 +107,7 @@ export function TransferSheet({
   })
 
   const fromTarget = useWatch({ control, name: "fromTarget" })
+  const toTarget = useWatch({ control, name: "toTarget" })
 
   useEffect(() => {
     if (open) {
@@ -167,6 +165,9 @@ export function TransferSheet({
     }
   })
 
+  const fromLabel = ledgerTargetLabel(fromTarget, accounts, cards)
+  const toLabel = ledgerTargetLabel(toTarget, accounts, cards)
+
   return (
     <BottomSheet
       open={open}
@@ -174,7 +175,7 @@ export function TransferSheet({
       title="Nueva transferencia"
       description={
         canTransfer
-          ? "Se crean dos movimientos enlazados, uno de salida y otro de entrada."
+          ? "Mueve dinero entre dos cuentas o tarjetas. Se crean dos movimientos enlazados."
           : "Necesitas al menos dos cuentas o tarjetas distintas."
       }
       actions={{
@@ -203,7 +204,7 @@ export function TransferSheet({
         ),
       }}
     >
-      <SummarySection title="Transferencia" icon={ArrowLeftRightIcon}>
+      <SummarySection title="Ruta" icon={ArrowLeftRightIcon}>
         <Controller
           control={control}
           name="fromTarget"
@@ -230,16 +231,44 @@ export function TransferSheet({
             />
           )}
         />
+        {errors.toTarget?.message ? (
+          <p className="text-sm text-destructive">{errors.toTarget.message}</p>
+        ) : null}
+        {fromLabel && toLabel ? (
+          <FinancePreviewRow
+            icon={ArrowRightIcon}
+            title={`${fromLabel} → ${toLabel}`}
+            description="Salida y entrada enlazadas"
+          />
+        ) : (
+          <FinanceHelpText>
+            Elige origen y destino distintos para ver el resumen.
+          </FinanceHelpText>
+        )}
+      </SummarySection>
+
+      <SummarySection title="Importe" icon={ArrowLeftRightIcon}>
         <Controller
           control={control}
           name="amount"
           render={({ field }) => (
-            <FormTextField
-              label="Monto"
+            <FinanceAmountField
               value={field.value}
               onChange={field.onChange}
               onBlur={field.onBlur}
-              placeholder="1.50"
+              error={errors.amount?.message}
+            />
+          )}
+        />
+        <Controller
+          control={control}
+          name="currency"
+          render={({ field }) => (
+            <FinanceCurrencyPills
+              value={field.value}
+              onChange={field.onChange}
+              baseCurrency={defaultCurrency}
+              extraCodes={[defaultCurrency]}
             />
           )}
         />
@@ -247,12 +276,11 @@ export function TransferSheet({
           control={control}
           name="transactionDate"
           render={({ field }) => (
-            <FormTextField
+            <FinanceDateField
               label="Fecha"
-              type="date"
               value={field.value}
               onChange={field.onChange}
-              onBlur={field.onBlur}
+              error={errors.transactionDate?.message}
             />
           )}
         />
@@ -260,7 +288,7 @@ export function TransferSheet({
           control={control}
           name="status"
           render={({ field }) => (
-            <SelectField
+            <FinanceSegmentedControl
               label="Estado"
               value={field.value}
               onChange={field.onChange}
@@ -268,6 +296,9 @@ export function TransferSheet({
             />
           )}
         />
+      </SummarySection>
+
+      <FinanceDetailsDisclosure>
         <Controller
           control={control}
           name="description"
@@ -280,21 +311,19 @@ export function TransferSheet({
             />
           )}
         />
-      </SummarySection>
-      <SummarySection title="Moneda" icon={DollarSign}>
         <Controller
           control={control}
-          name="currency"
+          name="notes"
           render={({ field }) => (
-            <CurrencySelectField
+            <FormTextField
+              label="Notas"
               value={field.value}
               onChange={field.onChange}
-              enabled={open}
-              extraCodes={[defaultCurrency]}
+              onBlur={field.onBlur}
             />
           )}
         />
-      </SummarySection>
+      </FinanceDetailsDisclosure>
     </BottomSheet>
   )
 }
