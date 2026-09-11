@@ -24,17 +24,32 @@ export function formatFinanceMoney(
   display: FinanceMoneyDisplay,
 ): string {
   const amount = parseFinanceMoney(value)
-  if (amount === null) {
+  const currency = display.currency.trim().toUpperCase()
+  if (amount === null || !currency) {
     return "—"
   }
   try {
-    return new Intl.NumberFormat(undefined, {
+    const symbol = new Intl.NumberFormat("en-US", {
       style: "currency",
-      currency: display.currency,
+      currency,
+      currencyDisplay: "narrowSymbol",
+    })
+      .formatToParts(0)
+      .find((part) => part.type === "currency")?.value
+
+    if (!symbol) {
+      return "—"
+    }
+
+    const formattedAmount = new Intl.NumberFormat("en-US", {
+      style: "decimal",
       minimumFractionDigits: display.showCents ? 2 : 0,
       maximumFractionDigits: display.showCents ? 2 : 0,
       notation: display.compactNumbers ? "compact" : "standard",
-    }).format(amount)
+    }).format(Math.abs(amount))
+    const sign = amount < 0 ? "-" : ""
+
+    return `${currency} ${sign}${symbol}${formattedAmount}`
   } catch {
     return "—"
   }
