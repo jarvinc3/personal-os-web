@@ -1,34 +1,16 @@
-# App assets
+# Assets públicos
 
-Iconografía neumórfica de Personal OS (módulos: finanzas, calendario, tareas, salud, etc.).
+Iconos y media servidos desde `public/assets/` (constantes: `src/shared/constants/app-assets.ts`).
 
-## Uso en `app.json` / nativo (Expo prebuild)
+| Archivo | Uso en web |
+| --- | --- |
+| `icon.png`, `icon-light.png`, `icon-dark.png` | Branding UI |
+| `icon-192x192.png`, `icon-512x512.png`, `apple-touch-icon.png` | PWA / touch |
+| `favicon.ico`, `favicon-96x96.png`, `favicon.svg` | Favicons |
+| `splash.png` | Splash / marketing |
+| `images/welcome-ilustration-*.png`, `app-banner-v1.png` | Landing / UI |
+| `banners/banner-enero.png` … `banner-diciembre.png` | Banners mensuales (timeline finance) |
+| `manifest.json`, `sw.js` | PWA + Web Push |
 
-| Archivo             | Tamaño    | Rol                                                                                          |
-| ------------------- | --------- | -------------------------------------------------------------------------------------------- |
-| `icon.png`          | 1024×1024 | Icono principal de la app (iOS, Android legacy, referencia Expo). Copia de `icon-light.png`. |
-| `icon-512x512.png`  | 512×512   | Primer plano del **adaptive icon** de Android (`android.adaptiveIcon.foregroundImage`).      |
-| `splash.png`        | 1254×1254 | Imagen del splash (`splash.image`, `resizeMode: contain`).                                   |
-| `favicon-96x96.png` | 96×96     | Favicon web (`web.favicon`).                                                                 |
-| `favicon.ico`       | —         | Favicon alternativo para navegadores legacy (no referenciado en `app.json`).                 |
-
-## Variantes de tema (UI en la app)
-
-| Archivo          | Tamaño    | Rol                                                                         |
-| ---------------- | --------- | --------------------------------------------------------------------------- |
-| `icon-light.png` | 1024×1024 | Icono claro — drawer, pantalla de auth (`getAppIconSource` en modo light).  |
-| `icon-dark.png`  | 1254×1254 | Icono oscuro — mismo arte en gris oscuro (`getAppIconSource` en modo dark). |
-
-## Otros (uso en la app)
-
-| Archivo       | Notas                                                                                          |
-| ------------- | ---------------------------------------------------------------------------------------------- |
-| `icon-x2.png` | Export grande (~1254px) con fondo oscuro; reserva o marketing. No enlazar en prebuild.         |
-| `images/*`    | Ilustraciones de bienvenida; solo UI, no iconos de sistema.                                    |
-| `banners/*`   | Banners mensuales del timeline de transacciones (`banner-enero.png` … `banner-diciembre.png`). |
-
-## Reglas Expo
-
-- Icono de tienda: **1024×1024** PNG → `icon.png` (desde `icon-light.png`).
-- Adaptive Android: logo en zona segura; fondo `#141414` en `app.json` → `icon-512x512.png`.
-- Tras cambiar iconos aquí, ejecutar `npx expo prebuild` (o actualizar carpetas `android/`/`ios/` a mano).
+> [!WARNING]
+> **REV-WEB-015** — instrucciones Expo/`icon-x2.png`/`getAppIconSource` no aplican a este cliente.
