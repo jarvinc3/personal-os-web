@@ -25,7 +25,7 @@ export { FinanceAccountsClient } from "@/src/modules/finance/pages/finance-accou
 export { FinanceOverviewClient } from "@/src/modules/finance/pages/finance-overview";
 export { FinancePlanningClient } from "@/src/modules/finance/pages/finance-planning";
 export { FinanceStatisticsClient } from "@/src/modules/finance/pages/finance-statistics";
-export { FinanceSyncClient } from "@/src/modules/finance/pages/finance-sync";
+export { FinanceMailboxesClient } from "@/src/modules/finance/pages/finance-sync";
 export { FinanceTransactionsClient } from "@/src/modules/finance/pages/finance-transactions";
 export type * from "@/src/modules/finance/types/api";
 export {
@@ -36,6 +36,8 @@ export {
   FINANCE_CARDS_QUERY_KEY,
   FINANCE_CATEGORIES_QUERY_KEY,
   FINANCE_EMAIL_SOURCES_QUERY_KEY,
+  FINANCE_EMAIL_MAILBOXES_QUERY_KEY,
+  FINANCE_EMAIL_PENDING_QUERY_KEY,
   FINANCE_INSTITUTIONS_QUERY_KEY,
   FINANCE_LOANS_QUERY_KEY,
   FINANCE_QUERY_KEY,

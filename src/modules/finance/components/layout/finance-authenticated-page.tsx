@@ -26,6 +26,7 @@ const SETTINGS_FINANCE_HREF = `${APP_ROUTES.app.settings}?sheet=${MODULE_SHEET_P
 function isFinanceAccountsDetail(pathname: string): boolean {
   return (
     pathname === APP_ROUTES.app.financeCategories ||
+    pathname === APP_ROUTES.app.financeSync ||
     pathname.startsWith(`${APP_ROUTES.app.financeAccounts}/institutions/`) ||
     pathname.startsWith(`${APP_ROUTES.app.financeAccounts}/cash/`)
   )

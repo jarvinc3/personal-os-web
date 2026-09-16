@@ -1,31 +1,18 @@
 /**
- * Web Gmail OAuth: `returnTo` is always this app's `NEXT_PUBLIC_URL` origin
- * (local `http://localhost:3000`, never Vite `:5173`). The UI never accepts a
- * caller-supplied return URL (open-redirect).
+ * Web Gmail OAuth: `returnTo` is always this app's `NEXT_PUBLIC_URL` origin.
+ * Lands on Correos with the result sheet query; never a separate oauth page.
  */
 
+import { FINANCE_SHEET_KEYS } from "../constants/sheet-keys.ts"
 import { APP_ROUTES } from "../../../shared/constants/app-routes.ts"
 
 const FALLBACK_APP_URL = "http://localhost:3000"
-export const GMAIL_OAUTH_RETURN_PATH = "/finance/sync/oauth"
-
-export const GMAIL_OAUTH_NEXT_PATHS = [
-  APP_ROUTES.app.financeSync,
-  APP_ROUTES.app.financeAccounts,
-] as const
-
-export type GmailOAuthNextPath = (typeof GMAIL_OAUTH_NEXT_PATHS)[number]
+export const GMAIL_OAUTH_RETURN_PATH = APP_ROUTES.app.financeSync
+export const GMAIL_OAUTH_RESULT_SHEET = FINANCE_SHEET_KEYS.oauthGmailResult
 
 export type PayloadResult<T> =
   | { ok: true; body: T }
   | { ok: false; error: string }
-
-export type GoogleOAuthUrlQuery = {
-  institutionId?: string
-  bankDomain?: string
-  label?: string
-  nextPath?: GmailOAuthNextPath
-}
 
 function optionalTrimmed(value: string | undefined): string | undefined {
   const trimmed = value?.trim()
@@ -41,11 +28,9 @@ export function financeAppOrigin(): string {
   }
 }
 
-export function buildGmailOAuthReturnTo(
-  nextPath: GmailOAuthNextPath = APP_ROUTES.app.financeSync,
-): string {
+export function buildGmailOAuthReturnTo(): string {
   const url = new URL(GMAIL_OAUTH_RETURN_PATH, financeAppOrigin())
-  url.searchParams.set("next", nextPath)
+  url.searchParams.set("sheet", GMAIL_OAUTH_RESULT_SHEET)
   return url.toString()
 }
 
@@ -65,39 +50,16 @@ export function parseOAuthSuccessParam(
   return "none"
 }
 
-export function parseOAuthNextPath(
-  value: string | null | undefined,
-): GmailOAuthNextPath {
-  if (
-    value === APP_ROUTES.app.financeAccounts ||
-    value === APP_ROUTES.app.financeSync
-  ) {
-    return value
-  }
-  return APP_ROUTES.app.financeSync
-}
-
-export function buildGoogleOAuthUrlSearch(
-  input: GoogleOAuthUrlQuery,
-): PayloadResult<string> {
-  const institutionId = optionalTrimmed(input.institutionId)
-  if (!institutionId) {
-    return {
-      ok: false,
-      error: "Conectar Gmail necesita una institución",
-    }
-  }
-
-  const nextPath = input.nextPath ?? APP_ROUTES.app.financeSync
-  const returnTo = buildGmailOAuthReturnTo(nextPath)
+export function buildGoogleOAuthUrlSearch(input?: {
+  label?: string
+}): PayloadResult<string> {
+  const returnTo = buildGmailOAuthReturnTo()
   if (!isAppReturnTo(returnTo)) {
     return { ok: false, error: "returnTo is not an allowed origin" }
   }
 
-  const params = new URLSearchParams({ returnTo, institutionId })
-  const bankDomain = optionalTrimmed(input.bankDomain)
-  const label = optionalTrimmed(input.label)
-  if (bankDomain) params.set("bankDomain", bankDomain)
+  const params = new URLSearchParams({ returnTo })
+  const label = optionalTrimmed(input?.label)
   if (label) params.set("label", label)
   return { ok: true, body: params.toString() }
 }

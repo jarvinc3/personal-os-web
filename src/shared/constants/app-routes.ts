@@ -18,6 +18,7 @@ export const APP_ROUTES = {
     financeStatistics: '/finance/statistics',
     financeAccounts: '/finance/accounts',
     financeCategories: '/finance/accounts/categories',
+    financeSync: '/finance/accounts/sync',
     financeInstitution: (institutionId: string) =>
       `/finance/accounts/institutions/${institutionId}`,
     financeCashAccount: (accountId: string) =>
@@ -25,7 +26,6 @@ export const APP_ROUTES = {
     financeTransactions: '/finance/transactions',
     financeBudgets: '/finance/budgets',
     financePlanning: '/finance/planning',
-    financeSync: '/finance/sync',
   },
 } as const;
 

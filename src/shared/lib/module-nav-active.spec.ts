@@ -9,7 +9,7 @@ import {
 const resumen = { href: "/finance", matchExact: true as const }
 const cuentas = {
   href: "/finance/accounts",
-  extraActiveHrefs: ["/finance/sync", "/finance/sync/oauth"],
+  extraActiveHrefs: ["/finance/accounts/categories", "/finance/accounts/sync"],
 }
 
 describe("isModuleSectionActive", () => {
@@ -17,12 +17,15 @@ describe("isModuleSectionActive", () => {
     assert.equal(isModuleSectionActive(cuentas, "/finance/accounts"), true)
   })
 
-  it("marks Cuentas active on /finance/sync", () => {
-    assert.equal(isModuleSectionActive(cuentas, "/finance/sync"), true)
+  it("marks Cuentas active on /finance/accounts/sync", () => {
+    assert.equal(isModuleSectionActive(cuentas, "/finance/accounts/sync"), true)
   })
 
-  it("marks Cuentas active on /finance/sync/oauth", () => {
-    assert.equal(isModuleSectionActive(cuentas, "/finance/sync/oauth"), true)
+  it("marks Cuentas active on /finance/accounts/categories", () => {
+    assert.equal(
+      isModuleSectionActive(cuentas, "/finance/accounts/categories"),
+      true,
+    )
   })
 
   it("does not mark Cuentas on sibling finance routes", () => {
@@ -33,7 +36,7 @@ describe("isModuleSectionActive", () => {
   it("marks Resumen exact and not on child routes", () => {
     assert.equal(isModuleSectionActive(resumen, "/finance"), true)
     assert.equal(isModuleSectionActive(resumen, "/finance/accounts"), false)
-    assert.equal(isModuleSectionActive(resumen, "/finance/sync"), false)
+    assert.equal(isModuleSectionActive(resumen, "/finance/accounts/sync"), false)
   })
 })
 

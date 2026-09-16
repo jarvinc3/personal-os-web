@@ -58,6 +58,8 @@ export const API_ENDPOINTS = {
     EMAIL_SOURCES: '/finance/email-sync/sources',
     EMAIL_SOURCE: (id: string) => `/finance/email-sync/sources/${id}`,
     EMAIL_SOURCE_SYNC: (id: string) => `/finance/email-sync/sources/${id}/sync`,
+    EMAIL_MAILBOXES: '/finance/email-sync/mailboxes',
+    EMAIL_MAILBOX: (id: string) => `/finance/email-sync/mailboxes/${id}`,
     EMAIL_PENDING: '/finance/email-sync/pending',
     EMAIL_PENDING_ASSIGN: (id: string) => `/finance/email-sync/pending/${id}/assign`,
     EMAIL_PENDING_RETRY: (id: string) => `/finance/email-sync/pending/${id}/retry`,

@@ -1,36 +1,20 @@
-# App Modules — Index
+# Módulos (web)
 
-Documentation for each functional area of **personal-os-web**. Some files still describe the React Native client (`personal-os-app`); prefer the backend docs when the web UI is not built yet.
+Implementados en `src/modules/` con rutas en `app/`.
 
-| Module        | Doc file           | Route(s)                                    | Backend module              |
-| ------------- | ------------------ | --------------------------------------------| ----------------------------|
-| Auth          | `auth.md`          | `/login`, `/verify-email`, `/auth/callback` | `auth`, Supabase            |
-| Settings      | `settings.md`      | `/settings`                                 | `users`                     |
-| AI Agent      | `ai.md`            | `/chat`                                     | `ai-agent`                  |
-| Notifications | `notifications.md` | `/notifications`                            | `notifications`             |
-| Keep Awake    | `keep-awake.md`    | `/keep-awake`                               | — (client-only)             |
-| Finance       | `finance.md`       | `/finance`, `/finance/accounts`, `/finance/transactions`, `/finance/budgets`, `/finance/planning`, `/finance/sync` | `finance`                   |
+| Módulo | Código | Doc | Rutas |
+| --- | --- | --- | --- |
+| Auth | `src/modules/auth/` | [auth/](./auth/README.md) | `/login`, `/verify-email`, `/auth/callback` |
+| Settings | `src/modules/settings/` | [settings/](./settings/README.md) | `/settings` |
+| Notifications | `src/modules/notifications/` | [notifications/](./notifications/README.md) | `/notifications` |
+| AI | `src/modules/ai/` | [ai/](./ai/README.md) | `/chat` |
+| Finance | `src/modules/finance/` | [finance/](./finance/README.md) | `/finance/*` |
+| Keep Awake | `src/modules/keep-awake/` | [keep-awake/](./keep-awake/README.md) | `/keep-awake` |
+| Home | `src/modules/home/` | [home/](./home/README.md) | `/home` |
+| Landing | `src/modules/landing/` | [landing/](./landing/README.md) | `/landing`, legal, `/delete-account` |
 
-## Planned modules (settings UI only)
+## Solo Settings (sin app routes)
 
-These have config sheets in Settings but no dedicated app routes yet:
+Agenda, Projects, Health, Subscriptions — sheets `Edit*Sheet`. No documentar como módulos de producto entregados.
 
-- Agenda (`EditAgendaSheet`)
-- Projects (`EditProjectsSheet`)
-- Health (`EditHealthSheet`)
-- Subscriptions (`EditSubscriptionsSheet`)
-
-When a module gains app routes, register `ModuleAppNav` (`items` = secciones) and wrap pages with `ModuleSectionLayout`. Default chrome is a mobile `ModuleTabBar` plus collapsible sidebar children on desktop. A leaf (Keep Awake) has no `items` and stays a flat sidebar row.
-
-## Cross-cutting docs
-
-- `project-guide.md` — architecture and data model
-- `core-contracts.md` — API envelope and shared types
-- `core-infra-status.md` — client infrastructure status
-- `core-runbook.md` — local dev and troubleshooting
-- `supabase-auth-checklist.md` — auth setup verification
-
-## Backend references
-
-- Module endpoints: `personal-os-back/docs/modules/`
-- AI tools per context: `personal-os-back/docs/ai-tools/`
+Chrome transversal: [architecture/module-conventions.md](../architecture/module-conventions.md).

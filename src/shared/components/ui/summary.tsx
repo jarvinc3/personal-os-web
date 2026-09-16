@@ -98,6 +98,7 @@ type SummaryItemBaseProps = {
   trailing?: ReactNode
   showChevron?: boolean
   isLast?: boolean
+  disabled?: boolean
   className?: string
 }
 
@@ -123,13 +124,14 @@ export function SummaryItem({
   trailing,
   showChevron,
   isLast = false,
+  disabled = false,
   className,
   ...props
 }: SummaryItemProps) {
-  const href = "href" in props ? props.href : undefined
-  const onPress = "onPress" in props ? props.onPress : undefined
+  const href = disabled ? undefined : "href" in props ? props.href : undefined
+  const onPress = disabled ? undefined : "onPress" in props ? props.onPress : undefined
   const isInteractive = Boolean(href ?? onPress)
-  const chevronVisible = showChevron ?? Boolean(onPress)
+  const chevronVisible = disabled ? false : (showChevron ?? Boolean(onPress))
   const showLeading = Boolean(leading) || Boolean(Icon)
 
   const rowClassName = cn(
@@ -137,6 +139,7 @@ export function SummaryItem({
     !isLast && "border-b border-border/60",
     isInteractive && cn(PRESSABLE_CLASS, "hover:bg-muted/50"),
     onPress && "cursor-pointer",
+    disabled && "opacity-50",
     className
   )
 
@@ -198,5 +201,9 @@ export function SummaryItem({
     )
   }
 
-  return <div className={rowClassName}>{content}</div>
+  return (
+    <div className={rowClassName} aria-disabled={disabled || undefined}>
+      {content}
+    </div>
+  )
 }

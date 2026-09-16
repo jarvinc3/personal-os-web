@@ -1,6 +1,11 @@
 "use client"
 
 import {
+  FLOATING_SHEET_CONTENT_CLASS,
+  getBottomSheetDirection,
+  type BottomSheetVariant,
+} from "@/src/shared/components/layout/bottom-sheet-variant"
+import {
   Drawer,
   DrawerContent,
   DrawerDescription,
@@ -15,6 +20,7 @@ import type { ReactNode } from "react"
 
 interface BottomSheetProps {
   open: boolean
+  variant?: BottomSheetVariant
   onOpenChange: (open: boolean) => void
   title: string
   description?: string
@@ -29,6 +35,7 @@ interface BottomSheetProps {
 
 export function BottomSheet({
   open,
+  variant = "default",
   onOpenChange,
   title,
   description,
@@ -37,10 +44,12 @@ export function BottomSheet({
   actions,
 }: BottomSheetProps) {
   const isMobile = useIsMobile()
-  const side = isMobile ? "bottom" : "right"
+  const direction = getBottomSheetDirection(variant, isMobile)
   return (
-    <Drawer direction={side} open={open} onOpenChange={onOpenChange}>
-      <DrawerContent>
+    <Drawer direction={direction} open={open} onOpenChange={onOpenChange}>
+      <DrawerContent
+        className={cn(variant === "floating" && FLOATING_SHEET_CONTENT_CLASS)}
+      >
         <DrawerHeader className="border-b">
           <DrawerTitle>{pending ? "Cargando" : title}</DrawerTitle>
           <DrawerDescription

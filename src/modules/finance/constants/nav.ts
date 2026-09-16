@@ -38,7 +38,6 @@ export const FINANCE_NAV_ITEMS: ModuleNavItem[] = [
     extraActiveHrefs: [
       APP_ROUTES.app.financeCategories,
       APP_ROUTES.app.financeSync,
-      `${APP_ROUTES.app.financeSync}/oauth`,
     ],
   },
 ]

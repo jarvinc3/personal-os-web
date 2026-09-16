@@ -1,0 +1,22 @@
+# Capacidad: hub
+
+## Flujo
+
+1. Guard de auth; loading → `LoadingView`.
+2. Título de header = nombre.
+3. Cards: Notificaciones, Agente IA, Configuración, Finanzas, Keep Awake.
+
+## Reglas
+
+| ID | Condición | Resultado | Evidencia |
+| --- | --- | --- | --- |
+| `BR-HOM-001` | Finance `isEnabled=false` | El atajo **sigue** yendo a `/finance` (el gate del módulo muestra CTA a Settings; no 404) | `home-client.tsx`, `useFinanceEnabled` en finance |
+| `BR-HOM-002` | Nombre | `profile.fullName` else `user.fullName` else `"Usuario"` | `home-client.tsx` |
+
+## Criterios
+
+- `AC-HOM-001` — Given sesión, When `/home`, Then atajos a notifications, chat, settings, finance, keep-awake. Runtime 2026-09-15: verificado.
+
+## Evidencia
+
+`src/modules/home/pages/home-client.tsx`, `app/(app)/home/page.tsx`.

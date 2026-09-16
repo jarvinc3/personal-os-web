@@ -30,7 +30,11 @@ import { z } from "zod"
 
 const schema = z.object({
   institutionId: z.string().min(1, "Elige una institución"),
-  bankDomain: z.string().trim().min(1, "Dominio obligatorio").max(150),
+  bankSenderEmail: z
+    .string()
+    .trim()
+    .email("Correo de notificaciones inválido")
+    .max(150),
   label: z.string().max(120),
 })
 
@@ -39,7 +43,7 @@ type FormValues = z.infer<typeof schema>
 function toFormValues(source: FinanceEmailSource | null): FormValues {
   return {
     institutionId: source?.institutionId ?? CATALOG_NONE,
-    bankDomain: source?.bankDomain ?? "",
+    bankSenderEmail: source?.bankSenderEmail ?? "",
     label: source?.label ?? "",
   }
 }
@@ -98,7 +102,7 @@ export function EmailSourceSheet({
         id: source.id,
         body: {
           institutionId: values.institutionId,
-          bankDomain: values.bankDomain,
+          bankSenderEmail: values.bankSenderEmail,
           label: values.label || undefined,
         },
       })
@@ -133,7 +137,7 @@ export function EmailSourceSheet({
 
   async function onDisconnect() {
     if (!source) return
-    const confirmed = window.confirm("¿Desconectar esta cuenta de Gmail?")
+    const confirmed = window.confirm("¿Desvincular esta institución de Gmail?")
     if (!confirmed) return
     try {
       await disconnectMutation.mutateAsync(source.id)
@@ -149,8 +153,8 @@ export function EmailSourceSheet({
       open={open}
       onOpenChange={onOpenChange}
       pending={pending}
-      title="Fuente de Gmail"
-      description={source?.emailAddress ?? "Edita dominio e institución."}
+      title="Editar vínculo"
+      description={source?.emailAddress ?? "Edita el remitente y la institución."}
       actions={{
         delete: source ? (
           <Button
@@ -159,7 +163,7 @@ export function EmailSourceSheet({
             disabled={isPending}
             onClick={() => void onDisconnect()}
           >
-            Desconectar
+            Desvincular
           </Button>
         ) : undefined,
         close: (
@@ -215,14 +219,15 @@ export function EmailSourceSheet({
         ) : null}
         <Controller
           control={control}
-          name="bankDomain"
+          name="bankSenderEmail"
           render={({ field }) => (
             <FormTextField
-              label="Dominio del banco"
+              label="Correo del banco"
               value={field.value}
               onChange={field.onChange}
               onBlur={field.onBlur}
-              error={errors.bankDomain?.message}
+              placeholder="alertas@bhd.com.do"
+              error={errors.bankSenderEmail?.message}
             />
           )}
         />

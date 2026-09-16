@@ -315,6 +315,7 @@ export type FinanceEmailSource = {
   institutionId: string
   institutionName: string | null
   emailAddress: string
+  bankSenderEmail: string | null
   bankDomain: string
   label: string | null
   provider: string
@@ -322,6 +323,15 @@ export type FinanceEmailSource = {
   lastSyncedAt: string | null
   createdAt: string
   logs: FinanceEmailSyncLog[]
+}
+
+export type FinanceMailbox = {
+  id: string
+  emailAddress: string
+  provider: string
+  isActive: boolean
+  createdAt: string
+  sources: FinanceEmailSource[]
 }
 
 export type FinancePendingEmailMessage = {
