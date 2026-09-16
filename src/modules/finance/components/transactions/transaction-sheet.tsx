@@ -13,6 +13,10 @@ import {
   useCreateTransaction,
   useUpdateTransaction,
 } from "@/src/modules/finance/hooks/use-transactions"
+import {
+  categoryTypeForTransaction,
+  filterCategoriesByType,
+} from "@/src/modules/finance/lib/category-tree"
 import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
 import {
   currencyForTarget,
@@ -130,16 +134,6 @@ export function TransactionSheet({
     [accounts, cards]
   )
   const defaultDestination = destinationOptions[1]?.value ?? CATALOG_NONE
-  const categoryOptions = useMemo(
-    () => [
-      { value: CATALOG_NONE, label: "Sin categoría" },
-      ...(categoriesQuery.data ?? []).map((category) => ({
-        value: category.id,
-        label: `${category.icon ? `${category.icon} ` : ""}${category.name}`,
-      })),
-    ],
-    [categoriesQuery.data]
-  )
 
   const {
     control,
@@ -158,6 +152,31 @@ export function TransactionSheet({
 
   const destination = useWatch({ control, name: "destination" })
   const type = useWatch({ control, name: "type" })
+  const categoryId = useWatch({ control, name: "categoryId" })
+  const categoryOptions = useMemo(() => {
+    const expected = categoryTypeForTransaction(type) ?? "EXPENSE"
+    const filtered = filterCategoriesByType(
+      categoriesQuery.data ?? [],
+      expected,
+    )
+    const options = [
+      { value: CATALOG_NONE, label: "Sin categoría" },
+      ...filtered.map((category) => ({
+        value: category.id,
+        label: `${category.icon ? `${category.icon} ` : ""}${category.name}`,
+      })),
+    ]
+    const selected = (categoriesQuery.data ?? []).find(
+      (category) => category.id === categoryId,
+    )
+    if (selected && !filtered.some((category) => category.id === selected.id)) {
+      options.push({
+        value: selected.id,
+        label: `${selected.icon ? `${selected.icon} ` : ""}${selected.name}`,
+      })
+    }
+    return options
+  }, [categoriesQuery.data, type, categoryId])
 
   useEffect(() => {
     if (open) {
@@ -267,7 +286,16 @@ export function TransactionSheet({
             <FinanceSegmentedControl
               label="Tipo"
               value={field.value}
-              onChange={field.onChange}
+              onChange={(next) => {
+                field.onChange(next)
+                const expected = categoryTypeForTransaction(next)
+                const current = (categoriesQuery.data ?? []).find(
+                  (category) => category.id === categoryId,
+                )
+                if (current && current.type !== expected) {
+                  setValue("categoryId", CATALOG_NONE)
+                }
+              }}
               options={TYPE_OPTIONS}
               disabled={isTransferLeg}
             />

@@ -15,6 +15,7 @@ import {
   boundsForPeriod,
   buildCreateBudgetBody,
 } from "@/src/modules/finance/lib/budget-payloads"
+import { filterCategoriesByType } from "@/src/modules/finance/lib/category-tree"
 import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
 import type {
   FinanceBudget,
@@ -98,16 +99,29 @@ export function BudgetSheet({
     createMutation.isPending ||
     updateMutation.isPending ||
     deleteMutation.isPending
-  const hasCategories = categories.length > 0
-  const defaultCategoryId = categories[0]?.id ?? ""
+  const expenseCategories = useMemo(() => {
+    const filtered = filterCategoriesByType(categories, "EXPENSE")
+    if (
+      budget?.categoryId &&
+      !filtered.some((category) => category.id === budget.categoryId)
+    ) {
+      const current = categories.find(
+        (category) => category.id === budget.categoryId,
+      )
+      return current ? [current, ...filtered] : filtered
+    }
+    return filtered
+  }, [budget?.categoryId, categories])
+  const hasCategories = expenseCategories.length > 0
+  const defaultCategoryId = expenseCategories[0]?.id ?? ""
 
   const categoryOptions = useMemo(
     () =>
-      categories.map((category) => ({
+      expenseCategories.map((category) => ({
         value: category.id,
         label: `${category.icon ? `${category.icon} ` : ""}${category.name}`,
       })),
-    [categories]
+    [expenseCategories]
   )
 
   const { control, handleSubmit, reset, setValue } = useForm<FormValues>({

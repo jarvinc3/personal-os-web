@@ -2,6 +2,7 @@ import assert from "node:assert/strict"
 import { describe, it } from "node:test"
 
 import {
+  filterCategoriesByType,
   groupCategoriesByParent,
   isFinanceCategoryEditable,
 } from "./category-tree.ts"
@@ -36,5 +37,23 @@ describe("isFinanceCategoryEditable", () => {
   it("allows custom categories and blocks system ones", () => {
     assert.equal(isFinanceCategoryEditable({ isSystem: false }), true)
     assert.equal(isFinanceCategoryEditable({ isSystem: true }), false)
+  })
+})
+
+describe("filterCategoriesByType", () => {
+  it("keeps only categories of the requested type", () => {
+    const items = [
+      { id: "food", type: "EXPENSE" },
+      { id: "salary", type: "INCOME" },
+      { id: "rent", type: "EXPENSE" },
+    ]
+    assert.deepEqual(
+      filterCategoriesByType(items, "INCOME").map((item) => item.id),
+      ["salary"],
+    )
+    assert.deepEqual(
+      filterCategoriesByType(items, "EXPENSE").map((item) => item.id),
+      ["food", "rent"],
+    )
   })
 })

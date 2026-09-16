@@ -9,6 +9,10 @@ import { useAccounts } from "@/src/modules/finance/hooks/use-accounts"
 import { useCards } from "@/src/modules/finance/hooks/use-cards"
 import { useCategories } from "@/src/modules/finance/hooks/use-categories"
 import { useCreateTransaction } from "@/src/modules/finance/hooks/use-transactions"
+import {
+  categoryTypeForTransaction,
+  filterCategoriesByType,
+} from "@/src/modules/finance/lib/category-tree"
 import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
 import { todayDateInput } from "@/src/modules/finance/lib/ledger-form"
 import {
@@ -76,15 +80,18 @@ export default function ExpenseIncomeForm({
       ),
     [accountsQuery.data, cardsQuery.data],
   )
+  const categoryType = categoryTypeForTransaction(type) ?? "EXPENSE"
   const categoryOptions = useMemo(
     () => [
       { value: CATALOG_NONE, label: "Sin categoría" },
-      ...(categoriesQuery.data ?? []).map((category) => ({
-        value: category.id,
-        label: `${category.icon ? `${category.icon} ` : ""}${category.name}`,
-      })),
+      ...filterCategoriesByType(categoriesQuery.data ?? [], categoryType).map(
+        (category) => ({
+          value: category.id,
+          label: `${category.icon ? `${category.icon} ` : ""}${category.name}`,
+        }),
+      ),
     ],
-    [categoriesQuery.data],
+    [categoriesQuery.data, categoryType],
   )
 
   const { control, handleSubmit, reset } = useForm<ExpenseIncomeFormValues>({
@@ -228,20 +235,18 @@ export default function ExpenseIncomeForm({
           )}
         />
 
-        {isExpense ? (
-          <Controller
-            control={control}
-            name="categoryId"
-            render={({ field }) => (
-              <SelectField
-                label="Categoría"
-                value={field.value}
-                onChange={field.onChange}
-                options={categoryOptions}
-              />
-            )}
-          />
-        ) : null}
+        <Controller
+          control={control}
+          name="categoryId"
+          render={({ field }) => (
+            <SelectField
+              label="Categoría"
+              value={field.value}
+              onChange={field.onChange}
+              options={categoryOptions}
+            />
+          )}
+        />
 
         <Controller
           control={control}

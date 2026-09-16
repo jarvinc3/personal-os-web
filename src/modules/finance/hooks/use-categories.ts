@@ -32,8 +32,13 @@ export function useCreateCategory() {
 export function useUpdateCategory() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: ({ id, body }: { id: string; body: CreateCategoryBody }) =>
-      apiPatch<FinanceCategory>(API_ENDPOINTS.FINANCE.CATEGORY(id), body),
+    mutationFn: ({
+      id,
+      body,
+    }: {
+      id: string
+      body: Omit<CreateCategoryBody, "type">
+    }) => apiPatch<FinanceCategory>(API_ENDPOINTS.FINANCE.CATEGORY(id), body),
     onSuccess: () => invalidateCategories(queryClient),
   })
 }

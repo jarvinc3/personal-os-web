@@ -39,3 +39,18 @@ export function groupCategoriesByParent<T extends CategoryLike>(
     children: children.get(category.id) ?? [],
   }))
 }
+
+export function categoryTypeForTransaction(
+  type: "DEBIT" | "CREDIT" | "TRANSFER",
+): "EXPENSE" | "INCOME" | null {
+  if (type === "DEBIT") return "EXPENSE"
+  if (type === "CREDIT") return "INCOME"
+  return null
+}
+
+export function filterCategoriesByType<T extends { type: string }>(
+  items: T[],
+  type: string,
+): T[] {
+  return items.filter((item) => item.type === type)
+}

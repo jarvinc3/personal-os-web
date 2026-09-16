@@ -6,6 +6,7 @@ import { useBudget, useBudgets } from "@/src/modules/finance/hooks/use-budgets"
 import { useCategories } from "@/src/modules/finance/hooks/use-categories"
 import { useSheetQueryEntity } from "@/src/modules/finance/hooks/use-sheet-entity"
 import { budgetPctUsed } from "@/src/modules/finance/lib/budget-payloads"
+import { filterCategoriesByType } from "@/src/modules/finance/lib/category-tree"
 import {
   budgetsFromPayload,
   FINANCE_BUDGET_PAGE_SIZE,
@@ -77,7 +78,10 @@ export function FinanceBudgetsList({
     setOpen: setOpenBudgetSheet,
   } = useSheetParam(FINANCE_SHEET_KEYS.budget)
   const categoriesQuery = useCategories(enabled)
-  const categories = categoriesQuery.data ?? []
+  const categories = filterCategoriesByType(
+    categoriesQuery.data ?? [],
+    "EXPENSE",
+  )
   const listQuery = useBudgets(enabled, {
     page,
     limit: FINANCE_BUDGET_PAGE_SIZE,
