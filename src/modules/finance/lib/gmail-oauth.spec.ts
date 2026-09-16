@@ -1,27 +1,33 @@
 import assert from "node:assert/strict"
 import { describe, it } from "node:test"
 
+import { FINANCE_SHEET_KEYS } from "../constants/sheet-keys.ts"
 import {
   buildGmailOAuthReturnTo,
   buildGoogleOAuthUrlSearch,
   financeAppOrigin,
   isAppReturnTo,
-  parseOAuthNextPath,
   parseOAuthSuccessParam,
   syncFailureReason,
 } from "./gmail-oauth.ts"
 
 describe("Gmail OAuth returnTo", () => {
-  it("uses NEXT_PUBLIC_URL origin (local :3000, never Vite :5173)", () => {
+  it("uses NEXT_PUBLIC_URL origin and the Correos result sheet", () => {
     const previous = process.env.NEXT_PUBLIC_URL
     process.env.NEXT_PUBLIC_URL = "http://localhost:3000"
     try {
       assert.equal(financeAppOrigin(), "http://localhost:3000")
+      const returnTo = buildGmailOAuthReturnTo()
       assert.equal(
-        buildGmailOAuthReturnTo(),
-        "http://localhost:3000/finance/sync/oauth?next=%2Ffinance%2Fsync",
+        returnTo.startsWith("http://localhost:3000/finance/accounts/sync"),
+        true,
       )
-      assert.equal(buildGmailOAuthReturnTo().includes(":5173"), false)
+      assert.equal(
+        new URL(returnTo).searchParams.get("sheet"),
+        FINANCE_SHEET_KEYS.oauthGmailResult,
+      )
+      assert.equal(returnTo.includes("/oauth"), false)
+      assert.equal(returnTo.includes(":5173"), false)
     } finally {
       process.env.NEXT_PUBLIC_URL = previous
     }
@@ -33,7 +39,7 @@ describe("Gmail OAuth returnTo", () => {
     try {
       assert.equal(isAppReturnTo("https://evil.example/phish"), false)
       assert.equal(
-        isAppReturnTo("http://localhost:3000/finance/sync/oauth"),
+        isAppReturnTo("http://localhost:3000/finance/accounts/sync"),
         true,
       )
     } finally {
@@ -43,30 +49,22 @@ describe("Gmail OAuth returnTo", () => {
 })
 
 describe("buildGoogleOAuthUrlSearch", () => {
-  const institutionId = "11111111-1111-1111-1111-111111111111"
-
-  it("rejects a missing institution", () => {
-    const result = buildGoogleOAuthUrlSearch({ bankDomain: "bhd.com.do" })
-    assert.equal(result.ok, false)
-  })
-
-  it("puts only the app returnTo on the query (no open redirect)", () => {
+  it("puts only the app returnTo on the query (no institution, no open redirect)", () => {
     const previous = process.env.NEXT_PUBLIC_URL
     process.env.NEXT_PUBLIC_URL = "http://localhost:3000"
     try {
-      const result = buildGoogleOAuthUrlSearch({
-        institutionId,
-        nextPath: "/finance/accounts",
-      })
+      const result = buildGoogleOAuthUrlSearch()
       assert.equal(result.ok, true)
       if (!result.ok) return
       const params = new URLSearchParams(result.body)
-      assert.equal(params.get("institutionId"), institutionId)
-      assert.equal(params.get("accountId"), null)
+      assert.equal(params.get("institutionId"), null)
       const returnTo = params.get("returnTo")
       assert.ok(returnTo)
       assert.equal(new URL(returnTo).origin, "http://localhost:3000")
-      assert.equal(new URL(returnTo).searchParams.get("next"), "/finance/accounts")
+      assert.equal(
+        new URL(returnTo).pathname,
+        "/finance/accounts/sync",
+      )
       assert.equal(returnTo.includes("evil"), false)
     } finally {
       process.env.NEXT_PUBLIC_URL = previous
@@ -79,13 +77,6 @@ describe("parseOAuthSuccessParam", () => {
     assert.equal(parseOAuthSuccessParam("false"), "error")
     assert.equal(parseOAuthSuccessParam("true"), "ok")
     assert.equal(parseOAuthSuccessParam(null), "none")
-  })
-})
-
-describe("parseOAuthNextPath", () => {
-  it("falls back to sync for unknown paths", () => {
-    assert.equal(parseOAuthNextPath("/finance/accounts"), "/finance/accounts")
-    assert.equal(parseOAuthNextPath("/evil"), "/finance/sync")
   })
 })
 

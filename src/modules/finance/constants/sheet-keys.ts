@@ -17,6 +17,9 @@ export const FINANCE_SHEET_KEYS = {
   connectGmail: "connect-gmail-sheet",
   emailSource: "email-source-sheet",
   assignEmail: "assign-email-sheet",
+  oauthGmailResult: "oauth-gmail-result",
+  linkInstitutionMailbox: "link-institution-mailbox-sheet",
+  mailbox: "mailbox-sheet",
 } as const
 
 export type FinanceSheetKey =

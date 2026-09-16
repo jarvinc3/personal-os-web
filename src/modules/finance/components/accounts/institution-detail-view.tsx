@@ -12,12 +12,14 @@ import { AccountSheet } from "@/src/modules/finance/components/catalog/account-s
 import { CardBalanceSheet } from "@/src/modules/finance/components/catalog/card-balance-sheet"
 import { CardSheet } from "@/src/modules/finance/components/catalog/card-sheet"
 import { InstitutionSheet } from "@/src/modules/finance/components/accounts/institution-sheet"
+import { LinkInstitutionMailboxSheet } from "@/src/modules/finance/components/sync/link-institution-mailbox-sheet"
 import { FinanceAuthenticatedPage } from "@/src/modules/finance/components/layout/finance-authenticated-page"
 import { LoanSheet } from "@/src/modules/finance/components/planning/loan-sheet"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/constants/sheet-keys"
 import { useAccounts } from "@/src/modules/finance/hooks/use-accounts"
 import { useBalanceSheet } from "@/src/modules/finance/hooks/use-balance-sheet"
 import { useCards } from "@/src/modules/finance/hooks/use-cards"
+import { useEmailMailboxes } from "@/src/modules/finance/hooks/use-email-sources"
 import { useFinanceEnabled } from "@/src/modules/finance/hooks/use-finance-enabled"
 import { useInstitutions } from "@/src/modules/finance/hooks/use-institutions"
 import { useLoans } from "@/src/modules/finance/hooks/use-loans"
@@ -41,9 +43,9 @@ import {
   CreditCardIcon,
   HandCoinsIcon,
   LandmarkIcon,
+  MailIcon,
   MoreVerticalIcon,
   PencilIcon,
-  RefreshCwIcon,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo, useState } from "react"
@@ -68,7 +70,7 @@ function InstitutionDetailView({
   institutionId,
 }: InstitutionDetailClientProps) {
   const router = useRouter()
-  const { isEnabled, config } = useFinanceEnabled()
+  const { isEnabled, config, emailSyncEnabled } = useFinanceEnabled()
   const display = {
     currency: config.baseCurrency,
     showCents: config.display.showCents,
@@ -80,6 +82,7 @@ function InstitutionDetailView({
   const cardsQuery = useCards(isEnabled)
   const loansQuery = useLoans(isEnabled)
   const balanceSheetQuery = useBalanceSheet(isEnabled)
+  const mailboxesQuery = useEmailMailboxes(isEnabled && emailSyncEnabled)
 
   const [tab, setTab] = useState<InstitutionDetailTab>("accounts")
   const { open: openOptionsSheet, setOpen: setOpenOptionsSheet } =
@@ -109,9 +112,18 @@ function InstitutionDetailView({
     sheetId: loanSheetId,
     setOpen: setOpenLoanSheet,
   } = useSheetParam(FINANCE_SHEET_KEYS.loan)
+  const { open: openLinkSheet, setOpen: setOpenLinkSheet } = useSheetParam(
+    FINANCE_SHEET_KEYS.linkInstitutionMailbox,
+  )
 
   const institutions = institutionsQuery.data ?? []
   const accounts = accountsQuery.data ?? []
+  const mailboxes = mailboxesQuery.data ?? []
+  const linkedMailbox = mailboxes.find((mailbox) =>
+    mailbox.sources.some(
+      (source) => source.isActive && source.institutionId === institutionId,
+    ),
+  )
 
   const moneyDisplay = {
     ...display,
@@ -414,11 +426,18 @@ function InstitutionDetailView({
             className="px-3"
           />
           <SummaryItem
-            title="Sincronización"
-            description="Conecta bancos y proveedores"
-            icon={RefreshCwIcon}
-            href={APP_ROUTES.app.financeSync}
-            showChevron
+            title="Vincular correo"
+            description={
+              linkedMailbox
+                ? `Conectada a ${linkedMailbox.emailAddress}`
+                : "Liga un Gmail ya conectado"
+            }
+            icon={MailIcon}
+            disabled={Boolean(linkedMailbox)}
+            onPress={
+              linkedMailbox ? undefined : () => setOpenLinkSheet(true)
+            }
+            showChevron={!linkedMailbox}
             isLast
             className="px-3"
           />
@@ -475,6 +494,15 @@ function InstitutionDetailView({
         institutions={institutions}
         defaultCurrency={config.baseCurrency}
         defaultInstitutionId={institutionId}
+      />
+
+      <LinkInstitutionMailboxSheet
+        open={openLinkSheet}
+        onOpenChange={setOpenLinkSheet}
+        mailboxes={mailboxes}
+        institutions={institutions}
+        institutionId={institutionId}
+        emailSyncEnabled={emailSyncEnabled}
       />
     </>
   )

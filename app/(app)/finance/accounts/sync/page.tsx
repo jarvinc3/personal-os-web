@@ -1,12 +1,12 @@
 import { Suspense } from "react"
 
-import { FinanceSyncClient } from "@/src/modules/finance/pages/finance-sync"
+import { FinanceMailboxesClient } from "@/src/modules/finance/pages/finance-sync"
 import { LoadingView } from "@/src/shared/components/layout/loading-view"
 
-export default function FinanceSyncPage() {
+export default function FinanceAccountsSyncPage() {
   return (
     <Suspense fallback={<LoadingView variant="screen" />}>
-      <FinanceSyncClient />
+      <FinanceMailboxesClient />
     </Suspense>
   )
 }

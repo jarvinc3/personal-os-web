@@ -1,17 +1,14 @@
 "use client"
 
 import { apiGet } from "@/src/config/api-client"
-import {
-  buildGoogleOAuthUrlSearch,
-  type GoogleOAuthUrlQuery,
-} from "@/src/modules/finance/lib/gmail-oauth"
+import { buildGoogleOAuthUrlSearch } from "@/src/modules/finance/lib/gmail-oauth"
 import { API_ENDPOINTS } from "@/src/shared/constants/api-endpoints"
 import { useMutation } from "@tanstack/react-query"
 
 export function useStartGmailOAuth() {
   return useMutation({
-    mutationFn: async (input: GoogleOAuthUrlQuery) => {
-      const search = buildGoogleOAuthUrlSearch(input)
+    mutationFn: async () => {
+      const search = buildGoogleOAuthUrlSearch()
       if (!search.ok) {
         throw new Error(search.error)
       }

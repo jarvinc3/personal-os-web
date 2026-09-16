@@ -4,6 +4,7 @@ import { apiDelete, apiGet, apiPatch, apiPost } from "@/src/config/api-client"
 import { invalidateFinancePositions } from "@/src/modules/finance/hooks/use-balance-sheet"
 import { asFinanceArray } from "@/src/modules/finance/lib/planning-lists"
 import {
+  FINANCE_EMAIL_MAILBOXES_QUERY_KEY,
   FINANCE_EMAIL_PENDING_QUERY_KEY,
   FINANCE_EMAIL_SOURCES_QUERY_KEY,
 } from "@/src/modules/finance/types/api"
@@ -11,6 +12,7 @@ import type {
   FinanceEmailAssignResult,
   FinanceEmailSource,
   FinanceEmailSyncTrigger,
+  FinanceMailbox,
   FinancePendingEmailMessage,
 } from "@/src/modules/finance/types/entities"
 import { API_ENDPOINTS } from "@/src/shared/constants/api-endpoints"
@@ -19,6 +21,9 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 function invalidate(queryClient: ReturnType<typeof useQueryClient>) {
   void queryClient.invalidateQueries({
     queryKey: FINANCE_EMAIL_SOURCES_QUERY_KEY,
+  })
+  void queryClient.invalidateQueries({
+    queryKey: FINANCE_EMAIL_MAILBOXES_QUERY_KEY,
   })
   void queryClient.invalidateQueries({
     queryKey: FINANCE_EMAIL_PENDING_QUERY_KEY,
@@ -49,7 +54,15 @@ function invalidateEmailResult(
 export type UpdateEmailSourceBody = {
   institutionId?: string
   label?: string
+  bankSenderEmail?: string
   bankDomain?: string
+}
+
+export type CreateEmailSourceBody = {
+  emailAddress: string
+  institutionId: string
+  bankSenderEmail: string
+  label?: string
 }
 
 export function useEmailSources(enabled: boolean) {
@@ -60,6 +73,35 @@ export function useEmailSources(enabled: boolean) {
         await apiGet(API_ENDPOINTS.FINANCE.EMAIL_SOURCES),
       ),
     enabled,
+  })
+}
+
+export function useEmailMailboxes(enabled: boolean) {
+  return useQuery({
+    queryKey: FINANCE_EMAIL_MAILBOXES_QUERY_KEY,
+    queryFn: async () =>
+      asFinanceArray<FinanceMailbox>(
+        await apiGet(API_ENDPOINTS.FINANCE.EMAIL_MAILBOXES),
+      ),
+    enabled,
+  })
+}
+
+export function useCreateEmailSource() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (body: CreateEmailSourceBody) =>
+      apiPost<FinanceEmailSource>(API_ENDPOINTS.FINANCE.EMAIL_SOURCES, body),
+    onSuccess: () => invalidate(queryClient),
+  })
+}
+
+export function useDisconnectMailbox() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) =>
+      apiDelete(API_ENDPOINTS.FINANCE.EMAIL_MAILBOX(id)),
+    onSuccess: () => invalidate(queryClient),
   })
 }
 

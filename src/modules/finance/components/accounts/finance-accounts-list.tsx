@@ -26,7 +26,7 @@ import { Spinner } from "@/src/shared/components/ui/spinner"
 import { SummaryItem } from "@/src/shared/components/ui/summary"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
-import { Building2Icon, PlusIcon, TagsIcon } from "lucide-react"
+import { Building2Icon, MailIcon, PlusIcon, TagsIcon } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useMemo } from "react"
 
@@ -164,6 +164,15 @@ export function FinanceAccountsList({
           description="Organiza gastos e ingresos"
           icon={TagsIcon}
           href={APP_ROUTES.app.financeCategories}
+          showChevron
+          isLast={false}
+          className="px-3"
+        />
+        <SummaryItem
+          title="Correos"
+          description="Gmail y notificaciones de bancos"
+          icon={MailIcon}
+          href={APP_ROUTES.app.financeSync}
           showChevron
           isLast
           className="px-3"

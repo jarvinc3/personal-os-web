@@ -19,7 +19,7 @@ Equivalente backend: `personal-os-back/docs/architecture/modules.md` (capas Nest
 ModuleNavItem = {
   label, href, icon,
   matchExact?: boolean,          // Resumen de Finanzas: true (no activo en hijos)
-  extraActiveHrefs?: string[],   // Cuentas también activo en /finance/sync*
+  extraActiveHrefs?: string[],   // Cuentas también activo en categories y Correos
   showInTabBar?: boolean,        // false = solo sidebar (Estadísticas)
 }
 
@@ -61,7 +61,7 @@ Finanzas (VERIFICADO runtime 2026-09-15):
 | Movimientos | sí | sí | |
 | Estadísticas | **no** | sí | `showInTabBar: false` |
 | Planificación | sí | sí | presupuestos viven aquí |
-| Cuentas | sí | sí | `extraActiveHrefs`: `/finance/sync`, oauth, categories |
+| Cuentas | sí | sí | `extraActiveHrefs`: categories, `/finance/accounts/sync` |
 
 Sync **no** es ítem de nav; queda bajo Cuentas.
 
@@ -74,7 +74,7 @@ Sync **no** es ítem de nav; queda bajo Cuentas.
 | `primary` (default) | Trigger sidebar + campana + menú usuario |
 | `secondary` | Back (`onBack`); oculta trigger/campana/menú **y** el tab bar (`ModuleSectionLayout` lee `config.variant`) |
 
-Usos `secondary`: detalle institución/cash, categorías, inbox de notificaciones, (chat configura header propio).
+Usos `secondary`: detalle institución/cash, categorías, Correos, inbox de notificaciones, (chat configura header propio).
 
 ## Layouts
 

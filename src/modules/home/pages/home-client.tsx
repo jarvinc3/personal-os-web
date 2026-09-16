@@ -2,6 +2,7 @@
 
 import { useAuthGuard } from "@/src/modules/auth";
 import { useProfile } from "@/src/modules/settings/hooks/use-profile";
+import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet";
 import { LoadingView } from "@/src/shared/components/layout/loading-view";
 import { Button } from "@/src/shared/components/ui/button";
 import { SummarySection } from "@/src/shared/components/ui/summary";
@@ -10,13 +11,13 @@ import { usePageHeader } from "@/src/shared/hooks/use-page-header";
 import { BellRing, Brain, ChevronRight, Landmark, Monitor, Settings, UserIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export function HomeClient() {
   const router = useRouter()
   const { isAuthenticated, isLoading, user } = useAuthGuard()
   const { profileQuery } = useProfile()
-
+  const [open, setOpen] = useState(false)
   const profile = profileQuery.data
   const displayName = profile?.fullName ?? user?.fullName ?? "Usuario"
 
@@ -109,6 +110,23 @@ export function HomeClient() {
           </Link>
         </Button>
       </SummarySection>
+
+      <Button onClick={() => setOpen(true)}>Open Floating Sheet</Button>
+      <BottomSheet
+        open={open}
+        onOpenChange={setOpen}
+        title="Floating Sheet"
+        variant="floating"
+        actions={{
+          close: <Button variant="outline" className="flex-1" onClick={() => setOpen(false)}>Entendido</Button>,
+        }}
+      >
+        <div className="flex flex-col items-center justify-center gap-2">
+          <p className="text-sm text-muted-foreground text-center">
+            Floating Player is a floating sheet that can be used to show a screen with any results or information.
+          </p>
+        </div>
+      </BottomSheet>
     </div>
   )
 }

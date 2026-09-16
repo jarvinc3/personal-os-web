@@ -111,15 +111,15 @@ describe("resolveSheetNavigation", () => {
 
   it("closes a deep-linked sheet with replace and keeps other params", () => {
     const result = resolveSheetNavigation({
-      pathname: "/finance/sync",
-      searchParams: params("success=true&sheet=connect-gmail-sheet"),
-      key: "connect-gmail-sheet",
+      pathname: "/finance/accounts/sync",
+      searchParams: params("success=true&sheet=oauth-gmail-result"),
+      key: "oauth-gmail-result",
       open: false,
       wasPushed: false,
     })
     assert.deepEqual(result, {
       action: "replace",
-      url: "/finance/sync?success=true",
+      url: "/finance/accounts/sync?success=true",
     })
   })
 
@@ -150,7 +150,7 @@ describe("resolveSheetNavigation", () => {
 
   it("preserves unrelated query params when opening", () => {
     const result = resolveSheetNavigation({
-      pathname: "/finance/sync",
+      pathname: "/finance/accounts/sync",
       searchParams: params("success=true"),
       key: "email-source-sheet",
       open: true,
@@ -159,7 +159,7 @@ describe("resolveSheetNavigation", () => {
     })
     assert.deepEqual(result, {
       action: "push",
-      url: "/finance/sync?success=true&sheet=email-source-sheet&sheetId=src-1",
+      url: "/finance/accounts/sync?success=true&sheet=email-source-sheet&sheetId=src-1",
     })
   })
 })

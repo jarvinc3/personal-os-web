@@ -15,7 +15,7 @@ describe("finance money presentations", () => {
     const sources = [
       financeSource("components/catalog/card-balance-sheet.tsx"),
       financeSource("components/catalog/account-sheet.tsx"),
-      financeSource("components/sync/finance-sync.tsx"),
+      financeSource("components/accounts/finance-mailboxes-view.tsx"),
       financeSource("components/sync/assign-email-message-sheet.tsx"),
     ].join("\n")
 

@@ -3,11 +3,15 @@
 import { AssignEmailMessageSheet } from "@/src/modules/finance/components/sync/assign-email-message-sheet"
 import { ConnectGmailSheet } from "@/src/modules/finance/components/sync/connect-gmail-sheet"
 import { EmailSourceSheet } from "@/src/modules/finance/components/sync/email-source-sheet"
+import { LinkInstitutionMailboxSheet } from "@/src/modules/finance/components/sync/link-institution-mailbox-sheet"
+import { MailboxGroup } from "@/src/modules/finance/components/sync/mailbox-group"
+import { MailboxSheet } from "@/src/modules/finance/components/sync/mailbox-sheet"
+import { OauthGmailResultSheet } from "@/src/modules/finance/components/sync/oauth-gmail-result-sheet"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/constants/sheet-keys"
 import { useAccounts } from "@/src/modules/finance/hooks/use-accounts"
 import { useCards } from "@/src/modules/finance/hooks/use-cards"
 import {
-  useEmailSources,
+  useEmailMailboxes,
   usePendingEmailMessages,
 } from "@/src/modules/finance/hooks/use-email-sources"
 import { useFinanceEnabled } from "@/src/modules/finance/hooks/use-finance-enabled"
@@ -15,17 +19,10 @@ import { useInstitutions } from "@/src/modules/finance/hooks/use-institutions"
 import { useSheetListEntity } from "@/src/modules/finance/hooks/use-sheet-entity"
 import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
 import {
-  parseOAuthSuccessParam,
-  type GmailOAuthNextPath,
-} from "@/src/modules/finance/lib/gmail-oauth"
-import {
   formatFinanceMoney,
   type FinanceMoneyDisplay,
 } from "@/src/modules/finance/lib/money"
-import type {
-  FinanceEmailSource,
-  FinancePendingEmailMessage,
-} from "@/src/modules/finance/types/entities"
+import type { FinancePendingEmailMessage } from "@/src/modules/finance/types/entities"
 import { Button } from "@/src/shared/components/ui/button"
 import {
   Empty,
@@ -37,25 +34,8 @@ import {
 } from "@/src/shared/components/ui/empty"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { SummaryItem, SummarySection } from "@/src/shared/components/ui/summary"
-import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { InboxIcon, MailIcon, PlusIcon } from "lucide-react"
-import Link from "next/link"
-import { useSearchParams } from "next/navigation"
-
-type FinanceSyncListProps = {
-  enabled: boolean
-  oauthNextPath?: GmailOAuthNextPath
-}
-
-function sourceRowValue(source: FinanceEmailSource): string {
-  const dest = source.institutionName ?? "Institución"
-  const status = source.isActive ? dest : `${dest} · Desconectada`
-  const synced = source.lastSyncedAt
-    ? source.lastSyncedAt.slice(0, 10)
-    : "Nunca sincronizada"
-  return `${source.bankDomain} · ${status} · ${synced}`
-}
 
 function pendingRowValue(
   message: FinancePendingEmailMessage,
@@ -74,12 +54,7 @@ function pendingRowValue(
   return `${message.institutionName} · ${amount}`
 }
 
-export function FinanceSyncList({
-  enabled,
-  oauthNextPath = APP_ROUTES.app.financeSync,
-}: FinanceSyncListProps) {
-  const searchParams = useSearchParams()
-  const oauthState = parseOAuthSuccessParam(searchParams.get("success"))
+export function FinanceMailboxesView({ enabled }: { enabled: boolean }) {
   const { emailSyncEnabled, config } = useFinanceEnabled()
   const display = {
     currency: config.baseCurrency,
@@ -88,44 +63,64 @@ export function FinanceSyncList({
   }
   const { open: openConnectSheet, setOpen: setOpenConnectSheet } =
     useSheetParam(FINANCE_SHEET_KEYS.connectGmail)
+  const { open: openOauthResult, setOpen: setOpenOauthResult } = useSheetParam(
+    FINANCE_SHEET_KEYS.oauthGmailResult,
+  )
+  const {
+    open: openMailboxSheet,
+    sheetId: mailboxSheetId,
+    setOpen: setOpenMailboxSheet,
+  } = useSheetParam(FINANCE_SHEET_KEYS.mailbox)
   const {
     open: openSourceSheet,
     sheetId: sourceSheetId,
     setOpen: setOpenSourceSheet,
   } = useSheetParam(FINANCE_SHEET_KEYS.emailSource)
   const {
+    open: openLinkSheet,
+    sheetId: linkMailboxId,
+    setOpen: setOpenLinkSheet,
+  } = useSheetParam(FINANCE_SHEET_KEYS.linkInstitutionMailbox)
+  const {
     open: openAssignSheet,
     sheetId: assignSheetId,
     setOpen: setOpenAssignSheet,
   } = useSheetParam(FINANCE_SHEET_KEYS.assignEmail)
+
   const institutionsQuery = useInstitutions(enabled)
   const accountsQuery = useAccounts(enabled)
   const cardsQuery = useCards(enabled)
-  const sourcesQuery = useEmailSources(enabled)
+  const mailboxesQuery = useEmailMailboxes(enabled && emailSyncEnabled)
   const pendingQuery = usePendingEmailMessages(enabled && emailSyncEnabled)
 
   const institutions = institutionsQuery.data ?? []
   const accounts = accountsQuery.data ?? []
   const cards = cardsQuery.data ?? []
-  const sources = sourcesQuery.data ?? []
+  const mailboxes = mailboxesQuery.data ?? []
   const pending = pendingQuery.data ?? []
-  const hasInstitutions = institutions.some((item) => item.isActive)
-  const visibleSources = sources.filter((source) => source.isActive)
-  const disconnectedCount = sources.length - visibleSources.length
+  const sources = mailboxes.flatMap((mailbox) => mailbox.sources)
 
-  const errorMessage = sourcesQuery.error
-    ? financeErrorMessage(sourcesQuery.error)
+  const errorMessage = mailboxesQuery.error
+    ? financeErrorMessage(mailboxesQuery.error)
     : pendingQuery.error
       ? financeErrorMessage(pendingQuery.error)
       : null
 
-  const editing = useSheetListEntity(
+  const editingMailbox = useSheetListEntity(
+    openMailboxSheet,
+    mailboxSheetId,
+    mailboxesQuery.data,
+    mailboxesQuery.isPending,
+    setOpenMailboxSheet,
+    true,
+  )
+  const editingSource = useSheetListEntity(
     openSourceSheet,
     sourceSheetId,
-    sourcesQuery.data,
-    sourcesQuery.isPending,
+    sources,
+    mailboxesQuery.isPending,
     setOpenSourceSheet,
-    true
+    true,
   )
   const assigning = useSheetListEntity(
     openAssignSheet,
@@ -133,22 +128,11 @@ export function FinanceSyncList({
     pendingQuery.data,
     pendingQuery.isPending,
     setOpenAssignSheet,
-    true
+    true,
   )
 
   return (
     <>
-      {oauthState === "error" ? (
-        <p className="rounded-xl border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
-          No se pudo conectar Gmail. Vuelve a intentar; no se importó nada.
-        </p>
-      ) : null}
-      {oauthState === "ok" ? (
-        <p className="rounded-xl border border-border bg-card p-3 text-sm">
-          Gmail quedó conectado a la institución. Lanza un sync cuando quieras.
-        </p>
-      ) : null}
-
       {errorMessage ? (
         <p className="text-sm text-destructive">{errorMessage}</p>
       ) : null}
@@ -179,13 +163,13 @@ export function FinanceSyncList({
       </SummarySection>
 
       <SummarySection
-        title="Gmail"
+        title="Correos"
         icon={MailIcon}
         right={
           <Button
             size="sm"
             variant="ghost"
-            disabled={!enabled || !hasInstitutions || !emailSyncEnabled}
+            disabled={!enabled || !emailSyncEnabled}
             onClick={() => setOpenConnectSheet(true)}
           >
             <PlusIcon />
@@ -198,75 +182,74 @@ export function FinanceSyncList({
             La sincronización de correo está apagada en Ajustes.
           </p>
         ) : null}
-        {sourcesQuery.isPending && !sourcesQuery.data ? (
+        {mailboxesQuery.isPending && !mailboxesQuery.data ? (
           <div className="flex justify-center p-6">
             <Spinner />
           </div>
-        ) : visibleSources.length === 0 ? (
+        ) : mailboxes.length === 0 ? (
           <Empty className="py-8">
             <EmptyHeader>
               <EmptyMedia variant="icon">
                 <MailIcon />
               </EmptyMedia>
-              <EmptyTitle>Aún no hay fuentes</EmptyTitle>
+              <EmptyTitle>Aún no hay Gmail</EmptyTitle>
               <EmptyDescription>
-                {hasInstitutions
-                  ? "Conecta Gmail (solo lectura) para importar movimientos de una institución."
-                  : "Crea una institución en Cuentas antes de conectar Gmail."}
+                Conecta Gmail (solo lectura). Después ligas cada banco con el
+                correo desde el que llegan las notificaciones.
               </EmptyDescription>
             </EmptyHeader>
             <EmptyContent>
-              {hasInstitutions ? (
-                <Button
-                  disabled={!emailSyncEnabled}
-                  onClick={() => setOpenConnectSheet(true)}
-                >
-                  Conectar Gmail
-                </Button>
-              ) : (
-                <Button asChild>
-                  <Link href={APP_ROUTES.app.financeAccounts}>
-                    Ir a Cuentas
-                  </Link>
-                </Button>
-              )}
+              <Button
+                disabled={!emailSyncEnabled}
+                onClick={() => setOpenConnectSheet(true)}
+              >
+                Conectar Gmail
+              </Button>
             </EmptyContent>
           </Empty>
         ) : (
-          visibleSources.map((source, index) => (
-            <div key={source.id}>
-              <SummaryItem
-                title={source.label || source.emailAddress}
-                value={sourceRowValue(source)}
-                icon={MailIcon}
-                onPress={() => setOpenSourceSheet(true, source.id)}
-                isLast={index === visibleSources.length - 1}
-              />
-            </div>
+          mailboxes.map((mailbox) => (
+            <MailboxGroup
+              key={mailbox.id}
+              mailbox={mailbox}
+              onOpenMailbox={(id) => setOpenMailboxSheet(true, id)}
+              onOpenSource={(id) => setOpenSourceSheet(true, id)}
+              onAddInstitution={(id) => setOpenLinkSheet(true, id)}
+            />
           ))
         )}
-        {disconnectedCount > 0 ? (
-          <p className="px-1 pt-2 text-xs text-muted-foreground">
-            {disconnectedCount} fuente{disconnectedCount === 1 ? "" : "s"}{" "}
-            desconectada{disconnectedCount === 1 ? "" : "s"} oculta
-            {disconnectedCount === 1 ? "" : "s"}.
-          </p>
-        ) : null}
       </SummarySection>
 
       <ConnectGmailSheet
         open={openConnectSheet}
         onOpenChange={setOpenConnectSheet}
-        institutions={institutions}
-        nextPath={oauthNextPath}
+        emailSyncEnabled={emailSyncEnabled}
+      />
+      <OauthGmailResultSheet
+        open={openOauthResult}
+        onOpenChange={setOpenOauthResult}
+      />
+      <MailboxSheet
+        open={openMailboxSheet}
+        onOpenChange={setOpenMailboxSheet}
+        pending={Boolean(mailboxSheetId) && !editingMailbox}
+        mailbox={editingMailbox}
         emailSyncEnabled={emailSyncEnabled}
       />
       <EmailSourceSheet
         open={openSourceSheet}
         onOpenChange={setOpenSourceSheet}
-        pending={Boolean(sourceSheetId) && !editing}
-        source={editing}
+        pending={Boolean(sourceSheetId) && !editingSource}
+        source={editingSource}
         institutions={institutions}
+        emailSyncEnabled={emailSyncEnabled}
+      />
+      <LinkInstitutionMailboxSheet
+        open={openLinkSheet}
+        onOpenChange={setOpenLinkSheet}
+        mailboxes={mailboxes}
+        institutions={institutions}
+        mailboxId={linkMailboxId}
         emailSyncEnabled={emailSyncEnabled}
       />
       <AssignEmailMessageSheet
