@@ -3,7 +3,7 @@
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
 import { Alert, AlertDescription, AlertTitle } from "@/src/shared/components/ui/alert"
 import { Button } from "@/src/shared/components/ui/button"
-import { PRESSABLE_CLASS } from "@/src/shared/lib/utils"
+import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
 import { MonitorPlay } from "lucide-react"
 
 type KeepAwakeAlertSheetProps = {
@@ -23,7 +23,7 @@ export function KeepAwakeAlertSheet({ open, onOpenChange }: KeepAwakeAlertSheetP
           <Button
             type="button"
             variant="outline"
-            className={PRESSABLE_CLASS}
+            className={cn(PRESSABLE_CLASS, "flex-1")}
             onClick={() => onOpenChange(false)}
           >
             Cerrar

@@ -19,8 +19,8 @@ Legacy epoch strings se aceptan. Records >24h o futuro se descartan.
 
 ## Modos
 
-- Libre: hero elapsed `Tiempo` (incluye `00:00:00` idle).
-- Temporizador: 15/25/45/60 o custom; hero `Quedan`. Al `endsAt` auto-stop + toast + history. Tab oculta aplica expiry al volver visible.
+- Libre: hero elapsed `Tiempo` (incluye `00:00:00` idle). Se elige con **Limpiar** en el popover del temporizador (no hay botón Libre).
+- Temporizador: un botón abre un popover con presets 15/25/45/60 min, `DurationWheels` (horas + minutos) y Aceptar / Cancelar / Limpiar. Hero `Quedan`. Al `endsAt` auto-stop + toast + history. Tab oculta aplica expiry al volver visible.
 
 ## Fases
 
@@ -30,11 +30,11 @@ Pausar suelta sentinel y congela tiempo; Continuar reacquire (countdown se despl
 
 ## Reminders
 
-Clock local; **nunca** pide Wake Lock solo. Confirmación de usuario. Browsers no adquieren lock desde tab oculta de forma fiable.
+Clock local; **nunca** pide Wake Lock solo. **Guardar** persiste y activa; **Quitar** lo apaga. `days: []` = todos los días. Dispara en una ventana de 5 min (`isReminderDue`). El aviso es un BottomSheet `floating` en Keep Awake; `Notification` si el permiso está granted. `TimePairWheels` (`HH:mm`, `minuteStep={1}`). Ver [ui-components.md](../../architecture/ui-components.md).
 
 ## UX
 
-Título solo en shell header. Un número hero. Help “Cómo funciona” en status header. Timer/toggle también en PiP via portal. Duración copiable del timer o history.
+Título solo en shell header. Un número hero. Chrome y sesión viven en `pages/keep-awake-client.tsx`: Recordatorio e Historial (sheets, izquierda); alerta PiP y Help “Cómo funciona” (derecha). Reminder activo: punto en la campana y chip con la hora. No hay tabs locales ni un panel intermedio. Timer/toggle también en PiP via portal. Duración copiable del timer o history.
 
 ## Browser
 

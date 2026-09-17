@@ -3,7 +3,7 @@
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
 import { Button } from "@/src/shared/components/ui/button"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
-import { MonitorPlay, PanelsTopLeft, Play } from "lucide-react"
+import { Bell, MonitorPlay, PanelsTopLeft, Play } from "lucide-react"
 
 const STEPS = [
   {
@@ -21,6 +21,11 @@ const STEPS = [
     description:
       "Puedes cambiar de sección en Personal OS; el bloqueo sigue en esta ventana. Si ocultas la pestaña, se reanuda al volver.",
     icon: PanelsTopLeft,
+  },
+  {
+    title: "Recordatorio",
+    description: "Guardar lo enciende. Al sonar, confirma para activar.",
+    icon: Bell,
   },
 ] as const
 
@@ -41,7 +46,7 @@ export function KeepAwakeHelpSheet({ open, onOpenChange }: KeepAwakeHelpSheetPro
           <Button
             type="button"
             variant="outline"
-            className={PRESSABLE_CLASS}
+            className={cn(PRESSABLE_CLASS, "flex-1")}
             onClick={() => onOpenChange(false)}
           >
             Cerrar

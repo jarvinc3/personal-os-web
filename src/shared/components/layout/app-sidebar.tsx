@@ -138,6 +138,7 @@ export function AppSidebar() {
     </Sidebar>
   )
 }
+
 type NavMainItem = {
   title: string
   url: string

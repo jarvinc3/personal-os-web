@@ -7,6 +7,7 @@ import {
   markReminderFired,
   parseReminder,
   reminderDateKey,
+  toggleReminderDay,
 } from "./reminders.ts"
 
 const wednesdayNoon = new Date("2026-09-09T12:00:00")
@@ -82,5 +83,40 @@ describe("parseReminder", () => {
   it("returns the default reminder for empty or invalid payloads", () => {
     assert.deepEqual(parseReminder(null), DEFAULT_REMINDER)
     assert.equal(parseReminder("{").enabled, false)
+  })
+})
+
+describe("toggleReminderDay", () => {
+  it("turns an empty list (every day) into all days minus the one clicked", () => {
+    assert.deepEqual(toggleReminderDay([], 0), [1, 2, 3, 4, 5, 6])
+  })
+
+  it("stores a full week as an empty list", () => {
+    assert.deepEqual(toggleReminderDay([1, 2, 3, 4, 5, 6], 0), [])
+  })
+
+  it("adds a second day without dropping the first", () => {
+    assert.deepEqual(toggleReminderDay([0], 4), [0, 4])
+  })
+})
+
+describe("isReminderDue window", () => {
+  it("still fires a few minutes after the due clock time the same day", () => {
+    const reminder = {
+      ...DEFAULT_REMINDER,
+      enabled: true,
+      hour: 12,
+      minute: 0,
+      days: [],
+      lastFiredKey: null,
+    }
+    assert.equal(
+      isReminderDue(reminder, new Date("2026-09-09T12:02:00")),
+      true
+    )
+    assert.equal(
+      isReminderDue(reminder, new Date("2026-09-09T12:06:00")),
+      false
+    )
   })
 })
