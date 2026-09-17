@@ -12,7 +12,6 @@ import {
   writePrefs,
   type KeepAwakePrefs,
 } from "@/src/modules/keep-awake/lib/prefs"
-import { Alert, AlertDescription, AlertTitle } from "@/src/shared/components/ui/alert"
 import {
   Empty,
   EmptyDescription,
@@ -20,7 +19,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
-import { MonitorOff, MonitorPlay } from "lucide-react"
+import { MonitorOff } from "lucide-react"
 import { useSyncExternalStore } from "react"
 
 export function KeepAwakeClient() {
@@ -102,18 +101,6 @@ export function KeepAwakeClient() {
         ) : null}
 
         <KeepAwakeHistory />
-
-        {supportsWakeLock && !supportsPip ? (
-          <Alert>
-            <MonitorPlay />
-            <AlertTitle>Miniplayer no disponible</AlertTitle>
-            <AlertDescription>
-              Document Picture-in-Picture no está disponible en este navegador.
-              Puedes activar Keep Awake igual; el bloqueo funciona en esta
-              pestaña.
-            </AlertDescription>
-          </Alert>
-        ) : null}
       </div>
     </KeepAwakeAuthenticatedPage>
   )
