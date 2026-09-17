@@ -49,6 +49,7 @@ describe("deriveFrequentExpenses", () => {
         color: "#ff0000",
         parentId: null,
         isSystem: false,
+        type: "EXPENSE",
       },
     ]
     const result = deriveFrequentExpenses(

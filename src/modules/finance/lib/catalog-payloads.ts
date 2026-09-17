@@ -1,4 +1,5 @@
 import { CATALOG_NONE } from "../constants/catalog.ts"
+import type { FinanceCategoryType } from "../types/entities.ts"
 import { FINANCE_QUICK_CURRENCIES } from "./finance-currency.ts"
 import { parseFinanceMoney } from "./money.ts"
 
@@ -44,6 +45,7 @@ export type CreateCategoryBody = {
   icon?: string
   color?: string
   parentId?: string
+  type: FinanceCategoryType
 }
 
 export type PayloadResult<T> =
@@ -310,6 +312,7 @@ export function buildCreateCategoryBody(input: {
   icon?: string
   color?: string
   parentId?: string
+  type: FinanceCategoryType
 }): PayloadResult<CreateCategoryBody> {
   const name = input.name.trim()
   if (!name) {
@@ -324,7 +327,7 @@ export function buildCreateCategoryBody(input: {
     return { ok: false, error: "Usa un emoji (por ejemplo 🛒), no una key Lucide" }
   }
 
-  const body: CreateCategoryBody = { name, icon }
+  const body: CreateCategoryBody = { name, icon, type: input.type }
   const color = optionalTrimmed(input.color)
   if (color) body.color = color
   const parentId = optionalId(input.parentId)

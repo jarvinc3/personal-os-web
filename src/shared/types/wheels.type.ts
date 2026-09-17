@@ -45,16 +45,25 @@ export const YEAR_OPTIONS: Array<{ value: string; label: string }> = Array.from(
    label: String(new Date().getFullYear() + i),
 }));
 
-export const MINUTE_SLOTS = ['00', '15', '30', '45'] as const;
+export type MinuteStep = 1 | 5 | 10
 
-export type MinuteSlot = (typeof MINUTE_SLOTS)[number];
+export function minuteOptionsForStep(
+  step: MinuteStep
+): Array<{ value: string; label: string }> {
+  const count = Math.floor(60 / step)
+  return Array.from({ length: count }, (_, index) => {
+    const value = String(index * step).padStart(2, "0")
+    return { value, label: value }
+  })
+}
 
-export function snapMinute(m: string): MinuteSlot {
-   const n = parseInt(m, 10);
-   const safe = Number.isNaN(n) ? 0 : n;
-   return MINUTE_SLOTS.reduce((prev, curr) =>
-      Math.abs(parseInt(curr, 10) - safe) < Math.abs(parseInt(prev, 10) - safe) ? curr : prev,
-   );
+export function snapMinute(m: string, step: MinuteStep = 1): string {
+  const parsed = parseInt(m, 10)
+  const safe = Number.isNaN(parsed) ? 0 : Math.min(59, Math.max(0, parsed))
+  if (step === 1) return String(safe).padStart(2, "0")
+  const nearest = Math.round(safe / step) * step
+  const wrapped = nearest >= 60 ? 0 : nearest
+  return String(wrapped).padStart(2, "0")
 }
 
 export const ALL_DAY_OF_WEEK = WEEK_DAYS_ORDERED;
@@ -63,10 +72,13 @@ export const ALL_DAY_OF_WEEK = WEEK_DAYS_ORDERED;
 export type Period = 'AM' | 'PM';
 
 /** Convierte HH:mm (24 h) a piezas para selector 12 h. */
-export function hm24To12Parts(hm24: string): { h12: string; minute: string; period: Period } {
+export function hm24To12Parts(
+  hm24: string,
+  step: MinuteStep = 1
+): { h12: string; minute: string; period: Period } {
    const [hs, ms] = hm24.split(':');
    const h24 = parseInt(hs ?? '0', 10);
-   const minute = snapMinute(ms ?? '00');
+   const minute = snapMinute(ms ?? '00', step);
    let period: Period = 'AM';
    let h12 = 12;
    if (h24 === 0) {
@@ -100,7 +112,7 @@ export function hm12To24(h12: string, minute: string, period: Period): string {
 export function formatHm24Display12h(hm24: string): string {
    const [hStr, mStr] = hm24.split(':');
    const h24 = parseInt(hStr ?? '0', 10);
-   const m = parseInt(snapMinute(mStr ?? '00'), 10);
+   const m = parseInt(snapMinute(mStr ?? '00', 1), 10);
    const d = new Date(2000, 0, 1, h24, m, 0, 0);
    return d.toLocaleTimeString('es', { hour: 'numeric', minute: '2-digit', hour12: true });
 }
@@ -111,10 +123,30 @@ export const HOUR12_OPTIONS = Array.from({ length: 12 }, (_, i) => {
    return { value: v, label: v };
 });
 
-export const MINUTE_OPTIONS = MINUTE_SLOTS.map((v) => ({
-   value: v,
-   label: v,
-}));
+/** Hours of duration: 00–24. 24 is only valid with minutes 00. */
+export const HOUR_DURATION_OPTIONS = Array.from({ length: 25 }, (_, i) => {
+   const value = String(i).padStart(2, "0")
+   return { value, label: value }
+})
+
+/** Total minutes → `HH:mm` duration (hours may exceed 12, e.g. `"24:00"`). */
+export function durationMinutesToHm(totalMinutes: number): string {
+   const safe = Number.isFinite(totalMinutes)
+      ? Math.max(0, Math.floor(totalMinutes))
+      : 0
+   const hours = Math.floor(safe / 60)
+   const minutes = safe % 60
+   return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`
+}
+
+/** `HH:mm` duration → total minutes. Invalid input yields 0. */
+export function hmToDurationMinutes(hm: string): number {
+   const [hoursText, minutesText] = hm.split(":")
+   const hours = parseInt(hoursText ?? "0", 10)
+   const minutes = parseInt(minutesText ?? "0", 10)
+   if (!Number.isFinite(hours) || !Number.isFinite(minutes)) return 0
+   return Math.max(0, hours * 60 + minutes)
+}
 
 export const PERIOD_OPTIONS: Array<{ value: Period; label: string }> = [
    { value: 'AM', label: 'a. m.' },

@@ -3,10 +3,10 @@
 import { useProfile } from '@/src/modules/settings/hooks/use-profile';
 import type { SettingsSheetProps } from '@/src/modules/settings/types/sheet.types';
 import { BottomSheet } from '@/src/shared/components/layout/bottom-sheet';
-import { FormTextField } from '@/src/shared/components/layout/form-blocks';
 import { Button } from '@/src/shared/components/ui/button';
 import { Spinner } from '@/src/shared/components/ui/spinner';
 import { SummarySection } from '@/src/shared/components/ui/summary';
+import { TimePairWheels } from '@/src/shared/components/ui/wheel-picker';
 import { appToast } from '@/src/shared/lib/app-toast';
 import { normalizeTimeToApi } from '@/src/shared/lib/date-format';
 import { ClockFadingIcon } from 'lucide-react';
@@ -89,16 +89,14 @@ export function EditQuietHoursSheet({ open, onOpenChange }: SettingsSheetProps) 
       }}
     >
       <SummarySection title="Horario" icon={ClockFadingIcon}>
-        <FormTextField
+        <TimePairWheels
           label="Inicio"
-          type="time"
           value={start}
           onChange={setStart}
           disabled={updateProfileMutation.isPending}
         />
-        <FormTextField
+        <TimePairWheels
           label="Fin"
-          type="time"
           value={end}
           onChange={setEnd}
           disabled={updateProfileMutation.isPending}

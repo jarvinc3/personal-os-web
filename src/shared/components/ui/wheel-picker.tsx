@@ -8,13 +8,18 @@ import { cn } from "@/src/shared/lib/utils";
 
 import {
   daysInMonth,
+  durationMinutesToHm,
   hm12To24,
   hm24To12Parts,
+  hmToDurationMinutes,
   HOUR12_OPTIONS,
-  MINUTE_OPTIONS,
+  HOUR_DURATION_OPTIONS,
+  minuteOptionsForStep,
   MONTH_OPTIONS,
   parseDate,
   PERIOD_OPTIONS,
+  snapMinute,
+  type MinuteStep,
   type Period,
 } from "@/src/shared/types/wheels.type";
 
@@ -33,7 +38,7 @@ function WheelColumn({
   children: ReactNode
 }) {
   return (
-    <div className="min-w-0 flex-1" role="group" aria-label={label}>
+    <div className="min-w-0 flex-1 flex items-center" role="group" aria-label={label}>
       {children}
     </div>
   )
@@ -98,6 +103,8 @@ interface TimePairWheelsProps {
   value: string
   onChange: (next: string) => void
   disabled?: boolean
+  /** Minute options: every minute (`1`), every 5, or every 10. Default `1` (00–59). */
+  minuteStep?: MinuteStep
 }
 
 export function TimePairWheels({
@@ -105,8 +112,13 @@ export function TimePairWheels({
   value,
   onChange,
   disabled = false,
+  minuteStep = 1,
 }: TimePairWheelsProps) {
-  const parsed = hm24To12Parts(value || "08:00")
+  const parsed = hm24To12Parts(value || "08:00", minuteStep)
+  const minuteOptions = useMemo(
+    () => minuteOptionsForStep(minuteStep),
+    [minuteStep]
+  )
 
   const commit = (next: { h12?: string; minute?: string; period?: Period }) => {
     if (disabled) return
@@ -143,7 +155,8 @@ export function TimePairWheels({
           <WheelPicker
             value={parsed.minute}
             onValueChange={(m: string) => commit({ minute: m })}
-            options={MINUTE_OPTIONS}
+            options={minuteOptions}
+            infinite
             visibleCount={20}
           />
         </WheelColumn>
@@ -246,6 +259,72 @@ export function DateWheels({
             value={parts.year}
             onValueChange={(year: string) => commit({ year })}
             options={yearOptions}
+            visibleCount={20}
+          />
+        </WheelColumn>
+      </WheelPickerWrapper>
+    </div>
+  )
+}
+
+interface DurationWheelsProps {
+  label?: string
+  value: string
+  onChange: (next: string) => void
+  disabled?: boolean
+  minuteStep?: MinuteStep
+}
+
+/** Hours + minutes of duration (`HH:mm`), without a. m./p. m. Hours 00–24. */
+export function DurationWheels({
+  label,
+  value,
+  onChange,
+  disabled = false,
+  minuteStep = 1,
+}: DurationWheelsProps) {
+  const totalMinutes = hmToDurationMinutes(value || "00:00")
+  const hm = durationMinutesToHm(totalMinutes)
+  const [hour, rawMinute = "00"] = hm.split(":")
+  const minute = snapMinute(rawMinute, minuteStep)
+  const minuteOptions = useMemo(
+    () => minuteOptionsForStep(minuteStep),
+    [minuteStep]
+  )
+
+  const commit = (next: { hour?: string; minute?: string }) => {
+    if (disabled) return
+    const nextHour = next.hour ?? hour
+    const nextMinute = Number(nextHour) >= 24 ? "00" : (next.minute ?? minute)
+    onChange(`${nextHour}:${nextMinute}`)
+  }
+
+  return (
+    <div className={cn("flex flex-col gap-2", disabled && "pointer-events-none opacity-50")}>
+      {label && (
+        <span className="text-sm font-medium text-muted-foreground">
+          {label}
+        </span>
+      )}
+      <WheelPickerWrapper className="flex w-full flex-wrap items-center justify-center gap-2 sm:flex-nowrap">
+        <WheelColumn label="Horas">
+          <WheelPicker
+            value={hour}
+            onValueChange={(nextHour: string) => commit({ hour: nextHour })}
+            options={HOUR_DURATION_OPTIONS}
+            infinite
+            visibleCount={20}
+          />
+        </WheelColumn>
+        <span className="flex items-center text-xl font-medium text-muted-foreground">
+          :
+        </span>
+        <WheelColumn label="Minutos">
+          <WheelPicker
+            value={minute}
+            onValueChange={(nextMinute: string) => commit({ minute: nextMinute })}
+            options={minuteOptions}
+            infinite
             visibleCount={20}
           />
         </WheelColumn>

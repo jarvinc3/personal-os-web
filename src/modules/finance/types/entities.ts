@@ -13,6 +13,14 @@ export const FINANCE_TRANSACTION_TYPE_LABEL: Record<FinanceTransactionType, stri
   TRANSFER: "Transferencia",
 }
 
+export const FINANCE_CATEGORY_TYPES = ["EXPENSE", "INCOME"] as const
+export type FinanceCategoryType = (typeof FINANCE_CATEGORY_TYPES)[number]
+
+export const FINANCE_CATEGORY_TYPE_LABEL: Record<FinanceCategoryType, string> = {
+  EXPENSE: "Gasto",
+  INCOME: "Ingreso",
+}
+
 export const FINANCE_TRANSACTION_STATUSES = [
   "PENDING",
   "CONFIRMED",
@@ -179,6 +187,7 @@ export type FinanceCategory = {
   color: string | null
   parentId: string | null
   isSystem: boolean
+  type: FinanceCategoryType
 }
 
 export const FINANCE_BUDGET_PERIODS = ["MONTHLY", "BIWEEKLY", "CUSTOM"] as const

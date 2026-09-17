@@ -18,9 +18,26 @@ export const DEFAULT_REMINDER: KeepAwakeReminder = {
 }
 
 export const WEEKDAY_LABELS = ["D", "L", "M", "X", "J", "V", "S"] as const
+export const ALL_WEEKDAYS = [0, 1, 2, 3, 4, 5, 6] as const
+export const REMINDER_DUE_WINDOW_MS = 5 * 60_000
+const MAX_REMINDER_ARM_MS = 60_000
 
 function pad(value: number) {
   return String(value).padStart(2, "0")
+}
+
+export function toggleReminderDay(days: number[], day: number): number[] {
+  const current =
+    days.length === 0 || days.length === 7 ? [...ALL_WEEKDAYS] : [...days]
+  const next = current.includes(day)
+    ? current.filter((item) => item !== day)
+    : [...current, day].sort((a, b) => a - b)
+  if (next.length === 0 || next.length === 7) return []
+  return next
+}
+
+export function reminderTimeFromDate(date: Date): Pick<KeepAwakeReminder, "hour" | "minute"> {
+  return { hour: date.getHours(), minute: date.getMinutes() }
 }
 
 export function reminderDateKey(date: Date): string {
@@ -75,13 +92,24 @@ export function serializeReminder(reminder: KeepAwakeReminder): string {
 
 export function isReminderDue(reminder: KeepAwakeReminder, now: Date): boolean {
   if (!reminder.enabled) return false
-  if (now.getHours() !== reminder.hour || now.getMinutes() !== reminder.minute) {
-    return false
-  }
   if (reminder.days.length > 0 && !reminder.days.includes(now.getDay())) {
     return false
   }
-  return reminder.lastFiredKey !== reminderDateKey(now)
+  if (reminder.lastFiredKey === reminderDateKey(now)) return false
+  const due = new Date(now)
+  due.setHours(reminder.hour, reminder.minute, 0, 0)
+  const elapsed = now.getTime() - due.getTime()
+  return elapsed >= 0 && elapsed < REMINDER_DUE_WINDOW_MS
+}
+
+export function nextReminderDelayMs(reminder: KeepAwakeReminder, now: Date): number {
+  if (!reminder.enabled) return MAX_REMINDER_ARM_MS
+  if (isReminderDue(reminder, now)) return 250
+  const due = new Date(now)
+  due.setHours(reminder.hour, reminder.minute, 0, 0)
+  const until = due.getTime() - now.getTime()
+  if (until > 0) return Math.min(until, MAX_REMINDER_ARM_MS)
+  return MAX_REMINDER_ARM_MS
 }
 
 export function markReminderFired(

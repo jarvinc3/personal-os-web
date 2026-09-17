@@ -1,4 +1,3 @@
-export { KeepAwakeStatusPanel } from "@/src/modules/keep-awake/components/keep-awake-status-panel"
 export { PipPanel } from "@/src/modules/keep-awake/components/pip-panel"
 export { KeepAwakeProvider, useKeepAwake } from "@/src/modules/keep-awake/context/keep-awake-context"
 export { useWakeLock } from "@/src/modules/keep-awake/hooks/use-wake-lock"

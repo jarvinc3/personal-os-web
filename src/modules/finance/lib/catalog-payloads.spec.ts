@@ -224,16 +224,29 @@ describe("buildCreateCategoryBody", () => {
       name: " Mercado ",
       icon: "🛒",
       parentId: "__none__",
+      type: "EXPENSE",
     })
     assert.equal(result.ok, true)
     if (!result.ok) return
-    assert.deepEqual(result.body, { name: "Mercado", icon: "🛒" })
+    assert.deepEqual(result.body, { name: "Mercado", icon: "🛒", type: "EXPENSE" })
+  })
+
+  it("includes INCOME type on create", () => {
+    const result = buildCreateCategoryBody({
+      name: "Salario",
+      icon: "💼",
+      type: "INCOME",
+    })
+    assert.equal(result.ok, true)
+    if (!result.ok) return
+    assert.equal(result.body.type, "INCOME")
   })
 
   it("rejects Lucide-style keys instead of sending them as icon", () => {
     const result = buildCreateCategoryBody({
       name: "Cart",
       icon: "shopping-cart",
+      type: "EXPENSE",
     })
     assert.equal(result.ok, false)
   })
