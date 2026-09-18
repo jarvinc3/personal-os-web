@@ -5,6 +5,7 @@ import type {
   CardBalanceBody,
   CreateCardBody,
 } from "@/src/modules/finance/lib/catalog-payloads"
+import { cardsQuery } from "@/src/modules/finance/lib/finance-query-options"
 import { FINANCE_CARDS_QUERY_KEY } from "@/src/modules/finance/types/api"
 import type { FinanceCard, FinanceCardBalance } from "@/src/modules/finance/types/entities"
 import { API_ENDPOINTS } from "@/src/shared/constants/api-endpoints"
@@ -18,8 +19,7 @@ function invalidateCards(queryClient: ReturnType<typeof useQueryClient>) {
 
 export function useCards(enabled: boolean) {
   return useQuery({
-    queryKey: FINANCE_CARDS_QUERY_KEY,
-    queryFn: () => apiGet<FinanceCard[]>(API_ENDPOINTS.FINANCE.CARDS),
+    ...cardsQuery(),
     enabled,
   })
 }

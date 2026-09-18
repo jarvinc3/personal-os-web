@@ -3,6 +3,7 @@
 import { apiDelete, apiGet, apiPatch, apiPost } from "@/src/config/api-client"
 import type { CreateInstitutionBody } from "@/src/modules/finance/lib/catalog-payloads"
 import { invalidateFinanceBalanceSheet } from "@/src/modules/finance/hooks/use-balance-sheet"
+import { institutionsQuery } from "@/src/modules/finance/lib/finance-query-options"
 import {
   FINANCE_ACCOUNTS_QUERY_KEY,
   FINANCE_CARDS_QUERY_KEY,
@@ -21,9 +22,7 @@ function invalidateCatalog(queryClient: ReturnType<typeof useQueryClient>) {
 
 export function useInstitutions(enabled: boolean) {
   return useQuery({
-    queryKey: FINANCE_INSTITUTIONS_QUERY_KEY,
-    queryFn: () =>
-      apiGet<FinanceInstitution[]>(API_ENDPOINTS.FINANCE.INSTITUTIONS),
+    ...institutionsQuery(),
     enabled,
   })
 }

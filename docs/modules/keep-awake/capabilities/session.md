@@ -36,6 +36,8 @@ Clock local; **nunca** pide Wake Lock solo. **Guardar** persiste y activa; **Qui
 
 Título solo en shell header. Un número hero. Chrome y sesión viven en `pages/keep-awake-client.tsx`: Recordatorio e Historial (sheets, izquierda); alerta PiP y Help “Cómo funciona” (derecha). Reminder activo: punto en la campana y chip con la hora. No hay tabs locales ni un panel intermedio. Timer/toggle también en PiP via portal. Duración copiable del timer o history.
 
+Molde de módulo hoja para otras vistas: [module-conventions.md — Módulo hoja (UX)](../../../architecture/module-conventions.md#módulo-hoja-ux).
+
 ## Browser
 
 Wake Lock: `"wakeLock" in navigator` — empty state si falta. Document PiP: `documentPictureInPicture`; lock sigue en el tab.

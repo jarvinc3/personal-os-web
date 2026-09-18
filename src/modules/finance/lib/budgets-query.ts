@@ -1,5 +1,6 @@
 import type { FinancePaginated } from "../types/api.ts"
 import type { FinanceBudget } from "../types/entities.ts"
+import { formatCalendarDate } from "./ledger-form.ts"
 
 export const FINANCE_BUDGET_PAGE_SIZE = 20
 
@@ -50,13 +51,5 @@ export function budgetsFromPayload(
 }
 
 export function formatBudgetPeriodDate(value: string): string {
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) {
-    return value.slice(0, 10)
-  }
-  return date.toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  })
+  return formatCalendarDate(value)
 }

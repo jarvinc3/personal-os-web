@@ -87,7 +87,7 @@ export function InstitutionSheet({
   )
 
   const onSubmit = submitForm(async (values) => {
-    const payload = buildCreateInstitutionBody(values)
+    const payload = buildCreateInstitutionBody(values, { isUpdate: isEdit })
     if (!payload.ok) {
       appToast.error({ text1: payload.error })
       return

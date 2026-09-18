@@ -6,8 +6,13 @@ import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/constants/sheet-keys"
 import { useAccounts } from "@/src/modules/finance/hooks/use-accounts"
 import { useBalanceSheet } from "@/src/modules/finance/hooks/use-balance-sheet"
 import { useCards } from "@/src/modules/finance/hooks/use-cards"
+import { useFinanceEnabled } from "@/src/modules/finance/hooks/use-finance-enabled"
 import { useInstitutions } from "@/src/modules/finance/hooks/use-institutions"
 import { useLoans } from "@/src/modules/finance/hooks/use-loans"
+import {
+  prefetchFinanceCategories,
+  prefetchFinanceSync,
+} from "@/src/modules/finance/lib/finance-prefetch"
 import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
 import { buildInstitutionStackItems } from "@/src/modules/finance/lib/institution-stack"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/lib/money"
@@ -26,6 +31,7 @@ import { Spinner } from "@/src/shared/components/ui/spinner"
 import { SummaryItem } from "@/src/shared/components/ui/summary"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
+import { useQueryClient } from "@tanstack/react-query"
 import { Building2Icon, MailIcon, PlusIcon, TagsIcon } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useMemo } from "react"
@@ -41,6 +47,8 @@ export function FinanceAccountsList({
   display,
 }: FinanceAccountsListProps) {
   const router = useRouter()
+  const queryClient = useQueryClient()
+  const { emailSyncEnabled } = useFinanceEnabled()
   const institutionsQuery = useInstitutions(enabled)
   const accountsQuery = useAccounts(enabled)
   const cardsQuery = useCards(enabled)
@@ -159,24 +167,46 @@ export function FinanceAccountsList({
       </div>
 
       <SettingsSection title="Atajos">
-        <SummaryItem
-          title="Categorías"
-          description="Organiza gastos e ingresos"
-          icon={TagsIcon}
-          href={APP_ROUTES.app.financeCategories}
-          showChevron
-          isLast={false}
-          className="px-3"
-        />
-        <SummaryItem
-          title="Correos"
-          description="Gmail y notificaciones de bancos"
-          icon={MailIcon}
-          href={APP_ROUTES.app.financeSync}
-          showChevron
-          isLast
-          className="px-3"
-        />
+        <div
+          onPointerEnter={() => {
+            void prefetchFinanceCategories(queryClient)
+          }}
+          onFocusCapture={() => {
+            void prefetchFinanceCategories(queryClient)
+          }}
+        >
+          <SummaryItem
+            title="Categorías"
+            description="Organiza gastos e ingresos"
+            icon={TagsIcon}
+            href={APP_ROUTES.app.financeCategories}
+            showChevron
+            isLast={false}
+            className="px-3"
+          />
+        </div>
+        <div
+          onPointerEnter={() => {
+            if (emailSyncEnabled) {
+              void prefetchFinanceSync(queryClient)
+            }
+          }}
+          onFocusCapture={() => {
+            if (emailSyncEnabled) {
+              void prefetchFinanceSync(queryClient)
+            }
+          }}
+        >
+          <SummaryItem
+            title="Correos"
+            description="Gmail y notificaciones de bancos"
+            icon={MailIcon}
+            href={APP_ROUTES.app.financeSync}
+            showChevron
+            isLast
+            className="px-3"
+          />
+        </div>
       </SettingsSection>
 
       <Button

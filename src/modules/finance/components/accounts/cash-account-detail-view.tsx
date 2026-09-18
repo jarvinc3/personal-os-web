@@ -4,7 +4,7 @@ import { AccountSheet } from "@/src/modules/finance/components/catalog/account-s
 import { FinanceAuthenticatedPage } from "@/src/modules/finance/components/layout/finance-authenticated-page"
 import { FINANCE_ACCOUNT_TYPE_LABEL } from "@/src/modules/finance/constants/catalog"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/constants/sheet-keys"
-import { useAccounts } from "@/src/modules/finance/hooks/use-accounts"
+import { useAccounts, useArchiveAccount } from "@/src/modules/finance/hooks/use-accounts"
 import { useFinanceEnabled } from "@/src/modules/finance/hooks/use-finance-enabled"
 import { useInstitutions } from "@/src/modules/finance/hooks/use-institutions"
 import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
@@ -17,7 +17,8 @@ import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { accentSurfaceGradient } from "@/src/shared/lib/accent-gradient"
-import { MoreVerticalIcon, PencilIcon, WalletIcon } from "lucide-react"
+import { appToast } from "@/src/shared/lib/app-toast"
+import { ArchiveIcon, MoreVerticalIcon, PencilIcon, WalletIcon } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
 
@@ -48,6 +49,7 @@ function CashAccountDetailView({ accountId }: CashAccountDetailClientProps) {
 
   const accountsQuery = useAccounts(isEnabled)
   const institutionsQuery = useInstitutions(isEnabled)
+  const archiveAccount = useArchiveAccount()
   const { open: openAccountSheet, setOpen: setOpenAccountSheet } =
     useSheetParam(FINANCE_SHEET_KEYS.account)
   const { open: openOptionsSheet, setOpen: setOpenOptionsSheet } =
@@ -61,6 +63,18 @@ function CashAccountDetailView({ accountId }: CashAccountDetailClientProps) {
   const handleBack = useCallback(() => {
     router.push(APP_ROUTES.app.financeAccounts)
   }, [router])
+
+  const onArchiveAccount = useCallback(async () => {
+    if (!account) return
+    try {
+      await archiveAccount.mutateAsync(account.id)
+      appToast.success({ text1: "Cuenta archivada" })
+      setOpenOptionsSheet(false)
+      router.push(APP_ROUTES.app.financeAccounts)
+    } catch (error) {
+      appToast.error({ text1: financeErrorMessage(error) })
+    }
+  }, [account, archiveAccount, router, setOpenOptionsSheet])
 
   const openMenu = useCallback(
     () => setOpenOptionsSheet(true),
@@ -173,8 +187,16 @@ function CashAccountDetailView({ accountId }: CashAccountDetailClientProps) {
             title="Editar cuenta"
             icon={PencilIcon}
             onPress={() => setOpenAccountSheet(true)}
-            isLast
+            isLast={false}
             className="px-3"
+          />
+          <SummaryItem
+            title="Archivar"
+            icon={ArchiveIcon}
+            onPress={() => void onArchiveAccount()}
+            disabled={archiveAccount.isPending}
+            isLast
+            className="px-3 text-destructive"
           />
         </div>
       </BottomSheet>

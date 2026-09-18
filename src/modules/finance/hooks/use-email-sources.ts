@@ -2,6 +2,10 @@
 
 import { apiDelete, apiGet, apiPatch, apiPost } from "@/src/config/api-client"
 import { invalidateFinancePositions } from "@/src/modules/finance/hooks/use-balance-sheet"
+import {
+  emailMailboxesQuery,
+  emailPendingQuery,
+} from "@/src/modules/finance/lib/finance-query-options"
 import { asFinanceArray } from "@/src/modules/finance/lib/planning-lists"
 import {
   FINANCE_EMAIL_MAILBOXES_QUERY_KEY,
@@ -12,7 +16,6 @@ import type {
   FinanceEmailAssignResult,
   FinanceEmailSource,
   FinanceEmailSyncTrigger,
-  FinanceMailbox,
   FinancePendingEmailMessage,
 } from "@/src/modules/finance/types/entities"
 import { API_ENDPOINTS } from "@/src/shared/constants/api-endpoints"
@@ -78,11 +81,7 @@ export function useEmailSources(enabled: boolean) {
 
 export function useEmailMailboxes(enabled: boolean) {
   return useQuery({
-    queryKey: FINANCE_EMAIL_MAILBOXES_QUERY_KEY,
-    queryFn: async () =>
-      asFinanceArray<FinanceMailbox>(
-        await apiGet(API_ENDPOINTS.FINANCE.EMAIL_MAILBOXES),
-      ),
+    ...emailMailboxesQuery(),
     enabled,
   })
 }
@@ -107,11 +106,7 @@ export function useDisconnectMailbox() {
 
 export function usePendingEmailMessages(enabled: boolean) {
   return useQuery({
-    queryKey: FINANCE_EMAIL_PENDING_QUERY_KEY,
-    queryFn: async () =>
-      asFinanceArray<FinancePendingEmailMessage>(
-        await apiGet(API_ENDPOINTS.FINANCE.EMAIL_PENDING),
-      ),
+    ...emailPendingQuery(),
     enabled,
   })
 }

@@ -8,6 +8,7 @@ import { Switch } from '@/src/shared/components/ui/switch';
 import { MODULE_REGISTRY, MODULE_SLUGS_ORDER } from '@/src/shared/constants/module-registry';
 import { appToast } from '@/src/shared/lib/app-toast';
 import { Settings } from 'lucide-react';
+import { useId } from 'react';
 import { useUserModuleConfig } from '../hooks/use-user-module-config';
 
 export type ModuleSheetEnableRowProps = {
@@ -23,17 +24,23 @@ function ModuleSheetEnableRow({
   onEnabledChange,
   disabled = false,
 }: ModuleSheetEnableRowProps) {
+  const id = useId();
   return (
     <div className="flex flex-row justify-between items-center px-4 py-3 rounded-2xl border border-border/60 bg-card">
-      <div className="flex-1 pr-3 min-w-0">
+      <label htmlFor={id} className="flex-1 pr-3 min-w-0 cursor-pointer">
         <p className="text-base font-medium text-foreground">Módulo activo</p>
         {state === 'unconfigured' ? (
           <p className="text-xs text-muted-foreground">
             Se aplicará al guardar la configuración por primera vez.
           </p>
         ) : null}
-      </div>
-      <Switch checked={isEnabled} onCheckedChange={onEnabledChange} disabled={disabled} />
+      </label>
+      <Switch
+        id={id}
+        checked={isEnabled}
+        onCheckedChange={onEnabledChange}
+        disabled={disabled}
+      />
     </div>
   );
 }

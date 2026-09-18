@@ -10,9 +10,14 @@ import { usePathname } from "next/navigation"
 type ModuleTabBarProps = {
   items: ModuleNavItem[]
   ariaLabel: string
+  onItemPrefetch?: (href: string) => void
 }
 
-export function ModuleTabBar({ items, ariaLabel }: ModuleTabBarProps) {
+export function ModuleTabBar({
+  items,
+  ariaLabel,
+  onItemPrefetch,
+}: ModuleTabBarProps) {
   const pathname = usePathname()
   const { hidden } = useScrollChrome()
 
@@ -38,6 +43,8 @@ export function ModuleTabBar({ items, ariaLabel }: ModuleTabBarProps) {
               <Link
                 href={item.href}
                 aria-current={isCurrent ? "page" : undefined}
+                onPointerEnter={() => onItemPrefetch?.(item.href)}
+                onFocus={() => onItemPrefetch?.(item.href)}
                 className={cn(
                   "flex min-h-12 flex-col items-center justify-center gap-0.5 px-1 py-2 text-center text-[10px] leading-tight sm:text-xs",
                   isCurrent

@@ -1,0 +1,29 @@
+---
+description: Leaf-module UX — hero + sheets, not local tabs or autosave. Keep Awake is the reference.
+alwaysApply: true
+---
+
+# Módulo hoja (UX)
+
+Keep Awake es el molde. Finanzas es el contraejemplo (secciones **con ruta**, no tabs locales).
+
+Antes de pintar: ¿esta pantalla **es** la acción, o **contiene** varias apps? Acción (timer, foco, recorder) → hoja. Secciones con URL (`/finance/movimientos`) → `ModuleSectionLayout`. Ver [module-conventions.md](docs/architecture/module-conventions.md).
+
+**Hacer**
+
+- Un hero: estado + un número/CTA. Título solo en el shell header.
+- Secundario (recordatorio, historial, ayuda, ajustes) en `BottomSheet` desde iconos de chrome. Popover solo para un ajuste puntual.
+- Borrador hasta **Guardar** / **Aceptar**. **Cerrar** descarta. Destructive explícito (**Quitar** / **Limpiar**).
+- Estado activo visible en la página (chip, punto en el icono). No hace falta abrir el sheet para saber si está on.
+- Evento (“llegó”, “listo”, “falló”) → `BottomSheet` `variant="floating"`, poco texto, visual fuerte.
+- El `*client.tsx` compone. Partir archivo si la pieza tiene trabajo propio (prompt, ruedas), no para reenviar 12 props.
+
+**No hacer**
+
+- Tabs locales (`Tabs*`) en un módulo de una pantalla.
+- Panel intermedio que solo reenvía props del contexto.
+- Autosave invisible sin Guardar.
+- Copy de manual bajo cada control; labels + estado bastan.
+- `<input type="date|time">` — ver `ui-shared-components.mdc`.
+
+Referencia: `src/modules/keep-awake/pages/keep-awake-client.tsx`.

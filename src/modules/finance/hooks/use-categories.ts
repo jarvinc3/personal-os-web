@@ -2,6 +2,7 @@
 
 import { apiDelete, apiGet, apiPatch, apiPost } from "@/src/config/api-client"
 import type { CreateCategoryBody } from "@/src/modules/finance/lib/catalog-payloads"
+import { categoriesQuery } from "@/src/modules/finance/lib/finance-query-options"
 import { FINANCE_CATEGORIES_QUERY_KEY } from "@/src/modules/finance/types/api"
 import type { FinanceCategory } from "@/src/modules/finance/types/entities"
 import { API_ENDPOINTS } from "@/src/shared/constants/api-endpoints"
@@ -13,9 +14,7 @@ function invalidateCategories(queryClient: ReturnType<typeof useQueryClient>) {
 
 export function useCategories(enabled: boolean) {
   return useQuery({
-    queryKey: FINANCE_CATEGORIES_QUERY_KEY,
-    queryFn: () =>
-      apiGet<FinanceCategory[]>(API_ENDPOINTS.FINANCE.CATEGORIES),
+    ...categoriesQuery(),
     enabled,
   })
 }

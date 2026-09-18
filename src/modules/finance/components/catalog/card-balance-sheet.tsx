@@ -149,7 +149,9 @@ function CardBalanceSheetForm({
       appToast.error({ text1: "Cada moneda solo puede usarse una vez" })
       return
     }
-    const payload = buildCardBalanceBody(values)
+    const payload = buildCardBalanceBody(values, {
+      requireCreditLimit: card?.type === "CREDIT",
+    })
     if (!payload.ok) {
       appToast.error({ text1: payload.error })
       return

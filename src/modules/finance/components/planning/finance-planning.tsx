@@ -17,7 +17,7 @@ import {
   formatFinanceMoney,
   parseFinanceMoney,
 } from "@/src/modules/finance/lib/money"
-import { formatPlanningDate } from "@/src/modules/finance/lib/planning-lists"
+import { formatPlanningDate, visibleReceivables } from "@/src/modules/finance/lib/planning-lists"
 import type {
   FinanceLoan,
   FinanceReceivable,
@@ -33,7 +33,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
-import { Spinner } from "@/src/shared/components/ui/spinner"
+import { FinanceListSkeleton } from "@/src/modules/finance/components/layout/finance-list-skeleton"
 import { SummaryItem, SummarySection } from "@/src/shared/components/ui/summary"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import {
@@ -123,6 +123,7 @@ export function FinancePlanningList({
   const savings = savingsQuery.data ?? []
   const loans = loansQuery.data ?? []
   const receivables = receivablesQuery.data ?? []
+  const listedReceivables = visibleReceivables(receivables)
 
   const errorMessage = useMemo(() => {
     const error =
@@ -174,9 +175,7 @@ export function FinancePlanningList({
         }
       >
         {savingsQuery.isPending && !savingsQuery.data ? (
-          <div className="flex justify-center p-6">
-            <Spinner />
-          </div>
+          <FinanceListSkeleton />
         ) : savings.length === 0 ? (
           <Empty className="py-8">
             <EmptyHeader>
@@ -227,9 +226,7 @@ export function FinancePlanningList({
         }
       >
         {loansQuery.isPending && !loansQuery.data ? (
-          <div className="flex justify-center p-6">
-            <Spinner />
-          </div>
+          <FinanceListSkeleton />
         ) : loans.length === 0 ? (
           <Empty className="py-8">
             <EmptyHeader>
@@ -277,10 +274,8 @@ export function FinancePlanningList({
         }
       >
         {receivablesQuery.isPending && !receivablesQuery.data ? (
-          <div className="flex justify-center p-6">
-            <Spinner />
-          </div>
-        ) : receivables.length === 0 ? (
+          <FinanceListSkeleton />
+        ) : listedReceivables.length === 0 ? (
           <Empty className="py-8">
             <EmptyHeader>
               <EmptyMedia variant="icon">
@@ -298,14 +293,14 @@ export function FinancePlanningList({
             </EmptyContent>
           </Empty>
         ) : (
-          receivables.map((item, index) => (
+          listedReceivables.map((item, index) => (
             <SummaryItem
               key={item.id}
               title={item.debtorName}
               value={receivableRowValue(item, display)}
               icon={HandshakeIcon}
               onPress={() => setOpenReceivableSheet(true, item.id)}
-              isLast={index === receivables.length - 1}
+              isLast={index === listedReceivables.length - 1}
             />
           ))
         )}

@@ -2,14 +2,11 @@
 
 import { apiDelete, apiGet, apiPatch, apiPost } from "@/src/config/api-client"
 import type { CreateBudgetBody } from "@/src/modules/finance/lib/budget-payloads"
-import {
-  buildBudgetsSearchParams,
-  type FinanceBudgetsQuery,
-} from "@/src/modules/finance/lib/budgets-query"
+import { type FinanceBudgetsQuery } from "@/src/modules/finance/lib/budgets-query"
+import { budgetsListQuery } from "@/src/modules/finance/lib/finance-query-options"
 import {
   FINANCE_ANALYTICS_QUERY_KEY,
   FINANCE_BUDGETS_QUERY_KEY,
-  type FinancePaginated,
 } from "@/src/modules/finance/types/api"
 import type { FinanceBudget } from "@/src/modules/finance/types/entities"
 import { API_ENDPOINTS } from "@/src/shared/constants/api-endpoints"
@@ -21,13 +18,8 @@ function invalidateBudgets(queryClient: ReturnType<typeof useQueryClient>) {
 }
 
 export function useBudgets(enabled: boolean, query: FinanceBudgetsQuery) {
-  const search = buildBudgetsSearchParams(query)
   return useQuery({
-    queryKey: [...FINANCE_BUDGETS_QUERY_KEY, "list", query],
-    queryFn: () =>
-      apiGet<FinancePaginated<FinanceBudget>>(
-        `${API_ENDPOINTS.FINANCE.BUDGETS}?${search}`,
-      ),
+    ...budgetsListQuery(query),
     enabled,
   })
 }

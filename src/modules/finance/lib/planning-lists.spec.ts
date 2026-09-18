@@ -1,7 +1,7 @@
 import assert from "node:assert/strict"
 import { describe, it } from "node:test"
 
-import { asFinanceArray } from "./planning-lists.ts"
+import { asFinanceArray, visibleReceivables } from "./planning-lists.ts"
 
 describe("asFinanceArray", () => {
   it("returns the array payload as-is", () => {
@@ -17,5 +17,19 @@ describe("asFinanceArray", () => {
   it("returns empty for null or a plain object", () => {
     assert.deepEqual(asFinanceArray(null), [])
     assert.deepEqual(asFinanceArray({ id: "1" }), [])
+  })
+})
+
+describe("visibleReceivables", () => {
+  it("hides CANCELLED and keeps PENDING and PAID", () => {
+    const listed = visibleReceivables([
+      { id: "1", status: "PENDING" },
+      { id: "2", status: "CANCELLED" },
+      { id: "3", status: "PAID" },
+    ])
+    assert.deepEqual(listed, [
+      { id: "1", status: "PENDING" },
+      { id: "3", status: "PAID" },
+    ])
   })
 })

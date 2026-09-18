@@ -250,13 +250,14 @@ export function SwitchFieldRow({
   onCheckedChange,
   disabled,
 }: SwitchFieldRowProps) {
+  const id = useId();
   return (
     <div className="flex flex-row gap-3 justify-between items-center px-4 py-3 rounded-full border border-border/60 bg-card">
-      <div className="flex-1 min-w-0">
+      <label htmlFor={id} className="flex-1 min-w-0 cursor-pointer">
         <p className="text-sm font-medium text-foreground">{label}</p>
         {description ? <p className="text-xs text-muted-foreground">{description}</p> : null}
-      </div>
-      <Switch checked={checked} onCheckedChange={onCheckedChange} disabled={disabled} />
+      </label>
+      <Switch id={id} checked={checked} onCheckedChange={onCheckedChange} disabled={disabled} />
     </div>
   );
 }

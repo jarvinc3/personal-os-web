@@ -27,7 +27,6 @@ import {
     ScanEyeIcon,
     Tags,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useEffect, useMemo } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
@@ -100,7 +99,6 @@ export function EditFinanceSheet({ open, onOpenChange }: SettingsSheetProps) {
   const { config, updateConfig, updateMutation } =
     useUserModuleConfig("finance")
   const moduleEnable = useModuleSheetEnable("finance")
-  const router = useRouter()
 
   const {
     control,
@@ -170,7 +168,7 @@ export function EditFinanceSheet({ open, onOpenChange }: SettingsSheetProps) {
           <Button
             variant="outline"
             className="flex-1"
-            onClick={() => router.back()}
+            onClick={() => onOpenChange(false)}
           >
             Cancelar
           </Button>

@@ -5,6 +5,7 @@ import {
   buildBudgetsSearchParams,
   budgetsFromPayload,
   FINANCE_BUDGET_PAGE_SIZE,
+  formatBudgetPeriodDate,
 } from "./budgets-query.ts"
 
 describe("buildBudgetsSearchParams", () => {
@@ -14,6 +15,18 @@ describe("buildBudgetsSearchParams", () => {
     )
     assert.equal(params.get("page"), "1")
     assert.equal(params.get("limit"), "20")
+  })
+})
+
+describe("formatBudgetPeriodDate", () => {
+  it("keeps the calendar day of an UTC midnight ISO string", () => {
+    const expected = new Date(2026, 8, 1).toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    })
+    assert.equal(formatBudgetPeriodDate("2026-09-01T00:00:00.000Z"), expected)
+    assert.equal(formatBudgetPeriodDate("2026-09-01"), expected)
   })
 })
 

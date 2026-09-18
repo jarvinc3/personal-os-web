@@ -10,12 +10,14 @@ type ModuleSectionLayoutProps = {
   children: ReactNode
   items: ModuleNavItem[]
   ariaLabel: string
+  onItemPrefetch?: (href: string) => void
 }
 
 export function ModuleSectionLayout({
   children,
   items,
   ariaLabel,
+  onItemPrefetch,
 }: ModuleSectionLayoutProps) {
   const { config } = useHeaderContext()
   const hideTabBar = config.variant === "secondary"
@@ -31,7 +33,11 @@ export function ModuleSectionLayout({
     >
       {children}
       {hideTabBar ? null : (
-        <ModuleTabBar items={items} ariaLabel={ariaLabel} />
+        <ModuleTabBar
+          items={items}
+          ariaLabel={ariaLabel}
+          onItemPrefetch={onItemPrefetch}
+        />
       )}
     </div>
   )

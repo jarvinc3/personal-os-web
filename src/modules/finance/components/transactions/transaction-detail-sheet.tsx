@@ -10,6 +10,7 @@ import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/lib/money"
 import { formatFinanceMoney } from "@/src/modules/finance/lib/money"
 import {
+  canReverseTransaction,
   formatTransactionDate,
   isTransferTransaction,
   transferDirectionLabel,
@@ -50,11 +51,6 @@ function canEdit(tx: FinanceTransaction): boolean {
 
 function canConfirm(tx: FinanceTransaction): boolean {
   return tx.status === "PENDING"
-}
-
-function canReverse(tx: FinanceTransaction): boolean {
-  if (tx.transferGroupId) return true
-  return tx.status === "CONFIRMED" || tx.status === "REVERSED"
 }
 
 export function TransactionDetailSheet({
@@ -238,7 +234,7 @@ export function TransactionDetailSheet({
               className="px-3"
             />
           </SettingsSection>
-          {canConfirm(tx) || canReverse(tx) ? (
+          {canConfirm(tx) || canReverseTransaction(tx) ? (
             <div className="flex flex-col gap-2 sm:flex-row">
               {canConfirm(tx) ? (
                 <Button
@@ -252,7 +248,7 @@ export function TransactionDetailSheet({
                   Confirmar
                 </Button>
               ) : null}
-              {canReverse(tx) ? (
+              {canReverseTransaction(tx) ? (
                 <Button
                   type="button"
                   variant="outline"

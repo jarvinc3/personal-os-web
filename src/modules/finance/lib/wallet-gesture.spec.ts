@@ -18,9 +18,9 @@ describe("classifyWalletGesture", () => {
     assert.equal(classifyWalletGesture(-120), "cycle")
   })
 
-  it("ignores in-between drags instead of opening or cycling", () => {
-    assert.equal(classifyWalletGesture(-40), "none")
-    assert.equal(classifyWalletGesture(30), "none")
+  it("treats in-between drags as a press, not a dead zone", () => {
+    assert.equal(classifyWalletGesture(-40), "press")
+    assert.equal(classifyWalletGesture(30), "press")
   })
 
   it("classifies each interaction independently after a reset", () => {

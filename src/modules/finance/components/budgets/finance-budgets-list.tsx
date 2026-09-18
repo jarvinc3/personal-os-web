@@ -28,7 +28,7 @@ import {
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
 import { Separator } from "@/src/shared/components/ui/separator"
-import { Spinner } from "@/src/shared/components/ui/spinner"
+import { FinanceListSkeleton } from "@/src/modules/finance/components/layout/finance-list-skeleton"
 import { SummaryItem, SummarySection } from "@/src/shared/components/ui/summary"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import {
@@ -130,9 +130,7 @@ export function FinanceBudgetsList({
         }
       >
         {listQuery.isPending && !listQuery.data ? (
-          <div className="flex justify-center p-6">
-            <Spinner />
-          </div>
+          <FinanceListSkeleton />
         ) : items.length === 0 ? (
           <Empty className="py-8">
             <EmptyHeader>

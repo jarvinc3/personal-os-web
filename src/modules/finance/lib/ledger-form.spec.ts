@@ -4,6 +4,7 @@ import { describe, it } from "node:test"
 import { encodeLedgerTarget } from "./ledger-payloads.ts"
 import {
   currencyForTarget,
+  formatCalendarDate,
   sliceDateInput,
   todayDateInput,
 } from "./ledger-form.ts"
@@ -17,6 +18,24 @@ describe("todayDateInput", () => {
 describe("sliceDateInput", () => {
   it("keeps the date part of an ISO timestamp", () => {
     assert.equal(sliceDateInput("2026-09-11T12:00:00.000Z"), "2026-09-11")
+  })
+})
+
+describe("formatCalendarDate", () => {
+  it("formats YYYY-MM-DD in local time, not the UTC day before", () => {
+    const expected = new Date(2026, 8, 18).toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    })
+    assert.equal(formatCalendarDate("2026-09-18T00:00:00.000Z"), expected)
+    assert.equal(formatCalendarDate("2026-09-18"), expected)
+    assert.match(expected, /18/)
+    assert.match(expected, /2026/)
+  })
+
+  it("returns the original string when the date slice is not YYYY-MM-DD", () => {
+    assert.equal(formatCalendarDate("not-a-date"), "not-a-date")
   })
 })
 

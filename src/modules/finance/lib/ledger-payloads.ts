@@ -8,10 +8,10 @@ export type CreateTransactionBody = {
   amount: number
   currency?: string
   transactionDate: string
-  merchant?: string
-  description?: string
-  notes?: string
-  categoryId?: string
+  merchant?: string | null
+  description?: string | null
+  notes?: string | null
+  categoryId?: string | null
   status?: "PENDING" | "CONFIRMED"
 }
 
@@ -107,19 +107,22 @@ function xorTarget(
   }
 }
 
-export function buildCreateTransactionBody(input: {
-  accountId?: string
-  cardId?: string
-  type: string
-  amount: string
-  currency?: string
-  transactionDate: string
-  merchant?: string
-  description?: string
-  notes?: string
-  categoryId?: string
-  status?: string
-}): PayloadResult<CreateTransactionBody> {
+export function buildCreateTransactionBody(
+  input: {
+    accountId?: string
+    cardId?: string
+    type: string
+    amount: string
+    currency?: string
+    transactionDate: string
+    merchant?: string
+    description?: string
+    notes?: string
+    categoryId?: string
+    status?: string
+  },
+  options?: { isUpdate?: boolean },
+): PayloadResult<CreateTransactionBody> {
   if (input.type !== "DEBIT" && input.type !== "CREDIT") {
     return { ok: false, error: "Las transferencias usan POST /finance/transfers" }
   }
@@ -136,6 +139,7 @@ export function buildCreateTransactionBody(input: {
     return { ok: false, error: target.error }
   }
 
+  const isUpdate = Boolean(options?.isUpdate)
   const body: CreateTransactionBody = {
     type: input.type,
     amount,
@@ -146,12 +150,16 @@ export function buildCreateTransactionBody(input: {
   if (currency) body.currency = currency
   const merchant = optionalTrimmed(input.merchant)
   if (merchant) body.merchant = merchant
+  else if (isUpdate) body.merchant = null
   const description = optionalTrimmed(input.description)
   if (description) body.description = description
+  else if (isUpdate) body.description = null
   const notes = optionalTrimmed(input.notes)
   if (notes) body.notes = notes
+  else if (isUpdate) body.notes = null
   const categoryId = optionalId(input.categoryId)
   if (categoryId) body.categoryId = categoryId
+  else if (isUpdate) body.categoryId = null
   if (input.status === "PENDING" || input.status === "CONFIRMED") {
     body.status = input.status
   }
