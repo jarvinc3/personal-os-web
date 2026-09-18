@@ -1,7 +1,7 @@
 "use client"
 
 import { apiDelete, apiGet, apiPatch, apiPost } from "@/src/config/api-client"
-import { asFinanceArray } from "@/src/modules/finance/lib/planning-lists"
+import { loansQuery } from "@/src/modules/finance/lib/finance-query-options"
 import type { CreateLoanBody } from "@/src/modules/finance/lib/planning-payloads"
 import { FINANCE_LOANS_QUERY_KEY } from "@/src/modules/finance/types/api"
 import type { FinanceLoan } from "@/src/modules/finance/types/entities"
@@ -16,9 +16,7 @@ function invalidate(queryClient: ReturnType<typeof useQueryClient>) {
 
 export function useLoans(enabled: boolean) {
   return useQuery({
-    queryKey: FINANCE_LOANS_QUERY_KEY,
-    queryFn: async () =>
-      asFinanceArray<FinanceLoan>(await apiGet(API_ENDPOINTS.FINANCE.LOANS)),
+    ...loansQuery(),
     enabled,
   })
 }

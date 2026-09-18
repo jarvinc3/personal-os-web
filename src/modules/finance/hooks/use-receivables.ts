@@ -1,7 +1,7 @@
 "use client"
 
 import { apiGet, apiPatch, apiPost } from "@/src/config/api-client"
-import { asFinanceArray } from "@/src/modules/finance/lib/planning-lists"
+import { receivablesQuery } from "@/src/modules/finance/lib/finance-query-options"
 import type { CreateReceivableBody } from "@/src/modules/finance/lib/planning-payloads"
 import { FINANCE_RECEIVABLES_QUERY_KEY } from "@/src/modules/finance/types/api"
 import type { FinanceReceivable } from "@/src/modules/finance/types/entities"
@@ -16,11 +16,7 @@ function invalidate(queryClient: ReturnType<typeof useQueryClient>) {
 
 export function useReceivables(enabled: boolean) {
   return useQuery({
-    queryKey: FINANCE_RECEIVABLES_QUERY_KEY,
-    queryFn: async () =>
-      asFinanceArray<FinanceReceivable>(
-        await apiGet(API_ENDPOINTS.FINANCE.RECEIVABLES),
-      ),
+    ...receivablesQuery(),
     enabled,
   })
 }

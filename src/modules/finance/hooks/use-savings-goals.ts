@@ -1,7 +1,7 @@
 "use client"
 
 import { apiDelete, apiGet, apiPatch, apiPost } from "@/src/config/api-client"
-import { asFinanceArray } from "@/src/modules/finance/lib/planning-lists"
+import { savingsGoalsQuery } from "@/src/modules/finance/lib/finance-query-options"
 import type { CreateSavingsGoalBody } from "@/src/modules/finance/lib/planning-payloads"
 import { FINANCE_SAVINGS_GOALS_QUERY_KEY } from "@/src/modules/finance/types/api"
 import type { FinanceSavingsGoal } from "@/src/modules/finance/types/entities"
@@ -16,11 +16,7 @@ function invalidate(queryClient: ReturnType<typeof useQueryClient>) {
 
 export function useSavingsGoals(enabled: boolean) {
   return useQuery({
-    queryKey: FINANCE_SAVINGS_GOALS_QUERY_KEY,
-    queryFn: async () =>
-      asFinanceArray<FinanceSavingsGoal>(
-        await apiGet(API_ENDPOINTS.FINANCE.SAVINGS_GOALS),
-      ),
+    ...savingsGoalsQuery(),
     enabled,
   })
 }
