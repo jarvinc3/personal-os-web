@@ -21,8 +21,8 @@ Si una afirmación no está `VERIFICADO`, leer [docs/review-register.md](docs/re
 | Rutas de app | `src/shared/constants/app-routes.ts` + `app/` |
 | Endpoints HTTP usados por el cliente | `src/shared/constants/api-endpoints.ts` |
 | Defaults de preferencias | `src/modules/settings/constants/user-settings-defaults.ts` |
-| Chrome de módulo | [docs/architecture/module-conventions.md](docs/architecture/module-conventions.md) |
-| Fecha/hora y UI compartida | [docs/architecture/ui-components.md](docs/architecture/ui-components.md) — `TimePairWheels` / `DurationWheels` / `DateWheels`, no inputs nativos |
+| Chrome de módulo | [docs/architecture/module-conventions.md](docs/architecture/module-conventions.md) — hoja (Keep Awake: hero + sheets) vs secciones (Finanzas: rutas + tab bar) |
+| Fecha/hora y UI compartida | [docs/architecture/ui-components.md](docs/architecture/ui-components.md) — `TimePairWheels` / `DurationWheels` / `DateWheels`, no inputs nativos; `BottomSheet` vs `floating` |
 | Sesión / 401 / proxy | [docs/modules/auth/](docs/modules/auth/README.md) + [docs/infrastructure/auth-session.md](docs/infrastructure/auth-session.md) |
 
 Este cliente es **Next.js 16**, no React Native. Instrucciones Expo/Metro/EAS no aplican aquí (ver registro).

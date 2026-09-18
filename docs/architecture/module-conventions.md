@@ -12,6 +12,7 @@ Equivalente backend: `personal-os-back/docs/architecture/modules.md` (capas Nest
 4. **No** copiar un tab bar solo de finance. El chrome vive en `src/shared/components/layout/`.
 5. El título de página lo pinta el **shell header** (`AppHeader` + `usePageHeader`). No duplicar un H1 hero con el mismo título.
 6. Contratos de dominio/API se enlazan al backend; este repo documenta rutas, UX y consumo.
+7. Un módulo **hoja** sigue el UX de Keep Awake (hero + sheets). Un módulo **con secciones** sigue Finanzas (rutas + tab bar). No mezclar: tabs locales no sustituyen ni a las rutas ni al hero.
 
 ## Tipos (`src/shared/types/module-nav.ts`)
 
@@ -87,6 +88,27 @@ Usos `secondary`: detalle institución/cash, categorías, Correos, inbox de noti
 
 `KeepAwakeProvider` está en `app/(app)/layout.tsx`: el lock **sobrevive** la navegación entre módulos autenticados.
 
+## Módulo hoja (UX)
+
+Referencia `VERIFICADO` 2026-09-18: [`keep-awake-client.tsx`](../../src/modules/keep-awake/pages/keep-awake-client.tsx) + [capabilities/session.md](../modules/keep-awake/capabilities/session.md). Controles: [ui-components.md](./ui-components.md).
+
+La pantalla **es** la acción (Keep Awake, un timer, un recorder). No es un contenedor de mini-apps. Finanzas (`/finance/movimientos`) no usa este molde.
+
+| Superficie | Qué va ahí |
+| --- | --- |
+| Hero | Un estado, un número, la CTA. Centrado, `max-w-lg`. |
+| Chrome | Iconos izq/der que abren sheets (recordatorio, historial, ayuda). Sin tabs locales. |
+| `BottomSheet` default | Edición secundaria. Borrador; **Guardar** / **Aceptar** confirma, **Cerrar** descarta, **Quitar** / **Limpiar** es explícito. |
+| `BottomSheet` `floating` | Evento: llegó la hora, terminó, falló. Poco texto, visual fuerte. |
+| Popover | Un ajuste puntual (p. ej. duración), no un flujo entero. |
+| Página | Chip / punto / badge si hay algo activo. El usuario no abre el sheet para enterarse. |
+
+El `pages/*-client.tsx` **compone** (toolbar, hero, acciones, sheets) y habla con el contexto. Extraer un componente cuando tiene trabajo propio (ruedas, prompt con timers). No extraer un panel que solo reenvía props.
+
+Copy: labels y estado, no manuales bajo cada control. Ayuda vive en su sheet.
+
+**Prohibido en una hoja:** `Tabs*` locales; autosave sin Guardar; panel-puente; `<input type="date|time">`.
+
 ## Carpetas típicas de un módulo web
 
 ```text
@@ -117,6 +139,7 @@ Keep Awake y Landing/Home **no** son slugs de `MODULE_REGISTRY`.
 ## Fuera de alcance de estas convenciones
 
 - Inventar tab bar para un módulo de una sola pantalla.
+- Usar `Tabs*` locales en un módulo hoja (Keep Awake es el molde: hero + sheets).
 - Duplicar `ModuleTabBar` dentro del feature.
 - Tratar `APP_ROUTES.app.financeBudgets` como ruta real (404 — REV-WEB-012).
 
@@ -131,10 +154,19 @@ Keep Awake y Landing/Home **no** son slugs de `MODULE_REGISTRY`.
 - [ ] Docs en `docs/modules/<slug>/` siguiendo [_templates/module](../_templates/module/README.md).
 - [ ] Specs de match de nav si hay `extraActiveHrefs` / `matchExact`.
 
+Hoja (además):
+
+- [ ] Un hero (estado + número/CTA); secundario en `BottomSheet`, no en `Tabs*`.
+- [ ] Edición = borrador hasta Guardar/Aceptar; Cerrar descarta.
+- [ ] Estado activo visible en la página (chip, punto, badge).
+- [ ] Eventos en `BottomSheet` `floating`.
+- [ ] Client de página compone; sin panel que solo reenvía props.
+
 ## Evidencia
 
 - Tipos: `src/shared/types/module-nav.ts`
 - Match: `src/shared/lib/module-nav-active.ts` + `module-nav-active.spec.ts`
 - Layout: `module-section-layout.tsx`, `module-tab-bar.tsx`, `app-sidebar.tsx`, `app-header.tsx`
 - Finance: `src/modules/finance/constants/nav.ts`, `components/layout/finance-layout.tsx`
+- Keep Awake (hoja): `KeepAwakeLayout`, `src/modules/keep-awake/pages/keep-awake-client.tsx`
 - Shell autenticado: `app/(app)/layout.tsx`

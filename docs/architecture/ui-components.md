@@ -1,6 +1,6 @@
 # Componentes UI reutilizables
 
-Inventario para agentes. Antes de inventar un control, buscar aquí y en `src/shared/components/`. Evidencia: archivos citados. Estado: `VERIFICADO` en código 2026-09-17.
+Inventario para agentes. Antes de inventar un control, buscar aquí y en `src/shared/components/`. Evidencia: archivos citados. Estado: `VERIFICADO` en código 2026-09-18.
 
 ## Fecha y hora — no usar inputs nativos
 
@@ -42,24 +42,26 @@ import { DurationWheels } from "@/src/shared/components/ui/wheel-picker"
 />
 ```
 
-Keep Awake reminder: [`keep-awake-reminder-form.tsx`](../../src/modules/keep-awake/components/keep-awake-reminder-form.tsx) dentro de [`keep-awake-reminder-sheet.tsx`](../../src/modules/keep-awake/components/keep-awake-reminder-sheet.tsx). Horario silencioso: [`edit-quiet-hours-sheet.tsx`](../../src/modules/settings/components/sheets/edit-quiet-hours-sheet.tsx). Temporizador de sesión: [`keep-awake-duration-controls.tsx`](../../src/modules/keep-awake/components/keep-awake-duration-controls.tsx) (`DurationWheels`).
-
 Un `Input type="number"` para cantidades **sí** es válido; no es fecha/hora. Duraciones con horas y minutos van en `DurationWheels`, no en un input numérico.
 
 ## Sheets, listas y vacíos
 
 | Necesitas | Usar | Path |
 | --- | --- | --- |
-| Sheet / drawer de módulo | `BottomSheet` | `src/shared/components/layout/bottom-sheet.tsx` |
+| Sheet / drawer de módulo (edición) | `BottomSheet` | `src/shared/components/layout/bottom-sheet.tsx` |
+| Evento (llegó, listo, falló) | `BottomSheet` `variant="floating"` | igual; card abajo, no drawer de formulario |
 | Sección con título + card | `SummarySection` | `src/shared/components/ui/summary.tsx` |
 | Fila de lista (icono, título, valor) | `SummaryItem` | igual |
 | Estado vacío | `Empty` + `EmptyHeader` / `EmptyMedia` / `EmptyTitle` / `EmptyDescription` | `src/shared/components/ui/empty.tsx` |
 | Color | `ColorPickerSwatch` | `src/shared/components/ui/color-picker.tsx` |
-| Tabs locales (no rutas) | `Tabs` / `TabsList` / `TabsTrigger` / `TabsContent` | `src/shared/components/ui/tabs.tsx` |
-| Aviso puntual | `Alert` | `src/shared/components/ui/alert.tsx` |
-| Tab bar de módulo con rutas | `ModuleSectionLayout` | `src/shared/components/layout/module-section-layout.tsx` — ver [module-conventions.md](./module-conventions.md) |
+| Tab bar de módulo **con rutas** | `ModuleSectionLayout` | `src/shared/components/layout/module-section-layout.tsx` — [module-conventions.md](./module-conventions.md) |
+| Aviso puntual dentro de un flujo | `Alert` | `src/shared/components/ui/alert.tsx` |
 
 No armar un drawer con `Drawer` crudo si `BottomSheet` cubre el caso (título, description, actions, pending).
+
+**Módulo hoja** (Keep Awake): hero + iconos + sheets. **No** uses `Tabs*` para Recordatorio/Historial/ajustes en la misma página. Eso es chrome de hoja, no secciones. Molde: [module-conventions.md — Módulo hoja (UX)](./module-conventions.md#módulo-hoja-ux). `Tabs*` solo si hay ≥2 superficies locales que **no** merecen ruta y **no** es un módulo hoja.
+
+Keep Awake reminder: [`keep-awake-reminder-sheet.tsx`](../../src/modules/keep-awake/components/keep-awake-reminder-sheet.tsx) (`Guardar` activa). Aviso al due: [`keep-awake-reminder-prompt.tsx`](../../src/modules/keep-awake/components/keep-awake-reminder-prompt.tsx) (`floating`). Temporizador: [`keep-awake-duration-controls.tsx`](../../src/modules/keep-awake/components/keep-awake-duration-controls.tsx) (popover + `DurationWheels`). Horario silencioso: [`edit-quiet-hours-sheet.tsx`](../../src/modules/settings/components/sheets/edit-quiet-hours-sheet.tsx).
 
 ## Formularios de Finanzas
 

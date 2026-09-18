@@ -15,7 +15,7 @@ Antes de crear un control, leer [docs/architecture/ui-components.md](docs/archit
 - Fecha → `DateWheels` (`YYYY-MM-DD`); en Finanzas preferir `FinanceDateField`
 - Minutos: `minuteStep={1}` (00–59), `{5}` o `{10}` — no usar slots fijos de 15 min
 
-**Chrome:** `BottomSheet` para sheets; `SummarySection` / `SummaryItem` para listas; `Empty*` para vacíos; `ColorPickerSwatch` para color; `Tabs*` para tabs locales; `ModuleSectionLayout` para tab bar de módulo con rutas.
+**Chrome:** `BottomSheet` para edición/secundario; `BottomSheet variant="floating"` para un evento. `SummarySection` / `SummaryItem` para listas; `Empty*` para vacíos; `ColorPickerSwatch` para color. Módulo **hoja** (Keep Awake): hero + iconos + sheets — **no** `Tabs*` locales. Módulo **con secciones** (Finanzas): `ModuleSectionLayout` (rutas), no tabs inventadas dentro de una página. Ver `leaf-module-ux.mdc` y [module-conventions.md](docs/architecture/module-conventions.md).
 
 ```tsx
 <TimePairWheels label="Hora" value={hhmm} minuteStep={1} onChange={setHhmm} />

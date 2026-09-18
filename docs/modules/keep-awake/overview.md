@@ -6,4 +6,4 @@ Ruta `/keep-awake` protegida. El lock vive en `KeepAwakeProvider` (`app/(app)/la
 
 No es slug de `MODULE_REGISTRY` / backend.
 
-Código: `src/modules/keep-awake/`. Tests: 8 specs en `lib/`.
+Código: `src/modules/keep-awake/`. Tests: specs en `lib/`. UX de módulo hoja (hero + sheets): [module-conventions.md](../../architecture/module-conventions.md#módulo-hoja-ux).
