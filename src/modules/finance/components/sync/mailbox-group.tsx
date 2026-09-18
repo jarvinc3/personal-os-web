@@ -57,7 +57,11 @@ export function MailboxGroup({
         <div className="min-w-0 flex-1">
           <SummaryItem
             title={mailbox.emailAddress}
-            description={`${sources.length} institución${sources.length === 1 ? "" : "es"}`}
+            description={
+              sources.length === 1
+                ? "1 institución"
+                : `${sources.length} instituciones`
+            }
             icon={MailIcon}
             isLast
             onPress={() => onOpenMailbox(mailbox.id)}

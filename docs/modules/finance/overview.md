@@ -11,4 +11,4 @@ Tab bar (4): Resumen, Movimientos, Planificación, Cuentas. Estadísticas `showI
 Helpers: `src/modules/finance/lib/money.ts`, `ledger-payloads.ts`. Tests: 20 specs bajo `lib/`.
 
 > [!WARNING]
-> **REV-WEB-012** (`CONTRADICE_CODIGO`) — docs y `APP_ROUTES` reclamaban `/finance/budgets` y “5 ítems” en tab bar. Presupuestos viven en `/finance/planning`. [review-register.md](../../review-register.md#rev-web-012)
+> **REV-WEB-012** — docs antiguas reclamaban `/finance/budgets`. Presupuestos viven en `/finance/planning`. Cuentas y cobros se reciclan con archivar / `CANCELLED`; no hay DELETE. [review-register.md](../../review-register.md#rev-web-012)

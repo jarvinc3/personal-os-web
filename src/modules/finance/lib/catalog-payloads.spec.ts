@@ -7,6 +7,7 @@ import {
   buildCreateAccountBody,
   buildCreateCardBody,
   buildCreateCategoryBody,
+  buildCreateInstitutionBody,
   cardBalanceSaveMessage,
   nextUnusedCurrency,
 } from "./catalog-payloads.ts"
@@ -69,6 +70,49 @@ describe("buildCreateAccountBody", () => {
     assert.equal(result.body.institutionId, "inst-1")
     assert.equal("institution" in result.body, false)
   })
+
+  it("sends color null on update and omits empty color on create", () => {
+    const created = buildCreateAccountBody({
+      name: "Efectivo",
+      type: "CASH",
+      color: "  ",
+    })
+    assert.equal(created.ok, true)
+    if (!created.ok) return
+    assert.equal("color" in created.body, false)
+
+    const updated = buildCreateAccountBody(
+      {
+        name: "Efectivo",
+        type: "CASH",
+        color: "",
+      },
+      { isUpdate: true },
+    )
+    assert.equal(updated.ok, true)
+    if (!updated.ok) return
+    assert.equal(updated.body.color, null)
+  })
+})
+
+describe("buildCreateInstitutionBody", () => {
+  it("sends color null on update and omits empty color on create", () => {
+    const created = buildCreateInstitutionBody({
+      name: "Banco",
+      color: "",
+    })
+    assert.equal(created.ok, true)
+    if (!created.ok) return
+    assert.equal("color" in created.body, false)
+
+    const updated = buildCreateInstitutionBody(
+      { name: "Banco", color: "  " },
+      { isUpdate: true },
+    )
+    assert.equal(updated.ok, true)
+    if (!updated.ok) return
+    assert.equal(updated.body.color, null)
+  })
 })
 
 describe("buildCreateCardBody", () => {
@@ -99,6 +143,71 @@ describe("buildCreateCardBody", () => {
     assert.equal(credit.ok, true)
     if (!credit.ok) return
     assert.equal("accountId" in credit.body, false)
+  })
+
+  it("rejects lastFour that is not exactly 4 digits and omits empty", () => {
+    const short = buildCreateCardBody({
+      institutionId: "inst-1",
+      name: "Crédito",
+      type: "CREDIT",
+      lastFour: "12",
+    })
+    assert.equal(short.ok, false)
+    if (short.ok) return
+    assert.match(short.error, /4 dígitos/)
+
+    const letters = buildCreateCardBody({
+      institutionId: "inst-1",
+      name: "Crédito",
+      type: "CREDIT",
+      lastFour: "abcd",
+    })
+    assert.equal(letters.ok, false)
+
+    const empty = buildCreateCardBody({
+      institutionId: "inst-1",
+      name: "Crédito",
+      type: "CREDIT",
+      lastFour: "  ",
+    })
+    assert.equal(empty.ok, true)
+    if (!empty.ok) return
+    assert.equal("lastFour" in empty.body, false)
+
+    const valid = buildCreateCardBody({
+      institutionId: "inst-1",
+      name: "Crédito",
+      type: "CREDIT",
+      lastFour: "4242",
+    })
+    assert.equal(valid.ok, true)
+    if (!valid.ok) return
+    assert.equal(valid.body.lastFour, "4242")
+  })
+
+  it("sends color null on update and omits empty color on create", () => {
+    const created = buildCreateCardBody({
+      institutionId: "inst-1",
+      name: "Crédito",
+      type: "CREDIT",
+      color: "",
+    })
+    assert.equal(created.ok, true)
+    if (!created.ok) return
+    assert.equal("color" in created.body, false)
+
+    const updated = buildCreateCardBody(
+      {
+        institutionId: "inst-1",
+        name: "Crédito",
+        type: "CREDIT",
+        color: "  ",
+      },
+      { isUpdate: true },
+    )
+    assert.equal(updated.ok, true)
+    if (!updated.ok) return
+    assert.equal(updated.body.color, null)
   })
 })
 
@@ -185,6 +294,19 @@ describe("buildCardBalanceBodies", () => {
     assert.equal(result.ok, false)
     if (result.ok) return
     assert.equal(result.error, "Saldo inválido")
+  })
+
+  it("requires a credit limit when every CREDIT row is empty", () => {
+    const result = buildCardBalanceBodies(
+      [
+        { currency: "DOP", balance: "", creditLimit: "" },
+        { currency: "USD", balance: "  ", creditLimit: "" },
+      ],
+      { requireCreditLimit: true },
+    )
+    assert.equal(result.ok, false)
+    if (result.ok) return
+    assert.equal(result.error, "Límite de crédito obligatorio")
   })
 })
 

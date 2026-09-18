@@ -70,6 +70,45 @@ describe("buildCreateTransactionBody", () => {
     })
     assert.deepEqual(splitLedgerTarget("__none__"), {})
   })
+
+  it("sends null for empty optionals on update and omits them on create", () => {
+    const created = buildCreateTransactionBody({
+      accountId: "acc-1",
+      type: "DEBIT",
+      amount: "10",
+      transactionDate: "2026-09-02",
+      notes: "",
+      merchant: "  ",
+      description: "",
+      categoryId: "__none__",
+    })
+    assert.equal(created.ok, true)
+    if (!created.ok) return
+    assert.equal("notes" in created.body, false)
+    assert.equal("merchant" in created.body, false)
+    assert.equal("description" in created.body, false)
+    assert.equal("categoryId" in created.body, false)
+
+    const updated = buildCreateTransactionBody(
+      {
+        accountId: "acc-1",
+        type: "DEBIT",
+        amount: "10",
+        transactionDate: "2026-09-02",
+        notes: "",
+        merchant: "  ",
+        description: "",
+        categoryId: "__none__",
+      },
+      { isUpdate: true },
+    )
+    assert.equal(updated.ok, true)
+    if (!updated.ok) return
+    assert.equal(updated.body.notes, null)
+    assert.equal(updated.body.merchant, null)
+    assert.equal(updated.body.description, null)
+    assert.equal(updated.body.categoryId, null)
+  })
 })
 
 describe("buildCreateTransferBody", () => {

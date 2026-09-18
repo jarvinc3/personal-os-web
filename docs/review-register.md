@@ -109,9 +109,9 @@ Afirmaciones de `project-guide.md`, `docs/infraestructure/*`, módulos monolíti
 | Categoría | `CONTRADICE_CODIGO` |
 | Origen | `finance.md` + `modules/README.md` ruta `/finance/budgets`; tab bar 5 ítems |
 | Validación | no hay `app/(app)/finance/budgets/page.tsx`; budgets UI en planning; tab bar 4 ítems + estadísticas sidebar |
-| También | `APP_ROUTES.app.financeBudgets` sigue definido |
+| También | `APP_ROUTES.app.financeBudgets` se eliminó; reciclar cuentas/cobros = archivar / `CANCELLED` |
 | Runtime 2026-09-15 | `GET http://localhost:3000/finance/budgets` → Next.js 404. `/finance/planning` muestra sección Presupuestos paginada (`DOP $…`) |
-| Resolución | `open` |
+| Resolución | `resolved` |
 
 ## REV-WEB-013 {#rev-web-013}
 

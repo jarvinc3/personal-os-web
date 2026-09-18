@@ -12,4 +12,4 @@ Dueño: `personal-os-back/docs/modules/finance/`. Query keys: `src/modules/finan
 
 Mutaciones de cuentas/tarjetas/loans/instituciones/txs confirmadas/email assign invalidan `FINANCE_BALANCE_SHEET_QUERY_KEY`.
 
-`APP_ROUTES.app.financeBudgets` está definido y **no** tiene ruta — REV-WEB-012.
+Presupuestos viven en `/finance/planning` (REV-WEB-012). Cuentas y cobros se reciclan con archivar / `CANCELLED`; no hay DELETE.

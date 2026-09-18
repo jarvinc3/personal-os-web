@@ -208,11 +208,14 @@ export function TransactionSheet({
   const onSubmit = submitForm(async (values) => {
     if (isTransferLeg) return
     const target = splitLedgerTarget(values.destination)
-    const payload = buildCreateTransactionBody({
-      ...values,
-      accountId: target.accountId,
-      cardId: target.cardId,
-    })
+    const payload = buildCreateTransactionBody(
+      {
+        ...values,
+        accountId: target.accountId,
+        cardId: target.cardId,
+      },
+      { isUpdate: isEdit },
+    )
     if (!payload.ok) {
       appToast.error({ text1: payload.error })
       return

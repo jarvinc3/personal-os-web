@@ -14,4 +14,5 @@ Contrato de dominio: **backend** `personal-os-back/docs/modules/finance/`. Aquí
 | [rules/gate.md](./rules/gate.md) | Módulo off, money, ruta muerta |
 | [contracts/consumed-api.md](./contracts/consumed-api.md) | Superficies → HTTP |
 
-**No existe** página `/finance/budgets`. `APP_ROUTES.app.financeBudgets` es ruta muerta (REV-WEB-012).
+**No existe** página `/finance/budgets`. Los presupuestos viven en `/finance/planning`.
+Cuentas y cobros se reciclan con archivar / `CANCELLED`; no hay DELETE (FKs Restrict en el ledger).

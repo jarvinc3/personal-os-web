@@ -67,7 +67,12 @@ const schema = z.object({
   institutionId: z.string().min(1, "Institución obligatoria"),
   accountId: z.string(),
   network: z.string(),
-  lastFour: z.string().trim().max(4),
+  lastFour: z
+    .string()
+    .trim()
+    .refine((value) => value === "" || /^\d{4}$/.test(value), {
+      message: "Deben ser 4 dígitos",
+    }),
   statementClosingDay: z.string().trim(),
   paymentDueDay: z.string().trim(),
   color: z.string().trim().max(20),
@@ -228,7 +233,7 @@ export function CardSheet({
   )
 
   const onSubmit = submitForm(async (values) => {
-    const payload = buildCreateCardBody(values)
+    const payload = buildCreateCardBody(values, { isUpdate: isEdit })
     if (!payload.ok) {
       appToast.error({ text1: payload.error })
       return
@@ -236,7 +241,9 @@ export function CardSheet({
 
     const balancesPayload = card
       ? { ok: true as const, body: [] }
-      : buildCardBalanceBodies(values.balances)
+      : buildCardBalanceBodies(values.balances, {
+          requireCreditLimit: values.type === "CREDIT",
+        })
     if (!balancesPayload.ok) {
       appToast.error({ text1: balancesPayload.error })
       return

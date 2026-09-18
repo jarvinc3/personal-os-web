@@ -141,7 +141,7 @@ Keep Awake y Landing/Home **no** son slugs de `MODULE_REGISTRY`.
 - Inventar tab bar para un módulo de una sola pantalla.
 - Usar `Tabs*` locales en un módulo hoja (Keep Awake es el molde: hero + sheets).
 - Duplicar `ModuleTabBar` dentro del feature.
-- Tratar `APP_ROUTES.app.financeBudgets` como ruta real (404 — REV-WEB-012).
+- Inventar una constante `APP_ROUTES` sin `page.tsx` (los presupuestos de finance viven en `/finance/planning`).
 
 ## PR checklist (módulo nuevo)
 

@@ -21,7 +21,7 @@ import { useBalanceSheet } from "@/src/modules/finance/hooks/use-balance-sheet"
 import { useCards } from "@/src/modules/finance/hooks/use-cards"
 import { useEmailMailboxes } from "@/src/modules/finance/hooks/use-email-sources"
 import { useFinanceEnabled } from "@/src/modules/finance/hooks/use-finance-enabled"
-import { useInstitutions } from "@/src/modules/finance/hooks/use-institutions"
+import { useArchiveInstitution, useInstitutions } from "@/src/modules/finance/hooks/use-institutions"
 import { useLoans } from "@/src/modules/finance/hooks/use-loans"
 import { useSheetListEntity } from "@/src/modules/finance/hooks/use-sheet-entity"
 import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
@@ -38,7 +38,9 @@ import { SummaryItem } from "@/src/shared/components/ui/summary"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
+import { appToast } from "@/src/shared/lib/app-toast"
 import {
+  ArchiveIcon,
   Building2Icon,
   CreditCardIcon,
   HandCoinsIcon,
@@ -83,6 +85,7 @@ function InstitutionDetailView({
   const loansQuery = useLoans(isEnabled)
   const balanceSheetQuery = useBalanceSheet(isEnabled)
   const mailboxesQuery = useEmailMailboxes(isEnabled && emailSyncEnabled)
+  const archiveInstitution = useArchiveInstitution()
 
   const [tab, setTab] = useState<InstitutionDetailTab>("accounts")
   const { open: openOptionsSheet, setOpen: setOpenOptionsSheet } =
@@ -160,6 +163,18 @@ function InstitutionDetailView({
   const handleBack = useCallback(() => {
     router.push(APP_ROUTES.app.financeAccounts)
   }, [router])
+
+  const onArchiveInstitution = useCallback(async () => {
+    if (!institution) return
+    try {
+      await archiveInstitution.mutateAsync(institution.id)
+      appToast.success({ text1: "Institución archivada" })
+      setOpenOptionsSheet(false)
+      router.push(APP_ROUTES.app.financeAccounts)
+    } catch (error) {
+      appToast.error({ text1: financeErrorMessage(error) })
+    }
+  }, [archiveInstitution, institution, router, setOpenOptionsSheet])
 
   const openMenu = useCallback(
     () => setOpenOptionsSheet(true),
@@ -438,8 +453,16 @@ function InstitutionDetailView({
               linkedMailbox ? undefined : () => setOpenLinkSheet(true)
             }
             showChevron={!linkedMailbox}
-            isLast
+            isLast={false}
             className="px-3"
+          />
+          <SummaryItem
+            title="Archivar"
+            icon={ArchiveIcon}
+            onPress={() => void onArchiveInstitution()}
+            disabled={archiveInstitution.isPending}
+            isLast
+            className="px-3 text-destructive"
           />
         </div>
       </BottomSheet>

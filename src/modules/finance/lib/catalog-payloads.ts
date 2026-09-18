@@ -12,12 +12,12 @@ export type CreateAccountBody = {
   type: FinanceAccountType
   institutionId?: string
   currency?: string
-  color?: string
+  color?: string | null
 }
 
 export type CreateInstitutionBody = {
   name: string
-  color?: string
+  color?: string | null
   logoUrl?: string
   country?: string
 }
@@ -31,7 +31,7 @@ export type CreateCardBody = {
   lastFour?: string
   statementClosingDay?: number
   paymentDueDay?: number
-  color?: string
+  color?: string | null
 }
 
 export type CardBalanceBody = {
@@ -65,13 +65,16 @@ function optionalId(value: string | undefined): string | undefined {
   return trimmed
 }
 
-export function buildCreateAccountBody(input: {
-  name: string
-  type: FinanceAccountType
-  currency?: string
-  institutionId?: string
-  color?: string
-}): PayloadResult<CreateAccountBody> {
+export function buildCreateAccountBody(
+  input: {
+    name: string
+    type: FinanceAccountType
+    currency?: string
+    institutionId?: string
+    color?: string
+  },
+  options?: { isUpdate?: boolean },
+): PayloadResult<CreateAccountBody> {
   const name = input.name.trim()
   if (!name) {
     return { ok: false, error: "Nombre obligatorio" }
@@ -98,17 +101,22 @@ export function buildCreateAccountBody(input: {
   const color = optionalTrimmed(input.color)
   if (color) {
     body.color = color
+  } else if (options?.isUpdate) {
+    body.color = null
   }
 
   return { ok: true, body }
 }
 
-export function buildCreateInstitutionBody(input: {
-  name: string
-  color?: string
-  logoUrl?: string
-  country?: string
-}): PayloadResult<CreateInstitutionBody> {
+export function buildCreateInstitutionBody(
+  input: {
+    name: string
+    color?: string
+    logoUrl?: string
+    country?: string
+  },
+  options?: { isUpdate?: boolean },
+): PayloadResult<CreateInstitutionBody> {
   const name = input.name.trim()
   if (!name) {
     return { ok: false, error: "Nombre obligatorio" }
@@ -117,6 +125,7 @@ export function buildCreateInstitutionBody(input: {
   const body: CreateInstitutionBody = { name }
   const color = optionalTrimmed(input.color)
   if (color) body.color = color
+  else if (options?.isUpdate) body.color = null
   const logoUrl = optionalTrimmed(input.logoUrl)
   if (logoUrl) body.logoUrl = logoUrl
   const country = optionalTrimmed(input.country)?.toUpperCase()
@@ -125,17 +134,20 @@ export function buildCreateInstitutionBody(input: {
   return { ok: true, body }
 }
 
-export function buildCreateCardBody(input: {
-  institutionId: string
-  name: string
-  type: FinanceCardType
-  accountId?: string
-  network?: string
-  lastFour?: string
-  statementClosingDay?: string
-  paymentDueDay?: string
-  color?: string
-}): PayloadResult<CreateCardBody> {
+export function buildCreateCardBody(
+  input: {
+    institutionId: string
+    name: string
+    type: FinanceCardType
+    accountId?: string
+    network?: string
+    lastFour?: string
+    statementClosingDay?: string
+    paymentDueDay?: string
+    color?: string
+  },
+  options?: { isUpdate?: boolean },
+): PayloadResult<CreateCardBody> {
   const name = input.name.trim()
   if (!name) {
     return { ok: false, error: "Nombre obligatorio" }
@@ -167,6 +179,9 @@ export function buildCreateCardBody(input: {
 
   const lastFour = optionalTrimmed(input.lastFour)
   if (lastFour) {
+    if (!/^[0-9]{4}$/.test(lastFour)) {
+      return { ok: false, error: "Deben ser 4 dígitos" }
+    }
     body.lastFour = lastFour
   }
 
@@ -180,6 +195,7 @@ export function buildCreateCardBody(input: {
 
   const color = optionalTrimmed(input.color)
   if (color) body.color = color
+  else if (options?.isUpdate) body.color = null
 
   return { ok: true, body }
 }
@@ -249,6 +265,10 @@ export function buildCardBalanceBodies(
     }
     seen.add(parsed.body.currency)
     bodies.push(parsed.body)
+  }
+
+  if (options?.requireCreditLimit && bodies.length === 0) {
+    return { ok: false, error: "Límite de crédito obligatorio" }
   }
 
   return { ok: true, body: bodies }

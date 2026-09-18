@@ -4,6 +4,7 @@ import type {
   FinanceTransactionStatus,
   FinanceTransactionType,
 } from "../types/entities.ts";
+import { formatCalendarDate } from "./ledger-form.ts";
 import { parseFinanceMoney } from "./money.ts";
 
 export const FINANCE_TX_FILTER_ALL = "__all__" as const
@@ -81,15 +82,14 @@ export function transactionsFromPayload(
 }
 
 export function formatTransactionDate(value: string): string {
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) {
-    return value.slice(0, 10)
-  }
-  return date.toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  })
+  return formatCalendarDate(value)
+}
+
+export function canReverseTransaction(
+  tx: Pick<FinanceTransaction, "status" | "transferGroupId" | "type">,
+): boolean {
+  if (tx.transferGroupId || tx.type === "TRANSFER") return false
+  return tx.status === "CONFIRMED"
 }
 
 export function isTransferTransaction(

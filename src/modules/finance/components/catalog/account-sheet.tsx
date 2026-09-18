@@ -161,7 +161,7 @@ export function AccountSheet({
   )
 
   const onSubmit = submitForm(async (values) => {
-    const payload = buildCreateAccountBody(values)
+    const payload = buildCreateAccountBody(values, { isUpdate: isEdit })
     if (!payload.ok) {
       appToast.error({ text1: payload.error })
       return

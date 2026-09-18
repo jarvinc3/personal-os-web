@@ -21,7 +21,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/src/shared/components/ui/collapsible"
-import { Spinner } from "@/src/shared/components/ui/spinner"
+import { FinanceListSkeleton } from "@/src/modules/finance/components/layout/finance-list-skeleton"
 import { SummaryItem, SummarySection } from "@/src/shared/components/ui/summary"
 import {
   Tabs,
@@ -197,9 +197,7 @@ export function FinanceCategoriesSection({
         <p className="text-sm text-destructive">{errorMessage}</p>
       ) : null}
       {categoriesQuery.isPending ? (
-        <div className="flex justify-center p-6">
-          <Spinner />
-        </div>
+        <FinanceListSkeleton />
       ) : groups.length === 0 ? (
         <p className="p-4 text-sm text-muted-foreground">
           No hay categorías. Crea una con un emoji.

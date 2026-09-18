@@ -3,6 +3,8 @@ import { describe, it } from "node:test";
 
 import {
   buildTransactionsSearchParams,
+  canReverseTransaction,
+  formatTransactionDate,
   transferDirectionLabel,
   transactionsFromPayload,
   visibleTransactionTotals,
@@ -76,6 +78,65 @@ describe("visibleTransactionTotals", () => {
     ])
     assert.equal(totals.income, 10)
     assert.equal(totals.expenses, 13.25)
+  })
+})
+
+describe("formatTransactionDate", () => {
+  it("keeps the calendar day of an UTC midnight ISO string", () => {
+    const expected = new Date(2026, 8, 18).toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    })
+    assert.equal(formatTransactionDate("2026-09-18T00:00:00.000Z"), expected)
+    assert.equal(formatTransactionDate("2026-09-18"), expected)
+    assert.match(formatTransactionDate("2026-09-18T00:00:00.000Z"), /18/)
+    assert.match(formatTransactionDate("2026-09-18T00:00:00.000Z"), /2026/)
+  })
+})
+
+describe("canReverseTransaction", () => {
+  it("is true only for CONFIRMED non-transfer movements", () => {
+    assert.equal(
+      canReverseTransaction({
+        status: "CONFIRMED",
+        type: "DEBIT",
+        transferGroupId: null,
+      }),
+      true,
+    )
+    assert.equal(
+      canReverseTransaction({
+        status: "CONFIRMED",
+        type: "TRANSFER",
+        transferGroupId: null,
+      }),
+      false,
+    )
+    assert.equal(
+      canReverseTransaction({
+        status: "CONFIRMED",
+        type: "DEBIT",
+        transferGroupId: "grp-1",
+      }),
+      false,
+    )
+    assert.equal(
+      canReverseTransaction({
+        status: "REVERSED",
+        type: "DEBIT",
+        transferGroupId: null,
+      }),
+      false,
+    )
+    assert.equal(
+      canReverseTransaction({
+        status: "PENDING",
+        type: "CREDIT",
+        transferGroupId: null,
+      }),
+      false,
+    )
   })
 })
 

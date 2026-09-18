@@ -22,5 +22,5 @@ Fecha: 2026-09-15
 | Keep Awake | `modules/keep-awake/rules/session.md` | `BR-KAW-001`–`005` |
 | Landing | `modules/landing/rules/access.md` | `BR-LND-001`–`002` |
 | Runtime 2026-09-15 | home, `/finance` (nav Resumen/Movimientos/Estadísticas/Planificación/Cuentas), planning+presupuestos, keep-awake idle, settings módulos, `/notifications`, `/chat` combobox `general`, `/landing` waitlist | sesión autenticada localhost:3000 |
-| `/finance/budgets` | REV-WEB-012 | no hay `page.tsx`; runtime 404 |
+| `/finance/budgets` | REV-WEB-012 | no hay `page.tsx`; presupuestos en `/finance/planning` |
 | Expo/RN docs | REV-WEB-001, 004, 005, 007 | contenidos antiguos `infraestructure/` y `project-guide.md` |

@@ -32,7 +32,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
-import { Spinner } from "@/src/shared/components/ui/spinner"
+import { FinanceListSkeleton } from "@/src/modules/finance/components/layout/finance-list-skeleton"
 import { SummaryItem, SummarySection } from "@/src/shared/components/ui/summary"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { InboxIcon, MailIcon, PlusIcon } from "lucide-react"
@@ -139,9 +139,7 @@ export function FinanceMailboxesView({ enabled }: { enabled: boolean }) {
 
       <SummarySection title="Movimientos por asignar" icon={InboxIcon}>
         {pendingQuery.isPending && !pendingQuery.data ? (
-          <div className="flex justify-center p-6">
-            <Spinner />
-          </div>
+          <FinanceListSkeleton />
         ) : pending.length === 0 ? (
           <p className="px-1 py-2 text-sm text-muted-foreground">
             No hay correos pendientes de cuenta o tarjeta.
@@ -183,9 +181,7 @@ export function FinanceMailboxesView({ enabled }: { enabled: boolean }) {
           </p>
         ) : null}
         {mailboxesQuery.isPending && !mailboxesQuery.data ? (
-          <div className="flex justify-center p-6">
-            <Spinner />
-          </div>
+          <FinanceListSkeleton />
         ) : mailboxes.length === 0 ? (
           <Empty className="py-8">
             <EmptyHeader>

@@ -33,12 +33,15 @@ export function ExpandableFab({ actions }: { actions: ExpandableFabAction[] }) {
       <div className="flex fixed right-4 bottom-24 z-50 flex-col-reverse gap-3 items-end">
         {/* Main FAB */}
         <motion.button
+          type="button"
           onClick={() => setIsOpen(!isOpen)}
+          aria-label={isOpen ? "Cerrar acciones" : "Nuevo movimiento"}
+          aria-expanded={isOpen}
           className="flex justify-center items-center w-12 h-12 text-white rounded-full shadow-xl bg-primary"
           animate={{ rotate: isOpen ? 45 : 0 }}
           transition={{ ease: "easeInOut" }}
         >
-          <Plus className="w-5 h-5" />
+          <Plus className="w-5 h-5" aria-hidden />
         </motion.button>
 
         {/* Action buttons */}

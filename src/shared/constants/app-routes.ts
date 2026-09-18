@@ -24,7 +24,6 @@ export const APP_ROUTES = {
     financeCashAccount: (accountId: string) =>
       `/finance/accounts/cash/${accountId}`,
     financeTransactions: '/finance/transactions',
-    financeBudgets: '/finance/budgets',
     financePlanning: '/finance/planning',
   },
 } as const;
