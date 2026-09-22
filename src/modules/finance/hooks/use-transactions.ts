@@ -7,8 +7,11 @@ import type {
 } from "@/src/modules/finance/lib/ledger-payloads"
 import {
   buildTransactionsSearchParams,
+  fetchAllTransactionPages,
+  FINANCE_TIMELINE_PAGE_SIZE,
   type FinanceTransactionsQuery,
 } from "@/src/modules/finance/lib/transactions-query"
+import { intersectIsoDateRange } from "@/src/modules/finance/lib/month-window"
 import { invalidateFinancePositions } from "@/src/modules/finance/hooks/use-balance-sheet"
 import {
   FINANCE_TRANSACTIONS_QUERY_KEY,
@@ -21,9 +24,11 @@ import type {
 import { API_ENDPOINTS } from "@/src/shared/constants/api-endpoints"
 import {
   useMutation,
+  useQueries,
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query"
+import { useMemo } from "react"
 
 function invalidateLedger(queryClient: ReturnType<typeof useQueryClient>) {
   invalidateFinancePositions(queryClient)
@@ -42,6 +47,64 @@ export function useTransactions(
       ),
     enabled,
   })
+}
+
+export type TimelineTransactionFilters = Omit<
+  FinanceTransactionsQuery,
+  "page" | "limit"
+>
+
+export function useTimelineTransactions(
+  enabled: boolean,
+  years: number[],
+  filters: TimelineTransactionFilters,
+) {
+  const queries = useQueries({
+    queries: years.map((year) => {
+      const intersection = intersectIsoDateRange(
+        `${year}-01-01`,
+        `${year}-12-31`,
+        filters.dateFrom,
+        filters.dateTo,
+      )
+      return {
+        queryKey: [
+          ...FINANCE_TRANSACTIONS_QUERY_KEY,
+          "timeline",
+          year,
+          filters,
+        ],
+        enabled: enabled && intersection !== null,
+        queryFn: () =>
+          fetchAllTransactionPages(
+            {
+              ...filters,
+              dateFrom: intersection?.dateFrom,
+              dateTo: intersection?.dateTo,
+              limit: FINANCE_TIMELINE_PAGE_SIZE,
+            },
+            (path) => apiGet(path),
+          ),
+      }
+    }),
+  })
+
+  const items = useMemo(() => {
+    const byId = new Map<string, FinanceTransaction>()
+    for (const query of queries) {
+      for (const item of query.data ?? []) {
+        byId.set(item.id, item)
+      }
+    }
+    return [...byId.values()]
+  }, [queries])
+
+  return {
+    items,
+    isPending: queries.some((query) => query.isLoading),
+    isError: queries.some((query) => query.isError),
+    error: queries.find((query) => query.error)?.error ?? null,
+  }
 }
 
 export function useTransaction(enabled: boolean, id: string | null) {

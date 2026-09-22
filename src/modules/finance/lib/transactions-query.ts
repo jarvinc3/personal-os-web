@@ -9,6 +9,8 @@ import { parseFinanceMoney } from "./money.ts";
 
 export const FINANCE_TX_FILTER_ALL = "__all__" as const
 export const FINANCE_TX_PAGE_SIZE = 20
+export const FINANCE_TIMELINE_PAGE_SIZE = 100
+const FINANCE_TIMELINE_MAX_PAGES = 50
 
 export type FinanceTransactionsQuery = {
   page: number
@@ -127,4 +129,22 @@ export function visibleTransactionTotals(
     },
     { income: 0, expenses: 0 },
   )
+}
+
+export async function fetchAllTransactionPages(
+  query: Omit<FinanceTransactionsQuery, "page">,
+  get: (path: string) => Promise<unknown>,
+): Promise<FinanceTransaction[]> {
+  const items: FinanceTransaction[] = []
+  let page = 1
+  let totalPages = 1
+  while (page <= totalPages && page <= FINANCE_TIMELINE_MAX_PAGES) {
+    const search = buildTransactionsSearchParams({ ...query, page })
+    const payload = await get(`/finance/transactions?${search}`)
+    const listed = transactionsFromPayload(payload)
+    items.push(...listed.items)
+    totalPages = listed.pagination.totalPages
+    page += 1
+  }
+  return items
 }

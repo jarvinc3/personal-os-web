@@ -1,5 +1,8 @@
 "use client"
 
+import { FinanceFlowPills } from "@/src/modules/finance/components/transactions/finance-flow-pills"
+import { FinanceMonthPicker } from "@/src/modules/finance/components/transactions/finance-month-picker"
+import { FinanceMonthSection } from "@/src/modules/finance/components/transactions/finance-month-section"
 import { TransactionDetailSheet } from "@/src/modules/finance/components/transactions/transaction-detail-sheet"
 import {
   countActiveTransactionFilters,
@@ -9,25 +12,30 @@ import {
 } from "@/src/modules/finance/components/transactions/transaction-filters-sheet"
 import { TransactionSheet } from "@/src/modules/finance/components/transactions/transaction-sheet"
 import { TransferSheet } from "@/src/modules/finance/components/transactions/transfer-sheet"
+import { FinanceListSkeleton } from "@/src/modules/finance/components/layout/finance-list-skeleton"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/constants/sheet-keys"
 import { useAccounts } from "@/src/modules/finance/hooks/use-accounts"
 import { useCards } from "@/src/modules/finance/hooks/use-cards"
+import { useCategories } from "@/src/modules/finance/hooks/use-categories"
 import { useSheetQueryEntity } from "@/src/modules/finance/hooks/use-sheet-entity"
 import {
+  useTimelineTransactions,
   useTransaction,
-  useTransactions,
 } from "@/src/modules/finance/hooks/use-transactions"
 import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
+import { buildTimelineMonths } from "@/src/modules/finance/lib/group-transactions-timeline"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/lib/money"
-import { formatFinanceMoney } from "@/src/modules/finance/lib/money"
+import {
+  extendMonthRange,
+  initialMonthRange,
+  listYearMonths,
+  monthKeyFromDate,
+  parseMonthKey,
+  yearsTouched,
+  type MonthKey,
+} from "@/src/modules/finance/lib/month-window"
 import {
   FINANCE_TX_FILTER_ALL,
-  FINANCE_TX_PAGE_SIZE,
-  formatTransactionDate,
-  isTransferTransaction,
-  transactionsFromPayload,
-  transferDirectionLabel,
-  visibleTransactionTotals,
   type FinanceTransactionsQuery,
 } from "@/src/modules/finance/lib/transactions-query"
 import {
@@ -40,29 +48,20 @@ import {
 } from "@/src/modules/finance/types/entities"
 import { ExpandableFab } from "@/src/shared/components/layout/expandable-fab"
 import { FilterSearchToolbar } from "@/src/shared/components/layout/filters"
-import { Button } from "@/src/shared/components/ui/button"
-import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "@/src/shared/components/ui/empty"
-import { Spinner } from "@/src/shared/components/ui/spinner"
-import { SummaryItem, SummarySection } from "@/src/shared/components/ui/summary"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
-import { cn } from "@/src/shared/lib/utils"
 import {
-  ArrowDownLeftIcon,
   ArrowLeftRightIcon,
-  ArrowRightLeftIcon,
-  ArrowUpRightIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
   MinusIcon,
   PlusIcon,
 } from "lucide-react"
-import { useEffect, useMemo, useState } from "react"
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react"
 
 type FinanceTransactionsListProps = {
   enabled: boolean
@@ -70,19 +69,61 @@ type FinanceTransactionsListProps = {
 }
 
 const SEARCH_DEBOUNCE_MS = 300
+const PROGRAMMATIC_SCROLL_MS = 700
+
+function getScrollParent(node: HTMLElement | null): HTMLElement | null {
+  let current = node?.parentElement ?? null
+  while (current) {
+    const overflowY = getComputedStyle(current).overflowY
+    if (
+      (overflowY === "auto" || overflowY === "scroll") &&
+      current.scrollHeight > current.clientHeight
+    ) {
+      return current
+    }
+    current = current.parentElement
+  }
+  return (document.scrollingElement as HTMLElement | null) ?? document.documentElement
+}
+
+function scrollSectionIntoView(
+  section: HTMLElement,
+  offset: number,
+  behavior: ScrollBehavior = "smooth",
+) {
+  const parent = getScrollParent(section)
+  if (!parent) {
+    section.scrollIntoView({ block: "start", behavior })
+    return
+  }
+  const parentTop =
+    parent === document.documentElement || parent === document.body
+      ? 0
+      : parent.getBoundingClientRect().top
+  const delta = section.getBoundingClientRect().top - parentTop - offset
+  parent.scrollBy({ top: delta, behavior })
+}
 
 export function FinanceTransactionsList({
   enabled,
   display,
 }: FinanceTransactionsListProps) {
-  const [page, setPage] = useState(1)
   const [search, setSearch] = useState("")
   const [debouncedSearch, setDebouncedSearch] = useState("")
   const [filters, setFilters] = useState<TransactionFilterState>(
-    INITIAL_TRANSACTION_FILTERS
+    INITIAL_TRANSACTION_FILTERS,
   )
+  const [range, setRange] = useState(() => initialMonthRange())
+  const [activeMonthKey, setActiveMonthKey] = useState<MonthKey>(() =>
+    monthKeyFromDate(new Date()),
+  )
+  const [stickyOffset, setStickyOffset] = useState(0)
+  const chromeRef = useRef<HTMLDivElement>(null)
+  const timelineRef = useRef<HTMLDivElement>(null)
+  const isProgrammaticScroll = useRef(false)
+  const didInitialScroll = useRef(false)
   const { open: openFilterSheet, setOpen: setOpenFilterSheet } = useSheetParam(
-    FINANCE_SHEET_KEYS.transactionFilters
+    FINANCE_SHEET_KEYS.transactionFilters,
   )
   const {
     open: openDetailSheet,
@@ -100,7 +141,6 @@ export function FinanceTransactionsList({
   useEffect(() => {
     const timer = window.setTimeout(() => {
       setDebouncedSearch(search.trim())
-      setPage(1)
     }, SEARCH_DEBOUNCE_MS)
     return () => window.clearTimeout(timer)
   }, [search])
@@ -113,15 +153,26 @@ export function FinanceTransactionsList({
 
   const accountsQuery = useAccounts(enabled)
   const cardsQuery = useCards(enabled)
+  const categoriesQuery = useCategories(enabled)
   const accounts = accountsQuery.data ?? []
   const cards = cardsQuery.data ?? []
+  const categories = categoriesQuery.data ?? []
   const hasTargets = accounts.length > 0 || cards.length > 0
   const canTransfer = accounts.length + cards.length >= 2
 
-  const query = useMemo<FinanceTransactionsQuery>(
+  const months = useMemo(
+    () => listYearMonths(range.from, range.to),
+    [range.from, range.to],
+  )
+  const years = useMemo(
+    () => yearsTouched(range.from, range.to),
+    [range.from, range.to],
+  )
+
+  const timelineFilters = useMemo<
+    Omit<FinanceTransactionsQuery, "page" | "limit">
+  >(
     () => ({
-      page,
-      limit: FINANCE_TX_PAGE_SIZE,
       dateFrom: filters.dateFrom || undefined,
       dateTo: filters.dateTo || undefined,
       accountId:
@@ -140,22 +191,28 @@ export function FinanceTransactionsList({
           : (filters.status as FinanceTransactionStatus),
       search: debouncedSearch || undefined,
     }),
-    [page, filters, debouncedSearch]
+    [filters, debouncedSearch],
   )
 
-  const listQuery = useTransactions(enabled, query)
-  const listed = transactionsFromPayload(listQuery.data)
-  const { items, pagination } = listed
-  const totals = useMemo(() => visibleTransactionTotals(items), [items])
+  const timelineQuery = useTimelineTransactions(
+    enabled,
+    years,
+    timelineFilters,
+  )
+  const timeline = useMemo(
+    () => buildTimelineMonths(months, timelineQuery.items),
+    [months, timelineQuery.items],
+  )
+  const activeMonth = timeline.find((month) => month.key === activeMonthKey)
   const editingQuery = useTransaction(
     enabled && openTransactionSheet && Boolean(transactionSheetId),
-    transactionSheetId
+    transactionSheetId,
   )
   const editing = useSheetQueryEntity(
     openTransactionSheet,
     transactionSheetId,
     editingQuery,
-    setOpenTransactionSheet
+    setOpenTransactionSheet,
   )
 
   const accountOptions = [
@@ -187,137 +244,148 @@ export function FinanceTransactionsList({
     })),
   ]
 
-  function applyFilters(next: TransactionFilterState) {
-    setFilters(next)
-    setPage(1)
-  }
+  const scrollToMonth = useCallback((key: MonthKey) => {
+    const section = timelineRef.current?.querySelector<HTMLElement>(
+      `[data-month-key="${key}"]`,
+    )
+    if (!section) return
+    isProgrammaticScroll.current = true
+    setActiveMonthKey(key)
+    scrollSectionIntoView(section, stickyOffset + 8, "smooth")
+    window.setTimeout(() => {
+      isProgrammaticScroll.current = false
+    }, PROGRAMMATIC_SCROLL_MS)
+  }, [stickyOffset])
+
+  useLayoutEffect(() => {
+    const chrome = chromeRef.current
+    if (!chrome) return
+    const update = () => setStickyOffset(chrome.offsetHeight)
+    update()
+    const observer = new ResizeObserver(update)
+    observer.observe(chrome)
+    return () => observer.disconnect()
+  }, [])
+
+  useLayoutEffect(() => {
+    if (didInitialScroll.current || timeline.length === 0 || stickyOffset === 0) {
+      return
+    }
+    const section = timelineRef.current?.querySelector<HTMLElement>(
+      `[data-month-key="${activeMonthKey}"]`,
+    )
+    if (!section) return
+    didInitialScroll.current = true
+    isProgrammaticScroll.current = true
+    scrollSectionIntoView(section, stickyOffset + 8, "auto")
+    window.setTimeout(() => {
+      isProgrammaticScroll.current = false
+    }, PROGRAMMATIC_SCROLL_MS)
+  }, [activeMonthKey, stickyOffset, timeline.length])
+
+  useEffect(() => {
+    const parsed = parseMonthKey(activeMonthKey)
+    const active = new Date(parsed.year, parsed.month - 1, 1)
+    setRange((current) => {
+      const next = extendMonthRange(current, active)
+      if (
+        next.from.getTime() === current.from.getTime() &&
+        next.to.getTime() === current.to.getTime()
+      ) {
+        return current
+      }
+      return next
+    })
+  }, [activeMonthKey])
+
+  useEffect(() => {
+    const rootNode = timelineRef.current
+    if (!rootNode) return
+    const scrollRoot = getScrollParent(rootNode)
+    if (!scrollRoot) return
+
+    let ticking = false
+    function updateActiveMonth() {
+      ticking = false
+      if (isProgrammaticScroll.current) return
+      const node = timelineRef.current
+      if (!node) return
+      const sections = [
+        ...node.querySelectorAll<HTMLElement>("[data-month-key]"),
+      ]
+      const marker = stickyOffset + 8
+      let bestKey: string | null = null
+      let bestScore = Number.POSITIVE_INFINITY
+      for (const section of sections) {
+        const score = Math.abs(section.getBoundingClientRect().top - marker)
+        if (score < bestScore) {
+          bestScore = score
+          bestKey = section.getAttribute("data-month-key")
+        }
+      }
+      if (bestKey) {
+        setActiveMonthKey((current) => (current === bestKey ? current : bestKey))
+      }
+    }
+
+    function onScroll() {
+      if (ticking) return
+      ticking = true
+      requestAnimationFrame(updateActiveMonth)
+    }
+
+    scrollRoot.addEventListener("scroll", onScroll, { passive: true })
+    return () => scrollRoot.removeEventListener("scroll", onScroll)
+  }, [stickyOffset, timeline.length])
 
   return (
-    <div className="flex flex-col gap-6">
-      <FilterSearchToolbar
-        searchValue={search}
-        onSearchChange={setSearch}
-        searchPlaceholder="Buscar comercio o descripción..."
-        activeFilterCount={countActiveTransactionFilters(filters)}
-        onFilterPress={() => setOpenFilterSheet(true)}
-      />
-
-      <div className="flex flex-col gap-1 rounded-xl border border-border bg-card p-3">
-        <div className="flex flex-row items-center justify-between">
-          <p className="text-sm text-muted-foreground">
-            Total movimientos visibles
-          </p>
-          <p className="text-xs text-muted-foreground">
-            {items.length} registros
-          </p>
-        </div>
-        <div className="flex flex-row items-center justify-between">
-          <p className="text-sm text-success tabular-nums">
-            ↑ {formatFinanceMoney(totals.income, display)}
-          </p>
-          <p className="text-sm text-destructive tabular-nums">
-            ↓ {formatFinanceMoney(totals.expenses, display)}
-          </p>
-        </div>
+    <div className="flex flex-col gap-4">
+      <div
+        ref={chromeRef}
+        className="sticky top-0 z-30 flex flex-col gap-3 bg-background pb-2"
+      >
+        <FilterSearchToolbar
+          searchValue={search}
+          onSearchChange={setSearch}
+          searchPlaceholder="Buscar comercio o descripción..."
+          activeFilterCount={countActiveTransactionFilters(filters)}
+          onFilterPress={() => setOpenFilterSheet(true)}
+        />
+        <FinanceMonthPicker
+          months={months}
+          activeMonthKey={activeMonthKey}
+          onSelect={scrollToMonth}
+        />
+        <FinanceFlowPills
+          income={activeMonth?.totals.income ?? 0}
+          expenses={activeMonth?.totals.expenses ?? 0}
+          display={display}
+        />
       </div>
 
-      {listQuery.isError ? (
+      {timelineQuery.isError ? (
         <p className="text-sm text-destructive">
-          {financeErrorMessage(listQuery.error)}
+          {financeErrorMessage(timelineQuery.error)}
         </p>
       ) : null}
 
-      <SummarySection title="Movimientos" icon={ArrowLeftRightIcon}>
-        {listQuery.isPending && !listQuery.data ? (
-          <div className="flex justify-center p-6">
-            <Spinner />
-          </div>
-        ) : items.length === 0 ? (
-          <Empty className="py-8">
-            <EmptyHeader>
-              <EmptyMedia variant="icon">
-                <ArrowLeftRightIcon />
-              </EmptyMedia>
-              <EmptyTitle>No hay movimientos</EmptyTitle>
-              <EmptyDescription>
-                Crea un movimiento o una transferencia para empezar. Prueba otro
-                periodo si ya tienes filtros activos.
-              </EmptyDescription>
-            </EmptyHeader>
-          </Empty>
-        ) : (
-          items.map((tx, index) => {
-            const isTransfer = isTransferTransaction(tx)
-            const party = isTransfer
-              ? transferDirectionLabel(tx)
-              : (tx.merchant ?? tx.description ?? tx.accountName ?? "Movimiento")
-            const meta = [
-              formatTransactionDate(tx.transactionDate),
-              FINANCE_TRANSACTION_TYPE_LABEL[tx.type] ?? tx.type,
-              FINANCE_TRANSACTION_STATUS_LABEL[tx.status] ?? tx.status,
-            ].join(" · ")
-            return (
-              <SummaryItem
-                key={tx.id}
-                title={party}
-                description={meta}
-                leading={
-                  tx.type === "DEBIT" && !isTransfer ? (
-                    <ArrowDownLeftIcon className="size-5 text-destructive" />
-                  ) : tx.type === "CREDIT" && !isTransfer ? (
-                    <ArrowUpRightIcon className="size-5 text-success" />
-                  ) : isTransfer ? (
-                    <ArrowRightLeftIcon className="text-info size-5" />
-                  ) : null
-                }
-                value={
-                  <span
-                    className={cn(
-                      !isTransfer && tx.type === "DEBIT" && "text-destructive",
-                      !isTransfer && tx.type === "CREDIT" && "text-success"
-                    )}
-                  >
-                    {formatFinanceMoney(tx.amount, {
-                      ...display,
-                      currency: tx.currency,
-                    })}
-                  </span>
-                }
-                onPress={() => setOpenDetailSheet(true, tx.id)}
-                isLast={index === items.length - 1}
-              />
-            )
-          })
-        )}
-      </SummarySection>
-
-      {listQuery.isSuccess ? (
-        <div className="flex items-center justify-between gap-3">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            disabled={page <= 1 || listQuery.isPending}
-            onClick={() => setPage((current) => Math.max(1, current - 1))}
-          >
-            <ChevronLeftIcon />
-            Anterior
-          </Button>
-          <p className="text-sm text-muted-foreground">
-            Página {pagination.page} de {pagination.totalPages}
-          </p>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            disabled={page >= pagination.totalPages || listQuery.isPending}
-            onClick={() => setPage((current) => current + 1)}
-          >
-            Siguiente
-            <ChevronRightIcon />
-          </Button>
-        </div>
+      {timelineQuery.isPending && timelineQuery.items.length === 0 ? (
+        <FinanceListSkeleton rows={4} />
       ) : null}
+
+      <div ref={timelineRef} className="flex flex-col gap-8">
+        {timeline.map((month) => (
+          <FinanceMonthSection
+            key={month.key}
+            month={month}
+            categories={categories}
+            display={display}
+            isActive={month.key === activeMonthKey}
+            stickyOffset={stickyOffset + 8}
+            onTransactionPress={(id) => setOpenDetailSheet(true, id)}
+          />
+        ))}
+      </div>
 
       <ExpandableFab
         actions={[
@@ -349,7 +417,7 @@ export function FinanceTransactionsList({
         open={openFilterSheet}
         onOpenChange={setOpenFilterSheet}
         filters={filters}
-        onApply={applyFilters}
+        onApply={setFilters}
         accountOptions={accountOptions}
         cardOptions={cardOptions}
         typeOptions={typeOptions}
