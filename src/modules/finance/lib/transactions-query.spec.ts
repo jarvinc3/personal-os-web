@@ -4,6 +4,7 @@ import { describe, it } from "node:test";
 import {
   buildTransactionsSearchParams,
   canReverseTransaction,
+  fetchAllTransactionPages,
   formatTransactionDate,
   transferDirectionLabel,
   transactionsFromPayload,
@@ -150,6 +151,40 @@ describe("transferDirectionLabel", () => {
         transferToCardName: null,
       }),
       "Nómina → Ahorros",
+    )
+  })
+})
+
+describe("fetchAllTransactionPages", () => {
+  it("walks pages until totalPages and keeps search filters", async () => {
+    const calls: string[] = []
+    const items = await fetchAllTransactionPages(
+      {
+        limit: 100,
+        accountId: "acc-1",
+        search: "super",
+        dateFrom: "2026-01-01",
+        dateTo: "2026-12-31",
+      },
+      async (path) => {
+        calls.push(path)
+        const params = new URLSearchParams(path.split("?")[1])
+        const page = Number(params.get("page"))
+        return {
+          items: [{ id: `t${page}`, amount: "1.00" }],
+          pagination: { page, limit: 100, total: 2, totalPages: 2 },
+        }
+      },
+    )
+    assert.equal(calls.length, 2)
+    assert.match(calls[0] ?? "", /page=1/)
+    assert.match(calls[1] ?? "", /page=2/)
+    assert.match(calls[0] ?? "", /limit=100/)
+    assert.match(calls[0] ?? "", /accountId=acc-1/)
+    assert.match(calls[0] ?? "", /search=super/)
+    assert.deepEqual(
+      items.map((item) => item.id),
+      ["t1", "t2"],
     )
   })
 })

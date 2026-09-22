@@ -20,9 +20,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <AppSidebar />
       <HeaderProvider>
         <ScrollChromeProvider scrollElement={scrollElement}>
-          <SidebarInset>
+          <SidebarInset className="h-svh max-h-svh overflow-hidden">
             <AppHeader />
-            <main ref={setScrollElement} className="flex-1 overflow-auto">
+            <main ref={setScrollElement} className="min-h-0 flex-1 overflow-auto">
               <KeepAwakeProvider>
                 <PendingAccountDeletionHandler />
                 {children}
