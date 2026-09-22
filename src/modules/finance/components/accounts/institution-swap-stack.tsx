@@ -13,10 +13,17 @@ import {
   classifyWalletGesture,
   resetWalletGestureOffset,
 } from "@/src/modules/finance/lib/wallet-gesture";
+import {
+  WALLET_VISIBLE_COUNT,
+  walletFrontIndex,
+  walletPositionLabel,
+  walletVisibleItems,
+} from "@/src/modules/finance/lib/wallet-stack";
+import { Button } from "@/src/shared/components/ui/button";
 import { cn } from "@/src/shared/lib/utils";
 import { motion } from "framer-motion";
-import { Building2Icon } from "lucide-react";
-import { useRef, useState } from "react";
+import { Building2Icon, ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
+import { type KeyboardEvent, useRef, useState } from "react";
 
 const FALLBACK_INSTITUTION_COLOR = "#1B4332"
 const FALLBACK_CASH_COLOR = "#334155"
@@ -65,6 +72,13 @@ function toWalletCard(
   }
 }
 
+function walletItemName(
+  item: InstitutionStackItem,
+  display: FinanceMoneyDisplay,
+): string {
+  return toWalletCard(item, display).name
+}
+
 export function InstitutionSwapStack({
   items,
   display,
@@ -75,53 +89,137 @@ export function InstitutionSwapStack({
 
   if (items.length === 0) return null
 
-  const safeOffset = ((cycleOffset % items.length) + items.length) % items.length
-  const ordered = [
-    ...items.slice(safeOffset),
-    ...items.slice(0, safeOffset),
-  ]
-  const visibleCount = Math.min(3, ordered.length)
-  const visible = ordered
-    .slice(0, visibleCount)
+  const frontIndex = walletFrontIndex(cycleOffset, items.length)
+  const position = walletPositionLabel(cycleOffset, items.length)
+  const visible = walletVisibleItems(items, cycleOffset, WALLET_VISIBLE_COUNT)
     .map((item) => toWalletCard(item, display))
+  const showCycleChrome = items.length > 1
+  const frontItem = items[frontIndex]
 
-  const cycle = () => setCycleOffset((current) => current + 1)
+  const cycleBy = (delta: number) => {
+    setCycleOffset((current) => current + delta)
+  }
+
+  const showItemAt = (index: number) => {
+    setCycleOffset(index)
+  }
+
+  function onStackKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+    if (!showCycleChrome) return
+    if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+      event.preventDefault()
+      cycleBy(1)
+      return
+    }
+    if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+      event.preventDefault()
+      cycleBy(-1)
+      return
+    }
+    if (event.key === "Enter" || event.key === " ") {
+      if (event.target !== event.currentTarget) return
+      event.preventDefault()
+      if (frontItem) onSelect(frontItem)
+    }
+  }
 
   return (
-    <div className={cn("relative h-110", className)}>
-      {visible.map((card, pos) => {
-        const isFront = pos === 0
-        const x = pos * 12
-        const y = pos * 22
-        const rotate = pos * 3.5
-        const scale = 1 - pos * 0.05
-        const opacity = 1 - pos * 0.15
-        return (
-          <motion.div
-            key={`${card.item.kind}-${card.item.id}`}
-            className="absolute top-0 right-8 left-0"
-            initial={false}
-            animate={{ x, y, rotate, scale, opacity, zIndex: 30 - pos }}
-            transition={{ type: "spring", stiffness: 320, damping: 30 }}
-            style={{
-              transformOrigin: "bottom center",
-              pointerEvents: isFront ? "auto" : "none",
-            }}
+    <div className={cn("flex flex-col gap-3", className)}>
+      <div
+        className="relative h-110 outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+        tabIndex={showCycleChrome ? 0 : undefined}
+        role={showCycleChrome ? "group" : undefined}
+        aria-label={
+          showCycleChrome
+            ? `Cartera de instituciones, ${position.current} de ${position.total}`
+            : undefined
+        }
+        onKeyDown={onStackKeyDown}
+      >
+        {visible.map((card, pos) => {
+          const isFront = pos === 0
+          const x = pos * 12
+          const y = pos * 22
+          const rotate = pos * 3.5
+          const scale = 1 - pos * 0.05
+          const opacity = 1 - pos * 0.15
+          return (
+            <motion.div
+              key={`${card.item.kind}-${card.item.id}`}
+              className="absolute top-0 right-8 left-0"
+              initial={false}
+              animate={{ x, y, rotate, scale, opacity, zIndex: 30 - pos }}
+              transition={{ type: "spring", stiffness: 320, damping: 30 }}
+              style={{
+                transformOrigin: "bottom center",
+                pointerEvents: isFront ? "auto" : "none",
+              }}
+            >
+              <InstitutionWalletCard
+                name={card.name}
+                monogram={card.monogram}
+                color={card.color}
+                productSummary={card.productSummary}
+                balanceLabel={card.balanceLabel}
+                balanceAmount={card.balanceAmount}
+                isFront={isFront}
+                onCycle={() => cycleBy(1)}
+                onPress={() => onSelect(card.item)}
+              />
+            </motion.div>
+          )
+        })}
+      </div>
+
+      {showCycleChrome ? (
+        <div className="flex flex-col items-center gap-2 px-2">
+          <p
+            className="text-xs tabular-nums text-muted-foreground"
+            aria-live="polite"
           >
-            <InstitutionWalletCard
-              name={card.name}
-              monogram={card.monogram}
-              color={card.color}
-              productSummary={card.productSummary}
-              balanceLabel={card.balanceLabel}
-              balanceAmount={card.balanceAmount}
-              isFront={isFront}
-              onCycle={cycle}
-              onPress={() => onSelect(card.item)}
-            />
-          </motion.div>
-        )
-      })}
+            {position.current} / {position.total}
+          </p>
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              aria-label="Institución anterior"
+              onClick={() => cycleBy(-1)}
+            >
+              <ChevronLeftIcon />
+            </Button>
+            <div className="flex items-center gap-1.5">
+              {items.map((item, index) => {
+                const isFront = index === frontIndex
+                const name = walletItemName(item, display)
+                return (
+                  <button
+                    key={`${item.kind}-${item.id}`}
+                    type="button"
+                    aria-label={name}
+                    aria-current={isFront ? "true" : undefined}
+                    className={cn(
+                      "size-2 rounded-full transition-colors",
+                      isFront ? "bg-foreground" : "bg-muted-foreground/40",
+                    )}
+                    onClick={() => showItemAt(index)}
+                  />
+                )
+              })}
+            </div>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              aria-label="Siguiente institución"
+              onClick={() => cycleBy(1)}
+            >
+              <ChevronRightIcon />
+            </Button>
+          </div>
+        </div>
+      ) : null}
     </div>
   )
 }

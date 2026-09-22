@@ -21,7 +21,7 @@ import { useBalanceSheet } from "@/src/modules/finance/hooks/use-balance-sheet"
 import { useCards } from "@/src/modules/finance/hooks/use-cards"
 import { useEmailMailboxes } from "@/src/modules/finance/hooks/use-email-sources"
 import { useFinanceEnabled } from "@/src/modules/finance/hooks/use-finance-enabled"
-import { useArchiveInstitution, useInstitutions } from "@/src/modules/finance/hooks/use-institutions"
+import { useArchiveInstitution, useDeleteInstitution, useInstitutions } from "@/src/modules/finance/hooks/use-institutions"
 import { useLoans } from "@/src/modules/finance/hooks/use-loans"
 import { useSheetListEntity } from "@/src/modules/finance/hooks/use-sheet-entity"
 import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
@@ -48,6 +48,7 @@ import {
   MailIcon,
   MoreVerticalIcon,
   PencilIcon,
+  Trash2Icon,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo, useState } from "react"
@@ -86,6 +87,7 @@ function InstitutionDetailView({
   const balanceSheetQuery = useBalanceSheet(isEnabled)
   const mailboxesQuery = useEmailMailboxes(isEnabled && emailSyncEnabled)
   const archiveInstitution = useArchiveInstitution()
+  const deleteInstitution = useDeleteInstitution()
 
   const [tab, setTab] = useState<InstitutionDetailTab>("accounts")
   const { open: openOptionsSheet, setOpen: setOpenOptionsSheet } =
@@ -175,6 +177,22 @@ function InstitutionDetailView({
       appToast.error({ text1: financeErrorMessage(error) })
     }
   }, [archiveInstitution, institution, router, setOpenOptionsSheet])
+
+  const onDeleteInstitution = useCallback(async () => {
+    if (!institution) return
+    const confirmed = window.confirm(
+      "¿Borrar este banco? Se eliminan cuentas, tarjetas, correos ligados y préstamos. No se puede deshacer."
+    )
+    if (!confirmed) return
+    try {
+      await deleteInstitution.mutateAsync(institution.id)
+      appToast.success({ text1: "Institución borrada" })
+      setOpenOptionsSheet(false)
+      router.push(APP_ROUTES.app.financeAccounts)
+    } catch (error) {
+      appToast.error({ text1: financeErrorMessage(error) })
+    }
+  }, [deleteInstitution, institution, router, setOpenOptionsSheet])
 
   const openMenu = useCallback(
     () => setOpenOptionsSheet(true),
@@ -460,7 +478,15 @@ function InstitutionDetailView({
             title="Archivar"
             icon={ArchiveIcon}
             onPress={() => void onArchiveInstitution()}
-            disabled={archiveInstitution.isPending}
+            disabled={archiveInstitution.isPending || deleteInstitution.isPending}
+            isLast={false}
+            className="px-3 text-destructive"
+          />
+          <SummaryItem
+            title="Borrar"
+            icon={Trash2Icon}
+            onPress={() => void onDeleteInstitution()}
+            disabled={archiveInstitution.isPending || deleteInstitution.isPending}
             isLast
             className="px-3 text-destructive"
           />
@@ -474,6 +500,7 @@ function InstitutionDetailView({
         institution={
           editingInstitution ?? (!institutionSheetId ? institution : null)
         }
+        onDeleted={() => router.push(APP_ROUTES.app.financeAccounts)}
       />
 
       <AccountSheet

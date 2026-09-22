@@ -9,6 +9,7 @@ import { useCards } from "@/src/modules/finance/hooks/use-cards"
 import { useFinanceEnabled } from "@/src/modules/finance/hooks/use-finance-enabled"
 import { useInstitutions } from "@/src/modules/finance/hooks/use-institutions"
 import { useLoans } from "@/src/modules/finance/hooks/use-loans"
+import { useSheetListEntity } from "@/src/modules/finance/hooks/use-sheet-entity"
 import {
   prefetchFinanceCategories,
   prefetchFinanceSync,
@@ -54,8 +55,18 @@ export function FinanceAccountsList({
   const cardsQuery = useCards(enabled)
   const loansQuery = useLoans(enabled)
   const balanceSheetQuery = useBalanceSheet(enabled)
-  const { open: openInstitutionSheet, setOpen: setOpenInstitutionSheet } =
-    useSheetParam(FINANCE_SHEET_KEYS.institution)
+  const {
+    open: openInstitutionSheet,
+    sheetId: institutionSheetId,
+    setOpen: setOpenInstitutionSheet,
+  } = useSheetParam(FINANCE_SHEET_KEYS.institution)
+  const editingInstitution = useSheetListEntity(
+    openInstitutionSheet,
+    institutionSheetId,
+    institutionsQuery.data,
+    institutionsQuery.isPending,
+    setOpenInstitutionSheet
+  )
 
   const moneyDisplay = {
     ...display,
@@ -222,7 +233,8 @@ export function FinanceAccountsList({
       <InstitutionSheet
         open={openInstitutionSheet}
         onOpenChange={setOpenInstitutionSheet}
-        institution={null}
+        institution={editingInstitution}
+        pending={institutionsQuery.isPending}
       />
     </>
   )

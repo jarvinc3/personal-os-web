@@ -3,6 +3,7 @@
 import {
   useArchiveInstitution,
   useCreateInstitution,
+  useDeleteInstitution,
   useUpdateInstitution,
 } from "@/src/modules/finance/hooks/use-institutions"
 import { buildCreateInstitutionBody } from "@/src/modules/finance/lib/catalog-payloads"
@@ -45,6 +46,7 @@ type InstitutionSheetProps = {
   onOpenChange: (open: boolean) => void
   institution: FinanceInstitution | null
   pending?: boolean
+  onDeleted?: () => void
 }
 
 export function InstitutionSheet({
@@ -52,15 +54,18 @@ export function InstitutionSheet({
   onOpenChange,
   institution,
   pending = false,
+  onDeleted,
 }: InstitutionSheetProps) {
   const isEdit = Boolean(institution)
   const createMutation = useCreateInstitution()
   const updateMutation = useUpdateInstitution()
   const archiveMutation = useArchiveInstitution()
+  const deleteMutation = useDeleteInstitution()
   const isPending =
     createMutation.isPending ||
     updateMutation.isPending ||
-    archiveMutation.isPending
+    archiveMutation.isPending ||
+    deleteMutation.isPending
 
   const {
     control,
@@ -120,6 +125,22 @@ export function InstitutionSheet({
     }
   }
 
+  async function onDelete() {
+    if (!institution) return
+    const confirmed = window.confirm(
+      "¿Borrar este banco? Se eliminan cuentas, tarjetas, correos ligados y préstamos. No se puede deshacer."
+    )
+    if (!confirmed) return
+    try {
+      await deleteMutation.mutateAsync(institution.id)
+      appToast.success({ text1: "Institución borrada" })
+      onOpenChange(false)
+      onDeleted?.()
+    } catch (error) {
+      appToast.error({ text1: financeErrorMessage(error) })
+    }
+  }
+
   return (
     <BottomSheet
       open={open}
@@ -128,13 +149,23 @@ export function InstitutionSheet({
       title={isEdit ? "Editar institución" : "Nueva institución"}
       actions={{
         delete: isEdit ? (
-          <Button
-            variant="destructive"
-            disabled={isPending}
-            onClick={() => void onArchive()}
-          >
-            Archivar
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              className="text-destructive"
+              disabled={isPending}
+              onClick={() => void onArchive()}
+            >
+              Archivar
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={isPending}
+              onClick={() => void onDelete()}
+            >
+              Borrar
+            </Button>
+          </div>
         ) : undefined,
         close: (
           <Button

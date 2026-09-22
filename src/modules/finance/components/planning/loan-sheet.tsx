@@ -12,6 +12,7 @@ import { CATALOG_NONE } from "@/src/modules/finance/constants/catalog"
 import {
   useArchiveLoan,
   useCreateLoan,
+  useDeleteLoan,
   useUpdateLoan,
 } from "@/src/modules/finance/hooks/use-loans"
 import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
@@ -115,10 +116,12 @@ export function LoanSheet({
   const createMutation = useCreateLoan()
   const updateMutation = useUpdateLoan()
   const archiveMutation = useArchiveLoan()
+  const deleteMutation = useDeleteLoan()
   const isPending =
     createMutation.isPending ||
     updateMutation.isPending ||
-    archiveMutation.isPending
+    archiveMutation.isPending ||
+    deleteMutation.isPending
 
   const resolvedDefaultInstitutionId = defaultInstitutionId ?? CATALOG_NONE
 
@@ -228,6 +231,21 @@ export function LoanSheet({
     }
   }
 
+  async function onDelete() {
+    if (!loan) return
+    const confirmed = window.confirm(
+      "¿Borrar este préstamo? No se puede deshacer."
+    )
+    if (!confirmed) return
+    try {
+      await deleteMutation.mutateAsync(loan.id)
+      appToast.success({ text1: "Préstamo borrado" })
+      onOpenChange(false)
+    } catch (error) {
+      appToast.error({ text1: financeErrorMessage(error) })
+    }
+  }
+
   return (
     <BottomSheet
       open={open}
@@ -237,14 +255,25 @@ export function LoanSheet({
       description="12% se envía como 0.12. La tasa no es un entero de porcentaje."
       actions={{
         delete: isEdit ? (
-          <Button
-            type="button"
-            variant="destructive"
-            disabled={isPending}
-            onClick={() => void onArchive()}
-          >
-            Archivar
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              className="text-destructive"
+              disabled={isPending}
+              onClick={() => void onArchive()}
+            >
+              Archivar
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              disabled={isPending}
+              onClick={() => void onDelete()}
+            >
+              Borrar
+            </Button>
+          </div>
         ) : undefined,
         close: (
           <Button

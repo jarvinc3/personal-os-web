@@ -4,7 +4,7 @@ import { AccountSheet } from "@/src/modules/finance/components/catalog/account-s
 import { FinanceAuthenticatedPage } from "@/src/modules/finance/components/layout/finance-authenticated-page"
 import { FINANCE_ACCOUNT_TYPE_LABEL } from "@/src/modules/finance/constants/catalog"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/constants/sheet-keys"
-import { useAccounts, useArchiveAccount } from "@/src/modules/finance/hooks/use-accounts"
+import { useAccounts, useArchiveAccount, useDeleteAccount } from "@/src/modules/finance/hooks/use-accounts"
 import { useFinanceEnabled } from "@/src/modules/finance/hooks/use-finance-enabled"
 import { useInstitutions } from "@/src/modules/finance/hooks/use-institutions"
 import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
@@ -18,7 +18,7 @@ import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { accentSurfaceGradient } from "@/src/shared/lib/accent-gradient"
 import { appToast } from "@/src/shared/lib/app-toast"
-import { ArchiveIcon, MoreVerticalIcon, PencilIcon, WalletIcon } from "lucide-react"
+import { ArchiveIcon, MoreVerticalIcon, PencilIcon, Trash2Icon, WalletIcon } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
 
@@ -50,6 +50,7 @@ function CashAccountDetailView({ accountId }: CashAccountDetailClientProps) {
   const accountsQuery = useAccounts(isEnabled)
   const institutionsQuery = useInstitutions(isEnabled)
   const archiveAccount = useArchiveAccount()
+  const deleteAccount = useDeleteAccount()
   const { open: openAccountSheet, setOpen: setOpenAccountSheet } =
     useSheetParam(FINANCE_SHEET_KEYS.account)
   const { open: openOptionsSheet, setOpen: setOpenOptionsSheet } =
@@ -75,6 +76,22 @@ function CashAccountDetailView({ accountId }: CashAccountDetailClientProps) {
       appToast.error({ text1: financeErrorMessage(error) })
     }
   }, [account, archiveAccount, router, setOpenOptionsSheet])
+
+  const onDeleteAccount = useCallback(async () => {
+    if (!account) return
+    const confirmed = window.confirm(
+      "¿Borrar esta cuenta? Se eliminan sus movimientos, tarjetas débito y saldos. No se puede deshacer."
+    )
+    if (!confirmed) return
+    try {
+      await deleteAccount.mutateAsync(account.id)
+      appToast.success({ text1: "Cuenta borrada" })
+      setOpenOptionsSheet(false)
+      router.push(APP_ROUTES.app.financeAccounts)
+    } catch (error) {
+      appToast.error({ text1: financeErrorMessage(error) })
+    }
+  }, [account, deleteAccount, router, setOpenOptionsSheet])
 
   const openMenu = useCallback(
     () => setOpenOptionsSheet(true),
@@ -194,7 +211,15 @@ function CashAccountDetailView({ accountId }: CashAccountDetailClientProps) {
             title="Archivar"
             icon={ArchiveIcon}
             onPress={() => void onArchiveAccount()}
-            disabled={archiveAccount.isPending}
+            disabled={archiveAccount.isPending || deleteAccount.isPending}
+            isLast={false}
+            className="px-3 text-destructive"
+          />
+          <SummaryItem
+            title="Borrar"
+            icon={Trash2Icon}
+            onPress={() => void onDeleteAccount()}
+            disabled={archiveAccount.isPending || deleteAccount.isPending}
             isLast
             className="px-3 text-destructive"
           />
@@ -208,6 +233,7 @@ function CashAccountDetailView({ accountId }: CashAccountDetailClientProps) {
         institutions={institutions}
         defaultCurrency={config.baseCurrency}
         display={display}
+        onDeleted={() => router.push(APP_ROUTES.app.financeAccounts)}
       />
     </>
   )

@@ -164,6 +164,10 @@ export function CategorySheet({
 
   async function onDelete() {
     if (!category) return
+    const confirmed = window.confirm(
+      "¿Eliminar esta categoría? No se puede deshacer."
+    )
+    if (!confirmed) return
     try {
       await deleteMutation.mutateAsync(category.id)
       appToast.success({ text1: "Categoría eliminada" })
