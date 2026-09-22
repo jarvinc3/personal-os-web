@@ -308,8 +308,10 @@ export function FinanceTransactionsList({
     function updateActiveMonth() {
       ticking = false
       if (isProgrammaticScroll.current) return
+      const node = timelineRef.current
+      if (!node) return
       const sections = [
-        ...rootNode.querySelectorAll<HTMLElement>("[data-month-key]"),
+        ...node.querySelectorAll<HTMLElement>("[data-month-key]"),
       ]
       const marker = stickyOffset + 8
       let bestKey: string | null = null
