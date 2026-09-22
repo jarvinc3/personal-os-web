@@ -15,6 +15,7 @@ import {
 import {
   useArchiveCard,
   useCreateCard,
+  useDeleteCard,
   useUpdateCard,
   useUpdateCardBalance,
 } from "@/src/modules/finance/hooks/use-cards"
@@ -143,11 +144,13 @@ export function CardSheet({
   const createMutation = useCreateCard()
   const updateMutation = useUpdateCard()
   const archiveMutation = useArchiveCard()
+  const deleteMutation = useDeleteCard()
   const balanceMutation = useUpdateCardBalance()
   const isPending =
     createMutation.isPending ||
     updateMutation.isPending ||
     archiveMutation.isPending ||
+    deleteMutation.isPending ||
     balanceMutation.isPending
 
   const resolvedDefaultInstitutionId =
@@ -295,6 +298,21 @@ export function CardSheet({
     }
   }
 
+  async function onDelete() {
+    if (!card) return
+    const confirmed = window.confirm(
+      "¿Borrar esta tarjeta? Se eliminan sus movimientos. No se puede deshacer."
+    )
+    if (!confirmed) return
+    try {
+      await deleteMutation.mutateAsync(card.id)
+      appToast.success({ text1: "Tarjeta borrada" })
+      onOpenChange(false)
+    } catch (error) {
+      appToast.error({ text1: financeErrorMessage(error) })
+    }
+  }
+
   const networkLabel =
     cardNetwork && cardNetwork !== CATALOG_NONE
       ? (FINANCE_CARD_NETWORK_LABEL[
@@ -315,13 +333,23 @@ export function CardSheet({
       }
       actions={{
         delete: isEdit ? (
-          <Button
-            variant="destructive"
-            disabled={isPending}
-            onClick={() => void onArchive()}
-          >
-            Archivar
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              className="text-destructive"
+              disabled={isPending}
+              onClick={() => void onArchive()}
+            >
+              Archivar
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={isPending}
+              onClick={() => void onDelete()}
+            >
+              Borrar
+            </Button>
+          </div>
         ) : undefined,
         close: (
           <Button

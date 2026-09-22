@@ -10,7 +10,10 @@ import { FINANCE_CARDS_QUERY_KEY } from "@/src/modules/finance/types/api"
 import type { FinanceCard, FinanceCardBalance } from "@/src/modules/finance/types/entities"
 import { API_ENDPOINTS } from "@/src/shared/constants/api-endpoints"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { invalidateFinanceBalanceSheet } from "@/src/modules/finance/hooks/use-balance-sheet"
+import {
+  invalidateFinanceBalanceSheet,
+  invalidateFinancePositions,
+} from "@/src/modules/finance/hooks/use-balance-sheet"
 
 function invalidateCards(queryClient: ReturnType<typeof useQueryClient>) {
   void queryClient.invalidateQueries({ queryKey: FINANCE_CARDS_QUERY_KEY })
@@ -49,9 +52,20 @@ export function useUpdateCard() {
 export function useArchiveCard() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (id: string) => apiDelete(API_ENDPOINTS.FINANCE.CARD(id)),
+    mutationFn: (id: string) =>
+      apiPatch<FinanceCard>(API_ENDPOINTS.FINANCE.CARD(id), { isActive: false }),
     onSuccess: () => {
       invalidateCards(queryClient)
+    },
+  })
+}
+
+export function useDeleteCard() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => apiDelete(API_ENDPOINTS.FINANCE.CARD(id)),
+    onSuccess: () => {
+      invalidateFinancePositions(queryClient)
     },
   })
 }

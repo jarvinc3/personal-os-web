@@ -13,6 +13,7 @@ import {
 import {
   useArchiveAccount,
   useCreateAccount,
+  useDeleteAccount,
   useUpdateAccount,
 } from "@/src/modules/finance/hooks/use-accounts"
 import { buildCreateAccountBody } from "@/src/modules/finance/lib/catalog-payloads"
@@ -96,6 +97,7 @@ type AccountSheetProps = {
   display?: FinanceMoneyDisplay
   defaultInstitutionId?: string
   pending?: boolean
+  onDeleted?: () => void
 }
 
 export function AccountSheet({
@@ -107,15 +109,18 @@ export function AccountSheet({
   display,
   defaultInstitutionId,
   pending = false,
+  onDeleted,
 }: AccountSheetProps) {
   const isEdit = Boolean(account)
   const createMutation = useCreateAccount()
   const updateMutation = useUpdateAccount()
   const archiveMutation = useArchiveAccount()
+  const deleteMutation = useDeleteAccount()
   const isPending =
     createMutation.isPending ||
     updateMutation.isPending ||
-    archiveMutation.isPending
+    archiveMutation.isPending ||
+    deleteMutation.isPending
 
   const institutionOptions = useMemo(
     () => [
@@ -201,6 +206,22 @@ export function AccountSheet({
     }
   }
 
+  async function onDelete() {
+    if (!account) return
+    const confirmed = window.confirm(
+      "¿Borrar esta cuenta? Se eliminan sus movimientos, tarjetas débito y saldos. No se puede deshacer."
+    )
+    if (!confirmed) return
+    try {
+      await deleteMutation.mutateAsync(account.id)
+      appToast.success({ text1: "Cuenta borrada" })
+      onOpenChange(false)
+      onDeleted?.()
+    } catch (error) {
+      appToast.error({ text1: financeErrorMessage(error) })
+    }
+  }
+
   return (
     <BottomSheet
       open={open}
@@ -214,13 +235,23 @@ export function AccountSheet({
       }
       actions={{
         delete: isEdit ? (
-          <Button
-            variant="destructive"
-            disabled={isPending}
-            onClick={() => void onArchive()}
-          >
-            Archivar
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              className="text-destructive"
+              disabled={isPending}
+              onClick={() => void onArchive()}
+            >
+              Archivar
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={isPending}
+              onClick={() => void onDelete()}
+            >
+              Borrar
+            </Button>
+          </div>
         ) : undefined,
         close: (
           <Button

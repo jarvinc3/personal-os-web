@@ -283,7 +283,7 @@ export function FinancePlanningList({
               </EmptyMedia>
               <EmptyTitle>Aún no hay cobros</EmptyTitle>
               <EmptyDescription>
-                Lo que te deben. Pagado o cancelado, sin eliminar.
+                Lo que te deben. Archiva o borra los que ya no apliquen.
               </EmptyDescription>
             </EmptyHeader>
             <EmptyContent>

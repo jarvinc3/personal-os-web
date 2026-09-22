@@ -1,6 +1,6 @@
 "use client"
 
-import { apiGet, apiPatch, apiPost } from "@/src/config/api-client"
+import { apiDelete, apiGet, apiPatch, apiPost } from "@/src/config/api-client"
 import type { CreateAccountBody } from "@/src/modules/finance/lib/catalog-payloads"
 import { accountsQuery } from "@/src/modules/finance/lib/finance-query-options"
 import {
@@ -10,7 +10,10 @@ import {
 import type { FinanceAccount } from "@/src/modules/finance/types/entities"
 import { API_ENDPOINTS } from "@/src/shared/constants/api-endpoints"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { invalidateFinanceBalanceSheet } from "@/src/modules/finance/hooks/use-balance-sheet"
+import {
+  invalidateFinanceBalanceSheet,
+  invalidateFinancePositions,
+} from "@/src/modules/finance/hooks/use-balance-sheet"
 
 function invalidateAccounts(queryClient: ReturnType<typeof useQueryClient>) {
   void queryClient.invalidateQueries({ queryKey: FINANCE_ACCOUNTS_QUERY_KEY })
@@ -61,6 +64,16 @@ export function useArchiveAccount() {
       }),
     onSuccess: () => {
       invalidateAccounts(queryClient)
+    },
+  })
+}
+
+export function useDeleteAccount() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => apiDelete(API_ENDPOINTS.FINANCE.ACCOUNT(id)),
+    onSuccess: () => {
+      invalidateFinancePositions(queryClient)
     },
   })
 }

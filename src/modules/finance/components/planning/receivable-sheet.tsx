@@ -10,6 +10,7 @@ import {
 } from "@/src/modules/finance/components/forms/finance-form-blocks"
 import {
   useCreateReceivable,
+  useDeleteReceivable,
   useUpdateReceivable,
 } from "@/src/modules/finance/hooks/use-receivables"
 import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
@@ -86,7 +87,11 @@ export function ReceivableSheet({
   const isEdit = Boolean(receivable)
   const createMutation = useCreateReceivable()
   const updateMutation = useUpdateReceivable()
-  const isPending = createMutation.isPending || updateMutation.isPending
+  const deleteMutation = useDeleteReceivable()
+  const isPending =
+    createMutation.isPending ||
+    updateMutation.isPending ||
+    deleteMutation.isPending
 
   const {
     control,
@@ -146,18 +151,29 @@ export function ReceivableSheet({
     }
   }
 
-  async function onCancelReceivable() {
+  async function onArchiveReceivable() {
     if (!receivable) return
-    const confirmed = window.confirm(
-      "¿Marcar este cobro como cancelado? No se elimina."
-    )
-    if (!confirmed) return
     try {
       await updateMutation.mutateAsync({
         id: receivable.id,
         body: { status: "CANCELLED" },
       })
-      appToast.success({ text1: "Cobro cancelado" })
+      appToast.success({ text1: "Cobro archivado" })
+      onOpenChange(false)
+    } catch (error) {
+      appToast.error({ text1: financeErrorMessage(error) })
+    }
+  }
+
+  async function onDelete() {
+    if (!receivable) return
+    const confirmed = window.confirm(
+      "¿Borrar este cobro? No se puede deshacer."
+    )
+    if (!confirmed) return
+    try {
+      await deleteMutation.mutateAsync(receivable.id)
+      appToast.success({ text1: "Cobro borrado" })
       onOpenChange(false)
     } catch (error) {
       appToast.error({ text1: financeErrorMessage(error) })
@@ -170,19 +186,31 @@ export function ReceivableSheet({
       onOpenChange={onOpenChange}
       pending={pending}
       title={isEdit ? "Editar cobro" : "Nuevo cobro"}
-      description="Pagado sin cobrado deja que el API complete el monto. No hay eliminar: usa Cancelado."
+      description="Pagado sin cobrado deja que el API complete el monto."
       actions={{
-        delete:
-          isEdit && receivable?.status !== "CANCELLED" ? (
+        delete: isEdit ? (
+          <div className="flex gap-2">
+            {receivable?.status !== "CANCELLED" ? (
+              <Button
+                type="button"
+                variant="outline"
+                className="text-destructive"
+                disabled={isPending}
+                onClick={() => void onArchiveReceivable()}
+              >
+                Archivar
+              </Button>
+            ) : null}
             <Button
               type="button"
               variant="destructive"
               disabled={isPending}
-              onClick={() => void onCancelReceivable()}
+              onClick={() => void onDelete()}
             >
-              Cancelar cobro
+              Borrar
             </Button>
-          ) : undefined,
+          </div>
+        ) : undefined,
         close: (
           <Button
             type="button"
@@ -190,7 +218,7 @@ export function ReceivableSheet({
             className="flex-1"
             onClick={() => onOpenChange(false)}
           >
-            Cerrar
+            Cancelar
           </Button>
         ),
         submit: (
