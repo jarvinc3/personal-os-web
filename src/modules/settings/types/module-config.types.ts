@@ -20,6 +20,7 @@ export type FinanceModuleConfig = {
   };
   emailSync: {
     enabled: boolean;
+    automatic: boolean;
     autoCategorize: boolean;
   };
 };

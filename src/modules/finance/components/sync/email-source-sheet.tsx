@@ -3,11 +3,10 @@
 import { CATALOG_NONE } from "@/src/modules/finance/constants/catalog"
 import {
   useDisconnectEmailSource,
-  useTriggerEmailSync,
+  useRunEmailSync,
   useUpdateEmailSource,
 } from "@/src/modules/finance/hooks/use-email-sources"
 import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
-import { syncFailureReason } from "@/src/modules/finance/lib/gmail-oauth"
 import type {
   FinanceEmailSource,
   FinanceInstitution,
@@ -23,7 +22,7 @@ import { SummarySection } from "@/src/shared/components/ui/summary"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { MailIcon } from "lucide-react"
+import { MailIcon, RefreshCwIcon } from "lucide-react"
 import { useEffect, useMemo } from "react"
 import { Controller, useForm } from "react-hook-form"
 import { z } from "zod"
@@ -67,11 +66,12 @@ export function EmailSourceSheet({
 }: EmailSourceSheetProps) {
   const updateMutation = useUpdateEmailSource()
   const disconnectMutation = useDisconnectEmailSource()
-  const syncMutation = useTriggerEmailSync()
+  const { run: runSync, isPending: syncPending } =
+    useRunEmailSync(emailSyncEnabled)
   const isPending =
     updateMutation.isPending ||
     disconnectMutation.isPending ||
-    syncMutation.isPending
+    syncPending
   const institutionOptions = institutions
     .filter((item) => item.isActive)
     .map((item) => ({ value: item.id, label: item.name }))
@@ -115,24 +115,7 @@ export function EmailSourceSheet({
 
   async function onSync() {
     if (!source) return
-    if (!emailSyncEnabled) {
-      appToast.error({
-        text1: "Sincronización de correo desactivada",
-        text2: "Actívala en Ajustes → Finanzas.",
-      })
-      return
-    }
-    try {
-      const result = await syncMutation.mutateAsync(source.id)
-      const reason = syncFailureReason(result)
-      if (reason) {
-        appToast.error({ text1: "Sync no encolado", text2: reason })
-        return
-      }
-      appToast.success({ text1: "Sync encolado" })
-    } catch (error) {
-      appToast.error({ text1: financeErrorMessage(error) })
-    }
+    await runSync(source.id)
   }
 
   async function onDisconnect() {
@@ -154,7 +137,9 @@ export function EmailSourceSheet({
       onOpenChange={onOpenChange}
       pending={pending}
       title="Editar vínculo"
-      description={source?.emailAddress ?? "Edita el remitente y la institución."}
+      description={
+        source?.emailAddress ?? "Edita el remitente y la institución."
+      }
       actions={{
         delete: source ? (
           <Button
@@ -189,17 +174,24 @@ export function EmailSourceSheet({
         ),
       }}
     >
-      <SummarySection title="Institución" icon={MailIcon}>
+      <SummarySection title="Sincronización" icon={RefreshCwIcon}>
         {source ? (
           <Button
             type="button"
-            variant="secondary"
+            className="w-full"
             disabled={isPending || !source.isActive || !emailSyncEnabled}
             onClick={() => void onSync()}
           >
+            {syncPending ? (
+              <Spinner data-icon="inline-start" />
+            ) : (
+              <RefreshCwIcon data-icon="inline-start" />
+            )}
             Sincronizar ahora
           </Button>
         ) : null}
+      </SummarySection>
+      <SummarySection title="Institución" icon={MailIcon}>
         <Controller
           control={control}
           name="institutionId"

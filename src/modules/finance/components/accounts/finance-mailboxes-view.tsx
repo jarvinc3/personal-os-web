@@ -13,6 +13,7 @@ import { useCards } from "@/src/modules/finance/hooks/use-cards"
 import {
   useEmailMailboxes,
   usePendingEmailMessages,
+  useRunEmailSync,
 } from "@/src/modules/finance/hooks/use-email-sources"
 import { useFinanceEnabled } from "@/src/modules/finance/hooks/use-finance-enabled"
 import { useInstitutions } from "@/src/modules/finance/hooks/use-institutions"
@@ -55,7 +56,8 @@ function pendingRowValue(
 }
 
 export function FinanceMailboxesView({ enabled }: { enabled: boolean }) {
-  const { emailSyncEnabled, config } = useFinanceEnabled()
+  const { emailSyncEnabled, emailSyncAutomatic, config } = useFinanceEnabled()
+  const { run: runSync, pendingSourceId } = useRunEmailSync(emailSyncEnabled)
   const display = {
     currency: config.baseCurrency,
     showCents: config.display.showCents,
@@ -179,7 +181,16 @@ export function FinanceMailboxesView({ enabled }: { enabled: boolean }) {
           <p className="px-1 pb-3 text-sm text-muted-foreground">
             La sincronización de correo está apagada en Ajustes.
           </p>
-        ) : null}
+        ) : emailSyncAutomatic ? (
+          <p className="px-1 pb-3 text-sm text-muted-foreground">
+            Sync automático cada 6 horas. Solo se usa IA si hay correos nuevos.
+          </p>
+        ) : (
+          <p className="px-1 pb-3 text-sm text-muted-foreground">
+            Sync automático apagado. Usa el botón de recarga o Sincronizar
+            ahora. Actívalo en Ajustes → Finanzas.
+          </p>
+        )}
         {mailboxesQuery.isPending && !mailboxesQuery.data ? (
           <FinanceListSkeleton />
         ) : mailboxes.length === 0 ? (
@@ -208,9 +219,12 @@ export function FinanceMailboxesView({ enabled }: { enabled: boolean }) {
             <MailboxGroup
               key={mailbox.id}
               mailbox={mailbox}
+              emailSyncEnabled={emailSyncEnabled}
+              syncingSourceId={pendingSourceId}
               onOpenMailbox={(id) => setOpenMailboxSheet(true, id)}
               onOpenSource={(id) => setOpenSourceSheet(true, id)}
               onAddInstitution={(id) => setOpenLinkSheet(true, id)}
+              onSyncSource={(id) => void runSync(id)}
             />
           ))
         )}

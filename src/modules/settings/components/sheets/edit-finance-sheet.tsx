@@ -38,6 +38,7 @@ const schema = z.object({
   showCents: z.boolean(),
   compactNumbers: z.boolean(),
   emailSyncEnabled: z.boolean(),
+  emailSyncAutomatic: z.boolean(),
   autoCategorize: z.boolean(),
   budgetAlerts: z.boolean(),
   aiSuggestions: z.boolean(),
@@ -85,6 +86,7 @@ function configToFormValues(config: FinanceModuleConfig): FormValues {
     showCents: config.display.showCents,
     compactNumbers: config.display.compactNumbers,
     emailSyncEnabled: config.emailSync.enabled,
+    emailSyncAutomatic: config.emailSync.automatic,
     autoCategorize: config.emailSync.autoCategorize,
     budgetAlerts: config.notifications.budgetAlerts,
     aiSuggestions: config.notifications.aiSuggestions,
@@ -113,6 +115,10 @@ export function EditFinanceSheet({ open, onOpenChange }: SettingsSheetProps) {
 
   const weekStartsOn = useWatch({ control, name: "weekStartsOn" })
   const dashboardPeriod = useWatch({ control, name: "dashboardPeriod" })
+  const emailSyncEnabledWatch = useWatch({
+    control,
+    name: "emailSyncEnabled",
+  })
   const formValues = useMemo(() => configToFormValues(config), [config])
   useProfileSheetFormSync(open, reset, formValues)
 
@@ -137,6 +143,7 @@ export function EditFinanceSheet({ open, onOpenChange }: SettingsSheetProps) {
         },
         emailSync: {
           enabled: values.emailSyncEnabled,
+          automatic: values.emailSyncAutomatic,
           autoCategorize: values.autoCategorize,
         },
         notifications: {
@@ -291,8 +298,22 @@ export function EditFinanceSheet({ open, onOpenChange }: SettingsSheetProps) {
           render={({ field }) => (
             <SwitchFieldRow
               label="Activar sync"
+              description="Permite conectar Gmail y sincronizar a mano."
               checked={field.value}
               onCheckedChange={field.onChange}
+            />
+          )}
+        />
+        <Controller
+          control={control}
+          name="emailSyncAutomatic"
+          render={({ field }) => (
+            <SwitchFieldRow
+              label="Sync automático"
+              description="Lee el correo cada 6 horas. Si está apagado, solo sincronizas a mano."
+              checked={field.value}
+              onCheckedChange={field.onChange}
+              disabled={!emailSyncEnabledWatch}
             />
           )}
         />

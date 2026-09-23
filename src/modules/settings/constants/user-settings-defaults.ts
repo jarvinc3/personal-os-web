@@ -60,6 +60,7 @@ export const DEFAULT_MODULE_CONFIG_BY_SLUG: ModuleConfigBySlug = {
     },
     emailSync: {
       enabled: false,
+      automatic: false,
       autoCategorize: true,
     },
   },

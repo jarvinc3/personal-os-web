@@ -23,6 +23,7 @@ import {
   useTransaction,
 } from "@/src/modules/finance/hooks/use-transactions"
 import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
+import { FINANCE_TRANSACTIONS_QUERY_KEY } from "@/src/modules/finance/types/api"
 import { buildTimelineMonths } from "@/src/modules/finance/lib/group-transactions-timeline"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/lib/money"
 import {
@@ -49,10 +50,13 @@ import {
 import { ExpandableFab } from "@/src/shared/components/layout/expandable-fab"
 import { FilterSearchToolbar } from "@/src/shared/components/layout/filters"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
+import { appToast } from "@/src/shared/lib/app-toast"
+import { useQueryClient } from "@tanstack/react-query"
 import {
   ArrowLeftRightIcon,
   MinusIcon,
   PlusIcon,
+  RefreshCwIcon,
 } from "lucide-react"
 import {
   useCallback,
@@ -137,6 +141,7 @@ export function FinanceTransactionsList({
   } = useSheetParam(FINANCE_SHEET_KEYS.transaction)
   const { open: openTransferSheet, setOpen: setOpenTransferSheet } =
     useSheetParam(FINANCE_SHEET_KEYS.transfer)
+  const queryClient = useQueryClient()
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -389,6 +394,22 @@ export function FinanceTransactionsList({
 
       <ExpandableFab
         actions={[
+          {
+            icon: <RefreshCwIcon />,
+            label: "Actualizar",
+            onClick: () => {
+              void queryClient
+                .invalidateQueries({ queryKey: FINANCE_TRANSACTIONS_QUERY_KEY })
+                .then(() => {
+                  appToast.success({ text1: "Movimientos actualizados" })
+                })
+                .catch((error: unknown) => {
+                  appToast.error({ text1: financeErrorMessage(error) })
+                })
+            },
+            disabled: !enabled || timelineQuery.isFetching,
+            color: "bg-slate-600",
+          },
           {
             icon: <MinusIcon />,
             label: "Gasto",

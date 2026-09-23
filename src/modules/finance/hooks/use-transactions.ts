@@ -102,6 +102,7 @@ export function useTimelineTransactions(
   return {
     items,
     isPending: queries.some((query) => query.isLoading),
+    isFetching: queries.some((query) => query.isFetching),
     isError: queries.some((query) => query.isError),
     error: queries.find((query) => query.error)?.error ?? null,
   }

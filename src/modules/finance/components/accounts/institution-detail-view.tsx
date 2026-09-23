@@ -19,7 +19,10 @@ import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/constants/sheet-keys"
 import { useAccounts } from "@/src/modules/finance/hooks/use-accounts"
 import { useBalanceSheet } from "@/src/modules/finance/hooks/use-balance-sheet"
 import { useCards } from "@/src/modules/finance/hooks/use-cards"
-import { useEmailMailboxes } from "@/src/modules/finance/hooks/use-email-sources"
+import {
+  useEmailMailboxes,
+  useRunEmailSync,
+} from "@/src/modules/finance/hooks/use-email-sources"
 import { useFinanceEnabled } from "@/src/modules/finance/hooks/use-finance-enabled"
 import { useArchiveInstitution, useDeleteInstitution, useInstitutions } from "@/src/modules/finance/hooks/use-institutions"
 import { useLoans } from "@/src/modules/finance/hooks/use-loans"
@@ -48,6 +51,7 @@ import {
   MailIcon,
   MoreVerticalIcon,
   PencilIcon,
+  RefreshCwIcon,
   Trash2Icon,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
@@ -86,6 +90,8 @@ function InstitutionDetailView({
   const loansQuery = useLoans(isEnabled)
   const balanceSheetQuery = useBalanceSheet(isEnabled)
   const mailboxesQuery = useEmailMailboxes(isEnabled && emailSyncEnabled)
+  const { run: runSync, isPending: syncPending } =
+    useRunEmailSync(emailSyncEnabled)
   const archiveInstitution = useArchiveInstitution()
   const deleteInstitution = useDeleteInstitution()
 
@@ -124,11 +130,19 @@ function InstitutionDetailView({
   const institutions = institutionsQuery.data ?? []
   const accounts = accountsQuery.data ?? []
   const mailboxes = mailboxesQuery.data ?? []
-  const linkedMailbox = mailboxes.find((mailbox) =>
-    mailbox.sources.some(
-      (source) => source.isActive && source.institutionId === institutionId,
-    ),
-  )
+  const linkedSource =
+    mailboxes
+      .flatMap((mailbox) => mailbox.sources)
+      .find(
+        (source) => source.isActive && source.institutionId === institutionId,
+      ) ?? null
+  const linkedMailbox = linkedSource
+    ? (mailboxes.find((mailbox) => mailbox.id === linkedSource.connectionId) ??
+      mailboxes.find((mailbox) =>
+        mailbox.sources.some((source) => source.id === linkedSource.id),
+      ) ??
+      null)
+    : null
 
   const moneyDisplay = {
     ...display,
@@ -474,6 +488,22 @@ function InstitutionDetailView({
             isLast={false}
             className="px-3"
           />
+          {linkedSource ? (
+            <SummaryItem
+              title="Sincronizar correo"
+              description={
+                emailSyncEnabled
+                  ? "Leer transacciones nuevas del banco"
+                  : "Actívala en Ajustes → Finanzas"
+              }
+              icon={RefreshCwIcon}
+              disabled={!emailSyncEnabled || syncPending}
+              onPress={() => void runSync(linkedSource.id)}
+              showChevron={false}
+              isLast={false}
+              className="px-3"
+            />
+          ) : null}
           <SummaryItem
             title="Archivar"
             icon={ArchiveIcon}
