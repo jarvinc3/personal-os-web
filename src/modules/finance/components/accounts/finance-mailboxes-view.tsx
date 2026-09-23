@@ -56,7 +56,7 @@ function pendingRowValue(
 }
 
 export function FinanceMailboxesView({ enabled }: { enabled: boolean }) {
-  const { emailSyncEnabled, config } = useFinanceEnabled()
+  const { emailSyncEnabled, emailSyncAutomatic, config } = useFinanceEnabled()
   const { run: runSync, pendingSourceId } = useRunEmailSync(emailSyncEnabled)
   const display = {
     currency: config.baseCurrency,
@@ -181,10 +181,14 @@ export function FinanceMailboxesView({ enabled }: { enabled: boolean }) {
           <p className="px-1 pb-3 text-sm text-muted-foreground">
             La sincronización de correo está apagada en Ajustes.
           </p>
+        ) : emailSyncAutomatic ? (
+          <p className="px-1 pb-3 text-sm text-muted-foreground">
+            Sync automático cada 6 horas. Solo se usa IA si hay correos nuevos.
+          </p>
         ) : (
           <p className="px-1 pb-3 text-sm text-muted-foreground">
-            Los bancos se leen solos cada 6 horas. Solo se usa IA si hay correos
-            nuevos.
+            Sync automático apagado. Usa el botón de recarga o Sincronizar
+            ahora. Actívalo en Ajustes → Finanzas.
           </p>
         )}
         {mailboxesQuery.isPending && !mailboxesQuery.data ? (

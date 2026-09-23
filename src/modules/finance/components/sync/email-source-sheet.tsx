@@ -138,9 +138,7 @@ export function EmailSourceSheet({
       pending={pending}
       title="Editar vínculo"
       description={
-        source?.lastSyncedAt
-          ? `${source.emailAddress}. Sync automático cada 6 h.`
-          : `${source?.emailAddress ?? "Edita el remitente y la institución."} El primer sync corre solo.`
+        source?.emailAddress ?? "Edita el remitente y la institución."
       }
       actions={{
         delete: source ? (
