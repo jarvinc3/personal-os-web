@@ -50,6 +50,7 @@ const schema = z
     type: z.enum(FINANCE_ACCOUNT_TYPES),
     currency: z.string().trim().min(3, "Moneda obligatoria").max(3),
     institutionId: z.string(),
+    accountNumber: z.string(),
     color: z.string().trim().max(20),
   })
   .superRefine((values, ctx) => {
@@ -61,6 +62,14 @@ const schema = z
         code: "custom",
         path: ["institutionId"],
         message: "La cuenta necesita una institución",
+      })
+    }
+    const digits = values.accountNumber.replace(/\D/g, "")
+    if (values.type !== "CASH" && (digits.length < 4 || digits.length > 34)) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["accountNumber"],
+        message: "Número de cuenta obligatorio (4 a 34 dígitos)",
       })
     }
   })
@@ -84,6 +93,7 @@ function toFormValues(
     institutionId:
       account?.institutionId ??
       (account?.type === "CASH" ? CATALOG_NONE : defaultInstitutionId),
+    accountNumber: account?.accountNumber ?? "",
     color: account?.color ?? "",
   }
 }
@@ -151,6 +161,7 @@ export function AccountSheet({
   const accountName = useWatch({ control, name: "name" })
   const accountColor = useWatch({ control, name: "color" })
   const accountCurrency = useWatch({ control, name: "currency" })
+  const accountNumber = useWatch({ control, name: "accountNumber" })
 
   useEffect(() => {
     if (open) {
@@ -166,7 +177,13 @@ export function AccountSheet({
   )
 
   const onSubmit = submitForm(async (values) => {
-    const payload = buildCreateAccountBody(values, { isUpdate: isEdit })
+    const payload = buildCreateAccountBody(
+      {
+        ...values,
+        accountNumber: values.type === "CASH" ? "" : values.accountNumber,
+      },
+      { isUpdate: isEdit }
+    )
     if (!payload.ok) {
       appToast.error({ text1: payload.error })
       return
@@ -278,7 +295,11 @@ export function AccountSheet({
         <FinancePreviewRow
           icon={LandmarkIcon}
           title={accountName.trim() || "Nueva cuenta"}
-          description={`${FINANCE_ACCOUNT_TYPE_LABEL[accountType]} · ${accountCurrency}`}
+          description={
+            accountType !== "CASH" && accountNumber.replace(/\D/g, "").length >= 4
+              ? `${FINANCE_ACCOUNT_TYPE_LABEL[accountType]} · •••• ${accountNumber.replace(/\D/g, "").slice(-4)}`
+              : `${FINANCE_ACCOUNT_TYPE_LABEL[accountType]} · ${accountCurrency}`
+          }
           accentColor={accountColor || undefined}
         />
         <Controller
@@ -337,6 +358,22 @@ export function AccountSheet({
           <p className="text-sm text-destructive">
             {errors.institutionId.message}
           </p>
+        ) : null}
+        {accountType !== "CASH" ? (
+          <Controller
+            control={control}
+            name="accountNumber"
+            render={({ field }) => (
+              <FormTextField
+                label="Número de cuenta"
+                value={field.value}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+                error={errors.accountNumber?.message}
+                placeholder="0123456789"
+              />
+            )}
+          />
         ) : null}
         <Controller
           control={control}

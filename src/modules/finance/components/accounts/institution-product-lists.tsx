@@ -89,6 +89,10 @@ export function AccountProductRow({
   onPress,
 }: AccountProductRowProps) {
   const Icon = account.type === "SAVINGS" ? PiggyBankIcon : LandmarkIcon
+  const lastFour = account.accountNumber?.replace(/\D/g, "").slice(-4)
+  const subtitle = lastFour
+    ? `${FINANCE_ACCOUNT_TYPE_LABEL[account.type]} · •••• ${lastFour}`
+    : `${FINANCE_ACCOUNT_TYPE_LABEL[account.type]} · ${account.currency}`
   return (
     <button
       type="button"
@@ -103,9 +107,7 @@ export function AccountProductRow({
       </div>
       <div className="min-w-0 flex-1">
         <p className="truncate font-semibold text-foreground">{account.name}</p>
-        <p className="text-sm text-muted-foreground">
-          {FINANCE_ACCOUNT_TYPE_LABEL[account.type]} · {account.currency}
-        </p>
+        <p className="text-sm text-muted-foreground">{subtitle}</p>
       </div>
       <p className="shrink-0 font-semibold text-foreground tabular-nums">
         {formatFinanceMoney(account.balance, {

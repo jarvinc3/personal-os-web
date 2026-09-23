@@ -140,6 +140,7 @@ export type FinanceAccount = {
   name: string
   type: FinanceAccountType
   currency: string
+  accountNumber: string | null
   balance: string
   color: string | null
   isActive: boolean
@@ -352,6 +353,7 @@ export type FinancePendingEmailMessage = {
   emailAddress: string
   instrumentHint: string | null
   lastFourHint: string | null
+  accountNumberHint: string | null
   extractedPayload: {
     amount?: number
     currency?: string

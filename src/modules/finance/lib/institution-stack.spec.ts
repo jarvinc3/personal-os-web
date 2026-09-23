@@ -28,6 +28,7 @@ function account(
     institutionName: null,
     type: "CHECKING",
     currency: "DOP",
+    accountNumber: null,
     balance: "0",
     color: null,
     isActive: true,

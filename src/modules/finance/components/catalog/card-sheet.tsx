@@ -71,9 +71,7 @@ const schema = z.object({
   lastFour: z
     .string()
     .trim()
-    .refine((value) => value === "" || /^\d{4}$/.test(value), {
-      message: "Deben ser 4 dígitos",
-    }),
+    .regex(/^\d{4}$/, "Deben ser 4 dígitos"),
   statementClosingDay: z.string().trim(),
   paymentDueDay: z.string().trim(),
   color: z.string().trim().max(20),

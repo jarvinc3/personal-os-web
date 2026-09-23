@@ -11,6 +11,7 @@ export type CreateAccountBody = {
   name: string
   type: FinanceAccountType
   institutionId?: string
+  accountNumber?: string
   currency?: string
   color?: string | null
 }
@@ -28,7 +29,7 @@ export type CreateCardBody = {
   type: FinanceCardType
   accountId?: string
   network?: FinanceCardNetwork
-  lastFour?: string
+  lastFour: string
   statementClosingDay?: number
   paymentDueDay?: number
   color?: string | null
@@ -65,12 +66,17 @@ function optionalId(value: string | undefined): string | undefined {
   return trimmed
 }
 
+function digitsOnly(value: string | undefined): string {
+  return (value ?? "").replace(/\D/g, "")
+}
+
 export function buildCreateAccountBody(
   input: {
     name: string
     type: FinanceAccountType
     currency?: string
     institutionId?: string
+    accountNumber?: string
     color?: string
   },
   options?: { isUpdate?: boolean },
@@ -85,12 +91,24 @@ export function buildCreateAccountBody(
     return { ok: false, error: "La cuenta necesita una institución" }
   }
 
+  const accountNumber = digitsOnly(input.accountNumber)
+  if (input.type === "CASH") {
+    if (accountNumber) {
+      return { ok: false, error: "El efectivo no usa número de cuenta" }
+    }
+  } else if (accountNumber.length < 4 || accountNumber.length > 34) {
+    return { ok: false, error: "Número de cuenta obligatorio (4 a 34 dígitos)" }
+  }
+
   const body: CreateAccountBody = {
     name,
     type: input.type,
   }
   if (institutionId) {
     body.institutionId = institutionId
+  }
+  if (accountNumber) {
+    body.accountNumber = accountNumber
   }
 
   const currency = optionalTrimmed(input.currency)?.toUpperCase()
@@ -158,10 +176,16 @@ export function buildCreateCardBody(
     return { ok: false, error: "La tarjeta necesita una institución" }
   }
 
+  const lastFour = optionalTrimmed(input.lastFour)
+  if (!lastFour || !/^[0-9]{4}$/.test(lastFour)) {
+    return { ok: false, error: "Últimos 4 dígitos obligatorios" }
+  }
+
   const body: CreateCardBody = {
     institutionId,
     name,
     type: input.type,
+    lastFour,
   }
 
   if (input.type === "DEBIT") {
@@ -175,14 +199,6 @@ export function buildCreateCardBody(
   const network = optionalId(input.network)
   if (network) {
     body.network = network as FinanceCardNetwork
-  }
-
-  const lastFour = optionalTrimmed(input.lastFour)
-  if (lastFour) {
-    if (!/^[0-9]{4}$/.test(lastFour)) {
-      return { ok: false, error: "Deben ser 4 dígitos" }
-    }
-    body.lastFour = lastFour
   }
 
   const closing = parseOptionalDay(input.statementClosingDay)

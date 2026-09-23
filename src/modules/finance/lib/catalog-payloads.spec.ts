@@ -19,6 +19,7 @@ describe("buildCreateAccountBody", () => {
       type: "CHECKING",
       currency: "dop",
       institutionId: "inst-1",
+      accountNumber: "0011-2233-5678",
       color: " #22c55e ",
     })
     assert.equal(result.ok, true)
@@ -29,6 +30,7 @@ describe("buildCreateAccountBody", () => {
       name: "Nómina",
       type: "CHECKING",
       institutionId: "inst-1",
+      accountNumber: "001122335678",
       currency: "DOP",
       color: "#22c55e",
     })
@@ -39,14 +41,27 @@ describe("buildCreateAccountBody", () => {
       name: "Ahorros",
       type: "SAVINGS",
       institutionId: "__none__",
+      accountNumber: "12345678",
     })
     assert.equal(none.ok, false)
 
     const missing = buildCreateAccountBody({
       name: "Ahorros",
       type: "SAVINGS",
+      accountNumber: "12345678",
     })
     assert.equal(missing.ok, false)
+  })
+
+  it("rejects bank accounts without an account number", () => {
+    const result = buildCreateAccountBody({
+      name: "Ahorros",
+      type: "SAVINGS",
+      institutionId: "inst-1",
+    })
+    assert.equal(result.ok, false)
+    if (result.ok) return
+    assert.match(result.error, /número de cuenta/i)
   })
 
   it("allows CASH without an institution", () => {
@@ -57,6 +72,16 @@ describe("buildCreateAccountBody", () => {
     assert.equal(result.ok, true)
     if (!result.ok) return
     assert.equal("institutionId" in result.body, false)
+    assert.equal("accountNumber" in result.body, false)
+  })
+
+  it("rejects CASH with an account number", () => {
+    const result = buildCreateAccountBody({
+      name: "Efectivo",
+      type: "CASH",
+      accountNumber: "12345678",
+    })
+    assert.equal(result.ok, false)
   })
 
   it("sends institutionId and never a free-text institution name", () => {
@@ -64,6 +89,7 @@ describe("buildCreateAccountBody", () => {
       name: "Ahorros",
       type: "SAVINGS",
       institutionId: "inst-1",
+      accountNumber: "12345678",
     })
     assert.equal(result.ok, true)
     if (!result.ok) return
@@ -121,6 +147,7 @@ describe("buildCreateCardBody", () => {
       institutionId: "inst-1",
       name: "Débito",
       type: "DEBIT",
+      lastFour: "4242",
     })
     assert.equal(debitMissing.ok, false)
 
@@ -129,6 +156,7 @@ describe("buildCreateCardBody", () => {
       name: "Débito",
       type: "DEBIT",
       accountId: "acc-1",
+      lastFour: "4242",
     })
     assert.equal(debit.ok, true)
     if (!debit.ok) return
@@ -139,13 +167,14 @@ describe("buildCreateCardBody", () => {
       name: "Crédito",
       type: "CREDIT",
       accountId: "acc-should-drop",
+      lastFour: "4242",
     })
     assert.equal(credit.ok, true)
     if (!credit.ok) return
     assert.equal("accountId" in credit.body, false)
   })
 
-  it("rejects lastFour that is not exactly 4 digits and omits empty", () => {
+  it("requires lastFour of exactly 4 digits", () => {
     const short = buildCreateCardBody({
       institutionId: "inst-1",
       name: "Crédito",
@@ -170,9 +199,9 @@ describe("buildCreateCardBody", () => {
       type: "CREDIT",
       lastFour: "  ",
     })
-    assert.equal(empty.ok, true)
-    if (!empty.ok) return
-    assert.equal("lastFour" in empty.body, false)
+    assert.equal(empty.ok, false)
+    if (empty.ok) return
+    assert.match(empty.error, /últimos 4/i)
 
     const valid = buildCreateCardBody({
       institutionId: "inst-1",
@@ -190,6 +219,7 @@ describe("buildCreateCardBody", () => {
       institutionId: "inst-1",
       name: "Crédito",
       type: "CREDIT",
+      lastFour: "4242",
       color: "",
     })
     assert.equal(created.ok, true)
@@ -201,6 +231,7 @@ describe("buildCreateCardBody", () => {
         institutionId: "inst-1",
         name: "Crédito",
         type: "CREDIT",
+        lastFour: "4242",
         color: "  ",
       },
       { isUpdate: true },

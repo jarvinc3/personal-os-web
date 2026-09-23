@@ -45,10 +45,10 @@ function navigateSheetUrl(
       return
     case "push":
       markSheetPushed(pathname)
-      router.push(decision.url)
+      router.push(decision.url, { scroll: false })
       return
     case "replace":
-      router.replace(decision.url)
+      router.replace(decision.url, { scroll: false })
       return
     case "back":
       clearSheetPushed(pathname)
