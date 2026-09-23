@@ -55,6 +55,7 @@ export function ExpandableFab({ actions }: { actions: ExpandableFabAction[] }) {
                 exit={{ opacity: 0, scale: 0.5, y: 20 }}
                 transition={{ type: "spring", stiffness: 200, damping: 20, ease: "easeInOut", delay: index * 0.05 }}
                 onClick={() => {
+                  if (action.disabled) return
                   action.onClick()
                   setIsOpen(false)
                 }}

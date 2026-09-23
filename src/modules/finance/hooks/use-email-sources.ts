@@ -6,12 +6,15 @@ import {
   emailMailboxesQuery,
   emailPendingQuery,
 } from "@/src/modules/finance/lib/finance-query-options"
+import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
+import { syncFailureReason } from "@/src/modules/finance/lib/gmail-oauth"
 import { asFinanceArray } from "@/src/modules/finance/lib/planning-lists"
 import {
   FINANCE_EMAIL_MAILBOXES_QUERY_KEY,
   FINANCE_EMAIL_PENDING_QUERY_KEY,
   FINANCE_EMAIL_SOURCES_QUERY_KEY,
 } from "@/src/modules/finance/types/api"
+import { appToast } from "@/src/shared/lib/app-toast"
 import type {
   FinanceEmailAssignResult,
   FinanceEmailSource,
@@ -141,6 +144,37 @@ export function useTriggerEmailSync() {
       ),
     onSuccess: () => invalidate(queryClient),
   })
+}
+
+export function useRunEmailSync(emailSyncEnabled: boolean) {
+  const mutation = useTriggerEmailSync()
+
+  const run = async (sourceId: string) => {
+    if (!emailSyncEnabled) {
+      appToast.error({
+        text1: "Sincronización de correo desactivada",
+        text2: "Actívala en Ajustes → Finanzas.",
+      })
+      return
+    }
+    try {
+      const result = await mutation.mutateAsync(sourceId)
+      const reason = syncFailureReason(result)
+      if (reason) {
+        appToast.error({ text1: "Sync no encolado", text2: reason })
+        return
+      }
+      appToast.success({ text1: "Sync encolado" })
+    } catch (error) {
+      appToast.error({ text1: financeErrorMessage(error) })
+    }
+  }
+
+  return {
+    run,
+    isPending: mutation.isPending,
+    pendingSourceId: mutation.isPending ? mutation.variables ?? null : null,
+  }
 }
 
 export function useAssignPendingEmail() {

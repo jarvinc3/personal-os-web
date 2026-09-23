@@ -10,24 +10,42 @@ import {
   CollapsibleTrigger,
 } from "@/src/shared/components/ui/collapsible"
 import { SummaryItem } from "@/src/shared/components/ui/summary"
-import { Building2Icon, ChevronDownIcon, MailIcon, PlusIcon } from "lucide-react"
+import { formatRelativeTimeFromIso } from "@/src/shared/lib/date-format"
+import {
+  Building2Icon,
+  ChevronDownIcon,
+  MailIcon,
+  PlusIcon,
+  RefreshCwIcon,
+} from "lucide-react"
 
 type MailboxGroupProps = {
   mailbox: FinanceMailbox
+  emailSyncEnabled: boolean
+  syncingSourceId: string | null
   onOpenMailbox: (id: string) => void
   onOpenSource: (id: string) => void
   onAddInstitution: (mailboxId: string) => void
+  onSyncSource: (sourceId: string) => void
 }
 
 function sourceDescription(source: FinanceEmailSource): string {
-  return source.bankSenderEmail ?? source.bankDomain
+  const sender = source.bankSenderEmail ?? source.bankDomain
+  if (!source.lastSyncedAt) {
+    return `${sender} · Primer sync pendiente`
+  }
+  const relative = formatRelativeTimeFromIso(source.lastSyncedAt)
+  return relative ? `${sender} · Sincronizado ${relative}` : sender
 }
 
 export function MailboxGroup({
   mailbox,
+  emailSyncEnabled,
+  syncingSourceId,
   onOpenMailbox,
   onOpenSource,
   onAddInstitution,
+  onSyncSource,
 }: MailboxGroupProps) {
   const sources = mailbox.sources.filter((source) => source.isActive)
 
@@ -78,16 +96,38 @@ export function MailboxGroup({
       </div>
       <CollapsibleContent>
         <div className="flex flex-col pl-7">
-          {sources.map((source) => (
-            <SummaryItem
-              key={source.id}
-              title={source.label || source.institutionName || "Institución"}
-              description={sourceDescription(source)}
-              icon={Building2Icon}
-              onPress={() => onOpenSource(source.id)}
-              isLast={false}
-            />
-          ))}
+          {sources.map((source) => {
+            const title = source.label || source.institutionName || "Institución"
+            const syncing = syncingSourceId === source.id
+            return (
+              <div
+                key={source.id}
+                className="flex items-stretch border-b border-border/60"
+              >
+                <div className="min-w-0 flex-1">
+                  <SummaryItem
+                    title={title}
+                    description={sourceDescription(source)}
+                    icon={Building2Icon}
+                    onPress={() => onOpenSource(source.id)}
+                    isLast
+                    showChevron={false}
+                  />
+                </div>
+                <button
+                  type="button"
+                  aria-label={`Sincronizar ${title}`}
+                  disabled={!emailSyncEnabled || !source.isActive || syncing}
+                  className="flex shrink-0 items-center px-3 text-primary hover:bg-muted/50 disabled:opacity-50"
+                  onClick={() => onSyncSource(source.id)}
+                >
+                  <RefreshCwIcon
+                    className={`size-4.5 ${syncing ? "animate-spin" : ""}`}
+                  />
+                </button>
+              </div>
+            )
+          })}
           <SummaryItem
             title="Añadir institución"
             icon={PlusIcon}
