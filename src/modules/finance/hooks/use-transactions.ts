@@ -9,6 +9,7 @@ import {
   buildTransactionsSearchParams,
   fetchAllTransactionPages,
   FINANCE_TIMELINE_PAGE_SIZE,
+  FINANCE_TX_PAGE_SIZE,
   type FinanceTransactionsQuery,
 } from "@/src/modules/finance/lib/transactions-query"
 import { intersectIsoDateRange } from "@/src/modules/finance/lib/month-window"
@@ -106,6 +107,15 @@ export function useTimelineTransactions(
     isError: queries.some((query) => query.isError),
     error: queries.find((query) => query.error)?.error ?? null,
   }
+}
+
+export function useTransactionSearch(enabled: boolean, search: string) {
+  const trimmed = search.trim()
+  return useTransactions(enabled && trimmed.length > 0, {
+    page: 1,
+    limit: FINANCE_TX_PAGE_SIZE,
+    search: trimmed,
+  })
 }
 
 export function useTransaction(enabled: boolean, id: string | null) {

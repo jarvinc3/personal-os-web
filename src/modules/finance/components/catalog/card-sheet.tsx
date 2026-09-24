@@ -1,60 +1,64 @@
 "use client"
 
-import { FinanceCurrencyPills } from "@/src/modules/finance/components/forms/finance-currency-pills"
+import { FinanceCurrencyPills } from "@/src/modules/finance/components/forms/finance-currency-pills";
 import {
   FinancePreviewRow,
   FinanceSegmentedControl,
-} from "@/src/modules/finance/components/forms/finance-form-blocks"
+} from "@/src/modules/finance/components/forms/finance-form-blocks";
 import {
   CATALOG_NONE,
   FINANCE_CARD_NETWORK_LABEL,
   FINANCE_CARD_NETWORKS,
   FINANCE_CARD_TYPE_LABEL,
   FINANCE_CARD_TYPES,
-} from "@/src/modules/finance/constants/catalog"
+} from "@/src/modules/finance/constants/catalog";
 import {
   useArchiveCard,
   useCreateCard,
   useDeleteCard,
   useUpdateCard,
   useUpdateCardBalance,
-} from "@/src/modules/finance/hooks/use-cards"
+} from "@/src/modules/finance/hooks/use-cards";
 import {
   buildCardBalanceBodies,
   buildCreateCardBody,
   cardBalanceSaveMessage,
   nextUnusedCurrency,
-} from "@/src/modules/finance/lib/catalog-payloads"
-import { buildFinanceCurrencyOptions } from "@/src/modules/finance/lib/finance-currency"
-import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
+} from "@/src/modules/finance/lib/catalog-payloads";
+import { buildFinanceCurrencyOptions } from "@/src/modules/finance/lib/finance-currency";
+import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error";
 import type {
   FinanceAccount,
   FinanceCard,
   FinanceInstitution,
-} from "@/src/modules/finance/types/entities"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+} from "@/src/modules/finance/types/entities";
+import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet";
 import {
   FormTextField,
   SelectField,
-} from "@/src/shared/components/layout/form-blocks"
-import { Button } from "@/src/shared/components/ui/button"
-import { ColorPickerSwatch } from "@/src/shared/components/ui/color-picker"
-import { Label } from "@/src/shared/components/ui/label"
-import { Spinner } from "@/src/shared/components/ui/spinner"
-import { SummarySection } from "@/src/shared/components/ui/summary"
-import { appToast } from "@/src/shared/lib/app-toast"
-import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
-import { zodResolver } from "@hookform/resolvers/zod"
+} from "@/src/shared/components/layout/form-blocks";
+import { Button } from "@/src/shared/components/ui/button";
+import { ColorPickerSwatch } from "@/src/shared/components/ui/color-picker";
+import { Label } from "@/src/shared/components/ui/label";
+import { Spinner } from "@/src/shared/components/ui/spinner";
+import { SummarySection } from "@/src/shared/components/ui/summary";
+import { appToast } from "@/src/shared/lib/app-toast";
+import { createSheetSubmit } from "@/src/shared/lib/sheet-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
+  ArchiveIcon,
   Building2Icon,
   CalendarDays,
   CreditCardIcon,
   DollarSign,
   Palette,
-} from "lucide-react"
-import { useEffect, useMemo } from "react"
-import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form"
-import { z } from "zod"
+  SaveIcon,
+  TrashIcon,
+  XIcon,
+} from "lucide-react";
+import { useEffect, useMemo } from "react";
+import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
+import { z } from "zod";
 
 const balanceRowSchema = z.object({
   currency: z.string().trim().min(3, "Moneda obligatoria").max(3),
@@ -71,9 +75,7 @@ const schema = z.object({
   lastFour: z
     .string()
     .trim()
-    .refine((value) => value === "" || /^\d{4}$/.test(value), {
-      message: "Deben ser 4 dígitos",
-    }),
+    .regex(/^\d{4}$/, "Deben ser 4 dígitos"),
   statementClosingDay: z.string().trim(),
   paymentDueDay: z.string().trim(),
   color: z.string().trim().max(20),
@@ -245,8 +247,8 @@ export function CardSheet({
     const balancesPayload = card
       ? { ok: true as const, body: [] }
       : buildCardBalanceBodies(values.balances, {
-          requireCreditLimit: values.type === "CREDIT",
-        })
+        requireCreditLimit: values.type === "CREDIT",
+      })
     if (!balancesPayload.ok) {
       appToast.error({ text1: balancesPayload.error })
       return
@@ -316,8 +318,8 @@ export function CardSheet({
   const networkLabel =
     cardNetwork && cardNetwork !== CATALOG_NONE
       ? (FINANCE_CARD_NETWORK_LABEL[
-          cardNetwork as keyof typeof FINANCE_CARD_NETWORK_LABEL
-        ] ?? cardNetwork)
+        cardNetwork as keyof typeof FINANCE_CARD_NETWORK_LABEL
+      ] ?? cardNetwork)
       : "Sin red"
 
   return (
@@ -332,31 +334,13 @@ export function CardSheet({
           : "Crea una institución en Cuentas antes de agregar una tarjeta."
       }
       actions={{
-        delete: isEdit ? (
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              className="text-destructive"
-              disabled={isPending}
-              onClick={() => void onArchive()}
-            >
-              Archivar
-            </Button>
-            <Button
-              variant="destructive"
-              disabled={isPending}
-              onClick={() => void onDelete()}
-            >
-              Borrar
-            </Button>
-          </div>
-        ) : undefined,
         close: (
           <Button
             variant="outline"
             className="flex-1"
             onClick={() => onOpenChange(false)}
           >
+            <XIcon className="size-4 shrink-0" />
             Cancelar
           </Button>
         ),
@@ -366,8 +350,8 @@ export function CardSheet({
             className="flex-1"
             onClick={onSubmit}
           >
-            {isPending ? <Spinner data-icon="inline-start" /> : null}
-            Guardar
+            {isPending ? <Spinner data-icon="inline-start" /> : <SaveIcon className="size-4 shrink-0" />}
+            {isPending ? "Guardando..." : "Guardar"}
           </Button>
         ),
       }}
@@ -385,11 +369,11 @@ export function CardSheet({
                 hasInstitutions
                   ? institutionOptions
                   : [
-                      {
-                        value: CATALOG_NONE,
-                        label: "Crea una institución primero",
-                      },
-                    ]
+                    {
+                      value: CATALOG_NONE,
+                      label: "Crea una institución primero",
+                    },
+                  ]
               }
               disabled={!hasInstitutions}
             />
@@ -613,6 +597,29 @@ export function CardSheet({
           </Button>
         </SummarySection>
       ) : null}
+
+      {isEdit && (
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            className="flex-1 text-destructive"
+            disabled={isPending}
+            onClick={() => void onArchive()}
+          >
+            <ArchiveIcon className="size-4" />
+            Archivar
+          </Button>
+          <Button
+            variant="destructive"
+            disabled={isPending}
+            className="flex-1"
+            onClick={() => void onDelete()}
+          >
+            <TrashIcon className="size-4" />
+            Borrar
+          </Button>
+        </div>
+      )}
     </BottomSheet>
   )
 }

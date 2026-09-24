@@ -10,6 +10,12 @@ import {
   type FinanceMoneyDisplay,
 } from "@/src/modules/finance/lib/money";
 import {
+  cycleOffsetForFrontKey,
+  readFrontItemKey,
+  stackItemKey,
+  writeFrontItemKey,
+} from "@/src/modules/finance/lib/wallet-front-persistence";
+import {
   classifyWalletGesture,
   resetWalletGestureOffset,
 } from "@/src/modules/finance/lib/wallet-gesture";
@@ -22,8 +28,13 @@ import {
 import { Button } from "@/src/shared/components/ui/button";
 import { cn } from "@/src/shared/lib/utils";
 import { motion } from "framer-motion";
-import { Building2Icon, ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
-import { type KeyboardEvent, useRef, useState } from "react";
+import {
+  Building2Icon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  CreditCardIcon,
+} from "lucide-react";
+import { type KeyboardEvent, useEffect, useRef, useState } from "react";
 
 const FALLBACK_INSTITUTION_COLOR = "#1B4332"
 const FALLBACK_CASH_COLOR = "#334155"
@@ -66,7 +77,7 @@ function toWalletCard(
     name: item.account.name,
     monogram: institutionInitials(item.account.name),
     color: item.account.color ?? FALLBACK_CASH_COLOR,
-    productSummary: "Efectivo sin institución",
+    productSummary: "Cuenta de dinero en efectivo",
     balanceLabel: "Saldo",
     balanceAmount: formatStackItemBalance(item, display),
   }
@@ -79,13 +90,28 @@ function walletItemName(
   return toWalletCard(item, display).name
 }
 
+function initialCycleOffset(items: InstitutionStackItem[]): number {
+  return cycleOffsetForFrontKey(items, readFrontItemKey())
+}
+
 export function InstitutionSwapStack({
   items,
   display,
   onSelect,
   className,
 }: InstitutionSwapStackProps) {
-  const [cycleOffset, setCycleOffset] = useState(0)
+  const [cycleOffset, setCycleOffset] = useState(() => initialCycleOffset(items))
+
+  useEffect(() => {
+    if (items.length === 0) return
+    const key = readFrontItemKey()
+    const next = cycleOffsetForFrontKey(items, key)
+    setCycleOffset(next)
+    const front = items[next]
+    if (front && (!key || stackItemKey(front) !== key)) {
+      writeFrontItemKey(stackItemKey(front))
+    }
+  }, [items])
 
   if (items.length === 0) return null
 
@@ -96,12 +122,22 @@ export function InstitutionSwapStack({
   const showCycleChrome = items.length > 1
   const frontItem = items[frontIndex]
 
+  const persistFront = (nextOffset: number) => {
+    const nextFront = items[walletFrontIndex(nextOffset, items.length)]
+    if (nextFront) writeFrontItemKey(stackItemKey(nextFront))
+  }
+
   const cycleBy = (delta: number) => {
-    setCycleOffset((current) => current + delta)
+    setCycleOffset((current) => {
+      const next = current + delta
+      persistFront(next)
+      return next
+    })
   }
 
   const showItemAt = (index: number) => {
     setCycleOffset(index)
+    persistFront(index)
   }
 
   function onStackKeyDown(event: KeyboardEvent<HTMLDivElement>) {
@@ -124,9 +160,9 @@ export function InstitutionSwapStack({
   }
 
   return (
-    <div className={cn("flex flex-col gap-3", className)}>
+    <div className={cn("flex flex-col", className)}>
       <div
-        className="relative h-110 outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+        className="relative outline-none h-100 focus-visible:ring-3 focus-visible:ring-ring/50"
         tabIndex={showCycleChrome ? 0 : undefined}
         role={showCycleChrome ? "group" : undefined}
         aria-label={
@@ -146,7 +182,7 @@ export function InstitutionSwapStack({
           return (
             <motion.div
               key={`${card.item.kind}-${card.item.id}`}
-              className="absolute top-0 right-8 left-0"
+              className="absolute top-0 left-0 right-8"
               initial={false}
               animate={{ x, y, rotate, scale, opacity, zIndex: 30 - pos }}
               transition={{ type: "spring", stiffness: 320, damping: 30 }}
@@ -156,6 +192,7 @@ export function InstitutionSwapStack({
               }}
             >
               <InstitutionWalletCard
+                kind={card.item.kind}
                 name={card.name}
                 monogram={card.monogram}
                 color={card.color}
@@ -172,14 +209,8 @@ export function InstitutionSwapStack({
       </div>
 
       {showCycleChrome ? (
-        <div className="flex flex-col items-center gap-2 px-2">
-          <p
-            className="text-xs tabular-nums text-muted-foreground"
-            aria-live="polite"
-          >
-            {position.current} / {position.total}
-          </p>
-          <div className="flex items-center gap-2">
+        <div className="flex flex-col gap-2 items-center px-2">
+          <div className="flex gap-2 items-center">
             <Button
               type="button"
               variant="ghost"
@@ -200,7 +231,7 @@ export function InstitutionSwapStack({
                     aria-label={name}
                     aria-current={isFront ? "true" : undefined}
                     className={cn(
-                      "size-2 rounded-full transition-colors",
+                      "rounded-full transition-colors size-2",
                       isFront ? "bg-foreground" : "bg-muted-foreground/40",
                     )}
                     onClick={() => showItemAt(index)}
@@ -225,6 +256,7 @@ export function InstitutionSwapStack({
 }
 
 type InstitutionWalletCardProps = {
+  kind: InstitutionStackItem["kind"]
   name: string
   monogram: string
   color: string
@@ -237,6 +269,7 @@ type InstitutionWalletCardProps = {
 }
 
 function InstitutionWalletCard({
+  kind,
   name,
   monogram,
   color,
@@ -248,6 +281,7 @@ function InstitutionWalletCard({
   onPress,
 }: InstitutionWalletCardProps) {
   const offsetYRef = useRef(resetWalletGestureOffset())
+  const KindIcon = kind === "institution" ? Building2Icon : CreditCardIcon
 
   return (
     <motion.button
@@ -274,24 +308,24 @@ function InstitutionWalletCard({
           onPress?.()
         }
       }}
-      className="relative flex h-95 w-full cursor-pointer flex-col justify-between rounded-3xl p-6 text-left"
+      className="flex relative flex-col justify-between p-6 w-full h-72 text-left rounded-3xl cursor-pointer"
       style={{ backgroundColor: color }}
     >
-      <div className="flex items-start justify-between">
+      <div className="flex justify-between items-start">
         <span
           className="rounded-xl px-3 py-1.5 font-display text-base font-bold text-white"
           style={{ backgroundColor: "rgba(255,255,255,0.18)" }}
         >
           {monogram}
         </span>
-        <Building2Icon
+        <KindIcon
           className="size-5"
           style={{ color: "rgba(255,255,255,0.6)" }}
         />
       </div>
 
-      <div className="flex flex-1 flex-col justify-center">
-        <h3 className="font-display text-3xl font-bold leading-tight text-white">
+      <div className="flex flex-col flex-1 justify-center">
+        <h3 className="text-3xl font-bold leading-tight text-white font-display">
           {name}
         </h3>
         <p className="mt-2 text-sm text-white/70">{productSummary}</p>
@@ -299,7 +333,7 @@ function InstitutionWalletCard({
 
       {isFront ? (
         <div
-          className="absolute inset-x-6 flex justify-between"
+          className="flex absolute inset-x-6 justify-between"
           style={{ bottom: "72px" }}
         >
           {Array.from({ length: 12 }).map((_, index) => (
@@ -312,11 +346,11 @@ function InstitutionWalletCard({
         </div>
       ) : null}
 
-      <div className="flex items-end justify-between gap-3">
-        <span className="text-[11px] tracking-wider text-white/60 uppercase">
-          {balanceLabel}
+      <div className="flex flex-col">
+        <span className="text-xs tracking-wider uppercase text-white/60">
+          {balanceLabel}:
         </span>
-        <span className="font-mono text-2xl font-semibold text-white tabular-nums">
+        <span className="font-mono text-2xl font-semibold tabular-nums text-right text-white">
           {balanceAmount}
         </span>
       </div>

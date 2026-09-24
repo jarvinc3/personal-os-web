@@ -11,7 +11,13 @@ type ExpandableFabAction = {
   color: string
 }
 
-export function ExpandableFab({ actions }: { actions: ExpandableFabAction[] }) {
+export function ExpandableFab({
+  actions,
+  label = "Nuevo movimiento",
+}: {
+  actions: ExpandableFabAction[]
+  label?: string
+}) {
   const [isOpen, setIsOpen] = useState(false)
 
   return (
@@ -35,7 +41,7 @@ export function ExpandableFab({ actions }: { actions: ExpandableFabAction[] }) {
         <motion.button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
-          aria-label={isOpen ? "Cerrar acciones" : "Nuevo movimiento"}
+          aria-label={isOpen ? "Cerrar acciones" : label}
           aria-expanded={isOpen}
           className="flex justify-center items-center w-12 h-12 text-white rounded-full shadow-xl bg-primary"
           animate={{ rotate: isOpen ? 45 : 0 }}

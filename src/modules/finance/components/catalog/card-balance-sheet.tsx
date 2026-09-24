@@ -1,31 +1,31 @@
 "use client"
 
-import { FinanceCurrencyPills } from "@/src/modules/finance/components/forms/finance-currency-pills"
-import { useUpdateCardBalance } from "@/src/modules/finance/hooks/use-cards"
+import { FinanceCurrencyPills } from "@/src/modules/finance/components/forms/finance-currency-pills";
+import { useUpdateCardBalance } from "@/src/modules/finance/hooks/use-cards";
 import {
   buildCardBalanceBody,
   nextUnusedCurrency,
-} from "@/src/modules/finance/lib/catalog-payloads"
-import { buildFinanceCurrencyOptions } from "@/src/modules/finance/lib/finance-currency"
-import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
+} from "@/src/modules/finance/lib/catalog-payloads";
+import { buildFinanceCurrencyOptions } from "@/src/modules/finance/lib/finance-currency";
+import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error";
 import {
   formatFinanceMoney,
   type FinanceMoneyDisplay,
-} from "@/src/modules/finance/lib/money"
-import type { FinanceCard } from "@/src/modules/finance/types/entities"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
-import { FormTextField } from "@/src/shared/components/layout/form-blocks"
-import { Button } from "@/src/shared/components/ui/button"
-import { Spinner } from "@/src/shared/components/ui/spinner"
-import { SummarySection } from "@/src/shared/components/ui/summary"
-import { appToast } from "@/src/shared/lib/app-toast"
-import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
-import { cn } from "@/src/shared/lib/utils"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { PlusIcon, WalletIcon } from "lucide-react"
-import { useMemo, useState } from "react"
-import { Controller, useForm } from "react-hook-form"
-import { z } from "zod"
+} from "@/src/modules/finance/lib/money";
+import type { FinanceCard } from "@/src/modules/finance/types/entities";
+import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet";
+import { FormTextField } from "@/src/shared/components/layout/form-blocks";
+import { Button } from "@/src/shared/components/ui/button";
+import { Spinner } from "@/src/shared/components/ui/spinner";
+import { SummarySection } from "@/src/shared/components/ui/summary";
+import { appToast } from "@/src/shared/lib/app-toast";
+import { createSheetSubmit } from "@/src/shared/lib/sheet-form";
+import { cn } from "@/src/shared/lib/utils";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { PlusIcon, SaveIcon, WalletIcon, XIcon } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { z } from "zod";
 
 const schema = z.object({
   currency: z.string().trim().min(3, "Moneda obligatoria").max(3),
@@ -183,6 +183,7 @@ function CardBalanceSheetForm({
             className="flex-1"
             onClick={() => onOpenChange(false)}
           >
+            <XIcon className="size-4 shrink-0" />
             Cancelar
           </Button>
         ),
@@ -192,8 +193,8 @@ function CardBalanceSheetForm({
             className="flex-1"
             onClick={onSubmit}
           >
-            {mutation.isPending ? <Spinner data-icon="inline-start" /> : null}
-            Guardar
+            {mutation.isPending ? <Spinner data-icon="inline-start" /> : <SaveIcon className="size-4 shrink-0" />}
+            {mutation.isPending ? "Guardando..." : "Guardar"}
           </Button>
         ),
       }}
@@ -212,7 +213,7 @@ function CardBalanceSheetForm({
             )}
           >
             <span className="font-medium">{item.currency}</span>
-            <span className="text-muted-foreground tabular-nums">
+            <span className="tabular-nums text-muted-foreground">
               {formatFinanceMoney(item.balance, {
                 currency: item.currency,
                 showCents: display?.showCents ?? true,

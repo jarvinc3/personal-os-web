@@ -7,41 +7,41 @@ import {
   InstitutionProductEmpty,
   LoanProductRow,
   type InstitutionDetailTab,
-} from "@/src/modules/finance/components/accounts/institution-product-lists"
-import { AccountSheet } from "@/src/modules/finance/components/catalog/account-sheet"
-import { CardBalanceSheet } from "@/src/modules/finance/components/catalog/card-balance-sheet"
-import { CardSheet } from "@/src/modules/finance/components/catalog/card-sheet"
-import { InstitutionSheet } from "@/src/modules/finance/components/accounts/institution-sheet"
-import { LinkInstitutionMailboxSheet } from "@/src/modules/finance/components/sync/link-institution-mailbox-sheet"
-import { FinanceAuthenticatedPage } from "@/src/modules/finance/components/layout/finance-authenticated-page"
-import { LoanSheet } from "@/src/modules/finance/components/planning/loan-sheet"
-import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/constants/sheet-keys"
-import { useAccounts } from "@/src/modules/finance/hooks/use-accounts"
-import { useBalanceSheet } from "@/src/modules/finance/hooks/use-balance-sheet"
-import { useCards } from "@/src/modules/finance/hooks/use-cards"
+} from "@/src/modules/finance/components/accounts/institution-product-lists";
+import { InstitutionSheet } from "@/src/modules/finance/components/accounts/institution-sheet";
+import { AccountSheet } from "@/src/modules/finance/components/catalog/account-sheet";
+import { CardBalanceSheet } from "@/src/modules/finance/components/catalog/card-balance-sheet";
+import { CardSheet } from "@/src/modules/finance/components/catalog/card-sheet";
+import { FinanceAuthenticatedPage } from "@/src/modules/finance/components/layout/finance-authenticated-page";
+import { LoanSheet } from "@/src/modules/finance/components/planning/loan-sheet";
+import { LinkInstitutionMailboxSheet } from "@/src/modules/finance/components/sync/link-institution-mailbox-sheet";
+import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/constants/sheet-keys";
+import { useAccounts } from "@/src/modules/finance/hooks/use-accounts";
+import { useBalanceSheet } from "@/src/modules/finance/hooks/use-balance-sheet";
+import { useCards } from "@/src/modules/finance/hooks/use-cards";
 import {
   useEmailMailboxes,
   useRunEmailSync,
-} from "@/src/modules/finance/hooks/use-email-sources"
-import { useFinanceEnabled } from "@/src/modules/finance/hooks/use-finance-enabled"
-import { useArchiveInstitution, useDeleteInstitution, useInstitutions } from "@/src/modules/finance/hooks/use-institutions"
-import { useLoans } from "@/src/modules/finance/hooks/use-loans"
-import { useSheetListEntity } from "@/src/modules/finance/hooks/use-sheet-entity"
-import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
+} from "@/src/modules/finance/hooks/use-email-sources";
+import { useFinanceEnabled } from "@/src/modules/finance/hooks/use-finance-enabled";
+import { useArchiveInstitution, useDeleteInstitution, useInstitutions } from "@/src/modules/finance/hooks/use-institutions";
+import { useLoans } from "@/src/modules/finance/hooks/use-loans";
+import { useSheetListEntity } from "@/src/modules/finance/hooks/use-sheet-entity";
+import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error";
 import {
   buildInstitutionStackItems,
   formatProductCounts,
   formatStackItemBalance,
   institutionInitials,
-} from "@/src/modules/finance/lib/institution-stack"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
-import { LoadingView } from "@/src/shared/components/layout/loading-view"
-import { Button } from "@/src/shared/components/ui/button"
-import { SummaryItem } from "@/src/shared/components/ui/summary"
-import { APP_ROUTES } from "@/src/shared/constants/app-routes"
-import { usePageHeader } from "@/src/shared/hooks/use-page-header"
-import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
-import { appToast } from "@/src/shared/lib/app-toast"
+} from "@/src/modules/finance/lib/institution-stack";
+import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet";
+import { LoadingView } from "@/src/shared/components/layout/loading-view";
+import { Button } from "@/src/shared/components/ui/button";
+import { SummaryItem } from "@/src/shared/components/ui/summary";
+import { APP_ROUTES } from "@/src/shared/constants/app-routes";
+import { usePageHeader } from "@/src/shared/hooks/use-page-header";
+import { useSheetParam } from "@/src/shared/hooks/use-sheet-params";
+import { appToast } from "@/src/shared/lib/app-toast";
 import {
   ArchiveIcon,
   Building2Icon,
@@ -53,9 +53,9 @@ import {
   PencilIcon,
   RefreshCwIcon,
   Trash2Icon,
-} from "lucide-react"
-import { useRouter } from "next/navigation"
-import { useCallback, useMemo, useState } from "react"
+} from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useCallback, useMemo, useState } from "react";
 
 const FALLBACK_COLOR = "#1B4332"
 
@@ -218,7 +218,7 @@ function InstitutionDetailView({
       <Button
         variant="outline"
         size="icon"
-        className="size-9 rounded-full"
+        className="rounded-full size-9"
         aria-label="Opciones de la institución"
         onClick={openMenu}
       >
@@ -296,7 +296,7 @@ function InstitutionDetailView({
 
   if (!institution) {
     return (
-      <div className="flex flex-col items-center gap-3 py-16">
+      <div className="flex flex-col gap-3 items-center py-16">
         <Building2Icon className="size-8 text-muted-foreground" />
         <p className="text-center text-muted-foreground">
           No encontramos esta institución.
@@ -341,19 +341,19 @@ function InstitutionDetailView({
         </p>
       ) : null}
 
-      <div className="-mx-4 -mt-4 overflow-hidden md:-mx-6">
+      <div className="overflow-hidden -mx-4 -mt-4 md:-mx-6">
         <div
-          className="px-4 pt-6 pb-10 text-white md:px-6"
+          className="px-4 pt-6 pb-10 text-white rounded-b-3xl md:px-6"
           style={{
             background: accent,
           }}
         >
-          <div className="flex items-start gap-3">
-            <div className="flex size-12 items-center justify-center rounded-xl bg-black/30 text-sm font-bold tracking-wide">
+          <div className="flex gap-3 items-start">
+            <div className="flex justify-center items-center text-sm font-bold tracking-wide rounded-xl size-12 bg-black/30">
               {institutionInitials(institution.name)}
             </div>
-            <div className="min-w-0 flex-1">
-              <h1 className="truncate text-2xl font-bold tracking-tight">
+            <div className="flex-1 min-w-0">
+              <h1 className="text-2xl font-bold tracking-tight truncate">
                 {institution.name}
               </h1>
               <p className="mt-1 text-sm text-white/70">
@@ -361,14 +361,14 @@ function InstitutionDetailView({
               </p>
             </div>
           </div>
-          <p className="mt-8 text-3xl font-bold tracking-tight tabular-nums">
+          <p className="mt-8 text-3xl font-bold tabular-nums tracking-tight">
             {balanceLabel}
           </p>
           {incompleteCard ? (
             <Button
               type="button"
               variant="secondary"
-              className="mt-4 bg-white/15 text-white hover:bg-white/25"
+              className="mt-4 text-white bg-white/15 hover:bg-white/25"
               onClick={() => setOpenCardBalanceSheet(true, incompleteCard.id)}
             >
               Completar límite de {incompleteCard.name}
@@ -376,14 +376,14 @@ function InstitutionDetailView({
           ) : null}
         </div>
 
-        <div className="-mt-4 rounded-t-3xl bg-background px-4 pt-4 pb-8 md:px-6">
+        <div className="px-4 pt-4">
           <InstitutionDetailTabs
             value={tab}
             onChange={setTab}
             accentColor={accent}
           />
 
-          <div className="mt-4 flex flex-col gap-3">
+          <div className="flex flex-col gap-3 mt-4">
             {tab === "accounts" ? (
               institutionAccounts.length === 0 ? (
                 <InstitutionProductEmpty
@@ -447,7 +447,7 @@ function InstitutionDetailView({
         title="Opciones"
         description={institution.name}
       >
-        <div className="overflow-hidden rounded-2xl border border-border bg-card">
+        <div className="overflow-hidden p-1 rounded-2xl border border-border bg-card">
           <SummaryItem
             title="Editar institución"
             icon={PencilIcon}
