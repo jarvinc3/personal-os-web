@@ -1,29 +1,29 @@
 "use client"
 
+import { FinancePreviewRow } from "@/src/modules/finance/components/forms/finance-form-blocks";
 import {
   useArchiveInstitution,
   useCreateInstitution,
   useDeleteInstitution,
   useUpdateInstitution,
-} from "@/src/modules/finance/hooks/use-institutions"
-import { buildCreateInstitutionBody } from "@/src/modules/finance/lib/catalog-payloads"
-import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
-import type { FinanceInstitution } from "@/src/modules/finance/types/entities"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
-import { FinancePreviewRow } from "@/src/modules/finance/components/forms/finance-form-blocks"
-import { FormTextField } from "@/src/shared/components/layout/form-blocks"
-import { Button } from "@/src/shared/components/ui/button"
-import { ColorPickerSwatch } from "@/src/shared/components/ui/color-picker"
-import { Label } from "@/src/shared/components/ui/label"
-import { Spinner } from "@/src/shared/components/ui/spinner"
-import { SummarySection } from "@/src/shared/components/ui/summary"
-import { appToast } from "@/src/shared/lib/app-toast"
-import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { Building2Icon, Palette } from "lucide-react"
-import { useEffect, useMemo } from "react"
-import { Controller, useForm, useWatch } from "react-hook-form"
-import { z } from "zod"
+} from "@/src/modules/finance/hooks/use-institutions";
+import { buildCreateInstitutionBody } from "@/src/modules/finance/lib/catalog-payloads";
+import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error";
+import type { FinanceInstitution } from "@/src/modules/finance/types/entities";
+import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet";
+import { FormTextField } from "@/src/shared/components/layout/form-blocks";
+import { Button } from "@/src/shared/components/ui/button";
+import { ColorPickerSwatch } from "@/src/shared/components/ui/color-picker";
+import { Label } from "@/src/shared/components/ui/label";
+import { Spinner } from "@/src/shared/components/ui/spinner";
+import { SummarySection } from "@/src/shared/components/ui/summary";
+import { appToast } from "@/src/shared/lib/app-toast";
+import { createSheetSubmit } from "@/src/shared/lib/sheet-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { ArchiveIcon, Building2Icon, Palette, SaveIcon, TrashIcon, XIcon } from "lucide-react";
+import { useEffect, useMemo } from "react";
+import { Controller, useForm, useWatch } from "react-hook-form";
+import { z } from "zod";
 
 const schema = z.object({
   name: z.string().trim().min(1, "Nombre obligatorio").max(120),
@@ -148,38 +148,20 @@ export function InstitutionSheet({
       pending={pending}
       title={isEdit ? "Editar institución" : "Nueva institución"}
       actions={{
-        delete: isEdit ? (
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              className="text-destructive"
-              disabled={isPending}
-              onClick={() => void onArchive()}
-            >
-              Archivar
-            </Button>
-            <Button
-              variant="destructive"
-              disabled={isPending}
-              onClick={() => void onDelete()}
-            >
-              Borrar
-            </Button>
-          </div>
-        ) : undefined,
         close: (
           <Button
             variant="outline"
             className="flex-1"
             onClick={() => onOpenChange(false)}
           >
+            <XIcon className="size-4" />
             Cancelar
           </Button>
         ),
         submit: (
           <Button disabled={isPending} className="flex-1" onClick={onSubmit}>
-            {isPending ? <Spinner data-icon="inline-start" /> : null}
-            Guardar
+            {isPending ? <Spinner data-icon="inline-start" /> : <SaveIcon className="size-4" />}
+            {isPending ? "Guardando..." : "Guardar"}
           </Button>
         ),
       }}
@@ -201,7 +183,6 @@ export function InstitutionSheet({
               onChange={field.onChange}
               onBlur={field.onBlur}
               error={errors.name?.message}
-              placeholder="Banco, fintech…"
             />
           )}
         />
@@ -215,11 +196,11 @@ export function InstitutionSheet({
               onChange={field.onChange}
               onBlur={field.onBlur}
               error={errors.country?.message}
-              placeholder="DO"
             />
           )}
         />
       </SummarySection>
+
       <SummarySection title="Apariencia" icon={Palette}>
         <Controller
           control={control}
@@ -237,6 +218,29 @@ export function InstitutionSheet({
           )}
         />
       </SummarySection>
+
+      {isEdit && (
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            className="flex-1 text-destructive"
+            disabled={isPending}
+            onClick={() => void onArchive()}
+          >
+            <ArchiveIcon className="size-4" />
+            Archivar
+          </Button>
+          <Button
+            variant="destructive"
+            className="flex-1"
+            disabled={isPending}
+            onClick={() => void onDelete()}
+          >
+            <TrashIcon className="size-4" />
+            Borrar
+          </Button>
+        </div>
+      )}
     </BottomSheet>
   )
 }

@@ -359,6 +359,7 @@ export type FinancePendingEmailMessage = {
     currency?: string
     merchant?: string | null
     description?: string
+    notes?: string | null
     type?: string
   } | null
   reason: string | null

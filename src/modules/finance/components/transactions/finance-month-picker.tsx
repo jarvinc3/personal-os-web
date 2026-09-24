@@ -1,15 +1,15 @@
 "use client"
 
-import { format } from "date-fns"
-import { es } from "date-fns/locale/es"
-import { useEffect, useRef } from "react"
+import { format } from "date-fns";
+import { es } from "date-fns/locale/es";
+import { useEffect, useRef } from "react";
 
-import { cn } from "@/src/shared/lib/utils"
 import {
   monthKey,
   type MonthKey,
   type YearMonth,
-} from "@/src/modules/finance/lib/month-window"
+} from "@/src/modules/finance/lib/month-window";
+import { cn } from "@/src/shared/lib/utils";
 
 function formatMonthPickerChip(date: Date): string {
   return format(date, "MMM yy", { locale: es }).replace(/\./g, "").toUpperCase()
@@ -43,7 +43,7 @@ export function FinanceMonthPicker({
   useEffect(() => {
     const list = listRef.current
     const chip = list?.querySelector<HTMLElement>(
-      `[data-month-chip="${activeMonthKey}"]`,
+      `[data-month-chip="${activeMonthKey}"]`
     )
     if (!list || !chip) return
     scrollChipIntoCenter(list, chip)
@@ -54,7 +54,7 @@ export function FinanceMonthPicker({
       ref={listRef}
       role="tablist"
       aria-label="Meses"
-      className="flex snap-x snap-mandatory gap-2 overflow-x-auto pb-1 scrollbar-none"
+      className="flex overflow-x-auto gap-2 pb-1 snap-x snap-mandatory scrollbar-none"
     >
       {months.map((slot) => {
         const key = monthKey(slot.year, slot.month)
@@ -70,14 +70,15 @@ export function FinanceMonthPicker({
             aria-selected={selected}
             aria-current={isCurrent ? "date" : undefined}
             title={isCurrent ? "Mes actual" : undefined}
+            onMouseDown={(event) => event.preventDefault()}
             onClick={() => onSelect(key)}
             className={cn(
-              "snap-center shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold tracking-wide transition-colors",
+              "px-3 py-1 text-xs font-semibold tracking-wide rounded-full transition-colors shrink-0 snap-center",
               selected
-                ? "bg-foreground text-background"
+                ? "ring-2 ring-inset bg-foreground/70 text-background"
                 : isCurrent
-                  ? "bg-muted text-foreground ring-2 ring-inset ring-foreground"
-                  : "bg-muted text-muted-foreground hover:text-foreground",
+                  ? "ring-2 ring-inset ring-primary text-foreground"
+                  : "text-muted-foreground hover:text-foreground"
             )}
           >
             {formatMonthPickerChip(date)}

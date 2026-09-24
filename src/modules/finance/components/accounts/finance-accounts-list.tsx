@@ -1,25 +1,29 @@
 "use client"
 
-import { InstitutionSwapStack } from "@/src/modules/finance/components/accounts/institution-swap-stack"
-import { InstitutionSheet } from "@/src/modules/finance/components/accounts/institution-sheet"
-import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/constants/sheet-keys"
-import { useAccounts } from "@/src/modules/finance/hooks/use-accounts"
-import { useBalanceSheet } from "@/src/modules/finance/hooks/use-balance-sheet"
-import { useCards } from "@/src/modules/finance/hooks/use-cards"
-import { useFinanceEnabled } from "@/src/modules/finance/hooks/use-finance-enabled"
-import { useInstitutions } from "@/src/modules/finance/hooks/use-institutions"
-import { useLoans } from "@/src/modules/finance/hooks/use-loans"
-import { useSheetListEntity } from "@/src/modules/finance/hooks/use-sheet-entity"
+import { InstitutionSheet } from "@/src/modules/finance/components/accounts/institution-sheet";
+import { InstitutionSwapStack } from "@/src/modules/finance/components/accounts/institution-swap-stack";
+import { AccountSheet } from "@/src/modules/finance/components/catalog/account-sheet";
+import { CategorySheet } from "@/src/modules/finance/components/catalog/category-sheet";
+import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/constants/sheet-keys";
+import { useAccounts } from "@/src/modules/finance/hooks/use-accounts";
+import { useBalanceSheet } from "@/src/modules/finance/hooks/use-balance-sheet";
+import { useCards } from "@/src/modules/finance/hooks/use-cards";
+import { useCategories } from "@/src/modules/finance/hooks/use-categories";
+import { useFinanceEnabled } from "@/src/modules/finance/hooks/use-finance-enabled";
+import { useInstitutions } from "@/src/modules/finance/hooks/use-institutions";
+import { useLoans } from "@/src/modules/finance/hooks/use-loans";
+import { useSheetListEntity } from "@/src/modules/finance/hooks/use-sheet-entity";
+import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error";
 import {
   prefetchFinanceCategories,
   prefetchFinanceSync,
-} from "@/src/modules/finance/lib/finance-prefetch"
-import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
-import { buildInstitutionStackItems } from "@/src/modules/finance/lib/institution-stack"
-import type { FinanceMoneyDisplay } from "@/src/modules/finance/lib/money"
-import { formatFinanceMoney } from "@/src/modules/finance/lib/money"
-import { SettingsSection } from "@/src/shared/components/layout/settings-section"
-import { Button } from "@/src/shared/components/ui/button"
+} from "@/src/modules/finance/lib/finance-prefetch";
+import { buildInstitutionStackItems } from "@/src/modules/finance/lib/institution-stack";
+import type { FinanceMoneyDisplay } from "@/src/modules/finance/lib/money";
+import { formatFinanceMoney } from "@/src/modules/finance/lib/money";
+import { ExpandableFab } from "@/src/shared/components/layout/expandable-fab";
+import { SettingsSection } from "@/src/shared/components/layout/settings-section";
+import { Button } from "@/src/shared/components/ui/button";
 import {
   Empty,
   EmptyContent,
@@ -27,15 +31,21 @@ import {
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
-} from "@/src/shared/components/ui/empty"
-import { Spinner } from "@/src/shared/components/ui/spinner"
-import { SummaryItem } from "@/src/shared/components/ui/summary"
-import { APP_ROUTES } from "@/src/shared/constants/app-routes"
-import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
-import { useQueryClient } from "@tanstack/react-query"
-import { Building2Icon, MailIcon, PlusIcon, TagsIcon } from "lucide-react"
-import { useRouter } from "next/navigation"
-import { useMemo } from "react"
+} from "@/src/shared/components/ui/empty";
+import { Spinner } from "@/src/shared/components/ui/spinner";
+import { SummaryItem } from "@/src/shared/components/ui/summary";
+import { APP_ROUTES } from "@/src/shared/constants/app-routes";
+import { useSheetParam } from "@/src/shared/hooks/use-sheet-params";
+import { useQueryClient } from "@tanstack/react-query";
+import {
+  Building2Icon,
+  MailIcon,
+  TagsIcon,
+  WalletIcon,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useMemo } from "react";
+import { FinanceHeroSection } from "./finance-hero-section";
 
 type FinanceAccountsListProps = {
   enabled: boolean
@@ -46,6 +56,7 @@ type FinanceAccountsListProps = {
 export function FinanceAccountsList({
   enabled,
   display,
+  defaultCurrency,
 }: FinanceAccountsListProps) {
   const router = useRouter()
   const queryClient = useQueryClient()
@@ -54,18 +65,43 @@ export function FinanceAccountsList({
   const accountsQuery = useAccounts(enabled)
   const cardsQuery = useCards(enabled)
   const loansQuery = useLoans(enabled)
+  const categoriesQuery = useCategories(enabled)
   const balanceSheetQuery = useBalanceSheet(enabled)
   const {
     open: openInstitutionSheet,
     sheetId: institutionSheetId,
     setOpen: setOpenInstitutionSheet,
   } = useSheetParam(FINANCE_SHEET_KEYS.institution)
+  const {
+    open: openAccountSheet,
+    sheetId: accountSheetId,
+    setOpen: setOpenAccountSheet,
+  } = useSheetParam(FINANCE_SHEET_KEYS.account)
+  const {
+    open: openCategorySheet,
+    sheetId: categorySheetId,
+    setOpen: setOpenCategorySheet,
+  } = useSheetParam(FINANCE_SHEET_KEYS.category)
   const editingInstitution = useSheetListEntity(
     openInstitutionSheet,
     institutionSheetId,
     institutionsQuery.data,
     institutionsQuery.isPending,
     setOpenInstitutionSheet
+  )
+  const editingAccount = useSheetListEntity(
+    openAccountSheet,
+    accountSheetId,
+    accountsQuery.data,
+    accountsQuery.isPending,
+    setOpenAccountSheet
+  )
+  const editingCategory = useSheetListEntity(
+    openCategorySheet,
+    categorySheetId,
+    categoriesQuery.data,
+    categoriesQuery.isPending,
+    setOpenCategorySheet
   )
 
   const moneyDisplay = {
@@ -94,7 +130,10 @@ export function FinanceAccountsList({
   const global = balanceSheetQuery.data?.global
   const netWorthLabel =
     global?.status === "COMPLETE"
-      ? formatFinanceMoney(global.netWorth, moneyDisplay)
+      ? formatFinanceMoney(global.netWorth, {
+        ...moneyDisplay,
+        leadingSign: true,
+      })
       : global
         ? "Balance incompleto"
         : "—"
@@ -128,16 +167,13 @@ export function FinanceAccountsList({
         <p className="text-sm text-destructive">{errorMessage}</p>
       ) : null}
 
-      <div className="flex flex-col items-center gap-1 px-2 pb-2">
-        <p className="text-[11px] font-medium tracking-[0.16em] text-muted-foreground uppercase">
-          Balance total
-        </p>
-        <p className="text-3xl font-bold tracking-tight text-foreground tabular-nums">
-          {balanceSheetQuery.isPending && !balanceSheetQuery.data
-            ? "…"
-            : netWorthLabel}
-        </p>
-      </div>
+      <FinanceHeroSection
+        items={stackItems}
+        display={moneyDisplay}
+        isPending={balanceSheetQuery.isPending}
+        hasData={Boolean(balanceSheetQuery.data)}
+        netWorthLabel={netWorthLabel}
+      />
 
       <div>
         {stackPending ? (
@@ -220,21 +256,62 @@ export function FinanceAccountsList({
         </div>
       </SettingsSection>
 
-      <Button
-        type="button"
-        size="icon-lg"
-        aria-label="Nueva institución"
-        className="fixed right-4 bottom-[calc(6rem+env(safe-area-inset-bottom))] z-50 size-14 rounded-full shadow-xl md:bottom-8"
-        onClick={() => setOpenInstitutionSheet(true, null)}
-      >
-        <PlusIcon className="size-6" />
-      </Button>
+      <ExpandableFab
+        label="Crear en cuentas"
+        actions={[
+          {
+            icon: <Building2Icon className="size-5" />,
+            label: "Institución",
+            onClick: () => setOpenInstitutionSheet(true, null),
+            disabled: !enabled,
+            color: "bg-emerald-700",
+          },
+          {
+            icon: <WalletIcon className="size-5" />,
+            label: "Efectivo",
+            onClick: () => setOpenAccountSheet(true, null),
+            disabled: !enabled,
+            color: "bg-slate-600",
+          },
+          {
+            icon: <TagsIcon className="size-5" />,
+            label: "Categoría",
+            onClick: () => {
+              void prefetchFinanceCategories(queryClient)
+              setOpenCategorySheet(true, null)
+            },
+            disabled: !enabled,
+            color: "bg-amber-600",
+          },
+        ]}
+      />
 
       <InstitutionSheet
         open={openInstitutionSheet}
         onOpenChange={setOpenInstitutionSheet}
         institution={editingInstitution}
-        pending={institutionsQuery.isPending}
+        pending={Boolean(institutionSheetId) && !editingInstitution}
+      />
+
+      <AccountSheet
+        open={openAccountSheet}
+        onOpenChange={setOpenAccountSheet}
+        pending={Boolean(accountSheetId) && !editingAccount}
+        account={editingAccount}
+        institutions={institutionsQuery.data ?? []}
+        defaultCurrency={
+          balanceSheetQuery.data?.baseCurrency ?? defaultCurrency
+        }
+        display={display}
+        defaultType="CASH"
+      />
+
+      <CategorySheet
+        open={openCategorySheet}
+        onOpenChange={setOpenCategorySheet}
+        pending={Boolean(categorySheetId) && !editingCategory}
+        category={editingCategory}
+        categories={categoriesQuery.data ?? []}
       />
     </>
   )

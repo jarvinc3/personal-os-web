@@ -1,26 +1,25 @@
 "use client"
 
-import { FinanceFlowPills } from "@/src/modules/finance/components/transactions/finance-flow-pills"
-import { FinanceMonthPicker } from "@/src/modules/finance/components/transactions/finance-month-picker"
-import { FinanceMonthSection } from "@/src/modules/finance/components/transactions/finance-month-section"
-import { FinanceTransactionSearch } from "@/src/modules/finance/components/transactions/finance-transaction-search"
-import { TransactionDetailSheet } from "@/src/modules/finance/components/transactions/transaction-detail-sheet"
-import { TransactionSheet } from "@/src/modules/finance/components/transactions/transaction-sheet"
-import { TransferSheet } from "@/src/modules/finance/components/transactions/transfer-sheet"
-import { FinanceListSkeleton } from "@/src/modules/finance/components/layout/finance-list-skeleton"
-import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/constants/sheet-keys"
-import { useAccounts } from "@/src/modules/finance/hooks/use-accounts"
-import { useCards } from "@/src/modules/finance/hooks/use-cards"
-import { useCategories } from "@/src/modules/finance/hooks/use-categories"
-import { useSheetQueryEntity } from "@/src/modules/finance/hooks/use-sheet-entity"
+import { FinanceListSkeleton } from "@/src/modules/finance/components/layout/finance-list-skeleton";
+import { FinanceFlowPills } from "@/src/modules/finance/components/transactions/finance-flow-pills";
+import { FinanceMonthPicker } from "@/src/modules/finance/components/transactions/finance-month-picker";
+import { FinanceMonthSection } from "@/src/modules/finance/components/transactions/finance-month-section";
+import { FinanceTransactionSearch } from "@/src/modules/finance/components/transactions/finance-transaction-search";
+import { TransactionDetailSheet } from "@/src/modules/finance/components/transactions/transaction-detail-sheet";
+import { TransactionSheet } from "@/src/modules/finance/components/transactions/transaction-sheet";
+import { TransferSheet } from "@/src/modules/finance/components/transactions/transfer-sheet";
+import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/constants/sheet-keys";
+import { useAccounts } from "@/src/modules/finance/hooks/use-accounts";
+import { useCards } from "@/src/modules/finance/hooks/use-cards";
+import { useCategories } from "@/src/modules/finance/hooks/use-categories";
+import { useSheetQueryEntity } from "@/src/modules/finance/hooks/use-sheet-entity";
 import {
   useTimelineTransactions,
   useTransaction,
-} from "@/src/modules/finance/hooks/use-transactions"
-import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
-import { FINANCE_TRANSACTIONS_QUERY_KEY } from "@/src/modules/finance/types/api"
-import { buildTimelineMonths } from "@/src/modules/finance/lib/group-transactions-timeline"
-import type { FinanceMoneyDisplay } from "@/src/modules/finance/lib/money"
+} from "@/src/modules/finance/hooks/use-transactions";
+import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error";
+import { buildTimelineMonths } from "@/src/modules/finance/lib/group-transactions-timeline";
+import type { FinanceMoneyDisplay } from "@/src/modules/finance/lib/money";
 import {
   extendMonthRange,
   initialMonthRange,
@@ -29,23 +28,24 @@ import {
   parseMonthKey,
   yearsTouched,
   type MonthKey,
-} from "@/src/modules/finance/lib/month-window"
+} from "@/src/modules/finance/lib/month-window";
 import {
   animateScrollSectionIntoView,
   findActiveMonthKey,
   getScrollParent,
   scrollSectionIntoView,
-} from "@/src/modules/finance/lib/timeline-scroll"
-import { ExpandableFab } from "@/src/shared/components/layout/expandable-fab"
-import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
-import { appToast } from "@/src/shared/lib/app-toast"
-import { useQueryClient } from "@tanstack/react-query"
+} from "@/src/modules/finance/lib/timeline-scroll";
+import { FINANCE_TRANSACTIONS_QUERY_KEY } from "@/src/modules/finance/types/api";
+import { ExpandableFab } from "@/src/shared/components/layout/expandable-fab";
+import { useSheetParam } from "@/src/shared/hooks/use-sheet-params";
+import { appToast } from "@/src/shared/lib/app-toast";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeftRightIcon,
   MinusIcon,
   PlusIcon,
   RefreshCwIcon,
-} from "lucide-react"
+} from "lucide-react";
 import {
   useCallback,
   useEffect,
@@ -53,7 +53,7 @@ import {
   useMemo,
   useRef,
   useState,
-} from "react"
+} from "react";
 
 type FinanceTransactionsListProps = {
   enabled: boolean
@@ -61,26 +61,10 @@ type FinanceTransactionsListProps = {
 }
 
 const STICKY_GAP = 8
-const PROGRAMMATIC_SCROLL_MS = 1800
+const PROGRAMMATIC_SCROLL_MS = 1600
 
 function prefersReducedMotion() {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches
-}
-
-function beginProgrammaticScroll(
-  flag: { current: boolean },
-  timer: { current: number },
-  parent: HTMLElement | null,
-) {
-  flag.current = true
-  window.clearTimeout(timer.current)
-  const finish = () => {
-    window.clearTimeout(timer.current)
-    parent?.removeEventListener("scrollend", finish)
-    flag.current = false
-  }
-  parent?.addEventListener("scrollend", finish, { once: true })
-  timer.current = window.setTimeout(finish, PROGRAMMATIC_SCROLL_MS)
 }
 
 export function FinanceTransactionsList({
@@ -89,7 +73,7 @@ export function FinanceTransactionsList({
 }: FinanceTransactionsListProps) {
   const [range, setRange] = useState(() => initialMonthRange())
   const [activeMonthKey, setActiveMonthKey] = useState<MonthKey>(() =>
-    monthKeyFromDate(new Date()),
+    monthKeyFromDate(new Date())
   )
   const [stickyOffset, setStickyOffset] = useState(0)
   const chromeRef = useRef<HTMLDivElement>(null)
@@ -97,8 +81,8 @@ export function FinanceTransactionsList({
   const isProgrammaticScroll = useRef(false)
   const programmaticTimer = useRef(0)
   const didInitialScroll = useRef(false)
-  const pendingScrollKey = useRef<MonthKey | null>(null)
-  const pendingScrollHeight = useRef<number | null>(null)
+  const programmaticTarget = useRef<MonthKey | null>(null)
+  const scrollGeneration = useRef(0)
   const currentMonthKey = monthKeyFromDate(new Date())
   const {
     open: openDetailSheet,
@@ -133,28 +117,28 @@ export function FinanceTransactionsList({
 
   const months = useMemo(
     () => listYearMonths(range.from, range.to),
-    [range.from, range.to],
+    [range.from, range.to]
   )
   const years = useMemo(
     () => yearsTouched(range.from, range.to),
-    [range.from, range.to],
+    [range.from, range.to]
   )
 
   const timelineQuery = useTimelineTransactions(enabled, years, {})
   const timeline = useMemo(
     () => buildTimelineMonths(months, timelineQuery.items),
-    [months, timelineQuery.items],
+    [months, timelineQuery.items]
   )
   const activeMonth = timeline.find((month) => month.key === activeMonthKey)
   const editingQuery = useTransaction(
     enabled && openTransactionSheet && Boolean(transactionSheetId),
-    transactionSheetId,
+    transactionSheetId
   )
   const editing = useSheetQueryEntity(
     openTransactionSheet,
     transactionSheetId,
     editingQuery,
-    setOpenTransactionSheet,
+    setOpenTransactionSheet
   )
 
   const applyActiveMonth = useCallback((key: MonthKey) => {
@@ -173,12 +157,13 @@ export function FinanceTransactionsList({
     })
   }, [])
 
-  const scrollToMonth = useCallback((key: MonthKey) => {
-    pendingScrollKey.current = key
-    pendingScrollHeight.current =
-      getScrollParent(timelineRef.current)?.scrollHeight ?? null
-    applyActiveMonth(key)
-  }, [applyActiveMonth])
+  const scrollToMonth = useCallback(
+    (key: MonthKey) => {
+      programmaticTarget.current = key
+      applyActiveMonth(key)
+    },
+    [applyActiveMonth]
+  )
 
   useLayoutEffect(() => {
     const chrome = chromeRef.current
@@ -191,49 +176,63 @@ export function FinanceTransactionsList({
   }, [])
 
   useLayoutEffect(() => {
-    if (didInitialScroll.current || stickyOffset === 0 || !timelineRef.current) {
-      return
-    }
-    if (timeline.length === 0) return
+    const isInitial = !didInitialScroll.current
+    const targetKey = isInitial ? activeMonthKey : programmaticTarget.current
+    if (!targetKey || stickyOffset === 0 || !timelineRef.current) return
     const section = timelineRef.current.querySelector<HTMLElement>(
-      `[data-month-key="${activeMonthKey}"]`,
+      `[data-month-key="${targetKey}"]`
     )
     if (!section) return
-    didInitialScroll.current = true
-    beginProgrammaticScroll(
-      isProgrammaticScroll,
-      programmaticTimer,
-      getScrollParent(section),
-    )
-    scrollSectionIntoView(section, stickyOffset + STICKY_GAP, "auto")
-  }, [activeMonthKey, stickyOffset, timeline.length])
 
-  useEffect(() => {
-    if (!didInitialScroll.current || stickyOffset === 0) return
-    const key = pendingScrollKey.current
-    if (!key) return
-    const section = timelineRef.current?.querySelector<HTMLElement>(
-      `[data-month-key="${key}"]`,
-    )
-    if (!section) return
-    pendingScrollKey.current = null
+    const generation = ++scrollGeneration.current
     const parent = getScrollParent(section)
-    const previousHeight = pendingScrollHeight.current
-    pendingScrollHeight.current = null
-    if (parent && previousHeight != null) {
-      const grown = parent.scrollHeight - previousHeight
-      if (grown > 0) parent.scrollTop += grown
+    const offset = stickyOffset + STICKY_GAP
+    isProgrammaticScroll.current = true
+
+    const release = () => {
+      if (scrollGeneration.current !== generation) return
+      isProgrammaticScroll.current = false
+      programmaticTarget.current = null
+      didInitialScroll.current = true
+      window.clearTimeout(programmaticTimer.current)
     }
-    beginProgrammaticScroll(isProgrammaticScroll, programmaticTimer, parent)
-    if (prefersReducedMotion()) {
-      scrollSectionIntoView(section, stickyOffset + STICKY_GAP, "auto")
-      return
+
+    let cancelAnimation = () => { }
+    const stopForUser = () => {
+      if (scrollGeneration.current !== generation) return
+      scrollGeneration.current += 1
+      cancelAnimation()
+      programmaticTarget.current = null
+      didInitialScroll.current = true
+      isProgrammaticScroll.current = false
+      window.clearTimeout(programmaticTimer.current)
     }
-    const cancel = animateScrollSectionIntoView(
-      section,
-      stickyOffset + STICKY_GAP,
-    )
-    return cancel
+    parent?.addEventListener("wheel", stopForUser, { passive: true })
+    parent?.addEventListener("touchstart", stopForUser, { passive: true })
+
+    if (isInitial || prefersReducedMotion()) {
+      scrollSectionIntoView(section, offset, "auto")
+      programmaticTimer.current = window.setTimeout(release, 80)
+    } else {
+      cancelAnimation = animateScrollSectionIntoView(section, offset, release)
+      programmaticTimer.current = window.setTimeout(
+        release,
+        PROGRAMMATIC_SCROLL_MS
+      )
+    }
+
+    return () => {
+      cancelAnimation()
+      window.clearTimeout(programmaticTimer.current)
+      parent?.removeEventListener("wheel", stopForUser)
+      parent?.removeEventListener("touchstart", stopForUser)
+      if (scrollGeneration.current === generation) {
+        scrollGeneration.current += 1
+      }
+      const willRetry =
+        programmaticTarget.current != null || !didInitialScroll.current
+      if (!willRetry) isProgrammaticScroll.current = false
+    }
   }, [activeMonthKey, months, stickyOffset, timeline.length])
 
   useEffect(() => {
@@ -269,7 +268,9 @@ export function FinanceTransactionsList({
         parent === document.documentElement || parent === document.body
           ? 0
           : parent.getBoundingClientRect().top
-      const sections = [...node.querySelectorAll<HTMLElement>("[data-month-key]")]
+      const sections = [
+        ...node.querySelectorAll<HTMLElement>("[data-month-key]"),
+      ]
         .map((section) => ({
           key: section.getAttribute("data-month-key") ?? "",
           top: section.getBoundingClientRect().top - parentTop,
@@ -278,7 +279,7 @@ export function FinanceTransactionsList({
       const nextKey = findActiveMonthKey(sections, stickyOffset + STICKY_GAP)
       if (nextKey) {
         setActiveMonthKey((current) =>
-          current === nextKey ? current : nextKey,
+          current === nextKey ? current : nextKey
         )
       }
     }
@@ -297,7 +298,7 @@ export function FinanceTransactionsList({
     <div className="flex flex-col gap-4">
       <div
         ref={chromeRef}
-        className="sticky top-0 z-30 flex flex-col gap-3 bg-background pb-2"
+        className="flex sticky top-0 z-30 flex-col gap-3 pb-2 bg-background"
       >
         <FinanceTransactionSearch
           enabled={enabled}

@@ -31,7 +31,7 @@ export function SettingsSection({
       {bare ? (
         children
       ) : (
-        <div className="overflow-hidden rounded-2xl border border-border bg-card">
+          <div className="overflow-hidden p-1 rounded-2xl border border-border bg-card">
           {children}
         </div>
       )}

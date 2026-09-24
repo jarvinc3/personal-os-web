@@ -1,11 +1,18 @@
+/**
+ * Scroll landing and subpixel layout can leave a banner a fraction below the
+ * marker. Without this slack the previous month stays selected.
+ */
+export const TIMELINE_MARKER_SLACK_PX = 1
+
 export function findActiveMonthKey(
   sections: ReadonlyArray<{ key: string; top: number }>,
-  marker: number,
+  marker: number
 ): string | null {
   if (sections.length === 0) return null
+  const line = marker + TIMELINE_MARKER_SLACK_PX
   let active: string | null = null
   for (const section of sections) {
-    if (section.top <= marker) {
+    if (section.top <= line) {
       active = section.key
     }
   }
@@ -22,7 +29,8 @@ export function getScrollParent(node: HTMLElement | null): HTMLElement | null {
     current = current.parentElement
   }
   return (
-    (document.scrollingElement as HTMLElement | null) ?? document.documentElement
+    (document.scrollingElement as HTMLElement | null) ??
+    document.documentElement
   )
 }
 
@@ -34,13 +42,13 @@ function sectionScrollTarget(section: HTMLElement, offset: number) {
       ? 0
       : parent.getBoundingClientRect().top
   const delta = section.getBoundingClientRect().top - parentTop - offset
-  return { parent, top: parent.scrollTop + delta }
+  return { parent, top: parent.scrollTop + delta + TIMELINE_MARKER_SLACK_PX }
 }
 
 export function scrollSectionIntoView(
   section: HTMLElement,
   offset: number,
-  behavior: ScrollBehavior = "smooth",
+  behavior: ScrollBehavior = "smooth"
 ) {
   const target = sectionScrollTarget(section, offset)
   if (!target) {
@@ -50,31 +58,53 @@ export function scrollSectionIntoView(
   target.parent.scrollTo({ top: target.top, behavior })
 }
 
-function easeOutCubic(t: number) {
-  return 1 - (1 - t) ** 3
+function easeInOutCubic(t: number) {
+  return t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2
 }
 
 export function animateScrollSectionIntoView(
   section: HTMLElement,
   offset: number,
+  onComplete?: () => void
 ): () => void {
   const target = sectionScrollTarget(section, offset)
-  if (!target) return () => {}
+  if (!target) {
+    onComplete?.()
+    return () => { }
+  }
   const start = target.parent.scrollTop
   const delta = target.top - start
-  if (Math.abs(delta) < 2) return () => {}
-  const durationMs = Math.min(900, Math.max(480, Math.abs(delta) * 0.42))
+  if (Math.abs(delta) < 2) {
+    target.parent.scrollTop = target.top
+    onComplete?.()
+    return () => { }
+  }
+  const durationMs = Math.min(1400, Math.max(560, Math.abs(delta) * 0.22))
   const raf = { id: 0 }
   const startedAt = performance.now()
+  let settled = false
+
+  function finish() {
+    if (settled) return
+    settled = true
+    onComplete?.()
+  }
 
   function step(now: number) {
+    if (settled) return
     const t = Math.min(1, (now - startedAt) / durationMs)
-    target.parent.scrollTop = start + delta * easeOutCubic(t)
+    target.parent.scrollTop = start + delta * easeInOutCubic(t)
     if (t < 1) {
       raf.id = window.requestAnimationFrame(step)
+      return
     }
+    target.parent.scrollTop = target.top
+    raf.id = window.requestAnimationFrame(finish)
   }
 
   raf.id = window.requestAnimationFrame(step)
-  return () => window.cancelAnimationFrame(raf.id)
+  return () => {
+    settled = true
+    window.cancelAnimationFrame(raf.id)
+  }
 }

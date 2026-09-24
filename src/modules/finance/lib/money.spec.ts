@@ -1,10 +1,10 @@
-import assert from "node:assert/strict"
-import { describe, it } from "node:test"
+import assert from "node:assert/strict";
+import { describe, it } from "node:test";
 
 import {
   formatFinanceMoney,
   parseFinanceMoney,
-} from "./money.ts"
+} from "./money.ts";
 
 describe("parseFinanceMoney", () => {
   it('parses "0.12" to 0.12', () => {
@@ -90,5 +90,17 @@ describe("formatFinanceMoney", () => {
     }
     assert.equal(formatFinanceMoney("nope", display), "—")
     assert.equal(formatFinanceMoney("10", { ...display, currency: "" }), "—")
+  })
+
+  it("prefixes + or - before the currency when leadingSign is set", () => {
+    const display = {
+      currency: "DOP",
+      showCents: true,
+      compactNumbers: false,
+      leadingSign: true,
+    }
+    assert.equal(formatFinanceMoney("491.00", display), "+DOP $491.00")
+    assert.equal(formatFinanceMoney("-159.00", display), "-DOP $159.00")
+    assert.equal(formatFinanceMoney("0", display), "+DOP $0.00")
   })
 })

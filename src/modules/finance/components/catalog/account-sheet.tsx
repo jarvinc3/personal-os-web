@@ -1,48 +1,48 @@
 "use client"
 
-import { FinanceCurrencyPills } from "@/src/modules/finance/components/forms/finance-currency-pills"
+import { FinanceCurrencyPills } from "@/src/modules/finance/components/forms/finance-currency-pills";
 import {
   FinancePreviewRow,
   FinanceSegmentedControl,
-} from "@/src/modules/finance/components/forms/finance-form-blocks"
+} from "@/src/modules/finance/components/forms/finance-form-blocks";
 import {
   CATALOG_NONE,
   FINANCE_ACCOUNT_TYPE_LABEL,
   FINANCE_ACCOUNT_TYPES,
-} from "@/src/modules/finance/constants/catalog"
+} from "@/src/modules/finance/constants/catalog";
 import {
   useArchiveAccount,
   useCreateAccount,
   useDeleteAccount,
   useUpdateAccount,
-} from "@/src/modules/finance/hooks/use-accounts"
-import { buildCreateAccountBody } from "@/src/modules/finance/lib/catalog-payloads"
-import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
+} from "@/src/modules/finance/hooks/use-accounts";
+import { buildCreateAccountBody } from "@/src/modules/finance/lib/catalog-payloads";
+import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error";
 import {
   formatFinanceMoney,
   type FinanceMoneyDisplay,
-} from "@/src/modules/finance/lib/money"
+} from "@/src/modules/finance/lib/money";
 import type {
   FinanceAccount,
   FinanceInstitution,
-} from "@/src/modules/finance/types/entities"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+} from "@/src/modules/finance/types/entities";
+import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet";
 import {
   FormTextField,
   SelectField,
-} from "@/src/shared/components/layout/form-blocks"
-import { Button } from "@/src/shared/components/ui/button"
-import { ColorPickerSwatch } from "@/src/shared/components/ui/color-picker"
-import { Label } from "@/src/shared/components/ui/label"
-import { Spinner } from "@/src/shared/components/ui/spinner"
-import { SummarySection } from "@/src/shared/components/ui/summary"
-import { appToast } from "@/src/shared/lib/app-toast"
-import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { LandmarkIcon, Palette } from "lucide-react"
-import { useEffect, useMemo } from "react"
-import { Controller, useForm, useWatch } from "react-hook-form"
-import { z } from "zod"
+} from "@/src/shared/components/layout/form-blocks";
+import { Button } from "@/src/shared/components/ui/button";
+import { ColorPickerSwatch } from "@/src/shared/components/ui/color-picker";
+import { Label } from "@/src/shared/components/ui/label";
+import { Spinner } from "@/src/shared/components/ui/spinner";
+import { SummarySection } from "@/src/shared/components/ui/summary";
+import { appToast } from "@/src/shared/lib/app-toast";
+import { createSheetSubmit } from "@/src/shared/lib/sheet-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { ArchiveIcon, LandmarkIcon, Palette, SaveIcon, TrashIcon, XIcon } from "lucide-react";
+import { useEffect, useMemo } from "react";
+import { Controller, useForm, useWatch } from "react-hook-form";
+import { z } from "zod";
 
 const schema = z
   .object({
@@ -84,15 +84,17 @@ const TYPE_OPTIONS = FINANCE_ACCOUNT_TYPES.map((value) => ({
 function toFormValues(
   account: FinanceAccount | null,
   defaultCurrency: string,
-  defaultInstitutionId: string
+  defaultInstitutionId: string,
+  defaultType: FormValues["type"] = "CHECKING",
 ): FormValues {
+  const type = account?.type ?? defaultType
   return {
     name: account?.name ?? "",
-    type: account?.type ?? "CHECKING",
+    type,
     currency: account?.currency ?? defaultCurrency,
     institutionId:
       account?.institutionId ??
-      (account?.type === "CASH" ? CATALOG_NONE : defaultInstitutionId),
+      (type === "CASH" ? CATALOG_NONE : defaultInstitutionId),
     accountNumber: account?.accountNumber ?? "",
     color: account?.color ?? "",
   }
@@ -106,6 +108,7 @@ type AccountSheetProps = {
   defaultCurrency: string
   display?: FinanceMoneyDisplay
   defaultInstitutionId?: string
+  defaultType?: FormValues["type"]
   pending?: boolean
   onDeleted?: () => void
 }
@@ -118,6 +121,7 @@ export function AccountSheet({
   defaultCurrency,
   display,
   defaultInstitutionId,
+  defaultType = "CHECKING",
   pending = false,
   onDeleted,
 }: AccountSheetProps) {
@@ -153,7 +157,8 @@ export function AccountSheet({
     defaultValues: toFormValues(
       account,
       defaultCurrency,
-      resolvedDefaultInstitutionId
+      resolvedDefaultInstitutionId,
+      defaultType,
     ),
   })
 
@@ -166,10 +171,22 @@ export function AccountSheet({
   useEffect(() => {
     if (open) {
       reset(
-        toFormValues(account, defaultCurrency, resolvedDefaultInstitutionId)
+        toFormValues(
+          account,
+          defaultCurrency,
+          resolvedDefaultInstitutionId,
+          defaultType,
+        )
       )
     }
-  }, [open, account, defaultCurrency, resolvedDefaultInstitutionId, reset])
+  }, [
+    open,
+    account,
+    defaultCurrency,
+    resolvedDefaultInstitutionId,
+    defaultType,
+    reset,
+  ])
 
   const submitForm = useMemo(
     () => createSheetSubmit(handleSubmit),
@@ -251,31 +268,13 @@ export function AccountSheet({
           : "Crea una institución bancaria antes de agregar una cuenta."
       }
       actions={{
-        delete: isEdit ? (
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              className="text-destructive"
-              disabled={isPending}
-              onClick={() => void onArchive()}
-            >
-              Archivar
-            </Button>
-            <Button
-              variant="destructive"
-              disabled={isPending}
-              onClick={() => void onDelete()}
-            >
-              Borrar
-            </Button>
-          </div>
-        ) : undefined,
         close: (
           <Button
             variant="outline"
             className="flex-1"
             onClick={() => onOpenChange(false)}
           >
+            <XIcon className="size-4 shrink-0" />
             Cancelar
           </Button>
         ),
@@ -285,8 +284,8 @@ export function AccountSheet({
             className="flex-1"
             onClick={onSubmit}
           >
-            {isPending ? <Spinner data-icon="inline-start" /> : null}
-            Guardar
+            {isPending ? <Spinner data-icon="inline-start" /> : <SaveIcon className="size-4 shrink-0" />}
+            {isPending ? "Guardando..." : "Guardar"}
           </Button>
         ),
       }}
@@ -344,11 +343,11 @@ export function AccountSheet({
                 hasInstitutions || accountType === "CASH"
                   ? institutionOptions
                   : [
-                      {
-                        value: CATALOG_NONE,
-                        label: "Crea una institución primero",
-                      },
-                    ]
+                    {
+                      value: CATALOG_NONE,
+                      label: "Crea una institución primero",
+                    },
+                  ]
               }
               disabled={!hasInstitutions && accountType !== "CASH"}
             />
@@ -388,6 +387,7 @@ export function AccountSheet({
           )}
         />
       </SummarySection>
+
       <SummarySection title="Apariencia" icon={Palette}>
         <Controller
           control={control}
@@ -405,6 +405,29 @@ export function AccountSheet({
           )}
         />
       </SummarySection>
+
+      {isEdit && (
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            className="flex-1 text-destructive"
+            disabled={isPending}
+            onClick={() => void onArchive()}
+          >
+            <ArchiveIcon className="size-4" />
+            Archivar
+          </Button>
+          <Button
+            variant="destructive"
+            disabled={isPending}
+            className="flex-1"
+            onClick={() => void onDelete()}
+          >
+            <TrashIcon className="size-4" />
+            Borrar
+          </Button>
+        </div>
+      )}
     </BottomSheet>
   )
 }

@@ -3,37 +3,37 @@
 import {
   FinancePreviewRow,
   FinanceSegmentedControl,
-} from "@/src/modules/finance/components/forms/finance-form-blocks"
-import { CATALOG_NONE } from "@/src/modules/finance/constants/catalog"
+} from "@/src/modules/finance/components/forms/finance-form-blocks";
+import { CATALOG_NONE } from "@/src/modules/finance/constants/catalog";
 import {
   useCreateCategory,
   useDeleteCategory,
   useUpdateCategory,
-} from "@/src/modules/finance/hooks/use-categories"
-import { buildCreateCategoryBody } from "@/src/modules/finance/lib/catalog-payloads"
-import { filterCategoriesByType } from "@/src/modules/finance/lib/category-tree"
-import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
+} from "@/src/modules/finance/hooks/use-categories";
+import { buildCreateCategoryBody } from "@/src/modules/finance/lib/catalog-payloads";
+import { filterCategoriesByType } from "@/src/modules/finance/lib/category-tree";
+import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error";
 import type {
   FinanceCategory,
   FinanceCategoryType,
-} from "@/src/modules/finance/types/entities"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+} from "@/src/modules/finance/types/entities";
+import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet";
 import {
   FormTextField,
   SelectField,
-} from "@/src/shared/components/layout/form-blocks"
-import { Button } from "@/src/shared/components/ui/button"
-import { ColorPickerSwatch } from "@/src/shared/components/ui/color-picker"
-import { Label } from "@/src/shared/components/ui/label"
-import { Spinner } from "@/src/shared/components/ui/spinner"
-import { SummarySection } from "@/src/shared/components/ui/summary"
-import { appToast } from "@/src/shared/lib/app-toast"
-import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { Palette, TagsIcon } from "lucide-react"
-import { useEffect, useMemo } from "react"
-import { Controller, useForm, useWatch } from "react-hook-form"
-import { z } from "zod"
+} from "@/src/shared/components/layout/form-blocks";
+import { Button } from "@/src/shared/components/ui/button";
+import { ColorPickerSwatch } from "@/src/shared/components/ui/color-picker";
+import { Label } from "@/src/shared/components/ui/label";
+import { Spinner } from "@/src/shared/components/ui/spinner";
+import { SummarySection } from "@/src/shared/components/ui/summary";
+import { appToast } from "@/src/shared/lib/app-toast";
+import { createSheetSubmit } from "@/src/shared/lib/sheet-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Palette, SaveIcon, TagsIcon, TrashIcon, XIcon } from "lucide-react";
+import { useEffect, useMemo } from "react";
+import { Controller, useForm, useWatch } from "react-hook-form";
+import { z } from "zod";
 
 const TYPE_OPTIONS = [
   { value: "EXPENSE" as const, label: "Gasto" },
@@ -195,29 +195,20 @@ export function CategorySheet({
           : "Usa un emoji como icono."
       }
       actions={{
-        delete:
-          isEdit && !isSystem ? (
-            <Button
-              variant="destructive"
-              disabled={isPending}
-              onClick={() => void onDelete()}
-            >
-              Eliminar
-            </Button>
-          ) : undefined,
         close: (
           <Button
             variant="outline"
             className="flex-1"
             onClick={() => onOpenChange(false)}
           >
+            <XIcon className="size-4 shrink-0" />
             Cancelar
           </Button>
         ),
         submit: isSystem ? undefined : (
           <Button disabled={isPending} className="flex-1" onClick={onSubmit}>
-            {isPending ? <Spinner data-icon="inline-start" /> : null}
-            Guardar
+            {isPending ? <Spinner data-icon="inline-start" /> : <SaveIcon className="size-4 shrink-0" />}
+            {isPending ? "Guardando..." : "Guardar"}
           </Button>
         ),
       }}
@@ -286,6 +277,7 @@ export function CategorySheet({
           )}
         />
       </SummarySection>
+
       <SummarySection title="Apariencia" icon={Palette}>
         <Controller
           control={control}
@@ -304,6 +296,18 @@ export function CategorySheet({
           )}
         />
       </SummarySection>
+
+      {isEdit && !isSystem && (
+        <Button
+          variant="destructive"
+          disabled={isPending}
+          className="flex-1"
+          onClick={() => void onDelete()}
+        >
+          {isPending ? <Spinner data-icon="inline-start" /> : <TrashIcon className="size-4" />}
+          {isPending ? "Eliminando..." : "Eliminar"}
+        </Button>
+      )}
     </BottomSheet>
   )
 }

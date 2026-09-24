@@ -194,8 +194,8 @@ export function FormTextField({
   const inputType = canReveal && revealed ? 'text' : type;
 
   return (
-    <Field data-invalid={hasError ? true : undefined}>
-      {label ? <FieldLabel>{label}</FieldLabel> : null}
+    <Field data-invalid={hasError ? true : undefined} className="relative">
+      {label ? <FieldLabel className="absolute -top-2.5 left-4 text-sm text-muted-foreground">{label}</FieldLabel> : null}
       <div className="flex relative flex-row gap-2 items-center">
         {Icon && (
           <div className="absolute left-3 top-1/2 -translate-y-1/2">

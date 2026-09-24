@@ -52,7 +52,10 @@ function pendingRowValue(
       : message.lastFourHint
         ? `****${message.lastFourHint}`
         : "Sin monto"
-  return `${message.institutionName} · ${amount}`
+  const notesHint = payload?.notes?.trim()
+    ? " · Con notas"
+    : ""
+  return `${message.institutionName} · ${amount}${notesHint}`
 }
 
 export function FinanceMailboxesView({ enabled }: { enabled: boolean }) {

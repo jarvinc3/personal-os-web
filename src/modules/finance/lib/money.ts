@@ -2,6 +2,8 @@ export type FinanceMoneyDisplay = {
   currency: string
   showCents: boolean
   compactNumbers: boolean
+  /** When true, prefixes `+` / `-` before the currency code (e.g. `+DOP $10`). */
+  leadingSign?: boolean
 }
 
 export function parseFinanceMoney(value: string | number | null | undefined): number | null {
@@ -47,8 +49,13 @@ export function formatFinanceMoney(
       maximumFractionDigits: display.showCents ? 2 : 0,
       notation: display.compactNumbers ? "compact" : "standard",
     }).format(Math.abs(amount))
-    const sign = amount < 0 ? "-" : ""
 
+    if (display.leadingSign) {
+      const sign = amount < 0 ? "-" : "+"
+      return `${sign}${currency} ${symbol}${formattedAmount}`
+    }
+
+    const sign = amount < 0 ? "-" : ""
     return `${currency} ${sign}${symbol}${formattedAmount}`
   } catch {
     return "—"

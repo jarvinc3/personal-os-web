@@ -1,29 +1,29 @@
 "use client"
 
-import type { TimelineMonth } from "@/src/modules/finance/lib/group-transactions-timeline"
+import type { TimelineMonth } from "@/src/modules/finance/lib/group-transactions-timeline";
 import {
   formatFinanceMoney,
   parseFinanceMoney,
   type FinanceMoneyDisplay,
-} from "@/src/modules/finance/lib/money"
+} from "@/src/modules/finance/lib/money";
 import {
   formatTransactionDate,
   isTransferTransaction,
   transferDirectionLabel,
-} from "@/src/modules/finance/lib/transactions-query"
+} from "@/src/modules/finance/lib/transactions-query";
 import {
   FINANCE_TRANSACTION_STATUS_LABEL,
   type FinanceCategory,
   type FinanceTransaction,
-} from "@/src/modules/finance/types/entities"
-import { SummaryItem } from "@/src/shared/components/ui/summary"
-import { cn } from "@/src/shared/lib/utils"
+} from "@/src/modules/finance/types/entities";
+import { SummaryItem } from "@/src/shared/components/ui/summary";
+import { cn } from "@/src/shared/lib/utils";
 import {
   ArrowDownLeftIcon,
   ArrowLeftRightIcon,
   ArrowUpRightIcon,
-} from "lucide-react"
-import Image from "next/image"
+} from "lucide-react";
+import Image from "next/image";
 
 type FinanceMonthSectionProps = {
   month: TimelineMonth
@@ -69,7 +69,7 @@ export function FinanceMonthSection({
       style={{ scrollMarginTop: stickyOffset }}
       className="flex flex-col gap-4"
     >
-      <div className="relative h-40 overflow-hidden rounded-2xl">
+      <div className="overflow-hidden relative h-40 rounded-2xl">
         <Image
           src={month.bannerSrc}
           alt=""
@@ -89,12 +89,12 @@ export function FinanceMonthSection({
 
       {month.weeks.map((week) => (
         <div key={week.id} className="flex flex-col gap-3">
-          <p className="text-center text-sm text-muted-foreground">
+          <p className="text-sm text-center text-muted-foreground">
             {week.label}
           </p>
           {week.days.map((day) => (
             <div key={day.dateKey} className="flex flex-col gap-2">
-              <div className="flex items-center justify-between gap-3 px-1">
+              <div className="flex gap-3 justify-between items-center px-1">
                 <p className="text-xs text-muted-foreground">{day.label}</p>
                 <p
                   className={cn(
@@ -109,7 +109,7 @@ export function FinanceMonthSection({
                     : `${day.net > 0 ? "+" : "−"} ${formatFinanceMoney(Math.abs(day.net), display)}`}
                 </p>
               </div>
-              <div className="rounded-2xl border border-border bg-card px-3">
+              <div className="rounded-2xl border border-border bg-card">
                 {day.items.map((transaction, index) => {
                   const isTransfer = isTransferTransaction(transaction)
                   const category = transaction.categoryId

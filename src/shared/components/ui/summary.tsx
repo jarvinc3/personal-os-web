@@ -1,14 +1,14 @@
 "use client"
 
-import { ChevronDownIcon, ChevronRightIcon, LucideIcon } from "lucide-react"
-import Link from "next/link"
-import { ComponentProps, ReactNode } from "react"
-import { cn, PRESSABLE_CLASS } from "../../lib/utils"
+import { ChevronDownIcon, ChevronRightIcon, LucideIcon } from "lucide-react";
+import Link from "next/link";
+import { ComponentProps, ReactNode } from "react";
+import { cn, PRESSABLE_CLASS } from "../../lib/utils";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "./collapsible"
+} from "./collapsible";
 
 type SummarySectionProps = {
   title?: string
@@ -17,75 +17,6 @@ type SummarySectionProps = {
   children: ReactNode
   color?: string
   collapsible?: boolean
-}
-
-export function SummarySection({
-  title,
-  children,
-  right,
-  icon: Icon,
-  color,
-  collapsible = false,
-}: SummarySectionProps) {
-  const titleContent = (
-    <div className="flex min-w-0 items-center gap-2">
-      {Icon && <Icon className="size-4 text-muted-foreground" />}
-      <span className="text-sm font-medium text-muted-foreground">{title}</span>
-    </div>
-  )
-
-  const header = title ? (
-    <div className="flex flex-row items-center justify-between px-3 py-1">
-      {collapsible ? (
-        <CollapsibleTrigger className="flex min-w-0 flex-1 cursor-pointer items-center justify-between gap-2 text-left">
-          {titleContent}
-          <ChevronDownIcon className="size-4 shrink-0 text-muted-foreground transition-transform duration-200 ease-out group-data-open/summary:rotate-180" />
-        </CollapsibleTrigger>
-      ) : (
-        titleContent
-      )}
-      {right && (
-        <div
-          className="flex shrink-0 flex-row items-center gap-2"
-          onClick={collapsible ? (event) => event.stopPropagation() : undefined}
-          onPointerDown={
-            collapsible ? (event) => event.stopPropagation() : undefined
-          }
-        >
-          {right}
-        </div>
-      )}
-    </div>
-  ) : null
-
-  const body = (
-    <div
-      className={cn(
-        "flex flex-col gap-3 rounded-2xl border border-border bg-card p-3",
-        color
-      )}
-    >
-      {children}
-    </div>
-  )
-
-  const rootClassName = cn("rounded-2xl border border-border bg-muted", color)
-
-  if (collapsible) {
-    return (
-      <Collapsible defaultOpen className={cn(rootClassName, "group/summary")}>
-        {header}
-        <CollapsibleContent>{body}</CollapsibleContent>
-      </Collapsible>
-    )
-  }
-
-  return (
-    <div className={rootClassName}>
-      {header}
-      {body}
-    </div>
-  )
 }
 
 type SummaryItemBaseProps = {
@@ -114,6 +45,75 @@ type SummaryItemActionProps = SummaryItemBaseProps & {
 
 export type SummaryItemProps = SummaryItemLinkProps | SummaryItemActionProps
 
+export function SummarySection({
+  title,
+  children,
+  right,
+  icon: Icon,
+  color,
+  collapsible = false,
+}: SummarySectionProps) {
+  const titleContent = (
+    <div className="flex gap-2 items-center min-w-0">
+      {Icon && <Icon className="size-4 text-muted-foreground" />}
+      <span className="text-sm font-medium text-muted-foreground">{title}</span>
+    </div>
+  )
+
+  const header = title ? (
+    <div className="flex flex-row justify-between items-center px-3 py-1">
+      {collapsible ? (
+        <CollapsibleTrigger className="flex flex-1 gap-2 justify-between items-center min-w-0 text-left cursor-pointer">
+          {titleContent}
+          <ChevronDownIcon className="transition-transform duration-200 ease-out size-4 shrink-0 text-muted-foreground group-data-open/summary:rotate-180" />
+        </CollapsibleTrigger>
+      ) : (
+        titleContent
+      )}
+      {right && (
+        <div
+          className="flex flex-row gap-2 items-center shrink-0"
+          onClick={collapsible ? (event) => event.stopPropagation() : undefined}
+          onPointerDown={
+            collapsible ? (event) => event.stopPropagation() : undefined
+          }
+        >
+          {right}
+        </div>
+      )}
+    </div>
+  ) : null
+
+  const body = (
+    <div
+      className={cn(
+        "flex flex-col gap-5 p-2 rounded-2xl border border-border bg-card",
+        color
+      )}
+    >
+      {children}
+    </div>
+  )
+
+  const rootClassName = cn("rounded-2xl border border-border bg-muted", color)
+
+  if (collapsible) {
+    return (
+      <Collapsible defaultOpen className={cn(rootClassName, "group/summary")}>
+        {header}
+        <CollapsibleContent>{body}</CollapsibleContent>
+      </Collapsible>
+    )
+  }
+
+  return (
+    <div className={rootClassName}>
+      {header}
+      {body}
+    </div>
+  )
+}
+
 export function SummaryItem({
   title,
   description,
@@ -135,11 +135,11 @@ export function SummaryItem({
   const showLeading = Boolean(leading) || Boolean(Icon)
 
   const rowClassName = cn(
-    "flex w-full items-center gap-3 py-3 text-left",
-    !isLast && "border-b border-border/60",
-    isInteractive && cn(PRESSABLE_CLASS, "hover:bg-muted/50"),
+    "flex w-full items-center gap-3 p-2 rounded-2xl text-left transition-all duration-200",
+    !isLast && "border-b border-border/60 transition-all duration-200",
+    isInteractive && cn(PRESSABLE_CLASS, "hover:bg-muted/50 transition-all duration-200"),
     onPress && "cursor-pointer",
-    disabled && "opacity-50",
+    disabled && "opacity-50 transition-all duration-200",
     className
   )
 
@@ -147,7 +147,7 @@ export function SummaryItem({
     <>
       {showLeading ? (
         <span
-          className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted"
+          className="flex justify-center items-center rounded-full size-10 shrink-0 bg-muted"
           style={
             accentColor
               ? {
@@ -165,16 +165,16 @@ export function SummaryItem({
             ) : null)}
         </span>
       ) : null}
-      <span className="min-w-0 flex-1">
-        <span className="block truncate text-sm font-medium">{title}</span>
+      <span className="flex-1 min-w-0">
+        <span className="block text-sm font-medium truncate">{title}</span>
         {description ? (
-          <span className="block truncate text-xs text-muted-foreground">
+          <span className="block text-xs truncate text-muted-foreground">
             {description}
           </span>
         ) : null}
       </span>
       {value ? (
-        <span className="shrink-0 text-sm font-semibold tabular-nums">
+        <span className="text-sm font-semibold tabular-nums shrink-0">
           {value}
         </span>
       ) : null}

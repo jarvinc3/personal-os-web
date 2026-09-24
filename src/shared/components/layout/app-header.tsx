@@ -1,16 +1,16 @@
 "use client"
 
-import { useAuth } from "@/src/modules/auth"
+import { useAuth } from "@/src/modules/auth";
 import {
     useNotificationPreferences,
     useUnreadNotificationCount,
-} from "@/src/modules/notifications"
+} from "@/src/modules/notifications";
 import {
     Avatar,
     AvatarFallback,
     AvatarImage,
-} from "@/src/shared/components/ui/avatar"
-import { Button } from "@/src/shared/components/ui/button"
+} from "@/src/shared/components/ui/avatar";
+import { Button } from "@/src/shared/components/ui/button";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -19,21 +19,21 @@ import {
     DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
-} from "@/src/shared/components/ui/dropdown-menu"
-import { Separator } from "@/src/shared/components/ui/separator"
-import { SidebarTrigger } from "@/src/shared/components/ui/sidebar"
-import { APP_ROUTES } from "@/src/shared/constants/app-routes"
-import { useHeaderContext } from "@/src/shared/context/header-context"
-import { cn } from "@/src/shared/lib/utils"
-import { useAppStore } from "@/src/shared/store/app-store"
+} from "@/src/shared/components/ui/dropdown-menu";
+import { Separator } from "@/src/shared/components/ui/separator";
+import { SidebarTrigger } from "@/src/shared/components/ui/sidebar";
+import { APP_ROUTES } from "@/src/shared/constants/app-routes";
+import { useHeaderContext } from "@/src/shared/context/header-context";
+import { cn } from "@/src/shared/lib/utils";
+import { useAppStore } from "@/src/shared/store/app-store";
 import {
     BellIcon,
     ChevronLeftIcon,
     LogOutIcon,
     SettingsIcon,
-} from "lucide-react"
-import { usePathname, useRouter } from "next/navigation"
-import type { ReactNode } from "react"
+} from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import type { ReactNode } from "react";
 
 const PAGE_TITLES: Record<string, string> = {
   [APP_ROUTES.app.home]: "Inicio",
@@ -77,7 +77,7 @@ function HeaderBackButton({
     <Button
       variant="outline"
       size="icon"
-      className={cn("size-9 rounded-full", className)}
+      className={cn("rounded-full size-9", className)}
       onClick={onBack}
       aria-label="Volver"
     >
@@ -96,7 +96,7 @@ function NotificationBell() {
     <Button
       variant="outline"
       size="icon"
-      className="relative mr-1 size-9 shrink-0 rounded-full"
+      className="relative mr-1 rounded-full size-9 shrink-0"
       onClick={() => router.push(APP_ROUTES.app.notifications)}
       aria-label="Centro de notificaciones"
     >
@@ -104,7 +104,7 @@ function NotificationBell() {
       {unreadCount > 0 ? (
         <span
           className={cn(
-            "absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-medium text-white"
+            "flex absolute -top-1 -right-1 justify-center items-center px-1 h-4 font-medium text-white rounded-full min-w-4 bg-destructive text-[10px]"
           )}
         >
           {unreadCount > 9 ? "9+" : String(unreadCount)}
@@ -133,7 +133,7 @@ function HeaderUserMenu() {
           className="rounded-full"
           aria-label="Menú de usuario"
         >
-          <Avatar className="size-9 rounded-full">
+          <Avatar className="rounded-full size-9">
             <AvatarImage src={avatarUrl} alt={displayName} />
             <AvatarFallback className="rounded-lg">
               {displayName.slice(0, 2).toUpperCase()}
@@ -150,7 +150,7 @@ function HeaderUserMenu() {
         <DropdownMenuGroup>
           <DropdownMenuLabel className="p-0 font-normal">
             <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-              <Avatar className="size-8 rounded-lg">
+              <Avatar className="rounded-lg size-8">
                 {avatarUrl ? (
                   <AvatarImage src={avatarUrl} alt={displayName} />
                 ) : null}
@@ -158,9 +158,9 @@ function HeaderUserMenu() {
                   {displayName.slice(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{displayName}</span>
-                <span className="truncate text-xs text-muted-foreground">
+              <div className="grid flex-1 text-sm leading-tight text-left">
+                <span className="font-medium truncate">{displayName}</span>
+                <span className="text-xs truncate text-muted-foreground">
                   {email}
                 </span>
               </div>
@@ -242,7 +242,7 @@ function PrimaryHeader({
   showUserMenu: boolean
 }) {
   return (
-    <div className="s flex w-full items-center gap-1 px-4 lg:px-6">
+    <div className="flex gap-1 items-center px-4 w-full s lg:px-6">
       {showSidebarTrigger ? (
         <>
           <SidebarTrigger />
@@ -252,9 +252,9 @@ function PrimaryHeader({
           />
         </>
       ) : null}
-      <div className="flex min-w-0 flex-1 flex-col">{title}</div>
+      <div className="flex flex-col flex-1 min-w-0">{title}</div>
       {actions ? (
-        <div className="mr-1 flex shrink-0 items-center gap-2">{actions}</div>
+        <div className="flex gap-2 items-center mr-1 shrink-0">{actions}</div>
       ) : null}
       {showNotificationBell ? <NotificationBell /> : null}
       {showUserMenu ? <HeaderUserMenu /> : null}
@@ -284,7 +284,7 @@ function SecondaryHeader({
         onBack={onBack}
         className={tinted ? "text-white hover:bg-white/15 hover:text-white" : undefined}
       />
-      <div className="min-w-0 justify-self-center">
+      <div className="justify-self-center min-w-0">
         <HeaderTitle title={title} centered />
       </div>
       <div
@@ -320,7 +320,7 @@ export function AppHeader() {
         "sticky top-0 z-40 flex h-(--header-height) shrink-0 items-center gap-2 py-2.5",
         accentColor
           ? "text-white backdrop-blur-none"
-          : "bg-background/80 backdrop-blur-lg",
+          : "backdrop-blur-lg",
       )}
       style={
         accentColor

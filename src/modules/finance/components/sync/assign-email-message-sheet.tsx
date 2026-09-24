@@ -186,6 +186,18 @@ export function AssignEmailMessageSheet({
     >
       <SummarySection title="Extracto" icon={InboxIcon}>
         <p className="text-sm text-muted-foreground">{summary}</p>
+        {extracted?.description ? (
+          <p className="text-sm">{extracted.description}</p>
+        ) : null}
+        {extracted?.notes ? (
+          <div className="space-y-1">
+            <p className="text-xs font-medium text-muted-foreground">Notas</p>
+            <p className="text-sm whitespace-pre-wrap">{extracted.notes}</p>
+          </div>
+        ) : null}
+        {message?.reason ? (
+          <p className="text-sm text-muted-foreground">{message.reason}</p>
+        ) : null}
         {message?.lastFourHint ? (
           <p className="text-sm">Últimos dígitos: {message.lastFourHint}</p>
         ) : null}

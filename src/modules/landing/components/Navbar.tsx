@@ -64,28 +64,48 @@ export function Navbar() {
           </Link>
           <Link
             href={`${APP_ROUTES.marketing.landing}#waitlist`}
-            className="group relative overflow-hidden rounded-xl border-2 border-text bg-primary px-4 py-2 text-sm font-bold text-primary-foreground shadow-[4px_4px_0px_0px_#111827] transition-all duration-200 hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_#111827] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none"
+            className="group relative overflow-hidden rounded-xl border-2 border-text bg-primary px-4 py-2 text-sm font-bold text-primary-foreground shadow-[4px_4px_0px_0px_#111827] transition-all duration-200 hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0px_0px_#111827] active:translate-x-1 active:translate-y-1 active:shadow-none"
           >
             <span className="relative z-10">{landingContent.nav.cta}</span>
           </Link>
         </div>
 
         {/* Mobile burger */}
-        <button
-          onClick={() => setMobileOpen(!mobileOpen)}
-          className="flex h-9 w-9 flex-col items-center justify-center gap-1.5 rounded-lg md:hidden"
-          aria-label="Toggle menu"
-        >
-          <span
-            className={`block h-0.5 w-5 bg-foreground transition-all duration-300 ${mobileOpen ? "translate-y-2 rotate-45" : ""}`}
-          />
-          <span
-            className={`block h-0.5 w-5 bg-foreground transition-all duration-300 ${mobileOpen ? "opacity-0" : ""}`}
-          />
-          <span
-            className={`block h-0.5 w-5 bg-foreground transition-all duration-300 ${mobileOpen ? "-translate-y-2 -rotate-45" : ""}`}
-          />
-        </button>
+        <div className="flex gap-3 items-center">
+          <AnimatePresence>
+            {mobileOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.25, ease: "easeOut" }}
+              >
+                <Link
+                  href={APP_ROUTES.auth.login}
+                  onClick={() => setMobileOpen(false)}
+                  className="rounded-xl border-2 border-text bg-white px-4 py-2 text-center text-sm font-bold text-text shadow-[2px_2px_0px_0px_#111827] transition-all duration-200 hover:translate-x-px hover:translate-y-px hover:shadow-[1px_1px_0px_0px_#111827]"
+                >
+                  Iniciar sesión
+                </Link>
+              </motion.div>
+            )}
+          </AnimatePresence>
+          <button
+            onClick={() => setMobileOpen(!mobileOpen)}
+            className="flex h-9 w-9 flex-col items-center justify-center gap-1.5 rounded-lg md:hidden"
+            aria-label="Toggle menu"
+          >
+            <span
+              className={`block h-0.5 w-5 bg-foreground transition-all duration-300 ${mobileOpen ? "translate-y-2 rotate-45" : ""}`}
+            />
+            <span
+              className={`block h-0.5 w-5 bg-foreground transition-all duration-300 ${mobileOpen ? "opacity-0" : ""}`}
+            />
+            <span
+              className={`block h-0.5 w-5 bg-foreground transition-all duration-300 ${mobileOpen ? "-translate-y-2 -rotate-45" : ""}`}
+            />
+          </button>
+        </div>
       </div>
 
       {/* Mobile menu */}
@@ -95,7 +115,7 @@ export function Navbar() {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.25 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
             className="overflow-hidden border-b-2 border-text bg-white shadow-[0px_8px_0px_0px_#111827] md:hidden"
           >
             <nav className="flex flex-col gap-1 px-6 py-4">
@@ -109,13 +129,6 @@ export function Navbar() {
                   {link.label}
                 </Link>
               ))}
-              <Link
-                href={APP_ROUTES.auth.login}
-                onClick={() => setMobileOpen(false)}
-                className="rounded-xl border-2 border-text bg-white px-4 py-2 text-center text-sm font-bold text-text shadow-[2px_2px_0px_0px_#111827] transition-all duration-200 hover:translate-x-px hover:translate-y-px hover:shadow-[1px_1px_0px_0px_#111827]"
-              >
-                Iniciar sesión
-              </Link>
               <Link
                 href={`${APP_ROUTES.marketing.landing}#waitlist`}
                 onClick={() => setMobileOpen(false)}
