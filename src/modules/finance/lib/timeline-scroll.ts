@@ -72,10 +72,12 @@ export function animateScrollSectionIntoView(
     onComplete?.()
     return () => { }
   }
-  const start = target.parent.scrollTop
-  const delta = target.top - start
+  const parent = target.parent
+  const endTop = target.top
+  const start = parent.scrollTop
+  const delta = endTop - start
   if (Math.abs(delta) < 2) {
-    target.parent.scrollTop = target.top
+    parent.scrollTop = endTop
     onComplete?.()
     return () => { }
   }
@@ -93,12 +95,12 @@ export function animateScrollSectionIntoView(
   function step(now: number) {
     if (settled) return
     const t = Math.min(1, (now - startedAt) / durationMs)
-    target.parent.scrollTop = start + delta * easeInOutCubic(t)
+    parent.scrollTop = start + delta * easeInOutCubic(t)
     if (t < 1) {
       raf.id = window.requestAnimationFrame(step)
       return
     }
-    target.parent.scrollTop = target.top
+    parent.scrollTop = endTop
     raf.id = window.requestAnimationFrame(finish)
   }
 
