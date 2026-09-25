@@ -49,3 +49,18 @@ export const FINANCE_APP_NAV: ModuleAppNav = {
   icon: LandmarkIcon,
   items: FINANCE_NAV_ITEMS,
 }
+
+export function financeSectionTitle(pathname: string): string | null {
+  const items = [...FINANCE_NAV_ITEMS].sort(
+    (left, right) => right.href.length - left.href.length,
+  )
+
+  for (const item of items) {
+    if (pathname === item.href) return item.label
+    if (!item.matchExact && pathname.startsWith(`${item.href}/`)) {
+      return item.label
+    }
+  }
+
+  return null
+}

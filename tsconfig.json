@@ -32,6 +32,8 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
-  ],
+,
+"../bottom-sheet-variant.ts"
+],
   "exclude": ["node_modules", "**/*.spec.ts"]
 }

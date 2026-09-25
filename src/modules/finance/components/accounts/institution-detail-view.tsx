@@ -3,10 +3,8 @@
 import {
   AccountProductRow,
   CardProductRow,
-  InstitutionDetailTabs,
   InstitutionProductEmpty,
   LoanProductRow,
-  type InstitutionDetailTab,
 } from "@/src/modules/finance/components/accounts/institution-product-lists";
 import { InstitutionSheet } from "@/src/modules/finance/components/accounts/institution-sheet";
 import { AccountSheet } from "@/src/modules/finance/components/catalog/account-sheet";
@@ -38,6 +36,12 @@ import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet";
 import { LoadingView } from "@/src/shared/components/layout/loading-view";
 import { Button } from "@/src/shared/components/ui/button";
 import { SummaryItem } from "@/src/shared/components/ui/summary";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/src/shared/components/ui/tabs";
 import { APP_ROUTES } from "@/src/shared/constants/app-routes";
 import { usePageHeader } from "@/src/shared/hooks/use-page-header";
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params";
@@ -95,7 +99,7 @@ function InstitutionDetailView({
   const archiveInstitution = useArchiveInstitution()
   const deleteInstitution = useDeleteInstitution()
 
-  const [tab, setTab] = useState<InstitutionDetailTab>("accounts")
+  const [tab, setTab] = useState<"accounts" | "cards" | "loans">("accounts")
   const { open: openOptionsSheet, setOpen: setOpenOptionsSheet } =
     useSheetParam(FINANCE_SHEET_KEYS.institutionOptions)
   const {
@@ -376,16 +380,23 @@ function InstitutionDetailView({
           ) : null}
         </div>
 
-        <div className="px-4 pt-4">
-          <InstitutionDetailTabs
-            value={tab}
-            onChange={setTab}
-            accentColor={accent}
-          />
+        <div className="flex flex-col gap-3 mx-4 -mt-7 rounded-3xl bg-background">
+          <Tabs className="flex flex-col gap-4 p-1.5 w-full" value={tab} onValueChange={setTab}>
+            <TabsList className="w-full rounded-2xl bg-background">
+              <TabsTrigger value="accounts" className="py-4 rounded-2xl">
+                Cuentas
+              </TabsTrigger>
+              <TabsTrigger value="cards" className="py-4 rounded-2xl">
+                Tarjetas
+              </TabsTrigger>
+              <TabsTrigger value="loans" className="py-4 rounded-2xl">
+                Préstamos
+              </TabsTrigger>
+            </TabsList>
 
-          <div className="flex flex-col gap-3 mt-4">
-            {tab === "accounts" ? (
-              institutionAccounts.length === 0 ? (
+            {/* Panels are rendered by the parent for layout control */}
+            <TabsContent value="accounts" className="flex flex-col gap-3">
+              {institutionAccounts.length === 0 ? (
                 <InstitutionProductEmpty
                   tab="accounts"
                   onCreate={() => setOpenAccountSheet(true, null)}
@@ -399,11 +410,11 @@ function InstitutionDetailView({
                     onPress={() => setOpenAccountSheet(true, account.id)}
                   />
                 ))
-              )
-            ) : null}
+              )}
+            </TabsContent>
 
-            {tab === "cards" ? (
-              institutionCards.length === 0 ? (
+            <TabsContent value="cards" className="flex flex-col gap-3">
+              {institutionCards.length === 0 ? (
                 <InstitutionProductEmpty
                   tab="cards"
                   onCreate={() => setOpenCardSheet(true, null)}
@@ -417,11 +428,11 @@ function InstitutionDetailView({
                     onPress={() => setOpenCardSheet(true, card.id)}
                   />
                 ))
-              )
-            ) : null}
+              )}
+            </TabsContent>
 
-            {tab === "loans" ? (
-              institutionLoans.length === 0 ? (
+            <TabsContent value="loans" className="flex flex-col gap-3">
+              {institutionLoans.length === 0 ? (
                 <InstitutionProductEmpty
                   tab="loans"
                   onCreate={() => setOpenLoanSheet(true, null)}
@@ -435,9 +446,9 @@ function InstitutionDetailView({
                     onPress={() => setOpenLoanSheet(true, loan.id)}
                   />
                 ))
-              )
-            ) : null}
-          </div>
+              )}
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
 

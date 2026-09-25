@@ -38,9 +38,9 @@ export function SelectField({ label, value, onChange, options, disabled }: Selec
   const labelId = useId();
 
   return (
-    <Field>
+    <Field className="flex flex-col gap-1">
       {label ? (
-        <FieldLabel id={labelId} htmlFor={selectId}>
+        <FieldLabel id={labelId} htmlFor={selectId} className="text-sm text-muted-foreground">
           {label}
         </FieldLabel>
       ) : null}
@@ -107,8 +107,8 @@ export function OptionRow({
         </div>
       )}
       <FieldContent>
-        <FieldTitle>{label}</FieldTitle>
-        <FieldDescription>{description}</FieldDescription>
+        <FieldTitle className="text-sm text-muted-foreground">{label}</FieldTitle>
+        <FieldDescription className="text-xs text-muted-foreground">{description}</FieldDescription>
       </FieldContent>
       {trailing}
     </FieldLabel>
@@ -194,8 +194,8 @@ export function FormTextField({
   const inputType = canReveal && revealed ? 'text' : type;
 
   return (
-    <Field data-invalid={hasError ? true : undefined} className="relative">
-      {label ? <FieldLabel className="absolute -top-2.5 left-4 text-sm text-muted-foreground">{label}</FieldLabel> : null}
+    <Field data-invalid={hasError ? true : undefined} className="flex relative flex-col gap-1">
+      {label ? <FieldLabel className="text-sm text-muted-foreground">{label}</FieldLabel> : null}
       <div className="flex relative flex-row gap-2 items-center">
         {Icon && (
           <div className="absolute left-3 top-1/2 -translate-y-1/2">
@@ -254,7 +254,7 @@ export function SwitchFieldRow({
   return (
     <div className="flex flex-row gap-3 justify-between items-center px-4 py-3 rounded-full border border-border/60 bg-card">
       <label htmlFor={id} className="flex-1 min-w-0 cursor-pointer">
-        <p className="text-sm font-medium text-foreground">{label}</p>
+        <FieldLabel className="text-sm text-muted-foreground">{label}</FieldLabel>
         {description ? <p className="text-xs text-muted-foreground">{description}</p> : null}
       </label>
       <Switch id={id} checked={checked} onCheckedChange={onCheckedChange} disabled={disabled} />

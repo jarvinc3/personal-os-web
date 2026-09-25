@@ -1,6 +1,7 @@
 "use client"
 
 import { useAuth } from "@/src/modules/auth";
+import { financeSectionTitle } from "@/src/modules/finance/constants/nav";
 import {
     useNotificationPreferences,
     useUnreadNotificationCount,
@@ -41,7 +42,7 @@ const PAGE_TITLES: Record<string, string> = {
   [APP_ROUTES.app.chat]: "Agente IA",
   [APP_ROUTES.app.notifications]: "Notificaciones",
   [APP_ROUTES.app.keepAwake]: "Keep Awake",
-  [APP_ROUTES.app.finance]: "Finanzas",
+  [APP_ROUTES.app.finance]: "Resumen",
 }
 
 function resolvePageTitle(pathname: string): string {
@@ -61,7 +62,7 @@ function resolvePageTitle(pathname: string): string {
     return "Keep Awake"
   }
   if (pathname.startsWith(APP_ROUTES.app.finance)) {
-    return "Finanzas"
+    return financeSectionTitle(pathname) ?? "Finanzas"
   }
   return "Personal OS"
 }
