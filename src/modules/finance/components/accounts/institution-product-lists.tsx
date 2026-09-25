@@ -4,15 +4,15 @@ import {
   FINANCE_ACCOUNT_TYPE_LABEL,
   FINANCE_CARD_NETWORK_LABEL,
   FINANCE_CARD_TYPE_LABEL,
-} from "@/src/modules/finance/constants/catalog"
-import type { FinanceMoneyDisplay } from "@/src/modules/finance/lib/money"
-import { formatFinanceMoney } from "@/src/modules/finance/lib/money"
+} from "@/src/modules/finance/constants/catalog";
+import type { FinanceMoneyDisplay } from "@/src/modules/finance/lib/money";
+import { formatFinanceMoney } from "@/src/modules/finance/lib/money";
 import type {
   FinanceAccount,
   FinanceCard,
   FinanceLoan,
-} from "@/src/modules/finance/types/entities"
-import { Button } from "@/src/shared/components/ui/button"
+} from "@/src/modules/finance/types/entities";
+import { Button } from "@/src/shared/components/ui/button";
 import {
   Empty,
   EmptyContent,
@@ -20,62 +20,15 @@ import {
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
-} from "@/src/shared/components/ui/empty"
-import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/src/shared/components/ui/tabs"
+} from "@/src/shared/components/ui/empty";
+import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils";
 import {
   CreditCardIcon,
   HandCoinsIcon,
   LandmarkIcon,
   PiggyBankIcon,
   PlusIcon,
-} from "lucide-react"
-
-export type InstitutionDetailTab = "accounts" | "cards" | "loans"
-
-type InstitutionDetailTabsProps = {
-  value: InstitutionDetailTab
-  onChange: (tab: InstitutionDetailTab) => void
-  accentColor?: string
-}
-
-export function InstitutionDetailTabs({
-  value,
-  onChange,
-}: InstitutionDetailTabsProps) {
-  return (
-    <Tabs
-      value={value}
-      onValueChange={(next) => {
-        if (next === "accounts" || next === "cards" || next === "loans") {
-          onChange(next)
-        }
-      }}
-      className="w-full gap-0"
-    >
-      <TabsList className="h-auto w-full rounded-2xl p-1" variant="default">
-        <TabsTrigger value="accounts" className="rounded-xl px-3 py-2">
-          Cuentas
-        </TabsTrigger>
-        <TabsTrigger value="cards" className="rounded-xl px-3 py-2">
-          Tarjetas
-        </TabsTrigger>
-        <TabsTrigger value="loans" className="rounded-xl px-3 py-2">
-          Préstamos
-        </TabsTrigger>
-      </TabsList>
-      {/* Panels are rendered by the parent for layout control */}
-      <TabsContent value="accounts" className="hidden" />
-      <TabsContent value="cards" className="hidden" />
-      <TabsContent value="loans" className="hidden" />
-    </Tabs>
-  )
-}
+} from "lucide-react";
 
 type AccountProductRowProps = {
   account: FinanceAccount
@@ -98,18 +51,18 @@ export function AccountProductRow({
       type="button"
       onClick={onPress}
       className={cn(
-        "flex w-full items-center gap-3 rounded-2xl border border-border bg-card p-4 text-left hover:bg-muted/40",
+        "flex gap-3 items-center p-4 w-full text-left rounded-2xl border border-border bg-card hover:bg-muted/40",
         PRESSABLE_CLASS
       )}
     >
-      <div className="flex size-11 items-center justify-center rounded-full bg-muted">
+      <div className="flex justify-center items-center rounded-full size-11 bg-muted">
         <Icon className="size-5 text-muted-foreground" />
       </div>
-      <div className="min-w-0 flex-1">
-        <p className="truncate font-semibold text-foreground">{account.name}</p>
+      <div className="flex-1 min-w-0">
+        <p className="font-semibold truncate text-foreground">{account.name}</p>
         <p className="text-sm text-muted-foreground">{subtitle}</p>
       </div>
-      <p className="shrink-0 font-semibold text-foreground tabular-nums">
+      <p className="font-semibold tabular-nums shrink-0 text-foreground">
         {formatFinanceMoney(account.balance, {
           ...display,
           currency: account.currency,
@@ -137,15 +90,15 @@ export function CardProductRow({
       type="button"
       onClick={onPress}
       className={cn(
-        "flex w-full flex-col gap-4 rounded-2xl bg-zinc-900 p-4 text-left text-white hover:opacity-95",
+        "flex flex-col gap-4 p-4 w-full text-left text-white rounded-2xl bg-zinc-900 hover:opacity-95",
         PRESSABLE_CLASS
       )}
       style={card.color ? { backgroundColor: card.color } : undefined}
     >
-      <div className="flex items-center justify-between gap-3">
-        <span className="text-sm font-semibold tracking-wide">
-          {network?.toUpperCase() ?? "TARJETA"}
-        </span>
+      <div className="flex gap-3 justify-between items-center">
+        <p className="text-sm truncate text-white/80">
+          {card.name}
+        </p>
         <span className="rounded-full bg-white/15 px-2.5 py-0.5 text-xs font-medium">
           {FINANCE_CARD_TYPE_LABEL[card.type]}
         </span>
@@ -153,10 +106,10 @@ export function CardProductRow({
       <p className="text-lg tracking-[0.2em] text-white/80">
         •••• {card.lastFour ?? "····"}
       </p>
-      <div className="flex items-end justify-between gap-3">
+      <div className="flex gap-3 justify-between items-end">
         <div className="min-w-0">
           <p className="text-[10px] tracking-[0.14em] text-white/55 uppercase">
-            {card.type === "CREDIT" ? "Balance disponible" : "Saldo"}
+            {card.type === "CREDIT" ? "Balance disponible" : "Saldo actual"}
           </p>
           {card.balances.length === 0 ? (
             <p className="text-xl font-bold tabular-nums">Sin saldo</p>
@@ -171,7 +124,9 @@ export function CardProductRow({
             ))
           )}
         </div>
-        <p className="truncate text-sm text-white/75">{card.name}</p>
+        <span className="text-sm font-semibold tracking-wide">
+          {network?.toUpperCase() ?? "TARJETA"}
+        </span>
       </div>
     </button>
   )
@@ -193,22 +148,22 @@ export function LoanProductRow({
       type="button"
       onClick={onPress}
       className={cn(
-        "flex w-full items-center gap-3 rounded-2xl border border-border bg-card p-4 text-left hover:bg-muted/40",
+        "flex gap-3 items-center p-4 w-full text-left rounded-2xl border border-border bg-card hover:bg-muted/40",
         PRESSABLE_CLASS
       )}
     >
-      <div className="flex size-11 items-center justify-center rounded-full bg-muted">
+      <div className="flex justify-center items-center rounded-full size-11 bg-muted">
         <HandCoinsIcon className="size-5 text-muted-foreground" />
       </div>
-      <div className="min-w-0 flex-1">
-        <p className="truncate font-semibold text-foreground">
+      <div className="flex-1 min-w-0">
+        <p className="font-semibold truncate text-foreground">
           {loan.lenderName}
         </p>
         <p className="text-sm text-muted-foreground">
           {loan.paidInstallments}/{loan.totalInstallments} cuotas
         </p>
       </div>
-      <p className="shrink-0 font-semibold text-foreground tabular-nums">
+      <p className="font-semibold tabular-nums shrink-0 text-foreground">
         {formatFinanceMoney(loan.currentBalance, {
           ...display,
           currency: loan.currency,
@@ -219,7 +174,7 @@ export function LoanProductRow({
 }
 
 type ProductEmptyProps = {
-  tab: InstitutionDetailTab
+  tab: "accounts" | "cards" | "loans"
   onCreate: () => void
 }
 

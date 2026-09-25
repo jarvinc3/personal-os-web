@@ -1,30 +1,34 @@
 "use client"
 
-import { LoanSheet } from "@/src/modules/finance/components/planning/loan-sheet"
-import { ReceivableSheet } from "@/src/modules/finance/components/planning/receivable-sheet"
-import { SavingsGoalSheet } from "@/src/modules/finance/components/planning/savings-goal-sheet"
-import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/constants/sheet-keys"
-import { useAccounts } from "@/src/modules/finance/hooks/use-accounts"
-import { useInstitutions } from "@/src/modules/finance/hooks/use-institutions"
-import { useLoans } from "@/src/modules/finance/hooks/use-loans"
-import { useReceivables } from "@/src/modules/finance/hooks/use-receivables"
-import { useSavingsGoals } from "@/src/modules/finance/hooks/use-savings-goals"
-import { useSheetListEntity } from "@/src/modules/finance/hooks/use-sheet-entity"
-import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
-import { formatRatePercentLabel } from "@/src/modules/finance/lib/interest-rate"
-import type { FinanceMoneyDisplay } from "@/src/modules/finance/lib/money"
+import { FinanceListSkeleton } from "@/src/modules/finance/components/layout/finance-list-skeleton";
+import { LoanSheet } from "@/src/modules/finance/components/planning/loan-sheet";
+import { ReceivableSheet } from "@/src/modules/finance/components/planning/receivable-sheet";
+import { SavingsGoalSheet } from "@/src/modules/finance/components/planning/savings-goal-sheet";
+import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/constants/sheet-keys";
+import { useAccounts } from "@/src/modules/finance/hooks/use-accounts";
+import { useInstitutions } from "@/src/modules/finance/hooks/use-institutions";
+import { useLoans } from "@/src/modules/finance/hooks/use-loans";
+import { useReceivables } from "@/src/modules/finance/hooks/use-receivables";
+import { useSavingsGoals } from "@/src/modules/finance/hooks/use-savings-goals";
+import { useSheetListEntity } from "@/src/modules/finance/hooks/use-sheet-entity";
+import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error";
+import { formatRatePercentLabel } from "@/src/modules/finance/lib/interest-rate";
+import type { FinanceMoneyDisplay } from "@/src/modules/finance/lib/money";
 import {
   formatFinanceMoney,
   parseFinanceMoney,
-} from "@/src/modules/finance/lib/money"
-import { formatPlanningDate, visibleReceivables } from "@/src/modules/finance/lib/planning-lists"
+} from "@/src/modules/finance/lib/money";
+import {
+  formatPlanningDate,
+  visibleReceivables,
+} from "@/src/modules/finance/lib/planning-lists";
 import type {
   FinanceLoan,
   FinanceReceivable,
   FinanceSavingsGoal,
-} from "@/src/modules/finance/types/entities"
-import { FINANCE_RECEIVABLE_STATUS_LABEL } from "@/src/modules/finance/types/entities"
-import { Button } from "@/src/shared/components/ui/button"
+} from "@/src/modules/finance/types/entities";
+import { FINANCE_RECEIVABLE_STATUS_LABEL } from "@/src/modules/finance/types/entities";
+import { Button } from "@/src/shared/components/ui/button";
 import {
   Empty,
   EmptyContent,
@@ -32,23 +36,41 @@ import {
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
-} from "@/src/shared/components/ui/empty"
-import { FinanceListSkeleton } from "@/src/modules/finance/components/layout/finance-list-skeleton"
-import { SummaryItem, SummarySection } from "@/src/shared/components/ui/summary"
-import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
+} from "@/src/shared/components/ui/empty";
+import { SummaryItem, SummarySection } from "@/src/shared/components/ui/summary";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/src/shared/components/ui/tabs";
+import { useSheetParam } from "@/src/shared/hooks/use-sheet-params";
 import {
   HandshakeIcon,
   LandmarkIcon,
   PiggyBankIcon,
   PlusIcon,
-} from "lucide-react"
-import { useMemo } from "react"
-import { FinanceBudgetsList } from "../budgets/finance-budgets-list"
+} from "lucide-react";
+import { useMemo, useState } from "react";
+import { FinanceBudgetsList } from "../budgets/finance-budgets-list";
 
 type FinancePlanningListProps = {
   enabled: boolean
   display: FinanceMoneyDisplay
   defaultCurrency: string
+}
+
+type PlanningTab = "savings" | "loans" | "receivables" | "budgets"
+
+const PLANNING_TABS: PlanningTab[] = [
+  "savings",
+  "loans",
+  "receivables",
+  "budgets",
+]
+
+function isPlanningTab(value: unknown): value is PlanningTab {
+  return PLANNING_TABS.some((tab) => tab === value)
 }
 
 function savingsRowValue(
@@ -152,6 +174,7 @@ export function FinancePlanningList({
     receivablesQuery.isPending,
     setOpenReceivableSheet
   )
+  const [tab, setTab] = useState<PlanningTab>("savings")
 
   return (
     <>
@@ -159,154 +182,194 @@ export function FinancePlanningList({
         <p className="text-sm text-destructive">{errorMessage}</p>
       ) : null}
 
-      <SummarySection
-        title="Ahorros"
-        icon={PiggyBankIcon}
-        right={
-          <Button
-            size="sm"
-            variant="ghost"
-            disabled={!enabled}
-            onClick={() => setOpenSavingsSheet(true, null)}
-          >
-            <PlusIcon />
-            Crear meta
-          </Button>
-        }
+      <Tabs
+        value={tab}
+        onValueChange={(value) => {
+          if (isPlanningTab(value)) setTab(value)
+        }}
+        className="gap-6 w-full"
       >
-        {savingsQuery.isPending && !savingsQuery.data ? (
-          <FinanceListSkeleton />
-        ) : savings.length === 0 ? (
-          <Empty className="py-8">
-            <EmptyHeader>
-              <EmptyMedia variant="icon">
-                <PiggyBankIcon />
-              </EmptyMedia>
-              <EmptyTitle>Aún no hay metas</EmptyTitle>
-              <EmptyDescription>
-                Define un objetivo y ve cuánto llevas ahorrado.
-              </EmptyDescription>
-            </EmptyHeader>
-            <EmptyContent>
-              <Button onClick={() => setOpenSavingsSheet(true, null)}>
+        <TabsList className="overflow-x-auto justify-start p-1 w-full h-auto rounded-2xl">
+          <TabsTrigger
+            value="savings"
+            className="px-3 py-2 rounded-xl"
+          >
+            Ahorros
+          </TabsTrigger>
+          <TabsTrigger value="loans" className="px-3 py-2 rounded-xl">
+            Préstamos
+          </TabsTrigger>
+          <TabsTrigger
+            value="receivables"
+            className="px-3 py-2 rounded-xl"
+          >
+            Cobros
+          </TabsTrigger>
+          <TabsTrigger
+            value="budgets"
+            className="px-3 py-2 rounded-xl"
+          >
+            Presupuestos
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="savings">
+          <SummarySection
+            title="Ahorros"
+            icon={PiggyBankIcon}
+            right={
+              <Button
+                size="sm"
+                variant="ghost"
+                disabled={!enabled}
+                onClick={() => setOpenSavingsSheet(true, null)}
+              >
+                <PlusIcon />
                 Crear meta
               </Button>
-            </EmptyContent>
-          </Empty>
-        ) : (
-          savings.map((goal, index) => (
-            <SummaryItem
-              key={goal.id}
-              title={goal.name}
-              value={savingsRowValue(goal, {
-                ...display,
-                currency: goal.currency,
-              })}
-              icon={PiggyBankIcon}
-              onPress={() => setOpenSavingsSheet(true, goal.id)}
-              isLast={index === savings.length - 1}
-            />
-          ))
-        )}
-      </SummarySection>
-
-      <SummarySection
-        title="Préstamos"
-        icon={LandmarkIcon}
-        right={
-          <Button
-            size="sm"
-            variant="ghost"
-            disabled={!enabled}
-            onClick={() => setOpenLoanSheet(true, null)}
+            }
           >
-            <PlusIcon />
-            Crear préstamo
-          </Button>
-        }
-      >
-        {loansQuery.isPending && !loansQuery.data ? (
-          <FinanceListSkeleton />
-        ) : loans.length === 0 ? (
-          <Empty className="py-8">
-            <EmptyHeader>
-              <EmptyMedia variant="icon">
-                <LandmarkIcon />
-              </EmptyMedia>
-              <EmptyTitle>Aún no hay préstamos</EmptyTitle>
-              <EmptyDescription>
-                Registra cuotas, tasa anual y próximo vencimiento.
-              </EmptyDescription>
-            </EmptyHeader>
-            <EmptyContent>
-              <Button onClick={() => setOpenLoanSheet(true, null)}>
+            {savingsQuery.isPending && !savingsQuery.data ? (
+              <FinanceListSkeleton />
+            ) : savings.length === 0 ? (
+              <Empty className="py-8">
+                <EmptyHeader>
+                  <EmptyMedia variant="icon">
+                    <PiggyBankIcon />
+                  </EmptyMedia>
+                  <EmptyTitle>Aún no hay metas</EmptyTitle>
+                  <EmptyDescription>
+                    Define un objetivo y ve cuánto llevas ahorrado.
+                  </EmptyDescription>
+                </EmptyHeader>
+                <EmptyContent>
+                  <Button onClick={() => setOpenSavingsSheet(true, null)}>
+                    Crear meta
+                  </Button>
+                </EmptyContent>
+              </Empty>
+            ) : (
+              savings.map((goal, index) => (
+                <SummaryItem
+                  key={goal.id}
+                  title={goal.name}
+                  value={savingsRowValue(goal, {
+                    ...display,
+                    currency: goal.currency,
+                  })}
+                  icon={PiggyBankIcon}
+                  onPress={() => setOpenSavingsSheet(true, goal.id)}
+                  isLast={index === savings.length - 1}
+                />
+              ))
+            )}
+          </SummarySection>
+        </TabsContent>
+
+        <TabsContent value="loans">
+          <SummarySection
+            title="Préstamos"
+            icon={LandmarkIcon}
+            right={
+              <Button
+                size="sm"
+                variant="ghost"
+                disabled={!enabled}
+                onClick={() => setOpenLoanSheet(true, null)}
+              >
+                <PlusIcon />
                 Crear préstamo
               </Button>
-            </EmptyContent>
-          </Empty>
-        ) : (
-          loans.map((loan, index) => (
-            <SummaryItem
-              key={loan.id}
-              title={loan.lenderName}
-              value={loanRowValue(loan, display)}
-              icon={LandmarkIcon}
-              onPress={() => setOpenLoanSheet(true, loan.id)}
-              isLast={index === loans.length - 1}
-            />
-          ))
-        )}
-      </SummarySection>
-
-      <SummarySection
-        title="Cobros"
-        icon={HandshakeIcon}
-        right={
-          <Button
-            size="sm"
-            variant="ghost"
-            disabled={!enabled}
-            onClick={() => setOpenReceivableSheet(true, null)}
+            }
           >
-            <PlusIcon />
-            Crear cobro
-          </Button>
-        }
-      >
-        {receivablesQuery.isPending && !receivablesQuery.data ? (
-          <FinanceListSkeleton />
-        ) : listedReceivables.length === 0 ? (
-          <Empty className="py-8">
-            <EmptyHeader>
-              <EmptyMedia variant="icon">
-                <HandshakeIcon />
-              </EmptyMedia>
-              <EmptyTitle>Aún no hay cobros</EmptyTitle>
-              <EmptyDescription>
-                Lo que te deben. Archiva o borra los que ya no apliquen.
-              </EmptyDescription>
-            </EmptyHeader>
-            <EmptyContent>
-              <Button onClick={() => setOpenReceivableSheet(true, null)}>
+            {loansQuery.isPending && !loansQuery.data ? (
+              <FinanceListSkeleton />
+            ) : loans.length === 0 ? (
+              <Empty className="py-8">
+                <EmptyHeader>
+                  <EmptyMedia variant="icon">
+                    <LandmarkIcon />
+                  </EmptyMedia>
+                  <EmptyTitle>Aún no hay préstamos</EmptyTitle>
+                  <EmptyDescription>
+                    Registra cuotas, tasa anual y próximo vencimiento.
+                  </EmptyDescription>
+                </EmptyHeader>
+                <EmptyContent>
+                  <Button onClick={() => setOpenLoanSheet(true, null)}>
+                    Crear préstamo
+                  </Button>
+                </EmptyContent>
+              </Empty>
+            ) : (
+              loans.map((loan, index) => (
+                <SummaryItem
+                  key={loan.id}
+                  title={loan.lenderName}
+                  value={loanRowValue(loan, display)}
+                  icon={LandmarkIcon}
+                  onPress={() => setOpenLoanSheet(true, loan.id)}
+                  isLast={index === loans.length - 1}
+                />
+              ))
+            )}
+          </SummarySection>
+        </TabsContent>
+
+        <TabsContent value="receivables">
+          <SummarySection
+            title="Cobros"
+            icon={HandshakeIcon}
+            right={
+              <Button
+                size="sm"
+                variant="ghost"
+                disabled={!enabled}
+                onClick={() => setOpenReceivableSheet(true, null)}
+              >
+                <PlusIcon />
                 Crear cobro
               </Button>
-            </EmptyContent>
-          </Empty>
-        ) : (
-          listedReceivables.map((item, index) => (
-            <SummaryItem
-              key={item.id}
-              title={item.debtorName}
-              value={receivableRowValue(item, display)}
-              icon={HandshakeIcon}
-              onPress={() => setOpenReceivableSheet(true, item.id)}
-              isLast={index === listedReceivables.length - 1}
-            />
-          ))
-        )}
-      </SummarySection>
+            }
+          >
+            {receivablesQuery.isPending && !receivablesQuery.data ? (
+              <FinanceListSkeleton />
+            ) : listedReceivables.length === 0 ? (
+              <Empty className="py-8">
+                <EmptyHeader>
+                  <EmptyMedia variant="icon">
+                    <HandshakeIcon />
+                  </EmptyMedia>
+                  <EmptyTitle>Aún no hay cobros</EmptyTitle>
+                  <EmptyDescription>
+                    Lo que te deben. Archiva o borra los que ya no apliquen.
+                  </EmptyDescription>
+                </EmptyHeader>
+                <EmptyContent>
+                  <Button onClick={() => setOpenReceivableSheet(true, null)}>
+                    Crear cobro
+                  </Button>
+                </EmptyContent>
+              </Empty>
+            ) : (
+              listedReceivables.map((item, index) => (
+                <SummaryItem
+                  key={item.id}
+                  title={item.debtorName}
+                  value={receivableRowValue(item, display)}
+                  icon={HandshakeIcon}
+                  onPress={() => setOpenReceivableSheet(true, item.id)}
+                  isLast={index === listedReceivables.length - 1}
+                />
+              ))
+            )}
+          </SummarySection>
+        </TabsContent>
 
-      <FinanceBudgetsList enabled={enabled} display={display} />
+        <TabsContent value="budgets">
+          <FinanceBudgetsList enabled={enabled} display={display} />
+        </TabsContent>
+      </Tabs>
 
       <SavingsGoalSheet
         open={openSavingsSheet}
