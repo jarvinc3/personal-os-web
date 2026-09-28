@@ -89,7 +89,7 @@ export function AppSidebar() {
   const { logoutMutation } = useAuth()
 
   return (
-    <Sidebar variant="sidebar" collapsible="icon">
+    <Sidebar variant="floating" collapsible="icon">
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>

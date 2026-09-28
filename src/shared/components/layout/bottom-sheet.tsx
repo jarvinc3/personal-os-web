@@ -61,6 +61,7 @@ export function BottomSheet({
             {description}
           </DrawerDescription>
         </DrawerHeader>
+
         <div
           data-vaul-no-drag=""
           className="flex overflow-y-auto flex-col gap-4 p-4 scrollbar-hide"
@@ -73,6 +74,7 @@ export function BottomSheet({
             children
           )}
         </div>
+        
         {actions && !pending && (
           <DrawerFooter className="flex flex-row gap-2 justify-end w-full border-t">
             {actions?.delete && actions?.delete}

@@ -17,6 +17,7 @@ import {
   FINANCE_CARDS_QUERY_KEY,
   FINANCE_CATEGORIES_QUERY_KEY,
   FINANCE_EMAIL_MAILBOXES_QUERY_KEY,
+  FINANCE_EMAIL_MESSAGES_QUERY_KEY,
   FINANCE_EMAIL_PENDING_QUERY_KEY,
   FINANCE_INSTITUTIONS_QUERY_KEY,
   FINANCE_LOANS_QUERY_KEY,
@@ -40,6 +41,7 @@ const SYNC_KEYS = [
   FINANCE_CARDS_QUERY_KEY,
   FINANCE_EMAIL_MAILBOXES_QUERY_KEY,
   FINANCE_EMAIL_PENDING_QUERY_KEY,
+  FINANCE_EMAIL_MESSAGES_QUERY_KEY,
 ] as const
 
 function createQueryClient() {
@@ -125,7 +127,7 @@ describe("prefetchFinancePlanning", () => {
 })
 
 describe("prefetchFinanceSync", () => {
-  it("writes the 5 sync keys into cache", async () => {
+  it("writes the 6 sync keys into cache", async () => {
     const queryClient = createQueryClient()
     const { get } = createMockGet()
     await prefetchFinanceSync(queryClient, get)

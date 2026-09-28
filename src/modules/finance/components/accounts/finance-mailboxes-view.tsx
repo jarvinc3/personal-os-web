@@ -3,6 +3,10 @@
 import { AssignEmailMessageSheet } from "@/src/modules/finance/components/sync/assign-email-message-sheet"
 import { ConnectGmailSheet } from "@/src/modules/finance/components/sync/connect-gmail-sheet"
 import { EmailSourceSheet } from "@/src/modules/finance/components/sync/email-source-sheet"
+import {
+  EmailMessageHistorySection,
+  EmailSyncLogsSection,
+} from "@/src/modules/finance/components/sync/email-sync-history"
 import { LinkInstitutionMailboxSheet } from "@/src/modules/finance/components/sync/link-institution-mailbox-sheet"
 import { MailboxGroup } from "@/src/modules/finance/components/sync/mailbox-group"
 import { MailboxSheet } from "@/src/modules/finance/components/sync/mailbox-sheet"
@@ -11,8 +15,10 @@ import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/constants/sheet-keys"
 import { useAccounts } from "@/src/modules/finance/hooks/use-accounts"
 import { useCards } from "@/src/modules/finance/hooks/use-cards"
 import {
+  useApiReady,
   useEmailMailboxes,
   usePendingEmailMessages,
+  useRecentEmailMessages,
   useRunEmailSync,
 } from "@/src/modules/finance/hooks/use-email-sources"
 import { useFinanceEnabled } from "@/src/modules/finance/hooks/use-finance-enabled"
@@ -26,6 +32,11 @@ import {
 import type { FinancePendingEmailMessage } from "@/src/modules/finance/types/entities"
 import { Button } from "@/src/shared/components/ui/button"
 import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/src/shared/components/ui/alert"
+import {
   Empty,
   EmptyContent,
   EmptyDescription,
@@ -36,7 +47,7 @@ import {
 import { FinanceListSkeleton } from "@/src/modules/finance/components/layout/finance-list-skeleton"
 import { SummaryItem, SummarySection } from "@/src/shared/components/ui/summary"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
-import { InboxIcon, MailIcon, PlusIcon } from "lucide-react"
+import { InboxIcon, MailIcon, PlusIcon, TriangleAlertIcon } from "lucide-react"
 
 function pendingRowValue(
   message: FinancePendingEmailMessage,
@@ -97,6 +108,8 @@ export function FinanceMailboxesView({ enabled }: { enabled: boolean }) {
   const cardsQuery = useCards(enabled)
   const mailboxesQuery = useEmailMailboxes(enabled && emailSyncEnabled)
   const pendingQuery = usePendingEmailMessages(enabled && emailSyncEnabled)
+  const messagesQuery = useRecentEmailMessages(enabled && emailSyncEnabled)
+  const healthQuery = useApiReady(enabled && emailSyncEnabled)
 
   const institutions = institutionsQuery.data ?? []
   const accounts = accountsQuery.data ?? []
@@ -104,6 +117,17 @@ export function FinanceMailboxesView({ enabled }: { enabled: boolean }) {
   const mailboxes = mailboxesQuery.data ?? []
   const pending = pendingQuery.data ?? []
   const sources = mailboxes.flatMap((mailbox) => mailbox.sources)
+  const syncLogs = sources
+    .flatMap((source) =>
+      (source.logs ?? []).map((log) => ({
+        ...log,
+        sourceName: source.label || source.institutionName || "Banco",
+      })),
+    )
+    .sort((a, b) => b.startedAt.localeCompare(a.startedAt))
+    .slice(0, 20)
+  const recentMessages = messagesQuery.data ?? []
+  const queueDown = healthQuery.data?.ready === false
 
   const errorMessage = mailboxesQuery.error
     ? financeErrorMessage(mailboxesQuery.error)
@@ -138,6 +162,17 @@ export function FinanceMailboxesView({ enabled }: { enabled: boolean }) {
 
   return (
     <>
+      {queueDown ? (
+        <Alert variant="destructive" className="mb-4">
+          <TriangleAlertIcon />
+          <AlertTitle>Cola de sync no disponible</AlertTitle>
+          <AlertDescription>
+            Redis no responde. Los correos no se encolan. En desarrollo levanta
+            Redis local (docker compose up -d redis) y usa
+            REDIS_URL=redis://localhost:6379.
+          </AlertDescription>
+        </Alert>
+      ) : null}
       {errorMessage ? (
         <p className="text-sm text-destructive">{errorMessage}</p>
       ) : null}
@@ -232,6 +267,16 @@ export function FinanceMailboxesView({ enabled }: { enabled: boolean }) {
           ))
         )}
       </SummarySection>
+
+      {emailSyncEnabled ? (
+        <>
+          <EmailSyncLogsSection
+            logs={syncLogs}
+            emptyLabel="Todavía no hay runs. Sincroniza un banco para ver el historial."
+          />
+          <EmailMessageHistorySection messages={recentMessages} />
+        </>
+      ) : null}
 
       <ConnectGmailSheet
         open={openConnectSheet}

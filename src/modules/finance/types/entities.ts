@@ -366,6 +366,10 @@ export type FinancePendingEmailMessage = {
   createdAt: string
 }
 
+export type FinanceEmailProcessedMessage = FinancePendingEmailMessage & {
+  outcome: string
+}
+
 export type FinanceEmailAssignResult = {
   assigned: boolean
   transactionId?: string
