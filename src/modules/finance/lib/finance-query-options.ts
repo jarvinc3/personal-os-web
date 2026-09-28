@@ -4,6 +4,7 @@ import {
   FINANCE_CARDS_QUERY_KEY,
   FINANCE_CATEGORIES_QUERY_KEY,
   FINANCE_EMAIL_MAILBOXES_QUERY_KEY,
+  FINANCE_EMAIL_MESSAGES_QUERY_KEY,
   FINANCE_EMAIL_PENDING_QUERY_KEY,
   FINANCE_INSTITUTIONS_QUERY_KEY,
   FINANCE_LOANS_QUERY_KEY,
@@ -20,6 +21,7 @@ import type {
   FinanceLoan,
   FinanceMailbox,
   FinancePendingEmailMessage,
+  FinanceEmailProcessedMessage,
   FinanceReceivable,
   FinanceSavingsGoal,
 } from "../types/entities.ts"
@@ -47,6 +49,7 @@ const PATHS = {
   budgets: "/finance/budgets",
   emailMailboxes: "/finance/email-sync/mailboxes",
   emailPending: "/finance/email-sync/pending",
+  emailMessages: "/finance/email-sync/messages",
 } as const
 
 export function categoriesQuery(get: FinanceQueryGet = defaultFinanceGet) {
@@ -125,5 +128,15 @@ export function emailPendingQuery(get: FinanceQueryGet = defaultFinanceGet) {
     queryKey: FINANCE_EMAIL_PENDING_QUERY_KEY,
     queryFn: async () =>
       asFinanceArray<FinancePendingEmailMessage>(await get(PATHS.emailPending)),
+  }
+}
+
+export function emailMessagesQuery(get: FinanceQueryGet = defaultFinanceGet) {
+  return {
+    queryKey: FINANCE_EMAIL_MESSAGES_QUERY_KEY,
+    queryFn: async () =>
+      asFinanceArray<FinanceEmailProcessedMessage>(
+        await get(PATHS.emailMessages),
+      ),
   }
 }

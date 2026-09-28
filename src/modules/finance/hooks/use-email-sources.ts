@@ -2,15 +2,17 @@
 
 import { apiDelete, apiGet, apiPatch, apiPost } from "@/src/config/api-client"
 import { invalidateFinancePositions } from "@/src/modules/finance/hooks/use-balance-sheet"
-import {
-  emailMailboxesQuery,
-  emailPendingQuery,
-} from "@/src/modules/finance/lib/finance-query-options"
+import { emailMailboxesQuery, emailMessagesQuery, emailPendingQuery } from "@/src/modules/finance/lib/finance-query-options"
 import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
+import {
+  hasRunningEmailSync,
+  RUNNING_SYNC_REFETCH_MS,
+} from "@/src/modules/finance/lib/email-sync-display"
 import { syncFailureReason } from "@/src/modules/finance/lib/gmail-oauth"
 import { asFinanceArray } from "@/src/modules/finance/lib/planning-lists"
 import {
   FINANCE_EMAIL_MAILBOXES_QUERY_KEY,
+  FINANCE_EMAIL_MESSAGES_QUERY_KEY,
   FINANCE_EMAIL_PENDING_QUERY_KEY,
   FINANCE_EMAIL_SOURCES_QUERY_KEY,
 } from "@/src/modules/finance/types/api"
@@ -22,6 +24,7 @@ import type {
   FinancePendingEmailMessage,
 } from "@/src/modules/finance/types/entities"
 import { API_ENDPOINTS } from "@/src/shared/constants/api-endpoints"
+import { API_BASE_URL } from "@/src/config/api-base-url"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
 function invalidate(queryClient: ReturnType<typeof useQueryClient>) {
@@ -33,6 +36,9 @@ function invalidate(queryClient: ReturnType<typeof useQueryClient>) {
   })
   void queryClient.invalidateQueries({
     queryKey: FINANCE_EMAIL_PENDING_QUERY_KEY,
+  })
+  void queryClient.invalidateQueries({
+    queryKey: FINANCE_EMAIL_MESSAGES_QUERY_KEY,
   })
 }
 
@@ -86,6 +92,10 @@ export function useEmailMailboxes(enabled: boolean) {
   return useQuery({
     ...emailMailboxesQuery(),
     enabled,
+    refetchInterval: (query) =>
+      hasRunningEmailSync(query.state.data ?? [])
+        ? RUNNING_SYNC_REFETCH_MS
+        : false,
   })
 }
 
@@ -114,6 +124,37 @@ export function usePendingEmailMessages(enabled: boolean) {
   })
 }
 
+export function useRecentEmailMessages(enabled: boolean) {
+  const queryClient = useQueryClient()
+  return useQuery({
+    ...emailMessagesQuery(),
+    enabled,
+    refetchInterval: () => {
+      const mailboxes = queryClient.getQueryData(
+        FINANCE_EMAIL_MAILBOXES_QUERY_KEY,
+      )
+      return hasRunningEmailSync(
+        Array.isArray(mailboxes) ? mailboxes : [],
+      )
+        ? RUNNING_SYNC_REFETCH_MS
+        : false
+    },
+  })
+}
+
+export function useApiReady(enabled: boolean) {
+  return useQuery({
+    queryKey: ["api-health-ready"],
+    enabled,
+    queryFn: async () => {
+      const response = await fetch(`${API_BASE_URL}/health/ready`)
+      return { ready: response.ok }
+    },
+    retry: false,
+    refetchInterval: 15_000,
+  })
+}
+
 export function useUpdateEmailSource() {
   const queryClient = useQueryClient()
   return useMutation({
@@ -138,10 +179,18 @@ export function useDisconnectEmailSource() {
 export function useTriggerEmailSync() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (id: string) =>
-      apiPost<FinanceEmailSyncTrigger>(
-        API_ENDPOINTS.FINANCE.EMAIL_SOURCE_SYNC(id),
-      ),
+    mutationFn: ({
+      id,
+      forceFullSync = false,
+    }: {
+      id: string
+      forceFullSync?: boolean
+    }) => {
+      const path = forceFullSync
+        ? `${API_ENDPOINTS.FINANCE.EMAIL_SOURCE_SYNC(id)}?forceFullSync=true`
+        : API_ENDPOINTS.FINANCE.EMAIL_SOURCE_SYNC(id)
+      return apiPost<FinanceEmailSyncTrigger>(path)
+    },
     onSuccess: () => invalidate(queryClient),
   })
 }
@@ -149,7 +198,10 @@ export function useTriggerEmailSync() {
 export function useRunEmailSync(emailSyncEnabled: boolean) {
   const mutation = useTriggerEmailSync()
 
-  const run = async (sourceId: string) => {
+  const run = async (
+    sourceId: string,
+    options?: { forceFullSync?: boolean },
+  ) => {
     if (!emailSyncEnabled) {
       appToast.error({
         text1: "Sincronización de correo desactivada",
@@ -158,13 +210,18 @@ export function useRunEmailSync(emailSyncEnabled: boolean) {
       return
     }
     try {
-      const result = await mutation.mutateAsync(sourceId)
+      const result = await mutation.mutateAsync({
+        id: sourceId,
+        forceFullSync: options?.forceFullSync,
+      })
       const reason = syncFailureReason(result)
       if (reason) {
         appToast.error({ text1: "Sync no encolado", text2: reason })
         return
       }
-      appToast.success({ text1: "Sync encolado" })
+      appToast.success({
+        text1: options?.forceFullSync ? "Relectura encolada" : "Sync encolado",
+      })
     } catch (error) {
       appToast.error({ text1: financeErrorMessage(error) })
     }
@@ -173,7 +230,9 @@ export function useRunEmailSync(emailSyncEnabled: boolean) {
   return {
     run,
     isPending: mutation.isPending,
-    pendingSourceId: mutation.isPending ? mutation.variables ?? null : null,
+    pendingSourceId: mutation.isPending
+      ? mutation.variables?.id ?? null
+      : null,
   }
 }
 

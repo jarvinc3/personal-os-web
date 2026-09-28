@@ -7,6 +7,7 @@ import {
   cardsQuery,
   categoriesQuery,
   emailMailboxesQuery,
+  emailMessagesQuery,
   emailPendingQuery,
   institutionsQuery,
   loansQuery,
@@ -62,5 +63,6 @@ export function prefetchFinanceSync(
     queryClient.prefetchQuery(cardsQuery(get)),
     queryClient.prefetchQuery(emailMailboxesQuery(get)),
     queryClient.prefetchQuery(emailPendingQuery(get)),
+    queryClient.prefetchQuery(emailMessagesQuery(get)),
   ])
 }

@@ -1,6 +1,7 @@
 "use client"
 
 import { CATALOG_NONE } from "@/src/modules/finance/constants/catalog"
+import { EmailSyncLogList } from "@/src/modules/finance/components/sync/email-sync-history"
 import {
   useDisconnectEmailSource,
   useRunEmailSync,
@@ -22,7 +23,7 @@ import { SummarySection } from "@/src/shared/components/ui/summary"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { MailIcon, RefreshCwIcon } from "lucide-react"
+import { HistoryIcon, MailIcon, RefreshCwIcon } from "lucide-react"
 import { useEffect, useMemo } from "react"
 import { Controller, useForm } from "react-hook-form"
 import { z } from "zod"
@@ -176,20 +177,40 @@ export function EmailSourceSheet({
     >
       <SummarySection title="Sincronización" icon={RefreshCwIcon}>
         {source ? (
-          <Button
-            type="button"
-            className="w-full"
-            disabled={isPending || !source.isActive || !emailSyncEnabled}
-            onClick={() => void onSync()}
-          >
-            {syncPending ? (
-              <Spinner data-icon="inline-start" />
-            ) : (
-              <RefreshCwIcon data-icon="inline-start" />
-            )}
-            Sincronizar ahora
-          </Button>
+          <div className="flex flex-col gap-2 px-3 pb-3">
+            <Button
+              type="button"
+              className="w-full"
+              disabled={isPending || !source.isActive || !emailSyncEnabled}
+              onClick={() => void onSync()}
+            >
+              {syncPending ? (
+                <Spinner data-icon="inline-start" />
+              ) : (
+                <RefreshCwIcon data-icon="inline-start" />
+              )}
+              Sincronizar ahora
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              disabled={isPending || !source.isActive || !emailSyncEnabled}
+              onClick={() => void runSync(source.id, { forceFullSync: true })}
+            >
+              Releer todo
+            </Button>
+          </div>
         ) : null}
+      </SummarySection>
+      <SummarySection title="Últimos syncs" icon={HistoryIcon}>
+        <EmailSyncLogList
+          logs={(source?.logs ?? []).map((log) => ({
+            ...log,
+            sourceName: source?.label || source?.institutionName || "Banco",
+          }))}
+          emptyLabel="Este vínculo aún no tiene runs. El primer sync aparecerá aquí."
+        />
       </SummarySection>
       <SummarySection title="Institución" icon={MailIcon}>
         <Controller

@@ -61,6 +61,7 @@ export const API_ENDPOINTS = {
     EMAIL_MAILBOXES: '/finance/email-sync/mailboxes',
     EMAIL_MAILBOX: (id: string) => `/finance/email-sync/mailboxes/${id}`,
     EMAIL_PENDING: '/finance/email-sync/pending',
+    EMAIL_MESSAGES: '/finance/email-sync/messages',
     EMAIL_PENDING_ASSIGN: (id: string) => `/finance/email-sync/pending/${id}/assign`,
     EMAIL_PENDING_RETRY: (id: string) => `/finance/email-sync/pending/${id}/retry`,
     ANALYTICS_SUMMARY: '/finance/analytics/summary',
