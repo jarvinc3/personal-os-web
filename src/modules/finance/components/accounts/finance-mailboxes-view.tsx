@@ -57,9 +57,9 @@ function pendingRowValue(
   const amount =
     payload?.amount != null
       ? formatFinanceMoney(payload.amount, {
-          ...display,
-          currency: payload.currency ?? display.currency,
-        })
+        ...display,
+        currency: payload.currency ?? display.currency,
+      })
       : message.lastFourHint
         ? `****${message.lastFourHint}`
         : "Sin monto"
@@ -177,29 +177,6 @@ export function FinanceMailboxesView({ enabled }: { enabled: boolean }) {
         <p className="text-sm text-destructive">{errorMessage}</p>
       ) : null}
 
-      <SummarySection title="Movimientos por asignar" icon={InboxIcon}>
-        {pendingQuery.isPending && !pendingQuery.data ? (
-          <FinanceListSkeleton />
-        ) : pending.length === 0 ? (
-          <p className="px-1 py-2 text-sm text-muted-foreground">
-            No hay correos pendientes de cuenta o tarjeta.
-          </p>
-        ) : (
-          pending.map((message, index) => (
-            <SummaryItem
-              key={message.id}
-              title={
-                message.extractedPayload?.merchant ?? message.gmailMessageId
-              }
-              value={pendingRowValue(message, display)}
-              icon={InboxIcon}
-              onPress={() => setOpenAssignSheet(true, message.id)}
-              isLast={index === pending.length - 1}
-            />
-          ))
-        )}
-      </SummarySection>
-
       <SummarySection
         title="Correos"
         icon={MailIcon}
@@ -263,6 +240,37 @@ export function FinanceMailboxesView({ enabled }: { enabled: boolean }) {
               onOpenSource={(id) => setOpenSourceSheet(true, id)}
               onAddInstitution={(id) => setOpenLinkSheet(true, id)}
               onSyncSource={(id) => void runSync(id)}
+            />
+          ))
+        )}
+      </SummarySection>
+
+      <SummarySection title="Movimientos por asignar" icon={InboxIcon}>
+        {pendingQuery.isPending && !pendingQuery.data ? (
+          <FinanceListSkeleton />
+        ) : pending.length === 0 ? (
+          <Empty className="py-8">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <InboxIcon />
+              </EmptyMedia>
+              <EmptyTitle>Aún no hay movimientos por asignar</EmptyTitle>
+              <EmptyDescription>
+                Cuando un banco envía un correo con un movimiento, se asigna automáticamente.
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
+        ) : (
+          pending.map((message, index) => (
+            <SummaryItem
+              key={message.id}
+              title={
+                message.extractedPayload?.merchant ?? message.gmailMessageId
+              }
+              value={pendingRowValue(message, display)}
+              icon={InboxIcon}
+              onPress={() => setOpenAssignSheet(true, message.id)}
+              isLast={index === pending.length - 1}
             />
           ))
         )}
