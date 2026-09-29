@@ -35,7 +35,7 @@ import {
   ChevronRightIcon,
   CreditCardIcon,
 } from "lucide-react";
-import { type KeyboardEvent, useEffect, useRef, useState } from "react";
+import { type KeyboardEvent, useRef, useState } from "react";
 
 const FALLBACK_INSTITUTION_COLOR = "#1B4332"
 const FALLBACK_CASH_COLOR = "#334155"
@@ -105,9 +105,10 @@ export function InstitutionSwapStack({
   className,
 }: InstitutionSwapStackProps) {
   const [cycleOffset, setCycleOffset] = useState(() => initialCycleOffset(items))
-
-  useEffect(() => {
-    if (items.length === 0) return
+  const itemsSignature = items.map((item) => stackItemKey(item)).join("\0")
+  const [syncedSignature, setSyncedSignature] = useState(itemsSignature)
+  if (items.length > 0 && syncedSignature !== itemsSignature) {
+    setSyncedSignature(itemsSignature)
     const key = readFrontItemKey()
     const next = cycleOffsetForFrontKey(items, key)
     setCycleOffset(next)
@@ -115,7 +116,7 @@ export function InstitutionSwapStack({
     if (front && (!key || stackItemKey(front) !== key)) {
       writeFrontItemKey(stackItemKey(front))
     }
-  }, [items])
+  }
 
   if (items.length === 0) return null
 

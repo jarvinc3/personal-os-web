@@ -13,14 +13,16 @@ type BrandPickerProps = {
 
 export function BrandPicker({ onSelect }: BrandPickerProps) {
   const [query, setQuery] = useState("")
-  const [results, setResults] = useState<BrandHit[]>([])
+  const [results, setResults] = useState<{ q: string; rows: BrandHit[] }>({
+    q: "",
+    rows: [],
+  })
+  const trimmed = query.trim()
+  const visible = results.q === trimmed && trimmed.length >= 2 ? results.rows : []
 
   useEffect(() => {
     const q = query.trim()
-    if (q.length < 2) {
-      setResults([])
-      return
-    }
+    if (q.length < 2) return
     const ctrl = new AbortController()
     const timer = setTimeout(() => {
       void apiGet<BrandHit[]>(
@@ -28,10 +30,12 @@ export function BrandPicker({ onSelect }: BrandPickerProps) {
         ctrl.signal,
       )
         .then((rows) => {
-          if (!ctrl.signal.aborted) setResults(Array.isArray(rows) ? rows : [])
+          if (!ctrl.signal.aborted) {
+            setResults({ q, rows: Array.isArray(rows) ? rows : [] })
+          }
         })
         .catch(() => {
-          if (!ctrl.signal.aborted) setResults([])
+          if (!ctrl.signal.aborted) setResults({ q, rows: [] })
         })
     }, 300)
     return () => {
@@ -49,9 +53,9 @@ export function BrandPicker({ onSelect }: BrandPickerProps) {
         className="h-10 w-full rounded-xl border border-border bg-background px-3 text-sm"
         aria-label="Buscar banco o marca"
       />
-      {results.length > 0 ? (
+      {visible.length > 0 ? (
         <ul className="flex flex-col overflow-hidden rounded-xl border border-border">
-          {results.map((brand) => (
+          {visible.map((brand) => (
             <li key={brand.domain}>
               <button
                 type="button"
@@ -59,7 +63,7 @@ export function BrandPicker({ onSelect }: BrandPickerProps) {
                 onClick={() => {
                   onSelect(brand)
                   setQuery("")
-                  setResults([])
+                  setResults({ q: "", rows: [] })
                 }}
               >
                 <BrandLogo

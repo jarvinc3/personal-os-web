@@ -102,11 +102,15 @@ export function InstitutionSheet({
     brandPreviewUrl(institutionDomain) ??
     (institution?.domain === institutionDomain ? institution?.logoUrl : null)
 
+  const logoScope = `${open ? "open" : "closed"}:${institution?.id ?? "new"}`
+  const [logoScopeSeen, setLogoScopeSeen] = useState(logoScope)
+  if (logoScopeSeen !== logoScope) {
+    setLogoScopeSeen(logoScope)
+    setLogoFile(null)
+  }
+
   useEffect(() => {
-    if (open) {
-      reset(toFormValues(institution))
-      setLogoFile(null)
-    }
+    if (open) reset(toFormValues(institution))
   }, [open, institution, reset])
 
   const submitForm = useMemo(

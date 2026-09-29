@@ -111,7 +111,7 @@ export function BudgetSheet({
       return current ? [current, ...filtered] : filtered
     }
     return filtered
-  }, [budget?.categoryId, categories])
+  }, [budget, categories])
   const hasCategories = expenseCategories.length > 0
   const defaultCategoryId = expenseCategories[0]?.id ?? ""
 

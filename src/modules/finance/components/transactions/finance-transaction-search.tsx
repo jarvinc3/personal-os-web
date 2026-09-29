@@ -62,7 +62,8 @@ export function FinanceTransactionSearch({
   const rootRef = useRef<HTMLDivElement>(null)
   const [search, setSearch] = useState("")
   const [debouncedSearch, setDebouncedSearch] = useState("")
-  const [open, setOpen] = useState(false)
+  const [closedFor, setClosedFor] = useState<string | null>(null)
+  const open = debouncedSearch.length > 0 && closedFor !== debouncedSearch
   const resultsQuery = useTransactionSearch(enabled, debouncedSearch)
   const items = resultsQuery.data?.items ?? []
   const showPanel = open && debouncedSearch.length > 0
@@ -78,18 +79,14 @@ export function FinanceTransactionSearch({
   }, [search])
 
   useEffect(() => {
-    setOpen(debouncedSearch.length > 0)
-  }, [debouncedSearch])
-
-  useEffect(() => {
     function onPointerDown(event: PointerEvent) {
       if (!rootRef.current?.contains(event.target as Node)) {
-        setOpen(false)
+        setClosedFor(debouncedSearch)
       }
     }
     document.addEventListener("pointerdown", onPointerDown)
     return () => document.removeEventListener("pointerdown", onPointerDown)
-  }, [])
+  }, [debouncedSearch])
 
   return (
     <div ref={rootRef} className="relative">
@@ -100,11 +97,11 @@ export function FinanceTransactionSearch({
         value={search}
         onChange={(event) => setSearch(event.target.value)}
         onFocus={() => {
-          if (debouncedSearch.length > 0) setOpen(true)
+          if (debouncedSearch.length > 0) setClosedFor(null)
         }}
         onKeyDown={(event) => {
           if (event.key === "Escape") {
-            setOpen(false)
+            setClosedFor(debouncedSearch)
             event.currentTarget.blur()
           }
         }}
@@ -159,7 +156,7 @@ export function FinanceTransactionSearch({
                     transaction.accountName ??
                     "Movimiento")
                 return (
-                  <div key={transaction.id} role="option">
+                  <div key={transaction.id} role="option" aria-selected={false}>
                     <SummaryItem
                       title={title}
                       description={
@@ -196,7 +193,7 @@ export function FinanceTransactionSearch({
                       trailing={<TransactionStatusMark status={transaction.status} />}
                       showChevron={false}
                       onPress={() => {
-                        setOpen(false)
+                        setClosedFor(debouncedSearch)
                         onSelect(transaction.id)
                       }}
                       isLast={index === items.length - 1}

@@ -4,7 +4,7 @@ import { FINANCE_CARD_NETWORK_LABEL } from "@/src/modules/finance/constants/cata
 import type { FinanceCardNetwork } from "@/src/modules/finance/constants/catalog"
 import { cn } from "@/src/shared/lib/utils"
 import Image from "next/image"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 
 type BrandLogoProps = {
   name: string
@@ -26,12 +26,9 @@ export function BrandLogo({
   size = 40,
   className,
 }: BrandLogoProps) {
-  const [failed, setFailed] = useState(false)
+  const [failedUrl, setFailedUrl] = useState<string | null>(null)
+  const failed = Boolean(logoUrl) && failedUrl === logoUrl
   const dimension = { width: size, height: size }
-
-  useEffect(() => {
-    setFailed(false)
-  }, [logoUrl])
 
   if (!logoUrl || failed) {
     return (
@@ -55,7 +52,7 @@ export function BrandLogo({
       width={size}
       height={size}
       className={cn("rounded-full bg-white object-contain", className)}
-      onError={() => setFailed(true)}
+      onError={() => setFailedUrl(logoUrl)}
     />
   )
 }
