@@ -29,7 +29,7 @@ type SelectFieldProps = {
   label?: string;
   value: string;
   onChange: (value: string) => void;
-  options: { value: string; label: string }[];
+  options: { value: string; label: string; mark?: ReactNode }[];
   disabled?: boolean;
 };
 
@@ -48,12 +48,21 @@ export function SelectField({ label, value, onChange, options, disabled }: Selec
         value={value}
         onValueChange={(next) => onChange(next ?? '')}
         disabled={disabled}
-        items={options}
+        items={options.map(({ value, label }) => ({ value, label }))}
         modal={false}
       >
         <SelectTrigger className="w-full max-w-full cursor-pointer">
           <SelectValue placeholder={label}>
-            {options.find((item) => item.value === value)?.label}
+            {(() => {
+              const selected = options.find((item) => item.value === value);
+              if (!selected) return null;
+              return (
+                <span className="flex items-center gap-2">
+                  {selected.mark}
+                  <span className="truncate">{selected.label}</span>
+                </span>
+              );
+            })()}
           </SelectValue>
         </SelectTrigger>
         <SelectContent alignItemWithTrigger={false} side="bottom">
@@ -61,7 +70,10 @@ export function SelectField({ label, value, onChange, options, disabled }: Selec
             {label ? <SelectLabel>{label}</SelectLabel> : null}
             {options.map((item) => (
               <SelectItem key={item.value} value={item.value}>
-                {item.label}
+                <span className="flex items-center gap-2">
+                  {item.mark}
+                  <span className="truncate">{item.label}</span>
+                </span>
               </SelectItem>
             ))}
           </SelectGroup>

@@ -1,7 +1,9 @@
 "use client"
 
+import { BrandLogo } from "@/src/modules/finance/components/brand-logo"
 import type {
   FinanceEmailSource,
+  FinanceInstitution,
   FinanceMailbox,
 } from "@/src/modules/finance/types/entities"
 import {
@@ -12,7 +14,6 @@ import {
 import { SummaryItem } from "@/src/shared/components/ui/summary"
 import { formatRelativeTimeFromIso } from "@/src/shared/lib/date-format"
 import {
-  Building2Icon,
   ChevronDownIcon,
   MailIcon,
   PlusIcon,
@@ -21,6 +22,7 @@ import {
 
 type MailboxGroupProps = {
   mailbox: FinanceMailbox
+  institutions: FinanceInstitution[]
   emailSyncEnabled: boolean
   syncingSourceId: string | null
   onOpenMailbox: (id: string) => void
@@ -40,6 +42,7 @@ function sourceDescription(source: FinanceEmailSource): string {
 
 export function MailboxGroup({
   mailbox,
+  institutions,
   emailSyncEnabled,
   syncingSourceId,
   onOpenMailbox,
@@ -98,6 +101,9 @@ export function MailboxGroup({
         <div className="flex flex-col pl-7">
           {sources.map((source) => {
             const title = source.label || source.institutionName || "Institución"
+            const institution = institutions.find(
+              (item) => item.id === source.institutionId,
+            )
             const syncing = syncingSourceId === source.id
             return (
               <div
@@ -108,7 +114,13 @@ export function MailboxGroup({
                   <SummaryItem
                     title={title}
                     description={sourceDescription(source)}
-                    icon={Building2Icon}
+                    leading={
+                      <BrandLogo
+                        name={institution?.name ?? title}
+                        logoUrl={institution?.logoUrl}
+                        size={28}
+                      />
+                    }
                     onPress={() => onOpenSource(source.id)}
                     isLast
                     showChevron={false}

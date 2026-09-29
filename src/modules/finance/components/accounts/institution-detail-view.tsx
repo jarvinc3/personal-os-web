@@ -1,5 +1,6 @@
 "use client"
 
+import { BrandLogo } from "@/src/modules/finance/components/brand-logo";
 import {
   AccountProductRow,
   CardProductRow,
@@ -30,7 +31,6 @@ import {
   buildInstitutionStackItems,
   formatProductCounts,
   formatStackItemBalance,
-  institutionInitials,
 } from "@/src/modules/finance/lib/institution-stack";
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet";
 import { LoadingView } from "@/src/shared/components/layout/loading-view";
@@ -353,9 +353,11 @@ function InstitutionDetailView({
           }}
         >
           <div className="flex gap-3 items-start">
-            <div className="flex justify-center items-center text-sm font-bold tracking-wide rounded-xl size-12 bg-black/30">
-              {institutionInitials(institution.name)}
-            </div>
+            <BrandLogo
+              name={institution.name}
+              logoUrl={institution.logoUrl}
+              size={48}
+            />
             <div className="flex-1 min-w-0">
               <h1 className="text-2xl font-bold tracking-tight truncate">
                 {institution.name}
@@ -443,6 +445,7 @@ function InstitutionDetailView({
                     key={loan.id}
                     loan={loan}
                     display={display}
+                    logoUrl={institution.logoUrl}
                     onPress={() => setOpenLoanSheet(true, loan.id)}
                   />
                 ))

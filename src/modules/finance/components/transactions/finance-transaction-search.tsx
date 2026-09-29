@@ -1,32 +1,32 @@
 "use client"
 
-import { useTransactionSearch } from "@/src/modules/finance/hooks/use-transactions"
-import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
+import { TransactionInstrument } from "@/src/modules/finance/components/transactions/transaction-instrument";
+import { TransactionStatusMark } from "@/src/modules/finance/components/transactions/transaction-status-mark";
+import { useTransactionSearch } from "@/src/modules/finance/hooks/use-transactions";
+import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error";
 import {
   formatFinanceMoney,
   parseFinanceMoney,
   type FinanceMoneyDisplay,
-} from "@/src/modules/finance/lib/money"
+} from "@/src/modules/finance/lib/money";
 import {
-  formatTransactionDate,
   isTransferTransaction,
   transferDirectionLabel,
-} from "@/src/modules/finance/lib/transactions-query"
-import {
-  FINANCE_TRANSACTION_STATUS_LABEL,
-  type FinanceCategory,
-  type FinanceTransaction,
-} from "@/src/modules/finance/types/entities"
-import { Input } from "@/src/shared/components/ui/input"
-import { SummaryItem } from "@/src/shared/components/ui/summary"
-import { cn } from "@/src/shared/lib/utils"
+} from "@/src/modules/finance/lib/transactions-query";
+import type {
+  FinanceCategory,
+  FinanceTransaction,
+} from "@/src/modules/finance/types/entities";
+import { Input } from "@/src/shared/components/ui/input";
+import { SummaryItem } from "@/src/shared/components/ui/summary";
+import { cn } from "@/src/shared/lib/utils";
 import {
   ArrowDownLeftIcon,
   ArrowLeftRightIcon,
   ArrowUpRightIcon,
   SearchIcon,
-} from "lucide-react"
-import { useEffect, useId, useRef, useState } from "react"
+} from "lucide-react";
+import { useEffect, useId, useRef, useState } from "react";
 
 const SEARCH_DEBOUNCE_MS = 300
 
@@ -62,7 +62,8 @@ export function FinanceTransactionSearch({
   const rootRef = useRef<HTMLDivElement>(null)
   const [search, setSearch] = useState("")
   const [debouncedSearch, setDebouncedSearch] = useState("")
-  const [open, setOpen] = useState(false)
+  const [closedFor, setClosedFor] = useState<string | null>(null)
+  const open = debouncedSearch.length > 0 && closedFor !== debouncedSearch
   const resultsQuery = useTransactionSearch(enabled, debouncedSearch)
   const items = resultsQuery.data?.items ?? []
   const showPanel = open && debouncedSearch.length > 0
@@ -78,18 +79,14 @@ export function FinanceTransactionSearch({
   }, [search])
 
   useEffect(() => {
-    setOpen(debouncedSearch.length > 0)
-  }, [debouncedSearch])
-
-  useEffect(() => {
     function onPointerDown(event: PointerEvent) {
       if (!rootRef.current?.contains(event.target as Node)) {
-        setOpen(false)
+        setClosedFor(debouncedSearch)
       }
     }
     document.addEventListener("pointerdown", onPointerDown)
     return () => document.removeEventListener("pointerdown", onPointerDown)
-  }, [])
+  }, [debouncedSearch])
 
   return (
     <div ref={rootRef} className="relative">
@@ -100,11 +97,11 @@ export function FinanceTransactionSearch({
         value={search}
         onChange={(event) => setSearch(event.target.value)}
         onFocus={() => {
-          if (debouncedSearch.length > 0) setOpen(true)
+          if (debouncedSearch.length > 0) setClosedFor(null)
         }}
         onKeyDown={(event) => {
           if (event.key === "Escape") {
-            setOpen(false)
+            setClosedFor(debouncedSearch)
             event.currentTarget.blur()
           }
         }}
@@ -159,10 +156,14 @@ export function FinanceTransactionSearch({
                     transaction.accountName ??
                     "Movimiento")
                 return (
-                  <div key={transaction.id} role="option">
+                  <div key={transaction.id} role="option" aria-selected={false}>
                     <SummaryItem
                       title={title}
-                      description={`${formatTransactionDate(transaction.transactionDate)} · ${FINANCE_TRANSACTION_STATUS_LABEL[transaction.status]}`}
+                      description={
+                        transaction.accountName || transaction.cardName ? (
+                          <TransactionInstrument transaction={transaction} />
+                        ) : undefined
+                      }
                       leading={
                         icon ? (
                           <span>{icon}</span>
@@ -189,8 +190,10 @@ export function FinanceTransactionSearch({
                           {signedAmount(transaction, display)}
                         </span>
                       }
+                      trailing={<TransactionStatusMark status={transaction.status} />}
+                      showChevron={false}
                       onPress={() => {
-                        setOpen(false)
+                        setClosedFor(debouncedSearch)
                         onSelect(transaction.id)
                       }}
                       isLast={index === items.length - 1}

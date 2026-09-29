@@ -86,7 +86,7 @@ export function FinanceFlowPills({
     <div className="grid grid-cols-2 gap-2">
       <div
         aria-label="Ingresos del mes"
-        className="flex justify-between items-center px-3 py-2 rounded-2xl border border-border bg-card"
+        className="flex justify-start items-center px-3 py-2 rounded-2xl border border-border bg-card relative"
       >
         <div className="flex flex-col gap-1">
           <p className="text-xs text-muted-foreground">Ingresos</p>
@@ -94,13 +94,13 @@ export function FinanceFlowPills({
             + {formatFinanceMoney(shown.income, display)}
           </p>
         </div>
-        <BanknoteArrowUpIcon className="size-4 text-success" />
+        <BanknoteArrowUpIcon className="size-4 text-success absolute right-2 top-1/2 -translate-y-1/2" />
       </div>
       <div
         aria-label="Gastos del mes"
-        className="flex justify-between items-center px-3 py-2 text-right rounded-2xl border border-border bg-card"
+        className="flex justify-end items-center px-3 py-2 text-right rounded-2xl border border-border bg-card relative"
       >
-        <BanknoteArrowDownIcon className="size-4 text-destructive" />
+        <BanknoteArrowDownIcon className="size-4 text-destructive absolute left-2 top-1/2 -translate-y-1/2" />
         <div className="flex flex-col gap-1">
           <p className="text-xs text-muted-foreground">Gastos</p>
           <p className="text-sm font-semibold tabular-nums text-destructive">

@@ -6,8 +6,9 @@ import {
   canReverseTransaction,
   fetchAllTransactionPages,
   formatTransactionDate,
-  transferDirectionLabel,
+  transactionInstrumentLabel,
   transactionsFromPayload,
+  transferDirectionLabel,
   visibleTransactionTotals,
 } from "./transactions-query.ts";
 
@@ -71,14 +72,31 @@ describe("transactionsFromPayload", () => {
 describe("visibleTransactionTotals", () => {
   it("splits CREDIT into income and DEBIT into expenses, ignoring transfers", () => {
     const totals = visibleTransactionTotals([
-      { type: "CREDIT", amount: "10.00", transferGroupId: null },
-      { type: "DEBIT", amount: "3.25", transferGroupId: null },
-      { type: "DEBIT", amount: "10.00", transferGroupId: null },
-      { type: "TRANSFER", amount: "50.00", transferGroupId: "grp-1" },
-      { type: "DEBIT", amount: "100.00", transferGroupId: "grp-2" },
+      { type: "CREDIT", amountBaseCurrency: "10.00", transferGroupId: null },
+      { type: "DEBIT", amountBaseCurrency: "3.25", transferGroupId: null },
+      { type: "DEBIT", amountBaseCurrency: "10.00", transferGroupId: null },
+      {
+        type: "TRANSFER",
+        amountBaseCurrency: "50.00",
+        transferGroupId: "grp-1",
+      },
+      {
+        type: "DEBIT",
+        amountBaseCurrency: "100.00",
+        transferGroupId: "grp-2",
+      },
     ])
     assert.equal(totals.income, 10)
     assert.equal(totals.expenses, 13.25)
+  })
+
+  it("adds the base-currency amount instead of the original foreign amount", () => {
+    const totals = visibleTransactionTotals([
+      { type: "DEBIT", amountBaseCurrency: "500.00", transferGroupId: null },
+      { type: "DEBIT", amountBaseCurrency: "500.00", transferGroupId: null },
+      { type: "DEBIT", amountBaseCurrency: "60.50", transferGroupId: null },
+    ])
+    assert.equal(totals.expenses, 1060.5)
   })
 })
 
@@ -137,6 +155,32 @@ describe("canReverseTransaction", () => {
         transferGroupId: null,
       }),
       false,
+    )
+  })
+})
+
+describe("transactionInstrumentLabel", () => {
+  it("prefers the card and falls back to the account", () => {
+    assert.equal(
+      transactionInstrumentLabel({
+        accountName: "Nómina",
+        cardName: "Visa Gold",
+      }),
+      "Visa Gold",
+    )
+    assert.equal(
+      transactionInstrumentLabel({
+        accountName: "Nómina",
+        cardName: null,
+      }),
+      "Nómina",
+    )
+    assert.equal(
+      transactionInstrumentLabel({
+        accountName: null,
+        cardName: null,
+      }),
+      null,
     )
   })
 })

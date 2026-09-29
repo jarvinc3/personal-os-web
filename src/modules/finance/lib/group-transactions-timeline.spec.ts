@@ -1,13 +1,13 @@
-import assert from "node:assert/strict"
-import { describe, it } from "node:test"
+import assert from "node:assert/strict";
+import { describe, it } from "node:test";
 
-import { buildTimelineMonths } from "./group-transactions-timeline.ts"
-import { monthBannerSrc } from "./month-banners.ts"
-import type { FinanceTransaction } from "../types/entities.ts"
+import type { FinanceTransaction } from "../types/entities.ts";
+import { buildTimelineMonths } from "./group-transactions-timeline.ts";
+import { monthBannerSrc } from "./month-banners.ts";
 
 function tx(
   partial: Pick<FinanceTransaction, "id" | "type" | "amount" | "transactionDate"> &
-    Partial<Pick<FinanceTransaction, "transferGroupId">>,
+    Partial<Pick<FinanceTransaction, "transferGroupId" | "amountBaseCurrency">>,
 ): FinanceTransaction {
   return {
     status: "CONFIRMED",
@@ -123,6 +123,36 @@ describe("buildTimelineMonths", () => {
       april.weeks.filter((week) => week.days.length === 0).length >= 1,
       true,
     )
+  })
+
+  it("nets a day in base currency when a movement is in another currency", () => {
+    const months = buildTimelineMonths(
+      [{ year: 2026, month: 4 }],
+      [
+        tx({
+          id: "dop-a",
+          type: "DEBIT",
+          amount: "500.00",
+          transactionDate: "2026-04-02",
+        }),
+        tx({
+          id: "dop-b",
+          type: "DEBIT",
+          amount: "500.00",
+          transactionDate: "2026-04-02",
+        }),
+        tx({
+          id: "usd",
+          type: "DEBIT",
+          amount: "1.00",
+          amountBaseCurrency: "60.50",
+          transactionDate: "2026-04-02",
+        }),
+      ],
+    )
+    const day = months[0]?.weeks[0]?.days[0]
+    assert.equal(day?.net, -1060.5)
+    assert.equal(months[0]?.totals.expenses, 1060.5)
   })
 
   it("renders months without transactions with weeks and no days", () => {

@@ -6,10 +6,8 @@ import {
   useRetryPendingEmail,
 } from "@/src/modules/finance/hooks/use-email-sources"
 import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
-import {
-  buildLedgerTargetOptions,
-  splitLedgerTarget,
-} from "@/src/modules/finance/lib/ledger-payloads"
+import { ledgerTargetSelectOptions } from "@/src/modules/finance/components/ledger-target-select"
+import { splitLedgerTarget } from "@/src/modules/finance/lib/ledger-payloads"
 import {
   formatFinanceMoney,
   type FinanceMoneyDisplay,
@@ -76,7 +74,7 @@ export function AssignEmailMessageSheet({
     [cards, message?.institutionId]
   )
   const targetOptions = useMemo(
-    () => buildLedgerTargetOptions(institutionAccounts, institutionCards),
+    () => ledgerTargetSelectOptions(institutionAccounts, institutionCards),
     [institutionAccounts, institutionCards]
   )
 

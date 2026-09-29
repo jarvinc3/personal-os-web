@@ -80,7 +80,10 @@ async function request<T>(
   try {
     const authHeaders = await getAuthHeaders();
     const headers = new Headers(init?.headers);
-    headers.set('Content-Type', 'application/json');
+    const isFormData = typeof FormData !== 'undefined' && init?.body instanceof FormData;
+    if (!isFormData) {
+      headers.set('Content-Type', 'application/json');
+    }
 
     if (authHeaders.Authorization) {
       headers.set('Authorization', authHeaders.Authorization);
@@ -163,3 +166,6 @@ export const apiPatch = <T,>(path: string, body?: unknown, config?: ApiRequestCo
 
 export const apiDelete = <T,>(path: string, config?: ApiRequestConfig) =>
   request<T>(path, { method: 'DELETE' }, config);
+
+export const apiPostForm = <T,>(path: string, body: FormData, config?: ApiRequestConfig) =>
+  request<T>(path, { method: 'POST', body }, config);

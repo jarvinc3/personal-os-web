@@ -1,5 +1,6 @@
 "use client"
 
+import { ledgerTargetSelectOptions } from "@/src/modules/finance/components/ledger-target-select"
 import { FinanceAmountField } from "@/src/modules/finance/components/forms/finance-form-blocks"
 import { FinanceCurrencyPills } from "@/src/modules/finance/components/forms/finance-currency-pills"
 import { FinanceDateField } from "@/src/modules/finance/components/forms/finance-date-field"
@@ -17,7 +18,6 @@ import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
 import { todayDateInput } from "@/src/modules/finance/lib/ledger-form"
 import {
   buildCreateTransactionBody,
-  buildLedgerTargetOptions,
   splitLedgerTarget,
 } from "@/src/modules/finance/lib/ledger-payloads"
 import type { FinanceTransactionType } from "@/src/modules/finance/types/entities"
@@ -74,7 +74,7 @@ export default function ExpenseIncomeForm({
 
   const destinationOptions = useMemo(
     () =>
-      buildLedgerTargetOptions(
+      ledgerTargetSelectOptions(
         accountsQuery.data ?? [],
         cardsQuery.data ?? [],
       ),

@@ -1,5 +1,6 @@
 "use client"
 
+import { institutionSelectOptions } from "@/src/modules/finance/components/ledger-target-select"
 import { CATALOG_NONE } from "@/src/modules/finance/constants/catalog"
 import { useCreateEmailSource } from "@/src/modules/finance/hooks/use-email-sources"
 import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
@@ -69,13 +70,13 @@ export function LinkInstitutionMailboxSheet({
         .map((source) => source.institutionId),
     ),
   )
-  const institutionOptions = institutions
-    .filter(
+  const institutionOptions = institutionSelectOptions(
+    institutions.filter(
       (item) =>
         item.isActive &&
         (!linkedInstitutionIds.has(item.id) || item.id === institutionId),
-    )
-    .map((item) => ({ value: item.id, label: item.name }))
+    ),
+  )
 
   const {
     control,

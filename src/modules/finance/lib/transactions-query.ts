@@ -100,6 +100,12 @@ export function isTransferTransaction(
   return item.type === "TRANSFER" || Boolean(item.transferGroupId)
 }
 
+export function transactionInstrumentLabel(
+  item: Pick<FinanceTransaction, "accountName" | "cardName">,
+): string | null {
+  return item.cardName ?? item.accountName
+}
+
 export function transferDirectionLabel(
   item: Pick<
     FinanceTransaction,
@@ -116,12 +122,15 @@ export function transferDirectionLabel(
 }
 
 export function visibleTransactionTotals(
-  items: Pick<FinanceTransaction, "type" | "amount" | "transferGroupId">[],
+  items: Pick<
+    FinanceTransaction,
+    "type" | "amountBaseCurrency" | "transferGroupId"
+  >[],
 ): { income: number; expenses: number } {
   return items.reduce(
     (totals, item) => {
       if (isTransferTransaction(item)) return totals
-      const amount = parseFinanceMoney(item.amount)
+      const amount = parseFinanceMoney(item.amountBaseCurrency)
       if (amount === null) return totals
       if (item.type === "CREDIT") totals.income += amount
       if (item.type === "DEBIT") totals.expenses += amount

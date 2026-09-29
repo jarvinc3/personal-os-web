@@ -21,6 +21,31 @@ export function parseFinanceMoney(value: string | number | null | undefined): nu
   return Number.isFinite(parsed) ? parsed : null
 }
 
+/**
+ * Narrow currency glyph. English locale keeps `$` / `€` stable.
+ * Some Spanish ICU data returns the ISO code again (`DOP` → `DOP`),
+ * which would render as `DOP DOP 3,000`. That repeat becomes `$`.
+ */
+export function currencyGlyph(
+  currency: string,
+  narrowSymbol: string | undefined,
+): string | null {
+  if (!narrowSymbol) return null
+  if (narrowSymbol.trim().toUpperCase() === currency) return "$"
+  return narrowSymbol
+}
+
+function narrowCurrencySymbol(currency: string): string | null {
+  const symbol = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency,
+    currencyDisplay: "narrowSymbol",
+  })
+    .formatToParts(0)
+    .find((part) => part.type === "currency")?.value
+  return currencyGlyph(currency, symbol)
+}
+
 export function formatFinanceMoney(
   value: string | number | null | undefined,
   display: FinanceMoneyDisplay,
@@ -31,13 +56,7 @@ export function formatFinanceMoney(
     return "—"
   }
   try {
-    const symbol = new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency,
-      currencyDisplay: "narrowSymbol",
-    })
-      .formatToParts(0)
-      .find((part) => part.type === "currency")?.value
+    const symbol = narrowCurrencySymbol(currency)
 
     if (!symbol) {
       return "—"

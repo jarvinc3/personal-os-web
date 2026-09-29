@@ -1,6 +1,6 @@
 "use client"
 
-import { apiDelete, apiGet, apiPatch, apiPost } from "@/src/config/api-client"
+import { apiDelete, apiPatch, apiPost, apiPostForm } from "@/src/config/api-client"
 import type { CreateInstitutionBody } from "@/src/modules/finance/lib/catalog-payloads"
 import {
   invalidateFinanceBalanceSheet,
@@ -57,6 +57,21 @@ export function useArchiveInstitution() {
       apiPatch<FinanceInstitution>(API_ENDPOINTS.FINANCE.INSTITUTION(id), {
         isActive: false,
       }),
+    onSuccess: () => invalidateCatalog(queryClient),
+  })
+}
+
+export function useUploadInstitutionLogo() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, file }: { id: string; file: File }) => {
+      const body = new FormData()
+      body.append("file", file)
+      return apiPostForm<FinanceInstitution>(
+        API_ENDPOINTS.FINANCE.INSTITUTION_LOGO(id),
+        body,
+      )
+    },
     onSuccess: () => invalidateCatalog(queryClient),
   })
 }

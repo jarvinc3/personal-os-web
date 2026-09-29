@@ -1,5 +1,6 @@
 "use client"
 
+import { ledgerTargetSelectOptions } from "@/src/modules/finance/components/ledger-target-select"
 import { FinanceCurrencyPills } from "@/src/modules/finance/components/forms/finance-currency-pills"
 import { FinanceDateField } from "@/src/modules/finance/components/forms/finance-date-field"
 import {
@@ -19,7 +20,6 @@ import {
 } from "@/src/modules/finance/lib/ledger-form"
 import {
   buildCreateTransferBody,
-  buildLedgerTargetOptions,
   splitLedgerTarget,
 } from "@/src/modules/finance/lib/ledger-payloads"
 import type { FinanceAccount, FinanceCard } from "@/src/modules/finance/types/entities"
@@ -79,7 +79,7 @@ export function TransferSheet({
 }: TransferSheetProps) {
   const createMutation = useCreateTransfer()
   const destinationOptions = useMemo(
-    () => buildLedgerTargetOptions(accounts, cards),
+    () => ledgerTargetSelectOptions(accounts, cards),
     [accounts, cards],
   )
   const fromDefault = destinationOptions[1]?.value ?? CATALOG_NONE

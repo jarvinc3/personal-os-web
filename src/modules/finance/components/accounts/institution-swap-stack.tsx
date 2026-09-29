@@ -1,5 +1,6 @@
 "use client"
 
+import { BrandLogo } from "@/src/modules/finance/components/brand-logo";
 import {
   formatProductCounts,
   formatStackItemBalance,
@@ -34,7 +35,7 @@ import {
   ChevronRightIcon,
   CreditCardIcon,
 } from "lucide-react";
-import { type KeyboardEvent, useEffect, useRef, useState } from "react";
+import { type KeyboardEvent, useRef, useState } from "react";
 
 const FALLBACK_INSTITUTION_COLOR = "#1B4332"
 const FALLBACK_CASH_COLOR = "#334155"
@@ -50,6 +51,7 @@ type WalletCardModel = {
   item: InstitutionStackItem
   name: string
   monogram: string
+  logoUrl: string | null
   color: string
   productSummary: string
   balanceLabel: string
@@ -65,6 +67,7 @@ function toWalletCard(
       item,
       name: item.institution.name,
       monogram: institutionInitials(item.institution.name),
+      logoUrl: item.institution.logoUrl,
       color: item.institution.color ?? FALLBACK_INSTITUTION_COLOR,
       productSummary: formatProductCounts(item.counts),
       balanceLabel: "Balance consolidado",
@@ -76,6 +79,7 @@ function toWalletCard(
     item,
     name: item.account.name,
     monogram: institutionInitials(item.account.name),
+    logoUrl: item.account.institutionLogoUrl ?? null,
     color: item.account.color ?? FALLBACK_CASH_COLOR,
     productSummary: "Cuenta de dinero en efectivo",
     balanceLabel: "Saldo",
@@ -101,9 +105,10 @@ export function InstitutionSwapStack({
   className,
 }: InstitutionSwapStackProps) {
   const [cycleOffset, setCycleOffset] = useState(() => initialCycleOffset(items))
-
-  useEffect(() => {
-    if (items.length === 0) return
+  const itemsSignature = items.map((item) => stackItemKey(item)).join("\0")
+  const [syncedSignature, setSyncedSignature] = useState(itemsSignature)
+  if (items.length > 0 && syncedSignature !== itemsSignature) {
+    setSyncedSignature(itemsSignature)
     const key = readFrontItemKey()
     const next = cycleOffsetForFrontKey(items, key)
     setCycleOffset(next)
@@ -111,7 +116,7 @@ export function InstitutionSwapStack({
     if (front && (!key || stackItemKey(front) !== key)) {
       writeFrontItemKey(stackItemKey(front))
     }
-  }, [items])
+  }
 
   if (items.length === 0) return null
 
@@ -195,6 +200,7 @@ export function InstitutionSwapStack({
                 kind={card.item.kind}
                 name={card.name}
                 monogram={card.monogram}
+                logoUrl={card.logoUrl}
                 color={card.color}
                 productSummary={card.productSummary}
                 balanceLabel={card.balanceLabel}
@@ -259,6 +265,7 @@ type InstitutionWalletCardProps = {
   kind: InstitutionStackItem["kind"]
   name: string
   monogram: string
+  logoUrl: string | null
   color: string
   productSummary: string
   balanceLabel: string
@@ -272,6 +279,7 @@ function InstitutionWalletCard({
   kind,
   name,
   monogram,
+  logoUrl,
   color,
   productSummary,
   balanceLabel,
@@ -312,12 +320,7 @@ function InstitutionWalletCard({
       style={{ backgroundColor: color }}
     >
       <div className="flex justify-between items-start">
-        <span
-          className="rounded-xl px-3 py-1.5 font-display text-base font-bold text-white"
-          style={{ backgroundColor: "rgba(255,255,255,0.18)" }}
-        >
-          {monogram}
-        </span>
+        <BrandLogo name={name || monogram} logoUrl={logoUrl} size={44} />
         <KindIcon
           className="size-5"
           style={{ color: "rgba(255,255,255,0.6)" }}

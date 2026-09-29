@@ -75,6 +75,22 @@ export function FinanceTransactionsList({
   const [activeMonthKey, setActiveMonthKey] = useState<MonthKey>(() =>
     monthKeyFromDate(new Date())
   )
+  const [rangeMonthKey, setRangeMonthKey] = useState(activeMonthKey)
+  if (rangeMonthKey !== activeMonthKey) {
+    setRangeMonthKey(activeMonthKey)
+    const parsed = parseMonthKey(activeMonthKey)
+    const active = new Date(parsed.year, parsed.month - 1, 1)
+    setRange((current) => {
+      const next = extendMonthRange(current, active)
+      if (
+        next.from.getTime() === current.from.getTime() &&
+        next.to.getTime() === current.to.getTime()
+      ) {
+        return current
+      }
+      return next
+    })
+  }
   const [stickyOffset, setStickyOffset] = useState(0)
   const chromeRef = useRef<HTMLDivElement>(null)
   const timelineRef = useRef<HTMLDivElement>(null)
@@ -234,21 +250,6 @@ export function FinanceTransactionsList({
       if (!willRetry) isProgrammaticScroll.current = false
     }
   }, [activeMonthKey, months, stickyOffset, timeline.length])
-
-  useEffect(() => {
-    const parsed = parseMonthKey(activeMonthKey)
-    const active = new Date(parsed.year, parsed.month - 1, 1)
-    setRange((current) => {
-      const next = extendMonthRange(current, active)
-      if (
-        next.from.getTime() === current.from.getTime() &&
-        next.to.getTime() === current.to.getTime()
-      ) {
-        return current
-      }
-      return next
-    })
-  }, [activeMonthKey])
 
   useEffect(() => {
     const rootNode = timelineRef.current

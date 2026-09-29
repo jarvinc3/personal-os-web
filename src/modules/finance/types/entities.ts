@@ -2,6 +2,7 @@ import type {
   FinanceAccountType,
   FinanceCardNetwork,
   FinanceCardType,
+  FinanceInstitutionType,
 } from "@/src/modules/finance/constants/catalog";
 
 export const FINANCE_TRANSACTION_TYPES = ["DEBIT", "CREDIT", "TRANSFER"] as const
@@ -51,8 +52,14 @@ export type FinanceTransaction = {
   exchangeRate: string | null
   accountId: string | null
   accountName: string | null
+  institutionLogoUrl?: string | null
   cardId: string | null
   cardName: string | null
+  network?: string | null
+  networkLogoUrl?: string | null
+  transferToInstitutionLogoUrl?: string | null
+  transferToNetwork?: string | null
+  transferToNetworkLogoUrl?: string | null
   categoryId: string | null
   merchant: string | null
   notes: string | null
@@ -137,6 +144,7 @@ export type FinanceAccount = {
   id: string
   institutionId: string | null
   institutionName: string | null
+  institutionLogoUrl?: string | null
   name: string
   type: FinanceAccountType
   currency: string
@@ -159,6 +167,8 @@ export type FinanceCard = {
   id: string
   institutionId: string
   institutionName: string
+  institutionLogoUrl?: string | null
+  networkLogoUrl?: string | null
   accountId: string | null
   accountName: string | null
   name: string
@@ -175,6 +185,10 @@ export type FinanceCard = {
 export type FinanceInstitution = {
   id: string
   name: string
+  type?: FinanceInstitutionType
+  shortName?: string | null
+  sortOrder?: number
+  domain?: string | null
   color: string | null
   logoUrl: string | null
   country: string | null

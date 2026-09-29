@@ -1,5 +1,6 @@
 "use client"
 
+import { institutionSelectOptions } from "@/src/modules/finance/components/ledger-target-select"
 import { CATALOG_NONE } from "@/src/modules/finance/constants/catalog"
 import { EmailSyncLogList } from "@/src/modules/finance/components/sync/email-sync-history"
 import {
@@ -73,9 +74,9 @@ export function EmailSourceSheet({
     updateMutation.isPending ||
     disconnectMutation.isPending ||
     syncPending
-  const institutionOptions = institutions
-    .filter((item) => item.isActive)
-    .map((item) => ({ value: item.id, label: item.name }))
+  const institutionOptions = institutionSelectOptions(
+    institutions.filter((item) => item.isActive),
+  )
 
   const {
     control,

@@ -1,5 +1,9 @@
 "use client"
 
+import {
+  accountSelectOptions,
+  institutionSelectOptions,
+} from "@/src/modules/finance/components/ledger-target-select";
 import { FinanceCurrencyPills } from "@/src/modules/finance/components/forms/finance-currency-pills";
 import {
   FinancePreviewRow,
@@ -191,20 +195,14 @@ export function CardSheet({
   const cardColor = useWatch({ control, name: "color" })
   const lastFour = useWatch({ control, name: "lastFour" })
 
-  const institutionOptions = institutions.map((item) => ({
-    value: item.id,
-    label: item.name,
-  }))
+  const institutionOptions = institutionSelectOptions(institutions)
   const institutionAccounts = accounts.filter(
     (item) => item.isActive && item.institutionId === selectedInstitutionId
   )
-  const accountOptions = [
-    { value: CATALOG_NONE, label: "Sin cuenta" },
-    ...institutionAccounts.map((item) => ({
-      value: item.id,
-      label: item.name,
-    })),
-  ]
+  const accountOptions = accountSelectOptions(institutionAccounts, {
+    value: CATALOG_NONE,
+    label: "Sin cuenta",
+  })
   const hasInstitutions = institutionOptions.length > 0
   const allowedCurrencies = buildFinanceCurrencyOptions(defaultCurrency)
   const usedCurrencies = (watchedBalances ?? []).map((row) => row.currency)

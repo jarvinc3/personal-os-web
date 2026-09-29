@@ -1,34 +1,34 @@
 "use client"
 
-import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
-import type { FinanceFrequentExpense } from "@/src/modules/finance/lib/finance-home"
+import { TransactionStatusMark } from "@/src/modules/finance/components/transactions/transaction-status-mark";
+import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error";
+import type { FinanceFrequentExpense } from "@/src/modules/finance/lib/finance-home";
 import {
   formatFinanceMoney,
   parseFinanceMoney,
   type FinanceMoneyDisplay,
-} from "@/src/modules/finance/lib/money"
+} from "@/src/modules/finance/lib/money";
 import {
-  formatTransactionDate,
   isTransferTransaction,
+  transactionInstrumentLabel,
   transferDirectionLabel,
-} from "@/src/modules/finance/lib/transactions-query"
-import {
-  FINANCE_TRANSACTION_STATUS_LABEL,
-  type FinanceCategory,
-  type FinanceTransaction,
-} from "@/src/modules/finance/types/entities"
-import { Button } from "@/src/shared/components/ui/button"
+} from "@/src/modules/finance/lib/transactions-query";
+import type {
+  FinanceCategory,
+  FinanceTransaction,
+} from "@/src/modules/finance/types/entities";
+import { Button } from "@/src/shared/components/ui/button";
 import {
   Empty,
   EmptyDescription,
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
-} from "@/src/shared/components/ui/empty"
-import { Spinner } from "@/src/shared/components/ui/spinner"
-import { SummaryItem, SummarySection } from "@/src/shared/components/ui/summary"
-import { APP_ROUTES } from "@/src/shared/constants/app-routes"
-import { cn } from "@/src/shared/lib/utils"
+} from "@/src/shared/components/ui/empty";
+import { Spinner } from "@/src/shared/components/ui/spinner";
+import { SummaryItem, SummarySection } from "@/src/shared/components/ui/summary";
+import { APP_ROUTES } from "@/src/shared/constants/app-routes";
+import { cn } from "@/src/shared/lib/utils";
 import {
   ArrowDownLeftIcon,
   ArrowLeftRightIcon,
@@ -38,8 +38,8 @@ import {
   ArrowUpRightIcon,
   LandmarkIcon,
   Plus,
-} from "lucide-react"
-import Link from "next/link"
+} from "lucide-react";
+import Link from "next/link";
 
 type QueryState = {
   isPending: boolean
@@ -220,7 +220,9 @@ export function RecentTransactionsSection({
                 key={transaction.id}
                 href={APP_ROUTES.app.financeTransactions}
                 title={title}
-                description={`${formatTransactionDate(transaction.transactionDate)} · ${FINANCE_TRANSACTION_STATUS_LABEL[transaction.status]}`}
+                description={
+                  transactionInstrumentLabel(transaction) ?? undefined
+                }
                 leading={
                   icon ? (
                     <span>{icon}</span>
@@ -247,6 +249,7 @@ export function RecentTransactionsSection({
                     {signedAmount(transaction, display)}
                   </span>
                 }
+                trailing={<TransactionStatusMark status={transaction.status} />}
                 isLast={index === transactions.length - 1}
               />
             )
