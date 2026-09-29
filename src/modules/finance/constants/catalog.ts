@@ -38,4 +38,23 @@ export const FINANCE_CARD_NETWORK_LABEL: Record<FinanceCardNetwork, string> = {
   OTHER: "Otra",
 }
 
+export const FINANCE_INSTITUTION_TYPES = [
+  "bank",
+  "credit_union",
+  "digital_wallet",
+  "broker",
+  "cash",
+  "other",
+] as const
+export type FinanceInstitutionType = (typeof FINANCE_INSTITUTION_TYPES)[number]
+
+export const FINANCE_INSTITUTION_TYPE_LABEL: Record<FinanceInstitutionType, string> = {
+  bank: "Banco",
+  credit_union: "Cooperativa",
+  digital_wallet: "Billetera digital",
+  broker: "Casa de bolsa",
+  cash: "Efectivo",
+  other: "Otro",
+}
+
 export const CATALOG_NONE = "__none__" as const

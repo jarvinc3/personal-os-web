@@ -1,8 +1,8 @@
 "use client"
 
+import { BrandLogo, CardNetworkMark } from "@/src/modules/finance/components/brand-logo";
 import {
   FINANCE_ACCOUNT_TYPE_LABEL,
-  FINANCE_CARD_NETWORK_LABEL,
   FINANCE_CARD_TYPE_LABEL,
 } from "@/src/modules/finance/constants/catalog";
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/lib/money";
@@ -26,7 +26,6 @@ import {
   CreditCardIcon,
   HandCoinsIcon,
   LandmarkIcon,
-  PiggyBankIcon,
   PlusIcon,
 } from "lucide-react";
 
@@ -41,7 +40,6 @@ export function AccountProductRow({
   display,
   onPress,
 }: AccountProductRowProps) {
-  const Icon = account.type === "SAVINGS" ? PiggyBankIcon : LandmarkIcon
   const lastFour = account.accountNumber?.replace(/\D/g, "").slice(-4)
   const subtitle = lastFour
     ? `${FINANCE_ACCOUNT_TYPE_LABEL[account.type]} · •••• ${lastFour}`
@@ -55,9 +53,11 @@ export function AccountProductRow({
         PRESSABLE_CLASS
       )}
     >
-      <div className="flex justify-center items-center rounded-full size-11 bg-muted">
-        <Icon className="size-5 text-muted-foreground" />
-      </div>
+      <BrandLogo
+        name={account.institutionName ?? account.name}
+        logoUrl={account.institutionLogoUrl}
+        size={44}
+      />
       <div className="flex-1 min-w-0">
         <p className="font-semibold truncate text-foreground">{account.name}</p>
         <p className="text-sm text-muted-foreground">{subtitle}</p>
@@ -83,8 +83,6 @@ export function CardProductRow({
   display,
   onPress,
 }: CardProductRowProps) {
-  const network = card.network ? FINANCE_CARD_NETWORK_LABEL[card.network] : null
-
   return (
     <button
       type="button"
@@ -124,8 +122,17 @@ export function CardProductRow({
             ))
           )}
         </div>
-        <span className="text-sm font-semibold tracking-wide">
-          {network?.toUpperCase() ?? "TARJETA"}
+        <span className="inline-flex items-center gap-1.5">
+          <BrandLogo
+            name={card.institutionName}
+            logoUrl={card.institutionLogoUrl}
+            size={28}
+          />
+          <CardNetworkMark
+            network={card.network}
+            logoUrl={card.networkLogoUrl}
+            size={28}
+          />
         </span>
       </div>
     </button>
@@ -135,12 +142,14 @@ export function CardProductRow({
 type LoanProductRowProps = {
   loan: FinanceLoan
   display: FinanceMoneyDisplay
+  logoUrl?: string | null
   onPress: () => void
 }
 
 export function LoanProductRow({
   loan,
   display,
+  logoUrl,
   onPress,
 }: LoanProductRowProps) {
   return (
@@ -152,9 +161,7 @@ export function LoanProductRow({
         PRESSABLE_CLASS
       )}
     >
-      <div className="flex justify-center items-center rounded-full size-11 bg-muted">
-        <HandCoinsIcon className="size-5 text-muted-foreground" />
-      </div>
+      <BrandLogo name={loan.lenderName} logoUrl={logoUrl} size={44} />
       <div className="flex-1 min-w-0">
         <p className="font-semibold truncate text-foreground">
           {loan.lenderName}

@@ -1,5 +1,7 @@
 "use client"
 
+import { TransactionInstrument } from "@/src/modules/finance/components/transactions/transaction-instrument";
+import { TransactionStatusMark } from "@/src/modules/finance/components/transactions/transaction-status-mark";
 import type { TimelineMonth } from "@/src/modules/finance/lib/group-transactions-timeline";
 import {
   formatFinanceMoney,
@@ -7,14 +9,12 @@ import {
   type FinanceMoneyDisplay,
 } from "@/src/modules/finance/lib/money";
 import {
-  formatTransactionDate,
   isTransferTransaction,
   transferDirectionLabel,
 } from "@/src/modules/finance/lib/transactions-query";
-import {
-  FINANCE_TRANSACTION_STATUS_LABEL,
-  type FinanceCategory,
-  type FinanceTransaction,
+import type {
+  FinanceCategory,
+  FinanceTransaction,
 } from "@/src/modules/finance/types/entities";
 import { SummaryItem } from "@/src/shared/components/ui/summary";
 import { cn } from "@/src/shared/lib/utils";
@@ -134,7 +134,11 @@ export function FinanceMonthSection({
                     <SummaryItem
                       key={transaction.id}
                       title={title}
-                      description={`${formatTransactionDate(transaction.transactionDate)} · ${FINANCE_TRANSACTION_STATUS_LABEL[transaction.status]}`}
+                      description={
+                        transaction.accountName || transaction.cardName ? (
+                          <TransactionInstrument transaction={transaction} />
+                        ) : undefined
+                      }
                       leading={
                         icon ? (
                           <span>{icon}</span>
@@ -161,6 +165,8 @@ export function FinanceMonthSection({
                           {signedAmount(transaction, display)}
                         </span>
                       }
+                      trailing={<TransactionStatusMark status={transaction.status} />}
+                      showChevron={false}
                       onPress={() => onTransactionPress(transaction.id)}
                       isLast={index === day.items.length - 1}
                     />

@@ -1,32 +1,33 @@
 "use client"
 
+import { BrandLogo, CardNetworkMark } from "@/src/modules/finance/components/brand-logo";
 import {
   useConfirmTransaction,
   useDeleteTransaction,
   useReverseTransaction,
   useTransaction,
-} from "@/src/modules/finance/hooks/use-transactions"
-import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
-import type { FinanceMoneyDisplay } from "@/src/modules/finance/lib/money"
-import { formatFinanceMoney } from "@/src/modules/finance/lib/money"
+} from "@/src/modules/finance/hooks/use-transactions";
+import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error";
+import type { FinanceMoneyDisplay } from "@/src/modules/finance/lib/money";
+import { formatFinanceMoney } from "@/src/modules/finance/lib/money";
 import {
   canReverseTransaction,
   formatTransactionDate,
   isTransferTransaction,
   transferDirectionLabel,
-} from "@/src/modules/finance/lib/transactions-query"
+} from "@/src/modules/finance/lib/transactions-query";
 import {
   FINANCE_TRANSACTION_STATUS_LABEL,
   FINANCE_TRANSACTION_TYPE_LABEL,
   type FinanceTransaction,
   type FinanceTransactionType,
-} from "@/src/modules/finance/types/entities"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
-import { SettingsSection } from "@/src/shared/components/layout/settings-section"
-import { Button } from "@/src/shared/components/ui/button"
-import { Spinner } from "@/src/shared/components/ui/spinner"
-import { SummaryItem } from "@/src/shared/components/ui/summary"
-import { appToast } from "@/src/shared/lib/app-toast"
+} from "@/src/modules/finance/types/entities";
+import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet";
+import { SettingsSection } from "@/src/shared/components/layout/settings-section";
+import { Button } from "@/src/shared/components/ui/button";
+import { Spinner } from "@/src/shared/components/ui/spinner";
+import { SummaryItem } from "@/src/shared/components/ui/summary";
+import { appToast } from "@/src/shared/lib/app-toast";
 
 type TransactionDetailSheetProps = {
   open: boolean
@@ -187,6 +188,22 @@ export function TransactionDetailSheet({
                 <SummaryItem
                   title="Origen"
                   value={tx.accountName ?? tx.cardName ?? "—"}
+                  leading={
+                    <span className="inline-flex items-center gap-1">
+                      <BrandLogo
+                        name={tx.accountName ?? tx.cardName ?? "Origen"}
+                        logoUrl={tx.institutionLogoUrl}
+                        size={28}
+                      />
+                      {tx.cardId ? (
+                        <CardNetworkMark
+                          network={tx.network}
+                          logoUrl={tx.networkLogoUrl}
+                          size={28}
+                        />
+                      ) : null}
+                    </span>
+                  }
                   isLast={false}
                   className="px-3"
                 />
@@ -194,6 +211,26 @@ export function TransactionDetailSheet({
                   title="Destino"
                   value={
                     tx.transferToAccountName ?? tx.transferToCardName ?? "—"
+                  }
+                  leading={
+                    <span className="inline-flex items-center gap-1">
+                      <BrandLogo
+                        name={
+                          tx.transferToAccountName ??
+                          tx.transferToCardName ??
+                          "Destino"
+                        }
+                        logoUrl={tx.transferToInstitutionLogoUrl}
+                        size={28}
+                      />
+                      {tx.transferToCardId ? (
+                        <CardNetworkMark
+                          network={tx.transferToNetwork}
+                          logoUrl={tx.transferToNetworkLogoUrl}
+                          size={28}
+                        />
+                      ) : null}
+                    </span>
                   }
                   isLast={false}
                   className="px-3"
@@ -210,12 +247,37 @@ export function TransactionDetailSheet({
                 <SummaryItem
                   title="Cuenta"
                   value={tx.accountName ?? "—"}
+                  leading={
+                    tx.accountId ? (
+                      <BrandLogo
+                        name={tx.accountName ?? "Cuenta"}
+                        logoUrl={tx.institutionLogoUrl}
+                        size={28}
+                      />
+                    ) : undefined
+                  }
                   isLast={false}
                   className="px-3"
                 />
                 <SummaryItem
                   title="Tarjeta"
                   value={tx.cardName ?? "—"}
+                  leading={
+                    tx.cardId ? (
+                      <span className="inline-flex items-center gap-1">
+                        <BrandLogo
+                          name={tx.cardName ?? "Tarjeta"}
+                          logoUrl={tx.institutionLogoUrl}
+                          size={28}
+                        />
+                        <CardNetworkMark
+                          network={tx.network}
+                          logoUrl={tx.networkLogoUrl}
+                          size={28}
+                        />
+                      </span>
+                    ) : undefined
+                  }
                   isLast={false}
                   className="px-3"
                 />

@@ -19,8 +19,11 @@ export type CreateAccountBody = {
 export type CreateInstitutionBody = {
   name: string
   color?: string | null
-  logoUrl?: string
   country?: string
+  type?: "bank" | "credit_union" | "digital_wallet" | "broker" | "cash" | "other"
+  shortName?: string | null
+  sortOrder?: number
+  domain?: string | null
 }
 
 export type CreateCardBody = {
@@ -130,8 +133,11 @@ export function buildCreateInstitutionBody(
   input: {
     name: string
     color?: string
-    logoUrl?: string
     country?: string
+    type?: CreateInstitutionBody["type"]
+    shortName?: string
+    sortOrder?: string
+    domain?: string
   },
   options?: { isUpdate?: boolean },
 ): PayloadResult<CreateInstitutionBody> {
@@ -144,10 +150,23 @@ export function buildCreateInstitutionBody(
   const color = optionalTrimmed(input.color)
   if (color) body.color = color
   else if (options?.isUpdate) body.color = null
-  const logoUrl = optionalTrimmed(input.logoUrl)
-  if (logoUrl) body.logoUrl = logoUrl
   const country = optionalTrimmed(input.country)?.toUpperCase()
   if (country) body.country = country
+  if (input.type) body.type = input.type
+  const shortName = optionalTrimmed(input.shortName)
+  if (shortName) body.shortName = shortName
+  else if (options?.isUpdate) body.shortName = null
+  const domain = optionalTrimmed(input.domain)?.toLowerCase()
+  if (domain) body.domain = domain
+  else if (options?.isUpdate) body.domain = null
+  const sortOrder = optionalTrimmed(input.sortOrder)
+  if (sortOrder) {
+    const parsed = Number(sortOrder)
+    if (!Number.isInteger(parsed) || parsed < 0) {
+      return { ok: false, error: "El orden debe ser un número entero" }
+    }
+    body.sortOrder = parsed
+  }
 
   return { ok: true, body }
 }

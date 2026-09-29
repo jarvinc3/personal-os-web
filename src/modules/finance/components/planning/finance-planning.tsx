@@ -1,5 +1,6 @@
 "use client"
 
+import { BrandLogo } from "@/src/modules/finance/components/brand-logo";
 import { FinanceListSkeleton } from "@/src/modules/finance/components/layout/finance-list-skeleton";
 import { LoanSheet } from "@/src/modules/finance/components/planning/loan-sheet";
 import { ReceivableSheet } from "@/src/modules/finance/components/planning/receivable-sheet";
@@ -302,16 +303,27 @@ export function FinancePlanningList({
                 </EmptyContent>
               </Empty>
             ) : (
-              loans.map((loan, index) => (
+              loans.map((loan, index) => {
+                const institution = (institutionsQuery.data ?? []).find(
+                  (item) => item.id === loan.institutionId,
+                )
+                return (
                 <SummaryItem
                   key={loan.id}
                   title={loan.lenderName}
                   value={loanRowValue(loan, display)}
-                  icon={LandmarkIcon}
+                  leading={
+                    <BrandLogo
+                      name={institution?.name ?? loan.lenderName}
+                      logoUrl={institution?.logoUrl}
+                      size={28}
+                    />
+                  }
                   onPress={() => setOpenLoanSheet(true, loan.id)}
                   isLast={index === loans.length - 1}
                 />
-              ))
+                )
+              })
             )}
           </SummarySection>
         </TabsContent>

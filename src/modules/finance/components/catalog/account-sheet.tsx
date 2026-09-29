@@ -1,5 +1,6 @@
 "use client"
 
+import { institutionSelectOptions } from "@/src/modules/finance/components/ledger-target-select";
 import { FinanceCurrencyPills } from "@/src/modules/finance/components/forms/finance-currency-pills";
 import {
   FinancePreviewRow,
@@ -137,10 +138,11 @@ export function AccountSheet({
     deleteMutation.isPending
 
   const institutionOptions = useMemo(
-    () => [
-      { value: CATALOG_NONE, label: "Sin institución" },
-      ...institutions.map((item) => ({ value: item.id, label: item.name })),
-    ],
+    () =>
+      institutionSelectOptions(institutions, {
+        value: CATALOG_NONE,
+        label: "Sin institución",
+      }),
     [institutions]
   )
   const hasInstitutions = institutions.length > 0

@@ -1,11 +1,18 @@
 "use client"
 
+import { BrandLogo, brandPreviewUrl } from "@/src/modules/finance/components/brand-logo";
+import { BrandPicker } from "@/src/modules/finance/components/brand-picker";
 import { FinancePreviewRow } from "@/src/modules/finance/components/forms/finance-form-blocks";
+import {
+  FINANCE_INSTITUTION_TYPE_LABEL,
+  FINANCE_INSTITUTION_TYPES,
+} from "@/src/modules/finance/constants/catalog";
 import {
   useArchiveInstitution,
   useCreateInstitution,
   useDeleteInstitution,
   useUpdateInstitution,
+  useUploadInstitutionLogo,
 } from "@/src/modules/finance/hooks/use-institutions";
 import { buildCreateInstitutionBody } from "@/src/modules/finance/lib/catalog-payloads";
 import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error";
@@ -21,7 +28,7 @@ import { appToast } from "@/src/shared/lib/app-toast";
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArchiveIcon, Building2Icon, Palette, SaveIcon, TrashIcon, XIcon } from "lucide-react";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 
@@ -29,6 +36,10 @@ const schema = z.object({
   name: z.string().trim().min(1, "Nombre obligatorio").max(120),
   color: z.string().trim().max(20),
   country: z.string().trim().max(2),
+  type: z.enum(FINANCE_INSTITUTION_TYPES),
+  shortName: z.string().trim().max(40),
+  sortOrder: z.string().trim().max(4),
+  domain: z.string().trim().max(253),
 })
 
 type FormValues = z.infer<typeof schema>
@@ -38,6 +49,10 @@ function toFormValues(institution: FinanceInstitution | null): FormValues {
     name: institution?.name ?? "",
     color: institution?.color ?? "",
     country: institution?.country ?? "DO",
+    type: institution?.type ?? "bank",
+    shortName: institution?.shortName ?? "",
+    sortOrder: String(institution?.sortOrder ?? 0),
+    domain: institution?.domain ?? "",
   }
 }
 
@@ -61,11 +76,14 @@ export function InstitutionSheet({
   const updateMutation = useUpdateInstitution()
   const archiveMutation = useArchiveInstitution()
   const deleteMutation = useDeleteInstitution()
+  const uploadMutation = useUploadInstitutionLogo()
+  const [logoFile, setLogoFile] = useState<File | null>(null)
   const isPending =
     createMutation.isPending ||
     updateMutation.isPending ||
     archiveMutation.isPending ||
-    deleteMutation.isPending
+    deleteMutation.isPending ||
+    uploadMutation.isPending
 
   const {
     control,
@@ -79,10 +97,15 @@ export function InstitutionSheet({
   const institutionName = useWatch({ control, name: "name" })
   const institutionColor = useWatch({ control, name: "color" })
   const institutionCountry = useWatch({ control, name: "country" })
+  const institutionDomain = useWatch({ control, name: "domain" })
+  const previewLogo =
+    brandPreviewUrl(institutionDomain) ??
+    (institution?.domain === institutionDomain ? institution?.logoUrl : null)
 
   useEffect(() => {
     if (open) {
       reset(toFormValues(institution))
+      setLogoFile(null)
     }
   }, [open, institution, reset])
 
@@ -98,16 +121,18 @@ export function InstitutionSheet({
       return
     }
     try {
-      if (institution) {
-        await updateMutation.mutateAsync({
-          id: institution.id,
-          body: payload.body,
-        })
-        appToast.success({ text1: "Institución actualizada" })
-      } else {
-        await createMutation.mutateAsync(payload.body)
-        appToast.success({ text1: "Institución creada" })
+      const saved = institution
+        ? await updateMutation.mutateAsync({
+            id: institution.id,
+            body: payload.body,
+          })
+        : await createMutation.mutateAsync(payload.body)
+      if (logoFile) {
+        await uploadMutation.mutateAsync({ id: saved.id, file: logoFile })
       }
+      appToast.success({
+        text1: institution ? "Institución actualizada" : "Institución creada",
+      })
       onOpenChange(false)
     } catch (error) {
       appToast.error({ text1: financeErrorMessage(error) })
@@ -167,11 +192,27 @@ export function InstitutionSheet({
       }}
     >
       <SummarySection title="Institución" icon={Building2Icon}>
-        <FinancePreviewRow
-          icon={Building2Icon}
-          title={institutionName.trim() || "Nueva institución"}
-          description={institutionCountry.trim() || "País"}
-          accentColor={institutionColor || undefined}
+        <div className="flex items-center gap-3">
+          <BrandLogo
+            name={institutionName.trim() || "Institución"}
+            logoUrl={previewLogo}
+            size={48}
+          />
+          <FinancePreviewRow
+            icon={Building2Icon}
+            title={institutionName.trim() || "Nueva institución"}
+            description={institutionCountry.trim() || "País"}
+            accentColor={institutionColor || undefined}
+          />
+        </div>
+        <BrandPicker
+          onSelect={(brand) => {
+            reset((current) => ({
+              ...current,
+              name: current.name.trim() ? current.name : brand.name,
+              domain: brand.domain,
+            }))
+          }}
         />
         <Controller
           control={control}
@@ -199,6 +240,75 @@ export function InstitutionSheet({
             />
           )}
         />
+        <Controller
+          control={control}
+          name="domain"
+          render={({ field }) => (
+            <FormTextField
+              label="Dominio"
+              value={field.value}
+              onChange={field.onChange}
+              onBlur={field.onBlur}
+              error={errors.domain?.message}
+              placeholder="bhd.com.do"
+            />
+          )}
+        />
+        <Controller
+          control={control}
+          name="shortName"
+          render={({ field }) => (
+            <FormTextField
+              label="Nombre corto"
+              value={field.value}
+              onChange={field.onChange}
+              onBlur={field.onBlur}
+              error={errors.shortName?.message}
+            />
+          )}
+        />
+        <Controller
+          control={control}
+          name="type"
+          render={({ field }) => (
+            <label className="flex flex-col gap-1 text-sm text-muted-foreground">
+              Tipo
+              <select
+                className="h-10 rounded-xl border border-border bg-background px-3 text-foreground"
+                value={field.value}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+              >
+                {FINANCE_INSTITUTION_TYPES.map((type) => (
+                  <option key={type} value={type}>
+                    {FINANCE_INSTITUTION_TYPE_LABEL[type]}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+        />
+        <Controller
+          control={control}
+          name="sortOrder"
+          render={({ field }) => (
+            <FormTextField
+              label="Orden"
+              value={field.value}
+              onChange={field.onChange}
+              onBlur={field.onBlur}
+              error={errors.sortOrder?.message}
+            />
+          )}
+        />
+        <label className="flex flex-col gap-1 text-sm text-muted-foreground">
+          Logo propio (PNG, JPG o WEBP, máx. 1 MB)
+          <input
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            onChange={(event) => setLogoFile(event.target.files?.[0] ?? null)}
+          />
+        </label>
       </SummarySection>
 
       <SummarySection title="Apariencia" icon={Palette}>

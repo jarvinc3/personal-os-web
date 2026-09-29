@@ -1,5 +1,6 @@
 "use client"
 
+import { ledgerTargetSelectOptions } from "@/src/modules/finance/components/ledger-target-select"
 import { FinanceCurrencyPills } from "@/src/modules/finance/components/forms/finance-currency-pills"
 import { FinanceDateField } from "@/src/modules/finance/components/forms/finance-date-field"
 import {
@@ -25,7 +26,6 @@ import {
 } from "@/src/modules/finance/lib/ledger-form"
 import {
   buildCreateTransactionBody,
-  buildLedgerTargetOptions,
   encodeLedgerTarget,
   splitLedgerTarget,
 } from "@/src/modules/finance/lib/ledger-payloads"
@@ -130,7 +130,7 @@ export function TransactionSheet({
   const hasTargets = accounts.length > 0 || cards.length > 0
 
   const destinationOptions = useMemo(
-    () => buildLedgerTargetOptions(accounts, cards),
+    () => ledgerTargetSelectOptions(accounts, cards),
     [accounts, cards]
   )
   const defaultDestination = destinationOptions[1]?.value ?? CATALOG_NONE

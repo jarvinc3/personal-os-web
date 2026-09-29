@@ -234,6 +234,7 @@ export function FinanceMailboxesView({ enabled }: { enabled: boolean }) {
             <MailboxGroup
               key={mailbox.id}
               mailbox={mailbox}
+              institutions={institutionsQuery.data ?? []}
               emailSyncEnabled={emailSyncEnabled}
               syncingSourceId={pendingSourceId}
               onOpenMailbox={(id) => setOpenMailboxSheet(true, id)}

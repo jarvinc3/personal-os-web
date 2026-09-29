@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import {
+  currencyGlyph,
   formatFinanceMoney,
   parseFinanceMoney,
 } from "./money.ts";
@@ -38,6 +39,15 @@ describe("parseFinanceMoney", () => {
 })
 
 describe("formatFinanceMoney", () => {
+  it("replaces a repeated currency code with $ and keeps real symbols", () => {
+    assert.equal(currencyGlyph("DOP", "DOP"), "$")
+    assert.equal(currencyGlyph("DOP", "dop"), "$")
+    assert.equal(currencyGlyph("USD", "$"), "$")
+    assert.equal(currencyGlyph("EUR", "€"), "€")
+    assert.equal(currencyGlyph("GBP", "£"), "£")
+    assert.equal(currencyGlyph("DOP", undefined), null)
+  })
+
   it("formats DOP with its ISO code and dollar symbol", () => {
     assert.equal(
       formatFinanceMoney("78224.48", {

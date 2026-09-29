@@ -1,5 +1,6 @@
 "use client"
 
+import { BrandLogo } from "@/src/modules/finance/components/brand-logo";
 import { AccountSheet } from "@/src/modules/finance/components/catalog/account-sheet";
 import { FinanceAuthenticatedPage } from "@/src/modules/finance/components/layout/finance-authenticated-page";
 import { FINANCE_ACCOUNT_TYPE_LABEL } from "@/src/modules/finance/constants/catalog";
@@ -147,9 +148,11 @@ function FinanceAccountDetailView({ accountId }: FinanceAccountDetailClientProps
           }}
         >
           <div className="flex gap-3 items-start">
-            <div className="flex justify-center items-center rounded-xl size-12 bg-black/30">
-              <WalletIcon className="size-5" />
-            </div>
+            <BrandLogo
+              name={account.institutionName ?? account.name}
+              logoUrl={account.institutionLogoUrl}
+              size={48}
+            />
             <div className="flex-1 min-w-0">
               <h1 className="text-2xl font-bold tracking-tight truncate">
                 {account.name}

@@ -1,5 +1,9 @@
 "use client"
 
+import {
+  accountSelectOptions,
+  institutionSelectOptions,
+} from "@/src/modules/finance/components/ledger-target-select"
 import { FinanceCurrencyPills } from "@/src/modules/finance/components/forms/finance-currency-pills"
 import { FinanceDateField } from "@/src/modules/finance/components/forms/finance-date-field"
 import {
@@ -144,10 +148,11 @@ export function LoanSheet({
   const selectedAccountId = useWatch({ control, name: "accountId" })
 
   const institutionOptions = useMemo(
-    () => [
-      { value: CATALOG_NONE, label: "Prestamista externo" },
-      ...institutions.map((item) => ({ value: item.id, label: item.name })),
-    ],
+    () =>
+      institutionSelectOptions(institutions, {
+        value: CATALOG_NONE,
+        label: "Prestamista externo",
+      }),
     [institutions]
   )
 
@@ -158,13 +163,11 @@ export function LoanSheet({
         item.institutionId === selectedInstitutionId)
   )
   const accountOptions = useMemo(
-    () => [
-      { value: CATALOG_NONE, label: "Sin cuenta de pago" },
-      ...institutionAccounts.map((item) => ({
-        value: item.id,
-        label: item.name,
-      })),
-    ],
+    () =>
+      accountSelectOptions(institutionAccounts, {
+        value: CATALOG_NONE,
+        label: "Sin cuenta de pago",
+      }),
     [institutionAccounts]
   )
 
