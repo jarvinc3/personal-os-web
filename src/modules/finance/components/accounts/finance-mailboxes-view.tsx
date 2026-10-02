@@ -51,21 +51,19 @@ import { InboxIcon, MailIcon, PlusIcon, TriangleAlertIcon } from "lucide-react"
 
 function pendingRowValue(
   message: FinancePendingEmailMessage,
-  display: FinanceMoneyDisplay,
+  display: FinanceMoneyDisplay
 ): string {
   const payload = message.extractedPayload
   const amount =
     payload?.amount != null
       ? formatFinanceMoney(payload.amount, {
-        ...display,
-        currency: payload.currency ?? display.currency,
-      })
+          ...display,
+          currency: payload.currency ?? display.currency,
+        })
       : message.lastFourHint
         ? `****${message.lastFourHint}`
         : "Sin monto"
-  const notesHint = payload?.notes?.trim()
-    ? " · Con notas"
-    : ""
+  const notesHint = payload?.notes?.trim() ? " · Con notas" : ""
   return `${message.institutionName} · ${amount}${notesHint}`
 }
 
@@ -80,7 +78,7 @@ export function FinanceMailboxesView({ enabled }: { enabled: boolean }) {
   const { open: openConnectSheet, setOpen: setOpenConnectSheet } =
     useSheetParam(FINANCE_SHEET_KEYS.connectGmail)
   const { open: openOauthResult, setOpen: setOpenOauthResult } = useSheetParam(
-    FINANCE_SHEET_KEYS.oauthGmailResult,
+    FINANCE_SHEET_KEYS.oauthGmailResult
   )
   const {
     open: openMailboxSheet,
@@ -122,7 +120,7 @@ export function FinanceMailboxesView({ enabled }: { enabled: boolean }) {
       (source.logs ?? []).map((log) => ({
         ...log,
         sourceName: source.label || source.institutionName || "Banco",
-      })),
+      }))
     )
     .sort((a, b) => b.startedAt.localeCompare(a.startedAt))
     .slice(0, 20)
@@ -141,7 +139,7 @@ export function FinanceMailboxesView({ enabled }: { enabled: boolean }) {
     mailboxesQuery.data,
     mailboxesQuery.isPending,
     setOpenMailboxSheet,
-    true,
+    true
   )
   const editingSource = useSheetListEntity(
     openSourceSheet,
@@ -149,7 +147,7 @@ export function FinanceMailboxesView({ enabled }: { enabled: boolean }) {
     sources,
     mailboxesQuery.isPending,
     setOpenSourceSheet,
-    true,
+    true
   )
   const assigning = useSheetListEntity(
     openAssignSheet,
@@ -157,7 +155,7 @@ export function FinanceMailboxesView({ enabled }: { enabled: boolean }) {
     pendingQuery.data,
     pendingQuery.isPending,
     setOpenAssignSheet,
-    true,
+    true
   )
 
   return (
@@ -198,7 +196,8 @@ export function FinanceMailboxesView({ enabled }: { enabled: boolean }) {
           </p>
         ) : emailSyncAutomatic ? (
           <p className="px-1 pb-3 text-sm text-muted-foreground">
-            Sync automático cada 6 horas. Solo se usa IA si hay correos nuevos.
+            Sync automático según la frecuencia configurada. Solo se usa IA si
+            hay correos nuevos.
           </p>
         ) : (
           <p className="px-1 pb-3 text-sm text-muted-foreground">
@@ -257,7 +256,8 @@ export function FinanceMailboxesView({ enabled }: { enabled: boolean }) {
               </EmptyMedia>
               <EmptyTitle>Aún no hay movimientos por asignar</EmptyTitle>
               <EmptyDescription>
-                Cuando un banco envía un correo con un movimiento, se asigna automáticamente.
+                Cuando un banco envía un correo con un movimiento, se asigna
+                automáticamente.
               </EmptyDescription>
             </EmptyHeader>
           </Empty>

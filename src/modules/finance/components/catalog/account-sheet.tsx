@@ -1,49 +1,57 @@
 "use client"
 
-import { institutionSelectOptions } from "@/src/modules/finance/components/ledger-target-select";
-import { FinanceCurrencyPills } from "@/src/modules/finance/components/forms/finance-currency-pills";
+import { institutionSelectOptions } from "@/src/modules/finance/components/ledger-target-select"
+import { FinanceCurrencyPills } from "@/src/modules/finance/components/forms/finance-currency-pills"
 import {
   FinancePreviewRow,
   FinanceSegmentedControl,
-} from "@/src/modules/finance/components/forms/finance-form-blocks";
+} from "@/src/modules/finance/components/forms/finance-form-blocks"
 import {
   CATALOG_NONE,
   FINANCE_ACCOUNT_TYPE_LABEL,
   FINANCE_ACCOUNT_TYPES,
-} from "@/src/modules/finance/constants/catalog";
+} from "@/src/modules/finance/constants/catalog"
 import {
   useArchiveAccount,
   useCreateAccount,
   useDeleteAccount,
   useUpdateAccount,
-} from "@/src/modules/finance/hooks/use-accounts";
-import { buildCreateAccountBody } from "@/src/modules/finance/lib/catalog-payloads";
-import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error";
+} from "@/src/modules/finance/hooks/use-accounts"
+import { buildCreateAccountBody } from "@/src/modules/finance/lib/catalog-payloads"
+import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
 import {
   formatFinanceMoney,
   type FinanceMoneyDisplay,
-} from "@/src/modules/finance/lib/money";
+} from "@/src/modules/finance/lib/money"
 import type {
   FinanceAccount,
   FinanceInstitution,
-} from "@/src/modules/finance/types/entities";
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet";
+} from "@/src/modules/finance/types/entities"
+import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
 import {
   FormTextField,
   SelectField,
-} from "@/src/shared/components/layout/form-blocks";
-import { Button } from "@/src/shared/components/ui/button";
-import { ColorPickerSwatch } from "@/src/shared/components/ui/color-picker";
-import { Label } from "@/src/shared/components/ui/label";
-import { Spinner } from "@/src/shared/components/ui/spinner";
-import { SummarySection } from "@/src/shared/components/ui/summary";
-import { appToast } from "@/src/shared/lib/app-toast";
-import { createSheetSubmit } from "@/src/shared/lib/sheet-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { ArchiveIcon, LandmarkIcon, Palette, SaveIcon, TrashIcon, XIcon } from "lucide-react";
-import { useEffect, useMemo } from "react";
-import { Controller, useForm, useWatch } from "react-hook-form";
-import { z } from "zod";
+  SwitchFieldRow,
+} from "@/src/shared/components/layout/form-blocks"
+import { Button } from "@/src/shared/components/ui/button"
+import { ColorPickerSwatch } from "@/src/shared/components/ui/color-picker"
+import { Label } from "@/src/shared/components/ui/label"
+import { Spinner } from "@/src/shared/components/ui/spinner"
+import { SummarySection } from "@/src/shared/components/ui/summary"
+import { appToast } from "@/src/shared/lib/app-toast"
+import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import {
+  ArchiveIcon,
+  LandmarkIcon,
+  Palette,
+  SaveIcon,
+  TrashIcon,
+  XIcon,
+} from "lucide-react"
+import { useEffect, useMemo } from "react"
+import { Controller, useForm, useWatch } from "react-hook-form"
+import { z } from "zod"
 
 const schema = z
   .object({
@@ -53,6 +61,7 @@ const schema = z
     institutionId: z.string(),
     accountNumber: z.string(),
     color: z.string().trim().max(20),
+    isDefaultForInstitution: z.boolean(),
   })
   .superRefine((values, ctx) => {
     if (
@@ -86,7 +95,7 @@ function toFormValues(
   account: FinanceAccount | null,
   defaultCurrency: string,
   defaultInstitutionId: string,
-  defaultType: FormValues["type"] = "CHECKING",
+  defaultType: FormValues["type"] = "CHECKING"
 ): FormValues {
   const type = account?.type ?? defaultType
   return {
@@ -98,6 +107,7 @@ function toFormValues(
       (type === "CASH" ? CATALOG_NONE : defaultInstitutionId),
     accountNumber: account?.accountNumber ?? "",
     color: account?.color ?? "",
+    isDefaultForInstitution: account?.isDefaultForInstitution ?? false,
   }
 }
 
@@ -160,7 +170,7 @@ export function AccountSheet({
       account,
       defaultCurrency,
       resolvedDefaultInstitutionId,
-      defaultType,
+      defaultType
     ),
   })
 
@@ -177,7 +187,7 @@ export function AccountSheet({
           account,
           defaultCurrency,
           resolvedDefaultInstitutionId,
-          defaultType,
+          defaultType
         )
       )
     }
@@ -286,7 +296,11 @@ export function AccountSheet({
             className="flex-1"
             onClick={onSubmit}
           >
-            {isPending ? <Spinner data-icon="inline-start" /> : <SaveIcon className="size-4 shrink-0" />}
+            {isPending ? (
+              <Spinner data-icon="inline-start" />
+            ) : (
+              <SaveIcon className="size-4 shrink-0" />
+            )}
             {isPending ? "Guardando..." : "Guardar"}
           </Button>
         ),
@@ -297,7 +311,8 @@ export function AccountSheet({
           icon={LandmarkIcon}
           title={accountName.trim() || "Nueva cuenta"}
           description={
-            accountType !== "CASH" && accountNumber.replace(/\D/g, "").length >= 4
+            accountType !== "CASH" &&
+            accountNumber.replace(/\D/g, "").length >= 4
               ? `${FINANCE_ACCOUNT_TYPE_LABEL[accountType]} · •••• ${accountNumber.replace(/\D/g, "").slice(-4)}`
               : `${FINANCE_ACCOUNT_TYPE_LABEL[accountType]} · ${accountCurrency}`
           }
@@ -345,11 +360,11 @@ export function AccountSheet({
                 hasInstitutions || accountType === "CASH"
                   ? institutionOptions
                   : [
-                    {
-                      value: CATALOG_NONE,
-                      label: "Crea una institución primero",
-                    },
-                  ]
+                      {
+                        value: CATALOG_NONE,
+                        label: "Crea una institución primero",
+                      },
+                    ]
               }
               disabled={!hasInstitutions && accountType !== "CASH"}
             />
@@ -361,20 +376,34 @@ export function AccountSheet({
           </p>
         ) : null}
         {accountType !== "CASH" ? (
-          <Controller
-            control={control}
-            name="accountNumber"
-            render={({ field }) => (
-              <FormTextField
-                label="Número de cuenta"
-                value={field.value}
-                onChange={field.onChange}
-                onBlur={field.onBlur}
-                error={errors.accountNumber?.message}
-                placeholder="0123456789"
-              />
-            )}
-          />
+          <>
+            <Controller
+              control={control}
+              name="accountNumber"
+              render={({ field }) => (
+                <FormTextField
+                  label="Número de cuenta"
+                  value={field.value}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                  error={errors.accountNumber?.message}
+                  placeholder="0123456789"
+                />
+              )}
+            />
+            <Controller
+              control={control}
+              name="isDefaultForInstitution"
+              render={({ field }) => (
+                <SwitchFieldRow
+                  label="Cuenta predeterminada"
+                  description="Se usa cuando el correo del banco no trae dígitos de cuenta."
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              )}
+            />
+          </>
         ) : null}
         <Controller
           control={control}

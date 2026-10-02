@@ -4,7 +4,9 @@ import { institutionSelectOptions } from "@/src/modules/finance/components/ledge
 import { CATALOG_NONE } from "@/src/modules/finance/constants/catalog"
 import { EmailSyncLogList } from "@/src/modules/finance/components/sync/email-sync-history"
 import {
+  useAddSourceSenders,
   useDisconnectEmailSource,
+  useDiscoveredSenders,
   useRunEmailSync,
   useUpdateEmailSource,
 } from "@/src/modules/finance/hooks/use-email-sources"
@@ -36,15 +38,24 @@ const schema = z.object({
     .trim()
     .email("Correo de notificaciones inválido")
     .max(150),
+  extraSenders: z.string().max(800),
   label: z.string().max(120),
 })
 
 type FormValues = z.infer<typeof schema>
 
+function extraSendersFromSource(source: FinanceEmailSource | null): string {
+  const extras = (source?.bankSenderEmails ?? []).filter(
+    (email) => email && email !== source?.bankSenderEmail
+  )
+  return extras.join(", ")
+}
+
 function toFormValues(source: FinanceEmailSource | null): FormValues {
   return {
     institutionId: source?.institutionId ?? CATALOG_NONE,
     bankSenderEmail: source?.bankSenderEmail ?? "",
+    extraSenders: extraSendersFromSource(source),
     label: source?.label ?? "",
   }
 }
@@ -68,14 +79,17 @@ export function EmailSourceSheet({
 }: EmailSourceSheetProps) {
   const updateMutation = useUpdateEmailSource()
   const disconnectMutation = useDisconnectEmailSource()
+  const addSendersMutation = useAddSourceSenders()
+  const discoveredQuery = useDiscoveredSenders(
+    open ? (source?.id ?? null) : null,
+    Boolean(open && source)
+  )
   const { run: runSync, isPending: syncPending } =
     useRunEmailSync(emailSyncEnabled)
   const isPending =
-    updateMutation.isPending ||
-    disconnectMutation.isPending ||
-    syncPending
+    updateMutation.isPending || disconnectMutation.isPending || syncPending
   const institutionOptions = institutionSelectOptions(
-    institutions.filter((item) => item.isActive),
+    institutions.filter((item) => item.isActive)
   )
 
   const {
@@ -105,6 +119,13 @@ export function EmailSourceSheet({
         body: {
           institutionId: values.institutionId,
           bankSenderEmail: values.bankSenderEmail,
+          bankSenderEmails: [
+            values.bankSenderEmail,
+            ...values.extraSenders
+              .split(/[,\s]+/)
+              .map((item) => item.trim().toLowerCase())
+              .filter(Boolean),
+          ],
           label: values.label || undefined,
         },
       })
@@ -245,6 +266,48 @@ export function EmailSourceSheet({
             />
           )}
         />
+        <Controller
+          control={control}
+          name="extraSenders"
+          render={({ field }) => (
+            <FormTextField
+              label="Otros remitentes"
+              value={field.value}
+              onChange={field.onChange}
+              onBlur={field.onBlur}
+              placeholder="avisos@banco.com, notificaciones@banco.com"
+              error={errors.extraSenders?.message}
+            />
+          )}
+        />
+        {discoveredQuery.data && discoveredQuery.data.length > 0 ? (
+          <div className="space-y-2">
+            <p className="text-xs font-medium text-muted-foreground">
+              Otros From de este dominio (elige cuáles son de movimientos)
+            </p>
+            {discoveredQuery.data.map((item) => (
+              <Button
+                key={item.email}
+                type="button"
+                variant="secondary"
+                disabled={addSendersMutation.isPending || !source}
+                onClick={() => {
+                  if (!source) return
+                  void addSendersMutation
+                    .mutateAsync({ id: source.id, emails: [item.email] })
+                    .then(() =>
+                      appToast.success({ text1: `Añadido ${item.email}` })
+                    )
+                    .catch((error) =>
+                      appToast.error({ text1: financeErrorMessage(error) })
+                    )
+                }}
+              >
+                Añadir {item.email} ({item.count})
+              </Button>
+            ))}
+          </div>
+        ) : null}
         <Controller
           control={control}
           name="label"
