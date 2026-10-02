@@ -1,12 +1,12 @@
 export const RUNNING_SYNC_REFETCH_MS = 3_000
 
 export function hasRunningEmailSync(
-  mailboxes: { sources: { logs?: { status: string }[] }[] }[],
+  mailboxes: { sources: { logs?: { status: string }[] }[] }[]
 ): boolean {
   return mailboxes.some((mailbox) =>
     mailbox.sources.some((source) =>
-      (source.logs ?? []).some((log) => log.status === "RUNNING"),
-    ),
+      (source.logs ?? []).some((log) => log.status === "RUNNING")
+    )
   )
 }
 
@@ -29,6 +29,8 @@ export function emailOutcomeLabel(outcome: string): string {
       return "Importado"
     case "PENDING_ASSIGNMENT":
       return "Por asignar"
+    case "PENDING_AMOUNT":
+      return "Falta el monto"
     case "SKIPPED_NOT_TX":
       return "No es movimiento"
     case "FAILED_NON_RETRYABLE":
@@ -39,7 +41,7 @@ export function emailOutcomeLabel(outcome: string): string {
 }
 
 export function syncLogBadgeVariant(
-  status: string,
+  status: string
 ): "secondary" | "destructive" | "outline" {
   if (status === "FAILED") return "destructive"
   if (status === "SUCCESS") return "secondary"

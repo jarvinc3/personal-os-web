@@ -14,13 +14,15 @@ export type CreateAccountBody = {
   accountNumber?: string
   currency?: string
   color?: string | null
+  isDefaultForInstitution?: boolean
 }
 
 export type CreateInstitutionBody = {
   name: string
   color?: string | null
   country?: string
-  type?: "bank" | "credit_union" | "digital_wallet" | "broker" | "cash" | "other"
+  type?:
+    "bank" | "credit_union" | "digital_wallet" | "broker" | "cash" | "other"
   shortName?: string | null
   sortOrder?: number
   domain?: string | null
@@ -53,8 +55,7 @@ export type CreateCategoryBody = {
 }
 
 export type PayloadResult<T> =
-  | { ok: true; body: T }
-  | { ok: false; error: string }
+  { ok: true; body: T } | { ok: false; error: string }
 
 function optionalTrimmed(value: string | undefined): string | undefined {
   const trimmed = value?.trim()
@@ -81,8 +82,9 @@ export function buildCreateAccountBody(
     institutionId?: string
     accountNumber?: string
     color?: string
+    isDefaultForInstitution?: boolean
   },
-  options?: { isUpdate?: boolean },
+  options?: { isUpdate?: boolean }
 ): PayloadResult<CreateAccountBody> {
   const name = input.name.trim()
   if (!name) {
@@ -126,6 +128,12 @@ export function buildCreateAccountBody(
     body.color = null
   }
 
+  if (input.type !== "CASH" && input.isDefaultForInstitution) {
+    body.isDefaultForInstitution = true
+  } else if (options?.isUpdate && input.type !== "CASH") {
+    body.isDefaultForInstitution = Boolean(input.isDefaultForInstitution)
+  }
+
   return { ok: true, body }
 }
 
@@ -139,7 +147,7 @@ export function buildCreateInstitutionBody(
     sortOrder?: string
     domain?: string
   },
-  options?: { isUpdate?: boolean },
+  options?: { isUpdate?: boolean }
 ): PayloadResult<CreateInstitutionBody> {
   const name = input.name.trim()
   if (!name) {
@@ -183,7 +191,7 @@ export function buildCreateCardBody(
     paymentDueDay?: string
     color?: string
   },
-  options?: { isUpdate?: boolean },
+  options?: { isUpdate?: boolean }
 ): PayloadResult<CreateCardBody> {
   const name = input.name.trim()
   if (!name) {
@@ -241,7 +249,7 @@ export function buildCardBalanceBody(
     balance: string
     creditLimit?: string
   },
-  options?: { requireCreditLimit?: boolean },
+  options?: { requireCreditLimit?: boolean }
 ): PayloadResult<CardBalanceBody> {
   const currency = optionalTrimmed(input.currency)?.toUpperCase()
   if (!currency) {
@@ -284,7 +292,7 @@ function isEmptyBalanceRow(input: CardBalanceInput): boolean {
 
 export function buildCardBalanceBodies(
   inputs: CardBalanceInput[],
-  options?: { requireCreditLimit?: boolean },
+  options?: { requireCreditLimit?: boolean }
 ): PayloadResult<CardBalanceBody[]> {
   const bodies: CardBalanceBody[] = []
   const seen = new Set<string>()
@@ -311,12 +319,9 @@ export function buildCardBalanceBodies(
 
 const FALLBACK_CURRENCIES = [...FINANCE_QUICK_CURRENCIES]
 
-export function nextUnusedCurrency(
-  used: string[],
-  preferred: string,
-): string {
+export function nextUnusedCurrency(used: string[], preferred: string): string {
   const taken = new Set(
-    used.map((code) => code.trim().toUpperCase()).filter(Boolean),
+    used.map((code) => code.trim().toUpperCase()).filter(Boolean)
   )
   const candidates = [preferred, ...FALLBACK_CURRENCIES]
   for (const candidate of candidates) {
@@ -379,7 +384,10 @@ export function buildCreateCategoryBody(input: {
     return { ok: false, error: "El icono debe ser un emoji" }
   }
   if (LUCIDE_KEY.test(icon)) {
-    return { ok: false, error: "Usa un emoji (por ejemplo 🛒), no una key Lucide" }
+    return {
+      ok: false,
+      error: "Usa un emoji (por ejemplo 🛒), no una key Lucide",
+    }
   }
 
   const body: CreateCategoryBody = { name, icon, type: input.type }
@@ -392,7 +400,7 @@ export function buildCreateCategoryBody(input: {
 }
 
 function parseOptionalDay(
-  value: string | undefined,
+  value: string | undefined
 ): { ok: true; value?: number } | { ok: false; error: string } {
   const raw = optionalTrimmed(value)
   if (!raw) {

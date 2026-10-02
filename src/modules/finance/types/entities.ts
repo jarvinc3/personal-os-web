@@ -3,12 +3,19 @@ import type {
   FinanceCardNetwork,
   FinanceCardType,
   FinanceInstitutionType,
-} from "@/src/modules/finance/constants/catalog";
+} from "@/src/modules/finance/constants/catalog"
 
-export const FINANCE_TRANSACTION_TYPES = ["DEBIT", "CREDIT", "TRANSFER"] as const
+export const FINANCE_TRANSACTION_TYPES = [
+  "DEBIT",
+  "CREDIT",
+  "TRANSFER",
+] as const
 export type FinanceTransactionType = (typeof FINANCE_TRANSACTION_TYPES)[number]
 
-export const FINANCE_TRANSACTION_TYPE_LABEL: Record<FinanceTransactionType, string> = {
+export const FINANCE_TRANSACTION_TYPE_LABEL: Record<
+  FinanceTransactionType,
+  string
+> = {
   DEBIT: "Gasto",
   CREDIT: "Ingreso",
   TRANSFER: "Transferencia",
@@ -17,10 +24,11 @@ export const FINANCE_TRANSACTION_TYPE_LABEL: Record<FinanceTransactionType, stri
 export const FINANCE_CATEGORY_TYPES = ["EXPENSE", "INCOME"] as const
 export type FinanceCategoryType = (typeof FINANCE_CATEGORY_TYPES)[number]
 
-export const FINANCE_CATEGORY_TYPE_LABEL: Record<FinanceCategoryType, string> = {
-  EXPENSE: "Gasto",
-  INCOME: "Ingreso",
-}
+export const FINANCE_CATEGORY_TYPE_LABEL: Record<FinanceCategoryType, string> =
+  {
+    EXPENSE: "Gasto",
+    INCOME: "Ingreso",
+  }
 
 export const FINANCE_TRANSACTION_STATUSES = [
   "PENDING",
@@ -29,10 +37,14 @@ export const FINANCE_TRANSACTION_STATUSES = [
   "CANCELLED",
   "REVERSED",
 ] as const
-export type FinanceTransactionStatus = (typeof FINANCE_TRANSACTION_STATUSES)[number]
+export type FinanceTransactionStatus =
+  (typeof FINANCE_TRANSACTION_STATUSES)[number]
 
 /** UI copy: there is no COMPLETED enum. "Completado" maps to CONFIRMED. */
-export const FINANCE_TRANSACTION_STATUS_LABEL: Record<FinanceTransactionStatus, string> = {
+export const FINANCE_TRANSACTION_STATUS_LABEL: Record<
+  FinanceTransactionStatus,
+  string
+> = {
   PENDING: "Pendiente",
   CONFIRMED: "Completado",
   DECLINED: "Rechazado",
@@ -149,6 +161,7 @@ export type FinanceAccount = {
   type: FinanceAccountType
   currency: string
   accountNumber: string | null
+  isDefaultForInstitution?: boolean
   balance: string
   color: string | null
   isActive: boolean
@@ -208,11 +221,12 @@ export type FinanceCategory = {
 export const FINANCE_BUDGET_PERIODS = ["MONTHLY", "BIWEEKLY", "CUSTOM"] as const
 export type FinanceBudgetPeriod = (typeof FINANCE_BUDGET_PERIODS)[number]
 
-export const FINANCE_BUDGET_PERIOD_LABEL: Record<FinanceBudgetPeriod, string> = {
-  MONTHLY: "Mensual",
-  BIWEEKLY: "Quincenal",
-  CUSTOM: "Personalizado",
-}
+export const FINANCE_BUDGET_PERIOD_LABEL: Record<FinanceBudgetPeriod, string> =
+  {
+    MONTHLY: "Mensual",
+    BIWEEKLY: "Quincenal",
+    CUSTOM: "Personalizado",
+  }
 
 export type FinanceBudgetCategory = {
   id: string
@@ -267,7 +281,10 @@ export const FINANCE_INSTALLMENT_FREQS = [
 ] as const
 export type FinanceInstallmentFreq = (typeof FINANCE_INSTALLMENT_FREQS)[number]
 
-export const FINANCE_INSTALLMENT_FREQ_LABEL: Record<FinanceInstallmentFreq, string> = {
+export const FINANCE_INSTALLMENT_FREQ_LABEL: Record<
+  FinanceInstallmentFreq,
+  string
+> = {
   WEEKLY: "Semanal",
   BIWEEKLY: "Quincenal",
   MONTHLY: "Mensual",
@@ -300,7 +317,8 @@ export const FINANCE_RECEIVABLE_STATUSES = [
   "PAID",
   "CANCELLED",
 ] as const
-export type FinanceReceivableStatus = (typeof FINANCE_RECEIVABLE_STATUSES)[number]
+export type FinanceReceivableStatus =
+  (typeof FINANCE_RECEIVABLE_STATUSES)[number]
 
 export const FINANCE_RECEIVABLE_STATUS_LABEL: Record<
   FinanceReceivableStatus,
@@ -340,6 +358,7 @@ export type FinanceEmailSource = {
   institutionName: string | null
   emailAddress: string
   bankSenderEmail: string | null
+  bankSenderEmails?: string[]
   bankDomain: string
   label: string | null
   provider: string
@@ -369,13 +388,15 @@ export type FinancePendingEmailMessage = {
   lastFourHint: string | null
   accountNumberHint: string | null
   extractedPayload: {
-    amount?: number
+    amount?: number | null
     currency?: string
     merchant?: string | null
     description?: string
     notes?: string | null
     type?: string
+    movementClass?: string
   } | null
+  outcome?: string
   reason: string | null
   createdAt: string
 }

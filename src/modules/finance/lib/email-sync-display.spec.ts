@@ -22,12 +22,10 @@ describe("email sync display labels", () => {
     assert.equal(
       hasRunningEmailSync([
         {
-          sources: [
-            { logs: [{ status: "FAILED" }, { status: "SUCCESS" }] },
-          ],
+          sources: [{ logs: [{ status: "FAILED" }, { status: "SUCCESS" }] }],
         },
       ]),
-      false,
+      false
     )
     assert.equal(
       hasRunningEmailSync([
@@ -35,7 +33,7 @@ describe("email sync display labels", () => {
           sources: [{ logs: [{ status: "RUNNING" }] }],
         },
       ]),
-      true,
+      true
     )
     assert.equal(RUNNING_SYNC_REFETCH_MS, 3_000)
   })
@@ -43,6 +41,7 @@ describe("email sync display labels", () => {
   it("maps extract outcomes", () => {
     assert.equal(emailOutcomeLabel("IMPORTED"), "Importado")
     assert.equal(emailOutcomeLabel("PENDING_ASSIGNMENT"), "Por asignar")
+    assert.equal(emailOutcomeLabel("PENDING_AMOUNT"), "Falta el monto")
     assert.equal(emailOutcomeLabel("SKIPPED_NOT_TX"), "No es movimiento")
   })
 })

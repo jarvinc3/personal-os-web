@@ -1,52 +1,115 @@
 "use client"
 
-import { CurrencySelectField } from "@/src/modules/finance/components/catalog/currency-select-field";
-import { ModuleSheetEnableRow } from "@/src/modules/settings/components/profile-ui";
-import { useModuleSheetEnable } from "@/src/modules/settings/hooks/use-module-sheet-enable";
-import { useProfileSheetFormSync } from "@/src/modules/settings/hooks/use-profile-sheet";
-import { useUserModuleConfig } from "@/src/modules/settings/hooks/use-user-module-config";
-import type { FinanceModuleConfig } from "@/src/modules/settings/types/module-config.types";
-import type { SettingsSheetProps } from "@/src/modules/settings/types/sheet.types";
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet";
-import { OptionRow, SwitchFieldRow } from "@/src/shared/components/layout/form-blocks";
-import { Button } from "@/src/shared/components/ui/button";
-import { RadioGroup, RadioGroupItem } from "@/src/shared/components/ui/radio-group";
-import { Spinner } from "@/src/shared/components/ui/spinner";
-import { SummarySection } from "@/src/shared/components/ui/summary";
-import { getModule } from "@/src/shared/constants/module-registry";
-import { appToast } from "@/src/shared/lib/app-toast";
-import { createSheetSubmit } from "@/src/shared/lib/sheet-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { CurrencySelectField } from "@/src/modules/finance/components/catalog/currency-select-field"
+import { ModuleSheetEnableRow } from "@/src/modules/settings/components/profile-ui"
+import { useModuleSheetEnable } from "@/src/modules/settings/hooks/use-module-sheet-enable"
+import { useProfileSheetFormSync } from "@/src/modules/settings/hooks/use-profile-sheet"
+import { useUserModuleConfig } from "@/src/modules/settings/hooks/use-user-module-config"
+import type { FinanceModuleConfig } from "@/src/modules/settings/types/module-config.types"
+import type { SettingsSheetProps } from "@/src/modules/settings/types/sheet.types"
+import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
 import {
-    BarChart3,
-    CalendarCog,
-    CalendarDays,
-    ChartBarIcon,
-    DollarSign,
-    Mail,
-    ScanEyeIcon,
-    Tags,
-} from "lucide-react";
-import { useEffect, useMemo } from "react";
-import { Controller, useForm, useWatch } from "react-hook-form";
-import { z } from "zod";
+  FormTextField,
+  OptionRow,
+  SwitchFieldRow,
+} from "@/src/shared/components/layout/form-blocks"
+import { Button } from "@/src/shared/components/ui/button"
+import {
+  RadioGroup,
+  RadioGroupItem,
+} from "@/src/shared/components/ui/radio-group"
+import { Spinner } from "@/src/shared/components/ui/spinner"
+import { SummarySection } from "@/src/shared/components/ui/summary"
+import { getModule } from "@/src/shared/constants/module-registry"
+import { appToast } from "@/src/shared/lib/app-toast"
+import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import {
+  BarChart3,
+  CalendarClock,
+  CalendarCog,
+  CalendarDays,
+  ChartBarIcon,
+  Clock,
+  DollarSign,
+  Mail,
+  ScanEyeIcon,
+  Tags,
+} from "lucide-react"
+import { useEffect, useMemo } from "react"
+import { Controller, useForm, useWatch } from "react-hook-form"
+import { z } from "zod"
 
-const schema = z.object({
-  baseCurrency: z.string().trim().min(3, "Moneda obligatoria"),
-  weekStartsOn: z.enum(["0", "1"]),
-  dashboardPeriod: z.enum(["week", "month", "year"]),
-  showCents: z.boolean(),
-  compactNumbers: z.boolean(),
-  emailSyncEnabled: z.boolean(),
-  emailSyncAutomatic: z.boolean(),
-  autoCategorize: z.boolean(),
-  budgetAlerts: z.boolean(),
-  aiSuggestions: z.boolean(),
-  transactionDetected: z.boolean(),
-  monthlyReport: z.boolean(),
-  cardDueDate: z.boolean(),
-  unusualExpense: z.boolean(),
-})
+const scheduleTimePattern = /^([01]\d|2[0-3]):[0-5]\d$/
+
+const EMAIL_SYNC_SCHEDULE_MODES = {
+  INTERVAL: "interval",
+  TIMES: "times",
+} as const
+
+const schema = z
+  .object({
+    baseCurrency: z.string().trim().min(3, "Moneda obligatoria"),
+    weekStartsOn: z.enum(["0", "1"]),
+    dashboardPeriod: z.enum(["week", "month", "year"]),
+    showCents: z.boolean(),
+    compactNumbers: z.boolean(),
+    emailSyncEnabled: z.boolean(),
+    emailSyncAutomatic: z.boolean(),
+    emailSyncScheduleMode: z.enum([
+      EMAIL_SYNC_SCHEDULE_MODES.INTERVAL,
+      EMAIL_SYNC_SCHEDULE_MODES.TIMES,
+    ]),
+    emailSyncEveryMinutes: z.string(),
+    emailSyncTimes: z.string(),
+    autoCategorize: z.boolean(),
+    budgetAlerts: z.boolean(),
+    aiSuggestions: z.boolean(),
+    transactionDetected: z.boolean(),
+    monthlyReport: z.boolean(),
+    cardDueDate: z.boolean(),
+    unusualExpense: z.boolean(),
+  })
+  .superRefine((values, ctx) => {
+    if (values.emailSyncScheduleMode === EMAIL_SYNC_SCHEDULE_MODES.INTERVAL) {
+      const minutes = Number(values.emailSyncEveryMinutes)
+      if (!Number.isInteger(minutes) || minutes < 15) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["emailSyncEveryMinutes"],
+          message: "Mínimo 15 minutos",
+        })
+      }
+      return
+    }
+    const times = values.emailSyncTimes
+      .split(",")
+      .map((time) => time.trim())
+      .filter(Boolean)
+    if (times.length === 0 || times.length > 8) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["emailSyncTimes"],
+        message: "Pon de 1 a 8 horas",
+      })
+      return
+    }
+    if (times.some((time) => !scheduleTimePattern.test(time))) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["emailSyncTimes"],
+        message: "Usa formato HH:MM",
+      })
+      return
+    }
+    if (new Set(times).size !== times.length) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["emailSyncTimes"],
+        message: "No repitas horas",
+      })
+    }
+  })
 
 type FormValues = z.infer<typeof schema>
 const MODULE_ACCENT = getModule("finance").accent
@@ -87,6 +150,15 @@ function configToFormValues(config: FinanceModuleConfig): FormValues {
     compactNumbers: config.display.compactNumbers,
     emailSyncEnabled: config.emailSync.enabled,
     emailSyncAutomatic: config.emailSync.automatic,
+    emailSyncScheduleMode: config.emailSync.schedule.mode,
+    emailSyncEveryMinutes:
+      config.emailSync.schedule.mode === "interval"
+        ? String(config.emailSync.schedule.everyMinutes)
+        : "360",
+    emailSyncTimes:
+      config.emailSync.schedule.mode === "times"
+        ? config.emailSync.schedule.times.join(", ")
+        : "08:00, 18:00",
     autoCategorize: config.emailSync.autoCategorize,
     budgetAlerts: config.notifications.budgetAlerts,
     aiSuggestions: config.notifications.aiSuggestions,
@@ -119,6 +191,10 @@ export function EditFinanceSheet({ open, onOpenChange }: SettingsSheetProps) {
     control,
     name: "emailSyncEnabled",
   })
+  const emailSyncScheduleMode = useWatch({
+    control,
+    name: "emailSyncScheduleMode",
+  })
   const formValues = useMemo(() => configToFormValues(config), [config])
   useProfileSheetFormSync(open, reset, formValues)
 
@@ -145,6 +221,19 @@ export function EditFinanceSheet({ open, onOpenChange }: SettingsSheetProps) {
           enabled: values.emailSyncEnabled,
           automatic: values.emailSyncAutomatic,
           autoCategorize: values.autoCategorize,
+          schedule:
+            values.emailSyncScheduleMode === EMAIL_SYNC_SCHEDULE_MODES.INTERVAL
+              ? {
+                  mode: EMAIL_SYNC_SCHEDULE_MODES.INTERVAL,
+                  everyMinutes: Number(values.emailSyncEveryMinutes),
+                }
+              : {
+                  mode: EMAIL_SYNC_SCHEDULE_MODES.TIMES,
+                  times: values.emailSyncTimes
+                    .split(",")
+                    .map((time) => time.trim())
+                    .filter(Boolean),
+                },
         },
         notifications: {
           budgetAlerts: values.budgetAlerts,
@@ -267,7 +356,7 @@ export function EditFinanceSheet({ open, onOpenChange }: SettingsSheetProps) {
           ))}
         </RadioGroup>
       </SummarySection>
-        <SummarySection title="Visualización" icon={ScanEyeIcon}>
+      <SummarySection title="Visualización" icon={ScanEyeIcon}>
         <Controller
           control={control}
           name="showCents"
@@ -310,13 +399,100 @@ export function EditFinanceSheet({ open, onOpenChange }: SettingsSheetProps) {
           render={({ field }) => (
             <SwitchFieldRow
               label="Sync automático"
-              description="Lee el correo cada 6 horas. Si está apagado, solo sincronizas a mano."
+              description="Usa la frecuencia configurada abajo. Si está apagado, solo sincronizas a mano."
               checked={field.value}
               onCheckedChange={field.onChange}
               disabled={!emailSyncEnabledWatch}
             />
           )}
         />
+        <Controller
+          control={control}
+          name="emailSyncScheduleMode"
+          render={({ field }) => (
+            <RadioGroup
+              value={field.value}
+              onValueChange={(value) =>
+                setValue(
+                  "emailSyncScheduleMode",
+                  value as "interval" | "times",
+                  { shouldDirty: true }
+                )
+              }
+            >
+              <OptionRow
+                icon={Clock}
+                iconColor={MODULE_ACCENT}
+                label="Cada cierto tiempo"
+                description="Ej.: cada 30 minutos o cada 6 horas."
+                selected={field.value === EMAIL_SYNC_SCHEDULE_MODES.INTERVAL}
+                onPress={() =>
+                  setValue(
+                    "emailSyncScheduleMode",
+                    EMAIL_SYNC_SCHEDULE_MODES.INTERVAL,
+                    {
+                      shouldDirty: true,
+                    }
+                  )
+                }
+                trailing={
+                  <RadioGroupItem value={EMAIL_SYNC_SCHEDULE_MODES.INTERVAL} />
+                }
+              />
+              <OptionRow
+                icon={CalendarClock}
+                iconColor={MODULE_ACCENT}
+                label="A horas fijas del día"
+                description="Se usa tu zona horaria. Ej.: 08:00 y 18:00."
+                selected={field.value === EMAIL_SYNC_SCHEDULE_MODES.TIMES}
+                onPress={() =>
+                  setValue(
+                    "emailSyncScheduleMode",
+                    EMAIL_SYNC_SCHEDULE_MODES.TIMES,
+                    {
+                      shouldDirty: true,
+                    }
+                  )
+                }
+                trailing={
+                  <RadioGroupItem value={EMAIL_SYNC_SCHEDULE_MODES.TIMES} />
+                }
+              />
+            </RadioGroup>
+          )}
+        />
+        {emailSyncScheduleMode === EMAIL_SYNC_SCHEDULE_MODES.INTERVAL ? (
+          <Controller
+            control={control}
+            name="emailSyncEveryMinutes"
+            render={({ field, fieldState }) => (
+              <FormTextField
+                label="Minutos entre revisiones"
+                type="number"
+                placeholder="360"
+                value={field.value}
+                onChange={field.onChange}
+                error={fieldState.error?.message}
+                disabled={updateMutation.isPending}
+              />
+            )}
+          />
+        ) : (
+          <Controller
+            control={control}
+            name="emailSyncTimes"
+            render={({ field, fieldState }) => (
+              <FormTextField
+                label="Horas del día"
+                placeholder="08:00, 18:00"
+                value={field.value}
+                onChange={field.onChange}
+                error={fieldState.error?.message}
+                disabled={updateMutation.isPending}
+              />
+            )}
+          />
+        )}
         <Controller
           control={control}
           name="autoCategorize"

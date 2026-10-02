@@ -2,7 +2,11 @@
 
 import { apiDelete, apiGet, apiPatch, apiPost } from "@/src/config/api-client"
 import { invalidateFinancePositions } from "@/src/modules/finance/hooks/use-balance-sheet"
-import { emailMailboxesQuery, emailMessagesQuery, emailPendingQuery } from "@/src/modules/finance/lib/finance-query-options"
+import {
+  emailMailboxesQuery,
+  emailMessagesQuery,
+  emailPendingQuery,
+} from "@/src/modules/finance/lib/finance-query-options"
 import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
 import {
   hasRunningEmailSync,
@@ -43,7 +47,7 @@ function invalidate(queryClient: ReturnType<typeof useQueryClient>) {
 }
 
 function importedFromEmail(
-  result: FinanceEmailAssignResult | FinancePendingEmailMessage,
+  result: FinanceEmailAssignResult | FinancePendingEmailMessage
 ): result is FinanceEmailAssignResult {
   return (
     "assigned" in result &&
@@ -55,7 +59,7 @@ function importedFromEmail(
 
 function invalidateEmailResult(
   queryClient: ReturnType<typeof useQueryClient>,
-  result: FinanceEmailAssignResult | FinancePendingEmailMessage,
+  result: FinanceEmailAssignResult | FinancePendingEmailMessage
 ) {
   invalidate(queryClient)
   if (importedFromEmail(result)) {
@@ -67,6 +71,7 @@ export type UpdateEmailSourceBody = {
   institutionId?: string
   label?: string
   bankSenderEmail?: string
+  bankSenderEmails?: string[]
   bankDomain?: string
 }
 
@@ -82,7 +87,7 @@ export function useEmailSources(enabled: boolean) {
     queryKey: FINANCE_EMAIL_SOURCES_QUERY_KEY,
     queryFn: async () =>
       asFinanceArray<FinanceEmailSource>(
-        await apiGet(API_ENDPOINTS.FINANCE.EMAIL_SOURCES),
+        await apiGet(API_ENDPOINTS.FINANCE.EMAIL_SOURCES)
       ),
     enabled,
   })
@@ -131,11 +136,9 @@ export function useRecentEmailMessages(enabled: boolean) {
     enabled,
     refetchInterval: () => {
       const mailboxes = queryClient.getQueryData(
-        FINANCE_EMAIL_MAILBOXES_QUERY_KEY,
+        FINANCE_EMAIL_MAILBOXES_QUERY_KEY
       )
-      return hasRunningEmailSync(
-        Array.isArray(mailboxes) ? mailboxes : [],
-      )
+      return hasRunningEmailSync(Array.isArray(mailboxes) ? mailboxes : [])
         ? RUNNING_SYNC_REFETCH_MS
         : false
     },
@@ -161,7 +164,7 @@ export function useUpdateEmailSource() {
     mutationFn: ({ id, body }: { id: string; body: UpdateEmailSourceBody }) =>
       apiPatch<FinanceEmailSource>(
         API_ENDPOINTS.FINANCE.EMAIL_SOURCE(id),
-        body,
+        body
       ),
     onSuccess: () => invalidate(queryClient),
   })
@@ -200,7 +203,7 @@ export function useRunEmailSync(emailSyncEnabled: boolean) {
 
   const run = async (
     sourceId: string,
-    options?: { forceFullSync?: boolean },
+    options?: { forceFullSync?: boolean }
   ) => {
     if (!emailSyncEnabled) {
       appToast.error({
@@ -231,7 +234,7 @@ export function useRunEmailSync(emailSyncEnabled: boolean) {
     run,
     isPending: mutation.isPending,
     pendingSourceId: mutation.isPending
-      ? mutation.variables?.id ?? null
+      ? (mutation.variables?.id ?? null)
       : null,
   }
 }
@@ -248,7 +251,7 @@ export function useAssignPendingEmail() {
     }) =>
       apiPost<FinanceEmailAssignResult>(
         API_ENDPOINTS.FINANCE.EMAIL_PENDING_ASSIGN(id),
-        body,
+        body
       ),
     onSuccess: (result) => invalidateEmailResult(queryClient, result),
   })
@@ -259,8 +262,46 @@ export function useRetryPendingEmail() {
   return useMutation({
     mutationFn: (id: string) =>
       apiPost<FinanceEmailAssignResult | FinancePendingEmailMessage>(
-        API_ENDPOINTS.FINANCE.EMAIL_PENDING_RETRY(id),
+        API_ENDPOINTS.FINANCE.EMAIL_PENDING_RETRY(id)
       ),
     onSuccess: (result) => invalidateEmailResult(queryClient, result),
+  })
+}
+
+export function useCompletePendingAmount() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, amount }: { id: string; amount: number }) =>
+      apiPost<FinanceEmailAssignResult | FinancePendingEmailMessage>(
+        API_ENDPOINTS.FINANCE.EMAIL_PENDING_AMOUNT(id),
+        { amount }
+      ),
+    onSuccess: (result) => invalidateEmailResult(queryClient, result),
+  })
+}
+
+export function useDiscoveredSenders(
+  sourceId: string | null,
+  enabled: boolean
+) {
+  return useQuery({
+    queryKey: ["finance-discovered-senders", sourceId],
+    enabled: Boolean(sourceId) && enabled,
+    queryFn: () =>
+      apiGet<{ email: string; count: number }[]>(
+        API_ENDPOINTS.FINANCE.EMAIL_SOURCE_DISCOVERED_SENDERS(sourceId!)
+      ),
+  })
+}
+
+export function useAddSourceSenders() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, emails }: { id: string; emails: string[] }) =>
+      apiPost<FinanceEmailSource>(
+        API_ENDPOINTS.FINANCE.EMAIL_SOURCE_SENDERS(id),
+        { emails }
+      ),
+    onSuccess: () => invalidate(queryClient),
   })
 }
