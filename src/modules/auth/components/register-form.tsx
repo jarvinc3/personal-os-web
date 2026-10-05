@@ -14,12 +14,12 @@ import { z } from 'zod';
 const registerSchema = z
   .object({
     fullName: z.string().trim().min(2, 'Ingresa tu nombre completo'),
-    email: z.string().trim().email('Ingresa un email valido'),
+    email: z.string().trim().email('Ingresa un email válido'),
     password: z
       .string()
       .min(8, 'La contraseña debe tener al menos 8 caracteres')
-      .regex(/[A-Z]/, 'Debe incluir al menos una mayuscula')
-      .regex(/[0-9]/, 'Debe incluir al menos un numero'),
+      .regex(/[A-Z]/, 'Debe incluir al menos una mayúscula')
+      .regex(/[0-9]/, 'Debe incluir al menos un número'),
     confirmPassword: z.string().min(8, 'Confirma tu contraseña'),
   })
   .refine((values) => values.password === values.confirmPassword, {

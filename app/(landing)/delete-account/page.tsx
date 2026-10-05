@@ -42,7 +42,6 @@ export default function DeleteAccountPage() {
         title="Eliminar tu cuenta"
         description="Solicita la eliminación de tu cuenta y los datos asociados en Personal OS."
         breadcrumb={[
-          { href: "/privacy", label: "Política de privacidad" },
           { href: "/delete-account", label: "Eliminar cuenta" },
         ]}
       />

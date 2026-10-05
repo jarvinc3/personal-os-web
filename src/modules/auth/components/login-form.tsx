@@ -16,12 +16,12 @@ import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 
 const loginSchema = z.object({
-  email: z.string().trim().email("Ingresa un email valido"),
+  email: z.string().trim().email("Ingresa un email válido"),
   password: z
     .string()
     .min(8, "La contraseña debe tener al menos 8 caracteres")
-    .regex(/[A-Z]/, "Debe incluir al menos una mayuscula")
-    .regex(/[0-9]/, "Debe incluir al menos un numero"),
+    .regex(/[A-Z]/, "Debe incluir al menos una mayúscula")
+    .regex(/[0-9]/, "Debe incluir al menos un número"),
 })
 
 type LoginSchema = z.infer<typeof loginSchema>
@@ -102,7 +102,7 @@ export const LoginForm = forwardRef<LoginFormHandle, LoginFormProps>(
                 type="password"
                 revealable
                 autoComplete="current-password"
-                placeholder="Mín. 8 caracteres, 1 mayúscula y 1 número"
+                placeholder="Ingresa tu contraseña"
                 inputRef={passwordInputRef}
                 value={field.value}
                 onChange={field.onChange}
