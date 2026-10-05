@@ -80,3 +80,10 @@ export function formatFinanceMoney(
     return "—"
   }
 }
+
+export function formatCompactFinanceMoney(
+  value: string | number | null | undefined,
+  display: FinanceMoneyDisplay,
+): string {
+  return formatFinanceMoney(value, { ...display, compactNumbers: true })
+}

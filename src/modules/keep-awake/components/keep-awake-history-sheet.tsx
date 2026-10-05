@@ -5,6 +5,7 @@ import { Button } from "@/src/shared/components/ui/button"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
 import { formatElapsed } from "@/src/modules/keep-awake/lib/format-elapsed"
 import { appToast } from "@/src/shared/lib/app-toast"
+import { formatClockTimeFromDate } from "@/src/shared/lib/date-format"
 import {
   getHistorySnapshot,
   getServerHistorySnapshot,
@@ -32,14 +33,8 @@ type KeepAwakeHistorySheetProps = {
 }
 
 function formatRange(entry: KeepAwakeHistoryEntry): string {
-  const start = new Date(entry.startedAt).toLocaleTimeString("es", {
-    hour: "2-digit",
-    minute: "2-digit",
-  })
-  const end = new Date(entry.endedAt).toLocaleTimeString("es", {
-    hour: "2-digit",
-    minute: "2-digit",
-  })
+  const start = formatClockTimeFromDate(new Date(entry.startedAt))
+  const end = formatClockTimeFromDate(new Date(entry.endedAt))
   return `${start} – ${end}`
 }
 

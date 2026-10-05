@@ -1,5 +1,6 @@
 "use client"
 
+import { LinkPendingOverlay } from "@/src/shared/components/ui/navigation-pending";
 import { ChevronDownIcon, ChevronRightIcon, LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { ComponentProps, ReactNode } from "react";
@@ -12,6 +13,7 @@ import {
 
 type SummarySectionProps = {
   title?: string
+  subtitle?: string
   icon?: LucideIcon
   right?: ReactNode
   children: ReactNode
@@ -49,6 +51,7 @@ export function SummarySection({
   title,
   children,
   right,
+  subtitle,
   icon: Icon,
   color,
   collapsible = false,
@@ -56,7 +59,10 @@ export function SummarySection({
   const titleContent = (
     <div className="flex gap-2 items-center min-w-0">
       {Icon && <Icon className="size-4 text-muted-foreground" />}
-      <span className="text-sm font-medium text-muted-foreground">{title}</span>
+      <div className="flex flex-col -space-y-0.5">
+        <span className="text-sm font-medium text-muted-foreground">{title}</span>
+        {subtitle && <span className="text-xs text-muted truncate">{subtitle}</span>}
+      </div>
     </div>
   )
 
@@ -72,7 +78,7 @@ export function SummarySection({
       )}
       {right && (
         <div
-          className="flex flex-row gap-2 items-center shrink-0"
+          className="flex flex-row items-center shrink-0"
           onClick={collapsible ? (event) => event.stopPropagation() : undefined}
           onPointerDown={
             collapsible ? (event) => event.stopPropagation() : undefined
@@ -87,7 +93,7 @@ export function SummarySection({
   const body = (
     <div
       className={cn(
-        "flex flex-col gap-5 p-2 rounded-2xl border border-border bg-card",
+        "flex flex-col gap-2 p-2 rounded-2xl border border-border bg-card",
         color
       )}
     >
@@ -187,8 +193,9 @@ export function SummaryItem({
 
   if (href) {
     return (
-      <Link href={href} className={rowClassName}>
+      <Link href={href} className={cn(rowClassName, "relative")}>
         {content}
+        <LinkPendingOverlay />
       </Link>
     )
   }

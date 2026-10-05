@@ -15,6 +15,8 @@ import {
   savingsGoalsQuery,
   type FinanceQueryGet,
 } from "./finance-query-options.ts"
+import { monthKeyFromDate } from "./month-window.ts"
+import { timelineMonthQuery } from "./transactions-query.ts"
 
 type PrefetchClient = Pick<QueryClient, "prefetchQuery">
 
@@ -65,4 +67,19 @@ export function prefetchFinanceSync(
     queryClient.prefetchQuery(emailPendingQuery(get)),
     queryClient.prefetchQuery(emailMessagesQuery(get)),
   ])
+}
+
+async function defaultTransactionsGet(path: string) {
+  const { apiGet } = await import("@/src/config/api-client")
+  return apiGet(path)
+}
+
+export function prefetchFinanceCurrentMonth(
+  queryClient: PrefetchClient,
+  get: FinanceQueryGet = defaultTransactionsGet,
+  now: Date = new Date(),
+) {
+  return queryClient.prefetchQuery(
+    timelineMonthQuery(monthKeyFromDate(now), get),
+  )
 }

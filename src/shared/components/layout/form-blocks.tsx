@@ -264,7 +264,7 @@ export function SwitchFieldRow({
 }: SwitchFieldRowProps) {
   const id = useId();
   return (
-    <div className="flex flex-row gap-3 justify-between items-center px-4 py-3 rounded-full border border-border/60 bg-card">
+    <div className="flex flex-row gap-3 justify-between items-center px-4 py-3 rounded-xl border border-border/60 bg-card">
       <label htmlFor={id} className="flex-1 min-w-0 cursor-pointer">
         <FieldLabel className="text-sm text-muted-foreground">{label}</FieldLabel>
         {description ? <p className="text-xs text-muted-foreground">{description}</p> : null}

@@ -8,6 +8,7 @@ type SettingsSectionProps = {
   description?: string
   className?: string
   bare?: boolean
+  headerTrailing?: ReactNode
   children: ReactNode
 }
 
@@ -16,17 +17,21 @@ export function SettingsSection({
   description,
   className,
   bare = false,
+  headerTrailing,
   children,
 }: SettingsSectionProps) {
   return (
     <section className={cn("flex flex-col gap-2", className)}>
-      <div className="flex flex-col gap-0.5 px-1">
-        <h2 className="text-xs font-medium tracking-wide uppercase text-muted-foreground">
-          {title}
-        </h2>
-        {description ? (
-          <p className="text-xs text-muted-foreground">{description}</p>
-        ) : null}
+      <div className="flex flex-row items-center justify-between gap-2 px-1">
+        <div className="flex min-w-0 flex-col gap-0.5">
+          <h2 className="text-xs font-medium tracking-wide uppercase text-muted-foreground">
+            {title}
+          </h2>
+          {description ? (
+            <p className="text-xs text-muted-foreground">{description}</p>
+          ) : null}
+        </div>
+        {headerTrailing}
       </div>
       {bare ? (
         children

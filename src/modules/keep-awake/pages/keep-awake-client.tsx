@@ -21,21 +21,19 @@ import {
 } from "@/src/modules/keep-awake/lib/prefs"
 import {
   DEFAULT_REMINDER,
-  formatReminderTime,
+  formatReminderTimeLabel,
   getReminderSnapshot,
   subscribeReminder,
 } from "@/src/modules/keep-awake/lib/reminders"
 import { getKeepAwakeCopy } from "@/src/modules/keep-awake/lib/session-status"
 import { Button } from "@/src/shared/components/ui/button"
+import { formatClockTimeFromDate } from "@/src/shared/lib/date-format"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
 import { Bell, Copy } from "lucide-react"
 import { useState, useSyncExternalStore } from "react"
 
 function formatSessionStarted(timestamp: number): string {
-  return new Date(timestamp).toLocaleTimeString("es", {
-    hour: "2-digit",
-    minute: "2-digit",
-  })
+  return formatClockTimeFromDate(new Date(timestamp))
 }
 
 export function KeepAwakeClient() {
@@ -99,7 +97,7 @@ export function KeepAwakeClient() {
           <KeepAwakePanelToolbar
             reminderOpen={reminderOpen}
             reminderActive={reminder.enabled}
-            reminderTime={formatReminderTime(reminder)}
+            reminderTime={formatReminderTimeLabel(reminder)}
             historyOpen={historyOpen}
             helpOpen={helpOpen}
             alertOpen={alertOpen}
@@ -148,11 +146,11 @@ export function KeepAwakeClient() {
                   variant="secondary"
                   size="sm"
                   className={cn(PRESSABLE_CLASS, "h-7 rounded-full px-3")}
-                  aria-label={`Recordatorio ${formatReminderTime(reminder)}`}
+                  aria-label={`Recordatorio ${formatReminderTimeLabel(reminder)}`}
                   onClick={() => setReminderOpen(true)}
                 >
                   <Bell data-icon="inline-start" aria-hidden />
-                  {formatReminderTime(reminder)}
+                  {formatReminderTimeLabel(reminder)}
                 </Button>
               ) : null}
             </div>

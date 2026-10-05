@@ -4,6 +4,7 @@ import { FINANCE_NAV_ITEMS } from "@/src/modules/finance/constants/nav"
 import { useFinanceEnabled } from "@/src/modules/finance/hooks/use-finance-enabled"
 import {
   prefetchFinanceCategories,
+  prefetchFinanceCurrentMonth,
   prefetchFinancePlanning,
   prefetchFinanceSync,
   scheduleIdle,
@@ -25,6 +26,7 @@ export function FinanceLayout({ children }: { children: ReactNode }) {
     return scheduleIdle(() => {
       void prefetchFinanceCategories(queryClient)
       void prefetchFinancePlanning(queryClient)
+      void prefetchFinanceCurrentMonth(queryClient)
       if (emailSyncEnabled) {
         void prefetchFinanceSync(queryClient)
       }
@@ -41,6 +43,9 @@ export function FinanceLayout({ children }: { children: ReactNode }) {
       }
       if (href === APP_ROUTES.app.financeAccounts) {
         void prefetchFinanceCategories(queryClient)
+      }
+      if (href === APP_ROUTES.app.financeTransactions) {
+        void prefetchFinanceCurrentMonth(queryClient)
       }
     },
     [isEnabled, queryClient],

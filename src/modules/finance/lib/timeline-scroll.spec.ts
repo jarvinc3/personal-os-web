@@ -1,7 +1,30 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { findActiveMonthKey } from "./timeline-scroll.ts";
+import { findActiveMonthKey, shouldFollowScroll } from "./timeline-scroll.ts";
+
+describe("shouldFollowScroll", () => {
+  it("ignores layout scroll until the user takes over", () => {
+    assert.equal(
+      shouldFollowScroll({ isProgrammatic: false, userTookOver: false }),
+      false,
+    )
+  })
+
+  it("ignores scroll events fired by a programmatic landing", () => {
+    assert.equal(
+      shouldFollowScroll({ isProgrammatic: true, userTookOver: true }),
+      false,
+    )
+  })
+
+  it("follows the marker after the user scrolls on their own", () => {
+    assert.equal(
+      shouldFollowScroll({ isProgrammatic: false, userTookOver: true }),
+      true,
+    )
+  })
+})
 
 describe("findActiveMonthKey", () => {
   it("keeps the current month while the next banner is still below the marker", () => {

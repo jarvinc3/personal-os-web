@@ -3,6 +3,7 @@ import { describe, it } from "node:test";
 
 import {
   currencyGlyph,
+  formatCompactFinanceMoney,
   formatFinanceMoney,
   parseFinanceMoney,
 } from "./money.ts";
@@ -89,6 +90,18 @@ describe("formatFinanceMoney", () => {
         compactNumbers: true,
       }),
       "DOP $1K",
+    )
+  })
+
+  it("always abbreviates compact money even when the display prefers full numbers", () => {
+    assert.equal(
+      formatCompactFinanceMoney("78224.48", {
+        currency: "DOP",
+        showCents: true,
+        compactNumbers: false,
+        leadingSign: true,
+      }),
+      "+DOP $78.22K",
     )
   })
 

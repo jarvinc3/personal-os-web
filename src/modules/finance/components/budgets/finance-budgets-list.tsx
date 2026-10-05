@@ -1,6 +1,7 @@
 "use client"
 
 import { BudgetSheet } from "@/src/modules/finance/components/budgets/budget-sheet"
+import { PlanningProgressCard } from "@/src/modules/finance/components/planning/planning-progress-card"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/constants/sheet-keys"
 import { useBudget, useBudgets } from "@/src/modules/finance/hooks/use-budgets"
 import { useCategories } from "@/src/modules/finance/hooks/use-categories"
@@ -13,8 +14,9 @@ import {
   formatBudgetPeriodDate,
 } from "@/src/modules/finance/lib/budgets-query"
 import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
+import { joinPlanningCaption } from "@/src/modules/finance/lib/planning-lists"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/lib/money"
-import { formatFinanceMoney } from "@/src/modules/finance/lib/money"
+import { formatFinanceMoney, parseFinanceMoney } from "@/src/modules/finance/lib/money"
 import {
   FINANCE_BUDGET_PERIOD_LABEL,
   type FinanceBudget,
@@ -29,12 +31,12 @@ import {
 } from "@/src/shared/components/ui/empty"
 import { Separator } from "@/src/shared/components/ui/separator"
 import { FinanceListSkeleton } from "@/src/modules/finance/components/layout/finance-list-skeleton"
-import { SummaryItem, SummarySection } from "@/src/shared/components/ui/summary"
+import { SummarySection } from "@/src/shared/components/ui/summary"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import {
+  ChartPieIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
-  PiggyBankIcon,
   PlusIcon,
 } from "lucide-react"
 import { useState } from "react"
@@ -45,26 +47,14 @@ type FinanceBudgetsListProps = {
 }
 
 function categoryLabel(budget: FinanceBudget): string {
-  const name = budget.category?.name ?? "Categoría"
-  return `${budget.category?.icon ? `${budget.category.icon} ` : ""}${name}`
+  return budget.category?.name ?? "Categoría"
 }
 
-function BudgetUsageBar({
-  pct,
-  color,
-}: {
-  pct: number
-  color?: string | null
-}) {
-  const width = Math.min(100, Math.max(0, pct))
-  return (
-    <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
-      <div
-        className="h-full rounded-full bg-primary"
-        style={{ width: `${width}%`, backgroundColor: color ?? undefined }}
-      />
-    </div>
-  )
+function budgetTone(pct: number | null, threshold: number) {
+  if (pct === null) return "info" as const
+  if (pct >= 100) return "danger" as const
+  if (pct >= threshold) return "warning" as const
+  return "info" as const
 }
 
 export function FinanceBudgetsList({
@@ -115,7 +105,7 @@ export function FinanceBudgetsList({
 
       <SummarySection
         title="Presupuestos"
-        icon={PiggyBankIcon}
+        icon={ChartPieIcon}
         right={
           <Button
             type="button"
@@ -135,7 +125,7 @@ export function FinanceBudgetsList({
           <Empty className="py-8">
             <EmptyHeader>
               <EmptyMedia variant="icon">
-                <PiggyBankIcon />
+                <ChartPieIcon />
               </EmptyMedia>
               <EmptyTitle>No hay presupuestos</EmptyTitle>
               <EmptyDescription>
@@ -145,28 +135,59 @@ export function FinanceBudgetsList({
             </EmptyHeader>
           </Empty>
         ) : (
-          items.map((budget, index) => {
+          items.map((budget) => {
             const pct = budgetPctUsed(budget.amountSpent, budget.amountLimit)
+            const threshold = budget.alertThresholdPct ?? 80
+            const tone = budgetTone(pct, threshold)
             const period =
               FINANCE_BUDGET_PERIOD_LABEL[budget.periodType] ??
               budget.periodType
             const range = `${formatBudgetPeriodDate(budget.periodStart)} – ${formatBudgetPeriodDate(budget.periodEnd)}`
-            const spent = formatFinanceMoney(budget.amountSpent, display)
-            const limit = formatFinanceMoney(budget.amountLimit, display)
-            const pctLabel = pct === null ? "—" : `${pct.toFixed(0)}%`
+            const spent = parseFinanceMoney(budget.amountSpent)
+            const limit = parseFinanceMoney(budget.amountLimit)
+            const remaining =
+              spent !== null && limit !== null ? limit - spent : null
+            const remainingLabel =
+              remaining === null
+                ? undefined
+                : remaining < 0
+                  ? `Excedido ${formatFinanceMoney(Math.abs(remaining), display)}`
+                  : `Quedan ${formatFinanceMoney(remaining, display)}`
+            const emoji = budget.category?.icon
             return (
-              <div key={budget.id} className="flex flex-col gap-2">
-                <SummaryItem
-                  title={categoryLabel(budget)}
-                  description={`${period} · ${range}`}
-                  value={`${spent} / ${limit} · ${pctLabel}`}
-                  onPress={() => setOpenBudgetSheet(true, budget.id)}
-                  isLast={index === items.length - 1}
-                />
-                {pct !== null ? (
-                  <BudgetUsageBar pct={pct} color={budget.category?.color} />
-                ) : null}
-              </div>
+              <PlanningProgressCard
+                key={budget.id}
+                title={categoryLabel(budget)}
+                leading={
+                  emoji ? (
+                    <span className="text-lg leading-none">{emoji}</span>
+                  ) : undefined
+                }
+                icon={emoji ? undefined : ChartPieIcon}
+                tone={tone}
+                accentColor={budget.category?.color}
+                badge={{
+                  label:
+                    tone === "danger"
+                      ? "Excedido"
+                      : tone === "warning"
+                        ? "Alerta"
+                        : "En curso",
+                  variant:
+                    tone === "danger"
+                      ? "danger"
+                      : tone === "warning"
+                        ? "warning"
+                        : "info",
+                }}
+                progress={pct}
+                currentHint="Gastado"
+                currentLabel={formatFinanceMoney(budget.amountSpent, display)}
+                targetHint="Tope"
+                targetLabel={formatFinanceMoney(budget.amountLimit, display)}
+                caption={joinPlanningCaption(remainingLabel, period, range)}
+                onPress={() => setOpenBudgetSheet(true, budget.id)}
+              />
             )
           })
         )}

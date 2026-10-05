@@ -9,20 +9,34 @@ import type { FinanceModuleConfig } from "@/src/modules/settings/types/module-co
 import type { SettingsSheetProps } from "@/src/modules/settings/types/sheet.types"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
 import {
-  FormTextField,
   OptionRow,
   SwitchFieldRow,
 } from "@/src/shared/components/layout/form-blocks"
 import { Button } from "@/src/shared/components/ui/button"
+import {
+  Field,
+  FieldError,
+  FieldLabel,
+} from "@/src/shared/components/ui/field"
 import {
   RadioGroup,
   RadioGroupItem,
 } from "@/src/shared/components/ui/radio-group"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { SummarySection } from "@/src/shared/components/ui/summary"
+import {
+  DurationWheels,
+  TimePairWheels,
+} from "@/src/shared/components/ui/wheel-picker"
 import { getModule } from "@/src/shared/constants/module-registry"
 import { appToast } from "@/src/shared/lib/app-toast"
+import { formatTimeForDisplay } from "@/src/shared/lib/date-format"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
+import { cn } from "@/src/shared/lib/utils"
+import {
+  durationMinutesToHm,
+  hmToDurationMinutes,
+} from "@/src/shared/types/wheels.type"
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
   BarChart3,
@@ -30,13 +44,18 @@ import {
   CalendarCog,
   CalendarDays,
   ChartBarIcon,
+  CheckIcon,
   Clock,
   DollarSign,
   Mail,
+  PencilIcon,
+  PlusIcon,
   ScanEyeIcon,
   Tags,
+  Timer,
+  Trash2Icon,
 } from "lucide-react"
-import { useEffect, useMemo } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import { z } from "zod"
 
@@ -46,6 +65,225 @@ const EMAIL_SYNC_SCHEDULE_MODES = {
   INTERVAL: "interval",
   TIMES: "times",
 } as const
+
+const DEFAULT_EMAIL_SYNC_TIMES = ["08:00", "18:00"]
+const MAX_EMAIL_SYNC_TIMES = 8
+const MIN_EMAIL_SYNC_INTERVAL_MINUTES = 15
+const DEFAULT_EMAIL_SYNC_INTERVAL_MINUTES = 360
+
+function formatSyncIntervalLabel(minutes: number): string {
+  if (minutes < 60) return `${minutes} min`
+  const hours = Math.floor(minutes / 60)
+  const leftover = minutes % 60
+  if (leftover === 0) return `${hours} h`
+  return `${hours} h ${leftover} min`
+}
+
+function parseSyncIntervalMinutes(value: string): number {
+  const minutes = Number(value)
+  if (!Number.isInteger(minutes) || minutes < MIN_EMAIL_SYNC_INTERVAL_MINUTES) {
+    return DEFAULT_EMAIL_SYNC_INTERVAL_MINUTES
+  }
+  return minutes
+}
+
+function nextEmailSyncTime(existing: string[]): string {
+  const taken = new Set(existing)
+  const last = existing.at(-1) ?? DEFAULT_EMAIL_SYNC_TIMES[0]
+  const [hoursText, minutesText = "00"] = last.split(":")
+  let hour = Number(hoursText)
+  for (let step = 0; step < 24; step += 1) {
+    hour = (hour + 1) % 24
+    const candidate = `${String(hour).padStart(2, "0")}:${minutesText}`
+    if (!taken.has(candidate)) return candidate
+  }
+  return DEFAULT_EMAIL_SYNC_TIMES[0]
+}
+
+function emailSyncTimesFromConfig(config: FinanceModuleConfig): string[] {
+  if (
+    config.emailSync.schedule.mode === "times" &&
+    config.emailSync.schedule.times.length > 0
+  ) {
+    return config.emailSync.schedule.times
+  }
+  return [...DEFAULT_EMAIL_SYNC_TIMES]
+}
+
+function EmailSyncTimesField({
+  times,
+  onChange,
+  error,
+  disabled = false,
+}: {
+  times: string[]
+  onChange: (times: string[]) => void
+  error?: string
+  disabled?: boolean
+}) {
+  const [editingIndex, setEditingIndex] = useState<number | null>(null)
+
+  return (
+    <Field
+      data-invalid={error ? true : undefined}
+      className="flex flex-col gap-3"
+    >
+      <FieldLabel className="text-sm text-muted-foreground">
+        Horas del día
+      </FieldLabel>
+      {times.map((time, index) => {
+        const isEditing = editingIndex === index
+        return (
+          <div
+            key={index}
+            className={cn(
+              "flex flex-col rounded-xl border bg-card p-2",
+              isEditing ? "border-primary" : "border-border"
+            )}
+          >
+            <div className="flex items-center gap-2">
+              <Clock className="size-4 shrink-0 text-muted-foreground" />
+              <span className="min-w-0 flex-1 text-sm font-medium tabular-nums">
+                {formatTimeForDisplay(time)}
+              </span>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-sm"
+                aria-label={
+                  isEditing
+                    ? `Cerrar hora ${index + 1}`
+                    : `Editar hora ${index + 1}`
+                }
+                aria-pressed={isEditing}
+                disabled={disabled}
+                onClick={() => setEditingIndex(isEditing ? null : index)}
+              >
+                {isEditing ? <CheckIcon /> : <PencilIcon />}
+              </Button>
+              {times.length > 1 ? (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  aria-label={`Quitar hora ${index + 1}`}
+                  disabled={disabled}
+                  onClick={() => {
+                    onChange(times.filter((_, itemIndex) => itemIndex !== index))
+                    setEditingIndex((current) => {
+                      if (current === null) return null
+                      if (current === index) return null
+                      if (current > index) return current - 1
+                      return current
+                    })
+                  }}
+                >
+                  <Trash2Icon />
+                </Button>
+              ) : null}
+            </div>
+            {isEditing ? (
+              <div className="pt-2">
+                <TimePairWheels
+                  value={time}
+                  onChange={(next) => {
+                    const nextTimes = [...times]
+                    nextTimes[index] = next
+                    onChange(nextTimes)
+                  }}
+                  disabled={disabled}
+                />
+              </div>
+            ) : null}
+          </div>
+        )
+      })}
+      {times.length < MAX_EMAIL_SYNC_TIMES ? (
+        <Button
+          type="button"
+          variant="outline"
+          disabled={disabled}
+          onClick={() => {
+            const nextTimes = [...times, nextEmailSyncTime(times)]
+            onChange(nextTimes)
+            setEditingIndex(nextTimes.length - 1)
+          }}
+        >
+          <PlusIcon data-icon="inline-start" />
+          Agregar hora
+        </Button>
+      ) : null}
+      {error ? <FieldError>{error}</FieldError> : null}
+    </Field>
+  )
+}
+
+function EmailSyncIntervalField({
+  value,
+  onChange,
+  error,
+  disabled = false,
+}: {
+  value: string
+  onChange: (value: string) => void
+  error?: string
+  disabled?: boolean
+}) {
+  const [editing, setEditing] = useState(false)
+  const minutes = parseSyncIntervalMinutes(value)
+
+  return (
+    <Field
+      data-invalid={error ? true : undefined}
+      className="flex flex-col gap-3"
+    >
+      <FieldLabel className="text-sm text-muted-foreground">
+        Tiempo entre revisiones
+      </FieldLabel>
+      <div
+        className={cn(
+          "flex flex-col rounded-xl border bg-card p-2",
+          editing ? "border-primary" : "border-border"
+        )}
+      >
+        <div className="flex items-center gap-2">
+          <Timer className="size-4 shrink-0 text-muted-foreground" />
+          <span className="min-w-0 flex-1 text-sm font-medium tabular-nums">
+            {formatSyncIntervalLabel(minutes)}
+          </span>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            aria-label={editing ? "Cerrar intervalo" : "Editar intervalo"}
+            aria-pressed={editing}
+            disabled={disabled}
+            onClick={() => setEditing((current) => !current)}
+          >
+            {editing ? <CheckIcon /> : <PencilIcon />}
+          </Button>
+        </div>
+        {editing ? (
+          <div className="pt-2">
+            <DurationWheels
+              value={durationMinutesToHm(minutes)}
+              minuteStep={5}
+              disabled={disabled}
+              onChange={(next) => {
+                const nextMinutes = Math.max(
+                  MIN_EMAIL_SYNC_INTERVAL_MINUTES,
+                  hmToDurationMinutes(next)
+                )
+                onChange(String(nextMinutes))
+              }}
+            />
+          </div>
+        ) : null}
+      </div>
+      {error ? <FieldError>{error}</FieldError> : null}
+    </Field>
+  )
+}
 
 const schema = z
   .object({
@@ -61,7 +299,7 @@ const schema = z
       EMAIL_SYNC_SCHEDULE_MODES.TIMES,
     ]),
     emailSyncEveryMinutes: z.string(),
-    emailSyncTimes: z.string(),
+    emailSyncTimes: z.array(z.string()),
     autoCategorize: z.boolean(),
     budgetAlerts: z.boolean(),
     aiSuggestions: z.boolean(),
@@ -73,7 +311,7 @@ const schema = z
   .superRefine((values, ctx) => {
     if (values.emailSyncScheduleMode === EMAIL_SYNC_SCHEDULE_MODES.INTERVAL) {
       const minutes = Number(values.emailSyncEveryMinutes)
-      if (!Number.isInteger(minutes) || minutes < 15) {
+      if (!Number.isInteger(minutes) || minutes < MIN_EMAIL_SYNC_INTERVAL_MINUTES) {
         ctx.addIssue({
           code: "custom",
           path: ["emailSyncEveryMinutes"],
@@ -82,11 +320,8 @@ const schema = z
       }
       return
     }
-    const times = values.emailSyncTimes
-      .split(",")
-      .map((time) => time.trim())
-      .filter(Boolean)
-    if (times.length === 0 || times.length > 8) {
+    const times = values.emailSyncTimes.map((time) => time.trim()).filter(Boolean)
+    if (times.length === 0 || times.length > MAX_EMAIL_SYNC_TIMES) {
       ctx.addIssue({
         code: "custom",
         path: ["emailSyncTimes"],
@@ -98,7 +333,7 @@ const schema = z
       ctx.addIssue({
         code: "custom",
         path: ["emailSyncTimes"],
-        message: "Usa formato HH:MM",
+        message: "Hora no válida",
       })
       return
     }
@@ -136,10 +371,10 @@ const PERIOD_OPTIONS: {
   label: string
   description: string
 }[] = [
-  { value: "week", label: "Semana", description: "Vista agregada por semana." },
-  { value: "month", label: "Mes", description: "Vista agregada por mes." },
-  { value: "year", label: "Año", description: "Vista agregada por año." },
-]
+    { value: "week", label: "Semana", description: "Vista agregada por semana." },
+    { value: "month", label: "Mes", description: "Vista agregada por mes." },
+    { value: "year", label: "Año", description: "Vista agregada por año." },
+  ]
 
 function configToFormValues(config: FinanceModuleConfig): FormValues {
   return {
@@ -155,10 +390,7 @@ function configToFormValues(config: FinanceModuleConfig): FormValues {
       config.emailSync.schedule.mode === "interval"
         ? String(config.emailSync.schedule.everyMinutes)
         : "360",
-    emailSyncTimes:
-      config.emailSync.schedule.mode === "times"
-        ? config.emailSync.schedule.times.join(", ")
-        : "08:00, 18:00",
+    emailSyncTimes: emailSyncTimesFromConfig(config),
     autoCategorize: config.emailSync.autoCategorize,
     budgetAlerts: config.notifications.budgetAlerts,
     aiSuggestions: config.notifications.aiSuggestions,
@@ -224,16 +456,15 @@ export function EditFinanceSheet({ open, onOpenChange }: SettingsSheetProps) {
           schedule:
             values.emailSyncScheduleMode === EMAIL_SYNC_SCHEDULE_MODES.INTERVAL
               ? {
-                  mode: EMAIL_SYNC_SCHEDULE_MODES.INTERVAL,
-                  everyMinutes: Number(values.emailSyncEveryMinutes),
-                }
+                mode: EMAIL_SYNC_SCHEDULE_MODES.INTERVAL,
+                everyMinutes: Number(values.emailSyncEveryMinutes),
+              }
               : {
-                  mode: EMAIL_SYNC_SCHEDULE_MODES.TIMES,
-                  times: values.emailSyncTimes
-                    .split(",")
-                    .map((time) => time.trim())
-                    .filter(Boolean),
-                },
+                mode: EMAIL_SYNC_SCHEDULE_MODES.TIMES,
+                times: values.emailSyncTimes
+                  .map((time) => time.trim())
+                  .filter(Boolean),
+              },
         },
         notifications: {
           budgetAlerts: values.budgetAlerts,
@@ -304,6 +535,7 @@ export function EditFinanceSheet({ open, onOpenChange }: SettingsSheetProps) {
           )}
         />
       </SummarySection>
+
       <SummarySection title="Inicio de semana" icon={CalendarCog}>
         <RadioGroup
           value={weekStartsOn}
@@ -327,6 +559,7 @@ export function EditFinanceSheet({ open, onOpenChange }: SettingsSheetProps) {
           ))}
         </RadioGroup>
       </SummarySection>
+
       <SummarySection title="Período del panel" icon={ChartBarIcon}>
         <RadioGroup
           value={dashboardPeriod}
@@ -356,6 +589,7 @@ export function EditFinanceSheet({ open, onOpenChange }: SettingsSheetProps) {
           ))}
         </RadioGroup>
       </SummarySection>
+
       <SummarySection title="Visualización" icon={ScanEyeIcon}>
         <Controller
           control={control}
@@ -380,6 +614,7 @@ export function EditFinanceSheet({ open, onOpenChange }: SettingsSheetProps) {
           )}
         />
       </SummarySection>
+
       <SummarySection title="Sincronización de email" icon={Mail}>
         <Controller
           control={control}
@@ -387,7 +622,7 @@ export function EditFinanceSheet({ open, onOpenChange }: SettingsSheetProps) {
           render={({ field }) => (
             <SwitchFieldRow
               label="Activar sync"
-              description="Permite conectar Gmail y sincronizar a mano."
+              description="Permite conectar Gmail y sincronizar."
               checked={field.value}
               onCheckedChange={field.onChange}
             />
@@ -399,7 +634,7 @@ export function EditFinanceSheet({ open, onOpenChange }: SettingsSheetProps) {
           render={({ field }) => (
             <SwitchFieldRow
               label="Sync automático"
-              description="Usa la frecuencia configurada abajo. Si está apagado, solo sincronizas a mano."
+              description="Se leen correos cada cierto tiempo."
               checked={field.value}
               onCheckedChange={field.onChange}
               disabled={!emailSyncEnabledWatch}
@@ -424,7 +659,7 @@ export function EditFinanceSheet({ open, onOpenChange }: SettingsSheetProps) {
                 icon={Clock}
                 iconColor={MODULE_ACCENT}
                 label="Cada cierto tiempo"
-                description="Ej.: cada 30 minutos o cada 6 horas."
+                description="Se configura un periodo de tiempo."
                 selected={field.value === EMAIL_SYNC_SCHEDULE_MODES.INTERVAL}
                 onPress={() =>
                   setValue(
@@ -443,7 +678,7 @@ export function EditFinanceSheet({ open, onOpenChange }: SettingsSheetProps) {
                 icon={CalendarClock}
                 iconColor={MODULE_ACCENT}
                 label="A horas fijas del día"
-                description="Se usa tu zona horaria. Ej.: 08:00 y 18:00."
+                description="Se configuran varias horas en el día."
                 selected={field.value === EMAIL_SYNC_SCHEDULE_MODES.TIMES}
                 onPress={() =>
                   setValue(
@@ -466,10 +701,7 @@ export function EditFinanceSheet({ open, onOpenChange }: SettingsSheetProps) {
             control={control}
             name="emailSyncEveryMinutes"
             render={({ field, fieldState }) => (
-              <FormTextField
-                label="Minutos entre revisiones"
-                type="number"
-                placeholder="360"
+              <EmailSyncIntervalField
                 value={field.value}
                 onChange={field.onChange}
                 error={fieldState.error?.message}
@@ -482,10 +714,8 @@ export function EditFinanceSheet({ open, onOpenChange }: SettingsSheetProps) {
             control={control}
             name="emailSyncTimes"
             render={({ field, fieldState }) => (
-              <FormTextField
-                label="Horas del día"
-                placeholder="08:00, 18:00"
-                value={field.value}
+              <EmailSyncTimesField
+                times={field.value}
                 onChange={field.onChange}
                 error={fieldState.error?.message}
                 disabled={updateMutation.isPending}
@@ -505,6 +735,7 @@ export function EditFinanceSheet({ open, onOpenChange }: SettingsSheetProps) {
           )}
         />
       </SummarySection>
+
       <SummarySection title="Alertas del módulo" icon={Tags}>
         {FINANCE_NOTIFICATION_ROWS.map((row) => (
           <Controller

@@ -34,6 +34,7 @@ import {
   findActiveMonthKey,
   getScrollParent,
   scrollSectionIntoView,
+  shouldFollowScroll,
 } from "@/src/modules/finance/lib/timeline-scroll";
 import { FINANCE_TRANSACTIONS_QUERY_KEY } from "@/src/modules/finance/types/api";
 import { ExpandableFab } from "@/src/shared/components/layout/expandable-fab";
@@ -72,9 +73,13 @@ export function FinanceTransactionsList({
   display,
 }: FinanceTransactionsListProps) {
   const [range, setRange] = useState(() => initialMonthRange())
-  const [activeMonthKey, setActiveMonthKey] = useState<MonthKey>(() =>
-    monthKeyFromDate(new Date())
-  )
+  const [landingMonthKey] = useState(() => monthKeyFromDate(new Date()))
+  const [activeMonthKey, setActiveMonthKey] = useState<MonthKey>(landingMonthKey)
+  const [userTookOver, setUserTookOver] = useState(false)
+  const userTookOverRef = useRef(false)
+  if (!userTookOver && activeMonthKey !== landingMonthKey) {
+    setActiveMonthKey(landingMonthKey)
+  }
   const [rangeMonthKey, setRangeMonthKey] = useState(activeMonthKey)
   if (rangeMonthKey !== activeMonthKey) {
     setRangeMonthKey(activeMonthKey)
@@ -96,7 +101,6 @@ export function FinanceTransactionsList({
   const timelineRef = useRef<HTMLDivElement>(null)
   const isProgrammaticScroll = useRef(false)
   const programmaticTimer = useRef(0)
-  const didInitialScroll = useRef(false)
   const programmaticTarget = useRef<MonthKey | null>(null)
   const scrollGeneration = useRef(0)
   const currentMonthKey = monthKeyFromDate(new Date())
@@ -140,7 +144,12 @@ export function FinanceTransactionsList({
     [range.from, range.to]
   )
 
-  const timelineQuery = useTimelineTransactions(enabled, years, {})
+  const timelineQuery = useTimelineTransactions(
+    enabled,
+    years,
+    {},
+    currentMonthKey,
+  )
   const timeline = useMemo(
     () => buildTimelineMonths(months, timelineQuery.items),
     [months, timelineQuery.items]
@@ -173,12 +182,19 @@ export function FinanceTransactionsList({
     })
   }, [])
 
+  const markUserTookOver = useCallback(() => {
+    if (userTookOverRef.current) return
+    userTookOverRef.current = true
+    setUserTookOver(true)
+  }, [])
+
   const scrollToMonth = useCallback(
     (key: MonthKey) => {
+      markUserTookOver()
       programmaticTarget.current = key
       applyActiveMonth(key)
     },
-    [applyActiveMonth]
+    [applyActiveMonth, markUserTookOver]
   )
 
   useLayoutEffect(() => {
@@ -192,8 +208,34 @@ export function FinanceTransactionsList({
   }, [])
 
   useLayoutEffect(() => {
-    const isInitial = !didInitialScroll.current
-    const targetKey = isInitial ? activeMonthKey : programmaticTarget.current
+    if (userTookOver) return
+    const node = timelineRef.current
+    if (!node || stickyOffset === 0) return
+
+    const offset = stickyOffset + STICKY_GAP
+    const pin = () => {
+      if (userTookOverRef.current) return
+      const section = node.querySelector<HTMLElement>(
+        `[data-month-key="${landingMonthKey}"]`
+      )
+      if (!section) return
+      scrollSectionIntoView(section, offset, "auto")
+    }
+
+    pin()
+    const observer = new ResizeObserver(pin)
+    observer.observe(node)
+    return () => observer.disconnect()
+  }, [
+    landingMonthKey,
+    stickyOffset,
+    timeline.length,
+    timelineQuery.items.length,
+    userTookOver,
+  ])
+
+  useLayoutEffect(() => {
+    const targetKey = programmaticTarget.current
     if (!targetKey || stickyOffset === 0 || !timelineRef.current) return
     const section = timelineRef.current.querySelector<HTMLElement>(
       `[data-month-key="${targetKey}"]`
@@ -209,7 +251,6 @@ export function FinanceTransactionsList({
       if (scrollGeneration.current !== generation) return
       isProgrammaticScroll.current = false
       programmaticTarget.current = null
-      didInitialScroll.current = true
       window.clearTimeout(programmaticTimer.current)
     }
 
@@ -219,14 +260,13 @@ export function FinanceTransactionsList({
       scrollGeneration.current += 1
       cancelAnimation()
       programmaticTarget.current = null
-      didInitialScroll.current = true
       isProgrammaticScroll.current = false
       window.clearTimeout(programmaticTimer.current)
     }
     parent?.addEventListener("wheel", stopForUser, { passive: true })
     parent?.addEventListener("touchstart", stopForUser, { passive: true })
 
-    if (isInitial || prefersReducedMotion()) {
+    if (prefersReducedMotion()) {
       scrollSectionIntoView(section, offset, "auto")
       programmaticTimer.current = window.setTimeout(release, 80)
     } else {
@@ -245,9 +285,9 @@ export function FinanceTransactionsList({
       if (scrollGeneration.current === generation) {
         scrollGeneration.current += 1
       }
-      const willRetry =
-        programmaticTarget.current != null || !didInitialScroll.current
-      if (!willRetry) isProgrammaticScroll.current = false
+      if (programmaticTarget.current == null) {
+        isProgrammaticScroll.current = false
+      }
     }
   }, [activeMonthKey, months, stickyOffset, timeline.length])
 
@@ -260,7 +300,15 @@ export function FinanceTransactionsList({
     let ticking = false
     function updateActiveMonth() {
       ticking = false
-      if (isProgrammaticScroll.current || sheetsOpen) return
+      if (
+        !shouldFollowScroll({
+          isProgrammatic: isProgrammaticScroll.current,
+          userTookOver: userTookOverRef.current,
+        }) ||
+        sheetsOpen
+      ) {
+        return
+      }
       const node = timelineRef.current
       if (!node) return
       const parent = getScrollParent(node)
@@ -291,9 +339,15 @@ export function FinanceTransactionsList({
       requestAnimationFrame(updateActiveMonth)
     }
 
+    scrollRoot.addEventListener("wheel", markUserTookOver, { passive: true })
+    scrollRoot.addEventListener("touchstart", markUserTookOver, { passive: true })
     scrollRoot.addEventListener("scroll", onScroll, { passive: true })
-    return () => scrollRoot.removeEventListener("scroll", onScroll)
-  }, [stickyOffset, timeline.length, sheetsOpen])
+    return () => {
+      scrollRoot.removeEventListener("wheel", markUserTookOver)
+      scrollRoot.removeEventListener("touchstart", markUserTookOver)
+      scrollRoot.removeEventListener("scroll", onScroll)
+    }
+  }, [markUserTookOver, stickyOffset, timeline.length, sheetsOpen])
 
   return (
     <div className="flex flex-col gap-4">

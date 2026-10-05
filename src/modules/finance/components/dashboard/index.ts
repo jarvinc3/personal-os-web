@@ -1,4 +1,5 @@
 export { FinanceBudgetStatusChart } from "./finance-budget-status"
+export { FinanceHomeMonthSummary } from "./finance-home-month-summary"
 export { FinanceOverTimeChart } from "./finance-over-time-chart"
 export { FinanceOverview } from "./finance-overview"
 export { FinanceSpendingChart } from "./finance-spending-chart"

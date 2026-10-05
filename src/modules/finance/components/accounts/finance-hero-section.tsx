@@ -6,6 +6,7 @@ import {
 } from "@/src/modules/finance/lib/donut-stack";
 import type { InstitutionStackItem } from "@/src/modules/finance/lib/institution-stack";
 import {
+   formatCompactFinanceMoney,
    formatFinanceMoney,
    type FinanceMoneyDisplay,
 } from "@/src/modules/finance/lib/money";
@@ -24,7 +25,8 @@ type FinanceHeroSectionProps = {
    display: FinanceMoneyDisplay
    isPending: boolean
    hasData: boolean
-   netWorthLabel: string
+   netWorth: string | null
+   netWorthComplete: boolean
 }
 
 function buildChartConfig(slices: DonutStackSlice[]): ChartConfig {
@@ -61,7 +63,8 @@ export function FinanceHeroSection({
    display,
    isPending,
    hasData,
-   netWorthLabel,
+   netWorth,
+   netWorthComplete,
 }: FinanceHeroSectionProps) {
    const slices = mapStackItemsToDonutSlices(items)
    const [activeKey, setActiveKey] = useState<string | null>(null)
@@ -81,11 +84,25 @@ export function FinanceHeroSection({
          : "Institución"
       : "Saldo"
    const signedDisplay = { ...display, leadingSign: true }
+   const compactDisplay = { ...signedDisplay, compactNumbers: true }
+
+   const netWorthFallback = (() => {
+      if (isPending && !hasData) return "…"
+      if (netWorthComplete) {
+         return formatFinanceMoney(netWorth, signedDisplay)
+      }
+      return hasData ? "Balance incompleto" : "—"
+   })()
+   const compactNetWorthFallback = (() => {
+      if (isPending && !hasData) return "…"
+      if (netWorthComplete) {
+         return formatCompactFinanceMoney(netWorth, compactDisplay)
+      }
+      return netWorthFallback
+   })()
    const centerValue = activeSlice
-      ? formatFinanceMoney(activeSlice.signedValue, signedDisplay)
-      : isPending && !hasData
-         ? "…"
-         : netWorthLabel
+      ? formatCompactFinanceMoney(activeSlice.signedValue, compactDisplay)
+      : compactNetWorthFallback
    const centerSubtitle = activeSlice?.name ?? null
 
    return (
@@ -96,7 +113,7 @@ export function FinanceHeroSection({
                   Balance total
                </p>
                <p className="text-3xl font-bold tabular-nums tracking-tight text-foreground">
-                  {isPending && !hasData ? "…" : netWorthLabel}
+                  {netWorthFallback}
                </p>
             </div>
          ) : (
@@ -104,7 +121,7 @@ export function FinanceHeroSection({
                <ChartContainer
                   id={chartId}
                   config={chartConfig}
-                  className="mx-auto w-full max-h-80 aspect-square"
+                  className="mx-auto w-full max-h-75 aspect-square"
                   initialDimension={{ width: 320, height: 320 }}
                >
                   <PieChart>
@@ -237,51 +254,6 @@ export function FinanceHeroSection({
                      </Pie>
                   </PieChart>
                </ChartContainer>
-
-               {/* 
-                  - Description: This is the list of accounts and institutions that are displayed in the hero section.
-                  - Reason: It is not currently used, but it is kept here for future reference.
-               */}
-               {/* <ul className="mt-1 flex flex-wrap justify-center gap-x-3 gap-y-1.5 px-2">
-                  {slices.map((slice, index) => {
-                     const isActive = slice.key === activeKey
-                     return (
-                        <li key={slice.key}>
-                           <button
-                              type="button"
-                              className={cn(
-                                 "flex items-center gap-1.5 rounded-full px-2 py-1 text-left text-xs transition-colors",
-                                 isActive
-                                    ? "bg-foreground/10 text-foreground"
-                                    : "text-muted-foreground hover:text-foreground",
-                              )}
-                              onClick={() =>
-                                 setActiveKey((current) =>
-                                    current === slice.key ? null : slice.key,
-                                 )
-                              }
-                           >
-                              <span
-                                 className="size-2.5 shrink-0 rounded-full"
-                                 style={{ backgroundColor: slice.fill }}
-                                 aria-hidden
-                              />
-                              <span className="truncate max-w-28">{slice.name}</span>
-                              <span className="tabular-nums opacity-70">
-                                 {formatPercent(slice.percent)}
-                              </span>
-                              <span className="sr-only">
-                                 {slice.kind === "cash"
-                                    ? "cuenta de efectivo"
-                                    : "institución"}
-                                 {", slice "}
-                                 {index + 1}
-                              </span>
-                           </button>
-                        </li>
-                     )
-                  })}
-               </ul> */}
             </div>
          )}
       </div>

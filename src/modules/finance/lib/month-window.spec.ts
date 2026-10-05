@@ -80,6 +80,10 @@ describe("isoMonthBounds", () => {
       dateFrom: "2026-02-01",
       dateTo: "2026-02-28",
     })
+    assert.deepEqual(isoMonthBounds(2026, 10), {
+      dateFrom: "2026-10-01",
+      dateTo: "2026-10-31",
+    })
   })
 })
 

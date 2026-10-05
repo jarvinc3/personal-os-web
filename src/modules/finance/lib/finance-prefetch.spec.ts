@@ -6,6 +6,7 @@ import { QueryClient } from "@tanstack/react-query"
 import { FINANCE_BUDGET_PAGE_SIZE } from "./budgets-query.ts"
 import {
   prefetchFinanceCategories,
+  prefetchFinanceCurrentMonth,
   prefetchFinancePlanning,
   prefetchFinanceSync,
   scheduleIdle,
@@ -23,6 +24,7 @@ import {
   FINANCE_LOANS_QUERY_KEY,
   FINANCE_RECEIVABLES_QUERY_KEY,
   FINANCE_SAVINGS_GOALS_QUERY_KEY,
+  FINANCE_TRANSACTIONS_QUERY_KEY,
 } from "../types/api.ts"
 
 const PLANNING_KEYS = [
@@ -147,6 +149,29 @@ describe("prefetchFinanceCategories", () => {
     const { get } = createMockGet()
     await prefetchFinanceCategories(queryClient, get)
     assert.ok(queryClient.getQueryState(FINANCE_CATEGORIES_QUERY_KEY))
+  })
+})
+
+describe("prefetchFinanceCurrentMonth", () => {
+  it("writes the current month timeline key into cache", async () => {
+    const queryClient = createQueryClient()
+    const { get, paths } = createMockGet()
+    await prefetchFinanceCurrentMonth(
+      queryClient,
+      get,
+      new Date(2026, 9, 5),
+    )
+    assert.match(paths[0] ?? "", /\/finance\/transactions\?/)
+    assert.match(paths[0] ?? "", /dateFrom=2026-10-01/)
+    assert.match(paths[0] ?? "", /dateTo=2026-10-31/)
+    assert.ok(
+      queryClient.getQueryState([
+        ...FINANCE_TRANSACTIONS_QUERY_KEY,
+        "timeline",
+        "month",
+        "2026-10",
+      ]),
+    )
   })
 })
 

@@ -4,6 +4,13 @@
  */
 export const TIMELINE_MARKER_SLACK_PX = 1
 
+export function shouldFollowScroll(input: {
+  isProgrammatic: boolean
+  userTookOver: boolean
+}): boolean {
+  return input.userTookOver && !input.isProgrammatic
+}
+
 export function findActiveMonthKey(
   sections: ReadonlyArray<{ key: string; top: number }>,
   marker: number

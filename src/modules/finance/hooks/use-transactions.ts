@@ -9,7 +9,10 @@ import {
   buildTransactionsSearchParams,
   fetchAllTransactionPages,
   FINANCE_TIMELINE_PAGE_SIZE,
+  FINANCE_TIMELINE_STALE_TIME_MS,
   FINANCE_TX_PAGE_SIZE,
+  mergeTransactionsById,
+  timelineMonthQuery,
   type FinanceTransactionsQuery,
 } from "@/src/modules/finance/lib/transactions-query"
 import { intersectIsoDateRange } from "@/src/modules/finance/lib/month-window"
@@ -59,8 +62,13 @@ export function useTimelineTransactions(
   enabled: boolean,
   years: number[],
   filters: TimelineTransactionFilters,
+  currentMonthKey: string,
 ) {
-  const queries = useQueries({
+  const monthQuery = useQuery({
+    ...timelineMonthQuery(currentMonthKey, (path) => apiGet(path)),
+    enabled,
+  })
+  const yearQueries = useQueries({
     queries: years.map((year) => {
       const intersection = intersectIsoDateRange(
         `${year}-01-01`,
@@ -75,6 +83,7 @@ export function useTimelineTransactions(
           year,
           filters,
         ],
+        staleTime: FINANCE_TIMELINE_STALE_TIME_MS,
         enabled: enabled && intersection !== null,
         queryFn: () =>
           fetchAllTransactionPages(
@@ -90,22 +99,24 @@ export function useTimelineTransactions(
     }),
   })
 
-  const items = useMemo(() => {
-    const byId = new Map<string, FinanceTransaction>()
-    for (const query of queries) {
-      for (const item of query.data ?? []) {
-        byId.set(item.id, item)
-      }
-    }
-    return [...byId.values()]
-  }, [queries])
+  const items = useMemo(
+    () =>
+      mergeTransactionsById([
+        monthQuery.data ?? [],
+        ...yearQueries.map((query) => query.data ?? []),
+      ]),
+    [monthQuery.data, yearQueries],
+  )
 
   return {
     items,
-    isPending: queries.some((query) => query.isLoading),
-    isFetching: queries.some((query) => query.isFetching),
-    isError: queries.some((query) => query.isError),
-    error: queries.find((query) => query.error)?.error ?? null,
+    isPending: monthQuery.isLoading,
+    isFetching: monthQuery.isFetching || yearQueries.some((query) => query.isFetching),
+    isError: monthQuery.isError || yearQueries.some((query) => query.isError),
+    error:
+      monthQuery.error ??
+      yearQueries.find((query) => query.error)?.error ??
+      null,
   }
 }
 
