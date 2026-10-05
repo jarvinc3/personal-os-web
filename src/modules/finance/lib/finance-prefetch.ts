@@ -69,9 +69,9 @@ export function prefetchFinanceSync(
   ])
 }
 
-async function defaultTransactionsGet(path: string) {
+async function defaultTransactionsGet<T = unknown>(path: string): Promise<T> {
   const { apiGet } = await import("@/src/config/api-client")
-  return apiGet(path)
+  return apiGet<T>(path)
 }
 
 export function prefetchFinanceCurrentMonth(
