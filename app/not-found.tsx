@@ -40,7 +40,7 @@ export default function NotFound() {
             </Link>
           </Button>
           <Button asChild variant="outline" size="lg" className="border-2 border-text shadow-[4px_4px_0px_0px_#111827] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none">
-            <Link href={APP_ROUTES.marketing.contact}>
+            <Link href="/contact">
               Contactar soporte
             </Link>
           </Button>
