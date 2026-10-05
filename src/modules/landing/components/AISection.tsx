@@ -23,7 +23,8 @@ export function AISection() {
           <motion.span
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.4 }}
             className="mb-4 inline-block rounded-full border-2 border-text bg-accent px-3 py-1 text-xs font-bold text-primary shadow-[2px_2px_0px_0px_#111827]"
           >
             {landingContent.ai.badge}
@@ -31,8 +32,8 @@ export function AISection() {
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.1 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ delay: 0.1, duration: 0.4 }}
             className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl"
           >
             {landingContent.ai.titleStart}{" "}
@@ -43,8 +44,8 @@ export function AISection() {
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.2 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ delay: 0.2, duration: 0.4 }}
             className="mx-auto mt-4 max-w-xl text-base text-muted-foreground sm:text-lg"
           >
             {landingContent.ai.description}
@@ -59,8 +60,8 @@ export function AISection() {
                 key={cap.title}
                 initial={{ opacity: 0, x: -20 }}
                 whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
+                viewport={{ once: true, amount: 0.3 }}
+                transition={{ delay: i * 0.1, duration: 0.4 }}
                 className="group flex gap-4 rounded-2xl border-2 border-transparent p-4 transition-all hover:border-text hover:bg-white hover:shadow-[4px_4px_0px_0px_#111827]"
               >
                 <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border-2 border-text bg-accent text-xl shadow-[2px_2px_0px_0px_#111827] transition-colors">
@@ -83,8 +84,8 @@ export function AISection() {
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.2 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ delay: 0.2, duration: 0.5 }}
           >
             <div className="relative mx-auto mt-12 max-w-md lg:mt-0 lg:max-w-none">
               <div className="overflow-hidden rounded-3xl border-2 border-text bg-white shadow-[8px_8px_0px_0px_#111827]">
@@ -145,7 +146,8 @@ export function AISection() {
                     />
                     <button
                       type="button"
-                      title="Send message"
+                      title="Enviar mensaje"
+                      aria-label="Enviar mensaje"
                       className="flex h-8 w-8 items-center justify-center rounded-lg border-2 border-text bg-primary text-primary-foreground shadow-[1px_1px_0px_0px_#111827] transition-colors hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none"
                     >
                       <svg
@@ -173,7 +175,8 @@ export function AISection() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.4 }}
           className="mt-12 flex flex-wrap items-center justify-center gap-8 rounded-2xl border-2 border-text bg-white p-6 text-center shadow-[4px_4px_0px_0px_#111827]"
         >
           {landingContent.ai.costNote.stats.map((stat, i) => (

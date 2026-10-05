@@ -20,6 +20,7 @@ import { useIsMobile } from "@/src/shared/hooks/use-mobile"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { ArrowRight } from "lucide-react"
 import Image from "next/image"
+import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useEffect, useRef, useState } from "react"
 
@@ -68,11 +69,13 @@ export default function LoginPage() {
   return (
     <div className="flex h-screen flex-col">
       <nav className="flex flex-row items-center gap-3 p-4">
-        <AppLogo size="lg" className="rounded-md" priority />
-        <div className="flex-1">
-          <p className="text-base font-bold text-foreground">Personal OS</p>
-          <p className="text-xs text-muted-foreground">Tu espacio personal</p>
-        </div>
+        <Link href={APP_ROUTES.marketing.landing} className="flex flex-row items-center gap-3 hover:opacity-80 transition-opacity">
+          <AppLogo size="lg" className="rounded-md" priority />
+          <div className="flex-1">
+            <p className="text-base font-bold text-foreground">Personal OS</p>
+            <p className="text-xs text-muted-foreground">Tu espacio personal</p>
+          </div>
+        </Link>
       </nav>
 
       <div className="flex min-h-0 flex-1 flex-col md:flex-row">

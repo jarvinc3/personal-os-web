@@ -3,9 +3,9 @@ export const siteInfo = {
   description:
     "Personal OS centraliza y automatiza la gestión de tus finanzas, agenda, proyectos, salud y suscripciones en una sola app potenciada por inteligencia artificial.",
   url: "https://personal-os-web-one.vercel.app",
-  email: "hola@personal-os-web-one.vercel.app",
-  legalEmail: "legal@personal-os-web-one.vercel.app",
-  privacyEmail: "privacidad@personal-os-web-one.vercel.app",
+  email: "hola@personal-os.app",
+  legalEmail: "legal@personal-os.app",
+  privacyEmail: "privacidad@personal-os.app",
   keywords: [
     "personal os",
     "personal os web",
@@ -150,7 +150,7 @@ export const landingContent = {
         },
         {
           role: "assistant",
-          text: "Supermercado Nacional: RD$8,200 · Uber Eats: RD$5,100 · Restaurantes: RD$3,200 · Panadería La Fe: RD$1,950. ¡Tu gasto en delivery subió 35% vs abril! ¿Quiero que ajuste el presupuesto para el próximo mes?",
+          text: "Supermercado Nacional: RD$8,200 · Uber Eats: RD$5,100 · Restaurantes: RD$3,200 · Panadería La Fe: RD$1,950. ¡Tu gasto en delivery subió 35% vs abril! ¿Quieres que ajuste el presupuesto para el próximo mes?",
         },
       ],
       placeholder: "Escribe un mensaje...",
