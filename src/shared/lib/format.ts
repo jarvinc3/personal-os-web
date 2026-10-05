@@ -1,38 +1,29 @@
-import { format, formatDistance } from 'date-fns';
+import { format, formatDistance, isValid } from 'date-fns';
 import { es } from 'date-fns/locale';
+
+import { formatTimeForDisplay, TIME_DISPLAY_FORMAT } from './date-format';
 
 export function formatDate(date: string | Date = new Date()): string {
   return format(new Date(date), 'dd MMM yyyy', { locale: es });
 }
 
 export function formatTime(date: string | Date = new Date()): string {
-  return format(new Date(date), 'HH:mm', { locale: es });
+  if (typeof date === 'string' && /^\d{1,2}:\d{2}$/.test(date.trim())) {
+    return formatTimeForDisplay(date);
+  }
+  const parsed = date instanceof Date ? date : new Date(date);
+  if (!isValid(parsed)) {
+    return '';
+  }
+  return format(parsed, TIME_DISPLAY_FORMAT, { locale: es });
 }
 
 export function formatTime12h(value: string | Date = new Date()): string {
-  if (typeof value === "string") {
-    const match = value.match(/^(\d{2}):(\d{2})$/);
-    if (match) {
-      const hour24 = Number(match[1]);
-      const minute = match[2];
-      const period = hour24 < 12 ? "a.m." : "p.m.";
-      let hour12 = hour24 % 12;
-      if (hour12 === 0) hour12 = 12;
-      return `${hour12}:${minute} ${period}`;
-    }
-  }
-
-  const d = value instanceof Date ? value : new Date(value);
-  const hour24 = d.getHours();
-  const minute = String(d.getMinutes()).padStart(2, "0");
-  const period = hour24 < 12 ? "a.m." : "p.m.";
-  let hour12 = hour24 % 12;
-  if (hour12 === 0) hour12 = 12;
-  return `${hour12}:${minute} ${period}`;
+  return formatTime(value);
 }
 
 export function formatDateTime(date: string | Date = new Date()): string {
-  return format(new Date(date), 'dd MMM yyyy HH:mm', { locale: es });
+  return format(new Date(date), "dd MMM yyyy, hh:mm aaaa", { locale: es });
 }
 
 export function formatDuration(minutes: number): string {
@@ -51,6 +42,7 @@ export function formatRelative(date: string | Date = new Date()): string {
   });
 }
 
+/** Canonical `HH:mm` (24 h) for API / storage — not for UI. */
 export function getHourFromDate(date: string | Date = new Date()): string {
   return format(new Date(date), 'HH:mm');
 }

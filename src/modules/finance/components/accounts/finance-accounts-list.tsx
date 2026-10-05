@@ -4,6 +4,7 @@ import { InstitutionSheet } from "@/src/modules/finance/components/accounts/inst
 import { InstitutionSwapStack } from "@/src/modules/finance/components/accounts/institution-swap-stack";
 import { AccountSheet } from "@/src/modules/finance/components/catalog/account-sheet";
 import { CategorySheet } from "@/src/modules/finance/components/catalog/category-sheet";
+import { FinanceExpenseTrendBadge } from "@/src/modules/finance/components/finance-expense-trend-badge";
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/constants/sheet-keys";
 import { useAccounts } from "@/src/modules/finance/hooks/use-accounts";
 import { useBalanceSheet } from "@/src/modules/finance/hooks/use-balance-sheet";
@@ -12,6 +13,7 @@ import { useCategories } from "@/src/modules/finance/hooks/use-categories";
 import { useFinanceEnabled } from "@/src/modules/finance/hooks/use-finance-enabled";
 import { useInstitutions } from "@/src/modules/finance/hooks/use-institutions";
 import { useLoans } from "@/src/modules/finance/hooks/use-loans";
+import { useMonthExpenseTrend } from "@/src/modules/finance/hooks/use-month-expense-trend";
 import { useSheetListEntity } from "@/src/modules/finance/hooks/use-sheet-entity";
 import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error";
 import {
@@ -20,10 +22,14 @@ import {
 } from "@/src/modules/finance/lib/finance-prefetch";
 import { buildInstitutionStackItems } from "@/src/modules/finance/lib/institution-stack";
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/lib/money";
-import { formatFinanceMoney } from "@/src/modules/finance/lib/money";
 import { ExpandableFab } from "@/src/shared/components/layout/expandable-fab";
 import { SettingsSection } from "@/src/shared/components/layout/settings-section";
 import { Button } from "@/src/shared/components/ui/button";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/src/shared/components/ui/collapsible";
 import {
   Empty,
   EmptyContent,
@@ -39,6 +45,7 @@ import { useSheetParam } from "@/src/shared/hooks/use-sheet-params";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   Building2Icon,
+  ChevronDownIcon,
   MailIcon,
   TagsIcon,
   WalletIcon,
@@ -61,6 +68,7 @@ export function FinanceAccountsList({
   const router = useRouter()
   const queryClient = useQueryClient()
   const { emailSyncEnabled } = useFinanceEnabled()
+  const { trend } = useMonthExpenseTrend(enabled)
   const institutionsQuery = useInstitutions(enabled)
   const accountsQuery = useAccounts(enabled)
   const cardsQuery = useCards(enabled)
@@ -128,15 +136,6 @@ export function FinanceAccountsList({
   )
 
   const global = balanceSheetQuery.data?.global
-  const netWorthLabel =
-    global?.status === "COMPLETE"
-      ? formatFinanceMoney(global.netWorth, {
-        ...moneyDisplay,
-        leadingSign: true,
-      })
-      : global
-        ? "Balance incompleto"
-        : "—"
 
   const errorMessage = useMemo(() => {
     const error =
@@ -162,7 +161,7 @@ export function FinanceAccountsList({
     (balanceSheetQuery.isPending && !balanceSheetQuery.data)
 
   return (
-    <>
+    <div className="flex flex-col gap-4 -mt-6">
       {errorMessage ? (
         <p className="text-sm text-destructive">{errorMessage}</p>
       ) : null}
@@ -172,7 +171,8 @@ export function FinanceAccountsList({
         display={moneyDisplay}
         isPending={balanceSheetQuery.isPending}
         hasData={Boolean(balanceSheetQuery.data)}
-        netWorthLabel={netWorthLabel}
+        netWorth={global?.netWorth ?? null}
+        netWorthComplete={global?.status === "COMPLETE"}
       />
 
       <div>
@@ -199,17 +199,35 @@ export function FinanceAccountsList({
             </EmptyContent>
           </Empty>
         ) : (
-          <InstitutionSwapStack
-            items={stackItems}
-            display={moneyDisplay}
-            onSelect={(item) => {
-              if (item.kind === "institution") {
-                router.push(APP_ROUTES.app.financeInstitution(item.id))
-                return
-              }
-              router.push(APP_ROUTES.app.financeCashAccount(item.id))
-            }}
-          />
+          <Collapsible defaultOpen className="group/institutions relative z-10 flex flex-col">
+            <CollapsibleTrigger
+              type="button"
+              className="flex w-full items-center justify-between gap-2 text-left cursor-pointer"
+            >
+              <p className="text-lg font-medium text-foreground">
+                Instituciones
+              </p>
+              <span className="flex items-center gap-2">
+                {trend ? <FinanceExpenseTrendBadge trend={trend} /> : null}
+                <ChevronDownIcon className="size-4 shrink-0 text-muted-foreground transition-transform duration-200 ease-out group-data-open/institutions:rotate-180" />
+              </span>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="overflow-visible data-ending-style:overflow-hidden data-starting-style:overflow-hidden">
+              <div className="pt-3">
+                <InstitutionSwapStack
+                  items={stackItems}
+                  display={moneyDisplay}
+                  onSelect={(item) => {
+                    if (item.kind === "institution") {
+                      router.push(APP_ROUTES.app.financeInstitution(item.id))
+                      return
+                    }
+                    router.push(APP_ROUTES.app.financeCashAccount(item.id))
+                  }}
+                />
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
         )}
       </div>
 
@@ -313,6 +331,6 @@ export function FinanceAccountsList({
         category={editingCategory}
         categories={categoriesQuery.data ?? []}
       />
-    </>
+    </div>
   )
 }

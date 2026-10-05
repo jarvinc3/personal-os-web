@@ -1,0 +1,27 @@
+---
+description: Navigation clickables must show pending (spinner, dim, disabled) until the destination view renders.
+globs: "**/*.{ts,tsx}"
+alwaysApply: true
+---
+
+# Pending al navegar
+
+Si un control **abre otra vista** (`Link`, `router.push`, `href`), el tap no puede quedar mudo.
+
+Hasta que el destino pinte:
+
+- Overlay / opacidad sobre **ese** control
+- `Spinner` dentro del control (no un loader de página)
+- Bloquear repetición: `disabled` / `pointer-events-none` / `aria-busy`
+
+**Link:** `useLinkStatus` + `LinkPendingOverlay` como hijo del `Link` (`className="relative"`).
+**Imperativo:** `useTransition` alrededor de `router.push`, o `usePendingNavigation`.
+
+No aplica a collapsibles, ciclo de cartera, ni sheets que ya muestran pending de mutación.
+
+```tsx
+<Link href={href} className="relative">
+  …
+  <LinkPendingOverlay />
+</Link>
+```

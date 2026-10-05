@@ -1,4 +1,12 @@
-import type { FinancePaginated } from "../types/api.ts";
+import {
+  FINANCE_TRANSACTIONS_QUERY_KEY,
+  type FinancePaginated,
+} from "../types/api.ts";
+import {
+  isoMonthBounds,
+  parseMonthKey,
+  type MonthKey,
+} from "./month-window.ts";
 import type {
   FinanceTransaction,
   FinanceTransactionStatus,
@@ -10,6 +18,7 @@ import { parseFinanceMoney } from "./money.ts";
 export const FINANCE_TX_FILTER_ALL = "__all__" as const
 export const FINANCE_TX_PAGE_SIZE = 20
 export const FINANCE_TIMELINE_PAGE_SIZE = 100
+export const FINANCE_TIMELINE_STALE_TIME_MS = 5 * 60 * 1000
 const FINANCE_TIMELINE_MAX_PAGES = 50
 
 export type FinanceTransactionsQuery = {
@@ -138,6 +147,43 @@ export function visibleTransactionTotals(
     },
     { income: 0, expenses: 0 },
   )
+}
+
+export function timelineMonthQueryKey(month: MonthKey) {
+  return [...FINANCE_TRANSACTIONS_QUERY_KEY, "timeline", "month", month] as const
+}
+
+export function timelineMonthQuery(
+  month: MonthKey,
+  get: (path: string) => Promise<unknown>,
+) {
+  const parsed = parseMonthKey(month)
+  const bounds = isoMonthBounds(parsed.year, parsed.month)
+  return {
+    queryKey: timelineMonthQueryKey(month),
+    staleTime: FINANCE_TIMELINE_STALE_TIME_MS,
+    queryFn: () =>
+      fetchAllTransactionPages(
+        {
+          dateFrom: bounds.dateFrom,
+          dateTo: bounds.dateTo,
+          limit: FINANCE_TIMELINE_PAGE_SIZE,
+        },
+        get,
+      ),
+  }
+}
+
+export function mergeTransactionsById<T extends { id: string }>(
+  groups: ReadonlyArray<readonly T[]>,
+): T[] {
+  const byId = new Map<string, T>()
+  for (const group of groups) {
+    for (const item of group) {
+      byId.set(item.id, item)
+    }
+  }
+  return [...byId.values()]
 }
 
 export async function fetchAllTransactionPages(

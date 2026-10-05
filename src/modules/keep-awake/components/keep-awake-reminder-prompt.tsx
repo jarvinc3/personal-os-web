@@ -1,7 +1,7 @@
 "use client"
 
 import {
-  formatReminderTime,
+  formatReminderTimeLabel,
   getReminderSnapshot,
   isReminderDue,
   markReminderFired,
@@ -44,7 +44,7 @@ export function KeepAwakeReminderPrompt({
       const now = new Date()
       if (!isReminderDue(current, now)) return
       writeReminder(markReminderFired(current, now))
-      setDueLabel(formatReminderTime(current))
+      setDueLabel(formatReminderTimeLabel(current))
       setPromptOpen(true)
       notifyReminder()
     }

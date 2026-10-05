@@ -56,6 +56,7 @@ Un `Input type="number"` para cantidades **sí** es válido; no es fecha/hora. D
 | Color | `ColorPickerSwatch` | `src/shared/components/ui/color-picker.tsx` |
 | Tab bar de módulo **con rutas** | `ModuleSectionLayout` | `src/shared/components/layout/module-section-layout.tsx` — [module-conventions.md](./module-conventions.md) |
 | Aviso puntual dentro de un flujo | `Alert` | `src/shared/components/ui/alert.tsx` |
+| Pending de navegación | `LinkPendingOverlay` / `usePendingNavigation` | `src/shared/components/ui/navigation-pending.tsx` — overlay + spinner en el control que abre otra vista |
 
 No armar un drawer con `Drawer` crudo si `BottomSheet` cubre el caso (título, description, actions, pending).
 

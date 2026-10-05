@@ -168,9 +168,7 @@ export default function SettingsPage() {
         />
       </SettingsSection>
 
-      <SettingsSection title="Módulos" bare>
-        <ModuleSettingsRows onOpenModule={openModule} />
-      </SettingsSection>
+      <ModuleSettingsRows onOpenModule={openModule} />
 
       <SettingsSection title="Inteligencia artificial">
         <SettingsRow

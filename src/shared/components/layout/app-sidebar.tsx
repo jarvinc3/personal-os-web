@@ -29,6 +29,7 @@ import {
   SidebarMenuSubItem,
   useSidebar,
 } from "@/src/shared/components/ui/sidebar";
+import { LinkPendingOverlay } from "@/src/shared/components/ui/navigation-pending";
 import { APP_ROUTES } from "@/src/shared/constants/app-routes";
 import { isModuleSectionActive } from "@/src/shared/lib/module-nav-active";
 import { cn } from "@/src/shared/lib/utils";
@@ -239,9 +240,10 @@ function NavMainCollapsibleItem({
                 asChild
                 active={isModuleSectionActive(section, pathname)}
               >
-                <Link href={section.href}>
+                <Link href={section.href} className="relative">
                   {section.icon && <section.icon />}
                   <span>{section.label}</span>
+                  <LinkPendingOverlay />
                 </Link>
               </DropdownMenuItem>
             ))}
@@ -278,9 +280,10 @@ function NavMainCollapsibleItem({
                   asChild
                   isActive={isModuleSectionActive(section, pathname)}
                 >
-                  <Link href={section.href}>
+                  <Link href={section.href} className="relative">
                     {section.icon && <section.icon />}
                     <span>{section.label}</span>
+                    <LinkPendingOverlay />
                   </Link>
                 </SidebarMenuSubButton>
               </SidebarMenuSubItem>

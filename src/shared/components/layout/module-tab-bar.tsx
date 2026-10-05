@@ -1,5 +1,6 @@
 "use client"
 
+import { LinkPendingOverlay } from "@/src/shared/components/ui/navigation-pending"
 import { isModuleSectionActive } from "@/src/shared/lib/module-nav-active"
 import { cn } from "@/src/shared/lib/utils"
 import { useScrollChrome } from "@/src/shared/context/scroll-chrome-context"
@@ -46,7 +47,7 @@ export function ModuleTabBar({
                 onPointerEnter={() => onItemPrefetch?.(item.href)}
                 onFocus={() => onItemPrefetch?.(item.href)}
                 className={cn(
-                  "flex min-h-12 flex-col items-center justify-center gap-0.5 px-1 py-2 text-center text-[10px] leading-tight sm:text-xs",
+                  "relative flex min-h-12 flex-col items-center justify-center gap-0.5 px-1 py-2 text-center text-[10px] leading-tight sm:text-xs",
                   isCurrent
                     ? "font-medium text-foreground"
                     : "text-muted-foreground",
@@ -54,6 +55,7 @@ export function ModuleTabBar({
               >
                 <Icon className="size-5 shrink-0" aria-hidden />
                 <span className="w-full truncate">{item.label}</span>
+                <LinkPendingOverlay />
               </Link>
             </li>
           )

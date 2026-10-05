@@ -6,11 +6,15 @@ import {
   canReverseTransaction,
   fetchAllTransactionPages,
   formatTransactionDate,
+  mergeTransactionsById,
+  timelineMonthQuery,
+  timelineMonthQueryKey,
   transactionInstrumentLabel,
   transactionsFromPayload,
   transferDirectionLabel,
   visibleTransactionTotals,
 } from "./transactions-query.ts";
+import { FINANCE_TRANSACTIONS_QUERY_KEY } from "../types/api.ts";
 
 describe("buildTransactionsSearchParams", () => {
   it("sends page and the DTO filters, omitting empty sentinels", () => {
@@ -229,6 +233,44 @@ describe("fetchAllTransactionPages", () => {
     assert.deepEqual(
       items.map((item) => item.id),
       ["t1", "t2"],
+    )
+  })
+})
+
+describe("timelineMonthQuery", () => {
+  it("requests the calendar bounds of the current month", async () => {
+    const paths: string[] = []
+    const query = timelineMonthQuery("2026-10", async (path) => {
+      paths.push(path)
+      return {
+        items: [],
+        pagination: { page: 1, limit: 100, total: 0, totalPages: 1 },
+      }
+    })
+    assert.deepEqual(query.queryKey, timelineMonthQueryKey("2026-10"))
+    assert.deepEqual(query.queryKey, [
+      ...FINANCE_TRANSACTIONS_QUERY_KEY,
+      "timeline",
+      "month",
+      "2026-10",
+    ])
+    assert.equal(query.staleTime, 5 * 60 * 1000)
+    await query.queryFn()
+    assert.match(paths[0] ?? "", /dateFrom=2026-10-01/)
+    assert.match(paths[0] ?? "", /dateTo=2026-10-31/)
+    assert.match(paths[0] ?? "", /limit=100/)
+  })
+})
+
+describe("mergeTransactionsById", () => {
+  it("keeps one row per id when the month query overlaps a year", () => {
+    const merged = mergeTransactionsById([
+      [{ id: "a" }, { id: "b" }],
+      [{ id: "b" }, { id: "c" }],
+    ])
+    assert.deepEqual(
+      merged.map((item) => item.id),
+      ["a", "b", "c"],
     )
   })
 })

@@ -1,7 +1,12 @@
 import assert from "node:assert/strict"
 import { describe, it } from "node:test"
 
-import { asFinanceArray, visibleReceivables } from "./planning-lists.ts"
+import {
+  amountRatioPct,
+  asFinanceArray,
+  joinPlanningCaption,
+  visibleReceivables,
+} from "./planning-lists.ts"
 
 describe("asFinanceArray", () => {
   it("returns the array payload as-is", () => {
@@ -17,6 +22,33 @@ describe("asFinanceArray", () => {
   it("returns empty for null or a plain object", () => {
     assert.deepEqual(asFinanceArray(null), [])
     assert.deepEqual(asFinanceArray({ id: "1" }), [])
+  })
+})
+
+describe("amountRatioPct", () => {
+  it("returns percent of numerator over denominator", () => {
+    assert.equal(amountRatioPct("85", "100"), 85)
+    assert.equal(amountRatioPct(0, 50), 0)
+  })
+
+  it("allows values over 100", () => {
+    assert.equal(amountRatioPct("120", "100"), 120)
+  })
+
+  it("returns null when the total is missing or zero", () => {
+    assert.equal(amountRatioPct("10", "0"), null)
+    assert.equal(amountRatioPct("10", null), null)
+    assert.equal(amountRatioPct("abc", "100"), null)
+  })
+})
+
+describe("joinPlanningCaption", () => {
+  it("joins non-empty parts", () => {
+    assert.equal(joinPlanningCaption("Faltan $10", "", "15 oct"), "Faltan $10 · 15 oct")
+  })
+
+  it("returns undefined when nothing is left", () => {
+    assert.equal(joinPlanningCaption("  ", null), undefined)
   })
 })
 

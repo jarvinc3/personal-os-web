@@ -64,17 +64,19 @@ export function FinanceHomeHero({
           {balanceAmount}
         </h2>
 
-        {pendingHoldLabel ? (
-          <div className="self-center rounded-full bg-background/80 px-4 py-1.5">
-            <span className="text-sm text-muted-foreground">{pendingHoldLabel || '0'}</span>
-          </div>
-        ) : null}
+        <div className="flex flex-col ">
+          {pendingHoldLabel ? (
+            <div className="self-center">
+              <span className="text-sm text-muted-foreground">{pendingHoldLabel || '0'}</span>
+            </div>
+          ) : null}
 
-        {cashFlowLabel ? (
-          <div className="self-center rounded-full bg-background/80 px-4 py-1.5">
-            <span className="text-sm text-muted-foreground">{cashFlowLabel}</span>
-          </div>
-        ) : null}
+          {cashFlowLabel ? (
+            <div className="self-center">
+              <span className="text-sm text-muted-foreground">{cashFlowLabel}</span>
+            </div>
+          ) : null}
+        </div>
 
         <div className="overflow-hidden grid grid-cols-3 gap-0.5 rounded-2xl border border-border">
           <Button

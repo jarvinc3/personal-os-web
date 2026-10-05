@@ -2,13 +2,14 @@
 
 import type { ModuleSettingsState } from '@/src/modules/settings/lib/module-settings-state';
 import type { ModuleSlug } from '@/src/modules/settings/types/module-config.types';
+import { SettingsSection } from '@/src/shared/components/layout/settings-section';
 import { Button } from '@/src/shared/components/ui/button';
 import { Separator } from '@/src/shared/components/ui/separator';
 import { Switch } from '@/src/shared/components/ui/switch';
 import { MODULE_REGISTRY, MODULE_SLUGS_ORDER } from '@/src/shared/constants/module-registry';
 import { appToast } from '@/src/shared/lib/app-toast';
-import { Settings } from 'lucide-react';
-import { useId } from 'react';
+import { ChevronLeftIcon, ChevronRightIcon, Settings } from 'lucide-react';
+import { useCallback, useId, useLayoutEffect, useRef, useState } from 'react';
 import { useUserModuleConfig } from '../hooks/use-user-module-config';
 
 export type ModuleSheetEnableRowProps = {
@@ -49,24 +50,86 @@ type ModuleSettingsRowsProps = {
   onOpenModule: (slug: ModuleSlug) => void;
 };
 
-function ModuleSettingsRows({ onOpenModule }: ModuleSettingsRowsProps) {
-  return (
-    <div
-      className="flex overflow-x-auto gap-3 pb-1 scrollbar-hide"
-      style={{ scrollSnapType: 'x mandatory' }}
-    >
-      {MODULE_SLUGS_ORDER.map((slug) => (
-        <div key={slug} style={{ scrollSnapAlign: 'start', minWidth: MODULE_SETTINGS_CARD_WIDTH }}>
-          <ModuleSettingsCard slug={slug} onOpen={() => onOpenModule(slug)} />
-        </div>
-      ))}
-      <div style={{ minWidth: MODULE_SETTINGS_CARD_GAP }} />
-    </div>
-  );
-}
-
 export const MODULE_SETTINGS_CARD_WIDTH = 156;
 export const MODULE_SETTINGS_CARD_GAP = 12;
+
+function ModuleSettingsRows({ onOpenModule }: ModuleSettingsRowsProps) {
+  const listRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  const updateScrollState = useCallback(() => {
+    const list = listRef.current;
+    if (!list) return;
+    const maxScroll = list.scrollWidth - list.clientWidth;
+    setCanScrollLeft(list.scrollLeft > 1);
+    setCanScrollRight(list.scrollLeft < maxScroll - 1);
+  }, []);
+
+  useLayoutEffect(() => {
+    const list = listRef.current;
+    if (!list) return;
+    updateScrollState();
+    const observer = new ResizeObserver(updateScrollState);
+    observer.observe(list);
+    return () => observer.disconnect();
+  }, [updateScrollState]);
+
+  const scrollByCard = (direction: -1 | 1) => {
+    listRef.current?.scrollBy({
+      left: direction * (MODULE_SETTINGS_CARD_WIDTH + MODULE_SETTINGS_CARD_GAP),
+      behavior: 'smooth',
+    });
+  };
+
+  return (
+    <SettingsSection
+      title="Módulos"
+      bare
+      headerTrailing={
+        <div className="flex items-center">
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-xs"
+            aria-label="Módulos anteriores"
+            disabled={!canScrollLeft}
+            onClick={() => scrollByCard(-1)}
+          >
+            <ChevronLeftIcon />
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-xs"
+            aria-label="Módulos siguientes"
+            disabled={!canScrollRight}
+            onClick={() => scrollByCard(1)}
+          >
+            <ChevronRightIcon />
+          </Button>
+        </div>
+      }
+    >
+      <div
+        ref={listRef}
+        onScroll={updateScrollState}
+        className="flex overflow-x-auto gap-3 pb-1 scrollbar-hide"
+        style={{ scrollSnapType: 'x mandatory' }}
+      >
+        {MODULE_SLUGS_ORDER.map((slug) => (
+          <div
+            key={slug}
+            style={{ scrollSnapAlign: 'start', minWidth: MODULE_SETTINGS_CARD_WIDTH }}
+          >
+            <ModuleSettingsCard slug={slug} onOpen={() => onOpenModule(slug)} />
+          </div>
+        ))}
+        <div style={{ minWidth: MODULE_SETTINGS_CARD_GAP }} />
+      </div>
+    </SettingsSection>
+  );
+}
 
 type ModuleSettingsCardProps = {
   slug: ModuleSlug;

@@ -74,6 +74,16 @@ export function formatTimeForDisplay(apiTime: string): string {
 }
 
 /**
+ * Hora de un `Date` para UI (12 h, español).
+ */
+export function formatClockTimeFromDate(date: Date): string {
+  if (!isValid(date)) {
+    return '';
+  }
+  return format(date, TIME_DISPLAY_FORMAT, { locale: es });
+}
+
+/**
  * Rango horario en español para listas y ajustes.
  */
 export function formatTimeRange(start: string, end: string): string {

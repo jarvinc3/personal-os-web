@@ -5,6 +5,7 @@ import {
   formatProductCounts,
   formatStackItemBalance,
   institutionInitials,
+  type InstitutionStackCounts,
   type InstitutionStackItem,
 } from "@/src/modules/finance/lib/institution-stack";
 import {
@@ -27,6 +28,7 @@ import {
   walletVisibleItems,
 } from "@/src/modules/finance/lib/wallet-stack";
 import { Button } from "@/src/shared/components/ui/button";
+import { PendingSurface } from "@/src/shared/components/ui/navigation-pending";
 import { cn } from "@/src/shared/lib/utils";
 import { motion } from "framer-motion";
 import {
@@ -34,8 +36,11 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   CreditCardIcon,
+  HandCoinsIcon,
+  LandmarkIcon,
+  type LucideIcon,
 } from "lucide-react";
-import { type KeyboardEvent, useRef, useState } from "react";
+import { type KeyboardEvent, useRef, useState, useTransition } from "react";
 
 const FALLBACK_INSTITUTION_COLOR = "#1B4332"
 const FALLBACK_CASH_COLOR = "#334155"
@@ -54,6 +59,7 @@ type WalletCardModel = {
   logoUrl: string | null
   color: string
   productSummary: string
+  counts: InstitutionStackCounts | null
   balanceLabel: string
   balanceAmount: string
 }
@@ -70,6 +76,7 @@ function toWalletCard(
       logoUrl: item.institution.logoUrl,
       color: item.institution.color ?? FALLBACK_INSTITUTION_COLOR,
       productSummary: formatProductCounts(item.counts),
+      counts: item.counts,
       balanceLabel: "Balance consolidado",
       balanceAmount: formatStackItemBalance(item, display),
     }
@@ -82,6 +89,7 @@ function toWalletCard(
     logoUrl: item.account.institutionLogoUrl ?? null,
     color: item.account.color ?? FALLBACK_CASH_COLOR,
     productSummary: "Cuenta de dinero en efectivo",
+    counts: null,
     balanceLabel: "Saldo",
     balanceAmount: formatStackItemBalance(item, display),
   }
@@ -105,6 +113,8 @@ export function InstitutionSwapStack({
   className,
 }: InstitutionSwapStackProps) {
   const [cycleOffset, setCycleOffset] = useState(() => initialCycleOffset(items))
+  const [isDragging, setIsDragging] = useState(false)
+  const [isPending, startTransition] = useTransition()
   const itemsSignature = items.map((item) => stackItemKey(item)).join("\0")
   const [syncedSignature, setSyncedSignature] = useState(itemsSignature)
   if (items.length > 0 && syncedSignature !== itemsSignature) {
@@ -160,14 +170,17 @@ export function InstitutionSwapStack({
     if (event.key === "Enter" || event.key === " ") {
       if (event.target !== event.currentTarget) return
       event.preventDefault()
-      if (frontItem) onSelect(frontItem)
+      if (frontItem) startTransition(() => onSelect(frontItem))
     }
   }
 
   return (
     <div className={cn("flex flex-col", className)}>
       <div
-        className="relative outline-none h-100 focus-visible:ring-3 focus-visible:ring-ring/50"
+        className={cn(
+          "relative outline-none h-80 focus-visible:ring-3 focus-visible:ring-ring/50",
+          isDragging && "z-50",
+        )}
         tabIndex={showCycleChrome ? 0 : undefined}
         role={showCycleChrome ? "group" : undefined}
         aria-label={
@@ -189,7 +202,14 @@ export function InstitutionSwapStack({
               key={`${card.item.kind}-${card.item.id}`}
               className="absolute top-0 left-0 right-8"
               initial={false}
-              animate={{ x, y, rotate, scale, opacity, zIndex: 30 - pos }}
+              animate={{
+                x,
+                y,
+                rotate,
+                scale,
+                opacity,
+                zIndex: isFront && isDragging ? 80 : 30 - pos,
+              }}
               transition={{ type: "spring", stiffness: 320, damping: 30 }}
               style={{
                 transformOrigin: "bottom center",
@@ -203,11 +223,16 @@ export function InstitutionSwapStack({
                 logoUrl={card.logoUrl}
                 color={card.color}
                 productSummary={card.productSummary}
+                counts={card.counts}
                 balanceLabel={card.balanceLabel}
                 balanceAmount={card.balanceAmount}
                 isFront={isFront}
+                isPending={isFront && isPending}
+                onDragActiveChange={isFront ? setIsDragging : undefined}
                 onCycle={() => cycleBy(1)}
-                onPress={() => onSelect(card.item)}
+                onPress={() => {
+                  startTransition(() => onSelect(card.item))
+                }}
               />
             </motion.div>
           )
@@ -268,11 +293,62 @@ type InstitutionWalletCardProps = {
   logoUrl: string | null
   color: string
   productSummary: string
+  counts: InstitutionStackCounts | null
   balanceLabel: string
   balanceAmount: string
   isFront?: boolean
+  isPending?: boolean
+  onDragActiveChange?: (dragging: boolean) => void
   onCycle?: () => void
   onPress?: () => void
+}
+
+function ProductCountItem({
+  icon: Icon,
+  count,
+  label,
+}: {
+  icon: LucideIcon
+  count: number
+  label: string
+}) {
+  return (
+    <span className="inline-flex items-center gap-1.5" title={label}>
+      <Icon className="size-5" aria-hidden />
+      <span>{count}</span>
+    </span>
+  )
+}
+
+function InstitutionProductCounts({
+  counts,
+}: {
+  counts: InstitutionStackCounts
+}) {
+  return (
+    <div className="flex items-center gap-3 text-base font-semibold tabular-nums text-white">
+      <span className="sr-only">{formatProductCounts(counts)}</span>
+      <span aria-hidden className="flex items-center gap-3">
+        <ProductCountItem
+          icon={LandmarkIcon}
+          count={counts.accounts}
+          label="Cuentas"
+        />
+        <span className="h-4 w-px bg-white/40" />
+        <ProductCountItem
+          icon={CreditCardIcon}
+          count={counts.cards}
+          label="Tarjetas"
+        />
+        <span className="h-4 w-px bg-white/40" />
+        <ProductCountItem
+          icon={HandCoinsIcon}
+          count={counts.loans}
+          label="Préstamos"
+        />
+      </span>
+    </div>
+  )
 }
 
 function InstitutionWalletCard({
@@ -282,9 +358,12 @@ function InstitutionWalletCard({
   logoUrl,
   color,
   productSummary,
+  counts,
   balanceLabel,
   balanceAmount,
   isFront = true,
+  isPending = false,
+  onDragActiveChange,
   onCycle,
   onPress,
 }: InstitutionWalletCardProps) {
@@ -294,29 +373,37 @@ function InstitutionWalletCard({
   return (
     <motion.button
       type="button"
-      drag={isFront ? "y" : false}
+      drag={isFront && !isPending ? "y" : false}
       dragConstraints={{ top: -180, bottom: 0 }}
       dragElastic={0.5}
       dragSnapToOrigin
+      disabled={isPending}
+      aria-busy={isPending || undefined}
       onPointerDown={() => {
         offsetYRef.current = resetWalletGestureOffset()
       }}
+      onDragStart={() => onDragActiveChange?.(true)}
       onDrag={(_event, info) => {
         offsetYRef.current = info.offset.y
       }}
       onDragEnd={(_event, info) => {
         offsetYRef.current = info.offset.y
+        onDragActiveChange?.(false)
         if (classifyWalletGesture(info.offset.y) === "cycle") {
           onCycle?.()
         }
       }}
-      whileTap={{ scale: 0.985 }}
+      whileTap={isPending ? undefined : { scale: 0.985 }}
       onClick={() => {
+        if (isPending) return
         if (classifyWalletGesture(offsetYRef.current) === "press") {
           onPress?.()
         }
       }}
-      className="flex relative flex-col justify-between p-6 w-full h-72 text-left rounded-3xl cursor-pointer"
+      className={cn(
+        "flex relative flex-col justify-between p-6 w-full h-60 text-left rounded-3xl cursor-pointer",
+        isPending && "pointer-events-none",
+      )}
       style={{ backgroundColor: color }}
     >
       <div className="flex justify-between items-start">
@@ -331,7 +418,13 @@ function InstitutionWalletCard({
         <h3 className="text-3xl font-bold leading-tight text-white font-display">
           {name}
         </h3>
-        <p className="mt-2 text-sm text-white/70">{productSummary}</p>
+        {counts ? (
+          <InstitutionProductCounts counts={counts} />
+        ) : (
+          <p className="text-base font-semibold text-white">
+            {productSummary}
+          </p>
+        )}
       </div>
 
       {isFront ? (
@@ -357,6 +450,13 @@ function InstitutionWalletCard({
           {balanceAmount}
         </span>
       </div>
+
+      {isPending ? (
+        <PendingSurface
+          className="rounded-3xl bg-black/45"
+          spinnerClassName="size-8 text-white"
+        />
+      ) : null}
     </motion.button>
   )
 }

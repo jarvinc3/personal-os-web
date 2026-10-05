@@ -93,7 +93,7 @@ export function useAuth() {
     onSuccess: async () => {
       clearAuthState();
       toast.success('Sesión cerrada');
-      await queryClient.removeQueries({ queryKey: PROFILE_QUERY_KEY });
+      await queryClient.clear();
       router.push(APP_ROUTES.auth.login);
     },
     onError: (error) => {

@@ -1,3 +1,5 @@
+import { formatTimeForDisplay } from "../../../shared/lib/date-format.ts"
+
 export const KEEP_AWAKE_REMINDER_KEY = "keepawake_reminder" as const
 export const REMINDER_CHANGED_EVENT = "keepawake-reminder-changed"
 
@@ -119,8 +121,14 @@ export function markReminderFired(
   return { ...reminder, lastFiredKey: reminderDateKey(now) }
 }
 
+/** Canonical `HH:mm` (24 h) for wheels and storage. */
 export function formatReminderTime(reminder: KeepAwakeReminder): string {
   return `${pad(reminder.hour)}:${pad(reminder.minute)}`
+}
+
+/** Clock label for UI (12 h). */
+export function formatReminderTimeLabel(reminder: KeepAwakeReminder): string {
+  return formatTimeForDisplay(formatReminderTime(reminder))
 }
 
 let reminderCacheRaw: string | null | undefined

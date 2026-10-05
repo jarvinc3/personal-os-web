@@ -3,6 +3,7 @@
 import { BrandLogo } from "@/src/modules/finance/components/brand-logo";
 import { FinanceListSkeleton } from "@/src/modules/finance/components/layout/finance-list-skeleton";
 import { LoanSheet } from "@/src/modules/finance/components/planning/loan-sheet";
+import { PlanningProgressCard } from "@/src/modules/finance/components/planning/planning-progress-card";
 import { ReceivableSheet } from "@/src/modules/finance/components/planning/receivable-sheet";
 import { SavingsGoalSheet } from "@/src/modules/finance/components/planning/savings-goal-sheet";
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/constants/sheet-keys";
@@ -19,16 +20,16 @@ import {
   formatFinanceMoney,
   parseFinanceMoney,
 } from "@/src/modules/finance/lib/money";
+import { formatCalendarDate } from "@/src/modules/finance/lib/ledger-form";
 import {
-  formatPlanningDate,
+  amountRatioPct,
+  joinPlanningCaption,
   visibleReceivables,
 } from "@/src/modules/finance/lib/planning-lists";
-import type {
-  FinanceLoan,
-  FinanceReceivable,
-  FinanceSavingsGoal,
+import {
+  FINANCE_INSTALLMENT_FREQ_LABEL,
+  FINANCE_RECEIVABLE_STATUS_LABEL,
 } from "@/src/modules/finance/types/entities";
-import { FINANCE_RECEIVABLE_STATUS_LABEL } from "@/src/modules/finance/types/entities";
 import { Button } from "@/src/shared/components/ui/button";
 import {
   Empty,
@@ -38,7 +39,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/src/shared/components/ui/empty";
-import { SummaryItem, SummarySection } from "@/src/shared/components/ui/summary";
+import { SummarySection } from "@/src/shared/components/ui/summary";
 import {
   Tabs,
   TabsContent,
@@ -47,6 +48,7 @@ import {
 } from "@/src/shared/components/ui/tabs";
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params";
 import {
+  ChartPieIcon,
   HandshakeIcon,
   LandmarkIcon,
   PiggyBankIcon,
@@ -61,58 +63,37 @@ type FinancePlanningListProps = {
   defaultCurrency: string
 }
 
-type PlanningTab = "savings" | "loans" | "receivables" | "budgets"
+const PLANNING_TAB_ITEMS = [
+  { value: "savings", label: "Ahorros", icon: PiggyBankIcon },
+  { value: "loans", label: "Préstamos", icon: LandmarkIcon },
+  { value: "receivables", label: "Cobros", icon: HandshakeIcon },
+  { value: "budgets", label: "Presupuestos", icon: ChartPieIcon },
+] as const
 
-const PLANNING_TABS: PlanningTab[] = [
-  "savings",
-  "loans",
-  "receivables",
-  "budgets",
-]
+type PlanningTab = (typeof PLANNING_TAB_ITEMS)[number]["value"]
 
 function isPlanningTab(value: unknown): value is PlanningTab {
-  return PLANNING_TABS.some((tab) => tab === value)
+  return PLANNING_TAB_ITEMS.some((tab) => tab.value === value)
 }
 
-function savingsRowValue(
-  goal: FinanceSavingsGoal,
-  display: FinanceMoneyDisplay
-): string {
-  const current = formatFinanceMoney(goal.currentAmount, display)
-  const target = formatFinanceMoney(goal.targetAmount, display)
-  const status = goal.isCompleted ? "Completada" : "En curso"
-  return `${current} / ${target} · ${status}`
+function withCurrency(
+  display: FinanceMoneyDisplay,
+  currency: string,
+): FinanceMoneyDisplay {
+  return { ...display, currency }
 }
 
-function loanRowValue(loan: FinanceLoan, display: FinanceMoneyDisplay): string {
-  const balance = formatFinanceMoney(loan.currentBalance, {
-    ...display,
-    currency: loan.currency,
-  })
-  const rate = formatRatePercentLabel(loan.interestRate)
-  const due = formatPlanningDate(loan.nextDueDate)
-  return `${balance} · ${rate}${due ? ` · ${due}` : ""}`
-}
-
-function receivableRowValue(
-  item: FinanceReceivable,
-  display: FinanceMoneyDisplay
-): string {
-  const amount = formatFinanceMoney(item.amount, {
-    ...display,
-    currency: item.currency,
-  })
-  const paid = parseFinanceMoney(item.paidAmount)
-  const total = parseFinanceMoney(item.amount)
-  const remaining =
-    paid !== null && total !== null
-      ? formatFinanceMoney(total - paid, {
-          ...display,
-          currency: item.currency,
-        })
-      : "—"
-  const status = FINANCE_RECEIVABLE_STATUS_LABEL[item.status] ?? item.status
-  return `${amount} · ${status} · resta ${remaining}`
+function remainingCaption(
+  current: number | null,
+  target: number | null,
+  display: FinanceMoneyDisplay,
+  reached: string,
+  prefix: string,
+): string | undefined {
+  if (current === null || target === null) return undefined
+  const left = target - current
+  if (left <= 0) return reached
+  return `${prefix} ${formatFinanceMoney(left, display)}`
 }
 
 export function FinancePlanningList({
@@ -191,27 +172,16 @@ export function FinancePlanningList({
         className="gap-6 w-full"
       >
         <TabsList className="overflow-x-auto justify-start p-1 w-full h-auto rounded-2xl">
-          <TabsTrigger
-            value="savings"
-            className="px-3 py-2 rounded-xl"
-          >
-            Ahorros
-          </TabsTrigger>
-          <TabsTrigger value="loans" className="px-3 py-2 rounded-xl">
-            Préstamos
-          </TabsTrigger>
-          <TabsTrigger
-            value="receivables"
-            className="px-3 py-2 rounded-xl"
-          >
-            Cobros
-          </TabsTrigger>
-          <TabsTrigger
-            value="budgets"
-            className="px-3 py-2 rounded-xl"
-          >
-            Presupuestos
-          </TabsTrigger>
+          {PLANNING_TAB_ITEMS.map(({ value, label, icon: Icon }) => (
+            <TabsTrigger
+              key={value}
+              value={value}
+              className="px-3 py-2 rounded-xl"
+            >
+              <Icon data-icon="inline-start" />
+              <span className="sr-only md:not-sr-only">{label}</span>
+            </TabsTrigger>
+          ))}
         </TabsList>
 
         <TabsContent value="savings">
@@ -250,19 +220,42 @@ export function FinancePlanningList({
                 </EmptyContent>
               </Empty>
             ) : (
-              savings.map((goal, index) => (
-                <SummaryItem
-                  key={goal.id}
-                  title={goal.name}
-                  value={savingsRowValue(goal, {
-                    ...display,
-                    currency: goal.currency,
-                  })}
-                  icon={PiggyBankIcon}
-                  onPress={() => setOpenSavingsSheet(true, goal.id)}
-                  isLast={index === savings.length - 1}
-                />
-              ))
+              savings.map((goal) => {
+                const money = withCurrency(display, goal.currency)
+                const current = parseFinanceMoney(goal.currentAmount)
+                const target = parseFinanceMoney(goal.targetAmount)
+                return (
+                  <PlanningProgressCard
+                    key={goal.id}
+                    title={goal.name}
+                    description={goal.description ?? undefined}
+                    icon={PiggyBankIcon}
+                    tone={goal.isCompleted ? "success" : "info"}
+                    badge={{
+                      label: goal.isCompleted ? "Completada" : "En curso",
+                      variant: goal.isCompleted ? "success" : "info",
+                    }}
+                    progress={amountRatioPct(goal.currentAmount, goal.targetAmount)}
+                    currentHint="Ahorrado"
+                    currentLabel={formatFinanceMoney(goal.currentAmount, money)}
+                    targetHint="Meta"
+                    targetLabel={formatFinanceMoney(goal.targetAmount, money)}
+                    caption={joinPlanningCaption(
+                      remainingCaption(
+                        current,
+                        target,
+                        money,
+                        "Meta alcanzada",
+                        "Faltan",
+                      ),
+                      goal.targetDate
+                        ? `Para ${formatCalendarDate(goal.targetDate)}`
+                        : undefined,
+                    )}
+                    onPress={() => setOpenSavingsSheet(true, goal.id)}
+                  />
+                )
+              })
             )}
           </SummarySection>
         </TabsContent>
@@ -303,25 +296,52 @@ export function FinancePlanningList({
                 </EmptyContent>
               </Empty>
             ) : (
-              loans.map((loan, index) => {
+              loans.map((loan) => {
+                const money = withCurrency(display, loan.currency)
+                const original = parseFinanceMoney(loan.originalAmount)
+                const balance = parseFinanceMoney(loan.currentBalance)
+                const paidDown =
+                  original !== null && balance !== null ? original - balance : null
+                const moneyProgress = amountRatioPct(paidDown, original)
+                const installmentProgress =
+                  loan.totalInstallments > 0
+                    ? (loan.paidInstallments / loan.totalInstallments) * 100
+                    : null
+                const paidOff = balance !== null && balance <= 0
                 const institution = (institutionsQuery.data ?? []).find(
                   (item) => item.id === loan.institutionId,
                 )
                 return (
-                <SummaryItem
-                  key={loan.id}
-                  title={loan.lenderName}
-                  value={loanRowValue(loan, display)}
-                  leading={
-                    <BrandLogo
-                      name={institution?.name ?? loan.lenderName}
-                      logoUrl={institution?.logoUrl}
-                      size={28}
-                    />
-                  }
-                  onPress={() => setOpenLoanSheet(true, loan.id)}
-                  isLast={index === loans.length - 1}
-                />
+                  <PlanningProgressCard
+                    key={loan.id}
+                    title={loan.lenderName}
+                    leading={
+                      <BrandLogo
+                        name={institution?.name ?? loan.lenderName}
+                        logoUrl={institution?.logoUrl}
+                        size={28}
+                      />
+                    }
+                    tone={paidOff ? "success" : "warning"}
+                    badge={{
+                      label: paidOff ? "Saldado" : "Activo",
+                      variant: paidOff ? "success" : "warning",
+                    }}
+                    progress={moneyProgress ?? installmentProgress}
+                    currentHint="Saldo"
+                    currentLabel={formatFinanceMoney(loan.currentBalance, money)}
+                    targetHint="Original"
+                    targetLabel={formatFinanceMoney(loan.originalAmount, money)}
+                    caption={joinPlanningCaption(
+                      `${loan.paidInstallments}/${loan.totalInstallments} cuotas`,
+                      FINANCE_INSTALLMENT_FREQ_LABEL[loan.installmentFreq],
+                      formatRatePercentLabel(loan.interestRate),
+                      loan.nextDueDate
+                        ? `Vence ${formatCalendarDate(loan.nextDueDate)}`
+                        : undefined,
+                    )}
+                    onPress={() => setOpenLoanSheet(true, loan.id)}
+                  />
                 )
               })
             )}
@@ -364,16 +384,56 @@ export function FinancePlanningList({
                 </EmptyContent>
               </Empty>
             ) : (
-              listedReceivables.map((item, index) => (
-                <SummaryItem
-                  key={item.id}
-                  title={item.debtorName}
-                  value={receivableRowValue(item, display)}
-                  icon={HandshakeIcon}
-                  onPress={() => setOpenReceivableSheet(true, item.id)}
-                  isLast={index === listedReceivables.length - 1}
-                />
-              ))
+              listedReceivables.map((item) => {
+                const money = withCurrency(display, item.currency)
+                const paid = parseFinanceMoney(item.paidAmount)
+                const total = parseFinanceMoney(item.amount)
+                const tone =
+                  item.status === "PAID"
+                    ? "success"
+                    : item.status === "PARTIAL"
+                      ? "info"
+                      : "warning"
+                const badgeVariant =
+                  item.status === "PAID"
+                    ? "success"
+                    : item.status === "PARTIAL"
+                      ? "info"
+                      : "warning"
+                return (
+                  <PlanningProgressCard
+                    key={item.id}
+                    title={item.debtorName}
+                    description={item.description ?? undefined}
+                    icon={HandshakeIcon}
+                    tone={tone}
+                    badge={{
+                      label:
+                        FINANCE_RECEIVABLE_STATUS_LABEL[item.status] ??
+                        item.status,
+                      variant: badgeVariant,
+                    }}
+                    progress={amountRatioPct(item.paidAmount, item.amount)}
+                    currentHint="Cobrado"
+                    currentLabel={formatFinanceMoney(item.paidAmount, money)}
+                    targetHint="Total"
+                    targetLabel={formatFinanceMoney(item.amount, money)}
+                    caption={joinPlanningCaption(
+                      remainingCaption(
+                        paid,
+                        total,
+                        money,
+                        "Cobro completo",
+                        "Resta",
+                      ),
+                      item.dueDate
+                        ? `Vence ${formatCalendarDate(item.dueDate)}`
+                        : undefined,
+                    )}
+                    onPress={() => setOpenReceivableSheet(true, item.id)}
+                  />
+                )
+              })
             )}
           </SummarySection>
         </TabsContent>
