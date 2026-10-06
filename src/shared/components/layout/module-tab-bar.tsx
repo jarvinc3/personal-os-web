@@ -3,7 +3,6 @@
 import { LinkPendingOverlay } from "@/src/shared/components/ui/navigation-pending"
 import { isModuleSectionActive } from "@/src/shared/lib/module-nav-active"
 import { cn } from "@/src/shared/lib/utils"
-import { useScrollChrome } from "@/src/shared/context/scroll-chrome-context"
 import type { ModuleNavItem } from "@/src/shared/types/module-nav"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -20,7 +19,6 @@ export function ModuleTabBar({
   onItemPrefetch,
 }: ModuleTabBarProps) {
   const pathname = usePathname()
-  const { hidden } = useScrollChrome()
 
   if (items.length === 0) {
     return null
@@ -29,10 +27,7 @@ export function ModuleTabBar({
   return (
     <nav
       aria-label={ariaLabel}
-      className={cn(
-        "fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md transition-transform duration-300 ease-in-out md:hidden",
-        hidden && "pointer-events-none translate-y-full",
-      )}
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md md:hidden"
     >
       <ul className="mx-auto flex max-w-5xl items-stretch">
         {items.map((item) => {
@@ -50,7 +45,7 @@ export function ModuleTabBar({
                   "relative flex min-h-12 flex-col items-center justify-center gap-0.5 px-1 py-2 text-center text-[10px] leading-tight sm:text-xs",
                   isCurrent
                     ? "font-medium text-foreground"
-                    : "text-muted-foreground",
+                    : "text-muted-foreground"
                 )}
               >
                 <Icon className="size-5 shrink-0" aria-hidden />
