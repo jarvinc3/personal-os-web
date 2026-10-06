@@ -18,39 +18,39 @@ Browser  →  proxy.ts (sesión Supabase)
 
 ## Stack de este repo (VERIFICADO)
 
-| Capa | Tecnología |
-| --- | --- |
-| Framework | Next.js 16, React 19, Turbopack (`pnpm dev`) |
-| Auth | `@supabase/ssr` + `@supabase/supabase-js` |
-| Datos servidor | Nest envelope vía `src/config/api-client.ts` |
-| Estado servidor | TanStack Query |
-| Estado UI | Zustand `app-store` |
-| Estilos | Tailwind 4 + componentes en `src/shared/components/ui` |
-| Tiempo real | socket.io-client namespace `/notifications` |
-| Push | Web Push + `public/sw.js` + VAPID |
+| Capa            | Tecnología                                             |
+| --------------- | ------------------------------------------------------ |
+| Framework       | Next.js 16, React 19, Turbopack (`pnpm dev`)           |
+| Auth            | `@supabase/ssr` + `@supabase/supabase-js`              |
+| Datos servidor  | Nest envelope vía `src/config/api-client.ts`           |
+| Estado servidor | TanStack Query                                         |
+| Estado UI       | Zustand `app-store`                                    |
+| Estilos         | Tailwind 4 + componentes en `src/shared/components/ui` |
+| Tiempo real     | socket.io-client namespace `/notifications`            |
+| Push            | Web Push + `public/sw.js` + VAPID                      |
 
 > [!WARNING]
 > **REV-WEB-001** (`CONTEXTO_NO_APLICABLE`) — `docs/project-guide.md` declaraba React Native como cliente principal, Frankfurter FX, parsers regex de email e IMAP. El cliente activo es este Next.js; FX es exchangerate.host en backend; ingestión es LLM. [review-register.md](../review-register.md#rev-web-001)
 
 ## Capas
 
-| Path | Rol |
-| --- | --- |
-| `app/` | Rutas delgadas (landing / auth / app) |
-| `src/modules/` | Feature UI |
-| `src/shared/` | Rutas, registry, layout, api-endpoints, store |
-| `src/providers/` | Query, AuthBootstrap, Theme, AppEffects |
-| `src/config/` | api-client, supabase |
-| `proxy.ts` | Refresh de sesión + guards de rutas |
+| Path             | Rol                                           |
+| ---------------- | --------------------------------------------- |
+| `app/`           | Rutas delgadas (landing / auth / app)         |
+| `src/modules/`   | Feature UI                                    |
+| `src/shared/`    | Rutas, registry, layout, api-endpoints, store |
+| `src/providers/` | Query, AuthBootstrap, Theme, AppEffects       |
+| `src/config/`    | api-client, supabase                          |
+| `proxy.ts`       | Refresh de sesión + guards de rutas           |
 
 ## Grupos de rutas
 
-| Grupo | Layout | Auth |
-| --- | --- | --- |
-| `(landing)` | marketing + legal | público |
-| `(auth)` | login / verify-email | público; login redirige a home si hay sesión |
-| `(app)` | sidebar + header + KeepAwakeProvider | `proxy.ts` + `useAuthGuard` |
-| `app/auth/callback/route.ts` | Route Handler | intercambio OAuth |
+| Grupo                        | Layout                               | Auth                                         |
+| ---------------------------- | ------------------------------------ | -------------------------------------------- |
+| `(landing)`                  | marketing + legal                    | público                                      |
+| `(auth)`                     | login / verify-email                 | público; login redirige a home si hay sesión |
+| `(app)`                      | sidebar + header + KeepAwakeProvider | `proxy.ts` + `useAuthGuard`                  |
+| `app/auth/callback/route.ts` | Route Handler                        | intercambio OAuth                            |
 
 `/` redirige a `/home` o `/landing` según haya usuario Supabase.
 
@@ -66,18 +66,18 @@ Rutas protegidas (`isProtectedAppPath`): home, settings, chat, notifications, ke
 4. `AppEffectsProvider` — tema, sockets notif/IA, registro Web Push (`usePushToken`)
 5. Tooltip / Toaster
 
-`app/(app)/layout.tsx`: `SidebarProvider` → `AppSidebar` → `HeaderProvider` → `ScrollChromeProvider` → `AppHeader` + `main` → `KeepAwakeProvider` + `PendingAccountDeletionHandler`.
+`app/(app)/layout.tsx`: `SidebarProvider` → `AppSidebar` → `HeaderProvider` → `AppHeader` + `main` → `KeepAwakeProvider` + `PendingAccountDeletionHandler`.
 
 Detalle de sesión: [../infrastructure/auth-session.md](../infrastructure/auth-session.md). API: [../infrastructure/api-client.md](../infrastructure/api-client.md).
 
 ## Módulos (docs atómicos)
 
-| Área | Doc |
-| --- | --- |
-| Auth (bootstrap, guards, 401) | [../modules/auth/](../modules/auth/README.md) |
-| Notifications (inbox, socket, push) | [../modules/notifications/](../modules/notifications/README.md) |
-| AI (`/chat`, stream, acciones) | [../modules/ai/](../modules/ai/README.md) |
-| Settings, Home, Finance, Keep Awake, Landing | [../modules/](../modules/README.md) |
+| Área                                         | Doc                                                             |
+| -------------------------------------------- | --------------------------------------------------------------- |
+| Auth (bootstrap, guards, 401)                | [../modules/auth/](../modules/auth/README.md)                   |
+| Notifications (inbox, socket, push)          | [../modules/notifications/](../modules/notifications/README.md) |
+| AI (`/chat`, stream, acciones)               | [../modules/ai/](../modules/ai/README.md)                       |
+| Settings, Home, Finance, Keep Awake, Landing | [../modules/](../modules/README.md)                             |
 
 ## Evidencia
 

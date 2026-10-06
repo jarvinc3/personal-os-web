@@ -47,22 +47,22 @@ Hoy el único `ModuleAppNav` cableado es `FINANCE_APP_NAV`.
 
 ## Chrome: dos superficies
 
-| Superficie | Dónde | Comportamiento |
-| --- | --- | --- |
-| Sidebar desktop | `AppSidebar` | Módulo con `items`: collapsible; hijos siempre visibles en el menú (incluye `showInTabBar: false`). Sidebar colapsado: dropdown a la derecha con **todas** las secciones. |
-| Tab bar móvil | `ModuleTabBar` vía `ModuleSectionLayout` | `md:hidden`, fijo abajo, se oculta al scroll (`ScrollChromeProvider`). Filtra `showInTabBar === false`. |
+| Superficie      | Dónde                                    | Comportamiento                                                                                                                                                            |
+| --------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Sidebar desktop | `AppSidebar`                             | Módulo con `items`: collapsible; hijos siempre visibles en el menú (incluye `showInTabBar: false`). Sidebar colapsado: dropdown a la derecha con **todas** las secciones. |
+| Tab bar móvil   | `ModuleTabBar` vía `ModuleSectionLayout` | `md:hidden`, fijo abajo, siempre visible (no se oculta al scroll). Filtra `showInTabBar === false`.                                                                       |
 
 Regla de activo: `isModuleSectionActive(item, pathname)` — href (+ hijos si no `matchExact`) o `extraActiveHrefs`.
 
 Finanzas (VERIFICADO runtime 2026-09-15):
 
-| Ítem | Tab bar | Sidebar | `matchExact` / extra |
-| --- | --- | --- | --- |
-| Resumen `/finance` | sí | sí | `matchExact: true` |
-| Movimientos | sí | sí | |
-| Estadísticas | **no** | sí | `showInTabBar: false` |
-| Planificación | sí | sí | presupuestos viven aquí |
-| Cuentas | sí | sí | `extraActiveHrefs`: categories, `/finance/accounts/sync` |
+| Ítem               | Tab bar | Sidebar | `matchExact` / extra                                     |
+| ------------------ | ------- | ------- | -------------------------------------------------------- |
+| Resumen `/finance` | sí      | sí      | `matchExact: true`                                       |
+| Movimientos        | sí      | sí      |                                                          |
+| Estadísticas       | **no**  | sí      | `showInTabBar: false`                                    |
+| Planificación      | sí      | sí      | presupuestos viven aquí                                  |
+| Cuentas            | sí      | sí      | `extraActiveHrefs`: categories, `/finance/accounts/sync` |
 
 Sync **no** es ítem de nav; queda bajo Cuentas.
 
@@ -70,21 +70,21 @@ Sync **no** es ítem de nav; queda bajo Cuentas.
 
 `usePageHeader(config)` escribe en `HeaderProvider`.
 
-| `variant` | Efecto |
-| --- | --- |
-| `primary` (default) | Trigger sidebar + campana + menú usuario |
-| `secondary` | Back (`onBack`); oculta trigger/campana/menú **y** el tab bar (`ModuleSectionLayout` lee `config.variant`) |
+| `variant`           | Efecto                                                                                                     |
+| ------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `primary` (default) | Trigger sidebar + campana + menú usuario                                                                   |
+| `secondary`         | Back (`onBack`); oculta trigger/campana/menú **y** el tab bar (`ModuleSectionLayout` lee `config.variant`) |
 
 Usos `secondary`: detalle institución/cash, categorías, Correos, inbox de notificaciones, (chat configura header propio).
 
 ## Layouts
 
-| Módulo | Layout | Tab bar |
-| --- | --- | --- |
-| Finance | `FinanceLayout` → `ModuleSectionLayout` | sí (filtrado) |
-| Keep Awake | `KeepAwakeLayout` (max-width, padding) | no |
-| Home / Settings | padding local en la página | no |
-| Chat / Notifications | página propia; notifications `secondary` | no |
+| Módulo               | Layout                                   | Tab bar       |
+| -------------------- | ---------------------------------------- | ------------- |
+| Finance              | `FinanceLayout` → `ModuleSectionLayout`  | sí (filtrado) |
+| Keep Awake           | `KeepAwakeLayout` (max-width, padding)   | no            |
+| Home / Settings      | padding local en la página               | no            |
+| Chat / Notifications | página propia; notifications `secondary` | no            |
 
 `KeepAwakeProvider` está en `app/(app)/layout.tsx`: el lock **sobrevive** la navegación entre módulos autenticados.
 
@@ -94,14 +94,14 @@ Referencia `VERIFICADO` 2026-09-18: [`keep-awake-client.tsx`](../../src/modules/
 
 La pantalla **es** la acción (Keep Awake, un timer, un recorder). No es un contenedor de mini-apps. Finanzas (`/finance/movimientos`) no usa este molde.
 
-| Superficie | Qué va ahí |
-| --- | --- |
-| Hero | Un estado, un número, la CTA. Centrado, `max-w-lg`. |
-| Chrome | Iconos izq/der que abren sheets (recordatorio, historial, ayuda). Sin tabs locales. |
-| `BottomSheet` default | Edición secundaria. Borrador; **Guardar** / **Aceptar** confirma, **Cerrar** descarta, **Quitar** / **Limpiar** es explícito. |
-| `BottomSheet` `floating` | Evento: llegó la hora, terminó, falló. Poco texto, visual fuerte. |
-| Popover | Un ajuste puntual (p. ej. duración), no un flujo entero. |
-| Página | Chip / punto / badge si hay algo activo. El usuario no abre el sheet para enterarse. |
+| Superficie               | Qué va ahí                                                                                                                    |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
+| Hero                     | Un estado, un número, la CTA. Centrado, `max-w-lg`.                                                                           |
+| Chrome                   | Iconos izq/der que abren sheets (recordatorio, historial, ayuda). Sin tabs locales.                                           |
+| `BottomSheet` default    | Edición secundaria. Borrador; **Guardar** / **Aceptar** confirma, **Cerrar** descarta, **Quitar** / **Limpiar** es explícito. |
+| `BottomSheet` `floating` | Evento: llegó la hora, terminó, falló. Poco texto, visual fuerte.                                                             |
+| Popover                  | Un ajuste puntual (p. ej. duración), no un flujo entero.                                                                      |
+| Página                   | Chip / punto / badge si hay algo activo. El usuario no abre el sheet para enterarse.                                          |
 
 El `pages/*-client.tsx` **compone** (toolbar, hero, acciones, sheets) y habla con el contexto. Extraer un componente cuando tiene trabajo propio (ruedas, prompt con timers). No extraer un panel que solo reenvía props.
 
@@ -129,10 +129,10 @@ src/modules/<slug>/
 
 `MODULE_REGISTRY` lista slugs backend (`finance`, `agenda`, `projects`, `subscriptions`, `health`). Tener sheet en Ajustes **no** crea rutas ni `ModuleAppNav`.
 
-| Slug | App routes | Nav |
-| --- | --- | --- |
-| `finance` | `/finance/*` | `FINANCE_APP_NAV` |
-| agenda, projects, health, subscriptions | ninguna | solo Settings |
+| Slug                                    | App routes   | Nav               |
+| --------------------------------------- | ------------ | ----------------- |
+| `finance`                               | `/finance/*` | `FINANCE_APP_NAV` |
+| agenda, projects, health, subscriptions | ninguna      | solo Settings     |
 
 Keep Awake y Landing/Home **no** son slugs de `MODULE_REGISTRY`.
 
