@@ -31,9 +31,10 @@ type SelectFieldProps = {
   onChange: (value: string) => void;
   options: { value: string; label: string; mark?: ReactNode }[];
   disabled?: boolean;
+  icon?: LucideIcon;
 };
 
-export function SelectField({ label, value, onChange, options, disabled }: SelectFieldProps) {
+export function SelectField({ label, value, onChange, options, disabled, icon: Icon }: SelectFieldProps) {
   const selectId = useId();
   const labelId = useId();
 
@@ -51,7 +52,10 @@ export function SelectField({ label, value, onChange, options, disabled }: Selec
         items={options.map(({ value, label }) => ({ value, label }))}
         modal={false}
       >
-        <SelectTrigger className="w-full max-w-full cursor-pointer">
+        <SelectTrigger className={cn("relative w-full max-w-full cursor-pointer", Icon && "pl-9")}>
+          {Icon ? (
+            <Icon className="pointer-events-none absolute left-3 size-4.5 text-muted-foreground" />
+          ) : null}
           <SelectValue placeholder={label}>
             {(() => {
               const selected = options.find((item) => item.value === value);
@@ -182,6 +186,8 @@ type FormTextFieldProps = {
   icon?: LucideIcon;
   inputRef?: Ref<HTMLInputElement>;
   revealable?: boolean;
+  maxLength?: number;
+  className?: string;
 };
 
 export function FormTextField({
@@ -199,6 +205,8 @@ export function FormTextField({
   icon: Icon,
   inputRef,
   revealable = false,
+  maxLength,
+  className,
 }: FormTextFieldProps) {
   const hasError = invalid ?? Boolean(error);
   const [revealed, setRevealed] = useState(false);
@@ -216,9 +224,10 @@ export function FormTextField({
         )}
         <Input
           ref={inputRef}
-          className={cn(Icon && "pl-9", canReveal && "pr-10")}
+          className={cn(Icon && "pl-9", canReveal && "pr-10", className)}
           type={inputType}
           value={value}
+          maxLength={maxLength}
           onChange={(e) => onChange(e.target.value)}
           onBlur={onBlur}
           onKeyDown={onKeyDown}

@@ -1,0 +1,15 @@
+---
+description: Use icons, not raw labels, for binary status and origin
+globs: "**/*.{ts,tsx}"
+alwaysApply: false
+---
+
+# Estados con icono
+
+Origen, tipo o estado binario (sistema/personal, on/off, bloqueado) se muestra con un icono y `aria-label`. No pongas la palabra cruda ("Sistema", "Custom") como valor de la fila.
+
+```tsx
+<span role="img" aria-label={isSystem ? "Sistema" : "Personal"}>
+  {isSystem ? <LockIcon className="size-4" /> : <UserIcon className="size-4" />}
+</span>
+```

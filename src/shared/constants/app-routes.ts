@@ -1,3 +1,5 @@
+import type { ModuleSlug } from '@/src/modules/settings/types/module-config.types';
+
 export const APP_ROUTES = {
   root: '/',
   marketing: {
@@ -15,6 +17,7 @@ export const APP_ROUTES = {
     notifications: '/notifications',
     keepAwake: '/keep-awake',
     finance: '/finance',
+    financeOverview: '/finance/overview',
     financeStatistics: '/finance/statistics',
     financeAccounts: '/finance/accounts',
     financeCategories: '/finance/accounts/categories',
@@ -24,9 +27,29 @@ export const APP_ROUTES = {
     financeCashAccount: (accountId: string) =>
       `/finance/accounts/cash/${accountId}`,
     financeTransactions: '/finance/transactions',
+    financeTransactionNew: '/finance/transactions/new',
+    financeTransactionEdit: (transactionId: string) =>
+      `/finance/transactions/${transactionId}/edit`,
+    financeTransferNew: '/finance/transfers/new',
     financePlanning: '/finance/planning',
   },
 } as const;
+
+export function financeTransactionNewHref(type: 'DEBIT' | 'CREDIT'): string {
+  const params = new URLSearchParams({ type });
+  return `${APP_ROUTES.app.financeTransactionNew}?${params.toString()}`;
+}
+
+/** `CREDIT` only when the query is exactly that; everything else is a debit. */
+export function parseTransactionFormType(
+  type: string | null | undefined,
+): 'DEBIT' | 'CREDIT' {
+  return type?.trim().toUpperCase() === 'CREDIT' ? 'CREDIT' : 'DEBIT';
+}
+
+export function settingsModuleHref(slug: ModuleSlug): string {
+  return `${APP_ROUTES.app.settings}/${slug}`;
+}
 
 export function authVerifyEmailHref(email: string): string {
   const params = new URLSearchParams({ email });

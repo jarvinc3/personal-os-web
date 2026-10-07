@@ -19,6 +19,7 @@ type SummarySectionProps = {
   children: ReactNode
   color?: string
   collapsible?: boolean
+  defaultOpen?: boolean
 }
 
 type SummaryItemBaseProps = {
@@ -28,6 +29,8 @@ type SummaryItemBaseProps = {
   icon?: LucideIcon
   leading?: ReactNode
   accentColor?: string
+  /** Tint the whole row with accentColor. Off by default so other lists stay unchanged. */
+  tintRow?: boolean
   trailing?: ReactNode
   showChevron?: boolean
   isLast?: boolean
@@ -49,6 +52,7 @@ export type SummaryItemProps = SummaryItemLinkProps | SummaryItemActionProps
 
 export function SummarySection({
   title,
+  defaultOpen = false,
   children,
   right,
   subtitle,
@@ -105,7 +109,7 @@ export function SummarySection({
 
   if (collapsible) {
     return (
-      <Collapsible defaultOpen className={cn(rootClassName, "group/summary")}>
+      <Collapsible defaultOpen={defaultOpen} className={cn(rootClassName, "group/summary")}>
         {header}
         <CollapsibleContent>{body}</CollapsibleContent>
       </Collapsible>
@@ -127,6 +131,7 @@ export function SummaryItem({
   icon: Icon,
   leading,
   accentColor,
+  tintRow = false,
   trailing,
   showChevron,
   isLast = false,
@@ -140,16 +145,27 @@ export function SummaryItem({
   const chevronVisible = disabled ? false : (showChevron ?? Boolean(onPress))
   const showLeading = Boolean(leading) || Boolean(Icon)
 
+  const tintStyle =
+    tintRow && accentColor
+      ? {
+          backgroundColor: `color-mix(in srgb, ${accentColor} 32%, transparent)`,
+        }
+      : undefined
+
   const rowClassName = cn(
     "flex w-full items-center gap-3 p-2 rounded-2xl text-left transition-all duration-200",
-    !isLast && "border-b border-border/60 transition-all duration-200",
-    isInteractive && cn(PRESSABLE_CLASS, "hover:bg-muted/50 transition-all duration-200"),
+    !isInteractive && !isLast && "border-b border-border/60",
+    isInteractive && cn(PRESSABLE_CLASS, "hover:bg-muted/50"),
     onPress && "cursor-pointer",
-    disabled && "opacity-50 transition-all duration-200",
+    !isInteractive && disabled && "opacity-50",
     className
   )
+  const shellClassName = cn(
+    "flex w-full items-stretch overflow-hidden rounded-2xl",
+    !isLast && "border-b border-border/60",
+  )
 
-  const content = (
+  const main = (
     <>
       {showLeading ? (
         <span
@@ -184,7 +200,6 @@ export function SummaryItem({
           {value}
         </span>
       ) : null}
-      {trailing}
       {chevronVisible ? (
         <ChevronRightIcon className="size-4 shrink-0 text-muted-foreground" />
       ) : null}
@@ -193,24 +208,43 @@ export function SummaryItem({
 
   if (href) {
     return (
-      <Link href={href} className={cn(rowClassName, "relative")}>
-        {content}
-        <LinkPendingOverlay />
-      </Link>
+      <div className={shellClassName} style={tintStyle}>
+        <Link href={href} className={cn(rowClassName, "relative min-w-0 flex-1")}>
+          {main}
+          <LinkPendingOverlay />
+        </Link>
+        {trailing ? (
+          <div className="flex shrink-0 items-center pr-2">{trailing}</div>
+        ) : null}
+      </div>
     )
   }
 
   if (onPress) {
     return (
-      <button type="button" className={rowClassName} onClick={onPress}>
-        {content}
-      </button>
+      <div className={shellClassName} style={tintStyle}>
+        <button
+          type="button"
+          className={cn(rowClassName, "min-w-0 flex-1")}
+          onClick={onPress}
+        >
+          {main}
+        </button>
+        {trailing ? (
+          <div className="flex shrink-0 items-center pr-2">{trailing}</div>
+        ) : null}
+      </div>
     )
   }
 
   return (
-    <div className={rowClassName} aria-disabled={disabled || undefined}>
-      {content}
+    <div
+      className={rowClassName}
+      style={tintStyle}
+      aria-disabled={disabled || undefined}
+    >
+      {main}
+      {trailing}
     </div>
   )
 }

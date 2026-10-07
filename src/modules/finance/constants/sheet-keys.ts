@@ -8,8 +8,6 @@ export const FINANCE_SHEET_KEYS = {
   loan: "loan-sheet",
   category: "category-sheet",
   transactionDetail: "transaction-detail-sheet",
-  transaction: "transaction-sheet",
-  transfer: "transfer-sheet",
   savings: "savings-sheet",
   receivable: "receivable-sheet",
   budget: "budget-sheet",

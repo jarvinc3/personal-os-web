@@ -1,48 +1,64 @@
 "use client"
 
-import {
-  FinancePreviewRow,
-  FinanceSegmentedControl,
-} from "@/src/modules/finance/components/forms/finance-form-blocks";
-import { CATALOG_NONE } from "@/src/modules/finance/constants/catalog";
+import { CategoryCard } from "@/src/modules/finance/components/catalog/category-card"
+import { CategoryEmojiField } from "@/src/modules/finance/components/catalog/category-emoji-field"
+import { FinanceSegmentedControl } from "@/src/modules/finance/components/forms/finance-form-blocks"
+import { CATALOG_NONE } from "@/src/modules/finance/constants/catalog"
 import {
   useCreateCategory,
   useDeleteCategory,
   useUpdateCategory,
-} from "@/src/modules/finance/hooks/use-categories";
-import { buildCreateCategoryBody } from "@/src/modules/finance/lib/catalog-payloads";
-import { filterCategoriesByType } from "@/src/modules/finance/lib/category-tree";
-import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error";
+} from "@/src/modules/finance/hooks/use-categories"
+import {
+  buildCreateCategoryBody,
+  buildUpdateCategoryBody,
+} from "@/src/modules/finance/lib/catalog-payloads"
+import { filterCategoriesByType } from "@/src/modules/finance/lib/category-tree"
+import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
 import type {
   FinanceCategory,
   FinanceCategoryType,
-} from "@/src/modules/finance/types/entities";
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet";
+} from "@/src/modules/finance/types/entities"
+import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
 import {
   FormTextField,
   SelectField,
-} from "@/src/shared/components/layout/form-blocks";
-import { Button } from "@/src/shared/components/ui/button";
-import { ColorPickerSwatch } from "@/src/shared/components/ui/color-picker";
-import { Label } from "@/src/shared/components/ui/label";
-import { Spinner } from "@/src/shared/components/ui/spinner";
-import { SummarySection } from "@/src/shared/components/ui/summary";
-import { appToast } from "@/src/shared/lib/app-toast";
-import { createSheetSubmit } from "@/src/shared/lib/sheet-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Palette, SaveIcon, TagsIcon, TrashIcon, XIcon } from "lucide-react";
-import { useEffect, useMemo } from "react";
-import { Controller, useForm, useWatch } from "react-hook-form";
-import { z } from "zod";
+} from "@/src/shared/components/layout/form-blocks"
+import { Button } from "@/src/shared/components/ui/button"
+import { ColorPickerSwatch } from "@/src/shared/components/ui/color-picker"
+import { Label } from "@/src/shared/components/ui/label"
+import { Separator } from "@/src/shared/components/ui/separator"
+import { Spinner } from "@/src/shared/components/ui/spinner"
+import { SummarySection } from "@/src/shared/components/ui/summary"
+import { appToast } from "@/src/shared/lib/app-toast"
+import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
+import { isSingleEmoji } from "@/src/shared/lib/single-emoji"
+import { zodResolver } from "@hookform/resolvers/zod"
+import {
+  ArrowDownCircleIcon,
+  ArrowUpCircleIcon,
+  ContactRoundIcon,
+  FolderTreeIcon,
+  PaletteIcon,
+  SaveIcon,
+  TrashIcon,
+  XIcon,
+} from "lucide-react"
+import { useEffect, useMemo } from "react"
+import { Controller, useForm, useWatch } from "react-hook-form"
+import { z } from "zod"
 
 const TYPE_OPTIONS = [
-  { value: "EXPENSE" as const, label: "Gasto" },
-  { value: "INCOME" as const, label: "Ingreso" },
+  { value: "EXPENSE" as const, label: "Gasto", icon: ArrowDownCircleIcon },
+  { value: "INCOME" as const, label: "Ingreso", icon: ArrowUpCircleIcon },
 ]
 
 const schema = z.object({
   name: z.string().trim().min(1, "Nombre obligatorio").max(80),
-  icon: z.string().trim().min(1, "El icono debe ser un emoji"),
+  icon: z
+    .string()
+    .trim()
+    .refine(isSingleEmoji, "El icono debe ser un emoji"),
   color: z.string().trim().max(20),
   parentId: z.string(),
   type: z.enum(["EXPENSE", "INCOME"]),
@@ -70,6 +86,7 @@ type CategorySheetProps = {
   categories: FinanceCategory[]
   defaultType?: FinanceCategoryType
   pending?: boolean
+  onSaved?: (category: FinanceCategory) => void
 }
 
 export function CategorySheet({
@@ -79,9 +96,11 @@ export function CategorySheet({
   categories,
   defaultType = "EXPENSE",
   pending = false,
+  onSaved,
 }: CategorySheetProps) {
   const isEdit = Boolean(category)
   const isSystem = Boolean(category?.isSystem)
+  const typeLocked = isSystem || (isEdit && category?.parentId != null)
   const createMutation = useCreateCategory()
   const updateMutation = useUpdateCategory()
   const deleteMutation = useDeleteCategory()
@@ -110,13 +129,13 @@ export function CategorySheet({
     () => [
       { value: CATALOG_NONE, label: "Sin padre" },
       ...filterCategoriesByType(categories, selectedType)
-        .filter((item) => item.id !== category?.id)
+        .filter((item) => item.id !== category?.id && item.parentId == null)
         .map((item) => ({
           value: item.id,
           label: `${item.icon ? `${item.icon} ` : ""}${item.name}`,
         })),
     ],
-    [categories, category?.id, selectedType]
+    [categories, category?.id, selectedType],
   )
 
   useEffect(() => {
@@ -126,34 +145,49 @@ export function CategorySheet({
   }, [open, category, defaultType, reset])
 
   useEffect(() => {
-    if (!open || isEdit) return
+    if (!open) return
     const parent = categories.find((item) => item.id === parentId)
     if (parent && parent.type !== selectedType) {
       setValue("parentId", CATALOG_NONE)
     }
-  }, [open, isEdit, parentId, selectedType, categories, setValue])
+  }, [open, parentId, selectedType, categories, setValue])
+
+  useEffect(() => {
+    if (!open || isSystem || categoryColor.trim()) return
+    const parent = categories.find((item) => item.id === parentId)
+    if (parent?.color) setValue("color", parent.color)
+  }, [open, isSystem, categoryColor, parentId, categories, setValue])
 
   const submitForm = useMemo(
     () => createSheetSubmit(handleSubmit),
-    [handleSubmit]
+    [handleSubmit],
   )
 
   const onSubmit = submitForm(async (values) => {
-    const payload = buildCreateCategoryBody(values)
-    if (!payload.ok) {
-      appToast.error({ text1: payload.error })
-      return
-    }
     try {
       if (category) {
-        const { type: _type, ...body } = payload.body
-        await updateMutation.mutateAsync({
-          id: category.id,
-          body,
+        const payload = buildUpdateCategoryBody({
+          ...values,
+          persistedParentId: category.parentId,
         })
+        if (!payload.ok) {
+          appToast.error({ text1: payload.error })
+          return
+        }
+        const updated = await updateMutation.mutateAsync({
+          id: category.id,
+          body: payload.body,
+        })
+        onSaved?.(updated)
         appToast.success({ text1: "Categoría actualizada" })
       } else {
-        await createMutation.mutateAsync(payload.body)
+        const payload = buildCreateCategoryBody(values)
+        if (!payload.ok) {
+          appToast.error({ text1: payload.error })
+          return
+        }
+        const created = await createMutation.mutateAsync(payload.body)
+        onSaved?.(created)
         appToast.success({ text1: "Categoría creada" })
       }
       onOpenChange(false)
@@ -165,7 +199,7 @@ export function CategorySheet({
   async function onDelete() {
     if (!category) return
     const confirmed = window.confirm(
-      "¿Eliminar esta categoría? No se puede deshacer."
+      "¿Eliminar esta categoría? No se puede deshacer.",
     )
     if (!confirmed) return
     try {
@@ -192,7 +226,7 @@ export function CategorySheet({
       description={
         isSystem
           ? "Esta categoría viene con el sistema. No se puede editar ni eliminar."
-          : "Usa un emoji como icono."
+          : undefined
       }
       actions={{
         close: (
@@ -207,68 +241,84 @@ export function CategorySheet({
         ),
         submit: isSystem ? undefined : (
           <Button disabled={isPending} className="flex-1" onClick={onSubmit}>
-            {isPending ? <Spinner data-icon="inline-start" /> : <SaveIcon className="size-4 shrink-0" />}
+            {isPending ? (
+              <Spinner data-icon="inline-start" />
+            ) : (
+              <SaveIcon className="size-4 shrink-0" />
+            )}
             {isPending ? "Guardando..." : "Guardar"}
           </Button>
         ),
       }}
     >
-      <SummarySection title="Categoría" icon={TagsIcon}>
-        <FinancePreviewRow
-          icon={TagsIcon}
-          title={`${categoryIcon.trim() ? `${categoryIcon.trim()} ` : ""}${categoryName.trim() || "Nueva categoría"}`}
-          description="Usa un emoji como icono"
-          accentColor={categoryColor || undefined}
-        />
-        <Controller
-          control={control}
-          name="type"
-          render={({ field }) => (
-            <FinanceSegmentedControl
-              label="Tipo"
-              value={field.value}
-              onChange={field.onChange}
-              options={TYPE_OPTIONS}
-              disabled={isEdit || isSystem}
-            />
-          )}
-        />
-        <Controller
-          control={control}
-          name="name"
-          render={({ field }) => (
-            <FormTextField
-              label="Nombre"
-              value={field.value}
-              onChange={field.onChange}
-              onBlur={field.onBlur}
-              error={errors.name?.message}
-              placeholder="Supermercado"
-              disabled={isSystem}
-            />
-          )}
-        />
-        <Controller
-          control={control}
-          name="icon"
-          render={({ field }) => (
-            <FormTextField
-              label="Emoji"
-              value={field.value}
-              onChange={field.onChange}
-              onBlur={field.onBlur}
-              error={errors.icon?.message}
-              placeholder="🛒"
-              disabled={isSystem}
-            />
-          )}
-        />
+      <Controller
+        control={control}
+        name="type"
+        render={({ field }) => (
+          <FinanceSegmentedControl
+            value={field.value}
+            onChange={field.onChange}
+            options={TYPE_OPTIONS}
+            disabled={typeLocked}
+            size="lg"
+            fullWidth
+          />
+        )}
+      />
+
+      <CategoryCard
+        name={categoryName}
+        icon={categoryIcon}
+        color={categoryColor}
+        isSystem={isSystem}
+        className="pr-4"
+      />
+
+      <SummarySection title="Datos" icon={ContactRoundIcon}>
+        <div data-emoji-panel-host className="flex flex-col gap-2">
+          <div className="flex items-start gap-2">
+            <div className="min-w-0 flex-1">
+              <Controller
+                control={control}
+                name="name"
+                render={({ field }) => (
+                  <FormTextField
+                    label="Nombre"
+                    icon={ContactRoundIcon}
+                    value={field.value}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                    error={errors.name?.message}
+                    placeholder="Supermercado"
+                    disabled={isSystem}
+                  />
+                )}
+              />
+            </div>
+            <div className="w-14 shrink-0">
+              <Controller
+                control={control}
+                name="icon"
+                render={({ field }) => (
+                  <CategoryEmojiField
+                    value={field.value}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                    error={errors.icon?.message}
+                    disabled={isSystem}
+                  />
+                )}
+              />
+            </div>
+          </div>
+        </div>
         <Controller
           control={control}
           name="parentId"
           render={({ field }) => (
             <SelectField
               label="Categoría padre"
+              icon={FolderTreeIcon}
               value={field.value}
               onChange={field.onChange}
               options={parentOptions}
@@ -278,7 +328,7 @@ export function CategorySheet({
         />
       </SummarySection>
 
-      <SummarySection title="Apariencia" icon={Palette}>
+      <SummarySection title="Apariencia" icon={PaletteIcon}>
         <Controller
           control={control}
           name="color"
@@ -297,15 +347,22 @@ export function CategorySheet({
         />
       </SummarySection>
 
+      <Separator />
+
       {isEdit && !isSystem && (
         <Button
           variant="destructive"
+          size="lg"
           disabled={isPending}
-          className="flex-1"
+          className="flex-1 py-2"
           onClick={() => void onDelete()}
         >
-          {isPending ? <Spinner data-icon="inline-start" /> : <TrashIcon className="size-4" />}
-          {isPending ? "Eliminando..." : "Eliminar"}
+          {isPending ? (
+            <Spinner data-icon="inline-start" />
+          ) : (
+            <TrashIcon className="size-4" />
+          )}
+          {isPending ? "Eliminando..." : "Eliminar categoría"}
         </Button>
       )}
     </BottomSheet>

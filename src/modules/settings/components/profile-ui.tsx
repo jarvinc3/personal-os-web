@@ -7,8 +7,10 @@ import { Button } from '@/src/shared/components/ui/button';
 import { Separator } from '@/src/shared/components/ui/separator';
 import { Switch } from '@/src/shared/components/ui/switch';
 import { MODULE_REGISTRY, MODULE_SLUGS_ORDER } from '@/src/shared/constants/module-registry';
+import { settingsModuleHref } from '@/src/shared/constants/app-routes';
 import { appToast } from '@/src/shared/lib/app-toast';
 import { ChevronLeftIcon, ChevronRightIcon, Settings } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useCallback, useId, useLayoutEffect, useRef, useState } from 'react';
 import { useUserModuleConfig } from '../hooks/use-user-module-config';
 
@@ -47,13 +49,14 @@ function ModuleSheetEnableRow({
 }
 
 type ModuleSettingsRowsProps = {
-  onOpenModule: (slug: ModuleSlug) => void;
+  onOpenModule?: (slug: ModuleSlug) => void;
 };
 
 export const MODULE_SETTINGS_CARD_WIDTH = 156;
 export const MODULE_SETTINGS_CARD_GAP = 12;
 
 function ModuleSettingsRows({ onOpenModule }: ModuleSettingsRowsProps) {
+  const router = useRouter();
   const listRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
@@ -122,7 +125,14 @@ function ModuleSettingsRows({ onOpenModule }: ModuleSettingsRowsProps) {
             key={slug}
             style={{ scrollSnapAlign: 'start', minWidth: MODULE_SETTINGS_CARD_WIDTH }}
           >
-            <ModuleSettingsCard slug={slug} onOpen={() => onOpenModule(slug)} />
+            <ModuleSettingsCard
+              slug={slug}
+              onOpen={() =>
+                onOpenModule
+                  ? onOpenModule(slug)
+                  : router.push(settingsModuleHref(slug))
+              }
+            />
           </div>
         ))}
         <div style={{ minWidth: MODULE_SETTINGS_CARD_GAP }} />

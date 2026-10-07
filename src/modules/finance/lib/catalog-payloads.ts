@@ -1,3 +1,4 @@
+import { isSingleEmoji } from "../../../shared/lib/single-emoji.ts"
 import { CATALOG_NONE } from "../constants/catalog.ts"
 import type { FinanceCategoryType } from "../types/entities.ts"
 import { FINANCE_QUICK_CURRENCIES } from "./finance-currency.ts"
@@ -48,10 +49,18 @@ export type CardBalanceBody = {
 
 export type CreateCategoryBody = {
   name: string
-  icon?: string
+  icon: string
   color?: string
   parentId?: string
   type: FinanceCategoryType
+}
+
+export type UpdateCategoryBody = {
+  name: string
+  icon: string
+  color?: string
+  parentId: string | null
+  type?: FinanceCategoryType
 }
 
 export type PayloadResult<T> =
@@ -365,8 +374,6 @@ export function cardBalanceSaveMessage(input: {
   }
 }
 
-const LUCIDE_KEY = /^[a-z][a-z0-9-]*$/i
-
 export function buildCreateCategoryBody(input: {
   name: string
   icon?: string
@@ -380,14 +387,8 @@ export function buildCreateCategoryBody(input: {
   }
 
   const icon = optionalTrimmed(input.icon)
-  if (!icon) {
+  if (!icon || !isSingleEmoji(icon)) {
     return { ok: false, error: "El icono debe ser un emoji" }
-  }
-  if (LUCIDE_KEY.test(icon)) {
-    return {
-      ok: false,
-      error: "Usa un emoji (por ejemplo 🛒), no una key Lucide",
-    }
   }
 
   const body: CreateCategoryBody = { name, icon, type: input.type }
@@ -395,6 +396,28 @@ export function buildCreateCategoryBody(input: {
   if (color) body.color = color
   const parentId = optionalId(input.parentId)
   if (parentId) body.parentId = parentId
+
+  return { ok: true, body }
+}
+
+export function buildUpdateCategoryBody(input: {
+  name: string
+  icon?: string
+  color?: string
+  parentId?: string
+  type: FinanceCategoryType
+  persistedParentId: string | null
+}): PayloadResult<UpdateCategoryBody> {
+  const created = buildCreateCategoryBody(input)
+  if (!created.ok) return created
+
+  const body: UpdateCategoryBody = {
+    name: created.body.name,
+    icon: created.body.icon,
+    parentId: created.body.parentId ?? null,
+  }
+  if (created.body.color) body.color = created.body.color
+  if (input.persistedParentId == null) body.type = input.type
 
   return { ok: true, body }
 }

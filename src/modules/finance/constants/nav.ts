@@ -10,15 +10,15 @@ import {
 
 export const FINANCE_NAV_ITEMS: ModuleNavItem[] = [
   {
-    label: "Resumen",
-    href: APP_ROUTES.app.finance,
-    icon: LayoutDashboard,
-    matchExact: true,
-  },
-  {
     label: "Movimientos",
     href: APP_ROUTES.app.financeTransactions,
     icon: ArrowLeftRight,
+  },
+  {
+    label: "Resumen",
+    href: APP_ROUTES.app.financeOverview,
+    icon: LayoutDashboard,
+    matchExact: true,
   },
   {
     label: "Estadísticas",

@@ -35,7 +35,7 @@ export function currencyGlyph(
   return narrowSymbol
 }
 
-function narrowCurrencySymbol(currency: string): string | null {
+export function narrowCurrencySymbol(currency: string): string | null {
   const symbol = new Intl.NumberFormat("en-US", {
     style: "currency",
     currency,

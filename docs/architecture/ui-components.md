@@ -51,7 +51,9 @@ Un `Input type="number"` para cantidades **sí** es válido; no es fecha/hora. D
 | Sheet / drawer de módulo (edición) | `BottomSheet` | `src/shared/components/layout/bottom-sheet.tsx` |
 | Evento (llegó, listo, falló) | `BottomSheet` `variant="floating"` | igual; card abajo, no drawer de formulario |
 | Sección con título + card | `SummarySection` | `src/shared/components/ui/summary.tsx` |
-| Fila de lista (icono, título, valor) | `SummaryItem` | igual |
+| Fila de lista (icono, título, valor) | `SummaryItem` | igual. `tintRow` pinta el fondo de la fila con `accentColor`; por defecto no |
+| Acción primaria flotante (una sola) | `Fab` | `src/shared/components/layout/fab.tsx` |
+| Varias acciones flotantes | `ExpandableFab` | `src/shared/components/layout/expandable-fab.tsx` |
 | Estado vacío | `Empty` + `EmptyHeader` / `EmptyMedia` / `EmptyTitle` / `EmptyDescription` | `src/shared/components/ui/empty.tsx` |
 | Color | `ColorPickerSwatch` | `src/shared/components/ui/color-picker.tsx` |
 | Tab bar de módulo **con rutas** | `ModuleSectionLayout` | `src/shared/components/layout/module-section-layout.tsx` — [module-conventions.md](./module-conventions.md) |
@@ -71,6 +73,7 @@ Viven en `src/modules/finance/components/forms/`. No copiarlos a otros módulos;
 - `FinanceDateField` → fecha
 - `FinanceAmountField`, `FinanceCurrencyPills`, `FinanceSegmentedControl` → dinero / segmentos
 - `Field` / `FieldLabel` / `FieldError` (`src/shared/components/ui/field.tsx`) → etiqueta y error
+- Campos de texto y select: icono líder del tipo de dato (`FormTextField` `icon`, `SelectField` `icon`). Estado binario en una fila: icono + `aria-label`, no la etiqueta cruda.
 
 ## Primitivos shadcn
 
