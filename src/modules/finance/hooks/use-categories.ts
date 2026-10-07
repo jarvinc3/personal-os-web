@@ -1,7 +1,10 @@
 "use client"
 
 import { apiDelete, apiGet, apiPatch, apiPost } from "@/src/config/api-client"
-import type { CreateCategoryBody } from "@/src/modules/finance/lib/catalog-payloads"
+import type {
+  CreateCategoryBody,
+  UpdateCategoryBody,
+} from "@/src/modules/finance/lib/catalog-payloads"
 import { categoriesQuery } from "@/src/modules/finance/lib/finance-query-options"
 import { FINANCE_CATEGORIES_QUERY_KEY } from "@/src/modules/finance/types/api"
 import type { FinanceCategory } from "@/src/modules/finance/types/entities"
@@ -36,7 +39,7 @@ export function useUpdateCategory() {
       body,
     }: {
       id: string
-      body: Omit<CreateCategoryBody, "type">
+      body: Partial<UpdateCategoryBody>
     }) => apiPatch<FinanceCategory>(API_ENDPOINTS.FINANCE.CATEGORY(id), body),
     onSuccess: () => invalidateCategories(queryClient),
   })

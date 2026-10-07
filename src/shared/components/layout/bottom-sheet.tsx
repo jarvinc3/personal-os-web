@@ -26,6 +26,8 @@ interface BottomSheetProps {
   description?: string
   pending?: boolean
   children: ReactNode
+  headerAction?: ReactNode
+  headerActionAlign?: "start" | "end"
   actions?: {
     delete?: ReactNode
     close?: ReactNode
@@ -41,6 +43,8 @@ export function BottomSheet({
   description,
   pending = false,
   children,
+  headerAction,
+  headerActionAlign = "end",
   actions,
 }: BottomSheetProps) {
   const isMobile = useIsMobile()
@@ -50,8 +54,20 @@ export function BottomSheet({
       <DrawerContent
         className={cn(variant === "floating" && FLOATING_SHEET_CONTENT_CLASS)}
       >
-        <DrawerHeader className="border-b">
-          <DrawerTitle>{pending ? "Cargando" : title}</DrawerTitle>
+        <DrawerHeader className="relative border-b">
+          <DrawerTitle className={headerAction ? "px-20" : undefined}>
+            {pending ? "Cargando" : title}
+          </DrawerTitle>
+          {headerAction && !pending ? (
+            <div
+              className={cn(
+                "absolute top-1/2 -translate-y-1/2",
+                headerActionAlign === "start" ? "left-3" : "right-3",
+              )}
+            >
+              {headerAction}
+            </div>
+          ) : null}
           <DrawerDescription
             className={cn(
               "text-muted-foreground",

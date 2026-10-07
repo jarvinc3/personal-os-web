@@ -7,6 +7,7 @@ import {
   buildCreateAccountBody,
   buildCreateCardBody,
   buildCreateCategoryBody,
+  buildUpdateCategoryBody,
   buildCreateInstitutionBody,
   cardBalanceSaveMessage,
   nextUnusedCurrency,
@@ -402,5 +403,35 @@ describe("buildCreateCategoryBody", () => {
       type: "EXPENSE",
     })
     assert.equal(result.ok, false)
+  })
+})
+
+describe("buildUpdateCategoryBody", () => {
+  it("sends parentId null when the category has no parent", () => {
+    const result = buildUpdateCategoryBody({
+      name: "Mercado",
+      icon: "🛒",
+      parentId: "__none__",
+      type: "EXPENSE",
+      persistedParentId: null,
+    })
+    assert.equal(result.ok, true)
+    if (!result.ok) return
+    assert.equal(result.body.parentId, null)
+    assert.equal(result.body.type, "EXPENSE")
+  })
+
+  it("omits type while a parent is still persisted", () => {
+    const result = buildUpdateCategoryBody({
+      name: "Cafetería",
+      icon: "☕",
+      parentId: "food",
+      type: "INCOME",
+      persistedParentId: "food",
+    })
+    assert.equal(result.ok, true)
+    if (!result.ok) return
+    assert.equal(result.body.parentId, "food")
+    assert.equal("type" in result.body, false)
   })
 })

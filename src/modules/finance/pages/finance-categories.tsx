@@ -33,5 +33,5 @@ function FinanceCategoriesView() {
     [handleBack],
   )
 
-  return <FinanceCategoriesSection enabled={isEnabled} editable bare />
+  return <FinanceCategoriesSection enabled={isEnabled} editable />
 }

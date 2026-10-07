@@ -20,6 +20,7 @@ import type { ReactNode } from "react"
 type SegmentOption<T extends string> = {
   value: T
   label: string
+  icon?: LucideIcon
 }
 
 type FinanceSegmentedControlProps<T extends string> = {
@@ -29,6 +30,8 @@ type FinanceSegmentedControlProps<T extends string> = {
   options: SegmentOption<T>[]
   disabled?: boolean
   error?: string
+  size?: "sm" | "lg"
+  fullWidth?: boolean
 }
 
 export function FinanceSegmentedControl<T extends string>({
@@ -38,30 +41,38 @@ export function FinanceSegmentedControl<T extends string>({
   options,
   disabled,
   error,
+  size = "sm",
+  fullWidth = false,
 }: FinanceSegmentedControlProps<T>) {
   return (
     <Field data-invalid={error ? true : undefined}>
       {label ? <FieldLabel>{label}</FieldLabel> : null}
       <div
-        className="flex flex-wrap gap-2"
+        className={cn("flex flex-wrap gap-2", fullWidth && "w-full")}
         role="radiogroup"
         aria-label={label}
         aria-disabled={disabled || undefined}
       >
         {options.map((option) => {
           const selected = option.value === value
+          const OptionIcon = option.icon
           return (
             <Button
               key={option.value}
               type="button"
-              size="sm"
+              size={size === "lg" ? "lg" : "sm"}
               role="radio"
               aria-checked={selected}
               variant={selected ? "default" : "outline"}
-              className={cn("rounded-full", PRESSABLE_CLASS)}
+              className={cn(
+                "rounded-full",
+                fullWidth && "h-11 flex-1 text-base",
+                PRESSABLE_CLASS,
+              )}
               disabled={disabled}
               onClick={() => onChange(option.value)}
             >
+              {OptionIcon ? <OptionIcon /> : null}
               {option.label}
             </Button>
           )
@@ -73,13 +84,18 @@ export function FinanceSegmentedControl<T extends string>({
 }
 
 type FinanceAmountFieldProps = {
-  label?: string
+  label?: string | null
   value: string
   onChange: (value: string) => void
   onBlur?: () => void
   error?: string
   placeholder?: string
   disabled?: boolean
+  readOnly?: boolean
+  trailing?: ReactNode
+  /** Narrow currency symbol drawn before the amount, e.g. `$`. */
+  prefix?: string | null
+  onReadOnlyActivate?: () => void
 }
 
 export function FinanceAmountField({
@@ -90,21 +106,56 @@ export function FinanceAmountField({
   error,
   placeholder = "0.00",
   disabled,
+  readOnly = false,
+  trailing,
+  prefix,
+  onReadOnlyActivate,
 }: FinanceAmountFieldProps) {
+  const symbol = prefix?.trim() || null
   return (
     <Field data-invalid={error ? true : undefined}>
       {label ? <FieldLabel>{label}</FieldLabel> : null}
-      <Input
-        inputMode="decimal"
-        autoComplete="off"
-        className="h-14 rounded-2xl px-4 text-3xl font-semibold tabular-nums"
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        onBlur={onBlur}
-        placeholder={placeholder}
-        disabled={disabled}
-        aria-invalid={error ? true : undefined}
-      />
+      <div className="relative">
+        {symbol ? (
+          <span
+            aria-hidden
+            className="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-3xl font-semibold tabular-nums"
+          >
+            {symbol}
+          </span>
+        ) : null}
+        <Input
+          inputMode={readOnly ? "none" : "decimal"}
+          autoComplete="off"
+          readOnly={readOnly}
+          className={cn(
+            "h-14 rounded-2xl px-4 text-3xl font-semibold tabular-nums",
+            trailing && "pr-14",
+            readOnly && "cursor-pointer",
+          )}
+          style={
+            symbol
+              ? { paddingLeft: `calc(1rem + ${symbol.length}ch + 0.4rem)` }
+              : undefined
+          }
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          onBlur={onBlur}
+          onClick={readOnly ? onReadOnlyActivate : undefined}
+          placeholder={placeholder}
+          disabled={disabled}
+          aria-invalid={error ? true : undefined}
+        />
+        {trailing ? (
+          <div
+            className="absolute inset-y-0 right-1.5 flex items-center"
+            onClick={(event) => event.stopPropagation()}
+            onPointerDown={(event) => event.stopPropagation()}
+          >
+            {trailing}
+          </div>
+        ) : null}
+      </div>
       {error ? <FieldError>{error}</FieldError> : null}
     </Field>
   )

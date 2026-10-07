@@ -1,28 +1,36 @@
 "use client"
 
+import { CategoryCard, subcategoryCountLabel } from "@/src/modules/finance/components/catalog/category-card"
 import { CategorySheet } from "@/src/modules/finance/components/catalog/category-sheet"
+import { FinanceListSkeleton } from "@/src/modules/finance/components/layout/finance-list-skeleton"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/constants/sheet-keys"
-import { useCategories } from "@/src/modules/finance/hooks/use-categories"
+import { useCategories, useUpdateCategory } from "@/src/modules/finance/hooks/use-categories"
 import { useSheetListEntity } from "@/src/modules/finance/hooks/use-sheet-entity"
 import {
   type CategoryGroup,
+  applyLocalCategoryOrder,
   filterCategoriesByType,
   groupCategoriesByParent,
-  isFinanceCategoryEditable,
+  sortCategoriesNewestFirst,
 } from "@/src/modules/finance/lib/category-tree"
 import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
 import type {
   FinanceCategory,
   FinanceCategoryType,
 } from "@/src/modules/finance/types/entities"
-import { Button } from "@/src/shared/components/ui/button"
+import { Fab } from "@/src/shared/components/layout/fab"
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/src/shared/components/ui/collapsible"
-import { FinanceListSkeleton } from "@/src/modules/finance/components/layout/finance-list-skeleton"
-import { SummaryItem, SummarySection } from "@/src/shared/components/ui/summary"
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/src/shared/components/ui/empty"
 import {
   Tabs,
   TabsContent,
@@ -30,116 +38,216 @@ import {
   TabsTrigger,
 } from "@/src/shared/components/ui/tabs"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
-import { ChevronDownIcon, PlusIcon, TagsIcon } from "lucide-react"
-import { useMemo, useState } from "react"
+import { appToast } from "@/src/shared/lib/app-toast"
+import {
+  ChevronDownIcon,
+  GripVerticalIcon,
+  TagsIcon,
+  UnlinkIcon,
+} from "lucide-react"
+import { Reorder, useDragControls } from "motion/react"
+import { useMemo, useState, type PointerEvent, type ReactNode } from "react"
 
 type CategoriesSectionProps = {
   enabled: boolean
   /** When true, tapping a category opens the edit sheet. */
   editable?: boolean
-  /** Hide the SummarySection chrome (title/actions) for dedicated pages. */
-  bare?: boolean
 }
 
-function categoryLabel(category: FinanceCategory) {
-  return `${category.icon ? `${category.icon} ` : ""}${category.name}`
+function mergeMovedIds(
+  previous: string[],
+  nextMoved: string[],
+  moving: Set<string>,
+): string[] {
+  const rest = previous.filter((id) => !moving.has(id) && !nextMoved.includes(id))
+  return [...nextMoved, ...rest]
 }
 
-function categoryValue(category: FinanceCategory) {
-  return category.isSystem ? "Sistema" : "Custom"
-}
-
-function CategoryRow({
-  category,
-  isLast,
-  onEdit,
+function DragHandle({
+  onPointerDown,
 }: {
-  category: FinanceCategory
-  isLast?: boolean
-  onEdit?: (category: FinanceCategory) => void
+  onPointerDown: (event: PointerEvent<HTMLButtonElement>) => void
 }) {
-  const canEdit = onEdit && isFinanceCategoryEditable(category)
   return (
-    <SummaryItem
-      title={categoryLabel(category)}
-      value={categoryValue(category)}
-      accentColor={category.color ?? undefined}
-      icon={TagsIcon}
-      isLast={isLast}
-      onPress={canEdit ? () => onEdit?.(category) : undefined}
-      showChevron={Boolean(canEdit)}
-    />
+    <button
+      type="button"
+      aria-label="Reordenar"
+      className="flex size-8 shrink-0 items-center justify-center text-muted-foreground"
+      onPointerDown={onPointerDown}
+    >
+      <GripVerticalIcon className="size-4" />
+    </button>
   )
 }
 
 function CategoryGroupBlock({
   group,
+  orderIds,
+  onReorderChildren,
   onEdit,
+  onUnlink,
+  unlinkingId,
 }: {
-  group: CategoryGroup<FinanceCategory>
+  group: CategoryGroup<FinanceCategory> & { id: string }
+  orderIds: string[]
+  onReorderChildren: (parentId: string, nextIds: string[]) => void
   onEdit?: (category: FinanceCategory) => void
+  onUnlink?: (category: FinanceCategory) => void
+  unlinkingId?: string
 }) {
+  const controls = useDragControls()
   const { category, children } = group
-  const canEditParent = onEdit && isFinanceCategoryEditable(category)
+  const orderedChildren = useMemo(
+    () =>
+      applyLocalCategoryOrder(sortCategoriesNewestFirst(children), orderIds),
+    [children, orderIds],
+  )
+  const childIds = orderedChildren.map((child) => child.id)
 
-  if (children.length === 0) {
-    return <CategoryRow category={category} isLast onEdit={onEdit} />
-  }
+  const card = (item: FinanceCategory, extra?: ReactNode) => (
+    <CategoryCard
+      name={item.name}
+      icon={item.icon}
+      color={item.color}
+      isSystem={item.isSystem}
+      description={
+        item.id === category.id && children.length > 0
+          ? subcategoryCountLabel(children.length)
+          : undefined
+      }
+      onPress={onEdit ? () => onEdit(item) : undefined}
+      trailing={extra}
+    />
+  )
+
+  const body =
+    children.length === 0 ? (
+      card(
+        category,
+        <DragHandle onPointerDown={(event) => controls.start(event)} />,
+      )
+    ) : (
+      <Collapsible className="group/category">
+        {card(
+          category,
+          <>
+            <CollapsibleTrigger
+              type="button"
+              className="flex size-8 shrink-0 items-center justify-center text-muted-foreground"
+              aria-label={`Expandir ${category.name}`}
+            >
+              <ChevronDownIcon className="size-4.5 transition-transform group-data-open/category:rotate-180" />
+            </CollapsibleTrigger>
+            <DragHandle onPointerDown={(event) => controls.start(event)} />
+          </>,
+        )}
+        <CollapsibleContent>
+          <Reorder.Group
+            axis="y"
+            values={childIds}
+            onReorder={(next) => onReorderChildren(category.id, next)}
+            className="mt-2 flex flex-col gap-2 pl-7"
+          >
+            {orderedChildren.map((child) => (
+              <ChildCategoryRow
+                key={child.id}
+                category={child}
+                parentColor={category.color}
+                onEdit={onEdit}
+                onUnlink={onUnlink}
+                unlinking={unlinkingId === child.id}
+              />
+            ))}
+          </Reorder.Group>
+        </CollapsibleContent>
+      </Collapsible>
+    )
 
   return (
-    <Collapsible className="group/category">
-      <div className="flex items-stretch border-b border-border/60 last:border-b-0">
-        <div className="min-w-0 flex-1">
-          <SummaryItem
-            title={categoryLabel(category)}
-            value={categoryValue(category)}
-            accentColor={category.color ?? undefined}
-            icon={TagsIcon}
-            isLast
-            onPress={canEditParent ? () => onEdit?.(category) : undefined}
-            showChevron={false}
-          />
-        </div>
-        <CollapsibleTrigger
-          type="button"
-          className="flex shrink-0 items-center px-3 text-muted-foreground hover:bg-muted/50"
-          aria-label={`Expandir ${category.name}`}
-        >
-          <ChevronDownIcon className="size-4.5 transition-transform group-data-open/category:rotate-180" />
-        </CollapsibleTrigger>
-      </div>
-      <CollapsibleContent>
-        <div className="flex flex-col pl-7">
-          {children.map((child, index) => (
-            <CategoryRow
-              key={child.id}
-              category={child}
-              isLast={index === children.length - 1}
-              onEdit={onEdit}
-            />
-          ))}
-        </div>
-      </CollapsibleContent>
-    </Collapsible>
+    <Reorder.Item
+      value={category.id}
+      dragListener={false}
+      dragControls={controls}
+      className="list-none"
+    >
+      {body}
+    </Reorder.Item>
+  )
+}
+
+function ChildCategoryRow({
+  category,
+  parentColor,
+  onEdit,
+  onUnlink,
+  unlinking,
+}: {
+  category: FinanceCategory
+  parentColor?: string | null
+  onEdit?: (category: FinanceCategory) => void
+  onUnlink?: (category: FinanceCategory) => void
+  unlinking: boolean
+}) {
+  const controls = useDragControls()
+  return (
+    <Reorder.Item
+      value={category.id}
+      dragListener={false}
+      dragControls={controls}
+      className="list-none"
+    >
+      <CategoryCard
+        name={category.name}
+        icon={category.icon}
+        color={category.color ?? parentColor}
+        isSystem={category.isSystem}
+        onPress={onEdit ? () => onEdit(category) : undefined}
+        trailing={
+          <>
+            {onUnlink && !category.isSystem ? (
+              <button
+                type="button"
+                aria-label="Quitar como subcategoría"
+                className="flex size-8 shrink-0 items-center justify-center text-muted-foreground disabled:opacity-50"
+                disabled={unlinking}
+                onClick={() => onUnlink(category)}
+              >
+                <UnlinkIcon className="size-4" />
+              </button>
+            ) : null}
+            <DragHandle onPointerDown={(event) => controls.start(event)} />
+          </>
+        }
+      />
+    </Reorder.Item>
   )
 }
 
 export function FinanceCategoriesSection({
   enabled,
-  editable = false,
-  bare = false,
+  editable,
 }: CategoriesSectionProps) {
   const [listType, setListType] = useState<FinanceCategoryType>("EXPENSE")
+  const [orderIds, setOrderIds] = useState<string[]>([])
+  const [unlinkingId, setUnlinkingId] = useState<string | null>(null)
   const categoriesQuery = useCategories(enabled)
+  const updateCategory = useUpdateCategory()
   const categories = categoriesQuery.data ?? []
   const filtered = useMemo(
-    () => filterCategoriesByType(categoriesQuery.data ?? [], listType),
-    [categoriesQuery.data, listType]
+    () =>
+      sortCategoriesNewestFirst(
+        filterCategoriesByType(categoriesQuery.data ?? [], listType),
+      ),
+    [categoriesQuery.data, listType],
   )
-  const groups = useMemo(
-    () => groupCategoriesByParent(filtered),
-    [filtered]
-  )
+  const groups = useMemo(() => {
+    const grouped = groupCategoriesByParent(filtered).map((group) => ({
+      ...group,
+      id: group.category.id,
+    }))
+    return applyLocalCategoryOrder(grouped, orderIds)
+  }, [filtered, orderIds])
+  const rootIds = groups.map((group) => group.category.id)
   const {
     open: openCategorySheet,
     sheetId: categorySheetId,
@@ -150,92 +258,113 @@ export function FinanceCategoriesSection({
     categorySheetId,
     categoriesQuery.data,
     categoriesQuery.isPending,
-    setOpenCategorySheet
+    setOpenCategorySheet,
   )
 
   const errorMessage = categoriesQuery.error
     ? financeErrorMessage(categoriesQuery.error)
     : null
 
-  const typeTabs = (
-    <Tabs
-      value={listType}
-      onValueChange={(next) => {
-        if (next === "EXPENSE" || next === "INCOME") {
-          setListType(next)
-        }
-      }}
-      className="w-full gap-0"
-    >
-      <TabsList className="h-auto w-full rounded-2xl p-1" variant="default">
-        <TabsTrigger value="EXPENSE" className="rounded-xl px-3 py-2">
-          Gastos
-        </TabsTrigger>
-        <TabsTrigger value="INCOME" className="rounded-xl px-3 py-2">
-          Ingresos
-        </TabsTrigger>
-      </TabsList>
-      <TabsContent value="EXPENSE" className="hidden" />
-      <TabsContent value="INCOME" className="hidden" />
-    </Tabs>
-  )
+  function onEdit(category: FinanceCategory) {
+    setOpenCategorySheet(true, category.id)
+  }
 
-  const createButton = (
-    <Button
-      size="sm"
-      variant="ghost"
-      onClick={() => setOpenCategorySheet(true, null)}
-    >
-      <PlusIcon />
-      Crear categoría
-    </Button>
-  )
-
-  const body = (
-    <>
-      {errorMessage ? (
-        <p className="text-sm text-destructive">{errorMessage}</p>
-      ) : null}
-      {categoriesQuery.isPending ? (
-        <FinanceListSkeleton />
-      ) : groups.length === 0 ? (
-        <p className="p-4 text-sm text-muted-foreground">
-          No hay categorías. Crea una con un emoji.
-        </p>
-      ) : (
-        groups.map((group) => (
-          <CategoryGroupBlock
-            key={group.category.id}
-            group={group}
-            onEdit={
-              editable
-                ? (category) => setOpenCategorySheet(true, category.id)
-                : undefined
-            }
-          />
-        ))
-      )}
-    </>
-  )
+  async function onUnlink(category: FinanceCategory) {
+    setUnlinkingId(category.id)
+    try {
+      await updateCategory.mutateAsync({
+        id: category.id,
+        body: { parentId: null },
+      })
+      appToast.success({ text1: "Subcategoría quitada" })
+    } catch (error) {
+      appToast.error({ text1: financeErrorMessage(error) })
+    } finally {
+      setUnlinkingId(null)
+    }
+  }
 
   return (
     <>
-      {bare ? (
-        <div className="flex flex-col gap-3">
-          <div className="flex items-center justify-between gap-3">
-            <div className="min-w-0 flex-1">{typeTabs}</div>
-            {createButton}
-          </div>
-          <div className="overflow-hidden rounded-2xl border border-border bg-card">
-            {body}
-          </div>
+      <div className="flex flex-col gap-3">
+        <Tabs
+          value={listType}
+          onValueChange={(next) => {
+            if (next === "EXPENSE" || next === "INCOME") {
+              setListType(next)
+            }
+          }}
+          className="w-full gap-0"
+        >
+          <TabsList className="h-auto w-full rounded-2xl p-1" variant="default">
+            <TabsTrigger value="EXPENSE" className="rounded-xl px-3 py-2">
+              Gastos
+            </TabsTrigger>
+            <TabsTrigger value="INCOME" className="rounded-xl px-3 py-2">
+              Ingresos
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="EXPENSE" className="hidden" />
+          <TabsContent value="INCOME" className="hidden" />
+        </Tabs>
+        <div>
+          {errorMessage ? (
+            <p className="text-sm text-destructive">{errorMessage}</p>
+          ) : null}
+          {categoriesQuery.isPending ? (
+            <FinanceListSkeleton />
+          ) : groups.length === 0 ? (
+            <Empty>
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <TagsIcon />
+                </EmptyMedia>
+                <EmptyTitle>No hay categorías</EmptyTitle>
+                <EmptyDescription>
+                  Crea una con el botón de más.
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
+          ) : (
+            <Reorder.Group
+              axis="y"
+              values={rootIds}
+              onReorder={(next) =>
+                setOrderIds((current) =>
+                  mergeMovedIds(current, next, new Set(rootIds)),
+                )
+              }
+              className="flex flex-col gap-2"
+            >
+              {groups.map((group) => (
+                <CategoryGroupBlock
+                  key={group.category.id}
+                  group={group}
+                  orderIds={orderIds}
+                  onReorderChildren={(_parentId, next) =>
+                    setOrderIds((current) =>
+                      mergeMovedIds(
+                        current,
+                        next,
+                        new Set(group.children.map((child) => child.id)),
+                      ),
+                    )
+                  }
+                  onEdit={editable ? onEdit : undefined}
+                  onUnlink={editable ? (category) => void onUnlink(category) : undefined}
+                  unlinkingId={unlinkingId ?? undefined}
+                />
+              ))}
+            </Reorder.Group>
+          )}
         </div>
-      ) : (
-        <SummarySection title="Categorías" icon={TagsIcon} right={createButton}>
-          <div className="p-3 pt-2">{typeTabs}</div>
-          {body}
-        </SummarySection>
-      )}
+      </div>
+
+      <Fab
+        label="Crear categoría"
+        disabled={!enabled}
+        onClick={() => setOpenCategorySheet(true, null)}
+      />
 
       <CategorySheet
         open={openCategorySheet}

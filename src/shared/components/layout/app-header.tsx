@@ -23,7 +23,9 @@ import {
 } from "@/src/shared/components/ui/dropdown-menu";
 import { Separator } from "@/src/shared/components/ui/separator";
 import { SidebarTrigger } from "@/src/shared/components/ui/sidebar";
-import { APP_ROUTES } from "@/src/shared/constants/app-routes";
+import { APP_ROUTES, settingsModuleHref } from "@/src/shared/constants/app-routes";
+import { getModule } from "@/src/shared/constants/module-registry";
+import { moduleSlugFromPathname } from "@/src/shared/lib/module-from-pathname";
 import { useHeaderContext } from "@/src/shared/context/header-context";
 import { cn } from "@/src/shared/lib/utils";
 import { useAppStore } from "@/src/shared/store/app-store";
@@ -42,7 +44,6 @@ const PAGE_TITLES: Record<string, string> = {
   [APP_ROUTES.app.chat]: "Agente IA",
   [APP_ROUTES.app.notifications]: "Notificaciones",
   [APP_ROUTES.app.keepAwake]: "Keep Awake",
-  [APP_ROUTES.app.finance]: "Resumen",
 }
 
 function resolvePageTitle(pathname: string): string {
@@ -124,6 +125,8 @@ function HeaderUserMenu() {
   const displayName = user?.fullName ?? "Usuario"
   const email = user?.email ?? ""
   const avatarUrl = user?.profile?.avatarUrl ?? user?.avatarUrl
+  const moduleSlug = moduleSlugFromPathname(pathname)
+  const moduleSettings = moduleSlug ? getModule(moduleSlug) : null
 
   return (
     <DropdownMenu>
@@ -176,6 +179,15 @@ function HeaderUserMenu() {
             <BellIcon />
             Notificaciones
           </DropdownMenuItem>
+          {moduleSettings && moduleSlug ? (
+            <DropdownMenuItem
+              active={pathname === settingsModuleHref(moduleSlug)}
+              onClick={() => router.push(settingsModuleHref(moduleSlug))}
+            >
+              <SettingsIcon />
+              Ajustes de {moduleSettings.label}
+            </DropdownMenuItem>
+          ) : null}
           <DropdownMenuItem
             active={pathname === APP_ROUTES.app.settings}
             onClick={() => router.push(APP_ROUTES.app.settings)}
@@ -268,11 +280,13 @@ function SecondaryHeader({
   actions,
   onBack,
   tinted,
+  showUserMenu,
 }: {
   title: ReactNode
   actions?: ReactNode
   onBack: () => void
   tinted?: boolean
+  showUserMenu: boolean
 }) {
   return (
     <div
@@ -290,12 +304,16 @@ function SecondaryHeader({
       </div>
       <div
         className={cn(
-          "flex items-center justify-end",
+          "flex items-center justify-end gap-2",
           tinted &&
             "[&_button]:text-white [&_button]:hover:bg-white/15 [&_button]:hover:text-white",
         )}
       >
-        {actions ?? <span className="size-8" aria-hidden="true" />}
+        {actions}
+        {showUserMenu ? <HeaderUserMenu /> : null}
+        {!actions && !showUserMenu ? (
+          <span className="size-8" aria-hidden="true" />
+        ) : null}
       </div>
     </div>
   )
@@ -313,6 +331,7 @@ export function AppHeader() {
 
   const accentColor =
     config.variant === "secondary" ? config.accentColor : undefined
+  const moduleSlug = moduleSlugFromPathname(pathname)
 
   return (
     <header
@@ -335,6 +354,7 @@ export function AppHeader() {
           actions={config.actions}
           onBack={handleBack}
           tinted={Boolean(accentColor)}
+          showUserMenu={moduleSlug !== null}
         />
       ) : (
         <PrimaryHeader

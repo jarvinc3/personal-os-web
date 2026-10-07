@@ -6,21 +6,15 @@ import { deactivatePushTokenIfPresent } from "@/src/modules/notifications/lib/de
 import { ModuleSettingsRows } from "@/src/modules/settings/components/profile-ui"
 import { DeleteAccountSheet } from "@/src/modules/settings/components/sheets/delete-account-sheet"
 import { EditAccountSheet } from "@/src/modules/settings/components/sheets/edit-account-sheet"
-import { EditAgendaSheet } from "@/src/modules/settings/components/sheets/edit-agenda-sheet"
 import { EditAIProviderSheet } from "@/src/modules/settings/components/sheets/edit-ai-provider-sheet"
 import { EditAISheet } from "@/src/modules/settings/components/sheets/edit-ai-sheet"
-import { EditFinanceSheet } from "@/src/modules/settings/components/sheets/edit-finance-sheet"
-import { EditHealthSheet } from "@/src/modules/settings/components/sheets/edit-health-sheet"
-import { EditProjectsSheet } from "@/src/modules/settings/components/sheets/edit-projects-sheet"
 import { EditQuietHoursSheet } from "@/src/modules/settings/components/sheets/edit-quiet-hours-sheet"
-import { EditSubscriptionsSheet } from "@/src/modules/settings/components/sheets/edit-subscriptions-sheet"
 import { EditThemeSheet } from "@/src/modules/settings/components/sheets/edit-theme-sheet"
 import {
   getAiToneLabel,
   getThemeOptionLabel,
   SETTINGS_REGISTRY,
 } from "@/src/modules/settings/constants/settings-metadata"
-import { useModuleSheetNav } from "@/src/modules/settings/hooks/use-module-sheet-nav"
 import { useProfile } from "@/src/modules/settings/hooks/use-profile"
 import { getSettingValue } from "@/src/modules/settings/lib/settings-value"
 import type { ThemeValue } from "@/src/modules/settings/types/profile.types"
@@ -36,12 +30,14 @@ import {
 } from "@/src/shared/components/ui/avatar"
 import { Button } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
-import { APP_ROUTES } from "@/src/shared/constants/app-routes"
+import { APP_ROUTES, settingsModuleHref } from "@/src/shared/constants/app-routes"
+import { MODULE_SLUGS_ORDER } from "@/src/shared/constants/module-registry"
+import { MODULE_SHEET_PARAM_KEYS } from "@/src/modules/settings/constants/module-sheet-keys"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { formatTimeRange } from "@/src/shared/lib/date-format"
 import { Edit, LogOut, RefreshCw } from "lucide-react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { useCallback, useEffect } from "react"
 
 const APP_VERSION = process.env.NEXT_PUBLIC_APP_VERSION ?? "1.0.0"
@@ -68,7 +64,7 @@ export default function SettingsPage() {
     useSheetParam("ai-provider-sheet")
   const { open: openQuietHoursSheet, setOpen: setOpenQuietHoursSheet } =
     useSheetParam("quiet-hours-sheet")
-  const { openModule, isOpen, setModuleOpen } = useModuleSheetNav()
+  const searchParams = useSearchParams()
 
   const profile = profileQuery.data
   const displayName = profile?.fullName ?? user?.fullName ?? "Usuario"
@@ -81,6 +77,16 @@ export default function SettingsPage() {
       router.replace(APP_ROUTES.auth.login)
     }
   }, [isAuthenticated, isLoading, router])
+
+  useEffect(() => {
+    const sheet = searchParams.get("sheet")
+    if (!sheet) return
+    const slug = MODULE_SLUGS_ORDER.find(
+      (item) => MODULE_SHEET_PARAM_KEYS[item] === sheet,
+    )
+    if (!slug) return
+    router.replace(settingsModuleHref(slug))
+  }, [router, searchParams])
 
   const handlePreferenceToggle = useCallback(
     async (
@@ -168,7 +174,7 @@ export default function SettingsPage() {
         />
       </SettingsSection>
 
-      <ModuleSettingsRows onOpenModule={openModule} />
+      <ModuleSettingsRows />
 
       <SettingsSection title="Inteligencia artificial">
         <SettingsRow
@@ -401,26 +407,6 @@ export default function SettingsPage() {
       <EditQuietHoursSheet
         open={openQuietHoursSheet}
         onOpenChange={setOpenQuietHoursSheet}
-      />
-      <EditFinanceSheet
-        open={isOpen("finance")}
-        onOpenChange={(open) => setModuleOpen("finance", open)}
-      />
-      <EditAgendaSheet
-        open={isOpen("agenda")}
-        onOpenChange={(open) => setModuleOpen("agenda", open)}
-      />
-      <EditProjectsSheet
-        open={isOpen("projects")}
-        onOpenChange={(open) => setModuleOpen("projects", open)}
-      />
-      <EditSubscriptionsSheet
-        open={isOpen("subscriptions")}
-        onOpenChange={(open) => setModuleOpen("subscriptions", open)}
-      />
-      <EditHealthSheet
-        open={isOpen("health")}
-        onOpenChange={(open) => setModuleOpen("health", open)}
       />
     </div>
   )

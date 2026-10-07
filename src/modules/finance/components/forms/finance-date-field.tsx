@@ -19,7 +19,7 @@ import { CalendarIcon, ChevronDownIcon } from "lucide-react"
 import { useState } from "react"
 
 type FinanceDateFieldProps = {
-  label: string
+  label?: string
   value: string
   onChange: (next: string) => void
   error?: string
@@ -60,7 +60,7 @@ export function FinanceDateField({
 
   return (
     <Field data-invalid={error ? true : undefined}>
-      <FieldLabel>{label}</FieldLabel>
+      {label ? <FieldLabel>{label}</FieldLabel> : null}
       <Collapsible open={open} onOpenChange={setOpen} disabled={disabled}>
         <CollapsibleTrigger
           disabled={disabled}

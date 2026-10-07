@@ -10,14 +10,10 @@ import {
     formatFinanceMoney,
     parseFinanceMoney,
 } from "@/src/modules/finance/lib/money";
-import type { FinanceTransactionType } from "@/src/modules/finance/types/entities";
-import { APP_ROUTES } from "@/src/shared/constants/app-routes";
+import { APP_ROUTES, financeTransactionNewHref } from "@/src/shared/constants/app-routes";
 import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
-import ExpenseIncomeForm from "../transactions/expense-income-form";
 import { FinanceHomeHero } from "./finance-home-hero";
-
-type QuickTransactionType = Exclude<FinanceTransactionType, "TRANSFER">
 
 export function FinanceHomeHeroSection() {
   const router = useRouter()
@@ -25,9 +21,6 @@ export function FinanceHomeHeroSection() {
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(
     null
   )
-  const [quickTransactionType, setQuickTransactionType] =
-    useState<QuickTransactionType>("DEBIT")
-  const [quickTransactionOpen, setQuickTransactionOpen] = useState(false)
   const range = useMemo(
     () => financeDashboardRange(config.dashboardPeriod, config.weekStartsOn),
     [config.dashboardPeriod, config.weekStartsOn]
@@ -112,8 +105,8 @@ export function FinanceHomeHeroSection() {
         : (accounts[currentIndex + 1]?.id ?? null)
     })
   }, [accounts])
-  const goToTransactions = useCallback(() => {
-    router.push(APP_ROUTES.app.financeTransactions)
+  const goToTransfer = useCallback(() => {
+    router.push(APP_ROUTES.app.financeTransferNew)
   }, [router])
 
   return (
@@ -125,22 +118,12 @@ export function FinanceHomeHeroSection() {
         cashFlowLabel={cashFlowLabel}
         onAccountPress={cycleAccount}
         onSendPress={() => {
-          setQuickTransactionType("DEBIT")
-          setQuickTransactionOpen(true)
+          router.push(financeTransactionNewHref("DEBIT"))
         }}
         onReceivePress={() => {
-          setQuickTransactionType("CREDIT")
-          setQuickTransactionOpen(true)
+          router.push(financeTransactionNewHref("CREDIT"))
         }}
-        onTransferPress={goToTransactions}
-      />
-
-      <ExpenseIncomeForm
-        type={quickTransactionType}
-        open={quickTransactionOpen}
-        onOpenChange={setQuickTransactionOpen}
-        enabled={isEnabled}
-        defaultCurrency={display.currency}
+        onTransferPress={goToTransfer}
       />
     </>
   )

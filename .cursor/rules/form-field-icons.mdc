@@ -1,0 +1,14 @@
+---
+description: Give data-entry fields a leading icon for the kind of value
+globs: "**/*.{ts,tsx}"
+alwaysApply: false
+---
+
+# Icono en campos
+
+`FormTextField`, `SelectField` y controles donde se escribe o elige un dato llevan un icono líder del tipo de dato (`icon={TypeIcon}`). El slot de un solo emoji no lleva icono extra: el carácter es el icono.
+
+```tsx
+<FormTextField label="Nombre" icon={TypeIcon} value={name} onChange={setName} />
+<SelectField label="Padre" icon={FolderTreeIcon} value={parentId} onChange={setParentId} options={options} />
+```

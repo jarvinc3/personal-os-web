@@ -6,17 +6,11 @@ import { FinanceMonthPicker } from "@/src/modules/finance/components/transaction
 import { FinanceMonthSection } from "@/src/modules/finance/components/transactions/finance-month-section";
 import { FinanceTransactionSearch } from "@/src/modules/finance/components/transactions/finance-transaction-search";
 import { TransactionDetailSheet } from "@/src/modules/finance/components/transactions/transaction-detail-sheet";
-import { TransactionSheet } from "@/src/modules/finance/components/transactions/transaction-sheet";
-import { TransferSheet } from "@/src/modules/finance/components/transactions/transfer-sheet";
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/constants/sheet-keys";
 import { useAccounts } from "@/src/modules/finance/hooks/use-accounts";
 import { useCards } from "@/src/modules/finance/hooks/use-cards";
 import { useCategories } from "@/src/modules/finance/hooks/use-categories";
-import { useSheetQueryEntity } from "@/src/modules/finance/hooks/use-sheet-entity";
-import {
-  useTimelineTransactions,
-  useTransaction,
-} from "@/src/modules/finance/hooks/use-transactions";
+import { useTimelineTransactions } from "@/src/modules/finance/hooks/use-transactions";
 import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error";
 import { buildTimelineMonths } from "@/src/modules/finance/lib/group-transactions-timeline";
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/lib/money";
@@ -38,6 +32,7 @@ import {
 } from "@/src/modules/finance/lib/timeline-scroll";
 import { FINANCE_TRANSACTIONS_QUERY_KEY } from "@/src/modules/finance/types/api";
 import { ExpandableFab } from "@/src/shared/components/layout/expandable-fab";
+import { APP_ROUTES, financeTransactionNewHref } from "@/src/shared/constants/app-routes";
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params";
 import { appToast } from "@/src/shared/lib/app-toast";
 import { useQueryClient } from "@tanstack/react-query";
@@ -47,6 +42,7 @@ import {
   PlusIcon,
   RefreshCwIcon,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import {
   useCallback,
   useEffect,
@@ -104,21 +100,14 @@ export function FinanceTransactionsList({
   const programmaticTarget = useRef<MonthKey | null>(null)
   const scrollGeneration = useRef(0)
   const currentMonthKey = monthKeyFromDate(new Date())
+  const router = useRouter()
   const {
     open: openDetailSheet,
     sheetId: detailSheetId,
     setOpen: setOpenDetailSheet,
   } = useSheetParam(FINANCE_SHEET_KEYS.transactionDetail)
-  const {
-    open: openTransactionSheet,
-    sheetId: transactionSheetId,
-    setOpen: setOpenTransactionSheet,
-  } = useSheetParam(FINANCE_SHEET_KEYS.transaction)
-  const { open: openTransferSheet, setOpen: setOpenTransferSheet } =
-    useSheetParam(FINANCE_SHEET_KEYS.transfer)
   const queryClient = useQueryClient()
-  const sheetsOpen =
-    openDetailSheet || openTransactionSheet || openTransferSheet
+  const sheetsOpen = openDetailSheet
 
   useEffect(() => {
     if (openDetailSheet && !detailSheetId) {
@@ -155,16 +144,6 @@ export function FinanceTransactionsList({
     [months, timelineQuery.items]
   )
   const activeMonth = timeline.find((month) => month.key === activeMonthKey)
-  const editingQuery = useTransaction(
-    enabled && openTransactionSheet && Boolean(transactionSheetId),
-    transactionSheetId
-  )
-  const editing = useSheetQueryEntity(
-    openTransactionSheet,
-    transactionSheetId,
-    editingQuery,
-    setOpenTransactionSheet
-  )
 
   const applyActiveMonth = useCallback((key: MonthKey) => {
     setActiveMonthKey(key)
@@ -419,21 +398,21 @@ export function FinanceTransactionsList({
           {
             icon: <MinusIcon />,
             label: "Gasto",
-            onClick: () => setOpenTransactionSheet(true, null),
+            onClick: () => router.push(financeTransactionNewHref("DEBIT")),
             disabled: !enabled || !hasTargets,
             color: "bg-destructive",
           },
           {
             icon: <PlusIcon />,
             label: "Ingreso",
-            onClick: () => setOpenTransactionSheet(true, null),
+            onClick: () => router.push(financeTransactionNewHref("CREDIT")),
             disabled: !enabled || !hasTargets,
             color: "bg-success",
           },
           {
             icon: <ArrowLeftRightIcon />,
             label: "Transferir",
-            onClick: () => setOpenTransferSheet(true),
+            onClick: () => router.push(APP_ROUTES.app.financeTransferNew),
             disabled: !enabled || !canTransfer,
             color: "bg-blue-500",
           },
@@ -447,27 +426,8 @@ export function FinanceTransactionsList({
         enabled={enabled}
         display={display}
         onEdit={(transaction) => {
-          setOpenTransactionSheet(true, transaction.id)
+          router.push(APP_ROUTES.app.financeTransactionEdit(transaction.id))
         }}
-      />
-
-      <TransactionSheet
-        open={openTransactionSheet}
-        onOpenChange={setOpenTransactionSheet}
-        pending={Boolean(transactionSheetId) && !editing}
-        transaction={editing}
-        accounts={accounts}
-        cards={cards}
-        defaultCurrency={display.currency}
-        enabled={enabled}
-      />
-
-      <TransferSheet
-        open={openTransferSheet}
-        onOpenChange={setOpenTransferSheet}
-        accounts={accounts}
-        cards={cards}
-        defaultCurrency={display.currency}
       />
     </div>
   )

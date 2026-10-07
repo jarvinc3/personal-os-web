@@ -216,6 +216,7 @@ export type FinanceCategory = {
   parentId: string | null
   isSystem: boolean
   type: FinanceCategoryType
+  createdAt: string
 }
 
 export const FINANCE_BUDGET_PERIODS = ["MONTHLY", "BIWEEKLY", "CUSTOM"] as const
