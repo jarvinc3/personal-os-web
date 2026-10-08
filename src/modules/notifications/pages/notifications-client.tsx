@@ -28,6 +28,13 @@ import {
 } from "@/src/shared/components/layout/settings-section"
 import { Button } from "@/src/shared/components/ui/button"
 import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/src/shared/components/ui/empty"
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
@@ -36,16 +43,22 @@ import {
 } from "@/src/shared/components/ui/dropdown-menu"
 import { Separator } from "@/src/shared/components/ui/separator"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
+import {
+  MODULE_SLUGS_ORDER,
+  getModule,
+  parseModuleSlugFromNotificationData,
+} from "@/src/shared/constants/module-registry"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { formatTimeRange } from "@/src/shared/lib/date-format"
-import { BellDot, CheckCheckIcon, MoreVerticalIcon } from "lucide-react"
+import type { ModuleSlug } from "@/src/modules/settings/types/module-config.types"
+import { BellDot, BellOff, CheckCheckIcon, MoreVerticalIcon } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useCallback, useEffect, useMemo, useState } from "react"
 
-type NotificationFilter = "all" | "unread"
+type NotificationReadFilter = "all" | "unread" | "read"
 
 function readTransactionId(
   notificationData: Record<string, unknown>
@@ -95,25 +108,62 @@ export function NotificationsClient() {
 
   const [prefsOpen, setPrefsOpen] = useState(false)
   const [quietHoursOpen, setQuietHoursOpen] = useState(false)
-  const [filter, setFilter] = useState<NotificationFilter>("all")
+  const [readFilter, setReadFilter] = useState<NotificationReadFilter>("all")
+  const [moduleFilter, setModuleFilter] = useState<ModuleSlug | null>(null)
 
   const notifications = useMemo(
     () => notificationsQuery.data?.pages.flatMap((page) => page.items) ?? [],
     [notificationsQuery.data?.pages]
   )
 
-  const unreadCount = useMemo(
-    () => notifications.filter((notification) => !notification.isRead).length,
-    [notifications]
+  const moduleOptions = useMemo(() => {
+    const present = new Set<ModuleSlug>()
+    for (const notification of notifications) {
+      const slug = parseModuleSlugFromNotificationData(notification.data)
+      if (slug) present.add(slug)
+    }
+    return MODULE_SLUGS_ORDER.filter((slug) => present.has(slug))
+  }, [notifications])
+
+  useEffect(() => {
+    if (moduleFilter && !moduleOptions.includes(moduleFilter)) {
+      setModuleFilter(null)
+    }
+  }, [moduleFilter, moduleOptions])
+
+  const scopedNotifications = useMemo(
+    () =>
+      moduleFilter
+        ? notifications.filter(
+            (notification) =>
+              parseModuleSlugFromNotificationData(notification.data) ===
+              moduleFilter,
+          )
+        : notifications,
+    [moduleFilter, notifications],
   )
 
-  const visibleNotifications = useMemo(
+  const unreadCount = useMemo(
     () =>
-      filter === "unread"
-        ? notifications.filter((notification) => !notification.isRead)
-        : notifications,
-    [filter, notifications]
+      scopedNotifications.filter((notification) => !notification.isRead).length,
+    [scopedNotifications],
   )
+
+  const readCount = useMemo(
+    () =>
+      scopedNotifications.filter((notification) => notification.isRead).length,
+    [scopedNotifications],
+  )
+
+  const visibleNotifications = useMemo(() => {
+    if (readFilter === "unread") {
+      return scopedNotifications.filter((notification) => !notification.isRead)
+    }
+    if (readFilter === "read") {
+      return scopedNotifications.filter((notification) => notification.isRead)
+    }
+    return scopedNotifications
+  }, [readFilter, scopedNotifications])
 
   const sections = useMemo(
     () => groupNotificationsByDate(visibleNotifications),
@@ -234,39 +284,78 @@ export function NotificationsClient() {
 
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-4 p-4 pb-16 md:px-6">
-      <div
-        className="flex gap-2"
-        role="tablist"
-        aria-label="Filtro de notificaciones"
-      >
-        <Button
-          role="tab"
-          aria-selected={filter === "all"}
-          variant={filter === "all" ? "default" : "outline"}
-          size="sm"
-          className="rounded-full"
-          onClick={() => setFilter("all")}
+      <div className="flex flex-wrap gap-2">
+        <div
+          className="flex flex-wrap gap-2"
+          role="tablist"
+          aria-label="Filtro de notificaciones"
         >
-          Todas
-        </Button>
-        <Button
-          role="tab"
-          aria-selected={filter === "unread"}
-          variant={filter === "unread" ? "default" : "outline"}
-          size="sm"
-          className="rounded-full"
-          onClick={() => setFilter("unread")}
-        >
-          {unreadCount > 0 ? `No leídas (${unreadCount})` : "No leídas"}
-        </Button>
+          <Button
+            role="tab"
+            aria-selected={readFilter === "all"}
+            variant={readFilter === "all" ? "default" : "outline"}
+            size="sm"
+            className="rounded-full"
+            onClick={() => setReadFilter("all")}
+          >
+            Todas
+          </Button>
+          <Button
+            role="tab"
+            aria-selected={readFilter === "unread"}
+            variant={readFilter === "unread" ? "default" : "outline"}
+            size="sm"
+            className="rounded-full"
+            onClick={() => setReadFilter("unread")}
+          >
+            {unreadCount > 0 ? `No leídas (${unreadCount})` : "No leídas"}
+          </Button>
+          <Button
+            role="tab"
+            aria-selected={readFilter === "read"}
+            variant={readFilter === "read" ? "default" : "outline"}
+            size="sm"
+            className="rounded-full"
+            onClick={() => setReadFilter("read")}
+          >
+            {readCount > 0 ? `Leídas (${readCount})` : "Leídas"}
+          </Button>
+        </div>
+        {moduleOptions.length > 0 ? (
+          <div
+            className="flex flex-wrap gap-2"
+            role="group"
+            aria-label="Filtro por módulo"
+          >
+            {moduleOptions.map((slug) => {
+              const selected = moduleFilter === slug
+              return (
+                <Button
+                  key={slug}
+                  type="button"
+                  aria-pressed={selected}
+                  variant={selected ? "default" : "outline"}
+                  size="sm"
+                  className="rounded-full"
+                  onClick={() =>
+                    setModuleFilter((current) =>
+                      current === slug ? null : slug,
+                    )
+                  }
+                >
+                  {getModule(slug).label}
+                </Button>
+              )
+            })}
+          </div>
+        ) : null}
       </div>
 
       {sections.length === 0 ? (
-        <p className="py-16 text-center text-muted-foreground">
-          {filter === "unread"
-            ? "No tienes notificaciones sin leer."
-            : "No tienes notificaciones por ahora."}
-        </p>
+        <NotificationEmptyState
+          readFilter={readFilter}
+          moduleLabel={moduleFilter ? getModule(moduleFilter).label : null}
+        />
       ) : (
         <div className="flex flex-col gap-4">
           {sections.map((section) => (
@@ -290,7 +379,7 @@ export function NotificationsClient() {
         </div>
       )}
 
-      {notificationsQuery.hasNextPage ? (
+      {notificationsQuery.hasNextPage && visibleNotifications.length > 0 ? (
         <div className="flex justify-center">
           <Button
             variant="outline"
@@ -336,6 +425,48 @@ type NotificationPreferencesSheetProps = {
     patch: Parameters<ReturnType<typeof useProfile>["updatePreferences"]>[0],
     successMessage: string
   ) => Promise<void>
+}
+
+function NotificationEmptyState({
+  readFilter,
+  moduleLabel,
+}: {
+  readFilter: NotificationReadFilter
+  moduleLabel: string | null
+}) {
+  const scope = moduleLabel ? ` en ${moduleLabel}` : ""
+  const copy =
+    readFilter === "unread"
+      ? {
+          title: "Todo al día",
+          description: `No tienes notificaciones sin leer${scope}.`,
+        }
+      : readFilter === "read"
+        ? {
+            title: "Nada leído",
+            description: `No tienes notificaciones leídas${scope}.`,
+          }
+        : moduleLabel
+          ? {
+              title: `Sin avisos de ${moduleLabel}`,
+              description: `Cuando ${moduleLabel} tenga algo nuevo, aparecerá aquí.`,
+            }
+          : {
+              title: "Sin notificaciones",
+              description: "Cuando llegue algo, lo verás aquí.",
+            }
+
+  return (
+    <Empty className="border">
+      <EmptyHeader>
+        <EmptyMedia variant="icon">
+          <BellOff />
+        </EmptyMedia>
+        <EmptyTitle>{copy.title}</EmptyTitle>
+        <EmptyDescription>{copy.description}</EmptyDescription>
+      </EmptyHeader>
+    </Empty>
+  )
 }
 
 function NotificationPreferencesSheet({

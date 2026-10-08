@@ -169,7 +169,10 @@ export function SummaryItem({
     <>
       {showLeading ? (
         <span
-          className="flex justify-center items-center rounded-full size-10 shrink-0 bg-muted"
+          className={cn(
+            "flex shrink-0 items-center justify-center rounded-full bg-muted",
+            leading ? "h-10 w-max min-w-10 px-1" : "size-10",
+          )}
           style={
             accentColor
               ? {
