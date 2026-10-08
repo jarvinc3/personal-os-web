@@ -10,6 +10,7 @@ import { EditAIProviderSheet } from "@/src/modules/settings/components/sheets/ed
 import { EditAISheet } from "@/src/modules/settings/components/sheets/edit-ai-sheet"
 import { EditQuietHoursSheet } from "@/src/modules/settings/components/sheets/edit-quiet-hours-sheet"
 import { EditThemeSheet } from "@/src/modules/settings/components/sheets/edit-theme-sheet"
+import { WipeUserDataSheet } from "@/src/modules/settings/components/sheets/wipe-user-data-sheet"
 import {
   getAiToneLabel,
   getThemeOptionLabel,
@@ -30,7 +31,10 @@ import {
 } from "@/src/shared/components/ui/avatar"
 import { Button } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
-import { APP_ROUTES, settingsModuleHref } from "@/src/shared/constants/app-routes"
+import {
+  APP_ROUTES,
+  settingsModuleHref,
+} from "@/src/shared/constants/app-routes"
 import { MODULE_SLUGS_ORDER } from "@/src/shared/constants/module-registry"
 import { MODULE_SHEET_PARAM_KEYS } from "@/src/modules/settings/constants/module-sheet-keys"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
@@ -56,6 +60,8 @@ export default function SettingsPage() {
     useSheetParam("account-sheet")
   const { open: openDeleteAccountSheet, setOpen: setOpenDeleteAccountSheet } =
     useSheetParam("delete-account-sheet")
+  const { open: openWipeDataSheet, setOpen: setOpenWipeDataSheet } =
+    useSheetParam("wipe-data-sheet")
   const { open: openThemeSheet, setOpen: setOpenThemeSheet } =
     useSheetParam("theme-sheet")
   const { open: openAISheet, setOpen: setOpenAISheet } =
@@ -82,7 +88,7 @@ export default function SettingsPage() {
     const sheet = searchParams.get("sheet")
     if (!sheet) return
     const slug = MODULE_SLUGS_ORDER.find(
-      (item) => MODULE_SHEET_PARAM_KEYS[item] === sheet,
+      (item) => MODULE_SHEET_PARAM_KEYS[item] === sheet
     )
     if (!slug) return
     router.replace(settingsModuleHref(slug))
@@ -364,9 +370,17 @@ export default function SettingsPage() {
 
       <SettingsSection title="Zona de Peligro">
         <SettingsRow
+          label="Vaciar datos"
+          destructive
+          onPress={() => setOpenWipeDataSheet(true)}
+          accentColor={SETTINGS_REGISTRY.danger.accent}
+          {...SETTINGS_REGISTRY.danger.rows.wipeData}
+        />
+        <SettingsRow
           label="Borrar cuenta"
           destructive
           onPress={() => setOpenDeleteAccountSheet(true)}
+          isLast
           accentColor={SETTINGS_REGISTRY.danger.accent}
           {...SETTINGS_REGISTRY.danger.rows.deleteAccount}
         />
@@ -396,6 +410,11 @@ export default function SettingsPage() {
       <DeleteAccountSheet
         open={openDeleteAccountSheet}
         onOpenChange={setOpenDeleteAccountSheet}
+        email={displayEmail}
+      />
+      <WipeUserDataSheet
+        open={openWipeDataSheet}
+        onOpenChange={setOpenWipeDataSheet}
         email={displayEmail}
       />
       <EditThemeSheet open={openThemeSheet} onOpenChange={setOpenThemeSheet} />

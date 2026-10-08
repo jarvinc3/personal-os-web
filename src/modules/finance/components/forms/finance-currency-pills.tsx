@@ -1,11 +1,8 @@
 "use client"
 
 import { buildFinanceCurrencyOptions } from "@/src/modules/finance/lib/finance-currency"
-import {
-  Field,
-  FieldError,
-  FieldLabel,
-} from "@/src/shared/components/ui/field"
+import { useFinanceEnabled } from "@/src/modules/finance/hooks/use-finance-enabled"
+import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
 import { Button } from "@/src/shared/components/ui/button"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
 
@@ -31,13 +28,15 @@ export function FinanceCurrencyPills({
   error,
 }: FinanceCurrencyPillsProps) {
   const excluded = new Set(
-    excludeCodes.map((code) => code.trim().toUpperCase()).filter(Boolean),
+    excludeCodes.map((code) => code.trim().toUpperCase()).filter(Boolean)
   )
   const current = value.trim().toUpperCase()
-  const options = buildFinanceCurrencyOptions(baseCurrency, [
-    ...extraCodes,
-    value,
-  ]).filter((code) => code === current || !excluded.has(code))
+  const { config } = useFinanceEnabled()
+  const options = buildFinanceCurrencyOptions(
+    baseCurrency,
+    config.trackedCurrencies,
+    [...extraCodes, value]
+  ).filter((code) => code === current || !excluded.has(code))
 
   return (
     <Field data-invalid={error ? true : undefined}>

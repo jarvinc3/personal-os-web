@@ -29,17 +29,27 @@ export const FINANCE_INSTITUTIONS_QUERY_KEY = [
   ...FINANCE_QUERY_KEY,
   "institutions",
 ] as const
-export const FINANCE_ACCOUNTS_QUERY_KEY = [...FINANCE_QUERY_KEY, "accounts"] as const
+export const FINANCE_ACCOUNTS_QUERY_KEY = [
+  ...FINANCE_QUERY_KEY,
+  "accounts",
+] as const
 export const FINANCE_CURRENCIES_QUERY_KEY = [
   ...FINANCE_QUERY_KEY,
   "currencies",
+] as const
+export const FINANCE_EXCHANGE_RATES_QUERY_KEY = [
+  ...FINANCE_QUERY_KEY,
+  "exchange-rates",
 ] as const
 export const FINANCE_CARDS_QUERY_KEY = [...FINANCE_QUERY_KEY, "cards"] as const
 export const FINANCE_CATEGORIES_QUERY_KEY = [
   ...FINANCE_QUERY_KEY,
   "categories",
 ] as const
-export const FINANCE_ANALYTICS_QUERY_KEY = [...FINANCE_QUERY_KEY, "analytics"] as const
+export const FINANCE_ANALYTICS_QUERY_KEY = [
+  ...FINANCE_QUERY_KEY,
+  "analytics",
+] as const
 export const FINANCE_BALANCE_SHEET_QUERY_KEY = [
   ...FINANCE_QUERY_KEY,
   "balance-sheet",
@@ -48,7 +58,10 @@ export const FINANCE_TRANSACTIONS_QUERY_KEY = [
   ...FINANCE_QUERY_KEY,
   "transactions",
 ] as const
-export const FINANCE_BUDGETS_QUERY_KEY = [...FINANCE_QUERY_KEY, "budgets"] as const
+export const FINANCE_BUDGETS_QUERY_KEY = [
+  ...FINANCE_QUERY_KEY,
+  "budgets",
+] as const
 export const FINANCE_SAVINGS_GOALS_QUERY_KEY = [
   ...FINANCE_QUERY_KEY,
   "savings-goals",

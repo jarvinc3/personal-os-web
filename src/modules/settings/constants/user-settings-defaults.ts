@@ -45,6 +45,7 @@ export const DEFAULT_MODULE_CONFIG_BY_SLUG: ModuleConfigBySlug = {
     fieldGuide:
       "Moneda, calendario financiero, panel y alertas del módulo Finanzas.",
     baseCurrency: "DOP",
+    trackedCurrencies: ["USD", "EUR"],
     weekStartsOn: 1,
     dashboardPeriod: "month",
     display: {

@@ -280,13 +280,11 @@ function SecondaryHeader({
   actions,
   onBack,
   tinted,
-  showUserMenu,
 }: {
   title: ReactNode
   actions?: ReactNode
   onBack: () => void
   tinted?: boolean
-  showUserMenu: boolean
 }) {
   return (
     <div
@@ -304,16 +302,12 @@ function SecondaryHeader({
       </div>
       <div
         className={cn(
-          "flex items-center justify-end gap-2",
+          "flex items-center justify-end",
           tinted &&
             "[&_button]:text-white [&_button]:hover:bg-white/15 [&_button]:hover:text-white",
         )}
       >
-        {actions}
-        {showUserMenu ? <HeaderUserMenu /> : null}
-        {!actions && !showUserMenu ? (
-          <span className="size-8" aria-hidden="true" />
-        ) : null}
+        {actions ?? <span className="size-8" aria-hidden="true" />}
       </div>
     </div>
   )
@@ -331,7 +325,6 @@ export function AppHeader() {
 
   const accentColor =
     config.variant === "secondary" ? config.accentColor : undefined
-  const moduleSlug = moduleSlugFromPathname(pathname)
 
   return (
     <header
@@ -354,7 +347,6 @@ export function AppHeader() {
           actions={config.actions}
           onBack={handleBack}
           tinted={Boolean(accentColor)}
-          showUserMenu={moduleSlug !== null}
         />
       ) : (
         <PrimaryHeader

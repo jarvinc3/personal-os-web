@@ -1,6 +1,7 @@
 "use client"
 
-import { ModuleSettingsFormShell } from "@/src/modules/settings/components/module-settings/module-settings-form-shell"
+import { Button } from "@/src/shared/components/ui/button"
+import { Spinner } from "@/src/shared/components/ui/spinner"
 import { ModuleSheetEnableRow } from "@/src/modules/settings/components/profile-ui";
 import { useModuleSheetEnable } from "@/src/modules/settings/hooks/use-module-sheet-enable";
 import { useProfileSheetFormSync } from "@/src/modules/settings/hooks/use-profile-sheet";
@@ -12,7 +13,7 @@ import { getModule } from "@/src/shared/constants/module-registry";
 import { appToast } from "@/src/shared/lib/app-toast";
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { HeartPulse, Ruler } from "lucide-react";
+import { CalendarDays, EyeOff, HeartPulse, Ruler, Target } from "lucide-react";
 import { useEffect, useMemo } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
@@ -95,14 +96,13 @@ export function HealthModuleSettingsForm({ onDone }: { onDone: () => void }) {
   })
 
   return (
-    <ModuleSettingsFormShell
-      onSubmit={onSubmit}
-      canSave={isDirty || moduleEnable.isEnabledDirty}
-      pending={updateMutation.isPending}
+    <form
+      className="flex flex-col gap-6"
+      onSubmit={(event) => {
+        event.preventDefault()
+        onSubmit()
+      }}
     >
-      {config.fieldGuide ? (
-        <p className="text-sm text-muted-foreground">{config.fieldGuide}</p>
-      ) : null}
       <ModuleSheetEnableRow
         state={moduleEnable.state}
         isEnabled={moduleEnable.sheetEnabled}
@@ -142,6 +142,8 @@ export function HealthModuleSettingsForm({ onDone }: { onDone: () => void }) {
           name="hideSensitiveMetrics"
           render={({ field }) => (
             <SwitchFieldRow
+              icon={EyeOff}
+              iconColor={MODULE_ACCENT}
               label="Ocultar métricas sensibles"
               checked={field.value}
               onCheckedChange={field.onChange}
@@ -153,6 +155,8 @@ export function HealthModuleSettingsForm({ onDone }: { onDone: () => void }) {
           name="goalReminders"
           render={({ field }) => (
             <SwitchFieldRow
+              icon={Target}
+              iconColor={MODULE_ACCENT}
               label="Recordatorios de metas"
               checked={field.value}
               onCheckedChange={field.onChange}
@@ -164,6 +168,8 @@ export function HealthModuleSettingsForm({ onDone }: { onDone: () => void }) {
           name="weeklySummary"
           render={({ field }) => (
             <SwitchFieldRow
+              icon={CalendarDays}
+              iconColor={MODULE_ACCENT}
               label="Resumen semanal"
               checked={field.value}
               onCheckedChange={field.onChange}
@@ -171,6 +177,16 @@ export function HealthModuleSettingsForm({ onDone }: { onDone: () => void }) {
           )}
         />
       </SummarySection>
-    </ModuleSettingsFormShell>
+      <Button
+        type="submit"
+        className="h-11 w-full"
+        disabled={
+          !(isDirty || moduleEnable.isEnabledDirty) || updateMutation.isPending
+        }
+      >
+        {updateMutation.isPending ? <Spinner data-icon="inline-start" /> : null}
+        {updateMutation.isPending ? "Guardando..." : "Guardar"}
+      </Button>
+    </form>
   )
 }

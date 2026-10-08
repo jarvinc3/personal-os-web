@@ -1,42 +1,75 @@
 "use client"
 
-import { useAuthGuard } from "@/src/modules/auth";
-import { DevicePushSettingsRow } from "@/src/modules/notifications/components/device-push-settings-row";
-import { NotificationRow } from "@/src/modules/notifications/components/notification-row";
+import { useAuthGuard } from "@/src/modules/auth"
+import { DevicePushSettingsRow } from "@/src/modules/notifications/components/device-push-settings-row"
+import { NotificationListSkeleton } from "@/src/modules/notifications/components/notification-list-skeleton"
+import { NotificationRow } from "@/src/modules/notifications/components/notification-row"
 import {
   useMarkAllNotificationsRead,
   useMarkNotificationRead,
-} from "@/src/modules/notifications/hooks/use-mark-notification-read";
-import { useNotificationPreferences } from "@/src/modules/notifications/hooks/use-notification-preferences";
-import { useNotifications } from "@/src/modules/notifications/hooks/use-notifications";
-import { deactivatePushTokenIfPresent } from "@/src/modules/notifications/lib/deactivate-web-push-token";
-import { groupNotificationsByDate } from "@/src/modules/notifications/lib/group-notifications-by-date";
-import { EditQuietHoursSheet } from "@/src/modules/settings/components/sheets/edit-quiet-hours-sheet";
-import { SETTINGS_REGISTRY } from "@/src/modules/settings/constants/settings-metadata";
-import { useProfile } from "@/src/modules/settings/hooks/use-profile";
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet";
-import { LoadingView } from "@/src/shared/components/layout/loading-view";
+} from "@/src/modules/notifications/hooks/use-mark-notification-read"
+import { useNotificationPreferences } from "@/src/modules/notifications/hooks/use-notification-preferences"
+import { useNotifications } from "@/src/modules/notifications/hooks/use-notifications"
+import { deactivatePushTokenIfPresent } from "@/src/modules/notifications/lib/deactivate-web-push-token"
+import { groupNotificationsByDate } from "@/src/modules/notifications/lib/group-notifications-by-date"
+import type { NotificationRecord } from "@/src/modules/notifications/types/notification.types"
+import { TransactionDetailSheet } from "@/src/modules/finance/components/transactions/transaction-detail-sheet"
+import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/constants/sheet-keys"
+import { useFinanceEnabled } from "@/src/modules/finance/hooks/use-finance-enabled"
+import type { FinanceMoneyDisplay } from "@/src/modules/finance/lib/money"
+import { EditQuietHoursSheet } from "@/src/modules/settings/components/sheets/edit-quiet-hours-sheet"
+import { SETTINGS_REGISTRY } from "@/src/modules/settings/constants/settings-metadata"
+import { useProfile } from "@/src/modules/settings/hooks/use-profile"
+import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+import { LoadingView } from "@/src/shared/components/layout/loading-view"
 import {
   SettingsRow,
   SettingsSection,
-} from "@/src/shared/components/layout/settings-section";
-import { Button } from "@/src/shared/components/ui/button";
+} from "@/src/shared/components/layout/settings-section"
+import { Button } from "@/src/shared/components/ui/button"
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/src/shared/components/ui/empty"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/src/shared/components/ui/dropdown-menu";
-import { Separator } from "@/src/shared/components/ui/separator";
-import { Spinner } from "@/src/shared/components/ui/spinner";
-import { APP_ROUTES } from "@/src/shared/constants/app-routes";
-import { usePageHeader } from "@/src/shared/hooks/use-page-header";
-import { appToast } from "@/src/shared/lib/app-toast";
-import { formatTimeRange } from "@/src/shared/lib/date-format";
-import { BellDot, CheckCheckIcon, MoreVerticalIcon } from "lucide-react";
-import Link from "next/link";
-import { useCallback, useMemo, useState } from "react";
+} from "@/src/shared/components/ui/dropdown-menu"
+import { Separator } from "@/src/shared/components/ui/separator"
+import { APP_ROUTES } from "@/src/shared/constants/app-routes"
+import {
+  MODULE_SLUGS_ORDER,
+  getModule,
+  parseModuleSlugFromNotificationData,
+} from "@/src/shared/constants/module-registry"
+import { usePageHeader } from "@/src/shared/hooks/use-page-header"
+import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
+import { appToast } from "@/src/shared/lib/app-toast"
+import { formatTimeRange } from "@/src/shared/lib/date-format"
+import type { ModuleSlug } from "@/src/modules/settings/types/module-config.types"
+import { BellDot, BellOff, CheckCheckIcon, MoreVerticalIcon } from "lucide-react"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { useCallback, useEffect, useMemo, useState } from "react"
+
+type NotificationReadFilter = "all" | "unread" | "read"
+
+function readTransactionId(
+  notificationData: Record<string, unknown>
+): string | null {
+  const value = notificationData.transactionId
+  if (typeof value !== "string") {
+    return null
+  }
+  const trimmed = value.trim()
+  return trimmed ? trimmed : null
+}
 
 export function NotificationsClient() {
   const { isAuthenticated, isLoading } = useAuthGuard()
@@ -46,6 +79,14 @@ export function NotificationsClient() {
   const { mutateAsync: markAllAsRead, isPending: isMarkAllPending } =
     useMarkAllNotificationsRead()
   const { updatePreferences } = useProfile()
+  const { isEnabled: isFinanceEnabled, config: financeConfig } =
+    useFinanceEnabled()
+  const router = useRouter()
+  const {
+    open: detailOpen,
+    sheetId: detailTransactionId,
+    setOpen: setDetailOpen,
+  } = useSheetParam(FINANCE_SHEET_KEYS.transactionDetail)
 
   const handlePreferenceToggle = useCallback(
     async (
@@ -67,24 +108,105 @@ export function NotificationsClient() {
 
   const [prefsOpen, setPrefsOpen] = useState(false)
   const [quietHoursOpen, setQuietHoursOpen] = useState(false)
+  const [readFilter, setReadFilter] = useState<NotificationReadFilter>("all")
+  const [moduleFilter, setModuleFilter] = useState<ModuleSlug | null>(null)
+
+  const notifications = useMemo(
+    () => notificationsQuery.data?.pages.flatMap((page) => page.items) ?? [],
+    [notificationsQuery.data?.pages]
+  )
+
+  const moduleOptions = useMemo(() => {
+    const present = new Set<ModuleSlug>()
+    for (const notification of notifications) {
+      const slug = parseModuleSlugFromNotificationData(notification.data)
+      if (slug) present.add(slug)
+    }
+    return MODULE_SLUGS_ORDER.filter((slug) => present.has(slug))
+  }, [notifications])
+
+  useEffect(() => {
+    if (moduleFilter && !moduleOptions.includes(moduleFilter)) {
+      setModuleFilter(null)
+    }
+  }, [moduleFilter, moduleOptions])
+
+  const scopedNotifications = useMemo(
+    () =>
+      moduleFilter
+        ? notifications.filter(
+            (notification) =>
+              parseModuleSlugFromNotificationData(notification.data) ===
+              moduleFilter,
+          )
+        : notifications,
+    [moduleFilter, notifications],
+  )
+
+  const unreadCount = useMemo(
+    () =>
+      scopedNotifications.filter((notification) => !notification.isRead).length,
+    [scopedNotifications],
+  )
+
+  const readCount = useMemo(
+    () =>
+      scopedNotifications.filter((notification) => notification.isRead).length,
+    [scopedNotifications],
+  )
+
+  const visibleNotifications = useMemo(() => {
+    if (readFilter === "unread") {
+      return scopedNotifications.filter((notification) => !notification.isRead)
+    }
+    if (readFilter === "read") {
+      return scopedNotifications.filter((notification) => notification.isRead)
+    }
+    return scopedNotifications
+  }, [readFilter, scopedNotifications])
 
   const sections = useMemo(
-    () => groupNotificationsByDate(notificationsQuery.data?.items ?? []),
-    [notificationsQuery.data?.items]
+    () => groupNotificationsByDate(visibleNotifications),
+    [visibleNotifications]
   )
+
+  const display: FinanceMoneyDisplay = {
+    currency: financeConfig.baseCurrency,
+    showCents: financeConfig.display.showCents,
+    compactNumbers: financeConfig.display.compactNumbers,
+  }
+
+  useEffect(() => {
+    if (detailOpen && !detailTransactionId) {
+      setDetailOpen(false)
+    }
+  }, [detailOpen, detailTransactionId, setDetailOpen])
 
   const handleMarkAllRead = useCallback(() => {
     void markAllAsRead()
   }, [markAllAsRead])
+
+  const handleNotificationPress = useCallback(
+    (notification: NotificationRecord) => {
+      if (!notification.isRead) {
+        void markReadMutation.mutateAsync(notification.id)
+      }
+      const transactionId = readTransactionId(notification.data)
+      if (transactionId) {
+        setDetailOpen(true, transactionId)
+      }
+    },
+    [markReadMutation, setDetailOpen]
+  )
 
   const headerMenu = useMemo(
     () => (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
-            variant="ghost"
+            variant="outline"
             size="icon"
-            className="rounded-full size-9"
+            className="size-9 rounded-full"
             aria-label="Opciones de notificaciones"
           >
             <MoreVerticalIcon />
@@ -93,7 +215,7 @@ export function NotificationsClient() {
         <DropdownMenuContent align="end" className="min-w-56">
           <DropdownMenuGroup className="space-y-1">
             <DropdownMenuItem
-              disabled={isMarkAllPending || sections.length === 0}
+              disabled={isMarkAllPending || notifications.length === 0}
               onClick={handleMarkAllRead}
             >
               <CheckCheckIcon />
@@ -107,7 +229,7 @@ export function NotificationsClient() {
         </DropdownMenuContent>
       </DropdownMenu>
     ),
-    [handleMarkAllRead, isMarkAllPending, sections.length]
+    [handleMarkAllRead, isMarkAllPending, notifications.length]
   )
 
   usePageHeader(
@@ -125,8 +247,8 @@ export function NotificationsClient() {
 
   if (!isInAppEnabled) {
     return (
-      <div className="flex flex-col gap-4 p-4 pb-16 mx-auto max-w-2xl md:px-6">
-        <div className="flex flex-col gap-4 justify-center items-center px-6 py-16">
+      <div className="mx-auto flex max-w-2xl flex-col gap-4 p-4 pb-16 md:px-6">
+        <div className="flex flex-col items-center justify-center gap-4 px-6 py-16">
           <p className="text-center text-muted-foreground">
             Las notificaciones in-app están desactivadas en tus preferencias.
           </p>
@@ -147,8 +269,8 @@ export function NotificationsClient() {
 
   if (notificationsQuery.isLoading) {
     return (
-      <div className="flex flex-col gap-4 p-4 pb-16 mx-auto max-w-2xl md:px-6">
-        <LoadingView />
+      <div className="mx-auto flex max-w-2xl flex-col gap-4 p-4 pb-16 md:px-6">
+        <NotificationListSkeleton />
         <NotificationPreferencesSheet
           open={prefsOpen}
           onOpenChange={setPrefsOpen}
@@ -161,17 +283,79 @@ export function NotificationsClient() {
   }
 
   return (
-    <div className="flex flex-col gap-4 p-4 pb-16 mx-auto max-w-2xl md:px-6">
-      {notificationsQuery.isRefetching ? (
-        <div className="flex justify-center py-2">
-          <Spinner />
+    <div className="mx-auto flex max-w-2xl flex-col gap-4 p-4 pb-16 md:px-6">
+      <div className="flex flex-wrap gap-2">
+        <div
+          className="flex flex-wrap gap-2"
+          role="tablist"
+          aria-label="Filtro de notificaciones"
+        >
+          <Button
+            role="tab"
+            aria-selected={readFilter === "all"}
+            variant={readFilter === "all" ? "default" : "outline"}
+            size="sm"
+            className="rounded-full"
+            onClick={() => setReadFilter("all")}
+          >
+            Todas
+          </Button>
+          <Button
+            role="tab"
+            aria-selected={readFilter === "unread"}
+            variant={readFilter === "unread" ? "default" : "outline"}
+            size="sm"
+            className="rounded-full"
+            onClick={() => setReadFilter("unread")}
+          >
+            {unreadCount > 0 ? `No leídas (${unreadCount})` : "No leídas"}
+          </Button>
+          <Button
+            role="tab"
+            aria-selected={readFilter === "read"}
+            variant={readFilter === "read" ? "default" : "outline"}
+            size="sm"
+            className="rounded-full"
+            onClick={() => setReadFilter("read")}
+          >
+            {readCount > 0 ? `Leídas (${readCount})` : "Leídas"}
+          </Button>
         </div>
-      ) : null}
+        {moduleOptions.length > 0 ? (
+          <div
+            className="flex flex-wrap gap-2"
+            role="group"
+            aria-label="Filtro por módulo"
+          >
+            {moduleOptions.map((slug) => {
+              const selected = moduleFilter === slug
+              return (
+                <Button
+                  key={slug}
+                  type="button"
+                  aria-pressed={selected}
+                  variant={selected ? "default" : "outline"}
+                  size="sm"
+                  className="rounded-full"
+                  onClick={() =>
+                    setModuleFilter((current) =>
+                      current === slug ? null : slug,
+                    )
+                  }
+                >
+                  {getModule(slug).label}
+                </Button>
+              )
+            })}
+          </div>
+        ) : null}
+      </div>
 
       {sections.length === 0 ? (
-        <p className="py-16 text-center text-muted-foreground">
-          No tienes notificaciones por ahora.
-        </p>
+        <NotificationEmptyState
+          readFilter={readFilter}
+          moduleLabel={moduleFilter ? getModule(moduleFilter).label : null}
+        />
       ) : (
         <div className="flex flex-col gap-4">
           {sections.map((section) => (
@@ -184,11 +368,7 @@ export function NotificationsClient() {
                   <div key={item.id}>
                     <NotificationRow
                       notification={item}
-                      onPress={() => {
-                        if (!item.isRead) {
-                          void markReadMutation.mutateAsync(item.id)
-                        }
-                      }}
+                      onPress={() => handleNotificationPress(item)}
                     />
                     {index < section.data.length - 1 ? <Separator /> : null}
                   </div>
@@ -199,16 +379,20 @@ export function NotificationsClient() {
         </div>
       )}
 
-      <div className="flex justify-center">
-        <Button
-          variant="outline"
-          size="sm"
-          disabled={notificationsQuery.isRefetching}
-          onClick={() => void notificationsQuery.refetch()}
-        >
-          Actualizar
-        </Button>
-      </div>
+      {notificationsQuery.hasNextPage && visibleNotifications.length > 0 ? (
+        <div className="flex justify-center">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={notificationsQuery.isFetchingNextPage}
+            onClick={() => void notificationsQuery.fetchNextPage()}
+          >
+            {notificationsQuery.isFetchingNextPage
+              ? "Cargando..."
+              : "Cargar más"}
+          </Button>
+        </div>
+      ) : null}
 
       <NotificationPreferencesSheet
         open={prefsOpen}
@@ -216,6 +400,17 @@ export function NotificationsClient() {
         quietHoursOpen={quietHoursOpen}
         onQuietHoursOpenChange={setQuietHoursOpen}
         onPreferenceToggle={handlePreferenceToggle}
+      />
+
+      <TransactionDetailSheet
+        open={detailOpen}
+        onOpenChange={setDetailOpen}
+        transactionId={detailTransactionId}
+        enabled={isFinanceEnabled}
+        display={display}
+        onEdit={(transaction) => {
+          router.push(APP_ROUTES.app.financeTransactionEdit(transaction.id))
+        }}
       />
     </div>
   )
@@ -230,6 +425,48 @@ type NotificationPreferencesSheetProps = {
     patch: Parameters<ReturnType<typeof useProfile>["updatePreferences"]>[0],
     successMessage: string
   ) => Promise<void>
+}
+
+function NotificationEmptyState({
+  readFilter,
+  moduleLabel,
+}: {
+  readFilter: NotificationReadFilter
+  moduleLabel: string | null
+}) {
+  const scope = moduleLabel ? ` en ${moduleLabel}` : ""
+  const copy =
+    readFilter === "unread"
+      ? {
+          title: "Todo al día",
+          description: `No tienes notificaciones sin leer${scope}.`,
+        }
+      : readFilter === "read"
+        ? {
+            title: "Nada leído",
+            description: `No tienes notificaciones leídas${scope}.`,
+          }
+        : moduleLabel
+          ? {
+              title: `Sin avisos de ${moduleLabel}`,
+              description: `Cuando ${moduleLabel} tenga algo nuevo, aparecerá aquí.`,
+            }
+          : {
+              title: "Sin notificaciones",
+              description: "Cuando llegue algo, lo verás aquí.",
+            }
+
+  return (
+    <Empty className="border">
+      <EmptyHeader>
+        <EmptyMedia variant="icon">
+          <BellOff />
+        </EmptyMedia>
+        <EmptyTitle>{copy.title}</EmptyTitle>
+        <EmptyDescription>{copy.description}</EmptyDescription>
+      </EmptyHeader>
+    </Empty>
+  )
 }
 
 function NotificationPreferencesSheet({

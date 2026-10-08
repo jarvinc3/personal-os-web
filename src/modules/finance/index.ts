@@ -6,12 +6,7 @@ export {
   FINANCE_NAV_ITEMS,
 } from "@/src/modules/finance/constants/nav"
 export { useAccounts } from "@/src/modules/finance/hooks/use-accounts"
-export {
-  useAnalyticsSummary,
-  useBudgetStatus,
-  useSpendingByCategory,
-  useSpendingOverTime,
-} from "@/src/modules/finance/hooks/use-analytics"
+export { useAnalyticsSummary } from "@/src/modules/finance/hooks/use-analytics"
 export { useBalanceSheet } from "@/src/modules/finance/hooks/use-balance-sheet"
 export { useBudgets } from "@/src/modules/finance/hooks/use-budgets"
 export { useCards } from "@/src/modules/finance/hooks/use-cards"
@@ -29,9 +24,7 @@ export {
 } from "@/src/modules/finance/lib/money"
 export type { FinanceMoneyDisplay } from "@/src/modules/finance/lib/money"
 export { FinanceAccountsClient } from "@/src/modules/finance/pages/finance-accounts"
-export { FinanceOverviewClient } from "@/src/modules/finance/pages/finance-overview"
 export { FinancePlanningClient } from "@/src/modules/finance/pages/finance-planning"
-export { FinanceStatisticsClient } from "@/src/modules/finance/pages/finance-statistics"
 export { FinanceMailboxesClient } from "@/src/modules/finance/pages/finance-sync"
 export { FinanceTransactionsClient } from "@/src/modules/finance/pages/finance-transactions"
 export type * from "@/src/modules/finance/types/api"

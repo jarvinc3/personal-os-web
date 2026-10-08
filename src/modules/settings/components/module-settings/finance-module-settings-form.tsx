@@ -1,7 +1,5 @@
 "use client"
 
-import { ModuleSettingsFormShell } from "@/src/modules/settings/components/module-settings/module-settings-form-shell"
-import { CurrencySelectField } from "@/src/modules/finance/components/catalog/currency-select-field"
 import { ModuleSheetEnableRow } from "@/src/modules/settings/components/profile-ui"
 import { useModuleSheetEnable } from "@/src/modules/settings/hooks/use-module-sheet-enable"
 import { useProfileSheetFormSync } from "@/src/modules/settings/hooks/use-profile-sheet"
@@ -12,21 +10,19 @@ import {
   SwitchFieldRow,
 } from "@/src/shared/components/layout/form-blocks"
 import { Button } from "@/src/shared/components/ui/button"
-import {
-  Field,
-  FieldError,
-  FieldLabel,
-} from "@/src/shared/components/ui/field"
+import { Spinner } from "@/src/shared/components/ui/spinner"
+import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
 import {
   RadioGroup,
   RadioGroupItem,
 } from "@/src/shared/components/ui/radio-group"
-import { SummarySection } from "@/src/shared/components/ui/summary"
+import { SummarySection, SummaryItem } from "@/src/shared/components/ui/summary"
 import {
   DurationWheels,
   TimePairWheels,
 } from "@/src/shared/components/ui/wheel-picker"
 import { getModule } from "@/src/shared/constants/module-registry"
+import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { formatTimeForDisplay } from "@/src/shared/lib/date-format"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
@@ -44,14 +40,24 @@ import {
   ChartBarIcon,
   CheckIcon,
   Clock,
+  Coins,
+  CreditCard,
   DollarSign,
+  FileBarChart,
   Mail,
   PencilIcon,
   PlusIcon,
+  Receipt,
+  RefreshCw,
   ScanEyeIcon,
+  Shrink,
+  Sparkles,
   Tags,
   Timer,
   Trash2Icon,
+  TriangleAlert,
+  Wallet,
+  type LucideIcon,
 } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
@@ -167,7 +173,9 @@ function EmailSyncTimesField({
                   aria-label={`Quitar hora ${index + 1}`}
                   disabled={disabled}
                   onClick={() => {
-                    onChange(times.filter((_, itemIndex) => itemIndex !== index))
+                    onChange(
+                      times.filter((_, itemIndex) => itemIndex !== index)
+                    )
                     setEditingIndex((current) => {
                       if (current === null) return null
                       if (current === index) return null
@@ -285,7 +293,6 @@ function EmailSyncIntervalField({
 
 const schema = z
   .object({
-    baseCurrency: z.string().trim().min(3, "Moneda obligatoria"),
     weekStartsOn: z.enum(["0", "1"]),
     dashboardPeriod: z.enum(["week", "month", "year"]),
     showCents: z.boolean(),
@@ -309,7 +316,10 @@ const schema = z
   .superRefine((values, ctx) => {
     if (values.emailSyncScheduleMode === EMAIL_SYNC_SCHEDULE_MODES.INTERVAL) {
       const minutes = Number(values.emailSyncEveryMinutes)
-      if (!Number.isInteger(minutes) || minutes < MIN_EMAIL_SYNC_INTERVAL_MINUTES) {
+      if (
+        !Number.isInteger(minutes) ||
+        minutes < MIN_EMAIL_SYNC_INTERVAL_MINUTES
+      ) {
         ctx.addIssue({
           code: "custom",
           path: ["emailSyncEveryMinutes"],
@@ -318,7 +328,9 @@ const schema = z
       }
       return
     }
-    const times = values.emailSyncTimes.map((time) => time.trim()).filter(Boolean)
+    const times = values.emailSyncTimes
+      .map((time) => time.trim())
+      .filter(Boolean)
     if (times.length === 0 || times.length > MAX_EMAIL_SYNC_TIMES) {
       ctx.addIssue({
         code: "custom",
@@ -348,15 +360,20 @@ type FormValues = z.infer<typeof schema>
 const MODULE_ACCENT = getModule("finance").accent
 
 const FINANCE_NOTIFICATION_ROWS = [
-  { key: "budgetAlerts", label: "Alertas de presupuesto" },
-  { key: "aiSuggestions", label: "Sugerencias de IA" },
-  { key: "transactionDetected", label: "Transacciones detectadas" },
-  { key: "monthlyReport", label: "Reporte mensual" },
-  { key: "cardDueDate", label: "Vencimiento de tarjetas" },
-  { key: "unusualExpense", label: "Gastos inusuales" },
+  { key: "budgetAlerts", label: "Alertas de presupuesto", icon: Wallet },
+  { key: "aiSuggestions", label: "Sugerencias de IA", icon: Sparkles },
+  {
+    key: "transactionDetected",
+    label: "Transacciones detectadas",
+    icon: Receipt,
+  },
+  { key: "monthlyReport", label: "Reporte mensual", icon: FileBarChart },
+  { key: "cardDueDate", label: "Vencimiento de tarjetas", icon: CreditCard },
+  { key: "unusualExpense", label: "Gastos inusuales", icon: TriangleAlert },
 ] as const satisfies readonly {
   key: keyof FinanceModuleConfig["notifications"]
   label: string
+  icon: LucideIcon
 }[]
 
 const WEEK_OPTIONS = [
@@ -369,14 +386,13 @@ const PERIOD_OPTIONS: {
   label: string
   description: string
 }[] = [
-    { value: "week", label: "Semana", description: "Vista agregada por semana." },
-    { value: "month", label: "Mes", description: "Vista agregada por mes." },
-    { value: "year", label: "Año", description: "Vista agregada por año." },
-  ]
+  { value: "week", label: "Semana", description: "Vista agregada por semana." },
+  { value: "month", label: "Mes", description: "Vista agregada por mes." },
+  { value: "year", label: "Año", description: "Vista agregada por año." },
+]
 
 function configToFormValues(config: FinanceModuleConfig): FormValues {
   return {
-    baseCurrency: config.baseCurrency,
     weekStartsOn: String(config.weekStartsOn) as "0" | "1",
     dashboardPeriod: config.dashboardPeriod,
     showCents: config.display.showCents,
@@ -440,7 +456,6 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
   const onSubmit = submitForm(async (values) => {
     await updateConfig(
       {
-        baseCurrency: values.baseCurrency,
         weekStartsOn: Number(values.weekStartsOn) as 0 | 1,
         dashboardPeriod: values.dashboardPeriod,
         display: {
@@ -454,15 +469,15 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
           schedule:
             values.emailSyncScheduleMode === EMAIL_SYNC_SCHEDULE_MODES.INTERVAL
               ? {
-                mode: EMAIL_SYNC_SCHEDULE_MODES.INTERVAL,
-                everyMinutes: Number(values.emailSyncEveryMinutes),
-              }
+                  mode: EMAIL_SYNC_SCHEDULE_MODES.INTERVAL,
+                  everyMinutes: Number(values.emailSyncEveryMinutes),
+                }
               : {
-                mode: EMAIL_SYNC_SCHEDULE_MODES.TIMES,
-                times: values.emailSyncTimes
-                  .map((time) => time.trim())
-                  .filter(Boolean),
-              },
+                  mode: EMAIL_SYNC_SCHEDULE_MODES.TIMES,
+                  times: values.emailSyncTimes
+                    .map((time) => time.trim())
+                    .filter(Boolean),
+                },
         },
         notifications: {
           budgetAlerts: values.budgetAlerts,
@@ -483,33 +498,29 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
   })
 
   return (
-    <ModuleSettingsFormShell
-      onSubmit={onSubmit}
-      canSave={isDirty || moduleEnable.isEnabledDirty}
-      pending={updateMutation.isPending}
+    <form
+      className="flex flex-col gap-6"
+      onSubmit={(event) => {
+        event.preventDefault()
+        onSubmit()
+      }}
     >
-      {config.fieldGuide ? (
-        <p className="text-sm text-muted-foreground">{config.fieldGuide}</p>
-      ) : null}
       <ModuleSheetEnableRow
         state={moduleEnable.state}
         isEnabled={moduleEnable.sheetEnabled}
         onEnabledChange={moduleEnable.handleEnabledChange}
         disabled={updateMutation.isPending}
       />
-      <SummarySection title="Moneda base" icon={DollarSign}>
-        <Controller
-          control={control}
-          name="baseCurrency"
-          render={({ field }) => (
-            <CurrencySelectField
-              value={field.value}
-              onChange={field.onChange}
-              enabled
-              extraCodes={[config.baseCurrency]}
-              disabled={updateMutation.isPending}
-            />
-          )}
+      <SummarySection title="Moneda" icon={DollarSign}>
+        <SummaryItem
+          href={APP_ROUTES.app.settingsFinanceCurrencies}
+          icon={DollarSign}
+          accentColor={MODULE_ACCENT}
+          title="Moneda principal"
+          description="Monedas y tasas del ledger."
+          value={config.baseCurrency}
+          showChevron
+          isLast
         />
       </SummarySection>
 
@@ -573,6 +584,8 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
           name="showCents"
           render={({ field }) => (
             <SwitchFieldRow
+              icon={Coins}
+              iconColor={MODULE_ACCENT}
               label="Mostrar centavos"
               checked={field.value}
               onCheckedChange={field.onChange}
@@ -584,6 +597,8 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
           name="compactNumbers"
           render={({ field }) => (
             <SwitchFieldRow
+              icon={Shrink}
+              iconColor={MODULE_ACCENT}
               label="Números compactos"
               checked={field.value}
               onCheckedChange={field.onChange}
@@ -598,6 +613,8 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
           name="emailSyncEnabled"
           render={({ field }) => (
             <SwitchFieldRow
+              icon={Mail}
+              iconColor={MODULE_ACCENT}
               label="Activar sync"
               description="Permite conectar Gmail y sincronizar."
               checked={field.value}
@@ -610,6 +627,8 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
           name="emailSyncAutomatic"
           render={({ field }) => (
             <SwitchFieldRow
+              icon={RefreshCw}
+              iconColor={MODULE_ACCENT}
               label="Sync automático"
               description="Se leen correos cada cierto tiempo."
               checked={field.value}
@@ -618,6 +637,22 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
             />
           )}
         />
+        <Controller
+          control={control}
+          name="autoCategorize"
+          render={({ field }) => (
+            <SwitchFieldRow
+              icon={Tags}
+              iconColor={MODULE_ACCENT}
+              label="Auto-categorizar"
+              checked={field.value}
+              onCheckedChange={field.onChange}
+            />
+          )}
+        />
+      </SummarySection>
+
+      <SummarySection title="Horarios de sincronización" icon={Clock}>
         <Controller
           control={control}
           name="emailSyncScheduleMode"
@@ -700,17 +735,6 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
             )}
           />
         )}
-        <Controller
-          control={control}
-          name="autoCategorize"
-          render={({ field }) => (
-            <SwitchFieldRow
-              label="Auto-categorizar"
-              checked={field.value}
-              onCheckedChange={field.onChange}
-            />
-          )}
-        />
       </SummarySection>
 
       <SummarySection title="Alertas del módulo" icon={Tags}>
@@ -721,6 +745,8 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
             name={row.key}
             render={({ field }) => (
               <SwitchFieldRow
+                icon={row.icon}
+                iconColor={MODULE_ACCENT}
                 label={row.label}
                 checked={field.value}
                 onCheckedChange={field.onChange}
@@ -729,6 +755,17 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
           />
         ))}
       </SummarySection>
-    </ModuleSettingsFormShell>
+
+      <Button
+        type="submit"
+        className="h-11 w-full"
+        disabled={
+          !(isDirty || moduleEnable.isEnabledDirty) || updateMutation.isPending
+        }
+      >
+        {updateMutation.isPending ? <Spinner data-icon="inline-start" /> : null}
+        {updateMutation.isPending ? "Guardando..." : "Guardar"}
+      </Button>
+    </form>
   )
 }

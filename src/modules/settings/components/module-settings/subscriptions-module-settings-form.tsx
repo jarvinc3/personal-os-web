@@ -1,6 +1,7 @@
 "use client"
 
-import { ModuleSettingsFormShell } from "@/src/modules/settings/components/module-settings/module-settings-form-shell"
+import { Button } from "@/src/shared/components/ui/button"
+import { Spinner } from "@/src/shared/components/ui/spinner"
 import { ModuleSheetEnableRow } from "@/src/modules/settings/components/profile-ui";
 import { useModuleSheetEnable } from "@/src/modules/settings/hooks/use-module-sheet-enable";
 import { useProfileSheetFormSync } from "@/src/modules/settings/hooks/use-profile-sheet";
@@ -12,7 +13,7 @@ import { getModule } from "@/src/shared/constants/module-registry";
 import { appToast } from "@/src/shared/lib/app-toast";
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { BadgeDollarSign, Bell, Layers, Wallet } from "lucide-react";
+import { BadgeDollarSign, Bell, Layers, RefreshCw, TrendingUp, Wallet } from "lucide-react";
 import { useEffect, useMemo } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
@@ -98,14 +99,13 @@ export function SubscriptionsModuleSettingsForm({ onDone }: { onDone: () => void
   })
 
   return (
-    <ModuleSettingsFormShell
-      onSubmit={onSubmit}
-      canSave={isDirty || moduleEnable.isEnabledDirty}
-      pending={updateMutation.isPending}
+    <form
+      className="flex flex-col gap-6"
+      onSubmit={(event) => {
+        event.preventDefault()
+        onSubmit()
+      }}
     >
-      {config.fieldGuide ? (
-        <p className="text-sm text-muted-foreground">{config.fieldGuide}</p>
-      ) : null}
       <ModuleSheetEnableRow
         state={moduleEnable.state}
         isEnabled={moduleEnable.sheetEnabled}
@@ -158,6 +158,8 @@ export function SubscriptionsModuleSettingsForm({ onDone }: { onDone: () => void
           name="renewalReminders"
           render={({ field }) => (
             <SwitchFieldRow
+              icon={RefreshCw}
+              iconColor={MODULE_ACCENT}
               label="Avisos de renovación"
               checked={field.value}
               onCheckedChange={field.onChange}
@@ -169,6 +171,8 @@ export function SubscriptionsModuleSettingsForm({ onDone }: { onDone: () => void
           name="priceIncreaseAlerts"
           render={({ field }) => (
             <SwitchFieldRow
+              icon={TrendingUp}
+              iconColor={MODULE_ACCENT}
               label="Subidas de precio"
               checked={field.value}
               onCheckedChange={field.onChange}
@@ -176,6 +180,16 @@ export function SubscriptionsModuleSettingsForm({ onDone }: { onDone: () => void
           )}
         />
       </SummarySection>
-    </ModuleSettingsFormShell>
+      <Button
+        type="submit"
+        className="h-11 w-full"
+        disabled={
+          !(isDirty || moduleEnable.isEnabledDirty) || updateMutation.isPending
+        }
+      >
+        {updateMutation.isPending ? <Spinner data-icon="inline-start" /> : null}
+        {updateMutation.isPending ? "Guardando..." : "Guardar"}
+      </Button>
+    </form>
   )
 }

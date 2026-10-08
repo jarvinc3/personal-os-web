@@ -18,7 +18,10 @@ export const DEFAULT_PREFS: KeepAwakePrefs = {
 
 function clampDuration(minutes: number) {
   if (!Number.isFinite(minutes)) return DEFAULT_PREFS.durationMinutes
-  return Math.min(MAX_DURATION_MINUTES, Math.max(MIN_DURATION_MINUTES, Math.floor(minutes)))
+  return Math.min(
+    MAX_DURATION_MINUTES,
+    Math.max(MIN_DURATION_MINUTES, Math.floor(minutes))
+  )
 }
 
 export function parsePrefs(raw: string | null): KeepAwakePrefs {
@@ -86,6 +89,15 @@ export function getPrefsSnapshot(): KeepAwakePrefs {
 export function writePrefs(prefs: KeepAwakePrefs) {
   const serialized = serializePrefs(prefs)
   window.localStorage.setItem(KEEP_AWAKE_PREFS_KEY, serialized)
+  prefsCacheRaw = undefined
+  window.dispatchEvent(new Event(PREFS_CHANGED_EVENT))
+}
+
+export function clearPrefs() {
+  if (typeof window === "undefined") {
+    return
+  }
+  window.localStorage.removeItem(KEEP_AWAKE_PREFS_KEY)
   prefsCacheRaw = undefined
   window.dispatchEvent(new Event(PREFS_CHANGED_EVENT))
 }

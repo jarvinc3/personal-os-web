@@ -6,21 +6,45 @@ import {
   currencyFlagEmoji,
   currencyFlagRegion,
   formatCurrencyTrigger,
+  normalizeTrackedCurrencies,
 } from "./finance-currency.ts"
 
-describe("buildFinanceCurrencyOptions", () => {
-  it("lists the base currency then USD and EUR without duplicates", () => {
-    assert.deepEqual(buildFinanceCurrencyOptions("DOP"), ["DOP", "USD", "EUR"])
-    assert.deepEqual(buildFinanceCurrencyOptions("usd"), ["USD", "EUR"])
-    assert.deepEqual(buildFinanceCurrencyOptions("EUR"), ["EUR", "USD"])
+describe("normalizeTrackedCurrencies", () => {
+  it("uppercases, dedupes and drops the base currency", () => {
+    assert.deepEqual(
+      normalizeTrackedCurrencies("dop", ["usd", "USD", "dop", ""]),
+      ["USD"]
+    )
   })
+})
 
-  it("keeps a historical extra code without inserting new free-form currencies", () => {
-    assert.deepEqual(buildFinanceCurrencyOptions("DOP", ["gbp", "USD"]), [
+describe("buildFinanceCurrencyOptions", () => {
+  it("lists the base currency then the tracked list", () => {
+    assert.deepEqual(buildFinanceCurrencyOptions("DOP", ["USD", "EUR"]), [
       "DOP",
       "USD",
       "EUR",
-      "GBP",
+    ])
+    assert.deepEqual(buildFinanceCurrencyOptions("usd", ["EUR"]), [
+      "USD",
+      "EUR",
+    ])
+    assert.deepEqual(buildFinanceCurrencyOptions("EUR", ["DOP"]), [
+      "EUR",
+      "DOP",
+    ])
+  })
+
+  it("appends historical extra codes after the tracked list", () => {
+    assert.deepEqual(
+      buildFinanceCurrencyOptions("DOP", ["GBP"], ["gbp", "USD"]),
+      ["DOP", "GBP", "USD"]
+    )
+  })
+
+  it("never duplicates the base even when tracked repeats it", () => {
+    assert.deepEqual(buildFinanceCurrencyOptions("DOP", ["DOP", "dop"]), [
+      "DOP",
     ])
   })
 })

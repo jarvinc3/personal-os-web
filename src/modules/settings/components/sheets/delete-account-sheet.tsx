@@ -8,6 +8,7 @@ import {
   isGoogleOnlyAccount,
 } from '@/src/modules/settings/lib/auth-providers';
 import { setPendingAccountDeletion } from '@/src/modules/settings/lib/pending-account-deletion';
+import { resolveReauthConfirmMode } from '@/src/modules/settings/lib/wipe-confirm';
 import type { SettingsSheetProps } from '@/src/modules/settings/types/sheet.types';
 import { BottomSheet } from '@/src/shared/components/layout/bottom-sheet';
 import { FormTextField } from '@/src/shared/components/layout/form-blocks';
@@ -27,7 +28,7 @@ import { Spinner } from '@/src/shared/components/ui/spinner';
 import { SummarySection } from '@/src/shared/components/ui/summary';
 import { APP_ROUTES } from '@/src/shared/constants/app-routes';
 import { AlertTriangle, KeyRound } from 'lucide-react';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 const DELETED_DATA_ITEMS = [
   'Perfil, preferencias y configuración de módulos',
@@ -62,19 +63,20 @@ export function DeleteAccountSheet({ open, onOpenChange, email }: DeleteAccountS
       }
       setCanDeleteInApp(hasEmailPasswordProvider(identities));
       setIsGoogleOnly(isGoogleOnlyAccount(identities));
+    } catch {
+      setCanDeleteInApp(Boolean(email));
+      setIsGoogleOnly(false);
     } finally {
       setIsLoadingProviders(false);
     }
   }, [email]);
 
-  const handleOpenChange = (nextOpen: boolean) => {
-    if (nextOpen) {
-      setPassword('');
-      setAlertOpen(false);
-      void loadAuthProviders();
-    }
-    onOpenChange(nextOpen);
-  };
+  useEffect(() => {
+    if (!open) return;
+    setPassword('');
+    setAlertOpen(false);
+    void loadAuthProviders();
+  }, [open, loadAuthProviders]);
 
   const handleContinue = () => {
     if (!password.trim()) return;
@@ -95,37 +97,48 @@ export function DeleteAccountSheet({ open, onOpenChange, email }: DeleteAccountS
     loginWithGoogleMutation.mutate({ next: APP_ROUTES.app.settings });
   };
 
+  const confirmMode = resolveReauthConfirmMode({
+    isLoadingProviders,
+    canConfirmInApp: canDeleteInApp,
+    isGoogleOnly,
+  });
+
+  const confirmAction =
+    confirmMode === 'pending' ? (
+      <Button variant="destructive" className="flex-1" disabled>
+        <Spinner data-icon="inline-start" />
+        Continuar
+      </Button>
+    ) : confirmMode === 'google' ? (
+      <Button
+        variant="destructive"
+        className="flex-1"
+        disabled={loginWithGoogleMutation.isPending}
+        onClick={handleGoogleReauth}
+      >
+        {loginWithGoogleMutation.isPending ? <Spinner data-icon="inline-start" /> : null}
+        {loginWithGoogleMutation.isPending ? 'Confirmando con Google...' : 'Confirmar con Google'}
+      </Button>
+    ) : confirmMode === 'password' ? (
+      <Button
+        variant="destructive"
+        className="flex-1"
+        disabled={!password.trim() || deleteAccountMutation.isPending}
+        onClick={handleContinue}
+      >
+        {deleteAccountMutation.isPending ? <Spinner data-icon="inline-start" /> : null}
+        Continuar
+      </Button>
+    ) : null;
+
   return (
     <>
       <BottomSheet
         open={open}
-        onOpenChange={handleOpenChange}
+        onOpenChange={onOpenChange}
         title="Eliminar cuenta"
         description="Esta acción es permanente e irreversible."
-        actions={{
-          delete: canDeleteInApp && (
-            <Button
-              variant="destructive"
-              className="flex-1"
-              disabled={!password.trim() || deleteAccountMutation.isPending}
-              onClick={handleContinue}
-            >
-              {deleteAccountMutation.isPending ? <Spinner data-icon="inline-start" /> : null}
-              Continuar
-            </Button>
-          ),
-          submit: isGoogleOnly && (
-            <Button
-              variant="destructive"
-              className="flex-1"
-              disabled={loginWithGoogleMutation.isPending}
-              onClick={handleGoogleReauth}
-            >
-              {loginWithGoogleMutation.isPending ? <Spinner data-icon="inline-start" /> : null}
-              {loginWithGoogleMutation.isPending ? 'Confirmando con Google...' : 'Confirmar con Google'}
-            </Button>
-          )
-        }}
+        actions={{ submit: confirmAction }}
       >
         <SummarySection title="Se eliminará" icon={AlertTriangle}>
           <ul className="flex flex-col gap-2">
@@ -137,13 +150,7 @@ export function DeleteAccountSheet({ open, onOpenChange, email }: DeleteAccountS
           </ul>
         </SummarySection>
 
-        {isLoadingProviders ? (
-          <div className="flex justify-center py-6">
-            <Spinner />
-          </div>
-        ) : null}
-
-        {!isLoadingProviders && canDeleteInApp === false && isGoogleOnly ? (
+        {confirmMode === 'google' ? (
           <Alert variant="destructive" className="mt-2">
             <AlertTriangle />
             <AlertTitle>Cuenta vinculada con Google</AlertTitle>
@@ -154,7 +161,18 @@ export function DeleteAccountSheet({ open, onOpenChange, email }: DeleteAccountS
           </Alert>
         ) : null}
 
-        {!isLoadingProviders && canDeleteInApp ? (
+        {confirmMode === 'unavailable' ? (
+          <Alert variant="destructive" className="mt-2">
+            <AlertTriangle />
+            <AlertTitle>No se puede confirmar</AlertTitle>
+            <AlertDescription>
+              Esta sesión no tiene contraseña ni un acceso solo con Google, así que la cuenta no se
+              puede eliminar desde aquí.
+            </AlertDescription>
+          </Alert>
+        ) : null}
+
+        {confirmMode === 'password' ? (
           <SummarySection title="Confirma tu contraseña" icon={KeyRound}>
             <FormTextField
               label="Contraseña"

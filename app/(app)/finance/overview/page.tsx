@@ -1,12 +1,7 @@
-import { Suspense } from "react"
+import { redirect } from "next/navigation"
 
-import { FinanceOverviewClient } from "@/src/modules/finance/pages/finance-overview"
-import { LoadingView } from "@/src/shared/components/layout/loading-view"
+import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 
 export default function FinanceOverviewPage() {
-  return (
-    <Suspense fallback={<LoadingView variant="inline" />}>
-      <FinanceOverviewClient />
-    </Suspense>
-  )
+  redirect(APP_ROUTES.app.financeTransactions)
 }

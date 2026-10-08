@@ -12,11 +12,11 @@ describe("financeTransactionNewHref", () => {
   it("builds the debit and credit create urls", () => {
     assert.equal(
       financeTransactionNewHref("DEBIT"),
-      "/finance/transactions/new?type=DEBIT",
+      "/finance/transactions/new?type=DEBIT"
     )
     assert.equal(
       financeTransactionNewHref("CREDIT"),
-      "/finance/transactions/new?type=CREDIT",
+      "/finance/transactions/new?type=CREDIT"
     )
   })
 })
@@ -29,11 +29,14 @@ describe("settingsModuleHref", () => {
 })
 
 describe("finance route constants", () => {
-  it("keeps the module root and splits overview from transfers", () => {
+  it("keeps the module root and the transfer route", () => {
     assert.equal(APP_ROUTES.app.finance, "/finance")
-    assert.equal(APP_ROUTES.app.financeOverview, "/finance/overview")
     assert.equal(APP_ROUTES.app.financeTransferNew, "/finance/transfers/new")
     assert.equal(APP_ROUTES.app.financeTransactions, "/finance/transactions")
+    assert.equal(
+      APP_ROUTES.app.settingsFinanceCurrencies,
+      "/settings/finance/currencies"
+    )
   })
 })
 

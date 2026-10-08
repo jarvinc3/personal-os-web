@@ -10,6 +10,7 @@ Este cliente:
 | Patch perfil/prefs | `PATCH /users/me` | `useProfile` |
 | Módulo | `PATCH /users/me/modules/:slug` | `useUserModuleConfig` |
 | Borrar cuenta | `DELETE /users/me` | `useDeleteAccount` (reauth previa) |
+| Vaciar datos por capas | `POST /users/me/data/wipe` | `useWipeUserData` (reauth previa) |
 | Providers IA | `GET /ai/providers` | `useAiProviders` |
 
 Defaults mergeados en cliente: `src/modules/settings/constants/user-settings-defaults.ts` (`normalizePreferences`, `normalizeModuleConfig`). El backend también mergea; el cliente re-normaliza para UI estable.

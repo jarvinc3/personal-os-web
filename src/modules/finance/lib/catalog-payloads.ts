@@ -328,11 +328,15 @@ export function buildCardBalanceBodies(
 
 const FALLBACK_CURRENCIES = [...FINANCE_QUICK_CURRENCIES]
 
-export function nextUnusedCurrency(used: string[], preferred: string): string {
+export function nextUnusedCurrency(
+  used: string[],
+  preferred: string,
+  trackedCurrencies: readonly string[] = []
+): string {
   const taken = new Set(
     used.map((code) => code.trim().toUpperCase()).filter(Boolean)
   )
-  const candidates = [preferred, ...FALLBACK_CURRENCIES]
+  const candidates = [preferred, ...trackedCurrencies, ...FALLBACK_CURRENCIES]
   for (const candidate of candidates) {
     const code = candidate.trim().toUpperCase()
     if (code && !taken.has(code)) {

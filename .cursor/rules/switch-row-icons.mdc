@@ -1,0 +1,20 @@
+---
+description: Give switch rows a leading icon for the setting they control
+globs: "**/*.{ts,tsx}"
+alwaysApply: false
+---
+
+# Icono en switches
+
+`SettingsRow` con `onSwitchChange` y `SwitchFieldRow` llevan un icono a la izquierda del título (`icon={TypeIcon}`), con el color de acento de la sección. El texto de ayuda va debajo del título.
+
+```tsx
+<SettingsRow
+  label="Push"
+  icon={Bell}
+  accentColor={accent}
+  switchValue={push}
+  onSwitchChange={setPush}
+/>
+<SwitchFieldRow icon={Bell} iconColor={accent} label="Push" checked={push} onCheckedChange={setPush} />
+```

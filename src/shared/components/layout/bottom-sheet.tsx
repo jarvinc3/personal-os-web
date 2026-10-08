@@ -49,6 +49,9 @@ export function BottomSheet({
 }: BottomSheetProps) {
   const isMobile = useIsMobile()
   const direction = getBottomSheetDirection(variant, isMobile)
+  const actionNodes = [actions?.delete, actions?.close, actions?.submit].filter(
+    (node) => node != null && node !== false
+  )
   return (
     <Drawer direction={direction} open={open} onOpenChange={onOpenChange}>
       <DrawerContent
@@ -91,11 +94,9 @@ export function BottomSheet({
           )}
         </div>
         
-        {actions && !pending && (
+        {actionNodes.length > 0 && !pending && (
           <DrawerFooter className="flex flex-row gap-2 justify-end w-full border-t">
-            {actions?.delete && actions?.delete}
-            {actions?.close && actions?.close}
-            {actions?.submit && actions?.submit}
+            {actionNodes}
           </DrawerFooter>
         )}
       </DrawerContent>
