@@ -3,52 +3,53 @@
 import {
   accountSelectOptions,
   institutionSelectOptions,
-} from "@/src/modules/finance/components/ledger-target-select";
-import { FinanceCurrencyPills } from "@/src/modules/finance/components/forms/finance-currency-pills";
+} from "@/src/modules/finance/components/ledger-target-select"
+import { FinanceCurrencyPills } from "@/src/modules/finance/components/forms/finance-currency-pills"
 import {
   FinancePreviewRow,
   FinanceSegmentedControl,
-} from "@/src/modules/finance/components/forms/finance-form-blocks";
+} from "@/src/modules/finance/components/forms/finance-form-blocks"
 import {
   CATALOG_NONE,
   FINANCE_CARD_NETWORK_LABEL,
   FINANCE_CARD_NETWORKS,
   FINANCE_CARD_TYPE_LABEL,
   FINANCE_CARD_TYPES,
-} from "@/src/modules/finance/constants/catalog";
+} from "@/src/modules/finance/constants/catalog"
 import {
   useArchiveCard,
   useCreateCard,
   useDeleteCard,
   useUpdateCard,
   useUpdateCardBalance,
-} from "@/src/modules/finance/hooks/use-cards";
+} from "@/src/modules/finance/hooks/use-cards"
+import { useFinanceEnabled } from "@/src/modules/finance/hooks/use-finance-enabled"
 import {
   buildCardBalanceBodies,
   buildCreateCardBody,
   cardBalanceSaveMessage,
   nextUnusedCurrency,
-} from "@/src/modules/finance/lib/catalog-payloads";
-import { buildFinanceCurrencyOptions } from "@/src/modules/finance/lib/finance-currency";
-import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error";
+} from "@/src/modules/finance/lib/catalog-payloads"
+import { buildFinanceCurrencyOptions } from "@/src/modules/finance/lib/finance-currency"
+import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
 import type {
   FinanceAccount,
   FinanceCard,
   FinanceInstitution,
-} from "@/src/modules/finance/types/entities";
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet";
+} from "@/src/modules/finance/types/entities"
+import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
 import {
   FormTextField,
   SelectField,
-} from "@/src/shared/components/layout/form-blocks";
-import { Button } from "@/src/shared/components/ui/button";
-import { ColorPickerSwatch } from "@/src/shared/components/ui/color-picker";
-import { Label } from "@/src/shared/components/ui/label";
-import { Spinner } from "@/src/shared/components/ui/spinner";
-import { SummarySection } from "@/src/shared/components/ui/summary";
-import { appToast } from "@/src/shared/lib/app-toast";
-import { createSheetSubmit } from "@/src/shared/lib/sheet-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+} from "@/src/shared/components/layout/form-blocks"
+import { Button } from "@/src/shared/components/ui/button"
+import { ColorPickerSwatch } from "@/src/shared/components/ui/color-picker"
+import { Label } from "@/src/shared/components/ui/label"
+import { Spinner } from "@/src/shared/components/ui/spinner"
+import { SummarySection } from "@/src/shared/components/ui/summary"
+import { appToast } from "@/src/shared/lib/app-toast"
+import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
+import { zodResolver } from "@hookform/resolvers/zod"
 import {
   ArchiveIcon,
   Building2Icon,
@@ -59,10 +60,10 @@ import {
   SaveIcon,
   TrashIcon,
   XIcon,
-} from "lucide-react";
-import { useEffect, useMemo } from "react";
-import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
-import { z } from "zod";
+} from "lucide-react"
+import { useEffect, useMemo } from "react"
+import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form"
+import { z } from "zod"
 
 const balanceRowSchema = z.object({
   currency: z.string().trim().min(3, "Moneda obligatoria").max(3),
@@ -204,7 +205,11 @@ export function CardSheet({
     label: "Sin cuenta",
   })
   const hasInstitutions = institutionOptions.length > 0
-  const allowedCurrencies = buildFinanceCurrencyOptions(defaultCurrency)
+  const { config: financeConfig } = useFinanceEnabled()
+  const allowedCurrencies = buildFinanceCurrencyOptions(
+    defaultCurrency,
+    financeConfig.trackedCurrencies
+  )
   const usedCurrencies = (watchedBalances ?? []).map((row) => row.currency)
   const canAddCurrency = allowedCurrencies.some(
     (code) => !usedCurrencies.some((used) => used.toUpperCase() === code)
@@ -245,8 +250,8 @@ export function CardSheet({
     const balancesPayload = card
       ? { ok: true as const, body: [] }
       : buildCardBalanceBodies(values.balances, {
-        requireCreditLimit: values.type === "CREDIT",
-      })
+          requireCreditLimit: values.type === "CREDIT",
+        })
     if (!balancesPayload.ok) {
       appToast.error({ text1: balancesPayload.error })
       return
@@ -316,8 +321,8 @@ export function CardSheet({
   const networkLabel =
     cardNetwork && cardNetwork !== CATALOG_NONE
       ? (FINANCE_CARD_NETWORK_LABEL[
-        cardNetwork as keyof typeof FINANCE_CARD_NETWORK_LABEL
-      ] ?? cardNetwork)
+          cardNetwork as keyof typeof FINANCE_CARD_NETWORK_LABEL
+        ] ?? cardNetwork)
       : "Sin red"
 
   return (
@@ -348,7 +353,11 @@ export function CardSheet({
             className="flex-1"
             onClick={onSubmit}
           >
-            {isPending ? <Spinner data-icon="inline-start" /> : <SaveIcon className="size-4 shrink-0" />}
+            {isPending ? (
+              <Spinner data-icon="inline-start" />
+            ) : (
+              <SaveIcon className="size-4 shrink-0" />
+            )}
             {isPending ? "Guardando..." : "Guardar"}
           </Button>
         ),
@@ -367,11 +376,11 @@ export function CardSheet({
                 hasInstitutions
                   ? institutionOptions
                   : [
-                    {
-                      value: CATALOG_NONE,
-                      label: "Crea una institución primero",
-                    },
-                  ]
+                      {
+                        value: CATALOG_NONE,
+                        label: "Crea una institución primero",
+                      },
+                    ]
               }
               disabled={!hasInstitutions}
             />
@@ -574,7 +583,8 @@ export function CardSheet({
                   emptyBalanceRow(
                     nextUnusedCurrency(
                       (watchedBalances ?? []).map((row) => row.currency),
-                      defaultCurrency
+                      defaultCurrency,
+                      financeConfig.trackedCurrencies
                     )
                   )
                 )

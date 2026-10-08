@@ -15,7 +15,7 @@ Antes de crear un control, leer [docs/architecture/ui-components.md](docs/archit
 - Fecha → `DateWheels` (`YYYY-MM-DD`); en Finanzas preferir `FinanceDateField`
 - Minutos: `minuteStep={1}` (00–59), `{5}` o `{10}` — no usar slots fijos de 15 min
 
-**Chrome:** `BottomSheet` para edición/secundario; `BottomSheet variant="floating"` para un evento. `SummarySection` / `SummaryItem` para listas; `Fab` para una acción primaria; `Empty*` para vacíos; `ColorPickerSwatch` para color. Inputs y selects llevan icono líder; un estado binario se muestra con icono, no con la palabra. Módulo **hoja** (Keep Awake): hero + iconos + sheets — **no** `Tabs*` locales. Módulo **con secciones** (Finanzas): `ModuleSectionLayout` (rutas), no tabs inventadas dentro de una página. Ver `leaf-module-ux.mdc` y [module-conventions.md](docs/architecture/module-conventions.md).
+**Chrome:** `BottomSheet` para edición/secundario; `BottomSheet variant="floating"` para un evento. `SummarySection` / `SummaryItem` para listas; `Fab` para una acción primaria; `Empty*` para vacíos; `ColorPickerSwatch` para color. Inputs y selects llevan icono líder. Un switch (`SettingsRow` con `onSwitchChange`, `SwitchFieldRow`) lleva icono a la izquierda del título; la descripción va debajo del título. Un estado binario se muestra con icono, no con la palabra. Módulo **hoja** (Keep Awake): hero + iconos + sheets — **no** `Tabs*` locales. Módulo **con secciones** (Finanzas): `ModuleSectionLayout` (rutas), no tabs inventadas dentro de una página. Ver `leaf-module-ux.mdc` y [module-conventions.md](docs/architecture/module-conventions.md).
 
 ```tsx
 <TimePairWheels label="Hora" value={hhmm} minuteStep={1} onChange={setHhmm} />

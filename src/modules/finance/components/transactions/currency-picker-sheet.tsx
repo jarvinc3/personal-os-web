@@ -14,6 +14,7 @@ type CurrencyPickerSheetProps = {
   value: string
   enabled: boolean
   onSelect: (code: string) => void
+  excludeCodes?: string[]
 }
 
 export function CurrencyPickerSheet({
@@ -22,18 +23,30 @@ export function CurrencyPickerSheet({
   value,
   enabled,
   onSelect,
+  excludeCodes = [],
 }: CurrencyPickerSheetProps) {
   const query = useCurrencies(enabled && open)
   const current = value.trim().toUpperCase()
+  const excluded = useMemo(
+    () =>
+      new Set(
+        excludeCodes.map((code) => code.trim().toUpperCase()).filter(Boolean)
+      ),
+    [excludeCodes]
+  )
   const codes = useMemo(() => {
     const seen = new Set<string>()
     for (const code of query.data ?? []) {
       const normalized = code.trim().toUpperCase()
-      if (normalized) seen.add(normalized)
+      if (normalized && !excluded.has(normalized)) {
+        seen.add(normalized)
+      }
     }
-    if (current) seen.add(current)
+    if (current && !excluded.has(current)) {
+      seen.add(current)
+    }
     return [...seen].sort()
-  }, [query.data, current])
+  }, [query.data, current, excluded])
 
   return (
     <BottomSheet open={open} onOpenChange={onOpenChange} title="Moneda">
@@ -52,7 +65,7 @@ export function CurrencyPickerSheet({
                 className={cn(
                   "flex w-full items-center justify-between rounded-2xl border border-border bg-card px-4 py-3 text-left",
                   PRESSABLE_CLASS,
-                  selected && "border-primary",
+                  selected && "border-primary"
                 )}
                 onClick={() => {
                   onSelect(code)

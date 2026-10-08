@@ -114,7 +114,7 @@ describe("buildCreateAccountBody", () => {
         type: "CASH",
         color: "",
       },
-      { isUpdate: true },
+      { isUpdate: true }
     )
     assert.equal(updated.ok, true)
     if (!updated.ok) return
@@ -134,7 +134,7 @@ describe("buildCreateInstitutionBody", () => {
 
     const updated = buildCreateInstitutionBody(
       { name: "Banco", color: "  " },
-      { isUpdate: true },
+      { isUpdate: true }
     )
     assert.equal(updated.ok, true)
     if (!updated.ok) return
@@ -235,7 +235,7 @@ describe("buildCreateCardBody", () => {
         lastFour: "4242",
         color: "  ",
       },
-      { isUpdate: true },
+      { isUpdate: true }
     )
     assert.equal(updated.ok, true)
     if (!updated.ok) return
@@ -272,7 +272,7 @@ describe("buildCardBalanceBody", () => {
   it("requires a credit limit when asked", () => {
     const result = buildCardBalanceBody(
       { currency: "DOP", balance: "42000" },
-      { requireCreditLimit: true },
+      { requireCreditLimit: true }
     )
     assert.equal(result.ok, false)
     if (result.ok) return
@@ -301,7 +301,7 @@ describe("buildCardBalanceBodies", () => {
         { currency: "dop", balance: "100", creditLimit: "50000" },
         { currency: "usd", balance: "25.5", creditLimit: "" },
       ],
-      { requireCreditLimit: true },
+      { requireCreditLimit: true }
     )
     assert.equal(result.ok, false)
     if (result.ok) return
@@ -334,7 +334,7 @@ describe("buildCardBalanceBodies", () => {
         { currency: "DOP", balance: "", creditLimit: "" },
         { currency: "USD", balance: "  ", creditLimit: "" },
       ],
-      { requireCreditLimit: true },
+      { requireCreditLimit: true }
     )
     assert.equal(result.ok, false)
     if (result.ok) return
@@ -350,13 +350,17 @@ describe("nextUnusedCurrency", () => {
   it("falls back to USD when the preferred currency is taken", () => {
     assert.equal(nextUnusedCurrency(["DOP"], "DOP"), "USD")
   })
+
+  it("prefers a tracked currency before the hardcoded fallback", () => {
+    assert.equal(nextUnusedCurrency(["DOP", "USD"], "DOP", ["GBP"]), "GBP")
+  })
 })
 
 describe("cardBalanceSaveMessage", () => {
   it("reports a full success after creating the card", () => {
     assert.deepEqual(
       cardBalanceSaveMessage({ created: true, total: 2, failedCurrencies: [] }),
-      { kind: "success", text1: "Tarjeta creada" },
+      { kind: "success", text1: "Tarjeta creada" }
     )
   })
 
@@ -382,7 +386,11 @@ describe("buildCreateCategoryBody", () => {
     })
     assert.equal(result.ok, true)
     if (!result.ok) return
-    assert.deepEqual(result.body, { name: "Mercado", icon: "🛒", type: "EXPENSE" })
+    assert.deepEqual(result.body, {
+      name: "Mercado",
+      icon: "🛒",
+      type: "EXPENSE",
+    })
   })
 
   it("includes INCOME type on create", () => {

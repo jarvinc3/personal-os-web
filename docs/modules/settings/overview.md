@@ -12,10 +12,14 @@ Ruta: `/settings` (`settings-client.tsx`). Sheets `?sheet=`.
 | Notificaciones | `EditQuietHoursSheet` | `preferences.notifications.quietHours` |
 | Módulos | `EditFinanceSheet` etc. | PATCH `/users/me/modules/:slug` |
 | Peligro | `DeleteAccountSheet` | DELETE `/users/me` |
+| Peligro | `WipeUserDataSheet` | POST `/users/me/data/wipe` |
+| Moneda | `FinanceCurrenciesView` (`/settings/finance/currencies`) | `config.baseCurrency` + `trackedCurrencies`; POST `/finance/base-currency` |
 
 Slugs: `finance`, `agenda`, `projects`, `health`, `subscriptions`. Solo finance tiene app routes.
 
-Defaults: `src/modules/settings/constants/user-settings-defaults.ts`. Hooks: `useProfile`, `useUserModuleConfig`, `useDeleteAccount`. Invalidación `profile`/`me` también desde tools IA.
+Defaults: `src/modules/settings/constants/user-settings-defaults.ts`. Hooks: `useProfile`, `useUserModuleConfig`, `useDeleteAccount`, `useWipeUserData`. Invalidación `profile`/`me` también desde tools IA.
+
+Vaciar datos: `wipe-layers.ts` (espejo del back: ids, labels, dependencias catalog → ledger y categories → planning), `pending-data-wipe.ts` + `PendingDataWipeHandler` para el reauth con Google. Reauth con Google vía `loginWithGoogleMutation`; la sesión nunca se cierra.
 
 > [!WARNING]
 > **REV-WEB-010** (`CONTRADICE_CODIGO`) — citaba `module-settings-ui.ts` (no existe; hay `module-settings-state.ts`) y “Drawer”. [review-register.md](../../review-register.md#rev-web-010)

@@ -1,12 +1,7 @@
-import { Suspense } from "react";
+import { redirect } from "next/navigation"
 
-import { FinanceStatisticsClient } from "@/src/modules/finance/pages/finance-statistics";
-import { LoadingView } from "@/src/shared/components/layout/loading-view";
+import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 
 export default function FinanceStatisticsPage() {
-  return (
-    <Suspense fallback={<LoadingView variant="screen" />}>
-      <FinanceStatisticsClient />
-    </Suspense>
-  )
+  redirect(APP_ROUTES.app.financeTransactions)
 }

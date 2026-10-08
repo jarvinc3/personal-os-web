@@ -5,6 +5,7 @@ export type FinanceModuleConfig = {
   version: number
   fieldGuide: string
   baseCurrency: string
+  trackedCurrencies: string[]
   weekStartsOn: 0 | 1
   dashboardPeriod: "week" | "month" | "year"
   display: {

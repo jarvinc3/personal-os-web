@@ -2,11 +2,13 @@
 
 ## Flujo
 
-1. `useNotifications` lista paginada IN_APP.
-2. `groupNotificationsByDate` agrupa la UI.
-3. Tap fila → `PATCH /notifications/:id/read`.
-4. Menú header → marcar todas / abrir prefs (canales + quiet hours sheet).
-5. Si `channels.inApp=false`, el backend devuelve lista vacía; el socket **no** se conecta (`useNotificationsSocket` exige `isInAppEnabled`).
+1. `useNotifications` lista paginada IN_APP con scroll incremental (`page`/`limit`, `Cargar más`).
+2. Tabs cliente `Todas` / `No leídas` sobre lo ya cargado.
+3. `groupNotificationsByDate` agrupa la UI; filas esqueleto en la primera carga.
+4. Ícono y color: categoría del movimiento (`data.categoryIcon` / `data.categoryColor`) con respaldo al módulo.
+5. Tap fila → `PATCH /notifications/:id/read`; si `data.transactionId`, abre `TransactionDetailSheet`.
+6. Menú header → marcar todas / abrir prefs (canales + quiet hours sheet).
+7. Si `channels.inApp=false`, el backend devuelve lista vacía; el socket **no** se conecta (`useNotificationsSocket` exige `isInAppEnabled`).
 
 ## Header
 
@@ -17,4 +19,4 @@
 - `AC-NTF-W-001` — Given IN_APP on, When llega `notification.new` y pathname no es `/notifications`, Then toast + invalidate list/unread.
 - `AC-NTF-W-002` — Given ya en `/notifications`, When `notification.new`, Then invalidate **sin** toast (evita duplicar).
 
-Evidencia: `notifications-client.tsx`, `use-notifications-socket.ts`, `group-notifications-by-date.ts`.
+Evidencia: `notifications-client.tsx`, `notification-row.tsx`, `notification-list-skeleton.tsx`, `use-notifications.ts`, `notification-visual.ts`, `group-notifications-by-date.ts`.

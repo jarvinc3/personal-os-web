@@ -2,9 +2,7 @@ import { APP_ROUTES } from "@/src/shared/constants/app-routes";
 import type { ModuleAppNav, ModuleNavItem } from "@/src/shared/types/module-nav";
 import {
   ArrowLeftRight,
-  BarChart3Icon,
   LandmarkIcon,
-  LayoutDashboard,
   Target
 } from "lucide-react";
 
@@ -13,18 +11,6 @@ export const FINANCE_NAV_ITEMS: ModuleNavItem[] = [
     label: "Movimientos",
     href: APP_ROUTES.app.financeTransactions,
     icon: ArrowLeftRight,
-  },
-  {
-    label: "Resumen",
-    href: APP_ROUTES.app.financeOverview,
-    icon: LayoutDashboard,
-    matchExact: true,
-  },
-  {
-    label: "Estadísticas",
-    href: APP_ROUTES.app.financeStatistics,
-    icon: BarChart3Icon,
-    showInTabBar: false,
   },
   {
     label: "Planificación",

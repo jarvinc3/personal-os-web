@@ -1,16 +1,18 @@
-export function serializePushSubscription(subscription: PushSubscription): string {
-  return JSON.stringify(subscription.toJSON());
+export function serializePushSubscription(
+  subscription: PushSubscription
+): string {
+  return JSON.stringify(subscription.toJSON())
 }
 
 export function urlBase64ToUint8Array(base64String: string): Uint8Array {
-  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
-  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
-  const rawData = window.atob(base64);
-  const outputArray = new Uint8Array(rawData.length);
+  const padding = "=".repeat((4 - (base64String.length % 4)) % 4)
+  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/")
+  const rawData = window.atob(base64)
+  const outputArray = new Uint8Array(rawData.length)
 
   for (let index = 0; index < rawData.length; index += 1) {
-    outputArray[index] = rawData.charCodeAt(index);
+    outputArray[index] = rawData.charCodeAt(index)
   }
 
-  return outputArray;
+  return outputArray
 }

@@ -262,6 +262,8 @@ type SwitchFieldRowProps = {
   checked: boolean;
   onCheckedChange: (checked: boolean) => void;
   disabled?: boolean;
+  icon: LucideIcon;
+  iconColor?: string;
 };
 
 export function SwitchFieldRow({
@@ -270,10 +272,18 @@ export function SwitchFieldRow({
   checked,
   onCheckedChange,
   disabled,
+  icon: Icon,
+  iconColor,
 }: SwitchFieldRowProps) {
   const id = useId();
   return (
-    <div className="flex flex-row gap-3 justify-between items-center px-4 py-3 rounded-xl border border-border/60 bg-card">
+    <div className="flex flex-row gap-3 justify-between items-center px-3 py-3 rounded-xl border border-border/60 bg-card">
+      <div
+        className="flex justify-center items-center rounded-md size-9 shrink-0"
+        style={{ backgroundColor: iconColor ? `${iconColor}1a` : undefined }}
+      >
+        <Icon className="size-4.5" style={{ color: iconColor }} />
+      </div>
       <label htmlFor={id} className="flex-1 min-w-0 cursor-pointer">
         <FieldLabel className="text-sm text-muted-foreground">{label}</FieldLabel>
         {description ? <p className="text-xs text-muted-foreground">{description}</p> : null}

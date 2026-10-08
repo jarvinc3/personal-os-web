@@ -44,7 +44,7 @@ export function SettingsSection({
   )
 }
 
-type SettingsRowProps = {
+type SettingsRowBaseProps = {
   label: string
   description?: string
   value?: string
@@ -54,12 +54,23 @@ type SettingsRowProps = {
   destructive?: boolean
   link?: boolean
   disabled?: boolean
-  switchValue?: boolean
-  onSwitchChange?: (value: boolean) => void
   trailing?: ReactNode
   isLast?: boolean
-  icon?: LucideIcon
 }
+
+type SettingsRowProps = SettingsRowBaseProps &
+  (
+    | {
+        onSwitchChange: (value: boolean) => void
+        switchValue?: boolean
+        icon: LucideIcon
+      }
+    | {
+        onSwitchChange?: undefined
+        switchValue?: undefined
+        icon?: LucideIcon
+      }
+  )
 
 export function SettingsRow({
   label,
@@ -101,23 +112,25 @@ export function SettingsRow({
           />
         </div>
       )}
-      <div className="flex flex-col flex-1 gap-1 justify-start text-left md:flex-row md:items-center md:justify-between md:gap-3">
-        <span
-          className={cn(
-            "text-sm md:text-base",
-            destructive && "text-destructive"
-          )}
-        >
-          {label}
-        </span>
-        {description && (
-          <span className="text-xs text-muted-foreground">{description}</span>
-        )}
-        {value && (
-          <span className="max-w-[90%] truncate text-xs text-muted-foreground md:text-right">
-            {value}
+      <div className="flex min-w-0 flex-1 flex-col gap-0.5 text-left">
+        <div className="flex flex-col gap-0.5 md:flex-row md:items-center md:justify-between md:gap-3">
+          <span
+            className={cn(
+              "text-sm md:text-base",
+              destructive && "text-destructive"
+            )}
+          >
+            {label}
           </span>
-        )}
+          {value ? (
+            <span className="max-w-[90%] truncate text-xs text-muted-foreground md:text-right">
+              {value}
+            </span>
+          ) : null}
+        </div>
+        {description ? (
+          <span className="text-xs text-muted-foreground">{description}</span>
+        ) : null}
       </div>
       {trailing}
       {hasSwitch && (

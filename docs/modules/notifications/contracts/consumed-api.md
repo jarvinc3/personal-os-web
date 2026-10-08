@@ -13,3 +13,5 @@ Dueño: `personal-os-back/docs/modules/notifications/`.
 | WS `notification.new` | room `user:{sub}` |
 
 Query keys: `NOTIFICATIONS_QUERY_KEY`, `NOTIFICATIONS_UNREAD_QUERY_KEY` (`['notifications','list']`, `['notifications','unread-count']`).
+
+`useNotifications` usa `useInfiniteQuery`: `page` inicia en 1, `limit` 20, y `getNextPageParam` avanza con `pagination.totalPages`.

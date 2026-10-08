@@ -16,18 +16,12 @@ import {
   EmptyTitle,
 } from "@/src/shared/components/ui/empty";
 import { useHeaderContext } from "@/src/shared/context/header-context";
-import { BarChart3Icon, LandmarkIcon } from "lucide-react";
+import { LandmarkIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useLayoutEffect, useMemo, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, type ReactNode } from "react";
 
 const SETTINGS_FINANCE_HREF = settingsModuleHref("finance")
-
-const STATISTICS_SHORTCUT_PATHS = new Set<string>([
-  APP_ROUTES.app.financePlanning,
-  APP_ROUTES.app.financeAccounts,
-  APP_ROUTES.app.financeTransactions,
-])
 
 function isFinanceSecondaryView(pathname: string): boolean {
   return (
@@ -48,29 +42,13 @@ export function FinanceAuthenticatedPage({ children }: { children: ReactNode }) 
   const { isAuthenticated, isLoading: isAuthLoading } = useAuthGuard()
   const { isEnabled, isProfileLoading } = useFinanceEnabled()
   const secondaryView = isFinanceSecondaryView(pathname)
-  const statisticsAction = useMemo(() => {
-    if (!STATISTICS_SHORTCUT_PATHS.has(pathname)) return undefined
-    return (
-      <Button
-        variant="outline"
-        size="icon"
-        className="rounded-full size-9 shrink-0"
-        asChild
-      >
-        <Link href={APP_ROUTES.app.financeStatistics} aria-label="Estadísticas">
-          <BarChart3Icon />
-        </Link>
-      </Button>
-    )
-  }, [pathname])
 
   useLayoutEffect(() => {
     if (secondaryView) return
     setConfig({
       title: financeSectionTitle(pathname) ?? "Finanzas",
-      actions: statisticsAction,
     })
-  }, [secondaryView, pathname, setConfig, statisticsAction])
+  }, [secondaryView, pathname, setConfig])
 
   useLayoutEffect(() => {
     return () => {

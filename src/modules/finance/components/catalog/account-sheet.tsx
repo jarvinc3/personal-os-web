@@ -38,6 +38,7 @@ import { ColorPickerSwatch } from "@/src/shared/components/ui/color-picker"
 import { Label } from "@/src/shared/components/ui/label"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { SummarySection } from "@/src/shared/components/ui/summary"
+import { getModule } from "@/src/shared/constants/module-registry"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -46,6 +47,7 @@ import {
   LandmarkIcon,
   Palette,
   SaveIcon,
+  Star,
   TrashIcon,
   XIcon,
 } from "lucide-react"
@@ -396,6 +398,8 @@ export function AccountSheet({
               name="isDefaultForInstitution"
               render={({ field }) => (
                 <SwitchFieldRow
+                  icon={Star}
+                  iconColor={getModule("finance").accent}
                   label="Cuenta predeterminada"
                   description="Se usa cuando el correo del banco no trae dígitos de cuenta."
                   checked={field.value}

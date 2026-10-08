@@ -9,6 +9,7 @@ export const API_ENDPOINTS = {
     GET_ME: "/users/me",
     UPDATE_ME: "/users/me",
     DELETE_ME: "/users/me",
+    WIPE_DATA: "/users/me/data/wipe",
     MODULE: (slug: string) => `/users/me/modules/${slug}`,
   },
   NOTIFICATIONS: {
@@ -81,5 +82,7 @@ export const API_ENDPOINTS = {
     BALANCE_SHEET: "/finance/balance-sheet",
     OAUTH_GOOGLE_URL: "/finance/email-sync/oauth/google/url",
     OAUTH_GOOGLE_CALLBACK: "/finance/email-sync/oauth/google/callback",
+    EXCHANGE_RATES: "/finance/exchange-rates",
+    BASE_CURRENCY: "/finance/base-currency",
   },
 } as const

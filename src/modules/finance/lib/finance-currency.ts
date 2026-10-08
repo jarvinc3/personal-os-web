@@ -17,9 +17,7 @@ export function currencyFlagRegion(code: string): string | null {
 
 function regionalIndicator(region: string): string | null {
   if (!/^[A-Z]{2}$/.test(region)) return null
-  const points = [...region].map(
-    (char) => 0x1f1e6 + char.charCodeAt(0) - 65,
-  )
+  const points = [...region].map((char) => 0x1f1e6 + char.charCodeAt(0) - 65)
   return String.fromCodePoint(...points)
 }
 
@@ -42,20 +40,49 @@ function normalizeCurrencyCode(value: string): string {
   return value.trim().toUpperCase()
 }
 
+/** Uppercase, unique, ISO-3 and never including the base currency. */
+export function normalizeTrackedCurrencies(
+  baseCurrency: string,
+  trackedCurrencies: readonly string[]
+): string[] {
+  const base = normalizeCurrencyCode(baseCurrency)
+  const codes: string[] = []
+  const seen = new Set<string>()
+  for (const raw of trackedCurrencies) {
+    const code = normalizeCurrencyCode(raw)
+    if (!code || code === base || seen.has(code)) {
+      continue
+    }
+    seen.add(code)
+    codes.push(code)
+  }
+  return codes
+}
+
 export function buildFinanceCurrencyOptions(
   baseCurrency: string,
-  extraCodes: string[] = [],
+  trackedCurrencies: readonly string[] = [],
+  extraCodes: string[] = []
 ): string[] {
   const codes: string[] = []
   const seen = new Set<string>()
   const add = (raw: string) => {
     const code = normalizeCurrencyCode(raw)
-    if (!code || seen.has(code)) return
+    if (!code || seen.has(code)) {
+      return
+    }
     seen.add(code)
     codes.push(code)
   }
   add(baseCurrency)
-  for (const code of FINANCE_QUICK_CURRENCIES) add(code)
-  for (const extra of extraCodes) add(extra)
+  for (const code of normalizeTrackedCurrencies(
+    baseCurrency,
+    trackedCurrencies
+  )) {
+    add(code)
+  }
+  for (const extra of extraCodes) {
+    add(extra)
+  }
   return codes
 }

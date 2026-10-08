@@ -1,5 +1,8 @@
-import type { AIPreferences, ThemeValue } from '@/src/modules/settings/types/profile.types';
-import type { LucideIcon } from 'lucide-react';
+import type {
+  AIPreferences,
+  ThemeValue,
+} from "@/src/modules/settings/types/profile.types"
+import type { LucideIcon } from "lucide-react"
 import {
   Bell,
   BookOpen,
@@ -7,6 +10,7 @@ import {
   ChartBarIcon,
   ClockFading,
   Cpu,
+  Eraser,
   Globe,
   Image,
   Mail,
@@ -20,99 +24,102 @@ import {
   Trash2,
   User,
   Zap,
-} from 'lucide-react';
+} from "lucide-react"
 
 export type SettingsRowIconMeta = {
-  icon: LucideIcon;
-  iconColorClass: string;
-  iconBgClass: string;
-};
+  icon: LucideIcon
+  iconColorClass: string
+  iconBgClass: string
+}
 
 export type SettingsOptionMeta<T extends string = string> = {
-  value: T;
-  label: string;
-  description: string;
-  icon: LucideIcon;
-};
+  value: T
+  label: string
+  description: string
+  icon: LucideIcon
+}
 
 type SettingsSectionDefinition = {
-  accent: string;
-  rows: Record<string, SettingsRowIconMeta>;
-};
+  accent: string
+  rows: Record<string, SettingsRowIconMeta>
+}
 
 function createRowMeta(accent: string, icon: LucideIcon): SettingsRowIconMeta {
   return {
     icon,
     iconColorClass: accent,
     iconBgClass: `${accent}/10`,
-  };
+  }
 }
 
 function createSection(
   accent: string,
-  rows: Record<string, LucideIcon>,
+  rows: Record<string, LucideIcon>
 ): SettingsSectionDefinition {
   return {
     accent,
     rows: Object.fromEntries(
-      Object.entries(rows).map(([key, icon]) => [key, createRowMeta(accent, icon)]),
+      Object.entries(rows).map(([key, icon]) => [
+        key,
+        createRowMeta(accent, icon),
+      ])
     ),
-  };
+  }
 }
 
 const themeOptions: SettingsOptionMeta<ThemeValue>[] = [
   {
-    value: 'system',
-    label: 'Sistema',
-    description: 'Sigue la configuración del dispositivo.',
+    value: "system",
+    label: "Sistema",
+    description: "Sigue la configuración del dispositivo.",
     icon: Monitor,
   },
   {
-    value: 'light',
-    label: 'Claro',
-    description: 'Interfaz clara en todo momento.',
+    value: "light",
+    label: "Claro",
+    description: "Interfaz clara en todo momento.",
     icon: Sun,
   },
   {
-    value: 'dark',
-    label: 'Oscuro',
-    description: 'Interfaz oscura para poca luz.',
+    value: "dark",
+    label: "Oscuro",
+    description: "Interfaz oscura para poca luz.",
     icon: Moon,
   },
-];
+]
 
-const aiToneOptions: SettingsOptionMeta<AIPreferences['tone']>[] = [
+const aiToneOptions: SettingsOptionMeta<AIPreferences["tone"]>[] = [
   {
-    value: 'concise',
-    label: 'Conciso',
-    description: 'Respuestas breves y directas.',
+    value: "concise",
+    label: "Conciso",
+    description: "Respuestas breves y directas.",
     icon: Zap,
   },
   {
-    value: 'balanced',
-    label: 'Equilibrado',
-    description: 'Equilibrio entre detalle y brevedad.',
+    value: "balanced",
+    label: "Equilibrado",
+    description: "Equilibrio entre detalle y brevedad.",
     icon: Bot,
   },
   {
-    value: 'detailed',
-    label: 'Detallado',
-    description: 'Más contexto y explicaciones.',
+    value: "detailed",
+    label: "Detallado",
+    description: "Más contexto y explicaciones.",
     icon: BookOpen,
   },
-];
+]
 
 export const SETTINGS_REGISTRY = {
-  account: createSection('#037cff', {
+  account: createSection("#037cff", {
     fullName: User,
     avatar: Image,
   }),
   appearance: {
-    ...createSection('#F59E0B', { theme: Palette }),
+    ...createSection("#F59E0B", { theme: Palette }),
     themeOptions,
   },
   ai: {
-    ...createSection('#dc95fd', {
+    ...createSection("#dc95fd", {
       tone: Bot,
       defaultProvider: Cpu,
       proactiveInsights: Sparkles,
@@ -120,9 +127,9 @@ export const SETTINGS_REGISTRY = {
       providerOption: Sparkles,
     }),
     toneOptions: aiToneOptions,
-    defaultProviderLabel: 'Automático',
+    defaultProviderLabel: "Automático",
   },
-  notifications: createSection('#dc95fd', {
+  notifications: createSection("#dc95fd", {
     push: Bell,
     email: Mail,
     inApp: Smartphone,
@@ -130,34 +137,42 @@ export const SETTINGS_REGISTRY = {
     quietHoursEnabled: Moon,
     quietHoursSchedule: ClockFading,
   }),
-  privacy: createSection('#64748B', {
+  privacy: createSection("#64748B", {
     analytics: ChartBarIcon,
     crashReports: ShieldCheck,
   }),
-  marketing: createSection('#037cff', {
+  marketing: createSection("#037cff", {
     landingPage: Globe,
   }),
-  danger: createSection('#EF4444', {
+  danger: createSection("#EF4444", {
+    wipeData: Eraser,
     deleteAccount: Trash2,
   }),
-} as const;
+} as const
 
 export function getThemeOptionLabel(value: ThemeValue): string {
-  return SETTINGS_REGISTRY.appearance.themeOptions.find((option) => option.value === value)?.label ?? value;
+  return (
+    SETTINGS_REGISTRY.appearance.themeOptions.find(
+      (option) => option.value === value
+    )?.label ?? value
+  )
 }
 
-export function getAiToneLabel(value: AIPreferences['tone']): string {
-  return SETTINGS_REGISTRY.ai.toneOptions.find((option) => option.value === value)?.label ?? value;
+export function getAiToneLabel(value: AIPreferences["tone"]): string {
+  return (
+    SETTINGS_REGISTRY.ai.toneOptions.find((option) => option.value === value)
+      ?.label ?? value
+  )
 }
 
 export function getSettingsRow(
   section: keyof typeof SETTINGS_REGISTRY,
-  row: string,
+  row: string
 ): SettingsRowIconMeta {
-  const sectionDef = SETTINGS_REGISTRY[section];
-  const rowMeta = sectionDef.rows[row];
+  const sectionDef = SETTINGS_REGISTRY[section]
+  const rowMeta = sectionDef.rows[row]
   if (!rowMeta) {
-    throw new Error(`Unknown settings row: ${section}.${row}`);
+    throw new Error(`Unknown settings row: ${section}.${row}`)
   }
-  return rowMeta;
+  return rowMeta
 }
