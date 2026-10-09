@@ -1,7 +1,4 @@
-import {
-  formatFinanceMoney,
-  type FinanceMoneyDisplay,
-} from "./money.ts"
+import { formatFinanceMoney, type FinanceMoneyDisplay } from "./money.ts"
 import type {
   FinanceAccount,
   FinanceBalanceSheetIssue,
@@ -25,6 +22,8 @@ export type InstitutionStackItem =
       counts: InstitutionStackCounts
       status: FinanceBalanceSheetStatus
       netWorth: string | null
+      totalAssets: string
+      totalLiabilities: string | null
       issues: FinanceBalanceSheetIssue[]
       accounts: FinanceAccount[]
       cards: FinanceCard[]
@@ -41,14 +40,13 @@ export type InstitutionBalancePosition = {
   institutionId: string
   status: FinanceBalanceSheetStatus
   netWorth: string | null
+  totalAssets: string
+  totalLiabilities: string | null
   issues: FinanceBalanceSheetIssue[]
 }
 
 export function institutionInitials(name: string): string {
-  const parts = name
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean)
+  const parts = name.trim().split(/\s+/).filter(Boolean)
   if (parts.length === 0) return "?"
   if (parts.length === 1) {
     return parts[0]!.slice(0, 2).toUpperCase()
@@ -62,7 +60,7 @@ export function formatProductCounts(counts: InstitutionStackCounts): string {
 
 export function formatStackItemBalance(
   item: InstitutionStackItem,
-  display: FinanceMoneyDisplay,
+  display: FinanceMoneyDisplay
 ): string {
   if (item.kind === "cash") {
     return formatFinanceMoney(item.balance, {
@@ -88,19 +86,22 @@ export function buildInstitutionStackItems(input: {
   const activeCards = input.cards.filter((item) => item.isActive)
   const activeLoans = input.loans.filter((item) => item.isActive)
   const positionsById = new Map(
-    (input.positions ?? []).map((position) => [position.institutionId, position]),
+    (input.positions ?? []).map((position) => [
+      position.institutionId,
+      position,
+    ])
   )
 
   const institutionItems: InstitutionStackItem[] = activeInstitutions.map(
     (institution) => {
       const accounts = activeAccounts.filter(
-        (account) => account.institutionId === institution.id,
+        (account) => account.institutionId === institution.id
       )
       const cards = activeCards.filter(
-        (card) => card.institutionId === institution.id,
+        (card) => card.institutionId === institution.id
       )
       const loans = activeLoans.filter(
-        (loan) => loan.institutionId === institution.id,
+        (loan) => loan.institutionId === institution.id
       )
       const position = positionsById.get(institution.id)
       return {
@@ -117,9 +118,11 @@ export function buildInstitutionStackItems(input: {
         },
         status: position?.status ?? "INCOMPLETE",
         netWorth: position?.netWorth ?? null,
+        totalAssets: position?.totalAssets ?? "0",
+        totalLiabilities: position?.totalLiabilities ?? null,
         issues: position?.issues ?? [],
       }
-    },
+    }
   )
 
   const cashItems: InstitutionStackItem[] = activeAccounts
@@ -136,10 +139,10 @@ export function buildInstitutionStackItems(input: {
 
 export function findInstitutionStackItem(
   items: InstitutionStackItem[],
-  institutionId: string,
+  institutionId: string
 ): Extract<InstitutionStackItem, { kind: "institution" }> | null {
   const match = items.find(
-    (item) => item.kind === "institution" && item.id === institutionId,
+    (item) => item.kind === "institution" && item.id === institutionId
   )
   return match?.kind === "institution" ? match : null
 }

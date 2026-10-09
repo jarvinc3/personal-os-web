@@ -23,20 +23,27 @@ export const APP_ROUTES = {
     financeSync: "/finance/accounts/sync",
     financeInstitution: (institutionId: string) =>
       `/finance/accounts/institutions/${institutionId}`,
-    financeCashAccount: (accountId: string) =>
-      `/finance/accounts/cash/${accountId}`,
+    financeAccount: (accountId: string) => `/finance/accounts/${accountId}`,
+    financeCard: (cardId: string) => `/finance/accounts/cards/${cardId}`,
     financeTransactions: "/finance/transactions",
     financeTransactionNew: "/finance/transactions/new",
     financeTransactionEdit: (transactionId: string) =>
       `/finance/transactions/${transactionId}/edit`,
     financeTransferNew: "/finance/transfers/new",
     financePlanning: "/finance/planning",
+    financeLoans: "/finance/loans",
+    financeLoan: (loanId: string) => `/finance/loans/${loanId}`,
     settingsFinanceCurrencies: "/settings/finance/currencies",
   },
 } as const
 
-export function financeTransactionNewHref(type: "DEBIT" | "CREDIT"): string {
+export function financeTransactionNewHref(
+  type: "DEBIT" | "CREDIT",
+  destination?: string
+): string {
   const params = new URLSearchParams({ type })
+  const target = destination?.trim()
+  if (target) params.set("destination", target)
   return `${APP_ROUTES.app.financeTransactionNew}?${params.toString()}`
 }
 

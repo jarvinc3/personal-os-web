@@ -47,6 +47,7 @@ export const API_ENDPOINTS = {
       `/finance/cards/${id}/balances/${encodeURIComponent(currency)}`,
     CARD_CREDIT_LIMIT: (id: string) =>
       `/finance/cards/${id}/balances/credit-limit`,
+    CARD_STATEMENTS: (id: string) => `/finance/cards/${id}/statements`,
     BALANCE_ADJUSTMENT: "/finance/balance-adjustments",
     TRANSACTIONS: "/finance/transactions",
     TRANSFERS: "/finance/transfers",
@@ -61,6 +62,7 @@ export const API_ENDPOINTS = {
     SAVINGS_GOAL: (id: string) => `/finance/savings-goals/${id}`,
     LOANS: "/finance/loans",
     LOAN: (id: string) => `/finance/loans/${id}`,
+    LOAN_INSTALLMENTS: (id: string) => `/finance/loans/${id}/installments`,
     RECEIVABLES: "/finance/receivables",
     RECEIVABLE: (id: string) => `/finance/receivables/${id}`,
     EMAIL_SOURCES: "/finance/email-sync/sources",

@@ -40,14 +40,14 @@ function invalidateLedger(queryClient: ReturnType<typeof useQueryClient>) {
 
 export function useTransactions(
   enabled: boolean,
-  query: FinanceTransactionsQuery,
+  query: FinanceTransactionsQuery
 ) {
   const search = buildTransactionsSearchParams(query)
   return useQuery({
     queryKey: [...FINANCE_TRANSACTIONS_QUERY_KEY, "list", query],
     queryFn: () =>
       apiGet<FinancePaginated<FinanceTransaction>>(
-        `${API_ENDPOINTS.FINANCE.TRANSACTIONS}?${search}`,
+        `${API_ENDPOINTS.FINANCE.TRANSACTIONS}?${search}`
       ),
     enabled,
   })
@@ -62,7 +62,7 @@ export function useTimelineTransactions(
   enabled: boolean,
   years: number[],
   filters: TimelineTransactionFilters,
-  currentMonthKey: string,
+  currentMonthKey: string
 ) {
   const monthQuery = useQuery({
     ...timelineMonthQuery(currentMonthKey, (path) => apiGet(path)),
@@ -74,7 +74,7 @@ export function useTimelineTransactions(
         `${year}-01-01`,
         `${year}-12-31`,
         filters.dateFrom,
-        filters.dateTo,
+        filters.dateTo
       )
       return {
         queryKey: [
@@ -93,7 +93,7 @@ export function useTimelineTransactions(
               dateTo: intersection?.dateTo,
               limit: FINANCE_TIMELINE_PAGE_SIZE,
             },
-            (path) => apiGet(path),
+            (path) => apiGet(path)
           ),
       }
     }),
@@ -105,19 +105,41 @@ export function useTimelineTransactions(
         monthQuery.data ?? [],
         ...yearQueries.map((query) => query.data ?? []),
       ]),
-    [monthQuery.data, yearQueries],
+    [monthQuery.data, yearQueries]
   )
 
   return {
     items,
     isPending: monthQuery.isLoading,
-    isFetching: monthQuery.isFetching || yearQueries.some((query) => query.isFetching),
+    isFetching:
+      monthQuery.isFetching || yearQueries.some((query) => query.isFetching),
     isError: monthQuery.isError || yearQueries.some((query) => query.isError),
     error:
       monthQuery.error ??
       yearQueries.find((query) => query.error)?.error ??
       null,
   }
+}
+
+export function allTransactionsQueryOptions(
+  filters: TimelineTransactionFilters
+) {
+  return {
+    queryKey: [...FINANCE_TRANSACTIONS_QUERY_KEY, "all", filters],
+    staleTime: FINANCE_TIMELINE_STALE_TIME_MS,
+    queryFn: () =>
+      fetchAllTransactionPages(
+        { ...filters, limit: FINANCE_TIMELINE_PAGE_SIZE },
+        (path) => apiGet(path)
+      ),
+  }
+}
+
+export function useAllTransactions(
+  enabled: boolean,
+  filters: TimelineTransactionFilters
+) {
+  return useQuery({ ...allTransactionsQueryOptions(filters), enabled })
 }
 
 export function useTransactionSearch(enabled: boolean, search: string) {
@@ -150,13 +172,7 @@ export function useCreateTransaction() {
 export function useUpdateTransaction() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: ({
-      id,
-      body,
-    }: {
-      id: string
-      body: CreateTransactionBody
-    }) =>
+    mutationFn: ({ id, body }: { id: string; body: CreateTransactionBody }) =>
       apiPatch<FinanceTransaction>(API_ENDPOINTS.FINANCE.TRANSACTION(id), body),
     onSuccess: () => invalidateLedger(queryClient),
   })
@@ -175,7 +191,9 @@ export function useConfirmTransaction() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (id: string) =>
-      apiPost<FinanceTransaction>(API_ENDPOINTS.FINANCE.TRANSACTION_CONFIRM(id)),
+      apiPost<FinanceTransaction>(
+        API_ENDPOINTS.FINANCE.TRANSACTION_CONFIRM(id)
+      ),
     onSuccess: () => invalidateLedger(queryClient),
   })
 }
@@ -184,7 +202,9 @@ export function useReverseTransaction() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (id: string) =>
-      apiPost<FinanceTransaction>(API_ENDPOINTS.FINANCE.TRANSACTION_REVERSE(id)),
+      apiPost<FinanceTransaction>(
+        API_ENDPOINTS.FINANCE.TRANSACTION_REVERSE(id)
+      ),
     onSuccess: () => invalidateLedger(queryClient),
   })
 }

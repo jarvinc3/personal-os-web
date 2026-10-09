@@ -92,8 +92,6 @@ export function AccountProductRow({
           })}
         </p>
       </div>
-
-      <ChevronRightIcon className="absolute right-0 top-1/2 -translate-y-1/2 size-8 text-muted-foreground group-hover:text-foreground" />
     </button>
   )
 }
@@ -172,8 +170,6 @@ export function CardProductRow({
           />
         </span>
       </div>
-
-      <ChevronRightIcon className="absolute right-0 top-1/2 -translate-y-1/2 size-8 text-muted-foreground group-hover:text-foreground" />
     </button>
   )
 }

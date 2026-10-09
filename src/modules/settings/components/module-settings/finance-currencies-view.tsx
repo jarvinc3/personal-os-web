@@ -25,7 +25,7 @@ import { API_ENDPOINTS } from "@/src/shared/constants/api-endpoints"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { PlusIcon, Trash2Icon } from "lucide-react"
-import { useMemo, useState } from "react"
+import { useMemo, useRef, useState } from "react"
 
 export function FinanceCurrenciesView() {
   const { config, updateConfig, updateMutation } =
@@ -37,6 +37,14 @@ export function FinanceCurrenciesView() {
   const [pendingBaseCurrency, setPendingBaseCurrency] = useState<string | null>(
     null
   )
+  const [pendingRemoveCurrency, setPendingRemoveCurrency] = useState<
+    string | null
+  >(null)
+  const removeCurrencyLabel = useRef<string | null>(null)
+  if (pendingRemoveCurrency) {
+    removeCurrencyLabel.current = pendingRemoveCurrency
+  }
+  const currencyToRemove = pendingRemoveCurrency ?? removeCurrencyLabel.current
 
   const baseCurrency = config.baseCurrency
   const trackedCurrencies = useMemo(
@@ -91,6 +99,14 @@ export function FinanceCurrenciesView() {
     await updateConfig({
       trackedCurrencies: trackedCurrencies.filter((item) => item !== code),
     })
+  }
+
+  const handleConfirmRemove = async () => {
+    if (!pendingRemoveCurrency) {
+      return
+    }
+    await handleRemoveCurrency(pendingRemoveCurrency)
+    setPendingRemoveCurrency(null)
   }
 
   const handleConfirmChange = () => {
@@ -179,7 +195,7 @@ export function FinanceCurrenciesView() {
                   size="icon"
                   aria-label={`Quitar ${code}`}
                   disabled={isSaving}
-                  onClick={() => void handleRemoveCurrency(code)}
+                  onClick={() => setPendingRemoveCurrency(code)}
                 >
                   <Trash2Icon className="size-4 text-destructive" />
                 </Button>
@@ -199,7 +215,9 @@ export function FinanceCurrenciesView() {
         onOpenChange={setChangePickerOpen}
         value={baseCurrency}
         enabled
-        excludeCodes={[baseCurrency]}
+        codes={trackedCurrencies}
+        quotes={rateByCurrency}
+        quoteCurrency={baseCurrency}
         onSelect={(code) => setPendingBaseCurrency(code)}
       />
       <CurrencyPickerSheet
@@ -207,9 +225,42 @@ export function FinanceCurrenciesView() {
         onOpenChange={setAddPickerOpen}
         value=""
         enabled
+        title="Agregar moneda"
+        searchable
+        showNames
         excludeCodes={[baseCurrency, ...trackedCurrencies]}
         onSelect={(code) => void handleAddCurrency(code)}
       />
+
+      <AlertDialog
+        open={pendingRemoveCurrency !== null}
+        onOpenChange={(open) => !open && setPendingRemoveCurrency(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Quitar {currencyToRemove}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {currencyToRemove} dejará de mostrarse en Otros. Las transacciones
+              en esa moneda no se borran.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={updateMutation.isPending}>
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              disabled={updateMutation.isPending}
+              onClick={(event) => {
+                event.preventDefault()
+                void handleConfirmRemove()
+              }}
+            >
+              {updateMutation.isPending ? "Quitando..." : "Quitar"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <AlertDialog
         open={pendingBaseCurrency !== null}

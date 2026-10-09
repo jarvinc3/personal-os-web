@@ -2,6 +2,7 @@ import {
   FINANCE_ACCOUNTS_QUERY_KEY,
   FINANCE_BUDGETS_QUERY_KEY,
   FINANCE_CARDS_QUERY_KEY,
+  FINANCE_CARD_STATEMENTS_QUERY_KEY,
   FINANCE_CATEGORIES_QUERY_KEY,
   FINANCE_EMAIL_MAILBOXES_QUERY_KEY,
   FINANCE_EMAIL_MESSAGES_QUERY_KEY,
@@ -16,9 +17,11 @@ import type {
   FinanceAccount,
   FinanceBudget,
   FinanceCard,
+  FinanceCardStatement,
   FinanceCategory,
   FinanceInstitution,
   FinanceLoan,
+  FinanceLoanInstallment,
   FinanceMailbox,
   FinancePendingEmailMessage,
   FinanceEmailProcessedMessage,
@@ -42,9 +45,11 @@ const PATHS = {
   accounts: "/finance/accounts",
   institutions: "/finance/institutions",
   cards: "/finance/cards",
+  cardStatements: (cardId: string) => `/finance/cards/${cardId}/statements`,
   categories: "/finance/categories",
   savingsGoals: "/finance/savings-goals",
   loans: "/finance/loans",
+  loanInstallments: (loanId: string) => `/finance/loans/${loanId}/installments`,
   receivables: "/finance/receivables",
   budgets: "/finance/budgets",
   emailMailboxes: "/finance/email-sync/mailboxes",
@@ -80,6 +85,16 @@ export function cardsQuery(get: FinanceQueryGet = defaultFinanceGet) {
   }
 }
 
+export function cardStatementsQuery(
+  cardId: string,
+  get: FinanceQueryGet = defaultFinanceGet
+) {
+  return {
+    queryKey: [...FINANCE_CARD_STATEMENTS_QUERY_KEY, cardId] as const,
+    queryFn: () => get<FinanceCardStatement[]>(PATHS.cardStatements(cardId)),
+  }
+}
+
 export function savingsGoalsQuery(get: FinanceQueryGet = defaultFinanceGet) {
   return {
     queryKey: FINANCE_SAVINGS_GOALS_QUERY_KEY,
@@ -95,6 +110,19 @@ export function loansQuery(get: FinanceQueryGet = defaultFinanceGet) {
   }
 }
 
+export function loanInstallmentsQuery(
+  loanId: string,
+  get: FinanceQueryGet = defaultFinanceGet
+) {
+  return {
+    queryKey: [...FINANCE_LOANS_QUERY_KEY, "installments", loanId] as const,
+    queryFn: async () =>
+      asFinanceArray<FinanceLoanInstallment>(
+        await get(PATHS.loanInstallments(loanId))
+      ),
+  }
+}
+
 export function receivablesQuery(get: FinanceQueryGet = defaultFinanceGet) {
   return {
     queryKey: FINANCE_RECEIVABLES_QUERY_KEY,
@@ -105,7 +133,7 @@ export function receivablesQuery(get: FinanceQueryGet = defaultFinanceGet) {
 
 export function budgetsListQuery(
   query: FinanceBudgetsQuery,
-  get: FinanceQueryGet = defaultFinanceGet,
+  get: FinanceQueryGet = defaultFinanceGet
 ) {
   const search = buildBudgetsSearchParams(query)
   return {
@@ -136,7 +164,7 @@ export function emailMessagesQuery(get: FinanceQueryGet = defaultFinanceGet) {
     queryKey: FINANCE_EMAIL_MESSAGES_QUERY_KEY,
     queryFn: async () =>
       asFinanceArray<FinanceEmailProcessedMessage>(
-        await get(PATHS.emailMessages),
+        await get(PATHS.emailMessages)
       ),
   }
 }

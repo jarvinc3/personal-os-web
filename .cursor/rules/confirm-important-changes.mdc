@@ -1,0 +1,32 @@
+---
+description: Confirm destructive or hard-to-undo actions with AlertDialog before they run.
+alwaysApply: true
+---
+
+# Confirmar cambios importantes
+
+Una acción que borra, quita, vacía, reemplaza datos o recalcula importes no corre al primer toque. Antes, un `AlertDialog` de `@/src/shared/components/ui/alert-dialog`.
+
+- Título en pregunta, con el objeto: "¿Quitar EUR?".
+- Descripción con la consecuencia. Si no se puede deshacer, decirlo.
+- `AlertDialogCancel`: "Cancelar". `AlertDialogAction`: el verbo ("Quitar", "Eliminar", "Cambiar"). En borrado, `variant="destructive"`.
+- Deshabilitar ambos botones mientras la mutación está en curso.
+
+No confirmar navegación, abrir un sheet, ni un alta que se revierte con otro control visible.
+
+```tsx
+<AlertDialog open={pendingCode !== null} onOpenChange={(open) => !open && setPendingCode(null)}>
+  <AlertDialogContent>
+    <AlertDialogHeader>
+      <AlertDialogTitle>¿Quitar {pendingCode}?</AlertDialogTitle>
+      <AlertDialogDescription>Dejará de mostrarse en la lista.</AlertDialogDescription>
+    </AlertDialogHeader>
+    <AlertDialogFooter>
+      <AlertDialogCancel disabled={pending}>Cancelar</AlertDialogCancel>
+      <AlertDialogAction variant="destructive" disabled={pending} onClick={confirm}>
+        Quitar
+      </AlertDialogAction>
+    </AlertDialogFooter>
+  </AlertDialogContent>
+</AlertDialog>
+```

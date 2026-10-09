@@ -18,6 +18,10 @@ describe("financeTransactionNewHref", () => {
       financeTransactionNewHref("CREDIT"),
       "/finance/transactions/new?type=CREDIT"
     )
+    assert.equal(
+      financeTransactionNewHref("DEBIT", "account:abc"),
+      "/finance/transactions/new?type=DEBIT&destination=account%3Aabc"
+    )
   })
 })
 

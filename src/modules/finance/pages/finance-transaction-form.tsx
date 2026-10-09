@@ -16,9 +16,14 @@ import { useCallback, useEffect, useState } from "react"
 export function FinanceTransactionCreateClient() {
   const searchParams = useSearchParams()
   const initialType = parseTransactionFormType(searchParams.get("type"))
+  const initialDestination = searchParams.get("destination")?.trim() || null
   return (
     <FinanceAuthenticatedPage>
-      <FinanceTransactionFormView mode="create" initialType={initialType} />
+      <FinanceTransactionFormView
+        mode="create"
+        initialType={initialType}
+        initialDestination={initialDestination}
+      />
     </FinanceAuthenticatedPage>
   )
 }
@@ -43,10 +48,12 @@ function FinanceTransactionFormView({
   mode,
   transactionId,
   initialType,
+  initialDestination = null,
 }: {
   mode: "create" | "edit"
   transactionId?: string
   initialType: "DEBIT" | "CREDIT"
+  initialDestination?: string | null
 }) {
   const router = useRouter()
   const { isEnabled, config } = useFinanceEnabled()
@@ -104,6 +111,7 @@ function FinanceTransactionFormView({
       <TransactionForm
       mode={mode}
       initialType={initialType}
+      initialDestination={initialDestination}
       transaction={editingQuery.data ?? null}
       defaultCurrency={config.baseCurrency}
       enabled={isEnabled}

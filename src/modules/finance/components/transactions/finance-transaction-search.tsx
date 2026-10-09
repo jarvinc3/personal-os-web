@@ -1,34 +1,28 @@
 "use client"
 
-import { TransactionInstrument } from "@/src/modules/finance/components/transactions/transaction-instrument";
-import { TransactionStatusMark } from "@/src/modules/finance/components/transactions/transaction-status-mark";
-import { useTransactionSearch } from "@/src/modules/finance/hooks/use-transactions";
-import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error";
-import {
-  formatFinanceMoney,
-  parseFinanceMoney,
-  type FinanceMoneyDisplay,
-} from "@/src/modules/finance/lib/money";
+import { TransactionInstrument } from "@/src/modules/finance/components/transactions/transaction-instrument"
+import { TransactionStatusMark } from "@/src/modules/finance/components/transactions/transaction-status-mark"
+import { useTransactionSearch } from "@/src/modules/finance/hooks/use-transactions"
+import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
+import type { FinanceMoneyDisplay } from "@/src/modules/finance/lib/money"
 import {
   isTransferTransaction,
   movementSign,
+  signedAmount,
   transferDirectionLabel,
-} from "@/src/modules/finance/lib/transactions-query";
-import type {
-  FinanceCategory,
-  FinanceTransaction,
-} from "@/src/modules/finance/types/entities";
-import { Input } from "@/src/shared/components/ui/input";
-import { SummaryItem } from "@/src/shared/components/ui/summary";
-import { cn } from "@/src/shared/lib/utils";
+} from "@/src/modules/finance/lib/transactions-query"
+import type { FinanceCategory } from "@/src/modules/finance/types/entities"
+import { Input } from "@/src/shared/components/ui/input"
+import { SummaryItem } from "@/src/shared/components/ui/summary"
+import { cn } from "@/src/shared/lib/utils"
 import {
   ArrowDownLeftIcon,
   ArrowLeftRightIcon,
   ArrowUpRightIcon,
   ScaleIcon,
   SearchIcon,
-} from "lucide-react";
-import { useEffect, useId, useRef, useState } from "react";
+} from "lucide-react"
+import { useEffect, useId, useRef, useState } from "react"
 
 const SEARCH_DEBOUNCE_MS = 300
 
@@ -37,21 +31,6 @@ type FinanceTransactionSearchProps = {
   display: FinanceMoneyDisplay
   categories: FinanceCategory[]
   onSelect: (id: string) => void
-}
-
-function signedAmount(
-  transaction: FinanceTransaction,
-  display: FinanceMoneyDisplay,
-): string {
-  const parsed = parseFinanceMoney(transaction.amount)
-  const formatted = formatFinanceMoney(
-    parsed === null ? null : Math.abs(parsed),
-    { ...display, currency: transaction.currency },
-  )
-  if (isTransferTransaction(transaction)) return formatted
-  const sign = movementSign(transaction)
-  if (!sign) return formatted
-  return `${sign} ${formatted}`
 }
 
 export function FinanceTransactionSearch({
@@ -70,7 +49,7 @@ export function FinanceTransactionSearch({
   const items = resultsQuery.data?.items ?? []
   const showPanel = open && debouncedSearch.length > 0
   const categoryById = new Map(
-    categories.map((category) => [category.id, category] as const),
+    categories.map((category) => [category.id, category] as const)
   )
 
   useEffect(() => {
@@ -126,9 +105,7 @@ export function FinanceTransactionSearch({
               {financeErrorMessage(resultsQuery.error)}
             </p>
           ) : resultsQuery.isPending ? (
-            <p className="px-3 py-3 text-sm text-muted-foreground">
-              Buscando…
-            </p>
+            <p className="px-3 py-3 text-sm text-muted-foreground">Buscando…</p>
           ) : items.length === 0 ? (
             <p className="px-3 py-3 text-sm text-muted-foreground">
               Sin resultados
@@ -181,7 +158,7 @@ export function FinanceTransactionSearch({
                               "size-5",
                               movementSign(transaction) === "−"
                                 ? "text-destructive"
-                                : "text-success",
+                                : "text-success"
                             )}
                           />
                         ) : null
@@ -195,13 +172,15 @@ export function FinanceTransactionSearch({
                               "text-destructive",
                             !isTransfer &&
                               movementSign(transaction) === "+" &&
-                              "text-success",
+                              "text-success"
                           )}
                         >
                           {signedAmount(transaction, display)}
                         </span>
                       }
-                      trailing={<TransactionStatusMark status={transaction.status} />}
+                      trailing={
+                        <TransactionStatusMark status={transaction.status} />
+                      }
                       showChevron={false}
                       onPress={() => {
                         setClosedFor(debouncedSearch)

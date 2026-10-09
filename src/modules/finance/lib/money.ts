@@ -6,7 +6,9 @@ export type FinanceMoneyDisplay = {
   leadingSign?: boolean
 }
 
-export function parseFinanceMoney(value: string | number | null | undefined): number | null {
+export function parseFinanceMoney(
+  value: string | number | null | undefined
+): number | null {
   if (typeof value === "number") {
     return Number.isFinite(value) ? value : null
   }
@@ -28,7 +30,7 @@ export function parseFinanceMoney(value: string | number | null | undefined): nu
  */
 export function currencyGlyph(
   currency: string,
-  narrowSymbol: string | undefined,
+  narrowSymbol: string | undefined
 ): string | null {
   if (!narrowSymbol) return null
   if (narrowSymbol.trim().toUpperCase() === currency) return "$"
@@ -48,7 +50,7 @@ export function narrowCurrencySymbol(currency: string): string | null {
 
 export function formatFinanceMoney(
   value: string | number | null | undefined,
-  display: FinanceMoneyDisplay,
+  display: FinanceMoneyDisplay
 ): string {
   const amount = parseFinanceMoney(value)
   const currency = display.currency.trim().toUpperCase()
@@ -83,7 +85,25 @@ export function formatFinanceMoney(
 
 export function formatCompactFinanceMoney(
   value: string | number | null | undefined,
-  display: FinanceMoneyDisplay,
+  display: FinanceMoneyDisplay
 ): string {
   return formatFinanceMoney(value, { ...display, compactNumbers: true })
+}
+
+/**
+ * Compact amount without the currency code, for the narrow centre of a chart
+ * where the currency is already spelled out beside every row.
+ */
+export function formatCompactFinanceAmount(
+  value: string | number | null | undefined
+): string {
+  const amount = parseFinanceMoney(value)
+  if (amount === null) {
+    return "—"
+  }
+  return new Intl.NumberFormat("en-US", {
+    style: "decimal",
+    notation: "compact",
+    maximumFractionDigits: 0,
+  }).format(amount)
 }

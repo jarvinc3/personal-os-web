@@ -197,6 +197,35 @@ export type FinanceCard = {
   balances: FinanceCardBalance[]
 }
 
+export const FINANCE_CARD_STATEMENT_STATUSES = [
+  "PENDING",
+  "PARTIAL",
+  "PAID",
+] as const
+export type FinanceCardStatementStatus =
+  (typeof FINANCE_CARD_STATEMENT_STATUSES)[number]
+
+export const FINANCE_CARD_STATEMENT_STATUS_LABEL: Record<
+  FinanceCardStatementStatus,
+  string
+> = {
+  PENDING: "Pendiente",
+  PARTIAL: "Parcial",
+  PAID: "Pagada",
+}
+
+export type FinanceCardStatement = {
+  id: string
+  currency: string
+  cycleStart: string
+  cycleEnd: string
+  dueDate: string | null
+  closingBalance: string
+  amountPaid: string
+  remaining: string
+  status: FinanceCardStatementStatus
+}
+
 export type FinanceInstitution = {
   id: string
   name: string
@@ -312,6 +341,15 @@ export type FinanceLoan = {
   interestRate: string | null
   notes: string | null
   isActive: boolean
+}
+
+export type FinanceLoanInstallment = {
+  id: string
+  loanId: string
+  installmentNo: number
+  dueDate: string
+  amount: string
+  paidAt: string | null
 }
 
 export const FINANCE_RECEIVABLE_STATUSES = [
