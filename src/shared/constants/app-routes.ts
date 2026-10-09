@@ -23,8 +23,8 @@ export const APP_ROUTES = {
     financeSync: "/finance/accounts/sync",
     financeInstitution: (institutionId: string) =>
       `/finance/accounts/institutions/${institutionId}`,
-    financeCashAccount: (accountId: string) =>
-      `/finance/accounts/cash/${accountId}`,
+    financeAccount: (accountId: string) => `/finance/accounts/${accountId}`,
+    financeCard: (cardId: string) => `/finance/accounts/cards/${cardId}`,
     financeTransactions: "/finance/transactions",
     financeTransactionNew: "/finance/transactions/new",
     financeTransactionEdit: (transactionId: string) =>

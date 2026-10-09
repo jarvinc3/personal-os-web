@@ -1,19 +1,19 @@
 import {
   FINANCE_TRANSACTIONS_QUERY_KEY,
   type FinancePaginated,
-} from "../types/api.ts";
-import {
-  isoMonthBounds,
-  parseMonthKey,
-  type MonthKey,
-} from "./month-window.ts";
+} from "../types/api.ts"
+import { isoMonthBounds, parseMonthKey, type MonthKey } from "./month-window.ts"
 import type {
   FinanceTransaction,
   FinanceTransactionStatus,
   FinanceTransactionType,
-} from "../types/entities.ts";
-import { formatCalendarDate } from "./ledger-form.ts";
-import { parseFinanceMoney } from "./money.ts";
+} from "../types/entities.ts"
+import { formatCalendarDate } from "./ledger-form.ts"
+import {
+  formatFinanceMoney,
+  parseFinanceMoney,
+  type FinanceMoneyDisplay,
+} from "./money.ts"
 
 export const FINANCE_TX_FILTER_ALL = "__all__" as const
 export const FINANCE_TX_PAGE_SIZE = 20
@@ -48,7 +48,7 @@ const OPTIONAL_KEYS = [
 ] as const
 
 export function buildTransactionsSearchParams(
-  query: FinanceTransactionsQuery,
+  query: FinanceTransactionsQuery
 ): string {
   const params = new URLSearchParams({
     page: String(query.page),
@@ -56,7 +56,11 @@ export function buildTransactionsSearchParams(
   })
   for (const key of OPTIONAL_KEYS) {
     const value = query[key]
-    if (typeof value === "string" && value.trim() && value !== FINANCE_TX_FILTER_ALL) {
+    if (
+      typeof value === "string" &&
+      value.trim() &&
+      value !== FINANCE_TX_FILTER_ALL
+    ) {
       params.set(key, value.trim())
     }
   }
@@ -64,11 +68,16 @@ export function buildTransactionsSearchParams(
 }
 
 export function transactionsFromPayload(
-  payload: unknown,
+  payload: unknown
 ): FinancePaginated<FinanceTransaction> {
   const empty: FinancePaginated<FinanceTransaction> = {
     items: [],
-    pagination: { page: 1, limit: FINANCE_TX_PAGE_SIZE, total: 0, totalPages: 1 },
+    pagination: {
+      page: 1,
+      limit: FINANCE_TX_PAGE_SIZE,
+      total: 0,
+      totalPages: 1,
+    },
   }
   if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
     return empty
@@ -97,20 +106,20 @@ export function formatTransactionDate(value: string): string {
 }
 
 export function canReverseTransaction(
-  tx: Pick<FinanceTransaction, "status" | "transferGroupId" | "type">,
+  tx: Pick<FinanceTransaction, "status" | "transferGroupId" | "type">
 ): boolean {
   if (tx.transferGroupId || tx.type === "TRANSFER") return false
   return tx.status === "CONFIRMED"
 }
 
 export function isTransferTransaction(
-  item: Pick<FinanceTransaction, "type" | "transferGroupId">,
+  item: Pick<FinanceTransaction, "type" | "transferGroupId">
 ): boolean {
   return item.type === "TRANSFER" || Boolean(item.transferGroupId)
 }
 
 export function transactionInstrumentLabel(
-  item: Pick<FinanceTransaction, "accountName" | "cardName">,
+  item: Pick<FinanceTransaction, "accountName" | "cardName">
 ): string | null {
   return item.cardName ?? item.accountName
 }
@@ -118,11 +127,8 @@ export function transactionInstrumentLabel(
 export function transferDirectionLabel(
   item: Pick<
     FinanceTransaction,
-    | "accountName"
-    | "cardName"
-    | "transferToAccountName"
-    | "transferToCardName"
-  >,
+    "accountName" | "cardName" | "transferToAccountName" | "transferToCardName"
+  >
 ): string {
   const origin = item.accountName ?? item.cardName ?? "Origen"
   const destination =
@@ -131,7 +137,7 @@ export function transferDirectionLabel(
 }
 
 export function movementSign(
-  transaction: Pick<FinanceTransaction, "type" | "ledgerAmount">,
+  transaction: Pick<FinanceTransaction, "type" | "ledgerAmount">
 ): "+" | "−" | null {
   if (transaction.type === "DEBIT") return "−"
   if (transaction.type === "CREDIT") return "+"
@@ -143,11 +149,30 @@ export function movementSign(
   return null
 }
 
+export function signedAmount(
+  transaction: FinanceTransaction,
+  display: FinanceMoneyDisplay
+): string {
+  const parsed = parseFinanceMoney(transaction.amount)
+  const formatted = formatFinanceMoney(
+    parsed === null ? null : Math.abs(parsed),
+    { ...display, currency: transaction.currency }
+  )
+  if (isTransferTransaction(transaction)) {
+    return formatted
+  }
+  const sign = movementSign(transaction)
+  if (!sign) {
+    return formatted
+  }
+  return `${sign} ${formatted}`
+}
+
 export function visibleTransactionTotals(
   items: Pick<
     FinanceTransaction,
     "type" | "amountBaseCurrency" | "transferGroupId"
-  >[],
+  >[]
 ): { income: number; expenses: number } {
   return items.reduce(
     (totals, item) => {
@@ -158,17 +183,22 @@ export function visibleTransactionTotals(
       if (item.type === "DEBIT") totals.expenses += amount
       return totals
     },
-    { income: 0, expenses: 0 },
+    { income: 0, expenses: 0 }
   )
 }
 
 export function timelineMonthQueryKey(month: MonthKey) {
-  return [...FINANCE_TRANSACTIONS_QUERY_KEY, "timeline", "month", month] as const
+  return [
+    ...FINANCE_TRANSACTIONS_QUERY_KEY,
+    "timeline",
+    "month",
+    month,
+  ] as const
 }
 
 export function timelineMonthQuery(
   month: MonthKey,
-  get: (path: string) => Promise<unknown>,
+  get: (path: string) => Promise<unknown>
 ) {
   const parsed = parseMonthKey(month)
   const bounds = isoMonthBounds(parsed.year, parsed.month)
@@ -182,13 +212,13 @@ export function timelineMonthQuery(
           dateTo: bounds.dateTo,
           limit: FINANCE_TIMELINE_PAGE_SIZE,
         },
-        get,
+        get
       ),
   }
 }
 
 export function mergeTransactionsById<T extends { id: string }>(
-  groups: ReadonlyArray<readonly T[]>,
+  groups: ReadonlyArray<readonly T[]>
 ): T[] {
   const byId = new Map<string, T>()
   for (const group of groups) {
@@ -201,7 +231,7 @@ export function mergeTransactionsById<T extends { id: string }>(
 
 export async function fetchAllTransactionPages(
   query: Omit<FinanceTransactionsQuery, "page">,
-  get: (path: string) => Promise<unknown>,
+  get: (path: string) => Promise<unknown>
 ): Promise<FinanceTransaction[]> {
   const items: FinanceTransaction[] = []
   let page = 1

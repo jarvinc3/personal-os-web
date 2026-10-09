@@ -1,31 +1,28 @@
 "use client"
 
-import { TransactionInstrument } from "@/src/modules/finance/components/transactions/transaction-instrument";
-import { TransactionStatusMark } from "@/src/modules/finance/components/transactions/transaction-status-mark";
-import type { TimelineMonth } from "@/src/modules/finance/lib/group-transactions-timeline";
+import { TransactionInstrument } from "@/src/modules/finance/components/transactions/transaction-instrument"
+import { TransactionStatusMark } from "@/src/modules/finance/components/transactions/transaction-status-mark"
+import type { TimelineMonth } from "@/src/modules/finance/lib/group-transactions-timeline"
 import {
   formatFinanceMoney,
-  parseFinanceMoney,
   type FinanceMoneyDisplay,
-} from "@/src/modules/finance/lib/money";
+} from "@/src/modules/finance/lib/money"
 import {
   isTransferTransaction,
   movementSign,
+  signedAmount,
   transferDirectionLabel,
-} from "@/src/modules/finance/lib/transactions-query";
-import type {
-  FinanceCategory,
-  FinanceTransaction,
-} from "@/src/modules/finance/types/entities";
-import { SummaryItem } from "@/src/shared/components/ui/summary";
-import { cn } from "@/src/shared/lib/utils";
+} from "@/src/modules/finance/lib/transactions-query"
+import type { FinanceCategory } from "@/src/modules/finance/types/entities"
+import { SummaryItem } from "@/src/shared/components/ui/summary"
+import { cn } from "@/src/shared/lib/utils"
 import {
   ArrowDownLeftIcon,
   ArrowLeftRightIcon,
   ArrowUpRightIcon,
   ScaleIcon,
-} from "lucide-react";
-import Image from "next/image";
+} from "lucide-react"
+import Image from "next/image"
 
 type FinanceMonthSectionProps = {
   month: TimelineMonth
@@ -34,21 +31,6 @@ type FinanceMonthSectionProps = {
   isActive: boolean
   stickyOffset: number
   onTransactionPress: (id: string) => void
-}
-
-function signedAmount(
-  transaction: FinanceTransaction,
-  display: FinanceMoneyDisplay,
-): string {
-  const parsed = parseFinanceMoney(transaction.amount)
-  const formatted = formatFinanceMoney(
-    parsed === null ? null : Math.abs(parsed),
-    { ...display, currency: transaction.currency },
-  )
-  if (isTransferTransaction(transaction)) return formatted
-  const sign = movementSign(transaction)
-  if (!sign) return formatted
-  return `${sign} ${formatted}`
 }
 
 export function FinanceMonthSection({
@@ -61,7 +43,7 @@ export function FinanceMonthSection({
 }: FinanceMonthSectionProps) {
   const headingId = `month-label-${month.key}`
   const categoryById = new Map(
-    categories.map((category) => [category.id, category] as const),
+    categories.map((category) => [category.id, category] as const)
   )
 
   return (
@@ -71,7 +53,7 @@ export function FinanceMonthSection({
       style={{ scrollMarginTop: stickyOffset }}
       className="flex flex-col gap-4"
     >
-      <div className="overflow-hidden relative h-40 rounded-2xl">
+      <div className="relative h-40 overflow-hidden rounded-2xl">
         <Image
           src={month.bannerSrc}
           alt=""
@@ -91,19 +73,19 @@ export function FinanceMonthSection({
 
       {month.weeks.map((week) => (
         <div key={week.id} className="flex flex-col gap-3">
-          <p className="text-sm text-center text-muted-foreground">
+          <p className="text-center text-sm text-muted-foreground">
             {week.label}
           </p>
           {week.days.map((day) => (
             <div key={day.dateKey} className="flex flex-col gap-2">
-              <div className="flex gap-3 justify-between items-center px-1">
+              <div className="flex items-center justify-between gap-3 px-1">
                 <p className="text-xs text-muted-foreground">{day.label}</p>
                 <p
                   className={cn(
                     "text-xs font-medium tabular-nums",
                     day.net > 0 && "text-success",
                     day.net < 0 && "text-destructive",
-                    day.net === 0 && "text-muted-foreground",
+                    day.net === 0 && "text-muted-foreground"
                   )}
                 >
                   {day.net === 0
@@ -125,7 +107,9 @@ export function FinanceMonthSection({
                     : category?.icon?.trim() || parent?.icon?.trim()
                   const color = isTransfer
                     ? "#3B82F6"
-                    : category?.color?.trim() || parent?.color?.trim() || "#64748B"
+                    : category?.color?.trim() ||
+                      parent?.color?.trim() ||
+                      "#64748B"
                   const title = isTransfer
                     ? transferDirectionLabel(transaction)
                     : (transaction.merchant ??
@@ -156,7 +140,7 @@ export function FinanceMonthSection({
                               "size-5",
                               movementSign(transaction) === "−"
                                 ? "text-destructive"
-                                : "text-success",
+                                : "text-success"
                             )}
                           />
                         ) : null
@@ -170,13 +154,15 @@ export function FinanceMonthSection({
                               "text-destructive",
                             !isTransfer &&
                               movementSign(transaction) === "+" &&
-                              "text-success",
+                              "text-success"
                           )}
                         >
                           {signedAmount(transaction, display)}
                         </span>
                       }
-                      trailing={<TransactionStatusMark status={transaction.status} />}
+                      trailing={
+                        <TransactionStatusMark status={transaction.status} />
+                      }
                       showChevron={false}
                       onPress={() => onTransactionPress(transaction.id)}
                       isLast={index === day.items.length - 1}

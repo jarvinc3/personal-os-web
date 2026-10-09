@@ -1,7 +1,7 @@
-import { Suspense } from "react";
+import { Suspense } from "react"
 
-import { FinanceAccountDetailClient } from "@/src/modules/finance/components/accounts/finance-account-detail-view";
-import { LoadingView } from "@/src/shared/components/layout/loading-view";
+import { FinanceAccountDetailClient } from "@/src/modules/finance/components/accounts/finance-account-detail-view"
+import { LoadingView } from "@/src/shared/components/layout/loading-view"
 
 type FinanceAccountDetailPageProps = {
   params: Promise<{ accountId: string }>

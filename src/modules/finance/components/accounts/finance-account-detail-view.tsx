@@ -1,26 +1,42 @@
 "use client"
 
-import { BrandLogo } from "@/src/modules/finance/components/brand-logo";
-import { AccountBalanceSheet } from "@/src/modules/finance/components/catalog/account-balance-sheet";
-import { AccountSheet } from "@/src/modules/finance/components/catalog/account-sheet";
-import { FinanceAuthenticatedPage } from "@/src/modules/finance/components/layout/finance-authenticated-page";
-import { FINANCE_ACCOUNT_TYPE_LABEL } from "@/src/modules/finance/constants/catalog";
-import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/constants/sheet-keys";
-import { useAccounts, useArchiveAccount, useDeleteAccount } from "@/src/modules/finance/hooks/use-accounts";
-import { useFinanceEnabled } from "@/src/modules/finance/hooks/use-finance-enabled";
-import { useInstitutions } from "@/src/modules/finance/hooks/use-institutions";
-import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error";
-import { formatFinanceMoney } from "@/src/modules/finance/lib/money";
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet";
-import { LoadingView } from "@/src/shared/components/layout/loading-view";
-import { Button } from "@/src/shared/components/ui/button";
-import { SummaryItem } from "@/src/shared/components/ui/summary";
-import { APP_ROUTES } from "@/src/shared/constants/app-routes";
-import { usePageHeader } from "@/src/shared/hooks/use-page-header";
-import { useSheetParam } from "@/src/shared/hooks/use-sheet-params";
-import { appToast } from "@/src/shared/lib/app-toast";
-import { ArchiveIcon, MoreVerticalIcon, PencilIcon, ScaleIcon, Trash2Icon, WalletIcon } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { BrandLogo } from "@/src/modules/finance/components/brand-logo"
+import { AccountBalanceSheet } from "@/src/modules/finance/components/catalog/account-balance-sheet"
+import { AccountSheet } from "@/src/modules/finance/components/catalog/account-sheet"
+import { FinanceAuthenticatedPage } from "@/src/modules/finance/components/layout/finance-authenticated-page"
+import { FinanceInstrumentMovements } from "@/src/modules/finance/components/transactions/finance-instrument-movements"
+import { FINANCE_ACCOUNT_TYPE_LABEL } from "@/src/modules/finance/constants/catalog"
+import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/constants/sheet-keys"
+import {
+  useAccounts,
+  useArchiveAccount,
+  useDeleteAccount,
+} from "@/src/modules/finance/hooks/use-accounts"
+import { useCards } from "@/src/modules/finance/hooks/use-cards"
+import { useFinanceEnabled } from "@/src/modules/finance/hooks/use-finance-enabled"
+import { useInstitutions } from "@/src/modules/finance/hooks/use-institutions"
+import { useAllTransactions } from "@/src/modules/finance/hooks/use-transactions"
+import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
+import { isoMonthBounds } from "@/src/modules/finance/lib/month-window"
+import { formatFinanceMoney } from "@/src/modules/finance/lib/money"
+import { visibleTransactionTotals } from "@/src/modules/finance/lib/transactions-query"
+import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+import { LoadingView } from "@/src/shared/components/layout/loading-view"
+import { Button } from "@/src/shared/components/ui/button"
+import { SummaryItem } from "@/src/shared/components/ui/summary"
+import { APP_ROUTES } from "@/src/shared/constants/app-routes"
+import { usePageHeader } from "@/src/shared/hooks/use-page-header"
+import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
+import { appToast } from "@/src/shared/lib/app-toast"
+import {
+  ArchiveIcon,
+  MoreVerticalIcon,
+  PencilIcon,
+  ScaleIcon,
+  Trash2Icon,
+  WalletIcon,
+} from "lucide-react"
+import { useRouter } from "next/navigation"
 
 const FALLBACK_COLOR = "#334155"
 
@@ -38,7 +54,9 @@ export function FinanceAccountDetailClient({
   )
 }
 
-function FinanceAccountDetailView({ accountId }: FinanceAccountDetailClientProps) {
+function FinanceAccountDetailView({
+  accountId,
+}: FinanceAccountDetailClientProps) {
   const router = useRouter()
   const { isEnabled, config } = useFinanceEnabled()
   const display = {
@@ -49,6 +67,7 @@ function FinanceAccountDetailView({ accountId }: FinanceAccountDetailClientProps
 
   const accountsQuery = useAccounts(isEnabled)
   const institutionsQuery = useInstitutions(isEnabled)
+  const cardsQuery = useCards(isEnabled)
   const archiveAccount = useArchiveAccount()
   const deleteAccount = useDeleteAccount()
   const { open: openAccountSheet, setOpen: setOpenAccountSheet } =
@@ -61,10 +80,32 @@ function FinanceAccountDetailView({ accountId }: FinanceAccountDetailClientProps
   const account =
     (accountsQuery.data ?? []).find((item) => item.id === accountId) ?? null
   const institutions = institutionsQuery.data ?? []
+  const debitCards = (cardsQuery.data ?? []).filter(
+    (item) => item.type === "DEBIT" && item.accountId === accountId
+  )
+  const movementSources = [
+    { accountId },
+    ...debitCards.map((item) => ({ cardId: item.id })),
+  ]
   const accent = account?.color ?? FALLBACK_COLOR
 
+  const today = new Date()
+  const monthBounds = isoMonthBounds(today.getFullYear(), today.getMonth() + 1)
+  const monthQuery = useAllTransactions(isEnabled, {
+    accountId,
+    dateFrom: monthBounds.dateFrom,
+    dateTo: monthBounds.dateTo,
+  })
+  const monthTotals = visibleTransactionTotals(monthQuery.data ?? [])
+  const accountDisplay = {
+    ...display,
+    currency: account?.currency ?? display.currency,
+  }
+
   async function onArchiveAccount() {
-    if (!account) return
+    if (!account) {
+      return
+    }
     try {
       await archiveAccount.mutateAsync(account.id)
       appToast.success({ text1: "Cuenta archivada" })
@@ -76,11 +117,15 @@ function FinanceAccountDetailView({ accountId }: FinanceAccountDetailClientProps
   }
 
   async function onDeleteAccount() {
-    if (!account) return
+    if (!account) {
+      return
+    }
     const confirmed = window.confirm(
       "¿Borrar esta cuenta? Se eliminan sus movimientos, tarjetas débito y saldos. No se puede deshacer."
     )
-    if (!confirmed) return
+    if (!confirmed) {
+      return
+    }
     try {
       await deleteAccount.mutateAsync(account.id)
       appToast.success({ text1: "Cuenta borrada" })
@@ -94,7 +139,7 @@ function FinanceAccountDetailView({ accountId }: FinanceAccountDetailClientProps
   usePageHeader(
     {
       variant: "secondary",
-      title: account?.name ?? "Efectivo",
+      title: account?.name ?? "Cuenta",
       onBack: () => {
         router.push(APP_ROUTES.app.financeAccounts)
       },
@@ -102,7 +147,7 @@ function FinanceAccountDetailView({ accountId }: FinanceAccountDetailClientProps
         <Button
           variant="ghost"
           size="icon"
-          className="rounded-full size-9"
+          className="size-9 rounded-full"
           aria-label="Opciones de la cuenta"
           onClick={() => setOpenOptionsSheet(true)}
         >
@@ -118,12 +163,12 @@ function FinanceAccountDetailView({ accountId }: FinanceAccountDetailClientProps
     return <LoadingView />
   }
 
-  if (!account || account.type !== "CASH") {
+  if (!account) {
     return (
-      <div className="flex flex-col gap-3 items-center py-16">
+      <div className="flex flex-col items-center gap-3 py-16">
         <WalletIcon className="size-8 text-muted-foreground" />
         <p className="text-center text-muted-foreground">
-          No encontramos esta cuenta de efectivo.
+          No encontramos esta cuenta.
         </p>
         <Button
           variant="outline"
@@ -143,21 +188,21 @@ function FinanceAccountDetailView({ accountId }: FinanceAccountDetailClientProps
         </p>
       ) : null}
 
-      <div className="overflow-hidden -mx-4 -mt-4 md:-mx-6">
+      <div className="-mx-4 -mt-4 overflow-hidden md:-mx-6">
         <div
-          className="px-4 pt-6 pb-10 text-white rounded-b-3xl md:px-6"
+          className="rounded-b-3xl px-4 pt-6 pb-8 text-white md:px-6"
           style={{
             background: accent,
           }}
         >
-          <div className="flex gap-3 items-start">
+          <div className="flex items-start gap-3">
             <BrandLogo
               name={account.institutionName ?? account.name}
               logoUrl={account.institutionLogoUrl}
               size={48}
             />
-            <div className="flex-1 min-w-0">
-              <h1 className="text-2xl font-bold tracking-tight truncate">
+            <div className="min-w-0 flex-1">
+              <h1 className="truncate text-2xl font-bold tracking-tight">
                 {account.name}
               </h1>
               <p className="mt-1 text-sm text-white/70">
@@ -165,14 +210,39 @@ function FinanceAccountDetailView({ accountId }: FinanceAccountDetailClientProps
               </p>
             </div>
           </div>
-          <p className="mt-8 text-3xl font-bold tabular-nums tracking-tight">
-            {formatFinanceMoney(account.balance, {
-              ...display,
-              currency: account.currency,
-            })}
+          <p className="mt-8 text-3xl font-bold tracking-tight tabular-nums">
+            {formatFinanceMoney(account.balance, accountDisplay)}
           </p>
+          <div className="mt-6 grid grid-cols-2 gap-3">
+            <div className="rounded-2xl bg-black/20 px-3 py-2">
+              <p className="text-[11px] tracking-wide text-white/70 uppercase">
+                Ingresos (mes)
+              </p>
+              <p className="mt-1 text-sm font-semibold tabular-nums">
+                + {formatFinanceMoney(monthTotals.income, accountDisplay)}
+              </p>
+            </div>
+            <div className="rounded-2xl bg-black/20 px-3 py-2">
+              <p className="text-[11px] tracking-wide text-white/70 uppercase">
+                Egresos (mes)
+              </p>
+              <p className="mt-1 text-sm font-semibold tabular-nums">
+                − {formatFinanceMoney(monthTotals.expenses, accountDisplay)}
+              </p>
+            </div>
+          </div>
         </div>
       </div>
+
+      <section className="mt-6 flex flex-col gap-3">
+        <h2 className="text-lg font-medium text-foreground">Movimientos</h2>
+        <FinanceInstrumentMovements
+          enabled={isEnabled}
+          display={accountDisplay}
+          sources={movementSources}
+          emptyLabel="Sin movimientos en esta cuenta."
+        />
+      </section>
 
       <BottomSheet
         open={openOptionsSheet}
@@ -223,14 +293,14 @@ function FinanceAccountDetailView({ accountId }: FinanceAccountDetailClientProps
         account={account}
         institutions={institutions}
         defaultCurrency={config.baseCurrency}
-        display={display}
+        display={accountDisplay}
         onDeleted={() => router.push(APP_ROUTES.app.financeAccounts)}
       />
       <AccountBalanceSheet
         open={openBalanceSheet}
         onOpenChange={setOpenBalanceSheet}
         account={account}
-        display={display}
+        display={accountDisplay}
       />
     </>
   )

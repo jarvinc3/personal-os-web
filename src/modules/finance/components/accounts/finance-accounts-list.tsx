@@ -1,35 +1,35 @@
 "use client"
 
-import { InstitutionSheet } from "@/src/modules/finance/components/accounts/institution-sheet";
-import { InstitutionSwapStack } from "@/src/modules/finance/components/accounts/institution-swap-stack";
-import { AccountSheet } from "@/src/modules/finance/components/catalog/account-sheet";
-import { CategorySheet } from "@/src/modules/finance/components/catalog/category-sheet";
-import { FinanceExpenseTrendBadge } from "@/src/modules/finance/components/finance-expense-trend-badge";
-import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/constants/sheet-keys";
-import { useAccounts } from "@/src/modules/finance/hooks/use-accounts";
-import { useBalanceSheet } from "@/src/modules/finance/hooks/use-balance-sheet";
-import { useCards } from "@/src/modules/finance/hooks/use-cards";
-import { useCategories } from "@/src/modules/finance/hooks/use-categories";
-import { useFinanceEnabled } from "@/src/modules/finance/hooks/use-finance-enabled";
-import { useInstitutions } from "@/src/modules/finance/hooks/use-institutions";
-import { useLoans } from "@/src/modules/finance/hooks/use-loans";
-import { useMonthExpenseTrend } from "@/src/modules/finance/hooks/use-month-expense-trend";
-import { useSheetListEntity } from "@/src/modules/finance/hooks/use-sheet-entity";
-import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error";
+import { InstitutionSheet } from "@/src/modules/finance/components/accounts/institution-sheet"
+import { InstitutionSwapStack } from "@/src/modules/finance/components/accounts/institution-swap-stack"
+import { AccountSheet } from "@/src/modules/finance/components/catalog/account-sheet"
+import { CategorySheet } from "@/src/modules/finance/components/catalog/category-sheet"
+import { FinanceExpenseTrendBadge } from "@/src/modules/finance/components/finance-expense-trend-badge"
+import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/constants/sheet-keys"
+import { useAccounts } from "@/src/modules/finance/hooks/use-accounts"
+import { useBalanceSheet } from "@/src/modules/finance/hooks/use-balance-sheet"
+import { useCards } from "@/src/modules/finance/hooks/use-cards"
+import { useCategories } from "@/src/modules/finance/hooks/use-categories"
+import { useFinanceEnabled } from "@/src/modules/finance/hooks/use-finance-enabled"
+import { useInstitutions } from "@/src/modules/finance/hooks/use-institutions"
+import { useLoans } from "@/src/modules/finance/hooks/use-loans"
+import { useMonthExpenseTrend } from "@/src/modules/finance/hooks/use-month-expense-trend"
+import { useSheetListEntity } from "@/src/modules/finance/hooks/use-sheet-entity"
+import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
 import {
   prefetchFinanceCategories,
   prefetchFinanceSync,
-} from "@/src/modules/finance/lib/finance-prefetch";
-import { buildInstitutionStackItems } from "@/src/modules/finance/lib/institution-stack";
-import type { FinanceMoneyDisplay } from "@/src/modules/finance/lib/money";
-import { ExpandableFab } from "@/src/shared/components/layout/expandable-fab";
-import { SettingsSection } from "@/src/shared/components/layout/settings-section";
-import { Button } from "@/src/shared/components/ui/button";
+} from "@/src/modules/finance/lib/finance-prefetch"
+import { buildInstitutionStackItems } from "@/src/modules/finance/lib/institution-stack"
+import type { FinanceMoneyDisplay } from "@/src/modules/finance/lib/money"
+import { ExpandableFab } from "@/src/shared/components/layout/expandable-fab"
+import { SettingsSection } from "@/src/shared/components/layout/settings-section"
+import { Button } from "@/src/shared/components/ui/button"
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@/src/shared/components/ui/collapsible";
+} from "@/src/shared/components/ui/collapsible"
 import {
   Empty,
   EmptyContent,
@@ -37,22 +37,22 @@ import {
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
-} from "@/src/shared/components/ui/empty";
-import { Spinner } from "@/src/shared/components/ui/spinner";
-import { SummaryItem } from "@/src/shared/components/ui/summary";
-import { APP_ROUTES } from "@/src/shared/constants/app-routes";
-import { useSheetParam } from "@/src/shared/hooks/use-sheet-params";
-import { useQueryClient } from "@tanstack/react-query";
+} from "@/src/shared/components/ui/empty"
+import { Spinner } from "@/src/shared/components/ui/spinner"
+import { SummaryItem } from "@/src/shared/components/ui/summary"
+import { APP_ROUTES } from "@/src/shared/constants/app-routes"
+import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
+import { useQueryClient } from "@tanstack/react-query"
 import {
   Building2Icon,
   ChevronDownIcon,
   MailIcon,
   TagsIcon,
   WalletIcon,
-} from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useMemo } from "react";
-import { FinanceHeroSection } from "./finance-hero-section";
+} from "lucide-react"
+import { useRouter } from "next/navigation"
+import { useMemo } from "react"
+import { FinanceHeroSection } from "./finance-hero-section"
 
 type FinanceAccountsListProps = {
   enabled: boolean
@@ -161,7 +161,7 @@ export function FinanceAccountsList({
     (balanceSheetQuery.isPending && !balanceSheetQuery.data)
 
   return (
-    <div className="flex flex-col gap-4 -mt-6">
+    <div className="-mt-6 flex flex-col gap-4">
       {errorMessage ? (
         <p className="text-sm text-destructive">{errorMessage}</p>
       ) : null}
@@ -199,10 +199,13 @@ export function FinanceAccountsList({
             </EmptyContent>
           </Empty>
         ) : (
-          <Collapsible defaultOpen className="group/institutions relative z-10 flex flex-col">
+          <Collapsible
+            defaultOpen
+            className="group/institutions relative z-10 flex flex-col"
+          >
             <CollapsibleTrigger
               type="button"
-              className="flex w-full items-center justify-between gap-2 text-left cursor-pointer"
+              className="flex w-full cursor-pointer items-center justify-between gap-2 text-left"
             >
               <p className="text-lg font-medium text-foreground">
                 Instituciones
@@ -222,7 +225,7 @@ export function FinanceAccountsList({
                       router.push(APP_ROUTES.app.financeInstitution(item.id))
                       return
                     }
-                    router.push(APP_ROUTES.app.financeCashAccount(item.id))
+                    router.push(APP_ROUTES.app.financeAccount(item.id))
                   }}
                 />
               </div>

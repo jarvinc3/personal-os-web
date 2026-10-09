@@ -47,6 +47,7 @@ export const API_ENDPOINTS = {
       `/finance/cards/${id}/balances/${encodeURIComponent(currency)}`,
     CARD_CREDIT_LIMIT: (id: string) =>
       `/finance/cards/${id}/balances/credit-limit`,
+    CARD_STATEMENTS: (id: string) => `/finance/cards/${id}/statements`,
     BALANCE_ADJUSTMENT: "/finance/balance-adjustments",
     TRANSACTIONS: "/finance/transactions",
     TRANSFERS: "/finance/transfers",

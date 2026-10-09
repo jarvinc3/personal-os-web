@@ -42,6 +42,10 @@ export const FINANCE_EXCHANGE_RATES_QUERY_KEY = [
   "exchange-rates",
 ] as const
 export const FINANCE_CARDS_QUERY_KEY = [...FINANCE_QUERY_KEY, "cards"] as const
+export const FINANCE_CARD_STATEMENTS_QUERY_KEY = [
+  ...FINANCE_QUERY_KEY,
+  "card-statements",
+] as const
 export const FINANCE_CATEGORIES_QUERY_KEY = [
   ...FINANCE_QUERY_KEY,
   "categories",
