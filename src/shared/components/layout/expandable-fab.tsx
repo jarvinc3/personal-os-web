@@ -1,15 +1,14 @@
+import {
+  useModuleTabBarVisible,
+  useRegisterModuleFab,
+  type ModuleFabAction,
+} from "@/src/shared/components/layout/module-fab-context";
 import { AnimatePresence, motion } from "framer-motion";
 import { Plus } from "lucide-react";
 import { useState } from "react";
 import { cn } from "../../lib/utils";
 
-type ExpandableFabAction = {
-  icon: React.ReactNode
-  label: string
-  onClick: () => void
-  disabled?: boolean
-  color: string
-}
+type ExpandableFabAction = ModuleFabAction
 
 export function ExpandableFab({
   actions,
@@ -19,6 +18,9 @@ export function ExpandableFab({
   label?: string
 }) {
   const [isOpen, setIsOpen] = useState(false)
+  const tabBarVisible = useModuleTabBarVisible()
+  useRegisterModuleFab({ label, actions })
+  const hiddenOnMobile = tabBarVisible && "max-md:hidden"
 
   return (
     <>
@@ -29,14 +31,20 @@ export function ExpandableFab({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 mb-0 backdrop-blur-sm bg-background/50"
+            className={cn(
+              "fixed inset-0 z-50 mb-0 backdrop-blur-sm bg-background/50",
+              hiddenOnMobile,
+            )}
             onClick={() => setIsOpen(false)}
           />
         )}
       </AnimatePresence>
 
       {/* FAB and actions container */}
-      <div className="flex fixed right-4 bottom-24 z-50 flex-col-reverse gap-3 items-end">
+      <div className={cn(
+        "flex fixed right-4 bottom-24 z-50 flex-col-reverse gap-3 items-end",
+        hiddenOnMobile,
+      )}>
         {/* Main FAB */}
         <motion.button
           type="button"

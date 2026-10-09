@@ -12,8 +12,6 @@ import {
 } from "@/src/modules/finance/lib/money";
 import {
    ChartContainer,
-   ChartTooltip,
-   ChartTooltipContent,
    type ChartConfig,
 } from "@/src/shared/components/ui/chart";
 import { useState } from "react";
@@ -125,31 +123,6 @@ export function FinanceHeroSection({
                   initialDimension={{ width: 320, height: 320 }}
                >
                   <PieChart>
-                     <ChartTooltip
-                        cursor={false}
-                        content={
-                           <ChartTooltipContent
-                              hideLabel
-                              formatter={(_value, _name, item) => {
-                                 const slice = item?.payload as DonutStackSlice | undefined
-                                 if (!slice) return null
-                                 return (
-                                    <div className="flex flex-col gap-0.5">
-                                       <span className="font-medium">{slice.name}</span>
-                                       <span className="text-muted-foreground">
-                                          {slice.kind === "cash" ? "Efectivo" : "Institución"}
-                                       </span>
-                                       <span className="tabular-nums text-muted-foreground">
-                                          {formatFinanceMoney(slice.signedValue, display)}
-                                          {" · "}
-                                          {formatPercent(slice.percent)}
-                                       </span>
-                                    </div>
-                                 )
-                              }}
-                           />
-                        }
-                     />
                      <Pie
                         data={slices}
                         dataKey="value"

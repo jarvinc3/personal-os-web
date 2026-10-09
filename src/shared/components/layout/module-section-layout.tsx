@@ -1,5 +1,6 @@
 "use client"
 
+import { ModuleFabProvider } from "@/src/shared/components/layout/module-fab-context"
 import { ModuleTabBar } from "@/src/shared/components/layout/module-tab-bar"
 import { useHeaderContext } from "@/src/shared/context/header-context"
 import { cn } from "@/src/shared/lib/utils"
@@ -23,22 +24,24 @@ export function ModuleSectionLayout({
   const hideTabBar = config.variant === "secondary"
 
   return (
-    <div
-      className={cn(
-        "mx-auto flex w-full max-w-5xl flex-col gap-6 p-4 md:px-6 md:pb-16",
-        hideTabBar
-          ? "pb-4"
-          : "pb-[calc(6rem+env(safe-area-inset-bottom))]",
-      )}
-    >
-      {children}
-      {hideTabBar ? null : (
-        <ModuleTabBar
-          items={items}
-          ariaLabel={ariaLabel}
-          onItemPrefetch={onItemPrefetch}
-        />
-      )}
-    </div>
+    <ModuleFabProvider tabBarVisible={!hideTabBar}>
+      <div
+        className={cn(
+          "mx-auto flex w-full max-w-5xl flex-col gap-6 p-4 md:px-6 md:pb-16",
+          hideTabBar
+            ? "pb-4"
+            : "pb-[calc(6rem+env(safe-area-inset-bottom))]",
+        )}
+      >
+        {children}
+        {hideTabBar ? null : (
+          <ModuleTabBar
+            items={items}
+            ariaLabel={ariaLabel}
+            onItemPrefetch={onItemPrefetch}
+          />
+        )}
+      </div>
+    </ModuleFabProvider>
   )
 }

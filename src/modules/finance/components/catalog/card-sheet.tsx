@@ -30,6 +30,7 @@ import {
   cardBalanceSaveMessage,
   nextUnusedCurrency,
 } from "@/src/modules/finance/lib/catalog-payloads"
+import { canManageCardBalances } from "@/src/modules/finance/lib/card-balances"
 import { buildFinanceCurrencyOptions } from "@/src/modules/finance/lib/finance-currency"
 import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
 import type {
@@ -247,7 +248,7 @@ export function CardSheet({
       return
     }
 
-    const balancesPayload = card
+    const balancesPayload = card || values.type === "DEBIT"
       ? { ok: true as const, body: [] }
       : buildCardBalanceBodies(values.balances, {
           requireCreditLimit: values.type === "CREDIT",
@@ -512,7 +513,7 @@ export function CardSheet({
         />
       </SummarySection>
 
-      {!isEdit ? (
+      {!isEdit && cardType === "CREDIT" ? (
         <SummarySection title="Saldos iniciales" icon={DollarSign}>
           {balanceFields.map((field, index) => {
             const usedByOthers = (watchedBalances ?? [])
@@ -594,7 +595,7 @@ export function CardSheet({
             </Button>
           ) : null}
         </SummarySection>
-      ) : card ? (
+      ) : card && canManageCardBalances(card) ? (
         <SummarySection title="Saldo" icon={DollarSign}>
           <Button
             type="button"

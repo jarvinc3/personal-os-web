@@ -1,7 +1,9 @@
 'use client';
 
 import { useAuth } from '@/src/modules/auth';
+import { AuthServiceError } from '@/src/modules/auth/services/supabase-auth.service';
 import { useDeleteAccount } from '@/src/modules/settings/hooks/use-delete-account';
+import { reauthenticateWithPassword } from '@/src/modules/settings/hooks/use-wipe-user-data';
 import {
   fetchCurrentAuthIdentities,
   hasEmailPasswordProvider,
@@ -27,8 +29,8 @@ import { Button } from '@/src/shared/components/ui/button';
 import { Spinner } from '@/src/shared/components/ui/spinner';
 import { SummarySection } from '@/src/shared/components/ui/summary';
 import { APP_ROUTES } from '@/src/shared/constants/app-routes';
-import { AlertTriangle, KeyRound } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
+import { AlertTriangle, KeyRound, Trash2, X } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 const DELETED_DATA_ITEMS = [
   'Perfil, preferencias y configuración de módulos',
@@ -43,11 +45,26 @@ type DeleteAccountSheetProps = SettingsSheetProps & {
 };
 
 export function DeleteAccountSheet({ open, onOpenChange, email }: DeleteAccountSheetProps) {
-  const deleteAccountMutation = useDeleteAccount();
+  const { deleteAfterReauth } = useDeleteAccount();
   const { loginWithGoogleMutation } = useAuth();
 
   const [password, setPassword] = useState('');
+  const [passwordError, setPasswordError] = useState<string>();
+  const [verifiedPassword, setVerifiedPassword] = useState<string | null>(null);
+  const [isVerifyingPassword, setIsVerifyingPassword] = useState(false);
   const [alertOpen, setAlertOpen] = useState(false);
+  const passwordRef = useRef('');
+  const passwordVerified = verifiedPassword !== null && verifiedPassword === password.trim();
+  const [sessionOpen, setSessionOpen] = useState(open);
+  if (open !== sessionOpen) {
+    setSessionOpen(open);
+    if (open) {
+      setPassword('');
+      setPasswordError(undefined);
+      setVerifiedPassword(null);
+      setAlertOpen(false);
+    }
+  }
   const [canDeleteInApp, setCanDeleteInApp] = useState<boolean | null>(null);
   const [isGoogleOnly, setIsGoogleOnly] = useState(false);
   const [isLoadingProviders, setIsLoadingProviders] = useState(false);
@@ -73,22 +90,59 @@ export function DeleteAccountSheet({ open, onOpenChange, email }: DeleteAccountS
 
   useEffect(() => {
     if (!open) return;
-    setPassword('');
-    setAlertOpen(false);
+    passwordRef.current = '';
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void loadAuthProviders();
   }, [open, loadAuthProviders]);
 
+  const clearPassword = () => {
+    setPassword('');
+    passwordRef.current = '';
+    setPasswordError(undefined);
+    setVerifiedPassword(null);
+  };
+
   const handleContinue = () => {
-    if (!password.trim()) return;
+    clearPassword();
     onOpenChange(false);
     setAlertOpen(true);
   };
 
+  const handlePasswordChange = (value: string) => {
+    passwordRef.current = value;
+    setPassword(value);
+    setVerifiedPassword(null);
+    setPasswordError(undefined);
+  };
+
+  const handlePasswordBlur = async () => {
+    const current = passwordRef.current.trim();
+    if (!current) {
+      setVerifiedPassword(null);
+      return;
+    }
+    setIsVerifyingPassword(true);
+    try {
+      await reauthenticateWithPassword(email, current);
+      if (passwordRef.current.trim() !== current) return;
+      setVerifiedPassword(current);
+      setPasswordError(undefined);
+    } catch (error) {
+      if (passwordRef.current.trim() !== current) return;
+      setVerifiedPassword(null);
+      setPasswordError(
+        error instanceof AuthServiceError ? error.message : 'La contraseña no es correcta.',
+      );
+    } finally {
+      setIsVerifyingPassword(false);
+    }
+  };
+
   const handleConfirmDelete = () => {
-    deleteAccountMutation.mutate(
-      { email, password },
-      { onSettled: () => setAlertOpen(false) },
-    );
+    if (!passwordVerified) return;
+    deleteAfterReauth.mutate(undefined, {
+      onSettled: () => setAlertOpen(false),
+    });
   };
 
   const handleGoogleReauth = () => {
@@ -116,17 +170,21 @@ export function DeleteAccountSheet({ open, onOpenChange, email }: DeleteAccountS
         disabled={loginWithGoogleMutation.isPending}
         onClick={handleGoogleReauth}
       >
-        {loginWithGoogleMutation.isPending ? <Spinner data-icon="inline-start" /> : null}
+        {loginWithGoogleMutation.isPending ? (
+          <Spinner data-icon="inline-start" />
+        ) : (
+          <Trash2 data-icon="inline-start" />
+        )}
         {loginWithGoogleMutation.isPending ? 'Confirmando con Google...' : 'Confirmar con Google'}
       </Button>
     ) : confirmMode === 'password' ? (
       <Button
         variant="destructive"
         className="flex-1"
-        disabled={!password.trim() || deleteAccountMutation.isPending}
+        disabled={deleteAfterReauth.isPending}
         onClick={handleContinue}
       >
-        {deleteAccountMutation.isPending ? <Spinner data-icon="inline-start" /> : null}
+        <Trash2 data-icon="inline-start" />
         Continuar
       </Button>
     ) : null;
@@ -172,7 +230,24 @@ export function DeleteAccountSheet({ open, onOpenChange, email }: DeleteAccountS
           </Alert>
         ) : null}
 
-        {confirmMode === 'password' ? (
+      </BottomSheet>
+
+      <AlertDialog
+        open={alertOpen}
+        onOpenChange={(next) => {
+          setAlertOpen(next);
+          if (!next && !deleteAfterReauth.isPending) {
+            clearPassword();
+          }
+        }}
+      >
+        <AlertDialogContent className="sm:max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar tu cuenta permanentemente?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Se borrarán todos los datos asociados a {email}. Esta acción no se puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
           <SummarySection title="Confirma tu contraseña" icon={KeyRound}>
             <FormTextField
               label="Contraseña"
@@ -180,32 +255,34 @@ export function DeleteAccountSheet({ open, onOpenChange, email }: DeleteAccountS
               autoComplete="current-password"
               placeholder="Tu contraseña actual"
               value={password}
-              onChange={setPassword}
-              disabled={deleteAccountMutation.isPending}
+              onChange={handlePasswordChange}
+              onBlur={() => void handlePasswordBlur()}
+              disabled={deleteAfterReauth.isPending || isVerifyingPassword}
+              error={passwordError}
+              invalid={Boolean(passwordError)}
             />
             <div className="px-4 py-3 rounded-2xl bg-muted">
               <p className="text-xs text-muted-foreground">Cuenta</p>
               <p className="mt-1 text-sm text-muted-foreground">{email}</p>
             </div>
           </SummarySection>
-        ) : null}
-      </BottomSheet>
-
-      <AlertDialog open={alertOpen} onOpenChange={setAlertOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>¿Eliminar tu cuenta permanentemente?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Se borrarán todos los datos asociados a {email}. Esta acción no se puede deshacer.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleteAccountMutation.isPending}>Cancelar</AlertDialogCancel>
+          <AlertDialogFooter className="flex-row">
+            <AlertDialogCancel className="flex-1" disabled={deleteAfterReauth.isPending}>
+              <X data-icon="inline-start" />
+              Cancelar
+            </AlertDialogCancel>
             <AlertDialogAction
-              disabled={deleteAccountMutation.isPending}
+              variant="destructive"
+              className="flex-1"
+              disabled={!passwordVerified || isVerifyingPassword || deleteAfterReauth.isPending}
               onClick={handleConfirmDelete}
             >
-              {deleteAccountMutation.isPending ? 'Eliminando...' : 'Eliminar cuenta'}
+              {deleteAfterReauth.isPending || isVerifyingPassword ? (
+                <Spinner data-icon="inline-start" />
+              ) : (
+                <Trash2 data-icon="inline-start" />
+              )}
+              {deleteAfterReauth.isPending ? 'Eliminando...' : 'Eliminar cuenta'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

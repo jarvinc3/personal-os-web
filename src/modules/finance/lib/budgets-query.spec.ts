@@ -20,7 +20,7 @@ describe("buildBudgetsSearchParams", () => {
 
 describe("formatBudgetPeriodDate", () => {
   it("keeps the calendar day of an UTC midnight ISO string", () => {
-    const expected = new Date(2026, 8, 1).toLocaleDateString(undefined, {
+    const expected = new Date(2026, 8, 1).toLocaleDateString("es", {
       year: "numeric",
       month: "short",
       day: "numeric",

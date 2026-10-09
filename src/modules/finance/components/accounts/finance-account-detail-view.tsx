@@ -1,6 +1,7 @@
 "use client"
 
 import { BrandLogo } from "@/src/modules/finance/components/brand-logo";
+import { AccountBalanceSheet } from "@/src/modules/finance/components/catalog/account-balance-sheet";
 import { AccountSheet } from "@/src/modules/finance/components/catalog/account-sheet";
 import { FinanceAuthenticatedPage } from "@/src/modules/finance/components/layout/finance-authenticated-page";
 import { FINANCE_ACCOUNT_TYPE_LABEL } from "@/src/modules/finance/constants/catalog";
@@ -18,7 +19,7 @@ import { APP_ROUTES } from "@/src/shared/constants/app-routes";
 import { usePageHeader } from "@/src/shared/hooks/use-page-header";
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params";
 import { appToast } from "@/src/shared/lib/app-toast";
-import { ArchiveIcon, MoreVerticalIcon, PencilIcon, Trash2Icon, WalletIcon } from "lucide-react";
+import { ArchiveIcon, MoreVerticalIcon, PencilIcon, ScaleIcon, Trash2Icon, WalletIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 const FALLBACK_COLOR = "#334155"
@@ -54,6 +55,8 @@ function FinanceAccountDetailView({ accountId }: FinanceAccountDetailClientProps
     useSheetParam(FINANCE_SHEET_KEYS.account)
   const { open: openOptionsSheet, setOpen: setOpenOptionsSheet } =
     useSheetParam(FINANCE_SHEET_KEYS.cashAccountOptions)
+  const { open: openBalanceSheet, setOpen: setOpenBalanceSheet } =
+    useSheetParam(FINANCE_SHEET_KEYS.accountBalance)
 
   const account =
     (accountsQuery.data ?? []).find((item) => item.id === accountId) ?? null
@@ -186,6 +189,16 @@ function FinanceAccountDetailView({ accountId }: FinanceAccountDetailClientProps
             className="px-3"
           />
           <SummaryItem
+            title="Ajustar saldo"
+            icon={ScaleIcon}
+            onPress={() => {
+              setOpenOptionsSheet(false)
+              setOpenBalanceSheet(true)
+            }}
+            isLast={false}
+            className="px-3"
+          />
+          <SummaryItem
             title="Archivar"
             icon={ArchiveIcon}
             onPress={() => void onArchiveAccount()}
@@ -212,6 +225,12 @@ function FinanceAccountDetailView({ accountId }: FinanceAccountDetailClientProps
         defaultCurrency={config.baseCurrency}
         display={display}
         onDeleted={() => router.push(APP_ROUTES.app.financeAccounts)}
+      />
+      <AccountBalanceSheet
+        open={openBalanceSheet}
+        onOpenChange={setOpenBalanceSheet}
+        account={account}
+        display={display}
       />
     </>
   )

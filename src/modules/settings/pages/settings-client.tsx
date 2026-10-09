@@ -10,7 +10,6 @@ import { EditAIProviderSheet } from "@/src/modules/settings/components/sheets/ed
 import { EditAISheet } from "@/src/modules/settings/components/sheets/edit-ai-sheet"
 import { EditQuietHoursSheet } from "@/src/modules/settings/components/sheets/edit-quiet-hours-sheet"
 import { EditThemeSheet } from "@/src/modules/settings/components/sheets/edit-theme-sheet"
-import { WipeUserDataSheet } from "@/src/modules/settings/components/sheets/wipe-user-data-sheet"
 import {
   getAiToneLabel,
   getThemeOptionLabel,
@@ -60,8 +59,6 @@ export default function SettingsPage() {
     useSheetParam("account-sheet")
   const { open: openDeleteAccountSheet, setOpen: setOpenDeleteAccountSheet } =
     useSheetParam("delete-account-sheet")
-  const { open: openWipeDataSheet, setOpen: setOpenWipeDataSheet } =
-    useSheetParam("wipe-data-sheet")
   const { open: openThemeSheet, setOpen: setOpenThemeSheet } =
     useSheetParam("theme-sheet")
   const { open: openAISheet, setOpen: setOpenAISheet } =
@@ -372,7 +369,7 @@ export default function SettingsPage() {
         <SettingsRow
           label="Vaciar datos"
           destructive
-          onPress={() => setOpenWipeDataSheet(true)}
+          onPress={() => router.push(APP_ROUTES.app.settingsWipeData)}
           accentColor={SETTINGS_REGISTRY.danger.accent}
           {...SETTINGS_REGISTRY.danger.rows.wipeData}
         />
@@ -410,11 +407,6 @@ export default function SettingsPage() {
       <DeleteAccountSheet
         open={openDeleteAccountSheet}
         onOpenChange={setOpenDeleteAccountSheet}
-        email={displayEmail}
-      />
-      <WipeUserDataSheet
-        open={openWipeDataSheet}
-        onOpenChange={setOpenWipeDataSheet}
         email={displayEmail}
       />
       <EditThemeSheet open={openThemeSheet} onOpenChange={setOpenThemeSheet} />

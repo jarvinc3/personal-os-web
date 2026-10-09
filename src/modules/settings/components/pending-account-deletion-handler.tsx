@@ -16,6 +16,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/src/shared/components/ui/alert-dialog';
+import { Trash2, X } from 'lucide-react';
 import { useState } from 'react';
 
 function readPendingAccountDeletion(): boolean {
@@ -44,7 +45,7 @@ export function PendingAccountDeletionHandler() {
 
   return (
     <AlertDialog open={confirmOpen} onOpenChange={(open) => !open && handleCancel()}>
-      <AlertDialogContent>
+      <AlertDialogContent className="sm:max-w-md">
         <AlertDialogHeader>
           <AlertDialogTitle>¿Eliminar tu cuenta permanentemente?</AlertDialogTitle>
           <AlertDialogDescription>
@@ -52,11 +53,22 @@ export function PendingAccountDeletionHandler() {
             deshacer.
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel disabled={deleteAfterReauth.isPending} onClick={handleCancel}>
+        <AlertDialogFooter className="flex-row">
+          <AlertDialogCancel
+            className="flex-1"
+            disabled={deleteAfterReauth.isPending}
+            onClick={handleCancel}
+          >
+            <X data-icon="inline-start" />
             Cancelar
           </AlertDialogCancel>
-          <AlertDialogAction disabled={deleteAfterReauth.isPending} onClick={handleConfirm}>
+          <AlertDialogAction
+            variant="destructive"
+            className="flex-1"
+            disabled={deleteAfterReauth.isPending}
+            onClick={handleConfirm}
+          >
+            {deleteAfterReauth.isPending ? null : <Trash2 data-icon="inline-start" />}
             {deleteAfterReauth.isPending ? 'Eliminando...' : 'Eliminar cuenta'}
           </AlertDialogAction>
         </AlertDialogFooter>

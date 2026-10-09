@@ -1,8 +1,12 @@
 "use client"
 
 import { useAuth } from "@/src/modules/auth"
+import { useInstitutions } from "@/src/modules/finance/hooks/use-institutions"
 import { SETTINGS_REGISTRY } from "@/src/modules/settings/constants/settings-metadata"
-import { useWipeUserData } from "@/src/modules/settings/hooks/use-wipe-user-data"
+import {
+  reauthenticateWithPassword,
+  useWipeUserData,
+} from "@/src/modules/settings/hooks/use-wipe-user-data"
 import {
   fetchCurrentAuthIdentities,
   hasEmailPasswordProvider,
@@ -20,8 +24,8 @@ import {
   WIPE_LAYERS,
   type WipeLayerId,
 } from "@/src/modules/settings/lib/wipe-layers"
-import type { SettingsSheetProps } from "@/src/modules/settings/types/sheet.types"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+import { AuthServiceError } from "@/src/modules/auth/services/supabase-auth.service"
+import { WipeBalanceInstitutionSheet } from "@/src/modules/settings/components/sheets/wipe-balance-institution-sheet"
 import { FormTextField } from "@/src/shared/components/layout/form-blocks"
 import { SettingsRow } from "@/src/shared/components/layout/settings-section"
 import {
@@ -40,6 +44,7 @@ import {
   AlertDialogTitle,
 } from "@/src/shared/components/ui/alert-dialog"
 import { Button } from "@/src/shared/components/ui/button"
+import { Checkbox } from "@/src/shared/components/ui/checkbox"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { SummarySection } from "@/src/shared/components/ui/summary"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
@@ -55,15 +60,21 @@ import {
   PiggyBank,
   Receipt,
   RotateCcw,
+  Scale,
   Settings,
   Tags,
+  Trash2,
+  X,
   type LucideIcon,
 } from "lucide-react"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useRouter } from "next/navigation"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
 const ALL_WIPE_LAYERS = sortWipeLayers(
   WIPE_LAYER_GROUPS.flatMap((group) => group.layers)
 )
+
+const ALL_INSTITUTIONS = "all"
 
 const WIPE_ACCENT = SETTINGS_REGISTRY.danger.accent
 
@@ -76,6 +87,7 @@ const WIPE_GROUP_ICONS: Record<string, LucideIcon> = {
 
 const WIPE_LAYER_ICONS: Record<WipeLayerId, LucideIcon> = {
   [WIPE_LAYERS.FINANCE_LEDGER]: Receipt,
+  [WIPE_LAYERS.FINANCE_BALANCES]: Scale,
   [WIPE_LAYERS.FINANCE_PLANNING]: PiggyBank,
   [WIPE_LAYERS.FINANCE_CATEGORIES]: Tags,
   [WIPE_LAYERS.FINANCE_CATALOG]: Landmark,
@@ -85,33 +97,76 @@ const WIPE_LAYER_ICONS: Record<WipeLayerId, LucideIcon> = {
   [WIPE_LAYERS.SETTINGS_DEFAULTS]: RotateCcw,
 }
 
-type WipeUserDataSheetProps = SettingsSheetProps & {
+function groupChecked(
+  layers: readonly WipeLayerId[],
+  selected: readonly WipeLayerId[],
+): boolean | "indeterminate" {
+  const count = layers.filter((layer) => selected.includes(layer)).length
+  if (count === 0) return false
+  if (count === layers.length) return true
+  return "indeterminate"
+}
+
+function toggleGroupLayers(
+  current: readonly WipeLayerId[],
+  layers: readonly WipeLayerId[],
+  checked: boolean,
+): WipeLayerId[] {
+  const order = checked ? layers : [...layers].reverse()
+  return order.reduce<WipeLayerId[]>(
+    (next, layer) => applyWipeLayerToggle(next, layer, checked),
+    [...current],
+  )
+}
+
+type WipeUserDataViewProps = {
   email: string
 }
 
-export function WipeUserDataSheet({
-  open,
-  onOpenChange,
-  email,
-}: WipeUserDataSheetProps) {
+export function WipeUserDataView({ email }: WipeUserDataViewProps) {
+  const router = useRouter()
   const wipeMutation = useWipeUserData()
   const { loginWithGoogleMutation } = useAuth()
+  const institutionsQuery = useInstitutions(true)
 
   const [selected, setSelected] = useState<WipeLayerId[]>([])
+  const [balanceScope, setBalanceScope] = useState(ALL_INSTITUTIONS)
+  const [institutionSheetOpen, setInstitutionSheetOpen] = useState(false)
   const [password, setPassword] = useState("")
+  const [passwordError, setPasswordError] = useState<string>()
+  const [verifiedPassword, setVerifiedPassword] = useState<string | null>(null)
+  const [isVerifyingPassword, setIsVerifyingPassword] = useState(false)
   const [alertOpen, setAlertOpen] = useState(false)
   const [canWipeInApp, setCanWipeInApp] = useState<boolean | null>(null)
   const [isGoogleOnly, setIsGoogleOnly] = useState(false)
   const [isLoadingProviders, setIsLoadingProviders] = useState(false)
+  const passwordRef = useRef("")
+  const passwordVerified =
+    verifiedPassword !== null && verifiedPassword === password.trim()
 
   const appliedLayers = useMemo(
     () => expandWipeLayerSelection(selected),
-    [selected]
+    [selected],
   )
   const allSelected = selected.length === ALL_WIPE_LAYERS.length
   const ledgerSelected = selected.includes(WIPE_LAYERS.FINANCE_LEDGER)
+  const balancesSelected = selected.includes(WIPE_LAYERS.FINANCE_BALANCES)
   const catalogSelected = selected.includes(WIPE_LAYERS.FINANCE_CATALOG)
   const categoriesSelected = selected.includes(WIPE_LAYERS.FINANCE_CATEGORIES)
+
+  const balanceScopeLabel =
+    balanceScope === ALL_INSTITUTIONS
+      ? "Todas las instituciones"
+      : (institutionsQuery.data?.find((institution) => institution.id === balanceScope)
+          ?.name ?? "Todas las instituciones")
+  if (!balancesSelected && institutionSheetOpen) {
+    setInstitutionSheetOpen(false)
+  }
+
+  const balanceInstitutionId =
+    balancesSelected && balanceScope !== ALL_INSTITUTIONS
+      ? balanceScope
+      : undefined
 
   const loadAuthProviders = useCallback(async () => {
     setIsLoadingProviders(true)
@@ -133,12 +188,10 @@ export function WipeUserDataSheet({
   }, [email])
 
   useEffect(() => {
-    if (!open) return
-    setSelected([])
-    setPassword("")
-    setAlertOpen(false)
+    // Auth identities decide whether this account confirms with a password.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void loadAuthProviders()
-  }, [open, loadAuthProviders])
+  }, [loadAuthProviders])
 
   const handleToggleLayer = (layer: WipeLayerId, checked: boolean) => {
     setSelected((current) => applyWipeLayerToggle(current, layer, checked))
@@ -148,30 +201,81 @@ export function WipeUserDataSheet({
     setSelected(checked ? ALL_WIPE_LAYERS : [])
   }
 
+  const handleToggleGroup = (layers: readonly WipeLayerId[], checked: boolean) => {
+    setSelected((current) => toggleGroupLayers(current, layers, checked))
+  }
+
+  const clearPassword = () => {
+    setPassword("")
+    passwordRef.current = ""
+    setPasswordError(undefined)
+    setVerifiedPassword(null)
+  }
+
   const handleContinue = () => {
     if (selected.length === 0) {
       return
     }
-    onOpenChange(false)
+    clearPassword()
     setAlertOpen(true)
   }
 
-  const resetAfterWipe = () => {
-    setAlertOpen(false)
-    setSelected([])
-    setPassword("")
-  }
-
   const handleConfirmWipe = () => {
+    if (!passwordVerified) return
     wipeMutation.mutate(
-      { email, password, layers: appliedLayers },
-      { onSettled: resetAfterWipe }
+      {
+        email,
+        password,
+        layers: appliedLayers,
+        balanceInstitutionId,
+        skipReauth: true,
+      },
+      {
+        onSuccess: () => {
+          setAlertOpen(false)
+          router.push(APP_ROUTES.app.settings)
+        },
+      },
     )
   }
 
+  const handlePasswordChange = (value: string) => {
+    passwordRef.current = value
+    setPassword(value)
+    setVerifiedPassword(null)
+    setPasswordError(undefined)
+  }
+
+  const handlePasswordBlur = async () => {
+    const current = passwordRef.current.trim()
+    if (!current) {
+      setVerifiedPassword(null)
+      return
+    }
+    setIsVerifyingPassword(true)
+    try {
+      await reauthenticateWithPassword(email, current)
+      if (passwordRef.current.trim() !== current) return
+      setVerifiedPassword(current)
+      setPasswordError(undefined)
+    } catch (error) {
+      if (passwordRef.current.trim() !== current) return
+      setVerifiedPassword(null)
+      setPasswordError(
+        error instanceof AuthServiceError
+          ? error.message
+          : "La contraseña no es correcta.",
+      )
+    } finally {
+      setIsVerifyingPassword(false)
+    }
+  }
+
   const handleGoogleReauth = () => {
-    setPendingDataWipe(appliedLayers)
-    onOpenChange(false)
+    setPendingDataWipe({
+      layers: appliedLayers,
+      balanceInstitutionId,
+    })
     loginWithGoogleMutation.mutate({ next: APP_ROUTES.app.settings })
   }
 
@@ -183,20 +287,22 @@ export function WipeUserDataSheet({
 
   const confirmAction =
     confirmMode === "pending" ? (
-      <Button variant="destructive" className="flex-1" disabled>
+      <Button variant="destructive" className="w-full" disabled>
         <Spinner data-icon="inline-start" />
         Continuar
       </Button>
     ) : confirmMode === "google" ? (
       <Button
         variant="destructive"
-        className="flex-1"
+        className="w-full"
         disabled={selected.length === 0 || loginWithGoogleMutation.isPending}
         onClick={handleGoogleReauth}
       >
         {loginWithGoogleMutation.isPending ? (
           <Spinner data-icon="inline-start" />
-        ) : null}
+        ) : (
+          <Trash2 data-icon="inline-start" />
+        )}
         {loginWithGoogleMutation.isPending
           ? "Confirmando con Google..."
           : "Confirmar con Google"}
@@ -204,32 +310,36 @@ export function WipeUserDataSheet({
     ) : confirmMode === "password" ? (
       <Button
         variant="destructive"
-        className="flex-1"
+        className="w-full"
         disabled={selected.length === 0 || wipeMutation.isPending}
         onClick={handleContinue}
       >
-        {wipeMutation.isPending ? <Spinner data-icon="inline-start" /> : null}
+        {wipeMutation.isPending ? (
+          <Spinner data-icon="inline-start" />
+        ) : (
+          <Trash2 data-icon="inline-start" />
+        )}
         Continuar
       </Button>
     ) : null
 
   return (
     <>
-      <BottomSheet
-        open={open}
-        onOpenChange={onOpenChange}
-        title="Vaciar datos"
-        description="Elige las capas a vaciar. Tu cuenta y tu acceso siguen."
-        actions={{ submit: confirmAction }}
-      >
+      <div className="flex flex-col gap-4">
         <SummarySection title="Capas" icon={Layers}>
           <SettingsRow
             label="Seleccionar todo (excepto cuenta)"
             description="Marca todas las capas disponibles."
             icon={ListChecks}
             accentColor={WIPE_ACCENT}
-            switchValue={allSelected}
-            onSwitchChange={handleToggleAll}
+            trailing={
+              <Checkbox
+                checked={allSelected}
+                onCheckedChange={(value) => handleToggleAll(value === true)}
+                disabled={wipeMutation.isPending}
+                aria-label="Seleccionar todo (excepto cuenta)"
+              />
+            }
             disabled={wipeMutation.isPending}
             isLast
           />
@@ -240,30 +350,69 @@ export function WipeUserDataSheet({
             key={group.title}
             title={group.title}
             icon={WIPE_GROUP_ICONS[group.title]}
+            right={
+              group.layers.length > 1 ? (
+                <Checkbox
+                  checked={groupChecked(group.layers, selected) === true}
+                  indeterminate={
+                    groupChecked(group.layers, selected) === "indeterminate"
+                  }
+                  onCheckedChange={(value) =>
+                    handleToggleGroup(group.layers, value === true)
+                  }
+                  disabled={wipeMutation.isPending}
+                  aria-label={`Seleccionar ${group.title}`}
+                />
+              ) : null
+            }
           >
             {group.layers.map((layer, index) => {
               const requiredByCatalog =
                 layer === WIPE_LAYERS.FINANCE_LEDGER && catalogSelected
               const requiredByCategories =
                 layer === WIPE_LAYERS.FINANCE_PLANNING && categoriesSelected
+              const disabled =
+                requiredByCatalog ||
+                requiredByCategories ||
+                wipeMutation.isPending
               return (
-                <SettingsRow
-                  key={layer}
-                  label={WIPE_LAYER_LABELS[layer]}
-                  description={WIPE_LAYER_DESCRIPTIONS[layer]}
-                  icon={WIPE_LAYER_ICONS[layer]}
-                  accentColor={WIPE_ACCENT}
-                  switchValue={selected.includes(layer)}
-                  onSwitchChange={(checked) =>
-                    handleToggleLayer(layer, checked)
-                  }
-                  disabled={
-                    requiredByCatalog ||
-                    requiredByCategories ||
-                    wipeMutation.isPending
-                  }
-                  isLast={index === group.layers.length - 1}
-                />
+                <div key={layer}>
+                  <SettingsRow
+                    label={WIPE_LAYER_LABELS[layer]}
+                    description={WIPE_LAYER_DESCRIPTIONS[layer]}
+                    icon={WIPE_LAYER_ICONS[layer]}
+                    accentColor={WIPE_ACCENT}
+                    trailing={
+                      <Checkbox
+                        checked={selected.includes(layer)}
+                        onCheckedChange={(value) =>
+                          handleToggleLayer(layer, value === true)
+                        }
+                        disabled={disabled}
+                        aria-label={WIPE_LAYER_LABELS[layer]}
+                      />
+                    }
+                    disabled={disabled}
+                    isLast={
+                      index === group.layers.length - 1 &&
+                      !(
+                        layer === WIPE_LAYERS.FINANCE_BALANCES &&
+                        balancesSelected
+                      )
+                    }
+                  />
+                  {layer === WIPE_LAYERS.FINANCE_BALANCES && balancesSelected ? (
+                    <SettingsRow
+                      label="Institución"
+                      value={balanceScopeLabel}
+                      icon={Landmark}
+                      accentColor={WIPE_ACCENT}
+                      onPress={() => setInstitutionSheetOpen(true)}
+                      disabled={wipeMutation.isPending}
+                      isLast
+                    />
+                  ) : null}
+                </div>
               )
             })}
           </SummarySection>
@@ -302,24 +451,6 @@ export function WipeUserDataSheet({
           </Alert>
         ) : null}
 
-        {confirmMode === "password" ? (
-          <SummarySection title="Confirma tu contraseña" icon={KeyRound}>
-            <FormTextField
-              label="Contraseña"
-              type="password"
-              autoComplete="current-password"
-              placeholder="Tu contraseña actual"
-              value={password}
-              onChange={setPassword}
-              disabled={wipeMutation.isPending}
-            />
-            <div className="rounded-2xl bg-muted px-4 py-3">
-              <p className="text-xs text-muted-foreground">Cuenta</p>
-              <p className="mt-1 text-sm text-muted-foreground">{email}</p>
-            </div>
-          </SummarySection>
-        ) : null}
-
         <Alert variant="destructive">
           <KeyRound />
           <AlertTitle>Esto no se puede deshacer</AlertTitle>
@@ -328,10 +459,28 @@ export function WipeUserDataSheet({
             vuelven.
           </AlertDescription>
         </Alert>
-      </BottomSheet>
 
-      <AlertDialog open={alertOpen} onOpenChange={setAlertOpen}>
-        <AlertDialogContent>
+        {confirmAction}
+      </div>
+
+      <WipeBalanceInstitutionSheet
+        open={institutionSheetOpen}
+        onOpenChange={setInstitutionSheetOpen}
+        value={balanceScope}
+        allValue={ALL_INSTITUTIONS}
+        onSelect={setBalanceScope}
+      />
+
+      <AlertDialog
+        open={alertOpen}
+        onOpenChange={(next) => {
+          setAlertOpen(next)
+          if (!next && !wipeMutation.isPending) {
+            clearPassword()
+          }
+        }}
+      >
+        <AlertDialogContent className="sm:max-w-md">
           <AlertDialogHeader>
             <AlertDialogTitle>
               ¿Vaciar los datos seleccionados?
@@ -344,17 +493,50 @@ export function WipeUserDataSheet({
             {appliedLayers.map((layer) => (
               <li key={layer} className="text-sm text-muted-foreground">
                 • {WIPE_LAYER_LABELS[layer]}
+                {layer === WIPE_LAYERS.FINANCE_BALANCES
+                  ? ` (${balanceScopeLabel})`
+                  : null}
               </li>
             ))}
           </ul>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={wipeMutation.isPending}>
+          <SummarySection title="Confirma tu contraseña" icon={KeyRound}>
+            <FormTextField
+              label="Contraseña"
+              type="password"
+              autoComplete="current-password"
+              placeholder="Tu contraseña actual"
+              value={password}
+              onChange={handlePasswordChange}
+              onBlur={() => void handlePasswordBlur()}
+              disabled={wipeMutation.isPending || isVerifyingPassword}
+              error={passwordError}
+              invalid={Boolean(passwordError)}
+            />
+            <div className="rounded-2xl bg-muted px-4 py-3">
+              <p className="text-xs text-muted-foreground">Cuenta</p>
+              <p className="mt-1 text-sm text-muted-foreground">{email}</p>
+            </div>
+          </SummarySection>
+          <AlertDialogFooter className="flex-row">
+            <AlertDialogCancel className="flex-1" disabled={wipeMutation.isPending}>
+              <X data-icon="inline-start" />
               Cancelar
             </AlertDialogCancel>
             <AlertDialogAction
-              disabled={wipeMutation.isPending}
+              variant="destructive"
+              className="flex-1"
+              disabled={
+                !passwordVerified ||
+                isVerifyingPassword ||
+                wipeMutation.isPending
+              }
               onClick={handleConfirmWipe}
             >
+              {wipeMutation.isPending || isVerifyingPassword ? (
+                <Spinner data-icon="inline-start" />
+              ) : (
+                <Trash2 data-icon="inline-start" />
+              )}
               {wipeMutation.isPending ? "Vaciando..." : "Vaciar datos"}
             </AlertDialogAction>
           </AlertDialogFooter>

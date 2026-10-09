@@ -17,15 +17,16 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/src/shared/components/ui/alert-dialog"
+import { Trash2, X } from "lucide-react"
 import { useState } from "react"
 
 export function PendingDataWipeHandler() {
   const { isAuthenticated } = useAuthGuard()
   const { wipeAfterReauth } = useWipeUserData()
   const [dismissed, setDismissed] = useState(false)
-  const [pendingLayers] = useState(() => readPendingDataWipe())
+  const [pendingWipe] = useState(() => readPendingDataWipe())
 
-  const confirmOpen = isAuthenticated && pendingLayers !== null && !dismissed
+  const confirmOpen = isAuthenticated && pendingWipe !== null && !dismissed
 
   const handleCancel = () => {
     clearPendingDataWipe()
@@ -33,11 +34,11 @@ export function PendingDataWipeHandler() {
   }
 
   const handleConfirm = () => {
-    if (!pendingLayers) {
+    if (!pendingWipe) {
       return
     }
     clearPendingDataWipe()
-    wipeAfterReauth.mutate(pendingLayers, {
+    wipeAfterReauth.mutate(pendingWipe, {
       onSettled: () => setDismissed(true),
     })
   }
@@ -56,23 +57,28 @@ export function PendingDataWipeHandler() {
           </AlertDialogDescription>
         </AlertDialogHeader>
         <ul className="flex flex-col gap-2">
-          {pendingLayers?.map((layer) => (
+          {pendingWipe?.layers.map((layer) => (
             <li key={layer} className="text-sm text-muted-foreground">
               • {WIPE_LAYER_LABELS[layer]}
             </li>
           ))}
         </ul>
-        <AlertDialogFooter>
+        <AlertDialogFooter className="flex-row">
           <AlertDialogCancel
+            className="flex-1"
             disabled={wipeAfterReauth.isPending}
             onClick={handleCancel}
           >
+            <X data-icon="inline-start" />
             Cancelar
           </AlertDialogCancel>
           <AlertDialogAction
+            variant="destructive"
+            className="flex-1"
             disabled={wipeAfterReauth.isPending}
             onClick={handleConfirm}
           >
+            <Trash2 data-icon="inline-start" />
             {wipeAfterReauth.isPending ? "Vaciando..." : "Vaciar datos"}
           </AlertDialogAction>
         </AlertDialogFooter>

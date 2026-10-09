@@ -37,6 +37,7 @@ describe("finance route constants", () => {
       APP_ROUTES.app.settingsFinanceCurrencies,
       "/settings/finance/currencies"
     )
+    assert.equal(APP_ROUTES.app.settingsWipeData, "/settings/wipe-data")
   })
 })
 

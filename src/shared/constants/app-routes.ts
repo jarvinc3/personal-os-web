@@ -13,6 +13,7 @@ export const APP_ROUTES = {
   app: {
     home: "/home",
     settings: "/settings",
+    settingsWipeData: "/settings/wipe-data",
     chat: "/chat",
     notifications: "/notifications",
     keepAwake: "/keep-awake",

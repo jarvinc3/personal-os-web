@@ -1,20 +1,21 @@
 "use client"
 
-import { BrandLogo } from "@/src/modules/finance/components/brand-logo";
 import { FinanceListSkeleton } from "@/src/modules/finance/components/layout/finance-list-skeleton";
+import { LoanProgressCard } from "@/src/modules/finance/components/planning/loan-progress-card";
 import { LoanSheet } from "@/src/modules/finance/components/planning/loan-sheet";
 import { PlanningProgressCard } from "@/src/modules/finance/components/planning/planning-progress-card";
 import { ReceivableSheet } from "@/src/modules/finance/components/planning/receivable-sheet";
 import { SavingsGoalSheet } from "@/src/modules/finance/components/planning/savings-goal-sheet";
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/constants/sheet-keys";
 import { useAccounts } from "@/src/modules/finance/hooks/use-accounts";
+import { useCategories } from "@/src/modules/finance/hooks/use-categories";
 import { useInstitutions } from "@/src/modules/finance/hooks/use-institutions";
 import { useLoans } from "@/src/modules/finance/hooks/use-loans";
 import { useReceivables } from "@/src/modules/finance/hooks/use-receivables";
 import { useSavingsGoals } from "@/src/modules/finance/hooks/use-savings-goals";
 import { useSheetListEntity } from "@/src/modules/finance/hooks/use-sheet-entity";
+import { filterCategoriesByType } from "@/src/modules/finance/lib/category-tree";
 import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error";
-import { formatRatePercentLabel } from "@/src/modules/finance/lib/interest-rate";
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/lib/money";
 import {
   formatFinanceMoney,
@@ -26,10 +27,8 @@ import {
   joinPlanningCaption,
   visibleReceivables,
 } from "@/src/modules/finance/lib/planning-lists";
-import {
-  FINANCE_INSTALLMENT_FREQ_LABEL,
-  FINANCE_RECEIVABLE_STATUS_LABEL,
-} from "@/src/modules/finance/types/entities";
+import { FINANCE_RECEIVABLE_STATUS_LABEL } from "@/src/modules/finance/types/entities";
+import { ExpandableFab } from "@/src/shared/components/layout/expandable-fab";
 import { Button } from "@/src/shared/components/ui/button";
 import {
   Empty,
@@ -116,7 +115,11 @@ export function FinancePlanningList({
     sheetId: receivableSheetId,
     setOpen: setOpenReceivableSheet,
   } = useSheetParam(FINANCE_SHEET_KEYS.receivable)
+  const { setOpen: setOpenBudgetSheet } = useSheetParam(
+    FINANCE_SHEET_KEYS.budget,
+  )
   const accountsQuery = useAccounts(enabled)
+  const categoriesQuery = useCategories(enabled)
   const institutionsQuery = useInstitutions(enabled)
   const savingsQuery = useSavingsGoals(enabled)
   const loansQuery = useLoans(enabled)
@@ -124,6 +127,8 @@ export function FinancePlanningList({
 
   const accounts = accountsQuery.data ?? []
   const institutions = institutionsQuery.data ?? []
+  const hasExpenseCategories =
+    filterCategoriesByType(categoriesQuery.data ?? [], "EXPENSE").length > 0
   const savings = savingsQuery.data ?? []
   const loans = loansQuery.data ?? []
   const receivables = receivablesQuery.data ?? []
@@ -157,6 +162,14 @@ export function FinancePlanningList({
     setOpenReceivableSheet
   )
   const [tab, setTab] = useState<PlanningTab>("savings")
+
+  function openCreate(next: PlanningTab) {
+    setTab(next)
+    if (next === "savings") setOpenSavingsSheet(true, null)
+    else if (next === "loans") setOpenLoanSheet(true, null)
+    else if (next === "receivables") setOpenReceivableSheet(true, null)
+    else setOpenBudgetSheet(true, null)
+  }
 
   return (
     <>
@@ -297,49 +310,15 @@ export function FinancePlanningList({
               </Empty>
             ) : (
               loans.map((loan) => {
-                const money = withCurrency(display, loan.currency)
-                const original = parseFinanceMoney(loan.originalAmount)
-                const balance = parseFinanceMoney(loan.currentBalance)
-                const paidDown =
-                  original !== null && balance !== null ? original - balance : null
-                const moneyProgress = amountRatioPct(paidDown, original)
-                const installmentProgress =
-                  loan.totalInstallments > 0
-                    ? (loan.paidInstallments / loan.totalInstallments) * 100
-                    : null
-                const paidOff = balance !== null && balance <= 0
                 const institution = (institutionsQuery.data ?? []).find(
                   (item) => item.id === loan.institutionId,
                 )
                 return (
-                  <PlanningProgressCard
+                  <LoanProgressCard
                     key={loan.id}
-                    title={loan.lenderName}
-                    leading={
-                      <BrandLogo
-                        name={institution?.name ?? loan.lenderName}
-                        logoUrl={institution?.logoUrl}
-                        size={28}
-                      />
-                    }
-                    tone={paidOff ? "success" : "warning"}
-                    badge={{
-                      label: paidOff ? "Saldado" : "Activo",
-                      variant: paidOff ? "success" : "warning",
-                    }}
-                    progress={moneyProgress ?? installmentProgress}
-                    currentHint="Saldo"
-                    currentLabel={formatFinanceMoney(loan.currentBalance, money)}
-                    targetHint="Original"
-                    targetLabel={formatFinanceMoney(loan.originalAmount, money)}
-                    caption={joinPlanningCaption(
-                      `${loan.paidInstallments}/${loan.totalInstallments} cuotas`,
-                      FINANCE_INSTALLMENT_FREQ_LABEL[loan.installmentFreq],
-                      formatRatePercentLabel(loan.interestRate),
-                      loan.nextDueDate
-                        ? `Vence ${formatCalendarDate(loan.nextDueDate)}`
-                        : undefined,
-                    )}
+                    loan={loan}
+                    display={display}
+                    institution={institution}
                     onPress={() => setOpenLoanSheet(true, loan.id)}
                   />
                 )
@@ -438,7 +417,7 @@ export function FinancePlanningList({
           </SummarySection>
         </TabsContent>
 
-        <TabsContent value="budgets">
+        <TabsContent value="budgets" keepMounted>
           <FinanceBudgetsList enabled={enabled} display={display} />
         </TabsContent>
       </Tabs>
@@ -467,6 +446,40 @@ export function FinancePlanningList({
         pending={Boolean(receivableSheetId) && !editingReceivable}
         receivable={editingReceivable}
         defaultCurrency={defaultCurrency}
+      />
+
+      <ExpandableFab
+        label="Crear en planificación"
+        actions={[
+          {
+            icon: <ChartPieIcon className="size-5" />,
+            label: "Presupuesto",
+            onClick: () => openCreate("budgets"),
+            disabled: !enabled || !hasExpenseCategories,
+            color: "bg-violet-600",
+          },
+          {
+            icon: <HandshakeIcon className="size-5" />,
+            label: "Cobro",
+            onClick: () => openCreate("receivables"),
+            disabled: !enabled,
+            color: "bg-blue-500",
+          },
+          {
+            icon: <LandmarkIcon className="size-5" />,
+            label: "Préstamo",
+            onClick: () => openCreate("loans"),
+            disabled: !enabled,
+            color: "bg-amber-600",
+          },
+          {
+            icon: <PiggyBankIcon className="size-5" />,
+            label: "Ahorro",
+            onClick: () => openCreate("savings"),
+            disabled: !enabled,
+            color: "bg-emerald-600",
+          },
+        ]}
       />
     </>
   )

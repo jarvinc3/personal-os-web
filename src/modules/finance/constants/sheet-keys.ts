@@ -2,6 +2,7 @@ export const FINANCE_SHEET_KEYS = {
   institution: "institution-sheet",
   institutionOptions: "institution-options-sheet",
   account: "account-sheet",
+  accountBalance: "account-balance-sheet",
   cashAccountOptions: "cash-account-options-sheet",
   card: "card-sheet",
   cardBalance: "card-balance-sheet",

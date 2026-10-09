@@ -14,6 +14,7 @@ import {
   canReverseTransaction,
   formatTransactionDate,
   isTransferTransaction,
+  movementSign,
   transferDirectionLabel,
 } from "@/src/modules/finance/lib/transactions-query";
 import {
@@ -158,10 +159,17 @@ export function TransactionDetailSheet({
           <SettingsSection title="Detalle">
             <SummaryItem
               title="Monto"
-              value={formatFinanceMoney(tx.amount, {
-                ...display,
-                currency: tx.currency,
-              })}
+              value={
+                tx.type === "ADJUSTMENT"
+                  ? `${movementSign(tx) ?? ""} ${formatFinanceMoney(tx.amount, {
+                      ...display,
+                      currency: tx.currency,
+                    })}`.trim()
+                  : formatFinanceMoney(tx.amount, {
+                      ...display,
+                      currency: tx.currency,
+                    })
+              }
               isLast={false}
               className="px-3"
             />

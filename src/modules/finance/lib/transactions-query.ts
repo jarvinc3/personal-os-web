@@ -130,6 +130,19 @@ export function transferDirectionLabel(
   return `${origin} → ${destination}`
 }
 
+export function movementSign(
+  transaction: Pick<FinanceTransaction, "type" | "ledgerAmount">,
+): "+" | "−" | null {
+  if (transaction.type === "DEBIT") return "−"
+  if (transaction.type === "CREDIT") return "+"
+  if (transaction.type === "ADJUSTMENT") {
+    const ledger = parseFinanceMoney(transaction.ledgerAmount)
+    if (ledger !== null && ledger < 0) return "−"
+    return "+"
+  }
+  return null
+}
+
 export function visibleTransactionTotals(
   items: Pick<
     FinanceTransaction,
