@@ -10,6 +10,7 @@ import {
 } from "@/src/modules/finance/lib/money";
 import {
   isTransferTransaction,
+  movementSign,
   transferDirectionLabel,
 } from "@/src/modules/finance/lib/transactions-query";
 import type {
@@ -22,6 +23,7 @@ import {
   ArrowDownLeftIcon,
   ArrowLeftRightIcon,
   ArrowUpRightIcon,
+  ScaleIcon,
 } from "lucide-react";
 import Image from "next/image";
 
@@ -44,9 +46,9 @@ function signedAmount(
     { ...display, currency: transaction.currency },
   )
   if (isTransferTransaction(transaction)) return formatted
-  if (transaction.type === "DEBIT") return `− ${formatted}`
-  if (transaction.type === "CREDIT") return `+ ${formatted}`
-  return formatted
+  const sign = movementSign(transaction)
+  if (!sign) return formatted
+  return `${sign} ${formatted}`
 }
 
 export function FinanceMonthSection({
@@ -148,6 +150,15 @@ export function FinanceMonthSection({
                           <ArrowDownLeftIcon className="size-5 text-destructive" />
                         ) : transaction.type === "CREDIT" ? (
                           <ArrowUpRightIcon className="size-5 text-success" />
+                        ) : transaction.type === "ADJUSTMENT" ? (
+                          <ScaleIcon
+                            className={cn(
+                              "size-5",
+                              movementSign(transaction) === "−"
+                                ? "text-destructive"
+                                : "text-success",
+                            )}
+                          />
                         ) : null
                       }
                       accentColor={color}
@@ -155,10 +166,10 @@ export function FinanceMonthSection({
                         <span
                           className={cn(
                             !isTransfer &&
-                              transaction.type === "DEBIT" &&
+                              movementSign(transaction) === "−" &&
                               "text-destructive",
                             !isTransfer &&
-                              transaction.type === "CREDIT" &&
+                              movementSign(transaction) === "+" &&
                               "text-success",
                           )}
                         >

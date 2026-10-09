@@ -330,10 +330,8 @@ export function AppHeader() {
     <header
       data-header-variant={config.variant}
       className={cn(
-        "sticky top-0 z-40 flex h-(--header-height) shrink-0 items-center gap-2 py-2.5",
-        accentColor
-          ? "text-white backdrop-blur-none"
-          : "backdrop-blur-lg",
+        "sticky top-0 z-40 flex h-(--header-height) shrink-0 items-center gap-2 py-2.5 bg-background",
+        accentColor && "bg-transparent text-white",
       )}
       style={
         accentColor

@@ -5,12 +5,12 @@ import {
   FINANCE_ACCOUNT_TYPE_LABEL,
   FINANCE_CARD_TYPE_LABEL,
 } from "@/src/modules/finance/constants/catalog";
+import { resolveCardDisplayBalances } from "@/src/modules/finance/lib/card-balances";
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/lib/money";
 import { formatFinanceMoney } from "@/src/modules/finance/lib/money";
 import type {
   FinanceAccount,
   FinanceCard,
-  FinanceLoan,
 } from "@/src/modules/finance/types/entities";
 import { Button } from "@/src/shared/components/ui/button";
 import {
@@ -23,6 +23,7 @@ import {
 } from "@/src/shared/components/ui/empty";
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils";
 import {
+  ChevronRightIcon,
   CreditCardIcon,
   HandCoinsIcon,
   LandmarkIcon,
@@ -44,85 +45,121 @@ export function AccountProductRow({
   const subtitle = lastFour
     ? `${FINANCE_ACCOUNT_TYPE_LABEL[account.type]} · •••• ${lastFour}`
     : `${FINANCE_ACCOUNT_TYPE_LABEL[account.type]} · ${account.currency}`
+  const tint = account.color
   return (
     <button
       type="button"
       onClick={onPress}
       className={cn(
-        "flex gap-3 items-center p-4 w-full text-left rounded-2xl border border-border bg-card hover:bg-muted/40",
+        "group relative flex w-full items-center gap-3 overflow-hidden rounded-2xl border p-2 pl-4 text-left",
+        tint
+          ? "border-transparent bg-card"
+          : "border-border bg-card",
         PRESSABLE_CLASS
       )}
+      style={
+        tint
+          ? {
+            borderColor: `color-mix(in srgb, ${tint} 0%, var(--border))`,
+          }
+          : undefined
+      }
     >
+      {tint && (
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-0 opacity-35 transition-opacity group-hover:opacity-50"
+          style={{ backgroundColor: tint }}
+        />
+      )}
+
       <BrandLogo
         name={account.institutionName ?? account.name}
         logoUrl={account.institutionLogoUrl}
         size={44}
+        className="relative z-10"
       />
-      <div className="flex-1 min-w-0">
-        <p className="font-semibold truncate text-foreground">{account.name}</p>
-        <p className="text-sm text-muted-foreground">{subtitle}</p>
+
+      <div className="relative z-10 flex flex-col gap-1 flex-2">
+        <div className="flex flex-col">
+          <p className="font-semibold truncate text-foreground">{account.name}</p>
+          <p className="text-sm text-muted-foreground">{subtitle}</p>
+        </div>
+        <p className="relative z-10 font-semibold tabular-nums shrink-0 text-foreground">
+          {formatFinanceMoney(account.balance, {
+            ...display,
+            currency: account.currency,
+          })}
+        </p>
       </div>
-      <p className="font-semibold tabular-nums shrink-0 text-foreground">
-        {formatFinanceMoney(account.balance, {
-          ...display,
-          currency: account.currency,
-        })}
-      </p>
+
+      <ChevronRightIcon className="absolute right-0 top-1/2 -translate-y-1/2 size-8 text-muted-foreground group-hover:text-foreground" />
     </button>
   )
 }
 
 type CardProductRowProps = {
   card: FinanceCard
+  accounts: readonly FinanceAccount[]
   display: FinanceMoneyDisplay
   onPress: () => void
 }
 
 export function CardProductRow({
   card,
+  accounts,
   display,
   onPress,
 }: CardProductRowProps) {
+  const balances = resolveCardDisplayBalances(card, accounts)
+
   return (
     <button
       type="button"
       onClick={onPress}
       className={cn(
-        "flex flex-col gap-4 p-4 w-full text-left text-white rounded-2xl bg-zinc-900 hover:opacity-95",
+        "relative flex w-full flex-col gap-4 overflow-hidden rounded-2xl bg-zinc-900 p-4 text-left text-white hover:opacity-95",
         PRESSABLE_CLASS
       )}
       style={card.color ? { backgroundColor: card.color } : undefined}
     >
-      <div className="flex gap-3 justify-between items-center">
-        <p className="text-sm truncate text-white/80">
+      <span aria-hidden className="pointer-events-none absolute inset-0">
+        <span className="absolute top-[-45%] right-[-12%] h-[190%] w-[38%] rotate-22 bg-black/20" />
+        <span className="absolute bottom-[-55%] left-[-18%] h-28 w-[62%] -rotate-6 rounded-4xl bg-white/10" />
+      </span>
+
+      <div className="relative z-10 flex gap-3 justify-between items-center">
+        <p className="text-sm truncate text-white font-semibold">
           {card.name}
         </p>
-        <span className="rounded-full bg-white/15 px-2.5 py-0.5 text-xs font-medium">
+        <span className="rounded-full bg-white/15 px-2.5 py-0.5 text-xs font-semibold">
           {FINANCE_CARD_TYPE_LABEL[card.type]}
         </span>
       </div>
-      <p className="text-lg tracking-[0.2em] text-white/80">
-        •••• {card.lastFour ?? "····"}
-      </p>
-      <div className="flex gap-3 justify-between items-end">
-        <div className="min-w-0">
-          <p className="text-[10px] tracking-[0.14em] text-white/55 uppercase">
-            {card.type === "CREDIT" ? "Balance disponible" : "Saldo actual"}
-          </p>
-          {card.balances.length === 0 ? (
-            <p className="text-xl font-bold tabular-nums">Sin saldo</p>
-          ) : (
-            card.balances.map((item) => (
-              <p key={item.id} className="text-xl font-bold tabular-nums">
-                {formatFinanceMoney(item.balance, {
-                  ...display,
-                  currency: item.currency,
-                })}
-              </p>
-            ))
-          )}
-        </div>
-        <span className="inline-flex items-center gap-1.5">
+
+      <div className="relative z-10 flex min-w-0 flex-col">
+        <p className="text-[10px] tracking-[0.14em] text-white/55 uppercase">
+          {card.type === "CREDIT" ? "Balance disponible" : "Saldo actual"}
+        </p>
+        {balances.length === 0 ? (
+          <p className="text-xl font-bold tabular-nums">Sin saldo</p>
+        ) : (
+          balances.map((item) => (
+            <p key={item.id} className="text-xl font-bold tabular-nums">
+              {formatFinanceMoney(item.balance, {
+                ...display,
+                currency: item.currency,
+              })}
+            </p>
+          ))
+        )}
+      </div>
+
+      <div className="relative z-10 flex gap-3 justify-between items-end">
+        <p className="tracking-[0.2em] text-white/80">
+          •••• {card.lastFour ?? "····"}
+        </p>
+        <span className="inline-flex items-center gap-1">
           <BrandLogo
             name={card.institutionName}
             logoUrl={card.institutionLogoUrl}
@@ -135,47 +172,8 @@ export function CardProductRow({
           />
         </span>
       </div>
-    </button>
-  )
-}
 
-type LoanProductRowProps = {
-  loan: FinanceLoan
-  display: FinanceMoneyDisplay
-  logoUrl?: string | null
-  onPress: () => void
-}
-
-export function LoanProductRow({
-  loan,
-  display,
-  logoUrl,
-  onPress,
-}: LoanProductRowProps) {
-  return (
-    <button
-      type="button"
-      onClick={onPress}
-      className={cn(
-        "flex gap-3 items-center p-4 w-full text-left rounded-2xl border border-border bg-card hover:bg-muted/40",
-        PRESSABLE_CLASS
-      )}
-    >
-      <BrandLogo name={loan.lenderName} logoUrl={logoUrl} size={44} />
-      <div className="flex-1 min-w-0">
-        <p className="font-semibold truncate text-foreground">
-          {loan.lenderName}
-        </p>
-        <p className="text-sm text-muted-foreground">
-          {loan.paidInstallments}/{loan.totalInstallments} cuotas
-        </p>
-      </div>
-      <p className="font-semibold tabular-nums shrink-0 text-foreground">
-        {formatFinanceMoney(loan.currentBalance, {
-          ...display,
-          currency: loan.currency,
-        })}
-      </p>
+      <ChevronRightIcon className="absolute right-0 top-1/2 -translate-y-1/2 size-8 text-muted-foreground group-hover:text-foreground" />
     </button>
   )
 }

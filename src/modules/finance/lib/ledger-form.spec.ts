@@ -23,7 +23,7 @@ describe("sliceDateInput", () => {
 
 describe("formatCalendarDate", () => {
   it("formats YYYY-MM-DD in local time, not the UTC day before", () => {
-    const expected = new Date(2026, 8, 18).toLocaleDateString(undefined, {
+    const expected = new Date(2026, 8, 18).toLocaleDateString("es", {
       year: "numeric",
       month: "short",
       day: "numeric",

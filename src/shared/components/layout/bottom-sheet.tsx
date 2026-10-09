@@ -11,6 +11,7 @@ import {
   DrawerDescription,
   DrawerFooter,
   DrawerHeader,
+  DrawerNested,
   DrawerTitle,
 } from "@/src/shared/components/ui/drawer";
 import { Spinner } from "@/src/shared/components/ui/spinner";
@@ -21,6 +22,8 @@ import type { ReactNode } from "react";
 interface BottomSheetProps {
   open: boolean
   variant?: BottomSheetVariant
+  /** Stacks this sheet on top of the drawer that renders it. */
+  nested?: boolean
   onOpenChange: (open: boolean) => void
   title: string
   description?: string
@@ -38,6 +41,7 @@ interface BottomSheetProps {
 export function BottomSheet({
   open,
   variant = "default",
+  nested = false,
   onOpenChange,
   title,
   description,
@@ -52,8 +56,9 @@ export function BottomSheet({
   const actionNodes = [actions?.delete, actions?.close, actions?.submit].filter(
     (node) => node != null && node !== false
   )
+  const Root = nested ? DrawerNested : Drawer
   return (
-    <Drawer direction={direction} open={open} onOpenChange={onOpenChange}>
+    <Root direction={direction} open={open} onOpenChange={onOpenChange}>
       <DrawerContent
         className={cn(variant === "floating" && FLOATING_SHEET_CONTENT_CLASS)}
       >
@@ -100,6 +105,6 @@ export function BottomSheet({
           </DrawerFooter>
         )}
       </DrawerContent>
-    </Drawer>
+    </Root>
   )
 }

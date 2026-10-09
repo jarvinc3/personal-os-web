@@ -32,6 +32,7 @@ import { PendingSurface } from "@/src/shared/components/ui/navigation-pending";
 import { cn } from "@/src/shared/lib/utils";
 import { motion } from "framer-motion";
 import {
+  BanknoteIcon,
   Building2Icon,
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -401,20 +402,33 @@ function InstitutionWalletCard({
         }
       }}
       className={cn(
-        "flex relative flex-col justify-between p-6 w-full h-60 text-left rounded-3xl cursor-pointer",
+        "relative flex h-60 w-full cursor-pointer flex-col justify-between overflow-hidden rounded-3xl p-6 text-left",
         isPending && "pointer-events-none",
       )}
       style={{ backgroundColor: color }}
     >
-      <div className="flex justify-between items-start">
-        <BrandLogo name={name || monogram} logoUrl={logoUrl} size={44} />
+      <span aria-hidden className="pointer-events-none absolute inset-0">
+        <span className="absolute -top-16 -right-8 size-52 rounded-full bg-white/20" />
+        <span className="absolute -right-14 top-14 size-64 rounded-full bg-white/10" />
+      </span>
+      <div className="relative z-10 flex justify-between items-start">
+        {kind === "cash" ? (
+          <span
+            aria-label={name}
+            className="inline-flex size-11 items-center justify-center rounded-full bg-white text-emerald-700"
+          >
+            <BanknoteIcon className="size-7" strokeWidth={2.25} aria-hidden />
+          </span>
+        ) : (
+          <BrandLogo name={name || monogram} logoUrl={logoUrl} size={44} />
+        )}
         <KindIcon
           className="size-5"
           style={{ color: "rgba(255,255,255,0.6)" }}
         />
       </div>
 
-      <div className="flex flex-col flex-1 justify-center">
+      <div className="relative z-10 flex flex-col flex-1 justify-center">
         <h3 className="text-3xl font-bold leading-tight text-white font-display">
           {name}
         </h3>
@@ -429,7 +443,7 @@ function InstitutionWalletCard({
 
       {isFront ? (
         <div
-          className="flex absolute inset-x-6 justify-between"
+          className="absolute inset-x-6 z-10 flex justify-between"
           style={{ bottom: "72px" }}
         >
           {Array.from({ length: 12 }).map((_, index) => (
@@ -442,7 +456,7 @@ function InstitutionWalletCard({
         </div>
       ) : null}
 
-      <div className="flex flex-col">
+      <div className="relative z-10 flex flex-col">
         <span className="text-xs tracking-wider uppercase text-white/60">
           {balanceLabel}:
         </span>

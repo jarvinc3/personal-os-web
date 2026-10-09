@@ -135,6 +135,7 @@ export function DestinationPickerSheet({
                 <CardProductRow
                   key={card.id}
                   card={card}
+                  accounts={accounts}
                   display={display}
                   onPress={() => choose(encodeLedgerTarget("card", card.id))}
                 />

@@ -17,7 +17,7 @@ type BadgeVariant = VariantProps<typeof badgeVariants>["variant"]
 
 export type PlanningProgressCardProps = {
   title: string
-  description?: string
+  description?: ReactNode
   icon?: LucideIcon
   leading?: ReactNode
   tone?: PlanningProgressTone
@@ -28,7 +28,7 @@ export type PlanningProgressCardProps = {
   currentLabel: string
   targetHint: string
   targetLabel: string
-  caption?: string
+  caption?: ReactNode
   onPress?: () => void
 }
 
@@ -156,7 +156,12 @@ export function PlanningProgressCard({
             <span className="min-w-0">
               <span className="block truncate text-sm font-medium">{title}</span>
               {description ? (
-                <span className="block truncate text-xs text-muted-foreground">
+                <span
+                  className={cn(
+                    "block text-xs text-muted-foreground",
+                    typeof description === "string" && "truncate",
+                  )}
+                >
                   {description}
                 </span>
               ) : null}

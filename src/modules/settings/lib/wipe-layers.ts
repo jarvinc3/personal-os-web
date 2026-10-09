@@ -1,5 +1,6 @@
 export const WIPE_LAYERS = {
   FINANCE_LEDGER: "finance.ledger",
+  FINANCE_BALANCES: "finance.balances",
   FINANCE_PLANNING: "finance.planning",
   FINANCE_CATEGORIES: "finance.categories",
   FINANCE_CATALOG: "finance.catalog",
@@ -13,6 +14,7 @@ export type WipeLayerId = (typeof WIPE_LAYERS)[keyof typeof WIPE_LAYERS]
 
 export const WIPE_LAYER_ORDER: readonly WipeLayerId[] = [
   WIPE_LAYERS.FINANCE_LEDGER,
+  WIPE_LAYERS.FINANCE_BALANCES,
   WIPE_LAYERS.FINANCE_PLANNING,
   WIPE_LAYERS.FINANCE_CATEGORIES,
   WIPE_LAYERS.FINANCE_CATALOG,
@@ -25,6 +27,7 @@ export const WIPE_LAYER_ORDER: readonly WipeLayerId[] = [
 /** Mirrors the server rules: catalog needs the ledger, categories need planning. */
 export const WIPE_LAYER_DEPENDENCIES: Record<WipeLayerId, WipeLayerId[]> = {
   [WIPE_LAYERS.FINANCE_LEDGER]: [],
+  [WIPE_LAYERS.FINANCE_BALANCES]: [],
   [WIPE_LAYERS.FINANCE_PLANNING]: [],
   [WIPE_LAYERS.FINANCE_CATEGORIES]: [WIPE_LAYERS.FINANCE_PLANNING],
   [WIPE_LAYERS.FINANCE_CATALOG]: [WIPE_LAYERS.FINANCE_LEDGER],
@@ -36,6 +39,7 @@ export const WIPE_LAYER_DEPENDENCIES: Record<WipeLayerId, WipeLayerId[]> = {
 
 export const WIPE_LAYER_LABELS: Record<WipeLayerId, string> = {
   [WIPE_LAYERS.FINANCE_LEDGER]: "Movimientos y saldos",
+  [WIPE_LAYERS.FINANCE_BALANCES]: "Saldos en cero",
   [WIPE_LAYERS.FINANCE_PLANNING]: "Presupuestos, metas y préstamos",
   [WIPE_LAYERS.FINANCE_CATEGORIES]: "Categorías propias",
   [WIPE_LAYERS.FINANCE_CATALOG]: "Instituciones, cuentas y tarjetas",
@@ -47,7 +51,9 @@ export const WIPE_LAYER_LABELS: Record<WipeLayerId, string> = {
 
 export const WIPE_LAYER_DESCRIPTIONS: Record<WipeLayerId, string> = {
   [WIPE_LAYERS.FINANCE_LEDGER]:
-    "Borra todos los movimientos y pone saldos y presupuestos en cero. Conserva cuentas y tarjetas.",
+    "Borra todos los movimientos, pone las cuentas en cero y devuelve el disponible de las tarjetas de crédito a su límite. Conserva cuentas y tarjetas.",
+  [WIPE_LAYERS.FINANCE_BALANCES]:
+    "Pone en cero las cuentas y restaura el disponible de las tarjetas de crédito a su límite. No borra movimientos, cuentas ni tarjetas, y el historial deja de cuadrar con el saldo.",
   [WIPE_LAYERS.FINANCE_PLANNING]:
     "Borra presupuestos, metas de ahorro, préstamos y cobros.",
   [WIPE_LAYERS.FINANCE_CATEGORIES]:
@@ -74,6 +80,7 @@ export const WIPE_LAYER_GROUPS: WipeLayerGroup[] = [
     title: "Finanzas",
     layers: [
       WIPE_LAYERS.FINANCE_LEDGER,
+      WIPE_LAYERS.FINANCE_BALANCES,
       WIPE_LAYERS.FINANCE_PLANNING,
       WIPE_LAYERS.FINANCE_CATEGORIES,
       WIPE_LAYERS.FINANCE_CATALOG,

@@ -106,7 +106,7 @@ describe("visibleTransactionTotals", () => {
 
 describe("formatTransactionDate", () => {
   it("keeps the calendar day of an UTC midnight ISO string", () => {
-    const expected = new Date(2026, 8, 18).toLocaleDateString(undefined, {
+    const expected = new Date(2026, 8, 18).toLocaleDateString("es", {
       year: "numeric",
       month: "short",
       day: "numeric",

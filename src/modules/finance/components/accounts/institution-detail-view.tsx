@@ -5,13 +5,13 @@ import {
   AccountProductRow,
   CardProductRow,
   InstitutionProductEmpty,
-  LoanProductRow,
 } from "@/src/modules/finance/components/accounts/institution-product-lists";
 import { InstitutionSheet } from "@/src/modules/finance/components/accounts/institution-sheet";
 import { AccountSheet } from "@/src/modules/finance/components/catalog/account-sheet";
 import { CardBalanceSheet } from "@/src/modules/finance/components/catalog/card-balance-sheet";
 import { CardSheet } from "@/src/modules/finance/components/catalog/card-sheet";
 import { FinanceAuthenticatedPage } from "@/src/modules/finance/components/layout/finance-authenticated-page";
+import { LoanProgressCard } from "@/src/modules/finance/components/planning/loan-progress-card";
 import { LoanSheet } from "@/src/modules/finance/components/planning/loan-sheet";
 import { LinkInstitutionMailboxSheet } from "@/src/modules/finance/components/sync/link-institution-mailbox-sheet";
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/constants/sheet-keys";
@@ -426,6 +426,7 @@ function InstitutionDetailView({
                   <CardProductRow
                     key={card.id}
                     card={card}
+                    accounts={accounts}
                     display={display}
                     onPress={() => setOpenCardSheet(true, card.id)}
                   />
@@ -441,11 +442,11 @@ function InstitutionDetailView({
                 />
               ) : (
                 institutionLoans.map((loan) => (
-                  <LoanProductRow
+                  <LoanProgressCard
                     key={loan.id}
                     loan={loan}
                     display={display}
-                    logoUrl={institution.logoUrl}
+                    institution={institution}
                     onPress={() => setOpenLoanSheet(true, loan.id)}
                   />
                 ))

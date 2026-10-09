@@ -1,6 +1,6 @@
 "use client"
 
-import { apiDelete, apiGet, apiPatch, apiPost } from "@/src/config/api-client"
+import { apiDelete, apiPatch, apiPost } from "@/src/config/api-client"
 import type {
   CardBalanceBody,
   CreateCardBody,
@@ -75,6 +75,34 @@ export function useUpdateCardBalance() {
   return useMutation({
     mutationFn: ({ id, body }: { id: string; body: CardBalanceBody }) =>
       apiPost<FinanceCardBalance>(API_ENDPOINTS.FINANCE.CARD_BALANCES(id), body),
+    onSuccess: () => {
+      invalidateCards(queryClient)
+    },
+  })
+}
+
+export function useDeleteCardBalance() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, currency }: { id: string; currency: string }) =>
+      apiDelete(API_ENDPOINTS.FINANCE.CARD_BALANCE(id, currency)),
+    onSuccess: () => {
+      invalidateCards(queryClient)
+    },
+  })
+}
+
+export function useUpdateCardCreditLimit() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({
+      id,
+      body,
+    }: {
+      id: string
+      body: { currency: string; creditLimit: number }
+    }) =>
+      apiPost<FinanceCardBalance>(API_ENDPOINTS.FINANCE.CARD_CREDIT_LIMIT(id), body),
     onSuccess: () => {
       invalidateCards(queryClient)
     },

@@ -9,6 +9,7 @@ export const FINANCE_TRANSACTION_TYPES = [
   "DEBIT",
   "CREDIT",
   "TRANSFER",
+  "ADJUSTMENT",
 ] as const
 export type FinanceTransactionType = (typeof FINANCE_TRANSACTION_TYPES)[number]
 
@@ -19,6 +20,7 @@ export const FINANCE_TRANSACTION_TYPE_LABEL: Record<
   DEBIT: "Gasto",
   CREDIT: "Ingreso",
   TRANSFER: "Transferencia",
+  ADJUSTMENT: "Reajuste",
 }
 
 export const FINANCE_CATEGORY_TYPES = ["EXPENSE", "INCOME"] as const

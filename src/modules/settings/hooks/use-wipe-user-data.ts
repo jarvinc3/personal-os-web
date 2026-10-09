@@ -23,9 +23,19 @@ export type WipeUserDataPayload = {
   email: string
   password: string
   layers: WipeLayerId[]
+  balanceInstitutionId?: string
+  skipReauth?: boolean
 }
 
-async function reauthenticate(email: string, password: string): Promise<void> {
+export type WipeRequest = {
+  layers: WipeLayerId[]
+  balanceInstitutionId?: string
+}
+
+export async function reauthenticateWithPassword(
+  email: string,
+  password: string,
+): Promise<void> {
   const { error: reauthError } =
     await getSupabaseBrowserClient().auth.signInWithPassword({
       email: email.trim().toLowerCase(),
@@ -41,8 +51,13 @@ async function reauthenticate(email: string, password: string): Promise<void> {
   }
 }
 
-async function wipeData(layers: WipeLayerId[]): Promise<void> {
-  await apiPost<WipeUserDataResult>(API_ENDPOINTS.USERS.WIPE_DATA, { layers })
+async function wipeData(request: WipeRequest): Promise<void> {
+  await apiPost<WipeUserDataResult>(API_ENDPOINTS.USERS.WIPE_DATA, {
+    layers: request.layers,
+    ...(request.balanceInstitutionId
+      ? { balanceInstitutionId: request.balanceInstitutionId }
+      : {}),
+  })
 }
 
 function clearLocalState(appliedLayers: readonly WipeLayerId[]): void {
@@ -65,8 +80,13 @@ export function useWipeUserData() {
 
   const mutation = useMutation({
     mutationFn: async (payload: WipeUserDataPayload) => {
-      await reauthenticate(payload.email, payload.password)
-      await wipeData(payload.layers)
+      if (!payload.skipReauth) {
+        await reauthenticateWithPassword(payload.email, payload.password)
+      }
+      await wipeData({
+        layers: payload.layers,
+        balanceInstitutionId: payload.balanceInstitutionId,
+      })
     },
     onSuccess: (_wipeResponse, variables) => finishWipe(variables.layers),
     onError: (error) => {
@@ -79,8 +99,8 @@ export function useWipeUserData() {
   })
 
   const wipeAfterReauth = useMutation({
-    mutationFn: (layers: WipeLayerId[]) => wipeData(layers),
-    onSuccess: (_wipeResponse, layers) => finishWipe(layers),
+    mutationFn: (request: WipeRequest) => wipeData(request),
+    onSuccess: (_wipeResponse, request) => finishWipe(request.layers),
     onError: (error) => {
       appToast.error({
         text1: "No se pudieron vaciar los datos",

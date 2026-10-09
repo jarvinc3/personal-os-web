@@ -1,12 +1,18 @@
 "use client"
 
 import { FinanceCurrencyPills } from "@/src/modules/finance/components/forms/finance-currency-pills"
-import { useUpdateCardBalance } from "@/src/modules/finance/hooks/use-cards"
+import { useAdjustBalance } from "@/src/modules/finance/hooks/use-balance-adjustment"
+import {
+  useDeleteCardBalance,
+  useUpdateCardBalance,
+  useUpdateCardCreditLimit,
+} from "@/src/modules/finance/hooks/use-cards"
 import { useFinanceEnabled } from "@/src/modules/finance/hooks/use-finance-enabled"
 import {
   buildCardBalanceBody,
   nextUnusedCurrency,
 } from "@/src/modules/finance/lib/catalog-payloads"
+import { canManageCardBalances } from "@/src/modules/finance/lib/card-balances"
 import { buildFinanceCurrencyOptions } from "@/src/modules/finance/lib/finance-currency"
 import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
 import {
@@ -23,7 +29,13 @@ import { appToast } from "@/src/shared/lib/app-toast"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
 import { cn } from "@/src/shared/lib/utils"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { PlusIcon, SaveIcon, WalletIcon, XIcon } from "lucide-react"
+import {
+  PlusIcon,
+  SaveIcon,
+  TrashIcon,
+  WalletIcon,
+  XIcon,
+} from "lucide-react"
 import { useMemo, useState } from "react"
 import { Controller, useForm } from "react-hook-form"
 import { z } from "zod"
@@ -78,6 +90,10 @@ export function CardBalanceSheet({
   display,
   pending = false,
 }: CardBalanceSheetProps) {
+  if (card && !canManageCardBalances(card)) {
+    return null
+  }
+
   return (
     <CardBalanceSheetForm
       key={`${open ? "open" : "closed"}:${card?.id ?? "none"}`}
@@ -99,7 +115,15 @@ function CardBalanceSheetForm({
   display,
   pending = false,
 }: CardBalanceSheetProps) {
-  const mutation = useUpdateCardBalance()
+  const mutation = useAdjustBalance()
+  const openingBalanceMutation = useUpdateCardBalance()
+  const creditLimitMutation = useUpdateCardCreditLimit()
+  const deleteBalanceMutation = useDeleteCardBalance()
+  const saving =
+    mutation.isPending ||
+    openingBalanceMutation.isPending ||
+    creditLimitMutation.isPending ||
+    deleteBalanceMutation.isPending
   const [mode, setMode] = useState<BalanceMode>(() =>
     initialMode(card, defaultCurrency)
   )
@@ -165,9 +189,36 @@ function CardBalanceSheetForm({
       return
     }
     try {
-      await mutation.mutateAsync({ id: card.id, body: payload.body })
+      const result = await mutation.mutateAsync({
+        cardId: card.id,
+        currency: payload.body.currency,
+        balance: payload.body.balance,
+      })
+      const openedAtZero = mode.kind === "add" && !result.adjusted
+      if (openedAtZero) {
+        await openingBalanceMutation.mutateAsync({
+          id: card.id,
+          body: payload.body,
+        })
+      } else if (
+        card.type === "CREDIT" &&
+        payload.body.creditLimit !== undefined
+      ) {
+        await creditLimitMutation.mutateAsync({
+          id: card.id,
+          body: {
+            currency: payload.body.currency,
+            creditLimit: payload.body.creditLimit,
+          },
+        })
+      }
       appToast.success({
-        text1: mode.kind === "add" ? "Moneda agregada" : "Saldo actualizado",
+        text1:
+          mode.kind === "add"
+            ? "Moneda agregada"
+            : result.adjusted
+              ? "Saldo reajustado"
+              : "Saldo actualizado",
       })
       onOpenChange(false)
     } catch (error) {
@@ -177,13 +228,27 @@ function CardBalanceSheetForm({
 
   const isAdding = mode.kind === "add"
 
+  async function deleteCurrency() {
+    if (!card || mode.kind !== "edit") return
+    try {
+      await deleteBalanceMutation.mutateAsync({
+        id: card.id,
+        currency: mode.currency,
+      })
+      appToast.success({ text1: `${mode.currency} eliminada` })
+      onOpenChange(false)
+    } catch (error) {
+      appToast.error({ text1: financeErrorMessage(error) })
+    }
+  }
+
   return (
     <BottomSheet
       open={open}
       onOpenChange={onOpenChange}
-      pending={pending}
+      pending={pending || saving}
       title={card ? `Saldos · ${card.name}` : "Saldos de tarjeta"}
-      description="Puedes actualizar un saldo existente o agregar otra moneda. El API espera números en el body."
+      description="El saldo nuevo queda como un reajuste. El límite de crédito se guarda aparte."
       actions={{
         close: (
           <Button
@@ -197,16 +262,16 @@ function CardBalanceSheetForm({
         ),
         submit: (
           <Button
-            disabled={mutation.isPending || !card}
+            disabled={saving || !card}
             className="flex-1"
             onClick={onSubmit}
           >
-            {mutation.isPending ? (
+            {saving ? (
               <Spinner data-icon="inline-start" />
             ) : (
               <SaveIcon className="size-4 shrink-0" />
             )}
-            {mutation.isPending ? "Guardando..." : "Guardar"}
+            {saving ? "Guardando..." : "Guardar"}
           </Button>
         ),
       }}
@@ -290,6 +355,23 @@ function CardBalanceSheetForm({
               />
             )}
           />
+        ) : null}
+        {!isAdding ? (
+          <Button
+            type="button"
+            variant="destructive"
+            disabled={saving}
+            onClick={() => void deleteCurrency()}
+          >
+            {deleteBalanceMutation.isPending ? (
+              <Spinner data-icon="inline-start" />
+            ) : (
+              <TrashIcon className="size-4 shrink-0" />
+            )}
+            {deleteBalanceMutation.isPending
+              ? "Eliminando..."
+              : `Eliminar ${mode.currency}`}
+          </Button>
         ) : null}
       </SummarySection>
     </BottomSheet>

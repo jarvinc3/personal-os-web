@@ -13,7 +13,7 @@ import {
 } from "@/src/shared/components/ui/select";
 import { Switch } from '@/src/shared/components/ui/switch';
 import { cn } from '@/src/shared/lib/utils';
-import { Eye, EyeOff, type LucideIcon } from 'lucide-react';
+import { Eye, EyeOff, KeyRound, type LucideIcon } from 'lucide-react';
 import {
   useId,
   useState,
@@ -209,6 +209,7 @@ export function FormTextField({
   className,
 }: FormTextFieldProps) {
   const hasError = invalid ?? Boolean(error);
+  const FieldIcon = Icon ?? (type === "password" ? KeyRound : undefined);
   const [revealed, setRevealed] = useState(false);
   const canReveal = revealable && type === 'password';
   const inputType = canReveal && revealed ? 'text' : type;
@@ -217,14 +218,14 @@ export function FormTextField({
     <Field data-invalid={hasError ? true : undefined} className="flex relative flex-col gap-1">
       {label ? <FieldLabel className="text-sm text-muted-foreground">{label}</FieldLabel> : null}
       <div className="flex relative flex-row gap-2 items-center">
-        {Icon && (
+        {FieldIcon ? (
           <div className="absolute left-3 top-1/2 -translate-y-1/2">
-            <Icon className="size-4.5" />
+            <FieldIcon className="size-4.5" />
           </div>
-        )}
+        ) : null}
         <Input
           ref={inputRef}
-          className={cn(Icon && "pl-9", canReveal && "pr-10", className)}
+          className={cn(FieldIcon && "pl-9", canReveal && "pr-10", className)}
           type={inputType}
           value={value}
           maxLength={maxLength}

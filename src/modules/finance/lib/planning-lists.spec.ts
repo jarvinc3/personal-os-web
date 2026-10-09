@@ -5,6 +5,7 @@ import {
   amountRatioPct,
   asFinanceArray,
   joinPlanningCaption,
+  loanProgressSummary,
   visibleReceivables,
 } from "./planning-lists.ts"
 
@@ -49,6 +50,44 @@ describe("joinPlanningCaption", () => {
 
   it("returns undefined when nothing is left", () => {
     assert.equal(joinPlanningCaption("  ", null), undefined)
+  })
+})
+
+describe("loanProgressSummary", () => {
+  it("uses the paid amount to calculate an active loan progress", () => {
+    assert.deepEqual(
+      loanProgressSummary({
+        originalAmount: "100000",
+        currentBalance: "90000",
+        paidInstallments: 1,
+        totalInstallments: 10,
+      }),
+      { paidOff: false, progress: 10 },
+    )
+  })
+
+  it("falls back to installment progress when amounts cannot be parsed", () => {
+    assert.deepEqual(
+      loanProgressSummary({
+        originalAmount: "invalid",
+        currentBalance: "invalid",
+        paidInstallments: 3,
+        totalInstallments: 12,
+      }),
+      { paidOff: false, progress: 25 },
+    )
+  })
+
+  it("marks a zero-balance loan as paid off", () => {
+    assert.deepEqual(
+      loanProgressSummary({
+        originalAmount: "100",
+        currentBalance: "0",
+        paidInstallments: 10,
+        totalInstallments: 10,
+      }),
+      { paidOff: true, progress: 100 },
+    )
   })
 })
 
