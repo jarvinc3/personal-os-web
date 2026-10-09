@@ -37,8 +37,13 @@ export const APP_ROUTES = {
   },
 } as const
 
-export function financeTransactionNewHref(type: "DEBIT" | "CREDIT"): string {
+export function financeTransactionNewHref(
+  type: "DEBIT" | "CREDIT",
+  destination?: string
+): string {
   const params = new URLSearchParams({ type })
+  const target = destination?.trim()
+  if (target) params.set("destination", target)
   return `${APP_ROUTES.app.financeTransactionNew}?${params.toString()}`
 }
 

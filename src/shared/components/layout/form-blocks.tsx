@@ -183,6 +183,7 @@ type FormTextFieldProps = {
   invalid?: boolean;
   type?: HTMLInputTypeAttribute;
   autoComplete?: string;
+  ariaLabel?: string;
   icon?: LucideIcon;
   inputRef?: Ref<HTMLInputElement>;
   revealable?: boolean;
@@ -202,6 +203,7 @@ export function FormTextField({
   invalid,
   type = 'text',
   autoComplete,
+  ariaLabel,
   icon: Icon,
   inputRef,
   revealable = false,
@@ -235,6 +237,7 @@ export function FormTextField({
           placeholder={placeholder}
           disabled={disabled}
           autoComplete={autoComplete}
+          aria-label={ariaLabel}
           aria-invalid={hasError || undefined}
         />
         {canReveal ? (

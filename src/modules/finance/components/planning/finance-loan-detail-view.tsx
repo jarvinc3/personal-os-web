@@ -33,7 +33,12 @@ import { SummaryItem } from "@/src/shared/components/ui/summary"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
-import { HandCoinsIcon, MoreVerticalIcon, PencilIcon } from "lucide-react"
+import {
+  HandCoinsIcon,
+  MoreVerticalIcon,
+  PencilIcon,
+  PlusIcon,
+} from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useMemo } from "react"
 
@@ -156,7 +161,7 @@ function FinanceLoanDetailView({ loanId }: FinanceLoanDetailClientProps) {
 
       <div className="-mx-4 -mt-4 overflow-hidden md:-mx-6">
         <div
-          className="rounded-b-3xl px-4 pt-6 pb-10 text-white md:px-6"
+          className="rounded-b-3xl p-4 text-white md:p-6"
           style={{ background: accent }}
         >
           <div className="flex items-start gap-3">
@@ -166,9 +171,17 @@ function FinanceLoanDetailView({ loanId }: FinanceLoanDetailClientProps) {
               size={48}
             />
             <div className="min-w-0 flex-1">
-              <h1 className="truncate text-2xl font-bold tracking-tight">
-                {loan.lenderName}
-              </h1>
+              <div className="flex min-w-0 items-center gap-2">
+                <h1 className="truncate text-2xl font-bold tracking-tight">
+                  {loan.lenderName}
+                </h1>
+                <Badge
+                  variant={paidOff ? "success" : "warning"}
+                  className="shrink-0"
+                >
+                  {paidOff ? "Saldado" : "Activo"}
+                </Badge>
+              </div>
               <p className="mt-1 flex flex-wrap items-center gap-x-2 text-sm text-white/70">
                 <span>
                   {FINANCE_INSTALLMENT_FREQ_LABEL[loan.installmentFreq]}
@@ -208,14 +221,7 @@ function FinanceLoanDetailView({ loanId }: FinanceLoanDetailClientProps) {
         </div>
       </div>
 
-      <div className="mx-4 -mt-7 flex flex-col gap-3 rounded-3xl bg-background">
-        <div className="flex items-center justify-between gap-3">
-          <h2 className="text-lg font-medium text-foreground">Cuotas</h2>
-          <Badge variant={paidOff ? "success" : "warning"}>
-            {paidOff ? "Saldado" : "Activo"}
-          </Badge>
-        </div>
-
+      <div className="mx-4 flex flex-col gap-3 rounded-3xl bg-background">
         {installmentsQuery.isError ? (
           <FinanceErrorState
             message={financeLoadErrorMessage(installmentsQuery.error)}
@@ -227,16 +233,22 @@ function FinanceLoanDetailView({ loanId }: FinanceLoanDetailClientProps) {
         {installmentsQuery.isPending ? <FinanceListSkeleton rows={5} /> : null}
 
         {!installmentsQuery.isPending && installments.length === 0 ? (
-          <Empty className="py-8">
+          <Empty className="py-10">
             <EmptyHeader>
               <EmptyMedia variant="icon">
                 <HandCoinsIcon />
               </EmptyMedia>
-              <EmptyTitle>Sin cuotas registradas</EmptyTitle>
+              <EmptyTitle>Sin cuotas</EmptyTitle>
               <EmptyDescription>
-                Este préstamo todavía no tiene cuotas programadas.
+                Define la cuota y el plazo para seguir los pagos.
               </EmptyDescription>
             </EmptyHeader>
+            <EmptyContent>
+              <Button onClick={() => setOpenLoanSheet(true)}>
+                <PlusIcon />
+                Préstamo
+              </Button>
+            </EmptyContent>
           </Empty>
         ) : null}
 

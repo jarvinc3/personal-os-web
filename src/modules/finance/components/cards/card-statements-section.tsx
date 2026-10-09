@@ -1,5 +1,6 @@
 "use client"
 
+import type { UpcomingCardCycle } from "@/src/modules/finance/lib/card-statement-cycle"
 import { formatCalendarDate } from "@/src/modules/finance/lib/ledger-form"
 import {
   formatFinanceMoney,
@@ -12,16 +13,23 @@ import {
   type FinanceCardStatementStatus,
 } from "@/src/modules/finance/types/entities"
 import { Badge, badgeVariants } from "@/src/shared/components/ui/badge"
+import { Button } from "@/src/shared/components/ui/button"
 import {
   Empty,
+  EmptyContent,
+  EmptyDescription,
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
+import { cn } from "@/src/shared/lib/utils"
 import type { VariantProps } from "class-variance-authority"
-import { CalendarIcon } from "lucide-react"
+import { CalendarIcon, PlusIcon } from "lucide-react"
 
 type BadgeVariant = VariantProps<typeof badgeVariants>["variant"]
+
+const STATEMENT_CARD_CLASS =
+  "flex flex-col gap-3 rounded-2xl border border-border bg-card p-4"
 
 const STATEMENT_STATUS_VARIANT: Record<
   FinanceCardStatementStatus,
@@ -34,9 +42,33 @@ const STATEMENT_STATUS_VARIANT: Record<
 
 type CardStatementsSectionProps = {
   statements: readonly FinanceCardStatement[]
+  upcomingCycle: UpcomingCardCycle | null
   display: FinanceMoneyDisplay
   isPending: boolean
   emptyLabel: string
+  emptyDescription: string
+  onCreate: () => void
+  createLabel: string
+}
+
+function CycleDates({
+  cycleEnd,
+  dueDate,
+}: {
+  cycleEnd: string
+  dueDate: string | null
+}) {
+  return (
+    <div className="flex gap-3">
+      <CalendarIcon className="size-5 shrink-0 text-muted-foreground" />
+      <div>
+        <p className="font-semibold">Corte {formatCalendarDate(cycleEnd)}</p>
+        <p className="text-sm text-muted-foreground">
+          {dueDate ? `Vence ${formatCalendarDate(dueDate)}` : "Sin vencimiento"}
+        </p>
+      </div>
+    </div>
+  )
 }
 
 function statementProgress(statement: FinanceCardStatement): number {
@@ -50,9 +82,13 @@ function statementProgress(statement: FinanceCardStatement): number {
 
 export function CardStatementsSection({
   statements,
+  upcomingCycle,
   display,
   isPending,
   emptyLabel,
+  emptyDescription,
+  onCreate,
+  createLabel,
 }: CardStatementsSectionProps) {
   if (isPending) {
     return (
@@ -67,42 +103,51 @@ export function CardStatementsSection({
     )
   }
 
-  if (statements.length === 0) {
+  if (statements.length === 0 && upcomingCycle === null) {
     return (
-      <Empty className="py-8">
+      <Empty className="py-10">
         <EmptyHeader>
           <EmptyMedia variant="icon">
             <CalendarIcon />
           </EmptyMedia>
           <EmptyTitle>{emptyLabel}</EmptyTitle>
+          <EmptyDescription>{emptyDescription}</EmptyDescription>
         </EmptyHeader>
+        <EmptyContent>
+          <Button onClick={onCreate}>
+            <PlusIcon />
+            {createLabel}
+          </Button>
+        </EmptyContent>
       </Empty>
     )
   }
 
   return (
     <div className="flex flex-col gap-3">
+      {upcomingCycle ? (
+        <article className={cn(STATEMENT_CARD_CLASS, "border-dashed")}>
+          <div className="flex items-start justify-between gap-3">
+            <CycleDates
+              cycleEnd={upcomingCycle.cycleEnd}
+              dueDate={upcomingCycle.dueDate}
+            />
+            <Badge variant="outline">En curso</Badge>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            El balance se calcula cuando el ciclo cierre.
+          </p>
+        </article>
+      ) : null}
       {statements.map((statement) => {
         const moneyDisplay = { ...display, currency: statement.currency }
         return (
-          <article
-            key={statement.id}
-            className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-4"
-          >
+          <article key={statement.id} className={STATEMENT_CARD_CLASS}>
             <div className="flex items-start justify-between gap-3">
-              <div className="flex gap-3">
-                <CalendarIcon className="size-5 shrink-0 text-muted-foreground" />
-                <div>
-                  <p className="font-semibold">
-                    Corte {formatCalendarDate(statement.cycleEnd)}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {statement.dueDate
-                      ? `Vence ${formatCalendarDate(statement.dueDate)}`
-                      : "Sin vencimiento"}
-                  </p>
-                </div>
-              </div>
+              <CycleDates
+                cycleEnd={statement.cycleEnd}
+                dueDate={statement.dueDate}
+              />
               <Badge variant={STATEMENT_STATUS_VARIANT[statement.status]}>
                 {FINANCE_CARD_STATEMENT_STATUS_LABEL[statement.status]}
               </Badge>

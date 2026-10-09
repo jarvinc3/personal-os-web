@@ -9,17 +9,13 @@ import { useCategories } from "@/src/modules/finance/hooks/use-categories"
 import { allTransactionsQueryOptions } from "@/src/modules/finance/hooks/use-transactions"
 import { financeLoadErrorMessage } from "@/src/modules/finance/lib/finance-error"
 import { groupTransactionsByMonth } from "@/src/modules/finance/lib/group-transactions-by-month"
-import {
-  formatFinanceMoney,
-  type FinanceMoneyDisplay,
-} from "@/src/modules/finance/lib/money"
+import type { FinanceMoneyDisplay } from "@/src/modules/finance/lib/money"
 import {
   formatTransactionDate,
   isTransferTransaction,
   mergeTransactionsById,
   movementSign,
   signedAmount,
-  visibleTransactionTotals,
 } from "@/src/modules/finance/lib/transactions-query"
 import type {
   FinanceCategory,
@@ -31,6 +27,8 @@ import { Button } from "@/src/shared/components/ui/button"
 import { Input } from "@/src/shared/components/ui/input"
 import {
   Empty,
+  EmptyContent,
+  EmptyDescription,
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
@@ -43,6 +41,7 @@ import {
   ArrowDownLeftIcon,
   ArrowLeftRightIcon,
   ArrowUpRightIcon,
+  PlusIcon,
   ScaleIcon,
   SearchIcon,
   SlidersHorizontalIcon,
@@ -71,6 +70,9 @@ type FinanceInstrumentMovementsProps = {
   display: FinanceMoneyDisplay
   sources: readonly FinanceMovementsSource[]
   emptyLabel: string
+  emptyDescription: string
+  onCreate: () => void
+  createLabel: string
 }
 
 function transactionRowTitle(
@@ -101,6 +103,9 @@ export function FinanceInstrumentMovements({
   display,
   sources,
   emptyLabel,
+  emptyDescription,
+  onCreate,
+  createLabel,
 }: FinanceInstrumentMovementsProps) {
   const router = useRouter()
   const [search, setSearch] = useState("")
@@ -158,8 +163,8 @@ export function FinanceInstrumentMovements({
     [categories]
   )
   const groups = useMemo(() => groupTransactionsByMonth(movements), [movements])
-  const totals = useMemo(() => visibleTransactionTotals(movements), [movements])
-  const filtersActive = Boolean(dateFrom || dateTo)
+  const filtersActive = flow !== "ALL" || Boolean(dateFrom || dateTo)
+  const queryNarrowed = Boolean(search.trim()) || filtersActive
   const isPending = movementQueries.some((query) => query.isPending)
   const error = movementQueries.find((query) => query.error)?.error ?? null
   const loadErrorMessage = error ? financeLoadErrorMessage(error) : null
@@ -170,58 +175,34 @@ export function FinanceInstrumentMovements({
     }
   }
 
+  const showToolbar = queryNarrowed || movements.length > 0
+
   return (
     <div className="flex flex-col gap-4">
-      <div className="relative">
-        <SearchIcon className="pointer-events-none absolute top-1/2 left-3 z-10 size-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          type="search"
-          placeholder="Buscar movimiento o comerciante"
-          value={search}
-          onChange={(event) => setSearch(event.target.value)}
-          autoComplete="off"
-          className="pr-3 pl-8"
-        />
-      </div>
-
-      <div className="flex items-center gap-2 overflow-x-auto">
-        {FLOW_FILTERS.map((option) => (
+      {showToolbar ? (
+        <div className="flex items-center gap-2">
+          <div className="relative min-w-0 flex-1">
+            <SearchIcon className="pointer-events-none absolute top-1/2 left-3 z-10 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              type="search"
+              placeholder="Buscar movimiento o comerciante"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              autoComplete="off"
+              className="pr-3 pl-8"
+            />
+          </div>
           <Button
-            key={option.value}
             type="button"
-            size="sm"
-            variant={flow === option.value ? "default" : "outline"}
-            className={cn("shrink-0 rounded-full", PRESSABLE_CLASS)}
-            onClick={() => setFlow(option.value)}
+            variant={filtersActive ? "default" : "outline"}
+            className={cn("h-10 shrink-0 rounded-full px-3", PRESSABLE_CLASS)}
+            onClick={() => setFiltersOpen(true)}
           >
-            {option.label}
+            <SlidersHorizontalIcon />
+            Filtros
           </Button>
-        ))}
-        <Button
-          type="button"
-          size="sm"
-          variant={filtersActive ? "default" : "outline"}
-          className={cn("shrink-0 rounded-full", PRESSABLE_CLASS)}
-          onClick={() => setFiltersOpen(true)}
-        >
-          <SlidersHorizontalIcon />
-          Filtros
-        </Button>
-      </div>
-
-      <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-card px-3 py-2 text-sm">
-        <span className="text-muted-foreground">
-          {movements.length} resultado(s)
-        </span>
-        <span className="flex gap-3 font-medium tabular-nums">
-          <span className="text-success">
-            + {formatFinanceMoney(totals.income, display)}
-          </span>
-          <span className="text-destructive">
-            − {formatFinanceMoney(totals.expenses, display)}
-          </span>
-        </span>
-      </div>
+        </div>
+      ) : null}
 
       {loadErrorMessage ? (
         <FinanceErrorState
@@ -234,13 +215,30 @@ export function FinanceInstrumentMovements({
       {isPending ? <FinanceListSkeleton rows={4} /> : null}
 
       {!isPending && !loadErrorMessage && movements.length === 0 ? (
-        <Empty className="py-8">
+        <Empty className="py-10">
           <EmptyHeader>
             <EmptyMedia variant="icon">
               <ArrowLeftRightIcon />
             </EmptyMedia>
-            <EmptyTitle>{emptyLabel}</EmptyTitle>
+            <EmptyTitle>
+              {queryNarrowed
+                ? "Ningún movimiento coincide"
+                : emptyLabel}
+            </EmptyTitle>
+            <EmptyDescription>
+              {queryNarrowed
+                ? "Prueba con otro tipo, otra fecha o borra la búsqueda."
+                : emptyDescription}
+            </EmptyDescription>
           </EmptyHeader>
+          {queryNarrowed ? null : (
+            <EmptyContent>
+              <Button onClick={onCreate}>
+                <PlusIcon />
+                {createLabel}
+              </Button>
+            </EmptyContent>
+          )}
         </Empty>
       ) : null}
 
@@ -318,9 +316,23 @@ export function FinanceInstrumentMovements({
         open={filtersOpen}
         onOpenChange={setFiltersOpen}
         title="Filtros"
-        description="Rango de fechas del movimiento"
+        description="Tipo de movimiento y rango de fechas"
       >
         <div className="flex flex-col gap-4">
+          <div className="flex flex-wrap gap-2">
+            {FLOW_FILTERS.map((option) => (
+              <Button
+                key={option.value}
+                type="button"
+                size="sm"
+                variant={flow === option.value ? "default" : "outline"}
+                className={cn("rounded-full", PRESSABLE_CLASS)}
+                onClick={() => setFlow(option.value)}
+              >
+                {option.label}
+              </Button>
+            ))}
+          </div>
           <FinanceDateField
             label="Desde"
             value={dateFrom}
@@ -338,6 +350,7 @@ export function FinanceInstrumentMovements({
               type="button"
               variant="outline"
               onClick={() => {
+                setFlow("ALL")
                 setDateFrom("")
                 setDateTo("")
               }}

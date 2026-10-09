@@ -14,7 +14,9 @@ import { useCards } from "@/src/modules/finance/hooks/use-cards"
 import { useFinanceEnabled } from "@/src/modules/finance/hooks/use-finance-enabled"
 import { useInstitutions } from "@/src/modules/finance/hooks/use-institutions"
 import { resolveCardDisplayBalances } from "@/src/modules/finance/lib/card-balances"
+import { buildUpcomingCardCycle } from "@/src/modules/finance/lib/card-statement-cycle"
 import { financeLoadErrorMessage } from "@/src/modules/finance/lib/finance-error"
+import { encodeLedgerTarget } from "@/src/modules/finance/lib/ledger-payloads"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
 import { LoadingView } from "@/src/shared/components/layout/loading-view"
 import { Button } from "@/src/shared/components/ui/button"
@@ -33,7 +35,10 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/src/shared/components/ui/tabs"
-import { APP_ROUTES } from "@/src/shared/constants/app-routes"
+import {
+  APP_ROUTES,
+  financeTransactionNewHref,
+} from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import {
@@ -113,9 +118,9 @@ function FinanceCardDetailView({ cardId }: FinanceCardDetailClientProps) {
       },
       actions: (
         <Button
-          variant="ghost"
+          variant="outline"
           size="icon"
-          className="size-9 rounded-full"
+          className="size-9 rounded-full border-border"
           aria-label="Opciones de la tarjeta"
           onClick={() => setOpenOptionsSheet(true)}
         >
@@ -166,9 +171,24 @@ function FinanceCardDetailView({ cardId }: FinanceCardDetailClientProps) {
       enabled={isEnabled}
       display={cardDisplay}
       sources={[{ cardId: card.id }]}
-      emptyLabel="Sin movimientos en esta tarjeta."
+      emptyLabel="Sin movimientos"
+      emptyDescription="Registra un gasto o un ingreso de esta tarjeta."
+      createLabel="Movimiento"
+      onCreate={() =>
+        router.push(
+          financeTransactionNewHref(
+            "DEBIT",
+            encodeLedgerTarget("card", card.id)
+          )
+        )
+      }
     />
   )
+
+  const upcomingCycle = buildUpcomingCardCycle({
+    closingDay: card.statementClosingDay,
+    dueDay: card.paymentDueDay,
+  })
 
   return (
     <>
@@ -184,17 +204,17 @@ function FinanceCardDetailView({ cardId }: FinanceCardDetailClientProps) {
 
       <div className="-mx-4 -mt-4 overflow-hidden md:-mx-6">
         <div
-          className="rounded-b-3xl px-4 pt-6 pb-10 md:px-6"
+          className="rounded-b-3xl p-4 md:p-6"
           style={{ background: card.color ?? "#18181b" }}
         >
           <CardVisual card={card} balances={balances} display={cardDisplay} />
         </div>
       </div>
 
-      <div className="mx-4 -mt-7 flex flex-col gap-3 rounded-3xl bg-background">
+      <div className="mx-4 -mt-4 flex flex-col gap-3 rounded-3xl bg-background">
         {isCredit ? (
           <Tabs
-            className="flex w-full flex-col gap-4"
+            className="flex w-full flex-col gap-4 p-1.5"
             value={tab}
             onValueChange={(value) => setTab(value as CardDetailTab)}
           >
@@ -222,9 +242,13 @@ function FinanceCardDetailView({ cardId }: FinanceCardDetailClientProps) {
               ) : null}
               <CardStatementsSection
                 statements={statementsQuery.data ?? []}
+                upcomingCycle={upcomingCycle}
                 display={cardDisplay}
                 isPending={statementsQuery.isPending}
-                emptyLabel="Sin estados de cuenta cerrados."
+                emptyLabel="Sin estados de cuenta"
+                emptyDescription="Configura el día de cierre para seguir cada ciclo."
+                createLabel="Tarjeta"
+                onCreate={() => setOpenCardSheet(true)}
               />
             </TabsContent>
             <TabsContent value={CARD_DETAIL_TABS.movements}>

@@ -132,6 +132,7 @@ function firstLedgerTarget(groups: DestinationPickerGroup[]): string {
 type TransactionFormProps = {
   mode: "create" | "edit"
   initialType: MovementType
+  initialDestination?: string | null
   transaction: FinanceTransaction | null
   defaultCurrency: string
   enabled: boolean
@@ -140,9 +141,25 @@ type TransactionFormProps = {
   onDone: () => void
 }
 
+function knownLedgerTarget(
+  destination: string,
+  accounts: { id: string }[],
+  cards: { id: string }[],
+): boolean {
+  const target = splitLedgerTarget(destination)
+  if (target.accountId) {
+    return accounts.some((account) => account.id === target.accountId)
+  }
+  if (target.cardId) {
+    return cards.some((card) => card.id === target.cardId)
+  }
+  return false
+}
+
 export function TransactionForm({
   mode,
   initialType,
+  initialDestination = null,
   transaction,
   defaultCurrency,
   enabled,
@@ -238,12 +255,31 @@ export function TransactionForm({
     ) {
       return
     }
+    const preferred = initialDestination?.trim()
+    if (
+      preferred &&
+      knownLedgerTarget(preferred, accounts, cards)
+    ) {
+      if (getValues("destination") !== preferred) {
+        setValue("destination", preferred)
+      }
+      return
+    }
     const current = getValues("destination")
-    if (current && current !== CATALOG_NONE) return
+    if (
+      current &&
+      current !== CATALOG_NONE &&
+      knownLedgerTarget(current, accounts, cards)
+    ) {
+      return
+    }
     const next = firstLedgerTarget(groups)
     if (next !== CATALOG_NONE) setValue("destination", next)
   }, [
     groups,
+    accounts,
+    cards,
+    initialDestination,
     isEdit,
     getValues,
     setValue,

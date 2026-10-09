@@ -355,9 +355,9 @@ function InstitutionDetailView({
         </p>
       ) : null}
 
-      <div className="-mx-4 -mt-4 overflow-hidden md:-mx-6">
+      <div className="-mx-4 -mt-4 overflow-hidden gap-3 flex flex-col md:-mx-6">
         <div
-          className="rounded-b-3xl px-4 pt-6 pb-10 text-white md:px-6"
+          className="rounded-b-3xl p-4 text-white md:p-6"
           style={{
             background: accent,
           }}
@@ -392,7 +392,7 @@ function InstitutionDetailView({
           ) : null}
         </div>
 
-        <div className="mx-4 -mt-7 flex flex-col gap-3 rounded-3xl bg-background">
+        <div className="mx-4 flex flex-col gap-3 rounded-3xl bg-background">
           <Tabs
             className="flex w-full flex-col gap-4 p-1.5"
             value={tab}

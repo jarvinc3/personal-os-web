@@ -21,7 +21,7 @@ const display = {
 }
 
 function account(
-  partial: Partial<FinanceAccount> & Pick<FinanceAccount, "id" | "name">,
+  partial: Partial<FinanceAccount> & Pick<FinanceAccount, "id" | "name">
 ): FinanceAccount {
   return {
     institutionId: null,
@@ -39,7 +39,8 @@ function account(
 }
 
 function card(
-  partial: Partial<FinanceCard> & Pick<FinanceCard, "id" | "name" | "institutionId">,
+  partial: Partial<FinanceCard> &
+    Pick<FinanceCard, "id" | "name" | "institutionId">
 ): FinanceCard {
   return {
     institutionName: "Bank",
@@ -58,7 +59,7 @@ function card(
 }
 
 function loan(
-  partial: Partial<FinanceLoan> & Pick<FinanceLoan, "id" | "lenderName">,
+  partial: Partial<FinanceLoan> & Pick<FinanceLoan, "id" | "lenderName">
 ): FinanceLoan {
   return {
     institutionId: null,
@@ -92,7 +93,7 @@ describe("formatProductCounts", () => {
   it("formats Spanish counts", () => {
     assert.equal(
       formatProductCounts({ accounts: 2, cards: 1, loans: 0 }),
-      "2 cuentas · 1 tarjetas · 0 préstamos",
+      "2 cuentas · 1 tarjetas · 0 préstamos"
     )
   })
 })
@@ -152,12 +153,21 @@ describe("buildInstitutionStackItems", () => {
           ],
         }),
       ],
-      loans: [loan({ id: "l1", lenderName: "Auto", institutionId: "i1", currentBalance: "13500" })],
+      loans: [
+        loan({
+          id: "l1",
+          lenderName: "Auto",
+          institutionId: "i1",
+          currentBalance: "13500",
+        }),
+      ],
       positions: [
         {
           institutionId: "i1",
           status: "COMPLETE",
           netWorth: "-8549.27",
+          totalAssets: "0",
+          totalLiabilities: "8549.27",
           issues: [],
         },
       ],
@@ -223,12 +233,19 @@ describe("formatStackItemBalance", () => {
           institutionId: "i1",
           status: "INCOMPLETE",
           netWorth: null,
-          issues: [{ code: "MISSING_CREDIT_LIMIT", cardId: "c1", currency: "DOP" }],
+          totalAssets: "0",
+          totalLiabilities: null,
+          issues: [
+            { code: "MISSING_CREDIT_LIMIT", cardId: "c1", currency: "DOP" },
+          ],
         },
       ],
     })
     assert.equal(items[0]?.kind, "institution")
     if (items[0]?.kind !== "institution") return
-    assert.equal(formatStackItemBalance(items[0], display), "Balance incompleto")
+    assert.equal(
+      formatStackItemBalance(items[0], display),
+      "Balance incompleto"
+    )
   })
 })

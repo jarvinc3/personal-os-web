@@ -21,6 +21,7 @@ import {
   financeErrorMessage,
   financeLoadErrorMessage,
 } from "@/src/modules/finance/lib/finance-error"
+import { encodeLedgerTarget } from "@/src/modules/finance/lib/ledger-payloads"
 import { isoMonthBounds } from "@/src/modules/finance/lib/month-window"
 import { formatFinanceMoney } from "@/src/modules/finance/lib/money"
 import { visibleTransactionTotals } from "@/src/modules/finance/lib/transactions-query"
@@ -36,7 +37,10 @@ import {
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
 import { SummaryItem } from "@/src/shared/components/ui/summary"
-import { APP_ROUTES } from "@/src/shared/constants/app-routes"
+import {
+  APP_ROUTES,
+  financeTransactionNewHref,
+} from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { appToast } from "@/src/shared/lib/app-toast"
@@ -161,7 +165,7 @@ function FinanceAccountDetailView({
       },
       actions: (
         <Button
-          variant="ghost"
+          variant="outline"
           size="icon"
           className="size-9 rounded-full"
           aria-label="Opciones de la cuenta"
@@ -223,7 +227,7 @@ function FinanceAccountDetailView({
 
       <div className="-mx-4 -mt-4 overflow-hidden md:-mx-6">
         <div
-          className="rounded-b-3xl px-4 pt-6 pb-10 text-white md:px-6"
+          className="rounded-b-3xl p-4 text-white md:p-6"
           style={{
             background: accent,
           }}
@@ -267,13 +271,22 @@ function FinanceAccountDetailView({
         </div>
       </div>
 
-      <div className="mx-4 -mt-7 flex flex-col gap-3 rounded-3xl bg-background">
-        <h2 className="text-lg font-medium text-foreground">Movimientos</h2>
+      <div className="mx-4 -mt-4 flex flex-col gap-3 rounded-3xl bg-background">
         <FinanceInstrumentMovements
           enabled={isEnabled}
           display={accountDisplay}
           sources={movementSources}
-          emptyLabel="Sin movimientos en esta cuenta."
+          emptyLabel="Sin movimientos"
+          emptyDescription="Registra un gasto o un ingreso de esta cuenta."
+          createLabel="Movimiento"
+          onCreate={() =>
+            router.push(
+              financeTransactionNewHref(
+                "DEBIT",
+                encodeLedgerTarget("account", account.id)
+              )
+            )
+          }
         />
       </div>
 
