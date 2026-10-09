@@ -62,6 +62,7 @@ export const API_ENDPOINTS = {
     SAVINGS_GOAL: (id: string) => `/finance/savings-goals/${id}`,
     LOANS: "/finance/loans",
     LOAN: (id: string) => `/finance/loans/${id}`,
+    LOAN_INSTALLMENTS: (id: string) => `/finance/loans/${id}/installments`,
     RECEIVABLES: "/finance/receivables",
     RECEIVABLE: (id: string) => `/finance/receivables/${id}`,
     EMAIL_SOURCES: "/finance/email-sync/sources",

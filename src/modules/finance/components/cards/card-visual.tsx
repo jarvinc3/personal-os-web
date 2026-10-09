@@ -27,7 +27,7 @@ export function CardVisual({ card, balances, display }: CardVisualProps) {
     <div className="flex flex-col gap-3">
       <div
         className={cn(
-          "relative flex flex-col gap-6 overflow-hidden rounded-3xl p-5 text-white",
+          "relative flex flex-col gap-6 overflow-hidden rounded-3xl p-5 text-white ring-1 ring-white/15",
           !card.color && "bg-zinc-900"
         )}
         style={card.color ? { backgroundColor: card.color } : undefined}
@@ -110,21 +110,21 @@ export function CardVisual({ card, balances, display }: CardVisualProps) {
             return (
               <div
                 key={balance.id}
-                className="flex flex-col gap-2 rounded-2xl border border-border bg-card p-3"
+                className="flex flex-col gap-2 rounded-2xl bg-white/10 p-3 text-white"
               >
-                <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
+                <div className="flex items-center justify-between gap-3 text-xs text-white/70">
                   <span>Utilización {Math.round(utilizationPct)}%</span>
                   <span>
                     Disponible {formatFinanceMoney(available, moneyDisplay)}
                   </span>
                 </div>
-                <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+                <div className="h-2 w-full overflow-hidden rounded-full bg-white/20">
                   <div
-                    className="h-full rounded-full bg-primary"
+                    className="h-full rounded-full bg-white"
                     style={{ width: `${utilizationPct}%` }}
                   />
                 </div>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-white/70">
                   Límite {formatFinanceMoney(creditLimit, moneyDisplay)}
                 </p>
               </div>

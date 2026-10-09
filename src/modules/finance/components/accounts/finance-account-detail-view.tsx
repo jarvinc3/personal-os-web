@@ -4,6 +4,7 @@ import { BrandLogo } from "@/src/modules/finance/components/brand-logo"
 import { AccountBalanceSheet } from "@/src/modules/finance/components/catalog/account-balance-sheet"
 import { AccountSheet } from "@/src/modules/finance/components/catalog/account-sheet"
 import { FinanceAuthenticatedPage } from "@/src/modules/finance/components/layout/finance-authenticated-page"
+import { FinanceErrorState } from "@/src/modules/finance/components/layout/finance-error-state"
 import { FinanceInstrumentMovements } from "@/src/modules/finance/components/transactions/finance-instrument-movements"
 import { FINANCE_ACCOUNT_TYPE_LABEL } from "@/src/modules/finance/constants/catalog"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/constants/sheet-keys"
@@ -16,13 +17,24 @@ import { useCards } from "@/src/modules/finance/hooks/use-cards"
 import { useFinanceEnabled } from "@/src/modules/finance/hooks/use-finance-enabled"
 import { useInstitutions } from "@/src/modules/finance/hooks/use-institutions"
 import { useAllTransactions } from "@/src/modules/finance/hooks/use-transactions"
-import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
+import {
+  financeErrorMessage,
+  financeLoadErrorMessage,
+} from "@/src/modules/finance/lib/finance-error"
 import { isoMonthBounds } from "@/src/modules/finance/lib/month-window"
 import { formatFinanceMoney } from "@/src/modules/finance/lib/money"
 import { visibleTransactionTotals } from "@/src/modules/finance/lib/transactions-query"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
 import { LoadingView } from "@/src/shared/components/layout/loading-view"
 import { Button } from "@/src/shared/components/ui/button"
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/src/shared/components/ui/empty"
 import { SummaryItem } from "@/src/shared/components/ui/summary"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
@@ -141,7 +153,11 @@ function FinanceAccountDetailView({
       variant: "secondary",
       title: account?.name ?? "Cuenta",
       onBack: () => {
-        router.push(APP_ROUTES.app.financeAccounts)
+        router.push(
+          account?.institutionId
+            ? APP_ROUTES.app.financeInstitution(account.institutionId)
+            : APP_ROUTES.app.financeAccounts
+        )
       },
       actions: (
         <Button
@@ -156,7 +172,13 @@ function FinanceAccountDetailView({
       ),
       accentColor: accent,
     },
-    [account?.id, account?.name, accent, setOpenOptionsSheet]
+    [
+      account?.id,
+      account?.name,
+      account?.institutionId,
+      accent,
+      setOpenOptionsSheet,
+    ]
   )
 
   if (accountsQuery.isPending && !account) {
@@ -165,32 +187,43 @@ function FinanceAccountDetailView({
 
   if (!account) {
     return (
-      <div className="flex flex-col items-center gap-3 py-16">
-        <WalletIcon className="size-8 text-muted-foreground" />
-        <p className="text-center text-muted-foreground">
-          No encontramos esta cuenta.
-        </p>
-        <Button
-          variant="outline"
-          onClick={() => router.push(APP_ROUTES.app.financeAccounts)}
-        >
-          Volver a Cuentas
-        </Button>
-      </div>
+      <Empty className="py-16">
+        <EmptyHeader>
+          <EmptyMedia variant="icon">
+            <WalletIcon />
+          </EmptyMedia>
+          <EmptyTitle>No encontramos esta cuenta</EmptyTitle>
+          <EmptyDescription>
+            Puede que se haya archivado o borrado.
+          </EmptyDescription>
+        </EmptyHeader>
+        <EmptyContent>
+          <Button
+            variant="outline"
+            onClick={() => router.push(APP_ROUTES.app.financeAccounts)}
+          >
+            Volver a Cuentas
+          </Button>
+        </EmptyContent>
+      </Empty>
     )
   }
 
   return (
     <>
       {accountsQuery.error ? (
-        <p className="mb-3 text-sm text-destructive">
-          {financeErrorMessage(accountsQuery.error)}
-        </p>
+        <div className="mb-3">
+          <FinanceErrorState
+            message={financeLoadErrorMessage(accountsQuery.error)}
+            onRetry={() => void accountsQuery.refetch()}
+            isRetrying={accountsQuery.isFetching}
+          />
+        </div>
       ) : null}
 
       <div className="-mx-4 -mt-4 overflow-hidden md:-mx-6">
         <div
-          className="rounded-b-3xl px-4 pt-6 pb-8 text-white md:px-6"
+          className="rounded-b-3xl px-4 pt-6 pb-10 text-white md:px-6"
           style={{
             background: accent,
           }}
@@ -234,7 +267,7 @@ function FinanceAccountDetailView({
         </div>
       </div>
 
-      <section className="mt-6 flex flex-col gap-3">
+      <div className="mx-4 -mt-7 flex flex-col gap-3 rounded-3xl bg-background">
         <h2 className="text-lg font-medium text-foreground">Movimientos</h2>
         <FinanceInstrumentMovements
           enabled={isEnabled}
@@ -242,7 +275,7 @@ function FinanceAccountDetailView({
           sources={movementSources}
           emptyLabel="Sin movimientos en esta cuenta."
         />
-      </section>
+      </div>
 
       <BottomSheet
         open={openOptionsSheet}

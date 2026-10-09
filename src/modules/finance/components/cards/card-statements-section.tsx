@@ -12,6 +12,12 @@ import {
   type FinanceCardStatementStatus,
 } from "@/src/modules/finance/types/entities"
 import { Badge, badgeVariants } from "@/src/shared/components/ui/badge"
+import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/src/shared/components/ui/empty"
 import type { VariantProps } from "class-variance-authority"
 import { CalendarIcon } from "lucide-react"
 
@@ -63,9 +69,14 @@ export function CardStatementsSection({
 
   if (statements.length === 0) {
     return (
-      <p className="py-8 text-center text-sm text-muted-foreground">
-        {emptyLabel}
-      </p>
+      <Empty className="py-8">
+        <EmptyHeader>
+          <EmptyMedia variant="icon">
+            <CalendarIcon />
+          </EmptyMedia>
+          <EmptyTitle>{emptyLabel}</EmptyTitle>
+        </EmptyHeader>
+      </Empty>
     )
   }
 

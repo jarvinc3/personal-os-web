@@ -31,6 +31,8 @@ export const APP_ROUTES = {
       `/finance/transactions/${transactionId}/edit`,
     financeTransferNew: "/finance/transfers/new",
     financePlanning: "/finance/planning",
+    financeLoans: "/finance/loans",
+    financeLoan: (loanId: string) => `/finance/loans/${loanId}`,
     settingsFinanceCurrencies: "/settings/finance/currencies",
   },
 } as const

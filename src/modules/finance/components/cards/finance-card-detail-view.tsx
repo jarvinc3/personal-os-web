@@ -5,6 +5,7 @@ import { CardVisual } from "@/src/modules/finance/components/cards/card-visual"
 import { CardBalanceSheet } from "@/src/modules/finance/components/catalog/card-balance-sheet"
 import { CardSheet } from "@/src/modules/finance/components/catalog/card-sheet"
 import { FinanceAuthenticatedPage } from "@/src/modules/finance/components/layout/finance-authenticated-page"
+import { FinanceErrorState } from "@/src/modules/finance/components/layout/finance-error-state"
 import { FinanceInstrumentMovements } from "@/src/modules/finance/components/transactions/finance-instrument-movements"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/constants/sheet-keys"
 import { useAccounts } from "@/src/modules/finance/hooks/use-accounts"
@@ -13,10 +14,18 @@ import { useCards } from "@/src/modules/finance/hooks/use-cards"
 import { useFinanceEnabled } from "@/src/modules/finance/hooks/use-finance-enabled"
 import { useInstitutions } from "@/src/modules/finance/hooks/use-institutions"
 import { resolveCardDisplayBalances } from "@/src/modules/finance/lib/card-balances"
-import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
+import { financeLoadErrorMessage } from "@/src/modules/finance/lib/finance-error"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
 import { LoadingView } from "@/src/shared/components/layout/loading-view"
 import { Button } from "@/src/shared/components/ui/button"
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/src/shared/components/ui/empty"
 import { SummaryItem } from "@/src/shared/components/ui/summary"
 import {
   Tabs,
@@ -96,7 +105,11 @@ function FinanceCardDetailView({ cardId }: FinanceCardDetailClientProps) {
       variant: "secondary",
       title: card?.name ?? "Tarjeta",
       onBack: () => {
-        router.push(APP_ROUTES.app.financeAccounts)
+        router.push(
+          card
+            ? APP_ROUTES.app.financeInstitution(card.institutionId)
+            : APP_ROUTES.app.financeAccounts
+        )
       },
       actions: (
         <Button
@@ -111,7 +124,13 @@ function FinanceCardDetailView({ cardId }: FinanceCardDetailClientProps) {
       ),
       accentColor: card?.color ?? undefined,
     },
-    [card?.id, card?.name, card?.color, setOpenOptionsSheet]
+    [
+      card?.id,
+      card?.name,
+      card?.color,
+      card?.institutionId,
+      setOpenOptionsSheet,
+    ]
   )
 
   if (cardsQuery.isPending && !card) {
@@ -120,18 +139,25 @@ function FinanceCardDetailView({ cardId }: FinanceCardDetailClientProps) {
 
   if (!card) {
     return (
-      <div className="flex flex-col items-center gap-3 py-16">
-        <CreditCardIcon className="size-8 text-muted-foreground" />
-        <p className="text-center text-muted-foreground">
-          No encontramos esta tarjeta.
-        </p>
-        <Button
-          variant="outline"
-          onClick={() => router.push(APP_ROUTES.app.financeAccounts)}
-        >
-          Volver a Cuentas
-        </Button>
-      </div>
+      <Empty className="py-16">
+        <EmptyHeader>
+          <EmptyMedia variant="icon">
+            <CreditCardIcon />
+          </EmptyMedia>
+          <EmptyTitle>No encontramos esta tarjeta</EmptyTitle>
+          <EmptyDescription>
+            Puede que se haya archivado o borrado.
+          </EmptyDescription>
+        </EmptyHeader>
+        <EmptyContent>
+          <Button
+            variant="outline"
+            onClick={() => router.push(APP_ROUTES.app.financeAccounts)}
+          >
+            Volver a Cuentas
+          </Button>
+        </EmptyContent>
+      </Empty>
     )
   }
 
@@ -147,14 +173,25 @@ function FinanceCardDetailView({ cardId }: FinanceCardDetailClientProps) {
   return (
     <>
       {cardsQuery.error ? (
-        <p className="mb-3 text-sm text-destructive">
-          {financeErrorMessage(cardsQuery.error)}
-        </p>
+        <div className="mb-3">
+          <FinanceErrorState
+            message={financeLoadErrorMessage(cardsQuery.error)}
+            onRetry={() => void cardsQuery.refetch()}
+            isRetrying={cardsQuery.isFetching}
+          />
+        </div>
       ) : null}
 
-      <div className="flex flex-col gap-4">
-        <CardVisual card={card} balances={balances} display={cardDisplay} />
+      <div className="-mx-4 -mt-4 overflow-hidden md:-mx-6">
+        <div
+          className="rounded-b-3xl px-4 pt-6 pb-10 md:px-6"
+          style={{ background: card.color ?? "#18181b" }}
+        >
+          <CardVisual card={card} balances={balances} display={cardDisplay} />
+        </div>
+      </div>
 
+      <div className="mx-4 -mt-7 flex flex-col gap-3 rounded-3xl bg-background">
         {isCredit ? (
           <Tabs
             className="flex w-full flex-col gap-4"
@@ -177,9 +214,11 @@ function FinanceCardDetailView({ cardId }: FinanceCardDetailClientProps) {
             </TabsList>
             <TabsContent value={CARD_DETAIL_TABS.statements}>
               {statementsQuery.isError ? (
-                <p className="text-sm text-destructive">
-                  {financeErrorMessage(statementsQuery.error)}
-                </p>
+                <FinanceErrorState
+                  message={financeLoadErrorMessage(statementsQuery.error)}
+                  onRetry={() => void statementsQuery.refetch()}
+                  isRetrying={statementsQuery.isFetching}
+                />
               ) : null}
               <CardStatementsSection
                 statements={statementsQuery.data ?? []}

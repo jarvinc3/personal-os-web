@@ -469,7 +469,9 @@ function InstitutionDetailView({
                     loan={loan}
                     display={display}
                     institution={institution}
-                    onPress={() => setOpenLoanSheet(true, loan.id)}
+                    onPress={() =>
+                      router.push(APP_ROUTES.app.financeLoan(loan.id))
+                    }
                   />
                 ))
               )}

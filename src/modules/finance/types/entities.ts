@@ -343,6 +343,15 @@ export type FinanceLoan = {
   isActive: boolean
 }
 
+export type FinanceLoanInstallment = {
+  id: string
+  loanId: string
+  installmentNo: number
+  dueDate: string
+  amount: string
+  paidAt: string | null
+}
+
 export const FINANCE_RECEIVABLE_STATUSES = [
   "PENDING",
   "PARTIAL",

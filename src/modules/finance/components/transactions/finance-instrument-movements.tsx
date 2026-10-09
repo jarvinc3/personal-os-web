@@ -2,11 +2,12 @@
 
 import { FinanceDateField } from "@/src/modules/finance/components/forms/finance-date-field"
 import { FinanceListSkeleton } from "@/src/modules/finance/components/layout/finance-list-skeleton"
+import { FinanceErrorState } from "@/src/modules/finance/components/layout/finance-error-state"
 import { TransactionDetailSheet } from "@/src/modules/finance/components/transactions/transaction-detail-sheet"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/constants/sheet-keys"
 import { useCategories } from "@/src/modules/finance/hooks/use-categories"
 import { allTransactionsQueryOptions } from "@/src/modules/finance/hooks/use-transactions"
-import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
+import { financeLoadErrorMessage } from "@/src/modules/finance/lib/finance-error"
 import { groupTransactionsByMonth } from "@/src/modules/finance/lib/group-transactions-by-month"
 import {
   formatFinanceMoney,
@@ -28,6 +29,12 @@ import type {
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
 import { Button } from "@/src/shared/components/ui/button"
 import { Input } from "@/src/shared/components/ui/input"
+import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/src/shared/components/ui/empty"
 import { SummaryItem } from "@/src/shared/components/ui/summary"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
@@ -155,6 +162,13 @@ export function FinanceInstrumentMovements({
   const filtersActive = Boolean(dateFrom || dateTo)
   const isPending = movementQueries.some((query) => query.isPending)
   const error = movementQueries.find((query) => query.error)?.error ?? null
+  const loadErrorMessage = error ? financeLoadErrorMessage(error) : null
+  const isRetrying = movementQueries.some((query) => query.isFetching)
+  const retryMovements = () => {
+    for (const query of movementQueries) {
+      void query.refetch()
+    }
+  }
 
   return (
     <div className="flex flex-col gap-4">
@@ -209,16 +223,25 @@ export function FinanceInstrumentMovements({
         </span>
       </div>
 
-      {error ? (
-        <p className="text-sm text-destructive">{financeErrorMessage(error)}</p>
+      {loadErrorMessage ? (
+        <FinanceErrorState
+          message={loadErrorMessage}
+          onRetry={retryMovements}
+          isRetrying={isRetrying}
+        />
       ) : null}
 
       {isPending ? <FinanceListSkeleton rows={4} /> : null}
 
-      {!isPending && movements.length === 0 ? (
-        <p className="py-8 text-center text-sm text-muted-foreground">
-          {emptyLabel}
-        </p>
+      {!isPending && !loadErrorMessage && movements.length === 0 ? (
+        <Empty className="py-8">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <ArrowLeftRightIcon />
+            </EmptyMedia>
+            <EmptyTitle>{emptyLabel}</EmptyTitle>
+          </EmptyHeader>
+        </Empty>
       ) : null}
 
       {groups.map((group) => (

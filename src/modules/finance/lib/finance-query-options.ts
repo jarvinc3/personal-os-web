@@ -21,6 +21,7 @@ import type {
   FinanceCategory,
   FinanceInstitution,
   FinanceLoan,
+  FinanceLoanInstallment,
   FinanceMailbox,
   FinancePendingEmailMessage,
   FinanceEmailProcessedMessage,
@@ -48,6 +49,7 @@ const PATHS = {
   categories: "/finance/categories",
   savingsGoals: "/finance/savings-goals",
   loans: "/finance/loans",
+  loanInstallments: (loanId: string) => `/finance/loans/${loanId}/installments`,
   receivables: "/finance/receivables",
   budgets: "/finance/budgets",
   emailMailboxes: "/finance/email-sync/mailboxes",
@@ -105,6 +107,19 @@ export function loansQuery(get: FinanceQueryGet = defaultFinanceGet) {
   return {
     queryKey: FINANCE_LOANS_QUERY_KEY,
     queryFn: async () => asFinanceArray<FinanceLoan>(await get(PATHS.loans)),
+  }
+}
+
+export function loanInstallmentsQuery(
+  loanId: string,
+  get: FinanceQueryGet = defaultFinanceGet
+) {
+  return {
+    queryKey: [...FINANCE_LOANS_QUERY_KEY, "installments", loanId] as const,
+    queryFn: async () =>
+      asFinanceArray<FinanceLoanInstallment>(
+        await get(PATHS.loanInstallments(loanId))
+      ),
   }
 }
 
