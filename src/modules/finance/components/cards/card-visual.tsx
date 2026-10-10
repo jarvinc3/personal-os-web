@@ -34,13 +34,11 @@ export function CardVisual({ card, balances, display }: CardVisualProps) {
       >
         <span aria-hidden className="pointer-events-none absolute inset-0">
           <span className="absolute top-[-45%] right-[-12%] h-[190%] w-[38%] rotate-22 bg-black/20" />
-          <span className="absolute bottom-[-55%] left-[-18%] h-28 w-[62%] -rotate-6 rounded-4xl bg-white/10" />
+          <span className="absolute bottom-[-45%] left-[-18%] h-28 w-[62%] -rotate-6 rounded-4xl bg-white/10" />
         </span>
 
         <div className="relative z-10 flex items-center justify-between gap-3">
-          <p className="truncate text-sm font-semibold">
-            {card.institutionName}
-          </p>
+          <p className="truncate text-sm font-semibold">{card.name}</p>
           <span className="rounded-full bg-white/15 px-2.5 py-0.5 text-xs font-semibold">
             {FINANCE_CARD_TYPE_LABEL[card.type]}
           </span>

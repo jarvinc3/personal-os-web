@@ -6,7 +6,16 @@ import {
   formatCompactFinanceMoney,
   formatFinanceMoney,
   parseFinanceMoney,
+  sanitizeAmountInput,
 } from "./money.ts";
+
+describe("sanitizeAmountInput", () => {
+  it("drops letters and keeps one decimal point", () => {
+    assert.equal(sanitizeAmountInput("sdkjfhsdfj"), "")
+    assert.equal(sanitizeAmountInput("12abc.3.4"), "12.34")
+    assert.equal(sanitizeAmountInput("1,50"), "1.50")
+  })
+})
 
 describe("parseFinanceMoney", () => {
   it('parses "0.12" to 0.12', () => {

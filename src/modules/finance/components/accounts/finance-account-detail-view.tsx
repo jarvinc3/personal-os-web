@@ -1,5 +1,8 @@
 "use client"
 
+import { format } from "date-fns"
+import { es } from "date-fns/locale/es"
+
 import { BrandLogo } from "@/src/modules/finance/components/brand-logo"
 import { AccountBalanceSheet } from "@/src/modules/finance/components/catalog/account-balance-sheet"
 import { AccountSheet } from "@/src/modules/finance/components/catalog/account-sheet"
@@ -53,6 +56,7 @@ import {
   WalletIcon,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { Label } from "@/src/shared/components/ui/label";
 
 const FALLBACK_COLOR = "#334155"
 
@@ -106,6 +110,9 @@ function FinanceAccountDetailView({
   const accent = account?.color ?? FALLBACK_COLOR
 
   const today = new Date()
+  const monthChip = format(today, "MMM yyyy", { locale: es })
+    .replace(/\./g, "")
+    .toUpperCase()
   const monthBounds = isoMonthBounds(today.getFullYear(), today.getMonth() + 1)
   const monthQuery = useAllTransactions(isEnabled, {
     accountId,
@@ -155,7 +162,7 @@ function FinanceAccountDetailView({
   usePageHeader(
     {
       variant: "secondary",
-      title: account?.name ?? "Cuenta",
+      title: account?.institutionName || account?.name || "Cuenta",
       onBack: () => {
         router.push(
           account?.institutionId
@@ -179,6 +186,7 @@ function FinanceAccountDetailView({
     [
       account?.id,
       account?.name,
+      account?.institutionName,
       account?.institutionId,
       accent,
       setOpenOptionsSheet,
@@ -227,45 +235,54 @@ function FinanceAccountDetailView({
 
       <div className="-mx-4 -mt-4 overflow-hidden md:-mx-6">
         <div
-          className="rounded-b-3xl p-4 text-white md:p-6"
+          className="relative overflow-hidden rounded-b-3xl p-4 text-white md:p-6"
           style={{
             background: accent,
           }}
         >
-          <div className="flex items-start gap-3">
-            <BrandLogo
-              name={account.institutionName ?? account.name}
-              logoUrl={account.institutionLogoUrl}
-              size={48}
-            />
-            <div className="min-w-0 flex-1">
-              <h1 className="truncate text-2xl font-bold tracking-tight">
-                {account.name}
-              </h1>
-              <p className="mt-1 text-sm text-white/70">
-                {FINANCE_ACCOUNT_TYPE_LABEL[account.type]} · {account.currency}
+          <span aria-hidden className="pointer-events-none absolute inset-0">
+            <span className="absolute -top-8 -right-12 size-56 rounded-full bg-white/15" />
+            <span className="absolute -bottom-15 right-16 size-48 rounded-full bg-black/15" />
+          </span>
+          <div className="relative z-10">
+            <div className="flex items-start gap-3">
+              <BrandLogo
+                name={account.institutionName ?? account.name}
+                logoUrl={account.institutionLogoUrl}
+                size={48}
+              />
+              <div className="min-w-0 flex-1">
+                <h1 className="truncate text-2xl font-bold tracking-tight">
+                  {account.name}
+                </h1>
+                <p className="mt-1 text-sm text-white/70">
+                  {FINANCE_ACCOUNT_TYPE_LABEL[account.type]} · {account.currency}
+                </p>
+              </div>
+            </div>
+            <div className="flex flex-col gap-1 mt-8 bg-black/20 rounded-2xl px-3 py-2">
+              <Label className="text-sm text-foreground">Saldo</Label>
+              <p className="text-3xl font-bold tracking-tight tabular-nums">
+                {formatFinanceMoney(account.balance, accountDisplay)}
               </p>
             </div>
-          </div>
-          <p className="mt-8 text-3xl font-bold tracking-tight tabular-nums">
-            {formatFinanceMoney(account.balance, accountDisplay)}
-          </p>
-          <div className="mt-6 grid grid-cols-2 gap-3">
-            <div className="rounded-2xl bg-black/20 px-3 py-2">
-              <p className="text-[11px] tracking-wide text-white/70 uppercase">
-                Ingresos (mes)
-              </p>
-              <p className="mt-1 text-sm font-semibold tabular-nums">
-                + {formatFinanceMoney(monthTotals.income, accountDisplay)}
-              </p>
-            </div>
-            <div className="rounded-2xl bg-black/20 px-3 py-2">
-              <p className="text-[11px] tracking-wide text-white/70 uppercase">
-                Egresos (mes)
-              </p>
-              <p className="mt-1 text-sm font-semibold tabular-nums">
-                − {formatFinanceMoney(monthTotals.expenses, accountDisplay)}
-              </p>
+            <div className="mt-6 grid grid-cols-2 gap-3">
+              <div className="rounded-2xl bg-black/20 px-3 py-2">
+                <p className="text-[11px] tracking-wide text-white/70 uppercase">
+                  Ingresos -{monthChip}
+                </p>
+                <p className="mt-1 text-sm font-semibold tabular-nums text-[color-mix(in_srgb,var(--success)_42%,white)]">
+                  + {formatFinanceMoney(monthTotals.income, accountDisplay)}
+                </p>
+              </div>
+              <div className="rounded-2xl bg-black/20 px-3 py-2">
+                <p className="text-[11px] tracking-wide text-white/70 uppercase">
+                  Egresos -{monthChip}
+                </p>
+                <p className="mt-1 text-sm font-semibold tabular-nums text-[color-mix(in_srgb,var(--destructive)_55%,white)]">
+                  − {formatFinanceMoney(monthTotals.expenses, accountDisplay)}
+                </p>
+              </div>
             </div>
           </div>
         </div>

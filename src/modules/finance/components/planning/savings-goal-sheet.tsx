@@ -14,7 +14,7 @@ import {
 } from "@/src/modules/finance/hooks/use-savings-goals"
 import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
 import { formatPlanningDate } from "@/src/modules/finance/lib/planning-lists"
-import { buildCreateSavingsGoalBody } from "@/src/modules/finance/lib/planning-payloads"
+import { buildSavingsGoalBody } from "@/src/modules/finance/lib/planning-payloads"
 import type { FinanceSavingsGoal } from "@/src/modules/finance/types/entities"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
 import { FormTextField } from "@/src/shared/components/layout/form-blocks"
@@ -100,7 +100,7 @@ export function SavingsGoalSheet({
   )
 
   const onSubmit = submitForm(async (values) => {
-    const payload = buildCreateSavingsGoalBody(values)
+    const payload = buildSavingsGoalBody(values, { isUpdate: isEdit })
     if (!payload.ok) {
       appToast.error({ text1: payload.error })
       return
@@ -236,6 +236,7 @@ export function SavingsGoalSheet({
               onBlur={field.onBlur}
               error={errors.currentAmount?.message}
               placeholder="0"
+              disabled={isEdit}
             />
           )}
         />

@@ -37,7 +37,7 @@ ModuleAppNav = {
 
 1. Constantes de nav en el módulo (`src/modules/<slug>/constants/nav.ts`).
 2. Layout del módulo que pasa a `ModuleSectionLayout` solo los ítems con `showInTabBar !== false`.
-3. Cada `app/(app)/<slug>/**/page.tsx` envuelve el client con ese layout (o un layout de ruta).
+3. Cada `app/(app)/<slug>/**/page.tsx` monta la screen del `index.ts`, que compone con ese layout (o un layout de ruta).
 4. Cablear `ModuleAppNav` en `src/shared/components/layout/app-sidebar.tsx` bajo **Aplicaciones**.
 5. Añadir el prefijo de ruta a `proxy.ts` (`isProtectedAppPath`) y a `APP_ROUTES`.
 6. Título: o bien `PAGE_TITLES` / `startsWith` en `app-header.tsx`, o `usePageHeader` en la página.
@@ -103,27 +103,66 @@ La pantalla **es** la acción (Keep Awake, un timer, un recorder). No es un cont
 | Popover                  | Un ajuste puntual (p. ej. duración), no un flujo entero.                                                                      |
 | Página                   | Chip / punto / badge si hay algo activo. El usuario no abre el sheet para enterarse.                                          |
 
-El `pages/*-client.tsx` **compone** (toolbar, hero, acciones, sheets) y habla con el contexto. Extraer un componente cuando tiene trabajo propio (ruedas, prompt con timers). No extraer un panel que solo reenvía props.
+El `*client.tsx` **compone** (toolbar, hero, acciones, sheets) y habla con el contexto. Extraer un componente cuando tiene trabajo propio (ruedas, prompt con timers). No extraer un panel que solo reenvía props.
 
 Copy: labels y estado, no manuales bajo cada control. Ayuda vive en su sheet.
 
 **Prohibido en una hoja:** `Tabs*` locales; autosave sin Guardar; panel-puente; `<input type="date|time">`.
 
-## Carpetas típicas de un módulo web
+## Papeles de archivo y frontera
+
+Un módulo es una carpeta de feature, no una mini-app con capas. Sin packages por feature y sin `presentation` / `application` / `infrastructure` / `domain`. Los papeles de abajo valen en todos los módulos.
+
+| Papel | Archivo | Qué contiene |
+| --- | --- | --- |
+| Ruta | `app/.../page.tsx` | `Suspense` e importa la screen. Nada de UI, fetching ni reglas. |
+| Screen | `<nombre>-screen.tsx` | Exporta `<Nombre>Screen`. Cero hooks. Monta el cuerpo y, si existe el corte, el gate. |
+| Cuerpo | el mismo archivo, sin exportar | `<Nombre>ScreenBody`. Header, navegación y datos de esa ruta. |
+| UI | kebab-case del bloque | Un bloque visual. Recibe datos ya preparados o llama un hook de su feature. |
+| Regla | `<nombre>.ts` + `<nombre>.spec.ts` | Zod, payloads, agrupaciones, dinero, fechas. Sin JSX. |
+
+El cuerpo existe para que el gate pueda devolver carga o “módulo apagado” sin ejecutar los hooks de la pantalla. No renombrar el papel a `Client`, `View` ni `Catalog`.
 
 ```text
 src/modules/<slug>/
-  index.ts                 # barrel público del feature
-  constants/               # nav, sheet keys, routes locales
-  pages/                   # *client.tsx montados desde app/
-  components/
+  index.ts                 # API pública del feature (incluye las screens)
+  <nombre>-screen.tsx      # ruta montada desde app/; cero hooks
+  components/              # bloques visuales (kebab-case)
   hooks/
-  lib/                     # helpers + *.spec.ts
+  <nombre>.ts + .spec.ts   # reglas, schemas, dinero, fechas
+  constants/               # nav, sheet keys, routes locales
   types/
   context/                 # solo si el estado es de shell (keep-awake)
 ```
 
-`app/(app)/<slug>/page.tsx` debe ser delgado (import del client). No poner reglas de negocio en `app/`.
+### Nombres
+
+- kebab-case en archivos. Sin repetir el nombre del módulo dentro de su carpeta: `categories-screen.tsx` dentro de finance, no `finance-categories.tsx`.
+- El export coincide con el archivo: `categories-screen.tsx` exporta `CategoriesScreen`. Landing en PascalCase entra en la misma regla.
+
+### Qué puede vivir en un `.tsx`
+
+- Header, atrás, gate y qué query disparar.
+- Estado local de un control (sheet abierto, tab, drag).
+- Componer componentes.
+
+Schemas Zod, armado del body del API, agrupación, orden, dinero y fechas van en un `.ts` con spec (`node --test` sobre `*.spec.ts`). Un schema dentro de un client component no entra ahí. Un helper que solo usa ese componente puede quedarse en el `.tsx`.
+
+### Gate y header
+
+Un gate solo si el cuerpo no debe montarse hasta tener sesión o hasta que el módulo esté encendido. Ahí hay un solo nombre: `FinanceGate`, `SettingsGate`, `KeepAwakeGate` y el equivalente donde ese corte ya existe hoy. Landing y login no ganan un gate vacío. Home sigue el shell autenticado de `app/(app)` si ese shell ya impide montar el cuerpo.
+
+El cuerpo declara el header con `usePageHeader` (ver [Header](#header)). El layout no vuelve a inferir “vista secundaria” leyendo el pathname. El objeto `{ currency, showCents, compactNumbers }` se arma en un solo hook de finance y lo consumen las screens.
+
+### Capabilities (solo Finanzas)
+
+Cada capability tiene sus components, hooks, reglas, types y screens. La screen de un detalle vive en su capability, no en un cajón `pages/` ni como `*-view.tsx` suelto bajo `components/`: **cuentas, tarjetas, catálogo, movimientos, planificación, presupuestos, sync, dashboard**. Un símbolo compartido por dos capabilities vive en `finance/shared/` de este módulo, no en `src/shared/`. Auth, settings, notifications, ai, keep-awake, home y landing no se parten en capabilities.
+
+### Frontera
+
+Cada módulo exporta su API y sus screens en su `index.ts`; `app/.../page.tsx` importa la screen solo desde ahí. En Finanzas, cada capability exporta la suya y el `index.ts` del módulo reexporta lo que otros módulos pueden usar; dentro de una capability los archivos se importan entre sí y las capabilities pueden importar `finance/shared`. ESLint `no-restricted-imports` rechaza cualquier import profundo hacia otro módulo o hacia otra capability, incluida la carpeta de la screen: no queda una excepción para `*-screen.tsx`. `src/shared` no importa features; el nav del sidebar se registra desde la composición de la app.
+
+Un archivo se borra cuando la screen nueva lo reemplaza y ningún import lo usa.
 
 ## Settings vs módulo de producto
 

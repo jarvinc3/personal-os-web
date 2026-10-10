@@ -13,10 +13,6 @@ import { useNotifications } from "@/src/modules/notifications/hooks/use-notifica
 import { deactivatePushTokenIfPresent } from "@/src/modules/notifications/lib/deactivate-web-push-token"
 import { groupNotificationsByDate } from "@/src/modules/notifications/lib/group-notifications-by-date"
 import type { NotificationRecord } from "@/src/modules/notifications/types/notification.types"
-import { TransactionDetailSheet } from "@/src/modules/finance/components/transactions/transaction-detail-sheet"
-import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/constants/sheet-keys"
-import { useFinanceEnabled } from "@/src/modules/finance/hooks/use-finance-enabled"
-import type { FinanceMoneyDisplay } from "@/src/modules/finance/lib/money"
 import { EditQuietHoursSheet } from "@/src/modules/settings/components/sheets/edit-quiet-hours-sheet"
 import { SETTINGS_REGISTRY } from "@/src/modules/settings/constants/settings-metadata"
 import { useProfile } from "@/src/modules/settings/hooks/use-profile"
@@ -49,11 +45,15 @@ import {
   parseModuleSlugFromNotificationData,
 } from "@/src/shared/constants/module-registry"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
-import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { formatTimeRange } from "@/src/shared/lib/date-format"
 import type { ModuleSlug } from "@/src/modules/settings/types/module-config.types"
-import { BellDot, BellOff, CheckCheckIcon, MoreVerticalIcon } from "lucide-react"
+import {
+  BellDot,
+  BellOff,
+  CheckCheckIcon,
+  MoreVerticalIcon,
+} from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useCallback, useEffect, useMemo, useState } from "react"
@@ -79,14 +79,7 @@ export function NotificationsClient() {
   const { mutateAsync: markAllAsRead, isPending: isMarkAllPending } =
     useMarkAllNotificationsRead()
   const { updatePreferences } = useProfile()
-  const { isEnabled: isFinanceEnabled, config: financeConfig } =
-    useFinanceEnabled()
   const router = useRouter()
-  const {
-    open: detailOpen,
-    sheetId: detailTransactionId,
-    setOpen: setDetailOpen,
-  } = useSheetParam(FINANCE_SHEET_KEYS.transactionDetail)
 
   const handlePreferenceToggle = useCallback(
     async (
@@ -137,22 +130,22 @@ export function NotificationsClient() {
         ? notifications.filter(
             (notification) =>
               parseModuleSlugFromNotificationData(notification.data) ===
-              moduleFilter,
+              moduleFilter
           )
         : notifications,
-    [moduleFilter, notifications],
+    [moduleFilter, notifications]
   )
 
   const unreadCount = useMemo(
     () =>
       scopedNotifications.filter((notification) => !notification.isRead).length,
-    [scopedNotifications],
+    [scopedNotifications]
   )
 
   const readCount = useMemo(
     () =>
       scopedNotifications.filter((notification) => notification.isRead).length,
-    [scopedNotifications],
+    [scopedNotifications]
   )
 
   const visibleNotifications = useMemo(() => {
@@ -170,18 +163,6 @@ export function NotificationsClient() {
     [visibleNotifications]
   )
 
-  const display: FinanceMoneyDisplay = {
-    currency: financeConfig.baseCurrency,
-    showCents: financeConfig.display.showCents,
-    compactNumbers: financeConfig.display.compactNumbers,
-  }
-
-  useEffect(() => {
-    if (detailOpen && !detailTransactionId) {
-      setDetailOpen(false)
-    }
-  }, [detailOpen, detailTransactionId, setDetailOpen])
-
   const handleMarkAllRead = useCallback(() => {
     void markAllAsRead()
   }, [markAllAsRead])
@@ -193,10 +174,10 @@ export function NotificationsClient() {
       }
       const transactionId = readTransactionId(notification.data)
       if (transactionId) {
-        setDetailOpen(true, transactionId)
+        router.push(APP_ROUTES.app.financeTransaction(transactionId))
       }
     },
-    [markReadMutation, setDetailOpen]
+    [markReadMutation, router]
   )
 
   const headerMenu = useMemo(
@@ -339,7 +320,7 @@ export function NotificationsClient() {
                   className="rounded-full"
                   onClick={() =>
                     setModuleFilter((current) =>
-                      current === slug ? null : slug,
+                      current === slug ? null : slug
                     )
                   }
                 >
@@ -400,17 +381,6 @@ export function NotificationsClient() {
         quietHoursOpen={quietHoursOpen}
         onQuietHoursOpenChange={setQuietHoursOpen}
         onPreferenceToggle={handlePreferenceToggle}
-      />
-
-      <TransactionDetailSheet
-        open={detailOpen}
-        onOpenChange={setDetailOpen}
-        transactionId={detailTransactionId}
-        enabled={isFinanceEnabled}
-        display={display}
-        onEdit={(transaction) => {
-          router.push(APP_ROUTES.app.financeTransactionEdit(transaction.id))
-        }}
       />
     </div>
   )

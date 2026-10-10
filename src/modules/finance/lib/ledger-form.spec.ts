@@ -1,10 +1,13 @@
 import assert from "node:assert/strict"
 import { describe, it } from "node:test"
 
+import { CATALOG_NONE } from "../constants/catalog.ts"
 import { encodeLedgerTarget } from "./ledger-payloads.ts"
 import {
   currencyForTarget,
   formatCalendarDate,
+  isLedgerTargetInput,
+  isPositiveAmountInput,
   sliceDateInput,
   todayDateInput,
 } from "./ledger-form.ts"
@@ -46,18 +49,51 @@ describe("currencyForTarget", () => {
         encodeLedgerTarget("account", "acc-1"),
         [{ id: "acc-1", currency: "USD" } as never],
         [],
-        "DOP",
+        "DOP"
       ),
-      "USD",
+      "USD"
     )
     assert.equal(
       currencyForTarget(
         encodeLedgerTarget("card", "card-1"),
         [],
         [{ id: "card-1", balances: [{ currency: "EUR" }] } as never],
-        "DOP",
+        "DOP"
       ),
-      "EUR",
+      "EUR"
+    )
+  })
+})
+
+describe("isPositiveAmountInput", () => {
+  it("rejects empty, zero and unusable amounts", () => {
+    assert.equal(isPositiveAmountInput(""), false)
+    assert.equal(isPositiveAmountInput("0"), false)
+    assert.equal(isPositiveAmountInput("0.00"), false)
+    assert.equal(isPositiveAmountInput("."), false)
+  })
+
+  it("accepts an amount greater than zero", () => {
+    assert.equal(isPositiveAmountInput("12.5"), true)
+    assert.equal(isPositiveAmountInput(" 1 "), true)
+  })
+})
+
+describe("isLedgerTargetInput", () => {
+  it("rejects the empty picker value", () => {
+    assert.equal(isLedgerTargetInput(CATALOG_NONE), false)
+    assert.equal(isLedgerTargetInput(""), false)
+    assert.equal(isLedgerTargetInput("account:"), false)
+  })
+
+  it("accepts an encoded account or card", () => {
+    assert.equal(
+      isLedgerTargetInput(encodeLedgerTarget("account", "acc-1")),
+      true
+    )
+    assert.equal(
+      isLedgerTargetInput(encodeLedgerTarget("card", "card-1")),
+      true
     )
   })
 })

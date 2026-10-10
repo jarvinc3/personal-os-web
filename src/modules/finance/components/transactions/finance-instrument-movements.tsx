@@ -3,8 +3,6 @@
 import { FinanceDateField } from "@/src/modules/finance/components/forms/finance-date-field"
 import { FinanceListSkeleton } from "@/src/modules/finance/components/layout/finance-list-skeleton"
 import { FinanceErrorState } from "@/src/modules/finance/components/layout/finance-error-state"
-import { TransactionDetailSheet } from "@/src/modules/finance/components/transactions/transaction-detail-sheet"
-import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/constants/sheet-keys"
 import { useCategories } from "@/src/modules/finance/hooks/use-categories"
 import { allTransactionsQueryOptions } from "@/src/modules/finance/hooks/use-transactions"
 import { financeLoadErrorMessage } from "@/src/modules/finance/lib/finance-error"
@@ -35,7 +33,6 @@ import {
 } from "@/src/shared/components/ui/empty"
 import { SummaryItem } from "@/src/shared/components/ui/summary"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
-import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
 import {
   ArrowDownLeftIcon,
@@ -114,11 +111,6 @@ export function FinanceInstrumentMovements({
   const [dateFrom, setDateFrom] = useState("")
   const [dateTo, setDateTo] = useState("")
   const [filtersOpen, setFiltersOpen] = useState(false)
-  const {
-    open: openDetailSheet,
-    sheetId: detailSheetId,
-    setOpen: setOpenDetailSheet,
-  } = useSheetParam(FINANCE_SHEET_KEYS.transactionDetail)
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -221,9 +213,7 @@ export function FinanceInstrumentMovements({
               <ArrowLeftRightIcon />
             </EmptyMedia>
             <EmptyTitle>
-              {queryNarrowed
-                ? "Ningún movimiento coincide"
-                : emptyLabel}
+              {queryNarrowed ? "Ningún movimiento coincide" : emptyLabel}
             </EmptyTitle>
             <EmptyDescription>
               {queryNarrowed
@@ -303,7 +293,11 @@ export function FinanceInstrumentMovements({
                     </span>
                   }
                   showChevron={false}
-                  onPress={() => setOpenDetailSheet(true, transaction.id)}
+                  onPress={() =>
+                    router.push(
+                      APP_ROUTES.app.financeTransaction(transaction.id)
+                    )
+                  }
                   isLast={index === group.items.length - 1}
                 />
               )
@@ -367,17 +361,6 @@ export function FinanceInstrumentMovements({
           </div>
         </div>
       </BottomSheet>
-
-      <TransactionDetailSheet
-        open={openDetailSheet}
-        onOpenChange={setOpenDetailSheet}
-        transactionId={detailSheetId}
-        enabled={enabled}
-        display={display}
-        onEdit={(transaction) => {
-          router.push(APP_ROUTES.app.financeTransactionEdit(transaction.id))
-        }}
-      />
     </div>
   )
 }

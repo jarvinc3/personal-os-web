@@ -1,13 +1,10 @@
 "use client"
 
 import { CategoryCard } from "@/src/modules/finance/components/catalog/category-card"
-import { CurrencyTriggerLabel } from "@/src/modules/finance/components/currency-flag"
 import { FinanceDateField } from "@/src/modules/finance/components/forms/finance-date-field"
-import {
-  FinanceAmountField,
-  FinanceSegmentedControl,
-} from "@/src/modules/finance/components/forms/finance-form-blocks"
-import { AmountCalculatorSheet } from "@/src/modules/finance/components/transactions/amount-calculator-sheet"
+import { FinanceSegmentedControl } from "@/src/modules/finance/components/forms/finance-form-blocks"
+import { FinanceFormScreen } from "@/src/modules/finance/components/forms/finance-form-screen"
+import { FinanceMoneyField } from "@/src/modules/finance/components/forms/finance-money-field"
 import { CategoryPickerSheet } from "@/src/modules/finance/components/transactions/category-picker-sheet"
 import { CurrencyPickerSheet } from "@/src/modules/finance/components/transactions/currency-picker-sheet"
 import { DestinationPickerSheet } from "@/src/modules/finance/components/transactions/destination-picker-sheet"
@@ -16,20 +13,23 @@ import { CATALOG_NONE } from "@/src/modules/finance/constants/catalog"
 import { useAccounts } from "@/src/modules/finance/hooks/use-accounts"
 import { useCards } from "@/src/modules/finance/hooks/use-cards"
 import { useCategories } from "@/src/modules/finance/hooks/use-categories"
+import { useCurrencyForTarget } from "@/src/modules/finance/hooks/use-currency-for-target"
+import { useFinanceCurrencyChoices } from "@/src/modules/finance/hooks/use-finance-currency-choices"
 import { useInstitutions } from "@/src/modules/finance/hooks/use-institutions"
 import {
   useCreateTransaction,
   useUpdateTransaction,
 } from "@/src/modules/finance/hooks/use-transactions"
-import {
-  buildDestinationPickerGroups,
-  type DestinationPickerGroup,
-} from "@/src/modules/finance/lib/destination-picker"
-import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
-import { narrowCurrencySymbol } from "@/src/modules/finance/lib/money"
 import { categoryTypeForTransaction } from "@/src/modules/finance/lib/category-tree"
 import {
-  currencyForTarget,
+  buildDestinationPickerGroups,
+  firstLedgerTarget,
+  isKnownLedgerTarget,
+} from "@/src/modules/finance/lib/destination-picker"
+import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
+import {
+  isLedgerTargetInput,
+  isPositiveAmountInput,
   sliceDateInput,
   todayDateInput,
 } from "@/src/modules/finance/lib/ledger-form"
@@ -44,33 +44,38 @@ import type {
   FinanceTransaction,
 } from "@/src/modules/finance/types/entities"
 import { FormTextField } from "@/src/shared/components/layout/form-blocks"
-import { Button } from "@/src/shared/components/ui/button"
-import { Spinner } from "@/src/shared/components/ui/spinner"
+import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
 import { SummarySection } from "@/src/shared/components/ui/summary"
 import { Switch } from "@/src/shared/components/ui/switch"
+import { usePicker } from "@/src/shared/hooks/use-picker"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
   ArrowDownCircleIcon,
   ArrowUpCircleIcon,
-  CalculatorIcon,
   FileTextIcon,
   HandCoinsIcon,
   InfoIcon,
-  KeyboardIcon,
   NotebookPenIcon,
+  SaveIcon,
   StoreIcon,
 } from "lucide-react"
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useId, useMemo, useRef } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import { z } from "zod"
 
 const schema = z.object({
   type: z.enum(["DEBIT", "CREDIT"]),
-  amount: z.string().trim().min(1, "Monto obligatorio"),
+  amount: z
+    .string()
+    .trim()
+    .min(1, "Monto obligatorio")
+    .refine(isPositiveAmountInput, "Monto mayor que cero"),
   currency: z.string().trim().min(3, "Moneda obligatoria").max(3),
   transactionDate: z.string().trim().min(1, "Fecha obligatoria"),
-  destination: z.string().min(1, "Elige una cuenta o una tarjeta"),
+  destination: z
+    .string()
+    .refine(isLedgerTargetInput, "Elige una cuenta o una tarjeta"),
   categoryId: z.string(),
   status: z.enum(["PENDING", "CONFIRMED"]),
   merchant: z.string().max(200),
@@ -80,7 +85,7 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>
 type MovementType = FormValues["type"]
-type Picker = "none" | "category" | "calculator" | "currency" | "destination"
+type Picker = "none" | "category" | "currency" | "destination"
 
 const TYPE_OPTIONS = [
   { value: "DEBIT" as const, label: "Gasto", icon: ArrowDownCircleIcon },
@@ -88,8 +93,12 @@ const TYPE_OPTIONS = [
 ]
 
 function destinationFromTransaction(tx: FinanceTransaction | null): string {
-  if (tx?.cardId) return encodeLedgerTarget("card", tx.cardId)
-  if (tx?.accountId) return encodeLedgerTarget("account", tx.accountId)
+  if (tx?.cardId) {
+    return encodeLedgerTarget("card", tx.cardId)
+  }
+  if (tx?.accountId) {
+    return encodeLedgerTarget("account", tx.accountId)
+  }
   return CATALOG_NONE
 }
 
@@ -97,7 +106,7 @@ function toFormValues(
   tx: FinanceTransaction | null,
   initialType: MovementType,
   defaultCurrency: string,
-  defaultDestination: string,
+  defaultDestination: string
 ): FormValues {
   return {
     type: tx?.type === "CREDIT" ? "CREDIT" : tx ? "DEBIT" : initialType,
@@ -113,22 +122,6 @@ function toFormValues(
   }
 }
 
-function firstLedgerTarget(groups: DestinationPickerGroup[]): string {
-  for (const group of groups) {
-    if (group.kind === "cash") {
-      return encodeLedgerTarget("account", group.account.id)
-    }
-  }
-  for (const group of groups) {
-    if (group.kind !== "institution") continue
-    const account = group.accounts[0]
-    if (account) return encodeLedgerTarget("account", account.id)
-    const card = group.cards[0]
-    if (card) return encodeLedgerTarget("card", card.id)
-  }
-  return CATALOG_NONE
-}
-
 type TransactionFormProps = {
   mode: "create" | "edit"
   initialType: MovementType
@@ -139,21 +132,6 @@ type TransactionFormProps = {
   display: FinanceMoneyDisplay
   onTypeChange?: (type: MovementType) => void
   onDone: () => void
-}
-
-function knownLedgerTarget(
-  destination: string,
-  accounts: { id: string }[],
-  cards: { id: string }[],
-): boolean {
-  const target = splitLedgerTarget(destination)
-  if (target.accountId) {
-    return accounts.some((account) => account.id === target.accountId)
-  }
-  if (target.cardId) {
-    return cards.some((card) => card.id === target.cardId)
-  }
-  return false
 }
 
 export function TransactionForm({
@@ -176,78 +154,97 @@ export function TransactionForm({
   const cardsQuery = useCards(enabled)
   const categoriesQuery = useCategories(enabled)
   const institutionsQuery = useInstitutions(enabled)
-  const accounts = useMemo(
-    () => accountsQuery.data ?? [],
-    [accountsQuery.data],
-  )
+  const accounts = useMemo(() => accountsQuery.data ?? [], [accountsQuery.data])
   const cards = useMemo(() => cardsQuery.data ?? [], [cardsQuery.data])
   const categories = useMemo(
     () => categoriesQuery.data ?? [],
-    [categoriesQuery.data],
+    [categoriesQuery.data]
   )
   const institutions = useMemo(
     () => institutionsQuery.data ?? [],
-    [institutionsQuery.data],
+    [institutionsQuery.data]
   )
   const isPending = createMutation.isPending || updateMutation.isPending
   const hasTargets = accounts.length > 0 || cards.length > 0
   const groups = useMemo(
     () => buildDestinationPickerGroups({ institutions, accounts, cards }),
-    [institutions, accounts, cards],
+    [institutions, accounts, cards]
   )
-  const [picker, setPicker] = useState<Picker>("none")
-  const [amountMode, setAmountMode] = useState<"keyboard" | "calculator">(
-    "keyboard",
-  )
+  const { picker, openPicker, closeHandlerFor } = usePicker<Picker>("none")
   const didAutoOpenCategory = useRef(false)
-  const currencyDestination = useRef<string | null>(null)
+  const statusSwitchId = useId()
 
   const {
     control,
     handleSubmit,
     reset,
     setValue,
+    trigger,
     getValues,
     formState: { errors },
   } = useForm<FormValues>({
+    mode: "onTouched",
     resolver: zodResolver(schema),
     defaultValues: toFormValues(
       transaction,
       initialType,
       defaultCurrency,
-      CATALOG_NONE,
+      CATALOG_NONE
     ),
   })
 
+  const formValues = useWatch({ control })
+  const formIsValid = schema.safeParse(formValues).success
   const destination = useWatch({ control, name: "destination" })
   const type = useWatch({ control, name: "type" })
   const categoryId = useWatch({ control, name: "categoryId" })
-  const amount = useWatch({ control, name: "amount" })
   const currency = useWatch({ control, name: "currency" })
-  const categoryType = categoryTypeForTransaction(type) ?? "EXPENSE"
-  const selectedCategory = categories.find((item) => item.id === categoryId) ?? null
+  const {
+    baseCurrency,
+    codes: currencyCodes,
+    quotes: currencyQuotes,
+  } = useFinanceCurrencyChoices(currency || defaultCurrency)
+  const targetsReady = accountsQuery.isSuccess && cardsQuery.isSuccess
+  const canSave =
+    !isPending && formIsValid && (isEdit || (targetsReady && hasTargets))
+
+  const selectedCategory =
+    categories.find((item) => item.id === categoryId) ?? null
+
+  const applyTargetCurrency = useCallback(
+    (next: string) => {
+      setValue("currency", next)
+    },
+    [setValue]
+  )
+
+  useCurrencyForTarget(
+    destination,
+    accounts,
+    cards,
+    defaultCurrency,
+    applyTargetCurrency,
+    !isEdit
+  )
 
   useEffect(() => {
-    if (isEdit && !transaction) return
+    if (isEdit && !transaction) {
+      return
+    }
     reset(
       toFormValues(
         isEdit ? transaction : null,
         initialType,
         defaultCurrency,
-        getValues("destination") || CATALOG_NONE,
-      ),
+        getValues("destination") || CATALOG_NONE
+      )
     )
-  }, [
-    isEdit,
-    transaction,
-    initialType,
-    defaultCurrency,
-    reset,
-    getValues,
-  ])
+  }, [isEdit, transaction, initialType, defaultCurrency, reset, getValues])
 
   useEffect(() => {
-    if (isEdit) return
+    if (isEdit) {
+      return
+    }
     if (
       !accountsQuery.isSuccess ||
       !cardsQuery.isSuccess ||
@@ -256,10 +253,7 @@ export function TransactionForm({
       return
     }
     const preferred = initialDestination?.trim()
-    if (
-      preferred &&
-      knownLedgerTarget(preferred, accounts, cards)
-    ) {
+    if (preferred && isKnownLedgerTarget(preferred, accounts, cards)) {
       if (getValues("destination") !== preferred) {
         setValue("destination", preferred)
       }
@@ -269,12 +263,14 @@ export function TransactionForm({
     if (
       current &&
       current !== CATALOG_NONE &&
-      knownLedgerTarget(current, accounts, cards)
+      isKnownLedgerTarget(current, accounts, cards)
     ) {
       return
     }
     const next = firstLedgerTarget(groups)
-    if (next !== CATALOG_NONE) setValue("destination", next)
+    if (next !== CATALOG_NONE) {
+      setValue("destination", next)
+    }
   }, [
     groups,
     accounts,
@@ -289,28 +285,18 @@ export function TransactionForm({
   ])
 
   useEffect(() => {
-    if (isEdit) return
-    if (currencyDestination.current === destination) return
-    currencyDestination.current = destination
-    setValue(
-      "currency",
-      currencyForTarget(destination, accounts, cards, defaultCurrency),
-    )
-  }, [isEdit, destination, accounts, cards, defaultCurrency, setValue])
-
-  useEffect(() => {
-    if (isEdit || didAutoOpenCategory.current) return
+    if (isEdit || didAutoOpenCategory.current) {
+      return
+    }
     didAutoOpenCategory.current = true
-    setPicker("category")
-  }, [isEdit])
-
-  function openPicker(next: Picker) {
-    setPicker(next)
-  }
+    openPicker("category")
+  }, [isEdit, openPicker])
 
   function clearIncompatibleCategory(next: MovementType) {
     const expected = categoryTypeForTransaction(next)
-    const current = categories.find((item) => item.id === getValues("categoryId"))
+    const current = categories.find(
+      (item) => item.id === getValues("categoryId")
+    )
     if (current && current.type !== expected) {
       setValue("categoryId", CATALOG_NONE)
       openPicker("category")
@@ -318,7 +304,9 @@ export function TransactionForm({
   }
 
   const onSubmit = handleSubmit(async (values) => {
-    if (isTransferLeg) return
+    if (isTransferLeg) {
+      return
+    }
     const target = splitLedgerTarget(values.destination)
     const payload = buildCreateTransactionBody(
       {
@@ -326,7 +314,7 @@ export function TransactionForm({
         accountId: target.accountId,
         cardId: target.cardId,
       },
-      { isUpdate: isEdit },
+      { isUpdate: isEdit }
     )
     if (!payload.ok) {
       appToast.error({ text1: payload.error })
@@ -358,6 +346,11 @@ export function TransactionForm({
     )
   }
 
+  const categoryType = categoryTypeForTransaction(type)
+  if (!categoryType) {
+    throw new Error(`Tipo de movimiento sin categoría: ${type}`)
+  }
+
   const cta = isEdit
     ? "Guardar"
     : type === "CREDIT"
@@ -367,11 +360,13 @@ export function TransactionForm({
 
   return (
     <>
-      <form
-        className="-mb-4 flex h-[calc(100dvh-var(--header-height)-1rem)] flex-col gap-4 md:-mb-16"
+      <FinanceFormScreen
         onSubmit={onSubmit}
+        submitLabel={cta}
+        submitIcon={SaveIcon}
+        isSubmitting={isPending}
+        submitDisabled={!canSave}
       >
-        <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto">
         <Controller
           control={control}
           name="type"
@@ -391,119 +386,93 @@ export function TransactionForm({
         />
 
         <SummarySection title="Movimiento" icon={ArrowDownCircleIcon}>
-          <CategoryTrigger
-            category={selectedCategory}
-            onClick={() => openPicker("category")}
+          <Field className="gap-1">
+            <FieldLabel className="text-sm text-muted-foreground">
+              Categoría
+            </FieldLabel>
+            <CategoryTrigger
+              category={selectedCategory}
+              onClick={() => openPicker("category")}
+            />
+          </Field>
+
+          <Controller
+            control={control}
+            name="amount"
+            render={({ field }) => (
+              <FinanceMoneyField
+                amount={field.value}
+                onAmountChange={field.onChange}
+                onAmountCommit={(next) => {
+                  field.onChange(next)
+                  void trigger("amount")
+                }}
+                onAmountBlur={field.onBlur}
+                amountError={errors.amount?.message}
+                currency={currency || defaultCurrency}
+                currencyError={errors.currency?.message}
+                onCurrencyPress={() => openPicker("currency")}
+              />
+            )}
           />
 
-          <div>
-            <div className="flex items-start gap-2">
-              <div className="min-w-0 flex-1">
-                <Controller
-                  control={control}
-                  name="amount"
-                  render={({ field }) => (
-                    <FinanceAmountField
-                      label={null}
-                      prefix={narrowCurrencySymbol(currency || defaultCurrency)}
-                      value={field.value}
-                      onChange={field.onChange}
-                      onBlur={field.onBlur}
-                      error={errors.amount?.message}
-                      readOnly={amountMode === "calculator"}
-                      onReadOnlyActivate={() => openPicker("calculator")}
-                      trailing={
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          aria-pressed={amountMode === "calculator"}
-                          aria-label={
-                            amountMode === "calculator"
-                              ? "Usar teclado"
-                              : "Abrir calculadora"
-                          }
-                          onClick={() => {
-                            if (amountMode === "keyboard") {
-                              setAmountMode("calculator")
-                              openPicker("calculator")
-                              return
-                            }
-                            setAmountMode("keyboard")
-                            if (picker === "calculator") setPicker("none")
-                          }}
-                        >
-                          {amountMode === "calculator" ? (
-                            <CalculatorIcon />
-                          ) : (
-                            <KeyboardIcon />
-                          )}
-                        </Button>
-                      }
-                    />
-                  )}
-                />
-              </div>
-              <Button
-                type="button"
-                variant="outline"
-                className="h-14 shrink-0 rounded-2xl px-3 text-base"
-                onClick={() => openPicker("currency")}
-              >
-                <CurrencyTriggerLabel code={currency || defaultCurrency} />
-              </Button>
-            </div>
-            {errors.currency?.message ? (
-              <p className="text-sm text-destructive">{errors.currency.message}</p>
-            ) : null}
-          </div>
-
-          <div>
+          <Field className="gap-1">
+            <FieldLabel className="text-sm text-muted-foreground">
+              Destino
+            </FieldLabel>
             <DestinationTrigger
               destination={destination}
               accounts={accounts}
               cards={cards}
+              display={display}
               disabled={!hasTargets}
               onClick={() => openPicker("destination")}
             />
-            {errors.destination?.message && destination === CATALOG_NONE ? (
-              <p className="-mt-2 text-sm text-destructive">
-                {errors.destination.message}
-              </p>
+            {errors.destination?.message ? (
+              <FieldError>{errors.destination.message}</FieldError>
             ) : null}
-          </div>
+          </Field>
 
-          <div className="flex items-start gap-2">
-            <div className="min-w-0 flex-1">
-              <Controller
-                control={control}
-                name="transactionDate"
-                render={({ field }) => (
-                  <FinanceDateField
-                    value={field.value}
-                    onChange={field.onChange}
-                    error={errors.transactionDate?.message}
+          <Controller
+            control={control}
+            name="transactionDate"
+            render={({ field }) => (
+              <FinanceDateField
+                label="Fecha"
+                value={field.value}
+                onChange={field.onChange}
+                error={errors.transactionDate?.message}
+                aside={
+                  <Controller
+                    control={control}
+                    name="status"
+                    render={({ field: statusField }) => (
+                      <Field
+                        orientation="horizontal"
+                        className="h-11 w-auto shrink-0 gap-2 rounded-xl border border-border bg-card px-3"
+                      >
+                        <FieldLabel
+                          htmlFor={statusSwitchId}
+                          className="text-sm font-medium"
+                        >
+                          {paidLabel}
+                        </FieldLabel>
+                        <Switch
+                          id={statusSwitchId}
+                          checked={statusField.value === "CONFIRMED"}
+                          onCheckedChange={(checked) =>
+                            statusField.onChange(
+                              checked ? "CONFIRMED" : "PENDING"
+                            )
+                          }
+                        />
+                      </Field>
+                    )}
                   />
-                )}
+                }
               />
-            </div>
-            <Controller
-              control={control}
-              name="status"
-              render={({ field }) => (
-                <label className="flex h-11 shrink-0 items-center gap-2 rounded-xl border border-border bg-card px-3">
-                  <span className="text-sm font-medium">{paidLabel}</span>
-                  <Switch
-                    checked={field.value === "CONFIRMED"}
-                    onCheckedChange={(checked) =>
-                      field.onChange(checked ? "CONFIRMED" : "PENDING")
-                    }
-                    aria-label={paidLabel}
-                  />
-                </label>
-              )}
-            />
-          </div>
+            )}
+          />
 
           <Controller
             control={control}
@@ -516,13 +485,17 @@ export function TransactionForm({
                 onChange={field.onChange}
                 onBlur={field.onBlur}
                 error={errors.merchant?.message}
-                placeholder={type === "CREDIT" ? "Origen del ingreso" : "Supermercado"}
               />
             )}
           />
         </SummarySection>
 
-        <SummarySection title="Detalles opcionales" icon={InfoIcon} collapsible defaultOpen={isEdit}>
+        <SummarySection
+          title="Detalles opcionales"
+          icon={InfoIcon}
+          collapsible
+          defaultOpen={isEdit}
+        >
           <Controller
             control={control}
             name="description"
@@ -536,6 +509,7 @@ export function TransactionForm({
               />
             )}
           />
+
           <Controller
             control={control}
             name="notes"
@@ -556,63 +530,38 @@ export function TransactionForm({
             Crea una cuenta o tarjeta para poder guardar el movimiento.
           </p>
         ) : null}
-        </div>
-
-        <div className="shrink-0 border-t bg-background px-0 pt-3 pb-4">
-          <Button
-            type="submit"
-            className="h-11 w-full"
-            disabled={isPending || (!isEdit && !hasTargets)}
-          >
-            {isPending ? <Spinner data-icon="inline-start" /> : null}
-            {cta}
-          </Button>
-        </div>
-      </form>
+      </FinanceFormScreen>
 
       <CategoryPickerSheet
         open={picker === "category"}
-        onOpenChange={(open) => {
-          if (open) return
-          setPicker((current) => (current === "category" ? "none" : current))
-        }}
+        onOpenChange={closeHandlerFor("category")}
         categories={categories}
         categoryType={categoryType}
         onSelect={(next) => setValue("categoryId", next)}
       />
-      <AmountCalculatorSheet
-        open={picker === "calculator"}
-        onOpenChange={(open) => {
-          setPicker((current) => {
-            if (open) return "calculator"
-            return current === "calculator" ? "none" : current
-          })
-        }}
-        amount={amount}
-        currency={currency || defaultCurrency}
-        onCommit={(next) => setValue("amount", next, { shouldValidate: true })}
-      />
+
       <CurrencyPickerSheet
         open={picker === "currency"}
-        onOpenChange={(open) => {
-          if (open) return
-          setPicker((current) => (current === "currency" ? "none" : current))
-        }}
+        onOpenChange={closeHandlerFor("currency")}
         value={currency || defaultCurrency}
         enabled={enabled}
+        codes={currencyCodes}
+        quotes={currencyQuotes}
+        quoteCurrency={baseCurrency}
+        showNames
         onSelect={(next) => setValue("currency", next)}
       />
+
       <DestinationPickerSheet
         open={picker === "destination"}
-        onOpenChange={(open) => {
-          if (open) return
-          setPicker((current) => (current === "destination" ? "none" : current))
-        }}
+        onOpenChange={closeHandlerFor("destination")}
         institutions={institutions}
         accounts={accounts}
         cards={cards}
         display={{ ...display, currency: currency || display.currency }}
-        onSelect={(next) => setValue("destination", next, { shouldValidate: true })}
+        onSelect={(next) =>
+          setValue("destination", next, { shouldValidate: true })
+        }
       />
     </>
   )
@@ -646,4 +595,3 @@ function CategoryTrigger({
     />
   )
 }
-

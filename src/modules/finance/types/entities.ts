@@ -306,6 +306,16 @@ export type FinanceSavingsGoal = {
   completedAt: string | null
 }
 
+/** One amount set aside for a goal. The goal balance is the sum of them. */
+export type FinanceSavingsGoalContribution = {
+  id: string
+  goalId: string
+  amount: string
+  contributedAt: string
+  notes: string | null
+  createdAt: string
+}
+
 export const FINANCE_INSTALLMENT_FREQS = [
   "WEEKLY",
   "BIWEEKLY",
@@ -380,6 +390,19 @@ export type FinanceReceivable = {
   currency: string
   dueDate: string | null
   status: FinanceReceivableStatus
+}
+
+/** One amount collected for a receivable, with the income it created. */
+export type FinanceReceivablePayment = {
+  id: string
+  receivableId: string
+  amount: string
+  paidAt: string
+  accountId: string | null
+  account?: { id: string; name: string } | null
+  transactionId: string | null
+  notes: string | null
+  createdAt: string
 }
 
 export type FinanceEmailSyncLog = {

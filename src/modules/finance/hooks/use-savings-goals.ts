@@ -1,10 +1,23 @@
 "use client"
 
 import { apiDelete, apiGet, apiPatch, apiPost } from "@/src/config/api-client"
-import { savingsGoalsQuery } from "@/src/modules/finance/lib/finance-query-options"
-import type { CreateSavingsGoalBody } from "@/src/modules/finance/lib/planning-payloads"
-import { FINANCE_SAVINGS_GOALS_QUERY_KEY } from "@/src/modules/finance/types/api"
-import type { FinanceSavingsGoal } from "@/src/modules/finance/types/entities"
+import {
+  savingsGoalContributionsQuery,
+  savingsGoalsQuery,
+} from "@/src/modules/finance/lib/finance-query-options"
+import type {
+  CreateSavingsGoalBody,
+  CreateSavingsGoalContributionBody,
+  UpdateSavingsGoalBody,
+} from "@/src/modules/finance/lib/planning-payloads"
+import {
+  FINANCE_SAVINGS_GOAL_CONTRIBUTIONS_QUERY_KEY,
+  FINANCE_SAVINGS_GOALS_QUERY_KEY,
+} from "@/src/modules/finance/types/api"
+import type {
+  FinanceSavingsGoal,
+  FinanceSavingsGoalContribution,
+} from "@/src/modules/finance/types/entities"
 import { API_ENDPOINTS } from "@/src/shared/constants/api-endpoints"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
@@ -33,10 +46,10 @@ export function useCreateSavingsGoal() {
 export function useUpdateSavingsGoal() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: ({ id, body }: { id: string; body: CreateSavingsGoalBody }) =>
+    mutationFn: ({ id, body }: { id: string; body: UpdateSavingsGoalBody }) =>
       apiPatch<FinanceSavingsGoal>(
         API_ENDPOINTS.FINANCE.SAVINGS_GOAL(id),
-        body,
+        body
       ),
     onSuccess: () => invalidate(queryClient),
   })
@@ -48,5 +61,60 @@ export function useDeleteSavingsGoal() {
     mutationFn: (id: string) =>
       apiDelete(API_ENDPOINTS.FINANCE.SAVINGS_GOAL(id)),
     onSuccess: () => invalidate(queryClient),
+  })
+}
+
+export function useSavingsGoalContributions(
+  enabled: boolean,
+  goalId: string | null
+) {
+  return useQuery({
+    ...savingsGoalContributionsQuery(goalId ?? ""),
+    enabled: enabled && Boolean(goalId),
+  })
+}
+
+/** A contribution moves the goal balance, so both lists are refreshed together. */
+function invalidateGoalAndContributions(
+  queryClient: ReturnType<typeof useQueryClient>
+) {
+  invalidate(queryClient)
+  void queryClient.invalidateQueries({
+    queryKey: FINANCE_SAVINGS_GOAL_CONTRIBUTIONS_QUERY_KEY,
+  })
+}
+
+export function useCreateSavingsGoalContribution() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({
+      goalId,
+      body,
+    }: {
+      goalId: string
+      body: CreateSavingsGoalContributionBody
+    }) =>
+      apiPost<FinanceSavingsGoalContribution>(
+        API_ENDPOINTS.FINANCE.SAVINGS_GOAL_CONTRIBUTIONS(goalId),
+        body
+      ),
+    onSuccess: () => invalidateGoalAndContributions(queryClient),
+  })
+}
+
+export function useDeleteSavingsGoalContribution() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({
+      goalId,
+      contributionId,
+    }: {
+      goalId: string
+      contributionId: string
+    }) =>
+      apiDelete(
+        API_ENDPOINTS.FINANCE.SAVINGS_GOAL_CONTRIBUTION(goalId, contributionId)
+      ),
+    onSuccess: () => invalidateGoalAndContributions(queryClient),
   })
 }

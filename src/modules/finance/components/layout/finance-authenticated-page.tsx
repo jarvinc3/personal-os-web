@@ -50,9 +50,13 @@ function isFinanceSecondaryView(pathname: string): boolean {
     pathname.startsWith(`${FINANCE_ACCOUNTS_PREFIX}cards/`) ||
     isAccountDetailPath(pathname) ||
     pathname.startsWith(`${APP_ROUTES.app.financeLoans}/`) ||
+    pathname.startsWith(`${APP_ROUTES.app.financeSavingsGoals}/`) ||
+    pathname.startsWith(`${APP_ROUTES.app.financeReceivables}/`) ||
+    pathname.startsWith(`${APP_ROUTES.app.financeBudgets}/`) ||
     pathname === APP_ROUTES.app.financeTransactionNew ||
     pathname === APP_ROUTES.app.financeTransferNew ||
-    /^\/finance\/transactions\/[^/]+\/edit$/.test(pathname)
+    /^\/finance\/transactions\/[^/]+\/edit$/.test(pathname) ||
+    /^\/finance\/transactions\/[^/]+$/.test(pathname)
   )
 }
 

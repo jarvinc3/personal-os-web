@@ -1,19 +1,17 @@
 "use client"
 
-import { FinanceListSkeleton } from "@/src/modules/finance/components/layout/finance-list-skeleton";
-import { FinanceFlowPills } from "@/src/modules/finance/components/transactions/finance-flow-pills";
-import { FinanceMonthPicker } from "@/src/modules/finance/components/transactions/finance-month-picker";
-import { FinanceMonthSection } from "@/src/modules/finance/components/transactions/finance-month-section";
-import { FinanceTransactionSearch } from "@/src/modules/finance/components/transactions/finance-transaction-search";
-import { TransactionDetailSheet } from "@/src/modules/finance/components/transactions/transaction-detail-sheet";
-import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/constants/sheet-keys";
-import { useAccounts } from "@/src/modules/finance/hooks/use-accounts";
-import { useCards } from "@/src/modules/finance/hooks/use-cards";
-import { useCategories } from "@/src/modules/finance/hooks/use-categories";
-import { useTimelineTransactions } from "@/src/modules/finance/hooks/use-transactions";
-import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error";
-import { buildTimelineMonths } from "@/src/modules/finance/lib/group-transactions-timeline";
-import type { FinanceMoneyDisplay } from "@/src/modules/finance/lib/money";
+import { FinanceListSkeleton } from "@/src/modules/finance/components/layout/finance-list-skeleton"
+import { FinanceFlowPills } from "@/src/modules/finance/components/transactions/finance-flow-pills"
+import { FinanceMonthPicker } from "@/src/modules/finance/components/transactions/finance-month-picker"
+import { FinanceMonthSection } from "@/src/modules/finance/components/transactions/finance-month-section"
+import { FinanceTransactionSearch } from "@/src/modules/finance/components/transactions/finance-transaction-search"
+import { useAccounts } from "@/src/modules/finance/hooks/use-accounts"
+import { useCards } from "@/src/modules/finance/hooks/use-cards"
+import { useCategories } from "@/src/modules/finance/hooks/use-categories"
+import { useTimelineTransactions } from "@/src/modules/finance/hooks/use-transactions"
+import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
+import { buildTimelineMonths } from "@/src/modules/finance/lib/group-transactions-timeline"
+import type { FinanceMoneyDisplay } from "@/src/modules/finance/lib/money"
 import {
   extendMonthRange,
   initialMonthRange,
@@ -22,27 +20,29 @@ import {
   parseMonthKey,
   yearsTouched,
   type MonthKey,
-} from "@/src/modules/finance/lib/month-window";
+} from "@/src/modules/finance/lib/month-window"
 import {
   animateScrollSectionIntoView,
   findActiveMonthKey,
   getScrollParent,
   scrollSectionIntoView,
   shouldFollowScroll,
-} from "@/src/modules/finance/lib/timeline-scroll";
-import { FINANCE_TRANSACTIONS_QUERY_KEY } from "@/src/modules/finance/types/api";
-import { ExpandableFab } from "@/src/shared/components/layout/expandable-fab";
-import { APP_ROUTES, financeTransactionNewHref } from "@/src/shared/constants/app-routes";
-import { useSheetParam } from "@/src/shared/hooks/use-sheet-params";
-import { appToast } from "@/src/shared/lib/app-toast";
-import { useQueryClient } from "@tanstack/react-query";
+} from "@/src/modules/finance/lib/timeline-scroll"
+import { FINANCE_TRANSACTIONS_QUERY_KEY } from "@/src/modules/finance/types/api"
+import { ExpandableFab } from "@/src/shared/components/layout/expandable-fab"
+import {
+  APP_ROUTES,
+  financeTransactionNewHref,
+} from "@/src/shared/constants/app-routes"
+import { appToast } from "@/src/shared/lib/app-toast"
+import { useQueryClient } from "@tanstack/react-query"
 import {
   ArrowLeftRightIcon,
   MinusIcon,
   PlusIcon,
   RefreshCwIcon,
-} from "lucide-react";
-import { useRouter } from "next/navigation";
+} from "lucide-react"
+import { useRouter } from "next/navigation"
 import {
   useCallback,
   useEffect,
@@ -50,7 +50,7 @@ import {
   useMemo,
   useRef,
   useState,
-} from "react";
+} from "react"
 
 type FinanceTransactionsListProps = {
   enabled: boolean
@@ -70,7 +70,8 @@ export function FinanceTransactionsList({
 }: FinanceTransactionsListProps) {
   const [range, setRange] = useState(() => initialMonthRange())
   const [landingMonthKey] = useState(() => monthKeyFromDate(new Date()))
-  const [activeMonthKey, setActiveMonthKey] = useState<MonthKey>(landingMonthKey)
+  const [activeMonthKey, setActiveMonthKey] =
+    useState<MonthKey>(landingMonthKey)
   const [userTookOver, setUserTookOver] = useState(false)
   const userTookOverRef = useRef(false)
   if (!userTookOver && activeMonthKey !== landingMonthKey) {
@@ -101,19 +102,7 @@ export function FinanceTransactionsList({
   const scrollGeneration = useRef(0)
   const currentMonthKey = monthKeyFromDate(new Date())
   const router = useRouter()
-  const {
-    open: openDetailSheet,
-    sheetId: detailSheetId,
-    setOpen: setOpenDetailSheet,
-  } = useSheetParam(FINANCE_SHEET_KEYS.transactionDetail)
   const queryClient = useQueryClient()
-  const sheetsOpen = openDetailSheet
-
-  useEffect(() => {
-    if (openDetailSheet && !detailSheetId) {
-      setOpenDetailSheet(false)
-    }
-  }, [openDetailSheet, detailSheetId, setOpenDetailSheet])
 
   const accountsQuery = useAccounts(enabled)
   const cardsQuery = useCards(enabled)
@@ -137,7 +126,7 @@ export function FinanceTransactionsList({
     enabled,
     years,
     {},
-    currentMonthKey,
+    currentMonthKey
   )
   const timeline = useMemo(
     () => buildTimelineMonths(months, timelineQuery.items),
@@ -233,7 +222,7 @@ export function FinanceTransactionsList({
       window.clearTimeout(programmaticTimer.current)
     }
 
-    let cancelAnimation = () => { }
+    let cancelAnimation = () => {}
     const stopForUser = () => {
       if (scrollGeneration.current !== generation) return
       scrollGeneration.current += 1
@@ -283,8 +272,7 @@ export function FinanceTransactionsList({
         !shouldFollowScroll({
           isProgrammatic: isProgrammaticScroll.current,
           userTookOver: userTookOverRef.current,
-        }) ||
-        sheetsOpen
+        })
       ) {
         return
       }
@@ -319,26 +307,28 @@ export function FinanceTransactionsList({
     }
 
     scrollRoot.addEventListener("wheel", markUserTookOver, { passive: true })
-    scrollRoot.addEventListener("touchstart", markUserTookOver, { passive: true })
+    scrollRoot.addEventListener("touchstart", markUserTookOver, {
+      passive: true,
+    })
     scrollRoot.addEventListener("scroll", onScroll, { passive: true })
     return () => {
       scrollRoot.removeEventListener("wheel", markUserTookOver)
       scrollRoot.removeEventListener("touchstart", markUserTookOver)
       scrollRoot.removeEventListener("scroll", onScroll)
     }
-  }, [markUserTookOver, stickyOffset, timeline.length, sheetsOpen])
+  }, [markUserTookOver, stickyOffset, timeline.length])
 
   return (
     <div className="flex flex-col gap-4">
       <div
         ref={chromeRef}
-        className="flex sticky top-0 z-30 flex-col gap-3 pb-2 bg-background"
+        className="sticky top-0 z-30 flex flex-col gap-3 bg-background pb-2"
       >
         <FinanceTransactionSearch
           enabled={enabled}
           display={display}
           categories={categories}
-          onSelect={(id) => setOpenDetailSheet(true, id)}
+          onSelect={(id) => router.push(APP_ROUTES.app.financeTransaction(id))}
         />
         <FinanceMonthPicker
           months={months}
@@ -372,7 +362,9 @@ export function FinanceTransactionsList({
             display={display}
             isActive={month.key === activeMonthKey}
             stickyOffset={stickyOffset + STICKY_GAP}
-            onTransactionPress={(id) => setOpenDetailSheet(true, id)}
+            onTransactionPress={(id) =>
+              router.push(APP_ROUTES.app.financeTransaction(id))
+            }
           />
         ))}
       </div>
@@ -417,17 +409,6 @@ export function FinanceTransactionsList({
             color: "bg-blue-500",
           },
         ]}
-      />
-
-      <TransactionDetailSheet
-        open={openDetailSheet}
-        onOpenChange={setOpenDetailSheet}
-        transactionId={detailSheetId}
-        enabled={enabled}
-        display={display}
-        onEdit={(transaction) => {
-          router.push(APP_ROUTES.app.financeTransactionEdit(transaction.id))
-        }}
       />
     </div>
   )

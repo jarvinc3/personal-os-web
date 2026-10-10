@@ -29,7 +29,7 @@ const KEY_ROWS: CalculatorKey[][] = [
   ["7", "8", "9", "-"],
   ["4", "5", "6", "+"],
   ["1", "2", "3"],
-  ["0", ".", "backspace"],
+  [".", "0", "backspace"],
 ]
 
 export function AmountCalculatorSheet({
@@ -90,7 +90,7 @@ export function AmountCalculatorSheet({
       title="Cantidad"
     >
       <div className="flex flex-col items-end gap-1 px-1">
-        <p className="max-w-full text-right text-3xl font-semibold leading-tight break-words tabular-nums">
+        <p className="max-w-full text-right text-3xl font-semibold leading-tight wrap-break-word tabular-nums">
           {calculatorHeadline(state)}
         </p>
         <p className="text-sm text-muted-foreground tabular-nums">{preview}</p>

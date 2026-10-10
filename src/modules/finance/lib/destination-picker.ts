@@ -1,3 +1,5 @@
+import { CATALOG_NONE } from "../constants/catalog.ts"
+import { encodeLedgerTarget, splitLedgerTarget } from "./ledger-payloads.ts"
 import type {
   FinanceAccount,
   FinanceCard,
@@ -33,14 +35,18 @@ export function buildDestinationPickerGroups(input: {
   const groups: DestinationPickerGroup[] = []
 
   for (const institution of input.institutions) {
-    if (!institution.isActive) continue
+    if (!institution.isActive) {
+      continue
+    }
     const accounts = activeAccounts.filter(
-      (account) => account.institutionId === institution.id,
+      (account) => account.institutionId === institution.id
     )
     const cards = activeCards.filter(
-      (card) => card.institutionId === institution.id,
+      (card) => card.institutionId === institution.id
     )
-    if (accounts.length === 0 && cards.length === 0) continue
+    if (accounts.length === 0 && cards.length === 0) {
+      continue
+    }
     groups.push({
       kind: "institution",
       id: institution.id,
@@ -58,4 +64,54 @@ export function buildDestinationPickerGroups(input: {
   }
 
   return groups
+}
+
+/**
+ * Todas las cuentas y tarjetas que se pueden elegir como destino. El efectivo
+ * va primero: es la opción más probable para un movimiento nuevo.
+ */
+export function ledgerTargetsFromGroups(
+  groups: DestinationPickerGroup[]
+): string[] {
+  const targets: string[] = []
+
+  for (const group of groups) {
+    if (group.kind === "cash") {
+      targets.push(encodeLedgerTarget("account", group.account.id))
+    }
+  }
+
+  for (const group of groups) {
+    if (group.kind !== "institution") {
+      continue
+    }
+    for (const account of group.accounts) {
+      targets.push(encodeLedgerTarget("account", account.id))
+    }
+    for (const card of group.cards) {
+      targets.push(encodeLedgerTarget("card", card.id))
+    }
+  }
+
+  return targets
+}
+
+export function firstLedgerTarget(groups: DestinationPickerGroup[]): string {
+  const [first] = ledgerTargetsFromGroups(groups)
+  return first ?? CATALOG_NONE
+}
+
+export function isKnownLedgerTarget(
+  destination: string,
+  accounts: FinanceAccount[],
+  cards: FinanceCard[]
+): boolean {
+  const target = splitLedgerTarget(destination)
+  if (target.accountId) {
+    return accounts.some((account) => account.id === target.accountId)
+  }
+  if (target.cardId) {
+    return cards.some((card) => card.id === target.cardId)
+  }
+  return false
 }

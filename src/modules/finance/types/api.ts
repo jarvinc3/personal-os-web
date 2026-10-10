@@ -75,6 +75,14 @@ export const FINANCE_RECEIVABLES_QUERY_KEY = [
   ...FINANCE_QUERY_KEY,
   "receivables",
 ] as const
+export const FINANCE_SAVINGS_GOAL_CONTRIBUTIONS_QUERY_KEY = [
+  ...FINANCE_QUERY_KEY,
+  "savings-goal-contributions",
+] as const
+export const FINANCE_RECEIVABLE_PAYMENTS_QUERY_KEY = [
+  ...FINANCE_QUERY_KEY,
+  "receivable-payments",
+] as const
 export const FINANCE_EMAIL_SOURCES_QUERY_KEY = [
   ...FINANCE_QUERY_KEY,
   "email-sources",

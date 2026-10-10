@@ -16,12 +16,16 @@ import {
 import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
 import { joinPlanningCaption } from "@/src/modules/finance/lib/planning-lists"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/lib/money"
-import { formatFinanceMoney, parseFinanceMoney } from "@/src/modules/finance/lib/money"
+import {
+  formatFinanceMoney,
+  parseFinanceMoney,
+} from "@/src/modules/finance/lib/money"
 import {
   FINANCE_BUDGET_PERIOD_LABEL,
   type FinanceBudget,
 } from "@/src/modules/finance/types/entities"
 import { Button } from "@/src/shared/components/ui/button"
+import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import {
   Empty,
   EmptyDescription,
@@ -39,6 +43,7 @@ import {
   ChevronRightIcon,
   PlusIcon,
 } from "lucide-react"
+import { useRouter } from "next/navigation"
 import { useState } from "react"
 
 type FinanceBudgetsListProps = {
@@ -62,6 +67,7 @@ export function FinanceBudgetsList({
   display,
 }: FinanceBudgetsListProps) {
   const [page, setPage] = useState(1)
+  const router = useRouter()
   const {
     open: openBudgetSheet,
     sheetId: budgetSheetId,
@@ -70,7 +76,7 @@ export function FinanceBudgetsList({
   const categoriesQuery = useCategories(enabled)
   const categories = filterCategoriesByType(
     categoriesQuery.data ?? [],
-    "EXPENSE",
+    "EXPENSE"
   )
   const listQuery = useBudgets(enabled, {
     page,
@@ -186,7 +192,9 @@ export function FinanceBudgetsList({
                 targetHint="Tope"
                 targetLabel={formatFinanceMoney(budget.amountLimit, display)}
                 caption={joinPlanningCaption(remainingLabel, period, range)}
-                onPress={() => setOpenBudgetSheet(true, budget.id)}
+                onPress={() =>
+                  router.push(APP_ROUTES.app.financeBudget(budget.id))
+                }
               />
             )
           })

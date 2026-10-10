@@ -1,5 +1,27 @@
-import type { FinanceAccount, FinanceCard } from "@/src/modules/finance/types/entities"
+import type {
+  FinanceAccount,
+  FinanceCard,
+} from "@/src/modules/finance/types/entities"
 import { splitLedgerTarget } from "./ledger-payloads.ts"
+import { parseFinanceMoney } from "./money.ts"
+
+/**
+ * A destination only counts when it encodes a real account or card. The empty
+ * picker value (`CATALOG_NONE`) is a non-empty string, so a length check alone
+ * would accept it and enable saving a movement without a destination.
+ */
+export function isLedgerTargetInput(value: string): boolean {
+  const target = splitLedgerTarget(value)
+  return Boolean(target.accountId || target.cardId)
+}
+
+export function isPositiveAmountInput(value: string): boolean {
+  const amount = parseFinanceMoney(value)
+  if (amount === null) {
+    return false
+  }
+  return amount > 0
+}
 
 export function todayDateInput(now = new Date()): string {
   const month = String(now.getMonth() + 1).padStart(2, "0")
@@ -9,9 +31,11 @@ export function todayDateInput(now = new Date()): string {
 
 export function sliceDateInput(
   value: string | undefined,
-  fallback = todayDateInput(),
+  fallback = todayDateInput()
 ): string {
-  if (!value) return fallback
+  if (!value) {
+    return fallback
+  }
   return value.slice(0, 10)
 }
 
@@ -38,26 +62,34 @@ export function currencyForTarget(
   destination: string,
   accounts: FinanceAccount[],
   cards: FinanceCard[],
-  fallback: string,
+  fallback: string
 ): string {
   const target = splitLedgerTarget(destination)
   const account = accounts.find((item) => item.id === target.accountId)
-  if (account?.currency) return account.currency
+  if (account?.currency) {
+    return account.currency
+  }
   const card = cards.find((item) => item.id === target.cardId)
   const cardCurrency = card?.balances[0]?.currency
-  if (cardCurrency) return cardCurrency
+  if (cardCurrency) {
+    return cardCurrency
+  }
   return fallback
 }
 
 export function ledgerTargetLabel(
   destination: string,
   accounts: FinanceAccount[],
-  cards: FinanceCard[],
+  cards: FinanceCard[]
 ): string | null {
   const target = splitLedgerTarget(destination)
   const account = accounts.find((item) => item.id === target.accountId)
-  if (account) return account.name
+  if (account) {
+    return account.name
+  }
   const card = cards.find((item) => item.id === target.cardId)
-  if (card) return card.name
+  if (card) {
+    return card.name
+  }
   return null
 }

@@ -1,7 +1,11 @@
-'use client';
+"use client"
 
-import { Button } from '@/src/shared/components/ui/button';
-import { Input } from '@/src/shared/components/ui/input';
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from "@/src/shared/components/ui/input-group"
 import {
   Select,
   SelectContent,
@@ -10,10 +14,10 @@ import {
   SelectLabel,
   SelectTrigger,
   SelectValue,
-} from "@/src/shared/components/ui/select";
-import { Switch } from '@/src/shared/components/ui/switch';
-import { cn } from '@/src/shared/lib/utils';
-import { Eye, EyeOff, KeyRound, type LucideIcon } from 'lucide-react';
+} from "@/src/shared/components/ui/select"
+import { Switch } from "@/src/shared/components/ui/switch"
+import { cn } from "@/src/shared/lib/utils"
+import { Eye, EyeOff, KeyRound, type LucideIcon } from "lucide-react"
 import {
   useId,
   useState,
@@ -21,51 +25,76 @@ import {
   type KeyboardEventHandler,
   type ReactNode,
   type Ref,
-} from 'react';
+} from "react"
 
-import { Field, FieldContent, FieldDescription, FieldError, FieldLabel, FieldTitle } from '@/src/shared/components/ui/field';
+import {
+  Field,
+  FieldContent,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+  FieldTitle,
+} from "@/src/shared/components/ui/field"
 
 type SelectFieldProps = {
-  label?: string;
-  value: string;
-  onChange: (value: string) => void;
-  options: { value: string; label: string; mark?: ReactNode }[];
-  disabled?: boolean;
-  icon?: LucideIcon;
-};
+  label?: string
+  value: string
+  onChange: (value: string) => void
+  options: { value: string; label: string; mark?: ReactNode }[]
+  disabled?: boolean
+  icon?: LucideIcon
+}
 
-export function SelectField({ label, value, onChange, options, disabled, icon: Icon }: SelectFieldProps) {
-  const selectId = useId();
-  const labelId = useId();
+export function SelectField({
+  label,
+  value,
+  onChange,
+  options,
+  disabled,
+  icon: Icon,
+}: SelectFieldProps) {
+  const selectId = useId()
+  const labelId = useId()
 
   return (
     <Field className="flex flex-col gap-1">
       {label ? (
-        <FieldLabel id={labelId} htmlFor={selectId} className="text-sm text-muted-foreground">
+        <FieldLabel
+          id={labelId}
+          htmlFor={selectId}
+          className="text-sm text-muted-foreground"
+        >
           {label}
         </FieldLabel>
       ) : null}
       <Select
         value={value}
-        onValueChange={(next) => onChange(next ?? '')}
+        onValueChange={(next) => onChange(next ?? "")}
         disabled={disabled}
         items={options.map(({ value, label }) => ({ value, label }))}
         modal={false}
       >
-        <SelectTrigger className={cn("relative w-full max-w-full cursor-pointer", Icon && "pl-9")}>
+        <SelectTrigger
+          className={cn(
+            "relative w-full max-w-full cursor-pointer",
+            Icon && "pl-9"
+          )}
+        >
           {Icon ? (
             <Icon className="pointer-events-none absolute left-3 size-4.5 text-muted-foreground" />
           ) : null}
           <SelectValue placeholder={label}>
             {(() => {
-              const selected = options.find((item) => item.value === value);
-              if (!selected) return null;
+              const selected = options.find((item) => item.value === value)
+              if (!selected) {
+                return null
+              }
               return (
                 <span className="flex items-center gap-2">
                   {selected.mark}
                   <span className="truncate">{selected.label}</span>
                 </span>
-              );
+              )
             })()}
           </SelectValue>
         </SelectTrigger>
@@ -84,18 +113,18 @@ export function SelectField({ label, value, onChange, options, disabled, icon: I
         </SelectContent>
       </Select>
     </Field>
-  );
+  )
 }
 
 type OptionRowProps = {
-  label: string;
-  description?: string;
-  selected?: boolean;
-  onPress?: () => void;
-  trailing?: ReactNode;
-  icon?: LucideIcon;
-  iconColor?: string;
-};
+  label: string
+  description?: string
+  selected?: boolean
+  onPress?: () => void
+  trailing?: ReactNode
+  icon?: LucideIcon
+  iconColor?: string
+}
 
 export function OptionRow({
   label,
@@ -110,35 +139,39 @@ export function OptionRow({
     <FieldLabel
       onClick={onPress}
       className={cn(
-        'flex flex-row gap-3 items-center px-3 py-3 w-full text-left rounded-xl border cursor-pointer hover:bg-card/70 active:bg-muted/80 active:scale-[0.99] transition-all duration-100 ease-in-out',
-        selected ? 'border-primary bg-card/50' : 'border-border bg-card',
+        "flex w-full cursor-pointer flex-row items-center gap-3 rounded-xl border px-3 py-3 text-left transition-all duration-100 ease-in-out hover:bg-card/70 active:scale-[0.99] active:bg-muted/80",
+        selected ? "border-primary bg-card/50" : "border-border bg-card"
       )}
     >
       {Icon && (
         <div
-          className="flex justify-center items-center rounded-md size-9 shrink-0"
+          className="flex size-9 shrink-0 items-center justify-center rounded-md"
           style={{ backgroundColor: iconColor ? `${iconColor}1a` : undefined }}
         >
           <Icon className="size-4.5" style={{ color: iconColor }} />
         </div>
       )}
       <FieldContent>
-        <FieldTitle className="text-sm text-muted-foreground">{label}</FieldTitle>
-        <FieldDescription className="text-xs text-muted-foreground">{description}</FieldDescription>
+        <FieldTitle className="text-sm text-muted-foreground">
+          {label}
+        </FieldTitle>
+        <FieldDescription className="text-xs text-muted-foreground">
+          {description}
+        </FieldDescription>
       </FieldContent>
       {trailing}
     </FieldLabel>
-  );
+  )
 }
 
 type SelectionGridProps<T> = {
-  items: T[];
-  value: string;
-  onValueChange: (value: string) => void;
-  getItemKey: (item: T) => string;
-  getItemValue: (item: T) => string;
-  renderCell: (item: T) => ReactNode;
-};
+  items: T[]
+  value: string
+  onValueChange: (value: string) => void
+  getItemKey: (item: T) => string
+  getItemValue: (item: T) => string
+  renderCell: (item: T) => ReactNode
+}
 
 export function SelectionGrid<T>({
   items,
@@ -151,45 +184,45 @@ export function SelectionGrid<T>({
   return (
     <div className="grid grid-cols-4 gap-2">
       {items.map((item) => {
-        const itemValue = getItemValue(item);
-        const selected = value === itemValue;
+        const itemValue = getItemValue(item)
+        const selected = value === itemValue
         return (
           <button
             key={getItemKey(item)}
             type="button"
             onClick={() => onValueChange(itemValue)}
             className={cn(
-              'overflow-hidden rounded-xl border-2 aspect-square',
-              selected ? 'border-primary' : 'border-transparent',
+              "aspect-square overflow-hidden rounded-xl border-2",
+              selected ? "border-primary" : "border-transparent"
             )}
           >
             {renderCell(item)}
           </button>
-        );
+        )
       })}
     </div>
-  );
+  )
 }
 
 type FormTextFieldProps = {
-  label?: string;
-  value: string;
-  onChange: (value: string) => void;
-  onBlur?: () => void;
-  onKeyDown?: KeyboardEventHandler<HTMLInputElement>;
-  placeholder?: string;
-  disabled?: boolean;
-  error?: string;
-  invalid?: boolean;
-  type?: HTMLInputTypeAttribute;
-  autoComplete?: string;
-  ariaLabel?: string;
-  icon?: LucideIcon;
-  inputRef?: Ref<HTMLInputElement>;
-  revealable?: boolean;
-  maxLength?: number;
-  className?: string;
-};
+  label?: string
+  value: string
+  onChange: (value: string) => void
+  onBlur?: () => void
+  onKeyDown?: KeyboardEventHandler<HTMLInputElement>
+  placeholder?: string
+  disabled?: boolean
+  error?: string
+  invalid?: boolean
+  type?: HTMLInputTypeAttribute
+  autoComplete?: string
+  ariaLabel?: string
+  icon?: LucideIcon
+  inputRef?: Ref<HTMLInputElement>
+  revealable?: boolean
+  maxLength?: number
+  className?: string
+}
 
 export function FormTextField({
   label,
@@ -201,7 +234,7 @@ export function FormTextField({
   disabled,
   error,
   invalid,
-  type = 'text',
+  type = "text",
   autoComplete,
   ariaLabel,
   icon: Icon,
@@ -210,28 +243,37 @@ export function FormTextField({
   maxLength,
   className,
 }: FormTextFieldProps) {
-  const hasError = invalid ?? Boolean(error);
-  const FieldIcon = Icon ?? (type === "password" ? KeyRound : undefined);
-  const [revealed, setRevealed] = useState(false);
-  const canReveal = revealable && type === 'password';
-  const inputType = canReveal && revealed ? 'text' : type;
+  const fieldId = useId()
+  const hasError = invalid ?? Boolean(error)
+  const FieldIcon = Icon ?? (type === "password" ? KeyRound : undefined)
+  const [revealed, setRevealed] = useState(false)
+  const canReveal = revealable && type === "password"
+  const inputType = canReveal && revealed ? "text" : type
 
   return (
-    <Field data-invalid={hasError ? true : undefined} className="flex relative flex-col gap-1">
-      {label ? <FieldLabel className="text-sm text-muted-foreground">{label}</FieldLabel> : null}
-      <div className="flex relative flex-row gap-2 items-center">
+    <Field
+      data-invalid={hasError ? true : undefined}
+      data-disabled={disabled ? true : undefined}
+      className="gap-1"
+    >
+      {label ? (
+        <FieldLabel htmlFor={fieldId} className="text-sm text-muted-foreground">
+          {label}
+        </FieldLabel>
+      ) : null}
+      <InputGroup className={cn("h-10", className)}>
         {FieldIcon ? (
-          <div className="absolute left-3 top-1/2 -translate-y-1/2">
-            <FieldIcon className="size-4.5" />
-          </div>
+          <InputGroupAddon align="inline-start">
+            <FieldIcon className="text-muted-foreground" />
+          </InputGroupAddon>
         ) : null}
-        <Input
+        <InputGroupInput
           ref={inputRef}
-          className={cn(FieldIcon && "pl-9", canReveal && "pr-10", className)}
+          id={fieldId}
           type={inputType}
           value={value}
           maxLength={maxLength}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={(event) => onChange(event.target.value)}
           onBlur={onBlur}
           onKeyDown={onKeyDown}
           placeholder={placeholder}
@@ -241,34 +283,35 @@ export function FormTextField({
           aria-invalid={hasError || undefined}
         />
         {canReveal ? (
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-xs"
-            className="absolute right-1 top-1/2 -translate-y-1/2 text-muted-foreground"
-            aria-label={revealed ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-            aria-pressed={revealed}
-            disabled={disabled}
-            onClick={() => setRevealed((current) => !current)}
-          >
-            {revealed ? <EyeOff /> : <Eye />}
-          </Button>
+          <InputGroupAddon align="inline-end">
+            <InputGroupButton
+              size="icon-xs"
+              aria-label={
+                revealed ? "Ocultar contraseña" : "Mostrar contraseña"
+              }
+              aria-pressed={revealed}
+              disabled={disabled}
+              onClick={() => setRevealed((current) => !current)}
+            >
+              {revealed ? <EyeOff /> : <Eye />}
+            </InputGroupButton>
+          </InputGroupAddon>
         ) : null}
-      </div>
+      </InputGroup>
       {error ? <FieldError>{error}</FieldError> : null}
     </Field>
-  );
+  )
 }
 
 type SwitchFieldRowProps = {
-  label: string;
-  description?: string;
-  checked: boolean;
-  onCheckedChange: (checked: boolean) => void;
-  disabled?: boolean;
-  icon: LucideIcon;
-  iconColor?: string;
-};
+  label: string
+  description?: string
+  checked: boolean
+  onCheckedChange: (checked: boolean) => void
+  disabled?: boolean
+  icon: LucideIcon
+  iconColor?: string
+}
 
 export function SwitchFieldRow({
   label,
@@ -279,20 +322,29 @@ export function SwitchFieldRow({
   icon: Icon,
   iconColor,
 }: SwitchFieldRowProps) {
-  const id = useId();
+  const id = useId()
   return (
-    <div className="flex flex-row gap-3 justify-between items-center px-3 py-3 rounded-xl border border-border/60 bg-card">
+    <div className="flex flex-row items-center justify-between gap-3 rounded-xl border border-border/60 bg-card px-3 py-3">
       <div
-        className="flex justify-center items-center rounded-md size-9 shrink-0"
+        className="flex size-9 shrink-0 items-center justify-center rounded-md"
         style={{ backgroundColor: iconColor ? `${iconColor}1a` : undefined }}
       >
         <Icon className="size-4.5" style={{ color: iconColor }} />
       </div>
-      <label htmlFor={id} className="flex-1 min-w-0 cursor-pointer">
-        <FieldLabel className="text-sm text-muted-foreground">{label}</FieldLabel>
-        {description ? <p className="text-xs text-muted-foreground">{description}</p> : null}
+      <label htmlFor={id} className="min-w-0 flex-1 cursor-pointer">
+        <FieldLabel className="text-sm text-muted-foreground">
+          {label}
+        </FieldLabel>
+        {description ? (
+          <p className="text-xs text-muted-foreground">{description}</p>
+        ) : null}
       </label>
-      <Switch id={id} checked={checked} onCheckedChange={onCheckedChange} disabled={disabled} />
+      <Switch
+        id={id}
+        checked={checked}
+        onCheckedChange={onCheckedChange}
+        disabled={disabled}
+      />
     </div>
-  );
+  )
 }

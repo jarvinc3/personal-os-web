@@ -1,10 +1,11 @@
 "use client"
 
-import { BrandLogo, CardNetworkMark } from "@/src/modules/finance/components/brand-logo"
 import {
-  ledgerTargetLabel,
-} from "@/src/modules/finance/lib/ledger-form"
+  AccountProductRow,
+  CardProductRow,
+} from "@/src/modules/finance/components/accounts/institution-product-lists"
 import { splitLedgerTarget } from "@/src/modules/finance/lib/ledger-payloads"
+import type { FinanceMoneyDisplay } from "@/src/modules/finance/lib/money"
 import type { FinanceAccount, FinanceCard } from "@/src/modules/finance/types/entities"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
 import { ChevronDownIcon, WalletIcon } from "lucide-react"
@@ -13,6 +14,7 @@ type DestinationTriggerProps = {
   destination: string
   accounts: FinanceAccount[]
   cards: FinanceCard[]
+  display: FinanceMoneyDisplay
   disabled?: boolean
   placeholder?: string
   onClick: () => void
@@ -22,14 +24,40 @@ export function DestinationTrigger({
   destination,
   accounts,
   cards,
+  display,
   disabled,
   placeholder = "Elige cuenta o tarjeta",
   onClick,
 }: DestinationTriggerProps) {
-  const label = ledgerTargetLabel(destination, accounts, cards)
   const target = splitLedgerTarget(destination)
   const account = accounts.find((item) => item.id === target.accountId)
   const card = cards.find((item) => item.id === target.cardId)
+
+  if (card) {
+    return (
+      <div className={cn(disabled && "pointer-events-none opacity-50")}>
+        <CardProductRow
+          card={card}
+          accounts={accounts}
+          display={display}
+          onPress={onClick}
+        />
+      </div>
+    )
+  }
+
+  if (account) {
+    return (
+      <div className={cn(disabled && "pointer-events-none opacity-50")}>
+        <AccountProductRow
+          account={account}
+          display={display}
+          onPress={onClick}
+        />
+      </div>
+    )
+  }
+
   return (
     <button
       type="button"
@@ -40,30 +68,10 @@ export function DestinationTrigger({
       )}
       onClick={onClick}
     >
-      {card ? (
-        <span className="inline-flex items-center gap-1">
-          <BrandLogo
-            name={card.institutionName || card.name}
-            logoUrl={card.institutionLogoUrl}
-            size={28}
-          />
-          <CardNetworkMark
-            network={card.network}
-            logoUrl={card.networkLogoUrl}
-            size={28}
-          />
-        </span>
-      ) : (
-        <BrandLogo
-          name={account?.institutionName || account?.name || label || "Cuenta"}
-          logoUrl={account?.institutionLogoUrl}
-          size={28}
-        />
-      )}
       <span className="min-w-0 flex-1 truncate text-sm font-medium">
-        {label ?? placeholder}
+        {placeholder}
       </span>
-      {!label ? <WalletIcon className="size-4 text-muted-foreground" /> : null}
+      <WalletIcon className="size-4 text-muted-foreground" />
       <ChevronDownIcon className="size-4 shrink-0 text-muted-foreground" />
     </button>
   )

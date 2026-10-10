@@ -22,6 +22,9 @@ export type PlanningProgressCardProps = {
   leading?: ReactNode
   tone?: PlanningProgressTone
   accentColor?: string | null
+  /** Solid wash for product cards that belong to an institution. */
+  surfaceColor?: string | null
+  decoration?: ReactNode
   badge?: { label: string; variant?: BadgeVariant }
   progress: number | null
   currentHint: string
@@ -67,10 +70,12 @@ function RingProgress({
   value,
   tone,
   accentColor,
+  tinted,
 }: {
   value: number | null
   tone: PlanningProgressTone
   accentColor?: string | null
+  tinted?: boolean
 }) {
   const visual = value === null ? 0 : clampPct(value)
   const offset = RING_CIRCUMFERENCE - (visual / 100) * RING_CIRCUMFERENCE
@@ -88,7 +93,7 @@ function RingProgress({
           cy="24"
           r={RING_RADIUS}
           fill="none"
-          className="stroke-muted"
+          className={tinted ? "stroke-white/25" : "stroke-muted"}
           strokeWidth="4"
         />
         <circle
@@ -96,8 +101,16 @@ function RingProgress({
           cy="24"
           r={RING_RADIUS}
           fill="none"
-          className={accentColor ? undefined : TONE_STROKE[tone]}
-          style={accentColor ? { stroke: accentColor } : undefined}
+          className={
+            tinted || accentColor ? undefined : TONE_STROKE[tone]
+          }
+          style={
+            tinted
+              ? { stroke: "white" }
+              : accentColor
+                ? { stroke: accentColor }
+                : undefined
+          }
           strokeWidth="4"
           strokeLinecap="round"
           strokeDasharray={RING_CIRCUMFERENCE}
@@ -118,6 +131,8 @@ export function PlanningProgressCard({
   leading,
   tone = "info",
   accentColor,
+  surfaceColor,
+  decoration,
   badge,
   progress,
   currentHint,
@@ -129,6 +144,7 @@ export function PlanningProgressCard({
 }: PlanningProgressCardProps) {
   const barWidth = progress === null ? 0 : clampPct(progress)
   const showLeading = Boolean(leading) || Boolean(Icon)
+  const tinted = Boolean(surfaceColor)
 
   const content = (
     <>
@@ -137,10 +153,11 @@ export function PlanningProgressCard({
           <span
             className={cn(
               "flex size-10 shrink-0 items-center justify-center rounded-full",
-              accentColor ? undefined : TONE_ICON[tone],
+              tinted || accentColor ? undefined : TONE_ICON[tone],
+              tinted && "bg-transparent",
             )}
             style={
-              accentColor
+              !tinted && accentColor
                 ? {
                     backgroundColor: `color-mix(in srgb, ${accentColor} 18%, transparent)`,
                     color: accentColor,
@@ -158,7 +175,8 @@ export function PlanningProgressCard({
               {description ? (
                 <span
                   className={cn(
-                    "block text-xs text-muted-foreground",
+                    "block text-xs",
+                    tinted ? "text-white/70" : "text-muted-foreground",
                     typeof description === "string" && "truncate",
                   )}
                 >
@@ -167,17 +185,34 @@ export function PlanningProgressCard({
               ) : null}
             </span>
             {badge ? (
-              <Badge variant={badge.variant ?? "secondary"}>{badge.label}</Badge>
+              <Badge
+                variant={badge.variant ?? "secondary"}
+                className={
+                  tinted ? "border-transparent bg-white/15 text-white" : undefined
+                }
+              >
+                {badge.label}
+              </Badge>
             ) : null}
           </span>
         </span>
-        <RingProgress value={progress} tone={tone} accentColor={accentColor} />
+        <RingProgress
+          value={progress}
+          tone={tone}
+          accentColor={accentColor}
+          tinted={tinted}
+        />
       </span>
 
       <span className="flex flex-col gap-1.5">
         <span className="flex items-end justify-between gap-3">
           <span className="min-w-0">
-            <span className="block text-xs text-muted-foreground">
+            <span
+              className={cn(
+                "block text-xs",
+                tinted ? "text-white/70" : "text-muted-foreground",
+              )}
+            >
               {currentHint}
             </span>
             <span className="block truncate text-sm font-semibold tabular-nums">
@@ -185,45 +220,85 @@ export function PlanningProgressCard({
             </span>
           </span>
           <span className="min-w-0 text-right">
-            <span className="block text-xs text-muted-foreground">
+            <span
+              className={cn(
+                "block text-xs",
+                tinted ? "text-white/70" : "text-muted-foreground",
+              )}
+            >
               {targetHint}
             </span>
-            <span className="block truncate text-sm font-medium tabular-nums text-muted-foreground">
+            <span
+              className={cn(
+                "block truncate text-sm font-medium tabular-nums",
+                tinted ? "text-white/80" : "text-muted-foreground",
+              )}
+            >
               {targetLabel}
             </span>
           </span>
         </span>
-        <span className="h-2 w-full overflow-hidden rounded-full bg-muted">
+        <span
+          className={cn(
+            "h-2 w-full overflow-hidden rounded-full",
+            tinted ? "bg-white/20" : "bg-muted",
+          )}
+        >
           <span
             className={cn(
               "block h-full rounded-full transition-[width]",
-              accentColor ? undefined : TONE_BAR[tone],
+              tinted || accentColor ? undefined : TONE_BAR[tone],
+              tinted && "bg-white",
             )}
             style={{
               width: `${barWidth}%`,
-              backgroundColor: accentColor ?? undefined,
+              backgroundColor: tinted ? undefined : (accentColor ?? undefined),
             }}
           />
         </span>
         {caption ? (
-          <span className="text-xs text-muted-foreground">{caption}</span>
+          <span
+            className={cn(
+              "text-xs",
+              tinted ? "text-white/70" : "text-muted-foreground",
+            )}
+          >
+            {caption}
+          </span>
         ) : null}
       </span>
     </>
   )
 
   const className = cn(
-    "flex w-full flex-col gap-3 rounded-2xl bg-muted/50 p-3 text-left",
-    onPress && cn(PRESSABLE_CLASS, "cursor-pointer hover:bg-muted"),
+    "relative flex w-full flex-col gap-3 overflow-hidden rounded-2xl p-3 text-left",
+    surfaceColor ? "text-white" : "bg-muted/50",
+    onPress &&
+      cn(
+        PRESSABLE_CLASS,
+        "cursor-pointer",
+        surfaceColor ? "hover:brightness-110" : "hover:bg-muted",
+      ),
+  )
+  const style = surfaceColor ? { backgroundColor: surfaceColor } : undefined
+  const body = (
+    <>
+      {decoration}
+      <span className="relative z-10 flex flex-col gap-3">{content}</span>
+    </>
   )
 
   if (onPress) {
     return (
-      <button type="button" className={className} onClick={onPress}>
-        {content}
+      <button type="button" className={className} style={style} onClick={onPress}>
+        {body}
       </button>
     )
   }
 
-  return <div className={className}>{content}</div>
+  return (
+    <div className={className} style={style}>
+      {body}
+    </div>
+  )
 }

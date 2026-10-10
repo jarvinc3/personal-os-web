@@ -16,6 +16,7 @@ import {
   type FinanceLoan,
 } from "@/src/modules/finance/types/entities"
 import { Badge } from "@/src/shared/components/ui/badge"
+import { cn } from "@/src/shared/lib/utils"
 import { CalendarDaysIcon } from "lucide-react"
 
 type LoanProgressCardProps = {
@@ -24,8 +25,39 @@ type LoanProgressCardProps = {
   institution?: {
     name: string
     logoUrl?: string | null
+    color?: string | null
   } | null
   onPress: () => void
+}
+
+export function LoanSurfaceMark({
+  tinted = true,
+  size = "card",
+}: {
+  tinted?: boolean
+  size?: "card" | "header"
+}) {
+  const header = size === "header"
+  return (
+    <span aria-hidden className="pointer-events-none absolute inset-0">
+      <span
+        className={cn(
+          "absolute",
+          header ? "-top-16 -right-10 size-72" : "-top-8 -right-6 size-40",
+          tinted ? "bg-white/20" : "bg-foreground/10",
+        )}
+        style={{ clipPath: "polygon(50% 0%, 100% 100%, 0% 100%)" }}
+      />
+      <span
+        className={cn(
+          "absolute",
+          header ? "-bottom-20 right-20 size-52" : "right-16 -bottom-10 size-28",
+          tinted ? "bg-black/20" : "bg-foreground/15",
+        )}
+        style={{ clipPath: "polygon(50% 100%, 0% 0%, 100% 0%)" }}
+      />
+    </span>
+  )
 }
 
 export function LoanProgressCard({
@@ -37,16 +69,24 @@ export function LoanProgressCard({
   const money = { ...display, currency: loan.currency }
   const { paidOff, progress } = loanProgressSummary(loan)
   const rateLabel = formatRatePercentLabel(loan.interestRate)
+  const surfaceColor = institution?.color || null
+  const tinted = Boolean(surfaceColor)
+  const pillClass = tinted ? "border-transparent bg-white/15 text-white" : undefined
 
   return (
     <PlanningProgressCard
       title={loan.lenderName}
+      surfaceColor={surfaceColor}
+      decoration={<LoanSurfaceMark tinted={tinted} />}
       description={
         <span className="mt-1 flex flex-wrap items-center gap-1">
-          <Badge variant="info">
+          <Badge variant="info" className={pillClass}>
             {FINANCE_INSTALLMENT_FREQ_LABEL[loan.installmentFreq]}
           </Badge>
-          <Badge variant={rateLabel === "Sin tasa" ? "success" : "warning"}>
+          <Badge
+            variant={rateLabel === "Sin tasa" ? "success" : "warning"}
+            className={pillClass}
+          >
             {rateLabel}
           </Badge>
         </span>
@@ -55,7 +95,7 @@ export function LoanProgressCard({
         <BrandLogo
           name={institution?.name ?? loan.lenderName}
           logoUrl={institution?.logoUrl}
-          size={28}
+          size={34}
         />
       }
       tone={paidOff ? "success" : "warning"}
@@ -74,7 +114,12 @@ export function LoanProgressCard({
             {loan.paidInstallments}/{loan.totalInstallments} cuotas
           </span>
           {loan.nextDueDate ? (
-            <span className="inline-flex items-center gap-1.5 font-medium text-foreground/80">
+            <span
+              className={cn(
+                "inline-flex items-center gap-1.5 font-medium",
+                tinted ? "text-white/80" : "text-foreground/80",
+              )}
+            >
               <CalendarDaysIcon className="size-3.5 shrink-0" aria-hidden />
               Próximo pago · {formatCalendarDate(loan.nextDueDate)}
             </span>

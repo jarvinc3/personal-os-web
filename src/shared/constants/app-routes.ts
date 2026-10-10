@@ -26,6 +26,8 @@ export const APP_ROUTES = {
     financeAccount: (accountId: string) => `/finance/accounts/${accountId}`,
     financeCard: (cardId: string) => `/finance/accounts/cards/${cardId}`,
     financeTransactions: "/finance/transactions",
+    financeTransaction: (transactionId: string) =>
+      `/finance/transactions/${transactionId}`,
     financeTransactionNew: "/finance/transactions/new",
     financeTransactionEdit: (transactionId: string) =>
       `/finance/transactions/${transactionId}/edit`,
@@ -33,6 +35,13 @@ export const APP_ROUTES = {
     financePlanning: "/finance/planning",
     financeLoans: "/finance/loans",
     financeLoan: (loanId: string) => `/finance/loans/${loanId}`,
+    financeBudget: (budgetId: string) => `/finance/budgets/${budgetId}`,
+    financeBudgets: "/finance/budgets",
+    financeSavingsGoals: "/finance/savings-goals",
+    financeSavingsGoal: (goalId: string) => `/finance/savings-goals/${goalId}`,
+    financeReceivables: "/finance/receivables",
+    financeReceivable: (receivableId: string) =>
+      `/finance/receivables/${receivableId}`,
     settingsFinanceCurrencies: "/settings/finance/currencies",
   },
 } as const

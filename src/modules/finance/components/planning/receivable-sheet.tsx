@@ -15,7 +15,7 @@ import {
 } from "@/src/modules/finance/hooks/use-receivables"
 import { financeErrorMessage } from "@/src/modules/finance/lib/finance-error"
 import { formatPlanningDate } from "@/src/modules/finance/lib/planning-lists"
-import { buildCreateReceivableBody } from "@/src/modules/finance/lib/planning-payloads"
+import { buildReceivableBody } from "@/src/modules/finance/lib/planning-payloads"
 import type {
   FinanceReceivable,
   FinanceReceivableStatus,
@@ -115,7 +115,7 @@ export function ReceivableSheet({
   )
 
   const onSubmit = submitForm(async (values) => {
-    const payload = buildCreateReceivableBody(values)
+    const payload = buildReceivableBody(values, { isUpdate: isEdit })
     if (!payload.ok) {
       appToast.error({ text1: payload.error })
       return
@@ -136,20 +136,6 @@ export function ReceivableSheet({
       appToast.error({ text1: financeErrorMessage(error) })
     }
   })
-
-  async function onMarkPaid() {
-    if (!receivable) return
-    try {
-      await updateMutation.mutateAsync({
-        id: receivable.id,
-        body: { status: "PAID" },
-      })
-      appToast.success({ text1: "Cobro marcado como pagado" })
-      onOpenChange(false)
-    } catch (error) {
-      appToast.error({ text1: financeErrorMessage(error) })
-    }
-  }
 
   async function onArchiveReceivable() {
     if (!receivable) return
@@ -235,16 +221,6 @@ export function ReceivableSheet({
       }}
     >
       <SummarySection title="Cobro" icon={HandshakeIcon}>
-        {isEdit && receivable?.status !== "PAID" ? (
-          <Button
-            type="button"
-            variant="secondary"
-            disabled={isPending}
-            onClick={() => void onMarkPaid()}
-          >
-            Marcar pagado
-          </Button>
-        ) : null}
         <Controller
           control={control}
           name="debtorName"
@@ -312,10 +288,12 @@ export function ReceivableSheet({
                 onBlur={field.onBlur}
                 error={errors.paidAmount?.message}
                 placeholder="Vacío si Pagado (el API completa)"
+                disabled={isEdit}
               />
               <FinanceHelpText>
-                Si supera el monto, el API responde 400. Cancelado admite cobro
-                parcial.
+                {isEdit
+                  ? "Se actualiza al registrar cada cobro."
+                  : "Si supera el monto, el API responde 400. Cancelado admite cobro parcial."}
               </FinanceHelpText>
             </div>
           )}

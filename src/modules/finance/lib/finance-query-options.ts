@@ -9,7 +9,9 @@ import {
   FINANCE_EMAIL_PENDING_QUERY_KEY,
   FINANCE_INSTITUTIONS_QUERY_KEY,
   FINANCE_LOANS_QUERY_KEY,
+  FINANCE_RECEIVABLE_PAYMENTS_QUERY_KEY,
   FINANCE_RECEIVABLES_QUERY_KEY,
+  FINANCE_SAVINGS_GOAL_CONTRIBUTIONS_QUERY_KEY,
   FINANCE_SAVINGS_GOALS_QUERY_KEY,
   type FinancePaginated,
 } from "../types/api.ts"
@@ -26,7 +28,9 @@ import type {
   FinancePendingEmailMessage,
   FinanceEmailProcessedMessage,
   FinanceReceivable,
+  FinanceReceivablePayment,
   FinanceSavingsGoal,
+  FinanceSavingsGoalContribution,
 } from "../types/entities.ts"
 import {
   buildBudgetsSearchParams,
@@ -48,9 +52,13 @@ const PATHS = {
   cardStatements: (cardId: string) => `/finance/cards/${cardId}/statements`,
   categories: "/finance/categories",
   savingsGoals: "/finance/savings-goals",
+  savingsGoalContributions: (goalId: string) =>
+    `/finance/savings-goals/${goalId}/contributions`,
   loans: "/finance/loans",
   loanInstallments: (loanId: string) => `/finance/loans/${loanId}/installments`,
   receivables: "/finance/receivables",
+  receivablePayments: (receivableId: string) =>
+    `/finance/receivables/${receivableId}/payments`,
   budgets: "/finance/budgets",
   emailMailboxes: "/finance/email-sync/mailboxes",
   emailPending: "/finance/email-sync/pending",
@@ -103,6 +111,22 @@ export function savingsGoalsQuery(get: FinanceQueryGet = defaultFinanceGet) {
   }
 }
 
+export function savingsGoalContributionsQuery(
+  goalId: string,
+  get: FinanceQueryGet = defaultFinanceGet
+) {
+  return {
+    queryKey: [
+      ...FINANCE_SAVINGS_GOAL_CONTRIBUTIONS_QUERY_KEY,
+      goalId,
+    ] as const,
+    queryFn: async () =>
+      asFinanceArray<FinanceSavingsGoalContribution>(
+        await get(PATHS.savingsGoalContributions(goalId))
+      ),
+  }
+}
+
 export function loansQuery(get: FinanceQueryGet = defaultFinanceGet) {
   return {
     queryKey: FINANCE_LOANS_QUERY_KEY,
@@ -128,6 +152,19 @@ export function receivablesQuery(get: FinanceQueryGet = defaultFinanceGet) {
     queryKey: FINANCE_RECEIVABLES_QUERY_KEY,
     queryFn: async () =>
       asFinanceArray<FinanceReceivable>(await get(PATHS.receivables)),
+  }
+}
+
+export function receivablePaymentsQuery(
+  receivableId: string,
+  get: FinanceQueryGet = defaultFinanceGet
+) {
+  return {
+    queryKey: [...FINANCE_RECEIVABLE_PAYMENTS_QUERY_KEY, receivableId] as const,
+    queryFn: async () =>
+      asFinanceArray<FinanceReceivablePayment>(
+        await get(PATHS.receivablePayments(receivableId))
+      ),
   }
 }
 

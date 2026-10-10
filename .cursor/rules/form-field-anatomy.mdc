@@ -1,0 +1,30 @@
+---
+description: Label above, muted and small; error inline under the field; rules between fields live in the zod schema.
+globs: "**/*.{ts,tsx}"
+alwaysApply: false
+---
+
+# Anatomía de un campo
+
+Todo campo de formulario se arma con `Field` / `FieldLabel` / `FieldError` (`src/shared/components/ui/field.tsx`).
+
+- Etiqueta arriba, `className="text-sm text-muted-foreground"`, en español y sin punto final. El valor va debajo, con peso (`font-medium`) o el tamaño que impone la pieza.
+- El `Field` va con `gap-1`. El error va pegado al campo, con `FieldError`, no en un párrafo suelto.
+- Los errores aparecen al salir de cada campo: `useForm({ mode: "onTouched" })`. No todos a la vez al primer tecleo.
+- Un campo opcional no bloquea el envío; su etiqueta lo dice ("Institución (opcional)") o vive en "Detalles opcionales".
+- Las filas y los disparadores que se tocan miden `h-11` como mínimo.
+- Las reglas entre campos (origen distinto de destino) viven en el esquema zod (`.refine` / `.superRefine`), no en el `onSubmit`.
+- Un campo de dato lleva icono líder: [form-field-icons.mdc](./form-field-icons.mdc).
+
+```tsx
+<Field className="gap-1">
+  <FieldLabel className="text-sm text-muted-foreground">Destino</FieldLabel>
+  <DestinationTrigger
+    destination={destination}
+    onClick={() => openPicker("destination")}
+  />
+  {errors.destination?.message ? (
+    <FieldError>{errors.destination.message}</FieldError>
+  ) : null}
+</Field>
+```

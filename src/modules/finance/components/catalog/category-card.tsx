@@ -35,12 +35,14 @@ export function CategoryCard({
   className?: string
 }) {
   const emoji = icon?.trim()
+  const empty = variant === "pick"
   return (
     <SummaryItem
       title={name.trim() || "Nueva categoría"}
       description={description}
       accentColor={color || undefined}
       tintRow={Boolean(color)}
+      leadingClassName={empty ? "bg-card" : undefined}
       leading={
         emoji ? (
           <span className="text-lg leading-none" aria-hidden>
@@ -68,7 +70,7 @@ export function CategoryCard({
       isLast={isLast}
       onPress={onPress}
       showChevron={false}
-      className={cn("pr-4", className)}
+      className={cn("pr-4", empty && "bg-background", className)}
     />
   )
 }

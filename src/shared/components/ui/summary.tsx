@@ -36,6 +36,7 @@ type SummaryItemBaseProps = {
   isLast?: boolean
   disabled?: boolean
   className?: string
+  leadingClassName?: string
 }
 
 type SummaryItemLinkProps = SummaryItemBaseProps & {
@@ -137,6 +138,7 @@ export function SummaryItem({
   isLast = false,
   disabled = false,
   className,
+  leadingClassName,
   ...props
 }: SummaryItemProps) {
   const href = disabled ? undefined : "href" in props ? props.href : undefined
@@ -171,6 +173,7 @@ export function SummaryItem({
         <span
           className={cn(
             "flex shrink-0 items-center justify-center rounded-full bg-muted",
+            leadingClassName,
             leading ? "h-10 w-max min-w-10 px-1" : "size-10",
           )}
           style={

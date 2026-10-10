@@ -1,0 +1,19 @@
+---
+description: Defaults and labels that depend on another field are derived in the form, not asked again.
+globs: "**/*.{ts,tsx}"
+alwaysApply: false
+---
+
+# Campos derivados
+
+Un valor que ya se deduce de otro no se pide de nuevo: se calcula y se mantiene actualizado.
+
+- Al elegir cuenta o tarjeta, la moneda sigue a la del destino (`useCurrencyForTarget`), salvo al editar un registro guardado.
+- Al crear, el destino y el origen arrancan en el primer valor válido. No se dejan vacíos para que el usuario los elija.
+- La etiqueta de un campo puede depender del estado: "Comercio" u "Origen" según el tipo de movimiento. No se muestran las dos ni un genérico.
+- El texto de la acción también sigue al estado: "Registrar gasto" o "Registrar ingreso".
+- Un valor derivado no se revalida en el envío; el esquema solo comprueba lo que el usuario escribió.
+
+```tsx
+useCurrencyForTarget(destination, accounts, cards, defaultCurrency, applyTargetCurrency, !isEdit)
+```

@@ -1,21 +1,29 @@
 "use client"
 
-import { FormTextField } from "@/src/shared/components/layout/form-blocks"
-import { Button } from "@/src/shared/components/ui/button"
+import { sanitizeAmountInput } from "@/src/modules/finance/lib/money"
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/src/shared/components/ui/collapsible"
+import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
 import {
-  Field,
-  FieldError,
-  FieldLabel,
-} from "@/src/shared/components/ui/field"
-import { Input } from "@/src/shared/components/ui/input"
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+  InputGroupText,
+} from "@/src/shared/components/ui/input-group"
+import {
+  ToggleGroup,
+  ToggleGroupItem,
+} from "@/src/shared/components/ui/toggle-group"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
 import { ChevronDownIcon, type LucideIcon } from "lucide-react"
 import type { ReactNode } from "react"
+
+/** El preset del proyecto no trae un estado pulsado con el color primario. */
+const SEGMENT_PRESSED_CLASS =
+  "aria-pressed:bg-primary aria-pressed:text-primary-foreground aria-pressed:hover:bg-primary/80"
 
 type SegmentOption<T extends string> = {
   value: T
@@ -45,46 +53,47 @@ export function FinanceSegmentedControl<T extends string>({
   fullWidth = false,
 }: FinanceSegmentedControlProps<T>) {
   return (
-    <Field data-invalid={error ? true : undefined}>
+    <Field data-invalid={error ? true : undefined} className="gap-1">
       {label ? <FieldLabel>{label}</FieldLabel> : null}
-      <div
-        className={cn("flex flex-wrap gap-2", fullWidth && "w-full")}
-        role="radiogroup"
+      <ToggleGroup
+        value={[value]}
+        onValueChange={(next) => {
+          const selected = options.find((option) => option.value === next[0])
+          if (!selected) {
+            return
+          }
+          onChange(selected.value)
+        }}
+        variant="outline"
+        size={size === "lg" ? "lg" : "sm"}
         aria-label={label}
-        aria-disabled={disabled || undefined}
+        disabled={disabled}
+        className={cn(fullWidth && "w-full")}
       >
         {options.map((option) => {
-          const selected = option.value === value
           const OptionIcon = option.icon
           return (
-            <Button
+            <ToggleGroupItem
               key={option.value}
-              type="button"
-              size={size === "lg" ? "lg" : "sm"}
-              role="radio"
-              aria-checked={selected}
-              variant={selected ? "default" : "outline"}
+              value={option.value}
               className={cn(
                 "rounded-full",
-                fullWidth && "h-11 flex-1 text-base",
-                PRESSABLE_CLASS,
+                SEGMENT_PRESSED_CLASS,
+                fullWidth && "h-11 flex-1 text-base"
               )}
-              disabled={disabled}
-              onClick={() => onChange(option.value)}
             >
               {OptionIcon ? <OptionIcon /> : null}
               {option.label}
-            </Button>
+            </ToggleGroupItem>
           )
         })}
-      </div>
+      </ToggleGroup>
       {error ? <FieldError>{error}</FieldError> : null}
     </Field>
   )
 }
 
-type FinanceAmountFieldProps = {
-  label?: string | null
+type FinanceAmountInputProps = {
   value: string
   onChange: (value: string) => void
   onBlur?: () => void
@@ -92,14 +101,14 @@ type FinanceAmountFieldProps = {
   placeholder?: string
   disabled?: boolean
   readOnly?: boolean
+  /** Botón que se coloca dentro del campo, al final. */
   trailing?: ReactNode
   /** Narrow currency symbol drawn before the amount, e.g. `$`. */
   prefix?: string | null
   onReadOnlyActivate?: () => void
 }
 
-export function FinanceAmountField({
-  label = "Monto",
+export function FinanceAmountInput({
   value,
   onChange,
   onBlur,
@@ -110,52 +119,58 @@ export function FinanceAmountField({
   trailing,
   prefix,
   onReadOnlyActivate,
-}: FinanceAmountFieldProps) {
+}: FinanceAmountInputProps) {
   const symbol = prefix?.trim() || null
+
   return (
-    <Field data-invalid={error ? true : undefined}>
-      {label ? <FieldLabel>{label}</FieldLabel> : null}
-      <div className="relative">
-        {symbol ? (
-          <span
-            aria-hidden
-            className="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-3xl font-semibold tabular-nums"
-          >
+    <InputGroup className="h-14 rounded-2xl">
+      {symbol ? (
+        <InputGroupAddon align="inline-start" className="pl-4">
+          <InputGroupText className="text-3xl font-semibold tabular-nums">
             {symbol}
-          </span>
-        ) : null}
-        <Input
-          inputMode={readOnly ? "none" : "decimal"}
-          autoComplete="off"
-          readOnly={readOnly}
-          className={cn(
-            "h-14 rounded-2xl px-4 text-3xl font-semibold tabular-nums",
-            trailing && "pr-14",
-            readOnly && "cursor-pointer",
-          )}
-          style={
-            symbol
-              ? { paddingLeft: `calc(1rem + ${symbol.length}ch + 0.4rem)` }
-              : undefined
-          }
-          value={value}
-          onChange={(event) => onChange(event.target.value)}
-          onBlur={onBlur}
-          onClick={readOnly ? onReadOnlyActivate : undefined}
-          placeholder={placeholder}
-          disabled={disabled}
-          aria-invalid={error ? true : undefined}
-        />
-        {trailing ? (
-          <div
-            className="absolute inset-y-0 right-1.5 flex items-center"
-            onClick={(event) => event.stopPropagation()}
-            onPointerDown={(event) => event.stopPropagation()}
-          >
-            {trailing}
-          </div>
-        ) : null}
-      </div>
+          </InputGroupText>
+        </InputGroupAddon>
+      ) : null}
+      <InputGroupInput
+        inputMode={readOnly ? "none" : "decimal"}
+        autoComplete="off"
+        readOnly={readOnly}
+        className={cn(
+          "px-4 text-3xl font-semibold tabular-nums",
+          readOnly && "cursor-pointer"
+        )}
+        value={value}
+        onChange={(event) => onChange(sanitizeAmountInput(event.target.value))}
+        onBlur={onBlur}
+        onClick={readOnly ? onReadOnlyActivate : undefined}
+        placeholder={placeholder}
+        disabled={disabled}
+        aria-invalid={error ? true : undefined}
+      />
+      {trailing ? (
+        <InputGroupAddon align="inline-end">{trailing}</InputGroupAddon>
+      ) : null}
+    </InputGroup>
+  )
+}
+
+type FinanceAmountFieldProps = FinanceAmountInputProps & {
+  label?: string | null
+}
+
+export function FinanceAmountField({
+  label = "Monto",
+  error,
+  disabled,
+  ...inputProps
+}: FinanceAmountFieldProps) {
+  return (
+    <Field
+      data-invalid={error ? true : undefined}
+      data-disabled={disabled ? true : undefined}
+    >
+      {label ? <FieldLabel>{label}</FieldLabel> : null}
+      <FinanceAmountInput {...inputProps} error={error} disabled={disabled} />
       {error ? <FieldError>{error}</FieldError> : null}
     </Field>
   )
@@ -177,7 +192,7 @@ export function FinanceDetailsDisclosure({
       <CollapsibleTrigger
         className={cn(
           "group/details flex w-full items-center justify-between rounded-xl px-1 py-2 text-left text-sm font-medium text-muted-foreground",
-          PRESSABLE_CLASS,
+          PRESSABLE_CLASS
         )}
       >
         {title}
@@ -241,5 +256,3 @@ export function FinancePreviewRow({
     </div>
   )
 }
-
-export { FormTextField }

@@ -2,9 +2,11 @@ import assert from "node:assert/strict"
 import { describe, it } from "node:test"
 
 import {
-  buildCreateReceivableBody,
-  buildCreateSavingsGoalBody,
   buildLoanBody,
+  buildReceivableBody,
+  buildReceivablePaymentBody,
+  buildSavingsGoalBody,
+  buildSavingsGoalContributionBody,
 } from "./planning-payloads.ts"
 
 describe("buildLoanBody", () => {
@@ -60,55 +62,128 @@ describe("buildLoanBody", () => {
   })
 })
 
-describe("buildCreateReceivableBody", () => {
+describe("buildReceivableBody", () => {
   it("rejects paidAmount greater than amount (400-equivalent)", () => {
-    const result = buildCreateReceivableBody({
+    const payload = buildReceivableBody({
       debtorName: "Ana",
       amount: "100",
       paidAmount: "150",
     })
-    assert.equal(result.ok, false)
-    if (result.ok) return
-    assert.match(result.error, /paidAmount cannot exceed amount/)
+    assert.equal(payload.ok, false)
+    if (payload.ok) {
+      return
+    }
+    assert.match(payload.error, /paidAmount cannot exceed amount/)
   })
 
   it("omits paidAmount when status is PAID and the field is empty", () => {
-    const result = buildCreateReceivableBody({
+    const payload = buildReceivableBody({
       debtorName: "Ana",
       amount: "100",
       status: "PAID",
     })
-    assert.equal(result.ok, true)
-    if (!result.ok) return
-    assert.equal(result.body.status, "PAID")
-    assert.equal("paidAmount" in result.body, false)
+    assert.equal(payload.ok, true)
+    if (!payload.ok) {
+      return
+    }
+    assert.equal(payload.body.status, "PAID")
+    assert.equal("paidAmount" in payload.body, false)
   })
 
   it("allows CANCELLED with a partial paidAmount", () => {
-    const result = buildCreateReceivableBody({
+    const payload = buildReceivableBody({
       debtorName: "Ana",
       amount: "100",
       paidAmount: "40",
       status: "CANCELLED",
     })
-    assert.equal(result.ok, true)
-    if (!result.ok) return
-    assert.equal(result.body.status, "CANCELLED")
-    assert.equal(result.body.paidAmount, 40)
+    assert.equal(payload.ok, true)
+    if (!payload.ok) {
+      return
+    }
+    assert.equal(payload.body.status, "CANCELLED")
+    assert.equal(payload.body.paidAmount, 40)
+  })
+
+  it("drops the collected amount when updating a receivable", () => {
+    const payload = buildReceivableBody(
+      { debtorName: "Ana", amount: "100", paidAmount: "40" },
+      { isUpdate: true }
+    )
+    assert.equal(payload.ok, true)
+    if (!payload.ok) {
+      return
+    }
+    assert.equal("paidAmount" in payload.body, false)
   })
 })
 
-describe("buildCreateSavingsGoalBody", () => {
+describe("buildSavingsGoalContributionBody", () => {
+  it("sends the amount as a number and leaves the date out when empty", () => {
+    const payload = buildSavingsGoalContributionBody({ amount: "5000" })
+    assert.equal(payload.ok, true)
+    if (!payload.ok) {
+      return
+    }
+    assert.equal(payload.body.amount, 5000)
+    assert.equal("contributedAt" in payload.body, false)
+  })
+
+  it("rejects a contribution of zero", () => {
+    assert.equal(
+      buildSavingsGoalContributionBody({ amount: "0" }).ok,
+      false
+    )
+  })
+})
+
+describe("buildReceivablePaymentBody", () => {
+  it("needs the account the money entered", () => {
+    assert.equal(
+      buildReceivablePaymentBody({ amount: "100", accountId: "  " }).ok,
+      false
+    )
+  })
+
+  it("keeps the account and the amount as a number", () => {
+    const payload = buildReceivablePaymentBody({
+      amount: "100",
+      accountId: "acc-1",
+    })
+    assert.equal(payload.ok, true)
+    if (!payload.ok) {
+      return
+    }
+    assert.equal(payload.body.accountId, "acc-1")
+    assert.equal(payload.body.amount, 100)
+  })
+})
+
+describe("buildSavingsGoalBody", () => {
   it("sends targetAmount as a number and does not invent isCompleted", () => {
-    const result = buildCreateSavingsGoalBody({
+    const payload = buildSavingsGoalBody({
       name: "Fondo",
       targetAmount: "5000",
       currentAmount: "5000",
     })
-    assert.equal(result.ok, true)
-    if (!result.ok) return
-    assert.equal(result.body.targetAmount, 5000)
-    assert.equal(result.body.currentAmount, 5000)
-    assert.equal("isCompleted" in result.body, false)
+    assert.equal(payload.ok, true)
+    if (!payload.ok) {
+      return
+    }
+    assert.equal(payload.body.targetAmount, 5000)
+    assert.equal(payload.body.currentAmount, 5000)
+    assert.equal("isCompleted" in payload.body, false)
+  })
+
+  it("drops the opening amount when updating a goal", () => {
+    const payload = buildSavingsGoalBody(
+      { name: "Fondo", targetAmount: "5000", currentAmount: "500" },
+      { isUpdate: true }
+    )
+    assert.equal(payload.ok, true)
+    if (!payload.ok) {
+      return
+    }
+    assert.equal("currentAmount" in payload.body, false)
   })
 })

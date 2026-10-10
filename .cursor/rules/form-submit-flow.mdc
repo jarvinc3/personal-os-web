@@ -1,0 +1,41 @@
+---
+description: Build the payload with a checked builder, report success or failure with a toast, then close the form.
+alwaysApply: true
+---
+
+# Envío del formulario
+
+- El `onSubmit` arma el cuerpo con un constructor del módulo que devuelve `{ ok, body }` o `{ ok, error }` (`buildCreateTransactionBody`, `buildCreateTransferBody`, `buildCreateAccountBody` en `src/modules/finance/lib/`). Si `!payload.ok`, se muestra `appToast.error({ text1: payload.error })` y se corta.
+- Éxito: `appToast.success({ text1: "Movimiento creado" })` y `onDone()` o cerrar el sheet. El texto nombra la entidad y el verbo.
+- Error del servidor: `appToast.error({ text1: financeErrorMessage(error) })` dentro de un `try/catch`. No un estado de error inline ni un `Alert` debajo del botón.
+- Mientras corre la mutación el botón de envío está deshabilitado (`isPending`). No se envía dos veces.
+- Una acción destructiva no corre en el `onSubmit`; pide confirmación antes ([confirm-important-changes.mdc](./confirm-important-changes.mdc)).
+- El esquema zod vive en el mismo archivo del formulario y es la única validación de esos campos. El envío confía en él.
+
+```tsx
+const onSubmit = handleSubmit(async (values) => {
+  const payload = buildCreateTransferBody({
+    amount: values.amount,
+    currency: values.currency,
+    transactionDate: values.transactionDate,
+    description: values.description,
+    notes: values.notes,
+    status: values.status,
+    fromAccountId: from.accountId,
+    fromCardId: from.cardId,
+    toAccountId: to.accountId,
+    toCardId: to.cardId,
+  })
+  if (!payload.ok) {
+    appToast.error({ text1: payload.error })
+    return
+  }
+  try {
+    await createMutation.mutateAsync(payload.body)
+    appToast.success({ text1: "Transferencia creada" })
+    onDone()
+  } catch (error) {
+    appToast.error({ text1: financeErrorMessage(error) })
+  }
+})
+```

@@ -4,6 +4,7 @@ import { BrandLogo } from "@/src/modules/finance/components/brand-logo"
 import { FinanceAuthenticatedPage } from "@/src/modules/finance/components/layout/finance-authenticated-page"
 import { FinanceErrorState } from "@/src/modules/finance/components/layout/finance-error-state"
 import { FinanceListSkeleton } from "@/src/modules/finance/components/layout/finance-list-skeleton"
+import { LoanSurfaceMark } from "@/src/modules/finance/components/planning/loan-progress-card"
 import { LoanSheet } from "@/src/modules/finance/components/planning/loan-sheet"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/constants/sheet-keys"
 import { useAccounts } from "@/src/modules/finance/hooks/use-accounts"
@@ -42,7 +43,7 @@ import {
 import { useRouter } from "next/navigation"
 import { useMemo } from "react"
 
-const FALLBACK_COLOR = "#1B4332"
+import { ACCENT_FALLBACK_COLOR } from "@/src/shared/lib/accent-gradient"
 
 type FinanceLoanDetailClientProps = {
   loanId: string
@@ -85,7 +86,7 @@ function FinanceLoanDetailView({ loanId }: FinanceLoanDetailClientProps) {
     ? (institutions.find((item) => item.id === loan.institutionId) ?? null)
     : null
   const installments = installmentsQuery.data ?? []
-  const accent = institution?.color ?? FALLBACK_COLOR
+  const accent = institution?.color ?? ACCENT_FALLBACK_COLOR
   const money = { ...display, currency: loan?.currency ?? display.currency }
   const summary = loan ? loanProgressSummary(loan) : null
   const rateLabel = formatRatePercentLabel(loan?.interestRate ?? null)
@@ -108,12 +109,12 @@ function FinanceLoanDetailView({ loanId }: FinanceLoanDetailClientProps) {
   usePageHeader(
     {
       variant: "secondary",
-      title: loan?.lenderName ?? "Préstamo",
+      title: institution?.name || loan?.lenderName || "Préstamo",
       onBack: () => router.back(),
       actions: headerActions,
       accentColor: accent,
     },
-    [router, loan?.id, loan?.lenderName, accent, headerActions]
+    [router, loan?.id, loan?.lenderName, institution?.name, accent, headerActions]
   )
 
   if (loansQuery.isPending && !loan) {
@@ -161,63 +162,66 @@ function FinanceLoanDetailView({ loanId }: FinanceLoanDetailClientProps) {
 
       <div className="-mx-4 -mt-4 overflow-hidden md:-mx-6">
         <div
-          className="rounded-b-3xl p-4 text-white md:p-6"
+          className="relative overflow-hidden rounded-b-3xl p-4 text-white md:p-6"
           style={{ background: accent }}
         >
-          <div className="flex items-start gap-3">
-            <BrandLogo
-              name={institution?.name ?? loan.lenderName}
-              logoUrl={institution?.logoUrl}
-              size={48}
-            />
-            <div className="min-w-0 flex-1">
-              <div className="flex min-w-0 items-center gap-2">
-                <h1 className="truncate text-2xl font-bold tracking-tight">
-                  {loan.lenderName}
-                </h1>
-                <Badge
-                  variant={paidOff ? "success" : "warning"}
-                  className="shrink-0"
-                >
-                  {paidOff ? "Saldado" : "Activo"}
-                </Badge>
+          <LoanSurfaceMark size="header" />
+          <div className="relative z-10">
+            <div className="flex items-start gap-3">
+              <BrandLogo
+                name={institution?.name ?? loan.lenderName}
+                logoUrl={institution?.logoUrl}
+                size={48}
+              />
+              <div className="min-w-0 flex-1">
+                <div className="flex min-w-0 items-center gap-2">
+                  <h1 className="truncate text-2xl font-bold tracking-tight">
+                    {loan.lenderName}
+                  </h1>
+                  <Badge
+                    variant={paidOff ? "success" : "warning"}
+                    className="shrink-0"
+                  >
+                    {paidOff ? "Saldado" : "Activo"}
+                  </Badge>
+                </div>
+                <p className="mt-1 flex flex-wrap items-center gap-x-2 text-sm text-white/70">
+                  <span>
+                    {FINANCE_INSTALLMENT_FREQ_LABEL[loan.installmentFreq]}
+                  </span>
+                  <span>{rateLabel}</span>
+                  {institution ? <span>{institution.name}</span> : null}
+                </p>
               </div>
-              <p className="mt-1 flex flex-wrap items-center gap-x-2 text-sm text-white/70">
-                <span>
-                  {FINANCE_INSTALLMENT_FREQ_LABEL[loan.installmentFreq]}
-                </span>
-                <span>{rateLabel}</span>
-                {institution ? <span>{institution.name}</span> : null}
-              </p>
             </div>
-          </div>
 
-          <p className="mt-8 text-[11px] tracking-wide text-white/60 uppercase">
-            Saldo
-          </p>
-          <p className="text-3xl font-bold tracking-tight tabular-nums">
-            {formatFinanceMoney(loan.currentBalance, money)}
-          </p>
-
-          <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-white/20">
-            <div
-              className="h-full rounded-full bg-white"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
-          <div className="mt-2 flex flex-wrap justify-between gap-x-3 text-xs text-white/70">
-            <span>
-              {loan.paidInstallments}/{loan.totalInstallments} cuotas
-            </span>
-            <span>
-              Original {formatFinanceMoney(loan.originalAmount, money)}
-            </span>
-          </div>
-          {loan.nextDueDate ? (
-            <p className="mt-3 text-sm text-white/80">
-              Próximo pago · {formatCalendarDate(loan.nextDueDate)}
+            <p className="mt-8 text-[11px] tracking-wide text-white/60 uppercase">
+              Saldo
             </p>
-          ) : null}
+            <p className="text-3xl font-bold tracking-tight tabular-nums">
+              {formatFinanceMoney(loan.currentBalance, money)}
+            </p>
+
+            <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-white/20">
+              <div
+                className="h-full rounded-full bg-white"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+            <div className="mt-2 flex flex-wrap justify-between gap-x-3 text-xs text-white/70">
+              <span>
+                {loan.paidInstallments}/{loan.totalInstallments} cuotas
+              </span>
+              <span>
+                Original {formatFinanceMoney(loan.originalAmount, money)}
+              </span>
+            </div>
+            {loan.nextDueDate ? (
+              <p className="mt-3 text-sm text-white/80">
+                Próximo pago · {formatCalendarDate(loan.nextDueDate)}
+              </p>
+            ) : null}
+          </div>
         </div>
       </div>
 

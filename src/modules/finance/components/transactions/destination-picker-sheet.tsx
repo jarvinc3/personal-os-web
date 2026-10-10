@@ -25,7 +25,7 @@ import {
   TabsTrigger,
 } from "@/src/shared/components/ui/tabs"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
-import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react"
+import { ChevronLeftIcon, ChevronRightIcon, LockIcon } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 
 type DestinationPickerSheetProps = {
@@ -36,6 +36,8 @@ type DestinationPickerSheetProps = {
   cards: FinanceCard[]
   display: FinanceMoneyDisplay
   onSelect: (destination: string) => void
+  /** Ledger target already used on the other side of a transfer. */
+  excludeTarget?: string | null
 }
 
 export function DestinationPickerSheet({
@@ -46,6 +48,7 @@ export function DestinationPickerSheet({
   cards,
   display,
   onSelect,
+  excludeTarget = null,
 }: DestinationPickerSheetProps) {
   const [institutionId, setInstitutionId] = useState<string | null>(null)
   const [tab, setTab] = useState("accounts")
@@ -65,6 +68,7 @@ export function DestinationPickerSheet({
   }, [open])
 
   function choose(destination: string) {
+    if (excludeTarget && destination === excludeTarget) return
     onSelect(destination)
     onOpenChange(false)
   }
@@ -94,6 +98,7 @@ export function DestinationPickerSheet({
     >
       {selected?.kind === "institution" ? (
         <Tabs
+          persist={false}
           value={tab}
           onValueChange={(next) => {
             if (typeof next === "string") setTab(next)
@@ -113,16 +118,18 @@ export function DestinationPickerSheet({
                 Esta institución no tiene cuentas.
               </p>
             ) : (
-              selected.accounts.map((account) => (
-                <AccountProductRow
-                  key={account.id}
-                  account={account}
-                  display={display}
-                  onPress={() =>
-                    choose(encodeLedgerTarget("account", account.id))
-                  }
-                />
-              ))
+              selected.accounts.map((account) => {
+                const target = encodeLedgerTarget("account", account.id)
+                return (
+                  <AccountProductRow
+                    key={account.id}
+                    account={account}
+                    display={display}
+                    disabled={target === excludeTarget}
+                    onPress={() => choose(target)}
+                  />
+                )
+              })
             )}
           </TabsContent>
           <TabsContent value="cards" className="flex flex-col gap-2">
@@ -131,15 +138,19 @@ export function DestinationPickerSheet({
                 Esta institución no tiene tarjetas.
               </p>
             ) : (
-              selected.cards.map((card) => (
-                <CardProductRow
-                  key={card.id}
-                  card={card}
-                  accounts={accounts}
-                  display={display}
-                  onPress={() => choose(encodeLedgerTarget("card", card.id))}
-                />
-              ))
+              selected.cards.map((card) => {
+                const target = encodeLedgerTarget("card", card.id)
+                return (
+                  <CardProductRow
+                    key={card.id}
+                    card={card}
+                    accounts={accounts}
+                    display={display}
+                    disabled={target === excludeTarget}
+                    onPress={() => choose(target)}
+                  />
+                )
+              })
             )}
           </TabsContent>
         </Tabs>
@@ -153,6 +164,7 @@ export function DestinationPickerSheet({
             <DestinationGroupRow
               key={`${group.kind}:${group.id}`}
               group={group}
+              excludeTarget={excludeTarget}
               onInstitution={() => {
                 setTab("accounts")
                 setInstitutionId(group.id)
@@ -171,28 +183,43 @@ export function DestinationPickerSheet({
 
 function DestinationGroupRow({
   group,
+  excludeTarget,
   onInstitution,
   onCash,
 }: {
   group: DestinationPickerGroup
+  excludeTarget: string | null
   onInstitution: () => void
   onCash: () => void
 }) {
   if (group.kind === "cash") {
+    const taken =
+      encodeLedgerTarget("account", group.account.id) === excludeTarget
     return (
       <button
         type="button"
+        disabled={taken}
         className={cn(
-          "flex w-full items-center gap-3 rounded-2xl border border-border bg-card px-3 py-3 text-left",
-          PRESSABLE_CLASS,
+          "relative flex w-full items-center gap-3 rounded-2xl border border-border bg-card px-3 py-3 text-left",
+          taken ? "cursor-not-allowed" : PRESSABLE_CLASS,
         )}
         onClick={onCash}
       >
-        <BrandLogo name={group.account.name} size={36} />
-        <span className="min-w-0 flex-1">
+        <BrandLogo
+          name={group.account.name}
+          size={36}
+          className={taken ? "opacity-45" : undefined}
+        />
+        <span className={cn("min-w-0 flex-1", taken && "opacity-45")}>
           <span className="block truncate font-medium">{group.account.name}</span>
           <span className="block text-sm text-muted-foreground">Efectivo</span>
         </span>
+        {taken ? (
+          <span className="pointer-events-none absolute inset-0 flex items-center justify-center">
+            <LockIcon className="size-7 text-foreground" aria-hidden />
+            <span className="sr-only">En uso</span>
+          </span>
+        ) : null}
       </button>
     )
   }

@@ -271,7 +271,7 @@ export function FinancePlanningList({
                         ? `Para ${formatCalendarDate(goal.targetDate)}`
                         : undefined
                     )}
-                    onPress={() => setOpenSavingsSheet(true, goal.id)}
+                    onPress={() => router.push(APP_ROUTES.app.financeSavingsGoal(goal.id))}
                   />
                 )
               })
@@ -417,7 +417,7 @@ export function FinancePlanningList({
                         ? `Vence ${formatCalendarDate(item.dueDate)}`
                         : undefined
                     )}
-                    onPress={() => setOpenReceivableSheet(true, item.id)}
+                    onPress={() => router.push(APP_ROUTES.app.financeReceivable(item.id))}
                   />
                 )
               })

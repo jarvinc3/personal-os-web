@@ -6,6 +6,23 @@ export type FinanceMoneyDisplay = {
   leadingSign?: boolean
 }
 
+/** Digits and a single decimal point. Commas become dots. Letters are dropped. */
+export function sanitizeAmountInput(value: string): string {
+  let seenDot = false
+  let next = ""
+  for (const char of value.replace(/,/g, ".")) {
+    if (char >= "0" && char <= "9") {
+      next += char
+      continue
+    }
+    if (char === "." && !seenDot) {
+      seenDot = true
+      next += "."
+    }
+  }
+  return next
+}
+
 export function parseFinanceMoney(
   value: string | number | null | undefined
 ): number | null {

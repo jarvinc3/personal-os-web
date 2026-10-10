@@ -108,7 +108,7 @@ function FinanceCardDetailView({ cardId }: FinanceCardDetailClientProps) {
   usePageHeader(
     {
       variant: "secondary",
-      title: card?.name ?? "Tarjeta",
+      title: card?.institutionName || card?.name || "Tarjeta",
       onBack: () => {
         router.push(
           card
@@ -132,6 +132,7 @@ function FinanceCardDetailView({ cardId }: FinanceCardDetailClientProps) {
     [
       card?.id,
       card?.name,
+      card?.institutionName,
       card?.color,
       card?.institutionId,
       setOpenOptionsSheet,

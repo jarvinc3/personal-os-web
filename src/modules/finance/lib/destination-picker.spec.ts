@@ -1,7 +1,13 @@
 import assert from "node:assert/strict"
 import { describe, it } from "node:test"
 
-import { buildDestinationPickerGroups } from "./destination-picker.ts"
+import { CATALOG_NONE } from "../constants/catalog.ts"
+import {
+  buildDestinationPickerGroups,
+  firstLedgerTarget,
+  isKnownLedgerTarget,
+  ledgerTargetsFromGroups,
+} from "./destination-picker.ts"
 import type {
   FinanceAccount,
   FinanceCard,
@@ -9,7 +15,7 @@ import type {
 } from "../types/entities.ts"
 
 function institution(
-  partial: Partial<FinanceInstitution> & Pick<FinanceInstitution, "id" | "name">,
+  partial: Partial<FinanceInstitution> & Pick<FinanceInstitution, "id" | "name">
 ): FinanceInstitution {
   return {
     color: null,
@@ -21,7 +27,7 @@ function institution(
 }
 
 function account(
-  partial: Partial<FinanceAccount> & Pick<FinanceAccount, "id" | "name">,
+  partial: Partial<FinanceAccount> & Pick<FinanceAccount, "id" | "name">
 ): FinanceAccount {
   return {
     institutionId: null,
@@ -40,7 +46,7 @@ function account(
 
 function card(
   partial: Partial<FinanceCard> &
-    Pick<FinanceCard, "id" | "name" | "institutionId">,
+    Pick<FinanceCard, "id" | "name" | "institutionId">
 ): FinanceCard {
   return {
     institutionName: "Bank",
@@ -75,7 +81,7 @@ describe("buildDestinationPickerGroups", () => {
     assert.equal(groups[0].logoUrl, "logo.png")
     assert.deepEqual(
       groups[0].accounts.map((item) => item.id),
-      ["a1"],
+      ["a1"]
     )
   })
 
@@ -95,14 +101,14 @@ describe("buildDestinationPickerGroups", () => {
     })
     assert.deepEqual(
       groups.map((group) => group.kind),
-      ["institution", "cash"],
+      ["institution", "cash"]
     )
     const bank = groups[0]
     const cash = groups[1]
     if (bank?.kind !== "institution" || cash?.kind !== "cash") return
     assert.deepEqual(
       bank.accounts.map((item) => item.id),
-      ["drawer"],
+      ["drawer"]
     )
     assert.equal(bank.cards[0]?.id, "c1")
     assert.equal(cash.account.id, "wallet")
@@ -137,5 +143,65 @@ describe("buildDestinationPickerGroups", () => {
       ],
     })
     assert.deepEqual(groups, [])
+  })
+})
+
+describe("ledgerTargetsFromGroups", () => {
+  const groups = buildDestinationPickerGroups({
+    institutions: [institution({ id: "bank", name: "Banco" })],
+    accounts: [
+      account({ id: "wallet", name: "Efectivo", type: "CASH" }),
+      account({ id: "a1", name: "Nómina", institutionId: "bank" }),
+    ],
+    cards: [card({ id: "c1", name: "Visa", institutionId: "bank" })],
+  })
+
+  it("lists the cash account first and then every institution product", () => {
+    assert.deepEqual(ledgerTargetsFromGroups(groups), [
+      "account:wallet",
+      "account:a1",
+      "card:c1",
+    ])
+  })
+
+  it("returns nothing when there is nothing to pick", () => {
+    assert.deepEqual(ledgerTargetsFromGroups([]), [])
+  })
+})
+
+describe("firstLedgerTarget", () => {
+  it("prefers the cash account over an institutional one", () => {
+    const groups = buildDestinationPickerGroups({
+      institutions: [institution({ id: "bank", name: "Banco" })],
+      accounts: [
+        account({ id: "a1", name: "Nómina", institutionId: "bank" }),
+        account({ id: "wallet", name: "Efectivo", type: "CASH" }),
+      ],
+      cards: [],
+    })
+    assert.equal(firstLedgerTarget(groups), "account:wallet")
+  })
+
+  it("falls back to the empty catalog value", () => {
+    assert.equal(firstLedgerTarget([]), CATALOG_NONE)
+  })
+})
+
+describe("isKnownLedgerTarget", () => {
+  const accounts = [account({ id: "a1", name: "Nómina" })]
+  const cards = [card({ id: "c1", name: "Visa", institutionId: "bank" })]
+
+  it("accepts a saved account and a saved card", () => {
+    assert.equal(isKnownLedgerTarget("account:a1", accounts, cards), true)
+    assert.equal(isKnownLedgerTarget("card:c1", accounts, cards), true)
+  })
+
+  it("rejects an unknown id", () => {
+    assert.equal(isKnownLedgerTarget("account:gone", accounts, cards), false)
+    assert.equal(isKnownLedgerTarget("card:gone", accounts, cards), false)
+  })
+
+  it("rejects the empty catalog value", () => {
+    assert.equal(isKnownLedgerTarget(CATALOG_NONE, accounts, cards), false)
   })
 })

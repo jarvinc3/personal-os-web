@@ -23,6 +23,9 @@ export type CreateSavingsGoalBody = {
   currentAmount?: number
 }
 
+/** The balance moves only through contributions, so an update never carries it. */
+export type UpdateSavingsGoalBody = Omit<CreateSavingsGoalBody, "currentAmount">
+
 export type CreateLoanBody = {
   lenderName: string
   originalAmount: number
@@ -48,6 +51,9 @@ export type CreateReceivableBody = {
   currency?: string
   dueDate?: string
 }
+
+/** The collected amount moves only through payments, so an update never carries it. */
+export type UpdateReceivableBody = Omit<CreateReceivableBody, "paidAmount">
 
 function optionalTrimmed(value: string | undefined): string | undefined {
   const trimmed = value?.trim()
@@ -97,14 +103,17 @@ function optionalIsoDate(value: string | undefined): PayloadResult<string | unde
   return { ok: true, body: trimmed }
 }
 
-export function buildCreateSavingsGoalBody(input: {
-  name: string
-  targetAmount: string
-  description?: string
-  currency?: string
-  targetDate?: string
-  currentAmount?: string
-}): PayloadResult<CreateSavingsGoalBody> {
+export function buildSavingsGoalBody(
+  input: {
+    name: string
+    targetAmount: string
+    description?: string
+    currency?: string
+    targetDate?: string
+    currentAmount?: string
+  },
+  options?: { isUpdate?: boolean }
+): PayloadResult<UpdateSavingsGoalBody> {
   const name = input.name.trim()
   if (!name) {
     return { ok: false, error: "Nombre obligatorio" }
@@ -115,7 +124,9 @@ export function buildCreateSavingsGoalBody(input: {
     return { ok: false, error: "La meta debe ser mayor que 0" }
   }
 
-  const currentRaw = optionalTrimmed(input.currentAmount)
+  const currentRaw = options?.isUpdate
+    ? undefined
+    : optionalTrimmed(input.currentAmount)
   let currentAmount: number | undefined
   if (currentRaw) {
     const current = requiredMoney(currentRaw, "Ahorrado")
@@ -228,15 +239,18 @@ export function buildLoanBody(
   return { ok: true, body }
 }
 
-export function buildCreateReceivableBody(input: {
-  debtorName: string
-  amount: string
-  description?: string
-  paidAmount?: string
-  status?: string
-  currency?: string
-  dueDate?: string
-}): PayloadResult<CreateReceivableBody> {
+export function buildReceivableBody(
+  input: {
+    debtorName: string
+    amount: string
+    description?: string
+    paidAmount?: string
+    status?: string
+    currency?: string
+    dueDate?: string
+  },
+  options?: { isUpdate?: boolean }
+): PayloadResult<UpdateReceivableBody> {
   const debtorName = input.debtorName.trim()
   if (!debtorName) {
     return { ok: false, error: "Deudor obligatorio" }
@@ -254,7 +268,9 @@ export function buildCreateReceivableBody(input: {
   }
   const status = statusRaw as ReceivableStatus | undefined
 
-  const paidRaw = optionalTrimmed(input.paidAmount)
+  const paidRaw = options?.isUpdate
+    ? undefined
+    : optionalTrimmed(input.paidAmount)
   let paidAmount: number | undefined
   if (paidRaw) {
     const paid = requiredMoney(paidRaw, "Cobrado")
@@ -286,4 +302,84 @@ export function buildCreateReceivableBody(input: {
   }
 
   return { ok: true, body }
+}
+
+export type CreateSavingsGoalContributionBody = {
+  amount: number
+  contributedAt?: string
+  notes?: string
+}
+
+export function buildSavingsGoalContributionBody(input: {
+  amount: string
+  contributedAt?: string
+  notes?: string
+}): PayloadResult<CreateSavingsGoalContributionBody> {
+  const amount = requiredMoney(input.amount, "Aporte")
+  if (!amount.ok) {
+    return amount
+  }
+  if (amount.body <= 0) {
+    return { ok: false, error: "El aporte debe ser mayor que 0" }
+  }
+
+  const contributedAt = optionalIsoDate(input.contributedAt)
+  if (!contributedAt.ok) {
+    return contributedAt
+  }
+
+  const notes = optionalTrimmed(input.notes)
+
+  return {
+    ok: true,
+    body: {
+      amount: amount.body,
+      ...(contributedAt.body ? { contributedAt: contributedAt.body } : {}),
+      ...(notes ? { notes } : {}),
+    },
+  }
+}
+
+export type RecordReceivablePaymentBody = {
+  amount: number
+  accountId: string
+  paidAt?: string
+  notes?: string
+}
+
+export function buildReceivablePaymentBody(input: {
+  amount: string
+  accountId: string
+  paidAt?: string
+  notes?: string
+}): PayloadResult<RecordReceivablePaymentBody> {
+  const amount = requiredMoney(input.amount, "Cobro")
+  if (!amount.ok) {
+    return amount
+  }
+  if (amount.body <= 0) {
+    return { ok: false, error: "El cobro debe ser mayor que 0" }
+  }
+
+  const accountId = input.accountId.trim()
+  if (!accountId) {
+    return { ok: false, error: "Cuenta obligatoria" }
+  }
+
+  const paidAt = optionalIsoDate(input.paidAt)
+  if (!paidAt.ok) {
+    return paidAt
+  }
+
+  const notes = optionalTrimmed(input.notes)
+
+  return {
+    ok: true,
+    body: {
+      amount: amount.body,
+      accountId,
+      ...(paidAt.body ? { paidAt: paidAt.body } : {}),
+      ...(notes ? { notes } : {}),
+    },
+  }
 }

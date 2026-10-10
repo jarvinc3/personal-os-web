@@ -23,23 +23,37 @@ import {
 } from "@/src/shared/components/ui/empty";
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils";
 import {
-  ChevronRightIcon,
   CreditCardIcon,
   HandCoinsIcon,
   LandmarkIcon,
+  LockIcon,
   PlusIcon,
 } from "lucide-react";
+
+function InUseLock({ onLightSurface }: { onLightSurface: boolean }) {
+  return (
+    <span className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center">
+      <LockIcon
+        className={cn("size-7", onLightSurface ? "text-foreground" : "text-white")}
+        aria-hidden
+      />
+      <span className="sr-only">En uso</span>
+    </span>
+  )
+}
 
 type AccountProductRowProps = {
   account: FinanceAccount
   display: FinanceMoneyDisplay
   onPress: () => void
+  disabled?: boolean
 }
 
 export function AccountProductRow({
   account,
   display,
   onPress,
+  disabled = false,
 }: AccountProductRowProps) {
   const lastFour = account.accountNumber?.replace(/\D/g, "").slice(-4)
   const subtitle = lastFour
@@ -50,48 +64,47 @@ export function AccountProductRow({
     <button
       type="button"
       onClick={onPress}
+      disabled={disabled}
       className={cn(
         "group relative flex w-full items-center gap-3 overflow-hidden rounded-2xl border p-2 pl-4 text-left",
-        tint
-          ? "border-transparent bg-card"
-          : "border-border bg-card",
-        PRESSABLE_CLASS
+        tint ? "border-transparent text-white" : "border-border bg-card text-foreground",
+        disabled ? "cursor-not-allowed" : PRESSABLE_CLASS
       )}
-      style={
-        tint
-          ? {
-            borderColor: `color-mix(in srgb, ${tint} 0%, var(--border))`,
-          }
-          : undefined
-      }
+      style={tint ? { backgroundColor: tint } : undefined}
     >
-      {tint && (
-        <span
-          aria-hidden
-          className="pointer-events-none absolute inset-0 opacity-35 transition-opacity group-hover:opacity-50"
-          style={{ backgroundColor: tint }}
-        />
-      )}
+      <span
+        aria-hidden
+        className={cn(
+          "pointer-events-none absolute inset-0",
+          disabled && "opacity-45",
+        )}
+      >
+        <span className="absolute -top-10 -right-8 size-28 rounded-full bg-white/25" />
+        <span className="absolute -bottom-12 right-10 size-24 rounded-full bg-black/15" />
+      </span>
 
       <BrandLogo
         name={account.institutionName ?? account.name}
         logoUrl={account.institutionLogoUrl}
         size={44}
-        className="relative z-10"
+        className={cn("relative z-10", disabled && "opacity-45")}
       />
 
-      <div className="relative z-10 flex flex-col gap-1 flex-2">
+      <div className={cn("relative z-10 flex min-w-0 flex-1 flex-col gap-1", disabled && "opacity-45")}>
         <div className="flex flex-col">
-          <p className="font-semibold truncate text-foreground">{account.name}</p>
-          <p className="text-sm text-muted-foreground">{subtitle}</p>
+          <p className="truncate font-semibold">{account.name}</p>
+          <p className={cn("text-sm", tint ? "text-white/70" : "text-muted-foreground")}>
+            {subtitle}
+          </p>
         </div>
-        <p className="relative z-10 font-semibold tabular-nums shrink-0 text-foreground">
+        <p className="font-semibold tabular-nums">
           {formatFinanceMoney(account.balance, {
             ...display,
             currency: account.currency,
           })}
         </p>
       </div>
+      {disabled ? <InUseLock onLightSurface={!tint} /> : null}
     </button>
   )
 }
@@ -101,6 +114,7 @@ type CardProductRowProps = {
   accounts: readonly FinanceAccount[]
   display: FinanceMoneyDisplay
   onPress: () => void
+  disabled?: boolean
 }
 
 export function CardProductRow({
@@ -108,6 +122,7 @@ export function CardProductRow({
   accounts,
   display,
   onPress,
+  disabled = false,
 }: CardProductRowProps) {
   const balances = resolveCardDisplayBalances(card, accounts)
 
@@ -115,18 +130,25 @@ export function CardProductRow({
     <button
       type="button"
       onClick={onPress}
+      disabled={disabled}
       className={cn(
-        "relative flex w-full flex-col gap-4 overflow-hidden rounded-2xl bg-zinc-900 p-4 text-left text-white hover:opacity-95",
-        PRESSABLE_CLASS
+        "relative flex w-full flex-col gap-4 overflow-hidden rounded-2xl bg-zinc-900 p-4 text-left text-white",
+        disabled ? "cursor-not-allowed" : cn("hover:opacity-95", PRESSABLE_CLASS)
       )}
       style={card.color ? { backgroundColor: card.color } : undefined}
     >
-      <span aria-hidden className="pointer-events-none absolute inset-0">
+      <span
+        aria-hidden
+        className={cn(
+          "pointer-events-none absolute inset-0",
+          disabled && "opacity-45",
+        )}
+      >
         <span className="absolute top-[-45%] right-[-12%] h-[190%] w-[38%] rotate-22 bg-black/20" />
-        <span className="absolute bottom-[-55%] left-[-18%] h-28 w-[62%] -rotate-6 rounded-4xl bg-white/10" />
+        <span className="absolute bottom-[-55%] left-[-18%] h-28 w-[62%] -rotate-6 rounded-4xl bg-white/15" />
       </span>
 
-      <div className="relative z-10 flex gap-3 justify-between items-center">
+      <div className={cn("relative z-10 flex gap-3 justify-between items-center", disabled && "opacity-45")}>
         <p className="text-sm truncate text-white font-semibold">
           {card.name}
         </p>
@@ -135,7 +157,7 @@ export function CardProductRow({
         </span>
       </div>
 
-      <div className="relative z-10 flex min-w-0 flex-col">
+      <div className={cn("relative z-10 flex min-w-0 flex-col", disabled && "opacity-45")}>
         <p className="text-[10px] tracking-[0.14em] text-white/55 uppercase">
           {card.type === "CREDIT" ? "Balance disponible" : "Saldo actual"}
         </p>
@@ -153,7 +175,7 @@ export function CardProductRow({
         )}
       </div>
 
-      <div className="relative z-10 flex gap-3 justify-between items-end">
+      <div className={cn("relative z-10 flex gap-3 justify-between items-end", disabled && "opacity-45")}>
         <p className="tracking-[0.2em] text-white/80">
           •••• {card.lastFour ?? "····"}
         </p>
@@ -170,6 +192,7 @@ export function CardProductRow({
           />
         </span>
       </div>
+      {disabled ? <InUseLock onLightSurface={false} /> : null}
     </button>
   )
 }

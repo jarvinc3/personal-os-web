@@ -172,7 +172,9 @@ export function CurrencyPickerSheet({
                 <span className="flex shrink-0 items-center gap-2">
                   {showQuotes ? (
                     <span className="text-sm tabular-nums text-muted-foreground">
-                      {formatQuote(quotes?.get(code), quoteCurrency ?? "")}
+                      {code === quoteCurrency
+                        ? "Principal"
+                        : formatQuote(quotes?.get(code), quoteCurrency ?? "")}
                     </span>
                   ) : null}
                   {selected ? <CheckIcon className="size-4" /> : null}
