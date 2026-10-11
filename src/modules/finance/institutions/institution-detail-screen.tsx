@@ -250,7 +250,7 @@ function InstitutionDetailScreenBody({
   usePageHeader(
     {
       variant: "secondary",
-      title: institution?.name ?? "Institución",
+      title: "Detalles de la institución",
       onBack: handleBack,
       actions: headerActions,
       accentColor: accent,
