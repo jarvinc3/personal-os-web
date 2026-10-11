@@ -1,7 +1,7 @@
 "use client"
 
-import { ThemeProvider as NextThemesProvider } from "next-themes";
-import * as React from "react";
+import { ThemeProvider as NextThemesProvider } from "next-themes"
+import * as React from "react"
 
 function ThemeProvider({
   children,
@@ -20,4 +20,4 @@ function ThemeProvider({
   )
 }
 
-export { ThemeProvider };
+export { ThemeProvider }

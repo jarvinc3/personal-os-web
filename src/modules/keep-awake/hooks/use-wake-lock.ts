@@ -30,8 +30,16 @@ import {
   openDocumentPip,
   watchVisibility,
 } from "@/src/modules/keep-awake/lib/document-pip"
-import { durationMsFromMinutes, KEEP_AWAKE_PREFS_KEY, parsePrefs } from "@/src/modules/keep-awake/lib/prefs"
-import { formatElapsed, sessionElapsedSeconds, sessionRemainingSeconds } from "@/src/modules/keep-awake/lib/format-elapsed"
+import {
+  durationMsFromMinutes,
+  KEEP_AWAKE_PREFS_KEY,
+  parsePrefs,
+} from "@/src/modules/keep-awake/lib/prefs"
+import {
+  formatElapsed,
+  sessionElapsedSeconds,
+  sessionRemainingSeconds,
+} from "@/src/modules/keep-awake/lib/format-elapsed"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { useEffect, useRef, useState, useSyncExternalStore } from "react"
 
@@ -72,9 +80,13 @@ function wrapSentinel(sentinel: WakeLockSentinel): WakeLockHandle {
 }
 
 function durationFromPrefs(): ActivateOptions | undefined {
-  if (typeof window === "undefined") return undefined
+  if (typeof window === "undefined") {
+    return undefined
+  }
   const prefs = parsePrefs(window.localStorage.getItem(KEEP_AWAKE_PREFS_KEY))
-  if (prefs.timerMode !== "countdown") return undefined
+  if (prefs.timerMode !== "countdown") {
+    return undefined
+  }
   return { durationMs: durationMsFromMinutes(prefs.durationMinutes) }
 }
 
@@ -144,7 +156,9 @@ export function useWakeLock(): UseWakeLockResult {
 
     const currentNav = (): Navigator => {
       const pip = pipWindowRef.current
-      if (pip && !pip.closed) return pip.navigator
+      if (pip && !pip.closed) {
+        return pip.navigator
+      }
       return navigator
     }
 
@@ -194,13 +208,17 @@ export function useWakeLock(): UseWakeLockResult {
     channel?.addEventListener("message", onChannelMessage)
 
     const onStorage = (event: StorageEvent) => {
-      if (event.key !== KEEP_AWAKE_STORAGE_KEY) return
+      if (event.key !== KEEP_AWAKE_STORAGE_KEY) {
+        return
+      }
       if (event.newValue === null) {
         void session.handleRemoteMessage({ type: "stop", ownerId: "remote" })
         return
       }
       const record = parseSessionRecord(event.newValue)
-      if (!record) return
+      if (!record) {
+        return
+      }
       void session.handleRemoteMessage({
         type: "claim",
         ownerId: record.ownerId || "remote",
@@ -225,14 +243,19 @@ export function useWakeLock(): UseWakeLockResult {
   }, [])
 
   useEffect(() => {
-    if (!sessionState.sessionRequested || sessionState.startTimestamp === null) {
+    if (
+      !sessionState.sessionRequested ||
+      sessionState.startTimestamp === null
+    ) {
       return
     }
 
     const id = window.setInterval(() => {
       setElapsedTick((tick) => tick + 1)
       const session = sessionRef.current
-      if (!session) return
+      if (!session) {
+        return
+      }
       const wasRequested = session.getState().sessionRequested
       void session.stopIfCountdownElapsed().then(() => {
         if (wasRequested && !session.getState().sessionRequested) {
@@ -268,7 +291,9 @@ export function useWakeLock(): UseWakeLockResult {
 
   const activate = async (options?: ActivateOptions) => {
     const session = sessionRef.current
-    if (!session) return
+    if (!session) {
+      return
+    }
     if (!supportsWakeLock) {
       toastWakeLockFailure(null, "unsupported")
       return
@@ -290,7 +315,9 @@ export function useWakeLock(): UseWakeLockResult {
 
   const toggle = async (options?: ActivateOptions) => {
     const session = sessionRef.current
-    if (!session) return
+    if (!session) {
+      return
+    }
     if (!supportsWakeLock && !session.getState().sessionRequested) {
       toastWakeLockFailure(null, "unsupported")
       return
@@ -334,7 +361,10 @@ export function useWakeLock(): UseWakeLockResult {
       setPipOpen(true)
 
       const session = sessionRef.current
-      if (session?.getState().sessionRequested && !session.getState().userPaused) {
+      if (
+        session?.getState().sessionRequested &&
+        !session.getState().userPaused
+      ) {
         await session.releaseHeldLock()
         await session.tryReacquire()
       }
@@ -354,7 +384,10 @@ export function useWakeLock(): UseWakeLockResult {
         setPipOpen(false)
 
         const current = sessionRef.current
-        if (current?.getState().sessionRequested && !current.getState().userPaused) {
+        if (
+          current?.getState().sessionRequested &&
+          !current.getState().userPaused
+        ) {
           void current.releaseHeldLock().then(() => current.tryReacquire())
         }
       })

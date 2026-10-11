@@ -1,33 +1,58 @@
-export { FinanceAuthenticatedPage } from "@/src/modules/finance/components/layout/finance-authenticated-page"
-export { FinanceHomeMonthSummary } from "@/src/modules/finance/components/dashboard/finance-home-month-summary"
-export { FinanceLayout } from "@/src/modules/finance/components/layout/finance-layout"
+export { FinanceGate } from "./finance-gate"
+export { FinanceLayout } from "./shared/components/layout/layout"
+export { FinanceHomeMonthSummary } from "./dashboard/components/home-month-summary"
 export {
   FINANCE_APP_NAV,
   FINANCE_NAV_ITEMS,
-} from "@/src/modules/finance/constants/nav"
-export { useAccounts } from "@/src/modules/finance/hooks/use-accounts"
-export { useAnalyticsSummary } from "@/src/modules/finance/hooks/use-analytics"
-export { useBalanceSheet } from "@/src/modules/finance/hooks/use-balance-sheet"
-export { useBudgets } from "@/src/modules/finance/hooks/use-budgets"
-export { useCards } from "@/src/modules/finance/hooks/use-cards"
-export { useCategories } from "@/src/modules/finance/hooks/use-categories"
-export { useEmailSources } from "@/src/modules/finance/hooks/use-email-sources"
-export { useFinanceEnabled } from "@/src/modules/finance/hooks/use-finance-enabled"
-export { useInstitutions } from "@/src/modules/finance/hooks/use-institutions"
-export { useLoans } from "@/src/modules/finance/hooks/use-loans"
-export { useReceivables } from "@/src/modules/finance/hooks/use-receivables"
-export { useSavingsGoals } from "@/src/modules/finance/hooks/use-savings-goals"
-export { useTransactions } from "@/src/modules/finance/hooks/use-transactions"
+  financeSectionTitle,
+} from "./shared/constants/nav"
+
+export { ProductsScreen } from "./products/products-screen"
+export { AccountDetailScreen } from "./accounts/account-detail-screen"
+export { InstitutionDetailScreen } from "./institutions/institution-detail-screen"
+export { CategoriesScreen } from "./catalog/categories-screen"
+export { CardDetailScreen } from "./cards/card-detail-screen"
+export { PlanningScreen } from "./planning/planning-screen"
+export { LoanDetailScreen } from "./planning/loan-detail-screen"
+export { ReceivableDetailScreen } from "./planning/receivable-detail-screen"
+export { SavingsGoalDetailScreen } from "./planning/savings-goal-detail-screen"
+export { BudgetDetailScreen } from "./budgets/budget-detail-screen"
+export { SyncScreen } from "./sync/sync-screen"
+export { TransactionsScreen } from "./transactions/transactions-screen"
+export { TransactionDetailScreen } from "./transactions/transaction-detail-screen"
 export {
-  formatFinanceMoney,
-  parseFinanceMoney,
-} from "@/src/modules/finance/lib/money"
-export type { FinanceMoneyDisplay } from "@/src/modules/finance/lib/money"
-export { FinanceAccountsClient } from "@/src/modules/finance/pages/finance-accounts"
-export { FinancePlanningClient } from "@/src/modules/finance/pages/finance-planning"
-export { FinanceMailboxesClient } from "@/src/modules/finance/pages/finance-sync"
-export { FinanceTransactionsClient } from "@/src/modules/finance/pages/finance-transactions"
-export type * from "@/src/modules/finance/types/api"
+  TransactionCreateScreen,
+  TransactionEditScreen,
+} from "./transactions/transaction-form-screen"
+export { TransferCreateScreen } from "./transactions/transfer-form-screen"
+
+export { BrandLogo } from "./shared/components/brand-logo"
+export { CurrencyFlag } from "./shared/components/currency-flag"
+export { CurrencyPickerSheet } from "./transactions/components/currency-picker-sheet"
+
+export { useAccounts } from "./shared/hooks/use-accounts"
+export { useAnalyticsSummary } from "./shared/hooks/use-analytics"
+export { useBalanceSheet } from "./shared/hooks/use-balance-sheet"
+export { useBudgets } from "./shared/hooks/use-budgets"
+export { useCards } from "./shared/hooks/use-cards"
+export { useCategories } from "./shared/hooks/use-categories"
+export { useEmailSources } from "./shared/hooks/use-email-sources"
+export { useExchangeRates } from "./shared/hooks/use-exchange-rates"
+export { useFinanceEnabled } from "./shared/hooks/use-finance-enabled"
+export { useInstitutions } from "./shared/hooks/use-institutions"
+export { useLoans } from "./shared/hooks/use-loans"
+export { useReceivables } from "./shared/hooks/use-receivables"
+export { useSavingsGoals } from "./shared/hooks/use-savings-goals"
+export { useTransactions } from "./shared/hooks/use-transactions"
+
+export { currencyDisplayName } from "./shared/lib/currency-display-name"
+export { normalizeTrackedCurrencies } from "./shared/lib/finance-currency"
+export { formatFinanceMoney, parseFinanceMoney } from "./shared/lib/money"
+export type { FinanceMoneyDisplay } from "./shared/lib/money"
+
+export type * from "./shared/types/api"
+export type { FinanceBalanceSheetSlice } from "./shared/types/entities"
+export type * from "./shared/types/entities"
 export {
   FINANCE_ACCOUNTS_QUERY_KEY,
   FINANCE_ANALYTICS_QUERY_KEY,
@@ -45,5 +70,4 @@ export {
   FINANCE_RECEIVABLES_QUERY_KEY,
   FINANCE_SAVINGS_GOALS_QUERY_KEY,
   FINANCE_TRANSACTIONS_QUERY_KEY,
-} from "@/src/modules/finance/types/api"
-export type * from "@/src/modules/finance/types/entities"
+} from "./shared/types/api"

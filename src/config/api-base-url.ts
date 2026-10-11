@@ -1,18 +1,18 @@
 function normalizeBaseUrl(url: string): string {
-  return url.replace(/\/$/, '');
+  return url.replace(/\/$/, "")
 }
 
 export function resolveApiBaseUrl(): string {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL?.trim();
-  const apiPrefix = process.env.NEXT_PUBLIC_API_PREFIX?.trim();
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL?.trim()
+  const apiPrefix = process.env.NEXT_PUBLIC_API_PREFIX?.trim()
 
   if (!apiUrl) {
-    throw new Error('NEXT_PUBLIC_API_URL is not set');
+    throw new Error("NEXT_PUBLIC_API_URL is not set")
   }
 
   return normalizeBaseUrl(
-    `${apiUrl}${apiPrefix ? `/${apiPrefix.replace(/^\/+/, '')}` : ''}`,
-  );
+    `${apiUrl}${apiPrefix ? `/${apiPrefix.replace(/^\/+/, "")}` : ""}`
+  )
 }
 
-export const API_BASE_URL = resolveApiBaseUrl();
+export const API_BASE_URL = resolveApiBaseUrl()

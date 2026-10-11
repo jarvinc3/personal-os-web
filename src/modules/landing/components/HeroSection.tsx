@@ -1,15 +1,15 @@
-"use client";
+"use client"
 
-import { APP_ROUTES } from "@/src/shared/constants/app-routes";
-import { motion } from "motion/react";
-import Link from "next/link";
-import { landingContent } from "../data/site-info";
+import { APP_ROUTES } from "@/src/shared/constants/app-routes"
+import { motion } from "motion/react"
+import Link from "next/link"
+import { landingContent } from "@/src/modules/landing/data/site-info"
 
 export function HeroSection() {
   return (
-    <section className="flex overflow-hidden relative flex-col justify-center items-center px-4 pt-24 pb-20 min-h-screen">
+    <section className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-4 pt-24 pb-20">
       {/* Background decorations */}
-      <div className="absolute inset-0 pointer-events-none -z-10 bg-surface">
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-surface">
         {/* Playful grid overlay */}
         <div
           className="absolute inset-0 opacity-[0.05]"
@@ -29,9 +29,9 @@ export function HeroSection() {
           transition={{ duration: 0.5 }}
           className="mb-8 inline-flex items-center gap-2 rounded-full border border-primary/75 bg-primary/10 px-4 py-1.5 text-sm text-primary"
         >
-          <span className="flex relative w-2 h-2">
-            <span className="inline-flex absolute w-full h-full rounded-full animate-ping bg-primary" />
-            <span className="inline-flex relative w-2 h-2 rounded-full bg-primary" />
+          <span className="relative flex h-2 w-2">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
           </span>
           {landingContent.hero.badge}
         </motion.div>
@@ -44,8 +44,8 @@ export function HeroSection() {
           className="text-4xl font-bold tracking-tight sm:text-6xl md:text-7xl lg:text-8xl"
         >
           {landingContent.hero.titleStart}{" "}
-          <span className="inline-block relative px-2">
-            <span className="absolute inset-0 rounded-xl scale-105 -rotate-1 -z-10 bg-primary"></span>
+          <span className="relative inline-block px-2">
+            <span className="absolute inset-0 -z-10 scale-105 -rotate-1 rounded-xl bg-primary"></span>
             <span className="text-primary-foreground">
               {landingContent.hero.titleHighlight}
             </span>
@@ -68,16 +68,16 @@ export function HeroSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.3 }}
-          className="flex flex-col gap-4 items-center mt-10 sm:flex-row sm:justify-center"
+          className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center"
         >
           <Link
             href="#waitlist"
             className="group relative overflow-hidden rounded-2xl bg-primary px-8 py-4 text-base font-bold text-primary-foreground shadow-[4px_4px_0px_0px_#111827] transition-all duration-300 hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_#111827] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none"
           >
-            <span className="flex relative z-10 gap-2 items-center">
+            <span className="relative z-10 flex items-center gap-2">
               {landingContent.hero.primaryCta}
               <svg
-                className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1"
+                className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -119,10 +119,10 @@ export function HeroSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.5 }}
-          className="flex flex-wrap gap-8 justify-center items-center mt-16 text-sm text-muted-foreground"
+          className="mt-16 flex flex-wrap items-center justify-center gap-8 text-sm text-muted-foreground"
         >
           {landingContent.hero.stats.map((stat) => (
-            <div key={stat.label} className="flex flex-col gap-1 items-center">
+            <div key={stat.label} className="flex flex-col items-center gap-1">
               <span className="text-2xl font-bold text-foreground">
                 {stat.value}
               </span>
@@ -140,20 +140,20 @@ export function HeroSection() {
         >
           <div className="relative overflow-hidden rounded-3xl border-2 border-text bg-white shadow-[8px_8px_0px_0px_var(--color-primary)]">
             {/* Window chrome */}
-            <div className="flex gap-2 items-center px-6 py-4 border-b-2 border-text bg-neutral-100">
+            <div className="flex items-center gap-2 border-b-2 border-text bg-neutral-100 px-6 py-4">
               <div className="flex gap-2">
                 <div className="h-3.5 w-3.5 rounded-full border border-text bg-red-400" />
                 <div className="h-3.5 w-3.5 rounded-full border border-text bg-yellow-400" />
                 <div className="h-3.5 w-3.5 rounded-full border border-text bg-green-400" />
               </div>
-              <div className="flex justify-center items-center mx-auto w-48 h-6 text-xs font-bold bg-white rounded-md border border-text text-text">
+              <div className="mx-auto flex h-6 w-48 items-center justify-center rounded-md border border-text bg-white text-xs font-bold text-text">
                 personal-os.app
               </div>
             </div>
 
             {/* Dashboard preview */}
             <div className="p-6">
-              <div className="flex justify-between items-center mb-4">
+              <div className="mb-4 flex items-center justify-between">
                 <div className="text-left">
                   <p className="text-xs font-medium text-muted-foreground">
                     Buenos días, Carlos
@@ -215,7 +215,7 @@ export function HeroSection() {
                     key={card.name}
                     className="rounded-xl border-2 border-text bg-white p-3 shadow-[2px_2px_0px_0px_#111827] transition-transform hover:-translate-y-1"
                   >
-                    <div className="flex gap-2 items-center mb-2">
+                    <div className="mb-2 flex items-center gap-2">
                       <span className="text-lg">{card.icon}</span>
                       <span className="text-xs font-bold text-text">
                         {card.name}
@@ -233,16 +233,19 @@ export function HeroSection() {
 
               {/* AI chat preview */}
               <div className="mt-4 rounded-xl border-2 border-text bg-accent p-4 shadow-[4px_4px_0px_0px_#111827]">
-                <div className="flex gap-2 items-center mb-2">
+                <div className="mb-2 flex items-center gap-2">
                   <span className="text-lg">🤖</span>
                   <span className="text-sm font-bold text-text">
                     {landingContent.hero.mockup.agentName}
                   </span>
                 </div>
                 <p className="text-sm font-medium text-text">
-                  &quot;Detecté un gasto de RD$3,200 en Supermercado Nacional. Lo
-                  categoricé como <strong className="text-primary">{landingContent.hero.mockup.highlight}</strong>. Tu
-                  presupuesto de comida está al 78% este mes.&quot;
+                  &quot;Detecté un gasto de RD$3,200 en Supermercado Nacional.
+                  Lo categoricé como{" "}
+                  <strong className="text-primary">
+                    {landingContent.hero.mockup.highlight}
+                  </strong>
+                  . Tu presupuesto de comida está al 78% este mes.&quot;
                 </p>
               </div>
             </div>
@@ -250,5 +253,5 @@ export function HeroSection() {
         </motion.div>
       </div>
     </section>
-  );
+  )
 }

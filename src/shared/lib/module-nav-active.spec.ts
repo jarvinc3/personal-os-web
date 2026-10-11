@@ -7,37 +7,37 @@ import {
 } from "./module-nav-active.ts"
 
 const resumen = { href: "/finance/overview", matchExact: true as const }
-const cuentas = {
-  href: "/finance/accounts",
-  extraActiveHrefs: ["/finance/accounts/categories", "/finance/accounts/sync"],
+const productos = {
+  href: "/finance/products",
+  extraActiveHrefs: ["/finance/categories", "/finance/sync"],
 }
 
 describe("isModuleSectionActive", () => {
-  it("marks Cuentas active on /finance/accounts", () => {
-    assert.equal(isModuleSectionActive(cuentas, "/finance/accounts"), true)
+  it("marks Productos active on /finance/products", () => {
+    assert.equal(isModuleSectionActive(productos, "/finance/products"), true)
   })
 
-  it("marks Cuentas active on /finance/accounts/sync", () => {
-    assert.equal(isModuleSectionActive(cuentas, "/finance/accounts/sync"), true)
+  it("marks Productos active on /finance/sync", () => {
+    assert.equal(isModuleSectionActive(productos, "/finance/sync"), true)
   })
 
-  it("marks Cuentas active on /finance/accounts/categories", () => {
+  it("marks Productos active on /finance/categories", () => {
+    assert.equal(isModuleSectionActive(productos, "/finance/categories"), true)
+  })
+
+  it("does not mark Productos on sibling finance routes", () => {
+    assert.equal(isModuleSectionActive(productos, "/finance"), false)
     assert.equal(
-      isModuleSectionActive(cuentas, "/finance/accounts/categories"),
-      true,
+      isModuleSectionActive(productos, "/finance/transactions"),
+      false
     )
-  })
-
-  it("does not mark Cuentas on sibling finance routes", () => {
-    assert.equal(isModuleSectionActive(cuentas, "/finance"), false)
-    assert.equal(isModuleSectionActive(cuentas, "/finance/transactions"), false)
   })
 
   it("marks Resumen exact and not on child routes", () => {
     assert.equal(isModuleSectionActive(resumen, "/finance/overview"), true)
     assert.equal(isModuleSectionActive(resumen, "/finance"), false)
-    assert.equal(isModuleSectionActive(resumen, "/finance/accounts"), false)
-    assert.equal(isModuleSectionActive(resumen, "/finance/accounts/sync"), false)
+    assert.equal(isModuleSectionActive(resumen, "/finance/products"), false)
+    assert.equal(isModuleSectionActive(resumen, "/finance/sync"), false)
   })
 })
 

@@ -1,0 +1,26 @@
+---
+description: Every list view loads more rows as the user scrolls; no prev/next page controls.
+alwaysApply: true
+---
+
+# Listas con scroll infinito
+
+Toda vista que renderiza una lista trae más filas a medida que el usuario baja. No se pagina con botones "Anterior" / "Siguiente" ni con un contador "Página X de Y": ese control es arcaico y obliga al usuario a navegar la lista a mano.
+
+- El scroll carga la siguiente tanda al acercarse al final, sin que el usuario pulse nada.
+- Mientras llega la tanda, un indicador de carga al pie. Nunca un salto en blanco.
+- Cuando no hay más filas, la lista termina en silencio (o con el estado vacío si no hay ninguna). No dejar un botón muerto.
+- Un fallo al traer la siguiente tanda muestra un aviso con reintento y no rompe lo ya cargado.
+- El tamaño de tanda es un valor único y con nombre (`limit`), no un número suelto por vista.
+
+En código, una lista paginada es `useInfiniteQuery` de TanStack Query con `getNextPageParam`, y el disparador de scroll es un `IntersectionObserver` sobre un centinela al final de la lista. No uses `useState` de página ni botones de paginación. Molde de la mecánica: `src/modules/notifications/hooks/use-notifications.ts` (ya usa `useInfiniteQuery`; le falta disparar por scroll).
+
+## Contrato del API
+
+El scroll infinito usa paginación por cursor:
+
+- El cliente manda `limit` y, para la siguiente tanda, el `cursor` que devolvió la respuesta anterior. No manda `page`.
+- La respuesta es `{ items, nextCursor, hasMore }`. `nextCursor` es opaco: el cliente no lo interpreta, solo lo reenvía. `hasMore` dice si hay más.
+- El cursor se calcula sobre un orden estable con desempate por id, para que insertar filas mientras el usuario baja no repita ni salte registros.
+
+El contrato vive en `packages/core/src/pagination/` del back y lo consumen movimientos, presupuestos, notificaciones y sesiones de IA. En la web, un `useInfiniteQuery` guarda el `nextCursor` y un `IntersectionObserver` sobre un centinela al final dispara `fetchNextPage`. Ver `personal-os-back/docs/decisions/ADR-006-cursor-pagination.md` y `docs/decisions/ADR-003-cursor-pagination.md`.

@@ -1,5 +1,5 @@
-import type { ModuleSlug } from "../../modules/settings/types/module-config.types.ts"
-import { APP_ROUTES } from "../constants/app-routes.ts"
+import type { ModuleSlug } from "@/src/modules/settings"
+import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 
 export function moduleSlugFromPathname(pathname: string): ModuleSlug | null {
   if (

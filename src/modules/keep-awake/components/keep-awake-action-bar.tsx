@@ -88,7 +88,9 @@ export function KeepAwakeActionBar({
           onClick={onOpenOrFocusPip}
         >
           <MonitorPlay className="size-5 text-foreground" aria-hidden />
-          <span className="text-foreground">{pipOpen ? "Enfocar" : "Miniplayer"}</span>
+          <span className="text-foreground">
+            {pipOpen ? "Enfocar" : "Miniplayer"}
+          </span>
         </Button>
       ) : null}
 

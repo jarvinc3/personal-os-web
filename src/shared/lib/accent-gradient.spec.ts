@@ -7,7 +7,7 @@ describe("accentSurfaceGradient", () => {
   it("matches the institution hero gradient", () => {
     assert.equal(
       accentSurfaceGradient("#1B4332"),
-      "linear-gradient(160deg, #1B4332 0%, #0b1220 100%)",
+      "linear-gradient(160deg, #1B4332 0%, #0b1220 100%)"
     )
   })
 })

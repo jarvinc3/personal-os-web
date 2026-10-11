@@ -1,13 +1,16 @@
 "use client"
 
-import { BrandLogo } from "@/src/modules/finance/components/brand-logo"
-import { useBalanceSheet } from "@/src/modules/finance/hooks/use-balance-sheet"
-import { useFinanceEnabled } from "@/src/modules/finance/hooks/use-finance-enabled"
-import { useInstitutions } from "@/src/modules/finance/hooks/use-institutions"
-import { formatFinanceMoney } from "@/src/modules/finance/lib/money"
-import type { FinanceBalanceSheetSlice } from "@/src/modules/finance/types/entities"
+import { BrandLogo } from "@/src/modules/finance"
+import { useBalanceSheet } from "@/src/modules/finance"
+import { useFinanceEnabled } from "@/src/modules/finance"
+import { useInstitutions } from "@/src/modules/finance"
+import { formatFinanceMoney } from "@/src/modules/finance"
+import type { FinanceBalanceSheetSlice } from "@/src/modules/finance"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
-import { RadioGroup, RadioGroupItem } from "@/src/shared/components/ui/radio-group"
+import {
+  RadioGroup,
+  RadioGroupItem,
+} from "@/src/shared/components/ui/radio-group"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
 import { LayersIcon } from "lucide-react"
@@ -28,7 +31,7 @@ function balanceLabel(
   slice: FinanceBalanceSheetSlice | undefined,
   currency: string,
   showCents: boolean,
-  compactNumbers: boolean,
+  compactNumbers: boolean
 ): string {
   if (!slice || slice.status !== "COMPLETE" || slice.netWorth === null) {
     return "Balance incompleto"
@@ -51,13 +54,13 @@ export function WipeBalanceInstitutionSheet({
   const institutionsQuery = useInstitutions(open)
   const balanceSheetQuery = useBalanceSheet(open)
   const institutions = (institutionsQuery.data ?? []).filter(
-    (institution) => institution.isActive,
+    (institution) => institution.isActive
   )
   const positions = new Map(
     (balanceSheetQuery.data?.institutions ?? []).map((position) => [
       position.institutionId,
       position,
-    ]),
+    ])
   )
   const loading =
     (institutionsQuery.isPending && institutions.length === 0) ||
@@ -98,7 +101,7 @@ export function WipeBalanceInstitutionSheet({
               balanceSheetQuery.data?.global,
               display.currency,
               display.showCents,
-              display.compactNumbers,
+              display.compactNumbers
             )}
             mark={<LayersIcon className="size-5" />}
           />
@@ -113,7 +116,7 @@ export function WipeBalanceInstitutionSheet({
                 positions.get(institution.id),
                 display.currency,
                 display.showCents,
-                display.compactNumbers,
+                display.compactNumbers
               )}
             />
           ))}
@@ -142,7 +145,7 @@ function ScopeCard({
     <label
       className={cn(
         "flex w-full items-center gap-3 rounded-2xl p-4 text-left text-white",
-        PRESSABLE_CLASS,
+        PRESSABLE_CLASS
       )}
       style={{ backgroundColor: color }}
     >

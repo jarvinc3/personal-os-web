@@ -1,6 +1,6 @@
 import { Suspense } from "react"
 
-import { FinanceReceivableDetailClient } from "@/src/modules/finance/components/planning/finance-receivable-detail-view"
+import { ReceivableDetailScreen } from "@/src/modules/finance"
 import { LoadingView } from "@/src/shared/components/layout/loading-view"
 
 type FinanceReceivableDetailPageProps = {
@@ -13,7 +13,7 @@ export default async function FinanceReceivableDetailPage({
   const { receivableId } = await params
   return (
     <Suspense fallback={<LoadingView variant="screen" />}>
-      <FinanceReceivableDetailClient receivableId={receivableId} />
+      <ReceivableDetailScreen receivableId={receivableId} />
     </Suspense>
   )
 }

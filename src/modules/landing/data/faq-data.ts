@@ -1,7 +1,7 @@
 export interface FAQItem {
-  question: string;
-  answer: string;
-  category: string;
+  question: string
+  answer: string
+  category: string
 }
 
 export const faqCategories = [
@@ -10,7 +10,7 @@ export const faqCategories = [
   "Finanzas y Seguridad",
   "Disponibilidad",
   "Privacidad",
-];
+]
 
 export const faqItems: FAQItem[] = [
   // General
@@ -126,4 +126,4 @@ export const faqItems: FAQItem[] = [
     answer:
       "Los datos se almacenan en PostgreSQL gestionado por Supabase, en servidores de AWS en US East. Todos los datos en tránsito usan TLS y los datos sensibles (tokens OAuth) están encriptados en reposo con AES-256.",
   },
-];
+]

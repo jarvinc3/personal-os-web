@@ -1,6 +1,6 @@
 import { Suspense } from "react"
 
-import { FinanceSavingsGoalDetailClient } from "@/src/modules/finance/components/planning/finance-savings-goal-detail-view"
+import { SavingsGoalDetailScreen } from "@/src/modules/finance"
 import { LoadingView } from "@/src/shared/components/layout/loading-view"
 
 type FinanceSavingsGoalDetailPageProps = {
@@ -13,7 +13,7 @@ export default async function FinanceSavingsGoalDetailPage({
   const { goalId } = await params
   return (
     <Suspense fallback={<LoadingView variant="screen" />}>
-      <FinanceSavingsGoalDetailClient goalId={goalId} />
+      <SavingsGoalDetailScreen goalId={goalId} />
     </Suspense>
   )
 }

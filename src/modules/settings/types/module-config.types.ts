@@ -1,5 +1,6 @@
-export type ModuleSlug =
-  "finance" | "agenda" | "projects" | "subscriptions" | "health"
+import type { ModuleSlug } from "@/src/shared/types/module-nav"
+
+export type { ModuleSlug }
 
 export type FinanceModuleConfig = {
   version: number

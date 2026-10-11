@@ -4,7 +4,7 @@ import {
   FLOATING_SHEET_CONTENT_CLASS,
   getBottomSheetDirection,
   type BottomSheetVariant,
-} from "@/src/shared/components/layout/bottom-sheet-variant";
+} from "@/src/shared/components/layout/bottom-sheet-variant"
 import {
   Drawer,
   DrawerContent,
@@ -13,11 +13,11 @@ import {
   DrawerHeader,
   DrawerNested,
   DrawerTitle,
-} from "@/src/shared/components/ui/drawer";
-import { Spinner } from "@/src/shared/components/ui/spinner";
-import { useIsMobile } from "@/src/shared/hooks/use-mobile";
-import { cn } from "@/src/shared/lib/utils";
-import type { ReactNode } from "react";
+} from "@/src/shared/components/ui/drawer"
+import { Spinner } from "@/src/shared/components/ui/spinner"
+import { useIsMobile } from "@/src/shared/hooks/use-mobile"
+import { cn } from "@/src/shared/lib/utils"
+import type { ReactNode } from "react"
 
 interface BottomSheetProps {
   open: boolean
@@ -70,7 +70,7 @@ export function BottomSheet({
             <div
               className={cn(
                 "absolute top-1/2 -translate-y-1/2",
-                headerActionAlign === "start" ? "left-3" : "right-3",
+                headerActionAlign === "start" ? "left-3" : "right-3"
               )}
             >
               {headerAction}
@@ -88,7 +88,7 @@ export function BottomSheet({
 
         <div
           data-vaul-no-drag=""
-          className="flex overflow-y-auto flex-col gap-4 p-4 scrollbar-hide"
+          className="scrollbar-hide flex flex-col gap-4 overflow-y-auto p-4"
         >
           {pending ? (
             <div className="flex justify-center py-12">
@@ -98,9 +98,9 @@ export function BottomSheet({
             children
           )}
         </div>
-        
+
         {actionNodes.length > 0 && !pending && (
-          <DrawerFooter className="flex flex-row gap-2 justify-end w-full border-t">
+          <DrawerFooter className="flex w-full flex-row justify-end gap-2 border-t">
             {actionNodes}
           </DrawerFooter>
         )}

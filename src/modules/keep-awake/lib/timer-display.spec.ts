@@ -10,7 +10,11 @@ describe("getTimerDisplay", () => {
       { label: "Tiempo", seconds: 0, mode: "open" }
     )
     assert.deepEqual(
-      getTimerDisplay({ endsAt: null, elapsedSeconds: 90, remainingSeconds: 0 }),
+      getTimerDisplay({
+        endsAt: null,
+        elapsedSeconds: 90,
+        remainingSeconds: 0,
+      }),
       { label: "Tiempo", seconds: 90, mode: "open" }
     )
   })

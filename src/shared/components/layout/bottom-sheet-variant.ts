@@ -4,7 +4,9 @@ export function getBottomSheetDirection(
   variant: BottomSheetVariant,
   isMobile: boolean
 ): "bottom" | "right" {
-  if (variant === "floating") return "bottom"
+  if (variant === "floating") {
+    return "bottom"
+  }
   return isMobile ? "bottom" : "right"
 }
 

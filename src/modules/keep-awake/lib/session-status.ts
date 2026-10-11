@@ -8,7 +8,8 @@ export type KeepAwakePhase =
   | "ending"
   | "interrupted"
 
-export type KeepAwakePending = "activate" | "pause" | "resume" | "deactivate" | null
+export type KeepAwakePending =
+  "activate" | "pause" | "resume" | "deactivate" | null
 
 export type KeepAwakeSessionState = {
   sessionRequested: boolean
@@ -23,12 +24,20 @@ export type KeepAwakeSessionState = {
 
 export type KeepAwakeSessionAction =
   | { type: "activate_started" }
-  | { type: "activate_succeeded"; startTimestamp: number; endsAt: number | null }
+  | {
+      type: "activate_succeeded"
+      startTimestamp: number
+      endsAt: number | null
+    }
   | { type: "activate_failed" }
   | { type: "pause_started" }
   | { type: "pause_succeeded"; pauseStartedAt: number }
   | { type: "resume_started" }
-  | { type: "resume_succeeded"; accumulatedPauseMs: number; endsAt: number | null }
+  | {
+      type: "resume_succeeded"
+      accumulatedPauseMs: number
+      endsAt: number | null
+    }
   | { type: "resume_failed" }
   | { type: "deactivate_started" }
   | { type: "deactivate_succeeded" }
@@ -63,13 +72,27 @@ export function deriveKeepAwakePhase(input: {
   pending: KeepAwakePending
   userPaused: boolean
 }): KeepAwakePhase {
-  if (!input.supportsWakeLock) return "unsupported"
-  if (input.pending === "activate" || input.pending === "resume") return "activating"
-  if (input.pending === "pause") return "pausing"
-  if (input.pending === "deactivate") return "ending"
-  if (input.userPaused && input.sessionRequested) return "paused"
-  if (input.sessionRequested && input.lockHeld) return "active"
-  if (input.sessionRequested && !input.lockHeld) return "interrupted"
+  if (!input.supportsWakeLock) {
+    return "unsupported"
+  }
+  if (input.pending === "activate" || input.pending === "resume") {
+    return "activating"
+  }
+  if (input.pending === "pause") {
+    return "pausing"
+  }
+  if (input.pending === "deactivate") {
+    return "ending"
+  }
+  if (input.userPaused && input.sessionRequested) {
+    return "paused"
+  }
+  if (input.sessionRequested && input.lockHeld) {
+    return "active"
+  }
+  if (input.sessionRequested && !input.lockHeld) {
+    return "interrupted"
+  }
   return "idle"
 }
 
@@ -105,10 +128,14 @@ export function reduceKeepAwakeSession(
     case "activate_failed":
       return { ...INITIAL_KEEP_AWAKE_SESSION }
     case "pause_started":
-      if (!state.sessionRequested) return state
+      if (!state.sessionRequested) {
+        return state
+      }
       return { ...state, pending: "pause" }
     case "pause_succeeded":
-      if (!state.sessionRequested) return state
+      if (!state.sessionRequested) {
+        return state
+      }
       return {
         ...state,
         lockHeld: false,
@@ -117,10 +144,14 @@ export function reduceKeepAwakeSession(
         pauseStartedAt: action.pauseStartedAt,
       }
     case "resume_started":
-      if (!state.sessionRequested || !state.userPaused) return state
+      if (!state.sessionRequested || !state.userPaused) {
+        return state
+      }
       return { ...state, pending: "resume" }
     case "resume_succeeded":
-      if (!state.sessionRequested) return state
+      if (!state.sessionRequested) {
+        return state
+      }
       return {
         ...state,
         lockHeld: true,
@@ -131,7 +162,9 @@ export function reduceKeepAwakeSession(
         endsAt: action.endsAt,
       }
     case "resume_failed":
-      if (!state.sessionRequested) return state
+      if (!state.sessionRequested) {
+        return state
+      }
       return { ...state, pending: null, lockHeld: false, userPaused: true }
     case "deactivate_started":
       return { ...state, pending: "deactivate" }
@@ -139,14 +172,18 @@ export function reduceKeepAwakeSession(
     case "remote_stopped":
       return { ...INITIAL_KEEP_AWAKE_SESSION }
     case "lock_released":
-      if (!state.sessionRequested) return state
+      if (!state.sessionRequested) {
+        return state
+      }
       return {
         ...state,
         lockHeld: false,
         pending: state.pending === "pause" ? state.pending : null,
       }
     case "reacquire_succeeded":
-      if (!state.sessionRequested || state.userPaused) return state
+      if (!state.sessionRequested || state.userPaused) {
+        return state
+      }
       return { ...state, lockHeld: true, pending: null }
     default:
       return state
@@ -167,9 +204,11 @@ export function getKeepAwakeCopy(
   phase: KeepAwakePhase,
   options: { supportsPip: boolean; countdown?: boolean }
 ): KeepAwakeCopy {
-  const busy = phase === "activating" || phase === "pausing" || phase === "ending"
+  const busy =
+    phase === "activating" || phase === "pausing" || phase === "ending"
   const canToggle = phase !== "unsupported" && !busy
-  const canEnd = phase === "active" || phase === "interrupted" || phase === "paused"
+  const canEnd =
+    phase === "active" || phase === "interrupted" || phase === "paused"
 
   switch (phase) {
     case "unsupported":

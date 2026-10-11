@@ -71,6 +71,8 @@ No armar un drawer con `Drawer` crudo si `BottomSheet` cubre el caso (título, d
 
 Una lista larga dentro de un sheet lleva búsqueda. El texto ignora mayúsculas y acentos. Cada coincidencia destella una vez (`animate-search-flash`). Si el ítem está dentro de un collapsible cerrado, ábrelo solo cuando la coincidencia es un hijo: un padre que coincide se queda cerrado para que sus hijos no tapen el resultado.
 
+Toda vista de lista (dentro o fuera de un sheet) trae más filas al bajar: scroll infinito, sin botones de página. La regla y el contrato por cursor viven en [`list-infinite-scroll.mdc`](../../.cursor/rules/list-infinite-scroll.mdc).
+
 **Módulo hoja** (Keep Awake): hero + iconos + sheets. **No** uses `Tabs*` para Recordatorio/Historial/ajustes en la misma página. Eso es chrome de hoja, no secciones. Molde: [module-conventions.md — Módulo hoja (UX)](./module-conventions.md#módulo-hoja-ux). `Tabs*` solo si hay ≥2 superficies locales que **no** merecen ruta y **no** es un módulo hoja. El tab activo se guarda en la query (`tab`) para que Atrás lo recupere; un sheet que reinicia su tab pasa `persist={false}`. El chip se desliza, el panel entra con presencia y un swipe horizontal cambia de tab.
 
 Keep Awake reminder: [`keep-awake-reminder-sheet.tsx`](../../src/modules/keep-awake/components/keep-awake-reminder-sheet.tsx) (`Guardar` activa). Aviso al due: [`keep-awake-reminder-prompt.tsx`](../../src/modules/keep-awake/components/keep-awake-reminder-prompt.tsx) (`floating`). Temporizador: [`keep-awake-duration-controls.tsx`](../../src/modules/keep-awake/components/keep-awake-duration-controls.tsx) (popover + `DurationWheels`). Horario silencioso: [`edit-quiet-hours-sheet.tsx`](../../src/modules/settings/components/sheets/edit-quiet-hours-sheet.tsx).
@@ -86,23 +88,32 @@ Viven en `src/modules/finance/components/forms/`. No copiarlos a otros módulos;
 
 ### Botón de registrar o guardar
 
-El botón que envía queda deshabilitado hasta que el formulario sea válido y hayan cargado los datos que el envío necesita. La regla completa vive en [`.cursor/rules/form-submit-disabled.mdc`](../../.cursor/rules/form-submit-disabled.mdc). Las reglas compartidas (`isPositiveAmountInput`, `isLedgerTargetInput`) viven en [`ledger-form.ts`](../../src/modules/finance/lib/ledger-form.ts) con su spec.
+Estado del botón de envío: [`.cursor/rules/form-submit-disabled.mdc`](../../.cursor/rules/form-submit-disabled.mdc). Las reglas compartidas (`isPositiveAmountInput`, `isLedgerTargetInput`) viven en [`ledger-form.ts`](../../src/modules/finance/lib/ledger-form.ts) con su spec.
 
-## Reglas de formularios
+## Reglas registradas (`.cursor/rules/`)
 
-Reglas obligatorias, una por archivo en [`.cursor/rules/`](../../.cursor/rules). Rigen para todo control de entrada de datos: formularios de página, sheets de edición y ajustes.
+Una regla por archivo `.mdc`; se leen todas antes de crear o cambiar un control. El detalle vive en cada `.mdc`; aquí solo el índice y su componente canónico.
 
-| Regla | Qué exige |
+| Regla | Componente o helper canónico |
 | --- | --- |
-| [form-shell-page.mdc](../../.cursor/rules/form-shell-page.mdc) | Formulario de página: `FinanceFormScreen`, barra de envío fija, texto = verbo. |
-| [form-shell-sheet.mdc](../../.cursor/rules/form-shell-sheet.mdc) | Formulario en `BottomSheet`: acciones del sheet; edición por `isDirty`, alta por validez. |
-| [form-sections.mdc](../../.cursor/rules/form-sections.mdc) | Bloques con título; opcionales en "Detalles opcionales". |
-| [form-field-anatomy.mdc](../../.cursor/rules/form-field-anatomy.mdc) | Etiqueta, error inline, `onTouched`, reglas cruzadas en el esquema. |
-| [form-picker-fields.mdc](../../.cursor/rules/form-picker-fields.mdc) | Listas largas en hoja de selección; un picker por formulario. |
-| [form-submit-flow.mdc](../../.cursor/rules/form-submit-flow.mdc) | Constructor de payload, toast de éxito o error, `onDone`. |
-| [form-derived-fields.mdc](../../.cursor/rules/form-derived-fields.mdc) | Moneda, destino y etiquetas derivadas del estado elegido. |
-| [form-submit-disabled.mdc](../../.cursor/rules/form-submit-disabled.mdc) | Estado del botón de envío. |
-| [form-field-icons.mdc](../../.cursor/rules/form-field-icons.mdc) | Icono líder en los campos de dato. |
+| [ui-shared-components.mdc](../../.cursor/rules/ui-shared-components.mdc) | `wheel-picker.tsx`, `BottomSheet`, `FinanceDateField` |
+| [leaf-module-ux.mdc](../../.cursor/rules/leaf-module-ux.mdc) | hero + `BottomSheet` (Keep Awake) |
+| [navigation-pending.mdc](../../.cursor/rules/navigation-pending.mdc) | `LinkPendingOverlay` / `usePendingNavigation` |
+| [confirm-important-changes.mdc](../../.cursor/rules/confirm-important-changes.mdc) | `AlertDialog` |
+| [switch-row-icons.mdc](../../.cursor/rules/switch-row-icons.mdc) | `SettingsRow` / `SwitchFieldRow` |
+| [visual-status-icons.mdc](../../.cursor/rules/visual-status-icons.mdc) | icono + `aria-label` |
+| [form-shell-page.mdc](../../.cursor/rules/form-shell-page.mdc) | `FinanceFormScreen` |
+| [form-shell-sheet.mdc](../../.cursor/rules/form-shell-sheet.mdc) | `BottomSheet` (acciones del sheet) |
+| [form-sections.mdc](../../.cursor/rules/form-sections.mdc) | bloques con título |
+| [form-field-anatomy.mdc](../../.cursor/rules/form-field-anatomy.mdc) | `Field` / `FieldLabel` / `FieldError` |
+| [form-picker-fields.mdc](../../.cursor/rules/form-picker-fields.mdc) | picker de selección en `BottomSheet` |
+| [form-submit-flow.mdc](../../.cursor/rules/form-submit-flow.mdc) | constructor de payload + `toast` |
+| [form-derived-fields.mdc](../../.cursor/rules/form-derived-fields.mdc) | campos derivados del estado elegido |
+| [form-submit-disabled.mdc](../../.cursor/rules/form-submit-disabled.mdc) | botón de envío |
+| [form-field-icons.mdc](../../.cursor/rules/form-field-icons.mdc) | `FormTextField` `icon` / `SelectField` `icon` |
+| [icons-required.mdc](../../.cursor/rules/icons-required.mdc) | icono obligatorio en todo botón y control |
+| [input-placeholders.mdc](../../.cursor/rules/input-placeholders.mdc) | placeholder solo para ejemplo o formato |
+| [list-infinite-scroll.mdc](../../.cursor/rules/list-infinite-scroll.mdc) | `useInfiniteQuery` + `IntersectionObserver` |
 
 Molde: `transaction-form.tsx` y `transfer-form.tsx`. No copiar los componentes de Finanzas a otros módulos; sí el patrón.
 

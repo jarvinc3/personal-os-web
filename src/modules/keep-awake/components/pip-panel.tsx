@@ -1,7 +1,10 @@
 "use client"
 
 import { formatElapsed } from "@/src/modules/keep-awake/lib/format-elapsed"
-import type { KeepAwakePhase, TimerDisplay } from "@/src/modules/keep-awake/lib/session-status"
+import type {
+  KeepAwakePhase,
+  TimerDisplay,
+} from "@/src/modules/keep-awake/lib/session-status"
 import { Button } from "@/src/shared/components/ui/button"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
 import { Pause, Play } from "lucide-react"
@@ -13,7 +16,8 @@ type PipPanelProps = {
 }
 
 export function PipPanel({ phase, timerDisplay, onToggle }: PipPanelProps) {
-  const isLive = phase === "active" || phase === "interrupted" || phase === "pausing"
+  const isLive =
+    phase === "active" || phase === "interrupted" || phase === "pausing"
   const isPaused = phase === "paused"
   const toggleLabel = isLive ? "Pausar" : isPaused ? "Continuar" : "Activar"
   const statusLabel = isLive ? "Activo" : isPaused ? "Pausada" : "Inactivo"

@@ -47,7 +47,10 @@ export function KeepAwakePanelToolbar({
         >
           <Bell aria-hidden />
           {reminderActive ? (
-            <span className="bg-primary absolute top-2.5 right-2.5 size-2 rounded-full" aria-hidden />
+            <span
+              className="absolute top-2.5 right-2.5 size-2 rounded-full bg-primary"
+              aria-hidden
+            />
           ) : null}
         </Button>
         <Button

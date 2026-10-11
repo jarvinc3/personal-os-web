@@ -54,12 +54,20 @@ export function formatCompactSeconds(totalSeconds: number): string {
   const safe = Number.isFinite(totalSeconds)
     ? Math.max(0, Math.floor(totalSeconds))
     : 0
-  if (safe === 0) return "0m"
-  if (safe < 60) return `${safe}s`
+  if (safe === 0) {
+    return "0m"
+  }
+  if (safe < 60) {
+    return `${safe}s`
+  }
   const hours = Math.floor(safe / 3600)
   const minutes = Math.floor((safe % 3600) / 60)
-  if (hours === 0) return `${minutes}m`
-  if (minutes === 0) return `${hours}h`
+  if (hours === 0) {
+    return `${minutes}m`
+  }
+  if (minutes === 0) {
+    return `${hours}h`
+  }
   return `${hours}h ${minutes}m`
 }
 
@@ -159,9 +167,13 @@ function startOfLocalDay(now: number): number {
 }
 
 function formatDurationMinutes(minutes: number): string {
-  if (minutes < 60) return `${minutes} min`
+  if (minutes < 60) {
+    return `${minutes} min`
+  }
   const hours = Math.floor(minutes / 60)
   const leftover = minutes % 60
-  if (leftover === 0) return `${hours} h`
+  if (leftover === 0) {
+    return `${hours} h`
+  }
   return `${hours} h ${leftover} min`
 }

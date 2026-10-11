@@ -1,12 +1,12 @@
 export interface AppModule {
-  id: string;
-  name: string;
-  description: string;
-  icon: string;
-  color: string;
-  bgColor: string;
-  status: "available" | "coming_soon" | "in_design";
-  features: string[];
+  id: string
+  name: string
+  description: string
+  icon: string
+  color: string
+  bgColor: string
+  status: "available" | "coming_soon" | "in_design"
+  features: string[]
 }
 
 export const appModules: AppModule[] = [
@@ -96,7 +96,7 @@ export const appModules: AppModule[] = [
       "Recordatorios de medicamentos",
     ],
   },
-];
+]
 
 export const appFeatures = [
   {
@@ -135,4 +135,4 @@ export const appFeatures = [
     description:
       "Soporte nativo para múltiples monedas con tasas de cambio en tiempo real. Perfecto para quien maneja DOP, USD y más.",
   },
-];
+]

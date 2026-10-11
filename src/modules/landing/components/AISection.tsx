@@ -1,20 +1,17 @@
-"use client";
+"use client"
 
-import { motion } from "motion/react";
-import { landingContent } from "../data/site-info";
+import { motion } from "motion/react"
+import { landingContent } from "@/src/modules/landing/data/site-info"
 
 export function AISection() {
   return (
-    <section
-      id="ai"
-      className="overflow-hidden relative px-6 py-24"
-    >
+    <section id="ai" className="relative overflow-hidden px-6 py-24">
       {/* Decorative lines */}
       <div className="absolute top-0 left-0 w-full">
-        <div className="mx-auto w-full max-w-7xl h-px bg-border" />
+        <div className="mx-auto h-px w-full max-w-7xl bg-border" />
       </div>
       <div className="absolute bottom-0 left-0 w-full">
-        <div className="mx-auto w-full max-w-7xl h-px bg-border" />
+        <div className="mx-auto h-px w-full max-w-7xl bg-border" />
       </div>
 
       <div className="relative mx-auto max-w-7xl">
@@ -72,7 +69,7 @@ export function AISection() {
                   <p className="mt-1 text-sm font-medium text-muted-foreground">
                     {cap.description}
                   </p>
-                  <p className="mt-2 text-xs italic font-semibold text-primary/80">
+                  <p className="mt-2 text-xs font-semibold text-primary/80 italic">
                     {cap.example}
                   </p>
                 </div>
@@ -90,31 +87,36 @@ export function AISection() {
             <div className="relative mx-auto mt-12 max-w-md lg:mt-0 lg:max-w-none">
               <div className="overflow-hidden rounded-3xl border-2 border-text bg-white shadow-[8px_8px_0px_0px_#111827]">
                 {/* Chat Header */}
-                <div className="flex gap-3 items-center p-4 border-b-2 border-text bg-neutral-100">
-                  <div className="flex justify-center items-center w-10 h-10 rounded-full border-2 border-text bg-primary/20">
+                <div className="flex items-center gap-3 border-b-2 border-text bg-neutral-100 p-4">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-text bg-primary/20">
                     <span className="text-sm">🤖</span>
                   </div>
                   <div>
-                    <p className="text-sm font-medium">{landingContent.ai.chatDemo.agentName}</p>
+                    <p className="text-sm font-medium">
+                      {landingContent.ai.chatDemo.agentName}
+                    </p>
                     <div className="flex items-center gap-1.5">
                       <div className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                      <p className="text-xs text-muted-foreground">{landingContent.ai.chatDemo.status}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {landingContent.ai.chatDemo.status}
+                      </p>
                     </div>
                   </div>
                 </div>
 
                 {/* Messages */}
-                <div className="p-5 space-y-4">
+                <div className="space-y-4 p-5">
                   {landingContent.ai.chatDemo.messages.map((msg, i) => (
                     <div
                       key={i}
                       className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
                     >
                       <div
-                        className={`max-w-[85%] rounded-2xl border-2 border-text p-3 text-sm shadow-[2px_2px_0px_0px_#111827] ${msg.role === "user"
-                            ? "bg-primary text-primary-foreground rounded-tr-sm"
-                            : "bg-neutral-100 text-text rounded-tl-sm"
-                          }`}
+                        className={`max-w-[85%] rounded-2xl border-2 border-text p-3 text-sm shadow-[2px_2px_0px_0px_#111827] ${
+                          msg.role === "user"
+                            ? "rounded-tr-sm bg-primary text-primary-foreground"
+                            : "rounded-tl-sm bg-neutral-100 text-text"
+                        }`}
                       >
                         {msg.text}
                       </div>
@@ -136,12 +138,12 @@ export function AISection() {
                 </div>
 
                 {/* Input */}
-                <div className="p-4 bg-white border-t-2 border-text">
-                  <div className="flex items-center gap-3 rounded-xl border-2 border-text bg-neutral-100 px-4 py-2.5 shadow-[2px_2px_0px_0px_#111827] focus-within:translate-x-0.5 focus-within:translate-y-0.5 focus-within:shadow-none transition-all">
+                <div className="border-t-2 border-text bg-white p-4">
+                  <div className="flex items-center gap-3 rounded-xl border-2 border-text bg-neutral-100 px-4 py-2.5 shadow-[2px_2px_0px_0px_#111827] transition-all focus-within:translate-x-0.5 focus-within:translate-y-0.5 focus-within:shadow-none">
                     <input
                       type="text"
                       placeholder={landingContent.ai.chatDemo.placeholder}
-                      className="flex-1 text-xs font-bold bg-transparent outline-none text-text placeholder:text-muted-foreground"
+                      className="flex-1 bg-transparent text-xs font-bold text-text outline-none placeholder:text-muted-foreground"
                       readOnly
                     />
                     <button
@@ -151,7 +153,7 @@ export function AISection() {
                       className="flex h-8 w-8 items-center justify-center rounded-lg border-2 border-text bg-primary text-primary-foreground shadow-[1px_1px_0px_0px_#111827] transition-colors hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none"
                     >
                       <svg
-                        className="w-4 h-4"
+                        className="h-4 w-4"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -180,7 +182,7 @@ export function AISection() {
           className="mt-12 flex flex-wrap items-center justify-center gap-8 rounded-2xl border-2 border-text bg-white p-6 text-center shadow-[4px_4px_0px_0px_#111827]"
         >
           {landingContent.ai.costNote.stats.map((stat, i) => (
-            <div key={stat.label} className="flex gap-8 items-center">
+            <div key={stat.label} className="flex items-center gap-8">
               <div>
                 <p className="text-2xl font-bold text-primary">{stat.value}</p>
                 <p className="text-xs font-bold text-text">{stat.label}</p>
@@ -199,5 +201,5 @@ export function AISection() {
         </motion.div>
       </div>
     </section>
-  );
+  )
 }

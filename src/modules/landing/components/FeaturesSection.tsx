@@ -1,15 +1,15 @@
-"use client";
+"use client"
 
-import { motion } from "motion/react";
-import { appFeatures } from "../data/modules-data";
-import { landingContent } from "../data/site-info";
+import { motion } from "motion/react"
+import { appFeatures } from "@/src/modules/landing/data/modules-data"
+import { landingContent } from "@/src/modules/landing/data/site-info"
 
 export function FeaturesSection() {
   return (
     <section id="features" className="relative px-6 py-24">
       {/* Simple decorative line */}
       <div className="absolute top-0 left-0 w-full">
-        <div className="mx-auto w-96 max-w-full h-px bg-border" />
+        <div className="mx-auto h-px w-96 max-w-full bg-border" />
       </div>
 
       <div className="mx-auto max-w-7xl">
@@ -52,7 +52,7 @@ export function FeaturesSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.07 }}
-              className="group relative overflow-hidden rounded-2xl border-2 border-text bg-white p-6 text-left shadow-[4px_4px_0px_0px_#111827] transition-all duration-300 hover:-translate-y-1 hover:translate-x-1 hover:shadow-[6px_6px_0px_0px_var(--color-primary)]"
+              className="group relative overflow-hidden rounded-2xl border-2 border-text bg-white p-6 text-left shadow-[4px_4px_0px_0px_#111827] transition-all duration-300 hover:translate-x-1 hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_var(--color-primary)]"
             >
               <div className="relative">
                 {/* Icon */}
@@ -72,5 +72,5 @@ export function FeaturesSection() {
         </div>
       </div>
     </section>
-  );
+  )
 }

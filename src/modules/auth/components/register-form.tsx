@@ -1,43 +1,47 @@
-'use client';
+"use client"
 
-import type { RegisterPayload } from '@/src/modules/auth/types/auth.types';
-import { FormTextField } from '@/src/shared/components/layout/form-blocks';
-import { Alert, AlertDescription, AlertTitle } from '@/src/shared/components/ui/alert';
-import { FieldGroup } from '@/src/shared/components/ui/field';
-import { cn } from '@/src/shared/lib/utils';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { AlertCircleIcon } from 'lucide-react';
-import { forwardRef, useImperativeHandle } from 'react';
-import { Controller, useForm } from 'react-hook-form';
-import { z } from 'zod';
+import type { RegisterPayload } from "@/src/modules/auth/types/auth.types"
+import { FormTextField } from "@/src/shared/components/layout/form-blocks"
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/src/shared/components/ui/alert"
+import { FieldGroup } from "@/src/shared/components/ui/field"
+import { cn } from "@/src/shared/lib/utils"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { AlertCircleIcon, LockIcon, MailIcon, UserIcon } from "lucide-react"
+import { forwardRef, useImperativeHandle } from "react"
+import { Controller, useForm } from "react-hook-form"
+import { z } from "zod"
 
 const registerSchema = z
   .object({
-    fullName: z.string().trim().min(2, 'Ingresa tu nombre completo'),
-    email: z.string().trim().email('Ingresa un email válido'),
+    fullName: z.string().trim().min(2, "Ingresa tu nombre completo"),
+    email: z.string().trim().email("Ingresa un email válido"),
     password: z
       .string()
-      .min(8, 'La contraseña debe tener al menos 8 caracteres')
-      .regex(/[A-Z]/, 'Debe incluir al menos una mayúscula')
-      .regex(/[0-9]/, 'Debe incluir al menos un número'),
-    confirmPassword: z.string().min(8, 'Confirma tu contraseña'),
+      .min(8, "La contraseña debe tener al menos 8 caracteres")
+      .regex(/[A-Z]/, "Debe incluir al menos una mayúscula")
+      .regex(/[0-9]/, "Debe incluir al menos un número"),
+    confirmPassword: z.string().min(8, "Confirma tu contraseña"),
   })
   .refine((values) => values.password === values.confirmPassword, {
-    message: 'Las contraseñas no coinciden',
-    path: ['confirmPassword'],
-  });
+    message: "Las contraseñas no coinciden",
+    path: ["confirmPassword"],
+  })
 
-type RegisterSchema = z.infer<typeof registerSchema>;
+type RegisterSchema = z.infer<typeof registerSchema>
 
 export type RegisterFormHandle = {
-  submit: () => void;
-};
+  submit: () => void
+}
 
 type RegisterFormProps = {
-  isPending: boolean;
-  error: Error | null;
-  onSubmit: (payload: RegisterPayload) => Promise<void>;
-};
+  isPending: boolean
+  error: Error | null
+  onSubmit: (payload: RegisterPayload) => Promise<void>
+}
 
 export const RegisterForm = forwardRef<RegisterFormHandle, RegisterFormProps>(
   function RegisterForm({ isPending, error, onSubmit }, ref) {
@@ -47,8 +51,13 @@ export const RegisterForm = forwardRef<RegisterFormHandle, RegisterFormProps>(
       formState: { errors },
     } = useForm<RegisterSchema>({
       resolver: zodResolver(registerSchema),
-      defaultValues: { fullName: '', email: '', password: '', confirmPassword: '' },
-    });
+      defaultValues: {
+        fullName: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+      },
+    })
 
     const submitForm = handleSubmit(async (values) => {
       try {
@@ -56,31 +65,32 @@ export const RegisterForm = forwardRef<RegisterFormHandle, RegisterFormProps>(
           fullName: values.fullName,
           email: values.email,
           password: values.password,
-        });
+        })
       } catch {
         // Error shown via mutation error prop
       }
-    });
+    })
 
     useImperativeHandle(ref, () => ({
       submit: () => void submitForm(),
-    }));
+    }))
 
     return (
       <div
         className={cn(
-          isPending ? "opacity-80 pointer-events-none" : "",
+          isPending ? "pointer-events-none opacity-80" : "",
           "w-full md:max-w-sm"
-        )}>
+        )}
+      >
         <FieldGroup className="gap-4">
           <Controller
             control={control}
             name="fullName"
             render={({ field }) => (
               <FormTextField
+                icon={UserIcon}
                 label="Nombre completo"
                 autoComplete="name"
-                placeholder="¿Cómo te llamas?"
                 value={field.value}
                 onChange={field.onChange}
                 onBlur={field.onBlur}
@@ -96,6 +106,7 @@ export const RegisterForm = forwardRef<RegisterFormHandle, RegisterFormProps>(
             name="email"
             render={({ field }) => (
               <FormTextField
+                icon={MailIcon}
                 label="Correo electrónico"
                 type="email"
                 autoComplete="email"
@@ -115,11 +126,11 @@ export const RegisterForm = forwardRef<RegisterFormHandle, RegisterFormProps>(
             name="password"
             render={({ field }) => (
               <FormTextField
+                icon={LockIcon}
                 label="Contraseña"
                 type="password"
                 revealable
                 autoComplete="new-password"
-                placeholder="Mín. 8 caracteres, 1 mayúscula y 1 número"
                 value={field.value}
                 onChange={field.onChange}
                 onBlur={field.onBlur}
@@ -135,11 +146,11 @@ export const RegisterForm = forwardRef<RegisterFormHandle, RegisterFormProps>(
             name="confirmPassword"
             render={({ field }) => (
               <FormTextField
+                icon={LockIcon}
                 label="Confirmar contraseña"
                 type="password"
                 revealable
                 autoComplete="new-password"
-                placeholder="Repite tu contraseña"
                 value={field.value}
                 onChange={field.onChange}
                 onBlur={field.onBlur}
@@ -158,6 +169,6 @@ export const RegisterForm = forwardRef<RegisterFormHandle, RegisterFormProps>(
           </Alert>
         ) : null}
       </div>
-    );
-  },
-);
+    )
+  }
+)

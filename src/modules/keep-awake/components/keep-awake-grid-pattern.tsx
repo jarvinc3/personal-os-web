@@ -1,6 +1,9 @@
 export function KeepAwakeGridPattern() {
   return (
-    <div className="absolute inset-0 overflow-hidden opacity-[0.35]" aria-hidden>
+    <div
+      className="absolute inset-0 overflow-hidden opacity-[0.35]"
+      aria-hidden
+    >
       {Array.from({ length: 14 }, (_, row) => (
         <div
           key={`row-${row}`}

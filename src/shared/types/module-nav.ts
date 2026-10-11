@@ -1,5 +1,7 @@
-import type { ModuleSlug } from "@/src/modules/settings/types/module-config.types";
-import type { LucideIcon } from "lucide-react";
+import type { LucideIcon } from "lucide-react"
+
+export type ModuleSlug =
+  "finance" | "agenda" | "projects" | "subscriptions" | "health"
 
 export type ModuleNavItem = {
   label: string

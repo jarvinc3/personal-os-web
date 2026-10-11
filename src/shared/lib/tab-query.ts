@@ -3,7 +3,7 @@ export function withTabQuery(
   pathname: string,
   currentQuery: string,
   key: string,
-  value: string,
+  value: string
 ): string | null {
   const params = new URLSearchParams(currentQuery)
   if (params.get(key) === value) {

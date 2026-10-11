@@ -18,8 +18,7 @@ import { TimePairWheels } from "@/src/shared/components/ui/wheel-picker"
 import { PRESSABLE_CLASS, cn } from "@/src/shared/lib/utils"
 import { type FormEvent, useState } from "react"
 import { SummarySection } from "@/src/shared/components/ui/summary"
-import { ClockIcon } from "lucide-react"
-
+import { ClockIcon, SaveIcon, Trash2Icon, XIcon } from "lucide-react"
 
 type KeepAwakeReminderSheetProps = {
   open: boolean
@@ -92,6 +91,7 @@ export function KeepAwakeReminderSheet({
             className={cn(PRESSABLE_CLASS, "flex-1")}
             onClick={disable}
           >
+            <Trash2Icon className="size-4 shrink-0" />
             Quitar
           </Button>
         ) : undefined,
@@ -102,6 +102,7 @@ export function KeepAwakeReminderSheet({
             className={cn(PRESSABLE_CLASS, "flex-1")}
             onClick={() => onOpenChange(false)}
           >
+            <XIcon className="size-4 shrink-0" />
             Cerrar
           </Button>
         ),
@@ -111,12 +112,15 @@ export function KeepAwakeReminderSheet({
             form={REMINDER_FORM_ID}
             className={cn(PRESSABLE_CLASS, "flex-1")}
           >
+            <SaveIcon className="size-4 shrink-0" />
             Guardar
           </Button>
         ),
       }}
     >
-      {open ? <KeepAwakeReminderForm onSaved={() => onOpenChange(false)} /> : null}
+      {open ? (
+        <KeepAwakeReminderForm onSaved={() => onOpenChange(false)} />
+      ) : null}
     </BottomSheet>
   )
 }
@@ -129,7 +133,10 @@ export function KeepAwakeReminderForm({ onSaved }: { onSaved: () => void }) {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    if (typeof Notification !== "undefined" && Notification.permission === "default") {
+    if (
+      typeof Notification !== "undefined" &&
+      Notification.permission === "default"
+    ) {
       try {
         await Notification.requestPermission()
       } catch {
@@ -145,11 +152,12 @@ export function KeepAwakeReminderForm({ onSaved }: { onSaved: () => void }) {
   }
 
   return (
-    <form id={REMINDER_FORM_ID} className="flex flex-col gap-4" onSubmit={(event) => void handleSubmit(event)}>
-      <SummarySection
-        title="Hora exacta"
-        icon={ClockIcon}
-      >
+    <form
+      id={REMINDER_FORM_ID}
+      className="flex flex-col gap-4"
+      onSubmit={(event) => void handleSubmit(event)}
+    >
+      <SummarySection title="Hora exacta" icon={ClockIcon}>
         <TimePairWheels
           value={formatReminderTime(draft)}
           minuteStep={1}
@@ -164,7 +172,11 @@ export function KeepAwakeReminderForm({ onSaved }: { onSaved: () => void }) {
         />
       </SummarySection>
 
-      <div className="grid grid-cols-7 items-center gap-1.5" role="group" aria-label="Días">
+      <div
+        className="grid grid-cols-7 items-center gap-1.5"
+        role="group"
+        aria-label="Días"
+      >
         {WEEKDAY_LABELS.map((label, day) => {
           const pressed = draft.days.includes(day)
           const selected = everyDay || pressed
@@ -183,10 +195,14 @@ export function KeepAwakeReminderForm({ onSaved }: { onSaved: () => void }) {
                 className={cn(
                   PRESSABLE_CLASS,
                   "size-10 rounded-full",
-                  isToday && "ring-2 ring-ring ring-offset-2 ring-offset-background"
+                  isToday &&
+                    "ring-2 ring-ring ring-offset-2 ring-offset-background"
                 )}
                 onClick={() =>
-                  setDraft({ ...draft, days: toggleReminderDay(draft.days, day) })
+                  setDraft({
+                    ...draft,
+                    days: toggleReminderDay(draft.days, day),
+                  })
                 }
               >
                 {label}

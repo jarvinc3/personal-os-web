@@ -20,7 +20,7 @@ Equivalente backend: `personal-os-back/docs/architecture/modules.md` (capas Nest
 ModuleNavItem = {
   label, href, icon,
   matchExact?: boolean,          // Resumen de Finanzas: true (no activo en hijos)
-  extraActiveHrefs?: string[],   // Cuentas también activo en categories y Correos
+  extraActiveHrefs?: string[],   // Productos también activo en categories y Correos
   showInTabBar?: boolean,        // false = solo sidebar (Estadísticas)
 }
 
@@ -62,9 +62,9 @@ Finanzas (VERIFICADO runtime 2026-09-15):
 | Movimientos        | sí      | sí      |                                                          |
 | Estadísticas       | **no**  | sí      | `showInTabBar: false`                                    |
 | Planificación      | sí      | sí      | presupuestos viven aquí                                  |
-| Cuentas            | sí      | sí      | `extraActiveHrefs`: categories, `/finance/accounts/sync` |
+| Productos          | sí      | sí      | `extraActiveHrefs`: categories, `/finance/sync` |
 
-Sync **no** es ítem de nav; queda bajo Cuentas.
+Sync **no** es ítem de nav; queda bajo Productos.
 
 ## Header
 
@@ -90,7 +90,7 @@ Usos `secondary`: detalle institución/cash, categorías, Correos, inbox de noti
 
 ## Módulo hoja (UX)
 
-Referencia `VERIFICADO` 2026-09-18: [`keep-awake-client.tsx`](../../src/modules/keep-awake/pages/keep-awake-client.tsx) + [capabilities/session.md](../modules/keep-awake/capabilities/session.md). Controles: [ui-components.md](./ui-components.md).
+Referencia `VERIFICADO` 2026-09-18: [`keep-awake-screen.tsx`](../../src/modules/keep-awake/keep-awake-screen.tsx) + [capabilities/session.md](../modules/keep-awake/capabilities/session.md). Controles: [ui-components.md](./ui-components.md).
 
 La pantalla **es** la acción (Keep Awake, un timer, un recorder). No es un contenedor de mini-apps. Finanzas (`/finance/movimientos`) no usa este molde.
 
@@ -103,7 +103,7 @@ La pantalla **es** la acción (Keep Awake, un timer, un recorder). No es un cont
 | Popover                  | Un ajuste puntual (p. ej. duración), no un flujo entero.                                                                      |
 | Página                   | Chip / punto / badge si hay algo activo. El usuario no abre el sheet para enterarse.                                          |
 
-El `*client.tsx` **compone** (toolbar, hero, acciones, sheets) y habla con el contexto. Extraer un componente cuando tiene trabajo propio (ruedas, prompt con timers). No extraer un panel que solo reenvía props.
+La screen **compone** (toolbar, hero, acciones, sheets) y habla con el contexto. Extraer un componente cuando tiene trabajo propio (ruedas, prompt con timers). No extraer un panel que solo reenvía props.
 
 Copy: labels y estado, no manuales bajo cada control. Ayuda vive en su sheet.
 
@@ -156,11 +156,11 @@ El cuerpo declara el header con `usePageHeader` (ver [Header](#header)). El layo
 
 ### Capabilities (solo Finanzas)
 
-Cada capability tiene sus components, hooks, reglas, types y screens. La screen de un detalle vive en su capability, no en un cajón `pages/` ni como `*-view.tsx` suelto bajo `components/`: **cuentas, tarjetas, catálogo, movimientos, planificación, presupuestos, sync, dashboard**. Un símbolo compartido por dos capabilities vive en `finance/shared/` de este módulo, no en `src/shared/`. Auth, settings, notifications, ai, keep-awake, home y landing no se parten en capabilities.
+Cada capability tiene sus components, hooks, reglas, types y screens. La screen de un detalle vive en su capability, no en un cajón `pages/` ni como `*-view.tsx` suelto bajo `components/`: **cuentas, tarjetas, catálogo, movimientos, planificación, presupuestos, sync, dashboard**. Cada capability exporta su API en su `index.ts`; otra capability la importa solo desde ahí. Un símbolo agnóstico vive en `finance/shared/` de este módulo, no en `src/shared/`. Auth, settings, notifications, ai, keep-awake, home y landing no se parten en capabilities.
 
 ### Frontera
 
-Cada módulo exporta su API y sus screens en su `index.ts`; `app/.../page.tsx` importa la screen solo desde ahí. En Finanzas, cada capability exporta la suya y el `index.ts` del módulo reexporta lo que otros módulos pueden usar; dentro de una capability los archivos se importan entre sí y las capabilities pueden importar `finance/shared`. ESLint `no-restricted-imports` rechaza cualquier import profundo hacia otro módulo o hacia otra capability, incluida la carpeta de la screen: no queda una excepción para `*-screen.tsx`. `src/shared` no importa features; el nav del sidebar se registra desde la composición de la app.
+Cada módulo exporta su API y sus screens en su `index.ts`; `app/.../page.tsx` importa la screen solo desde ahí. En Finanzas, cada capability exporta su API en su `index.ts`; dentro de una capability los archivos se importan entre sí y otra capability la importa solo desde su `index.ts`, y puede importar `finance/shared`. ESLint `no-restricted-imports` rechaza cualquier import profundo hacia otro módulo o hacia otra capability, incluida la carpeta de la screen: no queda una excepción para `*-screen.tsx`. `src/shared` no importa features; el nav del sidebar se registra desde la composición de la app.
 
 Un archivo se borra cuando la screen nueva lo reemplaza y ningún import lo usa.
 
@@ -185,7 +185,7 @@ Keep Awake y Landing/Home **no** son slugs de `MODULE_REGISTRY`.
 ## PR checklist (módulo nuevo)
 
 - [ ] Rutas en `APP_ROUTES` + `proxy.ts`.
-- [ ] Páginas bajo `app/(app)/` montan el client del módulo.
+- [ ] Páginas bajo `app/(app)/` montan la screen del `index.ts` del módulo.
 - [ ] Con secciones: `ModuleAppNav` + `ModuleSectionLayout`; sin copiar tab bar de finance.
 - [ ] Hoja: sin `items`; fila sidebar.
 - [ ] Header vía shell / `usePageHeader`; sin título duplicado en el body.
@@ -199,7 +199,7 @@ Hoja (además):
 - [ ] Edición = borrador hasta Guardar/Aceptar; Cerrar descarta.
 - [ ] Estado activo visible en la página (chip, punto, badge).
 - [ ] Eventos en `BottomSheet` `floating`.
-- [ ] Client de página compone; sin panel que solo reenvía props.
+- [ ] La screen compone; sin panel que solo reenvía props.
 
 ## Evidencia
 
@@ -207,5 +207,5 @@ Hoja (además):
 - Match: `src/shared/lib/module-nav-active.ts` + `module-nav-active.spec.ts`
 - Layout: `module-section-layout.tsx`, `module-tab-bar.tsx`, `app-sidebar.tsx`, `app-header.tsx`
 - Finance: `src/modules/finance/constants/nav.ts`, `components/layout/finance-layout.tsx`
-- Keep Awake (hoja): `KeepAwakeLayout`, `src/modules/keep-awake/pages/keep-awake-client.tsx`
+- Keep Awake (hoja): `KeepAwakeLayout`, `src/modules/keep-awake/keep-awake-screen.tsx`
 - Shell autenticado: `app/(app)/layout.tsx`

@@ -1,3 +1,4 @@
+export { clearPrefs } from "@/src/modules/keep-awake/lib/prefs"
 export { KeepAwakeHomeSection } from "@/src/modules/keep-awake/components/keep-awake-home-section"
 export { PipPanel } from "@/src/modules/keep-awake/components/pip-panel"
 export {
@@ -5,5 +6,6 @@ export {
   useKeepAwake,
 } from "@/src/modules/keep-awake/context/keep-awake-context"
 export { useWakeLock } from "@/src/modules/keep-awake/hooks/use-wake-lock"
-export { KeepAwakeClient } from "@/src/modules/keep-awake/pages/keep-awake-client"
+export { KeepAwakeGate } from "@/src/modules/keep-awake/keep-awake-gate"
+export { KeepAwakeScreen } from "@/src/modules/keep-awake/keep-awake-screen"
 export type * from "@/src/modules/keep-awake/types/wake-lock.types"

@@ -18,10 +18,7 @@ describe("formatTimeForDisplay", () => {
 
 describe("formatTimeRange", () => {
   it("joins start and end in 12-hour format", () => {
-    assert.equal(
-      formatTimeRange("22:00", "08:00"),
-      "10:00 p.m. – 08:00 a.m.",
-    )
+    assert.equal(formatTimeRange("22:00", "08:00"), "10:00 p.m. – 08:00 a.m.")
   })
 })
 
@@ -29,7 +26,7 @@ describe("formatClockTimeFromDate", () => {
   it("formats a Date in 12-hour Spanish time", () => {
     assert.equal(
       formatClockTimeFromDate(new Date(2026, 9, 5, 9, 5)),
-      "09:05 a.m.",
+      "09:05 a.m."
     )
   })
 })

@@ -10,8 +10,8 @@
 
 | ID | Condición | Resultado | Evidencia |
 | --- | --- | --- | --- |
-| `BR-HOM-001` | Finance `isEnabled=false` | El atajo **sigue** yendo a `/finance` (el gate del módulo muestra CTA a Settings; no 404) | `home-client.tsx`, `useFinanceEnabled` en finance |
-| `BR-HOM-002` | Nombre | `profile.fullName` else `user.fullName` else `"Usuario"` | `home-client.tsx` |
+| `BR-HOM-001` | Finance `isEnabled=false` | El atajo **sigue** yendo a `/finance` (el gate del módulo muestra CTA a Settings; no 404) | `home-screen.tsx`, `useFinanceEnabled` en finance |
+| `BR-HOM-002` | Nombre | `profile.fullName` else `user.fullName` else `"Usuario"` | `home-screen.tsx` |
 
 ## Criterios
 
@@ -19,4 +19,4 @@
 
 ## Evidencia
 
-`src/modules/home/pages/home-client.tsx`, `app/(app)/home/page.tsx`.
+`src/modules/home/home-screen.tsx`, `app/(app)/home/page.tsx`.

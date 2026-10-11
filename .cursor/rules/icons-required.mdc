@@ -1,0 +1,16 @@
+---
+description: Icons are mandatory on the web; every button carries a representative icon and label text is optional.
+alwaysApply: true
+---
+
+# Iconos obligatorios
+
+En la web los iconos no son decoración opcional: son el idioma principal de la interfaz. Todo control accionable y todo campo de dato lleva un icono representativo.
+
+- **Botón**: siempre lleva icono. El texto es opcional; se añade solo cuando el icono por sí solo no dice qué hace ("Guardar", "Eliminar"). Un botón solo-icono lleva `aria-label`.
+- **Campo de dato**: siempre lleva icono líder ([form-field-icons.mdc](./form-field-icons.mdc)).
+- **Switch o fila de ajuste**: icono a la izquierda del título ([switch-row-icons.mdc](./switch-row-icons.mdc)).
+- **Estado binario u origen**: icono con `aria-label`, nunca la palabra cruda ([visual-status-icons.mdc](./visual-status-icons.mdc)).
+- Un icono decorativo (acompaña texto que ya dice qué hace) lleva `aria-hidden`. Un icono que es la única etiqueta del control lleva `aria-label`.
+
+No inventar un botón sin icono ni un campo sin icono. Si no aparece un icono claro para la acción, la acción no está bien nombrada.

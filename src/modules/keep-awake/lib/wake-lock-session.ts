@@ -14,7 +14,10 @@ import {
   reduceKeepAwakeSession,
   type KeepAwakeSessionState,
 } from "./session-status.ts"
-import { classifyWakeLockError, type WakeLockFailureKind } from "./wake-lock-error.ts"
+import {
+  classifyWakeLockError,
+  type WakeLockFailureKind,
+} from "./wake-lock-error.ts"
 
 export type WakeLockHandle = {
   released: boolean
@@ -87,7 +90,9 @@ export function createWakeLockSession(
   }
 
   function persistCurrent() {
-    if (state.startTimestamp == null) return
+    if (state.startTimestamp == null) {
+      return
+    }
     persistClaim({
       startTimestamp: state.startTimestamp,
       endsAt: state.endsAt,
@@ -98,7 +103,9 @@ export function createWakeLockSession(
   }
 
   function recordHistory(reason: SessionEndReason) {
-    if (state.startTimestamp == null) return
+    if (state.startTimestamp == null) {
+      return
+    }
     const endedAt = now()
     appendHistoryEntry(options.storage, {
       startedAt: state.startTimestamp,
@@ -111,7 +118,9 @@ export function createWakeLockSession(
   async function detachSentinel(release: boolean) {
     const current = sentinel
     sentinel = null
-    if (!current) return
+    if (!current) {
+      return
+    }
     if (releaseListener && current.removeEventListener) {
       current.removeEventListener("release", releaseListener)
     }
@@ -128,7 +137,9 @@ export function createWakeLockSession(
   function attachSentinel(handle: WakeLockHandle) {
     sentinel = handle
     releaseListener = () => {
-      if (sentinel !== handle) return
+      if (sentinel !== handle) {
+        return
+      }
       sentinel = null
       if (state.sessionRequested) {
         dispatch({ type: "lock_released" })
@@ -144,7 +155,9 @@ export function createWakeLockSession(
   }
 
   async function activate(activateOptions?: ActivateOptions) {
-    if (disposed) return
+    if (disposed) {
+      return
+    }
     if (!options.isSupported()) {
       lastFailure = "unsupported"
       return
@@ -154,10 +167,14 @@ export function createWakeLockSession(
       return
     }
     if (state.sessionRequested) {
-      if (!state.lockHeld) await tryReacquire()
+      if (!state.lockHeld) {
+        await tryReacquire()
+      }
       return
     }
-    if (state.pending) return
+    if (state.pending) {
+      return
+    }
 
     dispatch({ type: "activate_started" })
     try {
@@ -186,8 +203,12 @@ export function createWakeLockSession(
   }
 
   async function pause() {
-    if (disposed) return
-    if (!state.sessionRequested || state.userPaused || state.pending) return
+    if (disposed) {
+      return
+    }
+    if (!state.sessionRequested || state.userPaused || state.pending) {
+      return
+    }
 
     dispatch({ type: "pause_started" })
     await detachSentinel(true)
@@ -196,8 +217,12 @@ export function createWakeLockSession(
   }
 
   async function resume() {
-    if (disposed) return
-    if (!state.sessionRequested || !state.userPaused || state.pending) return
+    if (disposed) {
+      return
+    }
+    if (!state.sessionRequested || !state.userPaused || state.pending) {
+      return
+    }
     if (!options.isSupported()) {
       lastFailure = "unsupported"
       return
@@ -207,7 +232,9 @@ export function createWakeLockSession(
     try {
       await requestAndAttach()
       const pauseMs =
-        state.pauseStartedAt != null ? Math.max(0, now() - state.pauseStartedAt) : 0
+        state.pauseStartedAt != null
+          ? Math.max(0, now() - state.pauseStartedAt)
+          : 0
       const accumulatedPauseMs = state.accumulatedPauseMs + pauseMs
       const endsAt = state.endsAt != null ? state.endsAt + pauseMs : null
       lastFailure = null
@@ -222,8 +249,12 @@ export function createWakeLockSession(
   }
 
   async function deactivate(reason: SessionEndReason = "ended") {
-    if (disposed && !state.sessionRequested && !sentinel) return
-    if (state.pending === "deactivate") return
+    if (disposed && !state.sessionRequested && !sentinel) {
+      return
+    }
+    if (state.pending === "deactivate") {
+      return
+    }
 
     dispatch({ type: "deactivate_started" })
     recordHistory(reason)
@@ -235,11 +266,17 @@ export function createWakeLockSession(
   }
 
   async function restoreIfNeeded() {
-    if (disposed || state.sessionRequested || state.pending) return
-    if (!options.isSupported()) return
+    if (disposed || state.sessionRequested || state.pending) {
+      return
+    }
+    if (!options.isSupported()) {
+      return
+    }
 
     const record = readSessionRecord(options.storage, now())
-    if (!record) return
+    if (!record) {
+      return
+    }
 
     if (record.endsAt != null && record.endsAt <= now() && !record.userPaused) {
       appendHistoryEntry(options.storage, {
@@ -291,7 +328,9 @@ export function createWakeLockSession(
   }
 
   async function releaseHeldLock() {
-    if (disposed) return
+    if (disposed) {
+      return
+    }
     await detachSentinel(true)
     if (state.sessionRequested) {
       dispatch({ type: "lock_released" })
@@ -308,7 +347,9 @@ export function createWakeLockSession(
     ) {
       return
     }
-    if (!options.isSupported()) return
+    if (!options.isSupported()) {
+      return
+    }
 
     try {
       await requestAndAttach()
@@ -320,8 +361,12 @@ export function createWakeLockSession(
   }
 
   async function stopIfCountdownElapsed() {
-    if (!state.sessionRequested || state.userPaused || state.endsAt == null) return
-    if (state.endsAt > now()) return
+    if (!state.sessionRequested || state.userPaused || state.endsAt == null) {
+      return
+    }
+    if (state.endsAt > now()) {
+      return
+    }
     await deactivate("countdown_finished")
   }
 
@@ -340,8 +385,12 @@ export function createWakeLockSession(
       (message && typeof message === "object" && "type" in message
         ? (message as KeepAwakeChannelMessage)
         : null)
-    if (!parsed) return
-    if (parsed.ownerId === options.ownerId) return
+    if (!parsed) {
+      return
+    }
+    if (parsed.ownerId === options.ownerId) {
+      return
+    }
 
     if (parsed.type === "claim") {
       const sameSession = parsed.startTimestamp === state.startTimestamp

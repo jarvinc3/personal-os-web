@@ -1,0 +1,66 @@
+"use client"
+
+import { useCurrencies } from "@/src/modules/finance/shared/hooks/use-currencies"
+import { SelectField } from "@/src/shared/components/layout/form-blocks"
+import { CoinsIcon } from "lucide-react"
+import { useMemo } from "react"
+
+type CurrencySelectFieldProps = {
+  value: string
+  onChange: (value: string) => void
+  enabled: boolean
+  extraCodes?: string[]
+  excludeCodes?: string[]
+  disabled?: boolean
+  label?: string
+}
+
+export function CurrencySelectField({
+  value,
+  onChange,
+  enabled,
+  extraCodes = [],
+  excludeCodes = [],
+  disabled,
+  label,
+}: CurrencySelectFieldProps) {
+  const query = useCurrencies(enabled)
+  const options = useMemo(() => {
+    const codes = new Set<string>()
+    for (const code of query.data ?? []) {
+      codes.add(code)
+    }
+    for (const code of extraCodes) {
+      if (code) {
+        codes.add(code)
+      }
+    }
+    if (value) {
+      codes.add(value)
+    }
+    const excluded = new Set(
+      excludeCodes
+        .map((code) => code.trim().toUpperCase())
+        .filter((code) => code && code !== value.trim().toUpperCase())
+    )
+    return [...codes]
+      .filter((code) => !excluded.has(code.toUpperCase()))
+      .sort()
+      .map((code) => ({ value: code, label: code }))
+  }, [query.data, extraCodes, excludeCodes, value])
+
+  return (
+    <SelectField
+      icon={CoinsIcon}
+      label={label}
+      value={value}
+      onChange={onChange}
+      options={
+        options.length > 0
+          ? options
+          : [{ value: value || "DOP", label: value || "DOP" }]
+      }
+      disabled={disabled || (query.isPending && options.length === 0)}
+    />
+  )
+}

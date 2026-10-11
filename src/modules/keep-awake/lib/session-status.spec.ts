@@ -129,7 +129,9 @@ describe("deriveKeepAwakePhase", () => {
 
 describe("reduceKeepAwakeSession", () => {
   it("marks a successful activation as requested and held", () => {
-    const activating = reduceKeepAwakeSession(idle, { type: "activate_started" })
+    const activating = reduceKeepAwakeSession(idle, {
+      type: "activate_started",
+    })
     assert.equal(activating.pending, "activate")
 
     const active = reduceKeepAwakeSession(activating, {
@@ -160,7 +162,9 @@ describe("reduceKeepAwakeSession", () => {
       pauseStartedAt: null,
       accumulatedPauseMs: 0,
     }
-    const interrupted = reduceKeepAwakeSession(active, { type: "lock_released" })
+    const interrupted = reduceKeepAwakeSession(active, {
+      type: "lock_released",
+    })
     assert.deepEqual(interrupted, {
       sessionRequested: true,
       lockHeld: false,
@@ -263,8 +267,12 @@ describe("reduceKeepAwakeSession", () => {
   })
 
   it("rolls back a failed activation", () => {
-    const activating = reduceKeepAwakeSession(idle, { type: "activate_started" })
-    const failed = reduceKeepAwakeSession(activating, { type: "activate_failed" })
+    const activating = reduceKeepAwakeSession(idle, {
+      type: "activate_started",
+    })
+    const failed = reduceKeepAwakeSession(activating, {
+      type: "activate_failed",
+    })
     assert.deepEqual(failed, idle)
   })
 })
@@ -279,10 +287,22 @@ describe("keep-awake copy", () => {
   })
 
   it("disables the toggle while unsupported or busy", () => {
-    assert.equal(getKeepAwakeCopy("unsupported", { supportsPip: false }).canToggle, false)
-    assert.equal(getKeepAwakeCopy("activating", { supportsPip: true }).busy, true)
-    assert.equal(getKeepAwakeCopy("pausing", { supportsPip: true }).canToggle, false)
-    assert.equal(getKeepAwakeCopy("ending", { supportsPip: true }).canToggle, false)
+    assert.equal(
+      getKeepAwakeCopy("unsupported", { supportsPip: false }).canToggle,
+      false
+    )
+    assert.equal(
+      getKeepAwakeCopy("activating", { supportsPip: true }).busy,
+      true
+    )
+    assert.equal(
+      getKeepAwakeCopy("pausing", { supportsPip: true }).canToggle,
+      false
+    )
+    assert.equal(
+      getKeepAwakeCopy("ending", { supportsPip: true }).canToggle,
+      false
+    )
   })
 
   it("offers continue and end on a paused session", () => {
@@ -298,9 +318,15 @@ describe("keep-awake copy", () => {
   it("offers end only while a session exists", () => {
     assert.equal(getKeepAwakeCopy("idle", { supportsPip: true }).canEnd, false)
     assert.equal(getKeepAwakeCopy("active", { supportsPip: true }).canEnd, true)
-    assert.equal(getKeepAwakeCopy("interrupted", { supportsPip: true }).canEnd, true)
+    assert.equal(
+      getKeepAwakeCopy("interrupted", { supportsPip: true }).canEnd,
+      true
+    )
     assert.equal(getKeepAwakeCopy("paused", { supportsPip: true }).canEnd, true)
-    assert.equal(getKeepAwakeCopy("ending", { supportsPip: true }).canEnd, false)
+    assert.equal(
+      getKeepAwakeCopy("ending", { supportsPip: true }).canEnd,
+      false
+    )
   })
 
   it("labels the PiP action as focus when the miniplayer is already open", () => {

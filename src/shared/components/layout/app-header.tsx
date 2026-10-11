@@ -1,42 +1,48 @@
 "use client"
 
-import { useAuth } from "@/src/modules/auth";
-import { financeSectionTitle } from "@/src/modules/finance/constants/nav";
+import { useAuth } from "@/src/modules/auth"
+import { financeSectionTitle } from "@/src/modules/finance"
 import {
-    useNotificationPreferences,
-    useUnreadNotificationCount,
-} from "@/src/modules/notifications";
+  useNotificationPreferences,
+  useUnreadNotificationCount,
+} from "@/src/modules/notifications"
 import {
-    Avatar,
-    AvatarFallback,
-    AvatarImage,
-} from "@/src/shared/components/ui/avatar";
-import { Button } from "@/src/shared/components/ui/button";
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/src/shared/components/ui/avatar"
+import { Button } from "@/src/shared/components/ui/button"
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuGroup,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from "@/src/shared/components/ui/dropdown-menu";
-import { Separator } from "@/src/shared/components/ui/separator";
-import { SidebarTrigger } from "@/src/shared/components/ui/sidebar";
-import { APP_ROUTES, settingsModuleHref } from "@/src/shared/constants/app-routes";
-import { getModule } from "@/src/shared/constants/module-registry";
-import { moduleSlugFromPathname } from "@/src/shared/lib/module-from-pathname";
-import { useHeaderContext } from "@/src/shared/context/header-context";
-import { cn } from "@/src/shared/lib/utils";
-import { useAppStore } from "@/src/shared/store/app-store";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/src/shared/components/ui/dropdown-menu"
+import { LinkPendingOverlay } from "@/src/shared/components/ui/navigation-pending"
+import { Separator } from "@/src/shared/components/ui/separator"
+import { SidebarTrigger } from "@/src/shared/components/ui/sidebar"
+import { Spinner } from "@/src/shared/components/ui/spinner"
 import {
-    BellIcon,
-    ChevronLeftIcon,
-    LogOutIcon,
-    SettingsIcon,
-} from "lucide-react";
-import { usePathname, useRouter } from "next/navigation";
-import type { ReactNode } from "react";
+  APP_ROUTES,
+  settingsModuleHref,
+} from "@/src/shared/constants/app-routes"
+import { getModule } from "@/src/shared/constants/module-registry"
+import { moduleSlugFromPathname } from "@/src/shared/lib/module-from-pathname"
+import { useHeaderContext } from "@/src/shared/context/header-context"
+import { cn } from "@/src/shared/lib/utils"
+import { useAppStore } from "@/src/shared/store/app-store"
+import {
+  BellIcon,
+  ChevronLeftIcon,
+  LogOutIcon,
+  SettingsIcon,
+} from "lucide-react"
+import Link from "next/link"
+import { usePathname, useRouter } from "next/navigation"
+import { useTransition, type ReactNode } from "react"
 
 const PAGE_TITLES: Record<string, string> = {
   [APP_ROUTES.app.home]: "Inicio",
@@ -70,48 +76,55 @@ function resolvePageTitle(pathname: string): string {
 
 function HeaderBackButton({
   onBack,
+  pending = false,
   className,
 }: {
   onBack: () => void
+  pending?: boolean
   className?: string
 }) {
   return (
     <Button
       variant="outline"
       size="icon"
-      className={cn("rounded-full size-9", className)}
+      className={cn("size-9 rounded-full", className)}
       onClick={onBack}
+      disabled={pending}
       aria-label="Volver"
     >
-      <ChevronLeftIcon className="size-4.5" />
+      {pending ? (
+        <Spinner className="size-4.5" />
+      ) : (
+        <ChevronLeftIcon className="size-4.5" />
+      )}
     </Button>
   )
 }
 
 function NotificationBell() {
-  const router = useRouter()
   const { isInAppEnabled } = useNotificationPreferences()
   const unreadQuery = useUnreadNotificationCount()
   const unreadCount = isInAppEnabled ? (unreadQuery.data?.count ?? 0) : 0
 
   return (
-    <Button
-      variant="outline"
-      size="icon"
-      className="relative mr-1 rounded-full size-9 shrink-0"
-      onClick={() => router.push(APP_ROUTES.app.notifications)}
-      aria-label="Centro de notificaciones"
-    >
-      <BellIcon />
-      {unreadCount > 0 ? (
-        <span
-          className={cn(
-            "flex absolute -top-1 -right-1 justify-center items-center px-1 h-4 font-medium text-white rounded-full min-w-4 bg-destructive text-[10px]"
-          )}
-        >
-          {unreadCount > 9 ? "9+" : String(unreadCount)}
-        </span>
-      ) : null}
+    <Button variant="outline" size="icon" className="mr-1" asChild>
+      <Link
+        href={APP_ROUTES.app.notifications}
+        className="relative size-9 shrink-0 rounded-full"
+        aria-label="Centro de notificaciones"
+      >
+        <BellIcon />
+        {unreadCount > 0 ? (
+          <span
+            className={cn(
+              "absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-medium text-white"
+            )}
+          >
+            {unreadCount > 9 ? "9+" : String(unreadCount)}
+          </span>
+        ) : null}
+        <LinkPendingOverlay />
+      </Link>
     </Button>
   )
 }
@@ -137,7 +150,7 @@ function HeaderUserMenu() {
           className="rounded-full"
           aria-label="Menú de usuario"
         >
-          <Avatar className="rounded-full size-9">
+          <Avatar className="size-9 rounded-full">
             <AvatarImage src={avatarUrl} alt={displayName} />
             <AvatarFallback className="rounded-lg">
               {displayName.slice(0, 2).toUpperCase()}
@@ -154,7 +167,7 @@ function HeaderUserMenu() {
         <DropdownMenuGroup>
           <DropdownMenuLabel className="p-0 font-normal">
             <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-              <Avatar className="rounded-lg size-8">
+              <Avatar className="size-8 rounded-lg">
                 {avatarUrl ? (
                   <AvatarImage src={avatarUrl} alt={displayName} />
                 ) : null}
@@ -162,9 +175,9 @@ function HeaderUserMenu() {
                   {displayName.slice(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
-              <div className="grid flex-1 text-sm leading-tight text-left">
-                <span className="font-medium truncate">{displayName}</span>
-                <span className="text-xs truncate text-muted-foreground">
+              <div className="grid flex-1 text-left text-sm leading-tight">
+                <span className="truncate font-medium">{displayName}</span>
+                <span className="truncate text-xs text-muted-foreground">
                   {email}
                 </span>
               </div>
@@ -255,7 +268,7 @@ function PrimaryHeader({
   showUserMenu: boolean
 }) {
   return (
-    <div className="flex gap-1 items-center px-4 w-full s lg:px-6">
+    <div className="s flex w-full items-center gap-1 px-4 lg:px-6">
       {showSidebarTrigger ? (
         <>
           <SidebarTrigger />
@@ -265,9 +278,9 @@ function PrimaryHeader({
           />
         </>
       ) : null}
-      <div className="flex flex-col flex-1 min-w-0">{title}</div>
+      <div className="flex min-w-0 flex-1 flex-col">{title}</div>
       {actions ? (
-        <div className="flex gap-2 items-center mr-1 shrink-0">{actions}</div>
+        <div className="mr-1 flex shrink-0 items-center gap-2">{actions}</div>
       ) : null}
       {showNotificationBell ? <NotificationBell /> : null}
       {showUserMenu ? <HeaderUserMenu /> : null}
@@ -279,32 +292,37 @@ function SecondaryHeader({
   title,
   actions,
   onBack,
+  pending,
   tinted,
 }: {
   title: ReactNode
   actions?: ReactNode
   onBack: () => void
+  pending?: boolean
   tinted?: boolean
 }) {
   return (
     <div
       className={cn(
         "grid w-full grid-cols-[auto_1fr_auto] items-center gap-2 px-4 lg:px-6",
-        tinted && "text-white",
+        tinted && "text-white"
       )}
     >
       <HeaderBackButton
         onBack={onBack}
-        className={tinted ? "text-white hover:bg-white/15 hover:text-white" : undefined}
+        pending={pending}
+        className={
+          tinted ? "text-white hover:bg-white/15 hover:text-white" : undefined
+        }
       />
-      <div className="justify-self-center min-w-0">
+      <div className="min-w-0 justify-self-center">
         <HeaderTitle title={title} centered />
       </div>
       <div
         className={cn(
           "flex items-center justify-end",
           tinted &&
-            "[&_button]:text-white [&_button]:hover:bg-white/15 [&_button]:hover:text-white",
+            "[&_button]:text-white [&_button]:hover:bg-white/15 [&_button]:hover:text-white"
         )}
       >
         {actions ?? <span className="size-8" aria-hidden="true" />}
@@ -317,11 +335,16 @@ export function AppHeader() {
   const pathname = usePathname()
   const router = useRouter()
   const { config } = useHeaderContext()
+  const [isBackPending, startBackTransition] = useTransition()
 
   const fallbackTitle = resolvePageTitle(pathname)
   const title = config.title ?? fallbackTitle
 
-  const handleBack = config.onBack ?? (() => router.back())
+  const handleBack = () => {
+    startBackTransition(() => {
+      ;(config.onBack ?? (() => router.back()))()
+    })
+  }
 
   const accentColor =
     config.variant === "secondary" ? config.accentColor : undefined
@@ -330,20 +353,17 @@ export function AppHeader() {
     <header
       data-header-variant={config.variant}
       className={cn(
-        "sticky top-0 z-40 flex h-(--header-height) shrink-0 items-center gap-2 py-2.5 bg-background",
-        accentColor && "bg-transparent text-white",
+        "sticky top-0 z-40 flex h-(--header-height) shrink-0 items-center gap-2 bg-background py-2.5",
+        accentColor && "bg-transparent text-white"
       )}
-      style={
-        accentColor
-          ? { background: accentColor }
-          : undefined
-      }
+      style={accentColor ? { background: accentColor } : undefined}
     >
       {config.variant === "secondary" ? (
         <SecondaryHeader
           title={title}
           actions={config.actions}
           onBack={handleBack}
+          pending={isBackPending}
           tinted={Boolean(accentColor)}
         />
       ) : (

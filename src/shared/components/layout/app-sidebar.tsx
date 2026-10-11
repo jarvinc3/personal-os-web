@@ -1,18 +1,18 @@
 "use client"
 
-import { useAuth } from "@/src/modules/auth";
-import { FINANCE_APP_NAV } from "@/src/modules/finance/constants/nav";
+import { useAuth } from "@/src/modules/auth"
+import { FINANCE_APP_NAV } from "@/src/modules/finance"
 import {
   Collapsible,
   CollapsibleContent,
-} from "@/src/shared/components/ui/collapsible";
+} from "@/src/shared/components/ui/collapsible"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
-} from "@/src/shared/components/ui/dropdown-menu";
+} from "@/src/shared/components/ui/dropdown-menu"
 import {
   Sidebar,
   SidebarContent,
@@ -28,12 +28,12 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
   useSidebar,
-} from "@/src/shared/components/ui/sidebar";
-import { LinkPendingOverlay } from "@/src/shared/components/ui/navigation-pending";
-import { APP_ROUTES } from "@/src/shared/constants/app-routes";
-import { isModuleSectionActive } from "@/src/shared/lib/module-nav-active";
-import { cn } from "@/src/shared/lib/utils";
-import type { ModuleNavItem } from "@/src/shared/types/module-nav";
+} from "@/src/shared/components/ui/sidebar"
+import { LinkPendingOverlay } from "@/src/shared/components/ui/navigation-pending"
+import { APP_ROUTES } from "@/src/shared/constants/app-routes"
+import { isModuleSectionActive } from "@/src/shared/lib/module-nav-active"
+import { cn } from "@/src/shared/lib/utils"
+import type { ModuleNavItem } from "@/src/shared/types/module-nav"
 import {
   BellIcon,
   ChevronRight,
@@ -43,12 +43,12 @@ import {
   Monitor,
   Settings,
   SparklesIcon,
-} from "lucide-react";
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
-import { AppLogo } from "../brand/app-logo";
-import { Separator } from "../ui/separator";
+} from "lucide-react"
+import Link from "next/link"
+import { usePathname, useRouter } from "next/navigation"
+import { useState } from "react"
+import { AppLogo } from "@/src/shared/components/brand/app-logo"
+import { Separator } from "@/src/shared/components/ui/separator"
 
 const navItems = {
   main: [

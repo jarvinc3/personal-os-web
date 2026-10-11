@@ -1,4 +1,5 @@
-export type ReauthConfirmMode = "pending" | "password" | "google" | "unavailable"
+export type ReauthConfirmMode =
+  "pending" | "password" | "google" | "unavailable"
 
 export function resolveReauthConfirmMode(state: {
   isLoadingProviders: boolean

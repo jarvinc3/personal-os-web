@@ -1,31 +1,31 @@
-import Image from "next/image";
+import Image from "next/image"
 
-import { appAssets } from "@/src/shared/constants/app-assets";
-import { cn } from "@/src/shared/lib/utils";
+import { appAssets } from "@/src/shared/constants/app-assets"
+import { cn } from "@/src/shared/lib/utils"
 
 const sizes = {
   xs: { className: "size-6", px: 20 },
   sm: { className: "size-8", px: 28 },
   md: { className: "size-9", px: 36 },
   lg: { className: "size-10", px: 44 },
-} as const;
+} as const
 
 type AppLogoProps = {
-  size?: keyof typeof sizes;
-  className?: string;
-  priority?: boolean;
-};
+  size?: keyof typeof sizes
+  className?: string
+  priority?: boolean
+}
 
 export function AppLogo({ size = "sm", className, priority }: AppLogoProps) {
-  const { className: sizeClass, px } = sizes[size];
-  const shouldPrioritize = priority ?? size === "sm";
+  const { className: sizeClass, px } = sizes[size]
+  const shouldPrioritize = priority ?? size === "sm"
 
   return (
     <span
       className={cn(
-        "overflow-hidden relative rounded-xl shrink-0",
+        "relative shrink-0 overflow-hidden rounded-xl",
         sizeClass,
-        className,
+        className
       )}
     >
       <Image
@@ -33,7 +33,7 @@ export function AppLogo({ size = "sm", className, priority }: AppLogoProps) {
         alt=""
         width={px}
         height={px}
-        className="object-cover size-full dark:hidden"
+        className="size-full object-cover dark:hidden"
         priority={shouldPrioritize}
       />
       <Image
@@ -41,9 +41,9 @@ export function AppLogo({ size = "sm", className, priority }: AppLogoProps) {
         alt=""
         width={px}
         height={px}
-        className="hidden object-cover size-full dark:block"
+        className="hidden size-full object-cover dark:block"
         priority={shouldPrioritize}
       />
     </span>
-  );
+  )
 }

@@ -1,8 +1,8 @@
 "use client"
 
-import { ScrollArea as ScrollAreaPrimitive } from "@base-ui/react/scroll-area";
+import { ScrollArea as ScrollAreaPrimitive } from "@base-ui/react/scroll-area"
 
-import { cn } from '@/src/shared/lib/utils';
+import { cn } from "@/src/shared/lib/utils"
 
 function ScrollArea({
   className,
@@ -51,4 +51,4 @@ function ScrollBar({
   )
 }
 
-export { ScrollArea, ScrollBar };
+export { ScrollArea, ScrollBar }

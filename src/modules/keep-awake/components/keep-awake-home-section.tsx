@@ -39,6 +39,7 @@ import {
   Timer,
   type LucideIcon,
 } from "lucide-react"
+import { LinkPendingOverlay } from "@/src/shared/components/ui/navigation-pending"
 import Link from "next/link"
 import { useSyncExternalStore } from "react"
 
@@ -91,9 +92,10 @@ export function KeepAwakeHomeSection() {
         <>
           <KeepAwakeStatusBadge status={summary.status} />
           <Button asChild variant="secondary" className="h-6">
-            <Link href={APP_ROUTES.app.keepAwake}>
+            <Link href={APP_ROUTES.app.keepAwake} className="relative">
               <span className="sr-only">Abrir Keep Awake</span>
               <ChevronRight className="size-4" />
+              <LinkPendingOverlay />
             </Link>
           </Button>
         </>

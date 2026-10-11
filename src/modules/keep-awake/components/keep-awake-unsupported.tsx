@@ -26,9 +26,9 @@ export function KeepAwakeUnsupported() {
           </EmptyMedia>
           <EmptyTitle>Wake Lock no está disponible</EmptyTitle>
           <EmptyDescription>
-            Este navegador no admite la API necesaria para mantener la
-            pantalla despierta. Prueba un navegador reciente basado en
-            Chromium, o Safari/Firefox actualizados.
+            Este navegador no admite la API necesaria para mantener la pantalla
+            despierta. Prueba un navegador reciente basado en Chromium, o
+            Safari/Firefox actualizados.
           </EmptyDescription>
         </EmptyHeader>
         <EmptyContent>

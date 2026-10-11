@@ -1,17 +1,18 @@
-import { LoadingView } from '@/src/shared/components/layout/loading-view';
-import type { Metadata } from "next";
-import { Suspense } from 'react';
-import VerifyEmailPage from '@/src/modules/auth/pages/verify-email-client';
+import { LoadingView } from "@/src/shared/components/layout/loading-view"
+import type { Metadata } from "next"
+import { Suspense } from "react"
+import { VerifyEmailScreen } from "@/src/modules/auth"
 
 export const metadata: Metadata = {
   title: "Verificar correo",
-  description: "Verifica tu dirección de correo electrónico para acceder a Personal OS.",
-};
+  description:
+    "Verifica tu dirección de correo electrónico para acceder a Personal OS.",
+}
 
 export default function VerifyEmailRoute() {
   return (
     <Suspense fallback={<LoadingView variant="screen" />}>
-      <VerifyEmailPage />
+      <VerifyEmailScreen />
     </Suspense>
-  );
+  )
 }

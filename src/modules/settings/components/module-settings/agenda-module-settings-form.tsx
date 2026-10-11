@@ -2,35 +2,39 @@
 
 import { Button } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
-import { ModuleSheetEnableRow } from "@/src/modules/settings/components/profile-ui";
-import { useModuleSheetEnable } from "@/src/modules/settings/hooks/use-module-sheet-enable";
-import { useProfileSheetFormSync } from "@/src/modules/settings/hooks/use-profile-sheet";
-import { useUserModuleConfig } from "@/src/modules/settings/hooks/use-user-module-config";
-import type { AgendaModuleConfig } from "@/src/modules/settings/types/module-config.types";
-import { OptionRow, SwitchFieldRow } from "@/src/shared/components/layout/form-blocks";
-import { RadioGroup, RadioGroupItem } from "@/src/shared/components/ui/radio-group";
-import { SummarySection } from "@/src/shared/components/ui/summary";
-import { getModule } from "@/src/shared/constants/module-registry";
-import { appToast } from "@/src/shared/lib/app-toast";
-import { createSheetSubmit } from "@/src/shared/lib/sheet-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Bell, Briefcase, CalendarCheck, CalendarCog, CalendarDays } from "lucide-react";
-import { useEffect, useMemo } from "react";
-import { Controller, useForm, useWatch } from "react-hook-form";
-import { z } from "zod";
+import { ModuleSheetEnableRow } from "@/src/modules/settings/components/profile-ui"
+import { useModuleSheetEnable } from "@/src/modules/settings/hooks/use-module-sheet-enable"
+import { useProfileSheetFormSync } from "@/src/modules/settings/hooks/use-profile-sheet"
+import { useUserModuleConfig } from "@/src/modules/settings/hooks/use-user-module-config"
+import type { AgendaModuleConfig } from "@/src/modules/settings/types/module-config.types"
+import {
+  OptionRow,
+  SwitchFieldRow,
+} from "@/src/shared/components/layout/form-blocks"
+import {
+  RadioGroup,
+  RadioGroupItem,
+} from "@/src/shared/components/ui/radio-group"
+import { SummarySection } from "@/src/shared/components/ui/summary"
+import { getModule } from "@/src/shared/constants/module-registry"
+import { appToast } from "@/src/shared/lib/app-toast"
+import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import {
+  Bell,
+  Briefcase,
+  CalendarCheck,
+  CalendarCog,
+  CalendarDays,
+} from "lucide-react"
+import { useEffect, useMemo } from "react"
+import { Controller, useForm, useWatch } from "react-hook-form"
+import {
+  agendaModuleSchema,
+  type AgendaModuleFormValues,
+} from "@/src/modules/settings/lib/agenda-module-form"
 
 const MODULE_ACCENT = getModule("agenda").accent
-
-const schema = z.object({
-  defaultView: z.enum(["day", "week", "month"]),
-  weekStartsOn: z.enum(["0", "1"]),
-  defaultReminderMinutes: z.number().min(0).max(120),
-  workingHoursEnabled: z.boolean(),
-  eventReminders: z.boolean(),
-  dailyAgenda: z.boolean(),
-})
-
-type FormValues = z.infer<typeof schema>
 
 const VIEW_OPTIONS: {
   value: AgendaModuleConfig["defaultView"]
@@ -51,8 +55,8 @@ export function AgendaModuleSettingsForm({ onDone }: { onDone: () => void }) {
     reset,
     setValue,
     formState: { isDirty },
-  } = useForm<FormValues>({
-    resolver: zodResolver(schema),
+  } = useForm<AgendaModuleFormValues>({
+    resolver: zodResolver(agendaModuleSchema),
     defaultValues: {
       defaultView: config.defaultView,
       weekStartsOn: String(config.weekStartsOn) as "0" | "1",
@@ -79,9 +83,10 @@ export function AgendaModuleSettingsForm({ onDone }: { onDone: () => void }) {
   )
   useProfileSheetFormSync(true, reset, formValues)
 
+  const syncPendingOnSheetOpen = moduleEnable.syncPendingOnSheetOpen
   useEffect(() => {
-    moduleEnable.syncPendingOnSheetOpen()
-  }, [moduleEnable.syncPendingOnSheetOpen])
+    syncPendingOnSheetOpen()
+  }, [syncPendingOnSheetOpen])
 
   const submitForm = useMemo(
     () => createSheetSubmit(handleSubmit),
@@ -130,9 +135,13 @@ export function AgendaModuleSettingsForm({ onDone }: { onDone: () => void }) {
         <RadioGroup
           value={defaultView}
           onValueChange={(v) =>
-            setValue("defaultView", v as FormValues["defaultView"], {
-              shouldDirty: true,
-            })
+            setValue(
+              "defaultView",
+              v as AgendaModuleFormValues["defaultView"],
+              {
+                shouldDirty: true,
+              }
+            )
           }
         >
           {VIEW_OPTIONS.map((o) => (

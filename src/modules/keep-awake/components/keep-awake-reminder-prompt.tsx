@@ -12,12 +12,16 @@ import {
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
 import { Button } from "@/src/shared/components/ui/button"
 import { PRESSABLE_CLASS, cn } from "@/src/shared/lib/utils"
-import { Bell } from "lucide-react"
+import { Bell, CheckIcon, XIcon } from "lucide-react"
 import { useEffect, useState } from "react"
 
 function notifyReminder() {
-  if (typeof Notification === "undefined") return
-  if (Notification.permission !== "granted") return
+  if (typeof Notification === "undefined") {
+    return
+  }
+  if (Notification.permission !== "granted") {
+    return
+  }
   try {
     new Notification("Llegó la hora", {
       body: "Keep Awake",
@@ -42,7 +46,9 @@ export function KeepAwakeReminderPrompt({
     function fire() {
       const current = getReminderSnapshot()
       const now = new Date()
-      if (!isReminderDue(current, now)) return
+      if (!isReminderDue(current, now)) {
+        return
+      }
       writeReminder(markReminderFired(current, now))
       setDueLabel(formatReminderTimeLabel(current))
       setPromptOpen(true)
@@ -51,24 +57,35 @@ export function KeepAwakeReminderPrompt({
 
     function arm() {
       window.clearTimeout(timeoutId)
-      if (cancelled) return
+      if (cancelled) {
+        return
+      }
       const current = getReminderSnapshot()
       const now = new Date()
       if (isReminderDue(current, now)) {
         fire()
         return
       }
-      if (!current.enabled) return
-      timeoutId = window.setTimeout(() => {
-        fire()
-        if (!cancelled) arm()
-      }, nextReminderDelayMs(current, now))
+      if (!current.enabled) {
+        return
+      }
+      timeoutId = window.setTimeout(
+        () => {
+          fire()
+          if (!cancelled) {
+            arm()
+          }
+        },
+        nextReminderDelayMs(current, now)
+      )
     }
 
     arm()
     const unsub = subscribeReminder(arm)
     const onVisible = () => {
-      if (document.visibilityState === "visible") arm()
+      if (document.visibilityState === "visible") {
+        arm()
+      }
     }
     document.addEventListener("visibilitychange", onVisible)
     return () => {
@@ -93,6 +110,7 @@ export function KeepAwakeReminderPrompt({
             className={cn(PRESSABLE_CLASS, "flex-1")}
             onClick={() => setPromptOpen(false)}
           >
+            <XIcon className="size-4 shrink-0" />
             Ahora no
           </Button>
         ),
@@ -105,6 +123,7 @@ export function KeepAwakeReminderPrompt({
               onConfirm()
             }}
           >
+            <CheckIcon className="size-4 shrink-0" />
             Activar
           </Button>
         ),

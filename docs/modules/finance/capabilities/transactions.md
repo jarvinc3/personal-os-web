@@ -4,4 +4,4 @@
 
 Copy “Completado” = `CONFIRMED`.
 
-Evidencia: `components/transactions/`, `hooks/use-transactions.ts`, `lib/ledger-form.ts` + specs.
+Evidencia: `src/modules/finance/transactions/`, `src/modules/finance/shared/hooks/use-transactions.ts`, `src/modules/finance/shared/lib/ledger-form.ts` + specs.

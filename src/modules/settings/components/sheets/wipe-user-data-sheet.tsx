@@ -1,7 +1,7 @@
 "use client"
 
 import { useAuth } from "@/src/modules/auth"
-import { useInstitutions } from "@/src/modules/finance/hooks/use-institutions"
+import { useInstitutions } from "@/src/modules/finance"
 import { SETTINGS_REGISTRY } from "@/src/modules/settings/constants/settings-metadata"
 import {
   reauthenticateWithPassword,
@@ -24,7 +24,7 @@ import {
   WIPE_LAYERS,
   type WipeLayerId,
 } from "@/src/modules/settings/lib/wipe-layers"
-import { AuthServiceError } from "@/src/modules/auth/services/supabase-auth.service"
+import { AuthServiceError } from "@/src/modules/auth"
 import { WipeBalanceInstitutionSheet } from "@/src/modules/settings/components/sheets/wipe-balance-institution-sheet"
 import { FormTextField } from "@/src/shared/components/layout/form-blocks"
 import { SettingsRow } from "@/src/shared/components/layout/settings-section"
@@ -99,23 +99,27 @@ const WIPE_LAYER_ICONS: Record<WipeLayerId, LucideIcon> = {
 
 function groupChecked(
   layers: readonly WipeLayerId[],
-  selected: readonly WipeLayerId[],
+  selected: readonly WipeLayerId[]
 ): boolean | "indeterminate" {
   const count = layers.filter((layer) => selected.includes(layer)).length
-  if (count === 0) return false
-  if (count === layers.length) return true
+  if (count === 0) {
+    return false
+  }
+  if (count === layers.length) {
+    return true
+  }
   return "indeterminate"
 }
 
 function toggleGroupLayers(
   current: readonly WipeLayerId[],
   layers: readonly WipeLayerId[],
-  checked: boolean,
+  checked: boolean
 ): WipeLayerId[] {
   const order = checked ? layers : [...layers].reverse()
   return order.reduce<WipeLayerId[]>(
     (next, layer) => applyWipeLayerToggle(next, layer, checked),
-    [...current],
+    [...current]
   )
 }
 
@@ -146,7 +150,7 @@ export function WipeUserDataView({ email }: WipeUserDataViewProps) {
 
   const appliedLayers = useMemo(
     () => expandWipeLayerSelection(selected),
-    [selected],
+    [selected]
   )
   const allSelected = selected.length === ALL_WIPE_LAYERS.length
   const ledgerSelected = selected.includes(WIPE_LAYERS.FINANCE_LEDGER)
@@ -157,8 +161,9 @@ export function WipeUserDataView({ email }: WipeUserDataViewProps) {
   const balanceScopeLabel =
     balanceScope === ALL_INSTITUTIONS
       ? "Todas las instituciones"
-      : (institutionsQuery.data?.find((institution) => institution.id === balanceScope)
-          ?.name ?? "Todas las instituciones")
+      : (institutionsQuery.data?.find(
+          (institution) => institution.id === balanceScope
+        )?.name ?? "Todas las instituciones")
   if (!balancesSelected && institutionSheetOpen) {
     setInstitutionSheetOpen(false)
   }
@@ -201,7 +206,10 @@ export function WipeUserDataView({ email }: WipeUserDataViewProps) {
     setSelected(checked ? ALL_WIPE_LAYERS : [])
   }
 
-  const handleToggleGroup = (layers: readonly WipeLayerId[], checked: boolean) => {
+  const handleToggleGroup = (
+    layers: readonly WipeLayerId[],
+    checked: boolean
+  ) => {
     setSelected((current) => toggleGroupLayers(current, layers, checked))
   }
 
@@ -221,7 +229,9 @@ export function WipeUserDataView({ email }: WipeUserDataViewProps) {
   }
 
   const handleConfirmWipe = () => {
-    if (!passwordVerified) return
+    if (!passwordVerified) {
+      return
+    }
     wipeMutation.mutate(
       {
         email,
@@ -235,7 +245,7 @@ export function WipeUserDataView({ email }: WipeUserDataViewProps) {
           setAlertOpen(false)
           router.push(APP_ROUTES.app.settings)
         },
-      },
+      }
     )
   }
 
@@ -255,16 +265,20 @@ export function WipeUserDataView({ email }: WipeUserDataViewProps) {
     setIsVerifyingPassword(true)
     try {
       await reauthenticateWithPassword(email, current)
-      if (passwordRef.current.trim() !== current) return
+      if (passwordRef.current.trim() !== current) {
+        return
+      }
       setVerifiedPassword(current)
       setPasswordError(undefined)
     } catch (error) {
-      if (passwordRef.current.trim() !== current) return
+      if (passwordRef.current.trim() !== current) {
+        return
+      }
       setVerifiedPassword(null)
       setPasswordError(
         error instanceof AuthServiceError
           ? error.message
-          : "La contraseña no es correcta.",
+          : "La contraseña no es correcta."
       )
     } finally {
       setIsVerifyingPassword(false)
@@ -401,7 +415,8 @@ export function WipeUserDataView({ email }: WipeUserDataViewProps) {
                       )
                     }
                   />
-                  {layer === WIPE_LAYERS.FINANCE_BALANCES && balancesSelected ? (
+                  {layer === WIPE_LAYERS.FINANCE_BALANCES &&
+                  balancesSelected ? (
                     <SettingsRow
                       label="Institución"
                       value={balanceScopeLabel}
@@ -501,10 +516,10 @@ export function WipeUserDataView({ email }: WipeUserDataViewProps) {
           </ul>
           <SummarySection title="Confirma tu contraseña" icon={KeyRound}>
             <FormTextField
+              icon={KeyRound}
               label="Contraseña"
               type="password"
               autoComplete="current-password"
-              placeholder="Tu contraseña actual"
               value={password}
               onChange={handlePasswordChange}
               onBlur={() => void handlePasswordBlur()}
@@ -518,7 +533,10 @@ export function WipeUserDataView({ email }: WipeUserDataViewProps) {
             </div>
           </SummarySection>
           <AlertDialogFooter className="flex-row">
-            <AlertDialogCancel className="flex-1" disabled={wipeMutation.isPending}>
+            <AlertDialogCancel
+              className="flex-1"
+              disabled={wipeMutation.isPending}
+            >
               <X data-icon="inline-start" />
               Cancelar
             </AlertDialogCancel>

@@ -2,33 +2,32 @@
 
 import { Button } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
-import { ModuleSheetEnableRow } from "@/src/modules/settings/components/profile-ui";
-import { useModuleSheetEnable } from "@/src/modules/settings/hooks/use-module-sheet-enable";
-import { useProfileSheetFormSync } from "@/src/modules/settings/hooks/use-profile-sheet";
-import { useUserModuleConfig } from "@/src/modules/settings/hooks/use-user-module-config";
-import { OptionRow, SwitchFieldRow } from "@/src/shared/components/layout/form-blocks";
-import { RadioGroup, RadioGroupItem } from "@/src/shared/components/ui/radio-group";
-import { SummarySection } from "@/src/shared/components/ui/summary";
-import { getModule } from "@/src/shared/constants/module-registry";
-import { appToast } from "@/src/shared/lib/app-toast";
-import { createSheetSubmit } from "@/src/shared/lib/sheet-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { CalendarDays, EyeOff, HeartPulse, Ruler, Target } from "lucide-react";
-import { useEffect, useMemo } from "react";
-import { Controller, useForm, useWatch } from "react-hook-form";
-import { z } from "zod";
+import { ModuleSheetEnableRow } from "@/src/modules/settings/components/profile-ui"
+import { useModuleSheetEnable } from "@/src/modules/settings/hooks/use-module-sheet-enable"
+import { useProfileSheetFormSync } from "@/src/modules/settings/hooks/use-profile-sheet"
+import { useUserModuleConfig } from "@/src/modules/settings/hooks/use-user-module-config"
+import {
+  OptionRow,
+  SwitchFieldRow,
+} from "@/src/shared/components/layout/form-blocks"
+import {
+  RadioGroup,
+  RadioGroupItem,
+} from "@/src/shared/components/ui/radio-group"
+import { SummarySection } from "@/src/shared/components/ui/summary"
+import { getModule } from "@/src/shared/constants/module-registry"
+import { appToast } from "@/src/shared/lib/app-toast"
+import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { CalendarDays, EyeOff, HeartPulse, Ruler, Target } from "lucide-react"
+import { useEffect, useMemo } from "react"
+import { Controller, useForm, useWatch } from "react-hook-form"
+import {
+  healthModuleSchema,
+  type HealthModuleFormValues,
+} from "@/src/modules/settings/lib/health-module-form"
 
 const MODULE_ACCENT = getModule("health").accent
-
-const schema = z.object({
-  units: z.enum(["metric", "imperial"]),
-  dashboardPeriod: z.enum(["week", "month", "year"]),
-  hideSensitiveMetrics: z.boolean(),
-  goalReminders: z.boolean(),
-  weeklySummary: z.boolean(),
-})
-
-type FormValues = z.infer<typeof schema>
 
 export function HealthModuleSettingsForm({ onDone }: { onDone: () => void }) {
   const { config, updateConfig, updateMutation } = useUserModuleConfig("health")
@@ -40,8 +39,8 @@ export function HealthModuleSettingsForm({ onDone }: { onDone: () => void }) {
     reset,
     setValue,
     formState: { isDirty },
-  } = useForm<FormValues>({
-    resolver: zodResolver(schema),
+  } = useForm<HealthModuleFormValues>({
+    resolver: zodResolver(healthModuleSchema),
     defaultValues: {
       units: config.units,
       dashboardPeriod: config.dashboardPeriod,
@@ -66,9 +65,10 @@ export function HealthModuleSettingsForm({ onDone }: { onDone: () => void }) {
 
   useProfileSheetFormSync(true, reset, formValues)
 
+  const syncPendingOnSheetOpen = moduleEnable.syncPendingOnSheetOpen
   useEffect(() => {
-    moduleEnable.syncPendingOnSheetOpen()
-  }, [moduleEnable.syncPendingOnSheetOpen])
+    syncPendingOnSheetOpen()
+  }, [syncPendingOnSheetOpen])
 
   const submitForm = useMemo(
     () => createSheetSubmit(handleSubmit),
@@ -114,7 +114,9 @@ export function HealthModuleSettingsForm({ onDone }: { onDone: () => void }) {
         <RadioGroup
           value={units}
           onValueChange={(v) =>
-            setValue("units", v as FormValues["units"], { shouldDirty: true })
+            setValue("units", v as HealthModuleFormValues["units"], {
+              shouldDirty: true,
+            })
           }
         >
           <OptionRow

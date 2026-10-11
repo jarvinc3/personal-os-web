@@ -1,6 +1,6 @@
 import { Suspense } from "react"
 
-import { FinanceBudgetDetailClient } from "@/src/modules/finance/components/budgets/finance-budget-detail-view"
+import { BudgetDetailScreen } from "@/src/modules/finance"
 import { LoadingView } from "@/src/shared/components/layout/loading-view"
 
 type FinanceBudgetDetailPageProps = {
@@ -13,7 +13,7 @@ export default async function FinanceBudgetDetailPage({
   const { budgetId } = await params
   return (
     <Suspense fallback={<LoadingView variant="screen" />}>
-      <FinanceBudgetDetailClient budgetId={budgetId} />
+      <BudgetDetailScreen budgetId={budgetId} />
     </Suspense>
   )
 }

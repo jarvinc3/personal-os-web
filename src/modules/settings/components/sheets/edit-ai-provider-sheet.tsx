@@ -1,45 +1,57 @@
-'use client';
+"use client"
 
-import { SETTINGS_REGISTRY } from '@/src/modules/settings/constants/settings-metadata';
-import { useAiProviders } from '@/src/modules/settings/hooks/use-ai-providers';
-import { useProfile } from '@/src/modules/settings/hooks/use-profile';
-import type { SettingsSheetProps } from '@/src/modules/settings/types/sheet.types';
-import { BottomSheet } from '@/src/shared/components/layout/bottom-sheet';
-import { OptionRow } from '@/src/shared/components/layout/form-blocks';
-import { Button } from '@/src/shared/components/ui/button';
-import { RadioGroup, RadioGroupItem } from '@/src/shared/components/ui/radio-group';
-import { Spinner } from '@/src/shared/components/ui/spinner';
-import { SummarySection } from '@/src/shared/components/ui/summary';
-import { appToast } from '@/src/shared/lib/app-toast';
-import { BrainCogIcon } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { SETTINGS_REGISTRY } from "@/src/modules/settings/constants/settings-metadata"
+import { useAiProviders } from "@/src/modules/settings/hooks/use-ai-providers"
+import { useProfile } from "@/src/modules/settings/hooks/use-profile"
+import type { SettingsSheetProps } from "@/src/modules/settings/types/sheet.types"
+import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+import { OptionRow } from "@/src/shared/components/layout/form-blocks"
+import { Button } from "@/src/shared/components/ui/button"
+import {
+  RadioGroup,
+  RadioGroupItem,
+} from "@/src/shared/components/ui/radio-group"
+import { Spinner } from "@/src/shared/components/ui/spinner"
+import { SummarySection } from "@/src/shared/components/ui/summary"
+import { appToast } from "@/src/shared/lib/app-toast"
+import { BrainCogIcon, XIcon } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { useState } from "react"
 
-export function EditAIProviderSheet({ open, onOpenChange }: SettingsSheetProps) {
-  const { preferences, updatePreferences, updateProfileMutation } = useProfile();
-  const providersQuery = useAiProviders();
-  const [provider, setProvider] = useState<string | null>(preferences.ai.defaultProvider);
-  const router = useRouter();
+export function EditAIProviderSheet({
+  open,
+  onOpenChange,
+}: SettingsSheetProps) {
+  const { preferences, updatePreferences, updateProfileMutation } = useProfile()
+  const providersQuery = useAiProviders()
+  const [provider, setProvider] = useState<string | null>(
+    preferences.ai.defaultProvider
+  )
+  const router = useRouter()
 
-  const isDirty = provider !== preferences.ai.defaultProvider;
+  const isDirty = provider !== preferences.ai.defaultProvider
 
   const handleOpenChange = (nextOpen: boolean) => {
     if (nextOpen) {
-      setProvider(preferences.ai.defaultProvider);
+      setProvider(preferences.ai.defaultProvider)
     }
-    onOpenChange(nextOpen);
-  };
+    onOpenChange(nextOpen)
+  }
 
   const handleSave = async () => {
-    await updatePreferences({ ai: { ...preferences.ai, defaultProvider: provider } });
+    await updatePreferences({
+      ai: { ...preferences.ai, defaultProvider: provider },
+    })
     appToast.success({
-      text1: 'Proveedor de IA guardado',
-      text2: provider ? `Preferencia: ${provider}` : 'Se usará el pool automático.',
-    });
-    onOpenChange(false);
-  };
+      text1: "Proveedor de IA guardado",
+      text2: provider
+        ? `Preferencia: ${provider}`
+        : "Se usará el pool automático.",
+    })
+    onOpenChange(false)
+  }
 
-  const providers = providersQuery.data?.providers ?? [];
+  const providers = providersQuery.data?.providers ?? []
 
   return (
     <BottomSheet
@@ -54,6 +66,7 @@ export function EditAIProviderSheet({ open, onOpenChange }: SettingsSheetProps) 
             className="flex-1"
             onClick={() => router.back()}
           >
+            <XIcon className="size-4 shrink-0" />
             Cancelar
           </Button>
         ),
@@ -63,8 +76,10 @@ export function EditAIProviderSheet({ open, onOpenChange }: SettingsSheetProps) 
             className="flex-1"
             onClick={handleSave}
           >
-            {updateProfileMutation.isPending ? <Spinner data-icon="inline-start" /> : null}
-            {updateProfileMutation.isPending ? 'Guardando...' : 'Guardar'}
+            {updateProfileMutation.isPending ? (
+              <Spinner data-icon="inline-start" />
+            ) : null}
+            {updateProfileMutation.isPending ? "Guardando..." : "Guardar"}
           </Button>
         ),
       }}
@@ -76,14 +91,14 @@ export function EditAIProviderSheet({ open, onOpenChange }: SettingsSheetProps) 
           </div>
         ) : (
           <RadioGroup
-            value={provider ?? 'auto'}
-            onValueChange={(v) => setProvider(v === 'auto' ? null : v)}
+            value={provider ?? "auto"}
+            onValueChange={(v) => setProvider(v === "auto" ? null : v)}
           >
             <div className="flex flex-col gap-2">
               <OptionRow
-                  icon={SETTINGS_REGISTRY.ai.rows.providerOption.icon}
-                  iconColor={SETTINGS_REGISTRY.ai.accent}
-                  label={SETTINGS_REGISTRY.ai.defaultProviderLabel}
+                icon={SETTINGS_REGISTRY.ai.rows.providerOption.icon}
+                iconColor={SETTINGS_REGISTRY.ai.accent}
+                label={SETTINGS_REGISTRY.ai.defaultProviderLabel}
                 description="Round-robin entre proveedores configurados"
                 selected={provider === null}
                 onPress={() => setProvider(null)}
@@ -111,5 +126,5 @@ export function EditAIProviderSheet({ open, onOpenChange }: SettingsSheetProps) 
         ) : null}
       </SummarySection>
     </BottomSheet>
-  );
+  )
 }

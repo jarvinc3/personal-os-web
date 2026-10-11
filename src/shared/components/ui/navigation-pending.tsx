@@ -19,7 +19,7 @@ export function PendingSurface({
     <span
       className={cn(
         "absolute inset-0 z-10 flex items-center justify-center rounded-[inherit] bg-background/50",
-        className,
+        className
       )}
     >
       <Spinner className={spinnerClassName} />
@@ -30,7 +30,9 @@ export function PendingSurface({
 /** Must render as a descendant of `next/link` `Link`. */
 export function LinkPendingOverlay(props: PendingSurfaceProps) {
   const { pending } = useLinkStatus()
-  if (!pending) return null
+  if (!pending) {
+    return null
+  }
   return <PendingSurface {...props} />
 }
 

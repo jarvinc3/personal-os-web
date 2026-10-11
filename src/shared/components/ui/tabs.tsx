@@ -5,19 +5,53 @@ import { cn } from "@/src/shared/lib/utils"
 import { Tabs as TabsPrimitive } from "@base-ui/react/tabs"
 import { cva, type VariantProps } from "class-variance-authority"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { useEffect, useLayoutEffect, useRef, useState } from "react"
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react"
 
 const TAB_QUERY_KEY = "tab"
 const SWIPE_DISTANCE_PX = 56
+
+function subscribeToNothing() {
+  return () => {}
+}
+
+/**
+ * The server cannot measure the active tab, so the first render puts the
+ * indicator in the corner. Transitions wait for hydration to move it.
+ */
+function useHasHydrated() {
+  return useSyncExternalStore(
+    subscribeToNothing,
+    () => true,
+    () => false
+  )
+}
 
 function tabMemoryKey(pathname: string, key: string) {
   return `personal-os:tab:${pathname}:${key}`
 }
 
+/**
+ * Storage is optional: private mode rejects it, and the query string still
+ * records the tab, so the failure is reported and the tab keeps working.
+ */
+function reportTabStorageFailure(action: "read" | "write", error: unknown) {
+  if (process.env.NODE_ENV !== "development") {
+    return
+  }
+  console.warn(`[tabs] sessionStorage ${action} failed: ${String(error)}`)
+}
+
 function readTabMemory(pathname: string, key: string): string | null {
   try {
     return sessionStorage.getItem(tabMemoryKey(pathname, key))
-  } catch {
+  } catch (error) {
+    reportTabStorageFailure("read", error)
     return null
   }
 }
@@ -25,9 +59,24 @@ function readTabMemory(pathname: string, key: string): string | null {
 function writeTabMemory(pathname: string, key: string, value: string) {
   try {
     sessionStorage.setItem(tabMemoryKey(pathname, key), value)
-  } catch {
-    // Private mode can reject storage. The query string still records the tab.
+  } catch (error) {
+    reportTabStorageFailure("write", error)
   }
+}
+
+function persistTab(
+  pathname: string,
+  key: string,
+  value: string,
+  searchParams: ReturnType<typeof useSearchParams>,
+  router: ReturnType<typeof useRouter>
+) {
+  writeTabMemory(pathname, key, value)
+  const nextUrl = withTabQuery(pathname, searchParams.toString(), key, value)
+  if (!nextUrl) {
+    return
+  }
+  router.replace(nextUrl, { scroll: false })
 }
 
 type TabsProps = TabsPrimitive.Root.Props & {
@@ -58,32 +107,30 @@ function Tabs({
   const searchParams = useSearchParams()
   const rootRef = useRef<HTMLDivElement>(null)
   const swipeRef = useRef<{ x: number; y: number; pointerId: number } | null>(
-    null,
+    null
   )
   const urlValue = persist ? searchParams.get(persistKey) : null
-  const initialUrlValue = useRef(urlValue)
+  const [initialUrlValue] = useState(urlValue)
   const urlAppliedRef = useRef(false)
   const [urlApplied, setUrlApplied] = useState(false)
   const skipQueryWrite = useRef(true)
   const isControlled = value !== undefined
   const resolvedValue =
-    !urlApplied && initialUrlValue.current != null
-      ? initialUrlValue.current
-      : value
+    !urlApplied && initialUrlValue != null ? initialUrlValue : value
 
   useLayoutEffect(() => {
     if (urlAppliedRef.current) {
       return
     }
     urlAppliedRef.current = true
-    const fromUrl = initialUrlValue.current
+    const fromUrl = initialUrlValue
     const remembered =
       fromUrl ?? (persist ? readTabMemory(pathname, persistKey) : null)
     if (persist && remembered != null && remembered !== String(value ?? "")) {
       onValueChange?.(remembered, undefined as never)
     }
     setUrlApplied(true)
-  }, [onValueChange, pathname, persist, persistKey, value])
+  }, [initialUrlValue, onValueChange, pathname, persist, persistKey, value])
 
   useEffect(() => {
     if (!persist || value == null) {
@@ -93,16 +140,7 @@ function Tabs({
       skipQueryWrite.current = false
       return
     }
-    writeTabMemory(pathname, persistKey, String(value))
-    const nextUrl = withTabQuery(
-      pathname,
-      searchParams.toString(),
-      persistKey,
-      String(value),
-    )
-    if (nextUrl) {
-      router.replace(nextUrl, { scroll: false })
-    }
+    persistTab(pathname, persistKey, String(value), searchParams, router)
   }, [pathname, persist, persistKey, router, searchParams, value])
 
   function changeTabBy(direction: 1 | -1) {
@@ -112,7 +150,7 @@ function Tabs({
     }
     const tabs = [...root.querySelectorAll<HTMLElement>('[role="tab"]')]
     const index = tabs.findIndex(
-      (tab) => tab.getAttribute("aria-selected") === "true",
+      (tab) => tab.getAttribute("aria-selected") === "true"
     )
     const next = tabs[index + direction]
     if (!next || next.getAttribute("aria-disabled") === "true") {
@@ -130,27 +168,18 @@ function Tabs({
       orientation={orientation}
       value={isControlled ? resolvedValue : undefined}
       defaultValue={
-        isControlled ? undefined : (initialUrlValue.current ?? defaultValue)
+        isControlled ? undefined : (initialUrlValue ?? defaultValue)
       }
       onValueChange={(next, details) => {
         onValueChange?.(next, details)
         if (!persist || details.reason !== "none" || next == null) {
           return
         }
-        writeTabMemory(pathname, persistKey, String(next))
-        const nextUrl = withTabQuery(
-          pathname,
-          searchParams.toString(),
-          persistKey,
-          String(next),
-        )
-        if (nextUrl) {
-          router.replace(nextUrl, { scroll: false })
-        }
+        persistTab(pathname, persistKey, String(next), searchParams, router)
       }}
       className={cn(
         "group/tabs relative flex touch-pan-y gap-2 data-horizontal:grid! data-horizontal:grid-cols-1",
-        className,
+        className
       )}
       onPointerDown={(event) => {
         onPointerDown?.(event)
@@ -210,7 +239,7 @@ const tabsListVariants = cva(
     defaultVariants: {
       variant: "default",
     },
-  },
+  }
 )
 
 function TabsList({
@@ -219,11 +248,7 @@ function TabsList({
   children,
   ...props
 }: TabsPrimitive.List.Props & VariantProps<typeof tabsListVariants>) {
-  const [ready, setReady] = useState(false)
-
-  useEffect(() => {
-    setReady(true)
-  }, [])
+  const ready = useHasHydrated()
 
   return (
     <TabsPrimitive.List
@@ -239,7 +264,7 @@ function TabsList({
             "pointer-events-none absolute top-0 left-0 z-0 h-(--active-tab-height) w-(--active-tab-width) translate-x-(--active-tab-left) translate-y-(--active-tab-top) rounded-[inherit] bg-background dark:border dark:border-input dark:bg-input/30",
             ready
               ? "transition-[translate,width,height] duration-300 ease-out motion-reduce:transition-none"
-              : "transition-none",
+              : "transition-none"
           )}
         />
       ) : null}
@@ -257,7 +282,7 @@ function TabsTrigger({ className, ...props }: TabsPrimitive.Tab.Props) {
         "group-data-[variant=line]/tabs-list:bg-transparent group-data-[variant=line]/tabs-list:data-active:bg-transparent dark:group-data-[variant=line]/tabs-list:data-active:border-transparent dark:group-data-[variant=line]/tabs-list:data-active:bg-transparent",
         "data-active:text-foreground dark:data-active:text-foreground",
         "after:absolute after:bg-foreground after:opacity-0 after:transition-opacity group-data-horizontal/tabs:after:inset-x-0 group-data-horizontal/tabs:after:-bottom-1.25 group-data-horizontal/tabs:after:h-0.5 group-data-vertical/tabs:after:inset-y-0 group-data-vertical/tabs:after:-right-1 group-data-vertical/tabs:after:w-0.5 group-data-[variant=line]/tabs-list:data-active:after:opacity-100",
-        className,
+        className
       )}
       {...props}
     />
@@ -271,10 +296,10 @@ function TabsContent({ className, ...props }: TabsPrimitive.Panel.Props) {
       className={cn(
         "relative z-10 flex-1 text-sm outline-none group-data-horizontal/tabs:col-start-1 group-data-horizontal/tabs:row-start-2",
         "transition-[opacity,translate] duration-200 ease-out motion-reduce:transition-none",
-        "data-starting-style:opacity-0 data-ending-style:pointer-events-none data-ending-style:z-0 data-ending-style:opacity-0",
-        "data-[activation-direction=right]:data-starting-style:translate-x-4 data-[activation-direction=left]:data-starting-style:-translate-x-4",
-        "data-[activation-direction=right]:data-ending-style:-translate-x-4 data-[activation-direction=left]:data-ending-style:translate-x-4",
-        className,
+        "data-ending-style:pointer-events-none data-ending-style:z-0 data-ending-style:opacity-0 data-starting-style:opacity-0",
+        "data-[activation-direction=left]:data-starting-style:-translate-x-4 data-[activation-direction=right]:data-starting-style:translate-x-4",
+        "data-[activation-direction=left]:data-ending-style:translate-x-4 data-[activation-direction=right]:data-ending-style:-translate-x-4",
+        className
       )}
       {...props}
     />

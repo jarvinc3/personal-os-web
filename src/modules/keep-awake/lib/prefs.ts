@@ -17,7 +17,9 @@ export const DEFAULT_PREFS: KeepAwakePrefs = {
 }
 
 function clampDuration(minutes: number) {
-  if (!Number.isFinite(minutes)) return DEFAULT_PREFS.durationMinutes
+  if (!Number.isFinite(minutes)) {
+    return DEFAULT_PREFS.durationMinutes
+  }
   return Math.min(
     MAX_DURATION_MINUTES,
     Math.max(MIN_DURATION_MINUTES, Math.floor(minutes))
@@ -25,10 +27,14 @@ function clampDuration(minutes: number) {
 }
 
 export function parsePrefs(raw: string | null): KeepAwakePrefs {
-  if (!raw) return { ...DEFAULT_PREFS }
+  if (!raw) {
+    return { ...DEFAULT_PREFS }
+  }
   try {
     const parsed: unknown = JSON.parse(raw)
-    if (!parsed || typeof parsed !== "object") return { ...DEFAULT_PREFS }
+    if (!parsed || typeof parsed !== "object") {
+      return { ...DEFAULT_PREFS }
+    }
     const data = parsed as Partial<KeepAwakePrefs>
     return {
       timerMode: data.timerMode === "countdown" ? "countdown" : "open",
@@ -58,7 +64,9 @@ let prefsCacheRaw: string | null | undefined
 let prefsCache: KeepAwakePrefs = DEFAULT_PREFS
 
 export function subscribePrefs(onChange: () => void) {
-  if (typeof window === "undefined") return () => {}
+  if (typeof window === "undefined") {
+    return () => {}
+  }
   const handler = (event: Event) => {
     if (
       event instanceof StorageEvent &&
@@ -78,9 +86,13 @@ export function subscribePrefs(onChange: () => void) {
 }
 
 export function getPrefsSnapshot(): KeepAwakePrefs {
-  if (typeof window === "undefined") return DEFAULT_PREFS
+  if (typeof window === "undefined") {
+    return DEFAULT_PREFS
+  }
   const raw = window.localStorage.getItem(KEEP_AWAKE_PREFS_KEY)
-  if (raw === prefsCacheRaw) return prefsCache
+  if (raw === prefsCacheRaw) {
+    return prefsCache
+  }
   prefsCacheRaw = raw
   prefsCache = parsePrefs(raw)
   return prefsCache

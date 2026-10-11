@@ -4,7 +4,7 @@ Fecha: 2026-09-15
 
 | Ítem | Estado | Evidencia |
 | --- | --- | --- |
-| Login/register sheets | `implemented` | `login-client.tsx` |
+| Login/register sheets | `implemented` | `login-screen.tsx` |
 | Google OAuth + callback | `implemented` | `app/auth/callback/route.ts` |
 | Verify email | `implemented` | `verify-email` |
 | Bootstrap 3s + 401 toast | `implemented` | `use-auth-bootstrap.ts` |

@@ -61,25 +61,26 @@ import {
 } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
-import { z } from "zod"
-
-const scheduleTimePattern = /^([01]\d|2[0-3]):[0-5]\d$/
-
-const EMAIL_SYNC_SCHEDULE_MODES = {
-  INTERVAL: "interval",
-  TIMES: "times",
-} as const
+import {
+  EMAIL_SYNC_SCHEDULE_MODES,
+  MAX_EMAIL_SYNC_TIMES,
+  MIN_EMAIL_SYNC_INTERVAL_MINUTES,
+  financeModuleSchema,
+  type FinanceModuleFormValues,
+} from "@/src/modules/settings/lib/finance-module-form"
 
 const DEFAULT_EMAIL_SYNC_TIMES = ["08:00", "18:00"]
-const MAX_EMAIL_SYNC_TIMES = 8
-const MIN_EMAIL_SYNC_INTERVAL_MINUTES = 15
 const DEFAULT_EMAIL_SYNC_INTERVAL_MINUTES = 360
 
 function formatSyncIntervalLabel(minutes: number): string {
-  if (minutes < 60) return `${minutes} min`
+  if (minutes < 60) {
+    return `${minutes} min`
+  }
   const hours = Math.floor(minutes / 60)
   const leftover = minutes % 60
-  if (leftover === 0) return `${hours} h`
+  if (leftover === 0) {
+    return `${hours} h`
+  }
   return `${hours} h ${leftover} min`
 }
 
@@ -99,7 +100,9 @@ function nextEmailSyncTime(existing: string[]): string {
   for (let step = 0; step < 24; step += 1) {
     hour = (hour + 1) % 24
     const candidate = `${String(hour).padStart(2, "0")}:${minutesText}`
-    if (!taken.has(candidate)) return candidate
+    if (!taken.has(candidate)) {
+      return candidate
+    }
   }
   return DEFAULT_EMAIL_SYNC_TIMES[0]
 }
@@ -177,9 +180,15 @@ function EmailSyncTimesField({
                       times.filter((_, itemIndex) => itemIndex !== index)
                     )
                     setEditingIndex((current) => {
-                      if (current === null) return null
-                      if (current === index) return null
-                      if (current > index) return current - 1
+                      if (current === null) {
+                        return null
+                      }
+                      if (current === index) {
+                        return null
+                      }
+                      if (current > index) {
+                        return current - 1
+                      }
                       return current
                     })
                   }}
@@ -291,72 +300,6 @@ function EmailSyncIntervalField({
   )
 }
 
-const schema = z
-  .object({
-    weekStartsOn: z.enum(["0", "1"]),
-    dashboardPeriod: z.enum(["week", "month", "year"]),
-    showCents: z.boolean(),
-    compactNumbers: z.boolean(),
-    emailSyncEnabled: z.boolean(),
-    emailSyncAutomatic: z.boolean(),
-    emailSyncScheduleMode: z.enum([
-      EMAIL_SYNC_SCHEDULE_MODES.INTERVAL,
-      EMAIL_SYNC_SCHEDULE_MODES.TIMES,
-    ]),
-    emailSyncEveryMinutes: z.string(),
-    emailSyncTimes: z.array(z.string()),
-    autoCategorize: z.boolean(),
-    budgetAlerts: z.boolean(),
-    aiSuggestions: z.boolean(),
-    transactionDetected: z.boolean(),
-    monthlyReport: z.boolean(),
-    cardDueDate: z.boolean(),
-    unusualExpense: z.boolean(),
-  })
-  .superRefine((values, ctx) => {
-    if (values.emailSyncScheduleMode === EMAIL_SYNC_SCHEDULE_MODES.INTERVAL) {
-      const minutes = Number(values.emailSyncEveryMinutes)
-      if (
-        !Number.isInteger(minutes) ||
-        minutes < MIN_EMAIL_SYNC_INTERVAL_MINUTES
-      ) {
-        ctx.addIssue({
-          code: "custom",
-          path: ["emailSyncEveryMinutes"],
-          message: "Mínimo 15 minutos",
-        })
-      }
-      return
-    }
-    const times = values.emailSyncTimes
-      .map((time) => time.trim())
-      .filter(Boolean)
-    if (times.length === 0 || times.length > MAX_EMAIL_SYNC_TIMES) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["emailSyncTimes"],
-        message: "Pon de 1 a 8 horas",
-      })
-      return
-    }
-    if (times.some((time) => !scheduleTimePattern.test(time))) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["emailSyncTimes"],
-        message: "Hora no válida",
-      })
-      return
-    }
-    if (new Set(times).size !== times.length) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["emailSyncTimes"],
-        message: "No repitas horas",
-      })
-    }
-  })
-
-type FormValues = z.infer<typeof schema>
 const MODULE_ACCENT = getModule("finance").accent
 
 const FINANCE_NOTIFICATION_ROWS = [
@@ -391,7 +334,9 @@ const PERIOD_OPTIONS: {
   { value: "year", label: "Año", description: "Vista agregada por año." },
 ]
 
-function configToFormValues(config: FinanceModuleConfig): FormValues {
+function configToFormValues(
+  config: FinanceModuleConfig
+): FinanceModuleFormValues {
   return {
     weekStartsOn: String(config.weekStartsOn) as "0" | "1",
     dashboardPeriod: config.dashboardPeriod,
@@ -426,8 +371,8 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
     reset,
     setValue,
     formState: { isDirty },
-  } = useForm<FormValues>({
-    resolver: zodResolver(schema),
+  } = useForm<FinanceModuleFormValues>({
+    resolver: zodResolver(financeModuleSchema),
     defaultValues: configToFormValues(config),
   })
 
@@ -444,9 +389,10 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
   const formValues = useMemo(() => configToFormValues(config), [config])
   useProfileSheetFormSync(true, reset, formValues)
 
+  const syncPendingOnSheetOpen = moduleEnable.syncPendingOnSheetOpen
   useEffect(() => {
-    moduleEnable.syncPendingOnSheetOpen()
-  }, [moduleEnable.syncPendingOnSheetOpen])
+    syncPendingOnSheetOpen()
+  }, [syncPendingOnSheetOpen])
 
   const submitForm = useMemo(
     () => createSheetSubmit(handleSubmit),

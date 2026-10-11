@@ -5,11 +5,7 @@ import {
   type TimerMode,
 } from "@/src/modules/keep-awake/lib/prefs"
 import { Button } from "@/src/shared/components/ui/button"
-import {
-  Field,
-  FieldGroup,
-  FieldTitle,
-} from "@/src/shared/components/ui/field"
+import { Field, FieldGroup, FieldTitle } from "@/src/shared/components/ui/field"
 import {
   Popover,
   PopoverContent,
@@ -25,7 +21,7 @@ import {
   durationMinutesToHm,
   hmToDurationMinutes,
 } from "@/src/shared/types/wheels.type"
-import { ChevronDown, Timer } from "lucide-react"
+import { CheckIcon, ChevronDown, Timer, XIcon } from "lucide-react"
 import { useState } from "react"
 
 type KeepAwakeDurationControlsProps = {
@@ -36,10 +32,14 @@ type KeepAwakeDurationControlsProps = {
 }
 
 function formatTimerLabel(minutes: number): string {
-  if (minutes < 60) return `${minutes} min`
+  if (minutes < 60) {
+    return `${minutes} min`
+  }
   const hours = Math.floor(minutes / 60)
   const leftover = minutes % 60
-  if (leftover === 0) return `${hours} h`
+  if (leftover === 0) {
+    return `${hours} h`
+  }
   return `${hours} h ${leftover} min`
 }
 
@@ -61,8 +61,12 @@ export function KeepAwakeDurationControls({
   }
 
   function handleOpenChange(nextOpen: boolean) {
-    if (nextOpen && !canEditMode) return
-    if (nextOpen) syncDraftFromPrefs()
+    if (nextOpen && !canEditMode) {
+      return
+    }
+    if (nextOpen) {
+      syncDraftFromPrefs()
+    }
     setOpen(nextOpen)
   }
 
@@ -160,6 +164,7 @@ export function KeepAwakeDurationControls({
               className={PRESSABLE_CLASS}
               onClick={handleClear}
             >
+              <XIcon className="size-4 shrink-0" />
               Limpiar
             </Button>
             <div className="flex items-center gap-2">
@@ -170,6 +175,7 @@ export function KeepAwakeDurationControls({
                 className={PRESSABLE_CLASS}
                 onClick={handleCancel}
               >
+                <XIcon className="size-4 shrink-0" />
                 Cancelar
               </Button>
               <Button
@@ -178,6 +184,7 @@ export function KeepAwakeDurationControls({
                 className={PRESSABLE_CLASS}
                 onClick={handleAccept}
               >
+                <CheckIcon className="size-4 shrink-0" />
                 Aceptar
               </Button>
             </div>
