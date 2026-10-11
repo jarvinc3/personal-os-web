@@ -3,7 +3,7 @@
 import {
   AccountProductRow,
   CardProductRow,
-} from "@/src/modules/finance/institutions"
+} from "@/src/modules/finance/shared/components/product-rows"
 import { BrandLogo } from "@/src/modules/finance/shared/components/brand-logo"
 import {
   buildDestinationPickerGroups,

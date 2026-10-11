@@ -1,7 +1,7 @@
 "use client"
 
 import { BudgetSheet } from "@/src/modules/finance/budgets/components/budget-sheet"
-import { PlanningProgressCard } from "@/src/modules/finance/planning"
+import { PlanningProgressCard } from "@/src/modules/finance/shared/components/planning-progress-card"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import {
   useBudget,
@@ -26,7 +26,6 @@ import {
   FINANCE_BUDGET_PERIOD_LABEL,
   type FinanceBudget,
 } from "@/src/modules/finance/shared/types/entities"
-import { Button } from "@/src/shared/components/ui/button"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import {
   Empty,
@@ -35,12 +34,11 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
-import { Separator } from "@/src/shared/components/ui/separator"
-import { Spinner } from "@/src/shared/components/ui/spinner"
+import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
+import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
 import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
-import { SummarySection } from "@/src/shared/components/ui/summary"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
-import { ChartPieIcon, PlusIcon } from "lucide-react"
+import { ChartPieIcon } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useEffect, useRef } from "react"
 
@@ -83,7 +81,6 @@ export function FinanceBudgetsList({
   )
   const listQuery = useBudgets(enabled, { limit: FINANCE_BUDGET_PAGE_SIZE })
   const items = listQuery.data?.pages.flatMap((page) => page.items) ?? []
-  const hasCategories = categories.length > 0
   const listedEditing = budgetSheetId
     ? (items.find((budget) => budget.id === budgetSheetId) ?? null)
     : null
@@ -120,44 +117,34 @@ export function FinanceBudgetsList({
   return (
     <div className="flex flex-col gap-6">
       {listQuery.isError ? (
-        <p className="text-sm text-destructive">
-          {financeErrorMessage(listQuery.error)}
-        </p>
+        <FinanceErrorState
+          message={financeErrorMessage(listQuery.error)}
+          onRetry={() => void listQuery.refetch()}
+          isRetrying={listQuery.isFetching}
+        />
       ) : null}
 
-      <SummarySection
-        title="Presupuestos"
-        icon={ChartPieIcon}
-        right={
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            disabled={!enabled || !hasCategories}
-            onClick={() => setOpenBudgetSheet(true, null)}
-          >
-            <PlusIcon />
-            Crear presupuesto
-          </Button>
-        }
-      >
-        {listQuery.isPending && !listQuery.data ? (
-          <FinanceListSkeleton />
-        ) : items.length === 0 ? (
-          <Empty className="py-8">
-            <EmptyHeader>
-              <EmptyMedia variant="icon">
-                <ChartPieIcon />
-              </EmptyMedia>
-              <EmptyTitle>No hay presupuestos</EmptyTitle>
-              <EmptyDescription>
-                Crea un tope por categoría y periodo para ver cuánto llevas
-                gastado.
-              </EmptyDescription>
-            </EmptyHeader>
-          </Empty>
-        ) : (
-          items.map((budget) => {
+      <div className="flex flex-col gap-2">
+        <AsyncRegion
+          pending={listQuery.isPending && !listQuery.data}
+          pendingFallback={<FinanceListSkeleton />}
+          empty={items.length === 0}
+          emptyFallback={
+            <Empty className="py-8">
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <ChartPieIcon />
+                </EmptyMedia>
+                <EmptyTitle>No hay presupuestos</EmptyTitle>
+                <EmptyDescription>
+                  Crea un tope por categoría y periodo para ver cuánto llevas
+                  gastado.
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
+          }
+        >
+          {items.map((budget) => {
             const pct = budgetPctUsed(budget.amountSpent, budget.amountLimit)
             const threshold = budget.alertThresholdPct ?? 80
             const tone = budgetTone(pct, threshold)
@@ -213,22 +200,9 @@ export function FinanceBudgetsList({
                 }
               />
             )
-          })
-        )}
-
-        <Separator />
-
-        {listQuery.hasNextPage || listQuery.isFetchingNextPage ? (
-          <div
-            ref={sentinelRef}
-            className="flex h-8 items-center justify-center"
-          >
-            {listQuery.isFetchingNextPage ? (
-              <Spinner className="size-4" />
-            ) : null}
-          </div>
-        ) : null}
-      </SummarySection>
+          })}
+        </AsyncRegion>
+      </div>
 
       <BudgetSheet
         open={openBudgetSheet}

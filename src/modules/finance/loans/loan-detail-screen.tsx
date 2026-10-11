@@ -3,9 +3,12 @@
 import { BrandLogo } from "@/src/modules/finance/shared/components/brand-logo"
 import { FinanceGate } from "@/src/modules/finance/finance-gate"
 import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
+import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
+import { MissingRecord } from "@/src/modules/finance/shared/components/layout/missing-record"
 import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
-import { LoanSurfaceMark } from "@/src/modules/finance/planning/components/loan-progress-card"
-import { LoanSheet } from "@/src/modules/finance/planning/components/loan-sheet"
+import { FinanceProgressHero } from "@/src/modules/finance/shared/components/layout/progress-hero"
+import { LoanSurfaceMark } from "@/src/modules/finance/loans/components/loan-progress-card"
+import { LoanSheet } from "@/src/modules/finance/loans/components/loan-sheet"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
@@ -35,14 +38,11 @@ import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import {
-  ArrowLeftIcon,
   HandCoinsIcon,
   MoreVerticalIcon,
   PencilIcon,
   PlusIcon,
 } from "lucide-react"
-import { LinkPendingOverlay } from "@/src/shared/components/ui/navigation-pending"
-import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useMemo } from "react"
 
@@ -131,26 +131,13 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
 
   if (!loan) {
     return (
-      <Empty className="py-16">
-        <EmptyHeader>
-          <EmptyMedia variant="icon">
-            <HandCoinsIcon />
-          </EmptyMedia>
-          <EmptyTitle>No encontramos este préstamo</EmptyTitle>
-          <EmptyDescription>
-            Puede que se haya archivado o borrado.
-          </EmptyDescription>
-        </EmptyHeader>
-        <EmptyContent>
-          <Button variant="outline" asChild>
-            <Link href={APP_ROUTES.app.financePlanning} className="relative">
-              <ArrowLeftIcon className="size-4 shrink-0" />
-              Volver a Planificación
-              <LinkPendingOverlay />
-            </Link>
-          </Button>
-        </EmptyContent>
-      </Empty>
+      <MissingRecord
+        icon={HandCoinsIcon}
+        title="No encontramos este préstamo"
+        description="Puede que se haya archivado o borrado."
+        backHref={APP_ROUTES.app.financePlanning}
+        backLabel="Volver a Planificación"
+      />
     )
   }
 
@@ -169,70 +156,39 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
         </div>
       ) : null}
 
-      <div className="-mx-4 -mt-4 overflow-hidden md:-mx-6">
-        <div
-          className="relative overflow-hidden rounded-b-3xl p-4 text-white md:p-6"
-          style={{ background: accent }}
-        >
-          <LoanSurfaceMark size="header" />
-          <div className="relative z-10">
-            <div className="flex items-start gap-3">
-              <BrandLogo
-                name={institution?.name ?? loan.lenderName}
-                logoUrl={institution?.logoUrl}
-                size={48}
-              />
-              <div className="min-w-0 flex-1">
-                <div className="flex min-w-0 items-center gap-2">
-                  <h1 className="truncate text-2xl font-bold tracking-tight">
-                    {loan.lenderName}
-                  </h1>
-                  <Badge
-                    variant={paidOff ? "success" : "warning"}
-                    className="shrink-0"
-                  >
-                    {paidOff ? "Saldado" : "Activo"}
-                  </Badge>
-                </div>
-                <p className="mt-1 flex flex-wrap items-center gap-x-2 text-sm text-white/70">
-                  <span>
-                    {FINANCE_INSTALLMENT_FREQ_LABEL[loan.installmentFreq]}
-                  </span>
-                  <span>{rateLabel}</span>
-                  {institution ? <span>{institution.name}</span> : null}
-                </p>
-              </div>
-            </div>
-
-            <p className="mt-8 text-[11px] tracking-wide text-white/60 uppercase">
-              Saldo
-            </p>
-            <p className="text-3xl font-bold tracking-tight tabular-nums">
-              {formatFinanceMoney(loan.currentBalance, money)}
-            </p>
-
-            <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-white/20">
-              <div
-                className="h-full rounded-full bg-white"
-                style={{ width: `${progress}%` }}
-              />
-            </div>
-            <div className="mt-2 flex flex-wrap justify-between gap-x-3 text-xs text-white/70">
-              <span>
-                {loan.paidInstallments}/{loan.totalInstallments} cuotas
-              </span>
-              <span>
-                Original {formatFinanceMoney(loan.originalAmount, money)}
-              </span>
-            </div>
-            {loan.nextDueDate ? (
-              <p className="mt-3 text-sm text-white/80">
-                Próximo pago · {formatCalendarDate(loan.nextDueDate)}
-              </p>
-            ) : null}
-          </div>
-        </div>
-      </div>
+      <FinanceProgressHero
+        accent={accent}
+        media={
+          <BrandLogo
+            name={institution?.name ?? loan.lenderName}
+            logoUrl={institution?.logoUrl}
+            size={48}
+          />
+        }
+        title={loan.lenderName}
+        badge={{
+          label: paidOff ? "Saldado" : "Activo",
+          variant: paidOff ? "success" : "warning",
+        }}
+        subtitle={[
+          FINANCE_INSTALLMENT_FREQ_LABEL[loan.installmentFreq],
+          rateLabel,
+          institution?.name,
+        ]
+          .filter(Boolean)
+          .join(" · ")}
+        metricLabel="Saldo"
+        metricValue={formatFinanceMoney(loan.currentBalance, money)}
+        progress={progress}
+        startCaption={`${loan.paidInstallments}/${loan.totalInstallments} cuotas`}
+        endCaption={`Original ${formatFinanceMoney(loan.originalAmount, money)}`}
+        footnote={
+          loan.nextDueDate
+            ? `Próximo pago · ${formatCalendarDate(loan.nextDueDate)}`
+            : undefined
+        }
+        decoration={<LoanSurfaceMark size="header" />}
+      />
 
       <div className="mx-4 flex flex-col gap-3 rounded-3xl bg-background">
         {installmentsQuery.isError ? (
@@ -243,46 +199,49 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
           />
         ) : null}
 
-        {installmentsQuery.isPending ? <FinanceListSkeleton rows={5} /> : null}
-
-        {!installmentsQuery.isPending && installments.length === 0 ? (
-          <Empty className="py-10">
-            <EmptyHeader>
-              <EmptyMedia variant="icon">
-                <HandCoinsIcon />
-              </EmptyMedia>
-              <EmptyTitle>Sin cuotas</EmptyTitle>
-              <EmptyDescription>
-                Define la cuota y el plazo para seguir los pagos.
-              </EmptyDescription>
-            </EmptyHeader>
-            <EmptyContent>
-              <Button onClick={() => setOpenLoanSheet(true)}>
-                <PlusIcon />
-                Préstamo
-              </Button>
-            </EmptyContent>
-          </Empty>
-        ) : null}
-
-        {installments.length > 0 ? (
-          <div className="rounded-2xl border border-border bg-card">
-            {installments.map((installment, index) => (
-              <SummaryItem
-                key={installment.id}
-                title={`Cuota ${installment.installmentNo}`}
-                description={`Vence ${formatCalendarDate(installment.dueDate)}`}
-                value={formatFinanceMoney(installment.amount, money)}
-                trailing={
-                  <Badge variant={installment.paidAt ? "success" : "warning"}>
-                    {installment.paidAt ? "Pagada" : "Pendiente"}
-                  </Badge>
-                }
-                isLast={index === installments.length - 1}
-              />
-            ))}
-          </div>
-        ) : null}
+        <AsyncRegion
+          pending={installmentsQuery.isPending}
+          pendingFallback={<FinanceListSkeleton rows={5} />}
+          empty={!installmentsQuery.isError && installments.length === 0}
+          emptyFallback={
+            <Empty className="py-10">
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <HandCoinsIcon />
+                </EmptyMedia>
+                <EmptyTitle>Sin cuotas</EmptyTitle>
+                <EmptyDescription>
+                  Define la cuota y el plazo para seguir los pagos.
+                </EmptyDescription>
+              </EmptyHeader>
+              <EmptyContent>
+                <Button onClick={() => setOpenLoanSheet(true)}>
+                  <PlusIcon />
+                  Préstamo
+                </Button>
+              </EmptyContent>
+            </Empty>
+          }
+        >
+          {installments.length > 0 ? (
+            <div className="rounded-2xl border border-border bg-card">
+              {installments.map((installment, index) => (
+                <SummaryItem
+                  key={installment.id}
+                  title={`Cuota ${installment.installmentNo}`}
+                  description={`Vence ${formatCalendarDate(installment.dueDate)}`}
+                  value={formatFinanceMoney(installment.amount, money)}
+                  trailing={
+                    <Badge variant={installment.paidAt ? "success" : "warning"}>
+                      {installment.paidAt ? "Pagada" : "Pendiente"}
+                    </Badge>
+                  }
+                  isLast={index === installments.length - 1}
+                />
+              ))}
+            </div>
+          ) : null}
+        </AsyncRegion>
       </div>
 
       <BottomSheet
@@ -312,6 +271,7 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
         accounts={accounts}
         institutions={institutions}
         defaultCurrency={config.baseCurrency}
+        display={money}
       />
     </>
   )

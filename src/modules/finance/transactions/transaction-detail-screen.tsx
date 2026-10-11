@@ -6,6 +6,7 @@ import {
 } from "@/src/modules/finance/shared/components/brand-logo"
 import { FinanceGate } from "@/src/modules/finance/finance-gate"
 import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
+import { MissingRecord } from "@/src/modules/finance/shared/components/layout/missing-record"
 import {
   useConfirmTransaction,
   useDeleteTransaction,
@@ -37,13 +38,15 @@ import { LoadingView } from "@/src/shared/components/layout/loading-view"
 import { SettingsSection } from "@/src/shared/components/layout/settings-section"
 import { Button } from "@/src/shared/components/ui/button"
 import {
-  Empty,
-  EmptyContent,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "@/src/shared/components/ui/empty"
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/src/shared/components/ui/alert-dialog"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { SummaryItem } from "@/src/shared/components/ui/summary"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
@@ -52,16 +55,13 @@ import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { ACCENT_FALLBACK_COLOR } from "@/src/shared/lib/accent-gradient"
 import { appToast } from "@/src/shared/lib/app-toast"
 import {
-  ArrowLeftIcon,
   ArrowLeftRightIcon,
   MoreVerticalIcon,
   PencilIcon,
   Trash2Icon,
 } from "lucide-react"
-import { LinkPendingOverlay } from "@/src/shared/components/ui/navigation-pending"
-import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 
@@ -145,20 +145,17 @@ function TransactionDetailScreenBody({
     }
   }
 
+  const [confirmOpen, setConfirmOpen] = useState(false)
+
   async function onDelete() {
     if (!tx) {
-      return
-    }
-    const confirmed = window.confirm(
-      "¿Eliminar este movimiento? No se puede deshacer."
-    )
-    if (!confirmed) {
       return
     }
     setOpenOptionsSheet(false)
     try {
       await deleteMutation.mutateAsync(tx.id)
       appToast.success({ text1: "Movimiento eliminado" })
+      setConfirmOpen(false)
       router.back()
     } catch (error) {
       appToast.error({ text1: financeErrorMessage(error) })
@@ -197,29 +194,13 @@ function TransactionDetailScreenBody({
 
   if (!tx) {
     return (
-      <Empty className="py-16">
-        <EmptyHeader>
-          <EmptyMedia variant="icon">
-            <ArrowLeftRightIcon />
-          </EmptyMedia>
-          <EmptyTitle>No encontramos este movimiento</EmptyTitle>
-          <EmptyDescription>
-            Puede que se haya eliminado o que el enlace esté roto.
-          </EmptyDescription>
-        </EmptyHeader>
-        <EmptyContent>
-          <Button variant="outline" asChild>
-            <Link
-              href={APP_ROUTES.app.financeTransactions}
-              className="relative"
-            >
-              <ArrowLeftIcon className="size-4 shrink-0" />
-              Volver a Movimientos
-              <LinkPendingOverlay />
-            </Link>
-          </Button>
-        </EmptyContent>
-      </Empty>
+      <MissingRecord
+        icon={ArrowLeftRightIcon}
+        title="No encontramos este movimiento"
+        description="Puede que se haya eliminado o que el enlace esté roto."
+        backHref={APP_ROUTES.app.financeTransactions}
+        backLabel="Volver a Movimientos"
+      />
     )
   }
 
@@ -440,12 +421,42 @@ function TransactionDetailScreenBody({
           <SummaryItem
             title="Eliminar movimiento"
             icon={Trash2Icon}
-            onPress={() => void onDelete()}
+            onPress={() => setConfirmOpen(true)}
             isLast
             className="px-3"
           />
         </div>
       </BottomSheet>
+
+      <AlertDialog
+        open={confirmOpen}
+        onOpenChange={(open) => {
+          if (!deleteMutation.isPending) {
+            setConfirmOpen(open)
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar este movimiento?</AlertDialogTitle>
+            <AlertDialogDescription>
+              No se puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteMutation.isPending}>
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              disabled={deleteMutation.isPending}
+              onClick={() => void onDelete()}
+            >
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   )
 }

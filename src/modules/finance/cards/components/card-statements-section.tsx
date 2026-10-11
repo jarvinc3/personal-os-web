@@ -1,6 +1,7 @@
 "use client"
 
 import type { UpcomingCardCycle } from "@/src/modules/finance/shared/lib/card-statement-cycle"
+import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
 import { formatCalendarDate } from "@/src/modules/finance/shared/lib/ledger-form"
 import {
   formatFinanceMoney,
@@ -90,96 +91,97 @@ export function CardStatementsSection({
   onCreate,
   createLabel,
 }: CardStatementsSectionProps) {
-  if (isPending) {
-    return (
-      <div className="flex flex-col gap-3">
-        {[0, 1].map((index) => (
-          <div
-            key={index}
-            className="h-40 animate-pulse rounded-2xl border border-border bg-muted/40"
-          />
-        ))}
-      </div>
-    )
-  }
-
-  if (statements.length === 0 && upcomingCycle === null) {
-    return (
-      <Empty className="py-10">
-        <EmptyHeader>
-          <EmptyMedia variant="icon">
-            <CalendarIcon />
-          </EmptyMedia>
-          <EmptyTitle>{emptyLabel}</EmptyTitle>
-          <EmptyDescription>{emptyDescription}</EmptyDescription>
-        </EmptyHeader>
-        <EmptyContent>
-          <Button onClick={onCreate}>
-            <PlusIcon />
-            {createLabel}
-          </Button>
-        </EmptyContent>
-      </Empty>
-    )
-  }
-
   return (
-    <div className="flex flex-col gap-3">
-      {upcomingCycle ? (
-        <article className={cn(STATEMENT_CARD_CLASS, "border-dashed")}>
-          <div className="flex items-start justify-between gap-3">
-            <CycleDates
-              cycleEnd={upcomingCycle.cycleEnd}
-              dueDate={upcomingCycle.dueDate}
+    <AsyncRegion
+      pending={isPending}
+      pendingFallback={
+        <div className="flex flex-col gap-3">
+          {[0, 1].map((index) => (
+            <div
+              key={index}
+              className="h-40 animate-pulse rounded-2xl border border-border bg-muted/40"
             />
-            <Badge variant="outline">En curso</Badge>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            El balance se calcula cuando el ciclo cierre.
-          </p>
-        </article>
-      ) : null}
-      {statements.map((statement) => {
-        const moneyDisplay = { ...display, currency: statement.currency }
-        return (
-          <article key={statement.id} className={STATEMENT_CARD_CLASS}>
+          ))}
+        </div>
+      }
+      empty={statements.length === 0 && upcomingCycle === null}
+      emptyFallback={
+        <Empty className="py-10">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <CalendarIcon />
+            </EmptyMedia>
+            <EmptyTitle>{emptyLabel}</EmptyTitle>
+            <EmptyDescription>{emptyDescription}</EmptyDescription>
+          </EmptyHeader>
+          <EmptyContent>
+            <Button onClick={onCreate}>
+              <PlusIcon />
+              {createLabel}
+            </Button>
+          </EmptyContent>
+        </Empty>
+      }
+    >
+      <div className="flex flex-col gap-3">
+        {upcomingCycle ? (
+          <article className={cn(STATEMENT_CARD_CLASS, "border-dashed")}>
             <div className="flex items-start justify-between gap-3">
               <CycleDates
-                cycleEnd={statement.cycleEnd}
-                dueDate={statement.dueDate}
+                cycleEnd={upcomingCycle.cycleEnd}
+                dueDate={upcomingCycle.dueDate}
               />
-              <Badge variant={STATEMENT_STATUS_VARIANT[statement.status]}>
-                {FINANCE_CARD_STATEMENT_STATUS_LABEL[statement.status]}
-              </Badge>
+              <Badge variant="outline">En curso</Badge>
             </div>
-
-            <div className="flex flex-col gap-1">
-              <p className="text-[11px] tracking-wide text-muted-foreground uppercase">
-                Balance del estado
-              </p>
-              <p className="text-2xl font-bold tabular-nums">
-                {formatFinanceMoney(statement.closingBalance, moneyDisplay)}
-              </p>
-            </div>
-
-            <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
-              <div
-                className="h-full rounded-full bg-success"
-                style={{ width: `${statementProgress(statement)}%` }}
-              />
-            </div>
-
-            <div className="flex items-center justify-between gap-3 text-sm text-muted-foreground">
-              <span>
-                Pagado {formatFinanceMoney(statement.amountPaid, moneyDisplay)}
-              </span>
-              <span>
-                Restante {formatFinanceMoney(statement.remaining, moneyDisplay)}
-              </span>
-            </div>
+            <p className="text-sm text-muted-foreground">
+              El balance se calcula cuando el ciclo cierre.
+            </p>
           </article>
-        )
-      })}
-    </div>
+        ) : null}
+        {statements.map((statement) => {
+          const moneyDisplay = { ...display, currency: statement.currency }
+          return (
+            <article key={statement.id} className={STATEMENT_CARD_CLASS}>
+              <div className="flex items-start justify-between gap-3">
+                <CycleDates
+                  cycleEnd={statement.cycleEnd}
+                  dueDate={statement.dueDate}
+                />
+                <Badge variant={STATEMENT_STATUS_VARIANT[statement.status]}>
+                  {FINANCE_CARD_STATEMENT_STATUS_LABEL[statement.status]}
+                </Badge>
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <p className="text-[11px] tracking-wide text-muted-foreground uppercase">
+                  Balance del estado
+                </p>
+                <p className="text-2xl font-bold tabular-nums">
+                  {formatFinanceMoney(statement.closingBalance, moneyDisplay)}
+                </p>
+              </div>
+
+              <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+                <div
+                  className="h-full rounded-full bg-success"
+                  style={{ width: `${statementProgress(statement)}%` }}
+                />
+              </div>
+
+              <div className="flex items-center justify-between gap-3 text-sm text-muted-foreground">
+                <span>
+                  Pagado{" "}
+                  {formatFinanceMoney(statement.amountPaid, moneyDisplay)}
+                </span>
+                <span>
+                  Restante{" "}
+                  {formatFinanceMoney(statement.remaining, moneyDisplay)}
+                </span>
+              </div>
+            </article>
+          )
+        })}
+      </div>
+    </AsyncRegion>
   )
 }

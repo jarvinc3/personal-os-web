@@ -5,6 +5,7 @@ import { CardVisual } from "@/src/modules/finance/cards/components/card-visual"
 import { CardBalanceSheet, CardSheet } from "@/src/modules/finance/catalog"
 import { FinanceGate } from "@/src/modules/finance/finance-gate"
 import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
+import { MissingRecord } from "@/src/modules/finance/shared/components/layout/missing-record"
 import { FinanceInstrumentMovements } from "@/src/modules/finance/transactions"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
@@ -19,14 +20,6 @@ import { encodeLedgerTarget } from "@/src/modules/finance/shared/lib/ledger-payl
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
 import { LoadingView } from "@/src/shared/components/layout/loading-view"
 import { Button } from "@/src/shared/components/ui/button"
-import {
-  Empty,
-  EmptyContent,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "@/src/shared/components/ui/empty"
 import { SummaryItem } from "@/src/shared/components/ui/summary"
 import {
   Tabs,
@@ -41,14 +34,11 @@ import {
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import {
-  ArrowLeftIcon,
   CreditCardIcon,
   MoreVerticalIcon,
   PencilIcon,
   ScaleIcon,
 } from "lucide-react"
-import { LinkPendingOverlay } from "@/src/shared/components/ui/navigation-pending"
-import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 
@@ -145,26 +135,13 @@ function CardDetailScreenBody({ cardId }: CardDetailScreenProps) {
 
   if (!card) {
     return (
-      <Empty className="py-16">
-        <EmptyHeader>
-          <EmptyMedia variant="icon">
-            <CreditCardIcon />
-          </EmptyMedia>
-          <EmptyTitle>No encontramos esta tarjeta</EmptyTitle>
-          <EmptyDescription>
-            Puede que se haya archivado o borrado.
-          </EmptyDescription>
-        </EmptyHeader>
-        <EmptyContent>
-          <Button variant="outline" asChild>
-            <Link href={APP_ROUTES.app.financeProducts} className="relative">
-              <ArrowLeftIcon className="size-4 shrink-0" />
-              Volver a Productos
-              <LinkPendingOverlay />
-            </Link>
-          </Button>
-        </EmptyContent>
-      </Empty>
+      <MissingRecord
+        icon={CreditCardIcon}
+        title="No encontramos esta tarjeta"
+        description="Puede que se haya archivado o borrado."
+        backHref={APP_ROUTES.app.financeProducts}
+        backLabel="Volver a Productos"
+      />
     )
   }
 

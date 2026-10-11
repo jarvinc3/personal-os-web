@@ -1,14 +1,14 @@
 "use client"
 
-import { CategoryCard } from "@/src/modules/finance/catalog"
+import { CategoryCard } from "@/src/modules/finance/shared/components/category-card"
 import { CATALOG_NONE } from "@/src/modules/finance/shared/constants/catalog"
 import {
   filterCategoriesByType,
-  foldCategorySearch,
   groupCategoriesByParent,
   searchCategoryGroups,
   sortCategoriesNewestFirst,
 } from "@/src/modules/finance/shared/lib/category-tree"
+import { foldSearchText } from "@/src/modules/finance/shared/lib/search-text"
 import type {
   FinanceCategory,
   FinanceCategoryType,
@@ -56,10 +56,9 @@ export function CategoryPickerSheet({
     () => searchCategoryGroups(groups, search),
     [groups, search]
   )
-  const searching = foldCategorySearch(search).length > 0
+  const searching = foldSearchText(search).length > 0
   const showNone =
-    !searching ||
-    foldCategorySearch(NONE_LABEL).includes(foldCategorySearch(search))
+    !searching || foldSearchText(NONE_LABEL).includes(foldSearchText(search))
 
   useEffect(() => {
     if (!open) {

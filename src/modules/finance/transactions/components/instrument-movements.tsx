@@ -1,6 +1,7 @@
 "use client"
 
 import { FinanceDateField } from "@/src/modules/finance/shared/components/forms/date-field"
+import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
 import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
 import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
 import { useCategories } from "@/src/modules/finance/shared/hooks/use-categories"
@@ -206,107 +207,112 @@ export function FinanceInstrumentMovements({
         />
       ) : null}
 
-      {isPending ? <FinanceListSkeleton rows={4} /> : null}
-
-      {!isPending && !loadErrorMessage && movements.length === 0 ? (
-        <Empty className="py-10">
-          <EmptyHeader>
-            <EmptyMedia variant="icon">
-              <ArrowLeftRightIcon />
-            </EmptyMedia>
-            <EmptyTitle>
-              {queryNarrowed ? "Ningún movimiento coincide" : emptyLabel}
-            </EmptyTitle>
-            <EmptyDescription>
-              {queryNarrowed
-                ? "Prueba con otro tipo, otra fecha o borra la búsqueda."
-                : emptyDescription}
-            </EmptyDescription>
-          </EmptyHeader>
-          {queryNarrowed ? null : (
-            <EmptyContent>
-              <Button onClick={onCreate}>
-                <PlusIcon />
-                {createLabel}
-              </Button>
-            </EmptyContent>
-          )}
-        </Empty>
-      ) : null}
-
-      {groups.map((group) => (
-        <section key={group.key} className="flex flex-col gap-2">
-          <p className="px-1 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-            {group.label}
-          </p>
-          <div className="rounded-2xl border border-border bg-card">
-            {group.items.map((transaction, index) => {
-              const isTransfer = isTransferTransaction(transaction)
-              const category = transaction.categoryId
-                ? categoryById.get(transaction.categoryId)
-                : undefined
-              const parent = category?.parentId
-                ? categoryById.get(category.parentId)
-                : undefined
-              const icon = isTransfer
-                ? undefined
-                : category?.icon?.trim() || parent?.icon?.trim()
-              const color = isTransfer
-                ? "#3B82F6"
-                : category?.color?.trim() || parent?.color?.trim() || "#64748B"
-              return (
-                <SummaryItem
-                  key={transaction.id}
-                  title={transactionRowTitle(transaction, category)}
-                  description={transactionRowDetail(transaction, category)}
-                  leading={
-                    icon ? (
-                      <span>{icon}</span>
-                    ) : isTransfer ? (
-                      <ArrowLeftRightIcon className="size-5 text-info" />
-                    ) : transaction.type === "DEBIT" ? (
-                      <ArrowDownLeftIcon className="size-5 text-destructive" />
-                    ) : transaction.type === "CREDIT" ? (
-                      <ArrowUpRightIcon className="size-5 text-success" />
-                    ) : transaction.type === "ADJUSTMENT" ? (
-                      <ScaleIcon
+      <AsyncRegion
+        pending={isPending}
+        pendingFallback={<FinanceListSkeleton rows={4} />}
+        empty={!loadErrorMessage && movements.length === 0}
+        emptyFallback={
+          <Empty className="py-10">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <ArrowLeftRightIcon />
+              </EmptyMedia>
+              <EmptyTitle>
+                {queryNarrowed ? "Ningún movimiento coincide" : emptyLabel}
+              </EmptyTitle>
+              <EmptyDescription>
+                {queryNarrowed
+                  ? "Prueba con otro tipo, otra fecha o borra la búsqueda."
+                  : emptyDescription}
+              </EmptyDescription>
+            </EmptyHeader>
+            {queryNarrowed ? null : (
+              <EmptyContent>
+                <Button onClick={onCreate}>
+                  <PlusIcon />
+                  {createLabel}
+                </Button>
+              </EmptyContent>
+            )}
+          </Empty>
+        }
+      >
+        {groups.map((group) => (
+          <section key={group.key} className="flex flex-col gap-2">
+            <p className="px-1 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+              {group.label}
+            </p>
+            <div className="rounded-2xl border border-border bg-card">
+              {group.items.map((transaction, index) => {
+                const isTransfer = isTransferTransaction(transaction)
+                const category = transaction.categoryId
+                  ? categoryById.get(transaction.categoryId)
+                  : undefined
+                const parent = category?.parentId
+                  ? categoryById.get(category.parentId)
+                  : undefined
+                const icon = isTransfer
+                  ? undefined
+                  : category?.icon?.trim() || parent?.icon?.trim()
+                const color = isTransfer
+                  ? "#3B82F6"
+                  : category?.color?.trim() ||
+                    parent?.color?.trim() ||
+                    "#64748B"
+                return (
+                  <SummaryItem
+                    key={transaction.id}
+                    title={transactionRowTitle(transaction, category)}
+                    description={transactionRowDetail(transaction, category)}
+                    leading={
+                      icon ? (
+                        <span>{icon}</span>
+                      ) : isTransfer ? (
+                        <ArrowLeftRightIcon className="size-5 text-info" />
+                      ) : transaction.type === "DEBIT" ? (
+                        <ArrowDownLeftIcon className="size-5 text-destructive" />
+                      ) : transaction.type === "CREDIT" ? (
+                        <ArrowUpRightIcon className="size-5 text-success" />
+                      ) : transaction.type === "ADJUSTMENT" ? (
+                        <ScaleIcon
+                          className={cn(
+                            "size-5",
+                            movementSign(transaction) === "−"
+                              ? "text-destructive"
+                              : "text-success"
+                          )}
+                        />
+                      ) : null
+                    }
+                    accentColor={color}
+                    value={
+                      <span
                         className={cn(
-                          "size-5",
-                          movementSign(transaction) === "−"
-                            ? "text-destructive"
-                            : "text-success"
+                          !isTransfer &&
+                            movementSign(transaction) === "−" &&
+                            "text-destructive",
+                          !isTransfer &&
+                            movementSign(transaction) === "+" &&
+                            "text-success"
                         )}
-                      />
-                    ) : null
-                  }
-                  accentColor={color}
-                  value={
-                    <span
-                      className={cn(
-                        !isTransfer &&
-                          movementSign(transaction) === "−" &&
-                          "text-destructive",
-                        !isTransfer &&
-                          movementSign(transaction) === "+" &&
-                          "text-success"
-                      )}
-                    >
-                      {signedAmount(transaction, display)}
-                    </span>
-                  }
-                  showChevron={false}
-                  onPress={() =>
-                    router.push(
-                      APP_ROUTES.app.financeTransaction(transaction.id)
-                    )
-                  }
-                  isLast={index === group.items.length - 1}
-                />
-              )
-            })}
-          </div>
-        </section>
-      ))}
+                      >
+                        {signedAmount(transaction, display)}
+                      </span>
+                    }
+                    showChevron={false}
+                    onPress={() =>
+                      router.push(
+                        APP_ROUTES.app.financeTransaction(transaction.id)
+                      )
+                    }
+                    isLast={index === group.items.length - 1}
+                  />
+                )
+              })}
+            </div>
+          </section>
+        ))}
+      </AsyncRegion>
 
       <BottomSheet
         open={filtersOpen}

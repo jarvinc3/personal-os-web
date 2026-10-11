@@ -1,7 +1,7 @@
 "use client"
 
 import { BrandLogo } from "@/src/modules/finance/shared/components/brand-logo"
-import { PlanningProgressCard } from "@/src/modules/finance/planning/components/planning-progress-card"
+import { PlanningProgressCard } from "@/src/modules/finance/shared/components/planning-progress-card"
 import { formatRatePercentLabel } from "@/src/modules/finance/shared/lib/interest-rate"
 import { formatCalendarDate } from "@/src/modules/finance/shared/lib/ledger-form"
 import {

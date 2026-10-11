@@ -1,12 +1,12 @@
 "use client"
 
-import { FinanceCurrencyPills } from "@/src/modules/finance/shared/components/forms/currency-pills"
 import { FinanceDateField } from "@/src/modules/finance/shared/components/forms/date-field"
 import {
-  FinanceAmountField,
   FinanceDetailsDisclosure,
   FinanceHelpText,
 } from "@/src/modules/finance/shared/components/forms/form-blocks"
+import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
+import { FinanceCurrencyPickerSheet } from "@/src/modules/finance/shared/components/pickers/finance-currency-picker-sheet"
 import {
   useCreateSavingsGoal,
   useDeleteSavingsGoal,
@@ -17,12 +17,23 @@ import { formatPlanningDate } from "@/src/modules/finance/shared/lib/planning-li
 import { buildSavingsGoalBody } from "@/src/modules/finance/shared/lib/planning-payloads"
 import type { FinanceSavingsGoal } from "@/src/modules/finance/shared/types/entities"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/src/shared/components/ui/alert-dialog"
 import { FormTextField } from "@/src/shared/components/layout/form-blocks"
 import { Button } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { SummarySection } from "@/src/shared/components/ui/summary"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
+import { usePicker } from "@/src/shared/hooks/use-picker"
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
   NotebookPenIcon,
@@ -31,12 +42,12 @@ import {
   Trash2Icon,
   XIcon,
 } from "lucide-react"
-import { useEffect, useMemo } from "react"
-import { Controller, useForm } from "react-hook-form"
+import { useEffect, useMemo, useState } from "react"
+import { Controller, useForm, useWatch } from "react-hook-form"
 import {
   savingsGoalSchema,
   type SavingsGoalFormValues,
-} from "@/src/modules/finance/planning/lib/savings-goal-form"
+} from "@/src/modules/finance/savings-goals/lib/savings-goal-form"
 
 function toFormValues(
   goal: FinanceSavingsGoal | null,
@@ -80,11 +91,18 @@ export function SavingsGoalSheet({
     control,
     handleSubmit,
     reset,
+    setValue,
+    trigger,
     formState: { errors },
   } = useForm<SavingsGoalFormValues>({
     resolver: zodResolver(savingsGoalSchema),
     defaultValues: toFormValues(goal, defaultCurrency),
   })
+
+  const currency = useWatch({ control, name: "currency" })
+  const { picker, openPicker, closeHandlerFor } = usePicker<
+    "none" | "currency"
+  >("none")
 
   useEffect(() => {
     if (open) {
@@ -117,17 +135,16 @@ export function SavingsGoalSheet({
     }
   })
 
+  const [confirmOpen, setConfirmOpen] = useState(false)
+
   async function onDelete() {
     if (!goal) {
-      return
-    }
-    const confirmed = window.confirm("¿Eliminar esta meta de ahorro?")
-    if (!confirmed) {
       return
     }
     try {
       await deleteMutation.mutateAsync(goal.id)
       appToast.success({ text1: "Meta eliminada" })
+      setConfirmOpen(false)
       onOpenChange(false)
     } catch (error) {
       appToast.error({ text1: financeErrorMessage(error) })
@@ -135,147 +152,184 @@ export function SavingsGoalSheet({
   }
 
   return (
-    <BottomSheet
-      open={open}
-      onOpenChange={onOpenChange}
-      pending={pending}
-      title={isEdit ? "Editar meta" : "Nueva meta"}
-      description="El estado Completada lo marca el API cuando lo ahorrado alcanza la meta."
-      actions={{
-        delete: isEdit ? (
-          <Button
-            type="button"
-            variant="destructive"
-            disabled={isPending}
-            onClick={() => void onDelete()}
-          >
-            <Trash2Icon className="size-4 shrink-0" />
-            Eliminar
-          </Button>
-        ) : undefined,
-        close: (
-          <Button
-            type="button"
-            variant="outline"
-            className="flex-1"
-            onClick={() => onOpenChange(false)}
-          >
-            <XIcon className="size-4 shrink-0" />
-            Cancelar
-          </Button>
-        ),
-        submit: (
-          <Button
-            type="button"
-            disabled={isPending}
-            className="flex-1"
-            onClick={onSubmit}
-          >
-            {isPending ? <Spinner data-icon="inline-start" /> : null}
-            Guardar
-          </Button>
-        ),
-      }}
-    >
-      <SummarySection title="Ahorro" icon={PiggyBankIcon}>
-        {goal ? (
-          <FinanceHelpText>
-            {goal.isCompleted ? "Completada" : "En curso"}
-            {goal.isCompleted && goal.completedAt
-              ? ` · ${formatPlanningDate(goal.completedAt)}`
-              : ""}
-          </FinanceHelpText>
-        ) : null}
-        <Controller
-          control={control}
-          name="name"
-          render={({ field }) => (
-            <FormTextField
-              icon={TargetIcon}
-              label="Nombre"
-              value={field.value}
-              onChange={field.onChange}
-              onBlur={field.onBlur}
-              error={errors.name?.message}
-              placeholder="Fondo de emergencia"
-            />
-          )}
-        />
-        <Controller
-          control={control}
-          name="currency"
-          render={({ field }) => (
-            <FinanceCurrencyPills
-              value={field.value}
-              onChange={field.onChange}
-              baseCurrency={defaultCurrency}
-              extraCodes={[defaultCurrency, goal?.currency ?? ""]}
-            />
-          )}
-        />
-      </SummarySection>
+    <>
+      <BottomSheet
+        open={open}
+        onOpenChange={onOpenChange}
+        pending={pending}
+        title={isEdit ? "Editar meta" : "Nueva meta"}
+        description="El estado Completada lo marca el API cuando lo ahorrado alcanza la meta."
+        actions={{
+          delete: isEdit ? (
+            <Button
+              type="button"
+              variant="destructive"
+              disabled={isPending}
+              onClick={() => setConfirmOpen(true)}
+            >
+              <Trash2Icon className="size-4 shrink-0" />
+              Eliminar
+            </Button>
+          ) : undefined,
+          close: (
+            <Button
+              type="button"
+              variant="outline"
+              className="flex-1"
+              onClick={() => onOpenChange(false)}
+            >
+              <XIcon className="size-4 shrink-0" />
+              Cancelar
+            </Button>
+          ),
+          submit: (
+            <Button
+              type="button"
+              disabled={isPending}
+              className="flex-1"
+              onClick={onSubmit}
+            >
+              {isPending ? <Spinner data-icon="inline-start" /> : null}
+              Guardar
+            </Button>
+          ),
+        }}
+      >
+        <SummarySection title="Ahorro" icon={PiggyBankIcon}>
+          {goal ? (
+            <FinanceHelpText>
+              {goal.isCompleted ? "Completada" : "En curso"}
+              {goal.isCompleted && goal.completedAt
+                ? ` · ${formatPlanningDate(goal.completedAt)}`
+                : ""}
+            </FinanceHelpText>
+          ) : null}
+          <Controller
+            control={control}
+            name="name"
+            render={({ field }) => (
+              <FormTextField
+                icon={TargetIcon}
+                label="Nombre"
+                value={field.value}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+                error={errors.name?.message}
+                placeholder="Fondo de emergencia"
+              />
+            )}
+          />
+        </SummarySection>
 
-      <SummarySection title="Progreso" icon={TargetIcon}>
-        <Controller
-          control={control}
-          name="targetAmount"
-          render={({ field }) => (
-            <FinanceAmountField
-              label="Meta"
-              value={field.value}
-              onChange={field.onChange}
-              onBlur={field.onBlur}
-              error={errors.targetAmount?.message}
-              placeholder="50000"
-            />
-          )}
-        />
-        <Controller
-          control={control}
-          name="currentAmount"
-          render={({ field }) => (
-            <FormTextField
-              icon={PiggyBankIcon}
-              label="Ahorrado"
-              value={field.value}
-              onChange={field.onChange}
-              onBlur={field.onBlur}
-              error={errors.currentAmount?.message}
-              placeholder="0"
-              disabled={isEdit}
-            />
-          )}
-        />
-        <Controller
-          control={control}
-          name="targetDate"
-          render={({ field }) => (
-            <FinanceDateField
-              label="Fecha objetivo"
-              value={field.value}
-              onChange={field.onChange}
-              optional
-            />
-          )}
-        />
-      </SummarySection>
+        <SummarySection title="Progreso" icon={TargetIcon}>
+          <Controller
+            control={control}
+            name="targetAmount"
+            render={({ field }) => (
+              <FinanceMoneyField
+                label="Meta"
+                amount={field.value}
+                onAmountChange={field.onChange}
+                onAmountCommit={(next) => {
+                  field.onChange(next)
+                  void trigger("targetAmount")
+                }}
+                onAmountBlur={field.onBlur}
+                amountError={errors.targetAmount?.message}
+                currency={currency || defaultCurrency}
+                onCurrencyPress={() => openPicker("currency")}
+              />
+            )}
+          />
+          <Controller
+            control={control}
+            name="currentAmount"
+            render={({ field }) => (
+              <FinanceMoneyField
+                label="Ahorrado"
+                amount={field.value}
+                onAmountChange={field.onChange}
+                onAmountCommit={(next) => {
+                  field.onChange(next)
+                  void trigger("currentAmount")
+                }}
+                onAmountBlur={field.onBlur}
+                amountError={errors.currentAmount?.message}
+                currency={currency || defaultCurrency}
+                disabled={isEdit}
+              />
+            )}
+          />
+          <Controller
+            control={control}
+            name="targetDate"
+            render={({ field }) => (
+              <FinanceDateField
+                label="Fecha objetivo"
+                value={field.value}
+                onChange={field.onChange}
+                optional
+              />
+            )}
+          />
+        </SummarySection>
 
-      <FinanceDetailsDisclosure>
-        <Controller
-          control={control}
-          name="description"
-          render={({ field }) => (
-            <FormTextField
-              icon={NotebookPenIcon}
-              label="Descripción"
-              value={field.value}
-              onChange={field.onChange}
-              onBlur={field.onBlur}
-              error={errors.description?.message}
-            />
-          )}
-        />
-      </FinanceDetailsDisclosure>
-    </BottomSheet>
+        <FinanceDetailsDisclosure>
+          <Controller
+            control={control}
+            name="description"
+            render={({ field }) => (
+              <FormTextField
+                icon={NotebookPenIcon}
+                label="Descripción"
+                value={field.value}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+                error={errors.description?.message}
+              />
+            )}
+          />
+        </FinanceDetailsDisclosure>
+      </BottomSheet>
+
+      <FinanceCurrencyPickerSheet
+        open={picker === "currency"}
+        onOpenChange={closeHandlerFor("currency")}
+        value={currency || defaultCurrency}
+        onSelect={(next) =>
+          setValue("currency", next, { shouldValidate: true })
+        }
+      />
+
+      <AlertDialog
+        open={confirmOpen}
+        onOpenChange={(open) => {
+          if (!deleteMutation.isPending) {
+            setConfirmOpen(open)
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar esta meta de ahorro?</AlertDialogTitle>
+            <AlertDialogDescription>
+              No se puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteMutation.isPending}>
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              disabled={deleteMutation.isPending}
+              onClick={() => void onDelete()}
+            >
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   )
 }

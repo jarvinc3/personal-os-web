@@ -553,7 +553,7 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
         />
       </SummarySection>
 
-      <SummarySection title="Sincronización de email" icon={Mail}>
+      <SummarySection title="Sincronización de correo" icon={Mail}>
         <Controller
           control={control}
           name="emailSyncEnabled"
@@ -561,8 +561,8 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
             <SwitchFieldRow
               icon={Mail}
               iconColor={MODULE_ACCENT}
-              label="Activar sync"
-              description="Permite conectar Gmail y sincronizar."
+              label="Sincronizar correo"
+              description="Conecta Gmail y trae los movimientos del banco."
               checked={field.value}
               onCheckedChange={field.onChange}
             />
@@ -575,8 +575,8 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
             <SwitchFieldRow
               icon={RefreshCw}
               iconColor={MODULE_ACCENT}
-              label="Sync automático"
-              description="Se leen correos cada cierto tiempo."
+              label="Sincronizar automáticamente"
+              description="Busca correos nuevos cada cierto tiempo."
               checked={field.value}
               onCheckedChange={field.onChange}
               disabled={!emailSyncEnabledWatch}
@@ -590,7 +590,7 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
             <SwitchFieldRow
               icon={Tags}
               iconColor={MODULE_ACCENT}
-              label="Auto-categorizar"
+              label="Asignar categoría automáticamente"
               checked={field.value}
               onCheckedChange={field.onChange}
             />

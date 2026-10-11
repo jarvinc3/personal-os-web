@@ -40,6 +40,16 @@ import type {
 } from "@/src/modules/finance/shared/types/entities"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/src/shared/components/ui/alert-dialog"
+import {
   FormTextField,
   SelectField,
 } from "@/src/shared/components/layout/form-blocks"
@@ -66,7 +76,7 @@ import {
   WalletIcon,
   XIcon,
 } from "lucide-react"
-import { useEffect, useMemo } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form"
 import {
   cardSchema,
@@ -152,7 +162,7 @@ export function CardSheet({
     handleSubmit,
     reset,
     setValue,
-    formState: { errors },
+    formState: { errors, isDirty },
   } = useForm<CardFormValues>({
     resolver: zodResolver(cardSchema),
     defaultValues: toFormValues(
@@ -189,6 +199,10 @@ export function CardSheet({
     label: "Sin cuenta",
   })
   const hasInstitutions = institutionOptions.length > 0
+  const formValues = useWatch({ control })
+  const formIsValid = cardSchema.safeParse(formValues).success
+  const canSave =
+    !isPending && (isEdit ? isDirty : formIsValid && hasInstitutions)
   const { config: financeConfig } = useFinanceEnabled()
   const allowedCurrencies = buildFinanceCurrencyOptions(
     defaultCurrency,
@@ -290,19 +304,16 @@ export function CardSheet({
     }
   }
 
+  const [confirmOpen, setConfirmOpen] = useState(false)
+
   async function onDelete() {
     if (!card) {
-      return
-    }
-    const confirmed = window.confirm(
-      "¿Borrar esta tarjeta? Se eliminan sus movimientos. No se puede deshacer."
-    )
-    if (!confirmed) {
       return
     }
     try {
       await deleteMutation.mutateAsync(card.id)
       appToast.success({ text1: "Tarjeta borrada" })
+      setConfirmOpen(false)
       onOpenChange(false)
     } catch (error) {
       appToast.error({ text1: financeErrorMessage(error) })
@@ -317,319 +328,351 @@ export function CardSheet({
       : "Sin red"
 
   return (
-    <BottomSheet
-      open={open}
-      onOpenChange={onOpenChange}
-      pending={pending}
-      title={isEdit ? "Editar tarjeta" : "Nueva tarjeta"}
-      description={
-        hasInstitutions
-          ? undefined
-          : "Crea una institución en Cuentas antes de agregar una tarjeta."
-      }
-      actions={{
-        close: (
-          <Button
-            variant="outline"
-            className="flex-1"
-            onClick={() => onOpenChange(false)}
-          >
-            <XIcon className="size-4 shrink-0" />
-            Cancelar
-          </Button>
-        ),
-        submit: (
-          <Button
-            disabled={isPending || (!isEdit && !hasInstitutions)}
-            className="flex-1"
-            onClick={onSubmit}
-          >
-            {isPending ? (
-              <Spinner data-icon="inline-start" />
-            ) : (
-              <SaveIcon className="size-4 shrink-0" />
-            )}
-            {isPending ? "Guardando..." : "Guardar"}
-          </Button>
-        ),
-      }}
-    >
-      <SummarySection title="Vínculos" icon={Building2Icon}>
-        <Controller
-          control={control}
-          name="institutionId"
-          render={({ field }) => (
-            <SelectField
-              icon={Building2Icon}
-              label="Institución"
-              value={field.value || (institutionOptions[0]?.value ?? "")}
-              onChange={field.onChange}
-              options={
-                hasInstitutions
-                  ? institutionOptions
-                  : [
-                      {
-                        value: CATALOG_NONE,
-                        label: "Crea una institución primero",
-                      },
-                    ]
-              }
-              disabled={!hasInstitutions}
-            />
-          )}
-        />
-        {cardType === "DEBIT" ? (
+    <>
+      <BottomSheet
+        open={open}
+        onOpenChange={onOpenChange}
+        pending={pending}
+        title={isEdit ? "Editar tarjeta" : "Nueva tarjeta"}
+        description={
+          hasInstitutions
+            ? undefined
+            : "Crea una institución en Cuentas antes de agregar una tarjeta."
+        }
+        actions={{
+          close: (
+            <Button
+              variant="outline"
+              className="flex-1"
+              onClick={() => onOpenChange(false)}
+            >
+              <XIcon className="size-4 shrink-0" />
+              Cancelar
+            </Button>
+          ),
+          submit: (
+            <Button disabled={!canSave} className="flex-1" onClick={onSubmit}>
+              {isPending ? (
+                <Spinner data-icon="inline-start" />
+              ) : (
+                <SaveIcon className="size-4 shrink-0" />
+              )}
+              {isPending ? "Guardando..." : "Guardar"}
+            </Button>
+          ),
+        }}
+      >
+        <SummarySection title="Vínculos" icon={Building2Icon}>
           <Controller
             control={control}
-            name="accountId"
+            name="institutionId"
             render={({ field }) => (
               <SelectField
-                icon={WalletIcon}
-                label="Cuenta asociada"
-                value={field.value}
+                icon={Building2Icon}
+                label="Institución"
+                value={field.value || (institutionOptions[0]?.value ?? "")}
                 onChange={field.onChange}
-                options={accountOptions}
+                options={
+                  hasInstitutions
+                    ? institutionOptions
+                    : [
+                        {
+                          value: CATALOG_NONE,
+                          label: "Crea una institución primero",
+                        },
+                      ]
+                }
+                disabled={!hasInstitutions}
               />
             )}
           />
-        ) : null}
-      </SummarySection>
+          {cardType === "DEBIT" ? (
+            <Controller
+              control={control}
+              name="accountId"
+              render={({ field }) => (
+                <SelectField
+                  icon={WalletIcon}
+                  label="Cuenta asociada"
+                  value={field.value}
+                  onChange={field.onChange}
+                  options={accountOptions}
+                />
+              )}
+            />
+          ) : null}
+        </SummarySection>
 
-      <SummarySection title="Tarjeta" icon={CreditCardIcon}>
-        <FinancePreviewRow
-          icon={CreditCardIcon}
-          title={cardName.trim() || "Nueva tarjeta"}
-          description={`${FINANCE_CARD_TYPE_LABEL[cardType]} · ${networkLabel}${lastFour ? ` · •••• ${lastFour}` : ""}`}
-          accentColor={cardColor || undefined}
-        />
-        <Controller
-          control={control}
-          name="name"
-          render={({ field }) => (
-            <FormTextField
-              icon={CreditCardIcon}
-              label="Nombre"
-              value={field.value}
-              onChange={field.onChange}
-              onBlur={field.onBlur}
-              error={errors.name?.message}
-              placeholder="Visa principal"
-            />
-          )}
-        />
-        <Controller
-          control={control}
-          name="type"
-          render={({ field }) => (
-            <FinanceSegmentedControl
-              label="Tipo"
-              value={field.value}
-              onChange={field.onChange}
-              options={TYPE_OPTIONS}
-            />
-          )}
-        />
-        <Controller
-          control={control}
-          name="network"
-          render={({ field }) => (
-            <FinanceSegmentedControl
-              label="Red"
-              value={field.value === CATALOG_NONE ? "VISA" : field.value}
-              onChange={field.onChange}
-              options={NETWORK_OPTIONS}
-            />
-          )}
-        />
-        <Controller
-          control={control}
-          name="lastFour"
-          render={({ field }) => (
-            <FormTextField
-              icon={HashIcon}
-              label="Últimos 4"
-              value={field.value}
-              onChange={field.onChange}
-              onBlur={field.onBlur}
-              error={errors.lastFour?.message}
-              placeholder="1234"
-            />
-          )}
-        />
-      </SummarySection>
-
-      <SummarySection title="Ciclo de facturación" icon={CalendarDays}>
-        <Controller
-          control={control}
-          name="statementClosingDay"
-          render={({ field }) => (
-            <FormTextField
-              icon={CalendarDays}
-              label="Cierre de estado (día)"
-              value={field.value}
-              onChange={field.onChange}
-              onBlur={field.onBlur}
-              error={errors.statementClosingDay?.message}
-              placeholder="15"
-            />
-          )}
-        />
-        <Controller
-          control={control}
-          name="paymentDueDay"
-          render={({ field }) => (
-            <FormTextField
-              icon={CalendarDays}
-              label="Vencimiento (día)"
-              value={field.value}
-              onChange={field.onChange}
-              onBlur={field.onBlur}
-              error={errors.paymentDueDay?.message}
-              placeholder="25"
-            />
-          )}
-        />
-      </SummarySection>
-
-      <SummarySection title="Apariencia" icon={Palette}>
-        <Controller
-          control={control}
-          name="color"
-          render={({ field }) => (
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="card-color">Color</Label>
-              <ColorPickerSwatch
-                id="card-color"
-                variant="button"
+        <SummarySection title="Tarjeta" icon={CreditCardIcon}>
+          <FinancePreviewRow
+            icon={CreditCardIcon}
+            title={cardName.trim() || "Nueva tarjeta"}
+            description={`${FINANCE_CARD_TYPE_LABEL[cardType]} · ${networkLabel}${lastFour ? ` · •••• ${lastFour}` : ""}`}
+            accentColor={cardColor || undefined}
+          />
+          <Controller
+            control={control}
+            name="name"
+            render={({ field }) => (
+              <FormTextField
+                icon={CreditCardIcon}
+                label="Nombre"
                 value={field.value}
                 onChange={field.onChange}
+                onBlur={field.onBlur}
+                error={errors.name?.message}
+                placeholder="Visa principal"
               />
-            </div>
-          )}
-        />
-      </SummarySection>
+            )}
+          />
+          <Controller
+            control={control}
+            name="type"
+            render={({ field }) => (
+              <FinanceSegmentedControl
+                label="Tipo"
+                value={field.value}
+                onChange={field.onChange}
+                options={TYPE_OPTIONS}
+              />
+            )}
+          />
+          <Controller
+            control={control}
+            name="network"
+            render={({ field }) => (
+              <FinanceSegmentedControl
+                label="Red"
+                value={field.value === CATALOG_NONE ? "VISA" : field.value}
+                onChange={field.onChange}
+                options={NETWORK_OPTIONS}
+              />
+            )}
+          />
+          <Controller
+            control={control}
+            name="lastFour"
+            render={({ field }) => (
+              <FormTextField
+                icon={HashIcon}
+                label="Últimos 4 dígitos"
+                value={field.value}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+                error={errors.lastFour?.message}
+                placeholder="1234"
+              />
+            )}
+          />
+        </SummarySection>
 
-      {!isEdit && cardType === "CREDIT" ? (
-        <SummarySection title="Saldos iniciales" icon={DollarSign}>
-          {balanceFields.map((field, index) => {
-            const usedByOthers = (watchedBalances ?? [])
-              .map((row, rowIndex) => (rowIndex === index ? "" : row.currency))
-              .filter(Boolean)
-            return (
-              <div key={field.id} className="flex flex-col gap-3">
-                <Controller
-                  control={control}
-                  name={`balances.${index}.currency`}
-                  render={({ field: currencyField }) => (
-                    <FinanceCurrencyPills
-                      label="Moneda"
-                      value={currencyField.value}
-                      onChange={currencyField.onChange}
-                      baseCurrency={defaultCurrency}
-                      extraCodes={[defaultCurrency, currencyField.value]}
-                      excludeCodes={usedByOthers}
-                    />
-                  )}
+        <SummarySection title="Ciclo de facturación" icon={CalendarDays}>
+          <Controller
+            control={control}
+            name="statementClosingDay"
+            render={({ field }) => (
+              <FormTextField
+                icon={CalendarDays}
+                label="Día de corte"
+                value={field.value}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+                error={errors.statementClosingDay?.message}
+                placeholder="15"
+              />
+            )}
+          />
+          <Controller
+            control={control}
+            name="paymentDueDay"
+            render={({ field }) => (
+              <FormTextField
+                icon={CalendarDays}
+                label="Día de pago"
+                value={field.value}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+                error={errors.paymentDueDay?.message}
+                placeholder="25"
+              />
+            )}
+          />
+        </SummarySection>
+
+        <SummarySection title="Apariencia" icon={Palette}>
+          <Controller
+            control={control}
+            name="color"
+            render={({ field }) => (
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="card-color">Color</Label>
+                <ColorPickerSwatch
+                  id="card-color"
+                  variant="button"
+                  value={field.value}
+                  onChange={field.onChange}
                 />
-                <Controller
-                  control={control}
-                  name={`balances.${index}.balance`}
-                  render={({ field: balanceField }) => (
-                    <FormTextField
-                      icon={DollarSign}
-                      label="Saldo"
-                      value={balanceField.value}
-                      onChange={balanceField.onChange}
-                      onBlur={balanceField.onBlur}
-                      placeholder="0.00"
-                    />
-                  )}
-                />
-                {cardType === "CREDIT" ? (
+              </div>
+            )}
+          />
+        </SummarySection>
+
+        {!isEdit && cardType === "CREDIT" ? (
+          <SummarySection title="Saldos iniciales" icon={DollarSign}>
+            {balanceFields.map((field, index) => {
+              const usedByOthers = (watchedBalances ?? [])
+                .map((row, rowIndex) =>
+                  rowIndex === index ? "" : row.currency
+                )
+                .filter(Boolean)
+              return (
+                <div key={field.id} className="flex flex-col gap-3">
                   <Controller
                     control={control}
-                    name={`balances.${index}.creditLimit`}
-                    render={({ field: limitField }) => (
-                      <FormTextField
-                        icon={CreditCardIcon}
-                        label="Límite de crédito"
-                        value={limitField.value}
-                        onChange={limitField.onChange}
-                        onBlur={limitField.onBlur}
-                        placeholder="50000"
+                    name={`balances.${index}.currency`}
+                    render={({ field: currencyField }) => (
+                      <FinanceCurrencyPills
+                        label="Moneda"
+                        value={currencyField.value}
+                        onChange={currencyField.onChange}
+                        baseCurrency={defaultCurrency}
+                        extraCodes={[defaultCurrency, currencyField.value]}
+                        excludeCodes={usedByOthers}
                       />
                     )}
                   />
-                ) : null}
-                {balanceFields.length > 1 ? (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    onClick={() => removeBalance(index)}
-                  >
-                    <TrashIcon className="size-4 shrink-0" />
-                    Quitar moneda
-                  </Button>
-                ) : null}
-              </div>
-            )
-          })}
-          {canAddCurrency ? (
+                  <Controller
+                    control={control}
+                    name={`balances.${index}.balance`}
+                    render={({ field: balanceField }) => (
+                      <FormTextField
+                        icon={DollarSign}
+                        label="Saldo"
+                        value={balanceField.value}
+                        onChange={balanceField.onChange}
+                        onBlur={balanceField.onBlur}
+                        error={errors.balances?.[index]?.balance?.message}
+                        placeholder="0.00"
+                      />
+                    )}
+                  />
+                  {cardType === "CREDIT" ? (
+                    <Controller
+                      control={control}
+                      name={`balances.${index}.creditLimit`}
+                      render={({ field: limitField }) => (
+                        <FormTextField
+                          icon={CreditCardIcon}
+                          label="Límite de crédito"
+                          value={limitField.value}
+                          onChange={limitField.onChange}
+                          onBlur={limitField.onBlur}
+                          error={errors.balances?.[index]?.creditLimit?.message}
+                          placeholder="50000"
+                        />
+                      )}
+                    />
+                  ) : null}
+                  {balanceFields.length > 1 ? (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={() => removeBalance(index)}
+                    >
+                      <TrashIcon className="size-4 shrink-0" />
+                      Quitar moneda
+                    </Button>
+                  ) : null}
+                </div>
+              )
+            })}
+            {canAddCurrency ? (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() =>
+                  appendBalance(
+                    emptyBalanceRow(
+                      nextUnusedCurrency(
+                        (watchedBalances ?? []).map((row) => row.currency),
+                        defaultCurrency,
+                        financeConfig.trackedCurrencies
+                      )
+                    )
+                  )
+                }
+              >
+                <PlusIcon className="size-4 shrink-0" />
+                Agregar moneda
+              </Button>
+            ) : null}
+          </SummarySection>
+        ) : card && canManageCardBalances(card) ? (
+          <SummarySection title="Saldo" icon={DollarSign}>
             <Button
               type="button"
               variant="outline"
-              onClick={() =>
-                appendBalance(
-                  emptyBalanceRow(
-                    nextUnusedCurrency(
-                      (watchedBalances ?? []).map((row) => row.currency),
-                      defaultCurrency,
-                      financeConfig.trackedCurrencies
-                    )
-                  )
-                )
-              }
+              onClick={() => onUpdateBalance(card)}
             >
-              <PlusIcon className="size-4 shrink-0" />
-              Agregar moneda
+              <RefreshCwIcon className="size-4 shrink-0" />
+              Actualizar saldo
             </Button>
-          ) : null}
-        </SummarySection>
-      ) : card && canManageCardBalances(card) ? (
-        <SummarySection title="Saldo" icon={DollarSign}>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => onUpdateBalance(card)}
-          >
-            <RefreshCwIcon className="size-4 shrink-0" />
-            Actualizar saldo
-          </Button>
-        </SummarySection>
-      ) : null}
+          </SummarySection>
+        ) : null}
 
-      {isEdit && (
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            className="flex-1 text-destructive"
-            disabled={isPending}
-            onClick={() => void onArchive()}
-          >
-            <ArchiveIcon className="size-4" />
-            Archivar
-          </Button>
-          <Button
-            variant="destructive"
-            disabled={isPending}
-            className="flex-1"
-            onClick={() => void onDelete()}
-          >
-            <TrashIcon className="size-4" />
-            Borrar
-          </Button>
-        </div>
-      )}
-    </BottomSheet>
+        {isEdit && (
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              className="flex-1 text-destructive"
+              disabled={isPending}
+              onClick={() => void onArchive()}
+            >
+              <ArchiveIcon className="size-4" />
+              Archivar
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={isPending}
+              className="flex-1"
+              onClick={() => setConfirmOpen(true)}
+            >
+              <TrashIcon className="size-4" />
+              Borrar
+            </Button>
+          </div>
+        )}
+      </BottomSheet>
+
+      <AlertDialog
+        open={confirmOpen}
+        onOpenChange={(open) => {
+          if (!deleteMutation.isPending) {
+            setConfirmOpen(open)
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Borrar esta tarjeta?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Se eliminan sus movimientos. No se puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteMutation.isPending}>
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              disabled={deleteMutation.isPending}
+              onClick={() => void onDelete()}
+            >
+              Borrar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   )
 }

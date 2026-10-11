@@ -6,6 +6,7 @@ import {
 } from "@/src/modules/finance/shared/components/currency-flag"
 import { useCurrencies } from "@/src/modules/finance/shared/hooks/use-currencies"
 import { currencyDisplayName } from "@/src/modules/finance/shared/lib/currency-display-name"
+import { foldSearchText } from "@/src/modules/finance/shared/lib/search-text"
 import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
 import { FormTextField } from "@/src/shared/components/layout/form-blocks"
@@ -31,10 +32,6 @@ type CurrencyPickerSheetProps = {
   /** Value of 1 unit of each code, expressed in `quoteCurrency`. Shown on the right of each card. */
   quotes?: ReadonlyMap<string, string | null>
   quoteCurrency?: string
-}
-
-function foldSearchText(value: string): string {
-  return value.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase()
 }
 
 function formatQuote(

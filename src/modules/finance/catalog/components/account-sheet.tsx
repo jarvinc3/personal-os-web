@@ -29,6 +29,16 @@ import type {
 } from "@/src/modules/finance/shared/types/entities"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/src/shared/components/ui/alert-dialog"
+import {
   FormTextField,
   SelectField,
   SwitchFieldRow,
@@ -53,7 +63,7 @@ import {
   WalletIcon,
   XIcon,
 } from "lucide-react"
-import { useEffect, useMemo } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import {
   accountSchema,
@@ -228,19 +238,16 @@ export function AccountSheet({
     }
   }
 
+  const [confirmOpen, setConfirmOpen] = useState(false)
+
   async function onDelete() {
     if (!account) {
-      return
-    }
-    const confirmed = window.confirm(
-      "¿Borrar esta cuenta? Se eliminan sus movimientos, tarjetas débito y saldos. No se puede deshacer."
-    )
-    if (!confirmed) {
       return
     }
     try {
       await deleteMutation.mutateAsync(account.id)
       appToast.success({ text1: "Cuenta borrada" })
+      setConfirmOpen(false)
       onOpenChange(false)
       onDeleted?.()
     } catch (error) {
@@ -249,203 +256,236 @@ export function AccountSheet({
   }
 
   return (
-    <BottomSheet
-      open={open}
-      onOpenChange={onOpenChange}
-      pending={pending}
-      title={isEdit ? "Editar cuenta" : "Nueva cuenta"}
-      description={
-        hasInstitutions
-          ? "El saldo empieza en 0. Se actualiza con los movimientos, no en este formulario."
-          : "Crea una institución bancaria antes de agregar una cuenta."
-      }
-      actions={{
-        close: (
-          <Button
-            key="cancel"
-            variant="outline"
-            className="flex-1"
-            onClick={() => onOpenChange(false)}
-          >
-            <XIcon className="size-4 shrink-0" />
-            Cancelar
-          </Button>
-        ),
-        submit: (
-          <Button
-            key="submit"
-            disabled={isPending || (!isEdit && !hasInstitutions)}
-            className="flex-1"
-            onClick={onSubmit}
-          >
-            {isPending ? (
-              <Spinner data-icon="inline-start" />
-            ) : (
-              <SaveIcon className="size-4 shrink-0" />
-            )}
-            {isPending ? "Guardando..." : "Guardar"}
-          </Button>
-        ),
-      }}
-    >
-      <SummarySection title="Cuenta" icon={LandmarkIcon}>
-        <FinancePreviewRow
-          icon={LandmarkIcon}
-          title={accountName.trim() || "Nueva cuenta"}
-          description={
-            accountType !== "CASH" &&
-            accountNumber.replace(/\D/g, "").length >= 4
-              ? `${FINANCE_ACCOUNT_TYPE_LABEL[accountType]} · •••• ${accountNumber.replace(/\D/g, "").slice(-4)}`
-              : `${FINANCE_ACCOUNT_TYPE_LABEL[accountType]} · ${accountCurrency}`
-          }
-          accentColor={accountColor || undefined}
-        />
-        <Controller
-          control={control}
-          name="name"
-          render={({ field }) => (
-            <FormTextField
-              icon={LandmarkIcon}
-              label="Nombre"
-              value={field.value}
-              onChange={field.onChange}
-              onBlur={field.onBlur}
-              error={errors.name?.message}
-              placeholder="Cuenta nómina"
-            />
-          )}
-        />
-        <Controller
-          control={control}
-          name="type"
-          render={({ field }) => (
-            <FinanceSegmentedControl
-              label="Tipo"
-              value={field.value}
-              onChange={field.onChange}
-              options={TYPE_OPTIONS}
-            />
-          )}
-        />
-        <Controller
-          control={control}
-          name="institutionId"
-          render={({ field }) => (
-            <SelectField
-              icon={WalletIcon}
-              label={
-                accountType === "CASH"
-                  ? "Institución (opcional)"
-                  : "Institución"
-              }
-              value={field.value}
-              onChange={field.onChange}
-              options={
-                hasInstitutions || accountType === "CASH"
-                  ? institutionOptions
-                  : [
-                      {
-                        value: CATALOG_NONE,
-                        label: "Crea una institución primero",
-                      },
-                    ]
-              }
-              disabled={!hasInstitutions && accountType !== "CASH"}
-            />
-          )}
-        />
-        {errors.institutionId?.message ? (
-          <p className="text-sm text-destructive">
-            {errors.institutionId.message}
-          </p>
-        ) : null}
-        {accountType !== "CASH" ? (
-          <>
-            <Controller
-              control={control}
-              name="accountNumber"
-              render={({ field }) => (
-                <FormTextField
-                  icon={HashIcon}
-                  label="Número de cuenta"
-                  value={field.value}
-                  onChange={field.onChange}
-                  onBlur={field.onBlur}
-                  error={errors.accountNumber?.message}
-                  placeholder="0123456789"
-                />
+    <>
+      <BottomSheet
+        open={open}
+        onOpenChange={onOpenChange}
+        pending={pending}
+        title={isEdit ? "Editar cuenta" : "Nueva cuenta"}
+        description={
+          hasInstitutions
+            ? "El saldo empieza en 0. Se actualiza con los movimientos, no en este formulario."
+            : "Crea una institución bancaria antes de agregar una cuenta."
+        }
+        actions={{
+          close: (
+            <Button
+              key="cancel"
+              variant="outline"
+              className="flex-1"
+              onClick={() => onOpenChange(false)}
+            >
+              <XIcon className="size-4 shrink-0" />
+              Cancelar
+            </Button>
+          ),
+          submit: (
+            <Button
+              key="submit"
+              disabled={isPending || (!isEdit && !hasInstitutions)}
+              className="flex-1"
+              onClick={onSubmit}
+            >
+              {isPending ? (
+                <Spinner data-icon="inline-start" />
+              ) : (
+                <SaveIcon className="size-4 shrink-0" />
               )}
-            />
-            <Controller
-              control={control}
-              name="isDefaultForInstitution"
-              render={({ field }) => (
-                <SwitchFieldRow
-                  icon={Star}
-                  iconColor={getModule("finance").accent}
-                  label="Cuenta predeterminada"
-                  description="Se usa cuando el correo del banco no trae dígitos de cuenta."
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
-              )}
-            />
-          </>
-        ) : null}
-        <Controller
-          control={control}
-          name="currency"
-          render={({ field }) => (
-            <FinanceCurrencyPills
-              value={field.value}
-              onChange={field.onChange}
-              baseCurrency={defaultCurrency}
-              extraCodes={[defaultCurrency, account?.currency ?? ""]}
-            />
-          )}
-        />
-      </SummarySection>
-
-      <SummarySection title="Apariencia" icon={Palette}>
-        <Controller
-          control={control}
-          name="color"
-          render={({ field }) => (
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="account-color">Color</Label>
-              <ColorPickerSwatch
-                id="account-color"
-                variant="button"
+              {isPending ? "Guardando..." : "Guardar"}
+            </Button>
+          ),
+        }}
+      >
+        <SummarySection title="Cuenta" icon={LandmarkIcon}>
+          <FinancePreviewRow
+            icon={LandmarkIcon}
+            title={accountName.trim() || "Nueva cuenta"}
+            description={
+              accountType !== "CASH" &&
+              accountNumber.replace(/\D/g, "").length >= 4
+                ? `${FINANCE_ACCOUNT_TYPE_LABEL[accountType]} · •••• ${accountNumber.replace(/\D/g, "").slice(-4)}`
+                : `${FINANCE_ACCOUNT_TYPE_LABEL[accountType]} · ${accountCurrency}`
+            }
+            accentColor={accountColor || undefined}
+          />
+          <Controller
+            control={control}
+            name="name"
+            render={({ field }) => (
+              <FormTextField
+                icon={LandmarkIcon}
+                label="Nombre"
                 value={field.value}
                 onChange={field.onChange}
+                onBlur={field.onBlur}
+                error={errors.name?.message}
+                placeholder="Cuenta nómina"
               />
-            </div>
-          )}
-        />
-      </SummarySection>
+            )}
+          />
+          <Controller
+            control={control}
+            name="type"
+            render={({ field }) => (
+              <FinanceSegmentedControl
+                label="Tipo"
+                value={field.value}
+                onChange={field.onChange}
+                options={TYPE_OPTIONS}
+              />
+            )}
+          />
+          <Controller
+            control={control}
+            name="institutionId"
+            render={({ field }) => (
+              <SelectField
+                icon={WalletIcon}
+                label={
+                  accountType === "CASH"
+                    ? "Institución (opcional)"
+                    : "Institución"
+                }
+                value={field.value}
+                onChange={field.onChange}
+                options={
+                  hasInstitutions || accountType === "CASH"
+                    ? institutionOptions
+                    : [
+                        {
+                          value: CATALOG_NONE,
+                          label: "Crea una institución primero",
+                        },
+                      ]
+                }
+                disabled={!hasInstitutions && accountType !== "CASH"}
+              />
+            )}
+          />
+          {errors.institutionId?.message ? (
+            <p className="text-sm text-destructive">
+              {errors.institutionId.message}
+            </p>
+          ) : null}
+          {accountType !== "CASH" ? (
+            <>
+              <Controller
+                control={control}
+                name="accountNumber"
+                render={({ field }) => (
+                  <FormTextField
+                    icon={HashIcon}
+                    label="Número de cuenta"
+                    value={field.value}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                    error={errors.accountNumber?.message}
+                    placeholder="0123456789"
+                  />
+                )}
+              />
+              <Controller
+                control={control}
+                name="isDefaultForInstitution"
+                render={({ field }) => (
+                  <SwitchFieldRow
+                    icon={Star}
+                    iconColor={getModule("finance").accent}
+                    label="Cuenta predeterminada"
+                    description="Se usa cuando el correo del banco no trae dígitos de cuenta."
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                )}
+              />
+            </>
+          ) : null}
+          <Controller
+            control={control}
+            name="currency"
+            render={({ field }) => (
+              <FinanceCurrencyPills
+                value={field.value}
+                onChange={field.onChange}
+                baseCurrency={defaultCurrency}
+                extraCodes={[defaultCurrency, account?.currency ?? ""]}
+              />
+            )}
+          />
+        </SummarySection>
 
-      {isEdit && (
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            className="flex-1 text-destructive"
-            disabled={isPending}
-            onClick={() => void onArchive()}
-          >
-            <ArchiveIcon className="size-4" />
-            Archivar
-          </Button>
-          <Button
-            variant="destructive"
-            disabled={isPending}
-            className="flex-1"
-            onClick={() => void onDelete()}
-          >
-            <TrashIcon className="size-4" />
-            Borrar
-          </Button>
-        </div>
-      )}
-    </BottomSheet>
+        <SummarySection title="Apariencia" icon={Palette}>
+          <Controller
+            control={control}
+            name="color"
+            render={({ field }) => (
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="account-color">Color</Label>
+                <ColorPickerSwatch
+                  id="account-color"
+                  variant="button"
+                  value={field.value}
+                  onChange={field.onChange}
+                />
+              </div>
+            )}
+          />
+        </SummarySection>
+
+        {isEdit && (
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              className="flex-1 text-destructive"
+              disabled={isPending}
+              onClick={() => void onArchive()}
+            >
+              <ArchiveIcon className="size-4" />
+              Archivar
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={isPending}
+              className="flex-1"
+              onClick={() => setConfirmOpen(true)}
+            >
+              <TrashIcon className="size-4" />
+              Borrar
+            </Button>
+          </div>
+        )}
+      </BottomSheet>
+
+      <AlertDialog
+        open={confirmOpen}
+        onOpenChange={(open) => {
+          if (!deleteMutation.isPending) {
+            setConfirmOpen(open)
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Borrar esta cuenta?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Se eliminan sus movimientos, tarjetas débito y saldos. No se puede
+              deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteMutation.isPending}>
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              disabled={deleteMutation.isPending}
+              onClick={() => void onDelete()}
+            >
+              Borrar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   )
 }

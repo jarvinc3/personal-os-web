@@ -6,7 +6,7 @@ import { Input } from "@/src/shared/components/ui/input"
 import { ScrollArea } from "@/src/shared/components/ui/scroll-area"
 import { isSingleEmoji, takeSingleEmoji } from "@/src/shared/lib/single-emoji"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
-import { KeyboardIcon, SearchIcon } from "lucide-react"
+import { KeyboardIcon, SearchIcon, TagsIcon } from "lucide-react"
 import { useLayoutEffect, useRef, useState } from "react"
 import { createPortal } from "react-dom"
 
@@ -188,7 +188,7 @@ export function CategoryEmojiField({
             PRESSABLE_CLASS
           )}
         >
-          {value || "🛒"}
+          {value ? value : <TagsIcon className="size-4" aria-hidden />}
         </button>
       </div>
       {open ? (host ? createPortal(panel, host) : panel) : null}

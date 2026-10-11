@@ -44,6 +44,8 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
+import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
+import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
 import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
 import { SummaryItem, SummarySection } from "@/src/shared/components/ui/summary"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
@@ -172,7 +174,14 @@ export function FinanceMailboxesView({ enabled }: { enabled: boolean }) {
         </Alert>
       ) : null}
       {errorMessage ? (
-        <p className="text-sm text-destructive">{errorMessage}</p>
+        <FinanceErrorState
+          message={errorMessage}
+          onRetry={() => {
+            void mailboxesQuery.refetch()
+            void pendingQuery.refetch()
+          }}
+          isRetrying={mailboxesQuery.isFetching || pendingQuery.isFetching}
+        />
       ) : null}
 
       <SummarySection
@@ -196,41 +205,44 @@ export function FinanceMailboxesView({ enabled }: { enabled: boolean }) {
           </p>
         ) : emailSyncAutomatic ? (
           <p className="px-1 pb-3 text-sm text-muted-foreground">
-            Sync automático según la frecuencia configurada. Solo se usa IA si
-            hay correos nuevos.
+            Sincronización automática según la frecuencia configurada. Solo se
+            usa IA si hay correos nuevos.
           </p>
         ) : (
           <p className="px-1 pb-3 text-sm text-muted-foreground">
-            Sync automático apagado. Usa el botón de recarga o Sincronizar
-            ahora. Actívalo en Ajustes → Finanzas.
+            Sincronización automática apagada. Usa el botón de recarga o
+            Sincronizar ahora. Actívala en Ajustes → Finanzas.
           </p>
         )}
-        {mailboxesQuery.isPending && !mailboxesQuery.data ? (
-          <FinanceListSkeleton />
-        ) : mailboxes.length === 0 ? (
-          <Empty className="py-8">
-            <EmptyHeader>
-              <EmptyMedia variant="icon">
-                <MailIcon />
-              </EmptyMedia>
-              <EmptyTitle>Aún no hay Gmail</EmptyTitle>
-              <EmptyDescription>
-                Conecta Gmail (solo lectura). Después ligas cada banco con el
-                correo desde el que llegan las notificaciones.
-              </EmptyDescription>
-            </EmptyHeader>
-            <EmptyContent>
-              <Button
-                disabled={!emailSyncEnabled}
-                onClick={() => setOpenConnectSheet(true)}
-              >
-                <PlusIcon className="size-4 shrink-0" />
-                Conectar Gmail
-              </Button>
-            </EmptyContent>
-          </Empty>
-        ) : (
-          mailboxes.map((mailbox) => (
+        <AsyncRegion
+          pending={mailboxesQuery.isPending && !mailboxesQuery.data}
+          pendingFallback={<FinanceListSkeleton />}
+          empty={mailboxes.length === 0}
+          emptyFallback={
+            <Empty className="py-8">
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <MailIcon />
+                </EmptyMedia>
+                <EmptyTitle>Aún no hay Gmail</EmptyTitle>
+                <EmptyDescription>
+                  Conecta Gmail (solo lectura). Después ligas cada banco con el
+                  correo desde el que llegan las notificaciones.
+                </EmptyDescription>
+              </EmptyHeader>
+              <EmptyContent>
+                <Button
+                  disabled={!emailSyncEnabled}
+                  onClick={() => setOpenConnectSheet(true)}
+                >
+                  <PlusIcon className="size-4 shrink-0" />
+                  Conectar Gmail
+                </Button>
+              </EmptyContent>
+            </Empty>
+          }
+        >
+          {mailboxes.map((mailbox) => (
             <MailboxGroup
               key={mailbox.id}
               mailbox={mailbox}
@@ -242,28 +254,31 @@ export function FinanceMailboxesView({ enabled }: { enabled: boolean }) {
               onAddInstitution={(id) => setOpenLinkSheet(true, id)}
               onSyncSource={(id) => void runSync(id)}
             />
-          ))
-        )}
+          ))}
+        </AsyncRegion>
       </SummarySection>
 
       <SummarySection title="Movimientos por asignar" icon={InboxIcon}>
-        {pendingQuery.isPending && !pendingQuery.data ? (
-          <FinanceListSkeleton />
-        ) : pending.length === 0 ? (
-          <Empty className="py-8">
-            <EmptyHeader>
-              <EmptyMedia variant="icon">
-                <InboxIcon />
-              </EmptyMedia>
-              <EmptyTitle>Aún no hay movimientos por asignar</EmptyTitle>
-              <EmptyDescription>
-                Cuando un banco envía un correo con un movimiento, se asigna
-                automáticamente.
-              </EmptyDescription>
-            </EmptyHeader>
-          </Empty>
-        ) : (
-          pending.map((message, index) => (
+        <AsyncRegion
+          pending={pendingQuery.isPending && !pendingQuery.data}
+          pendingFallback={<FinanceListSkeleton />}
+          empty={pending.length === 0}
+          emptyFallback={
+            <Empty className="py-8">
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <InboxIcon />
+                </EmptyMedia>
+                <EmptyTitle>Aún no hay movimientos por asignar</EmptyTitle>
+                <EmptyDescription>
+                  Cuando un banco envía un correo con un movimiento, se asigna
+                  automáticamente.
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
+          }
+        >
+          {pending.map((message, index) => (
             <SummaryItem
               key={message.id}
               title={
@@ -274,8 +289,8 @@ export function FinanceMailboxesView({ enabled }: { enabled: boolean }) {
               onPress={() => setOpenAssignSheet(true, message.id)}
               isLast={index === pending.length - 1}
             />
-          ))
-        )}
+          ))}
+        </AsyncRegion>
       </SummarySection>
 
       {emailSyncEnabled ? (
@@ -327,6 +342,7 @@ export function FinanceMailboxesView({ enabled }: { enabled: boolean }) {
         message={assigning}
         accounts={accounts}
         cards={cards}
+        institutions={institutions}
         display={display}
       />
     </>

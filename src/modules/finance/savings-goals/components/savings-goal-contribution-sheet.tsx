@@ -1,10 +1,8 @@
 "use client"
 
 import { FinanceDateField } from "@/src/modules/finance/shared/components/forms/date-field"
-import {
-  FinanceAmountField,
-  FinanceHelpText,
-} from "@/src/modules/finance/shared/components/forms/form-blocks"
+import { FinanceHelpText } from "@/src/modules/finance/shared/components/forms/form-blocks"
+import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
 import { useCreateSavingsGoalContribution } from "@/src/modules/finance/shared/hooks/use-savings-goals"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import { buildSavingsGoalContributionBody } from "@/src/modules/finance/shared/lib/planning-payloads"
@@ -22,7 +20,7 @@ import { Controller, useForm } from "react-hook-form"
 import {
   savingsGoalContributionSchema,
   type SavingsGoalContributionFormValues,
-} from "@/src/modules/finance/planning/lib/savings-goal-contribution-form"
+} from "@/src/modules/finance/savings-goals/lib/savings-goal-contribution-form"
 
 const EMPTY_FORM: SavingsGoalContributionFormValues = {
   amount: "",
@@ -35,6 +33,7 @@ type SavingsGoalContributionSheetProps = {
   onOpenChange: (open: boolean) => void
   goalId: string | null
   goalName?: string
+  currency?: string
   pending?: boolean
 }
 
@@ -43,6 +42,7 @@ export function SavingsGoalContributionSheet({
   onOpenChange,
   goalId,
   goalName,
+  currency,
   pending = false,
 }: SavingsGoalContributionSheetProps) {
   const createMutation = useCreateSavingsGoalContribution()
@@ -51,6 +51,7 @@ export function SavingsGoalContributionSheet({
     control,
     handleSubmit,
     reset,
+    trigger,
     formState: { errors },
   } = useForm<SavingsGoalContributionFormValues>({
     resolver: zodResolver(savingsGoalContributionSchema),
@@ -129,13 +130,17 @@ export function SavingsGoalContributionSheet({
           control={control}
           name="amount"
           render={({ field }) => (
-            <FinanceAmountField
+            <FinanceMoneyField
               label="Monto"
-              value={field.value}
-              onChange={field.onChange}
-              onBlur={field.onBlur}
-              error={errors.amount?.message}
-              placeholder="5000"
+              amount={field.value}
+              onAmountChange={field.onChange}
+              onAmountCommit={(next) => {
+                field.onChange(next)
+                void trigger("amount")
+              }}
+              onAmountBlur={field.onBlur}
+              amountError={errors.amount?.message}
+              currency={currency}
             />
           )}
         />

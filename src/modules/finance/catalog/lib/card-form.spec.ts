@@ -27,4 +27,24 @@ describe("cardSchema", () => {
       false
     )
   })
+
+  it("rejects a credit row with an invalid balance", () => {
+    assert.equal(
+      cardSchema.safeParse({
+        ...validCard,
+        balances: [{ currency: "DOP", balance: "abc", creditLimit: "" }],
+      }).success,
+      false
+    )
+  })
+
+  it("rejects a credit row with a balance but no limit", () => {
+    assert.equal(
+      cardSchema.safeParse({
+        ...validCard,
+        balances: [{ currency: "DOP", balance: "100", creditLimit: "" }],
+      }).success,
+      false
+    )
+  })
 })

@@ -1,6 +1,6 @@
 "use client"
 
-import { CategoryCard } from "@/src/modules/finance/catalog/components/category-card"
+import { CategoryCard } from "@/src/modules/finance/shared/components/category-card"
 import { CategoryEmojiField } from "@/src/modules/finance/catalog/components/category-emoji-field"
 import { FinanceSegmentedControl } from "@/src/modules/finance/shared/components/forms/form-blocks"
 import { CATALOG_NONE } from "@/src/modules/finance/shared/constants/catalog"
@@ -20,6 +20,16 @@ import type {
   FinanceCategoryType,
 } from "@/src/modules/finance/shared/types/entities"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/src/shared/components/ui/alert-dialog"
 import {
   FormTextField,
   SelectField,
@@ -43,7 +53,7 @@ import {
   TrashIcon,
   XIcon,
 } from "lucide-react"
-import { useEffect, useMemo } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import {
   categorySchema,
@@ -191,19 +201,16 @@ export function CategorySheet({
     }
   })
 
+  const [confirmOpen, setConfirmOpen] = useState(false)
+
   async function onDelete() {
     if (!category) {
-      return
-    }
-    const confirmed = window.confirm(
-      "¿Eliminar esta categoría? No se puede deshacer."
-    )
-    if (!confirmed) {
       return
     }
     try {
       await deleteMutation.mutateAsync(category.id)
       appToast.success({ text1: "Categoría eliminada" })
+      setConfirmOpen(false)
       onOpenChange(false)
     } catch (error) {
       appToast.error({ text1: financeErrorMessage(error) })
@@ -211,159 +218,191 @@ export function CategorySheet({
   }
 
   return (
-    <BottomSheet
-      open={open}
-      onOpenChange={onOpenChange}
-      pending={pending}
-      title={
-        isEdit
-          ? isSystem
-            ? "Categoría del sistema"
-            : "Editar categoría"
-          : "Nueva categoría"
-      }
-      description={
-        isSystem
-          ? "Esta categoría viene con el sistema. No se puede editar ni eliminar."
-          : undefined
-      }
-      actions={{
-        close: (
-          <Button
-            variant="outline"
-            className="flex-1"
-            onClick={() => onOpenChange(false)}
-          >
-            <XIcon className="size-4 shrink-0" />
-            Cancelar
-          </Button>
-        ),
-        submit: isSystem ? undefined : (
-          <Button disabled={isPending} className="flex-1" onClick={onSubmit}>
-            {isPending ? (
-              <Spinner data-icon="inline-start" />
-            ) : (
-              <SaveIcon className="size-4 shrink-0" />
-            )}
-            {isPending ? "Guardando..." : "Guardar"}
-          </Button>
-        ),
-      }}
-    >
-      <Controller
-        control={control}
-        name="type"
-        render={({ field }) => (
-          <FinanceSegmentedControl
-            value={field.value}
-            onChange={field.onChange}
-            options={TYPE_OPTIONS}
-            disabled={typeLocked}
-            size="lg"
-            fullWidth
-          />
-        )}
-      />
-
-      <CategoryCard
-        name={categoryName}
-        icon={categoryIcon}
-        color={categoryColor}
-        isSystem={isSystem}
-        className="pr-4"
-      />
-
-      <SummarySection title="Datos" icon={ContactRoundIcon}>
-        <div data-emoji-panel-host className="flex flex-col gap-2">
-          <div className="flex items-start gap-2">
-            <div className="min-w-0 flex-1">
-              <Controller
-                control={control}
-                name="name"
-                render={({ field }) => (
-                  <FormTextField
-                    label="Nombre"
-                    icon={ContactRoundIcon}
-                    value={field.value}
-                    onChange={field.onChange}
-                    onBlur={field.onBlur}
-                    error={errors.name?.message}
-                    placeholder="Supermercado"
-                    disabled={isSystem}
-                  />
-                )}
-              />
-            </div>
-            <div className="w-14 shrink-0">
-              <Controller
-                control={control}
-                name="icon"
-                render={({ field }) => (
-                  <CategoryEmojiField
-                    value={field.value}
-                    onChange={field.onChange}
-                    onBlur={field.onBlur}
-                    error={errors.icon?.message}
-                    disabled={isSystem}
-                  />
-                )}
-              />
-            </div>
-          </div>
-        </div>
+    <>
+      <BottomSheet
+        open={open}
+        onOpenChange={onOpenChange}
+        pending={pending}
+        title={
+          isEdit
+            ? isSystem
+              ? "Categoría del sistema"
+              : "Editar categoría"
+            : "Nueva categoría"
+        }
+        description={
+          isSystem
+            ? "Esta categoría viene con el sistema. No se puede editar ni eliminar."
+            : undefined
+        }
+        actions={{
+          close: (
+            <Button
+              variant="outline"
+              className="flex-1"
+              onClick={() => onOpenChange(false)}
+            >
+              <XIcon className="size-4 shrink-0" />
+              Cancelar
+            </Button>
+          ),
+          submit: isSystem ? undefined : (
+            <Button disabled={isPending} className="flex-1" onClick={onSubmit}>
+              {isPending ? (
+                <Spinner data-icon="inline-start" />
+              ) : (
+                <SaveIcon className="size-4 shrink-0" />
+              )}
+              {isPending ? "Guardando..." : "Guardar"}
+            </Button>
+          ),
+        }}
+      >
         <Controller
           control={control}
-          name="parentId"
+          name="type"
           render={({ field }) => (
-            <SelectField
-              label="Categoría padre"
-              icon={FolderTreeIcon}
+            <FinanceSegmentedControl
               value={field.value}
               onChange={field.onChange}
-              options={parentOptions}
-              disabled={isSystem}
+              options={TYPE_OPTIONS}
+              disabled={typeLocked}
+              size="lg"
+              fullWidth
             />
           )}
         />
-      </SummarySection>
 
-      <SummarySection title="Apariencia" icon={PaletteIcon}>
-        <Controller
-          control={control}
-          name="color"
-          render={({ field }) => (
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="category-color">Color</Label>
-              <ColorPickerSwatch
-                id="category-color"
-                variant="button"
+        <CategoryCard
+          name={categoryName}
+          icon={categoryIcon}
+          color={categoryColor}
+          isSystem={isSystem}
+          className="pr-4"
+        />
+
+        <SummarySection title="Datos" icon={ContactRoundIcon}>
+          <div data-emoji-panel-host className="flex flex-col gap-2">
+            <div className="flex items-start gap-2">
+              <div className="min-w-0 flex-1">
+                <Controller
+                  control={control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormTextField
+                      label="Nombre"
+                      icon={ContactRoundIcon}
+                      value={field.value}
+                      onChange={field.onChange}
+                      onBlur={field.onBlur}
+                      error={errors.name?.message}
+                      placeholder="Supermercado"
+                      disabled={isSystem}
+                    />
+                  )}
+                />
+              </div>
+              <div className="w-14 shrink-0">
+                <Controller
+                  control={control}
+                  name="icon"
+                  render={({ field }) => (
+                    <CategoryEmojiField
+                      value={field.value}
+                      onChange={field.onChange}
+                      onBlur={field.onBlur}
+                      error={errors.icon?.message}
+                      disabled={isSystem}
+                    />
+                  )}
+                />
+              </div>
+            </div>
+          </div>
+          <Controller
+            control={control}
+            name="parentId"
+            render={({ field }) => (
+              <SelectField
+                label="Categoría padre"
+                icon={FolderTreeIcon}
                 value={field.value}
                 onChange={field.onChange}
+                options={parentOptions}
                 disabled={isSystem}
               />
-            </div>
-          )}
-        />
-      </SummarySection>
+            )}
+          />
+        </SummarySection>
 
-      <Separator />
+        <SummarySection title="Apariencia" icon={PaletteIcon}>
+          <Controller
+            control={control}
+            name="color"
+            render={({ field }) => (
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="category-color">Color</Label>
+                <ColorPickerSwatch
+                  id="category-color"
+                  variant="button"
+                  value={field.value}
+                  onChange={field.onChange}
+                  disabled={isSystem}
+                />
+              </div>
+            )}
+          />
+        </SummarySection>
 
-      {isEdit && !isSystem && (
-        <Button
-          variant="destructive"
-          size="lg"
-          disabled={isPending}
-          className="flex-1 py-2"
-          onClick={() => void onDelete()}
-        >
-          {isPending ? (
-            <Spinner data-icon="inline-start" />
-          ) : (
-            <TrashIcon className="size-4" />
-          )}
-          {isPending ? "Eliminando..." : "Eliminar categoría"}
-        </Button>
-      )}
-    </BottomSheet>
+        <Separator />
+
+        {isEdit && !isSystem && (
+          <Button
+            variant="destructive"
+            size="lg"
+            disabled={isPending}
+            className="flex-1 py-2"
+            onClick={() => setConfirmOpen(true)}
+          >
+            {isPending ? (
+              <Spinner data-icon="inline-start" />
+            ) : (
+              <TrashIcon className="size-4" />
+            )}
+            {isPending ? "Eliminando..." : "Eliminar categoría"}
+          </Button>
+        )}
+      </BottomSheet>
+
+      <AlertDialog
+        open={confirmOpen}
+        onOpenChange={(open) => {
+          if (!deleteMutation.isPending) {
+            setConfirmOpen(open)
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar esta categoría?</AlertDialogTitle>
+            <AlertDialogDescription>
+              No se puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteMutation.isPending}>
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              disabled={deleteMutation.isPending}
+              onClick={() => void onDelete()}
+            >
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   )
 }

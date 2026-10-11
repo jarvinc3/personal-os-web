@@ -3,7 +3,7 @@
 import {
   AccountProductRow,
   CardProductRow,
-} from "@/src/modules/finance/institutions"
+} from "@/src/modules/finance/shared/components/product-rows"
 import { splitLedgerTarget } from "@/src/modules/finance/shared/lib/ledger-payloads"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
 import type {

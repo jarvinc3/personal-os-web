@@ -67,8 +67,11 @@ const FINANCE_CAPABILITIES = [
   "dashboard",
   "budgets",
   "institutions",
+  "loans",
   "planning",
   "products",
+  "receivables",
+  "savings-goals",
   "sync",
   "transactions",
 ]
