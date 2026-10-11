@@ -18,10 +18,19 @@ export type SessionStorageLike = {
   removeItem: (key: string) => void
 }
 
-export function isValidStartTimestamp(timestamp: number, now = Date.now()): boolean {
-  if (!Number.isFinite(timestamp)) return false
-  if (timestamp > now + SESSION_FUTURE_SKEW_MS) return false
-  if (now - timestamp > SESSION_MAX_AGE_MS) return false
+export function isValidStartTimestamp(
+  timestamp: number,
+  now = Date.now()
+): boolean {
+  if (!Number.isFinite(timestamp)) {
+    return false
+  }
+  if (timestamp > now + SESSION_FUTURE_SKEW_MS) {
+    return false
+  }
+  if (now - timestamp > SESSION_MAX_AGE_MS) {
+    return false
+  }
   return true
 }
 
@@ -37,19 +46,29 @@ export function serializeSessionRecord(record: KeepAwakeSessionRecord): string {
 }
 
 function parseEndsAt(value: unknown): number | null {
-  if (value == null) return null
-  if (typeof value !== "number" || !Number.isFinite(value)) return null
+  if (value == null) {
+    return null
+  }
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return null
+  }
   return value
 }
 
 function parsePauseStartedAt(value: unknown): number | null {
-  if (value == null) return null
-  if (typeof value !== "number" || !Number.isFinite(value)) return null
+  if (value == null) {
+    return null
+  }
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return null
+  }
   return value
 }
 
 function parseAccumulatedPauseMs(value: unknown): number {
-  if (typeof value !== "number" || !Number.isFinite(value) || value < 0) return 0
+  if (typeof value !== "number" || !Number.isFinite(value) || value < 0) {
+    return 0
+  }
   return value
 }
 
@@ -65,26 +84,49 @@ export function parseSessionRecord(
   raw: string | null,
   now = Date.now()
 ): KeepAwakeSessionRecord | null {
-  if (!raw) return null
+  if (!raw) {
+    return null
+  }
 
   const trimmed = raw.trim()
-  if (!trimmed) return null
+  if (!trimmed) {
+    return null
+  }
 
   const fromLegacy = Number(trimmed)
-  if (trimmed !== "" && Number.isFinite(fromLegacy) && !trimmed.startsWith("{")) {
-    if (!isValidStartTimestamp(fromLegacy, now)) return null
-    return { startTimestamp: fromLegacy, ownerId: "", endsAt: null, ...idlePauseFields() }
+  if (
+    trimmed !== "" &&
+    Number.isFinite(fromLegacy) &&
+    !trimmed.startsWith("{")
+  ) {
+    if (!isValidStartTimestamp(fromLegacy, now)) {
+      return null
+    }
+    return {
+      startTimestamp: fromLegacy,
+      ownerId: "",
+      endsAt: null,
+      ...idlePauseFields(),
+    }
   }
 
   try {
     const parsed: unknown = JSON.parse(trimmed)
-    if (!parsed || typeof parsed !== "object") return null
-    const startTimestamp = (parsed as { startTimestamp?: unknown }).startTimestamp
-    const ownerId = (parsed as { ownerId?: unknown }).ownerId
-    if (typeof startTimestamp !== "number" || !Number.isFinite(startTimestamp)) {
+    if (!parsed || typeof parsed !== "object") {
       return null
     }
-    if (!isValidStartTimestamp(startTimestamp, now)) return null
+    const startTimestamp = (parsed as { startTimestamp?: unknown })
+      .startTimestamp
+    const ownerId = (parsed as { ownerId?: unknown }).ownerId
+    if (
+      typeof startTimestamp !== "number" ||
+      !Number.isFinite(startTimestamp)
+    ) {
+      return null
+    }
+    if (!isValidStartTimestamp(startTimestamp, now)) {
+      return null
+    }
     return {
       startTimestamp,
       ownerId: typeof ownerId === "string" ? ownerId : "",
@@ -129,11 +171,17 @@ export type KeepAwakeChannelMessage =
   | { type: "claim"; ownerId: string; startTimestamp: number }
   | { type: "stop"; ownerId: string }
 
-export function parseChannelMessage(data: unknown): KeepAwakeChannelMessage | null {
-  if (!data || typeof data !== "object") return null
+export function parseChannelMessage(
+  data: unknown
+): KeepAwakeChannelMessage | null {
+  if (!data || typeof data !== "object") {
+    return null
+  }
   const type = (data as { type?: unknown }).type
   const ownerId = (data as { ownerId?: unknown }).ownerId
-  if (typeof ownerId !== "string" || ownerId.length === 0) return null
+  if (typeof ownerId !== "string" || ownerId.length === 0) {
+    return null
+  }
 
   if (type === "stop") {
     return { type: "stop", ownerId }
@@ -141,7 +189,10 @@ export function parseChannelMessage(data: unknown): KeepAwakeChannelMessage | nu
 
   if (type === "claim") {
     const startTimestamp = (data as { startTimestamp?: unknown }).startTimestamp
-    if (typeof startTimestamp !== "number" || !Number.isFinite(startTimestamp)) {
+    if (
+      typeof startTimestamp !== "number" ||
+      !Number.isFinite(startTimestamp)
+    ) {
       return null
     }
     return { type: "claim", ownerId, startTimestamp }

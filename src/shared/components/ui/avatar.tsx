@@ -1,9 +1,9 @@
 "use client"
 
-import { Avatar as AvatarPrimitive } from "radix-ui";
-import * as React from "react";
+import { Avatar as AvatarPrimitive } from "radix-ui"
+import * as React from "react"
 
-import { cn } from '@/src/shared/lib/utils';
+import { cn } from "@/src/shared/lib/utils"
 
 function Avatar({
   className,
@@ -17,7 +17,7 @@ function Avatar({
       data-slot="avatar"
       data-size={size}
       className={cn(
-        "group/avatar relative flex size-8 overflow-hidden border border-border bg-muted rounded-full shrink-0 select-none after:absolute after:inset-0 after:mix-blend-darken data-[size=lg]:size-10 data-[size=sm]:size-6 dark:after:mix-blend-lighten",
+        "group/avatar relative flex size-8 shrink-0 overflow-hidden rounded-full border border-border bg-muted select-none after:absolute after:inset-0 after:mix-blend-darken data-[size=lg]:size-10 data-[size=sm]:size-6 dark:after:mix-blend-lighten",
         className
       )}
       {...props}
@@ -32,10 +32,7 @@ function AvatarImage({
   return (
     <AvatarPrimitive.Image
       data-slot="avatar-image"
-      className={cn(
-        "object-cover aspect-square size-full",
-        className
-      )}
+      className={cn("aspect-square size-full object-cover", className)}
       {...props}
     />
   )
@@ -108,6 +105,5 @@ export {
   AvatarFallback,
   AvatarGroup,
   AvatarGroupCount,
-  AvatarImage
-};
-
+  AvatarImage,
+}

@@ -1,15 +1,15 @@
 "use client"
 
-import { LinkPendingOverlay } from "@/src/shared/components/ui/navigation-pending";
-import { ChevronDownIcon, ChevronRightIcon, LucideIcon } from "lucide-react";
-import Link from "next/link";
-import { ComponentProps, ReactNode } from "react";
-import { cn, PRESSABLE_CLASS } from "../../lib/utils";
+import { LinkPendingOverlay } from "@/src/shared/components/ui/navigation-pending"
+import { ChevronDownIcon, ChevronRightIcon, LucideIcon } from "lucide-react"
+import Link from "next/link"
+import { ComponentProps, ReactNode } from "react"
+import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "./collapsible";
+} from "./collapsible"
 
 type SummarySectionProps = {
   title?: string
@@ -36,6 +36,7 @@ type SummaryItemBaseProps = {
   isLast?: boolean
   disabled?: boolean
   className?: string
+  leadingClassName?: string
 }
 
 type SummaryItemLinkProps = SummaryItemBaseProps & {
@@ -61,28 +62,32 @@ export function SummarySection({
   collapsible = false,
 }: SummarySectionProps) {
   const titleContent = (
-    <div className="flex gap-2 items-center min-w-0">
+    <div className="flex min-w-0 items-center gap-2">
       {Icon && <Icon className="size-4 text-muted-foreground" />}
       <div className="flex flex-col -space-y-0.5">
-        <span className="text-sm font-medium text-muted-foreground">{title}</span>
-        {subtitle && <span className="text-xs text-muted truncate">{subtitle}</span>}
+        <span className="text-sm font-medium text-muted-foreground">
+          {title}
+        </span>
+        {subtitle && (
+          <span className="truncate text-xs text-muted">{subtitle}</span>
+        )}
       </div>
     </div>
   )
 
   const header = title ? (
-    <div className="flex flex-row justify-between items-center px-3 py-1">
+    <div className="flex flex-row items-center justify-between px-3 py-1">
       {collapsible ? (
-        <CollapsibleTrigger className="flex flex-1 gap-2 justify-between items-center min-w-0 text-left cursor-pointer">
+        <CollapsibleTrigger className="flex min-w-0 flex-1 cursor-pointer items-center justify-between gap-2 text-left">
           {titleContent}
-          <ChevronDownIcon className="transition-transform duration-200 ease-out size-4 shrink-0 text-muted-foreground group-data-open/summary:rotate-180" />
+          <ChevronDownIcon className="size-4 shrink-0 text-muted-foreground transition-transform duration-200 ease-out group-data-open/summary:rotate-180" />
         </CollapsibleTrigger>
       ) : (
         titleContent
       )}
       {right && (
         <div
-          className="flex flex-row items-center shrink-0"
+          className="flex shrink-0 flex-row items-center"
           onClick={collapsible ? (event) => event.stopPropagation() : undefined}
           onPointerDown={
             collapsible ? (event) => event.stopPropagation() : undefined
@@ -97,7 +102,7 @@ export function SummarySection({
   const body = (
     <div
       className={cn(
-        "flex flex-col gap-2 p-2 rounded-2xl border border-border bg-card",
+        "flex flex-col gap-2 rounded-2xl border border-border bg-card p-2",
         color
       )}
     >
@@ -109,7 +114,10 @@ export function SummarySection({
 
   if (collapsible) {
     return (
-      <Collapsible defaultOpen={defaultOpen} className={cn(rootClassName, "group/summary")}>
+      <Collapsible
+        defaultOpen={defaultOpen}
+        className={cn(rootClassName, "group/summary")}
+      >
         {header}
         <CollapsibleContent>{body}</CollapsibleContent>
       </Collapsible>
@@ -137,10 +145,15 @@ export function SummaryItem({
   isLast = false,
   disabled = false,
   className,
+  leadingClassName,
   ...props
 }: SummaryItemProps) {
   const href = disabled ? undefined : "href" in props ? props.href : undefined
-  const onPress = disabled ? undefined : "onPress" in props ? props.onPress : undefined
+  const onPress = disabled
+    ? undefined
+    : "onPress" in props
+      ? props.onPress
+      : undefined
   const isInteractive = Boolean(href ?? onPress)
   const chevronVisible = disabled ? false : (showChevron ?? Boolean(onPress))
   const showLeading = Boolean(leading) || Boolean(Icon)
@@ -153,7 +166,7 @@ export function SummaryItem({
       : undefined
 
   const rowClassName = cn(
-    "flex w-full items-center gap-3 p-2 rounded-2xl text-left transition-all duration-200",
+    "flex w-full items-center gap-3 rounded-2xl p-2 text-left transition-all duration-200",
     !isInteractive && !isLast && "border-b border-border/60",
     isInteractive && cn(PRESSABLE_CLASS, "hover:bg-muted/50"),
     onPress && "cursor-pointer",
@@ -162,7 +175,7 @@ export function SummaryItem({
   )
   const shellClassName = cn(
     "flex w-full items-stretch overflow-hidden rounded-2xl",
-    !isLast && "border-b border-border/60",
+    !isLast && "border-b border-border/60"
   )
 
   const main = (
@@ -171,7 +184,8 @@ export function SummaryItem({
         <span
           className={cn(
             "flex shrink-0 items-center justify-center rounded-full bg-muted",
-            leading ? "h-10 w-max min-w-10 px-1" : "size-10",
+            leadingClassName,
+            leading ? "h-10 w-max min-w-10 px-1" : "size-10"
           )}
           style={
             accentColor
@@ -190,16 +204,16 @@ export function SummaryItem({
             ) : null)}
         </span>
       ) : null}
-      <span className="flex-1 min-w-0">
-        <span className="block text-sm font-medium truncate">{title}</span>
+      <span className="min-w-0 flex-1">
+        <span className="block truncate text-sm font-medium">{title}</span>
         {description ? (
-          <span className="block text-xs truncate text-muted-foreground">
+          <span className="block truncate text-xs text-muted-foreground">
             {description}
           </span>
         ) : null}
       </span>
       {value ? (
-        <span className="text-sm font-semibold tabular-nums shrink-0">
+        <span className="shrink-0 text-sm font-semibold tabular-nums">
           {value}
         </span>
       ) : null}
@@ -212,7 +226,10 @@ export function SummaryItem({
   if (href) {
     return (
       <div className={shellClassName} style={tintStyle}>
-        <Link href={href} className={cn(rowClassName, "relative min-w-0 flex-1")}>
+        <Link
+          href={href}
+          className={cn(rowClassName, "relative min-w-0 flex-1")}
+        >
           {main}
           <LinkPendingOverlay />
         </Link>

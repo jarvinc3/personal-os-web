@@ -2,33 +2,39 @@
 
 import { Button } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
-import { ModuleSheetEnableRow } from "@/src/modules/settings/components/profile-ui";
-import { useModuleSheetEnable } from "@/src/modules/settings/hooks/use-module-sheet-enable";
-import { useProfileSheetFormSync } from "@/src/modules/settings/hooks/use-profile-sheet";
-import { useUserModuleConfig } from "@/src/modules/settings/hooks/use-user-module-config";
-import { OptionRow, SwitchFieldRow } from "@/src/shared/components/layout/form-blocks";
-import { RadioGroup, RadioGroupItem } from "@/src/shared/components/ui/radio-group";
-import { SummarySection } from "@/src/shared/components/ui/summary";
-import { getModule } from "@/src/shared/constants/module-registry";
-import { appToast } from "@/src/shared/lib/app-toast";
-import { createSheetSubmit } from "@/src/shared/lib/sheet-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Archive, ArrowRightLeft, Bell, BriefcaseBusiness, Columns3, LayoutGrid } from "lucide-react";
-import { useEffect, useMemo } from "react";
-import { Controller, useForm, useWatch } from "react-hook-form";
-import { z } from "zod";
+import { ModuleSheetEnableRow } from "@/src/modules/settings/components/profile-ui"
+import { useModuleSheetEnable } from "@/src/modules/settings/hooks/use-module-sheet-enable"
+import { useProfileSheetFormSync } from "@/src/modules/settings/hooks/use-profile-sheet"
+import { useUserModuleConfig } from "@/src/modules/settings/hooks/use-user-module-config"
+import {
+  OptionRow,
+  SwitchFieldRow,
+} from "@/src/shared/components/layout/form-blocks"
+import {
+  RadioGroup,
+  RadioGroupItem,
+} from "@/src/shared/components/ui/radio-group"
+import { SummarySection } from "@/src/shared/components/ui/summary"
+import { getModule } from "@/src/shared/constants/module-registry"
+import { appToast } from "@/src/shared/lib/app-toast"
+import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import {
+  Archive,
+  ArrowRightLeft,
+  Bell,
+  BriefcaseBusiness,
+  Columns3,
+  LayoutGrid,
+} from "lucide-react"
+import { useEffect, useMemo } from "react"
+import { Controller, useForm, useWatch } from "react-hook-form"
+import {
+  projectsModuleSchema,
+  type ProjectsModuleFormValues,
+} from "@/src/modules/settings/lib/projects-module-form"
 
 const MODULE_ACCENT = getModule("projects").accent
-
-const schema = z.object({
-  defaultView: z.enum(["board", "list", "timeline"]),
-  sortDirection: z.enum(["asc", "desc"]),
-  showArchived: z.boolean(),
-  dueDateReminders: z.boolean(),
-  statusChanges: z.boolean(),
-})
-
-type FormValues = z.infer<typeof schema>
 
 export function ProjectsModuleSettingsForm({ onDone }: { onDone: () => void }) {
   const { config, updateConfig, updateMutation } =
@@ -41,8 +47,8 @@ export function ProjectsModuleSettingsForm({ onDone }: { onDone: () => void }) {
     reset,
     setValue,
     formState: { isDirty },
-  } = useForm<FormValues>({
-    resolver: zodResolver(schema),
+  } = useForm<ProjectsModuleFormValues>({
+    resolver: zodResolver(projectsModuleSchema),
     defaultValues: {
       defaultView: config.defaultView,
       sortDirection: config.sortDirection,
@@ -67,9 +73,10 @@ export function ProjectsModuleSettingsForm({ onDone }: { onDone: () => void }) {
 
   useProfileSheetFormSync(true, reset, formValues)
 
+  const syncPendingOnSheetOpen = moduleEnable.syncPendingOnSheetOpen
   useEffect(() => {
-    moduleEnable.syncPendingOnSheetOpen()
-  }, [moduleEnable.syncPendingOnSheetOpen])
+    syncPendingOnSheetOpen()
+  }, [syncPendingOnSheetOpen])
 
   const submitForm = useMemo(
     () => createSheetSubmit(handleSubmit),
@@ -115,9 +122,13 @@ export function ProjectsModuleSettingsForm({ onDone }: { onDone: () => void }) {
         <RadioGroup
           value={defaultView}
           onValueChange={(v) =>
-            setValue("defaultView", v as FormValues["defaultView"], {
-              shouldDirty: true,
-            })
+            setValue(
+              "defaultView",
+              v as ProjectsModuleFormValues["defaultView"],
+              {
+                shouldDirty: true,
+              }
+            )
           }
         >
           {(["board", "list", "timeline"] as const).map((v) => (

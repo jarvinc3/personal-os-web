@@ -1,27 +1,27 @@
 function isPlainObject(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
+  return typeof value === "object" && value !== null && !Array.isArray(value)
 }
 
 function isEmptyObject(value: unknown): boolean {
-  return isPlainObject(value) && Object.keys(value).length === 0;
+  return isPlainObject(value) && Object.keys(value).length === 0
 }
 
 export type SettingWithValue<T> = {
-  fieldGuide: string;
-  value: T;
-};
+  fieldGuide: string
+  value: T
+}
 
 /** Reads `value` from a `{ fieldGuide, value }` preference node (v1 contract). */
 export function getSettingValue<T>(node: SettingWithValue<T>): T {
-  return node.value;
+  return node.value
 }
 
 /** Updates `value` on a `{ fieldGuide, value }` preference node (v1 contract). */
 export function patchSettingValue<T>(
   node: SettingWithValue<T>,
-  newValue: T,
+  newValue: T
 ): SettingWithValue<T> {
-  return { ...node, value: newValue };
+  return { ...node, value: newValue }
 }
 
 /**
@@ -30,31 +30,34 @@ export function patchSettingValue<T>(
  */
 export function mergeWithDefaults<T extends Record<string, unknown>>(
   partial: unknown,
-  defaults: T,
+  defaults: T
 ): T {
   if (partial === null || partial === undefined || isEmptyObject(partial)) {
-    return structuredClone(defaults) as T;
+    return structuredClone(defaults) as T
   }
   if (!isPlainObject(partial)) {
-    return structuredClone(defaults) as T;
+    return structuredClone(defaults) as T
   }
 
-  const result = structuredClone(defaults) as Record<string, unknown>;
+  const result = structuredClone(defaults) as Record<string, unknown>
 
   for (const key of Object.keys(partial)) {
-    const sourceValue = partial[key];
+    const sourceValue = partial[key]
     if (sourceValue === undefined) {
-      continue;
+      continue
     }
 
-    const defaultValue = result[key];
+    const defaultValue = result[key]
 
     if (isPlainObject(sourceValue) && isPlainObject(defaultValue)) {
-      result[key] = mergeWithDefaults(sourceValue, defaultValue as Record<string, unknown>);
+      result[key] = mergeWithDefaults(
+        sourceValue,
+        defaultValue as Record<string, unknown>
+      )
     } else {
-      result[key] = sourceValue;
+      result[key] = sourceValue
     }
   }
 
-  return result as T;
+  return result as T
 }

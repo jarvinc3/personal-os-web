@@ -5,7 +5,7 @@ import {
   useContext,
   useLayoutEffect,
   useMemo,
-  useRef,
+  useState,
   useSyncExternalStore,
   type ReactNode,
 } from "react"
@@ -62,19 +62,17 @@ export function ModuleFabProvider({
   tabBarVisible: boolean
   children: ReactNode
 }) {
-  const storeRef = useRef<FabStore | null>(null)
-  if (!storeRef.current) {
-    storeRef.current = createFabStore()
-  }
-  const store = storeRef.current
+  const [store] = useState(createFabStore)
 
   const value = useMemo(
     () => ({ tabBarVisible, store }),
-    [tabBarVisible, store],
+    [tabBarVisible, store]
   )
 
   return (
-    <ModuleFabContext.Provider value={value}>{children}</ModuleFabContext.Provider>
+    <ModuleFabContext.Provider value={value}>
+      {children}
+    </ModuleFabContext.Provider>
   )
 }
 
@@ -91,7 +89,7 @@ export function useModuleFabRegistration() {
   return useSyncExternalStore(
     context?.store.subscribe ?? subscribeNothing,
     context?.store.get ?? getNothing,
-    getNothing,
+    getNothing
   )
 }
 

@@ -1,7 +1,7 @@
-import { Switch } from "@/src/shared/components/ui/switch";
-import { cn } from "@/src/shared/lib/utils";
-import { ChevronRight, ExternalLink, type LucideIcon } from "lucide-react";
-import type { ReactNode } from "react";
+import { Switch } from "@/src/shared/components/ui/switch"
+import { cn } from "@/src/shared/lib/utils"
+import { ChevronRight, ExternalLink, type LucideIcon } from "lucide-react"
+import type { ReactNode } from "react"
 
 type SettingsSectionProps = {
   title: string
@@ -24,7 +24,7 @@ export function SettingsSection({
     <section className={cn("flex flex-col gap-2", className)}>
       <div className="flex flex-row items-center justify-between gap-2 px-1">
         <div className="flex min-w-0 flex-col gap-0.5">
-          <h2 className="text-xs font-medium tracking-wide uppercase text-muted-foreground">
+          <h2 className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
             {title}
           </h2>
           {description ? (
@@ -36,7 +36,7 @@ export function SettingsSection({
       {bare ? (
         children
       ) : (
-          <div className="overflow-hidden p-1 rounded-2xl border border-border bg-card">
+        <div className="overflow-hidden rounded-2xl border border-border bg-card p-1">
           {children}
         </div>
       )}
@@ -98,11 +98,11 @@ export function SettingsRow({
   )
 
   const content = (
-    <div className="flex flex-row gap-3 justify-between items-center w-full">
+    <div className="flex w-full flex-row items-center justify-between gap-3">
       {Icon && (
         <div
           className={cn(
-            "flex justify-center items-center rounded-md size-9 shrink-0 bg-muted"
+            "flex size-9 shrink-0 items-center justify-center rounded-md bg-muted"
           )}
           style={{ backgroundColor: accentColor + "20" }}
         >

@@ -29,12 +29,16 @@ export function copyStylesToPip(targetDoc: Document): void {
     const link = targetDoc.createElement("link")
     link.rel = "stylesheet"
     link.href = source.href
-    if (source.media) link.media = source.media
+    if (source.media) {
+      link.media = source.media
+    }
     targetDoc.head.appendChild(link)
   })
 
   for (const sheet of Array.from(document.styleSheets)) {
-    if (sheet.href) continue
+    if (sheet.href) {
+      continue
+    }
     try {
       const cssRules = Array.from(sheet.cssRules)
         .map((rule) => rule.cssText)

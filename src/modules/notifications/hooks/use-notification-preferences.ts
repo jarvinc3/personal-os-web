@@ -1,14 +1,16 @@
 "use client"
 
-import { PROFILE_QUERY_KEY } from "@/src/modules/auth/lib/hydrate-auth-user"
-import { normalizeUserPreferences } from "@/src/modules/settings/lib/normalize-preferences"
-import { isWithinQuietHours } from "@/src/modules/settings/lib/quiet-hours"
+import { PROFILE_QUERY_KEY } from "@/src/modules/auth"
+import {
+  isWithinQuietHours,
+  normalizeUserPreferences,
+} from "@/src/modules/settings"
 import type {
   NotificationChannelPreferences,
   NotificationsPreference,
   QuietHoursPreference,
   UserProfile,
-} from "@/src/modules/settings/types/profile.types"
+} from "@/src/modules/settings"
 import { useQueryClient } from "@tanstack/react-query"
 import { useMemo } from "react"
 

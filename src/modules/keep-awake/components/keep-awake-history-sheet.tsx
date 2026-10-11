@@ -23,9 +23,9 @@ import {
   Pause,
   Square,
   Timer,
+  XIcon,
 } from "lucide-react"
 import { useSyncExternalStore } from "react"
-
 
 type KeepAwakeHistorySheetProps = {
   open: boolean
@@ -93,57 +93,66 @@ export function KeepAwakeHistorySheet({
             className={cn(PRESSABLE_CLASS, "flex-1")}
             onClick={() => onOpenChange(false)}
           >
+            <XIcon className="size-4 shrink-0" />
             Cerrar
           </Button>
         ),
       }}
     >
-    {visible.length === 0 &&(
-      <div className="flex flex-col items-center gap-2 px-4 py-8 text-center">
-        <span className="flex size-10 items-center justify-center rounded-full bg-muted">
-          <ClockIcon className="size-5 text-muted-foreground" aria-hidden />
-        </span>
-        <p className="text-sm font-medium">Sin sesiones recientes</p>
-        <p className="text-xs text-muted-foreground">
-          Las sesiones cerradas aparecerán aquí.
-        </p>
-      </div>
-    )}
+      {visible.length === 0 && (
+        <div className="flex flex-col items-center gap-2 px-4 py-8 text-center">
+          <span className="flex size-10 items-center justify-center rounded-full bg-muted">
+            <ClockIcon className="size-5 text-muted-foreground" aria-hidden />
+          </span>
+          <p className="text-sm font-medium">Sin sesiones recientes</p>
+          <p className="text-xs text-muted-foreground">
+            Las sesiones cerradas aparecerán aquí.
+          </p>
+        </div>
+      )}
 
-    <div className="flex flex-col">
-      {visible.map((entry, index) => {
-        const Icon = historyReasonIcon(entry.endReason)
-        const color = historyReasonColor(entry.endReason)
-        return (
-          <SummaryItem
-            key={entry.id}
-            title={formatElapsed(entry.durationSeconds)}
-            description={`${formatRange(entry)} · ${historyEndReasonLabel(entry.endReason)}`}
-            leading={<Icon className="size-5" style={{ color }} />}
-            accentColor={color}
-            isLast={index === visible.length - 1}
-            trailing={
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon-sm"
-                className={PRESSABLE_CLASS}
-                aria-label={`Copiar ${formatElapsed(entry.durationSeconds)}`}
-                onClick={() => {
-                  const text = formatElapsed(entry.durationSeconds)
-                  void navigator.clipboard.writeText(text).then(
-                    () => appToast.success({ text1: "Duración copiada", text2: text }),
-                    () => appToast.error({ text1: "No se pudo copiar", text2: text })
-                  )
-                }}
-              >
-                <Copy className="size-4" aria-hidden />
-              </Button>
-            }
-          />
-        )
-      })}
-    </div>
+      <div className="flex flex-col">
+        {visible.map((entry, index) => {
+          const Icon = historyReasonIcon(entry.endReason)
+          const color = historyReasonColor(entry.endReason)
+          return (
+            <SummaryItem
+              key={entry.id}
+              title={formatElapsed(entry.durationSeconds)}
+              description={`${formatRange(entry)} · ${historyEndReasonLabel(entry.endReason)}`}
+              leading={<Icon className="size-5" style={{ color }} />}
+              accentColor={color}
+              isLast={index === visible.length - 1}
+              trailing={
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  className={PRESSABLE_CLASS}
+                  aria-label={`Copiar ${formatElapsed(entry.durationSeconds)}`}
+                  onClick={() => {
+                    const text = formatElapsed(entry.durationSeconds)
+                    void navigator.clipboard.writeText(text).then(
+                      () =>
+                        appToast.success({
+                          text1: "Duración copiada",
+                          text2: text,
+                        }),
+                      () =>
+                        appToast.error({
+                          text1: "No se pudo copiar",
+                          text2: text,
+                        })
+                    )
+                  }}
+                >
+                  <Copy className="size-4" aria-hidden />
+                </Button>
+              }
+            />
+          )
+        })}
+      </div>
     </BottomSheet>
   )
 }

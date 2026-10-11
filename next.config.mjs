@@ -11,6 +11,10 @@ const nextConfig = {
         protocol: "https",
         hostname: "img.logo.dev",
       },
+      {
+        protocol: "https",
+        hostname: "flagcdn.com",
+      },
     ],
   },
 }

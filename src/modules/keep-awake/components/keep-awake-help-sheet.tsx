@@ -3,7 +3,7 @@
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
 import { Button } from "@/src/shared/components/ui/button"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
-import { Bell, MonitorPlay, PanelsTopLeft, Play } from "lucide-react"
+import { Bell, MonitorPlay, PanelsTopLeft, Play, XIcon } from "lucide-react"
 
 const STEPS = [
   {
@@ -34,7 +34,10 @@ type KeepAwakeHelpSheetProps = {
   onOpenChange: (open: boolean) => void
 }
 
-export function KeepAwakeHelpSheet({ open, onOpenChange }: KeepAwakeHelpSheetProps) {
+export function KeepAwakeHelpSheet({
+  open,
+  onOpenChange,
+}: KeepAwakeHelpSheetProps) {
   return (
     <BottomSheet
       open={open}
@@ -49,6 +52,7 @@ export function KeepAwakeHelpSheet({ open, onOpenChange }: KeepAwakeHelpSheetPro
             className={cn(PRESSABLE_CLASS, "flex-1")}
             onClick={() => onOpenChange(false)}
           >
+            <XIcon className="size-4 shrink-0" />
             Cerrar
           </Button>
         ),

@@ -1,30 +1,22 @@
 "use client"
 
-import type { LoginPayload } from "@/src/modules/auth/types/auth.types";
-import { FormTextField } from "@/src/shared/components/layout/form-blocks";
+import type { LoginPayload } from "@/src/modules/auth/types/auth.types"
+import { FormTextField } from "@/src/shared/components/layout/form-blocks"
 import {
   Alert,
   AlertDescription,
   AlertTitle,
-} from "@/src/shared/components/ui/alert";
-import { FieldGroup } from "@/src/shared/components/ui/field";
-import { cn } from "@/src/shared/lib/utils";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { AlertCircleIcon } from "lucide-react";
-import { forwardRef, useImperativeHandle, useRef } from "react";
-import { Controller, useForm } from "react-hook-form";
-import { z } from "zod";
-
-const loginSchema = z.object({
-  email: z.string().trim().email("Ingresa un email válido"),
-  password: z
-    .string()
-    .min(8, "La contraseña debe tener al menos 8 caracteres")
-    .regex(/[A-Z]/, "Debe incluir al menos una mayúscula")
-    .regex(/[0-9]/, "Debe incluir al menos un número"),
-})
-
-type LoginSchema = z.infer<typeof loginSchema>
+} from "@/src/shared/components/ui/alert"
+import { FieldGroup } from "@/src/shared/components/ui/field"
+import { cn } from "@/src/shared/lib/utils"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { AlertCircleIcon, LockIcon, MailIcon } from "lucide-react"
+import { forwardRef, useImperativeHandle, useRef } from "react"
+import { Controller, useForm } from "react-hook-form"
+import {
+  loginFormSchema,
+  type LoginFormValues,
+} from "@/src/modules/auth/lib/login-form"
 
 export type LoginFormHandle = {
   submit: () => void
@@ -43,8 +35,8 @@ export const LoginForm = forwardRef<LoginFormHandle, LoginFormProps>(
       control,
       handleSubmit,
       formState: { errors },
-    } = useForm<LoginSchema>({
-      resolver: zodResolver(loginSchema),
+    } = useForm<LoginFormValues>({
+      resolver: zodResolver(loginFormSchema),
       defaultValues: { email: "", password: "" },
     })
 
@@ -63,7 +55,7 @@ export const LoginForm = forwardRef<LoginFormHandle, LoginFormProps>(
     return (
       <div
         className={cn(
-          isPending ? "opacity-80 pointer-events-none" : "",
+          isPending ? "pointer-events-none opacity-80" : "",
           "w-full md:max-w-sm"
         )}
       >
@@ -73,6 +65,7 @@ export const LoginForm = forwardRef<LoginFormHandle, LoginFormProps>(
             name="email"
             render={({ field }) => (
               <FormTextField
+                icon={MailIcon}
                 label="Correo electrónico"
                 type="email"
                 autoComplete="email"
@@ -98,11 +91,11 @@ export const LoginForm = forwardRef<LoginFormHandle, LoginFormProps>(
             name="password"
             render={({ field }) => (
               <FormTextField
+                icon={LockIcon}
                 label="Contraseña"
                 type="password"
                 revealable
                 autoComplete="current-password"
-                placeholder="Ingresa tu contraseña"
                 inputRef={passwordInputRef}
                 value={field.value}
                 onChange={field.onChange}

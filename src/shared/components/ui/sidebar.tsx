@@ -187,10 +187,7 @@ function Sidebar({
           data-sidebar="sidebar"
           data-slot="sidebar"
           data-mobile="true"
-          className={cn(
-            "overflow-hidden rounded-xl border m-3",
-            className
-          )}
+          className={cn("m-3 overflow-hidden rounded-xl border", className)}
           {...props}
           style={
             {
@@ -342,7 +339,7 @@ function SidebarHeader({ className, ...props }: React.ComponentProps<"div">) {
       data-slot="sidebar-header"
       data-sidebar="header"
       className={cn(
-        "flex flex-col gap-2 border-b border-border py-2 px-1",
+        "flex flex-col gap-2 border-b border-border px-1 py-2",
         className
       )}
       {...props}

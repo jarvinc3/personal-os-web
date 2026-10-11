@@ -1,5 +1,5 @@
 import { LoadingView } from "@/src/shared/components/layout/loading-view"
-import LoginPage from "@/src/modules/auth/pages/login-client"
+import { LoginScreen } from "@/src/modules/auth"
 import type { Metadata } from "next"
 import { Suspense } from "react"
 
@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 export default function LoginRoute() {
   return (
     <Suspense fallback={<LoadingView variant="screen" />}>
-      <LoginPage />
+      <LoginScreen />
     </Suspense>
   )
 }

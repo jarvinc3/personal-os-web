@@ -118,9 +118,9 @@ Afirmaciones de `project-guide.md`, `docs/infraestructure/*`, módulos monolíti
 | Campo | Valor |
 | --- | --- |
 | Categoría | `PARCIALMENTE_IMPLEMENTADO` |
-| Origen | `pages/finance-categories.tsx` existe |
-| Validación | la ruta de app importa `finance-categories-view.tsx` |
-| Resolución | `open` |
+| Origen | `catalog/categories-screen.tsx` (antes `pages/finance-categories.tsx`) |
+| Validación | `app/(app)/finance/categories/page.tsx` importa `CategoriesScreen` desde `@/src/modules/finance`; el archivo huérfano ya no existe |
+| Resolución | `resolved` |
 
 ## REV-WEB-014 {#rev-web-014}
 
@@ -158,3 +158,66 @@ Afirmaciones de `project-guide.md`, `docs/infraestructure/*`, módulos monolíti
 | Validación | helpers `money.ts` existen y se usan; el plan completo no se re-ejecutó como checklist |
 | Destino ADR | `docs/decisions/ADR-002-money-strings.md` |
 | Resolución | `partial` |
+
+## REV-WEB-018 {#rev-web-018}
+
+| Campo | Valor |
+| --- | --- |
+| Categoría | `CONTRADICE_CODIGO` |
+| Origen | `.cursor/rules/icons-required.mdc` (icono obligatorio en todo botón) |
+| Validación | 97 bloques `<Button>` sin componente `*Icon`; se agregó icono a todos los botones de acción de producto |
+| Resolución | `resolved` (quedan solo controles segmentados y botones con icono lucide sin sufijo `Icon`) |
+
+## REV-WEB-021 {#rev-web-021}
+
+| Campo | Valor |
+| --- | --- |
+| Categoría | `CONTRADICE_CODIGO` |
+| Origen | `.cursor/rules/navigation-pending.mdc` (la navegación muestra pending) |
+| Validación | 29 archivos con `router.push` sin `usePendingNavigation`/`useTransition`; 15 archivos con `<Link` sin `LinkPendingOverlay` |
+| Resolución | `open` |
+
+## REV-WEB-022 {#rev-web-022}
+
+| Campo | Valor |
+| --- | --- |
+| Categoría | `CONTRADICE_CODIGO` |
+| Origen | `.cursor/rules/switch-row-icons.mdc` (icono a la izquierda del título) |
+| Validación | los `SettingsRow` / `SwitchFieldRow` de `notifications-screen.tsx`, `settings-screen.tsx` y `device-push-settings-row.tsx` reciben el icono por el spread `{...SETTINGS_REGISTRY...}` (`createRowMeta` en `settings-metadata.ts`) |
+| Resolución | `resolved` (falso positivo) |
+
+## REV-WEB-023 {#rev-web-023}
+
+| Campo | Valor |
+| --- | --- |
+| Categoría | `CONTRADICE_CODIGO` |
+| Origen | `.cursor/rules/confirm-important-changes.mdc` (acción destructiva pide `AlertDialog`) |
+| Validación | 14 archivos confirman el borrado con `window.confirm` en vez del `AlertDialog` de `@/src/shared/components/ui/alert-dialog` |
+| Resolución | `open` |
+
+## REV-WEB-024 {#rev-web-024}
+
+| Campo | Valor |
+| --- | --- |
+| Categoría | `CONTRADICE_CODIGO` |
+| Origen | `.cursor/rules/form-shell-page.mdc` (formulario de página con barra fija) |
+| Validación | los formularios de `settings/components/module-settings/*` dejan el botón al final del `form`; la propia regla lo marca y dice "se migra cuando se toque" |
+| Resolución | `open` (deuda conocida y aceptada en la regla) |
+
+## REV-WEB-019 {#rev-web-019}
+
+| Campo | Valor |
+| --- | --- |
+| Categoría | `CONTRADICE_CODIGO` |
+| Origen | `.cursor/rules/input-placeholders.mdc` (placeholder solo para ejemplo o formato) |
+| Validación | 11 placeholders instruían o repetían la etiqueta (login, registro, chat, contacto, contraseñas, cobro) |
+| Resolución | `resolved` (eliminados o acortados; 54 a 43) |
+
+## REV-WEB-020 {#rev-web-020}
+
+| Campo | Valor |
+| --- | --- |
+| Categoría | `CONTRADICE_CODIGO` |
+| Origen | `.cursor/rules/list-infinite-scroll.mdc` (listas con scroll infinito) |
+| Validación | presupuestos usaba botones Anterior/Siguiente; notificaciones un botón "Cargar más"; movimientos precargaba todas las páginas; sesiones de IA no paginaba |
+| Resolución | `resolved` (`useInfiniteQuery` + `IntersectionObserver` sobre cursor) |

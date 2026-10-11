@@ -7,7 +7,9 @@ function graphemes(value: string): string[] {
 
 export function isSingleEmoji(value: string): boolean {
   const trimmed = value.trim()
-  if (!trimmed) return false
+  if (!trimmed) {
+    return false
+  }
   const parts = graphemes(trimmed)
   return parts.length === 1 && EMOJI_GRAPHEME.test(parts[0] ?? "")
 }
@@ -15,7 +17,9 @@ export function isSingleEmoji(value: string): boolean {
 /** Keeps the first emoji grapheme. Letters and other characters are dropped. */
 export function takeSingleEmoji(value: string): string {
   for (const part of graphemes(value)) {
-    if (EMOJI_GRAPHEME.test(part)) return part
+    if (EMOJI_GRAPHEME.test(part)) {
+      return part
+    }
   }
   return ""
 }

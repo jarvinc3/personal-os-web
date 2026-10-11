@@ -14,12 +14,8 @@ export type NotificationRecord = {
 
 export type PaginatedNotifications = {
   items: NotificationRecord[]
-  pagination: {
-    page: number
-    limit: number
-    total: number
-    totalPages: number
-  }
+  nextCursor: string | null
+  hasMore: boolean
 }
 
 export type UnreadCountResponse = {

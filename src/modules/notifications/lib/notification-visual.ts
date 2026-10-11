@@ -1,5 +1,5 @@
 import type { NotificationRecord } from "@/src/modules/notifications/types/notification.types"
-import { SETTINGS_REGISTRY } from "@/src/modules/settings/constants/settings-metadata"
+import { SETTINGS_REGISTRY } from "@/src/modules/settings"
 import {
   getModuleNotificationVisual,
   parseModuleSlugFromNotificationData,

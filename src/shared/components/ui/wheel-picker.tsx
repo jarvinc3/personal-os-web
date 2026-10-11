@@ -1,10 +1,10 @@
-import "@ncdai/react-wheel-picker/style.css";
+import "@ncdai/react-wheel-picker/style.css"
 
-import * as WheelPickerPrimitive from "@ncdai/react-wheel-picker";
-import type { ComponentProps, ReactNode } from "react";
-import { useMemo } from "react";
+import * as WheelPickerPrimitive from "@ncdai/react-wheel-picker"
+import type { ComponentProps, ReactNode } from "react"
+import { useMemo } from "react"
 
-import { cn } from "@/src/shared/lib/utils";
+import { cn } from "@/src/shared/lib/utils"
 
 import {
   daysInMonth,
@@ -21,7 +21,7 @@ import {
   snapMinute,
   type MinuteStep,
   type Period,
-} from "@/src/shared/types/wheels.type";
+} from "@/src/shared/types/wheels.type"
 
 type WheelPickerValue = WheelPickerPrimitive.WheelPickerValue
 
@@ -38,7 +38,11 @@ function WheelColumn({
   children: ReactNode
 }) {
   return (
-    <div className="min-w-0 flex-1 flex items-center" role="group" aria-label={label}>
+    <div
+      className="flex min-w-0 flex-1 items-center"
+      role="group"
+      aria-label={label}
+    >
       {children}
     </div>
   )
@@ -81,7 +85,7 @@ function WheelPicker<T extends WheelPickerValue = string>({
           classNames?.optionItem
         ),
         highlightWrapper: cn(
-          "bg-input/50 text-foreground font-medium",
+          "bg-input/50 font-medium text-foreground",
           "data-rwp-focused:ring-2 data-rwp-focused:ring-ring data-rwp-focused:ring-inset",
           classNames?.highlightWrapper
         ),
@@ -95,8 +99,8 @@ function WheelPicker<T extends WheelPickerValue = string>({
   )
 }
 
-export { WheelPicker, WheelPickerWrapper };
-export type { WheelPickerClassNames, WheelPickerOption };
+export { WheelPicker, WheelPickerWrapper }
+export type { WheelPickerClassNames, WheelPickerOption }
 
 interface TimePairWheelsProps {
   label?: string
@@ -121,7 +125,9 @@ export function TimePairWheels({
   )
 
   const commit = (next: { h12?: string; minute?: string; period?: Period }) => {
-    if (disabled) return
+    if (disabled) {
+      return
+    }
     onChange(
       hm12To24(
         next.h12 ?? parsed.h12,
@@ -132,7 +138,9 @@ export function TimePairWheels({
   }
 
   return (
-    <div className={cn("space-y-2", disabled && "pointer-events-none opacity-50")}>
+    <div
+      className={cn("space-y-2", disabled && "pointer-events-none opacity-50")}
+    >
       {label && (
         <span className="text-sm font-medium text-muted-foreground">
           {label}
@@ -219,7 +227,9 @@ export function DateWheels({
   }, [parts.month, parts.year])
 
   const commit = (next: Partial<typeof parts>) => {
-    if (disabled) return
+    if (disabled) {
+      return
+    }
     const merged = { ...parts, ...next }
     const maxDay = daysInMonth(Number(merged.year), Number(merged.month))
     const safeDay = Math.min(Number(merged.day), maxDay)
@@ -231,7 +241,9 @@ export function DateWheels({
   }
 
   return (
-    <div className={cn("space-y-2", disabled && "pointer-events-none opacity-50")}>
+    <div
+      className={cn("space-y-2", disabled && "pointer-events-none opacity-50")}
+    >
       {label && (
         <span className="text-sm font-medium text-muted-foreground">
           {label}
@@ -293,14 +305,21 @@ export function DurationWheels({
   )
 
   const commit = (next: { hour?: string; minute?: string }) => {
-    if (disabled) return
+    if (disabled) {
+      return
+    }
     const nextHour = next.hour ?? hour
     const nextMinute = Number(nextHour) >= 24 ? "00" : (next.minute ?? minute)
     onChange(`${nextHour}:${nextMinute}`)
   }
 
   return (
-    <div className={cn("flex flex-col gap-2", disabled && "pointer-events-none opacity-50")}>
+    <div
+      className={cn(
+        "flex flex-col gap-2",
+        disabled && "pointer-events-none opacity-50"
+      )}
+    >
       {label && (
         <span className="text-sm font-medium text-muted-foreground">
           {label}
@@ -322,7 +341,9 @@ export function DurationWheels({
         <WheelColumn label="Minutos">
           <WheelPicker
             value={minute}
-            onValueChange={(nextMinute: string) => commit({ minute: nextMinute })}
+            onValueChange={(nextMinute: string) =>
+              commit({ minute: nextMinute })
+            }
             options={minuteOptions}
             infinite
             visibleCount={20}

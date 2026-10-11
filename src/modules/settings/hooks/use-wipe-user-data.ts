@@ -2,8 +2,8 @@
 
 import { apiPost } from "@/src/config/api-client"
 import { getSupabaseBrowserClient } from "@/src/config/supabase/client"
-import { clearPrefs } from "@/src/modules/keep-awake/lib/prefs"
-import { AuthServiceError } from "@/src/modules/auth/services/supabase-auth.service"
+import { clearPrefs } from "@/src/modules/keep-awake"
+import { AuthServiceError } from "@/src/modules/auth"
 import {
   WIPE_LAYERS,
   type WipeLayerId,
@@ -34,7 +34,7 @@ export type WipeRequest = {
 
 export async function reauthenticateWithPassword(
   email: string,
-  password: string,
+  password: string
 ): Promise<void> {
   const { error: reauthError } =
     await getSupabaseBrowserClient().auth.signInWithPassword({

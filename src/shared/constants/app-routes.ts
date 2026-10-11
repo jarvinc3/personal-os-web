@@ -1,4 +1,7 @@
-import type { ModuleSlug } from "@/src/modules/settings/types/module-config.types"
+import type { ModuleSlug } from "@/src/shared/types/module-nav"
+
+const FINANCE_INSTITUTIONS_PATH = "/finance/institutions"
+const FINANCE_CASH_PATH = "/finance/cash"
 
 export const APP_ROUTES = {
   root: "/",
@@ -18,14 +21,22 @@ export const APP_ROUTES = {
     notifications: "/notifications",
     keepAwake: "/keep-awake",
     finance: "/finance",
-    financeAccounts: "/finance/accounts",
-    financeCategories: "/finance/accounts/categories",
-    financeSync: "/finance/accounts/sync",
+    financeProducts: "/finance/products",
+    financeInstitutions: FINANCE_INSTITUTIONS_PATH,
+    financeCash: FINANCE_CASH_PATH,
+    financeCategories: "/finance/categories",
+    financeSync: "/finance/sync",
     financeInstitution: (institutionId: string) =>
-      `/finance/accounts/institutions/${institutionId}`,
-    financeAccount: (accountId: string) => `/finance/accounts/${accountId}`,
-    financeCard: (cardId: string) => `/finance/accounts/cards/${cardId}`,
+      `${FINANCE_INSTITUTIONS_PATH}/${institutionId}`,
+    financeInstitutionAccount: (institutionId: string, accountId: string) =>
+      `${FINANCE_INSTITUTIONS_PATH}/${institutionId}/accounts/${accountId}`,
+    financeInstitutionCard: (institutionId: string, cardId: string) =>
+      `${FINANCE_INSTITUTIONS_PATH}/${institutionId}/cards/${cardId}`,
+    financeCashAccount: (accountId: string) =>
+      `${FINANCE_CASH_PATH}/${accountId}`,
     financeTransactions: "/finance/transactions",
+    financeTransaction: (transactionId: string) =>
+      `/finance/transactions/${transactionId}`,
     financeTransactionNew: "/finance/transactions/new",
     financeTransactionEdit: (transactionId: string) =>
       `/finance/transactions/${transactionId}/edit`,
@@ -33,6 +44,13 @@ export const APP_ROUTES = {
     financePlanning: "/finance/planning",
     financeLoans: "/finance/loans",
     financeLoan: (loanId: string) => `/finance/loans/${loanId}`,
+    financeBudget: (budgetId: string) => `/finance/budgets/${budgetId}`,
+    financeBudgets: "/finance/budgets",
+    financeSavingsGoals: "/finance/savings-goals",
+    financeSavingsGoal: (goalId: string) => `/finance/savings-goals/${goalId}`,
+    financeReceivables: "/finance/receivables",
+    financeReceivable: (receivableId: string) =>
+      `/finance/receivables/${receivableId}`,
     settingsFinanceCurrencies: "/settings/finance/currencies",
   },
 } as const
@@ -43,7 +61,9 @@ export function financeTransactionNewHref(
 ): string {
   const params = new URLSearchParams({ type })
   const target = destination?.trim()
-  if (target) params.set("destination", target)
+  if (target) {
+    params.set("destination", target)
+  }
   return `${APP_ROUTES.app.financeTransactionNew}?${params.toString()}`
 }
 

@@ -1,21 +1,30 @@
-import { AppLogo } from "@/src/shared/components/brand/app-logo";
-import { Button } from "@/src/shared/components/ui/button";
-import { APP_ROUTES } from "@/src/shared/constants/app-routes";
-import type { Metadata } from "next";
-import Link from "next/link";
+import { AppLogo } from "@/src/shared/components/brand/app-logo"
+import { Button } from "@/src/shared/components/ui/button"
+import { APP_ROUTES } from "@/src/shared/constants/app-routes"
+import { ArrowLeftIcon, MailIcon } from "lucide-react"
+import type { Metadata } from "next"
+import Link from "next/link"
 
 export const metadata: Metadata = {
   title: "Página no encontrada",
   description: "La página que buscas no existe.",
-};
+}
 
 export default function NotFound() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-8 px-6 py-16 text-center">
       <div className="flex flex-col items-center gap-4">
-        <Link href={APP_ROUTES.marketing.landing} className="group flex items-center gap-2.5">
-          <AppLogo size="lg" className="transition-transform duration-200 group-hover:translate-x-0.5 group-hover:translate-y-0.5" />
-          <span className="text-xl font-semibold tracking-tight">Personal OS</span>
+        <Link
+          href={APP_ROUTES.marketing.landing}
+          className="group flex items-center gap-2.5"
+        >
+          <AppLogo
+            size="lg"
+            className="transition-transform duration-200 group-hover:translate-x-0.5 group-hover:translate-y-0.5"
+          />
+          <span className="text-xl font-semibold tracking-tight">
+            Personal OS
+          </span>
         </Link>
       </div>
 
@@ -27,25 +36,38 @@ export default function NotFound() {
         </div>
 
         <div className="space-y-2">
-          <h1 className="text-3xl font-bold tracking-tight">Página no encontrada</h1>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Página no encontrada
+          </h1>
           <p className="max-w-md text-base text-muted-foreground">
             Lo sentimos, la página que buscas no existe o ha sido movida.
           </p>
         </div>
 
         <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:justify-center">
-          <Button asChild size="lg" className="shadow-[4px_4px_0px_0px_#111827] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none">
+          <Button
+            asChild
+            size="lg"
+            className="shadow-[4px_4px_0px_0px_#111827] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none"
+          >
             <Link href={APP_ROUTES.marketing.landing}>
+              <ArrowLeftIcon className="size-4 shrink-0" />
               Volver al inicio
             </Link>
           </Button>
-          <Button asChild variant="outline" size="lg" className="border-2 border-text shadow-[4px_4px_0px_0px_#111827] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none">
+          <Button
+            asChild
+            variant="outline"
+            size="lg"
+            className="border-2 border-text shadow-[4px_4px_0px_0px_#111827] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none"
+          >
             <Link href="/contact">
+              <MailIcon className="size-4 shrink-0" />
               Contactar soporte
             </Link>
           </Button>
         </div>
       </div>
     </div>
-  );
+  )
 }

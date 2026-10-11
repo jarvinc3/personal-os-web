@@ -11,7 +11,7 @@ export type ModuleNavSectionsInput = {
 function isHrefActive(
   href: string,
   pathname: string,
-  matchExact?: boolean,
+  matchExact?: boolean
 ): boolean {
   if (pathname === href) {
     return true
@@ -24,13 +24,13 @@ function isHrefActive(
 
 export function isModuleSectionActive(
   item: ModuleNavMatchInput,
-  pathname: string,
+  pathname: string
 ): boolean {
   if (isHrefActive(item.href, pathname, item.matchExact)) {
     return true
   }
   return (item.extraActiveHrefs ?? []).some((href) =>
-    isHrefActive(href, pathname, false),
+    isHrefActive(href, pathname, false)
   )
 }
 

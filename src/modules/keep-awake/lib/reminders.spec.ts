@@ -36,7 +36,10 @@ describe("isReminderDue", () => {
     }
     assert.equal(isReminderDue(reminder, wednesdayNoon), false)
     assert.equal(
-      isReminderDue({ ...reminder, lastFiredKey: null, days: [1] }, wednesdayNoon),
+      isReminderDue(
+        { ...reminder, lastFiredKey: null, days: [1] },
+        wednesdayNoon
+      ),
       false
     )
   })
@@ -75,7 +78,13 @@ describe("markReminderFired", () => {
   it("stamps the local date so the reminder will not repeat until tomorrow", () => {
     const next = markReminderFired(DEFAULT_REMINDER, wednesdayNoon)
     assert.equal(next.lastFiredKey, "2026-09-09")
-    assert.equal(isReminderDue({ ...next, enabled: true, hour: 12, minute: 0, days: [] }, wednesdayNoon), false)
+    assert.equal(
+      isReminderDue(
+        { ...next, enabled: true, hour: 12, minute: 0, days: [] },
+        wednesdayNoon
+      ),
+      false
+    )
   })
 })
 
@@ -110,10 +119,7 @@ describe("isReminderDue window", () => {
       days: [],
       lastFiredKey: null,
     }
-    assert.equal(
-      isReminderDue(reminder, new Date("2026-09-09T12:02:00")),
-      true
-    )
+    assert.equal(isReminderDue(reminder, new Date("2026-09-09T12:02:00")), true)
     assert.equal(
       isReminderDue(reminder, new Date("2026-09-09T12:06:00")),
       false

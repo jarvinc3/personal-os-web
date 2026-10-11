@@ -1,10 +1,12 @@
-import type { UserModuleEntry } from '@/src/modules/settings/types/module-config.types';
+import type { UserModuleEntry } from "@/src/modules/settings/types/module-config.types"
 
-export type ModuleSettingsState = 'unconfigured' | 'disabled' | 'enabled';
+export type ModuleSettingsState = "unconfigured" | "disabled" | "enabled"
 
-export function resolveModuleState(entry?: UserModuleEntry): ModuleSettingsState {
+export function resolveModuleState(
+  entry?: UserModuleEntry
+): ModuleSettingsState {
   if (!entry) {
-    return 'unconfigured';
+    return "unconfigured"
   }
-  return entry.isEnabled ? 'enabled' : 'disabled';
+  return entry.isEnabled ? "enabled" : "disabled"
 }

@@ -1,7 +1,10 @@
 "use client"
 
 import { PipPanel } from "@/src/modules/keep-awake/components/pip-panel"
-import { useWakeLock, type UseWakeLockResult } from "@/src/modules/keep-awake/hooks/use-wake-lock"
+import {
+  useWakeLock,
+  type UseWakeLockResult,
+} from "@/src/modules/keep-awake/hooks/use-wake-lock"
 import { createContext, useContext, type ReactNode } from "react"
 import { createPortal } from "react-dom"
 

@@ -17,18 +17,17 @@ export function useNotifications() {
     queryFn: ({ pageParam }) => {
       const params = new URLSearchParams({
         channel: "IN_APP",
-        page: String(pageParam),
         limit: String(NOTIFICATIONS_PAGE_SIZE),
       })
+      if (pageParam) {
+        params.set("cursor", pageParam)
+      }
       return apiGet<PaginatedNotifications>(
         `${API_ENDPOINTS.NOTIFICATIONS.LIST}?${params.toString()}`
       )
     },
-    initialPageParam: 1,
-    getNextPageParam: (lastPage) =>
-      lastPage.pagination.page < lastPage.pagination.totalPages
-        ? lastPage.pagination.page + 1
-        : undefined,
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
     enabled: Boolean(session),
     staleTime: 1000 * 15,
     refetchOnWindowFocus: true,

@@ -1,0 +1,23 @@
+---
+description: Group form fields into titled sections, required first and optional ones behind a collapsed "Detalles opcionales".
+globs: "**/*.{ts,tsx}"
+alwaysApply: false
+---
+
+# Secciones del formulario
+
+Los campos no van sueltos: se agrupan en `SummarySection` con título e icono del bloque ("Movimiento", "Ruta", "Importe", "Cuenta", "Horario").
+
+- Primero lo obligatorio, por orden de uso. Al final, `SummarySection` "Detalles opcionales" con `InfoIcon` y `collapsible`.
+- "Detalles opcionales" arranca cerrado al crear y abierto al editar un registro guardado (`defaultOpen={isEdit}`).
+- Un bloque que no aplica al estado elegido (la institución en una cuenta de efectivo) se oculta. No se muestra deshabilitado con una explicación.
+- No poner una sección por campo. Si el bloque tiene un solo campo, probablemente no la necesita.
+
+```tsx
+<SummarySection title="Movimiento" icon={ArrowDownCircleIcon}>
+  {/* campos obligatorios */}
+</SummarySection>
+<SummarySection title="Detalles opcionales" icon={InfoIcon} collapsible defaultOpen={isEdit}>
+  {/* campos opcionales */}
+</SummarySection>
+```

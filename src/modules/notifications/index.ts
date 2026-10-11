@@ -21,5 +21,7 @@ export { deactivatePushTokenIfPresent } from "@/src/modules/notifications/lib/de
 export { registerWebPushTokenWithApi } from "@/src/modules/notifications/lib/register-web-push-token"
 export { showInAppNotificationToast } from "@/src/modules/notifications/lib/show-in-app-notification-toast"
 export { isWebPushSupported } from "@/src/modules/notifications/lib/web-push-support"
-export { NotificationsClient } from "@/src/modules/notifications/pages/notifications-client"
+export { resolveNotificationsSocketUrl } from "@/src/modules/notifications/lib/notifications-socket-url"
+export { NotificationsGate } from "@/src/modules/notifications/notifications-gate"
+export { NotificationsScreen } from "@/src/modules/notifications/notifications-screen"
 export type * from "@/src/modules/notifications/types/notification.types"

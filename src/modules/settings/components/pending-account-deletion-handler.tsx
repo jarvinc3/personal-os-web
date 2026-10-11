@@ -1,11 +1,11 @@
-'use client';
+"use client"
 
-import { useAuthGuard } from '@/src/modules/auth';
-import { useDeleteAccount } from '@/src/modules/settings/hooks/use-delete-account';
+import { useAuthGuard } from "@/src/modules/auth"
+import { useDeleteAccount } from "@/src/modules/settings/hooks/use-delete-account"
 import {
   clearPendingAccountDeletion,
   PENDING_ACCOUNT_DELETION_KEY,
-} from '@/src/modules/settings/lib/pending-account-deletion';
+} from "@/src/modules/settings/lib/pending-account-deletion"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,42 +15,50 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/src/shared/components/ui/alert-dialog';
-import { Trash2, X } from 'lucide-react';
-import { useState } from 'react';
+} from "@/src/shared/components/ui/alert-dialog"
+import { Trash2, X } from "lucide-react"
+import { useState } from "react"
 
 function readPendingAccountDeletion(): boolean {
-  if (typeof window === 'undefined') return false;
-  return sessionStorage.getItem(PENDING_ACCOUNT_DELETION_KEY) === '1';
+  if (typeof window === "undefined") {
+    return false
+  }
+  return sessionStorage.getItem(PENDING_ACCOUNT_DELETION_KEY) === "1"
 }
 
 export function PendingAccountDeletionHandler() {
-  const { isAuthenticated } = useAuthGuard();
-  const { deleteAfterReauth } = useDeleteAccount();
-  const [dismissed, setDismissed] = useState(false);
+  const { isAuthenticated } = useAuthGuard()
+  const { deleteAfterReauth } = useDeleteAccount()
+  const [dismissed, setDismissed] = useState(false)
 
-  const confirmOpen = isAuthenticated && readPendingAccountDeletion() && !dismissed;
+  const confirmOpen =
+    isAuthenticated && readPendingAccountDeletion() && !dismissed
 
   const handleCancel = () => {
-    clearPendingAccountDeletion();
-    setDismissed(true);
-  };
+    clearPendingAccountDeletion()
+    setDismissed(true)
+  }
 
   const handleConfirm = () => {
-    clearPendingAccountDeletion();
+    clearPendingAccountDeletion()
     deleteAfterReauth.mutate(undefined, {
       onSettled: () => setDismissed(true),
-    });
-  };
+    })
+  }
 
   return (
-    <AlertDialog open={confirmOpen} onOpenChange={(open) => !open && handleCancel()}>
+    <AlertDialog
+      open={confirmOpen}
+      onOpenChange={(open) => !open && handleCancel()}
+    >
       <AlertDialogContent className="sm:max-w-md">
         <AlertDialogHeader>
-          <AlertDialogTitle>¿Eliminar tu cuenta permanentemente?</AlertDialogTitle>
+          <AlertDialogTitle>
+            ¿Eliminar tu cuenta permanentemente?
+          </AlertDialogTitle>
           <AlertDialogDescription>
-            Confirmaste tu identidad con Google. Esta acción borrará todos tus datos y no se puede
-            deshacer.
+            Confirmaste tu identidad con Google. Esta acción borrará todos tus
+            datos y no se puede deshacer.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter className="flex-row">
@@ -68,11 +76,13 @@ export function PendingAccountDeletionHandler() {
             disabled={deleteAfterReauth.isPending}
             onClick={handleConfirm}
           >
-            {deleteAfterReauth.isPending ? null : <Trash2 data-icon="inline-start" />}
-            {deleteAfterReauth.isPending ? 'Eliminando...' : 'Eliminar cuenta'}
+            {deleteAfterReauth.isPending ? null : (
+              <Trash2 data-icon="inline-start" />
+            )}
+            {deleteAfterReauth.isPending ? "Eliminando..." : "Eliminar cuenta"}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
-  );
+  )
 }

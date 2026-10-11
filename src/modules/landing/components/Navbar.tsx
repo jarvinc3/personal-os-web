@@ -1,37 +1,41 @@
-"use client";
+"use client"
 
-import { AnimatePresence, motion } from "motion/react";
-import Link from "next/link";
-import { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "motion/react"
+import Link from "next/link"
+import { useEffect, useState } from "react"
 
-import { AppLogo } from "@/src/shared/components/brand/app-logo";
-import { APP_ROUTES } from "@/src/shared/constants/app-routes";
+import { AppLogo } from "@/src/shared/components/brand/app-logo"
+import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 
-import { landingContent } from "../data/site-info";
+import { landingContent } from "@/src/modules/landing/data/site-info"
 
 export function Navbar() {
-  const [scrolled, setScrolled] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false)
+  const [mobileOpen, setMobileOpen] = useState(false)
 
   useEffect(() => {
-    const handler = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", handler);
-    return () => window.removeEventListener("scroll", handler);
-  }, []);
+    const handler = () => setScrolled(window.scrollY > 20)
+    window.addEventListener("scroll", handler)
+    return () => window.removeEventListener("scroll", handler)
+  }, [])
 
   return (
     <motion.header
       initial={{ y: -80, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
-      className={`fixed top-0 z-50 w-full transition-all duration-300 ${scrolled
-        ? "border-b-2 border-text bg-white/95 backdrop-blur-md shadow-[0px_4px_0px_0px_#111827]"
-        : "bg-transparent"
-        }`}
+      className={`fixed top-0 z-50 w-full transition-all duration-300 ${
+        scrolled
+          ? "border-b-2 border-text bg-white/95 shadow-[0px_4px_0px_0px_#111827] backdrop-blur-md"
+          : "bg-transparent"
+      }`}
     >
-      <div className="flex justify-between items-center px-6 mx-auto max-w-7xl h-16">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
         {/* Logo */}
-        <Link href={APP_ROUTES.marketing.landing} className="group flex items-center gap-2.5">
+        <Link
+          href={APP_ROUTES.marketing.landing}
+          className="group flex items-center gap-2.5"
+        >
           <AppLogo
             size="sm"
             className="transition-transform duration-200 group-hover:translate-x-0.5 group-hover:translate-y-0.5"
@@ -42,12 +46,12 @@ export function Navbar() {
         </Link>
 
         {/* Desktop nav */}
-        <nav className="hidden gap-6 items-center md:flex">
+        <nav className="hidden items-center gap-6 md:flex">
           {landingContent.nav.links.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className="text-sm transition-colors text-muted-foreground hover:text-foreground"
+              className="text-sm text-muted-foreground transition-colors hover:text-foreground"
             >
               {link.label}
             </Link>
@@ -55,7 +59,7 @@ export function Navbar() {
         </nav>
 
         {/* CTA */}
-        <div className="hidden gap-3 items-center md:flex">
+        <div className="hidden items-center gap-3 md:flex">
           <Link
             href={APP_ROUTES.auth.login}
             className="rounded-xl border-2 border-text bg-white px-4 py-2 text-sm font-bold text-text shadow-[2px_2px_0px_0px_#111827] transition-all duration-200 hover:translate-x-px hover:translate-y-px hover:shadow-[1px_1px_0px_0px_#111827]"
@@ -71,7 +75,7 @@ export function Navbar() {
         </div>
 
         {/* Mobile burger */}
-        <div className="flex gap-3 items-center">
+        <div className="flex items-center gap-3">
           <AnimatePresence>
             {mobileOpen && (
               <motion.div
@@ -141,5 +145,5 @@ export function Navbar() {
         )}
       </AnimatePresence>
     </motion.header>
-  );
+  )
 }

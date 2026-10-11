@@ -1,91 +1,104 @@
-'use client';
+"use client"
 
-import { AVATAR_OPTIONS, type AvatarOption } from '@/src/modules/settings/constants/avatar-options';
-import { useProfile } from '@/src/modules/settings/hooks/use-profile';
-import { useProfileSheetFormSync } from '@/src/modules/settings/hooks/use-profile-sheet';
-import type { UpdateProfilePayload } from '@/src/modules/settings/types/profile.types';
-import type { SettingsSheetProps } from '@/src/modules/settings/types/sheet.types';
-import { BottomSheet } from '@/src/shared/components/layout/bottom-sheet';
-import { FormTextField, SelectionGrid } from '@/src/shared/components/layout/form-blocks';
-import { Button } from '@/src/shared/components/ui/button';
-import { Spinner } from '@/src/shared/components/ui/spinner';
-import { SummarySection } from '@/src/shared/components/ui/summary';
-import { appToast } from '@/src/shared/lib/app-toast';
-import { createSheetSubmit } from '@/src/shared/lib/sheet-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Contact, Contact2, UserIcon } from 'lucide-react';
-import Image from 'next/image';
-import { useRouter } from 'next/navigation';
-import { useMemo, useState } from 'react';
-import { Controller, useForm } from 'react-hook-form';
-import { z } from 'zod';
-
-const schema = z.object({
-  fullName: z.string().trim().min(2, 'El nombre es obligatorio'),
-});
-
-type FormValues = z.infer<typeof schema>;
+import {
+  AVATAR_OPTIONS,
+  type AvatarOption,
+} from "@/src/modules/settings/constants/avatar-options"
+import { useProfile } from "@/src/modules/settings/hooks/use-profile"
+import { useProfileSheetFormSync } from "@/src/modules/settings/hooks/use-profile-sheet"
+import type { UpdateProfilePayload } from "@/src/modules/settings/types/profile.types"
+import type { SettingsSheetProps } from "@/src/modules/settings/types/sheet.types"
+import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+import {
+  FormTextField,
+  SelectionGrid,
+} from "@/src/shared/components/layout/form-blocks"
+import { Button } from "@/src/shared/components/ui/button"
+import { Spinner } from "@/src/shared/components/ui/spinner"
+import { SummarySection } from "@/src/shared/components/ui/summary"
+import { appToast } from "@/src/shared/lib/app-toast"
+import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { Contact, Contact2, UserIcon, XIcon } from "lucide-react"
+import Image from "next/image"
+import { useRouter } from "next/navigation"
+import { useMemo, useState } from "react"
+import { Controller, useForm } from "react-hook-form"
+import {
+  editAccountSchema,
+  type EditAccountFormValues,
+} from "@/src/modules/settings/lib/edit-account-form"
 
 type EditAccountSheetProps = SettingsSheetProps & {
-  email: string;
-};
+  email: string
+}
 
-export function EditAccountSheet({ open, onOpenChange, email }: EditAccountSheetProps) {
-  const { profileQuery, updateProfileMutation } = useProfile();
-  const router = useRouter();
+export function EditAccountSheet({
+  open,
+  onOpenChange,
+  email,
+}: EditAccountSheetProps) {
+  const { profileQuery, updateProfileMutation } = useProfile()
+  const router = useRouter()
 
-  const savedFullName = profileQuery.data?.fullName ?? '';
-  const savedAvatarUrl = profileQuery.data?.avatarUrl ?? '';
-  const [selectedAvatarUrl, setSelectedAvatarUrl] = useState(savedAvatarUrl);
+  const savedFullName = profileQuery.data?.fullName ?? ""
+  const savedAvatarUrl = profileQuery.data?.avatarUrl ?? ""
+  const [selectedAvatarUrl, setSelectedAvatarUrl] = useState(savedAvatarUrl)
 
   const {
     control,
     handleSubmit,
     reset,
     formState: { errors, isDirty: isNameDirty },
-  } = useForm<FormValues>({
-    resolver: zodResolver(schema),
+  } = useForm<EditAccountFormValues>({
+    resolver: zodResolver(editAccountSchema),
     defaultValues: { fullName: savedFullName },
-  });
+  })
 
-  const formValues = useMemo(() => ({ fullName: savedFullName }), [savedFullName]);
+  const formValues = useMemo(
+    () => ({ fullName: savedFullName }),
+    [savedFullName]
+  )
 
-  useProfileSheetFormSync(open, reset, formValues);
+  useProfileSheetFormSync(open, reset, formValues)
 
   const handleOpenChange = (nextOpen: boolean) => {
     if (nextOpen) {
-      setSelectedAvatarUrl(savedAvatarUrl);
+      setSelectedAvatarUrl(savedAvatarUrl)
     }
-    onOpenChange(nextOpen);
-  };
+    onOpenChange(nextOpen)
+  }
 
-  const isAvatarDirty = selectedAvatarUrl !== savedAvatarUrl;
-  const isDirty = isNameDirty || isAvatarDirty;
-  const canSave = isDirty && (!isAvatarDirty || Boolean(selectedAvatarUrl));
+  const isAvatarDirty = selectedAvatarUrl !== savedAvatarUrl
+  const isDirty = isNameDirty || isAvatarDirty
+  const canSave = isDirty && (!isAvatarDirty || Boolean(selectedAvatarUrl))
 
-  const submitForm = useMemo(() => createSheetSubmit(handleSubmit), [handleSubmit]);
+  const submitForm = useMemo(
+    () => createSheetSubmit(handleSubmit),
+    [handleSubmit]
+  )
 
   const onSubmit = submitForm(async (values) => {
-    const payload: UpdateProfilePayload = {};
+    const payload: UpdateProfilePayload = {}
 
     if (values.fullName !== savedFullName) {
-      payload.fullName = values.fullName;
+      payload.fullName = values.fullName
     }
     if (isAvatarDirty && selectedAvatarUrl) {
-      payload.avatarUrl = selectedAvatarUrl;
+      payload.avatarUrl = selectedAvatarUrl
     }
 
     if (Object.keys(payload).length === 0) {
-      return;
+      return
     }
 
-    await updateProfileMutation.mutateAsync(payload);
+    await updateProfileMutation.mutateAsync(payload)
     appToast.success({
-      text1: 'Cuenta actualizada',
-      text2: 'Tu perfil se guardó correctamente.',
-    });
-    onOpenChange(false);
-  });
+      text1: "Cuenta actualizada",
+      text2: "Tu perfil se guardó correctamente.",
+    })
+    onOpenChange(false)
+  })
 
   return (
     <BottomSheet
@@ -93,29 +106,30 @@ export function EditAccountSheet({ open, onOpenChange, email }: EditAccountSheet
       onOpenChange={handleOpenChange}
       title="Cuenta"
       description="Nombre y avatar de tu perfil."
-      actions={
-        {
-          close: (
-            <Button
-              variant="outline"
-              className="flex-1"
-              onClick={() => router.back()}
-            >
-              Cancelar
-            </Button>
-          ),
-          submit: (
-            <Button
-              disabled={!canSave || updateProfileMutation.isPending}
-              className="flex-1"
-              onClick={onSubmit}
-            >
-              {updateProfileMutation.isPending ? <Spinner data-icon="inline-start" /> : null}
-              {updateProfileMutation.isPending ? 'Guardando...' : 'Guardar'}
-            </Button>
-          ),
-        }
-      }
+      actions={{
+        close: (
+          <Button
+            variant="outline"
+            className="flex-1"
+            onClick={() => router.back()}
+          >
+            <XIcon className="size-4 shrink-0" />
+            Cancelar
+          </Button>
+        ),
+        submit: (
+          <Button
+            disabled={!canSave || updateProfileMutation.isPending}
+            className="flex-1"
+            onClick={onSubmit}
+          >
+            {updateProfileMutation.isPending ? (
+              <Spinner data-icon="inline-start" />
+            ) : null}
+            {updateProfileMutation.isPending ? "Guardando..." : "Guardar"}
+          </Button>
+        ),
+      }}
     >
       <SummarySection title="Nombre completo" icon={Contact}>
         <Controller
@@ -125,7 +139,6 @@ export function EditAccountSheet({ open, onOpenChange, email }: EditAccountSheet
             <FormTextField
               icon={UserIcon}
               autoComplete="name"
-              placeholder="¿Cómo te llamas?"
               value={field.value}
               onChange={field.onChange}
               onBlur={field.onBlur}
@@ -134,7 +147,7 @@ export function EditAccountSheet({ open, onOpenChange, email }: EditAccountSheet
             />
           )}
         />
-        <div className="px-4 py-3 rounded-2xl bg-muted">
+        <div className="rounded-2xl bg-muted px-4 py-3">
           <p className="text-xs text-muted-foreground">Correo</p>
           <p className="mt-1 text-sm text-muted-foreground">{email}</p>
         </div>
@@ -153,12 +166,12 @@ export function EditAccountSheet({ open, onOpenChange, email }: EditAccountSheet
               alt="Opción de avatar"
               width={80}
               height={80}
-              className="object-cover size-full"
+              className="size-full object-cover"
               unoptimized
             />
           )}
         />
       </SummarySection>
     </BottomSheet>
-  );
+  )
 }

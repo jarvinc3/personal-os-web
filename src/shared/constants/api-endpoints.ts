@@ -60,6 +60,11 @@ export const API_ENDPOINTS = {
     BUDGET: (id: string) => `/finance/budgets/${id}`,
     SAVINGS_GOALS: "/finance/savings-goals",
     SAVINGS_GOAL: (id: string) => `/finance/savings-goals/${id}`,
+    SAVINGS_GOAL_CONTRIBUTIONS: (id: string) =>
+      `/finance/savings-goals/${id}/contributions`,
+    SAVINGS_GOAL_CONTRIBUTION: (id: string, contributionId: string) =>
+      `/finance/savings-goals/${id}/contributions/${contributionId}`,
+    RECEIVABLE_PAYMENTS: (id: string) => `/finance/receivables/${id}/payments`,
     LOANS: "/finance/loans",
     LOAN: (id: string) => `/finance/loans/${id}`,
     LOAN_INSTALLMENTS: (id: string) => `/finance/loans/${id}/installments`,

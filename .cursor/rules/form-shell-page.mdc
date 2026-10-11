@@ -1,0 +1,30 @@
+---
+description: A page form uses the shared screen shell with a sticky bottom submit bar and the action verb as its label.
+alwaysApply: true
+---
+
+# Pantalla de formulario (página)
+
+Un formulario que ocupa una ruta se envuelve en `FinanceFormScreen` (`src/modules/finance/components/forms/finance-form-screen.tsx`) o en una pieza con la misma forma. El botón no se deja al final del scroll.
+
+- La barra de envío va pegada al fondo (`sticky bottom-0`), con borde superior y fondo de página.
+- Un solo botón de envío, a ancho completo, `h-11`. Lleva el icono del verbo (`SaveIcon` para guardar) y lo cambia por `Spinner` mientras envía. El texto no cambia a "Guardando...".
+- El texto es el verbo real: "Registrar gasto", "Registrar ingreso", "Transferir", "Guardar".
+- El botón arranca deshabilitado; la condición completa vive en [form-submit-disabled.mdc](./form-submit-disabled.mdc).
+- Si faltan datos para poder guardar (no hay cuentas ni tarjetas), un párrafo `text-sm text-muted-foreground` antes de la barra dice qué falta. No se explica con un diálogo ni con copy debajo de cada campo.
+
+```tsx
+<FinanceFormScreen
+  onSubmit={onSubmit}
+  submitLabel="Registrar gasto"
+  submitIcon={SaveIcon}
+  isSubmitting={isPending}
+  submitDisabled={!canSave}
+>
+  {/* secciones */}
+</FinanceFormScreen>
+```
+
+Molde: `src/modules/finance/components/transactions/transaction-form.tsx` y `transfer-form.tsx`.
+
+Rompe la regla: `src/modules/settings/components/module-settings/*-module-settings-form.tsx` deja el botón al final del `form`, sin barra fija. Se migra cuando se toque.

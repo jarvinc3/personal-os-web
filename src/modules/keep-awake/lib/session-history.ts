@@ -7,11 +7,7 @@ let historyCacheRaw: string | null | undefined
 let historyCache: KeepAwakeHistoryEntry[] = EMPTY_HISTORY
 
 export type SessionEndReason =
-  | "paused"
-  | "ended"
-  | "countdown_finished"
-  | "tab_yielded"
-  | "layout_unmounted"
+  "paused" | "ended" | "countdown_finished" | "tab_yielded" | "layout_unmounted"
 
 export type KeepAwakeHistoryEntry = {
   id: string
@@ -36,7 +32,9 @@ const END_REASONS = new Set<SessionEndReason>([
 ])
 
 function isHistoryEntry(value: unknown): value is KeepAwakeHistoryEntry {
-  if (!value || typeof value !== "object") return false
+  if (!value || typeof value !== "object") {
+    return false
+  }
   const entry = value as KeepAwakeHistoryEntry
   return (
     typeof entry.id === "string" &&
@@ -50,12 +48,18 @@ function isHistoryEntry(value: unknown): value is KeepAwakeHistoryEntry {
   )
 }
 
-export function readHistory(storage: SessionStorageLike): KeepAwakeHistoryEntry[] {
+export function readHistory(
+  storage: SessionStorageLike
+): KeepAwakeHistoryEntry[] {
   const raw = storage.getItem(KEEP_AWAKE_HISTORY_KEY)
-  if (!raw) return []
+  if (!raw) {
+    return []
+  }
   try {
     const parsed: unknown = JSON.parse(raw)
-    if (!Array.isArray(parsed)) return []
+    if (!Array.isArray(parsed)) {
+      return []
+    }
     return parsed.filter(isHistoryEntry).slice(0, HISTORY_MAX_ITEMS)
   } catch {
     return []
@@ -73,7 +77,8 @@ export function appendHistoryEntry(
   id = createHistoryId()
 ): KeepAwakeHistoryEntry {
   const durationSeconds =
-    typeof input.durationSeconds === "number" && Number.isFinite(input.durationSeconds)
+    typeof input.durationSeconds === "number" &&
+    Number.isFinite(input.durationSeconds)
       ? Math.max(0, Math.floor(input.durationSeconds))
       : Math.max(0, Math.floor((input.endedAt - input.startedAt) / 1000))
   const entry: KeepAwakeHistoryEntry = {
@@ -87,10 +92,10 @@ export function appendHistoryEntry(
     return entry
   }
 
-  const next = [entry, ...readHistory(storage).filter((item) => item.id !== id)].slice(
-    0,
-    HISTORY_MAX_ITEMS
-  )
+  const next = [
+    entry,
+    ...readHistory(storage).filter((item) => item.id !== id),
+  ].slice(0, HISTORY_MAX_ITEMS)
   storage.setItem(KEEP_AWAKE_HISTORY_KEY, JSON.stringify(next))
   historyCacheRaw = undefined
   if (typeof window !== "undefined") {
@@ -122,7 +127,9 @@ function createHistoryId() {
 }
 
 export function subscribeHistory(onChange: () => void) {
-  if (typeof window === "undefined") return () => {}
+  if (typeof window === "undefined") {
+    return () => {}
+  }
   const handler = (event: Event) => {
     if (
       event instanceof StorageEvent &&
@@ -142,9 +149,13 @@ export function subscribeHistory(onChange: () => void) {
 }
 
 export function getHistorySnapshot(): KeepAwakeHistoryEntry[] {
-  if (typeof window === "undefined") return EMPTY_HISTORY
+  if (typeof window === "undefined") {
+    return EMPTY_HISTORY
+  }
   const raw = window.localStorage.getItem(KEEP_AWAKE_HISTORY_KEY)
-  if (raw === historyCacheRaw) return historyCache
+  if (raw === historyCacheRaw) {
+    return historyCache
+  }
   historyCacheRaw = raw
   historyCache = readHistory(window.localStorage)
   return historyCache

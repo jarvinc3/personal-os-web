@@ -1,7 +1,6 @@
-import { LandingTheme } from './landing-theme';
-import { Footer } from '@/src/modules/landing/components/Footer';
-import { Navbar } from '@/src/modules/landing/components/Navbar';
-import type { ReactNode } from 'react';
+import { LandingTheme } from "./landing-theme"
+import { Footer, Navbar } from "@/src/modules/landing"
+import type { ReactNode } from "react"
 
 export default function LandingLayout({ children }: { children: ReactNode }) {
   return (
@@ -12,5 +11,5 @@ export default function LandingLayout({ children }: { children: ReactNode }) {
         <Footer />
       </div>
     </LandingTheme>
-  );
+  )
 }

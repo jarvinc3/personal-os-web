@@ -40,7 +40,7 @@ export const siteInfo = {
   author: "Personal OS",
   statusBadge: "En desarrollo activo",
   copyright: `© ${new Date().getFullYear()} Personal OS. Todos los derechos reservados.`,
-};
+}
 
 export const landingContent = {
   nav: {
@@ -212,4 +212,4 @@ export const landingContent = {
       },
     ],
   },
-};
+}

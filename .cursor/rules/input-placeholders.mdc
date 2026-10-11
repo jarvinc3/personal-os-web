@@ -1,0 +1,33 @@
+---
+description: Placeholders are the exception; add one only when it shows a format or example the label cannot.
+globs: "**/*.{ts,tsx}"
+alwaysApply: false
+---
+
+# Placeholders en campos
+
+Por defecto un campo **no** lleva placeholder. El icono líder y la etiqueta ya dicen qué se escribe. Un placeholder que repite la etiqueta, o que intenta explicar lo que el usuario debe entender antes de escribir, estorba y confunde.
+
+Se permite un placeholder solo cuando aporta algo que la etiqueta no puede:
+
+- Un **ejemplo** del valor ("Cuenta nómina", "bhd.com.do").
+- El **formato** esperado ("1234" para los últimos dígitos, "1000" para un monto).
+
+No usar el placeholder para:
+
+- Repetir la etiqueta ("Nombre" en un campo con etiqueta "Nombre").
+- Instrucciones ("Ingresa tu contraseña", "Mín. 8 caracteres y 1 número"): eso va en el texto de ayuda del campo o en el error, no dentro del input.
+- Textos largos que desaparecen al escribir y dejan al usuario sin la pista.
+
+Un campo de búsqueda sí puede llevar un placeholder corto ("Buscar"), porque no tiene etiqueta visible; aun así lleva icono de lupa.
+
+```tsx
+<FormTextField label="Nombre" icon={TypeIcon} value={name} onChange={setName} />
+<FormTextField
+  label="Últimos 4 dígitos"
+  icon={HashIcon}
+  placeholder="1234"
+  value={last4}
+  onChange={setLast4}
+/>
+```

@@ -2,7 +2,7 @@
 
 Cliente de `UsersService`: perfil, tema, IA, quiet hours, módulos, logout, delete.
 
-Ruta: `/settings` (`settings-client.tsx`). Sheets `?sheet=`.
+Ruta: `/settings` (`settings-screen.tsx`). Sheets `?sheet=`.
 
 | Sección | Sheet | API |
 | --- | --- | --- |

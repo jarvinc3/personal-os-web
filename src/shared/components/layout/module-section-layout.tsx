@@ -28,9 +28,7 @@ export function ModuleSectionLayout({
       <div
         className={cn(
           "mx-auto flex w-full max-w-5xl flex-col gap-6 p-4 md:px-6 md:pb-16",
-          hideTabBar
-            ? "pb-4"
-            : "pb-[calc(6rem+env(safe-area-inset-bottom))]",
+          hideTabBar ? "pb-4" : "pb-[calc(6rem+env(safe-area-inset-bottom))]"
         )}
       >
         {children}

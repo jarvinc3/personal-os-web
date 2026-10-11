@@ -2,40 +2,53 @@
 
 import { Button } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
-import { ModuleSheetEnableRow } from "@/src/modules/settings/components/profile-ui";
-import { useModuleSheetEnable } from "@/src/modules/settings/hooks/use-module-sheet-enable";
-import { useProfileSheetFormSync } from "@/src/modules/settings/hooks/use-profile-sheet";
-import { useUserModuleConfig } from "@/src/modules/settings/hooks/use-user-module-config";
-import { FormTextField, OptionRow, SwitchFieldRow } from "@/src/shared/components/layout/form-blocks";
-import { RadioGroup, RadioGroupItem } from "@/src/shared/components/ui/radio-group";
-import { SummarySection } from "@/src/shared/components/ui/summary";
-import { getModule } from "@/src/shared/constants/module-registry";
-import { appToast } from "@/src/shared/lib/app-toast";
-import { createSheetSubmit } from "@/src/shared/lib/sheet-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { BadgeDollarSign, Bell, Layers, RefreshCw, TrendingUp, Wallet } from "lucide-react";
-import { useEffect, useMemo } from "react";
-import { Controller, useForm, useWatch } from "react-hook-form";
-import { z } from "zod";
+import { ModuleSheetEnableRow } from "@/src/modules/settings/components/profile-ui"
+import { useModuleSheetEnable } from "@/src/modules/settings/hooks/use-module-sheet-enable"
+import { useProfileSheetFormSync } from "@/src/modules/settings/hooks/use-profile-sheet"
+import { useUserModuleConfig } from "@/src/modules/settings/hooks/use-user-module-config"
+import {
+  FormTextField,
+  OptionRow,
+  SwitchFieldRow,
+} from "@/src/shared/components/layout/form-blocks"
+import {
+  RadioGroup,
+  RadioGroupItem,
+} from "@/src/shared/components/ui/radio-group"
+import { SummarySection } from "@/src/shared/components/ui/summary"
+import { getModule } from "@/src/shared/constants/module-registry"
+import { appToast } from "@/src/shared/lib/app-toast"
+import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import {
+  BadgeDollarSign,
+  Bell,
+  CoinsIcon,
+  Layers,
+  RefreshCw,
+  TrendingUp,
+  Wallet,
+} from "lucide-react"
+import { useEffect, useMemo } from "react"
+import { Controller, useForm, useWatch } from "react-hook-form"
+import {
+  subscriptionsModuleSchema,
+  type SubscriptionsModuleFormValues,
+} from "@/src/modules/settings/lib/subscriptions-module-form"
 
 const MODULE_ACCENT = getModule("subscriptions").accent
 
-const schema = z.object({
-  defaultCurrency: z.string().trim().min(3),
-  groupBy: z.enum(["category", "provider", "none"]),
-  renewalReminders: z.boolean(),
-  priceIncreaseAlerts: z.boolean(),
-})
-
-type FormValues = z.infer<typeof schema>
-
-const GROUP_LABELS: Record<FormValues["groupBy"], string> = {
+const GROUP_LABELS: Record<SubscriptionsModuleFormValues["groupBy"], string> = {
   category: "Categoría",
   provider: "Proveedor",
   none: "Ninguno",
 }
 
-export function SubscriptionsModuleSettingsForm({ onDone }: { onDone: () => void }) {
+export function SubscriptionsModuleSettingsForm({
+  onDone,
+}: {
+  onDone: () => void
+}) {
   const { config, updateConfig, updateMutation } =
     useUserModuleConfig("subscriptions")
   const moduleEnable = useModuleSheetEnable("subscriptions")
@@ -46,8 +59,8 @@ export function SubscriptionsModuleSettingsForm({ onDone }: { onDone: () => void
     reset,
     setValue,
     formState: { isDirty, errors },
-  } = useForm<FormValues>({
-    resolver: zodResolver(schema),
+  } = useForm<SubscriptionsModuleFormValues>({
+    resolver: zodResolver(subscriptionsModuleSchema),
     defaultValues: {
       defaultCurrency: config.defaultCurrency,
       groupBy: config.groupBy,
@@ -70,9 +83,10 @@ export function SubscriptionsModuleSettingsForm({ onDone }: { onDone: () => void
 
   useProfileSheetFormSync(true, reset, formValues)
 
+  const syncPendingOnSheetOpen = moduleEnable.syncPendingOnSheetOpen
   useEffect(() => {
-    moduleEnable.syncPendingOnSheetOpen()
-  }, [moduleEnable.syncPendingOnSheetOpen])
+    syncPendingOnSheetOpen()
+  }, [syncPendingOnSheetOpen])
 
   const submitForm = useMemo(
     () => createSheetSubmit(handleSubmit),
@@ -119,6 +133,7 @@ export function SubscriptionsModuleSettingsForm({ onDone }: { onDone: () => void
           name="defaultCurrency"
           render={({ field }) => (
             <FormTextField
+              icon={CoinsIcon}
               placeholder="DOP"
               value={field.value}
               onChange={field.onChange}
@@ -133,7 +148,7 @@ export function SubscriptionsModuleSettingsForm({ onDone }: { onDone: () => void
         <RadioGroup
           value={groupBy}
           onValueChange={(v) =>
-            setValue("groupBy", v as FormValues["groupBy"], {
+            setValue("groupBy", v as SubscriptionsModuleFormValues["groupBy"], {
               shouldDirty: true,
             })
           }

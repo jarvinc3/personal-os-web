@@ -1,12 +1,12 @@
-import Link from "next/link";
+import Link from "next/link"
 
-import { APP_ROUTES } from "@/src/shared/constants/app-routes";
+import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 
 interface PageHeaderProps {
-  label?: string;
-  title: string;
-  description?: string;
-  breadcrumb?: { href: string; label: string }[];
+  label?: string
+  title: string
+  description?: string
+  breadcrumb?: { href: string; label: string }[]
 }
 
 export function PageHeader({
@@ -16,9 +16,9 @@ export function PageHeader({
   breadcrumb,
 }: PageHeaderProps) {
   return (
-    <div className="overflow-hidden relative bg-white border-b-2 border-text">
+    <div className="relative overflow-hidden border-b-2 border-text bg-white">
       {/* Background decoration */}
-      <div className="absolute inset-0 pointer-events-none -z-10 bg-surface">
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-surface">
         <div
           className="absolute inset-0 opacity-[0.05]"
           style={{
@@ -29,15 +29,18 @@ export function PageHeader({
         />
       </div>
 
-      <div className="relative px-6 py-20 pt-32 mx-auto max-w-4xl text-center">
+      <div className="relative mx-auto max-w-4xl px-6 py-20 pt-32 text-center">
         {/* Breadcrumb */}
         {breadcrumb && (
-          <nav className="flex gap-2 justify-center items-center mb-6 text-xs text-muted-foreground">
-            <Link href={APP_ROUTES.marketing.landing} className="transition-colors hover:text-foreground">
+          <nav className="mb-6 flex items-center justify-center gap-2 text-xs text-muted-foreground">
+            <Link
+              href={APP_ROUTES.marketing.landing}
+              className="transition-colors hover:text-foreground"
+            >
               Personal OS
             </Link>
             {breadcrumb.map((crumb, i) => (
-              <span key={i} className="flex gap-2 items-center">
+              <span key={i} className="flex items-center gap-2">
                 <span>/</span>
                 {i === breadcrumb.length - 1 ? (
                   <span className="text-foreground">{crumb.label}</span>
@@ -74,5 +77,5 @@ export function PageHeader({
         )}
       </div>
     </div>
-  );
+  )
 }

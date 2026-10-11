@@ -1,12 +1,12 @@
 "use client"
 
 import { apiPost } from "@/src/config/api-client"
-import { CurrencyFlag } from "@/src/modules/finance/components/currency-flag"
-import { CurrencyPickerSheet } from "@/src/modules/finance/components/transactions/currency-picker-sheet"
-import { useExchangeRates } from "@/src/modules/finance/hooks/use-exchange-rates"
-import { currencyDisplayName } from "@/src/modules/finance/lib/currency-display-name"
-import { normalizeTrackedCurrencies } from "@/src/modules/finance/lib/finance-currency"
-import { formatFinanceMoney } from "@/src/modules/finance/lib/money"
+import { CurrencyFlag } from "@/src/modules/finance"
+import { CurrencyPickerSheet } from "@/src/modules/finance"
+import { useExchangeRates } from "@/src/modules/finance"
+import { currencyDisplayName } from "@/src/modules/finance"
+import { normalizeTrackedCurrencies } from "@/src/modules/finance"
+import { formatFinanceMoney } from "@/src/modules/finance"
 import { useUserModuleConfig } from "@/src/modules/settings/hooks/use-user-module-config"
 import { SettingsSection } from "@/src/shared/components/layout/settings-section"
 import {
@@ -24,8 +24,8 @@ import { Spinner } from "@/src/shared/components/ui/spinner"
 import { API_ENDPOINTS } from "@/src/shared/constants/api-endpoints"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { PlusIcon, Trash2Icon } from "lucide-react"
-import { useMemo, useRef, useState } from "react"
+import { PencilIcon, PlusIcon, Trash2Icon } from "lucide-react"
+import { useMemo, useState } from "react"
 
 export function FinanceCurrenciesView() {
   const { config, updateConfig, updateMutation } =
@@ -40,11 +40,8 @@ export function FinanceCurrenciesView() {
   const [pendingRemoveCurrency, setPendingRemoveCurrency] = useState<
     string | null
   >(null)
-  const removeCurrencyLabel = useRef<string | null>(null)
-  if (pendingRemoveCurrency) {
-    removeCurrencyLabel.current = pendingRemoveCurrency
-  }
-  const currencyToRemove = pendingRemoveCurrency ?? removeCurrencyLabel.current
+  const [removalLabel, setRemovalLabel] = useState<string | null>(null)
+  const currencyToRemove = pendingRemoveCurrency ?? removalLabel
 
   const baseCurrency = config.baseCurrency
   const trackedCurrencies = useMemo(
@@ -139,6 +136,7 @@ export function FinanceCurrenciesView() {
             disabled={isSaving}
             onClick={() => setChangePickerOpen(true)}
           >
+            <PencilIcon className="size-4 shrink-0" />
             Cambiar
           </Button>
         </div>
@@ -195,7 +193,10 @@ export function FinanceCurrenciesView() {
                   size="icon"
                   aria-label={`Quitar ${code}`}
                   disabled={isSaving}
-                  onClick={() => setPendingRemoveCurrency(code)}
+                  onClick={() => {
+                    setRemovalLabel(code)
+                    setPendingRemoveCurrency(code)
+                  }}
                 >
                   <Trash2Icon className="size-4 text-destructive" />
                 </Button>

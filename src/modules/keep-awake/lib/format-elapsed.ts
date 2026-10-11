@@ -8,11 +8,17 @@ export function formatElapsed(totalSeconds: number): string {
   return `${h}:${m}:${s}`
 }
 
-export function elapsedSecondsSince(startTimestamp: number, now = Date.now()): number {
+export function elapsedSecondsSince(
+  startTimestamp: number,
+  now = Date.now()
+): number {
   return Math.max(0, Math.floor((now - startTimestamp) / 1000))
 }
 
-export function remainingSecondsUntil(endsAt: number, now = Date.now()): number {
+export function remainingSecondsUntil(
+  endsAt: number,
+  now = Date.now()
+): number {
   return Math.max(0, Math.floor((endsAt - now) / 1000))
 }
 
@@ -25,7 +31,9 @@ export function sessionElapsedSeconds(
   },
   now = Date.now()
 ): number {
-  if (input.startTimestamp == null) return 0
+  if (input.startTimestamp == null) {
+    return 0
+  }
   let pauseMs = input.accumulatedPauseMs
   if (input.userPaused && input.pauseStartedAt != null) {
     pauseMs += Math.max(0, now - input.pauseStartedAt)
@@ -41,8 +49,12 @@ export function sessionRemainingSeconds(
   },
   now = Date.now()
 ): number {
-  if (input.endsAt == null) return 0
+  if (input.endsAt == null) {
+    return 0
+  }
   const clock =
-    input.userPaused && input.pauseStartedAt != null ? input.pauseStartedAt : now
+    input.userPaused && input.pauseStartedAt != null
+      ? input.pauseStartedAt
+      : now
   return remainingSecondsUntil(input.endsAt, clock)
 }

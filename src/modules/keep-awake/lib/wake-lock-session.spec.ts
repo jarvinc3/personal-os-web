@@ -29,9 +29,13 @@ function createFakeLock() {
       return released
     },
     async release() {
-      if (released) return
+      if (released) {
+        return
+      }
       released = true
-      for (const listener of listeners) listener()
+      for (const listener of listeners) {
+        listener()
+      }
     },
     addEventListener(_type: "release", listener: () => void) {
       listeners.add(listener)
@@ -61,10 +65,7 @@ describe("createWakeLockSession", () => {
     assert.equal(session.getState().sessionRequested, true)
     assert.equal(session.getState().lockHeld, true)
     assert.equal(session.getState().startTimestamp, NOW)
-    assert.match(
-      storage.snapshot()[KEEP_AWAKE_STORAGE_KEY] ?? "",
-      /tab-a/
-    )
+    assert.match(storage.snapshot()[KEEP_AWAKE_STORAGE_KEY] ?? "", /tab-a/)
     assert.deepEqual(broadcasts[0], {
       type: "claim",
       ownerId: "tab-a",
@@ -322,7 +323,10 @@ describe("createWakeLockSession", () => {
     assert.equal(session.getState().lockHeld, false)
     assert.equal(session.getState().startTimestamp, NOW)
     assert.equal(storage.snapshot()[KEEP_AWAKE_HISTORY_KEY], undefined)
-    assert.match(storage.snapshot()[KEEP_AWAKE_STORAGE_KEY] ?? "", /"userPaused":true/)
+    assert.match(
+      storage.snapshot()[KEEP_AWAKE_STORAGE_KEY] ?? "",
+      /"userPaused":true/
+    )
 
     current = NOW + 15_000
     await session.resume()
@@ -445,6 +449,9 @@ describe("createWakeLockSession", () => {
 
     assert.equal(session.getState().sessionRequested, false)
     assert.equal(storage.snapshot()[KEEP_AWAKE_STORAGE_KEY], undefined)
-    assert.match(storage.snapshot()[KEEP_AWAKE_HISTORY_KEY] ?? "", /"endReason":"ended"/)
+    assert.match(
+      storage.snapshot()[KEEP_AWAKE_HISTORY_KEY] ?? "",
+      /"endReason":"ended"/
+    )
   })
 })

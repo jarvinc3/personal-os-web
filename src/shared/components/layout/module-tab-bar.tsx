@@ -23,15 +23,16 @@ const TAB_FADE_MS = 200
 let persistedActiveHref: string | null = null
 
 function useFadingTabHref(activeHref: string | undefined) {
-  const [visualHref, setVisualHref] = useState(
-    () =>
-      persistedActiveHref && persistedActiveHref !== activeHref
-        ? persistedActiveHref
-        : activeHref,
+  const [visualHref, setVisualHref] = useState(() =>
+    persistedActiveHref && persistedActiveHref !== activeHref
+      ? persistedActiveHref
+      : activeHref
   )
 
   useEffect(() => {
-    if (!activeHref) return
+    if (!activeHref) {
+      return
+    }
     if (visualHref === activeHref) {
       persistedActiveHref = activeHref
       return
@@ -65,27 +66,27 @@ export function ModuleTabBar({
 }: ModuleTabBarProps) {
   const pathname = usePathname()
   const activeHref = items.find((item) =>
-    isModuleSectionActive(item, pathname),
+    isModuleSectionActive(item, pathname)
   )?.href
   const visualHref = useFadingTabHref(activeHref)
   const reduceMotion = useReducedMotion() === true
   const registration = useModuleFabRegistration()
-  const [open, setOpen] = useState(false)
+  const [menuOpenPath, setMenuOpenPath] = useState<string | null>(null)
 
   const actions = registration?.actions ?? []
   const hasMenu = actions.length > 0
-  const menuOpen = open && hasMenu
+  const menuOpen = hasMenu && menuOpenPath === pathname
   const fade = { duration: reduceMotion ? 0 : 0.2, ease: EASE }
 
   useEffect(() => {
-    setOpen(false)
-  }, [pathname])
-
-  useEffect(() => {
-    if (!menuOpen) return
+    if (!menuOpen) {
+      return
+    }
 
     function onKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") setOpen(false)
+      if (event.key === "Escape") {
+        setMenuOpenPath(null)
+      }
     }
 
     window.addEventListener("keydown", onKeyDown)
@@ -111,7 +112,7 @@ export function ModuleTabBar({
             exit={{ opacity: 0 }}
             transition={fade}
             className="fixed inset-0 z-40 bg-background/50 backdrop-blur-sm md:hidden"
-            onClick={() => setOpen(false)}
+            onClick={() => setMenuOpenPath(null)}
           />
         ) : null}
       </AnimatePresence>
@@ -127,7 +128,7 @@ export function ModuleTabBar({
             style={{ borderRadius: 28 }}
             className={cn(
               "overflow-hidden bg-muted shadow-lg ring-1 ring-border",
-              menuOpen && "w-[min(22rem,calc(100vw-5rem))]",
+              menuOpen && "w-[min(22rem,calc(100vw-5rem))]"
             )}
           >
             <AnimatePresence mode="popLayout" initial={false}>
@@ -151,17 +152,21 @@ export function ModuleTabBar({
                       type="button"
                       disabled={action.disabled}
                       onClick={() => {
-                        if (action.disabled) return
+                        if (action.disabled) {
+                          return
+                        }
                         action.onClick()
-                        setOpen(false)
+                        setMenuOpenPath(null)
                       }}
                       className={cn(
                         "flex min-h-16 min-w-16 flex-col items-center justify-center gap-1 rounded-2xl px-0.5 py-2 text-center text-[10px] leading-tight disabled:opacity-40 [&_svg]:size-5",
-                        ACTION_TONES[action.color] ?? "bg-muted text-foreground",
+                        ACTION_TONES[action.color] ?? "bg-muted text-foreground"
                       )}
                     >
                       {action.icon}
-                      <span className="truncate text-xs text-center font-semibold">{action.label}</span>
+                      <span className="truncate text-center text-xs font-semibold">
+                        {action.label}
+                      </span>
                     </button>
                   ))}
                 </motion.div>
@@ -191,17 +196,19 @@ export function ModuleTabBar({
                             "relative flex h-9 items-center justify-center rounded-full px-3 transition-colors ease-out motion-reduce:transition-none",
                             isVisual
                               ? "text-foreground"
-                              : "text-muted-foreground",
+                              : "text-muted-foreground"
                           )}
                           style={{
-                            transitionDuration: reduceMotion ? "0ms" : `${TAB_FADE_MS}ms`,
+                            transitionDuration: reduceMotion
+                              ? "0ms"
+                              : `${TAB_FADE_MS}ms`,
                           }}
                         >
                           <span
                             aria-hidden
                             className={cn(
                               "absolute inset-0 rounded-full bg-background shadow-sm transition-opacity ease-out motion-reduce:transition-none",
-                              isVisual ? "opacity-100" : "opacity-0",
+                              isVisual ? "opacity-100" : "opacity-0"
                             )}
                             style={{
                               transitionDuration: reduceMotion
@@ -209,14 +216,17 @@ export function ModuleTabBar({
                                 : `${TAB_FADE_MS}ms`,
                             }}
                           />
-                          <Icon className="relative z-10 size-5 shrink-0" aria-hidden />
+                          <Icon
+                            className="relative z-10 size-5 shrink-0"
+                            aria-hidden
+                          />
                           <span
                             aria-hidden
                             className={cn(
                               "relative z-10 grid transition-[grid-template-columns,opacity] ease-out motion-reduce:transition-none",
                               isVisual
                                 ? "grid-cols-[1fr] opacity-100"
-                                : "grid-cols-[0fr] opacity-0",
+                                : "grid-cols-[0fr] opacity-0"
                             )}
                             style={{
                               transitionDuration: reduceMotion
@@ -245,7 +255,11 @@ export function ModuleTabBar({
               type="button"
               aria-expanded={menuOpen}
               aria-label={menuOpen ? "Cerrar acciones" : registration?.label}
-              onClick={() => setOpen((current) => !current)}
+              onClick={() =>
+                setMenuOpenPath((current) =>
+                  current === pathname ? null : pathname
+                )
+              }
               className="flex size-12 shrink-0 items-center justify-center rounded-full bg-background text-foreground shadow-lg ring-1 ring-border"
             >
               <motion.span

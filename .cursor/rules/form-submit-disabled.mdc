@@ -1,0 +1,30 @@
+---
+description: Keep the submit button of a form disabled until every required field is valid and the data the save needs has loaded.
+alwaysApply: true
+---
+
+# Botón de guardar deshabilitado
+
+El botón que envía (`Registrar gasto`, `Registrar ingreso`, `Guardar`, `Transferir`) arranca deshabilitado y solo se habilita cuando:
+
+- El esquema zod completo pasa, incluidas las reglas que antes solo se revisaban al armar el envío: monto numérico mayor que cero, destino que sea una cuenta o tarjeta real y no el valor vacío del selector (`CATALOG_NONE`), origen distinto del destino.
+- Ya terminaron de cargar los datos que el envío necesita (cuentas, tarjetas). Al editar un registro ya guardado no hace falta esperar esos datos.
+- No hay un envío en curso.
+
+El estado sale del mismo esquema que valida el envío. No uses `formState.isValid`: react-hook-form lo marca `true` al montar, antes de validar nada, y el botón quedaría activo en un formulario vacío.
+
+Los mensajes de error aparecen al salir de cada campo (`mode: "onTouched"`), no todos a la vez al primer tecleo. Un campo opcional no bloquea el botón.
+
+En un formulario dentro de un sheet de edición manda otra condición: se habilita solo si hay cambios (`formState.isDirty`). Un sheet de alta usa esta regla. Ver [form-shell-sheet.mdc](./form-shell-sheet.mdc).
+
+```tsx
+const formValues = useWatch({ control })
+const formIsValid = schema.safeParse(formValues).success
+const canSave = !isPending && formIsValid && targetsReady
+
+<Button type="submit" disabled={!canSave}>
+  Guardar
+</Button>
+```
+
+Molde: `transaction-form.tsx` y `transfer-form.tsx` en `src/modules/finance/components/transactions/`. Las reglas compartidas (`isPositiveAmountInput`, `isLedgerTargetInput`) viven en `src/modules/finance/lib/ledger-form.ts` con su spec.

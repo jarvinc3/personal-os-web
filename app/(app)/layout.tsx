@@ -1,8 +1,10 @@
 "use client"
 
-import { KeepAwakeProvider } from "@/src/modules/keep-awake/context/keep-awake-context"
-import { PendingAccountDeletionHandler } from "@/src/modules/settings/components/pending-account-deletion-handler"
-import { PendingDataWipeHandler } from "@/src/modules/settings/components/pending-data-wipe-handler"
+import {
+  PendingAccountDeletionHandler,
+  PendingDataWipeHandler,
+} from "@/src/modules/settings"
+import { KeepAwakeProvider } from "@/src/modules/keep-awake"
 import { AppHeader } from "@/src/shared/components/layout/app-header"
 import { AppSidebar } from "@/src/shared/components/layout/app-sidebar"
 import {

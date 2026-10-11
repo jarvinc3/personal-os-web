@@ -1,4 +1,4 @@
-import { formatTimeForDisplay } from "../../../shared/lib/date-format.ts"
+import { formatTimeForDisplay } from "@/src/shared/lib/date-format"
 
 export const KEEP_AWAKE_REMINDER_KEY = "keepawake_reminder" as const
 export const REMINDER_CHANGED_EVENT = "keepawake-reminder-changed"
@@ -34,11 +34,15 @@ export function toggleReminderDay(days: number[], day: number): number[] {
   const next = current.includes(day)
     ? current.filter((item) => item !== day)
     : [...current, day].sort((a, b) => a - b)
-  if (next.length === 0 || next.length === 7) return []
+  if (next.length === 0 || next.length === 7) {
+    return []
+  }
   return next
 }
 
-export function reminderTimeFromDate(date: Date): Pick<KeepAwakeReminder, "hour" | "minute"> {
+export function reminderTimeFromDate(
+  date: Date
+): Pick<KeepAwakeReminder, "hour" | "minute"> {
   return { hour: date.getHours(), minute: date.getMinutes() }
 }
 
@@ -47,41 +51,57 @@ export function reminderDateKey(date: Date): string {
 }
 
 function clampHour(value: number) {
-  if (!Number.isFinite(value)) return DEFAULT_REMINDER.hour
+  if (!Number.isFinite(value)) {
+    return DEFAULT_REMINDER.hour
+  }
   return Math.min(23, Math.max(0, Math.floor(value)))
 }
 
 function clampMinute(value: number) {
-  if (!Number.isFinite(value)) return DEFAULT_REMINDER.minute
+  if (!Number.isFinite(value)) {
+    return DEFAULT_REMINDER.minute
+  }
   return Math.min(59, Math.max(0, Math.floor(value)))
 }
 
 function parseDays(value: unknown): number[] {
-  if (!Array.isArray(value)) return []
+  if (!Array.isArray(value)) {
+    return []
+  }
   return [
     ...new Set(
       value.filter(
         (day): day is number =>
-          typeof day === "number" && Number.isInteger(day) && day >= 0 && day <= 6
+          typeof day === "number" &&
+          Number.isInteger(day) &&
+          day >= 0 &&
+          day <= 6
       )
     ),
   ].sort((a, b) => a - b)
 }
 
 export function parseReminder(raw: string | null): KeepAwakeReminder {
-  if (!raw) return { ...DEFAULT_REMINDER }
+  if (!raw) {
+    return { ...DEFAULT_REMINDER }
+  }
   try {
     const parsed: unknown = JSON.parse(raw)
-    if (!parsed || typeof parsed !== "object") return { ...DEFAULT_REMINDER }
+    if (!parsed || typeof parsed !== "object") {
+      return { ...DEFAULT_REMINDER }
+    }
     const data = parsed as Partial<KeepAwakeReminder>
     return {
       enabled: data.enabled === true,
-      hour: clampHour(typeof data.hour === "number" ? data.hour : DEFAULT_REMINDER.hour),
+      hour: clampHour(
+        typeof data.hour === "number" ? data.hour : DEFAULT_REMINDER.hour
+      ),
       minute: clampMinute(
         typeof data.minute === "number" ? data.minute : DEFAULT_REMINDER.minute
       ),
       days: parseDays(data.days),
-      lastFiredKey: typeof data.lastFiredKey === "string" ? data.lastFiredKey : null,
+      lastFiredKey:
+        typeof data.lastFiredKey === "string" ? data.lastFiredKey : null,
     }
   } catch {
     return { ...DEFAULT_REMINDER }
@@ -93,24 +113,37 @@ export function serializeReminder(reminder: KeepAwakeReminder): string {
 }
 
 export function isReminderDue(reminder: KeepAwakeReminder, now: Date): boolean {
-  if (!reminder.enabled) return false
+  if (!reminder.enabled) {
+    return false
+  }
   if (reminder.days.length > 0 && !reminder.days.includes(now.getDay())) {
     return false
   }
-  if (reminder.lastFiredKey === reminderDateKey(now)) return false
+  if (reminder.lastFiredKey === reminderDateKey(now)) {
+    return false
+  }
   const due = new Date(now)
   due.setHours(reminder.hour, reminder.minute, 0, 0)
   const elapsed = now.getTime() - due.getTime()
   return elapsed >= 0 && elapsed < REMINDER_DUE_WINDOW_MS
 }
 
-export function nextReminderDelayMs(reminder: KeepAwakeReminder, now: Date): number {
-  if (!reminder.enabled) return MAX_REMINDER_ARM_MS
-  if (isReminderDue(reminder, now)) return 250
+export function nextReminderDelayMs(
+  reminder: KeepAwakeReminder,
+  now: Date
+): number {
+  if (!reminder.enabled) {
+    return MAX_REMINDER_ARM_MS
+  }
+  if (isReminderDue(reminder, now)) {
+    return 250
+  }
   const due = new Date(now)
   due.setHours(reminder.hour, reminder.minute, 0, 0)
   const until = due.getTime() - now.getTime()
-  if (until > 0) return Math.min(until, MAX_REMINDER_ARM_MS)
+  if (until > 0) {
+    return Math.min(until, MAX_REMINDER_ARM_MS)
+  }
   return MAX_REMINDER_ARM_MS
 }
 
@@ -135,7 +168,9 @@ let reminderCacheRaw: string | null | undefined
 let reminderCache: KeepAwakeReminder = DEFAULT_REMINDER
 
 export function subscribeReminder(onChange: () => void) {
-  if (typeof window === "undefined") return () => {}
+  if (typeof window === "undefined") {
+    return () => {}
+  }
   const handler = (event: Event) => {
     if (
       event instanceof StorageEvent &&
@@ -155,16 +190,23 @@ export function subscribeReminder(onChange: () => void) {
 }
 
 export function getReminderSnapshot(): KeepAwakeReminder {
-  if (typeof window === "undefined") return DEFAULT_REMINDER
+  if (typeof window === "undefined") {
+    return DEFAULT_REMINDER
+  }
   const raw = window.localStorage.getItem(KEEP_AWAKE_REMINDER_KEY)
-  if (raw === reminderCacheRaw) return reminderCache
+  if (raw === reminderCacheRaw) {
+    return reminderCache
+  }
   reminderCacheRaw = raw
   reminderCache = parseReminder(raw)
   return reminderCache
 }
 
 export function writeReminder(reminder: KeepAwakeReminder) {
-  window.localStorage.setItem(KEEP_AWAKE_REMINDER_KEY, serializeReminder(reminder))
+  window.localStorage.setItem(
+    KEEP_AWAKE_REMINDER_KEY,
+    serializeReminder(reminder)
+  )
   reminderCacheRaw = undefined
   window.dispatchEvent(new Event(REMINDER_CHANGED_EVENT))
 }

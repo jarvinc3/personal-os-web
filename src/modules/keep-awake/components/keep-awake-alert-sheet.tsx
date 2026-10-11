@@ -1,17 +1,24 @@
 "use client"
 
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
-import { Alert, AlertDescription, AlertTitle } from "@/src/shared/components/ui/alert"
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/src/shared/components/ui/alert"
 import { Button } from "@/src/shared/components/ui/button"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
-import { MonitorPlay } from "lucide-react"
+import { MonitorPlay, XIcon } from "lucide-react"
 
 type KeepAwakeAlertSheetProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
 }
 
-export function KeepAwakeAlertSheet({ open, onOpenChange }: KeepAwakeAlertSheetProps) {
+export function KeepAwakeAlertSheet({
+  open,
+  onOpenChange,
+}: KeepAwakeAlertSheetProps) {
   return (
     <BottomSheet
       open={open}
@@ -26,6 +33,7 @@ export function KeepAwakeAlertSheet({ open, onOpenChange }: KeepAwakeAlertSheetP
             className={cn(PRESSABLE_CLASS, "flex-1")}
             onClick={() => onOpenChange(false)}
           >
+            <XIcon className="size-4 shrink-0" />
             Cerrar
           </Button>
         ),
@@ -36,8 +44,7 @@ export function KeepAwakeAlertSheet({ open, onOpenChange }: KeepAwakeAlertSheetP
         <AlertTitle>Miniplayer no disponible</AlertTitle>
         <AlertDescription>
           Document Picture-in-Picture no está disponible en este navegador.
-          Puedes activar Keep Awake igual; el bloqueo funciona en esta
-          pestaña.
+          Puedes activar Keep Awake igual; el bloqueo funciona en esta pestaña.
         </AlertDescription>
       </Alert>
     </BottomSheet>

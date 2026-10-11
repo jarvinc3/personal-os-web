@@ -16,7 +16,9 @@ describe("classifyWakeLockError", () => {
 
   it("detects a document that is not visible", () => {
     const error = Object.assign(
-      new Error("Wake Lock may not be requested when the document is not visible"),
+      new Error(
+        "Wake Lock may not be requested when the document is not visible"
+      ),
       { name: "NotAllowedError" }
     )
     assert.equal(classifyWakeLockError(error), "not_visible")
@@ -39,7 +41,10 @@ describe("wakeLockFailureMessage", () => {
   it("returns distinct copy per failure kind", () => {
     assert.equal(wakeLockFailureMessage("unsupported").title, "No disponible")
     assert.match(wakeLockFailureMessage("permission").description, /permiso/i)
-    assert.match(wakeLockFailureMessage("not_visible").description, /visible|pestaña/i)
+    assert.match(
+      wakeLockFailureMessage("not_visible").description,
+      /visible|pestaña/i
+    )
     assert.match(wakeLockFailureMessage("released").description, /liber/i)
   })
 })
