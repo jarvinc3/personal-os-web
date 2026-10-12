@@ -196,6 +196,17 @@ export function useUpdateTransfer() {
   })
 }
 
+export function useUnconfirmTransfer() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) =>
+      apiPost<{ success: boolean }>(
+        API_ENDPOINTS.FINANCE.TRANSFER_UNCONFIRM(id)
+      ),
+    onSuccess: () => invalidateLedger(queryClient),
+  })
+}
+
 export function useConfirmTransaction() {
   const queryClient = useQueryClient()
   return useMutation({

@@ -2,6 +2,14 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [1.7.0] - 2026-10-12
+
+### Agregado
+
+- Comisión opcional y carril (ACH, LBTR, mismo banco) al crear o editar una transferencia.
+- El destino de una transferencia es solo una cuenta; el pago de tarjeta sale a su propia acción.
+- "Marcar como pendiente" en una transferencia completada, para editarla.
+
 ## [1.6.0] - 2026-10-12
 
 ### Agregado
