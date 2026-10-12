@@ -10,10 +10,16 @@ export {
 export { ProductsScreen } from "./products/products-screen"
 export { AccountDetailScreen } from "./accounts/account-detail-screen"
 export { InstitutionDetailScreen } from "./institutions/institution-detail-screen"
+export {
+  InstitutionCreateScreen,
+  InstitutionEditScreen,
+} from "./institutions/institution-form-pages"
 export { CategoriesScreen } from "./catalog/categories-screen"
 export { CardDetailScreen } from "./cards/card-detail-screen"
+export { CardCreateScreen, CardEditScreen } from "./cards/card-form-pages"
 export { PlanningScreen } from "./planning"
 export { LoanDetailScreen } from "./loans"
+export { LoanCreateScreen, LoanEditScreen } from "./loans/loan-form-screen"
 export { ReceivableDetailScreen } from "./receivables"
 export { SavingsGoalDetailScreen } from "./savings-goals"
 export { BudgetDetailScreen } from "./budgets/budget-detail-screen"
@@ -24,7 +30,10 @@ export {
   TransactionCreateScreen,
   TransactionEditScreen,
 } from "./transactions/transaction-form-screen"
-export { TransferCreateScreen } from "./transactions/transfer-form-screen"
+export {
+  TransferCreateScreen,
+  TransferEditScreen,
+} from "./transactions/transfer-form-screen"
 
 export { BrandLogo } from "./shared/components/brand-logo"
 export { CurrencyFlag } from "./shared/components/currency-flag"

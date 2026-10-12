@@ -33,20 +33,11 @@ import {
   type FinanceTransaction,
   type FinanceTransactionType,
 } from "@/src/modules/finance/shared/types/entities"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+import { DeleteRecordDialog } from "@/src/modules/finance/shared/components/delete-record-dialog"
+import { RecordOptionsSheet } from "@/src/modules/finance/shared/components/record-options-sheet"
 import { LoadingView } from "@/src/shared/components/layout/loading-view"
 import { SettingsSection } from "@/src/shared/components/layout/settings-section"
 import { Button } from "@/src/shared/components/ui/button"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/src/shared/components/ui/alert-dialog"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { SummaryItem } from "@/src/shared/components/ui/summary"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
@@ -399,64 +390,55 @@ function TransactionDetailScreenBody({
         ) : null}
       </div>
 
-      <BottomSheet
+      <RecordOptionsSheet
         open={openOptionsSheet}
         onOpenChange={setOpenOptionsSheet}
-        title="Opciones"
         description={formatTransactionDate(tx.transactionDate)}
-      >
-        <div className="overflow-hidden rounded-2xl border border-border bg-card">
-          {canEdit(tx) ? (
-            <SummaryItem
-              title="Editar movimiento"
-              icon={PencilIcon}
-              onPress={() => {
-                setOpenOptionsSheet(false)
-                router.push(APP_ROUTES.app.financeTransactionEdit(tx.id))
-              }}
-              isLast={false}
-              className="px-3"
-            />
-          ) : null}
-          <SummaryItem
-            title="Eliminar movimiento"
-            icon={Trash2Icon}
-            onPress={() => setConfirmOpen(true)}
-            isLast
-            className="px-3"
-          />
-        </div>
-      </BottomSheet>
+        options={[
+          ...(canEdit(tx)
+            ? [
+                {
+                  id: "edit",
+                  title: "Editar movimiento",
+                  icon: PencilIcon,
+                  onPress: () => {
+                    setOpenOptionsSheet(false)
+                    router.push(APP_ROUTES.app.financeTransactionEdit(tx.id))
+                  },
+                },
+              ]
+            : []),
+          ...(isTransferTransaction(tx)
+            ? [
+                {
+                  id: "edit-transfer",
+                  title: "Editar transferencia",
+                  icon: PencilIcon,
+                  onPress: () => {
+                    setOpenOptionsSheet(false)
+                    router.push(APP_ROUTES.app.financeTransferEdit(tx.id))
+                  },
+                },
+              ]
+            : []),
+          {
+            id: "delete",
+            title: "Eliminar",
+            icon: Trash2Icon,
+            destructive: true,
+            onPress: () => setConfirmOpen(true),
+          },
+        ]}
+      />
 
-      <AlertDialog
+      <DeleteRecordDialog
         open={confirmOpen}
-        onOpenChange={(open) => {
-          if (!deleteMutation.isPending) {
-            setConfirmOpen(open)
-          }
-        }}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>¿Eliminar este movimiento?</AlertDialogTitle>
-            <AlertDialogDescription>
-              No se puede deshacer.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleteMutation.isPending}>
-              Cancelar
-            </AlertDialogCancel>
-            <AlertDialogAction
-              variant="destructive"
-              disabled={deleteMutation.isPending}
-              onClick={() => void onDelete()}
-            >
-              Eliminar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        onOpenChange={setConfirmOpen}
+        recordName={tx.merchant ?? tx.description ?? "Movimiento"}
+        pending={deleteMutation.isPending}
+        consequences="El saldo de la cuenta se corrige. No se puede deshacer."
+        onConfirm={() => void onDelete()}
+      />
     </>
   )
 }

@@ -1,13 +1,10 @@
 export const FINANCE_SHEET_KEYS = {
-  institution: "institution-sheet",
   institutionOptions: "institution-options-sheet",
   account: "account-sheet",
   accountBalance: "account-balance-sheet",
   cashAccountOptions: "cash-account-options-sheet",
-  card: "card-sheet",
   cardOptions: "card-options-sheet",
   cardBalance: "card-balance-sheet",
-  loan: "loan-sheet",
   loanOptions: "loan-options-sheet",
   category: "category-sheet",
   transactionOptions: "transaction-options-sheet",

@@ -11,10 +11,15 @@ import { ReceivableSheet } from "@/src/modules/finance/receivables/components/re
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
 import {
+  useDeleteReceivable,
   useReceivablePayments,
   useReceivables,
+  useUpdateReceivable,
 } from "@/src/modules/finance/shared/hooks/use-receivables"
-import { financeLoadErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
+import {
+  financeErrorMessage,
+  financeLoadErrorMessage,
+} from "@/src/modules/finance/shared/lib/finance-error"
 import {
   formatFinanceMoney,
   parseFinanceMoney,
@@ -27,6 +32,8 @@ import {
   FINANCE_RECEIVABLE_STATUS_LABEL,
   type FinanceReceivableStatus,
 } from "@/src/modules/finance/shared/types/entities"
+import { DeleteRecordDialog } from "@/src/modules/finance/shared/components/delete-record-dialog"
+import { RecordOptionsSheet } from "@/src/modules/finance/shared/components/record-options-sheet"
 import { LoadingView } from "@/src/shared/components/layout/loading-view"
 import { Badge } from "@/src/shared/components/ui/badge"
 import { Button } from "@/src/shared/components/ui/button"
@@ -42,9 +49,17 @@ import { SummaryItem } from "@/src/shared/components/ui/summary"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
-import { HandshakeIcon, MoreVerticalIcon, PlusIcon } from "lucide-react"
+import { appToast } from "@/src/shared/lib/app-toast"
+import {
+  ArchiveIcon,
+  HandshakeIcon,
+  MoreVerticalIcon,
+  PencilIcon,
+  PlusIcon,
+  Trash2Icon,
+} from "lucide-react"
 import { useRouter } from "next/navigation"
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 
 import { ACCENT_FALLBACK_COLOR } from "@/src/shared/lib/accent-gradient"
 
@@ -106,6 +121,41 @@ function ReceivableDetailScreenBody({
     ? (parseFinanceMoney(receivable.amount) ?? 0) -
       (parseFinanceMoney(receivable.paidAmount) ?? 0)
     : 0
+  const deleteReceivable = useDeleteReceivable()
+  const updateReceivable = useUpdateReceivable()
+  const [optionsOpen, setOptionsOpen] = useState(false)
+  const [confirmOpen, setConfirmOpen] = useState(false)
+
+  async function onCancelReceivable() {
+    if (!receivable) {
+      return
+    }
+    try {
+      await updateReceivable.mutateAsync({
+        id: receivable.id,
+        body: { status: "CANCELLED" },
+      })
+      appToast.success({ text1: "Cobro cancelado" })
+      setOptionsOpen(false)
+    } catch (error) {
+      appToast.error({ text1: financeErrorMessage(error) })
+    }
+  }
+
+  async function onDeleteReceivable() {
+    if (!receivable) {
+      return
+    }
+    try {
+      await deleteReceivable.mutateAsync(receivable.id)
+      appToast.success({ text1: "Cobro eliminado" })
+      setConfirmOpen(false)
+      setOptionsOpen(false)
+      router.push(APP_ROUTES.app.financePlanning)
+    } catch (error) {
+      appToast.error({ text1: financeErrorMessage(error) })
+    }
+  }
 
   const headerActions = useMemo(
     () => (
@@ -114,12 +164,12 @@ function ReceivableDetailScreenBody({
         size="icon"
         className="size-9 rounded-full"
         aria-label="Opciones del cobro"
-        onClick={() => setOpenReceivableSheet(true)}
+        onClick={() => setOptionsOpen(true)}
       >
         <MoreVerticalIcon className="size-4.5" />
       </Button>
     ),
-    [setOpenReceivableSheet]
+    []
   )
 
   usePageHeader(
@@ -258,6 +308,48 @@ function ReceivableDetailScreenBody({
         ) : null}
       </div>
 
+      <RecordOptionsSheet
+        open={optionsOpen}
+        onOpenChange={setOptionsOpen}
+        description={receivable.debtorName}
+        options={[
+          {
+            id: "edit",
+            title: "Editar cobro",
+            icon: PencilIcon,
+            onPress: () => {
+              setOptionsOpen(false)
+              setOpenReceivableSheet(true)
+            },
+          },
+          {
+            id: "cancel",
+            title: "Cancelar cobro",
+            icon: ArchiveIcon,
+            disabled:
+              updateReceivable.isPending || receivable.status === "CANCELLED",
+            onPress: () => void onCancelReceivable(),
+          },
+          {
+            id: "delete",
+            title: "Eliminar",
+            icon: Trash2Icon,
+            destructive: true,
+            disabled: deleteReceivable.isPending,
+            onPress: () => setConfirmOpen(true),
+          },
+        ]}
+      />
+
+      <DeleteRecordDialog
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        recordName={receivable.debtorName}
+        pending={deleteReceivable.isPending}
+        consequences="Se borra su historial de cobros. No se puede deshacer."
+        onConfirm={() => void onDeleteReceivable()}
+      />
+
       <ReceivablePaymentSheet
         open={openPaymentSheet}
         onOpenChange={setOpenPaymentSheet}
@@ -265,6 +357,7 @@ function ReceivableDetailScreenBody({
         debtorName={receivable.debtorName}
         currency={receivable.currency}
         display={money}
+        outstanding={outstanding > 0 ? outstanding : undefined}
         outstandingLabel={
           outstanding > 0 ? formatFinanceMoney(outstanding, money) : undefined
         }

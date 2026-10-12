@@ -7,6 +7,7 @@ import {
 import {
   FinanceHelpText,
   FinanceSegmentedControl,
+  FinanceSuggestionRow,
 } from "@/src/modules/finance/shared/components/forms/form-blocks"
 import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
 import { CategoryPickerSheet } from "@/src/modules/finance/shared/components/pickers/category-picker-sheet"
@@ -14,15 +15,18 @@ import { CategoryTrigger } from "@/src/modules/finance/shared/components/pickers
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
 import {
   useCreateBudget,
-  useDeleteBudget,
   useUpdateBudget,
 } from "@/src/modules/finance/shared/hooks/use-budgets"
+import { useAllTransactions } from "@/src/modules/finance/shared/hooks/use-transactions"
 import {
   boundsForPeriod,
   buildCreateBudgetBody,
 } from "@/src/modules/finance/shared/lib/budget-payloads"
 import { filterCategoriesByType } from "@/src/modules/finance/shared/lib/category-tree"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
+import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
+import { previousMonthsBounds } from "@/src/modules/finance/shared/lib/month-window"
+import { visibleTransactionTotals } from "@/src/modules/finance/shared/lib/transactions-query"
 import type {
   FinanceBudget,
   FinanceBudgetPeriod,
@@ -33,17 +37,6 @@ import {
   FINANCE_BUDGET_PERIODS,
 } from "@/src/modules/finance/shared/types/entities"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/src/shared/components/ui/alert-dialog"
-import { FormTextField } from "@/src/shared/components/layout/form-blocks"
 import { Button } from "@/src/shared/components/ui/button"
 import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
 import { Spinner } from "@/src/shared/components/ui/spinner"
@@ -52,14 +45,8 @@ import { appToast } from "@/src/shared/lib/app-toast"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
 import { usePicker } from "@/src/shared/hooks/use-picker"
 import { zodResolver } from "@hookform/resolvers/zod"
-import {
-  BellIcon,
-  CalendarIcon,
-  PiggyBankIcon,
-  Trash2Icon,
-  XIcon,
-} from "lucide-react"
-import { useEffect, useMemo, useState } from "react"
+import { CalendarIcon, PiggyBankIcon, XIcon } from "lucide-react"
+import { useEffect, useMemo } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import {
   budgetSchema,
@@ -70,6 +57,12 @@ const PERIOD_OPTIONS = FINANCE_BUDGET_PERIODS.map((value) => ({
   value,
   label: FINANCE_BUDGET_PERIOD_LABEL[value],
 }))
+
+const THRESHOLD_OPTIONS = [
+  { value: "50", label: "50 %" },
+  { value: "80", label: "80 %" },
+  { value: "100", label: "100 %" },
+]
 
 function toFormValues(
   budget: FinanceBudget | null,
@@ -107,11 +100,7 @@ export function BudgetSheet({
   const isEdit = Boolean(budget)
   const createMutation = useCreateBudget()
   const updateMutation = useUpdateBudget()
-  const deleteMutation = useDeleteBudget()
-  const isPending =
-    createMutation.isPending ||
-    updateMutation.isPending ||
-    deleteMutation.isPending
+  const isPending = createMutation.isPending || updateMutation.isPending
   const { config } = useFinanceEnabled()
   const baseCurrency = config.baseCurrency
   const expenseCategories = useMemo(() => {
@@ -145,6 +134,26 @@ export function BudgetSheet({
   const categoryId = useWatch({ control, name: "categoryId" })
   const selectedCategory =
     expenseCategories.find((category) => category.id === categoryId) ?? null
+  const display = {
+    currency: baseCurrency,
+    showCents: config.display.showCents,
+    compactNumbers: config.display.compactNumbers,
+  }
+  const historyRange = useMemo(() => previousMonthsBounds(new Date(), 3), [])
+  const historyQuery = useAllTransactions(open && Boolean(categoryId), {
+    categoryId,
+    type: "DEBIT",
+    dateFrom: historyRange.dateFrom,
+    dateTo: historyRange.dateTo,
+  })
+  const averageMonthlySpend = useMemo(() => {
+    const items = historyQuery.data ?? []
+    if (items.length === 0) {
+      return null
+    }
+    const { expenses } = visibleTransactionTotals(items)
+    return expenses > 0 ? expenses / 3 : null
+  }, [historyQuery.data])
   const { picker, openPicker, closeHandlerFor } = usePicker<
     "none" | "category"
   >("none")
@@ -193,22 +202,6 @@ export function BudgetSheet({
     }
   })
 
-  const [confirmOpen, setConfirmOpen] = useState(false)
-
-  async function onDelete() {
-    if (!budget) {
-      return
-    }
-    try {
-      await deleteMutation.mutateAsync(budget.id)
-      appToast.success({ text1: "Presupuesto eliminado" })
-      setConfirmOpen(false)
-      onOpenChange(false)
-    } catch (error) {
-      appToast.error({ text1: financeErrorMessage(error) })
-    }
-  }
-
   return (
     <>
       <BottomSheet
@@ -222,17 +215,6 @@ export function BudgetSheet({
             : "Crea una categoría antes de agregar un presupuesto."
         }
         actions={{
-          delete: isEdit ? (
-            <Button
-              type="button"
-              variant="destructive"
-              disabled={isPending}
-              onClick={() => setConfirmOpen(true)}
-            >
-              <Trash2Icon className="size-4 shrink-0" />
-              Eliminar
-            </Button>
-          ) : undefined,
           close: (
             <Button
               type="button"
@@ -292,17 +274,30 @@ export function BudgetSheet({
               />
             )}
           />
+          {averageMonthlySpend ? (
+            <FinanceSuggestionRow
+              actionLabel="Usar"
+              onAction={() =>
+                setValue(
+                  "amountLimit",
+                  String(Math.round(averageMonthlySpend)),
+                  { shouldValidate: true }
+                )
+              }
+            >
+              {`Gastas ~${formatFinanceMoney(averageMonthlySpend, display)}/mes · promedio 3 meses`}
+            </FinanceSuggestionRow>
+          ) : null}
           <Controller
             control={control}
             name="alertThresholdPct"
             render={({ field }) => (
-              <FormTextField
-                icon={BellIcon}
-                label="Umbral de alerta (%)"
+              <FinanceSegmentedControl
+                label="Avisarme al"
                 value={field.value}
                 onChange={field.onChange}
-                onBlur={field.onBlur}
-                placeholder="80"
+                options={THRESHOLD_OPTIONS}
+                error={errors.alertThresholdPct?.message}
               />
             )}
           />
@@ -365,36 +360,6 @@ export function BudgetSheet({
           setValue("categoryId", next, { shouldValidate: true })
         }
       />
-
-      <AlertDialog
-        open={confirmOpen}
-        onOpenChange={(open) => {
-          if (!deleteMutation.isPending) {
-            setConfirmOpen(open)
-          }
-        }}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>¿Eliminar este presupuesto?</AlertDialogTitle>
-            <AlertDialogDescription>
-              No se puede deshacer.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleteMutation.isPending}>
-              Cancelar
-            </AlertDialogCancel>
-            <AlertDialogAction
-              variant="destructive"
-              disabled={deleteMutation.isPending}
-              onClick={() => void onDelete()}
-            >
-              Eliminar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </>
   )
 }

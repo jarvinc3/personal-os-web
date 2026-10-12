@@ -31,20 +31,10 @@ import { encodeLedgerTarget } from "@/src/modules/finance/shared/lib/ledger-payl
 import { isoMonthBounds } from "@/src/modules/finance/shared/lib/month-window"
 import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 import { visibleTransactionTotals } from "@/src/modules/finance/shared/lib/transactions-query"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+import { DeleteRecordDialog } from "@/src/modules/finance/shared/components/delete-record-dialog"
+import { RecordOptionsSheet } from "@/src/modules/finance/shared/components/record-options-sheet"
 import { LoadingView } from "@/src/shared/components/layout/loading-view"
 import { Button } from "@/src/shared/components/ui/button"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/src/shared/components/ui/alert-dialog"
-import { SummaryItem } from "@/src/shared/components/ui/summary"
 import {
   APP_ROUTES,
   financeTransactionNewHref,
@@ -295,79 +285,60 @@ function AccountDetailScreenBody({ accountId }: AccountDetailScreenProps) {
         />
       </div>
 
-      <BottomSheet
+      <RecordOptionsSheet
         open={openOptionsSheet}
         onOpenChange={setOpenOptionsSheet}
-        title="Opciones"
         description={account.name}
-      >
-        <div className="overflow-hidden rounded-2xl border border-border bg-card">
-          <SummaryItem
-            title="Editar cuenta"
-            icon={PencilIcon}
-            onPress={() => setOpenAccountSheet(true)}
-            isLast={false}
-            className="px-3"
-          />
-          <SummaryItem
-            title="Ajustar saldo"
-            icon={ScaleIcon}
-            onPress={() => {
+        options={[
+          {
+            id: "edit",
+            title: "Editar cuenta",
+            icon: PencilIcon,
+            onPress: () => {
+              setOpenOptionsSheet(false)
+              setOpenAccountSheet(true)
+            },
+          },
+          {
+            id: "balance",
+            title: "Ajustar saldo",
+            icon: ScaleIcon,
+            onPress: () => {
               setOpenOptionsSheet(false)
               setOpenBalanceSheet(true)
-            }}
-            isLast={false}
-            className="px-3"
-          />
-          <SummaryItem
-            title="Archivar"
-            icon={ArchiveIcon}
-            onPress={() => void onArchiveAccount()}
-            disabled={archiveAccount.isPending || deleteAccount.isPending}
-            isLast={false}
-            className="px-3 text-destructive"
-          />
-          <SummaryItem
-            title="Borrar"
-            icon={Trash2Icon}
-            onPress={() => setConfirmOpen(true)}
-            disabled={archiveAccount.isPending || deleteAccount.isPending}
-            isLast
-            className="px-3 text-destructive"
-          />
-        </div>
-      </BottomSheet>
+            },
+          },
+          {
+            id: "archive",
+            title: "Archivar",
+            icon: ArchiveIcon,
+            disabled: archiveAccount.isPending || deleteAccount.isPending,
+            onPress: () => void onArchiveAccount(),
+          },
+          {
+            id: "delete",
+            title: "Eliminar",
+            icon: Trash2Icon,
+            destructive: true,
+            disabled: archiveAccount.isPending || deleteAccount.isPending,
+            onPress: () => setConfirmOpen(true),
+          },
+        ]}
+      />
 
-      <AlertDialog
+      <DeleteRecordDialog
         open={confirmOpen}
-        onOpenChange={(open) => {
-          if (!deleteAccount.isPending) {
-            setConfirmOpen(open)
-          }
+        onOpenChange={setConfirmOpen}
+        recordName={account.name}
+        pending={deleteAccount.isPending}
+        consequences="Se eliminan sus movimientos, tarjetas débito y saldos. No se puede deshacer."
+        onConfirm={() => void onDeleteAccount()}
+        archive={{
+          label: "¿Solo ocultarla? Archivar",
+          pending: archiveAccount.isPending,
+          onArchive: () => void onArchiveAccount(),
         }}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>¿Borrar esta cuenta?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Se eliminan sus movimientos, tarjetas débito y saldos. No se puede
-              deshacer.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleteAccount.isPending}>
-              Cancelar
-            </AlertDialogCancel>
-            <AlertDialogAction
-              variant="destructive"
-              disabled={deleteAccount.isPending}
-              onClick={() => void onDeleteAccount()}
-            >
-              Borrar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      />
 
       <AccountSheet
         open={openAccountSheet}
@@ -375,8 +346,6 @@ function AccountDetailScreenBody({ accountId }: AccountDetailScreenProps) {
         account={account}
         institutions={institutions}
         defaultCurrency={config.baseCurrency}
-        display={accountDisplay}
-        onDeleted={() => router.push(APP_ROUTES.app.financeProducts)}
       />
       <AccountBalanceSheet
         open={openBalanceSheet}

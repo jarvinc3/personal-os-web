@@ -6,7 +6,7 @@ export const linkInstitutionMailboxSchema = z.object({
   bankSenderEmail: z
     .string()
     .trim()
-    .email("Correo de notificaciones inválido")
+    .email("Correo del banco inválido")
     .max(150),
   label: z.string().max(120),
 })

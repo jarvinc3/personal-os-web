@@ -93,6 +93,19 @@ export function isoMonthBounds(
   }
 }
 
+/** The `months` full calendar months before the current one. */
+export function previousMonthsBounds(
+  now: Date,
+  months: number
+): { dateFrom: string; dateTo: string } {
+  const start = new Date(now.getFullYear(), now.getMonth() - months, 1)
+  const end = new Date(now.getFullYear(), now.getMonth(), 0)
+  return {
+    dateFrom: format(start, "yyyy-MM-dd"),
+    dateTo: format(end, "yyyy-MM-dd"),
+  }
+}
+
 export function intersectIsoDateRange(
   windowFrom: string,
   windowTo: string,

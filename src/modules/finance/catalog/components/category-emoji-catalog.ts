@@ -461,3 +461,45 @@ export const CATEGORY_EMOJI_GROUPS: {
     ],
   },
 ]
+
+function normalizeEmojiSearch(value: string): string {
+  return value.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase().trim()
+}
+
+/** Emojis whose keywords or group match the category name, best first. */
+export function suggestCategoryEmojis(name: string, limit = 4): string[] {
+  const tokens = normalizeEmojiSearch(name)
+    .split(/\s+/)
+    .filter((token) => token.length >= 3)
+  if (tokens.length === 0) {
+    return []
+  }
+  const scored: { emoji: string; score: number }[] = []
+  for (const group of CATEGORY_EMOJI_GROUPS) {
+    const groupHaystack = normalizeEmojiSearch(group.label)
+    for (const option of group.emojis) {
+      const haystack = `${normalizeEmojiSearch(option.keywords)} ${groupHaystack}`
+      let score = 0
+      for (const token of tokens) {
+        if (haystack.includes(token)) {
+          score += 1
+        }
+      }
+      if (score > 0) {
+        scored.push({ emoji: option.emoji, score })
+      }
+    }
+  }
+  scored.sort((left, right) => right.score - left.score)
+  const suggestions: string[] = []
+  for (const item of scored) {
+    if (suggestions.includes(item.emoji)) {
+      continue
+    }
+    suggestions.push(item.emoji)
+    if (suggestions.length >= limit) {
+      break
+    }
+  }
+  return suggestions
+}

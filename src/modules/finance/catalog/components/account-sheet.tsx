@@ -1,7 +1,11 @@
 "use client"
 
-import { institutionSelectOptions } from "@/src/modules/finance/shared/components/ledger-target-select"
-import { FinanceCurrencyPills } from "@/src/modules/finance/shared/components/forms/currency-pills"
+import { FinanceCurrencyPickerSheet } from "@/src/modules/finance/shared/components/pickers/finance-currency-picker-sheet"
+import {
+  InstitutionPickerSheet,
+  InstitutionTrigger,
+} from "@/src/modules/finance/shared/components/pickers/institution-picker"
+import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
 import {
   FinancePreviewRow,
   FinanceSegmentedControl,
@@ -11,39 +15,25 @@ import {
   FINANCE_ACCOUNT_TYPE_LABEL,
   FINANCE_ACCOUNT_TYPES,
 } from "@/src/modules/finance/shared/constants/catalog"
+import { useAdjustBalance } from "@/src/modules/finance/shared/hooks/use-balance-adjustment"
 import {
-  useArchiveAccount,
   useCreateAccount,
-  useDeleteAccount,
   useUpdateAccount,
 } from "@/src/modules/finance/shared/hooks/use-accounts"
 import { buildCreateAccountBody } from "@/src/modules/finance/shared/lib/catalog-payloads"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
-import {
-  formatFinanceMoney,
-  type FinanceMoneyDisplay,
-} from "@/src/modules/finance/shared/lib/money"
+import { parseFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 import type {
   FinanceAccount,
   FinanceInstitution,
 } from "@/src/modules/finance/shared/types/entities"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/src/shared/components/ui/alert-dialog"
-import {
   FormTextField,
-  SelectField,
   SwitchFieldRow,
 } from "@/src/shared/components/layout/form-blocks"
 import { Button } from "@/src/shared/components/ui/button"
+import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
 import { ColorPickerSwatch } from "@/src/shared/components/ui/color-picker"
 import { Label } from "@/src/shared/components/ui/label"
 import { Spinner } from "@/src/shared/components/ui/spinner"
@@ -51,19 +41,17 @@ import { SummarySection } from "@/src/shared/components/ui/summary"
 import { getModule } from "@/src/shared/constants/module-registry"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
+import { usePicker } from "@/src/shared/hooks/use-picker"
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
-  ArchiveIcon,
   HashIcon,
   LandmarkIcon,
   Palette,
   SaveIcon,
   Star,
-  TrashIcon,
-  WalletIcon,
   XIcon,
 } from "lucide-react"
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import {
   accountSchema,
@@ -91,6 +79,7 @@ function toFormValues(
       (type === "CASH" ? CATALOG_NONE : defaultInstitutionId),
     accountNumber: account?.accountNumber ?? "",
     color: account?.color ?? "",
+    initialBalance: "",
     isDefaultForInstitution: account?.isDefaultForInstitution ?? false,
   }
 }
@@ -101,11 +90,9 @@ type AccountSheetProps = {
   account: FinanceAccount | null
   institutions: FinanceInstitution[]
   defaultCurrency: string
-  display?: FinanceMoneyDisplay
   defaultInstitutionId?: string
   defaultType?: AccountFormValues["type"]
   pending?: boolean
-  onDeleted?: () => void
 }
 
 export function AccountSheet({
@@ -114,31 +101,19 @@ export function AccountSheet({
   account,
   institutions,
   defaultCurrency,
-  display,
   defaultInstitutionId,
   defaultType = "CHECKING",
   pending = false,
-  onDeleted,
 }: AccountSheetProps) {
   const isEdit = Boolean(account)
   const createMutation = useCreateAccount()
   const updateMutation = useUpdateAccount()
-  const archiveMutation = useArchiveAccount()
-  const deleteMutation = useDeleteAccount()
+  const adjustBalance = useAdjustBalance()
   const isPending =
     createMutation.isPending ||
     updateMutation.isPending ||
-    archiveMutation.isPending ||
-    deleteMutation.isPending
+    adjustBalance.isPending
 
-  const institutionOptions = useMemo(
-    () =>
-      institutionSelectOptions(institutions, {
-        value: CATALOG_NONE,
-        label: "Sin institución",
-      }),
-    [institutions]
-  )
   const hasInstitutions = institutions.length > 0
   const resolvedDefaultInstitutionId =
     defaultInstitutionId ?? institutions[0]?.id ?? CATALOG_NONE
@@ -147,6 +122,8 @@ export function AccountSheet({
     control,
     handleSubmit,
     reset,
+    setValue,
+    trigger,
     formState: { errors },
   } = useForm<AccountFormValues>({
     resolver: zodResolver(accountSchema),
@@ -163,6 +140,12 @@ export function AccountSheet({
   const accountColor = useWatch({ control, name: "color" })
   const accountCurrency = useWatch({ control, name: "currency" })
   const accountNumber = useWatch({ control, name: "accountNumber" })
+  const institutionId = useWatch({ control, name: "institutionId" })
+  const selectedInstitution =
+    institutions.find((item) => item.id === institutionId) ?? null
+  const { picker, openPicker, closeHandlerFor } = usePicker<
+    "none" | "institution" | "currency"
+  >("none")
 
   useEffect(() => {
     if (open) {
@@ -190,10 +173,12 @@ export function AccountSheet({
   )
 
   const onSubmit = submitForm(async (values) => {
+    const { initialBalance, ...accountValues } = values
     const payload = buildCreateAccountBody(
       {
-        ...values,
-        accountNumber: values.type === "CASH" ? "" : values.accountNumber,
+        ...accountValues,
+        accountNumber:
+          accountValues.type === "CASH" ? "" : accountValues.accountNumber,
       },
       { isUpdate: isEdit }
     )
@@ -210,50 +195,20 @@ export function AccountSheet({
         appToast.success({ text1: "Cuenta actualizada" })
       } else {
         const created = await createMutation.mutateAsync(payload.body)
-        appToast.success({
-          text1: "Cuenta creada",
-          text2: `El saldo arranca en ${formatFinanceMoney(created.balance, {
-            currency: created.currency,
-            showCents: display?.showCents ?? true,
-            compactNumbers: display?.compactNumbers ?? false,
-          })}.`,
-        })
+        const parsedInitialBalance = parseFinanceMoney(initialBalance)
+        if (parsedInitialBalance !== null && parsedInitialBalance > 0) {
+          await adjustBalance.mutateAsync({
+            accountId: created.id,
+            balance: parsedInitialBalance,
+          })
+        }
+        appToast.success({ text1: "Cuenta creada" })
       }
       onOpenChange(false)
     } catch (error) {
       appToast.error({ text1: financeErrorMessage(error) })
     }
   })
-
-  async function onArchive() {
-    if (!account) {
-      return
-    }
-    try {
-      await archiveMutation.mutateAsync(account.id)
-      appToast.success({ text1: "Cuenta archivada" })
-      onOpenChange(false)
-    } catch (error) {
-      appToast.error({ text1: financeErrorMessage(error) })
-    }
-  }
-
-  const [confirmOpen, setConfirmOpen] = useState(false)
-
-  async function onDelete() {
-    if (!account) {
-      return
-    }
-    try {
-      await deleteMutation.mutateAsync(account.id)
-      appToast.success({ text1: "Cuenta borrada" })
-      setConfirmOpen(false)
-      onOpenChange(false)
-      onDeleted?.()
-    } catch (error) {
-      appToast.error({ text1: financeErrorMessage(error) })
-    }
-  }
 
   return (
     <>
@@ -263,9 +218,11 @@ export function AccountSheet({
         pending={pending}
         title={isEdit ? "Editar cuenta" : "Nueva cuenta"}
         description={
-          hasInstitutions
-            ? "El saldo empieza en 0. Se actualiza con los movimientos, no en este formulario."
-            : "Crea una institución bancaria antes de agregar una cuenta."
+          isEdit
+            ? "El saldo se actualiza con los movimientos. Usa Ajustar saldo para cambiarlo."
+            : hasInstitutions
+              ? "El saldo inicial es opcional y se puede cambiar después con Ajustar saldo."
+              : "Crea una institución bancaria antes de agregar una cuenta."
         }
         actions={{
           close: (
@@ -335,40 +292,26 @@ export function AccountSheet({
               />
             )}
           />
-          <Controller
-            control={control}
-            name="institutionId"
-            render={({ field }) => (
-              <SelectField
-                icon={WalletIcon}
-                label={
-                  accountType === "CASH"
-                    ? "Institución (opcional)"
-                    : "Institución"
-                }
-                value={field.value}
-                onChange={field.onChange}
-                options={
-                  hasInstitutions || accountType === "CASH"
-                    ? institutionOptions
-                    : [
-                        {
-                          value: CATALOG_NONE,
-                          label: "Crea una institución primero",
-                        },
-                      ]
-                }
-                disabled={!hasInstitutions && accountType !== "CASH"}
-              />
-            )}
-          />
-          {errors.institutionId?.message ? (
-            <p className="text-sm text-destructive">
-              {errors.institutionId.message}
-            </p>
-          ) : null}
           {accountType !== "CASH" ? (
             <>
+              <Field className="gap-1">
+                <FieldLabel className="text-sm text-muted-foreground">
+                  Institución
+                </FieldLabel>
+                <InstitutionTrigger
+                  institution={selectedInstitution}
+                  placeholder={
+                    hasInstitutions
+                      ? "Elige la institución"
+                      : "Crea una institución primero"
+                  }
+                  disabled={!hasInstitutions}
+                  onClick={() => openPicker("institution")}
+                />
+                {errors.institutionId?.message ? (
+                  <FieldError>{errors.institutionId.message}</FieldError>
+                ) : null}
+              </Field>
               <Controller
                 control={control}
                 name="accountNumber"
@@ -400,18 +343,27 @@ export function AccountSheet({
               />
             </>
           ) : null}
-          <Controller
-            control={control}
-            name="currency"
-            render={({ field }) => (
-              <FinanceCurrencyPills
-                value={field.value}
-                onChange={field.onChange}
-                baseCurrency={defaultCurrency}
-                extraCodes={[defaultCurrency, account?.currency ?? ""]}
-              />
-            )}
-          />
+          {!isEdit ? (
+            <Controller
+              control={control}
+              name="initialBalance"
+              render={({ field }) => (
+                <FinanceMoneyField
+                  label="Saldo inicial"
+                  amount={field.value}
+                  onAmountChange={field.onChange}
+                  onAmountCommit={(next) => {
+                    field.onChange(next)
+                    void trigger("initialBalance")
+                  }}
+                  onAmountBlur={field.onBlur}
+                  amountError={errors.initialBalance?.message}
+                  currency={accountCurrency || defaultCurrency}
+                  onCurrencyPress={() => openPicker("currency")}
+                />
+              )}
+            />
+          ) : null}
         </SummarySection>
 
         <SummarySection title="Apariencia" icon={Palette}>
@@ -431,61 +383,26 @@ export function AccountSheet({
             )}
           />
         </SummarySection>
-
-        {isEdit && (
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              className="flex-1 text-destructive"
-              disabled={isPending}
-              onClick={() => void onArchive()}
-            >
-              <ArchiveIcon className="size-4" />
-              Archivar
-            </Button>
-            <Button
-              variant="destructive"
-              disabled={isPending}
-              className="flex-1"
-              onClick={() => setConfirmOpen(true)}
-            >
-              <TrashIcon className="size-4" />
-              Borrar
-            </Button>
-          </div>
-        )}
       </BottomSheet>
 
-      <AlertDialog
-        open={confirmOpen}
-        onOpenChange={(open) => {
-          if (!deleteMutation.isPending) {
-            setConfirmOpen(open)
-          }
-        }}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>¿Borrar esta cuenta?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Se eliminan sus movimientos, tarjetas débito y saldos. No se puede
-              deshacer.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleteMutation.isPending}>
-              Cancelar
-            </AlertDialogCancel>
-            <AlertDialogAction
-              variant="destructive"
-              disabled={deleteMutation.isPending}
-              onClick={() => void onDelete()}
-            >
-              Borrar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <InstitutionPickerSheet
+        open={picker === "institution"}
+        onOpenChange={closeHandlerFor("institution")}
+        institutions={institutions}
+        value={institutionId}
+        onSelect={(next) =>
+          setValue("institutionId", next, { shouldValidate: true })
+        }
+      />
+
+      <FinanceCurrencyPickerSheet
+        open={picker === "currency"}
+        onOpenChange={closeHandlerFor("currency")}
+        value={accountCurrency || defaultCurrency}
+        onSelect={(next) =>
+          setValue("currency", next, { shouldValidate: true })
+        }
+      />
     </>
   )
 }

@@ -186,6 +186,15 @@ export function useCreateTransfer() {
   })
 }
 
+export function useUpdateTransfer() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, body }: { id: string; body: CreateTransferBody }) =>
+      apiPatch<{ success: boolean }>(API_ENDPOINTS.FINANCE.TRANSFER(id), body),
+    onSuccess: () => invalidateLedger(queryClient),
+  })
+}
+
 export function useConfirmTransaction() {
   const queryClient = useQueryClient()
   return useMutation({

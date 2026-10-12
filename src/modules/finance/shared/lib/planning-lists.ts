@@ -59,3 +59,61 @@ export function visibleReceivables<T extends { status: string }>(
 ): T[] {
   return items.filter((item) => item.status !== "CANCELLED")
 }
+
+export type SavingsSuggestion = {
+  monthlyAmount: number
+  months: number
+  coveredPct: number
+}
+
+function monthsUntil(
+  targetDate: string | null | undefined,
+  now: Date
+): number | null {
+  if (!targetDate) {
+    return null
+  }
+  const target = new Date(`${targetDate.slice(0, 10)}T00:00:00`)
+  if (Number.isNaN(target.getTime())) {
+    return null
+  }
+  const months =
+    (target.getFullYear() - now.getFullYear()) * 12 +
+    (target.getMonth() - now.getMonth())
+  return months > 0 ? months : null
+}
+
+/**
+ * What to set aside each month to reach a goal on time. Null when there is no
+ * target date, the goal is already covered, or the date has passed.
+ */
+export function monthlySavingsSuggestion({
+  targetAmount,
+  currentAmount,
+  targetDate,
+  now,
+}: {
+  targetAmount: string | number | null | undefined
+  currentAmount: string | number | null | undefined
+  targetDate: string | null | undefined
+  now: Date
+}): SavingsSuggestion | null {
+  const target = parseFinanceMoney(targetAmount)
+  const saved = parseFinanceMoney(currentAmount)
+  if (target === null || saved === null || target <= 0) {
+    return null
+  }
+  const remaining = target - saved
+  if (remaining <= 0) {
+    return null
+  }
+  const months = monthsUntil(targetDate, now)
+  if (months === null) {
+    return null
+  }
+  return {
+    monthlyAmount: remaining / months,
+    months,
+    coveredPct: (saved / target) * 100,
+  }
+}

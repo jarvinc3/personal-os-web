@@ -10,7 +10,6 @@ import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms
 import { FinanceCurrencyPickerSheet } from "@/src/modules/finance/shared/components/pickers/finance-currency-picker-sheet"
 import {
   useCreateReceivable,
-  useDeleteReceivable,
   useUpdateReceivable,
 } from "@/src/modules/finance/shared/hooks/use-receivables"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
@@ -25,16 +24,6 @@ import {
   FINANCE_RECEIVABLE_STATUSES,
 } from "@/src/modules/finance/shared/types/entities"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/src/shared/components/ui/alert-dialog"
 import { FormTextField } from "@/src/shared/components/layout/form-blocks"
 import { Button } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
@@ -44,16 +33,14 @@ import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
 import { usePicker } from "@/src/shared/hooks/use-picker"
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
-  ArchiveIcon,
   CalendarIcon,
   HandshakeIcon,
   NotebookPenIcon,
-  Trash2Icon,
   UserIcon,
   WalletIcon,
   XIcon,
 } from "lucide-react"
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import {
   receivableSchema,
@@ -98,11 +85,7 @@ export function ReceivableSheet({
   const isEdit = Boolean(receivable)
   const createMutation = useCreateReceivable()
   const updateMutation = useUpdateReceivable()
-  const deleteMutation = useDeleteReceivable()
-  const isPending =
-    createMutation.isPending ||
-    updateMutation.isPending ||
-    deleteMutation.isPending
+  const isPending = createMutation.isPending || updateMutation.isPending
 
   const {
     control,
@@ -155,38 +138,6 @@ export function ReceivableSheet({
     }
   })
 
-  async function onArchiveReceivable() {
-    if (!receivable) {
-      return
-    }
-    try {
-      await updateMutation.mutateAsync({
-        id: receivable.id,
-        body: { status: "CANCELLED" },
-      })
-      appToast.success({ text1: "Cobro archivado" })
-      onOpenChange(false)
-    } catch (error) {
-      appToast.error({ text1: financeErrorMessage(error) })
-    }
-  }
-
-  const [confirmOpen, setConfirmOpen] = useState(false)
-
-  async function onDelete() {
-    if (!receivable) {
-      return
-    }
-    try {
-      await deleteMutation.mutateAsync(receivable.id)
-      appToast.success({ text1: "Cobro borrado" })
-      setConfirmOpen(false)
-      onOpenChange(false)
-    } catch (error) {
-      appToast.error({ text1: financeErrorMessage(error) })
-    }
-  }
-
   return (
     <>
       <BottomSheet
@@ -194,33 +145,8 @@ export function ReceivableSheet({
         onOpenChange={onOpenChange}
         pending={pending}
         title={isEdit ? "Editar cobro" : "Nuevo cobro"}
-        description="Pagado sin cobrado deja que el API complete el monto."
+        description="Al marcarlo Pagado se completa el monto con lo que falte."
         actions={{
-          delete: isEdit ? (
-            <div className="flex gap-2">
-              {receivable?.status !== "CANCELLED" ? (
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="text-destructive"
-                  disabled={isPending}
-                  onClick={() => void onArchiveReceivable()}
-                >
-                  <ArchiveIcon className="size-4 shrink-0" />
-                  Archivar
-                </Button>
-              ) : null}
-              <Button
-                type="button"
-                variant="destructive"
-                disabled={isPending}
-                onClick={() => setConfirmOpen(true)}
-              >
-                <Trash2Icon className="size-4 shrink-0" />
-                Borrar
-              </Button>
-            </div>
-          ) : undefined,
           close: (
             <Button
               type="button"
@@ -260,20 +186,22 @@ export function ReceivableSheet({
               />
             )}
           />
-          <Controller
-            control={control}
-            name="status"
-            render={({ field }) => (
-              <FinanceSegmentedControl
-                label="Estado"
-                value={field.value}
-                onChange={(value) =>
-                  field.onChange(value as FinanceReceivableStatus)
-                }
-                options={STATUS_OPTIONS}
-              />
-            )}
-          />
+          {isEdit ? (
+            <Controller
+              control={control}
+              name="status"
+              render={({ field }) => (
+                <FinanceSegmentedControl
+                  label="Estado"
+                  value={field.value}
+                  onChange={(value) =>
+                    field.onChange(value as FinanceReceivableStatus)
+                  }
+                  options={STATUS_OPTIONS}
+                />
+              )}
+            />
+          ) : null}
         </SummarySection>
 
         <SummarySection title="Montos" icon={WalletIcon}>
@@ -317,7 +245,7 @@ export function ReceivableSheet({
                 <FinanceHelpText>
                   {isEdit
                     ? "Se actualiza al registrar cada cobro."
-                    : "Si supera el monto, el API responde 400. Cancelado admite cobro parcial."}
+                    : "No puede superar el monto. Cancelado admite cobro parcial."}
                 </FinanceHelpText>
               </div>
             )}
@@ -364,36 +292,6 @@ export function ReceivableSheet({
           setValue("currency", next, { shouldValidate: true })
         }
       />
-
-      <AlertDialog
-        open={confirmOpen}
-        onOpenChange={(open) => {
-          if (!deleteMutation.isPending) {
-            setConfirmOpen(open)
-          }
-        }}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>¿Borrar este cobro?</AlertDialogTitle>
-            <AlertDialogDescription>
-              No se puede deshacer.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleteMutation.isPending}>
-              Cancelar
-            </AlertDialogCancel>
-            <AlertDialogAction
-              variant="destructive"
-              disabled={deleteMutation.isPending}
-              onClick={() => void onDelete()}
-            >
-              Borrar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </>
   )
 }

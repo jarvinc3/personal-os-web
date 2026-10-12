@@ -4,29 +4,24 @@ import { FinanceDateField } from "@/src/modules/finance/shared/components/forms/
 import {
   FinanceDetailsDisclosure,
   FinanceHelpText,
+  FinanceSuggestionRow,
 } from "@/src/modules/finance/shared/components/forms/form-blocks"
 import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
 import { FinanceCurrencyPickerSheet } from "@/src/modules/finance/shared/components/pickers/finance-currency-picker-sheet"
 import {
   useCreateSavingsGoal,
-  useDeleteSavingsGoal,
   useUpdateSavingsGoal,
 } from "@/src/modules/finance/shared/hooks/use-savings-goals"
+import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
-import { formatPlanningDate } from "@/src/modules/finance/shared/lib/planning-lists"
+import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
+import {
+  formatPlanningDate,
+  monthlySavingsSuggestion,
+} from "@/src/modules/finance/shared/lib/planning-lists"
 import { buildSavingsGoalBody } from "@/src/modules/finance/shared/lib/planning-payloads"
 import type { FinanceSavingsGoal } from "@/src/modules/finance/shared/types/entities"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/src/shared/components/ui/alert-dialog"
 import { FormTextField } from "@/src/shared/components/layout/form-blocks"
 import { Button } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
@@ -35,14 +30,8 @@ import { appToast } from "@/src/shared/lib/app-toast"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
 import { usePicker } from "@/src/shared/hooks/use-picker"
 import { zodResolver } from "@hookform/resolvers/zod"
-import {
-  NotebookPenIcon,
-  PiggyBankIcon,
-  TargetIcon,
-  Trash2Icon,
-  XIcon,
-} from "lucide-react"
-import { useEffect, useMemo, useState } from "react"
+import { NotebookPenIcon, PiggyBankIcon, TargetIcon, XIcon } from "lucide-react"
+import { useEffect, useMemo } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import {
   savingsGoalSchema,
@@ -81,11 +70,7 @@ export function SavingsGoalSheet({
   const isEdit = Boolean(goal)
   const createMutation = useCreateSavingsGoal()
   const updateMutation = useUpdateSavingsGoal()
-  const deleteMutation = useDeleteSavingsGoal()
-  const isPending =
-    createMutation.isPending ||
-    updateMutation.isPending ||
-    deleteMutation.isPending
+  const isPending = createMutation.isPending || updateMutation.isPending
 
   const {
     control,
@@ -100,6 +85,21 @@ export function SavingsGoalSheet({
   })
 
   const currency = useWatch({ control, name: "currency" })
+  const targetAmount = useWatch({ control, name: "targetAmount" })
+  const currentAmount = useWatch({ control, name: "currentAmount" })
+  const targetDate = useWatch({ control, name: "targetDate" })
+  const { config } = useFinanceEnabled()
+  const display = {
+    currency: currency || defaultCurrency,
+    showCents: config.display.showCents,
+    compactNumbers: config.display.compactNumbers,
+  }
+  const suggestion = monthlySavingsSuggestion({
+    targetAmount,
+    currentAmount,
+    targetDate,
+    now: new Date(),
+  })
   const { picker, openPicker, closeHandlerFor } = usePicker<
     "none" | "currency"
   >("none")
@@ -135,22 +135,6 @@ export function SavingsGoalSheet({
     }
   })
 
-  const [confirmOpen, setConfirmOpen] = useState(false)
-
-  async function onDelete() {
-    if (!goal) {
-      return
-    }
-    try {
-      await deleteMutation.mutateAsync(goal.id)
-      appToast.success({ text1: "Meta eliminada" })
-      setConfirmOpen(false)
-      onOpenChange(false)
-    } catch (error) {
-      appToast.error({ text1: financeErrorMessage(error) })
-    }
-  }
-
   return (
     <>
       <BottomSheet
@@ -158,19 +142,8 @@ export function SavingsGoalSheet({
         onOpenChange={onOpenChange}
         pending={pending}
         title={isEdit ? "Editar meta" : "Nueva meta"}
-        description="El estado Completada lo marca el API cuando lo ahorrado alcanza la meta."
+        description="Se marca como completada cuando lo ahorrado alcanza la meta."
         actions={{
-          delete: isEdit ? (
-            <Button
-              type="button"
-              variant="destructive"
-              disabled={isPending}
-              onClick={() => setConfirmOpen(true)}
-            >
-              <Trash2Icon className="size-4 shrink-0" />
-              Eliminar
-            </Button>
-          ) : undefined,
           close: (
             <Button
               type="button"
@@ -272,6 +245,11 @@ export function SavingsGoalSheet({
               />
             )}
           />
+          {suggestion ? (
+            <FinanceSuggestionRow>
+              {`${formatFinanceMoney(suggestion.monthlyAmount, display)} / mes · ${suggestion.months} meses · ${Math.round(suggestion.coveredPct)}% cubierto`}
+            </FinanceSuggestionRow>
+          ) : null}
         </SummarySection>
 
         <FinanceDetailsDisclosure>
@@ -300,36 +278,6 @@ export function SavingsGoalSheet({
           setValue("currency", next, { shouldValidate: true })
         }
       />
-
-      <AlertDialog
-        open={confirmOpen}
-        onOpenChange={(open) => {
-          if (!deleteMutation.isPending) {
-            setConfirmOpen(open)
-          }
-        }}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>¿Eliminar esta meta de ahorro?</AlertDialogTitle>
-            <AlertDialogDescription>
-              No se puede deshacer.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleteMutation.isPending}>
-              Cancelar
-            </AlertDialogCancel>
-            <AlertDialogAction
-              variant="destructive"
-              disabled={deleteMutation.isPending}
-              onClick={() => void onDelete()}
-            >
-              Eliminar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </>
   )
 }

@@ -2,6 +2,7 @@
 
 import { CategoryCard } from "@/src/modules/finance/shared/components/category-card"
 import { CategoryEmojiField } from "@/src/modules/finance/catalog/components/category-emoji-field"
+import { suggestCategoryEmojis } from "@/src/modules/finance/catalog/components/category-emoji-catalog"
 import { FinanceSegmentedControl } from "@/src/modules/finance/shared/components/forms/form-blocks"
 import { CATALOG_NONE } from "@/src/modules/finance/shared/constants/catalog"
 import {
@@ -19,29 +20,24 @@ import type {
   FinanceCategory,
   FinanceCategoryType,
 } from "@/src/modules/finance/shared/types/entities"
+import { DeleteRecordDialog } from "@/src/modules/finance/shared/components/delete-record-dialog"
+import { CategoryTrigger } from "@/src/modules/finance/shared/components/pickers/category-trigger"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/src/shared/components/ui/alert-dialog"
-import {
   FormTextField,
-  SelectField,
+  OptionRow,
 } from "@/src/shared/components/layout/form-blocks"
 import { Button } from "@/src/shared/components/ui/button"
 import { ColorPickerSwatch } from "@/src/shared/components/ui/color-picker"
+import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
 import { Label } from "@/src/shared/components/ui/label"
 import { Separator } from "@/src/shared/components/ui/separator"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { SummarySection } from "@/src/shared/components/ui/summary"
+import { usePicker } from "@/src/shared/hooks/use-picker"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
+import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
   ArrowDownCircleIcon,
@@ -99,7 +95,7 @@ export function CategorySheet({
 }: CategorySheetProps) {
   const isEdit = Boolean(category)
   const isSystem = Boolean(category?.isSystem)
-  const typeLocked = isSystem || (isEdit && category?.parentId != null)
+  const typeLocked = isSystem || isEdit
   const createMutation = useCreateCategory()
   const updateMutation = useUpdateCategory()
   const deleteMutation = useDeleteCategory()
@@ -123,6 +119,14 @@ export function CategorySheet({
   const categoryColor = useWatch({ control, name: "color" })
   const selectedType = useWatch({ control, name: "type" })
   const parentId = useWatch({ control, name: "parentId" })
+  const emojiSuggestions = useMemo(
+    () => suggestCategoryEmojis(categoryName),
+    [categoryName]
+  )
+  const { picker, openPicker, closeHandlerFor } = usePicker<"none" | "parent">(
+    "none"
+  )
+  const selectedParent = categories.find((item) => item.id === parentId) ?? null
 
   const parentOptions = useMemo(
     () => [
@@ -272,6 +276,11 @@ export function CategorySheet({
             />
           )}
         />
+        {isEdit && !isSystem ? (
+          <p className="text-xs text-muted-foreground">
+            El tipo no cambia: los movimientos ya registrados lo usan.
+          </p>
+        ) : null}
 
         <CategoryCard
           name={categoryName}
@@ -318,21 +327,42 @@ export function CategorySheet({
                 />
               </div>
             </div>
+            {emojiSuggestions.length > 0 ? (
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span className="text-xs text-muted-foreground">Sugeridos</span>
+                {emojiSuggestions.map((emoji) => (
+                  <button
+                    key={emoji}
+                    type="button"
+                    aria-label={`Usar ${emoji}`}
+                    className={cn(
+                      "flex size-8 items-center justify-center rounded-full border border-border text-base",
+                      PRESSABLE_CLASS
+                    )}
+                    onClick={() =>
+                      setValue("icon", emoji, { shouldValidate: true })
+                    }
+                  >
+                    {emoji}
+                  </button>
+                ))}
+              </div>
+            ) : null}
           </div>
-          <Controller
-            control={control}
-            name="parentId"
-            render={({ field }) => (
-              <SelectField
-                label="Categoría padre"
-                icon={FolderTreeIcon}
-                value={field.value}
-                onChange={field.onChange}
-                options={parentOptions}
-                disabled={isSystem}
-              />
-            )}
-          />
+          <Field className="gap-1">
+            <FieldLabel className="text-sm text-muted-foreground">
+              Categoría padre
+            </FieldLabel>
+            <CategoryTrigger
+              category={selectedParent}
+              placeholder="Sin padre"
+              disabled={isSystem}
+              onClick={() => openPicker("parent")}
+            />
+            {errors.parentId?.message ? (
+              <FieldError>{errors.parentId.message}</FieldError>
+            ) : null}
+          </Field>
         </SummarySection>
 
         <SummarySection title="Apariencia" icon={PaletteIcon}>
@@ -374,35 +404,48 @@ export function CategorySheet({
         )}
       </BottomSheet>
 
-      <AlertDialog
+      <DeleteRecordDialog
         open={confirmOpen}
-        onOpenChange={(open) => {
-          if (!deleteMutation.isPending) {
-            setConfirmOpen(open)
-          }
-        }}
+        onOpenChange={setConfirmOpen}
+        recordName={category?.name ?? "esta categoría"}
+        pending={deleteMutation.isPending}
+        consequences="Los movimientos que la usan quedan sin categoría. No se puede deshacer."
+        onConfirm={() => void onDelete()}
+      />
+
+      <BottomSheet
+        open={picker === "parent"}
+        onOpenChange={closeHandlerFor("parent")}
+        title="Categoría padre"
       >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>¿Eliminar esta categoría?</AlertDialogTitle>
-            <AlertDialogDescription>
-              No se puede deshacer.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleteMutation.isPending}>
-              Cancelar
-            </AlertDialogCancel>
-            <AlertDialogAction
-              variant="destructive"
-              disabled={deleteMutation.isPending}
-              onClick={() => void onDelete()}
-            >
-              Eliminar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        <div className="overflow-hidden rounded-2xl border border-border bg-card">
+          <OptionRow
+            label="Sin padre"
+            icon={FolderTreeIcon}
+            selected={parentId === CATALOG_NONE}
+            onPress={() => {
+              setValue("parentId", CATALOG_NONE, { shouldValidate: true })
+              closeHandlerFor("parent")(false)
+            }}
+          />
+          {parentOptions
+            .filter((option) => option.value !== CATALOG_NONE)
+            .map((option) => (
+              <OptionRow
+                key={option.value}
+                label={option.label}
+                icon={FolderTreeIcon}
+                selected={parentId === option.value}
+                onPress={() => {
+                  setValue("parentId", option.value, {
+                    shouldValidate: true,
+                  })
+                  closeHandlerFor("parent")(false)
+                }}
+              />
+            ))}
+        </div>
+      </BottomSheet>
     </>
   )
 }

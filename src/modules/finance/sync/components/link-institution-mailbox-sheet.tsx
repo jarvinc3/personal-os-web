@@ -82,8 +82,7 @@ export function LinkInstitutionMailboxSheet({
     resolver: zodResolver(linkInstitutionMailboxSchema),
     defaultValues: {
       mailboxId: mailboxId ?? mailboxOptions[0]?.value ?? "",
-      institutionId:
-        institutionId ?? availableInstitutions[0]?.id ?? CATALOG_NONE,
+      institutionId: institutionId ?? CATALOG_NONE,
       bankSenderEmail: "",
       label: "",
     },
@@ -97,12 +96,7 @@ export function LinkInstitutionMailboxSheet({
   >("none")
 
   const defaultMailboxId = mailboxId ?? mailboxes[0]?.id ?? ""
-  const defaultInstitutionId =
-    institutionId ??
-    institutions.find(
-      (item) => item.isActive && !linkedInstitutionIds.has(item.id)
-    )?.id ??
-    ""
+  const defaultInstitutionId = institutionId ?? CATALOG_NONE
 
   useEffect(() => {
     if (!open) {
@@ -157,7 +151,7 @@ export function LinkInstitutionMailboxSheet({
         open={open}
         onOpenChange={onOpenChange}
         title="Vincular institución"
-        description="Elige el Gmail y el correo From con el que el banco avisa los movimientos."
+        description="Elige el Gmail y el correo del banco con el que avisa los movimientos."
         actions={{
           close: (
             <Button
@@ -216,14 +210,10 @@ export function LinkInstitutionMailboxSheet({
                   onChange={field.onChange}
                   options={mailboxOptions}
                   disabled={lockMailbox}
+                  error={errors.mailboxId?.message}
                 />
               )}
             />
-            {errors.mailboxId?.message ? (
-              <p className="text-sm text-destructive">
-                {errors.mailboxId.message}
-              </p>
-            ) : null}
             <Field className="gap-1">
               <FieldLabel className="text-sm text-muted-foreground">
                 Institución
@@ -252,7 +242,7 @@ export function LinkInstitutionMailboxSheet({
                   value={field.value}
                   onChange={field.onChange}
                   onBlur={field.onBlur}
-                  placeholder="alertas@bhd.com.do"
+                  placeholder="ej. alertas@banco.com"
                   error={errors.bankSenderEmail?.message}
                 />
               )}

@@ -1,6 +1,5 @@
 "use client"
 
-import { InstitutionSheet } from "@/src/modules/finance/institutions"
 import { InstitutionSwapStack } from "@/src/modules/finance/products/components/institution-swap-stack"
 import { AccountSheet, CategorySheet } from "@/src/modules/finance/catalog"
 import { FinanceExpenseTrendBadge } from "@/src/modules/finance/shared/components/expense-trend-badge"
@@ -77,11 +76,6 @@ export function FinanceProductsList({
   const categoriesQuery = useCategories(enabled)
   const balanceSheetQuery = useBalanceSheet(enabled)
   const {
-    open: openInstitutionSheet,
-    sheetId: institutionSheetId,
-    setOpen: setOpenInstitutionSheet,
-  } = useSheetParam(FINANCE_SHEET_KEYS.institution)
-  const {
     open: openAccountSheet,
     sheetId: accountSheetId,
     setOpen: setOpenAccountSheet,
@@ -91,13 +85,6 @@ export function FinanceProductsList({
     sheetId: categorySheetId,
     setOpen: setOpenCategorySheet,
   } = useSheetParam(FINANCE_SHEET_KEYS.category)
-  const editingInstitution = useSheetListEntity(
-    openInstitutionSheet,
-    institutionSheetId,
-    institutionsQuery.data,
-    institutionsQuery.isPending,
-    setOpenInstitutionSheet
-  )
   const editingAccount = useSheetListEntity(
     openAccountSheet,
     accountSheetId,
@@ -219,7 +206,11 @@ export function FinanceProductsList({
                 </EmptyDescription>
               </EmptyHeader>
               <EmptyContent>
-                <Button onClick={() => setOpenInstitutionSheet(true, null)}>
+                <Button
+                  onClick={() =>
+                    router.push(APP_ROUTES.app.financeInstitutionNew)
+                  }
+                >
                   <PlusIcon className="size-4 shrink-0" />
                   Crear institución
                 </Button>
@@ -311,7 +302,7 @@ export function FinanceProductsList({
           {
             icon: <Building2Icon className="size-5" />,
             label: "Instituc...",
-            onClick: () => setOpenInstitutionSheet(true, null),
+            onClick: () => router.push(APP_ROUTES.app.financeInstitutionNew),
             disabled: !enabled,
             color: "bg-emerald-700",
           },
@@ -335,13 +326,6 @@ export function FinanceProductsList({
         ]}
       />
 
-      <InstitutionSheet
-        open={openInstitutionSheet}
-        onOpenChange={setOpenInstitutionSheet}
-        institution={editingInstitution}
-        pending={Boolean(institutionSheetId) && !editingInstitution}
-      />
-
       <AccountSheet
         open={openAccountSheet}
         onOpenChange={setOpenAccountSheet}
@@ -351,7 +335,6 @@ export function FinanceProductsList({
         defaultCurrency={
           balanceSheetQuery.data?.baseCurrency ?? defaultCurrency
         }
-        display={display}
         defaultType="CASH"
       />
 

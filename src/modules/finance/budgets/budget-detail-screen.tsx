@@ -9,14 +9,20 @@ import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/lay
 import { FinanceProgressHero } from "@/src/modules/finance/shared/components/layout/progress-hero"
 import type { PlanningProgressTone } from "@/src/modules/finance/shared/components/planning-progress-card"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
-import { useBudget } from "@/src/modules/finance/shared/hooks/use-budgets"
+import {
+  useBudget,
+  useDeleteBudget,
+} from "@/src/modules/finance/shared/hooks/use-budgets"
 import { useCategories } from "@/src/modules/finance/shared/hooks/use-categories"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
 import { useTransactions } from "@/src/modules/finance/shared/hooks/use-transactions"
 import { budgetPctUsed } from "@/src/modules/finance/shared/lib/budget-payloads"
 import { formatBudgetPeriodDate } from "@/src/modules/finance/shared/lib/budgets-query"
 import { filterCategoriesByType } from "@/src/modules/finance/shared/lib/category-tree"
-import { financeLoadErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
+import {
+  financeErrorMessage,
+  financeLoadErrorMessage,
+} from "@/src/modules/finance/shared/lib/finance-error"
 import {
   formatCalendarDate,
   sliceDateInput,
@@ -32,6 +38,8 @@ import {
   FINANCE_TRANSACTION_STATUS_LABEL,
   type FinanceTransactionStatus,
 } from "@/src/modules/finance/shared/types/entities"
+import { DeleteRecordDialog } from "@/src/modules/finance/shared/components/delete-record-dialog"
+import { RecordOptionsSheet } from "@/src/modules/finance/shared/components/record-options-sheet"
 import { LoadingView } from "@/src/shared/components/layout/loading-view"
 import { Button } from "@/src/shared/components/ui/button"
 import {
@@ -46,9 +54,15 @@ import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { ACCENT_FALLBACK_COLOR } from "@/src/shared/lib/accent-gradient"
-import { ChartPieIcon, EditIcon } from "lucide-react"
+import { appToast } from "@/src/shared/lib/app-toast"
+import {
+  ChartPieIcon,
+  MoreVerticalIcon,
+  PencilIcon,
+  Trash2Icon,
+} from "lucide-react"
 import { useRouter } from "next/navigation"
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 
 const CONFIRMED_STATUS: FinanceTransactionStatus = "CONFIRMED"
 
@@ -147,6 +161,24 @@ function BudgetDetailScreenBody({ budgetId }: FinanceBudgetDetailProps) {
     : 0
   const tone = budget ? budgetTone(pct, budget.alertThresholdPct ?? 80) : "info"
   const badge = budgetBadge(tone)
+  const deleteBudget = useDeleteBudget()
+  const [optionsOpen, setOptionsOpen] = useState(false)
+  const [confirmOpen, setConfirmOpen] = useState(false)
+
+  async function onDeleteBudget() {
+    if (!budget) {
+      return
+    }
+    try {
+      await deleteBudget.mutateAsync(budget.id)
+      appToast.success({ text1: "Presupuesto eliminado" })
+      setConfirmOpen(false)
+      setOptionsOpen(false)
+      router.push(APP_ROUTES.app.financePlanning)
+    } catch (error) {
+      appToast.error({ text1: financeErrorMessage(error) })
+    }
+  }
 
   const headerActions = useMemo(
     () => (
@@ -155,12 +187,12 @@ function BudgetDetailScreenBody({ budgetId }: FinanceBudgetDetailProps) {
         size="icon"
         className="size-9 rounded-full"
         aria-label="Opciones del presupuesto"
-        onClick={() => setOpenBudgetSheet(true)}
+        onClick={() => setOptionsOpen(true)}
       >
-        <EditIcon className="size-4.5" />
+        <MoreVerticalIcon className="size-4.5" />
       </Button>
     ),
-    [setOpenBudgetSheet]
+    [setOptionsOpen]
   )
 
   usePageHeader(
@@ -293,6 +325,40 @@ function BudgetDetailScreenBody({ budgetId }: FinanceBudgetDetailProps) {
           </p>
         ) : null}
       </div>
+
+      <RecordOptionsSheet
+        open={optionsOpen}
+        onOpenChange={setOptionsOpen}
+        description={budget.category?.name ?? "Presupuesto"}
+        options={[
+          {
+            id: "edit",
+            title: "Editar presupuesto",
+            icon: PencilIcon,
+            onPress: () => {
+              setOptionsOpen(false)
+              setOpenBudgetSheet(true)
+            },
+          },
+          {
+            id: "delete",
+            title: "Eliminar",
+            icon: Trash2Icon,
+            destructive: true,
+            disabled: deleteBudget.isPending,
+            onPress: () => setConfirmOpen(true),
+          },
+        ]}
+      />
+
+      <DeleteRecordDialog
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        recordName={budget.category?.name ?? "este presupuesto"}
+        pending={deleteBudget.isPending}
+        consequences="Deja de seguir el gasto de esa categoría. No se puede deshacer."
+        onConfirm={() => void onDeleteBudget()}
+      />
 
       <BudgetSheet
         open={openBudgetSheet}

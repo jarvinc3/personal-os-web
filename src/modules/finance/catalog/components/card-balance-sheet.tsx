@@ -1,7 +1,7 @@
 "use client"
 
-import { FinanceCurrencyPills } from "@/src/modules/finance/shared/components/forms/currency-pills"
 import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
+import { FinanceCurrencyPickerSheet } from "@/src/modules/finance/shared/components/pickers/finance-currency-picker-sheet"
 import { useAdjustBalance } from "@/src/modules/finance/shared/hooks/use-balance-adjustment"
 import {
   useDeleteCardBalance,
@@ -42,6 +42,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { PlusIcon, SaveIcon, TrashIcon, WalletIcon, XIcon } from "lucide-react"
 import { useMemo, useState } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
+import { usePicker } from "@/src/shared/hooks/use-picker"
 import {
   cardBalanceSchemaWithLimit,
   type CardBalanceFormValues,
@@ -142,6 +143,7 @@ function CardBalanceSheetForm({
     control,
     handleSubmit,
     reset,
+    setValue,
     trigger,
     formState: { errors },
   } = useForm<CardBalanceFormValues>({
@@ -149,6 +151,9 @@ function CardBalanceSheetForm({
     defaultValues: toFormValues(card, mode),
   })
   const selectedCurrency = useWatch({ control, name: "currency" })
+  const { picker, openPicker, closeHandlerFor } = usePicker<
+    "none" | "currency"
+  >("none")
 
   function selectExisting(currency: string) {
     const nextMode: BalanceMode = { kind: "edit", currency }
@@ -323,21 +328,6 @@ function CardBalanceSheetForm({
         >
           <Controller
             control={control}
-            name="currency"
-            render={({ field }) => (
-              <FinanceCurrencyPills
-                label="Moneda"
-                value={field.value}
-                onChange={field.onChange}
-                baseCurrency={defaultCurrency}
-                extraCodes={[defaultCurrency, field.value]}
-                excludeCodes={isAdding ? existingCurrencies : []}
-                disabled={!isAdding}
-              />
-            )}
-          />
-          <Controller
-            control={control}
             name="balance"
             render={({ field }) => (
               <FinanceMoneyField
@@ -351,6 +341,9 @@ function CardBalanceSheetForm({
                 onAmountBlur={field.onBlur}
                 amountError={errors.balance?.message}
                 currency={selectedCurrency || defaultCurrency}
+                onCurrencyPress={
+                  isAdding ? () => openPicker("currency") : undefined
+                }
               />
             )}
           />
@@ -417,6 +410,15 @@ function CardBalanceSheetForm({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <FinanceCurrencyPickerSheet
+        open={picker === "currency"}
+        onOpenChange={closeHandlerFor("currency")}
+        value={selectedCurrency || defaultCurrency}
+        onSelect={(next) =>
+          setValue("currency", next, { shouldValidate: true })
+        }
+      />
     </>
   )
 }

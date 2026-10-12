@@ -1,7 +1,6 @@
 "use client"
 
 import { CATALOG_NONE } from "@/src/modules/finance/shared/constants/catalog"
-import { EmailSyncLogList } from "@/src/modules/finance/sync/components/email-sync-history"
 import {
   useAddSourceSenders,
   useDisconnectEmailSource,
@@ -39,7 +38,6 @@ import { appToast } from "@/src/shared/lib/app-toast"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
-  HistoryIcon,
   MailIcon,
   PlusIcon,
   RefreshCwIcon,
@@ -256,15 +254,6 @@ export function EmailSourceSheet({
             </div>
           ) : null}
         </SummarySection>
-        <SummarySection title="Últimos syncs" icon={HistoryIcon}>
-          <EmailSyncLogList
-            logs={(source?.logs ?? []).map((log) => ({
-              ...log,
-              sourceName: source?.label || source?.institutionName || "Banco",
-            }))}
-            emptyLabel="Este vínculo aún no tiene runs. El primer sync aparecerá aquí."
-          />
-        </SummarySection>
         <SummarySection title="Institución" icon={MailIcon}>
           <Field className="gap-1">
             <FieldLabel className="text-sm text-muted-foreground">
@@ -288,7 +277,7 @@ export function EmailSourceSheet({
                 value={field.value}
                 onChange={field.onChange}
                 onBlur={field.onBlur}
-                placeholder="alertas@bhd.com.do"
+                placeholder="ej. alertas@banco.com"
                 error={errors.bankSenderEmail?.message}
               />
             )}

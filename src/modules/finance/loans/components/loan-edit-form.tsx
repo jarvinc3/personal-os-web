@@ -1,6 +1,20 @@
 "use client"
 
+import { zodResolver } from "@hookform/resolvers/zod"
+import {
+  CalendarIcon,
+  HashIcon,
+  LandmarkIcon,
+  NotebookPenIcon,
+  PercentIcon,
+  SaveIcon,
+  WalletIcon,
+} from "lucide-react"
+import { useEffect } from "react"
+import { Controller, useForm, useWatch } from "react-hook-form"
+
 import { FinanceDateField } from "@/src/modules/finance/shared/components/forms/date-field"
+import { FinanceFormScreen } from "@/src/modules/finance/shared/components/forms/form-screen"
 import {
   FinanceDetailsDisclosure,
   FinanceHelpText,
@@ -15,12 +29,7 @@ import {
   InstitutionTrigger,
 } from "@/src/modules/finance/shared/components/pickers/institution-picker"
 import { CATALOG_NONE } from "@/src/modules/finance/shared/constants/catalog"
-import {
-  useArchiveLoan,
-  useCreateLoan,
-  useDeleteLoan,
-  useUpdateLoan,
-} from "@/src/modules/finance/shared/hooks/use-loans"
+import { useUpdateLoan } from "@/src/modules/finance/shared/hooks/use-loans"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import { rateFractionToPercent } from "@/src/modules/finance/shared/lib/interest-rate"
 import { todayDateInput } from "@/src/modules/finance/shared/lib/ledger-form"
@@ -41,43 +50,15 @@ import {
   FINANCE_INSTALLMENT_FREQ_LABEL,
   FINANCE_INSTALLMENT_FREQS,
 } from "@/src/modules/finance/shared/types/entities"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/src/shared/components/ui/alert-dialog"
-import { FormTextField } from "@/src/shared/components/layout/form-blocks"
-import { Button } from "@/src/shared/components/ui/button"
-import { Field, FieldLabel } from "@/src/shared/components/ui/field"
-import { Spinner } from "@/src/shared/components/ui/spinner"
-import { SummarySection } from "@/src/shared/components/ui/summary"
-import { appToast } from "@/src/shared/lib/app-toast"
-import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
-import { usePicker } from "@/src/shared/hooks/use-picker"
-import { zodResolver } from "@hookform/resolvers/zod"
-import {
-  ArchiveIcon,
-  CalendarIcon,
-  HashIcon,
-  LandmarkIcon,
-  NotebookPenIcon,
-  PercentIcon,
-  Trash2Icon,
-  WalletIcon,
-  XIcon,
-} from "lucide-react"
-import { useEffect, useMemo, useState } from "react"
-import { Controller, useForm, useWatch } from "react-hook-form"
 import {
   loanSchema,
   type LoanFormValues,
 } from "@/src/modules/finance/loans/lib/loan-form"
+import { FormTextField } from "@/src/shared/components/layout/form-blocks"
+import { Field, FieldLabel } from "@/src/shared/components/ui/field"
+import { SummarySection } from "@/src/shared/components/ui/summary"
+import { usePicker } from "@/src/shared/hooks/use-picker"
+import { appToast } from "@/src/shared/lib/app-toast"
 
 const FREQ_OPTIONS = FINANCE_INSTALLMENT_FREQS.map((value) => ({
   value,
@@ -85,77 +66,54 @@ const FREQ_OPTIONS = FINANCE_INSTALLMENT_FREQS.map((value) => ({
 }))
 
 function toFormValues(
-  loan: FinanceLoan | null,
-  defaultCurrency: string,
+  loan: FinanceLoan,
   defaultInstitutionId: string = CATALOG_NONE
 ): LoanFormValues {
   return {
-    lenderName: loan?.lenderName ?? "",
-    institutionId: loan?.institutionId ?? defaultInstitutionId,
-    accountId: loan?.accountId ?? CATALOG_NONE,
-    originalAmount: loan?.originalAmount ?? "",
-    currentBalance: loan?.currentBalance ?? "",
-    installmentAmount: loan?.installmentAmount ?? "",
-    installmentFreq: loan?.installmentFreq ?? "MONTHLY",
-    totalInstallments: loan ? String(loan.totalInstallments) : "",
-    paidInstallments: loan ? String(loan.paidInstallments) : "0",
-    nextDueDate: formatPlanningDate(loan?.nextDueDate) || todayDateInput(),
-    interestRatePercent: rateFractionToPercent(loan?.interestRate) ?? "",
-    notes: loan?.notes ?? "",
-    currency: loan?.currency ?? defaultCurrency,
+    lenderName: loan.lenderName,
+    institutionId: loan.institutionId ?? defaultInstitutionId,
+    accountId: loan.accountId ?? CATALOG_NONE,
+    originalAmount: loan.originalAmount,
+    currentBalance: loan.currentBalance,
+    installmentAmount: loan.installmentAmount,
+    installmentFreq: loan.installmentFreq,
+    totalInstallments: String(loan.totalInstallments),
+    paidInstallments: String(loan.paidInstallments),
+    nextDueDate: formatPlanningDate(loan.nextDueDate) || todayDateInput(),
+    interestRatePercent: rateFractionToPercent(loan.interestRate) ?? "",
+    notes: loan.notes ?? "",
+    currency: loan.currency,
   }
 }
 
-type LoanSheetProps = {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  loan: FinanceLoan | null
+type LoanEditFormProps = {
+  loan: FinanceLoan
   accounts: FinanceAccount[]
   institutions: FinanceInstitution[]
   defaultCurrency: string
-  defaultInstitutionId?: string
   display: FinanceMoneyDisplay
-  pending?: boolean
+  onDone: () => void
 }
 
-export function LoanSheet({
-  open,
-  onOpenChange,
+export function LoanEditForm({
   loan,
   accounts,
   institutions,
   defaultCurrency,
-  defaultInstitutionId,
   display,
-  pending = false,
-}: LoanSheetProps) {
-  const isEdit = Boolean(loan)
-  const createMutation = useCreateLoan()
+  onDone,
+}: LoanEditFormProps) {
   const updateMutation = useUpdateLoan()
-  const archiveMutation = useArchiveLoan()
-  const deleteMutation = useDeleteLoan()
-  const isPending =
-    createMutation.isPending ||
-    updateMutation.isPending ||
-    archiveMutation.isPending ||
-    deleteMutation.isPending
-
-  const resolvedDefaultInstitutionId = defaultInstitutionId ?? CATALOG_NONE
-
   const {
     control,
     handleSubmit,
-    reset,
     setValue,
     trigger,
-    formState: { errors },
+    formState: { errors, isDirty },
   } = useForm<LoanFormValues>({
+    mode: "onTouched",
     resolver: zodResolver(loanSchema),
-    defaultValues: toFormValues(
-      loan,
-      defaultCurrency,
-      resolvedDefaultInstitutionId
-    ),
+    defaultValues: toFormValues(loan),
   })
 
   const selectedInstitutionId = useWatch({ control, name: "institutionId" })
@@ -170,19 +128,15 @@ export function LoanSheet({
     selectedInstitutionId === CATALOG_NONE
       ? institutions
       : institutions.filter((item) => item.id === selectedInstitutionId)
-
   const institutionAccounts = accounts.filter(
     (item) =>
       item.isActive &&
       (selectedInstitutionId === CATALOG_NONE ||
         item.institutionId === selectedInstitutionId)
   )
-
-  useEffect(() => {
-    if (open) {
-      reset(toFormValues(loan, defaultCurrency, resolvedDefaultInstitutionId))
-    }
-  }, [open, loan, defaultCurrency, resolvedDefaultInstitutionId, reset])
+  const formValues = useWatch({ control })
+  const formIsValid = loanSchema.safeParse(formValues).success
+  const canSave = !updateMutation.isPending && formIsValid && isDirty
 
   useEffect(() => {
     if (
@@ -199,120 +153,29 @@ export function LoanSheet({
     }
   }, [accounts, selectedAccountId, selectedInstitutionId, setValue])
 
-  const submitForm = useMemo(
-    () => createSheetSubmit(handleSubmit),
-    [handleSubmit]
-  )
-
-  const onSubmit = submitForm(async (values) => {
-    const payload = buildLoanBody(
-      {
-        ...values,
-        interestRatePercent: values.interestRatePercent,
-      },
-      { isUpdate: isEdit }
-    )
+  const onSubmit = handleSubmit(async (values) => {
+    const payload = buildLoanBody(values, { isUpdate: true })
     if (!payload.ok) {
       appToast.error({ text1: payload.error })
       return
     }
     try {
-      if (loan) {
-        await updateMutation.mutateAsync({ id: loan.id, body: payload.body })
-        appToast.success({ text1: "Préstamo actualizado" })
-      } else {
-        await createMutation.mutateAsync(payload.body)
-        appToast.success({ text1: "Préstamo creado" })
-      }
-      onOpenChange(false)
+      await updateMutation.mutateAsync({ id: loan.id, body: payload.body })
+      appToast.success({ text1: "Préstamo actualizado" })
+      onDone()
     } catch (error) {
       appToast.error({ text1: financeErrorMessage(error) })
     }
   })
 
-  async function onArchive() {
-    if (!loan) {
-      return
-    }
-    try {
-      await archiveMutation.mutateAsync(loan.id)
-      appToast.success({ text1: "Préstamo archivado" })
-      onOpenChange(false)
-    } catch (error) {
-      appToast.error({ text1: financeErrorMessage(error) })
-    }
-  }
-
-  const [confirmOpen, setConfirmOpen] = useState(false)
-
-  async function onDelete() {
-    if (!loan) {
-      return
-    }
-    try {
-      await deleteMutation.mutateAsync(loan.id)
-      appToast.success({ text1: "Préstamo borrado" })
-      setConfirmOpen(false)
-      onOpenChange(false)
-    } catch (error) {
-      appToast.error({ text1: financeErrorMessage(error) })
-    }
-  }
-
   return (
     <>
-      <BottomSheet
-        open={open}
-        onOpenChange={onOpenChange}
-        pending={pending}
-        title={isEdit ? "Editar préstamo" : "Nuevo préstamo"}
-        actions={{
-          delete: isEdit ? (
-            <div className="flex gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                className="text-destructive"
-                disabled={isPending}
-                onClick={() => void onArchive()}
-              >
-                <ArchiveIcon className="size-4 shrink-0" />
-                Archivar
-              </Button>
-              <Button
-                type="button"
-                variant="destructive"
-                disabled={isPending}
-                onClick={() => setConfirmOpen(true)}
-              >
-                <Trash2Icon className="size-4 shrink-0" />
-                Borrar
-              </Button>
-            </div>
-          ) : undefined,
-          close: (
-            <Button
-              type="button"
-              variant="outline"
-              className="flex-1"
-              onClick={() => onOpenChange(false)}
-            >
-              <XIcon className="size-4 shrink-0" />
-              Cancelar
-            </Button>
-          ),
-          submit: (
-            <Button
-              type="button"
-              disabled={isPending}
-              className="flex-1"
-              onClick={onSubmit}
-            >
-              {isPending ? <Spinner data-icon="inline-start" /> : null}
-              Guardar
-            </Button>
-          ),
-        }}
+      <FinanceFormScreen
+        onSubmit={onSubmit}
+        submitLabel="Guardar"
+        submitIcon={SaveIcon}
+        isSubmitting={updateMutation.isPending}
+        submitDisabled={!canSave}
       >
         <SummarySection title="Préstamo" icon={LandmarkIcon}>
           <Controller
@@ -350,7 +213,7 @@ export function LoanSheet({
                 </FieldLabel>
                 <DestinationTrigger
                   destination={
-                    field.value
+                    field.value && field.value !== CATALOG_NONE
                       ? encodeLedgerTarget("account", field.value)
                       : CATALOG_NONE
                   }
@@ -480,7 +343,7 @@ export function LoanSheet({
           />
         </SummarySection>
 
-        <FinanceDetailsDisclosure>
+        <FinanceDetailsDisclosure defaultOpen>
           <Controller
             control={control}
             name="interestRatePercent"
@@ -514,7 +377,7 @@ export function LoanSheet({
             )}
           />
         </FinanceDetailsDisclosure>
-      </BottomSheet>
+      </FinanceFormScreen>
 
       <FinanceCurrencyPickerSheet
         open={picker === "currency"}
@@ -550,36 +413,6 @@ export function LoanSheet({
           })
         }
       />
-
-      <AlertDialog
-        open={confirmOpen}
-        onOpenChange={(open) => {
-          if (!deleteMutation.isPending) {
-            setConfirmOpen(open)
-          }
-        }}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>¿Borrar este préstamo?</AlertDialogTitle>
-            <AlertDialogDescription>
-              No se puede deshacer.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleteMutation.isPending}>
-              Cancelar
-            </AlertDialogCancel>
-            <AlertDialogAction
-              variant="destructive"
-              disabled={deleteMutation.isPending}
-              onClick={() => void onDelete()}
-            >
-              Borrar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </>
   )
 }

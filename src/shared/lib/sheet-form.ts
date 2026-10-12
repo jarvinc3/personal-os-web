@@ -5,20 +5,31 @@ import type {
   UseFormHandleSubmit,
 } from "react-hook-form"
 
-export function firstFormErrorMessage(errors: FieldErrors): string | undefined {
+function collectFormErrorMessages(errors: FieldErrors): string[] {
+  const messages: string[] = []
   for (const value of Object.values(errors)) {
     if (!value || typeof value !== "object") {
       continue
     }
     if ("message" in value && value.message) {
-      return String(value.message)
+      messages.push(String(value.message))
+      continue
     }
-    const nested = firstFormErrorMessage(value as FieldErrors)
-    if (nested) {
-      return nested
-    }
+    messages.push(...collectFormErrorMessages(value as FieldErrors))
   }
-  return undefined
+  return messages
+}
+
+function focusFirstInvalidField() {
+  if (typeof document === "undefined") {
+    return
+  }
+  requestAnimationFrame(() => {
+    const invalidField = document.querySelector<HTMLElement>(
+      '[aria-invalid="true"]'
+    )
+    invalidField?.focus()
+  })
 }
 
 export function createSheetSubmit<T extends FieldValues>(
@@ -29,9 +40,13 @@ export function createSheetSubmit<T extends FieldValues>(
     onInvalid?: (errors: FieldErrors<T>) => void
   ) =>
     handleSubmit(onValid, (errors) => {
+      const messages = collectFormErrorMessages(errors)
       const message =
-        firstFormErrorMessage(errors) ?? "Revisa los campos del formulario"
+        messages.length > 1
+          ? `Revisa ${messages.length} campos`
+          : (messages[0] ?? "Revisa los campos del formulario")
       appToast.error({ text1: message })
       onInvalid?.(errors)
+      focusFirstInvalidField()
     })
 }

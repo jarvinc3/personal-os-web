@@ -9,6 +9,7 @@ import {
   listYearMonths,
   monthKey,
   parseMonthKey,
+  previousMonthsBounds,
   yearsTouched,
 } from "./month-window.ts"
 
@@ -108,5 +109,14 @@ describe("intersectIsoDateRange", () => {
       ),
       null
     )
+  })
+})
+
+describe("previousMonthsBounds", () => {
+  it("covers the three full months before October 2026", () => {
+    assert.deepEqual(previousMonthsBounds(new Date(2026, 9, 11), 3), {
+      dateFrom: "2026-07-01",
+      dateTo: "2026-09-30",
+    })
   })
 })

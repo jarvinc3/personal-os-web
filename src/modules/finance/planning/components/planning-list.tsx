@@ -3,12 +3,11 @@
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
 import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
 import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
-import { LoanProgressCard, LoanSheet } from "@/src/modules/finance/loans"
+import { LoanProgressCard } from "@/src/modules/finance/loans"
 import { ReceivableSheet } from "@/src/modules/finance/receivables"
 import { SavingsGoalSheet } from "@/src/modules/finance/savings-goals"
 import { PlanningProgressCard } from "@/src/modules/finance/shared/components/planning-progress-card"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
-import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
 import { useCategories } from "@/src/modules/finance/shared/hooks/use-categories"
 import { useInstitutions } from "@/src/modules/finance/shared/hooks/use-institutions"
 import { useLoans } from "@/src/modules/finance/shared/hooks/use-loans"
@@ -113,11 +112,6 @@ export function FinancePlanningList({
     setOpen: setOpenSavingsSheet,
   } = useSheetParam(FINANCE_SHEET_KEYS.savings)
   const {
-    open: openLoanSheet,
-    sheetId: loanSheetId,
-    setOpen: setOpenLoanSheet,
-  } = useSheetParam(FINANCE_SHEET_KEYS.loan)
-  const {
     open: openReceivableSheet,
     sheetId: receivableSheetId,
     setOpen: setOpenReceivableSheet,
@@ -125,15 +119,12 @@ export function FinancePlanningList({
   const { setOpen: setOpenBudgetSheet } = useSheetParam(
     FINANCE_SHEET_KEYS.budget
   )
-  const accountsQuery = useAccounts(enabled)
   const categoriesQuery = useCategories(enabled)
   const institutionsQuery = useInstitutions(enabled)
   const savingsQuery = useSavingsGoals(enabled)
   const loansQuery = useLoans(enabled)
   const receivablesQuery = useReceivables(enabled)
 
-  const accounts = accountsQuery.data ?? []
-  const institutions = institutionsQuery.data ?? []
   const hasExpenseCategories =
     filterCategoriesByType(categoriesQuery.data ?? [], "EXPENSE").length > 0
   const savings = savingsQuery.data ?? []
@@ -154,13 +145,6 @@ export function FinancePlanningList({
     savingsQuery.isPending,
     setOpenSavingsSheet
   )
-  const editingLoan = useSheetListEntity(
-    openLoanSheet,
-    loanSheetId,
-    loansQuery.data,
-    loansQuery.isPending,
-    setOpenLoanSheet
-  )
   const editingReceivable = useSheetListEntity(
     openReceivableSheet,
     receivableSheetId,
@@ -175,7 +159,7 @@ export function FinancePlanningList({
     if (next === "savings") {
       setOpenSavingsSheet(true, null)
     } else if (next === "loans") {
-      setOpenLoanSheet(true, null)
+      router.push(APP_ROUTES.app.financeLoanNew)
     } else if (next === "receivables") {
       setOpenReceivableSheet(true, null)
     } else {
@@ -308,7 +292,9 @@ export function FinancePlanningList({
                     </EmptyDescription>
                   </EmptyHeader>
                   <EmptyContent>
-                    <Button onClick={() => setOpenLoanSheet(true, null)}>
+                    <Button
+                      onClick={() => router.push(APP_ROUTES.app.financeLoanNew)}
+                    >
                       <PlusIcon className="size-4 shrink-0" />
                       Crear préstamo
                     </Button>
@@ -463,17 +449,6 @@ export function FinancePlanningList({
         pending={Boolean(savingsSheetId) && !editingGoal}
         goal={editingGoal}
         defaultCurrency={defaultCurrency}
-      />
-
-      <LoanSheet
-        open={openLoanSheet}
-        onOpenChange={setOpenLoanSheet}
-        pending={Boolean(loanSheetId) && !editingLoan}
-        loan={editingLoan}
-        accounts={accounts}
-        institutions={institutions}
-        defaultCurrency={defaultCurrency}
-        display={display}
       />
 
       <ReceivableSheet

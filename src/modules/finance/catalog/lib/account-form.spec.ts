@@ -10,6 +10,7 @@ const validCashAccount = {
   institutionId: "",
   accountNumber: "",
   color: "",
+  initialBalance: "",
   isDefaultForInstitution: false,
 }
 

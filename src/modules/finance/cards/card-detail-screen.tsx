@@ -2,7 +2,7 @@
 
 import { CardStatementsSection } from "@/src/modules/finance/cards/components/card-statements-section"
 import { CardVisual } from "@/src/modules/finance/cards/components/card-visual"
-import { CardBalanceSheet, CardSheet } from "@/src/modules/finance/catalog"
+import { CardBalanceSheet } from "@/src/modules/finance/catalog"
 import { FinanceGate } from "@/src/modules/finance/finance-gate"
 import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
 import { MissingRecord } from "@/src/modules/finance/shared/components/layout/missing-record"
@@ -10,17 +10,23 @@ import { FinanceInstrumentMovements } from "@/src/modules/finance/transactions"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
 import { useCardStatements } from "@/src/modules/finance/shared/hooks/use-card-statements"
-import { useCards } from "@/src/modules/finance/shared/hooks/use-cards"
+import {
+  useArchiveCard,
+  useCards,
+  useDeleteCard,
+} from "@/src/modules/finance/shared/hooks/use-cards"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
-import { useInstitutions } from "@/src/modules/finance/shared/hooks/use-institutions"
 import { resolveCardDisplayBalances } from "@/src/modules/finance/shared/lib/card-balances"
 import { buildUpcomingCardCycle } from "@/src/modules/finance/shared/lib/card-statement-cycle"
-import { financeLoadErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
+import {
+  financeErrorMessage,
+  financeLoadErrorMessage,
+} from "@/src/modules/finance/shared/lib/finance-error"
 import { encodeLedgerTarget } from "@/src/modules/finance/shared/lib/ledger-payloads"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+import { DeleteRecordDialog } from "@/src/modules/finance/shared/components/delete-record-dialog"
+import { RecordOptionsSheet } from "@/src/modules/finance/shared/components/record-options-sheet"
 import { LoadingView } from "@/src/shared/components/layout/loading-view"
 import { Button } from "@/src/shared/components/ui/button"
-import { SummaryItem } from "@/src/shared/components/ui/summary"
 import {
   Tabs,
   TabsContent,
@@ -33,11 +39,14 @@ import {
 } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
+import { appToast } from "@/src/shared/lib/app-toast"
 import {
+  ArchiveIcon,
   CreditCardIcon,
   MoreVerticalIcon,
   PencilIcon,
   ScaleIcon,
+  Trash2Icon,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
@@ -73,11 +82,7 @@ function CardDetailScreenBody({ cardId }: CardDetailScreenProps) {
 
   const cardsQuery = useCards(isEnabled)
   const accountsQuery = useAccounts(isEnabled)
-  const institutionsQuery = useInstitutions(isEnabled)
   const statementsQuery = useCardStatements(isEnabled, cardId)
-  const { open: openCardSheet, setOpen: setOpenCardSheet } = useSheetParam(
-    FINANCE_SHEET_KEYS.card
-  )
   const { open: openCardBalanceSheet, setOpen: setOpenCardBalanceSheet } =
     useSheetParam(FINANCE_SHEET_KEYS.cardBalance)
   const { open: openOptionsSheet, setOpen: setOpenOptionsSheet } =
@@ -86,7 +91,6 @@ function CardDetailScreenBody({ cardId }: CardDetailScreenProps) {
   const card =
     (cardsQuery.data ?? []).find((item) => item.id === cardId) ?? null
   const accounts = accountsQuery.data ?? []
-  const institutions = institutionsQuery.data ?? []
   const balances = card ? resolveCardDisplayBalances(card, accounts) : []
   const primaryBalance = balances[0]
   const cardDisplay = {
@@ -94,6 +98,38 @@ function CardDetailScreenBody({ cardId }: CardDetailScreenProps) {
     currency: primaryBalance?.currency ?? display.currency,
   }
   const isCredit = card?.type === "CREDIT"
+  const archiveCard = useArchiveCard()
+  const deleteCard = useDeleteCard()
+  const [confirmOpen, setConfirmOpen] = useState(false)
+
+  async function onArchiveCard() {
+    if (!card) {
+      return
+    }
+    try {
+      await archiveCard.mutateAsync(card.id)
+      appToast.success({ text1: "Tarjeta archivada" })
+      setOpenOptionsSheet(false)
+      router.push(APP_ROUTES.app.financeProducts)
+    } catch (error) {
+      appToast.error({ text1: financeErrorMessage(error) })
+    }
+  }
+
+  async function onDeleteCard() {
+    if (!card) {
+      return
+    }
+    try {
+      await deleteCard.mutateAsync(card.id)
+      appToast.success({ text1: "Tarjeta eliminada" })
+      setConfirmOpen(false)
+      setOpenOptionsSheet(false)
+      router.push(APP_ROUTES.app.financeProducts)
+    } catch (error) {
+      appToast.error({ text1: financeErrorMessage(error) })
+    }
+  }
 
   usePageHeader(
     {
@@ -227,7 +263,11 @@ function CardDetailScreenBody({ cardId }: CardDetailScreenProps) {
                 emptyLabel="Sin estados de cuenta"
                 emptyDescription="Configura el día de cierre para seguir cada ciclo."
                 createLabel="Tarjeta"
-                onCreate={() => setOpenCardSheet(true)}
+                onCreate={() =>
+                  router.push(
+                    `${APP_ROUTES.app.financeCardNew}?institutionId=${card.institutionId}`
+                  )
+                }
               />
             </TabsContent>
             <TabsContent value={CARD_DETAIL_TABS.movements}>
@@ -239,43 +279,58 @@ function CardDetailScreenBody({ cardId }: CardDetailScreenProps) {
         )}
       </div>
 
-      <BottomSheet
+      <RecordOptionsSheet
         open={openOptionsSheet}
         onOpenChange={setOpenOptionsSheet}
-        title="Opciones"
         description={card.name}
-      >
-        <div className="overflow-hidden rounded-2xl border border-border bg-card">
-          <SummaryItem
-            title="Editar tarjeta"
-            icon={PencilIcon}
-            onPress={() => setOpenCardSheet(true)}
-            isLast={false}
-            className="px-3"
-          />
-          <SummaryItem
-            title="Ajustar saldo"
-            icon={ScaleIcon}
-            onPress={() => {
+        options={[
+          {
+            id: "edit",
+            title: "Editar tarjeta",
+            icon: PencilIcon,
+            onPress: () => {
+              setOpenOptionsSheet(false)
+              router.push(APP_ROUTES.app.financeCardEdit(card.id))
+            },
+          },
+          {
+            id: "balance",
+            title: "Ajustar saldo",
+            icon: ScaleIcon,
+            onPress: () => {
               setOpenOptionsSheet(false)
               setOpenCardBalanceSheet(true)
-            }}
-            isLast
-            className="px-3"
-          />
-        </div>
-      </BottomSheet>
+            },
+          },
+          {
+            id: "archive",
+            title: "Archivar",
+            icon: ArchiveIcon,
+            disabled: archiveCard.isPending || deleteCard.isPending,
+            onPress: () => void onArchiveCard(),
+          },
+          {
+            id: "delete",
+            title: "Eliminar",
+            icon: Trash2Icon,
+            destructive: true,
+            disabled: archiveCard.isPending || deleteCard.isPending,
+            onPress: () => setConfirmOpen(true),
+          },
+        ]}
+      />
 
-      <CardSheet
-        open={openCardSheet}
-        onOpenChange={setOpenCardSheet}
-        card={card}
-        institutions={institutions}
-        accounts={accounts}
-        defaultCurrency={config.baseCurrency}
-        onUpdateBalance={() => {
-          setOpenCardSheet(false)
-          setOpenCardBalanceSheet(true)
+      <DeleteRecordDialog
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        recordName={card.name}
+        pending={deleteCard.isPending}
+        consequences="Se eliminan sus movimientos y sus estados de cuenta. No se puede deshacer."
+        onConfirm={() => void onDeleteCard()}
+        archive={{
+          label: "¿Solo ocultarla? Archivar",
+          pending: archiveCard.isPending,
+          onArchive: () => void onArchiveCard(),
         }}
       />
 

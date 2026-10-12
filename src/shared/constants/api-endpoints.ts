@@ -51,6 +51,7 @@ export const API_ENDPOINTS = {
     BALANCE_ADJUSTMENT: "/finance/balance-adjustments",
     TRANSACTIONS: "/finance/transactions",
     TRANSFERS: "/finance/transfers",
+    TRANSFER: (id: string) => `/finance/transfers/${id}`,
     TRANSACTION: (id: string) => `/finance/transactions/${id}`,
     TRANSACTION_CONFIRM: (id: string) => `/finance/transactions/${id}/confirm`,
     TRANSACTION_REVERSE: (id: string) => `/finance/transactions/${id}/reverse`,

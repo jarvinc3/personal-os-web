@@ -338,12 +338,14 @@ export function buildReceivableBody(
 
 export type CreateSavingsGoalContributionBody = {
   amount: number
+  accountId: string
   contributedAt?: string
   notes?: string
 }
 
 export function buildSavingsGoalContributionBody(input: {
   amount: string
+  accountId: string
   contributedAt?: string
   notes?: string
 }): PayloadResult<CreateSavingsGoalContributionBody> {
@@ -353,6 +355,11 @@ export function buildSavingsGoalContributionBody(input: {
   }
   if (amount.body <= 0) {
     return { ok: false, error: "El aporte debe ser mayor que 0" }
+  }
+
+  const accountId = optionalTrimmed(input.accountId)
+  if (!accountId) {
+    return { ok: false, error: "Elige la cuenta de origen" }
   }
 
   const contributedAt = optionalIsoDate(input.contributedAt)
@@ -366,6 +373,7 @@ export function buildSavingsGoalContributionBody(input: {
     ok: true,
     body: {
       amount: amount.body,
+      accountId,
       ...(contributedAt.body ? { contributedAt: contributedAt.body } : {}),
       ...(notes ? { notes } : {}),
     },
