@@ -27,21 +27,17 @@ import { useEffect, useLayoutEffect, type ReactNode } from "react"
 
 const SETTINGS_FINANCE_HREF = settingsModuleHref("finance")
 
+const FINANCE_PRIMARY_ROUTES = new Set<string>([
+  APP_ROUTES.app.finance,
+  APP_ROUTES.app.financeOverview,
+  APP_ROUTES.app.financeStatistics,
+  APP_ROUTES.app.financeProducts,
+  APP_ROUTES.app.financeTransactions,
+  APP_ROUTES.app.financePlanning,
+])
+
 function isFinanceSecondaryView(pathname: string): boolean {
-  return (
-    pathname === APP_ROUTES.app.financeCategories ||
-    pathname === APP_ROUTES.app.financeSync ||
-    pathname.startsWith(`${APP_ROUTES.app.financeInstitutions}/`) ||
-    pathname.startsWith(`${APP_ROUTES.app.financeCash}/`) ||
-    pathname.startsWith(`${APP_ROUTES.app.financeLoans}/`) ||
-    pathname.startsWith(`${APP_ROUTES.app.financeSavingsGoals}/`) ||
-    pathname.startsWith(`${APP_ROUTES.app.financeReceivables}/`) ||
-    pathname.startsWith(`${APP_ROUTES.app.financeBudgets}/`) ||
-    pathname === APP_ROUTES.app.financeTransactionNew ||
-    pathname === APP_ROUTES.app.financeTransferNew ||
-    /^\/finance\/transactions\/[^/]+\/edit$/.test(pathname) ||
-    /^\/finance\/transactions\/[^/]+$/.test(pathname)
-  )
+  return !FINANCE_PRIMARY_ROUTES.has(pathname)
 }
 
 export function FinanceGate({ children }: { children: ReactNode }) {

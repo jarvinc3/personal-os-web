@@ -46,7 +46,6 @@ import {
   SlidersHorizontalIcon,
   XIcon,
 } from "lucide-react"
-import { useRouter } from "next/navigation"
 import { useEffect, useMemo, useState } from "react"
 import { useQueries } from "@tanstack/react-query"
 
@@ -107,7 +106,6 @@ export function FinanceInstrumentMovements({
   onCreate,
   createLabel,
 }: FinanceInstrumentMovementsProps) {
-  const router = useRouter()
   const [search, setSearch] = useState("")
   const [debouncedSearch, setDebouncedSearch] = useState("")
   const [flow, setFlow] = useState<FlowFilter>("ALL")
@@ -300,11 +298,7 @@ export function FinanceInstrumentMovements({
                       </span>
                     }
                     showChevron={false}
-                    onPress={() =>
-                      router.push(
-                        APP_ROUTES.app.financeTransaction(transaction.id)
-                      )
-                    }
+                    href={APP_ROUTES.app.financeTransaction(transaction.id)}
                     isLast={index === group.items.length - 1}
                   />
                 )

@@ -39,7 +39,6 @@ import { FinanceErrorState } from "@/src/modules/finance/shared/components/layou
 import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { ChartPieIcon } from "lucide-react"
-import { useRouter } from "next/navigation"
 import { useEffect, useRef } from "react"
 
 type FinanceBudgetsListProps = {
@@ -68,7 +67,6 @@ export function FinanceBudgetsList({
   enabled,
   display,
 }: FinanceBudgetsListProps) {
-  const router = useRouter()
   const {
     open: openBudgetSheet,
     sheetId: budgetSheetId,
@@ -195,9 +193,7 @@ export function FinanceBudgetsList({
                 targetHint="Tope"
                 targetLabel={formatFinanceMoney(budget.amountLimit, display)}
                 caption={joinPlanningCaption(remainingLabel, period, range)}
-                onPress={() =>
-                  router.push(APP_ROUTES.app.financeBudget(budget.id))
-                }
+                href={APP_ROUTES.app.financeBudget(budget.id)}
               />
             )
           })}

@@ -54,10 +54,26 @@ export const FINANCE_TRANSACTION_STATUS_LABEL: Record<
   REVERSED: "Reversado",
 }
 
+export type FinanceTransactionEditability =
+  "FULL" | "METADATA" | "NOTES" | "NONE"
+
+export type FinanceInstrumentHistoryKind =
+  "CREDIT_LIMIT_CHANGED" | "ADJUSTMENT" | "STATEMENT_CLOSED"
+
+export type FinanceInstrumentHistoryItem = {
+  id: string
+  kind: FinanceInstrumentHistoryKind
+  at: string
+  amount: string | null
+  currency: string | null
+  payload: Record<string, unknown>
+}
+
 export type FinanceTransaction = {
   id: string
   type: FinanceTransactionType
   status: FinanceTransactionStatus
+  editable: FinanceTransactionEditability
   amount: string
   currency: string
   ledgerAmount: string

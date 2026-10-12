@@ -115,6 +115,19 @@ export function isTransferTransaction(
   return item.type === "TRANSFER" || Boolean(item.transferGroupId)
 }
 
+const NON_COUNTING_STATUSES: ReadonlySet<FinanceTransactionStatus> = new Set([
+  "REVERSED",
+  "CANCELLED",
+  "DECLINED",
+])
+
+/** Reversed, cancelled and declined movements never add to a total. */
+export function isInactiveTransactionStatus(
+  status: FinanceTransactionStatus
+): boolean {
+  return NON_COUNTING_STATUSES.has(status)
+}
+
 export function transactionInstrumentLabel(
   item: Pick<FinanceTransaction, "accountName" | "cardName">
 ): string | null {
@@ -174,12 +187,15 @@ export function signedAmount(
 export function visibleTransactionTotals(
   items: Pick<
     FinanceTransaction,
-    "type" | "amountBaseCurrency" | "transferGroupId"
+    "type" | "amountBaseCurrency" | "transferGroupId" | "status"
   >[]
 ): { income: number; expenses: number } {
   return items.reduce(
     (totals, item) => {
-      if (isTransferTransaction(item)) {
+      if (
+        isTransferTransaction(item) ||
+        isInactiveTransactionStatus(item.status)
+      ) {
         return totals
       }
       const amount = parseFinanceMoney(item.amountBaseCurrency)

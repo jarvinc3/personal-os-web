@@ -21,10 +21,13 @@ export const APP_ROUTES = {
     notifications: "/notifications",
     keepAwake: "/keep-awake",
     finance: "/finance",
+    financeOverview: "/finance/overview",
+    financeStatistics: "/finance/statistics",
     financeProducts: "/finance/products",
     financeInstitutions: FINANCE_INSTITUTIONS_PATH,
     financeCash: FINANCE_CASH_PATH,
     financeCategories: "/finance/categories",
+    financeRecycleBin: "/finance/recycle-bin",
     financeSync: "/finance/sync",
     financeInstitution: (institutionId: string) =>
       `${FINANCE_INSTITUTIONS_PATH}/${institutionId}`,

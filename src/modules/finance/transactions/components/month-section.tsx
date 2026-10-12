@@ -9,6 +9,7 @@ import {
   type FinanceMoneyDisplay,
 } from "@/src/modules/finance/shared/lib/money"
 import {
+  isInactiveTransactionStatus,
   isTransferTransaction,
   movementSign,
   signedAmount,
@@ -16,6 +17,7 @@ import {
 } from "@/src/modules/finance/shared/lib/transactions-query"
 import type { FinanceCategory } from "@/src/modules/finance/shared/types/entities"
 import { SummaryItem } from "@/src/shared/components/ui/summary"
+import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { cn } from "@/src/shared/lib/utils"
 import {
   ArrowDownLeftIcon,
@@ -31,7 +33,6 @@ type FinanceMonthSectionProps = {
   display: FinanceMoneyDisplay
   isActive: boolean
   stickyOffset: number
-  onTransactionPress: (id: string) => void
 }
 
 export function FinanceMonthSection({
@@ -40,7 +41,6 @@ export function FinanceMonthSection({
   display,
   isActive,
   stickyOffset,
-  onTransactionPress,
 }: FinanceMonthSectionProps) {
   const headingId = `month-label-${month.key}`
   const categoryById = new Map(
@@ -97,6 +97,9 @@ export function FinanceMonthSection({
               <div className="rounded-2xl border border-border bg-card">
                 {day.items.map((transaction, index) => {
                   const isTransfer = isTransferTransaction(transaction)
+                  const isInactive = isInactiveTransactionStatus(
+                    transaction.status
+                  )
                   const category = transaction.categoryId
                     ? categoryById.get(transaction.categoryId)
                     : undefined
@@ -152,6 +155,7 @@ export function FinanceMonthSection({
                         ) : null
                       }
                       accentColor={color}
+                      className={cn(isInactive && "opacity-50")}
                       value={
                         <span
                           className={cn(
@@ -160,7 +164,8 @@ export function FinanceMonthSection({
                               "text-destructive",
                             !isTransfer &&
                               movementSign(transaction) === "+" &&
-                              "text-success"
+                              "text-success",
+                            isInactive && "text-muted-foreground line-through"
                           )}
                         >
                           {signedAmount(transaction, display)}
@@ -170,7 +175,7 @@ export function FinanceMonthSection({
                         <TransactionStatusMark status={transaction.status} />
                       }
                       showChevron={false}
-                      onPress={() => onTransactionPress(transaction.id)}
+                      href={APP_ROUTES.app.financeTransaction(transaction.id)}
                       isLast={index === day.items.length - 1}
                     />
                   )

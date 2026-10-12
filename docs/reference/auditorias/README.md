@@ -23,6 +23,7 @@ Aplicado:
 - Accesibilidad de avatares, ruedas de hora (pasos de 5 minutos) y nombres de modelo del proveedor de IA.
 - "Deshacer" tras eliminar: cada borrado guarda un snapshot y el toast ofrece reponerlo.
 - Los atajos del ⋮ del detalle abren el formulario: se quitó el cierre del menú que cancelaba la apertura.
+- Archivar pide confirmación y ofrece "Deshacer"; una vista de archivados y eliminados permite restaurar cada registro.
 
 Pendiente (P2):
 

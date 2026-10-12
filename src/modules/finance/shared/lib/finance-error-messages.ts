@@ -4,6 +4,15 @@ const GMAIL_TOKEN_PREFIX = "Gmail tokens could not be decrypted"
 const GMAIL_TOKEN_ERROR =
   "No se pudo leer el acceso a Gmail. Vuelve a conectar la cuenta."
 
+/** Stable backend codes that the API sends alongside the message. */
+const BACKEND_CODE_MESSAGE_ES: Record<string, string> = {
+  TRANSACTION_LOCKED:
+    "Este movimiento está completado. Márcalo como pendiente para editarlo.",
+  TRANSACTION_IMMUTABLE: "Este movimiento ya no se puede editar.",
+  TRANSACTION_LINKED:
+    "Este movimiento está ligado a otro registro. Edítalo desde ahí.",
+}
+
 /** Backend messages translated once so no raw English reaches the screen. */
 const BACKEND_MESSAGE_ES: Record<string, string> = {
   "Account is not active": "La cuenta no está activa.",
@@ -60,9 +69,17 @@ const BACKEND_MESSAGE_ES: Record<string, string> = {
   "Savings goal not found": "No encontramos la meta.",
 }
 
-export function translateFinanceError(status: number, message: string): string {
+export function translateFinanceError(
+  status: number,
+  message: string,
+  code?: string
+): string {
   if (status >= 500) {
     return SERVER_ERROR
+  }
+  const coded = code ? BACKEND_CODE_MESSAGE_ES[code] : undefined
+  if (coded) {
+    return coded
   }
   const translated = BACKEND_MESSAGE_ES[message]
   if (translated) {
