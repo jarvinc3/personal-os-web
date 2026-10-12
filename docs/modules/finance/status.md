@@ -1,10 +1,17 @@
 # Finance — estado
 
-Fecha: 2026-09-16
+Fecha: 2026-10-12
 
 | Ítem | Estado | Evidencia |
 | --- | --- | --- |
-| Shell, catalog, dashboard, ledger, planning, préstamos, cobros, metas, statistics | `implemented` | `app/(app)/finance/**` |
-| Correos `/finance/sync` | `implemented` | `sync/components/mailboxes-view.tsx`; OAuth vuelve aquí con sheet `oauth-gmail-result` |
-| Presupuestos | `implemented` en `/finance/planning` | no hay ruta `/finance/budgets`; reciclar cuentas/cobros = archivar / `CANCELLED` |
-| Categorías | `implemented` | `catalog/categories-screen.tsx`; la ruta importa `CategoriesScreen` desde el index — REV-WEB-013 resuelto |
+| Shell, catálogo, dashboard, ledger, planificación, préstamos, cobros, metas y estadísticas | `implemented` | `app/(app)/finance/**` |
+| Alta y edición en vista dedicada: movimiento, transferencia, préstamo, tarjeta e institución | `implemented` | `app/(app)/finance/{transactions,transfers,loans,cards,institutions}/`; screens en `src/modules/finance/index.ts` |
+| Alta y edición en sheet: cuenta, categoría, presupuesto, meta de ahorro, aporte, cobro, registrar cobro, ajustar saldo y vínculos de correo | `implemented` | `src/modules/finance/**/components/*-sheet.tsx` |
+| Correos `/finance/sync` | `implemented` | `sync/components/mailboxes-view.tsx`; OAuth vuelve aquí con el sheet `oauth-gmail-result` |
+| Presupuestos | `implemented` | listado en `/finance/planning`; el detalle sí es `/finance/budgets/[budgetId]` |
+| Categorías | `implemented` | `catalog/categories-screen.tsx` |
+| Comercios, suscripciones y recurrentes | `planned` | no hay rutas `/finance/merchants`, `/finance/subscriptions` ni `/finance/recurring` |
+| Deshacer tras eliminar | `planned` | el borrado es duro; el API no expone borrado suave |
+| Prefill con el agente de IA | `planned` | no existe |
+
+Las auditorías de formularios y su resultado están en [reference/auditorias/](../../reference/auditorias/README.md).

@@ -69,6 +69,8 @@ Cuando un collapsible abre ruedas u otro control para elegir un valor (`FinanceD
 | Región pendiente / vacía / contenido | `AsyncRegion`                                                              | `src/modules/finance/shared/components/layout/async-region.tsx`                                             |
 | Registro ausente con vuelta          | `MissingRecord`                                                            | `src/modules/finance/shared/components/layout/missing-record.tsx`                                           |
 | Hero de progreso de un detalle       | `FinanceProgressHero`                                                      | `src/modules/finance/shared/components/layout/progress-hero.tsx`                                            |
+| Acciones de un registro (⋮ del detalle) | `RecordOptionsSheet`                                                     | `src/modules/finance/shared/components/record-options-sheet.tsx`                                            |
+| Confirmación de borrado              | `DeleteRecordDialog`                                                       | `src/modules/finance/shared/components/delete-record-dialog.tsx`                                            |
 
 No armar un drawer con `Drawer` crudo si `BottomSheet` cubre el caso (título, description, actions, pending).
 
@@ -82,16 +84,18 @@ Keep Awake reminder: [`keep-awake-reminder-sheet.tsx`](../../src/modules/keep-aw
 
 ## Formularios de Finanzas
 
-Viven en `src/modules/finance/components/forms/`. No copiarlos a otros módulos; sí reutilizar el patrón:
+Viven en `src/modules/finance/shared/components/forms/`. No copiarlos a otros módulos; sí reutilizar el patrón:
 
 - `FinanceDateField` → fecha
-- `FinanceAmountField`, `FinanceCurrencyPills`, `FinanceSegmentedControl` → dinero / segmentos
+- `FinanceMoneyField` → monto con teclado y calculadora; `FinanceCurrencyPickerSheet` → moneda con bandera; `FinanceSegmentedControl` → segmentos
+- Cuenta o tarjeta: `DestinationTrigger` + `DestinationPickerSheet`; institución: `InstitutionTrigger` + `InstitutionPickerSheet`; categoría: `CategoryTrigger` + `CategoryPickerSheet`; país: `CountryTrigger` + `CountryPickerSheet`. No se elige un catálogo largo en un `Select` inline.
+- Cerrar un formulario con cambios sin guardar: `useDiscardChanges` (`src/modules/finance/shared/hooks/use-discard-changes.tsx`).
 - `Field` / `FieldLabel` / `FieldError` (`src/shared/components/ui/field.tsx`) → etiqueta y error
 - Campos de texto y select: icono líder del tipo de dato (`FormTextField` `icon`, `SelectField` `icon`). Estado binario en una fila: icono + `aria-label`, no la etiqueta cruda.
 
 ### Botón de registrar o guardar
 
-Estado del botón de envío: [`.cursor/rules/form-submit-disabled.mdc`](../../.cursor/rules/form-submit-disabled.mdc). Las reglas compartidas (`isPositiveAmountInput`, `isLedgerTargetInput`) viven en [`ledger-form.ts`](../../src/modules/finance/lib/ledger-form.ts) con su spec.
+Estado del botón de envío: [`.cursor/rules/form-submit-disabled.mdc`](../../.cursor/rules/form-submit-disabled.mdc). Las reglas compartidas (`isPositiveAmountInput`, `isLedgerTargetInput`) viven en [`ledger-form.ts`](../../src/modules/finance/shared/lib/ledger-form.ts) con su spec.
 
 ## Reglas registradas (`.cursor/rules/`)
 
@@ -106,7 +110,7 @@ Una regla por archivo `.mdc`; se leen todas antes de crear o cambiar un control.
 | [switch-row-icons.mdc](../../.cursor/rules/switch-row-icons.mdc) | `SettingsRow` / `SwitchFieldRow` |
 | [visual-status-icons.mdc](../../.cursor/rules/visual-status-icons.mdc) | icono + `aria-label` |
 | [form-shell-page.mdc](../../.cursor/rules/form-shell-page.mdc) | `FinanceFormScreen` |
-| [form-shell-sheet.mdc](../../.cursor/rules/form-shell-sheet.mdc) | `BottomSheet` (acciones del sheet) |
+| [form-shell-sheet.mdc](../../.cursor/rules/form-shell-sheet.mdc) | `BottomSheet` (acciones del sheet) + `useDiscardChanges` |
 | [form-sections.mdc](../../.cursor/rules/form-sections.mdc) | bloques con título |
 | [form-field-anatomy.mdc](../../.cursor/rules/form-field-anatomy.mdc) | `Field` / `FieldLabel` / `FieldError` |
 | [form-picker-fields.mdc](../../.cursor/rules/form-picker-fields.mdc) | picker de selección en `BottomSheet` |

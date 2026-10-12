@@ -5,7 +5,7 @@ alwaysApply: true
 
 # Envío del formulario
 
-- El `onSubmit` arma el cuerpo con un constructor del módulo que devuelve `{ ok, body }` o `{ ok, error }` (`buildCreateTransactionBody`, `buildCreateTransferBody`, `buildCreateAccountBody` en `src/modules/finance/lib/`). Si `!payload.ok`, se muestra `appToast.error({ text1: payload.error })` y se corta.
+- El `onSubmit` arma el cuerpo con un constructor del módulo que devuelve `{ ok, body }` o `{ ok, error }` (`buildCreateTransactionBody`, `buildCreateTransferBody`, `buildCreateAccountBody` en `src/modules/finance/shared/lib/`). Si `!payload.ok`, se muestra `appToast.error({ text1: payload.error })` y se corta.
 - Éxito: `appToast.success({ text1: "Movimiento creado" })` y `onDone()` o cerrar el sheet. El texto nombra la entidad y el verbo.
 - Error del servidor: `appToast.error({ text1: financeErrorMessage(error) })` dentro de un `try/catch`. No un estado de error inline ni un `Alert` debajo del botón.
 - Mientras corre la mutación el botón de envío está deshabilitado (`isPending`). No se envía dos veces.

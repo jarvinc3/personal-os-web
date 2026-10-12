@@ -4,11 +4,21 @@ Gate `useFinanceEnabled`: módulo off → CTA Settings `?sheet=finance-sheet` y 
 
 Money: lecturas decimal **strings**; writes **numbers** (`parseFinanceMoney` / `formatFinanceMoney`). Loan `interestRate` UI % → API fracción 0–1. `pctUsed` budgets se calcula en cliente.
 
-Query keys: `src/modules/finance/types/api.ts` (`["finance", ...]`). Mutaciones de cuentas/tarjetas/loans/instituciones/txs confirmadas/email assign invalidan `FINANCE_BALANCE_SHEET_QUERY_KEY`.
+Query keys: `src/modules/finance/shared/types/api.ts` (`["finance", ...]`). Mutaciones de cuentas/tarjetas/loans/instituciones/txs confirmadas/email assign invalidan `FINANCE_BALANCE_SHEET_QUERY_KEY`.
 
 Tab bar (4): Resumen, Movimientos, Planificación, Productos. Estadísticas `showInTabBar: false`. Gmail sync no está en tab bar; vive en `/finance/sync` (atajo desde Productos).
 
-Helpers: `src/modules/finance/lib/money.ts`, `ledger-payloads.ts`. Tests: 20 specs bajo `lib/`.
+## Convenciones de formularios
+
+- Alta y edición comparten la pieza: el `mode` decide título, CTA y texto de ayuda. El alta se habilita por validez del esquema; la edición, solo si hay cambios (`isDirty`).
+- Un formulario de ruta usa `FinanceFormScreen` con la barra de envío fija; uno en sheet usa las acciones del `BottomSheet`.
+- El dinero usa `FinanceMoneyField` (teclado y calculadora) y la moneda, `FinanceCurrencyPickerSheet` (con bandera). No hay inputs de monto genéricos.
+- Cuenta o tarjeta se elige con `DestinationPickerSheet` desde un `DestinationTrigger`, no en un `<select>`.
+- Cerrar con cambios sin guardar pide confirmación con `useDiscardChanges` (`shared/hooks/use-discard-changes.tsx`); un guardado con éxito cierra directo.
+- Las acciones de un registro viven en el ⋮ del detalle (`RecordOptionsSheet`). "Eliminar" es el último ítem, en rojo, y confirma con `DeleteRecordDialog`.
+- Los errores del API pasan por `financeErrorMessage` (`shared/lib/finance-error.ts`), que traduce el `message` del servidor. El detalle de validación no se muestra crudo.
+
+Helpers: `src/modules/finance/shared/lib/money.ts`, `ledger-payloads.ts`. Tests: specs `*.spec.ts` bajo `shared/lib/` y cada capability.
 
 > [!WARNING]
-> **REV-WEB-012** — docs antiguas reclamaban `/finance/budgets`. Presupuestos viven en `/finance/planning`. Cuentas y cobros se reciclan con archivar / `CANCELLED`; no hay DELETE. [review-register.md](../../review-register.md#rev-web-012)
+> **REV-WEB-012** — docs antiguas reclamaban `/finance/budgets`. El listado de presupuestos vive en `/finance/planning`; el detalle sí tiene ruta propia. Cuentas y cobros se reciclan con archivar / `CANCELLED`; no hay DELETE. [review-register.md](../../review-register.md#rev-web-012)
