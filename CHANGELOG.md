@@ -2,6 +2,13 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [1.8.0] - 2026-10-12
+
+### Cambiado
+
+- Movimientos lee las transferencias como una operación agrupada (`groupOperations`), con todas sus patas.
+- Se mapean los códigos nuevos del back: `TRANSFER_LOCKED`, `SAME_ACCOUNT`, `ACCOUNT_NOT_FOUND` y `TRANSFER_TARGET_NOT_ACCOUNT`.
+
 ## [1.7.0] - 2026-10-12
 
 ### Agregado

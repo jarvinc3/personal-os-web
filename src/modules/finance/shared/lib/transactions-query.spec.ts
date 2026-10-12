@@ -32,6 +32,7 @@ describe("buildTransactionsSearchParams", () => {
     const params = new URLSearchParams(qs)
     assert.equal(params.get("cursor"), "cur-2")
     assert.equal(params.get("limit"), "20")
+    assert.equal(params.get("groupOperations"), "true")
     assert.equal(params.has("page"), false)
     assert.equal(params.get("dateFrom"), "2026-08-01")
     assert.equal(params.get("dateTo"), "2026-08-31")

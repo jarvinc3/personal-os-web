@@ -52,6 +52,8 @@ export function buildTransactionsSearchParams(
 ): string {
   const params = new URLSearchParams({
     limit: String(query.limit),
+    // The web always reads transfers as one grouped operation with its legs.
+    groupOperations: "true",
   })
   if (query.cursor) {
     params.set("cursor", query.cursor)

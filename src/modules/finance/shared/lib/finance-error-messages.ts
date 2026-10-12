@@ -11,6 +11,12 @@ const BACKEND_CODE_MESSAGE_ES: Record<string, string> = {
   TRANSACTION_IMMUTABLE: "Este movimiento ya no se puede editar.",
   TRANSACTION_LINKED:
     "Este movimiento está ligado a otro registro. Edítalo desde ahí.",
+  TRANSFER_LOCKED:
+    "Esta transferencia está completada. Márcala como pendiente para editarla.",
+  SAME_ACCOUNT: "El origen y el destino no pueden ser la misma cuenta.",
+  ACCOUNT_NOT_FOUND: "No encontramos la cuenta.",
+  TRANSFER_TARGET_NOT_ACCOUNT:
+    "El destino de una transferencia debe ser una cuenta. Para pagar una tarjeta usa Pagar tarjeta.",
 }
 
 /** Backend messages translated once so no raw English reaches the screen. */
