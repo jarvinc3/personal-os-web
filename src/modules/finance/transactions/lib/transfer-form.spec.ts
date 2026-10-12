@@ -10,6 +10,8 @@ const validTransfer = {
   fromTarget: "account:acc-1",
   toTarget: "account:acc-2",
   status: "CONFIRMED" as const,
+  rail: "" as const,
+  feeAmount: "",
   description: "",
   notes: "",
 }
@@ -35,6 +37,17 @@ describe("transferSchema", () => {
         ...validTransfer,
         transactionDate: "2026-01-01",
       }).success,
+      false
+    )
+  })
+
+  it("accepts an empty fee but rejects a non-positive one", () => {
+    assert.equal(
+      transferSchema.safeParse({ ...validTransfer, feeAmount: "25" }).success,
+      true
+    )
+    assert.equal(
+      transferSchema.safeParse({ ...validTransfer, feeAmount: "0" }).success,
       false
     )
   })

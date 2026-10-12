@@ -25,6 +25,9 @@ export type CreateTransferBody = {
   description?: string
   notes?: string
   status?: "PENDING" | "CONFIRMED"
+  rail?: string
+  fee?: { amount: number }
+  destinationPending?: boolean
 }
 
 /** A completed movement only accepts its non-monetary fields. */
@@ -216,6 +219,8 @@ export function buildCreateTransferBody(input: {
   description?: string
   notes?: string
   status?: string
+  rail?: string
+  feeAmount?: string
 }): PayloadResult<CreateTransferBody> {
   const amount = parseFinanceMoney(input.amount)
   if (amount === null) {
@@ -264,6 +269,17 @@ export function buildCreateTransferBody(input: {
   }
   if (input.status === "PENDING" || input.status === "CONFIRMED") {
     body.status = input.status
+  }
+  if (input.rail) {
+    body.rail = input.rail
+  }
+  const feeAmount = optionalTrimmed(input.feeAmount)
+  if (feeAmount) {
+    const parsedFee = parseFinanceMoney(feeAmount)
+    if (parsedFee === null || parsedFee <= 0) {
+      return { ok: false, error: "Monto de comisión inválido" }
+    }
+    body.fee = { amount: parsedFee }
   }
   return { ok: true, body }
 }

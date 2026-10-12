@@ -58,6 +58,7 @@ export const API_ENDPOINTS = {
     TRANSACTIONS: "/finance/transactions",
     TRANSFERS: "/finance/transfers",
     TRANSFER: (id: string) => `/finance/transfers/${id}`,
+    TRANSFER_UNCONFIRM: (id: string) => `/finance/transfers/${id}/unconfirm`,
     TRANSACTION: (id: string) => `/finance/transactions/${id}`,
     TRANSACTION_RESTORE: (id: string) => `/finance/transactions/${id}/restore`,
     TRANSACTION_CONFIRM: (id: string) => `/finance/transactions/${id}/confirm`,

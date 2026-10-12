@@ -43,6 +43,7 @@ import {
   ArrowUpDownIcon,
   FileTextIcon,
   InfoIcon,
+  LandmarkIcon,
   NotebookPenIcon,
 } from "lucide-react"
 import { useCallback, useEffect, useId, useMemo } from "react"
@@ -84,6 +85,8 @@ function transferDefaults(
       transfer?.status === "PENDING"
         ? ("PENDING" as const)
         : ("CONFIRMED" as const),
+    rail: "" as const,
+    feeAmount: "",
     description: transfer?.description ?? "",
     notes: transfer?.notes ?? "",
   }
@@ -199,6 +202,8 @@ export function TransferForm({
       description: values.description,
       notes: values.notes,
       status: values.status,
+      rail: values.rail || undefined,
+      feeAmount: values.feeAmount,
       fromAccountId: from.accountId,
       toAccountId: to.accountId,
       toCardId: to.cardId,
@@ -334,6 +339,20 @@ export function TransferForm({
         <SummarySection title="Detalles opcionales" icon={InfoIcon} collapsible>
           <Controller
             control={control}
+            name="feeAmount"
+            render={({ field }) => (
+              <FormTextField
+                label="Comisión (opcional)"
+                icon={LandmarkIcon}
+                value={field.value}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+                error={errors.feeAmount?.message}
+              />
+            )}
+          />
+          <Controller
+            control={control}
             name="description"
             render={({ field }) => (
               <FormTextField
@@ -380,7 +399,7 @@ export function TransferForm({
         institutions={institutions}
         accounts={accounts}
         cards={cards}
-        accountsOnly={picker === "from"}
+        accountsOnly={picker === "from" || picker === "to"}
         display={{ ...display, currency: currency || display.currency }}
         excludeTarget={
           picker === "to" ? fromTarget : picker === "from" ? toTarget : null
