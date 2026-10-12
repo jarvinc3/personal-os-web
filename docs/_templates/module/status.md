@@ -2,9 +2,9 @@
 
 Fecha de verificación: `YYYY-MM-DD`
 
-| Ítem | Estado | Evidencia |
-| --- | --- | --- |
-| … | `implemented` | `src/...` |
+| Ítem | Estado        | Evidencia |
+| ---- | ------------- | --------- |
+| …    | `implemented` | `src/...` |
 
 Estados permitidos: `implemented`, `in-progress`, `planned`, `blocked`, `deprecated`.
 

@@ -11,6 +11,7 @@ Formato y reglas para `CHANGELOG.md` y para la versión de `package.json`. Léel
   - `MINOR`: agrega una función, una pantalla, un endpoint o una capacidad visible.
   - `PATCH`: corrección, texto, estilo, refactor sin cambio de comportamiento, documentación.
 - El `CHANGELOG.md` va en español, de la versión más nueva a la más vieja.
+- El `CHANGELOG.md` de la raíz lleva el año en curso. Al cerrar el primer release de un año nuevo, mueve las versiones del año anterior a `docs/changelog/AAAA.md`, sin editar su contenido, y deja el año nuevo en la raíz.
 - Cada versión lleva su fecha en `AAAA-MM-DD`.
 - Las secciones que no aplican no se escriben.
 - El tag de git es `vX.Y.Z` y se crea después del commit del release.
@@ -18,14 +19,14 @@ Formato y reglas para `CHANGELOG.md` y para la versión de `package.json`. Léel
 
 ## Secciones
 
-| Sección | Cuándo |
-| --- | --- |
-| `Agregado` | algo nuevo para quien usa la app |
-| `Cambiado` | un comportamiento existente que cambia |
-| `Obsoleto` | algo que sigue funcionando pero se va a quitar |
-| `Eliminado` | algo que se quitó |
-| `Corregido` | un fallo que se arregló |
-| `Seguridad` | un problema de seguridad |
+| Sección     | Cuándo                                         |
+| ----------- | ---------------------------------------------- |
+| `Agregado`  | algo nuevo para quien usa la app               |
+| `Cambiado`  | un comportamiento existente que cambia         |
+| `Obsoleto`  | algo que sigue funcionando pero se va a quitar |
+| `Eliminado` | algo que se quitó                              |
+| `Corregido` | un fallo que se arregló                        |
+| `Seguridad` | un problema de seguridad                       |
 
 ## Ejemplo
 
@@ -54,7 +55,9 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 ## Pasos al cerrar la sesión
 
 1. Elige el bump más alto de la sesión.
-2. Agrega la entrada arriba del todo en `CHANGELOG.md`, con la versión nueva y la fecha de hoy.
-3. Sube `version` en `package.json`.
-4. Commitea `chore(release): vX.Y.Z`.
-5. Crea el tag: `git tag vX.Y.Z`.
+2. Si cambió el año, mueve las versiones del año anterior a `docs/changelog/AAAA.md`.
+3. Agrega la entrada arriba del todo en `CHANGELOG.md`, con la versión nueva y la fecha de hoy.
+4. Sube `version` en `package.json`.
+5. Corre `pnpm format:check`, `pnpm lint` y `pnpm typecheck`.
+6. Commitea `chore(release): vX.Y.Z`.
+7. Crea el tag: `git tag vX.Y.Z`.

@@ -2,9 +2,9 @@
 
 Dos recorridos manuales sobre los formularios de Finanzas. Se conservan como evidencia de lo que se probó y de los mockups acordados; el estado vigente vive en [status.md](../../modules/finance/status.md).
 
-| Documento | Fecha | Alcance |
-| --- | --- | --- |
-| [desarrollo.md](./desarrollo.md) | 11 oct 2026 | `localhost:3000`, un recorrido por cada formulario |
+| Documento                        | Fecha       | Alcance                                                    |
+| -------------------------------- | ----------- | ---------------------------------------------------------- |
+| [desarrollo.md](./desarrollo.md) | 11 oct 2026 | `localhost:3000`, un recorrido por cada formulario         |
 | [produccion.md](./produccion.md) | 11 oct 2026 | `personal-os-web-one.vercel.app`, ancho móvil, con mockups |
 
 `mockups/` guarda los mockups móviles citados por la auditoría de producción.

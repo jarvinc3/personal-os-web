@@ -23,10 +23,7 @@ Crear gasto/ingreso y transferir comparten este patrón:
 - Notas y descripción dentro de “Detalles opcionales”, cerrado por defecto.
 - Copy en español de uso. Los códigos (`DEBIT`, `CONFIRMED`, ISO) no se muestran.
 
-
-
 ## Resumen
-
 
 | Formulario                           | Estado                                                                 | En vivo     |
 | ------------------------------------ | ---------------------------------------------------------------------- | ----------- |
@@ -51,30 +48,25 @@ Crear gasto/ingreso y transferir comparten este patrón:
 | Contacto (landing)                   | Fuera del sistema de formularios de la app.                            | Código      |
 | Keep Awake, chat, historial          | No son formularios de datos al estilo finanzas.                        | Código      |
 
-
-
-
 ## Hallazgos que se repiten
 
 1. **Dos familias de formularios.** Movimiento y transferencia son pantalla. El resto sigue en `BottomSheet` con Cancelar y Guardar, y el botón siempre está activo. El error sale después del clic, a veces solo en un toast.
 2. **Tres controles de monto.** `FinanceMoneyField` (modelo, con calculadora), `FinanceAmountField` (número grande, sin calculadora) y `FormTextField` con placeholder `0.00` (el viejo). En un mismo formulario conviven los dos últimos. Préstamo: “Monto original” es `FinanceAmountField` y “Saldo actual” / “Cuota” son `FormTextField`.
 3. **Listas largas en** `SelectField`**.** Institución, cuenta, categoría padre, categoría de presupuesto y “cuenta donde entró el dinero” son combobox. El modelo usa un picker con marca y saldo (`DestinationPickerSheet`).
 4. **Texto de implementación en la UI.**
-  - Préstamo, subtítulo del sheet: “12% se envía como 0.12. La tasa no es un entero de porcentaje.” Se repite junto al campo: “12% se envía como 0.12. Vacío = sin tasa (no es lo mismo que 0%).”
-  - Institución: “País (ISO-2)”, “Orden”, “Dominio”, “Nombre corto”, “Logo propio (PNG, JPG o WEBP, máx. 1 MB)”.
-  - Tarjeta: “Últimos 4”, “Cierre de estado (día)”.
-  - Ajustes de Finanzas: “Activar sync”, “Sync automático”, “Auto-categorizar”.
-  - Suscripciones: la moneda es un texto libre con placeholder `DOP`, sin el picker de moneda.
+
+- Préstamo, subtítulo del sheet: “12% se envía como 0.12. La tasa no es un entero de porcentaje.” Se repite junto al campo: “12% se envía como 0.12. Vacío = sin tasa (no es lo mismo que 0%).”
+- Institución: “País (ISO-2)”, “Orden”, “Dominio”, “Nombre corto”, “Logo propio (PNG, JPG o WEBP, máx. 1 MB)”.
+- Tarjeta: “Últimos 4”, “Cierre de estado (día)”.
+- Ajustes de Finanzas: “Activar sync”, “Sync automático”, “Auto-categorizar”.
+- Suscripciones: la moneda es un texto libre con placeholder `DOP`, sin el picker de moneda.
+
 5. `<select>` **nativo.** Solo queda en el tipo de institución y en el motivo de la página de contacto. El resto de opciones cortas ya usa `FinanceSegmentedControl` o filas de radio.
 6. `window.confirm` **del navegador** al borrar o archivar cuenta, tarjeta, categoría, institución, préstamo, meta, cobro, presupuesto, buzón y vínculo de correo. No usa el sheet de confirmación de la app.
 7. **Errores de saldos anidados solo en toast.** En tarjeta, “Saldo” y “Límite de crédito” no pintan `FieldError`. Un saldo vacío con límite puesto responde “Saldo inválido” o “Límite de crédito obligatorio” en el toast, y el campo no se marca.
 8. **Error de hidratación de Next.js** en el sidebar (`Collapsible` de Finanzas). El overlay de issues tapa el botón Guardar. No es del formulario, pero bloquea enviarlo.
 
-
-
 ## Formularios probados
-
-
 
 ### Nuevo gasto / ingreso — funciona
 
@@ -108,8 +100,6 @@ Lo que se siente viejo:
 - `<input type="file">` pelado para el logo.
 - Etiquetas “País (ISO-2)”, “Orden”, “Dominio”, “Nombre corto”.
 - El país pide el código de dos letras en vez de un país.
-
-
 
 ### Nueva cuenta — funciona
 
@@ -152,8 +142,6 @@ Con prestamista “Auditoría préstamo”, monto 1000, saldo 800, cuota 100, 10
 Encima, el subtítulo del sheet es texto de implementación (“12% se envía como 0.12…”). La tasa vive en “Detalles opcionales” como “Tasa anual (%)”, que es lo correcto para la persona; el comentario de la fracción sobra. “Institución (si está en el catálogo)” y “Cuenta de pago (opcional)” son `SelectField`. “Saldo actual” y “Cuota” no usan el campo de monto grande.
 
 ## Revisados en código (no reenviados tras caer la sesión)
-
-
 
 ### Meta de ahorro y aporte
 
@@ -201,12 +189,9 @@ En móvil, login y registro viven en `BottomSheet` (`login-sheet`, `register-she
 - Keep Awake: el recordatorio es un sheet de hora y días. Historial, ayuda y alerta no son formularios de alta.
 - Chat: el composer y el sheet de historial de conversaciones. No los comparé con el alta de un movimiento.
 
-
-
 ## Datos de prueba que quedaron
 
 Hay que borrarlos a mano. La sesión se cayó antes de poder eliminarlos.
-
 
 | Qué                                                                     | Dónde                                                       |
 | ----------------------------------------------------------------------- | ----------------------------------------------------------- |
@@ -215,7 +200,6 @@ Hay que borrarlos a mano. La sesión se cayó antes de poder eliminarlos.
 | Cuenta “Cuenta auditoría”, corriente, •••• 7890                         | Dentro de esa institución                                   |
 | Tarjeta “Visa auditoría”, crédito Visa, •••• 4242, límite 10,000        | Misma institución. El consolidado quedó en − DOP $10,000.00 |
 | Categoría “Auditoría categoría”                                         | Pestaña Gastos                                              |
-
 
 El préstamo no se creó. La transferencia no está confirmada.
 
@@ -228,4 +212,3 @@ El préstamo no se creó. La transferencia no está confirmada.
 5. Reescribir institución: país con nombre, tipo segmentado, logo con el mismo control de archivo que el resto de la app, y esconder “Orden”.
 6. Sustituir los `window.confirm` por el sheet de confirmación.
 7. Mostrar el error del API cuando no es un 500 genérico, y marcar el campo cuando el fallo es de saldo o límite.
-

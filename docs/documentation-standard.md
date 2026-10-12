@@ -17,24 +17,24 @@ No inventar comportamiento desde nombres de carpeta. Si falta evidencia, abrir [
 
 ## Propiedad canónica
 
-| Tipo de información | Dueño |
-| --- | --- |
+| Tipo de información                                                     | Dueño              |
+| ----------------------------------------------------------------------- | ------------------ |
 | Dominio, API, DTOs, datos, eventos, colas, seguridad, operación backend | `personal-os-back` |
-| Rutas, UX, estado cliente, navegador, navegación, consumo de API | `personal-os-web` |
+| Rutas, UX, estado cliente, navegador, navegación, consumo de API        | `personal-os-web`  |
 
 Las referencias cruzadas enlazan al dueño. No duplicar el contrato completo.
 
 ## Áreas
 
-| Carpeta | Contenido |
-| --- | --- |
-| `architecture/` | Cómo se organiza el código de este repo |
-| `modules/` | Comportamiento por módulo/capacidad |
+| Carpeta           | Contenido                                            |
+| ----------------- | ---------------------------------------------------- |
+| `architecture/`   | Cómo se organiza el código de este repo              |
+| `modules/`        | Comportamiento por módulo/capacidad                  |
 | `infrastructure/` | Núcleo transversal (config, health, eventos, DB, WS) |
-| `operations/` | Cómo arrancar, operar, probar y diagnosticar |
-| `reference/` | Trazabilidad y catálogos que no son runbooks |
-| `decisions/` | ADR vigentes |
-| `_templates/` | Plantillas; no son fuente de verdad del producto |
+| `operations/`     | Cómo arrancar, operar, probar y diagnosticar         |
+| `reference/`      | Trazabilidad y catálogos que no son runbooks         |
+| `decisions/`      | ADR vigentes                                         |
+| `_templates/`     | Plantillas; no son fuente de verdad del producto     |
 
 ## Archivos de un módulo
 
@@ -56,12 +56,12 @@ No crear carpetas vacías como placeholder.
 
 ## IDs estables
 
-| Prefijo | Uso | Ejemplo |
-| --- | --- | --- |
-| `BR-<MOD>-NNN` | Regla de negocio | `BR-FIN-001` |
-| `AC-<MOD>-NNN` | Criterio de aceptación | `AC-FIN-014` |
-| `ADR-NNN` | Decisión de arquitectura | `ADR-003` |
-| `REV-BACK-NNN` / `REV-WEB-NNN` | Hallazgo de revisión | `REV-BACK-007` |
+| Prefijo                        | Uso                      | Ejemplo        |
+| ------------------------------ | ------------------------ | -------------- |
+| `BR-<MOD>-NNN`                 | Regla de negocio         | `BR-FIN-001`   |
+| `AC-<MOD>-NNN`                 | Criterio de aceptación   | `AC-FIN-014`   |
+| `ADR-NNN`                      | Decisión de arquitectura | `ADR-003`      |
+| `REV-BACK-NNN` / `REV-WEB-NNN` | Hallazgo de revisión     | `REV-BACK-007` |
 
 Códigos de módulo: `AUTH`, `USR`, `NTF`, `AI`, `FIN`, `CORE`, `KAW`, `SET`, `HOM`, `LND`, `SHR`.
 
@@ -69,15 +69,15 @@ Códigos de módulo: `AUTH`, `USR`, `NTF`, `AI`, `FIN`, `CORE`, `KAW`, `SET`, `H
 
 Cada afirmación funcional se clasifica:
 
-| Estado | Significado |
-| --- | --- |
-| `VERIFICADO` | Contrastado con código, esquema, prueba o runtime |
-| `PARCIALMENTE_IMPLEMENTADO` | Existe en parte |
-| `NO_IMPLEMENTADO` | Documentado o decidido, no aplicado |
-| `CONTRADICE_CODIGO` | El texto y el código no coinciden |
-| `CONTRADICE_RUNTIME` | El comportamiento ejecutado no coincide |
-| `NO_VERIFICABLE` | No hay evidencia suficiente |
-| `CONTEXTO_NO_APLICABLE` | Pertenece a otro cliente/repo o ya no aplica aquí |
+| Estado                      | Significado                                       |
+| --------------------------- | ------------------------------------------------- |
+| `VERIFICADO`                | Contrastado con código, esquema, prueba o runtime |
+| `PARCIALMENTE_IMPLEMENTADO` | Existe en parte                                   |
+| `NO_IMPLEMENTADO`           | Documentado o decidido, no aplicado               |
+| `CONTRADICE_CODIGO`         | El texto y el código no coinciden                 |
+| `CONTRADICE_RUNTIME`        | El comportamiento ejecutado no coincide           |
+| `NO_VERIFICABLE`            | No hay evidencia suficiente                       |
+| `CONTEXTO_NO_APLICABLE`     | Pertenece a otro cliente/repo o ya no aplica aquí |
 
 Toda categoría distinta de `VERIFICADO` se registra en `docs/review-register.md` y se resalta en el documento temático:
 

@@ -6,29 +6,29 @@ Si este archivo contradice a `AGENTS.md` o a una regla `.mdc`, manda el repo. Aq
 
 ## Referencia rápida
 
-| Haz | No hagas |
-| --- | --- |
-| Salir pronto ante una entrada inválida | Anidar `if/else` en pirámide |
-| Fallar con un error explícito | Encadenar fallbacks que esconden el fallo |
-| Una razón para cambiar por unidad | Validar, transformar, guardar y notificar en el mismo sitio |
-| Extraer al tercer uso real del mismo concepto | Abstraer al primer parecido, o un componente que solo reenvía props |
-| La solución más simple para el problema de hoy | Un hook, una capa o un flag “por si acaso” |
-| Componer componentes y funciones | Cadenas de herencia o un wrapper por cada prop |
-| Hablar con el colaborador inmediato | Atravesar tres objetos propios para leer un campo |
-| Una función hace o devuelve | Un getter que además muta o navega |
-| Un schema Zod en el borde | El mismo invariante revalidado en el mapper y en el submit |
-| Dejar salir el error con contexto | Un `catch` vacío o devolver `null` como si no hubiera fallado |
-| Devolver un valor nuevo | Mutar el argumento que recibió el caller |
-| Un significado por `null` / `undefined` | Usarlos para tres estados de negocio distintos |
-| Reglas puras en `.ts`, con `*.spec.ts` | Lógica de dinero, fechas o payloads imposible de probar sin montar React |
-| La regla no importa React ni `api-client` | Un `.ts` de dominio que llama a `fetch` o a un cliente HTTP |
-| `"use client"` solo en la frontera | Marcar cada archivo, o convertir `page.tsx` en cliente para usar un estado |
-| Calcular durante el render | Un `useEffect` que copia props o deriva otro estado |
-| `useQuery` / `useMutation` | `useEffect` + `useState` para traer o guardar datos del API |
-| La query key incluye cada variable que usa `queryFn` | Una key fija mientras el id o el filtro cambian |
-| `apiGet` / `apiPost` / `apiDelete` de `src/config/api-client.ts` | Otro `fetch` que vuelva a abrir el envelope `{ data, meta }` |
-| `<button>` para acciones, `<Link>` para navegar | Un `<div onClick>` |
-| Estado compartible en la URL | Un filtro o tab que se pierde al recargar y solo vive en `useState` |
+| Haz                                                              | No hagas                                                                   |
+| ---------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| Salir pronto ante una entrada inválida                           | Anidar `if/else` en pirámide                                               |
+| Fallar con un error explícito                                    | Encadenar fallbacks que esconden el fallo                                  |
+| Una razón para cambiar por unidad                                | Validar, transformar, guardar y notificar en el mismo sitio                |
+| Extraer al tercer uso real del mismo concepto                    | Abstraer al primer parecido, o un componente que solo reenvía props        |
+| La solución más simple para el problema de hoy                   | Un hook, una capa o un flag “por si acaso”                                 |
+| Componer componentes y funciones                                 | Cadenas de herencia o un wrapper por cada prop                             |
+| Hablar con el colaborador inmediato                              | Atravesar tres objetos propios para leer un campo                          |
+| Una función hace o devuelve                                      | Un getter que además muta o navega                                         |
+| Un schema Zod en el borde                                        | El mismo invariante revalidado en el mapper y en el submit                 |
+| Dejar salir el error con contexto                                | Un `catch` vacío o devolver `null` como si no hubiera fallado              |
+| Devolver un valor nuevo                                          | Mutar el argumento que recibió el caller                                   |
+| Un significado por `null` / `undefined`                          | Usarlos para tres estados de negocio distintos                             |
+| Reglas puras en `.ts`, con `*.spec.ts`                           | Lógica de dinero, fechas o payloads imposible de probar sin montar React   |
+| La regla no importa React ni `api-client`                        | Un `.ts` de dominio que llama a `fetch` o a un cliente HTTP                |
+| `"use client"` solo en la frontera                               | Marcar cada archivo, o convertir `page.tsx` en cliente para usar un estado |
+| Calcular durante el render                                       | Un `useEffect` que copia props o deriva otro estado                        |
+| `useQuery` / `useMutation`                                       | `useEffect` + `useState` para traer o guardar datos del API                |
+| La query key incluye cada variable que usa `queryFn`             | Una key fija mientras el id o el filtro cambian                            |
+| `apiGet` / `apiPost` / `apiDelete` de `src/config/api-client.ts` | Otro `fetch` que vuelva a abrir el envelope `{ data, meta }`               |
+| `<button>` para acciones, `<Link>` para navegar                  | Un `<div onClick>`                                                         |
+| Estado compartible en la URL                                     | Un filtro o tab que se pierde al recargar y solo vive en `useState`        |
 
 ## Principios
 
@@ -205,7 +205,8 @@ export function useAiSession(sessionId: string | null) {
 
   return useQuery({
     queryKey: ["ai", "session", sessionId],
-    queryFn: () => apiGet<AiSessionDetail>(API_ENDPOINTS.AI.SESSION(sessionId!)),
+    queryFn: () =>
+      apiGet<AiSessionDetail>(API_ENDPOINTS.AI.SESSION(sessionId!)),
     enabled: Boolean(session) && Boolean(sessionId),
   })
 }

@@ -78,6 +78,7 @@ Toda sesión de agente cierra con un release: `CHANGELOG.md` actualizado y `vers
 - Un release por sesión, aunque el cambio sea pequeño. El bump es el más alto de la sesión: `MAJOR` si rompe un contrato o los datos guardados, `MINOR` si agrega una capacidad visible y `PATCH` en el resto.
 - El CHANGELOG va en español, de la versión más nueva a la más vieja, con la fecha en `AAAA-MM-DD`.
 - Cierra con `chore(release): vX.Y.Z` y crea el tag `vX.Y.Z`.
+- La documentación también pasa prettier: `pnpm format:check` cubre `ts`, `tsx` y `md`.
 - `personal-os-app` está fuera de servicio y no sigue esta regla.
 
 ## Checklist al cambiar comportamiento

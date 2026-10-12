@@ -1,6 +1,6 @@
-declare module "*.css" { }
-declare module "*.sass" { }
-declare module "*.scss" { }
+declare module "*.css" {}
+declare module "*.sass" {}
+declare module "*.scss" {}
 
 interface DocumentPictureInPictureOptions {
   width?: number
@@ -10,9 +10,7 @@ interface DocumentPictureInPictureOptions {
 }
 
 interface DocumentPictureInPicture {
-  requestWindow: (
-    options?: DocumentPictureInPictureOptions
-  ) => Promise<Window>
+  requestWindow: (options?: DocumentPictureInPictureOptions) => Promise<Window>
   readonly window: Window | null
 }
 

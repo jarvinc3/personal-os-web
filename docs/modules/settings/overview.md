@@ -4,16 +4,16 @@ Cliente de `UsersService`: perfil, tema, IA, quiet hours, módulos, logout, dele
 
 Ruta: `/settings` (`settings-screen.tsx`). Sheets `?sheet=`.
 
-| Sección | Sheet | API |
-| --- | --- | --- |
-| Cuenta | `EditAccountSheet` | PATCH `/users/me` |
-| Apariencia | `EditThemeSheet` | `preferences.theme` |
-| IA | `EditAISheet`, `EditAIProviderSheet` | `preferences.ai` + `GET /ai/providers` |
-| Notificaciones | `EditQuietHoursSheet` | `preferences.notifications.quietHours` |
-| Módulos | `EditFinanceSheet` etc. | PATCH `/users/me/modules/:slug` |
-| Peligro | `DeleteAccountSheet` | DELETE `/users/me` |
-| Peligro | `WipeUserDataSheet` | POST `/users/me/data/wipe` |
-| Moneda | `FinanceCurrenciesView` (`/settings/finance/currencies`) | `config.baseCurrency` + `trackedCurrencies`; POST `/finance/base-currency` |
+| Sección        | Sheet                                                    | API                                                                        |
+| -------------- | -------------------------------------------------------- | -------------------------------------------------------------------------- |
+| Cuenta         | `EditAccountSheet`                                       | PATCH `/users/me`                                                          |
+| Apariencia     | `EditThemeSheet`                                         | `preferences.theme`                                                        |
+| IA             | `EditAISheet`, `EditAIProviderSheet`                     | `preferences.ai` + `GET /ai/providers`                                     |
+| Notificaciones | `EditQuietHoursSheet`                                    | `preferences.notifications.quietHours`                                     |
+| Módulos        | `EditFinanceSheet` etc.                                  | PATCH `/users/me/modules/:slug`                                            |
+| Peligro        | `DeleteAccountSheet`                                     | DELETE `/users/me`                                                         |
+| Peligro        | `WipeUserDataSheet`                                      | POST `/users/me/data/wipe`                                                 |
+| Moneda         | `FinanceCurrenciesView` (`/settings/finance/currencies`) | `config.baseCurrency` + `trackedCurrencies`; POST `/finance/base-currency` |
 
 Slugs: `finance`, `agenda`, `projects`, `health`, `subscriptions`. Solo finance tiene app routes.
 
