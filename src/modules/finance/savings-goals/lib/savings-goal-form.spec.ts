@@ -7,6 +7,8 @@ const validGoal = {
   name: "Viaje",
   description: "",
   targetAmount: "2000",
+  accountId: "acc-1",
+  mode: "EARMARK" as const,
   currentAmount: "0",
   currency: "EUR",
   targetDate: "",

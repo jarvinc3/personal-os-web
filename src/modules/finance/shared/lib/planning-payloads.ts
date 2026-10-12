@@ -16,6 +16,8 @@ export type PayloadResult<T> =
 export type CreateSavingsGoalBody = {
   name: string
   targetAmount: number
+  accountId: string
+  mode?: "EARMARK" | "DEDICATED"
   description?: string
   currency?: string
   targetDate?: string
@@ -147,6 +149,8 @@ export function buildSavingsGoalBody(
   input: {
     name: string
     targetAmount: string
+    accountId: string
+    mode?: "EARMARK" | "DEDICATED"
     description?: string
     currency?: string
     targetDate?: string
@@ -164,6 +168,10 @@ export function buildSavingsGoalBody(
   }
   if (target.body <= 0) {
     return { ok: false, error: "La meta debe ser mayor que 0" }
+  }
+  const accountId = optionalTrimmed(input.accountId)
+  if (!accountId) {
+    return { ok: false, error: "Cuenta obligatoria" }
   }
 
   const currentRaw = options?.isUpdate
@@ -191,6 +199,8 @@ export function buildSavingsGoalBody(
     body: {
       name,
       targetAmount: target.body,
+      accountId,
+      ...(input.mode ? { mode: input.mode } : {}),
       ...(description ? { description } : {}),
       ...(currency ? { currency } : {}),
       ...(targetDate.body ? { targetDate: targetDate.body } : {}),
@@ -377,15 +387,15 @@ export function buildReceivableBody(
 
 export type CreateSavingsGoalContributionBody = {
   amount: number
-  accountId: string
-  contributedAt?: string
+  kind?: "CONTRIBUTION" | "WITHDRAWAL"
+  date?: string
   notes?: string
 }
 
 export function buildSavingsGoalContributionBody(input: {
   amount: string
-  accountId: string
-  contributedAt?: string
+  kind?: "CONTRIBUTION" | "WITHDRAWAL"
+  date?: string
   notes?: string
 }): PayloadResult<CreateSavingsGoalContributionBody> {
   const amount = requiredMoney(input.amount, "Aporte")
@@ -393,17 +403,12 @@ export function buildSavingsGoalContributionBody(input: {
     return amount
   }
   if (amount.body <= 0) {
-    return { ok: false, error: "El aporte debe ser mayor que 0" }
+    return { ok: false, error: "El monto debe ser mayor que 0" }
   }
 
-  const accountId = optionalTrimmed(input.accountId)
-  if (!accountId) {
-    return { ok: false, error: "Elige la cuenta de origen" }
-  }
-
-  const contributedAt = optionalIsoDate(input.contributedAt)
-  if (!contributedAt.ok) {
-    return contributedAt
+  const date = optionalIsoDate(input.date)
+  if (!date.ok) {
+    return date
   }
 
   const notes = optionalTrimmed(input.notes)
@@ -412,8 +417,8 @@ export function buildSavingsGoalContributionBody(input: {
     ok: true,
     body: {
       amount: amount.body,
-      accountId,
-      ...(contributedAt.body ? { contributedAt: contributedAt.body } : {}),
+      ...(input.kind ? { kind: input.kind } : {}),
+      ...(date.body ? { date: date.body } : {}),
       ...(notes ? { notes } : {}),
     },
   }

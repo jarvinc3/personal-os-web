@@ -44,6 +44,7 @@ import {
 const EMPTY_FORM: SavingsGoalContributionFormValues = {
   amount: "",
   accountId: "",
+  kind: "CONTRIBUTION",
   contributedAt: "",
   notes: "",
 }
@@ -140,7 +141,12 @@ export function SavingsGoalContributionSheet({
     if (!goalId) {
       return
     }
-    const payload = buildSavingsGoalContributionBody(values)
+    const payload = buildSavingsGoalContributionBody({
+      amount: values.amount,
+      kind: values.kind,
+      date: values.contributedAt,
+      notes: values.notes,
+    })
     if (!payload.ok) {
       appToast.error({ text1: payload.error })
       return

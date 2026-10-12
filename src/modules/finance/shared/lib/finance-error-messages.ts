@@ -24,6 +24,9 @@ const BACKEND_CODE_MESSAGE_ES: Record<string, string> = {
     "El pago supera la cuota. ¿Quieres aplicar el excedente como abono a capital?",
   LOAN_HAS_OVERDUE: "Paga primero las cuotas vencidas.",
   LOAN_NOT_FOUND: "No encontramos el préstamo.",
+  GOAL_ACCOUNT_REQUIRED: "Elige la cuenta donde guardas este dinero.",
+  EARMARK_EXCEEDS_BALANCE: "No tienes suficiente saldo libre en la cuenta.",
+  GOAL_NOT_FOUND: "No encontramos la meta.",
   ALREADY_RESTORED: "Esto ya se restauró.",
   RESTORE_CONFLICT:
     "No se puede restaurar: ya existe un registro con los mismos datos.",

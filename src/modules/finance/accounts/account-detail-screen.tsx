@@ -266,6 +266,16 @@ function AccountDetailScreenBody({ accountId }: AccountDetailScreenProps) {
               <p className="text-3xl font-bold tracking-tight tabular-nums">
                 {formatFinanceMoney(account.balance, accountDisplay)}
               </p>
+              <div className="flex items-center justify-between text-sm text-white/70">
+                <span>
+                  Libre{" "}
+                  {formatFinanceMoney(account.freeBalance, accountDisplay)}
+                </span>
+                <span>
+                  Apartado{" "}
+                  {formatFinanceMoney(account.earmarkedAmount, accountDisplay)}
+                </span>
+              </div>
             </div>
             <div className="mt-6 grid grid-cols-2 gap-3">
               <div className="rounded-2xl bg-black/20 px-3 py-2">

@@ -77,9 +77,9 @@ export const API_ENDPOINTS = {
     SAVINGS_GOAL_RESTORE: (id: string) =>
       `/finance/savings-goals/${id}/restore`,
     SAVINGS_GOAL_CONTRIBUTIONS: (id: string) =>
-      `/finance/savings-goals/${id}/contributions`,
+      `/finance/savings-goals/${id}/allocations`,
     SAVINGS_GOAL_CONTRIBUTION: (id: string, contributionId: string) =>
-      `/finance/savings-goals/${id}/contributions/${contributionId}`,
+      `/finance/savings-goals/${id}/allocations/${contributionId}`,
     RECEIVABLE_PAYMENTS: (id: string) => `/finance/receivables/${id}/payments`,
     LOANS: "/finance/loans",
     LOAN: (id: string) => `/finance/loans/${id}`,

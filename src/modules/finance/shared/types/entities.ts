@@ -189,6 +189,8 @@ export type FinanceAccount = {
   accountNumber: string | null
   isDefaultForInstitution?: boolean
   balance: string
+  earmarkedAmount: string
+  freeBalance: string
   color: string | null
   isActive: boolean
   createdAt: string
@@ -334,6 +336,9 @@ export type FinanceSavingsGoal = {
   currentAmount: string
   currency: string
   targetDate: string | null
+  accountId: string | null
+  mode: "EARMARK" | "DEDICATED"
+  spendReducesProgress: boolean
   isCompleted: boolean
   completedAt: string | null
 }
@@ -344,6 +349,7 @@ export type FinanceSavingsGoalContribution = {
   goalId: string
   amount: string
   contributedAt: string
+  kind: "CONTRIBUTION" | "WITHDRAWAL"
   accountId: string | null
   transactionId: string | null
   notes: string | null

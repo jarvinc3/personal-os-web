@@ -2,6 +2,14 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [1.12.0] - 2026-10-12
+
+### Agregado
+
+- La cuenta muestra "Libre" y "Apartado" en su detalle.
+- La meta pide cuenta y modo al crearla; los apartados usan `/allocations`.
+- Se mapean los códigos `GOAL_ACCOUNT_REQUIRED`, `EARMARK_EXCEEDS_BALANCE` y `GOAL_NOT_FOUND`.
+
 ## [1.11.0] - 2026-10-12
 
 ### Agregado
