@@ -112,3 +112,15 @@ export function useRecordReceivablePayment() {
     },
   })
 }
+
+export function useWriteOffReceivable() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ receivableId }: { receivableId: string }) =>
+      apiPost<{ success: boolean }>(
+        API_ENDPOINTS.FINANCE.RECEIVABLE_WRITE_OFF(receivableId),
+        {}
+      ),
+    onSuccess: () => invalidate(queryClient),
+  })
+}

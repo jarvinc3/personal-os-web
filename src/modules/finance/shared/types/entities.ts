@@ -420,6 +420,7 @@ export const FINANCE_RECEIVABLE_STATUSES = [
   "PARTIAL",
   "PAID",
   "CANCELLED",
+  "WRITTEN_OFF",
 ] as const
 export type FinanceReceivableStatus =
   (typeof FINANCE_RECEIVABLE_STATUSES)[number]
@@ -432,6 +433,7 @@ export const FINANCE_RECEIVABLE_STATUS_LABEL: Record<
   PARTIAL: "Parcial",
   PAID: "Pagado",
   CANCELLED: "Cancelado",
+  WRITTEN_OFF: "Castigado",
 }
 
 export type FinanceReceivable = {
@@ -440,6 +442,9 @@ export type FinanceReceivable = {
   description: string | null
   amount: string
   paidAmount: string
+  creditBalance: string
+  writtenOffAmount: string
+  writtenOffAt: string | null
   currency: string
   dueDate: string | null
   status: FinanceReceivableStatus

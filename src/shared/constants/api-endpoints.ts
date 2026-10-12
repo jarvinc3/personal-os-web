@@ -91,6 +91,8 @@ export const API_ENDPOINTS = {
     RECEIVABLES: "/finance/receivables",
     RECEIVABLE: (id: string) => `/finance/receivables/${id}`,
     RECEIVABLE_RESTORE: (id: string) => `/finance/receivables/${id}/restore`,
+    RECEIVABLE_WRITE_OFF: (id: string) =>
+      `/finance/receivables/${id}/write-off`,
     EMAIL_SOURCES: "/finance/email-sync/sources",
     EMAIL_SOURCE: (id: string) => `/finance/email-sync/sources/${id}`,
     EMAIL_SOURCE_SYNC: (id: string) => `/finance/email-sync/sources/${id}/sync`,

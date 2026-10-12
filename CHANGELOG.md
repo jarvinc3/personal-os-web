@@ -2,6 +2,14 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [1.13.0] - 2026-10-12
+
+### Agregado
+
+- Si el cobro supera lo pendiente, la hoja muestra las 3 opciones (ingreso extra, saldo a favor o a otro cobro) y las envía como `excessHandling`.
+- Acción "Castigar deuda" en el detalle del cobro y el estado `WRITTEN_OFF`.
+- Se mapean los códigos `RECEIVABLE_EXCESS_UNRESOLVED` y `RECEIVABLE_NOT_FOUND`.
+
 ## [1.12.0] - 2026-10-12
 
 ### Agregado

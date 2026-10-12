@@ -27,6 +27,9 @@ const BACKEND_CODE_MESSAGE_ES: Record<string, string> = {
   GOAL_ACCOUNT_REQUIRED: "Elige la cuenta donde guardas este dinero.",
   EARMARK_EXCEEDS_BALANCE: "No tienes suficiente saldo libre en la cuenta.",
   GOAL_NOT_FOUND: "No encontramos la meta.",
+  RECEIVABLE_EXCESS_UNRESOLVED:
+    "El pago supera lo pendiente. Elige qué hacer con la diferencia.",
+  RECEIVABLE_NOT_FOUND: "No encontramos el cobro.",
   ALREADY_RESTORED: "Esto ya se restauró.",
   RESTORE_CONFLICT:
     "No se puede restaurar: ya existe un registro con los mismos datos.",

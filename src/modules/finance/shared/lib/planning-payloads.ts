@@ -429,6 +429,8 @@ export type RecordReceivablePaymentBody = {
   accountId: string
   paidAt?: string
   notes?: string
+  excessHandling?: "EXTRA_INCOME" | "CREDIT_BALANCE" | "APPLY_TO_RECEIVABLE"
+  targetReceivableId?: string
 }
 
 export function buildReceivablePaymentBody(input: {
@@ -436,6 +438,8 @@ export function buildReceivablePaymentBody(input: {
   accountId: string
   paidAt?: string
   notes?: string
+  excessHandling?: "EXTRA_INCOME" | "CREDIT_BALANCE" | "APPLY_TO_RECEIVABLE"
+  targetReceivableId?: string
 }): PayloadResult<RecordReceivablePaymentBody> {
   const amount = requiredMoney(input.amount, "Cobro")
   if (!amount.ok) {
@@ -464,6 +468,10 @@ export function buildReceivablePaymentBody(input: {
       accountId,
       ...(paidAt.body ? { paidAt: paidAt.body } : {}),
       ...(notes ? { notes } : {}),
+      ...(input.excessHandling ? { excessHandling: input.excessHandling } : {}),
+      ...(input.targetReceivableId
+        ? { targetReceivableId: input.targetReceivableId }
+        : {}),
     },
   }
 }
