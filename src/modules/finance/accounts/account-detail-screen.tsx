@@ -37,6 +37,7 @@ import { visibleTransactionTotals } from "@/src/modules/finance/shared/lib/trans
 import { DeleteRecordDialog } from "@/src/modules/finance/shared/components/delete-record-dialog"
 import { ArchiveRecordDialog } from "@/src/modules/finance/shared/components/archive-record-dialog"
 import { RecordOptionsSheet } from "@/src/modules/finance/shared/components/record-options-sheet"
+import { InstrumentHistorySheet } from "@/src/modules/finance/shared/components/instrument-history-sheet"
 import { LoadingView } from "@/src/shared/components/layout/loading-view"
 import { Button } from "@/src/shared/components/ui/button"
 import {
@@ -48,6 +49,7 @@ import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { appToast } from "@/src/shared/lib/app-toast"
 import {
   ArchiveIcon,
+  HistoryIcon,
   MoreVerticalIcon,
   PencilIcon,
   ScaleIcon,
@@ -94,6 +96,8 @@ function AccountDetailScreenBody({ accountId }: AccountDetailScreenProps) {
     useSheetParam(FINANCE_SHEET_KEYS.cashAccountOptions)
   const { open: openBalanceSheet, setOpen: setOpenBalanceSheet } =
     useSheetParam(FINANCE_SHEET_KEYS.accountBalance)
+  const { open: openHistorySheet, setOpen: setOpenHistorySheet } =
+    useSheetParam(FINANCE_SHEET_KEYS.accountHistory)
 
   const account =
     (accountsQuery.data ?? []).find((item) => item.id === accountId) ?? null
@@ -322,6 +326,12 @@ function AccountDetailScreenBody({ accountId }: AccountDetailScreenProps) {
             onPress: () => setOpenBalanceSheet(true),
           },
           {
+            id: "history",
+            title: "Historial",
+            icon: HistoryIcon,
+            onPress: () => setOpenHistorySheet(true),
+          },
+          {
             id: "archive",
             title: "Archivar",
             icon: ArchiveIcon,
@@ -372,6 +382,12 @@ function AccountDetailScreenBody({ accountId }: AccountDetailScreenProps) {
         open={openBalanceSheet}
         onOpenChange={setOpenBalanceSheet}
         account={account}
+        display={accountDisplay}
+      />
+      <InstrumentHistorySheet
+        open={openHistorySheet}
+        onOpenChange={setOpenHistorySheet}
+        target={{ kind: "account", id: account.id }}
         display={accountDisplay}
       />
     </>

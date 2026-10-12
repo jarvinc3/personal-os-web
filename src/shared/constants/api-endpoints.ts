@@ -43,9 +43,11 @@ export const API_ENDPOINTS = {
     ACCOUNTS: "/finance/accounts",
     ACCOUNT: (id: string) => `/finance/accounts/${id}`,
     ACCOUNT_RESTORE: (id: string) => `/finance/accounts/${id}/restore`,
+    ACCOUNT_HISTORY: (id: string) => `/finance/accounts/${id}/history`,
     CARDS: "/finance/cards",
     CARD: (id: string) => `/finance/cards/${id}`,
     CARD_RESTORE: (id: string) => `/finance/cards/${id}/restore`,
+    CARD_HISTORY: (id: string) => `/finance/cards/${id}/history`,
     CARD_BALANCES: (id: string) => `/finance/cards/${id}/balances`,
     CARD_BALANCE: (id: string, currency: string) =>
       `/finance/cards/${id}/balances/${encodeURIComponent(currency)}`,
@@ -59,6 +61,8 @@ export const API_ENDPOINTS = {
     TRANSACTION: (id: string) => `/finance/transactions/${id}`,
     TRANSACTION_RESTORE: (id: string) => `/finance/transactions/${id}/restore`,
     TRANSACTION_CONFIRM: (id: string) => `/finance/transactions/${id}/confirm`,
+    TRANSACTION_UNCONFIRM: (id: string) =>
+      `/finance/transactions/${id}/unconfirm`,
     TRANSACTION_REVERSE: (id: string) => `/finance/transactions/${id}/reverse`,
     CATEGORIES: "/finance/categories",
     CATEGORY: (id: string) => `/finance/categories/${id}`,

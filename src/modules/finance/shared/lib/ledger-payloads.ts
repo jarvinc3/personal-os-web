@@ -27,6 +27,17 @@ export type CreateTransferBody = {
   status?: "PENDING" | "CONFIRMED"
 }
 
+/** A completed movement only accepts its non-monetary fields. */
+export type UpdateTransactionMetadataBody = {
+  categoryId?: string | null
+  merchant?: string | null
+  description?: string | null
+  notes?: string | null
+}
+
+export type UpdateTransactionBody =
+  CreateTransactionBody | UpdateTransactionMetadataBody
+
 export type PayloadResult<T> =
   { ok: true; body: T } | { ok: false; error: string }
 
@@ -179,6 +190,20 @@ export function buildCreateTransactionBody(
     body.status = input.status
   }
   return { ok: true, body }
+}
+
+export function buildTransactionMetadataBody(input: {
+  categoryId?: string
+  merchant?: string
+  description?: string
+  notes?: string
+}): UpdateTransactionMetadataBody {
+  return {
+    categoryId: optionalId(input.categoryId) ?? null,
+    merchant: optionalTrimmed(input.merchant) ?? null,
+    description: optionalTrimmed(input.description) ?? null,
+    notes: optionalTrimmed(input.notes) ?? null,
+  }
 }
 
 export function buildCreateTransferBody(input: {

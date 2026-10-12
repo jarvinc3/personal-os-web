@@ -32,11 +32,16 @@ import {
 } from "@/src/modules/finance/shared/lib/ledger-form"
 import {
   buildCreateTransactionBody,
+  buildTransactionMetadataBody,
   encodeLedgerTarget,
   splitLedgerTarget,
 } from "@/src/modules/finance/shared/lib/ledger-payloads"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
 import type { FinanceTransaction } from "@/src/modules/finance/shared/types/entities"
+import {
+  isTransactionMetadataOnly,
+  isTransactionReadOnly,
+} from "@/src/modules/finance/transactions/lib/transaction-edit"
 import { FormTextField } from "@/src/shared/components/layout/form-blocks"
 import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
 import { SummarySection } from "@/src/shared/components/ui/summary"
@@ -50,6 +55,7 @@ import {
   FileTextIcon,
   HandCoinsIcon,
   InfoIcon,
+  LockIcon,
   NotebookPenIcon,
   SaveIcon,
   StoreIcon,
@@ -125,6 +131,11 @@ export function TransactionForm({
   const isEdit = mode === "edit"
   const isTransferLeg =
     Boolean(transaction?.transferGroupId) || transaction?.type === "TRANSFER"
+  const metadataOnly =
+    isEdit && transaction !== null && isTransactionMetadataOnly(transaction)
+  const readOnly =
+    isEdit && transaction !== null && isTransactionReadOnly(transaction)
+  const locked = metadataOnly || readOnly
   const createMutation = useCreateTransaction()
   const updateMutation = useUpdateTransaction()
   const accountsQuery = useAccounts(enabled)
@@ -279,6 +290,19 @@ export function TransactionForm({
     if (isTransferLeg) {
       return
     }
+    if (metadataOnly && transaction) {
+      try {
+        await updateMutation.mutateAsync({
+          id: transaction.id,
+          body: buildTransactionMetadataBody(values),
+        })
+        appToast.success({ text1: "Movimiento actualizado" })
+        onDone()
+      } catch (error) {
+        appToast.error({ text1: financeErrorMessage(error) })
+      }
+      return
+    }
     const target = splitLedgerTarget(values.destination)
     const payload = buildCreateTransactionBody(
       {
@@ -339,8 +363,17 @@ export function TransactionForm({
         submitLabel={cta}
         submitIcon={SaveIcon}
         isSubmitting={isPending}
-        submitDisabled={!canSave}
+        submitDisabled={!canSave || readOnly}
       >
+        {locked ? (
+          <p className="flex items-start gap-2 rounded-xl border border-border bg-muted px-3 py-2 text-sm text-muted-foreground">
+            <LockIcon className="mt-0.5 size-4 shrink-0" aria-hidden />
+            {readOnly
+              ? "Este movimiento ya no se puede editar."
+              : "Este movimiento está completado. Solo puedes cambiar categoría, comercio, descripción y notas."}
+          </p>
+        ) : null}
+
         <Controller
           control={control}
           name="type"
@@ -355,6 +388,7 @@ export function TransactionForm({
               options={TYPE_OPTIONS}
               size="lg"
               fullWidth
+              disabled={locked}
             />
           )}
         />
@@ -386,6 +420,7 @@ export function TransactionForm({
                 currency={currency || defaultCurrency}
                 currencyError={errors.currency?.message}
                 onCurrencyPress={() => openPicker("currency")}
+                disabled={locked}
               />
             )}
           />
@@ -399,7 +434,7 @@ export function TransactionForm({
               accounts={accounts}
               cards={cards}
               display={display}
-              disabled={!hasTargets}
+              disabled={!hasTargets || locked}
               onClick={() => openPicker("destination")}
             />
             {errors.destination?.message ? (
@@ -417,6 +452,7 @@ export function TransactionForm({
                 onChange={field.onChange}
                 error={errors.transactionDate?.message}
                 withTime
+                disabled={locked}
                 aside={
                   <Controller
                     control={control}
@@ -440,6 +476,7 @@ export function TransactionForm({
                               checked ? "CONFIRMED" : "PENDING"
                             )
                           }
+                          disabled={locked}
                         />
                       </Field>
                     )}

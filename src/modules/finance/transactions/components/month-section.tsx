@@ -9,6 +9,7 @@ import {
   type FinanceMoneyDisplay,
 } from "@/src/modules/finance/shared/lib/money"
 import {
+  isInactiveTransactionStatus,
   isTransferTransaction,
   movementSign,
   signedAmount,
@@ -96,6 +97,9 @@ export function FinanceMonthSection({
               <div className="rounded-2xl border border-border bg-card">
                 {day.items.map((transaction, index) => {
                   const isTransfer = isTransferTransaction(transaction)
+                  const isInactive = isInactiveTransactionStatus(
+                    transaction.status
+                  )
                   const category = transaction.categoryId
                     ? categoryById.get(transaction.categoryId)
                     : undefined
@@ -151,6 +155,7 @@ export function FinanceMonthSection({
                         ) : null
                       }
                       accentColor={color}
+                      className={cn(isInactive && "opacity-50")}
                       value={
                         <span
                           className={cn(
@@ -159,7 +164,8 @@ export function FinanceMonthSection({
                               "text-destructive",
                             !isTransfer &&
                               movementSign(transaction) === "+" &&
-                              "text-success"
+                              "text-success",
+                            isInactive && "text-muted-foreground line-through"
                           )}
                         >
                           {signedAmount(transaction, display)}

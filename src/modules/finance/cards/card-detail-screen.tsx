@@ -29,6 +29,7 @@ import { encodeLedgerTarget } from "@/src/modules/finance/shared/lib/ledger-payl
 import { DeleteRecordDialog } from "@/src/modules/finance/shared/components/delete-record-dialog"
 import { ArchiveRecordDialog } from "@/src/modules/finance/shared/components/archive-record-dialog"
 import { RecordOptionsSheet } from "@/src/modules/finance/shared/components/record-options-sheet"
+import { InstrumentHistorySheet } from "@/src/modules/finance/shared/components/instrument-history-sheet"
 import { LoadingView } from "@/src/shared/components/layout/loading-view"
 import { Button } from "@/src/shared/components/ui/button"
 import {
@@ -47,6 +48,7 @@ import { appToast } from "@/src/shared/lib/app-toast"
 import {
   ArchiveIcon,
   CreditCardIcon,
+  HistoryIcon,
   MoreVerticalIcon,
   PencilIcon,
   ScaleIcon,
@@ -89,6 +91,8 @@ function CardDetailScreenBody({ cardId }: CardDetailScreenProps) {
   const statementsQuery = useCardStatements(isEnabled, cardId)
   const { open: openCardBalanceSheet, setOpen: setOpenCardBalanceSheet } =
     useSheetParam(FINANCE_SHEET_KEYS.cardBalance)
+  const { open: openHistorySheet, setOpen: setOpenHistorySheet } =
+    useSheetParam(FINANCE_SHEET_KEYS.cardHistory)
   const { open: openOptionsSheet, setOpen: setOpenOptionsSheet } =
     useSheetParam(FINANCE_SHEET_KEYS.cardOptions)
 
@@ -316,6 +320,12 @@ function CardDetailScreenBody({ cardId }: CardDetailScreenProps) {
             onPress: () => setOpenCardBalanceSheet(true),
           },
           {
+            id: "history",
+            title: "Historial",
+            icon: HistoryIcon,
+            onPress: () => setOpenHistorySheet(true),
+          },
+          {
             id: "archive",
             title: "Archivar",
             icon: ArchiveIcon,
@@ -360,6 +370,12 @@ function CardDetailScreenBody({ cardId }: CardDetailScreenProps) {
         onOpenChange={setOpenCardBalanceSheet}
         card={card}
         defaultCurrency={config.baseCurrency}
+        display={cardDisplay}
+      />
+      <InstrumentHistorySheet
+        open={openHistorySheet}
+        onOpenChange={setOpenHistorySheet}
+        target={{ kind: "card", id: card.id }}
         display={cardDisplay}
       />
     </>

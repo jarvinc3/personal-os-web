@@ -4,6 +4,7 @@ import { apiDelete, apiGet, apiPatch, apiPost } from "@/src/config/api-client"
 import type {
   CreateTransactionBody,
   CreateTransferBody,
+  UpdateTransactionBody,
 } from "@/src/modules/finance/shared/lib/ledger-payloads"
 import {
   buildTransactionsSearchParams,
@@ -171,7 +172,7 @@ export function useCreateTransaction() {
 export function useUpdateTransaction() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: ({ id, body }: { id: string; body: CreateTransactionBody }) =>
+    mutationFn: ({ id, body }: { id: string; body: UpdateTransactionBody }) =>
       apiPatch<FinanceTransaction>(API_ENDPOINTS.FINANCE.TRANSACTION(id), body),
     onSuccess: () => invalidateLedger(queryClient),
   })
@@ -201,6 +202,17 @@ export function useConfirmTransaction() {
     mutationFn: (id: string) =>
       apiPost<FinanceTransaction>(
         API_ENDPOINTS.FINANCE.TRANSACTION_CONFIRM(id)
+      ),
+    onSuccess: () => invalidateLedger(queryClient),
+  })
+}
+
+export function useUnconfirmTransaction() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) =>
+      apiPost<FinanceTransaction>(
+        API_ENDPOINTS.FINANCE.TRANSACTION_UNCONFIRM(id)
       ),
     onSuccess: () => invalidateLedger(queryClient),
   })

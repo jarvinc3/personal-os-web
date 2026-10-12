@@ -97,6 +97,10 @@ export const FINANCE_RECYCLE_BIN_QUERY_KEY = [
   ...FINANCE_QUERY_KEY,
   "recycle-bin",
 ] as const
+export const FINANCE_INSTRUMENT_HISTORY_QUERY_KEY = [
+  ...FINANCE_QUERY_KEY,
+  "instrument-history",
+] as const
 
 export type FinanceArchivedType = "institution" | "account" | "card" | "loan"
 

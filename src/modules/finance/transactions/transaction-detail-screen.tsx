@@ -13,6 +13,7 @@ import {
   useRestoreTransaction,
   useReverseTransaction,
   useTransaction,
+  useUnconfirmTransaction,
 } from "@/src/modules/finance/shared/hooks/use-transactions"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
 import {
@@ -57,6 +58,10 @@ import { useRouter } from "next/navigation"
 import { useMemo, useState } from "react"
 
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
+import {
+  canEditTransaction,
+  canUnlockTransaction,
+} from "@/src/modules/finance/transactions/lib/transaction-edit"
 
 type FinanceTransactionDetailProps = {
   transactionId: string
@@ -79,15 +84,14 @@ function typeLabel(type: string): string {
   return type
 }
 
-function canEdit(transaction: FinanceTransaction): boolean {
-  if (isTransferTransaction(transaction)) {
-    return false
-  }
-  return transaction.type === "DEBIT" || transaction.type === "CREDIT"
-}
-
 function canConfirm(transaction: FinanceTransaction): boolean {
   return transaction.status === "PENDING"
+}
+
+function canUnlock(transaction: FinanceTransaction): boolean {
+  return (
+    !isTransferTransaction(transaction) && canUnlockTransaction(transaction)
+  )
 }
 
 function TransactionDetailScreenBody({
@@ -103,6 +107,7 @@ function TransactionDetailScreenBody({
 
   const detailQuery = useTransaction(isEnabled, transactionId)
   const confirmMutation = useConfirmTransaction()
+  const unconfirmMutation = useUnconfirmTransaction()
   const reverseMutation = useReverseTransaction()
   const deleteMutation = useDeleteTransaction()
   const restoreMutation = useRestoreTransaction()
@@ -112,6 +117,7 @@ function TransactionDetailScreenBody({
   const tx = detailQuery.data
   const isMutating =
     confirmMutation.isPending ||
+    unconfirmMutation.isPending ||
     reverseMutation.isPending ||
     deleteMutation.isPending
 
@@ -122,6 +128,18 @@ function TransactionDetailScreenBody({
     try {
       await confirmMutation.mutateAsync(tx.id)
       appToast.success({ text1: "Movimiento confirmado" })
+    } catch (error) {
+      appToast.error({ text1: financeErrorMessage(error) })
+    }
+  }
+
+  async function onUnconfirm() {
+    if (!tx) {
+      return
+    }
+    try {
+      await unconfirmMutation.mutateAsync(tx.id)
+      appToast.success({ text1: "Movimiento desbloqueado para editar" })
     } catch (error) {
       appToast.error({ text1: financeErrorMessage(error) })
     }
@@ -368,7 +386,7 @@ function TransactionDetailScreenBody({
           />
         </SettingsSection>
 
-        {canConfirm(tx) || canReverseTransaction(tx) ? (
+        {canConfirm(tx) || canReverseTransaction(tx) || canUnlock(tx) ? (
           <div className="flex flex-col gap-2 sm:flex-row">
             {canConfirm(tx) ? (
               <Button
@@ -380,6 +398,19 @@ function TransactionDetailScreenBody({
                   <Spinner data-icon="inline-start" />
                 ) : null}
                 Confirmar
+              </Button>
+            ) : null}
+            {canUnlock(tx) ? (
+              <Button
+                type="button"
+                variant="outline"
+                disabled={isMutating}
+                onClick={() => void onUnconfirm()}
+              >
+                {unconfirmMutation.isPending ? (
+                  <Spinner data-icon="inline-start" />
+                ) : null}
+                Marcar como pendiente
               </Button>
             ) : null}
             {canReverseTransaction(tx) ? (
@@ -404,7 +435,7 @@ function TransactionDetailScreenBody({
         onOpenChange={setOpenOptionsSheet}
         description={formatTransactionDate(tx.transactionDate)}
         options={[
-          ...(canEdit(tx)
+          ...(canEditTransaction(tx) && !isTransferTransaction(tx)
             ? [
                 {
                   id: "edit",
