@@ -312,6 +312,8 @@ export type FinanceSavingsGoalContribution = {
   goalId: string
   amount: string
   contributedAt: string
+  accountId: string | null
+  transactionId: string | null
   notes: string | null
   createdAt: string
 }

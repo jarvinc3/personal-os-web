@@ -131,17 +131,31 @@ describe("buildReceivableBody", () => {
 
 describe("buildSavingsGoalContributionBody", () => {
   it("sends the amount as a number and leaves the date out when empty", () => {
-    const payload = buildSavingsGoalContributionBody({ amount: "5000" })
+    const payload = buildSavingsGoalContributionBody({
+      amount: "5000",
+      accountId: "acc-1",
+    })
     assert.equal(payload.ok, true)
     if (!payload.ok) {
       return
     }
     assert.equal(payload.body.amount, 5000)
+    assert.equal(payload.body.accountId, "acc-1")
     assert.equal("contributedAt" in payload.body, false)
   })
 
+  it("needs the account the money left", () => {
+    assert.equal(
+      buildSavingsGoalContributionBody({ amount: "5000", accountId: "  " }).ok,
+      false
+    )
+  })
+
   it("rejects a contribution of zero", () => {
-    assert.equal(buildSavingsGoalContributionBody({ amount: "0" }).ok, false)
+    assert.equal(
+      buildSavingsGoalContributionBody({ amount: "0", accountId: "acc-1" }).ok,
+      false
+    )
   })
 })
 

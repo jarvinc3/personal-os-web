@@ -13,6 +13,7 @@ export const accountSchema = z
     institutionId: z.string(),
     accountNumber: z.string(),
     color: z.string().trim().max(20),
+    initialBalance: z.string(),
     isDefaultForInstitution: z.boolean(),
   })
   .superRefine((values, ctx) => {

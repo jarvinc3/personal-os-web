@@ -6,6 +6,7 @@ import {
   asFinanceArray,
   joinPlanningCaption,
   loanProgressSummary,
+  monthlySavingsSuggestion,
   visibleReceivables,
 } from "./planning-lists.ts"
 
@@ -105,5 +106,57 @@ describe("visibleReceivables", () => {
       { id: "1", status: "PENDING" },
       { id: "3", status: "PAID" },
     ])
+  })
+})
+
+describe("monthlySavingsSuggestion", () => {
+  const now = new Date(2026, 9, 11)
+
+  it("spreads the remaining amount across the months left", () => {
+    assert.deepEqual(
+      monthlySavingsSuggestion({
+        targetAmount: "120000",
+        currentAmount: "45000",
+        targetDate: "2027-06-01",
+        now,
+      }),
+      { monthlyAmount: 9375, months: 8, coveredPct: 37.5 }
+    )
+  })
+
+  it("returns null without a target date", () => {
+    assert.equal(
+      monthlySavingsSuggestion({
+        targetAmount: "120000",
+        currentAmount: "45000",
+        targetDate: null,
+        now,
+      }),
+      null
+    )
+  })
+
+  it("returns null when the goal is already covered", () => {
+    assert.equal(
+      monthlySavingsSuggestion({
+        targetAmount: "1000",
+        currentAmount: "1000",
+        targetDate: "2027-06-01",
+        now,
+      }),
+      null
+    )
+  })
+
+  it("returns null when the target date has passed", () => {
+    assert.equal(
+      monthlySavingsSuggestion({
+        targetAmount: "1000",
+        currentAmount: "0",
+        targetDate: "2026-01-01",
+        now,
+      }),
+      null
+    )
   })
 })

@@ -6,11 +6,11 @@
 
 ## Superficies
 
-| Path | Rol |
-| --- | --- |
-| `/landing` | Marketing, features, módulos, waitlist |
-| `/privacy` `/terms` `/faq` `/contact` | Legal / FAQ / contacto |
-| `/delete-account` | Flujo público Google-only (también hay handler autenticado en Settings) |
+| Path                                  | Rol                                                                     |
+| ------------------------------------- | ----------------------------------------------------------------------- |
+| `/landing`                            | Marketing, features, módulos, waitlist                                  |
+| `/privacy` `/terms` `/faq` `/contact` | Legal / FAQ / contacto                                                  |
+| `/delete-account`                     | Flujo público Google-only (también hay handler autenticado en Settings) |
 
 ## Criterios
 

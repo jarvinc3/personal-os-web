@@ -2,6 +2,7 @@ import { z } from "zod"
 
 export const savingsGoalContributionSchema = z.object({
   amount: z.string().trim().min(1, "Monto obligatorio"),
+  accountId: z.string().trim().min(1, "Cuenta obligatoria"),
   contributedAt: z.string(),
   notes: z.string().max(200),
 })

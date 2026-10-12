@@ -56,12 +56,12 @@ Regla de activo: `isModuleSectionActive(item, pathname)` — href (+ hijos si no
 
 Finanzas (VERIFICADO runtime 2026-09-15):
 
-| Ítem               | Tab bar | Sidebar | `matchExact` / extra                                     |
-| ------------------ | ------- | ------- | -------------------------------------------------------- |
-| Resumen `/finance` | sí      | sí      | `matchExact: true`                                       |
-| Movimientos        | sí      | sí      |                                                          |
-| Estadísticas       | **no**  | sí      | `showInTabBar: false`                                    |
-| Planificación      | sí      | sí      | presupuestos viven aquí                                  |
+| Ítem               | Tab bar | Sidebar | `matchExact` / extra                            |
+| ------------------ | ------- | ------- | ----------------------------------------------- |
+| Resumen `/finance` | sí      | sí      | `matchExact: true`                              |
+| Movimientos        | sí      | sí      |                                                 |
+| Estadísticas       | **no**  | sí      | `showInTabBar: false`                           |
+| Planificación      | sí      | sí      | presupuestos viven aquí                         |
 | Productos          | sí      | sí      | `extraActiveHrefs`: categories, `/finance/sync` |
 
 Sync **no** es ítem de nav; queda bajo Productos.
@@ -113,13 +113,13 @@ Copy: labels y estado, no manuales bajo cada control. Ayuda vive en su sheet.
 
 Un módulo es una carpeta de feature, no una mini-app con capas. Sin packages por feature y sin `presentation` / `application` / `infrastructure` / `domain`. Los papeles de abajo valen en todos los módulos.
 
-| Papel | Archivo | Qué contiene |
-| --- | --- | --- |
-| Ruta | `app/.../page.tsx` | `Suspense` e importa la screen. Nada de UI, fetching ni reglas. |
-| Screen | `<nombre>-screen.tsx` | Exporta `<Nombre>Screen`. Cero hooks. Monta el cuerpo y, si existe el corte, el gate. |
-| Cuerpo | el mismo archivo, sin exportar | `<Nombre>ScreenBody`. Header, navegación y datos de esa ruta. |
-| UI | kebab-case del bloque | Un bloque visual. Recibe datos ya preparados o llama un hook de su feature. |
-| Regla | `<nombre>.ts` + `<nombre>.spec.ts` | Zod, payloads, agrupaciones, dinero, fechas. Sin JSX. |
+| Papel  | Archivo                            | Qué contiene                                                                          |
+| ------ | ---------------------------------- | ------------------------------------------------------------------------------------- |
+| Ruta   | `app/.../page.tsx`                 | `Suspense` e importa la screen. Nada de UI, fetching ni reglas.                       |
+| Screen | `<nombre>-screen.tsx`              | Exporta `<Nombre>Screen`. Cero hooks. Monta el cuerpo y, si existe el corte, el gate. |
+| Cuerpo | el mismo archivo, sin exportar     | `<Nombre>ScreenBody`. Header, navegación y datos de esa ruta.                         |
+| UI     | kebab-case del bloque              | Un bloque visual. Recibe datos ya preparados o llama un hook de su feature.           |
+| Regla  | `<nombre>.ts` + `<nombre>.spec.ts` | Zod, payloads, agrupaciones, dinero, fechas. Sin JSX.                                 |
 
 El cuerpo existe para que el gate pueda devolver carga o “módulo apagado” sin ejecutar los hooks de la pantalla. No renombrar el papel a `Client`, `View` ni `Catalog`.
 

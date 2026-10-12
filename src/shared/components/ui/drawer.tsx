@@ -68,6 +68,7 @@ function DrawerContent({
   children,
   onPointerDownOutside,
   onInteractOutside,
+  onEscapeKeyDown,
   ...props
 }: React.ComponentProps<typeof DrawerPrimitive.Content>) {
   return (
@@ -90,6 +91,12 @@ function DrawerContent({
             event.preventDefault()
           }
           onInteractOutside?.(event)
+        }}
+        onEscapeKeyDown={(event) => {
+          if (isNestedPortaledEvent(event)) {
+            event.preventDefault()
+          }
+          onEscapeKeyDown?.(event)
         }}
         {...props}
       >

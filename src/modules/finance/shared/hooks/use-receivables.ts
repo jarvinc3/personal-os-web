@@ -67,6 +67,17 @@ export function useDeleteReceivable() {
   })
 }
 
+export function useRestoreReceivable() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) =>
+      apiPost<{ success: boolean }>(
+        API_ENDPOINTS.FINANCE.RECEIVABLE_RESTORE(id)
+      ),
+    onSuccess: () => invalidate(queryClient),
+  })
+}
+
 export function useReceivablePayments(
   enabled: boolean,
   receivableId: string | null

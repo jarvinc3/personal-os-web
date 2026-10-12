@@ -12,11 +12,11 @@ Montado en raíz (`AuthBootstrapProvider` → `useAuthBootstrap`):
 
 ## Login / registro
 
-| Flujo | Resultado |
-| --- | --- |
-| Login OK | Hidrata perfil → toast → `/home` |
-| Registro con sesión inmediata | Igual, `/home` |
-| Registro pendiente de email | code `REGISTER_PENDING_VERIFICATION` → `/verify-email?email=` |
+| Flujo                                    | Resultado                                                               |
+| ---------------------------------------- | ----------------------------------------------------------------------- |
+| Login OK                                 | Hidrata perfil → toast → `/home`                                        |
+| Registro con sesión inmediata            | Igual, `/home`                                                          |
+| Registro pendiente de email              | code `REGISTER_PENDING_VERIFICATION` → `/verify-email?email=`           |
 | Perfil backend inválido o error HTTP/red | `BackendProfileUnavailableError` → `revokeAuthSession`; no entra al app |
 
 Google: `loginWithGoogle({ next })` → redirect IdP → `GET /auth/callback?code&next=`. `next` se usa tal cual en el redirect post-exchange (p. ej. `/settings` en delete). Sin `code` o error de exchange → `/login`.

@@ -18,12 +18,12 @@ Auth de **este** cliente con Supabase Auth. El backend Nest solo valida el JWT (
 
 ## Rutas
 
-| Path | Grupo | Notas |
-| --- | --- | --- |
-| `/login` | `(auth)` | Landing + sheets login/registro |
-| `/verify-email` | `(auth)` | Tras `REGISTER_PENDING_VERIFICATION` |
+| Path             | Grupo         | Notas                                      |
+| ---------------- | ------------- | ------------------------------------------ |
+| `/login`         | `(auth)`      | Landing + sheets login/registro            |
+| `/verify-email`  | `(auth)`      | Tras `REGISTER_PENDING_VERIFICATION`       |
 | `/auth/callback` | Route Handler | Intercambia `code`; `next` default `/home` |
-| `(app)/*` | protegido | `proxy.ts` + `useAuthGuard` |
+| `(app)/*`        | protegido     | `proxy.ts` + `useAuthGuard`                |
 
 > [!WARNING]
 > **REV-WEB-008** (`CONTRADICE_CODIGO`) — docs antiguas: chat “hidden from drawer”; rutas protegidas solo `/home` `/settings`. [review-register.md](../../review-register.md#rev-web-008)

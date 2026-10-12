@@ -3,6 +3,7 @@ import { describe, it } from "node:test"
 
 import {
   currencyGlyph,
+  financeMoneyDifference,
   formatCompactFinanceMoney,
   formatFinanceMoney,
   parseFinanceMoney,
@@ -134,5 +135,23 @@ describe("formatFinanceMoney", () => {
     assert.equal(formatFinanceMoney("491.00", display), "+DOP $491.00")
     assert.equal(formatFinanceMoney("-159.00", display), "-DOP $159.00")
     assert.equal(formatFinanceMoney("0", display), "+DOP $0.00")
+  })
+})
+
+describe("financeMoneyDifference", () => {
+  it("returns the signed change between two amounts", () => {
+    assert.equal(financeMoneyDifference("100.00", "150.00"), 50)
+    assert.equal(financeMoneyDifference("100.00", "40.00"), -60)
+  })
+
+  it("returns null when either amount is missing or not a number", () => {
+    assert.equal(financeMoneyDifference("", "150.00"), null)
+    assert.equal(financeMoneyDifference("100.00", ""), null)
+    assert.equal(financeMoneyDifference(null, undefined), null)
+    assert.equal(financeMoneyDifference("100.00", "abc"), null)
+  })
+
+  it("returns zero when the amount does not change", () => {
+    assert.equal(financeMoneyDifference("100.00", "100.00"), 0)
   })
 })

@@ -16,10 +16,10 @@ Socket `ai.response` tipos: `chat.complete` | `chat.chunk` | `insight` | `action
 
 ## Side effects
 
-| type | Cliente |
-| --- | --- |
-| `invalidate` | `queryClient.invalidateQueries({ queryKey: effect.keys })` |
-| `theme` | `setTheme` + invalidate profile |
-| `moduleContext` | actualiza selector/label |
+| type            | Cliente                                                    |
+| --------------- | ---------------------------------------------------------- |
+| `invalidate`    | `queryClient.invalidateQueries({ queryKey: effect.keys })` |
+| `theme`         | `setTheme` + invalidate profile                            |
+| `moduleContext` | actualiza selector/label                                   |
 
 Evidencia: `chat.types.ts`, `use-ai-side-effects.ts`, `use-ai-actions.ts`, `use-ai-socket.ts`.

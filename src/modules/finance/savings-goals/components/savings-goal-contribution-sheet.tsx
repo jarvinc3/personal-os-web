@@ -3,14 +3,33 @@
 import { FinanceDateField } from "@/src/modules/finance/shared/components/forms/date-field"
 import { FinanceHelpText } from "@/src/modules/finance/shared/components/forms/form-blocks"
 import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
+import { DestinationPickerSheet } from "@/src/modules/finance/shared/components/pickers/destination-picker-sheet"
+import { DestinationTrigger } from "@/src/modules/finance/shared/components/pickers/destination-trigger"
+import { CATALOG_NONE } from "@/src/modules/finance/shared/constants/catalog"
+import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
 import { useCreateSavingsGoalContribution } from "@/src/modules/finance/shared/hooks/use-savings-goals"
+import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
+import { useInstitutions } from "@/src/modules/finance/shared/hooks/use-institutions"
+import { useDiscardChanges } from "@/src/modules/finance/shared/hooks/use-discard-changes"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
+import {
+  encodeLedgerTarget,
+  splitLedgerTarget,
+} from "@/src/modules/finance/shared/lib/ledger-payloads"
+import { todayDateInput } from "@/src/modules/finance/shared/lib/ledger-form"
+import {
+  formatFinanceMoney,
+  parseFinanceMoney,
+} from "@/src/modules/finance/shared/lib/money"
+import { monthlySavingsSuggestion } from "@/src/modules/finance/shared/lib/planning-lists"
 import { buildSavingsGoalContributionBody } from "@/src/modules/finance/shared/lib/planning-payloads"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
 import { FormTextField } from "@/src/shared/components/layout/form-blocks"
 import { Button } from "@/src/shared/components/ui/button"
+import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { SummarySection } from "@/src/shared/components/ui/summary"
+import { usePicker } from "@/src/shared/hooks/use-picker"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -24,6 +43,7 @@ import {
 
 const EMPTY_FORM: SavingsGoalContributionFormValues = {
   amount: "",
+  accountId: "",
   contributedAt: "",
   notes: "",
 }
@@ -34,6 +54,9 @@ type SavingsGoalContributionSheetProps = {
   goalId: string | null
   goalName?: string
   currency?: string
+  targetAmount?: string
+  currentAmount?: string
+  targetDate?: string | null
   pending?: boolean
 }
 
@@ -43,26 +66,70 @@ export function SavingsGoalContributionSheet({
   goalId,
   goalName,
   currency,
+  targetAmount,
+  currentAmount,
+  targetDate,
   pending = false,
 }: SavingsGoalContributionSheetProps) {
   const createMutation = useCreateSavingsGoalContribution()
+  const { config } = useFinanceEnabled()
+  const accountsQuery = useAccounts(open)
+  const institutionsQuery = useInstitutions(open)
+  const goalCurrency = currency ?? config.baseCurrency
+  const activeAccounts = (accountsQuery.data ?? []).filter(
+    (account) => account.isActive && account.currency === goalCurrency
+  )
+  const institutions = institutionsQuery.data ?? []
+  const defaultAccountId = activeAccounts[0]?.id ?? ""
+  const { picker, openPicker, closeHandlerFor } = usePicker<"none" | "account">(
+    "none"
+  )
 
   const {
     control,
+    getValues,
     handleSubmit,
     reset,
+    setValue,
     trigger,
-    formState: { errors },
+    formState: { errors, isDirty },
   } = useForm<SavingsGoalContributionFormValues>({
     resolver: zodResolver(savingsGoalContributionSchema),
     defaultValues: EMPTY_FORM,
   })
 
+  const { requestOpenChange, discardChangesDialog } = useDiscardChanges({
+    isDirty,
+    onOpenChange,
+  })
+
   useEffect(() => {
     if (open) {
-      reset(EMPTY_FORM)
+      reset({ ...EMPTY_FORM, contributedAt: todayDateInput() })
     }
   }, [open, reset])
+
+  useEffect(() => {
+    if (!open || !defaultAccountId || getValues("accountId")) {
+      return
+    }
+    setValue("accountId", defaultAccountId, { shouldValidate: true })
+  }, [open, defaultAccountId, getValues, setValue])
+
+  const display = {
+    currency: goalCurrency,
+    showCents: config.display.showCents,
+    compactNumbers: config.display.compactNumbers,
+  }
+  const target = parseFinanceMoney(targetAmount)
+  const saved = parseFinanceMoney(currentAmount)
+  const remaining = target !== null && saved !== null ? target - saved : null
+  const suggestion = monthlySavingsSuggestion({
+    targetAmount,
+    currentAmount,
+    targetDate,
+    now: new Date(),
+  })
 
   const submitForm = useMemo(
     () => createSheetSubmit(handleSubmit),
@@ -88,92 +155,171 @@ export function SavingsGoalContributionSheet({
   })
 
   return (
-    <BottomSheet
-      open={open}
-      onOpenChange={onOpenChange}
-      pending={pending}
-      title="Registrar aporte"
-      description={
-        goalName
-          ? `Se suma al avance de ${goalName}.`
-          : "Se suma al avance de la meta."
-      }
-      actions={{
-        close: (
-          <Button
-            type="button"
-            variant="outline"
-            className="flex-1"
-            onClick={() => onOpenChange(false)}
-          >
-            <XIcon className="size-4 shrink-0" />
-            Cancelar
-          </Button>
-        ),
-        submit: (
-          <Button
-            type="button"
-            disabled={createMutation.isPending}
-            className="flex-1"
-            onClick={onSubmit}
-          >
-            {createMutation.isPending ? (
-              <Spinner data-icon="inline-start" />
-            ) : null}
-            Registrar
-          </Button>
-        ),
-      }}
-    >
-      <SummarySection title="Aporte" icon={PiggyBankIcon}>
-        <Controller
-          control={control}
-          name="amount"
-          render={({ field }) => (
-            <FinanceMoneyField
-              label="Monto"
-              amount={field.value}
-              onAmountChange={field.onChange}
-              onAmountCommit={(next) => {
-                field.onChange(next)
-                void trigger("amount")
-              }}
-              onAmountBlur={field.onBlur}
-              amountError={errors.amount?.message}
-              currency={currency}
-            />
-          )}
-        />
-        <Controller
-          control={control}
-          name="contributedAt"
-          render={({ field }) => (
-            <FinanceDateField
-              label="Fecha"
-              value={field.value}
-              onChange={field.onChange}
-              optional
-            />
-          )}
-        />
-        <Controller
-          control={control}
-          name="notes"
-          render={({ field }) => (
-            <FormTextField
-              icon={NotebookPenIcon}
-              label="Nota"
-              value={field.value}
-              onChange={field.onChange}
-              onBlur={field.onBlur}
-              error={errors.notes?.message}
-            />
-          )}
-        />
-        <FinanceHelpText>
-          El aporte no mueve dinero entre cuentas: solo avanza la meta.
-        </FinanceHelpText>
-      </SummarySection>
-    </BottomSheet>
+    <>
+      <BottomSheet
+        open={open}
+        onOpenChange={requestOpenChange}
+        pending={pending}
+        title="Registrar aporte"
+        description={
+          goalName
+            ? `Se suma al avance de ${goalName}.`
+            : "Se suma al avance de la meta."
+        }
+        actions={{
+          close: (
+            <Button
+              type="button"
+              variant="outline"
+              className="flex-1"
+              onClick={() => requestOpenChange(false)}
+            >
+              <XIcon className="size-4 shrink-0" />
+              Cancelar
+            </Button>
+          ),
+          submit: (
+            <Button
+              type="button"
+              disabled={createMutation.isPending}
+              className="flex-1"
+              onClick={onSubmit}
+            >
+              {createMutation.isPending ? (
+                <Spinner data-icon="inline-start" />
+              ) : null}
+              Registrar
+            </Button>
+          ),
+        }}
+      >
+        <SummarySection title="Aporte" icon={PiggyBankIcon}>
+          <Controller
+            control={control}
+            name="amount"
+            render={({ field }) => (
+              <FinanceMoneyField
+                label="Monto"
+                amount={field.value}
+                onAmountChange={field.onChange}
+                onAmountCommit={(next) => {
+                  field.onChange(next)
+                  void trigger("amount")
+                }}
+                onAmountBlur={field.onBlur}
+                amountError={errors.amount?.message}
+                currency={goalCurrency}
+              />
+            )}
+          />
+          {remaining !== null && remaining > 0 ? (
+            <div className="flex flex-wrap gap-2">
+              {suggestion ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    setValue(
+                      "amount",
+                      String(Math.round(suggestion.monthlyAmount)),
+                      {
+                        shouldValidate: true,
+                      }
+                    )
+                  }
+                >
+                  {`Sugerido ${formatFinanceMoney(suggestion.monthlyAmount, display)}`}
+                </Button>
+              ) : null}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  setValue("amount", String(Math.round(remaining)), {
+                    shouldValidate: true,
+                  })
+                }
+              >
+                {`Lo que falta ${formatFinanceMoney(remaining, display)}`}
+              </Button>
+            </div>
+          ) : null}
+          <Controller
+            control={control}
+            name="accountId"
+            render={({ field }) => (
+              <Field className="gap-1">
+                <FieldLabel className="text-sm text-muted-foreground">
+                  Cuenta de origen
+                </FieldLabel>
+                <DestinationTrigger
+                  destination={
+                    field.value
+                      ? encodeLedgerTarget("account", field.value)
+                      : CATALOG_NONE
+                  }
+                  accounts={activeAccounts}
+                  cards={[]}
+                  display={display}
+                  placeholder="Elige la cuenta"
+                  onClick={() => openPicker("account")}
+                />
+                {errors.accountId?.message ? (
+                  <FieldError>{errors.accountId.message}</FieldError>
+                ) : null}
+              </Field>
+            )}
+          />
+          <Controller
+            control={control}
+            name="contributedAt"
+            render={({ field }) => (
+              <FinanceDateField
+                label="Fecha"
+                value={field.value}
+                onChange={field.onChange}
+                optional
+              />
+            )}
+          />
+          <Controller
+            control={control}
+            name="notes"
+            render={({ field }) => (
+              <FormTextField
+                icon={NotebookPenIcon}
+                label="Nota"
+                value={field.value}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+                error={errors.notes?.message}
+              />
+            )}
+          />
+          <FinanceHelpText>
+            El aporte sale de la cuenta elegida y se registra como gasto.
+          </FinanceHelpText>
+        </SummarySection>
+      </BottomSheet>
+
+      {discardChangesDialog}
+
+      <DestinationPickerSheet
+        open={picker === "account"}
+        onOpenChange={closeHandlerFor("account")}
+        institutions={institutions}
+        accounts={activeAccounts}
+        cards={[]}
+        display={display}
+        accountsOnly
+        onSelect={(next) =>
+          setValue("accountId", splitLedgerTarget(next).accountId ?? "", {
+            shouldValidate: true,
+          })
+        }
+      />
+    </>
   )
 }

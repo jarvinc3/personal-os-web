@@ -9,12 +9,18 @@ import { CATALOG_NONE } from "@/src/modules/finance/shared/constants/catalog"
 import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
 import { useInstitutions } from "@/src/modules/finance/shared/hooks/use-institutions"
 import { useRecordReceivablePayment } from "@/src/modules/finance/shared/hooks/use-receivables"
+import { useDiscardChanges } from "@/src/modules/finance/shared/hooks/use-discard-changes"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import {
   encodeLedgerTarget,
   splitLedgerTarget,
 } from "@/src/modules/finance/shared/lib/ledger-payloads"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
+import { todayDateInput } from "@/src/modules/finance/shared/lib/ledger-form"
+import {
+  formatFinanceMoney,
+  parseFinanceMoney,
+} from "@/src/modules/finance/shared/lib/money"
 import { buildReceivablePaymentBody } from "@/src/modules/finance/shared/lib/planning-payloads"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
 import { Button } from "@/src/shared/components/ui/button"
@@ -27,7 +33,7 @@ import { usePicker } from "@/src/shared/hooks/use-picker"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { HandshakeIcon, XIcon } from "lucide-react"
 import { useEffect, useMemo } from "react"
-import { Controller, useForm } from "react-hook-form"
+import { Controller, useForm, useWatch } from "react-hook-form"
 import {
   receivablePaymentSchema,
   type ReceivablePaymentFormValues,
@@ -45,6 +51,7 @@ type ReceivablePaymentSheetProps = {
   receivableId: string | null
   debtorName?: string
   outstandingLabel?: string
+  outstanding?: number
   currency?: string
   display: FinanceMoneyDisplay
   pending?: boolean
@@ -56,6 +63,7 @@ export function ReceivablePaymentSheet({
   receivableId,
   debtorName,
   outstandingLabel,
+  outstanding,
   currency,
   display,
   pending = false,
@@ -77,17 +85,34 @@ export function ReceivablePaymentSheet({
     reset,
     setValue,
     trigger,
-    formState: { errors },
+    formState: { errors, isDirty },
   } = useForm<ReceivablePaymentFormValues>({
     resolver: zodResolver(receivablePaymentSchema),
     defaultValues: EMPTY_FORM,
   })
 
+  const { requestOpenChange, discardChangesDialog } = useDiscardChanges({
+    isDirty,
+    onOpenChange,
+  })
+
   useEffect(() => {
     if (open) {
-      reset(EMPTY_FORM)
+      reset({ ...EMPTY_FORM, paidAt: todayDateInput() })
     }
   }, [open, reset])
+
+  const amount = useWatch({ control, name: "amount" })
+  const parsedAmount = parseFinanceMoney(amount)
+  const exceedsOutstanding =
+    outstanding !== undefined &&
+    parsedAmount !== null &&
+    parsedAmount > outstanding
+  const amountError =
+    errors.amount?.message ??
+    (exceedsOutstanding && outstanding !== undefined
+      ? `Máximo ${formatFinanceMoney(outstanding, display)} (lo que queda)`
+      : undefined)
 
   const submitForm = useMemo(
     () => createSheetSubmit(handleSubmit),
@@ -119,7 +144,7 @@ export function ReceivablePaymentSheet({
     <>
       <BottomSheet
         open={open}
-        onOpenChange={onOpenChange}
+        onOpenChange={requestOpenChange}
         pending={pending}
         title="Registrar cobro"
         description={
@@ -131,7 +156,7 @@ export function ReceivablePaymentSheet({
               type="button"
               variant="outline"
               className="flex-1"
-              onClick={() => onOpenChange(false)}
+              onClick={() => requestOpenChange(false)}
             >
               <XIcon className="size-4 shrink-0" />
               Cancelar
@@ -140,7 +165,7 @@ export function ReceivablePaymentSheet({
           submit: (
             <Button
               type="button"
-              disabled={createMutation.isPending}
+              disabled={createMutation.isPending || exceedsOutstanding}
               className="flex-1"
               onClick={onSubmit}
             >
@@ -166,11 +191,39 @@ export function ReceivablePaymentSheet({
                   void trigger("amount")
                 }}
                 onAmountBlur={field.onBlur}
-                amountError={errors.amount?.message}
+                amountError={amountError}
                 currency={currency}
               />
             )}
           />
+          {outstanding !== undefined && outstanding > 0 ? (
+            <div className="flex flex-wrap gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  setValue("amount", String(outstanding), {
+                    shouldValidate: true,
+                  })
+                }
+              >
+                {`Todo ${formatFinanceMoney(outstanding, display)}`}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  setValue("amount", String(outstanding / 2), {
+                    shouldValidate: true,
+                  })
+                }
+              >
+                Mitad
+              </Button>
+            </div>
+          ) : null}
           <Controller
             control={control}
             name="accountId"
@@ -215,6 +268,8 @@ export function ReceivablePaymentSheet({
           </FinanceHelpText>
         </SummarySection>
       </BottomSheet>
+
+      {discardChangesDialog}
 
       <DestinationPickerSheet
         open={picker === "account"}

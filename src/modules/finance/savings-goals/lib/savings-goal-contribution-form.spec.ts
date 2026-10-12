@@ -4,10 +4,11 @@ import { describe, it } from "node:test"
 import { savingsGoalContributionSchema } from "./savings-goal-contribution-form.ts"
 
 describe("savingsGoalContributionSchema", () => {
-  it("accepts an amount", () => {
+  it("accepts an amount with a source account", () => {
     assert.equal(
       savingsGoalContributionSchema.safeParse({
         amount: "25",
+        accountId: "acc-1",
         contributedAt: "",
         notes: "",
       }).success,
@@ -15,10 +16,23 @@ describe("savingsGoalContributionSchema", () => {
     )
   })
 
+  it("rejects a contribution without an account", () => {
+    assert.equal(
+      savingsGoalContributionSchema.safeParse({
+        amount: "25",
+        accountId: "  ",
+        contributedAt: "",
+        notes: "",
+      }).success,
+      false
+    )
+  })
+
   it("rejects an empty amount", () => {
     assert.equal(
       savingsGoalContributionSchema.safeParse({
         amount: "   ",
+        accountId: "acc-1",
         contributedAt: "",
         notes: "",
       }).success,

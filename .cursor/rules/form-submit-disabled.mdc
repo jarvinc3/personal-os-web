@@ -27,4 +27,4 @@ const canSave = !isPending && formIsValid && targetsReady
 </Button>
 ```
 
-Molde: `transaction-form.tsx` y `transfer-form.tsx` en `src/modules/finance/components/transactions/`. Las reglas compartidas (`isPositiveAmountInput`, `isLedgerTargetInput`) viven en `src/modules/finance/lib/ledger-form.ts` con su spec.
+Molde: `transaction-form.tsx` y `transfer-form.tsx` en `src/modules/finance/transactions/components/`. Las reglas compartidas (`isPositiveAmountInput`, `isLedgerTargetInput`) viven en `src/modules/finance/shared/lib/ledger-form.ts` con su spec.

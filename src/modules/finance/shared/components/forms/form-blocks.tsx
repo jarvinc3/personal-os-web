@@ -17,8 +17,9 @@ import {
   ToggleGroup,
   ToggleGroupItem,
 } from "@/src/shared/components/ui/toggle-group"
+import { Button } from "@/src/shared/components/ui/button"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
-import { ChevronDownIcon, type LucideIcon } from "lucide-react"
+import { ChevronDownIcon, SparklesIcon, type LucideIcon } from "lucide-react"
 import type { ReactNode } from "react"
 
 /** El preset del proyecto no trae un estado pulsado con el color primario. */
@@ -231,6 +232,36 @@ export function FinancePreviewRow({
           </span>
         ) : null}
       </span>
+    </div>
+  )
+}
+
+type FinanceSuggestionRowProps = {
+  children: ReactNode
+  actionLabel?: string
+  onAction?: () => void
+}
+
+export function FinanceSuggestionRow({
+  children,
+  actionLabel,
+  onAction,
+}: FinanceSuggestionRowProps) {
+  return (
+    <div className="flex items-center gap-2 rounded-2xl bg-success/10 px-3 py-2 text-sm">
+      <SparklesIcon className="size-4 shrink-0 text-success" />
+      <span className="min-w-0 flex-1">{children}</span>
+      {actionLabel && onAction ? (
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="shrink-0 text-success"
+          onClick={onAction}
+        >
+          {actionLabel}
+        </Button>
+      ) : null}
     </div>
   )
 }

@@ -43,6 +43,7 @@ type SelectFieldProps = {
   options: { value: string; label: string; mark?: ReactNode }[]
   disabled?: boolean
   icon?: LucideIcon
+  error?: string
 }
 
 export function SelectField({
@@ -52,6 +53,7 @@ export function SelectField({
   options,
   disabled,
   icon: Icon,
+  error,
 }: SelectFieldProps) {
   const selectId = useId()
   const labelId = useId()
@@ -112,6 +114,7 @@ export function SelectField({
           </SelectGroup>
         </SelectContent>
       </Select>
+      {error ? <FieldError>{error}</FieldError> : null}
     </Field>
   )
 }
@@ -170,6 +173,7 @@ type SelectionGridProps<T> = {
   onValueChange: (value: string) => void
   getItemKey: (item: T) => string
   getItemValue: (item: T) => string
+  getItemLabel?: (item: T) => string
   renderCell: (item: T) => ReactNode
 }
 
@@ -179,6 +183,7 @@ export function SelectionGrid<T>({
   onValueChange,
   getItemKey,
   getItemValue,
+  getItemLabel,
   renderCell,
 }: SelectionGridProps<T>) {
   return (
@@ -190,6 +195,8 @@ export function SelectionGrid<T>({
           <button
             key={getItemKey(item)}
             type="button"
+            aria-label={getItemLabel?.(item)}
+            aria-pressed={selected}
             onClick={() => onValueChange(itemValue)}
             className={cn(
               "aspect-square overflow-hidden rounded-xl border-2",

@@ -11,6 +11,8 @@ import { SavingsGoalSheet } from "@/src/modules/finance/savings-goals/components
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
 import {
+  useDeleteSavingsGoal,
+  useRestoreSavingsGoal,
   useDeleteSavingsGoalContribution,
   useSavingsGoalContributions,
   useSavingsGoals,
@@ -19,6 +21,7 @@ import {
   financeErrorMessage,
   financeLoadErrorMessage,
 } from "@/src/modules/finance/shared/lib/finance-error"
+import { showUndoToast } from "@/src/modules/finance/shared/components/undo-toast"
 import {
   formatFinanceMoney,
   parseFinanceMoney,
@@ -27,18 +30,10 @@ import {
   amountRatioPct,
   formatPlanningDate,
 } from "@/src/modules/finance/shared/lib/planning-lists"
+import { DeleteRecordDialog } from "@/src/modules/finance/shared/components/delete-record-dialog"
+import { RecordOptionsSheet } from "@/src/modules/finance/shared/components/record-options-sheet"
 import { LoadingView } from "@/src/shared/components/layout/loading-view"
 import { Button } from "@/src/shared/components/ui/button"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/src/shared/components/ui/alert-dialog"
 import {
   Empty,
   EmptyContent,
@@ -54,6 +49,7 @@ import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { appToast } from "@/src/shared/lib/app-toast"
 import {
   MoreVerticalIcon,
+  PencilIcon,
   PiggyBankIcon,
   PlusIcon,
   Trash2Icon,
@@ -110,6 +106,14 @@ function SavingsGoalDetailScreenBody({
     ? (parseFinanceMoney(goal.targetAmount) ?? 0) -
       (parseFinanceMoney(goal.currentAmount) ?? 0)
     : null
+  const [pendingContributionId, setPendingContributionId] = useState<
+    string | null
+  >(null)
+  const [contributionMenuId, setContributionMenuId] = useState<string | null>(
+    null
+  )
+  const [optionsOpen, setOptionsOpen] = useState(false)
+  const [confirmGoalOpen, setConfirmGoalOpen] = useState(false)
 
   const headerActions = useMemo(
     () => (
@@ -118,12 +122,12 @@ function SavingsGoalDetailScreenBody({
         size="icon"
         className="size-9 rounded-full"
         aria-label="Opciones de la meta"
-        onClick={() => setOpenGoalSheet(true)}
+        onClick={() => setOptionsOpen(true)}
       >
         <MoreVerticalIcon className="size-4.5" />
       </Button>
     ),
-    [setOpenGoalSheet]
+    [setOptionsOpen]
   )
 
   usePageHeader(
@@ -137,9 +141,32 @@ function SavingsGoalDetailScreenBody({
     [router, goal?.name, accent, headerActions]
   )
 
-  const [pendingContributionId, setPendingContributionId] = useState<
-    string | null
-  >(null)
+  const deleteGoal = useDeleteSavingsGoal()
+  const restoreGoal = useRestoreSavingsGoal()
+
+  const pendingContribution =
+    contributions.find((item) => item.id === pendingContributionId) ?? null
+
+  async function onDeleteGoal() {
+    if (!goal) {
+      return
+    }
+    try {
+      const goalId = goal.id
+      await deleteGoal.mutateAsync(goalId)
+      setConfirmGoalOpen(false)
+      setOptionsOpen(false)
+      router.push(APP_ROUTES.app.financePlanning)
+      showUndoToast("Meta eliminada", () =>
+        restoreGoal.mutate(goalId, {
+          onError: (error) =>
+            appToast.error({ text1: financeErrorMessage(error) }),
+        })
+      )
+    } catch (error) {
+      appToast.error({ text1: financeErrorMessage(error) })
+    }
+  }
 
   async function removeContribution() {
     if (!goal || !pendingContributionId) {
@@ -264,11 +291,11 @@ function SavingsGoalDetailScreenBody({
                     <Button
                       variant="ghost"
                       size="icon"
-                      aria-label="Borrar aporte"
+                      aria-label="Opciones del aporte"
                       disabled={deleteContribution.isPending}
-                      onClick={() => setPendingContributionId(contribution.id)}
+                      onClick={() => setContributionMenuId(contribution.id)}
                     >
-                      <Trash2Icon className="size-4" />
+                      <MoreVerticalIcon className="size-4" />
                     </Button>
                   }
                   isLast={index === contributions.length - 1}
@@ -285,6 +312,9 @@ function SavingsGoalDetailScreenBody({
         goalId={goal.id}
         goalName={goal.name}
         currency={goal.currency}
+        targetAmount={goal.targetAmount}
+        currentAmount={goal.currentAmount}
+        targetDate={goal.targetDate}
       />
 
       <SavingsGoalSheet
@@ -295,35 +325,79 @@ function SavingsGoalDetailScreenBody({
         pending={goalsQuery.isFetching}
       />
 
-      <AlertDialog
-        open={pendingContributionId !== null}
-        onOpenChange={(open) => {
-          if (!deleteContribution.isPending) {
-            setPendingContributionId(open ? pendingContributionId : null)
+      <RecordOptionsSheet
+        open={optionsOpen}
+        onOpenChange={setOptionsOpen}
+        description={goal.name}
+        options={[
+          {
+            id: "edit",
+            title: "Editar meta",
+            icon: PencilIcon,
+            onPress: () => {
+              setOptionsOpen(false)
+              setOpenGoalSheet(true)
+            },
+          },
+          {
+            id: "delete",
+            title: "Eliminar",
+            icon: Trash2Icon,
+            destructive: true,
+            disabled: deleteGoal.isPending,
+            onPress: () => setConfirmGoalOpen(true),
+          },
+        ]}
+      />
+
+      <RecordOptionsSheet
+        open={contributionMenuId !== null}
+        onOpenChange={(nextOpen) => {
+          if (!nextOpen) {
+            setContributionMenuId(null)
           }
         }}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>¿Borrar este aporte?</AlertDialogTitle>
-            <AlertDialogDescription>
-              El saldo de la meta baja.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleteContribution.isPending}>
-              Cancelar
-            </AlertDialogCancel>
-            <AlertDialogAction
-              variant="destructive"
-              disabled={deleteContribution.isPending}
-              onClick={() => void removeContribution()}
-            >
-              Borrar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        title="Aporte"
+        options={[
+          {
+            id: "delete-contribution",
+            title: "Eliminar aporte",
+            icon: Trash2Icon,
+            destructive: true,
+            disabled: deleteContribution.isPending,
+            onPress: () => {
+              setPendingContributionId(contributionMenuId)
+              setContributionMenuId(null)
+            },
+          },
+        ]}
+      />
+
+      <DeleteRecordDialog
+        open={confirmGoalOpen}
+        onOpenChange={setConfirmGoalOpen}
+        recordName={goal.name}
+        pending={deleteGoal.isPending}
+        consequences="Se borran sus aportes. No se puede deshacer."
+        onConfirm={() => void onDeleteGoal()}
+      />
+
+      <DeleteRecordDialog
+        open={pendingContributionId !== null}
+        onOpenChange={(nextOpen) => {
+          if (!nextOpen) {
+            setPendingContributionId(null)
+          }
+        }}
+        recordName={
+          pendingContribution
+            ? formatFinanceMoney(pendingContribution.amount, money)
+            : "el aporte"
+        }
+        pending={deleteContribution.isPending}
+        consequences="El saldo de la meta baja. No se puede deshacer."
+        onConfirm={() => void removeContribution()}
+      />
     </>
   )
 }

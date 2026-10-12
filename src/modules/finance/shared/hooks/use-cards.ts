@@ -75,6 +75,17 @@ export function useDeleteCard() {
   })
 }
 
+export function useRestoreCard() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) =>
+      apiPost<{ success: boolean }>(API_ENDPOINTS.FINANCE.CARD_RESTORE(id)),
+    onSuccess: () => {
+      invalidateFinancePositions(queryClient)
+    },
+  })
+}
+
 export function useUpdateCardBalance() {
   const queryClient = useQueryClient()
   return useMutation({

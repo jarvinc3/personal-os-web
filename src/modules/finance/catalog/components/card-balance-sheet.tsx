@@ -1,7 +1,7 @@
 "use client"
 
-import { FinanceCurrencyPills } from "@/src/modules/finance/shared/components/forms/currency-pills"
 import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
+import { FinanceCurrencyPickerSheet } from "@/src/modules/finance/shared/components/pickers/finance-currency-picker-sheet"
 import { useAdjustBalance } from "@/src/modules/finance/shared/hooks/use-balance-adjustment"
 import {
   useDeleteCardBalance,
@@ -9,6 +9,7 @@ import {
   useUpdateCardCreditLimit,
 } from "@/src/modules/finance/shared/hooks/use-cards"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
+import { useDiscardChanges } from "@/src/modules/finance/shared/hooks/use-discard-changes"
 import {
   buildCardBalanceBody,
   nextUnusedCurrency,
@@ -17,6 +18,7 @@ import { canManageCardBalances } from "@/src/modules/finance/shared/lib/card-bal
 import { buildFinanceCurrencyOptions } from "@/src/modules/finance/shared/lib/finance-currency"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import {
+  financeMoneyDifference,
   formatFinanceMoney,
   type FinanceMoneyDisplay,
 } from "@/src/modules/finance/shared/lib/money"
@@ -42,6 +44,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { PlusIcon, SaveIcon, TrashIcon, WalletIcon, XIcon } from "lucide-react"
 import { useMemo, useState } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
+import { usePicker } from "@/src/shared/hooks/use-picker"
 import {
   cardBalanceSchemaWithLimit,
   type CardBalanceFormValues,
@@ -142,13 +145,29 @@ function CardBalanceSheetForm({
     control,
     handleSubmit,
     reset,
+    setValue,
     trigger,
-    formState: { errors },
+    formState: { errors, isDirty },
   } = useForm<CardBalanceFormValues>({
     resolver: zodResolver(cardBalanceSchemaWithLimit(card?.type === "CREDIT")),
     defaultValues: toFormValues(card, mode),
   })
+  const { requestOpenChange, discardChangesDialog } = useDiscardChanges({
+    isDirty,
+    onOpenChange,
+  })
   const selectedCurrency = useWatch({ control, name: "currency" })
+  const balanceValue = useWatch({ control, name: "balance" })
+  const storedBalance =
+    mode.kind === "edit"
+      ? ((card?.balances ?? []).find(
+          (item) => item.currency.toUpperCase() === mode.currency.toUpperCase()
+        )?.balance ?? null)
+      : null
+  const difference = financeMoneyDifference(storedBalance, balanceValue)
+  const { picker, openPicker, closeHandlerFor } = usePicker<
+    "none" | "currency"
+  >("none")
 
   function selectExisting(currency: string) {
     const nextMode: BalanceMode = { kind: "edit", currency }
@@ -255,7 +274,7 @@ function CardBalanceSheetForm({
     <>
       <BottomSheet
         open={open}
-        onOpenChange={onOpenChange}
+        onOpenChange={requestOpenChange}
         pending={pending || saving}
         title={card ? `Saldos · ${card.name}` : "Saldos de tarjeta"}
         description="El saldo nuevo queda como un reajuste. El límite de crédito se guarda aparte."
@@ -264,7 +283,7 @@ function CardBalanceSheetForm({
             <Button
               variant="outline"
               className="flex-1"
-              onClick={() => onOpenChange(false)}
+              onClick={() => requestOpenChange(false)}
             >
               <XIcon className="size-4 shrink-0" />
               Cancelar
@@ -323,21 +342,6 @@ function CardBalanceSheetForm({
         >
           <Controller
             control={control}
-            name="currency"
-            render={({ field }) => (
-              <FinanceCurrencyPills
-                label="Moneda"
-                value={field.value}
-                onChange={field.onChange}
-                baseCurrency={defaultCurrency}
-                extraCodes={[defaultCurrency, field.value]}
-                excludeCodes={isAdding ? existingCurrencies : []}
-                disabled={!isAdding}
-              />
-            )}
-          />
-          <Controller
-            control={control}
             name="balance"
             render={({ field }) => (
               <FinanceMoneyField
@@ -351,9 +355,25 @@ function CardBalanceSheetForm({
                 onAmountBlur={field.onBlur}
                 amountError={errors.balance?.message}
                 currency={selectedCurrency || defaultCurrency}
+                onCurrencyPress={
+                  isAdding ? () => openPicker("currency") : undefined
+                }
               />
             )}
           />
+          {!isAdding && difference !== null && difference !== 0 ? (
+            <p className="px-1 text-sm text-muted-foreground">
+              Ajuste{" "}
+              <span className="font-medium text-foreground tabular-nums">
+                {formatFinanceMoney(difference, {
+                  currency: selectedCurrency || defaultCurrency,
+                  showCents: display?.showCents ?? true,
+                  compactNumbers: display?.compactNumbers ?? false,
+                  leadingSign: true,
+                })}
+              </span>
+            </p>
+          ) : null}
           {card?.type === "CREDIT" ? (
             <Controller
               control={control}
@@ -388,6 +408,8 @@ function CardBalanceSheetForm({
         </SummarySection>
       </BottomSheet>
 
+      {discardChangesDialog}
+
       <AlertDialog
         open={confirmDeleteOpen}
         onOpenChange={(next) => {
@@ -417,6 +439,15 @@ function CardBalanceSheetForm({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <FinanceCurrencyPickerSheet
+        open={picker === "currency"}
+        onOpenChange={closeHandlerFor("currency")}
+        value={selectedCurrency || defaultCurrency}
+        onSelect={(next) =>
+          setValue("currency", next, { shouldValidate: true })
+        }
+      />
     </>
   )
 }

@@ -36,11 +36,11 @@ Browser  →  proxy.ts (sesión Supabase)
 
 Un solo app Next.js. `app/` solo compone rutas; cada feature vive en `src/modules/<slug>/`. Sin packages por feature y sin capas `presentation` / `application` / `infrastructure` / `domain`. Del backend se copia la disciplina de frontera pública (un `index.ts` por módulo y lint que la hace fallar), no el árbol de Nest ni el monorepo.
 
-| Path             | Rol                                           |
-| ---------------- | --------------------------------------------- |
-| `src/providers/` | Query, AuthBootstrap, Theme, AppEffects       |
-| `src/config/`    | api-client, supabase                          |
-| `proxy.ts`       | Refresh de sesión + guards de rutas           |
+| Path             | Rol                                     |
+| ---------------- | --------------------------------------- |
+| `src/providers/` | Query, AuthBootstrap, Theme, AppEffects |
+| `src/config/`    | api-client, supabase                    |
+| `proxy.ts`       | Refresh de sesión + guards de rutas     |
 
 Papeles de archivo (ruta, screen, cuerpo, UI, regla), nombres, gate/header y capabilities: [module-conventions.md](./module-conventions.md) y [AGENTS.md](../../AGENTS.md). Cada módulo exporta su API y sus screens en su `index.ts`; otro módulo y `src/shared` importan solo ese `index.ts`. `src/shared` no importa features. Finanzas es el único módulo con capabilities.
 

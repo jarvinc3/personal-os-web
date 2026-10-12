@@ -6,14 +6,9 @@ import {
   CardProductRow,
 } from "@/src/modules/finance/shared/components/product-rows"
 import { InstitutionProductEmpty } from "@/src/modules/finance/institutions/components/institution-product-lists"
-import { InstitutionSheet } from "@/src/modules/finance/institutions/components/institution-sheet"
-import {
-  AccountSheet,
-  CardBalanceSheet,
-  CardSheet,
-} from "@/src/modules/finance/catalog"
+import { AccountSheet, CardBalanceSheet } from "@/src/modules/finance/catalog"
 import { FinanceGate } from "@/src/modules/finance/finance-gate"
-import { LoanProgressCard, LoanSheet } from "@/src/modules/finance/loans"
+import { LoanProgressCard } from "@/src/modules/finance/loans"
 import { LinkInstitutionMailboxSheet } from "@/src/modules/finance/sync"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
@@ -27,6 +22,7 @@ import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-financ
 import {
   useArchiveInstitution,
   useDeleteInstitution,
+  useRestoreInstitution,
   useInstitutions,
 } from "@/src/modules/finance/shared/hooks/use-institutions"
 import { useLoans } from "@/src/modules/finance/shared/hooks/use-loans"
@@ -37,24 +33,15 @@ import {
   financeErrorMessage,
   financeLoadErrorMessage,
 } from "@/src/modules/finance/shared/lib/finance-error"
+import { showUndoToast } from "@/src/modules/finance/shared/components/undo-toast"
 import {
   buildInstitutionStackItems,
   formatStackItemBalance,
 } from "@/src/modules/finance/shared/lib/institution-stack"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+import { DeleteRecordDialog } from "@/src/modules/finance/shared/components/delete-record-dialog"
+import { RecordOptionsSheet } from "@/src/modules/finance/shared/components/record-options-sheet"
 import { LoadingView } from "@/src/shared/components/layout/loading-view"
 import { Button } from "@/src/shared/components/ui/button"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/src/shared/components/ui/alert-dialog"
-import { SummaryItem } from "@/src/shared/components/ui/summary"
 import {
   Tabs,
   TabsContent,
@@ -119,36 +106,22 @@ function InstitutionDetailScreenBody({
     useRunEmailSync(emailSyncEnabled)
   const archiveInstitution = useArchiveInstitution()
   const deleteInstitution = useDeleteInstitution()
+  const restoreInstitution = useRestoreInstitution()
 
   const [tab, setTab] = useState<"accounts" | "cards" | "loans">("accounts")
   const [confirmOpen, setConfirmOpen] = useState(false)
   const { open: openOptionsSheet, setOpen: setOpenOptionsSheet } =
     useSheetParam(FINANCE_SHEET_KEYS.institutionOptions)
   const {
-    open: openInstitutionSheet,
-    sheetId: institutionSheetId,
-    setOpen: setOpenInstitutionSheet,
-  } = useSheetParam(FINANCE_SHEET_KEYS.institution)
-  const {
     open: openAccountSheet,
     sheetId: accountSheetId,
     setOpen: setOpenAccountSheet,
   } = useSheetParam(FINANCE_SHEET_KEYS.account)
   const {
-    open: openCardSheet,
-    sheetId: cardSheetId,
-    setOpen: setOpenCardSheet,
-  } = useSheetParam(FINANCE_SHEET_KEYS.card)
-  const {
     open: openCardBalanceSheet,
     sheetId: cardBalanceSheetId,
     setOpen: setOpenCardBalanceSheet,
   } = useSheetParam(FINANCE_SHEET_KEYS.cardBalance)
-  const {
-    open: openLoanSheet,
-    sheetId: loanSheetId,
-    setOpen: setOpenLoanSheet,
-  } = useSheetParam(FINANCE_SHEET_KEYS.loan)
   const { open: openLinkSheet, setOpen: setOpenLinkSheet } = useSheetParam(
     FINANCE_SHEET_KEYS.linkInstitutionMailbox
   )
@@ -225,16 +198,23 @@ function InstitutionDetailScreenBody({
       return
     }
     try {
-      await deleteInstitution.mutateAsync(institution.id)
-      appToast.success({ text1: "Institución borrada" })
+      const institutionId = institution.id
+      await deleteInstitution.mutateAsync(institutionId)
       setConfirmOpen(false)
       setOpenOptionsSheet(false)
       router.push(APP_ROUTES.app.financeProducts)
+      showUndoToast("Institución eliminada", () =>
+        restoreInstitution.mutate(institutionId, {
+          onError: (error) =>
+            appToast.error({ text1: financeErrorMessage(error) }),
+        })
+      )
     } catch (error) {
       appToast.error({ text1: financeErrorMessage(error) })
     }
   }, [
     deleteInstitution,
+    restoreInstitution,
     institution,
     router,
     setConfirmOpen,
@@ -286,26 +266,12 @@ function InstitutionDetailScreenBody({
     loansQuery.error ??
     balanceSheetQuery.error
 
-  const editingInstitution = useSheetListEntity(
-    openInstitutionSheet,
-    institutionSheetId,
-    institutionsQuery.data,
-    institutionsQuery.isPending,
-    setOpenInstitutionSheet
-  )
   const editingAccount = useSheetListEntity(
     openAccountSheet,
     accountSheetId,
     accountsQuery.data,
     accountsQuery.isPending,
     setOpenAccountSheet
-  )
-  const editingCard = useSheetListEntity(
-    openCardSheet,
-    cardSheetId,
-    cardsQuery.data,
-    cardsQuery.isPending,
-    setOpenCardSheet
   )
   const balancingCard = useSheetListEntity(
     openCardBalanceSheet,
@@ -314,13 +280,6 @@ function InstitutionDetailScreenBody({
     cardsQuery.isPending,
     setOpenCardBalanceSheet,
     true
-  )
-  const editingLoan = useSheetListEntity(
-    openLoanSheet,
-    loanSheetId,
-    loansQuery.data,
-    loansQuery.isPending,
-    setOpenLoanSheet
   )
 
   if (isLoading && !institution) {
@@ -491,7 +450,11 @@ function InstitutionDetailScreenBody({
               {institutionCards.length === 0 ? (
                 <InstitutionProductEmpty
                   tab="cards"
-                  onCreate={() => setOpenCardSheet(true, null)}
+                  onCreate={() =>
+                    router.push(
+                      `${APP_ROUTES.app.financeCardNew}?institutionId=${institutionId}`
+                    )
+                  }
                 />
               ) : (
                 institutionCards.map((card) => (
@@ -524,7 +487,11 @@ function InstitutionDetailScreenBody({
               {institutionLoans.length === 0 ? (
                 <InstitutionProductEmpty
                   tab="loans"
-                  onCreate={() => setOpenLoanSheet(true, null)}
+                  onCreate={() =>
+                    router.push(
+                      `${APP_ROUTES.app.financeLoanNew}?institutionId=${institutionId}`
+                    )
+                  }
                 />
               ) : (
                 institutionLoans.map((loan) => (
@@ -544,129 +511,109 @@ function InstitutionDetailScreenBody({
         </div>
       </div>
 
-      <BottomSheet
+      <RecordOptionsSheet
         open={openOptionsSheet}
         onOpenChange={setOpenOptionsSheet}
-        title="Opciones"
         description={institution.name}
-      >
-        <div className="overflow-hidden rounded-2xl border border-border bg-card p-1">
-          <SummaryItem
-            title="Editar institución"
-            icon={PencilIcon}
-            onPress={() => setOpenInstitutionSheet(true, institution.id)}
-            className="px-3"
-          />
-          <SummaryItem
-            title="Nueva cuenta"
-            icon={LandmarkIcon}
-            onPress={() => setOpenAccountSheet(true, null)}
-            className="px-3"
-          />
-          <SummaryItem
-            title="Nueva tarjeta"
-            icon={CreditCardIcon}
-            onPress={() => setOpenCardSheet(true, null)}
-            className="px-3"
-          />
-          <SummaryItem
-            title="Nuevo préstamo"
-            icon={HandCoinsIcon}
-            onPress={() => setOpenLoanSheet(true, null)}
-            className="px-3"
-          />
-          <SummaryItem
-            title="Vincular correo"
-            description={
-              linkedMailbox
-                ? `Conectada a ${linkedMailbox.emailAddress}`
-                : "Liga un Gmail ya conectado"
-            }
-            icon={MailIcon}
-            disabled={Boolean(linkedMailbox)}
-            onPress={linkedMailbox ? undefined : () => setOpenLinkSheet(true)}
-            showChevron={!linkedMailbox}
-            isLast={false}
-            className="px-3"
-          />
-          {linkedSource ? (
-            <SummaryItem
-              title="Sincronizar correo"
-              description={
-                emailSyncEnabled
-                  ? "Leer transacciones nuevas del banco"
-                  : "Actívala en Ajustes → Finanzas"
-              }
-              icon={RefreshCwIcon}
-              disabled={!emailSyncEnabled || syncPending}
-              onPress={() => void runSync(linkedSource.id)}
-              showChevron={false}
-              isLast={false}
-              className="px-3"
-            />
-          ) : null}
-          <SummaryItem
-            title="Archivar"
-            icon={ArchiveIcon}
-            onPress={() => void onArchiveInstitution()}
-            disabled={
-              archiveInstitution.isPending || deleteInstitution.isPending
-            }
-            isLast={false}
-            className="px-3 text-destructive"
-          />
-          <SummaryItem
-            title="Borrar"
-            icon={Trash2Icon}
-            onPress={() => setConfirmOpen(true)}
-            disabled={
-              archiveInstitution.isPending || deleteInstitution.isPending
-            }
-            isLast
-            className="px-3 text-destructive"
-          />
-        </div>
-      </BottomSheet>
+        options={[
+          {
+            id: "edit",
+            title: "Editar institución",
+            icon: PencilIcon,
+            onPress: () => {
+              setOpenOptionsSheet(false)
+              router.push(APP_ROUTES.app.financeInstitutionEdit(institution.id))
+            },
+          },
+          {
+            id: "new-account",
+            title: "Nueva cuenta",
+            icon: LandmarkIcon,
+            onPress: () => {
+              setOpenOptionsSheet(false)
+              setOpenAccountSheet(true, null)
+            },
+          },
+          {
+            id: "new-card",
+            title: "Nueva tarjeta",
+            icon: CreditCardIcon,
+            onPress: () => {
+              setOpenOptionsSheet(false)
+              router.push(
+                `${APP_ROUTES.app.financeCardNew}?institutionId=${institutionId}`
+              )
+            },
+          },
+          {
+            id: "new-loan",
+            title: "Nuevo préstamo",
+            icon: HandCoinsIcon,
+            onPress: () => {
+              setOpenOptionsSheet(false)
+              router.push(
+                `${APP_ROUTES.app.financeLoanNew}?institutionId=${institutionId}`
+              )
+            },
+          },
+          {
+            id: "link-mailbox",
+            title: "Vincular correo",
+            description: linkedMailbox
+              ? `Conectada a ${linkedMailbox.emailAddress}`
+              : "Liga un Gmail ya conectado",
+            icon: MailIcon,
+            disabled: Boolean(linkedMailbox),
+            showChevron: !linkedMailbox,
+            onPress: () => setOpenLinkSheet(true),
+          },
+          ...(linkedSource
+            ? [
+                {
+                  id: "sync-mailbox",
+                  title: "Sincronizar correo",
+                  description: emailSyncEnabled
+                    ? "Leer transacciones nuevas del banco"
+                    : "Actívala en Ajustes → Finanzas",
+                  icon: RefreshCwIcon,
+                  disabled: !emailSyncEnabled || syncPending,
+                  showChevron: false,
+                  onPress: () => void runSync(linkedSource.id),
+                },
+              ]
+            : []),
+          {
+            id: "archive",
+            title: "Archivar",
+            icon: ArchiveIcon,
+            disabled:
+              archiveInstitution.isPending || deleteInstitution.isPending,
+            onPress: () => void onArchiveInstitution(),
+          },
+          {
+            id: "delete",
+            title: "Eliminar",
+            icon: Trash2Icon,
+            destructive: true,
+            disabled:
+              archiveInstitution.isPending || deleteInstitution.isPending,
+            onPress: () => setConfirmOpen(true),
+          },
+        ]}
+      />
 
-      <AlertDialog
+      <DeleteRecordDialog
         open={confirmOpen}
-        onOpenChange={(open) => {
-          if (!deleteInstitution.isPending) {
-            setConfirmOpen(open)
-          }
+        onOpenChange={setConfirmOpen}
+        recordName={institution.name}
+        pending={deleteInstitution.isPending}
+        consequences="Se eliminan cuentas, tarjetas, correos ligados y préstamos. No se puede deshacer."
+        onConfirm={() => void onDeleteInstitution()}
+        archive={{
+          label: "¿Solo ocultarla? Archivar",
+          pending: archiveInstitution.isPending,
+          onArchive: () => void onArchiveInstitution(),
         }}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>¿Borrar este banco?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Se eliminan cuentas, tarjetas, correos ligados y préstamos. No se
-              puede deshacer.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleteInstitution.isPending}>
-              Cancelar
-            </AlertDialogCancel>
-            <AlertDialogAction
-              variant="destructive"
-              disabled={deleteInstitution.isPending}
-              onClick={() => void onDeleteInstitution()}
-            >
-              Borrar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      <InstitutionSheet
-        open={openInstitutionSheet}
-        onOpenChange={setOpenInstitutionSheet}
-        pending={Boolean(institutionSheetId) && !editingInstitution}
-        institution={
-          editingInstitution ?? (!institutionSheetId ? institution : null)
-        }
-        onDeleted={() => router.push(APP_ROUTES.app.financeProducts)}
       />
 
       <AccountSheet
@@ -676,20 +623,7 @@ function InstitutionDetailScreenBody({
         account={editingAccount}
         institutions={institutions}
         defaultCurrency={config.baseCurrency}
-        display={display}
         defaultInstitutionId={institutionId}
-      />
-
-      <CardSheet
-        open={openCardSheet}
-        onOpenChange={setOpenCardSheet}
-        pending={Boolean(cardSheetId) && !editingCard}
-        card={editingCard}
-        institutions={institutions}
-        accounts={accounts}
-        defaultCurrency={config.baseCurrency}
-        defaultInstitutionId={institutionId}
-        onUpdateBalance={(item) => setOpenCardBalanceSheet(true, item.id)}
       />
 
       <CardBalanceSheet
@@ -698,18 +632,6 @@ function InstitutionDetailScreenBody({
         pending={Boolean(cardBalanceSheetId) && !balancingCard}
         card={balancingCard}
         defaultCurrency={config.baseCurrency}
-        display={display}
-      />
-
-      <LoanSheet
-        open={openLoanSheet}
-        onOpenChange={setOpenLoanSheet}
-        pending={Boolean(loanSheetId) && !editingLoan}
-        loan={editingLoan}
-        accounts={accounts}
-        institutions={institutions}
-        defaultCurrency={config.baseCurrency}
-        defaultInstitutionId={institutionId}
         display={display}
       />
 

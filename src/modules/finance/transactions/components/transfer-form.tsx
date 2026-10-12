@@ -11,14 +11,17 @@ import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
 import { useCards } from "@/src/modules/finance/shared/hooks/use-cards"
 import { useCurrencyForTarget } from "@/src/modules/finance/shared/hooks/use-currency-for-target"
 import { useInstitutions } from "@/src/modules/finance/shared/hooks/use-institutions"
-import { useCreateTransfer } from "@/src/modules/finance/shared/hooks/use-transactions"
+import {
+  useCreateTransfer,
+  useUpdateTransfer,
+} from "@/src/modules/finance/shared/hooks/use-transactions"
 import {
   buildDestinationPickerGroups,
   ledgerTargetsFromGroups,
 } from "@/src/modules/finance/shared/lib/destination-picker"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import {
-  nowDateTimeInput,
+  sliceDateTimeInput,
   wallClockToIso,
 } from "@/src/modules/finance/shared/lib/ledger-form"
 import {
@@ -27,6 +30,7 @@ import {
   splitLedgerTarget,
 } from "@/src/modules/finance/shared/lib/ledger-payloads"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
+import type { FinanceTransaction } from "@/src/modules/finance/shared/types/entities"
 import { FormTextField } from "@/src/shared/components/layout/form-blocks"
 import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
 import { SummarySection } from "@/src/shared/components/ui/summary"
@@ -54,16 +58,48 @@ type TransferFormProps = {
   defaultCurrency: string
   enabled: boolean
   display: FinanceMoneyDisplay
+  transfer?: FinanceTransaction | null
   onDone: () => void
+}
+
+function transferDefaults(
+  transfer: FinanceTransaction | null,
+  defaultCurrency: string
+) {
+  return {
+    amount: transfer?.amount ?? "",
+    currency: transfer?.currency ?? defaultCurrency,
+    transactionDate: sliceDateTimeInput(transfer?.transactionDate),
+    fromTarget: transfer?.accountId
+      ? encodeLedgerTarget("account", transfer.accountId)
+      : transfer?.cardId
+        ? encodeLedgerTarget("card", transfer.cardId)
+        : CATALOG_NONE,
+    toTarget: transfer?.transferToAccountId
+      ? encodeLedgerTarget("account", transfer.transferToAccountId)
+      : transfer?.transferToCardId
+        ? encodeLedgerTarget("card", transfer.transferToCardId)
+        : CATALOG_NONE,
+    status:
+      transfer?.status === "PENDING"
+        ? ("PENDING" as const)
+        : ("CONFIRMED" as const),
+    description: transfer?.description ?? "",
+    notes: transfer?.notes ?? "",
+  }
 }
 
 export function TransferForm({
   defaultCurrency,
   enabled,
   display,
+  transfer = null,
   onDone,
 }: TransferFormProps) {
+  const isEdit = Boolean(transfer)
   const createMutation = useCreateTransfer()
+  const updateMutation = useUpdateTransfer()
+  const activeMutation = isEdit ? updateMutation : createMutation
   const accountsQuery = useAccounts(enabled)
   const cardsQuery = useCards(enabled)
   const institutionsQuery = useInstitutions(enabled)
@@ -96,16 +132,7 @@ export function TransferForm({
   } = useForm<TransferFormValues>({
     mode: "onTouched",
     resolver: zodResolver(transferSchema),
-    defaultValues: {
-      amount: "",
-      currency: defaultCurrency,
-      transactionDate: nowDateTimeInput(),
-      fromTarget: CATALOG_NONE,
-      toTarget: CATALOG_NONE,
-      status: "CONFIRMED",
-      description: "",
-      notes: "",
-    },
+    defaultValues: transferDefaults(transfer, defaultCurrency),
   })
 
   const formValues = useWatch({ control })
@@ -115,7 +142,7 @@ export function TransferForm({
   const currency = useWatch({ control, name: "currency" })
 
   const canSave =
-    !createMutation.isPending && targetsReady && canTransfer && formIsValid
+    !activeMutation.isPending && targetsReady && canTransfer && formIsValid
 
   const applyTargetCurrency = useCallback(
     (next: string) => {
@@ -158,7 +185,8 @@ export function TransferForm({
     accounts,
     cards,
     defaultCurrency,
-    applyTargetCurrency
+    applyTargetCurrency,
+    !isEdit
   )
 
   const onSubmit = handleSubmit(async (values) => {
@@ -180,8 +208,16 @@ export function TransferForm({
       return
     }
     try {
-      await createMutation.mutateAsync(payload.body)
-      appToast.success({ text1: "Transferencia creada" })
+      if (transfer) {
+        await updateMutation.mutateAsync({
+          id: transfer.id,
+          body: payload.body,
+        })
+        appToast.success({ text1: "Transferencia actualizada" })
+      } else {
+        await createMutation.mutateAsync(payload.body)
+        appToast.success({ text1: "Transferencia creada" })
+      }
       onDone()
     } catch (error) {
       appToast.error({ text1: financeErrorMessage(error) })
@@ -192,8 +228,8 @@ export function TransferForm({
     <>
       <FinanceFormScreen
         onSubmit={onSubmit}
-        submitLabel="Transferir"
-        isSubmitting={createMutation.isPending}
+        submitLabel={isEdit ? "Guardar" : "Transferir"}
+        isSubmitting={activeMutation.isPending}
         submitDisabled={!canSave}
       >
         <SummarySection title="Ruta" icon={ArrowLeftRightIcon}>

@@ -14,16 +14,16 @@ Una o dos frases.
 
 ## Actores
 
-| Actor | Rol |
-| --- | --- |
-| Usuario autenticado | … |
+| Actor               | Rol |
+| ------------------- | --- |
+| Usuario autenticado | …   |
 
 ## Dependencias
 
-| Dependencia | Cómo se consume |
-| --- | --- |
-| API backend | enlace al contrato dueño |
-| Chrome | `ModuleAppNav` / hoja / ninguno |
+| Dependencia | Cómo se consume                 |
+| ----------- | ------------------------------- |
+| API backend | enlace al contrato dueño        |
+| Chrome      | `ModuleAppNav` / hoja / ninguno |
 
 ## Evidencia
 

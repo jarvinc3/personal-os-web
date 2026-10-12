@@ -102,12 +102,14 @@ export function EditQuietHoursSheet({
           label="Inicio"
           value={start}
           onChange={setStart}
+          minuteStep={5}
           disabled={updateProfileMutation.isPending}
         />
         <TimePairWheels
           label="Fin"
           value={end}
           onChange={setEnd}
+          minuteStep={5}
           disabled={updateProfileMutation.isPending}
         />
       </SummarySection>

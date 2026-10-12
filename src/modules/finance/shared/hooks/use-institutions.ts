@@ -98,3 +98,21 @@ export function useDeleteInstitution() {
     },
   })
 }
+
+export function useRestoreInstitution() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) =>
+      apiPost<{ success: boolean }>(
+        API_ENDPOINTS.FINANCE.INSTITUTION_RESTORE(id)
+      ),
+    onSuccess: () => {
+      invalidateCatalog(queryClient)
+      invalidateFinancePositions(queryClient)
+      void queryClient.invalidateQueries({ queryKey: FINANCE_LOANS_QUERY_KEY })
+      void queryClient.invalidateQueries({
+        queryKey: FINANCE_EMAIL_SOURCES_QUERY_KEY,
+      })
+    },
+  })
+}

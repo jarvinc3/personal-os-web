@@ -1,6 +1,7 @@
 "use client"
 
 import { cn } from "@/src/shared/lib/utils"
+import Link from "next/link"
 import type { ReactNode } from "react"
 
 type ChatMarkdownBlockProps = {
@@ -79,7 +80,7 @@ function parseMarkdownSegments(content: string): MarkdownSegment[] {
 }
 
 function renderInline(text: string, keyPrefix: string): ReactNode[] {
-  const parts = text.split(/(\*\*[^*]+\*\*|`[^`]+`)/g)
+  const parts = text.split(/(\*\*[^*]+\*\*|`[^`]+`|\[[^\]]+\]\([^)]+\))/g)
   return parts.map((part, partIndex) => {
     if (part.startsWith("**") && part.endsWith("**")) {
       return (
@@ -94,6 +95,34 @@ function renderInline(text: string, keyPrefix: string): ReactNode[] {
         >
           {part.slice(1, -1)}
         </code>
+      )
+    }
+    const link = part.match(/^\[([^\]]+)\]\(([^)]+)\)$/)
+    if (link) {
+      const label = link[1]
+      const url = link[2]
+      const linkClass = "font-medium underline underline-offset-2 break-words"
+      if (url.startsWith("/")) {
+        return (
+          <Link
+            key={`${keyPrefix}-${partIndex}`}
+            href={url}
+            className={linkClass}
+          >
+            {label}
+          </Link>
+        )
+      }
+      return (
+        <a
+          key={`${keyPrefix}-${partIndex}`}
+          href={url}
+          target="_blank"
+          rel="noreferrer"
+          className={linkClass}
+        >
+          {label}
+        </a>
       )
     }
     return <span key={`${keyPrefix}-${partIndex}`}>{part}</span>

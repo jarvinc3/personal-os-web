@@ -5,7 +5,7 @@ alwaysApply: true
 
 # Pantalla de formulario (página)
 
-Un formulario que ocupa una ruta se envuelve en `FinanceFormScreen` (`src/modules/finance/components/forms/finance-form-screen.tsx`) o en una pieza con la misma forma. El botón no se deja al final del scroll.
+Un formulario que ocupa una ruta se envuelve en `FinanceFormScreen` (`src/modules/finance/shared/components/forms/form-screen.tsx`) o en una pieza con la misma forma. El botón no se deja al final del scroll.
 
 - La barra de envío va pegada al fondo (`sticky bottom-0`), con borde superior y fondo de página.
 - Un solo botón de envío, a ancho completo, `h-11`. Lleva el icono del verbo (`SaveIcon` para guardar) y lo cambia por `Spinner` mientras envía. El texto no cambia a "Guardando...".
@@ -25,6 +25,6 @@ Un formulario que ocupa una ruta se envuelve en `FinanceFormScreen` (`src/module
 </FinanceFormScreen>
 ```
 
-Molde: `src/modules/finance/components/transactions/transaction-form.tsx` y `transfer-form.tsx`.
+Molde: `src/modules/finance/transactions/components/transaction-form.tsx` y `transfer-form.tsx`.
 
 Rompe la regla: `src/modules/settings/components/module-settings/*-module-settings-form.tsx` deja el botón al final del `form`, sin barra fija. Se migra cuando se toque.

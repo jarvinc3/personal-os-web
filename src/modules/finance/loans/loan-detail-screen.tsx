@@ -8,20 +8,28 @@ import { MissingRecord } from "@/src/modules/finance/shared/components/layout/mi
 import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
 import { FinanceProgressHero } from "@/src/modules/finance/shared/components/layout/progress-hero"
 import { LoanSurfaceMark } from "@/src/modules/finance/loans/components/loan-progress-card"
-import { LoanSheet } from "@/src/modules/finance/loans/components/loan-sheet"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
-import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
 import { useInstitutions } from "@/src/modules/finance/shared/hooks/use-institutions"
 import { useLoanInstallments } from "@/src/modules/finance/shared/hooks/use-loan-installments"
-import { useLoans } from "@/src/modules/finance/shared/hooks/use-loans"
-import { financeLoadErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
+import {
+  useArchiveLoan,
+  useDeleteLoan,
+  useRestoreLoan,
+  useLoans,
+} from "@/src/modules/finance/shared/hooks/use-loans"
+import {
+  financeErrorMessage,
+  financeLoadErrorMessage,
+} from "@/src/modules/finance/shared/lib/finance-error"
+import { showUndoToast } from "@/src/modules/finance/shared/components/undo-toast"
 import { formatRatePercentLabel } from "@/src/modules/finance/shared/lib/interest-rate"
 import { formatCalendarDate } from "@/src/modules/finance/shared/lib/ledger-form"
 import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 import { loanProgressSummary } from "@/src/modules/finance/shared/lib/planning-lists"
 import { FINANCE_INSTALLMENT_FREQ_LABEL } from "@/src/modules/finance/shared/types/entities"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+import { DeleteRecordDialog } from "@/src/modules/finance/shared/components/delete-record-dialog"
+import { RecordOptionsSheet } from "@/src/modules/finance/shared/components/record-options-sheet"
 import { LoadingView } from "@/src/shared/components/layout/loading-view"
 import { Badge } from "@/src/shared/components/ui/badge"
 import { Button } from "@/src/shared/components/ui/button"
@@ -37,14 +45,16 @@ import { SummaryItem } from "@/src/shared/components/ui/summary"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
+import { appToast } from "@/src/shared/lib/app-toast"
 import {
+  ArchiveIcon,
   HandCoinsIcon,
   MoreVerticalIcon,
   PencilIcon,
-  PlusIcon,
+  Trash2Icon,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 
 import { ACCENT_FALLBACK_COLOR } from "@/src/shared/lib/accent-gradient"
 
@@ -71,18 +81,16 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
 
   const loansQuery = useLoans(isEnabled)
   const institutionsQuery = useInstitutions(isEnabled)
-  const accountsQuery = useAccounts(isEnabled)
   const installmentsQuery = useLoanInstallments(isEnabled, loanId)
-  const { open: openLoanSheet, setOpen: setOpenLoanSheet } = useSheetParam(
-    FINANCE_SHEET_KEYS.loan
-  )
+  const archiveLoan = useArchiveLoan()
+  const deleteLoan = useDeleteLoan()
+  const restoreLoan = useRestoreLoan()
   const { open: openOptionsSheet, setOpen: setOpenOptionsSheet } =
     useSheetParam(FINANCE_SHEET_KEYS.loanOptions)
 
   const loan =
     (loansQuery.data ?? []).find((item) => item.id === loanId) ?? null
   const institutions = institutionsQuery.data ?? []
-  const accounts = accountsQuery.data ?? []
   const institution = loan?.institutionId
     ? (institutions.find((item) => item.id === loan.institutionId) ?? null)
     : null
@@ -91,6 +99,43 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
   const money = { ...display, currency: loan?.currency ?? display.currency }
   const summary = loan ? loanProgressSummary(loan) : null
   const rateLabel = formatRatePercentLabel(loan?.interestRate ?? null)
+
+  const [confirmOpen, setConfirmOpen] = useState(false)
+
+  async function onArchiveLoan() {
+    if (!loan) {
+      return
+    }
+    try {
+      await archiveLoan.mutateAsync(loan.id)
+      appToast.success({ text1: "Préstamo archivado" })
+      setOpenOptionsSheet(false)
+      router.push(APP_ROUTES.app.financePlanning)
+    } catch (error) {
+      appToast.error({ text1: financeErrorMessage(error) })
+    }
+  }
+
+  async function onDeleteLoan() {
+    if (!loan) {
+      return
+    }
+    try {
+      const loanId = loan.id
+      await deleteLoan.mutateAsync(loanId)
+      setConfirmOpen(false)
+      setOpenOptionsSheet(false)
+      router.push(APP_ROUTES.app.financePlanning)
+      showUndoToast("Préstamo eliminado", () =>
+        restoreLoan.mutate(loanId, {
+          onError: (error) =>
+            appToast.error({ text1: financeErrorMessage(error) }),
+        })
+      )
+    } catch (error) {
+      appToast.error({ text1: financeErrorMessage(error) })
+    }
+  }
 
   const headerActions = useMemo(
     () => (
@@ -215,9 +260,13 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
                 </EmptyDescription>
               </EmptyHeader>
               <EmptyContent>
-                <Button onClick={() => setOpenLoanSheet(true)}>
-                  <PlusIcon />
-                  Préstamo
+                <Button
+                  onClick={() =>
+                    router.push(APP_ROUTES.app.financeLoanEdit(loan.id))
+                  }
+                >
+                  <PencilIcon />
+                  Editar préstamo
                 </Button>
               </EmptyContent>
             </Empty>
@@ -244,34 +293,50 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
         </AsyncRegion>
       </div>
 
-      <BottomSheet
+      <RecordOptionsSheet
         open={openOptionsSheet}
         onOpenChange={setOpenOptionsSheet}
-        title="Opciones"
         description={loan.lenderName}
-      >
-        <div className="overflow-hidden rounded-2xl border border-border bg-card">
-          <SummaryItem
-            title="Editar préstamo"
-            icon={PencilIcon}
-            onPress={() => {
+        options={[
+          {
+            id: "edit",
+            title: "Editar préstamo",
+            icon: PencilIcon,
+            onPress: () => {
               setOpenOptionsSheet(false)
-              setOpenLoanSheet(true)
-            }}
-            isLast
-            className="px-3"
-          />
-        </div>
-      </BottomSheet>
+              router.push(APP_ROUTES.app.financeLoanEdit(loan.id))
+            },
+          },
+          {
+            id: "archive",
+            title: "Archivar",
+            icon: ArchiveIcon,
+            disabled: archiveLoan.isPending || deleteLoan.isPending,
+            onPress: () => void onArchiveLoan(),
+          },
+          {
+            id: "delete",
+            title: "Eliminar",
+            icon: Trash2Icon,
+            destructive: true,
+            disabled: archiveLoan.isPending || deleteLoan.isPending,
+            onPress: () => setConfirmOpen(true),
+          },
+        ]}
+      />
 
-      <LoanSheet
-        open={openLoanSheet}
-        onOpenChange={setOpenLoanSheet}
-        loan={loan}
-        accounts={accounts}
-        institutions={institutions}
-        defaultCurrency={config.baseCurrency}
-        display={money}
+      <DeleteRecordDialog
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        recordName={loan.lenderName}
+        pending={deleteLoan.isPending}
+        consequences="Se borran sus cuotas y su calendario de pagos. No se puede deshacer."
+        onConfirm={() => void onDeleteLoan()}
+        archive={{
+          label: "¿Solo ocultarlo? Archivar",
+          pending: archiveLoan.isPending,
+          onArchive: () => void onArchiveLoan(),
+        }}
       />
     </>
   )

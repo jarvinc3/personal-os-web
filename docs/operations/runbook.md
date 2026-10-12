@@ -8,16 +8,16 @@
 
 ## Env (`.env.example`)
 
-| Variable | Uso |
-| --- | --- |
-| `NEXT_PUBLIC_SUPABASE_URL` | Supabase |
-| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Anon key |
-| `NEXT_PUBLIC_API_URL` | Origin API, ej. `http://localhost:3100` |
-| `NEXT_PUBLIC_API_PREFIX` | `api` |
-| `NEXT_PUBLIC_URL` | Origin de esta app (OAuth returnTo, CORS) |
-| `NEXT_PUBLIC_VAPID_PUBLIC_KEY` | Web Push |
-| `NEXT_PUBLIC_APP_NAME` / `VERSION` | Branding |
-| `NEXT_OS` / `NEXT_ENV` | No públicas; settings usa también `NEXT_PUBLIC_ENV` (default `"preview"` si falta) |
+| Variable                               | Uso                                                                                |
+| -------------------------------------- | ---------------------------------------------------------------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`             | Supabase                                                                           |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Anon key                                                                           |
+| `NEXT_PUBLIC_API_URL`                  | Origin API, ej. `http://localhost:3100`                                            |
+| `NEXT_PUBLIC_API_PREFIX`               | `api`                                                                              |
+| `NEXT_PUBLIC_URL`                      | Origin de esta app (OAuth returnTo, CORS)                                          |
+| `NEXT_PUBLIC_VAPID_PUBLIC_KEY`         | Web Push                                                                           |
+| `NEXT_PUBLIC_APP_NAME` / `VERSION`     | Branding                                                                           |
+| `NEXT_OS` / `NEXT_ENV`                 | No públicas; settings usa también `NEXT_PUBLIC_ENV` (default `"preview"` si falta) |
 
 > [!WARNING]
 > **REV-WEB-006** (`NO_VERIFICABLE`) — `app/layout` metadataBase usa `NEXT_PUBLIC_APP_URL`, **no** está en `.env.example`. [review-register.md](../review-register.md#rev-web-006)

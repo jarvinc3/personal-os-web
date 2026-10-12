@@ -28,10 +28,15 @@ export const APP_ROUTES = {
     financeSync: "/finance/sync",
     financeInstitution: (institutionId: string) =>
       `${FINANCE_INSTITUTIONS_PATH}/${institutionId}`,
+    financeInstitutionNew: `${FINANCE_INSTITUTIONS_PATH}/new`,
+    financeInstitutionEdit: (institutionId: string) =>
+      `${FINANCE_INSTITUTIONS_PATH}/${institutionId}/edit`,
     financeInstitutionAccount: (institutionId: string, accountId: string) =>
       `${FINANCE_INSTITUTIONS_PATH}/${institutionId}/accounts/${accountId}`,
     financeInstitutionCard: (institutionId: string, cardId: string) =>
       `${FINANCE_INSTITUTIONS_PATH}/${institutionId}/cards/${cardId}`,
+    financeCardNew: "/finance/cards/new",
+    financeCardEdit: (cardId: string) => `/finance/cards/${cardId}/edit`,
     financeCashAccount: (accountId: string) =>
       `${FINANCE_CASH_PATH}/${accountId}`,
     financeTransactions: "/finance/transactions",
@@ -41,9 +46,13 @@ export const APP_ROUTES = {
     financeTransactionEdit: (transactionId: string) =>
       `/finance/transactions/${transactionId}/edit`,
     financeTransferNew: "/finance/transfers/new",
+    financeTransferEdit: (transactionId: string) =>
+      `/finance/transfers/${transactionId}/edit`,
     financePlanning: "/finance/planning",
     financeLoans: "/finance/loans",
+    financeLoanNew: "/finance/loans/new",
     financeLoan: (loanId: string) => `/finance/loans/${loanId}`,
+    financeLoanEdit: (loanId: string) => `/finance/loans/${loanId}/edit`,
     financeBudget: (budgetId: string) => `/finance/budgets/${budgetId}`,
     financeBudgets: "/finance/budgets",
     financeSavingsGoals: "/finance/savings-goals",

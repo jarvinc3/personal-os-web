@@ -1,11 +1,10 @@
 import { ApiError } from "@/src/config/api-client"
 
+import { translateFinanceError } from "./finance-error-messages"
+
 export function financeErrorMessage(error: unknown): string {
   if (error instanceof ApiError) {
-    if (error.status >= 500) {
-      return "No se pudo guardar. Intenta de nuevo."
-    }
-    return error.message
+    return translateFinanceError(error.status, error.message)
   }
   if (error instanceof Error && error.message) {
     return error.message
