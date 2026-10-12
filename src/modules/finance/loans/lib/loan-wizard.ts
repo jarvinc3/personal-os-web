@@ -122,7 +122,10 @@ export function periodsElapsed(input: {
     return 0
   }
   if (freq === "MONTHLY") {
-    return differenceInCalendarMonths(to, from)
+    const months = differenceInCalendarMonths(to, from)
+    // The month only counts once its day arrives; `addMonths` clamps to the
+    // last day of a shorter month, so Jan 31 → Feb 28 still counts as one.
+    return addMonths(from, months) > to ? Math.max(0, months - 1) : months
   }
   const days = differenceInCalendarDays(to, from)
   return Math.floor(days / (freq === "WEEKLY" ? 7 : 14))

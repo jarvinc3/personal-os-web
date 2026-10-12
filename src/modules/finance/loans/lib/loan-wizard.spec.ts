@@ -135,6 +135,28 @@ describe("periodsElapsed", () => {
     )
   })
 
+  it("does not count a month until its day arrives", () => {
+    assert.equal(
+      periodsElapsed({
+        freq: "MONTHLY",
+        from: new Date(2025, 11, 10),
+        to: new Date(2026, 5, 1),
+      }),
+      5
+    )
+  })
+
+  it("counts the month when its day falls on a shorter month", () => {
+    assert.equal(
+      periodsElapsed({
+        freq: "MONTHLY",
+        from: new Date(2026, 0, 31),
+        to: new Date(2026, 1, 28),
+      }),
+      1
+    )
+  })
+
   it("counts weeks for a weekly loan", () => {
     assert.equal(
       periodsElapsed({
