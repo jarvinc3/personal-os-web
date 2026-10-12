@@ -140,3 +140,47 @@ export const loanWizardSchema = z
   })
 
 export type LoanWizardValues = z.infer<typeof loanWizardSchema>
+
+/**
+ * Reads the wizard fields an AI reply or a shared link can carry in the URL.
+ * Unknown or empty values are left out so the wizard keeps its own defaults.
+ */
+export function loanWizardPrefill(params: {
+  get(name: string): string | null
+}): Partial<LoanWizardValues> {
+  const prefill: Partial<LoanWizardValues> = {}
+
+  const amount = params.get("amount")?.trim()
+  if (amount) {
+    prefill.amount = amount
+  }
+  const periods = params.get("periods")?.trim()
+  if (periods) {
+    prefill.periods = periods
+  }
+  const ratePercent = params.get("ratePercent")?.trim()
+  if (ratePercent) {
+    prefill.ratePercent = ratePercent
+    prefill.known = "RATE"
+  }
+  const installment = params.get("installment")?.trim()
+  if (installment) {
+    prefill.installment = installment
+    prefill.known = "INSTALLMENT"
+  }
+  const lenderName = params.get("lenderName")?.trim()
+  if (lenderName) {
+    prefill.lenderName = lenderName
+    prefill.who = "PERSON"
+  }
+  const freq = params.get("freq")
+  if (freq && (FINANCE_INSTALLMENT_FREQS as readonly string[]).includes(freq)) {
+    prefill.freq = freq as LoanWizardValues["freq"]
+  }
+  const who = params.get("who")
+  if (who === "BANK" || who === "PERSON") {
+    prefill.who = who
+  }
+
+  return prefill
+}

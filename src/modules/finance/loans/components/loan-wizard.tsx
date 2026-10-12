@@ -112,7 +112,8 @@ const CALCULATING_STEPS = [
 
 function wizardDefaults(
   defaultCurrency: string,
-  defaultInstitutionId: string
+  defaultInstitutionId: string,
+  prefill: Partial<LoanWizardValues>
 ): LoanWizardValues {
   return {
     who: "BANK",
@@ -128,12 +129,14 @@ function wizardDefaults(
     accountId: CATALOG_NONE,
     disbursementDate: todayDateInput(),
     notes: "",
+    ...prefill,
   }
 }
 
 type LoanWizardProps = {
   defaultCurrency: string
   defaultInstitutionId?: string
+  prefill?: Partial<LoanWizardValues>
   display: FinanceMoneyDisplay
   onDone: () => void
 }
@@ -141,6 +144,7 @@ type LoanWizardProps = {
 export function LoanWizard({
   defaultCurrency,
   defaultInstitutionId = CATALOG_NONE,
+  prefill = {},
   display,
   onDone,
 }: LoanWizardProps) {
@@ -167,7 +171,11 @@ export function LoanWizard({
   } = useForm<LoanWizardValues>({
     mode: "onTouched",
     resolver: zodResolver(loanWizardSchema),
-    defaultValues: wizardDefaults(defaultCurrency, defaultInstitutionId),
+    defaultValues: wizardDefaults(
+      defaultCurrency,
+      defaultInstitutionId,
+      prefill
+    ),
   })
 
   const values = useWatch({ control }) as LoanWizardValues

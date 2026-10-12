@@ -17,3 +17,7 @@ Runtime 2026-09-15: `/chat` carga combobox `general`, historial y “Nueva conve
 - `AC-AI-W-002` — Given stream ya empezó, When error posterior, Then **no** fallback JSON.
 
 Evidencia: `use-ai-chat.ts`, `ai-chat-stream.ts`.
+
+## Render
+
+`ChatMarkdownBlock` pinta `**negrita**`, `` `código` `` y enlaces `[texto](url)`. Una ruta interna (`/finance/...`) se abre con `Link` de Next; una URL externa va en otra pestaña. El asistente usa ese enlace para abrir un formulario ya rellenado.

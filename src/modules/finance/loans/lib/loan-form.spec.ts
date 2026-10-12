@@ -1,7 +1,7 @@
 import assert from "node:assert/strict"
 import { describe, it } from "node:test"
 
-import { loanSchema } from "./loan-form.ts"
+import { loanSchema, loanWizardPrefill } from "./loan-form.ts"
 
 const validLoan = {
   lenderName: "Banco",
@@ -68,5 +68,50 @@ describe("loanSchema", () => {
     }
     const paths = parseResult.error.issues.map((issue) => issue.path.join("."))
     assert.equal(paths.includes("paidInstallments"), false)
+  })
+})
+
+describe("loanWizardPrefill", () => {
+  it("reads amount and periods", () => {
+    assert.deepEqual(
+      loanWizardPrefill(new URLSearchParams("amount=20000&periods=24")),
+      { amount: "20000", periods: "24" }
+    )
+  })
+
+  it("switches to the installment mode when a cuota is present", () => {
+    assert.deepEqual(
+      loanWizardPrefill(new URLSearchParams("amount=1000&installment=120")),
+      { amount: "1000", installment: "120", known: "INSTALLMENT" }
+    )
+  })
+
+  it("treats a lender name as a person loan", () => {
+    assert.deepEqual(
+      loanWizardPrefill(new URLSearchParams("lenderName=Juan")),
+      { lenderName: "Juan", who: "PERSON" }
+    )
+  })
+
+  it("lets an explicit who win over the lender name", () => {
+    assert.deepEqual(
+      loanWizardPrefill(new URLSearchParams("lenderName=Juan&who=BANK")),
+      { lenderName: "Juan", who: "BANK" }
+    )
+  })
+
+  it("accepts a known frequency", () => {
+    assert.deepEqual(loanWizardPrefill(new URLSearchParams("freq=WEEKLY")), {
+      freq: "WEEKLY",
+    })
+  })
+
+  it("ignores empty and unknown values", () => {
+    assert.deepEqual(
+      loanWizardPrefill(
+        new URLSearchParams("amount=&freq=YEARLY&who=OTHER&periods=")
+      ),
+      {}
+    )
   })
 })

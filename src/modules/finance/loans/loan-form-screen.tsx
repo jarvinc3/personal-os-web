@@ -7,6 +7,7 @@ import { useCallback } from "react"
 import { FinanceGate } from "@/src/modules/finance/finance-gate"
 import { LoanEditForm } from "@/src/modules/finance/loans/components/loan-edit-form"
 import { LoanWizard } from "@/src/modules/finance/loans/components/loan-wizard"
+import { loanWizardPrefill } from "@/src/modules/finance/loans/lib/loan-form"
 import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
 import { MissingRecord } from "@/src/modules/finance/shared/components/layout/missing-record"
 import { CATALOG_NONE } from "@/src/modules/finance/shared/constants/catalog"
@@ -32,6 +33,7 @@ function LoanCreateScreenBody() {
   const searchParams = useSearchParams()
   const { config } = useFinanceEnabled()
   const defaultInstitutionId = searchParams.get("institutionId") ?? CATALOG_NONE
+  const prefill = loanWizardPrefill(searchParams)
 
   const handleBack = useCallback(() => {
     if (window.history.length > 1) {
@@ -54,6 +56,7 @@ function LoanCreateScreenBody() {
     <LoanWizard
       defaultCurrency={config.baseCurrency}
       defaultInstitutionId={defaultInstitutionId}
+      prefill={prefill}
       display={{
         currency: config.baseCurrency,
         showCents: config.display.showCents,
