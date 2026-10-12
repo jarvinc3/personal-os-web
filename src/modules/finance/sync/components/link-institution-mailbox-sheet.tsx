@@ -2,6 +2,7 @@
 
 import { CATALOG_NONE } from "@/src/modules/finance/shared/constants/catalog"
 import { useCreateEmailSource } from "@/src/modules/finance/shared/hooks/use-email-sources"
+import { useDiscardChanges } from "@/src/modules/finance/shared/hooks/use-discard-changes"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import type {
   FinanceInstitution,
@@ -77,7 +78,7 @@ export function LinkInstitutionMailboxSheet({
     handleSubmit,
     reset,
     setValue,
-    formState: { errors },
+    formState: { errors, isDirty },
   } = useForm<LinkInstitutionMailboxFormValues>({
     resolver: zodResolver(linkInstitutionMailboxSchema),
     defaultValues: {
@@ -88,6 +89,10 @@ export function LinkInstitutionMailboxSheet({
     },
   })
 
+  const { requestOpenChange, discardChangesDialog } = useDiscardChanges({
+    isDirty,
+    onOpenChange,
+  })
   const selectedInstitutionId = useWatch({ control, name: "institutionId" })
   const selectedInstitution =
     institutions.find((item) => item.id === selectedInstitutionId) ?? null
@@ -149,7 +154,7 @@ export function LinkInstitutionMailboxSheet({
     <>
       <BottomSheet
         open={open}
-        onOpenChange={onOpenChange}
+        onOpenChange={requestOpenChange}
         title="Vincular institución"
         description="Elige el Gmail y el correo del banco con el que avisa los movimientos."
         actions={{
@@ -158,7 +163,7 @@ export function LinkInstitutionMailboxSheet({
               type="button"
               variant="outline"
               className="flex-1"
-              onClick={() => onOpenChange(false)}
+              onClick={() => requestOpenChange(false)}
             >
               <XIcon className="size-4 shrink-0" />
               Cancelar
@@ -263,6 +268,8 @@ export function LinkInstitutionMailboxSheet({
           </SummarySection>
         )}
       </BottomSheet>
+
+      {discardChangesDialog}
 
       <InstitutionPickerSheet
         open={picker === "institution"}

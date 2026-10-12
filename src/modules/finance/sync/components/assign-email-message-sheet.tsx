@@ -7,6 +7,7 @@ import {
   useAssignPendingEmail,
   useRetryPendingEmail,
 } from "@/src/modules/finance/shared/hooks/use-email-sources"
+import { useDiscardChanges } from "@/src/modules/finance/shared/hooks/use-discard-changes"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import { splitLedgerTarget } from "@/src/modules/finance/shared/lib/ledger-payloads"
 import {
@@ -77,10 +78,15 @@ export function AssignEmailMessageSheet({
     handleSubmit,
     reset,
     setValue,
-    formState: { errors },
+    formState: { errors, isDirty },
   } = useForm<AssignEmailMessageFormValues>({
     resolver: zodResolver(assignEmailMessageSchema),
     defaultValues: { target: CATALOG_NONE },
+  })
+
+  const { requestOpenChange, discardChangesDialog } = useDiscardChanges({
+    isDirty,
+    onOpenChange,
   })
 
   useEffect(() => {
@@ -152,7 +158,7 @@ export function AssignEmailMessageSheet({
     <>
       <BottomSheet
         open={open}
-        onOpenChange={onOpenChange}
+        onOpenChange={requestOpenChange}
         pending={pending}
         title="Asignar movimiento"
         description={
@@ -166,7 +172,7 @@ export function AssignEmailMessageSheet({
               type="button"
               variant="outline"
               className="flex-1"
-              onClick={() => onOpenChange(false)}
+              onClick={() => requestOpenChange(false)}
             >
               <XIcon className="size-4 shrink-0" />
               Cancelar
@@ -234,6 +240,8 @@ export function AssignEmailMessageSheet({
           />
         </SummarySection>
       </BottomSheet>
+
+      {discardChangesDialog}
 
       <DestinationPickerSheet
         open={picker === "target"}

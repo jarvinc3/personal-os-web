@@ -20,6 +20,7 @@ import {
   useCreateAccount,
   useUpdateAccount,
 } from "@/src/modules/finance/shared/hooks/use-accounts"
+import { useDiscardChanges } from "@/src/modules/finance/shared/hooks/use-discard-changes"
 import { buildCreateAccountBody } from "@/src/modules/finance/shared/lib/catalog-payloads"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import { parseFinanceMoney } from "@/src/modules/finance/shared/lib/money"
@@ -124,7 +125,7 @@ export function AccountSheet({
     reset,
     setValue,
     trigger,
-    formState: { errors },
+    formState: { errors, isDirty },
   } = useForm<AccountFormValues>({
     resolver: zodResolver(accountSchema),
     defaultValues: toFormValues(
@@ -135,6 +136,10 @@ export function AccountSheet({
     ),
   })
 
+  const { requestOpenChange, discardChangesDialog } = useDiscardChanges({
+    isDirty,
+    onOpenChange,
+  })
   const accountType = useWatch({ control, name: "type" })
   const accountName = useWatch({ control, name: "name" })
   const accountColor = useWatch({ control, name: "color" })
@@ -214,7 +219,7 @@ export function AccountSheet({
     <>
       <BottomSheet
         open={open}
-        onOpenChange={onOpenChange}
+        onOpenChange={requestOpenChange}
         pending={pending}
         title={isEdit ? "Editar cuenta" : "Nueva cuenta"}
         description={
@@ -230,7 +235,7 @@ export function AccountSheet({
               key="cancel"
               variant="outline"
               className="flex-1"
-              onClick={() => onOpenChange(false)}
+              onClick={() => requestOpenChange(false)}
             >
               <XIcon className="size-4 shrink-0" />
               Cancelar
@@ -384,6 +389,8 @@ export function AccountSheet({
           />
         </SummarySection>
       </BottomSheet>
+
+      {discardChangesDialog}
 
       <InstitutionPickerSheet
         open={picker === "institution"}

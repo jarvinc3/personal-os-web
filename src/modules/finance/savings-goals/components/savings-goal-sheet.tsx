@@ -12,6 +12,7 @@ import {
   useCreateSavingsGoal,
   useUpdateSavingsGoal,
 } from "@/src/modules/finance/shared/hooks/use-savings-goals"
+import { useDiscardChanges } from "@/src/modules/finance/shared/hooks/use-discard-changes"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
@@ -78,12 +79,16 @@ export function SavingsGoalSheet({
     reset,
     setValue,
     trigger,
-    formState: { errors },
+    formState: { errors, isDirty },
   } = useForm<SavingsGoalFormValues>({
     resolver: zodResolver(savingsGoalSchema),
     defaultValues: toFormValues(goal, defaultCurrency),
   })
 
+  const { requestOpenChange, discardChangesDialog } = useDiscardChanges({
+    isDirty,
+    onOpenChange,
+  })
   const currency = useWatch({ control, name: "currency" })
   const targetAmount = useWatch({ control, name: "targetAmount" })
   const currentAmount = useWatch({ control, name: "currentAmount" })
@@ -139,7 +144,7 @@ export function SavingsGoalSheet({
     <>
       <BottomSheet
         open={open}
-        onOpenChange={onOpenChange}
+        onOpenChange={requestOpenChange}
         pending={pending}
         title={isEdit ? "Editar meta" : "Nueva meta"}
         description="Se marca como completada cuando lo ahorrado alcanza la meta."
@@ -149,7 +154,7 @@ export function SavingsGoalSheet({
               type="button"
               variant="outline"
               className="flex-1"
-              onClick={() => onOpenChange(false)}
+              onClick={() => requestOpenChange(false)}
             >
               <XIcon className="size-4 shrink-0" />
               Cancelar
@@ -269,6 +274,8 @@ export function SavingsGoalSheet({
           />
         </FinanceDetailsDisclosure>
       </BottomSheet>
+
+      {discardChangesDialog}
 
       <FinanceCurrencyPickerSheet
         open={picker === "currency"}

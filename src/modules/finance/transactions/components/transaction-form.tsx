@@ -330,6 +330,7 @@ export function TransactionForm({
       ? "Registrar ingreso"
       : "Registrar gasto"
   const paidLabel = type === "CREDIT" ? "Recibido" : "Pagado"
+  const destinationLabel = type === "CREDIT" ? "Destino" : "Desde"
 
   return (
     <>
@@ -391,7 +392,7 @@ export function TransactionForm({
 
           <Field className="gap-1">
             <FieldLabel className="text-sm text-muted-foreground">
-              Destino
+              {destinationLabel}
             </FieldLabel>
             <DestinationTrigger
               destination={destination}

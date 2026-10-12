@@ -12,6 +12,7 @@ import {
   useCreateReceivable,
   useUpdateReceivable,
 } from "@/src/modules/finance/shared/hooks/use-receivables"
+import { useDiscardChanges } from "@/src/modules/finance/shared/hooks/use-discard-changes"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import { formatPlanningDate } from "@/src/modules/finance/shared/lib/planning-lists"
 import { buildReceivableBody } from "@/src/modules/finance/shared/lib/planning-payloads"
@@ -93,12 +94,16 @@ export function ReceivableSheet({
     reset,
     setValue,
     trigger,
-    formState: { errors },
+    formState: { errors, isDirty },
   } = useForm<ReceivableFormValues>({
     resolver: zodResolver(receivableSchema),
     defaultValues: toFormValues(receivable, defaultCurrency),
   })
 
+  const { requestOpenChange, discardChangesDialog } = useDiscardChanges({
+    isDirty,
+    onOpenChange,
+  })
   const currency = useWatch({ control, name: "currency" })
   const { picker, openPicker, closeHandlerFor } = usePicker<
     "none" | "currency"
@@ -142,7 +147,7 @@ export function ReceivableSheet({
     <>
       <BottomSheet
         open={open}
-        onOpenChange={onOpenChange}
+        onOpenChange={requestOpenChange}
         pending={pending}
         title={isEdit ? "Editar cobro" : "Nuevo cobro"}
         description="Al marcarlo Pagado se completa el monto con lo que falte."
@@ -152,7 +157,7 @@ export function ReceivableSheet({
               type="button"
               variant="outline"
               className="flex-1"
-              onClick={() => onOpenChange(false)}
+              onClick={() => requestOpenChange(false)}
             >
               <XIcon className="size-4 shrink-0" />
               Cancelar
@@ -283,6 +288,8 @@ export function ReceivableSheet({
           />
         </FinanceDetailsDisclosure>
       </BottomSheet>
+
+      {discardChangesDialog}
 
       <FinanceCurrencyPickerSheet
         open={picker === "currency"}

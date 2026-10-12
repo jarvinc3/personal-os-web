@@ -10,6 +10,7 @@ import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
 import { useCreateSavingsGoalContribution } from "@/src/modules/finance/shared/hooks/use-savings-goals"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
 import { useInstitutions } from "@/src/modules/finance/shared/hooks/use-institutions"
+import { useDiscardChanges } from "@/src/modules/finance/shared/hooks/use-discard-changes"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import {
   encodeLedgerTarget,
@@ -91,10 +92,15 @@ export function SavingsGoalContributionSheet({
     reset,
     setValue,
     trigger,
-    formState: { errors },
+    formState: { errors, isDirty },
   } = useForm<SavingsGoalContributionFormValues>({
     resolver: zodResolver(savingsGoalContributionSchema),
     defaultValues: EMPTY_FORM,
+  })
+
+  const { requestOpenChange, discardChangesDialog } = useDiscardChanges({
+    isDirty,
+    onOpenChange,
   })
 
   useEffect(() => {
@@ -152,7 +158,7 @@ export function SavingsGoalContributionSheet({
     <>
       <BottomSheet
         open={open}
-        onOpenChange={onOpenChange}
+        onOpenChange={requestOpenChange}
         pending={pending}
         title="Registrar aporte"
         description={
@@ -166,7 +172,7 @@ export function SavingsGoalContributionSheet({
               type="button"
               variant="outline"
               className="flex-1"
-              onClick={() => onOpenChange(false)}
+              onClick={() => requestOpenChange(false)}
             >
               <XIcon className="size-4 shrink-0" />
               Cancelar
@@ -297,6 +303,8 @@ export function SavingsGoalContributionSheet({
           </FinanceHelpText>
         </SummarySection>
       </BottomSheet>
+
+      {discardChangesDialog}
 
       <DestinationPickerSheet
         open={picker === "account"}

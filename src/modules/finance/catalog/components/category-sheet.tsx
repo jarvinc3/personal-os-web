@@ -10,6 +10,7 @@ import {
   useDeleteCategory,
   useUpdateCategory,
 } from "@/src/modules/finance/shared/hooks/use-categories"
+import { useDiscardChanges } from "@/src/modules/finance/shared/hooks/use-discard-changes"
 import {
   buildCreateCategoryBody,
   buildUpdateCategoryBody,
@@ -109,10 +110,14 @@ export function CategorySheet({
     handleSubmit,
     reset,
     setValue,
-    formState: { errors },
+    formState: { errors, isDirty },
   } = useForm<CategoryFormValues>({
     resolver: zodResolver(categorySchema),
     defaultValues: toFormValues(category, defaultType),
+  })
+  const { requestOpenChange, discardChangesDialog } = useDiscardChanges({
+    isDirty,
+    onOpenChange,
   })
   const categoryName = useWatch({ control, name: "name" })
   const categoryIcon = useWatch({ control, name: "icon" })
@@ -225,7 +230,7 @@ export function CategorySheet({
     <>
       <BottomSheet
         open={open}
-        onOpenChange={onOpenChange}
+        onOpenChange={requestOpenChange}
         pending={pending}
         title={
           isEdit
@@ -244,7 +249,7 @@ export function CategorySheet({
             <Button
               variant="outline"
               className="flex-1"
-              onClick={() => onOpenChange(false)}
+              onClick={() => requestOpenChange(false)}
             >
               <XIcon className="size-4 shrink-0" />
               Cancelar
@@ -403,6 +408,8 @@ export function CategorySheet({
           </Button>
         )}
       </BottomSheet>
+
+      {discardChangesDialog}
 
       <DeleteRecordDialog
         open={confirmOpen}

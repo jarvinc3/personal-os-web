@@ -17,6 +17,7 @@ import {
   useCreateBudget,
   useUpdateBudget,
 } from "@/src/modules/finance/shared/hooks/use-budgets"
+import { useDiscardChanges } from "@/src/modules/finance/shared/hooks/use-discard-changes"
 import { useAllTransactions } from "@/src/modules/finance/shared/hooks/use-transactions"
 import {
   boundsForPeriod,
@@ -125,12 +126,16 @@ export function BudgetSheet({
     reset,
     setValue,
     trigger,
-    formState: { errors },
+    formState: { errors, isDirty },
   } = useForm<BudgetFormValues>({
     resolver: zodResolver(budgetSchema),
     defaultValues: toFormValues(budget, defaultCategoryId),
   })
 
+  const { requestOpenChange, discardChangesDialog } = useDiscardChanges({
+    isDirty,
+    onOpenChange,
+  })
   const categoryId = useWatch({ control, name: "categoryId" })
   const selectedCategory =
     expenseCategories.find((category) => category.id === categoryId) ?? null
@@ -206,7 +211,7 @@ export function BudgetSheet({
     <>
       <BottomSheet
         open={open}
-        onOpenChange={onOpenChange}
+        onOpenChange={requestOpenChange}
         pending={pending}
         title={isEdit ? "Editar presupuesto" : "Nuevo presupuesto"}
         description={
@@ -220,7 +225,7 @@ export function BudgetSheet({
               type="button"
               variant="outline"
               className="flex-1"
-              onClick={() => onOpenChange(false)}
+              onClick={() => requestOpenChange(false)}
             >
               <XIcon className="size-4 shrink-0" />
               Cancelar
@@ -350,6 +355,8 @@ export function BudgetSheet({
           )}
         </SummarySection>
       </BottomSheet>
+
+      {discardChangesDialog}
 
       <CategoryPickerSheet
         open={picker === "category"}

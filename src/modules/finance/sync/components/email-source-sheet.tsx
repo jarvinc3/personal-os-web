@@ -8,6 +8,7 @@ import {
   useRunEmailSync,
   useUpdateEmailSource,
 } from "@/src/modules/finance/shared/hooks/use-email-sources"
+import { useDiscardChanges } from "@/src/modules/finance/shared/hooks/use-discard-changes"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import type {
   FinanceEmailSource,
@@ -105,12 +106,16 @@ export function EmailSourceSheet({
     handleSubmit,
     reset,
     setValue,
-    formState: { errors },
+    formState: { errors, isDirty },
   } = useForm<EmailSourceFormValues>({
     resolver: zodResolver(emailSourceSchema),
     defaultValues: toFormValues(source),
   })
 
+  const { requestOpenChange, discardChangesDialog } = useDiscardChanges({
+    isDirty,
+    onOpenChange,
+  })
   const institutionId = useWatch({ control, name: "institutionId" })
   const selectedInstitution =
     institutions.find((item) => item.id === institutionId) ?? null
@@ -183,7 +188,7 @@ export function EmailSourceSheet({
     <>
       <BottomSheet
         open={open}
-        onOpenChange={onOpenChange}
+        onOpenChange={requestOpenChange}
         pending={pending}
         title="Editar vínculo"
         description={
@@ -206,7 +211,7 @@ export function EmailSourceSheet({
               type="button"
               variant="outline"
               className="flex-1"
-              onClick={() => onOpenChange(false)}
+              onClick={() => requestOpenChange(false)}
             >
               <XIcon className="size-4 shrink-0" />
               Cancelar
@@ -343,6 +348,8 @@ export function EmailSourceSheet({
           />
         </SummarySection>
       </BottomSheet>
+
+      {discardChangesDialog}
 
       <InstitutionPickerSheet
         open={picker === "institution"}

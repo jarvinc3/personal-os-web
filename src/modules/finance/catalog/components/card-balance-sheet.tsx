@@ -9,6 +9,7 @@ import {
   useUpdateCardCreditLimit,
 } from "@/src/modules/finance/shared/hooks/use-cards"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
+import { useDiscardChanges } from "@/src/modules/finance/shared/hooks/use-discard-changes"
 import {
   buildCardBalanceBody,
   nextUnusedCurrency,
@@ -145,10 +146,14 @@ function CardBalanceSheetForm({
     reset,
     setValue,
     trigger,
-    formState: { errors },
+    formState: { errors, isDirty },
   } = useForm<CardBalanceFormValues>({
     resolver: zodResolver(cardBalanceSchemaWithLimit(card?.type === "CREDIT")),
     defaultValues: toFormValues(card, mode),
+  })
+  const { requestOpenChange, discardChangesDialog } = useDiscardChanges({
+    isDirty,
+    onOpenChange,
   })
   const selectedCurrency = useWatch({ control, name: "currency" })
   const { picker, openPicker, closeHandlerFor } = usePicker<
@@ -260,7 +265,7 @@ function CardBalanceSheetForm({
     <>
       <BottomSheet
         open={open}
-        onOpenChange={onOpenChange}
+        onOpenChange={requestOpenChange}
         pending={pending || saving}
         title={card ? `Saldos · ${card.name}` : "Saldos de tarjeta"}
         description="El saldo nuevo queda como un reajuste. El límite de crédito se guarda aparte."
@@ -269,7 +274,7 @@ function CardBalanceSheetForm({
             <Button
               variant="outline"
               className="flex-1"
-              onClick={() => onOpenChange(false)}
+              onClick={() => requestOpenChange(false)}
             >
               <XIcon className="size-4 shrink-0" />
               Cancelar
@@ -380,6 +385,8 @@ function CardBalanceSheetForm({
           ) : null}
         </SummarySection>
       </BottomSheet>
+
+      {discardChangesDialog}
 
       <AlertDialog
         open={confirmDeleteOpen}

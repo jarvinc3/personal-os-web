@@ -2,6 +2,7 @@
 
 import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
 import { useAdjustBalance } from "@/src/modules/finance/shared/hooks/use-balance-adjustment"
+import { useDiscardChanges } from "@/src/modules/finance/shared/hooks/use-discard-changes"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import {
   formatFinanceMoney,
@@ -43,7 +44,7 @@ export function AccountBalanceSheet({
     handleSubmit,
     reset,
     trigger,
-    formState: { errors },
+    formState: { errors, isDirty },
   } = useForm<AccountBalanceFormValues>({
     resolver: zodResolver(accountBalanceSchema),
     defaultValues: { balance: account?.balance ?? "" },
@@ -56,6 +57,10 @@ export function AccountBalanceSheet({
     reset({ balance: account?.balance ?? "" })
   }, [open, account?.balance, reset])
 
+  const { requestOpenChange, discardChangesDialog } = useDiscardChanges({
+    isDirty,
+    onOpenChange,
+  })
   const submitForm = useMemo(
     () => createSheetSubmit(handleSubmit),
     [handleSubmit]
@@ -85,68 +90,72 @@ export function AccountBalanceSheet({
   })
 
   return (
-    <BottomSheet
-      open={open}
-      onOpenChange={onOpenChange}
-      pending={mutation.isPending}
-      title={account ? `Ajustar saldo · ${account.name}` : "Ajustar saldo"}
-      description="El cambio queda como un reajuste. No cuenta como ingreso ni gasto."
-      actions={{
-        close: (
-          <Button
-            variant="outline"
-            className="flex-1"
-            onClick={() => onOpenChange(false)}
-          >
-            <XIcon className="size-4 shrink-0" />
-            Cancelar
-          </Button>
-        ),
-        submit: (
-          <Button
-            className="flex-1"
-            disabled={mutation.isPending || !account}
-            onClick={onSubmit}
-          >
-            {mutation.isPending ? (
-              <Spinner data-icon="inline-start" />
-            ) : (
-              <SaveIcon className="size-4 shrink-0" />
+    <>
+      <BottomSheet
+        open={open}
+        onOpenChange={requestOpenChange}
+        pending={mutation.isPending}
+        title={account ? `Ajustar saldo · ${account.name}` : "Ajustar saldo"}
+        description="El cambio queda como un reajuste. No cuenta como ingreso ni gasto."
+        actions={{
+          close: (
+            <Button
+              variant="outline"
+              className="flex-1"
+              onClick={() => requestOpenChange(false)}
+            >
+              <XIcon className="size-4 shrink-0" />
+              Cancelar
+            </Button>
+          ),
+          submit: (
+            <Button
+              className="flex-1"
+              disabled={mutation.isPending || !account}
+              onClick={onSubmit}
+            >
+              {mutation.isPending ? (
+                <Spinner data-icon="inline-start" />
+              ) : (
+                <SaveIcon className="size-4 shrink-0" />
+              )}
+              {mutation.isPending ? "Guardando..." : "Guardar"}
+            </Button>
+          ),
+        }}
+      >
+        <SummarySection title="Saldo" icon={ScaleIcon}>
+          <p className="px-1 text-sm text-muted-foreground">
+            Saldo actual{" "}
+            <span className="font-medium text-foreground tabular-nums">
+              {formatFinanceMoney(account?.balance, {
+                ...display,
+                currency: account?.currency ?? display.currency,
+              })}
+            </span>
+          </p>
+          <Controller
+            control={control}
+            name="balance"
+            render={({ field }) => (
+              <FinanceMoneyField
+                label="Saldo nuevo"
+                amount={field.value}
+                onAmountChange={field.onChange}
+                onAmountCommit={(next) => {
+                  field.onChange(next)
+                  void trigger("balance")
+                }}
+                onAmountBlur={field.onBlur}
+                amountError={errors.balance?.message}
+                currency={account?.currency ?? display.currency}
+              />
             )}
-            {mutation.isPending ? "Guardando..." : "Guardar"}
-          </Button>
-        ),
-      }}
-    >
-      <SummarySection title="Saldo" icon={ScaleIcon}>
-        <p className="px-1 text-sm text-muted-foreground">
-          Saldo actual{" "}
-          <span className="font-medium text-foreground tabular-nums">
-            {formatFinanceMoney(account?.balance, {
-              ...display,
-              currency: account?.currency ?? display.currency,
-            })}
-          </span>
-        </p>
-        <Controller
-          control={control}
-          name="balance"
-          render={({ field }) => (
-            <FinanceMoneyField
-              label="Saldo nuevo"
-              amount={field.value}
-              onAmountChange={field.onChange}
-              onAmountCommit={(next) => {
-                field.onChange(next)
-                void trigger("balance")
-              }}
-              onAmountBlur={field.onBlur}
-              amountError={errors.balance?.message}
-              currency={account?.currency ?? display.currency}
-            />
-          )}
-        />
-      </SummarySection>
-    </BottomSheet>
+          />
+        </SummarySection>
+      </BottomSheet>
+
+      {discardChangesDialog}
+    </>
   )
 }
