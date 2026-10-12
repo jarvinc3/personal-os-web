@@ -303,19 +303,13 @@ function AccountDetailScreenBody({ accountId }: AccountDetailScreenProps) {
             id: "edit",
             title: "Editar cuenta",
             icon: PencilIcon,
-            onPress: () => {
-              setOpenOptionsSheet(false)
-              setOpenAccountSheet(true)
-            },
+            onPress: () => setOpenAccountSheet(true),
           },
           {
             id: "balance",
             title: "Ajustar saldo",
             icon: ScaleIcon,
-            onPress: () => {
-              setOpenOptionsSheet(false)
-              setOpenBalanceSheet(true)
-            },
+            onPress: () => setOpenBalanceSheet(true),
           },
           {
             id: "archive",

@@ -410,10 +410,8 @@ function TransactionDetailScreenBody({
                   id: "edit",
                   title: "Editar movimiento",
                   icon: PencilIcon,
-                  onPress: () => {
-                    setOpenOptionsSheet(false)
-                    router.push(APP_ROUTES.app.financeTransactionEdit(tx.id))
-                  },
+                  onPress: () =>
+                    router.push(APP_ROUTES.app.financeTransactionEdit(tx.id)),
                 },
               ]
             : []),
@@ -423,10 +421,8 @@ function TransactionDetailScreenBody({
                   id: "edit-transfer",
                   title: "Editar transferencia",
                   icon: PencilIcon,
-                  onPress: () => {
-                    setOpenOptionsSheet(false)
-                    router.push(APP_ROUTES.app.financeTransferEdit(tx.id))
-                  },
+                  onPress: () =>
+                    router.push(APP_ROUTES.app.financeTransferEdit(tx.id)),
                 },
               ]
             : []),

@@ -74,6 +74,8 @@ Cuando un collapsible abre ruedas u otro control para elegir un valor (`FinanceD
 
 No armar un drawer con `Drawer` crudo si `BottomSheet` cubre el caso (título, description, actions, pending).
 
+Un atajo del `RecordOptionsSheet` que abre otro sheet o navega a otra vista no cierra el menú antes: cerrarlo usa `router.back()`, y ese retroceso cancela la apertura pedida en el mismo click. El sheet nuevo reemplaza al menú en la URL, y la navegación a otra ruta lo desmonta.
+
 Una lista larga dentro de un sheet lleva búsqueda. El texto ignora mayúsculas y acentos. Cada coincidencia destella una vez (`animate-search-flash`). Si el ítem está dentro de un collapsible cerrado, ábrelo solo cuando la coincidencia es un hijo: un padre que coincide se queda cerrado para que sus hijos no tapen el resultado.
 
 Toda vista de lista (dentro o fuera de un sheet) trae más filas al bajar: scroll infinito, sin botones de página. La regla y el contrato por cursor viven en [`list-infinite-scroll.mdc`](../../.cursor/rules/list-infinite-scroll.mdc).
