@@ -17,6 +17,11 @@ const BACKEND_CODE_MESSAGE_ES: Record<string, string> = {
   ACCOUNT_NOT_FOUND: "No encontramos la cuenta.",
   TRANSFER_TARGET_NOT_ACCOUNT:
     "El destino de una transferencia debe ser una cuenta. Para pagar una tarjeta usa Pagar tarjeta.",
+  ALREADY_RESTORED: "Esto ya se restauró.",
+  RESTORE_CONFLICT:
+    "No se puede restaurar: ya existe un registro con los mismos datos.",
+  PARTIAL_OPERATION:
+    "Esta operación está incompleta. Restaura la operación completa.",
 }
 
 /** Backend messages translated once so no raw English reaches the screen. */

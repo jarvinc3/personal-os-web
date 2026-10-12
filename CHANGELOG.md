@@ -2,6 +2,13 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [1.9.0] - 2026-10-12
+
+### Cambiado
+
+- Restaurar muestra los códigos nuevos (`ALREADY_RESTORED`, `RESTORE_CONFLICT`, `PARTIAL_OPERATION`) con su mensaje en español.
+- "Eliminados recientes" avisa cuando un registro tiene muchos datos y restaurarlo puede tardar.
+
 ## [1.8.0] - 2026-10-12
 
 ### Cambiado
