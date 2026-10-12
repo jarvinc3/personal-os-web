@@ -75,9 +75,9 @@ Fuentes: [Reglamento de Tarjetas de Crédito (SB)](https://sb.gob.do/media/zgyl2
 - **balance actual** = deuda de hoy;
 - **balance al corte** = deuda al cierre del último ciclo, es decir, lo que hay que pagar para no generar intereses.
 
-2. **Calcular el "pagado del corte":** suma de pagos desde `cycleEnd` hasta `dueDate`. Con eso se obtiene el estado del corte: `ABIERTO → CERRADO → PAGADO_TOTAL | PAGADO_MÍNIMO | VENCIDO`.
-3. **Pago mínimo:** guardarlo en el corte como dato **importado** (correo o PDF), no calcularlo, porque cada banco lo calcula a su manera. Como respaldo, estimarlo con la regla 1/36 + cargos.
-4. **Tipos de cargo nuevos:** `INTEREST`, `FEE`, `CASH_ADVANCE`. Pueden ser categorías del sistema con un _flag_, para que no se confundan con consumo.
+1. **Calcular el "pagado del corte":** suma de pagos desde `cycleEnd` hasta `dueDate`. Con eso se obtiene el estado del corte: `ABIERTO → CERRADO → PAGADO_TOTAL | PAGADO_MÍNIMO | VENCIDO`.
+2. **Pago mínimo:** guardarlo en el corte como dato **importado** (correo o PDF), no calcularlo, porque cada banco lo calcula a su manera. Como respaldo, estimarlo con la regla 1/36 + cargos.
+3. **Tipos de cargo nuevos:** `INTEREST`, `FEE`, `CASH_ADVANCE`. Pueden ser categorías del sistema con un _flag_, para que no se confundan con consumo.
 
 ```mermaid
 stateDiagram-v2
@@ -323,9 +323,9 @@ stateDiagram-v2
 - Se aplica al **corte** abierto o cerrado: cuenta como "pagado del corte" si cae entre `cycleEnd` y `dueDate`. En el tablero se muestra como "Pago a Visa BHD" con icono propio, no como transferencia.
 - Con eso obtienes lo que pides (resta de la cuenta, suma al disponible y alimenta el corte) sin romper los presupuestos.
 
-3. **Tablero:** mostrar **una sola fila** por `transferGroupId` ("Popular → BHD · RD$5,000", con los dos logos). En el detalle de cada cuenta se ve solo su pata con el signo correcto.
-4. **Flujo:** se abre el selector de origen → luego el de destino (filtrado: solo cuentas, sin la de origen) → foco en el monto. Es solo UI.
-5. **¿Integrar con ahorro?** **Sí, por enlace:** si el destino es la cuenta asignada a una meta, preguntar "¿Contar como aporte a 'Viaje'?" y crear el aporte enlazado a la transferencia.
+1. **Tablero:** mostrar **una sola fila** por `transferGroupId` ("Popular → BHD · RD$5,000", con los dos logos). En el detalle de cada cuenta se ve solo su pata con el signo correcto.
+2. **Flujo:** se abre el selector de origen → luego el de destino (filtrado: solo cuentas, sin la de origen) → foco en el monto. Es solo UI.
+3. **¿Integrar con ahorro?** **Sí, por enlace:** si el destino es la cuenta asignada a una meta, preguntar "¿Contar como aporte a 'Viaje'?" y crear el aporte enlazado a la transferencia.
 
 ### 2.3 Ajustes de saldo
 
@@ -462,15 +462,15 @@ Fuentes: [Google: Unverified apps](https://support.google.com/googleapi/answer/7
 - `list_pending_emails` / `assign_pending_email`
 - Las tools que escriben deben pedir confirmación.
 
-2. **Contexto del módulo de origen:** pasar `?from=finance&entity=loan:<id>` al abrir el agente desde un módulo, o mejor, que el botón del agente envíe `moduleSlug` y `entityRef` al crear la sesión. El back ya filtra tools por `moduleSlug`.
-3. **Respuestas duplicadas y streaming:**
+1. **Contexto del módulo de origen:** pasar `?from=finance&entity=loan:<id>` al abrir el agente desde un módulo, o mejor, que el botón del agente envíe `moduleSlug` y `entityRef` al crear la sesión. El back ya filtra tools por `moduleSlug`.
+2. **Respuestas duplicadas y streaming:**
 
 - Hay que usar SSE o streaming de tokens con un `clientMessageId` **idempotente**, para que un reintento no genere dos respuestas.
 - Además, deshabilitar el envío mientras hay un _stream_ activo.
 - **[sin verificar]** No revisé el código del chat.
 
-4. **Componentes visuales en el chat:** bloques tipados (`{type:'transaction_card'|'budget_progress'|'chart'|'confirm_action'}`) renderizados con los componentes del módulo.
-5. **Modos más allá del chat:**
+1. **Componentes visuales en el chat:** bloques tipados (`{type:'transaction_card'|'budget_progress'|'chart'|'confirm_action'}`) renderizados con los componentes del módulo.
+2. **Modos más allá del chat:**
 
 - **Captura rápida** ("café 250 popular") desde la barra del módulo.
 - **Sugerencias en contexto:** "este correo parece la cuota de BHD", "este pago parece suscripción".
@@ -583,7 +583,7 @@ Revisé los 12 commits del back desde `1fd5ceb2` (de `427cc21` a `b768249`) y lo
 - Ajustes fuera del tablero.
 - Revisar redirect URIs.
 
-2. **P1:**
+1. **P1:**
 
 - `CARD_PAYMENT` + estado y detalle del corte.
 - Abonos a capital.
@@ -593,7 +593,7 @@ Revisé los 12 commits del back desde `1fd5ceb2` (de `427cc21` a `b768249`) y lo
 - Paginación por cursor.
 - Comisión en transferencias.
 
-3. **P2:**
+1. **P2:**
 
 - Flujos guiados.
 - Fila única por transferencia.
@@ -603,7 +603,7 @@ Revisé los 12 commits del back desde `1fd5ceb2` (de `427cc21` a `b768249`) y lo
 - Branding de OAuth.
 - Comercios y recurrentes.
 
-4. **P3:**
+1. **P3:**
 
 - Tools del agente.
 - Contexto, streaming y bloques visuales.
