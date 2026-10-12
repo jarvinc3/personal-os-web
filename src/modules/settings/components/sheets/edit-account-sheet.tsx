@@ -160,10 +160,11 @@ export function EditAccountSheet({
           onValueChange={setSelectedAvatarUrl}
           getItemKey={(item: AvatarOption) => item.id}
           getItemValue={(item: AvatarOption) => item.url}
+          getItemLabel={(item: AvatarOption) => `Avatar ${Number(item.id) + 1}`}
           renderCell={(item: AvatarOption) => (
             <Image
               src={item.url}
-              alt="Opción de avatar"
+              alt=""
               width={80}
               height={80}
               className="size-full object-cover"

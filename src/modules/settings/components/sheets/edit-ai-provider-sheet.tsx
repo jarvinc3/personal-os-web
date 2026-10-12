@@ -3,6 +3,7 @@
 import { SETTINGS_REGISTRY } from "@/src/modules/settings/constants/settings-metadata"
 import { useAiProviders } from "@/src/modules/settings/hooks/use-ai-providers"
 import { useProfile } from "@/src/modules/settings/hooks/use-profile"
+import { aiProviderLabel } from "@/src/modules/settings/lib/ai-provider-label"
 import type { SettingsSheetProps } from "@/src/modules/settings/types/sheet.types"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
 import { OptionRow } from "@/src/shared/components/layout/form-blocks"
@@ -109,8 +110,8 @@ export function EditAIProviderSheet({
                   key={item.name}
                   icon={SETTINGS_REGISTRY.ai.rows.providerOption.icon}
                   iconColor={SETTINGS_REGISTRY.ai.accent}
-                  label={item.name}
-                  description={item.model}
+                  label={aiProviderLabel(item.name)}
+                  description={`Modelo ${item.model}`}
                   selected={provider === item.name}
                   onPress={() => setProvider(item.name)}
                   trailing={<RadioGroupItem value={item.name} />}
