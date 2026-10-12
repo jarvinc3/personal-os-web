@@ -54,12 +54,12 @@ export function FinanceMonthSection({
       style={{ scrollMarginTop: stickyOffset }}
       className="flex flex-col gap-4"
     >
-      <div className="relative h-40 overflow-hidden rounded-2xl">
+      <div className="relative h-24 overflow-hidden">
         <Image
           src={month.bannerSrc}
           alt=""
           fill
-          sizes="(max-width: 640px) 100vw, 64rem"
+          sizes="(max-width: 640px) 100vw, 20rem"
           className="object-cover"
           priority={isActive}
         />
