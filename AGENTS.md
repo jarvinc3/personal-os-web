@@ -71,6 +71,17 @@ Viven en [`.agents/skills/`](.agents/skills). Abre solo el `SKILL.md` cuyo dispa
 
 `frontend-design` y `typescript-advanced-types` están en la carpeta y no se abren para el trabajo de este cliente.
 
+## Pruebas obligatorias
+
+Todo cambio corre, antes de darlo por terminado:
+
+1. `pnpm format:check`
+2. `pnpm lint`
+3. `pnpm typecheck`
+4. `pnpm test`
+
+No hay excepción por tamaño ni por tipo: un cambio de documentación también corre los cuatro. Un test en rojo significa que el cambio no está terminado, y no se abre un PR con la suite en rojo.
+
 ## Changelog y versión
 
 Toda sesión de agente cierra con un release: `CHANGELOG.md` actualizado y `version` de `package.json` subida. Antes de escribirlo, lee [docs/reference/changelog-guide.md](docs/reference/changelog-guide.md) completo; ahí están las reglas, las secciones y un ejemplo.
@@ -91,6 +102,7 @@ Toda sesión de agente cierra con un release: `CHANGELOG.md` actualizado y `vers
 - [ ] Si cambiaste código, leíste [CODING_GUIDELINES.md](CODING_GUIDELINES.md).
 - [ ] Si el cambio coincide con un disparador de Skills, leíste ese `SKILL.md`.
 - [ ] Si el runtime contradice el doc, registrar `CONTRADICE_RUNTIME`.
+- [ ] Correr los cuatro comandos de pruebas obligatorias; un test en rojo bloquea el cierre.
 - [ ] Actualizar `CHANGELOG.md` y subir `version` en `package.json`; cerrar con `chore(release): vX.Y.Z` y el tag.
 
 ## Estructura de código
