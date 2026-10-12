@@ -36,9 +36,12 @@ const STATEMENT_STATUS_VARIANT: Record<
   FinanceCardStatementStatus,
   BadgeVariant
 > = {
-  PAID: "success",
+  OPEN: "info",
+  CLOSED: "info",
   PARTIAL: "warning",
-  PENDING: "info",
+  MINIMUM_PAID: "warning",
+  PAID: "success",
+  OVERDUE: "destructive",
 }
 
 type CardStatementsSectionProps = {
@@ -77,7 +80,7 @@ function statementProgress(statement: FinanceCardStatement): number {
   if (closing === null || closing <= 0) {
     return 100
   }
-  const paid = parseFinanceMoney(statement.amountPaid) ?? 0
+  const paid = parseFinanceMoney(statement.paidAmount) ?? 0
   return Math.min(100, Math.max(0, (paid / closing) * 100))
 }
 
@@ -171,11 +174,23 @@ export function CardStatementsSection({
               <div className="flex items-center justify-between gap-3 text-sm text-muted-foreground">
                 <span>
                   Pagado{" "}
-                  {formatFinanceMoney(statement.amountPaid, moneyDisplay)}
+                  {formatFinanceMoney(statement.paidAmount, moneyDisplay)}
                 </span>
                 <span>
                   Restante{" "}
                   {formatFinanceMoney(statement.remaining, moneyDisplay)}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between gap-3 text-sm text-muted-foreground">
+                <span>
+                  Mínimo{" "}
+                  {formatFinanceMoney(statement.minimumPayment, moneyDisplay)}
+                </span>
+                <span>
+                  {statement.minimumSource === "ESTIMATED"
+                    ? "Mínimo estimado"
+                    : "Mínimo del banco"}
                 </span>
               </div>
             </article>

@@ -1,6 +1,7 @@
 "use client"
 
 import { CardStatementsSection } from "@/src/modules/finance/cards/components/card-statements-section"
+import { CardPaymentSheet } from "@/src/modules/finance/cards/components/card-payment-sheet"
 import { CardVisual } from "@/src/modules/finance/cards/components/card-visual"
 import { CardBalanceSheet } from "@/src/modules/finance/catalog"
 import { FinanceGate } from "@/src/modules/finance/finance-gate"
@@ -95,6 +96,8 @@ function CardDetailScreenBody({ cardId }: CardDetailScreenProps) {
     useSheetParam(FINANCE_SHEET_KEYS.cardHistory)
   const { open: openOptionsSheet, setOpen: setOpenOptionsSheet } =
     useSheetParam(FINANCE_SHEET_KEYS.cardOptions)
+  const { open: openCardPaymentSheet, setOpen: setOpenCardPaymentSheet } =
+    useSheetParam(FINANCE_SHEET_KEYS.cardPayment)
 
   const card =
     (cardsQuery.data ?? []).find((item) => item.id === cardId) ?? null
@@ -239,7 +242,6 @@ function CardDetailScreenBody({ cardId }: CardDetailScreenProps) {
           />
         </div>
       ) : null}
-
       <div className="-mx-4 -mt-4 overflow-hidden md:-mx-6">
         <div
           className="rounded-b-3xl p-4 md:p-6"
@@ -248,7 +250,6 @@ function CardDetailScreenBody({ cardId }: CardDetailScreenProps) {
           <CardVisual card={card} balances={balances} display={cardDisplay} />
         </div>
       </div>
-
       <div className="mx-4 -mt-4 flex flex-col gap-3 rounded-3xl bg-background">
         {isCredit ? (
           <Tabs
@@ -301,12 +302,21 @@ function CardDetailScreenBody({ cardId }: CardDetailScreenProps) {
           movements
         )}
       </div>
-
       <RecordOptionsSheet
         open={openOptionsSheet}
         onOpenChange={setOpenOptionsSheet}
         description={card.name}
         options={[
+          ...(isCredit
+            ? [
+                {
+                  id: "pay",
+                  title: "Pagar tarjeta",
+                  icon: CreditCardIcon,
+                  onPress: () => setOpenCardPaymentSheet(true),
+                },
+              ]
+            : []),
           {
             id: "edit",
             title: "Editar tarjeta",
@@ -342,7 +352,6 @@ function CardDetailScreenBody({ cardId }: CardDetailScreenProps) {
           },
         ]}
       />
-
       <DeleteRecordDialog
         open={confirmOpen}
         onOpenChange={setConfirmOpen}
@@ -356,7 +365,6 @@ function CardDetailScreenBody({ cardId }: CardDetailScreenProps) {
           onArchive: () => void onArchiveCard(),
         }}
       />
-
       <ArchiveRecordDialog
         open={archiveConfirmOpen}
         onOpenChange={setArchiveConfirmOpen}
@@ -364,13 +372,22 @@ function CardDetailScreenBody({ cardId }: CardDetailScreenProps) {
         pending={archiveCard.isPending}
         onConfirm={() => void onArchiveCard()}
       />
-
       <CardBalanceSheet
         open={openCardBalanceSheet}
         onOpenChange={setOpenCardBalanceSheet}
         card={card}
         defaultCurrency={config.baseCurrency}
         display={cardDisplay}
+      />{" "}
+      <CardPaymentSheet
+        open={openCardPaymentSheet}
+        onOpenChange={setOpenCardPaymentSheet}
+        cardId={card.id}
+        cardName={card.name}
+        currencies={balances.map((balance) => balance.currency)}
+        defaultCurrency={config.baseCurrency}
+        minimumPayment={statementsQuery.data?.[0]?.minimumPayment}
+        closingBalance={statementsQuery.data?.[0]?.closingBalance}
       />
       <InstrumentHistorySheet
         open={openHistorySheet}

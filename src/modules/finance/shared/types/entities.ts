@@ -222,9 +222,12 @@ export type FinanceCard = {
 }
 
 export const FINANCE_CARD_STATEMENT_STATUSES = [
-  "PENDING",
+  "OPEN",
+  "CLOSED",
   "PARTIAL",
+  "MINIMUM_PAID",
   "PAID",
+  "OVERDUE",
 ] as const
 export type FinanceCardStatementStatus =
   (typeof FINANCE_CARD_STATEMENT_STATUSES)[number]
@@ -233,9 +236,12 @@ export const FINANCE_CARD_STATEMENT_STATUS_LABEL: Record<
   FinanceCardStatementStatus,
   string
 > = {
-  PENDING: "Pendiente",
+  OPEN: "En curso",
+  CLOSED: "Cerrado",
   PARTIAL: "Parcial",
+  MINIMUM_PAID: "Mínimo pagado",
   PAID: "Pagada",
+  OVERDUE: "Vencida",
 }
 
 export type FinanceCardStatement = {
@@ -245,7 +251,9 @@ export type FinanceCardStatement = {
   cycleEnd: string
   dueDate: string | null
   closingBalance: string
-  amountPaid: string
+  minimumPayment: string
+  minimumSource: "IMPORTED" | "ESTIMATED" | "MANUAL"
+  paidAmount: string
   remaining: string
   status: FinanceCardStatementStatus
 }

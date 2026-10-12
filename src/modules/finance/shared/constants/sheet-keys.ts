@@ -7,6 +7,7 @@ export const FINANCE_SHEET_KEYS = {
   cardOptions: "card-options-sheet",
   cardHistory: "card-history-sheet",
   cardBalance: "card-balance-sheet",
+  cardPayment: "card-payment-sheet",
   loanOptions: "loan-options-sheet",
   category: "category-sheet",
   transactionOptions: "transaction-options-sheet",

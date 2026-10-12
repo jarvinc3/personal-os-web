@@ -17,6 +17,9 @@ const BACKEND_CODE_MESSAGE_ES: Record<string, string> = {
   ACCOUNT_NOT_FOUND: "No encontramos la cuenta.",
   TRANSFER_TARGET_NOT_ACCOUNT:
     "El destino de una transferencia debe ser una cuenta. Para pagar una tarjeta usa Pagar tarjeta.",
+  CARD_NOT_FOUND: "No encontramos la tarjeta.",
+  CARD_NOT_CREDIT: "Solo se pagan tarjetas de crédito.",
+  CARD_CURRENCY_MISSING: "La tarjeta no tiene saldo en esa moneda.",
   ALREADY_RESTORED: "Esto ya se restauró.",
   RESTORE_CONFLICT:
     "No se puede restaurar: ya existe un registro con los mismos datos.",

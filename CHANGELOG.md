@@ -2,6 +2,14 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [1.10.0] - 2026-10-12
+
+### Agregado
+
+- "Pagar tarjeta" en el detalle de una tarjeta de crédito, con origen, monto y atajos de pago mínimo y balance al corte.
+- La lista de cortes muestra el mínimo, lo pagado y los estados nuevos (`En curso`, `Cerrado`, `Mínimo pagado`, `Vencida`).
+- Se mapean los códigos `CARD_NOT_FOUND`, `CARD_NOT_CREDIT` y `CARD_CURRENCY_MISSING`.
+
 ## [1.9.0] - 2026-10-12
 
 ### Cambiado

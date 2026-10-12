@@ -2,6 +2,7 @@
 
 import { apiDelete, apiGet, apiPatch, apiPost } from "@/src/config/api-client"
 import type {
+  CreateCardPaymentBody,
   CreateTransactionBody,
   CreateTransferBody,
   UpdateTransactionBody,
@@ -183,6 +184,15 @@ export function useCreateTransfer() {
   return useMutation({
     mutationFn: (body: CreateTransferBody) =>
       apiPost<FinanceTransferResult>(API_ENDPOINTS.FINANCE.TRANSFERS, body),
+    onSuccess: () => invalidateLedger(queryClient),
+  })
+}
+
+export function useCreateCardPayment() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (body: CreateCardPaymentBody) =>
+      apiPost<FinanceTransferResult>(API_ENDPOINTS.FINANCE.CARD_PAYMENTS, body),
     onSuccess: () => invalidateLedger(queryClient),
   })
 }
