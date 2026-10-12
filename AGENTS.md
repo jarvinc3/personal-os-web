@@ -10,6 +10,7 @@ Instrucciones para agentes y reviewers que trabajan en el cliente web de Persona
 4. [docs/documentation-standard.md](docs/documentation-standard.md).
 5. El módulo bajo `docs/modules/` o la arquitectura en `docs/architecture/`.
 6. Código y pruebas citados. No inferir desde nombres.
+7. [docs/reference/changelog-guide.md](docs/reference/changelog-guide.md) — antes de cerrar la sesión, para el CHANGELOG y la versión.
 
 Si una afirmación no está `VERIFICADO`, leer [docs/review-register.md](docs/review-register.md) antes de tratarla como comportamiento vigente.
 
@@ -70,6 +71,15 @@ Viven en [`.agents/skills/`](.agents/skills). Abre solo el `SKILL.md` cuyo dispa
 
 `frontend-design` y `typescript-advanced-types` están en la carpeta y no se abren para el trabajo de este cliente.
 
+## Changelog y versión
+
+Toda sesión de agente cierra con un release: `CHANGELOG.md` actualizado y `version` de `package.json` subida. Antes de escribirlo, lee [docs/reference/changelog-guide.md](docs/reference/changelog-guide.md) completo; ahí están las reglas, las secciones y un ejemplo.
+
+- Un release por sesión, aunque el cambio sea pequeño. El bump es el más alto de la sesión: `MAJOR` si rompe un contrato o los datos guardados, `MINOR` si agrega una capacidad visible y `PATCH` en el resto.
+- El CHANGELOG va en español, de la versión más nueva a la más vieja, con la fecha en `AAAA-MM-DD`.
+- Cierra con `chore(release): vX.Y.Z` y crea el tag `vX.Y.Z`.
+- `personal-os-app` está fuera de servicio y no sigue esta regla.
+
 ## Checklist al cambiar comportamiento
 
 - [ ] Actualizar el documento dueño (capacidad, contrato UI o arquitectura).
@@ -80,6 +90,7 @@ Viven en [`.agents/skills/`](.agents/skills). Abre solo el `SKILL.md` cuyo dispa
 - [ ] Si cambiaste código, leíste [CODING_GUIDELINES.md](CODING_GUIDELINES.md).
 - [ ] Si el cambio coincide con un disparador de Skills, leíste ese `SKILL.md`.
 - [ ] Si el runtime contradice el doc, registrar `CONTRADICE_RUNTIME`.
+- [ ] Actualizar `CHANGELOG.md` y subir `version` en `package.json`; cerrar con `chore(release): vX.Y.Z` y el tag.
 
 ## Estructura de código
 
