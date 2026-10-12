@@ -402,9 +402,6 @@ export function FinanceTransactionsList({
             display={display}
             isActive={month.key === activeMonthKey}
             stickyOffset={stickyOffset + STICKY_GAP}
-            onTransactionPress={(id) =>
-              router.push(APP_ROUTES.app.financeTransaction(id))
-            }
           />
         ))}
       </div>

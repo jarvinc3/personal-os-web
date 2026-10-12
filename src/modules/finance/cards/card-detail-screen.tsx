@@ -15,6 +15,7 @@ import {
   useCards,
   useDeleteCard,
   useRestoreCard,
+  useUnarchiveCard,
 } from "@/src/modules/finance/shared/hooks/use-cards"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
 import { resolveCardDisplayBalances } from "@/src/modules/finance/shared/lib/card-balances"
@@ -26,6 +27,7 @@ import {
 import { showUndoToast } from "@/src/modules/finance/shared/components/undo-toast"
 import { encodeLedgerTarget } from "@/src/modules/finance/shared/lib/ledger-payloads"
 import { DeleteRecordDialog } from "@/src/modules/finance/shared/components/delete-record-dialog"
+import { ArchiveRecordDialog } from "@/src/modules/finance/shared/components/archive-record-dialog"
 import { RecordOptionsSheet } from "@/src/modules/finance/shared/components/record-options-sheet"
 import { LoadingView } from "@/src/shared/components/layout/loading-view"
 import { Button } from "@/src/shared/components/ui/button"
@@ -103,17 +105,25 @@ function CardDetailScreenBody({ cardId }: CardDetailScreenProps) {
   const archiveCard = useArchiveCard()
   const deleteCard = useDeleteCard()
   const restoreCard = useRestoreCard()
+  const unarchiveCard = useUnarchiveCard()
   const [confirmOpen, setConfirmOpen] = useState(false)
+  const [archiveConfirmOpen, setArchiveConfirmOpen] = useState(false)
 
   async function onArchiveCard() {
     if (!card) {
       return
     }
     try {
-      await archiveCard.mutateAsync(card.id)
-      appToast.success({ text1: "Tarjeta archivada" })
+      const cardId = card.id
+      await archiveCard.mutateAsync(cardId)
       setOpenOptionsSheet(false)
       router.push(APP_ROUTES.app.financeProducts)
+      showUndoToast("Tarjeta archivada", () =>
+        unarchiveCard.mutate(cardId, {
+          onError: (error) =>
+            appToast.error({ text1: financeErrorMessage(error) }),
+        })
+      )
     } catch (error) {
       appToast.error({ text1: financeErrorMessage(error) })
     }
@@ -310,7 +320,7 @@ function CardDetailScreenBody({ cardId }: CardDetailScreenProps) {
             title: "Archivar",
             icon: ArchiveIcon,
             disabled: archiveCard.isPending || deleteCard.isPending,
-            onPress: () => void onArchiveCard(),
+            onPress: () => setArchiveConfirmOpen(true),
           },
           {
             id: "delete",
@@ -335,6 +345,14 @@ function CardDetailScreenBody({ cardId }: CardDetailScreenProps) {
           pending: archiveCard.isPending,
           onArchive: () => void onArchiveCard(),
         }}
+      />
+
+      <ArchiveRecordDialog
+        open={archiveConfirmOpen}
+        onOpenChange={setArchiveConfirmOpen}
+        recordName={card.name}
+        pending={archiveCard.isPending}
+        onConfirm={() => void onArchiveCard()}
       />
 
       <CardBalanceSheet

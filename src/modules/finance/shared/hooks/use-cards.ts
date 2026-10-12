@@ -65,6 +65,19 @@ export function useArchiveCard() {
   })
 }
 
+export function useUnarchiveCard() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) =>
+      apiPatch<FinanceCard>(API_ENDPOINTS.FINANCE.CARD(id), {
+        isActive: true,
+      }),
+    onSuccess: () => {
+      invalidateCards(queryClient)
+    },
+  })
+}
+
 export function useDeleteCard() {
   const queryClient = useQueryClient()
   return useMutation({

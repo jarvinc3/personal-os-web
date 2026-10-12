@@ -68,6 +68,17 @@ export function useArchiveInstitution() {
   })
 }
 
+export function useUnarchiveInstitution() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) =>
+      apiPatch<FinanceInstitution>(API_ENDPOINTS.FINANCE.INSTITUTION(id), {
+        isActive: true,
+      }),
+    onSuccess: () => invalidateCatalog(queryClient),
+  })
+}
+
 export function useUploadInstitutionLogo() {
   const queryClient = useQueryClient()
   return useMutation({

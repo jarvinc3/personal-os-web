@@ -50,6 +50,17 @@ export function useArchiveLoan() {
   })
 }
 
+export function useUnarchiveLoan() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) =>
+      apiPatch<FinanceLoan>(API_ENDPOINTS.FINANCE.LOAN(id), {
+        isActive: true,
+      }),
+    onSuccess: () => invalidate(queryClient),
+  })
+}
+
 export function useDeleteLoan() {
   const queryClient = useQueryClient()
   return useMutation({

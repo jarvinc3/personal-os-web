@@ -48,6 +48,7 @@ import {
   MailIcon,
   PlusIcon,
   TagsIcon,
+  Trash2Icon,
   WalletIcon,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
@@ -290,10 +291,19 @@ export function FinanceProductsList({
             icon={MailIcon}
             href={APP_ROUTES.app.financeSync}
             showChevron
-            isLast
+            isLast={false}
             className="px-3"
           />
         </div>
+        <SummaryItem
+          title="Papelera de reciclaje"
+          description="Restaura lo archivado o eliminado"
+          icon={Trash2Icon}
+          href={APP_ROUTES.app.financeRecycleBin}
+          showChevron
+          isLast
+          className="px-3"
+        />
       </SettingsSection>
 
       <ExpandableFab

@@ -11,9 +11,11 @@ import {
   FINANCE_LOANS_QUERY_KEY,
   FINANCE_RECEIVABLE_PAYMENTS_QUERY_KEY,
   FINANCE_RECEIVABLES_QUERY_KEY,
+  FINANCE_RECYCLE_BIN_QUERY_KEY,
   FINANCE_SAVINGS_GOAL_CONTRIBUTIONS_QUERY_KEY,
   FINANCE_SAVINGS_GOALS_QUERY_KEY,
   type FinancePaginated,
+  type FinanceRecycleBin,
 } from "@/src/modules/finance/shared/types/api"
 import type {
   FinanceAccount,
@@ -60,6 +62,7 @@ const PATHS = {
   receivablePayments: (receivableId: string) =>
     `/finance/receivables/${receivableId}/payments`,
   budgets: "/finance/budgets",
+  recycleBin: "/finance/recycle-bin",
   emailMailboxes: "/finance/email-sync/mailboxes",
   emailPending: "/finance/email-sync/pending",
   emailMessages: "/finance/email-sync/messages",
@@ -210,5 +213,12 @@ export function emailMessagesQuery(get: FinanceQueryGet = defaultFinanceGet) {
       asFinanceArray<FinanceEmailProcessedMessage>(
         await get(PATHS.emailMessages)
       ),
+  }
+}
+
+export function recycleBinQuery(get: FinanceQueryGet = defaultFinanceGet) {
+  return {
+    queryKey: FINANCE_RECYCLE_BIN_QUERY_KEY,
+    queryFn: () => get<FinanceRecycleBin>(PATHS.recycleBin),
   }
 }

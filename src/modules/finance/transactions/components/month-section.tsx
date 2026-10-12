@@ -16,6 +16,7 @@ import {
 } from "@/src/modules/finance/shared/lib/transactions-query"
 import type { FinanceCategory } from "@/src/modules/finance/shared/types/entities"
 import { SummaryItem } from "@/src/shared/components/ui/summary"
+import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { cn } from "@/src/shared/lib/utils"
 import {
   ArrowDownLeftIcon,
@@ -31,7 +32,6 @@ type FinanceMonthSectionProps = {
   display: FinanceMoneyDisplay
   isActive: boolean
   stickyOffset: number
-  onTransactionPress: (id: string) => void
 }
 
 export function FinanceMonthSection({
@@ -40,7 +40,6 @@ export function FinanceMonthSection({
   display,
   isActive,
   stickyOffset,
-  onTransactionPress,
 }: FinanceMonthSectionProps) {
   const headingId = `month-label-${month.key}`
   const categoryById = new Map(
@@ -170,7 +169,7 @@ export function FinanceMonthSection({
                         <TransactionStatusMark status={transaction.status} />
                       }
                       showChevron={false}
-                      onPress={() => onTransactionPress(transaction.id)}
+                      href={APP_ROUTES.app.financeTransaction(transaction.id)}
                       isLast={index === day.items.length - 1}
                     />
                   )

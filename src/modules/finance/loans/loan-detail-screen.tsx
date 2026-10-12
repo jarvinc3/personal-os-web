@@ -16,6 +16,7 @@ import {
   useArchiveLoan,
   useDeleteLoan,
   useRestoreLoan,
+  useUnarchiveLoan,
   useLoans,
 } from "@/src/modules/finance/shared/hooks/use-loans"
 import {
@@ -29,6 +30,7 @@ import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 import { loanProgressSummary } from "@/src/modules/finance/shared/lib/planning-lists"
 import { FINANCE_INSTALLMENT_FREQ_LABEL } from "@/src/modules/finance/shared/types/entities"
 import { DeleteRecordDialog } from "@/src/modules/finance/shared/components/delete-record-dialog"
+import { ArchiveRecordDialog } from "@/src/modules/finance/shared/components/archive-record-dialog"
 import { RecordOptionsSheet } from "@/src/modules/finance/shared/components/record-options-sheet"
 import { LoadingView } from "@/src/shared/components/layout/loading-view"
 import { Badge } from "@/src/shared/components/ui/badge"
@@ -85,6 +87,7 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
   const archiveLoan = useArchiveLoan()
   const deleteLoan = useDeleteLoan()
   const restoreLoan = useRestoreLoan()
+  const unarchiveLoan = useUnarchiveLoan()
   const { open: openOptionsSheet, setOpen: setOpenOptionsSheet } =
     useSheetParam(FINANCE_SHEET_KEYS.loanOptions)
 
@@ -101,16 +104,23 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
   const rateLabel = formatRatePercentLabel(loan?.interestRate ?? null)
 
   const [confirmOpen, setConfirmOpen] = useState(false)
+  const [archiveConfirmOpen, setArchiveConfirmOpen] = useState(false)
 
   async function onArchiveLoan() {
     if (!loan) {
       return
     }
     try {
-      await archiveLoan.mutateAsync(loan.id)
-      appToast.success({ text1: "Préstamo archivado" })
+      const loanId = loan.id
+      await archiveLoan.mutateAsync(loanId)
       setOpenOptionsSheet(false)
       router.push(APP_ROUTES.app.financePlanning)
+      showUndoToast("Préstamo archivado", () =>
+        unarchiveLoan.mutate(loanId, {
+          onError: (error) =>
+            appToast.error({ text1: financeErrorMessage(error) }),
+        })
+      )
     } catch (error) {
       appToast.error({ text1: financeErrorMessage(error) })
     }
@@ -309,7 +319,7 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
             title: "Archivar",
             icon: ArchiveIcon,
             disabled: archiveLoan.isPending || deleteLoan.isPending,
-            onPress: () => void onArchiveLoan(),
+            onPress: () => setArchiveConfirmOpen(true),
           },
           {
             id: "delete",
@@ -334,6 +344,14 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
           pending: archiveLoan.isPending,
           onArchive: () => void onArchiveLoan(),
         }}
+      />
+
+      <ArchiveRecordDialog
+        open={archiveConfirmOpen}
+        onOpenChange={setArchiveConfirmOpen}
+        recordName={loan.lenderName}
+        pending={archiveLoan.isPending}
+        onConfirm={() => void onArchiveLoan()}
       />
     </>
   )

@@ -39,6 +39,7 @@ export const API_ENDPOINTS = {
     INSTITUTION_LOGO: (id: string) => `/finance/institutions/${id}/logo`,
     BRANDS_SEARCH: "/brands/search",
     CURRENCIES: "/finance/currencies",
+    RECYCLE_BIN: "/finance/recycle-bin",
     ACCOUNTS: "/finance/accounts",
     ACCOUNT: (id: string) => `/finance/accounts/${id}`,
     ACCOUNT_RESTORE: (id: string) => `/finance/accounts/${id}/restore`,

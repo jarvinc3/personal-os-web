@@ -1,9 +1,11 @@
 "use client"
 
 import { Badge, badgeVariants } from "@/src/shared/components/ui/badge"
+import { LinkPendingOverlay } from "@/src/shared/components/ui/navigation-pending"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
 import type { VariantProps } from "class-variance-authority"
 import type { LucideIcon } from "lucide-react"
+import Link from "next/link"
 import type { ReactNode } from "react"
 
 export type PlanningProgressTone =
@@ -28,6 +30,7 @@ export type PlanningProgressCardProps = {
   targetHint: string
   targetLabel: string
   caption?: ReactNode
+  href?: string
   onPress?: () => void
 }
 
@@ -130,6 +133,7 @@ export function PlanningProgressCard({
   targetHint,
   targetLabel,
   caption,
+  href,
   onPress,
 }: PlanningProgressCardProps) {
   const barWidth = progress === null ? 0 : clampPct(progress)
@@ -267,7 +271,7 @@ export function PlanningProgressCard({
   const className = cn(
     "relative flex w-full flex-col gap-3 overflow-hidden rounded-2xl p-3 text-left",
     surfaceColor ? "text-white" : "bg-muted/50",
-    onPress &&
+    (href || onPress) &&
       cn(
         PRESSABLE_CLASS,
         "cursor-pointer",
@@ -281,6 +285,15 @@ export function PlanningProgressCard({
       <span className="relative z-10 flex flex-col gap-3">{content}</span>
     </>
   )
+
+  if (href) {
+    return (
+      <Link href={href} className={className} style={style}>
+        {body}
+        <LinkPendingOverlay />
+      </Link>
+    )
+  }
 
   if (onPress) {
     return (

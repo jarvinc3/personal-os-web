@@ -143,7 +143,8 @@ function HeaderUserMenu() {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
+      {/* Fixed id: the auto-generated one changes between server and client and breaks hydration. */}
+      <DropdownMenuTrigger asChild id="user-menu-trigger">
         <Button
           variant="ghost"
           size="icon"
