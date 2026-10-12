@@ -2,7 +2,10 @@
 
 import { apiDelete, apiPatch, apiPost } from "@/src/config/api-client"
 import { loansQuery } from "@/src/modules/finance/shared/lib/finance-query-options"
-import type { CreateLoanBody } from "@/src/modules/finance/shared/lib/planning-payloads"
+import type {
+  CreateLoanBody,
+  LoanPrepaymentBody,
+} from "@/src/modules/finance/shared/lib/planning-payloads"
 import { FINANCE_LOANS_QUERY_KEY } from "@/src/modules/finance/shared/types/api"
 import type { FinanceLoan } from "@/src/modules/finance/shared/types/entities"
 import { API_ENDPOINTS } from "@/src/shared/constants/api-endpoints"
@@ -26,6 +29,24 @@ export function useCreateLoan() {
   return useMutation({
     mutationFn: (body: CreateLoanBody) =>
       apiPost<FinanceLoan>(API_ENDPOINTS.FINANCE.LOANS, body),
+    onSuccess: () => invalidate(queryClient),
+  })
+}
+
+export function useLoanPrepayment() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({
+      loanId,
+      body,
+    }: {
+      loanId: string
+      body: LoanPrepaymentBody
+    }) =>
+      apiPost<{ prepayment: unknown; loan: FinanceLoan }>(
+        API_ENDPOINTS.FINANCE.LOAN_PREPAYMENTS(loanId),
+        body
+      ),
     onSuccess: () => invalidate(queryClient),
   })
 }

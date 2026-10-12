@@ -20,6 +20,10 @@ const BACKEND_CODE_MESSAGE_ES: Record<string, string> = {
   CARD_NOT_FOUND: "No encontramos la tarjeta.",
   CARD_NOT_CREDIT: "Solo se pagan tarjetas de crédito.",
   CARD_CURRENCY_MISSING: "La tarjeta no tiene saldo en esa moneda.",
+  PAYMENT_EXCEEDS_INSTALLMENT:
+    "El pago supera la cuota. ¿Quieres aplicar el excedente como abono a capital?",
+  LOAN_HAS_OVERDUE: "Paga primero las cuotas vencidas.",
+  LOAN_NOT_FOUND: "No encontramos el préstamo.",
   ALREADY_RESTORED: "Esto ya se restauró.",
   RESTORE_CONFLICT:
     "No se puede restaurar: ya existe un registro con los mismos datos.",

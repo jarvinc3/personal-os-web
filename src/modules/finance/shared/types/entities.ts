@@ -383,9 +383,15 @@ export type FinanceLoan = {
   nextDueDate: string
   /** Fraction 0–1 as a decimal string, e.g. `"0.12"` = 12%. Null means not provided. */
   interestRate: string | null
+  rateType: "FIXED" | "VARIABLE"
+  insuranceAmount: string | null
+  prepaymentPenaltyPct: string | null
   notes: string | null
   isActive: boolean
 }
+
+export type FinanceLoanInstallmentStatus =
+  "PENDING" | "PARTIAL" | "PAID" | "OVERDUE"
 
 export type FinanceLoanInstallment = {
   id: string
@@ -393,6 +399,13 @@ export type FinanceLoanInstallment = {
   installmentNo: number
   dueDate: string
   amount: string
+  principal: string
+  interest: string
+  insurance: string
+  fees: string
+  lateFee: string
+  paidAmount: string
+  status: FinanceLoanInstallmentStatus
   paidAt: string | null
 }
 

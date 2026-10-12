@@ -41,6 +41,45 @@ export type CreateLoanBody = {
   notes?: string
 }
 
+export const LOAN_PREPAYMENT_MODES = [
+  "REDUCE_TERM",
+  "REDUCE_INSTALLMENT",
+] as const
+export type LoanPrepaymentMode = (typeof LOAN_PREPAYMENT_MODES)[number]
+
+export type LoanPrepaymentBody = {
+  amount: number
+  accountId: string
+  mode: LoanPrepaymentMode
+  date?: string
+}
+
+export function buildLoanPrepaymentBody(input: {
+  amount: string
+  accountId?: string
+  mode: LoanPrepaymentMode
+  date?: string
+}): PayloadResult<LoanPrepaymentBody> {
+  const amount = parseFinanceMoney(input.amount)
+  if (amount === null || amount <= 0) {
+    return { ok: false, error: "Monto inválido" }
+  }
+  const accountId = optionalId(input.accountId)
+  if (!accountId) {
+    return { ok: false, error: "Elige una cuenta de origen" }
+  }
+  const body: LoanPrepaymentBody = {
+    amount,
+    accountId,
+    mode: input.mode,
+  }
+  const date = optionalTrimmed(input.date)
+  if (date) {
+    body.date = date
+  }
+  return { ok: true, body }
+}
+
 export type CreateReceivableBody = {
   debtorName: string
   amount: number
