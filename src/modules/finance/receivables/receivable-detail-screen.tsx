@@ -12,6 +12,7 @@ import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
 import {
   useDeleteReceivable,
+  useRestoreReceivable,
   useReceivablePayments,
   useReceivables,
   useUpdateReceivable,
@@ -20,6 +21,7 @@ import {
   financeErrorMessage,
   financeLoadErrorMessage,
 } from "@/src/modules/finance/shared/lib/finance-error"
+import { showUndoToast } from "@/src/modules/finance/shared/components/undo-toast"
 import {
   formatFinanceMoney,
   parseFinanceMoney,
@@ -122,6 +124,7 @@ function ReceivableDetailScreenBody({
       (parseFinanceMoney(receivable.paidAmount) ?? 0)
     : 0
   const deleteReceivable = useDeleteReceivable()
+  const restoreReceivable = useRestoreReceivable()
   const updateReceivable = useUpdateReceivable()
   const [optionsOpen, setOptionsOpen] = useState(false)
   const [confirmOpen, setConfirmOpen] = useState(false)
@@ -147,11 +150,17 @@ function ReceivableDetailScreenBody({
       return
     }
     try {
-      await deleteReceivable.mutateAsync(receivable.id)
-      appToast.success({ text1: "Cobro eliminado" })
+      const receivableId = receivable.id
+      await deleteReceivable.mutateAsync(receivableId)
       setConfirmOpen(false)
       setOptionsOpen(false)
       router.push(APP_ROUTES.app.financePlanning)
+      showUndoToast("Cobro eliminado", () =>
+        restoreReceivable.mutate(receivableId, {
+          onError: (error) =>
+            appToast.error({ text1: financeErrorMessage(error) }),
+        })
+      )
     } catch (error) {
       appToast.error({ text1: financeErrorMessage(error) })
     }

@@ -62,3 +62,12 @@ export function useDeleteBudget() {
     onSuccess: () => invalidateBudgets(queryClient),
   })
 }
+
+export function useRestoreBudget() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) =>
+      apiPost<{ success: boolean }>(API_ENDPOINTS.FINANCE.BUDGET_RESTORE(id)),
+    onSuccess: () => invalidateBudgets(queryClient),
+  })
+}

@@ -8,6 +8,7 @@ import { CATALOG_NONE } from "@/src/modules/finance/shared/constants/catalog"
 import {
   useCreateCategory,
   useDeleteCategory,
+  useRestoreCategory,
   useUpdateCategory,
 } from "@/src/modules/finance/shared/hooks/use-categories"
 import { useDiscardChanges } from "@/src/modules/finance/shared/hooks/use-discard-changes"
@@ -17,6 +18,7 @@ import {
 } from "@/src/modules/finance/shared/lib/catalog-payloads"
 import { filterCategoriesByType } from "@/src/modules/finance/shared/lib/category-tree"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
+import { showUndoToast } from "@/src/modules/finance/shared/components/undo-toast"
 import type {
   FinanceCategory,
   FinanceCategoryType,
@@ -100,6 +102,7 @@ export function CategorySheet({
   const createMutation = useCreateCategory()
   const updateMutation = useUpdateCategory()
   const deleteMutation = useDeleteCategory()
+  const restoreMutation = useRestoreCategory()
   const isPending =
     createMutation.isPending ||
     updateMutation.isPending ||
@@ -217,10 +220,16 @@ export function CategorySheet({
       return
     }
     try {
-      await deleteMutation.mutateAsync(category.id)
-      appToast.success({ text1: "Categoría eliminada" })
+      const categoryId = category.id
+      await deleteMutation.mutateAsync(categoryId)
       setConfirmOpen(false)
       onOpenChange(false)
+      showUndoToast("Categoría eliminada", () =>
+        restoreMutation.mutate(categoryId, {
+          onError: (error) =>
+            appToast.error({ text1: financeErrorMessage(error) }),
+        })
+      )
     } catch (error) {
       appToast.error({ text1: financeErrorMessage(error) })
     }

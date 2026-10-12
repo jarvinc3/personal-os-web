@@ -225,3 +225,14 @@ export function useDeleteTransaction() {
     onSuccess: () => invalidateLedger(queryClient),
   })
 }
+
+export function useRestoreTransaction() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) =>
+      apiPost<{ success: boolean }>(
+        API_ENDPOINTS.FINANCE.TRANSACTION_RESTORE(id)
+      ),
+    onSuccess: () => invalidateLedger(queryClient),
+  })
+}

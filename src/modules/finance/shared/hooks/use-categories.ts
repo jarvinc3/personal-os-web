@@ -52,3 +52,12 @@ export function useDeleteCategory() {
     onSuccess: () => invalidateCategories(queryClient),
   })
 }
+
+export function useRestoreCategory() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) =>
+      apiPost<{ success: boolean }>(API_ENDPOINTS.FINANCE.CATEGORY_RESTORE(id)),
+    onSuccess: () => invalidateCategories(queryClient),
+  })
+}

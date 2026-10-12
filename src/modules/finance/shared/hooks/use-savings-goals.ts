@@ -64,6 +64,17 @@ export function useDeleteSavingsGoal() {
   })
 }
 
+export function useRestoreSavingsGoal() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) =>
+      apiPost<{ success: boolean }>(
+        API_ENDPOINTS.FINANCE.SAVINGS_GOAL_RESTORE(id)
+      ),
+    onSuccess: () => invalidate(queryClient),
+  })
+}
+
 export function useSavingsGoalContributions(
   enabled: boolean,
   goalId: string | null

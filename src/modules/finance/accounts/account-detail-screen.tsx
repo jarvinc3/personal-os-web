@@ -18,6 +18,7 @@ import {
   useAccounts,
   useArchiveAccount,
   useDeleteAccount,
+  useRestoreAccount,
 } from "@/src/modules/finance/shared/hooks/use-accounts"
 import { useCards } from "@/src/modules/finance/shared/hooks/use-cards"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
@@ -27,6 +28,7 @@ import {
   financeErrorMessage,
   financeLoadErrorMessage,
 } from "@/src/modules/finance/shared/lib/finance-error"
+import { showUndoToast } from "@/src/modules/finance/shared/components/undo-toast"
 import { encodeLedgerTarget } from "@/src/modules/finance/shared/lib/ledger-payloads"
 import { isoMonthBounds } from "@/src/modules/finance/shared/lib/month-window"
 import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
@@ -82,6 +84,7 @@ function AccountDetailScreenBody({ accountId }: AccountDetailScreenProps) {
   const cardsQuery = useCards(isEnabled)
   const archiveAccount = useArchiveAccount()
   const deleteAccount = useDeleteAccount()
+  const restoreAccount = useRestoreAccount()
   const { open: openAccountSheet, setOpen: setOpenAccountSheet } =
     useSheetParam(FINANCE_SHEET_KEYS.account)
   const { open: openOptionsSheet, setOpen: setOpenOptionsSheet } =
@@ -138,11 +141,17 @@ function AccountDetailScreenBody({ accountId }: AccountDetailScreenProps) {
       return
     }
     try {
-      await deleteAccount.mutateAsync(account.id)
-      appToast.success({ text1: "Cuenta borrada" })
+      const accountId = account.id
+      await deleteAccount.mutateAsync(accountId)
       setConfirmOpen(false)
       setOpenOptionsSheet(false)
       router.push(APP_ROUTES.app.financeProducts)
+      showUndoToast("Cuenta borrada", () =>
+        restoreAccount.mutate(accountId, {
+          onError: (error) =>
+            appToast.error({ text1: financeErrorMessage(error) }),
+        })
+      )
     } catch (error) {
       appToast.error({ text1: financeErrorMessage(error) })
     }

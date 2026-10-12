@@ -22,6 +22,7 @@ import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-financ
 import {
   useArchiveInstitution,
   useDeleteInstitution,
+  useRestoreInstitution,
   useInstitutions,
 } from "@/src/modules/finance/shared/hooks/use-institutions"
 import { useLoans } from "@/src/modules/finance/shared/hooks/use-loans"
@@ -32,6 +33,7 @@ import {
   financeErrorMessage,
   financeLoadErrorMessage,
 } from "@/src/modules/finance/shared/lib/finance-error"
+import { showUndoToast } from "@/src/modules/finance/shared/components/undo-toast"
 import {
   buildInstitutionStackItems,
   formatStackItemBalance,
@@ -104,6 +106,7 @@ function InstitutionDetailScreenBody({
     useRunEmailSync(emailSyncEnabled)
   const archiveInstitution = useArchiveInstitution()
   const deleteInstitution = useDeleteInstitution()
+  const restoreInstitution = useRestoreInstitution()
 
   const [tab, setTab] = useState<"accounts" | "cards" | "loans">("accounts")
   const [confirmOpen, setConfirmOpen] = useState(false)
@@ -195,16 +198,23 @@ function InstitutionDetailScreenBody({
       return
     }
     try {
-      await deleteInstitution.mutateAsync(institution.id)
-      appToast.success({ text1: "Institución eliminada" })
+      const institutionId = institution.id
+      await deleteInstitution.mutateAsync(institutionId)
       setConfirmOpen(false)
       setOpenOptionsSheet(false)
       router.push(APP_ROUTES.app.financeProducts)
+      showUndoToast("Institución eliminada", () =>
+        restoreInstitution.mutate(institutionId, {
+          onError: (error) =>
+            appToast.error({ text1: financeErrorMessage(error) }),
+        })
+      )
     } catch (error) {
       appToast.error({ text1: financeErrorMessage(error) })
     }
   }, [
     deleteInstitution,
+    restoreInstitution,
     institution,
     router,
     setConfirmOpen,

@@ -21,10 +21,9 @@ Aplicado:
 - Errores del API traducidos al español; el detalle de validación no se pierde.
 - Emoji por defecto de categoría, país por nombre, tipo segmentado y logo con vista previa en institución.
 - Accesibilidad de avatares, ruedas de hora (pasos de 5 minutos) y nombres de modelo del proveedor de IA.
+- "Deshacer" tras eliminar: cada borrado guarda un snapshot y el toast ofrece reponerlo.
 
 Pendiente (P2):
 
 - Comercios, suscripciones y recurrentes: sin ruta todavía.
-- Deshacer tras eliminar y borrado suave.
-- Prefill del formulario con el agente de IA.
 - Leer la tarjeta desde un estado de cuenta o correo: hoy solo hay un atajo a Correos.

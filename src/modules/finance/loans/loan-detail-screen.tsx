@@ -15,12 +15,14 @@ import { useLoanInstallments } from "@/src/modules/finance/shared/hooks/use-loan
 import {
   useArchiveLoan,
   useDeleteLoan,
+  useRestoreLoan,
   useLoans,
 } from "@/src/modules/finance/shared/hooks/use-loans"
 import {
   financeErrorMessage,
   financeLoadErrorMessage,
 } from "@/src/modules/finance/shared/lib/finance-error"
+import { showUndoToast } from "@/src/modules/finance/shared/components/undo-toast"
 import { formatRatePercentLabel } from "@/src/modules/finance/shared/lib/interest-rate"
 import { formatCalendarDate } from "@/src/modules/finance/shared/lib/ledger-form"
 import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
@@ -82,6 +84,7 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
   const installmentsQuery = useLoanInstallments(isEnabled, loanId)
   const archiveLoan = useArchiveLoan()
   const deleteLoan = useDeleteLoan()
+  const restoreLoan = useRestoreLoan()
   const { open: openOptionsSheet, setOpen: setOpenOptionsSheet } =
     useSheetParam(FINANCE_SHEET_KEYS.loanOptions)
 
@@ -118,11 +121,17 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
       return
     }
     try {
-      await deleteLoan.mutateAsync(loan.id)
-      appToast.success({ text1: "Préstamo eliminado" })
+      const loanId = loan.id
+      await deleteLoan.mutateAsync(loanId)
       setConfirmOpen(false)
       setOpenOptionsSheet(false)
       router.push(APP_ROUTES.app.financePlanning)
+      showUndoToast("Préstamo eliminado", () =>
+        restoreLoan.mutate(loanId, {
+          onError: (error) =>
+            appToast.error({ text1: financeErrorMessage(error) }),
+        })
+      )
     } catch (error) {
       appToast.error({ text1: financeErrorMessage(error) })
     }

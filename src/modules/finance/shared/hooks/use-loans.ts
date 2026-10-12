@@ -57,3 +57,12 @@ export function useDeleteLoan() {
     onSuccess: () => invalidate(queryClient),
   })
 }
+
+export function useRestoreLoan() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) =>
+      apiPost<{ success: boolean }>(API_ENDPOINTS.FINANCE.LOAN_RESTORE(id)),
+    onSuccess: () => invalidate(queryClient),
+  })
+}

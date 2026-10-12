@@ -10,6 +10,7 @@ import { MissingRecord } from "@/src/modules/finance/shared/components/layout/mi
 import {
   useConfirmTransaction,
   useDeleteTransaction,
+  useRestoreTransaction,
   useReverseTransaction,
   useTransaction,
 } from "@/src/modules/finance/shared/hooks/use-transactions"
@@ -18,6 +19,7 @@ import {
   financeErrorMessage,
   financeLoadErrorMessage,
 } from "@/src/modules/finance/shared/lib/finance-error"
+import { showUndoToast } from "@/src/modules/finance/shared/components/undo-toast"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
 import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 import {
@@ -103,6 +105,7 @@ function TransactionDetailScreenBody({
   const confirmMutation = useConfirmTransaction()
   const reverseMutation = useReverseTransaction()
   const deleteMutation = useDeleteTransaction()
+  const restoreMutation = useRestoreTransaction()
   const { open: openOptionsSheet, setOpen: setOpenOptionsSheet } =
     useSheetParam(FINANCE_SHEET_KEYS.transactionOptions)
 
@@ -144,10 +147,16 @@ function TransactionDetailScreenBody({
     }
     setOpenOptionsSheet(false)
     try {
-      await deleteMutation.mutateAsync(tx.id)
-      appToast.success({ text1: "Movimiento eliminado" })
+      const transactionId = tx.id
+      await deleteMutation.mutateAsync(transactionId)
       setConfirmOpen(false)
       router.back()
+      showUndoToast("Movimiento eliminado", () =>
+        restoreMutation.mutate(transactionId, {
+          onError: (error) =>
+            appToast.error({ text1: financeErrorMessage(error) }),
+        })
+      )
     } catch (error) {
       appToast.error({ text1: financeErrorMessage(error) })
     }

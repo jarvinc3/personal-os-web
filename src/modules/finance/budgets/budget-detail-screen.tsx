@@ -12,6 +12,7 @@ import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet
 import {
   useBudget,
   useDeleteBudget,
+  useRestoreBudget,
 } from "@/src/modules/finance/shared/hooks/use-budgets"
 import { useCategories } from "@/src/modules/finance/shared/hooks/use-categories"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
@@ -23,6 +24,7 @@ import {
   financeErrorMessage,
   financeLoadErrorMessage,
 } from "@/src/modules/finance/shared/lib/finance-error"
+import { showUndoToast } from "@/src/modules/finance/shared/components/undo-toast"
 import {
   formatCalendarDate,
   sliceDateInput,
@@ -162,6 +164,7 @@ function BudgetDetailScreenBody({ budgetId }: FinanceBudgetDetailProps) {
   const tone = budget ? budgetTone(pct, budget.alertThresholdPct ?? 80) : "info"
   const badge = budgetBadge(tone)
   const deleteBudget = useDeleteBudget()
+  const restoreBudget = useRestoreBudget()
   const [optionsOpen, setOptionsOpen] = useState(false)
   const [confirmOpen, setConfirmOpen] = useState(false)
 
@@ -170,11 +173,17 @@ function BudgetDetailScreenBody({ budgetId }: FinanceBudgetDetailProps) {
       return
     }
     try {
-      await deleteBudget.mutateAsync(budget.id)
-      appToast.success({ text1: "Presupuesto eliminado" })
+      const budgetId = budget.id
+      await deleteBudget.mutateAsync(budgetId)
       setConfirmOpen(false)
       setOptionsOpen(false)
       router.push(APP_ROUTES.app.financePlanning)
+      showUndoToast("Presupuesto eliminado", () =>
+        restoreBudget.mutate(budgetId, {
+          onError: (error) =>
+            appToast.error({ text1: financeErrorMessage(error) }),
+        })
+      )
     } catch (error) {
       appToast.error({ text1: financeErrorMessage(error) })
     }

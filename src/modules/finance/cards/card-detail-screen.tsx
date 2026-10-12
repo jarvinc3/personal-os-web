@@ -14,6 +14,7 @@ import {
   useArchiveCard,
   useCards,
   useDeleteCard,
+  useRestoreCard,
 } from "@/src/modules/finance/shared/hooks/use-cards"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
 import { resolveCardDisplayBalances } from "@/src/modules/finance/shared/lib/card-balances"
@@ -22,6 +23,7 @@ import {
   financeErrorMessage,
   financeLoadErrorMessage,
 } from "@/src/modules/finance/shared/lib/finance-error"
+import { showUndoToast } from "@/src/modules/finance/shared/components/undo-toast"
 import { encodeLedgerTarget } from "@/src/modules/finance/shared/lib/ledger-payloads"
 import { DeleteRecordDialog } from "@/src/modules/finance/shared/components/delete-record-dialog"
 import { RecordOptionsSheet } from "@/src/modules/finance/shared/components/record-options-sheet"
@@ -100,6 +102,7 @@ function CardDetailScreenBody({ cardId }: CardDetailScreenProps) {
   const isCredit = card?.type === "CREDIT"
   const archiveCard = useArchiveCard()
   const deleteCard = useDeleteCard()
+  const restoreCard = useRestoreCard()
   const [confirmOpen, setConfirmOpen] = useState(false)
 
   async function onArchiveCard() {
@@ -121,11 +124,17 @@ function CardDetailScreenBody({ cardId }: CardDetailScreenProps) {
       return
     }
     try {
-      await deleteCard.mutateAsync(card.id)
-      appToast.success({ text1: "Tarjeta eliminada" })
+      const cardId = card.id
+      await deleteCard.mutateAsync(cardId)
       setConfirmOpen(false)
       setOpenOptionsSheet(false)
       router.push(APP_ROUTES.app.financeProducts)
+      showUndoToast("Tarjeta eliminada", () =>
+        restoreCard.mutate(cardId, {
+          onError: (error) =>
+            appToast.error({ text1: financeErrorMessage(error) }),
+        })
+      )
     } catch (error) {
       appToast.error({ text1: financeErrorMessage(error) })
     }

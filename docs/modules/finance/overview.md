@@ -16,6 +16,7 @@ Tab bar (4): Resumen, Movimientos, Planificación, Productos. Estadísticas `sho
 - Cuenta o tarjeta se elige con `DestinationPickerSheet` desde un `DestinationTrigger`, no en un `<select>`.
 - Cerrar con cambios sin guardar pide confirmación con `useDiscardChanges` (`shared/hooks/use-discard-changes.tsx`); un guardado con éxito cierra directo.
 - Las acciones de un registro viven en el ⋮ del detalle (`RecordOptionsSheet`). "Eliminar" es el último ítem, en rojo, y confirma con `DeleteRecordDialog`.
+- Tras eliminar, un toast con "Deshacer" (`showUndoToast`) llama al `POST <entidad>/:id/restore` durante unos segundos. La respuesta del `DELETE` trae `undoId`, que para una transferencia es el `transferGroupId`.
 - Los errores del API pasan por `financeErrorMessage` (`shared/lib/finance-error.ts`), que traduce el `message` del servidor. El detalle de validación no se muestra crudo.
 
 Helpers: `src/modules/finance/shared/lib/money.ts`, `ledger-payloads.ts`. Tests: specs `*.spec.ts` bajo `shared/lib/` y cada capability.

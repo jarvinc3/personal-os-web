@@ -72,3 +72,14 @@ export function useDeleteAccount() {
     },
   })
 }
+
+export function useRestoreAccount() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) =>
+      apiPost<{ success: boolean }>(API_ENDPOINTS.FINANCE.ACCOUNT_RESTORE(id)),
+    onSuccess: () => {
+      invalidateFinancePositions(queryClient)
+    },
+  })
+}

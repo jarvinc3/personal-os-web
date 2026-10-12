@@ -12,6 +12,7 @@ import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
 import {
   useDeleteSavingsGoal,
+  useRestoreSavingsGoal,
   useDeleteSavingsGoalContribution,
   useSavingsGoalContributions,
   useSavingsGoals,
@@ -20,6 +21,7 @@ import {
   financeErrorMessage,
   financeLoadErrorMessage,
 } from "@/src/modules/finance/shared/lib/finance-error"
+import { showUndoToast } from "@/src/modules/finance/shared/components/undo-toast"
 import {
   formatFinanceMoney,
   parseFinanceMoney,
@@ -140,6 +142,7 @@ function SavingsGoalDetailScreenBody({
   )
 
   const deleteGoal = useDeleteSavingsGoal()
+  const restoreGoal = useRestoreSavingsGoal()
 
   const pendingContribution =
     contributions.find((item) => item.id === pendingContributionId) ?? null
@@ -149,11 +152,17 @@ function SavingsGoalDetailScreenBody({
       return
     }
     try {
-      await deleteGoal.mutateAsync(goal.id)
-      appToast.success({ text1: "Meta eliminada" })
+      const goalId = goal.id
+      await deleteGoal.mutateAsync(goalId)
       setConfirmGoalOpen(false)
       setOptionsOpen(false)
       router.push(APP_ROUTES.app.financePlanning)
+      showUndoToast("Meta eliminada", () =>
+        restoreGoal.mutate(goalId, {
+          onError: (error) =>
+            appToast.error({ text1: financeErrorMessage(error) }),
+        })
+      )
     } catch (error) {
       appToast.error({ text1: financeErrorMessage(error) })
     }
