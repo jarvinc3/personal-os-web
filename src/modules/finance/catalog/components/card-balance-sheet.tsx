@@ -18,6 +18,7 @@ import { canManageCardBalances } from "@/src/modules/finance/shared/lib/card-bal
 import { buildFinanceCurrencyOptions } from "@/src/modules/finance/shared/lib/finance-currency"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import {
+  financeMoneyDifference,
   formatFinanceMoney,
   type FinanceMoneyDisplay,
 } from "@/src/modules/finance/shared/lib/money"
@@ -156,6 +157,14 @@ function CardBalanceSheetForm({
     onOpenChange,
   })
   const selectedCurrency = useWatch({ control, name: "currency" })
+  const balanceValue = useWatch({ control, name: "balance" })
+  const storedBalance =
+    mode.kind === "edit"
+      ? ((card?.balances ?? []).find(
+          (item) => item.currency.toUpperCase() === mode.currency.toUpperCase()
+        )?.balance ?? null)
+      : null
+  const difference = financeMoneyDifference(storedBalance, balanceValue)
   const { picker, openPicker, closeHandlerFor } = usePicker<
     "none" | "currency"
   >("none")
@@ -352,6 +361,19 @@ function CardBalanceSheetForm({
               />
             )}
           />
+          {!isAdding && difference !== null && difference !== 0 ? (
+            <p className="px-1 text-sm text-muted-foreground">
+              Ajuste{" "}
+              <span className="font-medium text-foreground tabular-nums">
+                {formatFinanceMoney(difference, {
+                  currency: selectedCurrency || defaultCurrency,
+                  showCents: display?.showCents ?? true,
+                  compactNumbers: display?.compactNumbers ?? false,
+                  leadingSign: true,
+                })}
+              </span>
+            </p>
+          ) : null}
           {card?.type === "CREDIT" ? (
             <Controller
               control={control}

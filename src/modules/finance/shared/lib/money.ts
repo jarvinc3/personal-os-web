@@ -40,6 +40,19 @@ export function parseFinanceMoney(
   return Number.isFinite(parsed) ? parsed : null
 }
 
+/** Difference between two money values, or null when either one is missing. */
+export function financeMoneyDifference(
+  current: string | number | null | undefined,
+  next: string | number | null | undefined
+): number | null {
+  const currentAmount = parseFinanceMoney(current)
+  const nextAmount = parseFinanceMoney(next)
+  if (currentAmount === null || nextAmount === null) {
+    return null
+  }
+  return nextAmount - currentAmount
+}
+
 /**
  * Narrow currency glyph. English locale keeps `$` / `€` stable.
  * Some Spanish ICU data returns the ISO code again (`DOP` → `DOP`),

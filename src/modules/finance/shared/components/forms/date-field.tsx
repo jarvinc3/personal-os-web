@@ -42,6 +42,8 @@ type FinanceDateFieldProps = {
   disabled?: boolean
   minYear?: number
   maxYear?: number
+  /** Fecha mínima elegible (`YYYY-MM-DD`); un valor anterior se ajusta a esta. */
+  minDate?: string
   /** Control que comparte la fila del disparador. El panel abierto sigue a ancho completo. */
   aside?: ReactNode
   /** El valor pasa a ser `YYYY-MM-DDTHH:mm` y el panel añade la hora. */
@@ -77,6 +79,7 @@ export function FinanceDateField({
   disabled = false,
   minYear,
   maxYear,
+  minDate,
   aside,
   withTime = false,
 }: FinanceDateFieldProps) {
@@ -89,11 +92,12 @@ export function FinanceDateField({
   const [step, setStep] = useState<DateStep>(DATE_STEP)
 
   function changeDate(next: string) {
+    const date = minDate && next < minDate ? minDate : next
     if (!withTime) {
-      onChange(next)
+      onChange(date)
       return
     }
-    onChange(`${next}T${hasTime ? timeValue : "00:00"}`)
+    onChange(`${date}T${hasTime ? timeValue : "00:00"}`)
   }
 
   function changeTime(next: string) {

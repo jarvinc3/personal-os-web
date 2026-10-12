@@ -20,6 +20,7 @@ import {
   formatPlanningDate,
   monthlySavingsSuggestion,
 } from "@/src/modules/finance/shared/lib/planning-lists"
+import { todayDateInput } from "@/src/modules/finance/shared/lib/ledger-form"
 import { buildSavingsGoalBody } from "@/src/modules/finance/shared/lib/planning-payloads"
 import type { FinanceSavingsGoal } from "@/src/modules/finance/shared/types/entities"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
@@ -246,6 +247,8 @@ export function SavingsGoalSheet({
                 label="Fecha objetivo"
                 value={field.value}
                 onChange={field.onChange}
+                minDate={todayDateInput()}
+                minYear={new Date().getFullYear()}
                 optional
               />
             )}

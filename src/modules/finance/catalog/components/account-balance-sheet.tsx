@@ -5,6 +5,7 @@ import { useAdjustBalance } from "@/src/modules/finance/shared/hooks/use-balance
 import { useDiscardChanges } from "@/src/modules/finance/shared/hooks/use-discard-changes"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import {
+  financeMoneyDifference,
   formatFinanceMoney,
   parseFinanceMoney,
   type FinanceMoneyDisplay,
@@ -19,7 +20,7 @@ import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { SaveIcon, ScaleIcon, XIcon } from "lucide-react"
 import { useEffect, useMemo } from "react"
-import { Controller, useForm } from "react-hook-form"
+import { Controller, useForm, useWatch } from "react-hook-form"
 import {
   accountBalanceSchema,
   type AccountBalanceFormValues,
@@ -61,6 +62,8 @@ export function AccountBalanceSheet({
     isDirty,
     onOpenChange,
   })
+  const balanceValue = useWatch({ control, name: "balance" })
+  const difference = financeMoneyDifference(account?.balance, balanceValue)
   const submitForm = useMemo(
     () => createSheetSubmit(handleSubmit),
     [handleSubmit]
@@ -134,6 +137,18 @@ export function AccountBalanceSheet({
               })}
             </span>
           </p>
+          {difference !== null && difference !== 0 ? (
+            <p className="px-1 text-sm text-muted-foreground">
+              Ajuste{" "}
+              <span className="font-medium text-foreground tabular-nums">
+                {formatFinanceMoney(difference, {
+                  ...display,
+                  currency: account?.currency ?? display.currency,
+                  leadingSign: true,
+                })}
+              </span>
+            </p>
+          ) : null}
           <Controller
             control={control}
             name="balance"
