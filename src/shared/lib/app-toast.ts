@@ -13,7 +13,11 @@ type ToastPayload = {
   duration?: number
 }
 
-function toastOptions({ text2, action, duration }: Omit<ToastPayload, "text1">) {
+function toastOptions({
+  text2,
+  action,
+  duration,
+}: Omit<ToastPayload, "text1">) {
   return {
     description: text2,
     ...(action
