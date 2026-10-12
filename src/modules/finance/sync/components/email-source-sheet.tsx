@@ -1,6 +1,5 @@
 "use client"
 
-import { institutionSelectOptions } from "@/src/modules/finance/shared/components/ledger-target-select"
 import { CATALOG_NONE } from "@/src/modules/finance/shared/constants/catalog"
 import { EmailSyncLogList } from "@/src/modules/finance/sync/components/email-sync-history"
 import {
@@ -17,9 +16,22 @@ import type {
 } from "@/src/modules/finance/shared/types/entities"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
 import {
-  FormTextField,
-  SelectField,
-} from "@/src/shared/components/layout/form-blocks"
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/src/shared/components/ui/alert-dialog"
+import { FormTextField } from "@/src/shared/components/layout/form-blocks"
+import {
+  InstitutionPickerSheet,
+  InstitutionTrigger,
+} from "@/src/modules/finance/shared/components/pickers/institution-picker"
+import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
+import { usePicker } from "@/src/shared/hooks/use-picker"
 import { Button } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { SummarySection } from "@/src/shared/components/ui/summary"
@@ -28,7 +40,6 @@ import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
   HistoryIcon,
-  LandmarkIcon,
   MailIcon,
   PlusIcon,
   RefreshCwIcon,
@@ -36,8 +47,8 @@ import {
   UnlinkIcon,
   XIcon,
 } from "lucide-react"
-import { useEffect, useMemo } from "react"
-import { Controller, useForm } from "react-hook-form"
+import { useEffect, useMemo, useState } from "react"
+import { Controller, useForm, useWatch } from "react-hook-form"
 import {
   emailSourceSchema,
   type EmailSourceFormValues,
@@ -89,19 +100,25 @@ export function EmailSourceSheet({
     useRunEmailSync(emailSyncEnabled)
   const isPending =
     updateMutation.isPending || disconnectMutation.isPending || syncPending
-  const institutionOptions = institutionSelectOptions(
-    institutions.filter((item) => item.isActive)
-  )
+  const activeInstitutions = institutions.filter((item) => item.isActive)
 
   const {
     control,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors },
   } = useForm<EmailSourceFormValues>({
     resolver: zodResolver(emailSourceSchema),
     defaultValues: toFormValues(source),
   })
+
+  const institutionId = useWatch({ control, name: "institutionId" })
+  const selectedInstitution =
+    institutions.find((item) => item.id === institutionId) ?? null
+  const { picker, openPicker, closeHandlerFor } = usePicker<
+    "none" | "institution"
+  >("none")
 
   useEffect(() => {
     if (open) {
@@ -148,17 +165,16 @@ export function EmailSourceSheet({
     await runSync(source.id)
   }
 
+  const [confirmOpen, setConfirmOpen] = useState(false)
+
   async function onDisconnect() {
     if (!source) {
-      return
-    }
-    const confirmed = window.confirm("¿Desvincular esta institución de Gmail?")
-    if (!confirmed) {
       return
     }
     try {
       await disconnectMutation.mutateAsync(source.id)
       appToast.success({ text1: "Fuente desconectada" })
+      setConfirmOpen(false)
       onOpenChange(false)
     } catch (error) {
       appToast.error({ text1: financeErrorMessage(error) })
@@ -166,182 +182,220 @@ export function EmailSourceSheet({
   }
 
   return (
-    <BottomSheet
-      open={open}
-      onOpenChange={onOpenChange}
-      pending={pending}
-      title="Editar vínculo"
-      description={
-        source?.emailAddress ?? "Edita el remitente y la institución."
-      }
-      actions={{
-        delete: source ? (
-          <Button
-            type="button"
-            variant="destructive"
-            disabled={isPending}
-            onClick={() => void onDisconnect()}
-          >
-            <UnlinkIcon className="size-4 shrink-0" />
-            Desvincular
-          </Button>
-        ) : undefined,
-        close: (
-          <Button
-            type="button"
-            variant="outline"
-            className="flex-1"
-            onClick={() => onOpenChange(false)}
-          >
-            <XIcon className="size-4 shrink-0" />
-            Cancelar
-          </Button>
-        ),
-        submit: (
-          <Button
-            type="button"
-            disabled={isPending || !source}
-            className="flex-1"
-            onClick={onSubmit}
-          >
-            {isPending ? <Spinner data-icon="inline-start" /> : null}
-            Guardar
-          </Button>
-        ),
-      }}
-    >
-      <SummarySection title="Sincronización" icon={RefreshCwIcon}>
-        {source ? (
-          <div className="flex flex-col gap-2 px-3 pb-3">
+    <>
+      <BottomSheet
+        open={open}
+        onOpenChange={onOpenChange}
+        pending={pending}
+        title="Editar vínculo"
+        description={
+          source?.emailAddress ?? "Edita el remitente y la institución."
+        }
+        actions={{
+          delete: source ? (
             <Button
               type="button"
-              className="w-full"
-              disabled={isPending || !source.isActive || !emailSyncEnabled}
-              onClick={() => void onSync()}
+              variant="destructive"
+              disabled={isPending}
+              onClick={() => setConfirmOpen(true)}
             >
-              {syncPending ? (
-                <Spinner data-icon="inline-start" />
-              ) : (
-                <RefreshCwIcon data-icon="inline-start" />
-              )}
-              Sincronizar ahora
+              <UnlinkIcon className="size-4 shrink-0" />
+              Desvincular
             </Button>
+          ) : undefined,
+          close: (
             <Button
               type="button"
               variant="outline"
-              className="w-full"
-              disabled={isPending || !source.isActive || !emailSyncEnabled}
-              onClick={() => void runSync(source.id, { forceFullSync: true })}
+              className="flex-1"
+              onClick={() => onOpenChange(false)}
             >
-              <RefreshCwIcon className="size-4 shrink-0" />
-              Releer todo
+              <XIcon className="size-4 shrink-0" />
+              Cancelar
             </Button>
-          </div>
-        ) : null}
-      </SummarySection>
-      <SummarySection title="Últimos syncs" icon={HistoryIcon}>
-        <EmailSyncLogList
-          logs={(source?.logs ?? []).map((log) => ({
-            ...log,
-            sourceName: source?.label || source?.institutionName || "Banco",
-          }))}
-          emptyLabel="Este vínculo aún no tiene runs. El primer sync aparecerá aquí."
-        />
-      </SummarySection>
-      <SummarySection title="Institución" icon={MailIcon}>
-        <Controller
-          control={control}
-          name="institutionId"
-          render={({ field }) => (
-            <SelectField
-              icon={LandmarkIcon}
-              label="Institución"
-              value={field.value}
-              onChange={field.onChange}
-              options={institutionOptions}
-            />
-          )}
-        />
-        {errors.institutionId?.message ? (
-          <p className="text-sm text-destructive">
-            {errors.institutionId.message}
-          </p>
-        ) : null}
-        <Controller
-          control={control}
-          name="bankSenderEmail"
-          render={({ field }) => (
-            <FormTextField
-              icon={MailIcon}
-              label="Correo del banco"
-              value={field.value}
-              onChange={field.onChange}
-              onBlur={field.onBlur}
-              placeholder="alertas@bhd.com.do"
-              error={errors.bankSenderEmail?.message}
-            />
-          )}
-        />
-        <Controller
-          control={control}
-          name="extraSenders"
-          render={({ field }) => (
-            <FormTextField
-              icon={MailIcon}
-              label="Otros remitentes"
-              value={field.value}
-              onChange={field.onChange}
-              onBlur={field.onBlur}
-              placeholder="avisos@banco.com, notificaciones@banco.com"
-              error={errors.extraSenders?.message}
-            />
-          )}
-        />
-        {discoveredQuery.data && discoveredQuery.data.length > 0 ? (
-          <div className="space-y-2">
-            <p className="text-xs font-medium text-muted-foreground">
-              Otros From de este dominio (elige cuáles son de movimientos)
-            </p>
-            {discoveredQuery.data.map((item) => (
+          ),
+          submit: (
+            <Button
+              type="button"
+              disabled={isPending || !source}
+              className="flex-1"
+              onClick={onSubmit}
+            >
+              {isPending ? <Spinner data-icon="inline-start" /> : null}
+              Guardar
+            </Button>
+          ),
+        }}
+      >
+        <SummarySection title="Sincronización" icon={RefreshCwIcon}>
+          {source ? (
+            <div className="flex flex-col gap-2 px-3 pb-3">
               <Button
-                key={item.email}
                 type="button"
-                variant="secondary"
-                disabled={addSendersMutation.isPending || !source}
-                onClick={() => {
-                  if (!source) {
-                    return
-                  }
-                  void addSendersMutation
-                    .mutateAsync({ id: source.id, emails: [item.email] })
-                    .then(() =>
-                      appToast.success({ text1: `Añadido ${item.email}` })
-                    )
-                    .catch((error) =>
-                      appToast.error({ text1: financeErrorMessage(error) })
-                    )
-                }}
+                className="w-full"
+                disabled={isPending || !source.isActive || !emailSyncEnabled}
+                onClick={() => void onSync()}
               >
-                <PlusIcon className="size-4 shrink-0" />
-                Añadir {item.email} ({item.count})
+                {syncPending ? (
+                  <Spinner data-icon="inline-start" />
+                ) : (
+                  <RefreshCwIcon data-icon="inline-start" />
+                )}
+                Sincronizar ahora
               </Button>
-            ))}
-          </div>
-        ) : null}
-        <Controller
-          control={control}
-          name="label"
-          render={({ field }) => (
-            <FormTextField
-              icon={TagIcon}
-              label="Etiqueta"
-              value={field.value}
-              onChange={field.onChange}
-              onBlur={field.onBlur}
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                disabled={isPending || !source.isActive || !emailSyncEnabled}
+                onClick={() => void runSync(source.id, { forceFullSync: true })}
+              >
+                <RefreshCwIcon className="size-4 shrink-0" />
+                Releer todo
+              </Button>
+            </div>
+          ) : null}
+        </SummarySection>
+        <SummarySection title="Últimos syncs" icon={HistoryIcon}>
+          <EmailSyncLogList
+            logs={(source?.logs ?? []).map((log) => ({
+              ...log,
+              sourceName: source?.label || source?.institutionName || "Banco",
+            }))}
+            emptyLabel="Este vínculo aún no tiene runs. El primer sync aparecerá aquí."
+          />
+        </SummarySection>
+        <SummarySection title="Institución" icon={MailIcon}>
+          <Field className="gap-1">
+            <FieldLabel className="text-sm text-muted-foreground">
+              Institución
+            </FieldLabel>
+            <InstitutionTrigger
+              institution={selectedInstitution}
+              onClick={() => openPicker("institution")}
             />
-          )}
-        />
-      </SummarySection>
-    </BottomSheet>
+            {errors.institutionId?.message ? (
+              <FieldError>{errors.institutionId.message}</FieldError>
+            ) : null}
+          </Field>
+          <Controller
+            control={control}
+            name="bankSenderEmail"
+            render={({ field }) => (
+              <FormTextField
+                icon={MailIcon}
+                label="Correo del banco"
+                value={field.value}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+                placeholder="alertas@bhd.com.do"
+                error={errors.bankSenderEmail?.message}
+              />
+            )}
+          />
+          <Controller
+            control={control}
+            name="extraSenders"
+            render={({ field }) => (
+              <FormTextField
+                icon={MailIcon}
+                label="Otros remitentes"
+                value={field.value}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+                placeholder="avisos@banco.com, notificaciones@banco.com"
+                error={errors.extraSenders?.message}
+              />
+            )}
+          />
+          {discoveredQuery.data && discoveredQuery.data.length > 0 ? (
+            <div className="space-y-2">
+              <p className="text-xs font-medium text-muted-foreground">
+                Otros From de este dominio (elige cuáles son de movimientos)
+              </p>
+              {discoveredQuery.data.map((item) => (
+                <Button
+                  key={item.email}
+                  type="button"
+                  variant="secondary"
+                  disabled={addSendersMutation.isPending || !source}
+                  onClick={() => {
+                    if (!source) {
+                      return
+                    }
+                    void addSendersMutation
+                      .mutateAsync({ id: source.id, emails: [item.email] })
+                      .then(() =>
+                        appToast.success({ text1: `Añadido ${item.email}` })
+                      )
+                      .catch((error) =>
+                        appToast.error({ text1: financeErrorMessage(error) })
+                      )
+                  }}
+                >
+                  <PlusIcon className="size-4 shrink-0" />
+                  Añadir {item.email} ({item.count})
+                </Button>
+              ))}
+            </div>
+          ) : null}
+          <Controller
+            control={control}
+            name="label"
+            render={({ field }) => (
+              <FormTextField
+                icon={TagIcon}
+                label="Etiqueta"
+                value={field.value}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+              />
+            )}
+          />
+        </SummarySection>
+      </BottomSheet>
+
+      <InstitutionPickerSheet
+        open={picker === "institution"}
+        onOpenChange={closeHandlerFor("institution")}
+        institutions={activeInstitutions}
+        value={institutionId}
+        onSelect={(next) =>
+          setValue("institutionId", next, { shouldValidate: true })
+        }
+      />
+
+      <AlertDialog
+        open={confirmOpen}
+        onOpenChange={(open) => {
+          if (!disconnectMutation.isPending) {
+            setConfirmOpen(open)
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              ¿Desvincular esta institución de Gmail?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              No se puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={disconnectMutation.isPending}>
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              disabled={disconnectMutation.isPending}
+              onClick={() => void onDisconnect()}
+            >
+              Desvincular
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   )
 }

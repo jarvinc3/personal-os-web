@@ -32,7 +32,7 @@ function HomeScreenBody() {
 
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-6 p-4 pb-16 md:px-6">
-      <SummarySection icon={UserIcon} title={`Hola, bienvenido ${displayName}`}>
+      <SummarySection icon={UserIcon} title="Tareas rápidas">
         <div className="grid grid-cols-3 gap-1">
           <Button variant="outline" asChild>
             <Link href={APP_ROUTES.app.chat} className="relative">

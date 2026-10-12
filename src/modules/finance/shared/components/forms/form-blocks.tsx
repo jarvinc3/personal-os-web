@@ -154,28 +154,6 @@ export function FinanceAmountInput({
   )
 }
 
-type FinanceAmountFieldProps = FinanceAmountInputProps & {
-  label?: string | null
-}
-
-export function FinanceAmountField({
-  label = "Monto",
-  error,
-  disabled,
-  ...inputProps
-}: FinanceAmountFieldProps) {
-  return (
-    <Field
-      data-invalid={error ? true : undefined}
-      data-disabled={disabled ? true : undefined}
-    >
-      {label ? <FieldLabel>{label}</FieldLabel> : null}
-      <FinanceAmountInput {...inputProps} error={error} disabled={disabled} />
-      {error ? <FieldError>{error}</FieldError> : null}
-    </Field>
-  )
-}
-
 type FinanceDetailsDisclosureProps = {
   title?: string
   children: ReactNode

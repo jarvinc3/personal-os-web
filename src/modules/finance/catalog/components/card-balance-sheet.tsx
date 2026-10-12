@@ -1,6 +1,7 @@
 "use client"
 
 import { FinanceCurrencyPills } from "@/src/modules/finance/shared/components/forms/currency-pills"
+import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
 import { useAdjustBalance } from "@/src/modules/finance/shared/hooks/use-balance-adjustment"
 import {
   useDeleteCardBalance,
@@ -21,7 +22,16 @@ import {
 } from "@/src/modules/finance/shared/lib/money"
 import type { FinanceCard } from "@/src/modules/finance/shared/types/entities"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
-import { FormTextField } from "@/src/shared/components/layout/form-blocks"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/src/shared/components/ui/alert-dialog"
 import { Button } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { SummarySection } from "@/src/shared/components/ui/summary"
@@ -29,18 +39,11 @@ import { appToast } from "@/src/shared/lib/app-toast"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
 import { cn } from "@/src/shared/lib/utils"
 import { zodResolver } from "@hookform/resolvers/zod"
-import {
-  CreditCardIcon,
-  PlusIcon,
-  SaveIcon,
-  TrashIcon,
-  WalletIcon,
-  XIcon,
-} from "lucide-react"
+import { PlusIcon, SaveIcon, TrashIcon, WalletIcon, XIcon } from "lucide-react"
 import { useMemo, useState } from "react"
-import { Controller, useForm } from "react-hook-form"
+import { Controller, useForm, useWatch } from "react-hook-form"
 import {
-  cardBalanceSchema,
+  cardBalanceSchemaWithLimit,
   type CardBalanceFormValues,
 } from "@/src/modules/finance/catalog/lib/card-balance-form"
 
@@ -139,11 +142,13 @@ function CardBalanceSheetForm({
     control,
     handleSubmit,
     reset,
+    trigger,
     formState: { errors },
   } = useForm<CardBalanceFormValues>({
-    resolver: zodResolver(cardBalanceSchema),
+    resolver: zodResolver(cardBalanceSchemaWithLimit(card?.type === "CREDIT")),
     defaultValues: toFormValues(card, mode),
   })
+  const selectedCurrency = useWatch({ control, name: "currency" })
 
   function selectExisting(currency: string) {
     const nextMode: BalanceMode = { kind: "edit", currency }
@@ -228,6 +233,7 @@ function CardBalanceSheetForm({
   })
 
   const isAdding = mode.kind === "add"
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false)
 
   async function deleteCurrency() {
     if (!card || mode.kind !== "edit") {
@@ -246,139 +252,171 @@ function CardBalanceSheetForm({
   }
 
   return (
-    <BottomSheet
-      open={open}
-      onOpenChange={onOpenChange}
-      pending={pending || saving}
-      title={card ? `Saldos · ${card.name}` : "Saldos de tarjeta"}
-      description="El saldo nuevo queda como un reajuste. El límite de crédito se guarda aparte."
-      actions={{
-        close: (
-          <Button
-            variant="outline"
-            className="flex-1"
-            onClick={() => onOpenChange(false)}
-          >
-            <XIcon className="size-4 shrink-0" />
-            Cancelar
-          </Button>
-        ),
-        submit: (
-          <Button
-            disabled={saving || !card}
-            className="flex-1"
-            onClick={onSubmit}
-          >
-            {saving ? (
-              <Spinner data-icon="inline-start" />
-            ) : (
-              <SaveIcon className="size-4 shrink-0" />
-            )}
-            {saving ? "Guardando..." : "Guardar"}
-          </Button>
-        ),
-      }}
-    >
-      <SummarySection title="Monedas" icon={WalletIcon}>
-        {(card?.balances ?? []).map((item) => (
-          <button
-            key={item.id}
-            type="button"
-            onClick={() => selectExisting(item.currency)}
-            className={cn(
-              "flex w-full items-center justify-between rounded-xl border px-3 py-2 text-left text-sm",
-              !isAdding && mode.currency === item.currency
-                ? "border-primary bg-primary/10"
-                : "border-border bg-card"
-            )}
-          >
-            <span className="font-medium">{item.currency}</span>
-            <span className="text-muted-foreground tabular-nums">
-              {formatFinanceMoney(item.balance, {
-                currency: item.currency,
-                showCents: display?.showCents ?? true,
-                compactNumbers: display?.compactNumbers ?? false,
-              })}
-            </span>
-          </button>
-        ))}
-        {canAddCurrency ? (
-          <Button type="button" variant="outline" onClick={startAdd}>
-            <PlusIcon />
-            Agregar moneda
-          </Button>
-        ) : null}
-      </SummarySection>
-
-      <SummarySection
-        title={isAdding ? "Nueva moneda" : `Editar ${mode.currency}`}
-        icon={WalletIcon}
+    <>
+      <BottomSheet
+        open={open}
+        onOpenChange={onOpenChange}
+        pending={pending || saving}
+        title={card ? `Saldos · ${card.name}` : "Saldos de tarjeta"}
+        description="El saldo nuevo queda como un reajuste. El límite de crédito se guarda aparte."
+        actions={{
+          close: (
+            <Button
+              variant="outline"
+              className="flex-1"
+              onClick={() => onOpenChange(false)}
+            >
+              <XIcon className="size-4 shrink-0" />
+              Cancelar
+            </Button>
+          ),
+          submit: (
+            <Button
+              disabled={saving || !card}
+              className="flex-1"
+              onClick={onSubmit}
+            >
+              {saving ? (
+                <Spinner data-icon="inline-start" />
+              ) : (
+                <SaveIcon className="size-4 shrink-0" />
+              )}
+              {saving ? "Guardando..." : "Guardar"}
+            </Button>
+          ),
+        }}
       >
-        <Controller
-          control={control}
-          name="currency"
-          render={({ field }) => (
-            <FinanceCurrencyPills
-              label="Moneda"
-              value={field.value}
-              onChange={field.onChange}
-              baseCurrency={defaultCurrency}
-              extraCodes={[defaultCurrency, field.value]}
-              excludeCodes={isAdding ? existingCurrencies : []}
-              disabled={!isAdding}
-            />
-          )}
-        />
-        <Controller
-          control={control}
-          name="balance"
-          render={({ field }) => (
-            <FormTextField
-              icon={WalletIcon}
-              label="Saldo"
-              value={field.value}
-              onChange={field.onChange}
-              onBlur={field.onBlur}
-              error={errors.balance?.message}
-              placeholder="0.00"
-            />
-          )}
-        />
-        {card?.type === "CREDIT" ? (
+        <SummarySection title="Monedas" icon={WalletIcon}>
+          {(card?.balances ?? []).map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => selectExisting(item.currency)}
+              className={cn(
+                "flex w-full items-center justify-between rounded-xl border px-3 py-2 text-left text-sm",
+                !isAdding && mode.currency === item.currency
+                  ? "border-primary bg-primary/10"
+                  : "border-border bg-card"
+              )}
+            >
+              <span className="font-medium">{item.currency}</span>
+              <span className="text-muted-foreground tabular-nums">
+                {formatFinanceMoney(item.balance, {
+                  currency: item.currency,
+                  showCents: display?.showCents ?? true,
+                  compactNumbers: display?.compactNumbers ?? false,
+                })}
+              </span>
+            </button>
+          ))}
+          {canAddCurrency ? (
+            <Button type="button" variant="outline" onClick={startAdd}>
+              <PlusIcon />
+              Agregar moneda
+            </Button>
+          ) : null}
+        </SummarySection>
+
+        <SummarySection
+          title={isAdding ? "Nueva moneda" : `Editar ${mode.currency}`}
+          icon={WalletIcon}
+        >
           <Controller
             control={control}
-            name="creditLimit"
+            name="currency"
             render={({ field }) => (
-              <FormTextField
-                icon={CreditCardIcon}
-                label="Límite de crédito"
+              <FinanceCurrencyPills
+                label="Moneda"
                 value={field.value}
                 onChange={field.onChange}
-                onBlur={field.onBlur}
-                error={errors.creditLimit?.message}
-                placeholder="50000"
+                baseCurrency={defaultCurrency}
+                extraCodes={[defaultCurrency, field.value]}
+                excludeCodes={isAdding ? existingCurrencies : []}
+                disabled={!isAdding}
               />
             )}
           />
-        ) : null}
-        {!isAdding ? (
-          <Button
-            type="button"
-            variant="destructive"
-            disabled={saving}
-            onClick={() => void deleteCurrency()}
-          >
-            {deleteBalanceMutation.isPending ? (
-              <Spinner data-icon="inline-start" />
-            ) : (
-              <TrashIcon className="size-4 shrink-0" />
+          <Controller
+            control={control}
+            name="balance"
+            render={({ field }) => (
+              <FinanceMoneyField
+                label="Saldo"
+                amount={field.value}
+                onAmountChange={field.onChange}
+                onAmountCommit={(next) => {
+                  field.onChange(next)
+                  void trigger("balance")
+                }}
+                onAmountBlur={field.onBlur}
+                amountError={errors.balance?.message}
+                currency={selectedCurrency || defaultCurrency}
+              />
             )}
-            {deleteBalanceMutation.isPending
-              ? "Eliminando..."
-              : `Eliminar ${mode.currency}`}
-          </Button>
-        ) : null}
-      </SummarySection>
-    </BottomSheet>
+          />
+          {card?.type === "CREDIT" ? (
+            <Controller
+              control={control}
+              name="creditLimit"
+              render={({ field }) => (
+                <FinanceMoneyField
+                  label="Límite de crédito"
+                  amount={field.value}
+                  onAmountChange={field.onChange}
+                  onAmountCommit={(next) => {
+                    field.onChange(next)
+                    void trigger("creditLimit")
+                  }}
+                  onAmountBlur={field.onBlur}
+                  amountError={errors.creditLimit?.message}
+                  currency={selectedCurrency || defaultCurrency}
+                />
+              )}
+            />
+          ) : null}
+          {!isAdding ? (
+            <Button
+              type="button"
+              variant="destructive"
+              disabled={saving}
+              onClick={() => setConfirmDeleteOpen(true)}
+            >
+              <TrashIcon className="size-4 shrink-0" />
+              {`Eliminar ${mode.currency}`}
+            </Button>
+          ) : null}
+        </SummarySection>
+      </BottomSheet>
+
+      <AlertDialog
+        open={confirmDeleteOpen}
+        onOpenChange={(next) => {
+          if (!deleteBalanceMutation.isPending) {
+            setConfirmDeleteOpen(next)
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar {mode.currency}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Se quita ese saldo de la tarjeta. No se puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteBalanceMutation.isPending}>
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              disabled={deleteBalanceMutation.isPending}
+              onClick={() => void deleteCurrency()}
+            >
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   )
 }

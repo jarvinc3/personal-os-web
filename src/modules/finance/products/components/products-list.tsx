@@ -15,6 +15,8 @@ import { useLoans } from "@/src/modules/finance/shared/hooks/use-loans"
 import { useMonthExpenseTrend } from "@/src/modules/finance/shared/hooks/use-month-expense-trend"
 import { useSheetListEntity } from "@/src/modules/finance/shared/hooks/use-sheet-entity"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
+import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
+import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
 import {
   prefetchFinanceCategories,
   prefetchFinanceSync,
@@ -37,7 +39,6 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
-import { Spinner } from "@/src/shared/components/ui/spinner"
 import { SummaryItem } from "@/src/shared/components/ui/summary"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
@@ -163,7 +164,23 @@ export function FinanceProductsList({
   return (
     <div className="-mt-6 flex flex-col gap-4">
       {errorMessage ? (
-        <p className="text-sm text-destructive">{errorMessage}</p>
+        <FinanceErrorState
+          message={errorMessage}
+          onRetry={() => {
+            void institutionsQuery.refetch()
+            void accountsQuery.refetch()
+            void cardsQuery.refetch()
+            void loansQuery.refetch()
+            void balanceSheetQuery.refetch()
+          }}
+          isRetrying={
+            institutionsQuery.isFetching ||
+            accountsQuery.isFetching ||
+            cardsQuery.isFetching ||
+            loansQuery.isFetching ||
+            balanceSheetQuery.isFetching
+          }
+        />
       ) : null}
 
       <FinanceHeroSection
@@ -176,30 +193,40 @@ export function FinanceProductsList({
       />
 
       <div>
-        {stackPending ? (
-          <div className="flex justify-center p-6">
-            <Spinner />
-          </div>
-        ) : stackItems.length === 0 ? (
-          <Empty className="py-8">
-            <EmptyHeader>
-              <EmptyMedia variant="icon">
-                <Building2Icon />
-              </EmptyMedia>
-              <EmptyTitle>Aún no hay instituciones</EmptyTitle>
-              <EmptyDescription>
-                Agrégala antes de crear una cuenta o una tarjeta. También puedes
-                crear una cuenta de efectivo sin institución.
-              </EmptyDescription>
-            </EmptyHeader>
-            <EmptyContent>
-              <Button onClick={() => setOpenInstitutionSheet(true, null)}>
-                <PlusIcon className="size-4 shrink-0" />
-                Crear institución
-              </Button>
-            </EmptyContent>
-          </Empty>
-        ) : (
+        <AsyncRegion
+          pending={stackPending}
+          pendingFallback={
+            <div className="flex flex-col gap-3">
+              {[0, 1].map((index) => (
+                <div
+                  key={index}
+                  className="h-28 animate-pulse rounded-2xl border border-border bg-muted/40"
+                />
+              ))}
+            </div>
+          }
+          empty={stackItems.length === 0}
+          emptyFallback={
+            <Empty className="py-8">
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <Building2Icon />
+                </EmptyMedia>
+                <EmptyTitle>Aún no hay instituciones</EmptyTitle>
+                <EmptyDescription>
+                  Agrégala antes de crear una cuenta o una tarjeta. También
+                  puedes crear una cuenta de efectivo sin institución.
+                </EmptyDescription>
+              </EmptyHeader>
+              <EmptyContent>
+                <Button onClick={() => setOpenInstitutionSheet(true, null)}>
+                  <PlusIcon className="size-4 shrink-0" />
+                  Crear institución
+                </Button>
+              </EmptyContent>
+            </Empty>
+          }
+        >
           <Collapsible
             defaultOpen
             className="group/institutions relative z-10 flex flex-col"
@@ -232,7 +259,7 @@ export function FinanceProductsList({
               </div>
             </CollapsibleContent>
           </Collapsible>
-        )}
+        </AsyncRegion>
       </div>
 
       <SettingsSection title="Atajos">
@@ -283,7 +310,7 @@ export function FinanceProductsList({
         actions={[
           {
             icon: <Building2Icon className="size-5" />,
-            label: "Institución",
+            label: "Instituc...",
             onClick: () => setOpenInstitutionSheet(true, null),
             disabled: !enabled,
             color: "bg-emerald-700",
@@ -297,7 +324,7 @@ export function FinanceProductsList({
           },
           {
             icon: <TagsIcon className="size-5" />,
-            label: "Categoría",
+            label: "Categor...",
             onClick: () => {
               void prefetchFinanceCategories(queryClient)
               setOpenCategorySheet(true, null)

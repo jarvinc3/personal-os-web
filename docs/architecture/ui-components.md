@@ -66,6 +66,9 @@ Cuando un collapsible abre ruedas u otro control para elegir un valor (`FinanceD
 | Tab bar de módulo **con rutas**      | `ModuleSectionLayout`                                                      | `src/shared/components/layout/module-section-layout.tsx` — [module-conventions.md](./module-conventions.md) |
 | Aviso puntual dentro de un flujo     | `Alert`                                                                    | `src/shared/components/ui/alert.tsx`                                                                        |
 | Pending de navegación                | `LinkPendingOverlay` / `usePendingNavigation`                              | `src/shared/components/ui/navigation-pending.tsx` — overlay + spinner en el control que abre otra vista     |
+| Región pendiente / vacía / contenido | `AsyncRegion`                                                              | `src/modules/finance/shared/components/layout/async-region.tsx`                                             |
+| Registro ausente con vuelta          | `MissingRecord`                                                            | `src/modules/finance/shared/components/layout/missing-record.tsx`                                           |
+| Hero de progreso de un detalle       | `FinanceProgressHero`                                                      | `src/modules/finance/shared/components/layout/progress-hero.tsx`                                            |
 
 No armar un drawer con `Drawer` crudo si `BottomSheet` cubre el caso (título, description, actions, pending).
 
@@ -114,6 +117,7 @@ Una regla por archivo `.mdc`; se leen todas antes de crear o cambiar un control.
 | [icons-required.mdc](../../.cursor/rules/icons-required.mdc) | icono obligatorio en todo botón y control |
 | [input-placeholders.mdc](../../.cursor/rules/input-placeholders.mdc) | placeholder solo para ejemplo o formato |
 | [list-infinite-scroll.mdc](../../.cursor/rules/list-infinite-scroll.mdc) | `useInfiniteQuery` + `IntersectionObserver` |
+| [ui-section-states.mdc](../../.cursor/rules/ui-section-states.mdc) | `FinanceListSkeleton` / `Empty` / `FinanceErrorState` |
 
 Molde: `transaction-form.tsx` y `transfer-form.tsx`. No copiar los componentes de Finanzas a otros módulos; sí el patrón.
 

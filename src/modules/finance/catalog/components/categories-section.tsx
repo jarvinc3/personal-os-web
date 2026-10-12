@@ -3,8 +3,10 @@
 import {
   CategoryCard,
   subcategoryCountLabel,
-} from "@/src/modules/finance/catalog/components/category-card"
+} from "@/src/modules/finance/shared/components/category-card"
 import { CategorySheet } from "@/src/modules/finance/catalog/components/category-sheet"
+import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
+import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
 import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import {
@@ -317,23 +319,30 @@ export function FinanceCategoriesSection({
         </Tabs>
         <div>
           {errorMessage ? (
-            <p className="text-sm text-destructive">{errorMessage}</p>
+            <FinanceErrorState
+              message={errorMessage}
+              onRetry={() => void categoriesQuery.refetch()}
+              isRetrying={categoriesQuery.isFetching}
+            />
           ) : null}
-          {categoriesQuery.isPending ? (
-            <FinanceListSkeleton />
-          ) : groups.length === 0 ? (
-            <Empty>
-              <EmptyHeader>
-                <EmptyMedia variant="icon">
-                  <TagsIcon />
-                </EmptyMedia>
-                <EmptyTitle>No hay categorías</EmptyTitle>
-                <EmptyDescription>
-                  Crea una con el botón de más.
-                </EmptyDescription>
-              </EmptyHeader>
-            </Empty>
-          ) : (
+          <AsyncRegion
+            pending={categoriesQuery.isPending}
+            pendingFallback={<FinanceListSkeleton />}
+            empty={groups.length === 0}
+            emptyFallback={
+              <Empty>
+                <EmptyHeader>
+                  <EmptyMedia variant="icon">
+                    <TagsIcon />
+                  </EmptyMedia>
+                  <EmptyTitle>No hay categorías</EmptyTitle>
+                  <EmptyDescription>
+                    Crea una con el botón de más.
+                  </EmptyDescription>
+                </EmptyHeader>
+              </Empty>
+            }
+          >
             <Reorder.Group
               axis="y"
               values={rootIds}
@@ -366,7 +375,7 @@ export function FinanceCategoriesSection({
                 />
               ))}
             </Reorder.Group>
-          )}
+          </AsyncRegion>
         </div>
       </div>
 

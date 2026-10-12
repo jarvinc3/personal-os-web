@@ -1,5 +1,6 @@
 "use client"
 
+import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
 import { useAdjustBalance } from "@/src/modules/finance/shared/hooks/use-balance-adjustment"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import {
@@ -9,7 +10,6 @@ import {
 } from "@/src/modules/finance/shared/lib/money"
 import type { FinanceAccount } from "@/src/modules/finance/shared/types/entities"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
-import { FormTextField } from "@/src/shared/components/layout/form-blocks"
 import { Button } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { SummarySection } from "@/src/shared/components/ui/summary"
@@ -42,6 +42,7 @@ export function AccountBalanceSheet({
     control,
     handleSubmit,
     reset,
+    trigger,
     formState: { errors },
   } = useForm<AccountBalanceFormValues>({
     resolver: zodResolver(accountBalanceSchema),
@@ -131,14 +132,17 @@ export function AccountBalanceSheet({
           control={control}
           name="balance"
           render={({ field }) => (
-            <FormTextField
-              icon={ScaleIcon}
+            <FinanceMoneyField
               label="Saldo nuevo"
-              value={field.value}
-              onChange={field.onChange}
-              onBlur={field.onBlur}
-              error={errors.balance?.message}
-              placeholder="0.00"
+              amount={field.value}
+              onAmountChange={field.onChange}
+              onAmountCommit={(next) => {
+                field.onChange(next)
+                void trigger("balance")
+              }}
+              onAmountBlur={field.onBlur}
+              amountError={errors.balance?.message}
+              currency={account?.currency ?? display.currency}
             />
           )}
         />

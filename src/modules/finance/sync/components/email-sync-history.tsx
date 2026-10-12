@@ -9,6 +9,12 @@ import type {
   FinanceEmailSyncLog,
 } from "@/src/modules/finance/shared/types/entities"
 import { SummaryItem, SummarySection } from "@/src/shared/components/ui/summary"
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+} from "@/src/shared/components/ui/empty"
 import { formatRelativeTimeFromIso } from "@/src/shared/lib/date-format"
 import { HistoryIcon, ScrollTextIcon } from "lucide-react"
 
@@ -25,7 +31,14 @@ export function EmailSyncLogList({
 }) {
   if (logs.length === 0) {
     return (
-      <p className="px-1 py-2 text-sm text-muted-foreground">{emptyLabel}</p>
+      <Empty className="py-8">
+        <EmptyHeader>
+          <EmptyMedia variant="icon">
+            <HistoryIcon />
+          </EmptyMedia>
+          <EmptyDescription>{emptyLabel}</EmptyDescription>
+        </EmptyHeader>
+      </Empty>
     )
   }
 
@@ -73,9 +86,16 @@ export function EmailMessageHistorySection({
   return (
     <SummarySection title="Historial de correos" icon={ScrollTextIcon}>
       {messages.length === 0 ? (
-        <p className="px-1 py-2 text-sm text-muted-foreground">
-          Aún no hay correos procesados. Un sync exitoso los listará aquí.
-        </p>
+        <Empty className="py-8">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <ScrollTextIcon />
+            </EmptyMedia>
+            <EmptyDescription>
+              Aún no hay correos procesados. Un sync exitoso los listará aquí.
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
       ) : (
         messages.map((message, index) => {
           const when = formatRelativeTimeFromIso(message.createdAt)

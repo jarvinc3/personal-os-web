@@ -1,20 +1,19 @@
 "use client"
 
-import { CategoryCard } from "@/src/modules/finance/catalog"
+import { CategoryTrigger } from "@/src/modules/finance/shared/components/pickers/category-trigger"
 import { FinanceDateField } from "@/src/modules/finance/shared/components/forms/date-field"
 import { FinanceSegmentedControl } from "@/src/modules/finance/shared/components/forms/form-blocks"
 import { FinanceFormScreen } from "@/src/modules/finance/shared/components/forms/form-screen"
 import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
-import { CategoryPickerSheet } from "@/src/modules/finance/transactions/components/category-picker-sheet"
-import { CurrencyPickerSheet } from "@/src/modules/finance/transactions/components/currency-picker-sheet"
-import { DestinationPickerSheet } from "@/src/modules/finance/transactions/components/destination-picker-sheet"
-import { DestinationTrigger } from "@/src/modules/finance/transactions/components/destination-trigger"
+import { CategoryPickerSheet } from "@/src/modules/finance/shared/components/pickers/category-picker-sheet"
+import { FinanceCurrencyPickerSheet } from "@/src/modules/finance/shared/components/pickers/finance-currency-picker-sheet"
+import { DestinationPickerSheet } from "@/src/modules/finance/shared/components/pickers/destination-picker-sheet"
+import { DestinationTrigger } from "@/src/modules/finance/shared/components/pickers/destination-trigger"
 import { CATALOG_NONE } from "@/src/modules/finance/shared/constants/catalog"
 import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
 import { useCards } from "@/src/modules/finance/shared/hooks/use-cards"
 import { useCategories } from "@/src/modules/finance/shared/hooks/use-categories"
 import { useCurrencyForTarget } from "@/src/modules/finance/shared/hooks/use-currency-for-target"
-import { useFinanceCurrencyChoices } from "@/src/modules/finance/shared/hooks/use-finance-currency-choices"
 import { useInstitutions } from "@/src/modules/finance/shared/hooks/use-institutions"
 import {
   useCreateTransaction,
@@ -37,10 +36,7 @@ import {
   splitLedgerTarget,
 } from "@/src/modules/finance/shared/lib/ledger-payloads"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
-import type {
-  FinanceCategory,
-  FinanceTransaction,
-} from "@/src/modules/finance/shared/types/entities"
+import type { FinanceTransaction } from "@/src/modules/finance/shared/types/entities"
 import { FormTextField } from "@/src/shared/components/layout/form-blocks"
 import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
 import { SummarySection } from "@/src/shared/components/ui/summary"
@@ -180,11 +176,6 @@ export function TransactionForm({
   const type = useWatch({ control, name: "type" })
   const categoryId = useWatch({ control, name: "categoryId" })
   const currency = useWatch({ control, name: "currency" })
-  const {
-    baseCurrency,
-    codes: currencyCodes,
-    quotes: currencyQuotes,
-  } = useFinanceCurrencyChoices(currency || defaultCurrency)
   const targetsReady = accountsQuery.isSuccess && cardsQuery.isSuccess
   const canSave =
     !isPending && formIsValid && (isEdit || (targetsReady && hasTargets))
@@ -523,15 +514,10 @@ export function TransactionForm({
         onSelect={(next) => setValue("categoryId", next)}
       />
 
-      <CurrencyPickerSheet
+      <FinanceCurrencyPickerSheet
         open={picker === "currency"}
         onOpenChange={closeHandlerFor("currency")}
         value={currency || defaultCurrency}
-        enabled={enabled}
-        codes={currencyCodes}
-        quotes={currencyQuotes}
-        quoteCurrency={baseCurrency}
-        showNames
         onSelect={(next) => setValue("currency", next)}
       />
 
@@ -547,34 +533,5 @@ export function TransactionForm({
         }
       />
     </>
-  )
-}
-
-function CategoryTrigger({
-  category,
-  onClick,
-}: {
-  category: FinanceCategory | null
-  onClick: () => void
-}) {
-  if (!category) {
-    return (
-      <CategoryCard
-        name="Sin categoría"
-        icon={null}
-        isSystem={false}
-        variant="pick"
-        onPress={onClick}
-      />
-    )
-  }
-  return (
-    <CategoryCard
-      name={category.name}
-      icon={category.icon}
-      color={category.color}
-      isSystem={category.isSystem}
-      onPress={onClick}
-    />
   )
 }

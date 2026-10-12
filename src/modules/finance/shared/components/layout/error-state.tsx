@@ -1,13 +1,15 @@
 "use client"
 
-import {
-  Alert,
-  AlertAction,
-  AlertDescription,
-  AlertTitle,
-} from "@/src/shared/components/ui/alert"
 import { Button } from "@/src/shared/components/ui/button"
 import { RefreshCwIcon, TriangleAlertIcon } from "lucide-react"
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/src/shared/components/ui/empty"
 
 type FinanceErrorStateProps = {
   message: string
@@ -21,12 +23,18 @@ export function FinanceErrorState({
   isRetrying = false,
 }: FinanceErrorStateProps) {
   return (
-    <Alert variant="destructive">
-      <TriangleAlertIcon />
-      <AlertTitle>No se pudieron cargar los datos</AlertTitle>
-      <AlertDescription>{message}</AlertDescription>
-      {onRetry ? (
-        <AlertAction>
+    <Empty className="rounded-2xl border border-border bg-card p-4">
+      <EmptyHeader>
+        <EmptyMedia variant="icon">
+          <TriangleAlertIcon />
+        </EmptyMedia>
+        <EmptyTitle>No se pudieron cargar los datos</EmptyTitle>
+        <EmptyDescription>
+          {message}
+        </EmptyDescription>
+      </EmptyHeader>
+      <EmptyContent>
+        {onRetry && (
           <Button
             type="button"
             size="sm"
@@ -37,8 +45,8 @@ export function FinanceErrorState({
             <RefreshCwIcon />
             Reintentar
           </Button>
-        </AlertAction>
-      ) : null}
-    </Alert>
+        )}
+      </EmptyContent>
+    </Empty>
   )
 }

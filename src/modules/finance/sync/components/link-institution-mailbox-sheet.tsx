@@ -1,6 +1,5 @@
 "use client"
 
-import { institutionSelectOptions } from "@/src/modules/finance/shared/components/ledger-target-select"
 import { CATALOG_NONE } from "@/src/modules/finance/shared/constants/catalog"
 import { useCreateEmailSource } from "@/src/modules/finance/shared/hooks/use-email-sources"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
@@ -13,6 +12,12 @@ import {
   FormTextField,
   SelectField,
 } from "@/src/shared/components/layout/form-blocks"
+import {
+  InstitutionPickerSheet,
+  InstitutionTrigger,
+} from "@/src/modules/finance/shared/components/pickers/institution-picker"
+import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
+import { usePicker } from "@/src/shared/hooks/use-picker"
 import { Button } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { SummarySection } from "@/src/shared/components/ui/summary"
@@ -20,11 +25,11 @@ import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { LandmarkIcon, MailIcon, TagIcon, XIcon } from "lucide-react"
+import { MailIcon, TagIcon, XIcon } from "lucide-react"
 import { LinkPendingOverlay } from "@/src/shared/components/ui/navigation-pending"
 import Link from "next/link"
 import { useEffect, useMemo } from "react"
-import { Controller, useForm } from "react-hook-form"
+import { Controller, useForm, useWatch } from "react-hook-form"
 import {
   linkInstitutionMailboxSchema,
   type LinkInstitutionMailboxFormValues,
@@ -61,29 +66,35 @@ export function LinkInstitutionMailboxSheet({
         .map((source) => source.institutionId)
     )
   )
-  const institutionOptions = institutionSelectOptions(
-    institutions.filter(
-      (item) =>
-        item.isActive &&
-        (!linkedInstitutionIds.has(item.id) || item.id === institutionId)
-    )
+  const availableInstitutions = institutions.filter(
+    (item) =>
+      item.isActive &&
+      (!linkedInstitutionIds.has(item.id) || item.id === institutionId)
   )
 
   const {
     control,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors },
   } = useForm<LinkInstitutionMailboxFormValues>({
     resolver: zodResolver(linkInstitutionMailboxSchema),
     defaultValues: {
       mailboxId: mailboxId ?? mailboxOptions[0]?.value ?? "",
       institutionId:
-        institutionId ?? institutionOptions[0]?.value ?? CATALOG_NONE,
+        institutionId ?? availableInstitutions[0]?.id ?? CATALOG_NONE,
       bankSenderEmail: "",
       label: "",
     },
   })
+
+  const selectedInstitutionId = useWatch({ control, name: "institutionId" })
+  const selectedInstitution =
+    institutions.find((item) => item.id === selectedInstitutionId) ?? null
+  const { picker, openPicker, closeHandlerFor } = usePicker<
+    "none" | "institution"
+  >("none")
 
   const defaultMailboxId = mailboxId ?? mailboxes[0]?.id ?? ""
   const defaultInstitutionId =
@@ -141,130 +152,137 @@ export function LinkInstitutionMailboxSheet({
   const lockInstitution = Boolean(institutionId)
 
   return (
-    <BottomSheet
-      open={open}
-      onOpenChange={onOpenChange}
-      title="Vincular institución"
-      description="Elige el Gmail y el correo From con el que el banco avisa los movimientos."
-      actions={{
-        close: (
-          <Button
-            type="button"
-            variant="outline"
-            className="flex-1"
-            onClick={() => onOpenChange(false)}
-          >
-            <XIcon className="size-4 shrink-0" />
-            Cancelar
-          </Button>
-        ),
-        submit: (
-          <Button
-            type="button"
-            disabled={
-              createSource.isPending ||
-              !emailSyncEnabled ||
-              mailboxOptions.length === 0 ||
-              institutionOptions.length === 0
-            }
-            className="flex-1"
-            onClick={onSubmit}
-          >
-            {createSource.isPending ? (
-              <Spinner data-icon="inline-start" />
+    <>
+      <BottomSheet
+        open={open}
+        onOpenChange={onOpenChange}
+        title="Vincular institución"
+        description="Elige el Gmail y el correo From con el que el banco avisa los movimientos."
+        actions={{
+          close: (
+            <Button
+              type="button"
+              variant="outline"
+              className="flex-1"
+              onClick={() => onOpenChange(false)}
+            >
+              <XIcon className="size-4 shrink-0" />
+              Cancelar
+            </Button>
+          ),
+          submit: (
+            <Button
+              type="button"
+              disabled={
+                createSource.isPending ||
+                !emailSyncEnabled ||
+                mailboxOptions.length === 0 ||
+                availableInstitutions.length === 0
+              }
+              className="flex-1"
+              onClick={onSubmit}
+            >
+              {createSource.isPending ? (
+                <Spinner data-icon="inline-start" />
+              ) : null}
+              Vincular
+            </Button>
+          ),
+        }}
+      >
+        {mailboxOptions.length === 0 ? (
+          <div className="flex flex-col gap-3">
+            <p className="text-sm text-muted-foreground">
+              Primero conecta Gmail en Correos. Desde aquí no se abre Google.
+            </p>
+            <Button asChild>
+              <Link href={APP_ROUTES.app.financeSync} className="relative">
+                <MailIcon className="size-4 shrink-0" />
+                Ir a Correos
+                <LinkPendingOverlay />
+              </Link>
+            </Button>
+          </div>
+        ) : (
+          <SummarySection title="Vínculo" icon={MailIcon}>
+            <Controller
+              control={control}
+              name="mailboxId"
+              render={({ field }) => (
+                <SelectField
+                  icon={MailIcon}
+                  label="Gmail"
+                  value={field.value}
+                  onChange={field.onChange}
+                  options={mailboxOptions}
+                  disabled={lockMailbox}
+                />
+              )}
+            />
+            {errors.mailboxId?.message ? (
+              <p className="text-sm text-destructive">
+                {errors.mailboxId.message}
+              </p>
             ) : null}
-            Vincular
-          </Button>
-        ),
-      }}
-    >
-      {mailboxOptions.length === 0 ? (
-        <div className="flex flex-col gap-3">
-          <p className="text-sm text-muted-foreground">
-            Primero conecta Gmail en Correos. Desde aquí no se abre Google.
-          </p>
-          <Button asChild>
-            <Link href={APP_ROUTES.app.financeSync} className="relative">
-              <MailIcon className="size-4 shrink-0" />
-              Ir a Correos
-              <LinkPendingOverlay />
-            </Link>
-          </Button>
-        </div>
-      ) : (
-        <SummarySection title="Vínculo" icon={MailIcon}>
-          <Controller
-            control={control}
-            name="mailboxId"
-            render={({ field }) => (
-              <SelectField
-                icon={MailIcon}
-                label="Gmail"
-                value={field.value}
-                onChange={field.onChange}
-                options={mailboxOptions}
-                disabled={lockMailbox}
-              />
-            )}
-          />
-          {errors.mailboxId?.message ? (
-            <p className="text-sm text-destructive">
-              {errors.mailboxId.message}
-            </p>
-          ) : null}
-          <Controller
-            control={control}
-            name="institutionId"
-            render={({ field }) => (
-              <SelectField
-                icon={LandmarkIcon}
-                label="Institución"
-                value={field.value}
-                onChange={field.onChange}
-                options={
-                  institutionOptions.length > 0
-                    ? institutionOptions
-                    : [{ value: "", label: "No hay instituciones libres" }]
+            <Field className="gap-1">
+              <FieldLabel className="text-sm text-muted-foreground">
+                Institución
+              </FieldLabel>
+              <InstitutionTrigger
+                institution={selectedInstitution}
+                placeholder={
+                  availableInstitutions.length > 0
+                    ? "Elige institución"
+                    : "No hay instituciones libres"
                 }
-                disabled={lockInstitution || institutionOptions.length === 0}
+                disabled={lockInstitution || availableInstitutions.length === 0}
+                onClick={() => openPicker("institution")}
               />
-            )}
-          />
-          {errors.institutionId?.message ? (
-            <p className="text-sm text-destructive">
-              {errors.institutionId.message}
-            </p>
-          ) : null}
-          <Controller
-            control={control}
-            name="bankSenderEmail"
-            render={({ field }) => (
-              <FormTextField
-                icon={MailIcon}
-                label="Correo del banco"
-                value={field.value}
-                onChange={field.onChange}
-                onBlur={field.onBlur}
-                placeholder="alertas@bhd.com.do"
-                error={errors.bankSenderEmail?.message}
-              />
-            )}
-          />
-          <Controller
-            control={control}
-            name="label"
-            render={({ field }) => (
-              <FormTextField
-                icon={TagIcon}
-                label="Etiqueta"
-                value={field.value}
-                onChange={field.onChange}
-                onBlur={field.onBlur}
-              />
-            )}
-          />
-        </SummarySection>
-      )}
-    </BottomSheet>
+              {errors.institutionId?.message ? (
+                <FieldError>{errors.institutionId.message}</FieldError>
+              ) : null}
+            </Field>
+            <Controller
+              control={control}
+              name="bankSenderEmail"
+              render={({ field }) => (
+                <FormTextField
+                  icon={MailIcon}
+                  label="Correo del banco"
+                  value={field.value}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                  placeholder="alertas@bhd.com.do"
+                  error={errors.bankSenderEmail?.message}
+                />
+              )}
+            />
+            <Controller
+              control={control}
+              name="label"
+              render={({ field }) => (
+                <FormTextField
+                  icon={TagIcon}
+                  label="Etiqueta"
+                  value={field.value}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                />
+              )}
+            />
+          </SummarySection>
+        )}
+      </BottomSheet>
+
+      <InstitutionPickerSheet
+        open={picker === "institution"}
+        onOpenChange={closeHandlerFor("institution")}
+        institutions={availableInstitutions}
+        value={selectedInstitutionId}
+        onSelect={(next) =>
+          setValue("institutionId", next, { shouldValidate: true })
+        }
+      />
+    </>
   )
 }

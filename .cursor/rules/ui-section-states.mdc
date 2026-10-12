@@ -1,0 +1,36 @@
+---
+description: A loading section shows a skeleton with its shape, an empty collection shows Empty, and a load failure is a retryable error state. No loose Spinner in the middle of content.
+globs: "**/*.{ts,tsx}"
+alwaysApply: true
+---
+
+# Estados de una sección: carga, vacío y error
+
+Una sección que va a pintar filas, cards o un gráfico no se queda en blanco, no se llena con un `Spinner` suelto en el centro, y no llama "vacío" a un fallo. Una regla por estado.
+
+## Carga: la forma, no un spinner
+
+Mientras llega la primera tanda, el hueco se parece a lo que va a llegar: un esqueleto (`Skeleton`, y `FinanceListSkeleton` en Finanzas) con el alto y el ancho de las filas o cards reales. Un `Spinner` centrado en medio de una sección cuya forma ya se conoce es un hueco en blanco disfrazado; ahí no va.
+
+El `Spinner` sigue en su sitio:
+
+- Dentro de un control que ya existe: el botón que guarda, el `Link` que navega, el pie de una lista infinita mientras llega la tanda siguiente.
+- En `LoadingView`, mientras la página todavía no tiene forma (no se sabe si el registro existe ni cuántas filas habrá).
+
+Molde: `FinanceListSkeleton`. Si la forma no es una fila (cards del stack de instituciones, cards de estados de cuenta), el esqueleto es de esa vista, no el genérico de la lista.
+
+## Vacío: `Empty`, no un párrafo
+
+Cero ítems de una colección es `Empty` (`EmptyHeader` / `EmptyMedia` / `EmptyTitle` / `EmptyDescription` / `EmptyContent`), con el botón de crear cuando aplica. Nunca una línea `text-muted-foreground` suelta.
+
+"La búsqueda no encontró" es el mismo `Empty`, con otro texto y sin el botón de crear. No es otro componente ni un párrafo.
+
+## Error: estado reintentable, no texto rojo
+
+Un fallo al cargar una sección se muestra con un estado de error con mensaje y botón `Reintentar` (`FinanceErrorState` en Finanzas), en el mismo sitio que ocuparía el contenido. Un `<p className="text-sm text-destructive">` sin reintento deja al usuario sin salida.
+
+- Error de carga de una sección → estado de error reintentable.
+- Error de un campo de formulario → `FieldError`. No es un estado de sección.
+- Error de una mutación (guardar, borrar) → `toast`. No es un estado de sección.
+
+En Finanzas, `AsyncRegion` elige la rama carga / vacío / contenido. El error queda fuera de esa región para que el reintento no quede tapado.

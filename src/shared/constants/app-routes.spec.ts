@@ -4,6 +4,7 @@ import { describe, it } from "node:test"
 import {
   APP_ROUTES,
   financeTransactionNewHref,
+  isFinanceTransferFormType,
   parseTransactionFormType,
   settingsModuleHref,
 } from "./app-routes.ts"
@@ -42,6 +43,16 @@ describe("finance route constants", () => {
       "/settings/finance/currencies"
     )
     assert.equal(APP_ROUTES.app.settingsWipeData, "/settings/wipe-data")
+  })
+})
+
+describe("isFinanceTransferFormType", () => {
+  it("detects only the transfer type", () => {
+    assert.equal(isFinanceTransferFormType("TRANSFER"), true)
+    assert.equal(isFinanceTransferFormType(" transfer "), true)
+    assert.equal(isFinanceTransferFormType("DEBIT"), false)
+    assert.equal(isFinanceTransferFormType(undefined), false)
+    assert.equal(isFinanceTransferFormType(["TRANSFER"]), false)
   })
 })
 

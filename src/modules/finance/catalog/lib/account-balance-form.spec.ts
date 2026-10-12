@@ -17,4 +17,11 @@ describe("accountBalanceSchema", () => {
       false
     )
   })
+
+  it("rejects a balance that is not a number", () => {
+    assert.equal(
+      accountBalanceSchema.safeParse({ balance: "abc" }).success,
+      false
+    )
+  })
 })

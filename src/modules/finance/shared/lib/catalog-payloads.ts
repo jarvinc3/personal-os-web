@@ -49,7 +49,7 @@ export type CardBalanceBody = {
 
 export type CreateCategoryBody = {
   name: string
-  icon: string
+  icon?: string
   color?: string
   parentId?: string
   type: FinanceCategoryType
@@ -57,7 +57,7 @@ export type CreateCategoryBody = {
 
 export type UpdateCategoryBody = {
   name: string
-  icon: string
+  icon?: string
   color?: string
   parentId: string | null
   type?: FinanceCategoryType
@@ -419,11 +419,14 @@ export function buildCreateCategoryBody(input: {
   }
 
   const icon = optionalTrimmed(input.icon)
-  if (!icon || !isSingleEmoji(icon)) {
+  if (icon && !isSingleEmoji(icon)) {
     return { ok: false, error: "El icono debe ser un emoji" }
   }
 
-  const body: CreateCategoryBody = { name, icon, type: input.type }
+  const body: CreateCategoryBody = { name, type: input.type }
+  if (icon) {
+    body.icon = icon
+  }
   const color = optionalTrimmed(input.color)
   if (color) {
     body.color = color
@@ -451,8 +454,10 @@ export function buildUpdateCategoryBody(input: {
 
   const body: UpdateCategoryBody = {
     name: created.body.name,
-    icon: created.body.icon,
     parentId: created.body.parentId ?? null,
+  }
+  if (created.body.icon) {
+    body.icon = created.body.icon
   }
   if (created.body.color) {
     body.color = created.body.color

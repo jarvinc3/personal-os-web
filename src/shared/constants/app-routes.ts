@@ -67,6 +67,15 @@ export function financeTransactionNewHref(
   return `${APP_ROUTES.app.financeTransactionNew}?${params.toString()}`
 }
 
+const FINANCE_TRANSFER_FORM_TYPE = "TRANSFER"
+
+export function isFinanceTransferFormType(type: unknown): boolean {
+  if (typeof type !== "string") {
+    return false
+  }
+  return type.trim().toUpperCase() === FINANCE_TRANSFER_FORM_TYPE
+}
+
 /** `CREDIT` only when the query is exactly that; everything else is a debit. */
 export function parseTransactionFormType(
   type: string | null | undefined

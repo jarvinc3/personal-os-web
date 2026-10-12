@@ -5,10 +5,13 @@ import {
   formatFinanceDateLabel,
 } from "@/src/modules/finance/shared/components/forms/date-field"
 import {
-  FinanceAmountField,
   FinanceHelpText,
   FinanceSegmentedControl,
 } from "@/src/modules/finance/shared/components/forms/form-blocks"
+import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
+import { CategoryPickerSheet } from "@/src/modules/finance/shared/components/pickers/category-picker-sheet"
+import { CategoryTrigger } from "@/src/modules/finance/shared/components/pickers/category-trigger"
+import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
 import {
   useCreateBudget,
   useDeleteBudget,
@@ -31,24 +34,32 @@ import {
 } from "@/src/modules/finance/shared/types/entities"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
 import {
-  FormTextField,
-  SelectField,
-} from "@/src/shared/components/layout/form-blocks"
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/src/shared/components/ui/alert-dialog"
+import { FormTextField } from "@/src/shared/components/layout/form-blocks"
 import { Button } from "@/src/shared/components/ui/button"
+import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { SummarySection } from "@/src/shared/components/ui/summary"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
+import { usePicker } from "@/src/shared/hooks/use-picker"
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
   BellIcon,
   CalendarIcon,
   PiggyBankIcon,
-  TagIcon,
   Trash2Icon,
   XIcon,
 } from "lucide-react"
-import { useEffect, useMemo } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import {
   budgetSchema,
@@ -101,6 +112,8 @@ export function BudgetSheet({
     createMutation.isPending ||
     updateMutation.isPending ||
     deleteMutation.isPending
+  const { config } = useFinanceEnabled()
+  const baseCurrency = config.baseCurrency
   const expenseCategories = useMemo(() => {
     const filtered = filterCategoriesByType(categories, "EXPENSE")
     if (
@@ -117,20 +130,24 @@ export function BudgetSheet({
   const hasCategories = expenseCategories.length > 0
   const defaultCategoryId = expenseCategories[0]?.id ?? ""
 
-  const categoryOptions = useMemo(
-    () =>
-      expenseCategories.map((category) => ({
-        value: category.id,
-        label: `${category.icon ? `${category.icon} ` : ""}${category.name}`,
-      })),
-    [expenseCategories]
-  )
-
-  const { control, handleSubmit, reset, setValue } = useForm<BudgetFormValues>({
+  const {
+    control,
+    handleSubmit,
+    reset,
+    setValue,
+    trigger,
+    formState: { errors },
+  } = useForm<BudgetFormValues>({
     resolver: zodResolver(budgetSchema),
     defaultValues: toFormValues(budget, defaultCategoryId),
   })
 
+  const categoryId = useWatch({ control, name: "categoryId" })
+  const selectedCategory =
+    expenseCategories.find((category) => category.id === categoryId) ?? null
+  const { picker, openPicker, closeHandlerFor } = usePicker<
+    "none" | "category"
+  >("none")
   const periodType = useWatch({ control, name: "periodType" })
   const periodStart = useWatch({ control, name: "periodStart" })
   const periodEnd = useWatch({ control, name: "periodEnd" })
@@ -176,19 +193,16 @@ export function BudgetSheet({
     }
   })
 
+  const [confirmOpen, setConfirmOpen] = useState(false)
+
   async function onDelete() {
     if (!budget) {
-      return
-    }
-    const confirmed = window.confirm(
-      "¿Eliminar este presupuesto? No se puede deshacer."
-    )
-    if (!confirmed) {
       return
     }
     try {
       await deleteMutation.mutateAsync(budget.id)
       appToast.success({ text1: "Presupuesto eliminado" })
+      setConfirmOpen(false)
       onOpenChange(false)
     } catch (error) {
       appToast.error({ text1: financeErrorMessage(error) })
@@ -196,144 +210,191 @@ export function BudgetSheet({
   }
 
   return (
-    <BottomSheet
-      open={open}
-      onOpenChange={onOpenChange}
-      pending={pending}
-      title={isEdit ? "Editar presupuesto" : "Nuevo presupuesto"}
-      description={
-        hasCategories
-          ? "El tope es por categoría y periodo. El gasto se calcula con los movimientos."
-          : "Crea una categoría antes de agregar un presupuesto."
-      }
-      actions={{
-        delete: isEdit ? (
-          <Button
-            type="button"
-            variant="destructive"
-            disabled={isPending}
-            onClick={() => void onDelete()}
-          >
-            <Trash2Icon className="size-4 shrink-0" />
-            Eliminar
-          </Button>
-        ) : undefined,
-        close: (
-          <Button
-            type="button"
-            variant="outline"
-            className="flex-1"
-            onClick={() => onOpenChange(false)}
-          >
-            <XIcon className="size-4 shrink-0" />
-            Cancelar
-          </Button>
-        ),
-        submit: (
-          <Button
-            type="button"
-            disabled={isPending || (!isEdit && !hasCategories)}
-            className="flex-1"
-            onClick={onSubmit}
-          >
-            {isPending ? <Spinner data-icon="inline-start" /> : null}
-            Guardar
-          </Button>
-        ),
-      }}
-    >
-      <SummarySection title="Presupuesto" icon={PiggyBankIcon}>
-        <Controller
-          control={control}
-          name="categoryId"
-          render={({ field }) => (
-            <SelectField
-              icon={TagIcon}
-              label="Categoría"
-              value={field.value}
-              onChange={field.onChange}
-              options={
-                hasCategories
-                  ? categoryOptions
-                  : [{ value: "", label: "Crea una categoría primero" }]
+    <>
+      <BottomSheet
+        open={open}
+        onOpenChange={onOpenChange}
+        pending={pending}
+        title={isEdit ? "Editar presupuesto" : "Nuevo presupuesto"}
+        description={
+          hasCategories
+            ? "El tope es por categoría y periodo. El gasto se calcula con los movimientos."
+            : "Crea una categoría antes de agregar un presupuesto."
+        }
+        actions={{
+          delete: isEdit ? (
+            <Button
+              type="button"
+              variant="destructive"
+              disabled={isPending}
+              onClick={() => setConfirmOpen(true)}
+            >
+              <Trash2Icon className="size-4 shrink-0" />
+              Eliminar
+            </Button>
+          ) : undefined,
+          close: (
+            <Button
+              type="button"
+              variant="outline"
+              className="flex-1"
+              onClick={() => onOpenChange(false)}
+            >
+              <XIcon className="size-4 shrink-0" />
+              Cancelar
+            </Button>
+          ),
+          submit: (
+            <Button
+              type="button"
+              disabled={isPending || (!isEdit && !hasCategories)}
+              className="flex-1"
+              onClick={onSubmit}
+            >
+              {isPending ? <Spinner data-icon="inline-start" /> : null}
+              Guardar
+            </Button>
+          ),
+        }}
+      >
+        <SummarySection title="Presupuesto" icon={PiggyBankIcon}>
+          <Field className="gap-1">
+            <FieldLabel className="text-sm text-muted-foreground">
+              Categoría
+            </FieldLabel>
+            <CategoryTrigger
+              category={selectedCategory}
+              placeholder={
+                hasCategories ? "Elige categoría" : "Crea una categoría primero"
               }
               disabled={!hasCategories}
+              onClick={() => openPicker("category")}
             />
+            {errors.categoryId?.message ? (
+              <FieldError>{errors.categoryId.message}</FieldError>
+            ) : null}
+          </Field>
+          <Controller
+            control={control}
+            name="amountLimit"
+            render={({ field }) => (
+              <FinanceMoneyField
+                label="Tope"
+                amount={field.value}
+                onAmountChange={field.onChange}
+                onAmountCommit={(next) => {
+                  field.onChange(next)
+                  void trigger("amountLimit")
+                }}
+                onAmountBlur={field.onBlur}
+                amountError={errors.amountLimit?.message}
+                currency={baseCurrency}
+              />
+            )}
+          />
+          <Controller
+            control={control}
+            name="alertThresholdPct"
+            render={({ field }) => (
+              <FormTextField
+                icon={BellIcon}
+                label="Umbral de alerta (%)"
+                value={field.value}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+                placeholder="80"
+              />
+            )}
+          />
+        </SummarySection>
+        <SummarySection title="Periodo" icon={CalendarIcon}>
+          <Controller
+            control={control}
+            name="periodType"
+            render={({ field }) => (
+              <FinanceSegmentedControl
+                label="Tipo"
+                value={field.value}
+                onChange={(value) =>
+                  field.onChange(value as FinanceBudgetPeriod)
+                }
+                options={PERIOD_OPTIONS}
+              />
+            )}
+          />
+          {isCustom ? (
+            <>
+              <Controller
+                control={control}
+                name="periodStart"
+                render={({ field }) => (
+                  <FinanceDateField
+                    label="Desde"
+                    value={field.value}
+                    onChange={field.onChange}
+                  />
+                )}
+              />
+              <Controller
+                control={control}
+                name="periodEnd"
+                render={({ field }) => (
+                  <FinanceDateField
+                    label="Hasta"
+                    value={field.value}
+                    onChange={field.onChange}
+                  />
+                )}
+              />
+            </>
+          ) : (
+            <FinanceHelpText>
+              {formatFinanceDateLabel(periodStart)} —{" "}
+              {formatFinanceDateLabel(periodEnd)}
+            </FinanceHelpText>
           )}
-        />
-        <Controller
-          control={control}
-          name="amountLimit"
-          render={({ field }) => (
-            <FinanceAmountField
-              label="Tope"
-              value={field.value}
-              onChange={field.onChange}
-              onBlur={field.onBlur}
-              placeholder="1000"
-            />
-          )}
-        />
-        <Controller
-          control={control}
-          name="alertThresholdPct"
-          render={({ field }) => (
-            <FormTextField
-              icon={BellIcon}
-              label="Umbral de alerta (%)"
-              value={field.value}
-              onChange={field.onChange}
-              onBlur={field.onBlur}
-              placeholder="80"
-            />
-          )}
-        />
-      </SummarySection>
-      <SummarySection title="Periodo" icon={CalendarIcon}>
-        <Controller
-          control={control}
-          name="periodType"
-          render={({ field }) => (
-            <FinanceSegmentedControl
-              label="Tipo"
-              value={field.value}
-              onChange={(value) => field.onChange(value as FinanceBudgetPeriod)}
-              options={PERIOD_OPTIONS}
-            />
-          )}
-        />
-        {isCustom ? (
-          <>
-            <Controller
-              control={control}
-              name="periodStart"
-              render={({ field }) => (
-                <FinanceDateField
-                  label="Desde"
-                  value={field.value}
-                  onChange={field.onChange}
-                />
-              )}
-            />
-            <Controller
-              control={control}
-              name="periodEnd"
-              render={({ field }) => (
-                <FinanceDateField
-                  label="Hasta"
-                  value={field.value}
-                  onChange={field.onChange}
-                />
-              )}
-            />
-          </>
-        ) : (
-          <FinanceHelpText>
-            {formatFinanceDateLabel(periodStart)} —{" "}
-            {formatFinanceDateLabel(periodEnd)}
-          </FinanceHelpText>
-        )}
-      </SummarySection>
-    </BottomSheet>
+        </SummarySection>
+      </BottomSheet>
+
+      <CategoryPickerSheet
+        open={picker === "category"}
+        onOpenChange={closeHandlerFor("category")}
+        categories={expenseCategories}
+        categoryType="EXPENSE"
+        onSelect={(next) =>
+          setValue("categoryId", next, { shouldValidate: true })
+        }
+      />
+
+      <AlertDialog
+        open={confirmOpen}
+        onOpenChange={(open) => {
+          if (!deleteMutation.isPending) {
+            setConfirmOpen(open)
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar este presupuesto?</AlertDialogTitle>
+            <AlertDialogDescription>
+              No se puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteMutation.isPending}>
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              disabled={deleteMutation.isPending}
+              onClick={() => void onDelete()}
+            >
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   )
 }

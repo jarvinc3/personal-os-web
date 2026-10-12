@@ -4,8 +4,8 @@ import { BrandLogo } from "@/src/modules/finance/shared/components/brand-logo"
 import {
   AccountProductRow,
   CardProductRow,
-  InstitutionProductEmpty,
-} from "@/src/modules/finance/institutions/components/institution-product-lists"
+} from "@/src/modules/finance/shared/components/product-rows"
+import { InstitutionProductEmpty } from "@/src/modules/finance/institutions/components/institution-product-lists"
 import { InstitutionSheet } from "@/src/modules/finance/institutions/components/institution-sheet"
 import {
   AccountSheet,
@@ -13,7 +13,7 @@ import {
   CardSheet,
 } from "@/src/modules/finance/catalog"
 import { FinanceGate } from "@/src/modules/finance/finance-gate"
-import { LoanProgressCard, LoanSheet } from "@/src/modules/finance/planning"
+import { LoanProgressCard, LoanSheet } from "@/src/modules/finance/loans"
 import { LinkInstitutionMailboxSheet } from "@/src/modules/finance/sync"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
@@ -31,7 +31,12 @@ import {
 } from "@/src/modules/finance/shared/hooks/use-institutions"
 import { useLoans } from "@/src/modules/finance/shared/hooks/use-loans"
 import { useSheetListEntity } from "@/src/modules/finance/shared/hooks/use-sheet-entity"
-import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
+import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
+import { MissingRecord } from "@/src/modules/finance/shared/components/layout/missing-record"
+import {
+  financeErrorMessage,
+  financeLoadErrorMessage,
+} from "@/src/modules/finance/shared/lib/finance-error"
 import {
   buildInstitutionStackItems,
   formatStackItemBalance,
@@ -39,6 +44,16 @@ import {
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
 import { LoadingView } from "@/src/shared/components/layout/loading-view"
 import { Button } from "@/src/shared/components/ui/button"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/src/shared/components/ui/alert-dialog"
 import { SummaryItem } from "@/src/shared/components/ui/summary"
 import {
   Tabs,
@@ -52,7 +67,6 @@ import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { appToast } from "@/src/shared/lib/app-toast"
 import {
   ArchiveIcon,
-  ArrowLeftIcon,
   Building2Icon,
   CreditCardIcon,
   HandCoinsIcon,
@@ -63,8 +77,6 @@ import {
   RefreshCwIcon,
   Trash2Icon,
 } from "lucide-react"
-import { LinkPendingOverlay } from "@/src/shared/components/ui/navigation-pending"
-import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo, useState } from "react"
 import { ProductCountItem } from "@/src/modules/finance/products"
@@ -109,6 +121,7 @@ function InstitutionDetailScreenBody({
   const deleteInstitution = useDeleteInstitution()
 
   const [tab, setTab] = useState<"accounts" | "cards" | "loans">("accounts")
+  const [confirmOpen, setConfirmOpen] = useState(false)
   const { open: openOptionsSheet, setOpen: setOpenOptionsSheet } =
     useSheetParam(FINANCE_SHEET_KEYS.institutionOptions)
   const {
@@ -211,21 +224,22 @@ function InstitutionDetailScreenBody({
     if (!institution) {
       return
     }
-    const confirmed = window.confirm(
-      "¿Borrar este banco? Se eliminan cuentas, tarjetas, correos ligados y préstamos. No se puede deshacer."
-    )
-    if (!confirmed) {
-      return
-    }
     try {
       await deleteInstitution.mutateAsync(institution.id)
       appToast.success({ text1: "Institución borrada" })
+      setConfirmOpen(false)
       setOpenOptionsSheet(false)
       router.push(APP_ROUTES.app.financeProducts)
     } catch (error) {
       appToast.error({ text1: financeErrorMessage(error) })
     }
-  }, [deleteInstitution, institution, router, setOpenOptionsSheet])
+  }, [
+    deleteInstitution,
+    institution,
+    router,
+    setConfirmOpen,
+    setOpenOptionsSheet,
+  ])
 
   const openMenu = useCallback(
     () => setOpenOptionsSheet(true),
@@ -250,7 +264,7 @@ function InstitutionDetailScreenBody({
   usePageHeader(
     {
       variant: "secondary",
-      title: institution?.name ?? "Institución",
+      title: "Detalles de la institución",
       onBack: handleBack,
       actions: headerActions,
       accentColor: accent,
@@ -315,19 +329,13 @@ function InstitutionDetailScreenBody({
 
   if (!institution) {
     return (
-      <div className="flex flex-col items-center gap-3 py-16">
-        <Building2Icon className="size-8 text-muted-foreground" />
-        <p className="text-center text-muted-foreground">
-          No encontramos esta institución.
-        </p>
-        <Button variant="outline" asChild>
-          <Link href={APP_ROUTES.app.financeProducts} className="relative">
-            <ArrowLeftIcon className="size-4 shrink-0" />
-            Volver a Productos
-            <LinkPendingOverlay />
-          </Link>
-        </Button>
-      </div>
+      <MissingRecord
+        icon={Building2Icon}
+        title="No encontramos esta institución"
+        description="Puede que se haya archivado o borrado."
+        backHref={APP_ROUTES.app.financeProducts}
+        backLabel="Volver a Productos"
+      />
     )
   }
 
@@ -352,9 +360,25 @@ function InstitutionDetailScreenBody({
   return (
     <>
       {error ? (
-        <p className="mb-3 text-sm text-destructive">
-          {financeErrorMessage(error)}
-        </p>
+        <div className="mb-3">
+          <FinanceErrorState
+            message={financeLoadErrorMessage(error)}
+            onRetry={() => {
+              void institutionsQuery.refetch()
+              void accountsQuery.refetch()
+              void cardsQuery.refetch()
+              void loansQuery.refetch()
+              void balanceSheetQuery.refetch()
+            }}
+            isRetrying={
+              institutionsQuery.isFetching ||
+              accountsQuery.isFetching ||
+              cardsQuery.isFetching ||
+              loansQuery.isFetching ||
+              balanceSheetQuery.isFetching
+            }
+          />
+        </div>
       ) : null}
 
       <div className="-mx-4 -mt-4 flex flex-col gap-3 overflow-hidden md:-mx-6">
@@ -594,7 +618,7 @@ function InstitutionDetailScreenBody({
           <SummaryItem
             title="Borrar"
             icon={Trash2Icon}
-            onPress={() => void onDeleteInstitution()}
+            onPress={() => setConfirmOpen(true)}
             disabled={
               archiveInstitution.isPending || deleteInstitution.isPending
             }
@@ -603,6 +627,37 @@ function InstitutionDetailScreenBody({
           />
         </div>
       </BottomSheet>
+
+      <AlertDialog
+        open={confirmOpen}
+        onOpenChange={(open) => {
+          if (!deleteInstitution.isPending) {
+            setConfirmOpen(open)
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Borrar este banco?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Se eliminan cuentas, tarjetas, correos ligados y préstamos. No se
+              puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteInstitution.isPending}>
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              disabled={deleteInstitution.isPending}
+              onClick={() => void onDeleteInstitution()}
+            >
+              Borrar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <InstitutionSheet
         open={openInstitutionSheet}
@@ -655,6 +710,7 @@ function InstitutionDetailScreenBody({
         institutions={institutions}
         defaultCurrency={config.baseCurrency}
         defaultInstitutionId={institutionId}
+        display={display}
       />
 
       <LinkInstitutionMailboxSheet

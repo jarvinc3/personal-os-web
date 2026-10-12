@@ -24,4 +24,11 @@ describe("categorySchema", () => {
       false
     )
   })
+
+  it("accepts an empty icon so the category can save without one", () => {
+    assert.equal(
+      categorySchema.safeParse({ ...validCategory, icon: "" }).success,
+      true
+    )
+  })
 })

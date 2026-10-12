@@ -2,9 +2,12 @@
 
 import { BudgetSheet } from "@/src/modules/finance/budgets/components/budget-sheet"
 import { FinanceGate } from "@/src/modules/finance/finance-gate"
+import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
 import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
+import { MissingRecord } from "@/src/modules/finance/shared/components/layout/missing-record"
 import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
-import type { PlanningProgressTone } from "@/src/modules/finance/planning"
+import { FinanceProgressHero } from "@/src/modules/finance/shared/components/layout/progress-hero"
+import type { PlanningProgressTone } from "@/src/modules/finance/shared/components/planning-progress-card"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import { useBudget } from "@/src/modules/finance/shared/hooks/use-budgets"
 import { useCategories } from "@/src/modules/finance/shared/hooks/use-categories"
@@ -30,11 +33,9 @@ import {
   type FinanceTransactionStatus,
 } from "@/src/modules/finance/shared/types/entities"
 import { LoadingView } from "@/src/shared/components/layout/loading-view"
-import { Badge } from "@/src/shared/components/ui/badge"
 import { Button } from "@/src/shared/components/ui/button"
 import {
   Empty,
-  EmptyContent,
   EmptyDescription,
   EmptyHeader,
   EmptyMedia,
@@ -45,9 +46,7 @@ import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { ACCENT_FALLBACK_COLOR } from "@/src/shared/lib/accent-gradient"
-import { ArrowLeftIcon, ChartPieIcon, MoreVerticalIcon } from "lucide-react"
-import { LinkPendingOverlay } from "@/src/shared/components/ui/navigation-pending"
-import Link from "next/link"
+import { ChartPieIcon, EditIcon } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useMemo } from "react"
 
@@ -158,7 +157,7 @@ function BudgetDetailScreenBody({ budgetId }: FinanceBudgetDetailProps) {
         aria-label="Opciones del presupuesto"
         onClick={() => setOpenBudgetSheet(true)}
       >
-        <MoreVerticalIcon className="size-4.5" />
+        <EditIcon className="size-4.5" />
       </Button>
     ),
     [setOpenBudgetSheet]
@@ -181,26 +180,13 @@ function BudgetDetailScreenBody({ budgetId }: FinanceBudgetDetailProps) {
 
   if (!budget) {
     return (
-      <Empty className="py-16">
-        <EmptyHeader>
-          <EmptyMedia variant="icon">
-            <ChartPieIcon />
-          </EmptyMedia>
-          <EmptyTitle>No encontramos este presupuesto</EmptyTitle>
-          <EmptyDescription>
-            Puede que se haya borrado o que su periodo ya haya terminado.
-          </EmptyDescription>
-        </EmptyHeader>
-        <EmptyContent>
-          <Button variant="outline" asChild>
-            <Link href={APP_ROUTES.app.financePlanning} className="relative">
-              <ArrowLeftIcon className="size-4 shrink-0" />
-              Volver a Planificación
-              <LinkPendingOverlay />
-            </Link>
-          </Button>
-        </EmptyContent>
-      </Empty>
+      <MissingRecord
+        icon={ChartPieIcon}
+        title="No encontramos este presupuesto"
+        description="Puede que se haya borrado o que su periodo ya haya terminado."
+        backHref={APP_ROUTES.app.financePlanning}
+        backLabel="Volver a Planificación"
+      />
     )
   }
 
@@ -221,55 +207,30 @@ function BudgetDetailScreenBody({ budgetId }: FinanceBudgetDetailProps) {
         </div>
       ) : null}
 
-      <div className="-mx-4 -mt-4 overflow-hidden md:-mx-6">
-        <div
-          className="rounded-b-3xl p-4 text-white md:p-6"
-          style={{ background: accent }}
-        >
-          <div className="flex items-start gap-3">
-            <span className="flex size-12 shrink-0 items-center justify-center rounded-full bg-white/20 text-lg">
-              {emoji ?? <ChartPieIcon className="size-6" />}
-            </span>
-            <div className="min-w-0 flex-1">
-              <div className="flex min-w-0 items-center gap-2">
-                <h1 className="truncate text-2xl font-bold tracking-tight">
-                  {budget.category?.name ?? "Sin categoría"}
-                </h1>
-                <Badge variant={badge.variant} className="shrink-0">
-                  {badge.label}
-                </Badge>
-              </div>
-              <p className="mt-1 text-sm text-white/70">
-                {joinPlanningCaption(periodLabel, periodRange)}
-              </p>
-            </div>
-          </div>
-
-          <p className="mt-8 text-[11px] tracking-wide text-white/60 uppercase">
-            Gastado
-          </p>
-          <p className="text-3xl font-bold tracking-tight tabular-nums">
-            {formatFinanceMoney(budget.amountSpent, display)}
-          </p>
-
-          <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-white/20">
-            <div
-              className="h-full rounded-full bg-white"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
-          <div className="mt-2 flex flex-wrap justify-between gap-x-3 text-xs text-white/70">
-            <span>{Math.round(progress)}% del tope</span>
-            <span>Tope {formatFinanceMoney(budget.amountLimit, display)}</span>
-          </div>
-          <p className="mt-3 text-sm text-white/80">
+      <FinanceProgressHero
+        accent={accent}
+        media={
+          <span className="flex size-12 shrink-0 items-center justify-center rounded-full bg-white/20 text-lg">
+            {emoji ?? <ChartPieIcon className="size-6" />}
+          </span>
+        }
+        title={budget.category?.name ?? "Sin categoría"}
+        badge={badge}
+        subtitle={joinPlanningCaption(periodLabel, periodRange)}
+        metricLabel="Gastado"
+        metricValue={formatFinanceMoney(budget.amountSpent, display)}
+        progress={progress}
+        startCaption={`${Math.round(progress)}% del tope`}
+        endCaption={`Tope ${formatFinanceMoney(budget.amountLimit, display)}`}
+        footnote={
+          <>
             {remaining < 0
               ? `Excedido en ${formatFinanceMoney(Math.abs(remaining), display)}`
               : `Quedan ${formatFinanceMoney(remaining, display)}`}
             {` · alerta al ${budget.alertThresholdPct}%`}
-          </p>
-        </div>
-      </div>
+          </>
+        }
+      />
 
       <div className="mx-4 flex flex-col gap-3 rounded-3xl bg-background">
         <h2 className="text-sm font-medium text-muted-foreground">
@@ -284,44 +245,47 @@ function BudgetDetailScreenBody({ budgetId }: FinanceBudgetDetailProps) {
           />
         ) : null}
 
-        {movementsQuery.isPending ? <FinanceListSkeleton rows={4} /> : null}
-
-        {!movementsQuery.isPending && movements.length === 0 ? (
-          <Empty className="py-10">
-            <EmptyHeader>
-              <EmptyMedia variant="icon">
-                <ChartPieIcon />
-              </EmptyMedia>
-              <EmptyTitle>Sin gastos en este periodo</EmptyTitle>
-              <EmptyDescription>
-                Un gasto aparece aquí cuando tiene esta categoría y cae dentro
-                de las fechas del presupuesto.
-              </EmptyDescription>
-            </EmptyHeader>
-          </Empty>
-        ) : null}
-
-        {movements.length > 0 ? (
-          <div className="rounded-2xl border border-border bg-card">
-            {movements.map((movement, index) => (
-              <SummaryItem
-                key={movement.id}
-                title={
-                  movement.merchant ?? movement.description ?? "Movimiento"
-                }
-                description={joinPlanningCaption(
-                  formatCalendarDate(movement.transactionDate),
-                  movementStatusCaption(movement.status)
-                )}
-                value={formatFinanceMoney(movement.amount, {
-                  ...display,
-                  currency: movement.currency,
-                })}
-                isLast={index === movements.length - 1}
-              />
-            ))}
-          </div>
-        ) : null}
+        <AsyncRegion
+          pending={movementsQuery.isPending}
+          pendingFallback={<FinanceListSkeleton rows={4} />}
+          empty={!movementsQuery.isError && movements.length === 0}
+          emptyFallback={
+            <Empty className="py-10">
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <ChartPieIcon />
+                </EmptyMedia>
+                <EmptyTitle>Sin gastos en este periodo</EmptyTitle>
+                <EmptyDescription>
+                  Un gasto aparece aquí cuando tiene esta categoría y cae dentro
+                  de las fechas del presupuesto.
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
+          }
+        >
+          {movements.length > 0 ? (
+            <div className="rounded-2xl border border-border bg-card">
+              {movements.map((movement, index) => (
+                <SummaryItem
+                  key={movement.id}
+                  title={
+                    movement.merchant ?? movement.description ?? "Movimiento"
+                  }
+                  description={joinPlanningCaption(
+                    formatCalendarDate(movement.transactionDate),
+                    movementStatusCaption(movement.status)
+                  )}
+                  value={formatFinanceMoney(movement.amount, {
+                    ...display,
+                    currency: movement.currency,
+                  })}
+                  isLast={index === movements.length - 1}
+                />
+              ))}
+            </div>
+          ) : null}
+        </AsyncRegion>
 
         {movementsQuery.data?.hasMore ? (
           <p className="px-1 text-xs text-muted-foreground">

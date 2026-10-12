@@ -10,6 +10,7 @@ import {
 } from "@/src/modules/finance/catalog"
 import { FinanceGate } from "@/src/modules/finance/finance-gate"
 import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
+import { MissingRecord } from "@/src/modules/finance/shared/components/layout/missing-record"
 import { FinanceInstrumentMovements } from "@/src/modules/finance/transactions"
 import { FINANCE_ACCOUNT_TYPE_LABEL } from "@/src/modules/finance/shared/constants/catalog"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
@@ -34,13 +35,15 @@ import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
 import { LoadingView } from "@/src/shared/components/layout/loading-view"
 import { Button } from "@/src/shared/components/ui/button"
 import {
-  Empty,
-  EmptyContent,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "@/src/shared/components/ui/empty"
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/src/shared/components/ui/alert-dialog"
 import { SummaryItem } from "@/src/shared/components/ui/summary"
 import {
   APP_ROUTES,
@@ -51,16 +54,14 @@ import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { appToast } from "@/src/shared/lib/app-toast"
 import {
   ArchiveIcon,
-  ArrowLeftIcon,
   MoreVerticalIcon,
   PencilIcon,
   ScaleIcon,
   Trash2Icon,
   WalletIcon,
 } from "lucide-react"
-import { LinkPendingOverlay } from "@/src/shared/components/ui/navigation-pending"
-import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { useState } from "react"
 import { Label } from "@/src/shared/components/ui/label"
 
 const FALLBACK_COLOR = "#334155"
@@ -126,6 +127,8 @@ function AccountDetailScreenBody({ accountId }: AccountDetailScreenProps) {
     currency: account?.currency ?? display.currency,
   }
 
+  const [confirmOpen, setConfirmOpen] = useState(false)
+
   async function onArchiveAccount() {
     if (!account) {
       return
@@ -144,15 +147,10 @@ function AccountDetailScreenBody({ accountId }: AccountDetailScreenProps) {
     if (!account) {
       return
     }
-    const confirmed = window.confirm(
-      "¿Borrar esta cuenta? Se eliminan sus movimientos, tarjetas débito y saldos. No se puede deshacer."
-    )
-    if (!confirmed) {
-      return
-    }
     try {
       await deleteAccount.mutateAsync(account.id)
       appToast.success({ text1: "Cuenta borrada" })
+      setConfirmOpen(false)
       setOpenOptionsSheet(false)
       router.push(APP_ROUTES.app.financeProducts)
     } catch (error) {
@@ -200,26 +198,13 @@ function AccountDetailScreenBody({ accountId }: AccountDetailScreenProps) {
 
   if (!account) {
     return (
-      <Empty className="py-16">
-        <EmptyHeader>
-          <EmptyMedia variant="icon">
-            <WalletIcon />
-          </EmptyMedia>
-          <EmptyTitle>No encontramos esta cuenta</EmptyTitle>
-          <EmptyDescription>
-            Puede que se haya archivado o borrado.
-          </EmptyDescription>
-        </EmptyHeader>
-        <EmptyContent>
-          <Button variant="outline" asChild>
-            <Link href={APP_ROUTES.app.financeProducts} className="relative">
-              <ArrowLeftIcon className="size-4 shrink-0" />
-              Volver a Productos
-              <LinkPendingOverlay />
-            </Link>
-          </Button>
-        </EmptyContent>
-      </Empty>
+      <MissingRecord
+        icon={WalletIcon}
+        title="No encontramos esta cuenta"
+        description="Puede que se haya archivado o borrado."
+        backHref={APP_ROUTES.app.financeProducts}
+        backLabel="Volver a Productos"
+      />
     )
   }
 
@@ -345,13 +330,44 @@ function AccountDetailScreenBody({ accountId }: AccountDetailScreenProps) {
           <SummaryItem
             title="Borrar"
             icon={Trash2Icon}
-            onPress={() => void onDeleteAccount()}
+            onPress={() => setConfirmOpen(true)}
             disabled={archiveAccount.isPending || deleteAccount.isPending}
             isLast
             className="px-3 text-destructive"
           />
         </div>
       </BottomSheet>
+
+      <AlertDialog
+        open={confirmOpen}
+        onOpenChange={(open) => {
+          if (!deleteAccount.isPending) {
+            setConfirmOpen(open)
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Borrar esta cuenta?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Se eliminan sus movimientos, tarjetas débito y saldos. No se puede
+              deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteAccount.isPending}>
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              disabled={deleteAccount.isPending}
+              onClick={() => void onDeleteAccount()}
+            >
+              Borrar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <AccountSheet
         open={openAccountSheet}

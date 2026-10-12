@@ -462,6 +462,18 @@ describe("buildCreateCategoryBody", () => {
     })
     assert.equal(result.ok, false)
   })
+
+  it("omits the icon when it was not chosen", () => {
+    const payload = buildCreateCategoryBody({
+      name: "Sin icono",
+      type: "EXPENSE",
+    })
+    assert.equal(payload.ok, true)
+    if (!payload.ok) {
+      return
+    }
+    assert.deepEqual(payload.body, { name: "Sin icono", type: "EXPENSE" })
+  })
 })
 
 describe("buildUpdateCategoryBody", () => {

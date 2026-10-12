@@ -1,3 +1,5 @@
+import { foldSearchText } from "./search-text.ts"
+
 export type CategoryLike = {
   id: string
   parentId: string | null
@@ -72,14 +74,6 @@ export function sortCategoriesNewestFirst<T extends { createdAt: string }>(
   })
 }
 
-/**
- * Applies a session-only id order. Ids missing from `orderIds` stay in front,
- * in their incoming order, so newly created categories appear first.
- */
-export function foldCategorySearch(value: string): string {
-  return value.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase().trim()
-}
-
 export type CategorySearchHit<T extends CategoryLike & { name: string }> = {
   category: T
   children: T[]
@@ -98,7 +92,7 @@ export function searchCategoryGroups<T extends CategoryLike & { name: string }>(
   groups: CategoryGroup<T>[],
   query: string
 ): CategorySearchHit<T>[] {
-  const needle = foldCategorySearch(query)
+  const needle = foldSearchText(query)
   if (!needle) {
     return groups.map((group) => ({
       category: group.category,
@@ -111,11 +105,9 @@ export function searchCategoryGroups<T extends CategoryLike & { name: string }>(
 
   const hits: CategorySearchHit<T>[] = []
   for (const group of groups) {
-    const parentMatches = foldCategorySearch(group.category.name).includes(
-      needle
-    )
+    const parentMatches = foldSearchText(group.category.name).includes(needle)
     const matchingChildren = group.children.filter((child) =>
-      foldCategorySearch(child.name).includes(needle)
+      foldSearchText(child.name).includes(needle)
     )
     if (!parentMatches && matchingChildren.length === 0) {
       continue

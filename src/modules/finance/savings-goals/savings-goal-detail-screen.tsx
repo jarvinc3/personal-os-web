@@ -1,0 +1,329 @@
+"use client"
+
+import { FinanceGate } from "@/src/modules/finance/finance-gate"
+import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
+import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
+import { MissingRecord } from "@/src/modules/finance/shared/components/layout/missing-record"
+import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
+import { FinanceProgressHero } from "@/src/modules/finance/shared/components/layout/progress-hero"
+import { SavingsGoalContributionSheet } from "@/src/modules/finance/savings-goals/components/savings-goal-contribution-sheet"
+import { SavingsGoalSheet } from "@/src/modules/finance/savings-goals/components/savings-goal-sheet"
+import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
+import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
+import {
+  useDeleteSavingsGoalContribution,
+  useSavingsGoalContributions,
+  useSavingsGoals,
+} from "@/src/modules/finance/shared/hooks/use-savings-goals"
+import {
+  financeErrorMessage,
+  financeLoadErrorMessage,
+} from "@/src/modules/finance/shared/lib/finance-error"
+import {
+  formatFinanceMoney,
+  parseFinanceMoney,
+} from "@/src/modules/finance/shared/lib/money"
+import {
+  amountRatioPct,
+  formatPlanningDate,
+} from "@/src/modules/finance/shared/lib/planning-lists"
+import { LoadingView } from "@/src/shared/components/layout/loading-view"
+import { Button } from "@/src/shared/components/ui/button"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/src/shared/components/ui/alert-dialog"
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/src/shared/components/ui/empty"
+import { SummaryItem } from "@/src/shared/components/ui/summary"
+import { APP_ROUTES } from "@/src/shared/constants/app-routes"
+import { usePageHeader } from "@/src/shared/hooks/use-page-header"
+import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
+import { appToast } from "@/src/shared/lib/app-toast"
+import {
+  MoreVerticalIcon,
+  PiggyBankIcon,
+  PlusIcon,
+  Trash2Icon,
+} from "lucide-react"
+import { useRouter } from "next/navigation"
+import { useMemo, useState } from "react"
+
+import { ACCENT_FALLBACK_COLOR } from "@/src/shared/lib/accent-gradient"
+
+type FinanceSavingsGoalDetailProps = {
+  goalId: string
+}
+
+export function SavingsGoalDetailScreen({
+  goalId,
+}: FinanceSavingsGoalDetailProps) {
+  return (
+    <FinanceGate>
+      <SavingsGoalDetailScreenBody goalId={goalId} />
+    </FinanceGate>
+  )
+}
+
+function SavingsGoalDetailScreenBody({
+  goalId,
+}: FinanceSavingsGoalDetailProps) {
+  const router = useRouter()
+  const { isEnabled, config } = useFinanceEnabled()
+  const display = {
+    currency: config.baseCurrency,
+    showCents: config.display.showCents,
+    compactNumbers: config.display.compactNumbers,
+  }
+
+  const goalsQuery = useSavingsGoals(isEnabled)
+  const contributionsQuery = useSavingsGoalContributions(isEnabled, goalId)
+  const deleteContribution = useDeleteSavingsGoalContribution()
+  const { open: openGoalSheet, setOpen: setOpenGoalSheet } = useSheetParam(
+    FINANCE_SHEET_KEYS.savings
+  )
+  const { open: openContributionSheet, setOpen: setOpenContributionSheet } =
+    useSheetParam(FINANCE_SHEET_KEYS.savingsContribution)
+
+  const goal =
+    (goalsQuery.data ?? []).find((item) => item.id === goalId) ?? null
+  const contributions = contributionsQuery.data ?? []
+  const money = { ...display, currency: goal?.currency ?? display.currency }
+  const accent = ACCENT_FALLBACK_COLOR
+  const progress = Math.min(
+    100,
+    Math.max(0, amountRatioPct(goal?.currentAmount, goal?.targetAmount) ?? 0)
+  )
+  const remaining = goal
+    ? (parseFinanceMoney(goal.targetAmount) ?? 0) -
+      (parseFinanceMoney(goal.currentAmount) ?? 0)
+    : null
+
+  const headerActions = useMemo(
+    () => (
+      <Button
+        variant="outline"
+        size="icon"
+        className="size-9 rounded-full"
+        aria-label="Opciones de la meta"
+        onClick={() => setOpenGoalSheet(true)}
+      >
+        <MoreVerticalIcon className="size-4.5" />
+      </Button>
+    ),
+    [setOpenGoalSheet]
+  )
+
+  usePageHeader(
+    {
+      variant: "secondary",
+      title: goal?.name ?? "Meta",
+      onBack: () => router.back(),
+      actions: headerActions,
+      accentColor: accent,
+    },
+    [router, goal?.name, accent, headerActions]
+  )
+
+  const [pendingContributionId, setPendingContributionId] = useState<
+    string | null
+  >(null)
+
+  async function removeContribution() {
+    if (!goal || !pendingContributionId) {
+      return
+    }
+    try {
+      await deleteContribution.mutateAsync({
+        goalId: goal.id,
+        contributionId: pendingContributionId,
+      })
+      appToast.success({ text1: "Aporte borrado" })
+      setPendingContributionId(null)
+    } catch (error) {
+      appToast.error({ text1: financeErrorMessage(error) })
+    }
+  }
+
+  if (goalsQuery.isPending && !goal) {
+    return <LoadingView />
+  }
+
+  if (!goal) {
+    return (
+      <MissingRecord
+        icon={PiggyBankIcon}
+        title="No encontramos esta meta"
+        description="Puede que se haya borrado o que ya esté completada."
+        backHref={APP_ROUTES.app.financePlanning}
+        backLabel="Volver a Planificación"
+      />
+    )
+  }
+
+  return (
+    <>
+      {goalsQuery.error ? (
+        <div className="mb-3">
+          <FinanceErrorState
+            message={financeLoadErrorMessage(goalsQuery.error)}
+            onRetry={() => void goalsQuery.refetch()}
+            isRetrying={goalsQuery.isFetching}
+          />
+        </div>
+      ) : null}
+
+      <FinanceProgressHero
+        accent={accent}
+        media={
+          <span className="flex size-12 shrink-0 items-center justify-center rounded-full bg-white/20">
+            <PiggyBankIcon className="size-6" />
+          </span>
+        }
+        title={goal.name}
+        badge={{
+          label: goal.isCompleted ? "Completada" : "En curso",
+          variant: goal.isCompleted ? "success" : "info",
+        }}
+        subtitle={goal.description ?? undefined}
+        metricLabel="Ahorrado"
+        metricValue={formatFinanceMoney(goal.currentAmount, money)}
+        progress={progress}
+        startCaption={`${Math.round(progress)}% de la meta`}
+        endCaption={`Meta ${formatFinanceMoney(goal.targetAmount, money)}`}
+        footnote={
+          remaining !== null && remaining > 0
+            ? `Faltan ${formatFinanceMoney(remaining, money)}${
+                goal.targetDate
+                  ? ` · meta al ${formatPlanningDate(goal.targetDate)}`
+                  : ""
+              }`
+            : undefined
+        }
+      />
+
+      <div className="mx-4 flex flex-col gap-3 rounded-3xl bg-background">
+        {contributionsQuery.isError ? (
+          <FinanceErrorState
+            message={financeLoadErrorMessage(contributionsQuery.error)}
+            onRetry={() => void contributionsQuery.refetch()}
+            isRetrying={contributionsQuery.isFetching}
+          />
+        ) : null}
+
+        <AsyncRegion
+          pending={contributionsQuery.isPending}
+          pendingFallback={<FinanceListSkeleton rows={4} />}
+          empty={!contributionsQuery.isError && contributions.length === 0}
+          emptyFallback={
+            <Empty className="py-10">
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <PiggyBankIcon />
+                </EmptyMedia>
+                <EmptyTitle>Sin aportes</EmptyTitle>
+                <EmptyDescription>
+                  Registra el primero para que el avance deje de ser un número
+                  escrito a mano.
+                </EmptyDescription>
+              </EmptyHeader>
+              <EmptyContent>
+                <Button onClick={() => setOpenContributionSheet(true)}>
+                  <PlusIcon />
+                  Aporte
+                </Button>
+              </EmptyContent>
+            </Empty>
+          }
+        >
+          {contributions.length > 0 ? (
+            <div className="rounded-2xl border border-border bg-card">
+              {contributions.map((contribution, index) => (
+                <SummaryItem
+                  key={contribution.id}
+                  title={formatFinanceMoney(contribution.amount, money)}
+                  description={[
+                    formatPlanningDate(contribution.contributedAt),
+                    contribution.notes ?? "",
+                  ]
+                    .filter(Boolean)
+                    .join(" · ")}
+                  trailing={
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      aria-label="Borrar aporte"
+                      disabled={deleteContribution.isPending}
+                      onClick={() => setPendingContributionId(contribution.id)}
+                    >
+                      <Trash2Icon className="size-4" />
+                    </Button>
+                  }
+                  isLast={index === contributions.length - 1}
+                />
+              ))}
+            </div>
+          ) : null}
+        </AsyncRegion>
+      </div>
+
+      <SavingsGoalContributionSheet
+        open={openContributionSheet}
+        onOpenChange={setOpenContributionSheet}
+        goalId={goal.id}
+        goalName={goal.name}
+        currency={goal.currency}
+      />
+
+      <SavingsGoalSheet
+        open={openGoalSheet}
+        onOpenChange={setOpenGoalSheet}
+        goal={goal}
+        defaultCurrency={display.currency}
+        pending={goalsQuery.isFetching}
+      />
+
+      <AlertDialog
+        open={pendingContributionId !== null}
+        onOpenChange={(open) => {
+          if (!deleteContribution.isPending) {
+            setPendingContributionId(open ? pendingContributionId : null)
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Borrar este aporte?</AlertDialogTitle>
+            <AlertDialogDescription>
+              El saldo de la meta baja.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteContribution.isPending}>
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              disabled={deleteContribution.isPending}
+              onClick={() => void removeContribution()}
+            >
+              Borrar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
+  )
+}

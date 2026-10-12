@@ -3,14 +3,13 @@
 import { FinanceDateField } from "@/src/modules/finance/shared/components/forms/date-field"
 import { FinanceFormScreen } from "@/src/modules/finance/shared/components/forms/form-screen"
 import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
-import { CurrencyPickerSheet } from "@/src/modules/finance/transactions/components/currency-picker-sheet"
-import { DestinationPickerSheet } from "@/src/modules/finance/transactions/components/destination-picker-sheet"
-import { DestinationTrigger } from "@/src/modules/finance/transactions/components/destination-trigger"
+import { FinanceCurrencyPickerSheet } from "@/src/modules/finance/shared/components/pickers/finance-currency-picker-sheet"
+import { DestinationPickerSheet } from "@/src/modules/finance/shared/components/pickers/destination-picker-sheet"
+import { DestinationTrigger } from "@/src/modules/finance/shared/components/pickers/destination-trigger"
 import { CATALOG_NONE } from "@/src/modules/finance/shared/constants/catalog"
 import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
 import { useCards } from "@/src/modules/finance/shared/hooks/use-cards"
 import { useCurrencyForTarget } from "@/src/modules/finance/shared/hooks/use-currency-for-target"
-import { useFinanceCurrencyChoices } from "@/src/modules/finance/shared/hooks/use-finance-currency-choices"
 import { useInstitutions } from "@/src/modules/finance/shared/hooks/use-institutions"
 import { useCreateTransfer } from "@/src/modules/finance/shared/hooks/use-transactions"
 import {
@@ -114,11 +113,6 @@ export function TransferForm({
   const fromTarget = useWatch({ control, name: "fromTarget" })
   const toTarget = useWatch({ control, name: "toTarget" })
   const currency = useWatch({ control, name: "currency" })
-  const {
-    baseCurrency,
-    codes: currencyCodes,
-    quotes: currencyQuotes,
-  } = useFinanceCurrencyChoices(currency || defaultCurrency)
 
   const canSave =
     !createMutation.isPending && targetsReady && canTransfer && formIsValid
@@ -337,15 +331,10 @@ export function TransferForm({
         ) : null}
       </FinanceFormScreen>
 
-      <CurrencyPickerSheet
+      <FinanceCurrencyPickerSheet
         open={picker === "currency"}
         onOpenChange={closeHandlerFor("currency")}
         value={currency || defaultCurrency}
-        enabled={enabled}
-        codes={currencyCodes}
-        quotes={currencyQuotes}
-        quoteCurrency={baseCurrency}
-        showNames
         onSelect={(next) => setValue("currency", next)}
       />
 

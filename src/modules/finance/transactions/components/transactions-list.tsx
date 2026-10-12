@@ -9,7 +9,11 @@ import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
 import { useCards } from "@/src/modules/finance/shared/hooks/use-cards"
 import { useCategories } from "@/src/modules/finance/shared/hooks/use-categories"
 import { useTimelineTransactions } from "@/src/modules/finance/shared/hooks/use-transactions"
-import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
+import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
+import {
+  financeErrorMessage,
+  financeLoadErrorMessage,
+} from "@/src/modules/finance/shared/lib/finance-error"
 import { buildTimelineMonths } from "@/src/modules/finance/shared/lib/group-transactions-timeline"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
 import {
@@ -374,9 +378,15 @@ export function FinanceTransactionsList({
       </div>
 
       {timelineQuery.isError ? (
-        <p className="text-sm text-destructive">
-          {financeErrorMessage(timelineQuery.error)}
-        </p>
+        <FinanceErrorState
+          message={financeLoadErrorMessage(timelineQuery.error)}
+          onRetry={() => {
+            void queryClient.invalidateQueries({
+              queryKey: FINANCE_TRANSACTIONS_QUERY_KEY,
+            })
+          }}
+          isRetrying={timelineQuery.isFetching}
+        />
       ) : null}
 
       {timelineQuery.isPending && timelineQuery.items.length === 0 ? (
