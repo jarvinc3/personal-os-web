@@ -22,6 +22,7 @@ Aplicado:
 - Emoji por defecto de categoría, país por nombre, tipo segmentado y logo con vista previa en institución.
 - Accesibilidad de avatares, ruedas de hora (pasos de 5 minutos) y nombres de modelo del proveedor de IA.
 - "Deshacer" tras eliminar: cada borrado guarda un snapshot y el toast ofrece reponerlo.
+- Los atajos del ⋮ del detalle abren el formulario: se quitó el cierre del menú que cancelaba la apertura.
 
 Pendiente (P2):
 

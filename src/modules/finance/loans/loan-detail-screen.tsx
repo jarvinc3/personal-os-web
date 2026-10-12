@@ -302,10 +302,7 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
             id: "edit",
             title: "Editar préstamo",
             icon: PencilIcon,
-            onPress: () => {
-              setOpenOptionsSheet(false)
-              router.push(APP_ROUTES.app.financeLoanEdit(loan.id))
-            },
+            onPress: () => router.push(APP_ROUTES.app.financeLoanEdit(loan.id)),
           },
           {
             id: "archive",

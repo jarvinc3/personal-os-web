@@ -297,19 +297,13 @@ function CardDetailScreenBody({ cardId }: CardDetailScreenProps) {
             id: "edit",
             title: "Editar tarjeta",
             icon: PencilIcon,
-            onPress: () => {
-              setOpenOptionsSheet(false)
-              router.push(APP_ROUTES.app.financeCardEdit(card.id))
-            },
+            onPress: () => router.push(APP_ROUTES.app.financeCardEdit(card.id)),
           },
           {
             id: "balance",
             title: "Ajustar saldo",
             icon: ScaleIcon,
-            onPress: () => {
-              setOpenOptionsSheet(false)
-              setOpenCardBalanceSheet(true)
-            },
+            onPress: () => setOpenCardBalanceSheet(true),
           },
           {
             id: "archive",

@@ -520,41 +520,34 @@ function InstitutionDetailScreenBody({
             id: "edit",
             title: "Editar institución",
             icon: PencilIcon,
-            onPress: () => {
-              setOpenOptionsSheet(false)
-              router.push(APP_ROUTES.app.financeInstitutionEdit(institution.id))
-            },
+            onPress: () =>
+              router.push(
+                APP_ROUTES.app.financeInstitutionEdit(institution.id)
+              ),
           },
           {
             id: "new-account",
             title: "Nueva cuenta",
             icon: LandmarkIcon,
-            onPress: () => {
-              setOpenOptionsSheet(false)
-              setOpenAccountSheet(true, null)
-            },
+            onPress: () => setOpenAccountSheet(true, null),
           },
           {
             id: "new-card",
             title: "Nueva tarjeta",
             icon: CreditCardIcon,
-            onPress: () => {
-              setOpenOptionsSheet(false)
+            onPress: () =>
               router.push(
                 `${APP_ROUTES.app.financeCardNew}?institutionId=${institutionId}`
-              )
-            },
+              ),
           },
           {
             id: "new-loan",
             title: "Nuevo préstamo",
             icon: HandCoinsIcon,
-            onPress: () => {
-              setOpenOptionsSheet(false)
+            onPress: () =>
               router.push(
                 `${APP_ROUTES.app.financeLoanNew}?institutionId=${institutionId}`
-              )
-            },
+              ),
           },
           {
             id: "link-mailbox",
