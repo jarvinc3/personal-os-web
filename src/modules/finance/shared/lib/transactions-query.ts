@@ -199,12 +199,14 @@ export function visibleTransactionTotals(
   return items.reduce(
     (totals, item) => {
       for (const leg of item.legs ?? []) {
-        if (leg.legRole === "FEE" && !isInactiveTransactionStatus(leg.status)) {
-          const fee = parseFinanceMoney(leg.amountBaseCurrency)
-          if (fee !== null) {
-            totals.expenses += fee
-          }
+        if (leg.legRole !== "FEE" || isInactiveTransactionStatus(leg.status)) {
+          continue
         }
+        const fee = parseFinanceMoney(leg.amountBaseCurrency)
+        if (fee === null) {
+          continue
+        }
+        totals.expenses += fee
       }
       if (
         isTransferTransaction(item) ||
