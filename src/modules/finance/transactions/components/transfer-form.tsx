@@ -3,6 +3,7 @@
 import { FinanceDateField } from "@/src/modules/finance/shared/components/forms/date-field"
 import { FinanceFormScreen } from "@/src/modules/finance/shared/components/forms/form-screen"
 import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
+import type { FinanceMoneyFieldHandle } from "@/src/modules/finance/shared/components/forms/money-field"
 import { FinanceCurrencyPickerSheet } from "@/src/modules/finance/shared/components/pickers/finance-currency-picker-sheet"
 import { DestinationPickerSheet } from "@/src/modules/finance/shared/components/pickers/destination-picker-sheet"
 import { DestinationTrigger } from "@/src/modules/finance/shared/components/pickers/destination-trigger"
@@ -10,6 +11,7 @@ import { CATALOG_NONE } from "@/src/modules/finance/shared/constants/catalog"
 import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
 import { useCards } from "@/src/modules/finance/shared/hooks/use-cards"
 import { useCurrencyForTarget } from "@/src/modules/finance/shared/hooks/use-currency-for-target"
+import { useFinanceAmountEntry } from "@/src/modules/finance/shared/hooks/use-finance-amount-entry"
 import { useInstitutions } from "@/src/modules/finance/shared/hooks/use-institutions"
 import {
   useCreateTransfer,
@@ -48,7 +50,7 @@ import {
   LandmarkIcon,
   NotebookPenIcon,
 } from "lucide-react"
-import { useCallback, useEffect, useId, useMemo } from "react"
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import {
   transferSchema,
@@ -56,6 +58,7 @@ import {
 } from "@/src/modules/finance/transactions/lib/transfer-form"
 
 type Picker = "none" | "from" | "to" | "currency"
+type GuidedStep = "from" | "to" | "amount" | "done"
 
 type TransferFormProps = {
   defaultCurrency: string
@@ -129,6 +132,13 @@ export function TransferForm({
   const { picker, openPicker, closeHandlerFor } = usePicker<Picker>("none")
   const statusSwitchId = useId()
   const destinationPendingId = useId()
+  const { amountEntry, setAmountEntry } = useFinanceAmountEntry()
+  const [guidedStep, setGuidedStep] = useState<GuidedStep>(() =>
+    isEdit ? "done" : "from"
+  )
+  const amountFieldRef = useRef<FinanceMoneyFieldHandle>(null)
+  const guidedFromOpened = useRef(false)
+  const guidedToOpened = useRef(false)
 
   const {
     control,
@@ -196,6 +206,37 @@ export function TransferForm({
     applyTargetCurrency,
     !isEdit
   )
+
+  useEffect(() => {
+    if (isEdit || guidedStep !== "from" || guidedFromOpened.current) {
+      return
+    }
+    guidedFromOpened.current = true
+    openPicker("from")
+  }, [isEdit, guidedStep, openPicker])
+
+  useEffect(() => {
+    if (isEdit || guidedStep !== "to" || guidedToOpened.current) {
+      return
+    }
+    guidedToOpened.current = true
+    openPicker("to")
+  }, [isEdit, guidedStep, openPicker])
+
+  function advanceToDestination() {
+    if (isEdit || guidedStep !== "from") {
+      return
+    }
+    setGuidedStep("to")
+  }
+
+  function advanceToAmount() {
+    if (isEdit || guidedStep !== "to") {
+      return
+    }
+    setGuidedStep("amount")
+    window.setTimeout(() => amountFieldRef.current?.focusAmount(), 0)
+  }
 
   const onSubmit = handleSubmit(async (values) => {
     const from = splitLedgerTarget(values.fromTarget)
@@ -329,6 +370,9 @@ export function TransferForm({
                 currency={currency || defaultCurrency}
                 currencyError={errors.currency?.message}
                 onCurrencyPress={() => openPicker("currency")}
+                entryMode={amountEntry}
+                onEntryModeChange={setAmountEntry}
+                fieldRef={amountFieldRef}
               />
             )}
           />
@@ -473,6 +517,11 @@ export function TransferForm({
             return
           }
           setValue(field, next, { shouldValidate: true })
+          if (field === "fromTarget") {
+            advanceToDestination()
+            return
+          }
+          advanceToAmount()
         }}
       />
     </>

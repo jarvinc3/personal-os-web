@@ -13,6 +13,8 @@ export type FinanceModuleConfig = {
     showCents: boolean
     compactNumbers: boolean
   }
+  /** Entrada de monto con la que abren los formularios de Finanzas. */
+  amountEntry: "keyboard" | "calculator"
   notifications: {
     budgetAlerts: boolean
     aiSuggestions: boolean

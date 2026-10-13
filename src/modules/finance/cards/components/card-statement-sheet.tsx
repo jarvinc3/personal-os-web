@@ -36,7 +36,7 @@ import { Button } from "@/src/shared/components/ui/button"
 import { FormTextField } from "@/src/shared/components/layout/form-blocks"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { CalendarIcon, XIcon } from "lucide-react"
-import { useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 
 type CardStatementSheetProps = {
   open: boolean
@@ -44,6 +44,8 @@ type CardStatementSheetProps = {
   cardId: string
   statementId: string | null
   display: FinanceMoneyDisplay
+  /** Abre el formulario de captura al entrar, sin pasar por "Registrar corte". */
+  defaultEditing?: boolean
 }
 
 function movementTitle(movement: FinanceCardStatementMovement): string {
@@ -86,6 +88,7 @@ export function CardStatementSheet({
   cardId,
   statementId,
   display,
+  defaultEditing = false,
 }: CardStatementSheetProps) {
   const detailQuery = useCardStatementDetail(open, cardId, statementId)
   const detail = detailQuery.data
@@ -98,7 +101,7 @@ export function CardStatementSheet({
   const [closingBalance, setClosingBalance] = useState("")
   const [dueDate, setDueDate] = useState("")
 
-  const startEdit = () => {
+  const startEdit = useCallback(() => {
     if (!detail) {
       return
     }
@@ -108,7 +111,7 @@ export function CardStatementSheet({
       detail.statement.dueDate ? detail.statement.dueDate.slice(0, 10) : ""
     )
     setEditing(true)
-  }
+  }, [detail])
 
   const saveEdit = () => {
     if (!statementId) {
@@ -138,6 +141,18 @@ export function CardStatementSheet({
       }
     )
   }
+
+  useEffect(() => {
+    if (!open) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setEditing(false)
+      return
+    }
+    if (!defaultEditing || editing || !detail) {
+      return
+    }
+    startEdit()
+  }, [open, defaultEditing, editing, detail, startEdit])
 
   return (
     <BottomSheet
@@ -171,7 +186,7 @@ export function CardStatementSheet({
       headerAction={
         detail && !editing ? (
           <Button type="button" variant="outline" onClick={startEdit}>
-            Editar
+            Registrar corte
           </Button>
         ) : undefined
       }

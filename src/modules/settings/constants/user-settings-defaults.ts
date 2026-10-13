@@ -52,6 +52,7 @@ export const DEFAULT_MODULE_CONFIG_BY_SLUG: ModuleConfigBySlug = {
       showCents: true,
       compactNumbers: false,
     },
+    amountEntry: "keyboard",
     notifications: {
       budgetAlerts: true,
       aiSuggestions: true,

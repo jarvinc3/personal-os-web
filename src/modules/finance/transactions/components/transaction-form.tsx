@@ -5,6 +5,7 @@ import { FinanceDateField } from "@/src/modules/finance/shared/components/forms/
 import { FinanceSegmentedControl } from "@/src/modules/finance/shared/components/forms/form-blocks"
 import { FinanceFormScreen } from "@/src/modules/finance/shared/components/forms/form-screen"
 import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
+import type { FinanceMoneyFieldHandle } from "@/src/modules/finance/shared/components/forms/money-field"
 import { CategoryPickerSheet } from "@/src/modules/finance/shared/components/pickers/category-picker-sheet"
 import { FinanceCurrencyPickerSheet } from "@/src/modules/finance/shared/components/pickers/finance-currency-picker-sheet"
 import { DestinationPickerSheet } from "@/src/modules/finance/shared/components/pickers/destination-picker-sheet"
@@ -14,6 +15,7 @@ import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
 import { useCards } from "@/src/modules/finance/shared/hooks/use-cards"
 import { useCategories } from "@/src/modules/finance/shared/hooks/use-categories"
 import { useCurrencyForTarget } from "@/src/modules/finance/shared/hooks/use-currency-for-target"
+import { useFinanceAmountEntry } from "@/src/modules/finance/shared/hooks/use-finance-amount-entry"
 import { useInstitutions } from "@/src/modules/finance/shared/hooks/use-institutions"
 import {
   useCreateTransaction,
@@ -60,7 +62,7 @@ import {
   SaveIcon,
   StoreIcon,
 } from "lucide-react"
-import { useCallback, useEffect, useId, useMemo, useRef } from "react"
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import {
   transactionSchema,
@@ -69,6 +71,7 @@ import {
 
 type MovementType = TransactionFormValues["type"]
 type Picker = "none" | "category" | "currency" | "destination"
+type GuidedStep = "category" | "amount" | "destination" | "done"
 
 const TYPE_OPTIONS = [
   { value: "DEBIT" as const, label: "Gasto", icon: ArrowDownCircleIcon },
@@ -159,8 +162,14 @@ export function TransactionForm({
     [institutions, accounts, cards]
   )
   const { picker, openPicker, closeHandlerFor } = usePicker<Picker>("none")
-  const didAutoOpenCategory = useRef(false)
   const statusSwitchId = useId()
+  const { amountEntry, setAmountEntry } = useFinanceAmountEntry()
+  const [guidedStep, setGuidedStep] = useState<GuidedStep>(() =>
+    isEdit ? "done" : "category"
+  )
+  const amountFieldRef = useRef<FinanceMoneyFieldHandle>(null)
+  const guidedCategoryOpened = useRef(false)
+  const guidedDestinationOpened = useRef(false)
 
   const {
     control,
@@ -268,12 +277,39 @@ export function TransactionForm({
   ])
 
   useEffect(() => {
-    if (isEdit || didAutoOpenCategory.current) {
+    if (isEdit || guidedStep !== "category" || guidedCategoryOpened.current) {
       return
     }
-    didAutoOpenCategory.current = true
+    guidedCategoryOpened.current = true
     openPicker("category")
-  }, [isEdit, openPicker])
+  }, [isEdit, guidedStep, openPicker])
+
+  useEffect(() => {
+    if (
+      isEdit ||
+      guidedStep !== "destination" ||
+      guidedDestinationOpened.current
+    ) {
+      return
+    }
+    guidedDestinationOpened.current = true
+    openPicker("destination")
+  }, [isEdit, guidedStep, openPicker])
+
+  function advanceToAmount() {
+    if (isEdit || guidedStep !== "category") {
+      return
+    }
+    setGuidedStep("amount")
+    window.setTimeout(() => amountFieldRef.current?.focusAmount(), 0)
+  }
+
+  function advanceToDestination() {
+    if (isEdit || guidedStep !== "amount") {
+      return
+    }
+    setGuidedStep("destination")
+  }
 
   function clearIncompatibleCategory(next: MovementType) {
     const expected = categoryTypeForTransaction(next)
@@ -414,13 +450,20 @@ export function TransactionForm({
                 onAmountCommit={(next) => {
                   field.onChange(next)
                   void trigger("amount")
+                  advanceToDestination()
                 }}
-                onAmountBlur={field.onBlur}
+                onAmountBlur={() => {
+                  field.onBlur()
+                  advanceToDestination()
+                }}
                 amountError={errors.amount?.message}
                 currency={currency || defaultCurrency}
                 currencyError={errors.currency?.message}
                 onCurrencyPress={() => openPicker("currency")}
                 disabled={locked}
+                entryMode={amountEntry}
+                onEntryModeChange={setAmountEntry}
+                fieldRef={amountFieldRef}
               />
             )}
           />
@@ -549,7 +592,10 @@ export function TransactionForm({
         onOpenChange={closeHandlerFor("category")}
         categories={categories}
         categoryType={categoryType}
-        onSelect={(next) => setValue("categoryId", next)}
+        onSelect={(next) => {
+          setValue("categoryId", next)
+          advanceToAmount()
+        }}
       />
 
       <FinanceCurrencyPickerSheet
@@ -566,9 +612,10 @@ export function TransactionForm({
         accounts={accounts}
         cards={cards}
         display={{ ...display, currency: currency || display.currency }}
-        onSelect={(next) =>
+        onSelect={(next) => {
           setValue("destination", next, { shouldValidate: true })
-        }
+          setGuidedStep("done")
+        }}
       />
     </>
   )

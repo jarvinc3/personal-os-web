@@ -26,7 +26,7 @@ import {
 } from "@/src/shared/components/ui/empty"
 import { cn } from "@/src/shared/lib/utils"
 import type { VariantProps } from "class-variance-authority"
-import { CalendarIcon, PlusIcon } from "lucide-react"
+import { CalendarIcon, CalendarPlusIcon, PlusIcon } from "lucide-react"
 import { useState } from "react"
 
 type BadgeVariant = VariantProps<typeof badgeVariants>["variant"]
@@ -101,6 +101,7 @@ export function CardStatementsSection({
   const [selectedStatementId, setSelectedStatementId] = useState<string | null>(
     null
   )
+  const [statementEditing, setStatementEditing] = useState(false)
   return (
     <>
       <AsyncRegion
@@ -156,7 +157,10 @@ export function CardStatementsSection({
                 key={statement.id}
                 type="button"
                 className={cn(STATEMENT_CARD_CLASS, "text-left")}
-                onClick={() => setSelectedStatementId(statement.id)}
+                onClick={() => {
+                  setStatementEditing(false)
+                  setSelectedStatementId(statement.id)
+                }}
               >
                 <div className="flex items-start justify-between gap-3">
                   <CycleDates
@@ -209,6 +213,20 @@ export function CardStatementsSection({
               </button>
             )
           })}
+          {statements.length > 0 ? (
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={() => {
+                setStatementEditing(true)
+                setSelectedStatementId(statements[0]?.id ?? null)
+              }}
+            >
+              <CalendarPlusIcon className="size-4 shrink-0" />
+              Registrar corte
+            </Button>
+          ) : null}
         </div>
       </AsyncRegion>
       <CardStatementSheet
@@ -221,6 +239,7 @@ export function CardStatementsSection({
         cardId={cardId}
         statementId={selectedStatementId}
         display={display}
+        defaultEditing={statementEditing}
       />
     </>
   )

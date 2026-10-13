@@ -51,7 +51,7 @@ export const FINANCE_TRANSACTION_STATUS_LABEL: Record<
   CONFIRMED: "Completado",
   DECLINED: "Rechazado",
   CANCELLED: "Cancelado",
-  REVERSED: "Reversado",
+  REVERSED: "Revertido",
 }
 
 export type FinanceTransactionEditability =
@@ -67,6 +67,15 @@ export type FinanceInstrumentHistoryItem = {
   amount: string | null
   currency: string | null
   payload: Record<string, unknown>
+}
+
+export type FinanceTransactionLinkKind =
+  "LOAN_INSTALLMENT" | "RECEIVABLE_PAYMENT" | "SAVINGS_CONTRIBUTION"
+
+export type FinanceTransactionPlanningLink = {
+  kind: FinanceTransactionLinkKind
+  targetId: string
+  label: string
 }
 
 export type FinanceTransaction = {
@@ -102,6 +111,11 @@ export type FinanceTransaction = {
   transferToCardId: string | null
   transferToCardName: string | null
   possibleDuplicateOfId?: string | null
+  /** Movimiento con el que este forma un par (por ejemplo, una reversa). */
+  linkedTransactionId?: string | null
+  aiMetadata?: Record<string, unknown> | null
+  /** Cuota, cobro o meta a la que el movimiento quedó vinculado. */
+  planningLink?: FinanceTransactionPlanningLink | null
   /** Present when the API groups a transfer operation (web default). */
   kind?: "TRANSACTION" | "OPERATION"
   operationType?: "TRANSFER"

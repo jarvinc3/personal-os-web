@@ -7,6 +7,8 @@ import {
 import { FinanceGate } from "@/src/modules/finance/finance-gate"
 import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
 import { MissingRecord } from "@/src/modules/finance/shared/components/layout/missing-record"
+import { LinkTransactionSheet } from "@/src/modules/finance/transactions/components/link-transaction-sheet"
+import { useUnlinkTransaction } from "@/src/modules/finance/shared/hooks/use-transaction-link"
 import {
   useConfirmTransaction,
   useDeleteTransaction,
@@ -112,6 +114,7 @@ function TransactionDetailScreenBody({
   const confirmMutation = useConfirmTransaction()
   const unconfirmMutation = useUnconfirmTransaction()
   const reverseMutation = useReverseTransaction()
+  const unlinkMutation = useUnlinkTransaction()
   const deleteMutation = useDeleteTransaction()
   const mergeMutation = useMergeTransaction()
   const notDuplicateMutation = useMarkNotDuplicate()
@@ -191,6 +194,19 @@ function TransactionDetailScreenBody({
   }
 
   const [confirmOpen, setConfirmOpen] = useState(false)
+  const [linkOpen, setLinkOpen] = useState(false)
+
+  async function onUnlink() {
+    if (!tx) {
+      return
+    }
+    try {
+      await unlinkMutation.mutateAsync(tx.id)
+      appToast.success({ text1: "Vínculo quitado" })
+    } catch (error) {
+      appToast.error({ text1: financeErrorMessage(error) })
+    }
+  }
 
   async function onDelete() {
     if (!tx) {
@@ -295,6 +311,65 @@ function TransactionDetailScreenBody({
               No es duplicado
             </Button>
           </div>
+        </div>
+      ) : null}
+
+      {!isTransferTransaction(tx) ? (
+        <div className="mx-4 mb-3 flex flex-col gap-2 rounded-2xl border border-border p-3">
+          <p className="text-sm text-muted-foreground">Planificación</p>
+          {tx.planningLink ? (
+            <>
+              <p className="text-sm font-medium">{tx.planningLink.label}</p>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="self-start"
+                disabled={unlinkMutation.isPending}
+                onClick={() => void onUnlink()}
+              >
+                Quitar vínculo
+              </Button>
+            </>
+          ) : (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="self-start"
+              onClick={() => setLinkOpen(true)}
+            >
+              Vincular a cuota, cobro o meta
+            </Button>
+          )}
+        </div>
+      ) : null}
+
+      {tx.status === "REVERSED" ? (
+        <div className="mx-4 mb-3 flex flex-col gap-2 rounded-2xl border border-border p-3">
+          <div className="flex items-center gap-2">
+            <Badge variant="info">Revertido</Badge>
+            <p className="text-sm text-muted-foreground">
+              {tx.source === "EMAIL"
+                ? "El banco devolvió este movimiento y el saldo volvió a su lugar."
+                : "El saldo de este movimiento volvió a su lugar."}
+            </p>
+          </div>
+          {tx.linkedTransactionId ? (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="self-start"
+              onClick={() =>
+                router.push(
+                  APP_ROUTES.app.financeTransaction(tx.linkedTransactionId!)
+                )
+              }
+            >
+              Ver movimiento original
+            </Button>
+          ) : null}
         </div>
       ) : null}
 
@@ -538,6 +613,14 @@ function TransactionDetailScreenBody({
         pending={deleteMutation.isPending}
         consequences="El saldo de la cuenta se corrige. No se puede deshacer."
         onConfirm={() => void onDelete()}
+      />
+
+      <LinkTransactionSheet
+        open={linkOpen}
+        onOpenChange={setLinkOpen}
+        transactionId={tx.id}
+        display={display}
+        onLinked={() => void detailQuery.refetch()}
       />
     </>
   )

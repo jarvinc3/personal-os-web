@@ -8,6 +8,7 @@ import { MissingRecord } from "@/src/modules/finance/shared/components/layout/mi
 import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
 import { FinanceProgressHero } from "@/src/modules/finance/shared/components/layout/progress-hero"
 import { LoanSurfaceMark } from "@/src/modules/finance/loans/components/loan-progress-card"
+import { LoanAmortizationSheet } from "@/src/modules/finance/loans/components/amortization-sheet"
 import { LoanPrepaymentSheet } from "@/src/modules/finance/loans/components/loan-prepayment-sheet"
 import { InstallmentDetailSheet } from "@/src/modules/finance/loans/components/installment-detail-sheet"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
@@ -59,6 +60,7 @@ import {
   HandCoinsIcon,
   MoreVerticalIcon,
   PencilIcon,
+  TableIcon,
   Trash2Icon,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
@@ -123,6 +125,7 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
 
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [archiveConfirmOpen, setArchiveConfirmOpen] = useState(false)
+  const [amortizationOpen, setAmortizationOpen] = useState(false)
   const [selectedInstallment, setSelectedInstallment] =
     useState<FinanceLoanInstallment | null>(null)
 
@@ -328,6 +331,18 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
             </div>
           ) : null}
         </AsyncRegion>
+
+        {installments.length > 0 ? (
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full"
+            onClick={() => setAmortizationOpen(true)}
+          >
+            <TableIcon className="size-4 shrink-0" />
+            Ver plan de amortización
+          </Button>
+        ) : null}
       </div>
 
       <RecordOptionsSheet
@@ -373,6 +388,14 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
           }
         }}
         installment={selectedInstallment}
+        display={money}
+      />
+
+      <LoanAmortizationSheet
+        open={amortizationOpen}
+        onOpenChange={setAmortizationOpen}
+        installments={installments}
+        currentBalance={loan.currentBalance}
         display={money}
       />
 

@@ -71,6 +71,7 @@ export const API_ENDPOINTS = {
     TRANSACTION_UNCONFIRM: (id: string) =>
       `/finance/transactions/${id}/unconfirm`,
     TRANSACTION_REVERSE: (id: string) => `/finance/transactions/${id}/reverse`,
+    TRANSACTION_LINK: (id: string) => `/finance/transactions/${id}/link`,
     CATEGORIES: "/finance/categories",
     CATEGORY: (id: string) => `/finance/categories/${id}`,
     CATEGORY_RESTORE: (id: string) => `/finance/categories/${id}/restore`,
