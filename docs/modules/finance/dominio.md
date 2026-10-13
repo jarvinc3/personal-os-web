@@ -1,0 +1,81 @@
+# Finanzas: cómo funciona hoy
+
+Estado al 13 oct 2026: web v1.18.0 (`fd0630c`) y back v1.19.0 (`bfcfded`). Este documento resume el dominio y los flujos principales tal como están implementados. El contrato HTTP completo vive en `personal-os-back/docs/modules/finance/`. Lo pendiente está en [pendientes/](./pendientes/README.md).
+
+Contexto: bancos dominicanos (BHD, Popular, Qik), moneda principal DOP (RD$).
+
+## Modelo
+
+| Entidad                               | Qué es                                   | Reglas clave                                                                                       |
+| ------------------------------------- | ---------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| Institución                           | Banco o entidad emisora                  | Borrarla da 409 si tiene dependientes (`details.dependents`)                                       |
+| Cuenta                                | CHECKING, SAVINGS, INVESTMENT o CASH     | Las bancarias exigen institución; CASH no. Se archiva con `isActive:false`, no se borra            |
+| Tarjeta                               | Crédito o débito                         | La de crédito tiene límite, disponible, día de corte y de pago. La de débito suma a su cuenta      |
+| Movimiento (`FinTransaction`)         | CREDIT, DEBIT, ADJUSTMENT, CARD_PAYMENT  | Estados `PENDING`, `CONFIRMED`, `REVERSED`, `CANCELLED`                                            |
+| Transferencia                         | Dos patas con el mismo `transferGroupId` | Atómica. El destino es solo una cuenta. Comisión opcional (`legs`). La lista muestra una sola fila |
+| Corte de tarjeta (`FinCardStatement`) | Ciclo de facturación                     | Abierto, `STATEMENT_CLOSED`, pagado o vencido. Se carga a mano                                     |
+| Préstamo                              | Capital, tasa, plazo y cuotas            | La cuota resta solo capital del saldo. Admite abonos a capital (reducir plazo o cuota)             |
+| Cobro (cuenta por cobrar)             | Dinero que te deben                      | Pagos parciales, excedente (`excessHandling`) y castigo (write-off)                                |
+| Meta de ahorro                        | Objetivo ligado a una cuenta             | Los aportes no crean `DEBIT`. Expone `freeBalance` (disponible libre de la cuenta)                 |
+| Presupuesto                           | Límite por periodo                       | Multicategoría, rollover y recurrencia (scheduler). El periodo arranca el `monthStartDay`          |
+| Correo de banco (`FinEmailMessage`)   | Correo leído de Gmail                    | Idempotente por huella (`source_id, fingerprint`)                                                  |
+
+## Estados y edición
+
+- Un movimiento `CONFIRMED` está bloqueado (`TRANSACTION_LOCKED`). Para editarlo se usa "Desbloquear" (`unconfirm`), que existe en movimientos, transferencias y pagos de tarjeta.
+- Una reversa queda `REVERSED`, enlazada a su original por `linkedTransactionId`. En la lista se ve en gris (opacidad 50 % y tachado) y no suma en los totales. El detalle muestra la etiqueta "Revertido" y enlaza al otro movimiento.
+- Los ajustes de saldo (`POST /balance-adjustments`, tipo `ADJUSTMENT`) quedan fuera del tablero (`includeAdjustments=false` por defecto) y se ven en el historial de la entidad (`instrument-history-sheet.tsx`).
+- Borrar guarda un snapshot en el diario: el toast "Deshacer" llama a `POST <entidad>/:id/restore`, y `/finance/recycle-bin` lista archivados y eliminados.
+
+## Flujos principales
+
+### Registrar un movimiento (flujo guiado)
+
+Categoría → monto → cuenta o tarjeta. El monto abre con teclado o calculadora según la preferencia `amountEntry` de la configuración, y la cuenta propuesta es `defaultAccountId`. La transferencia sigue el mismo patrón (`transfer-form.tsx`) y puede sugerir una meta de la cuenta destino (`suggestGoalId`).
+
+### Vincular un movimiento
+
+Desde el detalle del movimiento, "Vincular" (`link-transaction-sheet.tsx`) lo asocia a una cuota de préstamo, un cobro o un aporte a meta: `POST /finance/transactions/:id/link`. El agente tiene la tool `link_transaction`.
+
+### Tarjetas de crédito
+
+- Pago de tarjeta: `CARD_PAYMENT` desde una cuenta (`card-payment-sheet.tsx`).
+- Corte manual: el usuario baja el estado de cuenta desde la app del banco y carga balance al corte, mínimo y fecha límite en `card-statement-sheet.tsx`. El scheduler cierra los ciclos vencidos.
+- El correo de BHD "tu estado de cuenta está disponible" genera un recordatorio (`FINANCE_CARD_STATEMENT_REMINDER`), pero no importa movimientos.
+
+### Préstamos
+
+Asistente de alta con tabla de amortización previa (`amortization-plan.ts`, `amortization-sheet.tsx`). En el detalle: pagar la siguiente cuota con su desglose (capital, interés, seguro: `insurance_amount`), hoja de cuota (`installment-detail-sheet.tsx`) y abono a capital con vista previa (`loans/:id/prepayments/preview`).
+
+### Ingesta de correo de bancos
+
+1. El usuario conecta Gmail (OAuth, `gmail.readonly`) en `/finance/sync` y vincula cada remitente a una institución.
+2. `gmail-auto-sync.scheduler.ts` corre según `emailSync.schedule` (intervalo mínimo de 15 min u horas fijas) si `emailSync.automatic` está activo. También hay sincronización manual.
+3. Un extractor LLM convierte cada correo en movimiento. Dedupe: huella única, referencia, confirmación repetida y reversa existente. Los posibles duplicados se resuelven con "Unir" o "No es duplicado".
+4. `emailSync.mode`: `DIRECT` confirma lo importado; `PENDING` lo deja por confirmar.
+5. Sin cuenta o tarjeta destino, o sin monto, el correo queda en pendientes. Tools: `list_pending_emails`, `assign_pending_email`, `retry_pending_email` y `complete_pending_email_amount`.
+6. Nómina de Popular (depósito a la cuenta 3447): se reconoce aunque el correo no traiga monto. Se propone el monto de `fixedIncome`.
+
+Los correos de ejemplo por banco están en `personal-os-back/packages/finance/test/fixtures/bank-emails/{bhd,popular,qik}/`.
+
+### Configuración del módulo (Ajustes → Finanzas)
+
+`finance-module-settings-form.tsx`, tipos en `src/modules/settings/types/module-config.types.ts`:
+
+| Clave                         | Uso                                                                                                       |
+| ----------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `amountEntry`                 | Teclado o calculadora al abrir un monto                                                                   |
+| `fixedIncome`                 | Sueldo: monto, `BIWEEKLY`/`MONTHLY`, días de pago y cuenta. Se usa como sugerencia en la nómina sin monto |
+| `defaultAccountId`            | Cuenta propuesta en gastos y transferencias                                                               |
+| `monthStartDay`               | Día 1-28 en que arranca el mes financiero (presupuestos y totales)                                        |
+| `reminders.cardDueDaysBefore` | Aviso antes del vencimiento de tarjeta                                                                    |
+| `notifications.*`             | Alertas de presupuesto, movimiento detectado, reporte mensual, etc.                                       |
+| `emailSync.*`                 | `enabled`, `automatic`, `autoCategorize`, `mode` y `schedule`                                             |
+
+## Agente de IA
+
+36 tools de finanzas, filtradas por `moduleSlug`. El chat usa SSE con `clientMessageId` idempotente. Los bloques del chat son solo `markdown` y `action` (`ChatBlock` en `ai-agent/src/shared/ai.types.ts`). Las tools que escriben piden confirmación con la tarjeta de acción.
+
+## Paginación
+
+Usan cursor `{items, nextCursor, hasMore}`: transacciones, presupuestos, historial de instrumento y notificaciones. El resto devuelve arrays (ver [pendientes/04](./pendientes/04-paginacion-uniforme.md)).
