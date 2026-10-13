@@ -2,6 +2,19 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [1.17.0] - 2026-10-13
+
+### Agregado
+
+- Flujo guiado al crear un movimiento (categoría, monto y cuenta) y una transferencia (origen, destino y monto); el monto abre con el modo teclado o calculadora guardado en `module_config.finance.amountEntry`.
+- Plan de amortización del préstamo en el detalle, con capital, interés y saldo restante por cuota.
+- Registro manual del corte de tarjeta desde la pestaña de estados de cuenta (mínimo, balance y vencimiento con `PATCH`).
+- Vínculo de un movimiento a una cuota, un cobro o una meta desde el detalle, con quitar vínculo y su reversa.
+
+### Cambiado
+
+- La etiqueta del estado `REVERSED` pasa a "Revertido" y el detalle enlaza al movimiento original cuando existe.
+
 ## [1.16.0] - 2026-10-12
 
 ### Agregado
