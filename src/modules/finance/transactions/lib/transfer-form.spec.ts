@@ -10,6 +10,7 @@ const validTransfer = {
   fromTarget: "account:acc-1",
   toTarget: "account:acc-2",
   status: "CONFIRMED" as const,
+  destinationPending: false,
   rail: "" as const,
   feeAmount: "",
   description: "",

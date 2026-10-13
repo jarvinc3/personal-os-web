@@ -3,11 +3,19 @@
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
 import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
 import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
-import { useCardStatementDetail } from "@/src/modules/finance/shared/hooks/use-card-statements"
-import { financeLoadErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
+import {
+  useCardStatementDetail,
+  useUpdateCardStatement,
+} from "@/src/modules/finance/shared/hooks/use-card-statements"
+import type { UpdateCardStatementBody } from "@/src/modules/finance/shared/hooks/use-card-statements"
+import {
+  financeErrorMessage,
+  financeLoadErrorMessage,
+} from "@/src/modules/finance/shared/lib/finance-error"
 import { formatCalendarDate } from "@/src/modules/finance/shared/lib/ledger-form"
 import {
   formatFinanceMoney,
+  parseFinanceMoney,
   type FinanceMoneyDisplay,
 } from "@/src/modules/finance/shared/lib/money"
 import { joinPlanningCaption } from "@/src/modules/finance/shared/lib/planning-lists"
@@ -25,7 +33,10 @@ import {
 } from "@/src/shared/components/ui/empty"
 import { SummaryItem } from "@/src/shared/components/ui/summary"
 import { Button } from "@/src/shared/components/ui/button"
+import { FormTextField } from "@/src/shared/components/layout/form-blocks"
+import { appToast } from "@/src/shared/lib/app-toast"
 import { CalendarIcon, XIcon } from "lucide-react"
+import { useState } from "react"
 
 type CardStatementSheetProps = {
   open: boolean
@@ -81,6 +92,52 @@ export function CardStatementSheet({
   const moneyDisplay = detail
     ? { ...display, currency: detail.statement.currency }
     : display
+  const updateMutation = useUpdateCardStatement()
+  const [editing, setEditing] = useState(false)
+  const [minimumPayment, setMinimumPayment] = useState("")
+  const [closingBalance, setClosingBalance] = useState("")
+  const [dueDate, setDueDate] = useState("")
+
+  const startEdit = () => {
+    if (!detail) {
+      return
+    }
+    setMinimumPayment(detail.statement.minimumPayment)
+    setClosingBalance(detail.statement.closingBalance)
+    setDueDate(
+      detail.statement.dueDate ? detail.statement.dueDate.slice(0, 10) : ""
+    )
+    setEditing(true)
+  }
+
+  const saveEdit = () => {
+    if (!statementId) {
+      return
+    }
+    const body: UpdateCardStatementBody = {}
+    const minimum = parseFinanceMoney(minimumPayment)
+    if (minimum !== null) {
+      body.minimumPayment = minimum
+    }
+    const closing = parseFinanceMoney(closingBalance)
+    if (closing !== null) {
+      body.closingBalance = closing
+    }
+    if (dueDate) {
+      body.dueDate = dueDate
+    }
+    updateMutation.mutate(
+      { cardId, statementId, body },
+      {
+        onSuccess: () => {
+          appToast.success({ text1: "Corte actualizado" })
+          setEditing(false)
+        },
+        onError: (error) =>
+          appToast.error({ text1: financeErrorMessage(error) }),
+      }
+    )
+  }
 
   return (
     <BottomSheet
@@ -111,6 +168,13 @@ export function CardStatementSheet({
           </Button>
         ),
       }}
+      headerAction={
+        detail && !editing ? (
+          <Button type="button" variant="outline" onClick={startEdit}>
+            Editar
+          </Button>
+        ) : undefined
+      }
     >
       {detailQuery.isError ? (
         <FinanceErrorState
@@ -140,6 +204,44 @@ export function CardStatementSheet({
       >
         {detail ? (
           <div className="flex flex-col gap-5">
+            {editing ? (
+              <div className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-3">
+                <FormTextField
+                  label="Mínimo"
+                  value={minimumPayment}
+                  onChange={setMinimumPayment}
+                />
+                <FormTextField
+                  label="Balance al corte"
+                  value={closingBalance}
+                  onChange={setClosingBalance}
+                />
+                <FormTextField
+                  label="Vence (AAAA-MM-DD)"
+                  value={dueDate}
+                  onChange={setDueDate}
+                />
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    className="flex-1"
+                    disabled={updateMutation.isPending}
+                    onClick={saveEdit}
+                  >
+                    Guardar
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => setEditing(false)}
+                  >
+                    Cancelar
+                  </Button>
+                </div>
+              </div>
+            ) : null}
+
             <div className="grid grid-cols-2 gap-3">
               <div className="rounded-2xl border border-border bg-card p-3">
                 <p className="text-[11px] tracking-wide text-muted-foreground uppercase">

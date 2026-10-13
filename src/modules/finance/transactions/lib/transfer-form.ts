@@ -33,6 +33,7 @@ export const transferSchema = z
       .refine(isLedgerTargetInput, "Elige una cuenta de origen"),
     toTarget: z.string().refine(isLedgerTargetInput, "Elige destino"),
     status: z.enum(["PENDING", "CONFIRMED"]),
+    destinationPending: z.boolean(),
     rail: z.union([z.literal(""), z.enum(TRANSFER_RAILS)]),
     feeAmount: z
       .string()

@@ -177,4 +177,19 @@ describe("buildCreateTransferBody", () => {
     })
     assert.equal(same.ok, false)
   })
+
+  it("marks the destination leg as pending when asked", () => {
+    const payload = buildCreateTransferBody({
+      fromAccountId: "acc-1",
+      toAccountId: "acc-2",
+      amount: "20",
+      transactionDate: "2026-09-02",
+      destinationPending: true,
+    })
+    assert.equal(payload.ok, true)
+    if (!payload.ok) {
+      return
+    }
+    assert.equal(payload.body.destinationPending, true)
+  })
 })

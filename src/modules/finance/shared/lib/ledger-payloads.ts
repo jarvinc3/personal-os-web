@@ -268,6 +268,7 @@ export function buildCreateTransferBody(input: {
   status?: string
   rail?: string
   feeAmount?: string
+  destinationPending?: boolean
 }): PayloadResult<CreateTransferBody> {
   const amount = parseFinanceMoney(input.amount)
   if (amount === null) {
@@ -319,6 +320,9 @@ export function buildCreateTransferBody(input: {
   }
   if (input.rail) {
     body.rail = input.rail
+  }
+  if (input.destinationPending) {
+    body.destinationPending = true
   }
   const feeAmount = optionalTrimmed(input.feeAmount)
   if (feeAmount) {

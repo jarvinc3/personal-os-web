@@ -15,6 +15,7 @@ import {
   useCreateTransfer,
   useUpdateTransfer,
 } from "@/src/modules/finance/shared/hooks/use-transactions"
+import { useCreateSavingsGoalContribution } from "@/src/modules/finance/shared/hooks/use-savings-goals"
 import {
   buildDestinationPickerGroups,
   ledgerTargetsFromGroups,
@@ -29,6 +30,7 @@ import {
   encodeLedgerTarget,
   splitLedgerTarget,
 } from "@/src/modules/finance/shared/lib/ledger-payloads"
+import { buildSavingsGoalContributionBody } from "@/src/modules/finance/shared/lib/planning-payloads"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
 import type { FinanceTransaction } from "@/src/modules/finance/shared/types/entities"
 import { FormTextField } from "@/src/shared/components/layout/form-blocks"
@@ -85,6 +87,7 @@ function transferDefaults(
       transfer?.status === "PENDING"
         ? ("PENDING" as const)
         : ("CONFIRMED" as const),
+    destinationPending: false,
     rail: "" as const,
     feeAmount: "",
     description: transfer?.description ?? "",
@@ -102,6 +105,7 @@ export function TransferForm({
   const isEdit = Boolean(transfer)
   const createMutation = useCreateTransfer()
   const updateMutation = useUpdateTransfer()
+  const addAllocation = useCreateSavingsGoalContribution()
   const activeMutation = isEdit ? updateMutation : createMutation
   const accountsQuery = useAccounts(enabled)
   const cardsQuery = useCards(enabled)
@@ -124,6 +128,7 @@ export function TransferForm({
     institutionsQuery.isSuccess
   const { picker, openPicker, closeHandlerFor } = usePicker<Picker>("none")
   const statusSwitchId = useId()
+  const destinationPendingId = useId()
 
   const {
     control,
@@ -204,6 +209,7 @@ export function TransferForm({
       status: values.status,
       rail: values.rail || undefined,
       feeAmount: values.feeAmount,
+      destinationPending: values.destinationPending,
       fromAccountId: from.accountId,
       toAccountId: to.accountId,
       toCardId: to.cardId,
@@ -220,8 +226,42 @@ export function TransferForm({
         })
         appToast.success({ text1: "Transferencia actualizada" })
       } else {
-        await createMutation.mutateAsync(payload.body)
-        appToast.success({ text1: "Transferencia creada" })
+        const createdTransfer = await createMutation.mutateAsync(payload.body)
+        if (createdTransfer.suggestGoalId) {
+          const goalId = createdTransfer.suggestGoalId
+          const transferGroupId = createdTransfer.transferGroupId
+          appToast.success({
+            text1: "Transferencia creada",
+            text2: "¿Contar este movimiento como aporte a la meta?",
+            duration: 8000,
+            action: {
+              label: "Contar como aporte",
+              onClick: () => {
+                const allocation = buildSavingsGoalContributionBody({
+                  amount: values.amount,
+                  kind: "CONTRIBUTION",
+                  date: wallClockToIso(values.transactionDate),
+                  fromTransferGroupId: transferGroupId,
+                })
+                if (!allocation.ok) {
+                  appToast.error({ text1: allocation.error })
+                  return
+                }
+                addAllocation.mutate(
+                  { goalId, body: allocation.body },
+                  {
+                    onError: (error) =>
+                      appToast.error({
+                        text1: financeErrorMessage(error),
+                      }),
+                  }
+                )
+              },
+            },
+          })
+        } else {
+          appToast.success({ text1: "Transferencia creada" })
+        }
       }
       onDone()
     } catch (error) {
@@ -337,6 +377,28 @@ export function TransferForm({
         </SummarySection>
 
         <SummarySection title="Detalles opcionales" icon={InfoIcon} collapsible>
+          <Controller
+            control={control}
+            name="destinationPending"
+            render={({ field }) => (
+              <Field
+                orientation="horizontal"
+                className="justify-between gap-2 rounded-xl border border-border bg-card px-3 py-2"
+              >
+                <FieldLabel
+                  htmlFor={destinationPendingId}
+                  className="text-sm font-medium"
+                >
+                  El destino aún no lo recibe
+                </FieldLabel>
+                <Switch
+                  id={destinationPendingId}
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </Field>
+            )}
+          />
           <Controller
             control={control}
             name="feeAmount"

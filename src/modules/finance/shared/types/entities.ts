@@ -116,6 +116,7 @@ export type FinanceTransferResult = {
   transferGroupId: string
   debit: FinanceTransaction
   credit: FinanceTransaction
+  suggestGoalId?: string
 }
 
 export type FinanceAnalyticsSummary = {
