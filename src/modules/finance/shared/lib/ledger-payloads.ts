@@ -25,7 +25,30 @@ export type CreateTransferBody = {
   description?: string
   notes?: string
   status?: "PENDING" | "CONFIRMED"
+  rail?: string
+  fee?: { amount: number }
+  destinationPending?: boolean
 }
+
+export type CreateCardPaymentBody = {
+  fromAccountId: string
+  cardId: string
+  amount: number
+  currency?: string
+  transactionDate: string
+  notes?: string
+}
+
+/** A completed movement only accepts its non-monetary fields. */
+export type UpdateTransactionMetadataBody = {
+  categoryId?: string | null
+  merchant?: string | null
+  description?: string | null
+  notes?: string | null
+}
+
+export type UpdateTransactionBody =
+  CreateTransactionBody | UpdateTransactionMetadataBody
 
 export type PayloadResult<T> =
   { ok: true; body: T } | { ok: false; error: string }
@@ -181,6 +204,58 @@ export function buildCreateTransactionBody(
   return { ok: true, body }
 }
 
+export function buildTransactionMetadataBody(input: {
+  categoryId?: string
+  merchant?: string
+  description?: string
+  notes?: string
+}): UpdateTransactionMetadataBody {
+  return {
+    categoryId: optionalId(input.categoryId) ?? null,
+    merchant: optionalTrimmed(input.merchant) ?? null,
+    description: optionalTrimmed(input.description) ?? null,
+    notes: optionalTrimmed(input.notes) ?? null,
+  }
+}
+
+export function buildCreateCardPaymentBody(input: {
+  fromAccountId?: string
+  cardId: string
+  amount: string
+  currency?: string
+  transactionDate: string
+  notes?: string
+}): PayloadResult<CreateCardPaymentBody> {
+  const amount = parseFinanceMoney(input.amount)
+  if (amount === null) {
+    return { ok: false, error: "Monto inválido" }
+  }
+  const transactionDate = optionalTrimmed(input.transactionDate)
+  if (!transactionDate) {
+    return { ok: false, error: "Fecha obligatoria" }
+  }
+  const fromAccountId = optionalId(input.fromAccountId)
+  if (!fromAccountId) {
+    return { ok: false, error: "Elige una cuenta de origen" }
+  }
+
+  const body: CreateCardPaymentBody = {
+    fromAccountId,
+    cardId: input.cardId,
+    amount,
+    transactionDate,
+  }
+  const currency = optionalTrimmed(input.currency)?.toUpperCase()
+  if (currency) {
+    body.currency = currency
+  }
+  const notes = optionalTrimmed(input.notes)
+  if (notes) {
+    body.notes = notes
+  }
+  return { ok: true, body }
+}
+
 export function buildCreateTransferBody(input: {
   fromAccountId?: string
   toAccountId?: string
@@ -191,6 +266,9 @@ export function buildCreateTransferBody(input: {
   description?: string
   notes?: string
   status?: string
+  rail?: string
+  feeAmount?: string
+  destinationPending?: boolean
 }): PayloadResult<CreateTransferBody> {
   const amount = parseFinanceMoney(input.amount)
   if (amount === null) {
@@ -239,6 +317,20 @@ export function buildCreateTransferBody(input: {
   }
   if (input.status === "PENDING" || input.status === "CONFIRMED") {
     body.status = input.status
+  }
+  if (input.rail) {
+    body.rail = input.rail
+  }
+  if (input.destinationPending) {
+    body.destinationPending = true
+  }
+  const feeAmount = optionalTrimmed(input.feeAmount)
+  if (feeAmount) {
+    const parsedFee = parseFinanceMoney(feeAmount)
+    if (parsedFee === null || parsedFee <= 0) {
+      return { ok: false, error: "Monto de comisión inválido" }
+    }
+    body.fee = { amount: parsedFee }
   }
   return { ok: true, body }
 }

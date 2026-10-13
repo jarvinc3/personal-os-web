@@ -7,12 +7,17 @@ import {
 import { FinanceGate } from "@/src/modules/finance/finance-gate"
 import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
 import { MissingRecord } from "@/src/modules/finance/shared/components/layout/missing-record"
+import { LinkTransactionSheet } from "@/src/modules/finance/transactions/components/link-transaction-sheet"
+import { useUnlinkTransaction } from "@/src/modules/finance/shared/hooks/use-transaction-link"
 import {
   useConfirmTransaction,
   useDeleteTransaction,
+  useMarkNotDuplicate,
+  useMergeTransaction,
   useRestoreTransaction,
   useReverseTransaction,
   useTransaction,
+  useUnconfirmTransaction,
 } from "@/src/modules/finance/shared/hooks/use-transactions"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
 import {
@@ -40,6 +45,7 @@ import { RecordOptionsSheet } from "@/src/modules/finance/shared/components/reco
 import { LoadingView } from "@/src/shared/components/layout/loading-view"
 import { SettingsSection } from "@/src/shared/components/layout/settings-section"
 import { Button } from "@/src/shared/components/ui/button"
+import { Badge } from "@/src/shared/components/ui/badge"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { SummaryItem } from "@/src/shared/components/ui/summary"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
@@ -57,6 +63,10 @@ import { useRouter } from "next/navigation"
 import { useMemo, useState } from "react"
 
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
+import {
+  canEditTransaction,
+  canUnlockTransaction,
+} from "@/src/modules/finance/transactions/lib/transaction-edit"
 
 type FinanceTransactionDetailProps = {
   transactionId: string
@@ -79,15 +89,14 @@ function typeLabel(type: string): string {
   return type
 }
 
-function canEdit(transaction: FinanceTransaction): boolean {
-  if (isTransferTransaction(transaction)) {
-    return false
-  }
-  return transaction.type === "DEBIT" || transaction.type === "CREDIT"
-}
-
 function canConfirm(transaction: FinanceTransaction): boolean {
   return transaction.status === "PENDING"
+}
+
+function canUnlock(transaction: FinanceTransaction): boolean {
+  return (
+    !isTransferTransaction(transaction) && canUnlockTransaction(transaction)
+  )
 }
 
 function TransactionDetailScreenBody({
@@ -103,8 +112,40 @@ function TransactionDetailScreenBody({
 
   const detailQuery = useTransaction(isEnabled, transactionId)
   const confirmMutation = useConfirmTransaction()
+  const unconfirmMutation = useUnconfirmTransaction()
   const reverseMutation = useReverseTransaction()
+  const unlinkMutation = useUnlinkTransaction()
   const deleteMutation = useDeleteTransaction()
+  const mergeMutation = useMergeTransaction()
+  const notDuplicateMutation = useMarkNotDuplicate()
+
+  async function onMerge() {
+    if (!tx?.possibleDuplicateOfId) {
+      return
+    }
+    try {
+      await mergeMutation.mutateAsync({
+        id: tx.id,
+        intoId: tx.possibleDuplicateOfId,
+      })
+      appToast.success({ text1: "Movimientos unidos" })
+      router.back()
+    } catch (error) {
+      appToast.error({ text1: financeErrorMessage(error) })
+    }
+  }
+
+  async function onNotDuplicate() {
+    if (!tx) {
+      return
+    }
+    try {
+      await notDuplicateMutation.mutateAsync(tx.id)
+      appToast.success({ text1: "Marcado como no duplicado" })
+    } catch (error) {
+      appToast.error({ text1: financeErrorMessage(error) })
+    }
+  }
   const restoreMutation = useRestoreTransaction()
   const { open: openOptionsSheet, setOpen: setOpenOptionsSheet } =
     useSheetParam(FINANCE_SHEET_KEYS.transactionOptions)
@@ -112,6 +153,7 @@ function TransactionDetailScreenBody({
   const tx = detailQuery.data
   const isMutating =
     confirmMutation.isPending ||
+    unconfirmMutation.isPending ||
     reverseMutation.isPending ||
     deleteMutation.isPending
 
@@ -122,6 +164,18 @@ function TransactionDetailScreenBody({
     try {
       await confirmMutation.mutateAsync(tx.id)
       appToast.success({ text1: "Movimiento confirmado" })
+    } catch (error) {
+      appToast.error({ text1: financeErrorMessage(error) })
+    }
+  }
+
+  async function onUnconfirm() {
+    if (!tx) {
+      return
+    }
+    try {
+      await unconfirmMutation.mutateAsync(tx.id)
+      appToast.success({ text1: "Movimiento desbloqueado para editar" })
     } catch (error) {
       appToast.error({ text1: financeErrorMessage(error) })
     }
@@ -140,6 +194,19 @@ function TransactionDetailScreenBody({
   }
 
   const [confirmOpen, setConfirmOpen] = useState(false)
+  const [linkOpen, setLinkOpen] = useState(false)
+
+  async function onUnlink() {
+    if (!tx) {
+      return
+    }
+    try {
+      await unlinkMutation.mutateAsync(tx.id)
+      appToast.success({ text1: "Vínculo quitado" })
+    } catch (error) {
+      appToast.error({ text1: financeErrorMessage(error) })
+    }
+  }
 
   async function onDelete() {
     if (!tx) {
@@ -213,6 +280,96 @@ function TransactionDetailScreenBody({
             onRetry={() => void detailQuery.refetch()}
             isRetrying={detailQuery.isFetching}
           />
+        </div>
+      ) : null}
+
+      {tx.possibleDuplicateOfId ? (
+        <div className="mx-4 mb-3 flex flex-col gap-2 rounded-2xl border border-border p-3">
+          <div className="flex items-center gap-2">
+            <Badge variant="warning">¿Duplicado?</Badge>
+            <p className="text-sm text-muted-foreground">
+              Puede ser el mismo hecho que otro movimiento.
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={mergeMutation.isPending}
+              onClick={() => void onMerge()}
+            >
+              Unir
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={notDuplicateMutation.isPending}
+              onClick={() => void onNotDuplicate()}
+            >
+              No es duplicado
+            </Button>
+          </div>
+        </div>
+      ) : null}
+
+      {!isTransferTransaction(tx) ? (
+        <div className="mx-4 mb-3 flex flex-col gap-2 rounded-2xl border border-border p-3">
+          <p className="text-sm text-muted-foreground">Planificación</p>
+          {tx.planningLink ? (
+            <>
+              <p className="text-sm font-medium">{tx.planningLink.label}</p>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="self-start"
+                disabled={unlinkMutation.isPending}
+                onClick={() => void onUnlink()}
+              >
+                Quitar vínculo
+              </Button>
+            </>
+          ) : (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="self-start"
+              onClick={() => setLinkOpen(true)}
+            >
+              Vincular a cuota, cobro o meta
+            </Button>
+          )}
+        </div>
+      ) : null}
+
+      {tx.status === "REVERSED" ? (
+        <div className="mx-4 mb-3 flex flex-col gap-2 rounded-2xl border border-border p-3">
+          <div className="flex items-center gap-2">
+            <Badge variant="info">Revertido</Badge>
+            <p className="text-sm text-muted-foreground">
+              {tx.source === "EMAIL"
+                ? "El banco devolvió este movimiento y el saldo volvió a su lugar."
+                : "El saldo de este movimiento volvió a su lugar."}
+            </p>
+          </div>
+          {tx.linkedTransactionId ? (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="self-start"
+              onClick={() =>
+                router.push(
+                  APP_ROUTES.app.financeTransaction(tx.linkedTransactionId!)
+                )
+              }
+            >
+              Ver movimiento original
+            </Button>
+          ) : null}
         </div>
       ) : null}
 
@@ -368,7 +525,7 @@ function TransactionDetailScreenBody({
           />
         </SettingsSection>
 
-        {canConfirm(tx) || canReverseTransaction(tx) ? (
+        {canConfirm(tx) || canReverseTransaction(tx) || canUnlock(tx) ? (
           <div className="flex flex-col gap-2 sm:flex-row">
             {canConfirm(tx) ? (
               <Button
@@ -380,6 +537,19 @@ function TransactionDetailScreenBody({
                   <Spinner data-icon="inline-start" />
                 ) : null}
                 Confirmar
+              </Button>
+            ) : null}
+            {canUnlock(tx) ? (
+              <Button
+                type="button"
+                variant="outline"
+                disabled={isMutating}
+                onClick={() => void onUnconfirm()}
+              >
+                {unconfirmMutation.isPending ? (
+                  <Spinner data-icon="inline-start" />
+                ) : null}
+                Marcar como pendiente
               </Button>
             ) : null}
             {canReverseTransaction(tx) ? (
@@ -404,7 +574,7 @@ function TransactionDetailScreenBody({
         onOpenChange={setOpenOptionsSheet}
         description={formatTransactionDate(tx.transactionDate)}
         options={[
-          ...(canEdit(tx)
+          ...(canEditTransaction(tx) && !isTransferTransaction(tx)
             ? [
                 {
                   id: "edit",
@@ -443,6 +613,14 @@ function TransactionDetailScreenBody({
         pending={deleteMutation.isPending}
         consequences="El saldo de la cuenta se corrige. No se puede deshacer."
         onConfirm={() => void onDelete()}
+      />
+
+      <LinkTransactionSheet
+        open={linkOpen}
+        onOpenChange={setLinkOpen}
+        transactionId={tx.id}
+        display={display}
+        onLinked={() => void detailQuery.refetch()}
       />
     </>
   )

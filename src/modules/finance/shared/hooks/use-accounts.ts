@@ -63,6 +63,19 @@ export function useArchiveAccount() {
   })
 }
 
+export function useUnarchiveAccount() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) =>
+      apiPatch<FinanceAccount>(API_ENDPOINTS.FINANCE.ACCOUNT(id), {
+        isActive: true,
+      }),
+    onSuccess: () => {
+      invalidateAccounts(queryClient)
+    },
+  })
+}
+
 export function useDeleteAccount() {
   const queryClient = useQueryClient()
   return useMutation({

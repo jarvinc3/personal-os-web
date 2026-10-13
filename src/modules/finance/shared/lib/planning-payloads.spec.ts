@@ -130,32 +130,34 @@ describe("buildReceivableBody", () => {
 })
 
 describe("buildSavingsGoalContributionBody", () => {
-  it("sends the amount as a number and leaves the date out when empty", () => {
+  it("sends the amount and the kind", () => {
     const payload = buildSavingsGoalContributionBody({
       amount: "5000",
-      accountId: "acc-1",
+      kind: "CONTRIBUTION",
     })
     assert.equal(payload.ok, true)
     if (!payload.ok) {
       return
     }
     assert.equal(payload.body.amount, 5000)
-    assert.equal(payload.body.accountId, "acc-1")
-    assert.equal("contributedAt" in payload.body, false)
-  })
-
-  it("needs the account the money left", () => {
-    assert.equal(
-      buildSavingsGoalContributionBody({ amount: "5000", accountId: "  " }).ok,
-      false
-    )
+    assert.equal(payload.body.kind, "CONTRIBUTION")
+    assert.equal("date" in payload.body, false)
   })
 
   it("rejects a contribution of zero", () => {
-    assert.equal(
-      buildSavingsGoalContributionBody({ amount: "0", accountId: "acc-1" }).ok,
-      false
-    )
+    assert.equal(buildSavingsGoalContributionBody({ amount: "0" }).ok, false)
+  })
+
+  it("links the transfer that funded the allocation", () => {
+    const payload = buildSavingsGoalContributionBody({
+      amount: "100",
+      fromTransferGroupId: "grp-9",
+    })
+    assert.equal(payload.ok, true)
+    if (!payload.ok) {
+      return
+    }
+    assert.equal(payload.body.fromTransferGroupId, "grp-9")
   })
 })
 
@@ -186,6 +188,7 @@ describe("buildSavingsGoalBody", () => {
     const payload = buildSavingsGoalBody({
       name: "Fondo",
       targetAmount: "5000",
+      accountId: "acc-1",
       currentAmount: "5000",
     })
     assert.equal(payload.ok, true)
@@ -199,7 +202,12 @@ describe("buildSavingsGoalBody", () => {
 
   it("drops the opening amount when updating a goal", () => {
     const payload = buildSavingsGoalBody(
-      { name: "Fondo", targetAmount: "5000", currentAmount: "500" },
+      {
+        name: "Fondo",
+        targetAmount: "5000",
+        accountId: "acc-1",
+        currentAmount: "500",
+      },
       { isUpdate: true }
     )
     assert.equal(payload.ok, true)

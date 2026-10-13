@@ -130,6 +130,7 @@ function TransactionFormScreenBody({
       initialDestination={initialDestination}
       transaction={editingQuery.data ?? null}
       defaultCurrency={config.baseCurrency}
+      defaultAccountId={config.defaultAccountId}
       enabled={isEnabled}
       display={{
         currency: config.baseCurrency,

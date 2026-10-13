@@ -4,6 +4,39 @@ const GMAIL_TOKEN_PREFIX = "Gmail tokens could not be decrypted"
 const GMAIL_TOKEN_ERROR =
   "No se pudo leer el acceso a Gmail. Vuelve a conectar la cuenta."
 
+/** Stable backend codes that the API sends alongside the message. */
+const BACKEND_CODE_MESSAGE_ES: Record<string, string> = {
+  TRANSACTION_LOCKED:
+    "Este movimiento está completado. Márcalo como pendiente para editarlo.",
+  TRANSACTION_IMMUTABLE: "Este movimiento ya no se puede editar.",
+  TRANSACTION_LINKED:
+    "Este movimiento está ligado a otro registro. Edítalo desde ahí.",
+  TRANSFER_LOCKED:
+    "Esta transferencia está completada. Márcala como pendiente para editarla.",
+  SAME_ACCOUNT: "El origen y el destino no pueden ser la misma cuenta.",
+  ACCOUNT_NOT_FOUND: "No encontramos la cuenta.",
+  TRANSFER_TARGET_NOT_ACCOUNT:
+    "El destino de una transferencia debe ser una cuenta. Para pagar una tarjeta usa Pagar tarjeta.",
+  CARD_NOT_FOUND: "No encontramos la tarjeta.",
+  CARD_NOT_CREDIT: "Solo se pagan tarjetas de crédito.",
+  CARD_CURRENCY_MISSING: "La tarjeta no tiene saldo en esa moneda.",
+  PAYMENT_EXCEEDS_INSTALLMENT:
+    "El pago supera la cuota. ¿Quieres aplicar el excedente como abono a capital?",
+  LOAN_HAS_OVERDUE: "Paga primero las cuotas vencidas.",
+  LOAN_NOT_FOUND: "No encontramos el préstamo.",
+  GOAL_ACCOUNT_REQUIRED: "Elige la cuenta donde guardas este dinero.",
+  EARMARK_EXCEEDS_BALANCE: "No tienes suficiente saldo libre en la cuenta.",
+  GOAL_NOT_FOUND: "No encontramos la meta.",
+  RECEIVABLE_EXCESS_UNRESOLVED:
+    "El pago supera lo pendiente. Elige qué hacer con la diferencia.",
+  RECEIVABLE_NOT_FOUND: "No encontramos el cobro.",
+  ALREADY_RESTORED: "Esto ya se restauró.",
+  RESTORE_CONFLICT:
+    "No se puede restaurar: ya existe un registro con los mismos datos.",
+  PARTIAL_OPERATION:
+    "Esta operación está incompleta. Restaura la operación completa.",
+}
+
 /** Backend messages translated once so no raw English reaches the screen. */
 const BACKEND_MESSAGE_ES: Record<string, string> = {
   "Account is not active": "La cuenta no está activa.",
@@ -60,9 +93,17 @@ const BACKEND_MESSAGE_ES: Record<string, string> = {
   "Savings goal not found": "No encontramos la meta.",
 }
 
-export function translateFinanceError(status: number, message: string): string {
+export function translateFinanceError(
+  status: number,
+  message: string,
+  code?: string
+): string {
   if (status >= 500) {
     return SERVER_ERROR
+  }
+  const coded = code ? BACKEND_CODE_MESSAGE_ES[code] : undefined
+  if (coded) {
+    return coded
   }
   const translated = BACKEND_MESSAGE_ES[message]
   if (translated) {

@@ -4,7 +4,7 @@ import { translateFinanceError } from "./finance-error-messages"
 
 export function financeErrorMessage(error: unknown): string {
   if (error instanceof ApiError) {
-    return translateFinanceError(error.status, error.message)
+    return translateFinanceError(error.status, error.message, error.code)
   }
   if (error instanceof Error && error.message) {
     return error.message

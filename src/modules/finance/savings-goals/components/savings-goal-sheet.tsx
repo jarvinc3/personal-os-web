@@ -12,6 +12,7 @@ import {
   useCreateSavingsGoal,
   useUpdateSavingsGoal,
 } from "@/src/modules/finance/shared/hooks/use-savings-goals"
+import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
 import { useDiscardChanges } from "@/src/modules/finance/shared/hooks/use-discard-changes"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
@@ -48,6 +49,8 @@ function toFormValues(
     name: goal?.name ?? "",
     description: goal?.description ?? "",
     targetAmount: goal?.targetAmount ?? "",
+    accountId: goal?.accountId ?? "",
+    mode: goal?.mode ?? "EARMARK",
     currentAmount: goal?.currentAmount ?? "",
     currency: goal?.currency ?? defaultCurrency,
     targetDate: formatPlanningDate(goal?.targetDate),
@@ -73,9 +76,11 @@ export function SavingsGoalSheet({
   const createMutation = useCreateSavingsGoal()
   const updateMutation = useUpdateSavingsGoal()
   const isPending = createMutation.isPending || updateMutation.isPending
+  const accountsQuery = useAccounts(open)
 
   const {
     control,
+    getValues,
     handleSubmit,
     reset,
     setValue,
@@ -115,6 +120,18 @@ export function SavingsGoalSheet({
       reset(toFormValues(goal, defaultCurrency))
     }
   }, [open, goal, defaultCurrency, reset])
+
+  useEffect(() => {
+    if (!open || getValues("accountId")) {
+      return
+    }
+    const firstAccount = (accountsQuery.data ?? []).find(
+      (account) => account.isActive
+    )
+    if (firstAccount) {
+      setValue("accountId", firstAccount.id, { shouldValidate: true })
+    }
+  }, [open, accountsQuery.data, getValues, setValue])
 
   const submitForm = useMemo(
     () => createSheetSubmit(handleSubmit),

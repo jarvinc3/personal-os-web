@@ -2,8 +2,10 @@
 
 import { apiDelete, apiGet, apiPatch, apiPost } from "@/src/config/api-client"
 import type {
+  CreateCardPaymentBody,
   CreateTransactionBody,
   CreateTransferBody,
+  UpdateTransactionBody,
 } from "@/src/modules/finance/shared/lib/ledger-payloads"
 import {
   buildTransactionsSearchParams,
@@ -171,7 +173,7 @@ export function useCreateTransaction() {
 export function useUpdateTransaction() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: ({ id, body }: { id: string; body: CreateTransactionBody }) =>
+    mutationFn: ({ id, body }: { id: string; body: UpdateTransactionBody }) =>
       apiPatch<FinanceTransaction>(API_ENDPOINTS.FINANCE.TRANSACTION(id), body),
     onSuccess: () => invalidateLedger(queryClient),
   })
@@ -186,11 +188,31 @@ export function useCreateTransfer() {
   })
 }
 
+export function useCreateCardPayment() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (body: CreateCardPaymentBody) =>
+      apiPost<FinanceTransferResult>(API_ENDPOINTS.FINANCE.CARD_PAYMENTS, body),
+    onSuccess: () => invalidateLedger(queryClient),
+  })
+}
+
 export function useUpdateTransfer() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: ({ id, body }: { id: string; body: CreateTransferBody }) =>
       apiPatch<{ success: boolean }>(API_ENDPOINTS.FINANCE.TRANSFER(id), body),
+    onSuccess: () => invalidateLedger(queryClient),
+  })
+}
+
+export function useUnconfirmTransfer() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) =>
+      apiPost<{ success: boolean }>(
+        API_ENDPOINTS.FINANCE.TRANSFER_UNCONFIRM(id)
+      ),
     onSuccess: () => invalidateLedger(queryClient),
   })
 }
@@ -201,6 +223,17 @@ export function useConfirmTransaction() {
     mutationFn: (id: string) =>
       apiPost<FinanceTransaction>(
         API_ENDPOINTS.FINANCE.TRANSACTION_CONFIRM(id)
+      ),
+    onSuccess: () => invalidateLedger(queryClient),
+  })
+}
+
+export function useUnconfirmTransaction() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) =>
+      apiPost<FinanceTransaction>(
+        API_ENDPOINTS.FINANCE.TRANSACTION_UNCONFIRM(id)
       ),
     onSuccess: () => invalidateLedger(queryClient),
   })
@@ -232,6 +265,29 @@ export function useRestoreTransaction() {
     mutationFn: (id: string) =>
       apiPost<{ success: boolean }>(
         API_ENDPOINTS.FINANCE.TRANSACTION_RESTORE(id)
+      ),
+    onSuccess: () => invalidateLedger(queryClient),
+  })
+}
+
+export function useMergeTransaction() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, intoId }: { id: string; intoId: string }) =>
+      apiPost<{ success: boolean }>(
+        API_ENDPOINTS.FINANCE.TRANSACTION_MERGE(id),
+        { intoId }
+      ),
+    onSuccess: () => invalidateLedger(queryClient),
+  })
+}
+
+export function useMarkNotDuplicate() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) =>
+      apiPost<{ success: boolean }>(
+        API_ENDPOINTS.FINANCE.TRANSACTION_NOT_DUPLICATE(id)
       ),
     onSuccess: () => invalidateLedger(queryClient),
   })

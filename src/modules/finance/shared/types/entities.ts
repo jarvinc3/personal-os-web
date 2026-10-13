@@ -51,13 +51,38 @@ export const FINANCE_TRANSACTION_STATUS_LABEL: Record<
   CONFIRMED: "Completado",
   DECLINED: "Rechazado",
   CANCELLED: "Cancelado",
-  REVERSED: "Reversado",
+  REVERSED: "Revertido",
+}
+
+export type FinanceTransactionEditability =
+  "FULL" | "METADATA" | "NOTES" | "NONE"
+
+export type FinanceInstrumentHistoryKind =
+  "CREDIT_LIMIT_CHANGED" | "ADJUSTMENT" | "STATEMENT_CLOSED"
+
+export type FinanceInstrumentHistoryItem = {
+  id: string
+  kind: FinanceInstrumentHistoryKind
+  at: string
+  amount: string | null
+  currency: string | null
+  payload: Record<string, unknown>
+}
+
+export type FinanceTransactionLinkKind =
+  "LOAN_INSTALLMENT" | "RECEIVABLE_PAYMENT" | "SAVINGS_CONTRIBUTION"
+
+export type FinanceTransactionPlanningLink = {
+  kind: FinanceTransactionLinkKind
+  targetId: string
+  label: string
 }
 
 export type FinanceTransaction = {
   id: string
   type: FinanceTransactionType
   status: FinanceTransactionStatus
+  editable: FinanceTransactionEditability
   amount: string
   currency: string
   ledgerAmount: string
@@ -85,12 +110,27 @@ export type FinanceTransaction = {
   transferToAccountName: string | null
   transferToCardId: string | null
   transferToCardName: string | null
+  possibleDuplicateOfId?: string | null
+  /** Movimiento con el que este forma un par (por ejemplo, una reversa). */
+  linkedTransactionId?: string | null
+  aiMetadata?: Record<string, unknown> | null
+  /** Cuota, cobro o meta a la que el movimiento quedó vinculado. */
+  planningLink?: FinanceTransactionPlanningLink | null
+  /** Present when the API groups a transfer operation (web default). */
+  kind?: "TRANSACTION" | "OPERATION"
+  operationType?: "TRANSFER"
+  legs?: FinanceOperationLeg[]
+}
+
+export type FinanceOperationLeg = FinanceTransaction & {
+  legRole: string | null
 }
 
 export type FinanceTransferResult = {
   transferGroupId: string
   debit: FinanceTransaction
   credit: FinanceTransaction
+  suggestGoalId?: string
 }
 
 export type FinanceAnalyticsSummary = {
@@ -165,6 +205,8 @@ export type FinanceAccount = {
   accountNumber: string | null
   isDefaultForInstitution?: boolean
   balance: string
+  earmarkedAmount: string
+  freeBalance: string
   color: string | null
   isActive: boolean
   createdAt: string
@@ -198,9 +240,12 @@ export type FinanceCard = {
 }
 
 export const FINANCE_CARD_STATEMENT_STATUSES = [
-  "PENDING",
+  "OPEN",
+  "CLOSED",
   "PARTIAL",
+  "MINIMUM_PAID",
   "PAID",
+  "OVERDUE",
 ] as const
 export type FinanceCardStatementStatus =
   (typeof FINANCE_CARD_STATEMENT_STATUSES)[number]
@@ -209,9 +254,12 @@ export const FINANCE_CARD_STATEMENT_STATUS_LABEL: Record<
   FinanceCardStatementStatus,
   string
 > = {
-  PENDING: "Pendiente",
+  OPEN: "En curso",
+  CLOSED: "Cerrado",
   PARTIAL: "Parcial",
+  MINIMUM_PAID: "Mínimo pagado",
   PAID: "Pagada",
+  OVERDUE: "Vencida",
 }
 
 export type FinanceCardStatement = {
@@ -221,9 +269,31 @@ export type FinanceCardStatement = {
   cycleEnd: string
   dueDate: string | null
   closingBalance: string
-  amountPaid: string
+  minimumPayment: string
+  minimumSource: "IMPORTED" | "ESTIMATED" | "MANUAL"
+  paidAmount: string
   remaining: string
   status: FinanceCardStatementStatus
+}
+
+export type FinanceCardStatementMovement = {
+  id: string
+  type: string
+  status: string
+  amount: string
+  currency: string
+  ledgerAmount: string
+  ledgerCurrency: string
+  transactionDate: string
+  merchant: string | null
+  description: string | null
+  transferGroupId: string | null
+}
+
+export type FinanceCardStatementDetail = {
+  statement: FinanceCardStatement
+  movements: FinanceCardStatementMovement[]
+  payments: FinanceCardStatementMovement[]
 }
 
 export type FinanceInstitution = {
@@ -267,10 +337,34 @@ export type FinanceBudgetCategory = {
   color: string | null
 }
 
+export const FINANCE_BUDGET_ROLLOVERS = [
+  "NONE",
+  "SURPLUS",
+  "SURPLUS_AND_DEFICIT",
+] as const
+export type FinanceBudgetRollover = (typeof FINANCE_BUDGET_ROLLOVERS)[number]
+
+export const FINANCE_BUDGET_ROLLOVER_LABEL: Record<
+  FinanceBudgetRollover,
+  string
+> = {
+  NONE: "Sin arrastre",
+  SURPLUS: "Arrastra el sobrante",
+  SURPLUS_AND_DEFICIT: "Arrastra sobrante y déficit",
+}
+
 export type FinanceBudget = {
   id: string
+  name?: string | null
   categoryId: string
   category?: FinanceBudgetCategory | null
+  /** Full category set; falls back to `category` on older payloads. */
+  categories?: FinanceBudgetCategory[]
+  includeChildren?: boolean
+  rollover?: FinanceBudgetRollover
+  carriedOver?: string
+  effectiveLimit?: string
+  recurring?: boolean
   periodType: FinanceBudgetPeriod
   periodStart: string
   periodEnd: string
@@ -302,6 +396,9 @@ export type FinanceSavingsGoal = {
   currentAmount: string
   currency: string
   targetDate: string | null
+  accountId: string | null
+  mode: "EARMARK" | "DEDICATED"
+  spendReducesProgress: boolean
   isCompleted: boolean
   completedAt: string | null
 }
@@ -312,6 +409,7 @@ export type FinanceSavingsGoalContribution = {
   goalId: string
   amount: string
   contributedAt: string
+  kind: "CONTRIBUTION" | "WITHDRAWAL"
   accountId: string | null
   transactionId: string | null
   notes: string | null
@@ -351,8 +449,24 @@ export type FinanceLoan = {
   nextDueDate: string
   /** Fraction 0–1 as a decimal string, e.g. `"0.12"` = 12%. Null means not provided. */
   interestRate: string | null
+  rateType: "FIXED" | "VARIABLE"
+  insuranceAmount: string | null
+  prepaymentPenaltyPct: string | null
   notes: string | null
   isActive: boolean
+}
+
+export type FinanceLoanInstallmentStatus =
+  "PENDING" | "PARTIAL" | "PAID" | "OVERDUE"
+
+export const FINANCE_LOAN_INSTALLMENT_STATUS_LABEL: Record<
+  FinanceLoanInstallmentStatus,
+  string
+> = {
+  PENDING: "Pendiente",
+  PARTIAL: "Parcial",
+  PAID: "Pagada",
+  OVERDUE: "Vencida",
 }
 
 export type FinanceLoanInstallment = {
@@ -361,7 +475,15 @@ export type FinanceLoanInstallment = {
   installmentNo: number
   dueDate: string
   amount: string
+  principal: string
+  interest: string
+  insurance: string
+  fees: string
+  lateFee: string
+  paidAmount: string
+  status: FinanceLoanInstallmentStatus
   paidAt: string | null
+  transactionId?: string | null
 }
 
 export const FINANCE_RECEIVABLE_STATUSES = [
@@ -369,6 +491,7 @@ export const FINANCE_RECEIVABLE_STATUSES = [
   "PARTIAL",
   "PAID",
   "CANCELLED",
+  "WRITTEN_OFF",
 ] as const
 export type FinanceReceivableStatus =
   (typeof FINANCE_RECEIVABLE_STATUSES)[number]
@@ -381,6 +504,7 @@ export const FINANCE_RECEIVABLE_STATUS_LABEL: Record<
   PARTIAL: "Parcial",
   PAID: "Pagado",
   CANCELLED: "Cancelado",
+  WRITTEN_OFF: "Castigado",
 }
 
 export type FinanceReceivable = {
@@ -389,6 +513,9 @@ export type FinanceReceivable = {
   description: string | null
   amount: string
   paidAmount: string
+  creditBalance: string
+  writtenOffAmount: string
+  writtenOffAt: string | null
   currency: string
   dueDate: string | null
   status: FinanceReceivableStatus

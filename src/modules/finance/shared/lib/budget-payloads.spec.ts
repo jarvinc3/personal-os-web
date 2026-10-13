@@ -29,6 +29,27 @@ describe("buildCreateBudgetBody", () => {
     assert.equal("amountSpent" in result.body, false)
   })
 
+  it("sends the full category set and the rollover options", () => {
+    const builtBody = buildCreateBudgetBody({
+      categoryIds: ["cat-1", "cat-2"],
+      periodType: "MONTHLY",
+      periodStart: "2026-09-01",
+      periodEnd: "2026-09-30",
+      amountLimit: "100",
+      includeChildren: false,
+      rollover: "SURPLUS",
+      recurring: true,
+    })
+    assert.equal(builtBody.ok, true)
+    if (!builtBody.ok) {
+      return
+    }
+    assert.deepEqual(builtBody.body.categoryIds, ["cat-1", "cat-2"])
+    assert.equal(builtBody.body.includeChildren, false)
+    assert.equal(builtBody.body.rollover, "SURPLUS")
+    assert.equal(builtBody.body.recurring, true)
+  })
+
   it("rejects missing category, inverted dates, and NaN money", () => {
     assert.equal(
       buildCreateBudgetBody({
@@ -94,5 +115,17 @@ describe("monthPeriodBounds", () => {
     const bounds = monthPeriodBounds(new Date(2026, 8, 15))
     assert.equal(bounds.periodStart, "2026-09-01")
     assert.equal(bounds.periodEnd, "2026-09-30")
+  })
+
+  it("starts the month on the configured day", () => {
+    const bounds = monthPeriodBounds(new Date(2026, 8, 20), 15)
+    assert.equal(bounds.periodStart, "2026-09-15")
+    assert.equal(bounds.periodEnd, "2026-10-14")
+  })
+
+  it("keeps the previous month when the start day is later", () => {
+    const bounds = monthPeriodBounds(new Date(2026, 8, 10), 15)
+    assert.equal(bounds.periodStart, "2026-08-15")
+    assert.equal(bounds.periodEnd, "2026-09-14")
   })
 })

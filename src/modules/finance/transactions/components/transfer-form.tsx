@@ -3,6 +3,7 @@
 import { FinanceDateField } from "@/src/modules/finance/shared/components/forms/date-field"
 import { FinanceFormScreen } from "@/src/modules/finance/shared/components/forms/form-screen"
 import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
+import type { FinanceMoneyFieldHandle } from "@/src/modules/finance/shared/components/forms/money-field"
 import { FinanceCurrencyPickerSheet } from "@/src/modules/finance/shared/components/pickers/finance-currency-picker-sheet"
 import { DestinationPickerSheet } from "@/src/modules/finance/shared/components/pickers/destination-picker-sheet"
 import { DestinationTrigger } from "@/src/modules/finance/shared/components/pickers/destination-trigger"
@@ -10,11 +11,13 @@ import { CATALOG_NONE } from "@/src/modules/finance/shared/constants/catalog"
 import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
 import { useCards } from "@/src/modules/finance/shared/hooks/use-cards"
 import { useCurrencyForTarget } from "@/src/modules/finance/shared/hooks/use-currency-for-target"
+import { useFinanceAmountEntry } from "@/src/modules/finance/shared/hooks/use-finance-amount-entry"
 import { useInstitutions } from "@/src/modules/finance/shared/hooks/use-institutions"
 import {
   useCreateTransfer,
   useUpdateTransfer,
 } from "@/src/modules/finance/shared/hooks/use-transactions"
+import { useCreateSavingsGoalContribution } from "@/src/modules/finance/shared/hooks/use-savings-goals"
 import {
   buildDestinationPickerGroups,
   ledgerTargetsFromGroups,
@@ -29,6 +32,7 @@ import {
   encodeLedgerTarget,
   splitLedgerTarget,
 } from "@/src/modules/finance/shared/lib/ledger-payloads"
+import { buildSavingsGoalContributionBody } from "@/src/modules/finance/shared/lib/planning-payloads"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
 import type { FinanceTransaction } from "@/src/modules/finance/shared/types/entities"
 import { FormTextField } from "@/src/shared/components/layout/form-blocks"
@@ -43,9 +47,10 @@ import {
   ArrowUpDownIcon,
   FileTextIcon,
   InfoIcon,
+  LandmarkIcon,
   NotebookPenIcon,
 } from "lucide-react"
-import { useCallback, useEffect, useId, useMemo } from "react"
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import {
   transferSchema,
@@ -53,9 +58,11 @@ import {
 } from "@/src/modules/finance/transactions/lib/transfer-form"
 
 type Picker = "none" | "from" | "to" | "currency"
+type GuidedStep = "from" | "to" | "amount" | "done"
 
 type TransferFormProps = {
   defaultCurrency: string
+  defaultAccountId?: string | null
   enabled: boolean
   display: FinanceMoneyDisplay
   transfer?: FinanceTransaction | null
@@ -84,6 +91,9 @@ function transferDefaults(
       transfer?.status === "PENDING"
         ? ("PENDING" as const)
         : ("CONFIRMED" as const),
+    destinationPending: false,
+    rail: "" as const,
+    feeAmount: "",
     description: transfer?.description ?? "",
     notes: transfer?.notes ?? "",
   }
@@ -91,6 +101,7 @@ function transferDefaults(
 
 export function TransferForm({
   defaultCurrency,
+  defaultAccountId = null,
   enabled,
   display,
   transfer = null,
@@ -99,6 +110,7 @@ export function TransferForm({
   const isEdit = Boolean(transfer)
   const createMutation = useCreateTransfer()
   const updateMutation = useUpdateTransfer()
+  const addAllocation = useCreateSavingsGoalContribution()
   const activeMutation = isEdit ? updateMutation : createMutation
   const accountsQuery = useAccounts(enabled)
   const cardsQuery = useCards(enabled)
@@ -121,6 +133,14 @@ export function TransferForm({
     institutionsQuery.isSuccess
   const { picker, openPicker, closeHandlerFor } = usePicker<Picker>("none")
   const statusSwitchId = useId()
+  const destinationPendingId = useId()
+  const { amountEntry, setAmountEntry } = useFinanceAmountEntry()
+  const [guidedStep, setGuidedStep] = useState<GuidedStep>(() =>
+    isEdit ? "done" : "from"
+  )
+  const amountFieldRef = useRef<FinanceMoneyFieldHandle>(null)
+  const guidedFromOpened = useRef(false)
+  const guidedToOpened = useRef(false)
 
   const {
     control,
@@ -161,7 +181,13 @@ export function TransferForm({
     )
     const currentFrom = getValues("fromTarget")
     if (!splitLedgerTarget(currentFrom).accountId) {
-      const nextFrom = accountTargets[0]
+      const preferredFrom = defaultAccountId
+        ? encodeLedgerTarget("account", defaultAccountId)
+        : null
+      const nextFrom =
+        preferredFrom && accountTargets.includes(preferredFrom)
+          ? preferredFrom
+          : accountTargets[0]
       if (nextFrom) {
         setValue("fromTarget", nextFrom, { shouldValidate: true })
       }
@@ -178,7 +204,7 @@ export function TransferForm({
         setValue("toTarget", nextTo, { shouldValidate: true })
       }
     }
-  }, [accounts, getValues, groups, setValue, targetsReady])
+  }, [accounts, defaultAccountId, getValues, groups, setValue, targetsReady])
 
   useCurrencyForTarget(
     fromTarget,
@@ -188,6 +214,37 @@ export function TransferForm({
     applyTargetCurrency,
     !isEdit
   )
+
+  useEffect(() => {
+    if (isEdit || guidedStep !== "from" || guidedFromOpened.current) {
+      return
+    }
+    guidedFromOpened.current = true
+    openPicker("from")
+  }, [isEdit, guidedStep, openPicker])
+
+  useEffect(() => {
+    if (isEdit || guidedStep !== "to" || guidedToOpened.current) {
+      return
+    }
+    guidedToOpened.current = true
+    openPicker("to")
+  }, [isEdit, guidedStep, openPicker])
+
+  function advanceToDestination() {
+    if (isEdit || guidedStep !== "from") {
+      return
+    }
+    setGuidedStep("to")
+  }
+
+  function advanceToAmount() {
+    if (isEdit || guidedStep !== "to") {
+      return
+    }
+    setGuidedStep("amount")
+    window.setTimeout(() => amountFieldRef.current?.focusAmount(), 0)
+  }
 
   const onSubmit = handleSubmit(async (values) => {
     const from = splitLedgerTarget(values.fromTarget)
@@ -199,6 +256,9 @@ export function TransferForm({
       description: values.description,
       notes: values.notes,
       status: values.status,
+      rail: values.rail || undefined,
+      feeAmount: values.feeAmount,
+      destinationPending: values.destinationPending,
       fromAccountId: from.accountId,
       toAccountId: to.accountId,
       toCardId: to.cardId,
@@ -215,8 +275,42 @@ export function TransferForm({
         })
         appToast.success({ text1: "Transferencia actualizada" })
       } else {
-        await createMutation.mutateAsync(payload.body)
-        appToast.success({ text1: "Transferencia creada" })
+        const createdTransfer = await createMutation.mutateAsync(payload.body)
+        if (createdTransfer.suggestGoalId) {
+          const goalId = createdTransfer.suggestGoalId
+          const transferGroupId = createdTransfer.transferGroupId
+          appToast.success({
+            text1: "Transferencia creada",
+            text2: "¿Contar este movimiento como aporte a la meta?",
+            duration: 8000,
+            action: {
+              label: "Contar como aporte",
+              onClick: () => {
+                const allocation = buildSavingsGoalContributionBody({
+                  amount: values.amount,
+                  kind: "CONTRIBUTION",
+                  date: wallClockToIso(values.transactionDate),
+                  fromTransferGroupId: transferGroupId,
+                })
+                if (!allocation.ok) {
+                  appToast.error({ text1: allocation.error })
+                  return
+                }
+                addAllocation.mutate(
+                  { goalId, body: allocation.body },
+                  {
+                    onError: (error) =>
+                      appToast.error({
+                        text1: financeErrorMessage(error),
+                      }),
+                  }
+                )
+              },
+            },
+          })
+        } else {
+          appToast.success({ text1: "Transferencia creada" })
+        }
       }
       onDone()
     } catch (error) {
@@ -284,6 +378,9 @@ export function TransferForm({
                 currency={currency || defaultCurrency}
                 currencyError={errors.currency?.message}
                 onCurrencyPress={() => openPicker("currency")}
+                entryMode={amountEntry}
+                onEntryModeChange={setAmountEntry}
+                fieldRef={amountFieldRef}
               />
             )}
           />
@@ -334,6 +431,42 @@ export function TransferForm({
         <SummarySection title="Detalles opcionales" icon={InfoIcon} collapsible>
           <Controller
             control={control}
+            name="destinationPending"
+            render={({ field }) => (
+              <Field
+                orientation="horizontal"
+                className="justify-between gap-2 rounded-xl border border-border bg-card px-3 py-2"
+              >
+                <FieldLabel
+                  htmlFor={destinationPendingId}
+                  className="text-sm font-medium"
+                >
+                  El destino aún no lo recibe
+                </FieldLabel>
+                <Switch
+                  id={destinationPendingId}
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </Field>
+            )}
+          />
+          <Controller
+            control={control}
+            name="feeAmount"
+            render={({ field }) => (
+              <FormTextField
+                label="Comisión (opcional)"
+                icon={LandmarkIcon}
+                value={field.value}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+                error={errors.feeAmount?.message}
+              />
+            )}
+          />
+          <Controller
+            control={control}
             name="description"
             render={({ field }) => (
               <FormTextField
@@ -380,7 +513,7 @@ export function TransferForm({
         institutions={institutions}
         accounts={accounts}
         cards={cards}
-        accountsOnly={picker === "from"}
+        accountsOnly={picker === "from" || picker === "to"}
         display={{ ...display, currency: currency || display.currency }}
         excludeTarget={
           picker === "to" ? fromTarget : picker === "from" ? toTarget : null
@@ -392,6 +525,11 @@ export function TransferForm({
             return
           }
           setValue(field, next, { shouldValidate: true })
+          if (field === "fromTarget") {
+            advanceToDestination()
+            return
+          }
+          advanceToAmount()
         }}
       />
     </>

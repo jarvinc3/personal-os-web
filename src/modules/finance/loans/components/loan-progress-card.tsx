@@ -25,7 +25,7 @@ type LoanProgressCardProps = {
     logoUrl?: string | null
     color?: string | null
   } | null
-  onPress: () => void
+  href: string
 }
 
 export function LoanSurfaceMark({
@@ -64,7 +64,7 @@ export function LoanProgressCard({
   loan,
   display,
   institution,
-  onPress,
+  href,
 }: LoanProgressCardProps) {
   const money = { ...display, currency: loan.currency }
   const { paidOff, progress } = loanProgressSummary(loan)
@@ -128,7 +128,7 @@ export function LoanProgressCard({
           ) : null}
         </span>
       }
-      onPress={onPress}
+      href={href}
     />
   )
 }

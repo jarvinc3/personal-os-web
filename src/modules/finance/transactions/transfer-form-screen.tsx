@@ -53,6 +53,7 @@ function TransferCreateScreenBody() {
         showCents: config.display.showCents,
         compactNumbers: config.display.compactNumbers,
       }}
+      defaultAccountId={config.defaultAccountId}
       onDone={handleBack}
     />
   )
@@ -129,6 +130,7 @@ function TransferEditScreenBody({ transactionId }: TransferEditScreenProps) {
         compactNumbers: config.display.compactNumbers,
       }}
       transfer={transfer}
+      defaultAccountId={config.defaultAccountId}
       onDone={handleBack}
     />
   )

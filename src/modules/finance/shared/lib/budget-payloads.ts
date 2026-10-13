@@ -4,12 +4,16 @@ const PERIODS = ["MONTHLY", "BIWEEKLY", "CUSTOM"] as const
 export type CreateBudgetPeriod = (typeof PERIODS)[number]
 
 export type CreateBudgetBody = {
-  categoryId: string
+  categoryIds: string[]
+  categoryId?: string
   periodType: CreateBudgetPeriod
   periodStart: string
   periodEnd: string
   amountLimit: number
   alertThresholdPct?: number
+  includeChildren?: boolean
+  rollover?: "NONE" | "SURPLUS" | "SURPLUS_AND_DEFICIT"
+  recurring?: boolean
 }
 
 export type PayloadResult<T> =
@@ -23,14 +27,22 @@ export function dateInputValue(date: Date): string {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
 }
 
-export function monthPeriodBounds(now = new Date()): {
+export function monthPeriodBounds(
+  now = new Date(),
+  monthStartDay = 1
+): {
   periodStart: string
   periodEnd: string
 } {
+  const day = Math.min(Math.max(Math.trunc(monthStartDay), 1), 28)
+  const start =
+    now.getDate() >= day
+      ? new Date(now.getFullYear(), now.getMonth(), day)
+      : new Date(now.getFullYear(), now.getMonth() - 1, day)
   return {
-    periodStart: dateInputValue(new Date(now.getFullYear(), now.getMonth(), 1)),
+    periodStart: dateInputValue(start),
     periodEnd: dateInputValue(
-      new Date(now.getFullYear(), now.getMonth() + 1, 0)
+      new Date(start.getFullYear(), start.getMonth() + 1, day - 1)
     ),
   }
 }
@@ -48,12 +60,13 @@ export function biweeklyPeriodBounds(now = new Date()): {
 
 export function boundsForPeriod(
   periodType: string,
-  now = new Date()
+  options: { now?: Date; monthStartDay?: number } = {}
 ): { periodStart: string; periodEnd: string } {
+  const now = options.now ?? new Date()
   if (periodType === "BIWEEKLY") {
     return biweeklyPeriodBounds(now)
   }
-  return monthPeriodBounds(now)
+  return monthPeriodBounds(now, options.monthStartDay ?? 1)
 }
 
 export function budgetPctUsed(
@@ -70,17 +83,26 @@ export function budgetPctUsed(
 
 export function buildCreateBudgetBody(input: {
   categoryId?: string
+  categoryIds?: string[]
   periodType: string
   periodStart: string
   periodEnd: string
   amountLimit: string
   alertThresholdPct?: string
+  includeChildren?: boolean
+  rollover?: "NONE" | "SURPLUS" | "SURPLUS_AND_DEFICIT"
+  recurring?: boolean
 }): PayloadResult<CreateBudgetBody> {
   if (!PERIODS.includes(input.periodType as CreateBudgetPeriod)) {
     return { ok: false, error: "Periodo inválido" }
   }
-  const categoryId = input.categoryId?.trim()
-  if (!categoryId) {
+  const categoryIds =
+    input.categoryIds && input.categoryIds.length > 0
+      ? input.categoryIds
+      : input.categoryId?.trim()
+        ? [input.categoryId.trim()]
+        : []
+  if (categoryIds.length === 0) {
     return { ok: false, error: "Elige una categoría" }
   }
   const periodStart = input.periodStart.trim()
@@ -99,11 +121,21 @@ export function buildCreateBudgetBody(input: {
     return { ok: false, error: "Tope inválido" }
   }
   const body: CreateBudgetBody = {
-    categoryId,
+    categoryIds,
+    categoryId: categoryIds[0],
     periodType: input.periodType as CreateBudgetPeriod,
     periodStart,
     periodEnd,
     amountLimit,
+  }
+  if (input.includeChildren !== undefined) {
+    body.includeChildren = input.includeChildren
+  }
+  if (input.rollover) {
+    body.rollover = input.rollover
+  }
+  if (input.recurring !== undefined) {
+    body.recurring = input.recurring
   }
   const thresholdRaw = input.alertThresholdPct?.trim()
   if (thresholdRaw) {

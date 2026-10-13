@@ -2,6 +2,7 @@ import assert from "node:assert/strict"
 import { describe, it } from "node:test"
 
 import {
+  countSkippedDuplicates,
   emailOutcomeLabel,
   hasRunningEmailSync,
   RUNNING_SYNC_REFETCH_MS,
@@ -43,5 +44,17 @@ describe("email sync display labels", () => {
     assert.equal(emailOutcomeLabel("PENDING_ASSIGNMENT"), "Por asignar")
     assert.equal(emailOutcomeLabel("PENDING_AMOUNT"), "Falta el monto")
     assert.equal(emailOutcomeLabel("SKIPPED_NOT_TX"), "No es movimiento")
+    assert.equal(emailOutcomeLabel("SKIPPED_DUPLICATE"), "Duplicado")
+  })
+
+  it("counts the messages the sync skipped as duplicates", () => {
+    assert.equal(
+      countSkippedDuplicates([
+        { outcome: "IMPORTED" },
+        { outcome: "SKIPPED_DUPLICATE" },
+        { outcome: "SKIPPED_DUPLICATE" },
+      ]),
+      2
+    )
   })
 })

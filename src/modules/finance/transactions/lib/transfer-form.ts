@@ -6,6 +6,16 @@ import {
   isPositiveAmountInput,
 } from "@/src/modules/finance/shared/lib/ledger-form"
 
+export const TRANSFER_RAILS = ["SAME_BANK", "ACH", "LBTR", "OTHER"] as const
+export type TransferRail = (typeof TRANSFER_RAILS)[number]
+
+export const TRANSFER_RAIL_LABEL: Record<TransferRail, string> = {
+  SAME_BANK: "Mismo banco",
+  ACH: "ACH (día laborable)",
+  LBTR: "LBTR (al instante)",
+  OTHER: "Otro",
+}
+
 export const transferSchema = z
   .object({
     amount: z
@@ -23,6 +33,15 @@ export const transferSchema = z
       .refine(isLedgerTargetInput, "Elige una cuenta de origen"),
     toTarget: z.string().refine(isLedgerTargetInput, "Elige destino"),
     status: z.enum(["PENDING", "CONFIRMED"]),
+    destinationPending: z.boolean(),
+    rail: z.union([z.literal(""), z.enum(TRANSFER_RAILS)]),
+    feeAmount: z
+      .string()
+      .trim()
+      .refine(
+        (value) => value === "" || isPositiveAmountInput(value),
+        "Monto de comisión inválido"
+      ),
     description: z.string(),
     notes: z.string(),
   })

@@ -84,6 +84,8 @@ export const loanWizardSchema = z
     installment: z.string(),
     accountId: z.string(),
     disbursementDate: z.string().trim().min(1, "Fecha obligatoria"),
+    rateType: z.enum(["FIXED", "VARIABLE"]),
+    insuranceAmount: z.string(),
     notes: z.string().max(500),
   })
   .superRefine((values, ctx) => {

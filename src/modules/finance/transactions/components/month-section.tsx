@@ -9,6 +9,7 @@ import {
   type FinanceMoneyDisplay,
 } from "@/src/modules/finance/shared/lib/money"
 import {
+  isInactiveTransactionStatus,
   isTransferTransaction,
   movementSign,
   signedAmount,
@@ -16,6 +17,8 @@ import {
 } from "@/src/modules/finance/shared/lib/transactions-query"
 import type { FinanceCategory } from "@/src/modules/finance/shared/types/entities"
 import { SummaryItem } from "@/src/shared/components/ui/summary"
+import { Badge } from "@/src/shared/components/ui/badge"
+import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { cn } from "@/src/shared/lib/utils"
 import {
   ArrowDownLeftIcon,
@@ -31,7 +34,6 @@ type FinanceMonthSectionProps = {
   display: FinanceMoneyDisplay
   isActive: boolean
   stickyOffset: number
-  onTransactionPress: (id: string) => void
 }
 
 export function FinanceMonthSection({
@@ -40,7 +42,6 @@ export function FinanceMonthSection({
   display,
   isActive,
   stickyOffset,
-  onTransactionPress,
 }: FinanceMonthSectionProps) {
   const headingId = `month-label-${month.key}`
   const categoryById = new Map(
@@ -54,12 +55,12 @@ export function FinanceMonthSection({
       style={{ scrollMarginTop: stickyOffset }}
       className="flex flex-col gap-4"
     >
-      <div className="relative h-40 overflow-hidden rounded-2xl">
+      <div className="relative h-24 overflow-hidden">
         <Image
           src={month.bannerSrc}
           alt=""
           fill
-          sizes="(max-width: 640px) 100vw, 64rem"
+          sizes="(max-width: 640px) 100vw, 20rem"
           className="object-cover"
           priority={isActive}
         />
@@ -97,6 +98,9 @@ export function FinanceMonthSection({
               <div className="rounded-2xl border border-border bg-card">
                 {day.items.map((transaction, index) => {
                   const isTransfer = isTransferTransaction(transaction)
+                  const isInactive = isInactiveTransactionStatus(
+                    transaction.status
+                  )
                   const category = transaction.categoryId
                     ? categoryById.get(transaction.categoryId)
                     : undefined
@@ -117,20 +121,38 @@ export function FinanceMonthSection({
                       transaction.description ??
                       transaction.accountName ??
                       "Movimiento")
+                  const feeLeg = transaction.legs?.find(
+                    (leg) => leg.legRole === "FEE"
+                  )
+                  const instrumentLine =
+                    transaction.accountName || transaction.cardName ? (
+                      <TransactionInstrument
+                        transaction={transaction}
+                        suffix={formatFinanceTimeLabel(
+                          transaction.transactionDate
+                        )}
+                      />
+                    ) : null
+                  const description =
+                    instrumentLine || feeLeg ? (
+                      <span className="flex flex-col gap-0.5">
+                        {instrumentLine}
+                        {feeLeg ? (
+                          <span className="text-xs text-muted-foreground">
+                            Comisión{" "}
+                            {formatFinanceMoney(feeLeg.amount, {
+                              ...display,
+                              currency: feeLeg.currency,
+                            })}
+                          </span>
+                        ) : null}
+                      </span>
+                    ) : undefined
                   return (
                     <SummaryItem
                       key={transaction.id}
                       title={title}
-                      description={
-                        transaction.accountName || transaction.cardName ? (
-                          <TransactionInstrument
-                            transaction={transaction}
-                            suffix={formatFinanceTimeLabel(
-                              transaction.transactionDate
-                            )}
-                          />
-                        ) : undefined
-                      }
+                      description={description}
                       leading={
                         icon ? (
                           <span>{icon}</span>
@@ -152,6 +174,7 @@ export function FinanceMonthSection({
                         ) : null
                       }
                       accentColor={color}
+                      className={cn(isInactive && "opacity-50")}
                       value={
                         <span
                           className={cn(
@@ -160,17 +183,23 @@ export function FinanceMonthSection({
                               "text-destructive",
                             !isTransfer &&
                               movementSign(transaction) === "+" &&
-                              "text-success"
+                              "text-success",
+                            isInactive && "text-muted-foreground line-through"
                           )}
                         >
                           {signedAmount(transaction, display)}
                         </span>
                       }
                       trailing={
-                        <TransactionStatusMark status={transaction.status} />
+                        <span className="flex items-center gap-1.5">
+                          {transaction.possibleDuplicateOfId ? (
+                            <Badge variant="warning">¿Duplicado?</Badge>
+                          ) : null}
+                          <TransactionStatusMark status={transaction.status} />
+                        </span>
                       }
                       showChevron={false}
-                      onPress={() => onTransactionPress(transaction.id)}
+                      href={APP_ROUTES.app.financeTransaction(transaction.id)}
                       isLast={index === day.items.length - 1}
                     />
                   )

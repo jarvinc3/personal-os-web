@@ -33,6 +33,7 @@ export type FinanceTransactionsQuery = {
   dateFrom?: string
   dateTo?: string
   search?: string
+  possibleDuplicates?: boolean
 }
 
 const OPTIONAL_KEYS = [
@@ -52,9 +53,14 @@ export function buildTransactionsSearchParams(
 ): string {
   const params = new URLSearchParams({
     limit: String(query.limit),
+    // The web always reads transfers as one grouped operation with its legs.
+    groupOperations: "true",
   })
   if (query.cursor) {
     params.set("cursor", query.cursor)
+  }
+  if (query.possibleDuplicates) {
+    params.set("possibleDuplicates", "true")
   }
   for (const key of OPTIONAL_KEYS) {
     const value = query[key]
@@ -113,6 +119,19 @@ export function isTransferTransaction(
   item: Pick<FinanceTransaction, "type" | "transferGroupId">
 ): boolean {
   return item.type === "TRANSFER" || Boolean(item.transferGroupId)
+}
+
+const NON_COUNTING_STATUSES: ReadonlySet<FinanceTransactionStatus> = new Set([
+  "REVERSED",
+  "CANCELLED",
+  "DECLINED",
+])
+
+/** Reversed, cancelled and declined movements never add to a total. */
+export function isInactiveTransactionStatus(
+  status: FinanceTransactionStatus
+): boolean {
+  return NON_COUNTING_STATUSES.has(status)
 }
 
 export function transactionInstrumentLabel(
@@ -174,12 +193,25 @@ export function signedAmount(
 export function visibleTransactionTotals(
   items: Pick<
     FinanceTransaction,
-    "type" | "amountBaseCurrency" | "transferGroupId"
+    "type" | "amountBaseCurrency" | "transferGroupId" | "status" | "legs"
   >[]
 ): { income: number; expenses: number } {
   return items.reduce(
     (totals, item) => {
-      if (isTransferTransaction(item)) {
+      for (const leg of item.legs ?? []) {
+        if (leg.legRole !== "FEE" || isInactiveTransactionStatus(leg.status)) {
+          continue
+        }
+        const fee = parseFinanceMoney(leg.amountBaseCurrency)
+        if (fee === null) {
+          continue
+        }
+        totals.expenses += fee
+      }
+      if (
+        isTransferTransaction(item) ||
+        isInactiveTransactionStatus(item.status)
+      ) {
         return totals
       }
       const amount = parseFinanceMoney(item.amountBaseCurrency)

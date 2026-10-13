@@ -16,6 +16,7 @@ import {
   useReceivablePayments,
   useReceivables,
   useUpdateReceivable,
+  useWriteOffReceivable,
 } from "@/src/modules/finance/shared/hooks/use-receivables"
 import {
   financeErrorMessage,
@@ -54,6 +55,7 @@ import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { appToast } from "@/src/shared/lib/app-toast"
 import {
   ArchiveIcon,
+  HandCoinsIcon,
   HandshakeIcon,
   MoreVerticalIcon,
   PencilIcon,
@@ -73,6 +75,7 @@ const STATUS_VARIANT: Record<
   PARTIAL: "info",
   PAID: "success",
   CANCELLED: "secondary",
+  WRITTEN_OFF: "secondary",
 }
 
 type FinanceReceivableDetailProps = {
@@ -126,8 +129,22 @@ function ReceivableDetailScreenBody({
   const deleteReceivable = useDeleteReceivable()
   const restoreReceivable = useRestoreReceivable()
   const updateReceivable = useUpdateReceivable()
+  const writeOffReceivable = useWriteOffReceivable()
   const [optionsOpen, setOptionsOpen] = useState(false)
   const [confirmOpen, setConfirmOpen] = useState(false)
+
+  async function onWriteOff() {
+    if (!receivable) {
+      return
+    }
+    try {
+      await writeOffReceivable.mutateAsync({ receivableId: receivable.id })
+      appToast.success({ text1: "Deuda castigada" })
+      setOptionsOpen(false)
+    } catch (error) {
+      appToast.error({ text1: financeErrorMessage(error) })
+    }
+  }
 
   async function onCancelReceivable() {
     if (!receivable) {
@@ -338,6 +355,15 @@ function ReceivableDetailScreenBody({
             disabled:
               updateReceivable.isPending || receivable.status === "CANCELLED",
             onPress: () => void onCancelReceivable(),
+          },
+          {
+            id: "write-off",
+            title: "Castigar deuda",
+            icon: HandCoinsIcon,
+            disabled:
+              writeOffReceivable.isPending ||
+              receivable.status === "WRITTEN_OFF",
+            onPress: () => void onWriteOff(),
           },
           {
             id: "delete",

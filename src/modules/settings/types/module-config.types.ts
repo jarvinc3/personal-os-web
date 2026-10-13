@@ -13,6 +13,24 @@ export type FinanceModuleConfig = {
     showCents: boolean
     compactNumbers: boolean
   }
+  /** Entrada de monto con la que abren los formularios de Finanzas. */
+  amountEntry: "keyboard" | "calculator"
+  /** Ingreso fijo del usuario; sugerencia para una nómina sin monto. */
+  fixedIncome: {
+    enabled: boolean
+    amount: number
+    frequency: "BIWEEKLY" | "MONTHLY"
+    payDays: number[]
+    accountId: string | null
+  }
+  /** Cuenta que se propone primero en gastos y transferencias. */
+  defaultAccountId: string | null
+  /** Día del mes en que arranca el mes financiero (1-28). */
+  monthStartDay: number
+  reminders: {
+    /** Días antes del vencimiento de la tarjeta para avisar. */
+    cardDueDaysBefore: number
+  }
   notifications: {
     budgetAlerts: boolean
     aiSuggestions: boolean
@@ -25,6 +43,8 @@ export type FinanceModuleConfig = {
     enabled: boolean
     automatic: boolean
     autoCategorize: boolean
+    /** DIRECT confirma lo importado; PENDING lo deja por confirmar. */
+    mode: "DIRECT" | "PENDING"
     schedule:
       | { mode: "interval"; everyMinutes: number }
       | { mode: "times"; times: string[] }

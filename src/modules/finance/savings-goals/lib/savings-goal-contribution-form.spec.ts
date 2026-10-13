@@ -9,6 +9,7 @@ describe("savingsGoalContributionSchema", () => {
       savingsGoalContributionSchema.safeParse({
         amount: "25",
         accountId: "acc-1",
+        kind: "CONTRIBUTION",
         contributedAt: "",
         notes: "",
       }).success,
@@ -21,6 +22,7 @@ describe("savingsGoalContributionSchema", () => {
       savingsGoalContributionSchema.safeParse({
         amount: "25",
         accountId: "  ",
+        kind: "CONTRIBUTION",
         contributedAt: "",
         notes: "",
       }).success,
@@ -33,6 +35,7 @@ describe("savingsGoalContributionSchema", () => {
       savingsGoalContributionSchema.safeParse({
         amount: "   ",
         accountId: "acc-1",
+        kind: "CONTRIBUTION",
         contributedAt: "",
         notes: "",
       }).success,

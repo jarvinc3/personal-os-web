@@ -14,9 +14,14 @@ import {
 import { InputGroupButton } from "@/src/shared/components/ui/input-group"
 import { cn } from "@/src/shared/lib/utils"
 import { CalculatorIcon, KeyboardIcon } from "lucide-react"
-import { useState } from "react"
+import { useImperativeHandle, useRef, useState } from "react"
+import type { RefObject } from "react"
 
 type AmountEntryMode = "keyboard" | "calculator"
+
+export type FinanceMoneyFieldHandle = {
+  focusAmount: () => void
+}
 
 type FinanceMoneyFieldProps = {
   amount: string
@@ -32,6 +37,11 @@ type FinanceMoneyFieldProps = {
   /** Cuando existe, un botón al lado abre el selector de moneda. */
   onCurrencyPress?: () => void
   currencyError?: string
+  /** Modo persistido del usuario; si falta, el campo lo maneja solo. */
+  entryMode?: AmountEntryMode
+  onEntryModeChange?: (mode: AmountEntryMode) => void
+  /** Permite pedir el foco desde el flujo guiado. */
+  fieldRef?: RefObject<FinanceMoneyFieldHandle | null>
 }
 
 export function FinanceMoneyField({
@@ -45,20 +55,45 @@ export function FinanceMoneyField({
   currency,
   onCurrencyPress,
   currencyError,
+  entryMode,
+  onEntryModeChange,
+  fieldRef,
 }: FinanceMoneyFieldProps) {
-  const [entryMode, setEntryMode] = useState<AmountEntryMode>("keyboard")
+  const [localEntryMode, setLocalEntryMode] =
+    useState<AmountEntryMode>("keyboard")
   const [calculatorOpen, setCalculatorOpen] = useState(false)
-  const usingCalculator = entryMode === "calculator"
+  const activeEntryMode = entryMode ?? localEntryMode
+  const usingCalculator = activeEntryMode === "calculator"
   const showsCurrencyButton = Boolean(onCurrencyPress)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  useImperativeHandle(
+    fieldRef,
+    () => ({
+      focusAmount() {
+        if (usingCalculator) {
+          setCalculatorOpen(true)
+          return
+        }
+        inputRef.current?.focus()
+      },
+    }),
+    [usingCalculator]
+  )
+
+  function changeEntryMode(next: AmountEntryMode) {
+    setLocalEntryMode(next)
+    onEntryModeChange?.(next)
+  }
 
   function openCalculator() {
-    setEntryMode("calculator")
+    changeEntryMode("calculator")
     setCalculatorOpen(true)
   }
 
   function toggleEntryMode() {
     if (usingCalculator) {
-      setEntryMode("keyboard")
+      changeEntryMode("keyboard")
       setCalculatorOpen(false)
       return
     }
@@ -84,6 +119,7 @@ export function FinanceMoneyField({
             disabled={disabled}
             readOnly={usingCalculator}
             onReadOnlyActivate={openCalculator}
+            inputRef={inputRef}
             trailing={
               <InputGroupButton
                 size="icon-sm"
@@ -92,6 +128,7 @@ export function FinanceMoneyField({
                 aria-label={
                   usingCalculator ? "Usar teclado" : "Abrir calculadora"
                 }
+                onMouseDown={(event) => event.preventDefault()}
                 onClick={toggleEntryMode}
               >
                 {usingCalculator ? <CalculatorIcon /> : <KeyboardIcon />}
@@ -114,6 +151,7 @@ export function FinanceMoneyField({
               variant="outline"
               className="h-14 rounded-2xl px-3 text-base"
               disabled={disabled}
+              onMouseDown={(event) => event.preventDefault()}
               onClick={onCurrencyPress}
             >
               <CurrencyTriggerLabel code={currency ?? ""} />

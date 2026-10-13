@@ -6,6 +6,7 @@ import { useProfileSheetFormSync } from "@/src/modules/settings/hooks/use-profil
 import { useUserModuleConfig } from "@/src/modules/settings/hooks/use-user-module-config"
 import type { FinanceModuleConfig } from "@/src/modules/settings/types/module-config.types"
 import {
+  FormTextField,
   OptionRow,
   SwitchFieldRow,
 } from "@/src/shared/components/layout/form-blocks"
@@ -22,6 +23,7 @@ import {
   TimePairWheels,
 } from "@/src/shared/components/ui/wheel-picker"
 import { getModule } from "@/src/shared/constants/module-registry"
+import { useAccounts } from "@/src/modules/finance"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { formatTimeForDisplay } from "@/src/shared/lib/date-format"
@@ -34,9 +36,12 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
   BarChart3,
+  BellRing,
+  Calculator,
   CalendarClock,
   CalendarCog,
   CalendarDays,
+  CalendarRange,
   ChartBarIcon,
   CheckIcon,
   Clock,
@@ -44,6 +49,9 @@ import {
   CreditCard,
   DollarSign,
   FileBarChart,
+  HandCoins,
+  Keyboard,
+  Landmark,
   Mail,
   PencilIcon,
   PlusIcon,
@@ -66,6 +74,7 @@ import {
   MAX_EMAIL_SYNC_TIMES,
   MIN_EMAIL_SYNC_INTERVAL_MINUTES,
   financeModuleSchema,
+  parsePayDays,
   type FinanceModuleFormValues,
 } from "@/src/modules/settings/lib/finance-module-form"
 
@@ -334,6 +343,48 @@ const PERIOD_OPTIONS: {
   { value: "year", label: "Año", description: "Vista agregada por año." },
 ]
 
+function AccountChoiceList({
+  accounts,
+  selectedId,
+  onSelect,
+  noneLabel,
+}: {
+  accounts: { id: string; name: string; currency: string }[]
+  selectedId: string
+  onSelect: (accountId: string) => void
+  noneLabel: string
+}) {
+  return (
+    <>
+      <OptionRow
+        icon={Wallet}
+        iconColor={MODULE_ACCENT}
+        label={noneLabel}
+        selected={selectedId === ""}
+        onPress={() => onSelect("")}
+        trailing={selectedId === "" ? <CheckIcon /> : null}
+      />
+      {accounts.map((account) => (
+        <OptionRow
+          key={account.id}
+          icon={Landmark}
+          iconColor={MODULE_ACCENT}
+          label={account.name}
+          description={account.currency}
+          selected={selectedId === account.id}
+          onPress={() => onSelect(account.id)}
+          trailing={selectedId === account.id ? <CheckIcon /> : null}
+        />
+      ))}
+      {accounts.length === 0 ? (
+        <p className="px-1 text-sm text-muted-foreground">
+          No hay cuentas todavía.
+        </p>
+      ) : null}
+    </>
+  )
+}
+
 function configToFormValues(
   config: FinanceModuleConfig
 ): FinanceModuleFormValues {
@@ -342,6 +393,17 @@ function configToFormValues(
     dashboardPeriod: config.dashboardPeriod,
     showCents: config.display.showCents,
     compactNumbers: config.display.compactNumbers,
+    amountEntry: config.amountEntry,
+    defaultAccountId: config.defaultAccountId ?? "",
+    monthStartDay: String(config.monthStartDay),
+    cardDueDaysBefore: String(config.reminders.cardDueDaysBefore),
+    fixedIncomeEnabled: config.fixedIncome.enabled,
+    fixedIncomeAmount:
+      config.fixedIncome.amount > 0 ? String(config.fixedIncome.amount) : "",
+    fixedIncomeFrequency: config.fixedIncome.frequency,
+    fixedIncomePayDays: config.fixedIncome.payDays.join(", "),
+    fixedIncomeAccountId: config.fixedIncome.accountId ?? "",
+    emailSyncMode: config.emailSync.mode,
     emailSyncEnabled: config.emailSync.enabled,
     emailSyncAutomatic: config.emailSync.automatic,
     emailSyncScheduleMode: config.emailSync.schedule.mode,
@@ -364,6 +426,8 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
   const { config, updateConfig, updateMutation } =
     useUserModuleConfig("finance")
   const moduleEnable = useModuleSheetEnable("finance")
+  const accountsQuery = useAccounts(true)
+  const accounts = accountsQuery.data ?? []
 
   const {
     control,
@@ -385,6 +449,10 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
   const emailSyncScheduleMode = useWatch({
     control,
     name: "emailSyncScheduleMode",
+  })
+  const fixedIncomeEnabledWatch = useWatch({
+    control,
+    name: "fixedIncomeEnabled",
   })
   const formValues = useMemo(() => configToFormValues(config), [config])
   useProfileSheetFormSync(true, reset, formValues)
@@ -408,10 +476,24 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
           showCents: values.showCents,
           compactNumbers: values.compactNumbers,
         },
+        amountEntry: values.amountEntry,
+        defaultAccountId: values.defaultAccountId || null,
+        monthStartDay: Number(values.monthStartDay),
+        reminders: {
+          cardDueDaysBefore: Number(values.cardDueDaysBefore),
+        },
+        fixedIncome: {
+          enabled: values.fixedIncomeEnabled,
+          amount: Number(values.fixedIncomeAmount) || 0,
+          frequency: values.fixedIncomeFrequency,
+          payDays: parsePayDays(values.fixedIncomePayDays),
+          accountId: values.fixedIncomeAccountId || null,
+        },
         emailSync: {
           enabled: values.emailSyncEnabled,
           automatic: values.emailSyncAutomatic,
           autoCategorize: values.autoCategorize,
+          mode: values.emailSyncMode,
           schedule:
             values.emailSyncScheduleMode === EMAIL_SYNC_SCHEDULE_MODES.INTERVAL
               ? {
@@ -553,6 +635,189 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
         />
       </SummarySection>
 
+      <SummarySection title="Ingreso fijo" icon={HandCoins}>
+        <Controller
+          control={control}
+          name="fixedIncomeEnabled"
+          render={({ field }) => (
+            <SwitchFieldRow
+              icon={HandCoins}
+              iconColor={MODULE_ACCENT}
+              label="Tengo un ingreso fijo"
+              description="Se usa como monto sugerido cuando llega una nómina sin cifra."
+              checked={field.value}
+              onCheckedChange={field.onChange}
+            />
+          )}
+        />
+        <Controller
+          control={control}
+          name="fixedIncomeAmount"
+          render={({ field, fieldState }) => (
+            <FormTextField
+              label="Monto"
+              icon={HandCoins}
+              value={field.value}
+              onChange={field.onChange}
+              error={fieldState.error?.message}
+              disabled={!fixedIncomeEnabledWatch}
+            />
+          )}
+        />
+        <Controller
+          control={control}
+          name="fixedIncomeFrequency"
+          render={({ field }) => (
+            <RadioGroup
+              value={field.value}
+              onValueChange={(value) =>
+                setValue(
+                  "fixedIncomeFrequency",
+                  value as "BIWEEKLY" | "MONTHLY",
+                  { shouldDirty: true }
+                )
+              }
+            >
+              <OptionRow
+                icon={CalendarDays}
+                iconColor={MODULE_ACCENT}
+                label="Quincenal"
+                selected={field.value === "BIWEEKLY"}
+                onPress={() =>
+                  setValue("fixedIncomeFrequency", "BIWEEKLY", {
+                    shouldDirty: true,
+                  })
+                }
+                trailing={<RadioGroupItem value="BIWEEKLY" />}
+              />
+              <OptionRow
+                icon={CalendarRange}
+                iconColor={MODULE_ACCENT}
+                label="Mensual"
+                selected={field.value === "MONTHLY"}
+                onPress={() =>
+                  setValue("fixedIncomeFrequency", "MONTHLY", {
+                    shouldDirty: true,
+                  })
+                }
+                trailing={<RadioGroupItem value="MONTHLY" />}
+              />
+            </RadioGroup>
+          )}
+        />
+        <Controller
+          control={control}
+          name="fixedIncomePayDays"
+          render={({ field, fieldState }) => (
+            <FormTextField
+              label="Días de pago (ej. 15, 30)"
+              icon={CalendarDays}
+              value={field.value}
+              onChange={field.onChange}
+              error={fieldState.error?.message}
+              disabled={!fixedIncomeEnabledWatch}
+            />
+          )}
+        />
+        <Controller
+          control={control}
+          name="fixedIncomeAccountId"
+          render={({ field }) => (
+            <AccountChoiceList
+              accounts={accounts}
+              selectedId={field.value}
+              onSelect={field.onChange}
+              noneLabel="Sin cuenta"
+            />
+          )}
+        />
+      </SummarySection>
+
+      <SummarySection title="Cuenta por defecto" icon={Landmark}>
+        <Controller
+          control={control}
+          name="defaultAccountId"
+          render={({ field }) => (
+            <AccountChoiceList
+              accounts={accounts}
+              selectedId={field.value}
+              onSelect={field.onChange}
+              noneLabel="Sin cuenta por defecto"
+            />
+          )}
+        />
+      </SummarySection>
+
+      <SummarySection title="Entrada de monto" icon={Keyboard}>
+        <Controller
+          control={control}
+          name="amountEntry"
+          render={({ field }) => (
+            <RadioGroup
+              value={field.value}
+              onValueChange={(value) =>
+                setValue("amountEntry", value as "keyboard" | "calculator", {
+                  shouldDirty: true,
+                })
+              }
+            >
+              <OptionRow
+                icon={Keyboard}
+                iconColor={MODULE_ACCENT}
+                label="Teclado"
+                selected={field.value === "keyboard"}
+                onPress={() =>
+                  setValue("amountEntry", "keyboard", { shouldDirty: true })
+                }
+                trailing={<RadioGroupItem value="keyboard" />}
+              />
+              <OptionRow
+                icon={Calculator}
+                iconColor={MODULE_ACCENT}
+                label="Calculadora"
+                selected={field.value === "calculator"}
+                onPress={() =>
+                  setValue("amountEntry", "calculator", { shouldDirty: true })
+                }
+                trailing={<RadioGroupItem value="calculator" />}
+              />
+            </RadioGroup>
+          )}
+        />
+      </SummarySection>
+
+      <SummarySection title="Mes financiero" icon={CalendarRange}>
+        <Controller
+          control={control}
+          name="monthStartDay"
+          render={({ field, fieldState }) => (
+            <FormTextField
+              label="Día de inicio (1-28)"
+              icon={CalendarRange}
+              value={field.value}
+              onChange={field.onChange}
+              error={fieldState.error?.message}
+            />
+          )}
+        />
+      </SummarySection>
+
+      <SummarySection title="Recordatorios" icon={BellRing}>
+        <Controller
+          control={control}
+          name="cardDueDaysBefore"
+          render={({ field, fieldState }) => (
+            <FormTextField
+              label="Días antes del vencimiento de la tarjeta"
+              icon={BellRing}
+              value={field.value}
+              onChange={field.onChange}
+              error={fieldState.error?.message}
+            />
+          )}
+        />
+      </SummarySection>
+
       <SummarySection title="Sincronización de correo" icon={Mail}>
         <Controller
           control={control}
@@ -595,6 +860,52 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
               onCheckedChange={field.onChange}
             />
           )}
+        />
+        <Controller
+          control={control}
+          name="emailSyncMode"
+          render={({ field }) => (
+            <RadioGroup
+              value={field.value}
+              onValueChange={(value) =>
+                setValue("emailSyncMode", value as "DIRECT" | "PENDING", {
+                  shouldDirty: true,
+                })
+              }
+            >
+              <OptionRow
+                icon={Mail}
+                iconColor={MODULE_ACCENT}
+                label="Entran confirmados"
+                description="Se registran directo en el saldo."
+                selected={field.value === "DIRECT"}
+                onPress={() =>
+                  setValue("emailSyncMode", "DIRECT", { shouldDirty: true })
+                }
+                trailing={<RadioGroupItem value="DIRECT" />}
+              />
+              <OptionRow
+                icon={Mail}
+                iconColor={MODULE_ACCENT}
+                label="Entran pendientes"
+                description="Los revisas y confirmas después."
+                selected={field.value === "PENDING"}
+                onPress={() =>
+                  setValue("emailSyncMode", "PENDING", { shouldDirty: true })
+                }
+                trailing={<RadioGroupItem value="PENDING" />}
+              />
+            </RadioGroup>
+          )}
+        />
+        <SummaryItem
+          href={APP_ROUTES.app.financeSync}
+          icon={Mail}
+          accentColor={MODULE_ACCENT}
+          title="Bancos y remitentes"
+          description="Elige qué correos leer."
+          showChevron
+          isLast
         />
       </SummarySection>
 

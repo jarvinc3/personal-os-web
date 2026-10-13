@@ -8,6 +8,9 @@ import { MissingRecord } from "@/src/modules/finance/shared/components/layout/mi
 import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
 import { FinanceProgressHero } from "@/src/modules/finance/shared/components/layout/progress-hero"
 import { LoanSurfaceMark } from "@/src/modules/finance/loans/components/loan-progress-card"
+import { LoanAmortizationSheet } from "@/src/modules/finance/loans/components/amortization-sheet"
+import { LoanPrepaymentSheet } from "@/src/modules/finance/loans/components/loan-prepayment-sheet"
+import { InstallmentDetailSheet } from "@/src/modules/finance/loans/components/installment-detail-sheet"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
 import { useInstitutions } from "@/src/modules/finance/shared/hooks/use-institutions"
@@ -16,6 +19,7 @@ import {
   useArchiveLoan,
   useDeleteLoan,
   useRestoreLoan,
+  useUnarchiveLoan,
   useLoans,
 } from "@/src/modules/finance/shared/hooks/use-loans"
 import {
@@ -27,8 +31,13 @@ import { formatRatePercentLabel } from "@/src/modules/finance/shared/lib/interes
 import { formatCalendarDate } from "@/src/modules/finance/shared/lib/ledger-form"
 import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 import { loanProgressSummary } from "@/src/modules/finance/shared/lib/planning-lists"
-import { FINANCE_INSTALLMENT_FREQ_LABEL } from "@/src/modules/finance/shared/types/entities"
+import {
+  FINANCE_INSTALLMENT_FREQ_LABEL,
+  FINANCE_LOAN_INSTALLMENT_STATUS_LABEL,
+  type FinanceLoanInstallment,
+} from "@/src/modules/finance/shared/types/entities"
 import { DeleteRecordDialog } from "@/src/modules/finance/shared/components/delete-record-dialog"
+import { ArchiveRecordDialog } from "@/src/modules/finance/shared/components/archive-record-dialog"
 import { RecordOptionsSheet } from "@/src/modules/finance/shared/components/record-options-sheet"
 import { LoadingView } from "@/src/shared/components/layout/loading-view"
 import { Badge } from "@/src/shared/components/ui/badge"
@@ -51,12 +60,23 @@ import {
   HandCoinsIcon,
   MoreVerticalIcon,
   PencilIcon,
+  TableIcon,
   Trash2Icon,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useMemo, useState } from "react"
 
 import { ACCENT_FALLBACK_COLOR } from "@/src/shared/lib/accent-gradient"
+
+const INSTALLMENT_STATUS_VARIANT: Record<
+  FinanceLoanInstallment["status"],
+  "success" | "warning" | "destructive"
+> = {
+  PENDING: "warning",
+  PARTIAL: "warning",
+  PAID: "success",
+  OVERDUE: "destructive",
+}
 
 type LoanDetailScreenProps = {
   loanId: string
@@ -85,8 +105,11 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
   const archiveLoan = useArchiveLoan()
   const deleteLoan = useDeleteLoan()
   const restoreLoan = useRestoreLoan()
+  const unarchiveLoan = useUnarchiveLoan()
   const { open: openOptionsSheet, setOpen: setOpenOptionsSheet } =
     useSheetParam(FINANCE_SHEET_KEYS.loanOptions)
+  const { open: openPrepaymentSheet, setOpen: setOpenPrepaymentSheet } =
+    useSheetParam(FINANCE_SHEET_KEYS.loanPrepayment)
 
   const loan =
     (loansQuery.data ?? []).find((item) => item.id === loanId) ?? null
@@ -101,16 +124,26 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
   const rateLabel = formatRatePercentLabel(loan?.interestRate ?? null)
 
   const [confirmOpen, setConfirmOpen] = useState(false)
+  const [archiveConfirmOpen, setArchiveConfirmOpen] = useState(false)
+  const [amortizationOpen, setAmortizationOpen] = useState(false)
+  const [selectedInstallment, setSelectedInstallment] =
+    useState<FinanceLoanInstallment | null>(null)
 
   async function onArchiveLoan() {
     if (!loan) {
       return
     }
     try {
-      await archiveLoan.mutateAsync(loan.id)
-      appToast.success({ text1: "Préstamo archivado" })
+      const loanId = loan.id
+      await archiveLoan.mutateAsync(loanId)
       setOpenOptionsSheet(false)
       router.push(APP_ROUTES.app.financePlanning)
+      showUndoToast("Préstamo archivado", () =>
+        unarchiveLoan.mutate(loanId, {
+          onError: (error) =>
+            appToast.error({ text1: financeErrorMessage(error) }),
+        })
+      )
     } catch (error) {
       appToast.error({ text1: financeErrorMessage(error) })
     }
@@ -278,11 +311,18 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
                 <SummaryItem
                   key={installment.id}
                   title={`Cuota ${installment.installmentNo}`}
-                  description={`Vence ${formatCalendarDate(installment.dueDate)}`}
+                  description={`Vence ${formatCalendarDate(installment.dueDate)} · Capital ${formatFinanceMoney(installment.principal, money)} · Interés ${formatFinanceMoney(installment.interest, money)}`}
                   value={formatFinanceMoney(installment.amount, money)}
+                  onPress={() => setSelectedInstallment(installment)}
                   trailing={
-                    <Badge variant={installment.paidAt ? "success" : "warning"}>
-                      {installment.paidAt ? "Pagada" : "Pendiente"}
+                    <Badge
+                      variant={INSTALLMENT_STATUS_VARIANT[installment.status]}
+                    >
+                      {
+                        FINANCE_LOAN_INSTALLMENT_STATUS_LABEL[
+                          installment.status
+                        ]
+                      }
                     </Badge>
                   }
                   isLast={index === installments.length - 1}
@@ -291,6 +331,18 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
             </div>
           ) : null}
         </AsyncRegion>
+
+        {installments.length > 0 ? (
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full"
+            onClick={() => setAmortizationOpen(true)}
+          >
+            <TableIcon className="size-4 shrink-0" />
+            Ver plan de amortización
+          </Button>
+        ) : null}
       </div>
 
       <RecordOptionsSheet
@@ -298,6 +350,12 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
         onOpenChange={setOpenOptionsSheet}
         description={loan.lenderName}
         options={[
+          {
+            id: "prepay",
+            title: "Abonar a capital",
+            icon: HandCoinsIcon,
+            onPress: () => setOpenPrepaymentSheet(true),
+          },
           {
             id: "edit",
             title: "Editar préstamo",
@@ -309,7 +367,7 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
             title: "Archivar",
             icon: ArchiveIcon,
             disabled: archiveLoan.isPending || deleteLoan.isPending,
-            onPress: () => void onArchiveLoan(),
+            onPress: () => setArchiveConfirmOpen(true),
           },
           {
             id: "delete",
@@ -320,6 +378,34 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
             onPress: () => setConfirmOpen(true),
           },
         ]}
+      />
+
+      <InstallmentDetailSheet
+        open={selectedInstallment !== null}
+        onOpenChange={(next) => {
+          if (!next) {
+            setSelectedInstallment(null)
+          }
+        }}
+        installment={selectedInstallment}
+        display={money}
+      />
+
+      <LoanAmortizationSheet
+        open={amortizationOpen}
+        onOpenChange={setAmortizationOpen}
+        installments={installments}
+        currentBalance={loan.currentBalance}
+        display={money}
+      />
+
+      <LoanPrepaymentSheet
+        open={openPrepaymentSheet}
+        onOpenChange={setOpenPrepaymentSheet}
+        loanId={loan.id}
+        lenderName={loan.lenderName}
+        currency={loan.currency}
+        penaltyPct={loan.prepaymentPenaltyPct}
       />
 
       <DeleteRecordDialog
@@ -334,6 +420,14 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
           pending: archiveLoan.isPending,
           onArchive: () => void onArchiveLoan(),
         }}
+      />
+
+      <ArchiveRecordDialog
+        open={archiveConfirmOpen}
+        onOpenChange={setArchiveConfirmOpen}
+        recordName={loan.lenderName}
+        pending={archiveLoan.isPending}
+        onConfirm={() => void onArchiveLoan()}
       />
     </>
   )

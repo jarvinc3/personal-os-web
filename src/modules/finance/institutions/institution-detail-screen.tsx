@@ -23,6 +23,7 @@ import {
   useArchiveInstitution,
   useDeleteInstitution,
   useRestoreInstitution,
+  useUnarchiveInstitution,
   useInstitutions,
 } from "@/src/modules/finance/shared/hooks/use-institutions"
 import { useLoans } from "@/src/modules/finance/shared/hooks/use-loans"
@@ -39,6 +40,7 @@ import {
   formatStackItemBalance,
 } from "@/src/modules/finance/shared/lib/institution-stack"
 import { DeleteRecordDialog } from "@/src/modules/finance/shared/components/delete-record-dialog"
+import { ArchiveRecordDialog } from "@/src/modules/finance/shared/components/archive-record-dialog"
 import { RecordOptionsSheet } from "@/src/modules/finance/shared/components/record-options-sheet"
 import { LoadingView } from "@/src/shared/components/layout/loading-view"
 import { Button } from "@/src/shared/components/ui/button"
@@ -107,9 +109,11 @@ function InstitutionDetailScreenBody({
   const archiveInstitution = useArchiveInstitution()
   const deleteInstitution = useDeleteInstitution()
   const restoreInstitution = useRestoreInstitution()
+  const unarchiveInstitution = useUnarchiveInstitution()
 
   const [tab, setTab] = useState<"accounts" | "cards" | "loans">("accounts")
   const [confirmOpen, setConfirmOpen] = useState(false)
+  const [archiveConfirmOpen, setArchiveConfirmOpen] = useState(false)
   const { open: openOptionsSheet, setOpen: setOpenOptionsSheet } =
     useSheetParam(FINANCE_SHEET_KEYS.institutionOptions)
   const {
@@ -184,14 +188,26 @@ function InstitutionDetailScreenBody({
       return
     }
     try {
-      await archiveInstitution.mutateAsync(institution.id)
-      appToast.success({ text1: "Institución archivada" })
+      const institutionId = institution.id
+      await archiveInstitution.mutateAsync(institutionId)
       setOpenOptionsSheet(false)
       router.push(APP_ROUTES.app.financeProducts)
+      showUndoToast("Institución archivada", () =>
+        unarchiveInstitution.mutate(institutionId, {
+          onError: (error) =>
+            appToast.error({ text1: financeErrorMessage(error) }),
+        })
+      )
     } catch (error) {
       appToast.error({ text1: financeErrorMessage(error) })
     }
-  }, [archiveInstitution, institution, router, setOpenOptionsSheet])
+  }, [
+    archiveInstitution,
+    unarchiveInstitution,
+    institution,
+    router,
+    setOpenOptionsSheet,
+  ])
 
   const onDeleteInstitution = useCallback(async () => {
     if (!institution) {
@@ -433,14 +449,10 @@ function InstitutionDetailScreenBody({
                     key={account.id}
                     account={account}
                     display={display}
-                    onPress={() =>
-                      router.push(
-                        APP_ROUTES.app.financeInstitutionAccount(
-                          institutionId,
-                          account.id
-                        )
-                      )
-                    }
+                    href={APP_ROUTES.app.financeInstitutionAccount(
+                      institutionId,
+                      account.id
+                    )}
                   />
                 ))
               )}
@@ -463,19 +475,15 @@ function InstitutionDetailScreenBody({
                     card={card}
                     accounts={accounts}
                     display={display}
-                    onPress={() =>
+                    href={
                       card.type === "DEBIT" && card.accountId
-                        ? router.push(
-                            APP_ROUTES.app.financeInstitutionAccount(
-                              institutionId,
-                              card.accountId
-                            )
+                        ? APP_ROUTES.app.financeInstitutionAccount(
+                            institutionId,
+                            card.accountId
                           )
-                        : router.push(
-                            APP_ROUTES.app.financeInstitutionCard(
-                              institutionId,
-                              card.id
-                            )
+                        : APP_ROUTES.app.financeInstitutionCard(
+                            institutionId,
+                            card.id
                           )
                     }
                   />
@@ -500,9 +508,7 @@ function InstitutionDetailScreenBody({
                     loan={loan}
                     display={display}
                     institution={institution}
-                    onPress={() =>
-                      router.push(APP_ROUTES.app.financeLoan(loan.id))
-                    }
+                    href={APP_ROUTES.app.financeLoan(loan.id)}
                   />
                 ))
               )}
@@ -581,7 +587,7 @@ function InstitutionDetailScreenBody({
             icon: ArchiveIcon,
             disabled:
               archiveInstitution.isPending || deleteInstitution.isPending,
-            onPress: () => void onArchiveInstitution(),
+            onPress: () => setArchiveConfirmOpen(true),
           },
           {
             id: "delete",
@@ -607,6 +613,14 @@ function InstitutionDetailScreenBody({
           pending: archiveInstitution.isPending,
           onArchive: () => void onArchiveInstitution(),
         }}
+      />
+
+      <ArchiveRecordDialog
+        open={archiveConfirmOpen}
+        onOpenChange={setArchiveConfirmOpen}
+        recordName={institution.name}
+        pending={archiveInstitution.isPending}
+        onConfirm={() => void onArchiveInstitution()}
       />
 
       <AccountSheet

@@ -264,9 +264,7 @@ export function FinancePlanningList({
                         ? `Para ${formatCalendarDate(goal.targetDate)}`
                         : undefined
                     )}
-                    onPress={() =>
-                      router.push(APP_ROUTES.app.financeSavingsGoal(goal.id))
-                    }
+                    href={APP_ROUTES.app.financeSavingsGoal(goal.id)}
                   />
                 )
               })}
@@ -312,9 +310,7 @@ export function FinancePlanningList({
                     loan={loan}
                     display={display}
                     institution={institution}
-                    onPress={() =>
-                      router.push(APP_ROUTES.app.financeLoan(loan.id))
-                    }
+                    href={APP_ROUTES.app.financeLoan(loan.id)}
                   />
                 )
               })}
@@ -394,9 +390,7 @@ export function FinancePlanningList({
                         ? `Vence ${formatCalendarDate(item.dueDate)}`
                         : undefined
                     )}
-                    onPress={() =>
-                      router.push(APP_ROUTES.app.financeReceivable(item.id))
-                    }
+                    href={APP_ROUTES.app.financeReceivable(item.id)}
                   />
                 )
               })}

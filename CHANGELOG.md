@@ -2,11 +2,134 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
-## [1.4.3] - 2026-10-12
+## [1.18.0] - 2026-10-13
+
+### Agregado
+
+- Configuración de Finanzas en `/settings/finance`: ingreso fijo (monto, frecuencia, días de pago y cuenta), cuenta por defecto para gastos y transferencias, entrada de monto (teclado o calculadora), día de inicio del mes financiero, días de aviso antes del vencimiento de la tarjeta y modo de correo (directo o pendiente).
+
+### Cambiado
+
+- Los formularios de gasto y transferencia proponen la cuenta por defecto configurada.
+
+## [1.17.0] - 2026-10-13
+
+### Agregado
+
+- Flujo guiado al crear un movimiento (categoría, monto y cuenta) y una transferencia (origen, destino y monto); el monto abre con el modo teclado o calculadora guardado en `module_config.finance.amountEntry`.
+- Plan de amortización del préstamo en el detalle, con capital, interés y saldo restante por cuota.
+- Registro manual del corte de tarjeta desde la pestaña de estados de cuenta (mínimo, balance y vencimiento con `PATCH`).
+- Vínculo de un movimiento a una cuota, un cobro o una meta desde el detalle, con quitar vínculo y su reversa.
+
+### Cambiado
+
+- La etiqueta del estado `REVERSED` pasa a "Revertido" y el detalle enlaza al movimiento original cuando existe.
+
+## [1.16.0] - 2026-10-12
+
+### Agregado
+
+- Formulario de presupuesto multicategoría: chips de varias categorías, "incluir subcategorías", rollover y recurrencia.
+- El detalle del presupuesto lee `GET /budgets/:id/transactions` en vez de filtrar por una sola categoría.
+- La comisión de una transferencia se muestra y suma en los totales del mes.
+- "Desde otra cuenta" al apartar en una meta crea la transferencia y la enlaza con `fromTransferGroupId`.
+- Hoja de detalle del corte y selector de moneda al pagar la tarjeta.
+- Detalle de cuota del préstamo y campos de seguro y tipo de tasa en el formulario.
+- Badge "¿Duplicado?" en la fila y filtro de posibles duplicados.
+- Al crear una transferencia hacia la cuenta de una meta, el aviso ofrece contarla como aporte.
+
+### Cambiado
+
+- La lista de cortes lee la página de `GET /cards/:id/statements` (`items`).
+
+## [1.15.0] - 2026-10-12
+
+### Agregado
+
+- Badge "¿Duplicado?" en el detalle del movimiento, con "Unir" y "No es duplicado".
+
+## [1.14.0] - 2026-10-12
+
+### Cambiado
+
+- El presupuesto se envía con `categoryIds` (el formulario actual manda una categoría) y acepta `includeChildren` y `rollover`.
+
+## [1.13.0] - 2026-10-12
+
+### Agregado
+
+- Si el cobro supera lo pendiente, la hoja muestra las 3 opciones (ingreso extra, saldo a favor o a otro cobro) y las envía como `excessHandling`.
+- Acción "Castigar deuda" en el detalle del cobro y el estado `WRITTEN_OFF`.
+- Se mapean los códigos `RECEIVABLE_EXCESS_UNRESOLVED` y `RECEIVABLE_NOT_FOUND`.
+
+## [1.12.0] - 2026-10-12
+
+### Agregado
+
+- La cuenta muestra "Libre" y "Apartado" en su detalle.
+- La meta pide cuenta y modo al crearla; los apartados usan `/allocations`.
+- Se mapean los códigos `GOAL_ACCOUNT_REQUIRED`, `EARMARK_EXCEEDS_BALANCE` y `GOAL_NOT_FOUND`.
+
+## [1.11.0] - 2026-10-12
+
+### Agregado
+
+- La lista de cuotas muestra capital e interés de cada una y su estado (`Pendiente`, `Parcial`, `Pagada`, `Vencida`).
+- "Abonar a capital" en el detalle del préstamo, con monto, modo (reducir plazo o cuota), vista previa del interés restante y aviso de penalidad.
+- Se mapean los códigos `PAYMENT_EXCEEDS_INSTALLMENT`, `LOAN_HAS_OVERDUE` y `LOAN_NOT_FOUND`.
+
+## [1.10.0] - 2026-10-12
+
+### Agregado
+
+- "Pagar tarjeta" en el detalle de una tarjeta de crédito, con origen, monto y atajos de pago mínimo y balance al corte.
+- La lista de cortes muestra el mínimo, lo pagado y los estados nuevos (`En curso`, `Cerrado`, `Mínimo pagado`, `Vencida`).
+- Se mapean los códigos `CARD_NOT_FOUND`, `CARD_NOT_CREDIT` y `CARD_CURRENCY_MISSING`.
+
+## [1.9.0] - 2026-10-12
+
+### Cambiado
+
+- Restaurar muestra los códigos nuevos (`ALREADY_RESTORED`, `RESTORE_CONFLICT`, `PARTIAL_OPERATION`) con su mensaje en español.
+- "Eliminados recientes" avisa cuando un registro tiene muchos datos y restaurarlo puede tardar.
+
+## [1.8.0] - 2026-10-12
+
+### Cambiado
+
+- Movimientos lee las transferencias como una operación agrupada (`groupOperations`), con todas sus patas.
+- Se mapean los códigos nuevos del back: `TRANSFER_LOCKED`, `SAME_ACCOUNT`, `ACCOUNT_NOT_FOUND` y `TRANSFER_TARGET_NOT_ACCOUNT`.
+
+## [1.7.0] - 2026-10-12
+
+### Agregado
+
+- Comisión opcional y carril (ACH, LBTR, mismo banco) al crear o editar una transferencia.
+- El destino de una transferencia es solo una cuenta; el pago de tarjeta sale a su propia acción.
+- "Marcar como pendiente" en una transferencia completada, para editarla.
+
+## [1.6.0] - 2026-10-12
+
+### Agregado
+
+- Editar un movimiento completado sin tocar el monto: solo categoría, comercio, descripción y notas. La opción "Marcar como pendiente" lo desbloquea para editar todo.
+- Historial de cuenta y tarjeta, con ajustes de saldo y cambios de límite, en una hoja desde el menú de opciones.
+
+### Cambiado
+
+- Los movimientos revertidos, cancelados o rechazados se ven atenuados, con el monto tachado, y no suman en los totales del día ni del mes.
+
+## [1.5.0] - 2026-10-12
+
+### Agregado
+
+- Papelera de reciclaje (`/finance/recycle-bin`), con dos pestañas (archivados y eliminados) y restaurar por registro. Se entra desde la fila "Papelera de reciclaje" de los atajos de Productos.
+- Archivar pide confirmación y el aviso ofrece "Deshacer" para desarchivar, en instituciones, cuentas, tarjetas y préstamos.
 
 ### Corregido
 
 - Los atajos del menú de opciones (⋮) de un detalle ya abren su formulario. Cerrar el menú hacía un retroceso de historial que cancelaba la apertura de la cuenta, la tarjeta, el préstamo o la vista de edición en el mismo toque.
+- Las tarjetas y filas que abren otra vista muestran su loader al tocarlas: presupuestos, metas, préstamos, cobros, cuentas, tarjetas y movimientos.
 
 ## [1.4.2] - 2026-10-12
 

@@ -216,7 +216,7 @@ function NavMainCollapsibleItem({
     return (
       <SidebarMenuItem>
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
+          <DropdownMenuTrigger asChild id={`nav-menu-${item.url.slice(1)}`}>
             <SidebarMenuButton
               isActive={isUnderRoot}
               closeSidebarOnClick={false}
@@ -272,7 +272,8 @@ function NavMainCollapsibleItem({
             )}
           />
         </SidebarMenuButton>
-        <CollapsibleContent>
+        {/* Fixed id: the auto-generated one changes between server and client and breaks hydration. */}
+        <CollapsibleContent id={`nav-panel-${item.url.slice(1)}`}>
           <SidebarMenuSub>
             {sections.map((section) => (
               <SidebarMenuSubItem key={section.href}>

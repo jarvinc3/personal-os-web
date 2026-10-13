@@ -16,7 +16,9 @@ import type {
   FinanceCard,
 } from "@/src/modules/finance/shared/types/entities"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
+import { LinkPendingOverlay } from "@/src/shared/components/ui/navigation-pending"
 import { LockIcon } from "lucide-react"
+import Link from "next/link"
 
 function InUseLock({ onLightSurface }: { onLightSurface: boolean }) {
   return (
@@ -36,7 +38,8 @@ function InUseLock({ onLightSurface }: { onLightSurface: boolean }) {
 type AccountProductRowProps = {
   account: FinanceAccount
   display: FinanceMoneyDisplay
-  onPress: () => void
+  onPress?: () => void
+  href?: string
   disabled?: boolean
 }
 
@@ -44,6 +47,7 @@ export function AccountProductRow({
   account,
   display,
   onPress,
+  href,
   disabled = false,
 }: AccountProductRowProps) {
   const lastFour = account.accountNumber?.replace(/\D/g, "").slice(-4)
@@ -51,20 +55,16 @@ export function AccountProductRow({
     ? `${FINANCE_ACCOUNT_TYPE_LABEL[account.type]} · •••• ${lastFour}`
     : `${FINANCE_ACCOUNT_TYPE_LABEL[account.type]} · ${account.currency}`
   const tint = account.color
-  return (
-    <button
-      type="button"
-      onClick={onPress}
-      disabled={disabled}
-      className={cn(
-        "group relative flex w-full items-center gap-3 overflow-hidden rounded-2xl border p-2 pl-4 text-left",
-        tint
-          ? "border-transparent text-white"
-          : "border-border bg-card text-foreground",
-        disabled ? "cursor-not-allowed" : PRESSABLE_CLASS
-      )}
-      style={tint ? { backgroundColor: tint } : undefined}
-    >
+  const className = cn(
+    "group relative flex w-full items-center gap-3 overflow-hidden rounded-2xl border p-2 pl-4 text-left",
+    tint
+      ? "border-transparent text-white"
+      : "border-border bg-card text-foreground",
+    disabled ? "cursor-not-allowed" : PRESSABLE_CLASS
+  )
+  const style = tint ? { backgroundColor: tint } : undefined
+  const content = (
+    <>
       <span
         aria-hidden
         className={cn(
@@ -108,6 +108,27 @@ export function AccountProductRow({
         </p>
       </div>
       {disabled ? <InUseLock onLightSurface={!tint} /> : null}
+    </>
+  )
+
+  if (href && !disabled) {
+    return (
+      <Link href={href} className={className} style={style}>
+        {content}
+        <LinkPendingOverlay />
+      </Link>
+    )
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={onPress}
+      disabled={disabled}
+      className={className}
+      style={style}
+    >
+      {content}
     </button>
   )
 }
@@ -116,7 +137,8 @@ type CardProductRowProps = {
   card: FinanceCard
   accounts: readonly FinanceAccount[]
   display: FinanceMoneyDisplay
-  onPress: () => void
+  onPress?: () => void
+  href?: string
   disabled?: boolean
 }
 
@@ -125,23 +147,17 @@ export function CardProductRow({
   accounts,
   display,
   onPress,
+  href,
   disabled = false,
 }: CardProductRowProps) {
   const balances = resolveCardDisplayBalances(card, accounts)
-
-  return (
-    <button
-      type="button"
-      onClick={onPress}
-      disabled={disabled}
-      className={cn(
-        "relative flex w-full flex-col gap-4 overflow-hidden rounded-2xl bg-zinc-900 p-4 text-left text-white",
-        disabled
-          ? "cursor-not-allowed"
-          : cn("hover:opacity-95", PRESSABLE_CLASS)
-      )}
-      style={card.color ? { backgroundColor: card.color } : undefined}
-    >
+  const className = cn(
+    "relative flex w-full flex-col gap-4 overflow-hidden rounded-2xl bg-zinc-900 p-4 text-left text-white",
+    disabled ? "cursor-not-allowed" : cn("hover:opacity-95", PRESSABLE_CLASS)
+  )
+  const style = card.color ? { backgroundColor: card.color } : undefined
+  const content = (
+    <>
       <span
         aria-hidden
         className={cn(
@@ -211,6 +227,27 @@ export function CardProductRow({
         </span>
       </div>
       {disabled ? <InUseLock onLightSurface={false} /> : null}
+    </>
+  )
+
+  if (href && !disabled) {
+    return (
+      <Link href={href} className={className} style={style}>
+        {content}
+        <LinkPendingOverlay />
+      </Link>
+    )
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={onPress}
+      disabled={disabled}
+      className={className}
+      style={style}
+    >
+      {content}
     </button>
   )
 }

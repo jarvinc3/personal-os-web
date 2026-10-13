@@ -16,6 +16,8 @@ export type PayloadResult<T> =
 export type CreateSavingsGoalBody = {
   name: string
   targetAmount: number
+  accountId: string
+  mode?: "EARMARK" | "DEDICATED"
   description?: string
   currency?: string
   targetDate?: string
@@ -38,7 +40,50 @@ export type CreateLoanBody = {
   accountId?: string
   currency?: string
   interestRate?: number | null
+  rateType?: "FIXED" | "VARIABLE"
+  insuranceAmount?: number | null
+  prepaymentPenaltyPct?: number | null
+  disbursementDate?: string | null
   notes?: string
+}
+
+export const LOAN_PREPAYMENT_MODES = [
+  "REDUCE_TERM",
+  "REDUCE_INSTALLMENT",
+] as const
+export type LoanPrepaymentMode = (typeof LOAN_PREPAYMENT_MODES)[number]
+
+export type LoanPrepaymentBody = {
+  amount: number
+  accountId: string
+  mode: LoanPrepaymentMode
+  date?: string
+}
+
+export function buildLoanPrepaymentBody(input: {
+  amount: string
+  accountId?: string
+  mode: LoanPrepaymentMode
+  date?: string
+}): PayloadResult<LoanPrepaymentBody> {
+  const amount = parseFinanceMoney(input.amount)
+  if (amount === null || amount <= 0) {
+    return { ok: false, error: "Monto inválido" }
+  }
+  const accountId = optionalId(input.accountId)
+  if (!accountId) {
+    return { ok: false, error: "Elige una cuenta de origen" }
+  }
+  const body: LoanPrepaymentBody = {
+    amount,
+    accountId,
+    mode: input.mode,
+  }
+  const date = optionalTrimmed(input.date)
+  if (date) {
+    body.date = date
+  }
+  return { ok: true, body }
 }
 
 export type CreateReceivableBody = {
@@ -108,6 +153,8 @@ export function buildSavingsGoalBody(
   input: {
     name: string
     targetAmount: string
+    accountId: string
+    mode?: "EARMARK" | "DEDICATED"
     description?: string
     currency?: string
     targetDate?: string
@@ -125,6 +172,10 @@ export function buildSavingsGoalBody(
   }
   if (target.body <= 0) {
     return { ok: false, error: "La meta debe ser mayor que 0" }
+  }
+  const accountId = optionalTrimmed(input.accountId)
+  if (!accountId) {
+    return { ok: false, error: "Cuenta obligatoria" }
   }
 
   const currentRaw = options?.isUpdate
@@ -152,6 +203,8 @@ export function buildSavingsGoalBody(
     body: {
       name,
       targetAmount: target.body,
+      accountId,
+      ...(input.mode ? { mode: input.mode } : {}),
       ...(description ? { description } : {}),
       ...(currency ? { currency } : {}),
       ...(targetDate.body ? { targetDate: targetDate.body } : {}),
@@ -174,6 +227,10 @@ export function buildLoanBody(
     accountId?: string
     currency?: string
     interestRatePercent?: string
+    rateType?: "FIXED" | "VARIABLE"
+    insuranceAmount?: string
+    prepaymentPenaltyPct?: string
+    disbursementDate?: string | null
     notes?: string
   },
   options?: { isUpdate?: boolean }
@@ -259,6 +316,38 @@ export function buildLoanBody(
     body.interestRate = null
   }
 
+  if (input.rateType) {
+    body.rateType = input.rateType
+  }
+  if (input.insuranceAmount !== undefined) {
+    const trimmedInsurance = input.insuranceAmount.trim()
+    if (trimmedInsurance) {
+      const insurance = parseFinanceMoney(trimmedInsurance)
+      if (insurance === null) {
+        return { ok: false, error: "Seguro inválido" }
+      }
+      body.insuranceAmount = insurance
+    }
+  }
+  if (input.prepaymentPenaltyPct !== undefined) {
+    const penalty = percentToRateFraction(input.prepaymentPenaltyPct)
+    if (!penalty.ok) {
+      return penalty
+    }
+    if (penalty.interestRate !== undefined) {
+      body.prepaymentPenaltyPct = penalty.interestRate
+    }
+  }
+  if (input.disbursementDate) {
+    const disbursement = optionalIsoDate(input.disbursementDate)
+    if (!disbursement.ok) {
+      return disbursement
+    }
+    if (disbursement.body) {
+      body.disbursementDate = disbursement.body
+    }
+  }
+
   return { ok: true, body }
 }
 
@@ -338,44 +427,43 @@ export function buildReceivableBody(
 
 export type CreateSavingsGoalContributionBody = {
   amount: number
-  accountId: string
-  contributedAt?: string
+  kind?: "CONTRIBUTION" | "WITHDRAWAL"
+  date?: string
   notes?: string
+  fromTransferGroupId?: string
 }
 
 export function buildSavingsGoalContributionBody(input: {
   amount: string
-  accountId: string
-  contributedAt?: string
+  kind?: "CONTRIBUTION" | "WITHDRAWAL"
+  date?: string
   notes?: string
+  fromTransferGroupId?: string
 }): PayloadResult<CreateSavingsGoalContributionBody> {
   const amount = requiredMoney(input.amount, "Aporte")
   if (!amount.ok) {
     return amount
   }
   if (amount.body <= 0) {
-    return { ok: false, error: "El aporte debe ser mayor que 0" }
+    return { ok: false, error: "El monto debe ser mayor que 0" }
   }
 
-  const accountId = optionalTrimmed(input.accountId)
-  if (!accountId) {
-    return { ok: false, error: "Elige la cuenta de origen" }
-  }
-
-  const contributedAt = optionalIsoDate(input.contributedAt)
-  if (!contributedAt.ok) {
-    return contributedAt
+  const date = optionalIsoDate(input.date)
+  if (!date.ok) {
+    return date
   }
 
   const notes = optionalTrimmed(input.notes)
+  const transferGroupId = optionalTrimmed(input.fromTransferGroupId)
 
   return {
     ok: true,
     body: {
       amount: amount.body,
-      accountId,
-      ...(contributedAt.body ? { contributedAt: contributedAt.body } : {}),
+      ...(input.kind ? { kind: input.kind } : {}),
+      ...(date.body ? { date: date.body } : {}),
       ...(notes ? { notes } : {}),
+      ...(transferGroupId ? { fromTransferGroupId: transferGroupId } : {}),
     },
   }
 }
@@ -385,6 +473,8 @@ export type RecordReceivablePaymentBody = {
   accountId: string
   paidAt?: string
   notes?: string
+  excessHandling?: "EXTRA_INCOME" | "CREDIT_BALANCE" | "APPLY_TO_RECEIVABLE"
+  targetReceivableId?: string
 }
 
 export function buildReceivablePaymentBody(input: {
@@ -392,6 +482,8 @@ export function buildReceivablePaymentBody(input: {
   accountId: string
   paidAt?: string
   notes?: string
+  excessHandling?: "EXTRA_INCOME" | "CREDIT_BALANCE" | "APPLY_TO_RECEIVABLE"
+  targetReceivableId?: string
 }): PayloadResult<RecordReceivablePaymentBody> {
   const amount = requiredMoney(input.amount, "Cobro")
   if (!amount.ok) {
@@ -420,6 +512,10 @@ export function buildReceivablePaymentBody(input: {
       accountId,
       ...(paidAt.body ? { paidAt: paidAt.body } : {}),
       ...(notes ? { notes } : {}),
+      ...(input.excessHandling ? { excessHandling: input.excessHandling } : {}),
+      ...(input.targetReceivableId
+        ? { targetReceivableId: input.targetReceivableId }
+        : {}),
     },
   }
 }

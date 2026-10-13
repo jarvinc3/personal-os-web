@@ -20,7 +20,7 @@ import {
 import { Button } from "@/src/shared/components/ui/button"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
 import { ChevronDownIcon, SparklesIcon, type LucideIcon } from "lucide-react"
-import type { ReactNode } from "react"
+import type { ReactNode, Ref } from "react"
 
 /** El preset del proyecto no trae un estado pulsado con el color primario. */
 const SEGMENT_PRESSED_CLASS =
@@ -107,6 +107,7 @@ type FinanceAmountInputProps = {
   /** Narrow currency symbol drawn before the amount, e.g. `$`. */
   prefix?: string | null
   onReadOnlyActivate?: () => void
+  inputRef?: Ref<HTMLInputElement>
 }
 
 export function FinanceAmountInput({
@@ -120,6 +121,7 @@ export function FinanceAmountInput({
   trailing,
   prefix,
   onReadOnlyActivate,
+  inputRef,
 }: FinanceAmountInputProps) {
   const symbol = prefix?.trim() || null
 
@@ -136,6 +138,7 @@ export function FinanceAmountInput({
         inputMode={readOnly ? "none" : "decimal"}
         autoComplete="off"
         readOnly={readOnly}
+        ref={inputRef}
         className={cn(
           "px-4 text-3xl font-semibold tabular-nums",
           readOnly && "cursor-pointer"

@@ -5,6 +5,7 @@ import { FinanceDateField } from "@/src/modules/finance/shared/components/forms/
 import { FinanceSegmentedControl } from "@/src/modules/finance/shared/components/forms/form-blocks"
 import { FinanceFormScreen } from "@/src/modules/finance/shared/components/forms/form-screen"
 import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
+import type { FinanceMoneyFieldHandle } from "@/src/modules/finance/shared/components/forms/money-field"
 import { CategoryPickerSheet } from "@/src/modules/finance/shared/components/pickers/category-picker-sheet"
 import { FinanceCurrencyPickerSheet } from "@/src/modules/finance/shared/components/pickers/finance-currency-picker-sheet"
 import { DestinationPickerSheet } from "@/src/modules/finance/shared/components/pickers/destination-picker-sheet"
@@ -14,6 +15,7 @@ import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
 import { useCards } from "@/src/modules/finance/shared/hooks/use-cards"
 import { useCategories } from "@/src/modules/finance/shared/hooks/use-categories"
 import { useCurrencyForTarget } from "@/src/modules/finance/shared/hooks/use-currency-for-target"
+import { useFinanceAmountEntry } from "@/src/modules/finance/shared/hooks/use-finance-amount-entry"
 import { useInstitutions } from "@/src/modules/finance/shared/hooks/use-institutions"
 import {
   useCreateTransaction,
@@ -32,11 +34,16 @@ import {
 } from "@/src/modules/finance/shared/lib/ledger-form"
 import {
   buildCreateTransactionBody,
+  buildTransactionMetadataBody,
   encodeLedgerTarget,
   splitLedgerTarget,
 } from "@/src/modules/finance/shared/lib/ledger-payloads"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
 import type { FinanceTransaction } from "@/src/modules/finance/shared/types/entities"
+import {
+  isTransactionMetadataOnly,
+  isTransactionReadOnly,
+} from "@/src/modules/finance/transactions/lib/transaction-edit"
 import { FormTextField } from "@/src/shared/components/layout/form-blocks"
 import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
 import { SummarySection } from "@/src/shared/components/ui/summary"
@@ -50,11 +57,12 @@ import {
   FileTextIcon,
   HandCoinsIcon,
   InfoIcon,
+  LockIcon,
   NotebookPenIcon,
   SaveIcon,
   StoreIcon,
 } from "lucide-react"
-import { useCallback, useEffect, useId, useMemo, useRef } from "react"
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import {
   transactionSchema,
@@ -63,6 +71,7 @@ import {
 
 type MovementType = TransactionFormValues["type"]
 type Picker = "none" | "category" | "currency" | "destination"
+type GuidedStep = "category" | "amount" | "destination" | "done"
 
 const TYPE_OPTIONS = [
   { value: "DEBIT" as const, label: "Gasto", icon: ArrowDownCircleIcon },
@@ -105,6 +114,7 @@ type TransactionFormProps = {
   initialDestination?: string | null
   transaction: FinanceTransaction | null
   defaultCurrency: string
+  defaultAccountId?: string | null
   enabled: boolean
   display: FinanceMoneyDisplay
   onTypeChange?: (type: MovementType) => void
@@ -117,6 +127,7 @@ export function TransactionForm({
   initialDestination = null,
   transaction,
   defaultCurrency,
+  defaultAccountId = null,
   enabled,
   display,
   onTypeChange,
@@ -125,6 +136,11 @@ export function TransactionForm({
   const isEdit = mode === "edit"
   const isTransferLeg =
     Boolean(transaction?.transferGroupId) || transaction?.type === "TRANSFER"
+  const metadataOnly =
+    isEdit && transaction !== null && isTransactionMetadataOnly(transaction)
+  const readOnly =
+    isEdit && transaction !== null && isTransactionReadOnly(transaction)
+  const locked = metadataOnly || readOnly
   const createMutation = useCreateTransaction()
   const updateMutation = useUpdateTransaction()
   const accountsQuery = useAccounts(enabled)
@@ -148,8 +164,14 @@ export function TransactionForm({
     [institutions, accounts, cards]
   )
   const { picker, openPicker, closeHandlerFor } = usePicker<Picker>("none")
-  const didAutoOpenCategory = useRef(false)
   const statusSwitchId = useId()
+  const { amountEntry, setAmountEntry } = useFinanceAmountEntry()
+  const [guidedStep, setGuidedStep] = useState<GuidedStep>(() =>
+    isEdit ? "done" : "category"
+  )
+  const amountFieldRef = useRef<FinanceMoneyFieldHandle>(null)
+  const guidedCategoryOpened = useRef(false)
+  const guidedDestinationOpened = useRef(false)
 
   const {
     control,
@@ -240,6 +262,15 @@ export function TransactionForm({
       return
     }
     const next = firstLedgerTarget(groups)
+    const defaultTarget = defaultAccountId
+      ? encodeLedgerTarget("account", defaultAccountId)
+      : null
+    if (defaultTarget && isKnownLedgerTarget(defaultTarget, accounts, cards)) {
+      if (getValues("destination") !== defaultTarget) {
+        setValue("destination", defaultTarget)
+      }
+      return
+    }
     if (next !== CATALOG_NONE) {
       setValue("destination", next)
     }
@@ -248,6 +279,7 @@ export function TransactionForm({
     accounts,
     cards,
     initialDestination,
+    defaultAccountId,
     isEdit,
     getValues,
     setValue,
@@ -257,12 +289,39 @@ export function TransactionForm({
   ])
 
   useEffect(() => {
-    if (isEdit || didAutoOpenCategory.current) {
+    if (isEdit || guidedStep !== "category" || guidedCategoryOpened.current) {
       return
     }
-    didAutoOpenCategory.current = true
+    guidedCategoryOpened.current = true
     openPicker("category")
-  }, [isEdit, openPicker])
+  }, [isEdit, guidedStep, openPicker])
+
+  useEffect(() => {
+    if (
+      isEdit ||
+      guidedStep !== "destination" ||
+      guidedDestinationOpened.current
+    ) {
+      return
+    }
+    guidedDestinationOpened.current = true
+    openPicker("destination")
+  }, [isEdit, guidedStep, openPicker])
+
+  function advanceToAmount() {
+    if (isEdit || guidedStep !== "category") {
+      return
+    }
+    setGuidedStep("amount")
+    window.setTimeout(() => amountFieldRef.current?.focusAmount(), 0)
+  }
+
+  function advanceToDestination() {
+    if (isEdit || guidedStep !== "amount") {
+      return
+    }
+    setGuidedStep("destination")
+  }
 
   function clearIncompatibleCategory(next: MovementType) {
     const expected = categoryTypeForTransaction(next)
@@ -277,6 +336,19 @@ export function TransactionForm({
 
   const onSubmit = handleSubmit(async (values) => {
     if (isTransferLeg) {
+      return
+    }
+    if (metadataOnly && transaction) {
+      try {
+        await updateMutation.mutateAsync({
+          id: transaction.id,
+          body: buildTransactionMetadataBody(values),
+        })
+        appToast.success({ text1: "Movimiento actualizado" })
+        onDone()
+      } catch (error) {
+        appToast.error({ text1: financeErrorMessage(error) })
+      }
       return
     }
     const target = splitLedgerTarget(values.destination)
@@ -339,8 +411,17 @@ export function TransactionForm({
         submitLabel={cta}
         submitIcon={SaveIcon}
         isSubmitting={isPending}
-        submitDisabled={!canSave}
+        submitDisabled={!canSave || readOnly}
       >
+        {locked ? (
+          <p className="flex items-start gap-2 rounded-xl border border-border bg-muted px-3 py-2 text-sm text-muted-foreground">
+            <LockIcon className="mt-0.5 size-4 shrink-0" aria-hidden />
+            {readOnly
+              ? "Este movimiento ya no se puede editar."
+              : "Este movimiento está completado. Solo puedes cambiar categoría, comercio, descripción y notas."}
+          </p>
+        ) : null}
+
         <Controller
           control={control}
           name="type"
@@ -355,6 +436,7 @@ export function TransactionForm({
               options={TYPE_OPTIONS}
               size="lg"
               fullWidth
+              disabled={locked}
             />
           )}
         />
@@ -380,12 +462,20 @@ export function TransactionForm({
                 onAmountCommit={(next) => {
                   field.onChange(next)
                   void trigger("amount")
+                  advanceToDestination()
                 }}
-                onAmountBlur={field.onBlur}
+                onAmountBlur={() => {
+                  field.onBlur()
+                  advanceToDestination()
+                }}
                 amountError={errors.amount?.message}
                 currency={currency || defaultCurrency}
                 currencyError={errors.currency?.message}
                 onCurrencyPress={() => openPicker("currency")}
+                disabled={locked}
+                entryMode={amountEntry}
+                onEntryModeChange={setAmountEntry}
+                fieldRef={amountFieldRef}
               />
             )}
           />
@@ -399,7 +489,7 @@ export function TransactionForm({
               accounts={accounts}
               cards={cards}
               display={display}
-              disabled={!hasTargets}
+              disabled={!hasTargets || locked}
               onClick={() => openPicker("destination")}
             />
             {errors.destination?.message ? (
@@ -417,6 +507,7 @@ export function TransactionForm({
                 onChange={field.onChange}
                 error={errors.transactionDate?.message}
                 withTime
+                disabled={locked}
                 aside={
                   <Controller
                     control={control}
@@ -440,6 +531,7 @@ export function TransactionForm({
                               checked ? "CONFIRMED" : "PENDING"
                             )
                           }
+                          disabled={locked}
                         />
                       </Field>
                     )}
@@ -512,7 +604,10 @@ export function TransactionForm({
         onOpenChange={closeHandlerFor("category")}
         categories={categories}
         categoryType={categoryType}
-        onSelect={(next) => setValue("categoryId", next)}
+        onSelect={(next) => {
+          setValue("categoryId", next)
+          advanceToAmount()
+        }}
       />
 
       <FinanceCurrencyPickerSheet
@@ -529,9 +624,10 @@ export function TransactionForm({
         accounts={accounts}
         cards={cards}
         display={{ ...display, currency: currency || display.currency }}
-        onSelect={(next) =>
+        onSelect={(next) => {
           setValue("destination", next, { shouldValidate: true })
-        }
+          setGuidedStep("done")
+        }}
       />
     </>
   )

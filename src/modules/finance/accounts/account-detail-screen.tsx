@@ -19,6 +19,7 @@ import {
   useArchiveAccount,
   useDeleteAccount,
   useRestoreAccount,
+  useUnarchiveAccount,
 } from "@/src/modules/finance/shared/hooks/use-accounts"
 import { useCards } from "@/src/modules/finance/shared/hooks/use-cards"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
@@ -34,7 +35,9 @@ import { isoMonthBounds } from "@/src/modules/finance/shared/lib/month-window"
 import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 import { visibleTransactionTotals } from "@/src/modules/finance/shared/lib/transactions-query"
 import { DeleteRecordDialog } from "@/src/modules/finance/shared/components/delete-record-dialog"
+import { ArchiveRecordDialog } from "@/src/modules/finance/shared/components/archive-record-dialog"
 import { RecordOptionsSheet } from "@/src/modules/finance/shared/components/record-options-sheet"
+import { InstrumentHistorySheet } from "@/src/modules/finance/shared/components/instrument-history-sheet"
 import { LoadingView } from "@/src/shared/components/layout/loading-view"
 import { Button } from "@/src/shared/components/ui/button"
 import {
@@ -46,6 +49,7 @@ import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { appToast } from "@/src/shared/lib/app-toast"
 import {
   ArchiveIcon,
+  HistoryIcon,
   MoreVerticalIcon,
   PencilIcon,
   ScaleIcon,
@@ -85,12 +89,15 @@ function AccountDetailScreenBody({ accountId }: AccountDetailScreenProps) {
   const archiveAccount = useArchiveAccount()
   const deleteAccount = useDeleteAccount()
   const restoreAccount = useRestoreAccount()
+  const unarchiveAccount = useUnarchiveAccount()
   const { open: openAccountSheet, setOpen: setOpenAccountSheet } =
     useSheetParam(FINANCE_SHEET_KEYS.account)
   const { open: openOptionsSheet, setOpen: setOpenOptionsSheet } =
     useSheetParam(FINANCE_SHEET_KEYS.cashAccountOptions)
   const { open: openBalanceSheet, setOpen: setOpenBalanceSheet } =
     useSheetParam(FINANCE_SHEET_KEYS.accountBalance)
+  const { open: openHistorySheet, setOpen: setOpenHistorySheet } =
+    useSheetParam(FINANCE_SHEET_KEYS.accountHistory)
 
   const account =
     (accountsQuery.data ?? []).find((item) => item.id === accountId) ?? null
@@ -121,16 +128,23 @@ function AccountDetailScreenBody({ accountId }: AccountDetailScreenProps) {
   }
 
   const [confirmOpen, setConfirmOpen] = useState(false)
+  const [archiveConfirmOpen, setArchiveConfirmOpen] = useState(false)
 
   async function onArchiveAccount() {
     if (!account) {
       return
     }
     try {
-      await archiveAccount.mutateAsync(account.id)
-      appToast.success({ text1: "Cuenta archivada" })
+      const accountId = account.id
+      await archiveAccount.mutateAsync(accountId)
       setOpenOptionsSheet(false)
       router.push(APP_ROUTES.app.financeProducts)
+      showUndoToast("Cuenta archivada", () =>
+        unarchiveAccount.mutate(accountId, {
+          onError: (error) =>
+            appToast.error({ text1: financeErrorMessage(error) }),
+        })
+      )
     } catch (error) {
       appToast.error({ text1: financeErrorMessage(error) })
     }
@@ -252,6 +266,16 @@ function AccountDetailScreenBody({ accountId }: AccountDetailScreenProps) {
               <p className="text-3xl font-bold tracking-tight tabular-nums">
                 {formatFinanceMoney(account.balance, accountDisplay)}
               </p>
+              <div className="flex items-center justify-between text-sm text-white/70">
+                <span>
+                  Libre{" "}
+                  {formatFinanceMoney(account.freeBalance, accountDisplay)}
+                </span>
+                <span>
+                  Apartado{" "}
+                  {formatFinanceMoney(account.earmarkedAmount, accountDisplay)}
+                </span>
+              </div>
             </div>
             <div className="mt-6 grid grid-cols-2 gap-3">
               <div className="rounded-2xl bg-black/20 px-3 py-2">
@@ -312,11 +336,17 @@ function AccountDetailScreenBody({ accountId }: AccountDetailScreenProps) {
             onPress: () => setOpenBalanceSheet(true),
           },
           {
+            id: "history",
+            title: "Historial",
+            icon: HistoryIcon,
+            onPress: () => setOpenHistorySheet(true),
+          },
+          {
             id: "archive",
             title: "Archivar",
             icon: ArchiveIcon,
             disabled: archiveAccount.isPending || deleteAccount.isPending,
-            onPress: () => void onArchiveAccount(),
+            onPress: () => setArchiveConfirmOpen(true),
           },
           {
             id: "delete",
@@ -343,6 +373,14 @@ function AccountDetailScreenBody({ accountId }: AccountDetailScreenProps) {
         }}
       />
 
+      <ArchiveRecordDialog
+        open={archiveConfirmOpen}
+        onOpenChange={setArchiveConfirmOpen}
+        recordName={account.name}
+        pending={archiveAccount.isPending}
+        onConfirm={() => void onArchiveAccount()}
+      />
+
       <AccountSheet
         open={openAccountSheet}
         onOpenChange={setOpenAccountSheet}
@@ -354,6 +392,12 @@ function AccountDetailScreenBody({ accountId }: AccountDetailScreenProps) {
         open={openBalanceSheet}
         onOpenChange={setOpenBalanceSheet}
         account={account}
+        display={accountDisplay}
+      />
+      <InstrumentHistorySheet
+        open={openHistorySheet}
+        onOpenChange={setOpenHistorySheet}
+        target={{ kind: "account", id: account.id }}
         display={accountDisplay}
       />
     </>
