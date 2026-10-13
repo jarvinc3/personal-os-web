@@ -65,4 +65,15 @@ describe("buildAmortizationPlan", () => {
   it("returns an empty plan without installments", () => {
     assert.deepEqual(buildAmortizationPlan([], 500), [])
   })
+
+  it("fails fast when an installment has no valid principal", () => {
+    assert.throws(
+      () =>
+        buildAmortizationPlan(
+          [installment({ installmentNo: 1, principal: "" })],
+          100
+        ),
+      /sin capital válido/
+    )
+  })
 })

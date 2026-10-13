@@ -16,6 +16,16 @@ export type AmortizationRow = {
   remainingBalance: number
 }
 
+function requirePrincipal(installment: FinanceLoanInstallment): number {
+  const principal = parseFinanceMoney(installment.principal)
+  if (principal === null) {
+    throw new Error(
+      `Cuota ${installment.installmentNo} sin capital válido: "${installment.principal}"`
+    )
+  }
+  return principal
+}
+
 /**
  * El saldo del préstamo ya descontó las cuotas pagadas, así que el plan
  * empieza sumándoles su capital para reconstruir el saldo inicial y desde ahí
@@ -30,15 +40,11 @@ export function buildAmortizationPlan(
     .sort((left, right) => left.installmentNo - right.installmentNo)
   const paidPrincipal = ordered
     .filter((installment) => installment.status === "PAID")
-    .reduce(
-      (total, installment) =>
-        total + (parseFinanceMoney(installment.principal) ?? 0),
-      0
-    )
+    .reduce((total, installment) => total + requirePrincipal(installment), 0)
   let remainingBalance = currentBalance + paidPrincipal
   return ordered.map((installment) => {
     remainingBalance = roundToCents(
-      remainingBalance - (parseFinanceMoney(installment.principal) ?? 0)
+      remainingBalance - requirePrincipal(installment)
     )
     return {
       installmentNo: installment.installmentNo,

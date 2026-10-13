@@ -86,6 +86,64 @@ export function LinkTransactionSheet({
     )
   }
 
+  function renderInstallmentTargets() {
+    if (selectedLoan) {
+      if (installments.length === 0) {
+        return (
+          <p className="text-sm text-muted-foreground">
+            Sin cuotas pendientes.
+          </p>
+        )
+      }
+      return (
+        <div className="rounded-2xl border border-border bg-card">
+          {installments.map((installment, index) => (
+            <SummaryItem
+              key={installment.id}
+              title={`Cuota ${installment.installmentNo}`}
+              description={`Vence ${formatCalendarDate(installment.dueDate)}`}
+              value={formatFinanceMoney(installment.amount, {
+                ...display,
+                currency: selectedLoan.currency,
+              })}
+              onPress={() =>
+                submit({
+                  kind: "LOAN_INSTALLMENT",
+                  loanId: selectedLoan.id,
+                  installmentId: installment.id,
+                })
+              }
+              isLast={index === installments.length - 1}
+            />
+          ))}
+        </div>
+      )
+    }
+    if (loans.length === 0) {
+      return (
+        <p className="text-sm text-muted-foreground">
+          Sin préstamos con cuotas pendientes.
+        </p>
+      )
+    }
+    return (
+      <div className="rounded-2xl border border-border bg-card">
+        {loans.map((loan, index) => (
+          <SummaryItem
+            key={loan.id}
+            title={loan.lenderName}
+            description={`Saldo ${formatFinanceMoney(loan.currentBalance, {
+              ...display,
+              currency: loan.currency,
+            })}`}
+            onPress={() => setLoanId(loan.id)}
+            isLast={index === loans.length - 1}
+          />
+        ))}
+      </div>
+    )
+  }
+
   return (
     <BottomSheet
       open={open}
@@ -122,57 +180,7 @@ export function LinkTransactionSheet({
             </Button>
           ) : null}
 
-          {selectedLoan ? (
-            installments.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
-                Sin cuotas pendientes.
-              </p>
-            ) : (
-              <div className="rounded-2xl border border-border bg-card">
-                {installments.map((installment, index) => (
-                  <SummaryItem
-                    key={installment.id}
-                    title={`Cuota ${installment.installmentNo}`}
-                    description={`Vence ${formatCalendarDate(installment.dueDate)}`}
-                    value={formatFinanceMoney(installment.amount, {
-                      ...display,
-                      currency: selectedLoan.currency,
-                    })}
-                    onPress={() =>
-                      submit({
-                        kind: "LOAN_INSTALLMENT",
-                        loanId: selectedLoan.id,
-                        installmentId: installment.id,
-                      })
-                    }
-                    isLast={index === installments.length - 1}
-                  />
-                ))}
-              </div>
-            )
-          ) : loans.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              Sin préstamos con cuotas pendientes.
-            </p>
-          ) : (
-            <div className="rounded-2xl border border-border bg-card">
-              {loans.map((loan, index) => (
-                <SummaryItem
-                  key={loan.id}
-                  title={loan.lenderName}
-                  description={`Saldo ${formatFinanceMoney(
-                    loan.currentBalance,
-                    {
-                      ...display,
-                      currency: loan.currency,
-                    }
-                  )}`}
-                  onPress={() => setLoanId(loan.id)}
-                  isLast={index === loans.length - 1}
-                />
-              ))}
-            </div>
-          )}
+          {renderInstallmentTargets()}
         </TabsContent>
 
         <TabsContent
