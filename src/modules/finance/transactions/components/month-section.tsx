@@ -17,6 +17,7 @@ import {
 } from "@/src/modules/finance/shared/lib/transactions-query"
 import type { FinanceCategory } from "@/src/modules/finance/shared/types/entities"
 import { SummaryItem } from "@/src/shared/components/ui/summary"
+import { Badge } from "@/src/shared/components/ui/badge"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { cn } from "@/src/shared/lib/utils"
 import {
@@ -190,7 +191,12 @@ export function FinanceMonthSection({
                         </span>
                       }
                       trailing={
-                        <TransactionStatusMark status={transaction.status} />
+                        <span className="flex items-center gap-1.5">
+                          {transaction.possibleDuplicateOfId ? (
+                            <Badge variant="warning">¿Duplicado?</Badge>
+                          ) : null}
+                          <TransactionStatusMark status={transaction.status} />
+                        </span>
                       }
                       showChevron={false}
                       href={APP_ROUTES.app.financeTransaction(transaction.id)}

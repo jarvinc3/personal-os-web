@@ -38,6 +38,7 @@ describe("buildTransactionsSearchParams", () => {
     assert.equal(params.get("dateTo"), "2026-08-31")
     assert.equal(params.get("accountId"), "acc-1")
     assert.equal(params.get("type"), "DEBIT")
+    assert.equal(params.has("possibleDuplicates"), false)
     assert.equal(params.get("status"), "CONFIRMED")
     assert.equal(params.has("cardId"), false)
     assert.equal(params.has("search"), false)
@@ -50,6 +51,14 @@ describe("buildTransactionsSearchParams", () => {
       search: "  supermercado  ",
     })
     assert.equal(new URLSearchParams(qs).get("search"), "supermercado")
+  })
+
+  it("asks for possible duplicates only when filtering them", () => {
+    const qs = buildTransactionsSearchParams({
+      limit: 20,
+      possibleDuplicates: true,
+    })
+    assert.equal(new URLSearchParams(qs).get("possibleDuplicates"), "true")
   })
 })
 

@@ -33,6 +33,7 @@ export type FinanceTransactionsQuery = {
   dateFrom?: string
   dateTo?: string
   search?: string
+  possibleDuplicates?: boolean
 }
 
 const OPTIONAL_KEYS = [
@@ -57,6 +58,9 @@ export function buildTransactionsSearchParams(
   })
   if (query.cursor) {
     params.set("cursor", query.cursor)
+  }
+  if (query.possibleDuplicates) {
+    params.set("possibleDuplicates", "true")
   }
   for (const key of OPTIONAL_KEYS) {
     const value = query[key]
