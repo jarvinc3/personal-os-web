@@ -75,12 +75,12 @@ export function FinanceMonthPicker({
             onMouseDown={(event) => event.preventDefault()}
             onClick={() => onSelect(key)}
             className={cn(
-              "shrink-0 snap-center rounded-full px-3 py-1 text-xs font-semibold tracking-wide transition-colors",
+              "shrink-0 snap-center cursor-pointer rounded-full px-3 py-1 text-xs font-semibold tracking-wide transition-all duration-300",
               selected
-                ? "bg-foreground/70 text-background ring-2 ring-inset"
+                ? "bg-foreground/70 text-background ring-2 ring-inset ring-success"
                 : isCurrent
                   ? "text-foreground ring-2 ring-primary ring-inset"
-                  : "text-muted-foreground hover:text-foreground"
+                  : "text-muted-foreground hover:text-foreground "
             )}
           >
             {formatMonthPickerChip(date)}

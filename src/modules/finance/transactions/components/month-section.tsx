@@ -55,7 +55,7 @@ export function FinanceMonthSection({
       style={{ scrollMarginTop: stickyOffset }}
       className="flex flex-col gap-4"
     >
-      <div className="relative h-24 overflow-hidden">
+      <div className="relative h-24 overflow-hidden md:rounded-2xl">
         <Image
           src={month.bannerSrc}
           alt=""
@@ -64,151 +64,153 @@ export function FinanceMonthSection({
           className="object-cover"
           priority={isActive}
         />
-        <div className="absolute inset-0 bg-black/15" />
         <h2
           id={headingId}
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-black/55 px-4 py-1.5 text-sm font-medium text-white"
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-black/55 px-4 py-1 shadow-sm text-sm font-medium text-white"
         >
           {month.label}
         </h2>
       </div>
 
-      {month.weeks.map((week) => (
-        <div key={week.id} className="flex flex-col gap-3">
-          <p className="text-center text-sm text-muted-foreground">
-            {week.label}
-          </p>
-          {week.days.map((day) => (
-            <div key={day.dateKey} className="flex flex-col gap-2">
-              <div className="flex items-center justify-between gap-3 px-1">
-                <p className="text-xs text-muted-foreground">{day.label}</p>
-                <p
-                  className={cn(
-                    "text-xs font-medium tabular-nums",
-                    day.net > 0 && "text-success",
-                    day.net < 0 && "text-destructive",
-                    day.net === 0 && "text-muted-foreground"
-                  )}
-                >
-                  {day.net === 0
-                    ? formatFinanceMoney(0, display)
-                    : `${day.net > 0 ? "+" : "−"} ${formatFinanceMoney(Math.abs(day.net), display)}`}
-                </p>
-              </div>
-              <div className="rounded-2xl border border-border bg-card">
-                {day.items.map((transaction, index) => {
-                  const isTransfer = isTransferTransaction(transaction)
-                  const isInactive = isInactiveTransactionStatus(
-                    transaction.status
-                  )
-                  const category = transaction.categoryId
-                    ? categoryById.get(transaction.categoryId)
-                    : undefined
-                  const parent = category?.parentId
-                    ? categoryById.get(category.parentId)
-                    : undefined
-                  const icon = isTransfer
-                    ? undefined
-                    : category?.icon?.trim() || parent?.icon?.trim()
-                  const color = isTransfer
-                    ? "#3B82F6"
-                    : category?.color?.trim() ||
+      {month.weeks.map((week, index) => {
+        const isLast = index === month.weeks.length - 1
+        return (
+          <section key={week.id} aria-label={week.label} className="flex flex-col gap-3">
+            <h3 className={cn("text-center text-sm text-muted-foreground", !isLast && "border-b border-border pb-2")}>
+              {week.label}
+            </h3>
+            {week.days.map((day) => (
+              <section key={day.dateKey} aria-label={day.label} className="flex flex-col gap-2">
+                <h4 className="flex items-center justify-between gap-3 px-1">
+                  <span className="text-xs text-muted-foreground">{day.label}</span>
+                  <p
+                    className={cn(
+                      "text-xs font-medium tabular-nums",
+                      day.net > 0 && "text-success",
+                      day.net < 0 && "text-destructive",
+                      day.net === 0 && "text-muted-foreground"
+                    )}
+                  >
+                    {day.net === 0
+                      ? formatFinanceMoney(0, display)
+                      : `${day.net > 0 ? "+" : "−"} ${formatFinanceMoney(Math.abs(day.net), display)}`}
+                  </p>
+                </h4>
+                <div className="rounded-2xl border border-border bg-card">
+                  {day.items.map((transaction, index) => {
+                    const isTransfer = isTransferTransaction(transaction)
+                    const isInactive = isInactiveTransactionStatus(
+                      transaction.status
+                    )
+                    const category = transaction.categoryId
+                      ? categoryById.get(transaction.categoryId)
+                      : undefined
+                    const parent = category?.parentId
+                      ? categoryById.get(category.parentId)
+                      : undefined
+                    const icon = isTransfer
+                      ? undefined
+                      : category?.icon?.trim() || parent?.icon?.trim()
+                    const color = isTransfer
+                      ? "#3B82F6"
+                      : category?.color?.trim() ||
                       parent?.color?.trim() ||
                       "#64748B"
-                  const title = isTransfer
-                    ? transferDirectionLabel(transaction)
-                    : (transaction.merchant ??
-                      transaction.description ??
-                      transaction.accountName ??
-                      "Movimiento")
-                  const feeLeg = transaction.legs?.find(
-                    (leg) => leg.legRole === "FEE"
-                  )
-                  const instrumentLine =
-                    transaction.accountName || transaction.cardName ? (
-                      <TransactionInstrument
-                        transaction={transaction}
-                        suffix={formatFinanceTimeLabel(
-                          transaction.transactionDate
-                        )}
-                      />
-                    ) : null
-                  const description =
-                    instrumentLine || feeLeg ? (
-                      <span className="flex flex-col gap-0.5">
-                        {instrumentLine}
-                        {feeLeg ? (
-                          <span className="text-xs text-muted-foreground">
-                            Comisión{" "}
-                            {formatFinanceMoney(feeLeg.amount, {
-                              ...display,
-                              currency: feeLeg.currency,
-                            })}
-                          </span>
-                        ) : null}
-                      </span>
-                    ) : undefined
-                  return (
-                    <SummaryItem
-                      key={transaction.id}
-                      title={title}
-                      description={description}
-                      leading={
-                        icon ? (
-                          <span>{icon}</span>
-                        ) : isTransfer ? (
-                          <ArrowLeftRightIcon className="size-5 text-info" />
-                        ) : transaction.type === "DEBIT" ? (
-                          <ArrowDownLeftIcon className="size-5 text-destructive" />
-                        ) : transaction.type === "CREDIT" ? (
-                          <ArrowUpRightIcon className="size-5 text-success" />
-                        ) : transaction.type === "ADJUSTMENT" ? (
-                          <ScaleIcon
+                    const title = isTransfer
+                      ? transferDirectionLabel(transaction)
+                      : (transaction.merchant ??
+                        transaction.description ??
+                        transaction.accountName ??
+                        "Movimiento")
+                    const feeLeg = transaction.legs?.find(
+                      (leg) => leg.legRole === "FEE"
+                    )
+                    const instrumentLine =
+                      transaction.accountName || transaction.cardName ? (
+                        <TransactionInstrument
+                          transaction={transaction}
+                          suffix={formatFinanceTimeLabel(
+                            transaction.transactionDate
+                          )}
+                        />
+                      ) : null
+                    const description =
+                      instrumentLine || feeLeg ? (
+                        <span className="flex flex-col gap-0.5">
+                          {instrumentLine}
+                          {feeLeg ? (
+                            <span className="text-xs text-muted-foreground">
+                              Comisión{" "}
+                              {formatFinanceMoney(feeLeg.amount, {
+                                ...display,
+                                currency: feeLeg.currency,
+                              })}
+                            </span>
+                          ) : null}
+                        </span>
+                      ) : undefined
+                    return (
+                      <SummaryItem
+                        key={transaction.id}
+                        title={title}
+                        description={description}
+                        leading={
+                          icon ? (
+                            <span>{icon}</span>
+                          ) : isTransfer ? (
+                            <ArrowLeftRightIcon className="size-5 text-info" />
+                          ) : transaction.type === "DEBIT" ? (
+                            <ArrowDownLeftIcon className="size-5 text-destructive" />
+                          ) : transaction.type === "CREDIT" ? (
+                            <ArrowUpRightIcon className="size-5 text-success" />
+                          ) : transaction.type === "ADJUSTMENT" ? (
+                            <ScaleIcon
+                              className={cn(
+                                "size-5",
+                                movementSign(transaction) === "−"
+                                  ? "text-destructive"
+                                  : "text-success"
+                              )}
+                            />
+                          ) : null
+                        }
+                        accentColor={color}
+                        className={cn(isInactive && "opacity-50")}
+                        value={
+                          <span
                             className={cn(
-                              "size-5",
-                              movementSign(transaction) === "−"
-                                ? "text-destructive"
-                                : "text-success"
-                            )}
-                          />
-                        ) : null
-                      }
-                      accentColor={color}
-                      className={cn(isInactive && "opacity-50")}
-                      value={
-                        <span
-                          className={cn(
-                            !isTransfer &&
+                              !isTransfer &&
                               movementSign(transaction) === "−" &&
                               "text-destructive",
-                            !isTransfer &&
+                              !isTransfer &&
                               movementSign(transaction) === "+" &&
                               "text-success",
-                            isInactive && "text-muted-foreground line-through"
-                          )}
-                        >
-                          {signedAmount(transaction, display)}
-                        </span>
-                      }
-                      trailing={
-                        <span className="flex items-center gap-1.5">
-                          {transaction.possibleDuplicateOfId ? (
-                            <Badge variant="warning">¿Duplicado?</Badge>
-                          ) : null}
-                          <TransactionStatusMark status={transaction.status} />
-                        </span>
-                      }
-                      showChevron={false}
-                      href={APP_ROUTES.app.financeTransaction(transaction.id)}
-                      isLast={index === day.items.length - 1}
-                    />
-                  )
-                })}
-              </div>
-            </div>
-          ))}
-        </div>
-      ))}
+                              isInactive && "text-muted-foreground line-through"
+                            )}
+                          >
+                            {signedAmount(transaction, display)}
+                          </span>
+                        }
+                        trailing={
+                          <span className="flex items-center gap-1.5">
+                            {transaction.possibleDuplicateOfId ? (
+                              <Badge variant="warning">¿Duplicado?</Badge>
+                            ) : null}
+                            <TransactionStatusMark status={transaction.status} />
+                          </span>
+                        }
+                        showChevron={false}
+                        href={APP_ROUTES.app.financeTransaction(transaction.id)}
+                        isLast={index === day.items.length - 1}
+                      />
+                    )
+                  })}
+                </div>
+              </section>
+            ))}
+          </section>
+        )
+      })}
     </section>
   )
 }

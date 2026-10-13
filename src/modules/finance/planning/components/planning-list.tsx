@@ -56,6 +56,7 @@ import {
 } from "lucide-react"
 import { useMemo, useState } from "react"
 import { FinanceBudgetsList } from "@/src/modules/finance/budgets"
+import { cn } from "@/src/shared/lib/utils"
 
 type FinancePlanningListProps = {
   enabled: boolean
@@ -64,10 +65,10 @@ type FinancePlanningListProps = {
 }
 
 const PLANNING_TAB_ITEMS = [
-  { value: "savings", label: "Ahorros", icon: PiggyBankIcon },
-  { value: "loans", label: "Préstamos", icon: HandCoinsIcon },
-  { value: "receivables", label: "Cobros", icon: HandshakeIcon },
-  { value: "budgets", label: "Presupuestos", icon: ChartPieIcon },
+  { value: "savings", label: "Ahorros", icon: PiggyBankIcon, color: "#16a34a" },
+  { value: "budgets", label: "Presupuestos", icon: ChartPieIcon, color: "#8b5cf6" },
+  { value: "receivables", label: "Cobros", icon: HandshakeIcon, color: "#3b82f6" },
+  { value: "loans", label: "Préstamos", icon: HandCoinsIcon, color: "#f59e0b" },
 ] as const
 
 type PlanningTab = (typeof PLANNING_TAB_ITEMS)[number]["value"]
@@ -195,12 +196,15 @@ export function FinancePlanningList({
         className="w-full gap-6"
       >
         <TabsList className="h-auto w-full justify-start overflow-x-auto rounded-2xl p-1">
-          {PLANNING_TAB_ITEMS.map(({ value, label, icon: Icon }) => (
-            <TabsTrigger key={value} value={value} className="rounded-xl py-2">
-              <Icon data-icon="inline-start" />
-              <span className="sr-only md:not-sr-only">{label}</span>
-            </TabsTrigger>
-          ))}
+          {PLANNING_TAB_ITEMS.map(({ value, label, icon: Icon, color }) => {
+            const isSelected = tab === value
+            return (
+              <TabsTrigger key={value} value={value} className="rounded-xl py-2" style={{ backgroundColor: isSelected ? color : undefined }}>
+                <Icon data-icon="inline-start" className="size-5" style={{ color: isSelected ? "#fff" : color }} />
+                <span className={cn("sr-only md:not-sr-only text-foreground")} style={{ color: isSelected ? "#fff" : undefined }}>{label}</span>
+              </TabsTrigger>
+            )
+          })}
         </TabsList>
 
         <TabsContent value="savings">
@@ -272,50 +276,8 @@ export function FinancePlanningList({
           </div>
         </TabsContent>
 
-        <TabsContent value="loans">
-          <div className="flex flex-col gap-2">
-            <AsyncRegion
-              pending={loansQuery.isPending && !loansQuery.data}
-              pendingFallback={<FinanceListSkeleton />}
-              empty={loans.length === 0}
-              emptyFallback={
-                <Empty className="py-8">
-                  <EmptyHeader>
-                    <EmptyMedia variant="icon">
-                      <HandCoinsIcon />
-                    </EmptyMedia>
-                    <EmptyTitle>Aún no hay préstamos</EmptyTitle>
-                    <EmptyDescription>
-                      Registra cuotas, tasa anual y próximo vencimiento.
-                    </EmptyDescription>
-                  </EmptyHeader>
-                  <EmptyContent>
-                    <Button
-                      onClick={() => router.push(APP_ROUTES.app.financeLoanNew)}
-                    >
-                      <PlusIcon className="size-4 shrink-0" />
-                      Crear préstamo
-                    </Button>
-                  </EmptyContent>
-                </Empty>
-              }
-            >
-              {loans.map((loan) => {
-                const institution = (institutionsQuery.data ?? []).find(
-                  (item) => item.id === loan.institutionId
-                )
-                return (
-                  <LoanProgressCard
-                    key={loan.id}
-                    loan={loan}
-                    display={display}
-                    institution={institution}
-                    href={APP_ROUTES.app.financeLoan(loan.id)}
-                  />
-                )
-              })}
-            </AsyncRegion>
-          </div>
+        <TabsContent value="budgets" keepMounted>
+          <FinanceBudgetsList enabled={enabled} display={display} />
         </TabsContent>
 
         <TabsContent value="receivables">
@@ -398,14 +360,63 @@ export function FinancePlanningList({
           </div>
         </TabsContent>
 
-        <TabsContent value="budgets" keepMounted>
-          <FinanceBudgetsList enabled={enabled} display={display} />
+        <TabsContent value="loans">
+          <div className="flex flex-col gap-2">
+            <AsyncRegion
+              pending={loansQuery.isPending && !loansQuery.data}
+              pendingFallback={<FinanceListSkeleton />}
+              empty={loans.length === 0}
+              emptyFallback={
+                <Empty className="py-8">
+                  <EmptyHeader>
+                    <EmptyMedia variant="icon">
+                      <HandCoinsIcon />
+                    </EmptyMedia>
+                    <EmptyTitle>Aún no hay préstamos</EmptyTitle>
+                    <EmptyDescription>
+                      Registra cuotas, tasa anual y próximo vencimiento.
+                    </EmptyDescription>
+                  </EmptyHeader>
+                  <EmptyContent>
+                    <Button
+                      onClick={() => router.push(APP_ROUTES.app.financeLoanNew)}
+                    >
+                      <PlusIcon className="size-4 shrink-0" />
+                      Crear préstamo
+                    </Button>
+                  </EmptyContent>
+                </Empty>
+              }
+            >
+              {loans.map((loan) => {
+                const institution = (institutionsQuery.data ?? []).find(
+                  (item) => item.id === loan.institutionId
+                )
+                return (
+                  <LoanProgressCard
+                    key={loan.id}
+                    loan={loan}
+                    display={display}
+                    institution={institution}
+                    href={APP_ROUTES.app.financeLoan(loan.id)}
+                  />
+                )
+              })}
+            </AsyncRegion>
+          </div>
         </TabsContent>
       </Tabs>
 
       <ExpandableFab
         label="Crear en planificación"
         actions={[
+          {
+            icon: <PiggyBankIcon className="size-5" />,
+            label: "Ahorro",
+            onClick: () => openCreate("savings"),
+            disabled: !enabled,
+            color: "bg-emerald-600",
+          },
           {
             icon: <ChartPieIcon className="size-5" />,
             label: "Presup...",
@@ -426,13 +437,6 @@ export function FinancePlanningList({
             onClick: () => openCreate("loans"),
             disabled: !enabled,
             color: "bg-amber-600",
-          },
-          {
-            icon: <PiggyBankIcon className="size-5" />,
-            label: "Ahorro",
-            onClick: () => openCreate("savings"),
-            disabled: !enabled,
-            color: "bg-emerald-600",
           },
         ]}
       />

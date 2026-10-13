@@ -72,7 +72,7 @@ export function FinanceTransactionSearch({
 
   return (
     <div ref={rootRef} className="relative px-2">
-      <SearchIcon className="pointer-events-none absolute top-1/2 left-3 z-10 size-4 -translate-y-1/2 text-muted-foreground" />
+      <SearchIcon className="pointer-events-none absolute top-1/2 left-5 z-10 size-4 -translate-y-1/2 text-muted-foreground" />
       <Input
         type="search"
         placeholder="Buscar comercio o descripción..."

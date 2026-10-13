@@ -2,7 +2,6 @@
 
 import { FinanceDateField } from "@/src/modules/finance/shared/components/forms/date-field"
 import {
-  FinanceDetailsDisclosure,
   FinanceHelpText,
   FinanceSegmentedControl,
 } from "@/src/modules/finance/shared/components/forms/form-blocks"
@@ -35,6 +34,7 @@ import { usePicker } from "@/src/shared/hooks/use-picker"
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
   CalendarIcon,
+  CircleAlert,
   HandshakeIcon,
   NotebookPenIcon,
   UserIcon,
@@ -272,7 +272,7 @@ export function ReceivableSheet({
           />
         </SummarySection>
 
-        <FinanceDetailsDisclosure>
+        <SummarySection title="Detalles opcionales" icon={CircleAlert} collapsible>
           <Controller
             control={control}
             name="description"
@@ -286,7 +286,7 @@ export function ReceivableSheet({
               />
             )}
           />
-        </FinanceDetailsDisclosure>
+        </SummarySection>
       </BottomSheet>
 
       {discardChangesDialog}

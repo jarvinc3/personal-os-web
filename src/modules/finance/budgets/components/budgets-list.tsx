@@ -38,8 +38,9 @@ import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/asyn
 import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
 import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
-import { ChartPieIcon } from "lucide-react"
+import { ChartPieIcon, PlusIcon } from "lucide-react"
 import { useEffect, useRef } from "react"
+import { Button } from "@/src/shared/components/ui/button"
 
 type FinanceBudgetsListProps = {
   enabled: boolean
@@ -148,6 +149,10 @@ export function FinanceBudgetsList({
                   gastado.
                 </EmptyDescription>
               </EmptyHeader>
+              <Button onClick={() => setOpenBudgetSheet(true, null)}>
+                <PlusIcon />
+                Crear presupuesto
+              </Button>
             </Empty>
           }
         >

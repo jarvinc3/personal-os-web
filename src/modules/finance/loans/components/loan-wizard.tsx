@@ -6,6 +6,7 @@ import {
   ArrowLeftIcon,
   CalendarIcon,
   CheckIcon,
+  CircleAlert,
   HashIcon,
   InfoIcon,
   LandmarkIcon,
@@ -23,7 +24,6 @@ import { zodResolver } from "@hookform/resolvers/zod"
 
 import { FinanceDateField } from "@/src/modules/finance/shared/components/forms/date-field"
 import {
-  FinanceDetailsDisclosure,
   FinanceHelpText,
   FinanceSegmentedControl,
 } from "@/src/modules/finance/shared/components/forms/form-blocks"
@@ -674,7 +674,7 @@ export function LoanWizard({
               />
             </SummarySection>
 
-            <FinanceDetailsDisclosure>
+            <SummarySection title="Detalles opcionales" icon={CircleAlert} collapsible>
               <Controller
                 control={control}
                 name="notes"
@@ -689,7 +689,7 @@ export function LoanWizard({
                   />
                 )}
               />
-            </FinanceDetailsDisclosure>
+            </SummarySection>
           </>
         ) : null}
       </div>

@@ -21,8 +21,8 @@ import {
   CollapsibleTrigger,
 } from "@/src/shared/components/ui/collapsible"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
-import { ChevronDownIcon, SearchIcon, TagsIcon } from "lucide-react"
-import { useEffect, useMemo, useState } from "react"
+import { CheckIcon, ChevronDownIcon, SearchIcon, TagsIcon } from "lucide-react"
+import { useEffect, useMemo, useState, type ReactNode } from "react"
 
 const NONE_LABEL = "Sin categoría"
 
@@ -32,6 +32,9 @@ type CategoryPickerSheetProps = {
   categories: FinanceCategory[]
   categoryType: FinanceCategoryType
   onSelect: (categoryId: string) => void
+  /** Keeps the sheet open after each pick and marks selectedIds. */
+  multiple?: boolean
+  selectedIds?: string[]
 }
 
 export function CategoryPickerSheet({
@@ -40,6 +43,8 @@ export function CategoryPickerSheet({
   categories,
   categoryType,
   onSelect,
+  multiple = false,
+  selectedIds = [],
 }: CategoryPickerSheetProps) {
   const [search, setSearch] = useState("")
   const [manualOpen, setManualOpen] = useState<Record<string, boolean>>({})
@@ -70,9 +75,25 @@ export function CategoryPickerSheet({
     }
   }, [open])
 
+  const selected = new Set(selectedIds)
+
   function select(categoryId: string) {
     onSelect(categoryId)
-    onOpenChange(false)
+    if (!multiple) {
+      onOpenChange(false)
+    }
+  }
+
+  function selectedTrailing(categoryId: string, expand?: ReactNode) {
+    if (!multiple || !selected.has(categoryId)) {
+      return expand
+    }
+    return (
+      <>
+        <CheckIcon className="size-4 text-primary" aria-hidden />
+        {expand}
+      </>
+    )
   }
 
   return (
@@ -103,6 +124,9 @@ export function CategoryPickerSheet({
         >
           <TagsIcon className="size-5 text-muted-foreground" />
           <span className="text-sm font-medium">{NONE_LABEL}</span>
+          {multiple && selectedIds.length === 0 ? (
+            <CheckIcon className="ml-auto size-4 text-primary" aria-hidden />
+          ) : null}
         </button>
       ) : null}
 
@@ -129,6 +153,7 @@ export function CategoryPickerSheet({
                   isSystem={parent.isSystem}
                   onPress={() => select(parent.id)}
                   className={flash}
+                  trailing={selectedTrailing(parent.id)}
                 />
               )
             }
@@ -155,7 +180,8 @@ export function CategoryPickerSheet({
                   isSystem={parent.isSystem}
                   onPress={() => select(parent.id)}
                   className={flash}
-                  trailing={
+                  trailing={selectedTrailing(
+                    parent.id,
                     <CollapsibleTrigger
                       type="button"
                       className="flex size-8 shrink-0 items-center justify-center text-muted-foreground"
@@ -163,7 +189,7 @@ export function CategoryPickerSheet({
                     >
                       <ChevronDownIcon className="size-4 transition-transform group-data-open/category:rotate-180" />
                     </CollapsibleTrigger>
-                  }
+                  )}
                 />
                 <CollapsibleContent className="mt-2 flex flex-col gap-2 pl-7">
                   {hit.children.map((child) => {
@@ -181,6 +207,7 @@ export function CategoryPickerSheet({
                         className={
                           childHit ? "animate-search-flash" : undefined
                         }
+                        trailing={selectedTrailing(child.id)}
                       />
                     )
                   })}

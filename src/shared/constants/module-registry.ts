@@ -4,6 +4,7 @@ import {
   BarChart3Icon,
   BriefcaseBusinessIcon,
   Calendar,
+  MonitorIcon,
   Wallet,
   type LucideIcon,
 } from "lucide-react"
@@ -86,6 +87,17 @@ export const MODULE_REGISTRY: Record<ModuleSlug, ModuleDefinition> = {
     accent: "#EF4444",
     icon: BarChart3,
     order: 4,
+  }),
+  keepAwake: createModuleDefinition({
+    slug: "keepAwake",
+    id: "64356435-6435-6435-6435-643564356435",
+    key: "kaw",
+    label: "Keep Awake",
+    description:
+      "Este modulo es el encargado de la gestion de la keep awake del usuario.",
+    accent: "#45AAF2",
+    icon: MonitorIcon,
+    order: 5,
   }),
 }
 

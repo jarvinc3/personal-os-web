@@ -10,6 +10,9 @@ import {
   FinanceSuggestionRow,
 } from "@/src/modules/finance/shared/components/forms/form-blocks"
 import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
+import { CategoryMultiTrigger } from "@/src/modules/finance/shared/components/pickers/category-multi-trigger"
+import { CategoryPickerSheet } from "@/src/modules/finance/shared/components/pickers/category-picker-sheet"
+import { CATALOG_NONE } from "@/src/modules/finance/shared/constants/catalog"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
 import {
   useCreateBudget,
@@ -21,10 +24,7 @@ import {
   boundsForPeriod,
   buildCreateBudgetBody,
 } from "@/src/modules/finance/shared/lib/budget-payloads"
-import {
-  filterCategoriesByType,
-  groupCategoriesByParent,
-} from "@/src/modules/finance/shared/lib/category-tree"
+import { filterCategoriesByType } from "@/src/modules/finance/shared/lib/category-tree"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 import { previousMonthsBounds } from "@/src/modules/finance/shared/lib/month-window"
@@ -49,10 +49,9 @@ import { SummarySection } from "@/src/shared/components/ui/summary"
 import { Switch } from "@/src/shared/components/ui/switch"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
-import { cn } from "@/src/shared/lib/utils"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { CalendarIcon, CheckIcon, PiggyBankIcon, XIcon } from "lucide-react"
-import { useEffect, useId, useMemo } from "react"
+import { CalendarIcon, PiggyBankIcon, XIcon } from "lucide-react"
+import { useEffect, useId, useMemo, useState } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import {
   budgetSchema,
@@ -142,10 +141,6 @@ export function BudgetSheet({
     () => filterCategoriesByType(categories, "EXPENSE"),
     [categories]
   )
-  const categoryGroups = useMemo(
-    () => groupCategoriesByParent(expenseCategories),
-    [expenseCategories]
-  )
   const hasCategories = expenseCategories.length > 0
   const defaultCategoryId = expenseCategories[0]?.id ?? ""
   const includeChildrenId = useId()
@@ -172,6 +167,16 @@ export function BudgetSheet({
     onOpenChange,
   })
   const categoryIds = useWatch({ control, name: "categoryIds" })
+  const [categoryPickerOpen, setCategoryPickerOpen] = useState(false)
+  const selectedCategories = useMemo(
+    () =>
+      categoryIds
+        .map((categoryId) =>
+          categories.find((category) => category.id === categoryId)
+        )
+        .filter((category): category is FinanceCategory => Boolean(category)),
+    [categories, categoryIds]
+  )
   const display = {
     currency: baseCurrency,
     showCents: config.display.showCents,
@@ -293,47 +298,11 @@ export function BudgetSheet({
             <FieldLabel className="text-sm text-muted-foreground">
               Categorías
             </FieldLabel>
-            <div className="flex flex-wrap gap-2">
-              {categoryGroups.map((group) => {
-                const options = [group.category, ...group.children]
-                return options.map((category) => {
-                  const selected = categoryIds.includes(category.id)
-                  return (
-                    <button
-                      key={category.id}
-                      type="button"
-                      aria-pressed={selected}
-                      className={cn(
-                        "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-colors",
-                        selected
-                          ? "border-primary bg-primary text-primary-foreground"
-                          : "border-border bg-card text-muted-foreground",
-                        group.category.id !== category.id && "ml-4",
-                        !hasCategories && "opacity-50"
-                      )}
-                      disabled={!hasCategories}
-                      onClick={() =>
-                        setValue(
-                          "categoryIds",
-                          selected
-                            ? categoryIds.filter((id) => id !== category.id)
-                            : [...categoryIds, category.id],
-                          { shouldValidate: true }
-                        )
-                      }
-                    >
-                      {category.icon ? (
-                        <span className="text-sm leading-none">
-                          {category.icon}
-                        </span>
-                      ) : null}
-                      {category.name}
-                      {selected ? <CheckIcon className="size-3.5" /> : null}
-                    </button>
-                  )
-                })
-              })}
-            </div>
+            <CategoryMultiTrigger
+              categories={selectedCategories}
+              disabled={!hasCategories}
+              onClick={() => setCategoryPickerOpen(true)}
+            />
             {errors.categoryIds?.message ? (
               <FieldError>{errors.categoryIds.message}</FieldError>
             ) : null}
@@ -480,6 +449,24 @@ export function BudgetSheet({
           />
         </SummarySection>
       </BottomSheet>
+
+      <CategoryPickerSheet
+        open={categoryPickerOpen}
+        onOpenChange={setCategoryPickerOpen}
+        categories={categories}
+        categoryType="EXPENSE"
+        multiple
+        selectedIds={categoryIds}
+        onSelect={(categoryId) => {
+          const next =
+            categoryId === CATALOG_NONE
+              ? []
+              : categoryIds.includes(categoryId)
+                ? categoryIds.filter((current) => current !== categoryId)
+                : [...categoryIds, categoryId]
+          setValue("categoryIds", next, { shouldValidate: true })
+        }}
+      />
 
       {discardChangesDialog}
     </>

@@ -353,10 +353,10 @@ export function FinanceTransactionsList({
   }, [markUserTookOver, stickyOffset, timeline.length])
 
   return (
-    <div className="flex flex-col gap-4 -mx-4 bg-card">
+    <div className="flex flex-col -mx-4 bg-card md:bg-background">
       <div
         ref={chromeRef}
-        className="sticky top-0 z-30 flex flex-col gap-3 bg-background pb-2 rounded-b-2xl shadow-sm"
+        className="sticky top-0 z-30 flex flex-col gap-3 bg-background border-b border-border/70 md:border-none pb-2 rounded-b-2xl shadow-sm"
       >
         <FinanceTransactionSearch
           enabled={enabled}
@@ -424,14 +424,14 @@ export function FinanceTransactionsList({
           },
           {
             icon: <ArrowLeftRightIcon />,
-            label: "Transferir",
+            label: "Transf...",
             onClick: () => router.push(APP_ROUTES.app.financeTransferNew),
             disabled: !enabled || !canTransfer,
             color: "bg-blue-500",
           },
           {
             icon: <RefreshCwIcon />,
-            label: "Actualizar",
+            label: "Actual...",
             onClick: () => {
               void queryClient
                 .invalidateQueries({ queryKey: FINANCE_TRANSACTIONS_QUERY_KEY })
