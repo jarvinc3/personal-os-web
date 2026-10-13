@@ -2,6 +2,12 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [1.14.0] - 2026-10-12
+
+### Cambiado
+
+- El presupuesto se envía con `categoryIds` (el formulario actual manda una categoría) y acepta `includeChildren` y `rollover`.
+
 ## [1.13.0] - 2026-10-12
 
 ### Agregado

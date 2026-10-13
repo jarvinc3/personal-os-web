@@ -4,12 +4,15 @@ const PERIODS = ["MONTHLY", "BIWEEKLY", "CUSTOM"] as const
 export type CreateBudgetPeriod = (typeof PERIODS)[number]
 
 export type CreateBudgetBody = {
-  categoryId: string
+  categoryIds: string[]
+  categoryId?: string
   periodType: CreateBudgetPeriod
   periodStart: string
   periodEnd: string
   amountLimit: number
   alertThresholdPct?: number
+  includeChildren?: boolean
+  rollover?: "NONE" | "SURPLUS" | "SURPLUS_AND_DEFICIT"
 }
 
 export type PayloadResult<T> =
@@ -70,17 +73,25 @@ export function budgetPctUsed(
 
 export function buildCreateBudgetBody(input: {
   categoryId?: string
+  categoryIds?: string[]
   periodType: string
   periodStart: string
   periodEnd: string
   amountLimit: string
   alertThresholdPct?: string
+  includeChildren?: boolean
+  rollover?: "NONE" | "SURPLUS" | "SURPLUS_AND_DEFICIT"
 }): PayloadResult<CreateBudgetBody> {
   if (!PERIODS.includes(input.periodType as CreateBudgetPeriod)) {
     return { ok: false, error: "Periodo inválido" }
   }
-  const categoryId = input.categoryId?.trim()
-  if (!categoryId) {
+  const categoryIds =
+    input.categoryIds && input.categoryIds.length > 0
+      ? input.categoryIds
+      : input.categoryId?.trim()
+        ? [input.categoryId.trim()]
+        : []
+  if (categoryIds.length === 0) {
     return { ok: false, error: "Elige una categoría" }
   }
   const periodStart = input.periodStart.trim()
@@ -99,11 +110,18 @@ export function buildCreateBudgetBody(input: {
     return { ok: false, error: "Tope inválido" }
   }
   const body: CreateBudgetBody = {
-    categoryId,
+    categoryIds,
+    categoryId: categoryIds[0],
     periodType: input.periodType as CreateBudgetPeriod,
     periodStart,
     periodEnd,
     amountLimit,
+  }
+  if (input.includeChildren !== undefined) {
+    body.includeChildren = input.includeChildren
+  }
+  if (input.rollover) {
+    body.rollover = input.rollover
   }
   const thresholdRaw = input.alertThresholdPct?.trim()
   if (thresholdRaw) {
