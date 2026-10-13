@@ -37,6 +37,19 @@ scripts, y huecos de contrato en las tools del agente.
 | Medio     | 17       | Huecos de UI back a web, contrato de cobros, tools del agente, compatibilidad móvil                        |
 | Bajo      | 10       | Paginación, contrato de API, proceso de PR y CHANGELOG                                                     |
 
+## Nota de alcance (2026-10-12)
+
+Los datos actuales son de prueba y se pueden borrar, así que los hallazgos sobre
+scripts de migración y backfill de datos **no aplican**:
+
+- A1: script de deduplicación previo al índice único.
+- A2: backfill del desglose de cuotas.
+- A3: backfill de apartados de metas.
+- B4: recálculo de `amountSpent` de presupuestos existentes.
+- B9: pruebas de idempotencia de los scripts.
+
+No hay que corregirlos ni probarlos; el resto de hallazgos sigue vigente.
+
 ## Alto
 
 ### A1. La migración de idempotencia puede fallar el deploy sin el script de limpieza

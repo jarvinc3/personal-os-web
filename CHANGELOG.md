@@ -15,6 +15,10 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 - Badge "¿Duplicado?" en la fila y filtro de posibles duplicados.
 - Al crear una transferencia hacia la cuenta de una meta, el aviso ofrece contarla como aporte.
 
+### Cambiado
+
+- La lista de cortes lee la página de `GET /cards/:id/statements` (`items`).
+
 ## [1.15.0] - 2026-10-12
 
 ### Agregado

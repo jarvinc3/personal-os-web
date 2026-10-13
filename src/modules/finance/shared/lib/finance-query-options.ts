@@ -102,7 +102,12 @@ export function cardStatementsQuery(
 ) {
   return {
     queryKey: [...FINANCE_CARD_STATEMENTS_QUERY_KEY, cardId] as const,
-    queryFn: () => get<FinanceCardStatement[]>(PATHS.cardStatements(cardId)),
+    queryFn: async () =>
+      (
+        await get<FinancePaginated<FinanceCardStatement>>(
+          PATHS.cardStatements(cardId)
+        )
+      ).items,
   }
 }
 
