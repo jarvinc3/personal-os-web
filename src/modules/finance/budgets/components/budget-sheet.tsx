@@ -85,11 +85,16 @@ function budgetCategoryIds(budget: FinanceBudget | null): string[] {
   return budget.categoryId ? [budget.categoryId] : []
 }
 
-function toFormValues(
-  budget: FinanceBudget | null,
+function toFormValues({
+  budget,
+  defaultCategoryId,
+  monthStartDay,
+}: {
+  budget: FinanceBudget | null
   defaultCategoryId: string
-): BudgetFormValues {
-  const month = boundsForPeriod("MONTHLY")
+  monthStartDay: number
+}): BudgetFormValues {
+  const month = boundsForPeriod("MONTHLY", { monthStartDay })
   const categoryIds = budgetCategoryIds(budget)
   return {
     categoryIds:
@@ -155,7 +160,11 @@ export function BudgetSheet({
     formState: { errors, isDirty },
   } = useForm<BudgetFormValues>({
     resolver: zodResolver(budgetSchema),
-    defaultValues: toFormValues(budget, defaultCategoryId),
+    defaultValues: toFormValues({
+      budget,
+      defaultCategoryId,
+      monthStartDay: config.monthStartDay,
+    }),
   })
 
   const { requestOpenChange, discardChangesDialog } = useDiscardChanges({
@@ -192,18 +201,26 @@ export function BudgetSheet({
 
   useEffect(() => {
     if (open) {
-      reset(toFormValues(budget, defaultCategoryId))
+      reset(
+        toFormValues({
+          budget,
+          defaultCategoryId,
+          monthStartDay: config.monthStartDay,
+        })
+      )
     }
-  }, [open, budget, defaultCategoryId, reset])
+  }, [open, budget, defaultCategoryId, reset, config.monthStartDay])
 
   useEffect(() => {
     if (!open || budget || periodType === "CUSTOM") {
       return
     }
-    const bounds = boundsForPeriod(periodType)
+    const bounds = boundsForPeriod(periodType, {
+      monthStartDay: config.monthStartDay,
+    })
     setValue("periodStart", bounds.periodStart)
     setValue("periodEnd", bounds.periodEnd)
-  }, [open, budget, periodType, setValue])
+  }, [open, budget, periodType, setValue, config.monthStartDay])
 
   const submitForm = useMemo(
     () => createSheetSubmit(handleSubmit),

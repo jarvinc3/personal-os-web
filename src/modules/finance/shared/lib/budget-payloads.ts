@@ -27,14 +27,22 @@ export function dateInputValue(date: Date): string {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
 }
 
-export function monthPeriodBounds(now = new Date()): {
+export function monthPeriodBounds(
+  now = new Date(),
+  monthStartDay = 1
+): {
   periodStart: string
   periodEnd: string
 } {
+  const day = Math.min(Math.max(Math.trunc(monthStartDay), 1), 28)
+  const start =
+    now.getDate() >= day
+      ? new Date(now.getFullYear(), now.getMonth(), day)
+      : new Date(now.getFullYear(), now.getMonth() - 1, day)
   return {
-    periodStart: dateInputValue(new Date(now.getFullYear(), now.getMonth(), 1)),
+    periodStart: dateInputValue(start),
     periodEnd: dateInputValue(
-      new Date(now.getFullYear(), now.getMonth() + 1, 0)
+      new Date(start.getFullYear(), start.getMonth() + 1, day - 1)
     ),
   }
 }
@@ -52,12 +60,13 @@ export function biweeklyPeriodBounds(now = new Date()): {
 
 export function boundsForPeriod(
   periodType: string,
-  now = new Date()
+  options: { now?: Date; monthStartDay?: number } = {}
 ): { periodStart: string; periodEnd: string } {
+  const now = options.now ?? new Date()
   if (periodType === "BIWEEKLY") {
     return biweeklyPeriodBounds(now)
   }
-  return monthPeriodBounds(now)
+  return monthPeriodBounds(now, options.monthStartDay ?? 1)
 }
 
 export function budgetPctUsed(

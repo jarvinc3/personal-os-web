@@ -116,4 +116,16 @@ describe("monthPeriodBounds", () => {
     assert.equal(bounds.periodStart, "2026-09-01")
     assert.equal(bounds.periodEnd, "2026-09-30")
   })
+
+  it("starts the month on the configured day", () => {
+    const bounds = monthPeriodBounds(new Date(2026, 8, 20), 15)
+    assert.equal(bounds.periodStart, "2026-09-15")
+    assert.equal(bounds.periodEnd, "2026-10-14")
+  })
+
+  it("keeps the previous month when the start day is later", () => {
+    const bounds = monthPeriodBounds(new Date(2026, 8, 10), 15)
+    assert.equal(bounds.periodStart, "2026-08-15")
+    assert.equal(bounds.periodEnd, "2026-09-14")
+  })
 })
