@@ -101,6 +101,7 @@ export type FinanceTransaction = {
   transferToAccountName: string | null
   transferToCardId: string | null
   transferToCardName: string | null
+  possibleDuplicateOfId?: string | null
   /** Present when the API groups a transfer operation (web default). */
   kind?: "TRANSACTION" | "OPERATION"
   operationType?: "TRANSFER"

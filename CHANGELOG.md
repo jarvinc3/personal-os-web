@@ -2,6 +2,12 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [1.15.0] - 2026-10-12
+
+### Agregado
+
+- Badge "¿Duplicado?" en el detalle del movimiento, con "Unir" y "No es duplicado".
+
 ## [1.14.0] - 2026-10-12
 
 ### Cambiado

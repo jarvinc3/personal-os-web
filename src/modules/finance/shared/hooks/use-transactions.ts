@@ -269,3 +269,26 @@ export function useRestoreTransaction() {
     onSuccess: () => invalidateLedger(queryClient),
   })
 }
+
+export function useMergeTransaction() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, intoId }: { id: string; intoId: string }) =>
+      apiPost<{ success: boolean }>(
+        API_ENDPOINTS.FINANCE.TRANSACTION_MERGE(id),
+        { intoId }
+      ),
+    onSuccess: () => invalidateLedger(queryClient),
+  })
+}
+
+export function useMarkNotDuplicate() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) =>
+      apiPost<{ success: boolean }>(
+        API_ENDPOINTS.FINANCE.TRANSACTION_NOT_DUPLICATE(id)
+      ),
+    onSuccess: () => invalidateLedger(queryClient),
+  })
+}

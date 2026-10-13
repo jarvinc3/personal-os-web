@@ -61,6 +61,9 @@ export const API_ENDPOINTS = {
     TRANSFER: (id: string) => `/finance/transfers/${id}`,
     TRANSFER_UNCONFIRM: (id: string) => `/finance/transfers/${id}/unconfirm`,
     TRANSACTION: (id: string) => `/finance/transactions/${id}`,
+    TRANSACTION_MERGE: (id: string) => `/finance/transactions/${id}/merge`,
+    TRANSACTION_NOT_DUPLICATE: (id: string) =>
+      `/finance/transactions/${id}/not-duplicate`,
     TRANSACTION_RESTORE: (id: string) => `/finance/transactions/${id}/restore`,
     TRANSACTION_CONFIRM: (id: string) => `/finance/transactions/${id}/confirm`,
     TRANSACTION_UNCONFIRM: (id: string) =>
