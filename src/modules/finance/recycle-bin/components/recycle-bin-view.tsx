@@ -84,6 +84,9 @@ const DELETED_TYPE_ICON: Record<FinanceDeletedType, LucideIcon> = {
   receivable: HandCoinsIcon,
 }
 
+/** A snapshot past this size can take a while to restore; warn before it does. */
+const LARGE_SNAPSHOT_BYTES = 5 * 1024 * 1024
+
 function RecycleBinEmpty({
   title,
   description,
@@ -156,11 +159,14 @@ export function RecycleBinView() {
 
   function renderDeleted(record: FinanceDeletedRecord, isLast: boolean) {
     const typeLabel = DELETED_TYPE_LABEL[record.type]
+    const slowRestore = record.sizeBytes > LARGE_SNAPSHOT_BYTES
     return (
       <SummaryItem
         key={`${record.type}-${record.id}`}
         title={record.label ?? typeLabel}
-        description={`${typeLabel} · ${formatCalendarDate(record.deletedAt)}`}
+        description={`${typeLabel} · ${formatCalendarDate(record.deletedAt)}${
+          slowRestore ? " · Muchos datos, restaurar puede tardar" : ""
+        }`}
         icon={DELETED_TYPE_ICON[record.type]}
         isLast={isLast}
         className="px-3"

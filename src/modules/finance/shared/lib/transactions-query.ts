@@ -33,6 +33,7 @@ export type FinanceTransactionsQuery = {
   dateFrom?: string
   dateTo?: string
   search?: string
+  possibleDuplicates?: boolean
 }
 
 const OPTIONAL_KEYS = [
@@ -52,9 +53,14 @@ export function buildTransactionsSearchParams(
 ): string {
   const params = new URLSearchParams({
     limit: String(query.limit),
+    // The web always reads transfers as one grouped operation with its legs.
+    groupOperations: "true",
   })
   if (query.cursor) {
     params.set("cursor", query.cursor)
+  }
+  if (query.possibleDuplicates) {
+    params.set("possibleDuplicates", "true")
   }
   for (const key of OPTIONAL_KEYS) {
     const value = query[key]
@@ -187,11 +193,21 @@ export function signedAmount(
 export function visibleTransactionTotals(
   items: Pick<
     FinanceTransaction,
-    "type" | "amountBaseCurrency" | "transferGroupId" | "status"
+    "type" | "amountBaseCurrency" | "transferGroupId" | "status" | "legs"
   >[]
 ): { income: number; expenses: number } {
   return items.reduce(
     (totals, item) => {
+      for (const leg of item.legs ?? []) {
+        if (leg.legRole !== "FEE" || isInactiveTransactionStatus(leg.status)) {
+          continue
+        }
+        const fee = parseFinanceMoney(leg.amountBaseCurrency)
+        if (fee === null) {
+          continue
+        }
+        totals.expenses += fee
+      }
       if (
         isTransferTransaction(item) ||
         isInactiveTransactionStatus(item.status)

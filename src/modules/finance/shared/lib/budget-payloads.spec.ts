@@ -29,6 +29,27 @@ describe("buildCreateBudgetBody", () => {
     assert.equal("amountSpent" in result.body, false)
   })
 
+  it("sends the full category set and the rollover options", () => {
+    const builtBody = buildCreateBudgetBody({
+      categoryIds: ["cat-1", "cat-2"],
+      periodType: "MONTHLY",
+      periodStart: "2026-09-01",
+      periodEnd: "2026-09-30",
+      amountLimit: "100",
+      includeChildren: false,
+      rollover: "SURPLUS",
+      recurring: true,
+    })
+    assert.equal(builtBody.ok, true)
+    if (!builtBody.ok) {
+      return
+    }
+    assert.deepEqual(builtBody.body.categoryIds, ["cat-1", "cat-2"])
+    assert.equal(builtBody.body.includeChildren, false)
+    assert.equal(builtBody.body.rollover, "SURPLUS")
+    assert.equal(builtBody.body.recurring, true)
+  })
+
   it("rejects missing category, inverted dates, and NaN money", () => {
     assert.equal(
       buildCreateBudgetBody({

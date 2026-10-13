@@ -2,6 +2,7 @@
 
 import { apiDelete, apiGet, apiPatch, apiPost } from "@/src/config/api-client"
 import type {
+  CreateCardPaymentBody,
   CreateTransactionBody,
   CreateTransferBody,
   UpdateTransactionBody,
@@ -187,6 +188,15 @@ export function useCreateTransfer() {
   })
 }
 
+export function useCreateCardPayment() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (body: CreateCardPaymentBody) =>
+      apiPost<FinanceTransferResult>(API_ENDPOINTS.FINANCE.CARD_PAYMENTS, body),
+    onSuccess: () => invalidateLedger(queryClient),
+  })
+}
+
 export function useUpdateTransfer() {
   const queryClient = useQueryClient()
   return useMutation({
@@ -255,6 +265,29 @@ export function useRestoreTransaction() {
     mutationFn: (id: string) =>
       apiPost<{ success: boolean }>(
         API_ENDPOINTS.FINANCE.TRANSACTION_RESTORE(id)
+      ),
+    onSuccess: () => invalidateLedger(queryClient),
+  })
+}
+
+export function useMergeTransaction() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, intoId }: { id: string; intoId: string }) =>
+      apiPost<{ success: boolean }>(
+        API_ENDPOINTS.FINANCE.TRANSACTION_MERGE(id),
+        { intoId }
+      ),
+    onSuccess: () => invalidateLedger(queryClient),
+  })
+}
+
+export function useMarkNotDuplicate() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) =>
+      apiPost<{ success: boolean }>(
+        API_ENDPOINTS.FINANCE.TRANSACTION_NOT_DUPLICATE(id)
       ),
     onSuccess: () => invalidateLedger(queryClient),
   })

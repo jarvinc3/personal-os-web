@@ -17,6 +17,7 @@ import {
 } from "@/src/modules/finance/shared/lib/transactions-query"
 import type { FinanceCategory } from "@/src/modules/finance/shared/types/entities"
 import { SummaryItem } from "@/src/shared/components/ui/summary"
+import { Badge } from "@/src/shared/components/ui/badge"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { cn } from "@/src/shared/lib/utils"
 import {
@@ -120,20 +121,38 @@ export function FinanceMonthSection({
                       transaction.description ??
                       transaction.accountName ??
                       "Movimiento")
+                  const feeLeg = transaction.legs?.find(
+                    (leg) => leg.legRole === "FEE"
+                  )
+                  const instrumentLine =
+                    transaction.accountName || transaction.cardName ? (
+                      <TransactionInstrument
+                        transaction={transaction}
+                        suffix={formatFinanceTimeLabel(
+                          transaction.transactionDate
+                        )}
+                      />
+                    ) : null
+                  const description =
+                    instrumentLine || feeLeg ? (
+                      <span className="flex flex-col gap-0.5">
+                        {instrumentLine}
+                        {feeLeg ? (
+                          <span className="text-xs text-muted-foreground">
+                            Comisión{" "}
+                            {formatFinanceMoney(feeLeg.amount, {
+                              ...display,
+                              currency: feeLeg.currency,
+                            })}
+                          </span>
+                        ) : null}
+                      </span>
+                    ) : undefined
                   return (
                     <SummaryItem
                       key={transaction.id}
                       title={title}
-                      description={
-                        transaction.accountName || transaction.cardName ? (
-                          <TransactionInstrument
-                            transaction={transaction}
-                            suffix={formatFinanceTimeLabel(
-                              transaction.transactionDate
-                            )}
-                          />
-                        ) : undefined
-                      }
+                      description={description}
                       leading={
                         icon ? (
                           <span>{icon}</span>
@@ -172,7 +191,12 @@ export function FinanceMonthSection({
                         </span>
                       }
                       trailing={
-                        <TransactionStatusMark status={transaction.status} />
+                        <span className="flex items-center gap-1.5">
+                          {transaction.possibleDuplicateOfId ? (
+                            <Badge variant="warning">¿Duplicado?</Badge>
+                          ) : null}
+                          <TransactionStatusMark status={transaction.status} />
+                        </span>
                       }
                       showChevron={false}
                       href={APP_ROUTES.app.financeTransaction(transaction.id)}

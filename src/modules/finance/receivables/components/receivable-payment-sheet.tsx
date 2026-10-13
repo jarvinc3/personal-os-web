@@ -32,7 +32,7 @@ import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
 import { usePicker } from "@/src/shared/hooks/use-picker"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { HandshakeIcon, XIcon } from "lucide-react"
-import { useEffect, useMemo } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import {
   receivablePaymentSchema,
@@ -44,6 +44,12 @@ const EMPTY_FORM: ReceivablePaymentFormValues = {
   accountId: "",
   paidAt: "",
 }
+
+const EXCESS_OPTIONS = [
+  { value: "EXTRA_INCOME", label: "Ingreso extra" },
+  { value: "CREDIT_BALANCE", label: "Saldo a favor" },
+  { value: "APPLY_TO_RECEIVABLE", label: "A otro cobro" },
+] as const
 
 type ReceivablePaymentSheetProps = {
   open: boolean
@@ -108,11 +114,14 @@ export function ReceivablePaymentSheet({
     outstanding !== undefined &&
     parsedAmount !== null &&
     parsedAmount > outstanding
-  const amountError =
-    errors.amount?.message ??
-    (exceedsOutstanding && outstanding !== undefined
-      ? `Máximo ${formatFinanceMoney(outstanding, display)} (lo que queda)`
-      : undefined)
+  const [excessHandling, setExcessHandling] = useState<
+    "EXTRA_INCOME" | "CREDIT_BALANCE" | "APPLY_TO_RECEIVABLE" | null
+  >(null)
+  const excessAmount =
+    parsedAmount !== null && outstanding !== undefined
+      ? parsedAmount - outstanding
+      : 0
+  const amountError = errors.amount?.message
 
   const submitForm = useMemo(
     () => createSheetSubmit(handleSubmit),
@@ -123,7 +132,10 @@ export function ReceivablePaymentSheet({
     if (!receivableId) {
       return
     }
-    const payload = buildReceivablePaymentBody(values)
+    const payload = buildReceivablePaymentBody({
+      ...values,
+      ...(excessHandling ? { excessHandling } : {}),
+    })
     if (!payload.ok) {
       appToast.error({ text1: payload.error })
       return
@@ -165,7 +177,10 @@ export function ReceivablePaymentSheet({
           submit: (
             <Button
               type="button"
-              disabled={createMutation.isPending || exceedsOutstanding}
+              disabled={
+                createMutation.isPending ||
+                (exceedsOutstanding && excessHandling === null)
+              }
               className="flex-1"
               onClick={onSubmit}
             >
@@ -222,6 +237,31 @@ export function ReceivablePaymentSheet({
               >
                 Mitad
               </Button>
+            </div>
+          ) : null}
+          {exceedsOutstanding && outstanding !== undefined ? (
+            <div className="flex flex-col gap-2 rounded-2xl border border-border p-3">
+              <p className="text-sm font-semibold">
+                Sobra {formatFinanceMoney(excessAmount, display)}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Elige qué hacer con la diferencia.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {EXCESS_OPTIONS.map((option) => (
+                  <Button
+                    key={option.value}
+                    type="button"
+                    variant={
+                      excessHandling === option.value ? "default" : "outline"
+                    }
+                    size="sm"
+                    onClick={() => setExcessHandling(option.value)}
+                  >
+                    {option.label}
+                  </Button>
+                ))}
+              </div>
             </div>
           ) : null}
           <Controller

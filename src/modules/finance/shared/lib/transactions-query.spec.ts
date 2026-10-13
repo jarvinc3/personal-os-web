@@ -32,11 +32,13 @@ describe("buildTransactionsSearchParams", () => {
     const params = new URLSearchParams(qs)
     assert.equal(params.get("cursor"), "cur-2")
     assert.equal(params.get("limit"), "20")
+    assert.equal(params.get("groupOperations"), "true")
     assert.equal(params.has("page"), false)
     assert.equal(params.get("dateFrom"), "2026-08-01")
     assert.equal(params.get("dateTo"), "2026-08-31")
     assert.equal(params.get("accountId"), "acc-1")
     assert.equal(params.get("type"), "DEBIT")
+    assert.equal(params.has("possibleDuplicates"), false)
     assert.equal(params.get("status"), "CONFIRMED")
     assert.equal(params.has("cardId"), false)
     assert.equal(params.has("search"), false)
@@ -49,6 +51,14 @@ describe("buildTransactionsSearchParams", () => {
       search: "  supermercado  ",
     })
     assert.equal(new URLSearchParams(qs).get("search"), "supermercado")
+  })
+
+  it("asks for possible duplicates only when filtering them", () => {
+    const qs = buildTransactionsSearchParams({
+      limit: 20,
+      possibleDuplicates: true,
+    })
+    assert.equal(new URLSearchParams(qs).get("possibleDuplicates"), "true")
   })
 })
 
@@ -102,6 +112,31 @@ describe("visibleTransactionTotals", () => {
       { type: "DEBIT", amountBaseCurrency: "60.50", transferGroupId: null },
     ])
     assert.equal(totals.expenses, 1060.5)
+  })
+
+  it("counts the transfer fee leg as expense without counting the transfer", () => {
+    const totals = visibleTransactionTotals([
+      {
+        type: "TRANSFER",
+        amountBaseCurrency: "100.00",
+        transferGroupId: "grp-1",
+        status: "CONFIRMED",
+        legs: [
+          {
+            amountBaseCurrency: "100.00",
+            status: "CONFIRMED",
+            legRole: "SOURCE",
+          },
+          {
+            amountBaseCurrency: "2.50",
+            status: "CONFIRMED",
+            legRole: "FEE",
+          },
+        ],
+      },
+    ])
+    assert.equal(totals.expenses, 2.5)
+    assert.equal(totals.income, 0)
   })
 })
 

@@ -10,6 +10,8 @@ import { MissingRecord } from "@/src/modules/finance/shared/components/layout/mi
 import {
   useConfirmTransaction,
   useDeleteTransaction,
+  useMarkNotDuplicate,
+  useMergeTransaction,
   useRestoreTransaction,
   useReverseTransaction,
   useTransaction,
@@ -41,6 +43,7 @@ import { RecordOptionsSheet } from "@/src/modules/finance/shared/components/reco
 import { LoadingView } from "@/src/shared/components/layout/loading-view"
 import { SettingsSection } from "@/src/shared/components/layout/settings-section"
 import { Button } from "@/src/shared/components/ui/button"
+import { Badge } from "@/src/shared/components/ui/badge"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { SummaryItem } from "@/src/shared/components/ui/summary"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
@@ -110,6 +113,36 @@ function TransactionDetailScreenBody({
   const unconfirmMutation = useUnconfirmTransaction()
   const reverseMutation = useReverseTransaction()
   const deleteMutation = useDeleteTransaction()
+  const mergeMutation = useMergeTransaction()
+  const notDuplicateMutation = useMarkNotDuplicate()
+
+  async function onMerge() {
+    if (!tx?.possibleDuplicateOfId) {
+      return
+    }
+    try {
+      await mergeMutation.mutateAsync({
+        id: tx.id,
+        intoId: tx.possibleDuplicateOfId,
+      })
+      appToast.success({ text1: "Movimientos unidos" })
+      router.back()
+    } catch (error) {
+      appToast.error({ text1: financeErrorMessage(error) })
+    }
+  }
+
+  async function onNotDuplicate() {
+    if (!tx) {
+      return
+    }
+    try {
+      await notDuplicateMutation.mutateAsync(tx.id)
+      appToast.success({ text1: "Marcado como no duplicado" })
+    } catch (error) {
+      appToast.error({ text1: financeErrorMessage(error) })
+    }
+  }
   const restoreMutation = useRestoreTransaction()
   const { open: openOptionsSheet, setOpen: setOpenOptionsSheet } =
     useSheetParam(FINANCE_SHEET_KEYS.transactionOptions)
@@ -231,6 +264,37 @@ function TransactionDetailScreenBody({
             onRetry={() => void detailQuery.refetch()}
             isRetrying={detailQuery.isFetching}
           />
+        </div>
+      ) : null}
+
+      {tx.possibleDuplicateOfId ? (
+        <div className="mx-4 mb-3 flex flex-col gap-2 rounded-2xl border border-border p-3">
+          <div className="flex items-center gap-2">
+            <Badge variant="warning">¿Duplicado?</Badge>
+            <p className="text-sm text-muted-foreground">
+              Puede ser el mismo hecho que otro movimiento.
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={mergeMutation.isPending}
+              onClick={() => void onMerge()}
+            >
+              Unir
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={notDuplicateMutation.isPending}
+              onClick={() => void onNotDuplicate()}
+            >
+              No es duplicado
+            </Button>
+          </div>
         </div>
       ) : null}
 

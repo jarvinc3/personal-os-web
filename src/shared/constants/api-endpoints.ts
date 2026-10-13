@@ -54,12 +54,18 @@ export const API_ENDPOINTS = {
     CARD_CREDIT_LIMIT: (id: string) =>
       `/finance/cards/${id}/balances/credit-limit`,
     CARD_STATEMENTS: (id: string) => `/finance/cards/${id}/statements`,
+    CARD_STATEMENT: (id: string, statementId: string) =>
+      `/finance/cards/${id}/statements/${statementId}`,
     BALANCE_ADJUSTMENT: "/finance/balance-adjustments",
     TRANSACTIONS: "/finance/transactions",
     TRANSFERS: "/finance/transfers",
+    CARD_PAYMENTS: "/finance/card-payments",
     TRANSFER: (id: string) => `/finance/transfers/${id}`,
     TRANSFER_UNCONFIRM: (id: string) => `/finance/transfers/${id}/unconfirm`,
     TRANSACTION: (id: string) => `/finance/transactions/${id}`,
+    TRANSACTION_MERGE: (id: string) => `/finance/transactions/${id}/merge`,
+    TRANSACTION_NOT_DUPLICATE: (id: string) =>
+      `/finance/transactions/${id}/not-duplicate`,
     TRANSACTION_RESTORE: (id: string) => `/finance/transactions/${id}/restore`,
     TRANSACTION_CONFIRM: (id: string) => `/finance/transactions/${id}/confirm`,
     TRANSACTION_UNCONFIRM: (id: string) =>
@@ -70,23 +76,29 @@ export const API_ENDPOINTS = {
     CATEGORY_RESTORE: (id: string) => `/finance/categories/${id}/restore`,
     BUDGETS: "/finance/budgets",
     BUDGET: (id: string) => `/finance/budgets/${id}`,
+    BUDGET_TRANSACTIONS: (id: string) => `/finance/budgets/${id}/transactions`,
     BUDGET_RESTORE: (id: string) => `/finance/budgets/${id}/restore`,
     SAVINGS_GOALS: "/finance/savings-goals",
     SAVINGS_GOAL: (id: string) => `/finance/savings-goals/${id}`,
     SAVINGS_GOAL_RESTORE: (id: string) =>
       `/finance/savings-goals/${id}/restore`,
     SAVINGS_GOAL_CONTRIBUTIONS: (id: string) =>
-      `/finance/savings-goals/${id}/contributions`,
+      `/finance/savings-goals/${id}/allocations`,
     SAVINGS_GOAL_CONTRIBUTION: (id: string, contributionId: string) =>
-      `/finance/savings-goals/${id}/contributions/${contributionId}`,
+      `/finance/savings-goals/${id}/allocations/${contributionId}`,
     RECEIVABLE_PAYMENTS: (id: string) => `/finance/receivables/${id}/payments`,
     LOANS: "/finance/loans",
     LOAN: (id: string) => `/finance/loans/${id}`,
     LOAN_RESTORE: (id: string) => `/finance/loans/${id}/restore`,
     LOAN_INSTALLMENTS: (id: string) => `/finance/loans/${id}/installments`,
+    LOAN_PREPAYMENTS: (id: string) => `/finance/loans/${id}/prepayments`,
+    LOAN_PREPAYMENTS_PREVIEW: (id: string) =>
+      `/finance/loans/${id}/prepayments/preview`,
     RECEIVABLES: "/finance/receivables",
     RECEIVABLE: (id: string) => `/finance/receivables/${id}`,
     RECEIVABLE_RESTORE: (id: string) => `/finance/receivables/${id}/restore`,
+    RECEIVABLE_WRITE_OFF: (id: string) =>
+      `/finance/receivables/${id}/write-off`,
     EMAIL_SOURCES: "/finance/email-sync/sources",
     EMAIL_SOURCE: (id: string) => `/finance/email-sync/sources/${id}`,
     EMAIL_SOURCE_SYNC: (id: string) => `/finance/email-sync/sources/${id}/sync`,

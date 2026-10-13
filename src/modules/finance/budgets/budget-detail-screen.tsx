@@ -11,12 +11,12 @@ import type { PlanningProgressTone } from "@/src/modules/finance/shared/componen
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import {
   useBudget,
+  useBudgetTransactions,
   useDeleteBudget,
   useRestoreBudget,
 } from "@/src/modules/finance/shared/hooks/use-budgets"
 import { useCategories } from "@/src/modules/finance/shared/hooks/use-categories"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
-import { useTransactions } from "@/src/modules/finance/shared/hooks/use-transactions"
 import { budgetPctUsed } from "@/src/modules/finance/shared/lib/budget-payloads"
 import { formatBudgetPeriodDate } from "@/src/modules/finance/shared/lib/budgets-query"
 import { filterCategoriesByType } from "@/src/modules/finance/shared/lib/category-tree"
@@ -25,19 +25,16 @@ import {
   financeLoadErrorMessage,
 } from "@/src/modules/finance/shared/lib/finance-error"
 import { showUndoToast } from "@/src/modules/finance/shared/components/undo-toast"
-import {
-  formatCalendarDate,
-  sliceDateInput,
-} from "@/src/modules/finance/shared/lib/ledger-form"
+import { formatCalendarDate } from "@/src/modules/finance/shared/lib/ledger-form"
 import {
   formatFinanceMoney,
   parseFinanceMoney,
 } from "@/src/modules/finance/shared/lib/money"
 import { joinPlanningCaption } from "@/src/modules/finance/shared/lib/planning-lists"
-import { FINANCE_TIMELINE_PAGE_SIZE } from "@/src/modules/finance/shared/lib/transactions-query"
 import {
   FINANCE_BUDGET_PERIOD_LABEL,
   FINANCE_TRANSACTION_STATUS_LABEL,
+  type FinanceBudget,
   type FinanceTransactionStatus,
 } from "@/src/modules/finance/shared/types/entities"
 import { DeleteRecordDialog } from "@/src/modules/finance/shared/components/delete-record-dialog"
@@ -97,6 +94,20 @@ function budgetBadge(tone: PlanningProgressTone): {
   return { label: "En curso", variant: "info" }
 }
 
+/** One budget can carry several categories; the title lists them. */
+function budgetTitle(budget: FinanceBudget): string {
+  const list =
+    budget.categories && budget.categories.length > 0
+      ? budget.categories
+      : budget.category
+        ? [budget.category]
+        : []
+  if (list.length === 0) {
+    return budget.name ?? "Sin categoría"
+  }
+  return list.map((entry) => entry.name).join(", ")
+}
+
 /** Only a status other than confirmed is worth a caption on a movement. */
 function movementStatusCaption(
   status: FinanceTransactionStatus
@@ -139,17 +150,7 @@ function BudgetDetailScreenBody({ budgetId }: FinanceBudgetDetailProps) {
     FINANCE_SHEET_KEYS.budget
   )
 
-  const movementsQuery = useTransactions(Boolean(budget), {
-    limit: FINANCE_TIMELINE_PAGE_SIZE,
-    type: "DEBIT",
-    ...(budget
-      ? {
-          categoryId: budget.categoryId,
-          dateFrom: sliceDateInput(budget.periodStart),
-          dateTo: sliceDateInput(budget.periodEnd),
-        }
-      : {}),
-  })
+  const movementsQuery = useBudgetTransactions(isEnabled, budgetId)
 
   const movements = movementsQuery.data?.items ?? []
   const accent = budget?.category?.color ?? ACCENT_FALLBACK_COLOR
@@ -161,6 +162,13 @@ function BudgetDetailScreenBody({ budgetId }: FinanceBudgetDetailProps) {
     ? (parseFinanceMoney(budget.amountLimit) ?? 0) -
       (parseFinanceMoney(budget.amountSpent) ?? 0)
     : 0
+  const carriedOver = budget
+    ? (parseFinanceMoney(budget.carriedOver ?? "0") ?? 0)
+    : 0
+  const effectiveLimit = budget
+    ? (parseFinanceMoney(budget.effectiveLimit ?? budget.amountLimit) ?? 0)
+    : 0
+  const budgetTitleText = budget ? budgetTitle(budget) : "Presupuesto"
   const tone = budget ? budgetTone(pct, budget.alertThresholdPct ?? 80) : "info"
   const badge = budgetBadge(tone)
   const deleteBudget = useDeleteBudget()
@@ -207,12 +215,12 @@ function BudgetDetailScreenBody({ budgetId }: FinanceBudgetDetailProps) {
   usePageHeader(
     {
       variant: "secondary",
-      title: budget?.category?.name ?? "Presupuesto",
+      title: budgetTitleText,
       onBack: () => router.back(),
       actions: headerActions,
       accentColor: accent,
     },
-    [router, budget?.category?.name, accent, headerActions]
+    [router, budgetTitleText, accent, headerActions]
   )
 
   if (budgetQuery.isPending && !budget) {
@@ -255,20 +263,27 @@ function BudgetDetailScreenBody({ budgetId }: FinanceBudgetDetailProps) {
             {emoji ?? <ChartPieIcon className="size-6" />}
           </span>
         }
-        title={budget.category?.name ?? "Sin categoría"}
+        title={budgetTitleText}
         badge={badge}
         subtitle={joinPlanningCaption(periodLabel, periodRange)}
         metricLabel="Gastado"
         metricValue={formatFinanceMoney(budget.amountSpent, display)}
         progress={progress}
         startCaption={`${Math.round(progress)}% del tope`}
-        endCaption={`Tope ${formatFinanceMoney(budget.amountLimit, display)}`}
+        endCaption={
+          carriedOver !== 0
+            ? `Tope efectivo ${formatFinanceMoney(effectiveLimit, display)}`
+            : `Tope ${formatFinanceMoney(budget.amountLimit, display)}`
+        }
         footnote={
           <>
             {remaining < 0
               ? `Excedido en ${formatFinanceMoney(Math.abs(remaining), display)}`
               : `Quedan ${formatFinanceMoney(remaining, display)}`}
             {` · alerta al ${budget.alertThresholdPct}%`}
+            {carriedOver !== 0
+              ? ` · arrastre ${formatFinanceMoney(carriedOver, display)}`
+              : ""}
           </>
         }
       />
@@ -338,7 +353,7 @@ function BudgetDetailScreenBody({ budgetId }: FinanceBudgetDetailProps) {
       <RecordOptionsSheet
         open={optionsOpen}
         onOpenChange={setOptionsOpen}
-        description={budget.category?.name ?? "Presupuesto"}
+        description={budgetTitleText}
         options={[
           {
             id: "edit",
@@ -363,7 +378,7 @@ function BudgetDetailScreenBody({ budgetId }: FinanceBudgetDetailProps) {
       <DeleteRecordDialog
         open={confirmOpen}
         onOpenChange={setConfirmOpen}
-        recordName={budget.category?.name ?? "este presupuesto"}
+        recordName={budgetTitleText}
         pending={deleteBudget.isPending}
         consequences="Deja de seguir el gasto de esa categoría. No se puede deshacer."
         onConfirm={() => void onDeleteBudget()}

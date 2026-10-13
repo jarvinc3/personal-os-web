@@ -315,6 +315,8 @@ function SavingsGoalDetailScreenBody({
         targetAmount={goal.targetAmount}
         currentAmount={goal.currentAmount}
         targetDate={goal.targetDate}
+        goalAccountId={goal.accountId}
+        goalMode={goal.mode}
       />
 
       <SavingsGoalSheet

@@ -126,6 +126,7 @@ export type FinanceDeletedRecord = {
   id: string
   label: string | null
   deletedAt: string
+  sizeBytes: number
 }
 
 export type FinanceRecycleBin = {

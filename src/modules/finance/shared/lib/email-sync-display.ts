@@ -33,11 +33,21 @@ export function emailOutcomeLabel(outcome: string): string {
       return "Falta el monto"
     case "SKIPPED_NOT_TX":
       return "No es movimiento"
+    case "SKIPPED_DUPLICATE":
+      return "Duplicado"
     case "FAILED_NON_RETRYABLE":
       return "Descartado"
     default:
       return outcome
   }
+}
+
+/** Messages the sync skipped because a movement already existed. */
+export function countSkippedDuplicates(
+  messages: readonly { outcome: string }[]
+): number {
+  return messages.filter((message) => message.outcome === "SKIPPED_DUPLICATE")
+    .length
 }
 
 export function syncLogBadgeVariant(
