@@ -390,6 +390,7 @@ export type CreateSavingsGoalContributionBody = {
   kind?: "CONTRIBUTION" | "WITHDRAWAL"
   date?: string
   notes?: string
+  fromTransferGroupId?: string
 }
 
 export function buildSavingsGoalContributionBody(input: {
@@ -397,6 +398,7 @@ export function buildSavingsGoalContributionBody(input: {
   kind?: "CONTRIBUTION" | "WITHDRAWAL"
   date?: string
   notes?: string
+  fromTransferGroupId?: string
 }): PayloadResult<CreateSavingsGoalContributionBody> {
   const amount = requiredMoney(input.amount, "Aporte")
   if (!amount.ok) {
@@ -412,6 +414,7 @@ export function buildSavingsGoalContributionBody(input: {
   }
 
   const notes = optionalTrimmed(input.notes)
+  const transferGroupId = optionalTrimmed(input.fromTransferGroupId)
 
   return {
     ok: true,
@@ -420,6 +423,7 @@ export function buildSavingsGoalContributionBody(input: {
       ...(input.kind ? { kind: input.kind } : {}),
       ...(date.body ? { date: date.body } : {}),
       ...(notes ? { notes } : {}),
+      ...(transferGroupId ? { fromTransferGroupId: transferGroupId } : {}),
     },
   }
 }

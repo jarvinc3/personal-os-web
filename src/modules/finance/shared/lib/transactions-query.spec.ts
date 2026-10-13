@@ -104,6 +104,31 @@ describe("visibleTransactionTotals", () => {
     ])
     assert.equal(totals.expenses, 1060.5)
   })
+
+  it("counts the transfer fee leg as expense without counting the transfer", () => {
+    const totals = visibleTransactionTotals([
+      {
+        type: "TRANSFER",
+        amountBaseCurrency: "100.00",
+        transferGroupId: "grp-1",
+        status: "CONFIRMED",
+        legs: [
+          {
+            amountBaseCurrency: "100.00",
+            status: "CONFIRMED",
+            legRole: "SOURCE",
+          },
+          {
+            amountBaseCurrency: "2.50",
+            status: "CONFIRMED",
+            legRole: "FEE",
+          },
+        ],
+      },
+    ])
+    assert.equal(totals.expenses, 2.5)
+    assert.equal(totals.income, 0)
+  })
 })
 
 describe("formatTransactionDate", () => {

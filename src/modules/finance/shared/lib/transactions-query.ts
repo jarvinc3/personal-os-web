@@ -189,11 +189,19 @@ export function signedAmount(
 export function visibleTransactionTotals(
   items: Pick<
     FinanceTransaction,
-    "type" | "amountBaseCurrency" | "transferGroupId" | "status"
+    "type" | "amountBaseCurrency" | "transferGroupId" | "status" | "legs"
   >[]
 ): { income: number; expenses: number } {
   return items.reduce(
     (totals, item) => {
+      for (const leg of item.legs ?? []) {
+        if (leg.legRole === "FEE" && !isInactiveTransactionStatus(leg.status)) {
+          const fee = parseFinanceMoney(leg.amountBaseCurrency)
+          if (fee !== null) {
+            totals.expenses += fee
+          }
+        }
+      }
       if (
         isTransferTransaction(item) ||
         isInactiveTransactionStatus(item.status)

@@ -147,6 +147,18 @@ describe("buildSavingsGoalContributionBody", () => {
   it("rejects a contribution of zero", () => {
     assert.equal(buildSavingsGoalContributionBody({ amount: "0" }).ok, false)
   })
+
+  it("links the transfer that funded the allocation", () => {
+    const payload = buildSavingsGoalContributionBody({
+      amount: "100",
+      fromTransferGroupId: "grp-9",
+    })
+    assert.equal(payload.ok, true)
+    if (!payload.ok) {
+      return
+    }
+    assert.equal(payload.body.fromTransferGroupId, "grp-9")
+  })
 })
 
 describe("buildReceivablePaymentBody", () => {
