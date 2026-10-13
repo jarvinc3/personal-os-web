@@ -2,6 +2,16 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [1.18.0] - 2026-10-13
+
+### Agregado
+
+- Configuración de Finanzas en `/settings/finance`: ingreso fijo (monto, frecuencia, días de pago y cuenta), cuenta por defecto para gastos y transferencias, entrada de monto (teclado o calculadora), día de inicio del mes financiero, días de aviso antes del vencimiento de la tarjeta y modo de correo (directo o pendiente).
+
+### Cambiado
+
+- Los formularios de gasto y transferencia proponen la cuenta por defecto configurada.
+
 ## [1.17.0] - 2026-10-13
 
 ### Agregado
