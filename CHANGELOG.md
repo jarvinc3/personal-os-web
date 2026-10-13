@@ -2,6 +2,12 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [1.18.1] - 2026-10-13
+
+### Corregido
+
+- Los sheets con acciones ya no avisan de una `key` faltante en el pie: cada acción lleva su propia clave.
+
 ## [1.18.0] - 2026-10-13
 
 ### Agregado

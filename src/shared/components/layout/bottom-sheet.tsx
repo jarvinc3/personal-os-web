@@ -17,7 +17,7 @@ import {
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { useIsMobile } from "@/src/shared/hooks/use-mobile"
 import { cn } from "@/src/shared/lib/utils"
-import type { ReactNode } from "react"
+import { Fragment, type ReactNode } from "react"
 
 interface BottomSheetProps {
   open: boolean
@@ -53,9 +53,13 @@ export function BottomSheet({
 }: BottomSheetProps) {
   const isMobile = useIsMobile()
   const direction = getBottomSheetDirection(variant, isMobile)
-  const actionNodes = [actions?.delete, actions?.close, actions?.submit].filter(
-    (node) => node != null && node !== false
-  )
+  const actionEntries = (
+    [
+      ["delete", actions?.delete],
+      ["close", actions?.close],
+      ["submit", actions?.submit],
+    ] as const
+  ).filter(([, node]) => node != null && node !== false)
   const Root = nested ? DrawerNested : Drawer
   return (
     <Root direction={direction} open={open} onOpenChange={onOpenChange}>
@@ -99,9 +103,11 @@ export function BottomSheet({
           )}
         </div>
 
-        {actionNodes.length > 0 && !pending && (
+        {actionEntries.length > 0 && !pending && (
           <DrawerFooter className="flex w-full flex-row justify-end gap-2 border-t">
-            {actionNodes}
+            {actionEntries.map(([actionName, node]) => (
+              <Fragment key={actionName}>{node}</Fragment>
+            ))}
           </DrawerFooter>
         )}
       </DrawerContent>
