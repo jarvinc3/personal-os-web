@@ -261,6 +261,26 @@ export type FinanceCardStatement = {
   status: FinanceCardStatementStatus
 }
 
+export type FinanceCardStatementMovement = {
+  id: string
+  type: string
+  status: string
+  amount: string
+  currency: string
+  ledgerAmount: string
+  ledgerCurrency: string
+  transactionDate: string
+  merchant: string | null
+  description: string | null
+  transferGroupId: string | null
+}
+
+export type FinanceCardStatementDetail = {
+  statement: FinanceCardStatement
+  movements: FinanceCardStatementMovement[]
+  payments: FinanceCardStatementMovement[]
+}
+
 export type FinanceInstitution = {
   id: string
   name: string
@@ -307,8 +327,7 @@ export const FINANCE_BUDGET_ROLLOVERS = [
   "SURPLUS",
   "SURPLUS_AND_DEFICIT",
 ] as const
-export type FinanceBudgetRollover =
-  (typeof FINANCE_BUDGET_ROLLOVERS)[number]
+export type FinanceBudgetRollover = (typeof FINANCE_BUDGET_ROLLOVERS)[number]
 
 export const FINANCE_BUDGET_ROLLOVER_LABEL: Record<
   FinanceBudgetRollover,
@@ -425,6 +444,16 @@ export type FinanceLoan = {
 export type FinanceLoanInstallmentStatus =
   "PENDING" | "PARTIAL" | "PAID" | "OVERDUE"
 
+export const FINANCE_LOAN_INSTALLMENT_STATUS_LABEL: Record<
+  FinanceLoanInstallmentStatus,
+  string
+> = {
+  PENDING: "Pendiente",
+  PARTIAL: "Parcial",
+  PAID: "Pagada",
+  OVERDUE: "Vencida",
+}
+
 export type FinanceLoanInstallment = {
   id: string
   loanId: string
@@ -439,6 +468,7 @@ export type FinanceLoanInstallment = {
   paidAmount: string
   status: FinanceLoanInstallmentStatus
   paidAt: string | null
+  transactionId?: string | null
 }
 
 export const FINANCE_RECEIVABLE_STATUSES = [

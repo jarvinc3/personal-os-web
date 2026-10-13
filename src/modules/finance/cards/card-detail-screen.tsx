@@ -280,6 +280,7 @@ function CardDetailScreenBody({ cardId }: CardDetailScreenProps) {
                 />
               ) : null}
               <CardStatementsSection
+                cardId={card.id}
                 statements={statementsQuery.data ?? []}
                 upcomingCycle={upcomingCycle}
                 display={cardDisplay}

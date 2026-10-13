@@ -128,6 +128,8 @@ function wizardDefaults(
     installment: "",
     accountId: CATALOG_NONE,
     disbursementDate: todayDateInput(),
+    rateType: "FIXED",
+    insuranceAmount: "",
     notes: "",
     ...prefill,
   }
@@ -297,6 +299,9 @@ export function LoanWizard({
       accountId: formValues.accountId,
       currency: formValues.currency,
       interestRatePercent: String(roundToCents(currentPlan.annualRate * 100)),
+      rateType: formValues.rateType,
+      insuranceAmount: formValues.insuranceAmount,
+      disbursementDate: formValues.disbursementDate,
       notes: formValues.notes,
     })
     if (!payload.ok) {
@@ -568,6 +573,38 @@ export function LoanWizard({
                     value={field.value}
                     onChange={field.onChange}
                     error={errors.disbursementDate?.message}
+                  />
+                )}
+              />
+              <Controller
+                control={control}
+                name="rateType"
+                render={({ field }) => (
+                  <FinanceSegmentedControl
+                    label="Tipo de tasa"
+                    value={field.value}
+                    onChange={(value) =>
+                      field.onChange(value as "FIXED" | "VARIABLE")
+                    }
+                    options={[
+                      { value: "FIXED", label: "Fija" },
+                      { value: "VARIABLE", label: "Variable" },
+                    ]}
+                  />
+                )}
+              />
+              <Controller
+                control={control}
+                name="insuranceAmount"
+                render={({ field }) => (
+                  <FinanceMoneyField
+                    label="Seguro mensual (opcional)"
+                    amount={field.value}
+                    onAmountChange={field.onChange}
+                    onAmountCommit={(next) => field.onChange(next)}
+                    onAmountBlur={field.onBlur}
+                    amountError={errors.insuranceAmount?.message}
+                    currency={currency}
                   />
                 )}
               />

@@ -9,6 +9,7 @@ import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/lay
 import { FinanceProgressHero } from "@/src/modules/finance/shared/components/layout/progress-hero"
 import { LoanSurfaceMark } from "@/src/modules/finance/loans/components/loan-progress-card"
 import { LoanPrepaymentSheet } from "@/src/modules/finance/loans/components/loan-prepayment-sheet"
+import { InstallmentDetailSheet } from "@/src/modules/finance/loans/components/installment-detail-sheet"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
 import { useInstitutions } from "@/src/modules/finance/shared/hooks/use-institutions"
@@ -31,6 +32,7 @@ import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 import { loanProgressSummary } from "@/src/modules/finance/shared/lib/planning-lists"
 import {
   FINANCE_INSTALLMENT_FREQ_LABEL,
+  FINANCE_LOAN_INSTALLMENT_STATUS_LABEL,
   type FinanceLoanInstallment,
 } from "@/src/modules/finance/shared/types/entities"
 import { DeleteRecordDialog } from "@/src/modules/finance/shared/components/delete-record-dialog"
@@ -63,16 +65,6 @@ import { useRouter } from "next/navigation"
 import { useMemo, useState } from "react"
 
 import { ACCENT_FALLBACK_COLOR } from "@/src/shared/lib/accent-gradient"
-
-const INSTALLMENT_STATUS_LABEL: Record<
-  FinanceLoanInstallment["status"],
-  string
-> = {
-  PENDING: "Pendiente",
-  PARTIAL: "Parcial",
-  PAID: "Pagada",
-  OVERDUE: "Vencida",
-}
 
 const INSTALLMENT_STATUS_VARIANT: Record<
   FinanceLoanInstallment["status"],
@@ -131,6 +123,8 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
 
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [archiveConfirmOpen, setArchiveConfirmOpen] = useState(false)
+  const [selectedInstallment, setSelectedInstallment] =
+    useState<FinanceLoanInstallment | null>(null)
 
   async function onArchiveLoan() {
     if (!loan) {
@@ -316,11 +310,16 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
                   title={`Cuota ${installment.installmentNo}`}
                   description={`Vence ${formatCalendarDate(installment.dueDate)} · Capital ${formatFinanceMoney(installment.principal, money)} · Interés ${formatFinanceMoney(installment.interest, money)}`}
                   value={formatFinanceMoney(installment.amount, money)}
+                  onPress={() => setSelectedInstallment(installment)}
                   trailing={
                     <Badge
                       variant={INSTALLMENT_STATUS_VARIANT[installment.status]}
                     >
-                      {INSTALLMENT_STATUS_LABEL[installment.status]}
+                      {
+                        FINANCE_LOAN_INSTALLMENT_STATUS_LABEL[
+                          installment.status
+                        ]
+                      }
                     </Badge>
                   }
                   isLast={index === installments.length - 1}
@@ -364,6 +363,17 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
             onPress: () => setConfirmOpen(true),
           },
         ]}
+      />
+
+      <InstallmentDetailSheet
+        open={selectedInstallment !== null}
+        onOpenChange={(next) => {
+          if (!next) {
+            setSelectedInstallment(null)
+          }
+        }}
+        installment={selectedInstallment}
+        display={money}
       />
 
       <LoanPrepaymentSheet

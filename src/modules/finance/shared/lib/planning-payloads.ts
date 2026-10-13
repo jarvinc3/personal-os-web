@@ -40,6 +40,10 @@ export type CreateLoanBody = {
   accountId?: string
   currency?: string
   interestRate?: number | null
+  rateType?: "FIXED" | "VARIABLE"
+  insuranceAmount?: number | null
+  prepaymentPenaltyPct?: number | null
+  disbursementDate?: string | null
   notes?: string
 }
 
@@ -223,6 +227,10 @@ export function buildLoanBody(
     accountId?: string
     currency?: string
     interestRatePercent?: string
+    rateType?: "FIXED" | "VARIABLE"
+    insuranceAmount?: string
+    prepaymentPenaltyPct?: string
+    disbursementDate?: string | null
     notes?: string
   },
   options?: { isUpdate?: boolean }
@@ -306,6 +314,38 @@ export function buildLoanBody(
     body.interestRate = rate.interestRate
   } else if (options?.isUpdate) {
     body.interestRate = null
+  }
+
+  if (input.rateType) {
+    body.rateType = input.rateType
+  }
+  if (input.insuranceAmount !== undefined) {
+    const trimmedInsurance = input.insuranceAmount.trim()
+    if (trimmedInsurance) {
+      const insurance = parseFinanceMoney(trimmedInsurance)
+      if (insurance === null) {
+        return { ok: false, error: "Seguro inválido" }
+      }
+      body.insuranceAmount = insurance
+    }
+  }
+  if (input.prepaymentPenaltyPct !== undefined) {
+    const penalty = percentToRateFraction(input.prepaymentPenaltyPct)
+    if (!penalty.ok) {
+      return penalty
+    }
+    if (penalty.interestRate !== undefined) {
+      body.prepaymentPenaltyPct = penalty.interestRate
+    }
+  }
+  if (input.disbursementDate) {
+    const disbursement = optionalIsoDate(input.disbursementDate)
+    if (!disbursement.ok) {
+      return disbursement
+    }
+    if (disbursement.body) {
+      body.disbursementDate = disbursement.body
+    }
   }
 
   return { ok: true, body }

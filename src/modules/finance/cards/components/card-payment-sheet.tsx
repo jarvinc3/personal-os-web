@@ -1,7 +1,10 @@
 "use client"
 
 import { FinanceDateField } from "@/src/modules/finance/shared/components/forms/date-field"
-import { FinanceHelpText } from "@/src/modules/finance/shared/components/forms/form-blocks"
+import {
+  FinanceHelpText,
+  FinanceSegmentedControl,
+} from "@/src/modules/finance/shared/components/forms/form-blocks"
 import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
 import { DestinationPickerSheet } from "@/src/modules/finance/shared/components/pickers/destination-picker-sheet"
 import { DestinationTrigger } from "@/src/modules/finance/shared/components/pickers/destination-trigger"
@@ -56,7 +59,7 @@ export function CardPaymentSheet({
   const { config } = useFinanceEnabled()
   const accountsQuery = useAccounts(open)
   const institutionsQuery = useInstitutions(open)
-  const currency = currencies[0] ?? defaultCurrency
+  const [currency, setCurrency] = useState(currencies[0] ?? defaultCurrency)
   const accounts = (accountsQuery.data ?? []).filter(
     (account) => account.isActive
   )
@@ -140,6 +143,17 @@ export function CardPaymentSheet({
         }}
       >
         <SummarySection title="Pago" icon={CreditCardIcon}>
+          {currencies.length > 1 ? (
+            <FinanceSegmentedControl
+              label="Moneda"
+              value={currency}
+              onChange={setCurrency}
+              options={currencies.map((code) => ({
+                value: code,
+                label: code,
+              }))}
+            />
+          ) : null}
           <FinanceMoneyField
             label="Monto"
             amount={amount}
