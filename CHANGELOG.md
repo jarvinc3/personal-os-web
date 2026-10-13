@@ -2,6 +2,19 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [1.16.0] - 2026-10-12
+
+### Agregado
+
+- Formulario de presupuesto multicategoría: chips de varias categorías, "incluir subcategorías", rollover y recurrencia.
+- El detalle del presupuesto lee `GET /budgets/:id/transactions` en vez de filtrar por una sola categoría.
+- La comisión de una transferencia se muestra y suma en los totales del mes.
+- "Desde otra cuenta" al apartar en una meta crea la transferencia y la enlaza con `fromTransferGroupId`.
+- Hoja de detalle del corte y selector de moneda al pagar la tarjeta.
+- Detalle de cuota del préstamo y campos de seguro y tipo de tasa en el formulario.
+- Badge "¿Duplicado?" en la fila y filtro de posibles duplicados.
+- Al crear una transferencia hacia la cuenta de una meta, el aviso ofrece contarla como aporte.
+
 ## [1.15.0] - 2026-10-12
 
 ### Agregado
