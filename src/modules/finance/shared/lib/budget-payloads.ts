@@ -13,6 +13,7 @@ export type CreateBudgetBody = {
   alertThresholdPct?: number
   includeChildren?: boolean
   rollover?: "NONE" | "SURPLUS" | "SURPLUS_AND_DEFICIT"
+  recurring?: boolean
 }
 
 export type PayloadResult<T> =
@@ -81,6 +82,7 @@ export function buildCreateBudgetBody(input: {
   alertThresholdPct?: string
   includeChildren?: boolean
   rollover?: "NONE" | "SURPLUS" | "SURPLUS_AND_DEFICIT"
+  recurring?: boolean
 }): PayloadResult<CreateBudgetBody> {
   if (!PERIODS.includes(input.periodType as CreateBudgetPeriod)) {
     return { ok: false, error: "Periodo inválido" }
@@ -122,6 +124,9 @@ export function buildCreateBudgetBody(input: {
   }
   if (input.rollover) {
     body.rollover = input.rollover
+  }
+  if (input.recurring !== undefined) {
+    body.recurring = input.recurring
   }
   const thresholdRaw = input.alertThresholdPct?.trim()
   if (thresholdRaw) {

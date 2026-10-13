@@ -47,7 +47,16 @@ type FinanceBudgetsListProps = {
 }
 
 function categoryLabel(budget: FinanceBudget): string {
-  return budget.category?.name ?? "Categoría"
+  const list =
+    budget.categories && budget.categories.length > 0
+      ? budget.categories
+      : budget.category
+        ? [budget.category]
+        : []
+  if (list.length === 0) {
+    return budget.name ?? "Categoría"
+  }
+  return list.map((category) => category.name).join(", ")
 }
 
 function budgetTone(pct: number | null, threshold: number) {

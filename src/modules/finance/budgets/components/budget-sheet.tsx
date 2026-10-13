@@ -10,8 +10,6 @@ import {
   FinanceSuggestionRow,
 } from "@/src/modules/finance/shared/components/forms/form-blocks"
 import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
-import { CategoryPickerSheet } from "@/src/modules/finance/shared/components/pickers/category-picker-sheet"
-import { CategoryTrigger } from "@/src/modules/finance/shared/components/pickers/category-trigger"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
 import {
   useCreateBudget,
@@ -23,7 +21,10 @@ import {
   boundsForPeriod,
   buildCreateBudgetBody,
 } from "@/src/modules/finance/shared/lib/budget-payloads"
-import { filterCategoriesByType } from "@/src/modules/finance/shared/lib/category-tree"
+import {
+  filterCategoriesByType,
+  groupCategoriesByParent,
+} from "@/src/modules/finance/shared/lib/category-tree"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 import { previousMonthsBounds } from "@/src/modules/finance/shared/lib/month-window"
@@ -31,23 +32,27 @@ import { visibleTransactionTotals } from "@/src/modules/finance/shared/lib/trans
 import type {
   FinanceBudget,
   FinanceBudgetPeriod,
+  FinanceBudgetRollover,
   FinanceCategory,
 } from "@/src/modules/finance/shared/types/entities"
 import {
   FINANCE_BUDGET_PERIOD_LABEL,
   FINANCE_BUDGET_PERIODS,
+  FINANCE_BUDGET_ROLLOVER_LABEL,
+  FINANCE_BUDGET_ROLLOVERS,
 } from "@/src/modules/finance/shared/types/entities"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
 import { Button } from "@/src/shared/components/ui/button"
 import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { SummarySection } from "@/src/shared/components/ui/summary"
+import { Switch } from "@/src/shared/components/ui/switch"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
-import { usePicker } from "@/src/shared/hooks/use-picker"
+import { cn } from "@/src/shared/lib/utils"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { CalendarIcon, PiggyBankIcon, XIcon } from "lucide-react"
-import { useEffect, useMemo } from "react"
+import { CalendarIcon, CheckIcon, PiggyBankIcon, XIcon } from "lucide-react"
+import { useEffect, useId, useMemo } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import {
   budgetSchema,
@@ -65,13 +70,34 @@ const THRESHOLD_OPTIONS = [
   { value: "100", label: "100 %" },
 ]
 
+const ROLLOVER_OPTIONS = FINANCE_BUDGET_ROLLOVERS.map((value) => ({
+  value,
+  label: FINANCE_BUDGET_ROLLOVER_LABEL[value],
+}))
+
+function budgetCategoryIds(budget: FinanceBudget | null): string[] {
+  if (!budget) {
+    return []
+  }
+  if (budget.categories && budget.categories.length > 0) {
+    return budget.categories.map((category) => category.id)
+  }
+  return budget.categoryId ? [budget.categoryId] : []
+}
+
 function toFormValues(
   budget: FinanceBudget | null,
   defaultCategoryId: string
 ): BudgetFormValues {
   const month = boundsForPeriod("MONTHLY")
+  const categoryIds = budgetCategoryIds(budget)
   return {
-    categoryId: budget?.categoryId ?? defaultCategoryId,
+    categoryIds:
+      categoryIds.length > 0
+        ? categoryIds
+        : defaultCategoryId
+          ? [defaultCategoryId]
+          : [],
     periodType: budget?.periodType ?? "MONTHLY",
     periodStart: budget?.periodStart?.slice(0, 10) ?? month.periodStart,
     periodEnd: budget?.periodEnd?.slice(0, 10) ?? month.periodEnd,
@@ -80,6 +106,9 @@ function toFormValues(
       budget?.alertThresholdPct !== undefined
         ? String(budget.alertThresholdPct)
         : "80",
+    includeChildren: budget?.includeChildren ?? true,
+    rollover: budget?.rollover ?? "NONE",
+    recurring: budget?.recurring ?? false,
   }
 }
 
@@ -104,21 +133,18 @@ export function BudgetSheet({
   const isPending = createMutation.isPending || updateMutation.isPending
   const { config } = useFinanceEnabled()
   const baseCurrency = config.baseCurrency
-  const expenseCategories = useMemo(() => {
-    const filtered = filterCategoriesByType(categories, "EXPENSE")
-    if (
-      budget?.categoryId &&
-      !filtered.some((category) => category.id === budget.categoryId)
-    ) {
-      const current = categories.find(
-        (category) => category.id === budget.categoryId
-      )
-      return current ? [current, ...filtered] : filtered
-    }
-    return filtered
-  }, [budget, categories])
+  const expenseCategories = useMemo(
+    () => filterCategoriesByType(categories, "EXPENSE"),
+    [categories]
+  )
+  const categoryGroups = useMemo(
+    () => groupCategoriesByParent(expenseCategories),
+    [expenseCategories]
+  )
   const hasCategories = expenseCategories.length > 0
   const defaultCategoryId = expenseCategories[0]?.id ?? ""
+  const includeChildrenId = useId()
+  const recurringId = useId()
 
   const {
     control,
@@ -136,32 +162,29 @@ export function BudgetSheet({
     isDirty,
     onOpenChange,
   })
-  const categoryId = useWatch({ control, name: "categoryId" })
-  const selectedCategory =
-    expenseCategories.find((category) => category.id === categoryId) ?? null
+  const categoryIds = useWatch({ control, name: "categoryIds" })
   const display = {
     currency: baseCurrency,
     showCents: config.display.showCents,
     compactNumbers: config.display.compactNumbers,
   }
   const historyRange = useMemo(() => previousMonthsBounds(new Date(), 3), [])
-  const historyQuery = useAllTransactions(open && Boolean(categoryId), {
-    categoryId,
+  const historyQuery = useAllTransactions(open && categoryIds.length > 0, {
     type: "DEBIT",
     dateFrom: historyRange.dateFrom,
     dateTo: historyRange.dateTo,
   })
   const averageMonthlySpend = useMemo(() => {
-    const items = historyQuery.data ?? []
+    const selected = new Set(categoryIds)
+    const items = (historyQuery.data ?? []).filter(
+      (item) => item.categoryId && selected.has(item.categoryId)
+    )
     if (items.length === 0) {
       return null
     }
     const { expenses } = visibleTransactionTotals(items)
     return expenses > 0 ? expenses / 3 : null
-  }, [historyQuery.data])
-  const { picker, openPicker, closeHandlerFor } = usePicker<
-    "none" | "category"
-  >("none")
+  }, [historyQuery.data, categoryIds])
   const periodType = useWatch({ control, name: "periodType" })
   const periodStart = useWatch({ control, name: "periodStart" })
   const periodEnd = useWatch({ control, name: "periodEnd" })
@@ -216,7 +239,7 @@ export function BudgetSheet({
         title={isEdit ? "Editar presupuesto" : "Nuevo presupuesto"}
         description={
           hasCategories
-            ? "El tope es por categoría y periodo. El gasto se calcula con los movimientos."
+            ? "El tope es por categorías y periodo. El gasto se calcula con los movimientos."
             : "Crea una categoría antes de agregar un presupuesto."
         }
         actions={{
@@ -234,7 +257,11 @@ export function BudgetSheet({
           submit: (
             <Button
               type="button"
-              disabled={isPending || (!isEdit && !hasCategories)}
+              disabled={
+                isPending ||
+                (!isEdit && !hasCategories) ||
+                categoryIds.length === 0
+              }
               className="flex-1"
               onClick={onSubmit}
             >
@@ -247,18 +274,51 @@ export function BudgetSheet({
         <SummarySection title="Presupuesto" icon={PiggyBankIcon}>
           <Field className="gap-1">
             <FieldLabel className="text-sm text-muted-foreground">
-              Categoría
+              Categorías
             </FieldLabel>
-            <CategoryTrigger
-              category={selectedCategory}
-              placeholder={
-                hasCategories ? "Elige categoría" : "Crea una categoría primero"
-              }
-              disabled={!hasCategories}
-              onClick={() => openPicker("category")}
-            />
-            {errors.categoryId?.message ? (
-              <FieldError>{errors.categoryId.message}</FieldError>
+            <div className="flex flex-wrap gap-2">
+              {categoryGroups.map((group) => {
+                const options = [group.category, ...group.children]
+                return options.map((category) => {
+                  const selected = categoryIds.includes(category.id)
+                  return (
+                    <button
+                      key={category.id}
+                      type="button"
+                      aria-pressed={selected}
+                      className={cn(
+                        "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-colors",
+                        selected
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-border bg-card text-muted-foreground",
+                        group.category.id !== category.id && "ml-4",
+                        !hasCategories && "opacity-50"
+                      )}
+                      disabled={!hasCategories}
+                      onClick={() =>
+                        setValue(
+                          "categoryIds",
+                          selected
+                            ? categoryIds.filter((id) => id !== category.id)
+                            : [...categoryIds, category.id],
+                          { shouldValidate: true }
+                        )
+                      }
+                    >
+                      {category.icon ? (
+                        <span className="text-sm leading-none">
+                          {category.icon}
+                        </span>
+                      ) : null}
+                      {category.name}
+                      {selected ? <CheckIcon className="size-3.5" /> : null}
+                    </button>
+                  )
+                })
+              })}
+            </div>
+            {errors.categoryIds?.message ? (
+              <FieldError>{errors.categoryIds.message}</FieldError>
             ) : null}
           </Field>
           <Controller
@@ -354,19 +414,57 @@ export function BudgetSheet({
             </FinanceHelpText>
           )}
         </SummarySection>
+        <SummarySection title="Opciones" icon={PiggyBankIcon}>
+          <Controller
+            control={control}
+            name="includeChildren"
+            render={({ field }) => (
+              <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-card px-3 py-2.5">
+                <FieldLabel htmlFor={includeChildrenId} className="text-sm">
+                  Incluir subcategorías
+                </FieldLabel>
+                <Switch
+                  id={includeChildrenId}
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </div>
+            )}
+          />
+          <Controller
+            control={control}
+            name="recurring"
+            render={({ field }) => (
+              <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-card px-3 py-2.5">
+                <FieldLabel htmlFor={recurringId} className="text-sm">
+                  Repetir cada periodo
+                </FieldLabel>
+                <Switch
+                  id={recurringId}
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </div>
+            )}
+          />
+          <Controller
+            control={control}
+            name="rollover"
+            render={({ field }) => (
+              <FinanceSegmentedControl
+                label="Arrastre"
+                value={field.value}
+                onChange={(value) =>
+                  field.onChange(value as FinanceBudgetRollover)
+                }
+                options={ROLLOVER_OPTIONS}
+              />
+            )}
+          />
+        </SummarySection>
       </BottomSheet>
 
       {discardChangesDialog}
-
-      <CategoryPickerSheet
-        open={picker === "category"}
-        onOpenChange={closeHandlerFor("category")}
-        categories={expenseCategories}
-        categoryType="EXPENSE"
-        onSelect={(next) =>
-          setValue("categoryId", next, { shouldValidate: true })
-        }
-      />
     </>
   )
 }

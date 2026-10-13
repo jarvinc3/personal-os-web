@@ -5,6 +5,10 @@ import type { CreateBudgetBody } from "@/src/modules/finance/shared/lib/budget-p
 import { type FinanceBudgetsQuery } from "@/src/modules/finance/shared/lib/budgets-query"
 import { budgetsInfiniteQuery } from "@/src/modules/finance/shared/lib/finance-query-options"
 import {
+  FINANCE_TIMELINE_PAGE_SIZE,
+  transactionsFromPayload,
+} from "@/src/modules/finance/shared/lib/transactions-query"
+import {
   FINANCE_ANALYTICS_QUERY_KEY,
   FINANCE_BUDGETS_QUERY_KEY,
 } from "@/src/modules/finance/shared/types/api"
@@ -33,6 +37,19 @@ export function useBudget(enabled: boolean, id: string | null) {
   return useQuery({
     queryKey: [...FINANCE_BUDGETS_QUERY_KEY, "detail", id],
     queryFn: () => apiGet<FinanceBudget>(API_ENDPOINTS.FINANCE.BUDGET(id!)),
+    enabled: enabled && Boolean(id),
+  })
+}
+
+export function useBudgetTransactions(enabled: boolean, id: string | null) {
+  return useQuery({
+    queryKey: [...FINANCE_BUDGETS_QUERY_KEY, "transactions", id],
+    queryFn: async () =>
+      transactionsFromPayload(
+        await apiGet<unknown>(
+          `${API_ENDPOINTS.FINANCE.BUDGET_TRANSACTIONS(id!)}?limit=${FINANCE_TIMELINE_PAGE_SIZE}`
+        )
+      ),
     enabled: enabled && Boolean(id),
   })
 }

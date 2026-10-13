@@ -74,6 +74,7 @@ export const API_ENDPOINTS = {
     CATEGORY_RESTORE: (id: string) => `/finance/categories/${id}/restore`,
     BUDGETS: "/finance/budgets",
     BUDGET: (id: string) => `/finance/budgets/${id}`,
+    BUDGET_TRANSACTIONS: (id: string) => `/finance/budgets/${id}/transactions`,
     BUDGET_RESTORE: (id: string) => `/finance/budgets/${id}/restore`,
     SAVINGS_GOALS: "/finance/savings-goals",
     SAVINGS_GOAL: (id: string) => `/finance/savings-goals/${id}`,

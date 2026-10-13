@@ -302,10 +302,35 @@ export type FinanceBudgetCategory = {
   color: string | null
 }
 
+export const FINANCE_BUDGET_ROLLOVERS = [
+  "NONE",
+  "SURPLUS",
+  "SURPLUS_AND_DEFICIT",
+] as const
+export type FinanceBudgetRollover =
+  (typeof FINANCE_BUDGET_ROLLOVERS)[number]
+
+export const FINANCE_BUDGET_ROLLOVER_LABEL: Record<
+  FinanceBudgetRollover,
+  string
+> = {
+  NONE: "Sin arrastre",
+  SURPLUS: "Arrastra el sobrante",
+  SURPLUS_AND_DEFICIT: "Arrastra sobrante y déficit",
+}
+
 export type FinanceBudget = {
   id: string
+  name?: string | null
   categoryId: string
   category?: FinanceBudgetCategory | null
+  /** Full category set; falls back to `category` on older payloads. */
+  categories?: FinanceBudgetCategory[]
+  includeChildren?: boolean
+  rollover?: FinanceBudgetRollover
+  carriedOver?: string
+  effectiveLimit?: string
+  recurring?: boolean
   periodType: FinanceBudgetPeriod
   periodStart: string
   periodEnd: string
