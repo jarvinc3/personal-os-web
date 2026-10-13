@@ -4,6 +4,7 @@ import { describe, it } from "node:test"
 import {
   EMAIL_SYNC_SCHEDULE_MODES,
   financeModuleSchema,
+  parsePayDays,
 } from "./finance-module-form.ts"
 
 const validFinance = {
@@ -11,8 +12,18 @@ const validFinance = {
   dashboardPeriod: "month" as const,
   showCents: true,
   compactNumbers: false,
+  amountEntry: "keyboard" as const,
+  defaultAccountId: "",
+  monthStartDay: "1",
+  cardDueDaysBefore: "3",
+  fixedIncomeEnabled: false,
+  fixedIncomeAmount: "",
+  fixedIncomeFrequency: "MONTHLY" as const,
+  fixedIncomePayDays: "",
+  fixedIncomeAccountId: "",
   emailSyncEnabled: true,
   emailSyncAutomatic: true,
+  emailSyncMode: "DIRECT" as const,
   emailSyncScheduleMode: EMAIL_SYNC_SCHEDULE_MODES.INTERVAL,
   emailSyncEveryMinutes: "15",
   emailSyncTimes: [],
@@ -46,6 +57,44 @@ describe("financeModuleSchema", () => {
         ...validFinance,
         emailSyncScheduleMode: EMAIL_SYNC_SCHEDULE_MODES.TIMES,
         emailSyncTimes: [],
+      }).success,
+      false
+    )
+  })
+
+  it("reads pay days without repeats", () => {
+    assert.deepEqual(parsePayDays("15, 1 15"), [1, 15])
+  })
+
+  it("requires an amount and a pay day for the fixed income", () => {
+    assert.equal(
+      financeModuleSchema.safeParse({
+        ...validFinance,
+        fixedIncomeEnabled: true,
+        fixedIncomeAmount: "0",
+        fixedIncomePayDays: "",
+      }).success,
+      false
+    )
+  })
+
+  it("accepts a fixed income with amount and pay days", () => {
+    assert.equal(
+      financeModuleSchema.safeParse({
+        ...validFinance,
+        fixedIncomeEnabled: true,
+        fixedIncomeAmount: "45000",
+        fixedIncomePayDays: "15, 30",
+      }).success,
+      true
+    )
+  })
+
+  it("rejects a financial month start after the 28th", () => {
+    assert.equal(
+      financeModuleSchema.safeParse({
+        ...validFinance,
+        monthStartDay: "29",
       }).success,
       false
     )

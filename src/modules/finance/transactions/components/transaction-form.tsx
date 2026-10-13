@@ -114,6 +114,7 @@ type TransactionFormProps = {
   initialDestination?: string | null
   transaction: FinanceTransaction | null
   defaultCurrency: string
+  defaultAccountId?: string | null
   enabled: boolean
   display: FinanceMoneyDisplay
   onTypeChange?: (type: MovementType) => void
@@ -126,6 +127,7 @@ export function TransactionForm({
   initialDestination = null,
   transaction,
   defaultCurrency,
+  defaultAccountId = null,
   enabled,
   display,
   onTypeChange,
@@ -260,6 +262,15 @@ export function TransactionForm({
       return
     }
     const next = firstLedgerTarget(groups)
+    const defaultTarget = defaultAccountId
+      ? encodeLedgerTarget("account", defaultAccountId)
+      : null
+    if (defaultTarget && isKnownLedgerTarget(defaultTarget, accounts, cards)) {
+      if (getValues("destination") !== defaultTarget) {
+        setValue("destination", defaultTarget)
+      }
+      return
+    }
     if (next !== CATALOG_NONE) {
       setValue("destination", next)
     }
@@ -268,6 +279,7 @@ export function TransactionForm({
     accounts,
     cards,
     initialDestination,
+    defaultAccountId,
     isEdit,
     getValues,
     setValue,

@@ -62,6 +62,7 @@ type GuidedStep = "from" | "to" | "amount" | "done"
 
 type TransferFormProps = {
   defaultCurrency: string
+  defaultAccountId?: string | null
   enabled: boolean
   display: FinanceMoneyDisplay
   transfer?: FinanceTransaction | null
@@ -100,6 +101,7 @@ function transferDefaults(
 
 export function TransferForm({
   defaultCurrency,
+  defaultAccountId = null,
   enabled,
   display,
   transfer = null,
@@ -179,7 +181,13 @@ export function TransferForm({
     )
     const currentFrom = getValues("fromTarget")
     if (!splitLedgerTarget(currentFrom).accountId) {
-      const nextFrom = accountTargets[0]
+      const preferredFrom = defaultAccountId
+        ? encodeLedgerTarget("account", defaultAccountId)
+        : null
+      const nextFrom =
+        preferredFrom && accountTargets.includes(preferredFrom)
+          ? preferredFrom
+          : accountTargets[0]
       if (nextFrom) {
         setValue("fromTarget", nextFrom, { shouldValidate: true })
       }
@@ -196,7 +204,7 @@ export function TransferForm({
         setValue("toTarget", nextTo, { shouldValidate: true })
       }
     }
-  }, [accounts, getValues, groups, setValue, targetsReady])
+  }, [accounts, defaultAccountId, getValues, groups, setValue, targetsReady])
 
   useCurrencyForTarget(
     fromTarget,

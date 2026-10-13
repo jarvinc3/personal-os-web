@@ -53,6 +53,18 @@ export const DEFAULT_MODULE_CONFIG_BY_SLUG: ModuleConfigBySlug = {
       compactNumbers: false,
     },
     amountEntry: "keyboard",
+    fixedIncome: {
+      enabled: false,
+      amount: 0,
+      frequency: "MONTHLY",
+      payDays: [],
+      accountId: null,
+    },
+    defaultAccountId: null,
+    monthStartDay: 1,
+    reminders: {
+      cardDueDaysBefore: 3,
+    },
     notifications: {
       budgetAlerts: true,
       aiSuggestions: true,
@@ -65,6 +77,7 @@ export const DEFAULT_MODULE_CONFIG_BY_SLUG: ModuleConfigBySlug = {
       enabled: false,
       automatic: false,
       autoCategorize: true,
+      mode: "DIRECT",
       schedule: { mode: "interval", everyMinutes: 360 },
     },
   },
