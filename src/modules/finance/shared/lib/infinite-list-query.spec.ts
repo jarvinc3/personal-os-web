@@ -74,20 +74,26 @@ describe("financeInfiniteListQuery", () => {
   })
 
   it("keeps following nextCursor across several pages", () => {
-    const pages: Record<string, FinanceListPage> = {
+    type PageRow = { id: string }
+    type Page = {
+      items: readonly PageRow[]
+      nextCursor: string | null
+      hasMore: boolean
+    }
+    const pages: Record<string, Page> = {
       "": { items: [{ id: "a" }], nextCursor: "c1", hasMore: true },
       c1: { items: [{ id: "b" }], nextCursor: "c2", hasMore: true },
       c2: { items: [{ id: "c" }], nextCursor: null, hasMore: false },
     }
-    const query = financeInfiniteListQuery<FinanceListPage>({
+    const query = financeInfiniteListQuery<Page>({
       queryKey: ["finance", "test"],
       endpoint: "/finance/test",
     })
 
     const visited: string[] = []
-    let page: FinanceListPage | undefined = pages[""]
+    let page: Page | undefined = pages[""]
     while (page) {
-      visited.push(...page.items.map((item) => String(item.id)))
+      visited.push(...page.items.map((item) => item.id))
       const next = query.getNextPageParam(page)
       page = next ? pages[next] : undefined
     }
