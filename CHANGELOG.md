@@ -2,6 +2,17 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.21.0] - 2026-10-13
+
+### Agregado
+
+- La lista de Movimientos muestra una sola fila por reversa, en la fecha del movimiento original y con la insignia "Revertido". Al tocarla se despliegan las dos patas (original y reversa) con su fecha y origen.
+- Una reversa cuyo movimiento original aún no está cargado se muestra sola, con la insignia "Revertido" y el enlace "Ver original".
+
+### Cambiado
+
+- Una reversa parcial (monto distinto al original) no se agrupa: deja dos filas con la insignia "Reversa parcial".
+
 ## [0.20.1] - 2026-10-13
 
 ### Cambiado
@@ -39,6 +50,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 - La lista de movimientos separa cada semana en su propia sección, con un encabezado más limpio y el buscador ajustado.
 - Los detalles opcionales de préstamos, cobros y metas de ahorro se agrupan en una sección de resumen.
 - El botón principal del login muestra una flecha que se reemplaza por el indicador de carga, y el campo de correo ya no trae texto de ejemplo.
+
 ## [1.18.1] - 2026-10-13
 
 ### Corregido
