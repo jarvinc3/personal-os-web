@@ -50,11 +50,12 @@ export function groupReversals(
   const byId = new Map(items.map((item) => [item.id, item] as const))
   const reversalToOriginal = new Map<string, string>()
   const originalToReversal = new Map<string, string>()
+  const pairedIds = new Set<string>()
   const partialIds = new Set<string>()
 
   for (const item of items) {
     const linkedId = item.linkedTransactionId
-    if (!linkedId) {
+    if (!linkedId || linkedId === item.id) {
       continue
     }
     const target = byId.get(linkedId)
@@ -66,13 +67,18 @@ export function groupReversals(
       continue
     }
     const original = reversal.id === item.id ? target : item
-    if (sameAmount(original, reversal)) {
-      reversalToOriginal.set(reversal.id, original.id)
-      originalToReversal.set(original.id, reversal.id)
+    if (!sameAmount(original, reversal)) {
+      partialIds.add(original.id)
+      partialIds.add(reversal.id)
       continue
     }
-    partialIds.add(original.id)
-    partialIds.add(reversal.id)
+    if (pairedIds.has(original.id) || pairedIds.has(reversal.id)) {
+      continue
+    }
+    reversalToOriginal.set(reversal.id, original.id)
+    originalToReversal.set(original.id, reversal.id)
+    pairedIds.add(original.id)
+    pairedIds.add(reversal.id)
   }
 
   const groups: ReversalGroup[] = []

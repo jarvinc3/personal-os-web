@@ -30,8 +30,9 @@ Opcional (mejor): agregar `reversal: { id, amount, date } | null` en cada origin
 
 ## Criterios de aceptación
 
-- [ ] Un movimiento revertido y su reversa se ven como una fila con badge "Revertido".
-- [ ] El par no altera los totales del mes ni del tablero.
-- [ ] Expandir/abrir muestra las dos patas con enlace a cada una.
-- [ ] La reversa en otro mes no duplica filas.
-- [ ] Spec unitaria de `groupReversals` (pares, huérfanos, parcial, meses distintos).
+- [x] Un movimiento revertido y su reversa se ven como una fila con badge "Revertido".
+- [x] El par no altera los totales del mes ni del tablero.
+- [x] Expandir/abrir muestra las dos patas con su fecha, su origen y enlace a cada una.
+- [x] La reversa en otro mes no duplica filas.
+- [x] Spec unitaria de `groupReversals` (pares, huérfanos, parcial, meses distintos).
+- [x] Un auto-enlace o varias reversas al mismo original nunca hacen desaparecer una fila.

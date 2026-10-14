@@ -3,7 +3,10 @@
 import { TransactionInstrument } from "@/src/modules/finance/transactions/components/transaction-instrument"
 import { TransactionStatusMark } from "@/src/modules/finance/transactions/components/transaction-status-mark"
 import type { TimelineMonth } from "@/src/modules/finance/shared/lib/group-transactions-timeline"
-import { formatFinanceTimeLabel } from "@/src/modules/finance/shared/lib/ledger-form"
+import {
+  formatFinanceDateTimeLabel,
+  formatFinanceTimeLabel,
+} from "@/src/modules/finance/shared/lib/ledger-form"
 import {
   FINANCE_REVERSAL_PARTIAL_LABEL,
   type ReversalGroup,
@@ -75,7 +78,7 @@ function ReversalLeg({ leg, roleLabel, display, isLast }: ReversalLegProps) {
   return (
     <SummaryItem
       title={roleLabel}
-      description={`${detail} · ${formatFinanceTimeLabel(leg.transactionDate)} · ${reversalSourceLabel(leg.source)}`}
+      description={`${detail} · ${formatFinanceDateTimeLabel(leg.transactionDate)} · ${reversalSourceLabel(leg.source)}`}
       value={
         <span
           className={cn(isInactive && "text-muted-foreground line-through")}

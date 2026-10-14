@@ -148,4 +148,68 @@ describe("groupReversals", () => {
       true
     )
   })
+
+  it("picks the REVERSED leg as the reversal when both legs are reversed", () => {
+    const original = tx({
+      id: "original",
+      status: "REVERSED",
+      transactionDate: "2026-03-20T10:00:00.000Z",
+    })
+    const reversal = tx({
+      id: "reversal",
+      status: "REVERSED",
+      linkedTransactionId: "original",
+      transactionDate: "2026-04-05T10:00:00.000Z",
+    })
+
+    const groups = groupReversals([original, reversal])
+
+    assert.equal(groups.length, 1)
+    assert.equal(groups[0]?.original.id, "original")
+    assert.equal(groups[0]?.reversal?.id, "reversal")
+  })
+
+  it("does not drop a movement that links to itself", () => {
+    const selfLinked = tx({
+      id: "self",
+      status: "REVERSED",
+      linkedTransactionId: "self",
+    })
+
+    const groups = groupReversals([selfLinked])
+
+    assert.equal(groups.length, 1)
+    assert.equal(groups[0]?.original.id, "self")
+    assert.equal(groups[0]?.reversal, undefined)
+    assert.equal(groups[0]?.isOrphan, false)
+  })
+
+  it("keeps every reversal when an original has two full reversals", () => {
+    const original = tx({ id: "original", amount: "100.00" })
+    const first = tx({
+      id: "first",
+      status: "REVERSED",
+      amount: "100.00",
+      transactionDate: "2026-04-05T10:00:00.000Z",
+      linkedTransactionId: "original",
+    })
+    const second = tx({
+      id: "second",
+      status: "REVERSED",
+      amount: "100.00",
+      transactionDate: "2026-04-06T10:00:00.000Z",
+      linkedTransactionId: "original",
+    })
+
+    const groups = groupReversals([original, first, second])
+
+    assert.equal(groups.length, 2)
+    assert.deepEqual(
+      groups.map((group) => group.original.id),
+      ["original", "second"]
+    )
+    assert.equal(groups[0]?.reversal?.id, "first")
+    assert.equal(groups[1]?.reversal, undefined)
+    assert.equal(groups[1]?.isPartial, false)
+  })
 })
