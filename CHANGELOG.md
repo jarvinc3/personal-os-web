@@ -2,6 +2,12 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.26.3] - 2026-10-14
+
+### Cambiado
+
+- Las claves de la query que precarga el flujo guiado viven en una constante, y el tipo del movimiento se resuelve en un helper con guard clause. Sin cambios de comportamiento.
+
 ## [0.26.2] - 2026-10-14
 
 ### Corregido
