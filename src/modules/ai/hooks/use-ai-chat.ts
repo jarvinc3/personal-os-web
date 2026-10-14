@@ -8,6 +8,7 @@ import {
   type StreamChatError,
 } from "@/src/modules/ai/lib/ai-chat-stream"
 import type {
+  ChatContext,
   ChatMessage,
   ChatResponse,
   ModuleChatSlug,
@@ -21,6 +22,7 @@ export type SendChatInput = {
   sessionId?: string
   messages: ChatMessage[]
   clientMessageId?: string
+  context?: ChatContext | null
   onStreamChunk?: (content: string) => void
   onStreamStart?: (meta: {
     sessionId: string
@@ -54,6 +56,7 @@ async function chatViaJson(
     sessionId: input.sessionId,
     messages: input.messages,
     clientMessageId,
+    context: input.context ?? undefined,
   })
 
   input.onStreamStart?.({
@@ -100,6 +103,7 @@ export function useAiChat(
           sessionId: input.sessionId,
           messages: input.messages,
           clientMessageId,
+          context: input.context,
           onEvent: (event) => {
             if (event.type === "start") {
               streamStarted = true

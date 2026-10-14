@@ -1,5 +1,11 @@
 export { ChatActionCard } from "@/src/modules/ai/components/chat-action-card"
+export { ChatLauncherButton } from "@/src/modules/ai/components/chat-launcher-button"
 export { ChatMessageRenderer } from "@/src/modules/ai/components/chat-message-renderer"
+export {
+  ChatContextProvider,
+  useChatContext,
+  useRegisterChatContext,
+} from "@/src/modules/ai/context/chat-context"
 export {
   useCancelAiAction,
   useExecuteAiAction,

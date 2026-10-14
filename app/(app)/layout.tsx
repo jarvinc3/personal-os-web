@@ -4,6 +4,7 @@ import {
   PendingAccountDeletionHandler,
   PendingDataWipeHandler,
 } from "@/src/modules/settings"
+import { ChatContextProvider } from "@/src/modules/ai"
 import { KeepAwakeProvider } from "@/src/modules/keep-awake"
 import { AppHeader } from "@/src/shared/components/layout/app-header"
 import { AppSidebar } from "@/src/shared/components/layout/app-sidebar"
@@ -33,24 +34,26 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const mainRef = useRef<HTMLElement>(null)
 
   return (
-    <SidebarProvider>
-      <AppSidebar />
-      <HeaderProvider>
-        <SidebarInset className="h-svh max-h-svh overflow-hidden">
-          <AppHeader />
-          <main
-            ref={mainRef}
-            className="scrollbar-hide min-h-0 flex-1 overflow-auto"
-          >
-            <ResetMainScroll scrollerRef={mainRef} />
-            <KeepAwakeProvider>
-              <PendingAccountDeletionHandler />
-              <PendingDataWipeHandler />
-              {children}
-            </KeepAwakeProvider>
-          </main>
-        </SidebarInset>
-      </HeaderProvider>
-    </SidebarProvider>
+    <ChatContextProvider>
+      <SidebarProvider>
+        <AppSidebar />
+        <HeaderProvider>
+          <SidebarInset className="h-svh max-h-svh overflow-hidden">
+            <AppHeader />
+            <main
+              ref={mainRef}
+              className="scrollbar-hide min-h-0 flex-1 overflow-auto"
+            >
+              <ResetMainScroll scrollerRef={mainRef} />
+              <KeepAwakeProvider>
+                <PendingAccountDeletionHandler />
+                <PendingDataWipeHandler />
+                {children}
+              </KeepAwakeProvider>
+            </main>
+          </SidebarInset>
+        </HeaderProvider>
+      </SidebarProvider>
+    </ChatContextProvider>
   )
 }

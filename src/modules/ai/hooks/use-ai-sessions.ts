@@ -3,6 +3,7 @@
 import { apiDelete, apiGet, apiPost } from "@/src/config/api-client"
 import type {
   AiSessionDetail,
+  ChatContext,
   ModuleChatSlug,
   PaginatedAiSessions,
 } from "@/src/modules/ai/types/chat.types"
@@ -52,14 +53,18 @@ export function useCreateAiSession() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (input?: { moduleSlug?: ModuleChatSlug | string }) =>
-      apiPost<AiSessionDetail>(API_ENDPOINTS.AI.SESSIONS, {
+    mutationFn: (input?: {
+      moduleSlug?: ModuleChatSlug | string
+      context?: ChatContext | null
+    }) => {
+      const moduleSlug = input?.context?.moduleSlug ?? input?.moduleSlug
+      return apiPost<AiSessionDetail>(API_ENDPOINTS.AI.SESSIONS, {
         moduleSlug:
-          input?.moduleSlug && input.moduleSlug !== "general"
-            ? input.moduleSlug
-            : undefined,
-        contextType: input?.moduleSlug ?? "general",
-      }),
+          moduleSlug && moduleSlug !== "general" ? moduleSlug : undefined,
+        contextType: moduleSlug ?? "general",
+        context: input?.context ?? undefined,
+      })
+    },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: AI_SESSIONS_QUERY_KEY })
     },

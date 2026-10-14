@@ -1,6 +1,6 @@
 # Finanzas: cómo funciona hoy
 
-Estado al 14 oct 2026: web v0.23.0 y back v0.21.0. Este documento resume el dominio y los flujos principales tal como están implementados. El contrato HTTP completo vive en `personal-os-back/docs/modules/finance/`. Lo pendiente está en [pendientes/](./pendientes/README.md).
+Estado al 14 oct 2026: web v0.25.0 y back v0.23.0. Este documento resume el dominio y los flujos principales tal como están implementados. El contrato HTTP completo vive en `personal-os-back/docs/modules/finance/`. Lo pendiente está en [pendientes/](./pendientes/README.md).
 
 Contexto: bancos dominicanos (BHD, Popular, Qik), moneda principal DOP (RD$).
 
@@ -87,6 +87,10 @@ Los correos de ejemplo por banco están en `personal-os-back/packages/finance/te
 ## Agente de IA
 
 36 tools de finanzas, filtradas por `moduleSlug`. El chat usa SSE con `clientMessageId` idempotente. Los bloques del chat son solo `markdown` y `action` (`ChatBlock` en `ai-agent/src/shared/ai.types.ts`). Las tools que escriben piden confirmación con la tarjeta de acción.
+
+El agente recibe además `context` (`ChatContext`: `moduleSlug`, `screen?`, `entityRef?: { type, id }`). Cada detalle de Finanzas registra su entidad con `useRegisterChatContext`; el botón del header (`ChatLauncherButton`) abre `/chat` con `entityType`, `entityId`, `entityLabel` y `screen` en la URL. El chat muestra un chip "Contexto: …" en `chat-input.tsx`; quitarlo deja `entityRef` vacío en el siguiente mensaje. El back resuelve la entidad con la fachada de Finanzas (dueño validado por `userId`; si no existe o es de otro usuario, se ignora) y suma tipo, nombre, saldo/estado e id al prompt de sistema. El último `context` queda en la sesión (`ai_agent_sessions.chat_context`).
+
+Cubren el contexto: movimiento (y transferencia en el mismo detalle), cuenta, tarjeta, institución, préstamo, cuota (hoja), cobro, meta de ahorro, presupuesto y corte de tarjeta (hoja). `email_message` no tiene pantalla propia y no registra chip.
 
 ## Paginación
 

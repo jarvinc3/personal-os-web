@@ -45,6 +45,7 @@ import {
   financeTransactionNewHref,
 } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
+import { ChatLauncherButton, useRegisterChatContext } from "@/src/modules/ai"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { appToast } from "@/src/shared/lib/app-toast"
 import {
@@ -111,6 +112,17 @@ function CardDetailScreenBody({ cardId }: CardDetailScreenProps) {
     currency: primaryBalance?.currency ?? display.currency,
   }
   const isCredit = card?.type === "CREDIT"
+
+  useRegisterChatContext(
+    card
+      ? {
+          moduleSlug: "finance",
+          screen: "card-detail",
+          entityRef: { type: "card", id: card.id },
+          entityLabel: card.name,
+        }
+      : null
+  )
   const archiveCard = useArchiveCard()
   const deleteCard = useDeleteCard()
   const restoreCard = useRestoreCard()
@@ -171,15 +183,18 @@ function CardDetailScreenBody({ cardId }: CardDetailScreenProps) {
         )
       },
       actions: (
-        <Button
-          variant="outline"
-          size="icon"
-          className="size-9 rounded-full border-border"
-          aria-label="Opciones de la tarjeta"
-          onClick={() => setOpenOptionsSheet(true)}
-        >
-          <MoreVerticalIcon />
-        </Button>
+        <>
+          <ChatLauncherButton />
+          <Button
+            variant="outline"
+            size="icon"
+            className="size-9 rounded-full border-border"
+            aria-label="Opciones de la tarjeta"
+            onClick={() => setOpenOptionsSheet(true)}
+          >
+            <MoreVerticalIcon />
+          </Button>
+        </>
       ),
       accentColor: card?.color ?? undefined,
     },

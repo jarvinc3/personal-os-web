@@ -24,6 +24,7 @@ import {
   type FinanceCardStatementMovement,
 } from "@/src/modules/finance/shared/types/entities"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+import { ChatLauncherButton, useRegisterChatContext } from "@/src/modules/ai"
 import {
   Empty,
   EmptyDescription,
@@ -92,6 +93,17 @@ export function CardStatementSheet({
 }: CardStatementSheetProps) {
   const detailQuery = useCardStatementDetail(open, cardId, statementId)
   const detail = detailQuery.data
+
+  useRegisterChatContext(
+    open && detail
+      ? {
+          moduleSlug: "finance",
+          screen: "card-statement-detail",
+          entityRef: { type: "card_statement", id: detail.statement.id },
+          entityLabel: `Corte ${formatCalendarDate(detail.statement.cycleEnd)}`,
+        }
+      : null
+  )
   const moneyDisplay = detail
     ? { ...display, currency: detail.statement.currency }
     : display
@@ -184,10 +196,15 @@ export function CardStatementSheet({
         ),
       }}
       headerAction={
-        detail && !editing ? (
-          <Button type="button" variant="outline" onClick={startEdit}>
-            Registrar corte
-          </Button>
+        detail ? (
+          <div className="flex items-center gap-2">
+            <ChatLauncherButton />
+            {!editing ? (
+              <Button type="button" variant="outline" onClick={startEdit}>
+                Registrar corte
+              </Button>
+            ) : null}
+          </div>
         ) : undefined
       }
     >

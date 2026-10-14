@@ -5,6 +5,65 @@ export type ChatMessage = {
   content: string
 }
 
+export const ENTITY_REF_TYPES = [
+  "transaction",
+  "transfer",
+  "account",
+  "card",
+  "card_statement",
+  "loan",
+  "loan_installment",
+  "receivable",
+  "savings_goal",
+  "budget",
+  "institution",
+  "email_message",
+] as const
+
+export type EntityRefType = (typeof ENTITY_REF_TYPES)[number]
+
+export type EntityRef = {
+  type: EntityRefType
+  id: string
+}
+
+export type ChatContext = {
+  moduleSlug: string
+  screen?: string
+  entityRef?: EntityRef
+}
+
+/** Context kept in memory while a finance detail is open, plus its label. */
+export type RegisteredChatContext = ChatContext & {
+  entityLabel?: string
+}
+
+export const ENTITY_REF_TYPE_LABELS: Record<EntityRefType, string> = {
+  transaction: "Movimiento",
+  transfer: "Transferencia",
+  account: "Cuenta",
+  card: "Tarjeta",
+  card_statement: "Corte",
+  loan: "Préstamo",
+  loan_installment: "Cuota",
+  receivable: "Cobro",
+  savings_goal: "Meta de ahorro",
+  budget: "Presupuesto",
+  institution: "Institución",
+  email_message: "Correo de banco",
+}
+
+export function parseEntityRefType(
+  value: string | null | undefined
+): EntityRefType | null {
+  if (!value) {
+    return null
+  }
+  return (ENTITY_REF_TYPES as readonly string[]).includes(value)
+    ? (value as EntityRefType)
+    : null
+}
+
 export type AiProviderInfo = {
   name: string
   model: string
@@ -74,6 +133,7 @@ export type AiSessionSummary = {
   contextType: string
   moduleId?: string | null
   moduleSlug?: string | null
+  chatContext?: ChatContext | null
   title?: string | null
   lastActiveAt: string
   createdAt: string
@@ -94,6 +154,7 @@ export type AiSessionDetail = {
   contextType: string
   moduleId?: string | null
   moduleSlug?: string | null
+  chatContext?: ChatContext | null
   title?: string | null
   memorySnapshot?: Record<string, unknown>
   lastActiveAt: string

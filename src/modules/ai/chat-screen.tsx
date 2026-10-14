@@ -10,6 +10,12 @@ import {
   useCreateAiSession,
 } from "@/src/modules/ai/hooks/use-ai-sessions"
 import {
+  buildChatContextParams,
+  chatContextLabel,
+  parseChatContextParams,
+  toWireChatContext,
+} from "@/src/modules/ai/lib/chat-context-params"
+import {
   getUiMessageKey,
   mergeSessionMessages,
   type UiMessage,
@@ -20,6 +26,7 @@ import {
   type AiActionSummary,
   type AiSessionSummary,
   type ModuleChatSlug,
+  type RegisteredChatContext,
 } from "@/src/modules/ai/types/chat.types"
 import { AiGate } from "@/src/modules/ai/ai-gate"
 import { LoadingView } from "@/src/shared/components/layout/loading-view"
@@ -41,16 +48,25 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { v4 as uuidv4 } from "uuid"
 
-function parseModuleParam(value: string | null): ModuleChatSlug {
-  return parseModuleChatSlug(value)
-}
-
 function parseSessionIdParam(value: string | null): string | null {
   return value && value.length > 0 ? value : null
 }
 
 function parsePromptParam(value: string | null): string | null {
   return value && value.trim().length > 0 ? value.trim() : null
+}
+
+function sameChatContext(
+  a: RegisteredChatContext,
+  b: RegisteredChatContext
+): boolean {
+  return (
+    a.moduleSlug === b.moduleSlug &&
+    a.screen === b.screen &&
+    a.entityLabel === b.entityLabel &&
+    a.entityRef?.type === b.entityRef?.type &&
+    a.entityRef?.id === b.entityRef?.id
+  )
 }
 
 export function ChatScreen() {
@@ -69,8 +85,8 @@ function ChatScreenBody() {
   const [sessionId, setSessionId] = useState<string | null>(
     parseSessionIdParam(searchParams.get("sessionId"))
   )
-  const [moduleSlug, setModuleSlug] = useState<ModuleChatSlug>(
-    parseModuleParam(searchParams.get("module"))
+  const [chatContext, setChatContext] = useState<RegisteredChatContext>(() =>
+    parseChatContextParams(new URLSearchParams(searchParams.toString()))
   )
   const [draft, setDraft] = useState("")
   const [localMessages, setLocalMessages] = useState<UiMessage[]>([])
@@ -84,14 +100,46 @@ function ChatScreenBody() {
   const streamFrameRef = useRef<number | null>(null)
   const pendingStreamContentRef = useRef<string | null>(null)
 
-  const syncModuleContext = useCallback(
-    (slug: ModuleChatSlug) => {
-      setModuleSlug(slug)
-      const params = new URLSearchParams(searchParams.toString())
-      params.set("module", slug)
+  const moduleSlug = useMemo(
+    () => parseModuleChatSlug(chatContext.moduleSlug),
+    [chatContext.moduleSlug]
+  )
+  const contextLabel = chatContextLabel(chatContext)
+  const wireContext = useMemo(
+    () => toWireChatContext(chatContext),
+    [chatContext]
+  )
+
+  const writeUrl = useCallback(
+    (patch: {
+      sessionId?: string | null
+      prompt?: string
+      context?: RegisteredChatContext
+    }) => {
+      const params = buildChatContextParams(patch.context ?? chatContext)
+      const nextSessionId =
+        patch.sessionId === undefined ? sessionId : patch.sessionId
+      if (nextSessionId) {
+        params.set("sessionId", nextSessionId)
+      }
+      if (patch.prompt) {
+        params.set("prompt", patch.prompt)
+      }
       router.replace(`${APP_ROUTES.app.chat}?${params.toString()}`)
     },
-    [router, searchParams]
+    [router, chatContext, sessionId]
+  )
+
+  const syncModuleContext = useCallback(
+    (slug: ModuleChatSlug) => {
+      if (chatContext.moduleSlug === slug) {
+        return
+      }
+      const next: RegisteredChatContext = { moduleSlug: slug }
+      setChatContext(next)
+      writeUrl({ context: next })
+    },
+    [chatContext.moduleSlug, writeUrl]
   )
 
   const chatMutation = useAiChat((slug) => {
@@ -111,12 +159,12 @@ function ChatScreenBody() {
   }, [searchParams])
 
   useEffect(() => {
-    const moduleParam = searchParams.get("module")
-    if (moduleParam) {
-      // Keep local selection aligned with browser back/forward navigation.
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setModuleSlug(parseModuleParam(moduleParam))
-    }
+    const fromUrl = parseChatContextParams(
+      new URLSearchParams(searchParams.toString())
+    )
+    // URL navigation is an external source for the chip context.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setChatContext((prev) => (sameChatContext(prev, fromUrl) ? prev : fromUrl))
   }, [searchParams])
 
   useEffect(() => {
@@ -130,42 +178,24 @@ function ChatScreenBody() {
     if (sessionModule && sessionModule !== moduleSlug) {
       // The persisted session context is authoritative after the query resolves.
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setModuleSlug(sessionModule)
+      syncModuleContext(sessionModule)
     }
 
     setLocalMessages((prev) =>
       mergeSessionMessages(prev, sessionQuery.data.messages)
     )
-  }, [sessionQuery.data?.messages, sessionQuery.data?.moduleSlug, moduleSlug])
+  }, [
+    sessionQuery.data?.messages,
+    sessionQuery.data?.moduleSlug,
+    moduleSlug,
+    syncModuleContext,
+  ])
 
   const displayMessages = useMemo(() => localMessages, [localMessages])
 
   const scrollToEnd = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [])
-
-  const updateUrlParams = useCallback(
-    (patch: {
-      sessionId?: string | null
-      module?: ModuleChatSlug
-      prompt?: string
-    }) => {
-      const params = new URLSearchParams()
-      const moduleValue = patch.module ?? moduleSlug
-      params.set("module", moduleValue)
-
-      if (patch.sessionId) {
-        params.set("sessionId", patch.sessionId)
-      }
-
-      if (patch.prompt) {
-        params.set("prompt", patch.prompt)
-      }
-
-      router.replace(`${APP_ROUTES.app.chat}?${params.toString()}`)
-    },
-    [router, moduleSlug]
-  )
 
   const handleNewChat = useCallback(() => {
     isSendingRef.current = false
@@ -179,10 +209,8 @@ function ChatScreenBody() {
     setSessionId(null)
     setLocalMessages([])
     setDraft("")
-    const params = new URLSearchParams()
-    params.set("module", moduleSlug)
-    router.replace(`${APP_ROUTES.app.chat}?${params.toString()}`)
-  }, [moduleSlug, router])
+    writeUrl({ sessionId: null })
+  }, [writeUrl])
 
   const handleActionUpdated = useCallback((updatedAction: AiActionSummary) => {
     setLocalMessages((prev) =>
@@ -214,21 +242,25 @@ function ChatScreenBody() {
   }, [])
 
   const handleSelectSession = (session: AiSessionSummary) => {
+    const storedContext = session.chatContext
+    const nextContext: RegisteredChatContext = storedContext
+      ? {
+          moduleSlug:
+            storedContext.moduleSlug ?? session.moduleSlug ?? "general",
+          screen: storedContext.screen,
+          entityRef: storedContext.entityRef,
+        }
+      : { moduleSlug: (session.moduleSlug as ModuleChatSlug) ?? "general" }
     setSessionId(session.id)
-    setModuleSlug((session.moduleSlug as ModuleChatSlug) ?? "general")
-    updateUrlParams({
-      sessionId: session.id,
-      module: (session.moduleSlug as ModuleChatSlug) ?? "general",
-    })
+    setChatContext(nextContext)
+    writeUrl({ sessionId: session.id, context: nextContext })
   }
 
-  const handleModuleChange = useCallback(
-    (slug: ModuleChatSlug) => {
-      setModuleSlug(slug)
-      updateUrlParams({ module: slug })
-    },
-    [updateUrlParams]
-  )
+  const handleClearContext = useCallback(() => {
+    const next: RegisteredChatContext = { moduleSlug: chatContext.moduleSlug }
+    setChatContext(next)
+    writeUrl({ context: next })
+  }, [chatContext.moduleSlug, writeUrl])
 
   const sendMessage = useCallback(
     async (textOverride?: string) => {
@@ -295,16 +327,18 @@ function ChatScreenBody() {
         if (!activeSessionId) {
           const session = await createSessionMutation.mutateAsync({
             moduleSlug,
+            context: wireContext,
           })
           activeSessionId = session.id
           setSessionId(activeSessionId)
-          updateUrlParams({ sessionId: activeSessionId, module: moduleSlug })
+          writeUrl({ sessionId: activeSessionId })
         }
 
         const response = await chatMutation.mutateAsync({
           sessionId: activeSessionId,
           messages: [{ role: "user", content: text }],
           clientMessageId,
+          context: wireContext,
           onStreamStart: (meta) => {
             setSessionId(meta.sessionId)
             if (meta.moduleSlug) {
@@ -390,11 +424,12 @@ function ChatScreenBody() {
       draft,
       sessionId,
       moduleSlug,
+      wireContext,
       chatMutation,
       createSessionMutation,
       scrollToEnd,
       syncModuleContext,
-      updateUrlParams,
+      writeUrl,
     ]
   )
 
@@ -421,7 +456,7 @@ function ChatScreenBody() {
     const prompt = pendingPromptRef.current
     promptSentRef.current = true
     pendingPromptRef.current = null
-    updateUrlParams({ prompt: "" })
+    writeUrl({ prompt: "" })
     void sendMessage(prompt)
   }, [
     sessionId,
@@ -430,7 +465,7 @@ function ChatScreenBody() {
     createSessionMutation.isPending,
     sendMessage,
     searchParams,
-    updateUrlParams,
+    writeUrl,
   ])
 
   useEffect(() => {
@@ -441,7 +476,7 @@ function ChatScreenBody() {
     () => (
       <Select
         value={moduleSlug}
-        onValueChange={(value) => handleModuleChange(value as ModuleChatSlug)}
+        onValueChange={(value) => syncModuleContext(value as ModuleChatSlug)}
       >
         <SelectTrigger className="w-fit cursor-pointer border-none bg-transparent text-lg font-bold tracking-tight capitalize">
           <SelectValue />
@@ -458,7 +493,7 @@ function ChatScreenBody() {
         </SelectContent>
       </Select>
     ),
-    [moduleSlug, handleModuleChange]
+    [moduleSlug, syncModuleContext]
   )
 
   const headerActions = useMemo(
@@ -542,6 +577,8 @@ function ChatScreenBody() {
         onChange={setDraft}
         onSend={() => void sendMessage()}
         disabled={chatMutation.isPending || createSessionMutation.isPending}
+        contextLabel={contextLabel}
+        onClearContext={handleClearContext}
       />
 
       <ChatSessionSheet

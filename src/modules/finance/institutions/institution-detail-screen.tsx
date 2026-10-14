@@ -52,6 +52,7 @@ import {
 } from "@/src/shared/components/ui/tabs"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
+import { ChatLauncherButton, useRegisterChatContext } from "@/src/modules/ai"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { appToast } from "@/src/shared/lib/app-toast"
 import {
@@ -179,6 +180,17 @@ function InstitutionDetailScreenBody({
 
   const accent = institution?.color ?? FALLBACK_COLOR
 
+  useRegisterChatContext(
+    institution
+      ? {
+          moduleSlug: "finance",
+          screen: "institution-detail",
+          entityRef: { type: "institution", id: institution.id },
+          entityLabel: institution.name,
+        }
+      : null
+  )
+
   const handleBack = useCallback(() => {
     router.push(APP_ROUTES.app.financeProducts)
   }, [router])
@@ -244,15 +256,18 @@ function InstitutionDetailScreenBody({
 
   const headerActions = useMemo(
     () => (
-      <Button
-        variant="outline"
-        size="icon"
-        className="size-9 rounded-full"
-        aria-label="Opciones de la institución"
-        onClick={openMenu}
-      >
-        <MoreVerticalIcon className="size-4.5" />
-      </Button>
+      <>
+        <ChatLauncherButton />
+        <Button
+          variant="outline"
+          size="icon"
+          className="size-9 rounded-full"
+          aria-label="Opciones de la institución"
+          onClick={openMenu}
+        >
+          <MoreVerticalIcon className="size-4.5" />
+        </Button>
+      </>
     ),
     [openMenu]
   )

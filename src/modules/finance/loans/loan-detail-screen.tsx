@@ -42,6 +42,7 @@ import {
 import { DeleteRecordDialog } from "@/src/modules/finance/shared/components/delete-record-dialog"
 import { ArchiveRecordDialog } from "@/src/modules/finance/shared/components/archive-record-dialog"
 import { RecordOptionsSheet } from "@/src/modules/finance/shared/components/record-options-sheet"
+import { ChatLauncherButton, useRegisterChatContext } from "@/src/modules/ai"
 import { LoadingView } from "@/src/shared/components/layout/loading-view"
 import { Badge } from "@/src/shared/components/ui/badge"
 import { Button } from "@/src/shared/components/ui/button"
@@ -128,6 +129,17 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
   const summary = loan ? loanProgressSummary(loan) : null
   const rateLabel = formatRatePercentLabel(loan?.interestRate ?? null)
 
+  useRegisterChatContext(
+    loan
+      ? {
+          moduleSlug: "finance",
+          screen: "loan-detail",
+          entityRef: { type: "loan", id: loan.id },
+          entityLabel: loan.lenderName,
+        }
+      : null
+  )
+
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [archiveConfirmOpen, setArchiveConfirmOpen] = useState(false)
   const [amortizationOpen, setAmortizationOpen] = useState(false)
@@ -178,15 +190,18 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
 
   const headerActions = useMemo(
     () => (
-      <Button
-        variant="outline"
-        size="icon"
-        className="size-9 rounded-full"
-        aria-label="Opciones del préstamo"
-        onClick={() => setOpenOptionsSheet(true)}
-      >
-        <MoreVerticalIcon className="size-4.5" />
-      </Button>
+      <>
+        <ChatLauncherButton />
+        <Button
+          variant="outline"
+          size="icon"
+          className="size-9 rounded-full"
+          aria-label="Opciones del préstamo"
+          onClick={() => setOpenOptionsSheet(true)}
+        >
+          <MoreVerticalIcon className="size-4.5" />
+        </Button>
+      </>
     ),
     [setOpenOptionsSheet]
   )

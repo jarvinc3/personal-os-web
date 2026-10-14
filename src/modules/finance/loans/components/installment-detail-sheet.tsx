@@ -13,6 +13,7 @@ import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
 import { Button } from "@/src/shared/components/ui/button"
 import { SummaryItem } from "@/src/shared/components/ui/summary"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
+import { ChatLauncherButton, useRegisterChatContext } from "@/src/modules/ai"
 import { ReceiptIcon } from "lucide-react"
 import Link from "next/link"
 
@@ -29,10 +30,22 @@ export function InstallmentDetailSheet({
   installment,
   display,
 }: InstallmentDetailSheetProps) {
+  useRegisterChatContext(
+    open && installment
+      ? {
+          moduleSlug: "finance",
+          screen: "loan-installment-detail",
+          entityRef: { type: "loan_installment", id: installment.id },
+          entityLabel: `Cuota ${installment.installmentNo}`,
+        }
+      : null
+  )
+
   return (
     <BottomSheet
       open={open}
       onOpenChange={onOpenChange}
+      headerAction={<ChatLauncherButton />}
       title={
         installment ? `Cuota ${installment.installmentNo}` : "Detalle de cuota"
       }

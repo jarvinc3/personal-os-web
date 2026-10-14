@@ -50,6 +50,7 @@ import { Spinner } from "@/src/shared/components/ui/spinner"
 import { SummaryItem } from "@/src/shared/components/ui/summary"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
+import { ChatLauncherButton, useRegisterChatContext } from "@/src/modules/ai"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { ACCENT_FALLBACK_COLOR } from "@/src/shared/lib/accent-gradient"
 import { appToast } from "@/src/shared/lib/app-toast"
@@ -151,6 +152,20 @@ function TransactionDetailScreenBody({
     useSheetParam(FINANCE_SHEET_KEYS.transactionOptions)
 
   const tx = detailQuery.data
+
+  useRegisterChatContext(
+    tx
+      ? {
+          moduleSlug: "finance",
+          screen: "transaction-detail",
+          entityRef: {
+            type: isTransferTransaction(tx) ? "transfer" : "transaction",
+            id: tx.id,
+          },
+          entityLabel: tx.description ?? tx.merchant ?? "Movimiento",
+        }
+      : null
+  )
   const isMutating =
     confirmMutation.isPending ||
     unconfirmMutation.isPending ||
@@ -231,15 +246,18 @@ function TransactionDetailScreenBody({
 
   const headerActions = useMemo(
     () => (
-      <Button
-        variant="outline"
-        size="icon"
-        className="size-9 rounded-full"
-        aria-label="Opciones del movimiento"
-        onClick={() => setOpenOptionsSheet(true)}
-      >
-        <MoreVerticalIcon className="size-4.5" />
-      </Button>
+      <>
+        <ChatLauncherButton />
+        <Button
+          variant="outline"
+          size="icon"
+          className="size-9 rounded-full"
+          aria-label="Opciones del movimiento"
+          onClick={() => setOpenOptionsSheet(true)}
+        >
+          <MoreVerticalIcon className="size-4.5" />
+        </Button>
+      </>
     ),
     [setOpenOptionsSheet]
   )
