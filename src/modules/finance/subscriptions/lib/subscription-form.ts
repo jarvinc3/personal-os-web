@@ -118,20 +118,22 @@ export function toSubscriptionFormValues(
 export function subscriptionPayload(
   values: SubscriptionFormValues
 ): Record<string, unknown> {
+  // Clearable fields go as null so PATCH can empty them; undefined would mean
+  // "leave unchanged" on the server.
   return {
     name: values.name.trim(),
-    domain: values.domain.trim() || undefined,
+    domain: values.domain.trim() || null,
     amount: Number(values.amount.replace(",", ".")),
     currency: values.currency.toUpperCase(),
     billingCycle: values.billingCycle,
     billingInterval: Number(values.billingInterval),
     anchorDate: values.anchorDate,
-    trialEndsAt: values.trialEndsAt || undefined,
-    cardId: values.cardId === CATALOG_NONE ? undefined : values.cardId,
-    accountId: values.accountId === CATALOG_NONE ? undefined : values.accountId,
+    trialEndsAt: values.trialEndsAt || null,
+    cardId: values.cardId === CATALOG_NONE ? null : values.cardId,
+    accountId: values.accountId === CATALOG_NONE ? null : values.accountId,
     reminderDaysBefore: Number(values.reminderDaysBefore),
-    manageUrl: values.manageUrl.trim() || undefined,
-    notes: values.notes.trim() || undefined,
-    sourcePatternId: values.sourcePatternId || undefined,
+    manageUrl: values.manageUrl.trim() || null,
+    notes: values.notes.trim() || null,
+    sourcePatternId: values.sourcePatternId || null,
   }
 }

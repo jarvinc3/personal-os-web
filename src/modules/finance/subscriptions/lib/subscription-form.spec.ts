@@ -79,8 +79,28 @@ describe("subscriptionPayload", () => {
     assert.equal(payload.billingInterval, 2)
     assert.equal(payload.reminderDaysBefore, 5)
     assert.equal(payload.cardId, "card-1")
-    assert.equal(payload.trialEndsAt, undefined)
-    assert.equal(payload.accountId, undefined)
+    assert.equal(payload.trialEndsAt, null)
+    assert.equal(payload.accountId, null)
+  })
+
+  it("clears optional fields on edit instead of leaving them unchanged", () => {
+    const payload = subscriptionPayload({
+      ...baseValues,
+      name: "Spotify",
+      amount: "10.00",
+      cardId: CATALOG_NONE,
+      accountId: CATALOG_NONE,
+      trialEndsAt: "",
+      manageUrl: "",
+      notes: "",
+    })
+    assert.equal(payload.domain, null)
+    assert.equal(payload.trialEndsAt, null)
+    assert.equal(payload.cardId, null)
+    assert.equal(payload.accountId, null)
+    assert.equal(payload.manageUrl, null)
+    assert.equal(payload.notes, null)
+    assert.equal(payload.sourcePatternId, null)
   })
 
   it("keeps the source pattern when it came from a suggestion", () => {
