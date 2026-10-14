@@ -2,6 +2,18 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.30.0] - 2026-10-19
+
+### Agregado
+
+- Vista Suscripciones rediseñada: hero con costo mensual, equivalente anual, activas y tendencia contra el mes anterior; anillo por categoría, tarjeta-cuenta o moneda que filtra las tarjetas; próximos cobros a 30 días y calendario mensual; alertas descartables; tarjetas con barra del ciclo; bandeja de detectados; y pie de canceladas con el ahorro anual.
+- Hooks `useSubscriptionsBreakdown`, `useSubscriptionsUpcoming`, `useSubscriptionAlerts` y descarte de alertas.
+- Selector de categoría en el formulario de suscripción.
+
+### Cambiado
+
+- La pestaña Recurrentes desaparece: confirmar un detectado crea la suscripción y actualiza el contador, y confirmados y descartados pasan a una bandeja aparte.
+
 ## [0.29.1] - 2026-10-19
 
 ### Corregido
