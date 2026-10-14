@@ -1,5 +1,11 @@
 "use client"
 
+import {
+  activeChatContext,
+  registerChatContext,
+  unregisterChatContext,
+  type ChatContextRegistration,
+} from "@/src/modules/ai/lib/chat-context-registry"
 import type {
   EntityRefType,
   RegisteredChatContext,
@@ -9,6 +15,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useId,
   useMemo,
   useState,
   type ReactNode,
@@ -16,21 +23,34 @@ import {
 
 type ChatContextStore = {
   context: RegisteredChatContext | null
-  setContext: (context: RegisteredChatContext | null) => void
+  register: (registration: ChatContextRegistration) => void
+  unregister: (id: string) => void
 }
 
 const ChatContextStoreContext = createContext<ChatContextStore | null>(null)
 
 export function ChatContextProvider({ children }: { children: ReactNode }) {
-  const [context, setContextState] = useState<RegisteredChatContext | null>(
-    null
+  const [registrations, setRegistrations] = useState<ChatContextRegistration[]>(
+    []
   )
 
-  const setContext = useCallback((next: RegisteredChatContext | null) => {
-    setContextState(next)
+  const register = useCallback((registration: ChatContextRegistration) => {
+    setRegistrations((current) => registerChatContext(current, registration))
   }, [])
 
-  const value = useMemo(() => ({ context, setContext }), [context, setContext])
+  const unregister = useCallback((id: string) => {
+    setRegistrations((current) => unregisterChatContext(current, id))
+  }, [])
+
+  const context = useMemo(
+    () => activeChatContext(registrations),
+    [registrations]
+  )
+
+  const value = useMemo(
+    () => ({ context, register, unregister }),
+    [context, register, unregister]
+  )
 
   return (
     <ChatContextStoreContext.Provider value={value}>
@@ -44,12 +64,15 @@ export function useChatContext(): RegisteredChatContext | null {
 }
 
 /**
- * A finance detail registers the entity it is showing. The value is cleared on
- * unmount so the launcher never opens the chat with a stale entity.
+ * A finance detail registers the entity it is showing; a sheet over it
+ * registers a narrower one. The last registration wins and unmounting it
+ * reveals the screen below, so the launcher never opens with a stale entity.
  */
 export function useRegisterChatContext(context: RegisteredChatContext | null) {
   const store = useContext(ChatContextStoreContext)
-  const setContext = store?.setContext
+  const registrationId = useId()
+  const register = store?.register
+  const unregister = store?.unregister
 
   const moduleSlug = context?.moduleSlug ?? null
   const screen = context?.screen ?? null
@@ -58,22 +81,34 @@ export function useRegisterChatContext(context: RegisteredChatContext | null) {
   const entityLabel = context?.entityLabel ?? null
 
   useEffect(() => {
-    if (!setContext) {
-      return
-    }
-    if (!moduleSlug) {
-      setContext(null)
+    if (!register || !unregister) {
       return
     }
 
-    setContext({
-      moduleSlug,
-      screen: screen ?? undefined,
-      entityRef:
-        entityType && entityId ? { type: entityType, id: entityId } : undefined,
-      entityLabel: entityLabel ?? undefined,
+    register({
+      id: registrationId,
+      context: moduleSlug
+        ? {
+            moduleSlug,
+            screen: screen ?? undefined,
+            entityRef:
+              entityType && entityId
+                ? { type: entityType, id: entityId }
+                : undefined,
+            entityLabel: entityLabel ?? undefined,
+          }
+        : null,
     })
 
-    return () => setContext(null)
-  }, [setContext, moduleSlug, screen, entityType, entityId, entityLabel])
+    return () => unregister(registrationId)
+  }, [
+    register,
+    unregister,
+    registrationId,
+    moduleSlug,
+    screen,
+    entityType,
+    entityId,
+    entityLabel,
+  ])
 }
