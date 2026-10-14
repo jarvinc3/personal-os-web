@@ -2,6 +2,16 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.26.2] - 2026-10-14
+
+### Corregido
+
+- El flujo guiado que abre "Registrar rápido" cuando falta algo llega precargado con el monto, la categoría, la fecha y el comercio que ya se conocían.
+
+### Cambiado
+
+- El armado y la lectura de los datos precargados viven en un helper con spec. Sin cambios de comportamiento.
+
 ## [0.26.1] - 2026-10-14
 
 ### Corregido
