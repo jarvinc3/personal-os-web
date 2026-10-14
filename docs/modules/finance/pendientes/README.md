@@ -1,6 +1,6 @@
 # Finanzas: pendientes
 
-Specs de lo que falta tras la alineación de dominio (fases 01-09 y partes 1-4, ya implementadas y descritas en [../dominio.md](../dominio.md)). Estado al 14 oct 2026 (web `v0.28.0`, back `v0.26.0`). Cada pendiente se implementa en una sesión y se revisa en otra, que publica sus correcciones como PATCH.
+Specs de lo que falta tras la alineación de dominio (fases 01-09 y partes 1-4, ya implementadas y descritas en [../dominio.md](../dominio.md)). Estado al 14 oct 2026 (web `v0.28.1`, back `v0.26.0`). Cada pendiente se implementa en una sesión y se revisa en otra, que publica sus correcciones como PATCH.
 
 | #   | Spec                                                                                                  | Tamaño | Repos      | Estado        | Versiones                                  |
 | --- | ----------------------------------------------------------------------------------------------------- | ------ | ---------- | ------------- | ------------------------------------------ |
@@ -11,7 +11,7 @@ Specs de lo que falta tras la alineación de dominio (fases 01-09 y partes 1-4, 
 | 05  | Contexto de entidad en el agente (spec cerrada; descrito en [dominio.md](../dominio.md#agente-de-ia)) | M      | back + web | `implemented` | web v0.25.0–v0.25.1 · back v0.23.0–v0.23.2 |
 | 06  | [Bloques visuales, captura rápida y resumen semanal](./06-agente-bloques-captura-resumen.md)          | L      | back + web | `implemented` | web v0.26.0–v0.26.3 · back v0.24.0–v0.24.4 |
 | 07  | [Comercios y pagos recurrentes](./07-comercios-recurrentes-suscripciones.md)                          | L      | back + web | `implemented` | web v0.27.0–v0.27.2 · back v0.25.0–v0.25.2 |
-| 08  | [Suscripciones](./08-suscripciones.md)                                                                | L      | back + web | `implemented` | web v0.28.0 · back v0.26.0                 |
+| 08  | [Suscripciones](./08-suscripciones.md)                                                                | L      | back + web | `implemented` | web v0.28.0–v0.28.1 · back v0.26.0         |
 
 ## Notas
 
