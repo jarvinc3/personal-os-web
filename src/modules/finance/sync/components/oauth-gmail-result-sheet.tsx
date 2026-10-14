@@ -16,6 +16,7 @@ import {
   EmailSyncScheduleFields,
   configToFinanceFormValues,
   emailSyncOnboardingDefaults,
+  emailSyncPatchFromFormValues,
   emailSyncScheduleLabel,
   financeModuleSchema,
   formatSyncIntervalLabel,
@@ -130,24 +131,7 @@ export function OauthGmailResultSheet({
   const onSubmit = () =>
     void submitForm(async (values) => {
       await updateConfig({
-        emailSync: {
-          enabled: values.emailSyncEnabled,
-          automatic: values.emailSyncAutomatic,
-          autoCategorize: values.autoCategorize,
-          mode: values.emailSyncMode,
-          schedule:
-            values.emailSyncScheduleMode === EMAIL_SYNC_SCHEDULE_MODES.INTERVAL
-              ? {
-                  mode: EMAIL_SYNC_SCHEDULE_MODES.INTERVAL,
-                  everyMinutes: Number(values.emailSyncEveryMinutes),
-                }
-              : {
-                  mode: EMAIL_SYNC_SCHEDULE_MODES.TIMES,
-                  times: values.emailSyncTimes
-                    .map((time) => time.trim())
-                    .filter(Boolean),
-                },
-        },
+        emailSync: emailSyncPatchFromFormValues(values),
       })
       appToast.success({
         text1: "Sincronización configurada",

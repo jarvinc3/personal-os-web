@@ -38,6 +38,7 @@ export {
   EMAIL_SYNC_SCHEDULE_MODES,
   configToFinanceFormValues,
   emailSyncOnboardingDefaults,
+  emailSyncPatchFromFormValues,
   emailSyncScheduleLabel,
   financeModuleSchema,
   formatSyncIntervalLabel,

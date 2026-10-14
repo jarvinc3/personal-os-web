@@ -257,6 +257,30 @@ export const financeModuleSchema = z
 
 export type FinanceModuleFormValues = z.infer<typeof financeModuleSchema>
 
+/** Bloque `emailSync` del parche de configuración a partir del formulario. */
+export function emailSyncPatchFromFormValues(
+  values: FinanceModuleFormValues
+): FinanceModuleConfig["emailSync"] {
+  return {
+    enabled: values.emailSyncEnabled,
+    automatic: values.emailSyncAutomatic,
+    autoCategorize: values.autoCategorize,
+    mode: values.emailSyncMode,
+    schedule:
+      values.emailSyncScheduleMode === EMAIL_SYNC_SCHEDULE_MODES.INTERVAL
+        ? {
+            mode: EMAIL_SYNC_SCHEDULE_MODES.INTERVAL,
+            everyMinutes: Number(values.emailSyncEveryMinutes),
+          }
+        : {
+            mode: EMAIL_SYNC_SCHEDULE_MODES.TIMES,
+            times: values.emailSyncTimes
+              .map((time) => time.trim())
+              .filter(Boolean),
+          },
+  }
+}
+
 /** Valores del formulario de Ajustes a partir de la configuración guardada. */
 export function configToFinanceFormValues(
   config: FinanceModuleConfig

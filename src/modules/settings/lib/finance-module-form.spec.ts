@@ -4,6 +4,7 @@ import { describe, it } from "node:test"
 import {
   EMAIL_SYNC_SCHEDULE_MODES,
   emailSyncOnboardingDefaults,
+  emailSyncPatchFromFormValues,
   emailSyncScheduleLabel,
   emailSyncTimesFromSchedule,
   financeModuleSchema,
@@ -184,5 +185,33 @@ describe("isEmailSyncConfigured", () => {
   it("is true only when automatic sync is on", () => {
     assert.equal(isEmailSyncConfigured({ automatic: true }), true)
     assert.equal(isEmailSyncConfigured({ automatic: false }), false)
+  })
+})
+
+describe("emailSyncPatchFromFormValues", () => {
+  it("builds an interval schedule in minutes", () => {
+    const patch = emailSyncPatchFromFormValues({
+      ...validFinance,
+      emailSyncMode: "PENDING",
+      emailSyncScheduleMode: EMAIL_SYNC_SCHEDULE_MODES.INTERVAL,
+      emailSyncEveryMinutes: "60",
+    })
+
+    assert.equal(patch.mode, "PENDING")
+    assert.equal(patch.enabled, true)
+    assert.deepEqual(patch.schedule, { mode: "interval", everyMinutes: 60 })
+  })
+
+  it("builds a fixed-times schedule and drops empty entries", () => {
+    const patch = emailSyncPatchFromFormValues({
+      ...validFinance,
+      emailSyncScheduleMode: EMAIL_SYNC_SCHEDULE_MODES.TIMES,
+      emailSyncTimes: [" 08:00 ", "18:00", " "],
+    })
+
+    assert.deepEqual(patch.schedule, {
+      mode: "times",
+      times: ["08:00", "18:00"],
+    })
   })
 })

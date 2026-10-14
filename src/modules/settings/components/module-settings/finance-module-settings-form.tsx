@@ -58,6 +58,7 @@ import { EmailSyncScheduleFields } from "@/src/modules/settings/components/modul
 import {
   EMAIL_SYNC_SCHEDULE_MODES,
   configToFinanceFormValues,
+  emailSyncPatchFromFormValues,
   financeModuleSchema,
   parsePayDays,
   type FinanceModuleFormValues,
@@ -202,24 +203,7 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
           payDays: parsePayDays(values.fixedIncomePayDays),
           accountId: values.fixedIncomeAccountId || null,
         },
-        emailSync: {
-          enabled: values.emailSyncEnabled,
-          automatic: values.emailSyncAutomatic,
-          autoCategorize: values.autoCategorize,
-          mode: values.emailSyncMode,
-          schedule:
-            values.emailSyncScheduleMode === EMAIL_SYNC_SCHEDULE_MODES.INTERVAL
-              ? {
-                  mode: EMAIL_SYNC_SCHEDULE_MODES.INTERVAL,
-                  everyMinutes: Number(values.emailSyncEveryMinutes),
-                }
-              : {
-                  mode: EMAIL_SYNC_SCHEDULE_MODES.TIMES,
-                  times: values.emailSyncTimes
-                    .map((time) => time.trim())
-                    .filter(Boolean),
-                },
-        },
+        emailSync: emailSyncPatchFromFormValues(values),
         notifications: {
           budgetAlerts: values.budgetAlerts,
           aiSuggestions: values.aiSuggestions,
