@@ -221,3 +221,12 @@ Afirmaciones de `project-guide.md`, `docs/infraestructure/*`, módulos monolíti
 | Origen     | `.cursor/rules/list-infinite-scroll.mdc` (listas con scroll infinito)                                                                                     |
 | Validación | presupuestos usaba botones Anterior/Siguiente; notificaciones un botón "Cargar más"; movimientos precargaba todas las páginas; sesiones de IA no paginaba |
 | Resolución | `resolved` (`useInfiniteQuery` + `IntersectionObserver` sobre cursor)                                                                                     |
+
+## REV-WEB-025 {#rev-web-025}
+
+| Campo      | Valor                                                                                                                                                              |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Categoría  | `CONTRADICE_CODIGO`                                                                                                                                                |
+| Origen     | `.cursor/rules/` (24 reglas), `CODING_GUIDELINES.md`, `AGENTS.md`, `architecture/ui-components.md`, `architecture/module-conventions.md`                           |
+| Validación | 60 hallazgos de UI y convenciones; detalle con archivo y línea en [reference/auditoria-reglas-ui-convenciones.md](./reference/auditoria-reglas-ui-convenciones.md) |
+| Resolución | `open`                                                                                                                                                             |

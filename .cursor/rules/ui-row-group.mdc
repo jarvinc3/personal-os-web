@@ -1,0 +1,26 @@
+---
+description: A group of rows uses SummarySection or SettingsSection. Do not hand-roll a bordered card around SummaryItem.
+globs: "**/*.{ts,tsx}"
+alwaysApply: true
+---
+
+# Grupo de filas
+
+Varias filas `SummaryItem` (o `SettingsRow`) viven dentro de un contenedor que ya existe. No se envuelven en un `div` con `rounded-2xl border border-border bg-card`.
+
+- Bloque con título e icono → `SummarySection` (`src/shared/components/ui/summary.tsx`). El cuerpo ya pinta la card. Las filas van directo adentro.
+- Grupo con etiqueta corta, sin icono en el encabezado («Atajos», «Detalle») → `SettingsSection` (`src/shared/components/layout/settings-section.tsx`).
+
+Una fila suelta que es un disparador (picker, botón) puede llevar su propio borde. Esta regla es para el grupo.
+
+```tsx
+<SummarySection title="Movimientos" icon={ReceiptIcon}>
+  {items.map((item) => (
+    <SummaryItem key={item.id} title={item.title} value={item.value} />
+  ))}
+</SummarySection>
+
+<SettingsSection title="Atajos">
+  <SummaryItem title="Comercios" icon={StoreIcon} href={href} />
+</SettingsSection>
+```

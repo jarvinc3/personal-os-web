@@ -1,18 +1,19 @@
 ---
-description: A value from a long list is chosen in a selection sheet opened from a trigger row, not in an inline dropdown.
+description: A long catalog is chosen in a selection sheet from a trigger row, on any screen, not in an inline dropdown.
 globs: "**/*.{ts,tsx}"
 alwaysApply: false
 ---
 
 # Campos de selección
 
-Un valor que sale de una lista larga o de un catálogo (categoría, cuenta o tarjeta, moneda) no se elige en un `Select` inline: se abre una hoja de selección desde una fila disparadora.
+En cualquier vista, un valor que sale de una lista larga o de un catálogo (categoría, cuenta o tarjeta, moneda, institución, país) no se elige en un `Select` inline: se abre una hoja de selección desde una fila disparadora.
 
 - La fila muestra el valor elegido (icono y nombre) y abre la hoja al tocarla. Sin valor: "Sin categoría", "Elige origen", "Elegir fecha".
-- Un formulario usa un solo estado de picker, con unión de literales (`usePicker<"category" | "currency" | "destination">`), y `closeHandlerFor`. No un `useState` por hoja.
-- La hoja se coloca después de la pantalla del formulario, con `open` y `onOpenChange` cableados a ese estado. Al elegir, escribe el valor y cierra.
+- La hoja va después del contenido, con `open` y `onOpenChange`. Al elegir, escribe el valor y cierra.
 - Origen y destino que no pueden ser iguales: la segunda hoja excluye el valor ya elegido (`excludeTarget`).
 - Si la hoja lleva búsqueda, aplica las reglas de listas largas de [ui-shared-components.mdc](./ui-shared-components.mdc).
+
+En un formulario, el estado de esas hojas es uno solo: unión de literales (`usePicker<"category" | "currency" | "destination">`) y `closeHandlerFor`. No un `useState` por hoja.
 
 ## Categorías
 

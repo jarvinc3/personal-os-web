@@ -6,6 +6,8 @@ alwaysApply: false
 
 # Secciones del formulario
 
+Esta regla agrupa campos de un formulario. El chrome con título es `SummarySection` en toda la UI, no solo aquí: [ui-shared-components.mdc](./ui-shared-components.mdc). Ahí se prohíbe `Card` en pantallas de producto.
+
 Los campos no van sueltos: se agrupan en `SummarySection` con título e icono del bloque ("Movimiento", "Ruta", "Importe", "Cuenta", "Horario").
 
 - Primero lo obligatorio, por orden de uso. Al final, `SummarySection` "Detalles opcionales" con `InfoIcon` y `collapsible`.

@@ -12,7 +12,11 @@ import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-financ
 import { useInstitutions } from "@/src/modules/finance/shared/hooks/use-institutions"
 import { useLoans } from "@/src/modules/finance/shared/hooks/use-loans"
 import { useMonthExpenseTrend } from "@/src/modules/finance/shared/hooks/use-month-expense-trend"
-import { ReconciliationMonthStatus } from "@/src/modules/finance/reconciliation"
+import {
+  BankChargesCard,
+  ReconciliationMonthStatus,
+} from "@/src/modules/finance/reconciliation"
+import { todayDateInput } from "@/src/modules/finance/shared/lib/ledger-form"
 import { BalanceIntegrityAlert } from "@/src/modules/finance/integrity"
 import { recalculationPayload } from "@/src/modules/finance/shared/lib/integrity"
 import {
@@ -198,6 +202,12 @@ export function FinanceProductsList({
         month={monthKeyFromDate(new Date())}
         monthLabel={monthKeyFromDate(new Date())}
         display={moneyDisplay}
+      />
+
+      <BankChargesCard
+        enabled={enabled}
+        display={moneyDisplay}
+        today={todayDateInput()}
       />
 
       <BalanceIntegrityAlert

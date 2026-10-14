@@ -63,7 +63,7 @@ A fin de mes el saldo de la app casi nunca coincide con el banco (impuestos, com
 2. `POST /finance/reconciliations/preview` propone el 0.15 % de las salidas del mes como impuesto DGII y el resto como otro cargo; la web precarga esas líneas.
 3. El usuario ajusta las líneas (tipo y monto). Deben sumar exactamente la diferencia: si no, el botón queda bloqueado y la API responde 422.
 4. `POST /finance/reconciliations` crea el cierre y un movimiento de ajuste por línea. Los ajustes mueven el saldo pero no aparecen en el tablero ni en presupuestos.
-5. El historial de "Conciliaciones" vive en el detalle; el producto aparece como conciliado o pendiente del mes en Productos. En Planificación, la tarjeta "Cargos bancarios" suma los ajustes por mes, banco y tipo.
+5. El historial de "Conciliaciones" vive en el detalle; el producto aparece como conciliado o pendiente del mes en Productos. En Productos, debajo de ese indicador, la tarjeta "Cargos bancarios" suma los ajustes por mes, banco y tipo.
 6. Borrar el último cierre lo revierte (toast "Deshacer" y papelera); restaurarlo no duplica el efecto.
 
 ### Integridad interna de saldos (invariante I1)

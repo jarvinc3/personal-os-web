@@ -1,0 +1,19 @@
+---
+description: Product amounts render through formatFinanceMoney with the finance display settings, in tabular numerals.
+globs: "**/*.{ts,tsx}"
+alwaysApply: true
+---
+
+# Montos en pantalla
+
+Un importe de producto se muestra con `formatFinanceMoney` (`src/modules/finance/shared/lib/money.ts`). El segundo argumento es el `FinanceMoneyDisplay` de la config de Finanzas: `currency`, `showCents`, `compactNumbers`. Así el mismo monto respeta centavos y compactación en toda la web.
+
+No uses `Intl.NumberFormat`, `toLocaleString` ni el string crudo del monto. El nodo que lo pinta lleva `tabular-nums`.
+
+Escribir un monto es otra pieza: `FinanceMoneyField`. Esta regla es solo de lectura.
+
+```tsx
+<span className="tabular-nums">
+  {formatFinanceMoney(amount, display)}
+</span>
+```

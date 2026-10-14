@@ -2,6 +2,12 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.31.2] - 2026-10-14
+
+### Agregado
+
+- Informe de auditoría de reglas de UI y convenciones en `docs/reference/auditoria-reglas-ui-convenciones.md`: 60 hallazgos con archivo y línea, y su registro `REV-WEB-025`.
+
 ## [0.31.1] - 2026-10-20
 
 ### Corregido
