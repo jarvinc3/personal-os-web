@@ -11,30 +11,29 @@ import {
 describe("buildFinanceListPath", () => {
   it("returns the bare endpoint without params", () => {
     assert.equal(
-      buildFinanceListPath(
-        "/finance/loans/loan-1/installments",
-        undefined,
-        undefined
-      ),
+      buildFinanceListPath({
+        endpoint: "/finance/loans/loan-1/installments",
+        cursor: undefined,
+      }),
       "/finance/loans/loan-1/installments"
     )
   })
 
   it("serializes params and skips empty values", () => {
-    const path = buildFinanceListPath(
-      "/finance/receivables/rec-1/payments",
-      { limit: 20, cursor: undefined, search: null, empty: "" },
-      undefined
-    )
+    const path = buildFinanceListPath({
+      endpoint: "/finance/receivables/rec-1/payments",
+      params: { limit: 20, cursor: undefined, search: null, empty: "" },
+      cursor: undefined,
+    })
     assert.equal(path, "/finance/receivables/rec-1/payments?limit=20")
   })
 
   it("adds the cursor after the caller params", () => {
-    const path = buildFinanceListPath(
-      "/finance/budgets",
-      { limit: 20 },
-      "cursor-1"
-    )
+    const path = buildFinanceListPath({
+      endpoint: "/finance/budgets",
+      params: { limit: 20 },
+      cursor: "cursor-1",
+    })
     assert.equal(path, "/finance/budgets?limit=20&cursor=cursor-1")
   })
 })

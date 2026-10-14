@@ -63,11 +63,12 @@ export type FinanceListPage = {
 }
 
 /** Path of one cursor page, with the cursor kept out of the caller's params. */
-export function buildFinanceListPath(
-  endpoint: string,
-  params: FinanceListParams | undefined,
+export function buildFinanceListPath(input: {
+  endpoint: string
+  params?: FinanceListParams
   cursor: string | undefined
-): string {
+}): string {
+  const { endpoint, params, cursor } = input
   const search = new URLSearchParams()
   for (const [key, value] of Object.entries(params ?? {})) {
     if (value === undefined || value === null || value === "") {
@@ -97,7 +98,7 @@ export function financeInfiniteListQuery<TPage extends FinanceListPage>({
   return {
     queryKey,
     queryFn: ({ pageParam }: { pageParam: string | undefined }) =>
-      get<TPage>(buildFinanceListPath(endpoint, params, pageParam)),
+      get<TPage>(buildFinanceListPath({ endpoint, params, cursor: pageParam })),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage: TPage) => lastPage.nextCursor ?? undefined,
   }
