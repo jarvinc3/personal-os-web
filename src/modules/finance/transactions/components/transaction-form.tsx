@@ -44,6 +44,10 @@ import {
   isTransactionMetadataOnly,
   isTransactionReadOnly,
 } from "@/src/modules/finance/transactions/lib/transaction-edit"
+import {
+  EMPTY_TRANSACTION_PREFILL,
+  type TransactionPrefill,
+} from "@/src/modules/finance/transactions/lib/transaction-prefill"
 import { FormTextField } from "@/src/shared/components/layout/form-blocks"
 import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
 import { SummarySection } from "@/src/shared/components/ui/summary"
@@ -88,23 +92,41 @@ function destinationFromTransaction(tx: FinanceTransaction | null): string {
   return CATALOG_NONE
 }
 
-function toFormValues(
-  tx: FinanceTransaction | null,
-  initialType: MovementType,
-  defaultCurrency: string,
+type ToFormValuesInput = {
+  transaction: FinanceTransaction | null
+  initialType: MovementType
+  defaultCurrency: string
   defaultDestination: string
-): TransactionFormValues {
+  prefill: TransactionPrefill
+}
+
+function toFormValues({
+  transaction,
+  initialType,
+  defaultCurrency,
+  defaultDestination,
+  prefill,
+}: ToFormValuesInput): TransactionFormValues {
   return {
-    type: tx?.type === "CREDIT" ? "CREDIT" : tx ? "DEBIT" : initialType,
-    amount: tx?.amount ?? "",
-    currency: tx?.currency ?? defaultCurrency,
-    transactionDate: sliceDateTimeInput(tx?.transactionDate),
-    destination: tx ? destinationFromTransaction(tx) : defaultDestination,
-    categoryId: tx?.categoryId ?? CATALOG_NONE,
-    status: tx?.status === "PENDING" ? "PENDING" : "CONFIRMED",
-    merchant: tx?.merchant ?? "",
-    description: tx?.description ?? "",
-    notes: tx?.notes ?? "",
+    type:
+      transaction?.type === "CREDIT"
+        ? "CREDIT"
+        : transaction
+          ? "DEBIT"
+          : initialType,
+    amount: transaction?.amount ?? prefill.amount,
+    currency: transaction?.currency ?? (prefill.currency || defaultCurrency),
+    transactionDate: transaction
+      ? sliceDateTimeInput(transaction.transactionDate)
+      : sliceDateTimeInput(prefill.transactionDate),
+    destination: transaction
+      ? destinationFromTransaction(transaction)
+      : defaultDestination,
+    categoryId: transaction?.categoryId ?? (prefill.categoryId || CATALOG_NONE),
+    status: transaction?.status === "PENDING" ? "PENDING" : "CONFIRMED",
+    merchant: transaction?.merchant ?? prefill.merchant,
+    description: transaction?.description ?? prefill.description,
+    notes: transaction?.notes ?? "",
   }
 }
 
@@ -112,6 +134,7 @@ type TransactionFormProps = {
   mode: "create" | "edit"
   initialType: MovementType
   initialDestination?: string | null
+  initialPrefill?: TransactionPrefill
   transaction: FinanceTransaction | null
   defaultCurrency: string
   defaultAccountId?: string | null
@@ -125,6 +148,7 @@ export function TransactionForm({
   mode,
   initialType,
   initialDestination = null,
+  initialPrefill = EMPTY_TRANSACTION_PREFILL,
   transaction,
   defaultCurrency,
   defaultAccountId = null,
@@ -184,12 +208,13 @@ export function TransactionForm({
   } = useForm<TransactionFormValues>({
     mode: "onTouched",
     resolver: zodResolver(transactionSchema),
-    defaultValues: toFormValues(
+    defaultValues: toFormValues({
       transaction,
       initialType,
       defaultCurrency,
-      CATALOG_NONE
-    ),
+      defaultDestination: CATALOG_NONE,
+      prefill: initialPrefill,
+    }),
   })
 
   const formValues = useWatch({ control })
@@ -226,14 +251,23 @@ export function TransactionForm({
       return
     }
     reset(
-      toFormValues(
-        isEdit ? transaction : null,
+      toFormValues({
+        transaction: isEdit ? transaction : null,
         initialType,
         defaultCurrency,
-        getValues("destination") || CATALOG_NONE
-      )
+        defaultDestination: getValues("destination") || CATALOG_NONE,
+        prefill: initialPrefill,
+      })
     )
-  }, [isEdit, transaction, initialType, defaultCurrency, reset, getValues])
+  }, [
+    isEdit,
+    transaction,
+    initialType,
+    defaultCurrency,
+    reset,
+    getValues,
+    initialPrefill,
+  ])
 
   useEffect(() => {
     if (isEdit) {

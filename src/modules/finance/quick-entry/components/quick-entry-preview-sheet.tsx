@@ -28,6 +28,7 @@ import {
   splitLedgerTarget,
 } from "@/src/modules/finance/shared/lib/ledger-payloads"
 import { wallClockToIso } from "@/src/modules/finance/shared/lib/ledger-form"
+import { buildTransactionFormParams } from "@/src/modules/finance/transactions/lib/transaction-prefill"
 import type { QuickEntryParseResult } from "@/src/modules/finance/quick-entry/types"
 
 type QuickEntryPreviewSheetProps = {
@@ -93,10 +94,16 @@ export function QuickEntryPreviewSheet({
   const canSave = Number(amount) > 0 && hasTarget
 
   function openGuidedFlow() {
-    const params = new URLSearchParams({ type })
-    if (destination) {
-      params.set("destination", destination)
-    }
+    const params = buildTransactionFormParams({
+      type,
+      destination,
+      amount,
+      currency: draft?.currency,
+      categoryId,
+      transactionDate: date,
+      merchant,
+      description,
+    })
     onOpenChange(false)
     router.push(`${APP_ROUTES.app.financeTransactionNew}?${params.toString()}`)
   }

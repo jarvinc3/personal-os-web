@@ -11,7 +11,12 @@ import {
 } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { useRouter, useSearchParams } from "next/navigation"
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
+import {
+  EMPTY_TRANSACTION_PREFILL,
+  parseTransactionPrefill,
+  type TransactionPrefill,
+} from "@/src/modules/finance/transactions/lib/transaction-prefill"
 
 export function TransactionCreateScreen() {
   return (
@@ -25,12 +30,18 @@ function TransactionCreateScreenBody() {
   const searchParams = useSearchParams()
   const initialType = parseTransactionFormType(searchParams.get("type"))
   const initialDestination = searchParams.get("destination")?.trim() || null
+  const search = searchParams.toString()
+  const initialPrefill = useMemo(
+    () => parseTransactionPrefill(new URLSearchParams(search)),
+    [search]
+  )
 
   return (
     <TransactionFormScreenBody
       mode="create"
       initialType={initialType}
       initialDestination={initialDestination}
+      initialPrefill={initialPrefill}
     />
   )
 }
@@ -56,11 +67,13 @@ function TransactionFormScreenBody({
   transactionId,
   initialType,
   initialDestination = null,
+  initialPrefill = EMPTY_TRANSACTION_PREFILL,
 }: {
   mode: "create" | "edit"
   transactionId?: string
   initialType: "DEBIT" | "CREDIT"
   initialDestination?: string | null
+  initialPrefill?: TransactionPrefill
 }) {
   const router = useRouter()
   const { isEnabled, config } = useFinanceEnabled()
@@ -128,6 +141,7 @@ function TransactionFormScreenBody({
       mode={mode}
       initialType={initialType}
       initialDestination={initialDestination}
+      initialPrefill={initialPrefill}
       transaction={editingQuery.data ?? null}
       defaultCurrency={config.baseCurrency}
       defaultAccountId={config.defaultAccountId}
