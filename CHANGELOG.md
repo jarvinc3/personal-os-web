@@ -2,6 +2,19 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.20.1] - 2026-10-13
+
+### Cambiado
+
+- Todas las elecciones de categoría usan el mismo selector: movimientos, presupuestos y la categoría padre del catálogo. El modo de varias categorías recibe y devuelve la lista de ids, y alternar o limpiar vive en la hoja, no en cada formulario.
+- El selector de varias categorías permite quitar una con la X, muestra una fila "Añadir categoría" cuando ya hay elegidas y se ve deshabilitado si no hay categorías.
+- La categoría padre se elige con el mismo selector, con búsqueda y sin poder elegir la propia categoría.
+
+### Corregido
+
+- El formulario de tarjeta vuelve a agrupar red y color en la sección de detalles opcionales.
+- El módulo Keep Awake ya no aparece en Ajustes > Módulos: no tiene configuración propia.
+
 ## [0.20.0] - 2026-10-13 - Reinicio de versionado beta
 
 ### Cambiado
