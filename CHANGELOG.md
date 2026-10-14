@@ -2,6 +2,16 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.31.1] - 2026-10-20
+
+### Corregido
+
+- El diálogo de confirmación de «Recalcular» se cierra cuando el check deja de listar la desviación; antes quedaba abierto tras corregir el saldo.
+
+### Cambiado
+
+- Specs de integridad que cubren el cierre del diálogo tras el recálculo, además de la selección de desviaciones y el armado del body.
+
 ## [0.31.0] - 2026-10-20 - Integridad de saldos
 
 ### Agregado
