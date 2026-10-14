@@ -2,6 +2,8 @@ import assert from "node:assert/strict"
 import { describe, it } from "node:test"
 
 import {
+  bankChargesRange,
+  moneyMagnitude,
   reconciliationDifference,
   reconciliationLinePayloads,
   reconciliationLinesFromSuggestion,
@@ -79,5 +81,21 @@ describe("reconciliationLinesFromSuggestion", () => {
 describe("reconciliationMonth", () => {
   it("returns YYYY-MM", () => {
     assert.equal(reconciliationMonth("2026-10-15"), "2026-10")
+  })
+})
+
+describe("bankChargesRange", () => {
+  it("covers the calendar year up to today", () => {
+    assert.deepEqual(bankChargesRange("2026-10-15"), {
+      from: "2026-01-01",
+      to: "2026-10-15",
+    })
+  })
+})
+
+describe("moneyMagnitude", () => {
+  it("returns the absolute amount and 0 for unreadable values", () => {
+    assert.equal(moneyMagnitude("-35.00"), 35)
+    assert.equal(moneyMagnitude("nope"), 0)
   })
 })

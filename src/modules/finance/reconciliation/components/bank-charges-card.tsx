@@ -1,11 +1,12 @@
 "use client"
 
 import { useBankCharges } from "@/src/modules/finance/shared/hooks/use-reconciliations"
-import {
-  formatFinanceMoney,
-  parseFinanceMoney,
-} from "@/src/modules/finance/shared/lib/money"
+import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
+import {
+  bankChargesRange,
+  moneyMagnitude,
+} from "@/src/modules/finance/shared/lib/reconciliation"
 import { FINANCE_RECONCILIATION_KIND_LABEL } from "@/src/modules/finance/shared/types/entities"
 import {
   Card,
@@ -28,26 +29,17 @@ type BankChargesCardProps = {
   today: string
 }
 
-function chargesRange(today: string): { from: string; to: string } {
-  return { from: `${today.slice(0, 4)}-01-01`, to: today }
-}
-
-function magnitude(value: string): number {
-  const amount = parseFinanceMoney(value)
-  return amount === null ? 0 : Math.abs(amount)
-}
-
 export function BankChargesCard({
   enabled,
   display,
   today,
 }: BankChargesCardProps) {
-  const range = chargesRange(today)
+  const range = bankChargesRange(today)
   const query = useBankCharges(enabled, range)
   const charges = query.data
   const maxMonth = Math.max(
     1,
-    ...(charges?.byMonth.map((month) => magnitude(month.total)) ?? [1])
+    ...(charges?.byMonth.map((month) => moneyMagnitude(month.total)) ?? [1])
   )
 
   return (
@@ -66,7 +58,7 @@ export function BankChargesCard({
                 Total {range.from.slice(0, 4)}
               </span>
               <span className="text-lg font-semibold tabular-nums">
-                {formatFinanceMoney(magnitude(charges.total), display)}
+                {formatFinanceMoney(moneyMagnitude(charges.total), display)}
               </span>
             </div>
             <div className="flex flex-col gap-2">
@@ -80,17 +72,20 @@ export function BankChargesCard({
                     style={{
                       width: `${Math.max(
                         4,
-                        (magnitude(month.total) / maxMonth) * 100
+                        (moneyMagnitude(month.total) / maxMonth) * 100
                       )}%`,
                     }}
                   />
                   <span className="ml-auto text-xs font-medium tabular-nums">
-                    {formatFinanceMoney(magnitude(month.total), display)}
+                    {formatFinanceMoney(moneyMagnitude(month.total), display)}
                   </span>
                 </div>
               ))}
             </div>
-            <div className="flex flex-col gap-1">
+            <div className="flex flex-col gap-1 border-t border-border pt-3">
+              <span className="text-xs font-medium text-muted-foreground">
+                Por categoría
+              </span>
               {charges.byKind.map((entry) => (
                 <div
                   key={entry.kind}
@@ -100,11 +95,29 @@ export function BankChargesCard({
                     {FINANCE_RECONCILIATION_KIND_LABEL[entry.kind]}
                   </span>
                   <span className="tabular-nums">
-                    {formatFinanceMoney(magnitude(entry.total), display)}
+                    {formatFinanceMoney(moneyMagnitude(entry.total), display)}
                   </span>
                 </div>
               ))}
             </div>
+            {charges.byInstitution.length > 0 ? (
+              <div className="flex flex-col gap-1 border-t border-border pt-3">
+                <span className="text-xs font-medium text-muted-foreground">
+                  Por banco
+                </span>
+                {charges.byInstitution.map((entry) => (
+                  <div
+                    key={entry.name}
+                    className="flex items-center justify-between text-sm"
+                  >
+                    <span className="text-muted-foreground">{entry.name}</span>
+                    <span className="tabular-nums">
+                      {formatFinanceMoney(moneyMagnitude(entry.total), display)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            ) : null}
           </>
         ) : (
           <Empty className="py-6">

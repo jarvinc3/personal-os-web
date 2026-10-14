@@ -329,11 +329,13 @@ function CardDetailScreenBody({ cardId }: CardDetailScreenProps) {
         ) : (
           movements
         )}
-        <ReconciliationsSection
-          enabled={isEnabled}
-          target={{ cardId: card.id }}
-          display={cardDisplay}
-        />
+        {isCredit ? (
+          <ReconciliationsSection
+            enabled={isEnabled}
+            target={{ cardId: card.id }}
+            display={cardDisplay}
+          />
+        ) : null}
       </div>
       <RecordOptionsSheet
         open={openOptionsSheet}
@@ -348,6 +350,12 @@ function CardDetailScreenBody({ cardId }: CardDetailScreenProps) {
                   icon: CreditCardIcon,
                   onPress: () => setOpenCardPaymentSheet(true),
                 },
+                {
+                  id: "reconcile",
+                  title: "Conciliar",
+                  icon: LandmarkIcon,
+                  onPress: () => setOpenReconciliationSheet(true),
+                },
               ]
             : []),
           {
@@ -361,12 +369,6 @@ function CardDetailScreenBody({ cardId }: CardDetailScreenProps) {
             title: "Ajustar saldo",
             icon: ScaleIcon,
             onPress: () => setOpenCardBalanceSheet(true),
-          },
-          {
-            id: "reconcile",
-            title: "Conciliar",
-            icon: LandmarkIcon,
-            onPress: () => setOpenReconciliationSheet(true),
           },
           {
             id: "history",

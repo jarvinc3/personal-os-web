@@ -79,3 +79,14 @@ export function reconciliationLinesFromSuggestion(
 export function reconciliationMonth(isoDate: string): string {
   return isoDate.slice(0, 7)
 }
+
+/** Calendar-year window up to `today`, inclusive, for the charges card. */
+export function bankChargesRange(today: string): { from: string; to: string } {
+  return { from: `${today.slice(0, 4)}-01-01`, to: today }
+}
+
+/** Absolute money amount of a formatted string; 0 when it cannot be read. */
+export function moneyMagnitude(value: string): number {
+  const amount = parseFinanceMoney(value)
+  return amount === null ? 0 : Math.abs(amount)
+}
