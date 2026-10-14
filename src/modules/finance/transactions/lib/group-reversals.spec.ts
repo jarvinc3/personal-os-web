@@ -212,4 +212,29 @@ describe("groupReversals", () => {
     assert.equal(groups[1]?.reversal, undefined)
     assert.equal(groups[1]?.isPartial, false)
   })
+
+  it("does not mark a full pair as partial when the same original also has a partial reversal", () => {
+    const original = tx({ id: "original", amount: "100.00" })
+    const full = tx({
+      id: "full",
+      status: "REVERSED",
+      amount: "100.00",
+      linkedTransactionId: "original",
+    })
+    const partial = tx({
+      id: "partial",
+      status: "REVERSED",
+      amount: "40.00",
+      linkedTransactionId: "original",
+    })
+
+    const groups = groupReversals([original, full, partial])
+
+    assert.equal(groups.length, 2)
+    assert.equal(groups[0]?.original.id, "original")
+    assert.equal(groups[0]?.reversal?.id, "full")
+    assert.equal(groups[0]?.isPartial, false)
+    assert.equal(groups[1]?.original.id, "partial")
+    assert.equal(groups[1]?.isPartial, true)
+  })
 })

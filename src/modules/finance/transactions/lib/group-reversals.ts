@@ -98,7 +98,7 @@ export function groupReversals(
     groups.push({
       original: item,
       ...(reversal ? { reversal } : {}),
-      isPartial: partialIds.has(item.id),
+      isPartial: !reversal && partialIds.has(item.id),
       isOrphan,
     })
   }
