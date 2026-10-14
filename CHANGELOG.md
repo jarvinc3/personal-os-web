@@ -2,6 +2,21 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.28.0] - 2026-10-14 - Suscripciones
+
+### Agregado
+
+- Vista `/finance/subscriptions` como principal del tab bar, entre Planificación y Productos: resumen de costo mensual y anual en la moneda base, recurrentes detectados, filtros por estado y moneda, búsqueda y lista con estado.
+- Detalle de suscripción con costo mensual y anual, próximo cobro, historial de pagos vinculados a movimientos y acciones de pausar, reanudar, cancelar y registrar pago manual.
+- Formulario de suscripción con buscador de marca, monto, ciclo e intervalo, ancla del primer cobro, prueba, tarjeta o cuenta, recordatorio, enlace de gestión y notas.
+- Sección «Suscripciones» en los ajustes de Finanzas con días de recordatorio y agrupación; avisos de renovación y subidas de precio en las alertas del módulo.
+- Specs del etiquetado de ciclo y estado, del formulario de suscripción y del registro de módulos.
+
+### Cambiado
+
+- `/settings/subscriptions` redirige a `/settings/finance#suscripciones`; el módulo Suscripciones sale del registro, el nav, los ajustes y el selector de contexto del chat.
+- Los docs de Finanzas, Ajustes y IA reflejan que Suscripciones vive dentro de Finanzas.
+
 ## [0.27.2] - 2026-10-14
 
 ### Corregido
