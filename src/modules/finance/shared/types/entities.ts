@@ -296,6 +296,69 @@ export type FinanceCardStatementDetail = {
   payments: FinanceCardStatementMovement[]
 }
 
+export type FinanceStatementImportStatus =
+  "PARSING" | "READY" | "APPLIED" | "FAILED" | "DISCARDED"
+
+export type FinanceStatementLineDecision = "MATCH" | "CREATE" | "IGNORE"
+
+export type FinanceStatementLineType = "DEBIT" | "CREDIT"
+
+export type FinanceStatementImportLine = {
+  id: string
+  date: string
+  description: string
+  amount: string
+  currency: string
+  type: FinanceStatementLineType
+  reference: string | null
+  decision: FinanceStatementLineDecision
+  categoryId: string | null
+  categoryName: string | null
+  transactionId: string | null
+}
+
+export type FinanceStatementImportExtra = {
+  id: string
+  date: string
+  description: string | null
+  merchant: string | null
+  amount: string
+  currency: string
+  type: string
+}
+
+export type FinanceStatementImportTarget = {
+  kind: "CARD" | "ACCOUNT"
+  id: string
+  name: string
+  currency: string
+}
+
+export type FinanceStatementImport = {
+  id: string
+  status: FinanceStatementImportStatus
+  error: string | null
+  failureReason: string | null
+  target: FinanceStatementImportTarget
+  header: {
+    currency: string
+    periodStart: string | null
+    periodEnd: string | null
+    dueDate: string | null
+    previousBalance: string | null
+    closingBalance: string | null
+    minimumPayment: string | null
+  }
+  period: { from: string; to: string } | null
+  counts: { lines: number; matched: number; missing: number; extra: number }
+  lines: FinanceStatementImportLine[]
+  extra: FinanceStatementImportExtra[]
+  difference: string | null
+  adjustment: { amount: string; currency: string } | null
+  createdAt: string
+  appliedAt: string | null
+}
+
 export type FinanceInstitution = {
   id: string
   name: string

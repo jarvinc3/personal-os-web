@@ -2,6 +2,7 @@
 
 import type { UpcomingCardCycle } from "@/src/modules/finance/shared/lib/card-statement-cycle"
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
+import { StatementImportButton } from "@/src/modules/finance/shared/components/statement-import-button"
 import { CardStatementSheet } from "@/src/modules/finance/cards/components/card-statement-sheet"
 import { formatCalendarDate } from "@/src/modules/finance/shared/lib/ledger-form"
 import {
@@ -229,6 +230,7 @@ export function CardStatementsSection({
           ) : null}
         </div>
       </AsyncRegion>
+      <StatementImportButton cardId={cardId} className="w-full" />
       <CardStatementSheet
         open={selectedStatementId !== null}
         onOpenChange={(next) => {

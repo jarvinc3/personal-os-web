@@ -1,6 +1,6 @@
 # Finanzas: cómo funciona hoy
 
-Estado al 13 oct 2026: web v1.18.0 (`fd0630c`) y back v1.19.0 (`bfcfded`). Este documento resume el dominio y los flujos principales tal como están implementados. El contrato HTTP completo vive en `personal-os-back/docs/modules/finance/`. Lo pendiente está en [pendientes/](./pendientes/README.md).
+Estado al 14 oct 2026: web v0.22.0 y back v0.21.0. Este documento resume el dominio y los flujos principales tal como están implementados. El contrato HTTP completo vive en `personal-os-back/docs/modules/finance/`. Lo pendiente está en [pendientes/](./pendientes/README.md).
 
 Contexto: bancos dominicanos (BHD, Popular, Qik), moneda principal DOP (RD$).
 
@@ -13,7 +13,7 @@ Contexto: bancos dominicanos (BHD, Popular, Qik), moneda principal DOP (RD$).
 | Tarjeta                               | Crédito o débito                         | La de crédito tiene límite, disponible, día de corte y de pago. La de débito suma a su cuenta      |
 | Movimiento (`FinTransaction`)         | CREDIT, DEBIT, ADJUSTMENT, CARD_PAYMENT  | Estados `PENDING`, `CONFIRMED`, `REVERSED`, `CANCELLED`                                            |
 | Transferencia                         | Dos patas con el mismo `transferGroupId` | Atómica. El destino es solo una cuenta. Comisión opcional (`legs`). La lista muestra una sola fila |
-| Corte de tarjeta (`FinCardStatement`) | Ciclo de facturación                     | Abierto, `STATEMENT_CLOSED`, pagado o vencido. Se carga a mano                                     |
+| Corte de tarjeta (`FinCardStatement`) | Ciclo de facturación                     | Abierto, `STATEMENT_CLOSED`, pagado o vencido. Se carga a mano o se importa del PDF del banco      |
 | Préstamo                              | Capital, tasa, plazo y cuotas            | La cuota resta solo capital del saldo. Admite abonos a capital (reducir plazo o cuota)             |
 | Cobro (cuenta por cobrar)             | Dinero que te deben                      | Pagos parciales, excedente (`excessHandling`) y castigo (write-off)                                |
 | Meta de ahorro                        | Objetivo ligado a una cuenta             | Los aportes no crean `DEBIT`. Expone `freeBalance` (disponible libre de la cuenta)                 |
@@ -42,6 +42,18 @@ Desde el detalle del movimiento, "Vincular" (`link-transaction-sheet.tsx`) lo as
 - Pago de tarjeta: `CARD_PAYMENT` desde una cuenta (`card-payment-sheet.tsx`).
 - Corte manual: el usuario baja el estado de cuenta desde la app del banco y carga balance al corte, mínimo y fecha límite en `card-statement-sheet.tsx`. El scheduler cierra los ciclos vencidos.
 - El correo de BHD "tu estado de cuenta está disponible" genera un recordatorio (`FINANCE_CARD_STATEMENT_REMINDER`), pero no importa movimientos.
+
+### Importar un estado de cuenta
+
+Manual, desde el detalle de la tarjeta o de la cuenta bancaria ("Importar estado de cuenta", PDF de hasta 10 MB).
+
+1. La web sube el PDF (`POST /finance/cards/:id/statements/import` o `POST /finance/accounts/:id/statements/import`, multipart `file` y `password?`). Si el PDF tiene clave, se pide y no se guarda.
+2. El back extrae el texto con pdf.js y un extractor LLM devuelve periodo, saldos, mínimo, fecha límite y movimientos. Si BullMQ está activo, el parseo va a la cola `statement-import`; si no, corre en la misma petición. La web consulta el estado hasta que queda `READY`.
+3. La cabecera (periodo, saldos, mínimo y fecha límite) vive en el JSON del import; no hay tabla nueva. Para una cuenta bancaria es la única cabecera.
+4. Conciliación (`/finance/statement-imports/[importId]`) con tres grupos: **Coinciden** (misma referencia, o monto y moneda con ±3 días y texto parecido), **Faltan en la app** (se crean al aplicar) y **Sobran en la app** (registrados en el ciclo y ausentes del PDF). Cada línea se puede marcar o ignorar.
+5. Al aplicar (`POST /finance/statement-imports/:id/apply`): se crean los movimientos marcados, se cierra el corte de la tarjeta con los datos del PDF y, si el usuario lo pide, se crea un ajuste por la diferencia exacta. Es idempotente. `DELETE` descarta el import.
+
+El estado de cuenta no llega por correo: los bancos no lo envían y la subida es siempre manual. Errores: `STATEMENT_PASSWORD_REQUIRED`, `STATEMENT_PARSE_FAILED`, `STATEMENT_ALREADY_APPLIED`.
 
 ### Préstamos
 
@@ -79,3 +91,5 @@ Los correos de ejemplo por banco están en `personal-os-back/packages/finance/te
 ## Paginación
 
 Usan cursor `{items, nextCursor, hasMore}`: transacciones, presupuestos, historial de instrumento y notificaciones. El resto devuelve arrays (ver [pendientes/04](./pendientes/04-paginacion-uniforme.md)).
+
+Las líneas de un import de estado de cuenta se devuelven completas: un PDF trae decenas de filas, no miles.

@@ -56,6 +56,15 @@ export const API_ENDPOINTS = {
     CARD_STATEMENTS: (id: string) => `/finance/cards/${id}/statements`,
     CARD_STATEMENT: (id: string, statementId: string) =>
       `/finance/cards/${id}/statements/${statementId}`,
+    CARD_STATEMENT_IMPORT: (id: string) =>
+      `/finance/cards/${id}/statements/import`,
+    ACCOUNT_STATEMENT_IMPORT: (id: string) =>
+      `/finance/accounts/${id}/statements/import`,
+    STATEMENT_IMPORT: (id: string) => `/finance/statement-imports/${id}`,
+    STATEMENT_IMPORT_LINE: (id: string, lineId: string) =>
+      `/finance/statement-imports/${id}/lines/${lineId}`,
+    STATEMENT_IMPORT_APPLY: (id: string) =>
+      `/finance/statement-imports/${id}/apply`,
     BALANCE_ADJUSTMENT: "/finance/balance-adjustments",
     TRANSACTIONS: "/finance/transactions",
     TRANSFERS: "/finance/transfers",

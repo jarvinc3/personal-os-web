@@ -29,6 +29,11 @@ const BACKEND_CODE_MESSAGE_ES: Record<string, string> = {
   GOAL_NOT_FOUND: "No encontramos la meta.",
   RECEIVABLE_EXCESS_UNRESOLVED:
     "El pago supera lo pendiente. Elige qué hacer con la diferencia.",
+  STATEMENT_PARSE_FAILED:
+    "No pudimos leer el PDF. Revisa que sea un estado de cuenta del banco.",
+  STATEMENT_PASSWORD_REQUIRED: "El PDF tiene clave. Escríbela para continuar.",
+  STATEMENT_ALREADY_APPLIED: "Este estado de cuenta ya se aplicó.",
+  STATEMENT_IMPORT_DISCARDED: "Este estado de cuenta se descartó.",
   RECEIVABLE_NOT_FOUND: "No encontramos el cobro.",
   ALREADY_RESTORED: "Esto ya se restauró.",
   RESTORE_CONFLICT:
@@ -91,6 +96,20 @@ const BACKEND_MESSAGE_ES: Record<string, string> = {
     "El monto supera lo que queda por cobrar.",
   "Receivable not found": "No encontramos el cobro.",
   "Savings goal not found": "No encontramos la meta.",
+  "A statement import needs a target":
+    "Elige la tarjeta o la cuenta del estado de cuenta.",
+  "The statement PDF needs its password":
+    "El PDF tiene clave. Escríbela para continuar.",
+  "Statement import not found":
+    "No encontramos este estado de cuenta importado.",
+  "Statement import is not ready":
+    "Este estado de cuenta todavía no está listo para revisar.",
+  "Statement import is already applied": "Este estado de cuenta ya se aplicó.",
+  "Statement import was discarded": "Este estado de cuenta se descartó.",
+  "Statement line not found":
+    "No encontramos ese movimiento del estado de cuenta.",
+  "A match requires a transaction":
+    "Elige el movimiento que coincide con esta línea.",
 }
 
 export function translateFinanceError(

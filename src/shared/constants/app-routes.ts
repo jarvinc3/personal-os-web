@@ -63,6 +63,8 @@ export const APP_ROUTES = {
     financeReceivables: "/finance/receivables",
     financeReceivable: (receivableId: string) =>
       `/finance/receivables/${receivableId}`,
+    financeStatementImport: (importId: string) =>
+      `/finance/statement-imports/${importId}`,
     settingsFinanceCurrencies: "/settings/finance/currencies",
   },
 } as const

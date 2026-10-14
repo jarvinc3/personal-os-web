@@ -12,6 +12,7 @@ import { FinanceGate } from "@/src/modules/finance/finance-gate"
 import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
 import { MissingRecord } from "@/src/modules/finance/shared/components/layout/missing-record"
 import { FinanceInstrumentMovements } from "@/src/modules/finance/transactions"
+import { StatementImportButton } from "@/src/modules/finance/shared/components/statement-import-button"
 import { FINANCE_ACCOUNT_TYPE_LABEL } from "@/src/modules/finance/shared/constants/catalog"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import {
@@ -316,6 +317,7 @@ function AccountDetailScreenBody({ accountId }: AccountDetailScreenProps) {
             )
           }
         />
+        <StatementImportButton accountId={account.id} className="w-full" />
       </div>
 
       <RecordOptionsSheet
