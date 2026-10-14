@@ -3,6 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
   CalendarDays,
+  CircleAlert,
   CreditCardIcon,
   FileTextIcon,
   HashIcon,
@@ -17,10 +18,7 @@ import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form"
 
 import { CardNetworkMark } from "@/src/modules/finance/shared/components/brand-logo"
 import { FinanceFormScreen } from "@/src/modules/finance/shared/components/forms/form-screen"
-import {
-  FinanceDetailsDisclosure,
-  FinanceSegmentedControl,
-} from "@/src/modules/finance/shared/components/forms/form-blocks"
+import { FinanceSegmentedControl } from "@/src/modules/finance/shared/components/forms/form-blocks"
 import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
 import { DestinationPickerSheet } from "@/src/modules/finance/shared/components/pickers/destination-picker-sheet"
 import { DestinationTrigger } from "@/src/modules/finance/shared/components/pickers/destination-trigger"
@@ -554,7 +552,12 @@ export function CardFormScreen({
           </button>
         ) : null}
 
-        <FinanceDetailsDisclosure defaultOpen={isEdit}>
+        <SummarySection
+          title="Detalles opcionales"
+          icon={CircleAlert}
+          collapsible
+          defaultOpen={isEdit}
+        >
           <Controller
             control={control}
             name="network"
@@ -581,7 +584,7 @@ export function CardFormScreen({
               </div>
             )}
           />
-        </FinanceDetailsDisclosure>
+        </SummarySection>
 
         {!hasInstitutions ? (
           <p className="text-sm text-muted-foreground">

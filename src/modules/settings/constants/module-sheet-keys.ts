@@ -6,4 +6,5 @@ export const MODULE_SHEET_PARAM_KEYS: Record<ModuleSlug, string> = {
   projects: "projects-sheet",
   subscriptions: "subscriptions-sheet",
   health: "health-sheet",
+  keepAwake: "keep-awake-sheet",
 }

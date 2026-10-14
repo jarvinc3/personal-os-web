@@ -1,7 +1,11 @@
 "use client"
 
 import type { ModuleSettingsState } from "@/src/modules/settings/lib/module-settings-state"
-import type { ModuleSlug } from "@/src/modules/settings/types/module-config.types"
+import type {
+  ConfigurableModuleSlug,
+  ModuleSlug,
+} from "@/src/modules/settings/types/module-config.types"
+import { DEFAULT_MODULE_CONFIG_BY_SLUG } from "@/src/modules/settings/constants/user-settings-defaults"
 import { SettingsSection } from "@/src/shared/components/layout/settings-section"
 import { Button } from "@/src/shared/components/ui/button"
 import { Separator } from "@/src/shared/components/ui/separator"
@@ -16,6 +20,12 @@ import { ChevronLeftIcon, ChevronRightIcon, Settings } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useCallback, useId, useLayoutEffect, useRef, useState } from "react"
 import { useUserModuleConfig } from "@/src/modules/settings/hooks/use-user-module-config"
+
+export function isConfigurableModuleSlug(
+  slug: ModuleSlug
+): slug is ConfigurableModuleSlug {
+  return slug in DEFAULT_MODULE_CONFIG_BY_SLUG
+}
 
 export type ModuleSheetEnableRowProps = {
   state: ModuleSettingsState
@@ -52,7 +62,7 @@ function ModuleSheetEnableRow({
 }
 
 type ModuleSettingsRowsProps = {
-  onOpenModule?: (slug: ModuleSlug) => void
+  onOpenModule?: (slug: ConfigurableModuleSlug) => void
 }
 
 export const MODULE_SETTINGS_CARD_WIDTH = 156
@@ -127,7 +137,7 @@ function ModuleSettingsRows({ onOpenModule }: ModuleSettingsRowsProps) {
         className="scrollbar-hide flex gap-3 overflow-x-auto pb-1"
         style={{ scrollSnapType: "x mandatory" }}
       >
-        {MODULE_SLUGS_ORDER.map((slug) => (
+        {MODULE_SLUGS_ORDER.filter(isConfigurableModuleSlug).map((slug) => (
           <div
             key={slug}
             style={{
@@ -152,7 +162,7 @@ function ModuleSettingsRows({ onOpenModule }: ModuleSettingsRowsProps) {
 }
 
 type ModuleSettingsCardProps = {
-  slug: ModuleSlug
+  slug: ConfigurableModuleSlug
   onOpen: () => void
 }
 

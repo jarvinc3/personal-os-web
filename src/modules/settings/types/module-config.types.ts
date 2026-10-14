@@ -2,6 +2,9 @@ import type { ModuleSlug } from "@/src/shared/types/module-nav"
 
 export type { ModuleSlug }
 
+/** keepAwake is a module without user settings, so it has no stored config. */
+export type ConfigurableModuleSlug = Exclude<ModuleSlug, "keepAwake">
+
 export type FinanceModuleConfig = {
   version: number
   fieldGuide: string
@@ -115,8 +118,9 @@ export type ModuleConfigBySlug = {
   health: HealthModuleConfig
 }
 
-export type ModuleConfig<S extends ModuleSlug = ModuleSlug> =
-  ModuleConfigBySlug[S]
+export type ModuleConfig<
+  S extends ConfigurableModuleSlug = ConfigurableModuleSlug,
+> = ModuleConfigBySlug[S]
 
 export type UserModuleEntry = {
   slug: ModuleSlug
@@ -125,7 +129,7 @@ export type UserModuleEntry = {
   enabledAt: string
 }
 
-export type DeepPartialModuleConfig<S extends ModuleSlug> = {
+export type DeepPartialModuleConfig<S extends ConfigurableModuleSlug> = {
   [K in keyof ModuleConfig<S>]?: ModuleConfig<S>[K] extends object
     ? Partial<ModuleConfig<S>[K]>
     : ModuleConfig<S>[K]

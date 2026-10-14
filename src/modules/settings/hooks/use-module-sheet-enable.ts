@@ -1,10 +1,10 @@
 "use client"
 
 import { useUserModuleConfig } from "@/src/modules/settings/hooks/use-user-module-config"
-import type { ModuleSlug } from "@/src/modules/settings/types/module-config.types"
+import type { ConfigurableModuleSlug } from "@/src/modules/settings/types/module-config.types"
 import { useCallback, useMemo, useState } from "react"
 
-export function useModuleSheetEnable(slug: ModuleSlug) {
+export function useModuleSheetEnable(slug: ConfigurableModuleSlug) {
   const { state, entry } = useUserModuleConfig(slug)
 
   const savedIsEnabled = entry?.isEnabled ?? false
