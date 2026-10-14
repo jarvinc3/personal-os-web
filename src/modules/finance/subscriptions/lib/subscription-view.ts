@@ -45,6 +45,8 @@ export const SUBSCRIPTION_ALERT_LABEL: Record<
 
 const UNCATEGORIZED_GROUP_LABEL = "Sin categoría"
 const NO_METHOD_GROUP_LABEL = "Sin método"
+const UNCATEGORIZED_GROUP_KEY = "uncategorized"
+const NO_METHOD_GROUP_KEY = "no-method"
 
 export type SubscriptionCycleProgress = {
   startDate: Date
@@ -108,13 +110,13 @@ function groupKeyFor(
 ): { key: string; label: string } {
   if (groupBy === "category") {
     if (!subscription.category) {
-      return { key: "uncategorized", label: UNCATEGORIZED_GROUP_LABEL }
+      return { key: UNCATEGORIZED_GROUP_KEY, label: UNCATEGORIZED_GROUP_LABEL }
     }
     return { key: subscription.category.id, label: subscription.category.name }
   }
   if (groupBy === "provider") {
     if (!subscription.paymentMethod) {
-      return { key: "no-method", label: NO_METHOD_GROUP_LABEL }
+      return { key: NO_METHOD_GROUP_KEY, label: NO_METHOD_GROUP_LABEL }
     }
     return {
       key: subscription.paymentMethod.id,
@@ -191,7 +193,7 @@ export function breakdownFilter(
     return { currency: key }
   }
   if (by === "category") {
-    if (key === "uncategorized") {
+    if (key === UNCATEGORIZED_GROUP_KEY) {
       return null
     }
     return { categoryId: key }
