@@ -17,6 +17,7 @@ import { useCategories } from "@/src/modules/finance/shared/hooks/use-categories
 import { useCurrencyForTarget } from "@/src/modules/finance/shared/hooks/use-currency-for-target"
 import { useFinanceAmountEntry } from "@/src/modules/finance/shared/hooks/use-finance-amount-entry"
 import { useInstitutions } from "@/src/modules/finance/shared/hooks/use-institutions"
+import { useMerchantSuggest } from "@/src/modules/finance/shared/hooks/use-merchants"
 import {
   useCreateTransaction,
   useUpdateTransaction,
@@ -234,6 +235,38 @@ export function TransactionForm({
 
   const selectedCategory =
     categories.find((item) => item.id === categoryId) ?? null
+
+  const merchantName = useWatch({ control, name: "merchant" })
+  const [debouncedMerchant, setDebouncedMerchant] = useState("")
+  useEffect(() => {
+    const timer = window.setTimeout(
+      () => setDebouncedMerchant(merchantName),
+      300
+    )
+    return () => window.clearTimeout(timer)
+  }, [merchantName])
+  const merchantSuggestQuery = useMerchantSuggest(
+    enabled && !locked && Boolean(debouncedMerchant.trim()),
+    debouncedMerchant
+  )
+  const merchantSuggestion = merchantSuggestQuery.data ?? null
+  const merchantSuggestionCategory = merchantSuggestion?.categoryId
+    ? (categories.find((item) => item.id === merchantSuggestion.categoryId) ??
+      null)
+    : null
+
+  function applyMerchantSuggestion(
+    suggestedName: string,
+    suggestedCategoryId: string | null
+  ) {
+    setValue("merchant", suggestedName, {
+      shouldDirty: true,
+      shouldValidate: true,
+    })
+    if (suggestedCategoryId && getValues("categoryId") === CATALOG_NONE) {
+      setValue("categoryId", suggestedCategoryId, { shouldDirty: true })
+    }
+  }
 
   const applyTargetCurrency = useCallback(
     (next: string) => {
@@ -584,14 +617,36 @@ export function TransactionForm({
             control={control}
             name="merchant"
             render={({ field }) => (
-              <FormTextField
-                label={type === "CREDIT" ? "Origen" : "Comercio"}
-                icon={type === "CREDIT" ? HandCoinsIcon : StoreIcon}
-                value={field.value}
-                onChange={field.onChange}
-                onBlur={field.onBlur}
-                error={errors.merchant?.message}
-              />
+              <div className="flex flex-col gap-1">
+                <FormTextField
+                  label={type === "CREDIT" ? "Origen" : "Comercio"}
+                  icon={type === "CREDIT" ? HandCoinsIcon : StoreIcon}
+                  value={field.value}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                  error={errors.merchant?.message}
+                />
+                {merchantSuggestion &&
+                merchantSuggestion.name.trim().toLowerCase() !==
+                  field.value.trim().toLowerCase() ? (
+                  <button
+                    type="button"
+                    className="flex items-center gap-2 self-start rounded-lg bg-muted px-2 py-1 text-left text-xs text-muted-foreground transition-colors hover:text-foreground"
+                    onClick={() =>
+                      applyMerchantSuggestion(
+                        merchantSuggestion.name,
+                        merchantSuggestion.categoryId
+                      )
+                    }
+                  >
+                    <StoreIcon className="size-3.5 shrink-0" aria-hidden />
+                    Usar «{merchantSuggestion.name}»
+                    {merchantSuggestionCategory
+                      ? ` · ${merchantSuggestionCategory.name}`
+                      : ""}
+                  </button>
+                ) : null}
+              </div>
             )}
           />
         </SummarySection>

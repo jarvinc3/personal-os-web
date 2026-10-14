@@ -30,7 +30,9 @@ import {
 import { FINANCE_RECEIVABLE_STATUS_LABEL } from "@/src/modules/finance/shared/types/entities"
 import { useRouter } from "next/navigation"
 import { ExpandableFab } from "@/src/shared/components/layout/expandable-fab"
+import { SettingsSection } from "@/src/shared/components/layout/settings-section"
 import { Button } from "@/src/shared/components/ui/button"
+import { SummaryItem } from "@/src/shared/components/ui/summary"
 import {
   Empty,
   EmptyContent,
@@ -53,6 +55,7 @@ import {
   HandshakeIcon,
   PiggyBankIcon,
   PlusIcon,
+  RepeatIcon,
 } from "lucide-react"
 import { useMemo, useState } from "react"
 import { FinanceBudgetsList } from "@/src/modules/finance/budgets"
@@ -430,6 +433,18 @@ export function FinancePlanningList({
           </div>
         </TabsContent>
       </Tabs>
+
+      <SettingsSection title="Atajos">
+        <SummaryItem
+          title="Suscripciones"
+          description="Cobros recurrentes y próximos pagos"
+          icon={RepeatIcon}
+          href={APP_ROUTES.app.financeSubscriptions}
+          showChevron
+          isLast
+          className="px-3"
+        />
+      </SettingsSection>
 
       <ExpandableFab
         label="Crear en planificación"

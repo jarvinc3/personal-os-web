@@ -47,6 +47,8 @@ import {
   ChevronDownIcon,
   MailIcon,
   PlusIcon,
+  RepeatIcon,
+  StoreIcon,
   TagsIcon,
   Trash2Icon,
   WalletIcon,
@@ -295,6 +297,24 @@ export function FinanceProductsList({
             className="px-3"
           />
         </div>
+        <SummaryItem
+          title="Comercios"
+          description="Quién recibe tu dinero y cuánto"
+          icon={StoreIcon}
+          href={APP_ROUTES.app.financeMerchants}
+          showChevron
+          isLast={false}
+          className="px-3"
+        />
+        <SummaryItem
+          title="Suscripciones"
+          description="Cobros recurrentes y próximos pagos"
+          icon={RepeatIcon}
+          href={APP_ROUTES.app.financeSubscriptions}
+          showChevron
+          isLast={false}
+          className="px-3"
+        />
         <SummaryItem
           title="Papelera de reciclaje"
           description="Restaura lo archivado o eliminado"

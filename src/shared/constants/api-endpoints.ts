@@ -138,5 +138,13 @@ export const API_ENDPOINTS = {
     OAUTH_GOOGLE_CALLBACK: "/finance/email-sync/oauth/google/callback",
     EXCHANGE_RATES: "/finance/exchange-rates",
     BASE_CURRENCY: "/finance/base-currency",
+    MERCHANTS: "/finance/merchants",
+    MERCHANT_SUGGEST: "/finance/merchants/suggest",
+    MERCHANT: (id: string) => `/finance/merchants/${id}`,
+    MERCHANT_MERGE: (id: string) => `/finance/merchants/${id}/merge`,
+    MERCHANT_LOGO: (id: string) => `/finance/merchants/${id}/logo`,
+    RECURRING: "/finance/recurring",
+    RECURRING_UPCOMING: "/finance/recurring/upcoming",
+    RECURRING_PATTERN: (id: string) => `/finance/recurring/${id}`,
   },
 } as const

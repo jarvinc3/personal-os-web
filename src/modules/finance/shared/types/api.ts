@@ -60,6 +60,14 @@ export const FINANCE_TRANSACTIONS_QUERY_KEY = [
   ...FINANCE_QUERY_KEY,
   "transactions",
 ] as const
+export const FINANCE_MERCHANTS_QUERY_KEY = [
+  ...FINANCE_QUERY_KEY,
+  "merchants",
+] as const
+export const FINANCE_RECURRING_QUERY_KEY = [
+  ...FINANCE_QUERY_KEY,
+  "recurring",
+] as const
 export const FINANCE_BUDGETS_QUERY_KEY = [
   ...FINANCE_QUERY_KEY,
   "budgets",

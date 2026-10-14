@@ -44,6 +44,7 @@ import {
   Mail,
   Receipt,
   RefreshCw,
+  Repeat,
   ScanEyeIcon,
   Shrink,
   Sparkles,
@@ -78,6 +79,11 @@ const FINANCE_NOTIFICATION_ROWS = [
   { key: "weeklySummary", label: "Resumen semanal", icon: CalendarDays },
   { key: "cardDueDate", label: "Vencimiento de tarjetas", icon: CreditCard },
   { key: "unusualExpense", label: "Gastos inusuales", icon: TriangleAlert },
+  {
+    key: "recurringAlerts",
+    label: "Cobros recurrentes",
+    icon: Repeat,
+  },
 ] as const satisfies readonly {
   key: keyof FinanceModuleConfig["notifications"]
   label: string
@@ -223,6 +229,7 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
           weeklySummary: values.weeklySummary,
           cardDueDate: values.cardDueDate,
           unusualExpense: values.unusualExpense,
+          recurringAlerts: values.recurringAlerts,
         },
         reports: {
           weeklySummaryDay: Number(values.weeklySummaryDay),

@@ -44,6 +44,7 @@ const validFinance = {
   weeklySummaryDay: "1",
   cardDueDate: true,
   unusualExpense: true,
+  recurringAlerts: true,
 }
 
 describe("financeModuleSchema", () => {

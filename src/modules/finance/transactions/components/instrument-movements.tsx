@@ -80,6 +80,7 @@ function transactionRowTitle(
 ): string {
   return (
     category?.name?.trim() ||
+    transaction.merchantName ||
     transaction.merchant ||
     transaction.description ||
     "Movimiento"
@@ -91,10 +92,11 @@ function transactionRowDetail(
   category: FinanceCategory | undefined
 ): string {
   const date = formatTransactionDate(transaction.transactionDate)
-  if (!transaction.merchant || !category) {
+  const merchant = transaction.merchantName ?? transaction.merchant
+  if (!merchant || !category) {
     return date
   }
-  return `${transaction.merchant} · ${date}`
+  return `${merchant} · ${date}`
 }
 
 export function FinanceInstrumentMovements({

@@ -73,6 +73,7 @@ export const DEFAULT_MODULE_CONFIG_BY_SLUG: ModuleConfigBySlug = {
       weeklySummary: true,
       cardDueDate: true,
       unusualExpense: true,
+      recurringAlerts: true,
     },
     reports: {
       weeklySummaryDay: 1,

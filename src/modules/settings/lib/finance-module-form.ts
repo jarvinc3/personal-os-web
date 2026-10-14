@@ -170,6 +170,7 @@ export const financeModuleSchema = z
     weeklySummaryDay: z.enum(["0", "1", "2", "3", "4", "5", "6"]),
     cardDueDate: z.boolean(),
     unusualExpense: z.boolean(),
+    recurringAlerts: z.boolean(),
   })
   .superRefine((values, ctx) => {
     if (values.emailSyncScheduleMode === EMAIL_SYNC_SCHEDULE_MODES.INTERVAL) {
@@ -321,5 +322,6 @@ export function configToFinanceFormValues(
       "0" | "1" | "2" | "3" | "4" | "5" | "6",
     cardDueDate: config.notifications.cardDueDate,
     unusualExpense: config.notifications.unusualExpense,
+    recurringAlerts: config.notifications.recurringAlerts,
   }
 }

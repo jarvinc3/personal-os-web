@@ -2,6 +2,7 @@
 
 import { TransactionInstrument } from "@/src/modules/finance/transactions/components/transaction-instrument"
 import { TransactionStatusMark } from "@/src/modules/finance/transactions/components/transaction-status-mark"
+import { BrandLogo } from "@/src/modules/finance/shared/components/brand-logo"
 import type { TimelineMonth } from "@/src/modules/finance/shared/lib/group-transactions-timeline"
 import {
   formatFinanceDateTimeLabel,
@@ -207,7 +208,8 @@ export function FinanceMonthSection({
                         "#64748B"
                     const title = isTransfer
                       ? transferDirectionLabel(transaction)
-                      : (transaction.merchant ??
+                      : (transaction.merchantName ??
+                        transaction.merchant ??
                         transaction.description ??
                         transaction.accountName ??
                         "Movimiento")
@@ -241,7 +243,13 @@ export function FinanceMonthSection({
                     const rowBase = {
                       title,
                       description,
-                      leading: icon ? (
+                      leading: transaction.merchantLogoUrl ? (
+                        <BrandLogo
+                          name={title}
+                          logoUrl={transaction.merchantLogoUrl}
+                          size={28}
+                        />
+                      ) : icon ? (
                         <span>{icon}</span>
                       ) : isTransfer ? (
                         <ArrowLeftRightIcon className="size-5 text-info" />

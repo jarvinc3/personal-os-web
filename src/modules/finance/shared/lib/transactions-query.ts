@@ -28,6 +28,7 @@ export type FinanceTransactionsQuery = {
   accountId?: string
   cardId?: string
   categoryId?: string
+  merchantId?: string
   type?: FinanceTransactionType
   status?: FinanceTransactionStatus
   dateFrom?: string
@@ -41,6 +42,7 @@ const OPTIONAL_KEYS = [
   "accountId",
   "cardId",
   "categoryId",
+  "merchantId",
   "type",
   "status",
   "dateFrom",

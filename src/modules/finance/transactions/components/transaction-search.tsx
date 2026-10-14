@@ -133,7 +133,8 @@ export function FinanceTransactionSearch({
                     "#64748B"
                 const title = isTransfer
                   ? transferDirectionLabel(transaction)
-                  : (transaction.merchant ??
+                  : (transaction.merchantName ??
+                    transaction.merchant ??
                     transaction.description ??
                     transaction.accountName ??
                     "Movimiento")

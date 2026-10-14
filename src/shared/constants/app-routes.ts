@@ -65,6 +65,10 @@ export const APP_ROUTES = {
       `/finance/receivables/${receivableId}`,
     financeStatementImport: (importId: string) =>
       `/finance/statement-imports/${importId}`,
+    financeMerchants: "/finance/merchants",
+    financeMerchant: (merchantId: string) =>
+      `/finance/merchants/${merchantId}`,
+    financeSubscriptions: "/finance/subscriptions",
     settingsFinanceCurrencies: "/settings/finance/currencies",
   },
 } as const

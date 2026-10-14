@@ -1,6 +1,6 @@
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import type { ModuleAppNav, ModuleNavItem } from "@/src/shared/types/module-nav"
-import { ArrowLeftRight, LandmarkIcon, Target } from "lucide-react"
+import { ArrowLeftRight, LandmarkIcon, RepeatIcon, StoreIcon, Target } from "lucide-react"
 
 export const FINANCE_NAV_ITEMS: ModuleNavItem[] = [
   {
@@ -14,6 +14,11 @@ export const FINANCE_NAV_ITEMS: ModuleNavItem[] = [
     icon: Target,
   },
   {
+    label: "Suscripciones",
+    href: APP_ROUTES.app.financeSubscriptions,
+    icon: RepeatIcon,
+  },
+  {
     label: "Productos",
     href: APP_ROUTES.app.financeProducts,
     icon: LandmarkIcon,
@@ -21,6 +26,12 @@ export const FINANCE_NAV_ITEMS: ModuleNavItem[] = [
       APP_ROUTES.app.financeCategories,
       APP_ROUTES.app.financeSync,
     ],
+  },
+  {
+    label: "Comercios",
+    href: APP_ROUTES.app.financeMerchants,
+    icon: StoreIcon,
+    showInTabBar: false,
   },
 ]
 

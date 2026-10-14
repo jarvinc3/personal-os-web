@@ -531,7 +531,19 @@ function TransactionDetailScreenBody({
           )}
           <SummaryItem
             title="Comercio"
-            value={tx.merchant ?? "—"}
+            value={tx.merchantName ?? tx.merchant ?? "—"}
+            leading={
+              tx.merchantLogoUrl ? (
+                <BrandLogo
+                  name={tx.merchantName ?? tx.merchant ?? "Comercio"}
+                  logoUrl={tx.merchantLogoUrl}
+                  size={28}
+                />
+              ) : undefined
+            }
+            description={
+              tx.merchantName && tx.merchant ? tx.merchant : undefined
+            }
             isLast={false}
             className="px-3"
           />

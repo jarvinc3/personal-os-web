@@ -42,6 +42,7 @@ export type FinanceModuleConfig = {
     weeklySummary: boolean
     cardDueDate: boolean
     unusualExpense: boolean
+    recurringAlerts: boolean
   }
   reports: {
     /** 0 = domingo … 6 = sábado, en la zona horaria del usuario. */
