@@ -2,6 +2,12 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.25.0] - 2026-10-14
+
+### Agregado
+
+- El agente sabe desde qué pantalla o entidad se abrió. Los detalles de Finanzas registran su entidad (`useRegisterChatContext`), el botón de la cabecera abre el chat con el contexto en la URL y el chat muestra un chip "Contexto: …" que se puede quitar. Cubre movimiento y transferencia, cuenta, tarjeta, institución, préstamo, cuota, cobro, meta de ahorro, presupuesto y corte de tarjeta.
+
 ## [0.24.3] - 2026-10-14
 
 ### Cambiado
