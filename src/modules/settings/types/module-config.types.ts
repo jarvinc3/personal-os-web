@@ -45,6 +45,7 @@ export type FinanceModuleConfig = {
     recurringAlerts: boolean
     subscriptionReminders: boolean
     priceIncreaseAlerts: boolean
+    balanceIntegrity: boolean
   }
   /** Ajustes del gestor de suscripciones, dentro de Finanzas. */
   subscriptions: {

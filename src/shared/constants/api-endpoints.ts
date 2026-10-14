@@ -166,5 +166,7 @@ export const API_ENDPOINTS = {
     RECONCILIATION_RESTORE: (id: string) =>
       `/finance/reconciliations/${id}/restore`,
     RECONCILIATION_STATUS: "/finance/reconciliations/status",
+    INTEGRITY_CHECK: "/finance/integrity/check",
+    INTEGRITY_RECALCULATE: "/finance/integrity/recalculate",
   },
 } as const

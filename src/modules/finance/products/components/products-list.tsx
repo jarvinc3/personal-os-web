@@ -13,6 +13,12 @@ import { useInstitutions } from "@/src/modules/finance/shared/hooks/use-institut
 import { useLoans } from "@/src/modules/finance/shared/hooks/use-loans"
 import { useMonthExpenseTrend } from "@/src/modules/finance/shared/hooks/use-month-expense-trend"
 import { ReconciliationMonthStatus } from "@/src/modules/finance/reconciliation"
+import { BalanceIntegrityAlert } from "@/src/modules/finance/integrity"
+import { recalculationPayload } from "@/src/modules/finance/shared/lib/integrity"
+import {
+  useFinanceIntegrity,
+  useRecalculateBalance,
+} from "@/src/modules/finance/shared/hooks/use-integrity"
 import { monthKeyFromDate } from "@/src/modules/finance/shared/lib/month-window"
 import { useSheetListEntity } from "@/src/modules/finance/shared/hooks/use-sheet-entity"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
@@ -42,6 +48,7 @@ import {
 } from "@/src/shared/components/ui/empty"
 import { SummaryItem } from "@/src/shared/components/ui/summary"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
+import { appToast } from "@/src/shared/lib/app-toast"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { useQueryClient } from "@tanstack/react-query"
 import {
@@ -80,6 +87,8 @@ export function FinanceProductsList({
   const loansQuery = useLoans(enabled)
   const categoriesQuery = useCategories(enabled)
   const balanceSheetQuery = useBalanceSheet(enabled)
+  const integrityQuery = useFinanceIntegrity(enabled)
+  const recalculateBalance = useRecalculateBalance()
   const {
     open: openAccountSheet,
     sheetId: accountSheetId,
@@ -189,6 +198,19 @@ export function FinanceProductsList({
         month={monthKeyFromDate(new Date())}
         monthLabel={monthKeyFromDate(new Date())}
         display={moneyDisplay}
+      />
+
+      <BalanceIntegrityAlert
+        drifts={integrityQuery.data?.drifts ?? []}
+        display={moneyDisplay}
+        pending={recalculateBalance.isPending}
+        onRecalculate={(drift) => {
+          recalculateBalance.mutate(recalculationPayload(drift), {
+            onSuccess: () => appToast.success({ text1: "Saldo corregido" }),
+            onError: (error) =>
+              appToast.error({ text1: financeErrorMessage(error) }),
+          })
+        }}
       />
 
       <div>

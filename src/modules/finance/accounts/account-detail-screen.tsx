@@ -16,6 +16,15 @@ import {
   ReconciliationSheet,
   ReconciliationsSection,
 } from "@/src/modules/finance/reconciliation"
+import { BalanceIntegrityAlert } from "@/src/modules/finance/integrity"
+import {
+  findProductDrifts,
+  recalculationPayload,
+} from "@/src/modules/finance/shared/lib/integrity"
+import {
+  useFinanceIntegrity,
+  useRecalculateBalance,
+} from "@/src/modules/finance/shared/hooks/use-integrity"
 import { StatementImportButton } from "@/src/modules/finance/shared/components/statement-import-button"
 import { FINANCE_ACCOUNT_TYPE_LABEL } from "@/src/modules/finance/shared/constants/catalog"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
@@ -93,6 +102,8 @@ function AccountDetailScreenBody({ accountId }: AccountDetailScreenProps) {
   const accountsQuery = useAccounts(isEnabled)
   const institutionsQuery = useInstitutions(isEnabled)
   const cardsQuery = useCards(isEnabled)
+  const integrityQuery = useFinanceIntegrity(isEnabled, { accountId })
+  const recalculateBalance = useRecalculateBalance()
   const archiveAccount = useArchiveAccount()
   const deleteAccount = useDeleteAccount()
   const restoreAccount = useRestoreAccount()
@@ -146,6 +157,9 @@ function AccountDetailScreenBody({ accountId }: AccountDetailScreenProps) {
     ...display,
     currency: account?.currency ?? display.currency,
   }
+  const accountDrifts = findProductDrifts(integrityQuery.data?.drifts ?? [], {
+    accountId,
+  })
 
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [archiveConfirmOpen, setArchiveConfirmOpen] = useState(false)
@@ -323,6 +337,18 @@ function AccountDetailScreenBody({ accountId }: AccountDetailScreenProps) {
       </div>
 
       <div className="mx-4 -mt-4 flex flex-col gap-3 rounded-3xl bg-background">
+        <BalanceIntegrityAlert
+          drifts={accountDrifts}
+          display={accountDisplay}
+          pending={recalculateBalance.isPending}
+          onRecalculate={(drift) => {
+            recalculateBalance.mutate(recalculationPayload(drift), {
+              onSuccess: () => appToast.success({ text1: "Saldo corregido" }),
+              onError: (error) =>
+                appToast.error({ text1: financeErrorMessage(error) }),
+            })
+          }}
+        />
         <FinanceInstrumentMovements
           enabled={isEnabled}
           display={accountDisplay}

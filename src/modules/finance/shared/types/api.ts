@@ -129,6 +129,10 @@ export const FINANCE_BANK_CHARGES_QUERY_KEY = [
   ...FINANCE_QUERY_KEY,
   "bank-charges",
 ] as const
+export const FINANCE_INTEGRITY_QUERY_KEY = [
+  ...FINANCE_QUERY_KEY,
+  "integrity",
+] as const
 
 export type FinanceArchivedType = "institution" | "account" | "card" | "loan"
 

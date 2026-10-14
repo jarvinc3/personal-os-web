@@ -19,6 +19,7 @@ import {
 import { SummarySection, SummaryItem } from "@/src/shared/components/ui/summary"
 import { getModule } from "@/src/shared/constants/module-registry"
 import { useAccounts } from "@/src/modules/finance"
+import { FinanceIntegritySettingsSection } from "@/src/modules/finance"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
@@ -94,6 +95,11 @@ const FINANCE_NOTIFICATION_ROWS = [
     key: "priceIncreaseAlerts",
     label: "Subidas de precio",
     icon: TriangleAlert,
+  },
+  {
+    key: "balanceIntegrity",
+    label: "Saldos descuadrados",
+    icon: Coins,
   },
 ] as const satisfies readonly {
   key: keyof FinanceModuleConfig["notifications"]
@@ -244,6 +250,7 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
           recurringAlerts: values.recurringAlerts,
           subscriptionReminders: values.subscriptionReminders,
           priceIncreaseAlerts: values.priceIncreaseAlerts,
+          balanceIntegrity: values.balanceIntegrity,
         },
         reports: {
           weeklySummaryDay: Number(values.weeklySummaryDay),
@@ -804,6 +811,15 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
           />
         ))}
       </SummarySection>
+
+      <FinanceIntegritySettingsSection
+        enabled
+        display={{
+          currency: config.baseCurrency,
+          showCents: config.display.showCents,
+          compactNumbers: config.display.compactNumbers,
+        }}
+      />
 
       <Button
         type="submit"

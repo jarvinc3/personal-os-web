@@ -12,6 +12,15 @@ import {
   ReconciliationSheet,
   ReconciliationsSection,
 } from "@/src/modules/finance/reconciliation"
+import { BalanceIntegrityAlert } from "@/src/modules/finance/integrity"
+import {
+  findProductDrifts,
+  recalculationPayload,
+} from "@/src/modules/finance/shared/lib/integrity"
+import {
+  useFinanceIntegrity,
+  useRecalculateBalance,
+} from "@/src/modules/finance/shared/hooks/use-integrity"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
 import { useCardStatements } from "@/src/modules/finance/shared/hooks/use-card-statements"
@@ -97,6 +106,8 @@ function CardDetailScreenBody({ cardId }: CardDetailScreenProps) {
   const cardsQuery = useCards(isEnabled)
   const accountsQuery = useAccounts(isEnabled)
   const statementsQuery = useCardStatements(isEnabled, cardId)
+  const integrityQuery = useFinanceIntegrity(isEnabled, { cardId })
+  const recalculateBalance = useRecalculateBalance()
   const statements = infiniteListItems(statementsQuery.data)
   const { open: openCardBalanceSheet, setOpen: setOpenCardBalanceSheet } =
     useSheetParam(FINANCE_SHEET_KEYS.cardBalance)
@@ -119,6 +130,9 @@ function CardDetailScreenBody({ cardId }: CardDetailScreenProps) {
     currency: primaryBalance?.currency ?? display.currency,
   }
   const isCredit = card?.type === "CREDIT"
+  const cardDrifts = isCredit
+    ? findProductDrifts(integrityQuery.data?.drifts ?? [], { cardId })
+    : []
 
   useRegisterChatContext(
     card
@@ -275,6 +289,18 @@ function CardDetailScreenBody({ cardId }: CardDetailScreenProps) {
         </div>
       </div>
       <div className="mx-4 -mt-4 flex flex-col gap-3 rounded-3xl bg-background">
+        <BalanceIntegrityAlert
+          drifts={cardDrifts}
+          display={cardDisplay}
+          pending={recalculateBalance.isPending}
+          onRecalculate={(drift) => {
+            recalculateBalance.mutate(recalculationPayload(drift), {
+              onSuccess: () => appToast.success({ text1: "Saldo corregido" }),
+              onError: (error) =>
+                appToast.error({ text1: financeErrorMessage(error) }),
+            })
+          }}
+        />
         {isCredit ? (
           <Tabs
             className="flex w-full flex-col gap-4 p-1.5"

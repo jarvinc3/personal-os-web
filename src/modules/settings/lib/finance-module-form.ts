@@ -173,6 +173,7 @@ export const financeModuleSchema = z
     recurringAlerts: z.boolean(),
     subscriptionReminders: z.boolean(),
     priceIncreaseAlerts: z.boolean(),
+    balanceIntegrity: z.boolean(),
     subscriptionReminderDays: z.string(),
     subscriptionGroupBy: z.enum(["category", "provider", "none"]),
   })
@@ -352,6 +353,7 @@ export function configToFinanceFormValues(
     recurringAlerts: config.notifications.recurringAlerts,
     subscriptionReminders: config.notifications.subscriptionReminders,
     priceIncreaseAlerts: config.notifications.priceIncreaseAlerts,
+    balanceIntegrity: config.notifications.balanceIntegrity,
     subscriptionReminderDays: String(config.subscriptions.reminderDaysBefore),
     subscriptionGroupBy: config.subscriptions.groupBy,
   }

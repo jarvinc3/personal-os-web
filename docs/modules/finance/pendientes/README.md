@@ -1,6 +1,6 @@
 # Finanzas: pendientes
 
-Specs de lo que falta tras la alineación de dominio (fases 01-09 y partes 1-4, ya implementadas y descritas en [../dominio.md](../dominio.md)). Estado al 19 oct 2026 (web `v0.29.1`, back `v0.27.2`). Cada pendiente se implementa en una sesión y se revisa en otra, que publica sus correcciones como PATCH.
+Specs de lo que falta tras la alineación de dominio (fases 01-09 y partes 1-4, ya implementadas y descritas en [../dominio.md](../dominio.md)). Estado al 20 oct 2026 (web `v0.31.0`, back `v0.29.0`). Cada pendiente se implementa en una sesión y se revisa en otra, que publica sus correcciones como PATCH.
 
 | #   | Spec                                                                                                  | Tamaño | Repos      | Estado        | Versiones                                  |
 | --- | ----------------------------------------------------------------------------------------------------- | ------ | ---------- | ------------- | ------------------------------------------ |
@@ -13,8 +13,8 @@ Specs de lo que falta tras la alineación de dominio (fases 01-09 y partes 1-4, 
 | 07  | [Comercios y pagos recurrentes](./07-comercios-recurrentes-suscripciones.md)                          | L      | back + web | `implemented` | web v0.27.0–v0.27.2 · back v0.25.0–v0.25.2 |
 | 08  | [Suscripciones](./08-suscripciones.md)                                                                | L      | back + web | `implemented` | web v0.28.0–v0.28.2 · back v0.26.0–v0.26.1 |
 | 09  | [Conciliación con ajustes](./09-conciliacion-ajustes.md)                                              | M      | back + web | `implemented` | web v0.29.0–v0.29.1 · back v0.27.0–v0.27.2 |
-| 10  | [Rediseño de la vista Suscripciones](./10-suscripciones-rediseno.md)                                  | L      | back + web | `planned`     | prevista web v0.30.0 · back v0.28.0        |
-| 11  | [Integridad de saldos](./11-integridad-saldos.md)                                                     | M      | back + web | `planned`     | prevista web v0.31.0 · back v0.29.0        |
+| 10  | [Rediseño de la vista Suscripciones](./10-suscripciones-rediseno.md)                                  | L      | back + web | `implemented` | web v0.30.0–v0.30.2 · back v0.28.0–v0.28.2 |
+| 11  | [Integridad de saldos](./11-integridad-saldos.md)                                                     | M      | back + web | `implemented` | web v0.31.0 · back v0.29.0                 |
 | 12  | [Tarjetas prácticas](./12-tarjetas-practicas.md)                                                      | M      | back + web | `planned`     | prevista web v0.32.0 · back v0.30.0        |
 | 13  | [Decimales exactos](./13-decimales-exactos.md)                                                        | S      | back + web | `planned`     | prevista web v0.33.0 · back v0.31.0        |
 

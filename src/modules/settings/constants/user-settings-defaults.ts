@@ -76,6 +76,7 @@ export const DEFAULT_MODULE_CONFIG_BY_SLUG: ModuleConfigBySlug = {
       recurringAlerts: true,
       subscriptionReminders: true,
       priceIncreaseAlerts: true,
+      balanceIntegrity: true,
     },
     subscriptions: {
       reminderDaysBefore: 3,

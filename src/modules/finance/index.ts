@@ -44,6 +44,10 @@ export {
 } from "./transactions/transfer-form-screen"
 
 export { BrandLogo } from "./shared/components/brand-logo"
+export {
+  BalanceIntegrityAlert,
+  FinanceIntegritySettingsSection,
+} from "./integrity"
 export { CurrencyFlag } from "./shared/components/currency-flag"
 export { CurrencyPickerSheet } from "./shared/components/pickers/currency-picker-sheet"
 

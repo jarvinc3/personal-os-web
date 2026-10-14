@@ -1,6 +1,6 @@
 # Finanzas: cómo funciona hoy
 
-Estado al 14 oct 2026: web v0.25.0 y back v0.23.0. Este documento resume el dominio y los flujos principales tal como están implementados. El contrato HTTP completo vive en `personal-os-back/docs/modules/finance/`. Lo pendiente está en [pendientes/](./pendientes/README.md).
+Estado al 20 oct 2026: web v0.31.0 y back v0.29.0. Este documento resume el dominio y los flujos principales tal como están implementados. El contrato HTTP completo vive en `personal-os-back/docs/modules/finance/`. Lo pendiente está en [pendientes/](./pendientes/README.md).
 
 Contexto: bancos dominicanos (BHD, Popular, Qik), moneda principal DOP (RD$).
 
@@ -65,6 +65,17 @@ A fin de mes el saldo de la app casi nunca coincide con el banco (impuestos, com
 4. `POST /finance/reconciliations` crea el cierre y un movimiento de ajuste por línea. Los ajustes mueven el saldo pero no aparecen en el tablero ni en presupuestos.
 5. El historial de "Conciliaciones" vive en el detalle; el producto aparece como conciliado o pendiente del mes en Productos. En Planificación, la tarjeta "Cargos bancarios" suma los ajustes por mes, banco y tipo.
 6. Borrar el último cierre lo revierte (toast "Deshacer" y papelera); restaurarlo no duplica el efecto.
+
+### Integridad interna de saldos (invariante I1)
+
+El saldo guardado de cada cuenta y tarjeta debe ser siempre la suma de sus movimientos confirmados. No es una conciliación contra el banco: es la app comprobando que no se contradice a sí misma.
+
+1. `GET /finance/integrity/check` compara el saldo guardado con el recalculado desde el inicio (saldo inicial cero más los movimientos `CONFIRMED`; pendientes y revertidos no cuentan) y registra cada desviación abierta en `fin_balance_drifts`. Con `?accountId=` o `?cardId=` se limita a un producto.
+2. `POST /finance/integrity/recalculate` corrige el saldo guardado a la suma de los movimientos y cierra la desviación. No crea movimientos; el recálculo va en la misma transacción que la corrección.
+3. Un job nocturno (`BalanceIntegrityScheduler`) recorre los productos de cada usuario y emite `FINANCE_BALANCE_DRIFT_DETECTED` por desviación nueva o cambiada. La notificación se controla con `notifications.balanceIntegrity`.
+4. En la web, el detalle de cuenta o tarjeta de crédito (las de débito usan su cuenta) muestra un banner con saldo guardado, esperado y diferencia, más "Recalcular" con confirmación. Productos lista las desviaciones abiertas y Ajustes → Finanzas tiene "Verificar ahora".
+
+La diferencia con el banco sigue siendo cosa de la conciliación ([09](./pendientes/09-conciliacion-ajustes.md)); una desviación de I1 se recalcula, no se concilia.
 
 ### Préstamos
 

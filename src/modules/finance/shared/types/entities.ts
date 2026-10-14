@@ -993,3 +993,29 @@ export type FinanceBankCharges = {
     count: number
   }>
 }
+
+/** Open deviation between a product's stored balance and its movements (I1). */
+export type FinanceBalanceDrift = {
+  id: string
+  accountId: string | null
+  cardId: string | null
+  currency: string
+  name: string | null
+  storedBalance: string
+  expectedBalance: string
+  difference: string
+  detectedAt: string
+  resolvedAt: string | null
+}
+
+export type FinanceIntegrityCheck = {
+  drifts: FinanceBalanceDrift[]
+}
+
+export type FinanceBalanceRecalculation = {
+  corrected: boolean
+  accountId: string | null
+  cardId: string | null
+  currency: string
+  balance: string
+}

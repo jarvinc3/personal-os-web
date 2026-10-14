@@ -48,6 +48,7 @@ const validFinance = {
   recurringAlerts: true,
   subscriptionReminders: true,
   priceIncreaseAlerts: true,
+  balanceIntegrity: true,
   subscriptionReminderDays: "3",
   subscriptionGroupBy: "none" as const,
 }
