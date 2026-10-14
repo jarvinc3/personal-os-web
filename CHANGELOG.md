@@ -2,6 +2,12 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.28.1] - 2026-10-14
+
+### Cambiado
+
+- El formulario de suscripción usa `undefined` como «sin borrador» y deja de mezclar `null` y `undefined` para el mismo caso. Sin cambio de comportamiento.
+
 ## [0.28.0] - 2026-10-14 - Suscripciones
 
 ### Agregado
