@@ -1,4 +1,4 @@
-# 11 · Tarjetas prácticas
+# 12 · Tarjetas prácticas
 
 > Completa las tarjetas para el uso diario sin replicar al banco: crédito disponible, fechas de corte y pago, y corte automático. **No** se calculan intereses: los cobra el banco y entran por el ajuste de conciliación del [09](./09-conciliacion-ajustes.md) (`INTERES`).
 
@@ -46,4 +46,4 @@
 
 ## Versión esperada
 
-MINOR: web v0.31.0 / back v0.29.0. Revisión como PATCH.
+MINOR: web v0.32.0 / back v0.30.0. Revisión como PATCH.

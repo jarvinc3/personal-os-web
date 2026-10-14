@@ -1,4 +1,4 @@
-# 10 · Integridad de saldos
+# 11 · Integridad de saldos
 
 > La spec de alineación fija el invariante **I1**: el saldo de cada cuenta y tarjeta es siempre la suma de sus movimientos confirmados. Hoy el saldo se guarda y se suma o resta en cada movimiento, y nada verifica el invariante. Este pendiente garantiza que la app no se contradiga a sí misma; la diferencia con el banco la resuelve el [09](./09-conciliacion-ajustes.md).
 
@@ -53,4 +53,4 @@
 
 ## Versión esperada
 
-MINOR: web v0.30.0 / back v0.28.0. Revisión como PATCH.
+MINOR: web v0.31.0 / back v0.29.0. Revisión como PATCH.

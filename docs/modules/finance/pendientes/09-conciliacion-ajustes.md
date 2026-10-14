@@ -36,7 +36,7 @@
 
 - Montos en `Decimal`; la suma de los ajustes debe ser exactamente la diferencia (si no, 422).
 - Los ajustes nacen `CONFIRMED`, con tipo ajuste, fecha `asOfDate` y vínculo a la conciliación; no aparecen en el tablero, sí en el historial del producto y en "Cargos bancarios".
-- `appBalance` es el saldo confirmado a `asOfDate` (reutiliza el recálculo del pendiente 10 si ya existe; si no, el saldo guardado).
+- `appBalance` es el saldo confirmado a `asOfDate` (reutiliza el recálculo del pendiente 11 si ya existe; si no, el saldo guardado).
 - Borrar una conciliación (solo la última del producto) revierte sus ajustes vía diario de borrados y se puede restaurar sin doble efecto (fase 9).
 - Multimoneda: una conciliación por moneda del producto; tarjetas con dos monedas se concilian por separado.
 

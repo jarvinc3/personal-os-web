@@ -1,4 +1,4 @@
-# 12 · Decimales exactos de punta a punta
+# 13 · Decimales exactos de punta a punta
 
 > Lo que se guarda ya usa `Decimal` y la API devuelve strings (ADR-002), pero analytics, el balance general y las conversiones de moneda convierten a `Number`. Mejora técnica pequeña para evitar errores de redondeo en totales y en cambios de moneda.
 
@@ -38,4 +38,4 @@
 
 ## Versión esperada
 
-MINOR (cambio de comportamiento en cálculos visibles): web v0.32.0 / back v0.30.0. Revisión como PATCH.
+MINOR (cambio de comportamiento en cálculos visibles): web v0.33.0 / back v0.31.0. Revisión como PATCH.
