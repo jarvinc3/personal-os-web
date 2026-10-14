@@ -343,7 +343,12 @@ export function LoanEditForm({
           />
         </SummarySection>
 
-        <SummarySection title="Detalles opcionales" icon={CircleAlert} collapsible defaultOpen>
+        <SummarySection
+          title="Detalles opcionales"
+          icon={CircleAlert}
+          collapsible
+          defaultOpen
+        >
           <Controller
             control={control}
             name="interestRatePercent"

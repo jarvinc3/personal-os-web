@@ -272,7 +272,11 @@ export function ReceivableSheet({
           />
         </SummarySection>
 
-        <SummarySection title="Detalles opcionales" icon={CircleAlert} collapsible>
+        <SummarySection
+          title="Detalles opcionales"
+          icon={CircleAlert}
+          collapsible
+        >
           <Controller
             control={control}
             name="description"

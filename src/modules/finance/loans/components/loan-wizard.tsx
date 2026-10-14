@@ -674,7 +674,11 @@ export function LoanWizard({
               />
             </SummarySection>
 
-            <SummarySection title="Detalles opcionales" icon={CircleAlert} collapsible>
+            <SummarySection
+              title="Detalles opcionales"
+              icon={CircleAlert}
+              collapsible
+            >
               <Controller
                 control={control}
                 name="notes"

@@ -32,7 +32,13 @@ import { appToast } from "@/src/shared/lib/app-toast"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
 import { usePicker } from "@/src/shared/hooks/use-picker"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { CircleAlert, NotebookPenIcon, PiggyBankIcon, TargetIcon, XIcon } from "lucide-react"
+import {
+  CircleAlert,
+  NotebookPenIcon,
+  PiggyBankIcon,
+  TargetIcon,
+  XIcon,
+} from "lucide-react"
 import { useEffect, useMemo } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import {
@@ -276,7 +282,11 @@ export function SavingsGoalSheet({
           ) : null}
         </SummarySection>
 
-        <SummarySection title="Detalles opcionales" icon={CircleAlert} collapsible>
+        <SummarySection
+          title="Detalles opcionales"
+          icon={CircleAlert}
+          collapsible
+        >
           <Controller
             control={control}
             name="description"

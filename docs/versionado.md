@@ -32,12 +32,12 @@ git tag v0.20.1
 git push origin v0.20.1
 ```
 
-| Cambio | Antes | Después |
-| --- | --- | --- |
-| Corrige el cálculo del saldo de una tarjeta | `0.20.0` | `0.20.1` |
-| Ajusta colores y espaciados de Planificación | `0.20.1` | `0.20.2` |
-| Agrega importación de estados de cuenta | `0.20.2` | `0.21.0` |
-| Agrega el módulo de Agenda | `0.21.0` | `0.22.0` |
+| Cambio                                             | Antes    | Después  |
+| -------------------------------------------------- | -------- | -------- |
+| Corrige el cálculo del saldo de una tarjeta        | `0.20.0` | `0.20.1` |
+| Ajusta colores y espaciados de Planificación       | `0.20.1` | `0.20.2` |
+| Agrega importación de estados de cuenta            | `0.20.2` | `0.21.0` |
+| Agrega el módulo de Agenda                         | `0.21.0` | `0.22.0` |
 | Cambia un endpoint de forma incompatible (en beta) | `0.22.0` | `0.23.0` |
 
 ## Regla 2: marca de beta

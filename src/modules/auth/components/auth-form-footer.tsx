@@ -39,7 +39,11 @@ export function AuthFormFooter({
         onClick={onPrimaryPress}
       >
         {isPrimaryPending ? primaryPendingLabel : primaryLabel}
-        {isPrimaryPending ? <Spinner data-icon="inline-start" /> : <ChevronRightIcon className="size-4 shrink-0" />}
+        {isPrimaryPending ? (
+          <Spinner data-icon="inline-start" />
+        ) : (
+          <ChevronRightIcon className="size-4 shrink-0" />
+        )}
       </Button>
 
       <Separator />

@@ -66,8 +66,18 @@ type FinancePlanningListProps = {
 
 const PLANNING_TAB_ITEMS = [
   { value: "savings", label: "Ahorros", icon: PiggyBankIcon, color: "#16a34a" },
-  { value: "budgets", label: "Presupuestos", icon: ChartPieIcon, color: "#8b5cf6" },
-  { value: "receivables", label: "Cobros", icon: HandshakeIcon, color: "#3b82f6" },
+  {
+    value: "budgets",
+    label: "Presupuestos",
+    icon: ChartPieIcon,
+    color: "#8b5cf6",
+  },
+  {
+    value: "receivables",
+    label: "Cobros",
+    icon: HandshakeIcon,
+    color: "#3b82f6",
+  },
   { value: "loans", label: "Préstamos", icon: HandCoinsIcon, color: "#f59e0b" },
 ] as const
 
@@ -199,9 +209,23 @@ export function FinancePlanningList({
           {PLANNING_TAB_ITEMS.map(({ value, label, icon: Icon, color }) => {
             const isSelected = tab === value
             return (
-              <TabsTrigger key={value} value={value} className="rounded-xl py-2" style={{ backgroundColor: isSelected ? color : undefined }}>
-                <Icon data-icon="inline-start" className="size-5" style={{ color: isSelected ? "#fff" : color }} />
-                <span className={cn("sr-only md:not-sr-only text-foreground")} style={{ color: isSelected ? "#fff" : undefined }}>{label}</span>
+              <TabsTrigger
+                key={value}
+                value={value}
+                className="rounded-xl py-2"
+                style={{ backgroundColor: isSelected ? color : undefined }}
+              >
+                <Icon
+                  data-icon="inline-start"
+                  className="size-5"
+                  style={{ color: isSelected ? "#fff" : color }}
+                />
+                <span
+                  className={cn("sr-only text-foreground md:not-sr-only")}
+                  style={{ color: isSelected ? "#fff" : undefined }}
+                >
+                  {label}
+                </span>
               </TabsTrigger>
             )
           })}
