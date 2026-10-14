@@ -2,6 +2,13 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.23.1] - 2026-10-14
+
+### Corregido
+
+- Al conectar Gmail, el resultado de "Sincronizar ahora" se muestra también después de guardar y pasar al resumen.
+- Apagar la sincronización automática en el paso de onboarding ya no la vuelve a encender al guardar.
+
 ## [0.23.0] - 2026-10-14
 
 ### Agregado
