@@ -2,6 +2,17 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.29.1] - 2026-10-19
+
+### Corregido
+
+- La tarjeta «Cargos bancarios» incluye el desglose por banco, además del gráfico mensual y el desglose por tipo.
+- Las tarjetas de débito dejan de ofrecer «Conciliar» y «Conciliaciones»: su saldo se cierra desde la cuenta enlazada.
+
+### Cambiado
+
+- Specs del rango anual de cargos y de la magnitud de un monto.
+
 ## [0.29.0] - 2026-10-19 - Conciliación
 
 ### Agregado
