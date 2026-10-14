@@ -2,6 +2,15 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.29.0] - 2026-10-19 - Conciliación
+
+### Agregado
+
+- Sheet «Conciliar» en el detalle de cuenta y de tarjeta: saldo real, fecha de corte, diferencia en vivo y reparto en líneas por tipo con la sugerencia precargada.
+- Sección «Conciliaciones» con el historial del producto, borrado del último cierre y Deshacer.
+- Indicador del mes en Productos (productos conciliados y pendientes) y tarjeta «Cargos bancarios» en Planificación con el desglose mensual, por banco y por tipo.
+- Tipos, hooks, endpoints y validación de la suma de los ajustes.
+
 ## [0.28.2] - 2026-10-14
 
 ### Corregido
