@@ -2,6 +2,20 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.27.0] - 2026-10-14 - Comercios y suscripciones detectadas
+
+### Agregado
+
+- Comercios: cada movimiento se asocia a un comercio canónico ("UBER *TRIP 1234" y "Uber Eats" caen en Uber). Pantalla `/finance/merchants` con el gasto del mes y detalle con sus movimientos, logo, renombrar y unir comercios, y categoría por defecto.
+- Suscripciones: pantalla `/finance/subscriptions` (en el tab bar principal, entre Planificación y Productos) con los cobros recurrentes detectados por confirmar o descartar, los confirmados con próximo cobro, monto promedio y costo mensual y anual, y alta manual.
+- El formulario de movimiento autocompleta el comercio y sugiere su categoría; la fila y el detalle muestran el comercio con su logo.
+- Ajuste "Cobros recurrentes" en la configuración de Finanzas; las alertas de subida de precio, cobro no llegado y próximo cobro respetan ese interruptor.
+- Atajo a Comercios en Productos; atajo a Suscripciones en Planificación.
+
+### Cambiado
+
+- `FINANCE_APP_NAV` incluye Comercios (fuera del tab bar) y Suscripciones (dentro, entre Planificación y Productos).
+
 ## [0.26.3] - 2026-10-14
 
 ### Cambiado
