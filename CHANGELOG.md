@@ -2,6 +2,16 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.27.1] - 2026-10-14
+
+### Corregido
+
+- Suscripciones vuelve a quedar fuera del tab bar principal, con atajo en Planificación. El 07 entrega comercios y la detección de recurrentes; el gestor completo de suscripciones (tablas propias, pagos y recordatorios) pasa al pendiente 08 y no se implementa ahora.
+
+### Cambiado
+
+- La spec 07 se limita a comercios y recurrentes; el gestor de suscripciones se documenta en `docs/modules/finance/pendientes/08-suscripciones.md`.
+
 ## [0.27.0] - 2026-10-14 - Comercios y suscripciones detectadas
 
 ### Agregado
