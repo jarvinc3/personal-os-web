@@ -2,6 +2,19 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.27.2] - 2026-10-14
+
+### Corregido
+
+- El globo de la dona del bloque de chat `chart` formatea el monto con la moneda del bloque, igual que las barras y la línea.
+- La tarjeta de un recurrente confirmado muestra el costo anual además del mensual.
+- El total mensual de recurrentes confirmados solo aparece cuando la lista está completa, para no mostrar una suma parcial.
+
+### Cambiado
+
+- Los datos del bloque de chat `chart` viven en un helper puro cubierto con specs (serie, colores y título).
+- `contracts/consumed-api.md` documenta las superficies `merchants` y `recurring`; `dominio.md` y `status.md` dejan de decir que el gráfico no tiene componente.
+
 ## [0.27.1] - 2026-10-14
 
 ### Corregido
