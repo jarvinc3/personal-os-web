@@ -14,11 +14,6 @@ export const FINANCE_NAV_ITEMS: ModuleNavItem[] = [
     icon: Target,
   },
   {
-    label: "Suscripciones",
-    href: APP_ROUTES.app.financeSubscriptions,
-    icon: RepeatIcon,
-  },
-  {
     label: "Productos",
     href: APP_ROUTES.app.financeProducts,
     icon: LandmarkIcon,
@@ -31,6 +26,12 @@ export const FINANCE_NAV_ITEMS: ModuleNavItem[] = [
     label: "Comercios",
     href: APP_ROUTES.app.financeMerchants,
     icon: StoreIcon,
+    showInTabBar: false,
+  },
+  {
+    label: "Suscripciones",
+    href: APP_ROUTES.app.financeSubscriptions,
+    icon: RepeatIcon,
     showInTabBar: false,
   },
 ]
