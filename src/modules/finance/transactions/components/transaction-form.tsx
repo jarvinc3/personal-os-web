@@ -92,6 +92,16 @@ function destinationFromTransaction(tx: FinanceTransaction | null): string {
   return CATALOG_NONE
 }
 
+function movementTypeForTransaction(
+  transaction: FinanceTransaction | null,
+  initialType: MovementType
+): MovementType {
+  if (!transaction) {
+    return initialType
+  }
+  return transaction.type === "CREDIT" ? "CREDIT" : "DEBIT"
+}
+
 type ToFormValuesInput = {
   transaction: FinanceTransaction | null
   initialType: MovementType
@@ -108,12 +118,7 @@ function toFormValues({
   prefill,
 }: ToFormValuesInput): TransactionFormValues {
   return {
-    type:
-      transaction?.type === "CREDIT"
-        ? "CREDIT"
-        : transaction
-          ? "DEBIT"
-          : initialType,
+    type: movementTypeForTransaction(transaction, initialType),
     amount: transaction?.amount ?? prefill.amount,
     currency: transaction?.currency ?? (prefill.currency || defaultCurrency),
     transactionDate: transaction
