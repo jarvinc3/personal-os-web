@@ -2,6 +2,16 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.25.1] - 2026-10-14
+
+### Corregido
+
+- Cerrar la hoja de cuota de préstamo o de corte de tarjeta ya no borra el contexto del chat: el botón del agente vuelve a abrir con la entidad de la pantalla de abajo.
+
+### Cambiado
+
+- El registro de contextos del chat guarda una entrada por consumidor montado y muestra la más nueva. Sin cambios de comportamiento aparte del arreglo anterior.
+
 ## [0.25.0] - 2026-10-14
 
 ### Agregado
