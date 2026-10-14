@@ -77,3 +77,69 @@
 - [ ] El resumen suma multimoneda usando la moneda base del usuario.
 - [ ] `PAUSED` no genera recordatorios ni empareja pagos; `CANCELLED` conserva el historial.
 - [ ] Migración sin drift; specs del cálculo de fechas, del costo equivalente y del emparejado.
+
+## Ajustes: fusión con Finanzas
+
+Suscripciones vive dentro de Finanzas, así que su vista de ajustes independiente desaparece y sus opciones pasan a una sección «Suscripciones» dentro de los ajustes de Finanzas (`/settings/finance`).
+
+### Estado actual (a retirar)
+
+Web:
+
+- Ruta `app/(app)/settings/subscriptions/page.tsx` → `SubscriptionsModuleSettingsScreen`.
+- `src/modules/settings/subscriptions-module-settings-screen.tsx` (export en `src/modules/settings/index.ts`).
+- `src/modules/settings/components/module-settings/subscriptions-module-settings-form.tsx`: fila de activar/desactivar módulo (`ModuleSheetEnableRow`), moneda (`defaultCurrency`), agrupar por (`groupBy`: category/provider/none), avisos de renovación (`notifications.renewalReminders`) y subidas de precio (`notifications.priceIncreaseAlerts`).
+- `src/modules/settings/lib/subscriptions-module-form.ts` y su spec.
+- `SubscriptionsModuleConfig` y `ModuleConfigBySlug.subscriptions` en `src/modules/settings/types/module-config.types.ts`; defaults en `src/modules/settings/constants/user-settings-defaults.ts` (incluye `renewalReminderDays: [7, 1]`, que hoy no se edita en la UI).
+- `subscriptions` en `src/modules/settings/constants/module-sheet-keys.ts`, en `src/shared/constants/module-registry.ts` (id `7677a8ab-…`, order 3) y en `ModuleNavSlug` (`src/shared/types/module-nav.ts`). La lista de módulos de ajustes (`profile-ui.tsx`) sale del registro, por eso aparece la entrada.
+- Docs: `docs/modules/settings/overview.md` y `rules/modules.md` (BR-SET-002) listan el slug.
+
+Back:
+
+- `subscriptions` en `packages/users/src/domain/defaults/user-settings-defaults.ts` (deriva `MODULE_SLUGS`, valida `PATCH /users/me/modules/:slug`).
+- `packages/ai-agent`: `MODULE_CONTEXT` (`prompts/module-context.ts`), `system-base.ts` y la descripción de `update_module_config`/`toggle_module` en `tool.registry.ts`.
+- Fila en la tabla `modules` y filas `user_modules` con slug `subscriptions` (seed/migración).
+- Docs: `CONTEXT.md`, `AGENTS.md`, `docs/README.md`, `docs/modules/README.md`, `docs/modules/users/*`, `docs/modules/ai-agent/*`, `postman.json`.
+
+### Nueva sección «Suscripciones» en ajustes de Finanzas
+
+Se agrega a `FinanceModuleConfig` (web y back) un bloque `subscriptions`:
+
+| Opción | Clave nueva | Origen | Default |
+| --- | --- | --- | --- |
+| Días de recordatorio por defecto | `subscriptions.reminderDaysBefore` (número, 0-30) | `renewalReminderDays` (se toma el mayor) | `3` |
+| Avisos de renovación | `notifications.subscriptionReminders` | `notifications.renewalReminders` | `true` |
+| Subidas de precio | `notifications.priceIncreaseAlerts` | `notifications.priceIncreaseAlerts` | `true` |
+| Recurrentes detectados | `notifications.recurringAlerts` (existente, se reutiliza) | — | `true` |
+| Agrupar por | `subscriptions.groupBy` (`category`/`provider`/`none`) | `groupBy` | `none` |
+| Moneda de totales | no se crea clave: se usa la moneda base de Finanzas | `defaultCurrency` se descarta | — |
+
+- El nuevo formulario de suscripciones toma `reminderDaysBefore` como valor inicial; cada suscripción puede sobrescribirlo.
+- El job de recordatorios exige `subscriptionReminders` y la alerta de subida de precio exige `priceIncreaseAlerts`; ambos respetan los ajustes globales de notificaciones.
+- No hay fila de «activar módulo»: Suscripciones se activa con Finanzas.
+
+### Migración de claves
+
+Los datos son de prueba, así que no hay backfill. Se mapean las claves en los defaults y en el schema de config de finanzas (bump de `version`), la config vieja de `user_modules` slug `subscriptions` se ignora y una migración Prisma borra esas filas y la fila de `modules`. `PATCH /users/me/modules/subscriptions` responde 400 (slug inexistente).
+
+### Navegación y retiro del módulo
+
+- Eliminar la ruta, pantalla, formulario, schema, spec, tipo, defaults, sheet key, entrada del registro y `ModuleNavSlug` listados arriba; `/settings/subscriptions` redirige a `/settings/finance#suscripciones` (redirect en `next.config` o `page.tsx` con `redirect`).
+- La lista de módulos de ajustes ya no muestra Suscripciones; landing (`modules-data.ts`) lo presenta como parte de Finanzas.
+- Back: quitar `subscriptions` de `MODULE_SLUGS`, `MODULE_CONTEXT`, prompts y descripciones de tools del agente; el contexto de suscripciones pasa al contexto de finanzas.
+- Actualizar los docs listados (settings, users, ai-agent, README, CONTEXT, AGENTS, postman).
+
+### Criterios de aceptación (ajustes)
+
+- [ ] `/settings/finance` muestra la sección «Suscripciones» con días de recordatorio, avisos de renovación, subidas de precio, recurrentes detectados y agrupar por; guarda en la config de finanzas.
+- [ ] `/settings/subscriptions` redirige a `/settings/finance` y no existe ninguna entrada «Suscripciones» en la lista de módulos.
+- [ ] `subscriptions` no aparece en `MODULE_SLUGS`, `module-registry`, `ModuleNavSlug` ni `MODULE_CONTEXT`; `PATCH /users/me/modules/subscriptions` devuelve 400.
+- [ ] La migración elimina las filas `modules`/`user_modules` de `subscriptions` sin drift.
+- [ ] El recordatorio por defecto del formulario de alta usa `reminderDaysBefore`; desactivar `subscriptionReminders` o `priceIncreaseAlerts` suprime esas notificaciones.
+- [ ] Los totales usan la moneda base de Finanzas.
+- [ ] `rg subscriptions-module` no devuelve resultados en la web.
+
+### Tests (ajustes)
+
+- Web: spec de `finance-module-form` con los campos nuevos (rango 0-30, defaults, mapeo a payload); test de la sección en el formulario de ajustes de Finanzas; test del redirect de `/settings/subscriptions`; test de que la lista de módulos no incluye `subscriptions`.
+- Back: spec de defaults/validación de config de finanzas con el bloque `subscriptions`; spec de `PATCH /users/me/modules/subscriptions` → 400; spec del job de recordatorios y de la alerta de subida de precio respetando los toggles; spec de que `MODULE_CONTEXT` y las tools ya no aceptan el slug.
