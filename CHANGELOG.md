@@ -2,6 +2,17 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.24.0] - 2026-10-14
+
+### Agregado
+
+- Las listas que crecen cargan solas al hacer scroll, con un botón "Cargar más" de respaldo: cuotas de préstamo, cobros de un cobro, aportes de una meta, correos pendientes y procesados, movimientos de un presupuesto, cortes de tarjeta, eliminados de la papelera, presupuestos e historial de instrumento. Comparten el hook `useInfiniteFinanceList` y el componente `InfiniteListSentinel`.
+
+### Cambiado
+
+- El plan de amortización usa la proyección completa de `GET /finance/loans/:id/schedule` en vez de la lista paginada de cuotas.
+- La papelera deja de mostrar un contador de eliminados: con cursor no hay total.
+
 ## [0.23.1] - 2026-10-14
 
 ### Corregido
