@@ -52,6 +52,9 @@ export function StatementImportButton({
       if (error instanceof ApiError && error.code === PASSWORD_REQUIRED_CODE) {
         setLockedFile(file)
         setPasswordOpen(true)
+        if (pdfPassword) {
+          appToast.error({ text1: "La clave no es correcta." })
+        }
         return
       }
       appToast.error({ text1: financeErrorMessage(error) })

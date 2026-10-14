@@ -7,7 +7,10 @@ import {
   apiPost,
   apiPostForm,
 } from "@/src/config/api-client"
-import { FINANCE_STATEMENT_IMPORTS_QUERY_KEY } from "@/src/modules/finance/shared/types/api"
+import {
+  FINANCE_QUERY_KEY,
+  FINANCE_STATEMENT_IMPORTS_QUERY_KEY,
+} from "@/src/modules/finance/shared/types/api"
 import type {
   FinanceStatementImport,
   FinanceStatementLineDecision,
@@ -97,6 +100,7 @@ export function useApplyStatementImport(importId: string) {
       ),
     onSuccess: (updated) => {
       queryClient.setQueryData(importQueryKey(importId), updated)
+      void queryClient.invalidateQueries({ queryKey: FINANCE_QUERY_KEY })
     },
   })
 }
