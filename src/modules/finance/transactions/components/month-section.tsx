@@ -5,6 +5,10 @@ import { TransactionStatusMark } from "@/src/modules/finance/transactions/compon
 import type { TimelineMonth } from "@/src/modules/finance/shared/lib/group-transactions-timeline"
 import { formatFinanceTimeLabel } from "@/src/modules/finance/shared/lib/ledger-form"
 import {
+  FINANCE_REVERSAL_PARTIAL_LABEL,
+  type ReversalGroup,
+} from "@/src/modules/finance/transactions/lib/group-reversals"
+import {
   formatFinanceMoney,
   type FinanceMoneyDisplay,
 } from "@/src/modules/finance/shared/lib/money"
@@ -15,7 +19,11 @@ import {
   signedAmount,
   transferDirectionLabel,
 } from "@/src/modules/finance/shared/lib/transactions-query"
-import type { FinanceCategory } from "@/src/modules/finance/shared/types/entities"
+import {
+  FINANCE_TRANSACTION_STATUS_LABEL,
+  type FinanceCategory,
+  type FinanceTransaction,
+} from "@/src/modules/finance/shared/types/entities"
 import { SummaryItem } from "@/src/shared/components/ui/summary"
 import { Badge } from "@/src/shared/components/ui/badge"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
@@ -25,8 +33,11 @@ import {
   ArrowLeftRightIcon,
   ArrowUpRightIcon,
   ScaleIcon,
+  Undo2Icon,
 } from "lucide-react"
 import Image from "next/image"
+import Link from "next/link"
+import { useState } from "react"
 
 type FinanceMonthSectionProps = {
   month: TimelineMonth
@@ -36,6 +47,48 @@ type FinanceMonthSectionProps = {
   stickyOffset: number
 }
 
+type ReversalLegProps = {
+  leg: FinanceTransaction
+  roleLabel: string
+  display: FinanceMoneyDisplay
+  isLast: boolean
+}
+
+function reversalSourceLabel(source: string | null): string {
+  if (source === "EMAIL") {
+    return "Correo"
+  }
+  if (source === "AI") {
+    return "Asistente"
+  }
+  return "Manual"
+}
+
+function ReversalLeg({ leg, roleLabel, display, isLast }: ReversalLegProps) {
+  const detail =
+    leg.merchant ??
+    leg.description ??
+    leg.accountName ??
+    leg.cardName ??
+    "Movimiento"
+  const isInactive = isInactiveTransactionStatus(leg.status)
+  return (
+    <SummaryItem
+      title={roleLabel}
+      description={`${detail} · ${formatFinanceTimeLabel(leg.transactionDate)} · ${reversalSourceLabel(leg.source)}`}
+      value={
+        <span
+          className={cn(isInactive && "text-muted-foreground line-through")}
+        >
+          {signedAmount(leg, display)}
+        </span>
+      }
+      href={APP_ROUTES.app.financeTransaction(leg.id)}
+      isLast={isLast}
+    />
+  )
+}
+
 export function FinanceMonthSection({
   month,
   categories,
@@ -43,10 +96,23 @@ export function FinanceMonthSection({
   isActive,
   stickyOffset,
 }: FinanceMonthSectionProps) {
+  const [expandedIds, setExpandedIds] = useState<ReadonlySet<string>>(new Set())
   const headingId = `month-label-${month.key}`
   const categoryById = new Map(
     categories.map((category) => [category.id, category] as const)
   )
+
+  function toggleExpanded(transactionId: string) {
+    setExpandedIds((current) => {
+      const next = new Set(current)
+      if (next.has(transactionId)) {
+        next.delete(transactionId)
+      } else {
+        next.add(transactionId)
+      }
+      return next
+    })
+  }
 
   return (
     <section
@@ -66,7 +132,7 @@ export function FinanceMonthSection({
         />
         <h2
           id={headingId}
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-black/55 px-4 py-1 shadow-sm text-sm font-medium text-white"
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-black/55 px-4 py-1 text-sm font-medium text-white shadow-sm"
         >
           {month.label}
         </h2>
@@ -75,14 +141,29 @@ export function FinanceMonthSection({
       {month.weeks.map((week, index) => {
         const isLast = index === month.weeks.length - 1
         return (
-          <section key={week.id} aria-label={week.label} className="flex flex-col gap-3">
-            <h3 className={cn("text-center text-sm text-muted-foreground", !isLast && "border-b border-border pb-2")}>
+          <section
+            key={week.id}
+            aria-label={week.label}
+            className="flex flex-col gap-3"
+          >
+            <h3
+              className={cn(
+                "text-center text-sm text-muted-foreground",
+                !isLast && "border-b border-border pb-2"
+              )}
+            >
               {week.label}
             </h3>
             {week.days.map((day) => (
-              <section key={day.dateKey} aria-label={day.label} className="flex flex-col gap-2">
+              <section
+                key={day.dateKey}
+                aria-label={day.label}
+                className="flex flex-col gap-2"
+              >
                 <h4 className="flex items-center justify-between gap-3 px-1">
-                  <span className="text-xs text-muted-foreground">{day.label}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {day.label}
+                  </span>
                   <p
                     className={cn(
                       "text-xs font-medium tabular-nums",
@@ -97,11 +178,16 @@ export function FinanceMonthSection({
                   </p>
                 </h4>
                 <div className="rounded-2xl border border-border bg-card">
-                  {day.items.map((transaction, index) => {
+                  {day.rows.map((group: ReversalGroup, index) => {
+                    const transaction = group.original
                     const isTransfer = isTransferTransaction(transaction)
                     const isInactive = isInactiveTransactionStatus(
                       transaction.status
                     )
+                    const isPair = Boolean(group.reversal)
+                    const isReversed = transaction.status === "REVERSED"
+                    const isExpanded = expandedIds.has(transaction.id)
+                    const isLastRow = index === day.rows.length - 1
                     const category = transaction.categoryId
                       ? categoryById.get(transaction.categoryId)
                       : undefined
@@ -114,8 +200,8 @@ export function FinanceMonthSection({
                     const color = isTransfer
                       ? "#3B82F6"
                       : category?.color?.trim() ||
-                      parent?.color?.trim() ||
-                      "#64748B"
+                        parent?.color?.trim() ||
+                        "#64748B"
                     const title = isTransfer
                       ? transferDirectionLabel(transaction)
                       : (transaction.merchant ??
@@ -149,60 +235,115 @@ export function FinanceMonthSection({
                           ) : null}
                         </span>
                       ) : undefined
-                    return (
-                      <SummaryItem
-                        key={transaction.id}
-                        title={title}
-                        description={description}
-                        leading={
-                          icon ? (
-                            <span>{icon}</span>
-                          ) : isTransfer ? (
-                            <ArrowLeftRightIcon className="size-5 text-info" />
-                          ) : transaction.type === "DEBIT" ? (
-                            <ArrowDownLeftIcon className="size-5 text-destructive" />
-                          ) : transaction.type === "CREDIT" ? (
-                            <ArrowUpRightIcon className="size-5 text-success" />
-                          ) : transaction.type === "ADJUSTMENT" ? (
-                            <ScaleIcon
-                              className={cn(
-                                "size-5",
-                                movementSign(transaction) === "−"
-                                  ? "text-destructive"
-                                  : "text-success"
-                              )}
-                            />
-                          ) : null
-                        }
-                        accentColor={color}
-                        className={cn(isInactive && "opacity-50")}
-                        value={
-                          <span
-                            className={cn(
-                              !isTransfer &&
+                    const rowBase = {
+                      title,
+                      description,
+                      leading: icon ? (
+                        <span>{icon}</span>
+                      ) : isTransfer ? (
+                        <ArrowLeftRightIcon className="size-5 text-info" />
+                      ) : transaction.type === "DEBIT" ? (
+                        <ArrowDownLeftIcon className="size-5 text-destructive" />
+                      ) : transaction.type === "CREDIT" ? (
+                        <ArrowUpRightIcon className="size-5 text-success" />
+                      ) : transaction.type === "ADJUSTMENT" ? (
+                        <ScaleIcon
+                          className={cn(
+                            "size-5",
+                            movementSign(transaction) === "−"
+                              ? "text-destructive"
+                              : "text-success"
+                          )}
+                        />
+                      ) : null,
+                      accentColor: color,
+                      className: cn(isInactive && "opacity-50"),
+                      value: (
+                        <span
+                          className={cn(
+                            !isTransfer &&
                               movementSign(transaction) === "−" &&
                               "text-destructive",
-                              !isTransfer &&
+                            !isTransfer &&
                               movementSign(transaction) === "+" &&
                               "text-success",
-                              isInactive && "text-muted-foreground line-through"
+                            isInactive && "text-muted-foreground line-through"
+                          )}
+                        >
+                          {signedAmount(transaction, display)}
+                        </span>
+                      ),
+                      trailing: (
+                        <span className="flex items-center gap-1.5">
+                          {transaction.possibleDuplicateOfId ? (
+                            <Badge variant="warning">¿Duplicado?</Badge>
+                          ) : null}
+                          {group.isPartial ? (
+                            <Badge variant="warning">
+                              {FINANCE_REVERSAL_PARTIAL_LABEL}
+                            </Badge>
+                          ) : isPair || isReversed ? (
+                            <Badge variant="info">
+                              {FINANCE_TRANSACTION_STATUS_LABEL.REVERSED}
+                            </Badge>
+                          ) : (
+                            <TransactionStatusMark
+                              status={transaction.status}
+                            />
+                          )}
+                          {group.isOrphan && transaction.linkedTransactionId ? (
+                            <Link
+                              href={APP_ROUTES.app.financeTransaction(
+                                transaction.linkedTransactionId
+                              )}
+                              className="inline-flex items-center gap-1 text-xs font-medium text-info hover:underline"
+                            >
+                              <Undo2Icon className="size-3.5" aria-hidden />
+                              Ver original
+                            </Link>
+                          ) : null}
+                        </span>
+                      ),
+                      showChevron: isPair,
+                      isLast: true,
+                    }
+                    return (
+                      <div
+                        key={transaction.id}
+                        className={cn(
+                          !isLastRow && "border-b border-border/60"
+                        )}
+                      >
+                        {isPair ? (
+                          <SummaryItem
+                            {...rowBase}
+                            onPress={() => toggleExpanded(transaction.id)}
+                          />
+                        ) : (
+                          <SummaryItem
+                            {...rowBase}
+                            href={APP_ROUTES.app.financeTransaction(
+                              transaction.id
                             )}
-                          >
-                            {signedAmount(transaction, display)}
-                          </span>
-                        }
-                        trailing={
-                          <span className="flex items-center gap-1.5">
-                            {transaction.possibleDuplicateOfId ? (
-                              <Badge variant="warning">¿Duplicado?</Badge>
-                            ) : null}
-                            <TransactionStatusMark status={transaction.status} />
-                          </span>
-                        }
-                        showChevron={false}
-                        href={APP_ROUTES.app.financeTransaction(transaction.id)}
-                        isLast={index === day.items.length - 1}
-                      />
+                          />
+                        )}
+                        {isPair && group.reversal && isExpanded ? (
+                          <div className="flex flex-col gap-1 px-2 pb-2">
+                            <ReversalLeg
+                              leg={transaction}
+                              roleLabel="Original"
+                              display={display}
+                              isLast={false}
+                            />
+                            <ReversalLeg
+                              leg={group.reversal}
+                              roleLabel="Reversa"
+                              display={display}
+                              isLast={true}
+                            />
+                          </div>
+                        ) : null}
+                      </div>
                     )
                   })}
                 </div>

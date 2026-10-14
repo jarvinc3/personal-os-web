@@ -23,7 +23,7 @@ Contexto: bancos dominicanos (BHD, Popular, Qik), moneda principal DOP (RD$).
 ## Estados y edición
 
 - Un movimiento `CONFIRMED` está bloqueado (`TRANSACTION_LOCKED`). Para editarlo se usa "Desbloquear" (`unconfirm`), que existe en movimientos, transferencias y pagos de tarjeta.
-- Una reversa queda `REVERSED`, enlazada a su original por `linkedTransactionId`. En la lista se ve en gris (opacidad 50 % y tachado) y no suma en los totales. El detalle muestra la etiqueta "Revertido" y enlaza al otro movimiento.
+- Una reversa queda `REVERSED`, enlazada a su original por `linkedTransactionId`. La lista muestra una sola fila por par, en la fecha del original, con la insignia "Revertido" y ambas patas (original y reversa) al desplegarla. Una reversa parcial (monto distinto) deja dos filas con la insignia "Reversa parcial". El par no suma en los totales y el detalle enlaza al otro movimiento.
 - Los ajustes de saldo (`POST /balance-adjustments`, tipo `ADJUSTMENT`) quedan fuera del tablero (`includeAdjustments=false` por defecto) y se ven en el historial de la entidad (`instrument-history-sheet.tsx`).
 - Borrar guarda un snapshot en el diario: el toast "Deshacer" llama a `POST <entidad>/:id/restore`, y `/finance/recycle-bin` lista archivados y eliminados.
 
