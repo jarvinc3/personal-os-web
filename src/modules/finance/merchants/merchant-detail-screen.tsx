@@ -16,16 +16,10 @@ import {
   useMerchants,
 } from "@/src/modules/finance/shared/hooks/use-merchants"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
-import {
-  formatFinanceDateTimeLabel,
-} from "@/src/modules/finance/shared/lib/ledger-form"
+import { formatFinanceDateTimeLabel } from "@/src/modules/finance/shared/lib/ledger-form"
 import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
-import {
-  infiniteListItems,
-} from "@/src/modules/finance/shared/lib/finance-query-options"
-import {
-  signedAmount,
-} from "@/src/modules/finance/shared/lib/transactions-query"
+import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
+import { signedAmount } from "@/src/modules/finance/shared/lib/transactions-query"
 import {
   FINANCE_TRANSACTIONS_QUERY_KEY,
   type FinancePaginated,
@@ -55,7 +49,13 @@ import { API_ENDPOINTS } from "@/src/shared/constants/api-endpoints"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { appToast } from "@/src/shared/lib/app-toast"
-import { XIcon, GitMergeIcon, PencilIcon, SearchIcon, StoreIcon } from "lucide-react"
+import {
+  XIcon,
+  GitMergeIcon,
+  PencilIcon,
+  SearchIcon,
+  StoreIcon,
+} from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useMemo, useState } from "react"
 
@@ -104,7 +104,11 @@ function MerchantDetailBody({ merchantId }: { merchantId: string }) {
       title: merchant?.name ?? "Comercio",
       onBack: () => router.back(),
       actions: merchant ? (
-        <Button type="button" variant="outline" onClick={() => setEditOpen(true)}>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => setEditOpen(true)}
+        >
           <PencilIcon className="size-4 shrink-0" />
           Editar
         </Button>

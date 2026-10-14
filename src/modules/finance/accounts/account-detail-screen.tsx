@@ -12,6 +12,10 @@ import { FinanceGate } from "@/src/modules/finance/finance-gate"
 import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
 import { MissingRecord } from "@/src/modules/finance/shared/components/layout/missing-record"
 import { FinanceInstrumentMovements } from "@/src/modules/finance/transactions"
+import {
+  ReconciliationSheet,
+  ReconciliationsSection,
+} from "@/src/modules/finance/reconciliation"
 import { StatementImportButton } from "@/src/modules/finance/shared/components/statement-import-button"
 import { FINANCE_ACCOUNT_TYPE_LABEL } from "@/src/modules/finance/shared/constants/catalog"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
@@ -52,6 +56,7 @@ import { appToast } from "@/src/shared/lib/app-toast"
 import {
   ArchiveIcon,
   HistoryIcon,
+  LandmarkIcon,
   MoreVerticalIcon,
   PencilIcon,
   ScaleIcon,
@@ -100,6 +105,8 @@ function AccountDetailScreenBody({ accountId }: AccountDetailScreenProps) {
     useSheetParam(FINANCE_SHEET_KEYS.accountBalance)
   const { open: openHistorySheet, setOpen: setOpenHistorySheet } =
     useSheetParam(FINANCE_SHEET_KEYS.accountHistory)
+  const { open: openReconciliationSheet, setOpen: setOpenReconciliationSheet } =
+    useSheetParam(FINANCE_SHEET_KEYS.accountReconciliation)
 
   const account =
     (accountsQuery.data ?? []).find((item) => item.id === accountId) ?? null
@@ -333,6 +340,11 @@ function AccountDetailScreenBody({ accountId }: AccountDetailScreenProps) {
           }
         />
         <StatementImportButton accountId={account.id} className="w-full" />
+        <ReconciliationsSection
+          enabled={isEnabled}
+          target={{ accountId: account.id }}
+          display={accountDisplay}
+        />
       </div>
 
       <RecordOptionsSheet
@@ -351,6 +363,12 @@ function AccountDetailScreenBody({ accountId }: AccountDetailScreenProps) {
             title: "Ajustar saldo",
             icon: ScaleIcon,
             onPress: () => setOpenBalanceSheet(true),
+          },
+          {
+            id: "reconcile",
+            title: "Conciliar",
+            icon: LandmarkIcon,
+            onPress: () => setOpenReconciliationSheet(true),
           },
           {
             id: "history",
@@ -415,6 +433,18 @@ function AccountDetailScreenBody({ accountId }: AccountDetailScreenProps) {
         open={openHistorySheet}
         onOpenChange={setOpenHistorySheet}
         target={{ kind: "account", id: account.id }}
+        display={accountDisplay}
+      />
+      <ReconciliationSheet
+        open={openReconciliationSheet}
+        onOpenChange={setOpenReconciliationSheet}
+        target={{
+          kind: "account",
+          id: account.id,
+          currency: account.currency,
+          name: account.name,
+          balance: account.balance,
+        }}
         display={accountDisplay}
       />
     </>

@@ -360,6 +360,7 @@ export function BudgetSheet({
             )}
           />
         </SummarySection>
+
         <SummarySection title="Periodo" icon={CalendarIcon}>
           <Controller
             control={control}
@@ -407,6 +408,7 @@ export function BudgetSheet({
             </FinanceHelpText>
           )}
         </SummarySection>
+
         <SummarySection title="Opciones" icon={PiggyBankIcon}>
           <Controller
             control={control}

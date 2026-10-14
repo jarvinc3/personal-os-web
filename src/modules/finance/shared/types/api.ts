@@ -117,6 +117,18 @@ export const FINANCE_INSTRUMENT_HISTORY_QUERY_KEY = [
   ...FINANCE_QUERY_KEY,
   "instrument-history",
 ] as const
+export const FINANCE_RECONCILIATIONS_QUERY_KEY = [
+  ...FINANCE_QUERY_KEY,
+  "reconciliations",
+] as const
+export const FINANCE_RECONCILIATION_STATUS_QUERY_KEY = [
+  ...FINANCE_QUERY_KEY,
+  "reconciliation-status",
+] as const
+export const FINANCE_BANK_CHARGES_QUERY_KEY = [
+  ...FINANCE_QUERY_KEY,
+  "bank-charges",
+] as const
 
 export type FinanceArchivedType = "institution" | "account" | "card" | "loan"
 
@@ -130,6 +142,7 @@ export type FinanceDeletedType =
   | "budget"
   | "savingsGoal"
   | "receivable"
+  | "reconciliation"
 
 export type FinanceArchivedRecord = {
   type: FinanceArchivedType

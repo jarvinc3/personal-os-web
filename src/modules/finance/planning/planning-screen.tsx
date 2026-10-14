@@ -1,8 +1,10 @@
 "use client"
 
 import { FinanceHomeHeroSection } from "@/src/modules/finance/dashboard"
+import { BankChargesCard } from "@/src/modules/finance/reconciliation"
 import { FinanceGate } from "@/src/modules/finance/finance-gate"
 import { FinancePlanningList } from "@/src/modules/finance/planning/components/planning-list"
+import { todayDateInput } from "@/src/modules/finance/shared/lib/ledger-form"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
 
 export function PlanningScreen() {
@@ -28,6 +30,11 @@ function PlanningScreenBody() {
         enabled={isEnabled}
         display={display}
         defaultCurrency={config.baseCurrency}
+      />
+      <BankChargesCard
+        enabled={isEnabled}
+        display={display}
+        today={todayDateInput()}
       />
     </div>
   )

@@ -56,13 +56,7 @@ export function useCreateRecurring() {
 export function useUpdateRecurring() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: ({
-      id,
-      body,
-    }: {
-      id: string
-      body: Record<string, unknown>
-    }) =>
+    mutationFn: ({ id, body }: { id: string; body: Record<string, unknown> }) =>
       apiPatch<FinanceRecurringPattern>(
         API_ENDPOINTS.FINANCE.RECURRING_PATTERN(id),
         body

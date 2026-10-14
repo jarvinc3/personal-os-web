@@ -8,6 +8,10 @@ import { FinanceGate } from "@/src/modules/finance/finance-gate"
 import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
 import { MissingRecord } from "@/src/modules/finance/shared/components/layout/missing-record"
 import { FinanceInstrumentMovements } from "@/src/modules/finance/transactions"
+import {
+  ReconciliationSheet,
+  ReconciliationsSection,
+} from "@/src/modules/finance/reconciliation"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
 import { useCardStatements } from "@/src/modules/finance/shared/hooks/use-card-statements"
@@ -52,6 +56,7 @@ import {
   ArchiveIcon,
   CreditCardIcon,
   HistoryIcon,
+  LandmarkIcon,
   MoreVerticalIcon,
   PencilIcon,
   ScaleIcon,
@@ -101,6 +106,8 @@ function CardDetailScreenBody({ cardId }: CardDetailScreenProps) {
     useSheetParam(FINANCE_SHEET_KEYS.cardOptions)
   const { open: openCardPaymentSheet, setOpen: setOpenCardPaymentSheet } =
     useSheetParam(FINANCE_SHEET_KEYS.cardPayment)
+  const { open: openReconciliationSheet, setOpen: setOpenReconciliationSheet } =
+    useSheetParam(FINANCE_SHEET_KEYS.cardReconciliation)
 
   const card =
     (cardsQuery.data ?? []).find((item) => item.id === cardId) ?? null
@@ -322,6 +329,11 @@ function CardDetailScreenBody({ cardId }: CardDetailScreenProps) {
         ) : (
           movements
         )}
+        <ReconciliationsSection
+          enabled={isEnabled}
+          target={{ cardId: card.id }}
+          display={cardDisplay}
+        />
       </div>
       <RecordOptionsSheet
         open={openOptionsSheet}
@@ -349,6 +361,12 @@ function CardDetailScreenBody({ cardId }: CardDetailScreenProps) {
             title: "Ajustar saldo",
             icon: ScaleIcon,
             onPress: () => setOpenCardBalanceSheet(true),
+          },
+          {
+            id: "reconcile",
+            title: "Conciliar",
+            icon: LandmarkIcon,
+            onPress: () => setOpenReconciliationSheet(true),
           },
           {
             id: "history",
@@ -414,6 +432,18 @@ function CardDetailScreenBody({ cardId }: CardDetailScreenProps) {
         open={openHistorySheet}
         onOpenChange={setOpenHistorySheet}
         target={{ kind: "card", id: card.id }}
+        display={cardDisplay}
+      />
+      <ReconciliationSheet
+        open={openReconciliationSheet}
+        onOpenChange={setOpenReconciliationSheet}
+        target={{
+          kind: "card",
+          id: card.id,
+          currency: cardDisplay.currency,
+          name: card.name,
+          balance: primaryBalance?.balance ?? "0",
+        }}
         display={cardDisplay}
       />
     </>

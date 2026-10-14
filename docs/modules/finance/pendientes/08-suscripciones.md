@@ -105,14 +105,14 @@ Back:
 
 Se agrega a `FinanceModuleConfig` (web y back) un bloque `subscriptions`:
 
-| Opción | Clave nueva | Origen | Default |
-| --- | --- | --- | --- |
-| Días de recordatorio por defecto | `subscriptions.reminderDaysBefore` (número, 0-30) | `renewalReminderDays` (se toma el mayor) | `3` |
-| Avisos de renovación | `notifications.subscriptionReminders` | `notifications.renewalReminders` | `true` |
-| Subidas de precio | `notifications.priceIncreaseAlerts` | `notifications.priceIncreaseAlerts` | `true` |
-| Recurrentes detectados | `notifications.recurringAlerts` (existente, se reutiliza) | — | `true` |
-| Agrupar por | `subscriptions.groupBy` (`category`/`provider`/`none`) | `groupBy` | `none` |
-| Moneda de totales | no se crea clave: se usa la moneda base de Finanzas | `defaultCurrency` se descarta | — |
+| Opción                           | Clave nueva                                               | Origen                                   | Default |
+| -------------------------------- | --------------------------------------------------------- | ---------------------------------------- | ------- |
+| Días de recordatorio por defecto | `subscriptions.reminderDaysBefore` (número, 0-30)         | `renewalReminderDays` (se toma el mayor) | `3`     |
+| Avisos de renovación             | `notifications.subscriptionReminders`                     | `notifications.renewalReminders`         | `true`  |
+| Subidas de precio                | `notifications.priceIncreaseAlerts`                       | `notifications.priceIncreaseAlerts`      | `true`  |
+| Recurrentes detectados           | `notifications.recurringAlerts` (existente, se reutiliza) | —                                        | `true`  |
+| Agrupar por                      | `subscriptions.groupBy` (`category`/`provider`/`none`)    | `groupBy`                                | `none`  |
+| Moneda de totales                | no se crea clave: se usa la moneda base de Finanzas       | `defaultCurrency` se descarta            | —       |
 
 - El nuevo formulario de suscripciones toma `reminderDaysBefore` como valor inicial; cada suscripción puede sobrescribirlo.
 - El job de recordatorios exige `subscriptionReminders` y la alerta de subida de precio exige `priceIncreaseAlerts`; ambos respetan los ajustes globales de notificaciones.

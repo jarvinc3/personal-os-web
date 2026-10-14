@@ -42,6 +42,7 @@ import {
   HandCoinsIcon,
   LandmarkIcon,
   RotateCcwIcon,
+  ScaleIcon,
   TagsIcon,
   TargetIcon,
   WalletIcon,
@@ -72,6 +73,7 @@ const DELETED_TYPE_LABEL: Record<FinanceDeletedType, string> = {
   budget: "Presupuesto",
   savingsGoal: "Meta de ahorro",
   receivable: "Cobro",
+  reconciliation: "Conciliación",
 }
 
 const DELETED_TYPE_ICON: Record<FinanceDeletedType, LucideIcon> = {
@@ -84,6 +86,7 @@ const DELETED_TYPE_ICON: Record<FinanceDeletedType, LucideIcon> = {
   budget: WalletIcon,
   savingsGoal: TargetIcon,
   receivable: HandCoinsIcon,
+  reconciliation: ScaleIcon,
 }
 
 /** A snapshot past this size can take a while to restore; warn before it does. */

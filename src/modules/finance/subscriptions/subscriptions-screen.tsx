@@ -87,6 +87,8 @@ import { useMemo, useState } from "react"
 
 const MANAGED_TAB = "managed"
 const RECURRING_TAB = "recurring"
+const SECTION_TAB_QUERY = "tab"
+const RECURRING_STATUS_QUERY = "recurring"
 const SUGGESTION_LIMIT = 3
 
 type SectionTab = typeof MANAGED_TAB | typeof RECURRING_TAB
@@ -167,6 +169,7 @@ function SubscriptionsScreenBody() {
       </Button>
 
       <Tabs
+        persistKey={SECTION_TAB_QUERY}
         value={section}
         onValueChange={(value) => {
           if (isSectionTab(value)) {
@@ -452,6 +455,7 @@ function RecurringPatterns({ isEnabled, display }: RecurringPatternsProps) {
   return (
     <div className="flex flex-col gap-4">
       <Tabs
+        persistKey={RECURRING_STATUS_QUERY}
         value={tab}
         onValueChange={(value) => {
           if (isRecurringTab(value)) {

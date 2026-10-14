@@ -132,6 +132,7 @@ export const API_ENDPOINTS = {
     ANALYTICS_SPENDING_BY_CATEGORY: "/finance/analytics/spending-by-category",
     ANALYTICS_BUDGET_STATUS: "/finance/analytics/budget-status",
     ANALYTICS_SPENDING_OVER_TIME: "/finance/analytics/spending-over-time",
+    ANALYTICS_BANK_CHARGES: "/finance/analytics/bank-charges",
     BALANCE_SHEET: "/finance/balance-sheet",
     QUICK_ENTRY_PARSE: "/finance/quick-entry/parse",
     OAUTH_GOOGLE_URL: "/finance/email-sync/oauth/google/url",
@@ -155,5 +156,11 @@ export const API_ENDPOINTS = {
     SUBSCRIPTION_PAYMENTS: (id: string) =>
       `/finance/subscriptions/${id}/payments`,
     SUBSCRIPTION_LOGO: (id: string) => `/finance/subscriptions/${id}/logo`,
+    RECONCILIATIONS: "/finance/reconciliations",
+    RECONCILIATION_PREVIEW: "/finance/reconciliations/preview",
+    RECONCILIATION: (id: string) => `/finance/reconciliations/${id}`,
+    RECONCILIATION_RESTORE: (id: string) =>
+      `/finance/reconciliations/${id}/restore`,
+    RECONCILIATION_STATUS: "/finance/reconciliations/status",
   },
 } as const

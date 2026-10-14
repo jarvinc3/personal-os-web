@@ -55,6 +55,17 @@ Manual, desde el detalle de la tarjeta o de la cuenta bancaria ("Importar estado
 
 El estado de cuenta no llega por correo: los bancos no lo envían y la subida es siempre manual. Errores: `STATEMENT_PASSWORD_REQUIRED`, `STATEMENT_PARSE_FAILED`, `STATEMENT_ALREADY_APPLIED`.
 
+### Conciliar una cuenta o tarjeta
+
+A fin de mes el saldo de la app casi nunca coincide con el banco (impuestos, comisiones, cargos por plástico, intereses). En el detalle de la cuenta o la tarjeta, "Conciliar" abre el sheet:
+
+1. El usuario escribe el saldo real que ve en la app del banco y la fecha de corte (hoy por defecto). La web muestra la diferencia en vivo contra el saldo de la app.
+2. `POST /finance/reconciliations/preview` propone el 0.15 % de las salidas del mes como impuesto DGII y el resto como otro cargo; la web precarga esas líneas.
+3. El usuario ajusta las líneas (tipo y monto). Deben sumar exactamente la diferencia: si no, el botón queda bloqueado y la API responde 422.
+4. `POST /finance/reconciliations` crea el cierre y un movimiento de ajuste por línea. Los ajustes mueven el saldo pero no aparecen en el tablero ni en presupuestos.
+5. El historial de "Conciliaciones" vive en el detalle; el producto aparece como conciliado o pendiente del mes en Productos. En Planificación, la tarjeta "Cargos bancarios" suma los ajustes por mes, banco y tipo.
+6. Borrar el último cierre lo revierte (toast "Deshacer" y papelera); restaurarlo no duplica el efecto.
+
 ### Préstamos
 
 Asistente de alta con tabla de amortización previa (`amortization-plan.ts`, `amortization-sheet.tsx`). En el detalle: pagar la siguiente cuota con su desglose (capital, interés, seguro: `insurance_amount`), hoja de cuota (`installment-detail-sheet.tsx`) y abono a capital con vista previa (`loans/:id/prepayments/preview`).

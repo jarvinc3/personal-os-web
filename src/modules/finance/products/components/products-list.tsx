@@ -12,6 +12,8 @@ import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-financ
 import { useInstitutions } from "@/src/modules/finance/shared/hooks/use-institutions"
 import { useLoans } from "@/src/modules/finance/shared/hooks/use-loans"
 import { useMonthExpenseTrend } from "@/src/modules/finance/shared/hooks/use-month-expense-trend"
+import { ReconciliationMonthStatus } from "@/src/modules/finance/reconciliation"
+import { monthKeyFromDate } from "@/src/modules/finance/shared/lib/month-window"
 import { useSheetListEntity } from "@/src/modules/finance/shared/hooks/use-sheet-entity"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
@@ -180,6 +182,13 @@ export function FinanceProductsList({
         hasData={Boolean(balanceSheetQuery.data)}
         netWorth={global?.netWorth ?? null}
         netWorthComplete={global?.status === "COMPLETE"}
+      />
+
+      <ReconciliationMonthStatus
+        enabled={enabled}
+        month={monthKeyFromDate(new Date())}
+        monthLabel={monthKeyFromDate(new Date())}
+        display={moneyDisplay}
       />
 
       <div>

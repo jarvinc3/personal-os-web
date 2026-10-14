@@ -1,11 +1,6 @@
 "use client"
 
-import {
-  apiGet,
-  apiPatch,
-  apiPost,
-  apiPostForm,
-} from "@/src/config/api-client"
+import { apiGet, apiPatch, apiPost, apiPostForm } from "@/src/config/api-client"
 import { useInfiniteFinanceList } from "@/src/modules/finance/shared/hooks/use-infinite-finance-list"
 import {
   FINANCE_MERCHANTS_QUERY_KEY,
@@ -55,8 +50,7 @@ export function useMerchants(
 export function useMerchant(enabled: boolean, id: string | null) {
   return useQuery({
     queryKey: [...FINANCE_MERCHANTS_QUERY_KEY, "detail", id],
-    queryFn: () =>
-      apiGet<FinanceMerchant>(API_ENDPOINTS.FINANCE.MERCHANT(id!)),
+    queryFn: () => apiGet<FinanceMerchant>(API_ENDPOINTS.FINANCE.MERCHANT(id!)),
     enabled: enabled && Boolean(id),
   })
 }
@@ -77,13 +71,8 @@ export function useMerchantSuggest(enabled: boolean, merchant: string) {
 export function useUpdateMerchant() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: ({
-      id,
-      body,
-    }: {
-      id: string
-      body: Record<string, unknown>
-    }) => apiPatch<FinanceMerchant>(API_ENDPOINTS.FINANCE.MERCHANT(id), body),
+    mutationFn: ({ id, body }: { id: string; body: Record<string, unknown> }) =>
+      apiPatch<FinanceMerchant>(API_ENDPOINTS.FINANCE.MERCHANT(id), body),
     onSuccess: () => invalidateMerchants(queryClient),
   })
 }
