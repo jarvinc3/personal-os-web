@@ -1,6 +1,7 @@
 "use client"
 
 import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
+import { QuickEntryBar } from "@/src/modules/finance/quick-entry"
 import { FinanceFlowPills } from "@/src/modules/finance/transactions/components/flow-pills"
 import { FinanceMonthPicker } from "@/src/modules/finance/transactions/components/month-picker"
 import { FinanceMonthSection } from "@/src/modules/finance/transactions/components/month-section"
@@ -364,6 +365,7 @@ export function FinanceTransactionsList({
           categories={categories}
           onSelect={(id) => router.push(APP_ROUTES.app.financeTransaction(id))}
         />
+        <QuickEntryBar />
         <FinanceMonthPicker
           months={months}
           activeMonthKey={activeMonthKey}

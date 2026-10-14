@@ -128,10 +128,12 @@ export const API_ENDPOINTS = {
     EMAIL_SOURCE_SENDERS: (id: string) =>
       `/finance/email-sync/sources/${id}/senders`,
     ANALYTICS_SUMMARY: "/finance/analytics/summary",
+    ANALYTICS_WEEKLY_SUMMARY: "/finance/analytics/weekly-summary",
     ANALYTICS_SPENDING_BY_CATEGORY: "/finance/analytics/spending-by-category",
     ANALYTICS_BUDGET_STATUS: "/finance/analytics/budget-status",
     ANALYTICS_SPENDING_OVER_TIME: "/finance/analytics/spending-over-time",
     BALANCE_SHEET: "/finance/balance-sheet",
+    QUICK_ENTRY_PARSE: "/finance/quick-entry/parse",
     OAUTH_GOOGLE_URL: "/finance/email-sync/oauth/google/url",
     OAUTH_GOOGLE_CALLBACK: "/finance/email-sync/oauth/google/callback",
     EXCHANGE_RATES: "/finance/exchange-rates",

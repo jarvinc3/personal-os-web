@@ -40,6 +40,8 @@ const validFinance = {
   aiSuggestions: true,
   transactionDetected: true,
   monthlyReport: true,
+  weeklySummary: true,
+  weeklySummaryDay: "1",
   cardDueDate: true,
   unusualExpense: true,
 }

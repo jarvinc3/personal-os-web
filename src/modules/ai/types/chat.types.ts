@@ -83,9 +83,75 @@ export type AiActionSummary = {
   label?: string
 }
 
+export type ChatTransactionSnapshot = {
+  id: string
+  type: string
+  amount: string
+  currency: string
+  transactionDate: string
+  merchant: string | null
+  description: string | null
+  accountName: string | null
+  cardName: string | null
+  status: string
+}
+
+export type ChatChartPoint = {
+  label: string
+  value: string
+  color?: string | null
+}
+
+export type ChatNextInstallment = {
+  amount: string
+  currency: string
+  dueDate: string
+  installmentNo: number
+}
+
+/**
+ * Native blocks the agent can attach to a message. The back owns this
+ * contract; unknown types must be ignored, never rendered.
+ */
 export type ChatBlock =
   | { type: "markdown"; content: string }
   | { type: "action"; action: AiActionSummary }
+  | {
+      type: "transaction_card"
+      transactionId: string
+      snapshot: ChatTransactionSnapshot
+    }
+  | {
+      type: "transaction_list"
+      items: ChatTransactionSnapshot[]
+      moreHref?: string
+    }
+  | {
+      type: "budget_progress"
+      budgetId: string
+      spent: string
+      limit: string
+      currency: string
+      name?: string
+      pctUsed?: number
+      color?: string | null
+      icon?: string | null
+    }
+  | {
+      type: "loan_summary"
+      loanId: string
+      balance: string
+      currency: string
+      name?: string
+      nextInstallment?: ChatNextInstallment
+    }
+  | {
+      type: "chart"
+      kind: "bar" | "donut" | "line"
+      series: ChatChartPoint[]
+      title?: string
+      currency?: string
+    }
 
 export type ChatResponse = {
   sessionId: string

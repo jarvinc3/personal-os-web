@@ -75,6 +75,7 @@ const FINANCE_NOTIFICATION_ROWS = [
     icon: Receipt,
   },
   { key: "monthlyReport", label: "Reporte mensual", icon: FileBarChart },
+  { key: "weeklySummary", label: "Resumen semanal", icon: CalendarDays },
   { key: "cardDueDate", label: "Vencimiento de tarjetas", icon: CreditCard },
   { key: "unusualExpense", label: "Gastos inusuales", icon: TriangleAlert },
 ] as const satisfies readonly {
@@ -86,6 +87,16 @@ const FINANCE_NOTIFICATION_ROWS = [
 const WEEK_OPTIONS = [
   { value: "1", label: "Lunes", description: "Semana laboral estándar." },
   { value: "0", label: "Domingo", description: "Semana tipo calendario US." },
+] as const
+
+const WEEKDAY_OPTIONS = [
+  { value: "1", label: "Lunes" },
+  { value: "2", label: "Martes" },
+  { value: "3", label: "Miércoles" },
+  { value: "4", label: "Jueves" },
+  { value: "5", label: "Viernes" },
+  { value: "6", label: "Sábado" },
+  { value: "0", label: "Domingo" },
 ] as const
 
 const PERIOD_OPTIONS: {
@@ -209,8 +220,12 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
           aiSuggestions: values.aiSuggestions,
           transactionDetected: values.transactionDetected,
           monthlyReport: values.monthlyReport,
+          weeklySummary: values.weeklySummary,
           cardDueDate: values.cardDueDate,
           unusualExpense: values.unusualExpense,
+        },
+        reports: {
+          weeklySummaryDay: Number(values.weeklySummaryDay),
         },
       },
       { isEnabled: moduleEnable.pendingEnabled }
@@ -665,6 +680,41 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
         <EmailSyncScheduleFields
           control={control}
           disabled={updateMutation.isPending}
+        />
+      </SummarySection>
+
+      <SummarySection title="Resumen semanal" icon={CalendarDays}>
+        <Controller
+          control={control}
+          name="weeklySummaryDay"
+          render={({ field }) => (
+            <RadioGroup
+              value={field.value}
+              onValueChange={(value) =>
+                setValue(
+                  "weeklySummaryDay",
+                  value as "0" | "1" | "2" | "3" | "4" | "5" | "6",
+                  { shouldDirty: true }
+                )
+              }
+            >
+              {WEEKDAY_OPTIONS.map((option) => (
+                <OptionRow
+                  key={option.value}
+                  icon={CalendarDays}
+                  iconColor={MODULE_ACCENT}
+                  label={option.label}
+                  selected={field.value === option.value}
+                  onPress={() =>
+                    setValue("weeklySummaryDay", option.value, {
+                      shouldDirty: true,
+                    })
+                  }
+                  trailing={<RadioGroupItem value={option.value} />}
+                />
+              ))}
+            </RadioGroup>
+          )}
         />
       </SummarySection>
 

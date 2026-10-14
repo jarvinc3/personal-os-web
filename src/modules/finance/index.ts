@@ -1,6 +1,8 @@
 export { FinanceGate } from "./finance-gate"
 export { FinanceLayout } from "./shared/components/layout/layout"
 export { FinanceHomeMonthSummary } from "./dashboard/components/home-month-summary"
+export { FinanceHomeWeeklySummary } from "./dashboard/components/home-weekly-summary"
+export { QuickEntryBar } from "./quick-entry"
 export {
   FINANCE_APP_NAV,
   FINANCE_NAV_ITEMS,
@@ -60,6 +62,7 @@ export { currencyDisplayName } from "./shared/lib/currency-display-name"
 export { normalizeTrackedCurrencies } from "./shared/lib/finance-currency"
 export { formatFinanceMoney, parseFinanceMoney } from "./shared/lib/money"
 export type { FinanceMoneyDisplay } from "./shared/lib/money"
+export { formatFinanceDateTimeLabel } from "./shared/lib/ledger-form"
 
 export type * from "./shared/types/api"
 export type { FinanceBalanceSheetSlice } from "./shared/types/entities"

@@ -166,6 +166,8 @@ export const financeModuleSchema = z
     aiSuggestions: z.boolean(),
     transactionDetected: z.boolean(),
     monthlyReport: z.boolean(),
+    weeklySummary: z.boolean(),
+    weeklySummaryDay: z.enum(["0", "1", "2", "3", "4", "5", "6"]),
     cardDueDate: z.boolean(),
     unusualExpense: z.boolean(),
   })
@@ -314,6 +316,9 @@ export function configToFinanceFormValues(
     aiSuggestions: config.notifications.aiSuggestions,
     transactionDetected: config.notifications.transactionDetected,
     monthlyReport: config.notifications.monthlyReport,
+    weeklySummary: config.notifications.weeklySummary,
+    weeklySummaryDay: String(config.reports.weeklySummaryDay) as
+      "0" | "1" | "2" | "3" | "4" | "5" | "6",
     cardDueDate: config.notifications.cardDueDate,
     unusualExpense: config.notifications.unusualExpense,
   }

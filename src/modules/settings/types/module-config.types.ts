@@ -39,8 +39,13 @@ export type FinanceModuleConfig = {
     aiSuggestions: boolean
     transactionDetected: boolean
     monthlyReport: boolean
+    weeklySummary: boolean
     cardDueDate: boolean
     unusualExpense: boolean
+  }
+  reports: {
+    /** 0 = domingo … 6 = sábado, en la zona horaria del usuario. */
+    weeklySummaryDay: number
   }
   emailSync: {
     enabled: boolean

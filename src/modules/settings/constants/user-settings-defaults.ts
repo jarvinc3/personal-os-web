@@ -70,8 +70,12 @@ export const DEFAULT_MODULE_CONFIG_BY_SLUG: ModuleConfigBySlug = {
       aiSuggestions: true,
       transactionDetected: true,
       monthlyReport: false,
+      weeklySummary: true,
       cardDueDate: true,
       unusualExpense: true,
+    },
+    reports: {
+      weeklySummaryDay: 1,
     },
     emailSync: {
       enabled: false,
