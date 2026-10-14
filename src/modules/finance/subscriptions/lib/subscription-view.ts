@@ -14,6 +14,8 @@ import type {
   FinanceSubscriptionBreakdownAxis,
   FinanceSubscriptionBreakdownItem,
   FinanceSubscriptionGroupBy,
+  FinanceSubscriptionListQuery,
+  FinanceSubscriptionStatus,
   FinanceSubscriptionUpcomingCharge,
 } from "@/src/modules/finance/shared/types/entities"
 import {
@@ -47,6 +49,10 @@ const UNCATEGORIZED_GROUP_LABEL = "Sin categoría"
 const NO_METHOD_GROUP_LABEL = "Sin método"
 const UNCATEGORIZED_GROUP_KEY = "uncategorized"
 const NO_METHOD_GROUP_KEY = "no-method"
+/** Breakdown keys the back sends for the instrument axis. */
+const NO_INSTRUMENT_SLICE_KEY = "no-instrument"
+const CARD_SLICE_PREFIX = "CARD:"
+const ACCOUNT_SLICE_PREFIX = "ACCOUNT:"
 
 export type SubscriptionCycleProgress = {
   startDate: Date
@@ -182,6 +188,8 @@ export type SubscriptionListFilter = {
   cardId?: string
   accountId?: string
   currency?: string
+  unassignedCategory?: boolean
+  unassignedMethod?: boolean
 }
 
 /** Filter the card list should apply when a breakdown slice is selected. */
@@ -194,17 +202,45 @@ export function breakdownFilter(
   }
   if (by === "category") {
     if (key === UNCATEGORIZED_GROUP_KEY) {
-      return null
+      return { unassignedCategory: true }
     }
     return { categoryId: key }
   }
-  if (key.startsWith("CARD:")) {
-    return { cardId: key.slice("CARD:".length) }
+  if (key === NO_INSTRUMENT_SLICE_KEY) {
+    return { unassignedMethod: true }
   }
-  if (key.startsWith("ACCOUNT:")) {
-    return { accountId: key.slice("ACCOUNT:".length) }
+  if (key.startsWith(CARD_SLICE_PREFIX)) {
+    return { cardId: key.slice(CARD_SLICE_PREFIX.length) }
+  }
+  if (key.startsWith(ACCOUNT_SLICE_PREFIX)) {
+    return { accountId: key.slice(ACCOUNT_SLICE_PREFIX.length) }
   }
   return null
+}
+
+/**
+ * Query params for the card list: the ring slice wins over the local currency
+ * control, and an empty status/currency/search drops out of the request.
+ */
+export function subscriptionListQuery(input: {
+  filter: SubscriptionListFilter | null
+  status: "ALL" | FinanceSubscriptionStatus
+  currency: string
+  search: string
+}): FinanceSubscriptionListQuery {
+  const search = input.search.trim()
+  return {
+    status: input.status === "ALL" ? undefined : input.status,
+    currency:
+      input.filter?.currency ??
+      (input.currency === "ALL" ? undefined : input.currency),
+    categoryId: input.filter?.categoryId,
+    cardId: input.filter?.cardId,
+    accountId: input.filter?.accountId,
+    unassignedCategory: input.filter?.unassignedCategory,
+    unassignedMethod: input.filter?.unassignedMethod,
+    q: search || undefined,
+  }
 }
 
 const SUBSCRIPTION_SLICE_COLORS = [

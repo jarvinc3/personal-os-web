@@ -725,6 +725,17 @@ export type FinanceBillingCycle =
 
 export type FinanceSubscriptionStatus = "ACTIVE" | "PAUSED" | "CANCELLED"
 
+export type FinanceSubscriptionListQuery = {
+  status?: FinanceSubscriptionStatus
+  currency?: string
+  categoryId?: string
+  cardId?: string
+  accountId?: string
+  unassignedCategory?: boolean
+  unassignedMethod?: boolean
+  q?: string
+}
+
 export const FINANCE_SUBSCRIPTION_GROUP_BYS = [
   "category",
   "provider",

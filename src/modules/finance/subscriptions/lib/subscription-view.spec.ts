@@ -4,6 +4,7 @@ import { describe, it } from "node:test"
 import type {
   FinanceRecurringPattern,
   FinanceSubscription,
+  FinanceSubscriptionUpcomingCharge,
 } from "@/src/modules/finance/shared/types/entities"
 import {
   alertOccurrenceLabel,
@@ -11,7 +12,9 @@ import {
   buildSubscriptionSlices,
   groupSubscriptions,
   subscriptionCycleProgress,
+  subscriptionListQuery,
   subscriptionPayloadFromPattern,
+  upcomingByDay,
 } from "./subscription-view.ts"
 
 const localDay = (year: number, month: number, dayOfMonth: number) =>
@@ -133,15 +136,101 @@ describe("breakdownFilter", () => {
     assert.deepEqual(breakdownFilter("instrument", "ACCOUNT:acc-1"), {
       accountId: "acc-1",
     })
-    assert.equal(breakdownFilter("instrument", "no-instrument"), null)
+    assert.deepEqual(breakdownFilter("instrument", "no-instrument"), {
+      unassignedMethod: true,
+    })
   })
 
   it("maps category and currency keys", () => {
     assert.deepEqual(breakdownFilter("category", "cat-1"), {
       categoryId: "cat-1",
     })
-    assert.equal(breakdownFilter("category", "uncategorized"), null)
+    assert.deepEqual(breakdownFilter("category", "uncategorized"), {
+      unassignedCategory: true,
+    })
     assert.deepEqual(breakdownFilter("currency", "USD"), { currency: "USD" })
+  })
+})
+
+describe("subscriptionListQuery", () => {
+  it("lets the ring slice win over the local currency control", () => {
+    assert.deepEqual(
+      subscriptionListQuery({
+        filter: { currency: "USD" },
+        status: "ALL",
+        currency: "DOP",
+        search: "  ",
+      }),
+      {
+        status: undefined,
+        currency: "USD",
+        categoryId: undefined,
+        cardId: undefined,
+        accountId: undefined,
+        unassignedCategory: undefined,
+        unassignedMethod: undefined,
+        q: undefined,
+      }
+    )
+  })
+
+  it("falls back to the local filters when no slice is active", () => {
+    const query = subscriptionListQuery({
+      filter: null,
+      status: "PAUSED",
+      currency: "USD",
+      search: "  netflix ",
+    })
+    assert.equal(query.status, "PAUSED")
+    assert.equal(query.currency, "USD")
+    assert.equal(query.q, "netflix")
+  })
+
+  it("sends the unassigned filter of the uncategorized and no-method slices", () => {
+    assert.equal(
+      subscriptionListQuery({
+        filter: breakdownFilter("category", "uncategorized"),
+        status: "ALL",
+        currency: "ALL",
+        search: "",
+      }).unassignedCategory,
+      true
+    )
+    assert.equal(
+      subscriptionListQuery({
+        filter: breakdownFilter("instrument", "no-instrument"),
+        status: "ALL",
+        currency: "ALL",
+        search: "",
+      }).unassignedMethod,
+      true
+    )
+  })
+})
+
+describe("upcomingByDay", () => {
+  it("groups the charges of each date", () => {
+    const charge = (
+      id: string,
+      date: string
+    ): FinanceSubscriptionUpcomingCharge => ({
+      id,
+      subscriptionId: "sub-1",
+      name: "Netflix",
+      logoUrl: null,
+      amount: "100.00",
+      currency: "DOP",
+      date,
+      daysUntil: 3,
+      paymentMethod: null,
+    })
+    const byDay = upcomingByDay([
+      charge("a", "2026-11-02"),
+      charge("b", "2026-11-02"),
+      charge("c", "2026-11-05"),
+    ])
+    assert.equal(byDay.get("2026-11-02")?.length, 2)
+    assert.equal(byDay.get("2026-11-05")?.length, 1)
   })
 })
 

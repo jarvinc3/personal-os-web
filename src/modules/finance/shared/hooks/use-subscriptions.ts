@@ -13,8 +13,8 @@ import type {
   FinanceSubscriptionAlert,
   FinanceSubscriptionBreakdown,
   FinanceSubscriptionBreakdownAxis,
+  FinanceSubscriptionListQuery,
   FinanceSubscriptionPayment,
-  FinanceSubscriptionStatus,
   FinanceSubscriptionSummary,
   FinanceSubscriptionUpcoming,
 } from "@/src/modules/finance/shared/types/entities"
@@ -24,14 +24,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 export const FINANCE_SUBSCRIPTION_PAGE_SIZE = 20
 export const FINANCE_SUBSCRIPTION_PAYMENT_PAGE_SIZE = 20
 
-export type SubscriptionsQueryParams = {
-  status?: FinanceSubscriptionStatus
-  currency?: string
-  categoryId?: string
-  cardId?: string
-  accountId?: string
-  q?: string
-}
+export type SubscriptionsQueryParams = FinanceSubscriptionListQuery
 
 function invalidateSubscriptions(
   queryClient: ReturnType<typeof useQueryClient>

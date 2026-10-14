@@ -51,7 +51,9 @@ import {
   breakdownFilter,
   buildSubscriptionSlices,
   groupSubscriptions,
+  subscriptionListQuery,
   subscriptionPayloadFromPattern,
+  upcomingByDay,
   SUBSCRIPTION_ALERT_LABEL,
   SUBSCRIPTION_BREAKDOWN_LABEL,
   type SubscriptionListFilter,
@@ -370,15 +372,7 @@ function UpcomingSection({
     [monthDate]
   )
   const charges = view === "calendar" ? (calendarQuery.data?.items ?? []) : []
-  const chargesByDay = new Map<string, typeof charges>()
-  for (const charge of charges) {
-    const day = chargesByDay.get(charge.date)
-    if (day) {
-      day.push(charge)
-    } else {
-      chargesByDay.set(charge.date, [charge])
-    }
-  }
+  const chargesByDay = upcomingByDay(charges)
   const [activeYear, activeMonth] = month.split("-").map(Number)
 
   return (
@@ -612,14 +606,10 @@ function ManagedList({
   const [status, setStatus] = useState<"ALL" | FinanceSubscriptionStatus>("ALL")
   const [currency, setCurrency] = useState("ALL")
   const [search, setSearch] = useState("")
-  const listQuery = useSubscriptions(isEnabled, {
-    status: status === "ALL" ? undefined : status,
-    currency: currency === "ALL" ? undefined : currency,
-    categoryId: filter?.categoryId,
-    cardId: filter?.cardId,
-    accountId: filter?.accountId,
-    q: search.trim() || undefined,
-  })
+  const listQuery = useSubscriptions(
+    isEnabled,
+    subscriptionListQuery({ filter, status, currency, search })
+  )
   const items = infiniteListItems(listQuery.data)
   const currencyOptions = useMemo(() => {
     const codes = new Set<string>([display.currency])
@@ -661,7 +651,7 @@ function ManagedList({
         fullWidth
       />
 
-      {currencyOptions.length > 2 ? (
+      {!filter?.currency && currencyOptions.length > 2 ? (
         <FinanceSegmentedControl
           label="Moneda"
           value={currency}
