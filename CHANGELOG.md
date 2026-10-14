@@ -2,6 +2,13 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.21.1] - 2026-10-13
+
+### Corregido
+
+- Agrupar una reversa con su original ya no pierde filas: un movimiento enlazado a sí mismo y un original con varias reversas conservan todas sus filas.
+- Las patas desplegadas de una reversa muestran la fecha completa (día y hora), no solo la hora.
+
 ## [0.21.0] - 2026-10-13
 
 ### Agregado
