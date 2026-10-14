@@ -2,6 +2,12 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.21.2] - 2026-10-13
+
+### Corregido
+
+- Una reversa parcial junto a una reversa total del mismo movimiento ya no marca la fila completa como "Reversa parcial".
+
 ## [0.21.1] - 2026-10-13
 
 ### Corregido
