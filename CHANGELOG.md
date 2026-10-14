@@ -2,6 +2,12 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.24.2] - 2026-10-14
+
+### Cambiado
+
+- El spec del hook de listas infinitas cubre el cursor que gana sobre los params, el recorrido de varias páginas y la página vacía. Sin cambios de comportamiento.
+
 ## [0.24.1] - 2026-10-14
 
 ### Cambiado
