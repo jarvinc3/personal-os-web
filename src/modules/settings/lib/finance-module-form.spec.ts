@@ -3,12 +3,14 @@ import { describe, it } from "node:test"
 
 import {
   EMAIL_SYNC_SCHEDULE_MODES,
+  MAX_EMAIL_SYNC_TIMES,
   emailSyncOnboardingDefaults,
   emailSyncPatchFromFormValues,
   emailSyncScheduleLabel,
   emailSyncTimesFromSchedule,
   financeModuleSchema,
   isEmailSyncConfigured,
+  nextEmailSyncTime,
   parsePayDays,
   parseSyncIntervalMinutes,
 } from "./finance-module-form.ts"
@@ -63,6 +65,43 @@ describe("financeModuleSchema", () => {
         ...validFinance,
         emailSyncScheduleMode: EMAIL_SYNC_SCHEDULE_MODES.TIMES,
         emailSyncTimes: [],
+      }).success,
+      false
+    )
+  })
+
+  it("rejects duplicate fixed times", () => {
+    assert.equal(
+      financeModuleSchema.safeParse({
+        ...validFinance,
+        emailSyncScheduleMode: EMAIL_SYNC_SCHEDULE_MODES.TIMES,
+        emailSyncTimes: ["08:00", "08:00"],
+      }).success,
+      false
+    )
+  })
+
+  it("rejects a fixed time outside HH:MM", () => {
+    assert.equal(
+      financeModuleSchema.safeParse({
+        ...validFinance,
+        emailSyncScheduleMode: EMAIL_SYNC_SCHEDULE_MODES.TIMES,
+        emailSyncTimes: ["8:00"],
+      }).success,
+      false
+    )
+  })
+
+  it("rejects more fixed times than the maximum", () => {
+    const times = Array.from(
+      { length: MAX_EMAIL_SYNC_TIMES + 1 },
+      (_, index) => `${String(index).padStart(2, "0")}:00`
+    )
+    assert.equal(
+      financeModuleSchema.safeParse({
+        ...validFinance,
+        emailSyncScheduleMode: EMAIL_SYNC_SCHEDULE_MODES.TIMES,
+        emailSyncTimes: times,
       }).success,
       false
     )
@@ -188,6 +227,20 @@ describe("isEmailSyncConfigured", () => {
   })
 })
 
+describe("nextEmailSyncTime", () => {
+  it("advances an hour from the last entry", () => {
+    assert.equal(nextEmailSyncTime(["08:00"]), "09:00")
+  })
+
+  it("skips times that are already taken", () => {
+    assert.equal(nextEmailSyncTime(["08:00", "09:00"]), "10:00")
+  })
+
+  it("wraps around midnight", () => {
+    assert.equal(nextEmailSyncTime(["23:00"]), "00:00")
+  })
+})
+
 describe("emailSyncPatchFromFormValues", () => {
   it("builds an interval schedule in minutes", () => {
     const patch = emailSyncPatchFromFormValues({
@@ -200,6 +253,19 @@ describe("emailSyncPatchFromFormValues", () => {
     assert.equal(patch.mode, "PENDING")
     assert.equal(patch.enabled, true)
     assert.deepEqual(patch.schedule, { mode: "interval", everyMinutes: 60 })
+  })
+
+  it("keeps the enabled, automatic and auto-categorize flags", () => {
+    const patch = emailSyncPatchFromFormValues({
+      ...validFinance,
+      emailSyncEnabled: false,
+      emailSyncAutomatic: false,
+      autoCategorize: false,
+    })
+
+    assert.equal(patch.enabled, false)
+    assert.equal(patch.automatic, false)
+    assert.equal(patch.autoCategorize, false)
   })
 
   it("builds a fixed-times schedule and drops empty entries", () => {

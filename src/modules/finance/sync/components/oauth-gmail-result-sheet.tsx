@@ -77,6 +77,7 @@ export function OauthGmailResultSheet({
     useUserModuleConfig("finance")
   const configured = isEmailSyncConfigured(config.emailSync)
   const [editing, setEditing] = useState(false)
+  const [proposalActive, setProposalActive] = useState(true)
   const [syncNow, setSyncNow] = useState(false)
   const [syncRequested, setSyncRequested] = useState(false)
 
@@ -95,13 +96,15 @@ export function OauthGmailResultSheet({
     .sort((left, right) => right.startedAt.localeCompare(left.startedAt))[0]
 
   const showForm = ok && (!configured || editing)
-  const formValues = useMemo(
+  const savedValues = useMemo(() => configToFinanceFormValues(config), [config])
+  const proposalValues = useMemo(
     () => ({
-      ...configToFinanceFormValues(config),
+      ...savedValues,
       ...emailSyncOnboardingDefaults(config.emailSync),
     }),
-    [config]
+    [savedValues, config.emailSync]
   )
+  const formValues = proposalActive ? proposalValues : savedValues
 
   const { control, handleSubmit, reset, setValue } =
     useForm<FinanceModuleFormValues>({
@@ -118,6 +121,7 @@ export function OauthGmailResultSheet({
     setWasOpen(open)
     if (!open) {
       setEditing(false)
+      setProposalActive(true)
       setSyncNow(false)
       setSyncRequested(false)
     }
@@ -137,6 +141,7 @@ export function OauthGmailResultSheet({
         text1: "Sincronización configurada",
         text2: "Se guardó en Ajustes → Finanzas.",
       })
+      setProposalActive(false)
       setEditing(false)
       if (!syncNow || activeSources.length === 0) {
         return
@@ -321,28 +326,6 @@ export function OauthGmailResultSheet({
                 onCheckedChange={setSyncNow}
                 disabled={activeSources.length === 0}
               />
-
-              {syncRequested ? (
-                <div className="rounded-xl border border-border bg-card px-3 py-3 text-sm text-muted-foreground">
-                  {isSyncPending ? (
-                    <span className="flex items-center gap-2">
-                      <Spinner /> Encolando la sincronización…
-                    </span>
-                  ) : running ? (
-                    <span className="flex items-center gap-2">
-                      <Spinner /> Sincronizando correos…
-                    </span>
-                  ) : latestLog ? (
-                    <span>
-                      {syncLogStatusLabel(latestLog.status)} ·{" "}
-                      {latestLog.emailsScanned} correos ·{" "}
-                      {latestLog.transactionsNew} nuevos
-                    </span>
-                  ) : (
-                    <span>Sin correos nuevos por ahora.</span>
-                  )}
-                </div>
-              ) : null}
             </form>
           ) : (
             <SummarySection
@@ -372,6 +355,28 @@ export function OauthGmailResultSheet({
               />
             </SummarySection>
           )}
+
+          {syncRequested ? (
+            <div className="rounded-xl border border-border bg-card px-3 py-3 text-sm text-muted-foreground">
+              {isSyncPending ? (
+                <span className="flex items-center gap-2">
+                  <Spinner /> Encolando la sincronización…
+                </span>
+              ) : running ? (
+                <span className="flex items-center gap-2">
+                  <Spinner /> Sincronizando correos…
+                </span>
+              ) : latestLog ? (
+                <span>
+                  {syncLogStatusLabel(latestLog.status)} ·{" "}
+                  {latestLog.emailsScanned} correos ·{" "}
+                  {latestLog.transactionsNew} nuevos
+                </span>
+              ) : (
+                <span>Sin correos nuevos por ahora.</span>
+              )}
+            </div>
+          ) : null}
         </div>
       )}
     </BottomSheet>
