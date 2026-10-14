@@ -12,7 +12,6 @@ import {
 import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
 import { CategoryMultiTrigger } from "@/src/modules/finance/shared/components/pickers/category-multi-trigger"
 import { CategoryPickerSheet } from "@/src/modules/finance/shared/components/pickers/category-picker-sheet"
-import { CATALOG_NONE } from "@/src/modules/finance/shared/constants/catalog"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
 import {
   useCreateBudget,
@@ -24,6 +23,7 @@ import {
   boundsForPeriod,
   buildCreateBudgetBody,
 } from "@/src/modules/finance/shared/lib/budget-payloads"
+import { removeCategoryId } from "@/src/modules/finance/shared/lib/category-selection"
 import { filterCategoriesByType } from "@/src/modules/finance/shared/lib/category-tree"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
@@ -302,6 +302,13 @@ export function BudgetSheet({
               categories={selectedCategories}
               disabled={!hasCategories}
               onClick={() => setCategoryPickerOpen(true)}
+              onRemove={(categoryId) =>
+                setValue(
+                  "categoryIds",
+                  removeCategoryId(categoryIds, categoryId),
+                  { shouldValidate: true }
+                )
+              }
             />
             {errors.categoryIds?.message ? (
               <FieldError>{errors.categoryIds.message}</FieldError>
@@ -456,16 +463,10 @@ export function BudgetSheet({
         categories={categories}
         categoryType="EXPENSE"
         multiple
-        selectedIds={categoryIds}
-        onSelect={(categoryId) => {
-          const next =
-            categoryId === CATALOG_NONE
-              ? []
-              : categoryIds.includes(categoryId)
-                ? categoryIds.filter((current) => current !== categoryId)
-                : [...categoryIds, categoryId]
+        value={categoryIds}
+        onChange={(next) =>
           setValue("categoryIds", next, { shouldValidate: true })
-        }}
+        }
       />
 
       {discardChangesDialog}

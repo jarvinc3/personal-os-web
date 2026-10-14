@@ -18,18 +18,22 @@ Un valor que sale de una lista larga o de un catálogo (categoría, cuenta o tar
 
 Una categoría se elige siempre con el selector compartido de `pickers/`, nunca con chips en línea ni un `Select`.
 
-- Una categoría: `CategoryTrigger` abre `CategoryPickerSheet`.
-- Varias: `CategoryMultiTrigger` abre el mismo `CategoryPickerSheet` con `multiple` y `selectedIds`. La hoja no se cierra al tocar, marca cada elegida con un check y `Sin categoría` limpia la selección.
-- El disparador muestra las categorías elegidas como tarjetas; sin ninguna dice "Elegir categorías".
+- Una categoría: `CategoryTrigger` abre `CategoryPickerSheet` con `onSelect`. Al elegir escribe el valor y la hoja se cierra.
+- Varias: `CategoryMultiTrigger` abre el mismo `CategoryPickerSheet` con `multiple`, `value: string[]` y `onChange(ids)`. La hoja no se cierra al tocar, marca cada elegida con un check y `Sin categoría` limpia la selección.
+- La lógica de alternar o limpiar vive en la hoja: usa `toggleCategorySelection` de `lib/category-selection`. El formulario solo guarda los ids que recibe por `onChange`.
+- El disparador múltiple muestra las elegidas como tarjetas, cada una con una X para quitarla, una fila "Añadir categoría" cuando ya hay elegidas y "Elegir categorías" cuando no hay ninguna.
+- Categoría padre: la misma hoja con `onlyParents` y `excludeIds` (la propia categoría), y `noneLabel="Sin padre"`.
 
 ```tsx
 const { picker, openPicker, closeHandlerFor } = usePicker<Picker>("none")
 
-<DestinationTrigger destination={destination} onClick={() => openPicker("destination")} />
-
-<DestinationPickerSheet
-  open={picker === "destination"}
-  onOpenChange={closeHandlerFor("destination")}
-  onSelect={(next) => setValue("destination", next, { shouldValidate: true })}
+<CategoryPickerSheet
+  open={picker === "category"}
+  onOpenChange={closeHandlerFor("category")}
+  categories={categories}
+  categoryType="EXPENSE"
+  multiple
+  value={categoryIds}
+  onChange={(ids) => setValue("categoryIds", ids, { shouldValidate: true })}
 />
 ```

@@ -19,9 +19,11 @@ export function CategoryCard({
   isSystem,
   description,
   onPress,
+  leading,
   trailing,
   isLast = true,
   variant = "default",
+  disabled = false,
   className,
 }: {
   name: string
@@ -30,10 +32,12 @@ export function CategoryCard({
   isSystem: boolean
   description?: string
   onPress?: () => void
+  leading?: ReactNode
   trailing?: ReactNode
   isLast?: boolean
   /** Hides the system/personal mark. Used by the transaction category picker. */
   variant?: "default" | "pick"
+  disabled?: boolean
   className?: string
 }) {
   const emoji = icon?.trim()
@@ -46,11 +50,12 @@ export function CategoryCard({
       tintRow={Boolean(color)}
       leadingClassName={empty ? "bg-card" : undefined}
       leading={
-        emoji ? (
+        leading ??
+        (emoji ? (
           <span className="text-lg leading-none" aria-hidden>
             {emoji}
           </span>
-        ) : undefined
+        ) : undefined)
       }
       icon={emoji ? undefined : TagsIcon}
       value={
@@ -71,6 +76,7 @@ export function CategoryCard({
       trailing={trailing}
       isLast={isLast}
       onPress={onPress}
+      disabled={disabled}
       showChevron={false}
       className={cn("pr-4", empty && "bg-background", className)}
     />

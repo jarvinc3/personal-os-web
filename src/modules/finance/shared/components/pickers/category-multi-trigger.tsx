@@ -2,10 +2,12 @@
 
 import { CategoryCard } from "@/src/modules/finance/shared/components/category-card"
 import type { FinanceCategory } from "@/src/modules/finance/shared/types/entities"
+import { PlusIcon, XIcon } from "lucide-react"
 
 type CategoryMultiTriggerProps = {
   categories: FinanceCategory[]
   onClick: () => void
+  onRemove?: (categoryId: string) => void
   placeholder?: string
   disabled?: boolean
 }
@@ -13,6 +15,7 @@ type CategoryMultiTriggerProps = {
 export function CategoryMultiTrigger({
   categories,
   onClick,
+  onRemove,
   placeholder = "Elegir categorías",
   disabled = false,
 }: CategoryMultiTriggerProps) {
@@ -23,7 +26,8 @@ export function CategoryMultiTrigger({
         icon={null}
         isSystem={false}
         variant="pick"
-        onPress={disabled ? undefined : onClick}
+        disabled={disabled}
+        onPress={onClick}
       />
     )
   }
@@ -37,9 +41,32 @@ export function CategoryMultiTrigger({
           icon={category.icon}
           color={category.color}
           isSystem={category.isSystem}
-          onPress={disabled ? undefined : onClick}
+          disabled={disabled}
+          onPress={onClick}
+          trailing={
+            onRemove ? (
+              <button
+                type="button"
+                aria-label={`Quitar ${category.name}`}
+                disabled={disabled}
+                className="flex size-8 items-center justify-center rounded-full text-muted-foreground disabled:opacity-50"
+                onClick={() => onRemove(category.id)}
+              >
+                <XIcon className="size-4" />
+              </button>
+            ) : undefined
+          }
         />
       ))}
+      <CategoryCard
+        name="Añadir categoría"
+        icon={null}
+        isSystem={false}
+        variant="pick"
+        disabled={disabled}
+        onPress={onClick}
+        leading={<PlusIcon className="size-5" />}
+      />
     </div>
   )
 }
