@@ -86,16 +86,17 @@ export function toSubscriptionFormValues(
   options: {
     defaultCurrency: string
     defaultReminderDays: number
-    draft?: SubscriptionDraft | null
+    draft?: SubscriptionDraft
   }
 ): SubscriptionFormValues {
-  const draft = options.draft ?? null
   return {
-    name: subscription?.name ?? draft?.name ?? "",
+    name: subscription?.name ?? options.draft?.name ?? "",
     domain: subscription?.domain ?? "",
-    amount: subscription?.amount ?? draft?.amount ?? "",
+    amount: subscription?.amount ?? options.draft?.amount ?? "",
     currency:
-      subscription?.currency ?? draft?.currency ?? options.defaultCurrency,
+      subscription?.currency ??
+      options.draft?.currency ??
+      options.defaultCurrency,
     billingCycle: subscription?.billingCycle ?? "MONTHLY",
     billingInterval: String(subscription?.billingInterval ?? 1),
     anchorDate: subscription
@@ -110,7 +111,7 @@ export function toSubscriptionFormValues(
     manageUrl: subscription?.manageUrl ?? "",
     notes: subscription?.notes ?? "",
     sourcePatternId:
-      subscription?.sourcePatternId ?? draft?.sourcePatternId ?? "",
+      subscription?.sourcePatternId ?? options.draft?.sourcePatternId ?? "",
   }
 }
 

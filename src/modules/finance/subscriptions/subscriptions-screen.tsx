@@ -214,7 +214,7 @@ function SubscriptionsScreenBody() {
           }
         }}
         subscription={null}
-        draft={subscriptionDraft}
+        draft={subscriptionDraft ?? undefined}
         display={display}
         defaultReminderDays={config.subscriptions.reminderDaysBefore}
       />

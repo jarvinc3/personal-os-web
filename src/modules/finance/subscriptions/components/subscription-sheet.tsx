@@ -55,7 +55,7 @@ type SubscriptionSheetProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
   subscription: FinanceSubscription | null
-  draft?: SubscriptionDraft | null
+  draft?: SubscriptionDraft
   display: FinanceMoneyDisplay
   defaultReminderDays: number
 }
@@ -64,7 +64,7 @@ export function SubscriptionSheet({
   open,
   onOpenChange,
   subscription,
-  draft = null,
+  draft,
   display,
   defaultReminderDays,
 }: SubscriptionSheetProps) {
