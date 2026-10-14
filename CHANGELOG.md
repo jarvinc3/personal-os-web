@@ -2,6 +2,16 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.28.2] - 2026-10-14
+
+### Corregido
+
+- Editar una suscripción ya puede vaciar los campos opcionales (fin de la prueba, enlace de gestión y notas): el formulario envía `null` y el servidor deja de tomar la omisión como «sin cambios».
+
+### Cambiado
+
+- Specs del payload de suscripción que cubren el vaciado de los campos opcionales.
+
 ## [0.28.1] - 2026-10-14
 
 ### Cambiado
