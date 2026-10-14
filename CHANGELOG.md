@@ -2,6 +2,20 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [1.19.0] - 2026-10-13
+
+### Agregado
+
+- Selector de varias categorías en el presupuesto: las elegidas se muestran como tarjetas y se abre la hoja de categorías en modo múltiple, con una marca en cada selección.
+- Botón "Crear presupuesto" en la lista de presupuestos.
+- El resumen del mes en el inicio muestra el mes y el año en una insignia, con el color del módulo de Finanzas.
+
+### Cambiado
+
+- Las pestañas de Planificación tienen color propio y nuevo orden: Ahorros, Presupuestos, Cobros y Préstamos.
+- La lista de movimientos separa cada semana en su propia sección, con un encabezado más limpio y el buscador ajustado.
+- Los detalles opcionales de préstamos, cobros y metas de ahorro se agrupan en una sección de resumen.
+- El botón principal del login muestra una flecha que se reemplaza por el indicador de carga, y el campo de correo ya no trae texto de ejemplo.
 ## [1.18.1] - 2026-10-13
 
 ### Corregido
