@@ -2,6 +2,16 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.26.1] - 2026-10-14
+
+### Corregido
+
+- El chat conserva las respuestas del agente que son solo un bloque (una tarjeta sin texto) al recargar la sesión.
+
+### Cambiado
+
+- El spec de `mergeSessionMessages` cubre los mensajes con bloques sin texto, el mensaje interno de tools y la preferencia por los bloques guardados. Sin cambios de comportamiento.
+
 ## [0.26.0] - 2026-10-14
 
 ### Agregado
