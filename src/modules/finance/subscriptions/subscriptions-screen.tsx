@@ -219,7 +219,9 @@ function SubscriptionsScreenBody() {
               }
             >
               <div className="flex flex-col gap-3">
-                {value === "CONFIRMED" && items.length > 0 ? (
+                {value === "CONFIRMED" &&
+                items.length > 0 &&
+                !listQuery.hasNextPage ? (
                   <p className="text-sm text-muted-foreground">
                     Costo mensual estimado:{" "}
                     <span className="font-medium text-foreground">
@@ -367,6 +369,13 @@ function RecurringCard({
           <p className="text-xs text-muted-foreground">Costo mensual</p>
           <p className="text-sm font-medium">
             {formatFinanceMoney(pattern.monthlyEquivalent, {
+              ...display,
+              currency: pattern.currency,
+            })}
+          </p>
+          <p className="mt-1 text-xs text-muted-foreground">Costo anual</p>
+          <p className="text-sm font-medium">
+            {formatFinanceMoney(pattern.annualEquivalent, {
               ...display,
               currency: pattern.currency,
             })}

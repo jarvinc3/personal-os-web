@@ -1,16 +1,16 @@
 "use client"
 
+import {
+  chartConfig,
+  chartPoints,
+} from "@/src/modules/ai/components/blocks/chat-chart-data"
 import { chatMoneyDisplay } from "@/src/modules/ai/components/blocks/chat-money"
-import type {
-  ChatBlock,
-  ChatChartPoint,
-} from "@/src/modules/ai/types/chat.types"
+import type { ChatBlock } from "@/src/modules/ai/types/chat.types"
 import { formatFinanceMoney } from "@/src/modules/finance"
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-  type ChartConfig,
 } from "@/src/shared/components/ui/chart"
 import {
   Bar,
@@ -23,53 +23,15 @@ import {
   XAxis,
 } from "recharts"
 
-const CHART_PALETTE = [
-  "#10B981",
-  "#3B82F6",
-  "#F59E0B",
-  "#EF4444",
-  "#8B5CF6",
-  "#14B8A6",
-]
-
-type ChartPointValue = {
-  label: string
-  value: number
-  color: string
-}
-
-function toChartPoints(series: ChatChartPoint[]): ChartPointValue[] {
-  return series.map((point, index) => ({
-    label: point.label,
-    value: Number(point.value) || 0,
-    color: point.color ?? CHART_PALETTE[index % CHART_PALETTE.length],
-  }))
-}
-
-function chartConfig(
-  block: Extract<ChatBlock, { type: "chart" }>
-): ChartConfig {
-  return {
-    value: {
-      label: block.title ?? "Monto",
-      color: CHART_PALETTE[0],
-    },
-  }
-}
-
-function tooltipFormatter(currency: string | undefined) {
-  return (value: unknown) =>
-    formatFinanceMoney(String(value ?? ""), chatMoneyDisplay(currency))
-}
-
 type ChatChartProps = {
   block: Extract<ChatBlock, { type: "chart" }>
 }
 
 export function ChatChart({ block }: ChatChartProps) {
-  const points = toChartPoints(block.series)
-  const config = chartConfig(block)
-  const formatValue = tooltipFormatter(block.currency)
+  const points = chartPoints(block.series)
+  const config = chartConfig(block.title)
+  const formatValue = (value: unknown) =>
+    formatFinanceMoney(String(value ?? ""), chatMoneyDisplay(block.currency))
   const ariaLabel = block.title ?? "Gráfico"
 
   if (block.kind === "donut") {
@@ -85,7 +47,11 @@ export function ChatChart({ block }: ChatChartProps) {
           aria-label={ariaLabel}
         >
           <PieChart>
-            <ChartTooltip content={<ChartTooltipContent nameKey="label" />} />
+            <ChartTooltip
+              content={
+                <ChartTooltipContent nameKey="label" formatter={formatValue} />
+              }
+            />
             <Pie
               data={points}
               dataKey="value"
@@ -93,8 +59,8 @@ export function ChatChart({ block }: ChatChartProps) {
               innerRadius={44}
               outerRadius={72}
             >
-              {points.map((entry) => (
-                <Cell key={entry.label} fill={entry.color} />
+              {points.map((entry, index) => (
+                <Cell key={`${entry.label}-${index}`} fill={entry.color} />
               ))}
             </Pie>
           </PieChart>

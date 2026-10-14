@@ -1,6 +1,6 @@
 # Finance — estado
 
-Fecha: 2026-10-14 (web `v0.27.1` / `12eb305`, back `v0.25.1` / `c3f99bd`)
+Fecha: 2026-10-14 (web `v0.27.2` / `12eb305`, back `v0.25.2` / `c3f99bd`)
 
 | Ítem                                                                                                                                                                   | Estado        | Evidencia                                                                                                         |
 | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | ----------------------------------------------------------------------------------------------------------------- |
@@ -18,10 +18,10 @@ Fecha: 2026-10-14 (web `v0.27.1` / `12eb305`, back `v0.25.1` / `c3f99bd`)
 | Sincronización automática al conectar el correo | `implemented` | pendiente 03 (web v0.23.x) |
 | Paginación uniforme por cursor | `implemented` | `useInfiniteFinanceList` + `InfiniteListSentinel`; pendiente 04 (web v0.24.x / back v0.22.x) |
 | Agente: contexto de entidad (`entityRef`) | `implemented` | `useRegisterChatContext`, chip en `chat-input.tsx`; pendiente 05 (web v0.25.x / back v0.23.x) |
-| Agente: bloques visuales (movimiento, lista, presupuesto, préstamo) | `implemented` | `src/modules/ai/components/blocks/`; pendiente 06 |
+| Agente: bloques visuales (movimiento, lista, presupuesto, préstamo, gráfico) | `implemented` | `src/modules/ai/components/blocks/`; pendiente 06 |
 | Captura rápida en lenguaje natural | `implemented` | `quick-entry/` (barra + preview que precarga el flujo guiado); `POST /finance/quick-entry/parse` |
 | Resumen semanal | `implemented` | `dashboard/components/home-weekly-summary.tsx`; `GET /finance/analytics/weekly-summary`; ajustes `weeklySummary` y `weeklySummaryDay`; pendiente 06 (web v0.26.x / back v0.24.x) |
-| Comercios y recurrentes (detección básica) | `implemented` | `/finance/merchants` (atajo en Productos), `/finance/subscriptions` básica (atajo en Planificación); `GET/PATCH /finance/merchants`, `GET/POST/PATCH /finance/recurring`; ajuste `recurringAlerts`; pendiente 07 (web v0.27.x / back v0.25.x) |
+| Comercios y recurrentes (detección básica) | `implemented` | `/finance/merchants` (atajo en Productos), `/finance/subscriptions` básica (atajo en Planificación); `GET/PATCH /finance/merchants`, `GET/POST/PATCH /finance/recurring`; ajuste `recurringAlerts`; pendiente 07 (web v0.27.0–v0.27.2 / back v0.25.0–v0.25.2) |
 | Suscripciones (gestor completo, tablas propias y pagos)                                                                                                                | `planned`     | [pendientes/08](./pendientes/08-suscripciones.md) |
 | Deshacer tras eliminar                                                                                                                                                 | `implemented` | endpoints `POST <entidad>/:id/restore`; toast "Deshacer" en los 9 detalles                                        |
 | Papelera de reciclaje (`/finance/recycle-bin`)                                                                                                                         | `implemented` | `recycle-bin/`; `GET /finance/recycle-bin`; restaurar con `PATCH isActive:true` y `POST <entidad>/:id/restore`    |
