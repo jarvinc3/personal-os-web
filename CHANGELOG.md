@@ -2,6 +2,15 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.31.0] - 2026-10-20 - Integridad de saldos
+
+### Agregado
+
+- Banner de «Saldo descuadrado» en el detalle de cuenta y de tarjeta de crédito, con saldo guardado, esperado, diferencia y botón «Recalcular» con confirmación.
+- Lista de desviaciones abiertas en Productos, con el mismo recálculo, y sección «Integridad de saldos» con «Verificar ahora» en `/settings/finance`.
+- Hooks `useFinanceIntegrity` y `useRecalculateBalance`; ajuste de notificación «Saldos descuadrados».
+- Specs de la lógica del banner, del badge y del flujo de recálculo.
+
 ## [0.30.2] - 2026-10-19
 
 ### Corregido
