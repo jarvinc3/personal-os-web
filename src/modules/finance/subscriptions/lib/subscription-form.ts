@@ -52,6 +52,7 @@ export const subscriptionFormSchema = z.object({
   trialEndsAt: z.string(),
   cardId: z.string(),
   accountId: z.string(),
+  categoryId: z.string(),
   reminderDaysBefore: z
     .string()
     .trim()
@@ -105,6 +106,7 @@ export function toSubscriptionFormValues(
     trialEndsAt: toDateInput(subscription?.trialEndsAt),
     cardId: subscription?.cardId ?? CATALOG_NONE,
     accountId: subscription?.accountId ?? CATALOG_NONE,
+    categoryId: subscription?.categoryId ?? CATALOG_NONE,
     reminderDaysBefore: String(
       subscription?.reminderDaysBefore ?? options.defaultReminderDays
     ),
@@ -131,6 +133,7 @@ export function subscriptionPayload(
     trialEndsAt: values.trialEndsAt || null,
     cardId: values.cardId === CATALOG_NONE ? null : values.cardId,
     accountId: values.accountId === CATALOG_NONE ? null : values.accountId,
+    categoryId: values.categoryId === CATALOG_NONE ? null : values.categoryId,
     reminderDaysBefore: Number(values.reminderDaysBefore),
     manageUrl: values.manageUrl.trim() || null,
     notes: values.notes.trim() || null,

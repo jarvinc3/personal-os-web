@@ -10,6 +10,8 @@ import {
   BrandLogo,
   brandPreviewUrl,
 } from "@/src/modules/finance/shared/components/brand-logo"
+import { CategoryTrigger } from "@/src/modules/finance/shared/components/pickers/category-trigger"
+import { CategoryPickerSheet } from "@/src/modules/finance/shared/components/pickers/category-picker-sheet"
 import { DestinationTrigger } from "@/src/modules/finance/shared/components/pickers/destination-trigger"
 import { DestinationPickerSheet } from "@/src/modules/finance/shared/components/pickers/destination-picker-sheet"
 import { FinanceCurrencyPickerSheet } from "@/src/modules/finance/shared/components/pickers/finance-currency-picker-sheet"
@@ -25,6 +27,7 @@ import {
   useCreateSubscription,
   useUpdateSubscription,
 } from "@/src/modules/finance/shared/hooks/use-subscriptions"
+import { useCategories } from "@/src/modules/finance/shared/hooks/use-categories"
 import { CATALOG_NONE } from "@/src/modules/finance/shared/constants/catalog"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import {
@@ -79,8 +82,10 @@ export function SubscriptionSheet({
   const updateMutation = useUpdateSubscription()
   const { amountEntry, setAmountEntry } = useFinanceAmountEntry()
   const { picker, openPicker, closeHandlerFor } = usePicker<
-    "none" | "currency" | "destination"
+    "none" | "currency" | "destination" | "category"
   >("none")
+  const categoriesQuery = useCategories(open)
+  const categories = categoriesQuery.data ?? []
 
   const {
     control,
@@ -119,6 +124,8 @@ export function SubscriptionSheet({
   const domain = useWatch({ control, name: "domain" })
   const cardId = useWatch({ control, name: "cardId" })
   const accountId = useWatch({ control, name: "accountId" })
+  const categoryId = useWatch({ control, name: "categoryId" })
+  const category = categories.find((item) => item.id === categoryId) ?? null
   const destination =
     cardId !== CATALOG_NONE
       ? encodeLedgerTarget("card", cardId)
@@ -304,6 +311,16 @@ export function SubscriptionSheet({
               onClick={() => openPicker("destination")}
             />
           </Field>
+          <Field className="gap-1">
+            <FieldLabel className="text-sm text-muted-foreground">
+              Categoría
+            </FieldLabel>
+            <CategoryTrigger
+              category={category}
+              disabled={isPending}
+              onClick={() => openPicker("category")}
+            />
+          </Field>
           <Controller
             control={control}
             name="reminderDaysBefore"
@@ -372,6 +389,15 @@ export function SubscriptionSheet({
             shouldDirty: true,
           })
         }}
+      />
+
+      <CategoryPickerSheet
+        open={picker === "category"}
+        onOpenChange={closeHandlerFor("category")}
+        categories={categories}
+        categoryType="EXPENSE"
+        value={categoryId}
+        onSelect={(next) => setValue("categoryId", next, { shouldDirty: true })}
       />
 
       {discardChangesDialog}

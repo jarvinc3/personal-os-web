@@ -725,7 +725,31 @@ export type FinanceBillingCycle =
 
 export type FinanceSubscriptionStatus = "ACTIVE" | "PAUSED" | "CANCELLED"
 
+export const FINANCE_SUBSCRIPTION_GROUP_BYS = [
+  "category",
+  "provider",
+  "none",
+] as const
+export type FinanceSubscriptionGroupBy =
+  (typeof FINANCE_SUBSCRIPTION_GROUP_BYS)[number]
+
 export type FinanceSubscriptionPaymentSource = "AUTO" | "MANUAL"
+
+export type FinanceSubscriptionPaymentMethod = {
+  type: "CARD" | "ACCOUNT"
+  id: string
+  name: string
+  institution: string | null
+  last4: string | null
+  logoUrl: string | null
+}
+
+export type FinanceSubscriptionCategory = {
+  id: string
+  name: string
+  icon: string | null
+  color: string | null
+}
 
 export type FinanceSubscription = {
   id: string
@@ -749,6 +773,9 @@ export type FinanceSubscription = {
   cardName: string | null
   accountId: string | null
   accountName: string | null
+  categoryId: string | null
+  category: FinanceSubscriptionCategory | null
+  paymentMethod: FinanceSubscriptionPaymentMethod | null
   manageUrl: string | null
   notes: string | null
   sourcePatternId: string | null
@@ -777,12 +804,85 @@ export type FinanceSubscriptionPayment = {
   } | null
 }
 
+export type FinanceSubscriptionTrend = {
+  direction: "up" | "down" | "flat"
+  percent: number
+}
+
 export type FinanceSubscriptionSummary = {
   baseCurrency: string
   activeCount: number
   monthlyCost: string
   annualCost: string
+  previousMonthlyCost: string
+  realSpendThisMonth: string
+  realSpendPreviousMonth: string
+  trend: FinanceSubscriptionTrend | null
+  pendingDetectedCount: number
+  cancelledAnnualSavings: string
   upcoming: FinanceSubscription[]
+}
+
+export const FINANCE_SUBSCRIPTION_BREAKDOWNS = [
+  "category",
+  "instrument",
+  "currency",
+] as const
+export type FinanceSubscriptionBreakdownAxis =
+  (typeof FINANCE_SUBSCRIPTION_BREAKDOWNS)[number]
+
+export type FinanceSubscriptionBreakdownItem = {
+  key: string
+  label: string
+  color: string | null
+  count: number
+  amount: string
+}
+
+export type FinanceSubscriptionBreakdown = {
+  baseCurrency: string
+  by: FinanceSubscriptionBreakdownAxis
+  items: FinanceSubscriptionBreakdownItem[]
+}
+
+export type FinanceSubscriptionUpcomingCharge = {
+  id: string
+  subscriptionId: string
+  name: string
+  logoUrl: string | null
+  amount: string
+  currency: string
+  date: string
+  daysUntil: number
+  paymentMethod: FinanceSubscriptionPaymentMethod | null
+}
+
+export type FinanceSubscriptionUpcoming = {
+  from: string
+  to: string
+  items: FinanceSubscriptionUpcomingCharge[]
+}
+
+export const FINANCE_SUBSCRIPTION_ALERT_KINDS = [
+  "PRICE_INCREASE",
+  "TRIAL_ENDING",
+  "ANNUAL_RENEWAL",
+  "MISSED_CHARGE",
+] as const
+export type FinanceSubscriptionAlertKind =
+  (typeof FINANCE_SUBSCRIPTION_ALERT_KINDS)[number]
+
+export type FinanceSubscriptionAlert = {
+  id: string
+  kind: FinanceSubscriptionAlertKind
+  subscriptionId: string
+  subscriptionName: string
+  date: string
+  currency: string
+  amount: string | null
+  previousAmount: string | null
+  percent: number | null
+  daysUntil: number | null
 }
 
 export const FINANCE_RECONCILIATION_KINDS = [

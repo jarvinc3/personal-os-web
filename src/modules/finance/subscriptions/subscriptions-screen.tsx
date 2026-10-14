@@ -4,12 +4,15 @@ import { BrandLogo } from "@/src/modules/finance/shared/components/brand-logo"
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
 import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
 import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
-import {
-  FinanceSegmentedControl,
-  FinanceSuggestionRow,
-} from "@/src/modules/finance/shared/components/forms/form-blocks"
+import { FinanceExpenseTrendBadge } from "@/src/modules/finance/shared/components/expense-trend-badge"
+import { FinanceSegmentedControl } from "@/src/modules/finance/shared/components/forms/form-blocks"
 import { FinanceGate } from "@/src/modules/finance/finance-gate"
-import { RecurringSheet } from "@/src/modules/finance/subscriptions/components/recurring-sheet"
+import {
+  FinanceRingChart,
+  FinanceRingLegend,
+} from "@/src/modules/finance/products/components/ring-chart"
+import { RecurringArchiveSheet } from "@/src/modules/finance/subscriptions/components/recurring-archive-sheet"
+import { SubscriptionCard } from "@/src/modules/finance/subscriptions/components/subscription-card"
 import { SubscriptionSheet } from "@/src/modules/finance/subscriptions/components/subscription-sheet"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
 import {
@@ -17,40 +20,52 @@ import {
   useUpdateRecurring,
 } from "@/src/modules/finance/shared/hooks/use-recurring"
 import {
+  useCreateSubscription,
+  useDismissSubscriptionAlert,
+  useSubscriptionAlerts,
   useSubscriptionSummary,
   useSubscriptions,
+  useSubscriptionsBreakdown,
+  useSubscriptionsUpcoming,
 } from "@/src/modules/finance/shared/hooks/use-subscriptions"
+import { expenseTrend } from "@/src/modules/finance/shared/lib/finance-home-month"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
-import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 import {
-  billingCycleLabel,
-  subscriptionStatusLabel,
-  subscriptionStatusVariant,
-} from "@/src/modules/finance/subscriptions/lib/subscription-display"
+  formatFinanceMoney,
+  type FinanceMoneyDisplay,
+} from "@/src/modules/finance/shared/lib/money"
+import {
+  monthKeyFromDate,
+  isoMonthBounds,
+  listYearMonths,
+  type MonthKey,
+} from "@/src/modules/finance/shared/lib/month-window"
+import { weeksForMonth } from "@/src/modules/finance/shared/lib/calendar-weeks"
 import {
   nextChargeLabel,
-  RECURRING_KIND_LABEL,
   recurringFrequencyLabel,
 } from "@/src/modules/finance/subscriptions/lib/recurring-display"
+import {
+  alertOccurrenceLabel,
+  breakdownFilter,
+  buildSubscriptionSlices,
+  groupSubscriptions,
+  subscriptionPayloadFromPattern,
+  SUBSCRIPTION_ALERT_LABEL,
+  SUBSCRIPTION_BREAKDOWN_LABEL,
+  type SubscriptionListFilter,
+} from "@/src/modules/finance/subscriptions/lib/subscription-view"
 import type { SubscriptionDraft } from "@/src/modules/finance/subscriptions/lib/subscription-form"
+import { FinanceMonthPicker } from "@/src/modules/finance/transactions/components/month-picker"
 import type {
   FinanceRecurringPattern,
-  FinanceRecurringStatus,
+  FinanceSubscriptionAlert,
+  FinanceSubscriptionBreakdownAxis,
+  FinanceSubscriptionPaymentMethod,
   FinanceSubscriptionStatus,
 } from "@/src/modules/finance/shared/types/entities"
-import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { FormTextField } from "@/src/shared/components/layout/form-blocks"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/src/shared/components/ui/alert-dialog"
 import { Badge } from "@/src/shared/components/ui/badge"
 import { Button } from "@/src/shared/components/ui/button"
 import {
@@ -62,79 +77,37 @@ import {
 } from "@/src/shared/components/ui/empty"
 import { InfiniteListSentinel } from "@/src/shared/components/ui/infinite-list-sentinel"
 import { Spinner } from "@/src/shared/components/ui/spinner"
-import { SummaryItem, SummarySection } from "@/src/shared/components/ui/summary"
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/src/shared/components/ui/tabs"
+import { SummarySection } from "@/src/shared/components/ui/summary"
 import { appToast } from "@/src/shared/lib/app-toast"
-import { cn } from "@/src/shared/lib/utils"
 import {
-  CalendarClockIcon,
+  BellIcon,
+  CalendarDaysIcon,
   CheckIcon,
-  PencilIcon,
   PlusIcon,
   RepeatIcon,
-  RotateCcwIcon,
   SearchIcon,
   SparklesIcon,
-  WalletIcon,
   XIcon,
 } from "lucide-react"
-import { useMemo, useState } from "react"
+import { useMemo, useRef, useState } from "react"
 
-const MANAGED_TAB = "managed"
-const RECURRING_TAB = "recurring"
-const SECTION_TAB_QUERY = "tab"
-const RECURRING_STATUS_QUERY = "recurring"
-const SUGGESTION_LIMIT = 3
-
-type SectionTab = typeof MANAGED_TAB | typeof RECURRING_TAB
-
-type StatusFilter = "ALL" | FinanceSubscriptionStatus
-
-const STATUS_FILTER_OPTIONS: { value: StatusFilter; label: string }[] = [
+const STATUS_FILTER_OPTIONS: {
+  value: "ALL" | FinanceSubscriptionStatus
+  label: string
+}[] = [
   { value: "ALL", label: "Todas" },
   { value: "ACTIVE", label: "Activas" },
   { value: "PAUSED", label: "Pausadas" },
-  { value: "CANCELLED", label: "Canceladas" },
 ]
 
-const RECURRING_TABS: {
-  value: FinanceRecurringStatus
+const BREAKDOWN_OPTIONS: {
+  value: FinanceSubscriptionBreakdownAxis
   label: string
-  icon: typeof RepeatIcon
-  color: string
 }[] = [
-  {
-    value: "SUGGESTED",
-    label: "Por confirmar",
-    icon: RepeatIcon,
-    color: "#f59e0b",
-  },
-  {
-    value: "CONFIRMED",
-    label: "Confirmados",
-    icon: CheckIcon,
-    color: "#16a34a",
-  },
-  {
-    value: "DISMISSED",
-    label: "Descartados",
-    icon: XIcon,
-    color: "#64748b",
-  },
+  { value: "category", label: "Categoría" },
+  { value: "instrument", label: "Método" },
+  { value: "currency", label: "Moneda" },
 ]
-
-function isSectionTab(value: unknown): value is SectionTab {
-  return value === MANAGED_TAB || value === RECURRING_TAB
-}
-
-function isRecurringTab(value: unknown): value is FinanceRecurringStatus {
-  return RECURRING_TABS.some((tab) => tab.value === value)
-}
 
 export function SubscriptionsScreen() {
   return (
@@ -146,67 +119,196 @@ export function SubscriptionsScreen() {
 
 function SubscriptionsScreenBody() {
   const { isEnabled, config } = useFinanceEnabled()
-  const [section, setSection] = useState<SectionTab>(MANAGED_TAB)
-  const [sheetOpen, setSheetOpen] = useState(false)
-  const [subscriptionDraft, setSubscriptionDraft] =
-    useState<SubscriptionDraft | null>(null)
-  const display = {
+  const now = useMemo(() => new Date(), [])
+  const display: FinanceMoneyDisplay = {
     currency: config.baseCurrency,
     showCents: config.display.showCents,
     compactNumbers: config.display.compactNumbers,
   }
+  const [sheetOpen, setSheetOpen] = useState(false)
+  const [subscriptionDraft, setSubscriptionDraft] =
+    useState<SubscriptionDraft | null>(null)
+  const [breakdownBy, setBreakdownBy] =
+    useState<FinanceSubscriptionBreakdownAxis>("category")
+  const [activeSlice, setActiveSlice] = useState<string | null>(null)
+  const [upcomingView, setUpcomingView] = useState<"strip" | "calendar">(
+    "strip"
+  )
+  const upcomingRef = useRef<HTMLDivElement>(null)
+  const detectedRef = useRef<HTMLDivElement>(null)
+
+  const summaryQuery = useSubscriptionSummary(isEnabled)
+  const breakdownQuery = useSubscriptionsBreakdown(isEnabled, breakdownBy)
+  const summary = summaryQuery.data
+  const breakdownItems = breakdownQuery.data?.items ?? []
+  const ringDisplay = {
+    ...display,
+    currency: breakdownQuery.data?.baseCurrency ?? display.currency,
+  }
+  const slices = buildSubscriptionSlices(breakdownItems, ringDisplay)
+  const sliceFilter = activeSlice
+    ? breakdownFilter(breakdownBy, activeSlice)
+    : null
+  const activeSliceLabel = activeSlice
+    ? (breakdownItems.find((item) => item.key === activeSlice)?.label ?? null)
+    : null
 
   function openCreate(draft: SubscriptionDraft | null = null) {
     setSubscriptionDraft(draft)
     setSheetOpen(true)
   }
 
+  function toggleSlice(key: string) {
+    setActiveSlice((current) => (current === key ? null : key))
+  }
+
+  function openCalendar() {
+    setUpcomingView("calendar")
+    upcomingRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+  }
+
+  const trend = summary
+    ? expenseTrend(summary.monthlyCost, summary.previousMonthlyCost)
+    : null
+
   return (
-    <div className="flex flex-col gap-4">
-      <Button type="button" onClick={() => openCreate()}>
-        <PlusIcon className="size-4 shrink-0" />
-        Nueva suscripción
-      </Button>
-
-      <Tabs
-        persistKey={SECTION_TAB_QUERY}
-        value={section}
-        onValueChange={(value) => {
-          if (isSectionTab(value)) {
-            setSection(value)
-          }
-        }}
-      >
-        <TabsList className="h-auto w-full justify-start overflow-x-auto rounded-2xl p-1">
-          <TabsTrigger value={MANAGED_TAB} className="rounded-xl py-2">
-            <WalletIcon className="size-4 shrink-0" />
-            Suscripciones
-          </TabsTrigger>
-          <TabsTrigger value={RECURRING_TAB} className="rounded-xl py-2">
-            <RepeatIcon className="size-4 shrink-0" />
-            Recurrentes
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value={MANAGED_TAB} keepMounted>
-          <ManagedSubscriptions
-            isEnabled={isEnabled}
-            display={display}
-            onCreateFromPattern={(pattern) =>
-              openCreate({
-                name: pattern.merchantName,
-                amount: pattern.avgAmount,
-                currency: pattern.currency,
-                sourcePatternId: pattern.id,
+    <div className="flex flex-col gap-5">
+      <section className="rounded-3xl border border-border bg-card p-5">
+        <p className="text-[11px] font-medium tracking-[0.16em] text-muted-foreground uppercase">
+          Gasto en suscripciones
+        </p>
+        <div className="mt-1 flex flex-wrap items-center gap-3">
+          <p className="text-4xl font-bold tracking-tight tabular-nums">
+            {summary ? formatFinanceMoney(summary.monthlyCost, display) : "…"}
+          </p>
+          {trend ? <FinanceExpenseTrendBadge trend={trend} /> : null}
+        </div>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {summary
+            ? `${formatFinanceMoney(summary.annualCost, display)} al año · ${summary.activeCount} activa${summary.activeCount === 1 ? "" : "s"}`
+            : "Cargando resumen…"}
+        </p>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <Button type="button" onClick={() => openCreate()}>
+            <PlusIcon className="size-4 shrink-0" />
+            Nueva
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() =>
+              detectedRef.current?.scrollIntoView({
+                behavior: "smooth",
+                block: "start",
               })
             }
-          />
-        </TabsContent>
+          >
+            <SparklesIcon className="size-4 shrink-0" />
+            Por confirmar
+            {summary && summary.pendingDetectedCount > 0 ? (
+              <Badge variant="warning">{summary.pendingDetectedCount}</Badge>
+            ) : null}
+          </Button>
+          <Button type="button" variant="outline" onClick={openCalendar}>
+            <CalendarDaysIcon className="size-4 shrink-0" />
+            Calendario
+          </Button>
+        </div>
+      </section>
 
-        <TabsContent value={RECURRING_TAB} keepMounted>
-          <RecurringPatterns isEnabled={isEnabled} display={display} />
-        </TabsContent>
-      </Tabs>
+      {summaryQuery.isError ? (
+        <FinanceErrorState
+          message={financeErrorMessage(summaryQuery.error)}
+          onRetry={() => void summaryQuery.refetch()}
+          isRetrying={summaryQuery.isFetching}
+        />
+      ) : null}
+
+      <section className="flex flex-col gap-3 rounded-3xl border border-border bg-card p-4">
+        <div className="flex items-center justify-between gap-2">
+          <h2 className="text-sm font-semibold">Distribución del gasto</h2>
+        </div>
+        <FinanceSegmentedControl
+          label="Ver por"
+          value={breakdownBy}
+          onChange={(value) => {
+            setBreakdownBy(value)
+            setActiveSlice(null)
+          }}
+          options={BREAKDOWN_OPTIONS}
+          fullWidth
+        />
+        {breakdownQuery.isError ? (
+          <FinanceErrorState
+            message={financeErrorMessage(breakdownQuery.error)}
+            onRetry={() => void breakdownQuery.refetch()}
+            isRetrying={breakdownQuery.isFetching}
+          />
+        ) : null}
+        <AsyncRegion
+          pending={breakdownQuery.isPending && !breakdownQuery.data}
+          pendingFallback={<FinanceListSkeleton />}
+          empty={slices.length === 0}
+          emptyFallback={
+            <p className="py-4 text-center text-sm text-muted-foreground">
+              Sin suscripciones activas que repartir.
+            </p>
+          }
+        >
+          <div className="flex items-center gap-3 sm:gap-6">
+            <FinanceRingChart
+              slices={slices}
+              activeKey={activeSlice}
+              onSelect={toggleSlice}
+              centerLabel={SUBSCRIPTION_BREAKDOWN_LABEL[breakdownBy]}
+              centerValue={formatFinanceMoney(
+                summary?.monthlyCost ?? "0",
+                display
+              )}
+              centerDebt={null}
+              className="w-2/5 shrink-0 sm:w-40"
+            />
+            <FinanceRingLegend
+              slices={slices}
+              activeKey={activeSlice}
+              onSelect={toggleSlice}
+              className="min-w-0 flex-1"
+            />
+          </div>
+        </AsyncRegion>
+      </section>
+
+      <div ref={upcomingRef}>
+        <UpcomingSection
+          isEnabled={isEnabled}
+          display={display}
+          now={now}
+          view={upcomingView}
+          onViewChange={setUpcomingView}
+        />
+      </div>
+
+      <AlertsSection isEnabled={isEnabled} display={display} />
+
+      <ManagedList
+        isEnabled={isEnabled}
+        display={display}
+        now={now}
+        groupBy={config.subscriptions.groupBy}
+        filter={sliceFilter}
+        filterLabel={activeSliceLabel}
+        onClearFilter={() => setActiveSlice(null)}
+      />
+
+      <div ref={detectedRef}>
+        <DetectedTray isEnabled={isEnabled} display={display} />
+      </div>
+
+      <CancelledFooter
+        isEnabled={isEnabled}
+        display={display}
+        savings={summary?.cancelledAnnualSavings ?? "0"}
+      />
 
       <SubscriptionSheet
         open={sheetOpen}
@@ -225,37 +327,300 @@ function SubscriptionsScreenBody() {
   )
 }
 
-type ManagedSubscriptionsProps = {
-  isEnabled: boolean
-  display: {
-    currency: string
-    showCents: boolean
-    compactNumbers: boolean
+function methodLabel(method: FinanceSubscriptionPaymentMethod | null): string {
+  if (!method) {
+    return "Sin método"
   }
-  onCreateFromPattern: (pattern: FinanceRecurringPattern) => void
+  const last4 = method.last4 ? ` ••${method.last4}` : ""
+  return `${method.name}${last4}`
 }
 
-function ManagedSubscriptions({
+type UpcomingSectionProps = {
+  isEnabled: boolean
+  display: FinanceMoneyDisplay
+  now: Date
+  view: "strip" | "calendar"
+  onViewChange: (view: "strip" | "calendar") => void
+}
+
+function UpcomingSection({
   isEnabled,
   display,
-  onCreateFromPattern,
-}: ManagedSubscriptionsProps) {
-  const [status, setStatus] = useState<StatusFilter>("ALL")
-  const [currency, setCurrency] = useState<string>("ALL")
+  now,
+  view,
+  onViewChange,
+}: UpcomingSectionProps) {
+  const [month, setMonth] = useState<MonthKey>(monthKeyFromDate(now))
+  const [monthDate] = useState(now)
+  const stripQuery = useSubscriptionsUpcoming(isEnabled, { days: 30 })
+  const bounds = useMemo(() => {
+    const [year, monthNumber] = month.split("-").map(Number)
+    return isoMonthBounds(year ?? 0, monthNumber ?? 1)
+  }, [month])
+  const calendarQuery = useSubscriptionsUpcoming(
+    isEnabled && view === "calendar",
+    { from: bounds.dateFrom, to: bounds.dateTo }
+  )
+  const months = useMemo(
+    () =>
+      listYearMonths(
+        new Date(monthDate.getFullYear(), monthDate.getMonth() - 6, 1),
+        new Date(monthDate.getFullYear(), monthDate.getMonth() + 6, 1)
+      ),
+    [monthDate]
+  )
+  const charges = view === "calendar" ? (calendarQuery.data?.items ?? []) : []
+  const chargesByDay = new Map<string, typeof charges>()
+  for (const charge of charges) {
+    const day = chargesByDay.get(charge.date)
+    if (day) {
+      day.push(charge)
+    } else {
+      chargesByDay.set(charge.date, [charge])
+    }
+  }
+  const [activeYear, activeMonth] = month.split("-").map(Number)
+
+  return (
+    <section className="flex flex-col gap-3 rounded-3xl border border-border bg-card p-4">
+      <div className="flex items-center justify-between gap-2">
+        <h2 className="text-sm font-semibold">Próximos cobros</h2>
+        <FinanceSegmentedControl
+          value={view}
+          onChange={onViewChange}
+          options={[
+            { value: "strip", label: "30 días" },
+            { value: "calendar", label: "Calendario" },
+          ]}
+        />
+      </div>
+
+      {view === "strip" ? (
+        <>
+          {stripQuery.isError ? (
+            <FinanceErrorState
+              message={financeErrorMessage(stripQuery.error)}
+              onRetry={() => void stripQuery.refetch()}
+              isRetrying={stripQuery.isFetching}
+            />
+          ) : null}
+          <AsyncRegion
+            pending={stripQuery.isPending && !stripQuery.data}
+            pendingFallback={<FinanceListSkeleton />}
+            empty={(stripQuery.data?.items.length ?? 0) === 0}
+            emptyFallback={
+              <p className="py-4 text-center text-sm text-muted-foreground">
+                Sin cobros en los próximos 30 días.
+              </p>
+            }
+          >
+            <div className="flex snap-x snap-mandatory scrollbar-none gap-3 overflow-x-auto pb-1">
+              {(stripQuery.data?.items ?? []).map((charge) => (
+                <div
+                  key={charge.id}
+                  className="flex w-40 shrink-0 snap-start flex-col gap-2 rounded-2xl border border-border bg-background p-3"
+                >
+                  <BrandLogo
+                    name={charge.name}
+                    logoUrl={charge.logoUrl}
+                    size={32}
+                  />
+                  <p className="truncate text-sm font-medium">{charge.name}</p>
+                  <p className="text-sm font-semibold tabular-nums">
+                    {formatFinanceMoney(charge.amount, {
+                      ...display,
+                      currency: charge.currency,
+                    })}
+                  </p>
+                  <p className="truncate text-xs text-muted-foreground">
+                    {methodLabel(charge.paymentMethod)}
+                  </p>
+                  <Badge variant="info">
+                    {nextChargeLabel(charge.daysUntil)}
+                  </Badge>
+                </div>
+              ))}
+            </div>
+          </AsyncRegion>
+        </>
+      ) : (
+        <div className="flex flex-col gap-3">
+          <FinanceMonthPicker
+            months={months}
+            activeMonthKey={month}
+            currentMonthKey={monthKeyFromDate(now)}
+            onSelect={setMonth}
+          />
+          {calendarQuery.isError ? (
+            <FinanceErrorState
+              message={financeErrorMessage(calendarQuery.error)}
+              onRetry={() => void calendarQuery.refetch()}
+              isRetrying={calendarQuery.isFetching}
+            />
+          ) : null}
+          <div className="flex flex-col gap-2">
+            {weeksForMonth(activeYear ?? 0, activeMonth ?? 1).map((week) => (
+              <div
+                key={week.id}
+                className="rounded-2xl border border-border/70 p-2"
+              >
+                <p className="mb-1 text-xs font-medium text-muted-foreground">
+                  {week.label}
+                </p>
+                <div className="flex flex-wrap gap-1">
+                  {[...chargesByDay.entries()]
+                    .filter(([date]) => {
+                      const value = new Date(`${date}T00:00:00`)
+                      return value >= week.start && value <= week.end
+                    })
+                    .flatMap(([, dayCharges]) => dayCharges)
+                    .map((charge) => (
+                      <span
+                        key={charge.id}
+                        className="flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-xs"
+                      >
+                        <BrandLogo
+                          name={charge.name}
+                          logoUrl={charge.logoUrl}
+                          size={14}
+                        />
+                        {charge.date.slice(8)} · {charge.name}
+                      </span>
+                    ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </section>
+  )
+}
+
+type AlertsSectionProps = {
+  isEnabled: boolean
+  display: FinanceMoneyDisplay
+}
+
+function AlertsSection({ isEnabled, display }: AlertsSectionProps) {
+  const alertsQuery = useSubscriptionAlerts(isEnabled)
+  const dismissMutation = useDismissSubscriptionAlert()
+  const alerts = alertsQuery.data ?? []
+
+  async function dismiss(alert: FinanceSubscriptionAlert) {
+    try {
+      await dismissMutation.mutateAsync({
+        kind: alert.kind,
+        subscriptionId: alert.subscriptionId,
+        alertDate: alert.date,
+      })
+    } catch (error) {
+      appToast.error({ text1: financeErrorMessage(error) })
+    }
+  }
+
+  if (alertsQuery.isError) {
+    return (
+      <FinanceErrorState
+        message={financeErrorMessage(alertsQuery.error)}
+        onRetry={() => void alertsQuery.refetch()}
+        isRetrying={alertsQuery.isFetching}
+      />
+    )
+  }
+
+  if (alerts.length === 0) {
+    return null
+  }
+
+  return (
+    <SummarySection title="Alertas" icon={BellIcon}>
+      {alerts.map((alert) => (
+        <div
+          key={alert.id}
+          className="flex items-center gap-3 rounded-2xl bg-muted/40 px-3 py-2"
+        >
+          <span className="min-w-0 flex-1">
+            <span className="block truncate text-sm font-medium">
+              {alertTitle(alert, display)}
+            </span>
+            <span className="block truncate text-xs text-muted-foreground">
+              {SUBSCRIPTION_ALERT_LABEL[alert.kind]} ·{" "}
+              {alertOccurrenceLabel(alert)}
+            </span>
+          </span>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            aria-label="Descartar alerta"
+            disabled={dismissMutation.isPending}
+            onClick={() => void dismiss(alert)}
+          >
+            <XIcon className="size-4" />
+          </Button>
+        </div>
+      ))}
+    </SummarySection>
+  )
+}
+
+function alertTitle(
+  alert: FinanceSubscriptionAlert,
+  display: FinanceMoneyDisplay
+): string {
+  if (alert.kind === "PRICE_INCREASE") {
+    return `${alert.subscriptionName} subió ${alert.percent ?? 0} %`
+  }
+  if (alert.kind === "TRIAL_ENDING") {
+    return `La prueba de ${alert.subscriptionName} está por terminar`
+  }
+  if (alert.kind === "ANNUAL_RENEWAL") {
+    return `${alert.subscriptionName} se renueva pronto`
+  }
+  if (alert.amount) {
+    return `${alert.subscriptionName}: cobro de ${formatFinanceMoney(
+      alert.amount,
+      {
+        ...display,
+        currency: alert.currency,
+      }
+    )} sin registrar`
+  }
+  return `${alert.subscriptionName}: cobro sin registrar`
+}
+
+type ManagedListProps = {
+  isEnabled: boolean
+  display: FinanceMoneyDisplay
+  now: Date
+  groupBy: "category" | "provider" | "none"
+  filter: SubscriptionListFilter | null
+  filterLabel: string | null
+  onClearFilter: () => void
+}
+
+function ManagedList({
+  isEnabled,
+  display,
+  now,
+  groupBy,
+  filter,
+  filterLabel,
+  onClearFilter,
+}: ManagedListProps) {
+  const [status, setStatus] = useState<"ALL" | FinanceSubscriptionStatus>("ALL")
+  const [currency, setCurrency] = useState("ALL")
   const [search, setSearch] = useState("")
-  const summaryQuery = useSubscriptionSummary(isEnabled)
-  const suggestionsQuery = useRecurring(isEnabled, "SUGGESTED")
   const listQuery = useSubscriptions(isEnabled, {
     status: status === "ALL" ? undefined : status,
     currency: currency === "ALL" ? undefined : currency,
+    categoryId: filter?.categoryId,
+    cardId: filter?.cardId,
+    accountId: filter?.accountId,
     q: search.trim() || undefined,
   })
   const items = infiniteListItems(listQuery.data)
-  const suggestions = infiniteListItems(suggestionsQuery.data).slice(
-    0,
-    SUGGESTION_LIMIT
-  )
-  const summary = summaryQuery.data
   const currencyOptions = useMemo(() => {
     const codes = new Set<string>([display.currency])
     for (const item of items) {
@@ -266,66 +631,27 @@ function ManagedSubscriptions({
       ...[...codes].map((code) => ({ value: code, label: code })),
     ]
   }, [items, display.currency])
+  const groups = useMemo(
+    () => groupSubscriptions(items, groupBy),
+    [items, groupBy]
+  )
 
   return (
-    <div className="flex flex-col gap-4">
-      {summaryQuery.isError ? (
-        <FinanceErrorState
-          message={financeErrorMessage(summaryQuery.error)}
-          onRetry={() => void summaryQuery.refetch()}
-          isRetrying={summaryQuery.isFetching}
-        />
-      ) : null}
-
-      {summary ? (
-        <SummarySection title="Resumen" icon={WalletIcon}>
-          <SummaryItem
-            title="Costo mensual"
-            description={`${summary.activeCount} activa${summary.activeCount === 1 ? "" : "s"}`}
-            value={formatFinanceMoney(summary.monthlyCost, display)}
-          />
-          <SummaryItem
-            title="Costo anual"
-            value={formatFinanceMoney(summary.annualCost, display)}
-          />
-          <SummaryItem
-            title="Próximos cobros (7 días)"
-            icon={CalendarClockIcon}
-            description={
-              summary.upcoming.length === 0
-                ? "Nada en la próxima semana"
-                : summary.upcoming
-                    .map((item) => item.name)
-                    .slice(0, 3)
-                    .join(", ")
-            }
-            value={String(summary.upcoming.length)}
-            isLast
-          />
-        </SummarySection>
-      ) : null}
-
-      {suggestions.length > 0 ? (
-        <SummarySection
-          title="Detectamos cobros recurrentes"
-          icon={SparklesIcon}
-        >
-          {suggestions.map((pattern) => (
-            <FinanceSuggestionRow
-              key={pattern.id}
-              actionLabel="Es una suscripción"
-              onAction={() => onCreateFromPattern(pattern)}
-            >
-              {pattern.merchantName} cobra{" "}
-              {formatFinanceMoney(pattern.avgAmount, {
-                ...display,
-                currency: pattern.currency,
-              })}{" "}
-              {recurringFrequencyLabel(pattern.frequency).toLowerCase()}
-            </FinanceSuggestionRow>
-          ))}
-        </SummarySection>
-      ) : null}
+    <section className="flex flex-col gap-3">
+      <div className="flex items-center justify-between gap-2">
+        <h2 className="text-sm font-semibold">Mis suscripciones</h2>
+        {filterLabel ? (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={onClearFilter}
+          >
+            <XIcon className="size-4 shrink-0" />
+            {filterLabel}
+          </Button>
+        ) : null}
+      </div>
 
       <FinanceSegmentedControl
         label="Estado"
@@ -369,42 +695,35 @@ function ManagedSubscriptions({
           <Empty className="py-8">
             <EmptyHeader>
               <EmptyMedia variant="icon">
-                <WalletIcon />
+                <RepeatIcon />
               </EmptyMedia>
               <EmptyTitle>Sin suscripciones</EmptyTitle>
               <EmptyDescription>
-                Crea una a mano o conviértela desde un cobro recurrente
-                detectado.
+                Crea una a mano o confirma un cobro detectado.
               </EmptyDescription>
             </EmptyHeader>
           </Empty>
         }
       >
-        <div className="rounded-2xl border border-border bg-card">
-          {items.map((subscription, index) => (
-            <SummaryItem
-              key={subscription.id}
-              title={subscription.name}
-              description={`${billingCycleLabel(subscription.billingCycle, subscription.billingInterval)} · ${nextChargeLabel(subscription.daysUntil)}`}
-              leading={
-                <BrandLogo
-                  name={subscription.name}
-                  logoUrl={subscription.logoUrl}
-                  size={36}
-                />
-              }
-              value={formatFinanceMoney(subscription.amount, {
-                ...display,
-                currency: subscription.currency,
-              })}
-              trailing={
-                <Badge variant={subscriptionStatusVariant(subscription.status)}>
-                  {subscriptionStatusLabel(subscription.status)}
-                </Badge>
-              }
-              href={APP_ROUTES.app.financeSubscription(subscription.id)}
-              isLast={index === items.length - 1}
-            />
+        <div className="flex flex-col gap-4">
+          {groups.map((group) => (
+            <div key={group.key} className="flex flex-col gap-2">
+              {groupBy !== "none" ? (
+                <p className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+                  {group.label}
+                </p>
+              ) : null}
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                {group.items.map((subscription) => (
+                  <SubscriptionCard
+                    key={subscription.id}
+                    subscription={subscription}
+                    display={display}
+                    now={now}
+                  />
+                ))}
+              </div>
+            </div>
           ))}
         </div>
       </AsyncRegion>
@@ -414,299 +733,197 @@ function ManagedSubscriptions({
         isFetchingNextPage={listQuery.isFetchingNextPage}
         onLoadMore={() => void listQuery.fetchNextPage()}
       />
-    </div>
+    </section>
   )
 }
 
-type RecurringPatternsProps = {
+type DetectedTrayProps = {
   isEnabled: boolean
-  display: {
-    currency: string
-    showCents: boolean
-    compactNumbers: boolean
-  }
+  display: FinanceMoneyDisplay
 }
 
-function RecurringPatterns({ isEnabled, display }: RecurringPatternsProps) {
-  const [tab, setTab] = useState<FinanceRecurringStatus>("SUGGESTED")
+function DetectedTray({ isEnabled, display }: DetectedTrayProps) {
   const [sheetOpen, setSheetOpen] = useState(false)
-  const [editing, setEditing] = useState<FinanceRecurringPattern | null>(null)
-  const [dismissing, setDismissing] = useState<FinanceRecurringPattern | null>(
-    null
-  )
+  const [confirmingId, setConfirmingId] = useState<string | null>(null)
+  const recurringQuery = useRecurring(isEnabled, "SUGGESTED")
   const updateMutation = useUpdateRecurring()
-  const listQuery = useRecurring(isEnabled, tab)
-  const items = infiniteListItems(listQuery.data)
+  const createMutation = useCreateSubscription()
+  const items = infiniteListItems(recurringQuery.data)
 
-  async function changeStatus(
-    pattern: FinanceRecurringPattern,
-    status: FinanceRecurringStatus
-  ) {
+  async function confirm(pattern: FinanceRecurringPattern) {
+    setConfirmingId(pattern.id)
     try {
-      await updateMutation.mutateAsync({ id: pattern.id, body: { status } })
-      appToast.success({
-        text1: status === "CONFIRMED" ? "Recurrente confirmado" : "Descartado",
+      await createMutation.mutateAsync(subscriptionPayloadFromPattern(pattern))
+      await updateMutation.mutateAsync({
+        id: pattern.id,
+        body: { status: "CONFIRMED" },
       })
+      appToast.success({ text1: `${pattern.merchantName} es suscripción` })
+    } catch (error) {
+      appToast.error({ text1: financeErrorMessage(error) })
+    } finally {
+      setConfirmingId(null)
+    }
+  }
+
+  async function dismiss(pattern: FinanceRecurringPattern) {
+    try {
+      await updateMutation.mutateAsync({
+        id: pattern.id,
+        body: { status: "DISMISSED" },
+      })
+      appToast.success({ text1: "Descartado" })
     } catch (error) {
       appToast.error({ text1: financeErrorMessage(error) })
     }
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <Tabs
-        persistKey={RECURRING_STATUS_QUERY}
-        value={tab}
-        onValueChange={(value) => {
-          if (isRecurringTab(value)) {
-            setTab(value)
+    <>
+      <section className="flex flex-col gap-3 rounded-3xl border border-border bg-card p-4">
+        <h2 className="text-sm font-semibold">
+          Detectados por confirmar ({items.length})
+        </h2>
+        {recurringQuery.isError ? (
+          <FinanceErrorState
+            message={financeErrorMessage(recurringQuery.error)}
+            onRetry={() => void recurringQuery.refetch()}
+            isRetrying={recurringQuery.isFetching}
+          />
+        ) : null}
+        <AsyncRegion
+          pending={recurringQuery.isPending && !recurringQuery.data}
+          pendingFallback={<FinanceListSkeleton />}
+          empty={items.length === 0}
+          emptyFallback={
+            <p className="py-4 text-center text-sm text-muted-foreground">
+              No hay cobros repetidos por confirmar.
+            </p>
           }
-        }}
-      >
-        <TabsList className="h-auto w-full justify-start overflow-x-auto rounded-2xl p-1">
-          {RECURRING_TABS.map(({ value, label, icon: Icon, color }) => (
-            <TabsTrigger
-              key={value}
-              value={value}
-              className="rounded-xl py-2"
-              style={
-                tab === value
-                  ? { color, backgroundColor: `${color}1a` }
-                  : undefined
-              }
-            >
-              <Icon className="size-4 shrink-0" />
-              {label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-
-        {RECURRING_TABS.map(({ value }) => (
-          <TabsContent key={value} value={value} keepMounted>
-            {listQuery.isError ? (
-              <FinanceErrorState
-                message={financeErrorMessage(listQuery.error)}
-                onRetry={() => void listQuery.refetch()}
-                isRetrying={listQuery.isFetching}
-              />
-            ) : null}
-
-            <AsyncRegion
-              pending={listQuery.isPending && !listQuery.data}
-              pendingFallback={<FinanceListSkeleton />}
-              empty={items.length === 0}
-              emptyFallback={
-                <Empty className="py-8">
-                  <EmptyHeader>
-                    <EmptyMedia variant="icon">
-                      <RepeatIcon />
-                    </EmptyMedia>
-                    <EmptyTitle>
-                      {value === "SUGGESTED"
-                        ? "Sin cobros por confirmar"
-                        : value === "CONFIRMED"
-                          ? "Sin recurrentes confirmados"
-                          : "Sin descartados"}
-                    </EmptyTitle>
-                    <EmptyDescription>
-                      {value === "CONFIRMED"
-                        ? "Confirma un cobro detectado o crea uno a mano."
-                        : "Cuando detectemos cobros repetidos aparecerán aquí."}
-                    </EmptyDescription>
-                  </EmptyHeader>
-                </Empty>
-              }
-            >
-              <div className="flex flex-col gap-3">
-                {items.map((pattern) => (
-                  <RecurringCard
-                    key={pattern.id}
-                    pattern={pattern}
-                    display={display}
-                    isPending={updateMutation.isPending}
-                    onConfirm={() => void changeStatus(pattern, "CONFIRMED")}
-                    onDismiss={() => setDismissing(pattern)}
-                    onEdit={() => {
-                      setEditing(pattern)
-                      setSheetOpen(true)
-                    }}
-                  />
-                ))}
+        >
+          <div className="flex flex-col gap-2">
+            {items.map((pattern) => (
+              <div
+                key={pattern.id}
+                className="flex items-center gap-3 rounded-2xl border border-border bg-background p-3"
+              >
+                <BrandLogo
+                  name={pattern.merchantName}
+                  logoUrl={pattern.logoUrl}
+                  size={36}
+                />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium">
+                    {pattern.merchantName}
+                  </p>
+                  <p className="truncate text-xs text-muted-foreground">
+                    {formatFinanceMoney(pattern.avgAmount, {
+                      ...display,
+                      currency: pattern.currency,
+                    })}{" "}
+                    · {recurringFrequencyLabel(pattern.frequency).toLowerCase()}
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  size="sm"
+                  disabled={confirmingId === pattern.id}
+                  onClick={() => void confirm(pattern)}
+                >
+                  {confirmingId === pattern.id ? (
+                    <Spinner className="size-4" />
+                  ) : (
+                    <CheckIcon className="size-4 shrink-0" />
+                  )}
+                  Confirmar
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  disabled={updateMutation.isPending}
+                  onClick={() => void dismiss(pattern)}
+                >
+                  <XIcon className="size-4 shrink-0" />
+                </Button>
               </div>
-            </AsyncRegion>
-            <InfiniteListSentinel
-              hasNextPage={listQuery.hasNextPage}
-              isFetchingNextPage={listQuery.isFetchingNextPage}
-              onLoadMore={() => void listQuery.fetchNextPage()}
-            />
-          </TabsContent>
-        ))}
-      </Tabs>
+            ))}
+          </div>
+        </AsyncRegion>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => setSheetOpen(true)}
+        >
+          Ver bandeja completa
+        </Button>
+      </section>
 
-      <RecurringSheet
+      <RecurringArchiveSheet
         open={sheetOpen}
-        onOpenChange={(next) => {
-          setSheetOpen(next)
-          if (!next) {
-            setEditing(null)
-          }
-        }}
-        pattern={editing}
-        defaultCurrency={display.currency}
+        onOpenChange={setSheetOpen}
+        display={display}
       />
-
-      <AlertDialog
-        open={dismissing !== null}
-        onOpenChange={(open) => !open && setDismissing(null)}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              ¿Descartar {dismissing?.merchantName}?
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              No se volverá a sugerir. Puedes confirmarlo más tarde desde
-              Descartados.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={updateMutation.isPending}>
-              Cancelar
-            </AlertDialogCancel>
-            <AlertDialogAction
-              variant="destructive"
-              disabled={updateMutation.isPending}
-              onClick={() => {
-                if (dismissing) {
-                  void changeStatus(dismissing, "DISMISSED")
-                }
-                setDismissing(null)
-              }}
-            >
-              {updateMutation.isPending ? (
-                <Spinner data-icon="inline-start" />
-              ) : null}
-              Descartar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </div>
+    </>
   )
 }
 
-type RecurringCardProps = {
-  pattern: FinanceRecurringPattern
-  display: {
-    currency: string
-    showCents: boolean
-    compactNumbers: boolean
-  }
-  isPending: boolean
-  onConfirm: () => void
-  onDismiss: () => void
-  onEdit: () => void
+type CancelledFooterProps = {
+  isEnabled: boolean
+  display: FinanceMoneyDisplay
+  savings: string
 }
 
-function RecurringCard({
-  pattern,
+function CancelledFooter({
+  isEnabled,
   display,
-  isPending,
-  onConfirm,
-  onDismiss,
-  onEdit,
-}: RecurringCardProps) {
-  const late = pattern.daysUntil < 0
+  savings,
+}: CancelledFooterProps) {
+  const [open, setOpen] = useState(false)
+  const listQuery = useSubscriptions(isEnabled && open, {
+    status: "CANCELLED",
+  })
+  const items = infiniteListItems(listQuery.data)
+
   return (
-    <div className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-4">
-      <div className="flex items-center gap-3">
-        <BrandLogo
-          name={pattern.merchantName}
-          logoUrl={pattern.logoUrl}
-          size={40}
-        />
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-medium">{pattern.merchantName}</p>
-          <p className="truncate text-xs text-muted-foreground">
-            {RECURRING_KIND_LABEL[pattern.kind]} ·{" "}
-            {recurringFrequencyLabel(pattern.frequency)}
-          </p>
+    <section className="flex flex-col gap-3 rounded-3xl border border-border bg-card p-4">
+      <button
+        type="button"
+        className="flex items-center justify-between gap-2 text-left"
+        onClick={() => setOpen((current) => !current)}
+      >
+        <span className="text-sm font-semibold">Canceladas</span>
+        <span className="text-sm text-muted-foreground">
+          Ahorras {formatFinanceMoney(savings, display)} al año
+        </span>
+      </button>
+      {open ? (
+        <div className="flex flex-col gap-2">
+          {items.map((subscription) => (
+            <div
+              key={subscription.id}
+              className="flex items-center gap-3 text-sm text-muted-foreground"
+            >
+              <BrandLogo
+                name={subscription.name}
+                logoUrl={subscription.logoUrl}
+                size={28}
+              />
+              <span className="min-w-0 flex-1 truncate">
+                {subscription.name}
+              </span>
+              <span className="tabular-nums">
+                {formatFinanceMoney(subscription.annualEquivalent, {
+                  ...display,
+                  currency: subscription.currency,
+                })}{" "}
+                /año
+              </span>
+            </div>
+          ))}
         </div>
-        <Badge variant={late ? "warning" : "info"}>
-          {nextChargeLabel(pattern.daysUntil)}
-        </Badge>
-      </div>
-
-      <div className="flex items-end justify-between gap-3">
-        <div>
-          <p className="text-lg font-semibold">
-            {formatFinanceMoney(pattern.avgAmount, {
-              ...display,
-              currency: pattern.currency,
-            })}
-          </p>
-          <p
-            className={cn(
-              "text-xs text-muted-foreground",
-              late && "text-amber-600"
-            )}
-          >
-            Próximo: {pattern.nextExpectedDate}
-          </p>
-        </div>
-        <div className="text-right">
-          <p className="text-xs text-muted-foreground">Costo mensual</p>
-          <p className="text-sm font-medium">
-            {formatFinanceMoney(pattern.monthlyEquivalent, {
-              ...display,
-              currency: pattern.currency,
-            })}
-          </p>
-          <p className="mt-1 text-xs text-muted-foreground">Costo anual</p>
-          <p className="text-sm font-medium">
-            {formatFinanceMoney(pattern.annualEquivalent, {
-              ...display,
-              currency: pattern.currency,
-            })}
-          </p>
-        </div>
-      </div>
-
-      <div className="flex flex-wrap gap-2">
-        {pattern.status !== "CONFIRMED" ? (
-          <Button
-            type="button"
-            size="sm"
-            disabled={isPending}
-            onClick={onConfirm}
-          >
-            <RotateCcwIcon className="size-4 shrink-0" />
-            Confirmar
-          </Button>
-        ) : null}
-        <Button
-          type="button"
-          size="sm"
-          variant="outline"
-          disabled={isPending}
-          onClick={onEdit}
-        >
-          <PencilIcon className="size-4 shrink-0" />
-          Editar
-        </Button>
-        {pattern.status !== "DISMISSED" ? (
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            disabled={isPending}
-            onClick={onDismiss}
-          >
-            <XIcon className="size-4 shrink-0" />
-            Descartar
-          </Button>
-        ) : null}
-      </div>
-    </div>
+      ) : null}
+    </section>
   )
 }

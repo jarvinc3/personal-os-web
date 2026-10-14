@@ -21,6 +21,7 @@ describe("toSubscriptionFormValues", () => {
     assert.equal(baseValues.reminderDaysBefore, "3")
     assert.equal(baseValues.cardId, CATALOG_NONE)
     assert.equal(baseValues.accountId, CATALOG_NONE)
+    assert.equal(baseValues.categoryId, CATALOG_NONE)
     assert.equal(baseValues.sourcePatternId, "")
   })
 
@@ -71,6 +72,7 @@ describe("subscriptionPayload", () => {
       billingInterval: "2",
       reminderDaysBefore: "5",
       cardId: "card-1",
+      categoryId: "cat-1",
       trialEndsAt: "",
     })
     assert.equal(payload.name, "Spotify")
@@ -79,6 +81,7 @@ describe("subscriptionPayload", () => {
     assert.equal(payload.billingInterval, 2)
     assert.equal(payload.reminderDaysBefore, 5)
     assert.equal(payload.cardId, "card-1")
+    assert.equal(payload.categoryId, "cat-1")
     assert.equal(payload.trialEndsAt, null)
     assert.equal(payload.accountId, null)
   })
@@ -90,6 +93,7 @@ describe("subscriptionPayload", () => {
       amount: "10.00",
       cardId: CATALOG_NONE,
       accountId: CATALOG_NONE,
+      categoryId: CATALOG_NONE,
       trialEndsAt: "",
       manageUrl: "",
       notes: "",
@@ -98,6 +102,7 @@ describe("subscriptionPayload", () => {
     assert.equal(payload.trialEndsAt, null)
     assert.equal(payload.cardId, null)
     assert.equal(payload.accountId, null)
+    assert.equal(payload.categoryId, null)
     assert.equal(payload.manageUrl, null)
     assert.equal(payload.notes, null)
     assert.equal(payload.sourcePatternId, null)

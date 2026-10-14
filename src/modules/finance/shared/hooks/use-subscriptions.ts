@@ -2,6 +2,7 @@
 
 import { apiGet, apiPatch, apiPost, apiPostForm } from "@/src/config/api-client"
 import { useInfiniteFinanceList } from "@/src/modules/finance/shared/hooks/use-infinite-finance-list"
+import { buildFinanceQueryPath } from "@/src/modules/finance/shared/lib/finance-query-options"
 import {
   FINANCE_RECURRING_QUERY_KEY,
   FINANCE_SUBSCRIPTIONS_QUERY_KEY,
@@ -9,9 +10,13 @@ import {
 } from "@/src/modules/finance/shared/types/api"
 import type {
   FinanceSubscription,
+  FinanceSubscriptionAlert,
+  FinanceSubscriptionBreakdown,
+  FinanceSubscriptionBreakdownAxis,
   FinanceSubscriptionPayment,
   FinanceSubscriptionStatus,
   FinanceSubscriptionSummary,
+  FinanceSubscriptionUpcoming,
 } from "@/src/modules/finance/shared/types/entities"
 import { API_ENDPOINTS } from "@/src/shared/constants/api-endpoints"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
@@ -22,6 +27,9 @@ export const FINANCE_SUBSCRIPTION_PAYMENT_PAGE_SIZE = 20
 export type SubscriptionsQueryParams = {
   status?: FinanceSubscriptionStatus
   currency?: string
+  categoryId?: string
+  cardId?: string
+  accountId?: string
   q?: string
 }
 
@@ -54,6 +62,67 @@ export function useSubscriptionSummary(enabled: boolean) {
         API_ENDPOINTS.FINANCE.SUBSCRIPTION_SUMMARY
       ),
     enabled,
+  })
+}
+
+export function useSubscriptionsBreakdown(
+  enabled: boolean,
+  by: FinanceSubscriptionBreakdownAxis
+) {
+  return useQuery({
+    queryKey: [...FINANCE_SUBSCRIPTIONS_QUERY_KEY, "breakdown", by],
+    queryFn: () =>
+      apiGet<FinanceSubscriptionBreakdown>(
+        buildFinanceQueryPath({
+          endpoint: API_ENDPOINTS.FINANCE.SUBSCRIPTION_BREAKDOWN,
+          params: { by },
+        })
+      ),
+    enabled,
+  })
+}
+
+export function useSubscriptionsUpcoming(
+  enabled: boolean,
+  params: { days?: number; from?: string; to?: string } = {}
+) {
+  return useQuery({
+    queryKey: [...FINANCE_SUBSCRIPTIONS_QUERY_KEY, "upcoming", params],
+    queryFn: () =>
+      apiGet<FinanceSubscriptionUpcoming>(
+        buildFinanceQueryPath({
+          endpoint: API_ENDPOINTS.FINANCE.SUBSCRIPTION_UPCOMING,
+          params,
+        })
+      ),
+    enabled,
+  })
+}
+
+export function useSubscriptionAlerts(enabled: boolean) {
+  return useQuery({
+    queryKey: [...FINANCE_SUBSCRIPTIONS_QUERY_KEY, "alerts"],
+    queryFn: () =>
+      apiGet<FinanceSubscriptionAlert[]>(
+        API_ENDPOINTS.FINANCE.SUBSCRIPTION_ALERTS
+      ),
+    enabled,
+  })
+}
+
+export function useDismissSubscriptionAlert() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (body: {
+      kind: FinanceSubscriptionAlert["kind"]
+      subscriptionId: string
+      alertDate: string
+    }) =>
+      apiPost<{ id: string; dismissed: boolean }>(
+        API_ENDPOINTS.FINANCE.SUBSCRIPTION_ALERT_DISMISS,
+        body
+      ),
+    onSuccess: () => invalidateSubscriptions(queryClient),
   })
 }
 

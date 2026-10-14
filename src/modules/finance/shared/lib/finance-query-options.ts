@@ -68,19 +68,32 @@ export function buildFinanceListPath(input: {
   params?: FinanceListParams
   cursor: string | undefined
 }): string {
-  const { endpoint, params, cursor } = input
+  const callerParams = input.params ?? {}
+  const params = Object.fromEntries(
+    Object.entries(callerParams).filter(([key]) => key !== "cursor")
+  )
+  const path = buildFinanceQueryPath({ endpoint: input.endpoint, params })
+  if (!input.cursor) {
+    return path
+  }
+  const separator = path.includes("?") ? "&" : "?"
+  return `${path}${separator}cursor=${encodeURIComponent(input.cursor)}`
+}
+
+/** Endpoint plus only the defined params, for reads without a cursor. */
+export function buildFinanceQueryPath(input: {
+  endpoint: string
+  params?: FinanceListParams
+}): string {
   const search = new URLSearchParams()
-  for (const [key, value] of Object.entries(params ?? {})) {
+  for (const [key, value] of Object.entries(input.params ?? {})) {
     if (value === undefined || value === null || value === "") {
       continue
     }
     search.set(key, String(value))
   }
-  if (cursor) {
-    search.set("cursor", cursor)
-  }
   const query = search.toString()
-  return query ? `${endpoint}?${query}` : endpoint
+  return query ? `${input.endpoint}?${query}` : input.endpoint
 }
 
 /** Shared option builder for `useInfiniteQuery` over a cursor-paginated list. */
