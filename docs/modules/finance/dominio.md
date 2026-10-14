@@ -1,6 +1,6 @@
 # Finanzas: cómo funciona hoy
 
-Estado al 14 oct 2026: web v0.22.0 y back v0.21.0. Este documento resume el dominio y los flujos principales tal como están implementados. El contrato HTTP completo vive en `personal-os-back/docs/modules/finance/`. Lo pendiente está en [pendientes/](./pendientes/README.md).
+Estado al 14 oct 2026: web v0.23.0 y back v0.21.0. Este documento resume el dominio y los flujos principales tal como están implementados. El contrato HTTP completo vive en `personal-os-back/docs/modules/finance/`. Lo pendiente está en [pendientes/](./pendientes/README.md).
 
 Contexto: bancos dominicanos (BHD, Popular, Qik), moneda principal DOP (RD$).
 
@@ -61,7 +61,7 @@ Asistente de alta con tabla de amortización previa (`amortization-plan.ts`, `am
 
 ### Ingesta de correo de bancos
 
-1. El usuario conecta Gmail (OAuth, `gmail.readonly`) en `/finance/sync` y vincula cada remitente a una institución.
+1. El usuario conecta Gmail (OAuth, `gmail.readonly`) en `/finance/sync` y vincula cada remitente a una institución. Al volver del OAuth, el sheet `oauth-gmail-result` ofrece un paso de sincronización: enciende lo automático (`emailSync.automatic`), elige el horario (chips: cada 15 min, cada hora, cada 6 h u horas fijas con pasos de 5 min), el modo de importación (`DIRECT` o `PENDING`) y, si ya hay instituciones ligadas, "Sincronizar ahora". Se guarda con la misma configuración de módulo y se refleja en Ajustes → Finanzas. Si `emailSync.automatic` ya estaba encendido, el paso muestra el resumen con "Cambiar".
 2. `gmail-auto-sync.scheduler.ts` corre según `emailSync.schedule` (intervalo mínimo de 15 min u horas fijas) si `emailSync.automatic` está activo. También hay sincronización manual.
 3. Un extractor LLM convierte cada correo en movimiento. Dedupe: huella única, referencia, confirmación repetida y reversa existente. Los posibles duplicados se resuelven con "Unir" o "No es duplicado".
 4. `emailSync.mode`: `DIRECT` confirma lo importado; `PENDING` lo deja por confirmar.

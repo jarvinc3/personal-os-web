@@ -3,8 +3,13 @@ import { describe, it } from "node:test"
 
 import {
   EMAIL_SYNC_SCHEDULE_MODES,
+  emailSyncOnboardingDefaults,
+  emailSyncScheduleLabel,
+  emailSyncTimesFromSchedule,
   financeModuleSchema,
+  isEmailSyncConfigured,
   parsePayDays,
+  parseSyncIntervalMinutes,
 } from "./finance-module-form.ts"
 
 const validFinance = {
@@ -98,5 +103,86 @@ describe("financeModuleSchema", () => {
       }).success,
       false
     )
+  })
+})
+
+describe("emailSyncOnboardingDefaults", () => {
+  it("turns automatic sync on and keeps the saved mode and schedule", () => {
+    const defaults = emailSyncOnboardingDefaults({
+      automatic: false,
+      mode: "PENDING",
+      schedule: { mode: "times", times: ["07:30", "19:30"] },
+    })
+
+    assert.equal(defaults.emailSyncAutomatic, true)
+    assert.equal(defaults.emailSyncMode, "PENDING")
+    assert.equal(
+      defaults.emailSyncScheduleMode,
+      EMAIL_SYNC_SCHEDULE_MODES.TIMES
+    )
+    assert.deepEqual(defaults.emailSyncTimes, ["07:30", "19:30"])
+  })
+
+  it("keeps the interval and proposes default times as fallback", () => {
+    const defaults = emailSyncOnboardingDefaults({
+      automatic: true,
+      mode: "DIRECT",
+      schedule: { mode: "interval", everyMinutes: 15 },
+    })
+
+    assert.equal(defaults.emailSyncAutomatic, true)
+    assert.equal(
+      defaults.emailSyncScheduleMode,
+      EMAIL_SYNC_SCHEDULE_MODES.INTERVAL
+    )
+    assert.equal(defaults.emailSyncEveryMinutes, "15")
+    assert.deepEqual(defaults.emailSyncTimes, ["08:00", "18:00"])
+  })
+
+  it("does not propose an empty time list for a times schedule", () => {
+    assert.deepEqual(emailSyncTimesFromSchedule({ mode: "times", times: [] }), [
+      "08:00",
+      "18:00",
+    ])
+  })
+})
+
+describe("emailSyncScheduleLabel", () => {
+  it("labels an interval schedule", () => {
+    assert.equal(
+      emailSyncScheduleLabel({ mode: "interval", everyMinutes: 15 }),
+      "Cada 15 min"
+    )
+    assert.equal(
+      emailSyncScheduleLabel({ mode: "interval", everyMinutes: 60 }),
+      "Cada 1 h"
+    )
+    assert.equal(
+      emailSyncScheduleLabel({ mode: "interval", everyMinutes: 90 }),
+      "Cada 1 h 30 min"
+    )
+  })
+
+  it("labels a fixed-times schedule", () => {
+    assert.equal(
+      emailSyncScheduleLabel({ mode: "times", times: ["08:00", "18:00"] }),
+      "A las 08:00, 18:00"
+    )
+  })
+})
+
+describe("parseSyncIntervalMinutes", () => {
+  it("falls back to the default below the fifteen-minute minimum", () => {
+    assert.equal(parseSyncIntervalMinutes("5"), 360)
+    assert.equal(parseSyncIntervalMinutes("abc"), 360)
+    assert.equal(parseSyncIntervalMinutes("15"), 15)
+    assert.equal(parseSyncIntervalMinutes("60"), 60)
+  })
+})
+
+describe("isEmailSyncConfigured", () => {
+  it("is true only when automatic sync is on", () => {
+    assert.equal(isEmailSyncConfigured({ automatic: true }), true)
+    assert.equal(isEmailSyncConfigured({ automatic: false }), false)
   })
 })

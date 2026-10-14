@@ -26,7 +26,7 @@ Sin cambios: el ajuste vive en `UserModule.config.emailSync` (mínimo 15 min) y 
 
 ## Criterios de aceptación
 
-- [ ] Tras conectar Gmail aparece el paso de sincronización automática.
-- [ ] Guardar actualiza `emailSync` y se refleja en Ajustes → Finanzas.
-- [ ] "Sincronizar ahora" lanza la sync y muestra el progreso/resultado.
-- [ ] Con la sync ya configurada solo se muestra el resumen.
+- [x] Tras conectar Gmail aparece el paso de sincronización automática.
+- [x] Guardar actualiza `emailSync` y se refleja en Ajustes → Finanzas.
+- [x] "Sincronizar ahora" lanza la sync y muestra el progreso/resultado.
+- [x] Con la sync ya configurada solo se muestra el resumen.

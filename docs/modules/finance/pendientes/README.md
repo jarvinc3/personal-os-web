@@ -6,7 +6,7 @@ Specs de lo que falta tras la alineación de dominio (fases 01-09 y partes 1-4, 
 | --- | -------------------------------------------------------------------------------------------- | ------ | ---------- | ------------- |
 | 01  | [Agrupar reversa con su original](./01-agrupar-reversas.md)                                  | S      | web        | `implemented` |
 | 02  | [Importar estado de cuenta (PDF) y conciliar](./02-importar-estado-de-cuenta.md)             | L      | back + web | `implemented` |
-| 03  | [Sincronización automática al conectar el correo](./03-sync-tras-conectar-correo.md)         | S      | web        | `pending`     |
+| 03  | [Sincronización automática al conectar el correo](./03-sync-tras-conectar-correo.md)         | S      | web        | `implemented` |
 | 04  | [Paginación uniforme](./04-paginacion-uniforme.md)                                           | M      | back + web | `pending`     |
 | 05  | [Contexto de entidad del agente (`entityRef`)](./05-agente-entity-ref.md)                    | S-M    | back + web | `pending`     |
 | 06  | [Bloques visuales, captura rápida y resumen semanal](./06-agente-bloques-captura-resumen.md) | L      | back + web | `pending`     |
