@@ -2,6 +2,13 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.22.1] - 2026-10-14
+
+### Corregido
+
+- Al aplicar un estado de cuenta se refrescan los saldos, movimientos y cortes afectados.
+- Una clave de PDF incorrecta muestra un aviso en vez de dejar el diálogo sin respuesta.
+
 ## [0.22.0] - 2026-10-14
 
 ### Agregado
