@@ -6,21 +6,21 @@
 
 Back (`packages/finance/src/subscriptions/`, migración `20261018090000_fin_subscriptions`), verificado contra `develop` en back v0.27.0:
 
-| Dato | Estado |
-| --- | --- |
-| `amount`, `currency`, `billingCycle`, `billingInterval`, `nextBillingDate`, `anchorDate`, `status`, `pausedAt`, `cancelledAt` | ✅ existe |
-| `trialEndsAt` (`trial_ends_at`), `reminderDaysBefore`, `lastRemindedFor` | ✅ existe |
-| `cardId`/`cardName`, `accountId`/`accountName` en la respuesta de la lista | ✅ existe (solo nombre; sin banco, últimos 4 ni logo del instrumento) |
-| `logoUrl`, `domain`, `manageUrl`, `sourcePatternId` | ✅ existe |
-| `monthlyEquivalent`, `annualEquivalent`, `daysUntil` por suscripción | ✅ existe |
-| Historial de pagos (`fin_subscription_payments`: `amount`, `currency`, `paidAt`, `transactionId`, `source`) | ✅ existe; permite derivar precio anterior y gasto real del mes |
-| `GET /finance/subscriptions/summary`: `baseCurrency`, `activeCount`, `monthlyCost`, `annualCost`, `upcoming` (ventana fija `UPCOMING_WINDOW_DAYS`) | ✅ existe; sin tendencia, sin gasto real, sin días configurables |
-| Categoría de la suscripción (`categoryId`) | ❌ no existe: requiere migración |
-| Precio anterior (`previousAmount` / `priceChangedAt`) | ❌ no existe como columna; se deriva de los dos últimos pagos (sin migración) |
-| Desglose por categoría, instrumento o moneda | ❌ no existe |
-| Alertas | ❌ no existe (solo el job de recordatorios) |
-| Ajuste `subscriptions.groupBy` | ✅ existe en settings (default `none`) |
-| Monto y conteo del summary usan `Number` | ⚠️ coherente con el pendiente 13; aquí usar `Decimal` en lo nuevo |
+| Dato                                                                                                                                               | Estado                                                                        |
+| -------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `amount`, `currency`, `billingCycle`, `billingInterval`, `nextBillingDate`, `anchorDate`, `status`, `pausedAt`, `cancelledAt`                      | ✅ existe                                                                     |
+| `trialEndsAt` (`trial_ends_at`), `reminderDaysBefore`, `lastRemindedFor`                                                                           | ✅ existe                                                                     |
+| `cardId`/`cardName`, `accountId`/`accountName` en la respuesta de la lista                                                                         | ✅ existe (solo nombre; sin banco, últimos 4 ni logo del instrumento)         |
+| `logoUrl`, `domain`, `manageUrl`, `sourcePatternId`                                                                                                | ✅ existe                                                                     |
+| `monthlyEquivalent`, `annualEquivalent`, `daysUntil` por suscripción                                                                               | ✅ existe                                                                     |
+| Historial de pagos (`fin_subscription_payments`: `amount`, `currency`, `paidAt`, `transactionId`, `source`)                                        | ✅ existe; permite derivar precio anterior y gasto real del mes               |
+| `GET /finance/subscriptions/summary`: `baseCurrency`, `activeCount`, `monthlyCost`, `annualCost`, `upcoming` (ventana fija `UPCOMING_WINDOW_DAYS`) | ✅ existe; sin tendencia, sin gasto real, sin días configurables              |
+| Categoría de la suscripción (`categoryId`)                                                                                                         | ❌ no existe: requiere migración                                              |
+| Precio anterior (`previousAmount` / `priceChangedAt`)                                                                                              | ❌ no existe como columna; se deriva de los dos últimos pagos (sin migración) |
+| Desglose por categoría, instrumento o moneda                                                                                                       | ❌ no existe                                                                  |
+| Alertas                                                                                                                                            | ❌ no existe (solo el job de recordatorios)                                   |
+| Ajuste `subscriptions.groupBy`                                                                                                                     | ✅ existe en settings (default `none`)                                        |
+| Monto y conteo del summary usan `Number`                                                                                                           | ⚠️ coherente con el pendiente 13; aquí usar `Decimal` en lo nuevo             |
 
 Web: la vista actual es una lista con filtros y pestañas (Suscripciones / Recurrentes). Componentes reutilizables: `FinanceHomeHeroSection`, `ExpenseTrendBadge`, `FinanceRingChart`, `FinanceRingLegend`, `buildRingStackSlices`, `FinanceSegmentedControl`, `FinanceSuggestionRow`, `BrandLogo`, `calendar-weeks.ts`, `MonthPicker`, patrón de `transaction-search`.
 

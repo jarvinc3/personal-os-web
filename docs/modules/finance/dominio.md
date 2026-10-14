@@ -57,7 +57,7 @@ El estado de cuenta no llega por correo: los bancos no lo envían y la subida es
 
 ### Conciliar una cuenta o tarjeta
 
-A fin de mes el saldo de la app casi nunca coincide con el banco (impuestos, comisiones, cargos por plástico, intereses). En el detalle de la cuenta o la tarjeta, "Conciliar" abre el sheet:
+A fin de mes el saldo de la app casi nunca coincide con el banco (impuestos, comisiones, cargos por plástico, intereses). En el detalle de la cuenta o la tarjeta de crédito, "Conciliar" abre el sheet. Las tarjetas de débito se concilian desde su cuenta enlazada, que es donde vive el saldo:
 
 1. El usuario escribe el saldo real que ve en la app del banco y la fecha de corte (hoy por defecto). La web muestra la diferencia en vivo contra el saldo de la app.
 2. `POST /finance/reconciliations/preview` propone el 0.15 % de las salidas del mes como impuesto DGII y el resto como otro cargo; la web precarga esas líneas.
