@@ -1,26 +1,24 @@
 # Finanzas: pendientes
 
-Specs de lo que falta tras la alineación de dominio (fases 01-09 y partes 1-4, ya implementadas y descritas en [../dominio.md](../dominio.md)). Cada una se verificó contra el código de develop al 13 oct 2026 (web `fd0630c`, back `bfcfded`).
+Specs de lo que falta tras la alineación de dominio (fases 01-09 y partes 1-4, ya implementadas y descritas en [../dominio.md](../dominio.md)). Estado al 14 oct 2026 (web `v0.27.1` / `12eb305`, back `v0.25.1` / `c3f99bd`). Cada pendiente se implementa en una sesión y se revisa en otra, que publica sus correcciones como PATCH.
 
-| #   | Spec                                                                                         | Tamaño | Repos      | Estado        |
-| --- | -------------------------------------------------------------------------------------------- | ------ | ---------- | ------------- |
-| 01  | [Agrupar reversa con su original](./01-agrupar-reversas.md)                                  | S      | web        | `implemented` |
-| 02  | [Importar estado de cuenta (PDF) y conciliar](./02-importar-estado-de-cuenta.md)             | L      | back + web | `implemented` |
-| 03  | [Sincronización automática al conectar el correo](./03-sync-tras-conectar-correo.md)         | S      | web        | `implemented` |
-| 04  | [Paginación uniforme](./04-paginacion-uniforme.md)                                           | M      | back + web | `implemented` |
-| 06  | [Bloques visuales, captura rápida y resumen semanal](./06-agente-bloques-captura-resumen.md) | L      | back + web | `pending`     |
-| 07  | [Comercios y pagos recurrentes](./07-comercios-recurrentes-suscripciones.md)                 | L      | back + web | `implemented` |
-| 08  | [Suscripciones](./08-suscripciones.md)                                                       | L      | back + web | `pending`     |
+| #   | Spec                                                                                         | Tamaño | Repos      | Estado        | Versiones                                    |
+| --- | -------------------------------------------------------------------------------------------- | ------ | ---------- | ------------- | -------------------------------------------- |
+| 01  | [Agrupar reversa con su original](./01-agrupar-reversas.md)                                  | S      | web        | `implemented` | web v0.21.0–v0.21.2                          |
+| 02  | [Importar estado de cuenta (PDF) y conciliar](./02-importar-estado-de-cuenta.md)             | L      | back + web | `implemented` | web v0.22.0–v0.22.1 · back v0.21.0–v0.21.1   |
+| 03  | [Sincronización automática al conectar el correo](./03-sync-tras-conectar-correo.md)         | S      | web        | `implemented` | web v0.23.0–v0.23.1                          |
+| 04  | [Paginación uniforme](./04-paginacion-uniforme.md)                                           | M      | back + web | `implemented` | web v0.24.0–v0.24.3 · back v0.22.0–v0.22.2   |
+| 05  | Contexto de entidad en el agente (spec cerrada; descrito en [dominio.md](../dominio.md#agente-de-ia)) | M | back + web | `implemented` | web v0.25.0–v0.25.1 · back v0.23.0–v0.23.2 |
+| 06  | [Bloques visuales, captura rápida y resumen semanal](./06-agente-bloques-captura-resumen.md) | L      | back + web | `implemented` | web v0.26.0–v0.26.3 · back v0.24.0–v0.24.4   |
+| 07  | [Comercios y pagos recurrentes](./07-comercios-recurrentes-suscripciones.md)                 | L      | back + web | `implemented` (revisión pendiente) | web v0.27.0–v0.27.1 · back v0.25.0–v0.25.1 |
+| 08  | [Suscripciones](./08-suscripciones.md)                                                       | L      | back + web | `pending`     | —                                            |
 
-## Orden sugerido
+## Notas
 
-1. **01** y **03**: rápidas, solo web.
-2. **04**: base para las listas que crecen. 02 y 07 la reutilizan.
-3. **07**: comercios y detección básica de recurrentes (implementado). El comercio normalizado mejora la conciliación de 02 y la captura rápida de 06.
-4. **02**: el más grande; usa comercios (07) para emparejar.
-5. **06**: bloques, captura rápida y resumen semanal (este último usa 07 para "próximos cobros").
-6. **08**: gestor completo de suscripciones sobre los patrones de 07, con tablas propias, pagos, recordatorios y vista principal en el tab bar.
+- **02**: la importación es solo subida manual de PDF (pdf.js + cola BullMQ `statement-import` + extractor LLM con esquema estricto). No hay ingesta por correo: los bancos no envían el estado de cuenta por email.
+- **07**: Comercios queda fuera del tab bar con atajo solo en Productos. La vista `/finance/subscriptions` actual es básica (patrones detectados) y sigue fuera del tab bar con atajo en Planificación.
+- **08**: el gestor completo de suscripciones pasa a ser vista principal del tab bar de Finanzas, entre Planificación y Productos. Se basa en `personal-os-back/docs/implementations/modulo-suscripciones.md`, pero vive dentro de Finanzas en vez de un módulo `sub_` aparte.
 
 Fuera de alcance: la app móvil (fuera de servicio) y la configuración externa de OAuth (branding, dominio propio de Supabase, CASA).
 
-Reglas para quien implemente: trabajar en `develop`, migraciones Prisma con fecha posterior a la última (`20261015220000_*`), sin drift (`prisma migrate diff ... --exit-code`), tests unitarios de cada caso de uso y specs `*.spec.ts` en la web. Al terminar, mover lo implementado a `dominio.md` y borrar la spec.
+Reglas para quien implemente: trabajar en `develop`, migraciones Prisma con fecha posterior a la última, sin drift (`prisma migrate diff ... --exit-code`), tests unitarios de cada caso de uso y specs `*.spec.ts` en la web. Al terminar, mover lo implementado a `dominio.md`.

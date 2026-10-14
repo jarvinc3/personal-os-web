@@ -1,6 +1,6 @@
 # Finance — estado
 
-Fecha: 2026-10-13 (web `fd0630c`, back `bfcfded`)
+Fecha: 2026-10-14 (web `v0.27.1` / `12eb305`, back `v0.25.1` / `c3f99bd`)
 
 | Ítem                                                                                                                                                                   | Estado        | Evidencia                                                                                                         |
 | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | ----------------------------------------------------------------------------------------------------------------- |
@@ -14,11 +14,14 @@ Fecha: 2026-10-13 (web `fd0630c`, back `bfcfded`)
 | Flujo guiado de monto, amortización, vínculo de movimientos, corte manual                                                                                              | `implemented` | `use-finance-amount-entry.ts`, `amortization-sheet.tsx`, `link-transaction-sheet.tsx`, `card-statement-sheet.tsx` |
 | Ingesta de correo de bancos (incluida la nómina de Popular) y configuración del módulo (sueldo, cuenta por defecto, mes financiero, sync)                              | `implemented` | `finance-module-settings-form.tsx`                                                                                |
 | Agrupar reversa con su original en la lista                                                                                                                            | `implemented` | `transactions/lib/group-reversals.ts`; una fila por par en `month-section.tsx`                                    |
-| Importar estado de cuenta (PDF o correo) y conciliar                                                                                                                   | `planned`     | [pendientes/02](./pendientes/02-importar-estado-de-cuenta.md)                                                     |
-| Sincronización automática al conectar el correo                                                                                                                        | `partial`     | [pendientes/03](./pendientes/03-sync-tras-conectar-correo.md)                                                     |
-| Paginación uniforme                                                                                                                                                    | `partial`     | [pendientes/04](./pendientes/04-paginacion-uniforme.md)                                                           |
-| Agente: contexto de entidad, bloques visuales, captura rápida, resumen semanal                                                                                         | `planned`     | [pendientes/05](./pendientes/05-agente-entity-ref.md), [06](./pendientes/06-agente-bloques-captura-resumen.md)    |
-| Comercios y recurrentes (deteccion)                                                                                                                                   | `implemented` | `app/(app)/finance/merchants/**`; `GET/PATCH /finance/merchants`, `GET/POST/PATCH /finance/recurring` |
+| Importar estado de cuenta (PDF manual, sin correo) y conciliar | `implemented` | detalle de cuenta o tarjeta → `/finance/statement-imports/[importId]`; pendiente 02 (web v0.22.x / back v0.21.x) |
+| Sincronización automática al conectar el correo | `implemented` | pendiente 03 (web v0.23.x) |
+| Paginación uniforme por cursor | `implemented` | `useInfiniteFinanceList` + `InfiniteListSentinel`; pendiente 04 (web v0.24.x / back v0.22.x) |
+| Agente: contexto de entidad (`entityRef`) | `implemented` | `useRegisterChatContext`, chip en `chat-input.tsx`; pendiente 05 (web v0.25.x / back v0.23.x) |
+| Agente: bloques visuales (movimiento, lista, presupuesto, préstamo) | `implemented` | `src/modules/ai/components/blocks/`; pendiente 06 |
+| Captura rápida en lenguaje natural | `implemented` | `quick-entry/` (barra + preview que precarga el flujo guiado); `POST /finance/quick-entry/parse` |
+| Resumen semanal | `implemented` | `dashboard/components/home-weekly-summary.tsx`; `GET /finance/analytics/weekly-summary`; ajustes `weeklySummary` y `weeklySummaryDay`; pendiente 06 (web v0.26.x / back v0.24.x) |
+| Comercios y recurrentes (detección básica) | `implemented` | `/finance/merchants` (atajo en Productos), `/finance/subscriptions` básica (atajo en Planificación); `GET/PATCH /finance/merchants`, `GET/POST/PATCH /finance/recurring`; ajuste `recurringAlerts`; pendiente 07 (web v0.27.x / back v0.25.x) |
 | Suscripciones (gestor completo, tablas propias y pagos)                                                                                                                | `planned`     | [pendientes/08](./pendientes/08-suscripciones.md) |
 | Deshacer tras eliminar                                                                                                                                                 | `implemented` | endpoints `POST <entidad>/:id/restore`; toast "Deshacer" en los 9 detalles                                        |
 | Papelera de reciclaje (`/finance/recycle-bin`)                                                                                                                         | `implemented` | `recycle-bin/`; `GET /finance/recycle-bin`; restaurar con `PATCH isActive:true` y `POST <entidad>/:id/restore`    |

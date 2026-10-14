@@ -15,6 +15,6 @@ Implementados en `src/modules/` con rutas en `app/`.
 
 ## Solo Settings (sin app routes)
 
-Agenda, Projects, Health, Subscriptions — sheets `Edit*Sheet`. No documentar como módulos de producto entregados.
+Agenda, Projects, Health, Subscriptions — sheets `Edit*Sheet`. No documentar como módulos de producto entregados. Subscriptions ya no será un módulo aparte: se integra en Finanzas (vista básica de recurrentes en `/finance/subscriptions` y gestor completo en el pendiente [08](./finance/pendientes/08-suscripciones.md)).
 
 Chrome transversal: [architecture/module-conventions.md](../architecture/module-conventions.md).
