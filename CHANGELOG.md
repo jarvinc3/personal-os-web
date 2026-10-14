@@ -2,6 +2,14 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.30.2] - 2026-10-19
+
+### Corregido
+
+- El filtro de moneda del anillo de suscripciones se aplica a la lista de tarjetas, y los segmentos «Sin categoría» y «Sin método» filtran esas suscripciones.
+- El calendario de próximos cobros reutiliza el agrupado por día compartido.
+- Planificación deja de mostrar el atajo a Suscripciones, que ya está en el tab bar.
+
 ## [0.30.1] - 2026-10-19
 
 ### Cambiado
