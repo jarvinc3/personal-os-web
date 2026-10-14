@@ -43,6 +43,14 @@ export type FinanceModuleConfig = {
     cardDueDate: boolean
     unusualExpense: boolean
     recurringAlerts: boolean
+    subscriptionReminders: boolean
+    priceIncreaseAlerts: boolean
+  }
+  /** Ajustes del gestor de suscripciones, dentro de Finanzas. */
+  subscriptions: {
+    /** Días antes de la renovación para el recordatorio (0-30). */
+    reminderDaysBefore: number
+    groupBy: "category" | "provider" | "none"
   }
   reports: {
     /** 0 = domingo … 6 = sábado, en la zona horaria del usuario. */
@@ -90,18 +98,6 @@ export type ProjectsModuleConfig = {
   }
 }
 
-export type SubscriptionsModuleConfig = {
-  version: number
-  fieldGuide: string
-  defaultCurrency: string
-  renewalReminderDays: number[]
-  groupBy: "category" | "provider" | "none"
-  notifications: {
-    renewalReminders: boolean
-    priceIncreaseAlerts: boolean
-  }
-}
-
 export type HealthModuleConfig = {
   version: number
   fieldGuide: string
@@ -120,7 +116,6 @@ export type ModuleConfigBySlug = {
   finance: FinanceModuleConfig
   agenda: AgendaModuleConfig
   projects: ProjectsModuleConfig
-  subscriptions: SubscriptionsModuleConfig
   health: HealthModuleConfig
 }
 

@@ -6,7 +6,7 @@ Money: lecturas decimal **strings**; writes **numbers** (`parseFinanceMoney` / `
 
 Query keys: `src/modules/finance/shared/types/api.ts` (`["finance", ...]`). Mutaciones de cuentas/tarjetas/loans/instituciones/txs confirmadas/email assign invalidan `FINANCE_BALANCE_SHEET_QUERY_KEY`.
 
-Tab bar (4): Resumen, Movimientos, Planificación, Productos. Estadísticas, Comercios y Suscripciones `showInTabBar: false` (`shared/constants/nav.ts`). Comercios tiene atajo en Productos; Suscripciones (vista básica de recurrentes) en Planificación. El pendiente 08 convertirá Suscripciones en vista principal del tab bar, entre Planificación y Productos. Gmail sync no está en tab bar; vive en `/finance/sync` (atajo desde Productos).
+Tab bar (5): Resumen, Movimientos, Planificación, Suscripciones, Productos. Estadísticas y Comercios `showInTabBar: false` (`shared/constants/nav.ts`). Comercios tiene atajo en Productos. Suscripciones es el gestor (resumen de costo mensual y anual, cobros recurrentes detectados, filtros por estado y moneda, búsqueda e historial de pagos). Gmail sync no está en tab bar; vive en `/finance/sync` (atajo desde Productos).
 
 ## Convenciones de formularios
 

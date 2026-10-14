@@ -146,5 +146,14 @@ export const API_ENDPOINTS = {
     RECURRING: "/finance/recurring",
     RECURRING_UPCOMING: "/finance/recurring/upcoming",
     RECURRING_PATTERN: (id: string) => `/finance/recurring/${id}`,
+    SUBSCRIPTIONS: "/finance/subscriptions",
+    SUBSCRIPTION_SUMMARY: "/finance/subscriptions/summary",
+    SUBSCRIPTION: (id: string) => `/finance/subscriptions/${id}`,
+    SUBSCRIPTION_PAUSE: (id: string) => `/finance/subscriptions/${id}/pause`,
+    SUBSCRIPTION_RESUME: (id: string) => `/finance/subscriptions/${id}/resume`,
+    SUBSCRIPTION_CANCEL: (id: string) => `/finance/subscriptions/${id}/cancel`,
+    SUBSCRIPTION_PAYMENTS: (id: string) =>
+      `/finance/subscriptions/${id}/payments`,
+    SUBSCRIPTION_LOGO: (id: string) => `/finance/subscriptions/${id}/logo`,
   },
 } as const

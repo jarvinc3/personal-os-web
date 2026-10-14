@@ -17,7 +17,7 @@ Ruta: `/settings` (`settings-screen.tsx`). Sheets `?sheet=`.
 
 `/settings/finance` (`FinanceModuleSettingsForm`): módulo encendido, enlace a moneda principal y monedas seguidas, ingreso fijo (monto, frecuencia, días de pago y cuenta), cuenta por defecto para gastos y transferencias, entrada de monto (teclado o calculadora), inicio de semana, período del panel, visualización, mes financiero, recordatorios de tarjeta, correo (sincronización, modo directo o pendiente y enlace a Bancos y remitentes) y alertas del módulo. Todo vive en `module_config.finance`.
 
-Slugs: `finance`, `agenda`, `projects`, `health`, `subscriptions`. Solo finance tiene app routes.
+Slugs: `finance`, `agenda`, `projects`, `health`. Solo finance tiene app routes. Suscripciones dejó de ser un módulo: su sección vive en `/settings/finance#suscripciones` y `/settings/subscriptions` redirige allí.
 
 Defaults: `src/modules/settings/constants/user-settings-defaults.ts`. Hooks: `useProfile`, `useUserModuleConfig`, `useDeleteAccount`, `useWipeUserData`. Invalidación `profile`/`me` también desde tools IA.
 

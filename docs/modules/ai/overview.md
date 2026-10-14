@@ -17,7 +17,7 @@ Código: `src/modules/ai/` (docs en `docs/modules/ai/`, no `ai-agent`).
 ## Fuera de alcance
 
 - Implementar tools (backend registry).
-- Tools de dominio para agenda/projects/health/subscriptions.
+- Tools de dominio para agenda/projects/health/finance.
 
 > [!WARNING]
 > **REV-WEB-011** (`NO_IMPLEMENTADO`) — no hay `agenda-tools.md` etc. El selector igual ofrece esos slugs; el backend solo da tools mínimas. [review-register.md](../../review-register.md#rev-web-011)

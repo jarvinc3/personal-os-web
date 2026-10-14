@@ -13,6 +13,7 @@ import {
   nextEmailSyncTime,
   parsePayDays,
   parseSyncIntervalMinutes,
+  subscriptionsPatchFromFormValues,
 } from "./finance-module-form.ts"
 
 const validFinance = {
@@ -45,11 +46,25 @@ const validFinance = {
   cardDueDate: true,
   unusualExpense: true,
   recurringAlerts: true,
+  subscriptionReminders: true,
+  priceIncreaseAlerts: true,
+  subscriptionReminderDays: "3",
+  subscriptionGroupBy: "none" as const,
 }
 
 describe("financeModuleSchema", () => {
   it("accepts an interval of at least fifteen minutes", () => {
     assert.equal(financeModuleSchema.safeParse(validFinance).success, true)
+  })
+
+  it("rejects subscription reminder days outside 0-30", () => {
+    assert.equal(
+      financeModuleSchema.safeParse({
+        ...validFinance,
+        subscriptionReminderDays: "31",
+      }).success,
+      false
+    )
   })
 
   it("rejects an interval below fifteen minutes", () => {
@@ -282,5 +297,16 @@ describe("emailSyncPatchFromFormValues", () => {
       mode: "times",
       times: ["08:00", "18:00"],
     })
+  })
+})
+
+describe("subscriptionsPatchFromFormValues", () => {
+  it("maps the reminder days and the grouping", () => {
+    const patch = subscriptionsPatchFromFormValues({
+      ...validFinance,
+      subscriptionReminderDays: "5",
+      subscriptionGroupBy: "provider",
+    })
+    assert.deepEqual(patch, { reminderDaysBefore: 5, groupBy: "provider" })
   })
 })

@@ -41,7 +41,7 @@ export const DEFAULT_USER_PREFERENCES: UserPreferences = {
 
 export const DEFAULT_MODULE_CONFIG_BY_SLUG: ModuleConfigBySlug = {
   finance: {
-    version: 1,
+    version: 2,
     fieldGuide:
       "Moneda, calendario financiero, panel y alertas del módulo Finanzas.",
     baseCurrency: "DOP",
@@ -74,6 +74,12 @@ export const DEFAULT_MODULE_CONFIG_BY_SLUG: ModuleConfigBySlug = {
       cardDueDate: true,
       unusualExpense: true,
       recurringAlerts: true,
+      subscriptionReminders: true,
+      priceIncreaseAlerts: true,
+    },
+    subscriptions: {
+      reminderDaysBefore: 3,
+      groupBy: "none",
     },
     reports: {
       weeklySummaryDay: 1,
@@ -113,17 +119,6 @@ export const DEFAULT_MODULE_CONFIG_BY_SLUG: ModuleConfigBySlug = {
     notifications: {
       dueDateReminders: true,
       statusChanges: false,
-    },
-  },
-  subscriptions: {
-    version: 1,
-    fieldGuide: "Moneda, agrupación y avisos de renovación.",
-    defaultCurrency: "DOP",
-    renewalReminderDays: [7, 1],
-    groupBy: "category",
-    notifications: {
-      renewalReminders: true,
-      priceIncreaseAlerts: true,
     },
   },
   health: {

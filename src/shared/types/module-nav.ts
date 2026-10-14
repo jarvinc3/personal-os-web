@@ -1,7 +1,7 @@
 import type { LucideIcon } from "lucide-react"
 
 export type ModuleSlug =
-  "finance" | "agenda" | "projects" | "subscriptions" | "health" | "keepAwake"
+  "finance" | "agenda" | "projects" | "health" | "keepAwake"
 
 export type ModuleNavItem = {
   label: string

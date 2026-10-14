@@ -5,7 +5,6 @@ export { FinanceModuleSettingsScreen } from "@/src/modules/settings/finance-modu
 export { FinanceCurrenciesSettingsScreen } from "@/src/modules/settings/finance-currencies-settings-screen"
 export { HealthModuleSettingsScreen } from "@/src/modules/settings/health-module-settings-screen"
 export { ProjectsModuleSettingsScreen } from "@/src/modules/settings/projects-module-settings-screen"
-export { SubscriptionsModuleSettingsScreen } from "@/src/modules/settings/subscriptions-module-settings-screen"
 export { WipeDataSettingsScreen } from "@/src/modules/settings/wipe-data-settings-screen"
 export { SETTINGS_REGISTRY } from "@/src/modules/settings/constants/settings-metadata"
 export { EditQuietHoursSheet } from "@/src/modules/settings/components/sheets/edit-quiet-hours-sheet"

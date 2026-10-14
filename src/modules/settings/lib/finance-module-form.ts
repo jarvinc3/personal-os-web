@@ -171,6 +171,10 @@ export const financeModuleSchema = z
     cardDueDate: z.boolean(),
     unusualExpense: z.boolean(),
     recurringAlerts: z.boolean(),
+    subscriptionReminders: z.boolean(),
+    priceIncreaseAlerts: z.boolean(),
+    subscriptionReminderDays: z.string(),
+    subscriptionGroupBy: z.enum(["category", "provider", "none"]),
   })
   .superRefine((values, ctx) => {
     if (values.emailSyncScheduleMode === EMAIL_SYNC_SCHEDULE_MODES.INTERVAL) {
@@ -232,6 +236,19 @@ export const financeModuleSchema = z
       })
     }
 
+    const subscriptionDays = Number(values.subscriptionReminderDays)
+    if (
+      !Number.isInteger(subscriptionDays) ||
+      subscriptionDays < 0 ||
+      subscriptionDays > 30
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["subscriptionReminderDays"],
+        message: "De 0 a 30 días",
+      })
+    }
+
     if (!values.fixedIncomeEnabled) {
       return
     }
@@ -284,6 +301,16 @@ export function emailSyncPatchFromFormValues(
   }
 }
 
+/** Bloque `subscriptions` del parche de configuración. */
+export function subscriptionsPatchFromFormValues(
+  values: FinanceModuleFormValues
+): FinanceModuleConfig["subscriptions"] {
+  return {
+    reminderDaysBefore: Number(values.subscriptionReminderDays),
+    groupBy: values.subscriptionGroupBy,
+  }
+}
+
 /** Valores del formulario de Ajustes a partir de la configuración guardada. */
 export function configToFinanceFormValues(
   config: FinanceModuleConfig
@@ -323,5 +350,9 @@ export function configToFinanceFormValues(
     cardDueDate: config.notifications.cardDueDate,
     unusualExpense: config.notifications.unusualExpense,
     recurringAlerts: config.notifications.recurringAlerts,
+    subscriptionReminders: config.notifications.subscriptionReminders,
+    priceIncreaseAlerts: config.notifications.priceIncreaseAlerts,
+    subscriptionReminderDays: String(config.subscriptions.reminderDaysBefore),
+    subscriptionGroupBy: config.subscriptions.groupBy,
   }
 }

@@ -5,7 +5,6 @@ import {
   BriefcaseBusinessIcon,
   Calendar,
   MonitorIcon,
-  Wallet,
   type LucideIcon,
 } from "lucide-react"
 
@@ -65,17 +64,6 @@ export const MODULE_REGISTRY: Record<ModuleSlug, ModuleDefinition> = {
     accent: "#8B5CF6",
     icon: BriefcaseBusinessIcon,
     order: 2,
-  }),
-  subscriptions: createModuleDefinition({
-    slug: "subscriptions",
-    id: "7677a8ab-f1aa-4c9e-8fff-5ea2caddad9c",
-    key: "sub",
-    label: "Suscripciones",
-    description:
-      "Este modulo es el encargado de la gestion de las suscripciones del usuario.",
-    accent: "#F97316",
-    icon: Wallet,
-    order: 3,
   }),
   health: createModuleDefinition({
     slug: "health",

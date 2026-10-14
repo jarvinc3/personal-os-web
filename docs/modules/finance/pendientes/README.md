@@ -1,23 +1,23 @@
 # Finanzas: pendientes
 
-Specs de lo que falta tras la alineación de dominio (fases 01-09 y partes 1-4, ya implementadas y descritas en [../dominio.md](../dominio.md)). Estado al 14 oct 2026 (web `v0.27.1` / `12eb305`, back `v0.25.1` / `c3f99bd`). Cada pendiente se implementa en una sesión y se revisa en otra, que publica sus correcciones como PATCH.
+Specs de lo que falta tras la alineación de dominio (fases 01-09 y partes 1-4, ya implementadas y descritas en [../dominio.md](../dominio.md)). Estado al 14 oct 2026 (web `v0.28.0`, back `v0.26.0`). Cada pendiente se implementa en una sesión y se revisa en otra, que publica sus correcciones como PATCH.
 
-| #   | Spec                                                                                         | Tamaño | Repos      | Estado        | Versiones                                    |
-| --- | -------------------------------------------------------------------------------------------- | ------ | ---------- | ------------- | -------------------------------------------- |
-| 01  | [Agrupar reversa con su original](./01-agrupar-reversas.md)                                  | S      | web        | `implemented` | web v0.21.0–v0.21.2                          |
-| 02  | [Importar estado de cuenta (PDF) y conciliar](./02-importar-estado-de-cuenta.md)             | L      | back + web | `implemented` | web v0.22.0–v0.22.1 · back v0.21.0–v0.21.1   |
-| 03  | [Sincronización automática al conectar el correo](./03-sync-tras-conectar-correo.md)         | S      | web        | `implemented` | web v0.23.0–v0.23.1                          |
-| 04  | [Paginación uniforme](./04-paginacion-uniforme.md)                                           | M      | back + web | `implemented` | web v0.24.0–v0.24.3 · back v0.22.0–v0.22.2   |
-| 05  | Contexto de entidad en el agente (spec cerrada; descrito en [dominio.md](../dominio.md#agente-de-ia)) | M | back + web | `implemented` | web v0.25.0–v0.25.1 · back v0.23.0–v0.23.2 |
-| 06  | [Bloques visuales, captura rápida y resumen semanal](./06-agente-bloques-captura-resumen.md) | L      | back + web | `implemented` | web v0.26.0–v0.26.3 · back v0.24.0–v0.24.4   |
-| 07  | [Comercios y pagos recurrentes](./07-comercios-recurrentes-suscripciones.md)                 | L      | back + web | `implemented` | web v0.27.0–v0.27.2 · back v0.25.0–v0.25.2 |
-| 08  | [Suscripciones](./08-suscripciones.md)                                                       | L      | back + web | `pending`     | —                                            |
+| #   | Spec                                                                                                  | Tamaño | Repos      | Estado        | Versiones                                  |
+| --- | ----------------------------------------------------------------------------------------------------- | ------ | ---------- | ------------- | ------------------------------------------ |
+| 01  | [Agrupar reversa con su original](./01-agrupar-reversas.md)                                           | S      | web        | `implemented` | web v0.21.0–v0.21.2                        |
+| 02  | [Importar estado de cuenta (PDF) y conciliar](./02-importar-estado-de-cuenta.md)                      | L      | back + web | `implemented` | web v0.22.0–v0.22.1 · back v0.21.0–v0.21.1 |
+| 03  | [Sincronización automática al conectar el correo](./03-sync-tras-conectar-correo.md)                  | S      | web        | `implemented` | web v0.23.0–v0.23.1                        |
+| 04  | [Paginación uniforme](./04-paginacion-uniforme.md)                                                    | M      | back + web | `implemented` | web v0.24.0–v0.24.3 · back v0.22.0–v0.22.2 |
+| 05  | Contexto de entidad en el agente (spec cerrada; descrito en [dominio.md](../dominio.md#agente-de-ia)) | M      | back + web | `implemented` | web v0.25.0–v0.25.1 · back v0.23.0–v0.23.2 |
+| 06  | [Bloques visuales, captura rápida y resumen semanal](./06-agente-bloques-captura-resumen.md)          | L      | back + web | `implemented` | web v0.26.0–v0.26.3 · back v0.24.0–v0.24.4 |
+| 07  | [Comercios y pagos recurrentes](./07-comercios-recurrentes-suscripciones.md)                          | L      | back + web | `implemented` | web v0.27.0–v0.27.2 · back v0.25.0–v0.25.2 |
+| 08  | [Suscripciones](./08-suscripciones.md)                                                                | L      | back + web | `implemented` | web v0.28.0 · back v0.26.0                 |
 
 ## Notas
 
 - **02**: la importación es solo subida manual de PDF (pdf.js + cola BullMQ `statement-import` + extractor LLM con esquema estricto). No hay ingesta por correo: los bancos no envían el estado de cuenta por email.
-- **07**: Comercios queda fuera del tab bar con atajo solo en Productos. La vista `/finance/subscriptions` actual es básica (patrones detectados) y sigue fuera del tab bar con atajo en Planificación.
-- **08**: el gestor completo de suscripciones pasa a ser vista principal del tab bar de Finanzas, entre Planificación y Productos. Se basa en `personal-os-back/docs/implementations/modulo-suscripciones.md`, pero vive dentro de Finanzas en vez de un módulo `sub_` aparte.
+- **07**: Comercios queda fuera del tab bar con atajo solo en Productos. El gestor de `/finance/subscriptions` es del pendiente 08.
+- **08**: el gestor completo de suscripciones es vista principal del tab bar de Finanzas, entre Planificación y Productos. Tablas y REST propios (`fin_subscriptions`, `fin_subscription_payments`), emparejado de pagos y recordatorios; los ajustes se movieron a la sección «Suscripciones» de `/settings/finance`.
 
 Fuera de alcance: la app móvil (fuera de servicio) y la configuración externa de OAuth (branding, dominio propio de Supabase, CASA).
 

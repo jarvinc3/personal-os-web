@@ -249,7 +249,7 @@ export type AiResponseWsPayload = {
 }
 
 export type ModuleChatSlug =
-  "general" | "agenda" | "projects" | "health" | "subscriptions" | "finance"
+  "general" | "agenda" | "projects" | "health" | "finance"
 
 export function getChatModuleLabel(slug: string | undefined | null): string {
   const key = (slug ?? "general") as ModuleChatSlug
@@ -273,6 +273,5 @@ export const CHAT_MODULE_OPTIONS: { slug: ModuleChatSlug; label: string }[] = [
   { slug: "agenda", label: "Agenda" },
   { slug: "projects", label: "Proyectos" },
   { slug: "health", label: "Salud" },
-  { slug: "subscriptions", label: "Suscripciones" },
   { slug: "finance", label: "Finanzas" },
 ]

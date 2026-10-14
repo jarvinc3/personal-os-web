@@ -166,12 +166,12 @@ Un archivo se borra cuando la screen nueva lo reemplaza y ningún import lo usa.
 
 ## Settings vs módulo de producto
 
-`MODULE_REGISTRY` lista slugs backend (`finance`, `agenda`, `projects`, `subscriptions`, `health`). Tener sheet en Ajustes **no** crea rutas ni `ModuleAppNav`.
+`MODULE_REGISTRY` lista slugs backend (`finance`, `agenda`, `projects`, `health`). Tener sheet en Ajustes **no** crea rutas ni `ModuleAppNav`.
 
-| Slug                                    | App routes   | Nav               |
-| --------------------------------------- | ------------ | ----------------- |
-| `finance`                               | `/finance/*` | `FINANCE_APP_NAV` |
-| agenda, projects, health, subscriptions | ninguna      | solo Settings     |
+| Slug                     | App routes   | Nav               |
+| ------------------------ | ------------ | ----------------- |
+| `finance`                | `/finance/*` | `FINANCE_APP_NAV` |
+| agenda, projects, health | ninguna      | solo Settings     |
 
 Keep Awake y Landing/Home **no** son slugs de `MODULE_REGISTRY`.
 

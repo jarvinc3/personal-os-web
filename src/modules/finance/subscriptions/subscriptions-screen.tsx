@@ -4,28 +4,43 @@ import { BrandLogo } from "@/src/modules/finance/shared/components/brand-logo"
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
 import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
 import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
+import {
+  FinanceSegmentedControl,
+  FinanceSuggestionRow,
+} from "@/src/modules/finance/shared/components/forms/form-blocks"
 import { FinanceGate } from "@/src/modules/finance/finance-gate"
 import { RecurringSheet } from "@/src/modules/finance/subscriptions/components/recurring-sheet"
+import { SubscriptionSheet } from "@/src/modules/finance/subscriptions/components/subscription-sheet"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
 import {
   useRecurring,
   useUpdateRecurring,
 } from "@/src/modules/finance/shared/hooks/use-recurring"
+import {
+  useSubscriptionSummary,
+  useSubscriptions,
+} from "@/src/modules/finance/shared/hooks/use-subscriptions"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
+import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 import {
-  formatFinanceMoney,
-  parseFinanceMoney,
-} from "@/src/modules/finance/shared/lib/money"
+  billingCycleLabel,
+  subscriptionStatusLabel,
+  subscriptionStatusVariant,
+} from "@/src/modules/finance/subscriptions/lib/subscription-display"
 import {
   nextChargeLabel,
   RECURRING_KIND_LABEL,
   recurringFrequencyLabel,
 } from "@/src/modules/finance/subscriptions/lib/recurring-display"
+import type { SubscriptionDraft } from "@/src/modules/finance/subscriptions/lib/subscription-form"
 import type {
   FinanceRecurringPattern,
   FinanceRecurringStatus,
+  FinanceSubscriptionStatus,
 } from "@/src/modules/finance/shared/types/entities"
+import { APP_ROUTES } from "@/src/shared/constants/app-routes"
+import { FormTextField } from "@/src/shared/components/layout/form-blocks"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -47,6 +62,7 @@ import {
 } from "@/src/shared/components/ui/empty"
 import { InfiniteListSentinel } from "@/src/shared/components/ui/infinite-list-sentinel"
 import { Spinner } from "@/src/shared/components/ui/spinner"
+import { SummaryItem, SummarySection } from "@/src/shared/components/ui/summary"
 import {
   Tabs,
   TabsContent,
@@ -56,16 +72,35 @@ import {
 import { appToast } from "@/src/shared/lib/app-toast"
 import { cn } from "@/src/shared/lib/utils"
 import {
+  CalendarClockIcon,
   CheckIcon,
   PencilIcon,
   PlusIcon,
   RepeatIcon,
   RotateCcwIcon,
+  SearchIcon,
+  SparklesIcon,
+  WalletIcon,
   XIcon,
 } from "lucide-react"
 import { useMemo, useState } from "react"
 
-const TAB_ITEMS: {
+const MANAGED_TAB = "managed"
+const RECURRING_TAB = "recurring"
+const SUGGESTION_LIMIT = 3
+
+type SectionTab = typeof MANAGED_TAB | typeof RECURRING_TAB
+
+type StatusFilter = "ALL" | FinanceSubscriptionStatus
+
+const STATUS_FILTER_OPTIONS: { value: StatusFilter; label: string }[] = [
+  { value: "ALL", label: "Todas" },
+  { value: "ACTIVE", label: "Activas" },
+  { value: "PAUSED", label: "Pausadas" },
+  { value: "CANCELLED", label: "Canceladas" },
+]
+
+const RECURRING_TABS: {
   value: FinanceRecurringStatus
   label: string
   icon: typeof RepeatIcon
@@ -91,8 +126,12 @@ const TAB_ITEMS: {
   },
 ]
 
+function isSectionTab(value: unknown): value is SectionTab {
+  return value === MANAGED_TAB || value === RECURRING_TAB
+}
+
 function isRecurringTab(value: unknown): value is FinanceRecurringStatus {
-  return TAB_ITEMS.some((tab) => tab.value === value)
+  return RECURRING_TABS.some((tab) => tab.value === value)
 }
 
 export function SubscriptionsScreen() {
@@ -105,29 +144,296 @@ export function SubscriptionsScreen() {
 
 function SubscriptionsScreenBody() {
   const { isEnabled, config } = useFinanceEnabled()
-  const [tab, setTab] = useState<FinanceRecurringStatus>("SUGGESTED")
+  const [section, setSection] = useState<SectionTab>(MANAGED_TAB)
   const [sheetOpen, setSheetOpen] = useState(false)
-  const [editing, setEditing] = useState<FinanceRecurringPattern | null>(null)
-  const [dismissing, setDismissing] =
-    useState<FinanceRecurringPattern | null>(null)
-  const updateMutation = useUpdateRecurring()
+  const [subscriptionDraft, setSubscriptionDraft] =
+    useState<SubscriptionDraft | null>(null)
   const display = {
     currency: config.baseCurrency,
     showCents: config.display.showCents,
     compactNumbers: config.display.compactNumbers,
   }
 
+  function openCreate(draft: SubscriptionDraft | null = null) {
+    setSubscriptionDraft(draft)
+    setSheetOpen(true)
+  }
+
+  return (
+    <div className="flex flex-col gap-4">
+      <Button type="button" onClick={() => openCreate()}>
+        <PlusIcon className="size-4 shrink-0" />
+        Nueva suscripción
+      </Button>
+
+      <Tabs
+        value={section}
+        onValueChange={(value) => {
+          if (isSectionTab(value)) {
+            setSection(value)
+          }
+        }}
+      >
+        <TabsList className="h-auto w-full justify-start overflow-x-auto rounded-2xl p-1">
+          <TabsTrigger value={MANAGED_TAB} className="rounded-xl py-2">
+            <WalletIcon className="size-4 shrink-0" />
+            Suscripciones
+          </TabsTrigger>
+          <TabsTrigger value={RECURRING_TAB} className="rounded-xl py-2">
+            <RepeatIcon className="size-4 shrink-0" />
+            Recurrentes
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value={MANAGED_TAB} keepMounted>
+          <ManagedSubscriptions
+            isEnabled={isEnabled}
+            display={display}
+            onCreateFromPattern={(pattern) =>
+              openCreate({
+                name: pattern.merchantName,
+                amount: pattern.avgAmount,
+                currency: pattern.currency,
+                sourcePatternId: pattern.id,
+              })
+            }
+          />
+        </TabsContent>
+
+        <TabsContent value={RECURRING_TAB} keepMounted>
+          <RecurringPatterns isEnabled={isEnabled} display={display} />
+        </TabsContent>
+      </Tabs>
+
+      <SubscriptionSheet
+        open={sheetOpen}
+        onOpenChange={(next) => {
+          setSheetOpen(next)
+          if (!next) {
+            setSubscriptionDraft(null)
+          }
+        }}
+        subscription={null}
+        draft={subscriptionDraft}
+        display={display}
+        defaultReminderDays={config.subscriptions.reminderDaysBefore}
+      />
+    </div>
+  )
+}
+
+type ManagedSubscriptionsProps = {
+  isEnabled: boolean
+  display: {
+    currency: string
+    showCents: boolean
+    compactNumbers: boolean
+  }
+  onCreateFromPattern: (pattern: FinanceRecurringPattern) => void
+}
+
+function ManagedSubscriptions({
+  isEnabled,
+  display,
+  onCreateFromPattern,
+}: ManagedSubscriptionsProps) {
+  const [status, setStatus] = useState<StatusFilter>("ALL")
+  const [currency, setCurrency] = useState<string>("ALL")
+  const [search, setSearch] = useState("")
+  const summaryQuery = useSubscriptionSummary(isEnabled)
+  const suggestionsQuery = useRecurring(isEnabled, "SUGGESTED")
+  const listQuery = useSubscriptions(isEnabled, {
+    status: status === "ALL" ? undefined : status,
+    currency: currency === "ALL" ? undefined : currency,
+    q: search.trim() || undefined,
+  })
+  const items = infiniteListItems(listQuery.data)
+  const suggestions = infiniteListItems(suggestionsQuery.data).slice(
+    0,
+    SUGGESTION_LIMIT
+  )
+  const summary = summaryQuery.data
+  const currencyOptions = useMemo(() => {
+    const codes = new Set<string>([display.currency])
+    for (const item of items) {
+      codes.add(item.currency)
+    }
+    return [
+      { value: "ALL", label: "Todas" },
+      ...[...codes].map((code) => ({ value: code, label: code })),
+    ]
+  }, [items, display.currency])
+
+  return (
+    <div className="flex flex-col gap-4">
+      {summaryQuery.isError ? (
+        <FinanceErrorState
+          message={financeErrorMessage(summaryQuery.error)}
+          onRetry={() => void summaryQuery.refetch()}
+          isRetrying={summaryQuery.isFetching}
+        />
+      ) : null}
+
+      {summary ? (
+        <SummarySection title="Resumen" icon={WalletIcon}>
+          <SummaryItem
+            title="Costo mensual"
+            description={`${summary.activeCount} activa${summary.activeCount === 1 ? "" : "s"}`}
+            value={formatFinanceMoney(summary.monthlyCost, display)}
+          />
+          <SummaryItem
+            title="Costo anual"
+            value={formatFinanceMoney(summary.annualCost, display)}
+          />
+          <SummaryItem
+            title="Próximos cobros (7 días)"
+            icon={CalendarClockIcon}
+            description={
+              summary.upcoming.length === 0
+                ? "Nada en la próxima semana"
+                : summary.upcoming
+                    .map((item) => item.name)
+                    .slice(0, 3)
+                    .join(", ")
+            }
+            value={String(summary.upcoming.length)}
+            isLast
+          />
+        </SummarySection>
+      ) : null}
+
+      {suggestions.length > 0 ? (
+        <SummarySection
+          title="Detectamos cobros recurrentes"
+          icon={SparklesIcon}
+        >
+          {suggestions.map((pattern) => (
+            <FinanceSuggestionRow
+              key={pattern.id}
+              actionLabel="Es una suscripción"
+              onAction={() => onCreateFromPattern(pattern)}
+            >
+              {pattern.merchantName} cobra{" "}
+              {formatFinanceMoney(pattern.avgAmount, {
+                ...display,
+                currency: pattern.currency,
+              })}{" "}
+              {recurringFrequencyLabel(pattern.frequency).toLowerCase()}
+            </FinanceSuggestionRow>
+          ))}
+        </SummarySection>
+      ) : null}
+
+      <FinanceSegmentedControl
+        label="Estado"
+        value={status}
+        onChange={setStatus}
+        options={STATUS_FILTER_OPTIONS}
+        fullWidth
+      />
+
+      {currencyOptions.length > 2 ? (
+        <FinanceSegmentedControl
+          label="Moneda"
+          value={currency}
+          onChange={setCurrency}
+          options={currencyOptions}
+          fullWidth
+        />
+      ) : null}
+
+      <FormTextField
+        label="Buscar"
+        icon={SearchIcon}
+        value={search}
+        onChange={setSearch}
+        placeholder="Netflix, Spotify…"
+      />
+
+      {listQuery.isError ? (
+        <FinanceErrorState
+          message={financeErrorMessage(listQuery.error)}
+          onRetry={() => void listQuery.refetch()}
+          isRetrying={listQuery.isFetching}
+        />
+      ) : null}
+
+      <AsyncRegion
+        pending={listQuery.isPending && !listQuery.data}
+        pendingFallback={<FinanceListSkeleton />}
+        empty={items.length === 0}
+        emptyFallback={
+          <Empty className="py-8">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <WalletIcon />
+              </EmptyMedia>
+              <EmptyTitle>Sin suscripciones</EmptyTitle>
+              <EmptyDescription>
+                Crea una a mano o conviértela desde un cobro recurrente
+                detectado.
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
+        }
+      >
+        <div className="rounded-2xl border border-border bg-card">
+          {items.map((subscription, index) => (
+            <SummaryItem
+              key={subscription.id}
+              title={subscription.name}
+              description={`${billingCycleLabel(subscription.billingCycle, subscription.billingInterval)} · ${nextChargeLabel(subscription.daysUntil)}`}
+              leading={
+                <BrandLogo
+                  name={subscription.name}
+                  logoUrl={subscription.logoUrl}
+                  size={36}
+                />
+              }
+              value={formatFinanceMoney(subscription.amount, {
+                ...display,
+                currency: subscription.currency,
+              })}
+              trailing={
+                <Badge variant={subscriptionStatusVariant(subscription.status)}>
+                  {subscriptionStatusLabel(subscription.status)}
+                </Badge>
+              }
+              href={APP_ROUTES.app.financeSubscription(subscription.id)}
+              isLast={index === items.length - 1}
+            />
+          ))}
+        </div>
+      </AsyncRegion>
+
+      <InfiniteListSentinel
+        hasNextPage={listQuery.hasNextPage}
+        isFetchingNextPage={listQuery.isFetchingNextPage}
+        onLoadMore={() => void listQuery.fetchNextPage()}
+      />
+    </div>
+  )
+}
+
+type RecurringPatternsProps = {
+  isEnabled: boolean
+  display: {
+    currency: string
+    showCents: boolean
+    compactNumbers: boolean
+  }
+}
+
+function RecurringPatterns({ isEnabled, display }: RecurringPatternsProps) {
+  const [tab, setTab] = useState<FinanceRecurringStatus>("SUGGESTED")
+  const [sheetOpen, setSheetOpen] = useState(false)
+  const [editing, setEditing] = useState<FinanceRecurringPattern | null>(null)
+  const [dismissing, setDismissing] = useState<FinanceRecurringPattern | null>(
+    null
+  )
+  const updateMutation = useUpdateRecurring()
   const listQuery = useRecurring(isEnabled, tab)
   const items = infiniteListItems(listQuery.data)
-  const monthlyTotal = useMemo(
-    () =>
-      items.reduce(
-        (total, pattern) =>
-          total + (parseFinanceMoney(pattern.monthlyEquivalent) ?? 0),
-        0
-      ),
-    [items]
-  )
 
   async function changeStatus(
     pattern: FinanceRecurringPattern,
@@ -145,17 +451,6 @@ function SubscriptionsScreenBody() {
 
   return (
     <div className="flex flex-col gap-4">
-      <Button
-        type="button"
-        onClick={() => {
-          setEditing(null)
-          setSheetOpen(true)
-        }}
-      >
-        <PlusIcon className="size-4 shrink-0" />
-        Nuevo recurrente
-      </Button>
-
       <Tabs
         value={tab}
         onValueChange={(value) => {
@@ -165,7 +460,7 @@ function SubscriptionsScreenBody() {
         }}
       >
         <TabsList className="h-auto w-full justify-start overflow-x-auto rounded-2xl p-1">
-          {TAB_ITEMS.map(({ value, label, icon: Icon, color }) => (
+          {RECURRING_TABS.map(({ value, label, icon: Icon, color }) => (
             <TabsTrigger
               key={value}
               value={value}
@@ -182,7 +477,7 @@ function SubscriptionsScreenBody() {
           ))}
         </TabsList>
 
-        {TAB_ITEMS.map(({ value }) => (
+        {RECURRING_TABS.map(({ value }) => (
           <TabsContent key={value} value={value} keepMounted>
             {listQuery.isError ? (
               <FinanceErrorState
@@ -219,16 +514,6 @@ function SubscriptionsScreenBody() {
               }
             >
               <div className="flex flex-col gap-3">
-                {value === "CONFIRMED" &&
-                items.length > 0 &&
-                !listQuery.hasNextPage ? (
-                  <p className="text-sm text-muted-foreground">
-                    Costo mensual estimado:{" "}
-                    <span className="font-medium text-foreground">
-                      {formatFinanceMoney(monthlyTotal, display)}
-                    </span>
-                  </p>
-                ) : null}
                 {items.map((pattern) => (
                   <RecurringCard
                     key={pattern.id}
@@ -263,7 +548,7 @@ function SubscriptionsScreenBody() {
           }
         }}
         pattern={editing}
-        defaultCurrency={config.baseCurrency}
+        defaultCurrency={display.currency}
       />
 
       <AlertDialog

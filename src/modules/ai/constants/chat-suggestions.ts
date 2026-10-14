@@ -92,24 +92,6 @@ const MODULE_SUGGESTIONS: Record<
       prompt: "Activa el resumen semanal de salud.",
     },
   ],
-  subscriptions: [
-    {
-      id: "subs-renewal",
-      label: "Renovaciones",
-      prompt: "Activa las alertas de renovación de suscripciones.",
-    },
-    {
-      id: "subs-price",
-      label: "Subidas de precio",
-      prompt: "Activa las alertas cuando suba el precio de una suscripción.",
-    },
-    {
-      id: "subs-email",
-      label: "Email suscripciones",
-      prompt:
-        "Activa las notificaciones por email para el módulo de Suscripciones.",
-    },
-  ],
   finance: [
     {
       id: "finance-summary",
@@ -132,6 +114,11 @@ const MODULE_SUGGESTIONS: Record<
       id: "finance-transactions",
       label: "Últimas transacciones",
       prompt: "Lista mis transacciones más recientes.",
+    },
+    {
+      id: "finance-subscription-renewals",
+      label: "Renovaciones",
+      prompt: "Activa las alertas de renovación de suscripciones.",
     },
   ],
 }

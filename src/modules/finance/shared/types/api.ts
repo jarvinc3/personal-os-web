@@ -68,6 +68,10 @@ export const FINANCE_RECURRING_QUERY_KEY = [
   ...FINANCE_QUERY_KEY,
   "recurring",
 ] as const
+export const FINANCE_SUBSCRIPTIONS_QUERY_KEY = [
+  ...FINANCE_QUERY_KEY,
+  "subscriptions",
+] as const
 export const FINANCE_BUDGETS_QUERY_KEY = [
   ...FINANCE_QUERY_KEY,
   "budgets",

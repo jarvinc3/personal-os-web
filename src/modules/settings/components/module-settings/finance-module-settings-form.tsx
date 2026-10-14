@@ -62,6 +62,7 @@ import {
   emailSyncPatchFromFormValues,
   financeModuleSchema,
   parsePayDays,
+  subscriptionsPatchFromFormValues,
   type FinanceModuleFormValues,
 } from "@/src/modules/settings/lib/finance-module-form"
 
@@ -83,6 +84,16 @@ const FINANCE_NOTIFICATION_ROWS = [
     key: "recurringAlerts",
     label: "Cobros recurrentes",
     icon: Repeat,
+  },
+  {
+    key: "subscriptionReminders",
+    label: "Renovación de suscripciones",
+    icon: Repeat,
+  },
+  {
+    key: "priceIncreaseAlerts",
+    label: "Subidas de precio",
+    icon: TriangleAlert,
   },
 ] as const satisfies readonly {
   key: keyof FinanceModuleConfig["notifications"]
@@ -221,6 +232,7 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
           accountId: values.fixedIncomeAccountId || null,
         },
         emailSync: emailSyncPatchFromFormValues(values),
+        subscriptions: subscriptionsPatchFromFormValues(values),
         notifications: {
           budgetAlerts: values.budgetAlerts,
           aiSuggestions: values.aiSuggestions,
@@ -230,6 +242,8 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
           cardDueDate: values.cardDueDate,
           unusualExpense: values.unusualExpense,
           recurringAlerts: values.recurringAlerts,
+          subscriptionReminders: values.subscriptionReminders,
+          priceIncreaseAlerts: values.priceIncreaseAlerts,
         },
         reports: {
           weeklySummaryDay: Number(values.weeklySummaryDay),
@@ -536,6 +550,53 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
           )}
         />
       </SummarySection>
+
+      <div id="suscripciones">
+        <SummarySection title="Suscripciones" icon={Repeat}>
+          <Controller
+            control={control}
+            name="subscriptionReminderDays"
+            render={({ field, fieldState }) => (
+              <FormTextField
+                label="Días antes de la renovación"
+                icon={BellRing}
+                value={field.value}
+                onChange={field.onChange}
+                error={fieldState.error?.message}
+              />
+            )}
+          />
+          <Controller
+            control={control}
+            name="subscriptionGroupBy"
+            render={({ field }) => (
+              <>
+                {[
+                  { value: "none", label: "Sin agrupar" },
+                  { value: "category", label: "Por categoría" },
+                  { value: "provider", label: "Por proveedor" },
+                ].map((option) => (
+                  <OptionRow
+                    key={option.value}
+                    icon={Tags}
+                    iconColor={MODULE_ACCENT}
+                    label={option.label}
+                    selected={field.value === option.value}
+                    onPress={() =>
+                      field.onChange(
+                        option.value as FinanceModuleFormValues["subscriptionGroupBy"]
+                      )
+                    }
+                    trailing={
+                      field.value === option.value ? <CheckIcon /> : null
+                    }
+                  />
+                ))}
+              </>
+            )}
+          />
+        </SummarySection>
+      </div>
 
       <SummarySection title="Sincronización de correo" icon={Mail}>
         <Controller

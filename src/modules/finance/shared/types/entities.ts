@@ -697,11 +697,7 @@ export type FinanceRecurringFrequency = 7 | 14 | 30 | 365
 
 export type FinanceRecurringStatus = "SUGGESTED" | "CONFIRMED" | "DISMISSED"
 
-export type FinanceRecurringKind =
-  | "SUBSCRIPTION"
-  | "BILL"
-  | "INCOME"
-  | "OTHER"
+export type FinanceRecurringKind = "SUBSCRIPTION" | "BILL" | "INCOME" | "OTHER"
 
 export type FinanceRecurringPattern = {
   id: string
@@ -722,4 +718,69 @@ export type FinanceRecurringPattern = {
   monthlyEquivalent: string
   annualEquivalent: string
   daysUntil: number
+}
+
+export type FinanceBillingCycle =
+  "WEEKLY" | "MONTHLY" | "QUARTERLY" | "SEMIANNUAL" | "YEARLY"
+
+export type FinanceSubscriptionStatus = "ACTIVE" | "PAUSED" | "CANCELLED"
+
+export type FinanceSubscriptionPaymentSource = "AUTO" | "MANUAL"
+
+export type FinanceSubscription = {
+  id: string
+  name: string
+  normalizedKey: string
+  domain: string | null
+  logoUrl: string | null
+  amount: string
+  currency: string
+  billingCycle: FinanceBillingCycle
+  billingInterval: number
+  anchorDate: string
+  nextBillingDate: string
+  trialEndsAt: string | null
+  status: FinanceSubscriptionStatus
+  pausedAt: string | null
+  cancelledAt: string | null
+  reminderDaysBefore: number
+  lastRemindedFor: string | null
+  cardId: string | null
+  cardName: string | null
+  accountId: string | null
+  accountName: string | null
+  manageUrl: string | null
+  notes: string | null
+  sourcePatternId: string | null
+  monthlyEquivalent: string
+  annualEquivalent: string
+  daysUntil: number
+  createdAt: string
+  updatedAt: string
+}
+
+export type FinanceSubscriptionPayment = {
+  id: string
+  amount: string
+  currency: string
+  paidAt: string
+  source: FinanceSubscriptionPaymentSource
+  transactionId: string | null
+  transaction: {
+    id: string
+    merchant: string | null
+    amount: string
+    currency: string
+    transactionDate: string
+    accountName: string | null
+    cardName: string | null
+  } | null
+}
+
+export type FinanceSubscriptionSummary = {
+  baseCurrency: string
+  activeCount: number
+  monthlyCost: string
+  annualCost: string
+  upcoming: FinanceSubscription[]
 }
