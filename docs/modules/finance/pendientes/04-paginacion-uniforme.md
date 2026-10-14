@@ -34,7 +34,7 @@ Quedan sin paginar los catálogos chicos: cuentas, tarjetas, instituciones, cate
 
 ## Criterios de aceptación
 
-- [ ] Todos los endpoints de la tabla paginan con el mismo formato.
-- [ ] Todas las listas que crecen usan `useInfiniteFinanceList` y cargan al hacer scroll.
-- [ ] Sin regresiones en totales ni detalles que hoy suman sobre el array completo (mover esas sumas al back si hace falta).
-- [ ] Tests: e2e del back y spec del hook.
+- [x] Todos los endpoints de la tabla paginan con el mismo formato.
+- [x] Todas las listas que crecen usan `useInfiniteFinanceList` y cargan al hacer scroll.
+- [x] Sin regresiones en totales ni detalles que hoy suman sobre el array completo (mover esas sumas al back si hace falta).
+- [x] Tests: e2e del back y spec del hook.

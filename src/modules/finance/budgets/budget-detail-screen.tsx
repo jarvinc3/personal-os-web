@@ -49,6 +49,8 @@ import {
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
 import { SummaryItem } from "@/src/shared/components/ui/summary"
+import { InfiniteListSentinel } from "@/src/shared/components/ui/infinite-list-sentinel"
+import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
@@ -152,7 +154,7 @@ function BudgetDetailScreenBody({ budgetId }: FinanceBudgetDetailProps) {
 
   const movementsQuery = useBudgetTransactions(isEnabled, budgetId)
 
-  const movements = movementsQuery.data?.items ?? []
+  const movements = infiniteListItems(movementsQuery.data)
   const accent = budget?.category?.color ?? ACCENT_FALLBACK_COLOR
   const pct = budget
     ? budgetPctUsed(budget.amountSpent, budget.amountLimit)
@@ -343,11 +345,11 @@ function BudgetDetailScreenBody({ budgetId }: FinanceBudgetDetailProps) {
           ) : null}
         </AsyncRegion>
 
-        {movementsQuery.data?.hasMore ? (
-          <p className="px-1 text-xs text-muted-foreground">
-            Mostrando los primeros {movements.length} movimientos del periodo.
-          </p>
-        ) : null}
+        <InfiniteListSentinel
+          hasNextPage={movementsQuery.hasNextPage}
+          isFetchingNextPage={movementsQuery.isFetchingNextPage}
+          onLoadMore={() => void movementsQuery.fetchNextPage()}
+        />
       </div>
 
       <RecordOptionsSheet

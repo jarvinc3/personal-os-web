@@ -11,6 +11,7 @@ import { FinanceInstrumentMovements } from "@/src/modules/finance/transactions"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
 import { useCardStatements } from "@/src/modules/finance/shared/hooks/use-card-statements"
+import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
 import {
   useArchiveCard,
   useCards,
@@ -90,6 +91,7 @@ function CardDetailScreenBody({ cardId }: CardDetailScreenProps) {
   const cardsQuery = useCards(isEnabled)
   const accountsQuery = useAccounts(isEnabled)
   const statementsQuery = useCardStatements(isEnabled, cardId)
+  const statements = infiniteListItems(statementsQuery.data)
   const { open: openCardBalanceSheet, setOpen: setOpenCardBalanceSheet } =
     useSheetParam(FINANCE_SHEET_KEYS.cardBalance)
   const { open: openHistorySheet, setOpen: setOpenHistorySheet } =
@@ -281,13 +283,16 @@ function CardDetailScreenBody({ cardId }: CardDetailScreenProps) {
               ) : null}
               <CardStatementsSection
                 cardId={card.id}
-                statements={statementsQuery.data ?? []}
+                statements={statements}
                 upcomingCycle={upcomingCycle}
                 display={cardDisplay}
                 isPending={statementsQuery.isPending}
                 emptyLabel="Sin estados de cuenta"
                 emptyDescription="Configura el día de cierre para seguir cada ciclo."
                 createLabel="Tarjeta"
+                hasNextPage={statementsQuery.hasNextPage}
+                isFetchingNextPage={statementsQuery.isFetchingNextPage}
+                onLoadMore={() => void statementsQuery.fetchNextPage()}
                 onCreate={() =>
                   router.push(
                     `${APP_ROUTES.app.financeCardNew}?institutionId=${card.institutionId}`
@@ -387,8 +392,8 @@ function CardDetailScreenBody({ cardId }: CardDetailScreenProps) {
         cardName={card.name}
         currencies={balances.map((balance) => balance.currency)}
         defaultCurrency={config.baseCurrency}
-        minimumPayment={statementsQuery.data?.[0]?.minimumPayment}
-        closingBalance={statementsQuery.data?.[0]?.closingBalance}
+        minimumPayment={statements[0]?.minimumPayment}
+        closingBalance={statements[0]?.closingBalance}
       />
       <InstrumentHistorySheet
         open={openHistorySheet}

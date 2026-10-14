@@ -43,6 +43,8 @@ import {
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
 import { SummaryItem } from "@/src/shared/components/ui/summary"
+import { InfiniteListSentinel } from "@/src/shared/components/ui/infinite-list-sentinel"
+import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
@@ -95,7 +97,7 @@ function SavingsGoalDetailScreenBody({
 
   const goal =
     (goalsQuery.data ?? []).find((item) => item.id === goalId) ?? null
-  const contributions = contributionsQuery.data ?? []
+  const contributions = infiniteListItems(contributionsQuery.data)
   const money = { ...display, currency: goal?.currency ?? display.currency }
   const accent = ACCENT_FALLBACK_COLOR
   const progress = Math.min(
@@ -303,6 +305,11 @@ function SavingsGoalDetailScreenBody({
               ))}
             </div>
           ) : null}
+          <InfiniteListSentinel
+            hasNextPage={contributionsQuery.hasNextPage}
+            isFetchingNextPage={contributionsQuery.isFetchingNextPage}
+            onLoadMore={() => void contributionsQuery.fetchNextPage()}
+          />
         </AsyncRegion>
       </div>
 

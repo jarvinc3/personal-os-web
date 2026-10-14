@@ -8,6 +8,7 @@ import {
   type InstrumentHistoryTarget,
 } from "@/src/modules/finance/shared/hooks/use-instrument-history"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
+import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
 import {
   instrumentHistoryLabel,
   instrumentHistoryLimitTransition,
@@ -25,9 +26,9 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
+import { InfiniteListSentinel } from "@/src/shared/components/ui/infinite-list-sentinel"
 import { SummaryItem } from "@/src/shared/components/ui/summary"
 import { HistoryIcon, Settings2Icon } from "lucide-react"
-import { useEffect, useRef } from "react"
 
 type InstrumentHistorySheetProps = {
   open: boolean
@@ -43,24 +44,7 @@ export function InstrumentHistorySheet({
   display,
 }: InstrumentHistorySheetProps) {
   const historyQuery = useInstrumentHistory(open, target)
-  const items = historyQuery.data?.pages.flatMap((page) => page.items) ?? []
-  const sentinelRef = useRef<HTMLDivElement | null>(null)
-  const fetchNextPage = historyQuery.fetchNextPage
-  const hasNextPage = historyQuery.hasNextPage
-
-  useEffect(() => {
-    const sentinel = sentinelRef.current
-    if (!sentinel || !hasNextPage) {
-      return
-    }
-    const observer = new IntersectionObserver((entries) => {
-      if (entries.some((entry) => entry.isIntersecting)) {
-        void fetchNextPage()
-      }
-    })
-    observer.observe(sentinel)
-    return () => observer.disconnect()
-  }, [fetchNextPage, hasNextPage])
+  const items = infiniteListItems(historyQuery.data)
 
   return (
     <BottomSheet open={open} onOpenChange={onOpenChange} title="Historial">
@@ -113,7 +97,11 @@ export function InstrumentHistorySheet({
             )
           })}
         </div>
-        <div ref={sentinelRef} className="h-1" aria-hidden />
+        <InfiniteListSentinel
+          hasNextPage={historyQuery.hasNextPage}
+          isFetchingNextPage={historyQuery.isFetchingNextPage}
+          onLoadMore={() => void historyQuery.fetchNextPage()}
+        />
       </AsyncRegion>
     </BottomSheet>
   )

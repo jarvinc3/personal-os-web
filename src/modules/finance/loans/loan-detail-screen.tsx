@@ -14,7 +14,10 @@ import { InstallmentDetailSheet } from "@/src/modules/finance/loans/components/i
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
 import { useInstitutions } from "@/src/modules/finance/shared/hooks/use-institutions"
-import { useLoanInstallments } from "@/src/modules/finance/shared/hooks/use-loan-installments"
+import {
+  useLoanInstallments,
+  useLoanSchedule,
+} from "@/src/modules/finance/shared/hooks/use-loan-installments"
 import {
   useArchiveLoan,
   useDeleteLoan,
@@ -51,6 +54,8 @@ import {
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
 import { SummaryItem } from "@/src/shared/components/ui/summary"
+import { InfiniteListSentinel } from "@/src/shared/components/ui/infinite-list-sentinel"
+import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
@@ -117,7 +122,7 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
   const institution = loan?.institutionId
     ? (institutions.find((item) => item.id === loan.institutionId) ?? null)
     : null
-  const installments = installmentsQuery.data ?? []
+  const installments = infiniteListItems(installmentsQuery.data)
   const accent = institution?.color ?? ACCENT_FALLBACK_COLOR
   const money = { ...display, currency: loan?.currency ?? display.currency }
   const summary = loan ? loanProgressSummary(loan) : null
@@ -128,6 +133,7 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
   const [amortizationOpen, setAmortizationOpen] = useState(false)
   const [selectedInstallment, setSelectedInstallment] =
     useState<FinanceLoanInstallment | null>(null)
+  const scheduleQuery = useLoanSchedule(amortizationOpen, loanId)
 
   async function onArchiveLoan() {
     if (!loan) {
@@ -330,6 +336,11 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
               ))}
             </div>
           ) : null}
+          <InfiniteListSentinel
+            hasNextPage={installmentsQuery.hasNextPage}
+            isFetchingNextPage={installmentsQuery.isFetchingNextPage}
+            onLoadMore={() => void installmentsQuery.fetchNextPage()}
+          />
         </AsyncRegion>
 
         {installments.length > 0 ? (
@@ -394,7 +405,7 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
       <LoanAmortizationSheet
         open={amortizationOpen}
         onOpenChange={setAmortizationOpen}
-        installments={installments}
+        installments={scheduleQuery.data ?? installments}
         currentBalance={loan.currentBalance}
         display={money}
       />

@@ -133,7 +133,6 @@ export type FinanceDeletedRecord = {
   sizeBytes: number
 }
 
-export type FinanceRecycleBin = {
+export type FinanceRecycleBinPage = FinancePaginated<FinanceDeletedRecord> & {
   archived: FinanceArchivedRecord[]
-  deleted: FinanceDeletedRecord[]
 }

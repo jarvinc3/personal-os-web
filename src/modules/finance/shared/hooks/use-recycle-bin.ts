@@ -1,16 +1,19 @@
 "use client"
 
 import { apiPatch, apiPost } from "@/src/config/api-client"
-import { recycleBinQuery } from "@/src/modules/finance/shared/lib/finance-query-options"
+import { useInfiniteFinanceList } from "./use-infinite-finance-list"
+import { FINANCE_LIST_PAGE_SIZE } from "@/src/modules/finance/shared/lib/finance-query-options"
 import {
   FINANCE_QUERY_KEY,
+  FINANCE_RECYCLE_BIN_QUERY_KEY,
   type FinanceArchivedRecord,
   type FinanceArchivedType,
   type FinanceDeletedRecord,
   type FinanceDeletedType,
+  type FinanceRecycleBinPage,
 } from "@/src/modules/finance/shared/types/api"
 import { API_ENDPOINTS } from "@/src/shared/constants/api-endpoints"
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 
 const DELETED_RESTORE_ENDPOINT: Record<
   FinanceDeletedType,
@@ -38,8 +41,10 @@ const ARCHIVED_RESTORE_ENDPOINT: Record<
 }
 
 export function useRecycleBin(enabled: boolean) {
-  return useQuery({
-    ...recycleBinQuery(),
+  return useInfiniteFinanceList<FinanceRecycleBinPage>({
+    queryKey: FINANCE_RECYCLE_BIN_QUERY_KEY,
+    endpoint: API_ENDPOINTS.FINANCE.RECYCLE_BIN,
+    params: { limit: FINANCE_LIST_PAGE_SIZE },
     enabled,
   })
 }

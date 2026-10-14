@@ -14,6 +14,8 @@ Dueño: `personal-os-back/docs/modules/finance/`. Query keys: `src/modules/finan
 
 Mutaciones de cuentas/tarjetas/loans/instituciones/txs confirmadas/email assign invalidan `FINANCE_BALANCE_SHEET_QUERY_KEY`.
 
+Listas cursor-paginadas `{items, nextCursor, hasMore}` (hook `useInfiniteFinanceList` + `InfiniteListSentinel`, carga al hacer scroll): `transactions`, `budgets`, `budgets/:id/transactions`, `cards/:id/statements`, `accounts/:id/history`, `cards/:id/history`, `loans/:id/installments`, `receivables/:id/payments`, `savings-goals/:id/allocations`, `email-sync/pending`, `email-sync/messages` y los eliminados de `recycle-bin` (`{ archived, items, nextCursor, hasMore }`). El resto de listas sigue devolviendo arrays.
+
 Cada `DELETE` de una entidad devuelve `undoId` y guarda un snapshot en `fin_deletion_journal`; `POST /finance/<entidad>/:id/restore` deshace el borrado y repone filas, enlaces y saldos. El toast de la app ofrece "Deshacer" durante unos segundos.
 
 Presupuestos: el listado vive en `/finance/planning` (REV-WEB-012); el detalle sí tiene ruta. Cuentas y cobros se reciclan con archivar / `CANCELLED`; no hay DELETE.

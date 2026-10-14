@@ -90,6 +90,10 @@ Los correos de ejemplo por banco están en `personal-os-back/packages/finance/te
 
 ## Paginación
 
-Usan cursor `{items, nextCursor, hasMore}`: transacciones, presupuestos, historial de instrumento y notificaciones. El resto devuelve arrays (ver [pendientes/04](./pendientes/04-paginacion-uniforme.md)).
+Usan cursor `{items, nextCursor, hasMore}`: transacciones, presupuestos, movimientos de un presupuesto, cortes de tarjeta, historial de instrumento, cuotas de préstamo, cobros de un cobro, aportes de una meta, correos pendientes y procesados, eliminados de la papelera y notificaciones. Todas las listas que crecen usan `useInfiniteFinanceList` + `InfiniteListSentinel`, que carga al hacer scroll y deja un botón "Cargar más" como respaldo.
+
+Siguen devolviendo arrays los catálogos chicos (cuentas, tarjetas, instituciones, categorías, monedas), los listados de metas, préstamos y cobros, y la proyección completa de cuotas (`/loans/:id/schedule`).
+
+`/finance/recycle-bin` devuelve `{ archived, items, nextCursor, hasMore }`: los archivados van completos y los eliminados paginan por fecha.
 
 Las líneas de un import de estado de cuenta se devuelven completas: un PDF trae decenas de filas, no miles.

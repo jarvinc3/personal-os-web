@@ -3,6 +3,7 @@
 import type { UpcomingCardCycle } from "@/src/modules/finance/shared/lib/card-statement-cycle"
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
 import { StatementImportButton } from "@/src/modules/finance/shared/components/statement-import-button"
+import { InfiniteListSentinel } from "@/src/shared/components/ui/infinite-list-sentinel"
 import { CardStatementSheet } from "@/src/modules/finance/cards/components/card-statement-sheet"
 import { formatCalendarDate } from "@/src/modules/finance/shared/lib/ledger-form"
 import {
@@ -57,6 +58,9 @@ type CardStatementsSectionProps = {
   emptyDescription: string
   onCreate: () => void
   createLabel: string
+  hasNextPage: boolean
+  isFetchingNextPage: boolean
+  onLoadMore: () => void
 }
 
 function CycleDates({
@@ -98,6 +102,9 @@ export function CardStatementsSection({
   emptyDescription,
   onCreate,
   createLabel,
+  hasNextPage,
+  isFetchingNextPage,
+  onLoadMore,
 }: CardStatementsSectionProps) {
   const [selectedStatementId, setSelectedStatementId] = useState<string | null>(
     null
@@ -228,6 +235,11 @@ export function CardStatementsSection({
               Registrar corte
             </Button>
           ) : null}
+          <InfiniteListSentinel
+            hasNextPage={hasNextPage}
+            isFetchingNextPage={isFetchingNextPage}
+            onLoadMore={onLoadMore}
+          />
         </div>
       </AsyncRegion>
       <StatementImportButton cardId={cardId} className="w-full" />

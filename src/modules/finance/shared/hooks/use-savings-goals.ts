@@ -1,8 +1,9 @@
 "use client"
 
 import { apiDelete, apiPatch, apiPost } from "@/src/config/api-client"
+import { useInfiniteFinanceList } from "./use-infinite-finance-list"
 import {
-  savingsGoalContributionsQuery,
+  FINANCE_LIST_PAGE_SIZE,
   savingsGoalsQuery,
 } from "@/src/modules/finance/shared/lib/finance-query-options"
 import type {
@@ -13,6 +14,7 @@ import type {
 import {
   FINANCE_SAVINGS_GOAL_CONTRIBUTIONS_QUERY_KEY,
   FINANCE_SAVINGS_GOALS_QUERY_KEY,
+  type FinancePaginated,
 } from "@/src/modules/finance/shared/types/api"
 import type {
   FinanceSavingsGoal,
@@ -79,8 +81,12 @@ export function useSavingsGoalContributions(
   enabled: boolean,
   goalId: string | null
 ) {
-  return useQuery({
-    ...savingsGoalContributionsQuery(goalId ?? ""),
+  return useInfiniteFinanceList<
+    FinancePaginated<FinanceSavingsGoalContribution>
+  >({
+    queryKey: [...FINANCE_SAVINGS_GOAL_CONTRIBUTIONS_QUERY_KEY, goalId ?? ""],
+    endpoint: API_ENDPOINTS.FINANCE.SAVINGS_GOAL_CONTRIBUTIONS(goalId ?? ""),
+    params: { limit: FINANCE_LIST_PAGE_SIZE },
     enabled: enabled && Boolean(goalId),
   })
 }

@@ -101,6 +101,7 @@ export const API_ENDPOINTS = {
     LOAN: (id: string) => `/finance/loans/${id}`,
     LOAN_RESTORE: (id: string) => `/finance/loans/${id}/restore`,
     LOAN_INSTALLMENTS: (id: string) => `/finance/loans/${id}/installments`,
+    LOAN_SCHEDULE: (id: string) => `/finance/loans/${id}/schedule`,
     LOAN_PREPAYMENTS: (id: string) => `/finance/loans/${id}/prepayments`,
     LOAN_PREPAYMENTS_PREVIEW: (id: string) =>
       `/finance/loans/${id}/prepayments/preview`,

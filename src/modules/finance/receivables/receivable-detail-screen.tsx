@@ -49,6 +49,8 @@ import {
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
 import { SummaryItem } from "@/src/shared/components/ui/summary"
+import { InfiniteListSentinel } from "@/src/shared/components/ui/infinite-list-sentinel"
+import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
@@ -113,7 +115,7 @@ function ReceivableDetailScreenBody({
   const receivable =
     (receivablesQuery.data ?? []).find((item) => item.id === receivableId) ??
     null
-  const payments = paymentsQuery.data ?? []
+  const payments = infiniteListItems(paymentsQuery.data)
   const money = {
     ...display,
     currency: receivable?.currency ?? display.currency,
@@ -324,6 +326,11 @@ function ReceivableDetailScreenBody({
               ))}
             </div>
           ) : null}
+          <InfiniteListSentinel
+            hasNextPage={paymentsQuery.hasNextPage}
+            isFetchingNextPage={paymentsQuery.isFetchingNextPage}
+            onLoadMore={() => void paymentsQuery.fetchNextPage()}
+          />
         </AsyncRegion>
 
         {payments.length > 0 ? (

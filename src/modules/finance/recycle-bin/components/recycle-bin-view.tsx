@@ -25,6 +25,8 @@ import {
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
 import { SummaryItem } from "@/src/shared/components/ui/summary"
+import { InfiniteListSentinel } from "@/src/shared/components/ui/infinite-list-sentinel"
+import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
 import {
   Tabs,
   TabsContent,
@@ -112,8 +114,8 @@ export function RecycleBinView() {
   const recycleBinQuery = useRecycleBin(isEnabled)
   const restore = useRecycleBinRestore()
 
-  const archived = recycleBinQuery.data?.archived ?? []
-  const deleted = recycleBinQuery.data?.deleted ?? []
+  const archived = recycleBinQuery.data?.pages[0]?.archived ?? []
+  const deleted = infiniteListItems(recycleBinQuery.data)
 
   if (recycleBinQuery.isError) {
     return (
@@ -221,11 +223,6 @@ export function RecycleBinView() {
           <TabsTrigger value="deleted" className="rounded-2xl py-3">
             <RotateCcwIcon className="size-4 shrink-0" />
             Eliminados
-            {deleted.length > 0 ? (
-              <span className="text-xs text-muted-foreground tabular-nums">
-                {deleted.length}
-              </span>
-            ) : null}
           </TabsTrigger>
         </TabsList>
 
@@ -257,6 +254,11 @@ export function RecycleBinView() {
               )}
             </div>
           )}
+          <InfiniteListSentinel
+            hasNextPage={recycleBinQuery.hasNextPage}
+            isFetchingNextPage={recycleBinQuery.isFetchingNextPage}
+            onLoadMore={() => void recycleBinQuery.fetchNextPage()}
+          />
         </TabsContent>
       </Tabs>
     </AsyncRegion>

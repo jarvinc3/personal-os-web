@@ -9,6 +9,7 @@ import type {
   FinanceEmailSyncLog,
 } from "@/src/modules/finance/shared/types/entities"
 import { SummaryItem, SummarySection } from "@/src/shared/components/ui/summary"
+import { InfiniteListSentinel } from "@/src/shared/components/ui/infinite-list-sentinel"
 import {
   Empty,
   EmptyDescription,
@@ -80,8 +81,14 @@ export function EmailSyncLogsSection({
 
 export function EmailMessageHistorySection({
   messages,
+  hasNextPage,
+  isFetchingNextPage,
+  onLoadMore,
 }: {
   messages: FinanceEmailProcessedMessage[]
+  hasNextPage: boolean
+  isFetchingNextPage: boolean
+  onLoadMore: () => void
 }) {
   return (
     <SummarySection title="Historial de correos" icon={ScrollTextIcon}>
@@ -112,6 +119,11 @@ export function EmailMessageHistorySection({
           )
         })
       )}
+      <InfiniteListSentinel
+        hasNextPage={hasNextPage}
+        isFetchingNextPage={isFetchingNextPage}
+        onLoadMore={onLoadMore}
+      />
     </SummarySection>
   )
 }

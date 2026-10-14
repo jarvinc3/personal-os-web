@@ -39,8 +39,9 @@ import { FinanceErrorState } from "@/src/modules/finance/shared/components/layou
 import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { ChartPieIcon, PlusIcon } from "lucide-react"
-import { useEffect, useRef } from "react"
 import { Button } from "@/src/shared/components/ui/button"
+import { InfiniteListSentinel } from "@/src/shared/components/ui/infinite-list-sentinel"
+import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
 
 type FinanceBudgetsListProps = {
   enabled: boolean
@@ -88,7 +89,7 @@ export function FinanceBudgetsList({
     "EXPENSE"
   )
   const listQuery = useBudgets(enabled, { limit: FINANCE_BUDGET_PAGE_SIZE })
-  const items = listQuery.data?.pages.flatMap((page) => page.items) ?? []
+  const items = infiniteListItems(listQuery.data)
   const listedEditing = budgetSheetId
     ? (items.find((budget) => budget.id === budgetSheetId) ?? null)
     : null
@@ -104,23 +105,6 @@ export function FinanceBudgetsList({
       : budgetQuery,
     setOpenBudgetSheet
   )
-
-  const sentinelRef = useRef<HTMLDivElement | null>(null)
-  const fetchNextPage = listQuery.fetchNextPage
-  const hasNextPage = listQuery.hasNextPage
-  useEffect(() => {
-    const sentinel = sentinelRef.current
-    if (!sentinel || !hasNextPage) {
-      return
-    }
-    const observer = new IntersectionObserver((entries) => {
-      if (entries.some((entry) => entry.isIntersecting)) {
-        void fetchNextPage()
-      }
-    })
-    observer.observe(sentinel)
-    return () => observer.disconnect()
-  }, [fetchNextPage, hasNextPage])
 
   return (
     <div className="flex flex-col gap-6">
@@ -212,6 +196,11 @@ export function FinanceBudgetsList({
             )
           })}
         </AsyncRegion>
+        <InfiniteListSentinel
+          hasNextPage={listQuery.hasNextPage}
+          isFetchingNextPage={listQuery.isFetchingNextPage}
+          onLoadMore={() => void listQuery.fetchNextPage()}
+        />
       </div>
 
       <BudgetSheet
