@@ -2,6 +2,13 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.22.0] - 2026-10-14
+
+### Agregado
+
+- "Importar estado de cuenta" en el detalle de la tarjeta y de la cuenta bancaria: se sube el PDF (con clave si la tiene) y se abre la conciliación.
+- Pantalla `/finance/statement-imports/[importId]`: cabecera del corte (periodo, saldos, mínimo y fecha límite), grupos "Coinciden", "Faltan en la app" y "Sobran en la app", diferencia de saldo con ajuste opcional y CTA "Aplicar".
+
 ## [0.21.2] - 2026-10-13
 
 ### Corregido
