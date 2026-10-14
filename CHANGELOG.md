@@ -2,6 +2,12 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.23.0] - 2026-10-14
+
+### Agregado
+
+- Al conectar Gmail, el resultado del OAuth ofrece un paso para activar la sincronización automática: horario (cada 15 min, cada hora, cada 6 h u horas fijas), modo de importación y "Sincronizar ahora". Si la sincronización automática ya estaba encendida, muestra el resumen con "Cambiar".
+
 ## [0.22.1] - 2026-10-14
 
 ### Corregido
