@@ -48,6 +48,7 @@ import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { useState } from "react"
 import { AppLogo } from "@/src/shared/components/brand/app-logo"
+import { Badge } from "@/src/shared/components/ui/badge"
 import { Separator } from "@/src/shared/components/ui/separator"
 
 const navItems = {
@@ -97,6 +98,12 @@ export function AppSidebar() {
             <SidebarMenuButton onClick={() => router.push(APP_ROUTES.app.home)}>
               <AppLogo size="xs" className="rounded" />
               <span className="text-base font-semibold">Personal OS</span>
+              <Badge
+                variant="outline"
+                className="ml-auto text-[10px] group-data-[collapsible=icon]:hidden"
+              >
+                Beta
+              </Badge>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

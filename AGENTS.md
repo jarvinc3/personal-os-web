@@ -11,6 +11,7 @@ Instrucciones para agentes y reviewers que trabajan en el cliente web de Persona
 5. El módulo bajo `docs/modules/` o la arquitectura en `docs/architecture/`.
 6. Código y pruebas citados. No inferir desde nombres.
 7. [docs/reference/changelog-guide.md](docs/reference/changelog-guide.md) — antes de cerrar la sesión, para el CHANGELOG y la versión.
+   - [docs/versionado.md](docs/versionado.md) - política de versionado beta `0.x` (obligatoria; manda sobre la guía del changelog).
 
 Si una afirmación no está `VERIFICADO`, leer [docs/review-register.md](docs/review-register.md) antes de tratarla como comportamiento vigente.
 
@@ -85,6 +86,8 @@ No hay excepción por tamaño ni por tipo: un cambio de documentación también 
 ## Changelog y versión
 
 Toda sesión de agente cierra con un release: `CHANGELOG.md` actualizado y `version` de `package.json` subida. Antes de escribirlo, lee [docs/reference/changelog-guide.md](docs/reference/changelog-guide.md) completo; ahí están las reglas, las secciones y un ejemplo.
+
+La versión sigue **estrictamente** [docs/versionado.md](docs/versionado.md): beta `0.MINOR.PATCH`, nunca bajar de versión, `1.0.0` solo cuando el usuario lo decida y los hitos de módulo como nombre de release.
 
 - Un release por sesión, aunque el cambio sea pequeño. El bump es el más alto de la sesión: `MAJOR` si rompe un contrato o los datos guardados, `MINOR` si agrega una capacidad visible y `PATCH` en el resto.
 - El CHANGELOG va en español, de la versión más nueva a la más vieja, con la fecha en `AAAA-MM-DD`.
