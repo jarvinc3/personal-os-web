@@ -2,6 +2,15 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.26.0] - 2026-10-14
+
+### Agregado
+
+- El chat muestra bloques nativos de Finanzas: un movimiento, una lista corta, el progreso de un presupuesto, el resumen de un préstamo y gráficos de gasto (barras, dona y línea). Cada tarjeta abre el detalle con `Link`; los tipos de bloque desconocidos se ignoran sin romper el chat.
+- Barra "Registrar rápido" en Movimientos y en el Resumen. Interpreta una frase ("café 250 popular"), muestra una vista previa editable (tipo, monto, categoría, cuenta o tarjeta, fecha y comercio) y solo guarda al confirmar; si falta algo, abre el formulario guiado con lo que ya se sabe.
+- Tarjeta de resumen semanal en el Resumen con gasto de la semana frente al promedio, top de categorías, presupuestos en riesgo, próximas cuotas, vencimientos de tarjeta y correos por revisar.
+- Ajuste del día de envío del resumen semanal y de su aviso en la configuración de Finanzas (`notifications.weeklySummary` encendido por defecto).
+
 ## [0.25.1] - 2026-10-14
 
 ### Corregido
