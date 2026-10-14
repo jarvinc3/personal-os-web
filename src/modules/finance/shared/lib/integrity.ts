@@ -32,3 +32,14 @@ export function recalculationPayload(
   }
   throw new Error("A balance drift must reference an account or a card")
 }
+
+/** The same drift while it stays open; null once the check resolved it. */
+export function openDriftFrom(
+  drifts: readonly FinanceBalanceDrift[],
+  candidate: FinanceBalanceDrift | null
+): FinanceBalanceDrift | null {
+  if (!candidate) {
+    return null
+  }
+  return drifts.find((drift) => drift.id === candidate.id) ?? null
+}

@@ -2,7 +2,11 @@ import assert from "node:assert/strict"
 import { describe, it } from "node:test"
 
 import type { FinanceBalanceDrift } from "@/src/modules/finance/shared/types/entities"
-import { findProductDrifts, recalculationPayload } from "./integrity.ts"
+import {
+  findProductDrifts,
+  openDriftFrom,
+  recalculationPayload,
+} from "./integrity.ts"
 
 function drift(overrides: Partial<FinanceBalanceDrift>): FinanceBalanceDrift {
   return {
@@ -89,5 +93,20 @@ describe("recalculationPayload", () => {
     assert.throws(() =>
       recalculationPayload(drift({ accountId: null, cardId: null }))
     )
+  })
+})
+
+describe("openDriftFrom", () => {
+  it("keeps the drift while the check still lists it", () => {
+    const candidate = drift({})
+    assert.equal(openDriftFrom([candidate], candidate)?.id, "drift-1")
+  })
+
+  it("clears the drift once the recalculation resolves it", () => {
+    assert.equal(openDriftFrom([], drift({})), null)
+  })
+
+  it("has nothing to show without a candidate", () => {
+    assert.equal(openDriftFrom([drift({})], null), null)
   })
 })

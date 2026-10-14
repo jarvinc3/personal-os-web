@@ -5,6 +5,7 @@ import { useState } from "react"
 
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
 import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
+import { openDriftFrom } from "@/src/modules/finance/shared/lib/integrity"
 import type { FinanceBalanceDrift } from "@/src/modules/finance/shared/types/entities"
 import {
   Alert,
@@ -46,6 +47,7 @@ export function BalanceIntegrityAlert({
 }: BalanceIntegrityAlertProps) {
   const [confirmTarget, setConfirmTarget] =
     useState<FinanceBalanceDrift | null>(null)
+  const activeTarget = openDriftFrom(drifts, confirmTarget)
 
   if (drifts.length === 0) {
     return null
@@ -87,7 +89,7 @@ export function BalanceIntegrityAlert({
       </div>
 
       <AlertDialog
-        open={confirmTarget !== null}
+        open={activeTarget !== null}
         onOpenChange={(nextOpen) => {
           if (!nextOpen && !pending) {
             setConfirmTarget(null)
@@ -107,8 +109,8 @@ export function BalanceIntegrityAlert({
             <AlertDialogAction
               disabled={pending}
               onClick={() => {
-                if (confirmTarget) {
-                  onRecalculate(confirmTarget)
+                if (activeTarget) {
+                  onRecalculate(activeTarget)
                 }
               }}
             >
