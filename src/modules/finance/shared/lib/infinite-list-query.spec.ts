@@ -36,6 +36,15 @@ describe("buildFinanceListPath", () => {
     })
     assert.equal(path, "/finance/budgets?limit=20&cursor=cursor-1")
   })
+
+  it("lets the page cursor win over a cursor in the caller params", () => {
+    const path = buildFinanceListPath({
+      endpoint: "/finance/budgets",
+      params: { limit: 20, cursor: "stale" },
+      cursor: "fresh",
+    })
+    assert.equal(path, "/finance/budgets?limit=20&cursor=fresh")
+  })
 })
 
 describe("financeInfiniteListQuery", () => {
@@ -62,6 +71,42 @@ describe("financeInfiniteListQuery", () => {
     const second = await query.queryFn({ pageParam: "next-1" })
     assert.deepEqual(paths[1], "/finance/test?limit=20&cursor=next-1")
     assert.equal(query.getNextPageParam(second), undefined)
+  })
+
+  it("keeps following nextCursor across several pages", () => {
+    const pages: Record<string, FinanceListPage> = {
+      "": { items: [{ id: "a" }], nextCursor: "c1", hasMore: true },
+      c1: { items: [{ id: "b" }], nextCursor: "c2", hasMore: true },
+      c2: { items: [{ id: "c" }], nextCursor: null, hasMore: false },
+    }
+    const query = financeInfiniteListQuery<FinanceListPage>({
+      queryKey: ["finance", "test"],
+      endpoint: "/finance/test",
+    })
+
+    const visited: string[] = []
+    let page: FinanceListPage | undefined = pages[""]
+    while (page) {
+      visited.push(...page.items.map((item) => String(item.id)))
+      const next = query.getNextPageParam(page)
+      page = next ? pages[next] : undefined
+    }
+
+    assert.deepEqual(visited, ["a", "b", "c"])
+  })
+
+  it("stops when the first page is empty", () => {
+    const query = financeInfiniteListQuery<FinanceListPage>({
+      queryKey: ["finance", "test"],
+      endpoint: "/finance/test",
+    })
+    const emptyPage: FinanceListPage = {
+      items: [],
+      nextCursor: null,
+      hasMore: false,
+    }
+
+    assert.equal(query.getNextPageParam(emptyPage), undefined)
   })
 })
 
