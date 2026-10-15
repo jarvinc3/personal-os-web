@@ -87,7 +87,7 @@ export function bankChargesQuery(range: { from: string; to: string }) {
     queryFn: () => {
       const params = new URLSearchParams({ from: range.from, to: range.to })
       return apiGet<FinanceBankCharges>(
-        `${API_ENDPOINTS.FINANCE.ANALYTICS_BANK_CHARGES}?${params.toString()}`
+        `${API_ENDPOINTS.FINANCE.BANK_CHARGES}?${params.toString()}`
       )
     },
   }
