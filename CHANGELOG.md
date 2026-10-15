@@ -2,6 +2,20 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.35.3] - 2026-10-22
+
+### Corregido
+
+- Conciliación: el estado del mes muestra el error con reintento cuando la primera carga falla, en vez de quedarse en blanco.
+- El pie de las listas con scroll infinito lleva icono y un indicador de carga mientras llega la tanda.
+- El vacío del historial de conversaciones usa `Empty`, no un párrafo suelto.
+
+### Cambiado
+
+- El tamaño de tanda del historial de conversaciones usa la constante `AI_SESSIONS_PAGE_SIZE`.
+- El botón "Crear préstamo" del FAB de Planificación y las filas "Landing page" y "Vaciar datos" de Ajustes se bloquean mientras la vista de destino carga.
+- Spec de `expenseTrend` con un cambio que redondea a cero.
+
 ## [0.35.2] - 2026-10-22
 
 ### Corregido
