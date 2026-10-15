@@ -12,8 +12,10 @@ import {
   subscriptionAlertReviewTarget,
   subscriptionAlertView,
   subscriptionCardState,
+  subscriptionDetailTabFromParam,
   subscriptionShortcutBadges,
   subscriptionStatusVariant,
+  withSubscriptionDetailTab,
 } from "./subscription-display.ts"
 
 const display = {
@@ -154,6 +156,30 @@ describe("subscriptionCardState", () => {
     )
   })
 
+  it("does not highlight a subscription that does not bill", () => {
+    const paused = subscriptionCardState({
+      subscription: subscription({
+        status: "PAUSED",
+        nextBillingDate: "2026-10-15",
+      }),
+      today: day(2026, 10, 14),
+      windowDays: 5,
+    })
+    assert.equal(paused.inWindow, false)
+    assert.equal(paused.label, "15 oct")
+
+    const cancelled = subscriptionCardState({
+      subscription: subscription({
+        status: "CANCELLED",
+        nextBillingDate: "2026-10-14",
+      }),
+      today: day(2026, 10, 14),
+      windowDays: 5,
+    })
+    assert.equal(cancelled.inWindow, false)
+    assert.equal(cancelled.label, "14 oct")
+  })
+
   it("marks a free trial that has not ended", () => {
     assert.equal(
       subscriptionCardState({
@@ -170,6 +196,49 @@ describe("subscriptionCardState", () => {
         windowDays: 5,
       }).onTrial,
       false
+    )
+  })
+})
+
+describe("detail tab of the URL", () => {
+  it("reads the tab a link asks for and falls back to summary", () => {
+    assert.equal(
+      subscriptionDetailTabFromParam("price"),
+      SUBSCRIPTION_DETAIL_TABS.price
+    )
+    assert.equal(
+      subscriptionDetailTabFromParam("payments"),
+      SUBSCRIPTION_DETAIL_TABS.payments
+    )
+    assert.equal(
+      subscriptionDetailTabFromParam("summary"),
+      SUBSCRIPTION_DETAIL_TABS.summary
+    )
+    assert.equal(
+      subscriptionDetailTabFromParam(null),
+      SUBSCRIPTION_DETAIL_TABS.summary
+    )
+    assert.equal(
+      subscriptionDetailTabFromParam("oops"),
+      SUBSCRIPTION_DETAIL_TABS.summary
+    )
+  })
+
+  it("writes the tab and drops the default one", () => {
+    assert.equal(
+      withSubscriptionDetailTab("tab=price", SUBSCRIPTION_DETAIL_TABS.payments),
+      "tab=payments"
+    )
+    assert.equal(
+      withSubscriptionDetailTab(
+        "tab=price&sheet=alerts",
+        SUBSCRIPTION_DETAIL_TABS.summary
+      ),
+      "sheet=alerts"
+    )
+    assert.equal(
+      withSubscriptionDetailTab("", SUBSCRIPTION_DETAIL_TABS.price),
+      "tab=price"
     )
   })
 })

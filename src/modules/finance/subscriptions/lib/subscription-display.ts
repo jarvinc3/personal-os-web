@@ -13,7 +13,7 @@ import type {
   FinanceSubscriptionStatus,
   FinanceSubscriptionSummary,
 } from "@/src/modules/finance/shared/types/entities"
-import { billingLabel } from "./subscription-timing.ts"
+import { billingLabel, shortBillingDate } from "./subscription-timing.ts"
 
 export const BILLING_CYCLE_LABEL: Record<FinanceBillingCycle, string> = {
   WEEKLY: "Semanal",
@@ -71,6 +71,40 @@ export const SUBSCRIPTION_DETAIL_TABS = {
 export type SubscriptionDetailTab =
   (typeof SUBSCRIPTION_DETAIL_TABS)[keyof typeof SUBSCRIPTION_DETAIL_TABS]
 
+/** Query parameter a link uses to open a detail tab. */
+export const SUBSCRIPTION_DETAIL_TAB_PARAM = "tab"
+
+const SUBSCRIPTION_DETAIL_TAB_VALUES: readonly string[] = Object.values(
+  SUBSCRIPTION_DETAIL_TABS
+)
+
+/** Detail tab a link asks for; summary when it is missing or unknown. */
+export function subscriptionDetailTabFromParam(
+  value: string | null | undefined
+): SubscriptionDetailTab {
+  if (value && SUBSCRIPTION_DETAIL_TAB_VALUES.includes(value)) {
+    return value as SubscriptionDetailTab
+  }
+  return SUBSCRIPTION_DETAIL_TABS.summary
+}
+
+/**
+ * Query string with the detail tab and everything else untouched. The default
+ * tab leaves no parameter, so a plain detail URL stays clean.
+ */
+export function withSubscriptionDetailTab(
+  base: string,
+  tab: SubscriptionDetailTab
+): string {
+  const params = new URLSearchParams(base)
+  if (tab === SUBSCRIPTION_DETAIL_TABS.summary) {
+    params.delete(SUBSCRIPTION_DETAIL_TAB_PARAM)
+  } else {
+    params.set(SUBSCRIPTION_DETAIL_TAB_PARAM, tab)
+  }
+  return params.toString()
+}
+
 export type SubscriptionCardState = {
   /** Charge date copy: `Hoy`, `Mañana`, `en N días` or the short date. */
   label: string
@@ -93,9 +127,12 @@ export function subscriptionCardState(input: {
     today,
     windowDays: input.windowDays,
   })
+  // A paused or cancelled subscription does not bill, so it never gets the
+  // warning highlight or a place in Próximos: it only shows its date.
+  const active = subscription.status === "ACTIVE"
   return {
-    label: label.text,
-    inWindow: label.inWindow,
+    label: active ? label.text : shortBillingDate(subscription.nextBillingDate),
+    inWindow: active && label.inWindow,
     warnLastCharge: subscription.lastChargeMismatch,
     onTrial:
       subscription.trialEndsAt !== null &&

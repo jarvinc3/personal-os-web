@@ -19,9 +19,12 @@ import { SubscriptionPriceChart } from "@/src/modules/finance/subscriptions/comp
 import { SubscriptionSheet } from "@/src/modules/finance/subscriptions/components/subscription-sheet"
 import {
   billingCycleLabel,
+  SUBSCRIPTION_DETAIL_TAB_PARAM,
   SUBSCRIPTION_DETAIL_TABS,
+  subscriptionDetailTabFromParam,
   subscriptionStatusLabel,
   subscriptionStatusVariant,
+  withSubscriptionDetailTab,
   type SubscriptionDetailTab,
 } from "@/src/modules/finance/subscriptions/lib/subscription-display"
 import {
@@ -83,7 +86,7 @@ import {
   WalletIcon,
   XIcon,
 } from "lucide-react"
-import { useRouter } from "next/navigation"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useMemo, useState } from "react"
 
 const PAYMENT_SOURCE_LABEL: Record<FinanceSubscriptionPaymentSource, string> = {
@@ -109,12 +112,14 @@ function SubscriptionDetailBody({
   subscriptionId: string
 }) {
   const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
   const { isEnabled, config } = useFinanceEnabled()
   const [editOpen, setEditOpen] = useState(false)
   const [paymentOpen, setPaymentOpen] = useState(false)
   const [cancelOpen, setCancelOpen] = useState(false)
-  const [tab, setTab] = useState<SubscriptionDetailTab>(
-    SUBSCRIPTION_DETAIL_TABS.summary
+  const tab = subscriptionDetailTabFromParam(
+    searchParams.get(SUBSCRIPTION_DETAIL_TAB_PARAM)
   )
   const [today] = useState(() => new Date())
   const subscriptionQuery = useSubscription(isEnabled, subscriptionId)
@@ -247,7 +252,15 @@ function SubscriptionDetailBody({
         <Tabs
           className="flex w-full flex-col gap-4"
           value={tab}
-          onValueChange={(value) => setTab(value as SubscriptionDetailTab)}
+          onValueChange={(value) => {
+            const query = withSubscriptionDetailTab(
+              searchParams.toString(),
+              value as SubscriptionDetailTab
+            )
+            router.replace(query ? `${pathname}?${query}` : pathname, {
+              scroll: false,
+            })
+          }}
         >
           <TabsList className="w-full rounded-2xl bg-background">
             <TabsTrigger
