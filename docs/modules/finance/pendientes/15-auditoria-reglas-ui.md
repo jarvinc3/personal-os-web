@@ -154,7 +154,8 @@ PENDIENTE 15 COMPLETADO — web v0.35.2 (2026-10-22).
 - **`ui-section-states`.** El vacío del historial de conversaciones era un párrafo `text-muted-foreground`; pasa a `Empty`.
 - **`navigation-pending`.** El botón "Crear préstamo" del FAB de Planificación y las filas "Landing page" y "Vaciar datos" de Ajustes bloquean la repetición mientras la vista de destino carga.
 - Tests añadidos: `expenseTrend` con un cambio que redondea a cero (`100.04` sobre `100` → `0%`, plano).
+- El estado de error del resumen de conciliación se arma en un único `errorState`, en vez de repetir el bloque entre la primera carga fallida y el reintento posterior.
 
 ## Versión esperada
 
-PATCH (correcciones visuales y de convenciones, sin cambio de comportamiento): web v0.35.2. Revisión como PATCH: web v0.35.3.
+PATCH (correcciones visuales y de convenciones, sin cambio de comportamiento): web v0.35.2. Revisión como PATCH: web v0.35.3–v0.35.4.

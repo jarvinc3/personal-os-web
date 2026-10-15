@@ -22,15 +22,16 @@ export function ReconciliationMonthStatus({
 }: ReconciliationMonthStatusProps) {
   const query = useReconciliationStatus(enabled, month)
   const status = query.data
+  const errorState = query.isError ? (
+    <FinanceErrorState
+      message={financeErrorMessage(query.error)}
+      onRetry={() => void query.refetch()}
+      isRetrying={query.isFetching}
+    />
+  ) : null
 
   if (query.isError && !status) {
-    return (
-      <FinanceErrorState
-        message={financeErrorMessage(query.error)}
-        onRetry={() => void query.refetch()}
-        isRetrying={query.isFetching}
-      />
-    )
+    return errorState
   }
 
   if (!status || status.items.length === 0) {
@@ -71,13 +72,7 @@ export function ReconciliationMonthStatus({
           ))}
         </div>
       ) : null}
-      {query.isError ? (
-        <FinanceErrorState
-          message={financeErrorMessage(query.error)}
-          onRetry={() => void query.refetch()}
-          isRetrying={query.isFetching}
-        />
-      ) : null}
+      {errorState}
     </div>
   )
 }

@@ -9,7 +9,7 @@ Resultado:
 - **44 vigentes**: corregidos (grupos `confirm-important-changes`, `list-infinite-scroll`, bloques y grupos de filas, iconos, estados de sección, navegación, placeholders y montos).
 - **7 resueltos** antes del pendiente por Suscripciones v3 y los pendientes 12 y 13: H-02, H-03, H-10, H-13, H-31, H-32 y H-43.
 - **9 por decidir**, sin tocar: H-44, H-47, H-55 a H-58, H-59 y H-60.
-- **Revisión del pendiente** (2026-10-22, web `v0.35.3`): H-42 solo se veía con datos de un intento previo; ahora el error con reintento se pinta antes del corte por falta de datos. Se cerraron además tres incumplimientos fuera de H-01..H-60 detectados en la revisión: el botón de `InfiniteListSentinel` sin icono, el tamaño de tanda suelto en las sesiones de IA y el vacío del historial de conversaciones como párrafo.
+- **Revisión del pendiente** (2026-10-22, web `v0.35.3–v0.35.4`): H-42 solo se veía con datos de un intento previo; ahora el error con reintento se pinta antes del corte por falta de datos. Se cerraron además tres incumplimientos fuera de H-01..H-60 detectados en la revisión: el botón de `InfiniteListSentinel` sin icono, el tamaño de tanda suelto en las sesiones de IA y el vacío del historial de conversaciones como párrafo.
 
 ## Reglas revisadas
 
