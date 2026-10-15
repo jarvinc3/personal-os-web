@@ -177,6 +177,11 @@ function SubscriptionDetailBody({
     }
   }
 
+  function selectDetailTab(next: SubscriptionDetailTab) {
+    const query = withSubscriptionDetailTab(searchParams.toString(), next)
+    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false })
+  }
+
   const statusPending =
     pauseMutation.isPending ||
     resumeMutation.isPending ||
@@ -252,15 +257,9 @@ function SubscriptionDetailBody({
         <Tabs
           className="flex w-full flex-col gap-4"
           value={tab}
-          onValueChange={(value) => {
-            const query = withSubscriptionDetailTab(
-              searchParams.toString(),
-              value as SubscriptionDetailTab
-            )
-            router.replace(query ? `${pathname}?${query}` : pathname, {
-              scroll: false,
-            })
-          }}
+          onValueChange={(value) =>
+            selectDetailTab(value as SubscriptionDetailTab)
+          }
         >
           <TabsList className="w-full rounded-2xl bg-background">
             <TabsTrigger
