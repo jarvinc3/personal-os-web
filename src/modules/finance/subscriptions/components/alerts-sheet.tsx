@@ -74,7 +74,7 @@ export function AlertsSheet({
       open={open}
       onOpenChange={onOpenChange}
       title="Alertas"
-      description="Subidas de precio y cobros que no cuadran"
+      description="Subidas de precio, cobros que no cuadran y avisos de renovación"
       actions={{
         close: (
           <Button

@@ -4,13 +4,11 @@ import { describe, it } from "node:test"
 import type {
   FinanceRecurringPattern,
   FinanceSubscription,
-  FinanceSubscriptionUpcomingCharge,
 } from "@/src/modules/finance/shared/types/entities"
 import {
   buildSubscriptionSlices,
   groupSubscriptions,
   subscriptionPayloadFromPattern,
-  upcomingByDay,
 } from "./subscription-view.ts"
 
 function subscription(
@@ -98,32 +96,6 @@ describe("groupSubscriptions", () => {
       groups.map((group) => group.label),
       ["Visa BHD", "Sin método"]
     )
-  })
-})
-
-describe("upcomingByDay", () => {
-  it("groups the charges of each date", () => {
-    const charge = (
-      id: string,
-      date: string
-    ): FinanceSubscriptionUpcomingCharge => ({
-      id,
-      subscriptionId: "sub-1",
-      name: "Netflix",
-      logoUrl: null,
-      amount: "100.00",
-      currency: "DOP",
-      date,
-      daysUntil: 3,
-      paymentMethod: null,
-    })
-    const byDay = upcomingByDay([
-      charge("a", "2026-11-02"),
-      charge("b", "2026-11-02"),
-      charge("c", "2026-11-05"),
-    ])
-    assert.equal(byDay.get("2026-11-02")?.length, 2)
-    assert.equal(byDay.get("2026-11-05")?.length, 1)
   })
 })
 

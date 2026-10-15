@@ -280,6 +280,13 @@ function SubscriptionsCalendarBody() {
             isRetrying={breakdownQuery.isFetching}
           />
         ) : null}
+        {summaryQuery.isError ? (
+          <FinanceErrorState
+            message={financeErrorMessage(summaryQuery.error)}
+            onRetry={() => void summaryQuery.refetch()}
+            isRetrying={summaryQuery.isFetching}
+          />
+        ) : null}
         <AsyncRegion
           pending={breakdownQuery.isPending && !breakdownQuery.data}
           pendingFallback={<FinanceListSkeleton rows={3} />}

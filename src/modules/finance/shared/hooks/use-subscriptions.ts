@@ -103,22 +103,6 @@ export function useSubscriptionAlerts(enabled: boolean) {
   })
 }
 
-export function useDismissSubscriptionAlert() {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: (body: {
-      kind: FinanceSubscriptionAlert["kind"]
-      subscriptionId: string
-      alertDate: string
-    }) =>
-      apiPost<{ id: string; dismissed: boolean }>(
-        API_ENDPOINTS.FINANCE.SUBSCRIPTION_ALERT_DISMISS,
-        body
-      ),
-    onSuccess: () => invalidateSubscriptions(queryClient),
-  })
-}
-
 export function useDismissAllSubscriptionAlerts() {
   const queryClient = useQueryClient()
   return useMutation({

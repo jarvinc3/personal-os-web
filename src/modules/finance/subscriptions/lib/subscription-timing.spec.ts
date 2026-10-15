@@ -242,6 +242,28 @@ describe("subscriptionCycleProgress", () => {
     assert.ok(progress.ratio > 0.4 && progress.ratio < 0.6)
   })
 
+  it("measures quarterly and semiannual cycles", () => {
+    const quarterly = subscriptionCycleProgress(
+      subscription({
+        billingCycle: "QUARTERLY",
+        nextBillingDate: "2026-11-10",
+      }),
+      day(2026, 10, 10)
+    )
+    assert.equal(quarterly.startDate.toISOString().slice(0, 10), "2026-08-10")
+    assert.equal(quarterly.cycleDays, 92)
+
+    const semiannual = subscriptionCycleProgress(
+      subscription({
+        billingCycle: "SEMIANNUAL",
+        nextBillingDate: "2026-11-10",
+      }),
+      day(2026, 10, 10)
+    )
+    assert.equal(semiannual.startDate.toISOString().slice(0, 10), "2026-05-10")
+    assert.equal(semiannual.cycleDays, 184)
+  })
+
   it("clamps a charge already past its date to 100 %", () => {
     const progress = subscriptionCycleProgress(
       subscription(),

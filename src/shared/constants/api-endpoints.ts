@@ -152,7 +152,6 @@ export const API_ENDPOINTS = {
     SUBSCRIPTION_BREAKDOWN: "/finance/subscriptions/breakdown",
     SUBSCRIPTION_UPCOMING: "/finance/subscriptions/upcoming",
     SUBSCRIPTION_ALERTS: "/finance/subscriptions/alerts",
-    SUBSCRIPTION_ALERT_DISMISS: "/finance/subscriptions/alerts/dismiss",
     SUBSCRIPTION_ALERT_DISMISS_ALL: "/finance/subscriptions/alerts/dismiss-all",
     SUBSCRIPTION: (id: string) => `/finance/subscriptions/${id}`,
     SUBSCRIPTION_PAUSE: (id: string) => `/finance/subscriptions/${id}/pause`,

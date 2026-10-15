@@ -4,7 +4,6 @@ import type {
   FinanceSubscriptionBreakdownAxis,
   FinanceSubscriptionBreakdownItem,
   FinanceSubscriptionGroupBy,
-  FinanceSubscriptionUpcomingCharge,
 } from "@/src/modules/finance/shared/types/entities"
 import {
   formatFinanceMoney,
@@ -76,22 +75,6 @@ export function groupSubscriptions(
     })
   }
   return [...groups.values()]
-}
-
-/** Charges of each day, keyed by `YYYY-MM-DD`, for the monthly calendar. */
-export function upcomingByDay(
-  items: FinanceSubscriptionUpcomingCharge[]
-): Map<string, FinanceSubscriptionUpcomingCharge[]> {
-  const byDay = new Map<string, FinanceSubscriptionUpcomingCharge[]>()
-  for (const item of items) {
-    const day = byDay.get(item.date)
-    if (day) {
-      day.push(item)
-      continue
-    }
-    byDay.set(item.date, [item])
-  }
-  return byDay
 }
 
 const SUBSCRIPTION_SLICE_COLORS = [
