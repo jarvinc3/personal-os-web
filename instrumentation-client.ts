@@ -1,22 +1,15 @@
 import * as Sentry from "@sentry/nextjs"
-import {
-  resolveSentryDsn,
-  resolveSentryEnvironment,
-  resolveSentryTracesSampleRate,
-} from "./src/shared/observability/sentry-env"
+import { sentryBaseOptions } from "./src/shared/observability/sentry-env"
 import { scrubSentryEvent } from "./src/shared/observability/sentry-scrubber"
 
-const dsn = resolveSentryDsn()
-
 // The DSN is public, so the browser reads it at build time. No Session Replay.
-if (dsn) {
+const options = sentryBaseOptions(
+  process.env.NEXT_PUBLIC_SENTRY_TRACES_SAMPLE_RATE
+)
+
+if (options) {
   Sentry.init({
-    dsn,
-    environment: resolveSentryEnvironment(),
-    release: process.env.NEXT_PUBLIC_APP_VERSION,
-    tracesSampleRate: resolveSentryTracesSampleRate(
-      process.env.NEXT_PUBLIC_SENTRY_TRACES_SAMPLE_RATE
-    ),
+    ...options,
     beforeSend: (event) => scrubSentryEvent(event),
     beforeSendTransaction: (event) => scrubSentryEvent(event),
   })

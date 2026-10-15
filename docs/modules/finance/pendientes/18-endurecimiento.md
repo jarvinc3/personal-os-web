@@ -89,6 +89,7 @@ PENDIENTE 18 COMPLETADO — web v0.38.0 · back v0.37.0 (2026-10-15).
 
 - **Observabilidad (Sentry):** `@sentry/nestjs` 11.8.0. `apps/api/src/instrument.ts` llama `Sentry.init` y se importa en la primera línea de `main.ts`; sin `SENTRY_DSN` no se inicializa. El scrubber vive en `packages/core/src/observability/sentry-scrubber.ts` y limpia el body completo, cookies, cabeceras de auth y cualquier clave con `token`/`password`/`secret`/`api-key` en cabeceras y query strings; se aplica en `beforeSend` y `beforeSendTransaction`. `AllExceptionsFilter` reporta solo los 5xx con método, ruta sin query y `statusCode`; deja al usuario por id, sin email. En `@sentry/nestjs` 11 no existe `SentryModule.forRoot()` (la integración de Nest es parte de `init`), así que el módulo del spec se reemplaza por el `init` de `instrument.ts`.
 - **`env.schema`:** `SENTRY_DSN`, `SENTRY_TRACES_SAMPLE_RATE` (default 0.1), `SENTRY_AUTH_TOKEN`, `SENTRY_ORG` y `SENTRY_PROJECT`, todos opcionales; `.env.example` los documenta sin DSN real.
+- **Source maps:** `pnpm sentry:sourcemaps` (parte de `build`) sube `dist` con `@sentry/cli` solo si existe `SENTRY_AUTH_TOKEN`; sin token el build no falla.
 - **Paginación por cursor** en `accounts`, `cards`, `institutions`, `loans`, `savings-goals` y `receivables`. Cuentas ordenan por `name` (cursor de texto), instituciones por `(sortOrder, name, id)` con la clave `sortOrder\u0000name`, y el resto por fecha + id. Los controllers aceptan `CursorQueryDto` y devuelven `{ items, nextCursor, hasMore }`. No hizo falta ninguna excepción: las seis paginan.
 - **Prefijos de rutas:** `GET /finance/analytics/bank-charges` pasa a `GET /finance/bank-charges`; `AiActionsController` queda en `ai/actions` y la lista de acciones de una sesión se mueve a `AiSessionsController` como `GET ai/sessions/:id/actions`. Patrón documentado en `docs/modules/finance/contracts/http.md` (`finance/<recurso>`).
 - **Push token:** desactivar pasa a `DELETE /notifications/push-tokens/:token`; el `PATCH .../deactivate` queda como alias deprecado.
@@ -109,10 +110,11 @@ PENDIENTE 18 COMPLETADO — web v0.38.0 · back v0.37.0 (2026-10-15).
 - Back: `pnpm format:check`, `pnpm lint`, `pnpm test` (1028), `pnpm build` y `pnpm lint:money` en verde.
 - `review-register.md` y `roadmap.md` no tenían hallazgos abiertos que cayeran dentro del pendiente 18; no se tocaron.
 
-### Revisión (2026-10-15, web v0.38.2 · back v0.37.2)
+### Revisión (2026-10-15, web v0.38.3 · back v0.37.3)
 
 - **Back, Sentry:** el CI falló en `lint` por un `as T` innecesario en el scrubber; se quitó. `instrument.ts` ahora importa `dotenv/config` antes de leer `process.env`, para que un `SENTRY_DSN` guardado en `.env` cuente; antes el import de instrument corría antes que dotenv y la variable quedaba sin efecto.
 - **Back, e2e:** las pruebas esperaban arrays en cuentas, tarjetas y préstamos y mensajes en inglés; se actualizaron al nuevo contrato paginado y al español, junto con `moduleDisabledMessage`.
 - **Web, endpoints:** `ANALYTICS_BANK_CHARGES` pasa a `BANK_CHARGES`, acorde con la ruta nueva.
-- **Docs:** se agrega `docs/infrastructure/observability.md` en la web y el `docs/operations/ci.md` del back menciona `format:check`.
+- **Docs:** se agrega `docs/infrastructure/observability.md` en la web y el `docs/operations/ci.md` del back menciona `format:check`; `docs/operations/scripts.md` documenta `sentry:sourcemaps`.
+- **Guía de código:** `AllExceptionsFilter.reportToSentry` recibe un objeto en vez de tres parámetros y las tres configs de Sentry de la web comparten `sentryBaseOptions`, en línea con la regla de descomposición por intención.
 - **Verificación:** web `format:check`, `lint`, `typecheck`, `test` (758) y `build` en verde; back `format:check`, `lint`, `test` (1028), `build` y e2e en verde.
