@@ -465,10 +465,14 @@ export function FinancePlanningList({
             color: "bg-blue-500",
           },
           {
-            icon: <HandCoinsIcon className="size-5" />,
+            icon: isNewLoanPending ? (
+              <Spinner className="size-5" />
+            ) : (
+              <HandCoinsIcon className="size-5" />
+            ),
             label: "Prést...",
             onClick: () => openCreate("loans"),
-            disabled: !enabled,
+            disabled: !enabled || isNewLoanPending,
             color: "bg-amber-600",
           },
         ]}

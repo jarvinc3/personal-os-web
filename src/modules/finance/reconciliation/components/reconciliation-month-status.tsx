@@ -23,6 +23,16 @@ export function ReconciliationMonthStatus({
   const query = useReconciliationStatus(enabled, month)
   const status = query.data
 
+  if (query.isError && !status) {
+    return (
+      <FinanceErrorState
+        message={financeErrorMessage(query.error)}
+        onRetry={() => void query.refetch()}
+        isRetrying={query.isFetching}
+      />
+    )
+  }
+
   if (!status || status.items.length === 0) {
     return null
   }

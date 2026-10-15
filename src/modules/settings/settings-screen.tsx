@@ -361,6 +361,7 @@ function SettingsScreenBody() {
           label="Landing page"
           link
           onPress={() => navigateToLanding(APP_ROUTES.marketing.landing)}
+          disabled={isLandingPending}
           trailing={
             isLandingPending ? <Spinner className="size-4" /> : undefined
           }
@@ -374,6 +375,7 @@ function SettingsScreenBody() {
           label="Vaciar datos"
           destructive
           onPress={() => navigateToWipeData(APP_ROUTES.app.settingsWipeData)}
+          disabled={isWipeDataPending}
           trailing={
             isWipeDataPending ? <Spinner className="size-4" /> : undefined
           }

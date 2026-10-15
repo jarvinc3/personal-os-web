@@ -61,6 +61,14 @@ describe("expenseTrend", () => {
     })
   })
 
+  it("marks a change that rounds to zero as flat", () => {
+    assert.deepEqual(expenseTrend("100.04", "100"), {
+      label: "0%",
+      direction: "flat",
+      tone: "neutral",
+    })
+  })
+
   it("marks an equal amount as flat and neutral", () => {
     assert.deepEqual(expenseTrend("100", "100"), {
       label: "0%",

@@ -18,13 +18,17 @@ import {
 
 export const AI_SESSIONS_QUERY_KEY = ["ai", "sessions"] as const
 
+const AI_SESSIONS_PAGE_SIZE = 30
+
 export function useAiSessions() {
   const session = useAppStore((state) => state.session)
 
   return useInfiniteQuery({
     queryKey: AI_SESSIONS_QUERY_KEY,
     queryFn: ({ pageParam }) => {
-      const params = new URLSearchParams({ limit: "30" })
+      const params = new URLSearchParams({
+        limit: String(AI_SESSIONS_PAGE_SIZE),
+      })
       if (pageParam) {
         params.set("cursor", pageParam)
       }

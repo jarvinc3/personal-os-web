@@ -1,8 +1,10 @@
 "use client"
 
+import { ChevronDownIcon } from "lucide-react"
 import { useEffect, useRef } from "react"
 
 import { Button } from "@/src/shared/components/ui/button"
+import { Spinner } from "@/src/shared/components/ui/spinner"
 
 export type InfiniteListSentinelProps = {
   hasNextPage: boolean
@@ -53,6 +55,11 @@ export function InfiniteListSentinel({
         disabled={isFetchingNextPage}
         onClick={onLoadMore}
       >
+        {isFetchingNextPage ? (
+          <Spinner className="size-4" />
+        ) : (
+          <ChevronDownIcon className="size-4 shrink-0" />
+        )}
         {isFetchingNextPage ? loadingLabel : idleLabel}
       </Button>
     </div>

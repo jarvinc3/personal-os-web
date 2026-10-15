@@ -146,6 +146,15 @@ PENDIENTE 15 COMPLETADO — web v0.35.2 (2026-10-22).
 - Placeholder que repetía la etiqueta eliminado en `quick-entry-preview-sheet` y `chat-input` (con `aria-label`).
 - `finance-home-month.ts`: el porcentaje se formatea con `Intl.NumberFormat` (`style: "percent"`, `signDisplay: "exceptZero"`) en vez de `toFixed` con `%` a mano.
 
+### Revisión (2026-10-22)
+
+- **H-42 no se cumplía en el caso principal.** `reconciliation-month-status.tsx` devolvía `null` cuando la consulta fallaba en la primera carga, antes de llegar al `FinanceErrorState`; el error solo aparecía si ya había datos de un intento anterior. Ahora el error con reintento se pinta antes del corte por falta de datos.
+- **`icons-required`.** El botón de `InfiniteListSentinel` (pie de las cuatro listas con scroll infinito) no llevaba icono; lleva `ChevronDownIcon` y un `Spinner` mientras llega la tanda.
+- **`list-infinite-scroll`.** El tamaño de tanda de `useAiSessions` era el número suelto `"30"`; pasa a la constante `AI_SESSIONS_PAGE_SIZE`.
+- **`ui-section-states`.** El vacío del historial de conversaciones era un párrafo `text-muted-foreground`; pasa a `Empty`.
+- **`navigation-pending`.** El botón "Crear préstamo" del FAB de Planificación y las filas "Landing page" y "Vaciar datos" de Ajustes bloquean la repetición mientras la vista de destino carga.
+- Tests añadidos: `expenseTrend` con un cambio que redondea a cero (`100.04` sobre `100` → `0%`, plano).
+
 ## Versión esperada
 
-PATCH (correcciones visuales y de convenciones, sin cambio de comportamiento): web v0.35.2.
+PATCH (correcciones visuales y de convenciones, sin cambio de comportamiento): web v0.35.2. Revisión como PATCH: web v0.35.3.
