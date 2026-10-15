@@ -95,6 +95,10 @@ La versión sigue **estrictamente** [docs/versionado.md](docs/versionado.md): be
 - La documentación también pasa prettier: `pnpm format:check` cubre `ts`, `tsx` y `md`.
 - `personal-os-app` está fuera de servicio y no sigue esta regla.
 
+## Fechas
+
+Usa siempre la fecha real del sistema (`date`) para changelogs y documentos. No adelantes la fecha para "ordenar" artefactos; en el backend el nombre de la carpeta de una migración Prisma define su posición en el historial.
+
 ## Checklist al cambiar comportamiento
 
 - [ ] Actualizar el documento dueño (capacidad, contrato UI o arquitectura).
