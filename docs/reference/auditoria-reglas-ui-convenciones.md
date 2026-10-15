@@ -9,7 +9,7 @@ Resultado:
 - **44 vigentes**: corregidos (grupos `confirm-important-changes`, `list-infinite-scroll`, bloques y grupos de filas, iconos, estados de sección, navegación, placeholders y montos).
 - **7 resueltos** antes del pendiente por Suscripciones v3 y los pendientes 12 y 13: H-02, H-03, H-10, H-13, H-31, H-32 y H-43.
 - **9 por decidir**, sin tocar: H-44, H-47, H-55 a H-58, H-59 y H-60.
-- **9 decididos** el 2026-10-15: H-44 y H-47 quedan **aceptados**; H-55 a H-58 quedan **exentos** en la regla; H-59 y H-60 quedan **resueltos** (web `v0.36.5`, back `v0.34.0`).
+- **9 decididos** el 2026-10-15: H-44 y H-47 quedan **aceptados**; H-55 a H-58 quedan **exentos** en la regla; H-59 y H-60 quedan **resueltos** (web `v0.36.6`, back `v0.35.0`).
 - **Revisión del pendiente** (2026-10-22, web `v0.35.3–v0.35.4`): H-42 solo se veía con datos de un intento previo; ahora el error con reintento se pinta antes del corte por falta de datos. Se cerraron además tres incumplimientos fuera de H-01..H-60 detectados en la revisión: el botón de `InfiniteListSentinel` sin icono, el tamaño de tanda suelto en las sesiones de IA y el vacío del historial de conversaciones como párrafo.
 
 ## Reglas revisadas
@@ -171,7 +171,7 @@ Son casillas, radios o carga de avatar. **Exentos** (2026-10-15): la regla no ap
 
 ### `finance-brand-logo.mdc` — resuelto
 
-- **H-60** `src/modules/finance/recycle-bin/components/recycle-bin-view.tsx:60,61,80,81` — institución y cuenta se pintan con `Building2Icon` y `LandmarkIcon`. **Resuelto** (2026-10-15, web `v0.36.5` / back `v0.34.0`): el payload de papelera trae `logoUrl` de la institución y la vista usa `BrandLogo`; el back resuelve la marca con `LogoService`.
+- **H-60** `src/modules/finance/recycle-bin/components/recycle-bin-view.tsx:60,61,80,81` — institución y cuenta se pintan con `Building2Icon` y `LandmarkIcon`. **Resuelto** (2026-10-15, web `v0.36.6` / back `v0.35.0`): el payload de papelera trae `logoUrl` de la institución en archivados y eliminados, y la vista usa `BrandLogo`; el back resuelve la marca con `LogoService` (del snapshot para una institución, por `institutionId` para una cuenta).
 
 ## Sin hallazgos
 

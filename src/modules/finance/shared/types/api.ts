@@ -159,6 +159,7 @@ export type FinanceDeletedRecord = {
   type: FinanceDeletedType
   id: string
   label: string | null
+  logoUrl: string | null
   deletedAt: string
   sizeBytes: number
 }

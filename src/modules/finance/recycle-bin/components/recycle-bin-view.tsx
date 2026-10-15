@@ -38,10 +38,8 @@ import { appToast } from "@/src/shared/lib/app-toast"
 import {
   ArchiveIcon,
   ArrowLeftRightIcon,
-  Building2Icon,
   CreditCardIcon,
   HandCoinsIcon,
-  LandmarkIcon,
   RotateCcwIcon,
   ScaleIcon,
   TagsIcon,
@@ -59,11 +57,12 @@ const ARCHIVED_TYPE_LABEL: Record<FinanceArchivedType, string> = {
   loan: "Préstamo",
 }
 
-/** Institutions and accounts carry a brand; cards show their network, loans nothing. */
-type BrandedArchivedType = "institution" | "account"
-type IconArchivedType = Exclude<FinanceArchivedType, BrandedArchivedType>
+/** Institutions and accounts carry a brand; the rest use a generic icon. */
+type BrandedRecordType = "institution" | "account"
+type IconArchivedType = Exclude<FinanceArchivedType, BrandedRecordType>
+type IconDeletedType = Exclude<FinanceDeletedType, BrandedRecordType>
 
-const BRANDED_ARCHIVED_TYPES: readonly BrandedArchivedType[] = [
+const BRANDED_RECORD_TYPES: readonly BrandedRecordType[] = [
   "institution",
   "account",
 ]
@@ -73,10 +72,24 @@ const ARCHIVED_TYPE_ICON: Record<IconArchivedType, LucideIcon> = {
   loan: HandCoinsIcon,
 }
 
-function isBrandedArchivedType(
-  type: FinanceArchivedType
-): type is BrandedArchivedType {
-  return BRANDED_ARCHIVED_TYPES.includes(type as BrandedArchivedType)
+function isBrandedRecordType(
+  type: FinanceArchivedType | FinanceDeletedType
+): type is BrandedRecordType {
+  return BRANDED_RECORD_TYPES.includes(type as BrandedRecordType)
+}
+
+function archivedIcon(type: FinanceArchivedType): LucideIcon | undefined {
+  if (isBrandedRecordType(type)) {
+    return undefined
+  }
+  return ARCHIVED_TYPE_ICON[type]
+}
+
+function deletedIcon(type: FinanceDeletedType): LucideIcon | undefined {
+  if (isBrandedRecordType(type)) {
+    return undefined
+  }
+  return DELETED_TYPE_ICON[type]
 }
 
 const DELETED_TYPE_LABEL: Record<FinanceDeletedType, string> = {
@@ -92,9 +105,7 @@ const DELETED_TYPE_LABEL: Record<FinanceDeletedType, string> = {
   reconciliation: "Conciliación",
 }
 
-const DELETED_TYPE_ICON: Record<FinanceDeletedType, LucideIcon> = {
-  institution: Building2Icon,
-  account: LandmarkIcon,
+const DELETED_TYPE_ICON: Record<IconDeletedType, LucideIcon> = {
   card: CreditCardIcon,
   loan: HandCoinsIcon,
   transaction: ArrowLeftRightIcon,
@@ -154,17 +165,13 @@ export function RecycleBinView() {
   }
 
   function renderArchived(record: FinanceArchivedRecord, isLast: boolean) {
-    const branded = isBrandedArchivedType(record.type)
-    const icon =
-      record.type === "card" || record.type === "loan"
-        ? ARCHIVED_TYPE_ICON[record.type]
-        : undefined
+    const branded = isBrandedRecordType(record.type)
     return (
       <SummaryItem
         key={`${record.type}-${record.id}`}
         title={record.label}
         description={ARCHIVED_TYPE_LABEL[record.type]}
-        icon={icon}
+        icon={archivedIcon(record.type)}
         leading={
           branded ? (
             <BrandLogo name={record.label} logoUrl={record.logoUrl} size={36} />
@@ -191,6 +198,7 @@ export function RecycleBinView() {
   function renderDeleted(record: FinanceDeletedRecord, isLast: boolean) {
     const typeLabel = DELETED_TYPE_LABEL[record.type]
     const slowRestore = record.sizeBytes > LARGE_SNAPSHOT_BYTES
+    const branded = isBrandedRecordType(record.type)
     return (
       <SummaryItem
         key={`${record.type}-${record.id}`}
@@ -198,7 +206,16 @@ export function RecycleBinView() {
         description={`${typeLabel} · ${formatCalendarDate(record.deletedAt)}${
           slowRestore ? " · Muchos datos, restaurar puede tardar" : ""
         }`}
-        icon={DELETED_TYPE_ICON[record.type]}
+        icon={deletedIcon(record.type)}
+        leading={
+          branded ? (
+            <BrandLogo
+              name={record.label ?? typeLabel}
+              logoUrl={record.logoUrl}
+              size={36}
+            />
+          ) : undefined
+        }
         isLast={isLast}
         className="px-3"
         trailing={
