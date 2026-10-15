@@ -2,6 +2,14 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.36.0] - 2026-10-15
+
+### Agregado
+
+- Productos: Efectivo se muestra como una institución de sistema con icono de efectivo y el total convertido a la moneda de preferencia. El anillo usa ese total y marca «Balance incompleto» cuando falta una tasa.
+- Detalle de Efectivo: desglose por moneda y cuenta, secciones ocultas de tarjetas, préstamos, edición, borrado y sincronización por correo, y un «Agregar cuenta» discreto con el tipo fijo en efectivo.
+- Los selectores de institución de tarjetas y préstamos ya no ofrecen Efectivo. Al elegir una moneda sin cuenta de efectivo se sugiere «Efectivo <moneda>».
+
 ## [0.35.4] - 2026-10-22
 
 ### Cambiado
