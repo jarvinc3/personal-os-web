@@ -2,6 +2,12 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.36.4] - 2026-10-15
+
+### Corregido
+
+- El nombre «Efectivo <moneda>» solo se sugiere al crear una cuenta de efectivo de una moneda que aún no tiene cuenta; para un fondo en una moneda existente el nombre queda libre.
+
 ## [0.36.3] - 2026-10-15
 
 ### Cambiado
