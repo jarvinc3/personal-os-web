@@ -2,6 +2,16 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.35.0] - 2026-10-22 - Decimales exactos
+
+### Agregado
+
+- Dependencia `decimal.js-light` y utilidad `shared/lib/decimal.ts` (`toDecimal`, `sumDecimals`, `roundDecimal` con `ROUND_HALF_EVEN`, `decimalPercent`, `decimalAmount`).
+
+### Cambiado
+
+- Los totales y gráficos de dashboards, Suscripciones y el anillo suman los montos con esa utilidad, en vez de aritmética de `Number`, para no perder centavos con monedas fraccionarias.
+
 ## [0.34.1] - 2026-10-22
 
 ### Cambiado
