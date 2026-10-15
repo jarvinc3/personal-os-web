@@ -2,6 +2,13 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.36.3] - 2026-10-15
+
+### Cambiado
+
+- Limpieza interna sin cambios de comportamiento: formato de Prettier e imports en pantallas y documentos.
+- En desarrollo, seleccionar un elemento en el navegador envía su ubicación en el código fuente al chat de pi.
+
 ## [0.36.2] - 2026-10-15
 
 ### Cambiado
