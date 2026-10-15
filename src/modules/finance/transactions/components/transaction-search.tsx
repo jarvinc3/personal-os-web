@@ -27,6 +27,32 @@ const PRESENCE_EASE = [0.22, 1, 0.36, 1] as const
 
 const SEARCH_DEBOUNCE_MS = 300
 
+function wheelDelta(event: WheelEvent, node: HTMLElement) {
+  if (event.deltaMode === WheelEvent.DOM_DELTA_LINE) {
+    return event.deltaY * 16
+  }
+  if (event.deltaMode === WheelEvent.DOM_DELTA_PAGE) {
+    return event.deltaY * node.clientHeight
+  }
+  return event.deltaY
+}
+
+function containResultsWheel(event: WheelEvent) {
+  const node = event.currentTarget
+  if (!(node instanceof HTMLElement)) {
+    return
+  }
+  const max = node.scrollHeight - node.clientHeight
+  if (max > 0) {
+    node.scrollTop = Math.min(
+      max,
+      Math.max(0, node.scrollTop + wheelDelta(event, node))
+    )
+  }
+  event.preventDefault()
+  event.stopPropagation()
+}
+
 type FinanceTransactionSearchProps = {
   enabled: boolean
   display: FinanceMoneyDisplay
@@ -42,6 +68,7 @@ export function FinanceTransactionSearch({
 }: FinanceTransactionSearchProps) {
   const listId = useId()
   const rootRef = useRef<HTMLDivElement>(null)
+  const resultsRef = useRef<HTMLDivElement>(null)
   const reduceMotion = useReducedMotion() === true
   const presence = { duration: reduceMotion ? 0 : 0.2, ease: PRESENCE_EASE }
   const [search, setSearch] = useState("")
@@ -58,6 +85,15 @@ export function FinanceTransactionSearch({
     }, SEARCH_DEBOUNCE_MS)
     return () => window.clearTimeout(timer)
   }, [search])
+
+  useEffect(() => {
+    const node = resultsRef.current
+    if (!showPanel || !node) {
+      return
+    }
+    node.addEventListener("wheel", containResultsWheel, { passive: false })
+    return () => node.removeEventListener("wheel", containResultsWheel)
+  }, [showPanel])
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
@@ -138,7 +174,10 @@ export function FinanceTransactionSearch({
             className="absolute inset-x-0 top-full z-50 flex h-[50vh] min-h-[50vh] flex-col overflow-hidden rounded-t-none rounded-b-2xl border border-t-0 border-border bg-popover shadow-2xl"
           >
             <Separator />
-            <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto p-2">
+            <div
+              ref={resultsRef}
+              className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto overscroll-contain p-2"
+            >
             {resultsQuery.isError ? (
               <FinanceErrorState
                 message={financeErrorMessage(resultsQuery.error)}
