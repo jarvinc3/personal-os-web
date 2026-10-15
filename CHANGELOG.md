@@ -2,6 +2,15 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.35.2] - 2026-10-22
+
+### Corregido
+
+- Auditoría de reglas de UI (`REV-WEB-025`): bloques con título y grupos de filas con `SummarySection`/`SettingsSection` en vez de `Card` o un `div` con borde a mano; icono líder en los campos y botones que faltaban; `Empty` en los vacíos y estado de error con reintento donde había un párrafo suelto; `Skeleton` donde la forma ya se conoce; pending al navegar con `Link`/`usePendingNavigation`; placeholders que repetían la etiqueta.
+- El detalle de movimiento pide confirmación (`AlertDialog`) antes de unir duplicados o quitar un vínculo de planificación.
+- El historial de conversaciones carga la siguiente tanda al llegar al final.
+- El porcentaje de tendencia de gastos se formatea con `Intl.NumberFormat` en vez de `toFixed` con el símbolo a mano.
+
 ## [0.35.1] - 2026-10-22
 
 ### Corregido
