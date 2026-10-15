@@ -10,8 +10,8 @@ Contexto: bancos dominicanos (BHD, Popular, Qik), moneda principal DOP (RD$).
 
 | Entidad                               | Qué es                                   | Reglas clave                                                                                       |
 | ------------------------------------- | ---------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| Institución                           | Banco o entidad emisora                  | Borrarla da 409 si tiene dependientes (`details.dependents`)                                       |
-| Cuenta                                | CHECKING, SAVINGS, INVESTMENT o CASH     | Las bancarias exigen institución; CASH no. Se archiva con `isActive:false`, no se borra            |
+| Institución                           | Banco o entidad emisora                  | Borrarla da 409 si tiene dependientes (`details.dependents`). La de sistema "Efectivo" (`isSystem`) no se edita, archiva ni borra |
+| Cuenta                                | CHECKING, SAVINGS, INVESTMENT o CASH     | Todas exigen institución. Las de efectivo viven en la institución de sistema, una por moneda. Se archiva con `isActive:false`, no se borra |
 | Tarjeta                               | Crédito o débito                         | La de crédito tiene límite, disponible, día de corte y de pago. La de débito suma a su cuenta      |
 | Movimiento (`FinTransaction`)         | CREDIT, DEBIT, ADJUSTMENT, CARD_PAYMENT  | Estados `PENDING`, `CONFIRMED`, `REVERSED`, `CANCELLED`                                            |
 | Transferencia                         | Dos patas con el mismo `transferGroupId` | Atómica. El destino es solo una cuenta. Comisión opcional (`legs`). La lista muestra una sola fila |
@@ -38,6 +38,10 @@ Categoría → monto → cuenta o tarjeta. El monto abre con teclado o calculado
 ### Vincular un movimiento
 
 Desde el detalle del movimiento, "Vincular" (`link-transaction-sheet.tsx`) lo asocia a una cuota de préstamo, un cobro o un aporte a meta: `POST /finance/transactions/:id/link`. El agente tiene la tool `link_transaction`.
+
+### Efectivo
+
+Cada usuario tiene una institución de sistema "Efectivo" (`type: cash`, `isSystem`) con una cuenta por moneda; se crea sola (alta de usuario, listado o migración `20261021110000_fin_cash_institution`) y no se edita, archiva ni borra. Productos la muestra como una tarjeta con icono de efectivo y el total convertido a la moneda base (`cash.totalBase`); si falta una tasa, marca "Balance incompleto" y el detalle sigue mostrando cada moneda sin convertir. Al abrirla: desglose por moneda y cuenta, sin tarjetas, préstamos ni correo, y un "Agregar cuenta" con el tipo fijo `CASH`. Mover dinero entre cuentas de efectivo es una transferencia normal.
 
 ### Tarjetas de crédito
 
