@@ -1,6 +1,6 @@
 # Finanzas: cómo funciona hoy
 
-Estado al 22 oct 2026: web v0.34.0 y back v0.31.0. Este documento resume el dominio y los flujos principales tal como están implementados. El contrato HTTP completo vive en `personal-os-back/docs/modules/finance/`. Lo pendiente está en [pendientes/](./pendientes/README.md).
+Estado al 22 oct 2026: web v0.34.1 y back v0.31.1. Este documento resume el dominio y los flujos principales tal como están implementados. El contrato HTTP completo vive en `personal-os-back/docs/modules/finance/`. Lo pendiente está en [pendientes/](./pendientes/README.md).
 
 Contexto: bancos dominicanos (BHD, Popular, Qik), moneda principal DOP (RD$).
 

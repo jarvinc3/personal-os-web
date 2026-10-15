@@ -2,6 +2,13 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.34.1] - 2026-10-22
+
+### Cambiado
+
+- La nota del próximo corte con la cuenta regresiva se arma en `nextCycleNote`; el detalle de tarjeta solo la pinta.
+- Spec de `nextCycleNote` (corte más cuenta regresiva, y casos parciales).
+
 ## [0.34.0] - 2026-10-22 - Tarjetas prácticas
 
 ### Agregado
