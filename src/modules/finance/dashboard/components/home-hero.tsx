@@ -7,6 +7,7 @@ import {
   ArrowUpRightIcon,
   ChevronDownIcon,
   CreditCardIcon,
+  type LucideIcon,
 } from "lucide-react"
 import Link from "next/link"
 
@@ -20,6 +21,34 @@ type FinanceHomeHeroProps = {
   cashFlowLabel?: string
   onAccountPress?: () => void
   className?: string
+}
+
+type FinanceHomeHeroActionProps = {
+  href: string
+  icon: LucideIcon
+  label: string
+  className?: string
+}
+
+function FinanceHomeHeroAction({
+  href,
+  icon: Icon,
+  label,
+  className,
+}: FinanceHomeHeroActionProps) {
+  return (
+    <Button
+      asChild
+      variant="outline"
+      className={cn("relative flex-1", className)}
+    >
+      <Link href={href}>
+        <Icon className="text-foreground" />
+        <span className="text-base font-semibold text-foreground">{label}</span>
+        <LinkPendingOverlay />
+      </Link>
+    </Button>
+  )
 }
 
 function FinanceHomeGridPattern() {
@@ -93,45 +122,24 @@ export function FinanceHomeHero({
         </div>
 
         <div className="grid grid-cols-3 gap-0.5 overflow-hidden rounded-2xl border border-border">
-          <Button
-            asChild
-            variant="outline"
-            className="relative flex-1 rounded-none rounded-l-2xl"
-          >
-            <Link href={sendHref}>
-              <ArrowUpRightIcon className="text-foreground" />
-              <span className="text-base font-semibold text-foreground">
-                Gasto
-              </span>
-              <LinkPendingOverlay />
-            </Link>
-          </Button>
-          <Button
-            asChild
-            variant="outline"
-            className="relative flex-1 rounded-none"
-          >
-            <Link href={receiveHref}>
-              <ArrowDownLeftIcon className="text-foreground" />
-              <span className="text-base font-semibold text-foreground">
-                Ingreso
-              </span>
-              <LinkPendingOverlay />
-            </Link>
-          </Button>
-          <Button
-            asChild
-            variant="outline"
-            className="relative flex-1 rounded-none rounded-r-2xl"
-          >
-            <Link href={transferHref}>
-              <ArrowRightLeftIcon className="text-foreground" />
-              <span className="text-base font-semibold text-foreground">
-                Transf.
-              </span>
-              <LinkPendingOverlay />
-            </Link>
-          </Button>
+          <FinanceHomeHeroAction
+            href={sendHref}
+            icon={ArrowUpRightIcon}
+            label="Gasto"
+            className="rounded-none rounded-l-2xl"
+          />
+          <FinanceHomeHeroAction
+            href={receiveHref}
+            icon={ArrowDownLeftIcon}
+            label="Ingreso"
+            className="rounded-none"
+          />
+          <FinanceHomeHeroAction
+            href={transferHref}
+            icon={ArrowRightLeftIcon}
+            label="Transf."
+            className="rounded-none rounded-r-2xl"
+          />
         </div>
       </div>
     </div>
