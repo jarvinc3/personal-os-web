@@ -157,4 +157,4 @@ Aprobadas por el usuario el 15 oct 2026; no quedan preguntas abiertas.
 
 Según [docs/versionado.md](../../../versionado.md): MINOR en cada repo con cambios de funcionalidad (web y back), PATCH en la revisión. Al día de hoy serían **web v0.33.0** y **back v0.30.0**, antes del 12 y el 13; confirmar con el último tag al implementar. Actualizar el índice de pendientes con las versiones reales.
 
-Revisión (21 oct 2026): web v0.33.2 / back v0.30.2. El detalle abre el tab pedido por el enlace, las cards de suscripciones que no cobran no se resaltan, el calendario reintenta si falla el resumen y las alertas de cuenta atrás usan la ventana global.
+Revisión (21 oct 2026): web v0.33.2–v0.33.3 / back v0.30.2. El detalle abre el tab pedido por el enlace, las cards de suscripciones que no cobran no se resaltan, el calendario reintenta si falla el resumen y las alertas de cuenta atrás usan la ventana global.
