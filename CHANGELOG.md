@@ -2,6 +2,13 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.33.1] - 2026-10-21
+
+### Cambiado
+
+- La lista de suscripciones vive en su propio bloque (`components/subscriptions-list.tsx`) y el sheet de filtros carga sus propios datos: el cuerpo de la pantalla queda como orquestacion y el conteo de «Ver N resultados» sale de la misma consulta cacheada.
+- El titulo del mes del calendario falla con un error explicito si el mes no existe, en vez de mostrar solo el año.
+
 ## [0.33.0] - 2026-10-21 - Suscripciones v3
 
 ### Agregado
