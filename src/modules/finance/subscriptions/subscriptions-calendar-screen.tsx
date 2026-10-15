@@ -17,6 +17,7 @@ import {
   isoMonthBounds,
   listYearMonths,
   monthKeyFromDate,
+  parseMonthKey,
   type MonthKey,
 } from "@/src/modules/finance/shared/lib/month-window"
 import { FinanceRingChart } from "@/src/modules/finance/products/components/ring-chart"
@@ -74,11 +75,11 @@ function SubscriptionsCalendarBody() {
     onBack: () => router.back(),
   })
 
-  const bounds = useMemo(() => {
-    const [year, monthNumber] = month.split("-").map(Number)
-    return isoMonthBounds(year ?? 0, monthNumber ?? 1)
-  }, [month])
-  const [activeYear, activeMonth] = month.split("-").map(Number)
+  const parsedMonth = useMemo(() => parseMonthKey(month), [month])
+  const bounds = useMemo(
+    () => isoMonthBounds(parsedMonth.year, parsedMonth.month),
+    [parsedMonth]
+  )
   const chargesQuery = useSubscriptionsUpcoming(isEnabled, {
     from: bounds.dateFrom,
     to: bounds.dateTo,
@@ -93,14 +94,14 @@ function SubscriptionsCalendarBody() {
   const weeks = useMemo(
     () =>
       subscriptionCalendarWeeks({
-        year: activeYear ?? 0,
-        month: activeMonth ?? 1,
+        year: parsedMonth.year,
+        month: parsedMonth.month,
         charges,
         today,
         windowDays,
         weekStartsOn: config.weekStartsOn === 1 ? 1 : 0,
       }),
-    [activeYear, activeMonth, charges, today, windowDays, config.weekStartsOn]
+    [parsedMonth, charges, today, windowDays, config.weekStartsOn]
   )
   const summaryLabel = subscriptionChargeSummaryLabel({
     summary: subscriptionChargeSummary({
@@ -137,8 +138,8 @@ function SubscriptionsCalendarBody() {
         <div className="flex flex-col items-center gap-1">
           <p className="text-lg font-semibold">
             {subscriptionMonthLabel({
-              year: activeYear ?? 0,
-              month: activeMonth ?? 1,
+              year: parsedMonth.year,
+              month: parsedMonth.month,
             })}
           </p>
           <p className="text-sm text-muted-foreground">{summaryLabel}</p>

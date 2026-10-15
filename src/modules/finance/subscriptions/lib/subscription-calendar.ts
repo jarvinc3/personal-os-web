@@ -33,9 +33,9 @@ export function subscriptionMonthLabel(input: {
   year: number
   month: number
 }): string {
-  const name = MONTH_LONG[input.month - 1] ?? ""
+  const name = MONTH_LONG[input.month - 1]
   if (!name) {
-    return String(input.year)
+    throw new Error(`Unknown month: ${input.month}`)
   }
   return `${name.charAt(0).toUpperCase()}${name.slice(1)} ${input.year}`
 }

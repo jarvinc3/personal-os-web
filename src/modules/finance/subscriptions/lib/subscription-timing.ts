@@ -26,7 +26,7 @@ const MONTH_SHORT = [
 /** `mar 2023`, the month and year a subscription started. */
 export function billingMonthLabel(value: Date | string): string {
   const date = typeof value === "string" ? parseISO(value) : value
-  const month = MONTH_SHORT[date.getMonth()] ?? ""
+  const month = MONTH_SHORT[date.getMonth()]
   return `${month} ${date.getFullYear()}`
 }
 
@@ -45,7 +45,7 @@ export type SubscriptionCycleProgress = {
 /** `17 oct`, the short date a card shows outside the warning window. */
 export function shortBillingDate(value: Date | string): string {
   const date = typeof value === "string" ? parseISO(value) : value
-  const month = MONTH_SHORT[date.getMonth()] ?? ""
+  const month = MONTH_SHORT[date.getMonth()]
   return `${date.getDate()} ${month}`
 }
 

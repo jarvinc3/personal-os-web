@@ -36,6 +36,17 @@ describe("subscriptionMonthLabel", () => {
     )
     assert.equal(subscriptionMonthLabel({ year: 2026, month: 1 }), "Enero 2026")
   })
+
+  it("fails on a month that does not exist", () => {
+    assert.throws(
+      () => subscriptionMonthLabel({ year: 2026, month: 13 }),
+      /Unknown month: 13/
+    )
+    assert.throws(
+      () => subscriptionMonthLabel({ year: 2026, month: 0 }),
+      /Unknown month: 0/
+    )
+  })
 })
 
 describe("subscriptionCalendarWeeks", () => {
