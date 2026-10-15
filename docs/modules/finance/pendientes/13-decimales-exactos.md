@@ -33,7 +33,7 @@
 
 ## Implementación
 
-PENDIENTE 13 COMPLETADO — web v0.35.0 · back v0.32.0 (2026-10-22).
+PENDIENTE 13 COMPLETADO — web v0.35.0 · back v0.32.0–v0.32.1 (2026-10-22).
 
 ### Back
 

@@ -1,6 +1,6 @@
 # Finanzas: cómo funciona hoy
 
-Estado al 22 oct 2026: web v0.35.0 y back v0.32.0. Este documento resume el dominio y los flujos principales tal como están implementados. El contrato HTTP completo vive en `personal-os-back/docs/modules/finance/`. Lo pendiente está en [pendientes/](./pendientes/README.md).
+Estado al 22 oct 2026: web v0.35.0 y back v0.32.1. Este documento resume el dominio y los flujos principales tal como están implementados. El contrato HTTP completo vive en `personal-os-back/docs/modules/finance/`. Lo pendiente está en [pendientes/](./pendientes/README.md).
 
 El dinero se suma, resta y convierte con decimales exactos: `Prisma.Decimal` en el back (`shared/domain/money.ts`) y `decimal.js-light` en la web (`shared/lib/decimal.ts`). El redondeo es `ROUND_HALF_EVEN` a 2 decimales y ocurre solo al presentar o persistir. La API sigue serializando money como string (ADR-002); `Number` queda solo para escalas de gráfico y porcentajes.
 
