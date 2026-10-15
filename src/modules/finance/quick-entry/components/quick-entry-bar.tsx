@@ -46,7 +46,7 @@ export function QuickEntryBar() {
   }
 
   return (
-    <>
+    <div className="flex flex-col gap-2 px-3 md:px-0">
       <form className="flex items-center gap-2" onSubmit={handleSubmit}>
         <Input
           value={text}
@@ -70,6 +70,6 @@ export function QuickEntryBar() {
         onOpenChange={setPreviewOpen}
         parseResult={parseResult}
       />
-    </>
+    </div>
   )
 }

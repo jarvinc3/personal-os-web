@@ -1,7 +1,11 @@
 import assert from "node:assert/strict"
 import { describe, it } from "node:test"
 
-import { findActiveMonthKey, shouldFollowScroll } from "./timeline-scroll.ts"
+import {
+  findActiveMonthKey,
+  pickLandingDayKey,
+  shouldFollowScroll,
+} from "./timeline-scroll.ts"
 
 describe("shouldFollowScroll", () => {
   it("ignores layout scroll until the user takes over", () => {
@@ -23,6 +27,33 @@ describe("shouldFollowScroll", () => {
       shouldFollowScroll({ isProgrammatic: false, userTookOver: true }),
       true
     )
+  })
+})
+
+describe("pickLandingDayKey", () => {
+  it("lands on today when that day has movements", () => {
+    assert.equal(
+      pickLandingDayKey(["2026-10-01", "2026-10-15", "2026-10-20"], "2026-10-15"),
+      "2026-10-15"
+    )
+  })
+
+  it("lands on the latest day already passed when today is empty", () => {
+    assert.equal(
+      pickLandingDayKey(["2026-10-02", "2026-10-14", "2026-10-18"], "2026-10-15"),
+      "2026-10-14"
+    )
+  })
+
+  it("lands on the first day when every movement is still ahead", () => {
+    assert.equal(
+      pickLandingDayKey(["2026-10-20", "2026-10-21"], "2026-10-15"),
+      "2026-10-20"
+    )
+  })
+
+  it("returns null when the month has no days yet", () => {
+    assert.equal(pickLandingDayKey([], "2026-10-15"), null)
   })
 })
 

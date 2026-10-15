@@ -23,7 +23,7 @@ type SummarySectionProps = {
 }
 
 type SummaryItemBaseProps = {
-  title: string
+  title: ReactNode
   description?: ReactNode
   value?: ReactNode
   icon?: LucideIcon
@@ -174,7 +174,7 @@ export function SummaryItem({
       : undefined
 
   const rowClassName = cn(
-    "flex w-full items-center gap-3 rounded-2xl p-2 text-left transition-all duration-200",
+    "flex w-full items-center gap-3 hover:rounded-2xl p-2 text-left transition-all duration-200",
     !isInteractive && !isLast && "border-b border-border/60",
     isInteractive && cn(PRESSABLE_CLASS, "hover:bg-muted/50"),
     onPress && "cursor-pointer",
@@ -182,7 +182,7 @@ export function SummaryItem({
     className
   )
   const shellClassName = cn(
-    "flex w-full items-stretch overflow-hidden rounded-2xl",
+    "flex w-full items-stretch overflow-hidden hover:rounded-2xl",
     !isLast && "border-b border-border/60"
   )
 

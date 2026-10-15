@@ -27,6 +27,7 @@ export const APP_ROUTES = {
     financeInstitutions: FINANCE_INSTITUTIONS_PATH,
     financeCash: FINANCE_CASH_PATH,
     financeCategories: "/finance/categories",
+    financeBankCharges: "/finance/bank-charges",
     financeRecycleBin: "/finance/recycle-bin",
     financeSync: "/finance/sync",
     financeInstitution: (institutionId: string) =>

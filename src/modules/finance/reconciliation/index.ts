@@ -1,4 +1,4 @@
-export { BankChargesCard } from "./components/bank-charges-card"
+export { BankChargesScreen } from "./bank-charges-screen"
 export { ReconciliationMonthStatus } from "./components/reconciliation-month-status"
 export {
   ReconciliationSheet,

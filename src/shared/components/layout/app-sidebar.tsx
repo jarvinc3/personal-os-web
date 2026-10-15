@@ -99,8 +99,8 @@ export function AppSidebar() {
               <AppLogo size="xs" className="rounded" />
               <span className="text-base font-semibold">Personal OS</span>
               <Badge
-                variant="outline"
-                className="ml-auto text-[10px] group-data-[collapsible=icon]:hidden"
+                variant="info"
+                className="ml-auto group-data-[collapsible=icon]:hidden"
               >
                 Beta
               </Badge>

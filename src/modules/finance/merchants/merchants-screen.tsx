@@ -13,6 +13,7 @@ import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-quer
 import { merchantMonthParams } from "@/src/modules/finance/merchants/lib/merchant-query"
 import { FormTextField } from "@/src/shared/components/layout/form-blocks"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
+import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import {
   Empty,
   EmptyDescription,
@@ -23,7 +24,8 @@ import {
 import { InfiniteListSentinel } from "@/src/shared/components/ui/infinite-list-sentinel"
 import { SummaryItem } from "@/src/shared/components/ui/summary"
 import { SearchIcon, StoreIcon } from "lucide-react"
-import { useMemo, useState } from "react"
+import { useRouter } from "next/navigation"
+import { useCallback, useMemo, useState } from "react"
 
 export function MerchantsScreen() {
   return (
@@ -34,8 +36,22 @@ export function MerchantsScreen() {
 }
 
 function MerchantsScreenBody() {
+  const router = useRouter()
   const { isEnabled, config } = useFinanceEnabled()
   const [search, setSearch] = useState("")
+
+  const handleBack = useCallback(() => {
+    router.push(APP_ROUTES.app.financeProducts)
+  }, [router])
+
+  usePageHeader(
+    {
+      variant: "secondary",
+      title: "Comercios",
+      onBack: handleBack,
+    },
+    [handleBack]
+  )
   const month = useMemo(() => merchantMonthParams(), [])
   const listQuery = useMerchants(isEnabled, {
     search: search.trim() || undefined,

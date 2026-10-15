@@ -1,0 +1,12 @@
+import { Suspense } from "react"
+
+import { BankChargesScreen } from "@/src/modules/finance"
+import { LoadingView } from "@/src/shared/components/layout/loading-view"
+
+export default function FinanceBankChargesPage() {
+  return (
+    <Suspense fallback={<LoadingView variant="screen" />}>
+      <BankChargesScreen />
+    </Suspense>
+  )
+}

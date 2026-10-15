@@ -4,7 +4,6 @@ import {
   ArrowLeftRight,
   LandmarkIcon,
   RepeatIcon,
-  StoreIcon,
   Target,
 } from "lucide-react"
 
@@ -31,13 +30,10 @@ export const FINANCE_NAV_ITEMS: ModuleNavItem[] = [
     extraActiveHrefs: [
       APP_ROUTES.app.financeCategories,
       APP_ROUTES.app.financeSync,
+      APP_ROUTES.app.financeBankCharges,
+      APP_ROUTES.app.financeMerchants,
+      APP_ROUTES.app.financeRecycleBin,
     ],
-  },
-  {
-    label: "Comercios",
-    href: APP_ROUTES.app.financeMerchants,
-    icon: StoreIcon,
-    showInTabBar: false,
   },
 ]
 

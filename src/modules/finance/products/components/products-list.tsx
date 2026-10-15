@@ -12,11 +12,10 @@ import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-financ
 import { useInstitutions } from "@/src/modules/finance/shared/hooks/use-institutions"
 import { useLoans } from "@/src/modules/finance/shared/hooks/use-loans"
 import { useMonthExpenseTrend } from "@/src/modules/finance/shared/hooks/use-month-expense-trend"
-import {
-  BankChargesCard,
-  ReconciliationMonthStatus,
-} from "@/src/modules/finance/reconciliation"
+import { ReconciliationMonthStatus } from "@/src/modules/finance/reconciliation"
+import { bankChargesQuery } from "@/src/modules/finance/shared/hooks/use-reconciliations"
 import { todayDateInput } from "@/src/modules/finance/shared/lib/ledger-form"
+import { bankChargesRange } from "@/src/modules/finance/shared/lib/reconciliation"
 import { BalanceIntegrityAlert } from "@/src/modules/finance/integrity"
 import { recalculationPayload } from "@/src/modules/finance/shared/lib/integrity"
 import {
@@ -58,9 +57,9 @@ import { useQueryClient } from "@tanstack/react-query"
 import {
   Building2Icon,
   ChevronDownIcon,
+  LandmarkIcon,
   MailIcon,
   PlusIcon,
-  RepeatIcon,
   StoreIcon,
   TagsIcon,
   Trash2Icon,
@@ -204,12 +203,6 @@ export function FinanceProductsList({
         display={moneyDisplay}
       />
 
-      <BankChargesCard
-        enabled={enabled}
-        display={moneyDisplay}
-        today={todayDateInput()}
-      />
-
       <BalanceIntegrityAlert
         drifts={integrityQuery.data?.drifts ?? []}
         display={moneyDisplay}
@@ -300,6 +293,29 @@ export function FinanceProductsList({
       <SettingsSection title="Atajos">
         <div
           onPointerEnter={() => {
+            void queryClient.prefetchQuery(
+              bankChargesQuery(bankChargesRange(todayDateInput()))
+            )
+          }}
+          onFocusCapture={() => {
+            void queryClient.prefetchQuery(
+              bankChargesQuery(bankChargesRange(todayDateInput()))
+            )
+          }}
+        >
+          <SummaryItem
+            title="Cargos bancarios"
+            description="Ajustes al conciliar cuentas y tarjetas"
+            icon={LandmarkIcon}
+            href={APP_ROUTES.app.financeBankCharges}
+            showChevron
+            isLast={false}
+            className="px-3"
+          />
+        </div>
+
+        <div
+          onPointerEnter={() => {
             void prefetchFinanceCategories(queryClient)
           }}
           onFocusCapture={() => {
@@ -316,6 +332,7 @@ export function FinanceProductsList({
             className="px-3"
           />
         </div>
+
         <div
           onPointerEnter={() => {
             if (emailSyncEnabled) {
@@ -338,6 +355,7 @@ export function FinanceProductsList({
             className="px-3"
           />
         </div>
+
         <SummaryItem
           title="Comercios"
           description="Quién recibe tu dinero y cuánto"
@@ -347,15 +365,7 @@ export function FinanceProductsList({
           isLast={false}
           className="px-3"
         />
-        <SummaryItem
-          title="Suscripciones"
-          description="Cobros recurrentes y próximos pagos"
-          icon={RepeatIcon}
-          href={APP_ROUTES.app.financeSubscriptions}
-          showChevron
-          isLast={false}
-          className="px-3"
-        />
+
         <SummaryItem
           title="Papelera de reciclaje"
           description="Restaura lo archivado o eliminado"

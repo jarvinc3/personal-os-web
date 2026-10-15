@@ -83,7 +83,7 @@ export function FinanceFlowPills({
   const shown = useCountedAmounts(income, expenses)
 
   return (
-    <div className="grid grid-cols-2 gap-2 px-2">
+    <div className="grid grid-cols-2 gap-2 px-2 md:px-0">
       <div
         aria-label="Ingresos del mes"
         className="relative flex items-center justify-start rounded-2xl border border-border bg-card px-3 py-2"

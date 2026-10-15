@@ -26,10 +26,12 @@ import {
   yearsTouched,
   type MonthKey,
 } from "@/src/modules/finance/shared/lib/month-window"
+import { todayDateInput } from "@/src/modules/finance/shared/lib/ledger-form"
 import {
   animateScrollSectionIntoView,
   findActiveMonthKey,
   getScrollParent,
+  pickLandingDayKey,
   scrollSectionIntoView,
   shouldFollowScroll,
 } from "@/src/modules/finance/shared/lib/timeline-scroll"
@@ -198,12 +200,23 @@ export function FinanceTransactionsList({
       if (userTookOverRef.current) {
         return
       }
-      const section = node.querySelector<HTMLElement>(
+      const month = node.querySelector<HTMLElement>(
         `[data-month-key="${landingMonthKey}"]`
       )
-      if (!section) {
+      if (!month) {
         return
       }
+      const dayKeys = [
+        ...month.querySelectorAll<HTMLElement>("[data-day-key]"),
+      ].flatMap((day) => {
+        const key = day.getAttribute("data-day-key")
+        return key ? [key] : []
+      })
+      const dayKey = pickLandingDayKey(dayKeys, todayDateInput())
+      const section = dayKey
+        ? (month.querySelector<HTMLElement>(`[data-day-key="${dayKey}"]`) ??
+          month)
+        : month
       scrollSectionIntoView(section, offset, "auto")
     }
 
@@ -354,7 +367,7 @@ export function FinanceTransactionsList({
   }, [markUserTookOver, stickyOffset, timeline.length])
 
   return (
-    <div className="-mx-4 flex flex-col bg-card md:bg-background">
+    <div className="-mx-4 md:mx-0 flex flex-col bg-card md:bg-background">
       <div
         ref={chromeRef}
         className="sticky top-0 z-30 flex flex-col gap-3 rounded-b-2xl border-b border-border/70 bg-background pb-2 shadow-sm md:border-none"
@@ -445,7 +458,7 @@ export function FinanceTransactionsList({
                 })
             },
             disabled: !enabled || timelineQuery.isFetching,
-            color: "bg-slate-600",
+            color: "bg-primary",
           },
         ]}
       />

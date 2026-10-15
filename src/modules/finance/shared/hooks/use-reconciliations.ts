@@ -81,11 +81,8 @@ export function useReconciliationStatus(enabled: boolean, month: string) {
   })
 }
 
-export function useBankCharges(
-  enabled: boolean,
-  range: { from: string; to: string }
-) {
-  return useQuery({
+export function bankChargesQuery(range: { from: string; to: string }) {
+  return {
     queryKey: [...FINANCE_BANK_CHARGES_QUERY_KEY, range],
     queryFn: () => {
       const params = new URLSearchParams({ from: range.from, to: range.to })
@@ -93,6 +90,15 @@ export function useBankCharges(
         `${API_ENDPOINTS.FINANCE.ANALYTICS_BANK_CHARGES}?${params.toString()}`
       )
     },
+  }
+}
+
+export function useBankCharges(
+  enabled: boolean,
+  range: { from: string; to: string }
+) {
+  return useQuery({
+    ...bankChargesQuery(range),
     enabled,
   })
 }
