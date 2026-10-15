@@ -419,6 +419,7 @@ export function FinanceProductsList({
           balanceSheetQuery.data?.baseCurrency ?? defaultCurrency
         }
         defaultType="CASH"
+        cash={balanceSheetQuery.data?.cash}
       />
 
       <CategorySheet

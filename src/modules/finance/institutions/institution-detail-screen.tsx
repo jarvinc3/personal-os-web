@@ -685,6 +685,7 @@ function InstitutionDetailScreenBody({
         defaultInstitutionId={institutionId}
         defaultType={isCash ? "CASH" : "CHECKING"}
         lockType={isCash}
+        cash={balanceSheetQuery.data?.cash}
       />
 
       <CardBalanceSheet

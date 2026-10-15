@@ -22,11 +22,15 @@ import {
 } from "@/src/modules/finance/shared/hooks/use-accounts"
 import { useDiscardChanges } from "@/src/modules/finance/shared/hooks/use-discard-changes"
 import { buildCreateAccountBody } from "@/src/modules/finance/shared/lib/catalog-payloads"
-import { cashAccountNameFor } from "@/src/modules/finance/shared/lib/cash"
+import {
+  cashAccountNameFor,
+  cashCurrencyMissing,
+} from "@/src/modules/finance/shared/lib/cash"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import { parseFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 import type {
   FinanceAccount,
+  FinanceCashSummary,
   FinanceInstitution,
 } from "@/src/modules/finance/shared/types/entities"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
@@ -96,6 +100,8 @@ type AccountSheetProps = {
   defaultType?: AccountFormValues["type"]
   /** Inside Efectivo the type is fixed to CASH and the bank fields are hidden. */
   lockType?: boolean
+  /** Cash summary, so a new currency offers the default "Efectivo <moneda>" name. */
+  cash?: FinanceCashSummary
   pending?: boolean
 }
 
@@ -108,6 +114,7 @@ export function AccountSheet({
   defaultInstitutionId,
   defaultType = "CHECKING",
   lockType = false,
+  cash,
   pending = false,
 }: AccountSheetProps) {
   const isEdit = Boolean(account)
@@ -181,6 +188,9 @@ export function AccountSheet({
     if (!open || !lockType || isEdit || accountType !== "CASH") {
       return
     }
+    if (!cashCurrencyMissing(cash, accountCurrency)) {
+      return
+    }
     const currentName = getValues("name")
     if (currentName && !currentName.startsWith("Efectivo")) {
       return
@@ -195,6 +205,7 @@ export function AccountSheet({
     accountType,
     accountCurrency,
     defaultCurrency,
+    cash,
     getValues,
     setValue,
   ])

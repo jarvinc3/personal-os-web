@@ -1,5 +1,5 @@
 import type {
-  FinanceBalanceSheet,
+  FinanceCashSummary,
   FinanceInstitution,
 } from "@/src/modules/finance/shared/types/entities"
 
@@ -16,21 +16,19 @@ export function selectableBankInstitutions(
 }
 
 /** Currencies that already have a cash account, upper-cased. */
-export function cashCurrencies(
-  sheet: FinanceBalanceSheet | undefined
-): string[] {
-  return (sheet?.cash.byCurrency ?? []).map((row) =>
+export function cashCurrencies(cash: FinanceCashSummary | undefined): string[] {
+  return (cash?.byCurrency ?? []).map((row) =>
     row.currency.trim().toUpperCase()
   )
 }
 
 /** True when the currency has no cash account yet. */
 export function cashCurrencyMissing(
-  sheet: FinanceBalanceSheet | undefined,
+  cash: FinanceCashSummary | undefined,
   currency: string
 ): boolean {
   const code = currency.trim().toUpperCase()
-  return !cashCurrencies(sheet).includes(code)
+  return !cashCurrencies(cash).includes(code)
 }
 
 /** Default cash account name for a currency: "Efectivo" or "Efectivo USD". */

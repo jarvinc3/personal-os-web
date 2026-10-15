@@ -85,7 +85,7 @@ describe("cash institution helpers", () => {
   })
 
   it("lists the currencies with a cash account, upper-cased", () => {
-    assert.deepEqual(cashCurrencies(sheetWithCash(["dop", "usd"])), [
+    assert.deepEqual(cashCurrencies(sheetWithCash(["dop", "usd"]).cash), [
       "DOP",
       "USD",
     ])
@@ -94,8 +94,8 @@ describe("cash institution helpers", () => {
   it("reports a currency without a cash account", () => {
     const sheet = sheetWithCash(["DOP"])
 
-    assert.equal(cashCurrencyMissing(sheet, "usd"), true)
-    assert.equal(cashCurrencyMissing(sheet, "DOP"), false)
+    assert.equal(cashCurrencyMissing(sheet.cash, "usd"), true)
+    assert.equal(cashCurrencyMissing(sheet.cash, "DOP"), false)
   })
 
   it("names the base-currency cash account Efectivo and other currencies with the code", () => {
