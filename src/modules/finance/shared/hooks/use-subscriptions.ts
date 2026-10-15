@@ -119,6 +119,18 @@ export function useDismissSubscriptionAlert() {
   })
 }
 
+export function useDismissAllSubscriptionAlerts() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: () =>
+      apiPost<{ dismissed: number }>(
+        API_ENDPOINTS.FINANCE.SUBSCRIPTION_ALERT_DISMISS_ALL,
+        {}
+      ),
+    onSuccess: () => invalidateSubscriptions(queryClient),
+  })
+}
+
 export function useSubscription(enabled: boolean, id: string | null) {
   return useQuery({
     queryKey: [...FINANCE_SUBSCRIPTIONS_QUERY_KEY, "detail", id],

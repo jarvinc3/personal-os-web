@@ -10,7 +10,6 @@ import {
 
 const baseValues = toSubscriptionFormValues(null, {
   defaultCurrency: "DOP",
-  defaultReminderDays: 3,
 })
 
 describe("toSubscriptionFormValues", () => {
@@ -18,7 +17,6 @@ describe("toSubscriptionFormValues", () => {
     assert.equal(baseValues.currency, "DOP")
     assert.equal(baseValues.billingCycle, "MONTHLY")
     assert.equal(baseValues.billingInterval, "1")
-    assert.equal(baseValues.reminderDaysBefore, "3")
     assert.equal(baseValues.cardId, CATALOG_NONE)
     assert.equal(baseValues.accountId, CATALOG_NONE)
     assert.equal(baseValues.categoryId, CATALOG_NONE)
@@ -28,7 +26,6 @@ describe("toSubscriptionFormValues", () => {
   it("prefills from a detected recurring charge", () => {
     const draft = toSubscriptionFormValues(null, {
       defaultCurrency: "DOP",
-      defaultReminderDays: 3,
       draft: {
         name: "Netflix",
         amount: "12.99",
@@ -44,10 +41,11 @@ describe("toSubscriptionFormValues", () => {
 })
 
 describe("subscriptionFormSchema", () => {
-  it("rejects a reminder outside the 0-30 range", () => {
+  it("rejects a charge without a positive amount", () => {
     const invalidParse = subscriptionFormSchema.safeParse({
       ...baseValues,
-      reminderDaysBefore: "31",
+      name: "Netflix",
+      amount: "0",
     })
     assert.equal(invalidParse.success, false)
   })
@@ -70,7 +68,6 @@ describe("subscriptionPayload", () => {
       amount: "10,50",
       currency: "usd",
       billingInterval: "2",
-      reminderDaysBefore: "5",
       cardId: "card-1",
       categoryId: "cat-1",
       trialEndsAt: "",
@@ -79,7 +76,7 @@ describe("subscriptionPayload", () => {
     assert.equal(payload.amount, 10.5)
     assert.equal(payload.currency, "USD")
     assert.equal(payload.billingInterval, 2)
-    assert.equal(payload.reminderDaysBefore, 5)
+    assert.equal(payload.reminderDaysBefore, undefined)
     assert.equal(payload.cardId, "card-1")
     assert.equal(payload.categoryId, "cat-1")
     assert.equal(payload.trialEndsAt, null)

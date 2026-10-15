@@ -729,6 +729,10 @@ export type FinanceSubscriptionListQuery = {
   status?: FinanceSubscriptionStatus
   currency?: string
   categoryId?: string
+  /** Comma-separated ids; the list endpoint reads them as a list. */
+  categoryIds?: string
+  frequency?: "MONTHLY" | "YEARLY" | "OTHER"
+  sort?: "NEXT_DATE" | "AMOUNT" | "NAME"
   cardId?: string
   accountId?: string
   unassignedCategory?: boolean
@@ -780,6 +784,10 @@ export type FinanceSubscription = {
   cancelledAt: string | null
   reminderDaysBefore: number
   lastRemindedFor: string | null
+  /** Last charge did not match the expected amount. */
+  lastChargeMismatch: boolean
+  /** Amount of the newest charge, for the warning mark. */
+  lastPaymentAmount: string | null
   cardId: string | null
   cardName: string | null
   accountId: string | null
@@ -831,6 +839,8 @@ export type FinanceSubscriptionSummary = {
   trend: FinanceSubscriptionTrend | null
   pendingDetectedCount: number
   cancelledAnnualSavings: string
+  /** Days before a charge the app warns about it; the global setting. */
+  reminderWindowDays: number
   upcoming: FinanceSubscription[]
 }
 
@@ -876,6 +886,7 @@ export type FinanceSubscriptionUpcoming = {
 
 export const FINANCE_SUBSCRIPTION_ALERT_KINDS = [
   "PRICE_INCREASE",
+  "AMOUNT_MISMATCH",
   "TRIAL_ENDING",
   "ANNUAL_RENEWAL",
   "MISSED_CHARGE",
@@ -892,6 +903,8 @@ export type FinanceSubscriptionAlert = {
   currency: string
   amount: string | null
   previousAmount: string | null
+  /** Expected charge of the subscription; set on `AMOUNT_MISMATCH`. */
+  expectedAmount: string | null
   percent: number | null
   daysUntil: number | null
 }

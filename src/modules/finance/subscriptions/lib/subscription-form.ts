@@ -53,12 +53,6 @@ export const subscriptionFormSchema = z.object({
   cardId: z.string(),
   accountId: z.string(),
   categoryId: z.string(),
-  reminderDaysBefore: z
-    .string()
-    .trim()
-    .refine((value) => integerInRange(value, 0, 30), {
-      message: "Días de recordatorio entre 0 y 30",
-    }),
   manageUrl: z.string().trim().max(500),
   notes: z.string().trim().max(2000),
   sourcePatternId: z.string(),
@@ -86,7 +80,6 @@ export function toSubscriptionFormValues(
   subscription: FinanceSubscription | null,
   options: {
     defaultCurrency: string
-    defaultReminderDays: number
     draft?: SubscriptionDraft
   }
 ): SubscriptionFormValues {
@@ -107,9 +100,6 @@ export function toSubscriptionFormValues(
     cardId: subscription?.cardId ?? CATALOG_NONE,
     accountId: subscription?.accountId ?? CATALOG_NONE,
     categoryId: subscription?.categoryId ?? CATALOG_NONE,
-    reminderDaysBefore: String(
-      subscription?.reminderDaysBefore ?? options.defaultReminderDays
-    ),
     manageUrl: subscription?.manageUrl ?? "",
     notes: subscription?.notes ?? "",
     sourcePatternId:
@@ -134,7 +124,6 @@ export function subscriptionPayload(
     cardId: values.cardId === CATALOG_NONE ? null : values.cardId,
     accountId: values.accountId === CATALOG_NONE ? null : values.accountId,
     categoryId: values.categoryId === CATALOG_NONE ? null : values.categoryId,
-    reminderDaysBefore: Number(values.reminderDaysBefore),
     manageUrl: values.manageUrl.trim() || null,
     notes: values.notes.trim() || null,
     sourcePatternId: values.sourcePatternId || null,

@@ -15,12 +15,24 @@ import { MissingRecord } from "@/src/modules/finance/shared/components/layout/mi
 import { BrandLogo } from "@/src/modules/finance/shared/components/brand-logo"
 import { FinanceGate } from "@/src/modules/finance/finance-gate"
 import { SubscriptionPaymentSheet } from "@/src/modules/finance/subscriptions/components/subscription-payment-sheet"
+import { SubscriptionPriceChart } from "@/src/modules/finance/subscriptions/components/subscription-price-chart"
 import { SubscriptionSheet } from "@/src/modules/finance/subscriptions/components/subscription-sheet"
 import {
   billingCycleLabel,
+  SUBSCRIPTION_DETAIL_TABS,
   subscriptionStatusLabel,
   subscriptionStatusVariant,
+  type SubscriptionDetailTab,
 } from "@/src/modules/finance/subscriptions/lib/subscription-display"
+import {
+  priceChangeOverMonths,
+  subscriptionPriceHistory,
+} from "@/src/modules/finance/subscriptions/lib/subscription-price"
+import {
+  billingMonthLabel,
+  shortBillingDate,
+  subscriptionCycleProgress,
+} from "@/src/modules/finance/subscriptions/lib/subscription-timing"
 import { nextChargeLabel } from "@/src/modules/finance/subscriptions/lib/recurring-display"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
@@ -50,12 +62,20 @@ import {
 import { InfiniteListSentinel } from "@/src/shared/components/ui/infinite-list-sentinel"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { SummaryItem, SummarySection } from "@/src/shared/components/ui/summary"
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/src/shared/components/ui/tabs"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { appToast } from "@/src/shared/lib/app-toast"
 import {
+  BanknoteArrowDownIcon,
   ExternalLinkIcon,
   HandCoinsIcon,
+  LineChartIcon,
   PauseIcon,
   PencilIcon,
   PlayIcon,
@@ -93,6 +113,10 @@ function SubscriptionDetailBody({
   const [editOpen, setEditOpen] = useState(false)
   const [paymentOpen, setPaymentOpen] = useState(false)
   const [cancelOpen, setCancelOpen] = useState(false)
+  const [tab, setTab] = useState<SubscriptionDetailTab>(
+    SUBSCRIPTION_DETAIL_TABS.summary
+  )
+  const [today] = useState(() => new Date())
   const subscriptionQuery = useSubscription(isEnabled, subscriptionId)
   const paymentsQuery = useSubscriptionPayments(isEnabled, subscriptionId)
   const pauseMutation = usePauseSubscription()
@@ -100,6 +124,10 @@ function SubscriptionDetailBody({
   const cancelMutation = useCancelSubscription()
   const subscription = subscriptionQuery.data ?? null
   const payments = infiniteListItems(paymentsQuery.data)
+  const priceHistory = useMemo(
+    () => subscriptionPriceHistory(payments),
+    [payments]
+  )
   const display = {
     currency: config.baseCurrency,
     showCents: config.display.showCents,
@@ -166,6 +194,12 @@ function SubscriptionDetailBody({
   }
 
   const money = { ...display, currency: subscription.currency }
+  const cycle = subscriptionCycleProgress(subscription, today)
+  const changeOverYear = priceChangeOverMonths({
+    series: priceHistory.series,
+    months: 12,
+    today,
+  })
 
   return (
     <>
@@ -202,61 +236,263 @@ function SubscriptionDetailBody({
           </Badge>
         </div>
 
-        <SummarySection title="Cobro" icon={WalletIcon}>
-          <SummaryItem
-            title="Monto"
-            value={formatFinanceMoney(subscription.amount, money)}
-          />
-          <SummaryItem
-            title="Costo mensual"
-            value={formatFinanceMoney(subscription.monthlyEquivalent, money)}
-          />
-          <SummaryItem
-            title="Costo anual"
-            value={formatFinanceMoney(subscription.annualEquivalent, money)}
-          />
-          <SummaryItem
-            title="Próximo cobro"
-            description={formatPlanningDate(subscription.nextBillingDate)}
-            value={nextChargeLabel(subscription.daysUntil)}
-            isLast
-          />
-        </SummarySection>
+        <div className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-muted/40 px-4 py-2 text-xs text-muted-foreground">
+          <span>
+            Ciclo {shortBillingDate(cycle.startDate)} –{" "}
+            {shortBillingDate(cycle.endDate)}
+          </span>
+          <span>Desde {billingMonthLabel(subscription.createdAt)}</span>
+        </div>
 
-        <SummarySection title="Detalles" icon={ReceiptIcon} collapsible>
-          {subscription.cardName || subscription.accountName ? (
-            <SummaryItem
-              title="Cobro"
-              value={subscription.cardName ?? subscription.accountName}
-            />
-          ) : null}
-          {subscription.trialEndsAt ? (
-            <SummaryItem
-              title="Fin de la prueba"
-              value={formatPlanningDate(subscription.trialEndsAt)}
-            />
-          ) : null}
-          <SummaryItem
-            title="Recordatorio"
-            description="Días antes de la renovación"
-            value={String(subscription.reminderDaysBefore)}
-          />
-          {subscription.manageUrl ? (
-            <SummaryItem
-              title="Enlace de gestión"
-              icon={ExternalLinkIcon}
-              href={subscription.manageUrl}
-              showChevron
-            />
-          ) : null}
-          {subscription.notes ? (
-            <SummaryItem
-              title="Notas"
-              description={subscription.notes}
-              isLast
-            />
-          ) : null}
-        </SummarySection>
+        <Tabs
+          className="flex w-full flex-col gap-4"
+          value={tab}
+          onValueChange={(value) => setTab(value as SubscriptionDetailTab)}
+        >
+          <TabsList className="w-full rounded-2xl bg-background">
+            <TabsTrigger
+              value={SUBSCRIPTION_DETAIL_TABS.summary}
+              className="rounded-2xl py-4"
+            >
+              Resumen
+            </TabsTrigger>
+            <TabsTrigger
+              value={SUBSCRIPTION_DETAIL_TABS.payments}
+              className="rounded-2xl py-4"
+            >
+              Pagos
+            </TabsTrigger>
+            <TabsTrigger
+              value={SUBSCRIPTION_DETAIL_TABS.price}
+              className="rounded-2xl py-4"
+            >
+              Precio
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value={SUBSCRIPTION_DETAIL_TABS.summary}>
+            <div className="flex flex-col gap-4">
+              <SummarySection title="Cobro" icon={WalletIcon}>
+                <SummaryItem
+                  title="Monto"
+                  value={formatFinanceMoney(subscription.amount, money)}
+                />
+                <SummaryItem
+                  title="Costo mensual"
+                  value={formatFinanceMoney(
+                    subscription.monthlyEquivalent,
+                    money
+                  )}
+                />
+                <SummaryItem
+                  title="Costo anual"
+                  value={formatFinanceMoney(
+                    subscription.annualEquivalent,
+                    money
+                  )}
+                />
+                <SummaryItem
+                  title="Próximo cobro"
+                  description={formatPlanningDate(subscription.nextBillingDate)}
+                  value={nextChargeLabel(subscription.daysUntil)}
+                  isLast
+                />
+              </SummarySection>
+
+              <SummarySection title="Detalles" icon={ReceiptIcon} collapsible>
+                <SummaryItem
+                  title="Método de pago"
+                  value={
+                    subscription.paymentMethod
+                      ? `${subscription.paymentMethod.name}${
+                          subscription.paymentMethod.last4
+                            ? ` ••${subscription.paymentMethod.last4}`
+                            : ""
+                        }`
+                      : "Sin método"
+                  }
+                />
+                <SummaryItem
+                  title="Categoría"
+                  value={subscription.category?.name ?? "Sin categoría"}
+                />
+                {subscription.trialEndsAt ? (
+                  <SummaryItem
+                    title="Fin de la prueba"
+                    value={formatPlanningDate(subscription.trialEndsAt)}
+                  />
+                ) : null}
+                {subscription.manageUrl ? (
+                  <SummaryItem
+                    title="Enlace de gestión"
+                    icon={ExternalLinkIcon}
+                    href={subscription.manageUrl}
+                    showChevron
+                  />
+                ) : null}
+                {subscription.notes ? (
+                  <SummaryItem
+                    title="Notas"
+                    description={subscription.notes}
+                    isLast
+                  />
+                ) : null}
+              </SummarySection>
+            </div>
+          </TabsContent>
+
+          <TabsContent value={SUBSCRIPTION_DETAIL_TABS.payments}>
+            <SummarySection
+              title="Pagos"
+              icon={HandCoinsIcon}
+              right={
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  disabled={subscription.status === "CANCELLED"}
+                  onClick={() => setPaymentOpen(true)}
+                >
+                  <BanknoteArrowDownIcon className="size-4 shrink-0" />
+                  Registrar pago
+                </Button>
+              }
+            >
+              {paymentsQuery.isError ? (
+                <FinanceErrorState
+                  message={financeErrorMessage(paymentsQuery.error)}
+                  onRetry={() => void paymentsQuery.refetch()}
+                  isRetrying={paymentsQuery.isFetching}
+                />
+              ) : null}
+              <AsyncRegion
+                pending={paymentsQuery.isPending && !paymentsQuery.data}
+                pendingFallback={<FinanceListSkeleton rows={3} />}
+                empty={payments.length === 0}
+                emptyFallback={
+                  <Empty className="py-8">
+                    <EmptyHeader>
+                      <EmptyMedia variant="icon">
+                        <HandCoinsIcon />
+                      </EmptyMedia>
+                      <EmptyTitle>Sin pagos registrados</EmptyTitle>
+                      <EmptyDescription>
+                        Los cobros que coincidan se registran solos; también
+                        puedes añadirlos a mano.
+                      </EmptyDescription>
+                    </EmptyHeader>
+                  </Empty>
+                }
+              >
+                {payments.map((payment, index) => (
+                  <SummaryItem
+                    key={payment.id}
+                    title={formatFinanceMoney(payment.amount, {
+                      ...display,
+                      currency: payment.currency,
+                    })}
+                    description={`${formatPlanningDate(payment.paidAt)} · ${PAYMENT_SOURCE_LABEL[payment.source]}`}
+                    href={
+                      payment.transaction
+                        ? APP_ROUTES.app.financeTransaction(
+                            payment.transaction.id
+                          )
+                        : undefined
+                    }
+                    showChevron={Boolean(payment.transaction)}
+                    isLast={index === payments.length - 1}
+                  />
+                ))}
+              </AsyncRegion>
+              <InfiniteListSentinel
+                hasNextPage={paymentsQuery.hasNextPage}
+                isFetchingNextPage={paymentsQuery.isFetchingNextPage}
+                onLoadMore={() => void paymentsQuery.fetchNextPage()}
+              />
+            </SummarySection>
+          </TabsContent>
+
+          <TabsContent value={SUBSCRIPTION_DETAIL_TABS.price}>
+            <SummarySection
+              title="Precio"
+              icon={LineChartIcon}
+              right={
+                changeOverYear === null ? null : (
+                  <Badge variant={changeOverYear > 0 ? "danger" : "success"}>
+                    {changeOverYear > 0 ? "+" : ""}
+                    {changeOverYear}% en 12 meses
+                  </Badge>
+                )
+              }
+            >
+              {paymentsQuery.isError ? (
+                <FinanceErrorState
+                  message={financeErrorMessage(paymentsQuery.error)}
+                  onRetry={() => void paymentsQuery.refetch()}
+                  isRetrying={paymentsQuery.isFetching}
+                />
+              ) : null}
+              <AsyncRegion
+                pending={paymentsQuery.isPending && !paymentsQuery.data}
+                pendingFallback={<FinanceListSkeleton rows={3} />}
+                empty={priceHistory.series.length === 0}
+                emptyFallback={
+                  <Empty className="py-8">
+                    <EmptyHeader>
+                      <EmptyMedia variant="icon">
+                        <LineChartIcon />
+                      </EmptyMedia>
+                      <EmptyTitle>Sin historial de precio</EmptyTitle>
+                      <EmptyDescription>
+                        Cuando se registren cobros, aquí verás cómo cambió el
+                        monto.
+                      </EmptyDescription>
+                    </EmptyHeader>
+                  </Empty>
+                }
+              >
+                <div className="flex items-baseline justify-between gap-3">
+                  <span className="text-2xl font-bold tabular-nums">
+                    {formatFinanceMoney(subscription.amount, money)}
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    {billingCycleLabel(
+                      subscription.billingCycle,
+                      subscription.billingInterval
+                    ).toLowerCase()}
+                  </span>
+                </div>
+                <SubscriptionPriceChart
+                  series={priceHistory.series}
+                  display={money}
+                />
+                <div className="flex flex-col">
+                  {priceHistory.changes.map((change, index) => (
+                    <SummaryItem
+                      key={change.date}
+                      title={formatPlanningDate(change.date)}
+                      description={
+                        change.previousAmount === null
+                          ? "Inicio"
+                          : `Detectado en el cobro${
+                              change.percent === null
+                                ? ""
+                                : ` · ${change.percent > 0 ? "+" : ""}${change.percent}%`
+                            }`
+                      }
+                      value={
+                        change.previousAmount === null
+                          ? formatFinanceMoney(change.amount, money)
+                          : `${formatFinanceMoney(change.previousAmount, money)} → ${formatFinanceMoney(change.amount, money)}`
+                      }
+                      isLast={index === priceHistory.changes.length - 1}
+                    />
+                  ))}
+                </div>
+              </AsyncRegion>
+            </SummarySection>
+          </TabsContent>
+        </Tabs>
 
         <div className="flex flex-wrap gap-2">
           {subscription.status === "ACTIVE" ? (
@@ -310,72 +546,6 @@ function SubscriptionDetailBody({
             </Button>
           ) : null}
         </div>
-
-        <SummarySection
-          title="Historial de pagos"
-          icon={HandCoinsIcon}
-          right={
-            <Button
-              type="button"
-              size="sm"
-              variant="ghost"
-              disabled={subscription.status === "CANCELLED"}
-              onClick={() => setPaymentOpen(true)}
-            >
-              Registrar pago
-            </Button>
-          }
-        >
-          {paymentsQuery.isError ? (
-            <FinanceErrorState
-              message={financeErrorMessage(paymentsQuery.error)}
-              onRetry={() => void paymentsQuery.refetch()}
-              isRetrying={paymentsQuery.isFetching}
-            />
-          ) : null}
-          <AsyncRegion
-            pending={paymentsQuery.isPending && !paymentsQuery.data}
-            pendingFallback={<FinanceListSkeleton rows={3} />}
-            empty={payments.length === 0}
-            emptyFallback={
-              <Empty className="py-8">
-                <EmptyHeader>
-                  <EmptyMedia variant="icon">
-                    <HandCoinsIcon />
-                  </EmptyMedia>
-                  <EmptyTitle>Sin pagos registrados</EmptyTitle>
-                  <EmptyDescription>
-                    Los cobros que coincidan se registran solos; también puedes
-                    añadirlos a mano.
-                  </EmptyDescription>
-                </EmptyHeader>
-              </Empty>
-            }
-          >
-            {payments.map((payment, index) => (
-              <SummaryItem
-                key={payment.id}
-                title={formatFinanceMoney(payment.amount, {
-                  ...display,
-                  currency: payment.currency,
-                })}
-                description={`${formatPlanningDate(payment.paidAt)} · ${PAYMENT_SOURCE_LABEL[payment.source]}`}
-                href={
-                  payment.transaction
-                    ? APP_ROUTES.app.financeTransaction(payment.transaction.id)
-                    : undefined
-                }
-                showChevron={Boolean(payment.transaction)}
-                isLast={index === payments.length - 1}
-              />
-            ))}
-          </AsyncRegion>
-          <InfiniteListSentinel
-            hasNextPage={paymentsQuery.hasNextPage}
-            isFetchingNextPage={paymentsQuery.isFetchingNextPage}
-            onLoadMore={() => void paymentsQuery.fetchNextPage()}
-          />
-        </SummarySection>
       </div>
 
       <SubscriptionSheet
@@ -383,7 +553,6 @@ function SubscriptionDetailBody({
         onOpenChange={setEditOpen}
         subscription={subscription}
         display={display}
-        defaultReminderDays={config.subscriptions.reminderDaysBefore}
       />
 
       <SubscriptionPaymentSheet

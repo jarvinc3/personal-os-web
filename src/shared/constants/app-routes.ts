@@ -69,6 +69,7 @@ export const APP_ROUTES = {
     financeMerchants: "/finance/merchants",
     financeMerchant: (merchantId: string) => `/finance/merchants/${merchantId}`,
     financeSubscriptions: "/finance/subscriptions",
+    financeSubscriptionsCalendar: "/finance/subscriptions/calendar",
     financeSubscription: (subscriptionId: string) =>
       `/finance/subscriptions/${subscriptionId}`,
     settingsFinanceCurrencies: "/settings/finance/currencies",

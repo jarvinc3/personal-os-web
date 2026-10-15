@@ -1,7 +1,7 @@
 "use client"
 
 import { zodResolver } from "@hookform/resolvers/zod"
-import { InfoIcon, RepeatIcon, SaveIcon, TagIcon, XIcon } from "lucide-react"
+import { InfoIcon, RepeatIcon, SaveIcon, XIcon } from "lucide-react"
 import { useEffect, useMemo } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
 
@@ -60,7 +60,6 @@ type SubscriptionSheetProps = {
   subscription: FinanceSubscription | null
   draft?: SubscriptionDraft
   display: FinanceMoneyDisplay
-  defaultReminderDays: number
 }
 
 export function SubscriptionSheet({
@@ -69,7 +68,6 @@ export function SubscriptionSheet({
   subscription,
   draft,
   display,
-  defaultReminderDays,
 }: SubscriptionSheetProps) {
   const isEdit = Boolean(subscription)
   const accountsQuery = useAccounts(open)
@@ -97,7 +95,6 @@ export function SubscriptionSheet({
     resolver: zodResolver(subscriptionFormSchema),
     defaultValues: toSubscriptionFormValues(subscription, {
       defaultCurrency: display.currency,
-      defaultReminderDays,
       draft,
     }),
   })
@@ -112,12 +109,11 @@ export function SubscriptionSheet({
       reset(
         toSubscriptionFormValues(subscription, {
           defaultCurrency: display.currency,
-          defaultReminderDays,
           draft,
         })
       )
     }
-  }, [open, subscription, draft, display.currency, defaultReminderDays, reset])
+  }, [open, subscription, draft, display.currency, reset])
 
   const currency = useWatch({ control, name: "currency" })
   const name = useWatch({ control, name: "name" })
@@ -321,19 +317,6 @@ export function SubscriptionSheet({
               onClick={() => openPicker("category")}
             />
           </Field>
-          <Controller
-            control={control}
-            name="reminderDaysBefore"
-            render={({ field }) => (
-              <FormTextField
-                label="Días de recordatorio"
-                icon={TagIcon}
-                value={field.value}
-                onChange={field.onChange}
-                error={errors.reminderDaysBefore?.message}
-              />
-            )}
-          />
           <Controller
             control={control}
             name="manageUrl"

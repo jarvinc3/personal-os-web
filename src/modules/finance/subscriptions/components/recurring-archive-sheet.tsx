@@ -28,12 +28,15 @@ type RecurringArchiveSheetProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
   display: { currency: string; showCents: boolean; compactNumbers: boolean }
+  /** Stacks the sheet on top of the one that opened it. */
+  nested?: boolean
 }
 
 export function RecurringArchiveSheet({
   open,
   onOpenChange,
   display,
+  nested = false,
 }: RecurringArchiveSheetProps) {
   const [tab, setTab] = useState<"CONFIRMED" | "DISMISSED">("CONFIRMED")
   const query = useRecurring(open, tab)
@@ -43,6 +46,7 @@ export function RecurringArchiveSheet({
     <BottomSheet
       open={open}
       onOpenChange={onOpenChange}
+      nested={nested}
       title="Bandeja de recurrentes"
       description="Cobros ya confirmados o descartados."
       actions={{

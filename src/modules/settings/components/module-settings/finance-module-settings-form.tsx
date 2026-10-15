@@ -112,6 +112,9 @@ const WEEK_OPTIONS = [
   { value: "0", label: "Domingo", description: "Semana tipo calendario US." },
 ] as const
 
+/** Days of warning the user can pick without typing a number. */
+const REMINDER_DAY_PRESETS = [3, 5, 7, 10] as const
+
 const WEEKDAY_OPTIONS = [
   { value: "1", label: "Lunes" },
   { value: "2", label: "Martes" },
@@ -560,18 +563,52 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
 
       <div id="suscripciones">
         <SummarySection title="Suscripciones" icon={Repeat}>
+          <SummaryItem
+            title="Aviso de próximos cobros"
+            description="Cuántos días antes avisa el resumen de Suscripciones"
+          />
           <Controller
             control={control}
             name="subscriptionReminderDays"
-            render={({ field, fieldState }) => (
-              <FormTextField
-                label="Días antes de la renovación"
-                icon={BellRing}
-                value={field.value}
-                onChange={field.onChange}
-                error={fieldState.error?.message}
-              />
-            )}
+            render={({ field, fieldState }) => {
+              const isPreset = REMINDER_DAY_PRESETS.some(
+                (days) => String(days) === field.value
+              )
+              return (
+                <>
+                  {REMINDER_DAY_PRESETS.map((days) => (
+                    <OptionRow
+                      key={days}
+                      icon={BellRing}
+                      iconColor={MODULE_ACCENT}
+                      label={`${days} días antes`}
+                      selected={String(days) === field.value}
+                      onPress={() => field.onChange(String(days))}
+                      trailing={
+                        String(days) === field.value ? <CheckIcon /> : null
+                      }
+                    />
+                  ))}
+                  <OptionRow
+                    icon={BellRing}
+                    iconColor={MODULE_ACCENT}
+                    label="Personalizado"
+                    selected={!isPreset}
+                    onPress={() => field.onChange(isPreset ? "1" : field.value)}
+                    trailing={!isPreset ? <CheckIcon /> : null}
+                  />
+                  {!isPreset ? (
+                    <FormTextField
+                      label="Días antes del cobro"
+                      icon={BellRing}
+                      value={field.value}
+                      onChange={field.onChange}
+                      error={fieldState.error?.message}
+                    />
+                  ) : null}
+                </>
+              )
+            }}
           />
           <Controller
             control={control}

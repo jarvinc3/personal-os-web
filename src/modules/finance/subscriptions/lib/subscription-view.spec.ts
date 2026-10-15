@@ -7,18 +7,11 @@ import type {
   FinanceSubscriptionUpcomingCharge,
 } from "@/src/modules/finance/shared/types/entities"
 import {
-  alertOccurrenceLabel,
-  breakdownFilter,
   buildSubscriptionSlices,
   groupSubscriptions,
-  subscriptionCycleProgress,
-  subscriptionListQuery,
   subscriptionPayloadFromPattern,
   upcomingByDay,
 } from "./subscription-view.ts"
-
-const localDay = (year: number, month: number, dayOfMonth: number) =>
-  new Date(year, month - 1, dayOfMonth)
 
 function subscription(
   overrides: Partial<FinanceSubscription> = {}
@@ -39,8 +32,10 @@ function subscription(
     status: "ACTIVE",
     pausedAt: null,
     cancelledAt: null,
-    reminderDaysBefore: 3,
+    reminderDaysBefore: 5,
     lastRemindedFor: null,
+    lastChargeMismatch: false,
+    lastPaymentAmount: null,
     cardId: null,
     cardName: null,
     accountId: null,
@@ -59,28 +54,6 @@ function subscription(
     ...overrides,
   }
 }
-
-describe("subscriptionCycleProgress", () => {
-  it("measures the cycle from the previous charge to the next one", () => {
-    const progress = subscriptionCycleProgress(
-      subscription(),
-      localDay(2026, 10, 20)
-    )
-    assert.equal(progress.startDate.toISOString().slice(0, 10), "2026-10-10")
-    assert.equal(progress.endDate.toISOString().slice(0, 10), "2026-11-10")
-    assert.equal(progress.cycleDays, 31)
-    assert.equal(progress.elapsedDays, 10)
-    assert.ok(Math.abs(progress.percent - 32.26) < 0.05)
-  })
-
-  it("clamps a charge already past its date to 100 %", () => {
-    const progress = subscriptionCycleProgress(
-      subscription(),
-      localDay(2026, 11, 20)
-    )
-    assert.equal(progress.percent, 100)
-  })
-})
 
 describe("groupSubscriptions", () => {
   it("groups by category with a fallback for uncategorized", () => {
@@ -124,86 +97,6 @@ describe("groupSubscriptions", () => {
     assert.deepEqual(
       groups.map((group) => group.label),
       ["Visa BHD", "Sin método"]
-    )
-  })
-})
-
-describe("breakdownFilter", () => {
-  it("maps instrument keys to card and account filters", () => {
-    assert.deepEqual(breakdownFilter("instrument", "CARD:card-1"), {
-      cardId: "card-1",
-    })
-    assert.deepEqual(breakdownFilter("instrument", "ACCOUNT:acc-1"), {
-      accountId: "acc-1",
-    })
-    assert.deepEqual(breakdownFilter("instrument", "no-instrument"), {
-      unassignedMethod: true,
-    })
-  })
-
-  it("maps category and currency keys", () => {
-    assert.deepEqual(breakdownFilter("category", "cat-1"), {
-      categoryId: "cat-1",
-    })
-    assert.deepEqual(breakdownFilter("category", "uncategorized"), {
-      unassignedCategory: true,
-    })
-    assert.deepEqual(breakdownFilter("currency", "USD"), { currency: "USD" })
-  })
-})
-
-describe("subscriptionListQuery", () => {
-  it("lets the ring slice win over the local currency control", () => {
-    assert.deepEqual(
-      subscriptionListQuery({
-        filter: { currency: "USD" },
-        status: "ALL",
-        currency: "DOP",
-        search: "  ",
-      }),
-      {
-        status: undefined,
-        currency: "USD",
-        categoryId: undefined,
-        cardId: undefined,
-        accountId: undefined,
-        unassignedCategory: undefined,
-        unassignedMethod: undefined,
-        q: undefined,
-      }
-    )
-  })
-
-  it("falls back to the local filters when no slice is active", () => {
-    const query = subscriptionListQuery({
-      filter: null,
-      status: "PAUSED",
-      currency: "USD",
-      search: "  netflix ",
-    })
-    assert.equal(query.status, "PAUSED")
-    assert.equal(query.currency, "USD")
-    assert.equal(query.q, "netflix")
-  })
-
-  it("sends the unassigned filter of the uncategorized and no-method slices", () => {
-    assert.equal(
-      subscriptionListQuery({
-        filter: breakdownFilter("category", "uncategorized"),
-        status: "ALL",
-        currency: "ALL",
-        search: "",
-      }).unassignedCategory,
-      true
-    )
-    assert.equal(
-      subscriptionListQuery({
-        filter: breakdownFilter("instrument", "no-instrument"),
-        status: "ALL",
-        currency: "ALL",
-        search: "",
-      }).unassignedMethod,
-      true
     )
   })
 })
@@ -285,40 +178,5 @@ describe("subscriptionPayloadFromPattern", () => {
     const payload = subscriptionPayloadFromPattern(pattern(30))
     assert.equal(payload.sourcePatternId, "pattern-1")
     assert.equal(payload.amount, 12.99)
-  })
-})
-
-describe("alertOccurrenceLabel", () => {
-  it("describes the countdown and the missed charge date", () => {
-    assert.equal(
-      alertOccurrenceLabel({
-        id: "a",
-        kind: "TRIAL_ENDING",
-        subscriptionId: "s",
-        subscriptionName: "Netflix",
-        date: "2026-10-30",
-        currency: "DOP",
-        amount: null,
-        previousAmount: null,
-        percent: null,
-        daysUntil: 2,
-      }),
-      "En 2 días"
-    )
-    assert.equal(
-      alertOccurrenceLabel({
-        id: "a",
-        kind: "MISSED_CHARGE",
-        subscriptionId: "s",
-        subscriptionName: "Netflix",
-        date: "2026-10-20",
-        currency: "DOP",
-        amount: null,
-        previousAmount: null,
-        percent: null,
-        daysUntil: -8,
-      }),
-      "Esperado el 2026-10-20"
-    )
   })
 })

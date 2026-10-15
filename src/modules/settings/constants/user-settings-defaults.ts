@@ -79,7 +79,7 @@ export const DEFAULT_MODULE_CONFIG_BY_SLUG: ModuleConfigBySlug = {
       balanceIntegrity: true,
     },
     subscriptions: {
-      reminderDaysBefore: 3,
+      reminderDaysBefore: 5,
       groupBy: "none",
     },
     reports: {

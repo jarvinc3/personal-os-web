@@ -240,13 +240,13 @@ export const financeModuleSchema = z
     const subscriptionDays = Number(values.subscriptionReminderDays)
     if (
       !Number.isInteger(subscriptionDays) ||
-      subscriptionDays < 0 ||
+      subscriptionDays < 1 ||
       subscriptionDays > 30
     ) {
       ctx.addIssue({
         code: "custom",
         path: ["subscriptionReminderDays"],
-        message: "De 0 a 30 días",
+        message: "De 1 a 30 días",
       })
     }
 

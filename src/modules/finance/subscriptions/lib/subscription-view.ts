@@ -1,21 +1,9 @@
-import {
-  addDays,
-  addMonths,
-  differenceInCalendarDays,
-  parseISO,
-  startOfDay,
-} from "date-fns"
-
 import type {
   FinanceRecurringPattern,
   FinanceSubscription,
-  FinanceSubscriptionAlert,
-  FinanceSubscriptionAlertKind,
   FinanceSubscriptionBreakdownAxis,
   FinanceSubscriptionBreakdownItem,
   FinanceSubscriptionGroupBy,
-  FinanceSubscriptionListQuery,
-  FinanceSubscriptionStatus,
   FinanceSubscriptionUpcomingCharge,
 } from "@/src/modules/finance/shared/types/entities"
 import {
@@ -35,74 +23,10 @@ export const SUBSCRIPTION_BREAKDOWN_LABEL: Record<
   currency: "Moneda",
 }
 
-export const SUBSCRIPTION_ALERT_LABEL: Record<
-  FinanceSubscriptionAlertKind,
-  string
-> = {
-  PRICE_INCREASE: "Subida de precio",
-  TRIAL_ENDING: "Prueba por vencer",
-  ANNUAL_RENEWAL: "Renovación anual",
-  MISSED_CHARGE: "Cobro sin registrar",
-}
-
 const UNCATEGORIZED_GROUP_LABEL = "Sin categoría"
 const NO_METHOD_GROUP_LABEL = "Sin método"
 const UNCATEGORIZED_GROUP_KEY = "uncategorized"
 const NO_METHOD_GROUP_KEY = "no-method"
-/** Breakdown keys the back sends for the instrument axis. */
-const NO_INSTRUMENT_SLICE_KEY = "no-instrument"
-const CARD_SLICE_PREFIX = "CARD:"
-const ACCOUNT_SLICE_PREFIX = "ACCOUNT:"
-
-export type SubscriptionCycleProgress = {
-  startDate: Date
-  endDate: Date
-  /** Whole days elapsed in the current cycle. */
-  elapsedDays: number
-  cycleDays: number
-  /** 0–100, clamped. */
-  percent: number
-}
-
-function cycleStart(subscription: FinanceSubscription): Date {
-  const next = startOfDay(parseISO(subscription.nextBillingDate))
-  const interval = subscription.billingInterval
-  switch (subscription.billingCycle) {
-    case "WEEKLY":
-      return addDays(next, -7 * interval)
-    case "MONTHLY":
-      return addMonths(next, -interval)
-    case "QUARTERLY":
-      return addMonths(next, -3 * interval)
-    case "SEMIANNUAL":
-      return addMonths(next, -6 * interval)
-    case "YEARLY":
-      return addMonths(next, -12 * interval)
-  }
-}
-
-/**
- * How far the current billing cycle has run, from the charge before the next
- * one to the next one. The anchor is not used so a month-end cycle still
- * measures the real days of that month.
- */
-export function subscriptionCycleProgress(
-  subscription: FinanceSubscription,
-  now: Date
-): SubscriptionCycleProgress {
-  const endDate = startOfDay(parseISO(subscription.nextBillingDate))
-  const startDate = cycleStart(subscription)
-  const cycleDays = Math.max(1, differenceInCalendarDays(endDate, startDate))
-  const elapsedDays = differenceInCalendarDays(startOfDay(now), startDate)
-  const ratio = elapsedDays / cycleDays
-  return {
-    startDate,
-    endDate,
-    elapsedDays,
-    cycleDays,
-    percent: Math.min(100, Math.max(0, ratio * 100)),
-  }
-}
 
 export type SubscriptionGroup = {
   key: string
@@ -168,79 +92,6 @@ export function upcomingByDay(
     byDay.set(item.date, [item])
   }
   return byDay
-}
-
-export function alertOccurrenceLabel(alert: FinanceSubscriptionAlert): string {
-  if (alert.kind === "MISSED_CHARGE") {
-    return `Esperado el ${alert.date}`
-  }
-  if (alert.daysUntil === null) {
-    return alert.date
-  }
-  if (alert.daysUntil <= 0) {
-    return "Hoy"
-  }
-  return `En ${alert.daysUntil} día${alert.daysUntil === 1 ? "" : "s"}`
-}
-
-export type SubscriptionListFilter = {
-  categoryId?: string
-  cardId?: string
-  accountId?: string
-  currency?: string
-  unassignedCategory?: boolean
-  unassignedMethod?: boolean
-}
-
-/** Filter the card list should apply when a breakdown slice is selected. */
-export function breakdownFilter(
-  by: FinanceSubscriptionBreakdownAxis,
-  key: string
-): SubscriptionListFilter | null {
-  if (by === "currency") {
-    return { currency: key }
-  }
-  if (by === "category") {
-    if (key === UNCATEGORIZED_GROUP_KEY) {
-      return { unassignedCategory: true }
-    }
-    return { categoryId: key }
-  }
-  if (key === NO_INSTRUMENT_SLICE_KEY) {
-    return { unassignedMethod: true }
-  }
-  if (key.startsWith(CARD_SLICE_PREFIX)) {
-    return { cardId: key.slice(CARD_SLICE_PREFIX.length) }
-  }
-  if (key.startsWith(ACCOUNT_SLICE_PREFIX)) {
-    return { accountId: key.slice(ACCOUNT_SLICE_PREFIX.length) }
-  }
-  return null
-}
-
-/**
- * Query params for the card list: the ring slice wins over the local currency
- * control, and an empty status/currency/search drops out of the request.
- */
-export function subscriptionListQuery(input: {
-  filter: SubscriptionListFilter | null
-  status: "ALL" | FinanceSubscriptionStatus
-  currency: string
-  search: string
-}): FinanceSubscriptionListQuery {
-  const search = input.search.trim()
-  return {
-    status: input.status === "ALL" ? undefined : input.status,
-    currency:
-      input.filter?.currency ??
-      (input.currency === "ALL" ? undefined : input.currency),
-    categoryId: input.filter?.categoryId,
-    cardId: input.filter?.cardId,
-    accountId: input.filter?.accountId,
-    unassignedCategory: input.filter?.unassignedCategory,
-    unassignedMethod: input.filter?.unassignedMethod,
-    q: search || undefined,
-  }
 }
 
 const SUBSCRIPTION_SLICE_COLORS = [
