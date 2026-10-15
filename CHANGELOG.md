@@ -2,6 +2,26 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.32.0] - 2026-10-15 - Movimientos
+
+### Agregado
+
+- Vista «Cargos bancarios» en `/finance/bank-charges`: total del año, barras por mes y desglose por tipo y por banco. Se abre desde un atajo en Productos.
+
+### Cambiado
+
+- Comercios sale del menú lateral y se abre como vista secundaria desde el atajo de Productos.
+- Productos deja de mostrar el atajo a Suscripciones.
+- En Movimientos, cada movimiento es una tarjeta con el fondo de su categoría. Las patas de una misma transferencia siguen juntas. Al entrar, la lista baja al día de hoy.
+- El encabezado del día pasa a «Miércoles 14 Oct.».
+- El icono de estado queda junto al monto. «¿Duplicado?» y «Revertido» van debajo, a color pleno, y una reversa también muestra su icono.
+- La búsqueda de movimientos usa esas mismas tarjetas, ocupa media pantalla, se une al campo con una línea y se cierra al tocar el fondo desenfocado.
+- Ajustes centra el nombre y el correo, y muestra la marca Beta junto a la versión. La insignia Beta de la barra lateral usa el mismo estilo.
+
+### Corregido
+
+- Al desplazar los resultados de búsqueda, el timeline de atrás ya no se mueve.
+
 ## [0.31.2] - 2026-10-14
 
 ### Agregado
