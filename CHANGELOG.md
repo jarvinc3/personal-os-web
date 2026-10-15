@@ -2,6 +2,12 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.36.6] - 2026-10-15
+
+### Cambiado
+
+- La papelera de Finanzas pinta con `BrandLogo` también los registros eliminados de institución y cuenta, con el `logoUrl` que resuelve el back.
+
 ## [0.36.5] - 2026-10-15
 
 ### Cambiado
