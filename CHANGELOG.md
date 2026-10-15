@@ -2,6 +2,29 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.33.0] - 2026-10-21 - Suscripciones v3
+
+### Agregado
+
+- Vista de Suscripciones rehecha según los mockups v3: hero suelto con el gasto mensual y 4 atajos (Próximos, Alertas, Detectados y Calendario) con punto o conteo.
+- Sheets de Próximos cobros, Alertas y Detectados del correo; Próximos, Alertas y Detectados ya no se expanden dentro de la vista.
+- Filtros en bottom sheet con el picker real de cuenta o tarjeta y el de categoría múltiple, segmentados de estado y frecuencia, y «Ordenar por» (próximo cobro, monto, nombre). El icono de filtros muestra cuántos hay activos y cada filtro deja un chip descartable.
+- Ruta `/finance/subscriptions/calendar`: rejilla del mes con los cobros de cada día, resto del mes por delante y distribución del gasto por categoría como resumen.
+- Detalle con tabs Resumen / Pagos / Precio, como el detalle de tarjeta: el tab Precio trae el gráfico del monto en el tiempo y la lista de cambios, y la franja del hero muestra el ciclo actual y la fecha de alta.
+- Cards con el anillo de progreso del ciclo alrededor del logo, borde ámbar y etiqueta «Hoy» / «Mañana» / «en N días» dentro de la ventana de aviso, fecha corta fuera de ella, y marca cuando el último cobro no cuadró con el monto esperado.
+- Ajuste «Aviso de próximos cobros» en `/settings/finance` → Suscripciones: 3, 5, 7, 10 días o personalizado (1–30), 5 por defecto.
+- Botón flotante para crear una suscripción.
+
+### Cambiado
+
+- El hero deja de vivir dentro de `SummarySection`; salen de la vista principal el anillo de distribución, la franja de próximos y las alertas en línea.
+- El estado de los filtros vive en la URL, así que sobrevive a recargar y el botón Atrás lo respeta.
+- Los días de aviso por suscripción salen del formulario de alta y edición: manda el ajuste global.
+
+### Corregido
+
+- El conteo de filtros activos y los chips no se pierden al abrir un sheet: los parámetros de la hoja sobreviven al cambio de filtros.
+
 ## [0.32.1] - 2026-10-15
 
 ### Agregado
