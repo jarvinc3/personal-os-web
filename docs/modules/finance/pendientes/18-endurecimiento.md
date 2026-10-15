@@ -109,9 +109,10 @@ PENDIENTE 18 COMPLETADO — web v0.38.0 · back v0.37.0 (2026-10-15).
 - Back: `pnpm format:check`, `pnpm lint`, `pnpm test` (1028), `pnpm build` y `pnpm lint:money` en verde.
 - `review-register.md` y `roadmap.md` no tenían hallazgos abiertos que cayeran dentro del pendiente 18; no se tocaron.
 
-### Revisión (2026-10-15, web v0.38.1 · back v0.37.1)
+### Revisión (2026-10-15, web v0.38.2 · back v0.37.2)
 
 - **Back, Sentry:** el CI falló en `lint` por un `as T` innecesario en el scrubber; se quitó. `instrument.ts` ahora importa `dotenv/config` antes de leer `process.env`, para que un `SENTRY_DSN` guardado en `.env` cuente; antes el import de instrument corría antes que dotenv y la variable quedaba sin efecto.
+- **Back, e2e:** las pruebas esperaban arrays en cuentas, tarjetas y préstamos y mensajes en inglés; se actualizaron al nuevo contrato paginado y al español, junto con `moduleDisabledMessage`.
 - **Web, endpoints:** `ANALYTICS_BANK_CHARGES` pasa a `BANK_CHARGES`, acorde con la ruta nueva.
 - **Docs:** se agrega `docs/infrastructure/observability.md` en la web y el `docs/operations/ci.md` del back menciona `format:check`.
-- **Verificación:** web `format:check`, `lint`, `typecheck`, `test` (758) y `build` en verde; back `format:check`, `lint`, `test` (1028) y `build` en verde.
+- **Verificación:** web `format:check`, `lint`, `typecheck`, `test` (758) y `build` en verde; back `format:check`, `lint`, `test` (1028), `build` y e2e en verde.
