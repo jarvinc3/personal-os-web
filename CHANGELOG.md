@@ -2,6 +2,14 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.36.5] - 2026-10-15
+
+### Cambiado
+
+- De cara al usuario, cada área de Personal OS se llama **App**; el código sigue diciendo módulo. Ajustes, landing, ayudas, avisos y notificaciones usan el término nuevo, con el glosario [docs/glosario.md](./docs/glosario.md) y la regla `.cursor/rules/app-terminology.mdc`.
+- Los formularios de ajustes de Finanzas, Agenda, Salud y Proyectos guardan con la barra fija al pie (`FormScreen`) y el botón conserva el texto mientras envía.
+- La papelera de Finanzas muestra la marca de la institución y de sus cuentas con `BrandLogo`.
+
 ## [0.36.4] - 2026-10-15
 
 ### Corregido
