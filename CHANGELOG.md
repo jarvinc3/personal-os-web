@@ -2,6 +2,12 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.35.4] - 2026-10-22
+
+### Cambiado
+
+- El estado de error del resumen de conciliación se arma una sola vez: el bloque no se repite entre la primera carga fallida y el reintento posterior.
+
 ## [0.35.3] - 2026-10-22
 
 ### Corregido
