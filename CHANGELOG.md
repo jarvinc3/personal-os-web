@@ -2,6 +2,12 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.33.3] - 2026-10-21
+
+### Cambiado
+
+- En el detalle de suscripción, el cambio de tab se resuelve en una función con nombre (`selectDetailTab`) que arma la URL, en vez de dentro del JSX.
+
 ## [0.33.2] - 2026-10-21
 
 ### Corregido
