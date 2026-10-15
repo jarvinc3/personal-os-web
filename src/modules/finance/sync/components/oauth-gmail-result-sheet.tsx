@@ -45,6 +45,7 @@ import {
   CheckCircle2Icon,
   CircleXIcon,
   MailIcon,
+  PencilIcon,
   RefreshCw,
   XIcon,
 } from "lucide-react"
@@ -338,6 +339,7 @@ export function OauthGmailResultSheet({
                   size="sm"
                   onClick={() => setEditing(true)}
                 >
+                  <PencilIcon className="size-4 shrink-0" />
                   Cambiar
                 </Button>
               }

@@ -31,7 +31,15 @@ import { appToast } from "@/src/shared/lib/app-toast"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
 import { usePicker } from "@/src/shared/hooks/use-picker"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { HandshakeIcon, XIcon } from "lucide-react"
+import {
+  CoinsIcon,
+  DivideIcon,
+  HandCoinsIcon,
+  HandshakeIcon,
+  TrendingUpIcon,
+  WalletIcon,
+  XIcon,
+} from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import {
@@ -46,9 +54,9 @@ const EMPTY_FORM: ReceivablePaymentFormValues = {
 }
 
 const EXCESS_OPTIONS = [
-  { value: "EXTRA_INCOME", label: "Ingreso extra" },
-  { value: "CREDIT_BALANCE", label: "Saldo a favor" },
-  { value: "APPLY_TO_RECEIVABLE", label: "A otro cobro" },
+  { value: "EXTRA_INCOME", label: "Ingreso extra", icon: TrendingUpIcon },
+  { value: "CREDIT_BALANCE", label: "Saldo a favor", icon: WalletIcon },
+  { value: "APPLY_TO_RECEIVABLE", label: "A otro cobro", icon: HandCoinsIcon },
 ] as const
 
 type ReceivablePaymentSheetProps = {
@@ -223,6 +231,7 @@ export function ReceivablePaymentSheet({
                   })
                 }
               >
+                <CoinsIcon className="size-4 shrink-0" />
                 {`Todo ${formatFinanceMoney(outstanding, display)}`}
               </Button>
               <Button
@@ -235,6 +244,7 @@ export function ReceivablePaymentSheet({
                   })
                 }
               >
+                <DivideIcon className="size-4 shrink-0" />
                 Mitad
               </Button>
             </div>
@@ -248,19 +258,23 @@ export function ReceivablePaymentSheet({
                 Elige qué hacer con la diferencia.
               </p>
               <div className="flex flex-wrap gap-2">
-                {EXCESS_OPTIONS.map((option) => (
-                  <Button
-                    key={option.value}
-                    type="button"
-                    variant={
-                      excessHandling === option.value ? "default" : "outline"
-                    }
-                    size="sm"
-                    onClick={() => setExcessHandling(option.value)}
-                  >
-                    {option.label}
-                  </Button>
-                ))}
+                {EXCESS_OPTIONS.map((option) => {
+                  const Icon = option.icon
+                  return (
+                    <Button
+                      key={option.value}
+                      type="button"
+                      variant={
+                        excessHandling === option.value ? "default" : "outline"
+                      }
+                      size="sm"
+                      onClick={() => setExcessHandling(option.value)}
+                    >
+                      <Icon className="size-4 shrink-0" />
+                      {option.label}
+                    </Button>
+                  )
+                })}
               </div>
             </div>
           ) : null}

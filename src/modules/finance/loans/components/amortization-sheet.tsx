@@ -14,9 +14,16 @@ import {
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
 import { Badge } from "@/src/shared/components/ui/badge"
 import { Button } from "@/src/shared/components/ui/button"
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/src/shared/components/ui/empty"
 import type { VariantProps } from "class-variance-authority"
 import { badgeVariants } from "@/src/shared/components/ui/badge"
-import { XIcon } from "lucide-react"
+import { CalendarClockIcon, XIcon } from "lucide-react"
 
 type BadgeVariant = VariantProps<typeof badgeVariants>["variant"]
 
@@ -71,9 +78,17 @@ export function LoanAmortizationSheet({
       }}
     >
       {plan.length === 0 ? (
-        <p className="text-sm text-muted-foreground">
-          Todavía no hay cuotas para proyectar.
-        </p>
+        <Empty className="py-6">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <CalendarClockIcon />
+            </EmptyMedia>
+            <EmptyTitle>Sin cuotas para proyectar</EmptyTitle>
+            <EmptyDescription>
+              Todavía no hay cuotas para proyectar.
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full min-w-96 text-sm">

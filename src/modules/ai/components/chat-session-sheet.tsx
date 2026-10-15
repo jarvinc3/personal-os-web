@@ -17,7 +17,8 @@ import {
   AlertDialogTitle,
 } from "@/src/shared/components/ui/alert-dialog"
 import { Button } from "@/src/shared/components/ui/button"
-import { Spinner } from "@/src/shared/components/ui/spinner"
+import { InfiniteListSentinel } from "@/src/shared/components/ui/infinite-list-sentinel"
+import { Skeleton } from "@/src/shared/components/ui/skeleton"
 import { cn } from "@/src/shared/lib/utils"
 import { formatDistanceToNow } from "date-fns"
 import { es } from "date-fns/locale"
@@ -94,8 +95,10 @@ export function ChatSessionSheet({
       }}
     >
       {sessionsQuery.isLoading ? (
-        <div className="flex items-center justify-center py-8">
-          <Spinner />
+        <div className="flex flex-col gap-2 py-2" aria-hidden>
+          {Array.from({ length: 4 }, (_, index) => (
+            <Skeleton key={index} className="h-14 w-full rounded-xl" />
+          ))}
         </div>
       ) : items.length === 0 ? (
         <p className="py-8 text-center text-muted-foreground">
@@ -143,6 +146,11 @@ export function ChatSessionSheet({
               </Button>
             </div>
           ))}
+          <InfiniteListSentinel
+            hasNextPage={sessionsQuery.hasNextPage}
+            isFetchingNextPage={sessionsQuery.isFetchingNextPage}
+            onLoadMore={() => void sessionsQuery.fetchNextPage()}
+          />
         </div>
       )}
 

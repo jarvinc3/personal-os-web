@@ -131,7 +131,6 @@ function NotificationBell() {
 
 function HeaderUserMenu() {
   const pathname = usePathname()
-  const router = useRouter()
   const user = useAppStore((state) => state.user)
   const { logoutMutation } = useAuth()
 
@@ -187,27 +186,34 @@ function HeaderUserMenu() {
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup className="flex flex-col gap-2">
-          <DropdownMenuItem
-            onClick={() => router.push(APP_ROUTES.app.notifications)}
-          >
-            <BellIcon />
-            Notificaciones
+          <DropdownMenuItem asChild>
+            <Link href={APP_ROUTES.app.notifications} className="relative">
+              <BellIcon />
+              Notificaciones
+              <LinkPendingOverlay />
+            </Link>
           </DropdownMenuItem>
           {moduleSettings && moduleSlug ? (
             <DropdownMenuItem
+              asChild
               active={pathname === settingsModuleHref(moduleSlug)}
-              onClick={() => router.push(settingsModuleHref(moduleSlug))}
             >
-              <SettingsIcon />
-              Ajustes de {moduleSettings.label}
+              <Link href={settingsModuleHref(moduleSlug)} className="relative">
+                <SettingsIcon />
+                Ajustes de {moduleSettings.label}
+                <LinkPendingOverlay />
+              </Link>
             </DropdownMenuItem>
           ) : null}
           <DropdownMenuItem
+            asChild
             active={pathname === APP_ROUTES.app.settings}
-            onClick={() => router.push(APP_ROUTES.app.settings)}
           >
-            <SettingsIcon />
-            Configuración
+            <Link href={APP_ROUTES.app.settings} className="relative">
+              <SettingsIcon />
+              Configuración
+              <LinkPendingOverlay />
+            </Link>
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />

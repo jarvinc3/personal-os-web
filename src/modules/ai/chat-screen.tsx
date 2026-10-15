@@ -43,7 +43,7 @@ import {
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { appToast } from "@/src/shared/lib/app-toast"
-import { HistoryIcon, PlusCircleIcon } from "lucide-react"
+import { BotIcon, HistoryIcon, PlusCircleIcon } from "lucide-react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { v4 as uuidv4 } from "uuid"
@@ -479,6 +479,7 @@ function ChatScreenBody() {
         onValueChange={(value) => syncModuleContext(value as ModuleChatSlug)}
       >
         <SelectTrigger className="w-fit cursor-pointer border-none bg-transparent text-lg font-bold tracking-tight capitalize">
+          <BotIcon className="size-4 shrink-0 text-muted-foreground" />
           <SelectValue />
         </SelectTrigger>
         <SelectContent className="min-w-48">

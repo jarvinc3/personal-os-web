@@ -344,6 +344,7 @@ export function InstitutionFormScreen({
           className="h-11 w-full"
           onClick={onDone}
         >
+          <XIcon className="size-4 shrink-0" />
           Ahora no
         </Button>
       </div>

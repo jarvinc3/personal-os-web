@@ -11,7 +11,7 @@ import {
   RadioGroup,
   RadioGroupItem,
 } from "@/src/shared/components/ui/radio-group"
-import { Spinner } from "@/src/shared/components/ui/spinner"
+import { Skeleton } from "@/src/shared/components/ui/skeleton"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
 import { LayersIcon } from "lucide-react"
 import type { ReactNode } from "react"
@@ -84,8 +84,10 @@ export function WipeBalanceInstitutionSheet({
       description="Elige de quién se ponen los saldos en cero."
     >
       {loading ? (
-        <div className="flex justify-center py-8">
-          <Spinner />
+        <div className="flex flex-col gap-2" aria-hidden>
+          {Array.from({ length: 3 }, (_, index) => (
+            <Skeleton key={index} className="h-16 w-full rounded-2xl" />
+          ))}
         </div>
       ) : (
         <RadioGroup

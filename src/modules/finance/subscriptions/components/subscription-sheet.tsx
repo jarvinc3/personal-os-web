@@ -1,7 +1,15 @@
 "use client"
 
 import { zodResolver } from "@hookform/resolvers/zod"
-import { InfoIcon, RepeatIcon, SaveIcon, XIcon } from "lucide-react"
+import {
+  InfoIcon,
+  LinkIcon,
+  RepeatIcon,
+  SaveIcon,
+  StickyNoteIcon,
+  TagIcon,
+  XIcon,
+} from "lucide-react"
 import { useEffect, useMemo } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
 
@@ -213,6 +221,7 @@ export function SubscriptionSheet({
             render={({ field }) => (
               <FormTextField
                 label="Nombre"
+                icon={TagIcon}
                 value={field.value}
                 onChange={field.onChange}
                 onBlur={field.onBlur}
@@ -256,6 +265,7 @@ export function SubscriptionSheet({
             render={({ field }) => (
               <FormTextField
                 label="Cada cuántos ciclos"
+                icon={RepeatIcon}
                 value={field.value}
                 onChange={field.onChange}
                 error={errors.billingInterval?.message}
@@ -323,6 +333,7 @@ export function SubscriptionSheet({
             render={({ field }) => (
               <FormTextField
                 label="Enlace de gestión"
+                icon={LinkIcon}
                 value={field.value}
                 onChange={field.onChange}
                 error={errors.manageUrl?.message}
@@ -335,6 +346,7 @@ export function SubscriptionSheet({
             render={({ field }) => (
               <FormTextField
                 label="Notas"
+                icon={StickyNoteIcon}
                 value={field.value}
                 onChange={field.onChange}
                 error={errors.notes?.message}

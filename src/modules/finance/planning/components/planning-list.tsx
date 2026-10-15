@@ -28,7 +28,8 @@ import {
   visibleReceivables,
 } from "@/src/modules/finance/shared/lib/planning-lists"
 import { FINANCE_RECEIVABLE_STATUS_LABEL } from "@/src/modules/finance/shared/types/entities"
-import { useRouter } from "next/navigation"
+import { usePendingNavigation } from "@/src/shared/components/ui/navigation-pending"
+import { Spinner } from "@/src/shared/components/ui/spinner"
 import { ExpandableFab } from "@/src/shared/components/layout/expandable-fab"
 import { Button } from "@/src/shared/components/ui/button"
 import {
@@ -116,7 +117,8 @@ export function FinancePlanningList({
   display,
   defaultCurrency,
 }: FinancePlanningListProps) {
-  const router = useRouter()
+  const { navigate: navigateToNewLoan, isPending: isNewLoanPending } =
+    usePendingNavigation()
   const {
     open: openSavingsSheet,
     sheetId: savingsSheetId,
@@ -170,7 +172,7 @@ export function FinancePlanningList({
     if (next === "savings") {
       setOpenSavingsSheet(true, null)
     } else if (next === "loans") {
-      router.push(APP_ROUTES.app.financeLoanNew)
+      navigateToNewLoan(APP_ROUTES.app.financeLoanNew)
     } else if (next === "receivables") {
       setOpenReceivableSheet(true, null)
     } else {
@@ -403,9 +405,16 @@ export function FinancePlanningList({
                   </EmptyHeader>
                   <EmptyContent>
                     <Button
-                      onClick={() => router.push(APP_ROUTES.app.financeLoanNew)}
+                      onClick={() =>
+                        navigateToNewLoan(APP_ROUTES.app.financeLoanNew)
+                      }
+                      disabled={isNewLoanPending}
                     >
-                      <PlusIcon className="size-4 shrink-0" />
+                      {isNewLoanPending ? (
+                        <Spinner className="size-4" />
+                      ) : (
+                        <PlusIcon className="size-4 shrink-0" />
+                      )}
                       Crear préstamo
                     </Button>
                   </EmptyContent>

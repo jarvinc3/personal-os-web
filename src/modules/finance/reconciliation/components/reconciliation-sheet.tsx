@@ -44,6 +44,7 @@ import {
   PlusIcon,
   SaveIcon,
   ScaleIcon,
+  TagsIcon,
   Trash2Icon,
   XIcon,
 } from "lucide-react"
@@ -269,7 +270,8 @@ export function ReconciliationSheet({
                     })
                   }
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="relative w-full cursor-pointer pl-9">
+                    <TagsIcon className="pointer-events-none absolute left-3 size-4.5 text-muted-foreground" />
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>

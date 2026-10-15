@@ -31,7 +31,7 @@ import { Spinner } from "@/src/shared/components/ui/spinner"
 import { SummarySection } from "@/src/shared/components/ui/summary"
 import { usePicker } from "@/src/shared/hooks/use-picker"
 import { appToast } from "@/src/shared/lib/app-toast"
-import { CreditCardIcon, XIcon } from "lucide-react"
+import { CoinsIcon, CreditCardIcon, WalletIcon, XIcon } from "lucide-react"
 import { useMemo, useState } from "react"
 
 type CardPaymentSheetProps = {
@@ -170,6 +170,7 @@ export function CardPaymentSheet({
                 size="sm"
                 onClick={() => setAmount(String(minimum))}
               >
+                <CoinsIcon className="size-4 shrink-0" />
                 {`Pago mínimo ${formatFinanceMoney(minimum, display)}`}
               </Button>
             ) : null}
@@ -180,6 +181,7 @@ export function CardPaymentSheet({
                 size="sm"
                 onClick={() => setAmount(String(closing))}
               >
+                <WalletIcon className="size-4 shrink-0" />
                 {`Balance al corte ${formatFinanceMoney(closing, display)}`}
               </Button>
             ) : null}

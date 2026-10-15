@@ -14,7 +14,7 @@ import { Button } from "@/src/shared/components/ui/button"
 import { SummaryItem } from "@/src/shared/components/ui/summary"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { ChatLauncherButton, useRegisterChatContext } from "@/src/modules/ai"
-import { ReceiptIcon } from "lucide-react"
+import { ReceiptIcon, XIcon } from "lucide-react"
 import Link from "next/link"
 
 type InstallmentDetailSheetProps = {
@@ -62,6 +62,7 @@ export function InstallmentDetailSheet({
             className="flex-1"
             onClick={() => onOpenChange(false)}
           >
+            <XIcon className="size-4 shrink-0" />
             Cerrar
           </Button>
         ),

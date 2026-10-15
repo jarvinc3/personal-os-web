@@ -45,6 +45,22 @@ describe("expenseTrend", () => {
     })
   })
 
+  it("formats a decimal increase to one decimal place", () => {
+    assert.deepEqual(expenseTrend("112.5", "100"), {
+      label: "+12.5%",
+      direction: "up",
+      tone: "warning",
+    })
+  })
+
+  it("formats a decimal decrease to one decimal place", () => {
+    assert.deepEqual(expenseTrend("87.5", "100"), {
+      label: "-12.5%",
+      direction: "down",
+      tone: "success",
+    })
+  })
+
   it("marks an equal amount as flat and neutral", () => {
     assert.deepEqual(expenseTrend("100", "100"), {
       label: "0%",

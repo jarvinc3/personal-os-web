@@ -22,7 +22,7 @@ import {
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
 import { InfiniteListSentinel } from "@/src/shared/components/ui/infinite-list-sentinel"
-import { SummaryItem } from "@/src/shared/components/ui/summary"
+import { SummaryItem, SummarySection } from "@/src/shared/components/ui/summary"
 import { SearchIcon, StoreIcon } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo, useState } from "react"
@@ -103,7 +103,7 @@ function MerchantsScreenBody() {
           </Empty>
         }
       >
-        <div className="rounded-2xl border border-border bg-card">
+        <SummarySection title="Comercios" icon={StoreIcon}>
           {items.map((merchant, index) => (
             <SummaryItem
               key={merchant.id}
@@ -127,7 +127,7 @@ function MerchantsScreenBody() {
               className="px-3"
             />
           ))}
-        </div>
+        </SummarySection>
       </AsyncRegion>
 
       <InfiniteListSentinel

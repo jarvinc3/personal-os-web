@@ -32,7 +32,12 @@ import { SummarySection } from "@/src/shared/components/ui/summary"
 import { API_ENDPOINTS } from "@/src/shared/constants/api-endpoints"
 import { usePicker } from "@/src/shared/hooks/use-picker"
 import { appToast } from "@/src/shared/lib/app-toast"
-import { HandCoinsIcon, XIcon } from "lucide-react"
+import {
+  CalendarClockIcon,
+  CoinsIcon,
+  HandCoinsIcon,
+  XIcon,
+} from "lucide-react"
 import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 
@@ -166,6 +171,7 @@ export function LoanPrepaymentSheet({
               size="sm"
               onClick={() => setMode("REDUCE_TERM")}
             >
+              <CalendarClockIcon className="size-4 shrink-0" />
               Reducir plazo
             </Button>
             <Button
@@ -174,6 +180,7 @@ export function LoanPrepaymentSheet({
               size="sm"
               onClick={() => setMode("REDUCE_INSTALLMENT")}
             >
+              <CoinsIcon className="size-4 shrink-0" />
               Reducir cuota
             </Button>
           </div>

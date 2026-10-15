@@ -224,9 +224,10 @@ Afirmaciones de `project-guide.md`, `docs/infraestructure/*`, módulos monolíti
 
 ## REV-WEB-025 {#rev-web-025}
 
-| Campo      | Valor                                                                                                                                                              |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Categoría  | `CONTRADICE_CODIGO`                                                                                                                                                |
-| Origen     | `.cursor/rules/` (24 reglas), `CODING_GUIDELINES.md`, `AGENTS.md`, `architecture/ui-components.md`, `architecture/module-conventions.md`                           |
-| Validación | 60 hallazgos de UI y convenciones; detalle con archivo y línea en [reference/auditoria-reglas-ui-convenciones.md](./reference/auditoria-reglas-ui-convenciones.md) |
-| Resolución | `open`                                                                                                                                                             |
+| Campo           | Valor                                                                                                                                                                                       |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Categoría       | `CONTRADICE_CODIGO`                                                                                                                                                                         |
+| Origen          | `.cursor/rules/` (24 reglas), `CODING_GUIDELINES.md`, `AGENTS.md`, `architecture/ui-components.md`, `architecture/module-conventions.md`                                                    |
+| Validación      | 60 hallazgos de UI y convenciones; detalle con archivo y línea en [reference/auditoria-reglas-ui-convenciones.md](./reference/auditoria-reglas-ui-convenciones.md)                          |
+| Re-verificación | 2026-10-22 (pendiente 15, web v0.35.2): 44 vigentes corregidos, 7 resueltos antes por Suscripciones v3 y los pendientes 12-13, 9 por decidir                                                |
+| Resolución      | `partial` (quedan por decidir H-44, H-47, H-55 a H-58, H-59 y H-60; spec en [modules/finance/pendientes/15-auditoria-reglas-ui.md](./modules/finance/pendientes/15-auditoria-reglas-ui.md)) |

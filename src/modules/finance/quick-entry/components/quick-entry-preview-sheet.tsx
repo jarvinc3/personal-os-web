@@ -1,9 +1,9 @@
 "use client"
 
 import { Button } from "@/src/shared/components/ui/button"
-import { Input } from "@/src/shared/components/ui/input"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+import { FormTextField } from "@/src/shared/components/layout/form-blocks"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { useRouter } from "next/navigation"
@@ -30,6 +30,7 @@ import {
 import { wallClockToIso } from "@/src/modules/finance/shared/lib/ledger-form"
 import { buildTransactionFormParams } from "@/src/modules/finance/transactions/lib/transaction-prefill"
 import type { QuickEntryParseResult } from "@/src/modules/finance/quick-entry/types"
+import { AlignLeftIcon, SquarePenIcon, StoreIcon } from "lucide-react"
 
 type QuickEntryPreviewSheetProps = {
   open: boolean
@@ -177,17 +178,17 @@ export function QuickEntryPreviewSheet({
 
           <FinanceDateField label="Fecha" value={date} onChange={setDate} />
 
-          <Input
+          <FormTextField
             value={merchant}
-            onChange={(event) => setMerchant(event.target.value)}
-            placeholder="Comercio"
-            aria-label="Comercio"
+            onChange={setMerchant}
+            ariaLabel="Comercio"
+            icon={StoreIcon}
           />
-          <Input
+          <FormTextField
             value={description}
-            onChange={(event) => setDescription(event.target.value)}
-            placeholder="Descripción"
-            aria-label="Descripción"
+            onChange={setDescription}
+            ariaLabel="Descripción"
+            icon={AlignLeftIcon}
           />
 
           {canSave ? (
@@ -201,6 +202,7 @@ export function QuickEntryPreviewSheet({
             </Button>
           ) : (
             <Button type="button" variant="secondary" onClick={openGuidedFlow}>
+              <SquarePenIcon className="size-4 shrink-0" />
               Completar en el formulario
             </Button>
           )}

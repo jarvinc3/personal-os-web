@@ -1,7 +1,7 @@
 "use client"
 
 import { Button } from "@/src/shared/components/ui/button"
-import { Input } from "@/src/shared/components/ui/input"
+import { FormTextField } from "@/src/shared/components/layout/form-blocks"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { SparklesIcon } from "lucide-react"
 import { useState, type FormEvent } from "react"
@@ -48,11 +48,12 @@ export function QuickEntryBar() {
   return (
     <div className="flex flex-col gap-2 px-3 md:px-0">
       <form className="flex items-center gap-2" onSubmit={handleSubmit}>
-        <Input
+        <FormTextField
           value={text}
-          onChange={(event) => setText(event.target.value)}
+          onChange={setText}
           placeholder="Registrar rápido: café 250 popular"
-          aria-label="Registrar rápido"
+          ariaLabel="Registrar rápido"
+          icon={SparklesIcon}
           className="flex-1"
         />
         <Button

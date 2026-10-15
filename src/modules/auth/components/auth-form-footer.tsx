@@ -3,7 +3,11 @@
 import { Button } from "@/src/shared/components/ui/button"
 import { Separator } from "@/src/shared/components/ui/separator"
 import { Spinner } from "@/src/shared/components/ui/spinner"
-import { ExternalLink, ChevronRightIcon } from "lucide-react"
+import {
+  ArrowLeftRightIcon,
+  ExternalLink,
+  ChevronRightIcon,
+} from "lucide-react"
 
 type AuthFormFooterProps = {
   primaryLabel: string
@@ -70,6 +74,7 @@ export function AuthFormFooter({
         onClick={onSwitchPress}
         variant="link"
       >
+        <ArrowLeftRightIcon className="size-4 shrink-0" />
         <span className="text-sm text-muted-foreground">
           {switchPrompt}{" "}
           <span className="font-semibold text-foreground">{switchAction}</span>

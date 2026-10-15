@@ -1,6 +1,7 @@
 "use client"
 
 import { useReconciliationStatus } from "@/src/modules/finance/shared/hooks/use-reconciliations"
+import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
@@ -61,9 +62,11 @@ export function ReconciliationMonthStatus({
         </div>
       ) : null}
       {query.isError ? (
-        <p className="text-xs text-destructive">
-          {financeErrorMessage(query.error)}
-        </p>
+        <FinanceErrorState
+          message={financeErrorMessage(query.error)}
+          onRetry={() => void query.refetch()}
+          isRetrying={query.isFetching}
+        />
       ) : null}
     </div>
   )

@@ -42,7 +42,7 @@ import { SummaryItem } from "@/src/shared/components/ui/summary"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { appToast } from "@/src/shared/lib/app-toast"
-import { CheckCircleIcon, FileWarningIcon } from "lucide-react"
+import { CheckCircleIcon, FileWarningIcon, XIcon } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 
@@ -409,6 +409,7 @@ function StatementImportScreenBody({ importId }: StatementImportScreenProps) {
             disabled={apply.isPending}
             onClick={() => void onApply()}
           >
+            <CheckCircleIcon className="size-4 shrink-0" />
             Aplicar estado de cuenta
           </Button>
           <Button
@@ -417,6 +418,7 @@ function StatementImportScreenBody({ importId }: StatementImportScreenProps) {
             disabled={discard.isPending}
             onClick={() => void onDiscard()}
           >
+            <XIcon className="size-4 shrink-0" />
             Descartar
           </Button>
         </div>

@@ -8,7 +8,7 @@ import { FormTextField } from "@/src/shared/components/layout/form-blocks"
 import { Button } from "@/src/shared/components/ui/button"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { appToast } from "@/src/shared/lib/app-toast"
-import { FileUpIcon } from "lucide-react"
+import { ArrowRightIcon, FileUpIcon, XIcon } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useRef, useState } from "react"
 
@@ -104,6 +104,7 @@ export function StatementImportButton({
               variant="ghost"
               onClick={() => setPasswordOpen(false)}
             >
+              <XIcon className="size-4 shrink-0" />
               Cancelar
             </Button>
           ),
@@ -117,6 +118,7 @@ export function StatementImportButton({
                 }
               }}
             >
+              <ArrowRightIcon className="size-4 shrink-0" />
               Continuar
             </Button>
           ),

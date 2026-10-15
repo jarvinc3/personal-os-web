@@ -2,7 +2,13 @@
 
 Revisión de `personal-os-web` contra sus reglas vigentes. Fecha: 2026-10-14. Rama: `develop`, base `v0.31.1`.
 
-Estado: `CONTRADICE_CODIGO`. Cada hallazgo es un sitio donde el código no cumple una regla del repo. Registro: [review-register.md](../review-register.md) `REV-WEB-025`.
+Estado: `RESUELTO_PARCIAL` tras el [pendiente 15](../../modules/finance/pendientes/15-auditoria-reglas-ui.md) (2026-10-22, web `v0.35.2`). Los números de línea de cada hallazgo son del árbol del 2026-10-14 y ya no corresponden al código; la re-verificación contra `v0.35.1` y el arreglo por grupo están en el spec del pendiente. Registro: [review-register.md](../review-register.md) `REV-WEB-025`.
+
+Resultado:
+
+- **44 vigentes**: corregidos (grupos `confirm-important-changes`, `list-infinite-scroll`, bloques y grupos de filas, iconos, estados de sección, navegación, placeholders y montos).
+- **7 resueltos** antes del pendiente por Suscripciones v3 y los pendientes 12 y 13: H-02, H-03, H-10, H-13, H-31, H-32 y H-43.
+- **9 por decidir**, sin tocar: H-44, H-47, H-55 a H-58, H-59 y H-60.
 
 ## Reglas revisadas
 
@@ -175,5 +181,6 @@ Son casillas, radios o carga de avatar. Según se lean como "campo de dato" son 
 
 ## Fuera de alcance
 
-- No se tocó código. El arreglo de cada hallazgo es un cambio aparte.
-- Los hallazgos H-44, H-47, H-55 a H-58 y H-60 son dudosos o dependen de una decisión; el resto es incumplimiento directo.
+- Corregido en el [pendiente 15](../../modules/finance/pendientes/15-auditoria-reglas-ui.md); los números de línea quedan como referencia histórica del 2026-10-14.
+- Los hallazgos H-44, H-47, H-55 a H-58, H-59 y H-60 son dudosos o dependen de una decisión; quedan por decidir.
+- Detectados al re-verificar, mismo patrón de `ui-row-group`, fuera de H-01..H-60: `src/modules/finance/reconciliation/components/reconciliations-section.tsx` y `src/modules/finance/cards/components/card-statements-section.tsx`.

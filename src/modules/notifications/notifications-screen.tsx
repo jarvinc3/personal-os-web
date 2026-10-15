@@ -341,6 +341,7 @@ function NotificationsScreenBody() {
           >
             {moduleOptions.map((slug) => {
               const selected = moduleFilter === slug
+              const Icon = getModule(slug).icon
               return (
                 <Button
                   key={slug}
@@ -355,6 +356,7 @@ function NotificationsScreenBody() {
                     )
                   }
                 >
+                  <Icon className="size-4 shrink-0" />
                   {getModule(slug).label}
                 </Button>
               )

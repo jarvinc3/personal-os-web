@@ -29,6 +29,8 @@ import {
   AvatarImage,
 } from "@/src/shared/components/ui/avatar"
 import { Button } from "@/src/shared/components/ui/button"
+import { Spinner } from "@/src/shared/components/ui/spinner"
+import { usePendingNavigation } from "@/src/shared/components/ui/navigation-pending"
 import {
   APP_ROUTES,
   settingsModuleHref,
@@ -41,7 +43,7 @@ import { formatTimeRange } from "@/src/shared/lib/date-format"
 import { Edit, LogOut } from "lucide-react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useCallback, useEffect } from "react"
-import { Badge } from "@/src/shared/components/ui/badge";
+import { Badge } from "@/src/shared/components/ui/badge"
 
 const APP_VERSION = process.env.NEXT_PUBLIC_APP_VERSION ?? "1.0.0"
 const APP_ENV =
@@ -59,6 +61,10 @@ export function SettingsScreen() {
 
 function SettingsScreenBody() {
   const router = useRouter()
+  const { navigate: navigateToLanding, isPending: isLandingPending } =
+    usePendingNavigation()
+  const { navigate: navigateToWipeData, isPending: isWipeDataPending } =
+    usePendingNavigation()
   const { user } = useAuthGuard()
   const { logoutMutation } = useAuth()
   const { profileQuery, preferences, updatePreferences } = useProfile()
@@ -354,7 +360,10 @@ function SettingsScreenBody() {
         <SettingsRow
           label="Landing page"
           link
-          onPress={() => router.push(APP_ROUTES.marketing.landing)}
+          onPress={() => navigateToLanding(APP_ROUTES.marketing.landing)}
+          trailing={
+            isLandingPending ? <Spinner className="size-4" /> : undefined
+          }
           accentColor={SETTINGS_REGISTRY.marketing.accent}
           {...SETTINGS_REGISTRY.marketing.rows.landingPage}
         />
@@ -364,7 +373,10 @@ function SettingsScreenBody() {
         <SettingsRow
           label="Vaciar datos"
           destructive
-          onPress={() => router.push(APP_ROUTES.app.settingsWipeData)}
+          onPress={() => navigateToWipeData(APP_ROUTES.app.settingsWipeData)}
+          trailing={
+            isWipeDataPending ? <Spinner className="size-4" /> : undefined
+          }
           accentColor={SETTINGS_REGISTRY.danger.accent}
           {...SETTINGS_REGISTRY.danger.rows.wipeData}
         />
@@ -392,16 +404,14 @@ function SettingsScreenBody() {
 
       <div className="flex flex-col items-center justify-center gap-1 pb-6">
         <p className="text-xs text-muted-foreground">
-          Entorno {" "}
+          Entorno{" "}
           <span className="font-mono font-bold capitalize">{APP_ENV}</span>
         </p>
         <p className="text-xs text-muted-foreground">
-          Versión {" "}
-          <span className="font-mono font-bold">{APP_VERSION}</span>
+          Versión <span className="font-mono font-bold">{APP_VERSION}</span>
         </p>
         <Badge variant="info">Beta</Badge>
       </div>
-
 
       <EditAccountSheet
         open={openAccountSheet}

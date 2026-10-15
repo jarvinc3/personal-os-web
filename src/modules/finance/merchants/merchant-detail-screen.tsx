@@ -4,6 +4,13 @@ import { BrandLogo } from "@/src/modules/finance/shared/components/brand-logo"
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
 import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
 import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/src/shared/components/ui/empty"
 import { MissingRecord } from "@/src/modules/finance/shared/components/layout/missing-record"
 import { FinanceGate } from "@/src/modules/finance/finance-gate"
 import { MerchantEditSheet } from "@/src/modules/finance/merchants/components/merchant-edit-sheet"
@@ -166,19 +173,27 @@ function MerchantDetailBody({ merchantId }: { merchantId: string }) {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center gap-3 rounded-2xl border border-border bg-card px-4 py-4">
-        <BrandLogo name={merchant.name} logoUrl={merchant.logoUrl} size={48} />
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-base font-medium">{merchant.name}</p>
+      <SummarySection
+        title={merchant.name}
+        icon={StoreIcon}
+        right={
+          <span className="text-sm font-semibold tabular-nums">
+            {formatFinanceMoney(merchant.monthSpend, display)}
+          </span>
+        }
+      >
+        <div className="flex items-center gap-3 px-1">
+          <BrandLogo
+            name={merchant.name}
+            logoUrl={merchant.logoUrl}
+            size={48}
+          />
           <p className="truncate text-xs text-muted-foreground">
             {merchant.monthMovements} movimiento
             {merchant.monthMovements === 1 ? "" : "s"} este mes
           </p>
         </div>
-        <p className="text-sm font-semibold">
-          {formatFinanceMoney(merchant.monthSpend, display)}
-        </p>
-      </div>
+      </SummarySection>
 
       <div className="flex flex-col gap-2 sm:flex-row">
         <Button
@@ -206,9 +221,17 @@ function MerchantDetailBody({ merchantId }: { merchantId: string }) {
           pendingFallback={<FinanceListSkeleton />}
           empty={movements.length === 0}
           emptyFallback={
-            <p className="px-3 py-6 text-sm text-muted-foreground">
-              Este comercio todavía no tiene movimientos.
-            </p>
+            <Empty className="py-6">
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <StoreIcon />
+                </EmptyMedia>
+                <EmptyTitle>Sin movimientos</EmptyTitle>
+                <EmptyDescription>
+                  Este comercio todavía no tiene movimientos.
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
           }
         >
           {movements.map((transaction, index) => (

@@ -24,6 +24,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
+import { SettingsSection } from "@/src/shared/components/layout/settings-section"
 import { SummaryItem } from "@/src/shared/components/ui/summary"
 import { InfiniteListSentinel } from "@/src/shared/components/ui/infinite-list-sentinel"
 import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
@@ -236,11 +237,11 @@ export function RecycleBinView() {
               description="Las cuentas, tarjetas o préstamos que archives aparecen aquí."
             />
           ) : (
-            <div className="overflow-hidden rounded-2xl border border-border bg-card">
+            <SettingsSection title="Archivados">
               {archived.map((record, index) =>
                 renderArchived(record, index === archived.length - 1)
               )}
-            </div>
+            </SettingsSection>
           )}
         </TabsContent>
 
@@ -251,11 +252,11 @@ export function RecycleBinView() {
               description="Los registros que borres aparecen aquí mientras se puedan recuperar."
             />
           ) : (
-            <div className="overflow-hidden rounded-2xl border border-border bg-card">
+            <SettingsSection title="Eliminados">
               {deleted.map((record, index) =>
                 renderDeleted(record, index === deleted.length - 1)
               )}
-            </div>
+            </SettingsSection>
           )}
           <InfiniteListSentinel
             hasNextPage={recycleBinQuery.hasNextPage}

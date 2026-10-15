@@ -14,7 +14,7 @@ import {
 } from "@/src/shared/components/ui/toggle-group"
 import { Button } from "@/src/shared/components/ui/button"
 import { cn } from "@/src/shared/lib/utils"
-import { SparklesIcon, type LucideIcon } from "lucide-react"
+import { CheckIcon, SparklesIcon, type LucideIcon } from "lucide-react"
 import type { ReactNode, Ref } from "react"
 
 /** El preset del proyecto no trae un estado pulsado con el color primario. */
@@ -228,6 +228,7 @@ export function FinanceSuggestionRow({
           className="shrink-0 text-success"
           onClick={onAction}
         >
+          <CheckIcon className="size-4 shrink-0" />
           {actionLabel}
         </Button>
       ) : null}
