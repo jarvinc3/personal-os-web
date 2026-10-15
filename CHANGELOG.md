@@ -2,6 +2,12 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.36.2] - 2026-10-15
+
+### Cambiado
+
+- La fila del pendiente 16 registra la revisión del back v0.33.2: el comando que asegura Efectivo ya no devuelve el id y la lectura queda en la consulta.
+
 ## [0.36.1] - 2026-10-15
 
 ### Cambiado
