@@ -3,6 +3,7 @@ import {
   formatStackItemBalance,
   institutionInitials,
 } from "./institution-stack.ts"
+import { decimalAmount, decimalPercent, sumDecimals } from "./decimal.ts"
 import {
   formatFinanceMoney,
   parseFinanceMoney,
@@ -111,9 +112,8 @@ function cashCandidate(
   if (cashItems.length === 0) {
     return null
   }
-  const netValue = cashItems.reduce(
-    (sum, item) => sum + (parseFinanceMoney(item.balance) ?? 0),
-    0
+  const netValue = decimalAmount(
+    sumDecimals(cashItems.map((item) => item.balance))
   )
   // Cash in the red is money owed, so it takes the pale side of the arc.
   const assetsValue = Math.max(netValue, 0)
@@ -153,15 +153,16 @@ export function buildRingStackSlices(
     ? [...institutionCandidates, cash]
     : institutionCandidates
 
-  const totalMagnitude = candidates.reduce(
-    (sum, candidate) => sum + candidate.assetsValue + candidate.debtValue,
-    0
+  const totalMagnitude = sumDecimals(
+    candidates.map(
+      (candidate) => candidate.assetsValue + candidate.debtValue
+    )
   )
 
   return candidates
     .map((candidate) => {
       const value = candidate.assetsValue + candidate.debtValue
-      const percent = totalMagnitude > 0 ? (value / totalMagnitude) * 100 : 0
+      const percent = decimalPercent(value, totalMagnitude)
       return {
         ...candidate,
         value,

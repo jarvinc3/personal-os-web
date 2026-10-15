@@ -116,6 +116,19 @@ describe("buildRingStackSlices", () => {
     assert.equal(slices[2]?.value, 100)
   })
 
+  it("sums cash balances as decimals", () => {
+    const slices = buildRingStackSlices(
+      [
+        cashItem({ id: "c1", name: "Billetera", balance: "0.10" }),
+        cashItem({ id: "c2", name: "Alcancía", balance: "0.20" }),
+      ],
+      display
+    )
+
+    assert.equal(slices[0]?.signedValue, 0.3)
+    assert.equal(slices[0]?.percent, 100)
+  })
+
   it("draws the debt as the pale part of the same arc", () => {
     const slices = buildRingStackSlices(
       [

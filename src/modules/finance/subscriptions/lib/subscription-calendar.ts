@@ -6,9 +6,10 @@ import {
 } from "date-fns"
 
 import {
-  formatFinanceMoney,
-  parseFinanceMoney,
-} from "@/src/modules/finance/shared/lib/money"
+  roundDecimal,
+  sumDecimals,
+} from "@/src/modules/finance/shared/lib/decimal"
+import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 import type { FinanceSubscriptionUpcomingCharge } from "@/src/modules/finance/shared/types/entities"
 
 const DAYS_PER_WEEK = 7
@@ -141,9 +142,8 @@ export function subscriptionChargeSummary(input: {
       currency: input.baseCurrency,
     }
   }
-  const total = input.charges.reduce(
-    (sum, charge) => sum + (parseFinanceMoney(charge.amount) ?? 0),
-    0
+  const total = roundDecimal(
+    sumDecimals(input.charges.map((charge) => charge.amount))
   )
   return {
     count: input.charges.length,

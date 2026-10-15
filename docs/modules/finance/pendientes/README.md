@@ -1,6 +1,6 @@
 # Finanzas: pendientes
 
-Specs de lo que falta tras la alineación de dominio (fases 01-09 y partes 1-4, ya implementadas y descritas en [../dominio.md](../dominio.md)). Estado al 22 oct 2026 (web `v0.34.1`, back `v0.31.1`). Cada pendiente se implementa en una sesión y se revisa en otra, que publica sus correcciones como PATCH. Orden acordado el 15 oct 2026: el 14 va antes del 12 y el 13; versiones previstas a confirmar con el último tag.
+Specs de lo que falta tras la alineación de dominio (fases 01-09 y partes 1-4, ya implementadas y descritas en [../dominio.md](../dominio.md)). Estado al 22 oct 2026 (web `v0.35.0`, back `v0.32.0`). Cada pendiente se implementa en una sesión y se revisa en otra, que publica sus correcciones como PATCH. Orden acordado el 15 oct 2026: el 14 va antes del 12 y el 13; versiones previstas a confirmar con el último tag.
 
 | #   | Spec                                                                                                  | Tamaño | Repos      | Estado        | Versiones                                  |
 | --- | ----------------------------------------------------------------------------------------------------- | ------ | ---------- | ------------- | ------------------------------------------ |
@@ -17,7 +17,7 @@ Specs de lo que falta tras la alineación de dominio (fases 01-09 y partes 1-4, 
 | 11  | [Integridad de saldos](./11-integridad-saldos.md)                                                     | M      | back + web | `implemented` | web v0.31.0 · back v0.29.0                 |
 | 14  | [Suscripciones v3](./14-suscripciones-v3.md)                                                          | L      | back + web | `implemented` | web v0.33.0–v0.33.3 · back v0.30.0–v0.30.2 |
 | 12  | [Tarjetas prácticas](./12-tarjetas-practicas.md)                                                      | M      | back + web | `implemented` | web v0.34.0–v0.34.1 · back v0.31.0–v0.31.1 |
-| 13  | [Decimales exactos](./13-decimales-exactos.md)                                                        | S      | back + web | `planned`     | prevista web v0.35.0 · back v0.32.0        |
+| 13  | [Decimales exactos](./13-decimales-exactos.md)                                                        | S      | back + web | `implemented` | web v0.35.0 · back v0.32.0                 |
 
 ## Notas
 
@@ -27,6 +27,7 @@ Specs de lo que falta tras la alineación de dominio (fases 01-09 y partes 1-4, 
 - **10**: rediseño de Suscripciones como vista principal con diseño propio (pedido del usuario tras el 09).
 - **14**: rehace la vista de Suscripciones según los [mockups v3](../mockups/suscripciones-v3/README.md); reemplaza el diseño del 10.
 - **09, 11–13**: camino a 1.0; orden, decisiones y fuera de alcance (bitácora, intereses) en [../direccion-y-decisiones.md](../direccion-y-decisiones.md).
+- **13**: PENDIENTE 13 COMPLETADO (web v0.35.0 · back v0.32.0). El dinero se suma, resta y convierte con `Decimal` hasta presentar o persistir: `Prisma.Decimal` en el back (`shared/domain/money.ts`) y `decimal.js-light` en la web (`shared/lib/decimal.ts`). Redondeo `ROUND_HALF_EVEN` a 2 decimales. La API sigue devolviendo strings (ADR-002). Una regla ESLint y `pnpm lint:money` prohiben `Number`/`toNumber` en las rutas de lectura de dinero.
 
 Fuera de alcance: la app móvil (fuera de servicio) y la configuración externa de OAuth (branding, dominio propio de Supabase, CASA).
 

@@ -1,3 +1,4 @@
+import { decimalPercent, toDecimal } from "./decimal.ts"
 import { parseFinanceMoney } from "./money.ts"
 
 export type FinanceExpenseTrendDirection = "up" | "down" | "flat"
@@ -24,7 +25,12 @@ export function expenseTrend(
   }
 
   const changePercent =
-    Math.round(((current - previous) / previous) * 1000) / 10
+    Math.round(
+      decimalPercent(
+        toDecimal(currentExpenses).minus(toDecimal(previousExpenses)),
+        previousExpenses
+      ) * 10
+    ) / 10
   if (changePercent === 0) {
     return { label: "0%", direction: "flat", tone: "neutral" }
   }

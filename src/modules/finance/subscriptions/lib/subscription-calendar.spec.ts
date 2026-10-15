@@ -96,6 +96,17 @@ describe("subscriptionChargeSummary", () => {
     assert.deepEqual(summary, { count: 2, total: "200.00", currency: "DOP" })
   })
 
+  it("adds cent amounts without float drift", () => {
+    const summary = subscriptionChargeSummary({
+      charges: [
+        charge("2026-10-14", { amount: "0.10" }),
+        charge("2026-10-15", { amount: "0.20" }),
+      ],
+      baseCurrency: "DOP",
+    })
+    assert.deepEqual(summary, { count: 2, total: "0.30", currency: "DOP" })
+  })
+
   it("only counts when the month mixes currencies", () => {
     const summary = subscriptionChargeSummary({
       charges: [

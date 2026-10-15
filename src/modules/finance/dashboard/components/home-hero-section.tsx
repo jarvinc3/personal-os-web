@@ -10,6 +10,7 @@ import {
   formatFinanceMoney,
   parseFinanceMoney,
 } from "@/src/modules/finance/shared/lib/money"
+import { sumDecimals } from "@/src/modules/finance/shared/lib/decimal"
 import {
   APP_ROUTES,
   financeTransactionNewHref,
@@ -83,15 +84,14 @@ export function FinanceHomeHeroSection() {
               ? formatFinanceMoney(global.netWorth, moneyDisplay)
               : "Balance incompleto",
       }
-  const pendingHold = (pendingTransactionsQuery.data?.items ?? []).reduce(
-    (sum, transaction) =>
-      sum + (parseFinanceMoney(transaction.amountBaseCurrency) ?? 0),
-    0
+  const pendingHold = sumDecimals(
+    (pendingTransactionsQuery.data?.items ?? []).map(
+      (transaction) => transaction.amountBaseCurrency
+    )
   )
-  const pendingHoldLabel =
-    pendingHold > 0
-      ? `Retenido ${formatFinanceMoney(pendingHold, moneyDisplay)}`
-      : undefined
+  const pendingHoldLabel = pendingHold.gt(0)
+    ? `Retenido ${formatFinanceMoney(pendingHold.toFixed(2), moneyDisplay)}`
+    : undefined
   const cashFlowLabel = summaryQuery.data
     ? `Flujo ${formatFinanceMoney(summaryQuery.data.cashFlow, moneyDisplay)}`
     : undefined

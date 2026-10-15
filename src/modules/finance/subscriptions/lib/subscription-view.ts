@@ -5,9 +5,9 @@ import type {
   FinanceSubscriptionBreakdownItem,
   FinanceSubscriptionGroupBy,
 } from "@/src/modules/finance/shared/types/entities"
+import { decimalAmount, decimalPercent, sumDecimals } from "@/src/modules/finance/shared/lib/decimal"
 import {
   formatFinanceMoney,
-  parseFinanceMoney,
   type FinanceMoneyDisplay,
 } from "@/src/modules/finance/shared/lib/money"
 import { brandInitials } from "@/src/modules/finance/shared/components/brand-initials"
@@ -90,13 +90,10 @@ export function buildSubscriptionSlices(
   items: FinanceSubscriptionBreakdownItem[],
   display: FinanceMoneyDisplay
 ): RingStackSlice[] {
-  const total = items.reduce(
-    (sum, item) => sum + (parseFinanceMoney(item.amount) ?? 0),
-    0
-  )
+  const total = sumDecimals(items.map((item) => item.amount))
   return items.map((item, index) => {
-    const amount = parseFinanceMoney(item.amount) ?? 0
-    const percent = total > 0 ? (amount / total) * 100 : 0
+    const amount = decimalAmount(item.amount)
+    const percent = decimalPercent(item.amount, total)
     return {
       key: item.key,
       kind: "institution",
