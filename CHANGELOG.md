@@ -2,6 +2,20 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.33.2] - 2026-10-21
+
+### Corregido
+
+- El detalle de suscripción respeta el tab que pide el enlace (`?tab=`): «Revisar» en el sheet de Alertas entra en Precio o en Pagos, no en Resumen. El tab elegido vive en la URL y sobrevive a recargar.
+- Las cards de suscripciones pausadas o canceladas ya no llevan el borde ámbar ni la etiqueta de la ventana de aviso: solo muestran su fecha, porque no cobran.
+- El calendario muestra un error reintentable si falla el resumen del gasto mensual, en vez del centro del anillo en cero.
+
+### Cambiado
+
+- Se quita el descarte individual de alertas de la web (hook y endpoint de cliente) y el agrupador de cobros por día, sin uso desde la v3.
+- El sheet de Alertas describe también los avisos de renovación.
+- Specs: tab del detalle desde la URL, card de una suscripción que no cobra, y ciclos trimestral y semestral.
+
 ## [0.33.1] - 2026-10-21
 
 ### Cambiado
