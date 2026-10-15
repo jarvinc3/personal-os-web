@@ -5,23 +5,24 @@ import { CategoryPickerSheet } from "@/src/modules/finance/shared/components/pic
 import { DestinationPickerSheet } from "@/src/modules/finance/shared/components/pickers/destination-picker-sheet"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
+import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
+import { useCards } from "@/src/modules/finance/shared/hooks/use-cards"
 import { useCategories } from "@/src/modules/finance/shared/hooks/use-categories"
+import { useInstitutions } from "@/src/modules/finance/shared/hooks/use-institutions"
+import { useSubscriptions } from "@/src/modules/finance/shared/hooks/use-subscriptions"
+import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
 import { usePicker } from "@/src/shared/hooks/use-picker"
 import {
   EMPTY_SUBSCRIPTION_FILTERS,
   SUBSCRIPTION_FREQUENCY_LABEL,
   SUBSCRIPTION_SORT_LABEL,
+  subscriptionListQuery,
   subscriptionMethodLabel,
   type SubscriptionFilters,
 } from "@/src/modules/finance/subscriptions/lib/subscription-filters"
 import { SubscriptionSortSheet } from "@/src/modules/finance/subscriptions/components/subscription-sort-sheet"
-import type {
-  FinanceAccount,
-  FinanceCard,
-  FinanceInstitution,
-  FinanceSubscriptionStatus,
-} from "@/src/modules/finance/shared/types/entities"
+import type { FinanceSubscriptionStatus } from "@/src/modules/finance/shared/types/entities"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
 import { Button } from "@/src/shared/components/ui/button"
 import { FormTextField } from "@/src/shared/components/layout/form-blocks"
@@ -61,41 +62,38 @@ const FREQUENCY_OPTIONS: {
 type SubscriptionFiltersSheetProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
+  isEnabled: boolean
   filters: SubscriptionFilters
   onChange: (next: SubscriptionFilters) => void
-  accounts: FinanceAccount[]
-  cards: FinanceCard[]
-  institutions: FinanceInstitution[]
   display: FinanceMoneyDisplay
-  /** Rows the current filters return, for the footer button. */
-  resultCount: number
-  hasMore: boolean
-  error: unknown
-  isRetrying: boolean
-  onRetry: () => void
 }
 
 /**
  * Bottom sheet with the list filters: real pickers for the payment method and
  * the categories, segmented controls for status and frequency, and the order.
+ * Applies each change as it happens, so the footer count is the list behind.
  */
 export function SubscriptionFiltersSheet({
   open,
   onOpenChange,
+  isEnabled,
   filters,
   onChange,
-  accounts,
-  cards,
-  institutions,
   display,
-  resultCount,
-  hasMore,
-  error,
-  isRetrying,
-  onRetry,
 }: SubscriptionFiltersSheetProps) {
   const categoriesQuery = useCategories(open)
+  const accountsQuery = useAccounts(open)
+  const cardsQuery = useCards(open)
+  const institutionsQuery = useInstitutions(open)
+  const previewQuery = useSubscriptions(
+    isEnabled && open,
+    subscriptionListQuery(filters)
+  )
   const categories = categoriesQuery.data ?? []
+  const accounts = accountsQuery.data ?? []
+  const cards = cardsQuery.data ?? []
+  const institutions = institutionsQuery.data ?? []
+  const resultCount = infiniteListItems(previewQuery.data).length
   const { picker, openPicker, closeHandlerFor } = usePicker<
     "none" | "destination" | "category" | "sort"
   >("none")
@@ -133,7 +131,8 @@ export function SubscriptionFiltersSheet({
             <Button className="flex-1" onClick={() => onOpenChange(false)}>
               <ListFilterIcon className="size-4 shrink-0" />
               Ver {resultCount}
-              {hasMore ? "+" : ""} resultado{resultCount === 1 ? "" : "s"}
+              {previewQuery.hasNextPage ? "+" : ""} resultado
+              {resultCount === 1 ? "" : "s"}
             </Button>
           ),
         }}
@@ -184,11 +183,11 @@ export function SubscriptionFiltersSheet({
             onPress={() => openPicker("sort")}
           />
         </SettingsSection>
-        {error ? (
+        {previewQuery.error ? (
           <FinanceErrorState
-            message={financeErrorMessage(error)}
-            onRetry={onRetry}
-            isRetrying={isRetrying}
+            message={financeErrorMessage(previewQuery.error)}
+            onRetry={() => void previewQuery.refetch()}
+            isRetrying={previewQuery.isFetching}
           />
         ) : null}
       </BottomSheet>
