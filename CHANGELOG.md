@@ -2,6 +2,13 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.38.3] - 2026-10-15
+
+### Cambiado
+
+- Las configs de Sentry del cliente, el servidor y el edge comparten `sentryBaseOptions`; sin DSN no se inicializa ninguna.
+- El cierre del pendiente 18 documenta la subida de source maps del back y los ajustes de la revisión.
+
 ## [0.38.2] - 2026-10-15
 
 ### Corregido
