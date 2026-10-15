@@ -152,7 +152,7 @@ export function FinanceMonthSection({
           >
             <h3
               className={cn(
-                "text-center text-sm text-muted-foreground bg-input/30 py-2",
+                "bg-input/30 py-2 text-center text-sm text-muted-foreground"
               )}
             >
               {week.label}
@@ -162,7 +162,7 @@ export function FinanceMonthSection({
                 key={day.dateKey}
                 data-day-key={day.dateKey}
                 aria-label={day.label}
-                className="flex flex-col gap-2 px-2 md:px-0 pb-3"
+                className="flex flex-col gap-2 px-2 pb-3 md:px-0"
               >
                 <h4 className="flex items-center justify-between gap-3 px-2">
                   <span className="text-xs text-muted-foreground">
@@ -188,70 +188,73 @@ export function FinanceMonthSection({
                       className="overflow-hidden rounded-2xl border border-border"
                     >
                       {cluster.map((group: ReversalGroup, index) => {
-                    const transaction = group.original
-                    const isPair = Boolean(group.reversal)
-                    const isExpanded = expandedIds.has(transaction.id)
-                    const isLastRow = index === cluster.length - 1
-                    return (
-                      <div
-                        key={transaction.id}
-                        className={cn(
-                          !isLastRow && "border-b border-border/60"
-                        )}
-                      >
-                        <TransactionMovementRow
-                          transaction={transaction}
-                          categories={categories}
-                          display={display}
-                          partial={group.isPartial}
-                          paired={isPair}
-                          showChevron={isPair}
-                          trailing={
-                            group.isOrphan &&
-                            transaction.linkedTransactionId ? (
-                              <Link
-                                href={APP_ROUTES.app.financeTransaction(
-                                  transaction.linkedTransactionId
-                                )}
-                                className="inline-flex items-center gap-1 text-xs font-medium text-info hover:underline"
-                              >
-                                <Undo2Icon className="size-3.5" aria-hidden />
-                                Ver original
-                              </Link>
-                            ) : undefined
-                          }
-                          onPress={
-                            isPair
-                              ? () => toggleExpanded(transaction.id)
-                              : undefined
-                          }
-                          href={
-                            isPair
-                              ? undefined
-                              : APP_ROUTES.app.financeTransaction(
-                                  transaction.id
-                                )
-                          }
-                        />
-                        {isPair && group.reversal && isExpanded ? (
-                          <div className="flex flex-col gap-1 px-2 pb-2">
-                            <ReversalLeg
-                              leg={transaction}
-                              roleLabel="Original"
+                        const transaction = group.original
+                        const isPair = Boolean(group.reversal)
+                        const isExpanded = expandedIds.has(transaction.id)
+                        const isLastRow = index === cluster.length - 1
+                        return (
+                          <div
+                            key={transaction.id}
+                            className={cn(
+                              !isLastRow && "border-b border-border/60"
+                            )}
+                          >
+                            <TransactionMovementRow
+                              transaction={transaction}
+                              categories={categories}
                               display={display}
-                              isLast={false}
+                              partial={group.isPartial}
+                              paired={isPair}
+                              showChevron={isPair}
+                              trailing={
+                                group.isOrphan &&
+                                transaction.linkedTransactionId ? (
+                                  <Link
+                                    href={APP_ROUTES.app.financeTransaction(
+                                      transaction.linkedTransactionId
+                                    )}
+                                    className="inline-flex items-center gap-1 text-xs font-medium text-info hover:underline"
+                                  >
+                                    <Undo2Icon
+                                      className="size-3.5"
+                                      aria-hidden
+                                    />
+                                    Ver original
+                                  </Link>
+                                ) : undefined
+                              }
+                              onPress={
+                                isPair
+                                  ? () => toggleExpanded(transaction.id)
+                                  : undefined
+                              }
+                              href={
+                                isPair
+                                  ? undefined
+                                  : APP_ROUTES.app.financeTransaction(
+                                      transaction.id
+                                    )
+                              }
                             />
-                            <ReversalLeg
-                              leg={group.reversal}
-                              roleLabel="Reversa"
-                              display={display}
-                              isLast={true}
-                            />
+                            {isPair && group.reversal && isExpanded ? (
+                              <div className="flex flex-col gap-1 px-2 pb-2">
+                                <ReversalLeg
+                                  leg={transaction}
+                                  roleLabel="Original"
+                                  display={display}
+                                  isLast={false}
+                                />
+                                <ReversalLeg
+                                  leg={group.reversal}
+                                  roleLabel="Reversa"
+                                  display={display}
+                                  isLast={true}
+                                />
+                              </div>
+                            ) : null}
                           </div>
-                        ) : null}
-                      </div>
-                      )
-                    })}
+                        )
+                      })}
                     </div>
                   ))}
                 </div>

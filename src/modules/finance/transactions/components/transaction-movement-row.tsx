@@ -158,11 +158,11 @@ export function TransactionMovementRow({
           <span
             className={cn(
               !isTransfer &&
-              movementSign(transaction) === "−" &&
-              "text-destructive",
+                movementSign(transaction) === "−" &&
+                "text-destructive",
               !isTransfer &&
-              movementSign(transaction) === "+" &&
-              "text-success",
+                movementSign(transaction) === "+" &&
+                "text-success",
               isInactive && "text-muted-foreground line-through opacity-50"
             )}
           >
@@ -174,7 +174,9 @@ export function TransactionMovementRow({
                 <Badge variant="warning">¿Duplicado?</Badge>
               ) : null}
               {partial ? (
-                <Badge variant="warning">{FINANCE_REVERSAL_PARTIAL_LABEL}</Badge>
+                <Badge variant="warning">
+                  {FINANCE_REVERSAL_PARTIAL_LABEL}
+                </Badge>
               ) : paired || isReversed ? (
                 <Badge variant="info">
                   {FINANCE_TRANSACTION_STATUS_LABEL.REVERSED}

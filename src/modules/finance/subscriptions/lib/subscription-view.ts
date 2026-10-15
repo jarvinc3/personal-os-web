@@ -5,7 +5,11 @@ import type {
   FinanceSubscriptionBreakdownItem,
   FinanceSubscriptionGroupBy,
 } from "@/src/modules/finance/shared/types/entities"
-import { decimalAmount, decimalPercent, sumDecimals } from "@/src/modules/finance/shared/lib/decimal"
+import {
+  decimalAmount,
+  decimalPercent,
+  sumDecimals,
+} from "@/src/modules/finance/shared/lib/decimal"
 import {
   formatFinanceMoney,
   type FinanceMoneyDisplay,

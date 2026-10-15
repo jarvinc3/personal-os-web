@@ -8,19 +8,19 @@ Contexto: bancos dominicanos (BHD, Popular, Qik), moneda principal DOP (RD$).
 
 ## Modelo
 
-| Entidad                               | Qué es                                   | Reglas clave                                                                                       |
-| ------------------------------------- | ---------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| Institución                           | Banco o entidad emisora                  | Borrarla da 409 si tiene dependientes (`details.dependents`). La de sistema "Efectivo" (`isSystem`) no se edita, archiva ni borra |
+| Entidad                               | Qué es                                   | Reglas clave                                                                                                                               |
+| ------------------------------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| Institución                           | Banco o entidad emisora                  | Borrarla da 409 si tiene dependientes (`details.dependents`). La de sistema "Efectivo" (`isSystem`) no se edita, archiva ni borra          |
 | Cuenta                                | CHECKING, SAVINGS, INVESTMENT o CASH     | Todas exigen institución. Las de efectivo viven en la institución de sistema, una por moneda. Se archiva con `isActive:false`, no se borra |
-| Tarjeta                               | Crédito o débito                         | La de crédito tiene límite, disponible, día de corte y de pago. La de débito suma a su cuenta      |
-| Movimiento (`FinTransaction`)         | CREDIT, DEBIT, ADJUSTMENT, CARD_PAYMENT  | Estados `PENDING`, `CONFIRMED`, `REVERSED`, `CANCELLED`                                            |
-| Transferencia                         | Dos patas con el mismo `transferGroupId` | Atómica. El destino es solo una cuenta. Comisión opcional (`legs`). La lista muestra una sola fila |
-| Corte de tarjeta (`FinCardStatement`) | Ciclo de facturación                     | Abierto, `STATEMENT_CLOSED`, pagado o vencido. Se carga a mano o se importa del PDF del banco      |
-| Préstamo                              | Capital, tasa, plazo y cuotas            | La cuota resta solo capital del saldo. Admite abonos a capital (reducir plazo o cuota)             |
-| Cobro (cuenta por cobrar)             | Dinero que te deben                      | Pagos parciales, excedente (`excessHandling`) y castigo (write-off)                                |
-| Meta de ahorro                        | Objetivo ligado a una cuenta             | Los aportes no crean `DEBIT`. Expone `freeBalance` (disponible libre de la cuenta)                 |
-| Presupuesto                           | Límite por periodo                       | Multicategoría, rollover y recurrencia (scheduler). El periodo arranca el `monthStartDay`          |
-| Correo de banco (`FinEmailMessage`)   | Correo leído de Gmail                    | Idempotente por huella (`source_id, fingerprint`)                                                  |
+| Tarjeta                               | Crédito o débito                         | La de crédito tiene límite, disponible, día de corte y de pago. La de débito suma a su cuenta                                              |
+| Movimiento (`FinTransaction`)         | CREDIT, DEBIT, ADJUSTMENT, CARD_PAYMENT  | Estados `PENDING`, `CONFIRMED`, `REVERSED`, `CANCELLED`                                                                                    |
+| Transferencia                         | Dos patas con el mismo `transferGroupId` | Atómica. El destino es solo una cuenta. Comisión opcional (`legs`). La lista muestra una sola fila                                         |
+| Corte de tarjeta (`FinCardStatement`) | Ciclo de facturación                     | Abierto, `STATEMENT_CLOSED`, pagado o vencido. Se carga a mano o se importa del PDF del banco                                              |
+| Préstamo                              | Capital, tasa, plazo y cuotas            | La cuota resta solo capital del saldo. Admite abonos a capital (reducir plazo o cuota)                                                     |
+| Cobro (cuenta por cobrar)             | Dinero que te deben                      | Pagos parciales, excedente (`excessHandling`) y castigo (write-off)                                                                        |
+| Meta de ahorro                        | Objetivo ligado a una cuenta             | Los aportes no crean `DEBIT`. Expone `freeBalance` (disponible libre de la cuenta)                                                         |
+| Presupuesto                           | Límite por periodo                       | Multicategoría, rollover y recurrencia (scheduler). El periodo arranca el `monthStartDay`                                                  |
+| Correo de banco (`FinEmailMessage`)   | Correo leído de Gmail                    | Idempotente por huella (`source_id, fingerprint`)                                                                                          |
 
 ## Estados y edición
 

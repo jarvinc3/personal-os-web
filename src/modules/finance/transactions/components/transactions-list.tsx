@@ -367,7 +367,7 @@ export function FinanceTransactionsList({
   }, [markUserTookOver, stickyOffset, timeline.length])
 
   return (
-    <div className="-mx-4 md:mx-0 flex flex-col bg-card md:bg-background">
+    <div className="-mx-4 flex flex-col bg-card md:mx-0 md:bg-background">
       <div
         ref={chromeRef}
         className="sticky top-0 z-30 flex flex-col gap-3 rounded-b-2xl border-b border-border/70 bg-background pb-2 shadow-sm md:border-none"

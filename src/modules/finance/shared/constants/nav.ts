@@ -1,11 +1,6 @@
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import type { ModuleAppNav, ModuleNavItem } from "@/src/shared/types/module-nav"
-import {
-  ArrowLeftRight,
-  LandmarkIcon,
-  RepeatIcon,
-  Target,
-} from "lucide-react"
+import { ArrowLeftRight, LandmarkIcon, RepeatIcon, Target } from "lucide-react"
 
 export const FINANCE_NAV_ITEMS: ModuleNavItem[] = [
   {

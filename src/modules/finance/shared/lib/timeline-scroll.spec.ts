@@ -33,14 +33,20 @@ describe("shouldFollowScroll", () => {
 describe("pickLandingDayKey", () => {
   it("lands on today when that day has movements", () => {
     assert.equal(
-      pickLandingDayKey(["2026-10-01", "2026-10-15", "2026-10-20"], "2026-10-15"),
+      pickLandingDayKey(
+        ["2026-10-01", "2026-10-15", "2026-10-20"],
+        "2026-10-15"
+      ),
       "2026-10-15"
     )
   })
 
   it("lands on the latest day already passed when today is empty", () => {
     assert.equal(
-      pickLandingDayKey(["2026-10-02", "2026-10-14", "2026-10-18"], "2026-10-15"),
+      pickLandingDayKey(
+        ["2026-10-02", "2026-10-14", "2026-10-18"],
+        "2026-10-15"
+      ),
       "2026-10-14"
     )
   })

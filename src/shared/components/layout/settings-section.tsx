@@ -158,7 +158,7 @@ export function SettingsRow({
       type="button"
       className={cn(
         rowClassName,
-        "cursor-pointer transition-all hover:bg-muted/50 active:scale-[0.99] hover:rounded-2xl"
+        "cursor-pointer transition-all hover:rounded-2xl hover:bg-muted/50 active:scale-[0.99]"
       )}
       onClick={onPress}
       disabled={disabled}

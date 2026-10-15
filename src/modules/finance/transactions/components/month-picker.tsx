@@ -56,7 +56,7 @@ export function FinanceMonthPicker({
       ref={listRef}
       role="tablist"
       aria-label="Meses"
-      className="flex snap-x snap-mandatory scrollbar-none gap-2 overflow-x-auto mx-2 md:mx-0"
+      className="mx-2 flex snap-x snap-mandatory scrollbar-none gap-2 overflow-x-auto md:mx-0"
     >
       {months.map((slot) => {
         const key = monthKey(slot.year, slot.month)

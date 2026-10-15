@@ -53,27 +53,27 @@ Cuando un collapsible abre ruedas u otro control para elegir un valor (`FinanceD
 
 ## Sheets, listas y vacíos
 
-| Necesitas                               | Usar                                                                       | Path                                                                                                        |
-| --------------------------------------- | -------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| Sheet / drawer de módulo (edición)      | `BottomSheet`                                                              | `src/shared/components/layout/bottom-sheet.tsx`                                                             |
-| Evento (llegó, listo, falló)            | `BottomSheet` `variant="floating"`                                         | igual; card abajo, no drawer de formulario                                                                  |
-| Sección con título (cualquier vista)    | `SummarySection`. No `Card` ni `CardHeader` / `CardTitle` / `CardContent` / `CardFooter` en pantallas de producto | `src/shared/components/ui/summary.tsx`                                                                      |
-| Fila de lista (icono, título, valor)    | `SummaryItem`                                                              | igual. `tintRow` pinta el fondo de la fila con `accentColor`; por defecto no                                |
-| Grupo de filas                          | `SummarySection` (título + icono) o `SettingsSection` (etiqueta corta)     | `summary.tsx` y `src/shared/components/layout/settings-section.tsx`. No un `div` `rounded-2xl border bg-card` |
-| Marca de cuenta, tarjeta, institución, comercio o movimiento | `BrandLogo` (`CardNetworkMark` para la red)            | `src/modules/finance/shared/components/brand-logo.tsx`                                                      |
-| Importe en pantalla                     | `formatFinanceMoney` + `tabular-nums`                                      | `src/modules/finance/shared/lib/money.ts`. Escribir el monto es `FinanceMoneyField`                          |
-| Acción primaria flotante (una sola)     | `Fab`                                                                      | `src/shared/components/layout/fab.tsx`                                                                      |
-| Varias acciones flotantes               | `ExpandableFab`                                                            | `src/shared/components/layout/expandable-fab.tsx`                                                           |
-| Estado vacío                            | `Empty` + `EmptyHeader` / `EmptyMedia` / `EmptyTitle` / `EmptyDescription` | `src/shared/components/ui/empty.tsx`                                                                        |
-| Color                                   | `ColorPickerSwatch`                                                        | `src/shared/components/ui/color-picker.tsx`                                                                 |
-| Tab bar de módulo **con rutas**         | `ModuleSectionLayout`                                                      | `src/shared/components/layout/module-section-layout.tsx` — [module-conventions.md](./module-conventions.md) |
-| Aviso puntual dentro de un flujo        | `Alert`                                                                    | `src/shared/components/ui/alert.tsx`                                                                        |
-| Pending de navegación                   | `LinkPendingOverlay` / `usePendingNavigation`                              | `src/shared/components/ui/navigation-pending.tsx` — overlay + spinner en el control que abre otra vista     |
-| Región pendiente / vacía / contenido    | `AsyncRegion`                                                              | `src/modules/finance/shared/components/layout/async-region.tsx`                                             |
-| Registro ausente con vuelta             | `MissingRecord`                                                            | `src/modules/finance/shared/components/layout/missing-record.tsx`                                           |
-| Hero de progreso de un detalle          | `FinanceProgressHero`                                                      | `src/modules/finance/shared/components/layout/progress-hero.tsx`                                            |
-| Acciones de un registro (⋮ del detalle) | `RecordOptionsSheet`                                                       | `src/modules/finance/shared/components/record-options-sheet.tsx`                                            |
-| Confirmación de borrado                 | `DeleteRecordDialog`                                                       | `src/modules/finance/shared/components/delete-record-dialog.tsx`                                            |
+| Necesitas                                                    | Usar                                                                                                              | Path                                                                                                          |
+| ------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| Sheet / drawer de módulo (edición)                           | `BottomSheet`                                                                                                     | `src/shared/components/layout/bottom-sheet.tsx`                                                               |
+| Evento (llegó, listo, falló)                                 | `BottomSheet` `variant="floating"`                                                                                | igual; card abajo, no drawer de formulario                                                                    |
+| Sección con título (cualquier vista)                         | `SummarySection`. No `Card` ni `CardHeader` / `CardTitle` / `CardContent` / `CardFooter` en pantallas de producto | `src/shared/components/ui/summary.tsx`                                                                        |
+| Fila de lista (icono, título, valor)                         | `SummaryItem`                                                                                                     | igual. `tintRow` pinta el fondo de la fila con `accentColor`; por defecto no                                  |
+| Grupo de filas                                               | `SummarySection` (título + icono) o `SettingsSection` (etiqueta corta)                                            | `summary.tsx` y `src/shared/components/layout/settings-section.tsx`. No un `div` `rounded-2xl border bg-card` |
+| Marca de cuenta, tarjeta, institución, comercio o movimiento | `BrandLogo` (`CardNetworkMark` para la red)                                                                       | `src/modules/finance/shared/components/brand-logo.tsx`                                                        |
+| Importe en pantalla                                          | `formatFinanceMoney` + `tabular-nums`                                                                             | `src/modules/finance/shared/lib/money.ts`. Escribir el monto es `FinanceMoneyField`                           |
+| Acción primaria flotante (una sola)                          | `Fab`                                                                                                             | `src/shared/components/layout/fab.tsx`                                                                        |
+| Varias acciones flotantes                                    | `ExpandableFab`                                                                                                   | `src/shared/components/layout/expandable-fab.tsx`                                                             |
+| Estado vacío                                                 | `Empty` + `EmptyHeader` / `EmptyMedia` / `EmptyTitle` / `EmptyDescription`                                        | `src/shared/components/ui/empty.tsx`                                                                          |
+| Color                                                        | `ColorPickerSwatch`                                                                                               | `src/shared/components/ui/color-picker.tsx`                                                                   |
+| Tab bar de módulo **con rutas**                              | `ModuleSectionLayout`                                                                                             | `src/shared/components/layout/module-section-layout.tsx` — [module-conventions.md](./module-conventions.md)   |
+| Aviso puntual dentro de un flujo                             | `Alert`                                                                                                           | `src/shared/components/ui/alert.tsx`                                                                          |
+| Pending de navegación                                        | `LinkPendingOverlay` / `usePendingNavigation`                                                                     | `src/shared/components/ui/navigation-pending.tsx` — overlay + spinner en el control que abre otra vista       |
+| Región pendiente / vacía / contenido                         | `AsyncRegion`                                                                                                     | `src/modules/finance/shared/components/layout/async-region.tsx`                                               |
+| Registro ausente con vuelta                                  | `MissingRecord`                                                                                                   | `src/modules/finance/shared/components/layout/missing-record.tsx`                                             |
+| Hero de progreso de un detalle                               | `FinanceProgressHero`                                                                                             | `src/modules/finance/shared/components/layout/progress-hero.tsx`                                              |
+| Acciones de un registro (⋮ del detalle)                      | `RecordOptionsSheet`                                                                                              | `src/modules/finance/shared/components/record-options-sheet.tsx`                                              |
+| Confirmación de borrado                                      | `DeleteRecordDialog`                                                                                              | `src/modules/finance/shared/components/delete-record-dialog.tsx`                                              |
 
 Un bloque con título en cualquier superficie (formulario, panel, sheet, lista, chat) es `SummarySection`. `Card` y sus partes no se importan en pantallas de producto. El primitivo `src/shared/components/ui/card.tsx` no sustituye a `SummarySection`. El agrupado de campos de un formulario vive en [form-sections.mdc](../../.cursor/rules/form-sections.mdc); el chrome, en [ui-shared-components.mdc](../../.cursor/rules/ui-shared-components.mdc).
 
@@ -108,30 +108,30 @@ Estado del botón de envío: [`.cursor/rules/form-submit-disabled.mdc`](../../.c
 
 Una regla por archivo `.mdc`; se leen todas antes de crear o cambiar un control. El detalle vive en cada `.mdc`; aquí solo el índice y su componente canónico.
 
-| Regla                                                                              | Componente o helper canónico                             |
-| ---------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| Regla                                                                              | Componente o helper canónico                                                                           |
+| ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
 | [ui-shared-components.mdc](../../.cursor/rules/ui-shared-components.mdc)           | `wheel-picker.tsx`, `BottomSheet`, `FinanceDateField`, `SummarySection` (bloque con título; no `Card`) |
-| [leaf-module-ux.mdc](../../.cursor/rules/leaf-module-ux.mdc)                       | hero + `BottomSheet` (Keep Awake)                        |
-| [navigation-pending.mdc](../../.cursor/rules/navigation-pending.mdc)               | `LinkPendingOverlay` / `usePendingNavigation`            |
-| [confirm-important-changes.mdc](../../.cursor/rules/confirm-important-changes.mdc) | `AlertDialog`                                            |
-| [switch-row-icons.mdc](../../.cursor/rules/switch-row-icons.mdc)                   | `SettingsRow` / `SwitchFieldRow`                         |
-| [visual-status-icons.mdc](../../.cursor/rules/visual-status-icons.mdc)             | icono + `aria-label`                                     |
-| [form-shell-page.mdc](../../.cursor/rules/form-shell-page.mdc)                     | `FinanceFormScreen`                                      |
-| [form-shell-sheet.mdc](../../.cursor/rules/form-shell-sheet.mdc)                   | `BottomSheet` (acciones del sheet) + `useDiscardChanges` |
-| [form-sections.mdc](../../.cursor/rules/form-sections.mdc)                         | agrupado de campos del formulario                        |
-| [form-field-anatomy.mdc](../../.cursor/rules/form-field-anatomy.mdc)               | `Field` / `FieldLabel` / `FieldError` en cualquier control con etiqueta |
-| [form-picker-fields.mdc](../../.cursor/rules/form-picker-fields.mdc)               | hoja de catálogo en cualquier vista; `usePicker` en el formulario |
-| [form-submit-flow.mdc](../../.cursor/rules/form-submit-flow.mdc)                   | constructor de payload + `toast`                         |
-| [form-derived-fields.mdc](../../.cursor/rules/form-derived-fields.mdc)             | campos derivados del estado elegido                      |
-| [form-submit-disabled.mdc](../../.cursor/rules/form-submit-disabled.mdc)           | botón de envío                                           |
-| [form-field-icons.mdc](../../.cursor/rules/form-field-icons.mdc)                   | icono líder en todo campo de dato                        |
-| [icons-required.mdc](../../.cursor/rules/icons-required.mdc)                       | icono obligatorio en todo botón y control                |
-| [input-placeholders.mdc](../../.cursor/rules/input-placeholders.mdc)               | placeholder solo para ejemplo o formato, en cualquier campo |
-| [list-infinite-scroll.mdc](../../.cursor/rules/list-infinite-scroll.mdc)           | `useInfiniteQuery` + `IntersectionObserver`              |
-| [ui-section-states.mdc](../../.cursor/rules/ui-section-states.mdc)                 | `FinanceListSkeleton` / `Empty` / `FinanceErrorState`    |
-| [ui-row-group.mdc](../../.cursor/rules/ui-row-group.mdc)                           | `SummarySection` o `SettingsSection` alrededor de las filas |
-| [finance-brand-logo.mdc](../../.cursor/rules/finance-brand-logo.mdc)               | `BrandLogo` / `CardNetworkMark`                          |
-| [finance-money-display.mdc](../../.cursor/rules/finance-money-display.mdc)         | `formatFinanceMoney`                                     |
+| [leaf-module-ux.mdc](../../.cursor/rules/leaf-module-ux.mdc)                       | hero + `BottomSheet` (Keep Awake)                                                                      |
+| [navigation-pending.mdc](../../.cursor/rules/navigation-pending.mdc)               | `LinkPendingOverlay` / `usePendingNavigation`                                                          |
+| [confirm-important-changes.mdc](../../.cursor/rules/confirm-important-changes.mdc) | `AlertDialog`                                                                                          |
+| [switch-row-icons.mdc](../../.cursor/rules/switch-row-icons.mdc)                   | `SettingsRow` / `SwitchFieldRow`                                                                       |
+| [visual-status-icons.mdc](../../.cursor/rules/visual-status-icons.mdc)             | icono + `aria-label`                                                                                   |
+| [form-shell-page.mdc](../../.cursor/rules/form-shell-page.mdc)                     | `FinanceFormScreen`                                                                                    |
+| [form-shell-sheet.mdc](../../.cursor/rules/form-shell-sheet.mdc)                   | `BottomSheet` (acciones del sheet) + `useDiscardChanges`                                               |
+| [form-sections.mdc](../../.cursor/rules/form-sections.mdc)                         | agrupado de campos del formulario                                                                      |
+| [form-field-anatomy.mdc](../../.cursor/rules/form-field-anatomy.mdc)               | `Field` / `FieldLabel` / `FieldError` en cualquier control con etiqueta                                |
+| [form-picker-fields.mdc](../../.cursor/rules/form-picker-fields.mdc)               | hoja de catálogo en cualquier vista; `usePicker` en el formulario                                      |
+| [form-submit-flow.mdc](../../.cursor/rules/form-submit-flow.mdc)                   | constructor de payload + `toast`                                                                       |
+| [form-derived-fields.mdc](../../.cursor/rules/form-derived-fields.mdc)             | campos derivados del estado elegido                                                                    |
+| [form-submit-disabled.mdc](../../.cursor/rules/form-submit-disabled.mdc)           | botón de envío                                                                                         |
+| [form-field-icons.mdc](../../.cursor/rules/form-field-icons.mdc)                   | icono líder en todo campo de dato                                                                      |
+| [icons-required.mdc](../../.cursor/rules/icons-required.mdc)                       | icono obligatorio en todo botón y control                                                              |
+| [input-placeholders.mdc](../../.cursor/rules/input-placeholders.mdc)               | placeholder solo para ejemplo o formato, en cualquier campo                                            |
+| [list-infinite-scroll.mdc](../../.cursor/rules/list-infinite-scroll.mdc)           | `useInfiniteQuery` + `IntersectionObserver`                                                            |
+| [ui-section-states.mdc](../../.cursor/rules/ui-section-states.mdc)                 | `FinanceListSkeleton` / `Empty` / `FinanceErrorState`                                                  |
+| [ui-row-group.mdc](../../.cursor/rules/ui-row-group.mdc)                           | `SummarySection` o `SettingsSection` alrededor de las filas                                            |
+| [finance-brand-logo.mdc](../../.cursor/rules/finance-brand-logo.mdc)               | `BrandLogo` / `CardNetworkMark`                                                                        |
+| [finance-money-display.mdc](../../.cursor/rules/finance-money-display.mdc)         | `formatFinanceMoney`                                                                                   |
 
 Molde: `transaction-form.tsx` y `transfer-form.tsx`. No copiar los componentes de Finanzas a otros módulos; sí el patrón.
 

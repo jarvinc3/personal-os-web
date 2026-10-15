@@ -162,70 +162,75 @@ export function FinanceTransactionSearch({
         />
         <AnimatePresence>
           {showPanel ? (
-          <motion.div
-            key="search-results"
-            id={listId}
-            role="listbox"
-            aria-label="Resultados de búsqueda"
-            initial={{ opacity: 0, y: reduceMotion ? 0 : -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: reduceMotion ? 0 : -8 }}
-            transition={presence}
-            className="absolute inset-x-0 top-full z-50 flex h-[50vh] min-h-[50vh] flex-col overflow-hidden rounded-t-none rounded-b-2xl border border-t-0 border-border bg-popover shadow-2xl"
-          >
-            <Separator />
-            <div
-              ref={resultsRef}
-              className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto overscroll-contain p-2"
+            <motion.div
+              key="search-results"
+              id={listId}
+              role="listbox"
+              aria-label="Resultados de búsqueda"
+              initial={{ opacity: 0, y: reduceMotion ? 0 : -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: reduceMotion ? 0 : -8 }}
+              transition={presence}
+              className="absolute inset-x-0 top-full z-50 flex h-[50vh] min-h-[50vh] flex-col overflow-hidden rounded-t-none rounded-b-2xl border border-t-0 border-border bg-popover shadow-2xl"
             >
-            {resultsQuery.isError ? (
-              <FinanceErrorState
-                message={financeErrorMessage(resultsQuery.error)}
-                onRetry={() => void resultsQuery.refetch()}
-                isRetrying={resultsQuery.isFetching}
-              />
-            ) : resultsQuery.isPending ? (
-              <FinanceListSkeleton rows={3} />
-            ) : items.length === 0 ? (
-              <Empty className="py-6">
-                <EmptyHeader>
-                  <EmptyMedia variant="icon">
-                    <SearchIcon />
-                  </EmptyMedia>
-                  <EmptyTitle>Sin resultados</EmptyTitle>
-                  <EmptyDescription>
-                    Ningún movimiento coincide con «{debouncedSearch}».
-                  </EmptyDescription>
-                </EmptyHeader>
-                <EmptyContent>
-                  <Button type="button" size="sm" variant="outline" onClick={clearSearch}>
-                    <XIcon />
-                    Limpiar
-                  </Button>
-                </EmptyContent>
-              </Empty>
-            ) : (
-              items.map((transaction) => (
-                <div
-                  key={transaction.id}
-                  role="option"
-                  aria-selected={false}
-                  className="shrink-0 overflow-hidden rounded-2xl border border-border"
-                >
-                  <TransactionMovementRow
-                    transaction={transaction}
-                    categories={categories}
-                    display={display}
-                    onPress={() => {
-                      close()
-                      onSelect(transaction.id)
-                    }}
+              <Separator />
+              <div
+                ref={resultsRef}
+                className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto overscroll-contain p-2"
+              >
+                {resultsQuery.isError ? (
+                  <FinanceErrorState
+                    message={financeErrorMessage(resultsQuery.error)}
+                    onRetry={() => void resultsQuery.refetch()}
+                    isRetrying={resultsQuery.isFetching}
                   />
-                </div>
-              ))
-            )}
-            </div>
-          </motion.div>
+                ) : resultsQuery.isPending ? (
+                  <FinanceListSkeleton rows={3} />
+                ) : items.length === 0 ? (
+                  <Empty className="py-6">
+                    <EmptyHeader>
+                      <EmptyMedia variant="icon">
+                        <SearchIcon />
+                      </EmptyMedia>
+                      <EmptyTitle>Sin resultados</EmptyTitle>
+                      <EmptyDescription>
+                        Ningún movimiento coincide con «{debouncedSearch}».
+                      </EmptyDescription>
+                    </EmptyHeader>
+                    <EmptyContent>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={clearSearch}
+                      >
+                        <XIcon />
+                        Limpiar
+                      </Button>
+                    </EmptyContent>
+                  </Empty>
+                ) : (
+                  items.map((transaction) => (
+                    <div
+                      key={transaction.id}
+                      role="option"
+                      aria-selected={false}
+                      className="shrink-0 overflow-hidden rounded-2xl border border-border"
+                    >
+                      <TransactionMovementRow
+                        transaction={transaction}
+                        categories={categories}
+                        display={display}
+                        onPress={() => {
+                          close()
+                          onSelect(transaction.id)
+                        }}
+                      />
+                    </div>
+                  ))
+                )}
+              </div>
+            </motion.div>
           ) : null}
         </AnimatePresence>
       </div>

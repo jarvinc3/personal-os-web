@@ -225,7 +225,8 @@ export function formatDayHeaderLabel(date: Date): string {
   const weekdayLabel = weekday.charAt(0).toUpperCase() + weekday.slice(1)
   const day = format(date, "d")
   const month = format(date, "MMM", { locale: es }).replace(".", "")
-  const monthLabel = month.charAt(0).toUpperCase() + month.slice(1).toLowerCase()
+  const monthLabel =
+    month.charAt(0).toUpperCase() + month.slice(1).toLowerCase()
   return `${weekdayLabel} ${day} ${monthLabel}.`
 }
 

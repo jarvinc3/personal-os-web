@@ -8,46 +8,46 @@ Verificado contra `develop` (web v0.32.1, back v0.29.1) el 15 oct 2026.
 
 Back (`packages/finance/src/subscriptions/`):
 
-| Dato / endpoint | Estado |
-| --- | --- |
-| `GET /finance/subscriptions` (lista con `paymentMethod`, `category`, `monthlyEquivalent`, `daysUntil`) | ✅ existe |
-| `GET /finance/subscriptions/summary` (`monthlyCost`, `annualCost`, `activeCount`, `pendingDetectedCount`, `upcoming`) | ✅ existe; `upcoming` usa la constante fija `UPCOMING_WINDOW_DAYS = 7` |
-| `GET /finance/subscriptions/upcoming` (`days` o `from&to`) | ✅ existe; sirve para el calendario |
-| `GET /finance/subscriptions/breakdown` | ✅ existe; la v3 ya no lo usa en la vista |
-| `GET /finance/subscriptions/alerts` + `POST alerts/dismiss` | ✅ existe; tipos `PRICE_INCREASE`, `TRIAL_ENDING`, `ANNUAL_RENEWAL`, `MISSED_CHARGE`; descarte de uno en uno |
-| `GET/POST /finance/subscriptions/:id/payments` | ✅ existe; de aquí se deriva el historial de precio |
-| `GET/PATCH /:id`, `pause`, `resume`, `cancel`, `logo` | ✅ existe |
-| Ajuste global `subscriptions.reminderDaysBefore` (`packages/users/src/domain/defaults/user-settings-defaults.ts`) | ✅ existe, **default 3** (hay que pasarlo a 5) |
-| `reminderDaysBefore` por suscripción (columna en `fin_subscriptions`, se copia del global al crear) | ✅ existe; con la v3 deja de usarse en la UI |
-| Alerta «monto distinto al esperado» (cobró menos o distinto, no solo subida) | ❌ no existe: solo `PRICE_INCREASE` |
-| Marcar todas las alertas como vistas en una llamada | ❌ no existe |
-| Historial de precio como serie de cambios | ❌ no existe como endpoint; se deriva de `payments` |
+| Dato / endpoint                                                                                                       | Estado                                                                                                       |
+| --------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `GET /finance/subscriptions` (lista con `paymentMethod`, `category`, `monthlyEquivalent`, `daysUntil`)                | ✅ existe                                                                                                    |
+| `GET /finance/subscriptions/summary` (`monthlyCost`, `annualCost`, `activeCount`, `pendingDetectedCount`, `upcoming`) | ✅ existe; `upcoming` usa la constante fija `UPCOMING_WINDOW_DAYS = 7`                                       |
+| `GET /finance/subscriptions/upcoming` (`days` o `from&to`)                                                            | ✅ existe; sirve para el calendario                                                                          |
+| `GET /finance/subscriptions/breakdown`                                                                                | ✅ existe; la v3 ya no lo usa en la vista                                                                    |
+| `GET /finance/subscriptions/alerts` + `POST alerts/dismiss`                                                           | ✅ existe; tipos `PRICE_INCREASE`, `TRIAL_ENDING`, `ANNUAL_RENEWAL`, `MISSED_CHARGE`; descarte de uno en uno |
+| `GET/POST /finance/subscriptions/:id/payments`                                                                        | ✅ existe; de aquí se deriva el historial de precio                                                          |
+| `GET/PATCH /:id`, `pause`, `resume`, `cancel`, `logo`                                                                 | ✅ existe                                                                                                    |
+| Ajuste global `subscriptions.reminderDaysBefore` (`packages/users/src/domain/defaults/user-settings-defaults.ts`)     | ✅ existe, **default 3** (hay que pasarlo a 5)                                                               |
+| `reminderDaysBefore` por suscripción (columna en `fin_subscriptions`, se copia del global al crear)                   | ✅ existe; con la v3 deja de usarse en la UI                                                                 |
+| Alerta «monto distinto al esperado» (cobró menos o distinto, no solo subida)                                          | ❌ no existe: solo `PRICE_INCREASE`                                                                          |
+| Marcar todas las alertas como vistas en una llamada                                                                   | ❌ no existe                                                                                                 |
+| Historial de precio como serie de cambios                                                                             | ❌ no existe como endpoint; se deriva de `payments`                                                          |
 
 Web (`src/modules/finance/subscriptions/`): `subscriptions-screen.tsx` con las 7 secciones del 10 (hero en `SummarySection`, anillo de distribución, franja de próximos, alertas inline, cards con barra de progreso, detectados, pie de canceladas); `subscription-detail-screen.tsx` sin tabs; `components/subscription-card.tsx`; lógica en `lib/subscription-view.ts` y `lib/subscription-display.ts`. Hooks en `shared/hooks/use-subscriptions.ts` (`useSubscriptions`, `useSubscriptionSummary`, `useSubscriptionsUpcoming`, `useSubscriptionAlerts`, `useDismissSubscriptionAlert`, `useSubscription`, `useSubscriptionPayments`, mutaciones).
 
 ## Brechas (actual → objetivo)
 
-| Actual (10) | Objetivo (14) |
-| --- | --- |
-| Hero dentro de `SummarySection` con tendencia | Hero suelto como Planificación/Productos; mensual grande + «RD$X al año · N activas» |
-| Barra de acciones Nueva / Por confirmar / Calendario | Exactamente 4 atajos con icono y badge: Próximos, Alertas, Detectados, Calendario |
-| Anillo de distribución con segmentado | Se elimina de la vista |
-| Franja de próximos 30 días y alertas inline | Nada se expande inline: Próximos, Alertas y Detectados abren sheets; Calendario abre una ruta |
-| Filtros estado/moneda/búsqueda inline | Bottom sheet de filtros con filas, pickers reales, segmentados y «Ordenar por»; chips mínimos |
-| Card con barra de progreso interna | Card estilo v2 con anillo SVG alrededor del logo; sin barra interna |
-| «en N días» siempre | Dentro de la ventana: Hoy / Mañana / en N días + borde ámbar; fuera: fecha corta («17 oct») |
-| Ventana fija de 7 días (back) | Ventana = ajuste global `reminderDaysBefore` (default 5) |
-| Detalle sin tabs | Tabs Resumen / Pagos / Precio como en el detalle de tarjeta |
+| Actual (10)                                          | Objetivo (14)                                                                                 |
+| ---------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| Hero dentro de `SummarySection` con tendencia        | Hero suelto como Planificación/Productos; mensual grande + «RD$X al año · N activas»          |
+| Barra de acciones Nueva / Por confirmar / Calendario | Exactamente 4 atajos con icono y badge: Próximos, Alertas, Detectados, Calendario             |
+| Anillo de distribución con segmentado                | Se elimina de la vista                                                                        |
+| Franja de próximos 30 días y alertas inline          | Nada se expande inline: Próximos, Alertas y Detectados abren sheets; Calendario abre una ruta |
+| Filtros estado/moneda/búsqueda inline                | Bottom sheet de filtros con filas, pickers reales, segmentados y «Ordenar por»; chips mínimos |
+| Card con barra de progreso interna                   | Card estilo v2 con anillo SVG alrededor del logo; sin barra interna                           |
+| «en N días» siempre                                  | Dentro de la ventana: Hoy / Mañana / en N días + borde ámbar; fuera: fecha corta («17 oct»)   |
+| Ventana fija de 7 días (back)                        | Ventana = ajuste global `reminderDaysBefore` (default 5)                                      |
+| Detalle sin tabs                                     | Tabs Resumen / Pagos / Precio como en el detalle de tarjeta                                   |
 
 ## Decisiones acordadas
 
 1. **Hero suelto** (no `SummarySection`), con el patrón de `dashboard/components/home-hero.tsx` (Planificación) y el hero de Productos. Número grande = gasto mensual equivalente en moneda base. Línea pequeña: total anual y número de activas.
 2. **Exactamente 4 atajos** con icono y badge:
-   - **Próximos**: badge tipo *dot* si hay cobros dentro de la ventana; abre un sheet.
+   - **Próximos**: badge tipo _dot_ si hay cobros dentro de la ventana; abre un sheet.
    - **Alertas** (subida de precio, monto cobrado distinto al esperado, cobro no registrado): badge con conteo; abre un sheet.
    - **Detectados del correo**: badge con conteo (`pendingDetectedCount`); abre un sheet.
    - **Calendario**: abre una vista/ruta nueva (`/finance/subscriptions/calendar`).
-   Nada se expande inline en la vista.
+     Nada se expande inline en la vista.
 3. **Filtros en bottom sheet**:
    - Filas con etiqueta, valor actual y chevron.
    - **Método de pago** abre el picker real `shared/components/pickers/destination-picker-sheet.tsx` (institución → cuenta/tarjeta).
@@ -88,16 +88,16 @@ Web (`src/modules/finance/subscriptions/`): `subscriptions-screen.tsx` con las 7
 
 ### Reutilizar vs crear
 
-| Reutilizar | Crear |
-| --- | --- |
-| `home-hero.tsx` / hero de Productos (patrón) | `SubscriptionsHero` |
-| `destination-picker-sheet.tsx` | `subscription-filters-sheet.tsx` |
-| `category-picker-sheet.tsx` (`multiple`) | `upcoming-sheet.tsx`, `alerts-sheet.tsx`, `detected-sheet.tsx` |
-| `FinanceSegmentedControl` | `subscription-progress-ring.tsx` |
-| `BrandLogo` | ruta de calendario |
-| `Tabs` + patrón de `card-detail-screen.tsx` | tabs `Resumen`, `Pagos`, `Precio` del detalle |
-| `calendar-weeks.ts`, `MonthPicker` | gráfico de precio (reutilizar el chart de líneas existente si hay uno) |
-| hooks de `use-subscriptions.ts` | `useDismissAllSubscriptionAlerts` |
+| Reutilizar                                   | Crear                                                                  |
+| -------------------------------------------- | ---------------------------------------------------------------------- |
+| `home-hero.tsx` / hero de Productos (patrón) | `SubscriptionsHero`                                                    |
+| `destination-picker-sheet.tsx`               | `subscription-filters-sheet.tsx`                                       |
+| `category-picker-sheet.tsx` (`multiple`)     | `upcoming-sheet.tsx`, `alerts-sheet.tsx`, `detected-sheet.tsx`         |
+| `FinanceSegmentedControl`                    | `subscription-progress-ring.tsx`                                       |
+| `BrandLogo`                                  | ruta de calendario                                                     |
+| `Tabs` + patrón de `card-detail-screen.tsx`  | tabs `Resumen`, `Pagos`, `Precio` del detalle                          |
+| `calendar-weeks.ts`, `MonthPicker`           | gráfico de precio (reutilizar el chart de líneas existente si hay uno) |
+| hooks de `use-subscriptions.ts`              | `useDismissAllSubscriptionAlerts`                                      |
 
 ## Mockups de referencia
 

@@ -174,7 +174,7 @@ export function SummaryItem({
       : undefined
 
   const rowClassName = cn(
-    "flex w-full items-center gap-3 hover:rounded-2xl p-2 text-left transition-all duration-200",
+    "flex w-full items-center gap-3 p-2 text-left transition-all duration-200 hover:rounded-2xl",
     !isInteractive && !isLast && "border-b border-border/60",
     isInteractive && cn(PRESSABLE_CLASS, "hover:bg-muted/50"),
     onPress && "cursor-pointer",
