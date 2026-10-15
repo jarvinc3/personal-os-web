@@ -2,6 +2,12 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.38.2] - 2026-10-15
+
+### Corregido
+
+- El cierre del pendiente 18 documenta el ajuste de los e2e del back al contrato paginado y al español.
+
 ## [0.38.1] - 2026-10-15
 
 ### Corregido
