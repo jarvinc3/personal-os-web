@@ -12,6 +12,7 @@ import {
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
 import { Button } from "@/src/shared/components/ui/button"
 import { SummaryItem } from "@/src/shared/components/ui/summary"
+import { LinkPendingOverlay } from "@/src/shared/components/ui/navigation-pending"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { ChatLauncherButton, useRegisterChatContext } from "@/src/modules/ai"
 import { ReceiptIcon, XIcon } from "lucide-react"
@@ -95,9 +96,11 @@ export function InstallmentDetailSheet({
                 href={APP_ROUTES.app.financeTransaction(
                   installment.transactionId
                 )}
+                className="relative"
               >
                 <ReceiptIcon className="size-4 shrink-0" />
                 Ver movimiento
+                <LinkPendingOverlay spinnerClassName="size-4" />
               </Link>
             </Button>
           ) : null}

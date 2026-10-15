@@ -3,6 +3,8 @@
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { motion } from "motion/react"
 import Link from "next/link"
+
+import { LinkPendingOverlay } from "@/src/shared/components/ui/navigation-pending"
 import { landingContent } from "@/src/modules/landing/data/site-info"
 
 export function HeroSection() {
@@ -108,9 +110,10 @@ export function HeroSection() {
           ¿Ya tienes cuenta?{" "}
           <Link
             href={APP_ROUTES.auth.login}
-            className="font-medium text-foreground underline-offset-4 hover:underline"
+            className="relative font-medium text-foreground underline-offset-4 hover:underline"
           >
             Iniciar sesión
+            <LinkPendingOverlay spinnerClassName="size-3" />
           </Link>
         </motion.p>
 

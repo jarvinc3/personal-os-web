@@ -1,6 +1,7 @@
 import Link from "next/link"
 
 import { AppLogo } from "@/src/shared/components/brand/app-logo"
+import { LinkPendingOverlay } from "@/src/shared/components/ui/navigation-pending"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { landingContent, siteInfo } from "@/src/modules/landing/data/site-info"
 
@@ -16,7 +17,7 @@ export function Footer() {
           <div className="md:col-span-2">
             <Link
               href={APP_ROUTES.marketing.landing}
-              className="group mb-4 flex items-center gap-2.5"
+              className="group relative mb-4 flex items-center gap-2.5"
             >
               <AppLogo
                 size="md"
@@ -25,6 +26,7 @@ export function Footer() {
               <span className="text-base font-semibold tracking-tight">
                 {siteInfo.name}
               </span>
+              <LinkPendingOverlay />
             </Link>
             <p className="mb-6 max-w-xs text-sm leading-relaxed text-muted-foreground">
               {landingContent.footer.description}
@@ -50,9 +52,10 @@ export function Footer() {
                   <li key={link.href}>
                     <Link
                       href={link.href}
-                      className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                      className="relative text-sm text-muted-foreground transition-colors hover:text-foreground"
                     >
                       {link.label}
+                      <LinkPendingOverlay spinnerClassName="size-3" />
                     </Link>
                   </li>
                 ))}

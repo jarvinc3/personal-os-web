@@ -1,6 +1,7 @@
 "use client"
 
 import { cn } from "@/src/shared/lib/utils"
+import { LinkPendingOverlay } from "@/src/shared/components/ui/navigation-pending"
 import Link from "next/link"
 import type { ReactNode } from "react"
 
@@ -107,9 +108,10 @@ function renderInline(text: string, keyPrefix: string): ReactNode[] {
           <Link
             key={`${keyPrefix}-${partIndex}`}
             href={url}
-            className={linkClass}
+            className={cn(linkClass, "relative")}
           >
             {label}
+            <LinkPendingOverlay spinnerClassName="size-3" />
           </Link>
         )
       }

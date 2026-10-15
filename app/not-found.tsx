@@ -1,5 +1,6 @@
 import { AppLogo } from "@/src/shared/components/brand/app-logo"
 import { Button } from "@/src/shared/components/ui/button"
+import { LinkPendingOverlay } from "@/src/shared/components/ui/navigation-pending"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { ArrowLeftIcon, MailIcon } from "lucide-react"
 import type { Metadata } from "next"
@@ -16,7 +17,7 @@ export default function NotFound() {
       <div className="flex flex-col items-center gap-4">
         <Link
           href={APP_ROUTES.marketing.landing}
-          className="group flex items-center gap-2.5"
+          className="group relative flex items-center gap-2.5"
         >
           <AppLogo
             size="lg"
@@ -25,6 +26,7 @@ export default function NotFound() {
           <span className="text-xl font-semibold tracking-tight">
             Personal OS
           </span>
+          <LinkPendingOverlay />
         </Link>
       </div>
 
@@ -50,9 +52,10 @@ export default function NotFound() {
             size="lg"
             className="shadow-[4px_4px_0px_0px_#111827] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none"
           >
-            <Link href={APP_ROUTES.marketing.landing}>
+            <Link href={APP_ROUTES.marketing.landing} className="relative">
               <ArrowLeftIcon className="size-4 shrink-0" />
               Volver al inicio
+              <LinkPendingOverlay spinnerClassName="size-4" />
             </Link>
           </Button>
           <Button
@@ -61,9 +64,10 @@ export default function NotFound() {
             size="lg"
             className="border-2 border-text shadow-[4px_4px_0px_0px_#111827] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none"
           >
-            <Link href="/contact">
+            <Link href="/contact" className="relative">
               <MailIcon className="size-4 shrink-0" />
               Contactar soporte
+              <LinkPendingOverlay spinnerClassName="size-4" />
             </Link>
           </Button>
         </div>

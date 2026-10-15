@@ -4,6 +4,7 @@ import { chatMoneyDisplay } from "@/src/modules/ai/components/blocks/chat-money"
 import type { ChatBlock } from "@/src/modules/ai/types/chat.types"
 import { formatFinanceMoney } from "@/src/modules/finance"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
+import { LinkPendingOverlay } from "@/src/shared/components/ui/navigation-pending"
 import { ChevronRightIcon } from "lucide-react"
 import Link from "next/link"
 
@@ -29,7 +30,7 @@ export function ChatLoanSummary({ block }: ChatLoanSummaryProps) {
   return (
     <Link
       href={APP_ROUTES.app.financeLoan(block.loanId)}
-      className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3 transition-colors hover:bg-muted/50"
+      className="relative flex items-center gap-3 rounded-2xl border border-border bg-card p-3 transition-colors hover:bg-muted/50"
     >
       <span className="min-w-0 flex-1">
         <span className="block truncate text-sm font-medium">
@@ -47,6 +48,7 @@ export function ChatLoanSummary({ block }: ChatLoanSummaryProps) {
         ) : null}
       </span>
       <ChevronRightIcon className="size-4 shrink-0 text-muted-foreground" />
+      <LinkPendingOverlay />
     </Link>
   )
 }

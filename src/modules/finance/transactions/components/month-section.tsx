@@ -18,6 +18,7 @@ import type {
   FinanceTransaction,
 } from "@/src/modules/finance/shared/types/entities"
 import { SummaryItem } from "@/src/shared/components/ui/summary"
+import { LinkPendingOverlay } from "@/src/shared/components/ui/navigation-pending"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { cn } from "@/src/shared/lib/utils"
 import { Undo2Icon } from "lucide-react"
@@ -213,13 +214,14 @@ export function FinanceMonthSection({
                                     href={APP_ROUTES.app.financeTransaction(
                                       transaction.linkedTransactionId
                                     )}
-                                    className="inline-flex items-center gap-1 text-xs font-medium text-info hover:underline"
+                                    className="relative inline-flex items-center gap-1 text-xs font-medium text-info hover:underline"
                                   >
                                     <Undo2Icon
                                       className="size-3.5"
                                       aria-hidden
                                     />
                                     Ver original
+                                    <LinkPendingOverlay spinnerClassName="size-3" />
                                   </Link>
                                 ) : undefined
                               }

@@ -3,6 +3,7 @@
 import { ChatTransactionRow } from "@/src/modules/ai/components/blocks/chat-transaction-row"
 import type { ChatBlock } from "@/src/modules/ai/types/chat.types"
 import { Button } from "@/src/shared/components/ui/button"
+import { LinkPendingOverlay } from "@/src/shared/components/ui/navigation-pending"
 import Link from "next/link"
 
 type ChatTransactionListProps = {
@@ -23,7 +24,10 @@ export function ChatTransactionList({ block }: ChatTransactionListProps) {
       </div>
       {block.moreHref ? (
         <Button asChild variant="ghost" size="sm" className="w-fit">
-          <Link href={block.moreHref}>Ver todos</Link>
+          <Link href={block.moreHref} className="relative">
+            Ver todos
+            <LinkPendingOverlay spinnerClassName="size-4" />
+          </Link>
         </Button>
       ) : null}
     </div>

@@ -128,6 +128,9 @@ export function FinanceMailboxesView({ enabled }: { enabled: boolean }) {
     )
     .sort((a, b) => b.startedAt.localeCompare(a.startedAt))
     .slice(0, 20)
+  const latestSyncLog = syncLogs[0]
+  const latestFailedLog =
+    latestSyncLog?.status === "FAILED" ? latestSyncLog : undefined
   const recentMessages = infiniteListItems(messagesQuery.data)
   const queueDown = healthQuery.data?.ready === false
 
@@ -172,6 +175,18 @@ export function FinanceMailboxesView({ enabled }: { enabled: boolean }) {
             Redis no responde. Los correos no se encolan. En desarrollo levanta
             Redis local (docker compose up -d redis) y usa
             REDIS_URL=redis://localhost:6379.
+          </AlertDescription>
+        </Alert>
+      ) : null}
+      {latestFailedLog ? (
+        <Alert variant="destructive" className="mb-4">
+          <TriangleAlertIcon />
+          <AlertTitle>
+            Falló el último sync de {latestFailedLog.sourceName}
+          </AlertTitle>
+          <AlertDescription>
+            {latestFailedLog.error ??
+              "Revisa la conexión de Gmail y vuelve a sincronizar."}
           </AlertDescription>
         </Alert>
       ) : null}
