@@ -2,6 +2,12 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.36.1] - 2026-10-15
+
+### Cambiado
+
+- La fila del pendiente 16 registra la revisión del back (v0.33.1): el índice único de la institución Efectivo vive solo en SQL para no depender de la vista previa `partialIndexes`.
+
 ## [0.36.0] - 2026-10-15
 
 ### Agregado
