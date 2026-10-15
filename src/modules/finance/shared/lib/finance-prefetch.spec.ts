@@ -83,13 +83,13 @@ describe("prefetchFinancePlanning", () => {
     const { get, paths } = createMockGet()
     await prefetchFinancePlanning(queryClient, get)
     assert.deepEqual([...new Set(paths)].sort(), [
-      "/finance/accounts",
+      "/finance/accounts?limit=100",
       "/finance/budgets?limit=20",
       "/finance/categories",
-      "/finance/institutions",
-      "/finance/loans",
-      "/finance/receivables",
-      "/finance/savings-goals",
+      "/finance/institutions?limit=100",
+      "/finance/loans?limit=100",
+      "/finance/receivables?limit=100",
+      "/finance/savings-goals?limit=100",
     ])
 
     for (const key of PLANNING_KEYS) {

@@ -32,6 +32,13 @@ export type FinanceQueryGet = <T = unknown>(path: string) => Promise<T>
 /** Default page size for the finance lists that grow with the user's data. */
 export const FINANCE_LIST_PAGE_SIZE = 20
 
+/**
+ * Page size for lookup reads (selects, filters, cross-references). The API
+ * paginates these lists; a lookup wants the whole bounded set on the first
+ * page, so it asks for the maximum the endpoint accepts.
+ */
+export const FINANCE_LOOKUP_PAGE_LIMIT = 100
+
 async function defaultFinanceGet<T = unknown>(path: string): Promise<T> {
   const { apiGet } = await import("@/src/config/api-client")
   return apiGet<T>(path)
@@ -96,6 +103,24 @@ export function buildFinanceQueryPath(input: {
   return query ? `${input.endpoint}?${query}` : input.endpoint
 }
 
+/**
+ * First page of a cursor-paginated list, unwrapped to its rows. Lookups
+ * (selects, filters, cross-references) use this; screens that list a growing
+ * set use `useInfiniteFinanceList` instead.
+ */
+async function financeLookupItems<T>(
+  endpoint: string,
+  get: FinanceQueryGet
+): Promise<T[]> {
+  const page = await get<FinancePaginated<T>>(
+    buildFinanceQueryPath({
+      endpoint,
+      params: { limit: FINANCE_LOOKUP_PAGE_LIMIT },
+    })
+  )
+  return Array.isArray(page.items) ? page.items : []
+}
+
 /** Shared option builder for `useInfiniteQuery` over a cursor-paginated list. */
 export function financeInfiniteListQuery<TPage extends FinanceListPage>({
   queryKey,
@@ -134,44 +159,45 @@ export function categoriesQuery(get: FinanceQueryGet = defaultFinanceGet) {
 export function accountsQuery(get: FinanceQueryGet = defaultFinanceGet) {
   return {
     queryKey: FINANCE_ACCOUNTS_QUERY_KEY,
-    queryFn: () => get<FinanceAccount[]>(PATHS.accounts),
+    queryFn: () => financeLookupItems<FinanceAccount>(PATHS.accounts, get),
   }
 }
 
 export function institutionsQuery(get: FinanceQueryGet = defaultFinanceGet) {
   return {
     queryKey: FINANCE_INSTITUTIONS_QUERY_KEY,
-    queryFn: () => get<FinanceInstitution[]>(PATHS.institutions),
+    queryFn: () =>
+      financeLookupItems<FinanceInstitution>(PATHS.institutions, get),
   }
 }
 
 export function cardsQuery(get: FinanceQueryGet = defaultFinanceGet) {
   return {
     queryKey: FINANCE_CARDS_QUERY_KEY,
-    queryFn: () => get<FinanceCard[]>(PATHS.cards),
+    queryFn: () => financeLookupItems<FinanceCard>(PATHS.cards, get),
   }
 }
 
 export function savingsGoalsQuery(get: FinanceQueryGet = defaultFinanceGet) {
   return {
     queryKey: FINANCE_SAVINGS_GOALS_QUERY_KEY,
-    queryFn: async () =>
-      asFinanceArray<FinanceSavingsGoal>(await get(PATHS.savingsGoals)),
+    queryFn: () =>
+      financeLookupItems<FinanceSavingsGoal>(PATHS.savingsGoals, get),
   }
 }
 
 export function loansQuery(get: FinanceQueryGet = defaultFinanceGet) {
   return {
     queryKey: FINANCE_LOANS_QUERY_KEY,
-    queryFn: async () => asFinanceArray<FinanceLoan>(await get(PATHS.loans)),
+    queryFn: () => financeLookupItems<FinanceLoan>(PATHS.loans, get),
   }
 }
 
 export function receivablesQuery(get: FinanceQueryGet = defaultFinanceGet) {
   return {
     queryKey: FINANCE_RECEIVABLES_QUERY_KEY,
-    queryFn: async () =>
-      asFinanceArray<FinanceReceivable>(await get(PATHS.receivables)),
+    queryFn: () =>
+      financeLookupItems<FinanceReceivable>(PATHS.receivables, get),
   }
 }
 

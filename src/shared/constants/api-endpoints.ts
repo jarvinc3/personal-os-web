@@ -20,7 +20,7 @@ export const API_ENDPOINTS = {
     MARK_READ: (id: string) => `/notifications/${id}/read`,
     PUSH_TOKENS: "/notifications/push-tokens",
     DEACTIVATE_PUSH_TOKEN: (token: string) =>
-      `/notifications/push-tokens/${token}/deactivate`,
+      `/notifications/push-tokens/${token}`,
   },
   AI: {
     PROVIDERS: "/ai/providers",
@@ -132,7 +132,7 @@ export const API_ENDPOINTS = {
     ANALYTICS_SPENDING_BY_CATEGORY: "/finance/analytics/spending-by-category",
     ANALYTICS_BUDGET_STATUS: "/finance/analytics/budget-status",
     ANALYTICS_SPENDING_OVER_TIME: "/finance/analytics/spending-over-time",
-    ANALYTICS_BANK_CHARGES: "/finance/analytics/bank-charges",
+    ANALYTICS_BANK_CHARGES: "/finance/bank-charges",
     BALANCE_SHEET: "/finance/balance-sheet",
     QUICK_ENTRY_PARSE: "/finance/quick-entry/parse",
     OAUTH_GOOGLE_URL: "/finance/email-sync/oauth/google/url",

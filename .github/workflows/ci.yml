@@ -29,5 +29,22 @@ jobs:
       - name: Typecheck
         run: pnpm exec tsc --noEmit
 
+      - name: Lint
+        run: pnpm run lint
+
+      - name: Format check
+        run: pnpm run format:check
+
       - name: Unit tests
         run: pnpm run --if-present test
+
+      - name: Build
+        run: pnpm run build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: https://ci.supabase.co
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ci-publishable-key
+          NEXT_PUBLIC_API_URL: http://localhost:3100
+          NEXT_PUBLIC_API_PREFIX: api
+          NEXT_PUBLIC_APP_NAME: Personal OS
+          NEXT_PUBLIC_URL: http://localhost:3000
+          NEXT_PUBLIC_APP_URL: http://localhost:3000

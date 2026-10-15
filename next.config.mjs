@@ -3,6 +3,10 @@ import { createRequire as sideroomCreateRequire } from "node:module"
 
 const sideroomRequire = sideroomCreateRequire(import.meta.url)
 
+// The runtime entry does not expose withSentryConfig; the build helper lives
+// in the `./config` subpath and ships as CommonJS.
+const { withSentryConfig } = sideroomRequire("@sentry/nextjs/config")
+
 // Resolve the loader only inside development so a production install without
 // devDependencies never loads it.
 function sideroomLoader() {
@@ -89,4 +93,14 @@ const nextConfig = {
   },
 }
 
-export default nextConfig
+export default withSentryConfig(nextConfig, {
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  silent: !process.env.CI,
+  // Source maps upload only when a token is present; without one the build
+  // keeps going and no release is created.
+  sourcemaps: {
+    disable: !process.env.SENTRY_AUTH_TOKEN?.trim(),
+  },
+})
