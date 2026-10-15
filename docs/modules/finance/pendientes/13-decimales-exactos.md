@@ -33,7 +33,7 @@
 
 ## Implementación
 
-PENDIENTE 13 COMPLETADO — web v0.35.0 · back v0.32.0–v0.32.2 (2026-10-22).
+PENDIENTE 13 COMPLETADO — web v0.35.0–v0.35.1 · back v0.32.0–v0.32.3 (2026-10-22).
 
 ### Back
 
@@ -47,6 +47,12 @@ PENDIENTE 13 COMPLETADO — web v0.35.0 · back v0.32.0–v0.32.2 (2026-10-22).
 - Dependencia `decimal.js-light` y utilidad `shared/lib/decimal.ts` (`toDecimal`, `sumDecimals`, `roundDecimal`, `decimalPercent`, `decimalAmount`).
 - Totales y gráficos de dashboards, Suscripciones y el anillo usan la utilidad; los formateadores ya aceptaban string.
 - Tests: `decimal.spec.ts`, total de `subscription-calendar` y suma de efectivo en `ring-stack`.
+
+### Revisión (2026-10-22)
+
+- Back: el costo equivalente mensual y anual de recurrentes (`monthlyAmount`, `annualAmount`) pasa a `Prisma.Decimal` con `ROUND_HALF_EVEN`; el gasto del mes de comercios conserva la suma exacta del agregado (`Prisma.Decimal` → string). `pnpm lint:money` cubre también `merchants`.
+- Web: el anillo de Efectivo no mide cuando las cuentas de efectivo no comparten la moneda base (ADR-002: no sumar monedas distintas en el cliente).
+- Tests añadidos: `resolve-amounts.use-case.spec.ts` (conversión de un millón, redondeo bancario y fallo sin tasa), equivalencias de recurrentes, gasto exacto de comercios y anillo de efectivo con monedas mixtas.
 
 ## Tests
 
