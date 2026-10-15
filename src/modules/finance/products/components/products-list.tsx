@@ -12,6 +12,17 @@ import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-financ
 import { useInstitutions } from "@/src/modules/finance/shared/hooks/use-institutions"
 import { useLoans } from "@/src/modules/finance/shared/hooks/use-loans"
 import { useMonthExpenseTrend } from "@/src/modules/finance/shared/hooks/use-month-expense-trend"
+import { ReconciliationMonthStatus } from "@/src/modules/finance/reconciliation"
+import { bankChargesQuery } from "@/src/modules/finance/shared/hooks/use-reconciliations"
+import { todayDateInput } from "@/src/modules/finance/shared/lib/ledger-form"
+import { bankChargesRange } from "@/src/modules/finance/shared/lib/reconciliation"
+import { BalanceIntegrityAlert } from "@/src/modules/finance/integrity"
+import { recalculationPayload } from "@/src/modules/finance/shared/lib/integrity"
+import {
+  useFinanceIntegrity,
+  useRecalculateBalance,
+} from "@/src/modules/finance/shared/hooks/use-integrity"
+import { monthKeyFromDate } from "@/src/modules/finance/shared/lib/month-window"
 import { useSheetListEntity } from "@/src/modules/finance/shared/hooks/use-sheet-entity"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
@@ -40,13 +51,16 @@ import {
 } from "@/src/shared/components/ui/empty"
 import { SummaryItem } from "@/src/shared/components/ui/summary"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
+import { appToast } from "@/src/shared/lib/app-toast"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { useQueryClient } from "@tanstack/react-query"
 import {
   Building2Icon,
   ChevronDownIcon,
+  LandmarkIcon,
   MailIcon,
   PlusIcon,
+  StoreIcon,
   TagsIcon,
   Trash2Icon,
   WalletIcon,
@@ -76,6 +90,8 @@ export function FinanceProductsList({
   const loansQuery = useLoans(enabled)
   const categoriesQuery = useCategories(enabled)
   const balanceSheetQuery = useBalanceSheet(enabled)
+  const integrityQuery = useFinanceIntegrity(enabled)
+  const recalculateBalance = useRecalculateBalance()
   const {
     open: openAccountSheet,
     sheetId: accountSheetId,
@@ -114,6 +130,7 @@ export function FinanceProductsList({
         cards: cardsQuery.data ?? [],
         loans: loansQuery.data ?? [],
         positions: balanceSheetQuery.data?.institutions,
+        cash: balanceSheetQuery.data?.cash,
       }),
     [
       institutionsQuery.data,
@@ -121,6 +138,7 @@ export function FinanceProductsList({
       cardsQuery.data,
       loansQuery.data,
       balanceSheetQuery.data?.institutions,
+      balanceSheetQuery.data?.cash,
     ]
   )
 
@@ -180,6 +198,26 @@ export function FinanceProductsList({
         netWorthComplete={global?.status === "COMPLETE"}
       />
 
+      <ReconciliationMonthStatus
+        enabled={enabled}
+        month={monthKeyFromDate(new Date())}
+        monthLabel={monthKeyFromDate(new Date())}
+        display={moneyDisplay}
+      />
+
+      <BalanceIntegrityAlert
+        drifts={integrityQuery.data?.drifts ?? []}
+        display={moneyDisplay}
+        pending={recalculateBalance.isPending}
+        onRecalculate={(drift) => {
+          recalculateBalance.mutate(recalculationPayload(drift), {
+            onSuccess: () => appToast.success({ text1: "Saldo corregido" }),
+            onError: (error) =>
+              appToast.error({ text1: financeErrorMessage(error) }),
+          })
+        }}
+      />
+
       <div>
         <AsyncRegion
           pending={stackPending}
@@ -202,8 +240,8 @@ export function FinanceProductsList({
                 </EmptyMedia>
                 <EmptyTitle>Aún no hay instituciones</EmptyTitle>
                 <EmptyDescription>
-                  Agrégala antes de crear una cuenta o una tarjeta. También
-                  puedes crear una cuenta de efectivo sin institución.
+                  Agrégala antes de crear una cuenta o una tarjeta. Tu cuenta de
+                  Efectivo se crea sola.
                 </EmptyDescription>
               </EmptyHeader>
               <EmptyContent>
@@ -257,6 +295,29 @@ export function FinanceProductsList({
       <SettingsSection title="Atajos">
         <div
           onPointerEnter={() => {
+            void queryClient.prefetchQuery(
+              bankChargesQuery(bankChargesRange(todayDateInput()))
+            )
+          }}
+          onFocusCapture={() => {
+            void queryClient.prefetchQuery(
+              bankChargesQuery(bankChargesRange(todayDateInput()))
+            )
+          }}
+        >
+          <SummaryItem
+            title="Cargos bancarios"
+            description="Ajustes al conciliar cuentas y tarjetas"
+            icon={LandmarkIcon}
+            href={APP_ROUTES.app.financeBankCharges}
+            showChevron
+            isLast={false}
+            className="px-3"
+          />
+        </div>
+
+        <div
+          onPointerEnter={() => {
             void prefetchFinanceCategories(queryClient)
           }}
           onFocusCapture={() => {
@@ -273,6 +334,7 @@ export function FinanceProductsList({
             className="px-3"
           />
         </div>
+
         <div
           onPointerEnter={() => {
             if (emailSyncEnabled) {
@@ -295,6 +357,17 @@ export function FinanceProductsList({
             className="px-3"
           />
         </div>
+
+        <SummaryItem
+          title="Comercios"
+          description="Quién recibe tu dinero y cuánto"
+          icon={StoreIcon}
+          href={APP_ROUTES.app.financeMerchants}
+          showChevron
+          isLast={false}
+          className="px-3"
+        />
+
         <SummaryItem
           title="Papelera de reciclaje"
           description="Restaura lo archivado o eliminado"
@@ -346,6 +419,7 @@ export function FinanceProductsList({
           balanceSheetQuery.data?.baseCurrency ?? defaultCurrency
         }
         defaultType="CASH"
+        cash={balanceSheetQuery.data?.cash}
       />
 
       <CategorySheet

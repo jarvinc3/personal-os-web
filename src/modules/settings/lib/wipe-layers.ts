@@ -67,7 +67,7 @@ export const WIPE_LAYER_DESCRIPTIONS: Record<WipeLayerId, string> = {
   [WIPE_LAYERS.NOTIFICATIONS]:
     "Borra el historial de notificaciones y los tokens push.",
   [WIPE_LAYERS.SETTINGS_DEFAULTS]:
-    "Vuelve preferencias y configuración de módulos a sus valores por defecto.",
+    "Vuelve preferencias y configuración de apps a sus valores por defecto.",
 }
 
 export type WipeLayerGroup = {

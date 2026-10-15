@@ -4,7 +4,7 @@ import {
   BarChart3Icon,
   BriefcaseBusinessIcon,
   Calendar,
-  Wallet,
+  MonitorIcon,
   type LucideIcon,
 } from "lucide-react"
 
@@ -65,17 +65,6 @@ export const MODULE_REGISTRY: Record<ModuleSlug, ModuleDefinition> = {
     icon: BriefcaseBusinessIcon,
     order: 2,
   }),
-  subscriptions: createModuleDefinition({
-    slug: "subscriptions",
-    id: "7677a8ab-f1aa-4c9e-8fff-5ea2caddad9c",
-    key: "sub",
-    label: "Suscripciones",
-    description:
-      "Este modulo es el encargado de la gestion de las suscripciones del usuario.",
-    accent: "#F97316",
-    icon: Wallet,
-    order: 3,
-  }),
   health: createModuleDefinition({
     slug: "health",
     id: "fd782bbe-51ef-4f09-abd1-5c9885380b47",
@@ -86,6 +75,17 @@ export const MODULE_REGISTRY: Record<ModuleSlug, ModuleDefinition> = {
     accent: "#EF4444",
     icon: BarChart3,
     order: 4,
+  }),
+  keepAwake: createModuleDefinition({
+    slug: "keepAwake",
+    id: "64356435-6435-6435-6435-643564356435",
+    key: "kaw",
+    label: "Keep Awake",
+    description:
+      "Este modulo es el encargado de la gestion de la keep awake del usuario.",
+    accent: "#45AAF2",
+    icon: MonitorIcon,
+    order: 5,
   }),
 }
 

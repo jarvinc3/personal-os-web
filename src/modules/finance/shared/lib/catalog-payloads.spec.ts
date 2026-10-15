@@ -241,6 +241,54 @@ describe("buildCreateCardBody", () => {
     assert.equal(valid.body.lastFour, "4242")
   })
 
+  it("accepts closing and due days in 1..31 and rejects the rest", () => {
+    const valid = buildCreateCardBody({
+      institutionId: "inst-1",
+      name: "Crédito",
+      type: "CREDIT",
+      lastFour: "4242",
+      statementClosingDay: "31",
+      paymentDueDay: "15",
+    })
+    assert.equal(valid.ok, true)
+    if (!valid.ok) {
+      return
+    }
+    assert.equal(valid.body.statementClosingDay, 31)
+    assert.equal(valid.body.paymentDueDay, 15)
+
+    const zero = buildCreateCardBody({
+      institutionId: "inst-1",
+      name: "Crédito",
+      type: "CREDIT",
+      lastFour: "4242",
+      statementClosingDay: "0",
+    })
+    assert.equal(zero.ok, false)
+    if (zero.ok) {
+      return
+    }
+    assert.match(zero.error, /1 y 31/)
+
+    const high = buildCreateCardBody({
+      institutionId: "inst-1",
+      name: "Crédito",
+      type: "CREDIT",
+      lastFour: "4242",
+      paymentDueDay: "32",
+    })
+    assert.equal(high.ok, false)
+
+    const decimal = buildCreateCardBody({
+      institutionId: "inst-1",
+      name: "Crédito",
+      type: "CREDIT",
+      lastFour: "4242",
+      statementClosingDay: "15.5",
+    })
+    assert.equal(decimal.ok, false)
+  })
+
   it("sends color null on update and omits empty color on create", () => {
     const created = buildCreateCardBody({
       institutionId: "inst-1",

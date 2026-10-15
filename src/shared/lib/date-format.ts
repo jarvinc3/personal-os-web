@@ -219,12 +219,15 @@ export function formatMonthYearLabel(date: Date): string {
   return label.charAt(0).toUpperCase() + label.slice(1)
 }
 
-/** Encabezado de día en timeline: `jun 7 domingo`. */
+/** Encabezado de día en timeline: `Miércoles 14 Oct.`. */
 export function formatDayHeaderLabel(date: Date): string {
-  const month = format(date, "MMM", { locale: es }).toLowerCase()
+  const weekday = format(date, "EEEE", { locale: es })
+  const weekdayLabel = weekday.charAt(0).toUpperCase() + weekday.slice(1)
   const day = format(date, "d")
-  const weekday = format(date, "EEEE", { locale: es }).toLowerCase()
-  return `${month} ${day} ${weekday}`
+  const month = format(date, "MMM", { locale: es }).replace(".", "")
+  const monthLabel =
+    month.charAt(0).toUpperCase() + month.slice(1).toLowerCase()
+  return `${weekdayLabel} ${day} ${monthLabel}.`
 }
 
 export function formatNotificationDateSectionLabel(

@@ -2,6 +2,7 @@
 
 import { ChatActionCard } from "@/src/modules/ai/components/chat-action-card"
 import { ChatMarkdownBlock } from "@/src/modules/ai/components/chat-markdown-block"
+import { ChatBlockRenderer } from "@/src/modules/ai/components/blocks/chat-block-renderer"
 import { resolveMessageBlocks } from "@/src/modules/ai/lib/resolve-message-blocks"
 import type {
   AiActionSummary,
@@ -69,7 +70,7 @@ export function ChatMessageRenderer({
             </div>
           )
         }
-        return null
+        return <ChatBlockRenderer key={index} block={block} />
       })}
       {!isUser && !hasContent && streamingStatus ? (
         <p className="text-sm text-muted-foreground italic">

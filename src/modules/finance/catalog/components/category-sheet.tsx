@@ -16,7 +16,6 @@ import {
   buildCreateCategoryBody,
   buildUpdateCategoryBody,
 } from "@/src/modules/finance/shared/lib/catalog-payloads"
-import { filterCategoriesByType } from "@/src/modules/finance/shared/lib/category-tree"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import { showUndoToast } from "@/src/modules/finance/shared/components/undo-toast"
 import type {
@@ -24,12 +23,10 @@ import type {
   FinanceCategoryType,
 } from "@/src/modules/finance/shared/types/entities"
 import { DeleteRecordDialog } from "@/src/modules/finance/shared/components/delete-record-dialog"
+import { CategoryPickerSheet } from "@/src/modules/finance/shared/components/pickers/category-picker-sheet"
 import { CategoryTrigger } from "@/src/modules/finance/shared/components/pickers/category-trigger"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
-import {
-  FormTextField,
-  OptionRow,
-} from "@/src/shared/components/layout/form-blocks"
+import { FormTextField } from "@/src/shared/components/layout/form-blocks"
 import { Button } from "@/src/shared/components/ui/button"
 import { ColorPickerSwatch } from "@/src/shared/components/ui/color-picker"
 import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
@@ -46,7 +43,6 @@ import {
   ArrowDownCircleIcon,
   ArrowUpCircleIcon,
   ContactRoundIcon,
-  FolderTreeIcon,
   PaletteIcon,
   SaveIcon,
   TrashIcon,
@@ -136,17 +132,9 @@ export function CategorySheet({
   )
   const selectedParent = categories.find((item) => item.id === parentId) ?? null
 
-  const parentOptions = useMemo(
-    () => [
-      { value: CATALOG_NONE, label: "Sin padre" },
-      ...filterCategoriesByType(categories, selectedType)
-        .filter((item) => item.id !== category?.id && item.parentId == null)
-        .map((item) => ({
-          value: item.id,
-          label: `${item.icon ? `${item.icon} ` : ""}${item.name}`,
-        })),
-    ],
-    [categories, category?.id, selectedType]
+  const excludeParentIds = useMemo(
+    () => (category ? [category.id] : []),
+    [category]
   )
 
   useEffect(() => {
@@ -429,39 +417,18 @@ export function CategorySheet({
         onConfirm={() => void onDelete()}
       />
 
-      <BottomSheet
+      <CategoryPickerSheet
         open={picker === "parent"}
         onOpenChange={closeHandlerFor("parent")}
-        title="Categoría padre"
-      >
-        <div className="overflow-hidden rounded-2xl border border-border bg-card">
-          <OptionRow
-            label="Sin padre"
-            icon={FolderTreeIcon}
-            selected={parentId === CATALOG_NONE}
-            onPress={() => {
-              setValue("parentId", CATALOG_NONE, { shouldValidate: true })
-              closeHandlerFor("parent")(false)
-            }}
-          />
-          {parentOptions
-            .filter((option) => option.value !== CATALOG_NONE)
-            .map((option) => (
-              <OptionRow
-                key={option.value}
-                label={option.label}
-                icon={FolderTreeIcon}
-                selected={parentId === option.value}
-                onPress={() => {
-                  setValue("parentId", option.value, {
-                    shouldValidate: true,
-                  })
-                  closeHandlerFor("parent")(false)
-                }}
-              />
-            ))}
-        </div>
-      </BottomSheet>
+        categories={categories}
+        categoryType={selectedType}
+        onlyParents
+        excludeIds={excludeParentIds}
+        noneLabel="Sin padre"
+        onSelect={(next) =>
+          setValue("parentId", next, { shouldValidate: true })
+        }
+      />
     </>
   )
 }

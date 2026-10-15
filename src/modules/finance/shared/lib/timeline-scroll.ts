@@ -11,6 +11,22 @@ export function shouldFollowScroll(input: {
   return input.userTookOver && !input.isProgrammatic
 }
 
+/**
+ * Day to land on when the current month finishes loading.
+ * Prefers today, otherwise the latest day that already happened.
+ * `dayKeys` must be chronological.
+ */
+export function pickLandingDayKey(
+  dayKeys: readonly string[],
+  today: string
+): string | null {
+  const currentOrEarlier = dayKeys.filter((key) => key <= today)
+  if (currentOrEarlier.length > 0) {
+    return currentOrEarlier[currentOrEarlier.length - 1] ?? null
+  }
+  return dayKeys[0] ?? null
+}
+
 export function findActiveMonthKey(
   sections: ReadonlyArray<{ key: string; top: number }>,
   marker: number

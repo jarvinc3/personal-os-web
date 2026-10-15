@@ -45,19 +45,37 @@ import { RecordOptionsSheet } from "@/src/modules/finance/shared/components/reco
 import { LoadingView } from "@/src/shared/components/layout/loading-view"
 import { SettingsSection } from "@/src/shared/components/layout/settings-section"
 import { Button } from "@/src/shared/components/ui/button"
-import { Badge } from "@/src/shared/components/ui/badge"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/src/shared/components/ui/alert-dialog"
 import { Spinner } from "@/src/shared/components/ui/spinner"
-import { SummaryItem } from "@/src/shared/components/ui/summary"
+import { SummaryItem, SummarySection } from "@/src/shared/components/ui/summary"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
+import { ChatLauncherButton, useRegisterChatContext } from "@/src/modules/ai"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { ACCENT_FALLBACK_COLOR } from "@/src/shared/lib/accent-gradient"
 import { appToast } from "@/src/shared/lib/app-toast"
 import {
   ArrowLeftRightIcon,
+  CopyIcon,
+  ExternalLinkIcon,
+  GitMergeIcon,
+  LinkIcon,
   MoreVerticalIcon,
   PencilIcon,
+  RotateCcwIcon,
+  TargetIcon,
   Trash2Icon,
+  UnlinkIcon,
+  XIcon,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useMemo, useState } from "react"
@@ -151,6 +169,20 @@ function TransactionDetailScreenBody({
     useSheetParam(FINANCE_SHEET_KEYS.transactionOptions)
 
   const tx = detailQuery.data
+
+  useRegisterChatContext(
+    tx
+      ? {
+          moduleSlug: "finance",
+          screen: "transaction-detail",
+          entityRef: {
+            type: isTransferTransaction(tx) ? "transfer" : "transaction",
+            id: tx.id,
+          },
+          entityLabel: tx.description ?? tx.merchant ?? "Movimiento",
+        }
+      : null
+  )
   const isMutating =
     confirmMutation.isPending ||
     unconfirmMutation.isPending ||
@@ -195,6 +227,8 @@ function TransactionDetailScreenBody({
 
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [linkOpen, setLinkOpen] = useState(false)
+  const [mergeOpen, setMergeOpen] = useState(false)
+  const [unlinkOpen, setUnlinkOpen] = useState(false)
 
   async function onUnlink() {
     if (!tx) {
@@ -231,15 +265,18 @@ function TransactionDetailScreenBody({
 
   const headerActions = useMemo(
     () => (
-      <Button
-        variant="outline"
-        size="icon"
-        className="size-9 rounded-full"
-        aria-label="Opciones del movimiento"
-        onClick={() => setOpenOptionsSheet(true)}
-      >
-        <MoreVerticalIcon className="size-4.5" />
-      </Button>
+      <>
+        <ChatLauncherButton />
+        <Button
+          variant="outline"
+          size="icon"
+          className="size-9 rounded-full"
+          aria-label="Opciones del movimiento"
+          onClick={() => setOpenOptionsSheet(true)}
+        >
+          <MoreVerticalIcon className="size-4.5" />
+        </Button>
+      </>
     ),
     [setOpenOptionsSheet]
   )
@@ -284,92 +321,98 @@ function TransactionDetailScreenBody({
       ) : null}
 
       {tx.possibleDuplicateOfId ? (
-        <div className="mx-4 mb-3 flex flex-col gap-2 rounded-2xl border border-border p-3">
-          <div className="flex items-center gap-2">
-            <Badge variant="warning">¿Duplicado?</Badge>
-            <p className="text-sm text-muted-foreground">
+        <div className="mx-4 mb-3">
+          <SummarySection title="¿Duplicado?" icon={CopyIcon}>
+            <p className="px-1 text-sm text-muted-foreground">
               Puede ser el mismo hecho que otro movimiento.
             </p>
-          </div>
-          <div className="flex gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              disabled={mergeMutation.isPending}
-              onClick={() => void onMerge()}
-            >
-              Unir
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              disabled={notDuplicateMutation.isPending}
-              onClick={() => void onNotDuplicate()}
-            >
-              No es duplicado
-            </Button>
-          </div>
+            <div className="flex gap-2 px-1">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={mergeMutation.isPending}
+                onClick={() => setMergeOpen(true)}
+              >
+                <GitMergeIcon className="size-4 shrink-0" />
+                Unir
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={notDuplicateMutation.isPending}
+                onClick={() => void onNotDuplicate()}
+              >
+                <XIcon className="size-4 shrink-0" />
+                No es duplicado
+              </Button>
+            </div>
+          </SummarySection>
         </div>
       ) : null}
 
       {!isTransferTransaction(tx) ? (
-        <div className="mx-4 mb-3 flex flex-col gap-2 rounded-2xl border border-border p-3">
-          <p className="text-sm text-muted-foreground">Planificación</p>
-          {tx.planningLink ? (
-            <>
-              <p className="text-sm font-medium">{tx.planningLink.label}</p>
+        <div className="mx-4 mb-3">
+          <SummarySection title="Planificación" icon={TargetIcon}>
+            {tx.planningLink ? (
+              <>
+                <p className="px-1 text-sm font-medium">
+                  {tx.planningLink.label}
+                </p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="self-start"
+                  disabled={unlinkMutation.isPending}
+                  onClick={() => setUnlinkOpen(true)}
+                >
+                  <UnlinkIcon className="size-4 shrink-0" />
+                  Quitar vínculo
+                </Button>
+              </>
+            ) : (
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
                 className="self-start"
-                disabled={unlinkMutation.isPending}
-                onClick={() => void onUnlink()}
+                onClick={() => setLinkOpen(true)}
               >
-                Quitar vínculo
+                <LinkIcon className="size-4 shrink-0" />
+                Vincular a cuota, cobro o meta
               </Button>
-            </>
-          ) : (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="self-start"
-              onClick={() => setLinkOpen(true)}
-            >
-              Vincular a cuota, cobro o meta
-            </Button>
-          )}
+            )}
+          </SummarySection>
         </div>
       ) : null}
 
       {tx.status === "REVERSED" ? (
-        <div className="mx-4 mb-3 flex flex-col gap-2 rounded-2xl border border-border p-3">
-          <div className="flex items-center gap-2">
-            <Badge variant="info">Revertido</Badge>
-            <p className="text-sm text-muted-foreground">
+        <div className="mx-4 mb-3">
+          <SummarySection title="Revertido" icon={RotateCcwIcon}>
+            <p className="px-1 text-sm text-muted-foreground">
               {tx.source === "EMAIL"
                 ? "El banco devolvió este movimiento y el saldo volvió a su lugar."
                 : "El saldo de este movimiento volvió a su lugar."}
             </p>
-          </div>
-          {tx.linkedTransactionId ? (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="self-start"
-              onClick={() =>
-                router.push(
-                  APP_ROUTES.app.financeTransaction(tx.linkedTransactionId!)
-                )
-              }
-            >
-              Ver movimiento original
-            </Button>
-          ) : null}
+            {tx.linkedTransactionId ? (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="self-start"
+                onClick={() =>
+                  router.push(
+                    APP_ROUTES.app.financeTransaction(tx.linkedTransactionId!)
+                  )
+                }
+              >
+                <ExternalLinkIcon className="size-4 shrink-0" />
+                Ver movimiento original
+              </Button>
+            ) : null}
+          </SummarySection>
         </div>
       ) : null}
 
@@ -513,7 +556,19 @@ function TransactionDetailScreenBody({
           )}
           <SummaryItem
             title="Comercio"
-            value={tx.merchant ?? "—"}
+            value={tx.merchantName ?? tx.merchant ?? "—"}
+            leading={
+              tx.merchantLogoUrl ? (
+                <BrandLogo
+                  name={tx.merchantName ?? tx.merchant ?? "Comercio"}
+                  logoUrl={tx.merchantLogoUrl}
+                  size={28}
+                />
+              ) : undefined
+            }
+            description={
+              tx.merchantName && tx.merchant ? tx.merchant : undefined
+            }
             isLast={false}
             className="px-3"
           />
@@ -614,6 +669,52 @@ function TransactionDetailScreenBody({
         consequences="El saldo de la cuenta se corrige. No se puede deshacer."
         onConfirm={() => void onDelete()}
       />
+
+      <AlertDialog open={mergeOpen} onOpenChange={setMergeOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Unir los movimientos?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Los dos movimientos se unen en uno. No se puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={mergeMutation.isPending}>
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              disabled={mergeMutation.isPending}
+              onClick={() => void onMerge()}
+            >
+              Unir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={unlinkOpen} onOpenChange={setUnlinkOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Quitar el vínculo?</AlertDialogTitle>
+            <AlertDialogDescription>
+              El movimiento deja de estar ligado a la planificación.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={unlinkMutation.isPending}>
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              disabled={unlinkMutation.isPending}
+              onClick={() => void onUnlink()}
+            >
+              Quitar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <LinkTransactionSheet
         open={linkOpen}

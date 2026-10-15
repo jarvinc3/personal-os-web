@@ -22,10 +22,15 @@ import {
 } from "@/src/modules/finance/shared/hooks/use-accounts"
 import { useDiscardChanges } from "@/src/modules/finance/shared/hooks/use-discard-changes"
 import { buildCreateAccountBody } from "@/src/modules/finance/shared/lib/catalog-payloads"
+import {
+  cashAccountNameFor,
+  cashCurrencyMissing,
+} from "@/src/modules/finance/shared/lib/cash"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import { parseFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 import type {
   FinanceAccount,
+  FinanceCashSummary,
   FinanceInstitution,
 } from "@/src/modules/finance/shared/types/entities"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
@@ -93,6 +98,10 @@ type AccountSheetProps = {
   defaultCurrency: string
   defaultInstitutionId?: string
   defaultType?: AccountFormValues["type"]
+  /** Inside Efectivo the type is fixed to CASH and the bank fields are hidden. */
+  lockType?: boolean
+  /** Cash summary, so a new currency offers the default "Efectivo <moneda>" name. */
+  cash?: FinanceCashSummary
   pending?: boolean
 }
 
@@ -104,6 +113,8 @@ export function AccountSheet({
   defaultCurrency,
   defaultInstitutionId,
   defaultType = "CHECKING",
+  lockType = false,
+  cash,
   pending = false,
 }: AccountSheetProps) {
   const isEdit = Boolean(account)
@@ -124,6 +135,7 @@ export function AccountSheet({
     handleSubmit,
     reset,
     setValue,
+    getValues,
     trigger,
     formState: { errors, isDirty },
   } = useForm<AccountFormValues>({
@@ -170,6 +182,32 @@ export function AccountSheet({
     resolvedDefaultInstitutionId,
     defaultType,
     reset,
+  ])
+
+  useEffect(() => {
+    if (!open || !lockType || isEdit || accountType !== "CASH") {
+      return
+    }
+    if (!cashCurrencyMissing(cash, accountCurrency)) {
+      return
+    }
+    const currentName = getValues("name")
+    if (currentName && !currentName.startsWith("Efectivo")) {
+      return
+    }
+    setValue("name", cashAccountNameFor(accountCurrency, defaultCurrency), {
+      shouldValidate: false,
+    })
+  }, [
+    open,
+    lockType,
+    isEdit,
+    accountType,
+    accountCurrency,
+    defaultCurrency,
+    cash,
+    getValues,
+    setValue,
   ])
 
   const submitForm = useMemo(
@@ -285,18 +323,20 @@ export function AccountSheet({
               />
             )}
           />
-          <Controller
-            control={control}
-            name="type"
-            render={({ field }) => (
-              <FinanceSegmentedControl
-                label="Tipo"
-                value={field.value}
-                onChange={field.onChange}
-                options={TYPE_OPTIONS}
-              />
-            )}
-          />
+          {!lockType ? (
+            <Controller
+              control={control}
+              name="type"
+              render={({ field }) => (
+                <FinanceSegmentedControl
+                  label="Tipo"
+                  value={field.value}
+                  onChange={field.onChange}
+                  options={TYPE_OPTIONS}
+                />
+              )}
+            />
+          ) : null}
           {accountType !== "CASH" ? (
             <>
               <Field className="gap-1">

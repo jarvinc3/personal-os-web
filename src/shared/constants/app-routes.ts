@@ -27,6 +27,7 @@ export const APP_ROUTES = {
     financeInstitutions: FINANCE_INSTITUTIONS_PATH,
     financeCash: FINANCE_CASH_PATH,
     financeCategories: "/finance/categories",
+    financeBankCharges: "/finance/bank-charges",
     financeRecycleBin: "/finance/recycle-bin",
     financeSync: "/finance/sync",
     financeInstitution: (institutionId: string) =>
@@ -63,6 +64,14 @@ export const APP_ROUTES = {
     financeReceivables: "/finance/receivables",
     financeReceivable: (receivableId: string) =>
       `/finance/receivables/${receivableId}`,
+    financeStatementImport: (importId: string) =>
+      `/finance/statement-imports/${importId}`,
+    financeMerchants: "/finance/merchants",
+    financeMerchant: (merchantId: string) => `/finance/merchants/${merchantId}`,
+    financeSubscriptions: "/finance/subscriptions",
+    financeSubscriptionsCalendar: "/finance/subscriptions/calendar",
+    financeSubscription: (subscriptionId: string) =>
+      `/finance/subscriptions/${subscriptionId}`,
     settingsFinanceCurrencies: "/settings/finance/currencies",
   },
 } as const

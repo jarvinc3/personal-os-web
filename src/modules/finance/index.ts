@@ -1,6 +1,8 @@
 export { FinanceGate } from "./finance-gate"
 export { FinanceLayout } from "./shared/components/layout/layout"
 export { FinanceHomeMonthSummary } from "./dashboard/components/home-month-summary"
+export { FinanceHomeWeeklySummary } from "./dashboard/components/home-weekly-summary"
+export { QuickEntryBar } from "./quick-entry"
 export {
   FINANCE_APP_NAV,
   FINANCE_NAV_ITEMS,
@@ -15,6 +17,11 @@ export {
   InstitutionEditScreen,
 } from "./institutions/institution-form-pages"
 export { CategoriesScreen } from "./catalog/categories-screen"
+export { MerchantsScreen } from "./merchants/merchants-screen"
+export { MerchantDetailScreen } from "./merchants/merchant-detail-screen"
+export { SubscriptionsScreen } from "./subscriptions/subscriptions-screen"
+export { SubscriptionDetailScreen } from "./subscriptions/subscription-detail-screen"
+export { SubscriptionsCalendarScreen } from "./subscriptions/subscriptions-calendar-screen"
 export { CardDetailScreen } from "./cards/card-detail-screen"
 export { CardCreateScreen, CardEditScreen } from "./cards/card-form-pages"
 export { PlanningScreen } from "./planning"
@@ -23,7 +30,9 @@ export { LoanCreateScreen, LoanEditScreen } from "./loans/loan-form-screen"
 export { ReceivableDetailScreen } from "./receivables"
 export { SavingsGoalDetailScreen } from "./savings-goals"
 export { BudgetDetailScreen } from "./budgets/budget-detail-screen"
+export { StatementImportScreen } from "./statements/statement-import-screen"
 export { RecycleBinScreen } from "./recycle-bin"
+export { BankChargesScreen } from "./reconciliation"
 export { SyncScreen } from "./sync/sync-screen"
 export { TransactionsScreen } from "./transactions/transactions-screen"
 export { TransactionDetailScreen } from "./transactions/transaction-detail-screen"
@@ -37,6 +46,10 @@ export {
 } from "./transactions/transfer-form-screen"
 
 export { BrandLogo } from "./shared/components/brand-logo"
+export {
+  BalanceIntegrityAlert,
+  FinanceIntegritySettingsSection,
+} from "./integrity"
 export { CurrencyFlag } from "./shared/components/currency-flag"
 export { CurrencyPickerSheet } from "./shared/components/pickers/currency-picker-sheet"
 
@@ -59,6 +72,7 @@ export { currencyDisplayName } from "./shared/lib/currency-display-name"
 export { normalizeTrackedCurrencies } from "./shared/lib/finance-currency"
 export { formatFinanceMoney, parseFinanceMoney } from "./shared/lib/money"
 export type { FinanceMoneyDisplay } from "./shared/lib/money"
+export { formatFinanceDateTimeLabel } from "./shared/lib/ledger-form"
 
 export type * from "./shared/types/api"
 export type { FinanceBalanceSheetSlice } from "./shared/types/entities"
@@ -76,8 +90,10 @@ export {
   FINANCE_EMAIL_MESSAGES_QUERY_KEY,
   FINANCE_INSTITUTIONS_QUERY_KEY,
   FINANCE_LOANS_QUERY_KEY,
+  FINANCE_MERCHANTS_QUERY_KEY,
   FINANCE_QUERY_KEY,
   FINANCE_RECEIVABLES_QUERY_KEY,
+  FINANCE_RECURRING_QUERY_KEY,
   FINANCE_SAVINGS_GOALS_QUERY_KEY,
   FINANCE_TRANSACTIONS_QUERY_KEY,
 } from "./shared/types/api"

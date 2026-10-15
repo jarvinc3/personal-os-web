@@ -11,6 +11,8 @@ Dominio/API: repositorio hermano `personal-os-back` → `docs/README.md`.
 | [infrastructure/](./infrastructure/README.md) | API client, auth bootstrap, push, proxy                               |
 | [operations/](./operations/README.md)         | Runbook Next.js                                                       |
 | [reference/](./reference/README.md)           | Trazabilidad                                                          |
+| [roadmap.md](./roadmap.md)                    | Hallazgos del registro sin código y su disparador                     |
+| [glosario.md](./glosario.md)                  | App vs módulo: qué dice la interfaz y qué el código                   |
 | [decisions/](./decisions/README.md)           | ADR                                                                   |
 
 Este repo **no** es `personal-os-app` (React Native). Contenido Expo/Metro/EAS: [review-register.md](./review-register.md).

@@ -17,6 +17,7 @@ import { useCategories } from "@/src/modules/finance/shared/hooks/use-categories
 import { useCurrencyForTarget } from "@/src/modules/finance/shared/hooks/use-currency-for-target"
 import { useFinanceAmountEntry } from "@/src/modules/finance/shared/hooks/use-finance-amount-entry"
 import { useInstitutions } from "@/src/modules/finance/shared/hooks/use-institutions"
+import { useMerchantSuggest } from "@/src/modules/finance/shared/hooks/use-merchants"
 import {
   useCreateTransaction,
   useUpdateTransaction,
@@ -44,6 +45,10 @@ import {
   isTransactionMetadataOnly,
   isTransactionReadOnly,
 } from "@/src/modules/finance/transactions/lib/transaction-edit"
+import {
+  EMPTY_TRANSACTION_PREFILL,
+  type TransactionPrefill,
+} from "@/src/modules/finance/transactions/lib/transaction-prefill"
 import { FormTextField } from "@/src/shared/components/layout/form-blocks"
 import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
 import { SummarySection } from "@/src/shared/components/ui/summary"
@@ -88,23 +93,46 @@ function destinationFromTransaction(tx: FinanceTransaction | null): string {
   return CATALOG_NONE
 }
 
-function toFormValues(
-  tx: FinanceTransaction | null,
-  initialType: MovementType,
-  defaultCurrency: string,
+function movementTypeForTransaction(
+  transaction: FinanceTransaction | null,
+  initialType: MovementType
+): MovementType {
+  if (!transaction) {
+    return initialType
+  }
+  return transaction.type === "CREDIT" ? "CREDIT" : "DEBIT"
+}
+
+type ToFormValuesInput = {
+  transaction: FinanceTransaction | null
+  initialType: MovementType
+  defaultCurrency: string
   defaultDestination: string
-): TransactionFormValues {
+  prefill: TransactionPrefill
+}
+
+function toFormValues({
+  transaction,
+  initialType,
+  defaultCurrency,
+  defaultDestination,
+  prefill,
+}: ToFormValuesInput): TransactionFormValues {
   return {
-    type: tx?.type === "CREDIT" ? "CREDIT" : tx ? "DEBIT" : initialType,
-    amount: tx?.amount ?? "",
-    currency: tx?.currency ?? defaultCurrency,
-    transactionDate: sliceDateTimeInput(tx?.transactionDate),
-    destination: tx ? destinationFromTransaction(tx) : defaultDestination,
-    categoryId: tx?.categoryId ?? CATALOG_NONE,
-    status: tx?.status === "PENDING" ? "PENDING" : "CONFIRMED",
-    merchant: tx?.merchant ?? "",
-    description: tx?.description ?? "",
-    notes: tx?.notes ?? "",
+    type: movementTypeForTransaction(transaction, initialType),
+    amount: transaction?.amount ?? prefill.amount,
+    currency: transaction?.currency ?? (prefill.currency || defaultCurrency),
+    transactionDate: transaction
+      ? sliceDateTimeInput(transaction.transactionDate)
+      : sliceDateTimeInput(prefill.transactionDate),
+    destination: transaction
+      ? destinationFromTransaction(transaction)
+      : defaultDestination,
+    categoryId: transaction?.categoryId ?? (prefill.categoryId || CATALOG_NONE),
+    status: transaction?.status === "PENDING" ? "PENDING" : "CONFIRMED",
+    merchant: transaction?.merchant ?? prefill.merchant,
+    description: transaction?.description ?? prefill.description,
+    notes: transaction?.notes ?? "",
   }
 }
 
@@ -112,6 +140,7 @@ type TransactionFormProps = {
   mode: "create" | "edit"
   initialType: MovementType
   initialDestination?: string | null
+  initialPrefill?: TransactionPrefill
   transaction: FinanceTransaction | null
   defaultCurrency: string
   defaultAccountId?: string | null
@@ -125,6 +154,7 @@ export function TransactionForm({
   mode,
   initialType,
   initialDestination = null,
+  initialPrefill = EMPTY_TRANSACTION_PREFILL,
   transaction,
   defaultCurrency,
   defaultAccountId = null,
@@ -184,12 +214,13 @@ export function TransactionForm({
   } = useForm<TransactionFormValues>({
     mode: "onTouched",
     resolver: zodResolver(transactionSchema),
-    defaultValues: toFormValues(
+    defaultValues: toFormValues({
       transaction,
       initialType,
       defaultCurrency,
-      CATALOG_NONE
-    ),
+      defaultDestination: CATALOG_NONE,
+      prefill: initialPrefill,
+    }),
   })
 
   const formValues = useWatch({ control })
@@ -204,6 +235,38 @@ export function TransactionForm({
 
   const selectedCategory =
     categories.find((item) => item.id === categoryId) ?? null
+
+  const merchantName = useWatch({ control, name: "merchant" })
+  const [debouncedMerchant, setDebouncedMerchant] = useState("")
+  useEffect(() => {
+    const timer = window.setTimeout(
+      () => setDebouncedMerchant(merchantName),
+      300
+    )
+    return () => window.clearTimeout(timer)
+  }, [merchantName])
+  const merchantSuggestQuery = useMerchantSuggest(
+    enabled && !locked && Boolean(debouncedMerchant.trim()),
+    debouncedMerchant
+  )
+  const merchantSuggestion = merchantSuggestQuery.data ?? null
+  const merchantSuggestionCategory = merchantSuggestion?.categoryId
+    ? (categories.find((item) => item.id === merchantSuggestion.categoryId) ??
+      null)
+    : null
+
+  function applyMerchantSuggestion(
+    suggestedName: string,
+    suggestedCategoryId: string | null
+  ) {
+    setValue("merchant", suggestedName, {
+      shouldDirty: true,
+      shouldValidate: true,
+    })
+    if (suggestedCategoryId && getValues("categoryId") === CATALOG_NONE) {
+      setValue("categoryId", suggestedCategoryId, { shouldDirty: true })
+    }
+  }
 
   const applyTargetCurrency = useCallback(
     (next: string) => {
@@ -226,14 +289,23 @@ export function TransactionForm({
       return
     }
     reset(
-      toFormValues(
-        isEdit ? transaction : null,
+      toFormValues({
+        transaction: isEdit ? transaction : null,
         initialType,
         defaultCurrency,
-        getValues("destination") || CATALOG_NONE
-      )
+        defaultDestination: getValues("destination") || CATALOG_NONE,
+        prefill: initialPrefill,
+      })
     )
-  }, [isEdit, transaction, initialType, defaultCurrency, reset, getValues])
+  }, [
+    isEdit,
+    transaction,
+    initialType,
+    defaultCurrency,
+    reset,
+    getValues,
+    initialPrefill,
+  ])
 
   useEffect(() => {
     if (isEdit) {
@@ -545,14 +617,36 @@ export function TransactionForm({
             control={control}
             name="merchant"
             render={({ field }) => (
-              <FormTextField
-                label={type === "CREDIT" ? "Origen" : "Comercio"}
-                icon={type === "CREDIT" ? HandCoinsIcon : StoreIcon}
-                value={field.value}
-                onChange={field.onChange}
-                onBlur={field.onBlur}
-                error={errors.merchant?.message}
-              />
+              <div className="flex flex-col gap-1">
+                <FormTextField
+                  label={type === "CREDIT" ? "Origen" : "Comercio"}
+                  icon={type === "CREDIT" ? HandCoinsIcon : StoreIcon}
+                  value={field.value}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                  error={errors.merchant?.message}
+                />
+                {merchantSuggestion &&
+                merchantSuggestion.name.trim().toLowerCase() !==
+                  field.value.trim().toLowerCase() ? (
+                  <button
+                    type="button"
+                    className="flex items-center gap-2 self-start rounded-lg bg-muted px-2 py-1 text-left text-xs text-muted-foreground transition-colors hover:text-foreground"
+                    onClick={() =>
+                      applyMerchantSuggestion(
+                        merchantSuggestion.name,
+                        merchantSuggestion.categoryId
+                      )
+                    }
+                  >
+                    <StoreIcon className="size-3.5 shrink-0" aria-hidden />
+                    Usar «{merchantSuggestion.name}»
+                    {merchantSuggestionCategory
+                      ? ` · ${merchantSuggestionCategory.name}`
+                      : ""}
+                  </button>
+                ) : null}
+              </div>
             )}
           />
         </SummarySection>

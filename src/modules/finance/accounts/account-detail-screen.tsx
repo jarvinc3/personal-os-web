@@ -12,6 +12,20 @@ import { FinanceGate } from "@/src/modules/finance/finance-gate"
 import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
 import { MissingRecord } from "@/src/modules/finance/shared/components/layout/missing-record"
 import { FinanceInstrumentMovements } from "@/src/modules/finance/transactions"
+import {
+  ReconciliationSheet,
+  ReconciliationsSection,
+} from "@/src/modules/finance/reconciliation"
+import { BalanceIntegrityAlert } from "@/src/modules/finance/integrity"
+import {
+  findProductDrifts,
+  recalculationPayload,
+} from "@/src/modules/finance/shared/lib/integrity"
+import {
+  useFinanceIntegrity,
+  useRecalculateBalance,
+} from "@/src/modules/finance/shared/hooks/use-integrity"
+import { StatementImportButton } from "@/src/modules/finance/shared/components/statement-import-button"
 import { FINANCE_ACCOUNT_TYPE_LABEL } from "@/src/modules/finance/shared/constants/catalog"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import {
@@ -46,10 +60,12 @@ import {
 } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
+import { ChatLauncherButton, useRegisterChatContext } from "@/src/modules/ai"
 import { appToast } from "@/src/shared/lib/app-toast"
 import {
   ArchiveIcon,
   HistoryIcon,
+  LandmarkIcon,
   MoreVerticalIcon,
   PencilIcon,
   ScaleIcon,
@@ -86,6 +102,8 @@ function AccountDetailScreenBody({ accountId }: AccountDetailScreenProps) {
   const accountsQuery = useAccounts(isEnabled)
   const institutionsQuery = useInstitutions(isEnabled)
   const cardsQuery = useCards(isEnabled)
+  const integrityQuery = useFinanceIntegrity(isEnabled, { accountId })
+  const recalculateBalance = useRecalculateBalance()
   const archiveAccount = useArchiveAccount()
   const deleteAccount = useDeleteAccount()
   const restoreAccount = useRestoreAccount()
@@ -98,6 +116,8 @@ function AccountDetailScreenBody({ accountId }: AccountDetailScreenProps) {
     useSheetParam(FINANCE_SHEET_KEYS.accountBalance)
   const { open: openHistorySheet, setOpen: setOpenHistorySheet } =
     useSheetParam(FINANCE_SHEET_KEYS.accountHistory)
+  const { open: openReconciliationSheet, setOpen: setOpenReconciliationSheet } =
+    useSheetParam(FINANCE_SHEET_KEYS.accountReconciliation)
 
   const account =
     (accountsQuery.data ?? []).find((item) => item.id === accountId) ?? null
@@ -110,6 +130,17 @@ function AccountDetailScreenBody({ accountId }: AccountDetailScreenProps) {
     ...debitCards.map((item) => ({ cardId: item.id })),
   ]
   const accent = account?.color ?? FALLBACK_COLOR
+
+  useRegisterChatContext(
+    account
+      ? {
+          moduleSlug: "finance",
+          screen: "account-detail",
+          entityRef: { type: "account", id: account.id },
+          entityLabel: account.name,
+        }
+      : null
+  )
 
   const today = new Date()
   const monthChip = format(today, "MMM yyyy", { locale: es })
@@ -126,6 +157,9 @@ function AccountDetailScreenBody({ accountId }: AccountDetailScreenProps) {
     ...display,
     currency: account?.currency ?? display.currency,
   }
+  const accountDrifts = findProductDrifts(integrityQuery.data?.drifts ?? [], {
+    accountId,
+  })
 
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [archiveConfirmOpen, setArchiveConfirmOpen] = useState(false)
@@ -183,15 +217,18 @@ function AccountDetailScreenBody({ accountId }: AccountDetailScreenProps) {
         )
       },
       actions: (
-        <Button
-          variant="outline"
-          size="icon"
-          className="size-9 rounded-full"
-          aria-label="Opciones de la cuenta"
-          onClick={() => setOpenOptionsSheet(true)}
-        >
-          <MoreVerticalIcon />
-        </Button>
+        <>
+          <ChatLauncherButton />
+          <Button
+            variant="outline"
+            size="icon"
+            className="size-9 rounded-full"
+            aria-label="Opciones de la cuenta"
+            onClick={() => setOpenOptionsSheet(true)}
+          >
+            <MoreVerticalIcon />
+          </Button>
+        </>
       ),
       accentColor: accent,
     },
@@ -300,6 +337,18 @@ function AccountDetailScreenBody({ accountId }: AccountDetailScreenProps) {
       </div>
 
       <div className="mx-4 -mt-4 flex flex-col gap-3 rounded-3xl bg-background">
+        <BalanceIntegrityAlert
+          drifts={accountDrifts}
+          display={accountDisplay}
+          pending={recalculateBalance.isPending}
+          onRecalculate={(drift) => {
+            recalculateBalance.mutate(recalculationPayload(drift), {
+              onSuccess: () => appToast.success({ text1: "Saldo corregido" }),
+              onError: (error) =>
+                appToast.error({ text1: financeErrorMessage(error) }),
+            })
+          }}
+        />
         <FinanceInstrumentMovements
           enabled={isEnabled}
           display={accountDisplay}
@@ -315,6 +364,12 @@ function AccountDetailScreenBody({ accountId }: AccountDetailScreenProps) {
               )
             )
           }
+        />
+        <StatementImportButton accountId={account.id} className="w-full" />
+        <ReconciliationsSection
+          enabled={isEnabled}
+          target={{ accountId: account.id }}
+          display={accountDisplay}
         />
       </div>
 
@@ -334,6 +389,12 @@ function AccountDetailScreenBody({ accountId }: AccountDetailScreenProps) {
             title: "Ajustar saldo",
             icon: ScaleIcon,
             onPress: () => setOpenBalanceSheet(true),
+          },
+          {
+            id: "reconcile",
+            title: "Conciliar",
+            icon: LandmarkIcon,
+            onPress: () => setOpenReconciliationSheet(true),
           },
           {
             id: "history",
@@ -398,6 +459,18 @@ function AccountDetailScreenBody({ accountId }: AccountDetailScreenProps) {
         open={openHistorySheet}
         onOpenChange={setOpenHistorySheet}
         target={{ kind: "account", id: account.id }}
+        display={accountDisplay}
+      />
+      <ReconciliationSheet
+        open={openReconciliationSheet}
+        onOpenChange={setOpenReconciliationSheet}
+        target={{
+          kind: "account",
+          id: account.id,
+          currency: account.currency,
+          name: account.name,
+          balance: account.balance,
+        }}
         display={accountDisplay}
       />
     </>

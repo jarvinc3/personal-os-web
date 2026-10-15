@@ -2,6 +2,7 @@
 
 import { CategoryCard } from "@/src/modules/finance/shared/components/category-card"
 import { CATALOG_NONE } from "@/src/modules/finance/shared/constants/catalog"
+import { toggleCategorySelection } from "@/src/modules/finance/shared/lib/category-selection"
 import {
   filterCategoriesByType,
   groupCategoriesByParent,
@@ -21,44 +22,70 @@ import {
   CollapsibleTrigger,
 } from "@/src/shared/components/ui/collapsible"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
-import { ChevronDownIcon, SearchIcon, TagsIcon } from "lucide-react"
-import { useEffect, useMemo, useState } from "react"
+import { CheckIcon, ChevronDownIcon, SearchIcon, TagsIcon } from "lucide-react"
+import { useEffect, useMemo, useState, type ReactNode } from "react"
 
-const NONE_LABEL = "Sin categoría"
+const DEFAULT_NONE_LABEL = "Sin categoría"
+const NO_EXCLUDED_IDS: string[] = []
 
-type CategoryPickerSheetProps = {
+type CategoryPickerSheetBaseProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
   categories: FinanceCategory[]
   categoryType: FinanceCategoryType
+  /** Lists only root categories. Used to pick a parent category. */
+  onlyParents?: boolean
+  /** Hides these ids. Used to exclude the category being edited. */
+  excludeIds?: string[]
+  noneLabel?: string
+}
+
+type CategoryPickerSheetSingleProps = CategoryPickerSheetBaseProps & {
+  multiple?: false
+  value?: string
   onSelect: (categoryId: string) => void
 }
 
-export function CategoryPickerSheet({
-  open,
-  onOpenChange,
-  categories,
-  categoryType,
-  onSelect,
-}: CategoryPickerSheetProps) {
+type CategoryPickerSheetMultipleProps = CategoryPickerSheetBaseProps & {
+  multiple: true
+  value: string[]
+  onChange: (categoryIds: string[]) => void
+}
+
+export type CategoryPickerSheetProps =
+  CategoryPickerSheetSingleProps | CategoryPickerSheetMultipleProps
+
+export function CategoryPickerSheet(props: CategoryPickerSheetProps) {
+  const {
+    open,
+    onOpenChange,
+    categories,
+    categoryType,
+    onlyParents = false,
+    excludeIds = NO_EXCLUDED_IDS,
+    noneLabel = DEFAULT_NONE_LABEL,
+  } = props
   const [search, setSearch] = useState("")
   const [manualOpen, setManualOpen] = useState<Record<string, boolean>>({})
-  const groups = useMemo(
-    () =>
-      groupCategoriesByParent(
-        sortCategoriesNewestFirst(
-          filterCategoriesByType(categories, categoryType)
-        )
-      ),
-    [categories, categoryType]
-  )
+  const groups = useMemo(() => {
+    const excluded = new Set(excludeIds)
+    const typed = filterCategoriesByType(categories, categoryType).filter(
+      (item) => !excluded.has(item.id)
+    )
+    const pool = onlyParents
+      ? typed.filter((item) => item.parentId == null)
+      : typed
+    return groupCategoriesByParent(sortCategoriesNewestFirst(pool))
+  }, [categories, categoryType, onlyParents, excludeIds])
   const hits = useMemo(
     () => searchCategoryGroups(groups, search),
     [groups, search]
   )
   const searching = foldSearchText(search).length > 0
   const showNone =
-    !searching || foldSearchText(NONE_LABEL).includes(foldSearchText(search))
+    !searching || foldSearchText(noneLabel).includes(foldSearchText(search))
+  const selectedIds = props.multiple ? props.value : []
+  const selected = new Set(selectedIds)
 
   useEffect(() => {
     if (!open) {
@@ -71,8 +98,24 @@ export function CategoryPickerSheet({
   }, [open])
 
   function select(categoryId: string) {
-    onSelect(categoryId)
+    if (props.multiple) {
+      props.onChange(toggleCategorySelection(props.value, categoryId))
+      return
+    }
+    props.onSelect(categoryId)
     onOpenChange(false)
+  }
+
+  function selectedTrailing(categoryId: string, expand?: ReactNode) {
+    if (!props.multiple || !selected.has(categoryId)) {
+      return expand
+    }
+    return (
+      <>
+        <CheckIcon className="size-4 text-primary" aria-hidden />
+        {expand}
+      </>
+    )
   }
 
   return (
@@ -102,7 +145,10 @@ export function CategoryPickerSheet({
           onClick={() => select(CATALOG_NONE)}
         >
           <TagsIcon className="size-5 text-muted-foreground" />
-          <span className="text-sm font-medium">{NONE_LABEL}</span>
+          <span className="text-sm font-medium">{noneLabel}</span>
+          {props.multiple && selectedIds.length === 0 ? (
+            <CheckIcon className="ml-auto size-4 text-primary" aria-hidden />
+          ) : null}
         </button>
       ) : null}
 
@@ -129,6 +175,7 @@ export function CategoryPickerSheet({
                   isSystem={parent.isSystem}
                   onPress={() => select(parent.id)}
                   className={flash}
+                  trailing={selectedTrailing(parent.id)}
                 />
               )
             }
@@ -155,7 +202,8 @@ export function CategoryPickerSheet({
                   isSystem={parent.isSystem}
                   onPress={() => select(parent.id)}
                   className={flash}
-                  trailing={
+                  trailing={selectedTrailing(
+                    parent.id,
                     <CollapsibleTrigger
                       type="button"
                       className="flex size-8 shrink-0 items-center justify-center text-muted-foreground"
@@ -163,7 +211,7 @@ export function CategoryPickerSheet({
                     >
                       <ChevronDownIcon className="size-4 transition-transform group-data-open/category:rotate-180" />
                     </CollapsibleTrigger>
-                  }
+                  )}
                 />
                 <CollapsibleContent className="mt-2 flex flex-col gap-2 pl-7">
                   {hit.children.map((child) => {
@@ -181,6 +229,7 @@ export function CategoryPickerSheet({
                         className={
                           childHit ? "animate-search-flash" : undefined
                         }
+                        trailing={selectedTrailing(child.id)}
                       />
                     )
                   })}

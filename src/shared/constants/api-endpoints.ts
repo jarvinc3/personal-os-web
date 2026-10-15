@@ -20,7 +20,7 @@ export const API_ENDPOINTS = {
     MARK_READ: (id: string) => `/notifications/${id}/read`,
     PUSH_TOKENS: "/notifications/push-tokens",
     DEACTIVATE_PUSH_TOKEN: (token: string) =>
-      `/notifications/push-tokens/${token}/deactivate`,
+      `/notifications/push-tokens/${token}`,
   },
   AI: {
     PROVIDERS: "/ai/providers",
@@ -56,6 +56,15 @@ export const API_ENDPOINTS = {
     CARD_STATEMENTS: (id: string) => `/finance/cards/${id}/statements`,
     CARD_STATEMENT: (id: string, statementId: string) =>
       `/finance/cards/${id}/statements/${statementId}`,
+    CARD_STATEMENT_IMPORT: (id: string) =>
+      `/finance/cards/${id}/statements/import`,
+    ACCOUNT_STATEMENT_IMPORT: (id: string) =>
+      `/finance/accounts/${id}/statements/import`,
+    STATEMENT_IMPORT: (id: string) => `/finance/statement-imports/${id}`,
+    STATEMENT_IMPORT_LINE: (id: string, lineId: string) =>
+      `/finance/statement-imports/${id}/lines/${lineId}`,
+    STATEMENT_IMPORT_APPLY: (id: string) =>
+      `/finance/statement-imports/${id}/apply`,
     BALANCE_ADJUSTMENT: "/finance/balance-adjustments",
     TRANSACTIONS: "/finance/transactions",
     TRANSFERS: "/finance/transfers",
@@ -92,6 +101,7 @@ export const API_ENDPOINTS = {
     LOAN: (id: string) => `/finance/loans/${id}`,
     LOAN_RESTORE: (id: string) => `/finance/loans/${id}/restore`,
     LOAN_INSTALLMENTS: (id: string) => `/finance/loans/${id}/installments`,
+    LOAN_SCHEDULE: (id: string) => `/finance/loans/${id}/schedule`,
     LOAN_PREPAYMENTS: (id: string) => `/finance/loans/${id}/prepayments`,
     LOAN_PREPAYMENTS_PREVIEW: (id: string) =>
       `/finance/loans/${id}/prepayments/preview`,
@@ -118,13 +128,45 @@ export const API_ENDPOINTS = {
     EMAIL_SOURCE_SENDERS: (id: string) =>
       `/finance/email-sync/sources/${id}/senders`,
     ANALYTICS_SUMMARY: "/finance/analytics/summary",
+    ANALYTICS_WEEKLY_SUMMARY: "/finance/analytics/weekly-summary",
     ANALYTICS_SPENDING_BY_CATEGORY: "/finance/analytics/spending-by-category",
     ANALYTICS_BUDGET_STATUS: "/finance/analytics/budget-status",
     ANALYTICS_SPENDING_OVER_TIME: "/finance/analytics/spending-over-time",
+    BANK_CHARGES: "/finance/bank-charges",
     BALANCE_SHEET: "/finance/balance-sheet",
+    QUICK_ENTRY_PARSE: "/finance/quick-entry/parse",
     OAUTH_GOOGLE_URL: "/finance/email-sync/oauth/google/url",
     OAUTH_GOOGLE_CALLBACK: "/finance/email-sync/oauth/google/callback",
     EXCHANGE_RATES: "/finance/exchange-rates",
     BASE_CURRENCY: "/finance/base-currency",
+    MERCHANTS: "/finance/merchants",
+    MERCHANT_SUGGEST: "/finance/merchants/suggest",
+    MERCHANT: (id: string) => `/finance/merchants/${id}`,
+    MERCHANT_MERGE: (id: string) => `/finance/merchants/${id}/merge`,
+    MERCHANT_LOGO: (id: string) => `/finance/merchants/${id}/logo`,
+    RECURRING: "/finance/recurring",
+    RECURRING_UPCOMING: "/finance/recurring/upcoming",
+    RECURRING_PATTERN: (id: string) => `/finance/recurring/${id}`,
+    SUBSCRIPTIONS: "/finance/subscriptions",
+    SUBSCRIPTION_SUMMARY: "/finance/subscriptions/summary",
+    SUBSCRIPTION_BREAKDOWN: "/finance/subscriptions/breakdown",
+    SUBSCRIPTION_UPCOMING: "/finance/subscriptions/upcoming",
+    SUBSCRIPTION_ALERTS: "/finance/subscriptions/alerts",
+    SUBSCRIPTION_ALERT_DISMISS_ALL: "/finance/subscriptions/alerts/dismiss-all",
+    SUBSCRIPTION: (id: string) => `/finance/subscriptions/${id}`,
+    SUBSCRIPTION_PAUSE: (id: string) => `/finance/subscriptions/${id}/pause`,
+    SUBSCRIPTION_RESUME: (id: string) => `/finance/subscriptions/${id}/resume`,
+    SUBSCRIPTION_CANCEL: (id: string) => `/finance/subscriptions/${id}/cancel`,
+    SUBSCRIPTION_PAYMENTS: (id: string) =>
+      `/finance/subscriptions/${id}/payments`,
+    SUBSCRIPTION_LOGO: (id: string) => `/finance/subscriptions/${id}/logo`,
+    RECONCILIATIONS: "/finance/reconciliations",
+    RECONCILIATION_PREVIEW: "/finance/reconciliations/preview",
+    RECONCILIATION: (id: string) => `/finance/reconciliations/${id}`,
+    RECONCILIATION_RESTORE: (id: string) =>
+      `/finance/reconciliations/${id}/restore`,
+    RECONCILIATION_STATUS: "/finance/reconciliations/status",
+    INTEGRITY_CHECK: "/finance/integrity/check",
+    INTEGRITY_RECALCULATE: "/finance/integrity/recalculate",
   },
 } as const

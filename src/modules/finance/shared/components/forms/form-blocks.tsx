@@ -1,11 +1,6 @@
 "use client"
 
 import { sanitizeAmountInput } from "@/src/modules/finance/shared/lib/money"
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/src/shared/components/ui/collapsible"
 import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
 import {
   InputGroup,
@@ -18,8 +13,8 @@ import {
   ToggleGroupItem,
 } from "@/src/shared/components/ui/toggle-group"
 import { Button } from "@/src/shared/components/ui/button"
-import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
-import { ChevronDownIcon, SparklesIcon, type LucideIcon } from "lucide-react"
+import { cn } from "@/src/shared/lib/utils"
+import { CheckIcon, SparklesIcon, type LucideIcon } from "lucide-react"
 import type { ReactNode, Ref } from "react"
 
 /** El preset del proyecto no trae un estado pulsado con el color primario. */
@@ -158,35 +153,6 @@ export function FinanceAmountInput({
   )
 }
 
-type FinanceDetailsDisclosureProps = {
-  title?: string
-  children: ReactNode
-  defaultOpen?: boolean
-}
-
-export function FinanceDetailsDisclosure({
-  title = "Detalles opcionales",
-  children,
-  defaultOpen = false,
-}: FinanceDetailsDisclosureProps) {
-  return (
-    <Collapsible defaultOpen={defaultOpen}>
-      <CollapsibleTrigger
-        className={cn(
-          "group/details flex w-full items-center justify-between rounded-xl px-1 py-2 text-left text-sm font-medium text-muted-foreground",
-          PRESSABLE_CLASS
-        )}
-      >
-        {title}
-        <ChevronDownIcon className="size-4 shrink-0 transition-transform duration-200 group-aria-expanded/details:rotate-180" />
-      </CollapsibleTrigger>
-      <CollapsibleContent className="flex flex-col gap-3 pt-1">
-        {children}
-      </CollapsibleContent>
-    </Collapsible>
-  )
-}
-
 type FinanceHelpTextProps = {
   children: ReactNode
 }
@@ -262,6 +228,7 @@ export function FinanceSuggestionRow({
           className="shrink-0 text-success"
           onClick={onAction}
         >
+          <CheckIcon className="size-4 shrink-0" />
           {actionLabel}
         </Button>
       ) : null}

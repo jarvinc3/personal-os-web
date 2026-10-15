@@ -268,7 +268,7 @@ export function FormTextField({
           {label}
         </FieldLabel>
       ) : null}
-      <InputGroup className={cn("h-10", className)}>
+      <InputGroup className={cn("h-10 overflow-hidden", className)}>
         {FieldIcon ? (
           <InputGroupAddon align="inline-start">
             <FieldIcon className="text-muted-foreground" />

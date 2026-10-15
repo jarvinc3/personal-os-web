@@ -43,8 +43,11 @@ import {
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
 import { SummaryItem } from "@/src/shared/components/ui/summary"
+import { InfiniteListSentinel } from "@/src/shared/components/ui/infinite-list-sentinel"
+import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
+import { ChatLauncherButton, useRegisterChatContext } from "@/src/modules/ai"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { appToast } from "@/src/shared/lib/app-toast"
 import {
@@ -95,7 +98,18 @@ function SavingsGoalDetailScreenBody({
 
   const goal =
     (goalsQuery.data ?? []).find((item) => item.id === goalId) ?? null
-  const contributions = contributionsQuery.data ?? []
+  const contributions = infiniteListItems(contributionsQuery.data)
+
+  useRegisterChatContext(
+    goal
+      ? {
+          moduleSlug: "finance",
+          screen: "savings-goal-detail",
+          entityRef: { type: "savings_goal", id: goal.id },
+          entityLabel: goal.name,
+        }
+      : null
+  )
   const money = { ...display, currency: goal?.currency ?? display.currency }
   const accent = ACCENT_FALLBACK_COLOR
   const progress = Math.min(
@@ -117,15 +131,18 @@ function SavingsGoalDetailScreenBody({
 
   const headerActions = useMemo(
     () => (
-      <Button
-        variant="outline"
-        size="icon"
-        className="size-9 rounded-full"
-        aria-label="Opciones de la meta"
-        onClick={() => setOptionsOpen(true)}
-      >
-        <MoreVerticalIcon className="size-4.5" />
-      </Button>
+      <>
+        <ChatLauncherButton />
+        <Button
+          variant="outline"
+          size="icon"
+          className="size-9 rounded-full"
+          aria-label="Opciones de la meta"
+          onClick={() => setOptionsOpen(true)}
+        >
+          <MoreVerticalIcon className="size-4.5" />
+        </Button>
+      </>
     ),
     [setOptionsOpen]
   )
@@ -303,6 +320,11 @@ function SavingsGoalDetailScreenBody({
               ))}
             </div>
           ) : null}
+          <InfiniteListSentinel
+            hasNextPage={contributionsQuery.hasNextPage}
+            isFetchingNextPage={contributionsQuery.isFetchingNextPage}
+            onLoadMore={() => void contributionsQuery.fetchNextPage()}
+          />
         </AsyncRegion>
       </div>
 

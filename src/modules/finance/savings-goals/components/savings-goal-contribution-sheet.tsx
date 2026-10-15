@@ -35,7 +35,13 @@ import { usePicker } from "@/src/shared/hooks/use-picker"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { NotebookPenIcon, PiggyBankIcon, XIcon } from "lucide-react"
+import {
+  NotebookPenIcon,
+  PiggyBankIcon,
+  SparklesIcon,
+  TargetIcon,
+  XIcon,
+} from "lucide-react"
 import { useEffect, useMemo } from "react"
 import { Controller, useForm } from "react-hook-form"
 import {
@@ -266,6 +272,7 @@ export function SavingsGoalContributionSheet({
                     )
                   }
                 >
+                  <SparklesIcon className="size-4 shrink-0" />
                   {`Sugerido ${formatFinanceMoney(suggestion.monthlyAmount, display)}`}
                 </Button>
               ) : null}
@@ -279,6 +286,7 @@ export function SavingsGoalContributionSheet({
                   })
                 }
               >
+                <TargetIcon className="size-4 shrink-0" />
                 {`Lo que falta ${formatFinanceMoney(remaining, display)}`}
               </Button>
             </div>

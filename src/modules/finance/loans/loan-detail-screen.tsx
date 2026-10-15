@@ -14,7 +14,10 @@ import { InstallmentDetailSheet } from "@/src/modules/finance/loans/components/i
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
 import { useInstitutions } from "@/src/modules/finance/shared/hooks/use-institutions"
-import { useLoanInstallments } from "@/src/modules/finance/shared/hooks/use-loan-installments"
+import {
+  useLoanInstallments,
+  useLoanSchedule,
+} from "@/src/modules/finance/shared/hooks/use-loan-installments"
 import {
   useArchiveLoan,
   useDeleteLoan,
@@ -39,6 +42,7 @@ import {
 import { DeleteRecordDialog } from "@/src/modules/finance/shared/components/delete-record-dialog"
 import { ArchiveRecordDialog } from "@/src/modules/finance/shared/components/archive-record-dialog"
 import { RecordOptionsSheet } from "@/src/modules/finance/shared/components/record-options-sheet"
+import { ChatLauncherButton, useRegisterChatContext } from "@/src/modules/ai"
 import { LoadingView } from "@/src/shared/components/layout/loading-view"
 import { Badge } from "@/src/shared/components/ui/badge"
 import { Button } from "@/src/shared/components/ui/button"
@@ -51,6 +55,8 @@ import {
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
 import { SummaryItem } from "@/src/shared/components/ui/summary"
+import { InfiniteListSentinel } from "@/src/shared/components/ui/infinite-list-sentinel"
+import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
@@ -117,17 +123,29 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
   const institution = loan?.institutionId
     ? (institutions.find((item) => item.id === loan.institutionId) ?? null)
     : null
-  const installments = installmentsQuery.data ?? []
+  const installments = infiniteListItems(installmentsQuery.data)
   const accent = institution?.color ?? ACCENT_FALLBACK_COLOR
   const money = { ...display, currency: loan?.currency ?? display.currency }
   const summary = loan ? loanProgressSummary(loan) : null
   const rateLabel = formatRatePercentLabel(loan?.interestRate ?? null)
+
+  useRegisterChatContext(
+    loan
+      ? {
+          moduleSlug: "finance",
+          screen: "loan-detail",
+          entityRef: { type: "loan", id: loan.id },
+          entityLabel: loan.lenderName,
+        }
+      : null
+  )
 
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [archiveConfirmOpen, setArchiveConfirmOpen] = useState(false)
   const [amortizationOpen, setAmortizationOpen] = useState(false)
   const [selectedInstallment, setSelectedInstallment] =
     useState<FinanceLoanInstallment | null>(null)
+  const scheduleQuery = useLoanSchedule(amortizationOpen, loanId)
 
   async function onArchiveLoan() {
     if (!loan) {
@@ -172,15 +190,18 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
 
   const headerActions = useMemo(
     () => (
-      <Button
-        variant="outline"
-        size="icon"
-        className="size-9 rounded-full"
-        aria-label="Opciones del préstamo"
-        onClick={() => setOpenOptionsSheet(true)}
-      >
-        <MoreVerticalIcon className="size-4.5" />
-      </Button>
+      <>
+        <ChatLauncherButton />
+        <Button
+          variant="outline"
+          size="icon"
+          className="size-9 rounded-full"
+          aria-label="Opciones del préstamo"
+          onClick={() => setOpenOptionsSheet(true)}
+        >
+          <MoreVerticalIcon className="size-4.5" />
+        </Button>
+      </>
     ),
     [setOpenOptionsSheet]
   )
@@ -330,6 +351,11 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
               ))}
             </div>
           ) : null}
+          <InfiniteListSentinel
+            hasNextPage={installmentsQuery.hasNextPage}
+            isFetchingNextPage={installmentsQuery.isFetchingNextPage}
+            onLoadMore={() => void installmentsQuery.fetchNextPage()}
+          />
         </AsyncRegion>
 
         {installments.length > 0 ? (
@@ -394,7 +420,7 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
       <LoanAmortizationSheet
         open={amortizationOpen}
         onOpenChange={setAmortizationOpen}
-        installments={installments}
+        installments={scheduleQuery.data ?? installments}
         currentBalance={loan.currentBalance}
         display={money}
       />

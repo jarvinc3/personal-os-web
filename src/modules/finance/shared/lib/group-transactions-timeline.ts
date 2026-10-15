@@ -5,6 +5,10 @@ import {
   formatMonthYearLabel,
 } from "@/src/shared/lib/date-format"
 import type { FinanceTransaction } from "@/src/modules/finance/shared/types/entities"
+import {
+  groupReversals,
+  type ReversalGroup,
+} from "@/src/modules/finance/transactions/lib/group-reversals"
 import { weeksForMonth, type CalendarWeek } from "./calendar-weeks.ts"
 import { monthBannerSrc } from "./month-banners.ts"
 import { monthKey, type MonthKey, type YearMonth } from "./month-window.ts"
@@ -15,6 +19,8 @@ export type TimelineDay = {
   label: string
   net: number
   items: FinanceTransaction[]
+  /** Rendered rows: one per reversal pair, one per loose movement. */
+  rows: ReversalGroup[]
 }
 
 export type TimelineWeek = CalendarWeek & { days: TimelineDay[] }
@@ -63,59 +69,99 @@ function inClippedWeek(date: Date, week: CalendarWeek): boolean {
   return time >= week.start.getTime() && time <= week.end.getTime()
 }
 
+function monthKeyFromTransaction(item: FinanceTransaction): MonthKey | null {
+  const date = calendarDateFromTransaction(item.transactionDate)
+  if (!date) {
+    return null
+  }
+  return monthKey(date.getFullYear(), date.getMonth() + 1)
+}
+
+function groupItems(group: ReversalGroup): FinanceTransaction[] {
+  if (!group.reversal) {
+    return [group.original]
+  }
+  return [group.original, group.reversal]
+}
+
+function groupsByMonth(
+  groups: readonly ReversalGroup[]
+): Map<MonthKey, ReversalGroup[]> {
+  const byMonth = new Map<MonthKey, ReversalGroup[]>()
+  for (const group of groups) {
+    const key = monthKeyFromTransaction(group.original)
+    if (!key) {
+      continue
+    }
+    const bucket = byMonth.get(key)
+    if (bucket) {
+      bucket.push(group)
+      continue
+    }
+    byMonth.set(key, [group])
+  }
+  return byMonth
+}
+
+function groupsByDayKey(
+  groups: readonly ReversalGroup[]
+): Map<string, ReversalGroup[]> {
+  const byDay = new Map<string, ReversalGroup[]>()
+  for (const group of groups) {
+    const date = calendarDateFromTransaction(group.original.transactionDate)
+    if (!date) {
+      continue
+    }
+    const key = dateKey(date)
+    const bucket = byDay.get(key)
+    if (bucket) {
+      bucket.push(group)
+      continue
+    }
+    byDay.set(key, [group])
+  }
+  return byDay
+}
+
 export function buildTimelineMonths(
   months: YearMonth[],
   items: FinanceTransaction[]
 ): TimelineMonth[] {
-  const byMonth = new Map<MonthKey, FinanceTransaction[]>()
-  for (const item of items) {
-    const date = calendarDateFromTransaction(item.transactionDate)
-    if (!date) {
-      continue
-    }
-    const key = monthKey(date.getFullYear(), date.getMonth() + 1)
-    const bucket = byMonth.get(key)
-    if (bucket) {
-      bucket.push(item)
-    } else {
-      byMonth.set(key, [item])
-    }
-  }
+  const renderedMonthKeys = new Set(
+    months.map((slot) => monthKey(slot.year, slot.month))
+  )
+  const byMonth = groupsByMonth(
+    groupReversals(
+      items.filter((item) => {
+        const key = monthKeyFromTransaction(item)
+        return key !== null && renderedMonthKeys.has(key)
+      })
+    )
+  )
 
   return months.map((slot) => {
     const key = monthKey(slot.year, slot.month)
-    const monthItems = (byMonth.get(key) ?? [])
+    const monthGroups = (byMonth.get(key) ?? [])
       .slice()
-      .sort(compareTransactions)
+      .sort((left, right) => compareTransactions(left.original, right.original))
+    const monthItems = monthGroups.flatMap(groupItems)
     const weeks = weeksForMonth(slot.year, slot.month).map((week) => {
-      const weekItems = monthItems.filter((item) => {
-        const date = calendarDateFromTransaction(item.transactionDate)
+      const weekGroups = monthGroups.filter((group) => {
+        const date = calendarDateFromTransaction(group.original.transactionDate)
         return date ? inClippedWeek(date, week) : false
       })
-      const byDay = new Map<string, FinanceTransaction[]>()
-      for (const item of weekItems) {
-        const date = calendarDateFromTransaction(item.transactionDate)
-        if (!date) {
-          continue
-        }
-        const dayKey = dateKey(date)
-        const dayItems = byDay.get(dayKey)
-        if (dayItems) {
-          dayItems.push(item)
-        } else {
-          byDay.set(dayKey, [item])
-        }
-      }
-      const days: TimelineDay[] = [...byDay.entries()]
+      const days: TimelineDay[] = [...groupsByDayKey(weekGroups).entries()]
         .sort(([left], [right]) => left.localeCompare(right))
-        .map(([dayKey, dayItems]) => {
+        .map(([dayKey, dayGroups]) => {
           const date = calendarDateFromTransaction(dayKey)!
+          const dayItems = dayGroups.flatMap(groupItems)
           const totals = visibleTransactionTotals(dayItems)
           return {
             dateKey: dayKey,
             label: formatDayHeaderLabel(date),
             net: totals.income - totals.expenses,
             items: dayItems,
+            rows: dayGroups,
           }
         })
       return { ...week, days }

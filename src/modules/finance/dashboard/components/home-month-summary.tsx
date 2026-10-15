@@ -15,12 +15,15 @@ import { formatMonthYearLabel } from "@/src/shared/lib/date-format"
 import {
   BanknoteArrowDownIcon,
   BanknoteArrowUpIcon,
+  CalendarDaysIcon,
   ChevronRight,
   Landmark,
 } from "lucide-react"
 import { LinkPendingOverlay } from "@/src/shared/components/ui/navigation-pending"
 import Link from "next/link"
 import { useMemo } from "react"
+import { MODULE_REGISTRY } from "@/src/shared/constants/module-registry"
+import { Badge } from "@/src/shared/components/ui/badge"
 
 type AnalyticsSummaryQuery = {
   isPending: boolean
@@ -69,11 +72,12 @@ export function FinanceHomeMonthSummary() {
   return (
     <SummarySection
       icon={Landmark}
-      title={`Finanzas | ${formatMonthYearLabel(now)}`}
+      title={MODULE_REGISTRY.finance.label}
+      color={MODULE_REGISTRY.finance.accent}
       right={
         <>
           {trend ? <FinanceExpenseTrendBadge trend={trend} /> : null}
-          <Button asChild variant="secondary" className="h-6">
+          <Button asChild variant="ghost" className="h-6">
             <Link href={APP_ROUTES.app.finance} className="relative">
               <span className="sr-only">Abrir Finanzas</span>
               <ChevronRight className="size-4" />
@@ -86,7 +90,7 @@ export function FinanceHomeMonthSummary() {
       <div className="grid grid-cols-2 gap-2">
         <div
           aria-label="Ingresos del mes"
-          className="relative flex items-center justify-start rounded-2xl border border-border bg-card px-3 py-2"
+          className="relative flex items-center justify-start rounded-2xl bg-card/50 px-3 py-2"
         >
           <div className="flex flex-col gap-1">
             <p className="text-xs text-muted-foreground">Ingresos</p>
@@ -99,7 +103,7 @@ export function FinanceHomeMonthSummary() {
 
         <div
           aria-label="Gastos del mes"
-          className="relative flex items-center justify-end rounded-2xl border border-border bg-card px-3 py-2 text-right"
+          className="relative flex items-center justify-end rounded-2xl bg-card/50 px-3 py-2 text-right"
         >
           <BanknoteArrowDownIcon className="absolute top-1/2 left-2 size-4 -translate-y-1/2 text-destructive" />
           <div className="flex flex-col gap-1">
@@ -109,6 +113,12 @@ export function FinanceHomeMonthSummary() {
             </p>
           </div>
         </div>
+      </div>
+      <div>
+        <Badge variant="outline" className="text-xs">
+          <CalendarDaysIcon className="size-4" />
+          {formatMonthYearLabel(now)}
+        </Badge>
       </div>
     </SummarySection>
   )

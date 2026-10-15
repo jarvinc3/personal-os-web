@@ -18,7 +18,7 @@ export const faqItems: FAQItem[] = [
     category: "General",
     question: "¿Qué es Personal OS?",
     answer:
-      "Personal OS es una aplicación personal multi-módulo diseñada para centralizar y automatizar la gestión de todas las áreas de tu vida cotidiana: finanzas, agenda, proyectos, salud, suscripciones y más. Funciona como un sistema operativo personal con mini-apps interconectadas y un agente IA que las une.",
+      "Personal OS es una aplicación personal con varias apps diseñada para centralizar y automatizar la gestión de todas las áreas de tu vida cotidiana: finanzas, agenda, proyectos, salud, suscripciones y más. Funciona como un sistema operativo personal con mini-apps interconectadas y un agente IA que las une.",
   },
   {
     category: "General",
@@ -30,7 +30,7 @@ export const faqItems: FAQItem[] = [
     category: "General",
     question: "¿Es gratuita la aplicación?",
     answer:
-      "Aún estamos definiendo el modelo de precios. Nuestra visión es ofrecer acceso gratuito a los módulos básicos, con características avanzadas de IA y automatización en un plan premium. Quienes se unan a la lista de espera serán los primeros en conocer los precios y podrían acceder a beneficios especiales.",
+      "Aún estamos definiendo el modelo de precios. Nuestra visión es ofrecer acceso gratuito a las apps básicas, con características avanzadas de IA y automatización en un plan premium. Quienes se unan a la lista de espera serán los primeros en conocer los precios y podrían acceder a beneficios especiales.",
   },
   {
     category: "General",
@@ -43,7 +43,7 @@ export const faqItems: FAQItem[] = [
     category: "Agente IA",
     question: "¿Cómo funciona el agente IA?",
     answer:
-      "El agente IA central tiene acceso a todos tus módulos y mantiene memoria persistente de tu contexto. Puedes conversar con él de forma natural ('¿Cuánto gasté en comida este mes?', 'Agenda una reunión para el martes') y puede ejecutar acciones reales: crear transacciones, agendar eventos, crear tareas. También te envía sugerencias proactivas cuando detecta algo relevante.",
+      "El agente IA central tiene acceso a todas tus apps y mantiene memoria persistente de tu contexto. Puedes conversar con él de forma natural ('¿Cuánto gasté en comida este mes?', 'Agenda una reunión para el martes') y puede ejecutar acciones reales: crear transacciones, agendar eventos, crear tareas. También te envía sugerencias proactivas cuando detecta algo relevante.",
   },
   {
     category: "Agente IA",
@@ -84,7 +84,7 @@ export const faqItems: FAQItem[] = [
   },
   {
     category: "Finanzas y Seguridad",
-    question: "¿Cuánto cuesta en términos de IA el módulo de finanzas?",
+    question: "¿Cuánto cuesta en términos de IA la app de finanzas?",
     answer:
       "El costo operativo estimado para uso personal típico es menos de $1 USD/mes. La mayoría de emails se procesan con parsers de regex de costo cero. Solo los emails de bancos desconocidos o con formato cambiado usan IA, con un costo aproximado de $0.003 por email.",
   },
@@ -93,7 +93,7 @@ export const faqItems: FAQItem[] = [
     category: "Disponibilidad",
     question: "¿Cuándo estará disponible la app?",
     answer:
-      "Estamos en fase de desarrollo activo. El módulo de finanzas es la prioridad número uno. No tenemos una fecha de lanzamiento pública aún, pero las personas en la lista de espera serán las primeras en recibir acceso beta y novedades.",
+      "Estamos en fase de desarrollo activo. La app de finanzas es la prioridad número uno. No tenemos una fecha de lanzamiento pública aún, pero las personas en la lista de espera serán las primeras en recibir acceso beta y novedades.",
   },
   {
     category: "Disponibilidad",

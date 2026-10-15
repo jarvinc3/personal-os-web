@@ -23,7 +23,8 @@ export function CategoryTrigger({
         icon={null}
         isSystem={false}
         variant="pick"
-        onPress={disabled ? undefined : onClick}
+        disabled={disabled}
+        onPress={onClick}
       />
     )
   }
@@ -34,7 +35,8 @@ export function CategoryTrigger({
       icon={category.icon}
       color={category.color}
       isSystem={category.isSystem}
-      onPress={disabled ? undefined : onClick}
+      disabled={disabled}
+      onPress={onClick}
     />
   )
 }

@@ -5,6 +5,65 @@ export type ChatMessage = {
   content: string
 }
 
+export const ENTITY_REF_TYPES = [
+  "transaction",
+  "transfer",
+  "account",
+  "card",
+  "card_statement",
+  "loan",
+  "loan_installment",
+  "receivable",
+  "savings_goal",
+  "budget",
+  "institution",
+  "email_message",
+] as const
+
+export type EntityRefType = (typeof ENTITY_REF_TYPES)[number]
+
+export type EntityRef = {
+  type: EntityRefType
+  id: string
+}
+
+export type ChatContext = {
+  moduleSlug: string
+  screen?: string
+  entityRef?: EntityRef
+}
+
+/** Context kept in memory while a finance detail is open, plus its label. */
+export type RegisteredChatContext = ChatContext & {
+  entityLabel?: string
+}
+
+export const ENTITY_REF_TYPE_LABELS: Record<EntityRefType, string> = {
+  transaction: "Movimiento",
+  transfer: "Transferencia",
+  account: "Cuenta",
+  card: "Tarjeta",
+  card_statement: "Corte",
+  loan: "Préstamo",
+  loan_installment: "Cuota",
+  receivable: "Cobro",
+  savings_goal: "Meta de ahorro",
+  budget: "Presupuesto",
+  institution: "Institución",
+  email_message: "Correo de banco",
+}
+
+export function parseEntityRefType(
+  value: string | null | undefined
+): EntityRefType | null {
+  if (!value) {
+    return null
+  }
+  return (ENTITY_REF_TYPES as readonly string[]).includes(value)
+    ? (value as EntityRefType)
+    : null
+}
+
 export type AiProviderInfo = {
   name: string
   model: string
@@ -24,9 +83,75 @@ export type AiActionSummary = {
   label?: string
 }
 
+export type ChatTransactionSnapshot = {
+  id: string
+  type: string
+  amount: string
+  currency: string
+  transactionDate: string
+  merchant: string | null
+  description: string | null
+  accountName: string | null
+  cardName: string | null
+  status: string
+}
+
+export type ChatChartPoint = {
+  label: string
+  value: string
+  color?: string | null
+}
+
+export type ChatNextInstallment = {
+  amount: string
+  currency: string
+  dueDate: string
+  installmentNo: number
+}
+
+/**
+ * Native blocks the agent can attach to a message. The back owns this
+ * contract; unknown types must be ignored, never rendered.
+ */
 export type ChatBlock =
   | { type: "markdown"; content: string }
   | { type: "action"; action: AiActionSummary }
+  | {
+      type: "transaction_card"
+      transactionId: string
+      snapshot: ChatTransactionSnapshot
+    }
+  | {
+      type: "transaction_list"
+      items: ChatTransactionSnapshot[]
+      moreHref?: string
+    }
+  | {
+      type: "budget_progress"
+      budgetId: string
+      spent: string
+      limit: string
+      currency: string
+      name?: string
+      pctUsed?: number
+      color?: string | null
+      icon?: string | null
+    }
+  | {
+      type: "loan_summary"
+      loanId: string
+      balance: string
+      currency: string
+      name?: string
+      nextInstallment?: ChatNextInstallment
+    }
+  | {
+      type: "chart"
+      kind: "bar" | "donut" | "line"
+      series: ChatChartPoint[]
+      title?: string
+      currency?: string
+    }
 
 export type ChatResponse = {
   sessionId: string
@@ -74,6 +199,7 @@ export type AiSessionSummary = {
   contextType: string
   moduleId?: string | null
   moduleSlug?: string | null
+  chatContext?: ChatContext | null
   title?: string | null
   lastActiveAt: string
   createdAt: string
@@ -94,6 +220,7 @@ export type AiSessionDetail = {
   contextType: string
   moduleId?: string | null
   moduleSlug?: string | null
+  chatContext?: ChatContext | null
   title?: string | null
   memorySnapshot?: Record<string, unknown>
   lastActiveAt: string
@@ -122,7 +249,7 @@ export type AiResponseWsPayload = {
 }
 
 export type ModuleChatSlug =
-  "general" | "agenda" | "projects" | "health" | "subscriptions" | "finance"
+  "general" | "agenda" | "projects" | "health" | "finance"
 
 export function getChatModuleLabel(slug: string | undefined | null): string {
   const key = (slug ?? "general") as ModuleChatSlug
@@ -146,6 +273,5 @@ export const CHAT_MODULE_OPTIONS: { slug: ModuleChatSlug; label: string }[] = [
   { slug: "agenda", label: "Agenda" },
   { slug: "projects", label: "Proyectos" },
   { slug: "health", label: "Salud" },
-  { slug: "subscriptions", label: "Suscripciones" },
   { slug: "finance", label: "Finanzas" },
 ]

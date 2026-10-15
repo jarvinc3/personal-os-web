@@ -45,9 +45,10 @@ import {
   SparklesIcon,
 } from "lucide-react"
 import Link from "next/link"
-import { usePathname, useRouter } from "next/navigation"
+import { usePathname } from "next/navigation"
 import { useState } from "react"
 import { AppLogo } from "@/src/shared/components/brand/app-logo"
+import { Badge } from "@/src/shared/components/ui/badge"
 import { Separator } from "@/src/shared/components/ui/separator"
 
 const navItems = {
@@ -86,7 +87,6 @@ const navItems = {
 }
 
 export function AppSidebar() {
-  const router = useRouter()
   const { logoutMutation } = useAuth()
 
   return (
@@ -94,9 +94,18 @@ export function AppSidebar() {
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton onClick={() => router.push(APP_ROUTES.app.home)}>
-              <AppLogo size="xs" className="rounded" />
-              <span className="text-base font-semibold">Personal OS</span>
+            <SidebarMenuButton asChild>
+              <Link href={APP_ROUTES.app.home} className="relative">
+                <AppLogo size="xs" className="rounded" />
+                <span className="text-base font-semibold">Personal OS</span>
+                <Badge
+                  variant="info"
+                  className="ml-auto group-data-[collapsible=icon]:hidden"
+                >
+                  Beta
+                </Badge>
+                <LinkPendingOverlay />
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
@@ -111,12 +120,12 @@ export function AppSidebar() {
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton
-              size="md"
-              onClick={() => router.push(APP_ROUTES.app.chat)}
-            >
-              <SparklesIcon className="text-destructive" size={16} />
-              Agente IA
+            <SidebarMenuButton size="md" asChild>
+              <Link href={APP_ROUTES.app.chat} className="relative">
+                <SparklesIcon className="text-destructive" size={16} />
+                Agente IA
+                <LinkPendingOverlay />
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
@@ -155,7 +164,6 @@ function NavMain({
   items: NavMainItem[]
 }) {
   const pathname = usePathname()
-  const router = useRouter()
 
   return (
     <SidebarGroup>
@@ -171,13 +179,12 @@ function NavMain({
             if (!hasSections) {
               return (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    isActive={isUnderRoot}
-                    onClick={() => router.push(item.url)}
-                    size="md"
-                  >
-                    {item.icon && <item.icon />}
-                    <span>{item.title}</span>
+                  <SidebarMenuButton isActive={isUnderRoot} size="md" asChild>
+                    <Link href={item.url} className="relative">
+                      {item.icon && <item.icon />}
+                      <span>{item.title}</span>
+                      <LinkPendingOverlay />
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               )

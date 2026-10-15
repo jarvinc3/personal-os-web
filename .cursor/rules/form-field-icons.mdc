@@ -6,7 +6,7 @@ alwaysApply: false
 
 # Icono en campos
 
-Todo campo donde se escribe o elige un dato lleva un icono líder del tipo de dato (`icon={TypeIcon}`): texto, número, fecha, búsqueda, select y picker. No hay campos sin icono en la web. El slot de un solo emoji no lleva icono extra: el carácter es el icono.
+En cualquier vista, todo campo donde se escribe o elige un dato lleva un icono líder del tipo de dato (`icon={TypeIcon}`): texto, número, fecha, búsqueda, select y picker. No hay campos sin icono en la web. El slot de un solo emoji no lleva icono extra: el carácter es el icono. La obligación también está en [icons-required.mdc](./icons-required.mdc).
 
 ```tsx
 <FormTextField label="Nombre" icon={TypeIcon} value={name} onChange={setName} />

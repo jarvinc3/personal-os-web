@@ -1,3 +1,4 @@
+import { decimalPercent, toDecimal } from "./decimal.ts"
 import { parseFinanceMoney } from "./money.ts"
 
 export type FinanceExpenseTrendDirection = "up" | "down" | "flat"
@@ -13,6 +14,13 @@ export type FinanceExpenseTrend = {
 
 const CONSIDERABLE_DROP_PERCENT = -30
 
+const EXPENSE_TREND_PERCENT_FORMATTER = new Intl.NumberFormat("en-US", {
+  style: "percent",
+  minimumFractionDigits: 1,
+  maximumFractionDigits: 1,
+  signDisplay: "exceptZero",
+})
+
 export function expenseTrend(
   currentExpenses: string,
   previousExpenses: string
@@ -24,19 +32,25 @@ export function expenseTrend(
   }
 
   const changePercent =
-    Math.round(((current - previous) / previous) * 1000) / 10
+    Math.round(
+      decimalPercent(
+        toDecimal(currentExpenses).minus(toDecimal(previousExpenses)),
+        previousExpenses
+      ) * 10
+    ) / 10
   if (changePercent === 0) {
     return { label: "0%", direction: "flat", tone: "neutral" }
   }
+  const label = EXPENSE_TREND_PERCENT_FORMATTER.format(changePercent / 100)
   if (changePercent > 0) {
     return {
-      label: `+${changePercent.toFixed(1)}%`,
+      label,
       direction: "up",
       tone: "warning",
     }
   }
   return {
-    label: `${changePercent.toFixed(1)}%`,
+    label,
     direction: "down",
     tone: changePercent <= CONSIDERABLE_DROP_PERCENT ? "danger" : "success",
   }

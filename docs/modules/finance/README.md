@@ -4,6 +4,8 @@ Contrato de dominio: **backend** `personal-os-back/docs/modules/finance/`. Aquí
 
 | Documento                                                      | Contenido                                  |
 | -------------------------------------------------------------- | ------------------------------------------ |
+| [dominio.md](./dominio.md)                                     | Cómo funciona hoy: modelo y flujos         |
+| [pendientes/](./pendientes/README.md)                          | Specs de lo que falta, en orden            |
 | [overview.md](./overview.md)                                   | Gate, money, chrome                        |
 | [status.md](./status.md)                                       | Estado                                     |
 | [capabilities/dashboard.md](./capabilities/dashboard.md)       | Resumen y estadísticas                     |
@@ -18,5 +20,3 @@ Contrato de dominio: **backend** `personal-os-back/docs/modules/finance/`. Aquí
 Cuentas y cobros se reciclan con archivar / `CANCELLED`; no hay DELETE (FKs Restrict en el ledger).
 
 Alta y edición: movimiento, transferencia, préstamo, tarjeta e institución usan vista dedicada; cuenta, categoría, presupuesto, meta, aporte, cobro, registrar cobro, ajustar saldo y vínculos de correo siguen en sheet. Convenciones y componentes en [overview.md](./overview.md#convenciones-de-formularios).
-
-Resultado de las auditorías de formularios: [reference/auditorias/](../../reference/auditorias/README.md).

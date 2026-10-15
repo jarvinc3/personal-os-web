@@ -8,9 +8,23 @@ import { FinanceGate } from "@/src/modules/finance/finance-gate"
 import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
 import { MissingRecord } from "@/src/modules/finance/shared/components/layout/missing-record"
 import { FinanceInstrumentMovements } from "@/src/modules/finance/transactions"
+import {
+  ReconciliationSheet,
+  ReconciliationsSection,
+} from "@/src/modules/finance/reconciliation"
+import { BalanceIntegrityAlert } from "@/src/modules/finance/integrity"
+import {
+  findProductDrifts,
+  recalculationPayload,
+} from "@/src/modules/finance/shared/lib/integrity"
+import {
+  useFinanceIntegrity,
+  useRecalculateBalance,
+} from "@/src/modules/finance/shared/hooks/use-integrity"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
 import { useCardStatements } from "@/src/modules/finance/shared/hooks/use-card-statements"
+import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
 import {
   useArchiveCard,
   useCards,
@@ -20,7 +34,6 @@ import {
 } from "@/src/modules/finance/shared/hooks/use-cards"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
 import { resolveCardDisplayBalances } from "@/src/modules/finance/shared/lib/card-balances"
-import { buildUpcomingCardCycle } from "@/src/modules/finance/shared/lib/card-statement-cycle"
 import {
   financeErrorMessage,
   financeLoadErrorMessage,
@@ -44,12 +57,14 @@ import {
   financeTransactionNewHref,
 } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
+import { ChatLauncherButton, useRegisterChatContext } from "@/src/modules/ai"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { appToast } from "@/src/shared/lib/app-toast"
 import {
   ArchiveIcon,
   CreditCardIcon,
   HistoryIcon,
+  LandmarkIcon,
   MoreVerticalIcon,
   PencilIcon,
   ScaleIcon,
@@ -90,6 +105,9 @@ function CardDetailScreenBody({ cardId }: CardDetailScreenProps) {
   const cardsQuery = useCards(isEnabled)
   const accountsQuery = useAccounts(isEnabled)
   const statementsQuery = useCardStatements(isEnabled, cardId)
+  const integrityQuery = useFinanceIntegrity(isEnabled, { cardId })
+  const recalculateBalance = useRecalculateBalance()
+  const statements = infiniteListItems(statementsQuery.data)
   const { open: openCardBalanceSheet, setOpen: setOpenCardBalanceSheet } =
     useSheetParam(FINANCE_SHEET_KEYS.cardBalance)
   const { open: openHistorySheet, setOpen: setOpenHistorySheet } =
@@ -98,6 +116,8 @@ function CardDetailScreenBody({ cardId }: CardDetailScreenProps) {
     useSheetParam(FINANCE_SHEET_KEYS.cardOptions)
   const { open: openCardPaymentSheet, setOpen: setOpenCardPaymentSheet } =
     useSheetParam(FINANCE_SHEET_KEYS.cardPayment)
+  const { open: openReconciliationSheet, setOpen: setOpenReconciliationSheet } =
+    useSheetParam(FINANCE_SHEET_KEYS.cardReconciliation)
 
   const card =
     (cardsQuery.data ?? []).find((item) => item.id === cardId) ?? null
@@ -109,6 +129,20 @@ function CardDetailScreenBody({ cardId }: CardDetailScreenProps) {
     currency: primaryBalance?.currency ?? display.currency,
   }
   const isCredit = card?.type === "CREDIT"
+  const cardDrifts = isCredit
+    ? findProductDrifts(integrityQuery.data?.drifts ?? [], { cardId })
+    : []
+
+  useRegisterChatContext(
+    card
+      ? {
+          moduleSlug: "finance",
+          screen: "card-detail",
+          entityRef: { type: "card", id: card.id },
+          entityLabel: card.name,
+        }
+      : null
+  )
   const archiveCard = useArchiveCard()
   const deleteCard = useDeleteCard()
   const restoreCard = useRestoreCard()
@@ -169,15 +203,18 @@ function CardDetailScreenBody({ cardId }: CardDetailScreenProps) {
         )
       },
       actions: (
-        <Button
-          variant="outline"
-          size="icon"
-          className="size-9 rounded-full border-border"
-          aria-label="Opciones de la tarjeta"
-          onClick={() => setOpenOptionsSheet(true)}
-        >
-          <MoreVerticalIcon />
-        </Button>
+        <>
+          <ChatLauncherButton />
+          <Button
+            variant="outline"
+            size="icon"
+            className="size-9 rounded-full border-border"
+            aria-label="Opciones de la tarjeta"
+            onClick={() => setOpenOptionsSheet(true)}
+          >
+            <MoreVerticalIcon />
+          </Button>
+        </>
       ),
       accentColor: card?.color ?? undefined,
     },
@@ -226,10 +263,9 @@ function CardDetailScreenBody({ cardId }: CardDetailScreenProps) {
     />
   )
 
-  const upcomingCycle = buildUpcomingCardCycle({
-    closingDay: card.statementClosingDay,
-    dueDay: card.paymentDueDay,
-  })
+  const upcomingCycle = card.nextStatementDate
+    ? { cycleEnd: card.nextStatementDate, dueDate: card.nextPaymentDueDate }
+    : null
 
   return (
     <>
@@ -251,6 +287,18 @@ function CardDetailScreenBody({ cardId }: CardDetailScreenProps) {
         </div>
       </div>
       <div className="mx-4 -mt-4 flex flex-col gap-3 rounded-3xl bg-background">
+        <BalanceIntegrityAlert
+          drifts={cardDrifts}
+          display={cardDisplay}
+          pending={recalculateBalance.isPending}
+          onRecalculate={(drift) => {
+            recalculateBalance.mutate(recalculationPayload(drift), {
+              onSuccess: () => appToast.success({ text1: "Saldo corregido" }),
+              onError: (error) =>
+                appToast.error({ text1: financeErrorMessage(error) }),
+            })
+          }}
+        />
         {isCredit ? (
           <Tabs
             className="flex w-full flex-col gap-4 p-1.5"
@@ -281,13 +329,16 @@ function CardDetailScreenBody({ cardId }: CardDetailScreenProps) {
               ) : null}
               <CardStatementsSection
                 cardId={card.id}
-                statements={statementsQuery.data ?? []}
+                statements={statements}
                 upcomingCycle={upcomingCycle}
                 display={cardDisplay}
                 isPending={statementsQuery.isPending}
                 emptyLabel="Sin estados de cuenta"
                 emptyDescription="Configura el día de cierre para seguir cada ciclo."
                 createLabel="Tarjeta"
+                hasNextPage={statementsQuery.hasNextPage}
+                isFetchingNextPage={statementsQuery.isFetchingNextPage}
+                onLoadMore={() => void statementsQuery.fetchNextPage()}
                 onCreate={() =>
                   router.push(
                     `${APP_ROUTES.app.financeCardNew}?institutionId=${card.institutionId}`
@@ -302,6 +353,13 @@ function CardDetailScreenBody({ cardId }: CardDetailScreenProps) {
         ) : (
           movements
         )}
+        {isCredit ? (
+          <ReconciliationsSection
+            enabled={isEnabled}
+            target={{ cardId: card.id }}
+            display={cardDisplay}
+          />
+        ) : null}
       </div>
       <RecordOptionsSheet
         open={openOptionsSheet}
@@ -315,6 +373,12 @@ function CardDetailScreenBody({ cardId }: CardDetailScreenProps) {
                   title: "Pagar tarjeta",
                   icon: CreditCardIcon,
                   onPress: () => setOpenCardPaymentSheet(true),
+                },
+                {
+                  id: "reconcile",
+                  title: "Conciliar",
+                  icon: LandmarkIcon,
+                  onPress: () => setOpenReconciliationSheet(true),
                 },
               ]
             : []),
@@ -387,13 +451,25 @@ function CardDetailScreenBody({ cardId }: CardDetailScreenProps) {
         cardName={card.name}
         currencies={balances.map((balance) => balance.currency)}
         defaultCurrency={config.baseCurrency}
-        minimumPayment={statementsQuery.data?.[0]?.minimumPayment}
-        closingBalance={statementsQuery.data?.[0]?.closingBalance}
+        minimumPayment={statements[0]?.minimumPayment}
+        closingBalance={statements[0]?.closingBalance}
       />
       <InstrumentHistorySheet
         open={openHistorySheet}
         onOpenChange={setOpenHistorySheet}
         target={{ kind: "card", id: card.id }}
+        display={cardDisplay}
+      />
+      <ReconciliationSheet
+        open={openReconciliationSheet}
+        onOpenChange={setOpenReconciliationSheet}
+        target={{
+          kind: "card",
+          id: card.id,
+          currency: cardDisplay.currency,
+          name: card.name,
+          balance: primaryBalance?.balance ?? "0",
+        }}
         display={cardDisplay}
       />
     </>

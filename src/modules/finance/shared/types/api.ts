@@ -44,6 +44,10 @@ export const FINANCE_CATEGORIES_QUERY_KEY = [
   ...FINANCE_QUERY_KEY,
   "categories",
 ] as const
+export const FINANCE_STATEMENT_IMPORTS_QUERY_KEY = [
+  ...FINANCE_QUERY_KEY,
+  "statement-imports",
+] as const
 export const FINANCE_ANALYTICS_QUERY_KEY = [
   ...FINANCE_QUERY_KEY,
   "analytics",
@@ -55,6 +59,18 @@ export const FINANCE_BALANCE_SHEET_QUERY_KEY = [
 export const FINANCE_TRANSACTIONS_QUERY_KEY = [
   ...FINANCE_QUERY_KEY,
   "transactions",
+] as const
+export const FINANCE_MERCHANTS_QUERY_KEY = [
+  ...FINANCE_QUERY_KEY,
+  "merchants",
+] as const
+export const FINANCE_RECURRING_QUERY_KEY = [
+  ...FINANCE_QUERY_KEY,
+  "recurring",
+] as const
+export const FINANCE_SUBSCRIPTIONS_QUERY_KEY = [
+  ...FINANCE_QUERY_KEY,
+  "subscriptions",
 ] as const
 export const FINANCE_BUDGETS_QUERY_KEY = [
   ...FINANCE_QUERY_KEY,
@@ -101,6 +117,22 @@ export const FINANCE_INSTRUMENT_HISTORY_QUERY_KEY = [
   ...FINANCE_QUERY_KEY,
   "instrument-history",
 ] as const
+export const FINANCE_RECONCILIATIONS_QUERY_KEY = [
+  ...FINANCE_QUERY_KEY,
+  "reconciliations",
+] as const
+export const FINANCE_RECONCILIATION_STATUS_QUERY_KEY = [
+  ...FINANCE_QUERY_KEY,
+  "reconciliation-status",
+] as const
+export const FINANCE_BANK_CHARGES_QUERY_KEY = [
+  ...FINANCE_QUERY_KEY,
+  "bank-charges",
+] as const
+export const FINANCE_INTEGRITY_QUERY_KEY = [
+  ...FINANCE_QUERY_KEY,
+  "integrity",
+] as const
 
 export type FinanceArchivedType = "institution" | "account" | "card" | "loan"
 
@@ -114,22 +146,24 @@ export type FinanceDeletedType =
   | "budget"
   | "savingsGoal"
   | "receivable"
+  | "reconciliation"
 
 export type FinanceArchivedRecord = {
   type: FinanceArchivedType
   id: string
   label: string
+  logoUrl: string | null
 }
 
 export type FinanceDeletedRecord = {
   type: FinanceDeletedType
   id: string
   label: string | null
+  logoUrl: string | null
   deletedAt: string
   sizeBytes: number
 }
 
-export type FinanceRecycleBin = {
+export type FinanceRecycleBinPage = FinancePaginated<FinanceDeletedRecord> & {
   archived: FinanceArchivedRecord[]
-  deleted: FinanceDeletedRecord[]
 }

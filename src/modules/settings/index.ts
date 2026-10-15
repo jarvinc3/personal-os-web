@@ -5,7 +5,6 @@ export { FinanceModuleSettingsScreen } from "@/src/modules/settings/finance-modu
 export { FinanceCurrenciesSettingsScreen } from "@/src/modules/settings/finance-currencies-settings-screen"
 export { HealthModuleSettingsScreen } from "@/src/modules/settings/health-module-settings-screen"
 export { ProjectsModuleSettingsScreen } from "@/src/modules/settings/projects-module-settings-screen"
-export { SubscriptionsModuleSettingsScreen } from "@/src/modules/settings/subscriptions-module-settings-screen"
 export { WipeDataSettingsScreen } from "@/src/modules/settings/wipe-data-settings-screen"
 export { SETTINGS_REGISTRY } from "@/src/modules/settings/constants/settings-metadata"
 export { EditQuietHoursSheet } from "@/src/modules/settings/components/sheets/edit-quiet-hours-sheet"
@@ -31,3 +30,17 @@ export {
 } from "@/src/modules/settings/hooks/use-profile"
 export { useUserModuleConfig } from "@/src/modules/settings/hooks/use-user-module-config"
 export { useWipeUserData } from "@/src/modules/settings/hooks/use-wipe-user-data"
+export { useProfileSheetFormSync } from "@/src/modules/settings/hooks/use-profile-sheet"
+export { EmailSyncScheduleFields } from "@/src/modules/settings/components/module-settings/email-sync-schedule-fields"
+export {
+  EMAIL_SYNC_INTERVAL_PRESETS,
+  EMAIL_SYNC_SCHEDULE_MODES,
+  configToFinanceFormValues,
+  emailSyncOnboardingDefaults,
+  emailSyncPatchFromFormValues,
+  emailSyncScheduleLabel,
+  financeModuleSchema,
+  formatSyncIntervalLabel,
+  isEmailSyncConfigured,
+} from "@/src/modules/settings/lib/finance-module-form"
+export type { FinanceModuleFormValues } from "@/src/modules/settings/lib/finance-module-form"

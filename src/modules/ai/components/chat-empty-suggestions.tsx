@@ -30,7 +30,7 @@ export function ChatEmptySuggestions({
         </p>
         <p className="max-w-md text-center text-sm text-muted-foreground">
           Puedo cambiar tu perfil, preferencias, tema, notificaciones y
-          configuración de módulos.
+          configuración de apps.
         </p>
       </div>
 

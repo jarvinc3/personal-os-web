@@ -10,16 +10,15 @@ import {
   formatFinanceMoney,
   parseFinanceMoney,
 } from "@/src/modules/finance/shared/lib/money"
+import { sumDecimals } from "@/src/modules/finance/shared/lib/decimal"
 import {
   APP_ROUTES,
   financeTransactionNewHref,
 } from "@/src/shared/constants/app-routes"
-import { useRouter } from "next/navigation"
 import { useCallback, useMemo, useState } from "react"
 import { FinanceHomeHero } from "@/src/modules/finance/dashboard/components/home-hero"
 
 export function FinanceHomeHeroSection() {
-  const router = useRouter()
   const { isEnabled, config } = useFinanceEnabled()
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(
     null
@@ -83,15 +82,14 @@ export function FinanceHomeHeroSection() {
               ? formatFinanceMoney(global.netWorth, moneyDisplay)
               : "Balance incompleto",
       }
-  const pendingHold = (pendingTransactionsQuery.data?.items ?? []).reduce(
-    (sum, transaction) =>
-      sum + (parseFinanceMoney(transaction.amountBaseCurrency) ?? 0),
-    0
+  const pendingHold = sumDecimals(
+    (pendingTransactionsQuery.data?.items ?? []).map(
+      (transaction) => transaction.amountBaseCurrency
+    )
   )
-  const pendingHoldLabel =
-    pendingHold > 0
-      ? `Retenido ${formatFinanceMoney(pendingHold, moneyDisplay)}`
-      : undefined
+  const pendingHoldLabel = pendingHold.gt(0)
+    ? `Retenido ${formatFinanceMoney(pendingHold.toFixed(2), moneyDisplay)}`
+    : undefined
   const cashFlowLabel = summaryQuery.data
     ? `Flujo ${formatFinanceMoney(summaryQuery.data.cashFlow, moneyDisplay)}`
     : undefined
@@ -115,25 +113,18 @@ export function FinanceHomeHeroSection() {
         : (accounts[currentIndex + 1]?.id ?? null)
     })
   }, [accounts])
-  const goToTransfer = useCallback(() => {
-    router.push(APP_ROUTES.app.financeTransferNew)
-  }, [router])
 
   return (
     <>
       <FinanceHomeHero
         balanceLabel={homeBalance.label}
         balanceAmount={homeBalance.amount}
+        sendHref={financeTransactionNewHref("DEBIT")}
+        receiveHref={financeTransactionNewHref("CREDIT")}
+        transferHref={APP_ROUTES.app.financeTransferNew}
         pendingHoldLabel={pendingHoldLabel}
         cashFlowLabel={cashFlowLabel}
         onAccountPress={cycleAccount}
-        onSendPress={() => {
-          router.push(financeTransactionNewHref("DEBIT"))
-        }}
-        onReceivePress={() => {
-          router.push(financeTransactionNewHref("CREDIT"))
-        }}
-        onTransferPress={goToTransfer}
       />
     </>
   )

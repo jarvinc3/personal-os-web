@@ -10,7 +10,15 @@ function tx(
     FinanceTransaction,
     "id" | "type" | "amount" | "transactionDate"
   > &
-    Partial<Pick<FinanceTransaction, "transferGroupId" | "amountBaseCurrency">>
+    Partial<
+      Pick<
+        FinanceTransaction,
+        | "transferGroupId"
+        | "amountBaseCurrency"
+        | "status"
+        | "linkedTransactionId"
+      >
+    >
 ): FinanceTransaction {
   return {
     status: "CONFIRMED",
@@ -193,5 +201,131 @@ describe("buildTimelineMonths", () => {
       true
     )
     assert.deepEqual(months[0]?.totals, { income: 0, expenses: 0 })
+  })
+
+  it("groups a reversal from another month with its original", () => {
+    const months = buildTimelineMonths(
+      [
+        { year: 2026, month: 3 },
+        { year: 2026, month: 4 },
+      ],
+      [
+        tx({
+          id: "reversal",
+          type: "DEBIT",
+          amount: "100.00",
+          status: "REVERSED",
+          linkedTransactionId: "original",
+          transactionDate: "2026-04-05",
+        }),
+        tx({
+          id: "original",
+          type: "DEBIT",
+          amount: "100.00",
+          status: "REVERSED",
+          transactionDate: "2026-03-20",
+        }),
+      ]
+    )
+    const marchDays = months[0]?.weeks.flatMap((week) => week.days) ?? []
+    const aprilDays = months[1]?.weeks.flatMap((week) => week.days) ?? []
+    const marchRows = marchDays.flatMap((day) => day.rows)
+    assert.deepEqual(
+      marchDays.map((day) => day.dateKey),
+      ["2026-03-20"]
+    )
+    assert.deepEqual(
+      marchRows.map((group) => group.original.id),
+      ["original"]
+    )
+    assert.equal(marchRows[0]?.reversal?.id, "reversal")
+    assert.deepEqual(aprilDays, [])
+  })
+
+  it("keeps the reversal pair out of the month totals", () => {
+    const months = buildTimelineMonths(
+      [
+        { year: 2026, month: 3 },
+        { year: 2026, month: 4 },
+      ],
+      [
+        tx({
+          id: "reversal",
+          type: "DEBIT",
+          amount: "100.00",
+          status: "REVERSED",
+          linkedTransactionId: "original",
+          transactionDate: "2026-04-05",
+        }),
+        tx({
+          id: "original",
+          type: "DEBIT",
+          amount: "100.00",
+          status: "REVERSED",
+          transactionDate: "2026-03-20",
+        }),
+      ]
+    )
+    assert.deepEqual(months[0]?.totals, { income: 0, expenses: 0 })
+    assert.deepEqual(months[1]?.totals, { income: 0, expenses: 0 })
+  })
+
+  it("shows an orphan reversal alone with its badge data", () => {
+    const months = buildTimelineMonths(
+      [{ year: 2026, month: 4 }],
+      [
+        tx({
+          id: "reversal",
+          type: "DEBIT",
+          amount: "100.00",
+          status: "REVERSED",
+          linkedTransactionId: "missing-original",
+          transactionDate: "2026-04-05",
+        }),
+      ]
+    )
+    const rows = (months[0]?.weeks ?? [])
+      .flatMap((week) => week.days)
+      .flatMap((day) => day.rows)
+    assert.equal(rows.length, 1)
+    assert.equal(rows[0]?.original.id, "reversal")
+    assert.equal(rows[0]?.reversal, undefined)
+    assert.equal(rows[0]?.isOrphan, true)
+  })
+
+  it("keeps a partial reversal as two separate rows", () => {
+    const months = buildTimelineMonths(
+      [{ year: 2026, month: 4 }],
+      [
+        tx({
+          id: "original",
+          type: "DEBIT",
+          amount: "100.00",
+          transactionDate: "2026-04-05",
+        }),
+        tx({
+          id: "reversal",
+          type: "DEBIT",
+          amount: "40.00",
+          status: "REVERSED",
+          linkedTransactionId: "original",
+          transactionDate: "2026-04-06",
+        }),
+      ]
+    )
+    const days = months[0]?.weeks.flatMap((week) => week.days) ?? []
+    const rows = days.flatMap((day) => day.rows)
+    assert.deepEqual(
+      rows.map((group) => group.original.id),
+      ["original", "reversal"]
+    )
+    assert.equal(
+      rows.every((group) => group.isPartial),
+      true
+    )
+    assert.equal(
+      rows.every((group) => group.reversal === undefined),
+      true
+    )
   })
 })

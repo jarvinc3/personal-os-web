@@ -1,0 +1,24 @@
+---
+description: User-facing copy says "App"; code and architecture keep "módulo".
+globs: "**/*.{ts,tsx,md}"
+alwaysApply: true
+---
+
+# App de cara al usuario, módulo en el código
+
+Todo texto que lee la persona dice **App** (Finanzas, Agenda, Salud, Proyectos y demás son Apps; el producto es Personal OS). El código y la arquitectura siguen diciendo **módulo**: no renombres carpetas, rutas, paquetes, símbolos ni campos por el término de interfaz.
+
+Vale para títulos, descripciones, ayuda, toasts, `aria-label`, estados vacíos, textos de landing y `fieldGuide`.
+
+Rompe la regla: `title="Módulos"` en Ajustes, `toast "Módulo activado"`, `fieldGuide "…del módulo Finanzas"`, `aria-label "Filtro por módulo"`.
+
+```tsx
+// bien
+<SettingsSection title="Apps" />
+appToast.success({ text1: "App activada" })
+
+// no
+<SettingsSection title="Módulos" />
+```
+
+Se mantiene `MODULE_REGISTRY`, `ModuleSlug`, `moduleSlug`, `src/modules/<slug>` y toda la documentación de arquitectura. Detalle: [docs/glosario.md](../docs/glosario.md).

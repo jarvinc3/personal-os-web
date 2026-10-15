@@ -2,7 +2,6 @@
 
 import { FinanceDateField } from "@/src/modules/finance/shared/components/forms/date-field"
 import {
-  FinanceDetailsDisclosure,
   FinanceHelpText,
   FinanceSuggestionRow,
 } from "@/src/modules/finance/shared/components/forms/form-blocks"
@@ -33,7 +32,13 @@ import { appToast } from "@/src/shared/lib/app-toast"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
 import { usePicker } from "@/src/shared/hooks/use-picker"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { NotebookPenIcon, PiggyBankIcon, TargetIcon, XIcon } from "lucide-react"
+import {
+  CircleAlert,
+  NotebookPenIcon,
+  PiggyBankIcon,
+  TargetIcon,
+  XIcon,
+} from "lucide-react"
 import { useEffect, useMemo } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import {
@@ -191,7 +196,7 @@ export function SavingsGoalSheet({
           ),
         }}
       >
-        <SummarySection title="Ahorro" icon={PiggyBankIcon}>
+        <SummarySection title="Meta de ahorro" icon={PiggyBankIcon}>
           {goal ? (
             <FinanceHelpText>
               {goal.isCompleted ? "Completada" : "En curso"}
@@ -211,7 +216,7 @@ export function SavingsGoalSheet({
                 onChange={field.onChange}
                 onBlur={field.onBlur}
                 error={errors.name?.message}
-                placeholder="Fondo de emergencia"
+                placeholder=""
               />
             )}
           />
@@ -277,7 +282,11 @@ export function SavingsGoalSheet({
           ) : null}
         </SummarySection>
 
-        <FinanceDetailsDisclosure>
+        <SummarySection
+          title="Detalles opcionales"
+          icon={CircleAlert}
+          collapsible
+        >
           <Controller
             control={control}
             name="description"
@@ -292,7 +301,7 @@ export function SavingsGoalSheet({
               />
             )}
           />
-        </FinanceDetailsDisclosure>
+        </SummarySection>
       </BottomSheet>
 
       {discardChangesDialog}

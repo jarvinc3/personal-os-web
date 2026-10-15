@@ -4,8 +4,10 @@ export const FINANCE_SHEET_KEYS = {
   accountBalance: "account-balance-sheet",
   cashAccountOptions: "cash-account-options-sheet",
   accountHistory: "account-history-sheet",
+  accountReconciliation: "account-reconciliation-sheet",
   cardOptions: "card-options-sheet",
   cardHistory: "card-history-sheet",
+  cardReconciliation: "card-reconciliation-sheet",
   cardBalance: "card-balance-sheet",
   cardPayment: "card-payment-sheet",
   loanOptions: "loan-options-sheet",
@@ -23,6 +25,10 @@ export const FINANCE_SHEET_KEYS = {
   oauthGmailResult: "oauth-gmail-result",
   linkInstitutionMailbox: "link-institution-mailbox-sheet",
   mailbox: "mailbox-sheet",
+  subscriptionUpcoming: "subscription-upcoming-sheet",
+  subscriptionAlerts: "subscription-alerts-sheet",
+  subscriptionDetected: "subscription-detected-sheet",
+  subscriptionFilters: "subscription-filters-sheet",
 } as const
 
 export type FinanceSheetKey =

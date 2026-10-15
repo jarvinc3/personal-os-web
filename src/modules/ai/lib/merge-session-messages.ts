@@ -47,13 +47,23 @@ function mapSessionMessage(message: AiSessionMessage): UiMessage {
   }
 }
 
+function hasBlocks(message: AiSessionMessage): boolean {
+  const blocks = message.metadata.blocks as ChatBlock[] | undefined
+  return Array.isArray(blocks) && blocks.length > 0
+}
+
 function isVisibleSessionMessage(message: AiSessionMessage): boolean {
-  return (
-    (message.role === "user" || message.role === "assistant") &&
-    message.content.trim().length > 0 &&
-    message.content.trim() !== "[tool_calls]" &&
-    message.metadata.phase !== "tool_request"
-  )
+  if (message.role !== "user" && message.role !== "assistant") {
+    return false
+  }
+  if (
+    message.content.trim() === "[tool_calls]" ||
+    message.metadata.phase === "tool_request"
+  ) {
+    return false
+  }
+  // An assistant answer can be only blocks (a card with no prose).
+  return message.content.trim().length > 0 || hasBlocks(message)
 }
 
 function messageKey(

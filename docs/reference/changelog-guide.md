@@ -6,6 +6,9 @@ Formato y reglas para `CHANGELOG.md` y para la versión de `package.json`. Léel
 
 - Un release por sesión de agente, aunque el cambio sea pequeño.
 - La versión vive en `package.json`, en la raíz del repositorio. Una sola versión para todo el repo.
+
+> Mientras el proyecto esté en beta (`0.x`), la política de [docs/versionado.md](../versionado.md) manda: un cambio incompatible sube MINOR y `1.0.0` solo la decide el usuario.
+
 - El bump es el más alto de la sesión:
   - `MAJOR`: rompe un contrato o los datos guardados (endpoint, DTO, esquema, formato de un campo) y un cliente anterior deja de funcionar.
   - `MINOR`: agrega una función, una pantalla, un endpoint o una capacidad visible.

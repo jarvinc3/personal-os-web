@@ -1,0 +1,15 @@
+---
+description: Política de versionado beta 0.x (obligatoria en cada release)
+alwaysApply: true
+---
+
+# Versionado
+
+Antes de cualquier release, cambio de versión, tag o entrada de CHANGELOG, lee y sigue al pie de la letra [docs/versionado.md](mdc:docs/versionado.md).
+
+- Versión actual en beta: `0.MINOR.PATCH` (reinicio en `0.20.0`). Nunca bajar de versión.
+- Función o módulo nuevo → MINOR. Corrección o ajuste visual → PATCH.
+- Cada release: entrada en `CHANGELOG.md` + `version` en `package.json` + commit `chore(release): vX.Y.Z` + tag `vX.Y.Z` subido.
+- La marca "beta" se queda en el README y en la UI hasta `1.0.0`.
+- `1.0.0` solo cuando el usuario lo decida (datos reales, backups, E2E del flujo principal, semanas sin incidentes). Después: módulo → MINOR, solo cambios incompatibles → MAJOR.
+- Hitos de módulo como nombre de release: `## [0.22.0] - AAAA-MM-DD - Agenda`, nunca como MAJOR.

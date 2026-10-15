@@ -1,11 +1,5 @@
-import { SubscriptionsModuleSettingsScreen } from "@/src/modules/settings"
-import { LoadingView } from "@/src/shared/components/layout/loading-view"
-import { Suspense } from "react"
+import { redirect } from "next/navigation"
 
-export default function SubscriptionsSettingsPage() {
-  return (
-    <Suspense fallback={<LoadingView variant="screen" />}>
-      <SubscriptionsModuleSettingsScreen />
-    </Suspense>
-  )
+export default function SettingsSubscriptionsRedirectPage() {
+  redirect("/settings/finance#suscripciones")
 }

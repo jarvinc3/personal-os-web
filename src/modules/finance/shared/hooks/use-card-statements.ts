@@ -1,9 +1,16 @@
 "use client"
 
 import { apiGet, apiPatch } from "@/src/config/api-client"
-import { cardStatementsQuery } from "@/src/modules/finance/shared/lib/finance-query-options"
-import { FINANCE_CARD_STATEMENTS_QUERY_KEY } from "@/src/modules/finance/shared/types/api"
-import type { FinanceCardStatementDetail } from "@/src/modules/finance/shared/types/entities"
+import { useInfiniteFinanceList } from "@/src/modules/finance/shared/hooks/use-infinite-finance-list"
+import { FINANCE_LIST_PAGE_SIZE } from "@/src/modules/finance/shared/lib/finance-query-options"
+import {
+  FINANCE_CARD_STATEMENTS_QUERY_KEY,
+  type FinancePaginated,
+} from "@/src/modules/finance/shared/types/api"
+import type {
+  FinanceCardStatement,
+  FinanceCardStatementDetail,
+} from "@/src/modules/finance/shared/types/entities"
 import { API_ENDPOINTS } from "@/src/shared/constants/api-endpoints"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
@@ -14,8 +21,10 @@ export type UpdateCardStatementBody = {
 }
 
 export function useCardStatements(enabled: boolean, cardId: string | null) {
-  return useQuery({
-    ...cardStatementsQuery(cardId ?? ""),
+  return useInfiniteFinanceList<FinancePaginated<FinanceCardStatement>>({
+    queryKey: [...FINANCE_CARD_STATEMENTS_QUERY_KEY, cardId ?? ""],
+    endpoint: API_ENDPOINTS.FINANCE.CARD_STATEMENTS(cardId ?? ""),
+    params: { limit: FINANCE_LIST_PAGE_SIZE },
     enabled: enabled && Boolean(cardId),
   })
 }

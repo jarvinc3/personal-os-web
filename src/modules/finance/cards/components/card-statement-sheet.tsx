@@ -24,6 +24,7 @@ import {
   type FinanceCardStatementMovement,
 } from "@/src/modules/finance/shared/types/entities"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+import { ChatLauncherButton, useRegisterChatContext } from "@/src/modules/ai"
 import {
   Empty,
   EmptyDescription,
@@ -35,7 +36,13 @@ import { SummaryItem } from "@/src/shared/components/ui/summary"
 import { Button } from "@/src/shared/components/ui/button"
 import { FormTextField } from "@/src/shared/components/layout/form-blocks"
 import { appToast } from "@/src/shared/lib/app-toast"
-import { CalendarIcon, XIcon } from "lucide-react"
+import {
+  CalendarIcon,
+  CoinsIcon,
+  SaveIcon,
+  WalletIcon,
+  XIcon,
+} from "lucide-react"
 import { useCallback, useEffect, useState } from "react"
 
 type CardStatementSheetProps = {
@@ -92,6 +99,17 @@ export function CardStatementSheet({
 }: CardStatementSheetProps) {
   const detailQuery = useCardStatementDetail(open, cardId, statementId)
   const detail = detailQuery.data
+
+  useRegisterChatContext(
+    open && detail
+      ? {
+          moduleSlug: "finance",
+          screen: "card-statement-detail",
+          entityRef: { type: "card_statement", id: detail.statement.id },
+          entityLabel: `Corte ${formatCalendarDate(detail.statement.cycleEnd)}`,
+        }
+      : null
+  )
   const moneyDisplay = detail
     ? { ...display, currency: detail.statement.currency }
     : display
@@ -184,10 +202,16 @@ export function CardStatementSheet({
         ),
       }}
       headerAction={
-        detail && !editing ? (
-          <Button type="button" variant="outline" onClick={startEdit}>
-            Registrar corte
-          </Button>
+        detail ? (
+          <div className="flex items-center gap-2">
+            <ChatLauncherButton />
+            {!editing ? (
+              <Button type="button" variant="outline" onClick={startEdit}>
+                <CalendarIcon className="size-4 shrink-0" />
+                Registrar corte
+              </Button>
+            ) : null}
+          </div>
         ) : undefined
       }
     >
@@ -223,16 +247,19 @@ export function CardStatementSheet({
               <div className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-3">
                 <FormTextField
                   label="Mínimo"
+                  icon={CoinsIcon}
                   value={minimumPayment}
                   onChange={setMinimumPayment}
                 />
                 <FormTextField
                   label="Balance al corte"
+                  icon={WalletIcon}
                   value={closingBalance}
                   onChange={setClosingBalance}
                 />
                 <FormTextField
                   label="Vence (AAAA-MM-DD)"
+                  icon={CalendarIcon}
                   value={dueDate}
                   onChange={setDueDate}
                 />
@@ -243,6 +270,7 @@ export function CardStatementSheet({
                     disabled={updateMutation.isPending}
                     onClick={saveEdit}
                   >
+                    <SaveIcon className="size-4 shrink-0" />
                     Guardar
                   </Button>
                   <Button
@@ -251,6 +279,7 @@ export function CardStatementSheet({
                     className="flex-1"
                     onClick={() => setEditing(false)}
                   >
+                    <XIcon className="size-4 shrink-0" />
                     Cancelar
                   </Button>
                 </div>

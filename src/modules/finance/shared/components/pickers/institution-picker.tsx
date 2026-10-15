@@ -1,6 +1,7 @@
 "use client"
 
 import { BrandLogo } from "@/src/modules/finance/shared/components/brand-logo"
+import { selectableBankInstitutions } from "@/src/modules/finance/shared/lib/cash"
 import { CATALOG_NONE } from "@/src/modules/finance/shared/constants/catalog"
 import type { FinanceInstitution } from "@/src/modules/finance/shared/types/entities"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
@@ -66,6 +67,8 @@ export function InstitutionPickerSheet({
     onOpenChange(false)
   }
 
+  const selectable = selectableBankInstitutions(institutions)
+
   return (
     <BottomSheet open={open} onOpenChange={onOpenChange} title="Institución">
       {noneLabel ? (
@@ -76,13 +79,13 @@ export function InstitutionPickerSheet({
           onPress={() => choose(CATALOG_NONE)}
         />
       ) : null}
-      {institutions.length === 0 ? (
+      {selectable.length === 0 ? (
         <p className="text-sm text-muted-foreground">
           No hay instituciones en el catálogo.
         </p>
       ) : (
         <div className="flex flex-col gap-2">
-          {institutions.map((institution) => (
+          {selectable.map((institution) => (
             <InstitutionRow
               key={institution.id}
               name={institution.name}

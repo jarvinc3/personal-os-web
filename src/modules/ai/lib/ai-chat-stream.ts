@@ -1,5 +1,6 @@
 import { getSupabaseBrowserClient } from "@/src/config/supabase/client"
 import type {
+  ChatContext,
   ChatMessage,
   ChatStreamEvent,
 } from "@/src/modules/ai/types/chat.types"
@@ -9,6 +10,7 @@ export type StreamChatOptions = {
   sessionId?: string
   messages: ChatMessage[]
   clientMessageId?: string
+  context?: ChatContext | null
   signal?: AbortSignal
   onEvent: (event: ChatStreamEvent) => void
 }
@@ -47,6 +49,7 @@ export async function streamAiChat(options: StreamChatOptions): Promise<void> {
         sessionId: options.sessionId,
         messages: options.messages,
         clientMessageId: options.clientMessageId,
+        context: options.context ?? undefined,
       }),
       signal: options.signal,
     })

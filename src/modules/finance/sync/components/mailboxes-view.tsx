@@ -48,6 +48,8 @@ import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/asyn
 import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
 import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
 import { SummaryItem, SummarySection } from "@/src/shared/components/ui/summary"
+import { InfiniteListSentinel } from "@/src/shared/components/ui/infinite-list-sentinel"
+import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { InboxIcon, MailIcon, PlusIcon, TriangleAlertIcon } from "lucide-react"
 
@@ -115,7 +117,7 @@ export function FinanceMailboxesView({ enabled }: { enabled: boolean }) {
   const accounts = accountsQuery.data ?? []
   const cards = cardsQuery.data ?? []
   const mailboxes = mailboxesQuery.data ?? []
-  const pending = pendingQuery.data ?? []
+  const pending = infiniteListItems(pendingQuery.data)
   const sources = mailboxes.flatMap((mailbox) => mailbox.sources)
   const syncLogs = sources
     .flatMap((source) =>
@@ -126,7 +128,10 @@ export function FinanceMailboxesView({ enabled }: { enabled: boolean }) {
     )
     .sort((a, b) => b.startedAt.localeCompare(a.startedAt))
     .slice(0, 20)
-  const recentMessages = messagesQuery.data ?? []
+  const latestSyncLog = syncLogs[0]
+  const latestFailedLog =
+    latestSyncLog?.status === "FAILED" ? latestSyncLog : undefined
+  const recentMessages = infiniteListItems(messagesQuery.data)
   const queueDown = healthQuery.data?.ready === false
 
   const errorMessage = mailboxesQuery.error
@@ -154,7 +159,7 @@ export function FinanceMailboxesView({ enabled }: { enabled: boolean }) {
   const assigning = useSheetListEntity(
     openAssignSheet,
     assignSheetId,
-    pendingQuery.data,
+    pending,
     pendingQuery.isPending,
     setOpenAssignSheet,
     true
@@ -170,6 +175,18 @@ export function FinanceMailboxesView({ enabled }: { enabled: boolean }) {
             Redis no responde. Los correos no se encolan. En desarrollo levanta
             Redis local (docker compose up -d redis) y usa
             REDIS_URL=redis://localhost:6379.
+          </AlertDescription>
+        </Alert>
+      ) : null}
+      {latestFailedLog ? (
+        <Alert variant="destructive" className="mb-4">
+          <TriangleAlertIcon />
+          <AlertTitle>
+            Falló el último sync de {latestFailedLog.sourceName}
+          </AlertTitle>
+          <AlertDescription>
+            {latestFailedLog.error ??
+              "Revisa la conexión de Gmail y vuelve a sincronizar."}
           </AlertDescription>
         </Alert>
       ) : null}
@@ -290,6 +307,11 @@ export function FinanceMailboxesView({ enabled }: { enabled: boolean }) {
               isLast={index === pending.length - 1}
             />
           ))}
+          <InfiniteListSentinel
+            hasNextPage={pendingQuery.hasNextPage}
+            isFetchingNextPage={pendingQuery.isFetchingNextPage}
+            onLoadMore={() => void pendingQuery.fetchNextPage()}
+          />
         </AsyncRegion>
       </SummarySection>
 
@@ -299,7 +321,12 @@ export function FinanceMailboxesView({ enabled }: { enabled: boolean }) {
             logs={syncLogs}
             emptyLabel="Todavía no hay runs. Sincroniza un banco para ver el historial."
           />
-          <EmailMessageHistorySection messages={recentMessages} />
+          <EmailMessageHistorySection
+            messages={recentMessages}
+            hasNextPage={messagesQuery.hasNextPage}
+            isFetchingNextPage={messagesQuery.isFetchingNextPage}
+            onLoadMore={() => void messagesQuery.fetchNextPage()}
+          />
         </>
       ) : null}
 

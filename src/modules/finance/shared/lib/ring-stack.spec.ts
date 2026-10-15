@@ -53,6 +53,7 @@ function cashItem(partial: {
   id: string
   name: string
   balance: string
+  currency?: string
 }): Extract<InstitutionStackItem, { kind: "cash" }> {
   const account: FinanceAccount = {
     id: partial.id,
@@ -60,7 +61,7 @@ function cashItem(partial: {
     institutionName: null,
     name: partial.name,
     type: "CASH",
-    currency: "DOP",
+    currency: partial.currency ?? "DOP",
     accountNumber: null,
     balance: partial.balance,
     color: null,
@@ -114,6 +115,60 @@ describe("buildRingStackSlices", () => {
     assert.equal(slices[1]?.percent, 20)
     assert.equal(slices[2]?.signedValue, -100)
     assert.equal(slices[2]?.value, 100)
+  })
+
+  it("sums cash balances as decimals", () => {
+    const slices = buildRingStackSlices(
+      [
+        cashItem({ id: "c1", name: "Billetera", balance: "0.10" }),
+        cashItem({ id: "c2", name: "Alcancía", balance: "0.20" }),
+      ],
+      display
+    )
+
+    assert.equal(slices[0]?.signedValue, 0.3)
+    assert.equal(slices[0]?.percent, 100)
+  })
+
+  it("leaves the cash ring unmeasured when the currencies differ", () => {
+    const slices = buildRingStackSlices(
+      [
+        cashItem({
+          id: "c1",
+          name: "Billetera",
+          balance: "100",
+          currency: "DOP",
+        }),
+        cashItem({
+          id: "c2",
+          name: "Cuenta USD",
+          balance: "50",
+          currency: "USD",
+        }),
+      ],
+      display
+    )
+
+    assert.equal(slices[0]?.amountLabel, "Balance incompleto")
+    assert.equal(slices[0]?.signedValue, 0)
+    assert.equal(slices[0]?.percent, 0)
+  })
+
+  it("leaves the cash ring unmeasured when the cash is not in the base currency", () => {
+    const slices = buildRingStackSlices(
+      [
+        cashItem({
+          id: "c",
+          name: "Cuenta USD",
+          balance: "50",
+          currency: "USD",
+        }),
+      ],
+      display
+    )
+
+    assert.equal(slices[0]?.amountLabel, "Balance incompleto")
+    assert.equal(slices[0]?.signedValue, 0)
   })
 
   it("draws the debt as the pale part of the same arc", () => {
@@ -263,5 +318,37 @@ describe("buildRingStackSlices", () => {
     )
 
     assert.equal(slices[0]?.logoUrl, null)
+  })
+})
+
+describe("cash institution ring", () => {
+  it("sizes the Efectivo ring from the converted cash total", () => {
+    const item = {
+      ...institutionItem({ id: "cash", name: "Efectivo", netWorth: null }),
+      institution: {
+        id: "cash",
+        name: "Efectivo",
+        type: "cash" as const,
+        color: null,
+        logoUrl: null,
+        country: "DO",
+        isActive: true,
+        isSystem: true,
+      },
+      cash: {
+        totalBase: "1600",
+        baseCurrency: "DOP",
+        rateDate: "2026-10-15",
+        status: "COMPLETE" as const,
+        byCurrency: [],
+      },
+    }
+
+    const slices = buildRingStackSlices([item], display)
+    const slice = slices.find((entry) => entry.key === "institution-cash")
+
+    assert.equal(slice?.assetsValue, 1600)
+    assert.equal(slice?.percent, 100)
+    assert.equal(slice?.amountLabel, "DOP $1,600")
   })
 })

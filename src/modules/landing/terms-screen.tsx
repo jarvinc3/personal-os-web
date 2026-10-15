@@ -44,7 +44,7 @@ export function TermsScreen() {
           <p>
             Personal OS es una plataforma de gestión personal que permite a los
             usuarios centralizar y automatizar la administración de sus
-            finanzas, agenda, proyectos, salud y suscripciones mediante módulos
+            finanzas, agenda, proyectos, salud y suscripciones mediante apps
             interconectados y un agente de inteligencia artificial.
           </p>
           <p>

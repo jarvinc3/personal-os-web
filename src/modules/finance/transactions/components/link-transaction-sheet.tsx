@@ -9,6 +9,7 @@ import {
   type LinkTransactionBody,
 } from "@/src/modules/finance/shared/hooks/use-transaction-link"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
+import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
 import { formatCalendarDate } from "@/src/modules/finance/shared/lib/ledger-form"
 import {
   formatFinanceMoney,
@@ -16,6 +17,7 @@ import {
 } from "@/src/modules/finance/shared/lib/money"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
 import { Button } from "@/src/shared/components/ui/button"
+import { InfiniteListSentinel } from "@/src/shared/components/ui/infinite-list-sentinel"
 import { SummaryItem } from "@/src/shared/components/ui/summary"
 import {
   Tabs,
@@ -62,7 +64,7 @@ export function LinkTransactionSheet({
     (loan) => loan.isActive && loan.paidInstallments < loan.totalInstallments
   )
   const selectedLoan = loans.find((loan) => loan.id === loanId) ?? null
-  const installments = (installmentsQuery.data ?? []).filter(
+  const installments = infiniteListItems(installmentsQuery.data).filter(
     (installment) => installment.status !== "PAID"
   )
   const receivables = (receivablesQuery.data ?? []).filter(
@@ -88,7 +90,7 @@ export function LinkTransactionSheet({
 
   function renderInstallmentTargets() {
     if (selectedLoan) {
-      if (installments.length === 0) {
+      if (installments.length === 0 && !installmentsQuery.hasNextPage) {
         return (
           <p className="text-sm text-muted-foreground">
             Sin cuotas pendientes.
@@ -96,27 +98,36 @@ export function LinkTransactionSheet({
         )
       }
       return (
-        <div className="rounded-2xl border border-border bg-card">
-          {installments.map((installment, index) => (
-            <SummaryItem
-              key={installment.id}
-              title={`Cuota ${installment.installmentNo}`}
-              description={`Vence ${formatCalendarDate(installment.dueDate)}`}
-              value={formatFinanceMoney(installment.amount, {
-                ...display,
-                currency: selectedLoan.currency,
-              })}
-              onPress={() =>
-                submit({
-                  kind: "LOAN_INSTALLMENT",
-                  loanId: selectedLoan.id,
-                  installmentId: installment.id,
-                })
-              }
-              isLast={index === installments.length - 1}
-            />
-          ))}
-        </div>
+        <>
+          {installments.length > 0 ? (
+            <div className="rounded-2xl border border-border bg-card">
+              {installments.map((installment, index) => (
+                <SummaryItem
+                  key={installment.id}
+                  title={`Cuota ${installment.installmentNo}`}
+                  description={`Vence ${formatCalendarDate(installment.dueDate)}`}
+                  value={formatFinanceMoney(installment.amount, {
+                    ...display,
+                    currency: selectedLoan.currency,
+                  })}
+                  onPress={() =>
+                    submit({
+                      kind: "LOAN_INSTALLMENT",
+                      loanId: selectedLoan.id,
+                      installmentId: installment.id,
+                    })
+                  }
+                  isLast={index === installments.length - 1}
+                />
+              ))}
+            </div>
+          ) : null}
+          <InfiniteListSentinel
+            hasNextPage={installmentsQuery.hasNextPage}
+            isFetchingNextPage={installmentsQuery.isFetchingNextPage}
+            onLoadMore={() => void installmentsQuery.fetchNextPage()}
+          />
+        </>
       )
     }
     if (loans.length === 0) {

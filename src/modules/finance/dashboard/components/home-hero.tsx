@@ -1,4 +1,5 @@
 import { Button } from "@/src/shared/components/ui/button"
+import { LinkPendingOverlay } from "@/src/shared/components/ui/navigation-pending"
 import { cn } from "@/src/shared/lib/utils"
 import {
   ArrowDownLeftIcon,
@@ -6,18 +7,48 @@ import {
   ArrowUpRightIcon,
   ChevronDownIcon,
   CreditCardIcon,
+  type LucideIcon,
 } from "lucide-react"
+import Link from "next/link"
 
 type FinanceHomeHeroProps = {
   balanceLabel: string
   balanceAmount: string
+  sendHref: string
+  receiveHref: string
+  transferHref: string
   pendingHoldLabel?: string
   cashFlowLabel?: string
   onAccountPress?: () => void
-  onSendPress?: () => void
-  onReceivePress?: () => void
-  onTransferPress?: () => void
   className?: string
+}
+
+type FinanceHomeHeroActionProps = {
+  href: string
+  icon: LucideIcon
+  label: string
+  className?: string
+}
+
+function FinanceHomeHeroAction({
+  href,
+  icon: Icon,
+  label,
+  className,
+}: FinanceHomeHeroActionProps) {
+  return (
+    <Button
+      asChild
+      variant="outline"
+      className={cn("relative flex-1", className)}
+    >
+      <Link href={href}>
+        <Icon className="text-foreground" />
+        <span className="text-base font-semibold text-foreground">{label}</span>
+        <LinkPendingOverlay />
+      </Link>
+    </Button>
+  )
 }
 
 function FinanceHomeGridPattern() {
@@ -44,12 +75,12 @@ function FinanceHomeGridPattern() {
 export function FinanceHomeHero({
   balanceLabel,
   balanceAmount,
+  sendHref,
+  receiveHref,
+  transferHref,
   pendingHoldLabel,
   cashFlowLabel,
   onAccountPress,
-  onSendPress,
-  onReceivePress,
-  onTransferPress,
   className,
 }: FinanceHomeHeroProps) {
   return (
@@ -91,36 +122,24 @@ export function FinanceHomeHero({
         </div>
 
         <div className="grid grid-cols-3 gap-0.5 overflow-hidden rounded-2xl border border-border">
-          <Button
-            variant="outline"
-            onClick={onSendPress}
-            className="flex-1 rounded-none rounded-l-2xl"
-          >
-            <ArrowUpRightIcon className="text-foreground" />
-            <span className="text-base font-semibold text-foreground">
-              Gasto
-            </span>
-          </Button>
-          <Button
-            variant="outline"
-            onClick={onReceivePress}
-            className="flex-1 rounded-none"
-          >
-            <ArrowDownLeftIcon className="text-foreground" />
-            <span className="text-base font-semibold text-foreground">
-              Ingreso
-            </span>
-          </Button>
-          <Button
-            variant="outline"
-            onClick={onTransferPress}
-            className="flex-1 rounded-none rounded-r-2xl"
-          >
-            <ArrowRightLeftIcon className="text-foreground" />
-            <span className="text-base font-semibold text-foreground">
-              Transf.
-            </span>
-          </Button>
+          <FinanceHomeHeroAction
+            href={sendHref}
+            icon={ArrowUpRightIcon}
+            label="Gasto"
+            className="rounded-none rounded-l-2xl"
+          />
+          <FinanceHomeHeroAction
+            href={receiveHref}
+            icon={ArrowDownLeftIcon}
+            label="Ingreso"
+            className="rounded-none"
+          />
+          <FinanceHomeHeroAction
+            href={transferHref}
+            icon={ArrowRightLeftIcon}
+            label="Transf."
+            className="rounded-none rounded-r-2xl"
+          />
         </div>
       </div>
     </div>

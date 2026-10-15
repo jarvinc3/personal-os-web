@@ -67,8 +67,8 @@ export function prefetchFinanceSync(
     queryClient.prefetchQuery(accountsQuery(get)),
     queryClient.prefetchQuery(cardsQuery(get)),
     queryClient.prefetchQuery(emailMailboxesQuery(get)),
-    queryClient.prefetchQuery(emailPendingQuery(get)),
-    queryClient.prefetchQuery(emailMessagesQuery(get)),
+    queryClient.prefetchInfiniteQuery(emailPendingQuery(get)),
+    queryClient.prefetchInfiniteQuery(emailMessagesQuery(get)),
   ])
 }
 

@@ -1,5 +1,5 @@
 ---
-description: Use shared UI wheels, sheets, and lists instead of native date/time inputs or one-off chrome.
+description: Use shared wheels, sheets, and SummarySection. Product screens do not import Card.
 globs: "**/*.{ts,tsx}"
 alwaysApply: true
 ---
@@ -18,7 +18,19 @@ Antes de crear un control, leer [docs/architecture/ui-components.md](docs/archit
 
 **Listas largas en sheets:** búsqueda que ignora mayúsculas y acentos, y un destello (`animate-search-flash`) en cada coincidencia. Un collapsible se abre en la búsqueda solo si coincide un hijo; si coincide el padre, sigue cerrado.
 
-**Chrome:** `BottomSheet` para edición/secundario; `BottomSheet variant="floating"` para un evento. `SummarySection` / `SummaryItem` para listas; `Fab` para una acción primaria; `Empty*` para vacíos; `ColorPickerSwatch` para color. Inputs y selects llevan icono líder. Un switch (`SettingsRow` con `onSwitchChange`, `SwitchFieldRow`) lleva icono a la izquierda del título; la descripción va debajo del título. Un estado binario se muestra con icono, no con la palabra. Módulo **hoja** (Keep Awake): hero + iconos + sheets — **no** `Tabs*` locales. Módulo **con secciones** (Finanzas): `ModuleSectionLayout` (rutas), no tabs inventadas dentro de una página. `Tabs` persiste el tab en la query para que Atrás lo recupere (`persist={false}` en un sheet que lo reinicia); el chip se desliza, el panel anima su presencia y un swipe horizontal cambia de tab. Ver `leaf-module-ux.mdc` y [module-conventions.md](docs/architecture/module-conventions.md).
+**Chrome:** `BottomSheet` para edición/secundario; `BottomSheet variant="floating"` para un evento. `SummarySection` para todo bloque con título; `SettingsSection` para un grupo con etiqueta corta; `SummaryItem` para filas. El grupo de filas no se arma con un `div` de borde a mano (`ui-row-group.mdc`). `Fab` para una acción primaria; `Empty*` para vacíos; `ColorPickerSwatch` para color. En Finanzas, la marca de una entidad es `BrandLogo` (`finance-brand-logo.mdc`) y un importe en pantalla es `formatFinanceMoney` (`finance-money-display.mdc`).
+
+**Bloque con título:** en formularios, paneles, sheets, listas, chat y cualquier otra vista, el chrome es `SummarySection` (`title` + `icon`) desde `@/src/shared/components/ui/summary`. El cuerpo puede ser campos, filas `SummaryItem`, un gráfico o `Empty`. `Card`, `CardHeader`, `CardTitle`, `CardDescription`, `CardContent` y `CardFooter` no se importan en pantallas de producto. `src/shared/components/ui/card.tsx` es el primitivo y no sustituye a `SummarySection`. El agrupado de campos de un formulario sigue en `form-sections.mdc`.
+
+```tsx
+<SummarySection title="Cargos bancarios" icon={LandmarkIcon}>
+  {/* total, barras, desglose o Empty */}
+</SummarySection>
+```
+
+**Campos:** en cualquier vista, un control donde se escribe o se elige un dato lleva icono líder. La etiqueta va arriba, pequeña y en muted; el error va pegado al campo con `FieldError`. Un catálogo largo se elige en una hoja desde una fila disparadora, no en un `Select` inline. Placeholder solo como ejemplo o formato; una búsqueda puede decir "Buscar". El detalle vive en `form-field-icons.mdc`, `input-placeholders.mdc`, `form-field-anatomy.mdc` y `form-picker-fields.mdc`. Lo que es solo del envío (barra, esquema, botón deshabilitado) sigue en las reglas `form-shell-*` y `form-submit-*`.
+
+Un switch (`SettingsRow` con `onSwitchChange`, `SwitchFieldRow`) lleva icono a la izquierda del título; la descripción va debajo del título. Un estado binario se muestra con icono, no con la palabra. Módulo **hoja** (Keep Awake): hero + iconos + sheets — **no** `Tabs*` locales. Módulo **con secciones** (Finanzas): `ModuleSectionLayout` (rutas), no tabs inventadas dentro de una página. `Tabs` persiste el tab en la query para que Atrás lo recupere (`persist={false}` en un sheet que lo reinicia); el chip se desliza, el panel anima su presencia y un swipe horizontal cambia de tab. Ver `leaf-module-ux.mdc` y [module-conventions.md](docs/architecture/module-conventions.md).
 
 ```tsx
 <TimePairWheels label="Hora" value={hhmm} minuteStep={1} onChange={setHhmm} />

@@ -1,9 +1,17 @@
 "use client"
 
 import type { ModuleSettingsState } from "@/src/modules/settings/lib/module-settings-state"
-import type { ModuleSlug } from "@/src/modules/settings/types/module-config.types"
+import type {
+  ConfigurableModuleSlug,
+  ModuleSlug,
+} from "@/src/modules/settings/types/module-config.types"
+import { DEFAULT_MODULE_CONFIG_BY_SLUG } from "@/src/modules/settings/constants/user-settings-defaults"
 import { SettingsSection } from "@/src/shared/components/layout/settings-section"
 import { Button } from "@/src/shared/components/ui/button"
+import {
+  PendingSurface,
+  usePendingNavigation,
+} from "@/src/shared/components/ui/navigation-pending"
 import { Separator } from "@/src/shared/components/ui/separator"
 import { Switch } from "@/src/shared/components/ui/switch"
 import {
@@ -13,9 +21,14 @@ import {
 import { settingsModuleHref } from "@/src/shared/constants/app-routes"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { ChevronLeftIcon, ChevronRightIcon, Settings } from "lucide-react"
-import { useRouter } from "next/navigation"
 import { useCallback, useId, useLayoutEffect, useRef, useState } from "react"
 import { useUserModuleConfig } from "@/src/modules/settings/hooks/use-user-module-config"
+
+export function isConfigurableModuleSlug(
+  slug: ModuleSlug
+): slug is ConfigurableModuleSlug {
+  return slug in DEFAULT_MODULE_CONFIG_BY_SLUG
+}
 
 export type ModuleSheetEnableRowProps = {
   state: ModuleSettingsState
@@ -34,7 +47,7 @@ function ModuleSheetEnableRow({
   return (
     <div className="flex flex-row items-center justify-between rounded-2xl border border-border/60 bg-card px-4 py-3">
       <label htmlFor={id} className="min-w-0 flex-1 cursor-pointer pr-3">
-        <p className="text-base font-medium text-foreground">Módulo activo</p>
+        <p className="text-base font-medium text-foreground">App activa</p>
         {state === "unconfigured" ? (
           <p className="text-xs text-muted-foreground">
             Se aplicará al guardar la configuración por primera vez.
@@ -52,14 +65,13 @@ function ModuleSheetEnableRow({
 }
 
 type ModuleSettingsRowsProps = {
-  onOpenModule?: (slug: ModuleSlug) => void
+  onOpenModule?: (slug: ConfigurableModuleSlug) => void
 }
 
 export const MODULE_SETTINGS_CARD_WIDTH = 156
 export const MODULE_SETTINGS_CARD_GAP = 12
 
 function ModuleSettingsRows({ onOpenModule }: ModuleSettingsRowsProps) {
-  const router = useRouter()
   const listRef = useRef<HTMLDivElement>(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(false)
@@ -94,7 +106,7 @@ function ModuleSettingsRows({ onOpenModule }: ModuleSettingsRowsProps) {
 
   return (
     <SettingsSection
-      title="Módulos"
+      title="Apps"
       bare
       headerTrailing={
         <div className="flex items-center">
@@ -102,7 +114,7 @@ function ModuleSettingsRows({ onOpenModule }: ModuleSettingsRowsProps) {
             type="button"
             variant="ghost"
             size="icon-xs"
-            aria-label="Módulos anteriores"
+            aria-label="Apps anteriores"
             disabled={!canScrollLeft}
             onClick={() => scrollByCard(-1)}
           >
@@ -112,7 +124,7 @@ function ModuleSettingsRows({ onOpenModule }: ModuleSettingsRowsProps) {
             type="button"
             variant="ghost"
             size="icon-xs"
-            aria-label="Módulos siguientes"
+            aria-label="Apps siguientes"
             disabled={!canScrollRight}
             onClick={() => scrollByCard(1)}
           >
@@ -127,7 +139,7 @@ function ModuleSettingsRows({ onOpenModule }: ModuleSettingsRowsProps) {
         className="scrollbar-hide flex gap-3 overflow-x-auto pb-1"
         style={{ scrollSnapType: "x mandatory" }}
       >
-        {MODULE_SLUGS_ORDER.map((slug) => (
+        {MODULE_SLUGS_ORDER.filter(isConfigurableModuleSlug).map((slug) => (
           <div
             key={slug}
             style={{
@@ -137,11 +149,8 @@ function ModuleSettingsRows({ onOpenModule }: ModuleSettingsRowsProps) {
           >
             <ModuleSettingsCard
               slug={slug}
-              onOpen={() =>
-                onOpenModule
-                  ? onOpenModule(slug)
-                  : router.push(settingsModuleHref(slug))
-              }
+              onOpen={() => onOpenModule?.(slug)}
+              href={onOpenModule ? undefined : settingsModuleHref(slug)}
             />
           </div>
         ))}
@@ -152,21 +161,31 @@ function ModuleSettingsRows({ onOpenModule }: ModuleSettingsRowsProps) {
 }
 
 type ModuleSettingsCardProps = {
-  slug: ModuleSlug
+  slug: ConfigurableModuleSlug
   onOpen: () => void
+  href?: string
 }
 
-function ModuleSettingsCard({ slug, onOpen }: ModuleSettingsCardProps) {
+function ModuleSettingsCard({ slug, onOpen, href }: ModuleSettingsCardProps) {
+  const { navigate, isPending } = usePendingNavigation()
   const moduleDef = MODULE_REGISTRY[slug]
   const Icon = moduleDef.icon
   const { state, entry, setModuleEnabled, updateMutation } =
     useUserModuleConfig(slug)
 
+  const handleOpen = () => {
+    if (href) {
+      navigate(href)
+      return
+    }
+    onOpen()
+  }
+
   const handleSwitchChange = async (checked: boolean) => {
     try {
       await setModuleEnabled(checked)
       appToast.success({
-        text1: checked ? "Módulo activado" : "Módulo desactivado",
+        text1: checked ? "App activada" : "App desactivada",
         text2: `${moduleDef.label} actualizado.`,
       })
     } catch {
@@ -183,9 +202,10 @@ function ModuleSettingsCard({ slug, onOpen }: ModuleSettingsCardProps) {
 
   return (
     <div
-      className="flex cursor-pointer flex-col rounded-[20px] border border-border bg-card p-2 transition-all duration-100 ease-in-out hover:bg-muted/50 active:scale-[0.99] active:bg-muted/50"
+      className="relative flex cursor-pointer flex-col rounded-[20px] border border-border bg-card p-2 transition-all duration-100 ease-in-out hover:bg-muted/50 active:scale-[0.99] active:bg-muted/50"
       style={{ width: MODULE_SETTINGS_CARD_WIDTH }}
-      onClick={onOpen}
+      aria-busy={isPending || undefined}
+      onClick={handleOpen}
     >
       <div className="flex flex-row items-center justify-between">
         <div className="rounded-xl bg-muted p-2">
@@ -217,6 +237,7 @@ function ModuleSettingsCard({ slug, onOpen }: ModuleSettingsCardProps) {
         </p>
         <p className="text-xs text-muted-foreground">{statusLabel}</p>
       </div>
+      {isPending ? <PendingSurface /> : null}
     </div>
   )
 }

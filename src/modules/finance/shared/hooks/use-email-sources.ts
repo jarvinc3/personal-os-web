@@ -2,10 +2,10 @@
 
 import { apiDelete, apiGet, apiPatch, apiPost } from "@/src/config/api-client"
 import { invalidateFinancePositions } from "./use-balance-sheet"
+import { useInfiniteFinanceList } from "./use-infinite-finance-list"
 import {
   emailMailboxesQuery,
-  emailMessagesQuery,
-  emailPendingQuery,
+  FINANCE_LIST_PAGE_SIZE,
 } from "@/src/modules/finance/shared/lib/finance-query-options"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import {
@@ -19,10 +19,12 @@ import {
   FINANCE_EMAIL_MESSAGES_QUERY_KEY,
   FINANCE_EMAIL_PENDING_QUERY_KEY,
   FINANCE_EMAIL_SOURCES_QUERY_KEY,
+  type FinancePaginated,
 } from "@/src/modules/finance/shared/types/api"
 import { appToast } from "@/src/shared/lib/app-toast"
 import type {
   FinanceEmailAssignResult,
+  FinanceEmailProcessedMessage,
   FinanceEmailSource,
   FinanceEmailSyncTrigger,
   FinancePendingEmailMessage,
@@ -123,26 +125,32 @@ export function useDisconnectMailbox() {
 }
 
 export function usePendingEmailMessages(enabled: boolean) {
-  return useQuery({
-    ...emailPendingQuery(),
+  return useInfiniteFinanceList<FinancePaginated<FinancePendingEmailMessage>>({
+    queryKey: FINANCE_EMAIL_PENDING_QUERY_KEY,
+    endpoint: API_ENDPOINTS.FINANCE.EMAIL_PENDING,
+    params: { limit: FINANCE_LIST_PAGE_SIZE },
     enabled,
   })
 }
 
 export function useRecentEmailMessages(enabled: boolean) {
   const queryClient = useQueryClient()
-  return useQuery({
-    ...emailMessagesQuery(),
-    enabled,
-    refetchInterval: () => {
-      const mailboxes = queryClient.getQueryData(
-        FINANCE_EMAIL_MAILBOXES_QUERY_KEY
-      )
-      return hasRunningEmailSync(Array.isArray(mailboxes) ? mailboxes : [])
-        ? RUNNING_SYNC_REFETCH_MS
-        : false
-    },
-  })
+  return useInfiniteFinanceList<FinancePaginated<FinanceEmailProcessedMessage>>(
+    {
+      queryKey: FINANCE_EMAIL_MESSAGES_QUERY_KEY,
+      endpoint: API_ENDPOINTS.FINANCE.EMAIL_MESSAGES,
+      params: { limit: FINANCE_LIST_PAGE_SIZE },
+      enabled,
+      refetchInterval: () => {
+        const mailboxes = queryClient.getQueryData(
+          FINANCE_EMAIL_MAILBOXES_QUERY_KEY
+        )
+        return hasRunningEmailSync(Array.isArray(mailboxes) ? mailboxes : [])
+          ? RUNNING_SYNC_REFETCH_MS
+          : false
+      },
+    }
+  )
 }
 
 export function useApiReady(enabled: boolean) {

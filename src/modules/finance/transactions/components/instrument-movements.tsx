@@ -40,6 +40,7 @@ import {
   ArrowLeftRightIcon,
   ArrowUpRightIcon,
   CheckIcon,
+  LayersIcon,
   PlusIcon,
   ScaleIcon,
   SearchIcon,
@@ -52,9 +53,9 @@ import { useQueries } from "@tanstack/react-query"
 const SEARCH_DEBOUNCE_MS = 300
 
 const FLOW_FILTERS = [
-  { value: "ALL", label: "Todos" },
-  { value: "CREDIT", label: "Ingresos" },
-  { value: "DEBIT", label: "Egresos" },
+  { value: "ALL", label: "Todos", icon: LayersIcon },
+  { value: "CREDIT", label: "Ingresos", icon: ArrowUpRightIcon },
+  { value: "DEBIT", label: "Egresos", icon: ArrowDownLeftIcon },
 ] as const
 
 type FlowFilter = (typeof FLOW_FILTERS)[number]["value"]
@@ -80,6 +81,7 @@ function transactionRowTitle(
 ): string {
   return (
     category?.name?.trim() ||
+    transaction.merchantName ||
     transaction.merchant ||
     transaction.description ||
     "Movimiento"
@@ -91,10 +93,11 @@ function transactionRowDetail(
   category: FinanceCategory | undefined
 ): string {
   const date = formatTransactionDate(transaction.transactionDate)
-  if (!transaction.merchant || !category) {
+  const merchant = transaction.merchantName ?? transaction.merchant
+  if (!merchant || !category) {
     return date
   }
-  return `${transaction.merchant} · ${date}`
+  return `${merchant} · ${date}`
 }
 
 export function FinanceInstrumentMovements({
@@ -316,18 +319,22 @@ export function FinanceInstrumentMovements({
       >
         <div className="flex flex-col gap-4">
           <div className="flex flex-wrap gap-2">
-            {FLOW_FILTERS.map((option) => (
-              <Button
-                key={option.value}
-                type="button"
-                size="sm"
-                variant={flow === option.value ? "default" : "outline"}
-                className={cn("rounded-full", PRESSABLE_CLASS)}
-                onClick={() => setFlow(option.value)}
-              >
-                {option.label}
-              </Button>
-            ))}
+            {FLOW_FILTERS.map((option) => {
+              const Icon = option.icon
+              return (
+                <Button
+                  key={option.value}
+                  type="button"
+                  size="sm"
+                  variant={flow === option.value ? "default" : "outline"}
+                  className={cn("rounded-full", PRESSABLE_CLASS)}
+                  onClick={() => setFlow(option.value)}
+                >
+                  <Icon className="size-4 shrink-0" />
+                  {option.label}
+                </Button>
+              )
+            })}
           </div>
           <FinanceDateField
             label="Desde"

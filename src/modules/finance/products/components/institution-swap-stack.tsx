@@ -1,6 +1,7 @@
 "use client"
 
 import { BrandLogo } from "@/src/modules/finance/shared/components/brand-logo"
+import { isCashInstitution } from "@/src/modules/finance/shared/lib/cash"
 import {
   formatProductCounts,
   formatStackItemBalance,
@@ -57,6 +58,7 @@ type WalletCardModel = {
   monogram: string
   logoUrl: string | null
   color: string
+  isCash: boolean
   productSummary: string
   counts: InstitutionStackCounts | null
   balanceLabel: string
@@ -74,6 +76,7 @@ function toWalletCard(
       monogram: institutionInitials(item.institution.name),
       logoUrl: item.institution.logoUrl,
       color: item.institution.color ?? FALLBACK_INSTITUTION_COLOR,
+      isCash: isCashInstitution(item.institution),
       productSummary: formatProductCounts(item.counts),
       counts: item.counts,
       balanceLabel: "Balance consolidado",
@@ -87,6 +90,7 @@ function toWalletCard(
     monogram: institutionInitials(item.account.name),
     logoUrl: item.account.institutionLogoUrl ?? null,
     color: item.account.color ?? FALLBACK_CASH_COLOR,
+    isCash: true,
     productSummary: "Cuenta de dinero en efectivo",
     counts: null,
     balanceLabel: "Saldo",
@@ -236,6 +240,7 @@ export function InstitutionSwapStack({
                 monogram={card.monogram}
                 logoUrl={card.logoUrl}
                 color={card.color}
+                isCash={card.isCash}
                 productSummary={card.productSummary}
                 counts={card.counts}
                 balanceLabel={card.balanceLabel}
@@ -306,6 +311,7 @@ type InstitutionWalletCardProps = {
   monogram: string
   logoUrl: string | null
   color: string
+  isCash?: boolean
   productSummary: string
   counts: InstitutionStackCounts | null
   balanceLabel: string
@@ -368,6 +374,7 @@ function InstitutionWalletCard({
   monogram,
   logoUrl,
   color,
+  isCash = false,
   productSummary,
   counts,
   balanceLabel,
@@ -424,7 +431,7 @@ function InstitutionWalletCard({
         <span className="absolute top-14 -right-14 size-64 rounded-full bg-white/10" />
       </span>
       <div className="relative z-10 flex items-start justify-between">
-        {kind === "cash" ? (
+        {kind === "cash" || isCash ? (
           <span
             aria-label={name}
             className="inline-flex size-11 items-center justify-center rounded-full bg-white text-emerald-700"

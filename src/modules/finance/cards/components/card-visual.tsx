@@ -6,6 +6,7 @@ import {
 } from "@/src/modules/finance/shared/components/brand-logo"
 import { FINANCE_CARD_TYPE_LABEL } from "@/src/modules/finance/shared/constants/catalog"
 import type { FinanceCardDisplayBalance } from "@/src/modules/finance/shared/lib/card-balances"
+import { nextCycleNote } from "@/src/modules/finance/shared/lib/card-credit"
 import {
   formatFinanceMoney,
   parseFinanceMoney,
@@ -22,6 +23,7 @@ type CardVisualProps = {
 
 export function CardVisual({ card, balances, display }: CardVisualProps) {
   const isCredit = card.type === "CREDIT"
+  const cycleNote = isCredit ? nextCycleNote(card) : null
 
   return (
     <div className="flex flex-col gap-3">
@@ -52,7 +54,9 @@ export function CardVisual({ card, balances, display }: CardVisualProps) {
             <p className="text-3xl font-bold">Sin saldo</p>
           ) : (
             balances.map((balance) => {
-              const available = parseFinanceMoney(balance.balance)
+              const available = parseFinanceMoney(
+                balance.availableCredit ?? balance.balance
+              )
               const creditLimit = parseFinanceMoney(balance.creditLimit ?? null)
               const amount =
                 isCredit && available !== null && creditLimit !== null
@@ -93,7 +97,9 @@ export function CardVisual({ card, balances, display }: CardVisualProps) {
 
       {isCredit
         ? balances.map((balance) => {
-            const available = parseFinanceMoney(balance.balance)
+            const available = parseFinanceMoney(
+              balance.availableCredit ?? balance.balance
+            )
             const creditLimit = parseFinanceMoney(balance.creditLimit ?? null)
             if (
               creditLimit === null ||
@@ -129,6 +135,10 @@ export function CardVisual({ card, balances, display }: CardVisualProps) {
             )
           })
         : null}
+
+      {cycleNote ? (
+        <p className="px-1 text-xs text-white/70">{cycleNote}</p>
+      ) : null}
     </div>
   )
 }

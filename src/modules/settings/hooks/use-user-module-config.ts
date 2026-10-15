@@ -10,8 +10,8 @@ import {
 import { normalizeModuleConfig } from "@/src/modules/settings/lib/normalize-module-config"
 import { mergeWithDefaults } from "@/src/modules/settings/lib/settings-value"
 import type {
+  ConfigurableModuleSlug,
   DeepPartialModuleConfig,
-  ModuleSlug,
   UserModuleEntry,
 } from "@/src/modules/settings/types/module-config.types"
 import type { UserProfile } from "@/src/modules/settings/types/profile.types"
@@ -26,7 +26,7 @@ type UpdateModulePayload = {
   isEnabled?: boolean
 }
 
-export function useUserModuleConfig<S extends ModuleSlug>(slug: S) {
+export function useUserModuleConfig<S extends ConfigurableModuleSlug>(slug: S) {
   const { profileQuery, userModules } = useProfile()
   const queryClient = useQueryClient()
 

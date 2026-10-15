@@ -2,6 +2,9 @@ import type { ModuleSlug } from "@/src/shared/types/module-nav"
 
 export type { ModuleSlug }
 
+/** keepAwake is a module without user settings, so it has no stored config. */
+export type ConfigurableModuleSlug = Exclude<ModuleSlug, "keepAwake">
+
 export type FinanceModuleConfig = {
   version: number
   fieldGuide: string
@@ -36,8 +39,23 @@ export type FinanceModuleConfig = {
     aiSuggestions: boolean
     transactionDetected: boolean
     monthlyReport: boolean
+    weeklySummary: boolean
     cardDueDate: boolean
     unusualExpense: boolean
+    recurringAlerts: boolean
+    subscriptionReminders: boolean
+    priceIncreaseAlerts: boolean
+    balanceIntegrity: boolean
+  }
+  /** Ajustes del gestor de suscripciones, dentro de Finanzas. */
+  subscriptions: {
+    /** Días antes de la renovación para el recordatorio (0-30). */
+    reminderDaysBefore: number
+    groupBy: "category" | "provider" | "none"
+  }
+  reports: {
+    /** 0 = domingo … 6 = sábado, en la zona horaria del usuario. */
+    weeklySummaryDay: number
   }
   emailSync: {
     enabled: boolean
@@ -81,18 +99,6 @@ export type ProjectsModuleConfig = {
   }
 }
 
-export type SubscriptionsModuleConfig = {
-  version: number
-  fieldGuide: string
-  defaultCurrency: string
-  renewalReminderDays: number[]
-  groupBy: "category" | "provider" | "none"
-  notifications: {
-    renewalReminders: boolean
-    priceIncreaseAlerts: boolean
-  }
-}
-
 export type HealthModuleConfig = {
   version: number
   fieldGuide: string
@@ -111,12 +117,12 @@ export type ModuleConfigBySlug = {
   finance: FinanceModuleConfig
   agenda: AgendaModuleConfig
   projects: ProjectsModuleConfig
-  subscriptions: SubscriptionsModuleConfig
   health: HealthModuleConfig
 }
 
-export type ModuleConfig<S extends ModuleSlug = ModuleSlug> =
-  ModuleConfigBySlug[S]
+export type ModuleConfig<
+  S extends ConfigurableModuleSlug = ConfigurableModuleSlug,
+> = ModuleConfigBySlug[S]
 
 export type UserModuleEntry = {
   slug: ModuleSlug
@@ -125,7 +131,7 @@ export type UserModuleEntry = {
   enabledAt: string
 }
 
-export type DeepPartialModuleConfig<S extends ModuleSlug> = {
+export type DeepPartialModuleConfig<S extends ConfigurableModuleSlug> = {
   [K in keyof ModuleConfig<S>]?: ModuleConfig<S>[K] extends object
     ? Partial<ModuleConfig<S>[K]>
     : ModuleConfig<S>[K]

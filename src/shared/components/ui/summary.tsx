@@ -23,7 +23,7 @@ type SummarySectionProps = {
 }
 
 type SummaryItemBaseProps = {
-  title: string
+  title: ReactNode
   description?: ReactNode
   value?: ReactNode
   icon?: LucideIcon
@@ -61,9 +61,18 @@ export function SummarySection({
   color,
   collapsible = false,
 }: SummarySectionProps) {
+  const tintStyle = color
+    ? { backgroundColor: `color-mix(in srgb, ${color} 10%, transparent)` }
+    : undefined
+
   const titleContent = (
     <div className="flex min-w-0 items-center gap-2">
-      {Icon && <Icon className="size-4 text-muted-foreground" />}
+      {Icon && (
+        <Icon
+          className={cn("size-4", !color && "text-muted-foreground")}
+          style={color ? { color } : undefined}
+        />
+      )}
       <div className="flex flex-col -space-y-0.5">
         <span className="text-sm font-medium text-muted-foreground">
           {title}
@@ -101,22 +110,21 @@ export function SummarySection({
 
   const body = (
     <div
-      className={cn(
-        "flex flex-col gap-2 rounded-2xl border border-border bg-card p-2",
-        color
-      )}
+      className="flex flex-col gap-2 rounded-2xl border border-border bg-card p-2"
+      style={tintStyle}
     >
       {children}
     </div>
   )
 
-  const rootClassName = cn("rounded-2xl border border-border bg-muted", color)
+  const rootClassName = "rounded-2xl border border-border bg-muted"
 
   if (collapsible) {
     return (
       <Collapsible
         defaultOpen={defaultOpen}
         className={cn(rootClassName, "group/summary")}
+        style={tintStyle}
       >
         {header}
         <CollapsibleContent>{body}</CollapsibleContent>
@@ -125,7 +133,7 @@ export function SummarySection({
   }
 
   return (
-    <div className={rootClassName}>
+    <div className={rootClassName} style={tintStyle}>
       {header}
       {body}
     </div>
@@ -166,7 +174,7 @@ export function SummaryItem({
       : undefined
 
   const rowClassName = cn(
-    "flex w-full items-center gap-3 rounded-2xl p-2 text-left transition-all duration-200",
+    "flex w-full items-center gap-3 p-2 text-left transition-all duration-200 hover:rounded-2xl",
     !isInteractive && !isLast && "border-b border-border/60",
     isInteractive && cn(PRESSABLE_CLASS, "hover:bg-muted/50"),
     onPress && "cursor-pointer",

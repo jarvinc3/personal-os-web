@@ -17,6 +17,13 @@ import type {
   FinanceInstitution,
 } from "@/src/modules/finance/shared/types/entities"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/src/shared/components/ui/empty"
 import { Button } from "@/src/shared/components/ui/button"
 import {
   Tabs,
@@ -25,7 +32,13 @@ import {
   TabsTrigger,
 } from "@/src/shared/components/ui/tabs"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
-import { ChevronLeftIcon, ChevronRightIcon, LockIcon } from "lucide-react"
+import {
+  CreditCardIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  LockIcon,
+  WalletIcon,
+} from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 
 type DestinationPickerSheetProps = {
@@ -137,9 +150,17 @@ export function DestinationPickerSheet({
           </TabsList>
           <TabsContent value="accounts" className="flex flex-col gap-2">
             {selected.accounts.length === 0 ? (
-              <p className="py-6 text-center text-sm text-muted-foreground">
-                Esta institución no tiene cuentas.
-              </p>
+              <Empty className="py-6">
+                <EmptyHeader>
+                  <EmptyMedia variant="icon">
+                    <WalletIcon />
+                  </EmptyMedia>
+                  <EmptyTitle>Sin cuentas</EmptyTitle>
+                  <EmptyDescription>
+                    Esta institución no tiene cuentas.
+                  </EmptyDescription>
+                </EmptyHeader>
+              </Empty>
             ) : (
               selected.accounts.map((account) => {
                 const target = encodeLedgerTarget("account", account.id)
@@ -158,9 +179,17 @@ export function DestinationPickerSheet({
           {accountsOnly ? null : (
             <TabsContent value="cards" className="flex flex-col gap-2">
               {selected.cards.length === 0 ? (
-                <p className="py-6 text-center text-sm text-muted-foreground">
-                  Esta institución no tiene tarjetas.
-                </p>
+                <Empty className="py-6">
+                  <EmptyHeader>
+                    <EmptyMedia variant="icon">
+                      <CreditCardIcon />
+                    </EmptyMedia>
+                    <EmptyTitle>Sin tarjetas</EmptyTitle>
+                    <EmptyDescription>
+                      Esta institución no tiene tarjetas.
+                    </EmptyDescription>
+                  </EmptyHeader>
+                </Empty>
               ) : (
                 selected.cards.map((card) => {
                   const target = encodeLedgerTarget("card", card.id)

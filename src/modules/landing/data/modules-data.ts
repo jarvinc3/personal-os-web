@@ -25,24 +25,8 @@ export const appModules: AppModule[] = [
       "Presupuestos y alertas de gasto",
       "Multi-moneda y tasas de cambio en tiempo real",
       "Detección de gastos recurrentes",
+      "Gestión de suscripciones con alertas de renovación",
       "Reportes mensuales automáticos",
-    ],
-  },
-  {
-    id: "subscriptions",
-    name: "Suscripciones",
-    description:
-      "Rastrea y gestiona todas tus suscripciones en un solo lugar. Nunca más olvides una renovación ni pagues por algo que no usas.",
-    icon: "🔄",
-    color: "text-violet-700",
-    bgColor: "bg-violet-50 border-violet-200",
-    status: "coming_soon",
-    features: [
-      "Registro de todas tus suscripciones",
-      "Alertas de vencimiento y renovación",
-      "Integración con módulo de finanzas",
-      "Calendario de pagos automático",
-      "Análisis de gastos por suscripción",
     ],
   },
   {
@@ -113,9 +97,9 @@ export const appFeatures = [
   },
   {
     icon: "🔗",
-    title: "Módulos Interconectados",
+    title: "Apps Interconectadas",
     description:
-      "Cada módulo es independiente pero comparte datos con los demás. Una suscripción genera una transacción. Una tarea aparece en tu agenda.",
+      "Cada app es independiente pero comparte datos con los demás. Una suscripción genera una transacción. Una tarea aparece en tu agenda.",
   },
   {
     icon: "📱",

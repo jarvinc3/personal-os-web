@@ -2,8 +2,9 @@
 
 import { apiDelete, apiPatch, apiPost } from "@/src/config/api-client"
 import { invalidateFinancePositions } from "./use-balance-sheet"
+import { useInfiniteFinanceList } from "./use-infinite-finance-list"
 import {
-  receivablePaymentsQuery,
+  FINANCE_LIST_PAGE_SIZE,
   receivablesQuery,
 } from "@/src/modules/finance/shared/lib/finance-query-options"
 import type {
@@ -14,6 +15,7 @@ import type {
 import {
   FINANCE_RECEIVABLE_PAYMENTS_QUERY_KEY,
   FINANCE_RECEIVABLES_QUERY_KEY,
+  type FinancePaginated,
 } from "@/src/modules/finance/shared/types/api"
 import type {
   FinanceReceivable,
@@ -82,8 +84,10 @@ export function useReceivablePayments(
   enabled: boolean,
   receivableId: string | null
 ) {
-  return useQuery({
-    ...receivablePaymentsQuery(receivableId ?? ""),
+  return useInfiniteFinanceList<FinancePaginated<FinanceReceivablePayment>>({
+    queryKey: [...FINANCE_RECEIVABLE_PAYMENTS_QUERY_KEY, receivableId ?? ""],
+    endpoint: API_ENDPOINTS.FINANCE.RECEIVABLE_PAYMENTS(receivableId ?? ""),
+    params: { limit: FINANCE_LIST_PAGE_SIZE },
     enabled: enabled && Boolean(receivableId),
   })
 }

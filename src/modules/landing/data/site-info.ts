@@ -49,7 +49,7 @@ export const landingContent = {
     mobileCta: "Unirse a la lista de espera",
     links: [
       { href: "/landing#features", label: "Características" },
-      { href: "/landing#modules", label: "Módulos" },
+      { href: "/landing#modules", label: "Apps" },
       { href: "/landing#ai", label: "IA" },
       { href: "/faq", label: "FAQ" },
       { href: "/contact", label: "Contacto" },
@@ -64,7 +64,7 @@ export const landingContent = {
     primaryCta: "Lista de espera",
     secondaryCta: "Ver características",
     stats: [
-      { value: "5+", label: "Módulos integrados" },
+      { value: "5+", label: "Apps integradas" },
       { value: "<$1", label: "USD/mes en IA" },
       { value: "100%", label: "Privado y seguro" },
     ],
@@ -83,13 +83,13 @@ export const landingContent = {
       "No es otra app de productividad. Es una plataforma que automatiza lo repetitivo para que puedas enfocarte en lo que importa.",
   },
   modules: {
-    badge: "Módulos",
+    badge: "Apps",
     titleStart: "Todo lo que necesitas,",
     titleHighlight: "en un solo lugar",
     description:
-      "Cada módulo es independiente pero están interconectados. Una suscripción puede generar una transacción. Una tarea puede aparecer en tu agenda.",
+      "Cada app es independiente pero están interconectados. Una suscripción puede generar una transacción. Una tarea puede aparecer en tu agenda.",
     comingSoonNote:
-      "💡 Este módulo está en roadmap. Únete a la lista de espera para ser notificado cuando esté disponible.",
+      "💡 Esta app está en roadmap. Únete a la lista de espera para ser notificado cuando esté disponible.",
     labels: {
       available: "Disponible",
       in_design: "En diseño",
@@ -101,7 +101,7 @@ export const landingContent = {
     titleStart: "Un agente que",
     titleHighlight: "actúa por ti",
     description:
-      "No es un chatbot. Es un agente central con acceso a todos tus módulos y memoria persistente que recuerda quién eres.",
+      "No es un chatbot. Es un agente central con acceso a todas tus apps y memoria persistente que recuerda quién eres.",
     capabilities: [
       {
         title: "Conversación natural",
@@ -190,7 +190,7 @@ export const landingContent = {
         title: "Producto",
         links: [
           { href: "/landing#features", label: "Características" },
-          { href: "/landing#modules", label: "Módulos" },
+          { href: "/landing#modules", label: "Apps" },
           { href: "/landing#ai", label: "Agente IA" },
           { href: "/landing#waitlist", label: "Lista de espera" },
         ],

@@ -1,5 +1,6 @@
 import Link from "next/link"
 
+import { LinkPendingOverlay } from "@/src/shared/components/ui/navigation-pending"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 
 interface PageHeaderProps {
@@ -35,9 +36,10 @@ export function PageHeader({
           <nav className="mb-6 flex items-center justify-center gap-2 text-xs text-muted-foreground">
             <Link
               href={APP_ROUTES.marketing.landing}
-              className="transition-colors hover:text-foreground"
+              className="relative transition-colors hover:text-foreground"
             >
               Personal OS
+              <LinkPendingOverlay spinnerClassName="size-3" />
             </Link>
             {breadcrumb.map((crumb, i) => (
               <span key={i} className="flex items-center gap-2">
@@ -47,9 +49,10 @@ export function PageHeader({
                 ) : (
                   <Link
                     href={crumb.href}
-                    className="transition-colors hover:text-foreground"
+                    className="relative transition-colors hover:text-foreground"
                   >
                     {crumb.label}
+                    <LinkPendingOverlay spinnerClassName="size-3" />
                   </Link>
                 )}
               </span>

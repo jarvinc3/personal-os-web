@@ -2,7 +2,7 @@
 
 ## Selector
 
-`CHAT_MODULE_OPTIONS`: `general`, `agenda`, `projects`, `health`, `subscriptions`, `finance`. `POST /ai/sessions` omite `moduleSlug` si es `general`; `contextType` sí se envía (`general` u otro slug). Query `?module=finance` preselecciona.
+`CHAT_MODULE_OPTIONS`: `general`, `agenda`, `projects`, `health`, `finance`. `POST /ai/sessions` omite `moduleSlug` si es `general`; `contextType` sí se envía (`general` u otro slug). Query `?module=finance` preselecciona.
 
 `parseModuleChatSlug` cae a `general` si el slug es desconocido.
 

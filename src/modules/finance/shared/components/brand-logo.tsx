@@ -2,26 +2,18 @@
 
 import { FINANCE_CARD_NETWORK_LABEL } from "@/src/modules/finance/shared/constants/catalog"
 import type { FinanceCardNetwork } from "@/src/modules/finance/shared/constants/catalog"
+import { brandInitials } from "@/src/modules/finance/shared/components/brand-initials"
 import { cn } from "@/src/shared/lib/utils"
 import Image from "next/image"
 import { useState } from "react"
+
+export { brandInitials } from "@/src/modules/finance/shared/components/brand-initials"
 
 type BrandLogoProps = {
   name: string
   logoUrl?: string | null
   size?: number
   className?: string
-}
-
-export function brandInitials(name: string): string {
-  const parts = name.trim().split(/\s+/).filter(Boolean)
-  if (parts.length === 0) {
-    return "?"
-  }
-  if (parts.length === 1) {
-    return parts[0]!.slice(0, 2).toUpperCase()
-  }
-  return `${parts[0]![0] ?? ""}${parts[1]![0] ?? ""}`.toUpperCase()
 }
 
 export function BrandLogo({

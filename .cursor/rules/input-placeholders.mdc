@@ -6,7 +6,7 @@ alwaysApply: false
 
 # Placeholders en campos
 
-Por defecto un campo **no** lleva placeholder. El icono líder y la etiqueta ya dicen qué se escribe. Un placeholder que repite la etiqueta, o que intenta explicar lo que el usuario debe entender antes de escribir, estorba y confunde.
+Aplica a todo campo de la web, no solo a un formulario. Por defecto un campo no lleva placeholder. El icono líder y la etiqueta ya dicen qué se escribe. Un placeholder que repite la etiqueta, o que intenta explicar lo que el usuario debe entender antes de escribir, estorba y confunde. La misma línea está en [icons-required.mdc](./icons-required.mdc).
 
 Se permite un placeholder solo cuando aporta algo que la etiqueta no puede:
 

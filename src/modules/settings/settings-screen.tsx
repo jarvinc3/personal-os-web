@@ -30,6 +30,7 @@ import {
 } from "@/src/shared/components/ui/avatar"
 import { Button } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
+import { usePendingNavigation } from "@/src/shared/components/ui/navigation-pending"
 import {
   APP_ROUTES,
   settingsModuleHref,
@@ -39,9 +40,10 @@ import { MODULE_SHEET_PARAM_KEYS } from "@/src/modules/settings/constants/module
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { formatTimeRange } from "@/src/shared/lib/date-format"
-import { Edit, LogOut, RefreshCw } from "lucide-react"
+import { Edit, LogOut } from "lucide-react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useCallback, useEffect } from "react"
+import { Badge } from "@/src/shared/components/ui/badge"
 
 const APP_VERSION = process.env.NEXT_PUBLIC_APP_VERSION ?? "1.0.0"
 const APP_ENV =
@@ -59,6 +61,10 @@ export function SettingsScreen() {
 
 function SettingsScreenBody() {
   const router = useRouter()
+  const { navigate: navigateToLanding, isPending: isLandingPending } =
+    usePendingNavigation()
+  const { navigate: navigateToWipeData, isPending: isWipeDataPending } =
+    usePendingNavigation()
   const { user } = useAuthGuard()
   const { logoutMutation } = useAuth()
   const { profileQuery, preferences, updatePreferences } = useProfile()
@@ -114,7 +120,7 @@ function SettingsScreenBody() {
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 p-4 pb-10 md:px-6">
-      <div className="flex items-center gap-2 py-4">
+      <div className="flex flex-col items-center gap-8 py-4">
         <div className="relative" onClick={() => setOpenAccountSheet(true)}>
           <Avatar className="size-20 md:size-24">
             {profile?.avatarUrl ? (
@@ -135,25 +141,9 @@ function SettingsScreenBody() {
             <Edit className="size-3.5 text-foreground" />
           </Button>
         </div>
-        <div className="flex w-full justify-between">
-          <div className="flex-1">
-            <p className="text-xl font-semibold">{displayName}</p>
-            <p className="text-sm text-muted-foreground">{displayEmail}</p>
-          </div>
-          <Button
-            type="button"
-            variant="outline"
-            size="icon"
-            disabled={profileQuery.isFetching}
-            onClick={() => void profileQuery.refetch()}
-            aria-label="Actualizar perfil"
-          >
-            {profileQuery.isFetching ? (
-              <Spinner className="size-3.5" />
-            ) : (
-              <RefreshCw className="size-3.5" />
-            )}
-          </Button>
+        <div className="flex flex-col items-center gap-1">
+          <p className="text-2xl font-semibold">{displayName}</p>
+          <p className="text-xs text-muted-foreground">{displayEmail}</p>
         </div>
       </div>
 
@@ -189,6 +179,7 @@ function SettingsScreenBody() {
           accentColor={SETTINGS_REGISTRY.ai.accent}
           {...SETTINGS_REGISTRY.ai.rows.tone}
         />
+
         <SettingsRow
           label="Proveedor por defecto"
           value={
@@ -199,6 +190,7 @@ function SettingsScreenBody() {
           accentColor={SETTINGS_REGISTRY.ai.accent}
           {...SETTINGS_REGISTRY.ai.rows.defaultProvider}
         />
+
         <SettingsRow
           label="Insights proactivos"
           switchValue={preferences.ai.proactiveInsights}
@@ -211,6 +203,7 @@ function SettingsScreenBody() {
           accentColor={SETTINGS_REGISTRY.ai.accent}
           {...SETTINGS_REGISTRY.ai.rows.proactiveInsights}
         />
+
         <SettingsRow
           label="Confirmar antes de actuar"
           switchValue={preferences.ai.confirmBeforeActions}
@@ -250,6 +243,7 @@ function SettingsScreenBody() {
           accentColor={SETTINGS_REGISTRY.notifications.accent}
           {...SETTINGS_REGISTRY.notifications.rows.push}
         />
+
         <SettingsRow
           label="Email"
           switchValue={preferences.notifications.channels.email}
@@ -270,6 +264,7 @@ function SettingsScreenBody() {
           accentColor={SETTINGS_REGISTRY.notifications.accent}
           {...SETTINGS_REGISTRY.notifications.rows.email}
         />
+
         <SettingsRow
           label="In-App"
           switchValue={preferences.notifications.channels.inApp}
@@ -290,6 +285,7 @@ function SettingsScreenBody() {
           accentColor={SETTINGS_REGISTRY.notifications.accent}
           {...SETTINGS_REGISTRY.notifications.rows.inApp}
         />
+
         <SettingsRow
           label="Horario silencioso"
           switchValue={quietHours.enabled}
@@ -307,6 +303,7 @@ function SettingsScreenBody() {
           accentColor={SETTINGS_REGISTRY.notifications.accent}
           {...SETTINGS_REGISTRY.notifications.rows.quietHoursEnabled}
         />
+
         <SettingsRow
           label="Rango horario"
           value={formatTimeRange(quietHours.start, quietHours.end)}
@@ -315,6 +312,7 @@ function SettingsScreenBody() {
           accentColor={SETTINGS_REGISTRY.notifications.accent}
           {...SETTINGS_REGISTRY.notifications.rows.quietHoursSchedule}
         />
+
         <DevicePushSettingsRow
           isLast
           accentColor={SETTINGS_REGISTRY.notifications.accent}
@@ -337,6 +335,7 @@ function SettingsScreenBody() {
           accentColor={SETTINGS_REGISTRY.privacy.accent}
           {...SETTINGS_REGISTRY.privacy.rows.analytics}
         />
+
         <SettingsRow
           label="Reportes de fallos"
           switchValue={preferences.privacy.crashReportsEnabled}
@@ -361,7 +360,11 @@ function SettingsScreenBody() {
         <SettingsRow
           label="Landing page"
           link
-          onPress={() => router.push(APP_ROUTES.marketing.landing)}
+          onPress={() => navigateToLanding(APP_ROUTES.marketing.landing)}
+          disabled={isLandingPending}
+          trailing={
+            isLandingPending ? <Spinner className="size-4" /> : undefined
+          }
           accentColor={SETTINGS_REGISTRY.marketing.accent}
           {...SETTINGS_REGISTRY.marketing.rows.landingPage}
         />
@@ -371,10 +374,15 @@ function SettingsScreenBody() {
         <SettingsRow
           label="Vaciar datos"
           destructive
-          onPress={() => router.push(APP_ROUTES.app.settingsWipeData)}
+          onPress={() => navigateToWipeData(APP_ROUTES.app.settingsWipeData)}
+          disabled={isWipeDataPending}
+          trailing={
+            isWipeDataPending ? <Spinner className="size-4" /> : undefined
+          }
           accentColor={SETTINGS_REGISTRY.danger.accent}
           {...SETTINGS_REGISTRY.danger.rows.wipeData}
         />
+
         <SettingsRow
           label="Borrar cuenta"
           destructive
@@ -396,9 +404,15 @@ function SettingsScreenBody() {
         />
       </SettingsSection>
 
-      <div className="flex flex-col items-center justify-center gap-1 pb-4">
-        <p className="text-xs text-muted-foreground">Entorno {APP_ENV}</p>
-        <p className="text-xs text-muted-foreground">Versión {APP_VERSION}</p>
+      <div className="flex flex-col items-center justify-center gap-1 pb-6">
+        <p className="text-xs text-muted-foreground">
+          Entorno{" "}
+          <span className="font-mono font-bold capitalize">{APP_ENV}</span>
+        </p>
+        <p className="text-xs text-muted-foreground">
+          Versión <span className="font-mono font-bold">{APP_VERSION}</span>
+        </p>
+        <Badge variant="info">Beta</Badge>
       </div>
 
       <EditAccountSheet

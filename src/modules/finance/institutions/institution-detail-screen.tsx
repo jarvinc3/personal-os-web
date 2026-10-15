@@ -39,6 +39,12 @@ import {
   buildInstitutionStackItems,
   formatStackItemBalance,
 } from "@/src/modules/finance/shared/lib/institution-stack"
+import { isCashInstitution } from "@/src/modules/finance/shared/lib/cash"
+import {
+  formatFinanceMoney,
+  type FinanceMoneyDisplay,
+} from "@/src/modules/finance/shared/lib/money"
+import type { FinanceCashSummary } from "@/src/modules/finance/shared/types/entities"
 import { DeleteRecordDialog } from "@/src/modules/finance/shared/components/delete-record-dialog"
 import { ArchiveRecordDialog } from "@/src/modules/finance/shared/components/archive-record-dialog"
 import { RecordOptionsSheet } from "@/src/modules/finance/shared/components/record-options-sheet"
@@ -52,6 +58,7 @@ import {
 } from "@/src/shared/components/ui/tabs"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
+import { ChatLauncherButton, useRegisterChatContext } from "@/src/modules/ai"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { appToast } from "@/src/shared/lib/app-toast"
 import {
@@ -63,6 +70,7 @@ import {
   MailIcon,
   MoreVerticalIcon,
   PencilIcon,
+  PlusIcon,
   RefreshCwIcon,
   Trash2Icon,
 } from "lucide-react"
@@ -159,6 +167,7 @@ function InstitutionDetailScreenBody({
       cards: cardsQuery.data ?? [],
       loans: loansQuery.data ?? [],
       positions: balanceSheetQuery.data?.institutions,
+      cash: balanceSheetQuery.data?.cash,
     })
     return items.find(
       (item) => item.kind === "institution" && item.id === institutionId
@@ -169,6 +178,7 @@ function InstitutionDetailScreenBody({
     cardsQuery.data,
     loansQuery.data,
     balanceSheetQuery.data?.institutions,
+    balanceSheetQuery.data?.cash,
     institutionId,
   ])
 
@@ -178,6 +188,18 @@ function InstitutionDetailScreenBody({
       : (institutions.find((item) => item.id === institutionId) ?? null)
 
   const accent = institution?.color ?? FALLBACK_COLOR
+  const isCash = institution ? isCashInstitution(institution) : false
+
+  useRegisterChatContext(
+    institution
+      ? {
+          moduleSlug: "finance",
+          screen: "institution-detail",
+          entityRef: { type: "institution", id: institution.id },
+          entityLabel: institution.name,
+        }
+      : null
+  )
 
   const handleBack = useCallback(() => {
     router.push(APP_ROUTES.app.financeProducts)
@@ -244,17 +266,22 @@ function InstitutionDetailScreenBody({
 
   const headerActions = useMemo(
     () => (
-      <Button
-        variant="outline"
-        size="icon"
-        className="size-9 rounded-full"
-        aria-label="Opciones de la institución"
-        onClick={openMenu}
-      >
-        <MoreVerticalIcon className="size-4.5" />
-      </Button>
+      <>
+        <ChatLauncherButton />
+        {!isCash ? (
+          <Button
+            variant="outline"
+            size="icon"
+            className="size-9 rounded-full"
+            aria-label="Opciones de la institución"
+            onClick={openMenu}
+          >
+            <MoreVerticalIcon className="size-4.5" />
+          </Button>
+        ) : null}
+      </>
     ),
-    [openMenu]
+    [openMenu, isCash]
   )
 
   usePageHeader(
@@ -379,18 +406,22 @@ function InstitutionDetailScreenBody({
                   count={counts.accounts}
                   label="Cuentas"
                 />
-                <span className="h-4 w-px bg-white/40" />
-                <ProductCountItem
-                  icon={CreditCardIcon}
-                  count={counts.cards}
-                  label="Tarjetas"
-                />
-                <span className="h-4 w-px bg-white/40" />
-                <ProductCountItem
-                  icon={HandCoinsIcon}
-                  count={counts.loans}
-                  label="Préstamos"
-                />
+                {!isCash ? (
+                  <>
+                    <span className="h-4 w-px bg-white/40" />
+                    <ProductCountItem
+                      icon={CreditCardIcon}
+                      count={counts.cards}
+                      label="Tarjetas"
+                    />
+                    <span className="h-4 w-px bg-white/40" />
+                    <ProductCountItem
+                      icon={HandCoinsIcon}
+                      count={counts.loans}
+                      label="Préstamos"
+                    />
+                  </>
+                ) : null}
               </div>
             </div>
           </div>
@@ -426,18 +457,25 @@ function InstitutionDetailScreenBody({
                 <LandmarkIcon className="size-4 shrink-0" />
                 Cuentas
               </TabsTrigger>
-              <TabsTrigger value="cards" className="rounded-2xl py-4">
-                <CreditCardIcon className="size-4 shrink-0" />
-                Tarjetas
-              </TabsTrigger>
-              <TabsTrigger value="loans" className="rounded-2xl py-4">
-                <HandCoinsIcon className="size-4 shrink-0" />
-                Préstamos
-              </TabsTrigger>
+              {!isCash ? (
+                <TabsTrigger value="cards" className="rounded-2xl py-4">
+                  <CreditCardIcon className="size-4 shrink-0" />
+                  Tarjetas
+                </TabsTrigger>
+              ) : null}
+              {!isCash ? (
+                <TabsTrigger value="loans" className="rounded-2xl py-4">
+                  <HandCoinsIcon className="size-4 shrink-0" />
+                  Préstamos
+                </TabsTrigger>
+              ) : null}
             </TabsList>
 
             {/* Panels are rendered by the parent for layout control */}
             <TabsContent value="accounts" className="flex flex-col gap-3">
+              {isCash && stackItem?.kind === "institution" && stackItem.cash ? (
+                <CashBreakdown cash={stackItem.cash} display={moneyDisplay} />
+              ) : null}
               {institutionAccounts.length === 0 ? (
                 <InstitutionProductEmpty
                   tab="accounts"
@@ -456,63 +494,77 @@ function InstitutionDetailScreenBody({
                   />
                 ))
               )}
+              {isCash ? (
+                <Button
+                  variant="ghost"
+                  className="self-start text-muted-foreground"
+                  onClick={() => setOpenAccountSheet(true, null)}
+                >
+                  <PlusIcon className="size-4 shrink-0" />
+                  Agregar cuenta
+                </Button>
+              ) : null}
             </TabsContent>
 
-            <TabsContent value="cards" className="flex flex-col gap-3">
-              {institutionCards.length === 0 ? (
-                <InstitutionProductEmpty
-                  tab="cards"
-                  onCreate={() =>
-                    router.push(
-                      `${APP_ROUTES.app.financeCardNew}?institutionId=${institutionId}`
-                    )
-                  }
-                />
-              ) : (
-                institutionCards.map((card) => (
-                  <CardProductRow
-                    key={card.id}
-                    card={card}
-                    accounts={accounts}
-                    display={display}
-                    href={
-                      card.type === "DEBIT" && card.accountId
-                        ? APP_ROUTES.app.financeInstitutionAccount(
-                            institutionId,
-                            card.accountId
-                          )
-                        : APP_ROUTES.app.financeInstitutionCard(
-                            institutionId,
-                            card.id
-                          )
-                    }
-                  />
-                ))
-              )}
-            </TabsContent>
+            {!isCash ? (
+              <>
+                <TabsContent value="cards" className="flex flex-col gap-3">
+                  {institutionCards.length === 0 ? (
+                    <InstitutionProductEmpty
+                      tab="cards"
+                      onCreate={() =>
+                        router.push(
+                          `${APP_ROUTES.app.financeCardNew}?institutionId=${institutionId}`
+                        )
+                      }
+                    />
+                  ) : (
+                    institutionCards.map((card) => (
+                      <CardProductRow
+                        key={card.id}
+                        card={card}
+                        accounts={accounts}
+                        display={display}
+                        href={
+                          card.type === "DEBIT" && card.accountId
+                            ? APP_ROUTES.app.financeInstitutionAccount(
+                                institutionId,
+                                card.accountId
+                              )
+                            : APP_ROUTES.app.financeInstitutionCard(
+                                institutionId,
+                                card.id
+                              )
+                        }
+                      />
+                    ))
+                  )}
+                </TabsContent>
 
-            <TabsContent value="loans" className="flex flex-col gap-3">
-              {institutionLoans.length === 0 ? (
-                <InstitutionProductEmpty
-                  tab="loans"
-                  onCreate={() =>
-                    router.push(
-                      `${APP_ROUTES.app.financeLoanNew}?institutionId=${institutionId}`
-                    )
-                  }
-                />
-              ) : (
-                institutionLoans.map((loan) => (
-                  <LoanProgressCard
-                    key={loan.id}
-                    loan={loan}
-                    display={display}
-                    institution={institution}
-                    href={APP_ROUTES.app.financeLoan(loan.id)}
-                  />
-                ))
-              )}
-            </TabsContent>
+                <TabsContent value="loans" className="flex flex-col gap-3">
+                  {institutionLoans.length === 0 ? (
+                    <InstitutionProductEmpty
+                      tab="loans"
+                      onCreate={() =>
+                        router.push(
+                          `${APP_ROUTES.app.financeLoanNew}?institutionId=${institutionId}`
+                        )
+                      }
+                    />
+                  ) : (
+                    institutionLoans.map((loan) => (
+                      <LoanProgressCard
+                        key={loan.id}
+                        loan={loan}
+                        display={display}
+                        institution={institution}
+                        href={APP_ROUTES.app.financeLoan(loan.id)}
+                      />
+                    ))
+                  )}
+                </TabsContent>
+              </>
+            ) : null}
           </Tabs>
         </div>
       </div>
@@ -631,6 +683,9 @@ function InstitutionDetailScreenBody({
         institutions={institutions}
         defaultCurrency={config.baseCurrency}
         defaultInstitutionId={institutionId}
+        defaultType={isCash ? "CASH" : "CHECKING"}
+        lockType={isCash}
+        cash={balanceSheetQuery.data?.cash}
       />
 
       <CardBalanceSheet
@@ -651,5 +706,41 @@ function InstitutionDetailScreenBody({
         emailSyncEnabled={emailSyncEnabled}
       />
     </>
+  )
+}
+
+function CashBreakdown({
+  cash,
+  display,
+}: {
+  cash: FinanceCashSummary
+  display: FinanceMoneyDisplay
+}) {
+  return (
+    <div className="flex flex-col gap-2 rounded-2xl border border-border bg-card px-3 py-3">
+      <p className="text-sm font-medium text-muted-foreground">Por moneda</p>
+      {cash.byCurrency.map((row) => (
+        <div
+          key={row.currency}
+          className="flex items-baseline justify-between gap-2"
+        >
+          <span className="text-sm font-medium">{row.currency}</span>
+          <span className="text-sm tabular-nums">
+            {formatFinanceMoney(row.total, {
+              ...display,
+              currency: row.currency,
+            })}
+            {row.totalBase === null
+              ? " · sin tasa"
+              : ` · ${formatFinanceMoney(row.totalBase, display)}`}
+          </span>
+        </div>
+      ))}
+      {cash.totalBase === null ? (
+        <p className="text-xs text-muted-foreground">
+          Balance incompleto: falta una tasa de cambio.
+        </p>
+      ) : null}
+    </div>
   )
 }

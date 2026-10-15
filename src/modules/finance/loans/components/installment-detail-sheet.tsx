@@ -12,8 +12,10 @@ import {
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
 import { Button } from "@/src/shared/components/ui/button"
 import { SummaryItem } from "@/src/shared/components/ui/summary"
+import { LinkPendingOverlay } from "@/src/shared/components/ui/navigation-pending"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
-import { ReceiptIcon } from "lucide-react"
+import { ChatLauncherButton, useRegisterChatContext } from "@/src/modules/ai"
+import { ReceiptIcon, XIcon } from "lucide-react"
 import Link from "next/link"
 
 type InstallmentDetailSheetProps = {
@@ -29,10 +31,22 @@ export function InstallmentDetailSheet({
   installment,
   display,
 }: InstallmentDetailSheetProps) {
+  useRegisterChatContext(
+    open && installment
+      ? {
+          moduleSlug: "finance",
+          screen: "loan-installment-detail",
+          entityRef: { type: "loan_installment", id: installment.id },
+          entityLabel: `Cuota ${installment.installmentNo}`,
+        }
+      : null
+  )
+
   return (
     <BottomSheet
       open={open}
       onOpenChange={onOpenChange}
+      headerAction={<ChatLauncherButton />}
       title={
         installment ? `Cuota ${installment.installmentNo}` : "Detalle de cuota"
       }
@@ -49,6 +63,7 @@ export function InstallmentDetailSheet({
             className="flex-1"
             onClick={() => onOpenChange(false)}
           >
+            <XIcon className="size-4 shrink-0" />
             Cerrar
           </Button>
         ),
@@ -81,9 +96,11 @@ export function InstallmentDetailSheet({
                 href={APP_ROUTES.app.financeTransaction(
                   installment.transactionId
                 )}
+                className="relative"
               >
                 <ReceiptIcon className="size-4 shrink-0" />
                 Ver movimiento
+                <LinkPendingOverlay spinnerClassName="size-4" />
               </Link>
             </Button>
           ) : null}

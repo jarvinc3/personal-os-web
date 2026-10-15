@@ -37,7 +37,7 @@ import { AlertTriangle, KeyRound, Trash2, X } from "lucide-react"
 import { useCallback, useEffect, useRef, useState } from "react"
 
 const DELETED_DATA_ITEMS = [
-  "Perfil, preferencias y configuración de módulos",
+  "Perfil, preferencias y configuración de apps",
   "Datos financieros, transacciones y presupuestos",
   "Historial del agente IA y sesiones",
   "Tokens OAuth de Gmail y fuentes conectadas",

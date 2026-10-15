@@ -1,0 +1,117 @@
+import assert from "node:assert/strict"
+import { describe, it } from "node:test"
+
+import { CATALOG_NONE } from "@/src/modules/finance/shared/constants/catalog"
+import {
+  subscriptionFormSchema,
+  subscriptionPayload,
+  toSubscriptionFormValues,
+} from "./subscription-form.ts"
+
+const baseValues = toSubscriptionFormValues(null, {
+  defaultCurrency: "DOP",
+})
+
+describe("toSubscriptionFormValues", () => {
+  it("uses the finance defaults when creating", () => {
+    assert.equal(baseValues.currency, "DOP")
+    assert.equal(baseValues.billingCycle, "MONTHLY")
+    assert.equal(baseValues.billingInterval, "1")
+    assert.equal(baseValues.cardId, CATALOG_NONE)
+    assert.equal(baseValues.accountId, CATALOG_NONE)
+    assert.equal(baseValues.categoryId, CATALOG_NONE)
+    assert.equal(baseValues.sourcePatternId, "")
+  })
+
+  it("prefills from a detected recurring charge", () => {
+    const draft = toSubscriptionFormValues(null, {
+      defaultCurrency: "DOP",
+      draft: {
+        name: "Netflix",
+        amount: "12.99",
+        currency: "USD",
+        sourcePatternId: "pattern-1",
+      },
+    })
+    assert.equal(draft.name, "Netflix")
+    assert.equal(draft.amount, "12.99")
+    assert.equal(draft.currency, "USD")
+    assert.equal(draft.sourcePatternId, "pattern-1")
+  })
+})
+
+describe("subscriptionFormSchema", () => {
+  it("rejects a charge without a positive amount", () => {
+    const invalidParse = subscriptionFormSchema.safeParse({
+      ...baseValues,
+      name: "Netflix",
+      amount: "0",
+    })
+    assert.equal(invalidParse.success, false)
+  })
+
+  it("accepts a valid form", () => {
+    const validParse = subscriptionFormSchema.safeParse({
+      ...baseValues,
+      name: "Netflix",
+      amount: "12.99",
+    })
+    assert.equal(validParse.success, true)
+  })
+})
+
+describe("subscriptionPayload", () => {
+  it("maps the form to the REST body", () => {
+    const payload = subscriptionPayload({
+      ...baseValues,
+      name: " Spotify ",
+      amount: "10,50",
+      currency: "usd",
+      billingInterval: "2",
+      cardId: "card-1",
+      categoryId: "cat-1",
+      trialEndsAt: "",
+    })
+    assert.equal(payload.name, "Spotify")
+    assert.equal(payload.amount, 10.5)
+    assert.equal(payload.currency, "USD")
+    assert.equal(payload.billingInterval, 2)
+    assert.equal(payload.reminderDaysBefore, undefined)
+    assert.equal(payload.cardId, "card-1")
+    assert.equal(payload.categoryId, "cat-1")
+    assert.equal(payload.trialEndsAt, null)
+    assert.equal(payload.accountId, null)
+  })
+
+  it("clears optional fields on edit instead of leaving them unchanged", () => {
+    const payload = subscriptionPayload({
+      ...baseValues,
+      name: "Spotify",
+      amount: "10.00",
+      cardId: CATALOG_NONE,
+      accountId: CATALOG_NONE,
+      categoryId: CATALOG_NONE,
+      trialEndsAt: "",
+      manageUrl: "",
+      notes: "",
+    })
+    assert.equal(payload.domain, null)
+    assert.equal(payload.trialEndsAt, null)
+    assert.equal(payload.cardId, null)
+    assert.equal(payload.accountId, null)
+    assert.equal(payload.categoryId, null)
+    assert.equal(payload.manageUrl, null)
+    assert.equal(payload.notes, null)
+    assert.equal(payload.sourcePatternId, null)
+  })
+
+  it("keeps the source pattern when it came from a suggestion", () => {
+    const payload = subscriptionPayload({
+      ...baseValues,
+      name: "Netflix",
+      amount: "12.99",
+      sourcePatternId: "pattern-1",
+    })
+    assert.equal(payload.sourcePatternId, "pattern-1")
+  })
+})

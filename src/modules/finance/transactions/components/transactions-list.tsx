@@ -1,6 +1,7 @@
 "use client"
 
 import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
+import { QuickEntryBar } from "@/src/modules/finance/quick-entry"
 import { FinanceFlowPills } from "@/src/modules/finance/transactions/components/flow-pills"
 import { FinanceMonthPicker } from "@/src/modules/finance/transactions/components/month-picker"
 import { FinanceMonthSection } from "@/src/modules/finance/transactions/components/month-section"
@@ -25,10 +26,12 @@ import {
   yearsTouched,
   type MonthKey,
 } from "@/src/modules/finance/shared/lib/month-window"
+import { todayDateInput } from "@/src/modules/finance/shared/lib/ledger-form"
 import {
   animateScrollSectionIntoView,
   findActiveMonthKey,
   getScrollParent,
+  pickLandingDayKey,
   scrollSectionIntoView,
   shouldFollowScroll,
 } from "@/src/modules/finance/shared/lib/timeline-scroll"
@@ -197,12 +200,23 @@ export function FinanceTransactionsList({
       if (userTookOverRef.current) {
         return
       }
-      const section = node.querySelector<HTMLElement>(
+      const month = node.querySelector<HTMLElement>(
         `[data-month-key="${landingMonthKey}"]`
       )
-      if (!section) {
+      if (!month) {
         return
       }
+      const dayKeys = [
+        ...month.querySelectorAll<HTMLElement>("[data-day-key]"),
+      ].flatMap((day) => {
+        const key = day.getAttribute("data-day-key")
+        return key ? [key] : []
+      })
+      const dayKey = pickLandingDayKey(dayKeys, todayDateInput())
+      const section = dayKey
+        ? (month.querySelector<HTMLElement>(`[data-day-key="${dayKey}"]`) ??
+          month)
+        : month
       scrollSectionIntoView(section, offset, "auto")
     }
 
@@ -353,10 +367,10 @@ export function FinanceTransactionsList({
   }, [markUserTookOver, stickyOffset, timeline.length])
 
   return (
-    <div className="flex flex-col gap-4 -mx-4 bg-card">
+    <div className="-mx-4 flex flex-col bg-card md:mx-0 md:bg-background">
       <div
         ref={chromeRef}
-        className="sticky top-0 z-30 flex flex-col gap-3 bg-background pb-2 rounded-b-2xl shadow-sm"
+        className="sticky top-0 z-30 flex flex-col gap-3 rounded-b-2xl border-b border-border/70 bg-background pb-2 shadow-sm md:border-none"
       >
         <FinanceTransactionSearch
           enabled={enabled}
@@ -364,6 +378,7 @@ export function FinanceTransactionsList({
           categories={categories}
           onSelect={(id) => router.push(APP_ROUTES.app.financeTransaction(id))}
         />
+        <QuickEntryBar />
         <FinanceMonthPicker
           months={months}
           activeMonthKey={activeMonthKey}
@@ -424,14 +439,14 @@ export function FinanceTransactionsList({
           },
           {
             icon: <ArrowLeftRightIcon />,
-            label: "Transferir",
+            label: "Transf...",
             onClick: () => router.push(APP_ROUTES.app.financeTransferNew),
             disabled: !enabled || !canTransfer,
             color: "bg-blue-500",
           },
           {
             icon: <RefreshCwIcon />,
-            label: "Actualizar",
+            label: "Actual...",
             onClick: () => {
               void queryClient
                 .invalidateQueries({ queryKey: FINANCE_TRANSACTIONS_QUERY_KEY })
@@ -443,7 +458,7 @@ export function FinanceTransactionsList({
                 })
             },
             disabled: !enabled || timelineQuery.isFetching,
-            color: "bg-slate-600",
+            color: "bg-primary",
           },
         ]}
       />

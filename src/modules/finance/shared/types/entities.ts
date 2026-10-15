@@ -101,6 +101,9 @@ export type FinanceTransaction = {
   transferToNetworkLogoUrl?: string | null
   categoryId: string | null
   merchant: string | null
+  merchantId?: string | null
+  merchantName?: string | null
+  merchantLogoUrl?: string | null
   notes: string | null
   source: string | null
   transactionDate: string
@@ -149,11 +152,9 @@ export type FinanceAnalyticsSummary = {
 
 export type FinanceBalanceSheetStatus = "COMPLETE" | "INCOMPLETE"
 
-export type FinanceBalanceSheetIssue = {
-  code: "MISSING_CREDIT_LIMIT"
-  cardId: string
-  currency: string
-}
+export type FinanceBalanceSheetIssue =
+  | { code: "MISSING_CREDIT_LIMIT"; cardId: string; currency: string }
+  | { code: "MISSING_RATE"; currency: string }
 
 export type FinanceBalanceSheetSlice = {
   status: FinanceBalanceSheetStatus
@@ -168,12 +169,35 @@ export type FinanceBalanceSheetSlice = {
   issues: FinanceBalanceSheetIssue[]
 }
 
+export type FinanceCashAccountLine = {
+  id: string
+  name: string
+  balance: string
+}
+
+export type FinanceCashCurrencyBreakdown = {
+  currency: string
+  total: string
+  totalBase: string | null
+  accounts: FinanceCashAccountLine[]
+}
+
+/** Cash converted to the base currency, with a per-currency breakdown. */
+export type FinanceCashSummary = {
+  totalBase: string | null
+  baseCurrency: string
+  rateDate: string
+  status: FinanceBalanceSheetStatus
+  byCurrency: FinanceCashCurrencyBreakdown[]
+}
+
 export type FinanceBalanceSheet = {
   asOf: string
   rateDate: string
   baseCurrency: string
   global: FinanceBalanceSheetSlice
   institutions: Array<FinanceBalanceSheetSlice & { institutionId: string }>
+  cash: FinanceCashSummary
 }
 
 export type FinanceSpendingPoint = {
@@ -218,6 +242,8 @@ export type FinanceCardBalance = {
   currency: string
   balance: string
   creditLimit: string | null
+  /** Límite menos deuda confirmada y pendientes; null sin límite. */
+  availableCredit: string | null
 }
 
 export type FinanceCard = {
@@ -234,6 +260,10 @@ export type FinanceCard = {
   lastFour: string | null
   statementClosingDay: number | null
   paymentDueDay: number | null
+  /** Próximo corte, YYYY-MM-DD; null sin día de corte. */
+  nextStatementDate: string | null
+  /** Fecha límite de pago del próximo corte, YYYY-MM-DD. */
+  nextPaymentDueDate: string | null
   color: string | null
   isActive: boolean
   balances: FinanceCardBalance[]
@@ -296,6 +326,69 @@ export type FinanceCardStatementDetail = {
   payments: FinanceCardStatementMovement[]
 }
 
+export type FinanceStatementImportStatus =
+  "PARSING" | "READY" | "APPLIED" | "FAILED" | "DISCARDED"
+
+export type FinanceStatementLineDecision = "MATCH" | "CREATE" | "IGNORE"
+
+export type FinanceStatementLineType = "DEBIT" | "CREDIT"
+
+export type FinanceStatementImportLine = {
+  id: string
+  date: string
+  description: string
+  amount: string
+  currency: string
+  type: FinanceStatementLineType
+  reference: string | null
+  decision: FinanceStatementLineDecision
+  categoryId: string | null
+  categoryName: string | null
+  transactionId: string | null
+}
+
+export type FinanceStatementImportExtra = {
+  id: string
+  date: string
+  description: string | null
+  merchant: string | null
+  amount: string
+  currency: string
+  type: string
+}
+
+export type FinanceStatementImportTarget = {
+  kind: "CARD" | "ACCOUNT"
+  id: string
+  name: string
+  currency: string
+}
+
+export type FinanceStatementImport = {
+  id: string
+  status: FinanceStatementImportStatus
+  error: string | null
+  failureReason: string | null
+  target: FinanceStatementImportTarget
+  header: {
+    currency: string
+    periodStart: string | null
+    periodEnd: string | null
+    dueDate: string | null
+    previousBalance: string | null
+    closingBalance: string | null
+    minimumPayment: string | null
+  }
+  period: { from: string; to: string } | null
+  counts: { lines: number; matched: number; missing: number; extra: number }
+  lines: FinanceStatementImportLine[]
+  extra: FinanceStatementImportExtra[]
+  difference: string | null
+  adjustment: { amount: string; currency: string } | null
+  createdAt: string
+  appliedAt: string | null
+}
+
 export type FinanceInstitution = {
   id: string
   name: string
@@ -307,6 +400,7 @@ export type FinanceInstitution = {
   logoUrl: string | null
   country: string | null
   isActive: boolean
+  isSystem?: boolean
 }
 
 export type FinanceCategory = {
@@ -606,4 +700,363 @@ export type FinanceEmailAssignResult = {
 export type FinanceEmailSyncTrigger = {
   queued: boolean
   reason?: string
+}
+
+export type FinanceMerchant = {
+  id: string
+  name: string
+  normalizedKey: string
+  aliases: string[]
+  categoryId: string | null
+  logoUrl: string | null
+  createdAt: string
+  /** Spending of the requested window (current month by default). */
+  monthSpend: string
+  monthMovements: number
+}
+
+export type FinanceMerchantSuggestion = {
+  merchantId: string
+  name: string
+  categoryId: string | null
+} | null
+
+export type FinanceRecurringFrequency = 7 | 14 | 30 | 365
+
+export type FinanceRecurringStatus = "SUGGESTED" | "CONFIRMED" | "DISMISSED"
+
+export type FinanceRecurringKind = "SUBSCRIPTION" | "BILL" | "INCOME" | "OTHER"
+
+export type FinanceRecurringPattern = {
+  id: string
+  merchantId: string | null
+  merchant: string
+  merchantName: string
+  logoUrl: string | null
+  categoryId: string | null
+  avgAmount: string
+  currency: string
+  frequency: FinanceRecurringFrequency
+  nextExpectedDate: string
+  lastSeenAt: string | null
+  status: FinanceRecurringStatus
+  kind: FinanceRecurringKind
+  confidenceScore: number
+  amountTolerancePct: number
+  monthlyEquivalent: string
+  annualEquivalent: string
+  daysUntil: number
+}
+
+export type FinanceBillingCycle =
+  "WEEKLY" | "MONTHLY" | "QUARTERLY" | "SEMIANNUAL" | "YEARLY"
+
+export type FinanceSubscriptionStatus = "ACTIVE" | "PAUSED" | "CANCELLED"
+
+export type FinanceSubscriptionListQuery = {
+  status?: FinanceSubscriptionStatus
+  currency?: string
+  categoryId?: string
+  /** Comma-separated ids; the list endpoint reads them as a list. */
+  categoryIds?: string
+  frequency?: "MONTHLY" | "YEARLY" | "OTHER"
+  sort?: "NEXT_DATE" | "AMOUNT" | "NAME"
+  cardId?: string
+  accountId?: string
+  unassignedCategory?: boolean
+  unassignedMethod?: boolean
+  q?: string
+}
+
+export const FINANCE_SUBSCRIPTION_GROUP_BYS = [
+  "category",
+  "provider",
+  "none",
+] as const
+export type FinanceSubscriptionGroupBy =
+  (typeof FINANCE_SUBSCRIPTION_GROUP_BYS)[number]
+
+export type FinanceSubscriptionPaymentSource = "AUTO" | "MANUAL"
+
+export type FinanceSubscriptionPaymentMethod = {
+  type: "CARD" | "ACCOUNT"
+  id: string
+  name: string
+  institution: string | null
+  last4: string | null
+  logoUrl: string | null
+}
+
+export type FinanceSubscriptionCategory = {
+  id: string
+  name: string
+  icon: string | null
+  color: string | null
+}
+
+export type FinanceSubscription = {
+  id: string
+  name: string
+  normalizedKey: string
+  domain: string | null
+  logoUrl: string | null
+  amount: string
+  currency: string
+  billingCycle: FinanceBillingCycle
+  billingInterval: number
+  anchorDate: string
+  nextBillingDate: string
+  trialEndsAt: string | null
+  status: FinanceSubscriptionStatus
+  pausedAt: string | null
+  cancelledAt: string | null
+  reminderDaysBefore: number
+  lastRemindedFor: string | null
+  /** Last charge did not match the expected amount. */
+  lastChargeMismatch: boolean
+  /** Amount of the newest charge, for the warning mark. */
+  lastPaymentAmount: string | null
+  cardId: string | null
+  cardName: string | null
+  accountId: string | null
+  accountName: string | null
+  categoryId: string | null
+  category: FinanceSubscriptionCategory | null
+  paymentMethod: FinanceSubscriptionPaymentMethod | null
+  manageUrl: string | null
+  notes: string | null
+  sourcePatternId: string | null
+  monthlyEquivalent: string
+  annualEquivalent: string
+  daysUntil: number
+  createdAt: string
+  updatedAt: string
+}
+
+export type FinanceSubscriptionPayment = {
+  id: string
+  amount: string
+  currency: string
+  paidAt: string
+  source: FinanceSubscriptionPaymentSource
+  transactionId: string | null
+  transaction: {
+    id: string
+    merchant: string | null
+    amount: string
+    currency: string
+    transactionDate: string
+    accountName: string | null
+    cardName: string | null
+  } | null
+}
+
+export type FinanceSubscriptionTrend = {
+  direction: "up" | "down" | "flat"
+  percent: number
+}
+
+export type FinanceSubscriptionSummary = {
+  baseCurrency: string
+  activeCount: number
+  monthlyCost: string
+  annualCost: string
+  previousMonthlyCost: string
+  realSpendThisMonth: string
+  realSpendPreviousMonth: string
+  trend: FinanceSubscriptionTrend | null
+  pendingDetectedCount: number
+  cancelledAnnualSavings: string
+  /** Days before a charge the app warns about it; the global setting. */
+  reminderWindowDays: number
+  upcoming: FinanceSubscription[]
+}
+
+export const FINANCE_SUBSCRIPTION_BREAKDOWNS = [
+  "category",
+  "instrument",
+  "currency",
+] as const
+export type FinanceSubscriptionBreakdownAxis =
+  (typeof FINANCE_SUBSCRIPTION_BREAKDOWNS)[number]
+
+export type FinanceSubscriptionBreakdownItem = {
+  key: string
+  label: string
+  color: string | null
+  count: number
+  amount: string
+}
+
+export type FinanceSubscriptionBreakdown = {
+  baseCurrency: string
+  by: FinanceSubscriptionBreakdownAxis
+  items: FinanceSubscriptionBreakdownItem[]
+}
+
+export type FinanceSubscriptionUpcomingCharge = {
+  id: string
+  subscriptionId: string
+  name: string
+  logoUrl: string | null
+  amount: string
+  currency: string
+  date: string
+  daysUntil: number
+  paymentMethod: FinanceSubscriptionPaymentMethod | null
+}
+
+export type FinanceSubscriptionUpcoming = {
+  from: string
+  to: string
+  items: FinanceSubscriptionUpcomingCharge[]
+}
+
+export const FINANCE_SUBSCRIPTION_ALERT_KINDS = [
+  "PRICE_INCREASE",
+  "AMOUNT_MISMATCH",
+  "TRIAL_ENDING",
+  "ANNUAL_RENEWAL",
+  "MISSED_CHARGE",
+] as const
+export type FinanceSubscriptionAlertKind =
+  (typeof FINANCE_SUBSCRIPTION_ALERT_KINDS)[number]
+
+export type FinanceSubscriptionAlert = {
+  id: string
+  kind: FinanceSubscriptionAlertKind
+  subscriptionId: string
+  subscriptionName: string
+  date: string
+  currency: string
+  amount: string | null
+  previousAmount: string | null
+  /** Expected charge of the subscription; set on `AMOUNT_MISMATCH`. */
+  expectedAmount: string | null
+  percent: number | null
+  daysUntil: number | null
+}
+
+export const FINANCE_RECONCILIATION_KINDS = [
+  "IMPUESTO_DGII",
+  "COMISION",
+  "CARGO_PLASTICO",
+  "INTERES",
+  "OTRO",
+] as const
+export type FinanceReconciliationKind =
+  (typeof FINANCE_RECONCILIATION_KINDS)[number]
+
+export const FINANCE_RECONCILIATION_KIND_LABEL: Record<
+  FinanceReconciliationKind,
+  string
+> = {
+  IMPUESTO_DGII: "Impuesto DGII",
+  COMISION: "Comisión",
+  CARGO_PLASTICO: "Cargo por plástico",
+  INTERES: "Interés",
+  OTRO: "Otro",
+}
+
+export type FinanceReconciliationAdjustment = {
+  id: string
+  kind: FinanceReconciliationKind
+  amount: string
+  transactionId: string
+}
+
+export type FinanceReconciliation = {
+  id: string
+  accountId: string | null
+  cardId: string | null
+  currency: string
+  asOfDate: string
+  appBalance: string
+  realBalance: string
+  difference: string
+  note: string | null
+  createdAt: string
+  adjustments: FinanceReconciliationAdjustment[]
+}
+
+export type FinanceReconciliationSuggestedAdjustment = {
+  kind: FinanceReconciliationKind
+  amount: string
+}
+
+/** One editable line of the close sheet, before it becomes a payload. */
+export type FinanceReconciliationLineDraft = {
+  kind: FinanceReconciliationKind
+  amount: string
+}
+
+export type FinanceReconciliationPreview = {
+  accountId: string | null
+  cardId: string | null
+  currency: string
+  name: string
+  appBalance: string
+  realBalance: string
+  difference: string
+  suggestedAdjustments: FinanceReconciliationSuggestedAdjustment[]
+}
+
+export type FinanceReconciliationStatusItem = {
+  key: string
+  kind: "account" | "card"
+  accountId: string | null
+  cardId: string | null
+  currency: string
+  name: string
+  institutionName: string | null
+  balance: string
+  reconciled: boolean
+  lastReconciledAt: string | null
+}
+
+export type FinanceReconciliationStatus = {
+  month: string
+  items: FinanceReconciliationStatusItem[]
+  reconciledCount: number
+  pendingCount: number
+}
+
+export type FinanceBankCharges = {
+  from: string
+  to: string
+  total: string
+  count: number
+  byMonth: Array<{ month: string; total: string; count: number }>
+  byInstitution: Array<{ name: string; total: string; count: number }>
+  byKind: Array<{
+    kind: FinanceReconciliationKind
+    total: string
+    count: number
+  }>
+}
+
+/** Open deviation between a product's stored balance and its movements (I1). */
+export type FinanceBalanceDrift = {
+  id: string
+  accountId: string | null
+  cardId: string | null
+  currency: string
+  name: string | null
+  storedBalance: string
+  expectedBalance: string
+  difference: string
+  detectedAt: string
+  resolvedAt: string | null
+}
+
+export type FinanceIntegrityCheck = {
+  drifts: FinanceBalanceDrift[]
+}
+
+export type FinanceBalanceRecalculation = {
+  corrected: boolean
+  accountId: string | null
+  cardId: string | null
+  currency: string
+  balance: string
 }

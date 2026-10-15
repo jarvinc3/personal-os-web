@@ -1,31 +1,57 @@
 "use client"
 
-import { TransactionInstrument } from "@/src/modules/finance/transactions/components/transaction-instrument"
-import { TransactionStatusMark } from "@/src/modules/finance/transactions/components/transaction-status-mark"
+import { TransactionMovementRow } from "@/src/modules/finance/transactions/components/transaction-movement-row"
+import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
+import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
 import { useTransactionSearch } from "@/src/modules/finance/shared/hooks/use-transactions"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
-import { formatFinanceTimeLabel } from "@/src/modules/finance/shared/lib/ledger-form"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
-import {
-  isTransferTransaction,
-  movementSign,
-  signedAmount,
-  transferDirectionLabel,
-} from "@/src/modules/finance/shared/lib/transactions-query"
 import type { FinanceCategory } from "@/src/modules/finance/shared/types/entities"
-import { Input } from "@/src/shared/components/ui/input"
-import { SummaryItem } from "@/src/shared/components/ui/summary"
-import { cn } from "@/src/shared/lib/utils"
+import { Button } from "@/src/shared/components/ui/button"
 import {
-  ArrowDownLeftIcon,
-  ArrowLeftRightIcon,
-  ArrowUpRightIcon,
-  ScaleIcon,
-  SearchIcon,
-} from "lucide-react"
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/src/shared/components/ui/empty"
+import { Input } from "@/src/shared/components/ui/input"
+import { Separator } from "@/src/shared/components/ui/separator"
+import { cn } from "@/src/shared/lib/utils"
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion"
+import { SearchIcon, XIcon } from "lucide-react"
 import { useEffect, useId, useRef, useState } from "react"
 
+const PRESENCE_EASE = [0.22, 1, 0.36, 1] as const
+
 const SEARCH_DEBOUNCE_MS = 300
+
+function wheelDelta(event: WheelEvent, node: HTMLElement) {
+  if (event.deltaMode === WheelEvent.DOM_DELTA_LINE) {
+    return event.deltaY * 16
+  }
+  if (event.deltaMode === WheelEvent.DOM_DELTA_PAGE) {
+    return event.deltaY * node.clientHeight
+  }
+  return event.deltaY
+}
+
+function containResultsWheel(event: WheelEvent) {
+  const node = event.currentTarget
+  if (!(node instanceof HTMLElement)) {
+    return
+  }
+  const max = node.scrollHeight - node.clientHeight
+  if (max > 0) {
+    node.scrollTop = Math.min(
+      max,
+      Math.max(0, node.scrollTop + wheelDelta(event, node))
+    )
+  }
+  event.preventDefault()
+  event.stopPropagation()
+}
 
 type FinanceTransactionSearchProps = {
   enabled: boolean
@@ -42,6 +68,9 @@ export function FinanceTransactionSearch({
 }: FinanceTransactionSearchProps) {
   const listId = useId()
   const rootRef = useRef<HTMLDivElement>(null)
+  const resultsRef = useRef<HTMLDivElement>(null)
+  const reduceMotion = useReducedMotion() === true
+  const presence = { duration: reduceMotion ? 0 : 0.2, ease: PRESENCE_EASE }
   const [search, setSearch] = useState("")
   const [debouncedSearch, setDebouncedSearch] = useState("")
   const [closedFor, setClosedFor] = useState<string | null>(null)
@@ -49,9 +78,6 @@ export function FinanceTransactionSearch({
   const resultsQuery = useTransactionSearch(enabled, debouncedSearch)
   const items = resultsQuery.data?.items ?? []
   const showPanel = open && debouncedSearch.length > 0
-  const categoryById = new Map(
-    categories.map((category) => [category.id, category] as const)
-  )
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -61,148 +87,153 @@ export function FinanceTransactionSearch({
   }, [search])
 
   useEffect(() => {
-    function onPointerDown(event: PointerEvent) {
-      if (!rootRef.current?.contains(event.target as Node)) {
+    const node = resultsRef.current
+    if (!showPanel || !node) {
+      return
+    }
+    node.addEventListener("wheel", containResultsWheel, { passive: false })
+    return () => node.removeEventListener("wheel", containResultsWheel)
+  }, [showPanel])
+
+  useEffect(() => {
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
         setClosedFor(debouncedSearch)
       }
     }
-    document.addEventListener("pointerdown", onPointerDown)
-    return () => document.removeEventListener("pointerdown", onPointerDown)
+    document.addEventListener("keydown", onKeyDown)
+    return () => document.removeEventListener("keydown", onKeyDown)
   }, [debouncedSearch])
 
+  function close() {
+    setClosedFor(debouncedSearch)
+  }
+
+  function clearSearch() {
+    setSearch("")
+    setDebouncedSearch("")
+    setClosedFor(null)
+  }
+
   return (
-    <div ref={rootRef} className="relative px-2">
-      <SearchIcon className="pointer-events-none absolute top-1/2 left-3 z-10 size-4 -translate-y-1/2 text-muted-foreground" />
-      <Input
-        type="search"
-        placeholder="Buscar comercio o descripción..."
-        value={search}
-        onChange={(event) => setSearch(event.target.value)}
-        onFocus={() => {
-          if (debouncedSearch.length > 0) {
-            setClosedFor(null)
-          }
-        }}
-        onKeyDown={(event) => {
-          if (event.key === "Escape") {
-            setClosedFor(debouncedSearch)
-            event.currentTarget.blur()
-          }
-        }}
-        autoComplete="off"
-        role="combobox"
-        aria-expanded={showPanel}
-        aria-controls={listId}
-        aria-autocomplete="list"
-        className="pr-3 pl-8"
-      />
-      {showPanel ? (
-        <div
-          id={listId}
-          role="listbox"
-          aria-label="Resultados de búsqueda"
-          className="absolute top-full z-40 mt-1 max-h-72 w-full overflow-y-auto rounded-2xl border border-border bg-popover shadow-2xl"
-        >
-          {resultsQuery.isError ? (
-            <p className="px-3 py-3 text-sm text-destructive">
-              {financeErrorMessage(resultsQuery.error)}
-            </p>
-          ) : resultsQuery.isPending ? (
-            <p className="px-3 py-3 text-sm text-muted-foreground">Buscando…</p>
-          ) : items.length === 0 ? (
-            <p className="px-3 py-3 text-sm text-muted-foreground">
-              Sin resultados
-            </p>
-          ) : (
-            <div className="px-3">
-              {items.map((transaction, index) => {
-                const isTransfer = isTransferTransaction(transaction)
-                const category = transaction.categoryId
-                  ? categoryById.get(transaction.categoryId)
-                  : undefined
-                const parent = category?.parentId
-                  ? categoryById.get(category.parentId)
-                  : undefined
-                const icon = isTransfer
-                  ? undefined
-                  : category?.icon?.trim() || parent?.icon?.trim()
-                const color = isTransfer
-                  ? "#3B82F6"
-                  : category?.color?.trim() ||
-                    parent?.color?.trim() ||
-                    "#64748B"
-                const title = isTransfer
-                  ? transferDirectionLabel(transaction)
-                  : (transaction.merchant ??
-                    transaction.description ??
-                    transaction.accountName ??
-                    "Movimiento")
-                return (
-                  <div key={transaction.id} role="option" aria-selected={false}>
-                    <SummaryItem
-                      title={title}
-                      description={
-                        transaction.accountName || transaction.cardName ? (
-                          <TransactionInstrument
-                            transaction={transaction}
-                            suffix={formatFinanceTimeLabel(
-                              transaction.transactionDate
-                            )}
-                          />
-                        ) : undefined
-                      }
-                      leading={
-                        icon ? (
-                          <span>{icon}</span>
-                        ) : isTransfer ? (
-                          <ArrowLeftRightIcon className="size-5 text-info" />
-                        ) : transaction.type === "DEBIT" ? (
-                          <ArrowDownLeftIcon className="size-5 text-destructive" />
-                        ) : transaction.type === "CREDIT" ? (
-                          <ArrowUpRightIcon className="size-5 text-success" />
-                        ) : transaction.type === "ADJUSTMENT" ? (
-                          <ScaleIcon
-                            className={cn(
-                              "size-5",
-                              movementSign(transaction) === "−"
-                                ? "text-destructive"
-                                : "text-success"
-                            )}
-                          />
-                        ) : null
-                      }
-                      accentColor={color}
-                      value={
-                        <span
-                          className={cn(
-                            !isTransfer &&
-                              movementSign(transaction) === "−" &&
-                              "text-destructive",
-                            !isTransfer &&
-                              movementSign(transaction) === "+" &&
-                              "text-success"
-                          )}
-                        >
-                          {signedAmount(transaction, display)}
-                        </span>
-                      }
-                      trailing={
-                        <TransactionStatusMark status={transaction.status} />
-                      }
-                      showChevron={false}
-                      onPress={() => {
-                        setClosedFor(debouncedSearch)
-                        onSelect(transaction.id)
-                      }}
-                      isLast={index === items.length - 1}
-                    />
-                  </div>
-                )
-              })}
-            </div>
+    <>
+      <AnimatePresence>
+        {showPanel ? (
+          <motion.button
+            key="search-backdrop"
+            type="button"
+            aria-label="Cerrar búsqueda"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={presence}
+            className="fixed inset-0 z-40 bg-background/50 backdrop-blur-sm"
+            onClick={close}
+          />
+        ) : null}
+      </AnimatePresence>
+      <div ref={rootRef} className="relative z-50 mx-2 md:mx-0">
+        <SearchIcon className="pointer-events-none absolute top-1/2 left-4 z-10 size-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          type="search"
+          placeholder="Buscar comercio o descripción..."
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+          onFocus={() => {
+            if (debouncedSearch.length > 0) {
+              setClosedFor(null)
+            }
+          }}
+          onKeyDown={(event) => {
+            if (event.key === "Escape") {
+              close()
+              event.currentTarget.blur()
+            }
+          }}
+          autoComplete="on"
+          role="combobox"
+          aria-expanded={showPanel}
+          aria-controls={listId}
+          aria-autocomplete="list"
+          className={cn(
+            "relative z-10 pr-5 pl-9",
+            showPanel && "rounded-t-2xl rounded-b-none"
           )}
-        </div>
-      ) : null}
-    </div>
+        />
+        <AnimatePresence>
+          {showPanel ? (
+            <motion.div
+              key="search-results"
+              id={listId}
+              role="listbox"
+              aria-label="Resultados de búsqueda"
+              initial={{ opacity: 0, y: reduceMotion ? 0 : -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: reduceMotion ? 0 : -8 }}
+              transition={presence}
+              className="absolute inset-x-0 top-full z-50 flex h-[50vh] min-h-[50vh] flex-col overflow-hidden rounded-t-none rounded-b-2xl border border-t-0 border-border bg-popover shadow-2xl"
+            >
+              <Separator />
+              <div
+                ref={resultsRef}
+                className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto overscroll-contain p-2"
+              >
+                {resultsQuery.isError ? (
+                  <FinanceErrorState
+                    message={financeErrorMessage(resultsQuery.error)}
+                    onRetry={() => void resultsQuery.refetch()}
+                    isRetrying={resultsQuery.isFetching}
+                  />
+                ) : resultsQuery.isPending ? (
+                  <FinanceListSkeleton rows={3} />
+                ) : items.length === 0 ? (
+                  <Empty className="py-6">
+                    <EmptyHeader>
+                      <EmptyMedia variant="icon">
+                        <SearchIcon />
+                      </EmptyMedia>
+                      <EmptyTitle>Sin resultados</EmptyTitle>
+                      <EmptyDescription>
+                        Ningún movimiento coincide con «{debouncedSearch}».
+                      </EmptyDescription>
+                    </EmptyHeader>
+                    <EmptyContent>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={clearSearch}
+                      >
+                        <XIcon />
+                        Limpiar
+                      </Button>
+                    </EmptyContent>
+                  </Empty>
+                ) : (
+                  items.map((transaction) => (
+                    <div
+                      key={transaction.id}
+                      role="option"
+                      aria-selected={false}
+                      className="shrink-0 overflow-hidden rounded-2xl border border-border"
+                    >
+                      <TransactionMovementRow
+                        transaction={transaction}
+                        categories={categories}
+                        display={display}
+                        onPress={() => {
+                          close()
+                          onSelect(transaction.id)
+                        }}
+                      />
+                    </div>
+                  ))
+                )}
+              </div>
+            </motion.div>
+          ) : null}
+        </AnimatePresence>
+      </div>
+    </>
   )
 }

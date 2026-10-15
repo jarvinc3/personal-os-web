@@ -8,7 +8,7 @@ export const DEFAULT_USER_PREFERENCES: UserPreferences = {
     value: "system",
   },
   onboarding: {
-    fieldGuide: "Flujo inicial de la app, no de un módulo.",
+    fieldGuide: "Flujo inicial de Personal OS, no de una app.",
     completed: false,
   },
   ai: {
@@ -41,9 +41,9 @@ export const DEFAULT_USER_PREFERENCES: UserPreferences = {
 
 export const DEFAULT_MODULE_CONFIG_BY_SLUG: ModuleConfigBySlug = {
   finance: {
-    version: 1,
+    version: 2,
     fieldGuide:
-      "Moneda, calendario financiero, panel y alertas del módulo Finanzas.",
+      "Moneda, calendario financiero, panel y alertas de la app Finanzas.",
     baseCurrency: "DOP",
     trackedCurrencies: ["USD", "EUR"],
     weekStartsOn: 1,
@@ -70,8 +70,20 @@ export const DEFAULT_MODULE_CONFIG_BY_SLUG: ModuleConfigBySlug = {
       aiSuggestions: true,
       transactionDetected: true,
       monthlyReport: false,
+      weeklySummary: true,
       cardDueDate: true,
       unusualExpense: true,
+      recurringAlerts: true,
+      subscriptionReminders: true,
+      priceIncreaseAlerts: true,
+      balanceIntegrity: true,
+    },
+    subscriptions: {
+      reminderDaysBefore: 5,
+      groupBy: "none",
+    },
+    reports: {
+      weeklySummaryDay: 1,
     },
     emailSync: {
       enabled: false,
@@ -100,7 +112,7 @@ export const DEFAULT_MODULE_CONFIG_BY_SLUG: ModuleConfigBySlug = {
   },
   projects: {
     version: 1,
-    fieldGuide: "Vista y orden por defecto del módulo Proyectos.",
+    fieldGuide: "Vista y orden por defecto de la app Proyectos.",
     defaultView: "board",
     sortBy: "updatedAt",
     sortDirection: "desc",
@@ -108,17 +120,6 @@ export const DEFAULT_MODULE_CONFIG_BY_SLUG: ModuleConfigBySlug = {
     notifications: {
       dueDateReminders: true,
       statusChanges: false,
-    },
-  },
-  subscriptions: {
-    version: 1,
-    fieldGuide: "Moneda, agrupación y avisos de renovación.",
-    defaultCurrency: "DOP",
-    renewalReminderDays: [7, 1],
-    groupBy: "category",
-    notifications: {
-      renewalReminders: true,
-      priceIncreaseAlerts: true,
     },
   },
   health: {

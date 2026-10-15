@@ -3,6 +3,7 @@ import {
   formatStackItemBalance,
   institutionInitials,
 } from "./institution-stack.ts"
+import { decimalAmount, decimalPercent, sumDecimals } from "./decimal.ts"
 import {
   formatFinanceMoney,
   parseFinanceMoney,
@@ -23,6 +24,9 @@ export const CASH_RING_KEY = "cash-ring"
 export const CASH_RING_NAME = "Efectivo"
 
 const CASH_RING_COLOR = "#334155"
+
+/** Shown when a ring has no comparable amount, the same label institutions use. */
+const UNMEASURED_BALANCE_LABEL = "Balance incompleto"
 
 export type RingStackSlice = {
   key: string
@@ -78,11 +82,15 @@ function institutionCandidate(
   index: number,
   display: FinanceMoneyDisplay
 ): RingCandidate {
-  const measured = item.status === "COMPLETE"
-  const assetsValue = measured ? (parseFinanceMoney(item.totalAssets) ?? 0) : 0
-  const debtValue = measured
-    ? (parseFinanceMoney(item.totalLiabilities) ?? 0)
+  const cash = item.cash
+  const measured = cash
+    ? cash.status === "COMPLETE" && cash.totalBase !== null
+    : item.status === "COMPLETE"
+  const assetsValue = measured
+    ? (parseFinanceMoney(cash ? cash.totalBase : item.totalAssets) ?? 0)
     : 0
+  const debtValue =
+    !cash && measured ? (parseFinanceMoney(item.totalLiabilities) ?? 0) : 0
   return {
     key: `institution-${item.id}`,
     kind: "institution",
@@ -91,12 +99,43 @@ function institutionCandidate(
     logoUrl: item.institution.logoUrl?.trim() || null,
     color:
       item.institution.color?.trim() ||
-      FALLBACK_COLORS[index % FALLBACK_COLORS.length]!,
-    signedValue: measured ? (parseFinanceMoney(item.netWorth) ?? 0) : 0,
+      (cash
+        ? CASH_RING_COLOR
+        : FALLBACK_COLORS[index % FALLBACK_COLORS.length]!),
+    signedValue: measured
+      ? (parseFinanceMoney(cash ? cash.totalBase : item.netWorth) ?? 0)
+      : 0,
     amountLabel: formatStackItemBalance(item, display),
     assetsValue,
     debtValue,
     debtLabel: debtLabelFor(debtValue, display),
+  }
+}
+
+/** The ring is in the base currency; mixed cash cannot be added in the client (ADR-002). */
+function cashSharesBaseCurrency(
+  items: readonly Extract<InstitutionStackItem, { kind: "cash" }>[],
+  display: FinanceMoneyDisplay
+): boolean {
+  const baseCurrency = display.currency.trim().toUpperCase()
+  return items.every(
+    (item) => item.account.currency.trim().toUpperCase() === baseCurrency
+  )
+}
+
+function unmeasuredCashCandidate(): RingCandidate {
+  return {
+    key: CASH_RING_KEY,
+    kind: "cash",
+    name: CASH_RING_NAME,
+    monogram: institutionInitials(CASH_RING_NAME),
+    logoUrl: null,
+    color: CASH_RING_COLOR,
+    signedValue: 0,
+    amountLabel: UNMEASURED_BALANCE_LABEL,
+    assetsValue: 0,
+    debtValue: 0,
+    debtLabel: null,
   }
 }
 
@@ -111,9 +150,11 @@ function cashCandidate(
   if (cashItems.length === 0) {
     return null
   }
-  const netValue = cashItems.reduce(
-    (sum, item) => sum + (parseFinanceMoney(item.balance) ?? 0),
-    0
+  if (!cashSharesBaseCurrency(cashItems, display)) {
+    return unmeasuredCashCandidate()
+  }
+  const netValue = decimalAmount(
+    sumDecimals(cashItems.map((item) => item.balance))
   )
   // Cash in the red is money owed, so it takes the pale side of the arc.
   const assetsValue = Math.max(netValue, 0)
@@ -153,15 +194,14 @@ export function buildRingStackSlices(
     ? [...institutionCandidates, cash]
     : institutionCandidates
 
-  const totalMagnitude = candidates.reduce(
-    (sum, candidate) => sum + candidate.assetsValue + candidate.debtValue,
-    0
+  const totalMagnitude = sumDecimals(
+    candidates.map((candidate) => candidate.assetsValue + candidate.debtValue)
   )
 
   return candidates
     .map((candidate) => {
       const value = candidate.assetsValue + candidate.debtValue
-      const percent = totalMagnitude > 0 ? (value / totalMagnitude) * 100 : 0
+      const percent = decimalPercent(value, totalMagnitude)
       return {
         ...candidate,
         value,

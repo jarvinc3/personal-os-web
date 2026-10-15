@@ -25,8 +25,7 @@ const GENERAL_SUGGESTIONS: ChatSuggestion[] = [
   {
     id: "user-context",
     label: "Mi configuración",
-    prompt:
-      "Muéstrame mi contexto actual: preferencias, tema y módulos activos.",
+    prompt: "Muéstrame mi contexto actual: preferencias, tema y apps activas.",
   },
   {
     id: "user-profile",
@@ -64,7 +63,7 @@ const MODULE_SUGGESTIONS: Record<
     {
       id: "agenda-push",
       label: "Push en agenda",
-      prompt: "Activa las notificaciones push para el módulo de Agenda.",
+      prompt: "Activa las notificaciones push para la app Agenda.",
     },
   ],
   projects: [
@@ -84,30 +83,12 @@ const MODULE_SUGGESTIONS: Record<
     {
       id: "health-goals",
       label: "Metas de salud",
-      prompt: "Activa los recordatorios de metas en el módulo de Salud.",
+      prompt: "Activa los recordatorios de metas en la app Salud.",
     },
     {
       id: "health-weekly",
       label: "Resumen semanal",
       prompt: "Activa el resumen semanal de salud.",
-    },
-  ],
-  subscriptions: [
-    {
-      id: "subs-renewal",
-      label: "Renovaciones",
-      prompt: "Activa las alertas de renovación de suscripciones.",
-    },
-    {
-      id: "subs-price",
-      label: "Subidas de precio",
-      prompt: "Activa las alertas cuando suba el precio de una suscripción.",
-    },
-    {
-      id: "subs-email",
-      label: "Email suscripciones",
-      prompt:
-        "Activa las notificaciones por email para el módulo de Suscripciones.",
     },
   ],
   finance: [
@@ -132,6 +113,11 @@ const MODULE_SUGGESTIONS: Record<
       id: "finance-transactions",
       label: "Últimas transacciones",
       prompt: "Lista mis transacciones más recientes.",
+    },
+    {
+      id: "finance-subscription-renewals",
+      label: "Renovaciones",
+      prompt: "Activa las alertas de renovación de suscripciones.",
     },
   ],
 }

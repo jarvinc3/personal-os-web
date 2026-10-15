@@ -3,6 +3,7 @@
 import { apiDelete, apiGet, apiPost } from "@/src/config/api-client"
 import type {
   AiSessionDetail,
+  ChatContext,
   ModuleChatSlug,
   PaginatedAiSessions,
 } from "@/src/modules/ai/types/chat.types"
@@ -17,13 +18,17 @@ import {
 
 export const AI_SESSIONS_QUERY_KEY = ["ai", "sessions"] as const
 
+const AI_SESSIONS_PAGE_SIZE = 30
+
 export function useAiSessions() {
   const session = useAppStore((state) => state.session)
 
   return useInfiniteQuery({
     queryKey: AI_SESSIONS_QUERY_KEY,
     queryFn: ({ pageParam }) => {
-      const params = new URLSearchParams({ limit: "30" })
+      const params = new URLSearchParams({
+        limit: String(AI_SESSIONS_PAGE_SIZE),
+      })
       if (pageParam) {
         params.set("cursor", pageParam)
       }
@@ -52,14 +57,18 @@ export function useCreateAiSession() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (input?: { moduleSlug?: ModuleChatSlug | string }) =>
-      apiPost<AiSessionDetail>(API_ENDPOINTS.AI.SESSIONS, {
+    mutationFn: (input?: {
+      moduleSlug?: ModuleChatSlug | string
+      context?: ChatContext | null
+    }) => {
+      const moduleSlug = input?.context?.moduleSlug ?? input?.moduleSlug
+      return apiPost<AiSessionDetail>(API_ENDPOINTS.AI.SESSIONS, {
         moduleSlug:
-          input?.moduleSlug && input.moduleSlug !== "general"
-            ? input.moduleSlug
-            : undefined,
-        contextType: input?.moduleSlug ?? "general",
-      }),
+          moduleSlug && moduleSlug !== "general" ? moduleSlug : undefined,
+        contextType: moduleSlug ?? "general",
+        context: input?.context ?? undefined,
+      })
+    },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: AI_SESSIONS_QUERY_KEY })
     },

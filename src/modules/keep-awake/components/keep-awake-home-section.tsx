@@ -33,15 +33,15 @@ import {
   ChevronRight,
   Clock,
   History,
-  Infinity as InfinityIcon,
+  InfinityIcon,
   Layers,
-  Monitor,
   Timer,
   type LucideIcon,
 } from "lucide-react"
 import { LinkPendingOverlay } from "@/src/shared/components/ui/navigation-pending"
 import Link from "next/link"
 import { useSyncExternalStore } from "react"
+import { MODULE_REGISTRY } from "@/src/shared/constants/module-registry"
 
 const STAT_ICONS: Record<KeepAwakeHomeStat["key"], LucideIcon> = {
   today: Clock,
@@ -86,12 +86,13 @@ export function KeepAwakeHomeSection() {
 
   return (
     <SummarySection
-      title="Keep Awake"
-      icon={Monitor}
+      title={MODULE_REGISTRY.keepAwake.label}
+      icon={MODULE_REGISTRY.keepAwake.icon}
+      color={MODULE_REGISTRY.keepAwake.accent}
       right={
         <>
           <KeepAwakeStatusBadge status={summary.status} />
-          <Button asChild variant="secondary" className="h-6">
+          <Button asChild variant="ghost" className="h-6">
             <Link href={APP_ROUTES.app.keepAwake} className="relative">
               <span className="sr-only">Abrir Keep Awake</span>
               <ChevronRight className="size-4" />
@@ -171,7 +172,7 @@ function KeepAwakeStatPill({
     <div
       aria-label={`${stat.label}: ${stat.value}`}
       className={cn(
-        "relative flex items-center rounded-2xl border border-border bg-card px-3 py-2",
+        "relative flex items-center rounded-2xl bg-card/50 px-3 py-2",
         start ? "justify-start" : "justify-end text-right"
       )}
     >

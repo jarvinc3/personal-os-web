@@ -85,8 +85,7 @@ export function FinanceGate({ children }: { children: ReactNode }) {
             </EmptyMedia>
             <EmptyTitle>Finanzas está desactivado</EmptyTitle>
             <EmptyDescription>
-              Activa el módulo en Ajustes para ver cuentas, movimientos y
-              resumen.
+              Activa la app en Ajustes para ver cuentas, movimientos y resumen.
             </EmptyDescription>
           </EmptyHeader>
           <EmptyContent>

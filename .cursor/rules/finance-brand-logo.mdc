@@ -1,0 +1,17 @@
+---
+description: A finance entity identified by its brand shows BrandLogo, not a generic icon or hand-rolled initials.
+globs: "**/*.{ts,tsx}"
+alwaysApply: true
+---
+
+# Marca de una entidad
+
+Cuenta, tarjeta, institución, comercio o movimiento se identifica con `BrandLogo` (`src/modules/finance/shared/components/brand-logo.tsx`): `name` y `logoUrl`. Si no hay imagen, o falla, el propio componente muestra las iniciales. No pintes `brandInitials` a mano ni sustituyas la marca por un icono genérico (`StoreIcon`, `LandmarkIcon`, `Building2Icon`).
+
+La red de la tarjeta usa `CardNetworkMark`, que ya delega en `BrandLogo`.
+
+Una categoría sigue con su icono y su color. No es una marca.
+
+```tsx
+<BrandLogo name={merchant.name} logoUrl={merchant.logoUrl} size={36} />
+```

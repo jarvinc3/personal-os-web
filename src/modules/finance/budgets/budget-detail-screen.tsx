@@ -48,9 +48,12 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
-import { SummaryItem } from "@/src/shared/components/ui/summary"
+import { SummaryItem, SummarySection } from "@/src/shared/components/ui/summary"
+import { InfiniteListSentinel } from "@/src/shared/components/ui/infinite-list-sentinel"
+import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
+import { ChatLauncherButton, useRegisterChatContext } from "@/src/modules/ai"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { ACCENT_FALLBACK_COLOR } from "@/src/shared/lib/accent-gradient"
 import { appToast } from "@/src/shared/lib/app-toast"
@@ -152,7 +155,7 @@ function BudgetDetailScreenBody({ budgetId }: FinanceBudgetDetailProps) {
 
   const movementsQuery = useBudgetTransactions(isEnabled, budgetId)
 
-  const movements = movementsQuery.data?.items ?? []
+  const movements = infiniteListItems(movementsQuery.data)
   const accent = budget?.category?.color ?? ACCENT_FALLBACK_COLOR
   const pct = budget
     ? budgetPctUsed(budget.amountSpent, budget.amountLimit)
@@ -171,6 +174,17 @@ function BudgetDetailScreenBody({ budgetId }: FinanceBudgetDetailProps) {
   const budgetTitleText = budget ? budgetTitle(budget) : "Presupuesto"
   const tone = budget ? budgetTone(pct, budget.alertThresholdPct ?? 80) : "info"
   const badge = budgetBadge(tone)
+
+  useRegisterChatContext(
+    budget
+      ? {
+          moduleSlug: "finance",
+          screen: "budget-detail",
+          entityRef: { type: "budget", id: budget.id },
+          entityLabel: budgetTitleText,
+        }
+      : null
+  )
   const deleteBudget = useDeleteBudget()
   const restoreBudget = useRestoreBudget()
   const [optionsOpen, setOptionsOpen] = useState(false)
@@ -199,15 +213,18 @@ function BudgetDetailScreenBody({ budgetId }: FinanceBudgetDetailProps) {
 
   const headerActions = useMemo(
     () => (
-      <Button
-        variant="outline"
-        size="icon"
-        className="size-9 rounded-full"
-        aria-label="Opciones del presupuesto"
-        onClick={() => setOptionsOpen(true)}
-      >
-        <MoreVerticalIcon className="size-4.5" />
-      </Button>
+      <>
+        <ChatLauncherButton />
+        <Button
+          variant="outline"
+          size="icon"
+          className="size-9 rounded-full"
+          aria-label="Opciones del presupuesto"
+          onClick={() => setOptionsOpen(true)}
+        >
+          <MoreVerticalIcon className="size-4.5" />
+        </Button>
+      </>
     ),
     [setOptionsOpen]
   )
@@ -288,11 +305,7 @@ function BudgetDetailScreenBody({ budgetId }: FinanceBudgetDetailProps) {
         }
       />
 
-      <div className="mx-4 flex flex-col gap-3 rounded-3xl bg-background">
-        <h2 className="text-sm font-medium text-muted-foreground">
-          Movimientos del periodo
-        </h2>
-
+      <div className="mx-4 flex flex-col gap-3">
         {movementsQuery.isError ? (
           <FinanceErrorState
             message={financeLoadErrorMessage(movementsQuery.error)}
@@ -301,53 +314,51 @@ function BudgetDetailScreenBody({ budgetId }: FinanceBudgetDetailProps) {
           />
         ) : null}
 
-        <AsyncRegion
-          pending={movementsQuery.isPending}
-          pendingFallback={<FinanceListSkeleton rows={4} />}
-          empty={!movementsQuery.isError && movements.length === 0}
-          emptyFallback={
-            <Empty className="py-10">
-              <EmptyHeader>
-                <EmptyMedia variant="icon">
-                  <ChartPieIcon />
-                </EmptyMedia>
-                <EmptyTitle>Sin gastos en este periodo</EmptyTitle>
-                <EmptyDescription>
-                  Un gasto aparece aquí cuando tiene esta categoría y cae dentro
-                  de las fechas del presupuesto.
-                </EmptyDescription>
-              </EmptyHeader>
-            </Empty>
-          }
-        >
-          {movements.length > 0 ? (
-            <div className="rounded-2xl border border-border bg-card">
-              {movements.map((movement, index) => (
-                <SummaryItem
-                  key={movement.id}
-                  title={
-                    movement.merchant ?? movement.description ?? "Movimiento"
-                  }
-                  description={joinPlanningCaption(
-                    formatCalendarDate(movement.transactionDate),
-                    movementStatusCaption(movement.status)
-                  )}
-                  value={formatFinanceMoney(movement.amount, {
-                    ...display,
-                    currency: movement.currency,
-                  })}
-                  isLast={index === movements.length - 1}
-                />
-              ))}
-            </div>
-          ) : null}
-        </AsyncRegion>
+        <SummarySection title="Movimientos del periodo" icon={ChartPieIcon}>
+          <AsyncRegion
+            pending={movementsQuery.isPending}
+            pendingFallback={<FinanceListSkeleton rows={4} />}
+            empty={!movementsQuery.isError && movements.length === 0}
+            emptyFallback={
+              <Empty className="py-10">
+                <EmptyHeader>
+                  <EmptyMedia variant="icon">
+                    <ChartPieIcon />
+                  </EmptyMedia>
+                  <EmptyTitle>Sin gastos en este periodo</EmptyTitle>
+                  <EmptyDescription>
+                    Un gasto aparece aquí cuando tiene esta categoría y cae
+                    dentro de las fechas del presupuesto.
+                  </EmptyDescription>
+                </EmptyHeader>
+              </Empty>
+            }
+          >
+            {movements.map((movement, index) => (
+              <SummaryItem
+                key={movement.id}
+                title={
+                  movement.merchant ?? movement.description ?? "Movimiento"
+                }
+                description={joinPlanningCaption(
+                  formatCalendarDate(movement.transactionDate),
+                  movementStatusCaption(movement.status)
+                )}
+                value={formatFinanceMoney(movement.amount, {
+                  ...display,
+                  currency: movement.currency,
+                })}
+                isLast={index === movements.length - 1}
+              />
+            ))}
+          </AsyncRegion>
 
-        {movementsQuery.data?.hasMore ? (
-          <p className="px-1 text-xs text-muted-foreground">
-            Mostrando los primeros {movements.length} movimientos del periodo.
-          </p>
-        ) : null}
+          <InfiniteListSentinel
+            hasNextPage={movementsQuery.hasNextPage}
+            isFetchingNextPage={movementsQuery.isFetchingNextPage}
+            onLoadMore={() => void movementsQuery.fetchNextPage()}
+          />
+        </SummarySection>
       </div>
 
       <RecordOptionsSheet

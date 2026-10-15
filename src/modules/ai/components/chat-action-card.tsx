@@ -10,16 +10,11 @@ import {
 } from "@/src/modules/ai/lib/action-status-label"
 import type { AiActionSummary } from "@/src/modules/ai/types/chat.types"
 import { Button } from "@/src/shared/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/src/shared/components/ui/card"
 import { Spinner } from "@/src/shared/components/ui/spinner"
+import { SummarySection } from "@/src/shared/components/ui/summary"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { cn } from "@/src/shared/lib/utils"
-import { CheckIcon, XIcon } from "lucide-react"
+import { CheckIcon, SparklesIcon, XIcon } from "lucide-react"
 
 type ChatActionCardProps = {
   action: AiActionSummary
@@ -96,40 +91,40 @@ export function ChatActionCard({
   }
 
   return (
-    <Card className="my-2 w-full max-w-sm border-border">
-      <CardHeader className="flex flex-row items-center justify-between gap-2 pb-2">
-        <CardTitle className="flex-1 text-sm">
-          {action.label ?? action.actionType}
-        </CardTitle>
-        <ActionStatusBadge status={action.status} />
-      </CardHeader>
-      {isPending ? (
-        <CardContent className="flex flex-row gap-2 pt-0">
-          <Button
-            size="sm"
-            className="flex-1"
-            variant="outline"
-            onClick={() => void handleCancel()}
-            disabled={cancelMutation.isPending}
-          >
-            <XIcon />
-            Cancelar
-          </Button>
-          <Button
-            size="sm"
-            className="flex-1"
-            onClick={() => void handleExecute()}
-            disabled={executeMutation.isPending}
-          >
-            {executeMutation.isPending ? <Spinner /> : <CheckIcon />}
-            Confirmar
-          </Button>
-        </CardContent>
-      ) : confirmationMessage ? (
-        <CardContent className="pt-0">
-          <p className="text-xs text-muted-foreground">{confirmationMessage}</p>
-        </CardContent>
-      ) : null}
-    </Card>
+    <div className="my-2 w-full max-w-sm">
+      <SummarySection
+        title={action.label ?? action.actionType}
+        icon={SparklesIcon}
+        right={<ActionStatusBadge status={action.status} />}
+      >
+        {isPending ? (
+          <div className="flex flex-row gap-2 px-1">
+            <Button
+              size="sm"
+              className="flex-1"
+              variant="outline"
+              onClick={() => void handleCancel()}
+              disabled={cancelMutation.isPending}
+            >
+              <XIcon />
+              Cancelar
+            </Button>
+            <Button
+              size="sm"
+              className="flex-1"
+              onClick={() => void handleExecute()}
+              disabled={executeMutation.isPending}
+            >
+              {executeMutation.isPending ? <Spinner /> : <CheckIcon />}
+              Confirmar
+            </Button>
+          </div>
+        ) : confirmationMessage ? (
+          <p className="px-1 text-xs text-muted-foreground">
+            {confirmationMessage}
+          </p>
+        ) : null}
+      </SummarySection>
+    </div>
   )
 }

@@ -1,7 +1,11 @@
 "use client"
 
 import { useAuthGuard } from "@/src/modules/auth"
-import { FinanceHomeMonthSummary } from "@/src/modules/finance"
+import {
+  FinanceHomeMonthSummary,
+  FinanceHomeWeeklySummary,
+  QuickEntryBar,
+} from "@/src/modules/finance"
 import { KeepAwakeHomeSection } from "@/src/modules/keep-awake"
 import { useProfile } from "@/src/modules/settings"
 import { Button } from "@/src/shared/components/ui/button"
@@ -61,6 +65,10 @@ function HomeScreenBody() {
       </SummarySection>
 
       <FinanceHomeMonthSummary />
+
+      <FinanceHomeWeeklySummary />
+
+      <QuickEntryBar />
 
       <KeepAwakeHomeSection />
     </div>

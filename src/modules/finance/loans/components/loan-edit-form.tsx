@@ -3,6 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
   CalendarIcon,
+  CircleAlert,
   HashIcon,
   LandmarkIcon,
   NotebookPenIcon,
@@ -16,7 +17,6 @@ import { Controller, useForm, useWatch } from "react-hook-form"
 import { FinanceDateField } from "@/src/modules/finance/shared/components/forms/date-field"
 import { FinanceFormScreen } from "@/src/modules/finance/shared/components/forms/form-screen"
 import {
-  FinanceDetailsDisclosure,
   FinanceHelpText,
   FinanceSegmentedControl,
 } from "@/src/modules/finance/shared/components/forms/form-blocks"
@@ -343,7 +343,12 @@ export function LoanEditForm({
           />
         </SummarySection>
 
-        <FinanceDetailsDisclosure defaultOpen>
+        <SummarySection
+          title="Detalles opcionales"
+          icon={CircleAlert}
+          collapsible
+          defaultOpen
+        >
           <Controller
             control={control}
             name="interestRatePercent"
@@ -376,7 +381,7 @@ export function LoanEditForm({
               />
             )}
           />
-        </FinanceDetailsDisclosure>
+        </SummarySection>
       </FinanceFormScreen>
 
       <FinanceCurrencyPickerSheet
