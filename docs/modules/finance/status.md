@@ -1,7 +1,6 @@
 # Finance — estado
 
-Fecha: 2026-10-14 (web `v0.31.0` / back `v0.29.0`)
-
+Fecha: 2026-10-21 (web `v0.33.0` / back `v0.30.0`)
 
 | Ítem                                                                                                                                                                   | Estado        | Evidencia                                                                                                                                                                                                                                                                                                          |
 | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -30,6 +29,6 @@ Fecha: 2026-10-14 (web `v0.31.0` / back `v0.29.0`)
 | Prefill con el agente de IA                                                                                                                                            | `implemented` | préstamo por enlace `/finance/loans/new?...`; resto vía tools con confirmación                                                                                                                                                                                                                                     |
 | Conciliación con ajustes: cerrar cuenta o tarjeta contra el saldo real                                                                                                 | `implemented` | sheet «Conciliar» y sección «Conciliaciones» en el detalle; indicador del mes en Productos; tarjeta «Cargos bancarios» en Productos, debajo de ese indicador; `reconciliation/`; pendiente 09 (web v0.29.0–v0.29.1 / back v0.27.0–v0.27.2)                                                                         |
 | Integridad interna de saldos (invariante I1)                                                                                                                           | `implemented` | banner en el detalle de cuenta o tarjeta de crédito, lista de desviaciones en Productos y «Verificar ahora» en `/settings/finance`; `GET /finance/integrity/check`, `POST /finance/integrity/recalculate`, job nocturno y notificación `balanceIntegrity`; `integrity/`; pendiente 11 (web v0.31.0 / back v0.29.0) |
-
+| Suscripciones v3: hero suelto, 4 atajos, sheets y calendario con rutas propias                                                                                         | `implemented` | `subscriptions/subscriptions-hero.tsx`, `*-sheet.tsx`, `/finance/subscriptions/calendar`, detalle con tabs Resumen/Pagos/Precio y cards con anillo del ciclo; ventana de aviso global (`reminderWindowDays`); pendiente 14 (web v0.33.0 / back v0.30.0)                                                            |
 
 Detalle del dominio actual en [dominio.md](./dominio.md); specs de lo pendiente en [pendientes/](./pendientes/README.md).
