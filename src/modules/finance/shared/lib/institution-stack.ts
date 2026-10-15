@@ -1,9 +1,11 @@
 import { formatFinanceMoney, type FinanceMoneyDisplay } from "./money.ts"
+import { isCashInstitution } from "./cash.ts"
 import type {
   FinanceAccount,
   FinanceBalanceSheetIssue,
   FinanceBalanceSheetStatus,
   FinanceCard,
+  FinanceCashSummary,
   FinanceInstitution,
   FinanceLoan,
 } from "@/src/modules/finance/shared/types/entities"
@@ -28,6 +30,8 @@ export type InstitutionStackItem =
       accounts: FinanceAccount[]
       cards: FinanceCard[]
       loans: FinanceLoan[]
+      /** Cash summary, only set for the system Efectivo institution. */
+      cash: FinanceCashSummary | null
     }
   | {
       kind: "cash"
@@ -70,6 +74,12 @@ export function formatStackItemBalance(
       currency: item.account.currency,
     })
   }
+  if (item.cash) {
+    if (item.cash.status !== "COMPLETE" || item.cash.totalBase === null) {
+      return "Balance incompleto"
+    }
+    return formatFinanceMoney(item.cash.totalBase, display)
+  }
   if (item.status !== "COMPLETE" || item.netWorth === null) {
     return "Balance incompleto"
   }
@@ -82,6 +92,7 @@ export function buildInstitutionStackItems(input: {
   cards: FinanceCard[]
   loans: FinanceLoan[]
   positions?: InstitutionBalancePosition[]
+  cash?: FinanceCashSummary
 }): InstitutionStackItem[] {
   const activeInstitutions = input.institutions.filter((item) => item.isActive)
   const activeAccounts = input.accounts.filter((item) => item.isActive)
@@ -123,6 +134,7 @@ export function buildInstitutionStackItems(input: {
         totalAssets: position?.totalAssets ?? "0",
         totalLiabilities: position?.totalLiabilities ?? null,
         issues: position?.issues ?? [],
+        cash: isCashInstitution(institution) ? (input.cash ?? null) : null,
       }
     }
   )

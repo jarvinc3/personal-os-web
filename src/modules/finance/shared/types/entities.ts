@@ -152,11 +152,9 @@ export type FinanceAnalyticsSummary = {
 
 export type FinanceBalanceSheetStatus = "COMPLETE" | "INCOMPLETE"
 
-export type FinanceBalanceSheetIssue = {
-  code: "MISSING_CREDIT_LIMIT"
-  cardId: string
-  currency: string
-}
+export type FinanceBalanceSheetIssue =
+  | { code: "MISSING_CREDIT_LIMIT"; cardId: string; currency: string }
+  | { code: "MISSING_RATE"; currency: string }
 
 export type FinanceBalanceSheetSlice = {
   status: FinanceBalanceSheetStatus
@@ -171,12 +169,35 @@ export type FinanceBalanceSheetSlice = {
   issues: FinanceBalanceSheetIssue[]
 }
 
+export type FinanceCashAccountLine = {
+  id: string
+  name: string
+  balance: string
+}
+
+export type FinanceCashCurrencyBreakdown = {
+  currency: string
+  total: string
+  totalBase: string | null
+  accounts: FinanceCashAccountLine[]
+}
+
+/** Cash converted to the base currency, with a per-currency breakdown. */
+export type FinanceCashSummary = {
+  totalBase: string | null
+  baseCurrency: string
+  rateDate: string
+  status: FinanceBalanceSheetStatus
+  byCurrency: FinanceCashCurrencyBreakdown[]
+}
+
 export type FinanceBalanceSheet = {
   asOf: string
   rateDate: string
   baseCurrency: string
   global: FinanceBalanceSheetSlice
   institutions: Array<FinanceBalanceSheetSlice & { institutionId: string }>
+  cash: FinanceCashSummary
 }
 
 export type FinanceSpendingPoint = {
@@ -379,6 +400,7 @@ export type FinanceInstitution = {
   logoUrl: string | null
   country: string | null
   isActive: boolean
+  isSystem?: boolean
 }
 
 export type FinanceCategory = {

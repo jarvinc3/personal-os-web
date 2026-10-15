@@ -261,3 +261,62 @@ describe("formatStackItemBalance", () => {
     )
   })
 })
+
+describe("cash institution balance", () => {
+  const cashInstitution: FinanceInstitution = {
+    id: "cash",
+    name: "Efectivo",
+    type: "cash",
+    color: null,
+    logoUrl: null,
+    country: "DO",
+    isActive: true,
+    isSystem: true,
+  }
+
+  it("uses the converted cash total for the Efectivo card", () => {
+    const items = buildInstitutionStackItems({
+      institutions: [cashInstitution],
+      accounts: [
+        account({
+          id: "c1",
+          name: "Efectivo",
+          institutionId: "cash",
+          type: "CASH",
+        }),
+      ],
+      cards: [],
+      loans: [],
+      cash: {
+        totalBase: "1600",
+        baseCurrency: "DOP",
+        rateDate: "2026-10-15",
+        status: "COMPLETE",
+        byCurrency: [],
+      },
+    })
+
+    assert.equal(formatStackItemBalance(items[0]!, display), "DOP $1,600")
+  })
+
+  it("falls back to Balance incompleto when the cash total has no rate", () => {
+    const items = buildInstitutionStackItems({
+      institutions: [cashInstitution],
+      accounts: [],
+      cards: [],
+      loans: [],
+      cash: {
+        totalBase: null,
+        baseCurrency: "DOP",
+        rateDate: "2026-10-15",
+        status: "INCOMPLETE",
+        byCurrency: [],
+      },
+    })
+
+    assert.equal(
+      formatStackItemBalance(items[0]!, display),
+      "Balance incompleto"
+    )
+  })
+})

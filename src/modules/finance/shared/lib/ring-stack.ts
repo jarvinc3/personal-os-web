@@ -82,11 +82,15 @@ function institutionCandidate(
   index: number,
   display: FinanceMoneyDisplay
 ): RingCandidate {
-  const measured = item.status === "COMPLETE"
-  const assetsValue = measured ? (parseFinanceMoney(item.totalAssets) ?? 0) : 0
-  const debtValue = measured
-    ? (parseFinanceMoney(item.totalLiabilities) ?? 0)
+  const cash = item.cash
+  const measured = cash
+    ? cash.status === "COMPLETE" && cash.totalBase !== null
+    : item.status === "COMPLETE"
+  const assetsValue = measured
+    ? (parseFinanceMoney(cash ? cash.totalBase : item.totalAssets) ?? 0)
     : 0
+  const debtValue =
+    !cash && measured ? (parseFinanceMoney(item.totalLiabilities) ?? 0) : 0
   return {
     key: `institution-${item.id}`,
     kind: "institution",
@@ -95,8 +99,12 @@ function institutionCandidate(
     logoUrl: item.institution.logoUrl?.trim() || null,
     color:
       item.institution.color?.trim() ||
-      FALLBACK_COLORS[index % FALLBACK_COLORS.length]!,
-    signedValue: measured ? (parseFinanceMoney(item.netWorth) ?? 0) : 0,
+      (cash
+        ? CASH_RING_COLOR
+        : FALLBACK_COLORS[index % FALLBACK_COLORS.length]!),
+    signedValue: measured
+      ? (parseFinanceMoney(cash ? cash.totalBase : item.netWorth) ?? 0)
+      : 0,
     amountLabel: formatStackItemBalance(item, display),
     assetsValue,
     debtValue,

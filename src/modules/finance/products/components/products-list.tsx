@@ -130,6 +130,7 @@ export function FinanceProductsList({
         cards: cardsQuery.data ?? [],
         loans: loansQuery.data ?? [],
         positions: balanceSheetQuery.data?.institutions,
+        cash: balanceSheetQuery.data?.cash,
       }),
     [
       institutionsQuery.data,
@@ -137,6 +138,7 @@ export function FinanceProductsList({
       cardsQuery.data,
       loansQuery.data,
       balanceSheetQuery.data?.institutions,
+      balanceSheetQuery.data?.cash,
     ]
   )
 
@@ -238,8 +240,8 @@ export function FinanceProductsList({
                 </EmptyMedia>
                 <EmptyTitle>Aún no hay instituciones</EmptyTitle>
                 <EmptyDescription>
-                  Agrégala antes de crear una cuenta o una tarjeta. También
-                  puedes crear una cuenta de efectivo sin institución.
+                  Agrégala antes de crear una cuenta o una tarjeta. Tu cuenta de
+                  Efectivo se crea sola.
                 </EmptyDescription>
               </EmptyHeader>
               <EmptyContent>

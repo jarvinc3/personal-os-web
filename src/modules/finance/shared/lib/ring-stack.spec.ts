@@ -320,3 +320,35 @@ describe("buildRingStackSlices", () => {
     assert.equal(slices[0]?.logoUrl, null)
   })
 })
+
+describe("cash institution ring", () => {
+  it("sizes the Efectivo ring from the converted cash total", () => {
+    const item = {
+      ...institutionItem({ id: "cash", name: "Efectivo", netWorth: null }),
+      institution: {
+        id: "cash",
+        name: "Efectivo",
+        type: "cash" as const,
+        color: null,
+        logoUrl: null,
+        country: "DO",
+        isActive: true,
+        isSystem: true,
+      },
+      cash: {
+        totalBase: "1600",
+        baseCurrency: "DOP",
+        rateDate: "2026-10-15",
+        status: "COMPLETE" as const,
+        byCurrency: [],
+      },
+    }
+
+    const slices = buildRingStackSlices([item], display)
+    const slice = slices.find((entry) => entry.key === "institution-cash")
+
+    assert.equal(slice?.assetsValue, 1600)
+    assert.equal(slice?.percent, 100)
+    assert.equal(slice?.amountLabel, "DOP $1,600")
+  })
+})
