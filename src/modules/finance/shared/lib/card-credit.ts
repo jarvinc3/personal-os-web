@@ -4,6 +4,8 @@
  * web only formats them. Keep it that way: no duplicated cycle math here.
  */
 
+import { formatCalendarDate } from "./ledger-form.ts"
+
 export type UpcomingCardCycle = {
   /** Closing date of the open cycle, `YYYY-MM-DD`. */
   cycleEnd: string
@@ -48,4 +50,21 @@ export function countdownLabel(days: number | null): string | null {
     return "Vence mañana"
   }
   return `Vence en ${days} días`
+}
+
+/**
+ * One line with the next closing and the payment countdown; null when the card
+ * has no projected cycle.
+ */
+export function nextCycleNote(
+  card: { nextStatementDate: string | null; nextPaymentDueDate: string | null },
+  now: Date = new Date()
+): string | null {
+  const parts = [
+    card.nextStatementDate
+      ? `Próximo corte ${formatCalendarDate(card.nextStatementDate)}`
+      : null,
+    countdownLabel(daysUntilIsoDate(card.nextPaymentDueDate, now)),
+  ].filter((part): part is string => part !== null)
+  return parts.length > 0 ? parts.join(" · ") : null
 }

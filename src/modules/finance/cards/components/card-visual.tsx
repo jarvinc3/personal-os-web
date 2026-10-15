@@ -6,11 +6,7 @@ import {
 } from "@/src/modules/finance/shared/components/brand-logo"
 import { FINANCE_CARD_TYPE_LABEL } from "@/src/modules/finance/shared/constants/catalog"
 import type { FinanceCardDisplayBalance } from "@/src/modules/finance/shared/lib/card-balances"
-import {
-  countdownLabel,
-  daysUntilIsoDate,
-} from "@/src/modules/finance/shared/lib/card-credit"
-import { formatCalendarDate } from "@/src/modules/finance/shared/lib/ledger-form"
+import { nextCycleNote } from "@/src/modules/finance/shared/lib/card-credit"
 import {
   formatFinanceMoney,
   parseFinanceMoney,
@@ -27,6 +23,7 @@ type CardVisualProps = {
 
 export function CardVisual({ card, balances, display }: CardVisualProps) {
   const isCredit = card.type === "CREDIT"
+  const cycleNote = isCredit ? nextCycleNote(card) : null
 
   return (
     <div className="flex flex-col gap-3">
@@ -139,14 +136,8 @@ export function CardVisual({ card, balances, display }: CardVisualProps) {
           })
         : null}
 
-      {isCredit && (card.nextStatementDate || card.nextPaymentDueDate) ? (
-        <p className="px-1 text-xs text-white/70">
-          {card.nextStatementDate
-            ? `Próximo corte ${formatCalendarDate(card.nextStatementDate)}`
-            : null}
-          {card.nextStatementDate && card.nextPaymentDueDate ? " · " : null}
-          {countdownLabel(daysUntilIsoDate(card.nextPaymentDueDate)) ?? ""}
-        </p>
+      {cycleNote ? (
+        <p className="px-1 text-xs text-white/70">{cycleNote}</p>
       ) : null}
     </div>
   )
