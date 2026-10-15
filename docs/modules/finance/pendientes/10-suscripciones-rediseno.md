@@ -92,3 +92,7 @@ Estados `Empty`, carga y error reintentable en cada sección. Pantallas sin susc
 ## Versión esperada
 
 MINOR en ambos repos: web v0.30.0 / back v0.28.0. Las correcciones de la revisión salen como PATCH.
+
+## Mockups
+
+Referencia visual v3: [mockups/suscripciones-v3](../mockups/suscripciones-v3/README.md).
