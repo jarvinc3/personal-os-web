@@ -2,6 +2,18 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.37.0] - 2026-10-15
+
+### Agregado
+
+- Si el último sync de un banco falla, Sincronización muestra una alerta con el error del back, además del historial de «Últimos syncs».
+
+### Cambiado
+
+- Saneamiento del registro de revisión (pendiente 17): todos los `<Link>` que abren otra vista muestran el pending con `LinkPendingOverlay`; las cards y filas conservan `href`.
+- `NEXT_PUBLIC_APP_URL` queda documentada en `.env.example`.
+- Los hallazgos de documentación vieja de React Native, Expo y Metro se cierran; los que aún no tienen código pasan a [docs/roadmap.md](./docs/roadmap.md).
+
 ## [0.36.6] - 2026-10-15
 
 ### Cambiado
