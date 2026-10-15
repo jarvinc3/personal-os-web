@@ -44,7 +44,7 @@ function ModuleSheetEnableRow({
   return (
     <div className="flex flex-row items-center justify-between rounded-2xl border border-border/60 bg-card px-4 py-3">
       <label htmlFor={id} className="min-w-0 flex-1 cursor-pointer pr-3">
-        <p className="text-base font-medium text-foreground">Módulo activo</p>
+        <p className="text-base font-medium text-foreground">App activa</p>
         {state === "unconfigured" ? (
           <p className="text-xs text-muted-foreground">
             Se aplicará al guardar la configuración por primera vez.
@@ -104,7 +104,7 @@ function ModuleSettingsRows({ onOpenModule }: ModuleSettingsRowsProps) {
 
   return (
     <SettingsSection
-      title="Módulos"
+      title="Apps"
       bare
       headerTrailing={
         <div className="flex items-center">
@@ -112,7 +112,7 @@ function ModuleSettingsRows({ onOpenModule }: ModuleSettingsRowsProps) {
             type="button"
             variant="ghost"
             size="icon-xs"
-            aria-label="Módulos anteriores"
+            aria-label="Apps anteriores"
             disabled={!canScrollLeft}
             onClick={() => scrollByCard(-1)}
           >
@@ -122,7 +122,7 @@ function ModuleSettingsRows({ onOpenModule }: ModuleSettingsRowsProps) {
             type="button"
             variant="ghost"
             size="icon-xs"
-            aria-label="Módulos siguientes"
+            aria-label="Apps siguientes"
             disabled={!canScrollRight}
             onClick={() => scrollByCard(1)}
           >
@@ -176,7 +176,7 @@ function ModuleSettingsCard({ slug, onOpen }: ModuleSettingsCardProps) {
     try {
       await setModuleEnabled(checked)
       appToast.success({
-        text1: checked ? "Módulo activado" : "Módulo desactivado",
+        text1: checked ? "App activada" : "App desactivada",
         text2: `${moduleDef.label} actualizado.`,
       })
     } catch {

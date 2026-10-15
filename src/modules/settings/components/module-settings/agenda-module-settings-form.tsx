@@ -1,7 +1,5 @@
 "use client"
 
-import { Button } from "@/src/shared/components/ui/button"
-import { Spinner } from "@/src/shared/components/ui/spinner"
 import { ModuleSheetEnableRow } from "@/src/modules/settings/components/profile-ui"
 import { useModuleSheetEnable } from "@/src/modules/settings/hooks/use-module-sheet-enable"
 import { useProfileSheetFormSync } from "@/src/modules/settings/hooks/use-profile-sheet"
@@ -11,6 +9,7 @@ import {
   OptionRow,
   SwitchFieldRow,
 } from "@/src/shared/components/layout/form-blocks"
+import { FormScreen } from "@/src/shared/components/forms/form-screen"
 import {
   RadioGroup,
   RadioGroupItem,
@@ -26,6 +25,7 @@ import {
   CalendarCheck,
   CalendarCog,
   CalendarDays,
+  SaveIcon,
 } from "lucide-react"
 import { useEffect, useMemo } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
@@ -118,12 +118,17 @@ export function AgendaModuleSettingsForm({ onDone }: { onDone: () => void }) {
   })
 
   return (
-    <form
-      className="flex flex-col gap-6"
+    <FormScreen
       onSubmit={(event) => {
         event.preventDefault()
         onSubmit()
       }}
+      submitLabel="Guardar"
+      submitIcon={SaveIcon}
+      isSubmitting={updateMutation.isPending}
+      submitDisabled={
+        !(isDirty || moduleEnable.isEnabledDirty) || updateMutation.isPending
+      }
     >
       <ModuleSheetEnableRow
         state={moduleEnable.state}
@@ -225,16 +230,6 @@ export function AgendaModuleSettingsForm({ onDone }: { onDone: () => void }) {
           )}
         />
       </SummarySection>
-      <Button
-        type="submit"
-        className="h-11 w-full"
-        disabled={
-          !(isDirty || moduleEnable.isEnabledDirty) || updateMutation.isPending
-        }
-      >
-        {updateMutation.isPending ? <Spinner data-icon="inline-start" /> : null}
-        {updateMutation.isPending ? "Guardando..." : "Guardar"}
-      </Button>
-    </form>
+    </FormScreen>
   )
 }

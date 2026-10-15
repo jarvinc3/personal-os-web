@@ -2,13 +2,14 @@
 
 Revisión de `personal-os-web` contra sus reglas vigentes. Fecha: 2026-10-14. Rama: `develop`, base `v0.31.1`.
 
-Estado: `RESUELTO_PARCIAL` tras el [pendiente 15](../../modules/finance/pendientes/15-auditoria-reglas-ui.md) (2026-10-22, web `v0.35.2`). Los números de línea de cada hallazgo son del árbol del 2026-10-14 y ya no corresponden al código; la re-verificación contra `v0.35.1` y el arreglo por grupo están en el spec del pendiente. Registro: [review-register.md](../review-register.md) `REV-WEB-025`.
+Estado: `RESUELTO` tras las decisiones del 2026-10-15. Los números de línea de cada hallazgo son del árbol del 2026-10-14 y ya no corresponden al código; la re-verificación contra `v0.35.1` y el arreglo por grupo están en el spec del pendiente. Registro: [review-register.md](../review-register.md) `REV-WEB-025`.
 
 Resultado:
 
 - **44 vigentes**: corregidos (grupos `confirm-important-changes`, `list-infinite-scroll`, bloques y grupos de filas, iconos, estados de sección, navegación, placeholders y montos).
 - **7 resueltos** antes del pendiente por Suscripciones v3 y los pendientes 12 y 13: H-02, H-03, H-10, H-13, H-31, H-32 y H-43.
 - **9 por decidir**, sin tocar: H-44, H-47, H-55 a H-58, H-59 y H-60.
+- **9 decididos** el 2026-10-15: H-44 y H-47 quedan **aceptados**; H-55 a H-58 quedan **exentos** en la regla; H-59 y H-60 quedan **resueltos** (web `v0.36.5`, back `v0.34.0`).
 - **Revisión del pendiente** (2026-10-22, web `v0.35.3–v0.35.4`): H-42 solo se veía con datos de un intento previo; ahora el error con reintento se pinta antes del corte por falta de datos. Se cerraron además tres incumplimientos fuera de H-01..H-60 detectados en la revisión: el botón de `InfiniteListSentinel` sin icono, el tamaño de tanda suelto en las sesiones de IA y el vacío del historial de conversaciones como párrafo.
 
 ## Reglas revisadas
@@ -42,8 +43,8 @@ Las reglas sin commitear son más estrictas que la versión guardada: prohíben 
 | `navigation-pending.mdc`                                            | 4         |
 | `confirm-important-changes.mdc`                                     | 2         |
 | `form-field-anatomy.mdc` — `<label>` crudo                          | 4         |
-| `form-shell-page.mdc` — deuda aceptada                              | 1         |
-| `finance-brand-logo.mdc` — por decidir                              | 1         |
+| `form-shell-page.mdc` — resuelto (H-59)                             | 1         |
+| `finance-brand-logo.mdc` — resuelto (H-60)                          | 1         |
 
 ## Hallazgos
 
@@ -127,13 +128,13 @@ Error sin reintento:
 
 - **H-42** `src/modules/finance/reconciliation/components/reconciliation-month-status.tsx:64`.
 - **H-43** `src/modules/finance/transactions/components/transaction-search.tsx:107`.
-- **H-44** `src/modules/finance/integrity/components/integrity-settings-section.tsx:70` — hay un botón "Verificar ahora" al lado, así que el reintento existe (dudoso).
+- **H-44** `src/modules/finance/integrity/components/integrity-settings-section.tsx:70` — hay un botón "Verificar ahora" al lado, así que el reintento existe. **Aceptado** (2026-10-15).
 
 `Spinner` centrado donde la forma ya se conoce:
 
 - **H-45** `src/modules/ai/components/chat-session-sheet.tsx:96`.
 - **H-46** `src/modules/settings/components/sheets/wipe-balance-institution-sheet.tsx:86`.
-- **H-47** `src/modules/settings/components/module-settings/finance-currencies-view.tsx:207` — menor, es un refresco en línea.
+- **H-47** `src/modules/settings/components/module-settings/finance-currencies-view.tsx:207` — menor, es un refresco en línea. **Aceptado** (2026-10-15).
 
 ### `list-infinite-scroll.mdc`
 
@@ -162,15 +163,15 @@ La regla pide `Field` / `FieldLabel` en cualquier control con etiqueta. Estos us
 - **H-57** `src/modules/settings/components/profile-ui.tsx:46`.
 - **H-58** `src/modules/landing/contact-screen.tsx:147,164,185,208`.
 
-Son casillas, radios o carga de avatar. Según se lean como "campo de dato" son violación o no.
+Son casillas, radios o carga de avatar. **Exentos** (2026-10-15): la regla no aplica a estos controles; sin cambios de código. Ver [`.cursor/rules/form-field-anatomy.mdc`](../../.cursor/rules/form-field-anatomy.mdc).
 
-### `form-shell-page.mdc` — deuda aceptada
+### `form-shell-page.mdc` — resuelto
 
-- **H-59** `src/modules/settings/components/module-settings/{finance,agenda,health,projects}-module-settings-form.tsx` — botón al final del `form`, sin barra `sticky`. La propia regla lo marca y dice que se migra cuando se toque.
+- **H-59** `src/modules/settings/components/module-settings/{finance,agenda,health,projects}-module-settings-form.tsx` — botón al final del `form`, sin barra `sticky`. **Resuelto** (2026-10-15, web `v0.36.5`): los cuatro formularios usan `FormScreen` (`src/shared/components/forms/form-screen.tsx`) con barra fija, un solo botón `h-11` y `SaveIcon`, sin "Guardando...".
 
-### `finance-brand-logo.mdc` — por decidir
+### `finance-brand-logo.mdc` — resuelto
 
-- **H-60** `src/modules/finance/recycle-bin/components/recycle-bin-view.tsx:60,61,80,81` — institución y cuenta se pintan con `Building2Icon` y `LandmarkIcon`. El payload de papelera (`FinanceArchivedRecord`, `FinanceDeletedRecord`) no trae `logoUrl`, así que `BrandLogo` solo podría mostrar iniciales. Queda como decisión, no como error claro.
+- **H-60** `src/modules/finance/recycle-bin/components/recycle-bin-view.tsx:60,61,80,81` — institución y cuenta se pintan con `Building2Icon` y `LandmarkIcon`. **Resuelto** (2026-10-15, web `v0.36.5` / back `v0.34.0`): el payload de papelera trae `logoUrl` de la institución y la vista usa `BrandLogo`; el back resuelve la marca con `LogoService`.
 
 ## Sin hallazgos
 
@@ -183,5 +184,5 @@ Son casillas, radios o carga de avatar. Según se lean como "campo de dato" son 
 ## Fuera de alcance
 
 - Corregido en el [pendiente 15](../../modules/finance/pendientes/15-auditoria-reglas-ui.md); los números de línea quedan como referencia histórica del 2026-10-14.
-- Los hallazgos H-44, H-47, H-55 a H-58, H-59 y H-60 son dudosos o dependen de una decisión; quedan por decidir.
+- Los hallazgos H-44, H-47, H-55 a H-58, H-59 y H-60 quedaron decididos el 2026-10-15: H-44 y H-47 aceptados, H-55 a H-58 exentos, H-59 y H-60 resueltos.
 - Detectados al re-verificar, mismo patrón de `ui-row-group`, fuera de H-01..H-60: `src/modules/finance/reconciliation/components/reconciliations-section.tsx` y `src/modules/finance/cards/components/card-statements-section.tsx`.

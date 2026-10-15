@@ -50,6 +50,8 @@ import {
   type LucideIcon,
 } from "lucide-react"
 
+import { BrandLogo } from "@/src/modules/finance/shared/components/brand-logo"
+
 const ARCHIVED_TYPE_LABEL: Record<FinanceArchivedType, string> = {
   institution: "Institución",
   account: "Cuenta",
@@ -57,11 +59,24 @@ const ARCHIVED_TYPE_LABEL: Record<FinanceArchivedType, string> = {
   loan: "Préstamo",
 }
 
-const ARCHIVED_TYPE_ICON: Record<FinanceArchivedType, LucideIcon> = {
-  institution: Building2Icon,
-  account: LandmarkIcon,
+/** Institutions and accounts carry a brand; cards show their network, loans nothing. */
+type BrandedArchivedType = "institution" | "account"
+type IconArchivedType = Exclude<FinanceArchivedType, BrandedArchivedType>
+
+const BRANDED_ARCHIVED_TYPES: readonly BrandedArchivedType[] = [
+  "institution",
+  "account",
+]
+
+const ARCHIVED_TYPE_ICON: Record<IconArchivedType, LucideIcon> = {
   card: CreditCardIcon,
   loan: HandCoinsIcon,
+}
+
+function isBrandedArchivedType(
+  type: FinanceArchivedType
+): type is BrandedArchivedType {
+  return BRANDED_ARCHIVED_TYPES.includes(type as BrandedArchivedType)
 }
 
 const DELETED_TYPE_LABEL: Record<FinanceDeletedType, string> = {
@@ -139,12 +154,22 @@ export function RecycleBinView() {
   }
 
   function renderArchived(record: FinanceArchivedRecord, isLast: boolean) {
+    const branded = isBrandedArchivedType(record.type)
+    const icon =
+      record.type === "card" || record.type === "loan"
+        ? ARCHIVED_TYPE_ICON[record.type]
+        : undefined
     return (
       <SummaryItem
         key={`${record.type}-${record.id}`}
         title={record.label}
         description={ARCHIVED_TYPE_LABEL[record.type]}
-        icon={ARCHIVED_TYPE_ICON[record.type]}
+        icon={icon}
+        leading={
+          branded ? (
+            <BrandLogo name={record.label} logoUrl={record.logoUrl} size={36} />
+          ) : undefined
+        }
         isLast={isLast}
         className="px-3"
         trailing={

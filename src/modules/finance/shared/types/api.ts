@@ -152,6 +152,7 @@ export type FinanceArchivedRecord = {
   type: FinanceArchivedType
   id: string
   label: string
+  logoUrl: string | null
 }
 
 export type FinanceDeletedRecord = {

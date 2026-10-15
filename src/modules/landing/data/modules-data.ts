@@ -97,9 +97,9 @@ export const appFeatures = [
   },
   {
     icon: "🔗",
-    title: "Módulos Interconectados",
+    title: "Apps Interconectadas",
     description:
-      "Cada módulo es independiente pero comparte datos con los demás. Una suscripción genera una transacción. Una tarea aparece en tu agenda.",
+      "Cada app es independiente pero comparte datos con los demás. Una suscripción genera una transacción. Una tarea aparece en tu agenda.",
   },
   {
     icon: "📱",

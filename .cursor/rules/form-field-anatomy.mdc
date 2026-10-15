@@ -13,6 +13,8 @@ Cualquier control con etiqueta (formulario, ajustes, filtro, login, landing) se 
 - Las filas y los disparadores que se tocan miden `h-11` como mínimo.
 - Un campo de dato lleva icono líder: [form-field-icons.mdc](./form-field-icons.mdc). El placeholder sigue [input-placeholders.mdc](./input-placeholders.mdc).
 
+Exentos: una casilla o un radio con su propio `<label>` (la etiqueta va al lado del control, no arriba) y la carga de avatar. Ahí `Field`/`FieldLabel` no aportan nada. Casos: `statement-import-screen.tsx`, `wipe-balance-institution-sheet.tsx`, `profile-ui.tsx` y `contact-screen.tsx`.
+
 En un formulario que envía un registro:
 
 - Los errores aparecen al salir de cada campo: `useForm({ mode: "onTouched" })`. No todos a la vez al primer tecleo.

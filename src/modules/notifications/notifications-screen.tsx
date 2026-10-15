@@ -337,7 +337,7 @@ function NotificationsScreenBody() {
           <div
             className="flex flex-wrap gap-2"
             role="group"
-            aria-label="Filtro por módulo"
+            aria-label="Filtro por app"
           >
             {moduleOptions.map((slug) => {
               const selected = moduleFilter === slug

@@ -25,8 +25,7 @@ const GENERAL_SUGGESTIONS: ChatSuggestion[] = [
   {
     id: "user-context",
     label: "Mi configuración",
-    prompt:
-      "Muéstrame mi contexto actual: preferencias, tema y módulos activos.",
+    prompt: "Muéstrame mi contexto actual: preferencias, tema y apps activas.",
   },
   {
     id: "user-profile",
@@ -64,7 +63,7 @@ const MODULE_SUGGESTIONS: Record<
     {
       id: "agenda-push",
       label: "Push en agenda",
-      prompt: "Activa las notificaciones push para el módulo de Agenda.",
+      prompt: "Activa las notificaciones push para la app Agenda.",
     },
   ],
   projects: [
@@ -84,7 +83,7 @@ const MODULE_SUGGESTIONS: Record<
     {
       id: "health-goals",
       label: "Metas de salud",
-      prompt: "Activa los recordatorios de metas en el módulo de Salud.",
+      prompt: "Activa los recordatorios de metas en la app Salud.",
     },
     {
       id: "health-weekly",

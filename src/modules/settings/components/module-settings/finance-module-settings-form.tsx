@@ -10,8 +10,7 @@ import {
   OptionRow,
   SwitchFieldRow,
 } from "@/src/shared/components/layout/form-blocks"
-import { Button } from "@/src/shared/components/ui/button"
-import { Spinner } from "@/src/shared/components/ui/spinner"
+import { FormScreen } from "@/src/shared/components/forms/form-screen"
 import {
   RadioGroup,
   RadioGroupItem,
@@ -46,6 +45,7 @@ import {
   Receipt,
   RefreshCw,
   Repeat,
+  SaveIcon,
   ScanEyeIcon,
   Shrink,
   Sparkles,
@@ -263,18 +263,23 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
     )
     appToast.success({
       text1: "Finanzas actualizadas",
-      text2: "La configuración del módulo se guardó.",
+      text2: "La configuración de la app se guardó.",
     })
     onDone()
   })
 
   return (
-    <form
-      className="flex flex-col gap-6"
+    <FormScreen
       onSubmit={(event) => {
         event.preventDefault()
         onSubmit()
       }}
+      submitLabel="Guardar"
+      submitIcon={SaveIcon}
+      isSubmitting={updateMutation.isPending}
+      submitDisabled={
+        !(isDirty || moduleEnable.isEnabledDirty) || updateMutation.isPending
+      }
     >
       <ModuleSheetEnableRow
         state={moduleEnable.state}
@@ -830,7 +835,7 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
         />
       </SummarySection>
 
-      <SummarySection title="Alertas del módulo" icon={Tags}>
+      <SummarySection title="Alertas de la app" icon={Tags}>
         {FINANCE_NOTIFICATION_ROWS.map((row) => (
           <Controller
             key={row.key}
@@ -857,17 +862,6 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
           compactNumbers: config.display.compactNumbers,
         }}
       />
-
-      <Button
-        type="submit"
-        className="h-11 w-full"
-        disabled={
-          !(isDirty || moduleEnable.isEnabledDirty) || updateMutation.isPending
-        }
-      >
-        {updateMutation.isPending ? <Spinner data-icon="inline-start" /> : null}
-        {updateMutation.isPending ? "Guardando..." : "Guardar"}
-      </Button>
-    </form>
+    </FormScreen>
   )
 }

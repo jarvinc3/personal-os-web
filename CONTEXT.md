@@ -7,6 +7,7 @@ Los términos marcados como **en conflicto** todavía no tienen un significado a
 ## Producto
 
 **Módulo de producto**
+De cara al usuario se llama **App** ([docs/glosario.md](./docs/glosario.md)); el código mantiene "módulo".
 Una de las áreas registradas en `MODULE_REGISTRY`: `finance`, `agenda`, `projects`, `subscriptions` y `health`. Solo `finance` tiene rutas de app hoy; agenda, projects, subscriptions y health viven como hojas en Ajustes. _Avoid_: llamar "módulo" a una carpeta de `src/modules/`, a Keep Awake, Home, Landing, Settings, Notifications o AI.
 
 **Módulo activo / apagado**

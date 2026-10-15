@@ -31,9 +31,9 @@ export function PrivacyScreen() {
         <div className="prose-landing">
           <Section title="1. ¿Quiénes somos?">
             <p>
-              Personal OS es una aplicación personal multi-módulo diseñada para
-              centralizar y automatizar la gestión de las diferentes áreas de tu
-              vida cotidiana. En adelante, nos referiremos a nosotros como
+              Personal OS es una aplicación personal con varias apps diseñada
+              para centralizar y automatizar la gestión de las diferentes áreas
+              de tu vida cotidiana. En adelante, nos referiremos a nosotros como
               &quot;Personal OS&quot;, &quot;nosotros&quot; o &quot;la
               plataforma&quot;.
             </p>
@@ -79,7 +79,7 @@ export function PrivacyScreen() {
               </li>
               <li>
                 <strong className="text-foreground">Preferencias:</strong>{" "}
-                Configuraciones de módulos, moneda base, preferencias de
+                Configuraciones de apps, moneda base, preferencias de
                 notificación y tokens de dispositivos push.
               </li>
             </ul>
