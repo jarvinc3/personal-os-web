@@ -182,7 +182,7 @@ export function SummaryItem({
     className
   )
   const shellClassName = cn(
-    "flex w-full items-stretch overflow-hidden hover:rounded-2xl",
+    "flex w-full items-stretch overflow-hidden rounded-2xl",
     !isLast && "border-b border-border/60"
   )
 

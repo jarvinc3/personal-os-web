@@ -2,6 +2,12 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.32.1] - 2026-10-15
+
+### Agregado
+
+- Correccion de fechas y descripciones en el CHANGELOG.md
+
 ## [0.32.0] - 2026-10-15 - Movimientos
 
 ### Agregado
@@ -12,7 +18,8 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 - Comercios sale del menú lateral y se abre como vista secundaria desde el atajo de Productos.
 - Productos deja de mostrar el atajo a Suscripciones.
-- En Movimientos, cada movimiento es una tarjeta con el fondo de su categoría. Las patas de una misma transferencia siguen juntas. Al entrar, la lista baja al día de hoy.
+- En Movimientos, cada movimiento es una tarjeta con el fondo de su categoría. Las patas de una misma transferencia siguen juntas.
+- Al entrar al timeline de movimientos, la lista baja al día de hoy.
 - El encabezado del día pasa a «Miércoles 14 Oct.».
 - El icono de estado queda junto al monto. «¿Duplicado?» y «Revertido» van debajo, a color pleno, y una reversa también muestra su icono.
 - La búsqueda de movimientos usa esas mismas tarjetas, ocupa media pantalla, se une al campo con una línea y se cierra al tocar el fondo desenfocado.
@@ -28,7 +35,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 - Informe de auditoría de reglas de UI y convenciones en `docs/reference/auditoria-reglas-ui-convenciones.md`: 60 hallazgos con archivo y línea, y su registro `REV-WEB-025`.
 
-## [0.31.1] - 2026-10-20
+## [0.31.1] - 2026-10-14
 
 ### Corregido
 
@@ -38,7 +45,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 - Specs de integridad que cubren el cierre del diálogo tras el recálculo, además de la selección de desviaciones y el armado del body.
 
-## [0.31.0] - 2026-10-20 - Integridad de saldos
+## [0.31.0] - 2026-10-14 - Integridad de saldos
 
 ### Agregado
 
@@ -47,7 +54,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 - Hooks `useFinanceIntegrity` y `useRecalculateBalance`; ajuste de notificación «Saldos descuadrados».
 - Specs de la lógica del banner, del badge y del flujo de recálculo.
 
-## [0.30.2] - 2026-10-19
+## [0.30.2] - 2026-10-14
 
 ### Corregido
 
@@ -55,13 +62,13 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 - El calendario de próximos cobros reutiliza el agrupado por día compartido.
 - Planificación deja de mostrar el atajo a Suscripciones, que ya está en el tab bar.
 
-## [0.30.1] - 2026-10-19
+## [0.30.1] - 2026-10-14
 
 ### Cambiado
 
 - Las claves internas de agrupación del anillo de suscripciones usan constantes con nombre. Sin cambio de comportamiento.
 
-## [0.30.0] - 2026-10-19
+## [0.30.0] - 2026-10-14
 
 ### Agregado
 
@@ -73,7 +80,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 - La pestaña Recurrentes desaparece: confirmar un detectado crea la suscripción y actualiza el contador, y confirmados y descartados pasan a una bandeja aparte.
 
-## [0.29.1] - 2026-10-19
+## [0.29.1] - 2026-10-14
 
 ### Corregido
 
@@ -84,7 +91,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 - Specs del rango anual de cargos y de la magnitud de un monto.
 
-## [0.29.0] - 2026-10-19 - Conciliación
+## [0.29.0] - 2026-10-14 - Conciliación
 
 ### Agregado
 
