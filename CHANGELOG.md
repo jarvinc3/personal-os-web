@@ -2,6 +2,18 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.34.0] - 2026-10-22 - Tarjetas prácticas
+
+### Agregado
+
+- Detalle de tarjeta: barra de uso y crédito disponible del back (`availableCredit`), más el próximo corte y una cuenta regresiva a la fecha límite de pago (`card-credit.ts`).
+- Productos: el crédito disponible de la tarjeta usa el valor del back, que ya descuenta los movimientos pendientes.
+
+### Cambiado
+
+- La proyección del ciclo de la tarjeta sale del back (`nextStatementDate`/`nextPaymentDueDate`) en vez de calcularse en la web; se retira `card-statement-cycle.ts`.
+- Specs: días de corte y pago (1-31) en el formulario y cuenta regresiva del detalle.
+
 ## [0.33.3] - 2026-10-21
 
 ### Cambiado
