@@ -25,6 +25,9 @@ export const CASH_RING_NAME = "Efectivo"
 
 const CASH_RING_COLOR = "#334155"
 
+/** Shown when a ring has no comparable amount, the same label institutions use. */
+const UNMEASURED_BALANCE_LABEL = "Balance incompleto"
+
 export type RingStackSlice = {
   key: string
   kind: InstitutionStackItem["kind"]
@@ -101,6 +104,33 @@ function institutionCandidate(
   }
 }
 
+/** The ring is in the base currency; mixed cash cannot be added in the client (ADR-002). */
+function cashSharesBaseCurrency(
+  items: readonly Extract<InstitutionStackItem, { kind: "cash" }>[],
+  display: FinanceMoneyDisplay
+): boolean {
+  const baseCurrency = display.currency.trim().toUpperCase()
+  return items.every(
+    (item) => item.account.currency.trim().toUpperCase() === baseCurrency
+  )
+}
+
+function unmeasuredCashCandidate(): RingCandidate {
+  return {
+    key: CASH_RING_KEY,
+    kind: "cash",
+    name: CASH_RING_NAME,
+    monogram: institutionInitials(CASH_RING_NAME),
+    logoUrl: null,
+    color: CASH_RING_COLOR,
+    signedValue: 0,
+    amountLabel: UNMEASURED_BALANCE_LABEL,
+    assetsValue: 0,
+    debtValue: 0,
+    debtLabel: null,
+  }
+}
+
 function cashCandidate(
   items: readonly InstitutionStackItem[],
   display: FinanceMoneyDisplay
@@ -111,6 +141,9 @@ function cashCandidate(
   )
   if (cashItems.length === 0) {
     return null
+  }
+  if (!cashSharesBaseCurrency(cashItems, display)) {
+    return unmeasuredCashCandidate()
   }
   const netValue = decimalAmount(
     sumDecimals(cashItems.map((item) => item.balance))
@@ -154,9 +187,7 @@ export function buildRingStackSlices(
     : institutionCandidates
 
   const totalMagnitude = sumDecimals(
-    candidates.map(
-      (candidate) => candidate.assetsValue + candidate.debtValue
-    )
+    candidates.map((candidate) => candidate.assetsValue + candidate.debtValue)
   )
 
   return candidates
