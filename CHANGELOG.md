@@ -2,6 +2,12 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.35.1] - 2026-10-22
+
+### Corregido
+
+- Productos: el anillo de Efectivo queda sin medir ("Balance incompleto") cuando las cuentas de efectivo no comparten la moneda base, en vez de sumar monedas distintas (ADR-002).
+
 ## [0.35.0] - 2026-10-22 - Decimales exactos
 
 ### Agregado
