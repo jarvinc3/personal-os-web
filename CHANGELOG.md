@@ -2,6 +2,13 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.38.1] - 2026-10-15
+
+### Corregido
+
+- `BANK_CHARGES` reemplaza el nombre viejo de la constante del endpoint de cargos bancarios, acorde con la ruta nueva.
+- Se documenta la observabilidad con Sentry en [docs/infrastructure/observability.md](./docs/infrastructure/observability.md).
+
 ## [0.38.0] - 2026-10-15
 
 ### Agregado
