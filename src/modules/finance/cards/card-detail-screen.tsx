@@ -34,7 +34,6 @@ import {
 } from "@/src/modules/finance/shared/hooks/use-cards"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
 import { resolveCardDisplayBalances } from "@/src/modules/finance/shared/lib/card-balances"
-import { buildUpcomingCardCycle } from "@/src/modules/finance/shared/lib/card-statement-cycle"
 import {
   financeErrorMessage,
   financeLoadErrorMessage,
@@ -264,10 +263,9 @@ function CardDetailScreenBody({ cardId }: CardDetailScreenProps) {
     />
   )
 
-  const upcomingCycle = buildUpcomingCardCycle({
-    closingDay: card.statementClosingDay,
-    dueDay: card.paymentDueDay,
-  })
+  const upcomingCycle = card.nextStatementDate
+    ? { cycleEnd: card.nextStatementDate, dueDate: card.nextPaymentDueDate }
+    : null
 
   return (
     <>

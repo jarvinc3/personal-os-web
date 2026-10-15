@@ -1,6 +1,6 @@
 "use client"
 
-import type { UpcomingCardCycle } from "@/src/modules/finance/shared/lib/card-statement-cycle"
+import type { UpcomingCardCycle } from "@/src/modules/finance/shared/lib/card-credit"
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
 import { StatementImportButton } from "@/src/modules/finance/shared/components/statement-import-button"
 import { InfiniteListSentinel } from "@/src/shared/components/ui/infinite-list-sentinel"

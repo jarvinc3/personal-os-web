@@ -9,6 +9,7 @@ export type FinanceCardDisplayBalance = Pick<
   "id" | "currency" | "balance"
 > & {
   creditLimit?: string | null
+  availableCredit?: string | null
 }
 
 export function resolveCardDisplayBalances(

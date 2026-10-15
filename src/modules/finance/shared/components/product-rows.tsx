@@ -195,7 +195,7 @@ export function CardProductRow({
         ) : (
           balances.map((balance) => (
             <p key={balance.id} className="text-xl font-bold tabular-nums">
-              {formatFinanceMoney(balance.balance, {
+              {formatFinanceMoney(balance.availableCredit ?? balance.balance, {
                 ...display,
                 currency: balance.currency,
               })}

@@ -57,9 +57,19 @@ function card(
     lastFour: "4321",
     statementClosingDay: null,
     paymentDueDay: null,
+    nextStatementDate: null,
+    nextPaymentDueDate: null,
     color: null,
     isActive: true,
-    balances: [{ id: "b1", currency: "DOP", balance: "0", creditLimit: null }],
+    balances: [
+      {
+        id: "b1",
+        currency: "DOP",
+        balance: "0",
+        creditLimit: null,
+        availableCredit: null,
+      },
+    ],
     ...partial,
   }
 }

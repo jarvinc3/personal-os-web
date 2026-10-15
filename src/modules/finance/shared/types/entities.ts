@@ -221,6 +221,8 @@ export type FinanceCardBalance = {
   currency: string
   balance: string
   creditLimit: string | null
+  /** Límite menos deuda confirmada y pendientes; null sin límite. */
+  availableCredit: string | null
 }
 
 export type FinanceCard = {
@@ -237,6 +239,10 @@ export type FinanceCard = {
   lastFour: string | null
   statementClosingDay: number | null
   paymentDueDay: number | null
+  /** Próximo corte, YYYY-MM-DD; null sin día de corte. */
+  nextStatementDate: string | null
+  /** Fecha límite de pago del próximo corte, YYYY-MM-DD. */
+  nextPaymentDueDate: string | null
   color: string | null
   isActive: boolean
   balances: FinanceCardBalance[]

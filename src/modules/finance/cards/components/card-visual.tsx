@@ -7,6 +7,11 @@ import {
 import { FINANCE_CARD_TYPE_LABEL } from "@/src/modules/finance/shared/constants/catalog"
 import type { FinanceCardDisplayBalance } from "@/src/modules/finance/shared/lib/card-balances"
 import {
+  countdownLabel,
+  daysUntilIsoDate,
+} from "@/src/modules/finance/shared/lib/card-credit"
+import { formatCalendarDate } from "@/src/modules/finance/shared/lib/ledger-form"
+import {
   formatFinanceMoney,
   parseFinanceMoney,
   type FinanceMoneyDisplay,
@@ -52,7 +57,9 @@ export function CardVisual({ card, balances, display }: CardVisualProps) {
             <p className="text-3xl font-bold">Sin saldo</p>
           ) : (
             balances.map((balance) => {
-              const available = parseFinanceMoney(balance.balance)
+              const available = parseFinanceMoney(
+                balance.availableCredit ?? balance.balance
+              )
               const creditLimit = parseFinanceMoney(balance.creditLimit ?? null)
               const amount =
                 isCredit && available !== null && creditLimit !== null
@@ -93,7 +100,9 @@ export function CardVisual({ card, balances, display }: CardVisualProps) {
 
       {isCredit
         ? balances.map((balance) => {
-            const available = parseFinanceMoney(balance.balance)
+            const available = parseFinanceMoney(
+              balance.availableCredit ?? balance.balance
+            )
             const creditLimit = parseFinanceMoney(balance.creditLimit ?? null)
             if (
               creditLimit === null ||
@@ -129,6 +138,16 @@ export function CardVisual({ card, balances, display }: CardVisualProps) {
             )
           })
         : null}
+
+      {isCredit && (card.nextStatementDate || card.nextPaymentDueDate) ? (
+        <p className="px-1 text-xs text-white/70">
+          {card.nextStatementDate
+            ? `Próximo corte ${formatCalendarDate(card.nextStatementDate)}`
+            : null}
+          {card.nextStatementDate && card.nextPaymentDueDate ? " · " : null}
+          {countdownLabel(daysUntilIsoDate(card.nextPaymentDueDate)) ?? ""}
+        </p>
+      ) : null}
     </div>
   )
 }

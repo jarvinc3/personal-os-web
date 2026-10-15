@@ -1,6 +1,6 @@
 # Finanzas: cómo funciona hoy
 
-Estado al 20 oct 2026: web v0.31.0 y back v0.29.0. Este documento resume el dominio y los flujos principales tal como están implementados. El contrato HTTP completo vive en `personal-os-back/docs/modules/finance/`. Lo pendiente está en [pendientes/](./pendientes/README.md).
+Estado al 22 oct 2026: web v0.34.0 y back v0.31.0. Este documento resume el dominio y los flujos principales tal como están implementados. El contrato HTTP completo vive en `personal-os-back/docs/modules/finance/`. Lo pendiente está en [pendientes/](./pendientes/README.md).
 
 Contexto: bancos dominicanos (BHD, Popular, Qik), moneda principal DOP (RD$).
 
@@ -40,7 +40,10 @@ Desde el detalle del movimiento, "Vincular" (`link-transaction-sheet.tsx`) lo as
 ### Tarjetas de crédito
 
 - Pago de tarjeta: `CARD_PAYMENT` desde una cuenta (`card-payment-sheet.tsx`).
-- Corte manual: el usuario baja el estado de cuenta desde la app del banco y carga balance al corte, mínimo y fecha límite en `card-statement-sheet.tsx`. El scheduler cierra los ciclos vencidos.
+- Crédito disponible por moneda: el back expone `availableCredit` en la respuesta de la tarjeta (`balance` confirmado menos los movimientos `PENDING`) y la web lo muestra en la barra de uso del detalle y en Productos. Sin límite no hay disponible.
+- Corte automático: el job diario cierra los ciclos vencidos y crea un estado por moneda, con saldo al corte, mínimo y fecha límite. El corte manual (`card-statement-sheet.tsx`) queda como respaldo para cargar los datos del banco.
+- Próximo corte y pago: la tarjeta trae `nextStatementDate` y `nextPaymentDueDate`, y el detalle muestra la cuenta regresiva.
+- Recordatorio de pago: `CardPaymentRemindersScheduler` emite `finance.card_payment.due` `reminders.cardDueDaysBefore` días antes (default 3), una sola vez por corte y sin enviarlo si ya está pagado.
 - El correo de BHD "tu estado de cuenta está disponible" genera un recordatorio (`FINANCE_CARD_STATEMENT_REMINDER`), pero no importa movimientos.
 
 ### Importar un estado de cuenta

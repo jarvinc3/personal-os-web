@@ -25,6 +25,8 @@ function card(overrides: Partial<FinanceCard>): FinanceCard {
     lastFour: "4242",
     statementClosingDay: null,
     paymentDueDay: null,
+    nextStatementDate: null,
+    nextPaymentDueDate: null,
     color: null,
     isActive: true,
     balances: [],
@@ -39,7 +41,13 @@ describe("resolveCardDisplayBalances", () => {
         type: "DEBIT",
         accountId: account.id,
         balances: [
-          { id: "stale", currency: "USD", balance: "1", creditLimit: null },
+          {
+            id: "stale",
+            currency: "USD",
+            balance: "1",
+            creditLimit: null,
+            availableCredit: null,
+          },
         ],
       }),
       [account]
@@ -56,6 +64,7 @@ describe("resolveCardDisplayBalances", () => {
       currency: "USD",
       balance: "200",
       creditLimit: "1000",
+      availableCredit: "1000",
     }
     assert.deepEqual(
       resolveCardDisplayBalances(card({ balances: [balance] }), [account]),
