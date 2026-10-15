@@ -2,6 +2,12 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.37.1] - 2026-10-15
+
+### Corregido
+
+- El hero de Inicio (Gasto, Ingreso y Transferencia), la fila de una notificación, la card de cada App en Ajustes y el botón del agente muestran pending al abrir otra vista; antes el toque quedaba mudo.
+
 ## [0.37.0] - 2026-10-15
 
 ### Agregado
