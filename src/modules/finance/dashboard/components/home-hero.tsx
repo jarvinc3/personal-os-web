@@ -1,4 +1,5 @@
 import { Button } from "@/src/shared/components/ui/button"
+import { LinkPendingOverlay } from "@/src/shared/components/ui/navigation-pending"
 import { cn } from "@/src/shared/lib/utils"
 import {
   ArrowDownLeftIcon,
@@ -7,16 +8,17 @@ import {
   ChevronDownIcon,
   CreditCardIcon,
 } from "lucide-react"
+import Link from "next/link"
 
 type FinanceHomeHeroProps = {
   balanceLabel: string
   balanceAmount: string
+  sendHref: string
+  receiveHref: string
+  transferHref: string
   pendingHoldLabel?: string
   cashFlowLabel?: string
   onAccountPress?: () => void
-  onSendPress?: () => void
-  onReceivePress?: () => void
-  onTransferPress?: () => void
   className?: string
 }
 
@@ -44,12 +46,12 @@ function FinanceHomeGridPattern() {
 export function FinanceHomeHero({
   balanceLabel,
   balanceAmount,
+  sendHref,
+  receiveHref,
+  transferHref,
   pendingHoldLabel,
   cashFlowLabel,
   onAccountPress,
-  onSendPress,
-  onReceivePress,
-  onTransferPress,
   className,
 }: FinanceHomeHeroProps) {
   return (
@@ -92,34 +94,43 @@ export function FinanceHomeHero({
 
         <div className="grid grid-cols-3 gap-0.5 overflow-hidden rounded-2xl border border-border">
           <Button
+            asChild
             variant="outline"
-            onClick={onSendPress}
-            className="flex-1 rounded-none rounded-l-2xl"
+            className="relative flex-1 rounded-none rounded-l-2xl"
           >
-            <ArrowUpRightIcon className="text-foreground" />
-            <span className="text-base font-semibold text-foreground">
-              Gasto
-            </span>
+            <Link href={sendHref}>
+              <ArrowUpRightIcon className="text-foreground" />
+              <span className="text-base font-semibold text-foreground">
+                Gasto
+              </span>
+              <LinkPendingOverlay />
+            </Link>
           </Button>
           <Button
+            asChild
             variant="outline"
-            onClick={onReceivePress}
-            className="flex-1 rounded-none"
+            className="relative flex-1 rounded-none"
           >
-            <ArrowDownLeftIcon className="text-foreground" />
-            <span className="text-base font-semibold text-foreground">
-              Ingreso
-            </span>
+            <Link href={receiveHref}>
+              <ArrowDownLeftIcon className="text-foreground" />
+              <span className="text-base font-semibold text-foreground">
+                Ingreso
+              </span>
+              <LinkPendingOverlay />
+            </Link>
           </Button>
           <Button
+            asChild
             variant="outline"
-            onClick={onTransferPress}
-            className="flex-1 rounded-none rounded-r-2xl"
+            className="relative flex-1 rounded-none rounded-r-2xl"
           >
-            <ArrowRightLeftIcon className="text-foreground" />
-            <span className="text-base font-semibold text-foreground">
-              Transf.
-            </span>
+            <Link href={transferHref}>
+              <ArrowRightLeftIcon className="text-foreground" />
+              <span className="text-base font-semibold text-foreground">
+                Transf.
+              </span>
+              <LinkPendingOverlay />
+            </Link>
           </Button>
         </div>
       </div>

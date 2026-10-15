@@ -170,13 +170,14 @@ Afirmaciones de `project-guide.md`, `docs/infraestructure/*`, módulos monolíti
 
 ## REV-WEB-021 {#rev-web-021}
 
-| Campo           | Valor                                                                                                                                                                                                                               |
-| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Categoría       | `CONTRADICE_CODIGO`                                                                                                                                                                                                                 |
-| Origen          | `.cursor/rules/navigation-pending.mdc` (la navegación muestra pending)                                                                                                                                                              |
-| Validación      | 29 archivos con `router.push` sin `usePendingNavigation`/`useTransition`; 15 archivos con `<Link` sin `LinkPendingOverlay`                                                                                                          |
-| Re-verificación | 2026-10-15 (pendiente 17, web `v0.37.0`): todos los `<Link>` que abren otra vista llevan `LinkPendingOverlay`; las cards y filas navegan por `href`. Quedan fuera los ítems de menú/FAB y las navegaciones al terminar una mutación |
-| Resolución      | `resolved`                                                                                                                                                                                                                          |
+| Campo           | Valor                                                                                                                                                                                                                                           |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Categoría       | `CONTRADICE_CODIGO`                                                                                                                                                                                                                             |
+| Origen          | `.cursor/rules/navigation-pending.mdc` (la navegación muestra pending)                                                                                                                                                                          |
+| Validación      | 29 archivos con `router.push` sin `usePendingNavigation`/`useTransition`; 15 archivos con `<Link` sin `LinkPendingOverlay`                                                                                                                      |
+| Re-verificación | 2026-10-15 (pendiente 17, web `v0.37.0`): todos los `<Link>` que abren otra vista llevan `LinkPendingOverlay`; las cards y filas navegan por `href`. Quedan fuera los ítems de menú/FAB y las navegaciones al terminar una mutación             |
+| Revisión        | 2026-10-15 (web `v0.37.1`): se agrega pending a las navegaciones fuera de menú/FAB que faltaban —hero de Inicio, fila de notificaciones, card de Apps en Ajustes y botón del agente— con `usePendingNavigation` o `Link` + `LinkPendingOverlay` |
+| Resolución      | `resolved`                                                                                                                                                                                                                                      |
 
 ## REV-WEB-022 {#rev-web-022}
 

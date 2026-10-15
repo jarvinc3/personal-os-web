@@ -91,3 +91,10 @@ PENDIENTE 17 COMPLETADO — web v0.37.0 · back v0.36.0 (2026-10-15).
 - Web: `pnpm format:check`, `pnpm lint`, `pnpm typecheck` y `pnpm test` (749 tests) en verde.
 - Back: `pnpm format:check`, `pnpm lint`, `pnpm test` (1003 tests), `pnpm build` y `pnpm smoke:finance` (falla con código 1 si falta token o un endpoint responde mal) en verde.
 - `review-register.md` de ambos repos con cada `REV` en `resolved` o `roadmap`.
+
+### Revisión (2026-10-15, web v0.37.1 · back v0.36.1)
+
+- **Web, REV-WEB-021:** el pendiente solo había cubierto los `<Link>`. Se completan las navegaciones que abren otra vista y no son ítem de menú, FAB ni efecto de una mutación: el hero de Inicio (Gasto/Ingreso/Transf., ahora `Link` + `LinkPendingOverlay`), la fila de notificaciones y la card de Apps en Ajustes (`usePendingNavigation` + `PendingSurface`) y el botón del agente que abre `/chat` (`usePendingNavigation` + `Spinner`).
+- **Back, REV-BACK-009:** `apps/api/src/main.ts` usaba `?? 3000` como fallback de `PORT`; se alinea en `3100`, igual que `env.schema` y `.env.example`.
+- **Back, REV-BACK-002:** `env.schema` acepta una cadena vacía en `MAX_EMAIL_LLM_EXTRACTS` y `AI_DAILY_INSIGHT_QUOTA` y cae al default, igual que `ai-limits.ts`; antes un valor vacío rompía el boot con `z.coerce.number()`.
+- **Verificación:** web `format:check`, `lint`, `typecheck` y `test` (749) en verde; back `format:check`, `lint`, `test` (1004) y `build` en verde.

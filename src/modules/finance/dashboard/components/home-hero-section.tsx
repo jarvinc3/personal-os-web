@@ -15,12 +15,10 @@ import {
   APP_ROUTES,
   financeTransactionNewHref,
 } from "@/src/shared/constants/app-routes"
-import { useRouter } from "next/navigation"
 import { useCallback, useMemo, useState } from "react"
 import { FinanceHomeHero } from "@/src/modules/finance/dashboard/components/home-hero"
 
 export function FinanceHomeHeroSection() {
-  const router = useRouter()
   const { isEnabled, config } = useFinanceEnabled()
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(
     null
@@ -115,25 +113,18 @@ export function FinanceHomeHeroSection() {
         : (accounts[currentIndex + 1]?.id ?? null)
     })
   }, [accounts])
-  const goToTransfer = useCallback(() => {
-    router.push(APP_ROUTES.app.financeTransferNew)
-  }, [router])
 
   return (
     <>
       <FinanceHomeHero
         balanceLabel={homeBalance.label}
         balanceAmount={homeBalance.amount}
+        sendHref={financeTransactionNewHref("DEBIT")}
+        receiveHref={financeTransactionNewHref("CREDIT")}
+        transferHref={APP_ROUTES.app.financeTransferNew}
         pendingHoldLabel={pendingHoldLabel}
         cashFlowLabel={cashFlowLabel}
         onAccountPress={cycleAccount}
-        onSendPress={() => {
-          router.push(financeTransactionNewHref("DEBIT"))
-        }}
-        onReceivePress={() => {
-          router.push(financeTransactionNewHref("CREDIT"))
-        }}
-        onTransferPress={goToTransfer}
       />
     </>
   )

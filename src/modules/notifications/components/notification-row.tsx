@@ -2,28 +2,44 @@
 
 import { getNotificationVisual } from "@/src/modules/notifications/lib/notification-visual"
 import type { NotificationRecord } from "@/src/modules/notifications/types/notification.types"
+import {
+  PendingSurface,
+  usePendingNavigation,
+} from "@/src/shared/components/ui/navigation-pending"
 import { formatNotificationListTime } from "@/src/shared/lib/date-format"
 import { cn } from "@/src/shared/lib/utils"
 
 type NotificationRowProps = {
   notification: NotificationRecord
   onPress: () => void
+  href?: string
 }
 
 export function NotificationRow({
   notification,
   onPress,
+  href,
 }: NotificationRowProps) {
+  const { navigate, isPending } = usePendingNavigation()
   const visual = getNotificationVisual(notification)
   const timeLabel = formatNotificationListTime(notification.createdAt)
   const Icon = visual.icon
 
+  const handlePress = () => {
+    onPress()
+    if (href) {
+      navigate(href)
+    }
+  }
+
   return (
     <button
       type="button"
-      onClick={onPress}
+      onClick={handlePress}
+      disabled={isPending}
+      aria-busy={isPending || undefined}
       className={cn(
-        "flex w-full flex-row gap-3 px-4 py-4 text-left transition-colors hover:bg-muted/50",
+        "relative flex w-full flex-row gap-3 px-4 py-4 text-left transition-colors hover:bg-muted/50",
         !notification.isRead && "bg-muted/40"
       )}
     >
@@ -65,6 +81,7 @@ export function NotificationRow({
           <span className="size-2.5" />
         )}
       </div>
+      {isPending ? <PendingSurface /> : null}
     </button>
   )
 }

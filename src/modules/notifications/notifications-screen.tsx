@@ -60,7 +60,6 @@ import {
 } from "lucide-react"
 import { LinkPendingOverlay } from "@/src/shared/components/ui/navigation-pending"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
 type NotificationReadFilter = "all" | "unread" | "read"
@@ -74,6 +73,15 @@ function readTransactionId(
   }
   const trimmed = value.trim()
   return trimmed ? trimmed : null
+}
+
+function notificationHref(
+  notification: NotificationRecord
+): string | undefined {
+  const transactionId = readTransactionId(notification.data)
+  return transactionId
+    ? APP_ROUTES.app.financeTransaction(transactionId)
+    : undefined
 }
 
 export function NotificationsScreen() {
@@ -91,7 +99,6 @@ function NotificationsScreenBody() {
   const { mutateAsync: markAllAsRead, isPending: isMarkAllPending } =
     useMarkAllNotificationsRead()
   const { updatePreferences } = useProfile()
-  const router = useRouter()
 
   const handlePreferenceToggle = useCallback(
     async (
@@ -203,12 +210,8 @@ function NotificationsScreenBody() {
       if (!notification.isRead) {
         void markReadMutation.mutateAsync(notification.id)
       }
-      const transactionId = readTransactionId(notification.data)
-      if (transactionId) {
-        router.push(APP_ROUTES.app.financeTransaction(transactionId))
-      }
     },
-    [markReadMutation, router]
+    [markReadMutation]
   )
 
   const headerMenu = useMemo(
@@ -383,6 +386,7 @@ function NotificationsScreenBody() {
                     <NotificationRow
                       notification={item}
                       onPress={() => handleNotificationPress(item)}
+                      href={notificationHref(item)}
                     />
                     {index < section.data.length - 1 ? <Separator /> : null}
                   </div>

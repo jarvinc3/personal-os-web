@@ -8,6 +8,10 @@ import type {
 import { DEFAULT_MODULE_CONFIG_BY_SLUG } from "@/src/modules/settings/constants/user-settings-defaults"
 import { SettingsSection } from "@/src/shared/components/layout/settings-section"
 import { Button } from "@/src/shared/components/ui/button"
+import {
+  PendingSurface,
+  usePendingNavigation,
+} from "@/src/shared/components/ui/navigation-pending"
 import { Separator } from "@/src/shared/components/ui/separator"
 import { Switch } from "@/src/shared/components/ui/switch"
 import {
@@ -17,7 +21,6 @@ import {
 import { settingsModuleHref } from "@/src/shared/constants/app-routes"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { ChevronLeftIcon, ChevronRightIcon, Settings } from "lucide-react"
-import { useRouter } from "next/navigation"
 import { useCallback, useId, useLayoutEffect, useRef, useState } from "react"
 import { useUserModuleConfig } from "@/src/modules/settings/hooks/use-user-module-config"
 
@@ -69,7 +72,6 @@ export const MODULE_SETTINGS_CARD_WIDTH = 156
 export const MODULE_SETTINGS_CARD_GAP = 12
 
 function ModuleSettingsRows({ onOpenModule }: ModuleSettingsRowsProps) {
-  const router = useRouter()
   const listRef = useRef<HTMLDivElement>(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(false)
@@ -147,11 +149,8 @@ function ModuleSettingsRows({ onOpenModule }: ModuleSettingsRowsProps) {
           >
             <ModuleSettingsCard
               slug={slug}
-              onOpen={() =>
-                onOpenModule
-                  ? onOpenModule(slug)
-                  : router.push(settingsModuleHref(slug))
-              }
+              onOpen={() => onOpenModule?.(slug)}
+              href={onOpenModule ? undefined : settingsModuleHref(slug)}
             />
           </div>
         ))}
@@ -164,13 +163,23 @@ function ModuleSettingsRows({ onOpenModule }: ModuleSettingsRowsProps) {
 type ModuleSettingsCardProps = {
   slug: ConfigurableModuleSlug
   onOpen: () => void
+  href?: string
 }
 
-function ModuleSettingsCard({ slug, onOpen }: ModuleSettingsCardProps) {
+function ModuleSettingsCard({ slug, onOpen, href }: ModuleSettingsCardProps) {
+  const { navigate, isPending } = usePendingNavigation()
   const moduleDef = MODULE_REGISTRY[slug]
   const Icon = moduleDef.icon
   const { state, entry, setModuleEnabled, updateMutation } =
     useUserModuleConfig(slug)
+
+  const handleOpen = () => {
+    if (href) {
+      navigate(href)
+      return
+    }
+    onOpen()
+  }
 
   const handleSwitchChange = async (checked: boolean) => {
     try {
@@ -193,9 +202,10 @@ function ModuleSettingsCard({ slug, onOpen }: ModuleSettingsCardProps) {
 
   return (
     <div
-      className="flex cursor-pointer flex-col rounded-[20px] border border-border bg-card p-2 transition-all duration-100 ease-in-out hover:bg-muted/50 active:scale-[0.99] active:bg-muted/50"
+      className="relative flex cursor-pointer flex-col rounded-[20px] border border-border bg-card p-2 transition-all duration-100 ease-in-out hover:bg-muted/50 active:scale-[0.99] active:bg-muted/50"
       style={{ width: MODULE_SETTINGS_CARD_WIDTH }}
-      onClick={onOpen}
+      aria-busy={isPending || undefined}
+      onClick={handleOpen}
     >
       <div className="flex flex-row items-center justify-between">
         <div className="rounded-xl bg-muted p-2">
@@ -227,6 +237,7 @@ function ModuleSettingsCard({ slug, onOpen }: ModuleSettingsCardProps) {
         </p>
         <p className="text-xs text-muted-foreground">{statusLabel}</p>
       </div>
+      {isPending ? <PendingSurface /> : null}
     </div>
   )
 }
