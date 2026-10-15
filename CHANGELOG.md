@@ -2,6 +2,21 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.38.0] - 2026-10-15
+
+### Agregado
+
+- Observabilidad con Sentry (`@sentry/nextjs`): `instrumentation.ts`, `instrumentation-client.ts` y las configs de servidor y edge; `app/error.tsx` y `app/global-error.tsx` en español reportan con `captureException` y ofrecen «Reintentar». Sin `NEXT_PUBLIC_SENTRY_DSN` no se inicializa y no hay Session Replay, y el mismo scrubber borra body, cookies, cabeceras de auth y tokens antes de enviar.
+
+### Cambiado
+
+- El CI corre `lint`, `format:check`, `tsc`, tests y `next build` con variables públicas dummy.
+- Las listas de cuentas, tarjetas, instituciones, préstamos, metas de ahorro y cobros se leen como lookups (`limit=100` y se toma `items`) porque el back las paginó por cursor.
+- La desactivación del token push usa `DELETE /notifications/push-tokens/:token`.
+- `GET /finance/analytics/bank-charges` pasa a `GET /finance/bank-charges`.
+- `next.config` sube source maps solo si existe `SENTRY_AUTH_TOKEN`; sin token el build no falla y conserva el agregado para la extensión de dev.
+- `.env.example` documenta las variables de Sentry.
+
 ## [0.37.1] - 2026-10-15
 
 ### Corregido
