@@ -10,9 +10,12 @@ import {
 
 describe("resolveLandingUrl", () => {
   it("uses the published landing when there is no configured origin", () => {
-    assert.equal(resolveLandingUrl(undefined), LANDING_URL)
-    assert.equal(resolveLandingUrl(""), LANDING_URL)
-    assert.equal(resolveLandingUrl("   "), LANDING_URL)
+    assert.equal(
+      resolveLandingUrl(undefined),
+      "https://personal-os-landing-six.vercel.app"
+    )
+    assert.equal(resolveLandingUrl(""), resolveLandingUrl(undefined))
+    assert.equal(resolveLandingUrl("   "), resolveLandingUrl(undefined))
   })
 
   it("drops a trailing slash", () => {

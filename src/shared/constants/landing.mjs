@@ -10,15 +10,15 @@ const FALLBACK_LANDING_URL = "https://personal-os-landing-six.vercel.app"
  * la landing publicada; con un valor que no sea un origen, falla en el build.
  */
 export function resolveLandingUrl(configuredUrl) {
-  const candidate = typeof configuredUrl === "string" ? configuredUrl.trim() : ""
-  if (candidate === "") {
+  const configuredOrigin = (configuredUrl ?? "").trim()
+  if (configuredOrigin === "") {
     return FALLBACK_LANDING_URL
   }
 
-  const { origin, pathname } = new URL(candidate)
+  const { origin, pathname } = new URL(configuredOrigin)
   if (pathname !== "/") {
     throw new Error(
-      `NEXT_PUBLIC_LANDING_URL debe ser un origen sin ruta: ${candidate}`
+      `NEXT_PUBLIC_LANDING_URL must be an origin without a path: ${configuredOrigin}`
     )
   }
 
@@ -29,8 +29,8 @@ export function resolveLandingUrl(configuredUrl) {
 export const LANDING_URL = resolveLandingUrl(process.env.NEXT_PUBLIC_LANDING_URL)
 
 /** URL absoluta de una ruta de la landing; `landingUrl()` apunta a su portada. */
-export function landingUrl(path = "/", baseUrl = LANDING_URL) {
-  return new URL(path, `${baseUrl}/`).href
+export function landingUrl(path = "/") {
+  return new URL(path, `${LANDING_URL}/`).href
 }
 
 /**

@@ -1,6 +1,6 @@
 const FALLBACK_APP_URL = "http://localhost:3000"
 
-/** Identidad del cliente web: metadata de `app/layout.tsx` y `robots.ts`. */
+/** Identidad del cliente web, la que consume la metadata de `app/layout.tsx`. */
 export const appMetadata = {
   name: "Personal OS",
   description:
