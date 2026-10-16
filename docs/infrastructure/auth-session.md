@@ -20,4 +20,4 @@ Google OAuth: `signInWithOAuth` → `GET /auth/callback` intercambia `code`. Que
 Evidencia: `src/providers/auth-bootstrap-provider.tsx`, `src/modules/auth/hooks/*`, `proxy.ts`.
 
 > [!WARNING]
-> **REV-WEB-003** (`CONTRADICE_CODIGO`) — `auth.md` antiguo citaba `shared/providers/auth-bootstrap-provider.tsx`. Path real: `src/providers/`. [review-register.md](../review-register.md#rev-web-003)
+> **REV-WEB-003** (`CONTRADICE_CODIGO`) — `auth.md` antiguo citaba `shared/providers/auth-bootstrap-provider.tsx`. Path real: `src/providers/`. [registro archivado](../archive/review-register.md)

@@ -13,7 +13,15 @@ Instrucciones para agentes y reviewers que trabajan en el cliente web de Persona
 7. [docs/reference/changelog-guide.md](docs/reference/changelog-guide.md) — antes de cerrar la sesión, para el CHANGELOG y la versión.
    - [docs/versionado.md](docs/versionado.md) - política de versionado beta `0.x` (obligatoria; manda sobre la guía del changelog).
 
-Si una afirmación no está `VERIFICADO`, leer [docs/review-register.md](docs/review-register.md) antes de tratarla como comportamiento vigente.
+Si una afirmación no está `VERIFICADO`, no la trates como comportamiento vigente: compruébala en código o abre un issue.
+
+## Seguimiento con GitHub Issues
+
+El estado, el roadmap y los hallazgos viven en GitHub Issues. Los documentos de trabajo cerrados pasan a [docs/archive/](docs/archive/).
+
+- Un cambio resuelve un issue: el cuerpo del commit cierra con `Closes #N` cuando el issue queda resuelto, o `Refs #N` cuando solo avanza. Un commit del monorepo referencia el issue del repo por su número.
+- Lo decidido y no implementado se abre como issue con label `roadmap`; no se deja como `REV-*` suelto en los documentos.
+- La app móvil (`personal-os-app`) está fuera de servicio: no la cites como cliente.
 
 ## Fuentes canónicas
 
@@ -33,7 +41,7 @@ Si una afirmación no está `VERIFICADO`, leer [docs/review-register.md](docs/re
 | Money                                        | [docs/decisions/ADR-002-money-strings.md](docs/decisions/ADR-002-money-strings.md) — el API manda string; el cliente parsea a number solo para editar o escribir              |
 | Cliente HTTP                                 | [docs/infrastructure/api-client.md](docs/infrastructure/api-client.md) — envelope `{ data, meta }`, `ApiError`, 401. No abras otro `fetch`                                    |
 
-Este cliente es **Next.js 16**, no React Native. Instrucciones Expo/Metro/EAS no aplican aquí (ver registro). ADR-001 está resumido en esa frase.
+Este cliente es **Next.js 16**, no React Native. ADR-001 está resumido en esa frase.
 
 Al arrancar o diagnosticar el cliente, lee [docs/operations/runbook.md](docs/operations/runbook.md). Al tocar Web Push, lee [docs/infrastructure/web-push.md](docs/infrastructure/web-push.md).
 
@@ -100,16 +108,24 @@ La versión sigue **estrictamente** [docs/versionado.md](docs/versionado.md): be
 
 Usa siempre la fecha real del sistema (`date`) para changelogs y documentos. No adelantes la fecha para "ordenar" artefactos; en el backend el nombre de la carpeta de una migración Prisma define su posición en el historial.
 
+## Errores y observabilidad
+
+Sentry corre en cliente, servidor y edge (`instrumentation*.ts`, `sentry.*.config.ts`) y no se inicializa sin DSN. `app/error.tsx` y `app/global-error.tsx` muestran el fallo. `next.config.mjs` sube source maps con `SENTRY_AUTH_TOKEN`; sin token el build no falla.
+
+## CI
+
+`.github/workflows/ci.yml` corre en `develop`: typecheck, lint, format, tests y build.
+
 ## Checklist al cambiar comportamiento
 
 - [ ] Actualizar el documento dueño (capacidad, contrato UI o arquitectura).
 - [ ] Enlazar al backend cuando el contrato sea de dominio/API; no copiar tablas Prisma.
-- [ ] `agenda` / `projects` / `health` / `subscriptions` solo tienen sheets en Settings hasta que existan rutas en `app/`.
+- [ ] `agenda` / `projects` / `health` solo tienen sheets en Settings hasta que existan rutas en `app/`.
 - [ ] Keep Awake es client-only: no inventar endpoints.
 - [ ] Si tocaste UI, leíste [`.cursor/rules/`](.cursor/rules) y cumples cada regla.
 - [ ] Si cambiaste código, leíste [CODING_GUIDELINES.md](CODING_GUIDELINES.md).
 - [ ] Si el cambio coincide con un disparador de Skills, leíste ese `SKILL.md`.
-- [ ] Si el runtime contradice el doc, registrar `CONTRADICE_RUNTIME`.
+- [ ] Si el runtime contradice el doc, abre un issue con el detalle.
 - [ ] Correr los cuatro comandos de pruebas obligatorias; un test en rojo bloquea el cierre.
 - [ ] Actualizar `CHANGELOG.md` y subir `version` en `package.json`; cerrar con `chore(release): vX.Y.Z` y el tag.
 

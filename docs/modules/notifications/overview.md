@@ -15,7 +15,7 @@ Inbox in-app, badge, toasts en foreground, Web Push en background, preferencias 
 ## Fuera de alcance
 
 - Crear notificaciones de dominio (eso es backend listeners).
-- FCM/APNs nativo (REV-BACK-007; ver [docs/roadmap.md](../../roadmap.md)).
+- FCM/APNs nativo: [personal-os-back#137](https://github.com/jarvinc3/personal-os-back/issues/137).
 
 ## Autenticado
 

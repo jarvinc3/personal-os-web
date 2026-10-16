@@ -5,6 +5,6 @@ Layout `(landing)` + `landing-theme.tsx`. No usa `useAuthGuard`. `/` via proxy �
 Marketing. Waitlist/contacto son formularios visibles en `/landing`.
 
 > [!WARNING]
-> **REV-WEB-014** (`NO_VERIFICABLE`) — waitlist/contact pueden ser UI sin persistencia de servidor; no se afirmó endpoint Nest. [review-register.md](../../review-register.md#rev-web-014)
+> **REV-WEB-014** (`NO_VERIFICABLE`) — waitlist/contact pueden ser UI sin persistencia de servidor; no se afirmó endpoint Nest. [Issue #145](https://github.com/jarvinc3/personal-os-web/issues/145)
 
 Copy de marketing aún dice “Mobile First”; el cliente canónico de este repo es web (ADR-001).

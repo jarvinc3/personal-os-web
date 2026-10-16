@@ -11,6 +11,3 @@ Iconos y media servidos desde `public/assets/` (constantes: `src/shared/constant
 | `images/welcome-ilustration-*.png`, `app-banner-v1.png`        | Landing / UI                         |
 | `banners/banner-enero.png` … `banner-diciembre.png`            | Banners mensuales (timeline finance) |
 | `manifest.json`, `sw.js`                                       | PWA + Web Push                       |
-
-> [!WARNING]
-> **REV-WEB-015** — instrucciones Expo/`icon-x2.png`/`getAppIconSource` no aplican a este cliente.

@@ -36,7 +36,7 @@
 
 - Banner de alerta en el detalle de cuenta/tarjeta y badge en Productos cuando hay deriva abierta, con diferencia y botón "Recalcular" (`AlertDialog` de confirmación).
 - Sección en `/settings/finance` o en Sync para correr la verificación manual.
-- Hooks `use-integrity.ts`. Actualizar `status.md` y [dominio.md](../dominio.md).
+- Hooks `use-integrity.ts`. Actualizar `status.md` y [dominio.md](../../modules/finance/dominio.md).
 
 ## Criterios de aceptación
 

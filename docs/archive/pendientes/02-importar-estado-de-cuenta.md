@@ -1,6 +1,6 @@
 # 02 · Importar estado de cuenta (PDF) y conciliar
 
-> **Implementado el 14 oct 2026.** Lo que quedó en el producto se resume en [../dominio.md](../dominio.md). Esta spec se conserva como registro.
+> **Implementado el 14 oct 2026.** Lo que quedó en el producto se resume en [../../modules/finance/dominio.md](../../modules/finance/dominio.md). Esta spec se conserva como registro.
 > Ajustes respecto al plan original: la ingesta desde correo se descartó (los bancos no envían estados de cuenta por correo; la subida es siempre manual) y la cabecera del corte de una cuenta bancaria vive en el JSON del import.
 
 ## Problema

@@ -14,11 +14,11 @@ Resultado:
 
 ## Reglas revisadas
 
-- Los 24 archivos de [`.cursor/rules/`](../../.cursor/rules), incluidos los tres sin commitear (`finance-brand-logo.mdc`, `finance-money-display.mdc`, `ui-row-group.mdc`).
-- [CODING_GUIDELINES.md](../../CODING_GUIDELINES.md).
-- [AGENTS.md](../../AGENTS.md).
-- [docs/architecture/ui-components.md](../architecture/ui-components.md) y [module-conventions.md](../architecture/module-conventions.md).
-- [eslint.config.mjs](../../eslint.config.mjs).
+- Los 24 archivos de [`.cursor/rules/`](../../../.cursor/rules), incluidos los tres sin commitear (`finance-brand-logo.mdc`, `finance-money-display.mdc`, `ui-row-group.mdc`).
+- [CODING_GUIDELINES.md](../../../CODING_GUIDELINES.md).
+- [AGENTS.md](../../../AGENTS.md).
+- [docs/architecture/ui-components.md](../../architecture/ui-components.md) y [module-conventions.md](../../architecture/module-conventions.md).
+- [eslint.config.mjs](../../../eslint.config.mjs).
 
 Las reglas sin commitear son más estrictas que la versión guardada: prohíben `Card` en pantallas de producto, exigen icono "en cualquier vista" y piden hoja de selección para todo catálogo largo. Esta auditoría usa esa versión.
 
@@ -163,7 +163,7 @@ La regla pide `Field` / `FieldLabel` en cualquier control con etiqueta. Estos us
 - **H-57** `src/modules/settings/components/profile-ui.tsx:46`.
 - **H-58** `src/modules/landing/contact-screen.tsx:147,164,185,208`.
 
-Son casillas, radios o carga de avatar. **Exentos** (2026-10-15): la regla no aplica a estos controles; sin cambios de código. Ver [`.cursor/rules/form-field-anatomy.mdc`](../../.cursor/rules/form-field-anatomy.mdc).
+Son casillas, radios o carga de avatar. **Exentos** (2026-10-15): la regla no aplica a estos controles; sin cambios de código. Ver [`.cursor/rules/form-field-anatomy.mdc`](../../../.cursor/rules/form-field-anatomy.mdc).
 
 ### `form-shell-page.mdc` — resuelto
 
@@ -183,6 +183,6 @@ Son casillas, radios o carga de avatar. **Exentos** (2026-10-15): la regla no ap
 
 ## Fuera de alcance
 
-- Corregido en el [pendiente 15](../../modules/finance/pendientes/15-auditoria-reglas-ui.md); los números de línea quedan como referencia histórica del 2026-10-14.
+- Corregido en el [pendiente 15](../pendientes/15-auditoria-reglas-ui.md); los números de línea quedan como referencia histórica del 2026-10-14.
 - Los hallazgos H-44, H-47, H-55 a H-58, H-59 y H-60 quedaron decididos el 2026-10-15: H-44 y H-47 aceptados, H-55 a H-58 exentos, H-59 y H-60 resueltos.
 - Detectados al re-verificar, mismo patrón de `ui-row-group`, fuera de H-01..H-60: `src/modules/finance/reconciliation/components/reconciliations-section.tsx` y `src/modules/finance/cards/components/card-statements-section.tsx`.

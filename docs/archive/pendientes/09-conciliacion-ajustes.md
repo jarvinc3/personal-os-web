@@ -59,7 +59,7 @@
 - Indicador de cierre del mes en Productos (conciliado / pendiente) por cuenta y tarjeta.
 - Analytics: tarjeta "Cargos bancarios" con gráfico mensual y desglose por banco y por categoría.
 - Hooks `use-reconciliations.ts`; reutiliza campos de monto y moneda compartidos.
-- Actualizar `status.md` y [dominio.md](../dominio.md) al terminar.
+- Actualizar `status.md` y [dominio.md](../../modules/finance/dominio.md) al terminar.
 
 ## Criterios de aceptación
 

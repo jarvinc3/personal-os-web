@@ -1,6 +1,6 @@
 # 15 · Auditoría de reglas de UI y convenciones (REV-WEB-025)
 
-> Corrección de los 60 hallazgos de [reference/auditoria-reglas-ui-convenciones.md](../../reference/auditoria-reglas-ui-convenciones.md). Antes de tocar código se re-verifica cada hallazgo contra `develop`, porque Suscripciones v3 y los pendientes 12 y 13 movieron varios archivos. Los dudosos quedan listados, sin tocar.
+> Corrección de los 60 hallazgos de [reference/auditoria-reglas-ui-convenciones.md](../auditorias/auditoria-reglas-ui-convenciones.md). Antes de tocar código se re-verifica cada hallazgo contra `develop`, porque Suscripciones v3 y los pendientes 12 y 13 movieron varios archivos. Los dudosos quedan listados, sin tocar.
 
 ## Estado verificado
 

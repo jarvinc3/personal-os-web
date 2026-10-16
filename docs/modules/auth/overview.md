@@ -26,7 +26,7 @@ Auth de **este** cliente con Supabase Auth. El backend Nest solo valida el JWT (
 | `(app)/*`        | protegido     | `proxy.ts` + `useAuthGuard`                |
 
 > [!WARNING]
-> **REV-WEB-008** (`CONTRADICE_CODIGO`) — docs antiguas: chat “hidden from drawer”; rutas protegidas solo `/home` `/settings`. [review-register.md](../../review-register.md#rev-web-008)
+> **REV-WEB-008** (`CONTRADICE_CODIGO`) — docs antiguas: chat “hidden from drawer”; rutas protegidas solo `/home` `/settings`. [registro archivado](../../archive/review-register.md)
 
 ## Autenticado en el cliente
 

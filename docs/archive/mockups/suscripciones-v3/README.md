@@ -1,6 +1,6 @@
 # Mockups v3 — Suscripciones
 
-Rediseño visual de la vista de Suscripciones acordado con Jarvin (pendiente [10](../../pendientes/10-suscripciones-rediseno.md)). Son referencias visuales; habrá ajustes posteriores.
+Rediseño visual de la vista de Suscripciones acordado con Jarvin (pendiente [14](../../pendientes/14-suscripciones-v3.md)). Son referencias visuales; habrá ajustes posteriores.
 
 ## Decisiones clave
 

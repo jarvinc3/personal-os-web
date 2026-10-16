@@ -26,4 +26,4 @@
 5. Logout → push deactivate
 
 > [!WARNING]
-> **REV-WEB-005** (`CONTEXTO_NO_APLICABLE`) — checklist anterior incluía `personal-os://**`, Expo, `EXPO_PUBLIC_*`, scheme `app.json`. [review-register.md](../review-register.md#rev-web-005)
+> **REV-WEB-005** (`CONTEXTO_NO_APLICABLE`) — checklist anterior incluía `personal-os://**`, Expo, `EXPO_PUBLIC_*`, scheme `app.json`. [registro archivado](../archive/review-register.md)

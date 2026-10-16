@@ -1,6 +1,6 @@
 # 17 · Saneamiento del registro de revisión (REV-BACK / REV-WEB)
 
-> Decidido por Jarvin. Cierra en un solo pendiente los hallazgos de saneamiento que quedaban `open` en [review-register.md](../../../review-register.md) y en el de `personal-os-back`, sin agregar dependencias y sin tocar `personal-os-app`.
+> Decidido por Jarvin. Cierra en un solo pendiente los hallazgos de saneamiento que quedaban `open` en [review-register.md](../review-register.md) y en el de `personal-os-back`, sin agregar dependencias y sin tocar `personal-os-app`.
 
 ## Alcance por repo
 
@@ -42,7 +42,7 @@
 - **REV-BACK-001**: se registra el interceptor existente y se borran el guard, el decorador y sus exports muertos. El RBAC no está en uso; si se necesita, se reintroduce con dueño.
 - **REV-BACK-002**: los dos límites son opcionales y con `default` igual al de `ai-limits.ts`; `ai-limits.ts` sigue leyendo `process.env` para no cambiar su firma.
 - **REV-BACK-009**: `PORT` default 3100, igual que `.env.example` y el README.
-- **REV-WEB-009/011/014 y REV-BACK-006/007/008**: no se implementan. Se documentan en `docs/roadmap.md` de cada repo y el registro pasa a apuntar ahí.
+- **REV-WEB-009/011/014 y REV-BACK-006/007/008**: no se implementan. Se abren como issues con label `roadmap` en cada repo y el registro pasa a apuntar ahí.
 
 ## Criterios de aceptación
 
@@ -55,7 +55,7 @@
 - [ ] `env.schema` valida `MAX_EMAIL_LLM_EXTRACTS` y `AI_DAILY_INSIGHT_QUOTA`.
 - [ ] El comentario de crons coincide con los schedulers reales.
 - [ ] `PORT` por defecto es 3100.
-- [ ] Los hallazgos van al roadmap y `review-register.md` de ambos repos queda al día.
+- [ ] Los hallazgos van a issues con label `roadmap` y `review-register.md` de ambos repos queda al día.
 - [ ] Los cuatro comandos obligatorios pasan en la web y los del back (`format:check`, `lint`, `test`, `build`) pasan.
 
 ## Tests
@@ -74,7 +74,7 @@ PENDIENTE 17 COMPLETADO — web v0.37.0 · back v0.36.0 (2026-10-15).
 - **REV-WEB-021:** se agregó `LinkPendingOverlay` a todos los `<Link>` que abren otra vista (mes, cuotas, bloques del chat, markdown interno, 404, landing, navbar, footer). Las cards y filas ya navegaban por `href`; los ítems de menú, FAB y las navegaciones tras una mutación quedan fuera, como documenta la regla.
 - **REV-WEB-006:** `NEXT_PUBLIC_APP_URL` en `.env.example`.
 - **REV-WEB-001/004/005/007:** la documentación ya estaba migrada a Next.js y marcada con su `REV`; se cierran en el registro.
-- **REV-WEB-009/011/014:** a [docs/roadmap.md](../../../roadmap.md).
+- **REV-WEB-009/011/014:** a web [#143](https://github.com/jarvinc3/personal-os-web/issues/143), [#144](https://github.com/jarvinc3/personal-os-web/issues/144) y [#145](https://github.com/jarvinc3/personal-os-web/issues/145).
 
 ### Back
 
@@ -84,7 +84,7 @@ PENDIENTE 17 COMPLETADO — web v0.37.0 · back v0.36.0 (2026-10-15).
 - **REV-BACK-002:** `MAX_EMAIL_LLM_EXTRACTS` (default 25) y `AI_DAILY_INSIGHT_QUOTA` (default 20) en `env.schema`.
 - **REV-BACK-004:** comentario de crons en `app.module.ts`.
 - **REV-BACK-009:** `PORT` default 3100.
-- **REV-BACK-006/007/008:** a [docs/roadmap.md](../../../roadmap.md) del back.
+- **REV-BACK-006/007/008:** a back [#136](https://github.com/jarvinc3/personal-os-back/issues/136), [#137](https://github.com/jarvinc3/personal-os-back/issues/137) y [#138](https://github.com/jarvinc3/personal-os-back/issues/138).
 
 ### Verificación
 

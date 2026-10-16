@@ -24,4 +24,4 @@ Defaults: `src/modules/settings/constants/user-settings-defaults.ts`. Hooks: `us
 Vaciar datos: `wipe-layers.ts` (espejo del back: ids, labels, dependencias catalog → ledger y categories → planning), `pending-data-wipe.ts` + `PendingDataWipeHandler` para el reauth con Google. Reauth con Google vía `loginWithGoogleMutation`; la sesión nunca se cierra.
 
 > [!WARNING]
-> **REV-WEB-010** (`CONTRADICE_CODIGO`) — citaba `module-settings-ui.ts` (no existe; hay `module-settings-state.ts`) y “Drawer”. [review-register.md](../../review-register.md#rev-web-010)
+> **REV-WEB-010** (`CONTRADICE_CODIGO`) — citaba `module-settings-ui.ts` (no existe; hay `module-settings-state.ts`) y “Drawer”. [registro archivado](../../archive/review-register.md)

@@ -6,7 +6,7 @@
 - `FinRecurringPattern` existe en el esquema (`merchant`, `avgAmount`, `frequency`, `nextExpectedDate`, `confidenceScore`), pero no tiene REST, fachada, scheduler ni tools.
 - No hay rutas `/finance/merchants` ni `/finance/recurring`. La landing pública promete "Detección de gastos recurrentes".
 
-> El gestor completo de suscripciones (tablas propias, pagos vinculados, recordatorios, ciclos de facturación, vista principal en el tab bar) vive en [08 · Suscripciones](./08-suscripciones.md). Este pendiente solo entrega comercios y la detección básica de recurrentes.
+> El gestor completo de suscripciones (tablas propias, pagos vinculados, recordatorios, ciclos de facturación, vista principal en el tab bar) vive en [14 · Suscripciones v3](./14-suscripciones-v3.md). Este pendiente solo entrega comercios y la detección básica de recurrentes.
 
 ## Comportamiento esperado
 

@@ -77,12 +77,12 @@ Afirmaciones de `project-guide.md`, `docs/infraestructure/*`, módulos monolíti
 
 ## REV-WEB-009 {#rev-web-009}
 
-| Campo      | Valor                                                              |
-| ---------- | ------------------------------------------------------------------ |
-| Categoría  | `NO_IMPLEMENTADO`                                                  |
-| Origen     | `core-infra-status` “tests de integración auth hooks / api client” |
-| Validación | no hay specs en auth/settings/ai                                   |
-| Resolución | `roadmap` — [roadmap.md](./roadmap.md)                             |
+| Campo      | Valor                                                                         |
+| ---------- | ----------------------------------------------------------------------------- |
+| Categoría  | `NO_IMPLEMENTADO`                                                             |
+| Origen     | `core-infra-status` “tests de integración auth hooks / api client”            |
+| Validación | no hay specs en auth/settings/ai                                              |
+| Resolución | `roadmap` — [web#143](https://github.com/jarvinc3/personal-os-web/issues/143) |
 
 ## REV-WEB-010 {#rev-web-010}
 
@@ -95,12 +95,12 @@ Afirmaciones de `project-guide.md`, `docs/infraestructure/*`, módulos monolíti
 
 ## REV-WEB-011 {#rev-web-011}
 
-| Campo      | Valor                                  |
-| ---------- | -------------------------------------- |
-| Categoría  | `NO_IMPLEMENTADO`                      |
-| Origen     | `ai.md` tabla `agenda-tools.md` …      |
-| Validación | archivos inexistentes en backend       |
-| Resolución | `roadmap` — [roadmap.md](./roadmap.md) |
+| Campo      | Valor                                                                         |
+| ---------- | ----------------------------------------------------------------------------- |
+| Categoría  | `NO_IMPLEMENTADO`                                                             |
+| Origen     | `ai.md` tabla `agenda-tools.md` …                                             |
+| Validación | archivos inexistentes en backend                                              |
+| Resolución | `roadmap` — [web#144](https://github.com/jarvinc3/personal-os-web/issues/144) |
 
 ## REV-WEB-012 {#rev-web-012}
 
@@ -124,12 +124,12 @@ Afirmaciones de `project-guide.md`, `docs/infraestructure/*`, módulos monolíti
 
 ## REV-WEB-014 {#rev-web-014}
 
-| Campo      | Valor                                               |
-| ---------- | --------------------------------------------------- |
-| Categoría  | `NO_VERIFICABLE`                                    |
-| Origen     | landing waitlist/contact como captura de leads      |
-| Validación | no hay endpoint Nest de waitlist en este inventario |
-| Resolución | `roadmap` — [roadmap.md](./roadmap.md)              |
+| Campo      | Valor                                                                         |
+| ---------- | ----------------------------------------------------------------------------- |
+| Categoría  | `NO_VERIFICABLE`                                                              |
+| Origen     | landing waitlist/contact como captura de leads                                |
+| Validación | no hay endpoint Nest de waitlist en este inventario                           |
+| Resolución | `roadmap` — [web#145](https://github.com/jarvinc3/personal-os-web/issues/145) |
 
 ## REV-WEB-015 {#rev-web-015}
 
@@ -231,6 +231,6 @@ Afirmaciones de `project-guide.md`, `docs/infraestructure/*`, módulos monolíti
 | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Categoría       | `CONTRADICE_CODIGO`                                                                                                                                                                                                                                                                                                                                              |
 | Origen          | `.cursor/rules/` (24 reglas), `CODING_GUIDELINES.md`, `AGENTS.md`, `architecture/ui-components.md`, `architecture/module-conventions.md`                                                                                                                                                                                                                         |
-| Validación      | 60 hallazgos de UI y convenciones; detalle con archivo y línea en [reference/auditoria-reglas-ui-convenciones.md](./reference/auditoria-reglas-ui-convenciones.md)                                                                                                                                                                                               |
+| Validación      | 60 hallazgos de UI y convenciones; detalle con archivo y línea en [auditoria-reglas-ui-convenciones.md](./auditorias/auditoria-reglas-ui-convenciones.md)                                                                                                                                                                                                        |
 | Re-verificación | 2026-10-22 (pendiente 15, web v0.35.2; revisión web v0.35.3–v0.35.4): 44 vigentes corregidos, 7 resueltos antes por Suscripciones v3 y los pendientes 12-13, 9 por decidir. La revisión cerró H-42 en su caso principal y tres incumplimientos fuera de H-01..H-60. Decisiones del 2026-10-15: H-44 y H-47 aceptados, H-55 a H-58 exentos, H-59 y H-60 resueltos |
-| Resolución      | `resolved` (2026-10-15, web `v0.36.6` / back `v0.35.0`); detalle en [reference/auditoria-reglas-ui-convenciones.md](./reference/auditoria-reglas-ui-convenciones.md)                                                                                                                                                                                             |
+| Resolución      | `resolved` (2026-10-15, web `v0.36.6` / back `v0.35.0`); detalle en [auditoria-reglas-ui-convenciones.md](./auditorias/auditoria-reglas-ui-convenciones.md)                                                                                                                                                                                                      |

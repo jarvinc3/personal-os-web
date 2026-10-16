@@ -4,4 +4,4 @@
 | -------------------------- | ---------------------------------- |
 | [runbook.md](./runbook.md) | Arranque Next.js y troubleshooting |
 
-Validador de links (script en el backend): `personal-os-back/docs/operations/check-markdown-links.py`.
+CI: [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml) corre en `develop` (typecheck, lint, format, tests, build).

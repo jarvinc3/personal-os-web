@@ -70,7 +70,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 - Saneamiento del registro de revisión (pendiente 17): todos los `<Link>` que abren otra vista muestran el pending con `LinkPendingOverlay`; las cards y filas conservan `href`.
 - `NEXT_PUBLIC_APP_URL` queda documentada en `.env.example`.
-- Los hallazgos de documentación vieja de React Native, Expo y Metro se cierran; los que aún no tienen código pasan a [docs/roadmap.md](./docs/roadmap.md).
+- Los hallazgos de documentación vieja de React Native, Expo y Metro se cierran; los que aún no tienen código pasan a GitHub Issues (label `roadmap`).
 
 ## [0.36.6] - 2026-10-15
 

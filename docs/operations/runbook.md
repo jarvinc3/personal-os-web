@@ -18,9 +18,7 @@
 | `NEXT_PUBLIC_VAPID_PUBLIC_KEY`         | Web Push                                                                           |
 | `NEXT_PUBLIC_APP_NAME` / `VERSION`     | Branding                                                                           |
 | `NEXT_OS` / `NEXT_ENV`                 | No públicas; settings usa también `NEXT_PUBLIC_ENV` (default `"preview"` si falta) |
-
-> [!WARNING]
-> **REV-WEB-006** (`NO_VERIFICABLE`) — `app/layout` metadataBase usa `NEXT_PUBLIC_APP_URL`, **no** está en `.env.example`. [review-register.md](../review-register.md#rev-web-006)
+| `NEXT_PUBLIC_SENTRY_DSN` / `SENTRY_*`  | Sentry (opcional); sin DSN la SDK no se inicializa                                 |
 
 ## Arranque
 
@@ -38,6 +36,4 @@ App típica: `http://localhost:3000`. CORS del API debe incluir ese origin.
 - API 401 → sign-out automático.
 - Push no registra → permiso denegado o VAPID mismatch; no es Expo Go.
 - OAuth Gmail finance: `CORS_ORIGIN` del API debe incluir `NEXT_PUBLIC_URL`.
-
-> [!WARNING]
-> **REV-WEB-007** (`CONTEXTO_NO_APLICABLE`) — `core-runbook.md` antiguo era Metro/EAS/`expo start -c`. [review-register.md](../review-register.md#rev-web-007)
+- Sentry no reporta → falta DSN o el token de source maps; el build no falla por eso.

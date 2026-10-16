@@ -28,7 +28,7 @@
 
 - Formulario de tarjeta con límite por moneda, día de corte y de pago.
 - Detalle de tarjeta: barra de uso del crédito, crédito disponible, próximo corte y fecha límite con cuenta regresiva.
-- Productos muestra crédito disponible en la tarjeta. Actualizar `status.md` y [dominio.md](../dominio.md).
+- Productos muestra crédito disponible en la tarjeta. Actualizar `status.md` y [dominio.md](../../modules/finance/dominio.md).
 
 ## Criterios de aceptación
 

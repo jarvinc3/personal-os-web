@@ -18,19 +18,20 @@ Browser  →  proxy.ts (sesión Supabase)
 
 ## Stack de este repo (VERIFICADO)
 
-| Capa            | Tecnología                                             |
-| --------------- | ------------------------------------------------------ |
-| Framework       | Next.js 16, React 19, Turbopack (`pnpm dev`)           |
-| Auth            | `@supabase/ssr` + `@supabase/supabase-js`              |
-| Datos servidor  | Nest envelope vía `src/config/api-client.ts`           |
-| Estado servidor | TanStack Query                                         |
-| Estado UI       | Zustand `app-store`                                    |
-| Estilos         | Tailwind 4 + componentes en `src/shared/components/ui` |
-| Tiempo real     | socket.io-client namespace `/notifications`            |
-| Push            | Web Push + `public/sw.js` + VAPID                      |
+| Capa            | Tecnología                                                                  |
+| --------------- | --------------------------------------------------------------------------- |
+| Framework       | Next.js 16, React 19, Turbopack (`pnpm dev`)                                |
+| Auth            | `@supabase/ssr` + `@supabase/supabase-js`                                   |
+| Datos servidor  | Nest envelope vía `src/config/api-client.ts`                                |
+| Estado servidor | TanStack Query                                                              |
+| Estado UI       | Zustand `app-store`                                                         |
+| Estilos         | Tailwind 4 + componentes en `src/shared/components/ui`                      |
+| Tiempo real     | socket.io-client namespace `/notifications`                                 |
+| Push            | Web Push + `public/sw.js` + VAPID                                           |
+| Errores         | Sentry (cliente, servidor, edge) + `app/error.tsx` y `app/global-error.tsx` |
 
 > [!WARNING]
-> **REV-WEB-001** (`CONTEXTO_NO_APLICABLE`) — `docs/project-guide.md` declaraba React Native como cliente principal, Frankfurter FX, parsers regex de email e IMAP. El cliente activo es este Next.js; FX es exchangerate.host en backend; ingestión es LLM. [review-register.md](../review-register.md#rev-web-001)
+> **REV-WEB-001** (`CONTEXTO_NO_APLICABLE`) — `docs/project-guide.md` declaraba React Native como cliente principal, Frankfurter FX, parsers regex de email e IMAP. El cliente activo es este Next.js; FX es exchangerate.host en backend; ingestión es LLM. [Registro archivado](../archive/review-register.md)
 
 ## Estructura y frontera
 
@@ -79,6 +80,14 @@ Detalle de sesión: [../infrastructure/auth-session.md](../infrastructure/auth-s
 | Notifications (inbox, socket, push)          | [../modules/notifications/](../modules/notifications/README.md) |
 | AI (`/chat`, stream, acciones)               | [../modules/ai/](../modules/ai/README.md)                       |
 | Settings, Home, Finance, Keep Awake, Landing | [../modules/](../modules/README.md)                             |
+
+## Errores y observabilidad
+
+Sentry corre en cliente, servidor y edge (`instrumentation-client.ts`, `instrumentation.ts`, `sentry.*.config.ts`). Sin DSN la SDK no se inicializa. Los fallos de render los pintan `app/error.tsx` y `app/global-error.tsx`.
+
+## CI
+
+`.github/workflows/ci.yml` corre en `develop`: typecheck, lint, format, tests y build.
 
 ## Evidencia
 
