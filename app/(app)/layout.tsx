@@ -8,6 +8,7 @@ import { ChatContextProvider } from "@/src/modules/ai"
 import { KeepAwakeProvider } from "@/src/modules/keep-awake"
 import { AppHeader } from "@/src/shared/components/layout/app-header"
 import { AppSidebar } from "@/src/shared/components/layout/app-sidebar"
+import { ReleaseNotesSheet } from "@/src/shared/components/layout/release-notes-sheet"
 import {
   SidebarInset,
   SidebarProvider,
@@ -48,6 +49,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               <KeepAwakeProvider>
                 <PendingAccountDeletionHandler />
                 <PendingDataWipeHandler />
+                <ReleaseNotesSheet />
                 {children}
               </KeepAwakeProvider>
             </main>

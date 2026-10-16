@@ -4,7 +4,7 @@
 
 ## Estado actual
 
-- **Versión actual:** `0.20.0` (2026-10-13).
+- **Versión actual:** `0.40.0` (2026-10-16).
 - **Etapa:** beta (`0.x`).
 - El 2026-10-13 se reinició el esquema: las versiones `1.4.0` a `1.19.x` pasaron a ser historial y sus tags se borraron. El historial completo sigue en `CHANGELOG.md`.
 
@@ -84,6 +84,13 @@ git push origin v0.20.1
 
 Incorrecto: `## [2.0.0] - Agenda` o `## [3.0.0] - Proyectos`.
 
+## Regla 5: notas de usuario (hoja «Novedades»)
+
+1. Cada release agrega una entrada en `src/shared/constants/release-notes.ts`, arriba del arreglo, con la misma versión que `package.json`. Va en español de usuario (se dice **App**, nunca módulo) y explica qué cambió para quien usa la app, no el detalle técnico.
+2. `LATEST_RELEASE_VERSION` es la versión de la primera entrada y debe coincidir con `package.json`; la prueba `src/shared/lib/release-notes.spec.ts` lo verifica.
+3. La hoja se muestra una sola vez por versión: compara `LATEST_RELEASE_VERSION` con la última versión vista, guardada en `localStorage` con la clave `releaseNotesSeenVersion`. En la **primera visita** (sin valor guardado) la versión actual se marca como vista en silencio, sin hoja; una versión sin notas curadas también se marca en silencio.
+4. La hoja vive en el shell autenticado (`app/(app)/layout.tsx`): no aparece en rutas públicas.
+
 ## Lista de verificación del agente
 
 - [ ] La versión nueva es mayor que la actual y sigue `0.MINOR.PATCH`.
@@ -91,4 +98,5 @@ Incorrecto: `## [2.0.0] - Agenda` o `## [3.0.0] - Proyectos`.
 - [ ] `CHANGELOG.md` y `package.json` dicen la misma versión.
 - [ ] Commit `chore(release): vX.Y.Z`, push de `develop`, tag `vX.Y.Z` y push del tag.
 - [ ] La marca de beta sigue en el README (y en la UI de la web).
+- [ ] Si el release trae cambios visibles, agregué su entrada en `src/shared/constants/release-notes.ts` (regla 5).
 - [ ] No subí a `1.0.0` sin que el usuario lo pidiera.

@@ -2,6 +2,13 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.40.0] - 2026-10-16
+
+### Agregado
+
+- Hoja «Novedades» en el shell autenticado: al salir una versión nueva, la primera vez que se abre la app muestra qué cambió en lenguaje de usuario. Sale una sola vez por versión y en la primera visita la versión actual queda marcada como vista sin mostrar la hoja. No aparece en rutas públicas como el login.
+- `src/shared/constants/release-notes.ts` guarda las notas de usuario dentro del build: la versión y los cambios se comparan con la última versión vista en `localStorage`, sin endpoint ni sondeo.
+
 ## [0.39.4] - 2026-10-16
 
 ### Cambiado
