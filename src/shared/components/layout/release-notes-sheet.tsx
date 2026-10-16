@@ -16,7 +16,7 @@ import {
 import { CheckIcon, SparklesIcon } from "lucide-react"
 import { useEffect, useSyncExternalStore } from "react"
 
-function resolveCurrentOutcome() {
+function readReleaseNotesOutcome() {
   return resolveReleaseNotesOutcome({
     seenVersion: readSeenVersion(window.localStorage),
     currentVersion: LATEST_RELEASE_VERSION,
@@ -24,9 +24,24 @@ function resolveCurrentOutcome() {
   })
 }
 
+function markCurrentVersionSeen() {
+  markVersionSeen(window.localStorage, LATEST_RELEASE_VERSION)
+}
+
+/**
+ * La primera visita y una versión sin notas curadas no abren hoja: solo
+ * quedan marcadas como vistas.
+ */
+function markVersionSeenWithoutSheet() {
+  const outcome = readReleaseNotesOutcome()
+  if (outcome.action === "mark-seen") {
+    markCurrentVersionSeen()
+  }
+}
+
 /** Solo devuelve una entrada cuando toca mostrarla; el resto de casos no abren hoja. */
 function getEntrySnapshot(): ReleaseNotesEntry | null {
-  const outcome = resolveCurrentOutcome()
+  const outcome = readReleaseNotesOutcome()
   return outcome.action === "show" ? outcome.entry : null
 }
 
@@ -48,17 +63,14 @@ export function ReleaseNotesSheet() {
   )
 
   useEffect(() => {
-    const outcome = resolveCurrentOutcome()
-    if (outcome.action === "mark-seen") {
-      markVersionSeen(window.localStorage, LATEST_RELEASE_VERSION)
-    }
+    markVersionSeenWithoutSheet()
   }, [])
 
   const closeSheet = () => {
     if (entry === null) {
       return
     }
-    markVersionSeen(window.localStorage, LATEST_RELEASE_VERSION)
+    markCurrentVersionSeen()
   }
 
   return (
