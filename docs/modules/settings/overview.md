@@ -19,7 +19,7 @@ Ruta: `/settings` (`settings-screen.tsx`). Sheets `?sheet=`.
 
 Slugs: `finance`, `agenda`, `projects`, `health`. Solo finance tiene app routes. Suscripciones dejó de ser un módulo: su sección vive en `/settings/finance#suscripciones` y `/settings/subscriptions` redirige allí.
 
-Defaults: `src/modules/settings/constants/user-settings-defaults.ts`. Hooks: `useProfile`, `useUserModuleConfig`, `useDeleteAccount`, `useWipeUserData`. Invalidación `profile`/`me` también desde tools IA.
+Defaults: `src/modules/settings/constants/user-settings-defaults.ts`. Hooks: `useProfile`, `useUserModuleConfig`, `useDeleteAccount`, `useWipeUserData`, `useReleaseNotesSeen`. Invalidación `profile`/`me` también desde tools IA.
 
 Vaciar datos: `wipe-layers.ts` (espejo del back: ids, labels, dependencias catalog → ledger y categories → planning), `pending-data-wipe.ts` + `PendingDataWipeHandler` para el reauth con Google. Reauth con Google vía `loginWithGoogleMutation`; la sesión nunca se cierra.
 

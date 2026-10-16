@@ -11,6 +11,7 @@ export const API_ENDPOINTS = {
     DELETE_ME: "/users/me",
     WIPE_DATA: "/users/me/data/wipe",
     MODULE: (slug: string) => `/users/me/modules/${slug}`,
+    RELEASE_NOTES_SEEN: "/users/me/release-notes-seen",
   },
   NOTIFICATIONS: {
     LIST: "/notifications",

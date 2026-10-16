@@ -66,6 +66,7 @@ export type UserProfile = {
   timezone: string | null
   locale: string | null
   preferences: UserPreferences | null
+  lastSeenReleaseVersion: string | null
   userModules?: UserModuleEntry[]
   createdAt: string
   updatedAt: string

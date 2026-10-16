@@ -19,6 +19,7 @@ export type {
 export type { ModuleSlug } from "@/src/modules/settings/types/module-config.types"
 export { PendingAccountDeletionHandler } from "@/src/modules/settings/components/pending-account-deletion-handler"
 export { PendingDataWipeHandler } from "@/src/modules/settings/components/pending-data-wipe-handler"
+export { ReleaseNotes } from "@/src/modules/settings/components/release-notes"
 export { useApplyThemePreference } from "@/src/modules/settings/hooks/use-apply-theme-preference"
 export { useAiProviders } from "@/src/modules/settings/hooks/use-ai-providers"
 export { useDeleteAccount } from "@/src/modules/settings/hooks/use-delete-account"
