@@ -6,12 +6,12 @@ import { API_ENDPOINTS } from "@/src/shared/constants/api-endpoints"
 export const PROFILE_QUERY_KEY = ["profile", "me"] as const
 
 export class BackendProfileUnavailableError extends Error {
-  constructor(
-    message: string,
-    public readonly cause?: unknown
-  ) {
+  readonly cause?: unknown
+
+  constructor(message: string, cause?: unknown) {
     super(message)
     this.name = "BackendProfileUnavailableError"
+    this.cause = cause
   }
 }
 
@@ -19,6 +19,40 @@ function isValidUserProfile(
   profile: UserProfile | null | undefined
 ): profile is UserProfile {
   return Boolean(profile?.id && profile.email)
+}
+
+export function resolveProfileFailure(
+  error: unknown
+): BackendProfileUnavailableError {
+  if (error instanceof BackendProfileUnavailableError) {
+    return error
+  }
+
+  if (error instanceof ApiError) {
+    if (error.status === 404) {
+      return new BackendProfileUnavailableError(
+        "Tu cuenta no está registrada en el sistema. Contacta soporte.",
+        error
+      )
+    }
+
+    if (error.status >= 500) {
+      return new BackendProfileUnavailableError(
+        "El servidor no está disponible. Intenta más tarde.",
+        error
+      )
+    }
+
+    return new BackendProfileUnavailableError(
+      error.message || "No se pudo verificar tu cuenta con el servidor.",
+      error
+    )
+  }
+
+  return new BackendProfileUnavailableError(
+    "No se pudo conectar con el servidor. Comprueba que el servidor esté en marcha.",
+    error
+  )
 }
 
 export async function fetchUserProfileRequired(): Promise<UserProfile> {
@@ -33,35 +67,7 @@ export async function fetchUserProfileRequired(): Promise<UserProfile> {
 
     return profile
   } catch (error) {
-    if (error instanceof BackendProfileUnavailableError) {
-      throw error
-    }
-
-    if (error instanceof ApiError) {
-      if (error.status === 404) {
-        throw new BackendProfileUnavailableError(
-          "Tu cuenta no está registrada en el sistema. Contacta soporte.",
-          error
-        )
-      }
-
-      if (error.status >= 500) {
-        throw new BackendProfileUnavailableError(
-          "El servidor no está disponible. Intenta más tarde.",
-          error
-        )
-      }
-
-      throw new BackendProfileUnavailableError(
-        error.message || "No se pudo verificar tu cuenta con el servidor.",
-        error
-      )
-    }
-
-    throw new BackendProfileUnavailableError(
-      "No se pudo conectar con el servidor. Comprueba que el servidor esté en marcha.",
-      error
-    )
+    throw resolveProfileFailure(error)
   }
 }
 

@@ -12,13 +12,14 @@ import type { AuthError, Session, User } from "@supabase/supabase-js"
 export const REGISTER_PENDING_VERIFICATION = "REGISTER_PENDING_VERIFICATION"
 
 export class AuthServiceError extends Error {
-  constructor(
-    message: string,
-    public readonly code?: string,
-    public readonly cause?: unknown
-  ) {
+  readonly code?: string
+  readonly cause?: unknown
+
+  constructor(message: string, code?: string, cause?: unknown) {
     super(message)
     this.name = "AuthServiceError"
+    this.code = code
+    this.cause = cause
   }
 }
 

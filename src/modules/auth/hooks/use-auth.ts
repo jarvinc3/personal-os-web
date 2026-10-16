@@ -1,25 +1,22 @@
 "use client"
 
 import {
-  BackendProfileUnavailableError,
+  isProfileUnavailableFailure,
+  resolveRegisterFailure,
+  resolveSessionRecoveryMessage,
+} from "@/src/modules/auth/lib/auth-errors"
+import {
   hydrateAuthUser,
   PROFILE_QUERY_KEY,
 } from "@/src/modules/auth/lib/hydrate-auth-user"
 import { revokeAuthSession } from "@/src/modules/auth/lib/revoke-auth-session"
-import {
-  AuthServiceError,
-  REGISTER_PENDING_VERIFICATION,
-  supabaseAuthService,
-} from "@/src/modules/auth/services/supabase-auth.service"
+import { supabaseAuthService } from "@/src/modules/auth/services/supabase-auth.service"
 import type {
   LoginPayload,
   RegisterPayload,
 } from "@/src/modules/auth/types/auth.types"
 import { deactivatePushTokenIfPresent } from "@/src/modules/notifications"
-import {
-  APP_ROUTES,
-  authVerifyEmailHref,
-} from "@/src/shared/constants/app-routes"
+import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { useAppStore } from "@/src/shared/store/app-store"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useRouter } from "next/navigation"
@@ -42,10 +39,7 @@ export function useAuth() {
       return hydrated
     } catch (error) {
       await revokeAuthSession({
-        message:
-          error instanceof BackendProfileUnavailableError
-            ? error.message
-            : "No se pudo verificar tu cuenta con el servidor.",
+        message: resolveSessionRecoveryMessage(error),
       })
       throw error
     }
@@ -59,7 +53,7 @@ export function useAuth() {
       router.push(APP_ROUTES.app.home)
     },
     onError: (error) => {
-      if (error instanceof BackendProfileUnavailableError) {
+      if (isProfileUnavailableFailure(error)) {
         return
       }
       toast.error("No se pudo iniciar sesión", { description: error.message })
@@ -74,14 +68,12 @@ export function useAuth() {
       router.push(APP_ROUTES.app.home)
     },
     onError: (error, variables) => {
-      if (error instanceof BackendProfileUnavailableError) {
+      const action = resolveRegisterFailure(error, variables.email)
+      if (action.kind === "silent") {
         return
       }
-      if (
-        error instanceof AuthServiceError &&
-        error.code === REGISTER_PENDING_VERIFICATION
-      ) {
-        router.push(authVerifyEmailHref(variables.email))
+      if (action.kind === "verify-email") {
+        router.push(action.href)
         return
       }
 

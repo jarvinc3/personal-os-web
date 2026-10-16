@@ -1,5 +1,6 @@
 "use client"
 
+import { resolveAuthGuardState } from "@/src/modules/auth/lib/auth-guard-state"
 import { useAppStore } from "@/src/shared/store/app-store"
 import { useMemo } from "react"
 
@@ -8,11 +9,7 @@ export function useAuthGuard() {
   const user = useAppStore((state) => state.user)
 
   return useMemo(
-    () => ({
-      isLoading: !bootstrapped,
-      isAuthenticated: Boolean(user?.profile),
-      user,
-    }),
+    () => resolveAuthGuardState({ bootstrapped, user }),
     [bootstrapped, user]
   )
 }
