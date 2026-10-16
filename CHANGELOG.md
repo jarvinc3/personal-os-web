@@ -2,6 +2,22 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.39.2] - 2026-10-16
+
+### Cambiado
+
+- La documentación deja de llevar `status.md`, `review-register.md` y `roadmap.md`: el estado, el roadmap y los hallazgos viven en GitHub Issues (label `roadmap`) y los documentos cerrados pasan a `docs/archive/`.
+- `README.md`, `AGENTS.md`, `CONTEXT.md` y `docs/README.md` describen stack, scripts, entorno (Sentry), flujo de issues con `Closes #N`, error boundaries y CI.
+- `docs/modules/home/**` se funde en un solo README.
+
+### Eliminado
+
+- `docs/qa-personal-os-mobile-screens.md`, `docs/spec-alineacion-dominio/estado-implementacion.md` y los diseños de Suscripciones superados por el pendiente 14.
+
+### Corregido
+
+- `capabilities/sync.md` habla de `bankSenderEmails` (arreglo), no de `bankSenderEmail`.
+
 ## [0.39.1] - 2026-10-16
 
 ### Corregido
