@@ -2,6 +2,7 @@ import { z } from "zod"
 
 import { FINANCE_CARD_TYPES } from "@/src/modules/finance/shared/constants/catalog"
 import { parseFinanceMoney } from "@/src/modules/finance/shared/lib/money"
+import type { FinanceAccount } from "@/src/modules/finance/shared/types/entities"
 
 function isOptionalMoneyInput(value: string): boolean {
   return value.trim() === "" || parseFinanceMoney(value) !== null
@@ -50,3 +51,17 @@ export const cardSchema = z
   })
 
 export type CardFormValues = z.infer<typeof cardSchema>
+
+/**
+ * Accounts a card can point at: the active ones of the chosen institution.
+ * A DEBIT card is paid from its own institution, so the selector never offers
+ * accounts from another bank.
+ */
+export function institutionAccountOptions(
+  accounts: readonly FinanceAccount[],
+  institutionId: string
+): FinanceAccount[] {
+  return accounts.filter(
+    (account) => account.isActive && account.institutionId === institutionId
+  )
+}
