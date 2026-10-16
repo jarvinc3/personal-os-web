@@ -86,7 +86,7 @@ Sentry corre en cliente, servidor y edge (`instrumentation-client.ts`, `instrume
 
 ## CI
 
-`.github/workflows/ci.yml` corre en `develop`: typecheck, lint, format, tests y build.
+`.github/workflows/ci.yml` corre en `develop`: typecheck, lint, format, tests, build y audit de producción no bloqueante.
 
 ## Evidencia
 
