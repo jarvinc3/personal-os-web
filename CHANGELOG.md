@@ -2,6 +2,20 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.41.0] - 2026-10-16
+
+### Agregado
+
+- Reintentos sin duplicar: el cliente HTTP manda `Idempotency-Key` en POST, PATCH y DELETE, reutiliza la misma clave en los reintentos de esa petición y genera una clave nueva en cada llamada. Los GET se reintentan igual que antes.
+- Un 409 del servidor (clave en curso o usada con otro body) se muestra como conflicto y no se reintenta.
+- Pruebas del cliente HTTP y de la lógica de los hooks de autenticación (`src/config`, `src/modules/auth`).
+
+### Cambiado
+
+- El cliente HTTP se arma con dependencias inyectables (`createApiClient`) para poder probarlo sin sesión real; los `apiGet`, `apiPost`, `apiPatch`, `apiDelete` y `apiPostForm` exportados no cambian.
+- `pnpm test` incluye los specs de `src/config`.
+- `ApiError`, `AuthServiceError` y `BackendProfileUnavailableError` dejan de usar parameter properties de TypeScript, que `node --test --experimental-strip-types` no soporta.
+
 ## [0.40.0] - 2026-10-16
 
 ### Agregado
