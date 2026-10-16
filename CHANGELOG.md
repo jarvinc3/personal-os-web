@@ -2,6 +2,14 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.42.3] - 2026-10-16
+
+### Cambiado
+
+- Zod 3.25.76 → 4.6.7, alineado con el back. `@hookform/resolvers` sube de 3.10.0 a 5.9.1: el `zodResolver` de la v3 lee `ZodError.errors`, que Zod 4 quitó, y devolvía el error en vez de los mensajes por campo.
+- ESLint 9.39.5 → 10.12.0. `eslint.config.mjs` fija `settings.react.version` desde `package.json` porque `eslint-plugin-react` detectaba la versión de React con `context.getFilename()`, eliminado en ESLint 10.
+- Otras subidas: `@base-ui/react` 1.9.0, `@supabase/supabase-js` 2.118.0, `@tanstack/react-query` 5.104.3, `react`/`react-dom` 19.3.1, `react-hook-form` 7.90.0, `postcss` 8.5.30 y `prettier` 3.9.10.
+
 ## [0.42.2] - 2026-10-16
 
 ### Cambiado

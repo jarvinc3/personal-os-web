@@ -12,6 +12,12 @@ export type ReleaseNotesEntry = {
 
 export const RELEASE_NOTES: readonly ReleaseNotesEntry[] = [
   {
+    version: "0.42.3",
+    highlights: [
+      "Sin cambios visibles: actualización interna de dependencias.",
+    ],
+  },
+  {
     version: "0.42.2",
     highlights: [
       "Sin cambios visibles: limpieza interna de dependencias y del icono del navegador.",
