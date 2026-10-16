@@ -2,6 +2,18 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.42.2] - 2026-10-16
+
+### Cambiado
+
+- `package.json`: la `description` queda breve y precisa; las dependencias que estaban en `latest` se fijan a la versión instalada del lockfile con `^` (`@hugeicons/core-free-icons`, `@hugeicons/react`, `class-variance-authority`, `next-themes`, `radix-ui`, `shadcn` y `tw-animate-css`).
+- pnpm alineado con el back (`packageManager: pnpm@12.11.2`) y CI sin la versión fija 9.
+- `pnpm audit --prod --audit-level=high` corre en CI con `continue-on-error`, sin bloquear el pipeline.
+
+### Corregido
+
+- `public/assets/favicon.svg` baja de 2.28 MB a 59 KB: el PNG embebido de 1254 px se reemplaza por uno de 256 px con la misma apariencia.
+
 ## [0.42.1] - 2026-10-16
 
 ### Cambiado
