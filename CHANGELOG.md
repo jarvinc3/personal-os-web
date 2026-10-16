@@ -2,6 +2,17 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.39.0] - 2026-10-16
+
+### Agregado
+
+- La cola «Movimientos por asignar» ofrece «Reintentar» en cada mensaje pendiente: llama a `POST /finance/email-sync/pending/:id/retry`, muestra el estado de carga y avisa si el movimiento quedó asignado o si sigue pendiente.
+
+### Cambiado
+
+- El sync de correo queda documentado como funciona: el OAuth autoriza solo el buzón, la institución se vincula después, el callback vuelve siempre a `/finance/sync` y el efectivo vive en la institución de sistema «Efectivo». `emailSync.enabled` es el interruptor que el back exige para conectar, sincronizar y vincular; `emailSync.automatic` solo gobierna el sync programado.
+- El selector de cuenta de una tarjeta usa `institutionAccountOptions`, el helper puro que filtra las cuentas activas de la institución elegida.
+
 ## [0.38.3] - 2026-10-15
 
 ### Cambiado
