@@ -9,7 +9,7 @@ Infra transversal. Comportamiento de producto: [../modules/auth/](../modules/aut
 3. Con sesión: `establishAuthenticatedSession` → `hydrateAuthUser` (`GET /users/me`) → store + `PROFILE_QUERY_KEY` = `['profile','me']`.
 4. `TOKEN_REFRESHED` con `user.profile` ya hidratado: actualiza tokens, no re-fetch.
 5. `useAuthGuard` en páginas `(app)`: `isLoading: !bootstrapped`; autenticado = `Boolean(user?.profile)`.
-6. `proxy.ts` bloquea unauthenticated en home/settings/chat/notifications/keep-awake/finance; `/` redirige a home o landing; `/login` bounce si ya hay sesión.
+6. `proxy.ts` bloquea unauthenticated en home/settings/chat/notifications/keep-awake/finance; `/` redirige a `/home` con sesión y a `/login` sin ella; `/login` bounce si ya hay sesión.
 
 Tokens: `@supabase/ssr` + `@supabase/supabase-js`; no se guardan a mano.
 
@@ -20,4 +20,4 @@ Google OAuth: `signInWithOAuth` → `GET /auth/callback` intercambia `code`. Que
 Evidencia: `src/providers/auth-bootstrap-provider.tsx`, `src/modules/auth/hooks/*`, `proxy.ts`.
 
 > [!WARNING]
-> **REV-WEB-003** (`CONTRADICE_CODIGO`) — `auth.md` antiguo citaba `shared/providers/auth-bootstrap-provider.tsx`. Path real: `src/providers/`. [review-register.md](../review-register.md#rev-web-003)
+> **REV-WEB-003** (`CONTRADICE_CODIGO`) — `auth.md` antiguo citaba `shared/providers/auth-bootstrap-provider.tsx`. Path real: `src/providers/`. [registro archivado](../archive/review-register.md)

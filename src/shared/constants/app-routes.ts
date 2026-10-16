@@ -5,9 +5,6 @@ const FINANCE_CASH_PATH = "/finance/cash"
 
 export const APP_ROUTES = {
   root: "/",
-  marketing: {
-    landing: "/landing",
-  },
   auth: {
     login: "/login",
     verifyEmail: "/verify-email",

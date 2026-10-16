@@ -20,7 +20,7 @@ Código: `src/modules/ai/` (docs en `docs/modules/ai/`, no `ai-agent`).
 - Tools de dominio para agenda/projects/health/finance.
 
 > [!WARNING]
-> **REV-WEB-011** (`NO_IMPLEMENTADO`) — no hay `agenda-tools.md` etc. El selector igual ofrece esos slugs; el backend solo da tools mínimas. [review-register.md](../../review-register.md#rev-web-011)
+> **REV-WEB-011** (`NO_IMPLEMENTADO`) — no hay `agenda-tools.md` etc. El selector igual ofrece esos slugs; el backend solo da tools mínimas. [Issue #144](https://github.com/jarvinc3/personal-os-web/issues/144)
 
 ## Chrome
 

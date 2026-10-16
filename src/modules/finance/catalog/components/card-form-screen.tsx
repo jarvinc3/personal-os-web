@@ -65,6 +65,7 @@ import type {
 } from "@/src/modules/finance/shared/types/entities"
 import {
   cardSchema,
+  institutionAccountOptions,
   type CardFormValues,
 } from "@/src/modules/finance/catalog/lib/card-form"
 import { FormTextField } from "@/src/shared/components/layout/form-blocks"
@@ -180,8 +181,9 @@ export function CardFormScreen({
   const lastFour = useWatch({ control, name: "lastFour" })
   const selectedInstitution =
     institutions.find((item) => item.id === selectedInstitutionId) ?? null
-  const institutionAccounts = accounts.filter(
-    (item) => item.isActive && item.institutionId === selectedInstitutionId
+  const institutionAccounts = institutionAccountOptions(
+    accounts,
+    selectedInstitutionId
   )
   const hasInstitutions = institutions.length > 0
   const { picker, openPicker, closeHandlerFor } = usePicker<
@@ -202,15 +204,14 @@ export function CardFormScreen({
   )
 
   useEffect(() => {
-    if (
-      selectedAccountId !== CATALOG_NONE &&
-      !accounts.some(
-        (item) =>
-          item.id === selectedAccountId &&
-          item.isActive &&
-          item.institutionId === selectedInstitutionId
-      )
-    ) {
+    if (selectedAccountId === CATALOG_NONE) {
+      return
+    }
+    const accountIsOffered = institutionAccountOptions(
+      accounts,
+      selectedInstitutionId
+    ).some((account) => account.id === selectedAccountId)
+    if (!accountIsOffered) {
       setValue("accountId", CATALOG_NONE)
     }
   }, [accounts, selectedAccountId, selectedInstitutionId, setValue])

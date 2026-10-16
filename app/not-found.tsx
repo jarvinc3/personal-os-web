@@ -1,10 +1,8 @@
 import { AppLogo } from "@/src/shared/components/brand/app-logo"
 import { Button } from "@/src/shared/components/ui/button"
-import { LinkPendingOverlay } from "@/src/shared/components/ui/navigation-pending"
-import { APP_ROUTES } from "@/src/shared/constants/app-routes"
+import { landingUrl } from "@/src/shared/constants/landing.mjs"
 import { ArrowLeftIcon, MailIcon } from "lucide-react"
 import type { Metadata } from "next"
-import Link from "next/link"
 
 export const metadata: Metadata = {
   title: "Página no encontrada",
@@ -15,8 +13,8 @@ export default function NotFound() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-8 px-6 py-16 text-center">
       <div className="flex flex-col items-center gap-4">
-        <Link
-          href={APP_ROUTES.marketing.landing}
+        <a
+          href={landingUrl()}
           className="group relative flex items-center gap-2.5"
         >
           <AppLogo
@@ -26,8 +24,7 @@ export default function NotFound() {
           <span className="text-xl font-semibold tracking-tight">
             Personal OS
           </span>
-          <LinkPendingOverlay />
-        </Link>
+        </a>
       </div>
 
       <div className="flex flex-col gap-4">
@@ -52,11 +49,10 @@ export default function NotFound() {
             size="lg"
             className="shadow-[4px_4px_0px_0px_#111827] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none"
           >
-            <Link href={APP_ROUTES.marketing.landing} className="relative">
+            <a href={landingUrl()} className="relative">
               <ArrowLeftIcon className="size-4 shrink-0" />
               Volver al inicio
-              <LinkPendingOverlay spinnerClassName="size-4" />
-            </Link>
+            </a>
           </Button>
           <Button
             asChild
@@ -64,11 +60,10 @@ export default function NotFound() {
             size="lg"
             className="border-2 border-text shadow-[4px_4px_0px_0px_#111827] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none"
           >
-            <Link href="/contact" className="relative">
+            <a href={landingUrl("/contact")} className="relative">
               <MailIcon className="size-4 shrink-0" />
               Contactar soporte
-              <LinkPendingOverlay spinnerClassName="size-4" />
-            </Link>
+            </a>
           </Button>
         </div>
       </div>

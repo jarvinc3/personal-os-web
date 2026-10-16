@@ -1,6 +1,6 @@
 # Finanzas: cómo funciona hoy
 
-Estado al 22 oct 2026: web v0.35.1 y back v0.32.3. Este documento resume el dominio y los flujos principales tal como están implementados. El contrato HTTP completo vive en `personal-os-back/docs/modules/finance/`. Lo pendiente está en [pendientes/](./pendientes/README.md).
+Este documento resume el dominio y los flujos principales tal como están implementados. El contrato HTTP completo vive en `personal-os-back/docs/modules/finance/`. Los specs de los pendientes 01–18 y 18.1, ya implementados, quedan en [docs/archive/pendientes/](../../archive/pendientes/README.md).
 
 El dinero se suma, resta y convierte con decimales exactos: `Prisma.Decimal` en el back (`shared/domain/money.ts`) y `decimal.js-light` en la web (`shared/lib/decimal.ts`). El redondeo es `ROUND_HALF_EVEN` a 2 decimales y ocurre solo al presentar o persistir. La API sigue serializando money como string (ADR-002); `Number` queda solo para escalas de gráfico y porcentajes.
 
@@ -84,7 +84,7 @@ El saldo guardado de cada cuenta y tarjeta debe ser siempre la suma de sus movim
 3. Un job nocturno (`BalanceIntegrityScheduler`) recorre los productos de cada usuario y emite `FINANCE_BALANCE_DRIFT_DETECTED` por desviación nueva o cambiada. La notificación se controla con `notifications.balanceIntegrity`.
 4. En la web, el detalle de cuenta o tarjeta de crédito (las de débito usan su cuenta) muestra un banner con saldo guardado, esperado y diferencia, más "Recalcular" con confirmación. Productos lista las desviaciones abiertas y Ajustes → Finanzas tiene "Verificar ahora".
 
-La diferencia con el banco sigue siendo cosa de la conciliación ([09](./pendientes/09-conciliacion-ajustes.md)); una desviación de I1 se recalcula, no se concilia.
+La diferencia con el banco sigue siendo cosa de la conciliación ([09](../../archive/pendientes/09-conciliacion-ajustes.md)); una desviación de I1 se recalcula, no se concilia.
 
 ### Préstamos
 

@@ -19,6 +19,7 @@ import {
   useEmailMailboxes,
   usePendingEmailMessages,
   useRecentEmailMessages,
+  useRetryPendingEmail,
   useRunEmailSync,
 } from "@/src/modules/finance/shared/hooks/use-email-sources"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
@@ -49,9 +50,17 @@ import { FinanceErrorState } from "@/src/modules/finance/shared/components/layou
 import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
 import { SummaryItem, SummarySection } from "@/src/shared/components/ui/summary"
 import { InfiniteListSentinel } from "@/src/shared/components/ui/infinite-list-sentinel"
+import { Spinner } from "@/src/shared/components/ui/spinner"
 import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
+import { appToast } from "@/src/shared/lib/app-toast"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
-import { InboxIcon, MailIcon, PlusIcon, TriangleAlertIcon } from "lucide-react"
+import {
+  InboxIcon,
+  MailIcon,
+  PlusIcon,
+  RefreshCwIcon,
+  TriangleAlertIcon,
+} from "lucide-react"
 
 function pendingRowValue(
   message: FinancePendingEmailMessage,
@@ -69,6 +78,52 @@ function pendingRowValue(
         : "Sin monto"
   const notesHint = payload?.notes?.trim() ? " · Con notas" : ""
   return `${message.institutionName} · ${amount}${notesHint}`
+}
+
+type PendingEmailRowProps = {
+  message: FinancePendingEmailMessage
+  display: FinanceMoneyDisplay
+  isLast: boolean
+  isRetrying: boolean
+  onPress: () => void
+  onRetry: () => void
+}
+
+function PendingEmailRow({
+  message,
+  display,
+  isLast,
+  isRetrying,
+  onPress,
+  onRetry,
+}: PendingEmailRowProps) {
+  const title = message.extractedPayload?.merchant ?? message.gmailMessageId
+  return (
+    <SummaryItem
+      title={title}
+      value={pendingRowValue(message, display)}
+      icon={InboxIcon}
+      onPress={onPress}
+      isLast={isLast}
+      trailing={
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          disabled={isRetrying}
+          aria-label={`Reintentar ${title}`}
+          onClick={onRetry}
+        >
+          {isRetrying ? (
+            <Spinner data-icon="inline-start" />
+          ) : (
+            <RefreshCwIcon className="size-4 shrink-0" />
+          )}
+          Reintentar
+        </Button>
+      }
+    />
+  )
 }
 
 export function FinanceMailboxesView({ enabled }: { enabled: boolean }) {
@@ -164,6 +219,27 @@ export function FinanceMailboxesView({ enabled }: { enabled: boolean }) {
     setOpenAssignSheet,
     true
   )
+
+  const retryPendingMutation = useRetryPendingEmail()
+  const retryingPendingId = retryPendingMutation.isPending
+    ? (retryPendingMutation.variables ?? null)
+    : null
+
+  async function retryPending(message: FinancePendingEmailMessage) {
+    try {
+      const retryOutcome = await retryPendingMutation.mutateAsync(message.id)
+      if ("assigned" in retryOutcome && retryOutcome.assigned) {
+        appToast.success({ text1: "Movimiento asignado" })
+        return
+      }
+      appToast.info({
+        text1: "Sigue pendiente",
+        text2: "Ábrelo para elegir cuenta o tarjeta.",
+      })
+    } catch (error) {
+      appToast.error({ text1: financeErrorMessage(error) })
+    }
+  }
 
   return (
     <>
@@ -296,15 +372,14 @@ export function FinanceMailboxesView({ enabled }: { enabled: boolean }) {
           }
         >
           {pending.map((message, index) => (
-            <SummaryItem
+            <PendingEmailRow
               key={message.id}
-              title={
-                message.extractedPayload?.merchant ?? message.gmailMessageId
-              }
-              value={pendingRowValue(message, display)}
-              icon={InboxIcon}
-              onPress={() => setOpenAssignSheet(true, message.id)}
+              message={message}
+              display={display}
               isLast={index === pending.length - 1}
+              isRetrying={retryingPendingId === message.id}
+              onPress={() => setOpenAssignSheet(true, message.id)}
+              onRetry={() => void retryPending(message)}
             />
           ))}
           <InfiniteListSentinel

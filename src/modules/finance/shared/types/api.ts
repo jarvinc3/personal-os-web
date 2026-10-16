@@ -9,6 +9,10 @@
  *
  * Money fields on **read** are decimal strings. Write DTOs stay numbers.
  * `interestRate` read: string | null. Percentages (`pctUsed`, `alertThresholdPct`) stay number.
+ *
+ * `POST /finance/email-sync/pending/:id/retry` responds `{ assigned: true, transactionId }`
+ *   when the reroute imports the movement, or the pending message when it stays pending.
+ *   Same union as `POST /finance/email-sync/pending/:id/assign` and `.../amount`.
  */
 
 export type FinancePaginated<T> = {

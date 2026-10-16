@@ -35,6 +35,7 @@ import {
   APP_ROUTES,
   settingsModuleHref,
 } from "@/src/shared/constants/app-routes"
+import { landingUrl } from "@/src/shared/constants/landing.mjs"
 import { MODULE_SLUGS_ORDER } from "@/src/shared/constants/module-registry"
 import { MODULE_SHEET_PARAM_KEYS } from "@/src/modules/settings/constants/module-sheet-keys"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
@@ -51,6 +52,10 @@ const APP_ENV =
     ? "development"
     : (process.env.NEXT_PUBLIC_ENV ?? "preview")
 
+function openLandingPage() {
+  window.open(landingUrl(), "_blank", "noopener,noreferrer")
+}
+
 export function SettingsScreen() {
   return (
     <SettingsGate>
@@ -61,8 +66,6 @@ export function SettingsScreen() {
 
 function SettingsScreenBody() {
   const router = useRouter()
-  const { navigate: navigateToLanding, isPending: isLandingPending } =
-    usePendingNavigation()
   const { navigate: navigateToWipeData, isPending: isWipeDataPending } =
     usePendingNavigation()
   const { user } = useAuthGuard()
@@ -360,11 +363,7 @@ function SettingsScreenBody() {
         <SettingsRow
           label="Landing page"
           link
-          onPress={() => navigateToLanding(APP_ROUTES.marketing.landing)}
-          disabled={isLandingPending}
-          trailing={
-            isLandingPending ? <Spinner className="size-4" /> : undefined
-          }
+          onPress={openLandingPage}
           accentColor={SETTINGS_REGISTRY.marketing.accent}
           {...SETTINGS_REGISTRY.marketing.rows.landingPage}
         />

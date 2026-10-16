@@ -12,4 +12,4 @@ Requisitos: HTTPS (localhost ok), VAPID matching backend, Chrome/Firefox/Edge; S
 Evidencia: `src/modules/notifications/`, `public/sw.js`.
 
 > [!WARNING]
-> **REV-WEB-004** (`CONTEXTO_NO_APLICABLE`) — runbooks antiguos describían `ExponentPushToken` y Expo Go. Este cliente usa Web Push. [review-register.md](../review-register.md#rev-web-004)
+> **REV-WEB-004** (`CONTEXTO_NO_APLICABLE`) — runbooks antiguos describían `ExponentPushToken` y Expo Go. Este cliente usa Web Push. [registro archivado](../archive/review-register.md)

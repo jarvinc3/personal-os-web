@@ -16,12 +16,11 @@ import { LoadingView } from "@/src/shared/components/layout/loading-view"
 import { Button } from "@/src/shared/components/ui/button"
 import { appAssets } from "@/src/shared/constants/app-assets"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
+import { landingUrl } from "@/src/shared/constants/landing.mjs"
 import { useIsMobile } from "@/src/shared/hooks/use-mobile"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { ArrowRight } from "lucide-react"
 import Image from "next/image"
-import { LinkPendingOverlay } from "@/src/shared/components/ui/navigation-pending"
-import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useEffect, useRef, useState } from "react"
 
@@ -74,17 +73,16 @@ function LoginScreenBody() {
   return (
     <div className="flex h-screen flex-col">
       <nav className="flex flex-row items-center gap-3 p-4">
-        <Link
-          href={APP_ROUTES.marketing.landing}
-          className="relative flex flex-row items-center gap-3 transition-opacity hover:opacity-80"
+        <a
+          href={landingUrl()}
+          className="flex flex-row items-center gap-3 transition-opacity hover:opacity-80"
         >
           <AppLogo size="lg" className="rounded-md" priority />
           <div className="flex-1">
             <p className="text-base font-bold text-foreground">Personal OS</p>
             <p className="text-xs text-muted-foreground">Tu espacio personal</p>
           </div>
-          <LinkPendingOverlay />
-        </Link>
+        </a>
       </nav>
 
       <div className="flex min-h-0 flex-1 flex-col md:flex-row">

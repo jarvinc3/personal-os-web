@@ -16,4 +16,4 @@ Este cliente:
 Defaults mergeados en cliente: `src/modules/settings/constants/user-settings-defaults.ts` (`normalizePreferences`, `normalizeModuleConfig`). El backend también mergea; el cliente re-normaliza para UI estable.
 
 > [!WARNING]
-> **REV-WEB-002** — no existe `docs/user-settings-defaults.json`. [review-register.md](../../../review-register.md#rev-web-002)
+> **REV-WEB-002** — no existe `docs/user-settings-defaults.json`. [registro archivado](../../../archive/review-register.md)

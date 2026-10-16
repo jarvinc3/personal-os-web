@@ -1,7 +1,8 @@
 import assert from "node:assert/strict"
 import { describe, it } from "node:test"
 
-import { cardSchema } from "./card-form.ts"
+import { cardSchema, institutionAccountOptions } from "./card-form.ts"
+import type { FinanceAccount } from "../types/entities.ts"
 
 const validCard = {
   name: "Visa",
@@ -46,5 +47,64 @@ describe("cardSchema", () => {
       }).success,
       false
     )
+  })
+})
+
+function account(
+  partial: Partial<FinanceAccount> & Pick<FinanceAccount, "id" | "name">
+): FinanceAccount {
+  return {
+    institutionId: "inst-1",
+    institutionName: "Banco",
+    type: "CHECKING",
+    currency: "DOP",
+    accountNumber: null,
+    balance: "0",
+    color: null,
+    isActive: true,
+    createdAt: "2026-01-01T00:00:00.000Z",
+    updatedAt: "2026-01-01T00:00:00.000Z",
+    ...partial,
+  }
+}
+
+describe("institutionAccountOptions", () => {
+  it("keeps only the accounts of the card institution", () => {
+    const options = institutionAccountOptions(
+      [
+        account({ id: "acc-1", name: "Ahorros", institutionId: "inst-1" }),
+        account({ id: "acc-2", name: "Corriente", institutionId: "inst-2" }),
+      ],
+      "inst-1"
+    )
+
+    assert.deepEqual(
+      options.map((option) => option.id),
+      ["acc-1"]
+    )
+  })
+
+  it("drops inactive accounts of the institution", () => {
+    const options = institutionAccountOptions(
+      [
+        account({ id: "acc-1", name: "Ahorros" }),
+        account({ id: "acc-2", name: "Cerrada", isActive: false }),
+      ],
+      "inst-1"
+    )
+
+    assert.deepEqual(
+      options.map((option) => option.id),
+      ["acc-1"]
+    )
+  })
+
+  it("offers nothing when the institution has no accounts", () => {
+    const options = institutionAccountOptions(
+      [account({ id: "acc-1", name: "Ahorros", institutionId: "inst-2" })],
+      "inst-1"
+    )
+
+    assert.equal(options.length, 0)
   })
 })

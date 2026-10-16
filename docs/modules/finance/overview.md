@@ -22,4 +22,4 @@ Tab bar (5): Resumen, Movimientos, Planificación, Suscripciones, Productos. Est
 Helpers: `src/modules/finance/shared/lib/money.ts`, `ledger-payloads.ts`. Tests: specs `*.spec.ts` bajo `shared/lib/` y cada capability.
 
 > [!WARNING]
-> **REV-WEB-012** — docs antiguas reclamaban `/finance/budgets`. El listado de presupuestos vive en `/finance/planning`; el detalle sí tiene ruta propia. Cuentas y cobros se reciclan con archivar / `CANCELLED`; no hay DELETE. [review-register.md](../../review-register.md#rev-web-012)
+> **REV-WEB-012** — docs antiguas reclamaban `/finance/budgets`. El listado de presupuestos vive en `/finance/planning`; el detalle sí tiene ruta propia. Cuentas y cobros se reciclan con archivar / `CANCELLED`; no hay DELETE. [registro archivado](../../archive/review-register.md)

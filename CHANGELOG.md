@@ -2,6 +2,59 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.39.4] - 2026-10-16
+
+### Cambiado
+
+- `/` ya no envía a la landing cuando no hay sesión: sin sesión va a `/login` y con sesión a `/home`. Las rutas públicas retiradas (`/landing`, `/privacy`, `/terms`, `/faq`, `/contact` y `/delete-account`) siguen respondiendo con redirección permanente a la landing nueva.
+- Las reglas de redirección del proxy viven en `src/shared/lib/proxy-routes.ts`, con pruebas propias, y `proxy.ts` solo las aplica. Las redirecciones conservan las cookies de sesión que refresca el proxy.
+
+## [0.39.3] - 2026-10-16
+
+### Cambiado
+
+- La landing deja de servirse desde este repo: `/landing`, `/privacy`, `/terms`, `/faq`, `/contact` y `/delete-account` responden con redirección permanente (308) a la landing nueva (`personal-os-landing`, Astro). `NEXT_PUBLIC_LANDING_URL` cambia el origen; sin valor usa `https://personal-os-landing-six.vercel.app`.
+- `/` sigue llevando a `/home` con sesión y ahora envía a la landing publicada sin ella. Los enlaces a la landing de la bienvenida, de Ajustes y de la página 404 apuntan a la landing nueva.
+- La metadata de la app vive en `src/shared/constants/app-metadata.ts` y ya no declara canonical ni alternates hacia la landing vieja.
+
+### Eliminado
+
+- `app/(landing)/`, `src/modules/landing/` y `docs/modules/landing/`: el marketing, las páginas legales, la FAQ, el contacto, la lista de espera y el borrado de cuenta se sirven desde la landing.
+- `public/assets/splash.png`, sin uso.
+
+## [0.39.2] - 2026-10-16
+
+### Cambiado
+
+- La documentación deja de llevar `status.md`, `review-register.md` y `roadmap.md`: el estado, el roadmap y los hallazgos viven en GitHub Issues (label `roadmap`) y los documentos cerrados pasan a `docs/archive/`.
+- `README.md`, `AGENTS.md`, `CONTEXT.md` y `docs/README.md` describen stack, scripts, entorno (Sentry), flujo de issues con `Closes #N`, error boundaries y CI.
+- `docs/modules/home/**` se funde en un solo README.
+
+### Eliminado
+
+- `docs/qa-personal-os-mobile-screens.md`, `docs/spec-alineacion-dominio/estado-implementacion.md` y los diseños de Suscripciones superados por el pendiente 14.
+
+### Corregido
+
+- `capabilities/sync.md` habla de `bankSenderEmails` (arreglo), no de `bankSenderEmail`.
+
+## [0.39.1] - 2026-10-16
+
+### Corregido
+
+- «Reintentar» en la cola de pendientes anuncia el movimiento que reintenta, porque el texto del botón se repite en cada fila.
+
+## [0.39.0] - 2026-10-16
+
+### Agregado
+
+- La cola «Movimientos por asignar» ofrece «Reintentar» en cada mensaje pendiente: llama a `POST /finance/email-sync/pending/:id/retry`, muestra el estado de carga y avisa si el movimiento quedó asignado o si sigue pendiente.
+
+### Cambiado
+
+- El sync de correo queda documentado como funciona: el OAuth autoriza solo el buzón, la institución se vincula después, el callback vuelve siempre a `/finance/sync` y el efectivo vive en la institución de sistema «Efectivo». `emailSync.enabled` es el interruptor que el back exige para conectar, sincronizar y vincular; `emailSync.automatic` solo gobierna el sync programado.
+- El selector de cuenta de una tarjeta usa `institutionAccountOptions`, el helper puro que filtra las cuentas activas de la institución elegida.
+
 ## [0.38.3] - 2026-10-15
 
 ### Cambiado
@@ -53,7 +106,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 - Saneamiento del registro de revisión (pendiente 17): todos los `<Link>` que abren otra vista muestran el pending con `LinkPendingOverlay`; las cards y filas conservan `href`.
 - `NEXT_PUBLIC_APP_URL` queda documentada en `.env.example`.
-- Los hallazgos de documentación vieja de React Native, Expo y Metro se cierran; los que aún no tienen código pasan a [docs/roadmap.md](./docs/roadmap.md).
+- Los hallazgos de documentación vieja de React Native, Expo y Metro se cierran; los que aún no tienen código pasan a GitHub Issues (label `roadmap`).
 
 ## [0.36.6] - 2026-10-15
 

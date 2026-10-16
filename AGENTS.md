@@ -13,7 +13,15 @@ Instrucciones para agentes y reviewers que trabajan en el cliente web de Persona
 7. [docs/reference/changelog-guide.md](docs/reference/changelog-guide.md) — antes de cerrar la sesión, para el CHANGELOG y la versión.
    - [docs/versionado.md](docs/versionado.md) - política de versionado beta `0.x` (obligatoria; manda sobre la guía del changelog).
 
-Si una afirmación no está `VERIFICADO`, leer [docs/review-register.md](docs/review-register.md) antes de tratarla como comportamiento vigente.
+Si una afirmación no está `VERIFICADO`, no la trates como comportamiento vigente: compruébala en código o abre un issue.
+
+## Seguimiento con GitHub Issues
+
+El estado, el roadmap y los hallazgos viven en GitHub Issues. Los documentos de trabajo cerrados pasan a [docs/archive/](docs/archive/).
+
+- Un cambio resuelve un issue: el cuerpo del commit cierra con `Closes #N` cuando el issue queda resuelto, o `Refs #N` cuando solo avanza. Un commit del monorepo referencia el issue del repo por su número.
+- Lo decidido y no implementado se abre como issue con label `roadmap`; no se deja como `REV-*` suelto en los documentos.
+- La app móvil (`personal-os-app`) está fuera de servicio: no la cites como cliente.
 
 ## Fuentes canónicas
 
@@ -33,7 +41,7 @@ Si una afirmación no está `VERIFICADO`, leer [docs/review-register.md](docs/re
 | Money                                        | [docs/decisions/ADR-002-money-strings.md](docs/decisions/ADR-002-money-strings.md) — el API manda string; el cliente parsea a number solo para editar o escribir              |
 | Cliente HTTP                                 | [docs/infrastructure/api-client.md](docs/infrastructure/api-client.md) — envelope `{ data, meta }`, `ApiError`, 401. No abras otro `fetch`                                    |
 
-Este cliente es **Next.js 16**, no React Native. Instrucciones Expo/Metro/EAS no aplican aquí (ver registro). ADR-001 está resumido en esa frase.
+Este cliente es **Next.js 16**, no React Native. ADR-001 está resumido en esa frase.
 
 Al arrancar o diagnosticar el cliente, lee [docs/operations/runbook.md](docs/operations/runbook.md). Al tocar Web Push, lee [docs/infrastructure/web-push.md](docs/infrastructure/web-push.md).
 
@@ -66,7 +74,7 @@ Viven en [`.agents/skills/`](.agents/skills). Abre solo el `SKILL.md` cuyo dispa
 | `react-best-practices`, `composition-patterns`          | partes o escribes un componente            |
 | `accessibility`                                         | creas un control                           |
 | `next-best-practices`                                   | tocas `app/`                               |
-| `seo`                                                   | tocas metadata o la landing                |
+| `seo`                                                   | tocas metadata o el SEO                    |
 | `next-upgrade`                                          | el trabajo es subir Next                   |
 | `next-cache-components`                                 | el trabajo es `use cache` o PPR            |
 | `migrate-radix-to-base`                                 | se pide migrar de Radix a Base UI          |
@@ -100,16 +108,24 @@ La versión sigue **estrictamente** [docs/versionado.md](docs/versionado.md): be
 
 Usa siempre la fecha real del sistema (`date`) para changelogs y documentos. No adelantes la fecha para "ordenar" artefactos; en el backend el nombre de la carpeta de una migración Prisma define su posición en el historial.
 
+## Errores y observabilidad
+
+Sentry corre en cliente, servidor y edge (`instrumentation*.ts`, `sentry.*.config.ts`) y no se inicializa sin DSN. `app/error.tsx` y `app/global-error.tsx` muestran el fallo. `next.config.mjs` sube source maps con `SENTRY_AUTH_TOKEN`; sin token el build no falla.
+
+## CI
+
+`.github/workflows/ci.yml` corre en `develop`: typecheck, lint, format, tests y build.
+
 ## Checklist al cambiar comportamiento
 
 - [ ] Actualizar el documento dueño (capacidad, contrato UI o arquitectura).
 - [ ] Enlazar al backend cuando el contrato sea de dominio/API; no copiar tablas Prisma.
-- [ ] `agenda` / `projects` / `health` / `subscriptions` solo tienen sheets en Settings hasta que existan rutas en `app/`.
+- [ ] `agenda` / `projects` / `health` solo tienen sheets en Settings hasta que existan rutas en `app/`.
 - [ ] Keep Awake es client-only: no inventar endpoints.
 - [ ] Si tocaste UI, leíste [`.cursor/rules/`](.cursor/rules) y cumples cada regla.
 - [ ] Si cambiaste código, leíste [CODING_GUIDELINES.md](CODING_GUIDELINES.md).
 - [ ] Si el cambio coincide con un disparador de Skills, leíste ese `SKILL.md`.
-- [ ] Si el runtime contradice el doc, registrar `CONTRADICE_RUNTIME`.
+- [ ] Si el runtime contradice el doc, abre un issue con el detalle.
 - [ ] Correr los cuatro comandos de pruebas obligatorias; un test en rojo bloquea el cierre.
 - [ ] Actualizar `CHANGELOG.md` y subir `version` en `package.json`; cerrar con `chore(release): vX.Y.Z` y el tag.
 
@@ -119,7 +135,7 @@ Un solo app Next.js. Sin packages por feature y sin capas `presentation` / `appl
 
 ```text
 app/                 # rutas delgadas: Suspense + screen del index.ts del módulo
-src/modules/         # auth, settings, notifications, ai, finance, keep-awake, home, landing
+src/modules/         # auth, settings, notifications, ai, finance, keep-awake, home
 src/shared/          # chrome, rutas, api-endpoints, primitivos de UI; no importa features
 src/providers/
 src/config/          # api-client, supabase
@@ -143,7 +159,7 @@ El cuerpo existe para que el gate pueda devolver carga o “módulo apagado” s
 ### Nombres
 
 - kebab-case en archivos. Sin repetir el nombre del módulo dentro de su carpeta: `categories-screen.tsx` dentro de finance, no `finance-categories.tsx`.
-- El export coincide con el archivo: `categories-screen.tsx` exporta `CategoriesScreen`. Landing en PascalCase entra en la misma regla.
+- El export coincide con el archivo: `categories-screen.tsx` exporta `CategoriesScreen`.
 
 ### Qué puede vivir en un `.tsx`
 
@@ -155,13 +171,13 @@ Schemas Zod, armado del body del API, agrupación, orden, dinero y fechas van en
 
 ### Gate y header
 
-Un gate solo si el cuerpo no debe montarse hasta tener sesión o hasta que el módulo esté encendido. Ahí hay un solo nombre: `FinanceGate`, `SettingsGate`, `KeepAwakeGate` y el equivalente donde ese corte ya existe hoy. Landing y login no ganan un gate vacío. Home sigue el shell autenticado de `app/(app)`.
+Un gate solo si el cuerpo no debe montarse hasta tener sesión o hasta que el módulo esté encendido. Ahí hay un solo nombre: `FinanceGate`, `SettingsGate`, `KeepAwakeGate` y el equivalente donde ese corte ya existe hoy. Login no gana un gate vacío. Home sigue el shell autenticado de `app/(app)`.
 
 El cuerpo declara el header con `usePageHeader`. El layout no vuelve a inferir “vista secundaria” leyendo el pathname. El objeto `{ currency, showCents, compactNumbers }` se arma en un solo hook de finance y lo consumen las screens.
 
 ### Capabilities (solo Finanzas)
 
-Cada capability tiene sus components, hooks, reglas, types y screens. La screen de un detalle vive en su capability, no en un cajón `pages/` ni como `*-view.tsx` suelto bajo `components/`: cuentas, tarjetas, catálogo, movimientos, planificación, préstamos, cobros, metas de ahorro, presupuestos, sync, dashboard. Cada capability exporta su API en su `index.ts`; otra capability la importa solo desde ahí. Un símbolo agnóstico (dinero, error, tipos, primitivas de formulario) vive en `finance/shared/`, no en `src/shared/`. Auth, settings, notifications, ai, keep-awake, home y landing no se parten en capabilities.
+Cada capability tiene sus components, hooks, reglas, types y screens. La screen de un detalle vive en su capability, no en un cajón `pages/` ni como `*-view.tsx` suelto bajo `components/`: cuentas, tarjetas, catálogo, movimientos, planificación, préstamos, cobros, metas de ahorro, presupuestos, sync, dashboard. Cada capability exporta su API en su `index.ts`; otra capability la importa solo desde ahí. Un símbolo agnóstico (dinero, error, tipos, primitivas de formulario) vive en `finance/shared/`, no en `src/shared/`. Auth, settings, notifications, ai, keep-awake y home no se parten en capabilities.
 
 ### Frontera
 
