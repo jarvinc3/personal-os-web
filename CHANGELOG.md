@@ -2,6 +2,12 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.39.1] - 2026-10-16
+
+### Corregido
+
+- «Reintentar» en la cola de pendientes anuncia el movimiento que reintenta, porque el texto del botón se repite en cada fila.
+
 ## [0.39.0] - 2026-10-16
 
 ### Agregado
