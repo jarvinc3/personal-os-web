@@ -97,9 +97,10 @@ function PendingEmailRow({
   onPress,
   onRetry,
 }: PendingEmailRowProps) {
+  const title = message.extractedPayload?.merchant ?? message.gmailMessageId
   return (
     <SummaryItem
-      title={message.extractedPayload?.merchant ?? message.gmailMessageId}
+      title={title}
       value={pendingRowValue(message, display)}
       icon={InboxIcon}
       onPress={onPress}
@@ -110,6 +111,7 @@ function PendingEmailRow({
           variant="outline"
           size="sm"
           disabled={isRetrying}
+          aria-label={`Reintentar ${title}`}
           onClick={onRetry}
         >
           {isRetrying ? (
