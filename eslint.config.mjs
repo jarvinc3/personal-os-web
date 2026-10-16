@@ -4,10 +4,17 @@ import nextVitals from "eslint-config-next/core-web-vitals"
 import nextTs from "eslint-config-next/typescript"
 
 // eslint-plugin-react detects the React version through context.getFilename,
-// removed in ESLint 10. Pin the version from package.json so the detection
-// path never runs.
-const { dependencies } = createRequire(import.meta.url)("./package.json")
-const reactVersion = dependencies.react.replace(/^[^\d]*/, "")
+// removed in ESLint 10. Pin it from package.json so the detection path never
+// runs.
+function readReactVersion() {
+  const { dependencies } = createRequire(import.meta.url)("./package.json")
+  if (!dependencies.react) {
+    throw new Error("package.json must declare react in dependencies")
+  }
+  return dependencies.react.replace(/^[^\d]*/, "")
+}
+
+const reactVersion = readReactVersion()
 
 // Detectable check of .cursor/rules/ui-shared-components.mdc: no native date or time inputs.
 const NATIVE_DATE_INPUT_TYPES = ["date", "time", "datetime-local"]
