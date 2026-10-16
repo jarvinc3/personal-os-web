@@ -2,6 +2,17 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.42.0] - 2026-10-16
+
+### Agregado
+
+- La hoja «Novedades» guarda la última versión vista en el perfil del usuario: la lee de `GET /users/me` y la marca con `PATCH /users/me/release-notes-seen`. Así no vuelve a aparecer al entrar desde otro dispositivo.
+- `localStorage` (`releaseNotesSeenVersion`) queda como caché para no mostrar la hoja mientras responde el perfil. En la primera visita (`lastSeenReleaseVersion: null`) la versión actual se marca en silencio, sin hoja.
+
+### Cambiado
+
+- `ReleaseNotesSheet` pasa a ser presentacional: recibe la versión vista y el marcado desde `useReleaseNotesSeen` (`src/modules/settings`), que refleja el cambio en la caché del perfil al cerrar la hoja.
+
 ## [0.41.0] - 2026-10-16
 
 ### Agregado
