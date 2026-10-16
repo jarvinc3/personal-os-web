@@ -1,6 +1,13 @@
 import { defineConfig, globalIgnores } from "eslint/config"
+import { createRequire } from "node:module"
 import nextVitals from "eslint-config-next/core-web-vitals"
 import nextTs from "eslint-config-next/typescript"
+
+// eslint-plugin-react detects the React version through context.getFilename,
+// removed in ESLint 10. Pin the version from package.json so the detection
+// path never runs.
+const { dependencies } = createRequire(import.meta.url)("./package.json")
+const reactVersion = dependencies.react.replace(/^[^\d]*/, "")
 
 // Detectable check of .cursor/rules/ui-shared-components.mdc: no native date or time inputs.
 const NATIVE_DATE_INPUT_TYPES = ["date", "time", "datetime-local"]
@@ -143,6 +150,11 @@ const eslintConfig = defineConfig([
     ".claude/**",
   ]),
   {
+    settings: {
+      react: {
+        version: reactVersion,
+      },
+    },
     rules: {
       curly: ["error", "all"],
       "no-restricted-syntax": [
