@@ -11,7 +11,6 @@ Implementados en `src/modules/` con rutas en `app/`.
 | Finance       | `src/modules/finance/`       | [finance/](./finance/README.md)             | `/finance/*`                                |
 | Keep Awake    | `src/modules/keep-awake/`    | [keep-awake/](./keep-awake/README.md)       | `/keep-awake`                               |
 | Home          | `src/modules/home/`          | [home/](./home/README.md)                   | `/home`                                     |
-| Landing       | `src/modules/landing/`       | [landing/](./landing/README.md)             | `/landing`, legal, `/delete-account`        |
 
 ## Solo Settings (sin app routes)
 

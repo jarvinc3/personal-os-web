@@ -8,7 +8,7 @@ Los términos marcados como **en conflicto** todavía no tienen un significado a
 
 **Módulo de producto**
 De cara al usuario se llama **App** ([docs/glosario.md](./docs/glosario.md)); el código mantiene "módulo".
-Una de las áreas registradas en `MODULE_REGISTRY`: `finance`, `agenda`, `projects` y `health`. Solo `finance` tiene rutas de app hoy; agenda, projects y health viven como hojas en Ajustes. Suscripciones vive dentro de Finanzas y ya no es un módulo del registro. _Avoid_: llamar "módulo" a una carpeta de `src/modules/`, a Keep Awake, Home, Landing, Settings, Notifications o AI.
+Una de las áreas registradas en `MODULE_REGISTRY`: `finance`, `agenda`, `projects` y `health`. Solo `finance` tiene rutas de app hoy; agenda, projects y health viven como hojas en Ajustes. Suscripciones vive dentro de Finanzas y ya no es un módulo del registro. _Avoid_: llamar "módulo" a una carpeta de `src/modules/`, a Keep Awake, Home, Settings, Notifications o AI.
 
 **Módulo activo / apagado**
 Un módulo de producto con `isEnabled` en `UserModuleEntry`. Un módulo apagado no llama su API; muestra un CTA a Ajustes.

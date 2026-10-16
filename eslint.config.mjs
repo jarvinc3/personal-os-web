@@ -20,7 +20,6 @@ const MODULE_SLUGS = [
   "finance",
   "keep-awake",
   "home",
-  "landing",
 ]
 
 function moduleBoundaryPatterns(moduleSlugs) {

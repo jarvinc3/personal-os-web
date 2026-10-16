@@ -6,4 +6,4 @@
 | `BR-AUTH-002` | `GET /users/me` 404, 4xx, 5xx, red o perfil sin `id`+`email` | `BackendProfileUnavailableError` + `revokeAuthSession` | `hydrate-auth-user.ts`          |
 | `BR-AUTH-003` | Path protegido sin usuario de proxy                          | Redirect `/login`                                      | `proxy.ts` `isProtectedAppPath` |
 | `BR-AUTH-004` | `/login` con usuario Supabase                                | Redirect `/home`                                       | `proxy.ts`                      |
-| `BR-AUTH-005` | `/`                                                          | `/home` si hay user, si no `/landing`                  | `proxy.ts`                      |
+| `BR-AUTH-005` | `/`                                                          | `/home` si hay user, si no la landing publicada        | `proxy.ts`                      |

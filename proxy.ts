@@ -1,5 +1,6 @@
 import { updateSession } from "@/src/config/supabase/proxy"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
+import { LANDING_URL } from "@/src/shared/constants/landing.mjs"
 import { type NextRequest, NextResponse } from "next/server"
 
 function isProtectedAppPath(pathname: string): boolean {
@@ -18,8 +19,12 @@ export async function proxy(request: NextRequest) {
   const { response, user } = await updateSession(request)
 
   if (pathname === APP_ROUTES.root) {
+    if (!user) {
+      return NextResponse.redirect(LANDING_URL)
+    }
+
     const url = request.nextUrl.clone()
-    url.pathname = user ? APP_ROUTES.app.home : APP_ROUTES.marketing.landing
+    url.pathname = APP_ROUTES.app.home
     return NextResponse.redirect(url)
   }
 

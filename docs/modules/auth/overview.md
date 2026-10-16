@@ -20,7 +20,7 @@ Auth de **este** cliente con Supabase Auth. El backend Nest solo valida el JWT (
 
 | Path             | Grupo         | Notas                                      |
 | ---------------- | ------------- | ------------------------------------------ |
-| `/login`         | `(auth)`      | Landing + sheets login/registro            |
+| `/login`         | `(auth)`      | Bienvenida + sheets login/registro         |
 | `/verify-email`  | `(auth)`      | Tras `REGISTER_PENDING_VERIFICATION`       |
 | `/auth/callback` | Route Handler | Intercambia `code`; `next` default `/home` |
 | `(app)/*`        | protegido     | `proxy.ts` + `useAuthGuard`                |

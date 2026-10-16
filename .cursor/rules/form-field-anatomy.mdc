@@ -6,7 +6,7 @@ alwaysApply: false
 
 # Anatomía de un campo
 
-Cualquier control con etiqueta (formulario, ajustes, filtro, login, landing) se arma con `Field` / `FieldLabel` / `FieldError` (`src/shared/components/ui/field.tsx`).
+Cualquier control con etiqueta (formulario, ajustes, filtro, login) se arma con `Field` / `FieldLabel` / `FieldError` (`src/shared/components/ui/field.tsx`).
 
 - Etiqueta arriba, `className="text-sm text-muted-foreground"`, en español y sin punto final. El valor va debajo, con peso (`font-medium`) o el tamaño que impone la pieza.
 - El `Field` va con `gap-1`. El error va pegado al campo, con `FieldError`, no en un párrafo suelto.

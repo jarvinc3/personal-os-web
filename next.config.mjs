@@ -1,6 +1,12 @@
 import { readFileSync } from "node:fs"
 import { createRequire as sideroomCreateRequire } from "node:module"
 
+import {
+  LANDING_URL,
+  RETIRED_PUBLIC_PATHS,
+  landingUrl,
+} from "./src/shared/constants/landing.mjs"
+
 const sideroomRequire = sideroomCreateRequire(import.meta.url)
 
 // The runtime entry does not expose withSentryConfig; the build helper lives
@@ -59,7 +65,18 @@ const pkg = JSON.parse(
 const nextConfig = {
   env: {
     NEXT_PUBLIC_APP_VERSION: pkg.version,
+    NEXT_PUBLIC_LANDING_URL: LANDING_URL,
   },
+
+  // Rutas públicas retiradas del cliente: viven en la landing.
+  redirects() {
+    return RETIRED_PUBLIC_PATHS.map(({ source, destination }) => ({
+      source,
+      destination: landingUrl(destination),
+      permanent: true,
+    }))
+  },
+
   images: {
     remotePatterns: [
       {

@@ -74,7 +74,7 @@ Viven en [`.agents/skills/`](.agents/skills). Abre solo el `SKILL.md` cuyo dispa
 | `react-best-practices`, `composition-patterns`          | partes o escribes un componente            |
 | `accessibility`                                         | creas un control                           |
 | `next-best-practices`                                   | tocas `app/`                               |
-| `seo`                                                   | tocas metadata o la landing                |
+| `seo`                                                   | tocas metadata o el SEO                    |
 | `next-upgrade`                                          | el trabajo es subir Next                   |
 | `next-cache-components`                                 | el trabajo es `use cache` o PPR            |
 | `migrate-radix-to-base`                                 | se pide migrar de Radix a Base UI          |
@@ -135,7 +135,7 @@ Un solo app Next.js. Sin packages por feature y sin capas `presentation` / `appl
 
 ```text
 app/                 # rutas delgadas: Suspense + screen del index.ts del módulo
-src/modules/         # auth, settings, notifications, ai, finance, keep-awake, home, landing
+src/modules/         # auth, settings, notifications, ai, finance, keep-awake, home
 src/shared/          # chrome, rutas, api-endpoints, primitivos de UI; no importa features
 src/providers/
 src/config/          # api-client, supabase
@@ -159,7 +159,7 @@ El cuerpo existe para que el gate pueda devolver carga o “módulo apagado” s
 ### Nombres
 
 - kebab-case en archivos. Sin repetir el nombre del módulo dentro de su carpeta: `categories-screen.tsx` dentro de finance, no `finance-categories.tsx`.
-- El export coincide con el archivo: `categories-screen.tsx` exporta `CategoriesScreen`. Landing en PascalCase entra en la misma regla.
+- El export coincide con el archivo: `categories-screen.tsx` exporta `CategoriesScreen`.
 
 ### Qué puede vivir en un `.tsx`
 
@@ -171,13 +171,13 @@ Schemas Zod, armado del body del API, agrupación, orden, dinero y fechas van en
 
 ### Gate y header
 
-Un gate solo si el cuerpo no debe montarse hasta tener sesión o hasta que el módulo esté encendido. Ahí hay un solo nombre: `FinanceGate`, `SettingsGate`, `KeepAwakeGate` y el equivalente donde ese corte ya existe hoy. Landing y login no ganan un gate vacío. Home sigue el shell autenticado de `app/(app)`.
+Un gate solo si el cuerpo no debe montarse hasta tener sesión o hasta que el módulo esté encendido. Ahí hay un solo nombre: `FinanceGate`, `SettingsGate`, `KeepAwakeGate` y el equivalente donde ese corte ya existe hoy. Login no gana un gate vacío. Home sigue el shell autenticado de `app/(app)`.
 
 El cuerpo declara el header con `usePageHeader`. El layout no vuelve a inferir “vista secundaria” leyendo el pathname. El objeto `{ currency, showCents, compactNumbers }` se arma en un solo hook de finance y lo consumen las screens.
 
 ### Capabilities (solo Finanzas)
 
-Cada capability tiene sus components, hooks, reglas, types y screens. La screen de un detalle vive en su capability, no en un cajón `pages/` ni como `*-view.tsx` suelto bajo `components/`: cuentas, tarjetas, catálogo, movimientos, planificación, préstamos, cobros, metas de ahorro, presupuestos, sync, dashboard. Cada capability exporta su API en su `index.ts`; otra capability la importa solo desde ahí. Un símbolo agnóstico (dinero, error, tipos, primitivas de formulario) vive en `finance/shared/`, no en `src/shared/`. Auth, settings, notifications, ai, keep-awake, home y landing no se parten en capabilities.
+Cada capability tiene sus components, hooks, reglas, types y screens. La screen de un detalle vive en su capability, no en un cajón `pages/` ni como `*-view.tsx` suelto bajo `components/`: cuentas, tarjetas, catálogo, movimientos, planificación, préstamos, cobros, metas de ahorro, presupuestos, sync, dashboard. Cada capability exporta su API en su `index.ts`; otra capability la importa solo desde ahí. Un símbolo agnóstico (dinero, error, tipos, primitivas de formulario) vive en `finance/shared/`, no en `src/shared/`. Auth, settings, notifications, ai, keep-awake y home no se parten en capabilities.
 
 ### Frontera
 

@@ -4,7 +4,7 @@
 
 ```text
 Browser  →  proxy.ts (sesión Supabase)
-         →  app/(landing) | (auth) | (app)
+         →  app/(auth) | (app)
          →  src/modules/*  +  src/shared  +  src/providers
          →  Nest API  (NEXT_PUBLIC_API_URL + API_PREFIX)
 ```
@@ -49,12 +49,11 @@ Papeles de archivo (ruta, screen, cuerpo, UI, regla), nombres, gate/header y cap
 
 | Grupo                        | Layout                               | Auth                                         |
 | ---------------------------- | ------------------------------------ | -------------------------------------------- |
-| `(landing)`                  | marketing + legal                    | público                                      |
 | `(auth)`                     | login / verify-email                 | público; login redirige a home si hay sesión |
 | `(app)`                      | sidebar + header + KeepAwakeProvider | `proxy.ts` + `useAuthGuard`                  |
 | `app/auth/callback/route.ts` | Route Handler                        | intercambio OAuth                            |
 
-`/` redirige a `/home` o `/landing` según haya usuario Supabase.
+`/` redirige a `/home` con sesión y a la landing publicada sin ella. La landing (Astro) vive en el repo `personal-os-landing`; aquí solo quedan redirecciones permanentes a sus rutas públicas.
 
 Rutas protegidas (`isProtectedAppPath`): home, settings, chat, notifications, keep-awake, finance (y subpaths).
 
@@ -74,12 +73,12 @@ Detalle de sesión: [../infrastructure/auth-session.md](../infrastructure/auth-s
 
 ## Módulos (docs atómicos)
 
-| Área                                         | Doc                                                             |
-| -------------------------------------------- | --------------------------------------------------------------- |
-| Auth (bootstrap, guards, 401)                | [../modules/auth/](../modules/auth/README.md)                   |
-| Notifications (inbox, socket, push)          | [../modules/notifications/](../modules/notifications/README.md) |
-| AI (`/chat`, stream, acciones)               | [../modules/ai/](../modules/ai/README.md)                       |
-| Settings, Home, Finance, Keep Awake, Landing | [../modules/](../modules/README.md)                             |
+| Área                                | Doc                                                             |
+| ----------------------------------- | --------------------------------------------------------------- |
+| Auth (bootstrap, guards, 401)       | [../modules/auth/](../modules/auth/README.md)                   |
+| Notifications (inbox, socket, push) | [../modules/notifications/](../modules/notifications/README.md) |
+| AI (`/chat`, stream, acciones)      | [../modules/ai/](../modules/ai/README.md)                       |
+| Settings, Home, Finance, Keep Awake | [../modules/](../modules/README.md)                             |
 
 ## Errores y observabilidad
 

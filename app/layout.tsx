@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next"
 import { IBM_Plex_Mono, Noto_Sans, Geist } from "next/font/google"
 
-import { siteInfo } from "@/src/modules/landing"
+import { appMetadata } from "@/src/shared/constants/app-metadata"
 import { AppEffectsProvider } from "@/src/providers/app-effects-provider"
 import { AuthBootstrapProvider } from "@/src/providers/auth-bootstrap-provider"
 import { QueryProvider } from "@/src/providers/query-provider"
@@ -26,13 +26,13 @@ const ibmPlexMonoMono = IBM_Plex_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: `${siteInfo.name} — Tu sistema operativo personal con IA`,
-    template: `%s | ${siteInfo.name}`,
+    default: `${appMetadata.name} — Tu sistema operativo personal con IA`,
+    template: `%s | ${appMetadata.name}`,
   },
-  description: siteInfo.description,
-  keywords: siteInfo.keywords,
-  authors: [{ name: siteInfo.author }],
-  creator: siteInfo.author,
+  description: appMetadata.description,
+  keywords: appMetadata.keywords,
+  authors: [{ name: appMetadata.author }],
+  creator: appMetadata.author,
   manifest: "/manifest.json",
   category: "personal",
   applicationName: "Personal OS",
@@ -47,34 +47,28 @@ export const metadata: Metadata = {
     email: false,
     date: false,
   },
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
-  ),
+  metadataBase: new URL(appMetadata.url),
   openGraph: {
     type: "website",
     locale: "es_DO",
-    url: siteInfo.url,
-    siteName: siteInfo.name,
-    title: `${siteInfo.name} — Tu sistema operativo personal con IA`,
-    description: siteInfo.description,
+    url: appMetadata.url,
+    siteName: appMetadata.name,
+    title: `${appMetadata.name} — Tu sistema operativo personal con IA`,
+    description: appMetadata.description,
   },
   twitter: {
     card: "summary_large_image",
-    title: `${siteInfo.name} — Tu sistema operativo personal con IA`,
-    description: siteInfo.description,
+    title: `${appMetadata.name} — Tu sistema operativo personal con IA`,
+    description: appMetadata.description,
   },
   robots: {
     index: true,
     follow: true,
   },
   alternates: {
-    canonical: siteInfo.url,
-    languages: {
-      es: `${siteInfo.url}/es`,
-      en: `${siteInfo.url}/en`,
-    },
+    canonical: appMetadata.url,
     media: {
-      image: `${siteInfo.url}/images/app-banner-v1.png`,
+      image: `${appMetadata.url}/images/app-banner-v1.png`,
     },
   },
   icons: {

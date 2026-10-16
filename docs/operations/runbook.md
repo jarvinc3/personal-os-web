@@ -17,6 +17,7 @@
 | `NEXT_PUBLIC_URL`                      | Origin de esta app (OAuth returnTo, CORS)                                          |
 | `NEXT_PUBLIC_VAPID_PUBLIC_KEY`         | Web Push                                                                           |
 | `NEXT_PUBLIC_APP_NAME` / `VERSION`     | Branding                                                                           |
+| `NEXT_PUBLIC_LANDING_URL`              | Origen de la landing; sin valor usa la publicada                                   |
 | `NEXT_OS` / `NEXT_ENV`                 | No públicas; settings usa también `NEXT_PUBLIC_ENV` (default `"preview"` si falta) |
 | `NEXT_PUBLIC_SENTRY_DSN` / `SENTRY_*`  | Sentry (opcional); sin DSN la SDK no se inicializa                                 |
 

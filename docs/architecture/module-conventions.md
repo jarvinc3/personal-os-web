@@ -138,7 +138,7 @@ src/modules/<slug>/
 ### Nombres
 
 - kebab-case en archivos. Sin repetir el nombre del módulo dentro de su carpeta: `categories-screen.tsx` dentro de finance, no `finance-categories.tsx`.
-- El export coincide con el archivo: `categories-screen.tsx` exporta `CategoriesScreen`. Landing en PascalCase entra en la misma regla.
+- El export coincide con el archivo: `categories-screen.tsx` exporta `CategoriesScreen`.
 
 ### Qué puede vivir en un `.tsx`
 
@@ -150,13 +150,13 @@ Schemas Zod, armado del body del API, agrupación, orden, dinero y fechas van en
 
 ### Gate y header
 
-Un gate solo si el cuerpo no debe montarse hasta tener sesión o hasta que el módulo esté encendido. Ahí hay un solo nombre: `FinanceGate`, `SettingsGate`, `KeepAwakeGate` y el equivalente donde ese corte ya existe hoy. Landing y login no ganan un gate vacío. Home sigue el shell autenticado de `app/(app)` si ese shell ya impide montar el cuerpo.
+Un gate solo si el cuerpo no debe montarse hasta tener sesión o hasta que el módulo esté encendido. Ahí hay un solo nombre: `FinanceGate`, `SettingsGate`, `KeepAwakeGate` y el equivalente donde ese corte ya existe hoy. Login no gana un gate vacío. Home sigue el shell autenticado de `app/(app)` si ese shell ya impide montar el cuerpo.
 
 El cuerpo declara el header con `usePageHeader` (ver [Header](#header)). El layout no vuelve a inferir “vista secundaria” leyendo el pathname. El objeto `{ currency, showCents, compactNumbers }` se arma en un solo hook de finance y lo consumen las screens.
 
 ### Capabilities (solo Finanzas)
 
-Cada capability tiene sus components, hooks, reglas, types y screens. La screen de un detalle vive en su capability, no en un cajón `pages/` ni como `*-view.tsx` suelto bajo `components/`: **cuentas, tarjetas, catálogo, movimientos, planificación, préstamos, cobros, metas de ahorro, presupuestos, sync, dashboard**. Cada capability exporta su API en su `index.ts`; otra capability la importa solo desde ahí. Un símbolo agnóstico vive en `finance/shared/` de este módulo, no en `src/shared/`. Auth, settings, notifications, ai, keep-awake, home y landing no se parten en capabilities.
+Cada capability tiene sus components, hooks, reglas, types y screens. La screen de un detalle vive en su capability, no en un cajón `pages/` ni como `*-view.tsx` suelto bajo `components/`: **cuentas, tarjetas, catálogo, movimientos, planificación, préstamos, cobros, metas de ahorro, presupuestos, sync, dashboard**. Cada capability exporta su API en su `index.ts`; otra capability la importa solo desde ahí. Un símbolo agnóstico vive en `finance/shared/` de este módulo, no en `src/shared/`. Auth, settings, notifications, ai, keep-awake y home no se parten en capabilities.
 
 ### Frontera
 
@@ -173,7 +173,7 @@ Un archivo se borra cuando la screen nueva lo reemplaza y ningún import lo usa.
 | `finance`                | `/finance/*` | `FINANCE_APP_NAV` |
 | agenda, projects, health | ninguna      | solo Settings     |
 
-Keep Awake y Landing/Home **no** son slugs de `MODULE_REGISTRY`.
+Keep Awake y Home **no** son slugs de `MODULE_REGISTRY`.
 
 ## Fuera de alcance de estas convenciones
 
