@@ -12,6 +12,12 @@ export type ReleaseNotesEntry = {
 
 export const RELEASE_NOTES: readonly ReleaseNotesEntry[] = [
   {
+    version: "0.42.1",
+    highlights: [
+      "Sin cambios visibles: ajuste interno de cómo la app recuerda la última versión de Novedades que viste.",
+    ],
+  },
+  {
     version: "0.42.0",
     highlights: [
       "La hoja «Novedades» ahora recuerda en tu perfil la última versión que viste, así que no vuelve a aparecer aunque entres desde otro dispositivo.",
