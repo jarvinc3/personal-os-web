@@ -2,6 +2,13 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.39.4] - 2026-10-16
+
+### Cambiado
+
+- `/` ya no envía a la landing cuando no hay sesión: sin sesión va a `/login` y con sesión a `/home`. Las rutas públicas retiradas (`/landing`, `/privacy`, `/terms`, `/faq`, `/contact` y `/delete-account`) siguen respondiendo con redirección permanente a la landing nueva.
+- Las reglas de redirección del proxy viven en `src/shared/lib/proxy-routes.ts`, con pruebas propias, y `proxy.ts` solo las aplica. Las redirecciones conservan las cookies de sesión que refresca el proxy.
+
 ## [0.39.3] - 2026-10-16
 
 ### Cambiado
