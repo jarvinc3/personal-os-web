@@ -8,7 +8,7 @@ Este cliente:
 | ----------------------- | ------------------------------------ | ---------------------------------- |
 | Cargar perfil           | `GET /users/me`                      | `useProfile` / `hydrateAuthUser`   |
 | Patch perfil/prefs      | `PATCH /users/me`                    | `useProfile`                       |
-| Versión vista Novedades | `PATCH /users/me/release-notes-seen` | `useReleaseNotesSeen`              |
+| Versión vista Novedades | `PATCH /users/me/release-notes-seen` | `useMarkReleaseNotesSeen`          |
 | Módulo                  | `PATCH /users/me/modules/:slug`      | `useUserModuleConfig`              |
 | Borrar cuenta           | `DELETE /users/me`                   | `useDeleteAccount` (reauth previa) |
 | Vaciar datos por capas  | `POST /users/me/data/wipe`           | `useWipeUserData` (reauth previa)  |

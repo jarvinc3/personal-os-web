@@ -2,14 +2,12 @@
 
 import { apiPatch } from "@/src/config/api-client"
 import { PROFILE_QUERY_KEY } from "@/src/modules/auth"
-import { useProfile } from "@/src/modules/settings/hooks/use-profile"
 import type { UserProfile } from "@/src/modules/settings/types/profile.types"
 import { API_ENDPOINTS } from "@/src/shared/constants/api-endpoints"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useCallback } from "react"
 
-export function useReleaseNotesSeen() {
-  const { profileQuery } = useProfile()
+export function useMarkReleaseNotesSeen(): (version: string) => void {
   const queryClient = useQueryClient()
 
   const { mutate: markReleaseNotesSeen } = useMutation({
@@ -39,15 +37,10 @@ export function useReleaseNotesSeen() {
     },
   })
 
-  const markSeen = useCallback(
+  return useCallback(
     (version: string) => {
       markReleaseNotesSeen(version)
     },
     [markReleaseNotesSeen]
   )
-
-  return {
-    lastSeenVersion: profileQuery.data?.lastSeenReleaseVersion,
-    markSeen,
-  }
 }
