@@ -2,6 +2,19 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.39.3] - 2026-10-16
+
+### Cambiado
+
+- La landing deja de servirse desde este repo: `/landing`, `/privacy`, `/terms`, `/faq`, `/contact` y `/delete-account` responden con redirección permanente (308) a la landing nueva (`personal-os-landing`, Astro). `NEXT_PUBLIC_LANDING_URL` cambia el origen; sin valor usa `https://personal-os-landing-six.vercel.app`.
+- `/` sigue llevando a `/home` con sesión y ahora envía a la landing publicada sin ella. Los enlaces a la landing de la bienvenida, de Ajustes y de la página 404 apuntan a la landing nueva.
+- La metadata de la app vive en `src/shared/constants/app-metadata.ts` y ya no declara canonical ni alternates hacia la landing vieja.
+
+### Eliminado
+
+- `app/(landing)/`, `src/modules/landing/` y `docs/modules/landing/`: el marketing, las páginas legales, la FAQ, el contacto, la lista de espera y el borrado de cuenta se sirven desde la landing.
+- `public/assets/splash.png`, sin uso.
+
 ## [0.39.2] - 2026-10-16
 
 ### Cambiado
