@@ -58,7 +58,12 @@ describe("RETIRED_PUBLIC_PATHS", () => {
     }
   })
 
-  it("sends the old marketing path to the landing root", () => {
+  it("keeps the six retired public paths, with the old marketing one at the root", () => {
+    assert.deepEqual(
+      RETIRED_PUBLIC_PATHS.map(({ source }) => source),
+      ["/landing", "/privacy", "/terms", "/faq", "/contact", "/delete-account"]
+    )
+
     const marketingPath = RETIRED_PUBLIC_PATHS.find(
       ({ source }) => source === "/landing"
     )

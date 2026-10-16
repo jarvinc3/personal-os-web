@@ -53,7 +53,7 @@ Papeles de archivo (ruta, screen, cuerpo, UI, regla), nombres, gate/header y cap
 | `(app)`                      | sidebar + header + KeepAwakeProvider | `proxy.ts` + `useAuthGuard`                  |
 | `app/auth/callback/route.ts` | Route Handler                        | intercambio OAuth                            |
 
-`/` redirige a `/home` con sesión y a la landing publicada sin ella. La landing (Astro) vive en el repo `personal-os-landing`; aquí solo quedan redirecciones permanentes a sus rutas públicas.
+`/` redirige a `/home` con sesión y a `/login` sin ella. La landing (Astro) vive en el repo `personal-os-landing`; aquí solo quedan redirecciones permanentes a sus rutas públicas. Las reglas de redirección están en `src/shared/lib/proxy-routes.ts` y las aplica `proxy.ts`.
 
 Rutas protegidas (`isProtectedAppPath`): home, settings, chat, notifications, keep-awake, finance (y subpaths).
 
