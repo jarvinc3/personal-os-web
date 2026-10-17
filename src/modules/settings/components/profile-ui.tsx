@@ -49,7 +49,9 @@ function ModuleSheetEnableRow({
   return (
     <div
       className="flex flex-row items-center justify-between rounded-2xl border bg-card px-4 py-3"
-      style={isEnabled ? { borderColor: accentColor, borderWidth: 1 } : undefined}
+      style={
+        isEnabled ? { borderColor: accentColor, borderWidth: 1 } : undefined
+      }
     >
       <label htmlFor={id} className="min-w-0 flex-1 cursor-pointer pr-3">
         <p className="text-base font-medium text-foreground">App activa</p>
@@ -226,7 +228,8 @@ function ModuleSettingsCard({ slug, onOpen, href }: ModuleSettingsCardProps) {
               onClick={(e) => {
                 e.stopPropagation()
                 handleOpen()
-              }}>
+              }}
+            >
               <Settings className="size-4 text-foreground" />
             </Button>
           </div>

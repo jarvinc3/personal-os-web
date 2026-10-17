@@ -3,10 +3,7 @@
 import { Button } from "@/src/shared/components/ui/button"
 import { Separator } from "@/src/shared/components/ui/separator"
 import { Spinner } from "@/src/shared/components/ui/spinner"
-import {
-  ExternalLink,
-  ChevronRightIcon,
-} from "lucide-react"
+import { ExternalLink, ChevronRightIcon } from "lucide-react"
 
 type AuthFormFooterProps = {
   primaryLabel: string

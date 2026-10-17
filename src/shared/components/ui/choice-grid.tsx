@@ -81,7 +81,7 @@ export function ChoiceGrid<T extends string>({
               className={cn(
                 "relative flex aspect-auto h-auto min-h-11 w-full items-center rounded-xl border border-border bg-card px-2 py-2 text-foreground",
                 "after:hidden **:data-[slot=radio-group-indicator]:hidden",
-                "hover:bg-muted/40 data-checked:bg-card data-checked:text-foreground dark:data-checked:bg-card",
+                "hover:bg-muted/40 data-checked:bg-card data-checked:text-foreground dark:data-checked:bg-card"
               )}
               style={selected ? { borderColor: accentColor } : undefined}
             >

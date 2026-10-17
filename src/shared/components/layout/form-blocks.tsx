@@ -158,9 +158,7 @@ export function OptionRow({
         </div>
       )}
       <FieldContent>
-        <FieldTitle className="text-sm">
-          {label}
-        </FieldTitle>
+        <FieldTitle className="text-sm">{label}</FieldTitle>
         <FieldDescription className="text-xs text-muted-foreground">
           {description}
         </FieldDescription>
@@ -336,7 +334,10 @@ export function SwitchFieldRow({
 }: SwitchFieldRowProps) {
   const id = useId()
   return (
-    <div className="flex flex-row items-center justify-between gap-3 rounded-xl border bg-card px-3 py-3" style={checked ? { borderColor: accentColor, borderWidth: 1 } : undefined}>
+    <div
+      className="flex flex-row items-center justify-between gap-3 rounded-xl border bg-card px-3 py-3"
+      style={checked ? { borderColor: accentColor, borderWidth: 1 } : undefined}
+    >
       <div
         className="flex size-9 shrink-0 items-center justify-center rounded-md"
         style={{ backgroundColor: iconColor ? `${iconColor}1a` : undefined }}
@@ -344,9 +345,7 @@ export function SwitchFieldRow({
         <Icon className="size-4.5" style={{ color: iconColor }} />
       </div>
       <label htmlFor={id} className="min-w-0 flex-1 cursor-pointer">
-        <FieldLabel className="text-sm">
-          {label}
-        </FieldLabel>
+        <FieldLabel className="text-sm">{label}</FieldLabel>
         {description ? (
           <p className="text-xs text-muted-foreground">{description}</p>
         ) : null}

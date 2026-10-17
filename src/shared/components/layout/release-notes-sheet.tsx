@@ -90,7 +90,10 @@ export function ReleaseNotesSheet({
     >
       <ul className="flex flex-col gap-3">
         {entry?.highlights.map((highlight) => (
-          <li key={highlight} className="flex items-start gap-2 text-sm bg-card p-2 rounded-md shadow-sm border border-border/30">
+          <li
+            key={highlight}
+            className="flex items-start gap-2 rounded-md border border-border/30 bg-card p-2 text-sm shadow-sm"
+          >
             <SparklesIcon
               className="mt-0.5 size-4 shrink-0 text-success"
               aria-hidden
@@ -99,7 +102,7 @@ export function ReleaseNotesSheet({
           </li>
         ))}
       </ul>
-      <Button className="flex-1 py-2 rounded-full" onClick={closeSheet}>
+      <Button className="flex-1 rounded-full py-2" onClick={closeSheet}>
         <CheckIcon data-icon="inline-start" />
         Entendido
       </Button>

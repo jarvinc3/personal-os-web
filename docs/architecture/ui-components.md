@@ -6,15 +6,15 @@ Inventario para agentes. Antes de inventar un control, buscar aquí y en `src/sh
 
 **Prohibido** en UI de producto: `<input type="time">`, `<input type="date">`, y `Input` con esos `type`. La rueda vive en [`src/shared/components/ui/wheel-picker.tsx`](../../src/shared/components/ui/wheel-picker.tsx). En pantalla siempre va dentro de [`WheelField`](../../src/shared/components/ui/wheel-field.tsx): la misma fila que `FinanceDateField`.
 
-| Necesitas                          | Usar               | Valor                                                                                    |
-| ---------------------------------- | ------------------ | ---------------------------------------------------------------------------------------- |
-| Cualquier rueda en pantalla        | `WheelField`       | Fila (icono, valor, chevron), panel a ancho completo y `Listo` abajo a la derecha        |
-| Hora de reloj                      | `TimePairWheels`   | Contenido del panel. `HH:mm` 24 h (ej. `"09:00"`)                                        |
-| Duración (horas + minutos)         | `DurationWheels`   | Contenido del panel. `HH:mm` de duración (ej. `"01:30"` = 90 min). Sin a. m./p. m.       |
-| Fecha                              | `FinanceDateField` | `WheelField` + `DateWheels`. `YYYY-MM-DD`, atajos “Hoy” / “Listo”                        |
-| Un día dentro de un rango          | `DayWheel`         | `WheelField` + una rueda. String decimal (`"15"`), `min` / `max`                         |
-| Varios días del mes                | `DayListField`     | Cada día es un `DayWheel`                                                                |
-| 2 a 5 opciones exclusivas          | `ChoiceGrid`       | Celdas con icono en el color del módulo y, al elegir, borde más grueso y check           |
+| Necesitas                   | Usar               | Valor                                                                              |
+| --------------------------- | ------------------ | ---------------------------------------------------------------------------------- |
+| Cualquier rueda en pantalla | `WheelField`       | Fila (icono, valor, chevron), panel a ancho completo y `Listo` abajo a la derecha  |
+| Hora de reloj               | `TimePairWheels`   | Contenido del panel. `HH:mm` 24 h (ej. `"09:00"`)                                  |
+| Duración (horas + minutos)  | `DurationWheels`   | Contenido del panel. `HH:mm` de duración (ej. `"01:30"` = 90 min). Sin a. m./p. m. |
+| Fecha                       | `FinanceDateField` | `WheelField` + `DateWheels`. `YYYY-MM-DD`, atajos “Hoy” / “Listo”                  |
+| Un día dentro de un rango   | `DayWheel`         | `WheelField` + una rueda. String decimal (`"15"`), `min` / `max`                   |
+| Varios días del mes         | `DayListField`     | Cada día es un `DayWheel`                                                          |
+| 2 a 5 opciones exclusivas   | `ChoiceGrid`       | Celdas con icono en el color del módulo y, al elegir, borde más grueso y check     |
 
 `TimePairWheels`, `DurationWheels` y `DateWheels` no se montan sueltos en una vista. `TimePairWheels` muestra hora 12 h + minutos + periodo a. m./p. m. `DurationWheels` muestra horas 00–24 + minutos, sin periodo. Los minutos se configuran con `minuteStep`: `1` (00–59), `5` o `10`. Convierte reloj con `hm24To12Parts` / `hm12To24` y duración con `durationMinutesToHm` / `hmToDurationMinutes` en `src/shared/types/wheels.type.ts`.
 
