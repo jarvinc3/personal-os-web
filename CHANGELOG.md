@@ -2,6 +2,18 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.43.1] - 2026-10-17
+
+### Agregado
+
+- Pantallas «en camino» para Agenda, Proyectos y Salud: `/agenda`, `/projects` y `/health` avisan que la app todavía no está construida y enlazan a su configuración.
+
+### Cambiado
+
+- La configuración de cada app (formularios, validaciones, monedas y horario de sincronización) vive en su módulo; Ajustes queda como marco general.
+- Los `index.ts` de los módulos exportan solo hooks, tipos, componentes chicos y constantes; las pantallas se importan por ruta directa desde `app/`.
+- `proxy.ts` valida la sesión con `getClaims()` en lugar de `getUser()`: sin viaje de red por navegación.
+
 ## [0.43.0] - 2026-10-17
 
 ### Agregado

@@ -12,6 +12,13 @@ export type ReleaseNotesEntry = {
 
 export const RELEASE_NOTES: readonly ReleaseNotesEntry[] = [
   {
+    version: "0.43.1",
+    highlights: [
+      "Agenda, Proyectos y Salud ya muestran su pantalla de «en camino» con acceso a sus ajustes.",
+      "Sin cambios visibles en el resto: mejoras internas para que la app abra y navegue más rápido.",
+    ],
+  },
+  {
     version: "0.43.0",
     highlights: [
       "Comparte cobros con un link: elige los cobros de una misma persona, genera el enlace y mándalo por WhatsApp o cópialo.",
