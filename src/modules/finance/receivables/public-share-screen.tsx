@@ -96,10 +96,12 @@ export function PublicReceivableShareScreen({
     )
   }
 
-  const display = PUBLIC_DISPLAY
-  const currencyRows = publicShareCurrencyRows(share.totalsByCurrency, display)
+  const currencyRows = publicShareCurrencyRows(
+    share.totalsByCurrency,
+    PUBLIC_DISPLAY
+  )
   const pendingLabel = formatSharePendingTotals(
-    publicSharePendingTotals(share.totalsByCurrency, display)
+    publicSharePendingTotals(share.totalsByCurrency, PUBLIC_DISPLAY)
   )
   const updatedLabel = formatPublicShareUpdatedAt(share.updatedAt, new Date())
 
@@ -154,7 +156,7 @@ export function PublicReceivableShareScreen({
       ) : (
         <div className="flex flex-col gap-2">
           {share.items.map((item) => {
-            const money = { ...display, currency: item.currency }
+            const money = { ...PUBLIC_DISPLAY, currency: item.currency }
             return (
               <PlanningProgressCard
                 key={item.ref}
@@ -172,7 +174,7 @@ export function PublicReceivableShareScreen({
                 currentLabel={formatFinanceMoney(item.paid, money)}
                 targetHint="Total"
                 targetLabel={formatFinanceMoney(item.amount, money)}
-                caption={publicShareItemCaption(item, display)}
+                caption={publicShareItemCaption(item, PUBLIC_DISPLAY)}
                 onPress={() => setOpenItem(item)}
               />
             )
@@ -198,7 +200,7 @@ export function PublicReceivableShareScreen({
         }}
         item={openItem}
         ownerFirstName={share.ownerFirstName}
-        display={display}
+        display={PUBLIC_DISPLAY}
       />
     </div>
   )

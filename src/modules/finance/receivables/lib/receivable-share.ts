@@ -5,7 +5,10 @@ import {
   parseFinanceMoney,
   type FinanceMoneyDisplay,
 } from "@/src/modules/finance/shared/lib/money"
-import type { FinanceReceivable } from "@/src/modules/finance/shared/types/entities"
+import type {
+  FinanceReceivable,
+  FinanceReceivableStatus,
+} from "@/src/modules/finance/shared/types/entities"
 
 /** Same bound as the create DTO of the API, so one link stays manageable. */
 export const MAX_RECEIVABLE_SHARE_ITEMS = 50
@@ -16,7 +19,10 @@ const MASKED_TOKEN_EDGE = 4
 const WHATSAPP_SHARE_URL = "https://wa.me/"
 
 /** Closed cobros never reach the public page, so they cannot be shared either. */
-const UNSHAREABLE_STATUSES: readonly string[] = ["CANCELLED", "WRITTEN_OFF"]
+const UNSHAREABLE_STATUSES: readonly FinanceReceivableStatus[] = [
+  "CANCELLED",
+  "WRITTEN_OFF",
+]
 
 const CONCEPT_FALLBACK = "Cobro sin concepto"
 
@@ -179,10 +185,11 @@ export function buildCreateReceivableShareBody({
 
   const parsed = receivableShareSchema.safeParse({ debtorName })
   if (!parsed.success) {
-    return {
-      ok: false,
-      error: parsed.error.issues[0]?.message ?? "Escribe el nombre del deudor.",
+    const [issue] = parsed.error.issues
+    if (!issue) {
+      throw new Error("receivableShareSchema failed without a reported issue")
     }
+    return { ok: false, error: issue.message }
   }
 
   return {
@@ -196,12 +203,10 @@ export function buildCreateReceivableShareBody({
 
 /** Host and path with the middle of the token hidden: `personalos.app/c/k7Qp…X2aZ`. */
 export function maskShareUrl(url: string): string {
-  let parsed: URL
-  try {
-    parsed = new URL(url)
-  } catch {
+  if (!URL.canParse(url)) {
     return url
   }
+  const parsed = new URL(url)
 
   const token = parsed.pathname.split("/").filter(Boolean).pop()
   if (!token || token.length <= MASKED_TOKEN_EDGE * 2) {

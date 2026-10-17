@@ -54,15 +54,15 @@ export function shareModeUrl({
 }): string | null {
   const params = new URLSearchParams(query)
   const current = params.get(SHARE_MODE_QUERY_KEY)
-  const next = active ? selectedIds.join(",") : null
-  if ((current ?? null) === next) {
+  const nextSelection = active ? selectedIds.join(",") : null
+  if ((current ?? null) === nextSelection) {
     return null
   }
 
-  if (next === null) {
+  if (nextSelection === null) {
     params.delete(SHARE_MODE_QUERY_KEY)
   } else {
-    params.set(SHARE_MODE_QUERY_KEY, next)
+    params.set(SHARE_MODE_QUERY_KEY, nextSelection)
   }
 
   const search = params.toString()

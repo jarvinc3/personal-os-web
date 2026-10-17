@@ -181,11 +181,6 @@ export function FinancePlanningList({
     shareSelectionTotals(selectedForShare, display)
   )
 
-  function exitShareMode() {
-    setOpenShareSheet(false)
-    shareMode.exit()
-  }
-
   usePageHeader(
     shareMode.active
       ? {
@@ -195,18 +190,7 @@ export function FinancePlanningList({
           backIcon: XIcon,
           backLabel: "Salir de la selección",
           actions: shareDebtor ? (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() =>
-                shareMode.selectMany(
-                  debtorSelectionIds({
-                    receivables: shareableList,
-                    selectedIds: shareMode.selectedIds,
-                  })
-                )
-              }
-            >
+            <Button variant="ghost" size="sm" onClick={selectAllOfShareDebtor}>
               <UsersIcon className="size-4 shrink-0" aria-hidden="true" />
               {SHARE_ALL_LABEL} {debtorFirstName(shareDebtor)}
             </Button>
@@ -242,7 +226,31 @@ export function FinancePlanningList({
     receivablesQuery.isPending,
     setOpenReceivableSheet
   )
-  const [tab, setTab] = useState<PlanningTab>("savings")
+  const [tab, setTab] = useState<PlanningTab>(() =>
+    shareMode.active ? "receivables" : "savings"
+  )
+
+  function exitShareMode() {
+    setOpenShareSheet(false)
+    shareMode.exit()
+  }
+
+  function selectAllOfShareDebtor() {
+    shareMode.selectMany(
+      debtorSelectionIds({
+        receivables: shareableList,
+        selectedIds: shareMode.selectedIds,
+      })
+    )
+  }
+
+  function changeTab(next: PlanningTab) {
+    setTab(next)
+    // The selection only exists in the Cobros tab, so leaving it drops the mode.
+    if (shareMode.active && next !== "receivables") {
+      exitShareMode()
+    }
+  }
 
   function openCreate(next: PlanningTab) {
     setTab(next)
@@ -279,7 +287,7 @@ export function FinancePlanningList({
         value={tab}
         onValueChange={(value) => {
           if (isPlanningTab(value)) {
-            setTab(value)
+            changeTab(value)
           }
         }}
         className="w-full gap-6"
