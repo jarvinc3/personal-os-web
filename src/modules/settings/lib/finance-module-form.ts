@@ -178,40 +178,42 @@ export const financeModuleSchema = z
     subscriptionGroupBy: z.enum(["category", "provider", "none"]),
   })
   .superRefine((values, ctx) => {
-    if (values.emailSyncScheduleMode === EMAIL_SYNC_SCHEDULE_MODES.INTERVAL) {
-      const minutes = Number(values.emailSyncEveryMinutes)
-      if (
-        !Number.isInteger(minutes) ||
-        minutes < MIN_EMAIL_SYNC_INTERVAL_MINUTES
-      ) {
-        ctx.addIssue({
-          code: "custom",
-          path: ["emailSyncEveryMinutes"],
-          message: "Mínimo 15 minutos",
-        })
-      }
-    } else {
-      const times = values.emailSyncTimes
-        .map((time) => time.trim())
-        .filter(Boolean)
-      if (times.length === 0 || times.length > MAX_EMAIL_SYNC_TIMES) {
-        ctx.addIssue({
-          code: "custom",
-          path: ["emailSyncTimes"],
-          message: "Pon de 1 a 8 horas",
-        })
-      } else if (times.some((time) => !scheduleTimePattern.test(time))) {
-        ctx.addIssue({
-          code: "custom",
-          path: ["emailSyncTimes"],
-          message: "Hora no válida",
-        })
-      } else if (new Set(times).size !== times.length) {
-        ctx.addIssue({
-          code: "custom",
-          path: ["emailSyncTimes"],
-          message: "No repitas horas",
-        })
+    if (values.emailSyncEnabled && values.emailSyncAutomatic) {
+      if (values.emailSyncScheduleMode === EMAIL_SYNC_SCHEDULE_MODES.INTERVAL) {
+        const minutes = Number(values.emailSyncEveryMinutes)
+        if (
+          !Number.isInteger(minutes) ||
+          minutes < MIN_EMAIL_SYNC_INTERVAL_MINUTES
+        ) {
+          ctx.addIssue({
+            code: "custom",
+            path: ["emailSyncEveryMinutes"],
+            message: "Mínimo 15 minutos",
+          })
+        }
+      } else {
+        const times = values.emailSyncTimes
+          .map((time) => time.trim())
+          .filter(Boolean)
+        if (times.length === 0 || times.length > MAX_EMAIL_SYNC_TIMES) {
+          ctx.addIssue({
+            code: "custom",
+            path: ["emailSyncTimes"],
+            message: "Pon de 1 a 8 horas",
+          })
+        } else if (times.some((time) => !scheduleTimePattern.test(time))) {
+          ctx.addIssue({
+            code: "custom",
+            path: ["emailSyncTimes"],
+            message: "Hora no válida",
+          })
+        } else if (new Set(times).size !== times.length) {
+          ctx.addIssue({
+            code: "custom",
+            path: ["emailSyncTimes"],
+            message: "No repitas horas",
+          })
+        }
       }
     }
 
@@ -228,13 +230,15 @@ export const financeModuleSchema = z
       })
     }
 
-    const dueDays = Number(values.cardDueDaysBefore)
-    if (!Number.isInteger(dueDays) || dueDays < 0 || dueDays > 30) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["cardDueDaysBefore"],
-        message: "De 0 a 30 días",
-      })
+    if (values.cardDueDate) {
+      const dueDays = Number(values.cardDueDaysBefore)
+      if (!Number.isInteger(dueDays) || dueDays < 0 || dueDays > 30) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["cardDueDaysBefore"],
+          message: "De 0 a 30 días",
+        })
+      }
     }
 
     const subscriptionDays = Number(values.subscriptionReminderDays)

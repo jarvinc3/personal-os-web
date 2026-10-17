@@ -154,6 +154,39 @@ describe("financeModuleSchema", () => {
     )
   })
 
+  it("skips the sync schedule when automatic sync is off", () => {
+    assert.equal(
+      financeModuleSchema.safeParse({
+        ...validFinance,
+        emailSyncAutomatic: false,
+        emailSyncEveryMinutes: "5",
+      }).success,
+      true
+    )
+  })
+
+  it("skips card due days when that alert is off", () => {
+    assert.equal(
+      financeModuleSchema.safeParse({
+        ...validFinance,
+        cardDueDate: false,
+        cardDueDaysBefore: "99",
+      }).success,
+      true
+    )
+  })
+
+  it("rejects card due days outside 0-30 when the alert is on", () => {
+    assert.equal(
+      financeModuleSchema.safeParse({
+        ...validFinance,
+        cardDueDate: true,
+        cardDueDaysBefore: "99",
+      }).success,
+      false
+    )
+  })
+
   it("rejects a financial month start after the 28th", () => {
     assert.equal(
       financeModuleSchema.safeParse({

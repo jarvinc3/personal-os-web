@@ -132,6 +132,7 @@ export function AgendaModuleSettingsForm({ onDone }: { onDone: () => void }) {
     >
       <ModuleSheetEnableRow
         state={moduleEnable.state}
+        accentColor={MODULE_ACCENT}
         isEnabled={moduleEnable.sheetEnabled}
         onEnabledChange={moduleEnable.handleEnabledChange}
         disabled={updateMutation.isPending}

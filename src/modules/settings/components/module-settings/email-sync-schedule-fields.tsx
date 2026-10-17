@@ -11,24 +11,17 @@ import {
 } from "@/src/modules/settings/lib/finance-module-form"
 import { Button } from "@/src/shared/components/ui/button"
 import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
+import { WheelField } from "@/src/shared/components/ui/wheel-field"
 import {
   DurationWheels,
   TimePairWheels,
 } from "@/src/shared/components/ui/wheel-picker"
-import { cn } from "@/src/shared/lib/utils"
 import { formatTimeForDisplay } from "@/src/shared/lib/date-format"
 import {
   durationMinutesToHm,
   hmToDurationMinutes,
 } from "@/src/shared/types/wheels.type"
-import {
-  CheckIcon,
-  Clock,
-  PencilIcon,
-  PlusIcon,
-  Timer,
-  Trash2Icon,
-} from "lucide-react"
+import { Clock, PlusIcon, Timer, Trash2Icon } from "lucide-react"
 import { useState } from "react"
 import { Controller, useWatch, type Control } from "react-hook-form"
 
@@ -45,7 +38,7 @@ export function EmailSyncTimesField({
   error,
   disabled = false,
 }: EmailSyncTimesFieldProps) {
-  const [editingIndex, setEditingIndex] = useState<number | null>(null)
+  const [openedOnAdd, setOpenedOnAdd] = useState<number | null>(null)
 
   return (
     <Field
@@ -55,81 +48,42 @@ export function EmailSyncTimesField({
       <FieldLabel className="text-sm text-muted-foreground">
         Horas del día
       </FieldLabel>
-      {times.map((time, index) => {
-        const isEditing = editingIndex === index
-        return (
-          <div
-            key={index}
-            className={cn(
-              "flex flex-col rounded-xl border bg-card p-2",
-              isEditing ? "border-primary" : "border-border"
-            )}
-          >
-            <div className="flex items-center gap-2">
-              <Clock className="size-4 shrink-0 text-muted-foreground" />
-              <span className="min-w-0 flex-1 text-sm font-medium tabular-nums">
-                {formatTimeForDisplay(time)}
-              </span>
+      {times.map((time, index) => (
+        <WheelField
+          key={index}
+          valueLabel={formatTimeForDisplay(time)}
+          icon={Clock}
+          disabled={disabled}
+          defaultOpen={openedOnAdd === index}
+          aside={
+            times.length > 1 ? (
               <Button
                 type="button"
                 variant="ghost"
                 size="icon-sm"
-                aria-label={
-                  isEditing
-                    ? `Cerrar hora ${index + 1}`
-                    : `Editar hora ${index + 1}`
-                }
-                aria-pressed={isEditing}
+                aria-label={`Quitar hora ${index + 1}`}
                 disabled={disabled}
-                onClick={() => setEditingIndex(isEditing ? null : index)}
+                onClick={() => {
+                  onChange(times.filter((_, itemIndex) => itemIndex !== index))
+                  setOpenedOnAdd(null)
+                }}
               >
-                {isEditing ? <CheckIcon /> : <PencilIcon />}
+                <Trash2Icon />
               </Button>
-              {times.length > 1 ? (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon-sm"
-                  aria-label={`Quitar hora ${index + 1}`}
-                  disabled={disabled}
-                  onClick={() => {
-                    onChange(
-                      times.filter((_, itemIndex) => itemIndex !== index)
-                    )
-                    setEditingIndex((current) => {
-                      if (current === null) {
-                        return null
-                      }
-                      if (current === index) {
-                        return null
-                      }
-                      if (current > index) {
-                        return current - 1
-                      }
-                      return current
-                    })
-                  }}
-                >
-                  <Trash2Icon />
-                </Button>
-              ) : null}
-            </div>
-            {isEditing ? (
-              <div className="pt-2">
-                <TimePairWheels
-                  value={time}
-                  onChange={(next) => {
-                    const nextTimes = [...times]
-                    nextTimes[index] = next
-                    onChange(nextTimes)
-                  }}
-                  disabled={disabled}
-                />
-              </div>
-            ) : null}
-          </div>
-        )
-      })}
+            ) : null
+          }
+        >
+          <TimePairWheels
+            value={time}
+            onChange={(next) => {
+              const nextTimes = [...times]
+              nextTimes[index] = next
+              onChange(nextTimes)
+            }}
+            disabled={disabled}
+          />
+        </WheelField>
+      ))}
       {times.length < MAX_EMAIL_SYNC_TIMES ? (
         <Button
           type="button"
@@ -138,7 +92,7 @@ export function EmailSyncTimesField({
           onClick={() => {
             const nextTimes = [...times, nextEmailSyncTime(times)]
             onChange(nextTimes)
-            setEditingIndex(nextTimes.length - 1)
+            setOpenedOnAdd(nextTimes.length - 1)
           }}
         >
           <PlusIcon data-icon="inline-start" />
@@ -163,59 +117,29 @@ export function EmailSyncIntervalField({
   error,
   disabled = false,
 }: EmailSyncIntervalFieldProps) {
-  const [editing, setEditing] = useState(false)
   const minutes = parseSyncIntervalMinutes(value)
 
   return (
-    <Field
-      data-invalid={error ? true : undefined}
-      className="flex flex-col gap-3"
+    <WheelField
+      label="Tiempo entre revisiones"
+      valueLabel={formatSyncIntervalLabel(minutes)}
+      icon={Timer}
+      error={error}
+      disabled={disabled}
     >
-      <FieldLabel className="text-sm text-muted-foreground">
-        Tiempo entre revisiones
-      </FieldLabel>
-      <div
-        className={cn(
-          "flex flex-col rounded-xl border bg-card p-2",
-          editing ? "border-primary" : "border-border"
-        )}
-      >
-        <div className="flex items-center gap-2">
-          <Timer className="size-4 shrink-0 text-muted-foreground" />
-          <span className="min-w-0 flex-1 text-sm font-medium tabular-nums">
-            {formatSyncIntervalLabel(minutes)}
-          </span>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-sm"
-            aria-label={editing ? "Cerrar intervalo" : "Editar intervalo"}
-            aria-pressed={editing}
-            disabled={disabled}
-            onClick={() => setEditing((current) => !current)}
-          >
-            {editing ? <CheckIcon /> : <PencilIcon />}
-          </Button>
-        </div>
-        {editing ? (
-          <div className="pt-2">
-            <DurationWheels
-              value={durationMinutesToHm(minutes)}
-              minuteStep={5}
-              disabled={disabled}
-              onChange={(next) => {
-                const nextMinutes = Math.max(
-                  MIN_EMAIL_SYNC_INTERVAL_MINUTES,
-                  hmToDurationMinutes(next)
-                )
-                onChange(String(nextMinutes))
-              }}
-            />
-          </div>
-        ) : null}
-      </div>
-      {error ? <FieldError>{error}</FieldError> : null}
-    </Field>
+      <DurationWheels
+        value={durationMinutesToHm(minutes)}
+        minuteStep={5}
+        disabled={disabled}
+        onChange={(next) => {
+          const nextMinutes = Math.max(
+            MIN_EMAIL_SYNC_INTERVAL_MINUTES,
+            hmToDurationMinutes(next)
+          )
+          onChange(String(nextMinutes))
+        }}
+      />
+    </WheelField>
   )
 }
 

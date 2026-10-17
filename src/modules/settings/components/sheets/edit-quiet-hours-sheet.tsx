@@ -6,10 +6,14 @@ import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
 import { Button } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { SummarySection } from "@/src/shared/components/ui/summary"
+import { WheelField } from "@/src/shared/components/ui/wheel-field"
 import { TimePairWheels } from "@/src/shared/components/ui/wheel-picker"
 import { appToast } from "@/src/shared/lib/app-toast"
-import { normalizeTimeToApi } from "@/src/shared/lib/date-format"
-import { ClockFadingIcon, XIcon } from "lucide-react"
+import {
+  formatTimeForDisplay,
+  normalizeTimeToApi,
+} from "@/src/shared/lib/date-format"
+import { ClockFadingIcon, ClockIcon, XIcon } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 
@@ -98,20 +102,32 @@ export function EditQuietHoursSheet({
       }}
     >
       <SummarySection title="Horario" icon={ClockFadingIcon}>
-        <TimePairWheels
+        <WheelField
           label="Inicio"
-          value={start}
-          onChange={setStart}
-          minuteStep={5}
+          valueLabel={formatTimeForDisplay(start)}
+          icon={ClockIcon}
           disabled={updateProfileMutation.isPending}
-        />
-        <TimePairWheels
+        >
+          <TimePairWheels
+            value={start}
+            onChange={setStart}
+            minuteStep={5}
+            disabled={updateProfileMutation.isPending}
+          />
+        </WheelField>
+        <WheelField
           label="Fin"
-          value={end}
-          onChange={setEnd}
-          minuteStep={5}
+          valueLabel={formatTimeForDisplay(end)}
+          icon={ClockIcon}
           disabled={updateProfileMutation.isPending}
-        />
+        >
+          <TimePairWheels
+            value={end}
+            onChange={setEnd}
+            minuteStep={5}
+            disabled={updateProfileMutation.isPending}
+          />
+        </WheelField>
       </SummarySection>
     </BottomSheet>
   )
