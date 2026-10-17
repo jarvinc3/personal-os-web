@@ -12,6 +12,15 @@ export type ReleaseNotesEntry = {
 
 export const RELEASE_NOTES: readonly ReleaseNotesEntry[] = [
   {
+    version: "0.43.0",
+    highlights: [
+      "Comparte cobros con un link: elige los cobros de una misma persona, genera el enlace y mándalo por WhatsApp o cópialo.",
+      "Quien lo recibe ve el total pendiente, cada cobro y su historial de pagos, sin cuenta ni contraseña. Es de solo lectura: no enseña tus cuentas.",
+      "Puedes revocar el link cuando quieras; a partir de ahí deja de abrirse.",
+      "Al crear o editar un cobro, el campo Concepto ahora es obligatorio.",
+    ],
+  },
+  {
     version: "0.42.4",
     highlights: [
       "Sin cambios visibles: las pruebas ahora miden todo el código de la app.",

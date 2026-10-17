@@ -2,6 +2,18 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.43.0] - 2026-10-17
+
+### Agregado
+
+- Compartir cobros por link público: la pestaña Cobros entra en modo selección con long-press o con la acción «Seleccionar», se eligen los cobros de una misma persona y el sheet «Compartir cobros» genera el enlace con «Copiar», «WhatsApp» y «Revocar link». El pendiente se muestra por moneda y nunca se convierte.
+- Ruta pública `/c/[token]`: sin cuenta ni sesión, el deudor ve el total pendiente, una barra de progreso por moneda, la lista de cobros y el detalle de cada uno con su resumen, su nota y su historial de pagos. El link revocado, vencido o inexistente da el mismo aviso.
+- La pantalla pública y su API quedan fuera de los buscadores (`noindex`).
+
+### Cambiado
+
+- El campo `description` del cobro se llama **Concepto** y es obligatorio (1 a 120 caracteres) al crear y editar.
+
 ## [0.42.4] - 2026-10-16
 
 ### Cambiado
