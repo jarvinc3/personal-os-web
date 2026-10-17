@@ -39,6 +39,7 @@ import {
   ChevronLeftIcon,
   LogOutIcon,
   SettingsIcon,
+  type LucideIcon,
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
@@ -78,10 +79,14 @@ function HeaderBackButton({
   onBack,
   pending = false,
   className,
+  icon: Icon = ChevronLeftIcon,
+  label = "Volver",
 }: {
   onBack: () => void
   pending?: boolean
   className?: string
+  icon?: LucideIcon
+  label?: string
 }) {
   return (
     <Button
@@ -90,12 +95,12 @@ function HeaderBackButton({
       className={cn("size-9 rounded-full", className)}
       onClick={onBack}
       disabled={pending}
-      aria-label="Volver"
+      aria-label={label}
     >
       {pending ? (
         <Spinner className="size-4.5" />
       ) : (
-        <ChevronLeftIcon className="size-4.5" />
+        <Icon className="size-4.5" />
       )}
     </Button>
   )
@@ -301,12 +306,16 @@ function SecondaryHeader({
   onBack,
   pending,
   tinted,
+  backIcon,
+  backLabel,
 }: {
   title: ReactNode
   actions?: ReactNode
   onBack: () => void
   pending?: boolean
   tinted?: boolean
+  backIcon?: LucideIcon
+  backLabel?: string
 }) {
   return (
     <div
@@ -318,6 +327,8 @@ function SecondaryHeader({
       <HeaderBackButton
         onBack={onBack}
         pending={pending}
+        icon={backIcon}
+        label={backLabel}
         className={
           tinted ? "text-white hover:bg-white/15 hover:text-white" : undefined
         }
@@ -372,6 +383,8 @@ export function AppHeader() {
           onBack={handleBack}
           pending={isBackPending}
           tinted={Boolean(accentColor)}
+          backIcon={config.backIcon}
+          backLabel={config.backLabel}
         />
       ) : (
         <PrimaryHeader

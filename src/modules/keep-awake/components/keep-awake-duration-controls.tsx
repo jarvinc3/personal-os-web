@@ -15,6 +15,7 @@ import {
   PopoverTrigger,
 } from "@/src/shared/components/ui/popover"
 import { Separator } from "@/src/shared/components/ui/separator"
+import { WheelField } from "@/src/shared/components/ui/wheel-field"
 import { DurationWheels } from "@/src/shared/components/ui/wheel-picker"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
 import {
@@ -23,6 +24,18 @@ import {
 } from "@/src/shared/types/wheels.type"
 import { CheckIcon, ChevronDown, Timer, XIcon } from "lucide-react"
 import { useState } from "react"
+
+function formatDurationLabel(minutes: number): string {
+  const hours = Math.floor(minutes / 60)
+  const leftover = minutes % 60
+  if (hours === 0) {
+    return `${leftover} min`
+  }
+  if (leftover === 0) {
+    return `${hours} h`
+  }
+  return `${hours} h ${leftover} min`
+}
 
 type KeepAwakeDurationControlsProps = {
   timerMode: TimerMode
@@ -146,14 +159,17 @@ export function KeepAwakeDurationControls({
 
             <Separator />
 
-            <Field>
-              <FieldTitle>Horas y minutos</FieldTitle>
+            <WheelField
+              label="Horas y minutos"
+              valueLabel={formatDurationLabel(draftMinutes)}
+              icon={Timer}
+            >
               <DurationWheels
                 value={durationMinutesToHm(draftMinutes)}
                 minuteStep={1}
                 onChange={(next) => applyDraft(hmToDurationMinutes(next))}
               />
-            </Field>
+            </WheelField>
           </FieldGroup>
 
           <div className="flex items-center justify-between gap-2">

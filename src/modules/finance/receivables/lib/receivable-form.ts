@@ -4,7 +4,11 @@ import { FINANCE_RECEIVABLE_STATUSES } from "@/src/modules/finance/shared/types/
 
 export const receivableSchema = z.object({
   debtorName: z.string().trim().min(1, "Deudor obligatorio").max(120),
-  description: z.string(),
+  description: z
+    .string()
+    .trim()
+    .min(1, "Concepto obligatorio")
+    .max(120, "Máximo 120 caracteres."),
   amount: z.string().trim().min(1, "Monto obligatorio"),
   paidAmount: z.string(),
   status: z.enum(FINANCE_RECEIVABLE_STATUSES),

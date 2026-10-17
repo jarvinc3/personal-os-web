@@ -568,13 +568,14 @@ function NotificationPreferencesSheet({
             }
             {...SETTINGS_REGISTRY.notifications.rows.quietHoursEnabled}
           />
-          <SettingsRow
-            label="Rango horario"
-            value={formatTimeRange(quietHours.start, quietHours.end)}
-            onPress={() => onQuietHoursOpenChange(true)}
-            disabled={!quietHours.enabled}
-            {...SETTINGS_REGISTRY.notifications.rows.quietHoursSchedule}
-          />
+          {quietHours.enabled ? (
+            <SettingsRow
+              label="Rango horario"
+              value={formatTimeRange(quietHours.start, quietHours.end)}
+              onPress={() => onQuietHoursOpenChange(true)}
+              {...SETTINGS_REGISTRY.notifications.rows.quietHoursSchedule}
+            />
+          ) : null}
           <DevicePushSettingsRow isLast />
         </SettingsSection>
 

@@ -1,5 +1,6 @@
 "use client"
 
+import type { LucideIcon } from "lucide-react"
 import {
   createContext,
   useCallback,
@@ -21,6 +22,9 @@ export type PageHeaderConfig = {
   showNotificationBell?: boolean
   showUserMenu?: boolean
   onBack?: () => void
+  /** Replaces the "back" chevron when the header leaves a mode instead of a screen. */
+  backIcon?: LucideIcon
+  backLabel?: string
 }
 
 export type ResolvedPageHeaderConfig = {
@@ -33,6 +37,8 @@ export type ResolvedPageHeaderConfig = {
   showNotificationBell: boolean
   showUserMenu: boolean
   onBack?: () => void
+  backIcon?: LucideIcon
+  backLabel?: string
 }
 
 const DEFAULT_CONFIG: ResolvedPageHeaderConfig = {
@@ -56,6 +62,8 @@ function resolveConfig(config: PageHeaderConfig): ResolvedPageHeaderConfig {
     showNotificationBell: config.showNotificationBell ?? !isSecondary,
     showUserMenu: config.showUserMenu ?? !isSecondary,
     onBack: config.onBack,
+    backIcon: config.backIcon,
+    backLabel: config.backLabel,
   }
 }
 
@@ -83,7 +91,9 @@ export function HeaderProvider({ children }: { children: ReactNode }) {
         prev.showSidebarTrigger === resolved.showSidebarTrigger &&
         prev.showNotificationBell === resolved.showNotificationBell &&
         prev.showUserMenu === resolved.showUserMenu &&
-        prev.onBack === resolved.onBack
+        prev.onBack === resolved.onBack &&
+        prev.backIcon === resolved.backIcon &&
+        prev.backLabel === resolved.backLabel
       ) {
         return prev
       }

@@ -5,66 +5,69 @@ import { Button } from "@/src/shared/components/ui/button"
 import {
   LATEST_RELEASE_VERSION,
   RELEASE_NOTES,
-  type ReleaseNotesEntry,
 } from "@/src/shared/constants/release-notes"
 import {
-  markVersionSeen,
-  readSeenVersion,
+  readCachedSeenVersion,
   resolveReleaseNotesOutcome,
   subscribeSeenVersion,
+  writeCachedSeenVersion,
 } from "@/src/shared/lib/release-notes"
 import { CheckIcon, SparklesIcon } from "lucide-react"
-import { useEffect, useSyncExternalStore } from "react"
+import { useCallback, useEffect, useRef, useSyncExternalStore } from "react"
 
-function readReleaseNotesOutcome() {
-  return resolveReleaseNotesOutcome({
-    seenVersion: readSeenVersion(window.localStorage),
-    currentVersion: LATEST_RELEASE_VERSION,
-    entries: RELEASE_NOTES,
-  })
+export type ReleaseNotesSheetProps = {
+  /** `null` = primera visita; `undefined` = el perfil aún no responde. */
+  lastSeenVersion: string | null | undefined
+  onMarkSeen: (version: string) => void
 }
 
-function markCurrentVersionSeen() {
-  markVersionSeen(window.localStorage, LATEST_RELEASE_VERSION)
-}
-
-/**
- * La primera visita y una versión sin notas curadas no abren hoja: solo
- * quedan marcadas como vistas.
- */
-function markVersionSeenWithoutSheet() {
-  const outcome = readReleaseNotesOutcome()
-  if (outcome.action === "mark-seen") {
-    markCurrentVersionSeen()
-  }
-}
-
-/** Solo devuelve una entrada cuando toca mostrarla; el resto de casos no abren hoja. */
-function getEntrySnapshot(): ReleaseNotesEntry | null {
-  const outcome = readReleaseNotesOutcome()
-  return outcome.action === "show" ? outcome.entry : null
+function readCachedSnapshot(): string | null {
+  return readCachedSeenVersion(window.localStorage)
 }
 
 /** Durante el render del servidor no hay `localStorage`: la hoja nace cerrada. */
-function getServerEntrySnapshot(): ReleaseNotesEntry | null {
+function getServerCachedSnapshot(): string | null {
   return null
 }
 
 /**
- * Hoja global «Novedades» del shell autenticado. La versión vista vive en
- * `localStorage`, así que se lee como almacén externo y nunca durante el
- * render del servidor: sin desajustes de hidratación.
+ * Hoja global «Novedades» del shell autenticado. La última versión vista vive
+ * en el perfil; `localStorage` es solo la caché que evita mostrar la hoja
+ * mientras el perfil carga.
  */
-export function ReleaseNotesSheet() {
-  const entry = useSyncExternalStore(
+export function ReleaseNotesSheet({
+  lastSeenVersion,
+  onMarkSeen,
+}: ReleaseNotesSheetProps) {
+  const cachedSeenVersion = useSyncExternalStore(
     subscribeSeenVersion,
-    getEntrySnapshot,
-    getServerEntrySnapshot
+    readCachedSnapshot,
+    getServerCachedSnapshot
   )
+  const markedVersion = useRef<string | null>(null)
+
+  const outcome = resolveReleaseNotesOutcome({
+    serverSeenVersion: lastSeenVersion,
+    cachedSeenVersion,
+    currentVersion: LATEST_RELEASE_VERSION,
+    entries: RELEASE_NOTES,
+  })
+  const entry = outcome.action === "show" ? outcome.entry : null
+
+  const markCurrentVersionSeen = useCallback(() => {
+    if (markedVersion.current === LATEST_RELEASE_VERSION) {
+      return
+    }
+    markedVersion.current = LATEST_RELEASE_VERSION
+    writeCachedSeenVersion(window.localStorage, LATEST_RELEASE_VERSION)
+    onMarkSeen(LATEST_RELEASE_VERSION)
+  }, [onMarkSeen])
 
   useEffect(() => {
-    markVersionSeenWithoutSheet()
-  }, [])
+    if (outcome.action === "mark-seen") {
+      markCurrentVersionSeen()
+    }
+  }, [outcome.action, markCurrentVersionSeen])
 
   const closeSheet = () => {
     if (entry === null) {
@@ -76,6 +79,7 @@ export function ReleaseNotesSheet() {
   return (
     <BottomSheet
       open={entry !== null}
+      variant="floating"
       onOpenChange={(open) => {
         if (!open) {
           closeSheet()
@@ -83,26 +87,25 @@ export function ReleaseNotesSheet() {
       }}
       title="Novedades"
       description={entry ? `Cambios de la versión ${entry.version}` : undefined}
-      actions={{
-        close: (
-          <Button className="flex-1" onClick={closeSheet}>
-            <CheckIcon data-icon="inline-start" />
-            Entendido
-          </Button>
-        ),
-      }}
     >
       <ul className="flex flex-col gap-3">
         {entry?.highlights.map((highlight) => (
-          <li key={highlight} className="flex items-start gap-2 text-sm">
+          <li
+            key={highlight}
+            className="flex items-start gap-2 rounded-md border border-border/30 bg-card p-2 text-sm shadow-sm"
+          >
             <SparklesIcon
-              className="mt-0.5 size-4 shrink-0 text-muted-foreground"
+              className="mt-0.5 size-4 shrink-0 text-success"
               aria-hidden
             />
             <span>{highlight}</span>
           </li>
         ))}
       </ul>
+      <Button className="flex-1 rounded-full py-2" onClick={closeSheet}>
+        <CheckIcon data-icon="inline-start" />
+        Entendido
+      </Button>
     </BottomSheet>
   )
 }

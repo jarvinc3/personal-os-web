@@ -1,6 +1,6 @@
 import { Suspense } from "react"
 
-import { StatementImportScreen } from "@/src/modules/finance"
+import { StatementImportScreen } from "@/src/modules/finance/statements/statement-import-screen"
 import { LoadingView } from "@/src/shared/components/layout/loading-view"
 
 type FinanceStatementImportPageProps = {

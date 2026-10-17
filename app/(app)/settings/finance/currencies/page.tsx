@@ -1,4 +1,4 @@
-import { FinanceCurrenciesSettingsScreen } from "@/src/modules/settings"
+import { FinanceCurrenciesSettingsScreen } from "@/src/modules/finance/settings/finance-currencies-settings-screen"
 import { LoadingView } from "@/src/shared/components/layout/loading-view"
 import { Suspense } from "react"
 

@@ -4,9 +4,18 @@ import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/asyn
 import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
 import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
 import { LoanProgressCard } from "@/src/modules/finance/loans"
-import { ReceivableSheet } from "@/src/modules/finance/receivables"
+import {
+  debtorFirstName,
+  formatSharePendingTotals,
+  ReceivableShareSheet,
+  ReceivableSheet,
+  shareSelectionDebtor,
+  shareSelectionTotals,
+  shareableReceivables,
+} from "@/src/modules/finance/receivables"
 import { SavingsGoalSheet } from "@/src/modules/finance/savings-goals"
 import { PlanningProgressCard } from "@/src/modules/finance/shared/components/planning-progress-card"
+import { financeSectionTitle } from "@/src/modules/finance/shared/constants/nav"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import { useCategories } from "@/src/modules/finance/shared/hooks/use-categories"
 import { useInstitutions } from "@/src/modules/finance/shared/hooks/use-institutions"
@@ -28,6 +37,14 @@ import {
   visibleReceivables,
 } from "@/src/modules/finance/shared/lib/planning-lists"
 import { FINANCE_RECEIVABLE_STATUS_LABEL } from "@/src/modules/finance/shared/types/entities"
+import { ReceivableShareBar } from "@/src/modules/finance/planning/components/receivable-share-bar"
+import { useReceivableShareMode } from "@/src/modules/finance/planning/hooks/use-receivable-share-mode"
+import {
+  debtorSelectionIds,
+  selectedReceivables,
+  SHARE_ALL_LABEL,
+  shareSelectionTitle,
+} from "@/src/modules/finance/planning/lib/receivable-share-mode"
 import { usePendingNavigation } from "@/src/shared/components/ui/navigation-pending"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { ExpandableFab } from "@/src/shared/components/layout/expandable-fab"
@@ -47,14 +64,19 @@ import {
   TabsTrigger,
 } from "@/src/shared/components/ui/tabs"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
+import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import {
   ChartPieIcon,
+  CheckSquareIcon,
   HandCoinsIcon,
   HandshakeIcon,
   PiggyBankIcon,
   PlusIcon,
+  UsersIcon,
+  XIcon,
 } from "lucide-react"
+import { usePathname } from "next/navigation"
 import { useMemo, useState } from "react"
 import { FinanceBudgetsList } from "@/src/modules/finance/budgets"
 import { cn } from "@/src/shared/lib/utils"
@@ -117,6 +139,7 @@ export function FinancePlanningList({
   display,
   defaultCurrency,
 }: FinancePlanningListProps) {
+  const pathname = usePathname()
   const { navigate: navigateToNewLoan, isPending: isNewLoanPending } =
     usePendingNavigation()
   const {
@@ -129,6 +152,9 @@ export function FinancePlanningList({
     sheetId: receivableSheetId,
     setOpen: setOpenReceivableSheet,
   } = useSheetParam(FINANCE_SHEET_KEYS.receivable)
+  const { open: openShareSheet, setOpen: setOpenShareSheet } = useSheetParam(
+    FINANCE_SHEET_KEYS.receivableShare
+  )
   const { setOpen: setOpenBudgetSheet } = useSheetParam(
     FINANCE_SHEET_KEYS.budget
   )
@@ -144,6 +170,41 @@ export function FinancePlanningList({
   const loans = loansQuery.data ?? []
   const receivables = receivablesQuery.data ?? []
   const listedReceivables = visibleReceivables(receivables)
+  const shareMode = useReceivableShareMode()
+  const shareableList = shareableReceivables(listedReceivables)
+  const selectedForShare = selectedReceivables(
+    shareableList,
+    shareMode.selectedIds
+  )
+  const shareDebtor = shareSelectionDebtor(selectedForShare)
+  const sharePendingLabel = formatSharePendingTotals(
+    shareSelectionTotals(selectedForShare, display)
+  )
+
+  usePageHeader(
+    shareMode.active
+      ? {
+          variant: "secondary",
+          title: shareSelectionTitle(selectedForShare.length),
+          onBack: exitShareMode,
+          backIcon: XIcon,
+          backLabel: "Salir de la selección",
+          actions: shareDebtor ? (
+            <Button variant="ghost" size="sm" onClick={selectAllOfShareDebtor}>
+              <UsersIcon className="size-4 shrink-0" aria-hidden="true" />
+              {SHARE_ALL_LABEL} {debtorFirstName(shareDebtor)}
+            </Button>
+          ) : null,
+        }
+      : { title: financeSectionTitle(pathname) ?? "Finanzas" },
+    [
+      shareMode.active,
+      selectedForShare.length,
+      shareDebtor,
+      openShareSheet,
+      pathname,
+    ]
+  )
 
   const errorMessage = useMemo(() => {
     const error =
@@ -165,7 +226,31 @@ export function FinancePlanningList({
     receivablesQuery.isPending,
     setOpenReceivableSheet
   )
-  const [tab, setTab] = useState<PlanningTab>("savings")
+  const [tab, setTab] = useState<PlanningTab>(() =>
+    shareMode.active ? "receivables" : "savings"
+  )
+
+  function exitShareMode() {
+    setOpenShareSheet(false)
+    shareMode.exit()
+  }
+
+  function selectAllOfShareDebtor() {
+    shareMode.selectMany(
+      debtorSelectionIds({
+        receivables: shareableList,
+        selectedIds: shareMode.selectedIds,
+      })
+    )
+  }
+
+  function changeTab(next: PlanningTab) {
+    setTab(next)
+    // The selection only exists in the Cobros tab, so leaving it drops the mode.
+    if (shareMode.active && next !== "receivables") {
+      exitShareMode()
+    }
+  }
 
   function openCreate(next: PlanningTab) {
     setTab(next)
@@ -202,7 +287,7 @@ export function FinancePlanningList({
         value={tab}
         onValueChange={(value) => {
           if (isPlanningTab(value)) {
-            setTab(value)
+            changeTab(value)
           }
         }}
         className="w-full gap-6"
@@ -332,6 +417,30 @@ export function FinancePlanningList({
                 </Empty>
               }
             >
+              {shareMode.active ? (
+                <p className="px-1 text-sm text-muted-foreground">
+                  Toca los cobros de una misma persona para compartirlos.
+                </p>
+              ) : (
+                <div className="flex justify-end">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    disabled={shareableList.length === 0}
+                    onClick={() => {
+                      setTab("receivables")
+                      shareMode.start()
+                    }}
+                  >
+                    <CheckSquareIcon
+                      className="size-4 shrink-0"
+                      aria-hidden="true"
+                    />
+                    Seleccionar
+                  </Button>
+                </div>
+              )}
               {listedReceivables.map((item) => {
                 const money = withCurrency(display, item.currency)
                 const paid = parseFinanceMoney(item.paidAmount)
@@ -348,6 +457,10 @@ export function FinancePlanningList({
                     : item.status === "PARTIAL"
                       ? "info"
                       : "warning"
+                const dimmed =
+                  shareMode.active &&
+                  shareDebtor !== null &&
+                  item.debtorName !== shareDebtor
                 return (
                   <PlanningProgressCard
                     key={item.id}
@@ -378,7 +491,29 @@ export function FinancePlanningList({
                         ? `Vence ${formatCalendarDate(item.dueDate)}`
                         : undefined
                     )}
-                    href={APP_ROUTES.app.financeReceivable(item.id)}
+                    href={
+                      shareMode.active
+                        ? undefined
+                        : APP_ROUTES.app.financeReceivable(item.id)
+                    }
+                    onPress={
+                      shareMode.active && !dimmed
+                        ? () => shareMode.toggle(item.id)
+                        : undefined
+                    }
+                    selection={
+                      shareMode.active
+                        ? {
+                            selected: shareMode.selectedIds.includes(item.id),
+                            dimmed,
+                          }
+                        : undefined
+                    }
+                    onLongPress={() =>
+                      shareMode.active
+                        ? shareMode.toggle(item.id)
+                        : shareMode.selectOnly(item.id)
+                    }
                   />
                 )
               })}
@@ -440,43 +575,53 @@ export function FinancePlanningList({
         </TabsContent>
       </Tabs>
 
-      <ExpandableFab
-        label="Crear en planificación"
-        actions={[
-          {
-            icon: <PiggyBankIcon className="size-5" />,
-            label: "Ahorro",
-            onClick: () => openCreate("savings"),
-            disabled: !enabled,
-            color: "bg-emerald-600",
-          },
-          {
-            icon: <ChartPieIcon className="size-5" />,
-            label: "Presup...",
-            onClick: () => openCreate("budgets"),
-            disabled: !enabled || !hasExpenseCategories,
-            color: "bg-violet-600",
-          },
-          {
-            icon: <HandshakeIcon className="size-5" />,
-            label: "Cobro",
-            onClick: () => openCreate("receivables"),
-            disabled: !enabled,
-            color: "bg-blue-500",
-          },
-          {
-            icon: isNewLoanPending ? (
-              <Spinner className="size-5" />
-            ) : (
-              <HandCoinsIcon className="size-5" />
-            ),
-            label: "Prést...",
-            onClick: () => openCreate("loans"),
-            disabled: !enabled || isNewLoanPending,
-            color: "bg-amber-600",
-          },
-        ]}
-      />
+      {shareMode.active ? null : (
+        <ExpandableFab
+          label="Crear en planificación"
+          actions={[
+            {
+              icon: <PiggyBankIcon className="size-5" />,
+              label: "Ahorro",
+              onClick: () => openCreate("savings"),
+              disabled: !enabled,
+              color: "bg-emerald-600",
+            },
+            {
+              icon: <ChartPieIcon className="size-5" />,
+              label: "Presup...",
+              onClick: () => openCreate("budgets"),
+              disabled: !enabled || !hasExpenseCategories,
+              color: "bg-violet-600",
+            },
+            {
+              icon: <HandshakeIcon className="size-5" />,
+              label: "Cobro",
+              onClick: () => openCreate("receivables"),
+              disabled: !enabled,
+              color: "bg-blue-500",
+            },
+            {
+              icon: isNewLoanPending ? (
+                <Spinner className="size-5" />
+              ) : (
+                <HandCoinsIcon className="size-5" />
+              ),
+              label: "Prést...",
+              onClick: () => openCreate("loans"),
+              disabled: !enabled || isNewLoanPending,
+              color: "bg-amber-600",
+            },
+          ]}
+        />
+      )}
+
+      {shareMode.active ? (
+        <ReceivableShareBar
+          pendingLabel={sharePendingLabel}
+          disabled={selectedForShare.length === 0}
+          onShare={() => setOpenShareSheet(true)}
+        />
+      ) : null}
 
       <SavingsGoalSheet
         open={openSavingsSheet}
@@ -492,6 +637,14 @@ export function FinancePlanningList({
         pending={Boolean(receivableSheetId) && !editingReceivable}
         receivable={editingReceivable}
         defaultCurrency={defaultCurrency}
+      />
+
+      <ReceivableShareSheet
+        key={shareDebtor ?? "sin-deudor"}
+        open={openShareSheet}
+        onOpenChange={setOpenShareSheet}
+        receivables={selectedForShare}
+        display={display}
       />
     </>
   )

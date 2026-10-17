@@ -131,10 +131,10 @@ Sentry corre en cliente, servidor y edge (`instrumentation*.ts`, `sentry.*.confi
 
 ## Estructura de código
 
-Un solo app Next.js. Sin packages por feature y sin capas `presentation` / `application` / `infrastructure` / `domain`. `app/` solo compone rutas; cada feature vive en `src/modules/<slug>/` y otro módulo importa solo su `index.ts`.
+Un solo app Next.js. Sin packages por feature y sin capas `presentation` / `application` / `infrastructure` / `domain`. `app/` solo compone rutas; cada feature vive en `src/modules/<slug>/` y otro módulo importa solo su `index.ts`, que nunca exporta screens ni formularios pesados.
 
 ```text
-app/                 # rutas delgadas: Suspense + screen del index.ts del módulo
+app/                 # rutas delgadas: Suspense + screen del módulo por ruta directa
 src/modules/         # auth, settings, notifications, ai, finance, keep-awake, home
 src/shared/          # chrome, rutas, api-endpoints, primitivos de UI; no importa features
 src/providers/
@@ -181,4 +181,4 @@ Cada capability tiene sus components, hooks, reglas, types y screens. La screen 
 
 ### Frontera
 
-Cada módulo exporta su API y sus screens en su `index.ts`; `app/.../page.tsx` importa la screen solo desde ahí. En Finanzas, cada capability exporta su API en su `index.ts` y otra capability la importa solo desde ahí; las capabilities pueden importar `finance/shared`. ESLint `no-restricted-imports` rechaza cualquier import profundo hacia otro módulo o hacia otra capability, incluida la carpeta de la screen. El nav del sidebar se registra desde la composición de la app, no desde `src/shared`.
+Cada `index.ts` exporta solo la API pública que no es pantalla (hooks, tipos, componentes chicos, constantes); las páginas de `app/.../page.tsx` importan la screen por ruta directa y quedan exentas de la frontera. En Finanzas, cada capability exporta su API en su `index.ts` y otra capability la importa solo desde ahí; las capabilities pueden importar `finance/shared`. ESLint rechaza cualquier import profundo hacia otro módulo o hacia otra capability, con la excepción de los genéricos de settings listados en `eslint.config.mjs`. El nav del sidebar se registra desde la composición de la app, no desde `src/shared`.

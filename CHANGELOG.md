@@ -2,6 +2,94 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.43.2] - 2026-10-17
+
+### Cambiado
+
+- Finanzas toma la configuración de módulos por ruta directa: el barrel de Ajustes sale de su grafo y desaparece el ciclo entre ambos.
+- La lista de rutas `(app)` que exigen sesión vive en un solo arreglo en `proxy-routes.ts`.
+
+## [0.43.1] - 2026-10-17
+
+### Agregado
+
+- Pantallas «en camino» para Agenda, Proyectos y Salud: `/agenda`, `/projects` y `/health` avisan que la app todavía no está construida y enlazan a su configuración.
+
+### Cambiado
+
+- La configuración de cada app (formularios, validaciones, monedas y horario de sincronización) vive en su módulo; Ajustes queda como marco general.
+- Los `index.ts` de los módulos exportan solo hooks, tipos, componentes chicos y constantes; las pantallas se importan por ruta directa desde `app/`.
+- `proxy.ts` valida la sesión con `getClaims()` en lugar de `getUser()`: sin viaje de red por navegación.
+
+## [0.43.0] - 2026-10-17
+
+### Agregado
+
+- Compartir cobros por link público: la pestaña Cobros entra en modo selección con long-press o con la acción «Seleccionar», se eligen los cobros de una misma persona y el sheet «Compartir cobros» genera el enlace con «Copiar», «WhatsApp» y «Revocar link». El pendiente se muestra por moneda y nunca se convierte.
+- Ruta pública `/c/[token]`: sin cuenta ni sesión, el deudor ve el total pendiente, una barra de progreso por moneda, la lista de cobros y el detalle de cada uno con su resumen, su nota y su historial de pagos. El link revocado, vencido o inexistente da el mismo aviso.
+- La pantalla pública y su API quedan fuera de los buscadores (`noindex`).
+
+### Cambiado
+
+- El campo `description` del cobro se llama **Concepto** y es obligatorio (1 a 120 caracteres) al crear y editar.
+
+## [0.42.4] - 2026-10-16
+
+### Cambiado
+
+- `pnpm test:coverage` mide todo `src` con c8 (`--all`), no solo los archivos que cargan las pruebas: 18 % de líneas y statements, 72 % de ramas y 46 % de funciones. El script fija esos umbrales y el paso de tests del CI corre la suite con cobertura.
+
+## [0.42.3] - 2026-10-16
+
+### Cambiado
+
+- Zod 3.25.76 → 4.6.7, alineado con el back. `@hookform/resolvers` sube de 3.10.0 a 5.9.1: el `zodResolver` de la v3 lee `ZodError.errors`, que Zod 4 quitó, y devolvía el error en vez de los mensajes por campo.
+- ESLint 9.39.5 → 10.12.0. `eslint.config.mjs` fija `settings.react.version` desde `package.json` porque `eslint-plugin-react` detectaba la versión de React con `context.getFilename()`, eliminado en ESLint 10.
+- Otras subidas: `@base-ui/react` 1.9.0, `@supabase/supabase-js` 2.118.0, `@tanstack/react-query` 5.104.3, `react`/`react-dom` 19.3.1, `react-hook-form` 7.90.0, `postcss` 8.5.30 y `prettier` 3.9.10.
+
+## [0.42.2] - 2026-10-16
+
+### Cambiado
+
+- `package.json`: la `description` queda breve y precisa; las dependencias que estaban en `latest` se fijan a la versión instalada del lockfile con `^` (`@hugeicons/core-free-icons`, `@hugeicons/react`, `class-variance-authority`, `next-themes`, `radix-ui`, `shadcn` y `tw-animate-css`).
+- pnpm alineado con el back (`packageManager: pnpm@12.11.2`) y CI sin la versión fija 9.
+- `pnpm audit --prod --audit-level=high` corre en CI con `continue-on-error`, sin bloquear el pipeline.
+
+### Corregido
+
+- `public/assets/favicon.svg` baja de 2.28 MB a 59 KB: el PNG embebido de 1254 px se reemplaza por uno de 256 px con la misma apariencia.
+
+## [0.42.1] - 2026-10-16
+
+### Cambiado
+
+- La lectura de la última versión vista de Novedades (`useLastSeenReleaseVersion`) y su marcado (`useMarkReleaseNotesSeen`) viven en hooks separados; `ReleaseNotes` los compone. Sin cambio de comportamiento.
+
+## [0.42.0] - 2026-10-16
+
+### Agregado
+
+- La hoja «Novedades» guarda la última versión vista en el perfil del usuario: la lee de `GET /users/me` y la marca con `PATCH /users/me/release-notes-seen`. Así no vuelve a aparecer al entrar desde otro dispositivo.
+- `localStorage` (`releaseNotesSeenVersion`) queda como caché para no mostrar la hoja mientras responde el perfil. En la primera visita (`lastSeenReleaseVersion: null`) la versión actual se marca en silencio, sin hoja.
+
+### Cambiado
+
+- `ReleaseNotesSheet` pasa a ser presentacional: recibe la versión vista y el marcado desde `useReleaseNotesSeen` (`src/modules/settings`), que refleja el cambio en la caché del perfil al cerrar la hoja.
+
+## [0.41.0] - 2026-10-16
+
+### Agregado
+
+- Reintentos sin duplicar: el cliente HTTP manda `Idempotency-Key` en POST, PATCH y DELETE, reutiliza la misma clave en los reintentos de esa petición y genera una clave nueva en cada llamada. Los GET se reintentan igual que antes.
+- Un 409 del servidor (clave en curso o usada con otro body) se muestra como conflicto y no se reintenta.
+- Pruebas del cliente HTTP y de la lógica de los hooks de autenticación (`src/config`, `src/modules/auth`).
+
+### Cambiado
+
+- El cliente HTTP se arma con dependencias inyectables (`createApiClient`) para poder probarlo sin sesión real; los `apiGet`, `apiPost`, `apiPatch`, `apiDelete` y `apiPostForm` exportados no cambian.
+- `pnpm test` incluye los specs de `src/config`.
+- `ApiError`, `AuthServiceError` y `BackendProfileUnavailableError` dejan de usar parameter properties de TypeScript, que `node --test --experimental-strip-types` no soporta.
+
 ## [0.40.0] - 2026-10-16
 
 ### Agregado

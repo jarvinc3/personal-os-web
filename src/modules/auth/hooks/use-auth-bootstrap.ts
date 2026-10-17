@@ -2,6 +2,7 @@
 
 import { queryClient } from "@/src/config/query-client"
 import { getSupabaseBrowserClient } from "@/src/config/supabase/client"
+import { resolveAuthStateChangeDecision } from "@/src/modules/auth/lib/auth-state-change"
 import { establishAuthenticatedSession } from "@/src/modules/auth/lib/establish-auth-session"
 import { PROFILE_QUERY_KEY } from "@/src/modules/auth/lib/hydrate-auth-user"
 import { mapSupabaseSession } from "@/src/modules/auth/services/supabase-auth.service"
@@ -133,44 +134,47 @@ export function useAuthBootstrap() {
         return
       }
 
-      if (event === "SIGNED_OUT") {
-        clearAuthState()
-        void queryClient.removeQueries({ queryKey: PROFILE_QUERY_KEY })
-        markBootstrapped()
-        return
-      }
-
-      if (event === "INITIAL_SESSION") {
-        scheduleInitialBootstrap(session)
-        return
-      }
-
-      scheduleDeferred(async () => {
-        if (session) {
-          if (event === "TOKEN_REFRESHED") {
-            const existingUser = useAppStore.getState().user
-            if (existingUser?.profile) {
-              useAppStore.getState().setAuthState({
-                session: mapSupabaseSession(session),
-                user: existingUser,
-              })
-              return
-            }
-          }
-
-          try {
-            await runBootstrap(session)
-          } catch {
-            if (mounted) {
-              clearAuthState()
-            }
-          }
-          return
-        }
-
-        clearAuthState()
-        void queryClient.removeQueries({ queryKey: PROFILE_QUERY_KEY })
+      const decision = resolveAuthStateChangeDecision({
+        event,
+        session,
+        currentUser: useAppStore.getState().user,
       })
+
+      switch (decision.kind) {
+        case "clear-session":
+          clearAuthState()
+          void queryClient.removeQueries({ queryKey: PROFILE_QUERY_KEY })
+          markBootstrapped()
+          return
+
+        case "initial-session":
+          scheduleInitialBootstrap(decision.session)
+          return
+
+        case "keep-session":
+          useAppStore.getState().setAuthState({
+            session: mapSupabaseSession(decision.session),
+            user: decision.user,
+          })
+          return
+
+        case "establish-session":
+          scheduleDeferred(async () => {
+            try {
+              await runBootstrap(decision.session)
+            } catch {
+              if (mounted) {
+                clearAuthState()
+              }
+            }
+          })
+          return
+
+        case "clear":
+          clearAuthState()
+          void queryClient.removeQueries({ queryKey: PROFILE_QUERY_KEY })
+          return
+      }
     })
 
     return () => {

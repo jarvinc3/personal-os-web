@@ -4,83 +4,76 @@ Inventario para agentes. Antes de inventar un control, buscar aquí y en `src/sh
 
 ## Fecha y hora — no usar inputs nativos
 
-**Prohibido** en UI de producto: `<input type="time">`, `<input type="date">`, y `Input` con esos `type`. El reemplazo canónico está en [`src/shared/components/ui/wheel-picker.tsx`](../../src/shared/components/ui/wheel-picker.tsx).
+**Prohibido** en UI de producto: `<input type="time">`, `<input type="date">`, y `Input` con esos `type`. La rueda vive en [`src/shared/components/ui/wheel-picker.tsx`](../../src/shared/components/ui/wheel-picker.tsx). En pantalla siempre va dentro de [`WheelField`](../../src/shared/components/ui/wheel-field.tsx): la misma fila que `FinanceDateField`.
 
-| Necesitas                          | Usar               | Valor                                                                                    |
-| ---------------------------------- | ------------------ | ---------------------------------------------------------------------------------------- |
-| Hora de reloj                      | `TimePairWheels`   | `HH:mm` 24 h (ej. `"09:00"`)                                                             |
-| Duración (horas + minutos)         | `DurationWheels`   | `HH:mm` de duración (ej. `"01:30"` = 90 min). No usar `TimePairWheels`: trae a. m./p. m. |
-| Fecha                              | `DateWheels`       | `YYYY-MM-DD`                                                                             |
-| Fecha en un formulario de Finanzas | `FinanceDateField` | Igual `YYYY-MM-DD`; collapsible + `DateWheels` + atajos “Hoy” / “Listo”                  |
+| Necesitas                   | Usar               | Valor                                                                              |
+| --------------------------- | ------------------ | ---------------------------------------------------------------------------------- |
+| Cualquier rueda en pantalla | `WheelField`       | Fila (icono, valor, chevron), panel a ancho completo y `Listo` abajo a la derecha  |
+| Hora de reloj               | `TimePairWheels`   | Contenido del panel. `HH:mm` 24 h (ej. `"09:00"`)                                  |
+| Duración (horas + minutos)  | `DurationWheels`   | Contenido del panel. `HH:mm` de duración (ej. `"01:30"` = 90 min). Sin a. m./p. m. |
+| Fecha                       | `FinanceDateField` | `WheelField` + `DateWheels`. `YYYY-MM-DD`, atajos “Hoy” / “Listo”                  |
+| Un día dentro de un rango   | `DayWheel`         | `WheelField` + una rueda. String decimal (`"15"`), `min` / `max`                   |
+| Varios días del mes         | `DayListField`     | Cada día es un `DayWheel`                                                          |
+| 2 a 5 opciones exclusivas   | `ChoiceGrid`       | Celdas con icono en el color del módulo y, al elegir, borde más grueso y check     |
 
-`TimePairWheels` muestra hora 12 h + minutos + periodo a. m./p. m. `DurationWheels` muestra horas 00–24 + minutos, sin periodo. Los minutos se configuran con `minuteStep`: `1` (00–59), `5` o `10`. Convierte reloj con `hm24To12Parts` / `hm12To24` y duración con `durationMinutesToHm` / `hmToDurationMinutes` en `src/shared/types/wheels.type.ts`.
+`TimePairWheels`, `DurationWheels` y `DateWheels` no se montan sueltos en una vista. `TimePairWheels` muestra hora 12 h + minutos + periodo a. m./p. m. `DurationWheels` muestra horas 00–24 + minutos, sin periodo. Los minutos se configuran con `minuteStep`: `1` (00–59), `5` o `10`. Convierte reloj con `hm24To12Parts` / `hm12To24` y duración con `durationMinutesToHm` / `hmToDurationMinutes` en `src/shared/types/wheels.type.ts`.
 
 ```tsx
+import { WheelField } from "@/src/shared/components/ui/wheel-field"
 import { TimePairWheels } from "@/src/shared/components/ui/wheel-picker"
+import { ClockIcon } from "lucide-react"
 
-;<TimePairWheels
-  label="Hora"
-  value="09:07"
-  minuteStep={1}
-  disabled={false}
-  onChange={(next) => {
-    // next es "HH:mm" 24 h
-  }}
-/>
+;<WheelField label="Hora" valueLabel="9:07 a. m." icon={ClockIcon}>
+  <TimePairWheels
+    value="09:07"
+    minuteStep={1}
+    onChange={(next) => {
+      // next es "HH:mm" 24 h
+    }}
+  />
+</WheelField>
 ```
 
-```tsx
-import { DurationWheels } from "@/src/shared/components/ui/wheel-picker"
-
-;<DurationWheels
-  label="Duración"
-  value="01:30"
-  minuteStep={1}
-  onChange={(next) => {
-    // next es "HH:mm" de duración
-  }}
-/>
-```
-
-Un `Input type="number"` para cantidades **sí** es válido; no es fecha/hora. Duraciones con horas y minutos van en `DurationWheels`, no en un input numérico.
+Un `Input type="number"` para cantidades **sí** es válido; no es fecha/hora. Duraciones con horas y minutos van en `DurationWheels` dentro de `WheelField`, no en un input numérico.
 
 ## Collapsible para elegir un dato
 
-Cuando un collapsible abre ruedas u otro control para elegir un valor (`FinanceDateField` y el mismo patrón en otros módulos):
+`WheelField` (y `FinanceDateField`, `DayWheel`, que lo usan) es la presentación de una rueda:
 
-- El panel abierto ocupa **todo el ancho** del bloque que lo contiene. Si el disparador comparte fila con otro control (un switch, por ejemplo), ese control va en `aside` del campo, para que el panel siga a ancho completo.
-- El pie del panel deja los atajos a la izquierda (`Hoy`, y `Sin fecha` si aplica). A la derecha, al fondo, va un botón `Listo` del mismo tamaño. Se habilita cuando ya hay un valor elegido. Al pulsarlo, cierra el collapsible. El valor ya quedó escrito al elegirlo.
+- El panel abierto ocupa **todo el ancho** del bloque que lo contiene. Si el disparador comparte fila con otro control, ese control va en `aside`, para que el panel siga a ancho completo.
+- El pie del panel deja los atajos a la izquierda (`Hoy`, y `Sin fecha` si aplica). A la derecha, al fondo, va un botón `Listo`. Se habilita cuando ya hay un valor elegido. Al pulsarlo, cierra el panel. El valor ya quedó escrito al elegirlo.
+- `ChoiceGrid` recibe `accentColor` del módulo. El icono va sobre un fondo tenue de ese color. La celda elegida no se rellena: lleva un borde más grueso de ese color y un check.
 
 ## Sheets, listas y vacíos
 
-| Necesitas                                                    | Usar                                                                                                              | Path                                                                                                                                                                                               |
-| ------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Sheet / drawer de módulo (edición)                           | `BottomSheet`                                                                                                     | `src/shared/components/layout/bottom-sheet.tsx`                                                                                                                                                    |
-| Evento (llegó, listo, falló)                                 | `BottomSheet` `variant="floating"`                                                                                | igual; card abajo, no drawer de formulario                                                                                                                                                         |
-| Sección con título (cualquier vista)                         | `SummarySection`. No `Card` ni `CardHeader` / `CardTitle` / `CardContent` / `CardFooter` en pantallas de producto | `src/shared/components/ui/summary.tsx`                                                                                                                                                             |
-| Fila de lista (icono, título, valor)                         | `SummaryItem`                                                                                                     | igual. `tintRow` pinta el fondo de la fila con `accentColor`; por defecto no                                                                                                                       |
-| Grupo de filas                                               | `SummarySection` (título + icono) o `SettingsSection` (etiqueta corta)                                            | `summary.tsx` y `src/shared/components/layout/settings-section.tsx`. No un `div` `rounded-2xl border bg-card`                                                                                      |
-| Marca de cuenta, tarjeta, institución, comercio o movimiento | `BrandLogo` (`CardNetworkMark` para la red)                                                                       | `src/modules/finance/shared/components/brand-logo.tsx`                                                                                                                                             |
-| Importe en pantalla                                          | `formatFinanceMoney` + `tabular-nums`                                                                             | `src/modules/finance/shared/lib/money.ts`. Escribir el monto es `FinanceMoneyField`                                                                                                                |
-| Acción primaria flotante (una sola)                          | `Fab`                                                                                                             | `src/shared/components/layout/fab.tsx`                                                                                                                                                             |
-| Varias acciones flotantes                                    | `ExpandableFab`                                                                                                   | `src/shared/components/layout/expandable-fab.tsx`                                                                                                                                                  |
-| Estado vacío                                                 | `Empty` + `EmptyHeader` / `EmptyMedia` / `EmptyTitle` / `EmptyDescription`                                        | `src/shared/components/ui/empty.tsx`                                                                                                                                                               |
-| Color                                                        | `ColorPickerSwatch`                                                                                               | `src/shared/components/ui/color-picker.tsx`                                                                                                                                                        |
-| Tab bar de módulo **con rutas**                              | `ModuleSectionLayout`                                                                                             | `src/shared/components/layout/module-section-layout.tsx` — [module-conventions.md](./module-conventions.md)                                                                                        |
-| Aviso puntual dentro de un flujo                             | `Alert`                                                                                                           | `src/shared/components/ui/alert.tsx`                                                                                                                                                               |
-| Pending de navegación                                        | `LinkPendingOverlay` / `usePendingNavigation`                                                                     | `src/shared/components/ui/navigation-pending.tsx` — overlay + spinner en el control que abre otra vista                                                                                            |
-| Región pendiente / vacía / contenido                         | `AsyncRegion`                                                                                                     | `src/modules/finance/shared/components/layout/async-region.tsx`                                                                                                                                    |
-| Registro ausente con vuelta                                  | `MissingRecord`                                                                                                   | `src/modules/finance/shared/components/layout/missing-record.tsx`                                                                                                                                  |
-| Hero de progreso de un detalle                               | `FinanceProgressHero`                                                                                             | `src/modules/finance/shared/components/layout/progress-hero.tsx`                                                                                                                                   |
-| Acciones de un registro (⋮ del detalle)                      | `RecordOptionsSheet`                                                                                              | `src/modules/finance/shared/components/record-options-sheet.tsx`                                                                                                                                   |
-| Novedades de una versión (global)                            | `ReleaseNotesSheet`                                                                                               | `src/shared/components/layout/release-notes-sheet.tsx` — se monta en el shell autenticado; el texto curado vive en `src/shared/constants/release-notes.ts` (ver [versionado.md](../versionado.md)) |
-| Confirmación de borrado                                      | `DeleteRecordDialog`                                                                                              | `src/modules/finance/shared/components/delete-record-dialog.tsx`                                                                                                                                   |
+| Necesitas                                                    | Usar                                                                                                              | Path                                                                                                                                                                                                                                           |
+| ------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Sheet / drawer de módulo (edición)                           | `BottomSheet`                                                                                                     | `src/shared/components/layout/bottom-sheet.tsx`                                                                                                                                                                                                |
+| Evento (llegó, listo, falló)                                 | `BottomSheet` `variant="floating"`                                                                                | igual; card abajo, no drawer de formulario                                                                                                                                                                                                     |
+| Sección con título (cualquier vista)                         | `SummarySection`. No `Card` ni `CardHeader` / `CardTitle` / `CardContent` / `CardFooter` en pantallas de producto | `src/shared/components/ui/summary.tsx`                                                                                                                                                                                                         |
+| Fila de lista (icono, título, valor)                         | `SummaryItem`                                                                                                     | igual. `tintRow` pinta el fondo de la fila con `accentColor`; por defecto no                                                                                                                                                                   |
+| Grupo de filas                                               | `SummarySection` (título + icono) o `SettingsSection` (etiqueta corta)                                            | `summary.tsx` y `src/shared/components/layout/settings-section.tsx`. No un `div` `rounded-2xl border bg-card`                                                                                                                                  |
+| Marca de cuenta, tarjeta, institución, comercio o movimiento | `BrandLogo` (`CardNetworkMark` para la red)                                                                       | `src/modules/finance/shared/components/brand-logo.tsx`                                                                                                                                                                                         |
+| Importe en pantalla                                          | `formatFinanceMoney` + `tabular-nums`                                                                             | `src/modules/finance/shared/lib/money.ts`. Escribir el monto es `FinanceMoneyField`                                                                                                                                                            |
+| Acción primaria flotante (una sola)                          | `Fab`                                                                                                             | `src/shared/components/layout/fab.tsx`                                                                                                                                                                                                         |
+| Varias acciones flotantes                                    | `ExpandableFab`                                                                                                   | `src/shared/components/layout/expandable-fab.tsx`                                                                                                                                                                                              |
+| Estado vacío                                                 | `Empty` + `EmptyHeader` / `EmptyMedia` / `EmptyTitle` / `EmptyDescription`                                        | `src/shared/components/ui/empty.tsx`                                                                                                                                                                                                           |
+| Color                                                        | `ColorPickerSwatch`                                                                                               | `src/shared/components/ui/color-picker.tsx`                                                                                                                                                                                                    |
+| Tab bar de módulo **con rutas**                              | `ModuleSectionLayout`                                                                                             | `src/shared/components/layout/module-section-layout.tsx` — [module-conventions.md](./module-conventions.md)                                                                                                                                    |
+| Aviso puntual dentro de un flujo                             | `Alert`                                                                                                           | `src/shared/components/ui/alert.tsx`                                                                                                                                                                                                           |
+| Pending de navegación                                        | `LinkPendingOverlay` / `usePendingNavigation`                                                                     | `src/shared/components/ui/navigation-pending.tsx` — overlay + spinner en el control que abre otra vista                                                                                                                                        |
+| Región pendiente / vacía / contenido                         | `AsyncRegion`                                                                                                     | `src/modules/finance/shared/components/layout/async-region.tsx`                                                                                                                                                                                |
+| Registro ausente con vuelta                                  | `MissingRecord`                                                                                                   | `src/modules/finance/shared/components/layout/missing-record.tsx`                                                                                                                                                                              |
+| Hero de progreso de un detalle                               | `FinanceProgressHero`                                                                                             | `src/modules/finance/shared/components/layout/progress-hero.tsx`                                                                                                                                                                               |
+| Acciones de un registro (⋮ del detalle)                      | `RecordOptionsSheet`                                                                                              | `src/modules/finance/shared/components/record-options-sheet.tsx`                                                                                                                                                                               |
+| Novedades de una versión (global)                            | `ReleaseNotesSheet`                                                                                               | `src/shared/components/layout/release-notes-sheet.tsx` — se monta en el shell autenticado vía `ReleaseNotes` (`src/modules/settings`); el texto curado vive en `src/shared/constants/release-notes.ts` (ver [versionado.md](../versionado.md)) |
+| Confirmación de borrado                                      | `DeleteRecordDialog`                                                                                              | `src/modules/finance/shared/components/delete-record-dialog.tsx`                                                                                                                                                                               |
 
 Un bloque con título en cualquier superficie (formulario, panel, sheet, lista, chat) es `SummarySection`. `Card` y sus partes no se importan en pantallas de producto. El primitivo `src/shared/components/ui/card.tsx` no sustituye a `SummarySection`. El agrupado de campos de un formulario vive en [form-sections.mdc](../../.cursor/rules/form-sections.mdc); el chrome, en [ui-shared-components.mdc](../../.cursor/rules/ui-shared-components.mdc).
 
 No armar un drawer con `Drawer` crudo si `BottomSheet` cubre el caso (título, description, actions, pending).
 
-`ReleaseNotesSheet` es la única hoja global del shell: aparece una vez por versión, cuando la versión del build es distinta de la última vista en `localStorage` (`releaseNotesSeenVersion`). Lee ese valor como almacén externo (`useSyncExternalStore`) con instantánea del servidor vacía, así que no hay desajuste de hidratación, y la versión se marca como vista al cerrarla.
+`ReleaseNotesSheet` es la única hoja global del shell: aparece una vez por versión. La última versión vista vive en el perfil (`lastSeenReleaseVersion`; se marca con `PATCH /users/me/release-notes-seen`), y `localStorage` (`releaseNotesSeenVersion`) queda solo como caché para no mostrarla mientras el perfil carga. En la primera visita la versión actual se marca en silencio, sin hoja. El componente de `src/shared` es presentacional: recibe la versión vista y el marcado desde `ReleaseNotes` (`src/modules/settings`).
 
 Un atajo del `RecordOptionsSheet` que abre otro sheet o navega a otra vista no cierra el menú antes: cerrarlo usa `router.back()`, y ese retroceso cancela la apertura pedida en el mismo click. El sheet nuevo reemplaza al menú en la URL, y la navegación a otra ruta lo desmonta.
 

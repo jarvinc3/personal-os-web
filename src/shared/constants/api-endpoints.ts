@@ -11,6 +11,7 @@ export const API_ENDPOINTS = {
     DELETE_ME: "/users/me",
     WIPE_DATA: "/users/me/data/wipe",
     MODULE: (slug: string) => `/users/me/modules/${slug}`,
+    RELEASE_NOTES_SEEN: "/users/me/release-notes-seen",
   },
   NOTIFICATIONS: {
     LIST: "/notifications",
@@ -106,6 +107,11 @@ export const API_ENDPOINTS = {
     LOAN_PREPAYMENTS_PREVIEW: (id: string) =>
       `/finance/loans/${id}/prepayments/preview`,
     RECEIVABLES: "/finance/receivables",
+    RECEIVABLE_SHARES: "/finance/receivable-shares",
+    RECEIVABLE_SHARE_REVOKE: (id: string) =>
+      `/finance/receivable-shares/${id}/revoke`,
+    PUBLIC_RECEIVABLE_SHARE: (token: string) =>
+      `/public/receivable-shares/${encodeURIComponent(token)}`,
     RECEIVABLE: (id: string) => `/finance/receivables/${id}`,
     RECEIVABLE_RESTORE: (id: string) => `/finance/receivables/${id}/restore`,
     RECEIVABLE_WRITE_OFF: (id: string) =>

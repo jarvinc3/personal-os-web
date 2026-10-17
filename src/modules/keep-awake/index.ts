@@ -7,5 +7,4 @@ export {
 } from "@/src/modules/keep-awake/context/keep-awake-context"
 export { useWakeLock } from "@/src/modules/keep-awake/hooks/use-wake-lock"
 export { KeepAwakeGate } from "@/src/modules/keep-awake/keep-awake-gate"
-export { KeepAwakeScreen } from "@/src/modules/keep-awake/keep-awake-screen"
 export type * from "@/src/modules/keep-awake/types/wake-lock.types"

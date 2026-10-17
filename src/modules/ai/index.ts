@@ -21,5 +21,4 @@ export {
 export { useAiSocket } from "@/src/modules/ai/hooks/use-ai-socket"
 export { streamAiChat } from "@/src/modules/ai/lib/ai-chat-stream"
 export { AiGate } from "@/src/modules/ai/ai-gate"
-export { ChatScreen } from "@/src/modules/ai/chat-screen"
 export type * from "@/src/modules/ai/types/chat.types"

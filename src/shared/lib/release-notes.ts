@@ -10,21 +10,26 @@ export type ReleaseNotesStorage = {
 }
 
 export type ReleaseNotesOutcome =
+  | { action: "wait" }
   | { action: "none" }
   | { action: "mark-seen" }
   | { action: "show"; entry: ReleaseNotesEntry }
 
 type ResolveReleaseNotesOutcomeOptions = {
-  seenVersion: string | null
+  /** `null` = primera visita; `undefined` = el perfil aún no responde. */
+  serverSeenVersion: string | null | undefined
+  cachedSeenVersion: string | null
   currentVersion: string
   entries: readonly ReleaseNotesEntry[]
 }
 
-export function readSeenVersion(storage: ReleaseNotesStorage): string | null {
+export function readCachedSeenVersion(
+  storage: ReleaseNotesStorage
+): string | null {
   return storage.getItem(RELEASE_NOTES_SEEN_VERSION_KEY)
 }
 
-export function markVersionSeen(
+export function writeCachedSeenVersion(
   storage: ReleaseNotesStorage,
   version: string
 ): void {
@@ -65,14 +70,21 @@ export function findReleaseNotesEntry(
 }
 
 /**
- * Decide qué hacer al abrir el shell autenticado. La primera visita y una
+ * Decide qué hacer al abrir el shell autenticado. El perfil manda; la caché
+ * solo puede adelantar que la versión actual ya se vio. La primera visita y una
  * versión sin notas curadas no muestran la hoja: solo marcan la versión.
  */
 export function resolveReleaseNotesOutcome({
-  seenVersion,
+  serverSeenVersion,
+  cachedSeenVersion,
   currentVersion,
   entries,
 }: ResolveReleaseNotesOutcomeOptions): ReleaseNotesOutcome {
+  if (serverSeenVersion === undefined && cachedSeenVersion !== currentVersion) {
+    return { action: "wait" }
+  }
+  const seenVersion =
+    serverSeenVersion === undefined ? cachedSeenVersion : serverSeenVersion
   if (seenVersion === currentVersion) {
     return { action: "none" }
   }

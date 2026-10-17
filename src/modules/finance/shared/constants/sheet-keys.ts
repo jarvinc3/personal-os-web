@@ -17,6 +17,7 @@ export const FINANCE_SHEET_KEYS = {
   savings: "savings-sheet",
   savingsContribution: "savings-contribution-sheet",
   receivable: "receivable-sheet",
+  receivableShare: "receivable-share-sheet",
   receivablePayment: "receivable-payment-sheet",
   budget: "budget-sheet",
   connectGmail: "connect-gmail-sheet",

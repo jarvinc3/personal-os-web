@@ -1,6 +1,6 @@
 import { Suspense } from "react"
 
-import { CardDetailScreen } from "@/src/modules/finance"
+import { CardDetailScreen } from "@/src/modules/finance/cards/card-detail-screen"
 import { LoadingView } from "@/src/shared/components/layout/loading-view"
 
 type FinanceInstitutionCardPageProps = {

@@ -32,6 +32,7 @@ export function isConfigurableModuleSlug(
 
 export type ModuleSheetEnableRowProps = {
   state: ModuleSettingsState
+  accentColor: string
   isEnabled: boolean
   onEnabledChange: (enabled: boolean) => void
   disabled?: boolean
@@ -39,13 +40,19 @@ export type ModuleSheetEnableRowProps = {
 
 function ModuleSheetEnableRow({
   state,
+  accentColor,
   isEnabled,
   onEnabledChange,
   disabled = false,
 }: ModuleSheetEnableRowProps) {
   const id = useId()
   return (
-    <div className="flex flex-row items-center justify-between rounded-2xl border border-border/60 bg-card px-4 py-3">
+    <div
+      className="flex flex-row items-center justify-between rounded-2xl border bg-card px-4 py-3"
+      style={
+        isEnabled ? { borderColor: accentColor, borderWidth: 1 } : undefined
+      }
+    >
       <label htmlFor={id} className="min-w-0 flex-1 cursor-pointer pr-3">
         <p className="text-base font-medium text-foreground">App activa</p>
         {state === "unconfigured" ? (
@@ -209,12 +216,20 @@ function ModuleSettingsCard({ slug, onOpen, href }: ModuleSettingsCardProps) {
     >
       <div className="flex flex-row items-center justify-between">
         <div className="rounded-xl bg-muted p-2">
-          <Icon className="size-[22px]" style={{ color: moduleDef.accent }} />
+          <Icon className="size-5.5" style={{ color: moduleDef.accent }} />
         </div>
 
         {state === "unconfigured" ? (
           <div onClick={(e) => e.stopPropagation()}>
-            <Button variant="outline" size="icon">
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              onClick={(e) => {
+                e.stopPropagation()
+                handleOpen()
+              }}
+            >
               <Settings className="size-4 text-foreground" />
             </Button>
           </div>

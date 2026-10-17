@@ -1,6 +1,6 @@
 import { Suspense } from "react"
 
-import { BankChargesScreen } from "@/src/modules/finance"
+import { BankChargesScreen } from "@/src/modules/finance/reconciliation/bank-charges-screen"
 import { LoadingView } from "@/src/shared/components/layout/loading-view"
 
 export default function FinanceBankChargesPage() {

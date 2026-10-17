@@ -1,4 +1,4 @@
-import { FinanceModuleSettingsScreen } from "@/src/modules/settings"
+import { FinanceModuleSettingsScreen } from "@/src/modules/finance/settings/finance-module-settings-screen"
 import { LoadingView } from "@/src/shared/components/layout/loading-view"
 import { Suspense } from "react"
 

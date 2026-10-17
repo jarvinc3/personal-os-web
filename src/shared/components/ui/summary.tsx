@@ -10,6 +10,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "./collapsible"
+import { Separator } from "./separator"
 
 type SummarySectionProps = {
   title?: string
@@ -136,6 +137,36 @@ export function SummarySection({
     <div className={rootClassName} style={tintStyle}>
       {header}
       {body}
+    </div>
+  )
+}
+
+type SummaryGroupProps = {
+  title: string
+  description?: string
+  children: ReactNode
+}
+
+/** Une varios controles bajo un mismo concepto dentro de una sección. */
+export function SummaryGroup({
+  title,
+  description,
+  children,
+}: SummaryGroupProps) {
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-0.5 px-2 pt-1">
+        <div className="flex items-center gap-2">
+          <span className="shrink-0 text-xs font-medium text-muted-foreground">
+            {title}
+          </span>
+          <Separator className="min-w-0 flex-1" />
+        </div>
+        {description ? (
+          <span className="text-xs text-muted-foreground">{description}</span>
+        ) : null}
+      </div>
+      {children}
     </div>
   )
 }

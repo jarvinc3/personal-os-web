@@ -1,6 +1,6 @@
 import { queryClient } from "@/src/config/query-client"
+import { resolveSessionRecoveryMessage } from "@/src/modules/auth/lib/auth-errors"
 import {
-  BackendProfileUnavailableError,
   hydrateAuthUser,
   PROFILE_QUERY_KEY,
 } from "@/src/modules/auth/lib/hydrate-auth-user"
@@ -27,10 +27,7 @@ export async function establishAuthenticatedSession(
     return hydrated
   } catch (error) {
     await revokeAuthSession({
-      message:
-        error instanceof BackendProfileUnavailableError
-          ? error.message
-          : "No se pudo verificar tu cuenta con el servidor.",
+      message: resolveSessionRecoveryMessage(error),
     })
     throw error
   }

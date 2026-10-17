@@ -33,7 +33,7 @@ import {
 } from "@/src/modules/finance/shared/lib/planning-lists"
 import {
   FINANCE_RECEIVABLE_STATUS_LABEL,
-  type FinanceReceivableStatus,
+  FINANCE_RECEIVABLE_STATUS_VARIANT,
 } from "@/src/modules/finance/shared/types/entities"
 import { DeleteRecordDialog } from "@/src/modules/finance/shared/components/delete-record-dialog"
 import { RecordOptionsSheet } from "@/src/modules/finance/shared/components/record-options-sheet"
@@ -69,17 +69,6 @@ import { useRouter } from "next/navigation"
 import { useMemo, useState } from "react"
 
 import { ACCENT_FALLBACK_COLOR } from "@/src/shared/lib/accent-gradient"
-
-const STATUS_VARIANT: Record<
-  FinanceReceivableStatus,
-  "success" | "info" | "warning" | "secondary"
-> = {
-  PENDING: "warning",
-  PARTIAL: "info",
-  PAID: "success",
-  CANCELLED: "secondary",
-  WRITTEN_OFF: "secondary",
-}
 
 type FinanceReceivableDetailProps = {
   receivableId: string
@@ -264,7 +253,7 @@ function ReceivableDetailScreenBody({
         title={receivable.debtorName}
         badge={{
           label: FINANCE_RECEIVABLE_STATUS_LABEL[receivable.status],
-          variant: STATUS_VARIANT[receivable.status],
+          variant: FINANCE_RECEIVABLE_STATUS_VARIANT[receivable.status],
         }}
         subtitle={receivable.description ?? undefined}
         metricLabel="Cobrado"

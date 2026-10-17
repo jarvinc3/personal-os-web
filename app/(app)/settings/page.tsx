@@ -1,4 +1,4 @@
-import { SettingsScreen } from "@/src/modules/settings"
+import { SettingsScreen } from "@/src/modules/settings/settings-screen"
 import { LoadingView } from "@/src/shared/components/layout/loading-view"
 import { Suspense } from "react"
 

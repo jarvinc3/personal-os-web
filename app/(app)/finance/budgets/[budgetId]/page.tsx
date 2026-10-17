@@ -1,6 +1,6 @@
 import { Suspense } from "react"
 
-import { BudgetDetailScreen } from "@/src/modules/finance"
+import { BudgetDetailScreen } from "@/src/modules/finance/budgets/budget-detail-screen"
 import { LoadingView } from "@/src/shared/components/layout/loading-view"
 
 type FinanceBudgetDetailPageProps = {

@@ -21,6 +21,7 @@ describe("resolveRouteRedirect", () => {
     assert.equal(resolveRouteRedirect("/home", false), "/login")
     assert.equal(resolveRouteRedirect("/finance/transactions", false), "/login")
     assert.equal(resolveRouteRedirect("/settings/profile", false), "/login")
+    assert.equal(resolveRouteRedirect("/agenda", false), "/login")
   })
 
   it("leaves protected routes and public routes untouched", () => {
@@ -40,6 +41,9 @@ describe("isProtectedAppPath", () => {
     assert.equal(isProtectedAppPath("/keep-awake"), true)
     assert.equal(isProtectedAppPath("/finance"), true)
     assert.equal(isProtectedAppPath("/finance/cash/abc"), true)
+    assert.equal(isProtectedAppPath("/agenda"), true)
+    assert.equal(isProtectedAppPath("/projects"), true)
+    assert.equal(isProtectedAppPath("/health"), true)
   })
 
   it("ignores the auth routes", () => {

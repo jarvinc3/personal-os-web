@@ -2,12 +2,12 @@
 
 Cuatro capabilities hermanas. Antes vivían todas bajo `src/modules/finance/planning/`; el código se separó para que cada dominio tenga su carpeta, su `index.ts` y su spec, como presupuestos.
 
-| Capability      | Carpeta                              | Rutas                                                                           | Pantallas y hojas                                                                        |
-| --------------- | ------------------------------------ | ------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| Planificación   | `src/modules/finance/planning/`      | `/finance/planning`                                                             | Resumen con tabs: metas, préstamos, cobros y `FinanceBudgetsList`                        |
-| Préstamos       | `src/modules/finance/loans/`         | `/finance/loans/new`, `/finance/loans/[loanId]`, `/finance/loans/[loanId]/edit` | Asistente de alta (`LoanWizard`), detalle, edición (`LoanEditForm`) y `LoanProgressCard` |
-| Cobros          | `src/modules/finance/receivables/`   | `/finance/receivables/[receivableId]`                                           | Detalle, `ReceivableSheet` y `ReceivablePaymentSheet`                                    |
-| Metas de ahorro | `src/modules/finance/savings-goals/` | `/finance/savings-goals/[goalId]`                                               | Detalle, `SavingsGoalSheet` y `SavingsGoalContributionSheet`                             |
+| Capability      | Carpeta                              | Rutas                                                                           | Pantallas y hojas                                                                                       |
+| --------------- | ------------------------------------ | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| Planificación   | `src/modules/finance/planning/`      | `/finance/planning`                                                             | Resumen con tabs: metas, préstamos, cobros y `FinanceBudgetsList`                                       |
+| Préstamos       | `src/modules/finance/loans/`         | `/finance/loans/new`, `/finance/loans/[loanId]`, `/finance/loans/[loanId]/edit` | Asistente de alta (`LoanWizard`), detalle, edición (`LoanEditForm`) y `LoanProgressCard`                |
+| Cobros          | `src/modules/finance/receivables/`   | `/finance/receivables/[receivableId]`, `/c/[token]` (pública)                   | Detalle, `ReceivableSheet`, `ReceivablePaymentSheet`, `ReceivableShareSheet` y `PublicShareDetailSheet` |
+| Metas de ahorro | `src/modules/finance/savings-goals/` | `/finance/savings-goals/[goalId]`                                               | Detalle, `SavingsGoalSheet` y `SavingsGoalContributionSheet`                                            |
 
 `/finance/planning`: arrays (no paginado) ahorros, préstamos, cobros **y** `FinanceBudgetsList` embebido (HTTP budgets sí es paginado). El detalle de un presupuesto sí tiene ruta propia, `/finance/budgets/[budgetId]`. La lista de planificación compone las tres capabilities por su `index.ts`; el card de progreso compartido vive en `finance/shared/components/planning-progress-card.tsx`.
 
@@ -16,3 +16,5 @@ Préstamos: el alta es un asistente que calcula cuota, saldo y próximo vencimie
 No usa tool `list_budgets` del façade para la lista HTTP.
 
 Evidencia: `src/modules/finance/planning/`, `src/modules/finance/loans/`, `src/modules/finance/receivables/`, `src/modules/finance/savings-goals/`.
+
+Cobros compartidos: la pestaña Cobros entra en modo selección con long-press o con «Seleccionar», y el modo con los cobros elegidos vive en la query (`?compartir=id,id`), así que recargar conserva la elección y el sheet que se abre por URL encuentra los mismos cobros. Las tarjetas atenuadas son las de otro deudor: un link es de una sola persona. `ReceivableShareSheet` crea el link, lo copia o lo manda por WhatsApp y lo revoca con confirmación; no hay UI de regenerar (el endpoint existe y queda para cuando haga falta). `PublicReceivableShareScreen` es la única pantalla sin sesión ni gate del cliente: muestra el hero con el pendiente por moneda, la lista y `PublicShareDetailSheet` en solo lectura. Un share nunca convierte monedas: cada tarjeta, barra y total va en la moneda de su cobro. En el formulario de cobro, `description` se llama **Concepto** y es obligatorio (1-120) para crear y editar.

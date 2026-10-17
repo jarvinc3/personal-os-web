@@ -88,7 +88,7 @@ Incorrecto: `## [2.0.0] - Agenda` o `## [3.0.0] - Proyectos`.
 
 1. Cada release agrega una entrada en `src/shared/constants/release-notes.ts`, arriba del arreglo, con la misma versión que `package.json`. Va en español de usuario (se dice **App**, nunca módulo) y explica qué cambió para quien usa la app, no el detalle técnico.
 2. `LATEST_RELEASE_VERSION` es la versión de la primera entrada y debe coincidir con `package.json`; la prueba `src/shared/lib/release-notes.spec.ts` lo verifica.
-3. La hoja se muestra una sola vez por versión: compara `LATEST_RELEASE_VERSION` con la última versión vista, guardada en `localStorage` con la clave `releaseNotesSeenVersion`. En la **primera visita** (sin valor guardado) la versión actual se marca como vista en silencio, sin hoja; una versión sin notas curadas también se marca en silencio.
+3. La hoja se muestra una sola vez por versión: compara `LATEST_RELEASE_VERSION` con `lastSeenReleaseVersion` del perfil (`GET /users/me`). Al cerrarla se marca como vista con `PATCH /users/me/release-notes-seen`. En la **primera visita** (`null`) la versión actual se marca en silencio, sin hoja; una versión sin notas curadas también se marca en silencio. `localStorage` (clave `releaseNotesSeenVersion`) queda solo como caché para no mostrar la hoja mientras responde el perfil.
 4. La hoja vive en el shell autenticado (`app/(app)/layout.tsx`): no aparece en rutas públicas.
 
 ## Lista de verificación del agente

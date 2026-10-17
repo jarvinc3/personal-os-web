@@ -2,9 +2,10 @@
 
 import { Badge, badgeVariants } from "@/src/shared/components/ui/badge"
 import { LinkPendingOverlay } from "@/src/shared/components/ui/navigation-pending"
+import { useLongPress } from "@/src/shared/hooks/use-long-press"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
 import type { VariantProps } from "class-variance-authority"
-import type { LucideIcon } from "lucide-react"
+import { CheckIcon, type LucideIcon } from "lucide-react"
 import Link from "next/link"
 import type { ReactNode } from "react"
 
@@ -32,6 +33,9 @@ export type PlanningProgressCardProps = {
   caption?: ReactNode
   href?: string
   onPress?: () => void
+  /** Present only while the list is picking cobros; adds the round check. */
+  selection?: { selected: boolean; dimmed?: boolean }
+  onLongPress?: () => void
 }
 
 const TONE_STROKE: Record<PlanningProgressTone, string> = {
@@ -135,10 +139,13 @@ export function PlanningProgressCard({
   caption,
   href,
   onPress,
+  selection,
+  onLongPress,
 }: PlanningProgressCardProps) {
   const barWidth = progress === null ? 0 : clampPct(progress)
   const showLeading = Boolean(leading) || Boolean(Icon)
   const tinted = Boolean(surfaceColor)
+  const pressHandlers = useLongPress(onLongPress)
 
   const content = (
     <>
@@ -146,7 +153,7 @@ export function PlanningProgressCard({
         {showLeading ? (
           <span
             className={cn(
-              "flex size-10 shrink-0 items-center justify-center rounded-full",
+              "relative flex size-10 shrink-0 items-center justify-center rounded-full",
               tinted || accentColor ? undefined : TONE_ICON[tone],
               tinted && "bg-transparent"
             )}
@@ -160,6 +167,19 @@ export function PlanningProgressCard({
             }
           >
             {leading ?? (Icon ? <Icon className="size-5" /> : null)}
+            {selection ? (
+              <span
+                aria-hidden="true"
+                className={cn(
+                  "absolute -right-0.5 -bottom-0.5 flex size-5 items-center justify-center rounded-full border-2",
+                  selection.selected
+                    ? "border-info bg-info text-white"
+                    : "border-border bg-background"
+                )}
+              >
+                {selection.selected ? <CheckIcon className="size-3" /> : null}
+              </span>
+            ) : null}
           </span>
         ) : null}
         <span className="min-w-0 flex-1">
@@ -271,6 +291,8 @@ export function PlanningProgressCard({
   const className = cn(
     "relative flex w-full flex-col gap-3 overflow-hidden rounded-2xl p-3 text-left",
     surfaceColor ? "text-white" : "bg-muted/50",
+    selection?.selected && "border-2 border-info bg-info/[7%]",
+    selection?.dimmed && "opacity-60",
     (href || onPress) &&
       cn(
         PRESSABLE_CLASS,
@@ -288,7 +310,7 @@ export function PlanningProgressCard({
 
   if (href) {
     return (
-      <Link href={href} className={className} style={style}>
+      <Link href={href} className={className} style={style} {...pressHandlers}>
         {body}
         <LinkPendingOverlay />
       </Link>
@@ -302,6 +324,7 @@ export function PlanningProgressCard({
         className={className}
         style={style}
         onClick={onPress}
+        {...pressHandlers}
       >
         {body}
       </button>

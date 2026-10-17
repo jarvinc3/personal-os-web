@@ -1,6 +1,20 @@
 import { defineConfig, globalIgnores } from "eslint/config"
+import { createRequire } from "node:module"
 import nextVitals from "eslint-config-next/core-web-vitals"
 import nextTs from "eslint-config-next/typescript"
+
+// eslint-plugin-react detects the React version through context.getFilename,
+// removed in ESLint 10. Pin it from package.json so the detection path never
+// runs.
+function readReactVersion() {
+  const { dependencies } = createRequire(import.meta.url)("./package.json")
+  if (!dependencies.react) {
+    throw new Error("package.json must declare react in dependencies")
+  }
+  return dependencies.react.replace(/^[^\d]*/, "")
+}
+
+const reactVersion = readReactVersion()
 
 // Detectable check of .cursor/rules/ui-shared-components.mdc: no native date or time inputs.
 const NATIVE_DATE_INPUT_TYPES = ["date", "time", "datetime-local"]
@@ -22,17 +36,48 @@ const MODULE_SLUGS = [
   "home",
 ]
 
+// Settings expone configuración genérica: estos son los únicos caminos que otro
+// módulo puede importar por ruta directa (issue #159).
+const SETTINGS_DIRECT_IMPORT_ALLOWED = [
+  "@/src/modules/settings/hooks",
+  "@/src/modules/settings/types",
+  "@/src/modules/settings/lib",
+  "@/src/modules/settings/constants",
+  "@/src/modules/settings/components/layout",
+  "@/src/modules/settings/components/profile-ui",
+  "@/src/modules/settings/settings-gate",
+]
+
+const SETTINGS_BOUNDARY_MESSAGE =
+  "Frontera de módulo: de settings entra por ruta directa solo la configuración genérica (hooks, types, lib, constants, components/layout, components/profile-ui, settings-gate); el resto va por @/src/modules/settings."
+
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]/\\]/g, "\\$&")
+}
+
+const SETTINGS_ALLOWED_SOURCES = SETTINGS_DIRECT_IMPORT_ALLOWED.map(
+  escapeRegExp
+).join("|")
+
+const SETTINGS_DEEP_IMPORT_RESTRICTION = {
+  selector: `ImportDeclaration[source.value=/^@\\/src\\/modules\\/settings\\/.+/]:not([source.value=/^(${SETTINGS_ALLOWED_SOURCES})(\\/.*)?$/])`,
+  message: SETTINGS_BOUNDARY_MESSAGE,
+}
+
 function moduleBoundaryPatterns(moduleSlugs) {
-  return moduleSlugs.map((moduleSlug) => ({
-    group: [`@/src/modules/${moduleSlug}/*`],
-    message: `Frontera de módulo: importa solo el index.ts de ${moduleSlug} (@/src/modules/${moduleSlug}).`,
-  }))
+  return moduleSlugs
+    .filter((moduleSlug) => moduleSlug !== "settings")
+    .map((moduleSlug) => ({
+      group: [`@/src/modules/${moduleSlug}/*`],
+      message: `Frontera de módulo: importa solo el index.ts de ${moduleSlug} (@/src/modules/${moduleSlug}).`,
+    }))
 }
 
 const moduleBoundaryBlocks = [
+  // app/** queda exento: cada ruta importa su screen por ruta directa para no
+  // compilar las demás (issue #159).
   {
     files: [
-      "app/**/*.{ts,tsx}",
       "src/shared/**/*.{ts,tsx}",
       "src/providers/**/*.{ts,tsx}",
       "src/config/**/*.{ts,tsx}",
@@ -143,6 +188,11 @@ const eslintConfig = defineConfig([
     ".claude/**",
   ]),
   {
+    settings: {
+      react: {
+        version: reactVersion,
+      },
+    },
     rules: {
       curly: ["error", "all"],
       "no-restricted-syntax": [
@@ -161,6 +211,20 @@ const eslintConfig = defineConfig([
   },
   ...moduleBoundaryBlocks,
   ...financeCapabilityBlocks,
+  // Settings: los genéricos se importan por ruta directa solo desde los caminos
+  // de la lista; dentro de settings rige la frontera normal.
+  {
+    files: ["src/shared/**/*.{ts,tsx}", "src/providers/**/*.{ts,tsx}", "src/config/**/*.{ts,tsx}", "src/modules/**/*.{ts,tsx}"],
+    ignores: ["src/modules/settings/**", "**/*.spec.ts"],
+    rules: {
+      "no-restricted-syntax": [
+        "error",
+        ...UI_SYNTAX_RESTRICTIONS,
+        ...PARENT_IMPORT_SYNTAX_RESTRICTIONS,
+        SETTINGS_DEEP_IMPORT_RESTRICTION,
+      ],
+    },
+  },
 ])
 
 export default eslintConfig

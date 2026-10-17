@@ -6,15 +6,24 @@ export type ApiErrorBody = {
 }
 
 export class ApiError extends Error {
+  readonly status: number
+  readonly code?: string
+  readonly requestId?: string
+  readonly path?: string
+
   constructor(
-    public readonly status: number,
+    status: number,
     message: string,
-    public readonly code?: string,
-    public readonly requestId?: string,
-    public readonly path?: string
+    code?: string,
+    requestId?: string,
+    path?: string
   ) {
     super(message)
     this.name = "ApiError"
+    this.status = status
+    this.code = code
+    this.requestId = requestId
+    this.path = path
   }
 }
 
@@ -65,6 +74,15 @@ export function mapStatusToError(
         404,
         messageFromBody ?? "El recurso no existe",
         code ?? "NOT_FOUND",
+        requestId,
+        path
+      )
+    case 409:
+      return new ApiError(
+        409,
+        messageFromBody ??
+          "La operación ya se está procesando o se repitió; inténtalo más tarde",
+        code ?? "CONFLICT",
         requestId,
         path
       )

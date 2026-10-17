@@ -1,6 +1,6 @@
 import { Suspense } from "react"
 
-import { CategoriesScreen } from "@/src/modules/finance"
+import { CategoriesScreen } from "@/src/modules/finance/catalog/categories-screen"
 import { LoadingView } from "@/src/shared/components/layout/loading-view"
 
 export default function FinanceCategoriesPage() {

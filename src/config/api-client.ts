@@ -1,11 +1,11 @@
 import {
   ApiError,
-  ApiErrorBody,
   isApiEnvelope,
   isTransientError,
   mapStatusToError,
   sleep,
 } from "@/src/config/api-client.utils"
+import type { ApiErrorBody } from "@/src/config/api-client.utils"
 import { getSupabaseBrowserClient } from "@/src/config/supabase/client"
 import { API_BASE_URL } from "@/src/shared/constants/api-endpoints"
 import { authEvents } from "@/src/shared/events/auth-events"
@@ -25,11 +25,22 @@ export type ApiRequestConfig = {
   suppressUnauthorizedEvent?: boolean
 }
 
+export type ApiClientDependencies = {
+  resolveAccessToken: () => Promise<string | null>
+  fetchImpl: typeof fetch
+}
+
 const MAX_RETRIES = 2
 const RETRY_BASE_MS = 500
 const TOKEN_REFRESH_THRESHOLD_SEC = 60
+const IDEMPOTENCY_KEY_HEADER = "Idempotency-Key"
+const IDEMPOTENT_METHODS: ReadonlySet<string> = new Set([
+  "POST",
+  "PATCH",
+  "DELETE",
+])
 
-async function resolveAccessToken(): Promise<string | null> {
+async function resolveSupabaseAccessToken(): Promise<string | null> {
   const supabase = getSupabaseBrowserClient()
   const {
     data: { session },
@@ -59,130 +70,165 @@ async function resolveAccessToken(): Promise<string | null> {
   return data.session.access_token
 }
 
-async function getAuthHeaders() {
-  const accessToken = await resolveAccessToken()
+export function createApiClient({
+  resolveAccessToken,
+  fetchImpl,
+}: ApiClientDependencies) {
+  async function getAuthHeaders(): Promise<{ Authorization?: string }> {
+    const accessToken = await resolveAccessToken()
 
-  if (!accessToken) {
-    return {}
+    if (!accessToken) {
+      return {}
+    }
+
+    return {
+      Authorization: `Bearer ${accessToken}`,
+    }
   }
 
-  return {
-    Authorization: `Bearer ${accessToken}`,
-  }
-}
+  /**
+   * One idempotency key per logical call: it is generated on the first
+   * attempt and reused by every retry of that same request.
+   */
+  async function request<T>(
+    path: string,
+    init?: RequestInit,
+    config?: ApiRequestConfig,
+    attempt = 0,
+    idempotencyKey?: string
+  ): Promise<T> {
+    const method = init?.method ?? "GET"
+    const requestKey =
+      idempotencyKey ??
+      (IDEMPOTENT_METHODS.has(method) ? crypto.randomUUID() : undefined)
 
-async function request<T>(
-  path: string,
-  init?: RequestInit,
-  config?: ApiRequestConfig,
-  attempt = 0
-): Promise<T> {
-  try {
-    const authHeaders = await getAuthHeaders()
-    const headers = new Headers(init?.headers)
-    const isFormData =
-      typeof FormData !== "undefined" && init?.body instanceof FormData
-    if (!isFormData) {
-      headers.set("Content-Type", "application/json")
-    }
-
-    if (authHeaders.Authorization) {
-      headers.set("Authorization", authHeaders.Authorization)
-    }
-
-    const response = await fetch(`${API_BASE_URL}${path}`, {
-      ...init,
-      headers,
-    })
-
-    if (!response.ok) {
-      const errorBody = (await response
-        .json()
-        .catch(() => ({}))) as ApiErrorBody
-      const apiError = mapStatusToError(response.status, errorBody, path)
-      logApiError(apiError, path)
-
-      if (response.status === 401 && !config?.suppressUnauthorizedEvent) {
-        authEvents.emitUnauthorized()
+    try {
+      const authHeaders = await getAuthHeaders()
+      const headers = new Headers(init?.headers)
+      const isFormData =
+        typeof FormData !== "undefined" && init?.body instanceof FormData
+      if (!isFormData) {
+        headers.set("Content-Type", "application/json")
       }
 
-      throw apiError
-    }
-
-    if (response.status === 204) {
-      return undefined as T
-    }
-
-    const body = await response.json()
-
-    if (isApiEnvelope<T>(body)) {
-      const envelope = body as ApiEnvelope<T>
-      if (process.env.NODE_ENV === "development" && envelope.meta?.requestId) {
-        console.debug(`[API] ${path} requestId=${envelope.meta.requestId}`)
+      if (authHeaders.Authorization) {
+        headers.set("Authorization", authHeaders.Authorization)
       }
-      return envelope.data
-    }
 
-    return body as T
-  } catch (error) {
-    if (error instanceof ApiError) {
-      if (isTransientError(error) && attempt < MAX_RETRIES) {
+      if (requestKey) {
+        headers.set(IDEMPOTENCY_KEY_HEADER, requestKey)
+      }
+
+      const response = await fetchImpl(`${API_BASE_URL}${path}`, {
+        ...init,
+        headers,
+      })
+
+      if (!response.ok) {
+        const errorBody = (await response
+          .json()
+          .catch(() => ({}))) as ApiErrorBody
+        const apiError = mapStatusToError(response.status, errorBody, path)
+        logApiError(apiError, path)
+
+        if (response.status === 401 && !config?.suppressUnauthorizedEvent) {
+          authEvents.emitUnauthorized()
+        }
+
+        throw apiError
+      }
+
+      if (response.status === 204) {
+        return undefined as T
+      }
+
+      const body = await response.json()
+
+      if (isApiEnvelope<T>(body)) {
+        const envelope = body as ApiEnvelope<T>
+        if (
+          process.env.NODE_ENV === "development" &&
+          envelope.meta?.requestId
+        ) {
+          console.debug(`[API] ${path} requestId=${envelope.meta.requestId}`)
+        }
+        return envelope.data
+      }
+
+      return body as T
+    } catch (error) {
+      if (error instanceof ApiError) {
+        if (isTransientError(error) && attempt < MAX_RETRIES) {
+          await sleep(RETRY_BASE_MS * 2 ** attempt)
+          return request<T>(path, init, config, attempt + 1, requestKey)
+        }
+        throw error
+      }
+
+      logApiError(error, path)
+
+      if (attempt < MAX_RETRIES) {
         await sleep(RETRY_BASE_MS * 2 ** attempt)
-        return request<T>(path, init, config, attempt + 1)
+        return request<T>(path, init, config, attempt + 1, requestKey)
       }
+
       throw error
     }
-
-    logApiError(error, path)
-
-    if (attempt < MAX_RETRIES) {
-      await sleep(RETRY_BASE_MS * 2 ** attempt)
-      return request<T>(path, init, config, attempt + 1)
-    }
-
-    throw error
   }
+
+  const apiGet = <T>(
+    path: string,
+    signal?: AbortSignal,
+    config?: ApiRequestConfig
+  ) => request<T>(path, { method: "GET", signal }, config)
+
+  const apiPost = <T>(
+    path: string,
+    body?: unknown,
+    config?: ApiRequestConfig
+  ) =>
+    request<T>(
+      path,
+      {
+        method: "POST",
+        body: body ? JSON.stringify(body) : undefined,
+      },
+      config
+    )
+
+  const apiPatch = <T>(
+    path: string,
+    body?: unknown,
+    config?: ApiRequestConfig
+  ) =>
+    request<T>(
+      path,
+      {
+        method: "PATCH",
+        body: body ? JSON.stringify(body) : undefined,
+      },
+      config
+    )
+
+  const apiDelete = <T>(path: string, config?: ApiRequestConfig) =>
+    request<T>(path, { method: "DELETE" }, config)
+
+  const apiPostForm = <T>(
+    path: string,
+    body: FormData,
+    config?: ApiRequestConfig
+  ) => request<T>(path, { method: "POST", body }, config)
+
+  return { apiGet, apiPost, apiPatch, apiDelete, apiPostForm }
 }
 
-export const apiGet = <T>(
-  path: string,
-  signal?: AbortSignal,
-  config?: ApiRequestConfig
-) => request<T>(path, { method: "GET", signal }, config)
+const defaultApiClient = createApiClient({
+  resolveAccessToken: resolveSupabaseAccessToken,
+  fetchImpl: (input, init) => fetch(input, init),
+})
 
-export const apiPost = <T>(
-  path: string,
-  body?: unknown,
-  config?: ApiRequestConfig
-) =>
-  request<T>(
-    path,
-    {
-      method: "POST",
-      body: body ? JSON.stringify(body) : undefined,
-    },
-    config
-  )
-
-export const apiPatch = <T>(
-  path: string,
-  body?: unknown,
-  config?: ApiRequestConfig
-) =>
-  request<T>(
-    path,
-    {
-      method: "PATCH",
-      body: body ? JSON.stringify(body) : undefined,
-    },
-    config
-  )
-
-export const apiDelete = <T>(path: string, config?: ApiRequestConfig) =>
-  request<T>(path, { method: "DELETE" }, config)
-
-export const apiPostForm = <T>(
-  path: string,
-  body: FormData,
-  config?: ApiRequestConfig
-) => request<T>(path, { method: "POST", body }, config)
+export const apiGet = defaultApiClient.apiGet
+export const apiPost = defaultApiClient.apiPost
+export const apiPatch = defaultApiClient.apiPatch
+export const apiDelete = defaultApiClient.apiDelete
+export const apiPostForm = defaultApiClient.apiPostForm

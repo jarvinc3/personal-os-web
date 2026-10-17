@@ -5,7 +5,7 @@ import { receivableSchema } from "./receivable-form.ts"
 
 const validReceivable = {
   debtorName: "Ana",
-  description: "",
+  description: "Préstamo",
   amount: "100",
   paidAmount: "0",
   status: "PENDING" as const,
@@ -16,6 +16,24 @@ const validReceivable = {
 describe("receivableSchema", () => {
   it("accepts a pending receivable", () => {
     assert.equal(receivableSchema.safeParse(validReceivable).success, true)
+  })
+
+  it("rejects a cobro without concept", () => {
+    assert.equal(
+      receivableSchema.safeParse({ ...validReceivable, description: "  " })
+        .success,
+      false
+    )
+  })
+
+  it("rejects a concept longer than the API bound", () => {
+    assert.equal(
+      receivableSchema.safeParse({
+        ...validReceivable,
+        description: "C".repeat(121),
+      }).success,
+      false
+    )
   })
 
   it("rejects an unknown status", () => {

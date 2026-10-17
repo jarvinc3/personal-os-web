@@ -123,7 +123,7 @@ function SettingsScreenBody() {
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 p-4 pb-10 md:px-6">
-      <div className="flex flex-col items-center gap-8 py-4">
+      <div className="flex flex-col items-center gap-4 py-4">
         <div className="relative" onClick={() => setOpenAccountSheet(true)}>
           <Avatar className="size-20 md:size-24">
             {profile?.avatarUrl ? (
@@ -307,14 +307,15 @@ function SettingsScreenBody() {
           {...SETTINGS_REGISTRY.notifications.rows.quietHoursEnabled}
         />
 
-        <SettingsRow
-          label="Rango horario"
-          value={formatTimeRange(quietHours.start, quietHours.end)}
-          onPress={() => setOpenQuietHoursSheet(true)}
-          disabled={!quietHours.enabled}
-          accentColor={SETTINGS_REGISTRY.notifications.accent}
-          {...SETTINGS_REGISTRY.notifications.rows.quietHoursSchedule}
-        />
+        {quietHours.enabled ? (
+          <SettingsRow
+            label="Rango horario"
+            value={formatTimeRange(quietHours.start, quietHours.end)}
+            onPress={() => setOpenQuietHoursSheet(true)}
+            accentColor={SETTINGS_REGISTRY.notifications.accent}
+            {...SETTINGS_REGISTRY.notifications.rows.quietHoursSchedule}
+          />
+        ) : null}
 
         <DevicePushSettingsRow
           isLast
@@ -414,26 +415,31 @@ function SettingsScreenBody() {
         <Badge variant="info">Beta</Badge>
       </div>
 
-      <EditAccountSheet
-        open={openAccountSheet}
-        onOpenChange={setOpenAccountSheet}
-        email={displayEmail}
-      />
-      <DeleteAccountSheet
-        open={openDeleteAccountSheet}
-        onOpenChange={setOpenDeleteAccountSheet}
-        email={displayEmail}
-      />
-      <EditThemeSheet open={openThemeSheet} onOpenChange={setOpenThemeSheet} />
-      <EditAISheet open={openAISheet} onOpenChange={setOpenAISheet} />
-      <EditAIProviderSheet
-        open={openAIProviderSheet}
-        onOpenChange={setOpenAIProviderSheet}
-      />
-      <EditQuietHoursSheet
-        open={openQuietHoursSheet}
-        onOpenChange={setOpenQuietHoursSheet}
-      />
+      <>
+        <EditAccountSheet
+          open={openAccountSheet}
+          onOpenChange={setOpenAccountSheet}
+          email={displayEmail}
+        />
+        <DeleteAccountSheet
+          open={openDeleteAccountSheet}
+          onOpenChange={setOpenDeleteAccountSheet}
+          email={displayEmail}
+        />
+        <EditThemeSheet
+          open={openThemeSheet}
+          onOpenChange={setOpenThemeSheet}
+        />
+        <EditAISheet open={openAISheet} onOpenChange={setOpenAISheet} />
+        <EditAIProviderSheet
+          open={openAIProviderSheet}
+          onOpenChange={setOpenAIProviderSheet}
+        />
+        <EditQuietHoursSheet
+          open={openQuietHoursSheet}
+          onOpenChange={setOpenQuietHoursSheet}
+        />
+      </>
     </div>
   )
 }

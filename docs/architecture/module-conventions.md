@@ -37,7 +37,7 @@ ModuleAppNav = {
 
 1. Constantes de nav en el módulo (`src/modules/<slug>/constants/nav.ts`).
 2. Layout del módulo que pasa a `ModuleSectionLayout` solo los ítems con `showInTabBar !== false`.
-3. Cada `app/(app)/<slug>/**/page.tsx` monta la screen del `index.ts`, que compone con ese layout (o un layout de ruta).
+3. Cada `app/(app)/<slug>/**/page.tsx` monta la screen por ruta directa; la screen compone con ese layout (o un layout de ruta).
 4. Cablear `ModuleAppNav` en `src/shared/components/layout/app-sidebar.tsx` bajo **Aplicaciones**.
 5. Añadir el prefijo de ruta a `proxy.ts` (`isProtectedAppPath`) y a `APP_ROUTES`.
 6. Título: o bien `PAGE_TITLES` / `startsWith` en `app-header.tsx`, o `usePageHeader` en la página.
@@ -160,18 +160,18 @@ Cada capability tiene sus components, hooks, reglas, types y screens. La screen 
 
 ### Frontera
 
-Cada módulo exporta su API y sus screens en su `index.ts`; `app/.../page.tsx` importa la screen solo desde ahí. En Finanzas, cada capability exporta su API en su `index.ts`; dentro de una capability los archivos se importan entre sí y otra capability la importa solo desde su `index.ts`, y puede importar `finance/shared`. ESLint `no-restricted-imports` rechaza cualquier import profundo hacia otro módulo o hacia otra capability, incluida la carpeta de la screen: no queda una excepción para `*-screen.tsx`. `src/shared` no importa features; el nav del sidebar se registra desde la composición de la app.
+Cada `index.ts` exporta solo la API pública que no es pantalla: hooks, tipos, componentes chicos y constantes. Nunca screens, páginas ni formularios pesados. Las páginas de `app/**` importan las screens por ruta directa —quedan exentas de la frontera— para no compilar las demás rutas del módulo. Dentro de `src/modules`, un módulo importa de otro solo su `index.ts`, salvo los genéricos de settings listados en `eslint.config.mjs` (`hooks`, `types`, `lib`, `constants`, `components/layout`, `components/profile-ui`, `settings-gate`), que se pueden tomar por ruta directa. En Finanzas, cada capability exporta su API en su `index.ts`; dentro de una capability los archivos se importan entre sí y otra capability la importa solo desde su `index.ts`, y puede importar `finance/shared`. ESLint aplica la frontera y la excepción de settings. `src/shared` no importa features; el nav del sidebar se registra desde la composición de la app.
 
 Un archivo se borra cuando la screen nueva lo reemplaza y ningún import lo usa.
 
 ## Settings vs módulo de producto
 
-`MODULE_REGISTRY` lista slugs backend (`finance`, `agenda`, `projects`, `health`). Tener sheet en Ajustes **no** crea rutas ni `ModuleAppNav`.
+`MODULE_REGISTRY` lista slugs backend (`finance`, `agenda`, `projects`, `health`). Un módulo sin pantallas de producto no declara `ModuleAppNav`: su ruta monta `ModuleComingSoon`.
 
-| Slug                     | App routes   | Nav               |
-| ------------------------ | ------------ | ----------------- |
-| `finance`                | `/finance/*` | `FINANCE_APP_NAV` |
-| agenda, projects, health | ninguna      | solo Settings     |
+| Slug                     | App routes                                    | Nav               |
+| ------------------------ | --------------------------------------------- | ----------------- |
+| `finance`                | `/finance/*`                                  | `FINANCE_APP_NAV` |
+| agenda, projects, health | `/agenda`, `/projects`, `/health` (en camino) | solo Settings     |
 
 Keep Awake y Home **no** son slugs de `MODULE_REGISTRY`.
 
@@ -185,7 +185,7 @@ Keep Awake y Home **no** son slugs de `MODULE_REGISTRY`.
 ## PR checklist (módulo nuevo)
 
 - [ ] Rutas en `APP_ROUTES` + `proxy.ts`.
-- [ ] Páginas bajo `app/(app)/` montan la screen del `index.ts` del módulo.
+- [ ] Páginas bajo `app/(app)/` montan la screen del módulo por ruta directa.
 - [ ] Con secciones: `ModuleAppNav` + `ModuleSectionLayout`; sin copiar tab bar de finance.
 - [ ] Hoja: sin `items`; fila sidebar.
 - [ ] Header vía shell / `usePageHeader`; sin título duplicado en el body.
@@ -209,3 +209,4 @@ Hoja (además):
 - Finance: `src/modules/finance/constants/nav.ts`, `components/layout/finance-layout.tsx`
 - Keep Awake (hoja): `KeepAwakeLayout`, `src/modules/keep-awake/keep-awake-screen.tsx`
 - Shell autenticado: `app/(app)/layout.tsx`
+- Placeholder: `src/shared/components/layout/module-coming-soon.tsx`
