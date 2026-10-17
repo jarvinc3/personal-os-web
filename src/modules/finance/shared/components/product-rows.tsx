@@ -50,7 +50,7 @@ export function AccountProductRow({
   href,
   disabled = false,
 }: AccountProductRowProps) {
-  const lastFour = account.accountNumber?.replace(/\D/g, "").slice(-4)
+  const lastFour = account.accountNumberLast4
   const subtitle = lastFour
     ? `${FINANCE_ACCOUNT_TYPE_LABEL[account.type]} · •••• ${lastFour}`
     : `${FINANCE_ACCOUNT_TYPE_LABEL[account.type]} · ${account.currency}`

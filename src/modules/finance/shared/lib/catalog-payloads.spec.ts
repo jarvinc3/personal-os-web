@@ -56,17 +56,33 @@ describe("buildCreateAccountBody", () => {
     assert.equal(missing.ok, false)
   })
 
-  it("rejects bank accounts without an account number", () => {
-    const result = buildCreateAccountBody({
+  it("rejects bank accounts without an account number on create", () => {
+    const payload = buildCreateAccountBody({
       name: "Ahorros",
       type: "SAVINGS",
       institutionId: "inst-1",
     })
-    assert.equal(result.ok, false)
-    if (result.ok) {
+    assert.equal(payload.ok, false)
+    if (payload.ok) {
       return
     }
-    assert.match(result.error, /número de cuenta/i)
+    assert.match(payload.error, /número de cuenta/i)
+  })
+
+  it("allows an update that keeps the stored account number", () => {
+    const payload = buildCreateAccountBody(
+      {
+        name: "Ahorros",
+        type: "SAVINGS",
+        institutionId: "inst-1",
+      },
+      { isUpdate: true }
+    )
+    assert.equal(payload.ok, true)
+    if (!payload.ok) {
+      return
+    }
+    assert.equal("accountNumber" in payload.body, false)
   })
 
   it("allows CASH without an institution", () => {

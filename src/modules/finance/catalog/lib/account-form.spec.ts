@@ -1,7 +1,10 @@
 import assert from "node:assert/strict"
 import { describe, it } from "node:test"
 
-import { accountSchema } from "./account-form.ts"
+import { accountSchemaFor } from "./account-form.ts"
+
+const accountSchema = accountSchemaFor({ isEdit: false })
+const editAccountSchema = accountSchemaFor({ isEdit: true })
 
 const validCashAccount = {
   name: "Efectivo",
@@ -23,6 +26,40 @@ describe("accountSchema", () => {
     assert.equal(
       accountSchema.safeParse({ ...validCashAccount, type: "CHECKING" })
         .success,
+      false
+    )
+  })
+
+  it("rejects a bank account without a number on create", () => {
+    assert.equal(
+      accountSchema.safeParse({
+        ...validCashAccount,
+        type: "CHECKING",
+        institutionId: "inst-1",
+      }).success,
+      false
+    )
+  })
+
+  it("accepts an edit that keeps the stored number", () => {
+    assert.equal(
+      editAccountSchema.safeParse({
+        ...validCashAccount,
+        type: "CHECKING",
+        institutionId: "inst-1",
+      }).success,
+      true
+    )
+  })
+
+  it("rejects a short number on edit", () => {
+    assert.equal(
+      editAccountSchema.safeParse({
+        ...validCashAccount,
+        type: "CHECKING",
+        institutionId: "inst-1",
+        accountNumber: "12",
+      }).success,
       false
     )
   })

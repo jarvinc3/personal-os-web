@@ -62,7 +62,7 @@ function cashItem(partial: {
     name: partial.name,
     type: "CASH",
     currency: partial.currency ?? "DOP",
-    accountNumber: null,
+    accountNumberLast4: null,
     balance: partial.balance,
     color: null,
     isActive: true,

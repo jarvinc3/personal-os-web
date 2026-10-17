@@ -226,7 +226,7 @@ export type FinanceAccount = {
   name: string
   type: FinanceAccountType
   currency: string
-  accountNumber: string | null
+  accountNumberLast4: string | null
   isDefaultForInstitution?: boolean
   balance: string
   earmarkedAmount: string

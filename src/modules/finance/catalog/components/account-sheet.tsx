@@ -60,7 +60,7 @@ import {
 import { useEffect, useMemo } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import {
-  accountSchema,
+  accountSchemaFor,
   type AccountFormValues,
 } from "@/src/modules/finance/catalog/lib/account-form"
 
@@ -83,7 +83,7 @@ function toFormValues(
     institutionId:
       account?.institutionId ??
       (type === "CASH" ? CATALOG_NONE : defaultInstitutionId),
-    accountNumber: account?.accountNumber ?? "",
+    accountNumber: "",
     color: account?.color ?? "",
     initialBalance: "",
     isDefaultForInstitution: account?.isDefaultForInstitution ?? false,
@@ -130,6 +130,11 @@ export function AccountSheet({
   const resolvedDefaultInstitutionId =
     defaultInstitutionId ?? institutions[0]?.id ?? CATALOG_NONE
 
+  const accountResolver = useMemo(
+    () => zodResolver(accountSchemaFor({ isEdit })),
+    [isEdit]
+  )
+
   const {
     control,
     handleSubmit,
@@ -139,7 +144,7 @@ export function AccountSheet({
     trigger,
     formState: { errors, isDirty },
   } = useForm<AccountFormValues>({
-    resolver: zodResolver(accountSchema),
+    resolver: accountResolver,
     defaultValues: toFormValues(
       account,
       defaultCurrency,
@@ -157,6 +162,8 @@ export function AccountSheet({
   const accountColor = useWatch({ control, name: "color" })
   const accountCurrency = useWatch({ control, name: "currency" })
   const accountNumber = useWatch({ control, name: "accountNumber" })
+  const previewLast4 =
+    accountNumber.replace(/\D/g, "").slice(-4) || account?.accountNumberLast4
   const institutionId = useWatch({ control, name: "institutionId" })
   const selectedInstitution =
     institutions.find((item) => item.id === institutionId) ?? null
@@ -301,9 +308,8 @@ export function AccountSheet({
             icon={LandmarkIcon}
             title={accountName.trim() || "Nueva cuenta"}
             description={
-              accountType !== "CASH" &&
-              accountNumber.replace(/\D/g, "").length >= 4
-                ? `${FINANCE_ACCOUNT_TYPE_LABEL[accountType]} · •••• ${accountNumber.replace(/\D/g, "").slice(-4)}`
+              accountType !== "CASH" && previewLast4
+                ? `${FINANCE_ACCOUNT_TYPE_LABEL[accountType]} · •••• ${previewLast4}`
                 : `${FINANCE_ACCOUNT_TYPE_LABEL[accountType]} · ${accountCurrency}`
             }
             accentColor={accountColor || undefined}
@@ -368,7 +374,11 @@ export function AccountSheet({
                     onChange={field.onChange}
                     onBlur={field.onBlur}
                     error={errors.accountNumber?.message}
-                    placeholder="0123456789"
+                    placeholder={
+                      isEdit && account?.accountNumberLast4
+                        ? `Deja vacío para conservar •••• ${account.accountNumberLast4}`
+                        : "0123456789"
+                    }
                   />
                 )}
               />
