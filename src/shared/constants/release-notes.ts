@@ -12,6 +12,12 @@ export type ReleaseNotesEntry = {
 
 export const RELEASE_NOTES: readonly ReleaseNotesEntry[] = [
   {
+    version: "0.43.2",
+    highlights: [
+      "Sin cambios visibles: ajustes internos de la sesión y la navegación.",
+    ],
+  },
+  {
     version: "0.43.1",
     highlights: [
       "Agenda, Proyectos y Salud ya muestran su pantalla de «en camino» con acceso a sus ajustes.",
