@@ -2,6 +2,12 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.44.0] - 2026-10-17
+
+### Cambiado
+
+- Cuentas: la API ya no devuelve el número completo, así que las listas y el resumen usan `accountNumberLast4`. Al editar, el campo aparece vacío con el aviso «Deja vacío para conservar •••• NNNN»; escribir un número nuevo lo reemplaza y dejarlo vacío conserva el guardado (jarvinc3/personal-os-back#139).
+
 ## [0.43.2] - 2026-10-17
 
 ### Cambiado
