@@ -1,6 +1,6 @@
 "use client"
 
-import { useUserModuleConfig } from "@/src/modules/settings"
+import { useUserModuleConfig } from "@/src/modules/settings/hooks/use-user-module-config"
 
 export type FinanceAmountEntryMode = "keyboard" | "calculator"
 

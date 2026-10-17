@@ -1,17 +1,21 @@
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 
+const PROTECTED_APP_PATH_PREFIXES: readonly string[] = [
+  APP_ROUTES.app.settings,
+  APP_ROUTES.app.chat,
+  APP_ROUTES.app.notifications,
+  APP_ROUTES.app.keepAwake,
+  APP_ROUTES.app.agenda,
+  APP_ROUTES.app.projects,
+  APP_ROUTES.app.health,
+  APP_ROUTES.app.finance,
+]
+
 /** Rutas `(app)` que exigen sesión antes de montar el layout. */
 export function isProtectedAppPath(pathname: string): boolean {
   return (
     pathname === APP_ROUTES.app.home ||
-    pathname.startsWith(APP_ROUTES.app.settings) ||
-    pathname.startsWith(APP_ROUTES.app.chat) ||
-    pathname.startsWith(APP_ROUTES.app.notifications) ||
-    pathname.startsWith(APP_ROUTES.app.keepAwake) ||
-    pathname.startsWith(APP_ROUTES.app.agenda) ||
-    pathname.startsWith(APP_ROUTES.app.projects) ||
-    pathname.startsWith(APP_ROUTES.app.health) ||
-    pathname.startsWith(APP_ROUTES.app.finance)
+    PROTECTED_APP_PATH_PREFIXES.some((prefix) => pathname.startsWith(prefix))
   )
 }
 
