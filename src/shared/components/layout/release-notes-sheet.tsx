@@ -79,6 +79,7 @@ export function ReleaseNotesSheet({
   return (
     <BottomSheet
       open={entry !== null}
+      variant="floating"
       onOpenChange={(open) => {
         if (!open) {
           closeSheet()
@@ -86,26 +87,22 @@ export function ReleaseNotesSheet({
       }}
       title="Novedades"
       description={entry ? `Cambios de la versión ${entry.version}` : undefined}
-      actions={{
-        close: (
-          <Button className="flex-1" onClick={closeSheet}>
-            <CheckIcon data-icon="inline-start" />
-            Entendido
-          </Button>
-        ),
-      }}
     >
       <ul className="flex flex-col gap-3">
         {entry?.highlights.map((highlight) => (
-          <li key={highlight} className="flex items-start gap-2 text-sm">
+          <li key={highlight} className="flex items-start gap-2 text-sm bg-card p-2 rounded-md shadow-sm border border-border/30">
             <SparklesIcon
-              className="mt-0.5 size-4 shrink-0 text-muted-foreground"
+              className="mt-0.5 size-4 shrink-0 text-success"
               aria-hidden
             />
             <span>{highlight}</span>
           </li>
         ))}
       </ul>
+      <Button className="flex-1 py-2 rounded-full" onClick={closeSheet}>
+        <CheckIcon data-icon="inline-start" />
+        Entendido
+      </Button>
     </BottomSheet>
   )
 }

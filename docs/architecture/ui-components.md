@@ -4,52 +4,45 @@ Inventario para agentes. Antes de inventar un control, buscar aquí y en `src/sh
 
 ## Fecha y hora — no usar inputs nativos
 
-**Prohibido** en UI de producto: `<input type="time">`, `<input type="date">`, y `Input` con esos `type`. El reemplazo canónico está en [`src/shared/components/ui/wheel-picker.tsx`](../../src/shared/components/ui/wheel-picker.tsx).
+**Prohibido** en UI de producto: `<input type="time">`, `<input type="date">`, y `Input` con esos `type`. La rueda vive en [`src/shared/components/ui/wheel-picker.tsx`](../../src/shared/components/ui/wheel-picker.tsx). En pantalla siempre va dentro de [`WheelField`](../../src/shared/components/ui/wheel-field.tsx): la misma fila que `FinanceDateField`.
 
 | Necesitas                          | Usar               | Valor                                                                                    |
 | ---------------------------------- | ------------------ | ---------------------------------------------------------------------------------------- |
-| Hora de reloj                      | `TimePairWheels`   | `HH:mm` 24 h (ej. `"09:00"`)                                                             |
-| Duración (horas + minutos)         | `DurationWheels`   | `HH:mm` de duración (ej. `"01:30"` = 90 min). No usar `TimePairWheels`: trae a. m./p. m. |
-| Fecha                              | `DateWheels`       | `YYYY-MM-DD`                                                                             |
-| Fecha en un formulario de Finanzas | `FinanceDateField` | Igual `YYYY-MM-DD`; collapsible + `DateWheels` + atajos “Hoy” / “Listo”                  |
+| Cualquier rueda en pantalla        | `WheelField`       | Fila (icono, valor, chevron), panel a ancho completo y `Listo` abajo a la derecha        |
+| Hora de reloj                      | `TimePairWheels`   | Contenido del panel. `HH:mm` 24 h (ej. `"09:00"`)                                        |
+| Duración (horas + minutos)         | `DurationWheels`   | Contenido del panel. `HH:mm` de duración (ej. `"01:30"` = 90 min). Sin a. m./p. m.       |
+| Fecha                              | `FinanceDateField` | `WheelField` + `DateWheels`. `YYYY-MM-DD`, atajos “Hoy” / “Listo”                        |
+| Un día dentro de un rango          | `DayWheel`         | `WheelField` + una rueda. String decimal (`"15"`), `min` / `max`                         |
+| Varios días del mes                | `DayListField`     | Cada día es un `DayWheel`                                                                |
+| 2 a 5 opciones exclusivas          | `ChoiceGrid`       | Celdas con icono en el color del módulo y, al elegir, borde más grueso y check           |
 
-`TimePairWheels` muestra hora 12 h + minutos + periodo a. m./p. m. `DurationWheels` muestra horas 00–24 + minutos, sin periodo. Los minutos se configuran con `minuteStep`: `1` (00–59), `5` o `10`. Convierte reloj con `hm24To12Parts` / `hm12To24` y duración con `durationMinutesToHm` / `hmToDurationMinutes` en `src/shared/types/wheels.type.ts`.
+`TimePairWheels`, `DurationWheels` y `DateWheels` no se montan sueltos en una vista. `TimePairWheels` muestra hora 12 h + minutos + periodo a. m./p. m. `DurationWheels` muestra horas 00–24 + minutos, sin periodo. Los minutos se configuran con `minuteStep`: `1` (00–59), `5` o `10`. Convierte reloj con `hm24To12Parts` / `hm12To24` y duración con `durationMinutesToHm` / `hmToDurationMinutes` en `src/shared/types/wheels.type.ts`.
 
 ```tsx
+import { WheelField } from "@/src/shared/components/ui/wheel-field"
 import { TimePairWheels } from "@/src/shared/components/ui/wheel-picker"
+import { ClockIcon } from "lucide-react"
 
-;<TimePairWheels
-  label="Hora"
-  value="09:07"
-  minuteStep={1}
-  disabled={false}
-  onChange={(next) => {
-    // next es "HH:mm" 24 h
-  }}
-/>
+;<WheelField label="Hora" valueLabel="9:07 a. m." icon={ClockIcon}>
+  <TimePairWheels
+    value="09:07"
+    minuteStep={1}
+    onChange={(next) => {
+      // next es "HH:mm" 24 h
+    }}
+  />
+</WheelField>
 ```
 
-```tsx
-import { DurationWheels } from "@/src/shared/components/ui/wheel-picker"
-
-;<DurationWheels
-  label="Duración"
-  value="01:30"
-  minuteStep={1}
-  onChange={(next) => {
-    // next es "HH:mm" de duración
-  }}
-/>
-```
-
-Un `Input type="number"` para cantidades **sí** es válido; no es fecha/hora. Duraciones con horas y minutos van en `DurationWheels`, no en un input numérico.
+Un `Input type="number"` para cantidades **sí** es válido; no es fecha/hora. Duraciones con horas y minutos van en `DurationWheels` dentro de `WheelField`, no en un input numérico.
 
 ## Collapsible para elegir un dato
 
-Cuando un collapsible abre ruedas u otro control para elegir un valor (`FinanceDateField` y el mismo patrón en otros módulos):
+`WheelField` (y `FinanceDateField`, `DayWheel`, que lo usan) es la presentación de una rueda:
 
-- El panel abierto ocupa **todo el ancho** del bloque que lo contiene. Si el disparador comparte fila con otro control (un switch, por ejemplo), ese control va en `aside` del campo, para que el panel siga a ancho completo.
-- El pie del panel deja los atajos a la izquierda (`Hoy`, y `Sin fecha` si aplica). A la derecha, al fondo, va un botón `Listo` del mismo tamaño. Se habilita cuando ya hay un valor elegido. Al pulsarlo, cierra el collapsible. El valor ya quedó escrito al elegirlo.
+- El panel abierto ocupa **todo el ancho** del bloque que lo contiene. Si el disparador comparte fila con otro control, ese control va en `aside`, para que el panel siga a ancho completo.
+- El pie del panel deja los atajos a la izquierda (`Hoy`, y `Sin fecha` si aplica). A la derecha, al fondo, va un botón `Listo`. Se habilita cuando ya hay un valor elegido. Al pulsarlo, cierra el panel. El valor ya quedó escrito al elegirlo.
+- `ChoiceGrid` recibe `accentColor` del módulo. El icono va sobre un fondo tenue de ese color. La celda elegida no se rellena: lleva un borde más grueso de ese color y un check.
 
 ## Sheets, listas y vacíos
 

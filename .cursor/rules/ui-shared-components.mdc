@@ -10,10 +10,13 @@ Antes de crear un control, leer [docs/architecture/ui-components.md](docs/archit
 
 **Fecha y hora:** nunca `<input type="time|date">` ni `Input` con esos types.
 
-- Hora de reloj → `TimePairWheels` (`HH:mm` 24 h) desde `@/src/shared/components/ui/wheel-picker`
-- Duración horas+minutos → `DurationWheels` (`HH:mm` de duración). No usar `TimePairWheels` (incluye a. m./p. m.)
-- Fecha → `DateWheels` (`YYYY-MM-DD`); en Finanzas preferir `FinanceDateField`
-- Collapsible de selección (ruedas u otro dato): el panel abierto ocupa todo el ancho del bloque. Un control al lado del disparador va en `aside`. Pie: atajos a la izquierda; botón `Listo` siempre abajo a la derecha, habilitado cuando hay un valor elegido, y al pulsarlo cierra el panel.
+Toda rueda en una pantalla usa la misma fila que `FinanceDateField`: `WheelField` en `@/src/shared/components/ui/wheel-field`. La fila cerrada muestra icono, valor y chevron. Al abrirla, el panel ocupa todo el ancho del bloque y el pie lleva los atajos a la izquierda y `Listo` abajo a la derecha. `Listo` se habilita cuando hay un valor y, al pulsarlo, cierra el panel. Un control junto al disparador va en `aside`. `DateWheels`, `TimePairWheels`, `DurationWheels` y la rueda interna de `DayWheel` no se renderizan sueltas: solo como contenido de ese panel.
+
+- Hora de reloj → `TimePairWheels` (`HH:mm` 24 h) dentro de `WheelField`
+- Duración horas+minutos → `DurationWheels` (`HH:mm` de duración) dentro de `WheelField`. No usar `TimePairWheels` (incluye a. m./p. m.)
+- Fecha → `FinanceDateField` (ya es un `WheelField`). `DateWheels` solo vive dentro de ese panel
+- Un día del mes (o un rango corto de días) → `DayWheel` (ya es un `WheelField`). Varios días → `DayListField`. No un `Input` para escribir el número
+- Una elección exclusiva de dos a cinco opciones, sin descripción → `ChoiceGrid` (`accentColor` del módulo). Una lista larga sigue en filas `OptionRow`
 - Minutos: `minuteStep={1}` (00–59), `{5}` o `{10}` — no usar slots fijos de 15 min
 
 **Listas largas en sheets:** búsqueda que ignora mayúsculas y acentos, y un destello (`animate-search-flash`) en cada coincidencia. Un collapsible se abre en la búsqueda solo si coincide un hijo; si coincide el padre, sigue cerrado.
@@ -33,5 +36,7 @@ Antes de crear un control, leer [docs/architecture/ui-components.md](docs/archit
 Un switch (`SettingsRow` con `onSwitchChange`, `SwitchFieldRow`) lleva icono a la izquierda del título; la descripción va debajo del título. Un estado binario se muestra con icono, no con la palabra. Módulo **hoja** (Keep Awake): hero + iconos + sheets — **no** `Tabs*` locales. Módulo **con secciones** (Finanzas): `ModuleSectionLayout` (rutas), no tabs inventadas dentro de una página. `Tabs` persiste el tab en la query para que Atrás lo recupere (`persist={false}` en un sheet que lo reinicia); el chip se desliza, el panel anima su presencia y un swipe horizontal cambia de tab. Ver `leaf-module-ux.mdc` y [module-conventions.md](docs/architecture/module-conventions.md).
 
 ```tsx
-<TimePairWheels label="Hora" value={hhmm} minuteStep={1} onChange={setHhmm} />
+<WheelField label="Hora" valueLabel="9:00 a. m." icon={ClockIcon}>
+  <TimePairWheels value={hhmm} minuteStep={1} onChange={setHhmm} />
+</WheelField>
 ```

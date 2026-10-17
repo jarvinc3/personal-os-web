@@ -4,7 +4,9 @@ import * as WheelPickerPrimitive from "@ncdai/react-wheel-picker"
 import type { ComponentProps, ReactNode } from "react"
 import { useMemo } from "react"
 
+import { WheelField } from "@/src/shared/components/ui/wheel-field"
 import { cn } from "@/src/shared/lib/utils"
+import { CalendarDaysIcon, type LucideIcon } from "lucide-react"
 
 import {
   daysInMonth,
@@ -351,6 +353,109 @@ export function DurationWheels({
         </WheelColumn>
       </WheelPickerWrapper>
     </div>
+  )
+}
+
+function dayOptions(min: number, max: number) {
+  const start = Math.min(min, max)
+  const end = Math.max(min, max)
+  return Array.from({ length: end - start + 1 }, (_, index) => {
+    const day = String(start + index)
+    return { value: day, label: day }
+  })
+}
+
+interface DayWheelProps {
+  label?: string
+  /** Día elegido, en decimal (`"15"`). */
+  value: string
+  onChange: (next: string) => void
+  min?: number
+  max?: number
+  disabled?: boolean
+  error?: string
+  icon?: LucideIcon
+  /** Control junto al disparador. El panel sigue a ancho completo. */
+  aside?: ReactNode
+  defaultOpen?: boolean
+}
+
+function DayWheelPicker({
+  label,
+  value,
+  onChange,
+  options,
+  disabled,
+}: {
+  label?: string
+  value: string
+  onChange: (next: string) => void
+  options: { value: string; label: string }[]
+  disabled: boolean
+}) {
+  return (
+    <div className={cn(disabled && "pointer-events-none opacity-50")}>
+      <WheelPickerWrapper className="**:data-rwp:h-28.75! **:data-rwp-highlight-wrapper:rounded-md">
+        <WheelColumn label={label ?? "Día"}>
+          <WheelPicker
+            value={value}
+            onValueChange={(next: string) => {
+              if (!disabled) {
+                onChange(next)
+              }
+            }}
+            options={options}
+            visibleCount={16}
+          />
+        </WheelColumn>
+      </WheelPickerWrapper>
+    </div>
+  )
+}
+
+/**
+ * Un día del mes. La fila cerrada muestra el día; al abrirla, la rueda
+ * ocupa el ancho y se confirma con Listo.
+ */
+export function DayWheel({
+  label,
+  value,
+  onChange,
+  min = 1,
+  max = 31,
+  disabled = false,
+  error,
+  icon = CalendarDaysIcon,
+  aside,
+  defaultOpen = false,
+}: DayWheelProps) {
+  const options = useMemo(() => dayOptions(min, max), [min, max])
+  const numeric = Number(value)
+  const start = Math.min(min, max)
+  const end = Math.max(min, max)
+  const selected =
+    Number.isInteger(numeric) && numeric >= start && numeric <= end
+      ? String(numeric)
+      : String(start)
+
+  return (
+    <WheelField
+      label={label}
+      valueLabel={`Día ${selected}`}
+      icon={icon}
+      error={error}
+      disabled={disabled}
+      aside={aside}
+      defaultOpen={defaultOpen}
+    >
+      <DayWheelPicker
+        label={label}
+        value={selected}
+        onChange={onChange}
+        options={options}
+        disabled={disabled}
+      />
+    </WheelField>
   )
 }
 

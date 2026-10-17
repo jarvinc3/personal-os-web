@@ -116,6 +116,10 @@ export function OauthGmailResultSheet({
 
   const scheduleMode = useWatch({ control, name: "emailSyncScheduleMode" })
   const everyMinutes = useWatch({ control, name: "emailSyncEveryMinutes" })
+  const emailSyncAutomatic = useWatch({
+    control,
+    name: "emailSyncAutomatic",
+  })
 
   const [wasOpen, setWasOpen] = useState(open)
   if (wasOpen !== open) {
@@ -257,20 +261,22 @@ export function OauthGmailResultSheet({
                 )}
               />
 
-              <div className="flex flex-col gap-3">
-                <FinanceSegmentedControl
-                  label="Horario"
-                  value={scheduleChipValue}
-                  onChange={handleScheduleChange}
-                  options={scheduleOptions}
-                  size="lg"
-                  fullWidth
-                />
-                <EmailSyncScheduleFields
-                  control={control}
-                  disabled={updateMutation.isPending}
-                />
-              </div>
+              {emailSyncAutomatic ? (
+                <div className="flex flex-col gap-3">
+                  <FinanceSegmentedControl
+                    label="Horario"
+                    value={scheduleChipValue}
+                    onChange={handleScheduleChange}
+                    options={scheduleOptions}
+                    size="lg"
+                    fullWidth
+                  />
+                  <EmailSyncScheduleFields
+                    control={control}
+                    disabled={updateMutation.isPending}
+                  />
+                </div>
+              ) : null}
 
               <Controller
                 control={control}
@@ -344,11 +350,13 @@ export function OauthGmailResultSheet({
                 </Button>
               }
             >
-              <SummaryItem
-                title="Horario"
-                value={emailSyncScheduleLabel(config.emailSync.schedule)}
-                showChevron={false}
-              />
+              {config.emailSync.automatic ? (
+                <SummaryItem
+                  title="Horario"
+                  value={emailSyncScheduleLabel(config.emailSync.schedule)}
+                  showChevron={false}
+                />
+              ) : null}
               <SummaryItem
                 title="Importación"
                 value={IMPORT_MODE_LABELS[config.emailSync.mode]}

@@ -1,0 +1,28 @@
+---
+description: Dependent settings appear only while their parent choice is active.
+globs: "**/*.{ts,tsx}"
+alwaysApply: true
+---
+
+# Ajustes en cascada
+
+Una opción que solo aplica si otra está activa no se muestra apagada ni deshabilitada. Aparece al activar el padre y desaparece al apagarlo. El valor se conserva en el formulario; ocultarlo no lo borra.
+
+- El interruptor, radio o segmento padre queda siempre visible.
+- Lo que depende de él (campos, radios, otra sección, un enlace) va justo debajo, o en el bloque siguiente si es una sección propia.
+- Hay varios niveles: el horario de sincronización solo existe si el correo está activo y, además, la sincronización automática está activa.
+- Un campo que también sirve con el padre apagado (la ventana del resumen de suscripciones) no entra en la cascada.
+- La validación de lo oculto no bloquea el envío. Se comprueba solo mientras el padre está activo.
+
+```tsx
+<SwitchFieldRow
+  label="Tengo un ingreso fijo"
+  checked={enabled}
+  onCheckedChange={setEnabled}
+/>
+{enabled ? (
+  <FormTextField label="Monto" value={amount} onChange={setAmount} />
+) : null}
+```
+
+No dejes el campo visible con `disabled={!enabled}`.

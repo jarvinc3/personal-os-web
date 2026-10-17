@@ -53,6 +53,7 @@ export {
 } from "./integrity"
 export { CurrencyFlag } from "./shared/components/currency-flag"
 export { CurrencyPickerSheet } from "./shared/components/pickers/currency-picker-sheet"
+export { FinanceMoneyField } from "./shared/components/forms/money-field"
 
 export { useAccounts } from "./shared/hooks/use-accounts"
 export { useAnalyticsSummary } from "./shared/hooks/use-analytics"

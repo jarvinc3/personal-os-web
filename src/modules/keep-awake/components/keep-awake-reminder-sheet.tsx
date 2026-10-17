@@ -7,6 +7,7 @@ import {
   subscribeReminder,
   WEEKDAY_LABELS,
   formatReminderTime,
+  formatReminderTimeLabel,
   getReminderSnapshot,
   reminderTimeFromDate,
   toggleReminderDay,
@@ -14,6 +15,7 @@ import {
   type KeepAwakeReminder,
 } from "@/src/modules/keep-awake/lib/reminders"
 import { Button } from "@/src/shared/components/ui/button"
+import { WheelField } from "@/src/shared/components/ui/wheel-field"
 import { TimePairWheels } from "@/src/shared/components/ui/wheel-picker"
 import { PRESSABLE_CLASS, cn } from "@/src/shared/lib/utils"
 import { type FormEvent, useState } from "react"
@@ -158,18 +160,23 @@ export function KeepAwakeReminderForm({ onSaved }: { onSaved: () => void }) {
       onSubmit={(event) => void handleSubmit(event)}
     >
       <SummarySection title="Hora exacta" icon={ClockIcon}>
-        <TimePairWheels
-          value={formatReminderTime(draft)}
-          minuteStep={1}
-          onChange={(next) => {
-            const [hourText, minuteText] = next.split(":")
-            setDraft({
-              ...draft,
-              hour: Number(hourText) || 0,
-              minute: Number(minuteText) || 0,
-            })
-          }}
-        />
+        <WheelField
+          valueLabel={formatReminderTimeLabel(draft)}
+          icon={ClockIcon}
+        >
+          <TimePairWheels
+            value={formatReminderTime(draft)}
+            minuteStep={1}
+            onChange={(next) => {
+              const [hourText, minuteText] = next.split(":")
+              setDraft({
+                ...draft,
+                hour: Number(hourText) || 0,
+                minute: Number(minuteText) || 0,
+              })
+            }}
+          />
+        </WheelField>
       </SummarySection>
 
       <div
