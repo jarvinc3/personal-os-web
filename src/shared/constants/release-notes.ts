@@ -12,6 +12,12 @@ export type ReleaseNotesEntry = {
 
 export const RELEASE_NOTES: readonly ReleaseNotesEntry[] = [
   {
+    version: "0.44.0",
+    highlights: [
+      "Al editar una cuenta, el número ya no aparece completo: ves solo los últimos 4 dígitos. Déjalo vacío para conservarlo o escribe uno nuevo para cambiarlo.",
+    ],
+  },
+  {
     version: "0.43.2",
     highlights: [
       "Sin cambios visibles: ajustes internos de la sesión y la navegación.",
