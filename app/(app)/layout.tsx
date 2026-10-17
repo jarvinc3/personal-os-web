@@ -1,12 +1,10 @@
 "use client"
 
-import {
-  PendingAccountDeletionHandler,
-  PendingDataWipeHandler,
-  ReleaseNotes,
-} from "@/src/modules/settings"
-import { ChatContextProvider } from "@/src/modules/ai"
-import { KeepAwakeProvider } from "@/src/modules/keep-awake"
+import { PendingAccountDeletionHandler } from "@/src/modules/settings/components/pending-account-deletion-handler"
+import { PendingDataWipeHandler } from "@/src/modules/settings/components/pending-data-wipe-handler"
+import { ReleaseNotes } from "@/src/modules/settings/components/release-notes"
+import { ChatContextProvider } from "@/src/modules/ai/context/chat-context"
+import { KeepAwakeProvider } from "@/src/modules/keep-awake/context/keep-awake-context"
 import { AppHeader } from "@/src/shared/components/layout/app-header"
 import { AppSidebar } from "@/src/shared/components/layout/app-sidebar"
 import {

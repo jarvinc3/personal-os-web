@@ -1,7 +1,7 @@
 import { Suspense } from "react"
 import { redirect } from "next/navigation"
 
-import { TransactionCreateScreen } from "@/src/modules/finance"
+import { TransactionCreateScreen } from "@/src/modules/finance/transactions/transaction-form-screen"
 import {
   APP_ROUTES,
   isFinanceTransferFormType,

@@ -8,7 +8,7 @@ import {
   nextEmailSyncTime,
   parseSyncIntervalMinutes,
   type FinanceModuleFormValues,
-} from "@/src/modules/settings/lib/finance-module-form"
+} from "./lib/finance-module-form"
 import { Button } from "@/src/shared/components/ui/button"
 import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
 import { WheelField } from "@/src/shared/components/ui/wheel-field"

@@ -23,11 +23,9 @@ import {
   SummarySection,
 } from "@/src/shared/components/ui/summary"
 import { getModule } from "@/src/shared/constants/module-registry"
-import {
-  FinanceIntegritySettingsSection,
-  FinanceMoneyField,
-  useAccounts,
-} from "@/src/modules/finance"
+import { FinanceIntegritySettingsSection } from "@/src/modules/finance/integrity"
+import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
+import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
@@ -68,7 +66,7 @@ import {
 } from "lucide-react"
 import { useEffect, useMemo } from "react"
 import { Controller, useForm, useWatch, type Control } from "react-hook-form"
-import { EmailSyncScheduleFields } from "@/src/modules/settings/components/module-settings/email-sync-schedule-fields"
+import { EmailSyncScheduleFields } from "./email-sync-schedule-fields"
 import {
   EMAIL_SYNC_SCHEDULE_MODES,
   configToFinanceFormValues,
@@ -77,7 +75,7 @@ import {
   parsePayDays,
   subscriptionsPatchFromFormValues,
   type FinanceModuleFormValues,
-} from "@/src/modules/settings/lib/finance-module-form"
+} from "./lib/finance-module-form"
 
 const MODULE_ACCENT = getModule("finance").accent
 

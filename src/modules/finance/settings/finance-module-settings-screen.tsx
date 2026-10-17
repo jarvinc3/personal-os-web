@@ -2,7 +2,7 @@
 
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { getModule } from "@/src/shared/constants/module-registry"
-import { FinanceModuleSettingsForm } from "@/src/modules/settings/components/module-settings/finance-module-settings-form"
+import { FinanceModuleSettingsForm } from "./finance-module-settings-form"
 import { SettingsSecondaryPage } from "@/src/modules/settings/components/layout/settings-secondary-page"
 import { SettingsGate } from "@/src/modules/settings/settings-gate"
 import { useRouter } from "next/navigation"

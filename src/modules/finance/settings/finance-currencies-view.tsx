@@ -1,12 +1,12 @@
 "use client"
 
 import { apiPost } from "@/src/config/api-client"
-import { CurrencyFlag } from "@/src/modules/finance"
-import { CurrencyPickerSheet } from "@/src/modules/finance"
-import { useExchangeRates } from "@/src/modules/finance"
-import { currencyDisplayName } from "@/src/modules/finance"
-import { normalizeTrackedCurrencies } from "@/src/modules/finance"
-import { formatFinanceMoney } from "@/src/modules/finance"
+import { CurrencyFlag } from "@/src/modules/finance/shared/components/currency-flag"
+import { CurrencyPickerSheet } from "@/src/modules/finance/shared/components/pickers/currency-picker-sheet"
+import { useExchangeRates } from "@/src/modules/finance/shared/hooks/use-exchange-rates"
+import { currencyDisplayName } from "@/src/modules/finance/shared/lib/currency-display-name"
+import { normalizeTrackedCurrencies } from "@/src/modules/finance/shared/lib/finance-currency"
+import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 import { useUserModuleConfig } from "@/src/modules/settings/hooks/use-user-module-config"
 import { SettingsSection } from "@/src/shared/components/layout/settings-section"
 import {

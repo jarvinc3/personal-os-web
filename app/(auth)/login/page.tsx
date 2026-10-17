@@ -1,5 +1,5 @@
 import { LoadingView } from "@/src/shared/components/layout/loading-view"
-import { LoginScreen } from "@/src/modules/auth"
+import { LoginScreen } from "@/src/modules/auth/login-screen"
 import type { Metadata } from "next"
 import { Suspense } from "react"
 

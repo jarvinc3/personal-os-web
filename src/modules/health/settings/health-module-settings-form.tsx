@@ -31,7 +31,7 @@ import { Controller, useForm, useWatch } from "react-hook-form"
 import {
   healthModuleSchema,
   type HealthModuleFormValues,
-} from "@/src/modules/settings/lib/health-module-form"
+} from "./lib/health-module-form"
 
 const MODULE_ACCENT = getModule("health").accent
 

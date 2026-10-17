@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { useCallback } from "react"
 
 import { FinanceGate } from "@/src/modules/finance/finance-gate"
-import { CardFormScreen } from "@/src/modules/finance/catalog"
+import { CardFormScreen } from "@/src/modules/finance/cards/components/card-form-screen"
 import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
 import { MissingRecord } from "@/src/modules/finance/shared/components/layout/missing-record"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"

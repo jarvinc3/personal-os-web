@@ -43,7 +43,7 @@ Un solo app Next.js. `app/` solo compone rutas; cada feature vive en `src/module
 | `src/config/`    | api-client, supabase                    |
 | `proxy.ts`       | Refresh de sesión + guards de rutas     |
 
-Papeles de archivo (ruta, screen, cuerpo, UI, regla), nombres, gate/header y capabilities: [module-conventions.md](./module-conventions.md) y [AGENTS.md](../../AGENTS.md). Cada módulo exporta su API y sus screens en su `index.ts`; otro módulo y `src/shared` importan solo ese `index.ts`. `src/shared` no importa features. Finanzas es el único módulo con capabilities.
+Papeles de archivo (ruta, screen, cuerpo, UI, regla), nombres, gate/header y capabilities: [module-conventions.md](./module-conventions.md) y [AGENTS.md](../../AGENTS.md). Cada `index.ts` exporta solo la API pública que no es pantalla; otro módulo y `src/shared` importan solo ese `index.ts`, y las screens se importan por ruta directa desde `app/`. `src/shared` no importa features. Finanzas es el único módulo con capabilities.
 
 ## Grupos de rutas
 

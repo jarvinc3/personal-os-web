@@ -28,15 +28,12 @@ export async function updateSession(request: NextRequest) {
     },
   })
 
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser()
+  const { data, error } = await supabase.auth.getClaims()
 
   if (error?.code === "refresh_token_not_found") {
     await supabase.auth.signOut({ scope: "local" })
-    return { response: supabaseResponse, user: null }
+    return { response: supabaseResponse, claims: null }
   }
 
-  return { response: supabaseResponse, user }
+  return { response: supabaseResponse, claims: data?.claims ?? null }
 }

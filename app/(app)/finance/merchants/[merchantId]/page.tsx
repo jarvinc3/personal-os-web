@@ -1,6 +1,6 @@
 import { Suspense } from "react"
 
-import { MerchantDetailScreen } from "@/src/modules/finance"
+import { MerchantDetailScreen } from "@/src/modules/finance/merchants/merchant-detail-screen"
 import { LoadingView } from "@/src/shared/components/layout/loading-view"
 
 type FinanceMerchantDetailPageProps = {

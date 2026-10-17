@@ -67,7 +67,7 @@ import {
   cardSchema,
   institutionAccountOptions,
   type CardFormValues,
-} from "@/src/modules/finance/catalog/lib/card-form"
+} from "@/src/modules/finance/cards/lib/card-form"
 import { FormTextField } from "@/src/shared/components/layout/form-blocks"
 import { Button } from "@/src/shared/components/ui/button"
 import { ColorPickerSwatch } from "@/src/shared/components/ui/color-picker"

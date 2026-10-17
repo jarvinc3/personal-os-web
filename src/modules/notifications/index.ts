@@ -23,5 +23,4 @@ export { showInAppNotificationToast } from "@/src/modules/notifications/lib/show
 export { isWebPushSupported } from "@/src/modules/notifications/lib/web-push-support"
 export { resolveNotificationsSocketUrl } from "@/src/modules/notifications/lib/notifications-socket-url"
 export { NotificationsGate } from "@/src/modules/notifications/notifications-gate"
-export { NotificationsScreen } from "@/src/modules/notifications/notifications-screen"
 export type * from "@/src/modules/notifications/types/notification.types"

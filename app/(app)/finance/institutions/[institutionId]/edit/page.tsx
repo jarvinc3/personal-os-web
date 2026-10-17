@@ -1,6 +1,6 @@
 import { Suspense } from "react"
 
-import { InstitutionEditScreen } from "@/src/modules/finance"
+import { InstitutionEditScreen } from "@/src/modules/finance/institutions/institution-form-pages"
 import { LoadingView } from "@/src/shared/components/layout/loading-view"
 
 type FinanceInstitutionEditPageProps = {

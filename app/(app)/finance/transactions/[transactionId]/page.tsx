@@ -1,6 +1,6 @@
 import { Suspense } from "react"
 
-import { TransactionDetailScreen } from "@/src/modules/finance"
+import { TransactionDetailScreen } from "@/src/modules/finance/transactions/transaction-detail-screen"
 import { LoadingView } from "@/src/shared/components/layout/loading-view"
 
 type FinanceTransactionDetailPageProps = {

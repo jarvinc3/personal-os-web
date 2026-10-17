@@ -1,6 +1,6 @@
 import { Suspense } from "react"
 
-import { HomeScreen } from "@/src/modules/home"
+import { HomeScreen } from "@/src/modules/home/home-screen"
 import { LoadingView } from "@/src/shared/components/layout/loading-view"
 
 export default function HomePage() {

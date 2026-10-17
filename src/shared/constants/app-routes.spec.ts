@@ -46,6 +46,14 @@ describe("finance route constants", () => {
   })
 })
 
+describe("module placeholder routes", () => {
+  it("keeps the coming soon routes", () => {
+    assert.equal(APP_ROUTES.app.agenda, "/agenda")
+    assert.equal(APP_ROUTES.app.projects, "/projects")
+    assert.equal(APP_ROUTES.app.health, "/health")
+  })
+})
+
 describe("isFinanceTransferFormType", () => {
   it("detects only the transfer type", () => {
     assert.equal(isFinanceTransferFormType("TRANSFER"), true)

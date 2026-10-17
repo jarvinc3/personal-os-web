@@ -13,7 +13,6 @@ import { parseOAuthSuccessParam } from "@/src/modules/finance/shared/lib/gmail-o
 import {
   EMAIL_SYNC_INTERVAL_PRESETS,
   EMAIL_SYNC_SCHEDULE_MODES,
-  EmailSyncScheduleFields,
   configToFinanceFormValues,
   emailSyncOnboardingDefaults,
   emailSyncPatchFromFormValues,
@@ -21,10 +20,11 @@ import {
   financeModuleSchema,
   formatSyncIntervalLabel,
   isEmailSyncConfigured,
-  useProfileSheetFormSync,
-  useUserModuleConfig,
   type FinanceModuleFormValues,
-} from "@/src/modules/settings"
+} from "@/src/modules/finance/settings/lib/finance-module-form"
+import { EmailSyncScheduleFields } from "@/src/modules/finance/settings/email-sync-schedule-fields"
+import { useProfileSheetFormSync } from "@/src/modules/settings/hooks/use-profile-sheet"
+import { useUserModuleConfig } from "@/src/modules/settings/hooks/use-user-module-config"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
 import {
   OptionRow,

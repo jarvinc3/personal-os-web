@@ -4,9 +4,9 @@ import { type NextRequest, NextResponse } from "next/server"
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
-  const { response, user } = await updateSession(request)
+  const { response, claims } = await updateSession(request)
 
-  const targetPath = resolveRouteRedirect(pathname, Boolean(user))
+  const targetPath = resolveRouteRedirect(pathname, Boolean(claims))
   if (!targetPath) {
     return response
   }

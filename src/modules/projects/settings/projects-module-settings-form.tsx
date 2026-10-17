@@ -32,7 +32,7 @@ import { Controller, useForm, useWatch } from "react-hook-form"
 import {
   projectsModuleSchema,
   type ProjectsModuleFormValues,
-} from "@/src/modules/settings/lib/projects-module-form"
+} from "./lib/projects-module-form"
 
 const MODULE_ACCENT = getModule("projects").accent
 

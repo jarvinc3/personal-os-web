@@ -8,6 +8,9 @@ export function isProtectedAppPath(pathname: string): boolean {
     pathname.startsWith(APP_ROUTES.app.chat) ||
     pathname.startsWith(APP_ROUTES.app.notifications) ||
     pathname.startsWith(APP_ROUTES.app.keepAwake) ||
+    pathname.startsWith(APP_ROUTES.app.agenda) ||
+    pathname.startsWith(APP_ROUTES.app.projects) ||
+    pathname.startsWith(APP_ROUTES.app.health) ||
     pathname.startsWith(APP_ROUTES.app.finance)
   )
 }

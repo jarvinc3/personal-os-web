@@ -32,7 +32,7 @@ import { Controller, useForm, useWatch } from "react-hook-form"
 import {
   agendaModuleSchema,
   type AgendaModuleFormValues,
-} from "@/src/modules/settings/lib/agenda-module-form"
+} from "./lib/agenda-module-form"
 
 const MODULE_ACCENT = getModule("agenda").accent
 
