@@ -34,7 +34,6 @@ import { usePicker } from "@/src/shared/hooks/use-picker"
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
   CalendarIcon,
-  CircleAlert,
   HandshakeIcon,
   NotebookPenIcon,
   UserIcon,
@@ -207,6 +206,20 @@ export function ReceivableSheet({
               )}
             />
           ) : null}
+          <Controller
+            control={control}
+            name="description"
+            render={({ field }) => (
+              <FormTextField
+                icon={NotebookPenIcon}
+                label="Concepto"
+                value={field.value}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+                error={errors.description?.message}
+              />
+            )}
+          />
         </SummarySection>
 
         <SummarySection title="Montos" icon={WalletIcon}>
@@ -267,26 +280,6 @@ export function ReceivableSheet({
                 value={field.value}
                 onChange={field.onChange}
                 optional
-              />
-            )}
-          />
-        </SummarySection>
-
-        <SummarySection
-          title="Detalles opcionales"
-          icon={CircleAlert}
-          collapsible
-        >
-          <Controller
-            control={control}
-            name="description"
-            render={({ field }) => (
-              <FormTextField
-                icon={NotebookPenIcon}
-                label="Descripción"
-                value={field.value}
-                onChange={field.onChange}
-                onBlur={field.onBlur}
               />
             )}
           />

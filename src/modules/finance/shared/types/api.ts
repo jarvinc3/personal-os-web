@@ -89,6 +89,13 @@ export const FINANCE_RECEIVABLES_QUERY_KEY = [
   ...FINANCE_QUERY_KEY,
   "receivables",
 ] as const
+export const FINANCE_RECEIVABLE_SHARES_QUERY_KEY = [
+  ...FINANCE_QUERY_KEY,
+  "receivable-shares",
+] as const
+/** Public and unauthenticated: its own root so the session never invalidates it. */
+export const PUBLIC_RECEIVABLE_SHARE_QUERY_KEY =
+  "public-receivable-share" as const
 export const FINANCE_SAVINGS_GOAL_CONTRIBUTIONS_QUERY_KEY = [
   ...FINANCE_QUERY_KEY,
   "savings-goal-contributions",

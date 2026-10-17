@@ -4,6 +4,28 @@ import type { ReactNode } from "react"
 
 type BadgeVariant = VariantProps<typeof badgeVariants>["variant"]
 
+/** One measured row: a total, or one currency when the hero never converts. */
+export type FinanceProgressRow = {
+  key: string
+  progress: number
+  startCaption: ReactNode
+  endCaption: ReactNode
+}
+
+type SingleProgressBar = {
+  progress: number
+  startCaption: ReactNode
+  endCaption: ReactNode
+  progressRows?: never
+}
+
+type MultipleProgressBars = {
+  progressRows: readonly FinanceProgressRow[]
+  progress?: never
+  startCaption?: never
+  endCaption?: never
+}
+
 type FinanceProgressHeroProps = {
   accent: string
   media: ReactNode
@@ -12,32 +34,44 @@ type FinanceProgressHeroProps = {
   subtitle?: ReactNode
   metricLabel: string
   metricValue: string
-  progress: number
-  startCaption: ReactNode
-  endCaption: ReactNode
   footnote?: ReactNode
   decoration?: ReactNode
-}
+} & (SingleProgressBar | MultipleProgressBars)
 
 function clampPct(value: number): number {
   return Math.min(100, Math.max(0, value))
 }
 
-export function FinanceProgressHero({
-  accent,
-  media,
-  title,
-  badge,
-  subtitle,
-  metricLabel,
-  metricValue,
-  progress,
-  startCaption,
-  endCaption,
-  footnote,
-  decoration,
-}: FinanceProgressHeroProps) {
-  const width = clampPct(progress)
+/** Spreads only the multiple bars; both props are `never` on the other shape. */
+function resolveProgressRows(
+  props: FinanceProgressHeroProps
+): readonly FinanceProgressRow[] {
+  if (props.progressRows) {
+    return props.progressRows
+  }
+  return [
+    {
+      key: "progress",
+      progress: props.progress,
+      startCaption: props.startCaption,
+      endCaption: props.endCaption,
+    },
+  ]
+}
+
+export function FinanceProgressHero(props: FinanceProgressHeroProps) {
+  const {
+    accent,
+    media,
+    title,
+    badge,
+    subtitle,
+    metricLabel,
+    metricValue,
+    footnote,
+    decoration,
+  } = props
+  const rows = resolveProgressRows(props)
 
   return (
     <div className="-mx-4 -mt-4 overflow-hidden md:-mx-6">
@@ -73,16 +107,21 @@ export function FinanceProgressHero({
             {metricValue}
           </p>
 
-          <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-white/20">
-            <div
-              className="h-full rounded-full bg-white"
-              style={{ width: `${width}%` }}
-            />
-          </div>
-          <div className="mt-2 flex flex-wrap justify-between gap-x-3 text-xs text-white/70">
-            <span>{startCaption}</span>
-            <span>{endCaption}</span>
-          </div>
+          {rows.map((row, index) => (
+            <div key={row.key} className={index === 0 ? "mt-4" : "mt-3"}>
+              <div className="h-2 w-full overflow-hidden rounded-full bg-white/20">
+                <div
+                  className="h-full rounded-full bg-white"
+                  style={{ width: `${clampPct(row.progress)}%` }}
+                />
+              </div>
+              <div className="mt-2 flex flex-wrap justify-between gap-x-3 text-xs text-white/70">
+                <span>{row.startCaption}</span>
+                <span>{row.endCaption}</span>
+              </div>
+            </div>
+          ))}
+
           {footnote ? (
             <p className="mt-3 text-sm text-white/80">{footnote}</p>
           ) : null}

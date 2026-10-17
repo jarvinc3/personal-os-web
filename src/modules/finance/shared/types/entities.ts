@@ -601,6 +601,18 @@ export const FINANCE_RECEIVABLE_STATUS_LABEL: Record<
   WRITTEN_OFF: "Castigado",
 }
 
+/** Badge variants of the same statuses, shared by the detail and share views. */
+export const FINANCE_RECEIVABLE_STATUS_VARIANT: Record<
+  FinanceReceivableStatus,
+  "success" | "info" | "warning" | "secondary"
+> = {
+  PENDING: "warning",
+  PARTIAL: "info",
+  PAID: "success",
+  CANCELLED: "secondary",
+  WRITTEN_OFF: "secondary",
+}
+
 export type FinanceReceivable = {
   id: string
   debtorName: string
