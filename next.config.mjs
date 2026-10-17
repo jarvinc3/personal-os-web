@@ -33,8 +33,11 @@ function sideroomSourceLocationsRule() {
   }
 }
 
+// Only project JSX/TSX: without the 'foreign' exclusion Turbopack sends every
+// node_modules file through this Node.js loader, which made dev compiles take minutes.
 function sideroomTurbopackRule() {
   return {
+    condition: { not: "foreign" },
     loaders: [
       {
         loader: sideroomLoader(),
@@ -77,6 +80,10 @@ const nextConfig = {
     }))
   },
 
+  experimental: {
+    optimizePackageImports: ["@hugeicons/core-free-icons"],
+  },
+
   images: {
     remotePatterns: [
       {
@@ -105,7 +112,7 @@ const nextConfig = {
   turbopack: {
     rules:
       process.env.NODE_ENV === "development"
-        ? { "**/*.{jsx,tsx,js,ts,mjs,mts}": sideroomTurbopackRule() }
+        ? { "*.{jsx,tsx}": sideroomTurbopackRule() }
         : {},
   },
 }

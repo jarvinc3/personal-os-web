@@ -26,6 +26,7 @@ export function CurrencyFlag({
       alt=""
       width={24}
       height={18}
+      unoptimized
       className={cn(
         "h-[18px] w-6 shrink-0 rounded-[3px] object-cover",
         className
