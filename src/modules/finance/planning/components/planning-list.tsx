@@ -37,6 +37,11 @@ import {
   visibleReceivables,
 } from "@/src/modules/finance/shared/lib/planning-lists"
 import { FINANCE_RECEIVABLE_STATUS_LABEL } from "@/src/modules/finance/shared/types/entities"
+import {
+  isPlanningTab,
+  PLANNING_TAB_ITEMS,
+  type PlanningTab,
+} from "@/src/modules/finance/planning/lib/planning-tabs"
 import { ReceivableShareBar } from "@/src/modules/finance/planning/components/receivable-share-bar"
 import { useReceivableShareMode } from "@/src/modules/finance/planning/hooks/use-receivable-share-mode"
 import {
@@ -68,7 +73,6 @@ import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import {
   ChartPieIcon,
-  CheckSquareIcon,
   HandCoinsIcon,
   HandshakeIcon,
   PiggyBankIcon,
@@ -77,7 +81,7 @@ import {
   XIcon,
 } from "lucide-react"
 import { usePathname } from "next/navigation"
-import { useMemo, useState } from "react"
+import { useMemo } from "react"
 import { FinanceBudgetsList } from "@/src/modules/finance/budgets"
 import { cn } from "@/src/shared/lib/utils"
 
@@ -85,29 +89,8 @@ type FinancePlanningListProps = {
   enabled: boolean
   display: FinanceMoneyDisplay
   defaultCurrency: string
-}
-
-const PLANNING_TAB_ITEMS = [
-  { value: "savings", label: "Ahorros", icon: PiggyBankIcon, color: "#16a34a" },
-  {
-    value: "budgets",
-    label: "Presupuestos",
-    icon: ChartPieIcon,
-    color: "#8b5cf6",
-  },
-  {
-    value: "receivables",
-    label: "Cobros",
-    icon: HandshakeIcon,
-    color: "#3b82f6",
-  },
-  { value: "loans", label: "Préstamos", icon: HandCoinsIcon, color: "#f59e0b" },
-] as const
-
-type PlanningTab = (typeof PLANNING_TAB_ITEMS)[number]["value"]
-
-function isPlanningTab(value: unknown): value is PlanningTab {
-  return PLANNING_TAB_ITEMS.some((tab) => tab.value === value)
+  tab: PlanningTab
+  onTabChange: (tab: PlanningTab) => void
 }
 
 function withCurrency(
@@ -138,6 +121,8 @@ export function FinancePlanningList({
   enabled,
   display,
   defaultCurrency,
+  tab,
+  onTabChange,
 }: FinancePlanningListProps) {
   const pathname = usePathname()
   const { navigate: navigateToNewLoan, isPending: isNewLoanPending } =
@@ -226,10 +211,6 @@ export function FinancePlanningList({
     receivablesQuery.isPending,
     setOpenReceivableSheet
   )
-  const [tab, setTab] = useState<PlanningTab>(() =>
-    shareMode.active ? "receivables" : "savings"
-  )
-
   function exitShareMode() {
     setOpenShareSheet(false)
     shareMode.exit()
@@ -245,7 +226,7 @@ export function FinancePlanningList({
   }
 
   function changeTab(next: PlanningTab) {
-    setTab(next)
+    onTabChange(next)
     // The selection only exists in the Cobros tab, so leaving it drops the mode.
     if (shareMode.active && next !== "receivables") {
       exitShareMode()
@@ -253,7 +234,7 @@ export function FinancePlanningList({
   }
 
   function openCreate(next: PlanningTab) {
-    setTab(next)
+    onTabChange(next)
     if (next === "savings") {
       setOpenSavingsSheet(true, null)
     } else if (next === "loans") {
@@ -300,7 +281,6 @@ export function FinancePlanningList({
                 key={value}
                 value={value}
                 className="rounded-xl py-2"
-                style={{ backgroundColor: isSelected ? color : undefined }}
               >
                 <Icon
                   data-icon="inline-start"
@@ -318,266 +298,236 @@ export function FinancePlanningList({
           })}
         </TabsList>
 
-        <TabsContent value="savings">
-          <div className="flex flex-col gap-2">
-            <AsyncRegion
-              pending={savingsQuery.isPending && !savingsQuery.data}
-              pendingFallback={<FinanceListSkeleton />}
-              empty={savings.length === 0}
-              emptyFallback={
-                <Empty className="py-8">
-                  <EmptyHeader>
-                    <EmptyMedia variant="icon">
-                      <PiggyBankIcon />
-                    </EmptyMedia>
-                    <EmptyTitle>Aún no hay metas</EmptyTitle>
-                    <EmptyDescription>
-                      Define un objetivo y ve cuánto llevas ahorrado.
-                    </EmptyDescription>
-                  </EmptyHeader>
-                  <EmptyContent>
-                    <Button onClick={() => setOpenSavingsSheet(true, null)}>
-                      <PlusIcon className="size-4 shrink-0" />
-                      Crear meta
-                    </Button>
-                  </EmptyContent>
-                </Empty>
-              }
-            >
-              {savings.map((goal) => {
-                const money = withCurrency(display, goal.currency)
-                const current = parseFinanceMoney(goal.currentAmount)
-                const target = parseFinanceMoney(goal.targetAmount)
-                return (
-                  <PlanningProgressCard
-                    key={goal.id}
-                    title={goal.name}
-                    description={goal.description ?? undefined}
-                    icon={PiggyBankIcon}
-                    tone={goal.isCompleted ? "success" : "info"}
-                    badge={{
-                      label: goal.isCompleted ? "Completada" : "En curso",
-                      variant: goal.isCompleted ? "success" : "info",
-                    }}
-                    progress={amountRatioPct(
-                      goal.currentAmount,
-                      goal.targetAmount
-                    )}
-                    currentHint="Ahorrado"
-                    currentLabel={formatFinanceMoney(goal.currentAmount, money)}
-                    targetHint="Meta"
-                    targetLabel={formatFinanceMoney(goal.targetAmount, money)}
-                    caption={joinPlanningCaption(
-                      remainingCaption(
-                        current,
-                        target,
-                        money,
-                        "Meta alcanzada",
-                        "Faltan"
-                      ),
-                      goal.targetDate
-                        ? `Para ${formatCalendarDate(goal.targetDate)}`
-                        : undefined
-                    )}
-                    href={APP_ROUTES.app.financeSavingsGoal(goal.id)}
-                  />
-                )
-              })}
-            </AsyncRegion>
-          </div>
+        <TabsContent value="savings" className="flex flex-col gap-2">
+          <AsyncRegion
+            pending={savingsQuery.isPending && !savingsQuery.data}
+            pendingFallback={<FinanceListSkeleton />}
+            empty={savings.length === 0}
+            emptyFallback={
+              <Empty className="py-8">
+                <EmptyHeader>
+                  <EmptyMedia variant="icon">
+                    <PiggyBankIcon />
+                  </EmptyMedia>
+                  <EmptyTitle>Aún no hay metas</EmptyTitle>
+                  <EmptyDescription>
+                    Define un objetivo y ve cuánto llevas ahorrado.
+                  </EmptyDescription>
+                </EmptyHeader>
+                <EmptyContent>
+                  <Button onClick={() => setOpenSavingsSheet(true, null)}>
+                    <PlusIcon className="size-4 shrink-0" />
+                    Crear meta
+                  </Button>
+                </EmptyContent>
+              </Empty>
+            }
+          >
+            {savings.map((goal) => {
+              const money = withCurrency(display, goal.currency)
+              const current = parseFinanceMoney(goal.currentAmount)
+              const target = parseFinanceMoney(goal.targetAmount)
+              return (
+                <PlanningProgressCard
+                  key={goal.id}
+                  title={goal.name}
+                  description={goal.description ?? undefined}
+                  icon={PiggyBankIcon}
+                  tone={goal.isCompleted ? "success" : "info"}
+                  badge={{
+                    label: goal.isCompleted ? "Completada" : "En curso",
+                    variant: goal.isCompleted ? "success" : "info",
+                  }}
+                  progress={amountRatioPct(
+                    goal.currentAmount,
+                    goal.targetAmount
+                  )}
+                  currentHint="Ahorrado"
+                  currentLabel={formatFinanceMoney(goal.currentAmount, money)}
+                  targetHint="Meta"
+                  targetLabel={formatFinanceMoney(goal.targetAmount, money)}
+                  caption={joinPlanningCaption(
+                    remainingCaption(
+                      current,
+                      target,
+                      money,
+                      "Meta alcanzada",
+                      "Faltan"
+                    ),
+                    goal.targetDate
+                      ? `Para ${formatCalendarDate(goal.targetDate)}`
+                      : undefined
+                  )}
+                  href={APP_ROUTES.app.financeSavingsGoal(goal.id)}
+                />
+              )
+            })}
+          </AsyncRegion>
         </TabsContent>
 
         <TabsContent value="budgets" keepMounted>
           <FinanceBudgetsList enabled={enabled} display={display} />
         </TabsContent>
 
-        <TabsContent value="receivables">
-          <div className="flex flex-col gap-2">
-            <AsyncRegion
-              pending={receivablesQuery.isPending && !receivablesQuery.data}
-              pendingFallback={<FinanceListSkeleton />}
-              empty={listedReceivables.length === 0}
-              emptyFallback={
-                <Empty className="py-8">
-                  <EmptyHeader>
-                    <EmptyMedia variant="icon">
-                      <HandshakeIcon />
-                    </EmptyMedia>
-                    <EmptyTitle>Aún no hay cobros</EmptyTitle>
-                    <EmptyDescription>
-                      Lo que te deben. Archiva o borra los que ya no apliquen.
-                    </EmptyDescription>
-                  </EmptyHeader>
-                  <EmptyContent>
-                    <Button onClick={() => setOpenReceivableSheet(true, null)}>
-                      <PlusIcon className="size-4 shrink-0" />
-                      Crear cobro
-                    </Button>
-                  </EmptyContent>
-                </Empty>
-              }
-            >
-              {shareMode.active ? (
-                <p className="px-1 text-sm text-muted-foreground">
-                  Toca los cobros de una misma persona para compartirlos.
-                </p>
-              ) : (
-                <div className="flex justify-end">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    disabled={shareableList.length === 0}
-                    onClick={() => {
-                      setTab("receivables")
-                      shareMode.start()
-                    }}
-                  >
-                    <CheckSquareIcon
-                      className="size-4 shrink-0"
-                      aria-hidden="true"
-                    />
-                    Seleccionar
+        <TabsContent value="receivables" className="flex flex-col gap-2">
+          <AsyncRegion
+            pending={receivablesQuery.isPending && !receivablesQuery.data}
+            pendingFallback={<FinanceListSkeleton />}
+            empty={listedReceivables.length === 0}
+            emptyFallback={
+              <Empty className="py-8">
+                <EmptyHeader>
+                  <EmptyMedia variant="icon">
+                    <HandshakeIcon />
+                  </EmptyMedia>
+                  <EmptyTitle>Aún no hay cobros</EmptyTitle>
+                  <EmptyDescription>
+                    Lo que te deben. Archiva o borra los que ya no apliquen.
+                  </EmptyDescription>
+                </EmptyHeader>
+                <EmptyContent>
+                  <Button onClick={() => setOpenReceivableSheet(true, null)}>
+                    <PlusIcon className="size-4 shrink-0" />
+                    Crear cobro
                   </Button>
-                </div>
-              )}
-              {listedReceivables.map((item) => {
-                const money = withCurrency(display, item.currency)
-                const paid = parseFinanceMoney(item.paidAmount)
-                const total = parseFinanceMoney(item.amount)
-                const tone =
-                  item.status === "PAID"
-                    ? "success"
-                    : item.status === "PARTIAL"
-                      ? "info"
-                      : "warning"
-                const badgeVariant =
-                  item.status === "PAID"
-                    ? "success"
-                    : item.status === "PARTIAL"
-                      ? "info"
-                      : "warning"
-                const dimmed =
-                  shareMode.active &&
-                  shareDebtor !== null &&
-                  item.debtorName !== shareDebtor
-                return (
-                  <PlanningProgressCard
-                    key={item.id}
-                    title={item.debtorName}
-                    description={item.description ?? undefined}
-                    icon={HandshakeIcon}
-                    tone={tone}
-                    badge={{
-                      label:
-                        FINANCE_RECEIVABLE_STATUS_LABEL[item.status] ??
-                        item.status,
-                      variant: badgeVariant,
-                    }}
-                    progress={amountRatioPct(item.paidAmount, item.amount)}
-                    currentHint="Cobrado"
-                    currentLabel={formatFinanceMoney(item.paidAmount, money)}
-                    targetHint="Total"
-                    targetLabel={formatFinanceMoney(item.amount, money)}
-                    caption={joinPlanningCaption(
-                      remainingCaption(
-                        paid,
-                        total,
-                        money,
-                        "Cobro completo",
-                        "Resta"
-                      ),
-                      item.dueDate
-                        ? `Vence ${formatCalendarDate(item.dueDate)}`
-                        : undefined
-                    )}
-                    href={
-                      shareMode.active
-                        ? undefined
-                        : APP_ROUTES.app.financeReceivable(item.id)
-                    }
-                    onPress={
-                      shareMode.active && !dimmed
-                        ? () => shareMode.toggle(item.id)
-                        : undefined
-                    }
-                    selection={
-                      shareMode.active
-                        ? {
-                            selected: shareMode.selectedIds.includes(item.id),
-                            dimmed,
-                          }
-                        : undefined
-                    }
-                    onLongPress={() =>
-                      shareMode.active
-                        ? shareMode.toggle(item.id)
-                        : shareMode.selectOnly(item.id)
-                    }
-                  />
-                )
-              })}
-            </AsyncRegion>
-          </div>
+                </EmptyContent>
+              </Empty>
+            }
+          >
+            {listedReceivables.map((item) => {
+              const money = withCurrency(display, item.currency)
+              const paid = parseFinanceMoney(item.paidAmount)
+              const total = parseFinanceMoney(item.amount)
+              const tone =
+                item.status === "PAID"
+                  ? "success"
+                  : item.status === "PARTIAL"
+                    ? "info"
+                    : "warning"
+              const badgeVariant =
+                item.status === "PAID"
+                  ? "success"
+                  : item.status === "PARTIAL"
+                    ? "info"
+                    : "warning"
+              const dimmed =
+                shareMode.active &&
+                shareDebtor !== null &&
+                item.debtorName !== shareDebtor
+              return (
+                <PlanningProgressCard
+                  key={item.id}
+                  title={item.debtorName}
+                  description={item.description ?? undefined}
+                  icon={HandshakeIcon}
+                  tone={tone}
+                  badge={{
+                    label:
+                      FINANCE_RECEIVABLE_STATUS_LABEL[item.status] ??
+                      item.status,
+                    variant: badgeVariant,
+                  }}
+                  progress={amountRatioPct(item.paidAmount, item.amount)}
+                  currentHint="Cobrado"
+                  currentLabel={formatFinanceMoney(item.paidAmount, money)}
+                  targetHint="Total"
+                  targetLabel={formatFinanceMoney(item.amount, money)}
+                  caption={joinPlanningCaption(
+                    remainingCaption(
+                      paid,
+                      total,
+                      money,
+                      "Cobro completo",
+                      "Resta"
+                    ),
+                    item.dueDate
+                      ? `Vence ${formatCalendarDate(item.dueDate)}`
+                      : undefined
+                  )}
+                  href={
+                    shareMode.active
+                      ? undefined
+                      : APP_ROUTES.app.financeReceivable(item.id)
+                  }
+                  onPress={
+                    shareMode.active && !dimmed
+                      ? () => shareMode.toggle(item.id)
+                      : undefined
+                  }
+                  selection={
+                    shareMode.active
+                      ? {
+                          selected: shareMode.selectedIds.includes(item.id),
+                          dimmed,
+                        }
+                      : undefined
+                  }
+                  onLongPress={() =>
+                    shareMode.active
+                      ? shareMode.toggle(item.id)
+                      : shareMode.selectOnly(item.id)
+                  }
+                />
+              )
+            })}
+          </AsyncRegion>
         </TabsContent>
 
-        <TabsContent value="loans">
-          <div className="flex flex-col gap-2">
-            <AsyncRegion
-              pending={loansQuery.isPending && !loansQuery.data}
-              pendingFallback={<FinanceListSkeleton />}
-              empty={loans.length === 0}
-              emptyFallback={
-                <Empty className="py-8">
-                  <EmptyHeader>
-                    <EmptyMedia variant="icon">
-                      <HandCoinsIcon />
-                    </EmptyMedia>
-                    <EmptyTitle>Aún no hay préstamos</EmptyTitle>
-                    <EmptyDescription>
-                      Registra cuotas, tasa anual y próximo vencimiento.
-                    </EmptyDescription>
-                  </EmptyHeader>
-                  <EmptyContent>
-                    <Button
-                      onClick={() =>
-                        navigateToNewLoan(APP_ROUTES.app.financeLoanNew)
-                      }
-                      disabled={isNewLoanPending}
-                    >
-                      {isNewLoanPending ? (
-                        <Spinner className="size-4" />
-                      ) : (
-                        <PlusIcon className="size-4 shrink-0" />
-                      )}
-                      Crear préstamo
-                    </Button>
-                  </EmptyContent>
-                </Empty>
-              }
-            >
-              {loans.map((loan) => {
-                const institution = (institutionsQuery.data ?? []).find(
-                  (item) => item.id === loan.institutionId
-                )
-                return (
-                  <LoanProgressCard
-                    key={loan.id}
-                    loan={loan}
-                    display={display}
-                    institution={institution}
-                    href={APP_ROUTES.app.financeLoan(loan.id)}
-                  />
-                )
-              })}
-            </AsyncRegion>
-          </div>
+        <TabsContent value="loans" className="flex flex-col gap-2">
+          <AsyncRegion
+            pending={loansQuery.isPending && !loansQuery.data}
+            pendingFallback={<FinanceListSkeleton />}
+            empty={loans.length === 0}
+            emptyFallback={
+              <Empty className="py-8">
+                <EmptyHeader>
+                  <EmptyMedia variant="icon">
+                    <HandCoinsIcon />
+                  </EmptyMedia>
+                  <EmptyTitle>Aún no hay préstamos</EmptyTitle>
+                  <EmptyDescription>
+                    Registra cuotas, tasa anual y próximo vencimiento.
+                  </EmptyDescription>
+                </EmptyHeader>
+                <EmptyContent>
+                  <Button
+                    onClick={() =>
+                      navigateToNewLoan(APP_ROUTES.app.financeLoanNew)
+                    }
+                    disabled={isNewLoanPending}
+                  >
+                    {isNewLoanPending ? (
+                      <Spinner className="size-4" />
+                    ) : (
+                      <PlusIcon className="size-4 shrink-0" />
+                    )}
+                    Crear préstamo
+                  </Button>
+                </EmptyContent>
+              </Empty>
+            }
+          >
+            {loans.map((loan) => {
+              const institution = (institutionsQuery.data ?? []).find(
+                (item) => item.id === loan.institutionId
+              )
+              return (
+                <LoanProgressCard
+                  key={loan.id}
+                  loan={loan}
+                  display={display}
+                  institution={institution}
+                  href={APP_ROUTES.app.financeLoan(loan.id)}
+                />
+              )
+            })}
+          </AsyncRegion>
         </TabsContent>
       </Tabs>
 
       {shareMode.active ? null : (
         <ExpandableFab
-          label="Crear en planificación"
+          label="Acciones de Planificación"
           actions={[
             {
               icon: <PiggyBankIcon className="size-5" />,

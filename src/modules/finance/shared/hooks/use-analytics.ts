@@ -3,7 +3,10 @@
 import { ApiError, apiGet } from "@/src/config/api-client"
 import type { FinanceDashboardRange } from "@/src/modules/finance/shared/lib/dashboard-period"
 import { FINANCE_ANALYTICS_QUERY_KEY } from "@/src/modules/finance/shared/types/api"
-import type { FinanceAnalyticsSummary } from "@/src/modules/finance/shared/types/entities"
+import type {
+  FinanceAnalyticsSummary,
+  FinanceBudgetStatus,
+} from "@/src/modules/finance/shared/types/entities"
 import { API_ENDPOINTS } from "@/src/shared/constants/api-endpoints"
 import { useQuery } from "@tanstack/react-query"
 
@@ -32,5 +35,16 @@ export function useAnalyticsSummary(
       }
       return failureCount < 2
     },
+  })
+}
+
+export function useBudgetStatus(enabled: boolean) {
+  return useQuery({
+    queryKey: [...FINANCE_ANALYTICS_QUERY_KEY, "budget-status"],
+    queryFn: () =>
+      apiGet<FinanceBudgetStatus[]>(
+        API_ENDPOINTS.FINANCE.ANALYTICS_BUDGET_STATUS
+      ),
+    enabled,
   })
 }
