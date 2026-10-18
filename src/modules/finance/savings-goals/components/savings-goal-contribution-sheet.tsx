@@ -10,14 +10,12 @@ import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
 import { useCreateSavingsGoalContribution } from "@/src/modules/finance/shared/hooks/use-savings-goals"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
 import { useInstitutions } from "@/src/modules/finance/shared/hooks/use-institutions"
-import { useCreateTransfer } from "@/src/modules/finance/shared/hooks/use-transactions"
 import { useDiscardChanges } from "@/src/modules/finance/shared/hooks/use-discard-changes"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import {
   encodeLedgerTarget,
   splitLedgerTarget,
 } from "@/src/modules/finance/shared/lib/ledger-payloads"
-import { buildCreateTransferBody } from "@/src/modules/finance/shared/lib/ledger-payloads"
 import { todayDateInput } from "@/src/modules/finance/shared/lib/ledger-form"
 import {
   formatFinanceMoney,
@@ -66,9 +64,8 @@ type SavingsGoalContributionSheetProps = {
   targetAmount?: string
   currentAmount?: string
   targetDate?: string | null
-  /** Account that holds the goal; a different origin needs a transfer first. */
+  /** Account that holds the goal; it is the default origin of the money. */
   goalAccountId?: string | null
-  goalMode?: "EARMARK" | "DEDICATED"
   pending?: boolean
 }
 
@@ -82,11 +79,9 @@ export function SavingsGoalContributionSheet({
   currentAmount,
   targetDate,
   goalAccountId,
-  goalMode,
   pending = false,
 }: SavingsGoalContributionSheetProps) {
   const createMutation = useCreateSavingsGoalContribution()
-  const transferMutation = useCreateTransfer()
   const { config } = useFinanceEnabled()
   const accountsQuery = useAccounts(open)
   const institutionsQuery = useInstitutions(open)
@@ -95,7 +90,10 @@ export function SavingsGoalContributionSheet({
     (account) => account.isActive && account.currency === goalCurrency
   )
   const institutions = institutionsQuery.data ?? []
-  const defaultAccountId = activeAccounts[0]?.id ?? ""
+  const defaultAccountId =
+    activeAccounts.find((account) => account.id === goalAccountId)?.id ??
+    activeAccounts[0]?.id ??
+    ""
   const { picker, openPicker, closeHandlerFor } = usePicker<"none" | "account">(
     "none"
   )
@@ -160,35 +158,13 @@ export function SavingsGoalContributionSheet({
       kind: values.kind,
       date: values.contributedAt,
       notes: values.notes,
+      fromAccountId: values.accountId,
     })
     if (!payload.ok) {
       appToast.error({ text1: payload.error })
       return
     }
-    const needsTransfer =
-      values.kind === "CONTRIBUTION" &&
-      goalMode === "EARMARK" &&
-      Boolean(goalAccountId) &&
-      values.accountId !== goalAccountId
     try {
-      if (needsTransfer) {
-        const transferPayload = buildCreateTransferBody({
-          fromAccountId: values.accountId,
-          toAccountId: goalAccountId ?? undefined,
-          amount: values.amount,
-          currency: goalCurrency,
-          transactionDate: values.contributedAt,
-          description: goalName ? `Aporte a ${goalName}` : "Aporte a meta",
-        })
-        if (!transferPayload.ok) {
-          appToast.error({ text1: transferPayload.error })
-          return
-        }
-        const transfer = await transferMutation.mutateAsync(
-          transferPayload.body
-        )
-        payload.body.fromTransferGroupId = transfer.transferGroupId
-      }
       await createMutation.mutateAsync({ goalId, body: payload.body })
       appToast.success({ text1: "Aporte registrado" })
       onOpenChange(false)
@@ -224,11 +200,11 @@ export function SavingsGoalContributionSheet({
           submit: (
             <Button
               type="button"
-              disabled={createMutation.isPending || transferMutation.isPending}
+              disabled={createMutation.isPending}
               className="flex-1"
               onClick={onSubmit}
             >
-              {createMutation.isPending || transferMutation.isPending ? (
+              {createMutation.isPending ? (
                 <Spinner data-icon="inline-start" />
               ) : null}
               Registrar

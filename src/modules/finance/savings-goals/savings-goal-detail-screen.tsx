@@ -36,7 +36,6 @@ import { LoadingView } from "@/src/shared/components/layout/loading-view"
 import { Button } from "@/src/shared/components/ui/button"
 import {
   Empty,
-  EmptyContent,
   EmptyDescription,
   EmptyHeader,
   EmptyMedia,
@@ -259,6 +258,14 @@ function SavingsGoalDetailScreenBody({
       />
 
       <div className="mx-4 flex flex-col gap-3 rounded-3xl bg-background">
+        <Button
+          className="w-full"
+          onClick={() => setOpenContributionSheet(true)}
+        >
+          <PlusIcon />
+          Agregar aporte
+        </Button>
+
         {contributionsQuery.isError ? (
           <FinanceErrorState
             message={financeLoadErrorMessage(contributionsQuery.error)}
@@ -283,12 +290,6 @@ function SavingsGoalDetailScreenBody({
                   escrito a mano.
                 </EmptyDescription>
               </EmptyHeader>
-              <EmptyContent>
-                <Button onClick={() => setOpenContributionSheet(true)}>
-                  <PlusIcon />
-                  Aporte
-                </Button>
-              </EmptyContent>
             </Empty>
           }
         >
@@ -338,7 +339,6 @@ function SavingsGoalDetailScreenBody({
         currentAmount={goal.currentAmount}
         targetDate={goal.targetDate}
         goalAccountId={goal.accountId}
-        goalMode={goal.mode}
       />
 
       <SavingsGoalSheet
@@ -354,6 +354,15 @@ function SavingsGoalDetailScreenBody({
         onOpenChange={setOptionsOpen}
         description={goal.name}
         options={[
+          {
+            id: "add-contribution",
+            title: "Agregar aporte",
+            icon: PlusIcon,
+            onPress: () => {
+              setOptionsOpen(false)
+              setOpenContributionSheet(true)
+            },
+          },
           {
             id: "edit",
             title: "Editar meta",
