@@ -112,7 +112,7 @@ function NotificationBell() {
   const unreadCount = isInAppEnabled ? (unreadQuery.data?.count ?? 0) : 0
 
   return (
-    <Button variant="outline" size="icon" className="mr-1" asChild>
+    <Button variant="outline" size="icon" className="mr-1 rounded-full" asChild>
       <Link
         href={APP_ROUTES.app.notifications}
         className="relative size-9 shrink-0 rounded-full"

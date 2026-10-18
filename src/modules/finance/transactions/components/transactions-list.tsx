@@ -408,7 +408,7 @@ export function FinanceTransactionsList({
         <FinanceListSkeleton rows={4} />
       ) : null}
 
-      <div ref={timelineRef} className="flex flex-col gap-8">
+      <div ref={timelineRef} className="flex flex-col">
         {timeline.map((month) => (
           <FinanceMonthSection
             key={month.key}
