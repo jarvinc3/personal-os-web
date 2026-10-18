@@ -2,6 +2,25 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.45.0] - 2026-10-18
+
+### Agregado
+
+- Planificación estrena cabecera con pestañas (Ahorros, Presupuestos, Cobros y Préstamos): muestra el total de la pestaña activa, una cifra por moneda sin convertir, y cambia al tocarla. Los enlaces de cobros compartidos abren en la pestaña Cobros.
+- El formulario de una meta de ahorro muestra la cuenta vinculada y permite cambiarla.
+- El detalle de una meta ofrece «Agregar aporte» en el menú y como botón sobre la lista.
+
+### Cambiado
+
+- Registrar un aporte desde otra cuenta ya no arma la web dos pasos: la API valida el saldo libre y crea la transferencia, y la app muestra el aviso si no alcanza.
+- La fecha objetivo de una meta se puede quitar con «Sin fecha» y el cambio se guarda.
+- Suscripciones usa el botón de acciones expandible del resto de la app; la campana de notificaciones, el espaciado de Movimientos y el borde de los banners quedan uniformes.
+
+### Corregido
+
+- Borrar un aporte deshace la transferencia que creó.
+- Una transferencia entre cuentas propias avisa una sola vez.
+
 ## [0.44.0] - 2026-10-17
 
 ### Cambiado
