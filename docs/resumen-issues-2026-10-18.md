@@ -2,7 +2,7 @@
 
 Revisión inicial de **21 issues abiertos** contra el código de `develop`: **1 implementado, 5 parcialmente implementados y 15 no implementados** en ese momento. La web tenía 13 issues abiertos y el backend 8. Landing no tenía issues abiertos. Estado actual: **5 implementados, 5 parcialmente implementados y 11 no implementados**.
 
-Este documento conserva la clasificación de la revisión inicial. **Actualización posterior:** [Back #140](https://github.com/jarvinc3/personal-os-back/issues/140) fue validado y cerrado; [Back #155](https://github.com/jarvinc3/personal-os-back/issues/155) quedó corregido con la release `v0.43.2` (queda definir `PUBLIC_WEB_URL` en Railway); [Web #164](https://github.com/jarvinc3/personal-os-web/issues/164) quedó corregido con la release web `v0.45.1`; [Web #163](https://github.com/jarvinc3/personal-os-web/issues/163) quedó corregido con la release web `v0.45.2`; [Web #162](https://github.com/jarvinc3/personal-os-web/issues/162) quedó corregido con la release web `v0.45.3`. Los cinco issues están cerrados y en **Done**. Quedan 16 de los issues de esta revisión abiertos, salvo cambios posteriores en GitHub.
+Este documento conserva la clasificación de la revisión inicial. **Actualización posterior:** [Back #140](https://github.com/jarvinc3/personal-os-back/issues/140) fue validado y cerrado; [Back #155](https://github.com/jarvinc3/personal-os-back/issues/155) quedó corregido con la release `v0.43.2` (queda definir `PUBLIC_WEB_URL` en Railway); [Web #164](https://github.com/jarvinc3/personal-os-web/issues/164) quedó corregido con la release web `v0.45.1`; [Web #163](https://github.com/jarvinc3/personal-os-web/issues/163) quedó corregido con la release web `v0.45.2`; [Web #162](https://github.com/jarvinc3/personal-os-web/issues/162) quedó corregido con las releases web `v0.45.3` y `v0.45.4`. Los cinco issues están cerrados y en **Done**. Quedan 16 de los issues de esta revisión abiertos, salvo cambios posteriores en GitHub.
 
 ## Guia para agente pi
 
@@ -29,7 +29,7 @@ Las estimaciones son orientativas. En los bugs, «no implementado» significa qu
 
 | Issue                                                                                                            | Prioridad | Tamaño restante           | Evidencia                                                                                                                                                                                                     |
 | ---------------------------------------------------------------------------------------------------------------- | --------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [Web #162 — Login bloqueado unos 30 segundos](https://github.com/jarvinc3/personal-os-web/issues/162)            | P1        | S: implementado y cerrado | El login no espera al bootstrap ni a `GET /users/me`; en `/login` no se hidrata la sesión guardada. Un login exitoso marca la app como lista. 915 pruebas en verde.                                           |
+| [Web #162 — Login bloqueado unos 30 segundos](https://github.com/jarvinc3/personal-os-web/issues/162)            | P1        | S: implementado y cerrado | El login no espera al bootstrap ni a `GET /users/me`; en `/login` no se hidrata la sesión guardada. Un login exitoso marca la app como lista. 917 pruebas en verde.                                           |
 | [Web #163 — Switches lentos y preferencias sobrescritas](https://github.com/jarvinc3/personal-os-web/issues/163) | P1        | S: implementado y cerrado | Switches con actualización optimista y mutaciones en serie; cada parche se calcula sobre la última caché. Si falla, vuelve el valor anterior con toast. 915 pruebas en verde.                                 |
 | [Web #164 — Consultas con Finanzas desactivado](https://github.com/jarvinc3/personal-os-web/issues/164)          | P1        | S: implementado y cerrado | Ajustes → Finanzas consulta cuentas e integridad solo con la app activa; con Finanzas desactivada muestra el aviso para activarla y traduce el 403 de app desactivada. 913 pruebas en verde.                  |
 | [Back #155 — Dominio incorrecto en enlaces de cobros](https://github.com/jarvinc3/personal-os-back/issues/155)   | P1        | S: implementado y cerrado | `PUBLIC_WEB_URL` con fallback al primer `CORS_ORIGIN`; create, list, revoke y regenerate devuelven `<web>/c/<token>`. Pruebas unitarias y e2e; la variable en Railway sigue pendiente.                        |
@@ -85,13 +85,14 @@ Se corrigió en la web, release `v0.45.2` (commit `222ef83`, 2026-10-19):
 
 ### Implementación y cierre de Web #162
 
-Se corrigió en la web, release `v0.45.3` (commit `bb4644c`, 2026-10-19):
+Se corrigió en la web, releases `v0.45.3` y `v0.45.4` (commits `bb4644c` y `7353cb4`, 2026-10-19):
 
 - La pantalla de login ya no espera `bootstrapped`: muestra el formulario y redirige cuando hay perfil.
 - En `/login` no se hidrata una sesión guardada que el proxy descartó; una sesión vieja no bloquea ni revoca el login nuevo.
 - Un login o registro exitoso marca `bootstrapped=true` aunque el bootstrap siga pendiente.
+- La regla de hidratar una sesión guardada vive en `shouldHydrateStoredSession()`, con pruebas; sin cambio de comportamiento.
 - Medición: TTFB en producción `/login` 0,94 s y `/api/health` 0,33 s; el retraso era del cliente esperando la hidratación.
-- `pnpm format:check`, `pnpm lint`, `pnpm typecheck` y 915 pruebas en verde; el CI de `develop` también.
+- `pnpm format:check`, `pnpm lint`, `pnpm typecheck` y 917 pruebas en verde; el CI de `develop` también.
 - Issue cerrado como completado y movido a **Done**.
 
 **Verificación pendiente (Jarvin):** abrir `/login` sin sesión y con una sesión vieja; el formulario debe aparecer de inmediato.
