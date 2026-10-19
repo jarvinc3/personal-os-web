@@ -1,8 +1,8 @@
 # Resumen de issues de Personal OS — 2026-10-18
 
-Revisión inicial de **21 issues abiertos** contra el código de `develop`: **1 implementado, 5 parcialmente implementados y 15 no implementados** en ese momento. La web tenía 13 issues abiertos y el backend 8. Landing no tenía issues abiertos. Estado actual: **4 implementados, 5 parcialmente implementados y 12 no implementados**.
+Revisión inicial de **21 issues abiertos** contra el código de `develop`: **1 implementado, 5 parcialmente implementados y 15 no implementados** en ese momento. La web tenía 13 issues abiertos y el backend 8. Landing no tenía issues abiertos. Estado actual: **5 implementados, 5 parcialmente implementados y 11 no implementados**.
 
-Este documento conserva la clasificación de la revisión inicial. **Actualización posterior:** [Back #140](https://github.com/jarvinc3/personal-os-back/issues/140) fue validado y cerrado; [Back #155](https://github.com/jarvinc3/personal-os-back/issues/155) quedó corregido con la release `v0.43.2` (queda definir `PUBLIC_WEB_URL` en Railway); [Web #164](https://github.com/jarvinc3/personal-os-web/issues/164) quedó corregido con la release web `v0.45.1`; [Web #163](https://github.com/jarvinc3/personal-os-web/issues/163) quedó corregido con la release web `v0.45.2`. Los cuatro issues están cerrados y en **Done**. Quedan 17 de los issues de esta revisión abiertos, salvo cambios posteriores en GitHub.
+Este documento conserva la clasificación de la revisión inicial. **Actualización posterior:** [Back #140](https://github.com/jarvinc3/personal-os-back/issues/140) fue validado y cerrado; [Back #155](https://github.com/jarvinc3/personal-os-back/issues/155) quedó corregido con la release `v0.43.2` (queda definir `PUBLIC_WEB_URL` en Railway); [Web #164](https://github.com/jarvinc3/personal-os-web/issues/164) quedó corregido con la release web `v0.45.1`; [Web #163](https://github.com/jarvinc3/personal-os-web/issues/163) quedó corregido con la release web `v0.45.2`; [Web #162](https://github.com/jarvinc3/personal-os-web/issues/162) quedó corregido con la release web `v0.45.3`. Los cinco issues están cerrados y en **Done**. Quedan 16 de los issues de esta revisión abiertos, salvo cambios posteriores en GitHub.
 
 ## Guia para agente pi
 
@@ -29,6 +29,7 @@ Las estimaciones son orientativas. En los bugs, «no implementado» significa qu
 
 | Issue                                                                                                            | Prioridad | Tamaño restante           | Evidencia                                                                                                                                                                                                     |
 | ---------------------------------------------------------------------------------------------------------------- | --------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Web #162 — Login bloqueado unos 30 segundos](https://github.com/jarvinc3/personal-os-web/issues/162)            | P1        | S: implementado y cerrado | El login no espera al bootstrap ni a `GET /users/me`; en `/login` no se hidrata la sesión guardada. Un login exitoso marca la app como lista. 915 pruebas en verde.                                           |
 | [Web #163 — Switches lentos y preferencias sobrescritas](https://github.com/jarvinc3/personal-os-web/issues/163) | P1        | S: implementado y cerrado | Switches con actualización optimista y mutaciones en serie; cada parche se calcula sobre la última caché. Si falla, vuelve el valor anterior con toast. 915 pruebas en verde.                                 |
 | [Web #164 — Consultas con Finanzas desactivado](https://github.com/jarvinc3/personal-os-web/issues/164)          | P1        | S: implementado y cerrado | Ajustes → Finanzas consulta cuentas e integridad solo con la app activa; con Finanzas desactivada muestra el aviso para activarla y traduce el 403 de app desactivada. 913 pruebas en verde.                  |
 | [Back #155 — Dominio incorrecto en enlaces de cobros](https://github.com/jarvinc3/personal-os-back/issues/155)   | P1        | S: implementado y cerrado | `PUBLIC_WEB_URL` con fallback al primer `CORS_ORIGIN`; create, list, revoke y regenerate devuelven `<web>/c/<token>`. Pruebas unitarias y e2e; la variable en Railway sigue pendiente.                        |
@@ -82,6 +83,19 @@ Se corrigió en la web, release `v0.45.2` (commit `222ef83`, 2026-10-19):
 
 **Verificación pendiente (Jarvin):** tocar varios switches rápido y recargar; deben quedar los valores elegidos. Probar también un fallo de red para ver el rollback y el toast.
 
+### Implementación y cierre de Web #162
+
+Se corrigió en la web, release `v0.45.3` (commit `bb4644c`, 2026-10-19):
+
+- La pantalla de login ya no espera `bootstrapped`: muestra el formulario y redirige cuando hay perfil.
+- En `/login` no se hidrata una sesión guardada que el proxy descartó; una sesión vieja no bloquea ni revoca el login nuevo.
+- Un login o registro exitoso marca `bootstrapped=true` aunque el bootstrap siga pendiente.
+- Medición: TTFB en producción `/login` 0,94 s y `/api/health` 0,33 s; el retraso era del cliente esperando la hidratación.
+- `pnpm format:check`, `pnpm lint`, `pnpm typecheck` y 915 pruebas en verde; el CI de `develop` también.
+- Issue cerrado como completado y movido a **Done**.
+
+**Verificación pendiente (Jarvin):** abrir `/login` sin sesión y con una sesión vieja; el formulario debe aparecer de inmediato.
+
 ## Parcialmente implementados
 
 | Issue                                                                                                      | Prioridad | Tamaño restante | Qué existe y qué falta                                                                                                                                                                                                                                                 |
@@ -96,27 +110,25 @@ En los dos refactors, «parcial» describe avances generales; los issues son dem
 
 ## No implementados
 
-| Issue                                                                                                                | Prioridad | Tamaño                   | Hallazgo                                                                                                                                                                             |
-| -------------------------------------------------------------------------------------------------------------------- | --------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| [Web #161 — Mensaje de WhatsApp de cobros](https://github.com/jarvinc3/personal-os-web/issues/161)                   | P1        | S                        | Conserva el texto anterior, sin primer nombre, importe ni cantidad de cobros.                                                                                                        |
-| [Web #162 — Login bloqueado unos 30 segundos](https://github.com/jarvinc3/personal-os-web/issues/162)                | P1        | M                        | El formulario sigue esperando el bootstrap. El fallback vuelve a esperar sesión e hidratación; no garantiza liberar el formulario en 3 segundos. Falta medir la causa en producción. |
-| [Web #165 — Apps activas ausentes del sidebar](https://github.com/jarvinc3/personal-os-web/issues/165)               | P2        | S–M                      | La navegación sigue definida manualmente con Finanzas y Keep Awake.                                                                                                                  |
-| [Web #166 — Activación pendiente poco clara](https://github.com/jarvinc3/personal-os-web/issues/166)                 | P2        | S–M                      | El switch solo cambia `pendingEnabled`; se conserva la nota pequeña sobre guardar.                                                                                                   |
-| [Web #167 — Textos técnicos o en inglés](https://github.com/jarvinc3/personal-os-web/issues/167)                     | P2        | S                        | Apariencia muestra `fieldGuide`; Proyectos pinta los valores `board/list/timeline`.                                                                                                  |
-| [Web #168 — Guardar perfil tarda demasiado](https://github.com/jarvinc3/personal-os-web/issues/168)                  | P2        | S–M                      | Después del PATCH continúa esperando `invalidateQueries()`. La latencia real requiere medición.                                                                                      |
-| [Back #25 — Segundo módulo de vida](https://github.com/jarvinc3/personal-os-back/issues/25)                          | P2        | XL                       | No existe el nuevo dominio completo con tablas, CRUD y herramientas IA. Sigue pendiente elegirlo.                                                                                    |
-| [Web #155 — Tipos generados desde OpenAPI](https://github.com/jarvinc3/personal-os-web/issues/155)                   | P2*       | M–L                      | No se encontró generación integrada; los tipos continúan mantenidos manualmente.                                                                                                     |
-| [Web #160 — Estilos extensibles, Neo-Skeuo y color primario](https://github.com/jarvinc3/personal-os-web/issues/160) | P2*       | L–XL                     | Existe selección claro/oscuro/sistema, pero faltan registro de estilos, Neo-Skeuo y persistencia del primario independiente.                                                         |
-| [Back #138 — Herramientas IA de Agenda, Proyectos y Salud](https://github.com/jarvinc3/personal-os-back/issues/138)  | P3*       | L–XL                     | Solo hay herramientas de configuración; depende de implementar los dominios.                                                                                                         |
-| [Web #144 — Herramientas IA por módulo](https://github.com/jarvinc3/personal-os-web/issues/144)                      | P3*       | Compartido con Back #138 | Describe esencialmente el mismo pendiente del backend; conviene vincularlos y evitar estimarlos dos veces.                                                                           |
-| [Back #137 — Adaptador FCM/APNs](https://github.com/jarvinc3/personal-os-back/issues/137)                            | P3*       | L                        | El envío actual usa Expo y Web Push. El adaptador dedicado depende de retomar un cliente móvil.                                                                                      |
+| Issue                                                                                                                | Prioridad | Tamaño                   | Hallazgo                                                                                                                     |
+| -------------------------------------------------------------------------------------------------------------------- | --------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
+| [Web #161 — Mensaje de WhatsApp de cobros](https://github.com/jarvinc3/personal-os-web/issues/161)                   | P1        | S                        | Conserva el texto anterior, sin primer nombre, importe ni cantidad de cobros.                                                |
+| [Web #165 — Apps activas ausentes del sidebar](https://github.com/jarvinc3/personal-os-web/issues/165)               | P2        | S–M                      | La navegación sigue definida manualmente con Finanzas y Keep Awake.                                                          |
+| [Web #166 — Activación pendiente poco clara](https://github.com/jarvinc3/personal-os-web/issues/166)                 | P2        | S–M                      | El switch solo cambia `pendingEnabled`; se conserva la nota pequeña sobre guardar.                                           |
+| [Web #167 — Textos técnicos o en inglés](https://github.com/jarvinc3/personal-os-web/issues/167)                     | P2        | S                        | Apariencia muestra `fieldGuide`; Proyectos pinta los valores `board/list/timeline`.                                          |
+| [Web #168 — Guardar perfil tarda demasiado](https://github.com/jarvinc3/personal-os-web/issues/168)                  | P2        | S–M                      | Después del PATCH continúa esperando `invalidateQueries()`. La latencia real requiere medición.                              |
+| [Back #25 — Segundo módulo de vida](https://github.com/jarvinc3/personal-os-back/issues/25)                          | P2        | XL                       | No existe el nuevo dominio completo con tablas, CRUD y herramientas IA. Sigue pendiente elegirlo.                            |
+| [Web #155 — Tipos generados desde OpenAPI](https://github.com/jarvinc3/personal-os-web/issues/155)                   | P2*       | M–L                      | No se encontró generación integrada; los tipos continúan mantenidos manualmente.                                             |
+| [Web #160 — Estilos extensibles, Neo-Skeuo y color primario](https://github.com/jarvinc3/personal-os-web/issues/160) | P2*       | L–XL                     | Existe selección claro/oscuro/sistema, pero faltan registro de estilos, Neo-Skeuo y persistencia del primario independiente. |
+| [Back #138 — Herramientas IA de Agenda, Proyectos y Salud](https://github.com/jarvinc3/personal-os-back/issues/138)  | P3*       | L–XL                     | Solo hay herramientas de configuración; depende de implementar los dominios.                                                 |
+| [Web #144 — Herramientas IA por módulo](https://github.com/jarvinc3/personal-os-web/issues/144)                      | P3*       | Compartido con Back #138 | Describe esencialmente el mismo pendiente del backend; conviene vincularlos y evitar estimarlos dos veces.                   |
+| [Back #137 — Adaptador FCM/APNs](https://github.com/jarvinc3/personal-os-back/issues/137)                            | P3*       | L                        | El envío actual usa Expo y Web Push. El adaptador dedicado depende de retomar un cliente móvil.                              |
 
 ## Orden recomendado
 
-1. **Back #140, Back #155, Web #164 y Web #163** ya están implementados y cerrados.
-2. Continuar con **Web #162**.
-3. Resolver **Web #161, Web #167 y Web #168**.
-4. Separar lo pendiente de **Back #139**.
+1. **Back #140, Back #155, Web #164, Web #163 y Web #162** ya están implementados y cerrados.
+2. Resolver **Web #161, Web #167 y Web #168**.
+3. Separar lo pendiente de **Back #139**.
 
 Los refactors grandes están en P1 en el tablero, pero conviene dividirlos en tareas concretas antes de anteponerlos a los bugs que afectan al usuario.
 
@@ -124,6 +136,6 @@ Los refactors grandes están en P1 en el tablero, pero conviene dividirlos en ta
 
 - La clasificación se basa en evidencia del código y en el contenido de los issues consultados en GitHub. No confirma despliegues ni reproduce los fallos en producción.
 - Durante la clasificación no se ejecutaron nuevas pruebas ni se modificaron issues o el tablero.
-- Posteriormente se validó Back #140 y se corrigieron Back #155 y Web #164, con sus verificaciones obligatorias en verde. Los cuatro issues quedaron cerrados y este archivo al día.
+- Posteriormente se validó Back #140 y se corrigieron Back #155 y Web #164, con sus verificaciones obligatorias en verde. Los cinco issues quedaron cerrados y este archivo al día.
 - Las prioridades propuestas, estimaciones y recomendaciones de este archivo no se aplicaron al tablero.
 - Este archivo es una fotografía de la revisión; el seguimiento vigente permanece en GitHub Issues y en el [proyecto Personal OS](https://github.com/users/jarvinc3/projects/3).
