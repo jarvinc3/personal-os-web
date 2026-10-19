@@ -2,6 +2,12 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.45.4] - 2026-10-19
+
+### Cambiado
+
+- Interno: la regla de hidratar una sesión guardada sale del hook de bootstrap a `shouldHydrateStoredSession()`, con pruebas. Sin cambio de comportamiento (#162).
+
 ## [0.45.3] - 2026-10-19
 
 ### Corregido

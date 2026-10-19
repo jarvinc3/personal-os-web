@@ -12,6 +12,12 @@ export type ReleaseNotesEntry = {
 
 export const RELEASE_NOTES: readonly ReleaseNotesEntry[] = [
   {
+    version: "0.45.4",
+    highlights: [
+      "Sin cambios visibles: ajuste interno del arranque de sesión y más pruebas.",
+    ],
+  },
+  {
     version: "0.45.3",
     highlights: [
       "El formulario de login aparece de inmediato, aunque el servidor tarde en responder o haya una sesión vieja guardada. Si la sesión sigue siendo válida, la app entra sola.",
