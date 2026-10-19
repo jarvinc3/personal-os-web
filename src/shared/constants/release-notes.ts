@@ -12,6 +12,12 @@ export type ReleaseNotesEntry = {
 
 export const RELEASE_NOTES: readonly ReleaseNotesEntry[] = [
   {
+    version: "0.45.3",
+    highlights: [
+      "El formulario de login aparece de inmediato, aunque el servidor tarde en responder o haya una sesión vieja guardada. Si la sesión sigue siendo válida, la app entra sola.",
+    ],
+  },
+  {
     version: "0.45.2",
     highlights: [
       "Los switches de ajustes y notificaciones responden al toque: el cambio se ve al instante y ya no se pierde si tocas varios seguidos. Si el guardado falla, el switch vuelve a su valor anterior.",

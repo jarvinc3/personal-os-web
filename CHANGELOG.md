@@ -2,6 +2,13 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.45.3] - 2026-10-19
+
+### Corregido
+
+- El formulario de login aparece de inmediato: ya no espera a `bootstrapped` ni a `GET /users/me`. Un login o registro exitoso marca la app como lista aunque el bootstrap siga pendiente (#162).
+- En `/login` no se hidrata una sesión guardada que el proxy ya descartó; una sesión vieja ya no bloquea el formulario ni puede revocar el login nuevo.
+
 ## [0.45.2] - 2026-10-19
 
 ### Corregido
