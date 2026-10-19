@@ -5,10 +5,10 @@ Infra transversal. Comportamiento de producto: [../modules/auth/](../modules/aut
 ## Árbol
 
 1. `app/layout.tsx`: QueryProvider → AuthBootstrapProvider → Theme → AppEffects.
-2. `useAuthBootstrap` (`BOOTSTRAP_FALLBACK_MS` = 3s si no llega `INITIAL_SESSION`).
+2. `useAuthBootstrap` (`BOOTSTRAP_FALLBACK_MS` = 3s si no llega `INITIAL_SESSION`). En `/login` no hidrata la sesión guardada: el proxy ya la descartó y el formulario no espera al bootstrap.
 3. Con sesión: `establishAuthenticatedSession` → `hydrateAuthUser` (`GET /users/me`) → store + `PROFILE_QUERY_KEY` = `['profile','me']`.
 4. `TOKEN_REFRESHED` con `user.profile` ya hidratado: actualiza tokens, no re-fetch.
-5. `useAuthGuard` en páginas `(app)`: `isLoading: !bootstrapped`; autenticado = `Boolean(user?.profile)`.
+5. `useAuthGuard` en páginas `(app)`: `isLoading: !bootstrapped`; autenticado = `Boolean(user?.profile)`. La pantalla de login no usa `isLoading`: muestra el formulario y redirige cuando hay perfil.
 6. `proxy.ts` bloquea unauthenticated en home/settings/chat/notifications/keep-awake/finance; `/` redirige a `/home` con sesión y a `/login` sin ella; `/login` bounce si ya hay sesión.
 
 Tokens: `@supabase/ssr` + `@supabase/supabase-js`; no se guardan a mano.

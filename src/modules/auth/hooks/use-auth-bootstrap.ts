@@ -6,6 +6,7 @@ import { resolveAuthStateChangeDecision } from "@/src/modules/auth/lib/auth-stat
 import { establishAuthenticatedSession } from "@/src/modules/auth/lib/establish-auth-session"
 import { PROFILE_QUERY_KEY } from "@/src/modules/auth/lib/hydrate-auth-user"
 import { mapSupabaseSession } from "@/src/modules/auth/services/supabase-auth.service"
+import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { authEvents } from "@/src/shared/events/auth-events"
 import { useAppStore } from "@/src/shared/store/app-store"
 import type { Session } from "@supabase/supabase-js"
@@ -15,9 +16,18 @@ import { toast } from "sonner"
 const AUTH_CALLBACK_DEFER_MS = 0
 const BOOTSTRAP_FALLBACK_MS = 3_000
 
-async function resolveSessionBootstrap(session: Session | null): Promise<void> {
+async function resolveSessionBootstrap(
+  session: Session | null,
+  onLoginRoute: boolean
+): Promise<void> {
   if (!session) {
     useAppStore.getState().clearAuthState()
+    return
+  }
+
+  // `/login` is only reached when the proxy found no claims, so a stored
+  // session there is stale and hydrating it can block the form on `/users/me`.
+  if (onLoginRoute) {
     return
   }
 
@@ -49,7 +59,10 @@ export function useAuthBootstrap() {
         return
       }
 
-      const task = resolveSessionBootstrap(session).finally(() => {
+      const task = resolveSessionBootstrap(
+        session,
+        window.location.pathname === APP_ROUTES.auth.login
+      ).finally(() => {
         bootstrapInFlightRef.current = null
       })
       bootstrapInFlightRef.current = task

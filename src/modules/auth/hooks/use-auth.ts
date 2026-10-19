@@ -35,6 +35,9 @@ export function useAuth() {
       useAppStore
         .getState()
         .setAuthState({ session: payload.session, user: hydrated })
+      // A completed login unblocks the app even if the stored-session bootstrap
+      // is still waiting on Supabase.
+      useAppStore.getState().setBootstrapped(true)
       queryClient.setQueryData(PROFILE_QUERY_KEY, hydrated.profile)
       return hydrated
     } catch (error) {
