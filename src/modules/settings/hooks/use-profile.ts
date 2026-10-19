@@ -3,8 +3,8 @@
 import { ApiError, apiGet, apiPatch } from "@/src/config/api-client"
 import { mergeAuthUserWithProfile, PROFILE_QUERY_KEY } from "@/src/modules/auth"
 import { DEFAULT_USER_PREFERENCES } from "@/src/modules/settings/constants/user-settings-defaults"
+import { mergeUserPreferences } from "@/src/modules/settings/lib/merge-user-preferences"
 import { normalizeUserPreferences } from "@/src/modules/settings/lib/normalize-preferences"
-import { mergeWithDefaults } from "@/src/modules/settings/lib/settings-value"
 import type {
   DeepPartial,
   UpdateProfilePayload,
@@ -17,16 +17,8 @@ import { useAppStore } from "@/src/shared/store/app-store"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useMemo } from "react"
 
-export function mergeUserPreferences(
-  current: UserPreferences | null | undefined,
-  patch: DeepPartial<UserPreferences>
-): UserPreferences {
-  const normalized = normalizeUserPreferences(current)
-  return mergeWithDefaults(
-    patch as Record<string, unknown>,
-    normalized as unknown as Record<string, unknown>
-  ) as UserPreferences
-}
+const PROFILE_UPDATE_MUTATION_KEY = ["profile-update"] as const
+const PROFILE_UPDATE_SCOPE = "profile-update"
 
 export function useProfile() {
   const queryClient = useQueryClient()
@@ -49,17 +41,38 @@ export function useProfile() {
   })
 
   const updateProfileMutation = useMutation({
+    mutationKey: PROFILE_UPDATE_MUTATION_KEY,
+    scope: { id: PROFILE_UPDATE_SCOPE },
     mutationFn: (payload: UpdateProfilePayload) =>
       apiPatch<UserProfile>(API_ENDPOINTS.USERS.UPDATE_ME, payload),
-    onSuccess: async (profile) => {
+    onMutate: async (payload) => {
+      await queryClient.cancelQueries({ queryKey: PROFILE_QUERY_KEY })
+      const previousProfile =
+        queryClient.getQueryData<UserProfile>(PROFILE_QUERY_KEY)
+      const preferences = payload.preferences
+      if (preferences) {
+        queryClient.setQueryData<UserProfile>(PROFILE_QUERY_KEY, (profile) =>
+          profile ? { ...profile, preferences } : profile
+        )
+      }
+      return { previousProfile }
+    },
+    onSuccess: (profile) => {
+      if (
+        queryClient.isMutating({ mutationKey: PROFILE_UPDATE_MUTATION_KEY }) > 1
+      ) {
+        return
+      }
       queryClient.setQueryData(PROFILE_QUERY_KEY, profile)
       const { user, updateAuthUser } = useAppStore.getState()
       if (user) {
         updateAuthUser(mergeAuthUserWithProfile(user, profile))
       }
-      await queryClient.invalidateQueries({ queryKey: PROFILE_QUERY_KEY })
     },
-    onError: (error) => {
+    onError: (error, _payload, context) => {
+      if (context?.previousProfile) {
+        queryClient.setQueryData(PROFILE_QUERY_KEY, context.previousProfile)
+      }
       appToast.error({
         text1: "No se pudo guardar",
         text2: error.message,
@@ -68,7 +81,8 @@ export function useProfile() {
   })
 
   const updatePreferences = async (patch: DeepPartial<UserPreferences>) => {
-    const current = profileQuery.data?.preferences
+    const current =
+      queryClient.getQueryData<UserProfile>(PROFILE_QUERY_KEY)?.preferences
     const preferences = mergeUserPreferences(current, patch)
     await updateProfileMutation.mutateAsync({ preferences })
   }

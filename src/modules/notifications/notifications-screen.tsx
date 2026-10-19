@@ -502,9 +502,7 @@ function NotificationPreferencesSheet({
               void onPreferenceToggle(
                 {
                   notifications: {
-                    ...preferences.notifications,
                     channels: {
-                      ...preferences.notifications.channels,
                       push: checked,
                     },
                   },
@@ -521,9 +519,7 @@ function NotificationPreferencesSheet({
               void onPreferenceToggle(
                 {
                   notifications: {
-                    ...preferences.notifications,
                     channels: {
-                      ...preferences.notifications.channels,
                       email: checked,
                     },
                   },
@@ -540,9 +536,7 @@ function NotificationPreferencesSheet({
               void onPreferenceToggle(
                 {
                   notifications: {
-                    ...preferences.notifications,
                     channels: {
-                      ...preferences.notifications.channels,
                       inApp: checked,
                     },
                   },
@@ -559,8 +553,7 @@ function NotificationPreferencesSheet({
               void onPreferenceToggle(
                 {
                   notifications: {
-                    ...preferences.notifications,
-                    quietHours: { ...quietHours, enabled: checked },
+                    quietHours: { enabled: checked },
                   },
                 },
                 "Horario silencioso actualizado."

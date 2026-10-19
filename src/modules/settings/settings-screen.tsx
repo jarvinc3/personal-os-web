@@ -199,7 +199,7 @@ function SettingsScreenBody() {
           switchValue={preferences.ai.proactiveInsights}
           onSwitchChange={(checked) =>
             void handlePreferenceToggle(
-              { ai: { ...preferences.ai, proactiveInsights: checked } },
+              { ai: { proactiveInsights: checked } },
               "Insights proactivos actualizados."
             )
           }
@@ -212,7 +212,7 @@ function SettingsScreenBody() {
           switchValue={preferences.ai.confirmBeforeActions}
           onSwitchChange={(checked) =>
             void handlePreferenceToggle(
-              { ai: { ...preferences.ai, confirmBeforeActions: checked } },
+              { ai: { confirmBeforeActions: checked } },
               "Confirmación antes de actuar actualizada."
             )
           }
@@ -233,9 +233,7 @@ function SettingsScreenBody() {
             void handlePreferenceToggle(
               {
                 notifications: {
-                  ...preferences.notifications,
                   channels: {
-                    ...preferences.notifications.channels,
                     push: checked,
                   },
                 },
@@ -254,9 +252,7 @@ function SettingsScreenBody() {
             void handlePreferenceToggle(
               {
                 notifications: {
-                  ...preferences.notifications,
                   channels: {
-                    ...preferences.notifications.channels,
                     email: checked,
                   },
                 },
@@ -275,9 +271,7 @@ function SettingsScreenBody() {
             void handlePreferenceToggle(
               {
                 notifications: {
-                  ...preferences.notifications,
                   channels: {
-                    ...preferences.notifications.channels,
                     inApp: checked,
                   },
                 },
@@ -296,8 +290,7 @@ function SettingsScreenBody() {
             void handlePreferenceToggle(
               {
                 notifications: {
-                  ...preferences.notifications,
-                  quietHours: { ...quietHours, enabled: checked },
+                  quietHours: { enabled: checked },
                 },
               },
               "Horario silencioso actualizado."
@@ -330,9 +323,7 @@ function SettingsScreenBody() {
           switchValue={preferences.privacy.analyticsEnabled}
           onSwitchChange={(checked) =>
             void handlePreferenceToggle(
-              {
-                privacy: { ...preferences.privacy, analyticsEnabled: checked },
-              },
+              { privacy: { analyticsEnabled: checked } },
               "Preferencia de analíticas actualizada."
             )
           }
@@ -347,7 +338,6 @@ function SettingsScreenBody() {
             void handlePreferenceToggle(
               {
                 privacy: {
-                  ...preferences.privacy,
                   crashReportsEnabled: checked,
                 },
               },
