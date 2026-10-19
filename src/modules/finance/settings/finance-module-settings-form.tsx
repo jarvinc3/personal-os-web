@@ -246,10 +246,10 @@ function WeeklySummaryDayField({
 }
 
 export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
-  const { config, updateConfig, updateMutation } =
+  const { config, isModuleEnabled, updateConfig, updateMutation } =
     useUserModuleConfig("finance")
   const moduleEnable = useModuleSheetEnable("finance")
-  const accountsQuery = useAccounts(true)
+  const accountsQuery = useAccounts(isModuleEnabled)
   const accounts = accountsQuery.data ?? []
 
   const {
@@ -888,7 +888,7 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
       </SummarySection>
 
       <FinanceIntegritySettingsSection
-        enabled
+        enabled={isModuleEnabled}
         display={{
           currency: config.baseCurrency,
           showCents: config.display.showCents,
