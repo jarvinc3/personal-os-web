@@ -2,6 +2,13 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.45.1] - 2026-10-19
+
+### Corregido
+
+- Ajustes → Finanzas con la app desactivada ya no pide cuentas ni integridad: sin 403 en consola y sin «No se pudo guardar». La sección de integridad muestra el aviso para activar Finanzas, y al activarla funciona como antes (jarvinc3/personal-os-web#164).
+- Un 403 por app desactivada se traduce a «Finanzas está desactivado. Actívalo para usar esta función.» en vez de «No se pudo guardar».
+
 ## [0.45.0] - 2026-10-18
 
 ### Agregado
