@@ -1,8 +1,8 @@
 # Resumen de issues de Personal OS — 2026-10-18
 
-Revisión de **21 issues abiertos** contra el código de `develop`, actualizado respecto a GitHub: **1 implementado, 5 parcialmente implementados y 15 no implementados**. La web tenía 13 issues abiertos y el backend 8. Landing no tenía issues abiertos.
+Revisión inicial de **21 issues abiertos** contra el código de `develop`: **1 implementado, 5 parcialmente implementados y 15 no implementados** en ese momento. La web tenía 13 issues abiertos y el backend 8. Landing no tenía issues abiertos. Estado actual: **3 implementados, 5 parcialmente implementados y 13 no implementados**.
 
-Este documento conserva la clasificación de la revisión inicial. **Actualización posterior:** [Back #140](https://github.com/jarvinc3/personal-os-back/issues/140) fue validado, cerrado como completado y movido a **Done**; [Back #155](https://github.com/jarvinc3/personal-os-back/issues/155) quedó corregido en `develop` con la release `v0.43.2` y está pendiente de configurar `PUBLIC_WEB_URL` en Railway y validar en producción; [Web #164](https://github.com/jarvinc3/personal-os-web/issues/164) quedó corregido con la release web `v0.45.1`, pendiente de validar en producción. Tras ese cierre quedan 20 de los issues de esta revisión abiertos, salvo cambios posteriores en GitHub.
+Este documento conserva la clasificación de la revisión inicial. **Actualización posterior:** [Back #140](https://github.com/jarvinc3/personal-os-back/issues/140) fue validado y cerrado; [Back #155](https://github.com/jarvinc3/personal-os-back/issues/155) quedó corregido con la release `v0.43.2` (queda definir `PUBLIC_WEB_URL` en Railway); [Web #164](https://github.com/jarvinc3/personal-os-web/issues/164) quedó corregido con la release web `v0.45.1`. Los tres issues están cerrados y en **Done**. Quedan 18 de los issues de esta revisión abiertos, salvo cambios posteriores en GitHub.
 
 ## Guia para agente pi
 
@@ -27,9 +27,11 @@ Las estimaciones son orientativas. En los bugs, «no implementado» significa qu
 
 ## Ya implementados
 
-| Issue                                                                                        | Prioridad | Tamaño restante                                        | Evidencia                                                                                                                                                                                                     |
-| -------------------------------------------------------------------------------------------- | --------- | ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [Back #140 — Reportes por comercio](https://github.com/jarvinc3/personal-os-back/issues/140) | P2*       | S: validar y cerrar, completado después de la revisión | `sumSpendByMerchant()` agrupa por `merchantId`; el listado admite `dateFrom/dateTo` y devuelve gasto y cantidad de movimientos. El comportamiento central solicitado ya existe. La web muestra el mes actual. |
+| Issue                                                                                                          | Prioridad | Tamaño restante           | Evidencia                                                                                                                                                                                                     |
+| -------------------------------------------------------------------------------------------------------------- | --------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Web #164 — Consultas con Finanzas desactivado](https://github.com/jarvinc3/personal-os-web/issues/164)        | P1        | S: implementado y cerrado | Ajustes → Finanzas consulta cuentas e integridad solo con la app activa; con Finanzas desactivada muestra el aviso para activarla y traduce el 403 de app desactivada. 913 pruebas en verde.                  |
+| [Back #155 — Dominio incorrecto en enlaces de cobros](https://github.com/jarvinc3/personal-os-back/issues/155) | P1        | S: implementado y cerrado | `PUBLIC_WEB_URL` con fallback al primer `CORS_ORIGIN`; create, list, revoke y regenerate devuelven `<web>/c/<token>`. Pruebas unitarias y e2e; la variable en Railway sigue pendiente.                        |
+| [Back #140 — Reportes por comercio](https://github.com/jarvinc3/personal-os-back/issues/140)                   | P2*       | S: implementado y cerrado | `sumSpendByMerchant()` agrupa por `merchantId`; el listado admite `dateFrom/dateTo` y devuelve gasto y cantidad de movimientos. El comportamiento central solicitado ya existe. La web muestra el mes actual. |
 
 ### Validación y cierre de Back #140
 
@@ -42,7 +44,7 @@ Se verificó contra `develop`, commit `3cd9cefebbe09a162cea92a575e54b673ca34ef5`
 
 **Resultado:** 2 suites y 20 pruebas aprobadas. Se dejó [evidencia en el issue](https://github.com/jarvinc3/personal-os-back/issues/140#issuecomment-6258650009), se cerró como completado y se movió a Done. No fue necesario cambiar código ni desplegar. No se comprobó el reporte con datos de producción.
 
-### Implementación de Back #155
+### Implementación y cierre de Back #155
 
 Se corrigió en `develop`, releases `v0.43.1` y `v0.43.2` (commit `b2d61c4`, 2026-10-19):
 
@@ -50,11 +52,11 @@ Se corrigió en `develop`, releases `v0.43.1` y `v0.43.2` (commit `b2d61c4`, 202
 - `shareUrl()` usa `<PUBLIC_WEB_URL>/c/<token>` en create, list, revoke y regenerate; `shareBaseUrl()` resuelve la base y quita la barra final.
 - Se corrigió el fixture e2e: no incluía `token` y el resumen devolvía `/c/undefined` en la prueba.
 - `pnpm format:check`, `pnpm lint`, `pnpm build`, 1.302 pruebas unitarias y 134 e2e en verde; el CI de `develop` también.
-- [Issue actualizado](https://github.com/jarvinc3/personal-os-back/issues/155#issuecomment-6272804587) con evidencia y sin cerrar: queda en **In review**.
+- [Issue actualizado](https://github.com/jarvinc3/personal-os-back/issues/155#issuecomment-6272804587) con evidencia, cerrado como completado y movido a **Done**.
 
-**Pendiente (Jarvin):** definir `PUBLIC_WEB_URL` en Railway prod y dev y comprobar un link real. Sin la variable, producción conserva el dominio de la app; el despliegue por sí solo no cambia el resultado.
+**Operación pendiente (Jarvin):** definir `PUBLIC_WEB_URL` en Railway prod y dev y comprobar un link real. Sin la variable, producción conserva el dominio de la app; el despliegue por sí solo no cambia el resultado.
 
-### Implementación de Web #164
+### Implementación y cierre de Web #164
 
 Se corrigió en la web, release `v0.45.1` (2026-10-19):
 
@@ -62,9 +64,9 @@ Se corrigió en la web, release `v0.45.1` (2026-10-19):
 - Con Finanzas desactivada, la sección de integridad muestra el aviso para activarla en vez del error.
 - Un 403 de app desactivada se traduce a «Finanzas está desactivado. Actívalo para usar esta función.»; otros 403 conservan el mensaje genérico.
 - `pnpm format:check`, `pnpm lint`, `pnpm typecheck` y 913 pruebas en verde.
-- Issue actualizado con evidencia y sin cerrar: queda en **In review**.
+- Issue actualizado con evidencia, cerrado como completado y movido a **Done**.
 
-**Pendiente (Jarvin):** abrir Ajustes → Finanzas con una cuenta sin Finanzas activa, comprobar que no hay 403 en la consola y que aparece el aviso; después activar y guardar, y verificar que la integridad sigue funcionando.
+**Verificación pendiente (Jarvin):** abrir Ajustes → Finanzas con una cuenta sin Finanzas activa, comprobar que no hay 403 en la consola y que aparece el aviso; después activar y guardar, y verificar que la integridad sigue funcionando.
 
 ## Parcialmente implementados
 
@@ -98,11 +100,10 @@ En los dos refactors, «parcial» describe avances generales; los issues son dem
 
 ## Orden recomendado
 
-1. **Back #155 y Web #164** ya están corregidos y pendientes de validación en producción.
+1. **Back #140, Back #155 y Web #164** ya están implementados y cerrados.
 2. Continuar con **Web #163 y Web #162**.
 3. Resolver **Web #161, Web #167 y Web #168**.
-4. Revisar **Back #140** para cierre: **ya completado después de esta revisión**.
-5. Separar lo pendiente de **Back #139**.
+4. Separar lo pendiente de **Back #139**.
 
 Los refactors grandes están en P1 en el tablero, pero conviene dividirlos en tareas concretas antes de anteponerlos a los bugs que afectan al usuario.
 
@@ -110,6 +111,6 @@ Los refactors grandes están en P1 en el tablero, pero conviene dividirlos en ta
 
 - La clasificación se basa en evidencia del código y en el contenido de los issues consultados en GitHub. No confirma despliegues ni reproduce los fallos en producción.
 - Durante la clasificación no se ejecutaron nuevas pruebas ni se modificaron issues o el tablero.
-- Posteriormente se ejecutaron las pruebas indicadas para validar Back #140; en otras sesiones se corrigieron Back #155 y Web #164, con sus verificaciones obligatorias en verde. Se actualizaron los tres issues y este archivo.
+- Posteriormente se validó Back #140 y se corrigieron Back #155 y Web #164, con sus verificaciones obligatorias en verde. Los tres issues quedaron cerrados y este archivo al día.
 - Las prioridades propuestas, estimaciones y recomendaciones de este archivo no se aplicaron al tablero.
 - Este archivo es una fotografía de la revisión; el seguimiento vigente permanece en GitHub Issues y en el [proyecto Personal OS](https://github.com/users/jarvinc3/projects/3).
