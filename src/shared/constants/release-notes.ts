@@ -12,6 +12,12 @@ export type ReleaseNotesEntry = {
 
 export const RELEASE_NOTES: readonly ReleaseNotesEntry[] = [
   {
+    version: "0.45.2",
+    highlights: [
+      "Los switches de ajustes y notificaciones responden al toque: el cambio se ve al instante y ya no se pierde si tocas varios seguidos. Si el guardado falla, el switch vuelve a su valor anterior.",
+    ],
+  },
+  {
     version: "0.45.1",
     highlights: [
       "Con Finanzas desactivada, sus ajustes ya no muestran un error al abrir: ves el aviso para activarla y, cuando la activas, la revisión de integridad funciona igual.",

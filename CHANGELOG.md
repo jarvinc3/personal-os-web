@@ -2,6 +2,18 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.45.2] - 2026-10-19
+
+### Corregido
+
+- Los switches de preferencias de Ajustes y Notificaciones aplican el cambio al instante con actualización optimista; cada parche se calcula sobre la última caché y las mutaciones se envían en serie. Un clic rápido en varios switches ya no pisa el anterior (#163).
+- Si el guardado falla, el perfil vuelve a su estado anterior y sale el toast de error.
+- Cada pantalla envía solo la hoja que cambia, no el objeto completo de preferencias.
+
+### Cambiado
+
+- Interno: se quitó el `GET /users/me` extra después de cada `PATCH`; la respuesta ya trae el perfil completo.
+
 ## [0.45.1] - 2026-10-19
 
 ### Corregido
