@@ -14,6 +14,13 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 - `AGENTS.md` y `docs/README.md` enlazan las convenciones de issues y la nueva documentación. Sin cambios visibles en la app.
 
+## [0.46.0] - 2026-10-20
+
+### Agregado
+
+- El formulario de una transferencia entre monedas muestra la tasa del día, permite escribir otra tasa o el monto que realmente recibiste y enseña cuánto entrará en la cuenta destino antes de guardar. El monto recibido manda sobre la tasa (#169).
+- El detalle de la transferencia muestra monto enviado, monto recibido y tasa. Si no indicaste ninguna, avisa que la tasa es la del día (#169).
+
 ## [0.45.9] - 2026-10-20
 
 ### Corregido
