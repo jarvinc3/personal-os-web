@@ -12,6 +12,12 @@ export type ReleaseNotesEntry = {
 
 export const RELEASE_NOTES: readonly ReleaseNotesEntry[] = [
   {
+    version: "0.45.6",
+    highlights: [
+      "En el detalle de un cobro, la acción para registrar un pago sigue visible después del primero y solo desaparece si el cobro está cancelado o castigado.",
+    ],
+  },
+  {
     version: "0.45.4",
     highlights: [
       "Sin cambios visibles: ajuste interno del arranque de sesión y más pruebas.",

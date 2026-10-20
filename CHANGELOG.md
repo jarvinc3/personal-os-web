@@ -2,6 +2,12 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.45.6] - 2026-10-20
+
+### Corregido
+
+- El detalle de un cobro mantiene visible la acción para registrar un pago después del primero, con la nota de novedades que exige la suite. Sustituye la 0.45.5, que no pasó el CI por no incluir esa nota (#184).
+
 ## [0.45.5] - 2026-10-20
 
 ### Corregido
