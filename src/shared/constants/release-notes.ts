@@ -12,6 +12,14 @@ export type ReleaseNotesEntry = {
 
 export const RELEASE_NOTES: readonly ReleaseNotesEntry[] = [
   {
+    version: "0.45.9",
+    highlights: [
+      "Al crear una tarjeta de crédito ya queda con la deuda que escribes, no con el límite completo. Un saldo vacío cuenta como 0.",
+      "La tarjeta de Finanzas del inicio muestra los mismos ingresos y gastos del mes que Movimientos, incluidos los de hoy.",
+      "El mensaje de WhatsApp de cobros saluda por el primer nombre, dice cuántos cobros son y cuánto deben en cada moneda.",
+    ],
+  },
+  {
     version: "0.45.8",
     highlights: [
       "El detalle de un préstamo ya abre siempre: si una cuota llega sin un capital legible, el plan de amortización muestra esa fila y deja el saldo restante en blanco, en vez de caer en una pantalla de error.",

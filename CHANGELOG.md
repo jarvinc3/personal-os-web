@@ -13,6 +13,14 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 - `AGENTS.md` y `docs/README.md` enlazan las convenciones de issues y la nueva documentación. Sin cambios visibles en la app.
 
+## [0.45.9] - 2026-10-20
+
+### Corregido
+
+- Al crear una tarjeta de crédito, la app envía la deuda del formulario como crédito disponible: con «Saldo al corte» 0 la tarjeta nace sin deuda y con el límite completo disponible. Un saldo vacío cuenta como 0 (#174).
+- La tarjeta de Finanzas en el inicio usa el mes completo, igual que Movimientos, así que incluye los movimientos registrados hoy y deja de mostrar 0.00 (#170).
+- El mensaje de WhatsApp de cobros se escribe desde quien presta: saluda por el primer nombre, indica cuántos cobros son y el pendiente de cada moneda, y cierra con el enlace (#161).
+
 ## [0.45.8] - 2026-10-20
 
 ### Corregido
