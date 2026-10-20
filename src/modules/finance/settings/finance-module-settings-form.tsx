@@ -16,6 +16,7 @@ import { useEffect, useMemo } from "react"
 import { useForm } from "react-hook-form"
 import { DisplaySection } from "./components/display-section"
 import { EmailSyncSection } from "./components/email-sync-section"
+import { FinancialMonthSection } from "./components/financial-month-section"
 import { FixedIncomeSection } from "./components/fixed-income-section"
 import { MovementDefaultsSection } from "./components/movement-defaults-section"
 import { NotificationsSection } from "./components/notifications-section"
@@ -141,6 +142,8 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
       />
 
       <MovementDefaultsSection control={control} accounts={accounts} />
+
+      <FinancialMonthSection control={control} />
 
       <SubscriptionsSection control={control} />
 

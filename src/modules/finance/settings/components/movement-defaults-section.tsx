@@ -1,11 +1,10 @@
 import { ChoiceGrid } from "@/src/shared/components/ui/choice-grid"
-import { DayWheel } from "@/src/shared/components/ui/wheel-picker"
 import {
   SummaryGroup,
   SummarySection,
 } from "@/src/shared/components/ui/summary"
 import { getModule } from "@/src/shared/constants/module-registry"
-import { Calculator, CalendarRange, Keyboard, Landmark } from "lucide-react"
+import { Calculator, Keyboard, Landmark } from "lucide-react"
 import { Controller, type Control } from "react-hook-form"
 import type { FinanceModuleFormValues } from "@/src/modules/finance/settings/lib/finance-module-form"
 import { AccountChoiceList, type AccountOption } from "./account-choice-list"
@@ -22,8 +21,6 @@ type MovementDefaultsSectionProps = {
   accounts: AccountOption[]
 }
 
-/** How a new movement starts: which account it charges, how the amount is
- * captured and where the financial month begins. */
 export function MovementDefaultsSection({
   control,
   accounts,
@@ -59,25 +56,6 @@ export function MovementDefaultsSection({
                 value={field.value}
                 onValueChange={field.onChange}
                 options={AMOUNT_ENTRY_OPTIONS}
-              />
-            )}
-          />
-        </SummaryGroup>
-      </SummarySection>
-
-      <SummarySection title="Mes financiero" icon={CalendarRange}>
-        <SummaryGroup title="Inicio del mes financiero">
-          <Controller
-            control={control}
-            name="monthStartDay"
-            render={({ field, fieldState }) => (
-              <DayWheel
-                icon={CalendarRange}
-                value={field.value}
-                min={1}
-                max={28}
-                onChange={field.onChange}
-                error={fieldState.error?.message}
               />
             )}
           />
