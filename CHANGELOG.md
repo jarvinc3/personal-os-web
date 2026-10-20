@@ -14,6 +14,12 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 - `AGENTS.md` y `docs/README.md` enlazan las convenciones de issues y la nueva documentación. Sin cambios visibles en la app.
 
+## [0.47.3] - 2026-10-20
+
+### Cambiado
+
+- Interno: el inicio del mes financiero sale a su propia sección en `settings/components/`, en vez de viajar dentro de los valores por defecto de captura. Sin cambio visible (#154).
+
 ## [0.47.2] - 2026-10-20
 
 ### Cambiado

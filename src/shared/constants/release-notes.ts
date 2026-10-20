@@ -12,6 +12,12 @@ export type ReleaseNotesEntry = {
 
 export const RELEASE_NOTES: readonly ReleaseNotesEntry[] = [
   {
+    version: "0.47.3",
+    highlights: [
+      "Sin cambios visibles: orden interno de la configuración de Finanzas para que sea más fácil de mantener.",
+    ],
+  },
+  {
     version: "0.47.2",
     highlights: [
       "El menú lateral muestra solo las apps que tienes activas, en el mismo orden de siempre, y se actualiza al encenderlas o apagarlas. Keep Awake sigue fijo.",
