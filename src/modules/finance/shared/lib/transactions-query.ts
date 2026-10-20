@@ -192,11 +192,33 @@ export function signedAmount(
   return `${sign} ${formatted}`
 }
 
+type TotalsSource = Pick<
+  FinanceTransaction,
+  | "type"
+  | "amount"
+  | "currency"
+  | "amountBaseCurrency"
+  | "transferGroupId"
+  | "status"
+  | "legs"
+>
+
+function amountForTotals(
+  item: Pick<FinanceTransaction, "amount" | "currency" | "amountBaseCurrency">,
+  currency?: string
+): number | null {
+  if (!currency) {
+    return parseFinanceMoney(item.amountBaseCurrency)
+  }
+  if (item.currency !== currency) {
+    return null
+  }
+  return parseFinanceMoney(item.amount)
+}
+
 export function visibleTransactionTotals(
-  items: Pick<
-    FinanceTransaction,
-    "type" | "amountBaseCurrency" | "transferGroupId" | "status" | "legs"
-  >[]
+  items: TotalsSource[],
+  currency?: string
 ): { income: number; expenses: number } {
   return items.reduce(
     (totals, item) => {
@@ -204,7 +226,7 @@ export function visibleTransactionTotals(
         if (leg.legRole !== "FEE" || isInactiveTransactionStatus(leg.status)) {
           continue
         }
-        const fee = parseFinanceMoney(leg.amountBaseCurrency)
+        const fee = amountForTotals(leg, currency)
         if (fee === null) {
           continue
         }
@@ -216,7 +238,7 @@ export function visibleTransactionTotals(
       ) {
         return totals
       }
-      const amount = parseFinanceMoney(item.amountBaseCurrency)
+      const amount = amountForTotals(item, currency)
       if (amount === null) {
         return totals
       }
