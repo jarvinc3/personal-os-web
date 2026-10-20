@@ -72,6 +72,8 @@ export const API_ENDPOINTS = {
     CARD_PAYMENTS: "/finance/card-payments",
     TRANSFER: (id: string) => `/finance/transfers/${id}`,
     TRANSFER_UNCONFIRM: (id: string) => `/finance/transfers/${id}/unconfirm`,
+    TRANSFER_CONFIRM: (id: string) => `/finance/transfers/${id}/confirm`,
+    TRANSFER_REVERSE: (id: string) => `/finance/transfers/${id}/reverse`,
     TRANSACTION: (id: string) => `/finance/transactions/${id}`,
     TRANSACTION_MERGE: (id: string) => `/finance/transactions/${id}/merge`,
     TRANSACTION_NOT_DUPLICATE: (id: string) =>

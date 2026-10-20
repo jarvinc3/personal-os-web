@@ -109,11 +109,8 @@ export function formatTransactionDate(value: string): string {
 }
 
 export function canReverseTransaction(
-  tx: Pick<FinanceTransaction, "status" | "transferGroupId" | "type">
+  tx: Pick<FinanceTransaction, "status">
 ): boolean {
-  if (tx.transferGroupId || tx.type === "TRANSFER") {
-    return false
-  }
   return tx.status === "CONFIRMED"
 }
 

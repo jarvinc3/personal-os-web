@@ -217,6 +217,24 @@ export function useUnconfirmTransfer() {
   })
 }
 
+export function useConfirmTransfer() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) =>
+      apiPost<{ success: boolean }>(API_ENDPOINTS.FINANCE.TRANSFER_CONFIRM(id)),
+    onSuccess: () => invalidateLedger(queryClient),
+  })
+}
+
+export function useReverseTransfer() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) =>
+      apiPost<{ success: boolean }>(API_ENDPOINTS.FINANCE.TRANSFER_REVERSE(id)),
+    onSuccess: () => invalidateLedger(queryClient),
+  })
+}
+
 export function useConfirmTransaction() {
   const queryClient = useQueryClient()
   return useMutation({

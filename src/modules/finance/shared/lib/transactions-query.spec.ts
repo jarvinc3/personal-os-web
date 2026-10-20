@@ -187,7 +187,7 @@ describe("formatTransactionDate", () => {
 })
 
 describe("canReverseTransaction", () => {
-  it("is true only for CONFIRMED non-transfer movements", () => {
+  it("is true for any CONFIRMED movement, including transfers", () => {
     assert.equal(
       canReverseTransaction({
         status: "CONFIRMED",
@@ -202,7 +202,7 @@ describe("canReverseTransaction", () => {
         type: "TRANSFER",
         transferGroupId: null,
       }),
-      false
+      true
     )
     assert.equal(
       canReverseTransaction({
@@ -210,7 +210,7 @@ describe("canReverseTransaction", () => {
         type: "DEBIT",
         transferGroupId: "grp-1",
       }),
-      false
+      true
     )
     assert.equal(
       canReverseTransaction({

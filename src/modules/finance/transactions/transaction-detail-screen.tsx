@@ -11,13 +11,16 @@ import { LinkTransactionSheet } from "@/src/modules/finance/transactions/compone
 import { useUnlinkTransaction } from "@/src/modules/finance/shared/hooks/use-transaction-link"
 import {
   useConfirmTransaction,
+  useConfirmTransfer,
   useDeleteTransaction,
   useMarkNotDuplicate,
   useMergeTransaction,
   useRestoreTransaction,
   useReverseTransaction,
+  useReverseTransfer,
   useTransaction,
   useUnconfirmTransaction,
+  useUnconfirmTransfer,
 } from "@/src/modules/finance/shared/hooks/use-transactions"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
 import {
@@ -113,9 +116,7 @@ function canConfirm(transaction: FinanceTransaction): boolean {
 }
 
 function canUnlock(transaction: FinanceTransaction): boolean {
-  return (
-    !isTransferTransaction(transaction) && canUnlockTransaction(transaction)
-  )
+  return canUnlockTransaction(transaction)
 }
 
 function TransactionDetailScreenBody({
@@ -131,8 +132,11 @@ function TransactionDetailScreenBody({
 
   const detailQuery = useTransaction(isEnabled, transactionId)
   const confirmMutation = useConfirmTransaction()
+  const confirmTransferMutation = useConfirmTransfer()
   const unconfirmMutation = useUnconfirmTransaction()
+  const unconfirmTransferMutation = useUnconfirmTransfer()
   const reverseMutation = useReverseTransaction()
+  const reverseTransferMutation = useReverseTransfer()
   const unlinkMutation = useUnlinkTransaction()
   const deleteMutation = useDeleteTransaction()
   const mergeMutation = useMergeTransaction()
@@ -186,17 +190,27 @@ function TransactionDetailScreenBody({
   )
   const isMutating =
     confirmMutation.isPending ||
+    confirmTransferMutation.isPending ||
     unconfirmMutation.isPending ||
+    unconfirmTransferMutation.isPending ||
     reverseMutation.isPending ||
+    reverseTransferMutation.isPending ||
     deleteMutation.isPending
 
   async function onConfirm() {
     if (!tx) {
       return
     }
+    const isTransfer = isTransferTransaction(tx)
     try {
-      await confirmMutation.mutateAsync(tx.id)
-      appToast.success({ text1: "Movimiento confirmado" })
+      await (isTransfer
+        ? confirmTransferMutation.mutateAsync(tx.id)
+        : confirmMutation.mutateAsync(tx.id))
+      appToast.success({
+        text1: isTransfer
+          ? "Transferencia confirmada"
+          : "Movimiento confirmado",
+      })
     } catch (error) {
       appToast.error({ text1: financeErrorMessage(error) })
     }
@@ -206,9 +220,16 @@ function TransactionDetailScreenBody({
     if (!tx) {
       return
     }
+    const isTransfer = isTransferTransaction(tx)
     try {
-      await unconfirmMutation.mutateAsync(tx.id)
-      appToast.success({ text1: "Movimiento desbloqueado para editar" })
+      await (isTransfer
+        ? unconfirmTransferMutation.mutateAsync(tx.id)
+        : unconfirmMutation.mutateAsync(tx.id))
+      appToast.success({
+        text1: isTransfer
+          ? "Transferencia desbloqueada para editar"
+          : "Movimiento desbloqueado para editar",
+      })
     } catch (error) {
       appToast.error({ text1: financeErrorMessage(error) })
     }
@@ -218,9 +239,14 @@ function TransactionDetailScreenBody({
     if (!tx) {
       return
     }
+    const isTransfer = isTransferTransaction(tx)
     try {
-      await reverseMutation.mutateAsync(tx.id)
-      appToast.success({ text1: "Movimiento reversado" })
+      await (isTransfer
+        ? reverseTransferMutation.mutateAsync(tx.id)
+        : reverseMutation.mutateAsync(tx.id))
+      appToast.success({
+        text1: isTransfer ? "Transferencia reversada" : "Movimiento reversado",
+      })
     } catch (error) {
       appToast.error({ text1: financeErrorMessage(error) })
     }
@@ -672,7 +698,7 @@ function TransactionDetailScreenBody({
                 },
               ]
             : []),
-          ...(isTransferTransaction(tx)
+          ...(isTransferTransaction(tx) && tx.status === "PENDING"
             ? [
                 {
                   id: "edit-transfer",
