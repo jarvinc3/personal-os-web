@@ -1,6 +1,7 @@
 "use client"
 
 import { SETTINGS_REGISTRY } from "@/src/modules/settings/constants/settings-metadata"
+import { DEFAULT_USER_PREFERENCES } from "@/src/modules/settings/constants/user-settings-defaults"
 import { useProfile } from "@/src/modules/settings/hooks/use-profile"
 import {
   getSettingValue,
@@ -86,7 +87,7 @@ export function EditThemeSheet({ open, onOpenChange }: SettingsSheetProps) {
       open={open}
       onOpenChange={handleOpenChange}
       title="Apariencia"
-      description={preferences.theme.fieldGuide}
+      description={DEFAULT_USER_PREFERENCES.theme.fieldGuide}
       actions={{
         close: (
           <Button

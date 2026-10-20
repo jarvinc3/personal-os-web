@@ -4,7 +4,7 @@ import type { UserPreferences } from "@/src/modules/settings/types/profile.types
 export const DEFAULT_USER_PREFERENCES: UserPreferences = {
   version: 1,
   theme: {
-    fieldGuide: "Apariencia global (system | light | dark).",
+    fieldGuide: "Apariencia global: claro, oscuro o el del sistema.",
     value: "system",
   },
   onboarding: {

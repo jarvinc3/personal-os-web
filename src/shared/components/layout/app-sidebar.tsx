@@ -2,6 +2,7 @@
 
 import { useAuth } from "@/src/modules/auth"
 import { FINANCE_APP_NAV } from "@/src/modules/finance"
+import { useProfile } from "@/src/modules/settings/hooks/use-profile"
 import {
   Collapsible,
   CollapsibleContent,
@@ -31,9 +32,10 @@ import {
 } from "@/src/shared/components/ui/sidebar"
 import { LinkPendingOverlay } from "@/src/shared/components/ui/navigation-pending"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
+import { enabledAppEntries } from "@/src/shared/lib/enabled-app-nav"
 import { isModuleSectionActive } from "@/src/shared/lib/module-nav-active"
 import { cn } from "@/src/shared/lib/utils"
-import type { ModuleNavItem } from "@/src/shared/types/module-nav"
+import type { ModuleNavItem, ModuleSlug } from "@/src/shared/types/module-nav"
 import {
   BellIcon,
   ChevronRight,
@@ -64,19 +66,6 @@ const navItems = {
       icon: Settings,
     },
   ],
-  applications: [
-    {
-      title: FINANCE_APP_NAV.label,
-      url: FINANCE_APP_NAV.rootHref,
-      icon: FINANCE_APP_NAV.icon,
-      items: FINANCE_APP_NAV.items,
-    },
-    {
-      title: "Keep Awake",
-      url: APP_ROUTES.app.keepAwake,
-      icon: Monitor,
-    },
-  ],
   notifications: [
     {
       title: "Notificaciones",
@@ -86,8 +75,31 @@ const navItems = {
   ],
 }
 
+/** Sections shown inside an app; only Finanzas declares them today. */
+const APP_SECTIONS: Partial<Record<ModuleSlug, ModuleNavItem[]>> = {
+  finance: FINANCE_APP_NAV.items,
+}
+
 export function AppSidebar() {
   const { logoutMutation } = useAuth()
+  const { userModules } = useProfile()
+
+  const enabledSlugs = userModules
+    .filter((module) => module.isEnabled)
+    .map((module) => module.slug)
+  const applications = [
+    ...enabledAppEntries(enabledSlugs).map((entry) => ({
+      title: entry.label,
+      url: entry.href,
+      icon: entry.icon,
+      items: APP_SECTIONS[entry.slug],
+    })),
+    {
+      title: "Keep Awake",
+      url: APP_ROUTES.app.keepAwake,
+      icon: Monitor,
+    },
+  ]
 
   return (
     <Sidebar variant="floating" collapsible="icon">
@@ -114,7 +126,7 @@ export function AppSidebar() {
       <SidebarContent>
         <NavMain groupLabel="Menú principal" items={navItems.main} />
 
-        <NavMain groupLabel="Aplicaciones" items={navItems.applications} />
+        <NavMain groupLabel="Aplicaciones" items={applications} />
       </SidebarContent>
 
       <SidebarFooter>
