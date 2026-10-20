@@ -64,6 +64,7 @@ import type {
   FinanceInstitution,
 } from "@/src/modules/finance/shared/types/entities"
 import {
+  cardCreateBalanceRows,
   cardSchema,
   institutionAccountOptions,
   type CardFormValues,
@@ -234,7 +235,7 @@ export function CardFormScreen({
     const balancesPayload =
       card || values.type === "DEBIT"
         ? { ok: true as const, body: [] }
-        : buildCardBalanceBodies(values.balances, {
+        : buildCardBalanceBodies(cardCreateBalanceRows(values), {
             requireCreditLimit: values.type === "CREDIT",
           })
     if (!balancesPayload.ok) {

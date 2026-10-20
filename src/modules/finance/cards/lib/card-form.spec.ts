@@ -1,7 +1,12 @@
 import assert from "node:assert/strict"
 import { describe, it } from "node:test"
 
-import { cardSchema, institutionAccountOptions } from "./card-form.ts"
+import {
+  cardCreateBalanceRows,
+  cardSchema,
+  institutionAccountOptions,
+  type CardFormValues,
+} from "./card-form.ts"
 import type { FinanceAccount } from "../types/entities.ts"
 
 const validCard = {
@@ -67,6 +72,44 @@ function account(
     ...partial,
   }
 }
+
+describe("cardCreateBalanceRows", () => {
+  function creditCard(balances: CardFormValues["balances"]): CardFormValues {
+    return { ...validCard, balances }
+  }
+
+  it("turns the closing debt into the available credit the API stores", () => {
+    const rows = cardCreateBalanceRows(
+      creditCard([{ currency: "DOP", balance: "25000", creditLimit: "100000" }])
+    )
+
+    assert.deepEqual(rows, [
+      { currency: "DOP", balance: "75000", creditLimit: "100000" },
+    ])
+  })
+
+  it("takes an empty closing balance as zero debt", () => {
+    const rows = cardCreateBalanceRows(
+      creditCard([{ currency: "DOP", balance: "", creditLimit: "100000" }])
+    )
+
+    assert.deepEqual(rows, [
+      { currency: "DOP", balance: "100000", creditLimit: "100000" },
+    ])
+  })
+
+  it("leaves debit card rows untouched", () => {
+    const rows = cardCreateBalanceRows({
+      ...validCard,
+      type: "DEBIT",
+      balances: [{ currency: "DOP", balance: "100", creditLimit: "" }],
+    })
+
+    assert.deepEqual(rows, [
+      { currency: "DOP", balance: "100", creditLimit: "" },
+    ])
+  })
+})
 
 describe("institutionAccountOptions", () => {
   it("keeps only the accounts of the card institution", () => {

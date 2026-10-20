@@ -1,6 +1,7 @@
 import { z } from "zod"
 
 import { FINANCE_CARD_TYPES } from "@/src/modules/finance/shared/constants/catalog"
+import type { CardBalanceInput } from "@/src/modules/finance/shared/lib/catalog-payloads"
 import { parseFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 import type { FinanceAccount } from "@/src/modules/finance/shared/types/entities"
 
@@ -51,6 +52,27 @@ export const cardSchema = z
   })
 
 export type CardFormValues = z.infer<typeof cardSchema>
+
+/**
+ * The form asks for debt at the closing date; the API stores the available
+ * credit of each currency. An empty balance means no debt.
+ */
+export function cardCreateBalanceRows(
+  values: CardFormValues
+): CardBalanceInput[] {
+  if (values.type !== "CREDIT") {
+    return values.balances
+  }
+
+  return values.balances.map((row) => {
+    const creditLimit = parseFinanceMoney(row.creditLimit)
+    if (creditLimit === null) {
+      return row
+    }
+    const debt = parseFinanceMoney(row.balance) ?? 0
+    return { ...row, balance: String(creditLimit - debt) }
+  })
+}
 
 /**
  * Accounts a card can point at: the active ones of the chosen institution.
