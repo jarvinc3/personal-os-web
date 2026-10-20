@@ -2,6 +2,12 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.45.5] - 2026-10-20
+
+### Corregido
+
+- El detalle de un cobro mantiene visible la acción para registrar un pago mientras el cobro no esté cancelado ni castigado. Antes solo aparecía en el estado vacío y desaparecía con el primer pago (#184).
+
 ## [0.45.4] - 2026-10-19
 
 ### Cambiado
