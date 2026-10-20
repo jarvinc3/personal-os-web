@@ -14,6 +14,17 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 - `AGENTS.md` y `docs/README.md` enlazan las convenciones de issues y la nueva documentación. Sin cambios visibles en la app.
 
+## [0.47.0] - 2026-10-20
+
+### Agregado
+
+- El detalle de una transferencia ofrece Confirmar, Marcar como pendiente y Reversar. Marcar como pendiente devuelve los saldos y habilita la edición; Reversar deshace lo aplicado y deja el registro como revertido (#192).
+- Registrar el pago de una suscripción crea el gasto en su cuenta o tarjeta, lo vincula al historial del pago y avanza el próximo cobro. Sin método de pago no se registra (#197).
+
+### Corregido
+
+- El pago de una tarjeta aparece en Movimientos y en el historial de la cuenta y de la tarjeta; el saldo se puede reconstruir desde el historial (jarvinc3/personal-os-back#176).
+
 ## [0.46.0] - 2026-10-20
 
 ### Agregado

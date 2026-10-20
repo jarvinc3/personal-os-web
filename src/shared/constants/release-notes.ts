@@ -12,6 +12,14 @@ export type ReleaseNotesEntry = {
 
 export const RELEASE_NOTES: readonly ReleaseNotesEntry[] = [
   {
+    version: "0.47.0",
+    highlights: [
+      "El detalle de una transferencia permite confirmarla, marcarla como pendiente para editarla o reversarla. Al reversar, los saldos vuelven a su lugar.",
+      "Registrar el pago de una suscripción ya crea el gasto en su cuenta o tarjeta y lo cuenta en el mes. Si la suscripción no tiene método de pago, la app te pide asignarlo primero.",
+      "Los pagos de tarjeta aparecen en Movimientos y en el historial de la cuenta y de la tarjeta.",
+    ],
+  },
+  {
     version: "0.46.0",
     highlights: [
       "Al transferir entre monedas ya ves la tasa del día y puedes escribir la que usó el banco o el monto que recibiste. Antes de guardar ves cuánto entrará en la cuenta destino.",
