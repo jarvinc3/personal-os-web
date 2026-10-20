@@ -8,6 +8,7 @@ import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/lay
 import { FinanceProgressHero } from "@/src/modules/finance/shared/components/layout/progress-hero"
 import { ReceivablePaymentSheet } from "@/src/modules/finance/receivables/components/receivable-payment-sheet"
 import { ReceivableSheet } from "@/src/modules/finance/receivables/components/receivable-sheet"
+import { canRegisterReceivablePayment } from "@/src/modules/finance/receivables/lib/receivable-payment-form"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
 import {
@@ -42,7 +43,6 @@ import { Badge } from "@/src/shared/components/ui/badge"
 import { Button } from "@/src/shared/components/ui/button"
 import {
   Empty,
-  EmptyContent,
   EmptyDescription,
   EmptyHeader,
   EmptyMedia,
@@ -129,6 +129,9 @@ function ReceivableDetailScreenBody({
     ? (parseFinanceMoney(receivable.amount) ?? 0) -
       (parseFinanceMoney(receivable.paidAmount) ?? 0)
     : 0
+  const canRegisterPayment = receivable
+    ? canRegisterReceivablePayment(receivable.status)
+    : false
   const deleteReceivable = useDeleteReceivable()
   const restoreReceivable = useRestoreReceivable()
   const updateReceivable = useUpdateReceivable()
@@ -273,6 +276,13 @@ function ReceivableDetailScreenBody({
       />
 
       <div className="mx-4 flex flex-col gap-3 rounded-3xl bg-background">
+        {canRegisterPayment ? (
+          <Button className="w-full" onClick={() => setOpenPaymentSheet(true)}>
+            <PlusIcon />
+            Registrar cobro
+          </Button>
+        ) : null}
+
         {paymentsQuery.isError ? (
           <FinanceErrorState
             message={financeLoadErrorMessage(paymentsQuery.error)}
@@ -297,12 +307,6 @@ function ReceivableDetailScreenBody({
                   el saldo y tus movimientos cuentan lo mismo.
                 </EmptyDescription>
               </EmptyHeader>
-              <EmptyContent>
-                <Button onClick={() => setOpenPaymentSheet(true)}>
-                  <PlusIcon />
-                  Cobro
-                </Button>
-              </EmptyContent>
             </Empty>
           }
         >
