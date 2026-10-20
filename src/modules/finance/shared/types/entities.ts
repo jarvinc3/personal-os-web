@@ -113,6 +113,11 @@ export type FinanceTransaction = {
   transferToAccountName: string | null
   transferToCardId: string | null
   transferToCardName: string | null
+  /** Amount that entered the destination account, in its currency. */
+  transferToAmount?: string | null
+  transferToCurrency?: string | null
+  /** The rate came from the market quote instead of a user value. */
+  transferEstimated?: boolean
   possibleDuplicateOfId?: string | null
   /** Movimiento con el que este forma un par (por ejemplo, una reversa). */
   linkedTransactionId?: string | null

@@ -10,6 +10,7 @@ import { DestinationTrigger } from "@/src/modules/finance/shared/components/pick
 import { CATALOG_NONE } from "@/src/modules/finance/shared/constants/catalog"
 import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
 import { useCards } from "@/src/modules/finance/shared/hooks/use-cards"
+import { useExchangeRates } from "@/src/modules/finance/shared/hooks/use-exchange-rates"
 import { useCurrencyForTarget } from "@/src/modules/finance/shared/hooks/use-currency-for-target"
 import { useFinanceAmountEntry } from "@/src/modules/finance/shared/hooks/use-finance-amount-entry"
 import { useInstitutions } from "@/src/modules/finance/shared/hooks/use-institutions"
@@ -33,7 +34,18 @@ import {
   splitLedgerTarget,
 } from "@/src/modules/finance/shared/lib/ledger-payloads"
 import { buildSavingsGoalContributionBody } from "@/src/modules/finance/shared/lib/planning-payloads"
-import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
+import {
+  formatFinanceMoney,
+  parseFinanceMoney,
+  sanitizeAmountInput,
+  type FinanceMoneyDisplay,
+} from "@/src/modules/finance/shared/lib/money"
+import {
+  crossExchangeRate,
+  formatTransferRateInput,
+  receivedFromRate,
+  transferRateLabel,
+} from "@/src/modules/finance/transactions/lib/transfer-fx"
 import type { FinanceTransaction } from "@/src/modules/finance/shared/types/entities"
 import { FormTextField } from "@/src/shared/components/layout/form-blocks"
 import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
@@ -94,6 +106,14 @@ function transferDefaults(
     destinationPending: false,
     rail: "" as const,
     feeAmount: "",
+    exchangeRate:
+      transfer && !transfer.transferEstimated
+        ? (transfer.exchangeRate ?? "")
+        : "",
+    receivedAmount:
+      transfer && !transfer.transferEstimated
+        ? (transfer.transferToAmount ?? "")
+        : "",
     description: transfer?.description ?? "",
     notes: transfer?.notes ?? "",
   }
@@ -138,6 +158,9 @@ export function TransferForm({
   const [guidedStep, setGuidedStep] = useState<GuidedStep>(() =>
     isEdit ? "done" : "from"
   )
+  const [rateTouched, setRateTouched] = useState(
+    Boolean(isEdit && transfer && !transfer.transferEstimated)
+  )
   const amountFieldRef = useRef<FinanceMoneyFieldHandle>(null)
   const guidedFromOpened = useRef(false)
   const guidedToOpened = useRef(false)
@@ -160,6 +183,58 @@ export function TransferForm({
   const fromTarget = useWatch({ control, name: "fromTarget" })
   const toTarget = useWatch({ control, name: "toTarget" })
   const currency = useWatch({ control, name: "currency" })
+  const toAccountId = splitLedgerTarget(toTarget).accountId
+  const toCardId = splitLedgerTarget(toTarget).cardId
+  const destinationCurrency =
+    accounts.find((account) => account.id === toAccountId)?.currency ??
+    cards.find((card) => card.id === toCardId)?.balances[0]?.currency ??
+    null
+  const sourceCurrency = (currency || defaultCurrency).toUpperCase()
+  const crossCurrency = Boolean(
+    destinationCurrency && destinationCurrency.toUpperCase() !== sourceCurrency
+  )
+  const rateQuotes =
+    crossCurrency && destinationCurrency
+      ? [sourceCurrency, destinationCurrency]
+      : []
+  const ratesQuery = useExchangeRates(display.currency, rateQuotes)
+  const sourceRate = ratesQuery.data?.rates.find(
+    (quote) => quote.currency === sourceCurrency
+  )?.rate
+  const destinationRate = destinationCurrency
+    ? ratesQuery.data?.rates.find(
+        (quote) => quote.currency === destinationCurrency.toUpperCase()
+      )?.rate
+    : null
+  const marketRate = crossCurrency
+    ? crossExchangeRate({ sourceRate, destinationRate })
+    : null
+  const previewRate = parseFinanceMoney(formValues.exchangeRate) ?? marketRate
+  const receivedPreview =
+    parseFinanceMoney(formValues.receivedAmount) ??
+    receivedFromRate(formValues.amount, previewRate)
+  const prefilledPair = useRef("")
+
+  useEffect(() => {
+    if (isEdit || !crossCurrency || marketRate === null) {
+      return
+    }
+    const pairKey = `${sourceCurrency}:${destinationCurrency}`
+    if (prefilledPair.current === pairKey) {
+      return
+    }
+    prefilledPair.current = pairKey
+    setValue("exchangeRate", formatTransferRateInput(marketRate), {
+      shouldValidate: true,
+    })
+  }, [
+    crossCurrency,
+    destinationCurrency,
+    isEdit,
+    marketRate,
+    setValue,
+    sourceCurrency,
+  ])
 
   const canSave =
     !activeMutation.isPending && targetsReady && canTransfer && formIsValid
@@ -259,6 +334,11 @@ export function TransferForm({
       rail: values.rail || undefined,
       feeAmount: values.feeAmount,
       destinationPending: values.destinationPending,
+      exchangeRate:
+        rateTouched || (isEdit && transfer?.transferEstimated === false)
+          ? values.exchangeRate
+          : undefined,
+      receivedAmount: values.receivedAmount,
       fromAccountId: from.accountId,
       toAccountId: to.accountId,
       toCardId: to.cardId,
@@ -426,6 +506,73 @@ export function TransferForm({
               />
             )}
           />
+
+          {crossCurrency ? (
+            <>
+              <Controller
+                control={control}
+                name="exchangeRate"
+                render={({ field }) => (
+                  <FormTextField
+                    icon={ArrowUpDownIcon}
+                    label="Tasa aplicada"
+                    value={field.value}
+                    onChange={(next) => {
+                      setRateTouched(true)
+                      field.onChange(sanitizeAmountInput(next))
+                    }}
+                    onBlur={field.onBlur}
+                    error={errors.exchangeRate?.message}
+                    placeholder={
+                      marketRate === null
+                        ? "Tasa del día"
+                        : formatTransferRateInput(marketRate)
+                    }
+                  />
+                )}
+              />
+              <Controller
+                control={control}
+                name="receivedAmount"
+                render={({ field }) => (
+                  <FinanceMoneyField
+                    label="Monto recibido"
+                    amount={field.value}
+                    onAmountChange={field.onChange}
+                    onAmountCommit={(next) => {
+                      field.onChange(next)
+                      void trigger("receivedAmount")
+                    }}
+                    onAmountBlur={field.onBlur}
+                    amountError={errors.receivedAmount?.message}
+                    currency={destinationCurrency ?? currency}
+                  />
+                )}
+              />
+              <div className="flex flex-col gap-1 px-1 text-xs text-muted-foreground">
+                <span>
+                  {marketRate === null || !destinationCurrency
+                    ? "Tasa del día no disponible. Escribe la tasa o el monto recibido."
+                    : `Tasa del día: ${transferRateLabel({
+                        rate: marketRate,
+                        sourceCurrency,
+                        destinationCurrency,
+                      })}`}
+                </span>
+                {receivedPreview !== null && destinationCurrency ? (
+                  <span>
+                    Recibirás{" "}
+                    {formatFinanceMoney(String(receivedPreview), {
+                      ...display,
+                      currency: destinationCurrency,
+                    })}
+                    .
+                  </span>
+                ) : null}
+                <span>El monto recibido manda si escribes los dos.</span>
+              </div>
+            </>
+          ) : null}
         </SummarySection>
 
         <SummarySection title="Detalles opcionales" icon={InfoIcon} collapsible>

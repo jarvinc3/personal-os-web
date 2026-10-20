@@ -34,6 +34,7 @@ import {
   movementSign,
   transferDirectionLabel,
 } from "@/src/modules/finance/shared/lib/transactions-query"
+import { transferRateLabel } from "@/src/modules/finance/transactions/lib/transfer-fx"
 import {
   FINANCE_TRANSACTION_STATUS_LABEL,
   FINANCE_TRANSACTION_TYPE_LABEL,
@@ -438,6 +439,17 @@ function TransactionDetailScreenBody({
             isLast={false}
             className="px-3"
           />
+          {isTransferTransaction(tx) && tx.transferToAmount ? (
+            <SummaryItem
+              title="Monto recibido"
+              value={formatFinanceMoney(tx.transferToAmount, {
+                ...display,
+                currency: tx.transferToCurrency ?? tx.currency,
+              })}
+              isLast={false}
+              className="px-3"
+            />
+          ) : null}
           <SummaryItem
             title="En moneda base"
             value={formatFinanceMoney(tx.amountBaseCurrency, display)}
@@ -512,6 +524,26 @@ function TransactionDetailScreenBody({
                 isLast={false}
                 className="px-3"
               />
+              {tx.transferToCurrency &&
+              tx.transferToCurrency !== tx.currency &&
+              tx.exchangeRate ? (
+                <SummaryItem
+                  title={tx.transferEstimated ? "Tasa estimada" : "Tasa"}
+                  value={transferRateLabel({
+                    rate: tx.exchangeRate,
+                    sourceCurrency: tx.currency,
+                    destinationCurrency: tx.transferToCurrency,
+                  })}
+                  isLast={false}
+                  className="px-3"
+                />
+              ) : null}
+              {tx.transferEstimated ? (
+                <p className="px-1 text-xs text-muted-foreground">
+                  La tasa es la del día. Edita la transferencia para indicar la
+                  tasa o el monto que recibiste.
+                </p>
+              ) : null}
             </>
           ) : (
             <>

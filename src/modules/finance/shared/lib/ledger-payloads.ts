@@ -28,6 +28,8 @@ export type CreateTransferBody = {
   rail?: string
   fee?: { amount: number }
   destinationPending?: boolean
+  exchangeRate?: number
+  receivedAmount?: number
 }
 
 export type CreateCardPaymentBody = {
@@ -269,6 +271,8 @@ export function buildCreateTransferBody(input: {
   rail?: string
   feeAmount?: string
   destinationPending?: boolean
+  exchangeRate?: string
+  receivedAmount?: string
 }): PayloadResult<CreateTransferBody> {
   const amount = parseFinanceMoney(input.amount)
   if (amount === null) {
@@ -323,6 +327,22 @@ export function buildCreateTransferBody(input: {
   }
   if (input.destinationPending) {
     body.destinationPending = true
+  }
+  const exchangeRate = optionalTrimmed(input.exchangeRate)
+  if (exchangeRate) {
+    const parsedRate = parseFinanceMoney(exchangeRate)
+    if (parsedRate === null || parsedRate <= 0) {
+      return { ok: false, error: "Tasa inválida" }
+    }
+    body.exchangeRate = parsedRate
+  }
+  const receivedAmount = optionalTrimmed(input.receivedAmount)
+  if (receivedAmount) {
+    const parsedReceived = parseFinanceMoney(receivedAmount)
+    if (parsedReceived === null || parsedReceived <= 0) {
+      return { ok: false, error: "Monto recibido inválido" }
+    }
+    body.receivedAmount = parsedReceived
   }
   const feeAmount = optionalTrimmed(input.feeAmount)
   if (feeAmount) {

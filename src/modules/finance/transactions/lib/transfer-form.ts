@@ -4,6 +4,7 @@ import {
   isLedgerTargetInput,
   isDateTimeInput,
   isPositiveAmountInput,
+  isPositiveRateInput,
 } from "@/src/modules/finance/shared/lib/ledger-form"
 
 export const TRANSFER_RAILS = ["SAME_BANK", "ACH", "LBTR", "OTHER"] as const
@@ -41,6 +42,20 @@ export const transferSchema = z
       .refine(
         (value) => value === "" || isPositiveAmountInput(value),
         "Monto de comisión inválido"
+      ),
+    exchangeRate: z
+      .string()
+      .trim()
+      .refine(
+        (value) => value === "" || isPositiveRateInput(value),
+        "Tasa inválida"
+      ),
+    receivedAmount: z
+      .string()
+      .trim()
+      .refine(
+        (value) => value === "" || isPositiveAmountInput(value),
+        "Monto recibido inválido"
       ),
     description: z.string(),
     notes: z.string(),

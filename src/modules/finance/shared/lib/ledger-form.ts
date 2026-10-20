@@ -29,6 +29,14 @@ export function isPositiveAmountInput(value: string): boolean {
   return amount > 0
 }
 
+/** A rate keeps up to the 8 decimals the API stores. */
+export function isPositiveRateInput(value: string): boolean {
+  if (!/^\d*\.?\d{0,8}$/.test(value.trim())) {
+    return false
+  }
+  return isPositiveAmountInput(value)
+}
+
 /** The manual forms always carry a date and an hour. */
 export function isDateTimeInput(value: string): boolean {
   return DATE_TIME_FORM.test(value)

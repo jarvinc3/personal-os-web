@@ -12,6 +12,13 @@ export type ReleaseNotesEntry = {
 
 export const RELEASE_NOTES: readonly ReleaseNotesEntry[] = [
   {
+    version: "0.46.0",
+    highlights: [
+      "Al transferir entre monedas ya ves la tasa del día y puedes escribir la que usó el banco o el monto que recibiste. Antes de guardar ves cuánto entrará en la cuenta destino.",
+      "El detalle de la transferencia muestra lo enviado, lo recibido y la tasa. Si dejaste la tasa del día, te avisa que es una estimación.",
+    ],
+  },
+  {
     version: "0.45.9",
     highlights: [
       "Al crear una tarjeta de crédito ya queda con la deuda que escribes, no con el límite completo. Un saldo vacío cuenta como 0.",
