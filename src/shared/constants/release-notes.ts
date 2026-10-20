@@ -12,6 +12,16 @@ export type ReleaseNotesEntry = {
 
 export const RELEASE_NOTES: readonly ReleaseNotesEntry[] = [
   {
+    version: "0.47.2",
+    highlights: [
+      "El menú lateral muestra solo las apps que tienes activas, en el mismo orden de siempre, y se actualiza al encenderlas o apagarlas. Keep Awake sigue fijo.",
+      "La descripción de Apariencia y las opciones de vista de Proyectos ya se leen en español: Tablero, Lista y Cronograma.",
+      "El detalle de la tarjeta muestra la utilización real aunque la deuda pase del límite, y avisa cuánto es el sobregiro.",
+      "El resumen del préstamo cuadra el interés total con las cuotas que ves, y la última cuota aparece con su monto ajustado.",
+      "Al eliminar un movimiento, el diálogo lo nombra por su descripción e indica el monto antes de confirmar.",
+    ],
+  },
+  {
     version: "0.47.1",
     highlights: [
       "Sin cambios visibles: orden interno de los tipos y del detalle de movimiento para que sea más fácil mantenerlos.",
