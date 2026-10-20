@@ -651,6 +651,17 @@ export function LoanWizard({
                 })}
                 isLast={false}
               />
+              {plan.lastInstallmentAmount !== plan.installmentAmount ? (
+                <SummaryItem
+                  title="Última cuota"
+                  icon={ArrowDownCircleIcon}
+                  value={formatFinanceMoney(
+                    String(plan.lastInstallmentAmount),
+                    { ...display, currency }
+                  )}
+                  isLast={false}
+                />
+              ) : null}
               <SummaryItem
                 title="Cuotas"
                 icon={HashIcon}

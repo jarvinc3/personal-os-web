@@ -606,9 +606,12 @@ function TransactionDetailScreenBody({
       <DeleteRecordDialog
         open={confirmOpen}
         onOpenChange={setConfirmOpen}
-        recordName={tx.merchant ?? tx.description ?? "Movimiento"}
+        recordName={tx.description ?? tx.merchant ?? "Movimiento"}
         pending={deleteMutation.isPending}
-        consequences="El saldo de la cuenta se corrige. No se puede deshacer."
+        consequences={`Se elimina ${formatFinanceMoney(tx.amount, {
+          ...display,
+          currency: tx.currency,
+        })}. El saldo de la cuenta se corrige y no se puede deshacer.`}
         onConfirm={() => void onDelete()}
       />
 
