@@ -1,5 +1,7 @@
 import { format, startOfMonth, startOfWeek, startOfYear } from "date-fns"
 
+import { isoMonthBounds } from "./month-window.ts"
+
 export type FinanceDashboardPeriod = "week" | "month" | "year"
 
 export type FinanceDashboardRange = {
@@ -37,6 +39,17 @@ export function financeDashboardRange(
     dateTo,
     granularity: "month",
   }
+}
+
+/** Calendar month used by the home card, so it matches Movimientos. */
+export function financeMonthSummaryRange(
+  now: Date = new Date()
+): FinanceDashboardRange {
+  const { dateFrom, dateTo } = isoMonthBounds(
+    now.getFullYear(),
+    now.getMonth() + 1
+  )
+  return { dateFrom, dateTo, granularity: "day" }
 }
 
 export const FINANCE_DASHBOARD_PERIOD_OPTIONS: {
