@@ -35,15 +35,15 @@ import {
   formatTransactionDate,
   isTransferTransaction,
   movementSign,
-  transferDirectionLabel,
 } from "@/src/modules/finance/shared/lib/transactions-query"
-import { transferRateLabel } from "@/src/modules/finance/transactions/lib/transfer-fx"
+import { FINANCE_TRANSACTION_STATUS_LABEL } from "@/src/modules/finance/shared/types/entities"
+import { TransactionReversalNotice } from "@/src/modules/finance/transactions/components/transaction-reversal-notice"
+import { TransactionTransferDetails } from "@/src/modules/finance/transactions/components/transaction-transfer-details"
 import {
-  FINANCE_TRANSACTION_STATUS_LABEL,
-  FINANCE_TRANSACTION_TYPE_LABEL,
-  type FinanceTransaction,
-  type FinanceTransactionType,
-} from "@/src/modules/finance/shared/types/entities"
+  canConfirmTransaction as canConfirm,
+  canUnlockConfirmedTransaction as canUnlock,
+  transactionTypeLabel as typeLabel,
+} from "@/src/modules/finance/transactions/lib/transaction-detail"
 import { DeleteRecordDialog } from "@/src/modules/finance/shared/components/delete-record-dialog"
 import { RecordOptionsSheet } from "@/src/modules/finance/shared/components/record-options-sheet"
 import { LoadingView } from "@/src/shared/components/layout/loading-view"
@@ -70,12 +70,10 @@ import { appToast } from "@/src/shared/lib/app-toast"
 import {
   ArrowLeftRightIcon,
   CopyIcon,
-  ExternalLinkIcon,
   GitMergeIcon,
   LinkIcon,
   MoreVerticalIcon,
   PencilIcon,
-  RotateCcwIcon,
   TargetIcon,
   Trash2Icon,
   UnlinkIcon,
@@ -85,10 +83,7 @@ import { useRouter } from "next/navigation"
 import { useMemo, useState } from "react"
 
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
-import {
-  canEditTransaction,
-  canUnlockTransaction,
-} from "@/src/modules/finance/transactions/lib/transaction-edit"
+import { canEditTransaction } from "@/src/modules/finance/transactions/lib/transaction-edit"
 
 type FinanceTransactionDetailProps = {
   transactionId: string
@@ -102,21 +97,6 @@ export function TransactionDetailScreen({
       <TransactionDetailScreenBody transactionId={transactionId} />
     </FinanceGate>
   )
-}
-
-function typeLabel(type: string): string {
-  if (type in FINANCE_TRANSACTION_TYPE_LABEL) {
-    return FINANCE_TRANSACTION_TYPE_LABEL[type as FinanceTransactionType]
-  }
-  return type
-}
-
-function canConfirm(transaction: FinanceTransaction): boolean {
-  return transaction.status === "PENDING"
-}
-
-function canUnlock(transaction: FinanceTransaction): boolean {
-  return canUnlockTransaction(transaction)
 }
 
 function TransactionDetailScreenBody({
@@ -415,33 +395,12 @@ function TransactionDetailScreenBody({
         </div>
       ) : null}
 
-      {tx.status === "REVERSED" ? (
-        <div className="mx-4 mb-3">
-          <SummarySection title="Revertido" icon={RotateCcwIcon}>
-            <p className="px-1 text-sm text-muted-foreground">
-              {tx.source === "EMAIL"
-                ? "El banco devolvió este movimiento y el saldo volvió a su lugar."
-                : "El saldo de este movimiento volvió a su lugar."}
-            </p>
-            {tx.linkedTransactionId ? (
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="self-start"
-                onClick={() =>
-                  router.push(
-                    APP_ROUTES.app.financeTransaction(tx.linkedTransactionId!)
-                  )
-                }
-              >
-                <ExternalLinkIcon className="size-4 shrink-0" />
-                Ver movimiento original
-              </Button>
-            ) : null}
-          </SummarySection>
-        </div>
-      ) : null}
+      <TransactionReversalNotice
+        transaction={tx}
+        onOpenOriginal={(id) =>
+          router.push(APP_ROUTES.app.financeTransaction(id))
+        }
+      />
 
       <div className="mx-4 flex flex-col gap-3">
         <p className="text-sm text-muted-foreground">
@@ -495,82 +454,7 @@ function TransactionDetailScreenBody({
             className="px-3"
           />
           {isTransferTransaction(tx) ? (
-            <>
-              <SummaryItem
-                title="Origen"
-                value={tx.accountName ?? tx.cardName ?? "—"}
-                leading={
-                  <span className="inline-flex items-center gap-1">
-                    <BrandLogo
-                      name={tx.accountName ?? tx.cardName ?? "Origen"}
-                      logoUrl={tx.institutionLogoUrl}
-                      size={28}
-                    />
-                    {tx.cardId ? (
-                      <CardNetworkMark
-                        network={tx.network}
-                        logoUrl={tx.networkLogoUrl}
-                        size={28}
-                      />
-                    ) : null}
-                  </span>
-                }
-                isLast={false}
-                className="px-3"
-              />
-              <SummaryItem
-                title="Destino"
-                value={tx.transferToAccountName ?? tx.transferToCardName ?? "—"}
-                leading={
-                  <span className="inline-flex items-center gap-1">
-                    <BrandLogo
-                      name={
-                        tx.transferToAccountName ??
-                        tx.transferToCardName ??
-                        "Destino"
-                      }
-                      logoUrl={tx.transferToInstitutionLogoUrl}
-                      size={28}
-                    />
-                    {tx.transferToCardId ? (
-                      <CardNetworkMark
-                        network={tx.transferToNetwork}
-                        logoUrl={tx.transferToNetworkLogoUrl}
-                        size={28}
-                      />
-                    ) : null}
-                  </span>
-                }
-                isLast={false}
-                className="px-3"
-              />
-              <SummaryItem
-                title="Ruta"
-                value={transferDirectionLabel(tx)}
-                isLast={false}
-                className="px-3"
-              />
-              {tx.transferToCurrency &&
-              tx.transferToCurrency !== tx.currency &&
-              tx.exchangeRate ? (
-                <SummaryItem
-                  title={tx.transferEstimated ? "Tasa estimada" : "Tasa"}
-                  value={transferRateLabel({
-                    rate: tx.exchangeRate,
-                    sourceCurrency: tx.currency,
-                    destinationCurrency: tx.transferToCurrency,
-                  })}
-                  isLast={false}
-                  className="px-3"
-                />
-              ) : null}
-              {tx.transferEstimated ? (
-                <p className="px-1 text-xs text-muted-foreground">
-                  La tasa es la del día. Edita la transferencia para indicar la
-                  tasa o el monto que recibiste.
-                </p>
-              ) : null}
-            </>
+            <TransactionTransferDetails transaction={tx} />
           ) : (
             <>
               <SummaryItem
