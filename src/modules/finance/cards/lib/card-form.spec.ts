@@ -58,7 +58,7 @@ function account(
     institutionName: "Banco",
     type: "CHECKING",
     currency: "DOP",
-    accountNumber: null,
+    accountNumberLast4: null,
     balance: "0",
     color: null,
     isActive: true,

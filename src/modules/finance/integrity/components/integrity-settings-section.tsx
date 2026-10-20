@@ -29,6 +29,16 @@ export function FinanceIntegritySettingsSection({
   const recalculate = useRecalculateBalance()
   const drifts = integrityQuery.data?.drifts ?? []
 
+  if (!enabled) {
+    return (
+      <SummarySection title="Integridad de saldos" icon={RefreshCwIcon}>
+        <p className="p-3 text-sm text-muted-foreground">
+          Activa Finanzas para revisar la integridad de tus saldos.
+        </p>
+      </SummarySection>
+    )
+  }
+
   async function runCheck() {
     try {
       const checked = await integrityQuery.refetch()

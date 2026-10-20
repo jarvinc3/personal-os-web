@@ -43,7 +43,7 @@ export function LoginScreen() {
 function LoginScreenBody() {
   const router = useRouter()
   const isMobile = useIsMobile()
-  const { isAuthenticated, isLoading } = useAuthGuard()
+  const { isAuthenticated } = useAuthGuard()
   const { loginMutation, loginWithGoogleMutation, registerMutation } = useAuth()
   const [authMode, setAuthMode] = useState<AuthMode>("login")
   const desktopLoginFormRef = useRef<LoginFormHandle>(null)
@@ -57,15 +57,13 @@ function LoginScreenBody() {
     useSheetParam("register-sheet")
 
   useEffect(() => {
-    if (!isLoading && isAuthenticated) {
+    if (isAuthenticated) {
       router.replace(APP_ROUTES.app.home)
     }
-  }, [isAuthenticated, isLoading, router])
+  }, [isAuthenticated, router])
 
-  if (isLoading) {
-    return <LoadingView variant="screen" />
-  }
-
+  // No bootstrap gate: a stale stored session must not block the form while
+  // `/users/me` is slow. The effect redirects once the profile hydrates.
   if (isAuthenticated) {
     return <LoadingView variant="screen" />
   }

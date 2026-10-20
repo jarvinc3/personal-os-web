@@ -13,7 +13,6 @@ import {
   formatSharePendingTotals,
   MAX_RECEIVABLE_SHARE_ITEMS,
   maskShareUrl,
-  receivablePending,
   receivableShareConcept,
   shareSelectionDebtor,
   shareSelectionError,
@@ -66,19 +65,6 @@ describe("shareableReceivables", () => {
     const listed = [receivable({ id: "pending" })]
 
     assert.notEqual(shareableReceivables(listed), listed)
-  })
-})
-
-describe("receivablePending", () => {
-  it("subtracts what was collected", () => {
-    assert.equal(receivablePending(receivable({ id: "a" })), 5500)
-  })
-
-  it("treats a missing collected amount as zero", () => {
-    assert.equal(
-      receivablePending(receivable({ id: "a", paidAmount: "" })),
-      8500
-    )
   })
 })
 

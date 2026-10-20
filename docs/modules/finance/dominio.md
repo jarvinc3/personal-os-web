@@ -82,7 +82,7 @@ El saldo guardado de cada cuenta y tarjeta debe ser siempre la suma de sus movim
 1. `GET /finance/integrity/check` compara el saldo guardado con el recalculado desde el inicio (saldo inicial cero más los movimientos `CONFIRMED`; pendientes y revertidos no cuentan) y registra cada desviación abierta en `fin_balance_drifts`. Con `?accountId=` o `?cardId=` se limita a un producto.
 2. `POST /finance/integrity/recalculate` corrige el saldo guardado a la suma de los movimientos y cierra la desviación. No crea movimientos; el recálculo va en la misma transacción que la corrección.
 3. Un job nocturno (`BalanceIntegrityScheduler`) recorre los productos de cada usuario y emite `FINANCE_BALANCE_DRIFT_DETECTED` por desviación nueva o cambiada. La notificación se controla con `notifications.balanceIntegrity`.
-4. En la web, el detalle de cuenta o tarjeta de crédito (las de débito usan su cuenta) muestra un banner con saldo guardado, esperado y diferencia, más "Recalcular" con confirmación. Productos lista las desviaciones abiertas y Ajustes → Finanzas tiene "Verificar ahora".
+4. En la web, el detalle de cuenta o tarjeta de crédito (las de débito usan su cuenta) muestra un banner con saldo guardado, esperado y diferencia, más "Recalcular" con confirmación. Productos lista las desviaciones abiertas y Ajustes → Finanzas tiene "Verificar ahora". Esa sección solo consulta con la app activa; desactivada, muestra el aviso para activarla.
 
 La diferencia con el banco sigue siendo cosa de la conciliación ([09](../../archive/pendientes/09-conciliacion-ajustes.md)); una desviación de I1 se recalcula, no se concilia.
 

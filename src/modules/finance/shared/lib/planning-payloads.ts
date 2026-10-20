@@ -20,7 +20,8 @@ export type CreateSavingsGoalBody = {
   mode?: "EARMARK" | "DEDICATED"
   description?: string
   currency?: string
-  targetDate?: string
+  /** `null` clears the date; a string sets it. */
+  targetDate?: string | null
   currentAmount?: number
 }
 
@@ -207,7 +208,7 @@ export function buildSavingsGoalBody(
       ...(input.mode ? { mode: input.mode } : {}),
       ...(description ? { description } : {}),
       ...(currency ? { currency } : {}),
-      ...(targetDate.body ? { targetDate: targetDate.body } : {}),
+      targetDate: targetDate.body ?? null,
       ...(currentAmount !== undefined ? { currentAmount } : {}),
     },
   }
@@ -430,6 +431,8 @@ export type CreateSavingsGoalContributionBody = {
   kind?: "CONTRIBUTION" | "WITHDRAWAL"
   date?: string
   notes?: string
+  /** Account the money comes from; the API moves it when it is not the goal account. */
+  fromAccountId?: string
   fromTransferGroupId?: string
 }
 
@@ -438,6 +441,7 @@ export function buildSavingsGoalContributionBody(input: {
   kind?: "CONTRIBUTION" | "WITHDRAWAL"
   date?: string
   notes?: string
+  fromAccountId?: string
   fromTransferGroupId?: string
 }): PayloadResult<CreateSavingsGoalContributionBody> {
   const amount = requiredMoney(input.amount, "Aporte")
@@ -454,6 +458,7 @@ export function buildSavingsGoalContributionBody(input: {
   }
 
   const notes = optionalTrimmed(input.notes)
+  const fromAccountId = optionalTrimmed(input.fromAccountId)
   const transferGroupId = optionalTrimmed(input.fromTransferGroupId)
 
   return {
@@ -463,6 +468,7 @@ export function buildSavingsGoalContributionBody(input: {
       ...(input.kind ? { kind: input.kind } : {}),
       ...(date.body ? { date: date.body } : {}),
       ...(notes ? { notes } : {}),
+      ...(fromAccountId ? { fromAccountId } : {}),
       ...(transferGroupId ? { fromTransferGroupId: transferGroupId } : {}),
     },
   }

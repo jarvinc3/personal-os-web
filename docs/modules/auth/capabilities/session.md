@@ -9,6 +9,7 @@ Montado en raíz (`AuthBootstrapProvider` → `useAuthBootstrap`):
 3. Con sesión: `establishAuthenticatedSession` → `hydrateAuthUser` (`GET /users/me`) → store + `PROFILE_QUERY_KEY`.
 4. `TOKEN_REFRESHED` con perfil ya hidratado: solo actualiza tokens, no re-fetch.
 5. `bootstrapped=true` al terminar (o al fallar y limpiar). Hasta entonces `useAuthGuard().isLoading`.
+6. En `/login` no se hidrata la sesión guardada: el proxy ya no encontró claims. El formulario se muestra sin esperar a `bootstrapped`, y un login o registro exitoso marca `bootstrapped=true` aunque el bootstrap siga pendiente.
 
 ## Login / registro
 

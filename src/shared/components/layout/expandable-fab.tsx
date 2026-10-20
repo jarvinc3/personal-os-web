@@ -12,7 +12,7 @@ type ExpandableFabAction = ModuleFabAction
 
 export function ExpandableFab({
   actions,
-  label = "Nuevo movimiento",
+  label = "Acciones",
 }: {
   actions: ExpandableFabAction[]
   label?: string
@@ -47,7 +47,7 @@ export function ExpandableFab({
           hiddenOnMobile
         )}
       >
-        {/* Main FAB */}
+        {/* Button to open the actions */}
         <motion.button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
@@ -60,7 +60,7 @@ export function ExpandableFab({
           <Plus className="h-5 w-5" aria-hidden />
         </motion.button>
 
-        {/* Action buttons */}
+        {/* Buttons for the actions */}
         <AnimatePresence>
           {isOpen &&
             actions.map((action, index) => (

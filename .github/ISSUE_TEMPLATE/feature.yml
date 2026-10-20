@@ -1,0 +1,114 @@
+name: Capacidad
+description: Un resultado observable que el producto debe entregar
+title: ""
+labels: ["feature"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Antes de guardar, revisa `docs/issue-conventions.md` del repositorio.
+        Un issue expresa una sola necesidad principal.
+
+  - type: textarea
+    id: historia
+    attributes:
+      label: Historia
+      description: Como <persona>, quiero <capacidad>, para <resultado verificable>.
+      placeholder: Como dueño de la cuenta, quiero..., para...
+    validations:
+      required: true
+
+  - type: textarea
+    id: contexto
+    attributes:
+      label: Contexto
+      description: Por qué se necesita ahora. Déjalo vacío si no evita una ambigüedad real.
+    validations:
+      required: false
+
+  - type: textarea
+    id: alcance
+    attributes:
+      label: Alcance
+      description: Qué comportamiento o capacidad se entrega, en bullets independientes.
+      placeholder: |
+        - ...
+        - ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: reglas
+    attributes:
+      label: Reglas de negocio
+      description: Reglas que deben cumplirse siempre, permisos, precedencias o casos límite.
+    validations:
+      required: false
+
+  - type: textarea
+    id: criterios
+    attributes:
+      label: Criterios de aceptación
+      description: Dado <contexto>, cuando <acción>, entonces <resultado observable>.
+      placeholder: |
+        - Dado ..., cuando ..., entonces ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: dependencias
+    attributes:
+      label: Dependencias
+      description: Issues o cambios que deben existir primero, con una frase que explique por qué bloquean.
+      placeholder: "- #123 — define el contrato de..."
+    validations:
+      required: false
+
+  - type: textarea
+    id: fuera-de-alcance
+    attributes:
+      label: Fuera de alcance
+      description: Trabajo cercano que este issue no resuelve.
+    validations:
+      required: false
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Área
+      description: La app de producto o el paquete del workspace que toca.
+      options:
+        - finance
+        - agenda
+        - projects
+        - health
+        - ai
+        - notifications
+        - users
+        - core
+    validations:
+      required: true
+
+  - type: dropdown
+    id: prioridad
+    attributes:
+      label: Prioridad
+      description: Impacto y urgencia, no dificultad técnica.
+      options:
+        - High
+        - Medium
+        - Low
+    validations:
+      required: true
+
+  - type: dropdown
+    id: talla
+    attributes:
+      label: Talla
+      description: S un par de archivos; M toca contrato o migración; L cruza back y web.
+      options:
+        - S
+        - M
+        - L
+    validations:
+      required: true

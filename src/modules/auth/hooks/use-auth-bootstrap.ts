@@ -5,6 +5,7 @@ import { getSupabaseBrowserClient } from "@/src/config/supabase/client"
 import { resolveAuthStateChangeDecision } from "@/src/modules/auth/lib/auth-state-change"
 import { establishAuthenticatedSession } from "@/src/modules/auth/lib/establish-auth-session"
 import { PROFILE_QUERY_KEY } from "@/src/modules/auth/lib/hydrate-auth-user"
+import { shouldHydrateStoredSession } from "@/src/modules/auth/lib/auth-bootstrap-state"
 import { mapSupabaseSession } from "@/src/modules/auth/services/supabase-auth.service"
 import { authEvents } from "@/src/shared/events/auth-events"
 import { useAppStore } from "@/src/shared/store/app-store"
@@ -18,6 +19,10 @@ const BOOTSTRAP_FALLBACK_MS = 3_000
 async function resolveSessionBootstrap(session: Session | null): Promise<void> {
   if (!session) {
     useAppStore.getState().clearAuthState()
+    return
+  }
+
+  if (!shouldHydrateStoredSession(window.location.pathname)) {
     return
   }
 

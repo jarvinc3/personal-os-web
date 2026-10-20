@@ -6,7 +6,10 @@ import {
   FinanceSuggestionRow,
 } from "@/src/modules/finance/shared/components/forms/form-blocks"
 import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
+import { DestinationPickerSheet } from "@/src/modules/finance/shared/components/pickers/destination-picker-sheet"
+import { DestinationTrigger } from "@/src/modules/finance/shared/components/pickers/destination-trigger"
 import { FinanceCurrencyPickerSheet } from "@/src/modules/finance/shared/components/pickers/finance-currency-picker-sheet"
+import { CATALOG_NONE } from "@/src/modules/finance/shared/constants/catalog"
 import {
   useCreateSavingsGoal,
   useUpdateSavingsGoal,
@@ -14,18 +17,24 @@ import {
 import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
 import { useDiscardChanges } from "@/src/modules/finance/shared/hooks/use-discard-changes"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
+import { useInstitutions } from "@/src/modules/finance/shared/hooks/use-institutions"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 import {
   formatPlanningDate,
   monthlySavingsSuggestion,
 } from "@/src/modules/finance/shared/lib/planning-lists"
+import {
+  encodeLedgerTarget,
+  splitLedgerTarget,
+} from "@/src/modules/finance/shared/lib/ledger-payloads"
 import { todayDateInput } from "@/src/modules/finance/shared/lib/ledger-form"
 import { buildSavingsGoalBody } from "@/src/modules/finance/shared/lib/planning-payloads"
 import type { FinanceSavingsGoal } from "@/src/modules/finance/shared/types/entities"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
 import { FormTextField } from "@/src/shared/components/layout/form-blocks"
 import { Button } from "@/src/shared/components/ui/button"
+import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { SummarySection } from "@/src/shared/components/ui/summary"
 import { appToast } from "@/src/shared/lib/app-toast"
@@ -82,6 +91,11 @@ export function SavingsGoalSheet({
   const updateMutation = useUpdateSavingsGoal()
   const isPending = createMutation.isPending || updateMutation.isPending
   const accountsQuery = useAccounts(open)
+  const institutionsQuery = useInstitutions(open)
+  const activeAccounts = (accountsQuery.data ?? []).filter(
+    (account) => account.isActive
+  )
+  const institutions = institutionsQuery.data ?? []
 
   const {
     control,
@@ -117,7 +131,7 @@ export function SavingsGoalSheet({
     now: new Date(),
   })
   const { picker, openPicker, closeHandlerFor } = usePicker<
-    "none" | "currency"
+    "none" | "currency" | "account"
   >("none")
 
   useEffect(() => {
@@ -220,6 +234,35 @@ export function SavingsGoalSheet({
               />
             )}
           />
+          <Controller
+            control={control}
+            name="accountId"
+            render={({ field }) => (
+              <Field className="gap-1">
+                <FieldLabel className="text-sm text-muted-foreground">
+                  Cuenta de ahorro
+                </FieldLabel>
+                <DestinationTrigger
+                  destination={
+                    field.value
+                      ? encodeLedgerTarget("account", field.value)
+                      : CATALOG_NONE
+                  }
+                  accounts={activeAccounts}
+                  cards={[]}
+                  display={display}
+                  placeholder="Elige la cuenta"
+                  onClick={() => openPicker("account")}
+                />
+                {errors.accountId?.message ? (
+                  <FieldError>{errors.accountId.message}</FieldError>
+                ) : null}
+              </Field>
+            )}
+          />
+          <FinanceHelpText>
+            Elige la cuenta donde guardas este dinero.
+          </FinanceHelpText>
         </SummarySection>
 
         <SummarySection title="Progreso" icon={TargetIcon}>
@@ -312,6 +355,21 @@ export function SavingsGoalSheet({
         value={currency || defaultCurrency}
         onSelect={(next) =>
           setValue("currency", next, { shouldValidate: true })
+        }
+      />
+
+      <DestinationPickerSheet
+        open={picker === "account"}
+        onOpenChange={closeHandlerFor("account")}
+        institutions={institutions}
+        accounts={activeAccounts}
+        cards={[]}
+        display={display}
+        accountsOnly
+        onSelect={(next) =>
+          setValue("accountId", splitLedgerTarget(next).accountId ?? "", {
+            shouldValidate: true,
+          })
         }
       />
     </>

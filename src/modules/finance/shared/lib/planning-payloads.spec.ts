@@ -159,6 +159,30 @@ describe("buildSavingsGoalContributionBody", () => {
     }
     assert.equal(payload.body.fromTransferGroupId, "grp-9")
   })
+
+  it("sends the source account when the money comes from another account", () => {
+    const payload = buildSavingsGoalContributionBody({
+      amount: "100",
+      fromAccountId: "acc-2",
+    })
+    assert.equal(payload.ok, true)
+    if (!payload.ok) {
+      return
+    }
+    assert.equal(payload.body.fromAccountId, "acc-2")
+  })
+
+  it("leaves the source account out when it is empty", () => {
+    const payload = buildSavingsGoalContributionBody({
+      amount: "100",
+      fromAccountId: "  ",
+    })
+    assert.equal(payload.ok, true)
+    if (!payload.ok) {
+      return
+    }
+    assert.equal("fromAccountId" in payload.body, false)
+  })
 })
 
 describe("buildReceivablePaymentBody", () => {
@@ -215,5 +239,36 @@ describe("buildSavingsGoalBody", () => {
       return
     }
     assert.equal("currentAmount" in payload.body, false)
+  })
+
+  it("sends null targetDate when the date is cleared on update", () => {
+    const payload = buildSavingsGoalBody(
+      {
+        name: "Fondo",
+        targetAmount: "5000",
+        accountId: "acc-1",
+        targetDate: "",
+      },
+      { isUpdate: true }
+    )
+    assert.equal(payload.ok, true)
+    if (!payload.ok) {
+      return
+    }
+    assert.equal(payload.body.targetDate, null)
+  })
+
+  it("sends the chosen targetDate", () => {
+    const payload = buildSavingsGoalBody({
+      name: "Fondo",
+      targetAmount: "5000",
+      accountId: "acc-1",
+      targetDate: "2026-12-01",
+    })
+    assert.equal(payload.ok, true)
+    if (!payload.ok) {
+      return
+    }
+    assert.equal(payload.body.targetDate, "2026-12-01")
   })
 })

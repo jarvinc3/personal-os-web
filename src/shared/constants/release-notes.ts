@@ -12,6 +12,63 @@ export type ReleaseNotesEntry = {
 
 export const RELEASE_NOTES: readonly ReleaseNotesEntry[] = [
   {
+    version: "0.45.8",
+    highlights: [
+      "El detalle de un préstamo ya abre siempre: si una cuota llega sin un capital legible, el plan de amortización muestra esa fila y deja el saldo restante en blanco, en vez de caer en una pantalla de error.",
+    ],
+  },
+  {
+    version: "0.45.7",
+    highlights: [
+      "En el detalle de una cuenta en dólares, los totales de ingresos y egresos del mes ya se muestran en dólares y suman solo los movimientos de esa cuenta.",
+    ],
+  },
+  {
+    version: "0.45.6",
+    highlights: [
+      "En el detalle de un cobro, la acción para registrar un pago sigue visible después del primero y solo desaparece si el cobro está cancelado o castigado.",
+    ],
+  },
+  {
+    version: "0.45.4",
+    highlights: [
+      "Sin cambios visibles: ajuste interno del arranque de sesión y más pruebas.",
+    ],
+  },
+  {
+    version: "0.45.3",
+    highlights: [
+      "El formulario de login aparece de inmediato, aunque el servidor tarde en responder o haya una sesión vieja guardada. Si la sesión sigue siendo válida, la app entra sola.",
+    ],
+  },
+  {
+    version: "0.45.2",
+    highlights: [
+      "Los switches de ajustes y notificaciones responden al toque: el cambio se ve al instante y ya no se pierde si tocas varios seguidos. Si el guardado falla, el switch vuelve a su valor anterior.",
+    ],
+  },
+  {
+    version: "0.45.1",
+    highlights: [
+      "Con Finanzas desactivada, sus ajustes ya no muestran un error al abrir: ves el aviso para activarla y, cuando la activas, la revisión de integridad funciona igual.",
+    ],
+  },
+  {
+    version: "0.45.0",
+    highlights: [
+      "Planificación estrena cabecera: cambia entre Ahorros, Presupuestos, Cobros y Préstamos tocando la pestaña y ve el total de cada una. Los montos nunca se convierten entre monedas.",
+      "Al crear o editar una meta de ahorro ya eliges la cuenta donde guardas el dinero, y puedes quitar la fecha objetivo cuando quieras.",
+      "En el detalle de una meta tienes «Agregar aporte» en el menú y en el botón de arriba; si el dinero sale de otra cuenta, la app mueve el saldo por ti y te avisa si no alcanza.",
+      "Al borrar un aporte, la transferencia que creó se deshace. Una transferencia entre tus cuentas avisa una sola vez.",
+    ],
+  },
+  {
+    version: "0.44.0",
+    highlights: [
+      "Al editar una cuenta, el número ya no aparece completo: ves solo los últimos 4 dígitos. Déjalo vacío para conservarlo o escribe uno nuevo para cambiarlo.",
+    ],
+  },
+  {
     version: "0.43.2",
     highlights: [
       "Sin cambios visibles: ajustes internos de la sesión y la navegación.",

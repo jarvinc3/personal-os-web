@@ -12,25 +12,37 @@ export type AmortizationRow = {
   fees: string
   paidAmount: string
   status: FinanceLoanInstallment["status"]
-  /** Capital pendiente después de esta cuota. */
-  remainingBalance: number
-}
-
-function requirePrincipal(installment: FinanceLoanInstallment): number {
-  const principal = parseFinanceMoney(installment.principal)
-  if (principal === null) {
-    throw new Error(
-      `Cuota ${installment.installmentNo} sin capital válido: "${installment.principal}"`
-    )
-  }
-  return principal
+  /**
+   * Capital pendiente después de esta cuota. Queda en null cuando una cuota no
+   * trae un capital legible y el saldo ya no se puede reconstruir.
+   */
+  remainingBalance: number | null
 }
 
 /**
  * El saldo del préstamo ya descontó las cuotas pagadas, así que el plan
  * empieza sumándoles su capital para reconstruir el saldo inicial y desde ahí
- * resta el capital de cada cuota.
+ * resta el capital de cada cuota. Devuelve null si una cuota pagada no trae un
+ * capital legible.
  */
+function initialBalance(
+  installments: readonly FinanceLoanInstallment[],
+  currentBalance: number
+): number | null {
+  let paidPrincipal = 0
+  for (const installment of installments) {
+    if (installment.status !== "PAID") {
+      continue
+    }
+    const principal = parseFinanceMoney(installment.principal)
+    if (principal === null) {
+      return null
+    }
+    paidPrincipal += principal
+  }
+  return currentBalance + paidPrincipal
+}
+
 export function buildAmortizationPlan(
   installments: readonly FinanceLoanInstallment[],
   currentBalance: number
@@ -38,14 +50,13 @@ export function buildAmortizationPlan(
   const ordered = installments
     .slice()
     .sort((left, right) => left.installmentNo - right.installmentNo)
-  const paidPrincipal = ordered
-    .filter((installment) => installment.status === "PAID")
-    .reduce((total, installment) => total + requirePrincipal(installment), 0)
-  let remainingBalance = currentBalance + paidPrincipal
+  let remainingBalance = initialBalance(ordered, currentBalance)
   return ordered.map((installment) => {
-    remainingBalance = roundToCents(
-      remainingBalance - requirePrincipal(installment)
-    )
+    const principal = parseFinanceMoney(installment.principal)
+    remainingBalance =
+      remainingBalance === null || principal === null
+        ? null
+        : roundToCents(remainingBalance - principal)
     return {
       installmentNo: installment.installmentNo,
       dueDate: installment.dueDate,

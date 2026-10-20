@@ -1,7 +1,10 @@
 import assert from "node:assert/strict"
 import { describe, it } from "node:test"
 
-import { receivablePaymentSchema } from "./receivable-payment-form.ts"
+import {
+  canRegisterReceivablePayment,
+  receivablePaymentSchema,
+} from "./receivable-payment-form.ts"
 
 describe("receivablePaymentSchema", () => {
   it("accepts an amount and account", () => {
@@ -24,5 +27,17 @@ describe("receivablePaymentSchema", () => {
       }).success,
       false
     )
+  })
+})
+
+describe("canRegisterReceivablePayment", () => {
+  it("allows a pending and a fully paid receivable", () => {
+    assert.equal(canRegisterReceivablePayment("PENDING"), true)
+    assert.equal(canRegisterReceivablePayment("PAID"), true)
+  })
+
+  it("blocks a cancelled or written off receivable", () => {
+    assert.equal(canRegisterReceivablePayment("CANCELLED"), false)
+    assert.equal(canRegisterReceivablePayment("WRITTEN_OFF"), false)
   })
 })

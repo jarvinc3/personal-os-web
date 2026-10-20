@@ -2,6 +2,98 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [Sin publicar]
+
+### Agregado
+
+- Skill `archify` en `.agents/skills/archify/` (registrada en `skills-lock.json`) para generar diagramas de arquitectura.
+- Convenciones de issues en `docs/issue-conventions.md` y plantillas `.github/ISSUE_TEMPLATE/`.
+
+### Cambiado
+
+- `AGENTS.md` y `docs/README.md` enlazan las convenciones de issues y la nueva documentación. Sin cambios visibles en la app.
+
+## [0.45.8] - 2026-10-20
+
+### Corregido
+
+- El detalle de un préstamo abre aunque una cuota llegue sin un capital legible. El plan de amortización muestra la fila, deja el saldo restante en blanco y avisa dentro de la hoja, en vez de tumbar la pantalla completa (#179).
+
+## [0.45.7] - 2026-10-20
+
+### Corregido
+
+- El detalle de una cuenta muestra los totales de ingresos y egresos del mes en la moneda de la cuenta. Un gasto de US$10 en una cuenta en dólares ya no aparece como USD 614.51: la cifra salía del equivalente en la moneda base (#204).
+
+## [0.45.6] - 2026-10-20
+
+### Corregido
+
+- El detalle de un cobro mantiene visible la acción para registrar un pago después del primero, con la nota de novedades que exige la suite. Sustituye la 0.45.5, que no pasó el CI por no incluir esa nota (#184).
+
+## [0.45.5] - 2026-10-20
+
+### Corregido
+
+- El detalle de un cobro mantiene visible la acción para registrar un pago mientras el cobro no esté cancelado ni castigado. Antes solo aparecía en el estado vacío y desaparecía con el primer pago (#184).
+
+## [0.45.4] - 2026-10-19
+
+### Cambiado
+
+- Interno: la regla de hidratar una sesión guardada sale del hook de bootstrap a `shouldHydrateStoredSession()`, con pruebas. Sin cambio de comportamiento (#162).
+
+## [0.45.3] - 2026-10-19
+
+### Corregido
+
+- El formulario de login aparece de inmediato: ya no espera a `bootstrapped` ni a `GET /users/me`. Un login o registro exitoso marca la app como lista aunque el bootstrap siga pendiente (#162).
+- En `/login` no se hidrata una sesión guardada que el proxy ya descartó; una sesión vieja ya no bloquea el formulario ni puede revocar el login nuevo.
+
+## [0.45.2] - 2026-10-19
+
+### Corregido
+
+- Los switches de preferencias de Ajustes y Notificaciones aplican el cambio al instante con actualización optimista; cada parche se calcula sobre la última caché y las mutaciones se envían en serie. Un clic rápido en varios switches ya no pisa el anterior (#163).
+- Si el guardado falla, el perfil vuelve a su estado anterior y sale el toast de error.
+- Cada pantalla envía solo la hoja que cambia, no el objeto completo de preferencias.
+
+### Cambiado
+
+- Interno: se quitó el `GET /users/me` extra después de cada `PATCH`; la respuesta ya trae el perfil completo.
+
+## [0.45.1] - 2026-10-19
+
+### Corregido
+
+- Ajustes → Finanzas con la app desactivada ya no pide cuentas ni integridad: sin 403 en consola y sin «No se pudo guardar». La sección de integridad muestra el aviso para activar Finanzas, y al activarla funciona como antes (jarvinc3/personal-os-web#164).
+- Un 403 por app desactivada se traduce a «Finanzas está desactivado. Actívalo para usar esta función.» en vez de «No se pudo guardar».
+
+## [0.45.0] - 2026-10-18
+
+### Agregado
+
+- Planificación estrena cabecera con pestañas (Ahorros, Presupuestos, Cobros y Préstamos): muestra el total de la pestaña activa, una cifra por moneda sin convertir, y cambia al tocarla. Los enlaces de cobros compartidos abren en la pestaña Cobros.
+- El formulario de una meta de ahorro muestra la cuenta vinculada y permite cambiarla.
+- El detalle de una meta ofrece «Agregar aporte» en el menú y como botón sobre la lista.
+
+### Cambiado
+
+- Registrar un aporte desde otra cuenta ya no arma la web dos pasos: la API valida el saldo libre y crea la transferencia, y la app muestra el aviso si no alcanza.
+- La fecha objetivo de una meta se puede quitar con «Sin fecha» y el cambio se guarda.
+- Suscripciones usa el botón de acciones expandible del resto de la app; la campana de notificaciones, el espaciado de Movimientos y el borde de los banners quedan uniformes.
+
+### Corregido
+
+- Borrar un aporte deshace la transferencia que creó.
+- Una transferencia entre cuentas propias avisa una sola vez.
+
+## [0.44.0] - 2026-10-17
+
+### Cambiado
+
+- Cuentas: la API ya no devuelve el número completo, así que las listas y el resumen usan `accountNumberLast4`. Al editar, el campo aparece vacío con el aviso «Deja vacío para conservar •••• NNNN»; escribir un número nuevo lo reemplaza y dejarlo vacío conserva el guardado (jarvinc3/personal-os-back#139).
+
 ## [0.43.2] - 2026-10-17
 
 ### Cambiado

@@ -26,6 +26,23 @@ describe("translateFinanceError", () => {
     )
   })
 
+  it("translates a disabled module", () => {
+    assert.equal(
+      translateFinanceError(403, "El módulo finance está desactivado"),
+      "Finanzas está desactivado. Actívalo para usar esta función."
+    )
+  })
+
+  it("keeps other 403 messages generic", () => {
+    assert.equal(
+      translateFinanceError(
+        403,
+        "La institución Efectivo es de sistema: no se puede editar ni borrar"
+      ),
+      REQUEST_ERROR
+    )
+  })
+
   it("hides raw validation messages", () => {
     assert.equal(
       translateFinanceError(400, "categoryId must be a UUID"),

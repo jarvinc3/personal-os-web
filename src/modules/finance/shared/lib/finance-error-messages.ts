@@ -3,6 +3,9 @@ const REQUEST_ERROR = "No se pudo guardar. Revisa los datos e intenta de nuevo."
 const GMAIL_TOKEN_PREFIX = "Gmail tokens could not be decrypted"
 const GMAIL_TOKEN_ERROR =
   "No se pudo leer el acceso a Gmail. Vuelve a conectar la cuenta."
+const MODULE_DISABLED_MESSAGE = "El módulo finance está desactivado"
+const MODULE_DISABLED_ERROR =
+  "Finanzas está desactivado. Actívalo para usar esta función."
 
 /** Stable backend codes that the API sends alongside the message. */
 const BACKEND_CODE_MESSAGE_ES: Record<string, string> = {
@@ -130,6 +133,9 @@ export function translateFinanceError(
   }
   if (message.startsWith(GMAIL_TOKEN_PREFIX)) {
     return GMAIL_TOKEN_ERROR
+  }
+  if (message === MODULE_DISABLED_MESSAGE) {
+    return MODULE_DISABLED_ERROR
   }
   return REQUEST_ERROR
 }

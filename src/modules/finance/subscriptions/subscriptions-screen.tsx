@@ -23,11 +23,12 @@ import {
 } from "@/src/modules/finance/subscriptions/lib/subscription-filters"
 import { subscriptionShortcutBadges } from "@/src/modules/finance/subscriptions/lib/subscription-display"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
-import { Fab } from "@/src/shared/components/layout/fab"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useMemo, useState } from "react"
+import { ExpandableFab } from "@/src/shared/components/layout/expandable-fab"
+import { ReceiptTextIcon } from "lucide-react"
 
 export function SubscriptionsScreen() {
   return (
@@ -111,7 +112,17 @@ function SubscriptionsScreenBody() {
         onOpenFilters={() => filtersSheet.setOpen(true)}
       />
 
-      <Fab label="Nueva suscripción" onClick={() => setCreateOpen(true)} />
+      <ExpandableFab
+        label="Acciones de Suscripciones"
+        actions={[
+          {
+            icon: <ReceiptTextIcon className="size-5" aria-hidden />,
+            label: "Añadir suscripción",
+            color: "bg-blue-500",
+            onClick: () => setCreateOpen(true),
+          },
+        ]}
+      />
 
       <SubscriptionSheet
         open={createOpen}

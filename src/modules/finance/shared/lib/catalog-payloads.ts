@@ -106,12 +106,20 @@ export function buildCreateAccountBody(
   }
 
   const accountNumber = digitsOnly(input.accountNumber)
+  const isUpdate = options?.isUpdate === true
   if (input.type === "CASH") {
     if (accountNumber) {
       return { ok: false, error: "El efectivo no usa número de cuenta" }
     }
+  } else if (accountNumber.length === 0) {
+    if (!isUpdate) {
+      return {
+        ok: false,
+        error: "Número de cuenta obligatorio (4 a 34 dígitos)",
+      }
+    }
   } else if (accountNumber.length < 4 || accountNumber.length > 34) {
-    return { ok: false, error: "Número de cuenta obligatorio (4 a 34 dígitos)" }
+    return { ok: false, error: "Número de cuenta: 4 a 34 dígitos" }
   }
 
   const body: CreateAccountBody = {

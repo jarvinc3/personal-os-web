@@ -21,6 +21,8 @@ Slugs: `finance`, `agenda`, `projects`, `health`. Solo finance tiene app routes.
 
 Defaults: `src/modules/settings/constants/user-settings-defaults.ts`. Hooks: `useProfile`, `useUserModuleConfig`, `useDeleteAccount`, `useWipeUserData`, `useLastSeenReleaseVersion`, `useMarkReleaseNotesSeen`. Invalidación `profile`/`me` también desde tools IA.
 
+Las preferencias se guardan con `PATCH /users/me` desde `useProfile().updatePreferences`: la caché se actualiza de forma optimista antes del envío, cada parche se calcula sobre la última caché, las mutaciones se serializan por `scope` y un fallo restaura el perfil anterior con su toast. Cada pantalla envía solo la hoja que cambia, no el objeto completo de preferencias.
+
 Vaciar datos: `wipe-layers.ts` (espejo del back: ids, labels, dependencias catalog → ledger y categories → planning), `pending-data-wipe.ts` + `PendingDataWipeHandler` para el reauth con Google. Reauth con Google vía `loginWithGoogleMutation`; la sesión nunca se cierra.
 
 > [!WARNING]

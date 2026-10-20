@@ -66,14 +66,18 @@ describe("buildAmortizationPlan", () => {
     assert.deepEqual(buildAmortizationPlan([], 500), [])
   })
 
-  it("fails fast when an installment has no valid principal", () => {
-    assert.throws(
-      () =>
-        buildAmortizationPlan(
-          [installment({ installmentNo: 1, principal: "" })],
-          100
-        ),
-      /sin capital válido/
+  it("leaves the remaining balance unknown when a principal is not readable", () => {
+    const plan = buildAmortizationPlan(
+      [
+        installment({ installmentNo: 1, principal: "" }),
+        installment({ installmentNo: 2, principal: "50.00" }),
+      ],
+      100
+    )
+
+    assert.deepEqual(
+      plan.map((row) => row.remainingBalance),
+      [null, null]
     )
   })
 })

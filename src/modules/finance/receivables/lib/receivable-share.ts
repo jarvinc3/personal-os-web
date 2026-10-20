@@ -2,9 +2,9 @@ import { z } from "zod"
 
 import {
   formatFinanceMoney,
-  parseFinanceMoney,
   type FinanceMoneyDisplay,
 } from "@/src/modules/finance/shared/lib/money"
+import { receivablePending } from "@/src/modules/finance/shared/lib/planning-lists"
 import type {
   FinanceReceivable,
   FinanceReceivableStatus,
@@ -77,16 +77,6 @@ export function shareableReceivables(
   return receivables.filter(
     (receivable) => !UNSHAREABLE_STATUSES.includes(receivable.status)
   )
-}
-
-/** What is still owed on one cobro; zero when the amount is unreadable. */
-export function receivablePending(receivable: FinanceReceivable): number {
-  const amount = parseFinanceMoney(receivable.amount)
-  const paid = parseFinanceMoney(receivable.paidAmount)
-  if (amount === null) {
-    return 0
-  }
-  return amount - (paid ?? 0)
 }
 
 /** Pending per currency. Currencies are never converted into each other. */

@@ -60,6 +60,19 @@ export function visibleReceivables<T extends { status: string }>(
   return items.filter((item) => item.status !== "CANCELLED")
 }
 
+/** What is still owed on one cobro; zero when the amount is unreadable. */
+export function receivablePending(receivable: {
+  amount: string
+  paidAmount: string
+}): number {
+  const amount = parseFinanceMoney(receivable.amount)
+  const paid = parseFinanceMoney(receivable.paidAmount)
+  if (amount === null) {
+    return 0
+  }
+  return amount - (paid ?? 0)
+}
+
 export type SavingsSuggestion = {
   monthlyAmount: number
   months: number

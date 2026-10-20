@@ -6,36 +6,35 @@ import {
   ArrowRightLeftIcon,
   ArrowUpRightIcon,
   ChevronDownIcon,
-  CreditCardIcon,
   type LucideIcon,
 } from "lucide-react"
 import Link from "next/link"
 
-type FinanceHomeHeroProps = {
-  balanceLabel: string
-  balanceAmount: string
+type FinancePlanningHeroProps = {
+  tabLabel: string
+  tabIcon: LucideIcon
+  tabColor: string
+  totalAmount: string
   sendHref: string
   receiveHref: string
   transferHref: string
-  pendingHoldLabel?: string
-  cashFlowLabel?: string
-  onAccountPress?: () => void
+  onCyclePress?: () => void
   className?: string
 }
 
-type FinanceHomeHeroActionProps = {
+type FinancePlanningHeroActionProps = {
   href: string
   icon: LucideIcon
   label: string
   className?: string
 }
 
-function FinanceHomeHeroAction({
+function FinancePlanningHeroAction({
   href,
   icon: Icon,
   label,
   className,
-}: FinanceHomeHeroActionProps) {
+}: FinancePlanningHeroActionProps) {
   return (
     <Button
       asChild
@@ -51,7 +50,7 @@ function FinanceHomeHeroAction({
   )
 }
 
-function FinanceHomeGridPattern() {
+function FinancePlanningGridPattern() {
   return (
     <div className="absolute inset-0 overflow-hidden opacity-[0.35]">
       {Array.from({ length: 14 }, (_, row) => (
@@ -72,69 +71,51 @@ function FinanceHomeGridPattern() {
   )
 }
 
-export function FinanceHomeHero({
-  balanceLabel,
-  balanceAmount,
+export function FinancePlanningHero({
+  tabLabel,
+  tabIcon: TabIcon,
+  tabColor,
+  totalAmount,
   sendHref,
   receiveHref,
   transferHref,
-  pendingHoldLabel,
-  cashFlowLabel,
-  onAccountPress,
+  onCyclePress,
   className,
-}: FinanceHomeHeroProps) {
+}: FinancePlanningHeroProps) {
   return (
     <div className={cn("relative overflow-hidden", className)}>
-      <FinanceHomeGridPattern />
+      <FinancePlanningGridPattern />
       <div className="relative flex w-full flex-col gap-3 px-4 pt-4 pb-6">
         <Button
           variant="ghost"
-          onClick={onAccountPress}
+          onClick={onCyclePress}
           className="flex-row items-center justify-center gap-2 self-center active:opacity-70"
         >
-          <CreditCardIcon className="text-success" />
+          <TabIcon className="size-5" style={{ color: tabColor }} />
           <span className="text-base font-medium text-foreground">
-            {balanceLabel}
+            {tabLabel}
           </span>
           <ChevronDownIcon className="text-muted-foreground" />
         </Button>
 
         <h2 className="text-center text-4xl font-bold tracking-tight text-foreground tabular-nums">
-          {balanceAmount}
+          {totalAmount}
         </h2>
 
-        <div className="flex flex-col">
-          {pendingHoldLabel ? (
-            <div className="self-center">
-              <span className="text-sm text-muted-foreground">
-                {pendingHoldLabel || "0"}
-              </span>
-            </div>
-          ) : null}
-
-          {cashFlowLabel ? (
-            <div className="self-center">
-              <span className="text-sm text-muted-foreground">
-                {cashFlowLabel}
-              </span>
-            </div>
-          ) : null}
-        </div>
-
         <div className="grid grid-cols-3 gap-0.5 overflow-hidden rounded-2xl border border-border">
-          <FinanceHomeHeroAction
+          <FinancePlanningHeroAction
             href={sendHref}
             icon={ArrowUpRightIcon}
             label="Gasto"
             className="rounded-none rounded-l-2xl"
           />
-          <FinanceHomeHeroAction
+          <FinancePlanningHeroAction
             href={receiveHref}
             icon={ArrowDownLeftIcon}
             label="Ingreso"
             className="rounded-none"
           />
-          <FinanceHomeHeroAction
+          <FinancePlanningHeroAction
             href={transferHref}
             icon={ArrowRightLeftIcon}
             label="Transf."

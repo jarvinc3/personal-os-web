@@ -138,6 +138,38 @@ describe("visibleTransactionTotals", () => {
     assert.equal(totals.expenses, 2.5)
     assert.equal(totals.income, 0)
   })
+
+  it("uses the amount in the requested currency instead of the base amount", () => {
+    const totals = visibleTransactionTotals(
+      [
+        {
+          type: "DEBIT",
+          amount: "10.00",
+          currency: "USD",
+          amountBaseCurrency: "614.51",
+          transferGroupId: null,
+        },
+      ],
+      "USD"
+    )
+    assert.equal(totals.expenses, 10)
+  })
+
+  it("ignores movements in another currency when one is requested", () => {
+    const totals = visibleTransactionTotals(
+      [
+        {
+          type: "DEBIT",
+          amount: "500.00",
+          currency: "DOP",
+          amountBaseCurrency: "500.00",
+          transferGroupId: null,
+        },
+      ],
+      "USD"
+    )
+    assert.equal(totals.expenses, 0)
+  })
 })
 
 describe("formatTransactionDate", () => {

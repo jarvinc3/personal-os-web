@@ -7,6 +7,7 @@ import {
   joinPlanningCaption,
   loanProgressSummary,
   monthlySavingsSuggestion,
+  receivablePending,
   visibleReceivables,
 } from "./planning-lists.ts"
 
@@ -106,6 +107,23 @@ describe("visibleReceivables", () => {
       { id: "1", status: "PENDING" },
       { id: "3", status: "PAID" },
     ])
+  })
+})
+
+describe("receivablePending", () => {
+  it("subtracts what was collected", () => {
+    assert.equal(
+      receivablePending({ amount: "8500", paidAmount: "3000" }),
+      5500
+    )
+  })
+
+  it("treats a missing collected amount as zero", () => {
+    assert.equal(receivablePending({ amount: "8500", paidAmount: "" }), 8500)
+  })
+
+  it("returns zero when the amount is unreadable", () => {
+    assert.equal(receivablePending({ amount: "", paidAmount: "10" }), 0)
   })
 })
 

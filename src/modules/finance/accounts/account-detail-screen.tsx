@@ -152,11 +152,14 @@ function AccountDetailScreenBody({ accountId }: AccountDetailScreenProps) {
     dateFrom: monthBounds.dateFrom,
     dateTo: monthBounds.dateTo,
   })
-  const monthTotals = visibleTransactionTotals(monthQuery.data ?? [])
   const accountDisplay = {
     ...display,
     currency: account?.currency ?? display.currency,
   }
+  const monthTotals = visibleTransactionTotals(
+    monthQuery.data ?? [],
+    accountDisplay.currency
+  )
   const accountDrifts = findProductDrifts(integrityQuery.data?.drifts ?? [], {
     accountId,
   })
