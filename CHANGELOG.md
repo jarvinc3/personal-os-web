@@ -14,6 +14,20 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 - `AGENTS.md` y `docs/README.md` enlazan las convenciones de issues y la nueva documentación. Sin cambios visibles en la app.
 
+## [0.47.2] - 2026-10-20
+
+### Cambiado
+
+- Interno: el formulario de configuración de Finanzas se reparte en secciones por tema en `settings/components/`; el formulario queda como contenedor del estado y del envío. Sin cambio visible (#154).
+
+### Corregido
+
+- La sección de aplicaciones del sidebar muestra solo las apps activas del usuario, en el orden del registro, y se actualiza al activarlas o apagarlas. Keep Awake sigue fijo (#165).
+- La descripción del panel de Apariencia y las opciones de vista por defecto de Proyectos se leen en español: Tablero, Lista y Cronograma (#167).
+- El detalle de la tarjeta muestra la utilización real por encima del 100% y avisa del sobregiro cuando el disponible queda en negativo (#175).
+- El interés total del resumen del préstamo es la suma de las cuotas mostradas, y la última cuota aparece con su monto ajustado por el redondeo (#180).
+- El diálogo para eliminar un movimiento lo nombra por su descripción e indica el monto antes de confirmar (#196).
+
 ## [0.47.1] - 2026-10-20
 
 ### Cambiado
