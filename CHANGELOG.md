@@ -2,6 +2,12 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.45.7] - 2026-10-20
+
+### Corregido
+
+- El detalle de una cuenta muestra los totales de ingresos y egresos del mes en la moneda de la cuenta. Un gasto de US$10 en una cuenta en dólares ya no aparece como USD 614.51: la cifra salía del equivalente en la moneda base (#204).
+
 ## [0.45.6] - 2026-10-20
 
 ### Corregido

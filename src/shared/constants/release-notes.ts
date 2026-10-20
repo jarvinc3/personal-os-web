@@ -12,6 +12,12 @@ export type ReleaseNotesEntry = {
 
 export const RELEASE_NOTES: readonly ReleaseNotesEntry[] = [
   {
+    version: "0.45.7",
+    highlights: [
+      "En el detalle de una cuenta en dólares, los totales de ingresos y egresos del mes ya se muestran en dólares y suman solo los movimientos de esa cuenta.",
+    ],
+  },
+  {
     version: "0.45.6",
     highlights: [
       "En el detalle de un cobro, la acción para registrar un pago sigue visible después del primero y solo desaparece si el cobro está cancelado o castigado.",
