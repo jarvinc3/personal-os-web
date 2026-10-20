@@ -14,6 +14,12 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 - `AGENTS.md` y `docs/README.md` enlazan las convenciones de issues y la nueva documentación. Sin cambios visibles en la app.
 
+## [0.47.1] - 2026-10-20
+
+### Cambiado
+
+- Interno: los tipos de Finanzas se agrupan por dominio en `shared/types/entities/` con un barrel, y el detalle de movimiento separa su bloque de transferencia y el aviso de reversión en componentes propios. Sin cambio visible (#154).
+
 ## [0.47.0] - 2026-10-20
 
 ### Agregado

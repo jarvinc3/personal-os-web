@@ -12,6 +12,12 @@ export type ReleaseNotesEntry = {
 
 export const RELEASE_NOTES: readonly ReleaseNotesEntry[] = [
   {
+    version: "0.47.1",
+    highlights: [
+      "Sin cambios visibles: orden interno de los tipos y del detalle de movimiento para que sea más fácil mantenerlos.",
+    ],
+  },
+  {
     version: "0.47.0",
     highlights: [
       "El detalle de una transferencia permite confirmarla, marcarla como pendiente para editarla o reversarla. Al reversar, los saldos vuelven a su lugar.",
