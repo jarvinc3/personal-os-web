@@ -12,6 +12,12 @@ export type ReleaseNotesEntry = {
 
 export const RELEASE_NOTES: readonly ReleaseNotesEntry[] = [
   {
+    version: "0.45.8",
+    highlights: [
+      "El detalle de un préstamo ya abre siempre: si una cuota llega sin un capital legible, el plan de amortización muestra esa fila y deja el saldo restante en blanco, en vez de caer en una pantalla de error.",
+    ],
+  },
+  {
     version: "0.45.7",
     highlights: [
       "En el detalle de una cuenta en dólares, los totales de ingresos y egresos del mes ya se muestran en dólares y suman solo los movimientos de esa cuenta.",

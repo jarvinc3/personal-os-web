@@ -2,6 +2,12 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.45.8] - 2026-10-20
+
+### Corregido
+
+- El detalle de un préstamo abre aunque una cuota llegue sin un capital legible. El plan de amortización muestra la fila, deja el saldo restante en blanco y avisa dentro de la hoja, en vez de tumbar la pantalla completa (#179).
+
 ## [0.45.7] - 2026-10-20
 
 ### Corregido
