@@ -8,6 +8,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 - Skill `archify` en `.agents/skills/archify/` (registrada en `skills-lock.json`) para generar diagramas de arquitectura.
 - Convenciones de issues en `docs/issue-conventions.md` y plantillas `.github/ISSUE_TEMPLATE/`.
+- Convenciones de issues: regla contra issues espejo entre repositorios y secciones «Notas técnicas» y «Definición de terminado» en `docs/issue-conventions.md` y en las plantillas `feature.yml` y `bug.yml`.
 
 ### Cambiado
 
