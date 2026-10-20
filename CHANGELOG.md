@@ -2,6 +2,17 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [Sin publicar]
+
+### Agregado
+
+- Skill `archify` en `.agents/skills/archify/` (registrada en `skills-lock.json`) para generar diagramas de arquitectura.
+- Convenciones de issues en `docs/issue-conventions.md` y plantillas `.github/ISSUE_TEMPLATE/`.
+
+### Cambiado
+
+- `AGENTS.md` y `docs/README.md` enlazan las convenciones de issues y la nueva documentación. Sin cambios visibles en la app.
+
 ## [0.45.8] - 2026-10-20
 
 ### Corregido

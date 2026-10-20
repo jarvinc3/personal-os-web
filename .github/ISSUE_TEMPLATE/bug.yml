@@ -1,0 +1,95 @@
+name: Bug
+description: Algo no hace lo que debería hacer
+title: ""
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Antes de guardar, revisa `docs/issue-conventions.md` del repositorio.
+        Adjunta datos mínimos anonimizados: nunca tokens, secretos ni datos personales innecesarios.
+
+  - type: textarea
+    id: observado
+    attributes:
+      label: Comportamiento observado
+      description: Qué ocurre y a quién afecta.
+    validations:
+      required: true
+
+  - type: textarea
+    id: esperado
+    attributes:
+      label: Comportamiento esperado
+      description: Resultado correcto y verificable.
+    validations:
+      required: true
+
+  - type: textarea
+    id: pasos
+    attributes:
+      label: Pasos para reproducir
+      description: Estado inicial, acción y resultado observado.
+      placeholder: |
+        1. ...
+        2. ...
+        3. ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: impacto
+    attributes:
+      label: Impacto
+      description: Frecuencia, usuarios afectados y bloqueo operativo.
+    validations:
+      required: false
+
+  - type: textarea
+    id: criterios
+    attributes:
+      label: Criterios de aceptación
+      description: Prueba observable de la corrección y ausencia de regresión relevante.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Área
+      description: La app de producto o el paquete del workspace que toca.
+      options:
+        - finance
+        - agenda
+        - projects
+        - health
+        - ai
+        - notifications
+        - users
+        - core
+    validations:
+      required: true
+
+  - type: dropdown
+    id: prioridad
+    attributes:
+      label: Prioridad
+      description: Impacto y urgencia, no dificultad técnica.
+      options:
+        - High
+        - Medium
+        - Low
+    validations:
+      required: true
+
+  - type: dropdown
+    id: talla
+    attributes:
+      label: Talla
+      description: S un par de archivos; M toca contrato o migración; L cruza back y web.
+      options:
+        - S
+        - M
+        - L
+    validations:
+      required: true

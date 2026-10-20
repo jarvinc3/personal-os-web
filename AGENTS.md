@@ -21,6 +21,7 @@ El estado, el roadmap y los hallazgos viven en GitHub Issues. Los documentos de 
 
 - Un cambio resuelve un issue: el cuerpo del commit cierra con `Closes #N` cuando el issue queda resuelto, o `Refs #N` cuando solo avanza. Un commit del monorepo referencia el issue del repo por su número.
 - Lo decidido y no implementado se abre como issue con label `roadmap`; no se deja como `REV-*` suelto en los documentos.
+- Cómo se escribe un issue: [docs/issue-conventions.md](docs/issue-conventions.md) — estructura, título, criterios de aceptación, etiquetas, talla y cierre.
 - La app móvil (`personal-os-app`) está fuera de servicio: no la cites como cliente.
 
 ## Fuentes canónicas
