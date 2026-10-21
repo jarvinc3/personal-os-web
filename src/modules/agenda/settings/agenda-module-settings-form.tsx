@@ -110,6 +110,7 @@ export function AgendaModuleSettingsForm({ onDone }: { onDone: () => void }) {
       },
       { isEnabled: moduleEnable.pendingEnabled }
     )
+    moduleEnable.markSaved()
     appToast.success({
       text1: "Agenda actualizada",
       text2: "Configuración guardada.",
@@ -123,6 +124,7 @@ export function AgendaModuleSettingsForm({ onDone }: { onDone: () => void }) {
         event.preventDefault()
         onSubmit()
       }}
+      submitEmphasis={moduleEnable.isEnabledDirty}
       submitLabel="Guardar"
       submitIcon={SaveIcon}
       isSubmitting={updateMutation.isPending}
@@ -134,6 +136,7 @@ export function AgendaModuleSettingsForm({ onDone }: { onDone: () => void }) {
         state={moduleEnable.state}
         accentColor={MODULE_ACCENT}
         isEnabled={moduleEnable.sheetEnabled}
+        pending={moduleEnable.isEnabledDirty}
         onEnabledChange={moduleEnable.handleEnabledChange}
         disabled={updateMutation.isPending}
       />

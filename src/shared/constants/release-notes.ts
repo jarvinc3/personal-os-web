@@ -12,6 +12,13 @@ export type ReleaseNotesEntry = {
 
 export const RELEASE_NOTES: readonly ReleaseNotesEntry[] = [
   {
+    version: "0.51.0",
+    highlights: [
+      "La lista de Apps ya no dice Activo antes de tiempo: mientras el interruptor está encendido sin guardar, esa app aparece como «Pendiente de guardar».",
+      "El botón Guardar se destaca mientras falta guardar y, si sales del panel, la app pide confirmación antes de descartar el cambio.",
+    ],
+  },
+  {
     version: "0.50.1",
     highlights: [
       "Si los datos de un cobro llegan rotos, los totales de Cobros avisan en vez de mostrar una cifra inventada.",

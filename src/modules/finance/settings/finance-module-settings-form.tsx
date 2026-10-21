@@ -105,6 +105,7 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
       },
       { isEnabled: moduleEnable.pendingEnabled }
     )
+    moduleEnable.markSaved()
     appToast.success({
       text1: "Finanzas actualizadas",
       text2: "La configuración de la app se guardó.",
@@ -118,6 +119,7 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
         event.preventDefault()
         onSubmit()
       }}
+      submitEmphasis={moduleEnable.isEnabledDirty}
       submitLabel="Guardar"
       submitIcon={SaveIcon}
       isSubmitting={updateMutation.isPending}
@@ -129,6 +131,7 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
         state={moduleEnable.state}
         accentColor={MODULE_ACCENT}
         isEnabled={moduleEnable.sheetEnabled}
+        pending={moduleEnable.isEnabledDirty}
         onEnabledChange={moduleEnable.handleEnabledChange}
         disabled={updateMutation.isPending}
       />

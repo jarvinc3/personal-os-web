@@ -103,6 +103,7 @@ export function ProjectsModuleSettingsForm({ onDone }: { onDone: () => void }) {
       },
       { isEnabled: moduleEnable.pendingEnabled }
     )
+    moduleEnable.markSaved()
     appToast.success({
       text1: "Proyectos actualizado",
       text2: "Configuración guardada.",
@@ -116,6 +117,7 @@ export function ProjectsModuleSettingsForm({ onDone }: { onDone: () => void }) {
         event.preventDefault()
         onSubmit()
       }}
+      submitEmphasis={moduleEnable.isEnabledDirty}
       submitLabel="Guardar"
       submitIcon={SaveIcon}
       isSubmitting={updateMutation.isPending}
@@ -127,6 +129,7 @@ export function ProjectsModuleSettingsForm({ onDone }: { onDone: () => void }) {
         state={moduleEnable.state}
         accentColor={MODULE_ACCENT}
         isEnabled={moduleEnable.sheetEnabled}
+        pending={moduleEnable.isEnabledDirty}
         onEnabledChange={moduleEnable.handleEnabledChange}
         disabled={updateMutation.isPending}
       />

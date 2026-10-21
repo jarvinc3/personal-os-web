@@ -22,7 +22,9 @@ import { settingsModuleHref } from "@/src/shared/constants/app-routes"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { ChevronLeftIcon, ChevronRightIcon, Settings } from "lucide-react"
 import { useCallback, useId, useLayoutEffect, useRef, useState } from "react"
+import { usePendingModuleActivations } from "@/src/modules/settings/hooks/use-pending-module-activations"
 import { useUserModuleConfig } from "@/src/modules/settings/hooks/use-user-module-config"
+import { moduleActivationLabel } from "@/src/modules/settings/lib/module-activation-status"
 
 export function isConfigurableModuleSlug(
   slug: ModuleSlug
@@ -34,6 +36,7 @@ export type ModuleSheetEnableRowProps = {
   state: ModuleSettingsState
   accentColor: string
   isEnabled: boolean
+  pending: boolean
   onEnabledChange: (enabled: boolean) => void
   disabled?: boolean
 }
@@ -42,6 +45,7 @@ function ModuleSheetEnableRow({
   state,
   accentColor,
   isEnabled,
+  pending,
   onEnabledChange,
   disabled = false,
 }: ModuleSheetEnableRowProps) {
@@ -58,6 +62,11 @@ function ModuleSheetEnableRow({
         {state === "unconfigured" ? (
           <p className="text-xs text-muted-foreground">
             Se aplicará al guardar la configuración por primera vez.
+          </p>
+        ) : null}
+        {pending ? (
+          <p className="text-xs font-medium text-warning">
+            Falta guardar: la app cambia cuando pulses Guardar.
           </p>
         ) : null}
       </label>
@@ -179,6 +188,7 @@ function ModuleSettingsCard({ slug, onOpen, href }: ModuleSettingsCardProps) {
   const Icon = moduleDef.icon
   const { state, entry, setModuleEnabled, updateMutation } =
     useUserModuleConfig(slug)
+  const { pendingActivations } = usePendingModuleActivations()
 
   const handleOpen = () => {
     if (href) {
@@ -200,12 +210,11 @@ function ModuleSettingsCard({ slug, onOpen, href }: ModuleSettingsCardProps) {
     }
   }
 
-  const statusLabel =
-    state === "unconfigured"
-      ? "Sin configurar"
-      : state === "disabled"
-        ? "Desactivado"
-        : "Activo"
+  const statusLabel = moduleActivationLabel({
+    state,
+    savedIsEnabled: entry?.isEnabled ?? false,
+    pendingEnabled: pendingActivations[slug] ?? null,
+  })
 
   return (
     <div
