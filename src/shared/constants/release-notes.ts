@@ -12,6 +12,12 @@ export type ReleaseNotesEntry = {
 
 export const RELEASE_NOTES: readonly ReleaseNotesEntry[] = [
   {
+    version: "0.47.6",
+    highlights: [
+      "Sin cambios visibles: ajustes internos en el formulario de movimientos y en el reparto de conciliación para que sea más fácil mantenerlos.",
+    ],
+  },
+  {
     version: "0.47.5",
     highlights: [
       "Al guardar un gasto o un ingreso vuelves a Movimientos con el movimiento que acabas de registrar. Si abriste el formulario desde una cuenta o una tarjeta, vuelves a esa pantalla con el movimiento en su historial.",
