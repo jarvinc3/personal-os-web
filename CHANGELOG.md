@@ -2,6 +2,19 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.53.0] - 2026-10-21
+
+### Agregado
+
+- Preferencias regionales con el primer día de la semana en el perfil: los calendarios lo usan y Finanzas y Agenda dejan de tener su propio ajuste (#223).
+- Zona de peligro en Ajustes de Finanzas para vaciar solo los datos de ese módulo, con confirmación (#226).
+
+### Cambiado
+
+- Las fechas, las tasas, los porcentajes y los montos siguen el idioma y la región del perfil; la entrada de montos acepta coma o punto (#223).
+- Ajustes de Finanzas pasa a una lista corta con accesos a Categorías, Monedas y Conciliación y una hoja por sección; el Guardar sigue siendo único (#225).
+- Privacidad y datos vacía todos los datos desde una hoja con confirmación, sin selector de capas por módulo (#224).
+
 ## [0.52.1] - 2026-10-21
 
 ### Corregido

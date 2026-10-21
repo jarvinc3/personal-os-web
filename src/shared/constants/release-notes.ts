@@ -12,6 +12,16 @@ export type ReleaseNotesEntry = {
 
 export const RELEASE_NOTES: readonly ReleaseNotesEntry[] = [
   {
+    version: "0.53.0",
+    highlights: [
+      "El primer día de la semana se elige en Preferencias › Región y lo usan los calendarios. Finanzas y Agenda ya no guardan uno propio.",
+      "Las fechas, las tasas y los montos respetan el idioma y la región de tu perfil, y puedes escribir montos con coma o punto.",
+      "Ajustes de Finanzas ahora es una lista corta: Categorías, Monedas y Conciliación, y cada sección abre su propia hoja.",
+      "En Privacidad y datos, vaciar todo abre una hoja que explica qué se borra y pide tu contraseña o tu cuenta de Google.",
+      "Ajustes de Finanzas tiene su propia zona de peligro para vaciar solo los datos de ese módulo.",
+    ],
+  },
+  {
     version: "0.52.1",
     highlights: [
       "La hoja de Idioma muestra el idioma guardado al abrirse, incluso si el perfil tarda en cargar.",
