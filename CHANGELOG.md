@@ -2,6 +2,14 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.47.10] - 2026-10-21
+
+### Corregido
+
+- El historial de una transferencia entre monedas muestra el monto recibido en la moneda de destino, con su signo y la tasa usada; el origen sigue mostrando lo que salió (#171).
+- El monto de un movimiento o de una transferencia se marca en el campo cuando lleva más de dos decimales o pasa del tope permitido, en vez de fallar con un mensaje genérico (#194).
+- Una cuenta de efectivo se guarda en Efectivo aunque el formulario venga de una institución de banco, sin el error genérico de antes (#172).
+
 ## [0.47.9] - 2026-10-20
 
 ### Cambiado
