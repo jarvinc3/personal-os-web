@@ -2,6 +2,12 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.49.3] - 2026-10-21
+
+### Corregido
+
+- Novedades lista la entrada de esta entrega con el sobrante de un cobro y el aviso de sobrepago; 0.49.2 se publicó sin esa entrada (#190, #154).
+
 ## [0.49.2] - 2026-10-21
 
 ### Corregido

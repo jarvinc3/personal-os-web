@@ -12,6 +12,13 @@ export type ReleaseNotesEntry = {
 
 export const RELEASE_NOTES: readonly ReleaseNotesEntry[] = [
   {
+    version: "0.49.3",
+    highlights: [
+      "El aviso de sobrepago de un cobro muestra el sobrante real y deja elegir a qué otro cobro va la diferencia.",
+      "Un monto escrito con separador de miles se lee completo: 3,003 sobre 3,000 avisa que sobran 3.00.",
+    ],
+  },
+  {
     version: "0.49.1",
     highlights: [
       "El formulario de Gasto abre completo: la categoría se elige cuando la tocas y el campo Comercio queda a la vista.",
