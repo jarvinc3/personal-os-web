@@ -104,6 +104,8 @@ function TransactionDetailScreenBody({
   const [linkOpen, setLinkOpen] = useState(false)
   const [mergeOpen, setMergeOpen] = useState(false)
   const [unlinkOpen, setUnlinkOpen] = useState(false)
+  const [unconfirmOpen, setUnconfirmOpen] = useState(false)
+  const [reverseOpen, setReverseOpen] = useState(false)
 
   useRegisterChatContext(
     tx
@@ -289,6 +291,16 @@ function TransactionDetailScreenBody({
     )
   }
 
+  const affectedBalance = tx.cardName
+    ? `la tarjeta ${tx.cardName}`
+    : tx.accountName
+      ? `la cuenta ${tx.accountName}`
+      : "la cuenta del movimiento"
+  const movementAmount = formatFinanceMoney(tx.amount, {
+    ...display,
+    currency: tx.currency,
+  })
+
   const options = [
     ...(canEditTransaction(tx) && !isTransferTransaction(tx)
       ? [
@@ -371,8 +383,8 @@ function TransactionDetailScreenBody({
             reverseMutation.isPending || reverseTransferMutation.isPending
           }
           onConfirm={() => void onConfirm()}
-          onUnconfirm={() => void onUnconfirm()}
-          onReverse={() => void onReverse()}
+          onUnconfirm={() => setUnconfirmOpen(true)}
+          onReverse={() => setReverseOpen(true)}
         />
       </div>
 
@@ -393,6 +405,34 @@ function TransactionDetailScreenBody({
           currency: tx.currency,
         })}. El saldo de la cuenta se corrige y no se puede deshacer.`}
         onConfirm={() => void onDelete()}
+      />
+
+      <TransactionConfirmAlert
+        open={unconfirmOpen}
+        onOpenChange={setUnconfirmOpen}
+        title="¿Marcar como pendiente?"
+        description={`${movementAmount} deja de contar en el saldo de ${affectedBalance} hasta que se confirme otra vez.`}
+        confirmLabel="Marcar pendiente"
+        pending={
+          unconfirmMutation.isPending || unconfirmTransferMutation.isPending
+        }
+        onConfirm={() => {
+          setUnconfirmOpen(false)
+          void onUnconfirm()
+        }}
+      />
+
+      <TransactionConfirmAlert
+        open={reverseOpen}
+        onOpenChange={setReverseOpen}
+        title="¿Reversar el movimiento?"
+        description={`Se crea el asiento contrario de ${movementAmount}. El saldo de ${affectedBalance} se corrige y no se puede deshacer.`}
+        confirmLabel="Reversar"
+        pending={reverseMutation.isPending || reverseTransferMutation.isPending}
+        onConfirm={() => {
+          setReverseOpen(false)
+          void onReverse()
+        }}
       />
 
       <TransactionConfirmAlert
