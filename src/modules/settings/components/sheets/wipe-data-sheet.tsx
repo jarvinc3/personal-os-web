@@ -1,27 +1,35 @@
 "use client"
 
 import { WipeUserDataView } from "@/src/modules/settings/components/sheets/wipe-user-data-sheet"
-import { WIPE_LAYER_ORDER } from "@/src/modules/settings/lib/wipe-layers"
+import type { WipeLayerId } from "@/src/modules/settings/lib/wipe-layers"
 import type { SettingsSheetProps } from "@/src/modules/settings/types/sheet.types"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
 import { Button } from "@/src/shared/components/ui/button"
 import { XIcon } from "lucide-react"
 
-type WipeAllDataSheetProps = SettingsSheetProps & {
+type WipeDataSheetProps = SettingsSheetProps & {
   email: string
+  title: string
+  description: string
+  confirmTitle: string
+  layers: readonly WipeLayerId[]
 }
 
-export function WipeAllDataSheet({
+export function WipeDataSheet({
   open,
   onOpenChange,
   email,
-}: WipeAllDataSheetProps) {
+  title,
+  description,
+  confirmTitle,
+  layers,
+}: WipeDataSheetProps) {
   return (
     <BottomSheet
       open={open}
       onOpenChange={onOpenChange}
-      title="Vaciar todos los datos"
-      description="Borra el contenido de todas las apps. La cuenta se conserva."
+      title={title}
+      description={description}
       actions={{
         close: (
           <Button
@@ -37,7 +45,8 @@ export function WipeAllDataSheet({
     >
       <WipeUserDataView
         email={email}
-        fixedLayers={WIPE_LAYER_ORDER}
+        fixedLayers={layers}
+        confirmTitle={confirmTitle}
         onWiped={() => onOpenChange(false)}
       />
     </BottomSheet>

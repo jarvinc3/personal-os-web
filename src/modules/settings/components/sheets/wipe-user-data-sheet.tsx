@@ -103,12 +103,15 @@ type WipeUserDataViewProps = {
   email: string
   /** Every layer is wiped; the per-module picker stays hidden. */
   fixedLayers?: readonly WipeLayerId[]
+  /** Title of the last confirmation when the layers are fixed. */
+  confirmTitle?: string
   onWiped?: () => void
 }
 
 export function WipeUserDataView({
   email,
   fixedLayers,
+  confirmTitle,
   onWiped,
 }: WipeUserDataViewProps) {
   const router = useRouter()
@@ -508,7 +511,7 @@ export function WipeUserDataView({
           <AlertDialogHeader>
             <AlertDialogTitle>
               {fixedLayers
-                ? "¿Vaciar todos los datos?"
+                ? (confirmTitle ?? "¿Vaciar todos los datos?")
                 : "¿Vaciar los datos seleccionados?"}
             </AlertDialogTitle>
             <AlertDialogDescription>

@@ -4,9 +4,12 @@ import { FinanceIntegritySettingsSection } from "@/src/modules/finance/integrity
 import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
 import { FINANCE_DASHBOARD_PERIOD_OPTIONS } from "@/src/modules/finance/shared/lib/dashboard-period"
 import { ModuleSheetEnableRow } from "@/src/modules/settings/components/profile-ui"
+import { WipeDataSheet } from "@/src/modules/settings"
+import { SETTINGS_REGISTRY } from "@/src/modules/settings/constants/settings-metadata"
 import { useModuleSheetEnable } from "@/src/modules/settings/hooks/use-module-sheet-enable"
 import { useProfileSheetFormSync } from "@/src/modules/settings/hooks/use-profile-sheet"
 import { useUserModuleConfig } from "@/src/modules/settings/hooks/use-user-module-config"
+import { FINANCE_WIPE_LAYERS } from "@/src/modules/settings/lib/wipe-layers"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
 import {
   SettingsRow,
@@ -31,6 +34,7 @@ import {
   Scale,
   ScanEyeIcon,
   Tags,
+  Trash2,
   XIcon,
   type LucideIcon,
 } from "lucide-react"
@@ -145,6 +149,7 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
     updateConfig,
     updateMutation,
     formatLocale,
+    profileQuery,
   } = useUserModuleConfig("finance")
   const moduleEnable = useModuleSheetEnable("finance")
   const accountsQuery = useAccounts(isModuleEnabled)
@@ -152,6 +157,7 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
   const [openSheet, setOpenSheet] = useState<FinanceSettingsSheetId | null>(
     null
   )
+  const [wipeSheetOpen, setWipeSheetOpen] = useState(false)
 
   const {
     control,
@@ -335,6 +341,21 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
         }}
       />
 
+      <SettingsSection
+        title="Zona de peligro"
+        description="Borra solo los datos de Finanzas. La cuenta y sus preferencias se conservan."
+      >
+        <SettingsRow
+          label="Vaciar datos de Finanzas"
+          description="Movimientos, cuentas, presupuestos, categorías y conexiones de correo."
+          destructive
+          icon={Trash2}
+          accentColor={SETTINGS_REGISTRY.danger.accent}
+          onPress={() => setWipeSheetOpen(true)}
+          isLast
+        />
+      </SettingsSection>
+
       <FinanceSettingsSheet
         id="display"
         openSheet={openSheet}
@@ -397,6 +418,16 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
       >
         <NotificationsSection control={control} />
       </FinanceSettingsSheet>
+
+      <WipeDataSheet
+        open={wipeSheetOpen}
+        onOpenChange={setWipeSheetOpen}
+        email={profileQuery.data?.email ?? ""}
+        title="Vaciar datos de Finanzas"
+        description="Borra solo los datos de Finanzas. La cuenta se conserva."
+        confirmTitle="¿Vaciar los datos de Finanzas?"
+        layers={FINANCE_WIPE_LAYERS}
+      />
     </FormScreen>
   )
 }

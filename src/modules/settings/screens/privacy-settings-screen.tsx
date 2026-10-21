@@ -3,9 +3,10 @@
 import { useAuthGuard } from "@/src/modules/auth"
 import { SettingsSecondaryPage } from "@/src/modules/settings/components/layout/settings-secondary-page"
 import { DeleteAccountSheet } from "@/src/modules/settings/components/sheets/delete-account-sheet"
-import { WipeAllDataSheet } from "@/src/modules/settings/components/sheets/wipe-all-data-sheet"
+import { WipeDataSheet } from "@/src/modules/settings/components/sheets/wipe-data-sheet"
 import { SETTINGS_REGISTRY } from "@/src/modules/settings/constants/settings-metadata"
 import { usePreferenceToggle } from "@/src/modules/settings/hooks/use-preference-toggle"
+import { WIPE_LAYER_ORDER } from "@/src/modules/settings/lib/wipe-layers"
 import { useProfile } from "@/src/modules/settings/hooks/use-profile"
 import { SettingsGate } from "@/src/modules/settings/settings-gate"
 import {
@@ -87,10 +88,14 @@ function PrivacySettingsScreenBody() {
         />
       </SettingsSection>
 
-      <WipeAllDataSheet
+      <WipeDataSheet
         open={openWipeAllSheet}
         onOpenChange={setOpenWipeAllSheet}
         email={displayEmail}
+        title="Vaciar todos los datos"
+        description="Borra el contenido de todas las apps. La cuenta se conserva."
+        confirmTitle="¿Vaciar todos los datos?"
+        layers={WIPE_LAYER_ORDER}
       />
       <DeleteAccountSheet
         open={openDeleteAccountSheet}

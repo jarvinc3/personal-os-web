@@ -75,17 +75,20 @@ export type WipeLayerGroup = {
   layers: WipeLayerId[]
 }
 
+/** Layers that belong to Finanzas; a module wipe sends only these. */
+export const FINANCE_WIPE_LAYERS: readonly WipeLayerId[] = [
+  WIPE_LAYERS.FINANCE_LEDGER,
+  WIPE_LAYERS.FINANCE_BALANCES,
+  WIPE_LAYERS.FINANCE_PLANNING,
+  WIPE_LAYERS.FINANCE_CATEGORIES,
+  WIPE_LAYERS.FINANCE_CATALOG,
+  WIPE_LAYERS.FINANCE_EMAIL_CONNECTIONS,
+]
+
 export const WIPE_LAYER_GROUPS: WipeLayerGroup[] = [
   {
     title: "Finanzas",
-    layers: [
-      WIPE_LAYERS.FINANCE_LEDGER,
-      WIPE_LAYERS.FINANCE_BALANCES,
-      WIPE_LAYERS.FINANCE_PLANNING,
-      WIPE_LAYERS.FINANCE_CATEGORIES,
-      WIPE_LAYERS.FINANCE_CATALOG,
-      WIPE_LAYERS.FINANCE_EMAIL_CONNECTIONS,
-    ],
+    layers: [...FINANCE_WIPE_LAYERS],
   },
   { title: "Asistente IA", layers: [WIPE_LAYERS.AI_SESSIONS] },
   { title: "Notificaciones", layers: [WIPE_LAYERS.NOTIFICATIONS] },
