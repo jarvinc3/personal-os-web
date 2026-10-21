@@ -42,3 +42,27 @@ export function walletPositionLabel(
     total: length,
   }
 }
+
+export type WalletWrapDirection = "forward" | "backward"
+
+/**
+ * Direction of the bounce when a step leaves one end of the ring and returns on
+ * the other. `null` while the step stays inside.
+ */
+export function walletWrapDirection(
+  offset: number,
+  delta: number,
+  length: number
+): WalletWrapDirection | null {
+  if (length <= 1 || delta === 0) {
+    return null
+  }
+  const front = walletFrontIndex(offset, length)
+  if (delta > 0 && front === length - 1) {
+    return "forward"
+  }
+  if (delta < 0 && front === 0) {
+    return "backward"
+  }
+  return null
+}

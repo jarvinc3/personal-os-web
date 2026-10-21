@@ -8,6 +8,7 @@ import {
   walletOrderedItems,
   walletPositionLabel,
   walletVisibleItems,
+  walletWrapDirection,
 } from "./wallet-stack.ts"
 
 const six = [0, 1, 2, 3, 4, 5]
@@ -45,5 +46,31 @@ describe("wallet-stack", () => {
     assert.equal(walletFrontIndex(3, 0), 0)
     assert.deepEqual(walletVisibleItems([], 2), [])
     assert.deepEqual(walletPositionLabel(1, 0), { current: 0, total: 0 })
+  })
+})
+
+describe("walletWrapDirection", () => {
+  it("bounces forward when the step leaves the last card", () => {
+    assert.equal(walletWrapDirection(5, 1, 6), "forward")
+  })
+
+  it("bounces backward when the step leaves the first card", () => {
+    assert.equal(walletWrapDirection(0, -1, 6), "backward")
+  })
+
+  it("does not bounce while the step stays inside the ring", () => {
+    assert.equal(walletWrapDirection(2, 1, 6), null)
+    assert.equal(walletWrapDirection(2, -1, 6), null)
+  })
+
+  it("reads an offset past the ring as the card it lands on", () => {
+    assert.equal(walletWrapDirection(6, 1, 6), null)
+    assert.equal(walletWrapDirection(6, -1, 6), "backward")
+    assert.equal(walletWrapDirection(-1, 1, 6), "forward")
+  })
+
+  it("never bounces with one card or without a step", () => {
+    assert.equal(walletWrapDirection(0, 1, 1), null)
+    assert.equal(walletWrapDirection(0, 0, 6), null)
   })
 })

@@ -12,6 +12,13 @@ export type ReleaseNotesEntry = {
 
 export const RELEASE_NOTES: readonly ReleaseNotesEntry[] = [
   {
+    version: "0.48.0",
+    highlights: [
+      "En Productos, las instituciones se mueven con un deslizamiento horizontal y el botón Desplegar las abre en fila para verlas todas.",
+      "La pila vuelve a empezar donde la dejaste y recuerda si prefieres verla apilada o desplegada.",
+    ],
+  },
+  {
     version: "0.47.10",
     highlights: [
       "Al ver una transferencia entre monedas, cada cuenta muestra su propio monto: lo que salió y lo que llegó, con la tasa usada.",

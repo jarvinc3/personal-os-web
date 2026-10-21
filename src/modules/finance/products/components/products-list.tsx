@@ -39,11 +39,6 @@ import { ExpandableFab } from "@/src/shared/components/layout/expandable-fab"
 import { SettingsSection } from "@/src/shared/components/layout/settings-section"
 import { Button } from "@/src/shared/components/ui/button"
 import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/src/shared/components/ui/collapsible"
-import {
   Empty,
   EmptyContent,
   EmptyDescription,
@@ -58,7 +53,6 @@ import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { useQueryClient } from "@tanstack/react-query"
 import {
   Building2Icon,
-  ChevronDownIcon,
   LandmarkIcon,
   MailIcon,
   PlusIcon,
@@ -270,38 +264,25 @@ export function FinanceProductsList({
             </Empty>
           }
         >
-          <Collapsible
-            defaultOpen
-            className="group/institutions relative z-10 flex flex-col"
-          >
-            <CollapsibleTrigger
-              type="button"
-              className="flex w-full cursor-pointer items-center justify-between gap-2 text-left"
-            >
+          <div className="relative z-10 flex flex-col gap-3">
+            <div className="flex items-center justify-between gap-2">
               <p className="text-lg font-medium text-foreground">
                 Instituciones
               </p>
-              <span className="flex items-center gap-2">
-                {trend ? <FinanceExpenseTrendBadge trend={trend} /> : null}
-                <ChevronDownIcon className="size-4 shrink-0 text-muted-foreground transition-transform duration-200 ease-out group-data-open/institutions:rotate-180" />
-              </span>
-            </CollapsibleTrigger>
-            <CollapsibleContent className="overflow-visible data-ending-style:overflow-hidden data-starting-style:overflow-hidden">
-              <div className="pt-3">
-                <InstitutionSwapStack
-                  items={stackItems}
-                  display={moneyDisplay}
-                  onSelect={(item) => {
-                    if (item.kind === "institution") {
-                      router.push(APP_ROUTES.app.financeInstitution(item.id))
-                      return
-                    }
-                    router.push(APP_ROUTES.app.financeCashAccount(item.id))
-                  }}
-                />
-              </div>
-            </CollapsibleContent>
-          </Collapsible>
+              {trend ? <FinanceExpenseTrendBadge trend={trend} /> : null}
+            </div>
+            <InstitutionSwapStack
+              items={stackItems}
+              display={moneyDisplay}
+              onSelect={(item) => {
+                if (item.kind === "institution") {
+                  router.push(APP_ROUTES.app.financeInstitution(item.id))
+                  return
+                }
+                router.push(APP_ROUTES.app.financeCashAccount(item.id))
+              }}
+            />
+          </div>
         </AsyncRegion>
       </div>
 

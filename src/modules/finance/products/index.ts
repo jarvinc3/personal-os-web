@@ -1,1 +1,1 @@
-export { ProductCountItem } from "@/src/modules/finance/products/components/institution-swap-stack"
+export { ProductCountItem } from "@/src/modules/finance/products/components/institution-wallet-card"
