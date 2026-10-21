@@ -3,7 +3,7 @@
 import { apiPatch } from "@/src/config/api-client"
 import { mergeAuthUserWithProfile, PROFILE_QUERY_KEY } from "@/src/modules/auth"
 import { useProfile } from "@/src/modules/settings/hooks/use-profile"
-import { normalizeFormatLocale } from "@/src/modules/settings/lib/format-locale"
+import { DEFAULT_LOCALE } from "@/src/modules/settings/lib/locale-options"
 import {
   resolveModuleState,
   type ModuleSettingsState,
@@ -106,6 +106,6 @@ export function useUserModuleConfig<S extends ConfigurableModuleSlug>(slug: S) {
     setModuleEnabled,
     updateMutation,
     profileQuery,
-    formatLocale: normalizeFormatLocale(profileQuery.data?.locale),
+    formatLocale: profileQuery.data?.locale ?? DEFAULT_LOCALE,
   }
 }

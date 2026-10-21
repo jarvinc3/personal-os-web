@@ -1,11 +1,11 @@
 "use client"
 
-import { normalizeFormatLocale } from "@/src/modules/settings/lib/format-locale"
+import { DEFAULT_LOCALE } from "@/src/modules/settings/lib/locale-options"
 
 import { useProfile } from "./use-profile"
 
 /** Locale that drives date and number formatting across the app. */
 export function useFormatLocale(): string {
   const { profileQuery } = useProfile()
-  return normalizeFormatLocale(profileQuery.data?.locale)
+  return profileQuery.data?.locale ?? DEFAULT_LOCALE
 }
