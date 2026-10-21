@@ -18,18 +18,12 @@ import {
   DollarSign,
   ScanEyeIcon,
   Shrink,
-  Sun,
   type LucideIcon,
 } from "lucide-react"
 import { Controller, type Control } from "react-hook-form"
 import type { FinanceModuleFormValues } from "@/src/modules/finance/settings/lib/finance-module-form"
 
 const MODULE_ACCENT = getModule("finance").accent
-
-const WEEK_OPTIONS = [
-  { value: "1", label: "Lunes", icon: CalendarDays },
-  { value: "0", label: "Domingo", icon: Sun },
-] as const
 
 const PERIOD_OPTIONS = [
   { value: "week", label: "Semana", icon: CalendarDays },
@@ -63,21 +57,15 @@ export function DisplaySection({ control, baseCurrency }: DisplaySectionProps) {
       </SummarySection>
 
       <SummarySection title="Inicio de semana" icon={CalendarCog}>
-        <SummaryGroup title="Primer día de la semana">
-          <Controller
-            control={control}
-            name="weekStartsOn"
-            render={({ field }) => (
-              <ChoiceGrid
-                ariaLabel="Primer día de la semana"
-                accentColor={MODULE_ACCENT}
-                value={field.value}
-                onValueChange={field.onChange}
-                options={WEEK_OPTIONS}
-              />
-            )}
-          />
-        </SummaryGroup>
+        <SummaryItem
+          href={APP_ROUTES.app.settingsRegional}
+          icon={CalendarCog}
+          accentColor={MODULE_ACCENT}
+          title="Primer día de la semana"
+          description="Se configura en Preferencias › Región."
+          showChevron
+          isLast
+        />
       </SummarySection>
 
       <SummarySection title="Período del panel" icon={ChartBarIcon}>

@@ -5,6 +5,7 @@ import {
   formatMonthYearLabel,
 } from "@/src/shared/lib/date-format"
 import type { FinanceTransaction } from "@/src/modules/finance/shared/types/entities"
+import type { WeekStartsOn } from "@/src/modules/settings/types/profile.types"
 import {
   groupReversals,
   type ReversalGroup,
@@ -123,10 +124,12 @@ function groupsByDayKey(
   return byDay
 }
 
-export function buildTimelineMonths(
-  months: YearMonth[],
+export function buildTimelineMonths(input: {
+  months: YearMonth[]
   items: FinanceTransaction[]
-): TimelineMonth[] {
+  weekStartsOn: WeekStartsOn
+}): TimelineMonth[] {
+  const { months, items, weekStartsOn } = input
   const renderedMonthKeys = new Set(
     months.map((slot) => monthKey(slot.year, slot.month))
   )
@@ -145,7 +148,11 @@ export function buildTimelineMonths(
       .slice()
       .sort((left, right) => compareTransactions(left.original, right.original))
     const monthItems = monthGroups.flatMap(groupItems)
-    const weeks = weeksForMonth(slot.year, slot.month).map((week) => {
+    const weeks = weeksForMonth({
+      year: slot.year,
+      month: slot.month,
+      weekStartsOn,
+    }).map((week) => {
       const weekGroups = monthGroups.filter((group) => {
         const date = calendarDateFromTransaction(group.original.transactionDate)
         return date ? inClippedWeek(date, week) : false

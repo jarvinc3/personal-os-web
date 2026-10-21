@@ -3,13 +3,16 @@
 import { SettingsSecondaryPage } from "@/src/modules/settings/components/layout/settings-secondary-page"
 import { EditLocaleSheet } from "@/src/modules/settings/components/sheets/edit-locale-sheet"
 import { EditTimeZoneSheet } from "@/src/modules/settings/components/sheets/edit-time-zone-sheet"
+import { EditWeekStartSheet } from "@/src/modules/settings/components/sheets/edit-week-start-sheet"
 import { SETTINGS_REGISTRY } from "@/src/modules/settings/constants/settings-metadata"
 import { useProfile } from "@/src/modules/settings/hooks/use-profile"
 import { useUserModuleConfig } from "@/src/modules/settings/hooks/use-user-module-config"
+import { useWeekStartsOn } from "@/src/modules/settings/hooks/use-week-starts-on"
 import {
   DEFAULT_LOCALE,
   localeLabel,
 } from "@/src/modules/settings/lib/locale-options"
+import { weekStartsOnLabel } from "@/src/modules/settings/lib/week-starts-on"
 import { SettingsGate } from "@/src/modules/settings/settings-gate"
 import {
   SettingsRow,
@@ -31,17 +34,25 @@ export function RegionalSettingsScreen() {
 }
 
 function RegionalSettingsScreenBody() {
-  const { profileQuery } = useProfile()
+  const { profileQuery, preferences } = useProfile()
   const { config } = useUserModuleConfig("finance")
   const { navigate, isPending } = usePendingNavigation()
   const { open: openTimeZoneSheet, setOpen: setOpenTimeZoneSheet } =
     useSheetParam("time-zone-sheet")
   const { open: openLocaleSheet, setOpen: setOpenLocaleSheet } =
     useSheetParam("locale-sheet")
+  const { open: openWeekStartSheet, setOpen: setOpenWeekStartSheet } =
+    useSheetParam("week-start-sheet")
 
   const profile = profileQuery.data
   const timeZone = profile?.timezone?.trim() || "Sin definir"
   const locale = localeLabel(profile?.locale)
+  const storedWeekStart = preferences.regional.weekStartsOn
+  const weekStart = useWeekStartsOn()
+  const weekStartValue =
+    storedWeekStart === null
+      ? `${weekStartsOnLabel(weekStart)} (según la región)`
+      : weekStartsOnLabel(weekStart)
 
   return (
     <SettingsSecondaryPage title="Preferencias regionales">
@@ -61,6 +72,14 @@ function RegionalSettingsScreenBody() {
           onPress={() => setOpenLocaleSheet(true)}
           accentColor={REGIONAL_ACCENT}
           icon={Globe}
+        />
+        <SettingsRow
+          label="Primer día de la semana"
+          description="Se usa en calendarios y en las semanas de la app."
+          value={weekStartValue}
+          onPress={() => setOpenWeekStartSheet(true)}
+          accentColor={REGIONAL_ACCENT}
+          {...SETTINGS_REGISTRY.account.rows.weekStartsOn}
           isLast
         />
       </SettingsSection>
@@ -86,6 +105,11 @@ function RegionalSettingsScreenBody() {
         key={profile?.locale ?? DEFAULT_LOCALE}
         open={openLocaleSheet}
         onOpenChange={setOpenLocaleSheet}
+      />
+      <EditWeekStartSheet
+        key={storedWeekStart ?? "auto"}
+        open={openWeekStartSheet}
+        onOpenChange={setOpenWeekStartSheet}
       />
     </SettingsSecondaryPage>
   )

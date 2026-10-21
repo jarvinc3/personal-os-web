@@ -11,6 +11,7 @@ import {
 } from "@/src/modules/finance/shared/lib/decimal"
 import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 import type { FinanceSubscriptionUpcomingCharge } from "@/src/modules/finance/shared/types/entities"
+import type { WeekStartsOn } from "@/src/modules/settings/types/profile.types"
 
 const DAYS_PER_WEEK = 7
 
@@ -75,7 +76,7 @@ export function subscriptionCalendarWeeks(input: {
   charges: readonly FinanceSubscriptionUpcomingCharge[]
   today: Date
   windowDays: number
-  weekStartsOn: 0 | 1
+  weekStartsOn: WeekStartsOn
 }): SubscriptionCalendarWeek[] {
   const monthStart = new Date(input.year, input.month - 1, 1)
   const monthEnd = new Date(input.year, input.month, 0)
