@@ -2,6 +2,20 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.57.0] - 2026-10-21 - Préstamos y metas
+
+### Agregado
+
+- El asistente de préstamo acepta un nombre o alias opcional y la cuenta donde entró el capital; la lista y el detalle prefieren el alias y muestran la cuenta de desembolso (#181, #182).
+- El detalle de una meta de ahorro muestra su cuenta asociada y el monto apartado, y ofrece **Retirar** con cuenta de destino; el historial distingue aportes y retiros (#188, #189).
+- El detalle de la institución **Efectivo** tiene menú propio, pestañas **Cuentas** y **Préstamos** (solo lectura, préstamos sin banco) y el saldo por moneda vive en el header (#213).
+
+### Cambiado
+
+- El alta de un préstamo avisa cuando el capital no entró a ninguna cuenta.
+- Un retiro mayor a lo apartado se bloquea con el máximo visible.
+- Aportes, retiros y desembolsos refrescan las cuentas y el patrimonio.
+
 ## [0.56.1] - 2026-10-21
 
 ### Corregido

@@ -12,6 +12,14 @@ export type ReleaseNotesEntry = {
 
 export const RELEASE_NOTES: readonly ReleaseNotesEntry[] = [
   {
+    version: "0.57.0",
+    highlights: [
+      "Puedes ponerle un nombre a cada préstamo para distinguirlo, y elegir la cuenta donde entró el dinero: ese saldo sube y el patrimonio no baja por el capital recibido.",
+      "Cada meta de ahorro muestra en qué cuenta vive su dinero, y ahora puedes retirar lo apartado hacia la cuenta que elijas sin borrar el historial.",
+      "La vista de Efectivo queda propia de una institución del sistema: menú con Nueva cuenta, el saldo de cada moneda en el header y una pestaña Préstamos con los préstamos que no están ligados a un banco.",
+    ],
+  },
+  {
     version: "0.56.1",
     highlights: [
       "El detalle de una institución muestra el saldo de cada moneda cuando tiene más de una, y con una sola moneda lo muestra en esa moneda, sin convertir.",
