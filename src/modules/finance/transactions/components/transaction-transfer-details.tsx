@@ -6,7 +6,10 @@ import type { FinanceTransaction } from "@/src/modules/finance/shared/types/enti
 import { transferDirectionLabel } from "@/src/modules/finance/shared/lib/transactions-query"
 import { SummaryItem } from "@/src/shared/components/ui/summary"
 
-import { transferRateLabel } from "@/src/modules/finance/transactions/lib/transfer-fx"
+import {
+  crossCurrencyRate,
+  transferRateLabel,
+} from "@/src/modules/finance/transactions/lib/transfer-fx"
 
 type TransactionTransferDetailsProps = {
   transaction: FinanceTransaction
@@ -15,6 +18,8 @@ type TransactionTransferDetailsProps = {
 export function TransactionTransferDetails({
   transaction,
 }: TransactionTransferDetailsProps) {
+  const crossRate = crossCurrencyRate(transaction)
+
   return (
     <>
       <SummaryItem
@@ -75,16 +80,10 @@ export function TransactionTransferDetails({
         isLast={false}
         className="px-3"
       />
-      {transaction.transferToCurrency &&
-      transaction.transferToCurrency !== transaction.currency &&
-      transaction.exchangeRate ? (
+      {crossRate ? (
         <SummaryItem
           title={transaction.transferEstimated ? "Tasa estimada" : "Tasa"}
-          value={transferRateLabel({
-            rate: transaction.exchangeRate,
-            sourceCurrency: transaction.currency,
-            destinationCurrency: transaction.transferToCurrency,
-          })}
+          value={transferRateLabel(crossRate)}
           isLast={false}
           className="px-3"
         />

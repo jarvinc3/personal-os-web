@@ -1,4 +1,5 @@
 import { parseFinanceMoney } from "@/src/modules/finance/shared/lib/money"
+import type { FinanceTransaction } from "@/src/modules/finance/shared/types/entities"
 
 /** Pair rate from two display quotes that share the same base currency. */
 export function crossExchangeRate(input: {
@@ -44,4 +45,34 @@ export function transferRateLabel(input: {
     maximumFractionDigits: 8,
   }).format(rate)
   return `1 ${input.sourceCurrency} = ${decimals} ${input.destinationCurrency}`
+}
+
+export type CrossCurrencyRate = {
+  rate: string
+  sourceCurrency: string
+  destinationCurrency: string
+}
+
+/**
+ * The rate a transfer used and the two currencies it crossed. `null` when the
+ * transfer stayed in one currency or the API sent no rate.
+ */
+export function crossCurrencyRate(
+  transaction: Pick<
+    FinanceTransaction,
+    "currency" | "transferToCurrency" | "exchangeRate"
+  >
+): CrossCurrencyRate | null {
+  const destinationCurrency = transaction.transferToCurrency
+  if (!destinationCurrency || !transaction.exchangeRate) {
+    return null
+  }
+  if (destinationCurrency === transaction.currency) {
+    return null
+  }
+  return {
+    rate: transaction.exchangeRate,
+    sourceCurrency: transaction.currency,
+    destinationCurrency,
+  }
 }

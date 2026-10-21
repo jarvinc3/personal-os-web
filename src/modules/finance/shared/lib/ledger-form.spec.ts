@@ -7,8 +7,11 @@ import {
   currencyForTarget,
   formatCalendarDate,
   formatFinanceDateTimeLabel,
+  hasMoneyCentsInput,
   isLedgerTargetInput,
+  isMoneyAmountInput,
   isPositiveAmountInput,
+  isWithinMaxAmountInput,
   nowDateTimeInput,
   sliceDateInput,
   sliceDateTimeInput,
@@ -171,5 +174,33 @@ describe("isLedgerTargetInput", () => {
       isLedgerTargetInput(encodeLedgerTarget("card", "card-1")),
       true
     )
+  })
+})
+
+describe("hasMoneyCentsInput", () => {
+  it("accepts whole amounts and up to two decimals", () => {
+    assert.equal(hasMoneyCentsInput("10"), true)
+    assert.equal(hasMoneyCentsInput("10.5"), true)
+    assert.equal(hasMoneyCentsInput("10.05"), true)
+  })
+
+  it("rejects a third decimal", () => {
+    assert.equal(hasMoneyCentsInput("10.005"), false)
+  })
+})
+
+describe("isWithinMaxAmountInput", () => {
+  it("accepts an amount on the ceiling and rejects the one above it", () => {
+    assert.equal(isWithinMaxAmountInput("999999999.99"), true)
+    assert.equal(isWithinMaxAmountInput("1000000000"), false)
+  })
+})
+
+describe("isMoneyAmountInput", () => {
+  it("requires cents, a positive value and the ceiling at once", () => {
+    assert.equal(isMoneyAmountInput("10.05"), true)
+    assert.equal(isMoneyAmountInput("10.005"), false)
+    assert.equal(isMoneyAmountInput("0"), false)
+    assert.equal(isMoneyAmountInput("99999999999"), false)
   })
 })

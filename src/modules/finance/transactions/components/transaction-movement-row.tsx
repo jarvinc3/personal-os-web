@@ -8,7 +8,10 @@ import {
   formatFinanceMoney,
   type FinanceMoneyDisplay,
 } from "@/src/modules/finance/shared/lib/money"
-import { transferRateLabel } from "@/src/modules/finance/transactions/lib/transfer-fx"
+import {
+  crossCurrencyRate,
+  transferRateLabel,
+} from "@/src/modules/finance/transactions/lib/transfer-fx"
 import { formatFinanceTimeLabel } from "@/src/modules/finance/shared/lib/ledger-form"
 import {
   displayedMovementSign,
@@ -80,18 +83,9 @@ export function TransactionMovementRow({
     ? "#3B82F6"
     : category?.color?.trim() || parent?.color?.trim() || "#64748B"
   const sign = displayedMovementSign(transaction, instrument)
-  const rateLabel =
-    isTransfer &&
-    instrument &&
-    transaction.transferToCurrency &&
-    transaction.transferToCurrency !== transaction.currency &&
-    transaction.exchangeRate
-      ? transferRateLabel({
-          rate: transaction.exchangeRate,
-          sourceCurrency: transaction.currency,
-          destinationCurrency: transaction.transferToCurrency,
-        })
-      : null
+  const crossRate =
+    isTransfer && instrument ? crossCurrencyRate(transaction) : null
+  const rateLabel = crossRate ? transferRateLabel(crossRate) : null
   const title = isTransfer
     ? transferDirectionLabel(transaction)
     : (transaction.merchantName ??

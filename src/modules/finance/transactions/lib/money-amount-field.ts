@@ -3,6 +3,7 @@ import { z } from "zod"
 import {
   FINANCE_MAX_AMOUNT,
   hasMoneyCentsInput,
+  isMoneyAmountInput,
   isPositiveAmountInput,
   isWithinMaxAmountInput,
 } from "@/src/modules/finance/shared/lib/ledger-form"
@@ -30,12 +31,5 @@ export function optionalMoneyAmountField(message: string) {
   return z
     .string()
     .trim()
-    .refine(
-      (value) =>
-        value === "" ||
-        (hasMoneyCentsInput(value) &&
-          isPositiveAmountInput(value) &&
-          isWithinMaxAmountInput(value)),
-      message
-    )
+    .refine((value) => value === "" || isMoneyAmountInput(value), message)
 }

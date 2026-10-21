@@ -47,6 +47,18 @@ export function isWithinMaxAmountInput(value: string): boolean {
   return amount <= FINANCE_MAX_AMOUNT
 }
 
+/**
+ * Every money rule at once, for inputs that answer with one message instead of
+ * naming the rule that failed.
+ */
+export function isMoneyAmountInput(value: string): boolean {
+  return (
+    hasMoneyCentsInput(value) &&
+    isPositiveAmountInput(value) &&
+    isWithinMaxAmountInput(value)
+  )
+}
+
 /** A rate keeps up to the 8 decimals the API stores. */
 export function isPositiveRateInput(value: string): boolean {
   if (!/^\d*\.?\d{0,8}$/.test(value.trim())) {

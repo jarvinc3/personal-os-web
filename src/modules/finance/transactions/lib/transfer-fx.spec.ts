@@ -2,11 +2,55 @@ import assert from "node:assert/strict"
 import { describe, it } from "node:test"
 
 import {
+  crossCurrencyRate,
   crossExchangeRate,
   formatTransferRateInput,
   receivedFromRate,
   transferRateLabel,
 } from "./transfer-fx.ts"
+
+describe("crossCurrencyRate", () => {
+  it("returns the rate and both currencies of a cross-currency transfer", () => {
+    assert.deepEqual(
+      crossCurrencyRate({
+        currency: "USD",
+        transferToCurrency: "DOP",
+        exchangeRate: "61.45",
+      }),
+      { rate: "61.45", sourceCurrency: "USD", destinationCurrency: "DOP" }
+    )
+  })
+
+  it("returns null when the transfer stays in one currency", () => {
+    assert.equal(
+      crossCurrencyRate({
+        currency: "DOP",
+        transferToCurrency: "DOP",
+        exchangeRate: "1",
+      }),
+      null
+    )
+  })
+
+  it("returns null without a destination currency or a rate", () => {
+    assert.equal(
+      crossCurrencyRate({
+        currency: "USD",
+        transferToCurrency: null,
+        exchangeRate: "61.45",
+      }),
+      null
+    )
+    assert.equal(
+      crossCurrencyRate({
+        currency: "USD",
+        transferToCurrency: "DOP",
+        exchangeRate: null,
+      }),
+      null
+    )
+  })
+})
 
 describe("crossExchangeRate", () => {
   it("derives the pair rate from quotes in the same base", () => {
