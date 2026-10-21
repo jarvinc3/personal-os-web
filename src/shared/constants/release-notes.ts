@@ -12,6 +12,14 @@ export type ReleaseNotesEntry = {
 
 export const RELEASE_NOTES: readonly ReleaseNotesEntry[] = [
   {
+    version: "0.47.10",
+    highlights: [
+      "Al ver una transferencia entre monedas, cada cuenta muestra su propio monto: lo que salió y lo que llegó, con la tasa usada.",
+      "Si un monto lleva más de dos decimales o pasa del máximo, el campo te lo dice antes de guardar.",
+      "Una cuenta de efectivo se guarda siempre en Efectivo, aunque la estés creando desde un banco.",
+    ],
+  },
+  {
     version: "0.47.9",
     highlights: [
       "Al crear una categoría desde el presupuesto, la hoja se cierra y la categoría queda elegida.",
