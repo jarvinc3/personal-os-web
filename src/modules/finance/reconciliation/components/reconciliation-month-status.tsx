@@ -6,10 +6,13 @@ import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-er
 import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
 import type { FinanceReconciliationStatusItem } from "@/src/modules/finance/shared/types/entities"
-import { BanknoteIcon, CheckIcon, ChevronRightIcon } from "lucide-react"
+import { BanknoteIcon, ChevronRightIcon } from "lucide-react"
 import Link from "next/link"
+import { cn } from "@/src/shared/lib/utils"
 
 const MAX_VISIBLE_PRODUCTS = 4
+const CHIP_CLASS =
+  "rounded-full bg-muted px-2 py-1 text-xs text-muted-foreground"
 
 type ReconciliationMonthStatusProps = {
   enabled: boolean
@@ -46,15 +49,22 @@ export function ReconciliationMonthStatus({
   }
 
   const pending = status.items.filter((item) => !item.reconciled)
+  if (pending.length === 0) {
+    return null
+  }
+
   const visible = pending.slice(0, MAX_VISIBLE_PRODUCTS)
   const hidden = pending.length - visible.length
-  const firstHref = pending[0] ? hrefFor(pending[0]) : null
-  const title =
-    pending.length === 0
-      ? `Todo conciliado en ${monthLabel}`
-      : `${pending.length} producto${
-          pending.length === 1 ? "" : "s"
-        } sin conciliar en ${monthLabel}`
+  const firstHref = hrefFor(pending[0]!)
+  const title = `${pending.length} producto${
+    pending.length === 1 ? "" : "s"
+  } sin conciliar en ${monthLabel}`
+  const statusRow = (
+    <>
+      <BanknoteIcon className="size-4 shrink-0 text-muted-foreground" />
+      <p className="flex-1 text-sm font-medium">{title}</p>
+    </>
+  )
 
   return (
     <div className="flex flex-col gap-2 rounded-2xl border border-border bg-card p-3">
@@ -64,15 +74,11 @@ export function ReconciliationMonthStatus({
           className="flex items-center gap-2 text-left"
           aria-label={`${title}. Abrir la conciliación`}
         >
-          <StatusIcon pending={pending.length > 0} />
-          <p className="flex-1 text-sm font-medium">{title}</p>
+          {statusRow}
           <ChevronRightIcon className="size-4 shrink-0 text-muted-foreground" />
         </Link>
       ) : (
-        <div className="flex items-center gap-2">
-          <StatusIcon pending={pending.length > 0} />
-          <p className="text-sm font-medium">{title}</p>
-        </div>
+        <div className="flex items-center gap-2">{statusRow}</div>
       )}
       {visible.length > 0 ? (
         <div className="flex flex-wrap gap-2">
@@ -84,10 +90,7 @@ export function ReconciliationMonthStatus({
             const href = hrefFor(item)
             if (!href) {
               return (
-                <span
-                  key={item.key}
-                  className="rounded-full bg-muted px-2 py-1 text-xs text-muted-foreground"
-                >
+                <span key={item.key} className={CHIP_CLASS}>
                   {label}
                 </span>
               )
@@ -96,7 +99,10 @@ export function ReconciliationMonthStatus({
               <Link
                 key={item.key}
                 href={href}
-                className="rounded-full bg-muted px-2 py-1 text-xs text-muted-foreground transition-colors hover:bg-muted/70"
+                className={cn(
+                  CHIP_CLASS,
+                  "transition-colors hover:bg-muted/70"
+                )}
                 aria-label={`Conciliar ${item.name}`}
               >
                 {label}
@@ -104,20 +110,11 @@ export function ReconciliationMonthStatus({
             )
           })}
           {hidden > 0 ? (
-            <span className="rounded-full bg-muted px-2 py-1 text-xs text-muted-foreground">
-              +{hidden} más
-            </span>
+            <span className={CHIP_CLASS}>+{hidden} más</span>
           ) : null}
         </div>
       ) : null}
       {errorState}
     </div>
   )
-}
-
-function StatusIcon({ pending }: { pending: boolean }) {
-  if (!pending) {
-    return <CheckIcon className="size-4 shrink-0 text-[var(--success)]" />
-  }
-  return <BanknoteIcon className="size-4 shrink-0 text-muted-foreground" />
 }

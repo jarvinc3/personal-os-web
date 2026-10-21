@@ -15,8 +15,12 @@ import {
   UserIcon,
   WalletIcon,
 } from "lucide-react"
-import { Controller } from "react-hook-form"
-import type { Control, FieldErrors, UseFormTrigger } from "react-hook-form"
+import {
+  Controller,
+  type Control,
+  type FieldErrors,
+  type UseFormTrigger,
+} from "react-hook-form"
 
 import { FinanceDateField } from "@/src/modules/finance/shared/components/forms/date-field"
 import {
@@ -32,14 +36,12 @@ import {
   formatFinanceMoney,
   type FinanceMoneyDisplay,
 } from "@/src/modules/finance/shared/lib/money"
-import type {
-  FinanceAccount,
-  FinanceInstitution,
-  FinanceInstallmentFreq,
-} from "@/src/modules/finance/shared/types/entities"
 import {
   FINANCE_INSTALLMENT_FREQ_LABEL,
   FINANCE_INSTALLMENT_FREQS,
+  type FinanceAccount,
+  type FinanceInstitution,
+  type FinanceInstallmentFreq,
 } from "@/src/modules/finance/shared/types/entities"
 import {
   LOAN_WIZARD_TERMS,

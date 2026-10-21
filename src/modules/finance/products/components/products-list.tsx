@@ -14,6 +14,7 @@ import { useLoans } from "@/src/modules/finance/shared/hooks/use-loans"
 import { useMonthExpenseTrend } from "@/src/modules/finance/shared/hooks/use-month-expense-trend"
 import { ReconciliationMonthStatus } from "@/src/modules/finance/reconciliation"
 import { reconciliationProductHref } from "@/src/modules/finance/reconciliation/lib/reconciliation-links"
+import type { FinanceReconciliationStatusItem } from "@/src/modules/finance/shared/types/entities"
 import { bankChargesQuery } from "@/src/modules/finance/shared/hooks/use-reconciliations"
 import { todayDateInput } from "@/src/modules/finance/shared/lib/ledger-form"
 import { bankChargesRange } from "@/src/modules/finance/shared/lib/reconciliation"
@@ -168,6 +169,16 @@ export function FinanceProductsList({
     loansQuery.isPending ||
     (balanceSheetQuery.isPending && !balanceSheetQuery.data)
 
+  function reconciliationHref(
+    item: FinanceReconciliationStatusItem
+  ): string | null {
+    return reconciliationProductHref({
+      item,
+      accounts: accountsQuery.data ?? [],
+      cards: cardsQuery.data ?? [],
+    })
+  }
+
   return (
     <div className="-mt-6 flex flex-col gap-4">
       {errorMessage ? (
@@ -204,13 +215,7 @@ export function FinanceProductsList({
         month={monthKeyFromDate(new Date())}
         monthLabel={monthKeyFromDate(new Date())}
         display={moneyDisplay}
-        hrefFor={(item) =>
-          reconciliationProductHref({
-            item,
-            accounts: accountsQuery.data ?? [],
-            cards: cardsQuery.data ?? [],
-          })
-        }
+        hrefFor={reconciliationHref}
       />
 
       <BalanceIntegrityAlert
