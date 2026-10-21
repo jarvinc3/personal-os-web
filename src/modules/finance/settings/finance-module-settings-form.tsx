@@ -1,18 +1,41 @@
 "use client"
 
+import { FinanceIntegritySettingsSection } from "@/src/modules/finance/integrity"
+import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
+import { FINANCE_DASHBOARD_PERIOD_OPTIONS } from "@/src/modules/finance/shared/lib/dashboard-period"
 import { ModuleSheetEnableRow } from "@/src/modules/settings/components/profile-ui"
 import { useModuleSheetEnable } from "@/src/modules/settings/hooks/use-module-sheet-enable"
 import { useProfileSheetFormSync } from "@/src/modules/settings/hooks/use-profile-sheet"
 import { useUserModuleConfig } from "@/src/modules/settings/hooks/use-user-module-config"
+import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+import {
+  SettingsRow,
+  SettingsSection,
+} from "@/src/shared/components/layout/settings-section"
 import { FormScreen } from "@/src/shared/components/forms/form-screen"
+import { Button } from "@/src/shared/components/ui/button"
+import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { getModule } from "@/src/shared/constants/module-registry"
-import { FinanceIntegritySettingsSection } from "@/src/modules/finance/integrity"
-import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { SaveIcon } from "lucide-react"
-import { useEffect, useMemo } from "react"
+import {
+  ArrowLeftRight,
+  Bell,
+  CalendarRange,
+  Coins,
+  HandCoins,
+  Mail,
+  Repeat,
+  SaveIcon,
+  Scale,
+  ScanEyeIcon,
+  Tags,
+  XIcon,
+  type LucideIcon,
+} from "lucide-react"
+import { useRouter } from "next/navigation"
+import { useEffect, useMemo, useState, type ReactNode } from "react"
 import { useForm } from "react-hook-form"
 import { DisplaySection } from "./components/display-section"
 import { EmailSyncSection } from "./components/email-sync-section"
@@ -32,7 +55,90 @@ import {
 
 const MODULE_ACCENT = getModule("finance").accent
 
+const FINANCE_SETTINGS_SHEETS = {
+  display: {
+    title: "Visualización y panel",
+    description: "Período del panel y formato de las cantidades.",
+    icon: ScanEyeIcon,
+  },
+  month: {
+    title: "Mes financiero",
+    description: "Cuándo empieza tu mes financiero.",
+    icon: CalendarRange,
+  },
+  movements: {
+    title: "Movimientos",
+    description: "Cuenta por defecto y entrada de montos.",
+    icon: ArrowLeftRight,
+  },
+  fixedIncome: {
+    title: "Ingreso fijo",
+    description: "Ingreso recurrente para el panel.",
+    icon: HandCoins,
+  },
+  subscriptions: {
+    title: "Suscripciones",
+    description: "Avisos y agrupación de cobros.",
+    icon: Repeat,
+  },
+  emailSync: {
+    title: "Correo",
+    description: "Sincronización automática y horarios.",
+    icon: Mail,
+  },
+  notifications: {
+    title: "Alertas",
+    description: "Qué avisos de Finanzas recibes.",
+    icon: Bell,
+  },
+} as const satisfies Record<
+  string,
+  { title: string; description: string; icon: LucideIcon }
+>
+
+type FinanceSettingsSheetId = keyof typeof FINANCE_SETTINGS_SHEETS
+
+type FinanceSettingsSheetProps = {
+  id: FinanceSettingsSheetId
+  openSheet: FinanceSettingsSheetId | null
+  onOpenSheetChange: (sheet: FinanceSettingsSheetId | null) => void
+  children: ReactNode
+}
+
+function FinanceSettingsSheet({
+  id,
+  openSheet,
+  onOpenSheetChange,
+  children,
+}: FinanceSettingsSheetProps) {
+  const sheet = FINANCE_SETTINGS_SHEETS[id]
+
+  return (
+    <BottomSheet
+      open={openSheet === id}
+      onOpenChange={(open) => onOpenSheetChange(open ? id : null)}
+      title={sheet.title}
+      description={sheet.description}
+      actions={{
+        close: (
+          <Button
+            variant="outline"
+            className="flex-1"
+            onClick={() => onOpenSheetChange(null)}
+          >
+            <XIcon className="size-4 shrink-0" />
+            Cerrar
+          </Button>
+        ),
+      }}
+    >
+      {children}
+    </BottomSheet>
+  )
+}
+
 export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
+  const router = useRouter()
   const {
     config,
     isModuleEnabled,
@@ -43,6 +149,9 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
   const moduleEnable = useModuleSheetEnable("finance")
   const accountsQuery = useAccounts(isModuleEnabled)
   const accounts = accountsQuery.data ?? []
+  const [openSheet, setOpenSheet] = useState<FinanceSettingsSheetId | null>(
+    null
+  )
 
   const {
     control,
@@ -66,6 +175,37 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
     () => createSheetSubmit(handleSubmit),
     [handleSubmit]
   )
+
+  const describeSheet = (id: FinanceSettingsSheetId): string | undefined => {
+    switch (id) {
+      case "display":
+        return FINANCE_DASHBOARD_PERIOD_OPTIONS.find(
+          (option) => option.value === config.dashboardPeriod
+        )?.label
+      case "month":
+        return `Día ${config.monthStartDay}`
+      case "movements":
+        return (
+          accounts.find((account) => account.id === config.defaultAccountId)
+            ?.name ?? "Cuenta principal"
+        )
+      case "fixedIncome":
+        return config.fixedIncome.enabled ? "Activado" : "Desactivado"
+      case "subscriptions":
+        return `${config.subscriptions.reminderDaysBefore} días antes`
+      case "emailSync":
+        if (!config.emailSync.enabled) {
+          return "Desactivada"
+        }
+        return config.emailSync.automatic ? "Automática" : "Manual"
+      case "notifications": {
+        const active = Object.values(config.notifications).filter(
+          Boolean
+        ).length
+        return `${active} de ${Object.keys(config.notifications).length} activas`
+      }
+    }
+  }
 
   const onSubmit = submitForm(async (values) => {
     await updateConfig(
@@ -118,6 +258,10 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
     onDone()
   })
 
+  const sheetIds = Object.keys(
+    FINANCE_SETTINGS_SHEETS
+  ) as FinanceSettingsSheetId[]
+
   return (
     <FormScreen
       onSubmit={(event) => {
@@ -141,26 +285,45 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
         disabled={updateMutation.isPending}
       />
 
-      <DisplaySection control={control} baseCurrency={config.baseCurrency} />
+      <SettingsSection title="Accesos">
+        <SettingsRow
+          label="Categorías"
+          description="Gestiona las categorías de movimientos."
+          icon={Tags}
+          accentColor={MODULE_ACCENT}
+          onPress={() => router.push(APP_ROUTES.app.financeCategories)}
+        />
+        <SettingsRow
+          label="Monedas"
+          description="Monedas y tasas del ledger."
+          icon={Coins}
+          accentColor={MODULE_ACCENT}
+          onPress={() => router.push(APP_ROUTES.app.settingsFinanceCurrencies)}
+        />
+        <SettingsRow
+          label="Conciliación"
+          description="Cierres y cargos bancarios."
+          icon={Scale}
+          accentColor={MODULE_ACCENT}
+          onPress={() => router.push(APP_ROUTES.app.financeBankCharges)}
+          isLast
+        />
+      </SettingsSection>
 
-      <FixedIncomeSection
-        control={control}
-        baseCurrency={config.baseCurrency}
-        accounts={accounts}
-      />
-
-      <MovementDefaultsSection control={control} accounts={accounts} />
-
-      <FinancialMonthSection control={control} />
-
-      <SubscriptionsSection control={control} />
-
-      <EmailSyncSection
-        control={control}
-        isSubmitting={updateMutation.isPending}
-      />
-
-      <NotificationsSection control={control} />
+      <SettingsSection title="Configuración">
+        {sheetIds.map((id, index) => (
+          <SettingsRow
+            key={id}
+            label={FINANCE_SETTINGS_SHEETS[id].title}
+            description={FINANCE_SETTINGS_SHEETS[id].description}
+            value={describeSheet(id)}
+            icon={FINANCE_SETTINGS_SHEETS[id].icon}
+            accentColor={MODULE_ACCENT}
+            onPress={() => setOpenSheet(id)}
+            isLast={index === sheetIds.length - 1}
+          />
+        ))}
+      </SettingsSection>
 
       <FinanceIntegritySettingsSection
         enabled={isModuleEnabled}
@@ -171,6 +334,69 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
           locale: formatLocale,
         }}
       />
+
+      <FinanceSettingsSheet
+        id="display"
+        openSheet={openSheet}
+        onOpenSheetChange={setOpenSheet}
+      >
+        <DisplaySection control={control} baseCurrency={config.baseCurrency} />
+      </FinanceSettingsSheet>
+
+      <FinanceSettingsSheet
+        id="month"
+        openSheet={openSheet}
+        onOpenSheetChange={setOpenSheet}
+      >
+        <FinancialMonthSection control={control} />
+      </FinanceSettingsSheet>
+
+      <FinanceSettingsSheet
+        id="movements"
+        openSheet={openSheet}
+        onOpenSheetChange={setOpenSheet}
+      >
+        <MovementDefaultsSection control={control} accounts={accounts} />
+      </FinanceSettingsSheet>
+
+      <FinanceSettingsSheet
+        id="fixedIncome"
+        openSheet={openSheet}
+        onOpenSheetChange={setOpenSheet}
+      >
+        <FixedIncomeSection
+          control={control}
+          baseCurrency={config.baseCurrency}
+          accounts={accounts}
+        />
+      </FinanceSettingsSheet>
+
+      <FinanceSettingsSheet
+        id="subscriptions"
+        openSheet={openSheet}
+        onOpenSheetChange={setOpenSheet}
+      >
+        <SubscriptionsSection control={control} />
+      </FinanceSettingsSheet>
+
+      <FinanceSettingsSheet
+        id="emailSync"
+        openSheet={openSheet}
+        onOpenSheetChange={setOpenSheet}
+      >
+        <EmailSyncSection
+          control={control}
+          isSubmitting={updateMutation.isPending}
+        />
+      </FinanceSettingsSheet>
+
+      <FinanceSettingsSheet
+        id="notifications"
+        openSheet={openSheet}
+        onOpenSheetChange={setOpenSheet}
+      >
+        <NotificationsSection control={control} />
+      </FinanceSettingsSheet>
     </FormScreen>
   )
 }
