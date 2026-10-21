@@ -2,6 +2,22 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.49.0] - 2026-10-21
+
+### Agregado
+
+- La zona horaria del perfil se edita en Ajustes → Cuenta → Zona horaria, con buscador sobre todas las zonas del navegador (#162).
+- La primera vez que se abre la app, la zona se toma del navegador y queda guardada en el perfil; una zona elegida a mano nunca se sobrescribe (#162).
+
+### Corregido
+
+- Los movimientos se envían como instantes reales y se muestran en la zona del usuario, así que el ajuste de saldo que crea la conciliación deja de aparecer con otra hora (#211).
+- El historial de un instrumento y las transferencias muestran la hora en la zona del usuario, no la de UTC (#211).
+
+### Cambiado
+
+- El mes de Movimientos se corta por la zona del usuario en vez de por UTC, así que un movimiento de las 21:00 ya no cae en el mes siguiente (#211).
+
 ## [0.48.0] - 2026-10-21
 
 ### Agregado
