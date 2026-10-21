@@ -2,6 +2,12 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.47.9] - 2026-10-20
+
+### Cambiado
+
+- Interno: el selector de categorías solo comunica el nombre escrito; el presupuesto crea, elige y cierra. La creación deja de devolver un valor y separa la escritura de la lectura (#199).
+
 ## [0.47.8] - 2026-10-20
 
 ### Cambiado
