@@ -2,6 +2,17 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.51.0] - 2026-10-21
+
+### Agregado
+
+- La lista de Apps dice «Pendiente de guardar» mientras el interruptor del panel está encendido sin guardar. Al guardar pasa a Activo y, si se descarta, vuelve a su estado real (#166).
+
+### Cambiado
+
+- El botón Guardar del panel de una app se destaca y la fila de activación avisa que falta guardar (#166).
+- Salir de los ajustes de una app con una activación sin guardar pide confirmación antes de descartarla (#166).
+
 ## [0.50.1] - 2026-10-21
 
 ### Corregido
