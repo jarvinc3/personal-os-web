@@ -101,15 +101,24 @@ const WIPE_LAYER_ICONS: Record<WipeLayerId, LucideIcon> = {
 
 type WipeUserDataViewProps = {
   email: string
+  /** Every layer is wiped; the per-module picker stays hidden. */
+  fixedLayers?: readonly WipeLayerId[]
+  onWiped?: () => void
 }
 
-export function WipeUserDataView({ email }: WipeUserDataViewProps) {
+export function WipeUserDataView({
+  email,
+  fixedLayers,
+  onWiped,
+}: WipeUserDataViewProps) {
   const router = useRouter()
   const wipeMutation = useWipeUserData()
   const { loginWithGoogleMutation } = useAuth()
   const institutionsQuery = useInstitutions(true)
 
-  const [selected, setSelected] = useState<WipeLayerId[]>([])
+  const [selected, setSelected] = useState<WipeLayerId[]>(() =>
+    fixedLayers ? [...fixedLayers] : []
+  )
   const [balanceScope, setBalanceScope] = useState(ALL_INSTITUTIONS)
   const [institutionSheetOpen, setInstitutionSheetOpen] = useState(false)
   const [password, setPassword] = useState("")
@@ -219,6 +228,10 @@ export function WipeUserDataView({ email }: WipeUserDataViewProps) {
       {
         onSuccess: () => {
           setAlertOpen(false)
+          if (onWiped) {
+            onWiped()
+            return
+          }
           router.push(APP_ROUTES.app.settings)
         },
       }
@@ -316,98 +329,118 @@ export function WipeUserDataView({ email }: WipeUserDataViewProps) {
   return (
     <>
       <div className="flex flex-col gap-4">
-        <SummarySection title="Capas" icon={Layers}>
-          <SettingsRow
-            label="Seleccionar todo (excepto cuenta)"
-            description="Marca todas las capas disponibles."
-            icon={ListChecks}
-            accentColor={WIPE_ACCENT}
-            trailing={
-              <Checkbox
-                checked={allSelected}
-                onCheckedChange={(value) => handleToggleAll(value === true)}
+        {fixedLayers ? (
+          <SummarySection title="Se borrará" icon={Layers}>
+            <ul className="flex flex-col gap-2">
+              {fixedLayers.map((layer) => (
+                <li
+                  key={layer}
+                  className="text-sm leading-relaxed text-muted-foreground"
+                >
+                  • {WIPE_LAYER_LABELS[layer]}
+                </li>
+              ))}
+            </ul>
+          </SummarySection>
+        ) : (
+          <>
+            <SummarySection title="Capas" icon={Layers}>
+              <SettingsRow
+                label="Seleccionar todo (excepto cuenta)"
+                description="Marca todas las capas disponibles."
+                icon={ListChecks}
+                accentColor={WIPE_ACCENT}
+                trailing={
+                  <Checkbox
+                    checked={allSelected}
+                    onCheckedChange={(value) => handleToggleAll(value === true)}
+                    disabled={wipeMutation.isPending}
+                    aria-label="Seleccionar todo (excepto cuenta)"
+                  />
+                }
                 disabled={wipeMutation.isPending}
-                aria-label="Seleccionar todo (excepto cuenta)"
+                isLast
               />
-            }
-            disabled={wipeMutation.isPending}
-            isLast
-          />
-        </SummarySection>
+            </SummarySection>
 
-        {WIPE_LAYER_GROUPS.map((group) => (
-          <SummarySection
-            key={group.title}
-            title={group.title}
-            icon={WIPE_GROUP_ICONS[group.title]}
-            right={
-              group.layers.length > 1 ? (
-                <Checkbox
-                  checked={wipeGroupChecked(group.layers, selected) === true}
-                  indeterminate={
-                    wipeGroupChecked(group.layers, selected) === "indeterminate"
-                  }
-                  onCheckedChange={(value) =>
-                    handleToggleGroup(group.layers, value === true)
-                  }
-                  disabled={wipeMutation.isPending}
-                  aria-label={`Seleccionar ${group.title}`}
-                />
-              ) : null
-            }
-          >
-            {group.layers.map((layer, index) => {
-              const requiredByCatalog =
-                layer === WIPE_LAYERS.FINANCE_LEDGER && catalogSelected
-              const requiredByCategories =
-                layer === WIPE_LAYERS.FINANCE_PLANNING && categoriesSelected
-              const disabled =
-                requiredByCatalog ||
-                requiredByCategories ||
-                wipeMutation.isPending
-              return (
-                <div key={layer}>
-                  <SettingsRow
-                    label={WIPE_LAYER_LABELS[layer]}
-                    description={WIPE_LAYER_DESCRIPTIONS[layer]}
-                    icon={WIPE_LAYER_ICONS[layer]}
-                    accentColor={WIPE_ACCENT}
-                    trailing={
-                      <Checkbox
-                        checked={selected.includes(layer)}
-                        onCheckedChange={(value) =>
-                          handleToggleLayer(layer, value === true)
+            {WIPE_LAYER_GROUPS.map((group) => (
+              <SummarySection
+                key={group.title}
+                title={group.title}
+                icon={WIPE_GROUP_ICONS[group.title]}
+                right={
+                  group.layers.length > 1 ? (
+                    <Checkbox
+                      checked={
+                        wipeGroupChecked(group.layers, selected) === true
+                      }
+                      indeterminate={
+                        wipeGroupChecked(group.layers, selected) ===
+                        "indeterminate"
+                      }
+                      onCheckedChange={(value) =>
+                        handleToggleGroup(group.layers, value === true)
+                      }
+                      disabled={wipeMutation.isPending}
+                      aria-label={`Seleccionar ${group.title}`}
+                    />
+                  ) : null
+                }
+              >
+                {group.layers.map((layer, index) => {
+                  const requiredByCatalog =
+                    layer === WIPE_LAYERS.FINANCE_LEDGER && catalogSelected
+                  const requiredByCategories =
+                    layer === WIPE_LAYERS.FINANCE_PLANNING && categoriesSelected
+                  const disabled =
+                    requiredByCatalog ||
+                    requiredByCategories ||
+                    wipeMutation.isPending
+                  return (
+                    <div key={layer}>
+                      <SettingsRow
+                        label={WIPE_LAYER_LABELS[layer]}
+                        description={WIPE_LAYER_DESCRIPTIONS[layer]}
+                        icon={WIPE_LAYER_ICONS[layer]}
+                        accentColor={WIPE_ACCENT}
+                        trailing={
+                          <Checkbox
+                            checked={selected.includes(layer)}
+                            onCheckedChange={(value) =>
+                              handleToggleLayer(layer, value === true)
+                            }
+                            disabled={disabled}
+                            aria-label={WIPE_LAYER_LABELS[layer]}
+                          />
                         }
                         disabled={disabled}
-                        aria-label={WIPE_LAYER_LABELS[layer]}
+                        isLast={
+                          index === group.layers.length - 1 &&
+                          !(
+                            layer === WIPE_LAYERS.FINANCE_BALANCES &&
+                            balancesSelected
+                          )
+                        }
                       />
-                    }
-                    disabled={disabled}
-                    isLast={
-                      index === group.layers.length - 1 &&
-                      !(
-                        layer === WIPE_LAYERS.FINANCE_BALANCES &&
-                        balancesSelected
-                      )
-                    }
-                  />
-                  {layer === WIPE_LAYERS.FINANCE_BALANCES &&
-                  balancesSelected ? (
-                    <SettingsRow
-                      label="Institución"
-                      value={balanceScopeLabel}
-                      icon={Landmark}
-                      accentColor={WIPE_ACCENT}
-                      onPress={() => setInstitutionSheetOpen(true)}
-                      disabled={wipeMutation.isPending}
-                      isLast
-                    />
-                  ) : null}
-                </div>
-              )
-            })}
-          </SummarySection>
-        ))}
+                      {layer === WIPE_LAYERS.FINANCE_BALANCES &&
+                      balancesSelected ? (
+                        <SettingsRow
+                          label="Institución"
+                          value={balanceScopeLabel}
+                          icon={Landmark}
+                          accentColor={WIPE_ACCENT}
+                          onPress={() => setInstitutionSheetOpen(true)}
+                          disabled={wipeMutation.isPending}
+                          isLast
+                        />
+                      ) : null}
+                    </div>
+                  )
+                })}
+              </SummarySection>
+            ))}
+          </>
+        )}
 
         {ledgerSelected ? (
           <Alert>
@@ -474,7 +507,9 @@ export function WipeUserDataView({ email }: WipeUserDataViewProps) {
         <AlertDialogContent className="sm:max-w-md">
           <AlertDialogHeader>
             <AlertDialogTitle>
-              ¿Vaciar los datos seleccionados?
+              {fixedLayers
+                ? "¿Vaciar todos los datos?"
+                : "¿Vaciar los datos seleccionados?"}
             </AlertDialogTitle>
             <AlertDialogDescription>
               Esto no se puede deshacer. Se vaciarán:
