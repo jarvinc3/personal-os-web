@@ -2,6 +2,12 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.49.6] - 2026-10-21
+
+### Corregido
+
+- «Marcar como pendiente» y «Reversar» piden confirmación antes de tocar el saldo: el aviso nombra el monto y la cuenta o tarjeta afectada, y al cancelar no cambia nada (#195).
+
 ## [0.49.5] - 2026-10-21
 
 ### Cambiado
