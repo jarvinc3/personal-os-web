@@ -51,6 +51,7 @@ import {
 import {
   buildInstitutionStackItems,
   formatStackItemBalance,
+  institutionBalanceLines,
 } from "@/src/modules/finance/shared/lib/institution-stack"
 import { recalculationPayload } from "@/src/modules/finance/shared/lib/integrity"
 import { monthKeyFromDate } from "@/src/modules/finance/shared/lib/month-window"
@@ -361,6 +362,9 @@ function InstitutionDetailScreenBody({
   const balanceText = stackItem
     ? formatStackItemBalance(stackItem, moneyDisplay)
     : INCOMPLETE_BALANCE_TEXT
+  const balanceLines = stackItem
+    ? institutionBalanceLines({ item: stackItem, display: moneyDisplay })
+    : []
   const isBusy = archiveInstitution.isPending || deleteInstitution.isPending
   const productAccountIds = new Set(
     products.accounts.map((account) => account.id)
@@ -438,6 +442,7 @@ function InstitutionDetailScreenBody({
           isCash={isCash}
           counts={counts}
           balanceText={balanceText}
+          balanceLines={balanceLines}
           incompleteCardName={incompleteCard?.name ?? null}
           onCompleteLimit={() => {
             if (!incompleteCard) {

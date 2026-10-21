@@ -62,6 +62,29 @@ export type InstitutionBalancePosition = {
   issues: FinanceBalanceSheetIssue[]
 }
 
+/** Native balance lines for a card or detail hero; empty when a limit is missing. */
+export function institutionBalanceLines({
+  item,
+  display,
+}: {
+  item: InstitutionStackItem
+  display: FinanceMoneyDisplay
+}): Array<{ currency: string; amount: string }> {
+  const hasMissingCreditLimit =
+    item.kind === "institution" &&
+    item.issues.some((issue) => issue.code === "MISSING_CREDIT_LIMIT")
+  if (hasMissingCreditLimit) {
+    return []
+  }
+  return item.currencyTotals.map((total) => ({
+    currency: total.currency,
+    amount: formatFinanceMoney(total.netWorth, {
+      ...display,
+      currency: total.currency,
+    }),
+  }))
+}
+
 export function institutionInitials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean)
   if (parts.length === 0) {

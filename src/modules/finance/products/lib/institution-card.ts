@@ -2,12 +2,12 @@ import { isCashInstitution } from "@/src/modules/finance/shared/lib/cash"
 import {
   formatProductCounts,
   formatStackItemBalance,
+  institutionBalanceLines,
   institutionInitials,
   type InstitutionIrregularities,
   type InstitutionStackCounts,
   type InstitutionStackItem,
 } from "@/src/modules/finance/shared/lib/institution-stack"
-import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
 
 const FALLBACK_INSTITUTION_COLOR = "#1B4332"
@@ -38,18 +38,7 @@ export function buildInstitutionCard(
   item: InstitutionStackItem,
   display: FinanceMoneyDisplay
 ): InstitutionCardModel {
-  const hasMissingCreditLimit =
-    item.kind === "institution" &&
-    item.issues.some((issue) => issue.code === "MISSING_CREDIT_LIMIT")
-  const balanceLines = hasMissingCreditLimit
-    ? []
-    : item.currencyTotals.map((total) => ({
-        currency: total.currency,
-        amount: formatFinanceMoney(total.netWorth, {
-          ...display,
-          currency: total.currency,
-        }),
-      }))
+  const balanceLines = institutionBalanceLines({ item, display })
 
   if (item.kind === "institution") {
     return {

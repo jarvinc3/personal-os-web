@@ -5,6 +5,7 @@ import type { InstitutionStackCounts } from "@/src/modules/finance/shared/lib/in
 import type { FinanceInstitution } from "@/src/modules/finance/shared/types/entities"
 import { ProductCountItem } from "@/src/modules/finance/products"
 import { Button } from "@/src/shared/components/ui/button"
+import { cn } from "@/src/shared/lib/utils"
 import { Label } from "@/src/shared/components/ui/label"
 import {
   CreditCardIcon,
@@ -19,6 +20,7 @@ type InstitutionDetailHeroProps = {
   isCash: boolean
   counts: InstitutionStackCounts
   balanceText: string
+  balanceLines: Array<{ currency: string; amount: string }>
   incompleteCardName: string | null
   onCompleteLimit: () => void
 }
@@ -29,6 +31,7 @@ export function InstitutionDetailHero({
   isCash,
   counts,
   balanceText,
+  balanceLines,
   incompleteCardName,
   onCompleteLimit,
 }: InstitutionDetailHeroProps) {
@@ -75,9 +78,30 @@ export function InstitutionDetailHero({
 
       <div className="mt-8 flex flex-col gap-1 rounded-2xl bg-black/20 px-3 py-2">
         <Label className="text-sm text-foreground">Saldo</Label>
-        <p className="text-3xl font-bold tracking-tight tabular-nums">
-          {balanceText}
-        </p>
+        {balanceLines.length === 0 ? (
+          <p className="text-3xl font-bold tracking-tight tabular-nums">
+            {balanceText}
+          </p>
+        ) : (
+          balanceLines.map((line) => (
+            <span
+              key={line.currency}
+              className="flex items-baseline justify-between gap-2"
+            >
+              {balanceLines.length > 1 ? (
+                <span className="text-xs text-white/70">{line.currency}</span>
+              ) : null}
+              <span
+                className={cn(
+                  "flex-1 text-right font-bold tracking-tight tabular-nums",
+                  balanceLines.length > 1 ? "text-xl" : "text-3xl"
+                )}
+              >
+                {line.amount}
+              </span>
+            </span>
+          ))
+        )}
       </div>
 
       {incompleteCardName ? (
