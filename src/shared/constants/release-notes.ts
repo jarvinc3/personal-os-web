@@ -12,6 +12,12 @@ export type ReleaseNotesEntry = {
 
 export const RELEASE_NOTES: readonly ReleaseNotesEntry[] = [
   {
+    version: "0.50.1",
+    highlights: [
+      "Si los datos de un cobro llegan rotos, los totales de Cobros avisan en vez de mostrar una cifra inventada.",
+    ],
+  },
+  {
     version: "0.50.0",
     highlights: [
       "En Cobros ves arriba de la lista cuánto te deben y cuánto ya cobraste, separado por moneda.",

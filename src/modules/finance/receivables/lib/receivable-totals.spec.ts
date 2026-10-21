@@ -73,3 +73,23 @@ describe("receivableTotalsByCurrency", () => {
     assert.deepEqual(totals, [{ currency: "DOP", pending: 0, collected: 0 }])
   })
 })
+
+describe("receivableTotalsByCurrency con datos rotos", () => {
+  it("no inventa un cero cuando el monto no se puede leer", () => {
+    assert.throws(
+      () =>
+        receivableTotalsByCurrency([receivable({ id: "r-roto", amount: "" })]),
+      /r-roto con amount ilegible/
+    )
+  })
+
+  it("avisa cual cobro trae un pago ilegible", () => {
+    assert.throws(
+      () =>
+        receivableTotalsByCurrency([
+          receivable({ id: "r-pago", paidAmount: "n/a" }),
+        ]),
+      /r-pago con paidAmount ilegible/
+    )
+  })
+})

@@ -37,9 +37,23 @@ export function receivableTotalsByCurrency(
 }
 
 function pendingAmount(receivable: FinanceReceivable): number {
-  const amount = parseFinanceMoney(receivable.amount) ?? 0
-  const paid = parseFinanceMoney(receivable.paidAmount) ?? 0
-  const credit = parseFinanceMoney(receivable.creditBalance) ?? 0
-  const writtenOff = parseFinanceMoney(receivable.writtenOffAmount) ?? 0
+  const amount = requireMoney(receivable, "amount")
+  const paid = requireMoney(receivable, "paidAmount")
+  const credit = requireMoney(receivable, "creditBalance")
+  const writtenOff = requireMoney(receivable, "writtenOffAmount")
   return Math.max(0, amount - paid - credit - writtenOff)
+}
+
+/** A receivable amount the API always sends; an unreadable one is a bug. */
+function requireMoney(
+  receivable: FinanceReceivable,
+  field: "amount" | "paidAmount" | "creditBalance" | "writtenOffAmount"
+): number {
+  const parsed = parseFinanceMoney(receivable[field])
+  if (parsed === null) {
+    throw new Error(
+      `Cobro ${receivable.id} con ${field} ilegible: "${receivable[field]}"`
+    )
+  }
+  return parsed
 }
