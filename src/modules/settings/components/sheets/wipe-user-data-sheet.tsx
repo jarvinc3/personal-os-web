@@ -99,21 +99,25 @@ const WIPE_LAYER_ICONS: Record<WipeLayerId, LucideIcon> = {
   [WIPE_LAYERS.SETTINGS_DEFAULTS]: RotateCcw,
 }
 
+export type WipeScope = {
+  layers: readonly WipeLayerId[]
+  /** Title of the last confirmation for this scope. */
+  confirmTitle: string
+}
+
 type WipeUserDataViewProps = {
   email: string
-  /** Every layer is wiped; the per-module picker stays hidden. */
-  fixedLayers?: readonly WipeLayerId[]
-  /** Title of the last confirmation when the layers are fixed. */
-  confirmTitle?: string
+  /** Fixed scope: the per-module picker stays hidden and only these layers are wiped. */
+  scope?: WipeScope
   onWiped?: () => void
 }
 
 export function WipeUserDataView({
   email,
-  fixedLayers,
-  confirmTitle,
+  scope,
   onWiped,
 }: WipeUserDataViewProps) {
+  const fixedLayers = scope?.layers
   const router = useRouter()
   const wipeMutation = useWipeUserData()
   const { loginWithGoogleMutation } = useAuth()
@@ -510,9 +514,7 @@ export function WipeUserDataView({
         <AlertDialogContent className="sm:max-w-md">
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {fixedLayers
-                ? (confirmTitle ?? "¿Vaciar todos los datos?")
-                : "¿Vaciar los datos seleccionados?"}
+              {scope ? scope.confirmTitle : "¿Vaciar los datos seleccionados?"}
             </AlertDialogTitle>
             <AlertDialogDescription>
               Esto no se puede deshacer. Se vaciarán:

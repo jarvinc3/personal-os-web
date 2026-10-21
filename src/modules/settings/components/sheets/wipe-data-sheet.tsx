@@ -1,7 +1,9 @@
 "use client"
 
-import { WipeUserDataView } from "@/src/modules/settings/components/sheets/wipe-user-data-sheet"
-import type { WipeLayerId } from "@/src/modules/settings/lib/wipe-layers"
+import {
+  WipeUserDataView,
+  type WipeScope,
+} from "@/src/modules/settings/components/sheets/wipe-user-data-sheet"
 import type { SettingsSheetProps } from "@/src/modules/settings/types/sheet.types"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
 import { Button } from "@/src/shared/components/ui/button"
@@ -11,8 +13,7 @@ type WipeDataSheetProps = SettingsSheetProps & {
   email: string
   title: string
   description: string
-  confirmTitle: string
-  layers: readonly WipeLayerId[]
+  scope: WipeScope
 }
 
 export function WipeDataSheet({
@@ -21,8 +22,7 @@ export function WipeDataSheet({
   email,
   title,
   description,
-  confirmTitle,
-  layers,
+  scope,
 }: WipeDataSheetProps) {
   return (
     <BottomSheet
@@ -45,8 +45,7 @@ export function WipeDataSheet({
     >
       <WipeUserDataView
         email={email}
-        fixedLayers={layers}
-        confirmTitle={confirmTitle}
+        scope={scope}
         onWiped={() => onOpenChange(false)}
       />
     </BottomSheet>

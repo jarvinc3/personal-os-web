@@ -94,8 +94,10 @@ function PrivacySettingsScreenBody() {
         email={displayEmail}
         title="Vaciar todos los datos"
         description="Borra el contenido de todas las apps. La cuenta se conserva."
-        confirmTitle="¿Vaciar todos los datos?"
-        layers={WIPE_LAYER_ORDER}
+        scope={{
+          layers: WIPE_LAYER_ORDER,
+          confirmTitle: "¿Vaciar todos los datos?",
+        }}
       />
       <DeleteAccountSheet
         open={openDeleteAccountSheet}

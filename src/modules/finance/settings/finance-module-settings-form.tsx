@@ -425,8 +425,10 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
         email={profileQuery.data?.email ?? ""}
         title="Vaciar datos de Finanzas"
         description="Borra solo los datos de Finanzas. La cuenta se conserva."
-        confirmTitle="¿Vaciar los datos de Finanzas?"
-        layers={FINANCE_WIPE_LAYERS}
+        scope={{
+          layers: FINANCE_WIPE_LAYERS,
+          confirmTitle: "¿Vaciar los datos de Finanzas?",
+        }}
       />
     </FormScreen>
   )
