@@ -52,6 +52,7 @@ import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
 import { SummarySection } from "@/src/shared/components/ui/summary"
 import { Switch } from "@/src/shared/components/ui/switch"
 import { usePicker } from "@/src/shared/hooks/use-picker"
+import { useUserTimeZone } from "@/src/modules/settings/hooks/use-user-time-zone"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
@@ -152,6 +153,7 @@ export function TransferForm({
     cardsQuery.isSuccess &&
     institutionsQuery.isSuccess
   const { picker, openPicker, closeHandlerFor } = usePicker<Picker>("none")
+  const timeZone = useUserTimeZone()
   const statusSwitchId = useId()
   const destinationPendingId = useId()
   const { amountEntry, setAmountEntry } = useFinanceAmountEntry()
@@ -327,7 +329,7 @@ export function TransferForm({
     const payload = buildCreateTransferBody({
       amount: values.amount,
       currency: values.currency,
-      transactionDate: wallClockToIso(values.transactionDate),
+      transactionDate: wallClockToIso(values.transactionDate, timeZone),
       description: values.description,
       notes: values.notes,
       status: values.status,
@@ -369,7 +371,7 @@ export function TransferForm({
                 const allocation = buildSavingsGoalContributionBody({
                   amount: values.amount,
                   kind: "CONTRIBUTION",
-                  date: wallClockToIso(values.transactionDate),
+                  date: wallClockToIso(values.transactionDate, timeZone),
                   fromTransferGroupId: transferGroupId,
                 })
                 if (!allocation.ok) {

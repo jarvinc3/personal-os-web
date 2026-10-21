@@ -113,6 +113,7 @@ export const SETTINGS_REGISTRY = {
   account: createSection("#037cff", {
     fullName: User,
     avatar: Image,
+    timeZone: Globe,
   }),
   appearance: {
     ...createSection("#F59E0B", { theme: Palette }),

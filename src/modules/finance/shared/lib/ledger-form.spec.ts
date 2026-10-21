@@ -69,9 +69,15 @@ describe("sliceDateTimeInput", () => {
 })
 
 describe("wallClockToIso", () => {
-  it("marks the wall clock as UTC", () => {
-    assert.equal(wallClockToIso("2026-09-11T14:05"), "2026-09-11T14:05:00.000Z")
-    assert.equal(wallClockToIso("2026-09-11"), "2026-09-11T00:00:00.000Z")
+  it("turns the wall clock into the instant of the user's zone", () => {
+    assert.equal(
+      wallClockToIso("2026-09-11T14:05", "America/La_Paz"),
+      "2026-09-11T18:05:00.000Z"
+    )
+    assert.equal(
+      wallClockToIso("2026-09-11", "America/La_Paz"),
+      "2026-09-11T04:00:00.000Z"
+    )
   })
 })
 

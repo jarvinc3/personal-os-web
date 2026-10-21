@@ -20,6 +20,7 @@ import {
   todayDateInput,
   wallClockToIso,
 } from "@/src/modules/finance/shared/lib/ledger-form"
+import { useUserTimeZone } from "@/src/modules/settings/hooks/use-user-time-zone"
 import type { FinanceSubscription } from "@/src/modules/finance/shared/types/entities"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
 import { Button } from "@/src/shared/components/ui/button"
@@ -72,6 +73,7 @@ export function SubscriptionPaymentSheet({
     subscription.cardName ??
     subscription.accountName
   const { amountEntry, setAmountEntry } = useFinanceAmountEntry()
+  const timeZone = useUserTimeZone()
   const {
     control,
     handleSubmit,
@@ -103,7 +105,7 @@ export function SubscriptionPaymentSheet({
       type: "DEBIT",
       amount: String(amount),
       currency: subscription.currency,
-      transactionDate: wallClockToIso(`${values.paidAt}T12:00`),
+      transactionDate: wallClockToIso(`${values.paidAt}T12:00`, timeZone),
       description: `Suscripción: ${subscription.name}`,
       categoryId: subscription.categoryId ?? undefined,
     })

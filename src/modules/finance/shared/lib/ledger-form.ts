@@ -3,6 +3,7 @@ import type {
   FinanceCard,
 } from "@/src/modules/finance/shared/types/entities"
 import { formatHm24Display12h } from "@/src/shared/types/wheels.type"
+import { zonedWallTimeToInstant } from "@/src/shared/lib/zoned-time"
 import { splitLedgerTarget } from "./ledger-payloads.ts"
 import { parseFinanceMoney } from "./money.ts"
 
@@ -118,13 +119,21 @@ export function sliceDateTimeInput(
 }
 
 /** Wall-clock `YYYY-MM-DDTHH:mm` in the ISO instant the API stores. */
-export function wallClockToIso(value: string): string {
+/**
+ * The instant the form's wall clock names in the user's zone. The API stores
+ * instants, so a bare `HH:mm` labelled as UTC lands hours away from the day the
+ * user picked.
+ */
+export function wallClockToIso(value: string, timeZone: string): string {
   const dateTime = value.match(DATE_TIME_INPUT)
   if (dateTime) {
-    return `${dateTime[1]}T${dateTime[2]}:${dateTime[3]}:00.000Z`
+    return zonedWallTimeToInstant(
+      `${dateTime[1]}T${dateTime[2]}:${dateTime[3]}`,
+      timeZone
+    )
   }
   if (DATE_INPUT.test(value)) {
-    return `${value}T00:00:00.000Z`
+    return zonedWallTimeToInstant(`${value}T00:00`, timeZone)
   }
   return value
 }

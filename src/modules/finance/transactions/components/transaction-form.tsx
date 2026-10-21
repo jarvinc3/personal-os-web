@@ -54,6 +54,7 @@ import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
 import { SummarySection } from "@/src/shared/components/ui/summary"
 import { Switch } from "@/src/shared/components/ui/switch"
 import { usePicker } from "@/src/shared/hooks/use-picker"
+import { useUserTimeZone } from "@/src/modules/settings/hooks/use-user-time-zone"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
@@ -194,6 +195,7 @@ export function TransactionForm({
     [institutions, accounts, cards]
   )
   const { picker, openPicker, closeHandlerFor } = usePicker<Picker>("none")
+  const timeZone = useUserTimeZone()
   const statusSwitchId = useId()
   const { amountEntry, setAmountEntry } = useFinanceAmountEntry()
   const [guidedStep, setGuidedStep] = useState<GuidedStep>(() =>
@@ -427,7 +429,7 @@ export function TransactionForm({
     const payload = buildCreateTransactionBody(
       {
         ...values,
-        transactionDate: wallClockToIso(values.transactionDate),
+        transactionDate: wallClockToIso(values.transactionDate, timeZone),
         accountId: target.accountId,
         cardId: target.cardId,
       },

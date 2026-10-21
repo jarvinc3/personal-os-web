@@ -320,27 +320,34 @@ describe("fetchAllTransactionPages", () => {
 })
 
 describe("timelineMonthQuery", () => {
+  const laPaz = "America/La_Paz"
+
   it("requests the calendar bounds of the current month", async () => {
     const paths: string[] = []
-    const query = timelineMonthQuery("2026-10", async (path) => {
-      paths.push(path)
-      return {
-        items: [],
-        nextCursor: null,
-        hasMore: false,
-      }
-    })
-    assert.deepEqual(query.queryKey, timelineMonthQueryKey("2026-10"))
+    const query = timelineMonthQuery(
+      "2026-10",
+      async (path) => {
+        paths.push(path)
+        return {
+          items: [],
+          nextCursor: null,
+          hasMore: false,
+        }
+      },
+      laPaz
+    )
+    assert.deepEqual(query.queryKey, timelineMonthQueryKey("2026-10", laPaz))
     assert.deepEqual(query.queryKey, [
       ...FINANCE_TRANSACTIONS_QUERY_KEY,
       "timeline",
       "month",
       "2026-10",
+      laPaz,
     ])
     assert.equal(query.staleTime, 5 * 60 * 1000)
     await query.queryFn()
-    assert.match(paths[0] ?? "", /dateFrom=2026-10-01/)
-    assert.match(paths[0] ?? "", /dateTo=2026-10-31/)
+    assert.match(paths[0] ?? "", /dateFrom=2026-10-01T04%3A00/)
+    assert.match(paths[0] ?? "", /dateTo=2026-11-01T03%3A59/)
     assert.match(paths[0] ?? "", /limit=100/)
   })
 })

@@ -29,6 +29,8 @@ import {
 import { InfiniteListSentinel } from "@/src/shared/components/ui/infinite-list-sentinel"
 import { SummaryItem } from "@/src/shared/components/ui/summary"
 import { HistoryIcon, Settings2Icon } from "lucide-react"
+import { instantToZonedWallTime } from "@/src/shared/lib/zoned-time"
+import { useUserTimeZone } from "@/src/modules/settings/hooks/use-user-time-zone"
 
 type InstrumentHistorySheetProps = {
   open: boolean
@@ -44,6 +46,7 @@ export function InstrumentHistorySheet({
   display,
 }: InstrumentHistorySheetProps) {
   const historyQuery = useInstrumentHistory(open, target)
+  const timeZone = useUserTimeZone()
   const items = infiniteListItems(historyQuery.data)
 
   return (
@@ -88,7 +91,9 @@ export function InstrumentHistorySheet({
               <SummaryItem
                 key={item.id}
                 title={instrumentHistoryLabel(item)}
-                description={formatFinanceDateTimeLabel(item.at)}
+                description={formatFinanceDateTimeLabel(
+                  instantToZonedWallTime(item.at, timeZone)
+                )}
                 icon={Settings2Icon}
                 value={transition ?? amount ?? undefined}
                 isLast={index === items.length - 1}

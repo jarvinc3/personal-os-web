@@ -27,6 +27,7 @@ import {
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
+import { useUserTimeZone } from "@/src/modules/settings/hooks/use-user-time-zone"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
 import {
   ArrowDownLeftIcon,
@@ -82,6 +83,7 @@ export function FinanceInstrumentMovements({
   const [dateFrom, setDateFrom] = useState("")
   const [dateTo, setDateTo] = useState("")
   const [filtersOpen, setFiltersOpen] = useState(false)
+  const timeZone = useUserTimeZone()
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -102,11 +104,14 @@ export function FinanceInstrumentMovements({
 
   const movementQueries = useQueries({
     queries: sources.map((source) => ({
-      ...allTransactionsQueryOptions({
-        ...filters,
-        accountId: source.accountId,
-        cardId: source.cardId,
-      }),
+      ...allTransactionsQueryOptions(
+        {
+          ...filters,
+          accountId: source.accountId,
+          cardId: source.cardId,
+        },
+        timeZone
+      ),
       enabled: enabled && sources.length > 0,
     })),
   })

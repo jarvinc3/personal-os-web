@@ -12,6 +12,13 @@ export type ReleaseNotesEntry = {
 
 export const RELEASE_NOTES: readonly ReleaseNotesEntry[] = [
   {
+    version: "0.49.0",
+    highlights: [
+      "Ya puedes elegir tu zona horaria en Ajustes, Cuenta, Zona horaria; la primera vez se toma del navegador.",
+      "Las horas de Finanzas se muestran en tu zona, incluido el ajuste de saldo que crea la conciliación.",
+    ],
+  },
+  {
     version: "0.48.0",
     highlights: [
       "En Productos, las instituciones se mueven con un deslizamiento horizontal y el botón Desplegar las abre en fila para verlas todas.",

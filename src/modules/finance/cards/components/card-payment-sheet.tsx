@@ -33,6 +33,8 @@ import { usePicker } from "@/src/shared/hooks/use-picker"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { CoinsIcon, CreditCardIcon, WalletIcon, XIcon } from "lucide-react"
 import { useMemo, useState } from "react"
+import { useUserTimeZone } from "@/src/modules/settings/hooks/use-user-time-zone"
+import { wallClockToIso } from "@/src/modules/finance/shared/lib/ledger-form"
 
 type CardPaymentSheetProps = {
   open: boolean
@@ -67,6 +69,7 @@ export function CardPaymentSheet({
   const [accountId, setAccountId] = useState("")
   const [amount, setAmount] = useState("")
   const [transactionDate, setTransactionDate] = useState(todayDateInput())
+  const timeZone = useUserTimeZone()
   const [amountError, setAmountError] = useState<string | null>(null)
   const { picker, openPicker, closeHandlerFor } = usePicker<"none" | "account">(
     "none"
@@ -89,7 +92,7 @@ export function CardPaymentSheet({
       cardId,
       amount,
       currency,
-      transactionDate,
+      transactionDate: wallClockToIso(transactionDate, timeZone),
     })
     if (!payload.ok) {
       setAmountError(payload.error)

@@ -7,6 +7,7 @@ import { deactivatePushTokenIfPresent } from "@/src/modules/notifications"
 import { ModuleSettingsRows } from "@/src/modules/settings/components/profile-ui"
 import { DeleteAccountSheet } from "@/src/modules/settings/components/sheets/delete-account-sheet"
 import { EditAccountSheet } from "@/src/modules/settings/components/sheets/edit-account-sheet"
+import { EditTimeZoneSheet } from "@/src/modules/settings/components/sheets/edit-time-zone-sheet"
 import { EditAIProviderSheet } from "@/src/modules/settings/components/sheets/edit-ai-provider-sheet"
 import { EditAISheet } from "@/src/modules/settings/components/sheets/edit-ai-sheet"
 import { EditQuietHoursSheet } from "@/src/modules/settings/components/sheets/edit-quiet-hours-sheet"
@@ -84,6 +85,8 @@ function SettingsScreenBody() {
     useSheetParam("ai-provider-sheet")
   const { open: openQuietHoursSheet, setOpen: setOpenQuietHoursSheet } =
     useSheetParam("quiet-hours-sheet")
+  const { open: openTimeZoneSheet, setOpen: setOpenTimeZoneSheet } =
+    useSheetParam("time-zone-sheet")
   const searchParams = useSearchParams()
 
   const profile = profileQuery.data
@@ -155,9 +158,17 @@ function SettingsScreenBody() {
           label="Perfil"
           value={displayName}
           onPress={() => setOpenAccountSheet(true)}
-          isLast
+          isLast={false}
           accentColor={SETTINGS_REGISTRY.account.accent}
           {...SETTINGS_REGISTRY.account.rows.fullName}
+        />
+        <SettingsRow
+          label="Zona horaria"
+          value={profile?.timezone ?? "Sin definir"}
+          onPress={() => setOpenTimeZoneSheet(true)}
+          isLast
+          accentColor={SETTINGS_REGISTRY.account.accent}
+          {...SETTINGS_REGISTRY.account.rows.timeZone}
         />
       </SettingsSection>
 
@@ -419,6 +430,10 @@ function SettingsScreenBody() {
         <EditThemeSheet
           open={openThemeSheet}
           onOpenChange={setOpenThemeSheet}
+        />
+        <EditTimeZoneSheet
+          open={openTimeZoneSheet}
+          onOpenChange={setOpenTimeZoneSheet}
         />
         <EditAISheet open={openAISheet} onOpenChange={setOpenAISheet} />
         <EditAIProviderSheet

@@ -2,7 +2,7 @@ import {
   FINANCE_TRANSACTIONS_QUERY_KEY,
   type FinancePaginated,
 } from "@/src/modules/finance/shared/types/api"
-import { isoMonthBounds, parseMonthKey, type MonthKey } from "./month-window.ts"
+import { parseMonthKey, type MonthKey } from "./month-window.ts"
 import type {
   FinanceTransaction,
   FinanceTransactionStatus,
@@ -14,6 +14,12 @@ import {
   parseFinanceMoney,
   type FinanceMoneyDisplay,
 } from "./money.ts"
+
+import {
+  instantToZonedWallTime,
+  zonedMonthEnd,
+  zonedMonthStart,
+} from "@/src/shared/lib/zoned-time"
 
 export const FINANCE_TX_FILTER_ALL = "__all__" as const
 export const FINANCE_TX_PAGE_SIZE = 20
@@ -77,8 +83,27 @@ export function buildTransactionsSearchParams(
   return params.toString()
 }
 
+/** The instant the API stored becomes the wall clock the user reads. */
+function toUserWallClock(
+  transaction: FinanceTransaction,
+  timeZone: string
+): FinanceTransaction {
+  return {
+    ...transaction,
+    transactionDate: instantToZonedWallTime(
+      transaction.transactionDate,
+      timeZone
+    ),
+    legs: transaction.legs?.map((leg) => ({
+      ...leg,
+      transactionDate: instantToZonedWallTime(leg.transactionDate, timeZone),
+    })),
+  }
+}
+
 export function transactionsFromPayload(
-  payload: unknown
+  payload: unknown,
+  timeZone: string
 ): FinancePaginated<FinanceTransaction> {
   const empty: FinancePaginated<FinanceTransaction> = {
     items: [],
@@ -97,7 +122,9 @@ export function transactionsFromPayload(
     return empty
   }
   return {
-    items: record.items as FinanceTransaction[],
+    items: (record.items as FinanceTransaction[]).map((item) =>
+      toUserWallClock(item, timeZone)
+    ),
     nextCursor:
       typeof record.nextCursor === "string" ? record.nextCursor : null,
     hasMore: record.hasMore === true,
@@ -389,32 +416,34 @@ export function visibleTransactionTotals(
   )
 }
 
-export function timelineMonthQueryKey(month: MonthKey) {
+export function timelineMonthQueryKey(month: MonthKey, timeZone: string) {
   return [
     ...FINANCE_TRANSACTIONS_QUERY_KEY,
     "timeline",
     "month",
     month,
+    timeZone,
   ] as const
 }
 
 export function timelineMonthQuery(
   month: MonthKey,
-  get: (path: string) => Promise<unknown>
+  get: (path: string) => Promise<unknown>,
+  timeZone: string
 ) {
   const parsed = parseMonthKey(month)
-  const bounds = isoMonthBounds(parsed.year, parsed.month)
   return {
-    queryKey: timelineMonthQueryKey(month),
+    queryKey: timelineMonthQueryKey(month, timeZone),
     staleTime: FINANCE_TIMELINE_STALE_TIME_MS,
     queryFn: () =>
       fetchAllTransactionPages(
         {
-          dateFrom: bounds.dateFrom,
-          dateTo: bounds.dateTo,
+          dateFrom: zonedMonthStart(parsed.year, parsed.month, timeZone),
+          dateTo: zonedMonthEnd(parsed.year, parsed.month, timeZone),
           limit: FINANCE_TIMELINE_PAGE_SIZE,
         },
-        get
+        get,
+        timeZone
       ),
   }
 }
@@ -433,7 +462,8 @@ export function mergeTransactionsById<T extends { id: string }>(
 
 export async function fetchAllTransactionPages(
   query: Omit<FinanceTransactionsQuery, "cursor">,
-  get: (path: string) => Promise<unknown>
+  get: (path: string) => Promise<unknown>,
+  timeZone: string
 ): Promise<FinanceTransaction[]> {
   const items: FinanceTransaction[] = []
   let cursor: string | undefined
@@ -441,7 +471,7 @@ export async function fetchAllTransactionPages(
   do {
     const search = buildTransactionsSearchParams({ ...query, cursor })
     const payload = await get(`/finance/transactions?${search}`)
-    const listed = transactionsFromPayload(payload)
+    const listed = transactionsFromPayload(payload, timeZone)
     items.push(...listed.items)
     cursor = listed.nextCursor ?? undefined
     pages += 1
