@@ -12,6 +12,13 @@ export type ReleaseNotesEntry = {
 
 export const RELEASE_NOTES: readonly ReleaseNotesEntry[] = [
   {
+    version: "0.51.1",
+    highlights: [
+      "En Productos, la gráfica ya no se rompe con saldos negativos: lo que tienes va a un lado y lo que debes al otro, cada grupo con su porcentaje.",
+      "El centro sigue mostrando el patrimonio neto con su signo, y si todo está en cero aparece un estado vacío.",
+    ],
+  },
+  {
     version: "0.51.0",
     highlights: [
       "La lista de Apps ya no dice Activo antes de tiempo: mientras el interruptor está encendido sin guardar, esa app aparece como «Pendiente de guardar».",
