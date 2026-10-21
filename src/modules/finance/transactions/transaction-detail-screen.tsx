@@ -291,12 +291,12 @@ function TransactionDetailScreenBody({
     )
   }
 
-  const affectedBalance = tx.cardName
+  const affectedAccountLabel = tx.cardName
     ? `la tarjeta ${tx.cardName}`
     : tx.accountName
       ? `la cuenta ${tx.accountName}`
       : "la cuenta del movimiento"
-  const movementAmount = formatFinanceMoney(tx.amount, {
+  const formattedAmount = formatFinanceMoney(tx.amount, {
     ...display,
     currency: tx.currency,
   })
@@ -411,7 +411,7 @@ function TransactionDetailScreenBody({
         open={unconfirmOpen}
         onOpenChange={setUnconfirmOpen}
         title="¿Marcar como pendiente?"
-        description={`${movementAmount} deja de contar en el saldo de ${affectedBalance} hasta que se confirme otra vez.`}
+        description={`${formattedAmount} deja de contar en el saldo de ${affectedAccountLabel} hasta que se confirme otra vez.`}
         confirmLabel="Marcar pendiente"
         pending={
           unconfirmMutation.isPending || unconfirmTransferMutation.isPending
@@ -426,7 +426,7 @@ function TransactionDetailScreenBody({
         open={reverseOpen}
         onOpenChange={setReverseOpen}
         title="¿Reversar el movimiento?"
-        description={`Se crea el asiento contrario de ${movementAmount}. El saldo de ${affectedBalance} se corrige y no se puede deshacer.`}
+        description={`Se crea el asiento contrario de ${formattedAmount}. El saldo de ${affectedAccountLabel} se corrige y no se puede deshacer.`}
         confirmLabel="Reversar"
         pending={reverseMutation.isPending || reverseTransferMutation.isPending}
         onConfirm={() => {
