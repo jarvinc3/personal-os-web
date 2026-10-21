@@ -2,6 +2,22 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.48.0] - 2026-10-21
+
+### Agregado
+
+- La sección de instituciones de Productos se despliega en un carrusel horizontal con todas las cards y vuelve a la pila con animación de empaquetar y desempaquetar. La elección se guarda en el navegador y el carrusel arranca en la card que estaba al frente (#209).
+
+### Cambiado
+
+- La pila de instituciones se mueve con un deslizamiento horizontal: a la izquierda avanza, a la derecha retrocede, en bucle y con un rebote al cruzar un extremo; el scroll vertical de la página no la mueve. En escritorio responden las flechas izquierda y derecha, y Enter abre la card frontal (#209).
+- La sección de instituciones deja de ocultarse tras un encabezado colapsable: las cards quedan siempre a la vista y el encabezado solo lleva el título, la tendencia y el botón Desplegar o Apilar (#209).
+
+### Corregido
+
+- Las cards del carrusel de instituciones ya no se superponen y el toque abre la institución que se ve; el hueco entre cards no abre nada (#209).
+- El primer toque después de deslizar la pila abre la institución en vez de perderse (#209).
+
 ## [0.47.10] - 2026-10-21
 
 ### Corregido
