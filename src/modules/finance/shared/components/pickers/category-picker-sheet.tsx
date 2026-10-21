@@ -22,7 +22,13 @@ import {
   CollapsibleTrigger,
 } from "@/src/shared/components/ui/collapsible"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
-import { CheckIcon, ChevronDownIcon, SearchIcon, TagsIcon } from "lucide-react"
+import {
+  CheckIcon,
+  ChevronDownIcon,
+  PlusIcon,
+  SearchIcon,
+  TagsIcon,
+} from "lucide-react"
 import { useEffect, useMemo, useState, type ReactNode } from "react"
 
 const DEFAULT_NONE_LABEL = "Sin categoría"
@@ -38,6 +44,8 @@ type CategoryPickerSheetBaseProps = {
   /** Hides these ids. Used to exclude the category being edited. */
   excludeIds?: string[]
   noneLabel?: string
+  /** Creates the typed name and returns its id, or null when it fails. */
+  onCreate?: (name: string) => Promise<string | null>
 }
 
 type CategoryPickerSheetSingleProps = CategoryPickerSheetBaseProps & {
@@ -64,6 +72,7 @@ export function CategoryPickerSheet(props: CategoryPickerSheetProps) {
     onlyParents = false,
     excludeIds = NO_EXCLUDED_IDS,
     noneLabel = DEFAULT_NONE_LABEL,
+    onCreate,
   } = props
   const [search, setSearch] = useState("")
   const [manualOpen, setManualOpen] = useState<Record<string, boolean>>({})
@@ -82,6 +91,13 @@ export function CategoryPickerSheet(props: CategoryPickerSheetProps) {
     [groups, search]
   )
   const searching = foldSearchText(search).length > 0
+  const typedName = search.trim()
+  const exactMatch =
+    typedName.length > 0 &&
+    filterCategoriesByType(categories, categoryType).some(
+      (item) => foldSearchText(item.name) === foldSearchText(typedName)
+    )
+  const canCreate = Boolean(onCreate) && typedName.length > 0 && !exactMatch
   const showNone =
     !searching || foldSearchText(noneLabel).includes(foldSearchText(search))
   const selectedIds = props.multiple ? props.value : []
@@ -104,6 +120,18 @@ export function CategoryPickerSheet(props: CategoryPickerSheetProps) {
     }
     props.onSelect(categoryId)
     onOpenChange(false)
+  }
+
+  async function createFromSearch() {
+    if (!onCreate) {
+      return
+    }
+    const createdId = await onCreate(typedName)
+    if (!createdId) {
+      return
+    }
+    setSearch("")
+    select(createdId)
   }
 
   function selectedTrailing(categoryId: string, expand?: ReactNode) {
@@ -132,6 +160,20 @@ export function CategoryPickerSheet(props: CategoryPickerSheetProps) {
           className="min-h-10"
         />
       </div>
+
+      {canCreate ? (
+        <button
+          type="button"
+          className={cn(
+            "flex w-full items-center gap-3 rounded-2xl border border-dashed border-border bg-card px-3 py-3 text-left",
+            PRESSABLE_CLASS
+          )}
+          onClick={() => void createFromSearch()}
+        >
+          <PlusIcon className="size-5 text-muted-foreground" />
+          <span className="text-sm font-medium">Crear «{typedName}»</span>
+        </button>
+      ) : null}
 
       {showNone ? (
         <button

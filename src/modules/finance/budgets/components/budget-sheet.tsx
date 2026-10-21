@@ -13,6 +13,7 @@ import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms
 import { CategoryMultiTrigger } from "@/src/modules/finance/shared/components/pickers/category-multi-trigger"
 import { CategoryPickerSheet } from "@/src/modules/finance/shared/components/pickers/category-picker-sheet"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
+import { useCreateCategory } from "@/src/modules/finance/shared/hooks/use-categories"
 import {
   useCreateBudget,
   useUpdateBudget,
@@ -86,22 +87,15 @@ function budgetCategoryIds(budget: FinanceBudget | null): string[] {
 
 function toFormValues({
   budget,
-  defaultCategoryId,
   monthStartDay,
 }: {
   budget: FinanceBudget | null
-  defaultCategoryId: string
   monthStartDay: number
 }): BudgetFormValues {
   const month = boundsForPeriod("MONTHLY", { monthStartDay })
   const categoryIds = budgetCategoryIds(budget)
   return {
-    categoryIds:
-      categoryIds.length > 0
-        ? categoryIds
-        : defaultCategoryId
-          ? [defaultCategoryId]
-          : [],
+    categoryIds,
     periodType: budget?.periodType ?? "MONTHLY",
     periodStart: budget?.periodStart?.slice(0, 10) ?? month.periodStart,
     periodEnd: budget?.periodEnd?.slice(0, 10) ?? month.periodEnd,
@@ -142,7 +136,7 @@ export function BudgetSheet({
     [categories]
   )
   const hasCategories = expenseCategories.length > 0
-  const defaultCategoryId = expenseCategories[0]?.id ?? ""
+  const createCategory = useCreateCategory()
   const includeChildrenId = useId()
   const recurringId = useId()
 
@@ -157,7 +151,6 @@ export function BudgetSheet({
     resolver: zodResolver(budgetSchema),
     defaultValues: toFormValues({
       budget,
-      defaultCategoryId,
       monthStartDay: config.monthStartDay,
     }),
   })
@@ -209,12 +202,11 @@ export function BudgetSheet({
       reset(
         toFormValues({
           budget,
-          defaultCategoryId,
           monthStartDay: config.monthStartDay,
         })
       )
     }
-  }, [open, budget, defaultCategoryId, reset, config.monthStartDay])
+  }, [open, budget, reset, config.monthStartDay])
 
   useEffect(() => {
     if (!open || budget || periodType === "CUSTOM") {
@@ -262,7 +254,7 @@ export function BudgetSheet({
         description={
           hasCategories
             ? "El tope es por categorías y periodo. El gasto se calcula con los movimientos."
-            : "Crea una categoría antes de agregar un presupuesto."
+            : "Crea la categoría desde el selector de categorías."
         }
         actions={{
           close: (
@@ -279,11 +271,7 @@ export function BudgetSheet({
           submit: (
             <Button
               type="button"
-              disabled={
-                isPending ||
-                (!isEdit && !hasCategories) ||
-                categoryIds.length === 0
-              }
+              disabled={isPending || categoryIds.length === 0}
               className="flex-1"
               onClick={onSubmit}
             >
@@ -300,7 +288,6 @@ export function BudgetSheet({
             </FieldLabel>
             <CategoryMultiTrigger
               categories={selectedCategories}
-              disabled={!hasCategories}
               onClick={() => setCategoryPickerOpen(true)}
               onRemove={(categoryId) =>
                 setValue(
@@ -469,6 +456,18 @@ export function BudgetSheet({
         onChange={(next) =>
           setValue("categoryIds", next, { shouldValidate: true })
         }
+        onCreate={async (name) => {
+          try {
+            const created = await createCategory.mutateAsync({
+              name,
+              type: "EXPENSE",
+            })
+            return created.id
+          } catch (error) {
+            appToast.error({ text1: financeErrorMessage(error) })
+            return null
+          }
+        }}
       />
 
       {discardChangesDialog}
