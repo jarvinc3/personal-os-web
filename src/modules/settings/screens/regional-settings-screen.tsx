@@ -6,7 +6,10 @@ import { EditTimeZoneSheet } from "@/src/modules/settings/components/sheets/edit
 import { SETTINGS_REGISTRY } from "@/src/modules/settings/constants/settings-metadata"
 import { useProfile } from "@/src/modules/settings/hooks/use-profile"
 import { useUserModuleConfig } from "@/src/modules/settings/hooks/use-user-module-config"
-import { localeLabel } from "@/src/modules/settings/lib/locale-options"
+import {
+  DEFAULT_LOCALE,
+  localeLabel,
+} from "@/src/modules/settings/lib/locale-options"
 import { SettingsGate } from "@/src/modules/settings/settings-gate"
 import {
   SettingsRow,
@@ -17,7 +20,7 @@ import { usePendingNavigation } from "@/src/shared/components/ui/navigation-pend
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { Coins, Globe } from "lucide-react"
 
-const REGIONAL_ACCENT = "#037cff"
+const REGIONAL_ACCENT = SETTINGS_REGISTRY.account.accent
 
 export function RegionalSettingsScreen() {
   return (
@@ -80,6 +83,7 @@ function RegionalSettingsScreenBody() {
         onOpenChange={setOpenTimeZoneSheet}
       />
       <EditLocaleSheet
+        key={profile?.locale ?? DEFAULT_LOCALE}
         open={openLocaleSheet}
         onOpenChange={setOpenLocaleSheet}
       />

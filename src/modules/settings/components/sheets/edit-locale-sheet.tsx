@@ -1,5 +1,6 @@
 "use client"
 
+import { SETTINGS_REGISTRY } from "@/src/modules/settings/constants/settings-metadata"
 import { useProfile } from "@/src/modules/settings/hooks/use-profile"
 import {
   DEFAULT_LOCALE,
@@ -18,6 +19,8 @@ import { SummarySection } from "@/src/shared/components/ui/summary"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { GlobeIcon, XIcon } from "lucide-react"
 import { useState } from "react"
+
+const LOCALE_ACCENT = SETTINGS_REGISTRY.account.accent
 
 export function EditLocaleSheet({ open, onOpenChange }: SettingsSheetProps) {
   const { profileQuery, updateProfileMutation } = useProfile()
@@ -83,8 +86,8 @@ export function EditLocaleSheet({ open, onOpenChange }: SettingsSheetProps) {
             <OptionRow
               key={option.value}
               icon={GlobeIcon}
-              iconColor="#037cff"
-              accentColor="#037cff"
+              iconColor={LOCALE_ACCENT}
+              accentColor={LOCALE_ACCENT}
               label={option.label}
               description={option.description}
               selected={locale === option.value}

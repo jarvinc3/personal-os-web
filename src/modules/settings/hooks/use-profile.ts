@@ -78,7 +78,7 @@ export function useProfile() {
     },
   })
 
-  const preferencesPayload = useCallback(
+  const preferencesFromPatch = useCallback(
     (patch: DeepPartial<UserPreferences>): UserPreferences => {
       const current =
         queryClient.getQueryData<UserProfile>(PROFILE_QUERY_KEY)?.preferences
@@ -89,7 +89,7 @@ export function useProfile() {
 
   const updatePreferences = async (patch: DeepPartial<UserPreferences>) => {
     await updateProfileMutation.mutateAsync({
-      preferences: preferencesPayload(patch),
+      preferences: preferencesFromPatch(patch),
     })
   }
 
@@ -99,11 +99,11 @@ export function useProfile() {
       options?: { onSuccess?: () => void }
     ) => {
       updateProfileMutation.mutate(
-        { preferences: preferencesPayload(patch) },
+        { preferences: preferencesFromPatch(patch) },
         { onSuccess: options?.onSuccess }
       )
     },
-    [preferencesPayload, updateProfileMutation]
+    [preferencesFromPatch, updateProfileMutation]
   )
 
   const rawPreferences = profileQuery.data?.preferences

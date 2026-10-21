@@ -20,5 +20,5 @@ export const LOCALE_OPTIONS = [
 
 export function localeLabel(locale: string | null | undefined): string {
   const match = LOCALE_OPTIONS.find((option) => option.value === locale)
-  return match?.label ?? locale ?? DEFAULT_LOCALE
+  return match?.label ?? locale ?? LOCALE_OPTIONS[0].label
 }
