@@ -2,6 +2,21 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.54.0] - 2026-10-21
+
+### Agregado
+
+- Centro de ayuda en `/help` con glosario buscable, guías paso a paso y preguntas frecuentes, con entrada desde Ajustes → Ayuda (#227).
+- Glosario de los conceptos que aparecen en pantalla, con sinónimos, términos relacionados y enlace directo por término en `/help/glossary?term=…` (#228).
+- Guías de instalación en Android, iPhone y escritorio, y primeros pasos (#230).
+- Guías de Finanzas y Ajustes: conectar el correo, conciliar, importar un estado de cuenta, presupuestos, metas de ahorro, préstamos, cobros, tarjetas, suscripciones y notificaciones (#231).
+- Preguntas frecuentes agrupadas por cuenta, finanzas, correo, notificaciones y privacidad; las respuestas enlazan al glosario y a las guías (#232).
+
+### Cambiado
+
+- La sección «Módulos» de Ajustes pasa a llamarse «Apps», como el resto de la interfaz.
+- La búsqueda sin mayúsculas ni acentos vive en `src/shared/lib/search-text.ts` y la comparten Finanzas y el Centro de ayuda.
+
 ## [0.53.0] - 2026-10-21
 
 ### Agregado

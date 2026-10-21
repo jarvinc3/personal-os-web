@@ -12,6 +12,15 @@ export type ReleaseNotesEntry = {
 
 export const RELEASE_NOTES: readonly ReleaseNotesEntry[] = [
   {
+    version: "0.54.0",
+    highlights: [
+      "Nuevo Centro de ayuda en Ajustes → Ayuda: glosario con buscador, guías paso a paso y preguntas frecuentes.",
+      "Cada término del glosario tiene su propio enlace y las guías y respuestas llevan al término que explican.",
+      "Guías para instalar la app en Android, iPhone y escritorio, y para conectar el correo, conciliar, presupuestar, ahorrar, prestar y cobrar.",
+      "La sección Módulos de Ajustes ahora se llama Apps.",
+    ],
+  },
+  {
     version: "0.53.0",
     highlights: [
       "El primer día de la semana se elige en Preferencias › Región y lo usan los calendarios. Finanzas y Agenda ya no guardan uno propio.",
