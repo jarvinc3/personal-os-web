@@ -9,9 +9,7 @@ import { useProfile } from "./use-profile"
  * `moduleFallback` keeps profiles saved before the global preference working
  * until the module values are cleaned up.
  */
-export function useWeekStartsOn(
-  moduleFallback?: 0 | 1 | null
-): WeekStartsOn {
+export function useWeekStartsOn(moduleFallback?: 0 | 1 | null): WeekStartsOn {
   const { profileQuery, preferences } = useProfile()
 
   return resolveWeekStartsOn({

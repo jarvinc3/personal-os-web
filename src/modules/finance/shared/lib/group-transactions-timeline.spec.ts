@@ -2,9 +2,7 @@ import assert from "node:assert/strict"
 import { describe, it } from "node:test"
 
 import type { FinanceTransaction } from "../types/entities.ts"
-import {
-  buildTimelineMonths as buildTimeline,
-} from "./group-transactions-timeline.ts"
+import { buildTimelineMonths as buildTimeline } from "./group-transactions-timeline.ts"
 import type { YearMonth } from "./month-window.ts"
 import { monthBannerSrc } from "./month-banners.ts"
 

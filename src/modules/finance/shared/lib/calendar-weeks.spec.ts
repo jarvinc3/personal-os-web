@@ -1,7 +1,10 @@
 import assert from "node:assert/strict"
 import { describe, it } from "node:test"
 
-import { formatClippedWeekLabel, weeksForMonth as weeksForMonthAt } from "./calendar-weeks.ts"
+import {
+  formatClippedWeekLabel,
+  weeksForMonth as weeksForMonthAt,
+} from "./calendar-weeks.ts"
 
 function weeksForMonth(year: number, month: number) {
   return weeksForMonthAt({ year, month, weekStartsOn: 0 })
