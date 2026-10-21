@@ -84,7 +84,7 @@ function ReversalLeg({ leg, roleLabel, display, isLast }: ReversalLegProps) {
   return (
     <SummaryItem
       title={roleLabel}
-      description={`${detail} · ${formatFinanceDateTimeLabel(leg.transactionDate)} · ${reversalSourceLabel(leg.source)}`}
+      description={`${detail} · ${formatFinanceDateTimeLabel(leg.transactionDate, display.locale)} · ${reversalSourceLabel(leg.source)}`}
       value={
         <span
           className={cn(isInactive && "text-muted-foreground line-through")}

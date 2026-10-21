@@ -98,11 +98,12 @@ export function LoanDetailScreen({ loanId }: LoanDetailScreenProps) {
 
 function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
   const router = useRouter()
-  const { isEnabled, config } = useFinanceEnabled()
+  const { isEnabled, config, formatLocale } = useFinanceEnabled()
   const display = {
     currency: config.baseCurrency,
     showCents: config.display.showCents,
     compactNumbers: config.display.compactNumbers,
+    locale: formatLocale,
   }
 
   const loansQuery = useLoans(isEnabled)
@@ -283,7 +284,7 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
         endCaption={`Original ${formatFinanceMoney(loan.originalAmount, money)}`}
         footnote={
           loan.nextDueDate
-            ? `Próximo pago · ${formatCalendarDate(loan.nextDueDate)}`
+            ? `Próximo pago · ${formatCalendarDate(loan.nextDueDate, display.locale)}`
             : undefined
         }
         decoration={<LoanSurfaceMark size="header" />}
@@ -332,7 +333,7 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
                 <SummaryItem
                   key={installment.id}
                   title={`Cuota ${installment.installmentNo}`}
-                  description={`Vence ${formatCalendarDate(installment.dueDate)} · Capital ${formatFinanceMoney(installment.principal, money)} · Interés ${formatFinanceMoney(installment.interest, money)}`}
+                  description={`Vence ${formatCalendarDate(installment.dueDate, display.locale)} · Capital ${formatFinanceMoney(installment.principal, money)} · Interés ${formatFinanceMoney(installment.interest, money)}`}
                   value={formatFinanceMoney(installment.amount, money)}
                   onPress={() => setSelectedInstallment(installment)}
                   trailing={

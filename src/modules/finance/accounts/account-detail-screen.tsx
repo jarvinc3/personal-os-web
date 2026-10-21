@@ -93,11 +93,12 @@ export function AccountDetailScreen({ accountId }: AccountDetailScreenProps) {
 function AccountDetailScreenBody({ accountId }: AccountDetailScreenProps) {
   const router = useRouter()
   const pathname = usePathname()
-  const { isEnabled, config } = useFinanceEnabled()
+  const { isEnabled, config, formatLocale } = useFinanceEnabled()
   const display = {
     currency: config.baseCurrency,
     showCents: config.display.showCents,
     compactNumbers: config.display.compactNumbers,
+    locale: formatLocale,
   }
 
   const accountsQuery = useAccounts(isEnabled)

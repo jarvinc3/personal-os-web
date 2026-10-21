@@ -155,8 +155,11 @@ export function formatFinanceTimeLabel(value: string): string | null {
 }
 
 /** Date plus hour, when the value carries one. */
-export function formatFinanceDateTimeLabel(value: string): string {
-  const date = formatCalendarDate(value)
+export function formatFinanceDateTimeLabel(
+  value: string,
+  locale: string
+): string {
+  const date = formatCalendarDate(value, locale)
   const time = formatFinanceTimeLabel(value)
   if (!time) {
     return date
@@ -164,7 +167,7 @@ export function formatFinanceDateTimeLabel(value: string): string {
   return `${date}, ${time}`
 }
 
-export function formatCalendarDate(value: string): string {
+export function formatCalendarDate(value: string, locale: string): string {
   const slice = value.slice(0, 10)
   if (!/^\d{4}-\d{2}-\d{2}$/.test(slice)) {
     return value
@@ -176,7 +179,7 @@ export function formatCalendarDate(value: string): string {
   if (Number.isNaN(date.getTime())) {
     return value
   }
-  return date.toLocaleDateString("es", {
+  return date.toLocaleDateString(locale, {
     year: "numeric",
     month: "short",
     day: "numeric",

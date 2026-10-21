@@ -76,11 +76,12 @@ function TransactionDetailScreenBody({
   transactionId,
 }: FinanceTransactionDetailProps) {
   const router = useRouter()
-  const { isEnabled, config } = useFinanceEnabled()
+  const { isEnabled, config, formatLocale } = useFinanceEnabled()
   const display: FinanceMoneyDisplay = {
     currency: config.baseCurrency,
     showCents: config.display.showCents,
     compactNumbers: config.display.compactNumbers,
+    locale: formatLocale,
   }
 
   const detailQuery = useTransaction(isEnabled, transactionId)
@@ -365,7 +366,7 @@ function TransactionDetailScreenBody({
 
       <div className="mx-4 flex flex-col gap-3">
         <p className="text-sm text-muted-foreground">
-          {formatTransactionDate(tx.transactionDate)}
+          {formatTransactionDate(tx.transactionDate, display.locale)}
         </p>
 
         <TransactionDetailFacts transaction={tx} display={display} />
@@ -391,7 +392,7 @@ function TransactionDetailScreenBody({
       <RecordOptionsSheet
         open={openOptionsSheet}
         onOpenChange={setOpenOptionsSheet}
-        description={formatTransactionDate(tx.transactionDate)}
+        description={formatTransactionDate(tx.transactionDate, display.locale)}
         options={options}
       />
 

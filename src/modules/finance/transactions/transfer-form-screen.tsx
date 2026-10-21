@@ -25,7 +25,7 @@ export function TransferCreateScreen() {
 
 function TransferCreateScreenBody() {
   const router = useRouter()
-  const { isEnabled, config } = useFinanceEnabled()
+  const { isEnabled, config, formatLocale } = useFinanceEnabled()
 
   const handleBack = useCallback(() => {
     if (window.history.length > 1) {
@@ -52,6 +52,7 @@ function TransferCreateScreenBody() {
         currency: config.baseCurrency,
         showCents: config.display.showCents,
         compactNumbers: config.display.compactNumbers,
+        locale: formatLocale,
       }}
       defaultAccountId={config.defaultAccountId}
       onDone={handleBack}
@@ -73,7 +74,7 @@ export function TransferEditScreen({ transactionId }: TransferEditScreenProps) {
 
 function TransferEditScreenBody({ transactionId }: TransferEditScreenProps) {
   const router = useRouter()
-  const { isEnabled, config } = useFinanceEnabled()
+  const { isEnabled, config, formatLocale } = useFinanceEnabled()
   const detailQuery = useTransaction(isEnabled, transactionId)
   const transfer = detailQuery.data ?? null
 
@@ -128,6 +129,7 @@ function TransferEditScreenBody({ transactionId }: TransferEditScreenProps) {
         currency: config.baseCurrency,
         showCents: config.display.showCents,
         compactNumbers: config.display.compactNumbers,
+        locale: formatLocale,
       }}
       transfer={transfer}
       defaultAccountId={config.defaultAccountId}

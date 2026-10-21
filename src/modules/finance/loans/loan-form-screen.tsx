@@ -31,7 +31,7 @@ export function LoanCreateScreen() {
 function LoanCreateScreenBody() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { config } = useFinanceEnabled()
+  const { config, formatLocale } = useFinanceEnabled()
   const defaultInstitutionId = searchParams.get("institutionId") ?? CATALOG_NONE
   const prefill = loanWizardPrefill(searchParams)
 
@@ -61,6 +61,7 @@ function LoanCreateScreenBody() {
         currency: config.baseCurrency,
         showCents: config.display.showCents,
         compactNumbers: config.display.compactNumbers,
+        locale: formatLocale,
       }}
       onDone={handleBack}
     />
@@ -81,7 +82,7 @@ export function LoanEditScreen({ loanId }: LoanEditScreenProps) {
 
 function LoanEditScreenBody({ loanId }: LoanEditScreenProps) {
   const router = useRouter()
-  const { isEnabled, config } = useFinanceEnabled()
+  const { isEnabled, config, formatLocale } = useFinanceEnabled()
   const loansQuery = useLoans(isEnabled)
   const institutionsQuery = useInstitutions(isEnabled)
   const accountsQuery = useAccounts(isEnabled)
@@ -141,6 +142,7 @@ function LoanEditScreenBody({ loanId }: LoanEditScreenProps) {
         currency: loan.currency || config.baseCurrency,
         showCents: config.display.showCents,
         compactNumbers: config.display.compactNumbers,
+        locale: formatLocale,
       }}
       onDone={handleBack}
     />

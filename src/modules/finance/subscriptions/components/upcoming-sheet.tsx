@@ -58,6 +58,7 @@ export function UpcomingSheet({
       baseCurrency: display.currency,
     }),
     showCents: display.showCents,
+    locale: display.locale,
   })
 
   return (

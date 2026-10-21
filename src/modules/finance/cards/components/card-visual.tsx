@@ -24,7 +24,9 @@ type CardVisualProps = {
 
 export function CardVisual({ card, balances, display }: CardVisualProps) {
   const isCredit = card.type === "CREDIT"
-  const cycleNote = isCredit ? nextCycleNote(card) : null
+  const cycleNote = isCredit
+    ? nextCycleNote({ card, locale: display.locale })
+    : null
 
   return (
     <div className="flex flex-col gap-3">

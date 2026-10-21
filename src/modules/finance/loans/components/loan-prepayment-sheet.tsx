@@ -67,7 +67,7 @@ export function LoanPrepaymentSheet({
   penaltyPct,
 }: LoanPrepaymentSheetProps) {
   const prepayment = useLoanPrepayment()
-  const { config } = useFinanceEnabled()
+  const { config, formatLocale } = useFinanceEnabled()
   const accountsQuery = useAccounts(open)
   const institutionsQuery = useInstitutions(open)
   const accounts = (accountsQuery.data ?? []).filter(
@@ -87,6 +87,7 @@ export function LoanPrepaymentSheet({
     currency,
     showCents: config.display.showCents,
     compactNumbers: config.display.compactNumbers,
+    locale: formatLocale,
   }
 
   const previewQuery = useQuery({
@@ -206,7 +207,7 @@ export function LoanPrepaymentSheet({
           </Field>
           {preview ? (
             <FinanceHelpText>
-              {`Termina el ${formatCalendarDate(preview.newEndDate)} · Interés restante ${formatFinanceMoney(preview.interestRemaining, display)}`}
+              {`Termina el ${formatCalendarDate(preview.newEndDate, display.locale)} · Interés restante ${formatFinanceMoney(preview.interestRemaining, display)}`}
             </FinanceHelpText>
           ) : null}
           {penalty > 0 ? (

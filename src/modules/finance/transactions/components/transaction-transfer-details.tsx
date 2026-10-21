@@ -3,6 +3,7 @@ import {
   CardNetworkMark,
 } from "@/src/modules/finance/shared/components/brand-logo"
 import type { FinanceTransaction } from "@/src/modules/finance/shared/types/entities"
+import { useFormatLocale } from "@/src/modules/settings/hooks/use-format-locale"
 import { transferDirectionLabel } from "@/src/modules/finance/shared/lib/transactions-query"
 import { SummaryItem } from "@/src/shared/components/ui/summary"
 
@@ -18,6 +19,7 @@ type TransactionTransferDetailsProps = {
 export function TransactionTransferDetails({
   transaction,
 }: TransactionTransferDetailsProps) {
+  const formatLocale = useFormatLocale()
   const crossRate = crossCurrencyRate(transaction)
 
   return (
@@ -83,7 +85,7 @@ export function TransactionTransferDetails({
       {crossRate ? (
         <SummaryItem
           title={transaction.transferEstimated ? "Tasa estimada" : "Tasa"}
-          value={transferRateLabel(crossRate)}
+          value={transferRateLabel({ ...crossRate, locale: formatLocale })}
           isLast={false}
           className="px-3"
         />

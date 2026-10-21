@@ -33,8 +33,11 @@ describe("formatBudgetPeriodDate", () => {
       month: "short",
       day: "numeric",
     })
-    assert.equal(formatBudgetPeriodDate("2026-09-01T00:00:00.000Z"), expected)
-    assert.equal(formatBudgetPeriodDate("2026-09-01"), expected)
+    assert.equal(
+      formatBudgetPeriodDate("2026-09-01T00:00:00.000Z", "es"),
+      expected
+    )
+    assert.equal(formatBudgetPeriodDate("2026-09-01", "es"), expected)
   })
 })
 

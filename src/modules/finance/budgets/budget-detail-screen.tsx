@@ -135,11 +135,12 @@ export function BudgetDetailScreen({ budgetId }: FinanceBudgetDetailProps) {
 
 function BudgetDetailScreenBody({ budgetId }: FinanceBudgetDetailProps) {
   const router = useRouter()
-  const { isEnabled, config } = useFinanceEnabled()
+  const { isEnabled, config, formatLocale } = useFinanceEnabled()
   const display = {
     currency: config.baseCurrency,
     showCents: config.display.showCents,
     compactNumbers: config.display.compactNumbers,
+    locale: formatLocale,
   }
 
   const budgetQuery = useBudget(isEnabled, budgetId)
@@ -258,7 +259,7 @@ function BudgetDetailScreenBody({ budgetId }: FinanceBudgetDetailProps) {
 
   const periodLabel =
     FINANCE_BUDGET_PERIOD_LABEL[budget.periodType] ?? budget.periodType
-  const periodRange = `${formatBudgetPeriodDate(budget.periodStart)} – ${formatBudgetPeriodDate(budget.periodEnd)}`
+  const periodRange = `${formatBudgetPeriodDate(budget.periodStart, display.locale)} – ${formatBudgetPeriodDate(budget.periodEnd, display.locale)}`
   const emoji = budget.category?.icon
 
   return (
@@ -341,7 +342,7 @@ function BudgetDetailScreenBody({ budgetId }: FinanceBudgetDetailProps) {
                   movement.merchant ?? movement.description ?? "Movimiento"
                 }
                 description={joinPlanningCaption(
-                  formatCalendarDate(movement.transactionDate),
+                  formatCalendarDate(movement.transactionDate, display.locale),
                   movementStatusCaption(movement.status)
                 )}
                 value={formatFinanceMoney(movement.amount, {

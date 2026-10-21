@@ -6,6 +6,7 @@ import { useRecurring } from "@/src/modules/finance/shared/hooks/use-recurring"
 import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
 import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 import { recurringFrequencyLabel } from "@/src/modules/finance/subscriptions/lib/recurring-display"
+import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
 import type {
   FinanceRecurringStatus,
   FinanceRecurringPattern,
@@ -27,7 +28,7 @@ const ARCHIVE_TABS: {
 type RecurringArchiveSheetProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
-  display: { currency: string; showCents: boolean; compactNumbers: boolean }
+  display: FinanceMoneyDisplay
   /** Stacks the sheet on top of the one that opened it. */
   nested?: boolean
 }

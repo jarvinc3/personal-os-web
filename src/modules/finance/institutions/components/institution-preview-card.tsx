@@ -2,6 +2,7 @@
 
 import { BrandLogo } from "@/src/modules/finance/shared/components/brand-logo"
 import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
+import { useFormatLocale } from "@/src/modules/settings/hooks/use-format-locale"
 
 type InstitutionPreviewCardProps = {
   name: string
@@ -16,6 +17,7 @@ export function InstitutionPreviewCard({
   logoUrl,
   caption,
 }: InstitutionPreviewCardProps) {
+  const locale = useFormatLocale()
   return (
     <div
       className="flex flex-col justify-between gap-6 rounded-3xl p-5 text-white"
@@ -34,6 +36,7 @@ export function InstitutionPreviewCard({
             currency: "DOP",
             showCents: true,
             compactNumbers: false,
+            locale,
           })}
         </span>
       </div>

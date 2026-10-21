@@ -1,5 +1,6 @@
 "use client"
 
+import { useFormatLocale } from "@/src/modules/settings/hooks/use-format-locale"
 import {
   formatCalendarDate,
   nowDateTimeInput,
@@ -44,7 +45,7 @@ type FinanceDateFieldProps = {
   withTime?: boolean
 }
 
-export function formatFinanceDateLabel(value: string): string {
+export function formatFinanceDateLabel(value: string, locale: string): string {
   const parsed = parseDate(value)
   if (!parsed) {
     return "Elegir fecha"
@@ -57,7 +58,7 @@ export function formatFinanceDateLabel(value: string): string {
   if (Number.isNaN(date.getTime())) {
     return "Elegir fecha"
   }
-  return date.toLocaleDateString("es", {
+  return date.toLocaleDateString(locale, {
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -77,6 +78,7 @@ export function FinanceDateField({
   aside,
   withTime = false,
 }: FinanceDateFieldProps) {
+  const formatLocale = useFormatLocale()
   const dateValue = value.slice(0, 10)
   const timeValue = value.slice(11, 16)
   const hasDate = Boolean(parseDate(dateValue))
@@ -85,8 +87,8 @@ export function FinanceDateField({
   const [step, setStep] = useState<DateStep>(DATE_STEP)
   const valueLabel = hasValue
     ? withTime
-      ? `${formatCalendarDate(value)}, ${formatHm24Display12h(timeValue)}`
-      : formatFinanceDateLabel(value)
+      ? `${formatCalendarDate(value, formatLocale)}, ${formatHm24Display12h(timeValue)}`
+      : formatFinanceDateLabel(value, formatLocale)
     : optional
       ? "Sin fecha"
       : "Elegir fecha"

@@ -22,6 +22,12 @@ describe("sanitizeAmountInput", () => {
     assert.equal(sanitizeAmountInput("1,234,567.89"), "1234567.89")
     assert.equal(sanitizeAmountInput("DOP 19,997,000"), "19997000")
   })
+
+  it("takes the separator closest to the digits as the decimal one", () => {
+    assert.equal(sanitizeAmountInput("1.234,56"), "1234.56")
+    assert.equal(sanitizeAmountInput("1,234.56"), "1234.56")
+    assert.equal(sanitizeAmountInput("12.345,6"), "12345.6")
+  })
 })
 
 describe("parseFinanceMoney", () => {

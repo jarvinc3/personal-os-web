@@ -125,7 +125,7 @@ export function PlanningReceivablesTab({
                   prefix: "Resta",
                 }),
                 item.dueDate
-                  ? `Vence ${formatCalendarDate(item.dueDate)}`
+                  ? `Vence ${formatCalendarDate(item.dueDate, display.locale)}`
                   : undefined
               )}
               href={

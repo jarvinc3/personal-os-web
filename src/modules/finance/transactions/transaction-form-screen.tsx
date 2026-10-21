@@ -82,7 +82,7 @@ function TransactionFormScreenBody({
   returnTo?: string | null
 }) {
   const router = useRouter()
-  const { isEnabled, config } = useFinanceEnabled()
+  const { isEnabled, config, formatLocale } = useFinanceEnabled()
   const [typeOverride, setTypeOverride] = useState<{
     base: "DEBIT" | "CREDIT"
     next: "DEBIT" | "CREDIT"
@@ -160,6 +160,7 @@ function TransactionFormScreenBody({
         currency: config.baseCurrency,
         showCents: config.display.showCents,
         compactNumbers: config.display.compactNumbers,
+        locale: formatLocale,
       }}
       onTypeChange={handleTypeChange}
       onDone={mode === "edit" ? handleBack : handleCreated}

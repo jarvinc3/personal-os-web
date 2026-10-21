@@ -1,6 +1,7 @@
 "use client"
 
 import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
+import { useFormatLocale } from "@/src/modules/settings/hooks/use-format-locale"
 import type { SubscriptionShortcutBadges } from "@/src/modules/finance/subscriptions/lib/subscription-display"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { Badge } from "@/src/shared/components/ui/badge"
@@ -53,10 +54,12 @@ export function SubscriptionsHero({
   onAlerts,
   onDetected,
 }: SubscriptionsHeroProps) {
+  const locale = useFormatLocale()
   const display = {
     currency: baseCurrency,
     showCents: false,
     compactNumbers: false,
+    locale,
   }
 
   return (

@@ -156,6 +156,7 @@ export function subscriptionChargeSummary(input: {
 export function subscriptionChargeSummaryLabel(input: {
   summary: SubscriptionMonthSummary
   showCents: boolean
+  locale: string
 }): string {
   const charges = `${input.summary.count} cobro${input.summary.count === 1 ? "" : "s"}`
   if (input.summary.total === null) {
@@ -165,6 +166,7 @@ export function subscriptionChargeSummaryLabel(input: {
     currency: input.summary.currency,
     showCents: input.showCents,
     compactNumbers: false,
+    locale: input.locale,
   })}`
 }
 

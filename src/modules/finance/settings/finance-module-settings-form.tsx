@@ -33,8 +33,13 @@ import {
 const MODULE_ACCENT = getModule("finance").accent
 
 export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
-  const { config, isModuleEnabled, updateConfig, updateMutation } =
-    useUserModuleConfig("finance")
+  const {
+    config,
+    isModuleEnabled,
+    updateConfig,
+    updateMutation,
+    formatLocale,
+  } = useUserModuleConfig("finance")
   const moduleEnable = useModuleSheetEnable("finance")
   const accountsQuery = useAccounts(isModuleEnabled)
   const accounts = accountsQuery.data ?? []
@@ -163,6 +168,7 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
           currency: config.baseCurrency,
           showCents: config.display.showCents,
           compactNumbers: config.display.compactNumbers,
+          locale: formatLocale,
         }}
       />
     </FormScreen>

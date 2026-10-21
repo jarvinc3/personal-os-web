@@ -85,7 +85,9 @@ export function TransactionMovementRow({
   const sign = displayedMovementSign(transaction, instrument)
   const crossRate =
     isTransfer && instrument ? crossCurrencyRate(transaction) : null
-  const rateLabel = crossRate ? transferRateLabel(crossRate) : null
+  const rateLabel = crossRate
+    ? transferRateLabel({ ...crossRate, locale: display.locale })
+    : null
   const title = isTransfer
     ? transferDirectionLabel(transaction)
     : (transaction.merchantName ??

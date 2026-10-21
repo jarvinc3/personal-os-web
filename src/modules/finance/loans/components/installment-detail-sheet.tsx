@@ -52,7 +52,7 @@ export function InstallmentDetailSheet({
       }
       description={
         installment
-          ? `Vence ${formatCalendarDate(installment.dueDate)} · ${FINANCE_LOAN_INSTALLMENT_STATUS_LABEL[installment.status]}`
+          ? `Vence ${formatCalendarDate(installment.dueDate, display.locale)} · ${FINANCE_LOAN_INSTALLMENT_STATUS_LABEL[installment.status]}`
           : undefined
       }
       actions={{
