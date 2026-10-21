@@ -12,6 +12,12 @@ export type ReleaseNotesEntry = {
 
 export const RELEASE_NOTES: readonly ReleaseNotesEntry[] = [
   {
+    version: "0.52.1",
+    highlights: [
+      "La hoja de Idioma muestra el idioma guardado al abrirse, incluso si el perfil tarda en cargar.",
+    ],
+  },
+  {
     version: "0.52.0",
     highlights: [
       "Ajustes ahora es una lista de secciones: Perfil y cuenta, Preferencias regionales, Apariencia, Asistente IA, Notificaciones, Privacidad y datos, y Módulos.",

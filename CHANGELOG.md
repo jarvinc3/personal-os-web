@@ -2,6 +2,12 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.52.1] - 2026-10-21
+
+### Corregido
+
+- La hoja de Idioma muestra el idioma guardado al abrirse, aunque el perfil termine de cargar después; antes podía quedar seleccionado otro idioma (#222).
+
 ## [0.52.0] - 2026-10-21
 
 ### Cambiado
