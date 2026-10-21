@@ -2,7 +2,7 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
-## [Sin publicar]
+## [0.47.4] - 2026-10-20
 
 ### Agregado
 
@@ -13,6 +13,13 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 ### Cambiado
 
 - `AGENTS.md` y `docs/README.md` enlazan las convenciones de issues y la nueva documentación. Sin cambios visibles en la app.
+- Interno: el detalle de cuenta y de tarjeta reutiliza la fila de Movimientos en vez de su propio render, y el signo de una transferencia sale del instrumento que la muestra.
+
+### Corregido
+
+- El formulario de una suscripción muestra «Cuenta o tarjeta» como campo visible, avisa al guardar cuando queda vacío y el detalle de la suscripción lo indica con la acción de asignarlo (#203).
+- El detalle de una cuenta y de una tarjeta usa el mismo tratamiento que Movimientos: los revertidos aparecen en gris con su badge y las transferencias con signo y color según el lado de la cuenta (#206).
+- El reparto de una conciliación muestra las etiquetas traducidas (Impuesto DGII, Otro) y el monto completo en su campo, sin truncar decimales ni el signo (#208).
 
 ## [0.47.3] - 2026-10-20
 
