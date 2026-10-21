@@ -2,6 +2,13 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.47.5] - 2026-10-20
+
+### Corregido
+
+- Al guardar un gasto o un ingreso, la app vuelve a Movimientos con el movimiento nuevo. Si el formulario se abrió desde una cuenta o una tarjeta, vuelve a ese detalle con el movimiento en su historial (#202).
+- Una meta de ahorro muestra el avance real por encima del objetivo y el excedente, en vez de quedarse en 100%; el formulario de aporte avisa cuánto quedaría por encima de la meta (#187).
+
 ## [0.47.4] - 2026-10-20
 
 ### Agregado
