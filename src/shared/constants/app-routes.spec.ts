@@ -13,26 +13,35 @@ import {
 describe("financeTransactionNewHref", () => {
   it("builds the debit and credit create urls", () => {
     assert.equal(
-      financeTransactionNewHref("DEBIT"),
+      financeTransactionNewHref({ type: "DEBIT" }),
       "/finance/transactions/new?type=DEBIT"
     )
     assert.equal(
-      financeTransactionNewHref("CREDIT"),
+      financeTransactionNewHref({ type: "CREDIT" }),
       "/finance/transactions/new?type=CREDIT"
     )
     assert.equal(
-      financeTransactionNewHref("DEBIT", "account:abc"),
+      financeTransactionNewHref({
+        type: "DEBIT",
+        destination: "account:abc",
+      }),
       "/finance/transactions/new?type=DEBIT&destination=account%3Aabc"
     )
   })
 
   it("carries the place to return after saving when it is internal", () => {
     assert.equal(
-      financeTransactionNewHref("DEBIT", undefined, "/finance/cash/acc-1"),
+      financeTransactionNewHref({
+        type: "DEBIT",
+        returnTo: "/finance/cash/acc-1",
+      }),
       "/finance/transactions/new?type=DEBIT&returnTo=%2Ffinance%2Fcash%2Facc-1"
     )
     assert.equal(
-      financeTransactionNewHref("DEBIT", undefined, "https://evil.test/x"),
+      financeTransactionNewHref({
+        type: "DEBIT",
+        returnTo: "https://evil.test/x",
+      }),
       "/finance/transactions/new?type=DEBIT"
     )
   })

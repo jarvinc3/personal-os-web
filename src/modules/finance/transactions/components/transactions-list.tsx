@@ -426,14 +426,16 @@ export function FinanceTransactionsList({
           {
             icon: <MinusIcon />,
             label: "Gasto",
-            onClick: () => router.push(financeTransactionNewHref("DEBIT")),
+            onClick: () =>
+              router.push(financeTransactionNewHref({ type: "DEBIT" })),
             disabled: !enabled || !hasTargets,
             color: "bg-destructive",
           },
           {
             icon: <PlusIcon />,
             label: "Ingreso",
-            onClick: () => router.push(financeTransactionNewHref("CREDIT")),
+            onClick: () =>
+              router.push(financeTransactionNewHref({ type: "CREDIT" })),
             disabled: !enabled || !hasTargets,
             color: "bg-success",
           },

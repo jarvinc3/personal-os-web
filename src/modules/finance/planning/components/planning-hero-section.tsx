@@ -71,8 +71,8 @@ export function FinancePlanningHeroSection({
       tabIcon={tabItem.icon}
       tabColor={tabItem.color}
       totalAmount={totalAmount}
-      sendHref={financeTransactionNewHref("DEBIT")}
-      receiveHref={financeTransactionNewHref("CREDIT")}
+      sendHref={financeTransactionNewHref({ type: "DEBIT" })}
+      receiveHref={financeTransactionNewHref({ type: "CREDIT" })}
       transferHref={APP_ROUTES.app.financeTransferNew}
       onCyclePress={() =>
         setDisplayedTab((current) => nextPlanningTab(current))

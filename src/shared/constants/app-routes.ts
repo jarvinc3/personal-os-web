@@ -76,11 +76,15 @@ export const APP_ROUTES = {
   },
 } as const
 
-export function financeTransactionNewHref(
-  type: "DEBIT" | "CREDIT",
-  destination?: string,
+export function financeTransactionNewHref({
+  type,
+  destination,
+  returnTo,
+}: {
+  type: "DEBIT" | "CREDIT"
+  destination?: string
   returnTo?: string
-): string {
+}): string {
   const params = new URLSearchParams({ type })
   const target = destination?.trim()
   if (target) {

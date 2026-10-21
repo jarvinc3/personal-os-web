@@ -206,25 +206,28 @@ export function FinanceInstrumentMovements({
               {group.label}
             </p>
             <div className="overflow-hidden rounded-2xl border border-border">
-              {group.items.map((transaction, index) => (
-                <div
-                  key={transaction.id}
-                  className={cn(
-                    index !== group.items.length - 1 &&
-                      "border-b border-border/60"
-                  )}
-                >
-                  <TransactionMovementRow
-                    transaction={transaction}
-                    categories={categories}
-                    display={display}
-                    instrument={sources.find((source) =>
-                      movementTouchesInstrument(transaction, source)
+              {group.items.map((transaction, index) => {
+                const instrument = sources.find((source) =>
+                  movementTouchesInstrument(transaction, source)
+                )
+                return (
+                  <div
+                    key={transaction.id}
+                    className={cn(
+                      index !== group.items.length - 1 &&
+                        "border-b border-border/60"
                     )}
-                    href={APP_ROUTES.app.financeTransaction(transaction.id)}
-                  />
-                </div>
-              ))}
+                  >
+                    <TransactionMovementRow
+                      transaction={transaction}
+                      categories={categories}
+                      display={display}
+                      instrument={instrument}
+                      href={APP_ROUTES.app.financeTransaction(transaction.id)}
+                    />
+                  </div>
+                )
+              })}
             </div>
           </section>
         ))}

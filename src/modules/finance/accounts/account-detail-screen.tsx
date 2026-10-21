@@ -362,11 +362,11 @@ function AccountDetailScreenBody({ accountId }: AccountDetailScreenProps) {
           createLabel="Movimiento"
           onCreate={() =>
             router.push(
-              financeTransactionNewHref(
-                "DEBIT",
-                encodeLedgerTarget("account", account.id),
-                pathname
-              )
+              financeTransactionNewHref({
+                type: "DEBIT",
+                destination: encodeLedgerTarget("account", account.id),
+                returnTo: pathname,
+              })
             )
           }
         />

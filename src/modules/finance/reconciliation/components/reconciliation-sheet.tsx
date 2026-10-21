@@ -58,6 +58,12 @@ export type ReconciliationSheetTarget = {
   balance: string
 }
 
+/** Labels for the split kind selector, read by the trigger as the selected text. */
+const RECONCILIATION_KIND_ITEMS = FINANCE_RECONCILIATION_KINDS.map((kind) => ({
+  value: kind,
+  label: FINANCE_RECONCILIATION_KIND_LABEL[kind],
+}))
+
 type ReconciliationSheetProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -270,10 +276,7 @@ export function ReconciliationSheet({
                         kind: value as FinanceReconciliationKind,
                       })
                     }
-                    items={FINANCE_RECONCILIATION_KINDS.map((kind) => ({
-                      value: kind,
-                      label: FINANCE_RECONCILIATION_KIND_LABEL[kind],
-                    }))}
+                    items={RECONCILIATION_KIND_ITEMS}
                   >
                     <SelectTrigger className="relative w-full cursor-pointer pl-9">
                       <TagsIcon className="pointer-events-none absolute left-3 size-4.5 text-muted-foreground" />

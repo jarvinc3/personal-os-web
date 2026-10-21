@@ -255,11 +255,11 @@ function CardDetailScreenBody({ cardId }: CardDetailScreenProps) {
       createLabel="Movimiento"
       onCreate={() =>
         router.push(
-          financeTransactionNewHref(
-            "DEBIT",
-            encodeLedgerTarget("card", card.id),
-            pathname
-          )
+          financeTransactionNewHref({
+            type: "DEBIT",
+            destination: encodeLedgerTarget("card", card.id),
+            returnTo: pathname,
+          })
         )
       }
     />
