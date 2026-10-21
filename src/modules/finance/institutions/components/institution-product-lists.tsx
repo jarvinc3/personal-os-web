@@ -18,10 +18,15 @@ import {
 
 type ProductEmptyProps = {
   tab: "accounts" | "cards" | "loans"
-  onCreate: () => void
+  onCreate?: () => void
+  description?: string
 }
 
-export function InstitutionProductEmpty({ tab, onCreate }: ProductEmptyProps) {
+export function InstitutionProductEmpty({
+  tab,
+  onCreate,
+  description,
+}: ProductEmptyProps) {
   if (tab === "loans") {
     return (
       <Empty className="py-10">
@@ -31,15 +36,17 @@ export function InstitutionProductEmpty({ tab, onCreate }: ProductEmptyProps) {
           </EmptyMedia>
           <EmptyTitle>Sin préstamos</EmptyTitle>
           <EmptyDescription>
-            Registra un préstamo para seguir sus cuotas.
+            {description ?? "Registra un préstamo para seguir sus cuotas."}
           </EmptyDescription>
         </EmptyHeader>
-        <EmptyContent>
-          <Button onClick={onCreate}>
-            <PlusIcon />
-            Préstamo
-          </Button>
-        </EmptyContent>
+        {onCreate ? (
+          <EmptyContent>
+            <Button onClick={onCreate}>
+              <PlusIcon />
+              Préstamo
+            </Button>
+          </EmptyContent>
+        ) : null}
       </Empty>
     )
   }
@@ -56,12 +63,14 @@ export function InstitutionProductEmpty({ tab, onCreate }: ProductEmptyProps) {
             Agrega una tarjeta de crédito o débito de esta institución.
           </EmptyDescription>
         </EmptyHeader>
-        <EmptyContent>
-          <Button onClick={onCreate}>
-            <PlusIcon />
-            Tarjeta
-          </Button>
-        </EmptyContent>
+        {onCreate ? (
+          <EmptyContent>
+            <Button onClick={onCreate}>
+              <PlusIcon />
+              Tarjeta
+            </Button>
+          </EmptyContent>
+        ) : null}
       </Empty>
     )
   }
@@ -74,15 +83,17 @@ export function InstitutionProductEmpty({ tab, onCreate }: ProductEmptyProps) {
         </EmptyMedia>
         <EmptyTitle>Sin cuentas</EmptyTitle>
         <EmptyDescription>
-          Crea la primera cuenta de esta institución.
+          {description ?? "Crea la primera cuenta de esta institución."}
         </EmptyDescription>
       </EmptyHeader>
-      <EmptyContent>
-        <Button onClick={onCreate}>
-          <PlusIcon />
-          Cuenta
-        </Button>
-      </EmptyContent>
+      {onCreate ? (
+        <EmptyContent>
+          <Button onClick={onCreate}>
+            <PlusIcon />
+            Cuenta
+          </Button>
+        </EmptyContent>
+      ) : null}
     </Empty>
   )
 }

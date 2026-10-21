@@ -269,20 +269,18 @@ function InstitutionDetailScreenBody({
     () => (
       <>
         <ChatLauncherButton />
-        {!isCash ? (
-          <Button
-            variant="outline"
-            size="icon"
-            className="size-9 rounded-full"
-            aria-label="Opciones de la institución"
-            onClick={openMenu}
-          >
-            <MoreVerticalIcon className="size-4.5" />
-          </Button>
-        ) : null}
+        <Button
+          variant="outline"
+          size="icon"
+          className="size-9 rounded-full"
+          aria-label="Opciones de la institución"
+          onClick={openMenu}
+        >
+          <MoreVerticalIcon className="size-4.5" />
+        </Button>
       </>
     ),
-    [openMenu, isCash]
+    [openMenu]
   )
 
   usePageHeader(
@@ -358,7 +356,10 @@ function InstitutionDetailScreenBody({
     cards: stackItem?.kind === "institution" ? stackItem.cards : [],
     loans: stackItem?.kind === "institution" ? stackItem.loans : [],
   }
-  const cash = stackItem?.kind === "institution" ? stackItem.cash : null
+  const cashLoans = (loansQuery.data ?? []).filter(
+    (loan) => loan.institutionId === null
+  )
+  const heroCounts = isCash ? { ...counts, loans: cashLoans.length } : counts
   const balanceText = stackItem
     ? formatStackItemBalance(stackItem, moneyDisplay)
     : INCOMPLETE_BALANCE_TEXT
@@ -382,6 +383,7 @@ function InstitutionDetailScreenBody({
   )
 
   const options = buildInstitutionOptions({
+    isCash,
     linkedMailboxEmail: linkedMailbox?.emailAddress ?? null,
     hasLinkedSource: Boolean(linkedSource),
     emailSyncEnabled,
@@ -440,7 +442,7 @@ function InstitutionDetailScreenBody({
           institution={institution}
           accent={accent}
           isCash={isCash}
-          counts={counts}
+          counts={heroCounts}
           balanceText={balanceText}
           balanceLines={balanceLines}
           incompleteCardName={incompleteCard?.name ?? null}
@@ -486,7 +488,7 @@ function InstitutionDetailScreenBody({
           onTabChange={setTab}
           institution={institution}
           isCash={isCash}
-          cash={cash}
+          cashLoans={cashLoans}
           products={products}
           allAccounts={accounts}
           display={display}

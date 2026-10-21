@@ -64,14 +64,14 @@ export function InstitutionDetailHero({
                   count={counts.cards}
                   label="Tarjetas"
                 />
-                <span className="h-4 w-px bg-white/40" />
-                <ProductCountItem
-                  icon={HandCoinsIcon}
-                  count={counts.loans}
-                  label="Préstamos"
-                />
               </>
             ) : null}
+            <span className="h-4 w-px bg-white/40" />
+            <ProductCountItem
+              icon={HandCoinsIcon}
+              count={counts.loans}
+              label="Préstamos"
+            />
           </div>
         </div>
       </div>

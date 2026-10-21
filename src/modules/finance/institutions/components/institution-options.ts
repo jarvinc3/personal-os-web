@@ -24,6 +24,7 @@ type InstitutionOptionActions = {
 }
 
 type InstitutionOptionsInput = {
+  isCash: boolean
   linkedMailboxEmail: string | null
   hasLinkedSource: boolean
   emailSyncEnabled: boolean
@@ -33,6 +34,7 @@ type InstitutionOptionsInput = {
 }
 
 export function buildInstitutionOptions({
+  isCash,
   linkedMailboxEmail,
   hasLinkedSource,
   emailSyncEnabled,
@@ -40,6 +42,17 @@ export function buildInstitutionOptions({
   busy,
   actions,
 }: InstitutionOptionsInput): RecordOption[] {
+  if (isCash) {
+    return [
+      {
+        id: "new-account",
+        title: "Nueva cuenta",
+        icon: LandmarkIcon,
+        onPress: actions.onNewAccount,
+      },
+    ]
+  }
+
   const linkMailboxOption: RecordOption = {
     id: "link-mailbox",
     title: "Vincular correo",
