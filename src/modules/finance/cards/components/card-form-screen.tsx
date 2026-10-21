@@ -274,29 +274,30 @@ export function CardFormScreen({
 
         {!isEdit && cardType === "CREDIT" ? (
           <CardBalancesSection
-            control={control}
-            errors={errors}
-            rows={balanceFields}
-            balances={watchedBalances ?? []}
-            defaultCurrency={defaultCurrency}
-            canAddCurrency={canAddCurrency}
-            onRemoveRow={removeBalance}
-            onAddCurrency={() =>
-              appendBalance(
-                emptyBalanceRow(
-                  nextUnusedCurrency(
-                    (watchedBalances ?? []).map((row) => row.currency),
-                    defaultCurrency,
-                    financeConfig.trackedCurrencies
-                  )
-                )
-              )
-            }
-            onOpenCurrency={(index) => {
-              setCurrencyRowIndex(index)
-              openPicker("currency")
+            form={{ control, errors, onTrigger: trigger }}
+            balances={{
+              rows: balanceFields,
+              values: watchedBalances ?? [],
+              defaultCurrency,
             }}
-            onTrigger={trigger}
+            canAddCurrency={canAddCurrency}
+            actions={{
+              onRemoveRow: removeBalance,
+              onAddCurrency: () =>
+                appendBalance(
+                  emptyBalanceRow(
+                    nextUnusedCurrency(
+                      (watchedBalances ?? []).map((row) => row.currency),
+                      defaultCurrency,
+                      financeConfig.trackedCurrencies
+                    )
+                  )
+                ),
+              onOpenCurrency: (index) => {
+                setCurrencyRowIndex(index)
+                openPicker("currency")
+              },
+            }}
           />
         ) : null}
 

@@ -12,12 +12,7 @@ import {
   Trash2Icon,
 } from "lucide-react"
 
-type InstitutionOptionsInput = {
-  linkedMailboxEmail: string | null
-  hasLinkedSource: boolean
-  emailSyncEnabled: boolean
-  syncPending: boolean
-  busy: boolean
+type InstitutionOptionActions = {
   onEdit: () => void
   onNewAccount: () => void
   onNewCard: () => void
@@ -28,20 +23,22 @@ type InstitutionOptionsInput = {
   onDelete: () => void
 }
 
+type InstitutionOptionsInput = {
+  linkedMailboxEmail: string | null
+  hasLinkedSource: boolean
+  emailSyncEnabled: boolean
+  syncPending: boolean
+  busy: boolean
+  actions: InstitutionOptionActions
+}
+
 export function buildInstitutionOptions({
   linkedMailboxEmail,
   hasLinkedSource,
   emailSyncEnabled,
   syncPending,
   busy,
-  onEdit,
-  onNewAccount,
-  onNewCard,
-  onNewLoan,
-  onLinkMailbox,
-  onSyncMailbox,
-  onArchive,
-  onDelete,
+  actions,
 }: InstitutionOptionsInput): RecordOption[] {
   const linkMailboxOption: RecordOption = {
     id: "link-mailbox",
@@ -52,7 +49,7 @@ export function buildInstitutionOptions({
     icon: MailIcon,
     disabled: Boolean(linkedMailboxEmail),
     showChevron: !linkedMailboxEmail,
-    onPress: onLinkMailbox,
+    onPress: actions.onLinkMailbox,
   }
 
   const syncMailboxOption: RecordOption = {
@@ -64,7 +61,7 @@ export function buildInstitutionOptions({
     icon: RefreshCwIcon,
     disabled: !emailSyncEnabled || syncPending,
     showChevron: false,
-    onPress: onSyncMailbox,
+    onPress: actions.onSyncMailbox,
   }
 
   return [
@@ -72,25 +69,25 @@ export function buildInstitutionOptions({
       id: "edit",
       title: "Editar institución",
       icon: PencilIcon,
-      onPress: onEdit,
+      onPress: actions.onEdit,
     },
     {
       id: "new-account",
       title: "Nueva cuenta",
       icon: LandmarkIcon,
-      onPress: onNewAccount,
+      onPress: actions.onNewAccount,
     },
     {
       id: "new-card",
       title: "Nueva tarjeta",
       icon: CreditCardIcon,
-      onPress: onNewCard,
+      onPress: actions.onNewCard,
     },
     {
       id: "new-loan",
       title: "Nuevo préstamo",
       icon: HandCoinsIcon,
-      onPress: onNewLoan,
+      onPress: actions.onNewLoan,
     },
     linkMailboxOption,
     ...(hasLinkedSource ? [syncMailboxOption] : []),
@@ -99,7 +96,7 @@ export function buildInstitutionOptions({
       title: "Archivar",
       icon: ArchiveIcon,
       disabled: busy,
-      onPress: onArchive,
+      onPress: actions.onArchive,
     },
     {
       id: "delete",
@@ -107,7 +104,7 @@ export function buildInstitutionOptions({
       icon: Trash2Icon,
       destructive: true,
       disabled: busy,
-      onPress: onDelete,
+      onPress: actions.onDelete,
     },
   ]
 }

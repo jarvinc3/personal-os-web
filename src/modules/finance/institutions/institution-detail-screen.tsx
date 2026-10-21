@@ -344,26 +344,28 @@ function InstitutionDetailScreenBody({
     emailSyncEnabled,
     syncPending,
     busy: isBusy,
-    onEdit: () =>
-      router.push(APP_ROUTES.app.financeInstitutionEdit(institutionId)),
-    onNewAccount: () => setOpenAccountSheet(true, null),
-    onNewCard: () =>
-      router.push(
-        `${APP_ROUTES.app.financeCardNew}?institutionId=${institutionId}`
-      ),
-    onNewLoan: () =>
-      router.push(
-        `${APP_ROUTES.app.financeLoanNew}?institutionId=${institutionId}`
-      ),
-    onLinkMailbox: () => setOpenLinkSheet(true),
-    onSyncMailbox: () => {
-      if (!linkedSource) {
-        return
-      }
-      void runSync(linkedSource.id)
+    actions: {
+      onEdit: () =>
+        router.push(APP_ROUTES.app.financeInstitutionEdit(institutionId)),
+      onNewAccount: () => setOpenAccountSheet(true, null),
+      onNewCard: () =>
+        router.push(
+          `${APP_ROUTES.app.financeCardNew}?institutionId=${institutionId}`
+        ),
+      onNewLoan: () =>
+        router.push(
+          `${APP_ROUTES.app.financeLoanNew}?institutionId=${institutionId}`
+        ),
+      onLinkMailbox: () => setOpenLinkSheet(true),
+      onSyncMailbox: () => {
+        if (!linkedSource) {
+          return
+        }
+        void runSync(linkedSource.id)
+      },
+      onArchive: () => setArchiveConfirmOpen(true),
+      onDelete: () => setConfirmOpen(true),
     },
-    onArchive: () => setArchiveConfirmOpen(true),
-    onDelete: () => setConfirmOpen(true),
   })
 
   return (

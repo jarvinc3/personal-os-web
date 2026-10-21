@@ -34,7 +34,7 @@ import { parseFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
 import type { FinanceTransaction } from "@/src/modules/finance/shared/types/entities"
 import { TransactionAmountField } from "@/src/modules/finance/transactions/components/transaction-amount-field"
-import { TransactionDateStatusField } from "@/src/modules/finance/transactions/components/transaction-date-status-field"
+import { LedgerDateStatusField } from "@/src/modules/finance/transactions/components/ledger-date-status-field"
 import { TransactionDestinationField } from "@/src/modules/finance/transactions/components/transaction-destination-field"
 import { TransactionDetailsSection } from "@/src/modules/finance/transactions/components/transaction-form-details"
 import {
@@ -492,12 +492,32 @@ export function TransactionForm({
             onOpen={() => openPicker("destination")}
           />
 
-          <TransactionDateStatusField
+          <Controller
             control={control}
-            errors={errors}
-            paidLabel={paidLabel}
-            statusSwitchId={statusSwitchId}
-            locked={locked}
+            name="transactionDate"
+            render={({ field }) => (
+              <Controller
+                control={control}
+                name="status"
+                render={({ field: statusField }) => (
+                  <LedgerDateStatusField
+                    date={{
+                      value: field.value,
+                      error: errors.transactionDate?.message,
+                      disabled: locked,
+                      onChange: field.onChange,
+                    }}
+                    status={{
+                      value: statusField.value,
+                      label: paidLabel,
+                      switchId: statusSwitchId,
+                      disabled: locked,
+                      onChange: statusField.onChange,
+                    }}
+                  />
+                )}
+              />
+            )}
           />
 
           <TransactionMerchantField

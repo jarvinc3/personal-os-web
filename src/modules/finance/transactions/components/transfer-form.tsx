@@ -304,10 +304,10 @@ export function TransferForm({
       } else {
         const createdTransfer = await createMutation.mutateAsync(payload.body)
         if (createdTransfer.suggestGoalId) {
-          showGoalSuggestion({
+          suggestGoalAllocation({
             goalId: createdTransfer.suggestGoalId,
             transferGroupId: createdTransfer.transferGroupId,
-            board: {
+            payment: {
               amount: values.amount,
               transactionDate: values.transactionDate,
             },
@@ -322,14 +322,14 @@ export function TransferForm({
     }
   })
 
-  function showGoalSuggestion({
+  function suggestGoalAllocation({
     goalId,
     transferGroupId,
-    board,
+    payment,
   }: {
     goalId: string
     transferGroupId: string
-    board: { amount: string; transactionDate: string }
+    payment: { amount: string; transactionDate: string }
   }) {
     appToast.success({
       text1: "Transferencia creada",
@@ -339,9 +339,9 @@ export function TransferForm({
         label: "Contar como aporte",
         onClick: () => {
           const allocation = buildSavingsGoalContributionBody({
-            amount: board.amount,
+            amount: payment.amount,
             kind: "CONTRIBUTION",
-            date: wallClockToIso(board.transactionDate, timeZone),
+            date: wallClockToIso(payment.transactionDate, timeZone),
             fromTransferGroupId: transferGroupId,
           })
           if (!allocation.ok) {
@@ -386,23 +386,26 @@ export function TransferForm({
         />
 
         <TransferImportSection
-          control={control}
-          errors={errors}
-          currency={currency}
-          defaultCurrency={defaultCurrency}
-          destinationCurrency={crossCurrency ? destinationCurrency : null}
-          sourceCurrency={sourceCurrency}
-          marketRate={marketRate}
-          receivedPreview={receivedPreview}
-          display={display}
+          form={{ control, errors }}
+          amount={{
+            currency,
+            defaultCurrency,
+            entryMode: amountEntry,
+            onEntryModeChange: setAmountEntry,
+            fieldRef: amountFieldRef,
+            onCommit: () => void trigger("amount"),
+            onCurrencyPress: () => openPicker("currency"),
+          }}
           statusSwitchId={statusSwitchId}
-          entryMode={amountEntry}
-          onEntryModeChange={setAmountEntry}
-          amountRef={amountFieldRef}
-          onAmountCommit={() => void trigger("amount")}
-          onCurrencyPress={() => openPicker("currency")}
-          onRateChange={() => setRateTouched(true)}
-          onReceivedCommit={() => void trigger("receivedAmount")}
+          fx={{
+            destinationCurrency: crossCurrency ? destinationCurrency : null,
+            sourceCurrency,
+            marketRate,
+            receivedPreview,
+            display,
+            onRateChange: () => setRateTouched(true),
+            onReceivedCommit: () => void trigger("receivedAmount"),
+          }}
         />
 
         <TransferDetailsSection

@@ -12,6 +12,12 @@ export type ReleaseNotesEntry = {
 
 export const RELEASE_NOTES: readonly ReleaseNotesEntry[] = [
   {
+    version: "0.49.4",
+    highlights: [
+      "Sin cambios visibles: los formularios de movimiento y de transferencia comparten internamente la fecha y su interruptor de estado.",
+    ],
+  },
+  {
     version: "0.49.3",
     highlights: [
       "El aviso de sobrepago de un cobro muestra el sobrante real y deja elegir a qué otro cobro va la diferencia.",

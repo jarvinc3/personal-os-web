@@ -15,30 +15,32 @@ import {
 type CardBalanceRow = { id: string }
 
 type CardBalancesSectionProps = {
-  control: Control<CardFormValues>
-  errors: FieldErrors<CardFormValues>
-  rows: CardBalanceRow[]
-  balances: NonNullable<CardFormValues["balances"]>
-  defaultCurrency: string
+  form: {
+    control: Control<CardFormValues>
+    errors: FieldErrors<CardFormValues>
+    onTrigger: UseFormTrigger<CardFormValues>
+  }
+  balances: {
+    rows: CardBalanceRow[]
+    values: NonNullable<CardFormValues["balances"]>
+    defaultCurrency: string
+  }
   canAddCurrency: boolean
-  onRemoveRow: (index: number) => void
-  onAddCurrency: () => void
-  onOpenCurrency: (index: number) => void
-  onTrigger: UseFormTrigger<CardFormValues>
+  actions: {
+    onRemoveRow: (index: number) => void
+    onAddCurrency: () => void
+    onOpenCurrency: (index: number) => void
+  }
 }
 
 export function CardBalancesSection({
-  control,
-  errors,
-  rows,
+  form,
   balances,
-  defaultCurrency,
   canAddCurrency,
-  onRemoveRow,
-  onAddCurrency,
-  onOpenCurrency,
-  onTrigger,
+  actions,
 }: CardBalancesSectionProps) {
+  const { control, errors, onTrigger } = form
+  const { rows, values, defaultCurrency } = balances
   return (
     <SummarySection title="Importe" icon={WalletIcon}>
       {rows.map((row, index) => (
@@ -57,8 +59,8 @@ export function CardBalancesSection({
                 }}
                 onAmountBlur={field.onBlur}
                 amountError={errors.balances?.[index]?.creditLimit?.message}
-                currency={balances[index]?.currency ?? defaultCurrency}
-                onCurrencyPress={() => onOpenCurrency(index)}
+                currency={values[index]?.currency ?? defaultCurrency}
+                onCurrencyPress={() => actions.onOpenCurrency(index)}
               />
             )}
           />
@@ -76,7 +78,7 @@ export function CardBalancesSection({
                 }}
                 onAmountBlur={field.onBlur}
                 amountError={errors.balances?.[index]?.balance?.message}
-                currency={balances[index]?.currency ?? defaultCurrency}
+                currency={values[index]?.currency ?? defaultCurrency}
               />
             )}
           />
@@ -84,7 +86,7 @@ export function CardBalancesSection({
             <Button
               type="button"
               variant="ghost"
-              onClick={() => onRemoveRow(index)}
+              onClick={() => actions.onRemoveRow(index)}
             >
               <TrashIcon className="size-4 shrink-0" />
               Quitar moneda
@@ -93,7 +95,7 @@ export function CardBalancesSection({
         </div>
       ))}
       {canAddCurrency ? (
-        <Button type="button" variant="outline" onClick={onAddCurrency}>
+        <Button type="button" variant="outline" onClick={actions.onAddCurrency}>
           <PlusIcon className="size-4 shrink-0" />
           Agregar moneda
         </Button>
