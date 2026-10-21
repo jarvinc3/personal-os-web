@@ -12,6 +12,14 @@ export type ReleaseNotesEntry = {
 
 export const RELEASE_NOTES: readonly ReleaseNotesEntry[] = [
   {
+    version: "0.47.4",
+    highlights: [
+      "En el formulario de una suscripción, la cuenta o la tarjeta se ve a simple vista. Si la dejas vacía, la app te avisa: los pagos que registres no moverán ningún saldo hasta que la asignes, y el detalle te deja hacerlo.",
+      "El historial de una cuenta y de una tarjeta marca los movimientos revertidos en gris con su etiqueta, y muestra si una transferencia entró o salió, con signo y color.",
+      "El reparto de una conciliación muestra los nombres en español (Impuesto DGII, Comisión, Otro) y el monto completo, sin cortar los decimales.",
+    ],
+  },
+  {
     version: "0.47.3",
     highlights: [
       "Sin cambios visibles: orden interno de la configuración de Finanzas para que sea más fácil de mantener.",

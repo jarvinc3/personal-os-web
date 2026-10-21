@@ -7,13 +7,18 @@ import {
   fetchAllTransactionPages,
   formatTransactionDate,
   mergeTransactionsById,
+  movementTouchesInstrument,
+  OPERATION_LEG_ROLE,
+  signedAmount,
   timelineMonthQuery,
   timelineMonthQueryKey,
   transactionInstrumentLabel,
   transactionsFromPayload,
   transferDirectionLabel,
+  transferSignFromInstrument,
   visibleTransactionTotals,
 } from "./transactions-query.ts"
+import type { FinanceTransaction } from "../types/entities.ts"
 import { FINANCE_TRANSACTIONS_QUERY_KEY } from "../types/api.ts"
 
 describe("buildTransactionsSearchParams", () => {
@@ -348,6 +353,148 @@ describe("mergeTransactionsById", () => {
     assert.deepEqual(
       merged.map((item) => item.id),
       ["a", "b", "c"]
+    )
+  })
+})
+
+const transfer: FinanceTransaction = {
+  id: "tx-1",
+  type: "DEBIT",
+  status: "CONFIRMED",
+  editable: "NONE",
+  amount: "100.00",
+  currency: "DOP",
+  ledgerAmount: "-100.00",
+  ledgerCurrency: "DOP",
+  amountBaseCurrency: "100.00",
+  exchangeRate: null,
+  accountId: "acc-a",
+  accountName: "Ahorros",
+  cardId: null,
+  cardName: null,
+  categoryId: null,
+  merchant: null,
+  notes: null,
+  source: null,
+  transactionDate: "2026-10-20T13:02:00.000Z",
+  description: null,
+  transferGroupId: "grp-1",
+  transferToAccountId: "acc-b",
+  transferToAccountName: "Corriente",
+  transferToCardId: null,
+  transferToCardName: null,
+  kind: "OPERATION",
+  operationType: "TRANSFER",
+  legs: [
+    {
+      ...({
+        id: "leg-out",
+        type: "DEBIT",
+        amount: "100.00",
+        accountId: "acc-a",
+        cardId: null,
+      } as FinanceTransaction),
+      legRole: OPERATION_LEG_ROLE.SOURCE,
+    },
+    {
+      ...({
+        id: "leg-in",
+        type: "CREDIT",
+        amount: "100.00",
+        accountId: "acc-b",
+        cardId: "card-b",
+      } as FinanceTransaction),
+      legRole: OPERATION_LEG_ROLE.DESTINATION,
+    },
+  ],
+}
+
+describe("transferSignFromInstrument", () => {
+  it("signs the source account negative and the destination positive", () => {
+    assert.equal(
+      transferSignFromInstrument(transfer, { accountId: "acc-a" }),
+      "−"
+    )
+    assert.equal(
+      transferSignFromInstrument(transfer, { accountId: "acc-b" }),
+      "+"
+    )
+  })
+
+  it("signs a card on the destination leg positive", () => {
+    assert.equal(
+      transferSignFromInstrument(transfer, { cardId: "card-b" }),
+      "+"
+    )
+  })
+
+  it("falls back to the row fields when the legs are missing", () => {
+    const withoutLegs = { ...transfer, legs: undefined }
+    assert.equal(
+      transferSignFromInstrument(withoutLegs, { accountId: "acc-a" }),
+      "−"
+    )
+    assert.equal(
+      transferSignFromInstrument(withoutLegs, { accountId: "acc-b" }),
+      "+"
+    )
+  })
+
+  it("returns no sign for an unrelated instrument", () => {
+    assert.equal(
+      transferSignFromInstrument(transfer, { accountId: "acc-z" }),
+      null
+    )
+  })
+})
+
+describe("movementTouchesInstrument", () => {
+  it("matches the origin, the destination and the legs", () => {
+    assert.equal(
+      movementTouchesInstrument(transfer, { accountId: "acc-a" }),
+      true
+    )
+    assert.equal(
+      movementTouchesInstrument(transfer, { accountId: "acc-b" }),
+      true
+    )
+    assert.equal(
+      movementTouchesInstrument(transfer, { cardId: "card-b" }),
+      true
+    )
+    assert.equal(
+      movementTouchesInstrument(transfer, { cardId: "card-z" }),
+      false
+    )
+  })
+})
+
+describe("signedAmount", () => {
+  const display = { currency: "DOP", showCents: true, compactNumbers: false }
+
+  it("signs a transfer from the side of the instrument", () => {
+    assert.match(
+      signedAmount({
+        transaction: transfer,
+        display,
+        instrument: { accountId: "acc-a" },
+      }),
+      /^− /
+    )
+    assert.match(
+      signedAmount({
+        transaction: transfer,
+        display,
+        instrument: { accountId: "acc-b" },
+      }),
+      /^\+ /
+    )
+  })
+
+  it("leaves a transfer unsigned when no instrument is given", () => {
+    assert.doesNotMatch(
+      signedAmount({ transaction: transfer, display }),
+      /^[+−] /
     )
   })
 })

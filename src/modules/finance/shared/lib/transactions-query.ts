@@ -151,6 +151,14 @@ export function transferDirectionLabel(
   return `${origin} → ${destination}`
 }
 
+export const OPERATION_LEG_ROLE = {
+  SOURCE: "SOURCE",
+  DESTINATION: "DESTINATION",
+  FEE: "FEE",
+} as const
+
+export type FinanceInstrumentRef = { accountId?: string; cardId?: string }
+
 export function movementSign(
   transaction: Pick<FinanceTransaction, "type" | "ledgerAmount">
 ): "+" | "−" | null {
@@ -170,23 +178,119 @@ export function movementSign(
   return null
 }
 
-export function signedAmount(
-  transaction: FinanceTransaction,
+export function signedAmount({
+  transaction,
+  display,
+  instrument,
+}: {
+  transaction: FinanceTransaction
   display: FinanceMoneyDisplay
-): string {
+  instrument?: FinanceInstrumentRef
+}): string {
   const parsed = parseFinanceMoney(transaction.amount)
   const formatted = formatFinanceMoney(
     parsed === null ? null : Math.abs(parsed),
     { ...display, currency: transaction.currency }
   )
-  if (isTransferTransaction(transaction)) {
-    return formatted
-  }
-  const sign = movementSign(transaction)
+  const sign = displayedMovementSign(transaction, instrument)
   if (!sign) {
     return formatted
   }
   return `${sign} ${formatted}`
+}
+
+/** Sign of a row: a transfer depends on the account or card it is read from. */
+export function displayedMovementSign(
+  transaction: FinanceTransaction,
+  instrument?: FinanceInstrumentRef
+): "+" | "−" | null {
+  if (!isTransferTransaction(transaction)) {
+    return movementSign(transaction)
+  }
+  if (!instrument) {
+    return null
+  }
+  return transferSignFromInstrument(transaction, instrument)
+}
+
+function legMatchesInstrument(
+  leg: FinanceTransaction,
+  instrument: FinanceInstrumentRef
+): boolean {
+  if (instrument.accountId) {
+    return leg.accountId === instrument.accountId
+  }
+  if (instrument.cardId) {
+    return leg.cardId === instrument.cardId
+  }
+  return false
+}
+
+/** True when the movement moves money into or out of that account or card. */
+export function movementTouchesInstrument(
+  transaction: FinanceTransaction,
+  instrument: FinanceInstrumentRef
+): boolean {
+  if (
+    instrument.accountId &&
+    (transaction.accountId === instrument.accountId ||
+      transaction.transferToAccountId === instrument.accountId)
+  ) {
+    return true
+  }
+  if (
+    instrument.cardId &&
+    (transaction.cardId === instrument.cardId ||
+      transaction.transferToCardId === instrument.cardId)
+  ) {
+    return true
+  }
+  return (transaction.legs ?? []).some((leg) =>
+    legMatchesInstrument(leg, instrument)
+  )
+}
+
+/** Sign of a transfer seen from one account or card: money out is negative. */
+export function transferSignFromInstrument(
+  transaction: FinanceTransaction,
+  instrument: FinanceInstrumentRef
+): "+" | "−" | null {
+  const legs = transaction.legs ?? []
+  if (
+    legs.some(
+      (leg) =>
+        leg.legRole === OPERATION_LEG_ROLE.SOURCE &&
+        legMatchesInstrument(leg, instrument)
+    )
+  ) {
+    return "−"
+  }
+  if (
+    legs.some(
+      (leg) =>
+        leg.legRole === OPERATION_LEG_ROLE.DESTINATION &&
+        legMatchesInstrument(leg, instrument)
+    )
+  ) {
+    return "+"
+  }
+  if (instrument.accountId) {
+    if (transaction.accountId === instrument.accountId) {
+      return "−"
+    }
+    if (transaction.transferToAccountId === instrument.accountId) {
+      return "+"
+    }
+  }
+  if (instrument.cardId) {
+    if (transaction.cardId === instrument.cardId) {
+      return "−"
+    }
+    if (transaction.transferToCardId === instrument.cardId) {
+      return "+"
+    }
+  }
+  return null
 }
 
 type TotalsSource = Pick<
@@ -220,7 +324,10 @@ export function visibleTransactionTotals(
   return items.reduce(
     (totals, item) => {
       for (const leg of item.legs ?? []) {
-        if (leg.legRole !== "FEE" || isInactiveTransactionStatus(leg.status)) {
+        if (
+          leg.legRole !== OPERATION_LEG_ROLE.FEE ||
+          isInactiveTransactionStatus(leg.status)
+        ) {
           continue
         }
         const fee = amountForTotals(leg, currency)

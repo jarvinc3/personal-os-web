@@ -246,9 +246,9 @@ function MerchantDetailBody({ merchantId }: { merchantId: string }) {
               description={formatFinanceDateTimeLabel(
                 transaction.transactionDate
               )}
-              value={signedAmount(transaction, {
-                ...display,
-                currency: transaction.currency,
+              value={signedAmount({
+                transaction,
+                display: { ...display, currency: transaction.currency },
               })}
               href={APP_ROUTES.app.financeTransaction(transaction.id)}
               isLast={index === movements.length - 1}

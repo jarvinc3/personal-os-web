@@ -3,6 +3,7 @@ import { describe, it } from "node:test"
 
 import { CATALOG_NONE } from "@/src/modules/finance/shared/constants/catalog"
 import {
+  hasPaymentMethodTarget,
   subscriptionFormSchema,
   subscriptionPayload,
   toSubscriptionFormValues,
@@ -103,6 +104,24 @@ describe("subscriptionPayload", () => {
     assert.equal(payload.manageUrl, null)
     assert.equal(payload.notes, null)
     assert.equal(payload.sourcePatternId, null)
+  })
+
+  it("reports whether the payments have a card or an account", () => {
+    assert.equal(
+      hasPaymentMethodTarget({ cardId: "card-1", accountId: CATALOG_NONE }),
+      true
+    )
+    assert.equal(
+      hasPaymentMethodTarget({ cardId: CATALOG_NONE, accountId: "acc-1" }),
+      true
+    )
+    assert.equal(
+      hasPaymentMethodTarget({
+        cardId: CATALOG_NONE,
+        accountId: CATALOG_NONE,
+      }),
+      false
+    )
   })
 
   it("keeps the source pattern when it came from a suggestion", () => {

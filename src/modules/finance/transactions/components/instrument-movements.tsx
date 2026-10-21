@@ -10,17 +10,11 @@ import { financeLoadErrorMessage } from "@/src/modules/finance/shared/lib/financ
 import { groupTransactionsByMonth } from "@/src/modules/finance/shared/lib/group-transactions-by-month"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
 import {
-  formatTransactionDate,
-  isTransferTransaction,
   mergeTransactionsById,
-  movementSign,
-  signedAmount,
+  movementTouchesInstrument,
 } from "@/src/modules/finance/shared/lib/transactions-query"
-import type {
-  FinanceCategory,
-  FinanceTransaction,
-  FinanceTransactionType,
-} from "@/src/modules/finance/shared/types/entities"
+import type { FinanceTransactionType } from "@/src/modules/finance/shared/types/entities"
+import { TransactionMovementRow } from "@/src/modules/finance/transactions/components/transaction-movement-row"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
 import { Button } from "@/src/shared/components/ui/button"
 import { Input } from "@/src/shared/components/ui/input"
@@ -32,7 +26,6 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
-import { SummaryItem } from "@/src/shared/components/ui/summary"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
 import {
@@ -42,7 +35,6 @@ import {
   CheckIcon,
   LayersIcon,
   PlusIcon,
-  ScaleIcon,
   SearchIcon,
   SlidersHorizontalIcon,
   XIcon,
@@ -73,31 +65,6 @@ type FinanceInstrumentMovementsProps = {
   emptyDescription: string
   onCreate: () => void
   createLabel: string
-}
-
-function transactionRowTitle(
-  transaction: FinanceTransaction,
-  category: FinanceCategory | undefined
-): string {
-  return (
-    category?.name?.trim() ||
-    transaction.merchantName ||
-    transaction.merchant ||
-    transaction.description ||
-    "Movimiento"
-  )
-}
-
-function transactionRowDetail(
-  transaction: FinanceTransaction,
-  category: FinanceCategory | undefined
-): string {
-  const date = formatTransactionDate(transaction.transactionDate)
-  const merchant = transaction.merchantName ?? transaction.merchant
-  if (!merchant || !category) {
-    return date
-  }
-  return `${merchant} · ${date}`
 }
 
 export function FinanceInstrumentMovements({
@@ -152,11 +119,6 @@ export function FinanceInstrumentMovements({
   const categories = useMemo(
     () => categoriesQuery.data ?? [],
     [categoriesQuery.data]
-  )
-  const categoryById = useMemo(
-    () =>
-      new Map(categories.map((category) => [category.id, category] as const)),
-    [categories]
   )
   const groups = useMemo(() => groupTransactionsByMonth(movements), [movements])
   const filtersActive = flow !== "ALL" || Boolean(dateFrom || dateTo)
@@ -243,69 +205,26 @@ export function FinanceInstrumentMovements({
             <p className="px-1 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
               {group.label}
             </p>
-            <div className="rounded-2xl border border-border bg-card">
-              {group.items.map((transaction, index) => {
-                const isTransfer = isTransferTransaction(transaction)
-                const category = transaction.categoryId
-                  ? categoryById.get(transaction.categoryId)
-                  : undefined
-                const parent = category?.parentId
-                  ? categoryById.get(category.parentId)
-                  : undefined
-                const icon = isTransfer
-                  ? undefined
-                  : category?.icon?.trim() || parent?.icon?.trim()
-                const color = isTransfer
-                  ? "#3B82F6"
-                  : category?.color?.trim() ||
-                    parent?.color?.trim() ||
-                    "#64748B"
-                return (
-                  <SummaryItem
-                    key={transaction.id}
-                    title={transactionRowTitle(transaction, category)}
-                    description={transactionRowDetail(transaction, category)}
-                    leading={
-                      icon ? (
-                        <span>{icon}</span>
-                      ) : isTransfer ? (
-                        <ArrowLeftRightIcon className="size-5 text-info" />
-                      ) : transaction.type === "DEBIT" ? (
-                        <ArrowDownLeftIcon className="size-5 text-destructive" />
-                      ) : transaction.type === "CREDIT" ? (
-                        <ArrowUpRightIcon className="size-5 text-success" />
-                      ) : transaction.type === "ADJUSTMENT" ? (
-                        <ScaleIcon
-                          className={cn(
-                            "size-5",
-                            movementSign(transaction) === "−"
-                              ? "text-destructive"
-                              : "text-success"
-                          )}
-                        />
-                      ) : null
-                    }
-                    accentColor={color}
-                    value={
-                      <span
-                        className={cn(
-                          !isTransfer &&
-                            movementSign(transaction) === "−" &&
-                            "text-destructive",
-                          !isTransfer &&
-                            movementSign(transaction) === "+" &&
-                            "text-success"
-                        )}
-                      >
-                        {signedAmount(transaction, display)}
-                      </span>
-                    }
-                    showChevron={false}
+            <div className="overflow-hidden rounded-2xl border border-border">
+              {group.items.map((transaction, index) => (
+                <div
+                  key={transaction.id}
+                  className={cn(
+                    index !== group.items.length - 1 &&
+                      "border-b border-border/60"
+                  )}
+                >
+                  <TransactionMovementRow
+                    transaction={transaction}
+                    categories={categories}
+                    display={display}
+                    instrument={sources.find((source) =>
+                      movementTouchesInstrument(transaction, source)
+                    )}
                     href={APP_ROUTES.app.financeTransaction(transaction.id)}
-                    isLast={index === group.items.length - 1}
                   />
-                )
-              })}
+                </div>
+              ))}
             </div>
           </section>
         ))}

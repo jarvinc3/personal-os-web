@@ -89,7 +89,7 @@ function ReversalLeg({ leg, roleLabel, display, isLast }: ReversalLegProps) {
         <span
           className={cn(isInactive && "text-muted-foreground line-through")}
         >
-          {signedAmount(leg, display)}
+          {signedAmount({ transaction: leg, display })}
         </span>
       }
       href={APP_ROUTES.app.financeTransaction(leg.id)}

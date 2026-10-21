@@ -260,56 +260,56 @@ export function ReconciliationSheet({
             .
           </p>
           {lines.map((line, index) => (
-            <div key={index} className="flex items-end gap-2 px-1">
-              <div className="flex-1">
-                <Select
-                  value={line.kind}
-                  onValueChange={(value) =>
-                    updateLine(index, {
-                      kind: value as FinanceReconciliationKind,
-                    })
-                  }
-                >
-                  <SelectTrigger className="relative w-full cursor-pointer pl-9">
-                    <TagsIcon className="pointer-events-none absolute left-3 size-4.5 text-muted-foreground" />
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {FINANCE_RECONCILIATION_KINDS.map((kind) => (
-                      <SelectItem key={kind} value={kind}>
-                        {FINANCE_RECONCILIATION_KIND_LABEL[kind]}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+            <div key={index} className="flex flex-col gap-2 px-1">
+              <div className="flex items-center gap-2">
+                <div className="min-w-0 flex-1">
+                  <Select
+                    value={line.kind}
+                    onValueChange={(value) =>
+                      updateLine(index, {
+                        kind: value as FinanceReconciliationKind,
+                      })
+                    }
+                    items={FINANCE_RECONCILIATION_KINDS.map((kind) => ({
+                      value: kind,
+                      label: FINANCE_RECONCILIATION_KIND_LABEL[kind],
+                    }))}
+                  >
+                    <SelectTrigger className="relative w-full cursor-pointer pl-9">
+                      <TagsIcon className="pointer-events-none absolute left-3 size-4.5 text-muted-foreground" />
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {FINANCE_RECONCILIATION_KINDS.map((kind) => (
+                        <SelectItem key={kind} value={kind}>
+                          {FINANCE_RECONCILIATION_KIND_LABEL[kind]}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                {lines.length > 1 ? (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    aria-label="Quitar línea"
+                    onClick={() =>
+                      setEditedLines(
+                        lines.filter((_, position) => position !== index)
+                      )
+                    }
+                  >
+                    <Trash2Icon className="size-4" />
+                  </Button>
+                ) : null}
               </div>
-              <div className="flex-1">
-                <FinanceMoneyField
-                  label="Monto"
-                  amount={line.amount}
-                  onAmountChange={(value) =>
-                    updateLine(index, { amount: value })
-                  }
-                  onAmountCommit={(value) =>
-                    updateLine(index, { amount: value })
-                  }
-                  currency={target.currency}
-                />
-              </div>
-              {lines.length > 1 ? (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  aria-label="Quitar línea"
-                  onClick={() =>
-                    setEditedLines(
-                      lines.filter((_, position) => position !== index)
-                    )
-                  }
-                >
-                  <Trash2Icon className="size-4" />
-                </Button>
-              ) : null}
+              <FinanceMoneyField
+                label="Monto"
+                amount={line.amount}
+                onAmountChange={(value) => updateLine(index, { amount: value })}
+                onAmountCommit={(value) => updateLine(index, { amount: value })}
+                currency={target.currency}
+              />
             </div>
           ))}
           <Button

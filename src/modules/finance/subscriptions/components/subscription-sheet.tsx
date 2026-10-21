@@ -2,6 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
+  CircleAlertIcon,
   InfoIcon,
   LinkIcon,
   RepeatIcon,
@@ -45,6 +46,7 @@ import {
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
 import {
   BILLING_CYCLE_OPTIONS,
+  hasPaymentMethodTarget,
   subscriptionFormSchema,
   subscriptionPayload,
   toSubscriptionFormValues,
@@ -136,6 +138,7 @@ export function SubscriptionSheet({
       : accountId !== CATALOG_NONE
         ? encodeLedgerTarget("account", accountId)
         : CATALOG_NONE
+  const hasPaymentMethod = hasPaymentMethodTarget({ cardId, accountId })
   const logoUrl =
     brandPreviewUrl(domain) ??
     (subscription?.domain === domain ? subscription?.logoUrl : null)
@@ -154,10 +157,22 @@ export function SubscriptionSheet({
           id: subscription.id,
           body: subscriptionPayload(values),
         })
-        appToast.success({ text1: "Suscripción actualizada" })
       } else {
         await createMutation.mutateAsync(subscriptionPayload(values))
-        appToast.success({ text1: "Suscripción creada" })
+      }
+      if (hasPaymentMethodTarget(values)) {
+        appToast.success({
+          text1: subscription
+            ? "Suscripción actualizada"
+            : "Suscripción creada",
+        })
+      } else {
+        appToast.warning({
+          text1: subscription
+            ? "Guardada sin método de pago"
+            : "Creada sin método de pago",
+          text2: "Registrar un pago no moverá ningún saldo.",
+        })
       }
       onOpenChange(false)
     } catch (error) {
@@ -284,6 +299,27 @@ export function SubscriptionSheet({
               />
             )}
           />
+          <div className="flex flex-col gap-1">
+            <Field className="gap-1">
+              <FieldLabel className="text-sm text-muted-foreground">
+                Cuenta o tarjeta
+              </FieldLabel>
+              <DestinationTrigger
+                destination={destination}
+                accounts={accounts}
+                cards={cards}
+                display={display}
+                disabled={isPending}
+                onClick={() => openPicker("destination")}
+              />
+            </Field>
+            {hasPaymentMethod ? null : (
+              <p className="flex items-start gap-1.5 text-xs text-amber-600 dark:text-amber-500">
+                <CircleAlertIcon className="mt-px size-3.5 shrink-0" />
+                Sin método de pago: registrar un pago no moverá ningún saldo.
+              </p>
+            )}
+          </div>
         </SummarySection>
 
         <SummarySection
@@ -304,19 +340,6 @@ export function SubscriptionSheet({
               />
             )}
           />
-          <Field className="gap-1">
-            <FieldLabel className="text-sm text-muted-foreground">
-              Cuenta o tarjeta
-            </FieldLabel>
-            <DestinationTrigger
-              destination={destination}
-              accounts={accounts}
-              cards={cards}
-              display={display}
-              disabled={isPending}
-              onClick={() => openPicker("destination")}
-            />
-          </Field>
           <Field className="gap-1">
             <FieldLabel className="text-sm text-muted-foreground">
               Categoría

@@ -44,6 +44,12 @@ import { formatPlanningDate } from "@/src/modules/finance/shared/lib/planning-li
 import type { FinanceSubscriptionPaymentSource } from "@/src/modules/finance/shared/types/entities"
 import { LoadingView } from "@/src/shared/components/layout/loading-view"
 import {
+  Alert,
+  AlertAction,
+  AlertDescription,
+  AlertTitle,
+} from "@/src/shared/components/ui/alert"
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -76,6 +82,7 @@ import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { appToast } from "@/src/shared/lib/app-toast"
 import {
   BanknoteArrowDownIcon,
+  CircleAlertIcon,
   ExternalLinkIcon,
   HandCoinsIcon,
   LineChartIcon,
@@ -254,6 +261,26 @@ function SubscriptionDetailBody({
           <span>Desde {billingMonthLabel(subscription.createdAt)}</span>
         </div>
 
+        {subscription.paymentMethod ? null : (
+          <Alert variant="destructive">
+            <CircleAlertIcon />
+            <AlertTitle>Sin método de pago</AlertTitle>
+            <AlertDescription>
+              Los pagos de esta suscripción no afectan ningún saldo.
+            </AlertDescription>
+            <AlertAction>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={() => setEditOpen(true)}
+              >
+                Asignar
+              </Button>
+            </AlertAction>
+          </Alert>
+        )}
+
         <Tabs
           className="flex w-full flex-col gap-4"
           value={tab}
@@ -321,7 +348,7 @@ function SubscriptionDetailBody({
                             ? ` ••${subscription.paymentMethod.last4}`
                             : ""
                         }`
-                      : "Sin método"
+                      : "Sin método de pago"
                   }
                 />
                 <SummaryItem
