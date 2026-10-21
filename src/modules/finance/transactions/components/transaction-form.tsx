@@ -39,6 +39,7 @@ import {
   encodeLedgerTarget,
   splitLedgerTarget,
 } from "@/src/modules/finance/shared/lib/ledger-payloads"
+import { parseFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
 import type { FinanceTransaction } from "@/src/modules/finance/shared/types/entities"
 import {
@@ -202,7 +203,6 @@ export function TransactionForm({
     isEdit ? "done" : "category"
   )
   const amountFieldRef = useRef<FinanceMoneyFieldHandle>(null)
-  const guidedCategoryOpened = useRef(false)
   const guidedDestinationOpened = useRef(false)
 
   const {
@@ -363,14 +363,6 @@ export function TransactionForm({
   ])
 
   useEffect(() => {
-    if (isEdit || guidedStep !== "category" || guidedCategoryOpened.current) {
-      return
-    }
-    guidedCategoryOpened.current = true
-    openPicker("category")
-  }, [isEdit, guidedStep, openPicker])
-
-  useEffect(() => {
     if (
       isEdit ||
       guidedStep !== "destination" ||
@@ -390,8 +382,13 @@ export function TransactionForm({
     window.setTimeout(() => amountFieldRef.current?.focusAmount(), 0)
   }
 
+  /** The amount is the step that sends the form to the destination. */
   function advanceToDestination() {
-    if (isEdit || guidedStep !== "amount") {
+    if (isEdit) {
+      return
+    }
+    const amount = parseFinanceMoney(getValues("amount"))
+    if (amount === null || amount <= 0) {
       return
     }
     setGuidedStep("destination")

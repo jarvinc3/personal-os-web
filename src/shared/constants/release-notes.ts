@@ -12,6 +12,13 @@ export type ReleaseNotesEntry = {
 
 export const RELEASE_NOTES: readonly ReleaseNotesEntry[] = [
   {
+    version: "0.49.1",
+    highlights: [
+      "El formulario de Gasto abre completo: la categoría se elige cuando la tocas y el campo Comercio queda a la vista.",
+      "Si pasas una cuenta a Efectivo, la institución queda en Efectivo sin perder lo demás que escribiste.",
+    ],
+  },
+  {
     version: "0.49.0",
     highlights: [
       "Ya puedes elegir tu zona horaria en Ajustes, Cuenta, Zona horaria; la primera vez se toma del navegador.",
