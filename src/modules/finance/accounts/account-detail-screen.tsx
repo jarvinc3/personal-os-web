@@ -72,7 +72,7 @@ import {
   Trash2Icon,
   WalletIcon,
 } from "lucide-react"
-import { useRouter } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { useState } from "react"
 import { Label } from "@/src/shared/components/ui/label"
 
@@ -92,6 +92,7 @@ export function AccountDetailScreen({ accountId }: AccountDetailScreenProps) {
 
 function AccountDetailScreenBody({ accountId }: AccountDetailScreenProps) {
   const router = useRouter()
+  const pathname = usePathname()
   const { isEnabled, config } = useFinanceEnabled()
   const display = {
     currency: config.baseCurrency,
@@ -363,7 +364,8 @@ function AccountDetailScreenBody({ accountId }: AccountDetailScreenProps) {
             router.push(
               financeTransactionNewHref(
                 "DEBIT",
-                encodeLedgerTarget("account", account.id)
+                encodeLedgerTarget("account", account.id),
+                pathname
               )
             )
           }

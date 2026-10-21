@@ -78,14 +78,30 @@ export const APP_ROUTES = {
 
 export function financeTransactionNewHref(
   type: "DEBIT" | "CREDIT",
-  destination?: string
+  destination?: string,
+  returnTo?: string
 ): string {
   const params = new URLSearchParams({ type })
   const target = destination?.trim()
   if (target) {
     params.set("destination", target)
   }
+  const back = internalReturnPath(returnTo)
+  if (back) {
+    params.set("returnTo", back)
+  }
   return `${APP_ROUTES.app.financeTransactionNew}?${params.toString()}`
+}
+
+/** Same-origin path accepted as "return here" after an action, or null. */
+export function internalReturnPath(
+  value: string | null | undefined
+): string | null {
+  const path = value?.trim() ?? ""
+  if (!path.startsWith("/") || path.startsWith("//")) {
+    return null
+  }
+  return path
 }
 
 const FINANCE_TRANSFER_FORM_TYPE = "TRANSFER"

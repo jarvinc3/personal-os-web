@@ -111,14 +111,24 @@ function SavingsGoalDetailScreenBody({
   )
   const money = { ...display, currency: goal?.currency ?? display.currency }
   const accent = ACCENT_FALLBACK_COLOR
-  const progress = Math.min(
-    100,
-    Math.max(0, amountRatioPct(goal?.currentAmount, goal?.targetAmount) ?? 0)
+  const progress = Math.max(
+    0,
+    amountRatioPct(goal?.currentAmount, goal?.targetAmount) ?? 0
   )
   const remaining = goal
     ? (parseFinanceMoney(goal.targetAmount) ?? 0) -
       (parseFinanceMoney(goal.currentAmount) ?? 0)
     : null
+  const surplus = remaining !== null && remaining < 0 ? -remaining : null
+  const targetDateCaption = goal?.targetDate
+    ? ` · meta al ${formatPlanningDate(goal.targetDate)}`
+    : ""
+  let footnote: string | undefined
+  if (surplus !== null) {
+    footnote = `Excedente ${formatFinanceMoney(surplus, money)}${targetDateCaption}`
+  } else if (remaining !== null && remaining > 0) {
+    footnote = `Faltan ${formatFinanceMoney(remaining, money)}${targetDateCaption}`
+  }
   const [pendingContributionId, setPendingContributionId] = useState<
     string | null
   >(null)
@@ -246,15 +256,7 @@ function SavingsGoalDetailScreenBody({
         progress={progress}
         startCaption={`${Math.round(progress)}% de la meta`}
         endCaption={`Meta ${formatFinanceMoney(goal.targetAmount, money)}`}
-        footnote={
-          remaining !== null && remaining > 0
-            ? `Faltan ${formatFinanceMoney(remaining, money)}${
-                goal.targetDate
-                  ? ` · meta al ${formatPlanningDate(goal.targetDate)}`
-                  : ""
-              }`
-            : undefined
-        }
+        footnote={footnote}
       />
 
       <div className="mx-4 flex flex-col gap-3 rounded-3xl bg-background">

@@ -70,7 +70,7 @@ import {
   ScaleIcon,
   Trash2Icon,
 } from "lucide-react"
-import { useRouter } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { useState } from "react"
 
 type CardDetailScreenProps = {
@@ -94,6 +94,7 @@ export function CardDetailScreen({ cardId }: CardDetailScreenProps) {
 
 function CardDetailScreenBody({ cardId }: CardDetailScreenProps) {
   const router = useRouter()
+  const pathname = usePathname()
   const { isEnabled, config } = useFinanceEnabled()
   const display = {
     currency: config.baseCurrency,
@@ -256,7 +257,8 @@ function CardDetailScreenBody({ cardId }: CardDetailScreenProps) {
         router.push(
           financeTransactionNewHref(
             "DEBIT",
-            encodeLedgerTarget("card", card.id)
+            encodeLedgerTarget("card", card.id),
+            pathname
           )
         )
       }

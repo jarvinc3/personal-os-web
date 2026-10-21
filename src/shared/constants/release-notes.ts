@@ -12,6 +12,13 @@ export type ReleaseNotesEntry = {
 
 export const RELEASE_NOTES: readonly ReleaseNotesEntry[] = [
   {
+    version: "0.47.5",
+    highlights: [
+      "Al guardar un gasto o un ingreso vuelves a Movimientos con el movimiento que acabas de registrar. Si abriste el formulario desde una cuenta o una tarjeta, vuelves a esa pantalla con el movimiento en su historial.",
+      "Una meta de ahorro que pasa de su objetivo muestra el avance real y cuánto es el excedente. Al registrar un aporte que se pasa de la meta, la app te avisa antes de guardarlo.",
+    ],
+  },
+  {
     version: "0.47.4",
     highlights: [
       "En el formulario de una suscripción, la cuenta o la tarjeta se ve a simple vista. Si la dejas vacía, la app te avisa: los pagos que registres no moverán ningún saldo hasta que la asignes, y el detalle te deja hacerlo.",

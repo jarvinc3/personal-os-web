@@ -34,6 +34,7 @@ import { appToast } from "@/src/shared/lib/app-toast"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
+  CircleAlertIcon,
   NotebookPenIcon,
   PiggyBankIcon,
   SparklesIcon,
@@ -41,7 +42,7 @@ import {
   XIcon,
 } from "lucide-react"
 import { useEffect, useMemo } from "react"
-import { Controller, useForm } from "react-hook-form"
+import { Controller, useForm, useWatch } from "react-hook-form"
 import {
   savingsGoalContributionSchema,
   type SavingsGoalContributionFormValues,
@@ -137,6 +138,13 @@ export function SavingsGoalContributionSheet({
   const target = parseFinanceMoney(targetAmount)
   const saved = parseFinanceMoney(currentAmount)
   const remaining = target !== null && saved !== null ? target - saved : null
+  const typedAmount = useWatch({ control, name: "amount" })
+  const projectedAmount =
+    saved !== null ? saved + (parseFinanceMoney(typedAmount) ?? 0) : null
+  const surplusAfterContribution =
+    target !== null && projectedAmount !== null && projectedAmount > target
+      ? projectedAmount - target
+      : null
   const suggestion = monthlySavingsSuggestion({
     targetAmount,
     currentAmount,
@@ -231,6 +239,14 @@ export function SavingsGoalContributionSheet({
               />
             )}
           />
+          {surplusAfterContribution !== null ? (
+            <p className="flex items-start gap-1.5 text-xs text-amber-600 dark:text-amber-500">
+              <CircleAlertIcon className="mt-px size-3.5 shrink-0" />
+              Este aporte deja{" "}
+              {formatFinanceMoney(surplusAfterContribution, display)} por encima
+              de la meta.
+            </p>
+          ) : null}
           {remaining !== null && remaining > 0 ? (
             <div className="flex flex-wrap gap-2">
               {suggestion ? (
