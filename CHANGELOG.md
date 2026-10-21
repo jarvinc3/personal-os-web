@@ -2,6 +2,16 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.50.0] - 2026-10-21
+
+### Agregado
+
+- Cobros muestra arriba de la lista el total pendiente y el cobrado de cada moneda; se recalculan al crear o registrar un cobro y una moneda sin cobros no aparece (#191).
+
+### Corregido
+
+- Guardar el perfil cierra la hoja de inmediato y el nombre o el avatar se ven al instante: el PATCH sigue en segundo plano y, si falla, vuelve el valor anterior con un aviso (#168).
+
 ## [0.49.6] - 2026-10-21
 
 ### Corregido
