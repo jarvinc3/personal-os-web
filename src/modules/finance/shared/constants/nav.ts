@@ -28,6 +28,7 @@ export const FINANCE_NAV_ITEMS: ModuleNavItem[] = [
       APP_ROUTES.app.financeBankCharges,
       APP_ROUTES.app.financeMerchants,
       APP_ROUTES.app.financeRecycleBin,
+      APP_ROUTES.app.financeWealth,
     ],
   },
 ]

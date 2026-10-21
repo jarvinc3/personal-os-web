@@ -36,6 +36,7 @@ export const APP_ROUTES = {
     financeOverview: "/finance/overview",
     financeStatistics: "/finance/statistics",
     financeProducts: "/finance/products",
+    financeWealth: "/finance/wealth",
     financeInstitutions: FINANCE_INSTITUTIONS_PATH,
     financeCash: FINANCE_CASH_PATH,
     financeCategories: "/finance/categories",

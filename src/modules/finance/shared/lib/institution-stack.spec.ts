@@ -319,4 +319,92 @@ describe("cash institution balance", () => {
       "Balance incompleto"
     )
   })
+
+  it("marks an institution with an open drift and a pending reconciliation", () => {
+    const items = buildInstitutionStackItems({
+      institutions: [
+        {
+          id: "i1",
+          name: "Banco Popular",
+          color: "#1B4332",
+          logoUrl: null,
+          country: "DO",
+          isActive: true,
+        },
+      ],
+      accounts: [account({ id: "a1", name: "Ahorros", institutionId: "i1" })],
+      cards: [card({ id: "c1", name: "Visa", institutionId: "i1" })],
+      loans: [],
+      positions: [
+        {
+          institutionId: "i1",
+          status: "COMPLETE",
+          netWorth: "0",
+          totalAssets: "0",
+          totalLiabilities: "0",
+          issues: [],
+        },
+      ],
+      drifts: [
+        {
+          id: "drift-1",
+          accountId: "a1",
+          cardId: null,
+          currency: "DOP",
+          name: "Ahorros",
+          storedBalance: "100",
+          expectedBalance: "90",
+          difference: "-10",
+          detectedAt: "2026-10-20T04:00:00.000Z",
+          resolvedAt: null,
+        },
+      ],
+      reconciliationItems: [
+        {
+          key: "card:c1:DOP",
+          kind: "card",
+          accountId: null,
+          cardId: "c1",
+          currency: "DOP",
+          name: "Visa",
+          institutionName: "Banco Popular",
+          balance: "0",
+          reconciled: false,
+          lastReconciledAt: null,
+        },
+      ],
+    })
+
+    const bank = items.find((item) => item.kind === "institution")
+    assert.equal(bank?.irregularities.drift, true)
+    assert.equal(bank?.irregularities.reconciliation, true)
+  })
+
+  it("marks a cash card only when its own account has an irregularity", () => {
+    const items = buildInstitutionStackItems({
+      institutions: [],
+      accounts: [account({ id: "cash-1", name: "Efectivo", type: "CASH" })],
+      cards: [],
+      loans: [],
+      drifts: [],
+      reconciliationItems: [
+        {
+          key: "account:cash-1:DOP",
+          kind: "account",
+          accountId: "cash-1",
+          cardId: null,
+          currency: "DOP",
+          name: "Efectivo",
+          institutionName: null,
+          balance: "0",
+          reconciled: false,
+          lastReconciledAt: null,
+        },
+      ],
+    })
+
+    const cash = items.find((item) => item.kind === "cash")
+    assert.equal(cash?.irregularities.drift, false)
+    assert.equal(cash?.irregularities.reconciliation, true)
+  })
 })

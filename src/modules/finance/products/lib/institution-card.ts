@@ -3,6 +3,7 @@ import {
   formatProductCounts,
   formatStackItemBalance,
   institutionInitials,
+  type InstitutionIrregularities,
   type InstitutionStackCounts,
   type InstitutionStackItem,
 } from "@/src/modules/finance/shared/lib/institution-stack"
@@ -23,6 +24,7 @@ export type InstitutionCardModel = {
   counts: InstitutionStackCounts | null
   balanceLabel: string
   balanceAmount: string
+  irregularities: InstitutionIrregularities
 }
 
 export function institutionCardName(item: InstitutionStackItem): string {
@@ -45,6 +47,7 @@ export function buildInstitutionCard(
       counts: item.counts,
       balanceLabel: "Balance consolidado",
       balanceAmount: formatStackItemBalance(item, display),
+      irregularities: item.irregularities,
     }
   }
 
@@ -59,5 +62,6 @@ export function buildInstitutionCard(
     counts: null,
     balanceLabel: "Saldo",
     balanceAmount: formatStackItemBalance(item, display),
+    irregularities: item.irregularities,
   }
 }

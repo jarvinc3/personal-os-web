@@ -2,18 +2,25 @@ import { formatFinanceMoney, type FinanceMoneyDisplay } from "./money.ts"
 import { isCashInstitution } from "./cash.ts"
 import type {
   FinanceAccount,
+  FinanceBalanceDrift,
   FinanceBalanceSheetIssue,
   FinanceBalanceSheetStatus,
   FinanceCard,
   FinanceCashSummary,
   FinanceInstitution,
   FinanceLoan,
+  FinanceReconciliationStatusItem,
 } from "@/src/modules/finance/shared/types/entities"
 
 export type InstitutionStackCounts = {
   accounts: number
   cards: number
   loans: number
+}
+
+export type InstitutionIrregularities = {
+  drift: boolean
+  reconciliation: boolean
 }
 
 export type InstitutionStackItem =
@@ -32,12 +39,14 @@ export type InstitutionStackItem =
       loans: FinanceLoan[]
       /** Cash summary, only set for the system Efectivo institution. */
       cash: FinanceCashSummary | null
+      irregularities: InstitutionIrregularities
     }
   | {
       kind: "cash"
       id: string
       account: FinanceAccount
       balance: string
+      irregularities: InstitutionIrregularities
     }
 
 export type InstitutionBalancePosition = {
@@ -86,6 +95,37 @@ export function formatStackItemBalance(
   return formatFinanceMoney(item.netWorth, display)
 }
 
+function hasDriftForProduct(
+  drifts: readonly FinanceBalanceDrift[],
+  target: { accountId?: string | null; cardId?: string | null }
+): boolean {
+  return drifts.some(
+    (drift) =>
+      (target.accountId !== undefined &&
+        target.accountId !== null &&
+        drift.accountId === target.accountId) ||
+      (target.cardId !== undefined &&
+        target.cardId !== null &&
+        drift.cardId === target.cardId)
+  )
+}
+
+function hasPendingReconciliationForProduct(
+  reconciliationItems: readonly FinanceReconciliationStatusItem[],
+  target: { accountId?: string | null; cardId?: string | null }
+): boolean {
+  return reconciliationItems.some(
+    (item) =>
+      !item.reconciled &&
+      ((target.accountId !== undefined &&
+        target.accountId !== null &&
+        item.accountId === target.accountId) ||
+        (target.cardId !== undefined &&
+          target.cardId !== null &&
+          item.cardId === target.cardId))
+  )
+}
+
 export function buildInstitutionStackItems(input: {
   institutions: FinanceInstitution[]
   accounts: FinanceAccount[]
@@ -93,6 +133,8 @@ export function buildInstitutionStackItems(input: {
   loans: FinanceLoan[]
   positions?: InstitutionBalancePosition[]
   cash?: FinanceCashSummary
+  drifts?: readonly FinanceBalanceDrift[]
+  reconciliationItems?: readonly FinanceReconciliationStatusItem[]
 }): InstitutionStackItem[] {
   const activeInstitutions = input.institutions.filter((item) => item.isActive)
   const activeAccounts = input.accounts.filter((item) => item.isActive)
@@ -117,6 +159,30 @@ export function buildInstitutionStackItems(input: {
         (loan) => loan.institutionId === institution.id
       )
       const position = positionsById.get(institution.id)
+      const irregularities = {
+        drift:
+          accounts.some((account) =>
+            hasDriftForProduct(input.drifts ?? [], {
+              accountId: account.id,
+            })
+          ) ||
+          cards.some((card) =>
+            hasDriftForProduct(input.drifts ?? [], { cardId: card.id })
+          ),
+        reconciliation:
+          accounts.some((account) =>
+            hasPendingReconciliationForProduct(
+              input.reconciliationItems ?? [],
+              { accountId: account.id }
+            )
+          ) ||
+          cards.some((card) =>
+            hasPendingReconciliationForProduct(
+              input.reconciliationItems ?? [],
+              { cardId: card.id }
+            )
+          ),
+      }
       return {
         kind: "institution",
         id: institution.id,
@@ -135,6 +201,7 @@ export function buildInstitutionStackItems(input: {
         totalLiabilities: position?.totalLiabilities ?? null,
         issues: position?.issues ?? [],
         cash: isCashInstitution(institution) ? (input.cash ?? null) : null,
+        irregularities,
       }
     }
   )
@@ -146,6 +213,15 @@ export function buildInstitutionStackItems(input: {
       id: account.id,
       account,
       balance: account.balance,
+      irregularities: {
+        drift: hasDriftForProduct(input.drifts ?? [], {
+          accountId: account.id,
+        }),
+        reconciliation: hasPendingReconciliationForProduct(
+          input.reconciliationItems ?? [],
+          { accountId: account.id }
+        ),
+      },
     }))
 
   return [...institutionItems, ...cashItems]

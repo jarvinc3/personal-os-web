@@ -12,7 +12,7 @@ import {
   ReconciliationSheet,
   ReconciliationsSection,
 } from "@/src/modules/finance/reconciliation"
-import { BalanceIntegrityAlert } from "@/src/modules/finance/integrity"
+import { IrregularitiesSection } from "@/src/modules/finance/integrity"
 import {
   findProductDrifts,
   recalculationPayload,
@@ -21,6 +21,7 @@ import {
   useFinanceIntegrity,
   useRecalculateBalance,
 } from "@/src/modules/finance/shared/hooks/use-integrity"
+import { useReconciliationStatus } from "@/src/modules/finance/shared/hooks/use-reconciliations"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
 import { useCardStatements } from "@/src/modules/finance/shared/hooks/use-card-statements"
@@ -40,6 +41,7 @@ import {
 } from "@/src/modules/finance/shared/lib/finance-error"
 import { showUndoToast } from "@/src/modules/finance/shared/components/undo-toast"
 import { encodeLedgerTarget } from "@/src/modules/finance/shared/lib/ledger-payloads"
+import { monthKeyFromDate } from "@/src/modules/finance/shared/lib/month-window"
 import { DeleteRecordDialog } from "@/src/modules/finance/shared/components/delete-record-dialog"
 import { ArchiveRecordDialog } from "@/src/modules/finance/shared/components/archive-record-dialog"
 import { RecordOptionsSheet } from "@/src/modules/finance/shared/components/record-options-sheet"
@@ -134,6 +136,13 @@ function CardDetailScreenBody({ cardId }: CardDetailScreenProps) {
   const cardDrifts = isCredit
     ? findProductDrifts(integrityQuery.data?.drifts ?? [], { cardId })
     : []
+  const reconciliationStatusQuery = useReconciliationStatus(
+    isEnabled,
+    monthKeyFromDate(new Date())
+  )
+  const cardReconciliations = (
+    reconciliationStatusQuery.data?.items ?? []
+  ).filter((item) => item.kind === "card" && item.cardId === cardId)
 
   useRegisterChatContext(
     card
@@ -290,10 +299,15 @@ function CardDetailScreenBody({ cardId }: CardDetailScreenProps) {
         </div>
       </div>
       <div className="mx-4 -mt-4 flex flex-col gap-3 rounded-3xl bg-background">
-        <BalanceIntegrityAlert
+        <IrregularitiesSection
           drifts={cardDrifts}
+          reconciliationItems={cardReconciliations}
           display={cardDisplay}
-          pending={recalculateBalance.isPending}
+          driftHref={() => null}
+          reconciliationHref={() =>
+            `${pathname}?sheet=${FINANCE_SHEET_KEYS.cardReconciliation}`
+          }
+          recalculatePending={recalculateBalance.isPending}
           onRecalculate={(drift) => {
             recalculateBalance.mutate(recalculationPayload(drift), {
               onSuccess: () => appToast.success({ text1: "Saldo corregido" }),

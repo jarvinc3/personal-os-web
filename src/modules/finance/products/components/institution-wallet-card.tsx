@@ -47,6 +47,32 @@ export function ProductCountItem({
   )
 }
 
+function IrregularityMarks({
+  irregularities,
+}: {
+  irregularities: InstitutionCardModel["irregularities"]
+}) {
+  if (!irregularities.drift && !irregularities.reconciliation) {
+    return null
+  }
+  return (
+    <span className="flex items-center gap-1">
+      {irregularities.drift ? (
+        <span
+          className="size-2 rounded-full bg-destructive ring-2 ring-white/60"
+          title="Descuadre"
+        />
+      ) : null}
+      {irregularities.reconciliation ? (
+        <span
+          className="size-2 rounded-full bg-warning ring-2 ring-white/60"
+          title="Sin conciliar"
+        />
+      ) : null}
+    </span>
+  )
+}
+
 function InstitutionProductCounts({
   counts,
 }: {
@@ -157,10 +183,13 @@ export function InstitutionWalletCard({
             size={44}
           />
         )}
-        <KindIcon
-          className="size-5"
-          style={{ color: "rgba(255,255,255,0.6)" }}
-        />
+        <span className="flex items-center gap-2">
+          <IrregularityMarks irregularities={card.irregularities} />
+          <KindIcon
+            className="size-5"
+            style={{ color: "rgba(255,255,255,0.6)" }}
+          />
+        </span>
       </div>
 
       <div className="relative z-10 flex flex-1 flex-col justify-center">

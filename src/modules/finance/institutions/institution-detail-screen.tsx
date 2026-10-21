@@ -1,6 +1,11 @@
 "use client"
 
 import { AccountSheet, CardBalanceSheet } from "@/src/modules/finance/catalog"
+import { IrregularitiesSection } from "@/src/modules/finance/integrity"
+import {
+  productDetailHref,
+  reconciliationProductHref,
+} from "@/src/modules/finance/reconciliation/lib/reconciliation-links"
 import { FinanceGate } from "@/src/modules/finance/finance-gate"
 import { InstitutionDetailHero } from "@/src/modules/finance/institutions/components/institution-detail-hero"
 import { buildInstitutionOptions } from "@/src/modules/finance/institutions/components/institution-options"
@@ -32,6 +37,11 @@ import {
   useUnarchiveInstitution,
 } from "@/src/modules/finance/shared/hooks/use-institutions"
 import { useLoans } from "@/src/modules/finance/shared/hooks/use-loans"
+import { useReconciliationStatus } from "@/src/modules/finance/shared/hooks/use-reconciliations"
+import {
+  useFinanceIntegrity,
+  useRecalculateBalance,
+} from "@/src/modules/finance/shared/hooks/use-integrity"
 import { useSheetListEntity } from "@/src/modules/finance/shared/hooks/use-sheet-entity"
 import { isCashInstitution } from "@/src/modules/finance/shared/lib/cash"
 import {
@@ -42,6 +52,8 @@ import {
   buildInstitutionStackItems,
   formatStackItemBalance,
 } from "@/src/modules/finance/shared/lib/institution-stack"
+import { recalculationPayload } from "@/src/modules/finance/shared/lib/integrity"
+import { monthKeyFromDate } from "@/src/modules/finance/shared/lib/month-window"
 import { ChatLauncherButton, useRegisterChatContext } from "@/src/modules/ai"
 import { LoadingView } from "@/src/shared/components/layout/loading-view"
 import { Button } from "@/src/shared/components/ui/button"
@@ -88,6 +100,13 @@ function InstitutionDetailScreenBody({
   const cardsQuery = useCards(isEnabled)
   const loansQuery = useLoans(isEnabled)
   const balanceSheetQuery = useBalanceSheet(isEnabled)
+  const integrityQuery = useFinanceIntegrity(isEnabled)
+  const reconciliationStatusQuery = useReconciliationStatus(
+    isEnabled,
+    monthKeyFromDate(new Date())
+  )
+  const reconciliationItems = reconciliationStatusQuery.data?.items
+  const recalculateBalance = useRecalculateBalance()
   const mailboxesQuery = useEmailMailboxes(isEnabled && emailSyncEnabled)
   const { run: runSync, isPending: syncPending } =
     useRunEmailSync(emailSyncEnabled)
@@ -145,6 +164,8 @@ function InstitutionDetailScreenBody({
       loans: loansQuery.data ?? [],
       positions: balanceSheetQuery.data?.institutions,
       cash: balanceSheetQuery.data?.cash,
+      drifts: integrityQuery.data?.drifts ?? [],
+      reconciliationItems: reconciliationItems ?? [],
     })
     return items.find(
       (item) => item.kind === "institution" && item.id === institutionId
@@ -156,6 +177,8 @@ function InstitutionDetailScreenBody({
     loansQuery.data,
     balanceSheetQuery.data?.institutions,
     balanceSheetQuery.data?.cash,
+    integrityQuery.data?.drifts,
+    reconciliationItems,
     institutionId,
   ])
 
@@ -339,6 +362,20 @@ function InstitutionDetailScreenBody({
     ? formatStackItemBalance(stackItem, moneyDisplay)
     : INCOMPLETE_BALANCE_TEXT
   const isBusy = archiveInstitution.isPending || deleteInstitution.isPending
+  const productAccountIds = new Set(
+    products.accounts.map((account) => account.id)
+  )
+  const productCardIds = new Set(products.cards.map((card) => card.id))
+  const institutionDrifts = (integrityQuery.data?.drifts ?? []).filter(
+    (drift) =>
+      (drift.accountId !== null && productAccountIds.has(drift.accountId)) ||
+      (drift.cardId !== null && productCardIds.has(drift.cardId))
+  )
+  const institutionReconciliations = (reconciliationItems ?? []).filter(
+    (item) =>
+      (item.accountId !== null && productAccountIds.has(item.accountId)) ||
+      (item.cardId !== null && productCardIds.has(item.cardId))
+  )
 
   const options = buildInstitutionOptions({
     linkedMailboxEmail: linkedMailbox?.emailAddress ?? null,
@@ -408,6 +445,35 @@ function InstitutionDetailScreenBody({
             }
             setOpenCardBalanceSheet(true, incompleteCard.id)
           }}
+        />
+
+        <IrregularitiesSection
+          drifts={institutionDrifts}
+          reconciliationItems={institutionReconciliations}
+          display={moneyDisplay}
+          driftHref={(drift) =>
+            productDetailHref({
+              target: { accountId: drift.accountId, cardId: drift.cardId },
+              accounts: accountsQuery.data ?? [],
+              cards: cardsQuery.data ?? [],
+            })
+          }
+          reconciliationHref={(item) =>
+            reconciliationProductHref({
+              item,
+              accounts: accountsQuery.data ?? [],
+              cards: cardsQuery.data ?? [],
+            })
+          }
+          recalculatePending={recalculateBalance.isPending}
+          onRecalculate={(drift) => {
+            recalculateBalance.mutate(recalculationPayload(drift), {
+              onSuccess: () => appToast.success({ text1: "Saldo corregido" }),
+              onError: (error) =>
+                appToast.error({ text1: financeErrorMessage(error) }),
+            })
+          }}
+          className="mx-4"
         />
 
         <InstitutionProductTabs

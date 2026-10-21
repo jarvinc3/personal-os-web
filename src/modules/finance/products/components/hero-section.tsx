@@ -10,6 +10,7 @@ import {
   buildRingStackSlices,
   hasDrawableRingBalance,
 } from "@/src/modules/finance/shared/lib/ring-stack"
+import Link from "next/link"
 import { useEffect, useRef, useState } from "react"
 import {
   FinanceRingChart,
@@ -39,6 +40,7 @@ type FinanceHeroSectionProps = {
   hasData: boolean
   netWorth: string | null
   netWorthComplete: boolean
+  netWorthHref: string
 }
 
 export function FinanceHeroSection({
@@ -48,6 +50,7 @@ export function FinanceHeroSection({
   hasData,
   netWorth,
   netWorthComplete,
+  netWorthHref,
 }: FinanceHeroSectionProps) {
   const slices = buildRingStackSlices(items, display)
   const hasChart = hasDrawableRingBalance(slices)
@@ -106,9 +109,13 @@ export function FinanceHeroSection({
         <p className="text-[11px] font-medium tracking-[0.16em] text-muted-foreground uppercase">
           Balance total
         </p>
-        <p className="text-3xl font-bold tracking-tight text-foreground tabular-nums">
+        <Link
+          href={netWorthHref}
+          aria-label="Ver desglose del patrimonio"
+          className="rounded-md text-3xl font-bold tracking-tight text-foreground tabular-nums outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
           {netWorthFallback}
-        </p>
+        </Link>
         {slices.length > 0 ? (
           <p className="text-xs text-muted-foreground">
             Sin saldos para graficar
@@ -127,6 +134,7 @@ export function FinanceHeroSection({
         centerLabel={centerLabel}
         centerValue={centerValue}
         centerDebt={centerDebt}
+        centerHref={netWorthHref}
         className="w-2/5 shrink-0 sm:w-44"
       />
       <FinanceRingLegend

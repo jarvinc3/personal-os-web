@@ -27,7 +27,13 @@ export type FinanceBalanceSheetIssue =
 
 export type FinanceBalanceSheetSlice = {
   status: FinanceBalanceSheetStatus
-  assets: { accounts: string }
+  assets: {
+    /** All account balances on the base currency, cash included. */
+    accounts: string
+    /** Informational subset of `accounts`; never add it again. */
+    cash: string
+    receivables: string
+  }
   liabilities: {
     creditCards: string | null
     loans: string
@@ -36,6 +42,66 @@ export type FinanceBalanceSheetSlice = {
   totalLiabilities: string | null
   netWorth: string | null
   issues: FinanceBalanceSheetIssue[]
+}
+
+export type FinanceBalanceSheetLineKind =
+  "ACCOUNT" | "CASH" | "RECEIVABLE" | "CREDIT_CARD" | "LOAN"
+
+export type FinanceBalanceSheetReconciliation =
+  "RECONCILED" | "PENDING" | "NOT_APPLICABLE"
+
+/** One product in the net-worth breakdown; amounts arrive in its own currency. */
+export type FinanceBalanceSheetLine = {
+  id: string
+  kind: FinanceBalanceSheetLineKind
+  name: string
+  description: string | null
+  institutionId: string | null
+  currency: string
+  balance: string
+  balanceBase: string | null
+  hasDrift: boolean
+  driftDifference: string | null
+  reconciliation: FinanceBalanceSheetReconciliation
+  creditLimit: string | null
+  availableCredit: string | null
+  dueDate: string | null
+  doubtful: boolean
+}
+
+export type FinanceBalanceSheetCurrencyTotals = {
+  assets: string
+  available: string
+  receivables: string
+  liabilities: string
+  netWorth: string
+  doubtfulReceivables: string
+}
+
+export type FinanceBalanceSheetCurrencyTotalsBase = {
+  assets: string | null
+  available: string | null
+  receivables: string | null
+  liabilities: string | null
+  netWorth: string | null
+  doubtfulReceivables: string | null
+}
+
+export type FinanceBalanceSheetCurrencyGroup = {
+  currency: string
+  accounts: FinanceBalanceSheetLine[]
+  cash: FinanceBalanceSheetLine[]
+  receivables: FinanceBalanceSheetLine[]
+  creditCards: FinanceBalanceSheetLine[]
+  loans: FinanceBalanceSheetLine[]
+  doubtfulReceivables: FinanceBalanceSheetLine[]
+  totals: FinanceBalanceSheetCurrencyTotals
+  totalsBase: FinanceBalanceSheetCurrencyTotalsBase
+}
+
+export type FinanceBalanceSheetBreakdown = {
+  byCurrency: FinanceBalanceSheetCurrencyGroup[]
+  totals: FinanceBalanceSheetCurrencyTotalsBase
 }
 
 export type FinanceCashAccountLine = {
@@ -67,6 +133,7 @@ export type FinanceBalanceSheet = {
   global: FinanceBalanceSheetSlice
   institutions: Array<FinanceBalanceSheetSlice & { institutionId: string }>
   cash: FinanceCashSummary
+  breakdown: FinanceBalanceSheetBreakdown
 }
 
 export type FinanceAccount = {

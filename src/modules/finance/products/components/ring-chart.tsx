@@ -4,6 +4,7 @@ import { BrandLogo } from "@/src/modules/finance/shared/components/brand-logo"
 import type { RingStackSlice } from "@/src/modules/finance/shared/lib/ring-stack"
 import { cn } from "@/src/shared/lib/utils"
 import { WalletIcon } from "lucide-react"
+import Link from "next/link"
 import type { KeyboardEvent, ReactNode } from "react"
 
 /** Drawing constants measured from the reference mockup in `docs/suggest/image.png`. */
@@ -105,6 +106,8 @@ type FinanceRingChartProps = {
   centerValue: string
   /** Debt line under the value, null when the selected ring owes nothing. */
   centerDebt: string | null
+  /** When set, the centre value opens the net-worth breakdown. */
+  centerHref?: string
   className?: string
 }
 
@@ -115,6 +118,7 @@ export function FinanceRingChart({
   centerLabel,
   centerValue,
   centerDebt,
+  centerHref,
   className,
 }: FinanceRingChartProps) {
   const ringCount = slices.length
@@ -239,7 +243,7 @@ export function FinanceRingChart({
         })}
       </svg>
       <div
-        aria-hidden
+        aria-hidden={centerHref ? undefined : true}
         className="pointer-events-none absolute top-1/2 -translate-x-1/2 -translate-y-1/2 text-center"
         style={{
           left: `${centreLeftPercent}%`,
@@ -249,9 +253,21 @@ export function FinanceRingChart({
         <p className="truncate text-[10px] font-medium tracking-[0.14em] text-muted-foreground uppercase sm:text-[11px]">
           {centerLabel}
         </p>
-        <p className="truncate text-lg font-bold text-foreground tabular-nums sm:text-xl">
-          {centerValue}
-        </p>
+        {centerHref ? (
+          <Link
+            href={centerHref}
+            aria-label="Ver desglose del patrimonio"
+            className="pointer-events-auto inline-block max-w-full rounded-md outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <span className="block truncate text-lg font-bold text-foreground tabular-nums sm:text-xl">
+              {centerValue}
+            </span>
+          </Link>
+        ) : (
+          <p className="truncate text-lg font-bold text-foreground tabular-nums sm:text-xl">
+            {centerValue}
+          </p>
+        )}
         {centerDebt ? (
           <p className="truncate text-xs font-medium text-muted-foreground sm:text-sm">
             Deuda {centerDebt}

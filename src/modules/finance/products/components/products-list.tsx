@@ -12,13 +12,21 @@ import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-financ
 import { useInstitutions } from "@/src/modules/finance/shared/hooks/use-institutions"
 import { useLoans } from "@/src/modules/finance/shared/hooks/use-loans"
 import { useMonthExpenseTrend } from "@/src/modules/finance/shared/hooks/use-month-expense-trend"
-import { ReconciliationMonthStatus } from "@/src/modules/finance/reconciliation"
-import { reconciliationProductHref } from "@/src/modules/finance/reconciliation/lib/reconciliation-links"
-import type { FinanceReconciliationStatusItem } from "@/src/modules/finance/shared/types/entities"
-import { bankChargesQuery } from "@/src/modules/finance/shared/hooks/use-reconciliations"
+import {
+  productDetailHref,
+  reconciliationProductHref,
+} from "@/src/modules/finance/reconciliation/lib/reconciliation-links"
+import type {
+  FinanceBalanceDrift,
+  FinanceReconciliationStatusItem,
+} from "@/src/modules/finance/shared/types/entities"
+import {
+  bankChargesQuery,
+  useReconciliationStatus,
+} from "@/src/modules/finance/shared/hooks/use-reconciliations"
 import { todayDateInput } from "@/src/modules/finance/shared/lib/ledger-form"
 import { bankChargesRange } from "@/src/modules/finance/shared/lib/reconciliation"
-import { BalanceIntegrityAlert } from "@/src/modules/finance/integrity"
+import { IrregularitiesSection } from "@/src/modules/finance/integrity"
 import { recalculationPayload } from "@/src/modules/finance/shared/lib/integrity"
 import {
   useFinanceIntegrity,
@@ -87,6 +95,11 @@ export function FinanceProductsList({
   const categoriesQuery = useCategories(enabled)
   const balanceSheetQuery = useBalanceSheet(enabled)
   const integrityQuery = useFinanceIntegrity(enabled)
+  const reconciliationStatusQuery = useReconciliationStatus(
+    enabled,
+    monthKeyFromDate(new Date())
+  )
+  const reconciliationItems = reconciliationStatusQuery.data?.items
   const recalculateBalance = useRecalculateBalance()
   const {
     open: openAccountSheet,
@@ -127,6 +140,8 @@ export function FinanceProductsList({
         loans: loansQuery.data ?? [],
         positions: balanceSheetQuery.data?.institutions,
         cash: balanceSheetQuery.data?.cash,
+        drifts: integrityQuery.data?.drifts ?? [],
+        reconciliationItems: reconciliationItems ?? [],
       }),
     [
       institutionsQuery.data,
@@ -135,6 +150,8 @@ export function FinanceProductsList({
       loansQuery.data,
       balanceSheetQuery.data?.institutions,
       balanceSheetQuery.data?.cash,
+      integrityQuery.data?.drifts,
+      reconciliationItems,
     ]
   )
 
@@ -173,6 +190,14 @@ export function FinanceProductsList({
     })
   }
 
+  function driftHref(drift: FinanceBalanceDrift): string | null {
+    return productDetailHref({
+      target: { accountId: drift.accountId, cardId: drift.cardId },
+      accounts: accountsQuery.data ?? [],
+      cards: cardsQuery.data ?? [],
+    })
+  }
+
   return (
     <div className="-mt-6 flex flex-col gap-4">
       {errorMessage ? (
@@ -202,20 +227,16 @@ export function FinanceProductsList({
         hasData={Boolean(balanceSheetQuery.data)}
         netWorth={global?.netWorth ?? null}
         netWorthComplete={global?.status === "COMPLETE"}
+        netWorthHref={APP_ROUTES.app.financeWealth}
       />
 
-      <ReconciliationMonthStatus
-        enabled={enabled}
-        month={monthKeyFromDate(new Date())}
-        monthLabel={monthKeyFromDate(new Date())}
-        display={moneyDisplay}
-        hrefFor={reconciliationHref}
-      />
-
-      <BalanceIntegrityAlert
+      <IrregularitiesSection
         drifts={integrityQuery.data?.drifts ?? []}
+        reconciliationItems={reconciliationItems ?? []}
         display={moneyDisplay}
-        pending={recalculateBalance.isPending}
+        driftHref={driftHref}
+        reconciliationHref={reconciliationHref}
+        recalculatePending={recalculateBalance.isPending}
         onRecalculate={(drift) => {
           recalculateBalance.mutate(recalculationPayload(drift), {
             onSuccess: () => appToast.success({ text1: "Saldo corregido" }),

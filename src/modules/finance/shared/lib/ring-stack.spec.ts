@@ -47,6 +47,8 @@ function institutionItem(partial: {
     accounts: [],
     cards: [],
     loans: [],
+    cash: null,
+    irregularities: { drift: false, reconciliation: false },
   }
 }
 
@@ -75,6 +77,7 @@ function cashItem(partial: {
     id: partial.id,
     account,
     balance: partial.balance,
+    irregularities: { drift: false, reconciliation: false },
   }
 }
 

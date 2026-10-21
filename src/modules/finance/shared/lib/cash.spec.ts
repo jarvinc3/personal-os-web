@@ -34,7 +34,7 @@ function sheetWithCash(currencies: string[]): FinanceBalanceSheet {
     baseCurrency: "DOP",
     global: {
       status: "COMPLETE",
-      assets: { accounts: "0" },
+      assets: { accounts: "0", cash: "0", receivables: "0" },
       liabilities: { creditCards: "0", loans: "0" },
       totalAssets: "0",
       totalLiabilities: "0",

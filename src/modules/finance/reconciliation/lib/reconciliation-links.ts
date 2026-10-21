@@ -11,9 +11,48 @@ type StatusTarget = Pick<
   "kind" | "accountId" | "cardId"
 >
 
+export type FinanceProductTarget = {
+  accountId?: string | null
+  cardId?: string | null
+}
+
+/** Product detail, or null when the product is no longer in the loaded lists. */
+export function productDetailHref({
+  target,
+  accounts,
+  cards,
+}: {
+  target: FinanceProductTarget
+  accounts: readonly FinanceAccount[]
+  cards: readonly FinanceCard[]
+}): string | null {
+  if (target.cardId) {
+    const card = cards.find((candidate) => candidate.id === target.cardId)
+    if (!card) {
+      return null
+    }
+    return APP_ROUTES.app.financeInstitutionCard(card.institutionId, card.id)
+  }
+  if (!target.accountId) {
+    return null
+  }
+  const account = accounts.find(
+    (candidate) => candidate.id === target.accountId
+  )
+  if (!account) {
+    return null
+  }
+  return account.institutionId
+    ? APP_ROUTES.app.financeInstitutionAccount(
+        account.institutionId,
+        account.id
+      )
+    : APP_ROUTES.app.financeCashAccount(account.id)
+}
+
 /**
- * Detail of the product with its reconciliation sheet already open, or null
- * when the product is no longer in the loaded lists.
+ * Product detail with its reconciliation sheet already open, or null when the
+ * product is no longer in the loaded lists.
  */
 export function reconciliationProductHref({
   item,
@@ -24,27 +63,16 @@ export function reconciliationProductHref({
   accounts: readonly FinanceAccount[]
   cards: readonly FinanceCard[]
 }): string | null {
-  if (item.kind === "card") {
-    const card = cards.find((candidate) => candidate.id === item.cardId)
-    if (!card) {
-      return null
-    }
-    return withReconciliationSheet(
-      APP_ROUTES.app.financeInstitutionCard(card.institutionId, card.id),
-      FINANCE_SHEET_KEYS.cardReconciliation
-    )
-  }
-  const account = accounts.find((candidate) => candidate.id === item.accountId)
-  if (!account) {
+  const path = productDetailHref({ target: item, accounts, cards })
+  if (!path) {
     return null
   }
-  const path = account.institutionId
-    ? APP_ROUTES.app.financeInstitutionAccount(
-        account.institutionId,
-        account.id
-      )
-    : APP_ROUTES.app.financeCashAccount(account.id)
-  return withReconciliationSheet(path, FINANCE_SHEET_KEYS.accountReconciliation)
+  return withReconciliationSheet(
+    path,
+    item.kind === "card"
+      ? FINANCE_SHEET_KEYS.cardReconciliation
+      : FINANCE_SHEET_KEYS.accountReconciliation
+  )
 }
 
 function withReconciliationSheet(path: string, sheetKey: string): string {
