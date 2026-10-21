@@ -15,10 +15,13 @@ describe("weekStartsOnFromLocale", () => {
     assert.equal(weekStartsOnFromLocale("ar-EG"), 6)
   })
 
-  it("falls back to monday for a missing or malformed locale", () => {
-    assert.equal(weekStartsOnFromLocale(null), 0)
-    assert.equal(weekStartsOnFromLocale("not a locale"), 1)
-    assert.equal(weekStartsOnFromLocale("es_DO"), 1)
+  it("rejects a malformed locale instead of guessing the day", () => {
+    assert.throws(
+      () => weekStartsOnFromLocale("not a locale"),
+      /Invalid locale/
+    )
+    assert.throws(() => weekStartsOnFromLocale("es_DO"), /Invalid locale/)
+    assert.throws(() => weekStartsOnFromLocale(""), /Invalid locale/)
   })
 })
 

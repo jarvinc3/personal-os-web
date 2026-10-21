@@ -2,7 +2,10 @@
 
 import { SETTINGS_REGISTRY } from "@/src/modules/settings/constants/settings-metadata"
 import { useProfile } from "@/src/modules/settings/hooks/use-profile"
-import { localeLabel } from "@/src/modules/settings/lib/locale-options"
+import {
+  DEFAULT_LOCALE,
+  localeLabel,
+} from "@/src/modules/settings/lib/locale-options"
 import {
   WEEK_STARTS_ON_OPTIONS,
   weekStartsOnFromLocale,
@@ -37,7 +40,7 @@ export function EditWeekStartSheet({ open, onOpenChange }: SettingsSheetProps) {
     useProfile()
   const locale = profileQuery.data?.locale
   const stored = preferences.regional.weekStartsOn
-  const automaticDay = weekStartsOnFromLocale(locale)
+  const automaticDay = weekStartsOnFromLocale(locale ?? DEFAULT_LOCALE)
   const [selection, setSelection] = useState<Selection>(selectionFrom(stored))
   const isDirty = selection !== selectionFrom(stored)
 
@@ -119,9 +122,7 @@ export function EditWeekStartSheet({ open, onOpenChange }: SettingsSheetProps) {
               label={option.label}
               description={`La semana empieza el ${option.label.toLowerCase()}.`}
               selected={selection === String(option.value)}
-              onPress={() =>
-                setSelection(String(option.value) as Selection)
-              }
+              onPress={() => setSelection(String(option.value) as Selection)}
               trailing={<RadioGroupItem value={String(option.value)} />}
             />
           ))}
