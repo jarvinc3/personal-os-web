@@ -2,6 +2,13 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.52.0] - 2026-10-21
+
+### Cambiado
+
+- Ajustes se organiza como una lista de secciones: Perfil y cuenta, Preferencias regionales, Apariencia, Asistente IA, Notificaciones, Privacidad y datos, y Módulos. Cada sección abre su propia vista y se vuelve con la flecha (#222).
+- La zona horaria, el idioma y la moneda por defecto quedan en Preferencias regionales; el tema en Apariencia; los canales, el horario silencioso y el push en Notificaciones (#222).
+
 ## [0.51.1] - 2026-10-21
 
 ### Corregido

@@ -12,6 +12,13 @@ export type ReleaseNotesEntry = {
 
 export const RELEASE_NOTES: readonly ReleaseNotesEntry[] = [
   {
+    version: "0.52.0",
+    highlights: [
+      "Ajustes ahora es una lista de secciones: Perfil y cuenta, Preferencias regionales, Apariencia, Asistente IA, Notificaciones, Privacidad y datos, y Módulos.",
+      "Cada sección abre su propia pantalla y puedes volver con la flecha; la zona horaria, el idioma y la moneda quedan juntos en Preferencias regionales.",
+    ],
+  },
+  {
     version: "0.51.1",
     highlights: [
       "En Productos, la gráfica ya no se rompe con saldos negativos: lo que tienes va a un lado y lo que debes al otro, cada grupo con su porcentaje.",
