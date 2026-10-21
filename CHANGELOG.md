@@ -2,6 +2,12 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.56.1] - 2026-10-21
+
+### Corregido
+
+- El detalle de institución muestra el saldo por moneda cuando hay más de una y, con una sola moneda distinta de la base, lo muestra en esa moneda. El hero, la tarjeta y el detalle usan las mismas líneas nativas.
+
 ## [0.56.0] - 2026-10-21 - Operación diaria
 
 ### Agregado

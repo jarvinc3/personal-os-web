@@ -12,6 +12,12 @@ export type ReleaseNotesEntry = {
 
 export const RELEASE_NOTES: readonly ReleaseNotesEntry[] = [
   {
+    version: "0.56.1",
+    highlights: [
+      "El detalle de una institución muestra el saldo de cada moneda cuando tiene más de una, y con una sola moneda lo muestra en esa moneda, sin convertir.",
+    ],
+  },
+  {
     version: "0.56.0",
     highlights: [
       "Al registrar un gasto, si te pasas del presupuesto de su categoría, la app te dice cuánto queda de exceso y te deja decidir si lo guardas igual.",
