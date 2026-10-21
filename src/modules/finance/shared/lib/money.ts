@@ -8,9 +8,13 @@ export type FinanceMoneyDisplay = {
 
 /** Digits and a single decimal point. Commas become dots. Letters are dropped. */
 export function sanitizeAmountInput(value: string): string {
+  const cleaned = value.replace(/[^\d.,]/g, "")
+  const normalized = isThousandsSeparated(cleaned)
+    ? cleaned.replaceAll(",", "")
+    : cleaned.replaceAll(",", ".")
   let seenDot = false
   let next = ""
-  for (const char of value.replace(/,/g, ".")) {
+  for (const char of normalized) {
     if (char >= "0" && char <= "9") {
       next += char
       continue
@@ -21,6 +25,16 @@ export function sanitizeAmountInput(value: string): string {
     }
   }
   return next
+}
+
+/**
+ * `1,234,567.89` groups thousands; `1,50` is a decimal comma. A comma followed
+ * by exactly three digits is grouping, never a decimal separator.
+ */
+const THOUSANDS_SEPARATED = /^\d{1,3}(,\d{3})+(\.\d*)?$/
+
+function isThousandsSeparated(value: string): boolean {
+  return THOUSANDS_SEPARATED.test(value)
 }
 
 export function parseFinanceMoney(
@@ -35,6 +49,9 @@ export function parseFinanceMoney(
   const trimmed = value.trim()
   if (!trimmed) {
     return null
+  }
+  if (THOUSANDS_SEPARATED.test(trimmed)) {
+    return parseFinanceMoney(trimmed.replaceAll(",", ""))
   }
   const parsed = Number(trimmed)
   return Number.isFinite(parsed) ? parsed : null
