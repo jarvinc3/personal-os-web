@@ -2,6 +2,19 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.56.0] - 2026-10-21 - Operación diaria
+
+### Agregado
+
+- Al registrar un gasto, si su categoría tiene presupuesto vigente y el gasto supera lo disponible, la app muestra el exceso y pide confirmación antes de guardar (#198).
+- Movimientos agrega una sección **Programados** con la próxima cuota de cada préstamo y los próximos cobros de las suscripciones, sin alterar los totales del mes (#210).
+- Productos y Suscripciones agrupan los totales por moneda cuando hay más de una, en vez de mostrar una cifra única convertida (#178, #183).
+
+### Cambiado
+
+- Las tarjetas de institución muestran una línea de balance por moneda; el hero de Productos y el resumen de Suscripciones hacen lo mismo (#178, #183).
+- Los importes de cada moneda se muestran en su propia moneda, sin conversión, y los cobros dudosos siguen fuera del patrimonio.
+
 ## [0.55.0] - 2026-10-21 - Patrimonio
 
 ### Agregado

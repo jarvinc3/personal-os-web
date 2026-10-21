@@ -12,6 +12,14 @@ export type ReleaseNotesEntry = {
 
 export const RELEASE_NOTES: readonly ReleaseNotesEntry[] = [
   {
+    version: "0.56.0",
+    highlights: [
+      "Al registrar un gasto, si te pasas del presupuesto de su categoría, la app te dice cuánto queda de exceso y te deja decidir si lo guardas igual.",
+      "Movimientos muestra los compromisos que ya conoces, como la próxima cuota de un préstamo o el próximo cobro de una suscripción, marcados como programados y sin cambiar los totales.",
+      "Si tienes cuentas o suscripciones en varias monedas, los totales de Productos y Suscripciones se muestran por moneda, sin convertir todo a una sola cifra.",
+    ],
+  },
+  {
     version: "0.55.0",
     highlights: [
       "El patrimonio ahora tiene su propia vista: toca la cifra del balance en Productos para ver cuánto tienes disponible, cuánto te deben y qué debes, separado por moneda.",
