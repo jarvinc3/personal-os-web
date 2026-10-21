@@ -2,6 +2,14 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.49.1] - 2026-10-21
+
+### Corregido
+
+- Al pasar una cuenta a tipo Efectivo, el formulario deja la institución en Efectivo en vez de descartar en silencio el banco elegido un momento antes (#172).
+- El formulario de Gasto abre sin el selector de categorías desplegado, así que el campo Comercio queda visible; el selector aparece al tocar la categoría (#177).
+- Al confirmar el monto, el formulario sigue llevando al destino aunque la categoría se haya dejado para después (#177).
+
 ## [0.49.0] - 2026-10-21
 
 ### Agregado
