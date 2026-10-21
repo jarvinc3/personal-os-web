@@ -8,6 +8,8 @@ Copy “Completado” = `CONFIRMED`. La etiqueta del destino sigue al tipo: “D
 
 Alta guiada (solo en crear): la categoría abre primero; al elegirla, el monto toma el foco con el modo guardado en `module_config.finance.amountEntry` (teclado o calculadora persistente); al confirmar el monto abre el selector de cuenta o tarjeta. En una transferencia el orden es origen, destino y monto.
 
+Antes de guardar un gasto, `assessExpenseBalance` compara el monto con el saldo de la cuenta elegida. En efectivo, si quedaría negativo, se bloquea con el saldo disponible; en una cuenta bancaria, un `AlertDialog` muestra el saldo resultante y pide confirmación. Solo aplica a gastos en la misma moneda de la cuenta; la conversión la resuelve el back.
+
 Un movimiento `REVERSED` lleva la etiqueta “Revertido” en la lista y el detalle, sin sumar a los totales; si tiene un movimiento vinculado, el detalle enlaza al original.
 
 El detalle muestra `planningLink` y permite vincular el movimiento a una cuota de préstamo, un cobro o una meta (`POST/DELETE /transactions/:id/link`). Vincular no crea un movimiento nuevo y quitar el vínculo revierte el efecto.

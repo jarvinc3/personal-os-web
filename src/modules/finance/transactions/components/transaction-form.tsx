@@ -29,8 +29,12 @@ import {
   buildTransactionMetadataBody,
   encodeLedgerTarget,
   splitLedgerTarget,
+  type CreateTransactionBody,
 } from "@/src/modules/finance/shared/lib/ledger-payloads"
-import { parseFinanceMoney } from "@/src/modules/finance/shared/lib/money"
+import {
+  formatFinanceMoney,
+  parseFinanceMoney,
+} from "@/src/modules/finance/shared/lib/money"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
 import type { FinanceTransaction } from "@/src/modules/finance/shared/types/entities"
 import { TransactionAmountField } from "@/src/modules/finance/transactions/components/transaction-amount-field"
@@ -54,9 +58,21 @@ import {
   toFormValues,
   type MovementType,
 } from "@/src/modules/finance/transactions/lib/transaction-form-values"
+import { assessExpenseBalance } from "@/src/modules/finance/transactions/lib/expense-balance"
 import type { TransactionFormValues } from "@/src/modules/finance/transactions/lib/transaction-form"
 import { useUserTimeZone } from "@/src/modules/settings/hooks/use-user-time-zone"
 import { Field, FieldLabel } from "@/src/shared/components/ui/field"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/src/shared/components/ui/alert-dialog"
+import { Spinner } from "@/src/shared/components/ui/spinner"
 import { SummarySection } from "@/src/shared/components/ui/summary"
 import { usePicker } from "@/src/shared/hooks/use-picker"
 import { appToast } from "@/src/shared/lib/app-toast"
@@ -90,6 +106,13 @@ type TransactionFormProps = {
   display: FinanceMoneyDisplay
   onTypeChange?: (type: MovementType) => void
   onDone: () => void
+}
+
+type PendingOverdraft = {
+  body: CreateTransactionBody
+  accountName: string
+  accountCurrency: string
+  projectedBalance: number
 }
 
 export function TransactionForm({
@@ -145,6 +168,8 @@ export function TransactionForm({
   )
   const amountFieldRef = useRef<FinanceMoneyFieldHandle>(null)
   const guidedDestinationOpened = useRef(false)
+  const [pendingOverdraft, setPendingOverdraft] =
+    useState<PendingOverdraft | null>(null)
 
   const {
     control,
@@ -346,6 +371,21 @@ export function TransactionForm({
     }
   }
 
+  async function submitTransactionBody(body: CreateTransactionBody) {
+    try {
+      if (transaction) {
+        await updateMutation.mutateAsync({ id: transaction.id, body })
+        appToast.success({ text1: "Movimiento actualizado" })
+      } else {
+        await createMutation.mutateAsync(body)
+        appToast.success({ text1: "Movimiento creado" })
+      }
+      onDone()
+    } catch (error) {
+      appToast.error({ text1: financeErrorMessage(error) })
+    }
+  }
+
   const onSubmit = handleSubmit(async (values) => {
     if (isTransferLeg) {
       return
@@ -377,21 +417,37 @@ export function TransactionForm({
       appToast.error({ text1: payload.error })
       return
     }
-    try {
-      if (transaction) {
-        await updateMutation.mutateAsync({
-          id: transaction.id,
-          body: payload.body,
+
+    const account = target.accountId
+      ? (accounts.find((item) => item.id === target.accountId) ?? null)
+      : null
+    if (values.type === "DEBIT" && account) {
+      const verdict = assessExpenseBalance({
+        accountType: account.type,
+        balance: account.balance,
+        amount: values.amount,
+        accountCurrency: account.currency,
+        transactionCurrency: values.currency,
+      })
+      if (verdict.status === "blocked") {
+        appToast.error({
+          text1: "El efectivo no puede quedar negativo",
+          text2: `Saldo disponible: ${formatFinanceMoney(account.balance, { ...display, currency: account.currency })}.`,
         })
-        appToast.success({ text1: "Movimiento actualizado" })
-      } else {
-        await createMutation.mutateAsync(payload.body)
-        appToast.success({ text1: "Movimiento creado" })
+        return
       }
-      onDone()
-    } catch (error) {
-      appToast.error({ text1: financeErrorMessage(error) })
+      if (verdict.status === "confirm") {
+        setPendingOverdraft({
+          body: payload.body,
+          accountName: account.name,
+          accountCurrency: account.currency,
+          projectedBalance: verdict.projectedBalance,
+        })
+        return
+      }
     }
+
+    await submitTransactionBody(payload.body)
   })
 
   if (isTransferLeg) {
@@ -560,6 +616,44 @@ export function TransactionForm({
           setGuidedStep("done")
         }}
       />
+
+      <AlertDialog
+        open={pendingOverdraft !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setPendingOverdraft(null)
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              ¿Registrar un gasto mayor que el saldo?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {pendingOverdraft
+                ? `La cuenta ${pendingOverdraft.accountName} quedaría en ${formatFinanceMoney(pendingOverdraft.projectedBalance, { ...display, currency: pendingOverdraft.accountCurrency })}.`
+                : null}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isPending}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={isPending}
+              onClick={() => {
+                const pending = pendingOverdraft
+                setPendingOverdraft(null)
+                if (pending) {
+                  void submitTransactionBody(pending.body)
+                }
+              }}
+            >
+              {isPending ? <Spinner data-icon="inline-start" /> : null}
+              {isEdit ? "Guardar" : "Registrar"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   )
 }
