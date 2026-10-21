@@ -12,6 +12,13 @@ export type ReleaseNotesEntry = {
 
 export const RELEASE_NOTES: readonly ReleaseNotesEntry[] = [
   {
+    version: "0.50.0",
+    highlights: [
+      "En Cobros ves arriba de la lista cuánto te deben y cuánto ya cobraste, separado por moneda.",
+      "Guardar el perfil ya no espera: el nombre o el avatar cambian al instante y, si algo falla, vuelve el valor anterior con un aviso.",
+    ],
+  },
+  {
     version: "0.49.6",
     highlights: [
       "Marcar un movimiento como pendiente o reversarlo ahora pide confirmación y avisa el monto y la cuenta que cambia.",

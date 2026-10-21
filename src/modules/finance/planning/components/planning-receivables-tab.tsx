@@ -15,6 +15,7 @@ import {
 } from "@/src/modules/finance/shared/lib/planning-lists"
 import { FINANCE_RECEIVABLE_STATUS_LABEL } from "@/src/modules/finance/shared/types/entities"
 import type { FinanceReceivable } from "@/src/modules/finance/shared/types/entities"
+import { ReceivableTotalsStrip } from "@/src/modules/finance/receivables"
 import {
   remainingCaption,
   withCurrency,
@@ -50,101 +51,108 @@ export function PlanningReceivablesTab({
   onCreate,
 }: PlanningReceivablesTabProps) {
   return (
-    <AsyncRegion
-      pending={pending}
-      pendingFallback={<FinanceListSkeleton />}
-      empty={receivables.length === 0}
-      emptyFallback={
-        <Empty className="py-8">
-          <EmptyHeader>
-            <EmptyMedia variant="icon">
-              <HandshakeIcon />
-            </EmptyMedia>
-            <EmptyTitle>Aún no hay cobros</EmptyTitle>
-            <EmptyDescription>
-              Lo que te deben. Archiva o borra los que ya no apliquen.
-            </EmptyDescription>
-          </EmptyHeader>
-          <EmptyContent>
-            <Button onClick={onCreate}>
-              <PlusIcon className="size-4 shrink-0" />
-              Crear cobro
-            </Button>
-          </EmptyContent>
-        </Empty>
-      }
-    >
-      {receivables.map((item) => {
-        const money = withCurrency(display, item.currency)
-        const paid = parseFinanceMoney(item.paidAmount)
-        const total = parseFinanceMoney(item.amount)
-        const tone =
-          item.status === "PAID"
-            ? "success"
-            : item.status === "PARTIAL"
-              ? "info"
-              : "warning"
-        const badgeVariant =
-          item.status === "PAID"
-            ? "success"
-            : item.status === "PARTIAL"
-              ? "info"
-              : "warning"
-        const dimmed =
-          share.active &&
-          shareDebtor !== null &&
-          item.debtorName !== shareDebtor
-        return (
-          <PlanningProgressCard
-            key={item.id}
-            title={item.debtorName}
-            description={item.description ?? undefined}
-            icon={HandshakeIcon}
-            tone={tone}
-            badge={{
-              label:
-                FINANCE_RECEIVABLE_STATUS_LABEL[item.status] ?? item.status,
-              variant: badgeVariant,
-            }}
-            progress={amountRatioPct(item.paidAmount, item.amount)}
-            currentHint="Cobrado"
-            currentLabel={formatFinanceMoney(item.paidAmount, money)}
-            targetHint="Total"
-            targetLabel={formatFinanceMoney(item.amount, money)}
-            caption={joinPlanningCaption(
-              remainingCaption({
-                current: paid,
-                target: total,
-                display: money,
-                reached: "Cobro completo",
-                prefix: "Resta",
-              }),
-              item.dueDate
-                ? `Vence ${formatCalendarDate(item.dueDate)}`
-                : undefined
-            )}
-            href={
-              share.active
-                ? undefined
-                : APP_ROUTES.app.financeReceivable(item.id)
-            }
-            onPress={
-              share.active && !dimmed ? () => share.toggle(item.id) : undefined
-            }
-            selection={
-              share.active
-                ? {
-                    selected: share.selectedIds.includes(item.id),
-                    dimmed,
-                  }
-                : undefined
-            }
-            onLongPress={() =>
-              share.active ? share.toggle(item.id) : share.selectOnly(item.id)
-            }
-          />
-        )
-      })}
-    </AsyncRegion>
+    <div className="flex flex-col gap-2">
+      {receivables.length === 0 ? null : (
+        <ReceivableTotalsStrip receivables={receivables} display={display} />
+      )}
+      <AsyncRegion
+        pending={pending}
+        pendingFallback={<FinanceListSkeleton />}
+        empty={receivables.length === 0}
+        emptyFallback={
+          <Empty className="py-8">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <HandshakeIcon />
+              </EmptyMedia>
+              <EmptyTitle>Aún no hay cobros</EmptyTitle>
+              <EmptyDescription>
+                Lo que te deben. Archiva o borra los que ya no apliquen.
+              </EmptyDescription>
+            </EmptyHeader>
+            <EmptyContent>
+              <Button onClick={onCreate}>
+                <PlusIcon className="size-4 shrink-0" />
+                Crear cobro
+              </Button>
+            </EmptyContent>
+          </Empty>
+        }
+      >
+        {receivables.map((item) => {
+          const money = withCurrency(display, item.currency)
+          const paid = parseFinanceMoney(item.paidAmount)
+          const total = parseFinanceMoney(item.amount)
+          const tone =
+            item.status === "PAID"
+              ? "success"
+              : item.status === "PARTIAL"
+                ? "info"
+                : "warning"
+          const badgeVariant =
+            item.status === "PAID"
+              ? "success"
+              : item.status === "PARTIAL"
+                ? "info"
+                : "warning"
+          const dimmed =
+            share.active &&
+            shareDebtor !== null &&
+            item.debtorName !== shareDebtor
+          return (
+            <PlanningProgressCard
+              key={item.id}
+              title={item.debtorName}
+              description={item.description ?? undefined}
+              icon={HandshakeIcon}
+              tone={tone}
+              badge={{
+                label:
+                  FINANCE_RECEIVABLE_STATUS_LABEL[item.status] ?? item.status,
+                variant: badgeVariant,
+              }}
+              progress={amountRatioPct(item.paidAmount, item.amount)}
+              currentHint="Cobrado"
+              currentLabel={formatFinanceMoney(item.paidAmount, money)}
+              targetHint="Total"
+              targetLabel={formatFinanceMoney(item.amount, money)}
+              caption={joinPlanningCaption(
+                remainingCaption({
+                  current: paid,
+                  target: total,
+                  display: money,
+                  reached: "Cobro completo",
+                  prefix: "Resta",
+                }),
+                item.dueDate
+                  ? `Vence ${formatCalendarDate(item.dueDate)}`
+                  : undefined
+              )}
+              href={
+                share.active
+                  ? undefined
+                  : APP_ROUTES.app.financeReceivable(item.id)
+              }
+              onPress={
+                share.active && !dimmed
+                  ? () => share.toggle(item.id)
+                  : undefined
+              }
+              selection={
+                share.active
+                  ? {
+                      selected: share.selectedIds.includes(item.id),
+                      dimmed,
+                    }
+                  : undefined
+              }
+              onLongPress={() =>
+                share.active ? share.toggle(item.id) : share.selectOnly(item.id)
+              }
+            />
+          )
+        })}
+      </AsyncRegion>
+    </div>
   )
 }

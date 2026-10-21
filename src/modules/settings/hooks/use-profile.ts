@@ -5,6 +5,7 @@ import { mergeAuthUserWithProfile, PROFILE_QUERY_KEY } from "@/src/modules/auth"
 import { DEFAULT_USER_PREFERENCES } from "@/src/modules/settings/constants/user-settings-defaults"
 import { mergeUserPreferences } from "@/src/modules/settings/lib/merge-user-preferences"
 import { normalizeUserPreferences } from "@/src/modules/settings/lib/normalize-preferences"
+import { applyProfilePatch } from "@/src/modules/settings/lib/profile-optimistic"
 import type {
   DeepPartial,
   UpdateProfilePayload,
@@ -49,12 +50,9 @@ export function useProfile() {
       await queryClient.cancelQueries({ queryKey: PROFILE_QUERY_KEY })
       const previousProfile =
         queryClient.getQueryData<UserProfile>(PROFILE_QUERY_KEY)
-      const preferences = payload.preferences
-      if (preferences) {
-        queryClient.setQueryData<UserProfile>(PROFILE_QUERY_KEY, (profile) =>
-          profile ? { ...profile, preferences } : profile
-        )
-      }
+      queryClient.setQueryData<UserProfile>(PROFILE_QUERY_KEY, (profile) =>
+        profile ? applyProfilePatch(profile, payload) : profile
+      )
       return { previousProfile }
     },
     onSuccess: (profile) => {
