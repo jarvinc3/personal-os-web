@@ -1,15 +1,9 @@
 "use client"
 
 import { CategoryTrigger } from "@/src/modules/finance/shared/components/pickers/category-trigger"
-import { FinanceDateField } from "@/src/modules/finance/shared/components/forms/date-field"
 import { FinanceSegmentedControl } from "@/src/modules/finance/shared/components/forms/form-blocks"
 import { FinanceFormScreen } from "@/src/modules/finance/shared/components/forms/form-screen"
-import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
 import type { FinanceMoneyFieldHandle } from "@/src/modules/finance/shared/components/forms/money-field"
-import { CategoryPickerSheet } from "@/src/modules/finance/shared/components/pickers/category-picker-sheet"
-import { FinanceCurrencyPickerSheet } from "@/src/modules/finance/shared/components/pickers/finance-currency-picker-sheet"
-import { DestinationPickerSheet } from "@/src/modules/finance/shared/components/pickers/destination-picker-sheet"
-import { DestinationTrigger } from "@/src/modules/finance/shared/components/pickers/destination-trigger"
 import { CATALOG_NONE } from "@/src/modules/finance/shared/constants/catalog"
 import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
 import { useCards } from "@/src/modules/finance/shared/hooks/use-cards"
@@ -29,10 +23,7 @@ import {
   isKnownLedgerTarget,
 } from "@/src/modules/finance/shared/lib/destination-picker"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
-import {
-  sliceDateTimeInput,
-  wallClockToIso,
-} from "@/src/modules/finance/shared/lib/ledger-form"
+import { wallClockToIso } from "@/src/modules/finance/shared/lib/ledger-form"
 import {
   buildCreateTransactionBody,
   buildTransactionMetadataBody,
@@ -42,6 +33,15 @@ import {
 import { parseFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
 import type { FinanceTransaction } from "@/src/modules/finance/shared/types/entities"
+import { TransactionAmountField } from "@/src/modules/finance/transactions/components/transaction-amount-field"
+import { TransactionDateStatusField } from "@/src/modules/finance/transactions/components/transaction-date-status-field"
+import { TransactionDestinationField } from "@/src/modules/finance/transactions/components/transaction-destination-field"
+import { TransactionDetailsSection } from "@/src/modules/finance/transactions/components/transaction-form-details"
+import {
+  TransactionFormSheets,
+  type TransactionFormPicker,
+} from "@/src/modules/finance/transactions/components/transaction-form-sheets"
+import { TransactionMerchantField } from "@/src/modules/finance/transactions/components/transaction-merchant-field"
 import {
   isTransactionMetadataOnly,
   isTransactionReadOnly,
@@ -50,93 +50,33 @@ import {
   EMPTY_TRANSACTION_PREFILL,
   type TransactionPrefill,
 } from "@/src/modules/finance/transactions/lib/transaction-prefill"
-import { FormTextField } from "@/src/shared/components/layout/form-blocks"
-import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
-import { SummarySection } from "@/src/shared/components/ui/summary"
-import { Switch } from "@/src/shared/components/ui/switch"
-import { usePicker } from "@/src/shared/hooks/use-picker"
+import {
+  toFormValues,
+  type MovementType,
+} from "@/src/modules/finance/transactions/lib/transaction-form-values"
+import type { TransactionFormValues } from "@/src/modules/finance/transactions/lib/transaction-form"
 import { useUserTimeZone } from "@/src/modules/settings/hooks/use-user-time-zone"
+import { Field, FieldLabel } from "@/src/shared/components/ui/field"
+import { SummarySection } from "@/src/shared/components/ui/summary"
+import { usePicker } from "@/src/shared/hooks/use-picker"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
   ArrowDownCircleIcon,
   ArrowUpCircleIcon,
-  FileTextIcon,
-  HandCoinsIcon,
-  InfoIcon,
   LockIcon,
-  NotebookPenIcon,
   SaveIcon,
-  StoreIcon,
 } from "lucide-react"
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
-import {
-  transactionSchema,
-  type TransactionFormValues,
-} from "@/src/modules/finance/transactions/lib/transaction-form"
+import { transactionSchema } from "@/src/modules/finance/transactions/lib/transaction-form"
 
-type MovementType = TransactionFormValues["type"]
-type Picker = "none" | "category" | "currency" | "destination"
 type GuidedStep = "category" | "amount" | "destination" | "done"
 
 const TYPE_OPTIONS = [
   { value: "DEBIT" as const, label: "Gasto", icon: ArrowDownCircleIcon },
   { value: "CREDIT" as const, label: "Ingreso", icon: ArrowUpCircleIcon },
 ]
-
-function destinationFromTransaction(tx: FinanceTransaction | null): string {
-  if (tx?.cardId) {
-    return encodeLedgerTarget("card", tx.cardId)
-  }
-  if (tx?.accountId) {
-    return encodeLedgerTarget("account", tx.accountId)
-  }
-  return CATALOG_NONE
-}
-
-function movementTypeForTransaction(
-  transaction: FinanceTransaction | null,
-  initialType: MovementType
-): MovementType {
-  if (!transaction) {
-    return initialType
-  }
-  return transaction.type === "CREDIT" ? "CREDIT" : "DEBIT"
-}
-
-type ToFormValuesInput = {
-  transaction: FinanceTransaction | null
-  initialType: MovementType
-  defaultCurrency: string
-  defaultDestination: string
-  prefill: TransactionPrefill
-}
-
-function toFormValues({
-  transaction,
-  initialType,
-  defaultCurrency,
-  defaultDestination,
-  prefill,
-}: ToFormValuesInput): TransactionFormValues {
-  return {
-    type: movementTypeForTransaction(transaction, initialType),
-    amount: transaction?.amount ?? prefill.amount,
-    currency: transaction?.currency ?? (prefill.currency || defaultCurrency),
-    transactionDate: transaction
-      ? sliceDateTimeInput(transaction.transactionDate)
-      : sliceDateTimeInput(prefill.transactionDate),
-    destination: transaction
-      ? destinationFromTransaction(transaction)
-      : defaultDestination,
-    categoryId: transaction?.categoryId ?? (prefill.categoryId || CATALOG_NONE),
-    status: transaction?.status === "PENDING" ? "PENDING" : "CONFIRMED",
-    merchant: transaction?.merchant ?? prefill.merchant,
-    description: transaction?.description ?? prefill.description,
-    notes: transaction?.notes ?? "",
-  }
-}
 
 type TransactionFormProps = {
   mode: "create" | "edit"
@@ -195,7 +135,8 @@ export function TransactionForm({
     () => buildDestinationPickerGroups({ institutions, accounts, cards }),
     [institutions, accounts, cards]
   )
-  const { picker, openPicker, closeHandlerFor } = usePicker<Picker>("none")
+  const { picker, openPicker, closeHandlerFor } =
+    usePicker<TransactionFormPicker>("none")
   const timeZone = useUserTimeZone()
   const statusSwitchId = useId()
   const { amountEntry, setAmountEntry } = useFinanceAmountEntry()
@@ -252,23 +193,23 @@ export function TransactionForm({
     debouncedMerchant
   )
   const merchantSuggestion = merchantSuggestQuery.data ?? null
-  const merchantSuggestionCategory = merchantSuggestion?.categoryId
-    ? (categories.find((item) => item.id === merchantSuggestion.categoryId) ??
-      null)
+  const merchantSuggestionCategoryName = merchantSuggestion?.categoryId
+    ? (categories.find((item) => item.id === merchantSuggestion.categoryId)
+        ?.name ?? null)
     : null
 
-  function applyMerchantSuggestion(
-    suggestedName: string,
-    suggestedCategoryId: string | null
-  ) {
-    setValue("merchant", suggestedName, {
-      shouldDirty: true,
-      shouldValidate: true,
-    })
-    if (suggestedCategoryId && getValues("categoryId") === CATALOG_NONE) {
-      setValue("categoryId", suggestedCategoryId, { shouldDirty: true })
-    }
-  }
+  const applyMerchantSuggestion = useCallback(
+    (suggestedName: string, suggestedCategoryId: string | null) => {
+      setValue("merchant", suggestedName, {
+        shouldDirty: true,
+        shouldValidate: true,
+      })
+      if (suggestedCategoryId && getValues("categoryId") === CATALOG_NONE) {
+        setValue("categoryId", suggestedCategoryId, { shouldDirty: true })
+      }
+    },
+    [getValues, setValue]
+  )
 
   const applyTargetCurrency = useCallback(
     (next: string) => {
@@ -523,167 +464,53 @@ export function TransactionForm({
             />
           </Field>
 
-          <Controller
+          <TransactionAmountField
             control={control}
-            name="amount"
-            render={({ field }) => (
-              <FinanceMoneyField
-                amount={field.value}
-                onAmountChange={field.onChange}
-                onAmountCommit={(next) => {
-                  field.onChange(next)
-                  void trigger("amount")
-                  advanceToDestination()
-                }}
-                onAmountBlur={() => {
-                  field.onBlur()
-                  advanceToDestination()
-                }}
-                amountError={errors.amount?.message}
-                currency={currency || defaultCurrency}
-                currencyError={errors.currency?.message}
-                onCurrencyPress={() => openPicker("currency")}
-                disabled={locked}
-                entryMode={amountEntry}
-                onEntryModeChange={setAmountEntry}
-                fieldRef={amountFieldRef}
-              />
-            )}
+            errors={errors}
+            currency={currency}
+            defaultCurrency={defaultCurrency}
+            locked={locked}
+            entryMode={amountEntry}
+            onEntryModeChange={setAmountEntry}
+            amountRef={amountFieldRef}
+            onCommit={() => {
+              void trigger("amount")
+              advanceToDestination()
+            }}
+            onBlur={advanceToDestination}
+            onCurrencyPress={() => openPicker("currency")}
           />
 
-          <Field className="gap-1">
-            <FieldLabel className="text-sm text-muted-foreground">
-              {destinationLabel}
-            </FieldLabel>
-            <DestinationTrigger
-              destination={destination}
-              accounts={accounts}
-              cards={cards}
-              display={display}
-              disabled={!hasTargets || locked}
-              onClick={() => openPicker("destination")}
-            />
-            {errors.destination?.message ? (
-              <FieldError>{errors.destination.message}</FieldError>
-            ) : null}
-          </Field>
-
-          <Controller
-            control={control}
-            name="transactionDate"
-            render={({ field }) => (
-              <FinanceDateField
-                label="Fecha y hora"
-                value={field.value}
-                onChange={field.onChange}
-                error={errors.transactionDate?.message}
-                withTime
-                disabled={locked}
-                aside={
-                  <Controller
-                    control={control}
-                    name="status"
-                    render={({ field: statusField }) => (
-                      <Field
-                        orientation="horizontal"
-                        className="h-11 w-auto shrink-0 gap-2 rounded-xl border border-border bg-card px-3"
-                      >
-                        <FieldLabel
-                          htmlFor={statusSwitchId}
-                          className="text-sm font-medium"
-                        >
-                          {paidLabel}
-                        </FieldLabel>
-                        <Switch
-                          id={statusSwitchId}
-                          checked={statusField.value === "CONFIRMED"}
-                          onCheckedChange={(checked) =>
-                            statusField.onChange(
-                              checked ? "CONFIRMED" : "PENDING"
-                            )
-                          }
-                          disabled={locked}
-                        />
-                      </Field>
-                    )}
-                  />
-                }
-              />
-            )}
+          <TransactionDestinationField
+            destination={destination}
+            label={destinationLabel}
+            accounts={accounts}
+            cards={cards}
+            display={display}
+            disabled={!hasTargets || locked}
+            error={errors.destination?.message}
+            onOpen={() => openPicker("destination")}
           />
 
-          <Controller
+          <TransactionDateStatusField
             control={control}
-            name="merchant"
-            render={({ field }) => (
-              <div className="flex flex-col gap-1">
-                <FormTextField
-                  label={type === "CREDIT" ? "Origen" : "Comercio"}
-                  icon={type === "CREDIT" ? HandCoinsIcon : StoreIcon}
-                  value={field.value}
-                  onChange={field.onChange}
-                  onBlur={field.onBlur}
-                  error={errors.merchant?.message}
-                />
-                {merchantSuggestion &&
-                merchantSuggestion.name.trim().toLowerCase() !==
-                  field.value.trim().toLowerCase() ? (
-                  <button
-                    type="button"
-                    className="flex items-center gap-2 self-start rounded-lg bg-muted px-2 py-1 text-left text-xs text-muted-foreground transition-colors hover:text-foreground"
-                    onClick={() =>
-                      applyMerchantSuggestion(
-                        merchantSuggestion.name,
-                        merchantSuggestion.categoryId
-                      )
-                    }
-                  >
-                    <StoreIcon className="size-3.5 shrink-0" aria-hidden />
-                    Usar «{merchantSuggestion.name}»
-                    {merchantSuggestionCategory
-                      ? ` · ${merchantSuggestionCategory.name}`
-                      : ""}
-                  </button>
-                ) : null}
-              </div>
-            )}
+            errors={errors}
+            paidLabel={paidLabel}
+            statusSwitchId={statusSwitchId}
+            locked={locked}
+          />
+
+          <TransactionMerchantField
+            control={control}
+            errors={errors}
+            type={type}
+            suggestion={merchantSuggestion}
+            suggestionCategoryName={merchantSuggestionCategoryName}
+            onApplySuggestion={applyMerchantSuggestion}
           />
         </SummarySection>
 
-        <SummarySection
-          title="Detalles opcionales"
-          icon={InfoIcon}
-          collapsible
-          defaultOpen={isEdit}
-        >
-          <Controller
-            control={control}
-            name="description"
-            render={({ field }) => (
-              <FormTextField
-                label="Descripción"
-                icon={FileTextIcon}
-                value={field.value}
-                onChange={field.onChange}
-                onBlur={field.onBlur}
-              />
-            )}
-          />
-
-          <Controller
-            control={control}
-            name="notes"
-            render={({ field }) => (
-              <FormTextField
-                label="Notas"
-                icon={NotebookPenIcon}
-                value={field.value}
-                onChange={field.onChange}
-                onBlur={field.onBlur}
-              />
-            )}
-          />
-        </SummarySection>
+        <TransactionDetailsSection control={control} openByDefault={isEdit} />
 
         {!hasTargets && !accountsQuery.isPending && !cardsQuery.isPending ? (
           <p className="text-sm text-muted-foreground">
@@ -692,32 +519,23 @@ export function TransactionForm({
         ) : null}
       </FinanceFormScreen>
 
-      <CategoryPickerSheet
-        open={picker === "category"}
-        onOpenChange={closeHandlerFor("category")}
+      <TransactionFormSheets
+        picker={picker}
+        closeHandlerFor={closeHandlerFor}
         categories={categories}
         categoryType={categoryType}
-        onSelect={(next) => {
-          setValue("categoryId", next)
-          advanceToAmount()
-        }}
-      />
-
-      <FinanceCurrencyPickerSheet
-        open={picker === "currency"}
-        onOpenChange={closeHandlerFor("currency")}
-        value={currency || defaultCurrency}
-        onSelect={(next) => setValue("currency", next)}
-      />
-
-      <DestinationPickerSheet
-        open={picker === "destination"}
-        onOpenChange={closeHandlerFor("destination")}
+        currency={currency}
+        defaultCurrency={defaultCurrency}
         institutions={institutions}
         accounts={accounts}
         cards={cards}
-        display={{ ...display, currency: currency || display.currency }}
-        onSelect={(next) => {
+        display={display}
+        onSelectCategory={(next) => {
+          setValue("categoryId", next)
+          advanceToAmount()
+        }}
+        onSelectCurrency={(next) => setValue("currency", next)}
+        onSelectDestination={(next) => {
           setValue("destination", next, { shouldValidate: true })
           setGuidedStep("done")
         }}

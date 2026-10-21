@@ -1,15 +1,20 @@
 "use client"
 
-import { BrandLogo } from "@/src/modules/finance/shared/components/brand-logo"
-import {
-  AccountProductRow,
-  CardProductRow,
-} from "@/src/modules/finance/shared/components/product-rows"
-import { InstitutionProductEmpty } from "@/src/modules/finance/institutions/components/institution-product-lists"
 import { AccountSheet, CardBalanceSheet } from "@/src/modules/finance/catalog"
 import { FinanceGate } from "@/src/modules/finance/finance-gate"
-import { LoanProgressCard } from "@/src/modules/finance/loans"
+import { InstitutionDetailHero } from "@/src/modules/finance/institutions/components/institution-detail-hero"
+import { buildInstitutionOptions } from "@/src/modules/finance/institutions/components/institution-options"
+import {
+  InstitutionProductTabs,
+  type InstitutionProductTab,
+} from "@/src/modules/finance/institutions/components/institution-product-tabs"
 import { LinkInstitutionMailboxSheet } from "@/src/modules/finance/sync"
+import { ArchiveRecordDialog } from "@/src/modules/finance/shared/components/archive-record-dialog"
+import { DeleteRecordDialog } from "@/src/modules/finance/shared/components/delete-record-dialog"
+import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
+import { MissingRecord } from "@/src/modules/finance/shared/components/layout/missing-record"
+import { RecordOptionsSheet } from "@/src/modules/finance/shared/components/record-options-sheet"
+import { showUndoToast } from "@/src/modules/finance/shared/components/undo-toast"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
 import { useBalanceSheet } from "@/src/modules/finance/shared/hooks/use-balance-sheet"
@@ -22,64 +27,34 @@ import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-financ
 import {
   useArchiveInstitution,
   useDeleteInstitution,
+  useInstitutions,
   useRestoreInstitution,
   useUnarchiveInstitution,
-  useInstitutions,
 } from "@/src/modules/finance/shared/hooks/use-institutions"
 import { useLoans } from "@/src/modules/finance/shared/hooks/use-loans"
 import { useSheetListEntity } from "@/src/modules/finance/shared/hooks/use-sheet-entity"
-import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
-import { MissingRecord } from "@/src/modules/finance/shared/components/layout/missing-record"
+import { isCashInstitution } from "@/src/modules/finance/shared/lib/cash"
 import {
   financeErrorMessage,
   financeLoadErrorMessage,
 } from "@/src/modules/finance/shared/lib/finance-error"
-import { showUndoToast } from "@/src/modules/finance/shared/components/undo-toast"
 import {
   buildInstitutionStackItems,
   formatStackItemBalance,
 } from "@/src/modules/finance/shared/lib/institution-stack"
-import { isCashInstitution } from "@/src/modules/finance/shared/lib/cash"
-import {
-  formatFinanceMoney,
-  type FinanceMoneyDisplay,
-} from "@/src/modules/finance/shared/lib/money"
-import type { FinanceCashSummary } from "@/src/modules/finance/shared/types/entities"
-import { DeleteRecordDialog } from "@/src/modules/finance/shared/components/delete-record-dialog"
-import { ArchiveRecordDialog } from "@/src/modules/finance/shared/components/archive-record-dialog"
-import { RecordOptionsSheet } from "@/src/modules/finance/shared/components/record-options-sheet"
+import { ChatLauncherButton, useRegisterChatContext } from "@/src/modules/ai"
 import { LoadingView } from "@/src/shared/components/layout/loading-view"
 import { Button } from "@/src/shared/components/ui/button"
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/src/shared/components/ui/tabs"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
-import { ChatLauncherButton, useRegisterChatContext } from "@/src/modules/ai"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { appToast } from "@/src/shared/lib/app-toast"
-import {
-  ArchiveIcon,
-  Building2Icon,
-  CreditCardIcon,
-  HandCoinsIcon,
-  LandmarkIcon,
-  MailIcon,
-  MoreVerticalIcon,
-  PencilIcon,
-  PlusIcon,
-  RefreshCwIcon,
-  Trash2Icon,
-} from "lucide-react"
+import { Building2Icon, MoreVerticalIcon } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo, useState } from "react"
-import { ProductCountItem } from "@/src/modules/finance/products"
-import { Label } from "@/src/shared/components/ui/label"
 
 const FALLBACK_COLOR = "#1B4332"
+const INCOMPLETE_BALANCE_TEXT = "Balance incompleto"
 
 type InstitutionDetailScreenProps = {
   institutionId: string
@@ -119,7 +94,7 @@ function InstitutionDetailScreenBody({
   const restoreInstitution = useRestoreInstitution()
   const unarchiveInstitution = useUnarchiveInstitution()
 
-  const [tab, setTab] = useState<"accounts" | "cards" | "loans">("accounts")
+  const [tab, setTab] = useState<InstitutionProductTab>("accounts")
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [archiveConfirmOpen, setArchiveConfirmOpen] = useState(false)
   const { open: openOptionsSheet, setOpen: setOpenOptionsSheet } =
@@ -352,12 +327,44 @@ function InstitutionDetailScreenBody({
   const incompleteCard = incompleteIssue
     ? (cardsQuery.data ?? []).find((card) => card.id === incompleteIssue.cardId)
     : undefined
-  const institutionAccounts =
-    stackItem?.kind === "institution" ? stackItem.accounts : []
-  const institutionCards =
-    stackItem?.kind === "institution" ? stackItem.cards : []
-  const institutionLoans =
-    stackItem?.kind === "institution" ? stackItem.loans : []
+  const products = {
+    accounts: stackItem?.kind === "institution" ? stackItem.accounts : [],
+    cards: stackItem?.kind === "institution" ? stackItem.cards : [],
+    loans: stackItem?.kind === "institution" ? stackItem.loans : [],
+  }
+  const cash = stackItem?.kind === "institution" ? stackItem.cash : null
+  const balanceText = stackItem
+    ? formatStackItemBalance(stackItem, moneyDisplay)
+    : INCOMPLETE_BALANCE_TEXT
+  const isBusy = archiveInstitution.isPending || deleteInstitution.isPending
+
+  const options = buildInstitutionOptions({
+    linkedMailboxEmail: linkedMailbox?.emailAddress ?? null,
+    hasLinkedSource: Boolean(linkedSource),
+    emailSyncEnabled,
+    syncPending,
+    busy: isBusy,
+    onEdit: () =>
+      router.push(APP_ROUTES.app.financeInstitutionEdit(institutionId)),
+    onNewAccount: () => setOpenAccountSheet(true, null),
+    onNewCard: () =>
+      router.push(
+        `${APP_ROUTES.app.financeCardNew}?institutionId=${institutionId}`
+      ),
+    onNewLoan: () =>
+      router.push(
+        `${APP_ROUTES.app.financeLoanNew}?institutionId=${institutionId}`
+      ),
+    onLinkMailbox: () => setOpenLinkSheet(true),
+    onSyncMailbox: () => {
+      if (!linkedSource) {
+        return
+      }
+      void runSync(linkedSource.id)
+    },
+    onArchive: () => setArchiveConfirmOpen(true),
+    onDelete: () => setConfirmOpen(true),
+  })
 
   return (
     <>
@@ -384,273 +391,49 @@ function InstitutionDetailScreenBody({
       ) : null}
 
       <div className="-mx-4 -mt-4 flex flex-col gap-3 overflow-hidden md:-mx-6">
-        <div
-          className="rounded-b-3xl p-4 text-white md:p-6"
-          style={{
-            background: accent,
+        <InstitutionDetailHero
+          institution={institution}
+          accent={accent}
+          isCash={isCash}
+          counts={counts}
+          balanceText={balanceText}
+          incompleteCardName={incompleteCard?.name ?? null}
+          onCompleteLimit={() => {
+            if (!incompleteCard) {
+              return
+            }
+            setOpenCardBalanceSheet(true, incompleteCard.id)
           }}
-        >
-          <div className="flex items-center gap-3">
-            <BrandLogo
-              name={institution.name}
-              logoUrl={institution.logoUrl}
-              size={48}
-            />
-            <div className="flex min-w-0 flex-1 flex-col gap-1">
-              <h1 className="truncate text-2xl font-bold tracking-tight">
-                {institution.name}
-              </h1>
-              <div className="flex items-center gap-3 text-base font-semibold text-white tabular-nums">
-                <ProductCountItem
-                  icon={LandmarkIcon}
-                  count={counts.accounts}
-                  label="Cuentas"
-                />
-                {!isCash ? (
-                  <>
-                    <span className="h-4 w-px bg-white/40" />
-                    <ProductCountItem
-                      icon={CreditCardIcon}
-                      count={counts.cards}
-                      label="Tarjetas"
-                    />
-                    <span className="h-4 w-px bg-white/40" />
-                    <ProductCountItem
-                      icon={HandCoinsIcon}
-                      count={counts.loans}
-                      label="Préstamos"
-                    />
-                  </>
-                ) : null}
-              </div>
-            </div>
-          </div>
+        />
 
-          <div className="mt-8 flex flex-col gap-1 rounded-2xl bg-black/20 px-3 py-2">
-            <Label className="text-sm text-foreground">Saldo</Label>
-            <p className="text-3xl font-bold tracking-tight tabular-nums">
-              {formatStackItemBalance(stackItem!, moneyDisplay)}
-            </p>
-          </div>
-
-          {incompleteCard ? (
-            <Button
-              type="button"
-              variant="secondary"
-              className="mt-4 bg-white/15 text-white hover:bg-white/25"
-              onClick={() => setOpenCardBalanceSheet(true, incompleteCard.id)}
-            >
-              <PencilIcon className="size-4 shrink-0" />
-              Completar límite de {incompleteCard.name}
-            </Button>
-          ) : null}
-        </div>
-
-        <div className="mx-4 flex flex-col gap-3 rounded-3xl bg-background">
-          <Tabs
-            className="flex w-full flex-col gap-4 p-1.5"
-            value={tab}
-            onValueChange={setTab}
-          >
-            <TabsList className="w-full rounded-2xl bg-background">
-              <TabsTrigger value="accounts" className="rounded-2xl py-4">
-                <LandmarkIcon className="size-4 shrink-0" />
-                Cuentas
-              </TabsTrigger>
-              {!isCash ? (
-                <TabsTrigger value="cards" className="rounded-2xl py-4">
-                  <CreditCardIcon className="size-4 shrink-0" />
-                  Tarjetas
-                </TabsTrigger>
-              ) : null}
-              {!isCash ? (
-                <TabsTrigger value="loans" className="rounded-2xl py-4">
-                  <HandCoinsIcon className="size-4 shrink-0" />
-                  Préstamos
-                </TabsTrigger>
-              ) : null}
-            </TabsList>
-
-            {/* Panels are rendered by the parent for layout control */}
-            <TabsContent value="accounts" className="flex flex-col gap-3">
-              {isCash && stackItem?.kind === "institution" && stackItem.cash ? (
-                <CashBreakdown cash={stackItem.cash} display={moneyDisplay} />
-              ) : null}
-              {institutionAccounts.length === 0 ? (
-                <InstitutionProductEmpty
-                  tab="accounts"
-                  onCreate={() => setOpenAccountSheet(true, null)}
-                />
-              ) : (
-                institutionAccounts.map((account) => (
-                  <AccountProductRow
-                    key={account.id}
-                    account={account}
-                    display={display}
-                    href={APP_ROUTES.app.financeInstitutionAccount(
-                      institutionId,
-                      account.id
-                    )}
-                  />
-                ))
-              )}
-              {isCash ? (
-                <Button
-                  variant="ghost"
-                  className="self-start text-muted-foreground"
-                  onClick={() => setOpenAccountSheet(true, null)}
-                >
-                  <PlusIcon className="size-4 shrink-0" />
-                  Agregar cuenta
-                </Button>
-              ) : null}
-            </TabsContent>
-
-            {!isCash ? (
-              <>
-                <TabsContent value="cards" className="flex flex-col gap-3">
-                  {institutionCards.length === 0 ? (
-                    <InstitutionProductEmpty
-                      tab="cards"
-                      onCreate={() =>
-                        router.push(
-                          `${APP_ROUTES.app.financeCardNew}?institutionId=${institutionId}`
-                        )
-                      }
-                    />
-                  ) : (
-                    institutionCards.map((card) => (
-                      <CardProductRow
-                        key={card.id}
-                        card={card}
-                        accounts={accounts}
-                        display={display}
-                        href={
-                          card.type === "DEBIT" && card.accountId
-                            ? APP_ROUTES.app.financeInstitutionAccount(
-                                institutionId,
-                                card.accountId
-                              )
-                            : APP_ROUTES.app.financeInstitutionCard(
-                                institutionId,
-                                card.id
-                              )
-                        }
-                      />
-                    ))
-                  )}
-                </TabsContent>
-
-                <TabsContent value="loans" className="flex flex-col gap-3">
-                  {institutionLoans.length === 0 ? (
-                    <InstitutionProductEmpty
-                      tab="loans"
-                      onCreate={() =>
-                        router.push(
-                          `${APP_ROUTES.app.financeLoanNew}?institutionId=${institutionId}`
-                        )
-                      }
-                    />
-                  ) : (
-                    institutionLoans.map((loan) => (
-                      <LoanProgressCard
-                        key={loan.id}
-                        loan={loan}
-                        display={display}
-                        institution={institution}
-                        href={APP_ROUTES.app.financeLoan(loan.id)}
-                      />
-                    ))
-                  )}
-                </TabsContent>
-              </>
-            ) : null}
-          </Tabs>
-        </div>
+        <InstitutionProductTabs
+          tab={tab}
+          onTabChange={setTab}
+          institution={institution}
+          isCash={isCash}
+          cash={cash}
+          products={products}
+          allAccounts={accounts}
+          display={display}
+          onCreate={{
+            account: () => setOpenAccountSheet(true, null),
+            card: () =>
+              router.push(
+                `${APP_ROUTES.app.financeCardNew}?institutionId=${institutionId}`
+              ),
+            loan: () =>
+              router.push(
+                `${APP_ROUTES.app.financeLoanNew}?institutionId=${institutionId}`
+              ),
+          }}
+        />
       </div>
 
       <RecordOptionsSheet
         open={openOptionsSheet}
         onOpenChange={setOpenOptionsSheet}
         description={institution.name}
-        options={[
-          {
-            id: "edit",
-            title: "Editar institución",
-            icon: PencilIcon,
-            onPress: () =>
-              router.push(
-                APP_ROUTES.app.financeInstitutionEdit(institution.id)
-              ),
-          },
-          {
-            id: "new-account",
-            title: "Nueva cuenta",
-            icon: LandmarkIcon,
-            onPress: () => setOpenAccountSheet(true, null),
-          },
-          {
-            id: "new-card",
-            title: "Nueva tarjeta",
-            icon: CreditCardIcon,
-            onPress: () =>
-              router.push(
-                `${APP_ROUTES.app.financeCardNew}?institutionId=${institutionId}`
-              ),
-          },
-          {
-            id: "new-loan",
-            title: "Nuevo préstamo",
-            icon: HandCoinsIcon,
-            onPress: () =>
-              router.push(
-                `${APP_ROUTES.app.financeLoanNew}?institutionId=${institutionId}`
-              ),
-          },
-          {
-            id: "link-mailbox",
-            title: "Vincular correo",
-            description: linkedMailbox
-              ? `Conectada a ${linkedMailbox.emailAddress}`
-              : "Liga un Gmail ya conectado",
-            icon: MailIcon,
-            disabled: Boolean(linkedMailbox),
-            showChevron: !linkedMailbox,
-            onPress: () => setOpenLinkSheet(true),
-          },
-          ...(linkedSource
-            ? [
-                {
-                  id: "sync-mailbox",
-                  title: "Sincronizar correo",
-                  description: emailSyncEnabled
-                    ? "Leer transacciones nuevas del banco"
-                    : "Actívala en Ajustes → Finanzas",
-                  icon: RefreshCwIcon,
-                  disabled: !emailSyncEnabled || syncPending,
-                  showChevron: false,
-                  onPress: () => void runSync(linkedSource.id),
-                },
-              ]
-            : []),
-          {
-            id: "archive",
-            title: "Archivar",
-            icon: ArchiveIcon,
-            disabled:
-              archiveInstitution.isPending || deleteInstitution.isPending,
-            onPress: () => setArchiveConfirmOpen(true),
-          },
-          {
-            id: "delete",
-            title: "Eliminar",
-            icon: Trash2Icon,
-            destructive: true,
-            disabled:
-              archiveInstitution.isPending || deleteInstitution.isPending,
-            onPress: () => setConfirmOpen(true),
-          },
-        ]}
+        options={options}
       />
 
       <DeleteRecordDialog
@@ -706,41 +489,5 @@ function InstitutionDetailScreenBody({
         emailSyncEnabled={emailSyncEnabled}
       />
     </>
-  )
-}
-
-function CashBreakdown({
-  cash,
-  display,
-}: {
-  cash: FinanceCashSummary
-  display: FinanceMoneyDisplay
-}) {
-  return (
-    <div className="flex flex-col gap-2 rounded-2xl border border-border bg-card px-3 py-3">
-      <p className="text-sm font-medium text-muted-foreground">Por moneda</p>
-      {cash.byCurrency.map((row) => (
-        <div
-          key={row.currency}
-          className="flex items-baseline justify-between gap-2"
-        >
-          <span className="text-sm font-medium">{row.currency}</span>
-          <span className="text-sm tabular-nums">
-            {formatFinanceMoney(row.total, {
-              ...display,
-              currency: row.currency,
-            })}
-            {row.totalBase === null
-              ? " · sin tasa"
-              : ` · ${formatFinanceMoney(row.totalBase, display)}`}
-          </span>
-        </div>
-      ))}
-      {cash.totalBase === null ? (
-        <p className="text-xs text-muted-foreground">
-          Balance incompleto: falta una tasa de cambio.
-        </p>
-      ) : null}
-    </div>
   )
 }
