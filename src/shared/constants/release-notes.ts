@@ -12,6 +12,12 @@ export type ReleaseNotesEntry = {
 
 export const RELEASE_NOTES: readonly ReleaseNotesEntry[] = [
   {
+    version: "0.47.8",
+    highlights: [
+      "Cuando ya conciliaste todos los productos del mes, el aviso de productos sin conciliar deja de aparecer.",
+    ],
+  },
+  {
     version: "0.47.7",
     highlights: [
       "El aviso de productos sin conciliar cuenta lo mismo que muestra, resume los que sobran con «+N más» y te lleva a conciliar el producto con un toque.",

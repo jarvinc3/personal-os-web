@@ -2,6 +2,16 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.47.8] - 2026-10-20
+
+### Cambiado
+
+- Interno: el encabezado y los chips del banner de conciliación comparten una sola definición, y el alta de la categoría del presupuesto sale de la vista con un nombre propio. Sin cambio de comportamiento.
+
+### Corregido
+
+- El banner de productos sin conciliar desaparece cuando ya no queda ninguno, en vez de quedarse con el mensaje de todo conciliado (#205).
+
 ## [0.47.7] - 2026-10-20
 
 ### Cambiado
