@@ -16,6 +16,8 @@ import { setPendingDataWipe } from "@/src/modules/settings/lib/pending-data-wipe
 import { resolveReauthConfirmMode } from "@/src/modules/settings/lib/wipe-confirm"
 import {
   applyWipeLayerToggle,
+  toggleWipeGroupLayers,
+  wipeGroupChecked,
   expandWipeLayerSelection,
   sortWipeLayers,
   WIPE_LAYER_DESCRIPTIONS,
@@ -95,32 +97,6 @@ const WIPE_LAYER_ICONS: Record<WipeLayerId, LucideIcon> = {
   [WIPE_LAYERS.AI_SESSIONS]: Bot,
   [WIPE_LAYERS.NOTIFICATIONS]: Bell,
   [WIPE_LAYERS.SETTINGS_DEFAULTS]: RotateCcw,
-}
-
-function groupChecked(
-  layers: readonly WipeLayerId[],
-  selected: readonly WipeLayerId[]
-): boolean | "indeterminate" {
-  const count = layers.filter((layer) => selected.includes(layer)).length
-  if (count === 0) {
-    return false
-  }
-  if (count === layers.length) {
-    return true
-  }
-  return "indeterminate"
-}
-
-function toggleGroupLayers(
-  current: readonly WipeLayerId[],
-  layers: readonly WipeLayerId[],
-  checked: boolean
-): WipeLayerId[] {
-  const order = checked ? layers : [...layers].reverse()
-  return order.reduce<WipeLayerId[]>(
-    (next, layer) => applyWipeLayerToggle(next, layer, checked),
-    [...current]
-  )
 }
 
 type WipeUserDataViewProps = {
@@ -210,7 +186,7 @@ export function WipeUserDataView({ email }: WipeUserDataViewProps) {
     layers: readonly WipeLayerId[],
     checked: boolean
   ) => {
-    setSelected((current) => toggleGroupLayers(current, layers, checked))
+    setSelected((current) => toggleWipeGroupLayers(current, layers, checked))
   }
 
   const clearPassword = () => {
@@ -367,9 +343,9 @@ export function WipeUserDataView({ email }: WipeUserDataViewProps) {
             right={
               group.layers.length > 1 ? (
                 <Checkbox
-                  checked={groupChecked(group.layers, selected) === true}
+                  checked={wipeGroupChecked(group.layers, selected) === true}
                   indeterminate={
-                    groupChecked(group.layers, selected) === "indeterminate"
+                    wipeGroupChecked(group.layers, selected) === "indeterminate"
                   }
                   onCheckedChange={(value) =>
                     handleToggleGroup(group.layers, value === true)

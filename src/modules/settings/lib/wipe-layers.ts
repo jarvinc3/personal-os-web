@@ -136,3 +136,31 @@ export function applyWipeLayerToggle(
   }
   return sortWipeLayers([...next])
 }
+
+/** Checkbox state of a group whose layers can be all, none or in between. */
+export function wipeGroupChecked(
+  layers: readonly WipeLayerId[],
+  selected: readonly WipeLayerId[]
+): boolean | "indeterminate" {
+  const count = layers.filter((layer) => selected.includes(layer)).length
+  if (count === 0) {
+    return false
+  }
+  if (count === layers.length) {
+    return true
+  }
+  return "indeterminate"
+}
+
+/** Applies one group checkbox change over every layer of the group. */
+export function toggleWipeGroupLayers(
+  current: readonly WipeLayerId[],
+  layers: readonly WipeLayerId[],
+  checked: boolean
+): WipeLayerId[] {
+  const order = checked ? layers : [...layers].reverse()
+  return order.reduce<WipeLayerId[]>(
+    (next, layer) => applyWipeLayerToggle(next, layer, checked),
+    [...current]
+  )
+}

@@ -12,6 +12,12 @@ export type ReleaseNotesEntry = {
 
 export const RELEASE_NOTES: readonly ReleaseNotesEntry[] = [
   {
+    version: "0.49.5",
+    highlights: [
+      "Sin cambios visibles: las pantallas de Planificación, Notificaciones, Suscripciones y el formulario de institución quedan iguales por dentro, ordenadas en piezas más pequeñas.",
+    ],
+  },
+  {
     version: "0.49.4",
     highlights: [
       "Sin cambios visibles: los formularios de movimiento y de transferencia comparten internamente la fecha y su interruptor de estado.",
