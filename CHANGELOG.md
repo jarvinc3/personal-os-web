@@ -2,6 +2,17 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.49.5] - 2026-10-21
+
+### Cambiado
+
+- El detalle de una suscripción se parte en encabezado, pestañas de resumen, pagos y precio, y acciones de estado; cada pestaña pide sus propios pagos (#154).
+- La lista de Planificación delega cada pestaña en su componente y el botón de crear en uno propio; la leyenda de lo que falta pasa a una lib con pruebas (#154).
+- Notificaciones separa filtros, lista agrupada, estado vacío, menú y hoja de configuración en archivos propios (#154).
+- El formulario de institución separa el catálogo del primer paso, el paso de productos, la tarjeta de vista previa y las secciones del formulario; la selección por grupos del borrado de datos pasa a una lib con pruebas (#154).
+
+Sin cambio de comportamiento visible.
+
 ## [0.49.4] - 2026-10-21
 
 ### Cambiado
