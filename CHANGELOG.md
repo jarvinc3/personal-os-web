@@ -2,6 +2,12 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.50.1] - 2026-10-21
+
+### Corregido
+
+- Los totales de Cobros ya no cuentan un cobro con el monto ilegible como cero: la pantalla falla de forma explícita y nombra el cobro, en vez de mostrar una cifra inventada (#191).
+
 ## [0.50.0] - 2026-10-21
 
 ### Agregado
