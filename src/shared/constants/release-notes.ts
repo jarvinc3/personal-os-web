@@ -12,6 +12,13 @@ export type ReleaseNotesEntry = {
 
 export const RELEASE_NOTES: readonly ReleaseNotesEntry[] = [
   {
+    version: "0.54.2",
+    highlights: [
+      "Un gasto ya no deja una cuenta de efectivo en negativo: la app lo bloquea y te dice cuánto tienes disponible.",
+      "En una cuenta bancaria, si el gasto supera el saldo, la app muestra cómo quedaría la cuenta y pide confirmación antes de guardar.",
+    ],
+  },
+  {
     version: "0.54.1",
     highlights: [
       "Sin cambios visibles: el Centro de ayuda queda igual por dentro, con los enlaces y la búsqueda más ordenados.",

@@ -2,6 +2,12 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.54.2] - 2026-10-21
+
+### Corregido
+
+- Un gasto que deja una cuenta de efectivo en negativo se bloquea con el saldo disponible; en una cuenta bancaria, la app muestra el saldo que quedaría y pide confirmación antes de guardar (#193).
+
 ## [0.54.1] - 2026-10-21
 
 ### Cambiado
