@@ -47,10 +47,19 @@ export type PrivacyPreference = {
   crashReportsEnabled: boolean
 }
 
+/** `Date.getDay()` values the product supports. */
+export type WeekStartsOn = 0 | 1 | 6
+
+export type RegionalPreference = {
+  /** `null` resolves the first day from the profile locale. */
+  weekStartsOn: WeekStartsOn | null
+}
+
 export type UserPreferences = {
   version: number
   theme: ThemePreference
   onboarding: OnboardingPreference
+  regional: RegionalPreference
   ai: AIPreferences
   notifications: NotificationsPreference
   privacy: PrivacyPreference

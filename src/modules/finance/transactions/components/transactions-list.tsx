@@ -16,6 +16,7 @@ import {
   financeLoadErrorMessage,
 } from "@/src/modules/finance/shared/lib/finance-error"
 import { buildTimelineMonths } from "@/src/modules/finance/shared/lib/group-transactions-timeline"
+import { useWeekStartsOn } from "@/src/modules/settings/hooks/use-week-starts-on"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
 import {
   extendMonthRange,
@@ -135,9 +136,10 @@ export function FinanceTransactionsList({
     {},
     currentMonthKey
   )
+  const weekStartsOn = useWeekStartsOn()
   const timeline = useMemo(
-    () => buildTimelineMonths(months, timelineQuery.items),
-    [months, timelineQuery.items]
+    () => buildTimelineMonths({ months, items: timelineQuery.items, weekStartsOn }),
+    [months, timelineQuery.items, weekStartsOn]
   )
   const activeMonth = timeline.find((month) => month.key === activeMonthKey)
 

@@ -2,8 +2,15 @@ import assert from "node:assert/strict"
 import { describe, it } from "node:test"
 
 import type { FinanceTransaction } from "../types/entities.ts"
-import { buildTimelineMonths } from "./group-transactions-timeline.ts"
+import {
+  buildTimelineMonths as buildTimeline,
+} from "./group-transactions-timeline.ts"
+import type { YearMonth } from "./month-window.ts"
 import { monthBannerSrc } from "./month-banners.ts"
+
+function buildTimelineMonths(months: YearMonth[], items: FinanceTransaction[]) {
+  return buildTimeline({ months, items, weekStartsOn: 0 })
+}
 
 function tx(
   partial: Pick<
@@ -327,5 +334,21 @@ describe("buildTimelineMonths", () => {
       rows.every((group) => group.reversal === undefined),
       true
     )
+  })
+
+  it("starts the month weeks on Monday when the profile asks for it", () => {
+    const months = buildTimeline({
+      months: [{ year: 2026, month: 4 }],
+      items: [
+        tx({
+          id: "debit-2",
+          type: "DEBIT",
+          amount: "25.00",
+          transactionDate: "2026-04-02T00:00:00.000Z",
+        }),
+      ],
+      weekStartsOn: 1,
+    })
+    assert.equal(months[0]?.weeks[0]?.label, "mie 1 - dom 5")
   })
 })

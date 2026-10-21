@@ -31,6 +31,7 @@ import {
 } from "@/src/modules/finance/subscriptions/lib/subscription-calendar"
 import { billingLabel } from "@/src/modules/finance/subscriptions/lib/subscription-timing"
 import { FinanceMonthPicker } from "@/src/modules/finance/transactions/components/month-picker"
+import { useWeekStartsOn } from "@/src/modules/settings/hooks/use-week-starts-on"
 import {
   Empty,
   EmptyDescription,
@@ -63,6 +64,7 @@ function SubscriptionsCalendarBody() {
   const [today] = useState(() => new Date())
   const [month, setMonth] = useState<MonthKey>(monthKeyFromDate(today))
   const windowDays = config.subscriptions.reminderDaysBefore
+  const weekStartsOn = useWeekStartsOn(config.weekStartsOn)
   const display = {
     currency: config.baseCurrency,
     showCents: config.display.showCents,
@@ -99,9 +101,9 @@ function SubscriptionsCalendarBody() {
         charges,
         today,
         windowDays,
-        weekStartsOn: config.weekStartsOn === 1 ? 1 : 0,
+        weekStartsOn,
       }),
-    [parsedMonth, charges, today, windowDays, config.weekStartsOn]
+    [parsedMonth, charges, today, windowDays, weekStartsOn]
   )
   const summaryLabel = subscriptionChargeSummaryLabel({
     summary: subscriptionChargeSummary({

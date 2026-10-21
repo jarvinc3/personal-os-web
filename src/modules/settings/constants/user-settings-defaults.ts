@@ -11,6 +11,9 @@ export const DEFAULT_USER_PREFERENCES: UserPreferences = {
     fieldGuide: "Flujo inicial de Personal OS, no de una app.",
     completed: false,
   },
+  regional: {
+    weekStartsOn: null,
+  },
   ai: {
     fieldGuide: "Comportamiento del agente en toda la app.",
     tone: "balanced",

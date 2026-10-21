@@ -7,6 +7,7 @@ import {
   Bell,
   BookOpen,
   Bot,
+  CalendarRange,
   ChartBarIcon,
   ClockFading,
   Cpu,
@@ -114,6 +115,7 @@ export const SETTINGS_REGISTRY = {
     fullName: User,
     avatar: Image,
     timeZone: Globe,
+    weekStartsOn: CalendarRange,
   }),
   appearance: {
     ...createSection("#F59E0B", { theme: Palette }),
