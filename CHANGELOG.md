@@ -2,6 +2,15 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.49.4] - 2026-10-21
+
+### Cambiado
+
+- La fecha con su interruptor de estado se escribe una sola vez y la usan el formulario de movimiento y el de transferencia; antes cada uno tenía su copia (#154).
+- Las secciones de importe de transferencia y de saldos de tarjeta, y el menú de la institución, reciben sus datos y acciones agrupados en vez de una lista larga de parámetros sueltos (#154).
+
+Sin cambio de comportamiento visible.
+
 ## [0.49.3] - 2026-10-21
 
 ### Corregido
