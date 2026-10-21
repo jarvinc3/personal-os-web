@@ -79,11 +79,12 @@ function SavingsGoalDetailScreenBody({
   goalId,
 }: FinanceSavingsGoalDetailProps) {
   const router = useRouter()
-  const { isEnabled, config } = useFinanceEnabled()
+  const { isEnabled, config, formatLocale } = useFinanceEnabled()
   const display = {
     currency: config.baseCurrency,
     showCents: config.display.showCents,
     compactNumbers: config.display.compactNumbers,
+    locale: formatLocale,
   }
 
   const goalsQuery = useSavingsGoals(isEnabled)

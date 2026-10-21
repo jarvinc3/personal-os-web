@@ -46,7 +46,7 @@ describe("transactionSchema", () => {
       amount: "99999999999",
     })
     assert.equal(parsed.success, false)
-    assert.match(parsed.error?.issues[0]?.message ?? "", /^Monto máximo /)
+    assert.match(parsed.error?.issues[0]?.message ?? "", /máximo permitido/)
   })
 
   it("accepts an amount with two decimals", () => {

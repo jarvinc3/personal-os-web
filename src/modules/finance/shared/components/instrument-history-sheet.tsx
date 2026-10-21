@@ -92,7 +92,8 @@ export function InstrumentHistorySheet({
                 key={item.id}
                 title={instrumentHistoryLabel(item)}
                 description={formatFinanceDateTimeLabel(
-                  instantToZonedWallTime(item.at, timeZone)
+                  instantToZonedWallTime(item.at, timeZone),
+                  display.locale
                 )}
                 icon={Settings2Icon}
                 value={transition ?? amount ?? undefined}

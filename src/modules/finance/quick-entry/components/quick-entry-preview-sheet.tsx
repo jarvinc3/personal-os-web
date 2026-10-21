@@ -64,7 +64,7 @@ export function QuickEntryPreviewSheet({
   parseResult,
 }: QuickEntryPreviewSheetProps) {
   const router = useRouter()
-  const { config } = useFinanceEnabled()
+  const { config, formatLocale } = useFinanceEnabled()
   const accounts = useAccounts(open).data ?? []
   const cards = useCards(open).data ?? []
   const institutions = useInstitutions(open).data ?? []
@@ -89,6 +89,7 @@ export function QuickEntryPreviewSheet({
     currency: config.baseCurrency,
     showCents: config.display.showCents,
     compactNumbers: config.display.compactNumbers,
+    locale: formatLocale,
   }
   const selectedCategory =
     categories.find((category) => category.id === categoryId) ?? null

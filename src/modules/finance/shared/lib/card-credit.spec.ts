@@ -38,10 +38,14 @@ describe("nextCycleNote", () => {
   const now = new Date(2026, 1, 12, 9, 30)
 
   it("joins the next closing and the payment countdown", () => {
-    const note = nextCycleNote(
-      { nextStatementDate: "2026-02-28", nextPaymentDueDate: "2026-02-15" },
-      now
-    )
+    const note = nextCycleNote({
+      card: {
+        nextStatementDate: "2026-02-28",
+        nextPaymentDueDate: "2026-02-15",
+      },
+      locale: "es-DO",
+      now,
+    })
     assert.ok(note)
     assert.match(note, /Próximo corte/)
     assert.match(note, /Vence en 3 días/)
@@ -49,17 +53,22 @@ describe("nextCycleNote", () => {
 
   it("keeps only the countdown when the card has no closing date", () => {
     assert.equal(
-      nextCycleNote(
-        { nextStatementDate: null, nextPaymentDueDate: "2026-02-15" },
-        now
-      ),
+      nextCycleNote({
+        card: { nextStatementDate: null, nextPaymentDueDate: "2026-02-15" },
+        locale: "es-DO",
+        now,
+      }),
       "Vence en 3 días"
     )
   })
 
   it("returns null without any projected date", () => {
     assert.equal(
-      nextCycleNote({ nextStatementDate: null, nextPaymentDueDate: null }, now),
+      nextCycleNote({
+        card: { nextStatementDate: null, nextPaymentDueDate: null },
+        locale: "es-DO",
+        now,
+      }),
       null
     )
   })

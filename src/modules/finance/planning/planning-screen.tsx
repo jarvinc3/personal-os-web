@@ -22,7 +22,7 @@ export function PlanningScreen() {
 }
 
 function PlanningScreenBody() {
-  const { isEnabled, config } = useFinanceEnabled()
+  const { isEnabled, config, formatLocale } = useFinanceEnabled()
   const searchParams = useSearchParams()
   const [tab, setTab] = useState<PlanningTab>(() =>
     readShareMode(searchParams).active
@@ -33,6 +33,7 @@ function PlanningScreenBody() {
     currency: config.baseCurrency,
     showCents: config.display.showCents,
     compactNumbers: config.display.compactNumbers,
+    locale: formatLocale,
   }
 
   return (

@@ -185,10 +185,16 @@ describe("formatTransactionDate", () => {
       month: "short",
       day: "numeric",
     })
-    assert.equal(formatTransactionDate("2026-09-18T00:00:00.000Z"), expected)
-    assert.equal(formatTransactionDate("2026-09-18"), expected)
-    assert.match(formatTransactionDate("2026-09-18T00:00:00.000Z"), /18/)
-    assert.match(formatTransactionDate("2026-09-18T00:00:00.000Z"), /2026/)
+    assert.equal(
+      formatTransactionDate("2026-09-18T00:00:00.000Z", "es"),
+      expected
+    )
+    assert.equal(formatTransactionDate("2026-09-18", "es"), expected)
+    assert.match(formatTransactionDate("2026-09-18T00:00:00.000Z", "es"), /18/)
+    assert.match(
+      formatTransactionDate("2026-09-18T00:00:00.000Z", "es"),
+      /2026/
+    )
   })
 })
 

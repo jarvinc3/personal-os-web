@@ -88,6 +88,7 @@ export function TransferFxSection({
                 rate: marketRate,
                 sourceCurrency,
                 destinationCurrency,
+                locale: display.locale,
               })}`}
         </span>
         {receivedPreview !== null ? (

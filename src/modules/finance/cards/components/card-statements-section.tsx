@@ -6,6 +6,7 @@ import { StatementImportButton } from "@/src/modules/finance/shared/components/s
 import { InfiniteListSentinel } from "@/src/shared/components/ui/infinite-list-sentinel"
 import { CardStatementSheet } from "@/src/modules/finance/cards/components/card-statement-sheet"
 import { formatCalendarDate } from "@/src/modules/finance/shared/lib/ledger-form"
+import { useFormatLocale } from "@/src/modules/settings/hooks/use-format-locale"
 import {
   formatFinanceMoney,
   parseFinanceMoney,
@@ -70,13 +71,18 @@ function CycleDates({
   cycleEnd: string
   dueDate: string | null
 }) {
+  const formatLocale = useFormatLocale()
   return (
     <div className="flex gap-3">
       <CalendarIcon className="size-5 shrink-0 text-muted-foreground" />
       <div>
-        <p className="font-semibold">Corte {formatCalendarDate(cycleEnd)}</p>
+        <p className="font-semibold">
+          Corte {formatCalendarDate(cycleEnd, formatLocale)}
+        </p>
         <p className="text-sm text-muted-foreground">
-          {dueDate ? `Vence ${formatCalendarDate(dueDate)}` : "Sin vencimiento"}
+          {dueDate
+            ? `Vence ${formatCalendarDate(dueDate, formatLocale)}`
+            : "Sin vencimiento"}
         </p>
       </div>
     </div>

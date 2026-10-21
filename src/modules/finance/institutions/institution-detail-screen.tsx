@@ -74,11 +74,13 @@ function InstitutionDetailScreenBody({
   institutionId,
 }: InstitutionDetailScreenProps) {
   const router = useRouter()
-  const { isEnabled, config, emailSyncEnabled } = useFinanceEnabled()
+  const { isEnabled, config, emailSyncEnabled, formatLocale } =
+    useFinanceEnabled()
   const display = {
     currency: config.baseCurrency,
     showCents: config.display.showCents,
     compactNumbers: config.display.compactNumbers,
+    locale: formatLocale,
   }
 
   const institutionsQuery = useInstitutions(isEnabled)

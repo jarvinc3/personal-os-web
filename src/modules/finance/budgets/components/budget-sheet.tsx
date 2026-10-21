@@ -129,7 +129,7 @@ export function BudgetSheet({
   const createMutation = useCreateBudget()
   const updateMutation = useUpdateBudget()
   const isPending = createMutation.isPending || updateMutation.isPending
-  const { config } = useFinanceEnabled()
+  const { config, formatLocale } = useFinanceEnabled()
   const baseCurrency = config.baseCurrency
   const expenseCategories = useMemo(
     () => filterCategoriesByType(categories, "EXPENSE"),
@@ -174,6 +174,7 @@ export function BudgetSheet({
     currency: baseCurrency,
     showCents: config.display.showCents,
     compactNumbers: config.display.compactNumbers,
+    locale: formatLocale,
   }
   const historyRange = useMemo(() => previousMonthsBounds(new Date(), 3), [])
   const historyQuery = useAllTransactions(open && categoryIds.length > 0, {
@@ -405,8 +406,8 @@ export function BudgetSheet({
             </>
           ) : (
             <FinanceHelpText>
-              {formatFinanceDateLabel(periodStart)} —{" "}
-              {formatFinanceDateLabel(periodEnd)}
+              {formatFinanceDateLabel(periodStart, display.locale)} —{" "}
+              {formatFinanceDateLabel(periodEnd, display.locale)}
             </FinanceHelpText>
           )}
         </SummarySection>

@@ -49,6 +49,7 @@ import {
 } from "lucide-react"
 
 import { BrandLogo } from "@/src/modules/finance/shared/components/brand-logo"
+import { useFormatLocale } from "@/src/modules/settings/hooks/use-format-locale"
 
 const ARCHIVED_TYPE_LABEL: Record<FinanceArchivedType, string> = {
   institution: "Institución",
@@ -140,6 +141,7 @@ function RecycleBinEmpty({
 }
 
 export function RecycleBinView() {
+  const formatLocale = useFormatLocale()
   const { isEnabled } = useFinanceEnabled()
   const recycleBinQuery = useRecycleBin(isEnabled)
   const restore = useRecycleBinRestore()
@@ -203,7 +205,7 @@ export function RecycleBinView() {
       <SummaryItem
         key={`${record.type}-${record.id}`}
         title={record.label ?? typeLabel}
-        description={`${typeLabel} · ${formatCalendarDate(record.deletedAt)}${
+        description={`${typeLabel} · ${formatCalendarDate(record.deletedAt, formatLocale)}${
           slowRestore ? " · Muchos datos, restaurar puede tardar" : ""
         }`}
         icon={deletedIcon(record.type)}

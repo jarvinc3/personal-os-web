@@ -89,14 +89,14 @@ export function FinanceHeroSection({
       return "…"
     }
     if (netWorthComplete) {
-      return formatCompactFinanceAmount(netWorth)
+      return formatCompactFinanceAmount(netWorth, display.locale)
     }
     return "—"
   })()
 
   const centerLabel = activeSlice ? activeSlice.name : "Total"
   const centerValue = activeSlice
-    ? formatCompactFinanceAmount(activeSlice.signedValue)
+    ? formatCompactFinanceAmount(activeSlice.signedValue, display.locale)
     : compactNetWorthFallback
   const centerDebt = activeSlice?.debtLabel ?? null
 

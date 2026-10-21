@@ -58,7 +58,7 @@ export function CardPaymentSheet({
   closingBalance,
 }: CardPaymentSheetProps) {
   const createMutation = useCreateCardPayment()
-  const { config } = useFinanceEnabled()
+  const { config, formatLocale } = useFinanceEnabled()
   const accountsQuery = useAccounts(open)
   const institutionsQuery = useInstitutions(open)
   const [currency, setCurrency] = useState(currencies[0] ?? defaultCurrency)
@@ -80,8 +80,14 @@ export function CardPaymentSheet({
       currency,
       showCents: config.display.showCents,
       compactNumbers: config.display.compactNumbers,
+      locale: formatLocale,
     }),
-    [currency, config.display.compactNumbers, config.display.showCents]
+    [
+      currency,
+      config.display.compactNumbers,
+      config.display.showCents,
+      formatLocale,
+    ]
   )
 
   const effectiveAccountId = accountId || accounts[0]?.id || ""

@@ -44,6 +44,6 @@ export function budgetsFromPayload(
   }
 }
 
-export function formatBudgetPeriodDate(value: string): string {
-  return formatCalendarDate(value)
+export function formatBudgetPeriodDate(value: string, locale: string): string {
+  return formatCalendarDate(value, locale)
 }

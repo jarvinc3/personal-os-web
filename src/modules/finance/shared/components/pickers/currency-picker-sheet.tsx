@@ -8,6 +8,7 @@ import { useCurrencies } from "@/src/modules/finance/shared/hooks/use-currencies
 import { currencyDisplayName } from "@/src/modules/finance/shared/lib/currency-display-name"
 import { foldSearchText } from "@/src/modules/finance/shared/lib/search-text"
 import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
+import { useFormatLocale } from "@/src/modules/settings/hooks/use-format-locale"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
 import { FormTextField } from "@/src/shared/components/layout/form-blocks"
 import { Spinner } from "@/src/shared/components/ui/spinner"
@@ -36,7 +37,8 @@ type CurrencyPickerSheetProps = {
 
 function formatQuote(
   rate: string | null | undefined,
-  currency: string
+  currency: string,
+  locale: string
 ): string {
   if (rate == null || rate === "") {
     return "—"
@@ -45,6 +47,7 @@ function formatQuote(
     currency,
     showCents: true,
     compactNumbers: false,
+    locale,
   })
 }
 
@@ -62,6 +65,7 @@ export function CurrencyPickerSheet({
   quotes,
   quoteCurrency,
 }: CurrencyPickerSheetProps) {
+  const formatLocale = useFormatLocale()
   const [search, setSearch] = useState("")
   const restricted = allowedCodes !== undefined
   const currenciesQuery = useCurrencies(enabled && open && !restricted)
@@ -189,7 +193,11 @@ export function CurrencyPickerSheet({
                     <span className="text-sm text-muted-foreground tabular-nums">
                       {code === quoteCurrency
                         ? "Principal"
-                        : formatQuote(quotes?.get(code), quoteCurrency ?? "")}
+                        : formatQuote(
+                            quotes?.get(code),
+                            quoteCurrency ?? "",
+                            formatLocale
+                          )}
                     </span>
                   ) : null}
                   {selected ? <CheckIcon className="size-4" /> : null}

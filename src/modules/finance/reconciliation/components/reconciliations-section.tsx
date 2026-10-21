@@ -100,7 +100,7 @@ export function ReconciliationsSection({
                 ...display,
                 currency: item.currency,
               })}
-              description={`${formatCalendarDate(item.asOfDate)} · ${
+              description={`${formatCalendarDate(item.asOfDate, display.locale)} · ${
                 item.adjustments.length === 0
                   ? "Sin ajustes"
                   : item.adjustments

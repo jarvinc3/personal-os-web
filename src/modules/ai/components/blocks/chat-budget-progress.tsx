@@ -1,6 +1,7 @@
 "use client"
 
 import { chatMoneyDisplay } from "@/src/modules/ai/components/blocks/chat-money"
+import { useFormatLocale } from "@/src/modules/settings/hooks/use-format-locale"
 import type { ChatBlock } from "@/src/modules/ai/types/chat.types"
 import { formatFinanceMoney } from "@/src/modules/finance"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
@@ -14,7 +15,8 @@ type ChatBudgetProgressProps = {
 }
 
 export function ChatBudgetProgress({ block }: ChatBudgetProgressProps) {
-  const display = chatMoneyDisplay(block.currency)
+  const locale = useFormatLocale()
+  const display = chatMoneyDisplay(block.currency, locale)
   const limit = Number(block.limit)
   const spent = Number(block.spent)
   const rawPct = block.pctUsed ?? (limit > 0 ? (spent / limit) * 100 : 0)

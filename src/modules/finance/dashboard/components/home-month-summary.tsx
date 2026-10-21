@@ -45,7 +45,7 @@ function formatSummaryAmount(
 }
 
 export function FinanceHomeMonthSummary() {
-  const { isEnabled, config } = useFinanceEnabled()
+  const { isEnabled, config, formatLocale } = useFinanceEnabled()
   const now = useMemo(() => new Date(), [])
   const { trend, currentQuery } = useMonthExpenseTrend(isEnabled)
 
@@ -57,6 +57,7 @@ export function FinanceHomeMonthSummary() {
     currency: currentQuery.data?.baseCurrency ?? config.baseCurrency,
     showCents: config.display.showCents,
     compactNumbers: config.display.compactNumbers,
+    locale: formatLocale,
   }
   const incomeValue = formatSummaryAmount(
     currentQuery,

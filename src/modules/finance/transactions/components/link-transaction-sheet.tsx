@@ -105,7 +105,7 @@ export function LinkTransactionSheet({
                 <SummaryItem
                   key={installment.id}
                   title={`Cuota ${installment.installmentNo}`}
-                  description={`Vence ${formatCalendarDate(installment.dueDate)}`}
+                  description={`Vence ${formatCalendarDate(installment.dueDate, display.locale)}`}
                   value={formatFinanceMoney(installment.amount, {
                     ...display,
                     currency: selectedLoan.currency,

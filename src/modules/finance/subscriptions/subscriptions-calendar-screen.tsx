@@ -59,7 +59,7 @@ export function SubscriptionsCalendarScreen() {
 
 function SubscriptionsCalendarBody() {
   const router = useRouter()
-  const { isEnabled, config } = useFinanceEnabled()
+  const { isEnabled, config, formatLocale } = useFinanceEnabled()
   const [today] = useState(() => new Date())
   const [month, setMonth] = useState<MonthKey>(monthKeyFromDate(today))
   const windowDays = config.subscriptions.reminderDaysBefore
@@ -67,6 +67,7 @@ function SubscriptionsCalendarBody() {
     currency: config.baseCurrency,
     showCents: config.display.showCents,
     compactNumbers: config.display.compactNumbers,
+    locale: formatLocale,
   }
 
   usePageHeader({
@@ -104,6 +105,7 @@ function SubscriptionsCalendarBody() {
     [parsedMonth, charges, today, windowDays, config.weekStartsOn]
   )
   const summaryLabel = subscriptionChargeSummaryLabel({
+    locale: formatLocale,
     summary: subscriptionChargeSummary({
       charges,
       baseCurrency: display.currency,

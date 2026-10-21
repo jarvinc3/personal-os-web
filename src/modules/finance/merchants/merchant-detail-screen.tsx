@@ -75,7 +75,7 @@ export function MerchantDetailScreen({ merchantId }: { merchantId: string }) {
 }
 
 function MerchantDetailBody({ merchantId }: { merchantId: string }) {
-  const { isEnabled, config } = useFinanceEnabled()
+  const { isEnabled, config, formatLocale } = useFinanceEnabled()
   const router = useRouter()
   const [editOpen, setEditOpen] = useState(false)
   const [mergeOpen, setMergeOpen] = useState(false)
@@ -103,6 +103,7 @@ function MerchantDetailBody({ merchantId }: { merchantId: string }) {
     currency: config.baseCurrency,
     showCents: config.display.showCents,
     compactNumbers: config.display.compactNumbers,
+    locale: formatLocale,
   }
 
   usePageHeader(
@@ -244,7 +245,8 @@ function MerchantDetailBody({ merchantId }: { merchantId: string }) {
                 "Movimiento"
               }
               description={formatFinanceDateTimeLabel(
-                transaction.transactionDate
+                transaction.transactionDate,
+                display.locale
               )}
               value={signedAmount({
                 transaction,

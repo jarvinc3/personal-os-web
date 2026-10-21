@@ -88,11 +88,12 @@ function ReceivableDetailScreenBody({
   receivableId,
 }: FinanceReceivableDetailProps) {
   const router = useRouter()
-  const { isEnabled, config } = useFinanceEnabled()
+  const { isEnabled, config, formatLocale } = useFinanceEnabled()
   const display = {
     currency: config.baseCurrency,
     showCents: config.display.showCents,
     compactNumbers: config.display.compactNumbers,
+    locale: formatLocale,
   }
 
   const receivablesQuery = useReceivables(isEnabled)

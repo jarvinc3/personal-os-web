@@ -131,8 +131,8 @@ export function transactionsFromPayload(
   }
 }
 
-export function formatTransactionDate(value: string): string {
-  return formatFinanceDateTimeLabel(value)
+export function formatTransactionDate(value: string, locale: string): string {
+  return formatFinanceDateTimeLabel(value, locale)
 }
 
 export function canReverseTransaction(

@@ -118,11 +118,12 @@ export function SavingsGoalSheet({
   const targetAmount = useWatch({ control, name: "targetAmount" })
   const currentAmount = useWatch({ control, name: "currentAmount" })
   const targetDate = useWatch({ control, name: "targetDate" })
-  const { config } = useFinanceEnabled()
+  const { config, formatLocale } = useFinanceEnabled()
   const display = {
     currency: currency || defaultCurrency,
     showCents: config.display.showCents,
     compactNumbers: config.display.compactNumbers,
+    locale: formatLocale,
   }
   const suggestion = monthlySavingsSuggestion({
     targetAmount,

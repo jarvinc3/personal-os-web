@@ -83,7 +83,7 @@ export function SavingsGoalContributionSheet({
   pending = false,
 }: SavingsGoalContributionSheetProps) {
   const createMutation = useCreateSavingsGoalContribution()
-  const { config } = useFinanceEnabled()
+  const { config, formatLocale } = useFinanceEnabled()
   const accountsQuery = useAccounts(open)
   const institutionsQuery = useInstitutions(open)
   const goalCurrency = currency ?? config.baseCurrency
@@ -134,6 +134,7 @@ export function SavingsGoalContributionSheet({
     currency: goalCurrency,
     showCents: config.display.showCents,
     compactNumbers: config.display.compactNumbers,
+    locale: formatLocale,
   }
   const target = parseFinanceMoney(targetAmount)
   const saved = parseFinanceMoney(currentAmount)

@@ -117,7 +117,11 @@ describe("subscriptionChargeSummary", () => {
     })
     assert.deepEqual(summary, { count: 2, total: null, currency: "DOP" })
     assert.equal(
-      subscriptionChargeSummaryLabel({ summary, showCents: false }),
+      subscriptionChargeSummaryLabel({
+        summary,
+        showCents: false,
+        locale: "es-DO",
+      }),
       "2 cobros"
     )
   })
@@ -128,7 +132,11 @@ describe("subscriptionChargeSummary", () => {
       baseCurrency: "DOP",
     })
     assert.equal(
-      subscriptionChargeSummaryLabel({ summary, showCents: false }),
+      subscriptionChargeSummaryLabel({
+        summary,
+        showCents: false,
+        locale: "es-DO",
+      }),
       "1 cobro · DOP $100"
     )
   })

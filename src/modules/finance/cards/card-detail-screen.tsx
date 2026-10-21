@@ -95,11 +95,12 @@ export function CardDetailScreen({ cardId }: CardDetailScreenProps) {
 function CardDetailScreenBody({ cardId }: CardDetailScreenProps) {
   const router = useRouter()
   const pathname = usePathname()
-  const { isEnabled, config } = useFinanceEnabled()
+  const { isEnabled, config, formatLocale } = useFinanceEnabled()
   const display = {
     currency: config.baseCurrency,
     showCents: config.display.showCents,
     compactNumbers: config.display.compactNumbers,
+    locale: formatLocale,
   }
   const [tab, setTab] = useState<CardDetailTab>(CARD_DETAIL_TABS.statements)
 

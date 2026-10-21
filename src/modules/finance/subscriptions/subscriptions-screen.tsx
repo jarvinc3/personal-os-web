@@ -42,7 +42,7 @@ function SubscriptionsScreenBody() {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
-  const { isEnabled, config } = useFinanceEnabled()
+  const { isEnabled, config, formatLocale } = useFinanceEnabled()
   const [today] = useState(() => new Date())
   const [createOpen, setCreateOpen] = useState(false)
   const filters = useMemo(
@@ -53,6 +53,7 @@ function SubscriptionsScreenBody() {
     currency: config.baseCurrency,
     showCents: config.display.showCents,
     compactNumbers: config.display.compactNumbers,
+    locale: formatLocale,
   }
 
   const upcomingSheet = useSheetParam(FINANCE_SHEET_KEYS.subscriptionUpcoming)

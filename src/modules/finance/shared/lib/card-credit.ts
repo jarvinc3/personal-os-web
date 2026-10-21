@@ -56,13 +56,15 @@ export function countdownLabel(days: number | null): string | null {
  * One line with the next closing and the payment countdown; null when the card
  * has no projected cycle.
  */
-export function nextCycleNote(
-  card: { nextStatementDate: string | null; nextPaymentDueDate: string | null },
-  now: Date = new Date()
-): string | null {
+export function nextCycleNote(input: {
+  card: { nextStatementDate: string | null; nextPaymentDueDate: string | null }
+  locale: string
+  now?: Date
+}): string | null {
+  const { card, locale, now = new Date() } = input
   const parts = [
     card.nextStatementDate
-      ? `Próximo corte ${formatCalendarDate(card.nextStatementDate)}`
+      ? `Próximo corte ${formatCalendarDate(card.nextStatementDate, locale)}`
       : null,
     countdownLabel(daysUntilIsoDate(card.nextPaymentDueDate, now)),
   ].filter((part): part is string => part !== null)

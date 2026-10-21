@@ -36,12 +36,13 @@ export function transferRateLabel(input: {
   rate: string | number | null | undefined
   sourceCurrency: string
   destinationCurrency: string
+  locale: string
 }): string {
   const rate = parseFinanceMoney(input.rate)
   if (rate === null) {
     return "—"
   }
-  const decimals = new Intl.NumberFormat("en-US", {
+  const decimals = new Intl.NumberFormat(input.locale, {
     maximumFractionDigits: 8,
   }).format(rate)
   return `1 ${input.sourceCurrency} = ${decimals} ${input.destinationCurrency}`

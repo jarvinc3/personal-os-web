@@ -123,7 +123,8 @@ export function LoanProgressCard({
               )}
             >
               <CalendarDaysIcon className="size-3.5 shrink-0" aria-hidden />
-              Próximo pago · {formatCalendarDate(loan.nextDueDate)}
+              Próximo pago ·{" "}
+              {formatCalendarDate(loan.nextDueDate, display.locale)}
             </span>
           ) : null}
         </span>

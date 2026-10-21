@@ -28,7 +28,7 @@ import { PencilIcon, PlusIcon, Trash2Icon } from "lucide-react"
 import { useMemo, useState } from "react"
 
 export function FinanceCurrenciesView() {
-  const { config, updateConfig, updateMutation } =
+  const { config, updateConfig, updateMutation, formatLocale } =
     useUserModuleConfig("finance")
   const queryClient = useQueryClient()
 
@@ -184,6 +184,7 @@ export function FinanceCurrenciesView() {
                           currency: baseCurrency,
                           showCents: true,
                           compactNumbers: false,
+                          locale: formatLocale,
                         })}
                   </span>
                 </div>

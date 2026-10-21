@@ -29,7 +29,7 @@ export function CardCreateScreen() {
 function CardCreateScreenBody() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { isEnabled, config } = useFinanceEnabled()
+  const { isEnabled, config, formatLocale } = useFinanceEnabled()
   const institutionsQuery = useInstitutions(isEnabled)
   const accountsQuery = useAccounts(isEnabled)
 
@@ -56,6 +56,7 @@ function CardCreateScreenBody() {
         currency: config.baseCurrency,
         showCents: config.display.showCents,
         compactNumbers: config.display.compactNumbers,
+        locale: formatLocale,
       }}
       onDone={handleBack}
       onReadStatement={() => router.push(APP_ROUTES.app.financeSync)}
@@ -77,7 +78,7 @@ export function CardEditScreen({ cardId }: CardEditScreenProps) {
 
 function CardEditScreenBody({ cardId }: CardEditScreenProps) {
   const router = useRouter()
-  const { isEnabled, config } = useFinanceEnabled()
+  const { isEnabled, config, formatLocale } = useFinanceEnabled()
   const cardsQuery = useCards(isEnabled)
   const institutionsQuery = useInstitutions(isEnabled)
   const accountsQuery = useAccounts(isEnabled)
@@ -133,6 +134,7 @@ function CardEditScreenBody({ cardId }: CardEditScreenProps) {
         currency: config.baseCurrency,
         showCents: config.display.showCents,
         compactNumbers: config.display.compactNumbers,
+        locale: formatLocale,
       }}
       onDone={handleBack}
       onReadStatement={() => router.push(APP_ROUTES.app.financeSync)}

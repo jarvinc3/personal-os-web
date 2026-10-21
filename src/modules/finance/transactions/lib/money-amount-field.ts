@@ -1,19 +1,14 @@
 import { z } from "zod"
 
 import {
-  FINANCE_MAX_AMOUNT,
   hasMoneyCentsInput,
   isMoneyAmountInput,
   isPositiveAmountInput,
   isWithinMaxAmountInput,
 } from "@/src/modules/finance/shared/lib/ledger-form"
 
-const MAX_AMOUNT_LABEL = new Intl.NumberFormat("es-DO", {
-  maximumFractionDigits: 2,
-}).format(FINANCE_MAX_AMOUNT)
-
 const CENTS_MESSAGE = "Monto con dos decimales como máximo"
-const MAX_AMOUNT_MESSAGE = `Monto máximo ${MAX_AMOUNT_LABEL}`
+const MAX_AMOUNT_MESSAGE = "El monto supera el máximo permitido"
 
 /** Money field the ledger forms share: cents only, above zero, below the ceiling. */
 export function moneyAmountField() {

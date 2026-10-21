@@ -5,6 +5,7 @@ import {
   chartPoints,
 } from "@/src/modules/ai/components/blocks/chat-chart-data"
 import { chatMoneyDisplay } from "@/src/modules/ai/components/blocks/chat-money"
+import { useFormatLocale } from "@/src/modules/settings/hooks/use-format-locale"
 import type { ChatBlock } from "@/src/modules/ai/types/chat.types"
 import { formatFinanceMoney } from "@/src/modules/finance"
 import {
@@ -28,10 +29,14 @@ type ChatChartProps = {
 }
 
 export function ChatChart({ block }: ChatChartProps) {
+  const locale = useFormatLocale()
   const points = chartPoints(block.series)
   const config = chartConfig(block.title)
   const formatValue = (value: unknown) =>
-    formatFinanceMoney(String(value ?? ""), chatMoneyDisplay(block.currency))
+    formatFinanceMoney(
+      String(value ?? ""),
+      chatMoneyDisplay(block.currency, locale)
+    )
   const ariaLabel = block.title ?? "Gráfico"
 
   if (block.kind === "donut") {

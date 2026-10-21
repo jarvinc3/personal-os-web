@@ -4,7 +4,10 @@ import { BrandLogo } from "@/src/modules/finance"
 import { useBalanceSheet } from "@/src/modules/finance"
 import { useFinanceEnabled } from "@/src/modules/finance"
 import { useInstitutions } from "@/src/modules/finance"
-import { formatFinanceMoney } from "@/src/modules/finance"
+import {
+  formatFinanceMoney,
+  type FinanceMoneyDisplay,
+} from "@/src/modules/finance"
 import type { FinanceBalanceSheetSlice } from "@/src/modules/finance"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
 import {
@@ -29,18 +32,12 @@ type WipeBalanceInstitutionSheetProps = {
 
 function balanceLabel(
   slice: FinanceBalanceSheetSlice | undefined,
-  currency: string,
-  showCents: boolean,
-  compactNumbers: boolean
+  display: FinanceMoneyDisplay
 ): string {
   if (!slice || slice.status !== "COMPLETE" || slice.netWorth === null) {
     return "Balance incompleto"
   }
-  return formatFinanceMoney(slice.netWorth, {
-    currency,
-    showCents,
-    compactNumbers,
-  })
+  return formatFinanceMoney(slice.netWorth, display)
 }
 
 export function WipeBalanceInstitutionSheet({
@@ -50,7 +47,7 @@ export function WipeBalanceInstitutionSheet({
   allValue,
   onSelect,
 }: WipeBalanceInstitutionSheetProps) {
-  const { config } = useFinanceEnabled()
+  const { config, formatLocale } = useFinanceEnabled()
   const institutionsQuery = useInstitutions(open)
   const balanceSheetQuery = useBalanceSheet(open)
   const institutions = (institutionsQuery.data ?? []).filter(
@@ -69,6 +66,7 @@ export function WipeBalanceInstitutionSheet({
     currency: balanceSheetQuery.data?.baseCurrency ?? config.baseCurrency,
     showCents: config.display.showCents,
     compactNumbers: config.display.compactNumbers,
+    locale: formatLocale,
   }
 
   function choose(next: string) {
@@ -99,12 +97,7 @@ export function WipeBalanceInstitutionSheet({
             optionValue={allValue}
             name="Todas las instituciones"
             color={ALL_INSTITUTIONS_COLOR}
-            balance={balanceLabel(
-              balanceSheetQuery.data?.global,
-              display.currency,
-              display.showCents,
-              display.compactNumbers
-            )}
+            balance={balanceLabel(balanceSheetQuery.data?.global, display)}
             mark={<LayersIcon className="size-5" />}
           />
           {institutions.map((institution) => (
@@ -114,12 +107,7 @@ export function WipeBalanceInstitutionSheet({
               name={institution.name}
               logoUrl={institution.logoUrl}
               color={institution.color ?? FALLBACK_INSTITUTION_COLOR}
-              balance={balanceLabel(
-                positions.get(institution.id),
-                display.currency,
-                display.showCents,
-                display.compactNumbers
-              )}
+              balance={balanceLabel(positions.get(institution.id), display)}
             />
           ))}
         </RadioGroup>

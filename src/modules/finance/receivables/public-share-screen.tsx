@@ -18,6 +18,7 @@ import { PlanningProgressCard } from "@/src/modules/finance/shared/components/pl
 import { financeLoadErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import { formatCalendarDate } from "@/src/modules/finance/shared/lib/ledger-form"
 import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
+import { DEFAULT_LOCALE } from "@/src/modules/settings/lib/locale-options"
 import { usePublicReceivableShare } from "@/src/modules/finance/shared/hooks/use-receivable-shares"
 import {
   FINANCE_RECEIVABLE_STATUS_LABEL,
@@ -47,6 +48,7 @@ const PUBLIC_DISPLAY = {
   currency: "DOP",
   showCents: true,
   compactNumbers: false,
+  locale: DEFAULT_LOCALE,
 }
 
 type PublicReceivableShareScreenProps = {
@@ -161,7 +163,7 @@ export function PublicReceivableShareScreen({
               <PlanningProgressCard
                 key={item.ref}
                 title={item.concept}
-                description={`Creado ${formatCalendarDate(item.createdAt)}`}
+                description={`Creado ${formatCalendarDate(item.createdAt, DEFAULT_LOCALE)}`}
                 icon={HandshakeIcon}
                 tone={item.status === "PAID" ? "success" : "info"}
                 badge={{

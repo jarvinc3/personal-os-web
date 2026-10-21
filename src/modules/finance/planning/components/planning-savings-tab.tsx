@@ -97,7 +97,7 @@ export function PlanningSavingsTab({
                 prefix: "Faltan",
               }),
               goal.targetDate
-                ? `Para ${formatCalendarDate(goal.targetDate)}`
+                ? `Para ${formatCalendarDate(goal.targetDate, display.locale)}`
                 : undefined
             )}
             href={APP_ROUTES.app.financeSavingsGoal(goal.id)}
