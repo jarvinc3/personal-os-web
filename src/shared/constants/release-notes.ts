@@ -12,6 +12,12 @@ export type ReleaseNotesEntry = {
 
 export const RELEASE_NOTES: readonly ReleaseNotesEntry[] = [
   {
+    version: "0.54.1",
+    highlights: [
+      "Sin cambios visibles: el Centro de ayuda queda igual por dentro, con los enlaces y la búsqueda más ordenados.",
+    ],
+  },
+  {
     version: "0.54.0",
     highlights: [
       "Nuevo Centro de ayuda en Ajustes → Ayuda: glosario con buscador, guías paso a paso y preguntas frecuentes.",

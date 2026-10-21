@@ -2,6 +2,12 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.54.1] - 2026-10-21
+
+### Cambiado
+
+- Interno: el Centro de ayuda comparte el estilo de sus enlaces y normaliza una sola vez el término de la URL. Sin cambio de comportamiento.
+
 ## [0.54.0] - 2026-10-21
 
 ### Agregado
