@@ -13,6 +13,13 @@ export const APP_ROUTES = {
   app: {
     home: "/home",
     settings: "/settings",
+    settingsAccount: "/settings/account",
+    settingsRegional: "/settings/regional",
+    settingsAppearance: "/settings/appearance",
+    settingsAi: "/settings/ai",
+    settingsNotifications: "/settings/notifications",
+    settingsPrivacy: "/settings/privacy",
+    settingsModules: "/settings/modules",
     settingsWipeData: "/settings/wipe-data",
     chat: "/chat",
     notifications: "/notifications",

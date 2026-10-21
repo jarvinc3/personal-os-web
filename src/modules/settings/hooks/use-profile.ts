@@ -16,7 +16,7 @@ import { API_ENDPOINTS } from "@/src/shared/constants/api-endpoints"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { useAppStore } from "@/src/shared/store/app-store"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { useMemo } from "react"
+import { useCallback, useMemo } from "react"
 
 const PROFILE_UPDATE_MUTATION_KEY = ["profile-update"] as const
 const PROFILE_UPDATE_SCOPE = "profile-update"
@@ -78,12 +78,33 @@ export function useProfile() {
     },
   })
 
+  const preferencesPayload = useCallback(
+    (patch: DeepPartial<UserPreferences>): UserPreferences => {
+      const current =
+        queryClient.getQueryData<UserProfile>(PROFILE_QUERY_KEY)?.preferences
+      return mergeUserPreferences(current, patch)
+    },
+    [queryClient]
+  )
+
   const updatePreferences = async (patch: DeepPartial<UserPreferences>) => {
-    const current =
-      queryClient.getQueryData<UserProfile>(PROFILE_QUERY_KEY)?.preferences
-    const preferences = mergeUserPreferences(current, patch)
-    await updateProfileMutation.mutateAsync({ preferences })
+    await updateProfileMutation.mutateAsync({
+      preferences: preferencesPayload(patch),
+    })
   }
+
+  const savePreferences = useCallback(
+    (
+      patch: DeepPartial<UserPreferences>,
+      options?: { onSuccess?: () => void }
+    ) => {
+      updateProfileMutation.mutate(
+        { preferences: preferencesPayload(patch) },
+        { onSuccess: options?.onSuccess }
+      )
+    },
+    [preferencesPayload, updateProfileMutation]
+  )
 
   const rawPreferences = profileQuery.data?.preferences
   const preferences = useMemo(
@@ -100,6 +121,7 @@ export function useProfile() {
     profileQuery,
     updateProfileMutation,
     updatePreferences,
+    savePreferences,
     preferences,
     userModules,
   }
