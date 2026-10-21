@@ -8,6 +8,8 @@ import { FinanceMonthSection } from "@/src/modules/finance/transactions/componen
 import { FinanceTransactionSearch } from "@/src/modules/finance/transactions/components/transaction-search"
 import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
 import { useCards } from "@/src/modules/finance/shared/hooks/use-cards"
+import { useLoans } from "@/src/modules/finance/shared/hooks/use-loans"
+import { useSubscriptionsUpcoming } from "@/src/modules/finance/shared/hooks/use-subscriptions"
 import { useCategories } from "@/src/modules/finance/shared/hooks/use-categories"
 import { useTimelineTransactions } from "@/src/modules/finance/shared/hooks/use-transactions"
 import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
@@ -28,6 +30,11 @@ import {
   type MonthKey,
 } from "@/src/modules/finance/shared/lib/month-window"
 import { todayDateInput } from "@/src/modules/finance/shared/lib/ledger-form"
+import {
+  groupCommitmentsByMonth,
+  loanCommitments,
+  subscriptionCommitments,
+} from "@/src/modules/finance/transactions/lib/scheduled-commitments"
 import {
   animateScrollSectionIntoView,
   findActiveMonthKey,
@@ -50,6 +57,7 @@ import {
   PlusIcon,
   RefreshCwIcon,
 } from "lucide-react"
+import { endOfMonth, format } from "date-fns"
 import { useRouter } from "next/navigation"
 import {
   useCallback,
@@ -115,6 +123,27 @@ export function FinanceTransactionsList({
   const accountsQuery = useAccounts(enabled)
   const cardsQuery = useCards(enabled)
   const categoriesQuery = useCategories(enabled)
+  const loansQuery = useLoans(enabled)
+  const today = todayDateInput()
+  const upcomingQuery = useSubscriptionsUpcoming(enabled, {
+    from: today,
+    to: format(endOfMonth(range.to), "yyyy-MM-dd"),
+  })
+  const commitments = useMemo(
+    () => [
+      ...loanCommitments({
+        loans: loansQuery.data ?? [],
+        fromDate: today,
+      }),
+      ...subscriptionCommitments(upcomingQuery.data?.items ?? []),
+    ],
+    [loansQuery.data, upcomingQuery.data?.items, today]
+  )
+  const commitmentsByMonth = useMemo(
+    () => groupCommitmentsByMonth(commitments),
+    [commitments]
+  )
+  const commitmentsError = loansQuery.error ?? upcomingQuery.error
   const accounts = accountsQuery.data ?? []
   const cards = cardsQuery.data ?? []
   const categories = categoriesQuery.data ?? []
@@ -407,6 +436,17 @@ export function FinanceTransactionsList({
         />
       ) : null}
 
+      {commitmentsError ? (
+        <FinanceErrorState
+          message={financeErrorMessage(commitmentsError)}
+          onRetry={() => {
+            void loansQuery.refetch()
+            void upcomingQuery.refetch()
+          }}
+          isRetrying={loansQuery.isFetching || upcomingQuery.isFetching}
+        />
+      ) : null}
+
       {timelineQuery.isPending && timelineQuery.items.length === 0 ? (
         <FinanceListSkeleton rows={4} />
       ) : null}
@@ -419,6 +459,7 @@ export function FinanceTransactionsList({
             categories={categories}
             display={display}
             isActive={month.key === activeMonthKey}
+            scheduled={commitmentsByMonth.get(month.key) ?? []}
             stickyOffset={stickyOffset + STICKY_GAP}
           />
         ))}

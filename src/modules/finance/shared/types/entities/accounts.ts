@@ -25,6 +25,15 @@ export type FinanceBalanceSheetIssue =
   | { code: "MISSING_CREDIT_LIMIT"; cardId: string; currency: string }
   | { code: "MISSING_RATE"; currency: string }
 
+export type FinanceBalanceSheetCurrencySlice = {
+  currency: string
+  assets: string
+  available: string
+  receivables: string
+  liabilities: string
+  netWorth: string
+}
+
 export type FinanceBalanceSheetSlice = {
   status: FinanceBalanceSheetStatus
   assets: {
@@ -41,6 +50,8 @@ export type FinanceBalanceSheetSlice = {
   totalAssets: string
   totalLiabilities: string | null
   netWorth: string | null
+  /** Native totals per currency; no conversion. */
+  byCurrency: FinanceBalanceSheetCurrencySlice[]
   issues: FinanceBalanceSheetIssue[]
 }
 

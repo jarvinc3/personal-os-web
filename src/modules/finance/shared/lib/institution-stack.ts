@@ -3,6 +3,7 @@ import { isCashInstitution } from "./cash.ts"
 import type {
   FinanceAccount,
   FinanceBalanceDrift,
+  FinanceBalanceSheetCurrencySlice,
   FinanceBalanceSheetIssue,
   FinanceBalanceSheetStatus,
   FinanceCard,
@@ -39,6 +40,7 @@ export type InstitutionStackItem =
       loans: FinanceLoan[]
       /** Cash summary, only set for the system Efectivo institution. */
       cash: FinanceCashSummary | null
+      currencyTotals: FinanceBalanceSheetCurrencySlice[]
       irregularities: InstitutionIrregularities
     }
   | {
@@ -46,6 +48,7 @@ export type InstitutionStackItem =
       id: string
       account: FinanceAccount
       balance: string
+      currencyTotals: FinanceBalanceSheetCurrencySlice[]
       irregularities: InstitutionIrregularities
     }
 
@@ -55,6 +58,7 @@ export type InstitutionBalancePosition = {
   netWorth: string | null
   totalAssets: string
   totalLiabilities: string | null
+  byCurrency?: FinanceBalanceSheetCurrencySlice[]
   issues: FinanceBalanceSheetIssue[]
 }
 
@@ -201,6 +205,7 @@ export function buildInstitutionStackItems(input: {
         totalLiabilities: position?.totalLiabilities ?? null,
         issues: position?.issues ?? [],
         cash: isCashInstitution(institution) ? (input.cash ?? null) : null,
+        currencyTotals: position?.byCurrency ?? [],
         irregularities,
       }
     }
@@ -213,6 +218,16 @@ export function buildInstitutionStackItems(input: {
       id: account.id,
       account,
       balance: account.balance,
+      currencyTotals: [
+        {
+          currency: account.currency,
+          assets: account.balance,
+          available: account.balance,
+          receivables: "0",
+          liabilities: "0",
+          netWorth: account.balance,
+        },
+      ],
       irregularities: {
         drift: hasDriftForProduct(input.drifts ?? [], {
           accountId: account.id,

@@ -35,6 +35,7 @@ function sheetWithCash(currencies: string[]): FinanceBalanceSheet {
     global: {
       status: "COMPLETE",
       assets: { accounts: "0", cash: "0", receivables: "0" },
+      byCurrency: [],
       liabilities: { creditCards: "0", loans: "0" },
       totalAssets: "0",
       totalLiabilities: "0",

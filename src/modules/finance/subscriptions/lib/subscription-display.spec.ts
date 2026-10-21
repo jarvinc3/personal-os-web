@@ -96,6 +96,7 @@ function summary(
     activeCount: 9,
     monthlyCost: "4860.00",
     annualCost: "58320.00",
+    byCurrency: [],
     previousMonthlyCost: "4800.00",
     realSpendThisMonth: "4860.00",
     realSpendPreviousMonth: "0.00",

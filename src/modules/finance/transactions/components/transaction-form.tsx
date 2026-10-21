@@ -6,6 +6,7 @@ import { FinanceFormScreen } from "@/src/modules/finance/shared/components/forms
 import type { FinanceMoneyFieldHandle } from "@/src/modules/finance/shared/components/forms/money-field"
 import { CATALOG_NONE } from "@/src/modules/finance/shared/constants/catalog"
 import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
+import { useBudgetStatus } from "@/src/modules/finance/shared/hooks/use-analytics"
 import { useCards } from "@/src/modules/finance/shared/hooks/use-cards"
 import { useCategories } from "@/src/modules/finance/shared/hooks/use-categories"
 import { useCurrencyForTarget } from "@/src/modules/finance/shared/hooks/use-currency-for-target"
@@ -36,7 +37,10 @@ import {
   parseFinanceMoney,
 } from "@/src/modules/finance/shared/lib/money"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
-import type { FinanceTransaction } from "@/src/modules/finance/shared/types/entities"
+import type {
+  FinanceAccount,
+  FinanceTransaction,
+} from "@/src/modules/finance/shared/types/entities"
 import { TransactionAmountField } from "@/src/modules/finance/transactions/components/transaction-amount-field"
 import { LedgerDateStatusField } from "@/src/modules/finance/transactions/components/ledger-date-status-field"
 import { TransactionDestinationField } from "@/src/modules/finance/transactions/components/transaction-destination-field"
@@ -59,6 +63,10 @@ import {
   type MovementType,
 } from "@/src/modules/finance/transactions/lib/transaction-form-values"
 import { assessExpenseBalance } from "@/src/modules/finance/transactions/lib/expense-balance"
+import {
+  budgetOverageForExpense,
+  type BudgetOverage,
+} from "@/src/modules/finance/transactions/lib/budget-overage"
 import type { TransactionFormValues } from "@/src/modules/finance/transactions/lib/transaction-form"
 import { useUserTimeZone } from "@/src/modules/settings/hooks/use-user-time-zone"
 import { Field, FieldLabel } from "@/src/shared/components/ui/field"
@@ -115,6 +123,13 @@ type PendingOverdraft = {
   projectedBalance: number
 }
 
+type PendingBudgetOverage = {
+  body: CreateTransactionBody
+  values: TransactionFormValues
+  account: FinanceAccount | null
+  overage: BudgetOverage
+}
+
 export function TransactionForm({
   mode,
   initialType,
@@ -141,6 +156,7 @@ export function TransactionForm({
   const accountsQuery = useAccounts(enabled)
   const cardsQuery = useCards(enabled)
   const categoriesQuery = useCategories(enabled)
+  const budgetStatusQuery = useBudgetStatus(enabled)
   const institutionsQuery = useInstitutions(enabled)
   const accounts = useMemo(() => accountsQuery.data ?? [], [accountsQuery.data])
   const cards = useMemo(() => cardsQuery.data ?? [], [cardsQuery.data])
@@ -170,6 +186,8 @@ export function TransactionForm({
   const guidedDestinationOpened = useRef(false)
   const [pendingOverdraft, setPendingOverdraft] =
     useState<PendingOverdraft | null>(null)
+  const [pendingBudgetOverage, setPendingBudgetOverage] =
+    useState<PendingBudgetOverage | null>(null)
 
   const {
     control,
@@ -386,6 +404,44 @@ export function TransactionForm({
     }
   }
 
+  async function submitAfterBudgetWarning({
+    body,
+    values,
+    account,
+  }: {
+    body: CreateTransactionBody
+    values: TransactionFormValues
+    account: FinanceAccount | null
+  }) {
+    if (values.type === "DEBIT" && account) {
+      const verdict = assessExpenseBalance({
+        accountType: account.type,
+        balance: account.balance,
+        amount: values.amount,
+        accountCurrency: account.currency,
+        transactionCurrency: values.currency,
+      })
+      if (verdict.status === "blocked") {
+        appToast.error({
+          text1: "El efectivo no puede quedar negativo",
+          text2: `Saldo disponible: ${formatFinanceMoney(account.balance, { ...display, currency: account.currency })}.`,
+        })
+        return
+      }
+      if (verdict.status === "confirm") {
+        setPendingOverdraft({
+          body,
+          accountName: account.name,
+          accountCurrency: account.currency,
+          projectedBalance: verdict.projectedBalance,
+        })
+        return
+      }
+    }
+
+    await submitTransactionBody(body)
+  }
+
   const onSubmit = handleSubmit(async (values) => {
     if (isTransferLeg) {
       return
@@ -421,33 +477,32 @@ export function TransactionForm({
     const account = target.accountId
       ? (accounts.find((item) => item.id === target.accountId) ?? null)
       : null
-    if (values.type === "DEBIT" && account) {
-      const verdict = assessExpenseBalance({
-        accountType: account.type,
-        balance: account.balance,
-        amount: values.amount,
-        accountCurrency: account.currency,
-        transactionCurrency: values.currency,
+    const budgets =
+      budgetStatusQuery.data ?? (await budgetStatusQuery.refetch()).data ?? []
+    const overage =
+      !isEdit && values.type === "DEBIT" && values.currency === display.currency
+        ? budgetOverageForExpense({
+            budgets,
+            categoryId: values.categoryId,
+            date: values.transactionDate,
+            amount: values.amount,
+          })
+        : null
+    if (overage) {
+      setPendingBudgetOverage({
+        body: payload.body,
+        values,
+        account,
+        overage,
       })
-      if (verdict.status === "blocked") {
-        appToast.error({
-          text1: "El efectivo no puede quedar negativo",
-          text2: `Saldo disponible: ${formatFinanceMoney(account.balance, { ...display, currency: account.currency })}.`,
-        })
-        return
-      }
-      if (verdict.status === "confirm") {
-        setPendingOverdraft({
-          body: payload.body,
-          accountName: account.name,
-          accountCurrency: account.currency,
-          projectedBalance: verdict.projectedBalance,
-        })
-        return
-      }
+      return
     }
 
-    await submitTransactionBody(payload.body)
+    await submitAfterBudgetWarning({
+      body: payload.body,
+      values,
+      account,
+    })
   })
 
   if (isTransferLeg) {
@@ -616,6 +671,48 @@ export function TransactionForm({
           setGuidedStep("done")
         }}
       />
+
+      <AlertDialog
+        open={pendingBudgetOverage !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setPendingBudgetOverage(null)
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              Este gasto excede el presupuesto
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {pendingBudgetOverage
+                ? `${pendingBudgetOverage.overage.budget.category}: el exceso queda en ${formatFinanceMoney(pendingBudgetOverage.overage.excess, display)}. ¿Registrar el gasto igual?`
+                : null}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isPending}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={isPending}
+              onClick={() => {
+                const pending = pendingBudgetOverage
+                setPendingBudgetOverage(null)
+                if (pending) {
+                  void submitAfterBudgetWarning({
+                    body: pending.body,
+                    values: pending.values,
+                    account: pending.account,
+                  })
+                }
+              }}
+            >
+              {isPending ? <Spinner data-icon="inline-start" /> : null}
+              Registrar igual
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <AlertDialog
         open={pendingOverdraft !== null}

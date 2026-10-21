@@ -1,6 +1,7 @@
 "use client"
 
 import type { InstitutionStackItem } from "@/src/modules/finance/shared/lib/institution-stack"
+import type { FinanceBalanceSheetCurrencyGroup } from "@/src/modules/finance/shared/types/entities"
 import {
   formatCompactFinanceAmount,
   formatFinanceMoney,
@@ -41,6 +42,7 @@ type FinanceHeroSectionProps = {
   netWorth: string | null
   netWorthComplete: boolean
   netWorthHref: string
+  currencyTotals: readonly FinanceBalanceSheetCurrencyGroup[]
 }
 
 export function FinanceHeroSection({
@@ -51,6 +53,7 @@ export function FinanceHeroSection({
   netWorth,
   netWorthComplete,
   netWorthHref,
+  currencyTotals,
 }: FinanceHeroSectionProps) {
   const slices = buildRingStackSlices(items, display)
   const hasChart = hasDrawableRingBalance(slices)
@@ -74,6 +77,48 @@ export function FinanceHeroSection({
 
   const toggleSlice = (key: string) => {
     setActiveKey((current) => (current === key ? null : key))
+  }
+
+  const onlyCurrency = currencyTotals.length === 1 ? currencyTotals[0] : null
+  const showsGroupedBalances =
+    currencyTotals.length > 1 ||
+    (onlyCurrency !== null && onlyCurrency.currency !== display.currency)
+  if (showsGroupedBalances && netWorthComplete) {
+    return (
+      <div className="flex flex-col gap-2 px-2 pb-2">
+        <p className="text-[11px] font-medium tracking-[0.16em] text-muted-foreground uppercase">
+          {currencyTotals.length > 1
+            ? "Balance total por moneda"
+            : "Balance total"}
+        </p>
+        <div className="grid grid-cols-2 gap-2">
+          {currencyTotals.map((group) => (
+            <Link
+              key={group.currency}
+              href={netWorthHref}
+              aria-label={`Ver el desglose del patrimonio en ${group.currency}`}
+              className="flex flex-col gap-1 rounded-2xl border border-border bg-card px-3 py-2 outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <span className="text-xs text-muted-foreground">
+                {group.currency}
+              </span>
+              <span className="text-xl font-bold tracking-tight tabular-nums">
+                {formatFinanceMoney(group.totals.netWorth, {
+                  ...display,
+                  currency: group.currency,
+                  leadingSign: true,
+                })}
+              </span>
+            </Link>
+          ))}
+        </div>
+        <p className="text-xs text-muted-foreground">
+          {currencyTotals.length > 1
+            ? "Cada moneda va por separado; no se convierten entre sí."
+            : `Se muestra en ${onlyCurrency?.currency}, sin convertir a ${display.currency}.`}
+        </p>
+      </div>
+    )
   }
 
   const signedDisplay = { ...display, leadingSign: true }

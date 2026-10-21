@@ -228,6 +228,7 @@ export function FinanceProductsList({
         netWorth={global?.netWorth ?? null}
         netWorthComplete={global?.status === "COMPLETE"}
         netWorthHref={APP_ROUTES.app.financeWealth}
+        currencyTotals={balanceSheetQuery.data?.breakdown.byCurrency ?? []}
       />
 
       <IrregularitiesSection

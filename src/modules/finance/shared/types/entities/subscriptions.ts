@@ -106,11 +106,20 @@ export type FinanceSubscriptionTrend = {
   percent: number
 }
 
+export type FinanceSubscriptionCurrencyCost = {
+  currency: string
+  monthlyCost: string
+  annualCost: string
+  activeCount: number
+}
+
 export type FinanceSubscriptionSummary = {
   baseCurrency: string
   activeCount: number
   monthlyCost: string
   annualCost: string
+  /** Native monthly and annual cost per currency; no conversion. */
+  byCurrency: FinanceSubscriptionCurrencyCost[]
   previousMonthlyCost: string
   realSpendThisMonth: string
   realSpendPreviousMonth: string

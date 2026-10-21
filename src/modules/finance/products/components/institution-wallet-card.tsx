@@ -225,9 +225,30 @@ export function InstitutionWalletCard({
         <span className="text-xs tracking-wider text-white/60 uppercase">
           {card.balanceLabel}:
         </span>
-        <span className="text-right font-mono text-2xl font-semibold text-white tabular-nums">
-          {card.balanceAmount}
-        </span>
+        {card.balanceLines.length === 0 ? (
+          <span className="text-right font-mono text-2xl font-semibold text-white tabular-nums">
+            {card.balanceAmount}
+          </span>
+        ) : (
+          card.balanceLines.map((line) => (
+            <span
+              key={line.currency}
+              className="flex items-baseline justify-between gap-2"
+            >
+              {card.balanceLines.length > 1 ? (
+                <span className="text-xs text-white/60">{line.currency}</span>
+              ) : null}
+              <span
+                className={cn(
+                  "flex-1 text-right font-mono font-semibold text-white tabular-nums",
+                  card.balanceLines.length > 1 ? "text-lg" : "text-2xl"
+                )}
+              >
+                {line.amount}
+              </span>
+            </span>
+          ))
+        )}
       </div>
 
       {isPending ? (

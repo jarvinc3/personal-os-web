@@ -7,6 +7,7 @@ import {
   type InstitutionStackCounts,
   type InstitutionStackItem,
 } from "@/src/modules/finance/shared/lib/institution-stack"
+import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
 
 const FALLBACK_INSTITUTION_COLOR = "#1B4332"
@@ -24,6 +25,8 @@ export type InstitutionCardModel = {
   counts: InstitutionStackCounts | null
   balanceLabel: string
   balanceAmount: string
+  /** Native balance per currency; multiple lines are never converted. */
+  balanceLines: Array<{ currency: string; amount: string }>
   irregularities: InstitutionIrregularities
 }
 
@@ -35,6 +38,19 @@ export function buildInstitutionCard(
   item: InstitutionStackItem,
   display: FinanceMoneyDisplay
 ): InstitutionCardModel {
+  const hasMissingCreditLimit =
+    item.kind === "institution" &&
+    item.issues.some((issue) => issue.code === "MISSING_CREDIT_LIMIT")
+  const balanceLines = hasMissingCreditLimit
+    ? []
+    : item.currencyTotals.map((total) => ({
+        currency: total.currency,
+        amount: formatFinanceMoney(total.netWorth, {
+          ...display,
+          currency: total.currency,
+        }),
+      }))
+
   if (item.kind === "institution") {
     return {
       item,
@@ -45,8 +61,10 @@ export function buildInstitutionCard(
       isCash: isCashInstitution(item.institution),
       productSummary: formatProductCounts(item.counts),
       counts: item.counts,
-      balanceLabel: "Balance consolidado",
+      balanceLabel:
+        balanceLines.length > 1 ? "Balance por moneda" : "Balance consolidado",
       balanceAmount: formatStackItemBalance(item, display),
+      balanceLines,
       irregularities: item.irregularities,
     }
   }
@@ -62,6 +80,7 @@ export function buildInstitutionCard(
     counts: null,
     balanceLabel: "Saldo",
     balanceAmount: formatStackItemBalance(item, display),
+    balanceLines,
     irregularities: item.irregularities,
   }
 }

@@ -86,6 +86,7 @@ function SubscriptionsScreenBody() {
         monthlyCost={summary?.monthlyCost ?? "0"}
         annualCost={summary?.annualCost ?? "0"}
         activeCount={summary?.activeCount ?? 0}
+        byCurrency={summary?.byCurrency ?? []}
         baseCurrency={summary?.baseCurrency ?? display.currency}
         badges={badges}
         loading={summaryQuery.isPending && !summary}

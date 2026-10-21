@@ -178,6 +178,16 @@ describe("buildInstitutionStackItems", () => {
           netWorth: "-8549.27",
           totalAssets: "0",
           totalLiabilities: "8549.27",
+          byCurrency: [
+            {
+              currency: "DOP",
+              assets: "0",
+              available: "0",
+              receivables: "0",
+              liabilities: "8549.27",
+              netWorth: "-8549.27",
+            },
+          ],
           issues: [],
         },
       ],
@@ -191,6 +201,16 @@ describe("buildInstitutionStackItems", () => {
       assert.equal(items[0].counts.loans, 1)
       assert.equal(items[0].status, "COMPLETE")
       assert.equal(items[0].netWorth, "-8549.27")
+      assert.deepEqual(items[0].currencyTotals, [
+        {
+          currency: "DOP",
+          assets: "0",
+          available: "0",
+          receivables: "0",
+          liabilities: "8549.27",
+          netWorth: "-8549.27",
+        },
+      ])
     }
     assert.equal(items[1]?.kind, "cash")
     if (items[1]?.kind === "cash") {
