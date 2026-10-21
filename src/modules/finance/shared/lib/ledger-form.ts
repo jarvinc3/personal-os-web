@@ -29,6 +29,24 @@ export function isPositiveAmountInput(value: string): boolean {
   return amount > 0
 }
 
+/** Ceiling for a money amount in the client forms, under the stored decimal width. */
+export const FINANCE_MAX_AMOUNT = 999_999_999.99
+
+const MONEY_CENTS_INPUT = /^\d*\.?\d{0,2}$/
+
+/** A money amount is written in cents: no digit survives past the second decimal. */
+export function hasMoneyCentsInput(value: string): boolean {
+  return MONEY_CENTS_INPUT.test(value.trim())
+}
+
+export function isWithinMaxAmountInput(value: string): boolean {
+  const amount = parseFinanceMoney(value)
+  if (amount === null) {
+    return false
+  }
+  return amount <= FINANCE_MAX_AMOUNT
+}
+
 /** A rate keeps up to the 8 decimals the API stores. */
 export function isPositiveRateInput(value: string): boolean {
   if (!/^\d*\.?\d{0,8}$/.test(value.trim())) {

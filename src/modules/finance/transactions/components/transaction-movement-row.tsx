@@ -8,6 +8,7 @@ import {
   formatFinanceMoney,
   type FinanceMoneyDisplay,
 } from "@/src/modules/finance/shared/lib/money"
+import { transferRateLabel } from "@/src/modules/finance/transactions/lib/transfer-fx"
 import { formatFinanceTimeLabel } from "@/src/modules/finance/shared/lib/ledger-form"
 import {
   displayedMovementSign,
@@ -79,6 +80,18 @@ export function TransactionMovementRow({
     ? "#3B82F6"
     : category?.color?.trim() || parent?.color?.trim() || "#64748B"
   const sign = displayedMovementSign(transaction, instrument)
+  const rateLabel =
+    isTransfer &&
+    instrument &&
+    transaction.transferToCurrency &&
+    transaction.transferToCurrency !== transaction.currency &&
+    transaction.exchangeRate
+      ? transferRateLabel({
+          rate: transaction.exchangeRate,
+          sourceCurrency: transaction.currency,
+          destinationCurrency: transaction.transferToCurrency,
+        })
+      : null
   const title = isTransfer
     ? transferDirectionLabel(transaction)
     : (transaction.merchantName ??
@@ -170,6 +183,11 @@ export function TransactionMovementRow({
           >
             {signedAmount({ transaction, display, instrument })}
           </span>
+          {rateLabel ? (
+            <span className="text-[11px] text-muted-foreground tabular-nums">
+              {rateLabel}
+            </span>
+          ) : null}
           {hasStatusBadge ? (
             <span className="flex flex-col items-end gap-1 font-normal">
               {transaction.possibleDuplicateOfId ? (

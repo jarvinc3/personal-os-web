@@ -7,6 +7,7 @@ import {
   fetchAllTransactionPages,
   formatTransactionDate,
   mergeTransactionsById,
+  movementSideMoney,
   movementTouchesInstrument,
   OPERATION_LEG_ROLE,
   signedAmount,
@@ -495,6 +496,94 @@ describe("signedAmount", () => {
     assert.doesNotMatch(
       signedAmount({ transaction: transfer, display }),
       /^[+−] /
+    )
+  })
+})
+
+describe("movementSideMoney", () => {
+  const crossCurrency: FinanceTransaction = {
+    ...transfer,
+    amount: "100.00",
+    currency: "USD",
+    exchangeRate: "61.45",
+    transferToAmount: "6145.00",
+    transferToCurrency: "DOP",
+    legs: [
+      {
+        ...({
+          id: "leg-out",
+          type: "DEBIT",
+          amount: "100.00",
+          accountId: "acc-a",
+          cardId: null,
+        } as FinanceTransaction),
+        legRole: OPERATION_LEG_ROLE.SOURCE,
+      },
+      {
+        ...({
+          id: "leg-in",
+          type: "CREDIT",
+          amount: "6145.00",
+          accountId: "acc-b",
+          cardId: null,
+        } as FinanceTransaction),
+        legRole: OPERATION_LEG_ROLE.DESTINATION,
+      },
+    ],
+  }
+
+  it("keeps the source amount on the origin side", () => {
+    assert.deepEqual(movementSideMoney(crossCurrency, { accountId: "acc-a" }), {
+      amount: "100.00",
+      currency: "USD",
+    })
+  })
+
+  it("shows the received amount and currency on the destination side", () => {
+    assert.deepEqual(movementSideMoney(crossCurrency, { accountId: "acc-b" }), {
+      amount: "6145.00",
+      currency: "DOP",
+    })
+  })
+
+  it("falls back to the source amount when the destination is unknown", () => {
+    assert.deepEqual(movementSideMoney(crossCurrency), {
+      amount: "100.00",
+      currency: "USD",
+    })
+  })
+
+  it("falls back to the source amount when the API sends no received amount", () => {
+    const withoutReceived: FinanceTransaction = {
+      ...crossCurrency,
+      transferToAmount: null,
+    }
+    assert.deepEqual(
+      movementSideMoney(withoutReceived, { accountId: "acc-b" }),
+      {
+        amount: "100.00",
+        currency: "USD",
+      }
+    )
+  })
+
+  it("prices the destination row in the received currency", () => {
+    const display = { currency: "DOP", showCents: true, compactNumbers: false }
+    assert.equal(
+      signedAmount({
+        transaction: crossCurrency,
+        display,
+        instrument: { accountId: "acc-b" },
+      }),
+      "+ DOP $6,145.00"
+    )
+    assert.equal(
+      signedAmount({
+        transaction: crossCurrency,
+        display,
+        instrument: { accountId: "acc-a" },
+      }),
+      "− USD $100.00"
     )
   })
 })

@@ -178,6 +178,33 @@ export function movementSign(
   return null
 }
 
+/**
+ * Money a movement shows on the instrument it is read from. A cross-currency
+ * transfer credits the destination with the received amount, not the source one.
+ */
+export function movementSideMoney(
+  transaction: FinanceTransaction,
+  instrument?: FinanceInstrumentRef
+): { amount: string; currency: string } {
+  const sourceSide = {
+    amount: transaction.amount,
+    currency: transaction.currency,
+  }
+  if (!instrument || !transaction.transferToAmount) {
+    return sourceSide
+  }
+  if (!transaction.transferToCurrency) {
+    return sourceSide
+  }
+  if (transferSignFromInstrument(transaction, instrument) !== "+") {
+    return sourceSide
+  }
+  return {
+    amount: transaction.transferToAmount,
+    currency: transaction.transferToCurrency,
+  }
+}
+
 export function signedAmount({
   transaction,
   display,
@@ -187,10 +214,14 @@ export function signedAmount({
   display: FinanceMoneyDisplay
   instrument?: FinanceInstrumentRef
 }): string {
-  const parsed = parseFinanceMoney(transaction.amount)
+  const side = movementSideMoney(transaction, instrument)
+  const parsed = parseFinanceMoney(side.amount)
   const formatted = formatFinanceMoney(
     parsed === null ? null : Math.abs(parsed),
-    { ...display, currency: transaction.currency }
+    {
+      ...display,
+      currency: side.currency,
+    }
   )
   const sign = displayedMovementSign(transaction, instrument)
   if (!sign) {
