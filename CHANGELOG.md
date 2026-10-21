@@ -2,6 +2,17 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.47.7] - 2026-10-20
+
+### Cambiado
+
+- Interno: el asistente de préstamo se reparte en el cálculo del plan (con pruebas), los componentes de cada paso y un contenedor que solo orquesta (#154).
+
+### Corregido
+
+- El banner de productos sin conciliar muestra la cantidad que lista, resume los que no caben como «+N más» y lleva a conciliar el producto al tocarlo o al tocar un chip (#205).
+- El formulario de presupuesto ya no llega con una categoría elegida y el selector permite crear la categoría que se escribe (#199).
+
 ## [0.47.6] - 2026-10-20
 
 ### Cambiado
