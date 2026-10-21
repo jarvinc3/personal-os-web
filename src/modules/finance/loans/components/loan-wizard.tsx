@@ -55,6 +55,7 @@ function wizardDefaults(
 ): LoanWizardValues {
   return {
     who: "BANK",
+    name: "",
     lenderName: "",
     institutionId: defaultInstitutionId,
     amount: "",
@@ -65,6 +66,7 @@ function wizardDefaults(
     ratePercent: "",
     installment: "",
     accountId: CATALOG_NONE,
+    disbursementAccountId: CATALOG_NONE,
     disbursementDate: todayDateInput(),
     rateType: "FIXED",
     insuranceAmount: "",
@@ -98,7 +100,7 @@ export function LoanWizard({
   )
   const [step, setStep] = useState<WizardStep>("who")
   const { picker, openPicker, closeHandlerFor } = usePicker<
-    "none" | "institution" | "account" | "currency"
+    "none" | "institution" | "account" | "disbursement" | "currency"
   >("none")
 
   const {
@@ -151,6 +153,19 @@ export function LoanWizard({
   }, [accounts, accountsQuery.isSuccess, getValues, setValue])
 
   useEffect(() => {
+    const chosen = getValues("disbursementAccountId")
+    if (!chosen || chosen === CATALOG_NONE) {
+      return
+    }
+    const account = accounts.find((item) => item.id === chosen)
+    if (account && account.currency !== values?.currency) {
+      setValue("disbursementAccountId", CATALOG_NONE, {
+        shouldValidate: true,
+      })
+    }
+  }, [accounts, values?.currency, getValues, setValue])
+
+  useEffect(() => {
     if (step !== "calculating") {
       return
     }
@@ -183,6 +198,7 @@ export function LoanWizard({
         ? (selectedInstitution?.name ?? "")
         : formValues.lenderName.trim()
     const payload = buildLoanBody({
+      name: formValues.name,
       lenderName,
       originalAmount: formValues.amount,
       currentBalance: String(currentPlan.outstandingBalance),
@@ -194,6 +210,7 @@ export function LoanWizard({
       institutionId:
         formValues.who === "BANK" ? formValues.institutionId : CATALOG_NONE,
       accountId: formValues.accountId,
+      disbursementAccountId: formValues.disbursementAccountId,
       currency: formValues.currency,
       interestRatePercent: String(roundToCents(currentPlan.annualRate * 100)),
       rateType: formValues.rateType,
@@ -207,7 +224,15 @@ export function LoanWizard({
     }
     try {
       await createMutation.mutateAsync(payload.body)
-      appToast.success({ text1: "Préstamo creado" })
+      const hasDisbursement =
+        formValues.disbursementAccountId !== CATALOG_NONE &&
+        formValues.disbursementAccountId !== ""
+      appToast.success({
+        text1: "Préstamo creado",
+        text2: hasDisbursement
+          ? "El capital entró a la cuenta elegida."
+          : "El dinero no entró a ninguna cuenta.",
+      })
       onDone()
     } catch (error) {
       appToast.error({ text1: financeErrorMessage(error) })
@@ -285,6 +310,7 @@ export function LoanWizard({
             display={display}
             onPickCurrency={() => openPicker("currency")}
             onPickAccount={() => openPicker("account")}
+            onPickDisbursement={() => openPicker("disbursement")}
           />
         ) : null}
 
@@ -374,6 +400,25 @@ export function LoanWizard({
           setValue("accountId", splitLedgerTarget(next).accountId ?? "", {
             shouldValidate: true,
           })
+        }
+      />
+
+      <DestinationPickerSheet
+        open={picker === "disbursement"}
+        onOpenChange={closeHandlerFor("disbursement")}
+        institutions={institutions}
+        accounts={activeAccounts.filter(
+          (account) => account.currency === values?.currency
+        )}
+        cards={[]}
+        display={display}
+        accountsOnly
+        onSelect={(next) =>
+          setValue(
+            "disbursementAccountId",
+            splitLedgerTarget(next).accountId ?? "",
+            { shouldValidate: true }
+          )
         }
       />
     </>

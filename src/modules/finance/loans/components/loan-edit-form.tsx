@@ -70,6 +70,7 @@ function toFormValues(
   defaultInstitutionId: string = CATALOG_NONE
 ): LoanFormValues {
   return {
+    name: loan.name ?? "",
     lenderName: loan.lenderName,
     institutionId: loan.institutionId ?? defaultInstitutionId,
     accountId: loan.accountId ?? CATALOG_NONE,
@@ -178,6 +179,21 @@ export function LoanEditForm({
         submitDisabled={!canSave}
       >
         <SummarySection title="Préstamo" icon={LandmarkIcon}>
+          <Controller
+            control={control}
+            name="name"
+            render={({ field }) => (
+              <FormTextField
+                icon={NotebookPenIcon}
+                label="Nombre (opcional)"
+                value={field.value}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+                error={errors.name?.message}
+                placeholder="Carro"
+              />
+            )}
+          />
           <Controller
             control={control}
             name="lenderName"

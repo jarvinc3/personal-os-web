@@ -54,7 +54,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
-import { SummaryItem } from "@/src/shared/components/ui/summary"
+import { SummaryItem, SummarySection } from "@/src/shared/components/ui/summary"
 import { InfiniteListSentinel } from "@/src/shared/components/ui/infinite-list-sentinel"
 import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
@@ -64,10 +64,12 @@ import { appToast } from "@/src/shared/lib/app-toast"
 import {
   ArchiveIcon,
   HandCoinsIcon,
+  LandmarkIcon,
   MoreVerticalIcon,
   PencilIcon,
   TableIcon,
   Trash2Icon,
+  WalletIcon,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useMemo, useState } from "react"
@@ -120,6 +122,7 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
 
   const loan =
     (loansQuery.data ?? []).find((item) => item.id === loanId) ?? null
+  const loanTitle = loan?.name?.trim() || loan?.lenderName || "Préstamo"
   const institutions = institutionsQuery.data ?? []
   const institution = loan?.institutionId
     ? (institutions.find((item) => item.id === loan.institutionId) ?? null)
@@ -136,7 +139,7 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
           moduleSlug: "finance",
           screen: "loan-detail",
           entityRef: { type: "loan", id: loan.id },
-          entityLabel: loan.lenderName,
+          entityLabel: loanTitle,
         }
       : null
   )
@@ -210,19 +213,12 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
   usePageHeader(
     {
       variant: "secondary",
-      title: institution?.name || loan?.lenderName || "Préstamo",
+      title: loanTitle,
       onBack: () => router.back(),
       actions: headerActions,
       accentColor: accent,
     },
-    [
-      router,
-      loan?.id,
-      loan?.lenderName,
-      institution?.name,
-      accent,
-      headerActions,
-    ]
+    [router, loan?.id, loanTitle, accent, headerActions]
   )
 
   if (loansQuery.isPending && !loan) {
@@ -265,7 +261,7 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
             size={48}
           />
         }
-        title={loan.lenderName}
+        title={loanTitle}
         badge={{
           label: paidOff ? "Saldado" : "Activo",
           variant: paidOff ? "success" : "warning",
@@ -289,6 +285,34 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
         }
         decoration={<LoanSurfaceMark size="header" />}
       />
+
+      <div className="mx-4 mt-3">
+        <SummarySection title="Préstamo" icon={LandmarkIcon}>
+          <SummaryItem
+            title="Prestamista"
+            icon={LandmarkIcon}
+            value={institution?.name ?? loan.lenderName}
+            isLast={false}
+          />
+          <SummaryItem
+            title="Se paga desde"
+            icon={WalletIcon}
+            value={loan.account?.name ?? "Sin cuenta de pago"}
+            isLast={false}
+          />
+          <SummaryItem
+            title="Desembolso"
+            icon={HandCoinsIcon}
+            value={loan.disbursementAccount?.name ?? "Sin cuenta"}
+            description={
+              loan.disbursementAccount
+                ? undefined
+                : "El dinero no entró a ninguna cuenta."
+            }
+            isLast
+          />
+        </SummarySection>
+      </div>
 
       <div className="mx-4 flex flex-col gap-3 rounded-3xl bg-background">
         {installmentsQuery.isError ? (
@@ -375,7 +399,7 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
       <RecordOptionsSheet
         open={openOptionsSheet}
         onOpenChange={setOpenOptionsSheet}
-        description={loan.lenderName}
+        description={loanTitle}
         options={[
           {
             id: "prepay",
@@ -438,7 +462,7 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
       <DeleteRecordDialog
         open={confirmOpen}
         onOpenChange={setConfirmOpen}
-        recordName={loan.lenderName}
+        recordName={loanTitle}
         pending={deleteLoan.isPending}
         consequences="Se borran sus cuotas y su calendario de pagos. No se puede deshacer."
         onConfirm={() => void onDeleteLoan()}
@@ -452,7 +476,7 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
       <ArchiveRecordDialog
         open={archiveConfirmOpen}
         onOpenChange={setArchiveConfirmOpen}
-        recordName={loan.lenderName}
+        recordName={loanTitle}
         pending={archiveLoan.isPending}
         onConfirm={() => void onArchiveLoan()}
       />

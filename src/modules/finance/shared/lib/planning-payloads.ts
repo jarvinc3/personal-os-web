@@ -29,6 +29,7 @@ export type CreateSavingsGoalBody = {
 export type UpdateSavingsGoalBody = Omit<CreateSavingsGoalBody, "currentAmount">
 
 export type CreateLoanBody = {
+  name?: string
   lenderName: string
   originalAmount: number
   currentBalance: number
@@ -39,6 +40,7 @@ export type CreateLoanBody = {
   paidInstallments?: number
   institutionId?: string
   accountId?: string
+  disbursementAccountId?: string
   currency?: string
   interestRate?: number | null
   rateType?: "FIXED" | "VARIABLE"
@@ -216,6 +218,7 @@ export function buildSavingsGoalBody(
 
 export function buildLoanBody(
   input: {
+    name?: string
     lenderName: string
     originalAmount: string
     currentBalance: string
@@ -226,6 +229,7 @@ export function buildLoanBody(
     paidInstallments?: string
     institutionId?: string
     accountId?: string
+    disbursementAccountId?: string
     currency?: string
     interestRatePercent?: string
     rateType?: "FIXED" | "VARIABLE"
@@ -292,8 +296,12 @@ export function buildLoanBody(
   }
 
   const accountId = optionalId(input.accountId)
+  const disbursementAccountId = options?.isUpdate
+    ? undefined
+    : optionalId(input.disbursementAccountId)
   const institutionId = optionalId(input.institutionId)
   const currency = optionalTrimmed(input.currency)?.toUpperCase()
+  const name = optionalTrimmed(input.name)
   const notes = optionalTrimmed(input.notes)
 
   const body: CreateLoanBody = {
@@ -305,8 +313,10 @@ export function buildLoanBody(
     totalInstallments: totalInstallments.body,
     nextDueDate: nextDue.body,
     ...(paidInstallments !== undefined ? { paidInstallments } : {}),
+    ...(name ? { name } : options?.isUpdate ? { name: "" } : {}),
     ...(institutionId ? { institutionId } : {}),
     ...(accountId ? { accountId } : {}),
+    ...(disbursementAccountId ? { disbursementAccountId } : {}),
     ...(currency ? { currency } : {}),
     ...(notes ? { notes } : {}),
   }
@@ -433,6 +443,8 @@ export type CreateSavingsGoalContributionBody = {
   notes?: string
   /** Account the money comes from; the API moves it when it is not the goal account. */
   fromAccountId?: string
+  /** Account that receives a withdrawal. */
+  toAccountId?: string
   fromTransferGroupId?: string
 }
 
@@ -442,6 +454,7 @@ export function buildSavingsGoalContributionBody(input: {
   date?: string
   notes?: string
   fromAccountId?: string
+  toAccountId?: string
   fromTransferGroupId?: string
 }): PayloadResult<CreateSavingsGoalContributionBody> {
   const amount = requiredMoney(input.amount, "Aporte")
@@ -459,6 +472,7 @@ export function buildSavingsGoalContributionBody(input: {
 
   const notes = optionalTrimmed(input.notes)
   const fromAccountId = optionalTrimmed(input.fromAccountId)
+  const toAccountId = optionalTrimmed(input.toAccountId)
   const transferGroupId = optionalTrimmed(input.fromTransferGroupId)
 
   return {
@@ -469,6 +483,7 @@ export function buildSavingsGoalContributionBody(input: {
       ...(date.body ? { date: date.body } : {}),
       ...(notes ? { notes } : {}),
       ...(fromAccountId ? { fromAccountId } : {}),
+      ...(toAccountId ? { toAccountId } : {}),
       ...(transferGroupId ? { fromTransferGroupId: transferGroupId } : {}),
     },
   }

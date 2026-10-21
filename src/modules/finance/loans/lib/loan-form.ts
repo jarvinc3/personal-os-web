@@ -6,6 +6,7 @@ import { parseFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 
 export const loanSchema = z
   .object({
+    name: z.string().max(120),
     lenderName: z.string().trim().min(1, "Prestamista obligatorio").max(120),
     institutionId: z.string(),
     accountId: z.string(),
@@ -73,6 +74,7 @@ export const LOAN_WIZARD_TERMS = [12, 24, 36, 48, 60] as const
 export const loanWizardSchema = z
   .object({
     who: z.enum(["BANK", "PERSON"]),
+    name: z.string().max(120),
     lenderName: z.string().max(120),
     institutionId: z.string(),
     amount: z.string().trim().min(1, "Monto obligatorio"),
@@ -83,6 +85,7 @@ export const loanWizardSchema = z
     ratePercent: z.string(),
     installment: z.string(),
     accountId: z.string(),
+    disbursementAccountId: z.string(),
     disbursementDate: z.string().trim().min(1, "Fecha obligatoria"),
     rateType: z.enum(["FIXED", "VARIABLE"]),
     insuranceAmount: z.string(),

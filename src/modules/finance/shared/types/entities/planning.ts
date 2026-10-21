@@ -102,6 +102,8 @@ export type FinanceSavingsGoalContribution = {
   contributedAt: string
   kind: "CONTRIBUTION" | "WITHDRAWAL"
   accountId: string | null
+  /** Account that received a withdrawal; null for a contribution. */
+  destinationAccountId: string | null
   transactionId: string | null
   notes: string | null
   createdAt: string
@@ -129,6 +131,11 @@ export type FinanceLoan = {
   institution?: { id: string; name: string } | null
   accountId: string | null
   account?: { id: string; name: string } | null
+  /** Account that received the disbursed principal; null when it was not recorded. */
+  disbursementAccountId: string | null
+  disbursementAccount?: { id: string; name: string } | null
+  /** Optional alias that the UI prefers over the lender name. */
+  name: string | null
   lenderName: string
   originalAmount: string
   currentBalance: string

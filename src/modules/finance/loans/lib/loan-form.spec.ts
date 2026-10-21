@@ -4,6 +4,7 @@ import { describe, it } from "node:test"
 import { loanSchema, loanWizardPrefill } from "./loan-form.ts"
 
 const validLoan = {
+  name: "",
   lenderName: "Banco",
   institutionId: "",
   accountId: "",
@@ -22,6 +23,13 @@ const validLoan = {
 describe("loanSchema", () => {
   it("accepts a monthly loan", () => {
     assert.equal(loanSchema.safeParse(validLoan).success, true)
+  })
+
+  it("accepts an optional alias", () => {
+    assert.equal(
+      loanSchema.safeParse({ ...validLoan, name: "Carro" }).success,
+      true
+    )
   })
 
   it("rejects an empty lender name", () => {

@@ -214,6 +214,7 @@ export function LoanWizardDetailsStep({
   display,
   onPickCurrency,
   onPickAccount,
+  onPickDisbursement,
 }: LoanWizardStepForm & {
   trigger: UseFormTrigger<LoanWizardValues>
   values: LoanWizardValues
@@ -221,6 +222,7 @@ export function LoanWizardDetailsStep({
   display: FinanceMoneyDisplay
   onPickCurrency: () => void
   onPickAccount: () => void
+  onPickDisbursement: () => void
 }) {
   const currency = values.currency
   const known = values.known ?? "RATE"
@@ -325,6 +327,21 @@ export function LoanWizardDetailsStep({
       <SummarySection title="Ruta" icon={LandmarkIcon}>
         <Controller
           control={control}
+          name="name"
+          render={({ field }) => (
+            <FormTextField
+              icon={NotebookPenIcon}
+              label="Nombre (opcional)"
+              value={field.value}
+              onChange={field.onChange}
+              onBlur={field.onBlur}
+              error={errors.name?.message}
+              placeholder="Carro"
+            />
+          )}
+        />
+        <Controller
+          control={control}
           name="accountId"
           render={({ field }) => (
             <Field className="gap-1">
@@ -346,6 +363,35 @@ export function LoanWizardDetailsStep({
             </Field>
           )}
         />
+        <Controller
+          control={control}
+          name="disbursementAccountId"
+          render={({ field }) => (
+            <Field className="gap-1">
+              <FieldLabel className="text-sm text-muted-foreground">
+                Entró en (opcional)
+              </FieldLabel>
+              <DestinationTrigger
+                destination={
+                  field.value && field.value !== CATALOG_NONE
+                    ? encodeLedgerTarget("account", field.value)
+                    : CATALOG_NONE
+                }
+                accounts={accounts.filter(
+                  (account) => account.isActive && account.currency === currency
+                )}
+                cards={[]}
+                display={display}
+                placeholder="Sin cuenta de desembolso"
+                onClick={onPickDisbursement}
+              />
+            </Field>
+          )}
+        />
+        <FinanceHelpText>
+          Si eliges dónde entró el dinero, el saldo de esa cuenta sube y no
+          cuenta como ingreso.
+        </FinanceHelpText>
       </SummarySection>
 
       <SummarySection title="Calendario" icon={CalendarIcon}>
