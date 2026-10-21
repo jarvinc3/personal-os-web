@@ -13,7 +13,6 @@ import {
   findHelpTerm,
   groupHelpTerms,
   hasHelpSearch,
-  parseHelpTermParam,
 } from "@/src/modules/help/lib/help-search"
 import { FormTextField } from "@/src/shared/components/layout/form-blocks"
 import { SettingsSection } from "@/src/shared/components/layout/settings-section"
@@ -36,8 +35,7 @@ function termCountLabel(count: number): string {
 
 export function GlossaryScreen() {
   const searchParams = useSearchParams()
-  const termSlug = parseHelpTermParam(searchParams.get("term"))
-  const activeTerm = findHelpTerm(HELP_TERMS, termSlug)
+  const activeTerm = findHelpTerm(HELP_TERMS, searchParams.get("term"))
   const [search, setSearch] = useState("")
   const back = useHelpBack(APP_ROUTES.app.help)
   const searching = hasHelpSearch(search)

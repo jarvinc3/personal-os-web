@@ -1,5 +1,6 @@
 "use client"
 
+import { HELP_LINK_CLASS } from "@/src/modules/help/constants/help-ui"
 import {
   glossaryTermHref,
   helpGuideHref,
@@ -12,9 +13,6 @@ type HelpRichTextProps = {
   text: string
   onNavigate?: () => void
 }
-
-const LINK_CLASS =
-  "font-medium text-primary underline underline-offset-4 transition-opacity hover:opacity-80"
 
 export function HelpRichText({ text, onNavigate }: HelpRichTextProps) {
   return parseHelpText(text).map((segment, index) => {
@@ -31,7 +29,7 @@ export function HelpRichText({ text, onNavigate }: HelpRichTextProps) {
       <Link
         key={`${segment.kind}-${segment.slug}-${index}`}
         href={href}
-        className={LINK_CLASS}
+        className={HELP_LINK_CLASS}
         onClick={onNavigate}
       >
         {segment.value}

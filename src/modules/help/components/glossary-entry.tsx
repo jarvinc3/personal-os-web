@@ -2,6 +2,7 @@
 
 import { HelpRichText } from "@/src/modules/help/components/help-rich-text"
 import { HELP_TERMS } from "@/src/modules/help/constants/glossary"
+import { HELP_LINK_CLASS } from "@/src/modules/help/constants/help-ui"
 import { glossaryTermHref } from "@/src/modules/help/lib/help-links"
 import type { HelpTerm } from "@/src/modules/help/types/help.types"
 import { cn } from "@/src/shared/lib/utils"
@@ -51,7 +52,7 @@ export function GlossaryEntry({
               key={item.slug}
               href={glossaryTermHref(item.slug)}
               onClick={onTermPress}
-              className="font-medium text-primary underline underline-offset-4 transition-opacity hover:opacity-80"
+              className={HELP_LINK_CLASS}
             >
               {item.term}
             </Link>
