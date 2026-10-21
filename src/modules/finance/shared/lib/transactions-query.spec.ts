@@ -280,15 +280,16 @@ describe("transferDirectionLabel", () => {
 describe("fetchAllTransactionPages", () => {
   it("walks the cursor and keeps search filters", async () => {
     const calls: string[] = []
-    const items = await fetchAllTransactionPages(
-      {
+    const items = await fetchAllTransactionPages({
+      query: {
         limit: 100,
         accountId: "acc-1",
         search: "super",
         dateFrom: "2026-01-01",
         dateTo: "2026-12-31",
       },
-      async (path) => {
+      timeZone: "America/La_Paz",
+      get: async (path) => {
         calls.push(path)
         const params = new URLSearchParams(path.split("?")[1])
         const index = Number(params.get("cursor") ?? 1)
@@ -298,8 +299,8 @@ describe("fetchAllTransactionPages", () => {
           nextCursor: index < 2 ? String(nextIndex) : null,
           hasMore: index < 2,
         }
-      }
-    )
+      },
+    })
     assert.equal(calls.length, 2)
     assert.equal(
       new URLSearchParams(calls[0]?.split("?")[1]).has("cursor"),
@@ -324,9 +325,10 @@ describe("timelineMonthQuery", () => {
 
   it("requests the calendar bounds of the current month", async () => {
     const paths: string[] = []
-    const query = timelineMonthQuery(
-      "2026-10",
-      async (path) => {
+    const query = timelineMonthQuery({
+      month: "2026-10",
+      timeZone: laPaz,
+      get: async (path) => {
         paths.push(path)
         return {
           items: [],
@@ -334,8 +336,7 @@ describe("timelineMonthQuery", () => {
           hasMore: false,
         }
       },
-      laPaz
-    )
+    })
     assert.deepEqual(query.queryKey, timelineMonthQueryKey("2026-10", laPaz))
     assert.deepEqual(query.queryKey, [
       ...FINANCE_TRANSACTIONS_QUERY_KEY,

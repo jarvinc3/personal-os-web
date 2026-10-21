@@ -156,12 +156,12 @@ describe("prefetchFinanceCurrentMonth", () => {
     const queryClient = createQueryClient()
     const { get, paths } = createMockGet()
     const laPaz = "America/La_Paz"
-    await prefetchFinanceCurrentMonth(
+    await prefetchFinanceCurrentMonth({
       queryClient,
-      laPaz,
+      timeZone: laPaz,
       get,
-      new Date(2026, 9, 5)
-    )
+      now: new Date(2026, 9, 5),
+    })
     assert.match(paths[0] ?? "", /\/finance\/transactions\?/)
     assert.match(paths[0] ?? "", /dateFrom=2026-10-01T04%3A00/)
     assert.match(paths[0] ?? "", /dateTo=2026-11-01T03%3A59/)

@@ -1,10 +1,17 @@
 const WALL_TIME = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/
 
+const pad = (value: number): string => String(value).padStart(2, "0")
+
+type ZonedParts = {
+  year: number
+  month: number
+  day: number
+  hour: number
+  minute: number
+}
+
 /** Parts an instant shows in one zone, using the h23 clock (`00`–`23`). */
-function zonedParts(
-  instant: Date,
-  timeZone: string
-): { date: string; time: string } {
+function zonedParts(instant: Date, timeZone: string): ZonedParts {
   const parts = new Intl.DateTimeFormat("en-CA", {
     timeZone,
     hourCycle: "h23",
@@ -14,20 +21,33 @@ function zonedParts(
     hour: "2-digit",
     minute: "2-digit",
   }).formatToParts(instant)
-  const read = (type: Intl.DateTimeFormatPartTypes): string =>
-    parts.find((part) => part.type === type)?.value ?? ""
+  const read = (type: Intl.DateTimeFormatPartTypes): number => {
+    const value = parts.find((part) => part.type === type)?.value
+    const parsed = Number(value)
+    if (!value || !Number.isFinite(parsed)) {
+      throw new Error(`The zone formatter returned no ${type} for ${timeZone}`)
+    }
+    return parsed
+  }
   return {
-    date: `${read("year")}-${read("month")}-${read("day")}`,
-    time: `${read("hour")}:${read("minute")}`,
+    year: read("year"),
+    month: read("month"),
+    day: read("day"),
+    hour: read("hour"),
+    minute: read("minute"),
   }
 }
 
 /** Minutes the zone is ahead of UTC at that instant. */
 function zoneOffsetMinutes(instantMs: number, timeZone: string): number {
   const parts = zonedParts(new Date(instantMs), timeZone)
-  const [year, month, day] = parts.date.split("-").map(Number)
-  const [hour, minute] = parts.time.split(":").map(Number)
-  const asUtc = Date.UTC(year!, month! - 1, day!, hour!, minute!)
+  const asUtc = Date.UTC(
+    parts.year,
+    parts.month - 1,
+    parts.day,
+    parts.hour,
+    parts.minute
+  )
   return (asUtc - instantMs) / 60_000
 }
 
@@ -59,8 +79,8 @@ export function instantToZonedWallTime(iso: string, timeZone: string): string {
   if (Number.isNaN(instant.getTime())) {
     return iso
   }
-  const { date, time } = zonedParts(instant, timeZone)
-  return `${date}T${time}`
+  const parts = zonedParts(instant, timeZone)
+  return `${parts.year}-${pad(parts.month)}-${pad(parts.day)}T${pad(parts.hour)}:${pad(parts.minute)}`
 }
 
 export function instantToZonedDate(iso: string, timeZone: string): string {
@@ -68,7 +88,8 @@ export function instantToZonedDate(iso: string, timeZone: string): string {
   if (Number.isNaN(instant.getTime())) {
     return iso
   }
-  return zonedParts(instant, timeZone).date
+  const parts = zonedParts(instant, timeZone)
+  return `${parts.year}-${pad(parts.month)}-${pad(parts.day)}`
 }
 
 /** First instant of the first day of a month, in the user's zone. */
@@ -77,10 +98,7 @@ export function zonedMonthStart(
   month: number,
   timeZone: string
 ): string {
-  return zonedWallTimeToInstant(
-    `${String(year).padStart(4, "0")}-${String(month).padStart(2, "0")}-01T00:00`,
-    timeZone
-  )
+  return zonedWallTimeToInstant(`${year}-${pad(month)}-01T00:00`, timeZone)
 }
 
 /** Last instant of the last day of a month, in the user's zone. */
@@ -91,7 +109,7 @@ export function zonedMonthEnd(
 ): string {
   const lastDay = new Date(Date.UTC(year, month, 0)).getUTCDate()
   return zonedWallTimeToInstant(
-    `${String(year).padStart(4, "0")}-${String(month).padStart(2, "0")}-${String(lastDay).padStart(2, "0")}T23:59`,
+    `${year}-${pad(month)}-${pad(lastDay)}T23:59`,
     timeZone
   )
 }

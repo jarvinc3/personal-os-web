@@ -28,7 +28,7 @@ export function FinanceLayout({ children }: { children: ReactNode }) {
     return scheduleIdle(() => {
       void prefetchFinanceCategories(queryClient)
       void prefetchFinancePlanning(queryClient)
-      void prefetchFinanceCurrentMonth(queryClient, timeZone)
+      void prefetchFinanceCurrentMonth({ queryClient, timeZone })
       if (emailSyncEnabled) {
         void prefetchFinanceSync(queryClient)
       }
@@ -47,7 +47,7 @@ export function FinanceLayout({ children }: { children: ReactNode }) {
         void prefetchFinanceCategories(queryClient)
       }
       if (href === APP_ROUTES.app.financeTransactions) {
-        void prefetchFinanceCurrentMonth(queryClient, timeZone)
+        void prefetchFinanceCurrentMonth({ queryClient, timeZone })
       }
     },
     [isEnabled, queryClient, timeZone]

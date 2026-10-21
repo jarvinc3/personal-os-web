@@ -69,7 +69,11 @@ export function useTimelineTransactions(
 ) {
   const timeZone = useUserTimeZone()
   const monthQuery = useQuery({
-    ...timelineMonthQuery(currentMonthKey, (path) => apiGet(path), timeZone),
+    ...timelineMonthQuery({
+      month: currentMonthKey,
+      get: (path) => apiGet(path),
+      timeZone,
+    }),
     enabled,
   })
   const yearQueries = useQueries({
@@ -91,16 +95,16 @@ export function useTimelineTransactions(
         staleTime: FINANCE_TIMELINE_STALE_TIME_MS,
         enabled: enabled && intersection !== null,
         queryFn: () =>
-          fetchAllTransactionPages(
-            {
+          fetchAllTransactionPages({
+            query: {
               ...filters,
               dateFrom: intersection?.dateFrom,
               dateTo: intersection?.dateTo,
               limit: FINANCE_TIMELINE_PAGE_SIZE,
             },
-            (path) => apiGet(path),
-            timeZone
-          ),
+            get: (path) => apiGet(path),
+            timeZone,
+          }),
       }
     }),
   })
@@ -135,11 +139,11 @@ export function allTransactionsQueryOptions(
     queryKey: [...FINANCE_TRANSACTIONS_QUERY_KEY, "all", filters, timeZone],
     staleTime: FINANCE_TIMELINE_STALE_TIME_MS,
     queryFn: () =>
-      fetchAllTransactionPages(
-        { ...filters, limit: FINANCE_TIMELINE_PAGE_SIZE },
-        (path) => apiGet(path),
-        timeZone
-      ),
+      fetchAllTransactionPages({
+        query: { ...filters, limit: FINANCE_TIMELINE_PAGE_SIZE },
+        get: (path) => apiGet(path),
+        timeZone,
+      }),
   }
 }
 

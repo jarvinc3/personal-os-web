@@ -426,25 +426,29 @@ export function timelineMonthQueryKey(month: MonthKey, timeZone: string) {
   ] as const
 }
 
-export function timelineMonthQuery(
-  month: MonthKey,
-  get: (path: string) => Promise<unknown>,
+export function timelineMonthQuery({
+  month,
+  get,
+  timeZone,
+}: {
+  month: MonthKey
+  get: (path: string) => Promise<unknown>
   timeZone: string
-) {
+}) {
   const parsed = parseMonthKey(month)
   return {
     queryKey: timelineMonthQueryKey(month, timeZone),
     staleTime: FINANCE_TIMELINE_STALE_TIME_MS,
     queryFn: () =>
-      fetchAllTransactionPages(
-        {
+      fetchAllTransactionPages({
+        query: {
           dateFrom: zonedMonthStart(parsed.year, parsed.month, timeZone),
           dateTo: zonedMonthEnd(parsed.year, parsed.month, timeZone),
           limit: FINANCE_TIMELINE_PAGE_SIZE,
         },
         get,
-        timeZone
-      ),
+        timeZone,
+      }),
   }
 }
 
@@ -460,11 +464,15 @@ export function mergeTransactionsById<T extends { id: string }>(
   return [...byId.values()]
 }
 
-export async function fetchAllTransactionPages(
-  query: Omit<FinanceTransactionsQuery, "cursor">,
-  get: (path: string) => Promise<unknown>,
+export async function fetchAllTransactionPages({
+  query,
+  get,
+  timeZone,
+}: {
+  query: Omit<FinanceTransactionsQuery, "cursor">
+  get: (path: string) => Promise<unknown>
   timeZone: string
-): Promise<FinanceTransaction[]> {
+}): Promise<FinanceTransaction[]> {
   const items: FinanceTransaction[] = []
   let cursor: string | undefined
   let pages = 0
