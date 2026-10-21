@@ -2,6 +2,18 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.49.2] - 2026-10-21
+
+### Corregido
+
+- Un separador de miles en el monto de un cobro deja de leerse como decimal: pagar 3,003 sobre 3,000 avisa que sobran DOP 3.00 en vez de una cifra absurda (#190).
+- El aviso de sobrepago muestra el sobrante en la moneda del cobro y deja elegir a qué otro cobro abierto va la diferencia; antes la opción «A otro cobro» no tenía destinatario y no se podía completar (#190).
+- El aviso ya no ofrece «A otro cobro» cuando no hay otro cobro abierto en esa moneda (#190).
+
+### Cambiado
+
+- Los formularios de movimiento, transferencia y tarjeta, el detalle de institución y el detalle de movimiento se parten en piezas de una sola responsabilidad. Rutas, formularios y mensajes no cambian (#154).
+
 ## [0.49.1] - 2026-10-21
 
 ### Corregido
