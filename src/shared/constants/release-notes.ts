@@ -12,6 +12,12 @@ export type ReleaseNotesEntry = {
 
 export const RELEASE_NOTES: readonly ReleaseNotesEntry[] = [
   {
+    version: "0.47.9",
+    highlights: [
+      "Al crear una categoría desde el presupuesto, la hoja se cierra y la categoría queda elegida.",
+    ],
+  },
+  {
     version: "0.47.8",
     highlights: [
       "Cuando ya conciliaste todos los productos del mes, el aviso de productos sin conciliar deja de aparecer.",

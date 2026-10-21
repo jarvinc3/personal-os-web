@@ -44,8 +44,8 @@ type CategoryPickerSheetBaseProps = {
   /** Hides these ids. Used to exclude the category being edited. */
   excludeIds?: string[]
   noneLabel?: string
-  /** Creates the typed name and returns its id, or null when it fails. */
-  onCreate?: (name: string) => Promise<string | null>
+  /** Creates the typed category; the caller selects it and closes the sheet. */
+  onCreate?: (name: string) => void | Promise<void>
 }
 
 type CategoryPickerSheetSingleProps = CategoryPickerSheetBaseProps & {
@@ -122,16 +122,11 @@ export function CategoryPickerSheet(props: CategoryPickerSheetProps) {
     onOpenChange(false)
   }
 
-  async function createFromSearch() {
+  function createFromSearch() {
     if (!onCreate) {
       return
     }
-    const createdId = await onCreate(typedName)
-    if (!createdId) {
-      return
-    }
-    setSearch("")
-    select(createdId)
+    void onCreate(typedName)
   }
 
   function selectedTrailing(categoryId: string, expand?: ReactNode) {
@@ -168,7 +163,7 @@ export function CategoryPickerSheet(props: CategoryPickerSheetProps) {
             "flex w-full items-center gap-3 rounded-2xl border border-dashed border-border bg-card px-3 py-3 text-left",
             PRESSABLE_CLASS
           )}
-          onClick={() => void createFromSearch()}
+          onClick={createFromSearch}
         >
           <PlusIcon className="size-5 text-muted-foreground" />
           <span className="text-sm font-medium">Crear «{typedName}»</span>

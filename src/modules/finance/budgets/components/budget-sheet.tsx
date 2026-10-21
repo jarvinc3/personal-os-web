@@ -244,16 +244,18 @@ export function BudgetSheet({
     }
   })
 
-  async function createBudgetCategory(name: string): Promise<string | null> {
+  async function addBudgetCategory(name: string): Promise<void> {
     try {
       const created = await createCategory.mutateAsync({
         name,
         type: "EXPENSE",
       })
-      return created.id
+      setValue("categoryIds", [...categoryIds, created.id], {
+        shouldValidate: true,
+      })
+      setCategoryPickerOpen(false)
     } catch (error) {
       appToast.error({ text1: financeErrorMessage(error) })
-      return null
     }
   }
 
@@ -469,7 +471,7 @@ export function BudgetSheet({
         onChange={(next) =>
           setValue("categoryIds", next, { shouldValidate: true })
         }
-        onCreate={createBudgetCategory}
+        onCreate={addBudgetCategory}
       />
 
       {discardChangesDialog}
