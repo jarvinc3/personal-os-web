@@ -47,6 +47,10 @@ export function InstitutionPile({
   const showCycleChrome = items.length > 1
   const frontItem = items[frontIndex]
 
+  function openItem(item: InstitutionStackItem) {
+    startTransition(() => onSelect(item))
+  }
+
   function onStackKeyDown(event: KeyboardEvent<HTMLDivElement>) {
     if (!showCycleChrome) {
       return
@@ -67,7 +71,7 @@ export function InstitutionPile({
       }
       event.preventDefault()
       if (frontItem) {
-        startTransition(() => onSelect(frontItem))
+        openItem(frontItem)
       }
     }
   }
@@ -119,11 +123,7 @@ export function InstitutionPile({
                 isPending={isFront && isPending}
                 onDragActiveChange={isFront ? setIsDragging : undefined}
                 onCycle={isFront ? onCycle : undefined}
-                onPress={
-                  isFront
-                    ? () => startTransition(() => onSelect(item))
-                    : undefined
-                }
+                onPress={isFront ? () => openItem(item) : undefined}
               />
             </motion.div>
           )
