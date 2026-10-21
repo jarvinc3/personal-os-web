@@ -23,7 +23,7 @@ function ModulesSettingsScreenBody() {
   }
 
   return (
-    <SettingsSecondaryPage title="Módulos">
+    <SettingsSecondaryPage title="Apps">
       <p className="px-1 text-sm text-muted-foreground">
         Elige una app para ver y guardar sus ajustes.
       </p>

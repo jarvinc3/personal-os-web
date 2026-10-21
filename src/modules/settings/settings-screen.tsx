@@ -95,7 +95,7 @@ const SETTINGS_MENU = [
     href: APP_ROUTES.app.settingsPrivacy,
   },
   {
-    label: "Módulos",
+    label: "Apps",
     description: "Ajustes de cada app.",
     icon: LayoutGrid,
     accent: SETTINGS_REGISTRY.account.accent,
@@ -174,6 +174,18 @@ function SettingsScreenBody() {
             isLast={index === SETTINGS_MENU.length - 1}
           />
         ))}
+      </SettingsSection>
+
+      <SettingsSection title="Ayuda">
+        <SettingsRow
+          label="Centro de ayuda"
+          description="Glosario, guías y preguntas frecuentes."
+          accentColor={SETTINGS_REGISTRY.help.accent}
+          disabled={isPending}
+          onPress={() => navigate(APP_ROUTES.app.help)}
+          isLast
+          {...SETTINGS_REGISTRY.help.rows.center}
+        />
       </SettingsSection>
 
       <SettingsSection title="Información">

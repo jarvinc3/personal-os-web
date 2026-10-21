@@ -4,7 +4,7 @@ import {
   COUNTRY_OPTIONS,
   countryName,
 } from "@/src/modules/finance/shared/lib/countries"
-import { foldSearchText } from "@/src/modules/finance/shared/lib/search-text"
+import { foldSearchText } from "@/src/shared/lib/search-text"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
 import { FormTextField } from "@/src/shared/components/layout/form-blocks"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"

@@ -34,6 +34,7 @@ const MODULE_SLUGS = [
   "finance",
   "keep-awake",
   "home",
+  "help",
 ]
 
 // Settings expone configuración genérica: estos son los únicos caminos que otro

@@ -1,3 +1,4 @@
+import { HELP_ACCENT } from "@/src/modules/help"
 import type {
   AIPreferences,
   ThemeValue,
@@ -14,6 +15,7 @@ import {
   Eraser,
   Globe,
   Image,
+  LifeBuoyIcon,
   Mail,
   Monitor,
   Moon,
@@ -146,6 +148,9 @@ export const SETTINGS_REGISTRY = {
   }),
   marketing: createSection("#037cff", {
     landingPage: Globe,
+  }),
+  help: createSection(HELP_ACCENT, {
+    center: LifeBuoyIcon,
   }),
   danger: createSection("#EF4444", {
     wipeData: Eraser,

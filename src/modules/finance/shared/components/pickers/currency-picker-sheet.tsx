@@ -6,7 +6,7 @@ import {
 } from "@/src/modules/finance/shared/components/currency-flag"
 import { useCurrencies } from "@/src/modules/finance/shared/hooks/use-currencies"
 import { currencyDisplayName } from "@/src/modules/finance/shared/lib/currency-display-name"
-import { foldSearchText } from "@/src/modules/finance/shared/lib/search-text"
+import { foldSearchText } from "@/src/shared/lib/search-text"
 import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 import { useFormatLocale } from "@/src/modules/settings/hooks/use-format-locale"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"

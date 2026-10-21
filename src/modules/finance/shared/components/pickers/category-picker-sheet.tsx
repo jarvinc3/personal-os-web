@@ -9,7 +9,7 @@ import {
   searchCategoryGroups,
   sortCategoriesNewestFirst,
 } from "@/src/modules/finance/shared/lib/category-tree"
-import { foldSearchText } from "@/src/modules/finance/shared/lib/search-text"
+import { foldSearchText } from "@/src/shared/lib/search-text"
 import type {
   FinanceCategory,
   FinanceCategoryType,

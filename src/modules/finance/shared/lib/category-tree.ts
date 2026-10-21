@@ -1,4 +1,4 @@
-import { foldSearchText } from "./search-text.ts"
+import { foldSearchText } from "@/src/shared/lib/search-text"
 
 export type CategoryLike = {
   id: string
