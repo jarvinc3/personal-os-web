@@ -12,6 +12,15 @@ export type ReleaseNotesEntry = {
 
 export const RELEASE_NOTES: readonly ReleaseNotesEntry[] = [
   {
+    version: "0.55.0",
+    highlights: [
+      "El patrimonio ahora tiene su propia vista: toca la cifra del balance en Productos para ver cuánto tienes disponible, cuánto te deben y qué debes, separado por moneda.",
+      "Los cobros pendientes suman al patrimonio; los vencidos hace más de 90 días se muestran aparte como dudosos y no suman.",
+      "Los avisos de descuadre y de productos sin conciliar ahora son dos indicadores con su lista y sus acciones, en vez de tarjetas rojas.",
+      "Los botones de ayuda de esos avisos abren el glosario del Centro de ayuda.",
+    ],
+  },
+  {
     version: "0.54.2",
     highlights: [
       "Un gasto ya no deja una cuenta de efectivo en negativo: la app lo bloquea y te dice cuánto tienes disponible.",

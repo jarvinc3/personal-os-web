@@ -2,6 +2,21 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.55.0] - 2026-10-21 - Patrimonio
+
+### Agregado
+
+- Vista de patrimonio en `/finance/wealth`, con el total, **Disponible** y **Por cobrar**, y el desglose por moneda de cuentas, efectivo, cobros, tarjetas y préstamos (#218, #173).
+- El patrimonio incluye los cobros vigentes y muestra los cobros vencidos hace más de 90 días en un bloque **Dudosos** que no suma; la decisión queda en el ADR-005 (#207).
+- Indicadores **Descuadres** y **Sin conciliar** con sus hojas, la diferencia por producto y las acciones Recalcular y Revisar movimientos (#215).
+- Los «?» de descuadre, conciliación, patrimonio y dudosos abren la entrada del glosario del Centro de ayuda (#229, #219).
+- Las tarjetas de institución y de efectivo muestran un punto rojo si hay descuadre y uno ámbar si falta conciliar (#215).
+
+### Cambiado
+
+- El detalle de cuenta y de tarjeta usa el mismo aviso compacto de irregularidades; se eliminan las cards rojas y los badges sin acción (#215).
+- El detalle de institución muestra los indicadores de sus productos (#215).
+
 ## [0.54.2] - 2026-10-21
 
 ### Corregido
