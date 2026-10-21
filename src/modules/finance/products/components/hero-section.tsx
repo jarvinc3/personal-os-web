@@ -6,7 +6,10 @@ import {
   formatFinanceMoney,
   type FinanceMoneyDisplay,
 } from "@/src/modules/finance/shared/lib/money"
-import { buildRingStackSlices } from "@/src/modules/finance/shared/lib/ring-stack"
+import {
+  buildRingStackSlices,
+  hasDrawableRingBalance,
+} from "@/src/modules/finance/shared/lib/ring-stack"
 import { useEffect, useRef, useState } from "react"
 import {
   FinanceRingChart,
@@ -47,6 +50,7 @@ export function FinanceHeroSection({
   netWorthComplete,
 }: FinanceHeroSectionProps) {
   const slices = buildRingStackSlices(items, display)
+  const hasChart = hasDrawableRingBalance(slices)
   const [activeKey, setActiveKey] = useState<string | null>(null)
 
   const activeSlice = slices.find((slice) => slice.key === activeKey) ?? null
@@ -96,7 +100,7 @@ export function FinanceHeroSection({
     : compactNetWorthFallback
   const centerDebt = activeSlice?.debtLabel ?? null
 
-  if (slices.length === 0) {
+  if (!hasChart) {
     return (
       <div className="flex flex-col items-center gap-1 px-2 pb-2">
         <p className="text-[11px] font-medium tracking-[0.16em] text-muted-foreground uppercase">
@@ -105,6 +109,11 @@ export function FinanceHeroSection({
         <p className="text-3xl font-bold tracking-tight text-foreground tabular-nums">
           {netWorthFallback}
         </p>
+        {slices.length > 0 ? (
+          <p className="text-xs text-muted-foreground">
+            Sin saldos para graficar
+          </p>
+        ) : null}
       </div>
     )
   }

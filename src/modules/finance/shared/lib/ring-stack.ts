@@ -39,20 +39,29 @@ export type RingStackSlice = {
   signedValue: number
   amountLabel: string
   /**
-   * What the arc is made of. The ring measures the institution's gross size,
-   * so a debt grows the arc pale instead of hiding inside a solid one.
+   * What the ring is made of. Assets and debts are separate groups, so a debt
+   * gets its own left half instead of shortening the assets arc.
    */
   assetsValue: number
   debtValue: number
   /** Debt amount, null when the institution owes nothing. */
   debtLabel: string | null
-  /** Arc length: the gross size. */
+  /** Gross size, assets plus debt. */
   value: number
+  /** Share of the gross size for summaries and labels. */
   percent: number
+  /** Share of the assets group. */
+  assetsPercent: number
+  /** Share of the debt group. */
+  debtPercent: number
+  /** Legend label with the share of each group this ring belongs to. */
   percentLabel: string
 }
 
-type RingCandidate = Omit<RingStackSlice, "value" | "percent" | "percentLabel">
+type RingCandidate = Omit<
+  RingStackSlice,
+  "value" | "percent" | "assetsPercent" | "debtPercent" | "percentLabel"
+>
 
 /**
  * Share for the legend. A share below half a point stays visible as `<1%`
@@ -64,6 +73,18 @@ function formatPercentLabel(percent: number): string {
     return "<1%"
   }
   return `${rounded}%`
+}
+
+function groupPercentLabel(assetsPercent: number, debtPercent: number): string {
+  const hasAssets = assetsPercent > 0
+  const hasDebt = debtPercent > 0
+  if (hasAssets && hasDebt) {
+    return `${formatPercentLabel(assetsPercent)} activos · ${formatPercentLabel(debtPercent)} deuda`
+  }
+  if (hasDebt) {
+    return `${formatPercentLabel(debtPercent)} deuda`
+  }
+  return formatPercentLabel(assetsPercent)
 }
 
 /** A debt of zero has no label: the ring has nothing pale to explain. */
@@ -86,11 +107,15 @@ function institutionCandidate(
   const measured = cash
     ? cash.status === "COMPLETE" && cash.totalBase !== null
     : item.status === "COMPLETE"
-  const assetsValue = measured
+  const assetsAmount = measured
     ? (parseFinanceMoney(cash ? cash.totalBase : item.totalAssets) ?? 0)
     : 0
-  const debtValue =
+  const liabilitiesAmount =
     !cash && measured ? (parseFinanceMoney(item.totalLiabilities) ?? 0) : 0
+  // A negative amount belongs to the opposite group.
+  const assetsValue =
+    Math.max(assetsAmount, 0) + Math.max(-liabilitiesAmount, 0)
+  const debtValue = Math.max(-assetsAmount, 0) + Math.max(liabilitiesAmount, 0)
   return {
     key: `institution-${item.id}`,
     kind: "institution",
@@ -176,8 +201,8 @@ function cashCandidate(
 
 /**
  * Maps wallet stack items into one ring per institution plus a single ring for
- * every orphan cash account. The arc is the institution's gross size, assets
- * plus debt, and the percent is its share of the sum of those sizes. Items
+ * every orphan cash account. Assets and debts are separate groups: each arc is
+ * the slice's share of its own group, so each group adds up to 100 %. Items
  * without a measurable balance keep their ring at 0 % instead of disappearing.
  */
 export function buildRingStackSlices(
@@ -194,6 +219,12 @@ export function buildRingStackSlices(
     ? [...institutionCandidates, cash]
     : institutionCandidates
 
+  const totalAssets = sumDecimals(
+    candidates.map((candidate) => candidate.assetsValue)
+  )
+  const totalDebt = sumDecimals(
+    candidates.map((candidate) => candidate.debtValue)
+  )
   const totalMagnitude = sumDecimals(
     candidates.map((candidate) => candidate.assetsValue + candidate.debtValue)
   )
@@ -201,13 +232,23 @@ export function buildRingStackSlices(
   return candidates
     .map((candidate) => {
       const value = candidate.assetsValue + candidate.debtValue
-      const percent = decimalPercent(value, totalMagnitude)
+      const assetsPercent = decimalPercent(candidate.assetsValue, totalAssets)
+      const debtPercent = decimalPercent(candidate.debtValue, totalDebt)
       return {
         ...candidate,
         value,
-        percent,
-        percentLabel: formatPercentLabel(percent),
+        percent: decimalPercent(value, totalMagnitude),
+        assetsPercent,
+        debtPercent,
+        percentLabel: groupPercentLabel(assetsPercent, debtPercent),
       }
     })
     .sort((first, second) => second.value - first.value)
+}
+
+/** True when at least one ring has something to draw. */
+export function hasDrawableRingBalance(
+  slices: readonly RingStackSlice[]
+): boolean {
+  return slices.some((slice) => slice.value > 0)
 }
