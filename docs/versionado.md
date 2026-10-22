@@ -4,7 +4,7 @@
 
 ## Estado actual
 
-- **Versión actual:** `0.58.0` (2026-10-21).
+- **Versión actual:** `0.58.1` (2026-10-21).
 - **Etapa:** beta (`0.x`).
 - El 2026-10-13 se reinició el esquema: las versiones `1.4.0` a `1.19.x` pasaron a ser historial y sus tags se borraron. El historial completo sigue en `CHANGELOG.md`.
 

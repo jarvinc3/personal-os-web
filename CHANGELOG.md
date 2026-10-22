@@ -2,6 +2,12 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.58.1] - 2026-10-21
+
+### Corregido
+
+- Guardar una preferencia de Apariencia usa la mutación del perfil: si falla la red, la hoja sigue abierta con el aviso y el borrador se puede reintentar o descartar (#160).
+
 ## [0.58.0] - 2026-10-21 - Apariencia
 
 ### Agregado
