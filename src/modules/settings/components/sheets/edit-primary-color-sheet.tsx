@@ -33,20 +33,22 @@ export function EditPrimaryColorSheet({
   open,
   onOpenChange,
 }: SettingsSheetProps) {
-  const { preferences, updatePreferences, updateProfileMutation } = useProfile()
+  const { savePreferences, preferences, updateProfileMutation } = useProfile()
   const currentColor = preferences.theme.primaryColor
   const [draftColor, setDraftColor] = useState<string | null>(null)
   const colorValue = draftColor ?? currentColor
   const isDirty = draftColor !== null && draftColor !== currentColor
   const currentOption = findPrimaryColor(colorValue)
 
-  const resetToCurrent = () => {
+  const revertDraft = () => {
     setDraftColor(null)
     applyPrimaryColorToDocument(currentColor)
   }
 
   const handleOpenChange = (nextOpen: boolean) => {
-    resetToCurrent()
+    if (!nextOpen) {
+      revertDraft()
+    }
     onOpenChange(nextOpen)
   }
 
@@ -56,14 +58,20 @@ export function EditPrimaryColorSheet({
     applyPrimaryColorToDocument(normalized)
   }
 
-  const handleSave = async () => {
-    await updatePreferences({ theme: { primaryColor: colorValue } })
-    setDraftColor(null)
-    appToast.success({
-      text1: "Color primario actualizado",
-      text2: "Tu preferencia de apariencia se guardó.",
-    })
-    onOpenChange(false)
+  const handleSave = () => {
+    savePreferences(
+      { theme: { primaryColor: colorValue } },
+      {
+        onSuccess: () => {
+          setDraftColor(null)
+          appToast.success({
+            text1: "Color primario actualizado",
+            text2: "Tu preferencia de apariencia se guardó.",
+          })
+          onOpenChange(false)
+        },
+      }
+    )
   }
 
   return (
@@ -77,7 +85,9 @@ export function EditPrimaryColorSheet({
           <Button
             variant="outline"
             className="flex-1"
-            onClick={() => handleOpenChange(false)}
+            onClick={() => {
+              handleOpenChange(false)
+            }}
           >
             <XIcon className="size-4 shrink-0" />
             Cancelar
@@ -113,7 +123,9 @@ export function EditPrimaryColorSheet({
                   type="button"
                   aria-label={option.label}
                   aria-pressed={selected}
-                  onClick={() => handleColorChange(option.hex)}
+                  onClick={() => {
+                    handleColorChange(option.hex)
+                  }}
                   className={cn(
                     "flex size-12 items-center justify-center rounded-full border-2 transition-transform hover:scale-105 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none",
                     selected ? "border-foreground" : "border-transparent"
@@ -162,7 +174,9 @@ export function EditPrimaryColorSheet({
             aria-label="Color primario personalizado"
             type="color"
             value={colorValue.toLowerCase()}
-            onChange={(event) => handleColorChange(event.target.value)}
+            onChange={(event) => {
+              handleColorChange(event.target.value)
+            }}
             className="size-9 shrink-0 cursor-pointer rounded-full border border-border bg-transparent p-0"
           />
         </FieldLabel>

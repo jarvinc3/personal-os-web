@@ -24,19 +24,21 @@ export function EditAppearanceStyleSheet({
   open,
   onOpenChange,
 }: SettingsSheetProps) {
-  const { preferences, updatePreferences, updateProfileMutation } = useProfile()
+  const { savePreferences, preferences, updateProfileMutation } = useProfile()
   const currentStyle = preferences.theme.style
   const [draftStyle, setDraftStyle] = useState<AppearanceStyleId | null>(null)
   const styleValue = draftStyle ?? currentStyle
   const isDirty = draftStyle !== null && draftStyle !== currentStyle
 
-  const resetToCurrent = () => {
+  const revertDraft = () => {
     setDraftStyle(null)
     applyStyleToDocument(currentStyle)
   }
 
   const handleOpenChange = (nextOpen: boolean) => {
-    resetToCurrent()
+    if (!nextOpen) {
+      revertDraft()
+    }
     onOpenChange(nextOpen)
   }
 
@@ -45,14 +47,20 @@ export function EditAppearanceStyleSheet({
     applyStyleToDocument(value)
   }
 
-  const handleSave = async () => {
-    await updatePreferences({ theme: { style: styleValue } })
-    setDraftStyle(null)
-    appToast.success({
-      text1: "Estilo actualizado",
-      text2: "Tu preferencia de apariencia se guardó.",
-    })
-    onOpenChange(false)
+  const handleSave = () => {
+    savePreferences(
+      { theme: { style: styleValue } },
+      {
+        onSuccess: () => {
+          setDraftStyle(null)
+          appToast.success({
+            text1: "Estilo actualizado",
+            text2: "Tu preferencia de apariencia se guardó.",
+          })
+          onOpenChange(false)
+        },
+      }
+    )
   }
 
   return (
@@ -66,7 +74,9 @@ export function EditAppearanceStyleSheet({
           <Button
             variant="outline"
             className="flex-1"
-            onClick={() => handleOpenChange(false)}
+            onClick={() => {
+              handleOpenChange(false)
+            }}
           >
             <XIcon className="size-4 shrink-0" />
             Cancelar
@@ -92,9 +102,9 @@ export function EditAppearanceStyleSheet({
         <RadioGroup
           aria-label="Estilo visual"
           value={styleValue}
-          onValueChange={(value) =>
+          onValueChange={(value) => {
             handleStyleChange(value as AppearanceStyleId)
-          }
+          }}
           className="gap-3"
         >
           {APPEARANCE_STYLES.map((style) => (

@@ -3,10 +3,7 @@
 import { SETTINGS_REGISTRY } from "@/src/modules/settings/constants/settings-metadata"
 import { DEFAULT_USER_PREFERENCES } from "@/src/modules/settings/constants/user-settings-defaults"
 import { useProfile } from "@/src/modules/settings/hooks/use-profile"
-import {
-  getSettingValue,
-  patchSettingValue,
-} from "@/src/modules/settings/lib/settings-value"
+import { getSettingValue } from "@/src/modules/settings/lib/settings-value"
 import type { ThemeValue } from "@/src/modules/settings/types/profile.types"
 import type { SettingsSheetProps } from "@/src/modules/settings/types/sheet.types"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
@@ -24,7 +21,7 @@ import { useTheme } from "next-themes"
 import { useCallback, useState } from "react"
 
 export function EditThemeSheet({ open, onOpenChange }: SettingsSheetProps) {
-  const { preferences, updatePreferences, updateProfileMutation } = useProfile()
+  const { savePreferences, preferences, updateProfileMutation } = useProfile()
   const { setTheme } = useTheme()
   const currentTheme = getSettingValue<ThemeValue>(preferences.theme)
   const [draftTheme, setDraftTheme] = useState<ThemeValue | null>(null)
@@ -38,13 +35,15 @@ export function EditThemeSheet({ open, onOpenChange }: SettingsSheetProps) {
     [setTheme]
   )
 
-  const resetToCurrent = useCallback(() => {
+  const revertDraft = useCallback(() => {
     setDraftTheme(null)
     applyTheme(currentTheme)
   }, [applyTheme, currentTheme])
 
   const handleOpenChange = (nextOpen: boolean) => {
-    resetToCurrent()
+    if (!nextOpen) {
+      revertDraft()
+    }
     onOpenChange(nextOpen)
   }
 
@@ -53,16 +52,20 @@ export function EditThemeSheet({ open, onOpenChange }: SettingsSheetProps) {
     applyTheme(value)
   }
 
-  const handleSave = async () => {
-    await updatePreferences({
-      theme: patchSettingValue(preferences.theme, themeValue),
-    })
-    setDraftTheme(null)
-    appToast.success({
-      text1: "Tema actualizado",
-      text2: "Tu preferencia de apariencia se guardó.",
-    })
-    onOpenChange(false)
+  const handleSave = () => {
+    savePreferences(
+      { theme: { value: themeValue } },
+      {
+        onSuccess: () => {
+          setDraftTheme(null)
+          appToast.success({
+            text1: "Tema actualizado",
+            text2: "Tu preferencia de apariencia se guardó.",
+          })
+          onOpenChange(false)
+        },
+      }
+    )
   }
 
   return (
@@ -76,7 +79,9 @@ export function EditThemeSheet({ open, onOpenChange }: SettingsSheetProps) {
           <Button
             variant="outline"
             className="flex-1"
-            onClick={() => handleOpenChange(false)}
+            onClick={() => {
+              handleOpenChange(false)
+            }}
           >
             <XIcon className="size-4 shrink-0" />
             Cancelar
@@ -101,7 +106,9 @@ export function EditThemeSheet({ open, onOpenChange }: SettingsSheetProps) {
       <SummarySection title="Tema" icon={Palette}>
         <RadioGroup
           value={themeValue}
-          onValueChange={(v) => handleThemeChange(v as ThemeValue)}
+          onValueChange={(value) => {
+            handleThemeChange(value as ThemeValue)
+          }}
         >
           {SETTINGS_REGISTRY.appearance.themeOptions.map((option) => (
             <OptionRow
