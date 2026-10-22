@@ -1,6 +1,6 @@
 {
   "name": "personal-os-web",
-  "version": "0.58.1",
+  "version": "0.58.2",
   "description": "Cliente web de Personal OS: gestiona finanzas, agenda, proyectos y más en una sola app.",
   "author": "jarvinc3",
   "license": "MIT",
@@ -9,6 +9,7 @@
   "packageManager": "pnpm@12.11.2",
   "scripts": {
     "dev": "next dev --turbopack",
+    "env:pull": "infisical export --env=dev --path=/web > .env",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
