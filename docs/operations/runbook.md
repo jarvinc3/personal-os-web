@@ -23,7 +23,7 @@
 
 ## Variables de entorno y secretos
 
-Infisical es la fuente de verdad: proyecto `personal-os`, entornos `dev` y `prod`, carpetas `/back` y `/web`. Vercel (web) y Railway (back) se llenan con sus Secret Syncs, así que no edites variables directo en esas plataformas: el siguiente sync sobrescribe el cambio.
+Infisical es la fuente de verdad: proyecto `personal-os`, entornos `dev` y `prod`, carpetas `/back` y `/web`. Vercel (web) y Railway (back) se llenan con sus Secret Syncs, así que no edites variables directo en esas plataformas. Los syncs tienen activado el borrado: cualquier variable de Railway o Vercel que no exista en Infisical se elimina en el siguiente sync, y los cambios manuales se sobrescriben. Las variables nuevas se agregan solo en Infisical.
 
 El repo trae `.infisical.json` con el `workspaceId`. Con la CLI de Infisical instalada y la sesión iniciada:
 
