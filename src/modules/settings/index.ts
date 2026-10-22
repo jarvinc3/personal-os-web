@@ -15,6 +15,7 @@ export { PendingAccountDeletionHandler } from "@/src/modules/settings/components
 export { PendingDataWipeHandler } from "@/src/modules/settings/components/pending-data-wipe-handler"
 export { ReleaseNotes } from "@/src/modules/settings/components/release-notes"
 export { useApplyThemePreference } from "@/src/modules/settings/hooks/use-apply-theme-preference"
+export { useApplyAppearancePreference } from "@/src/modules/settings/hooks/use-apply-appearance-preference"
 export { useAiProviders } from "@/src/modules/settings/hooks/use-ai-providers"
 export { useDeleteAccount } from "@/src/modules/settings/hooks/use-delete-account"
 export { useModuleSheetEnable } from "@/src/modules/settings/hooks/use-module-sheet-enable"

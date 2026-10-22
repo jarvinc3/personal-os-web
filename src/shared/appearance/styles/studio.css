@@ -1,0 +1,85 @@
+/*
+ * Estilo Estudio: el aspecto base de Personal OS.
+ * Cada estilo define sus tokens bajo `[data-style="<id>"]` y, en oscuro,
+ * bajo `.dark [data-style="<id>"]` para servir también a las vistas previas.
+ */
+[data-style="studio"] {
+  --background: #f0efe9;
+  --foreground: #131313;
+  --card: #ffffff;
+  --card-foreground: #131313;
+  --popover: #ffffff;
+  --popover-foreground: #131313;
+  --primary: #d6c5b3;
+  --primary-foreground: #131313;
+  --secondary: #78716c;
+  --secondary-foreground: #faf9f6;
+  --muted: #faf9f6;
+  --muted-foreground: #78716c;
+  --accent: #f5f2eb;
+  --accent-foreground: #78716c;
+  --destructive: #dc2626;
+  --border: #e6dfd5;
+  --input: #e6dfd5;
+  --ring: #78716c;
+  --chart-1: #d6c5b3;
+  --chart-2: #78716c;
+  --chart-3: #16a34a;
+  --chart-4: #d97706;
+  --chart-5: #6b7280;
+  --radius: 0.625rem;
+  --sidebar: #faf9f6;
+  --sidebar-foreground: #131313;
+  --sidebar-primary: #d6c5b3;
+  --sidebar-primary-foreground: #131313;
+  --sidebar-accent: #e6dfd5;
+  --sidebar-accent-foreground: #131313;
+  --sidebar-border: #e6dfd5;
+  --sidebar-ring: #78716c;
+  --text: #131313;
+  --surface: #ffffff;
+  --success: oklch(0.62 0.17 150);
+  --warning: oklch(0.75 0.16 75);
+  --danger: oklch(0.58 0.22 27);
+  --info: oklch(0.6 0.16 245);
+}
+
+.dark [data-style="studio"],
+.dark[data-style="studio"] {
+  --background: hsl(0, 0%, 7%);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.424 0.199 265.638);
+  --primary-foreground: oklch(0.97 0.014 254.604);
+  --secondary: oklch(0.274 0.006 286.033);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+  --chart-1: oklch(0.828 0.111 230.318);
+  --chart-2: oklch(0.685 0.169 237.323);
+  --chart-3: oklch(0.588 0.158 241.966);
+  --chart-4: oklch(0.5 0.134 242.749);
+  --chart-5: oklch(0.443 0.11 240.79);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.623 0.214 259.815);
+  --sidebar-primary-foreground: oklch(0.97 0.014 254.604);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
+  --surface: oklch(0.205 0 0);
+  --success: oklch(0.74 0.17 150);
+  --warning: oklch(0.82 0.15 80);
+  --danger: oklch(0.7 0.19 25);
+  --info: oklch(0.74 0.13 245);
+}

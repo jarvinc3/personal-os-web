@@ -19,21 +19,17 @@ import {
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { SummarySection } from "@/src/shared/components/ui/summary"
 import { appToast } from "@/src/shared/lib/app-toast"
-import { Palette, XIcon } from "lucide-react"
+import { Palette, SaveIcon, XIcon } from "lucide-react"
 import { useTheme } from "next-themes"
-import { useRouter } from "next/navigation"
-import { useCallback, useRef, useState } from "react"
+import { useCallback, useState } from "react"
 
 export function EditThemeSheet({ open, onOpenChange }: SettingsSheetProps) {
   const { preferences, updatePreferences, updateProfileMutation } = useProfile()
   const { setTheme } = useTheme()
-  const router = useRouter()
   const currentTheme = getSettingValue<ThemeValue>(preferences.theme)
-  const [themeValue, setThemeValue] = useState<ThemeValue>(currentTheme)
-  const initialThemeRef = useRef<ThemeValue>(currentTheme)
-  const savedRef = useRef(false)
-
-  const isDirty = themeValue !== currentTheme
+  const [draftTheme, setDraftTheme] = useState<ThemeValue | null>(null)
+  const themeValue = draftTheme ?? currentTheme
+  const isDirty = draftTheme !== null && draftTheme !== currentTheme
 
   const applyTheme = useCallback(
     (theme: ThemeValue) => {
@@ -42,39 +38,26 @@ export function EditThemeSheet({ open, onOpenChange }: SettingsSheetProps) {
     [setTheme]
   )
 
-  const resetToInitial = useCallback(() => {
-    const initial = initialThemeRef.current
-    setThemeValue(initial)
-    applyTheme(initial)
-  }, [applyTheme])
+  const resetToCurrent = useCallback(() => {
+    setDraftTheme(null)
+    applyTheme(currentTheme)
+  }, [applyTheme, currentTheme])
 
   const handleOpenChange = (nextOpen: boolean) => {
-    if (!nextOpen) {
-      if (!savedRef.current) {
-        resetToInitial()
-      }
-      onOpenChange(false)
-      return
-    }
-
-    savedRef.current = false
-    const savedTheme = getSettingValue<ThemeValue>(preferences.theme)
-    initialThemeRef.current = savedTheme
-    setThemeValue(savedTheme)
-    applyTheme(savedTheme)
-    onOpenChange(true)
+    resetToCurrent()
+    onOpenChange(nextOpen)
   }
 
   const handleThemeChange = (value: ThemeValue) => {
-    setThemeValue(value)
+    setDraftTheme(value)
     applyTheme(value)
   }
 
   const handleSave = async () => {
-    savedRef.current = true
     await updatePreferences({
       theme: patchSettingValue(preferences.theme, themeValue),
     })
+    setDraftTheme(null)
     appToast.success({
       text1: "Tema actualizado",
       text2: "Tu preferencia de apariencia se guardó.",
@@ -93,7 +76,7 @@ export function EditThemeSheet({ open, onOpenChange }: SettingsSheetProps) {
           <Button
             variant="outline"
             className="flex-1"
-            onClick={() => router.back()}
+            onClick={() => handleOpenChange(false)}
           >
             <XIcon className="size-4 shrink-0" />
             Cancelar
@@ -107,7 +90,9 @@ export function EditThemeSheet({ open, onOpenChange }: SettingsSheetProps) {
           >
             {updateProfileMutation.isPending ? (
               <Spinner data-icon="inline-start" />
-            ) : null}
+            ) : (
+              <SaveIcon className="size-4 shrink-0" />
+            )}
             {updateProfileMutation.isPending ? "Guardando..." : "Guardar"}
           </Button>
         ),

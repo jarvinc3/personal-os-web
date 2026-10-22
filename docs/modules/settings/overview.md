@@ -4,22 +4,24 @@ Cliente de `UsersService`: perfil, tema, IA, quiet hours, módulos, logout, dele
 
 Ruta: `/settings` (`settings-screen.tsx`). Sheets `?sheet=`.
 
-| Sección        | Sheet                                                    | API                                                                        |
-| -------------- | -------------------------------------------------------- | -------------------------------------------------------------------------- |
-| Cuenta         | `EditAccountSheet`                                       | PATCH `/users/me`                                                          |
-| Apariencia     | `EditThemeSheet`                                         | `preferences.theme`                                                        |
-| IA             | `EditAISheet`, `EditAIProviderSheet`                     | `preferences.ai` + `GET /ai/providers`                                     |
-| Notificaciones | `EditQuietHoursSheet`                                    | `preferences.notifications.quietHours`                                     |
-| Módulos        | `EditFinanceSheet` etc.                                  | PATCH `/users/me/modules/:slug`                                            |
-| Peligro        | `DeleteAccountSheet`                                     | DELETE `/users/me`                                                         |
-| Peligro        | `WipeUserDataSheet`                                      | POST `/users/me/data/wipe`                                                 |
-| Moneda         | `FinanceCurrenciesView` (`/settings/finance/currencies`) | `config.baseCurrency` + `trackedCurrencies`; POST `/finance/base-currency` |
+| Sección        | Sheet                                                                 | API                                                                        |
+| -------------- | --------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| Cuenta         | `EditAccountSheet`                                                    | PATCH `/users/me`                                                          |
+| Apariencia     | `EditThemeSheet`, `EditAppearanceStyleSheet`, `EditPrimaryColorSheet` | `preferences.theme` (`value`, `style`, `primaryColor`)                     |
+| IA             | `EditAISheet`, `EditAIProviderSheet`                                  | `preferences.ai` + `GET /ai/providers`                                     |
+| Notificaciones | `EditQuietHoursSheet`                                                 | `preferences.notifications.quietHours`                                     |
+| Módulos        | `EditFinanceSheet` etc.                                               | PATCH `/users/me/modules/:slug`                                            |
+| Peligro        | `DeleteAccountSheet`                                                  | DELETE `/users/me`                                                         |
+| Peligro        | `WipeUserDataSheet`                                                   | POST `/users/me/data/wipe`                                                 |
+| Moneda         | `FinanceCurrenciesView` (`/settings/finance/currencies`)              | `config.baseCurrency` + `trackedCurrencies`; POST `/finance/base-currency` |
 
 `/settings/finance` (`FinanceModuleSettingsForm`): módulo encendido, enlace a moneda principal y monedas seguidas, ingreso fijo (monto, frecuencia, días de pago y cuenta), cuenta por defecto para gastos y transferencias, entrada de monto (teclado o calculadora), inicio de semana, período del panel, visualización, mes financiero, recordatorios de tarjeta, correo (sincronización, modo directo o pendiente y enlace a Bancos y remitentes) y alertas del módulo. Todo vive en `module_config.finance`.
 
 Slugs: `finance`, `agenda`, `projects`, `health`. Solo finance tiene app routes. Suscripciones dejó de ser un módulo: su sección vive en `/settings/finance#suscripciones` y `/settings/subscriptions` redirige allí.
 
 Defaults: `src/modules/settings/constants/user-settings-defaults.ts`. Hooks: `useProfile`, `useUserModuleConfig`, `useDeleteAccount`, `useWipeUserData`, `useLastSeenReleaseVersion`, `useMarkReleaseNotesSeen`. Invalidación `profile`/`me` también desde tools IA.
+
+Apariencia tiene tres ejes independientes: modo (`preferences.theme.value`), estilo visual (`style`) y color primario (`primaryColor`). El registro de estilos vive en `src/shared/appearance/style-registry.ts`; cada estilo aporta un CSS con sus tokens. El selector muestra una vista previa por estilo. El color se elige de `PRIMARY_COLORS` o con el selector nativo, y el texto sobre el primario se calcula por contraste. La preferencia se guarda con `preferences.version` 2; una copia en `localStorage` y un script antes del primer pintado evitan el parpadeo. Decisión: [ADR-006](../../decisions/ADR-006-appearance.md). Neo-Skeuo queda en #235.
 
 Las preferencias se guardan con `PATCH /users/me` desde `useProfile().updatePreferences`: la caché se actualiza de forma optimista antes del envío, cada parche se calcula sobre la última caché, las mutaciones se serializan por `scope` y un fallo restaura el perfil anterior con su toast. Cada pantalla envía solo la hoja que cambia, no el objeto completo de preferencias.
 

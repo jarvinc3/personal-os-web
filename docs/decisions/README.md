@@ -7,3 +7,4 @@
 | [ADR-003](./ADR-003-cursor-pagination.md)             | Listas con scroll infinito y paginación por cursor      |
 | [ADR-004](./ADR-004-web-finance-product-routes.md)    | Rutas de productos, instituciones y cuentas en Finanzas |
 | [ADR-005](./ADR-005-patrimonio-incluye-por-cobrar.md) | El patrimonio neto incluye los cobros pendientes        |
+| [ADR-006](./ADR-006-appearance.md)                    | Apariencia extensible: modo, estilo y color primario    |

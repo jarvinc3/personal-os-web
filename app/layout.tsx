@@ -9,10 +9,15 @@ import { ThemeProvider } from "@/src/providers/theme-provider"
 import { Toaster } from "@/src/shared/components/ui/sonner"
 import { TooltipProvider } from "@/src/shared/components/ui/tooltip"
 import { appAssets } from "@/src/shared/constants/app-assets"
+import {
+  APPEARANCE_SCRIPT,
+  DEFAULT_APPEARANCE_STYLE,
+} from "@/src/shared/appearance"
 import { cn } from "@/src/shared/lib/utils"
 import { Analytics } from "@vercel/analytics/next"
 
 import "./globals.css"
+import "@/src/shared/appearance/styles/index.css"
 
 const geistHeading = Geist({ subsets: ["latin"], variable: "--font-heading" })
 
@@ -92,6 +97,7 @@ export default function RootLayout({
   return (
     <html
       lang="es"
+      data-style={DEFAULT_APPEARANCE_STYLE}
       suppressHydrationWarning
       className={cn(
         "min-h-screen bg-background font-sans antialiased",
@@ -102,6 +108,7 @@ export default function RootLayout({
       )}
     >
       <body>
+        <script dangerouslySetInnerHTML={{ __html: APPEARANCE_SCRIPT }} />
         <QueryProvider>
           <AuthBootstrapProvider>
             <ThemeProvider defaultTheme="light">

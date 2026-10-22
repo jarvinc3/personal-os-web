@@ -68,7 +68,7 @@ const SETTINGS_MENU = [
   },
   {
     label: "Apariencia",
-    description: "Tema claro, oscuro o del sistema.",
+    description: "Modo, estilo y color de la app.",
     icon: Palette,
     accent: SETTINGS_REGISTRY.appearance.accent,
     href: APP_ROUTES.app.settingsAppearance,

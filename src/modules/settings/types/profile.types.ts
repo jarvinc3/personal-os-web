@@ -1,10 +1,13 @@
 import type { UserModuleEntry } from "@/src/modules/settings/types/module-config.types"
+import type { AppearanceStyleId } from "@/src/shared/appearance"
 
 export type ThemeValue = "system" | "light" | "dark"
 
 export type ThemePreference = {
   fieldGuide: string
   value: ThemeValue
+  style: AppearanceStyleId
+  primaryColor: string
 }
 
 export type OnboardingPreference = {
