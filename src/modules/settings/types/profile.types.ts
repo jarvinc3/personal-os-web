@@ -1,10 +1,13 @@
 import type { UserModuleEntry } from "@/src/modules/settings/types/module-config.types"
+import type { AppearanceStyleId } from "@/src/shared/appearance"
 
 export type ThemeValue = "system" | "light" | "dark"
 
 export type ThemePreference = {
   fieldGuide: string
   value: ThemeValue
+  style: AppearanceStyleId
+  primaryColor: string
 }
 
 export type OnboardingPreference = {
@@ -47,10 +50,19 @@ export type PrivacyPreference = {
   crashReportsEnabled: boolean
 }
 
+/** `Date.getDay()` values the product supports. */
+export type WeekStartsOn = 0 | 1 | 6
+
+export type RegionalPreference = {
+  /** `null` resolves the first day from the profile locale. */
+  weekStartsOn: WeekStartsOn | null
+}
+
 export type UserPreferences = {
   version: number
   theme: ThemePreference
   onboarding: OnboardingPreference
+  regional: RegionalPreference
   ai: AIPreferences
   notifications: NotificationsPreference
   privacy: PrivacyPreference

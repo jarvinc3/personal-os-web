@@ -13,6 +13,8 @@ const validTransfer = {
   destinationPending: false,
   rail: "" as const,
   feeAmount: "",
+  exchangeRate: "",
+  receivedAmount: "",
   description: "",
   notes: "",
 }
@@ -49,6 +51,39 @@ describe("transferSchema", () => {
     )
     assert.equal(
       transferSchema.safeParse({ ...validTransfer, feeAmount: "0" }).success,
+      false
+    )
+  })
+
+  it("accepts a positive rate and received amount", () => {
+    assert.equal(
+      transferSchema.safeParse({
+        ...validTransfer,
+        exchangeRate: "77.6544",
+        receivedAmount: "7765.44",
+      }).success,
+      true
+    )
+  })
+
+  it("rejects a non-positive or over-precise rate", () => {
+    assert.equal(
+      transferSchema.safeParse({ ...validTransfer, exchangeRate: "0" }).success,
+      false
+    )
+    assert.equal(
+      transferSchema.safeParse({
+        ...validTransfer,
+        exchangeRate: "7.123456789",
+      }).success,
+      false
+    )
+  })
+
+  it("rejects a non-positive received amount", () => {
+    assert.equal(
+      transferSchema.safeParse({ ...validTransfer, receivedAmount: "0" })
+        .success,
       false
     )
   })

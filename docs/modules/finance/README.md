@@ -7,6 +7,7 @@ Contrato de dominio: **backend** `personal-os-back/docs/modules/finance/`. Aquí
 | [dominio.md](./dominio.md)                                     | Cómo funciona hoy: modelo y flujos         |
 | [overview.md](./overview.md)                                   | Gate, money, chrome                        |
 | [capabilities/dashboard.md](./capabilities/dashboard.md)       | Resumen y estadísticas                     |
+| [capabilities/wealth.md](./capabilities/wealth.md)             | Desglose del patrimonio y avisos           |
 | [capabilities/catalog.md](./capabilities/catalog.md)           | Cuentas                                    |
 | [capabilities/transactions.md](./capabilities/transactions.md) | Ledger UI                                  |
 | [capabilities/planning.md](./capabilities/planning.md)         | Planificación, préstamos, cobros y metas   |

@@ -1,36 +1,35 @@
 "use client"
 
 import { zodResolver } from "@hookform/resolvers/zod"
-import {
-  CalendarDays,
-  CircleAlert,
-  CreditCardIcon,
-  FileTextIcon,
-  HashIcon,
-  PlusIcon,
-  RefreshCwIcon,
-  SaveIcon,
-  TrashIcon,
-  WalletIcon,
-} from "lucide-react"
+import { FileTextIcon, RefreshCwIcon, SaveIcon, WalletIcon } from "lucide-react"
 import { useEffect, useState } from "react"
 import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form"
 
-import { CardNetworkMark } from "@/src/modules/finance/shared/components/brand-logo"
+import { CardBalancesSection } from "@/src/modules/finance/cards/components/card-balances-section"
+import {
+  CardFormSheets,
+  type CardFormPicker,
+} from "@/src/modules/finance/cards/components/card-form-sheets"
+import {
+  CardCycleSection,
+  CardOptionalDetailsSection,
+} from "@/src/modules/finance/cards/components/card-form-sections"
+import { CardIdentitySection } from "@/src/modules/finance/cards/components/card-identity-section"
+import { CardPreview } from "@/src/modules/finance/cards/components/card-preview"
+import {
+  cardCreateBalanceRows,
+  cardSchema,
+  institutionAccountOptions,
+  type CardFormValues,
+} from "@/src/modules/finance/cards/lib/card-form"
+import {
+  emptyBalanceRow,
+  toCardFormValues,
+} from "@/src/modules/finance/cards/lib/card-form-values"
 import { FinanceFormScreen } from "@/src/modules/finance/shared/components/forms/form-screen"
 import { FinanceSegmentedControl } from "@/src/modules/finance/shared/components/forms/form-blocks"
-import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
-import { DestinationPickerSheet } from "@/src/modules/finance/shared/components/pickers/destination-picker-sheet"
-import { DestinationTrigger } from "@/src/modules/finance/shared/components/pickers/destination-trigger"
-import { FinanceCurrencyPickerSheet } from "@/src/modules/finance/shared/components/pickers/finance-currency-picker-sheet"
-import {
-  InstitutionPickerSheet,
-  InstitutionTrigger,
-} from "@/src/modules/finance/shared/components/pickers/institution-picker"
 import {
   CATALOG_NONE,
-  FINANCE_CARD_NETWORK_LABEL,
-  FINANCE_CARD_NETWORKS,
   FINANCE_CARD_TYPE_LABEL,
   FINANCE_CARD_TYPES,
 } from "@/src/modules/finance/shared/constants/catalog"
@@ -40,19 +39,15 @@ import {
   useUpdateCardBalance,
 } from "@/src/modules/finance/shared/hooks/use-cards"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
+import { canManageCardBalances } from "@/src/modules/finance/shared/lib/card-balances"
 import {
   buildCardBalanceBodies,
   buildCreateCardBody,
   cardBalanceSaveMessage,
   nextUnusedCurrency,
 } from "@/src/modules/finance/shared/lib/catalog-payloads"
-import { canManageCardBalances } from "@/src/modules/finance/shared/lib/card-balances"
 import { buildFinanceCurrencyOptions } from "@/src/modules/finance/shared/lib/finance-currency"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
-import {
-  encodeLedgerTarget,
-  splitLedgerTarget,
-} from "@/src/modules/finance/shared/lib/ledger-payloads"
 import {
   formatFinanceMoney,
   parseFinanceMoney,
@@ -63,16 +58,7 @@ import type {
   FinanceCard,
   FinanceInstitution,
 } from "@/src/modules/finance/shared/types/entities"
-import {
-  cardSchema,
-  institutionAccountOptions,
-  type CardFormValues,
-} from "@/src/modules/finance/cards/lib/card-form"
-import { FormTextField } from "@/src/shared/components/layout/form-blocks"
 import { Button } from "@/src/shared/components/ui/button"
-import { ColorPickerSwatch } from "@/src/shared/components/ui/color-picker"
-import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
-import { Label } from "@/src/shared/components/ui/label"
 import { SummarySection } from "@/src/shared/components/ui/summary"
 import { usePicker } from "@/src/shared/hooks/use-picker"
 import { appToast } from "@/src/shared/lib/app-toast"
@@ -82,37 +68,6 @@ const TYPE_OPTIONS = FINANCE_CARD_TYPES.map((value) => ({
   value,
   label: FINANCE_CARD_TYPE_LABEL[value],
 }))
-
-const NETWORK_OPTIONS = FINANCE_CARD_NETWORKS.map((value) => ({
-  value,
-  label: FINANCE_CARD_NETWORK_LABEL[value],
-}))
-
-function emptyBalanceRow(currency: string) {
-  return { currency, balance: "", creditLimit: "" }
-}
-
-function toFormValues(input: {
-  card: FinanceCard | null
-  defaultCurrency: string
-  defaultInstitutionId: string
-}): CardFormValues {
-  const { card, defaultCurrency, defaultInstitutionId } = input
-  return {
-    name: card?.name ?? "",
-    type: card?.type ?? "CREDIT",
-    institutionId: card?.institutionId ?? defaultInstitutionId,
-    accountId: card?.accountId ?? CATALOG_NONE,
-    network: card?.network ?? "VISA",
-    lastFour: card?.lastFour ?? "",
-    statementClosingDay: card?.statementClosingDay
-      ? String(card.statementClosingDay)
-      : "",
-    paymentDueDay: card?.paymentDueDay ? String(card.paymentDueDay) : "",
-    color: card?.color ?? "",
-    balances: [emptyBalanceRow(card?.balances[0]?.currency ?? defaultCurrency)],
-  }
-}
 
 type CardFormScreenProps = {
   card?: FinanceCard | null
@@ -158,7 +113,7 @@ export function CardFormScreen({
   } = useForm<CardFormValues>({
     mode: "onTouched",
     resolver: zodResolver(cardSchema),
-    defaultValues: toFormValues({
+    defaultValues: toCardFormValues({
       card,
       defaultCurrency,
       defaultInstitutionId: resolvedDefaultInstitutionId,
@@ -186,9 +141,8 @@ export function CardFormScreen({
     selectedInstitutionId
   )
   const hasInstitutions = institutions.length > 0
-  const { picker, openPicker, closeHandlerFor } = usePicker<
-    "none" | "institution" | "account" | "currency"
-  >("none")
+  const { picker, openPicker, closeHandlerFor } =
+    usePicker<CardFormPicker>("none")
   const [currencyRowIndex, setCurrencyRowIndex] = useState<number | null>(null)
   const formValues = useWatch({ control })
   const formIsValid = cardSchema.safeParse(formValues).success
@@ -234,7 +188,7 @@ export function CardFormScreen({
     const balancesPayload =
       card || values.type === "DEBIT"
         ? { ok: true as const, body: [] }
-        : buildCardBalanceBodies(values.balances, {
+        : buildCardBalanceBodies(cardCreateBalanceRows(values), {
             requireCreditLimit: values.type === "CREDIT",
           })
     if (!balancesPayload.ok) {
@@ -279,39 +233,17 @@ export function CardFormScreen({
         isSubmitting={isPending}
         submitDisabled={!canSave}
       >
-        <div
-          className={cn(
-            "flex flex-col gap-6 rounded-3xl p-5 text-white",
-            !cardColor && "bg-zinc-900"
-          )}
-          style={cardColor ? { backgroundColor: cardColor } : undefined}
-        >
-          <div className="flex items-center justify-between gap-3">
-            <p className="truncate text-sm font-semibold">
-              {cardName.trim() || "Nueva tarjeta"}
-            </p>
-            <span className="rounded-full bg-white/15 px-2.5 py-0.5 text-xs font-semibold">
-              {FINANCE_CARD_TYPE_LABEL[cardType]}
-            </span>
-          </div>
-          <div className="flex flex-col gap-1">
-            <span className="text-[10px] tracking-[0.14em] text-white/55 uppercase">
-              {cardType === "CREDIT" ? "Disponible" : "Saldo"}
-            </span>
-            <span className="text-3xl font-bold tabular-nums">
-              {formatFinanceMoney(String(previewValue), {
-                ...display,
-                currency: previewCurrency,
-              })}
-            </span>
-          </div>
-          <div className="flex items-end justify-between gap-3">
-            <span className="tracking-[0.2em] text-white/80">
-              •••• {lastFour || "····"}
-            </span>
-            <CardNetworkMark network={cardNetwork} logoUrl={null} size={28} />
-          </div>
-        </div>
+        <CardPreview
+          name={cardName}
+          type={cardType}
+          color={cardColor}
+          network={cardNetwork}
+          lastFour={lastFour}
+          availableText={formatFinanceMoney(String(previewValue), {
+            ...display,
+            currency: previewCurrency,
+          })}
+        />
 
         <Controller
           control={control}
@@ -327,161 +259,46 @@ export function CardFormScreen({
           )}
         />
 
-        <SummarySection title="Tarjeta" icon={CreditCardIcon}>
-          <Field className="gap-1">
-            <FieldLabel className="text-sm text-muted-foreground">
-              Institución
-            </FieldLabel>
-            <InstitutionTrigger
-              institution={selectedInstitution}
-              placeholder={
-                hasInstitutions
-                  ? "Elige la institución"
-                  : "Crea una institución primero"
-              }
-              disabled={!hasInstitutions}
-              onClick={() => openPicker("institution")}
-            />
-            {errors.institutionId?.message ? (
-              <FieldError>{errors.institutionId.message}</FieldError>
-            ) : null}
-          </Field>
-          <Controller
-            control={control}
-            name="name"
-            render={({ field }) => (
-              <FormTextField
-                icon={CreditCardIcon}
-                label="Nombre"
-                value={field.value}
-                onChange={field.onChange}
-                onBlur={field.onBlur}
-                error={errors.name?.message}
-                placeholder="Visa principal"
-              />
-            )}
-          />
-          <Controller
-            control={control}
-            name="lastFour"
-            render={({ field }) => (
-              <FormTextField
-                icon={HashIcon}
-                label="Últimos 4 dígitos"
-                value={field.value}
-                onChange={field.onChange}
-                onBlur={field.onBlur}
-                error={errors.lastFour?.message}
-                placeholder="1234"
-              />
-            )}
-          />
-          {cardType === "DEBIT" ? (
-            <Field className="gap-1">
-              <FieldLabel className="text-sm text-muted-foreground">
-                Cuenta asociada
-              </FieldLabel>
-              <DestinationTrigger
-                destination={
-                  selectedAccountId && selectedAccountId !== CATALOG_NONE
-                    ? encodeLedgerTarget("account", selectedAccountId)
-                    : CATALOG_NONE
-                }
-                accounts={institutionAccounts}
-                cards={[]}
-                display={display}
-                onClick={() => openPicker("account")}
-              />
-              {errors.accountId?.message ? (
-                <FieldError>{errors.accountId.message}</FieldError>
-              ) : null}
-            </Field>
-          ) : null}
-        </SummarySection>
+        <CardIdentitySection
+          control={control}
+          errors={errors}
+          cardType={cardType}
+          selectedInstitution={selectedInstitution}
+          hasInstitutions={hasInstitutions}
+          institutionAccounts={institutionAccounts}
+          selectedAccountId={selectedAccountId}
+          display={display}
+          onOpenInstitution={() => openPicker("institution")}
+          onOpenAccount={() => openPicker("account")}
+        />
 
         {!isEdit && cardType === "CREDIT" ? (
-          <SummarySection title="Importe" icon={WalletIcon}>
-            {balanceFields.map((field, index) => (
-              <div key={field.id} className="flex flex-col gap-3">
-                <Controller
-                  control={control}
-                  name={`balances.${index}.creditLimit`}
-                  render={({ field: limitField }) => (
-                    <FinanceMoneyField
-                      label="Límite"
-                      amount={limitField.value}
-                      onAmountChange={limitField.onChange}
-                      onAmountCommit={(next) => {
-                        limitField.onChange(next)
-                        void trigger(`balances.${index}.creditLimit`)
-                      }}
-                      onAmountBlur={limitField.onBlur}
-                      amountError={
-                        errors.balances?.[index]?.creditLimit?.message
-                      }
-                      currency={
-                        watchedBalances?.[index]?.currency ?? defaultCurrency
-                      }
-                      onCurrencyPress={() => {
-                        setCurrencyRowIndex(index)
-                        openPicker("currency")
-                      }}
-                    />
-                  )}
-                />
-                <Controller
-                  control={control}
-                  name={`balances.${index}.balance`}
-                  render={({ field: balanceField }) => (
-                    <FinanceMoneyField
-                      label="Saldo al corte"
-                      amount={balanceField.value}
-                      onAmountChange={balanceField.onChange}
-                      onAmountCommit={(next) => {
-                        balanceField.onChange(next)
-                        void trigger(`balances.${index}.balance`)
-                      }}
-                      onAmountBlur={balanceField.onBlur}
-                      amountError={errors.balances?.[index]?.balance?.message}
-                      currency={
-                        watchedBalances?.[index]?.currency ?? defaultCurrency
-                      }
-                    />
-                  )}
-                />
-                {balanceFields.length > 1 ? (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    onClick={() => removeBalance(index)}
-                  >
-                    <TrashIcon className="size-4 shrink-0" />
-                    Quitar moneda
-                  </Button>
-                ) : null}
-              </div>
-            ))}
-            {canAddCurrency ? (
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() =>
-                  appendBalance(
-                    emptyBalanceRow(
-                      nextUnusedCurrency(
-                        (watchedBalances ?? []).map((row) => row.currency),
-                        defaultCurrency,
-                        financeConfig.trackedCurrencies
-                      )
+          <CardBalancesSection
+            form={{ control, errors, onTrigger: trigger }}
+            balances={{
+              rows: balanceFields,
+              values: watchedBalances ?? [],
+              defaultCurrency,
+            }}
+            canAddCurrency={canAddCurrency}
+            actions={{
+              onRemoveRow: removeBalance,
+              onAddCurrency: () =>
+                appendBalance(
+                  emptyBalanceRow(
+                    nextUnusedCurrency(
+                      (watchedBalances ?? []).map((row) => row.currency),
+                      defaultCurrency,
+                      financeConfig.trackedCurrencies
                     )
                   )
-                }
-              >
-                <PlusIcon className="size-4 shrink-0" />
-                Agregar moneda
-              </Button>
-            ) : null}
-          </SummarySection>
+                ),
+              onOpenCurrency: (index) => {
+                setCurrencyRowIndex(index)
+                openPicker("currency")
+              },
+            }}
+          />
         ) : null}
 
         {card && canManageCardBalances(card) && onUpdateBalance ? (
@@ -498,38 +315,7 @@ export function CardFormScreen({
         ) : null}
 
         {cardType === "CREDIT" ? (
-          <SummarySection title="Ciclo" icon={CalendarDays}>
-            <Controller
-              control={control}
-              name="statementClosingDay"
-              render={({ field }) => (
-                <FormTextField
-                  icon={CalendarDays}
-                  label="Día de corte"
-                  value={field.value}
-                  onChange={field.onChange}
-                  onBlur={field.onBlur}
-                  error={errors.statementClosingDay?.message}
-                  placeholder="15"
-                />
-              )}
-            />
-            <Controller
-              control={control}
-              name="paymentDueDay"
-              render={({ field }) => (
-                <FormTextField
-                  icon={CalendarDays}
-                  label="Día de pago"
-                  value={field.value}
-                  onChange={field.onChange}
-                  onBlur={field.onBlur}
-                  error={errors.paymentDueDay?.message}
-                  placeholder="25"
-                />
-              )}
-            />
-          </SummarySection>
+          <CardCycleSection control={control} errors={errors} />
         ) : null}
 
         {onReadStatement ? (
@@ -553,39 +339,7 @@ export function CardFormScreen({
           </button>
         ) : null}
 
-        <SummarySection
-          title="Detalles opcionales"
-          icon={CircleAlert}
-          collapsible
-          defaultOpen={isEdit}
-        >
-          <Controller
-            control={control}
-            name="network"
-            render={({ field }) => (
-              <FinanceSegmentedControl
-                label="Red"
-                value={field.value === CATALOG_NONE ? "VISA" : field.value}
-                onChange={field.onChange}
-                options={NETWORK_OPTIONS}
-              />
-            )}
-          />
-          <Controller
-            control={control}
-            name="color"
-            render={({ field }) => (
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="card-color">Color</Label>
-                <ColorPickerSwatch
-                  id="card-color"
-                  value={field.value}
-                  onChange={field.onChange}
-                />
-              </div>
-            )}
-          />
-        </SummarySection>
+        <CardOptionalDetailsSection control={control} openByDefault={isEdit} />
 
         {!hasInstitutions ? (
           <p className="text-sm text-muted-foreground">
@@ -594,40 +348,26 @@ export function CardFormScreen({
         ) : null}
       </FinanceFormScreen>
 
-      <InstitutionPickerSheet
-        open={picker === "institution"}
-        onOpenChange={closeHandlerFor("institution")}
+      <CardFormSheets
+        picker={picker}
+        closeHandlerFor={closeHandlerFor}
         institutions={institutions}
-        value={selectedInstitutionId}
-        onSelect={(next) =>
-          setValue("institutionId", next, { shouldValidate: true })
-        }
-      />
-
-      <DestinationPickerSheet
-        open={picker === "account"}
-        onOpenChange={closeHandlerFor("account")}
-        institutions={institutions}
-        accounts={institutionAccounts}
-        cards={[]}
+        institutionAccounts={institutionAccounts}
         display={display}
-        accountsOnly
-        onSelect={(next) =>
-          setValue("accountId", splitLedgerTarget(next).accountId ?? "", {
-            shouldValidate: true,
-          })
-        }
-      />
-
-      <FinanceCurrencyPickerSheet
-        open={picker === "currency"}
-        onOpenChange={closeHandlerFor("currency")}
-        value={
+        selectedInstitutionId={selectedInstitutionId}
+        defaultCurrency={defaultCurrency}
+        currencyRowValue={
           currencyRowIndex !== null
             ? (watchedBalances?.[currencyRowIndex]?.currency ?? defaultCurrency)
             : defaultCurrency
         }
-        onSelect={(next) => {
+        onSelectInstitution={(next) =>
+          setValue("institutionId", next, { shouldValidate: true })
+        }
+        onSelectAccount={(next) =>
+          setValue("accountId", next, { shouldValidate: true })
+        }
+        onSelectCurrency={(next) => {
           if (currencyRowIndex === null) {
             return
           }

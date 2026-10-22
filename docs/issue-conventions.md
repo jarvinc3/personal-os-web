@@ -52,12 +52,29 @@ Como <persona>, quiero <capacidad>, para <resultado o valor verificable>.
 ## Fuera de alcance
 
 - <Trabajo cercano que este issue no resolverá>.
+
+## Notas técnicas
+
+- Módulos o archivos afectados: <módulo, carpeta o archivo principal>.
+- Migración: sí | no.
+- Cambio de contrato de API: sí | no.
+
+## Definición de terminado
+
+- [ ] Tests y CI en verde.
+- [ ] Lint, format y build sin errores.
+- [ ] Changelog y versión actualizados según `docs/versionado.md`.
+- [ ] Probado con el usuario QA en la web (cuando aplique).
+- [ ] Issue cerrado y en **Done** en Project 3.
 ```
 
 Reglas de uso:
 
 - La oración de historia, `Alcance` y `Criterios de aceptación` son obligatorios.
 - `Contexto`, `Reglas de negocio`, `Dependencias` y `Fuera de alcance` se incluyen cuando aportan información real. No dejes secciones vacías.
+- `Notas técnicas` es breve y orientativa: solo módulos o archivos principales afectados y si hay migración o cambio de contrato de API. Sirve para estimar y agrupar arreglos menores; el detalle de implementación va en el PR.
+- `Definición de terminado` se copia tal cual en cada issue y se marca al cerrarlo. No sustituye a los criterios de aceptación.
+- Nunca crees issues espejo entre repositorios. Abre un solo issue en el repositorio dueño del trabajo; si el otro repositorio tiene trabajo concreto propio, abre ahí un issue aparte con ese trabajo, que dependa del primero.
 - Un issue expresa una necesidad principal. Si contiene resultados independientes, divídelo y enlázalo.
 - Mantén schema, API, pantalla y flujos operativos en issues separados, salvo que el alcance aprobado los combine explícitamente.
 
@@ -155,11 +172,11 @@ En un issue técnico, la restricción puede aparecer como criterio si es el entr
 Mantén fuera del cuerpo del issue:
 
 - Una solución técnica especulativa cuando todavía no se ha tomado esa decisión.
-- Rutas de archivos, números de línea, hashes de commit o listas de clases a modificar.
+- Números de línea, hashes de commit o listas exhaustivas de clases a modificar. Los módulos o archivos principales caben solo en `Notas técnicas`.
 - Logs, salidas de consola y resultados de comandos rutinarios.
 - Decisiones arquitectónicas extensas, alternativas descartadas o razonamientos de diseño; colócalos en un ADR o spec y enlázalos.
 - Checklists de implementación interna que conviertan la historia en instrucciones paso a paso.
-- Criterios como `hacer pruebas`, `ejecutar lint` o `actualizar documentación` cuando solo forman parte de la Definition of Done. Las pruebas deben derivarse del comportamiento esperado.
+- Criterios de aceptación como `hacer pruebas`, `ejecutar lint` o `actualizar documentación`: pertenecen a `Definición de terminado`. Las pruebas deben derivarse del comportamiento esperado.
 - Frases de relleno como `según mejores prácticas`, `de forma correcta`, `si aplica`, `etc.` o `manejar todos los errores`.
 - Información duplicada entre contexto, alcance y criterios de aceptación.
 - Trabajo futuro hipotético que no sea necesario para delimitar el alcance actual.
@@ -286,6 +303,9 @@ Antes de guardar, confirma:
 - [ ] Cada criterio corresponde al alcance y no introduce trabajo nuevo.
 - [ ] Los detalles técnicos aparecen solo cuando son contrato o entregable técnico.
 - [ ] Las dependencias están enlazadas y explicadas.
+- [ ] No es un espejo de un issue del otro repositorio.
+- [ ] `Notas técnicas` indica módulos afectados, migración y cambio de contrato de API.
+- [ ] Incluye la `Definición de terminado`.
 - [ ] El fuera de alcance evita confusiones reales.
 - [ ] Tipo, área, prioridad, talla y milestone son correctos.
 
@@ -346,7 +366,7 @@ Evita inventar roles que el producto no tiene. Si el valor es para un módulo co
 - `personal-os-web` contiene pantallas Next.js, rutas, estado del cliente, API client, push del navegador y proxy.
 - Un cambio end-to-end se divide en dos issues enlazados: el del back define el contrato y el comportamiento de servidor; el de web lo consume. El de back bloquea al de web.
 
-Cada issue vive en el repositorio que lo resuelve. No abras el mismo issue en los dos.
+Cada issue vive en el repositorio que lo resuelve. No abras el mismo issue en los dos: nada de issues espejo. Si el otro repositorio tiene trabajo concreto propio, va en un issue aparte con ese trabajo, que depende del primero.
 
 ## Entregas y milestones
 

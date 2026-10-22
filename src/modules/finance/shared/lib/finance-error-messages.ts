@@ -30,6 +30,11 @@ const BACKEND_CODE_MESSAGE_ES: Record<string, string> = {
   GOAL_ACCOUNT_REQUIRED: "Elige la cuenta donde guardas este dinero.",
   EARMARK_EXCEEDS_BALANCE: "No tienes suficiente saldo libre en la cuenta.",
   GOAL_NOT_FOUND: "No encontramos la meta.",
+  GOAL_WITHDRAWAL_ACCOUNT_REQUIRED: "Elige la cuenta que recibe el dinero.",
+  GOAL_WITHDRAWAL_EXCEEDS_AVAILABLE:
+    "Solo puedes retirar lo que está apartado en la meta.",
+  ACCOUNT_HAS_GOAL_MONEY:
+    "La cuenta tiene dinero apartado en una meta. Retíralo antes de archivarla.",
   RECEIVABLE_EXCESS_UNRESOLVED:
     "El pago supera lo pendiente. Elige qué hacer con la diferencia.",
   STATEMENT_PARSE_FAILED:

@@ -171,6 +171,17 @@ export function AccountSheet({
     "none" | "institution" | "currency"
   >("none")
 
+  /**
+   * Cash lives in the system Efectivo institution, so switching to it drops any
+   * bank the user had picked instead of discarding it silently on submit.
+   */
+  function changeType(next: AccountFormValues["type"]) {
+    setValue("type", next)
+    if (next === "CASH") {
+      setValue("institutionId", CATALOG_NONE, { shouldValidate: true })
+    }
+  }
+
   useEffect(() => {
     if (open) {
       reset(
@@ -337,7 +348,7 @@ export function AccountSheet({
                 <FinanceSegmentedControl
                   label="Tipo"
                   value={field.value}
-                  onChange={field.onChange}
+                  onChange={changeType}
                   options={TYPE_OPTIONS}
                 />
               )}

@@ -114,6 +114,8 @@ export function buildSubscriptionSlices(
       debtLabel: null,
       value: amount,
       percent,
+      assetsPercent: percent,
+      debtPercent: 0,
       percentLabel:
         percent > 0 && Math.round(percent) === 0
           ? "<1%"

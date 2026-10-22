@@ -143,6 +143,53 @@ export function dueDateAfter(input: {
   return addWeeks(from, periods * (freq === "WEEKLY" ? 1 : 2))
 }
 
+export type LoanScheduleRow = {
+  installmentNo: number
+  amount: number
+  principal: number
+  interest: number
+}
+
+/**
+ * French amortisation with the instalment rounded to cents. The last one absorbs
+ * the rounding, so the schedule adds up to the principal and every interest row
+ * is what the borrower actually pays.
+ */
+export function buildLoanSchedule(input: {
+  principal: number
+  annualRate: number
+  periods: number
+  freq: FinanceInstallmentFreq
+}): LoanScheduleRow[] {
+  const { principal, annualRate, periods, freq } = input
+  if (principal <= 0 || periods <= 0) {
+    return []
+  }
+  const rate = periodicRate(annualRate, freq)
+  const installment = roundToCents(
+    installmentAmount({ principal, annualRate, periods, freq })
+  )
+  const rows: LoanScheduleRow[] = []
+  let balance = roundToCents(principal)
+
+  for (let installmentNo = 1; installmentNo <= periods; installmentNo += 1) {
+    const isLast = installmentNo === periods
+    const interest = roundToCents(balance * rate)
+    const principalPart = isLast
+      ? balance
+      : roundToCents(Math.min(installment - interest, balance))
+    rows.push({
+      installmentNo,
+      amount: roundToCents(principalPart + interest),
+      principal: principalPart,
+      interest,
+    })
+    balance = roundToCents(balance - principalPart)
+  }
+
+  return rows
+}
+
 type KnownRate = { known: "RATE"; annualRatePercent: number }
 type KnownInstallment = { known: "INSTALLMENT"; installmentAmount: number }
 
@@ -156,6 +203,7 @@ export type LoanPlanInput = {
 
 export type LoanPlan = {
   installmentAmount: number
+  lastInstallmentAmount: number
   annualRate: number
   paidPeriods: number
   outstandingBalance: number
@@ -191,8 +239,18 @@ export function computeLoanPlan(input: LoanPlanInput): LoanPlan | null {
     periodsElapsed({ freq, from: disbursementDate, to: now }),
     periods
   )
+  const schedule = buildLoanSchedule({
+    principal,
+    annualRate,
+    periods,
+    freq,
+  })
   return {
     installmentAmount: roundToCents(installment),
+    lastInstallmentAmount:
+      schedule.length > 0
+        ? schedule[schedule.length - 1].amount
+        : roundToCents(installment),
     annualRate,
     paidPeriods,
     outstandingBalance: roundToCents(
@@ -203,6 +261,8 @@ export function computeLoanPlan(input: LoanPlanInput): LoanPlan | null {
       from: disbursementDate,
       periods: paidPeriods + 1,
     }),
-    totalInterest: roundToCents(installment * periods - principal),
+    totalInterest: roundToCents(
+      schedule.reduce((total, row) => total + row.interest, 0)
+    ),
   }
 }

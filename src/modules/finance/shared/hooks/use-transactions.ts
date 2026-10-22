@@ -18,6 +18,7 @@ import {
   type FinanceTransactionsQuery,
 } from "@/src/modules/finance/shared/lib/transactions-query"
 import { intersectIsoDateRange } from "@/src/modules/finance/shared/lib/month-window"
+import { useUserTimeZone } from "@/src/modules/settings/hooks/use-user-time-zone"
 import { invalidateFinancePositions } from "./use-balance-sheet"
 import {
   FINANCE_TRANSACTIONS_QUERY_KEY,
@@ -66,8 +67,13 @@ export function useTimelineTransactions(
   filters: TimelineTransactionFilters,
   currentMonthKey: string
 ) {
+  const timeZone = useUserTimeZone()
   const monthQuery = useQuery({
-    ...timelineMonthQuery(currentMonthKey, (path) => apiGet(path)),
+    ...timelineMonthQuery({
+      month: currentMonthKey,
+      get: (path) => apiGet(path),
+      timeZone,
+    }),
     enabled,
   })
   const yearQueries = useQueries({
@@ -84,19 +90,21 @@ export function useTimelineTransactions(
           "timeline",
           year,
           filters,
+          timeZone,
         ],
         staleTime: FINANCE_TIMELINE_STALE_TIME_MS,
         enabled: enabled && intersection !== null,
         queryFn: () =>
-          fetchAllTransactionPages(
-            {
+          fetchAllTransactionPages({
+            query: {
               ...filters,
               dateFrom: intersection?.dateFrom,
               dateTo: intersection?.dateTo,
               limit: FINANCE_TIMELINE_PAGE_SIZE,
             },
-            (path) => apiGet(path)
-          ),
+            get: (path) => apiGet(path),
+            timeZone,
+          }),
       }
     }),
   })
@@ -124,16 +132,18 @@ export function useTimelineTransactions(
 }
 
 export function allTransactionsQueryOptions(
-  filters: TimelineTransactionFilters
+  filters: TimelineTransactionFilters,
+  timeZone: string
 ) {
   return {
-    queryKey: [...FINANCE_TRANSACTIONS_QUERY_KEY, "all", filters],
+    queryKey: [...FINANCE_TRANSACTIONS_QUERY_KEY, "all", filters, timeZone],
     staleTime: FINANCE_TIMELINE_STALE_TIME_MS,
     queryFn: () =>
-      fetchAllTransactionPages(
-        { ...filters, limit: FINANCE_TIMELINE_PAGE_SIZE },
-        (path) => apiGet(path)
-      ),
+      fetchAllTransactionPages({
+        query: { ...filters, limit: FINANCE_TIMELINE_PAGE_SIZE },
+        get: (path) => apiGet(path),
+        timeZone,
+      }),
   }
 }
 
@@ -141,7 +151,11 @@ export function useAllTransactions(
   enabled: boolean,
   filters: TimelineTransactionFilters
 ) {
-  return useQuery({ ...allTransactionsQueryOptions(filters), enabled })
+  const timeZone = useUserTimeZone()
+  return useQuery({
+    ...allTransactionsQueryOptions(filters, timeZone),
+    enabled,
+  })
 }
 
 export function useTransactionSearch(enabled: boolean, search: string) {
@@ -213,6 +227,24 @@ export function useUnconfirmTransfer() {
       apiPost<{ success: boolean }>(
         API_ENDPOINTS.FINANCE.TRANSFER_UNCONFIRM(id)
       ),
+    onSuccess: () => invalidateLedger(queryClient),
+  })
+}
+
+export function useConfirmTransfer() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) =>
+      apiPost<{ success: boolean }>(API_ENDPOINTS.FINANCE.TRANSFER_CONFIRM(id)),
+    onSuccess: () => invalidateLedger(queryClient),
+  })
+}
+
+export function useReverseTransfer() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) =>
+      apiPost<{ success: boolean }>(API_ENDPOINTS.FINANCE.TRANSFER_REVERSE(id)),
     onSuccess: () => invalidateLedger(queryClient),
   })
 }

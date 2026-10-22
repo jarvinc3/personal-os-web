@@ -30,3 +30,6 @@ export type NotificationSocketPayload = {
   data: Record<string, unknown>
   createdAt: string
 }
+
+/** Which read state the list is showing. */
+export type NotificationReadFilter = "all" | "unread" | "read"

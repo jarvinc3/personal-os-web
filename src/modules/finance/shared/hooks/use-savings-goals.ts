@@ -12,6 +12,7 @@ import type {
   UpdateSavingsGoalBody,
 } from "@/src/modules/finance/shared/lib/planning-payloads"
 import {
+  FINANCE_ACCOUNTS_QUERY_KEY,
   FINANCE_SAVINGS_GOAL_CONTRIBUTIONS_QUERY_KEY,
   FINANCE_SAVINGS_GOALS_QUERY_KEY,
   type FinancePaginated,
@@ -22,6 +23,7 @@ import type {
 } from "@/src/modules/finance/shared/types/entities"
 import { API_ENDPOINTS } from "@/src/shared/constants/api-endpoints"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { invalidateFinanceBalanceSheet } from "./use-balance-sheet"
 
 function invalidate(queryClient: ReturnType<typeof useQueryClient>) {
   void queryClient.invalidateQueries({
@@ -91,7 +93,7 @@ export function useSavingsGoalContributions(
   })
 }
 
-/** A contribution moves the goal balance, so both lists are refreshed together. */
+/** A contribution or withdrawal moves the goal balance and the accounts. */
 function invalidateGoalAndContributions(
   queryClient: ReturnType<typeof useQueryClient>
 ) {
@@ -99,6 +101,8 @@ function invalidateGoalAndContributions(
   void queryClient.invalidateQueries({
     queryKey: FINANCE_SAVINGS_GOAL_CONTRIBUTIONS_QUERY_KEY,
   })
+  void queryClient.invalidateQueries({ queryKey: FINANCE_ACCOUNTS_QUERY_KEY })
+  invalidateFinanceBalanceSheet(queryClient)
 }
 
 export function useCreateSavingsGoalContribution() {

@@ -4,6 +4,7 @@ import { BrandLogo } from "@/src/modules/finance/shared/components/brand-logo"
 import type { RingStackSlice } from "@/src/modules/finance/shared/lib/ring-stack"
 import { cn } from "@/src/shared/lib/utils"
 import { WalletIcon } from "lucide-react"
+import Link from "next/link"
 import type { KeyboardEvent, ReactNode } from "react"
 
 /** Drawing constants measured from the reference mockup in `docs/suggest/image.png`. */
@@ -34,16 +35,36 @@ function ringPoint(radius: number, angleDegrees: number): string {
 }
 
 function sweepDegrees(percent: number): number {
+  if (!Number.isFinite(percent) || percent <= 0) {
+    return 0
+  }
   return Math.min(percent * DEGREES_PER_PERCENT, MAX_SWEEP)
 }
 
-function arcPath(radius: number, startDegrees: number, sweep: number): string {
-  if (sweep <= 0) {
+type ArcDirection = "clockwise" | "counterclockwise"
+
+type ArcPathInput = {
+  radius: number
+  startDegrees: number
+  sweep: number
+  direction?: ArcDirection
+}
+
+function arcPath({
+  radius,
+  startDegrees,
+  sweep,
+  direction = "clockwise",
+}: ArcPathInput): string {
+  if (!Number.isFinite(sweep) || sweep <= 0) {
     return ""
   }
+  const endDegrees =
+    direction === "clockwise" ? startDegrees - sweep : startDegrees + sweep
   const start = ringPoint(radius, startDegrees)
-  const end = ringPoint(radius, startDegrees - sweep)
-  return `M ${start} A ${radius} ${radius} 0 0 1 ${end}`
+  const end = ringPoint(radius, endDegrees)
+  const sweepFlag = direction === "clockwise" ? 1 : 0
+  return `M ${start} A ${radius} ${radius} 0 0 ${sweepFlag} ${end}`
 }
 
 function ringLabel(slice: RingStackSlice): string {
@@ -85,6 +106,8 @@ type FinanceRingChartProps = {
   centerValue: string
   /** Debt line under the value, null when the selected ring owes nothing. */
   centerDebt: string | null
+  /** When set, the centre value opens the net-worth breakdown. */
+  centerHref?: string
   className?: string
 }
 
@@ -95,6 +118,7 @@ export function FinanceRingChart({
   centerLabel,
   centerValue,
   centerDebt,
+  centerHref,
   className,
 }: FinanceRingChartProps) {
   const ringCount = slices.length
@@ -105,22 +129,29 @@ export function FinanceRingChart({
   const outerEdge = outerCenter + capClearance
   const halfThickness = RING_THICKNESS / 2
   const innerRadius = INNERMOST_RADIUS - halfThickness
-  // The gauge is the right-hand semicircle. The left margin only has to keep
-  // the round caps; the hollow opens on that side.
+  const hasAssets = slices.some((slice) => slice.assetsValue > 0)
+  const hasDebt = slices.some((slice) => slice.debtValue > 0)
+  // Assets keep the right half. Debts only get their own left half when both
+  // groups exist; alone, they use the full gauge so the chart stays compact.
+  const showsBothGroups = hasAssets && hasDebt
+  // The left margin only has to keep the round caps when the gauge is a single
+  // semicircle. With two groups the left half needs the full radius.
   const leftMargin = capClearance
-  const totalWidth = outerEdge + leftMargin
+  const chartLeft = showsBothGroups ? -outerEdge : -leftMargin
+  const chartWidth = outerEdge - chartLeft
+  const hollowLeft = showsBothGroups ? -innerRadius : -leftMargin
+  const hollowRight = innerRadius
   // The centre text is HTML, not SVG, so it keeps a readable size when the
-  // chart shrinks on a phone. It is centred in the visible hollow, from the
-  // left edge of the box to the inner edge of the smallest ring.
-  const hollowCenter = (-leftMargin + innerRadius) / 2
-  const centreLeftPercent = ((hollowCenter + leftMargin) / totalWidth) * 100
-  const centreWidthPercent = ((innerRadius + leftMargin) / totalWidth) * 100
+  // chart shrinks on a phone. It is centred in the visible hollow.
+  const centreLeftPercent =
+    (((hollowLeft + hollowRight) / 2 - chartLeft) / chartWidth) * 100
+  const centreWidthPercent = ((hollowRight - hollowLeft) / chartWidth) * 100
   const gaugeSweep = sweepDegrees(100)
 
   return (
     <div className={cn("relative", className)}>
       <svg
-        viewBox={`${-leftMargin} ${-outerEdge} ${totalWidth} ${outerEdge * 2}`}
+        viewBox={`${chartLeft} ${-outerEdge} ${chartWidth} ${outerEdge * 2}`}
         role="group"
         aria-label={`Anillos de balance. ${centerLabel}: ${centerValue}`}
         className="h-auto w-full"
@@ -132,13 +163,30 @@ export function FinanceRingChart({
           const thickness = isActive
             ? RING_THICKNESS + ACTIVE_EXTRA_THICKNESS
             : RING_THICKNESS
-          const arcSweep = sweepDegrees(slice.percent)
-          const debtSweep =
-            slice.value > 0 ? arcSweep * (slice.debtValue / slice.value) : 0
-          const assetsSweep = arcSweep - debtSweep
-          const track = arcPath(radius, START_ANGLE, gaugeSweep)
-          const debtArc = arcPath(radius, START_ANGLE - assetsSweep, debtSweep)
-          const assetsArc = arcPath(radius, START_ANGLE, assetsSweep)
+          const assetsSweep = sweepDegrees(slice.assetsPercent)
+          const debtSweep = sweepDegrees(slice.debtPercent)
+          const track = arcPath({
+            radius,
+            startDegrees: START_ANGLE,
+            sweep: gaugeSweep,
+          })
+          const debtTrack = arcPath({
+            radius,
+            startDegrees: START_ANGLE,
+            sweep: gaugeSweep,
+            direction: "counterclockwise",
+          })
+          const debtArc = arcPath({
+            radius,
+            startDegrees: START_ANGLE,
+            sweep: debtSweep,
+            direction: showsBothGroups ? "counterclockwise" : "clockwise",
+          })
+          const assetsArc = arcPath({
+            radius,
+            startDegrees: START_ANGLE,
+            sweep: assetsSweep,
+          })
           return (
             <g
               key={slice.key}
@@ -164,6 +212,16 @@ export function FinanceRingChart({
                   slice.value > 0 ? TRACK_OPACITY : UNMEASURED_TRACK_OPACITY
                 }
               />
+              {showsBothGroups ? (
+                <RingArc
+                  d={debtTrack}
+                  color={slice.color}
+                  thickness={thickness}
+                  opacity={
+                    slice.value > 0 ? TRACK_OPACITY : UNMEASURED_TRACK_OPACITY
+                  }
+                />
+              ) : null}
               {debtSweep > 0 ? (
                 <RingArc
                   d={debtArc}
@@ -185,7 +243,7 @@ export function FinanceRingChart({
         })}
       </svg>
       <div
-        aria-hidden
+        aria-hidden={centerHref ? undefined : true}
         className="pointer-events-none absolute top-1/2 -translate-x-1/2 -translate-y-1/2 text-center"
         style={{
           left: `${centreLeftPercent}%`,
@@ -195,9 +253,21 @@ export function FinanceRingChart({
         <p className="truncate text-[10px] font-medium tracking-[0.14em] text-muted-foreground uppercase sm:text-[11px]">
           {centerLabel}
         </p>
-        <p className="truncate text-lg font-bold text-foreground tabular-nums sm:text-xl">
-          {centerValue}
-        </p>
+        {centerHref ? (
+          <Link
+            href={centerHref}
+            aria-label="Ver desglose del patrimonio"
+            className="pointer-events-auto inline-block max-w-full rounded-md outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <span className="block truncate text-lg font-bold text-foreground tabular-nums sm:text-xl">
+              {centerValue}
+            </span>
+          </Link>
+        ) : (
+          <p className="truncate text-lg font-bold text-foreground tabular-nums sm:text-xl">
+            {centerValue}
+          </p>
+        )}
         {centerDebt ? (
           <p className="truncate text-xs font-medium text-muted-foreground sm:text-sm">
             Deuda {centerDebt}
@@ -268,7 +338,7 @@ export function FinanceRingLegend({
                   {slice.amountLabel}
                 </span>
               </span>
-              <span className="shrink-0 text-base font-semibold text-foreground tabular-nums sm:text-lg">
+              <span className="max-w-[45%] shrink-0 text-right text-xs leading-tight font-semibold text-foreground tabular-nums sm:text-sm">
                 {slice.percentLabel}
               </span>
             </button>

@@ -2,8 +2,12 @@
 
 import { TransactionMovementRow } from "@/src/modules/finance/transactions/components/transaction-movement-row"
 import type { TimelineMonth } from "@/src/modules/finance/shared/lib/group-transactions-timeline"
-import { formatFinanceDateTimeLabel } from "@/src/modules/finance/shared/lib/ledger-form"
+import {
+  formatCalendarDate,
+  formatFinanceDateTimeLabel,
+} from "@/src/modules/finance/shared/lib/ledger-form"
 import type { ReversalGroup } from "@/src/modules/finance/transactions/lib/group-reversals"
+import type { ScheduledCommitment } from "@/src/modules/finance/transactions/lib/scheduled-commitments"
 import {
   formatFinanceMoney,
   type FinanceMoneyDisplay,
@@ -17,11 +21,25 @@ import type {
   FinanceCategory,
   FinanceTransaction,
 } from "@/src/modules/finance/shared/types/entities"
-import { SummaryItem } from "@/src/shared/components/ui/summary"
+import { Badge } from "@/src/shared/components/ui/badge"
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/src/shared/components/ui/empty"
+import { SummaryItem, SummarySection } from "@/src/shared/components/ui/summary"
 import { LinkPendingOverlay } from "@/src/shared/components/ui/navigation-pending"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { cn } from "@/src/shared/lib/utils"
-import { Undo2Icon } from "lucide-react"
+import {
+  CalendarClockIcon,
+  CalendarDaysIcon,
+  HandCoinsIcon,
+  RepeatIcon,
+  Undo2Icon,
+} from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { useState } from "react"
@@ -31,6 +49,7 @@ type FinanceMonthSectionProps = {
   categories: FinanceCategory[]
   display: FinanceMoneyDisplay
   isActive: boolean
+  scheduled: readonly ScheduledCommitment[]
   stickyOffset: number
 }
 
@@ -84,12 +103,12 @@ function ReversalLeg({ leg, roleLabel, display, isLast }: ReversalLegProps) {
   return (
     <SummaryItem
       title={roleLabel}
-      description={`${detail} · ${formatFinanceDateTimeLabel(leg.transactionDate)} · ${reversalSourceLabel(leg.source)}`}
+      description={`${detail} · ${formatFinanceDateTimeLabel(leg.transactionDate, display.locale)} · ${reversalSourceLabel(leg.source)}`}
       value={
         <span
           className={cn(isInactive && "text-muted-foreground line-through")}
         >
-          {signedAmount(leg, display)}
+          {signedAmount({ transaction: leg, display })}
         </span>
       }
       href={APP_ROUTES.app.financeTransaction(leg.id)}
@@ -98,11 +117,54 @@ function ReversalLeg({ leg, roleLabel, display, isLast }: ReversalLegProps) {
   )
 }
 
+function ScheduledCommitments({
+  commitments,
+  display,
+}: {
+  commitments: readonly ScheduledCommitment[]
+  display: FinanceMoneyDisplay
+}) {
+  if (commitments.length === 0) {
+    return null
+  }
+
+  return (
+    <div className="px-2 pb-3 md:px-0">
+      <SummarySection
+        title="Programados"
+        subtitle="No alteran los totales hasta que se pagan"
+        icon={CalendarClockIcon}
+      >
+        {commitments.map((commitment, index) => (
+          <SummaryItem
+            key={commitment.id}
+            title={commitment.name}
+            description={`${commitment.kind === "LOAN" ? "Cuota de préstamo" : "Suscripción"} · ${formatCalendarDate(commitment.date, display.locale)}${commitment.hasPaymentMethod ? "" : " · Sin método de pago"}`}
+            icon={commitment.kind === "LOAN" ? HandCoinsIcon : RepeatIcon}
+            value={formatFinanceMoney(commitment.amount, {
+              ...display,
+              currency: commitment.currency,
+            })}
+            href={
+              commitment.kind === "LOAN"
+                ? APP_ROUTES.app.financeLoan(commitment.referenceId)
+                : APP_ROUTES.app.financeSubscription(commitment.referenceId)
+            }
+            isLast={index === commitments.length - 1}
+            trailing={<Badge variant="warning">Programado</Badge>}
+          />
+        ))}
+      </SummarySection>
+    </div>
+  )
+}
+
 export function FinanceMonthSection({
   month,
   categories,
   display,
   isActive,
+  scheduled,
   stickyOffset,
 }: FinanceMonthSectionProps) {
   const [expandedIds, setExpandedIds] = useState<ReadonlySet<string>>(new Set())
@@ -143,6 +205,24 @@ export function FinanceMonthSection({
           {month.label}
         </h2>
       </div>
+
+      <ScheduledCommitments commitments={scheduled} display={display} />
+
+      {isActive &&
+      scheduled.length === 0 &&
+      month.weeks.every((week) => week.days.length === 0) ? (
+        <Empty className="py-10">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <CalendarDaysIcon />
+            </EmptyMedia>
+            <EmptyTitle>Sin movimientos este mes</EmptyTitle>
+            <EmptyDescription>
+              No hay movimientos ni compromisos programados.
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
+      ) : null}
 
       {month.weeks.map((week) => {
         return (

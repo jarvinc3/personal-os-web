@@ -1,6 +1,7 @@
 "use client"
 
 import { chatMoneyDisplay } from "@/src/modules/ai/components/blocks/chat-money"
+import { useFormatLocale } from "@/src/modules/settings/hooks/use-format-locale"
 import type { ChatTransactionSnapshot } from "@/src/modules/ai/types/chat.types"
 import {
   formatFinanceDateTimeLabel,
@@ -51,11 +52,12 @@ export function ChatTransactionRow({
   snapshot,
   isLast,
 }: ChatTransactionRowProps) {
+  const locale = useFormatLocale()
   const sign = movementSign(snapshot)
   const instrument = snapshot.cardName ?? snapshot.accountName
   const description = [
     instrument,
-    formatFinanceDateTimeLabel(snapshot.transactionDate),
+    formatFinanceDateTimeLabel(snapshot.transactionDate, locale),
   ]
     .filter(Boolean)
     .join(" · ")
@@ -77,7 +79,7 @@ export function ChatTransactionRow({
           {sign ? `${sign} ` : null}
           {formatFinanceMoney(
             snapshot.amount,
-            chatMoneyDisplay(snapshot.currency)
+            chatMoneyDisplay(snapshot.currency, locale)
           )}
         </span>
       }

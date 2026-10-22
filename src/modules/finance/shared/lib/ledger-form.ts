@@ -3,6 +3,7 @@ import type {
   FinanceCard,
 } from "@/src/modules/finance/shared/types/entities"
 import { formatHm24Display12h } from "@/src/shared/types/wheels.type"
+import { zonedWallTimeToInstant } from "@/src/shared/lib/zoned-time"
 import { splitLedgerTarget } from "./ledger-payloads.ts"
 import { parseFinanceMoney } from "./money.ts"
 
@@ -27,6 +28,44 @@ export function isPositiveAmountInput(value: string): boolean {
     return false
   }
   return amount > 0
+}
+
+/** Ceiling for a money amount in the client forms, under the stored decimal width. */
+export const FINANCE_MAX_AMOUNT = 999_999_999.99
+
+const MONEY_CENTS_INPUT = /^\d*\.?\d{0,2}$/
+
+/** A money amount is written in cents: no digit survives past the second decimal. */
+export function hasMoneyCentsInput(value: string): boolean {
+  return MONEY_CENTS_INPUT.test(value.trim())
+}
+
+export function isWithinMaxAmountInput(value: string): boolean {
+  const amount = parseFinanceMoney(value)
+  if (amount === null) {
+    return false
+  }
+  return amount <= FINANCE_MAX_AMOUNT
+}
+
+/**
+ * Every money rule at once, for inputs that answer with one message instead of
+ * naming the rule that failed.
+ */
+export function isMoneyAmountInput(value: string): boolean {
+  return (
+    hasMoneyCentsInput(value) &&
+    isPositiveAmountInput(value) &&
+    isWithinMaxAmountInput(value)
+  )
+}
+
+/** A rate keeps up to the 8 decimals the API stores. */
+export function isPositiveRateInput(value: string): boolean {
+  if (!/^\d*\.?\d{0,8}$/.test(value.trim())) {
+    return false
+  }
+  return isPositiveAmountInput(value)
 }
 
 /** The manual forms always carry a date and an hour. */
@@ -80,13 +119,21 @@ export function sliceDateTimeInput(
 }
 
 /** Wall-clock `YYYY-MM-DDTHH:mm` in the ISO instant the API stores. */
-export function wallClockToIso(value: string): string {
+/**
+ * The instant the form's wall clock names in the user's zone. The API stores
+ * instants, so a bare `HH:mm` labelled as UTC lands hours away from the day the
+ * user picked.
+ */
+export function wallClockToIso(value: string, timeZone: string): string {
   const dateTime = value.match(DATE_TIME_INPUT)
   if (dateTime) {
-    return `${dateTime[1]}T${dateTime[2]}:${dateTime[3]}:00.000Z`
+    return zonedWallTimeToInstant(
+      `${dateTime[1]}T${dateTime[2]}:${dateTime[3]}`,
+      timeZone
+    )
   }
   if (DATE_INPUT.test(value)) {
-    return `${value}T00:00:00.000Z`
+    return zonedWallTimeToInstant(`${value}T00:00`, timeZone)
   }
   return value
 }
@@ -108,8 +155,11 @@ export function formatFinanceTimeLabel(value: string): string | null {
 }
 
 /** Date plus hour, when the value carries one. */
-export function formatFinanceDateTimeLabel(value: string): string {
-  const date = formatCalendarDate(value)
+export function formatFinanceDateTimeLabel(
+  value: string,
+  locale: string
+): string {
+  const date = formatCalendarDate(value, locale)
   const time = formatFinanceTimeLabel(value)
   if (!time) {
     return date
@@ -117,7 +167,7 @@ export function formatFinanceDateTimeLabel(value: string): string {
   return `${date}, ${time}`
 }
 
-export function formatCalendarDate(value: string): string {
+export function formatCalendarDate(value: string, locale: string): string {
   const slice = value.slice(0, 10)
   if (!/^\d{4}-\d{2}-\d{2}$/.test(slice)) {
     return value
@@ -129,7 +179,7 @@ export function formatCalendarDate(value: string): string {
   if (Number.isNaN(date.getTime())) {
     return value
   }
-  return date.toLocaleDateString("es", {
+  return date.toLocaleDateString(locale, {
     year: "numeric",
     month: "short",
     day: "numeric",

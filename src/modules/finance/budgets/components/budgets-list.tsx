@@ -147,7 +147,7 @@ export function FinanceBudgetsList({
             const period =
               FINANCE_BUDGET_PERIOD_LABEL[budget.periodType] ??
               budget.periodType
-            const range = `${formatBudgetPeriodDate(budget.periodStart)} – ${formatBudgetPeriodDate(budget.periodEnd)}`
+            const range = `${formatBudgetPeriodDate(budget.periodStart, display.locale)} – ${formatBudgetPeriodDate(budget.periodEnd, display.locale)}`
             const spent = parseFinanceMoney(budget.amountSpent)
             const limit = parseFinanceMoney(budget.amountLimit)
             const remaining =

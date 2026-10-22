@@ -9,6 +9,7 @@ import { FinanceProgressHero } from "@/src/modules/finance/shared/components/lay
 import { SavingsGoalContributionSheet } from "@/src/modules/finance/savings-goals/components/savings-goal-contribution-sheet"
 import { SavingsGoalSheet } from "@/src/modules/finance/savings-goals/components/savings-goal-sheet"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
+import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
 import {
   useDeleteSavingsGoal,
@@ -41,7 +42,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
-import { SummaryItem } from "@/src/shared/components/ui/summary"
+import { SummaryItem, SummarySection } from "@/src/shared/components/ui/summary"
 import { InfiniteListSentinel } from "@/src/shared/components/ui/infinite-list-sentinel"
 import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
@@ -50,11 +51,13 @@ import { ChatLauncherButton, useRegisterChatContext } from "@/src/modules/ai"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { appToast } from "@/src/shared/lib/app-toast"
 import {
+  BanknoteIcon,
   MoreVerticalIcon,
   PencilIcon,
   PiggyBankIcon,
   PlusIcon,
   Trash2Icon,
+  WalletIcon,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useMemo, useState } from "react"
@@ -79,14 +82,16 @@ function SavingsGoalDetailScreenBody({
   goalId,
 }: FinanceSavingsGoalDetailProps) {
   const router = useRouter()
-  const { isEnabled, config } = useFinanceEnabled()
+  const { isEnabled, config, formatLocale } = useFinanceEnabled()
   const display = {
     currency: config.baseCurrency,
     showCents: config.display.showCents,
     compactNumbers: config.display.compactNumbers,
+    locale: formatLocale,
   }
 
   const goalsQuery = useSavingsGoals(isEnabled)
+  const accountsQuery = useAccounts(isEnabled)
   const contributionsQuery = useSavingsGoalContributions(isEnabled, goalId)
   const deleteContribution = useDeleteSavingsGoalContribution()
   const { open: openGoalSheet, setOpen: setOpenGoalSheet } = useSheetParam(
@@ -98,6 +103,9 @@ function SavingsGoalDetailScreenBody({
   const goal =
     (goalsQuery.data ?? []).find((item) => item.id === goalId) ?? null
   const contributions = infiniteListItems(contributionsQuery.data)
+  const accounts = accountsQuery.data ?? []
+  const accountName = (id: string | null) =>
+    id ? (accounts.find((account) => account.id === id)?.name ?? null) : null
 
   useRegisterChatContext(
     goal
@@ -111,14 +119,24 @@ function SavingsGoalDetailScreenBody({
   )
   const money = { ...display, currency: goal?.currency ?? display.currency }
   const accent = ACCENT_FALLBACK_COLOR
-  const progress = Math.min(
-    100,
-    Math.max(0, amountRatioPct(goal?.currentAmount, goal?.targetAmount) ?? 0)
+  const progress = Math.max(
+    0,
+    amountRatioPct(goal?.currentAmount, goal?.targetAmount) ?? 0
   )
   const remaining = goal
     ? (parseFinanceMoney(goal.targetAmount) ?? 0) -
       (parseFinanceMoney(goal.currentAmount) ?? 0)
     : null
+  const surplus = remaining !== null && remaining < 0 ? -remaining : null
+  const targetDateCaption = goal?.targetDate
+    ? ` · meta al ${formatPlanningDate(goal.targetDate)}`
+    : ""
+  let footnote: string | undefined
+  if (surplus !== null) {
+    footnote = `Excedente ${formatFinanceMoney(surplus, money)}${targetDateCaption}`
+  } else if (remaining !== null && remaining > 0) {
+    footnote = `Faltan ${formatFinanceMoney(remaining, money)}${targetDateCaption}`
+  }
   const [pendingContributionId, setPendingContributionId] = useState<
     string | null
   >(null)
@@ -126,6 +144,7 @@ function SavingsGoalDetailScreenBody({
     null
   )
   const [optionsOpen, setOptionsOpen] = useState(false)
+  const [withdrawalOpen, setWithdrawalOpen] = useState(false)
   const [confirmGoalOpen, setConfirmGoalOpen] = useState(false)
 
   const headerActions = useMemo(
@@ -246,25 +265,44 @@ function SavingsGoalDetailScreenBody({
         progress={progress}
         startCaption={`${Math.round(progress)}% de la meta`}
         endCaption={`Meta ${formatFinanceMoney(goal.targetAmount, money)}`}
-        footnote={
-          remaining !== null && remaining > 0
-            ? `Faltan ${formatFinanceMoney(remaining, money)}${
-                goal.targetDate
-                  ? ` · meta al ${formatPlanningDate(goal.targetDate)}`
-                  : ""
-              }`
-            : undefined
-        }
+        footnote={footnote}
       />
 
+      <div className="mx-4 mt-3">
+        <SummarySection title="Cuenta" icon={WalletIcon}>
+          <SummaryItem
+            title="Cuenta asociada"
+            icon={WalletIcon}
+            value={accountName(goal.accountId) ?? "Sin cuenta"}
+            isLast={false}
+          />
+          <SummaryItem
+            title="Apartado"
+            icon={PiggyBankIcon}
+            value={formatFinanceMoney(goal.currentAmount, money)}
+            isLast
+          />
+        </SummarySection>
+      </div>
+
       <div className="mx-4 flex flex-col gap-3 rounded-3xl bg-background">
-        <Button
-          className="w-full"
-          onClick={() => setOpenContributionSheet(true)}
-        >
-          <PlusIcon />
-          Agregar aporte
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            className="flex-1"
+            onClick={() => setOpenContributionSheet(true)}
+          >
+            <PlusIcon />
+            Agregar aporte
+          </Button>
+          <Button
+            variant="outline"
+            className="flex-1"
+            onClick={() => setWithdrawalOpen(true)}
+          >
+            <BanknoteIcon />
+            Retirar
+          </Button>
+        </div>
 
         {contributionsQuery.isError ? (
           <FinanceErrorState
@@ -300,7 +338,11 @@ function SavingsGoalDetailScreenBody({
                   key={contribution.id}
                   title={formatFinanceMoney(contribution.amount, money)}
                   description={[
+                    contribution.kind === "WITHDRAWAL" ? "Retiro" : "Aporte",
                     formatPlanningDate(contribution.contributedAt),
+                    contribution.kind === "WITHDRAWAL"
+                      ? accountName(contribution.destinationAccountId)
+                      : null,
                     contribution.notes ?? "",
                   ]
                     .filter(Boolean)
@@ -341,6 +383,19 @@ function SavingsGoalDetailScreenBody({
         goalAccountId={goal.accountId}
       />
 
+      <SavingsGoalContributionSheet
+        open={withdrawalOpen}
+        onOpenChange={setWithdrawalOpen}
+        goalId={goal.id}
+        goalName={goal.name}
+        currency={goal.currency}
+        targetAmount={goal.targetAmount}
+        currentAmount={goal.currentAmount}
+        targetDate={goal.targetDate}
+        goalAccountId={goal.accountId}
+        mode="WITHDRAWAL"
+      />
+
       <SavingsGoalSheet
         open={openGoalSheet}
         onOpenChange={setOpenGoalSheet}
@@ -361,6 +416,15 @@ function SavingsGoalDetailScreenBody({
             onPress: () => {
               setOptionsOpen(false)
               setOpenContributionSheet(true)
+            },
+          },
+          {
+            id: "withdraw",
+            title: "Retirar dinero",
+            icon: BanknoteIcon,
+            onPress: () => {
+              setOptionsOpen(false)
+              setWithdrawalOpen(true)
             },
           },
           {

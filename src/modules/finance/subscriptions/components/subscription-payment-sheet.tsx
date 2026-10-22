@@ -10,8 +10,17 @@ import { FinanceDateField } from "@/src/modules/finance/shared/components/forms/
 import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
 import { useFinanceAmountEntry } from "@/src/modules/finance/shared/hooks/use-finance-amount-entry"
 import { useRecordSubscriptionPayment } from "@/src/modules/finance/shared/hooks/use-subscriptions"
+import {
+  useCreateTransaction,
+  useDeleteTransaction,
+} from "@/src/modules/finance/shared/hooks/use-transactions"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
-import { todayDateInput } from "@/src/modules/finance/shared/lib/ledger-form"
+import { buildCreateTransactionBody } from "@/src/modules/finance/shared/lib/ledger-payloads"
+import {
+  todayDateInput,
+  wallClockToIso,
+} from "@/src/modules/finance/shared/lib/ledger-form"
+import { useUserTimeZone } from "@/src/modules/settings/hooks/use-user-time-zone"
 import type { FinanceSubscription } from "@/src/modules/finance/shared/types/entities"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
 import { Button } from "@/src/shared/components/ui/button"
@@ -44,7 +53,27 @@ export function SubscriptionPaymentSheet({
   subscription,
 }: SubscriptionPaymentSheetProps) {
   const recordPayment = useRecordSubscriptionPayment(subscription.id)
+  const createExpense = useCreateTransaction()
+  const deleteExpense = useDeleteTransaction()
+  const saving =
+    recordPayment.isPending ||
+    createExpense.isPending ||
+    deleteExpense.isPending
+  const paymentTarget = subscription.paymentMethod
+    ? subscription.paymentMethod.type === "CARD"
+      ? { cardId: subscription.paymentMethod.id }
+      : { accountId: subscription.paymentMethod.id }
+    : subscription.cardId
+      ? { cardId: subscription.cardId }
+      : subscription.accountId
+        ? { accountId: subscription.accountId }
+        : null
+  const paymentTargetName =
+    subscription.paymentMethod?.name ??
+    subscription.cardName ??
+    subscription.accountName
   const { amountEntry, setAmountEntry } = useFinanceAmountEntry()
+  const timeZone = useUserTimeZone()
   const {
     control,
     handleSubmit,
@@ -63,12 +92,49 @@ export function SubscriptionPaymentSheet({
   )
 
   const onSubmit = submitForm(async (values) => {
-    try {
-      await recordPayment.mutateAsync({
-        amount: Number(values.amount.replace(",", ".")),
-        paidAt: values.paidAt,
+    const amount = Number(values.amount.replace(",", "."))
+    if (!paymentTarget) {
+      appToast.error({
+        text1:
+          "Asigna una cuenta o tarjeta a la suscripción antes de registrar el pago.",
       })
-      appToast.success({ text1: "Pago registrado" })
+      return
+    }
+    const expense = buildCreateTransactionBody({
+      ...paymentTarget,
+      type: "DEBIT",
+      amount: String(amount),
+      currency: subscription.currency,
+      transactionDate: wallClockToIso(`${values.paidAt}T12:00`, timeZone),
+      description: `Suscripción: ${subscription.name}`,
+      categoryId: subscription.categoryId ?? undefined,
+    })
+    if (!expense.ok) {
+      appToast.error({ text1: expense.error })
+      return
+    }
+
+    try {
+      const created = await createExpense.mutateAsync(expense.body)
+      try {
+        await recordPayment.mutateAsync({
+          amount,
+          paidAt: values.paidAt,
+          transactionId: created.id,
+        })
+      } catch (error) {
+        try {
+          await deleteExpense.mutateAsync(created.id)
+        } catch (rollbackError) {
+          void rollbackError
+          appToast.error({
+            text1:
+              "El gasto quedó registrado, pero no se pudo vincular a la suscripción.",
+          })
+        }
+        throw error
+      }
+      appToast.success({ text1: "Pago registrado y gasto creado" })
       onOpenChange(false)
     } catch (error) {
       appToast.error({ text1: financeErrorMessage(error) })
@@ -79,9 +145,13 @@ export function SubscriptionPaymentSheet({
     <BottomSheet
       open={open}
       onOpenChange={onOpenChange}
-      pending={recordPayment.isPending}
+      pending={saving}
       title="Registrar pago"
-      description="Queda en el historial y avanza el próximo cobro."
+      description={
+        paymentTargetName
+          ? `Crea el gasto en ${paymentTargetName} y avanza el próximo cobro.`
+          : "Asigna una cuenta o tarjeta a la suscripción para registrar el pago."
+      }
       actions={{
         close: (
           <Button
@@ -98,15 +168,15 @@ export function SubscriptionPaymentSheet({
           <Button
             key="submit"
             className="flex-1"
-            disabled={recordPayment.isPending}
+            disabled={saving || !paymentTarget}
             onClick={onSubmit}
           >
-            {recordPayment.isPending ? (
+            {saving ? (
               <Spinner data-icon="inline-start" />
             ) : (
               <SaveIcon className="size-4 shrink-0" />
             )}
-            {recordPayment.isPending ? "Guardando..." : "Guardar"}
+            {saving ? "Guardando..." : "Guardar"}
           </Button>
         ),
       }}
@@ -122,7 +192,7 @@ export function SubscriptionPaymentSheet({
               onAmountCommit={field.onChange}
               amountError={errors.amount?.message}
               currency={subscription.currency}
-              disabled={recordPayment.isPending}
+              disabled={saving}
               entryMode={amountEntry}
               onEntryModeChange={setAmountEntry}
             />

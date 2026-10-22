@@ -7,13 +7,19 @@ import {
   fetchAllTransactionPages,
   formatTransactionDate,
   mergeTransactionsById,
+  movementSideMoney,
+  movementTouchesInstrument,
+  OPERATION_LEG_ROLE,
+  signedAmount,
   timelineMonthQuery,
   timelineMonthQueryKey,
   transactionInstrumentLabel,
   transactionsFromPayload,
   transferDirectionLabel,
+  transferSignFromInstrument,
   visibleTransactionTotals,
 } from "./transactions-query.ts"
+import type { FinanceTransaction } from "../types/entities.ts"
 import { FINANCE_TRANSACTIONS_QUERY_KEY } from "../types/api.ts"
 
 describe("buildTransactionsSearchParams", () => {
@@ -179,15 +185,21 @@ describe("formatTransactionDate", () => {
       month: "short",
       day: "numeric",
     })
-    assert.equal(formatTransactionDate("2026-09-18T00:00:00.000Z"), expected)
-    assert.equal(formatTransactionDate("2026-09-18"), expected)
-    assert.match(formatTransactionDate("2026-09-18T00:00:00.000Z"), /18/)
-    assert.match(formatTransactionDate("2026-09-18T00:00:00.000Z"), /2026/)
+    assert.equal(
+      formatTransactionDate("2026-09-18T00:00:00.000Z", "es"),
+      expected
+    )
+    assert.equal(formatTransactionDate("2026-09-18", "es"), expected)
+    assert.match(formatTransactionDate("2026-09-18T00:00:00.000Z", "es"), /18/)
+    assert.match(
+      formatTransactionDate("2026-09-18T00:00:00.000Z", "es"),
+      /2026/
+    )
   })
 })
 
 describe("canReverseTransaction", () => {
-  it("is true only for CONFIRMED non-transfer movements", () => {
+  it("is true for any CONFIRMED movement, including transfers", () => {
     assert.equal(
       canReverseTransaction({
         status: "CONFIRMED",
@@ -202,7 +214,7 @@ describe("canReverseTransaction", () => {
         type: "TRANSFER",
         transferGroupId: null,
       }),
-      false
+      true
     )
     assert.equal(
       canReverseTransaction({
@@ -210,7 +222,7 @@ describe("canReverseTransaction", () => {
         type: "DEBIT",
         transferGroupId: "grp-1",
       }),
-      false
+      true
     )
     assert.equal(
       canReverseTransaction({
@@ -274,15 +286,16 @@ describe("transferDirectionLabel", () => {
 describe("fetchAllTransactionPages", () => {
   it("walks the cursor and keeps search filters", async () => {
     const calls: string[] = []
-    const items = await fetchAllTransactionPages(
-      {
+    const items = await fetchAllTransactionPages({
+      query: {
         limit: 100,
         accountId: "acc-1",
         search: "super",
         dateFrom: "2026-01-01",
         dateTo: "2026-12-31",
       },
-      async (path) => {
+      timeZone: "America/La_Paz",
+      get: async (path) => {
         calls.push(path)
         const params = new URLSearchParams(path.split("?")[1])
         const index = Number(params.get("cursor") ?? 1)
@@ -292,8 +305,8 @@ describe("fetchAllTransactionPages", () => {
           nextCursor: index < 2 ? String(nextIndex) : null,
           hasMore: index < 2,
         }
-      }
-    )
+      },
+    })
     assert.equal(calls.length, 2)
     assert.equal(
       new URLSearchParams(calls[0]?.split("?")[1]).has("cursor"),
@@ -314,27 +327,34 @@ describe("fetchAllTransactionPages", () => {
 })
 
 describe("timelineMonthQuery", () => {
+  const laPaz = "America/La_Paz"
+
   it("requests the calendar bounds of the current month", async () => {
     const paths: string[] = []
-    const query = timelineMonthQuery("2026-10", async (path) => {
-      paths.push(path)
-      return {
-        items: [],
-        nextCursor: null,
-        hasMore: false,
-      }
+    const query = timelineMonthQuery({
+      month: "2026-10",
+      timeZone: laPaz,
+      get: async (path) => {
+        paths.push(path)
+        return {
+          items: [],
+          nextCursor: null,
+          hasMore: false,
+        }
+      },
     })
-    assert.deepEqual(query.queryKey, timelineMonthQueryKey("2026-10"))
+    assert.deepEqual(query.queryKey, timelineMonthQueryKey("2026-10", laPaz))
     assert.deepEqual(query.queryKey, [
       ...FINANCE_TRANSACTIONS_QUERY_KEY,
       "timeline",
       "month",
       "2026-10",
+      laPaz,
     ])
     assert.equal(query.staleTime, 5 * 60 * 1000)
     await query.queryFn()
-    assert.match(paths[0] ?? "", /dateFrom=2026-10-01/)
-    assert.match(paths[0] ?? "", /dateTo=2026-10-31/)
+    assert.match(paths[0] ?? "", /dateFrom=2026-10-01T04%3A00/)
+    assert.match(paths[0] ?? "", /dateTo=2026-11-01T03%3A59/)
     assert.match(paths[0] ?? "", /limit=100/)
   })
 })
@@ -348,6 +368,236 @@ describe("mergeTransactionsById", () => {
     assert.deepEqual(
       merged.map((item) => item.id),
       ["a", "b", "c"]
+    )
+  })
+})
+
+const transfer: FinanceTransaction = {
+  id: "tx-1",
+  type: "DEBIT",
+  status: "CONFIRMED",
+  editable: "NONE",
+  amount: "100.00",
+  currency: "DOP",
+  ledgerAmount: "-100.00",
+  ledgerCurrency: "DOP",
+  amountBaseCurrency: "100.00",
+  exchangeRate: null,
+  accountId: "acc-a",
+  accountName: "Ahorros",
+  cardId: null,
+  cardName: null,
+  categoryId: null,
+  merchant: null,
+  notes: null,
+  source: null,
+  transactionDate: "2026-10-20T13:02:00.000Z",
+  description: null,
+  transferGroupId: "grp-1",
+  transferToAccountId: "acc-b",
+  transferToAccountName: "Corriente",
+  transferToCardId: null,
+  transferToCardName: null,
+  kind: "OPERATION",
+  operationType: "TRANSFER",
+  legs: [
+    {
+      ...({
+        id: "leg-out",
+        type: "DEBIT",
+        amount: "100.00",
+        accountId: "acc-a",
+        cardId: null,
+      } as FinanceTransaction),
+      legRole: OPERATION_LEG_ROLE.SOURCE,
+    },
+    {
+      ...({
+        id: "leg-in",
+        type: "CREDIT",
+        amount: "100.00",
+        accountId: "acc-b",
+        cardId: "card-b",
+      } as FinanceTransaction),
+      legRole: OPERATION_LEG_ROLE.DESTINATION,
+    },
+  ],
+}
+
+describe("transferSignFromInstrument", () => {
+  it("signs the source account negative and the destination positive", () => {
+    assert.equal(
+      transferSignFromInstrument(transfer, { accountId: "acc-a" }),
+      "−"
+    )
+    assert.equal(
+      transferSignFromInstrument(transfer, { accountId: "acc-b" }),
+      "+"
+    )
+  })
+
+  it("signs a card on the destination leg positive", () => {
+    assert.equal(
+      transferSignFromInstrument(transfer, { cardId: "card-b" }),
+      "+"
+    )
+  })
+
+  it("falls back to the row fields when the legs are missing", () => {
+    const withoutLegs = { ...transfer, legs: undefined }
+    assert.equal(
+      transferSignFromInstrument(withoutLegs, { accountId: "acc-a" }),
+      "−"
+    )
+    assert.equal(
+      transferSignFromInstrument(withoutLegs, { accountId: "acc-b" }),
+      "+"
+    )
+  })
+
+  it("returns no sign for an unrelated instrument", () => {
+    assert.equal(
+      transferSignFromInstrument(transfer, { accountId: "acc-z" }),
+      null
+    )
+  })
+})
+
+describe("movementTouchesInstrument", () => {
+  it("matches the origin, the destination and the legs", () => {
+    assert.equal(
+      movementTouchesInstrument(transfer, { accountId: "acc-a" }),
+      true
+    )
+    assert.equal(
+      movementTouchesInstrument(transfer, { accountId: "acc-b" }),
+      true
+    )
+    assert.equal(
+      movementTouchesInstrument(transfer, { cardId: "card-b" }),
+      true
+    )
+    assert.equal(
+      movementTouchesInstrument(transfer, { cardId: "card-z" }),
+      false
+    )
+  })
+})
+
+describe("signedAmount", () => {
+  const display = { currency: "DOP", showCents: true, compactNumbers: false }
+
+  it("signs a transfer from the side of the instrument", () => {
+    assert.match(
+      signedAmount({
+        transaction: transfer,
+        display,
+        instrument: { accountId: "acc-a" },
+      }),
+      /^− /
+    )
+    assert.match(
+      signedAmount({
+        transaction: transfer,
+        display,
+        instrument: { accountId: "acc-b" },
+      }),
+      /^\+ /
+    )
+  })
+
+  it("leaves a transfer unsigned when no instrument is given", () => {
+    assert.doesNotMatch(
+      signedAmount({ transaction: transfer, display }),
+      /^[+−] /
+    )
+  })
+})
+
+describe("movementSideMoney", () => {
+  const crossCurrency: FinanceTransaction = {
+    ...transfer,
+    amount: "100.00",
+    currency: "USD",
+    exchangeRate: "61.45",
+    transferToAmount: "6145.00",
+    transferToCurrency: "DOP",
+    legs: [
+      {
+        ...({
+          id: "leg-out",
+          type: "DEBIT",
+          amount: "100.00",
+          accountId: "acc-a",
+          cardId: null,
+        } as FinanceTransaction),
+        legRole: OPERATION_LEG_ROLE.SOURCE,
+      },
+      {
+        ...({
+          id: "leg-in",
+          type: "CREDIT",
+          amount: "6145.00",
+          accountId: "acc-b",
+          cardId: null,
+        } as FinanceTransaction),
+        legRole: OPERATION_LEG_ROLE.DESTINATION,
+      },
+    ],
+  }
+
+  it("keeps the source amount on the origin side", () => {
+    assert.deepEqual(movementSideMoney(crossCurrency, { accountId: "acc-a" }), {
+      amount: "100.00",
+      currency: "USD",
+    })
+  })
+
+  it("shows the received amount and currency on the destination side", () => {
+    assert.deepEqual(movementSideMoney(crossCurrency, { accountId: "acc-b" }), {
+      amount: "6145.00",
+      currency: "DOP",
+    })
+  })
+
+  it("falls back to the source amount when the destination is unknown", () => {
+    assert.deepEqual(movementSideMoney(crossCurrency), {
+      amount: "100.00",
+      currency: "USD",
+    })
+  })
+
+  it("falls back to the source amount when the API sends no received amount", () => {
+    const withoutReceived: FinanceTransaction = {
+      ...crossCurrency,
+      transferToAmount: null,
+    }
+    assert.deepEqual(
+      movementSideMoney(withoutReceived, { accountId: "acc-b" }),
+      {
+        amount: "100.00",
+        currency: "USD",
+      }
+    )
+  })
+
+  it("prices the destination row in the received currency", () => {
+    const display = { currency: "DOP", showCents: true, compactNumbers: false }
+    assert.equal(
+      signedAmount({
+        transaction: crossCurrency,
+        display,
+        instrument: { accountId: "acc-b" },
+      }),
+      "+ DOP $6,145.00"
+    )
+    assert.equal(
+      signedAmount({
+        transaction: crossCurrency,
+        display,
+        instrument: { accountId: "acc-a" },
+      }),
+      "− USD $100.00"
     )
   })
 })

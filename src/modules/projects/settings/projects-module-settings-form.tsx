@@ -23,8 +23,9 @@ import {
   ArrowRightLeft,
   Bell,
   BriefcaseBusiness,
+  CalendarRange,
   Columns3,
-  LayoutGrid,
+  List,
   SaveIcon,
 } from "lucide-react"
 import { useEffect, useMemo } from "react"
@@ -35,6 +36,12 @@ import {
 } from "./lib/projects-module-form"
 
 const MODULE_ACCENT = getModule("projects").accent
+
+const PROJECT_VIEW_OPTIONS = [
+  { value: "board", label: "Tablero", icon: Columns3 },
+  { value: "list", label: "Lista", icon: List },
+  { value: "timeline", label: "Cronograma", icon: CalendarRange },
+] as const
 
 export function ProjectsModuleSettingsForm({ onDone }: { onDone: () => void }) {
   const { config, updateConfig, updateMutation } =
@@ -96,6 +103,7 @@ export function ProjectsModuleSettingsForm({ onDone }: { onDone: () => void }) {
       },
       { isEnabled: moduleEnable.pendingEnabled }
     )
+    moduleEnable.markSaved()
     appToast.success({
       text1: "Proyectos actualizado",
       text2: "Configuración guardada.",
@@ -109,6 +117,7 @@ export function ProjectsModuleSettingsForm({ onDone }: { onDone: () => void }) {
         event.preventDefault()
         onSubmit()
       }}
+      submitEmphasis={moduleEnable.isEnabledDirty}
       submitLabel="Guardar"
       submitIcon={SaveIcon}
       isSubmitting={updateMutation.isPending}
@@ -120,6 +129,7 @@ export function ProjectsModuleSettingsForm({ onDone }: { onDone: () => void }) {
         state={moduleEnable.state}
         accentColor={MODULE_ACCENT}
         isEnabled={moduleEnable.sheetEnabled}
+        pending={moduleEnable.isEnabledDirty}
         onEnabledChange={moduleEnable.handleEnabledChange}
         disabled={updateMutation.isPending}
       />
@@ -137,15 +147,17 @@ export function ProjectsModuleSettingsForm({ onDone }: { onDone: () => void }) {
             )
           }
         >
-          {(["board", "list", "timeline"] as const).map((v) => (
+          {PROJECT_VIEW_OPTIONS.map((option) => (
             <OptionRow
-              key={v}
-              icon={LayoutGrid}
+              key={option.value}
+              icon={option.icon}
               iconColor={MODULE_ACCENT}
-              label={v}
-              selected={defaultView === v}
-              onPress={() => setValue("defaultView", v, { shouldDirty: true })}
-              trailing={<RadioGroupItem value={v} />}
+              label={option.label}
+              selected={defaultView === option.value}
+              onPress={() =>
+                setValue("defaultView", option.value, { shouldDirty: true })
+              }
+              trailing={<RadioGroupItem value={option.value} />}
             />
           ))}
         </RadioGroup>

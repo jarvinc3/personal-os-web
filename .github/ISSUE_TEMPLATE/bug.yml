@@ -7,6 +7,7 @@ body:
     attributes:
       value: |
         Antes de guardar, revisa `docs/issue-conventions.md` del repositorio.
+        No crees issues espejo: un solo issue en el repositorio dueño del trabajo; si el otro repositorio tiene trabajo propio, va en un issue aparte que depende de este.
         Adjunta datos mínimos anonimizados: nunca tokens, secretos ni datos personales innecesarios.
 
   - type: textarea
@@ -52,6 +53,30 @@ body:
       description: Prueba observable de la corrección y ausencia de regresión relevante.
     validations:
       required: true
+
+  - type: textarea
+    id: notas-tecnicas
+    attributes:
+      label: Notas técnicas
+      description: Módulos o archivos principales afectados, y si hay migración o cambio de contrato de API.
+      value: |
+        - Módulos o archivos afectados:
+        - Migración: sí | no
+        - Cambio de contrato de API: sí | no
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: definicion-de-terminado
+    attributes:
+      label: Definición de terminado
+      description: Se marca al cerrar el issue.
+      options:
+        - label: Tests y CI en verde.
+        - label: Lint, format y build sin errores.
+        - label: Changelog y versión actualizados según `docs/versionado.md`.
+        - label: Probado con el usuario QA en la web (cuando aplique).
+        - label: Issue cerrado y en Done en Project 3.
 
   - type: dropdown
     id: area

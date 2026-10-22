@@ -31,6 +31,7 @@ import {
 } from "@/src/modules/finance/subscriptions/lib/subscription-calendar"
 import { billingLabel } from "@/src/modules/finance/subscriptions/lib/subscription-timing"
 import { FinanceMonthPicker } from "@/src/modules/finance/transactions/components/month-picker"
+import { useWeekStartsOn } from "@/src/modules/settings/hooks/use-week-starts-on"
 import {
   Empty,
   EmptyDescription,
@@ -59,14 +60,16 @@ export function SubscriptionsCalendarScreen() {
 
 function SubscriptionsCalendarBody() {
   const router = useRouter()
-  const { isEnabled, config } = useFinanceEnabled()
+  const { isEnabled, config, formatLocale } = useFinanceEnabled()
   const [today] = useState(() => new Date())
   const [month, setMonth] = useState<MonthKey>(monthKeyFromDate(today))
   const windowDays = config.subscriptions.reminderDaysBefore
+  const weekStartsOn = useWeekStartsOn(config.weekStartsOn)
   const display = {
     currency: config.baseCurrency,
     showCents: config.display.showCents,
     compactNumbers: config.display.compactNumbers,
+    locale: formatLocale,
   }
 
   usePageHeader({
@@ -99,11 +102,12 @@ function SubscriptionsCalendarBody() {
         charges,
         today,
         windowDays,
-        weekStartsOn: config.weekStartsOn === 1 ? 1 : 0,
+        weekStartsOn,
       }),
-    [parsedMonth, charges, today, windowDays, config.weekStartsOn]
+    [parsedMonth, charges, today, windowDays, weekStartsOn]
   )
   const summaryLabel = subscriptionChargeSummaryLabel({
+    locale: formatLocale,
     summary: subscriptionChargeSummary({
       charges,
       baseCurrency: display.currency,

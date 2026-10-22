@@ -16,9 +16,29 @@ describe("sanitizeAmountInput", () => {
     assert.equal(sanitizeAmountInput("12abc.3.4"), "12.34")
     assert.equal(sanitizeAmountInput("1,50"), "1.50")
   })
+
+  it("reads a thousands separator as grouping, never as a decimal", () => {
+    assert.equal(sanitizeAmountInput("3,003"), "3003")
+    assert.equal(sanitizeAmountInput("1,234,567.89"), "1234567.89")
+    assert.equal(sanitizeAmountInput("DOP 19,997,000"), "19997000")
+  })
+
+  it("takes the separator closest to the digits as the decimal one", () => {
+    assert.equal(sanitizeAmountInput("1.234,56"), "1234.56")
+    assert.equal(sanitizeAmountInput("1,234.56"), "1234.56")
+    assert.equal(sanitizeAmountInput("12.345,6"), "12345.6")
+  })
 })
 
 describe("parseFinanceMoney", () => {
+  it("reads grouped thousands with a decimal part", () => {
+    assert.equal(parseFinanceMoney("19,997,000"), 19997000)
+    assert.equal(parseFinanceMoney("1,234.5"), 1234.5)
+  })
+
+  it("keeps a decimal comma out of the grouped path", () => {
+    assert.equal(parseFinanceMoney("1,50"), null)
+  })
   it('parses "0.12" to 0.12', () => {
     assert.equal(parseFinanceMoney("0.12"), 0.12)
   })

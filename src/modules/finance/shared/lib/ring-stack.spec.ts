@@ -8,6 +8,7 @@ import {
   CASH_RING_KEY,
   CASH_RING_NAME,
   buildRingStackSlices,
+  hasDrawableRingBalance,
 } from "./ring-stack.ts"
 
 const display: FinanceMoneyDisplay = {
@@ -46,6 +47,9 @@ function institutionItem(partial: {
     accounts: [],
     cards: [],
     loans: [],
+    cash: null,
+    currencyTotals: [],
+    irregularities: { drift: false, reconciliation: false },
   }
 }
 
@@ -74,6 +78,8 @@ function cashItem(partial: {
     id: partial.id,
     account,
     balance: partial.balance,
+    currencyTotals: [],
+    irregularities: { drift: false, reconciliation: false },
   }
 }
 
@@ -110,11 +116,114 @@ describe("buildRingStackSlices", () => {
     assert.equal(slices[0]?.kind, "cash")
     assert.equal(slices[0]?.signedValue, 300)
     assert.equal(slices[0]?.percent, 60)
-    assert.equal(slices[0]?.percentLabel, "60%")
+    assert.equal(slices[0]?.assetsPercent, 75)
+    assert.equal(slices[0]?.percentLabel, "75%")
     assert.match(slices[0]?.amountLabel ?? "", /300/)
     assert.equal(slices[1]?.percent, 20)
+    assert.equal(slices[1]?.assetsPercent, 25)
     assert.equal(slices[2]?.signedValue, -100)
     assert.equal(slices[2]?.value, 100)
+    assert.equal(slices[2]?.debtPercent, 100)
+    assert.equal(slices[2]?.percentLabel, "100% deuda")
+  })
+
+  it("calculates each group over its own total", () => {
+    const slices = buildRingStackSlices(
+      [
+        institutionItem({
+          id: "a",
+          name: "Banco A",
+          netWorth: "100",
+          totalAssets: "100",
+          totalLiabilities: "0",
+        }),
+        institutionItem({
+          id: "b",
+          name: "Banco B",
+          netWorth: "-300",
+          totalAssets: "0",
+          totalLiabilities: "300",
+        }),
+        institutionItem({
+          id: "c",
+          name: "Banco C",
+          netWorth: "200",
+          totalAssets: "300",
+          totalLiabilities: "100",
+        }),
+      ],
+      display
+    )
+
+    const totalAssets = slices.reduce(
+      (sum, slice) => sum + slice.assetsPercent,
+      0
+    )
+    const totalDebt = slices.reduce((sum, slice) => sum + slice.debtPercent, 0)
+    const first = slices.find((slice) => slice.name === "Banco A")
+    const second = slices.find((slice) => slice.name === "Banco B")
+    const third = slices.find((slice) => slice.name === "Banco C")
+
+    assert.equal(totalAssets, 100)
+    assert.equal(totalDebt, 100)
+    assert.equal(first?.assetsPercent, 25)
+    assert.equal(second?.debtPercent, 75)
+    assert.equal(third?.assetsPercent, 75)
+    assert.equal(third?.debtPercent, 25)
+    assert.equal(third?.percentLabel, "75% activos · 25% deuda")
+  })
+
+  it("moves a negative asset balance to the debt group", () => {
+    const slices = buildRingStackSlices(
+      [
+        institutionItem({
+          id: "a",
+          name: "Banco A",
+          netWorth: "-50",
+          totalAssets: "-50",
+          totalLiabilities: "0",
+        }),
+      ],
+      display
+    )
+
+    assert.equal(slices[0]?.assetsValue, 0)
+    assert.equal(slices[0]?.debtValue, 50)
+    assert.equal(slices[0]?.assetsPercent, 0)
+    assert.equal(slices[0]?.debtPercent, 100)
+    assert.equal(slices[0]?.percentLabel, "100% deuda")
+  })
+
+  it("keeps every share between 0 and 100 with negative balances", () => {
+    const slices = buildRingStackSlices(
+      [
+        institutionItem({
+          id: "a",
+          name: "Banco A",
+          netWorth: "-80",
+          totalAssets: "0",
+          totalLiabilities: "80",
+        }),
+        institutionItem({
+          id: "b",
+          name: "Banco B",
+          netWorth: "-20",
+          totalAssets: "0",
+          totalLiabilities: "20",
+        }),
+      ],
+      display
+    )
+
+    for (const slice of slices) {
+      assert.ok(slice.assetsPercent >= 0 && slice.assetsPercent <= 100)
+      assert.ok(slice.debtPercent >= 0 && slice.debtPercent <= 100)
+      assert.ok(slice.percent >= 0 && slice.percent <= 100)
+    }
+    assert.deepEqual(
+      slices.map((slice) => slice.debtPercent),
+      [80, 20]
+    )
   })
 
   it("sums cash balances as decimals", () => {
@@ -190,6 +299,9 @@ describe("buildRingStackSlices", () => {
     assert.equal(slices[0]?.debtValue, 50)
     assert.equal(slices[0]?.signedValue, 50)
     assert.equal(slices[0]?.percent, 100)
+    assert.equal(slices[0]?.assetsPercent, 100)
+    assert.equal(slices[0]?.debtPercent, 100)
+    assert.equal(slices[0]?.percentLabel, "100% activos · 100% deuda")
     assert.match(slices[0]?.debtLabel ?? "", /50/)
   })
 
@@ -220,6 +332,9 @@ describe("buildRingStackSlices", () => {
     assert.equal(slices[0]?.signedValue, -80)
     assert.equal(slices[0]?.assetsValue, 0)
     assert.equal(slices[0]?.debtValue, 80)
+    assert.equal(slices[0]?.assetsPercent, 0)
+    assert.equal(slices[0]?.debtPercent, 100)
+    assert.equal(slices[0]?.percentLabel, "100% deuda")
     assert.match(slices[0]?.debtLabel ?? "", /80/)
   })
 
@@ -321,34 +436,78 @@ describe("buildRingStackSlices", () => {
   })
 })
 
+describe("hasDrawableRingBalance", () => {
+  it("is false when every ring is zero or unmeasured", () => {
+    const slices = buildRingStackSlices(
+      [
+        institutionItem({ id: "a", name: "Sin balance", netWorth: null }),
+        cashItem({ id: "c", name: "Cero", balance: "0" }),
+      ],
+      display
+    )
+
+    assert.equal(hasDrawableRingBalance(slices), false)
+  })
+
+  it("is true when any ring has assets or debt", () => {
+    const slices = buildRingStackSlices(
+      [
+        institutionItem({
+          id: "a",
+          name: "Banco A",
+          netWorth: "-10",
+          totalAssets: "0",
+          totalLiabilities: "10",
+        }),
+      ],
+      display
+    )
+
+    assert.equal(hasDrawableRingBalance(slices), true)
+  })
+})
+
+function cashInstitutionItem(totalBase: string) {
+  return {
+    ...institutionItem({ id: "cash", name: "Efectivo", netWorth: null }),
+    institution: {
+      id: "cash",
+      name: "Efectivo",
+      type: "cash" as const,
+      color: null,
+      logoUrl: null,
+      country: "DO",
+      isActive: true,
+      isSystem: true,
+    },
+    cash: {
+      totalBase,
+      baseCurrency: "DOP",
+      rateDate: "2026-10-15",
+      status: "COMPLETE" as const,
+      byCurrency: [],
+    },
+  }
+}
+
 describe("cash institution ring", () => {
   it("sizes the Efectivo ring from the converted cash total", () => {
-    const item = {
-      ...institutionItem({ id: "cash", name: "Efectivo", netWorth: null }),
-      institution: {
-        id: "cash",
-        name: "Efectivo",
-        type: "cash" as const,
-        color: null,
-        logoUrl: null,
-        country: "DO",
-        isActive: true,
-        isSystem: true,
-      },
-      cash: {
-        totalBase: "1600",
-        baseCurrency: "DOP",
-        rateDate: "2026-10-15",
-        status: "COMPLETE" as const,
-        byCurrency: [],
-      },
-    }
-
-    const slices = buildRingStackSlices([item], display)
+    const slices = buildRingStackSlices([cashInstitutionItem("1600")], display)
     const slice = slices.find((entry) => entry.key === "institution-cash")
 
     assert.equal(slice?.assetsValue, 1600)
     assert.equal(slice?.percent, 100)
     assert.equal(slice?.amountLabel, "DOP $1,600")
+  })
+
+  it("moves a negative Efectivo total to the debt group", () => {
+    const slices = buildRingStackSlices([cashInstitutionItem("-1600")], display)
+    const slice = slices.find((entry) => entry.key === "institution-cash")
+
+    assert.equal(slice?.signedValue, -1600)
+    assert.equal(slice?.assetsValue, 0)
+    assert.equal(slice?.debtValue, 1600)
+    assert.equal(slice?.debtPercent, 100)
+    assert.equal(slice?.percentLabel, "100% deuda")
   })
 })

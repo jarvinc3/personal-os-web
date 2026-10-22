@@ -2,15 +2,24 @@ export type FinanceMoneyDisplay = {
   currency: string
   showCents: boolean
   compactNumbers: boolean
+  /** Locale for digits, separators and the date labels beside the amount. */
+  locale: string
   /** When true, prefixes `+` / `-` before the currency code (e.g. `+DOP $10`). */
   leadingSign?: boolean
 }
 
 /** Digits and a single decimal point. Commas become dots. Letters are dropped. */
 export function sanitizeAmountInput(value: string): string {
+  const cleaned = value.replace(/[^\d.,]/g, "")
+  if (cleaned.includes(",") && cleaned.includes(".")) {
+    return sanitizeWithDecimalSeparatorLast(cleaned)
+  }
+  const normalized = isThousandsSeparated(cleaned)
+    ? cleaned.replaceAll(",", "")
+    : cleaned.replaceAll(",", ".")
   let seenDot = false
   let next = ""
-  for (const char of value.replace(/,/g, ".")) {
+  for (const char of normalized) {
     if (char >= "0" && char <= "9") {
       next += char
       continue
@@ -21,6 +30,27 @@ export function sanitizeAmountInput(value: string): string {
     }
   }
   return next
+}
+
+/**
+ * `1.234,56` and `1,234.56` both mean the same: the separator closest to the
+ * digits is the decimal one and the other groups thousands.
+ */
+function sanitizeWithDecimalSeparatorLast(value: string): string {
+  const decimalIndex = Math.max(value.lastIndexOf(","), value.lastIndexOf("."))
+  const integerDigits = value.slice(0, decimalIndex).replace(/[.,]/g, "")
+  const decimalDigits = value.slice(decimalIndex + 1).replace(/[.,]/g, "")
+  return `${integerDigits}.${decimalDigits}`
+}
+
+/**
+ * `1,234,567.89` groups thousands; `1,50` is a decimal comma. A comma followed
+ * by exactly three digits is grouping, never a decimal separator.
+ */
+const THOUSANDS_SEPARATED = /^\d{1,3}(,\d{3})+(\.\d*)?$/
+
+function isThousandsSeparated(value: string): boolean {
+  return THOUSANDS_SEPARATED.test(value)
 }
 
 export function parseFinanceMoney(
@@ -35,6 +65,9 @@ export function parseFinanceMoney(
   const trimmed = value.trim()
   if (!trimmed) {
     return null
+  }
+  if (THOUSANDS_SEPARATED.test(trimmed)) {
+    return parseFinanceMoney(trimmed.replaceAll(",", ""))
   }
   const parsed = Number(trimmed)
   return Number.isFinite(parsed) ? parsed : null
@@ -98,7 +131,7 @@ export function formatFinanceMoney(
       return "—"
     }
 
-    const formattedAmount = new Intl.NumberFormat("en-US", {
+    const formattedAmount = new Intl.NumberFormat(display.locale, {
       style: "decimal",
       minimumFractionDigits: display.showCents ? 2 : 0,
       maximumFractionDigits: display.showCents ? 2 : 0,
@@ -129,13 +162,14 @@ export function formatCompactFinanceMoney(
  * where the currency is already spelled out beside every row.
  */
 export function formatCompactFinanceAmount(
-  value: string | number | null | undefined
+  value: string | number | null | undefined,
+  locale: string
 ): string {
   const amount = parseFinanceMoney(value)
   if (amount === null) {
     return "—"
   }
-  return new Intl.NumberFormat("en-US", {
+  return new Intl.NumberFormat(locale, {
     style: "decimal",
     notation: "compact",
     maximumFractionDigits: 0,

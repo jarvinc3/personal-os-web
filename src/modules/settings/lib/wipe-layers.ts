@@ -75,17 +75,20 @@ export type WipeLayerGroup = {
   layers: WipeLayerId[]
 }
 
+/** Layers that belong to Finanzas; a module wipe sends only these. */
+export const FINANCE_WIPE_LAYERS: readonly WipeLayerId[] = [
+  WIPE_LAYERS.FINANCE_LEDGER,
+  WIPE_LAYERS.FINANCE_BALANCES,
+  WIPE_LAYERS.FINANCE_PLANNING,
+  WIPE_LAYERS.FINANCE_CATEGORIES,
+  WIPE_LAYERS.FINANCE_CATALOG,
+  WIPE_LAYERS.FINANCE_EMAIL_CONNECTIONS,
+]
+
 export const WIPE_LAYER_GROUPS: WipeLayerGroup[] = [
   {
     title: "Finanzas",
-    layers: [
-      WIPE_LAYERS.FINANCE_LEDGER,
-      WIPE_LAYERS.FINANCE_BALANCES,
-      WIPE_LAYERS.FINANCE_PLANNING,
-      WIPE_LAYERS.FINANCE_CATEGORIES,
-      WIPE_LAYERS.FINANCE_CATALOG,
-      WIPE_LAYERS.FINANCE_EMAIL_CONNECTIONS,
-    ],
+    layers: [...FINANCE_WIPE_LAYERS],
   },
   { title: "Asistente IA", layers: [WIPE_LAYERS.AI_SESSIONS] },
   { title: "Notificaciones", layers: [WIPE_LAYERS.NOTIFICATIONS] },
@@ -135,4 +138,32 @@ export function applyWipeLayerToggle(
     }
   }
   return sortWipeLayers([...next])
+}
+
+/** Checkbox state of a group whose layers can be all, none or in between. */
+export function wipeGroupChecked(
+  layers: readonly WipeLayerId[],
+  selected: readonly WipeLayerId[]
+): boolean | "indeterminate" {
+  const count = layers.filter((layer) => selected.includes(layer)).length
+  if (count === 0) {
+    return false
+  }
+  if (count === layers.length) {
+    return true
+  }
+  return "indeterminate"
+}
+
+/** Applies one group checkbox change over every layer of the group. */
+export function toggleWipeGroupLayers(
+  current: readonly WipeLayerId[],
+  layers: readonly WipeLayerId[],
+  checked: boolean
+): WipeLayerId[] {
+  const order = checked ? layers : [...layers].reverse()
+  return order.reduce<WipeLayerId[]>(
+    (next, layer) => applyWipeLayerToggle(next, layer, checked),
+    [...current]
+  )
 }

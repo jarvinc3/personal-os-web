@@ -107,6 +107,19 @@ describe("buildCreateAccountBody", () => {
     assert.equal(result.ok, false)
   })
 
+  it("drops a chosen institution from a CASH account", () => {
+    const accountPayload = buildCreateAccountBody({
+      name: "Efectivo",
+      type: "CASH",
+      institutionId: "inst-bank-1",
+    })
+    assert.equal(accountPayload.ok, true)
+    if (!accountPayload.ok) {
+      return
+    }
+    assert.equal("institutionId" in accountPayload.body, false)
+  })
+
   it("sends institutionId and never a free-text institution name", () => {
     const result = buildCreateAccountBody({
       name: "Ahorros",

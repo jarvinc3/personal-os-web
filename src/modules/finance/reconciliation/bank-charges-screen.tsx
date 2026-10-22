@@ -19,7 +19,7 @@ export function BankChargesScreen() {
 
 function BankChargesScreenBody() {
   const router = useRouter()
-  const { isEnabled, config } = useFinanceEnabled()
+  const { isEnabled, config, formatLocale } = useFinanceEnabled()
 
   const handleBack = useCallback(() => {
     router.push(APP_ROUTES.app.financeProducts)
@@ -41,6 +41,7 @@ function BankChargesScreenBody() {
         currency: config.baseCurrency,
         showCents: config.display.showCents,
         compactNumbers: config.display.compactNumbers,
+        locale: formatLocale,
       }}
       today={todayDateInput()}
     />

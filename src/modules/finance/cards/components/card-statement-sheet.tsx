@@ -77,7 +77,10 @@ function MovementList({
         <SummaryItem
           key={movement.id}
           title={movementTitle(movement)}
-          description={formatCalendarDate(movement.transactionDate)}
+          description={formatCalendarDate(
+            movement.transactionDate,
+            display.locale
+          )}
           value={formatFinanceMoney(movement.ledgerAmount, {
             ...display,
             currency: movement.ledgerCurrency,
@@ -106,7 +109,7 @@ export function CardStatementSheet({
           moduleSlug: "finance",
           screen: "card-statement-detail",
           entityRef: { type: "card_statement", id: detail.statement.id },
-          entityLabel: `Corte ${formatCalendarDate(detail.statement.cycleEnd)}`,
+          entityLabel: `Corte ${formatCalendarDate(detail.statement.cycleEnd, display.locale)}`,
         }
       : null
   )
@@ -180,9 +183,9 @@ export function CardStatementSheet({
       description={
         detail
           ? joinPlanningCaption(
-              `Corte ${formatCalendarDate(detail.statement.cycleEnd)}`,
+              `Corte ${formatCalendarDate(detail.statement.cycleEnd, display.locale)}`,
               detail.statement.dueDate
-                ? `Vence ${formatCalendarDate(detail.statement.dueDate)}`
+                ? `Vence ${formatCalendarDate(detail.statement.dueDate, display.locale)}`
                 : undefined,
               FINANCE_CARD_STATEMENT_STATUS_LABEL[detail.statement.status]
             )

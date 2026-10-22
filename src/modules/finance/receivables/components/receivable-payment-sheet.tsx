@@ -8,7 +8,10 @@ import { DestinationTrigger } from "@/src/modules/finance/shared/components/pick
 import { CATALOG_NONE } from "@/src/modules/finance/shared/constants/catalog"
 import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
 import { useInstitutions } from "@/src/modules/finance/shared/hooks/use-institutions"
-import { useRecordReceivablePayment } from "@/src/modules/finance/shared/hooks/use-receivables"
+import {
+  useReceivables,
+  useRecordReceivablePayment,
+} from "@/src/modules/finance/shared/hooks/use-receivables"
 import { useDiscardChanges } from "@/src/modules/finance/shared/hooks/use-discard-changes"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import {
@@ -22,6 +25,7 @@ import {
   parseFinanceMoney,
 } from "@/src/modules/finance/shared/lib/money"
 import { buildReceivablePaymentBody } from "@/src/modules/finance/shared/lib/planning-payloads"
+import { receivableTargets } from "@/src/modules/finance/receivables/lib/receivable-targets"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
 import { Button } from "@/src/shared/components/ui/button"
 import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
@@ -85,6 +89,7 @@ export function ReceivablePaymentSheet({
   const createMutation = useRecordReceivablePayment()
   const accountsQuery = useAccounts(open)
   const institutionsQuery = useInstitutions(open)
+  const receivablesQuery = useReceivables(open)
   const activeAccounts = (accountsQuery.data ?? []).filter(
     (account) => account.isActive
   )
@@ -110,12 +115,6 @@ export function ReceivablePaymentSheet({
     onOpenChange,
   })
 
-  useEffect(() => {
-    if (open) {
-      reset({ ...EMPTY_FORM, paidAt: todayDateInput() })
-    }
-  }, [open, reset])
-
   const amount = useWatch({ control, name: "amount" })
   const parsedAmount = parseFinanceMoney(amount)
   const exceedsOutstanding =
@@ -125,11 +124,47 @@ export function ReceivablePaymentSheet({
   const [excessHandling, setExcessHandling] = useState<
     "EXTRA_INCOME" | "CREDIT_BALANCE" | "APPLY_TO_RECEIVABLE" | null
   >(null)
+  const [targetReceivableId, setTargetReceivableId] = useState<string | null>(
+    null
+  )
+  const targetOptions = receivableTargets({
+    receivables: receivablesQuery.data ?? [],
+    excludeId: receivableId,
+    currency,
+  })
+  const excessOptions = EXCESS_OPTIONS.filter(
+    (option) =>
+      option.value !== "APPLY_TO_RECEIVABLE" || targetOptions.length > 0
+  )
+  const targetMissing =
+    excessHandling === "APPLY_TO_RECEIVABLE" && targetReceivableId === null
   const excessAmount =
     parsedAmount !== null && outstanding !== undefined
       ? parsedAmount - outstanding
       : 0
   const amountError = errors.amount?.message
+  const receivableDisplay = {
+    ...display,
+    currency: currency ?? display.currency,
+  }
+
+  function clearExcessChoice() {
+    setExcessHandling(null)
+    setTargetReceivableId(null)
+  }
+
+  function handleOpenChange(next: boolean) {
+    if (!next) {
+      clearExcessChoice()
+    }
+    requestOpenChange(next)
+  }
+
+  useEffect(() => {
+    if (open) {
+      reset({ ...EMPTY_FORM, paidAt: todayDateInput() })
+    }
+  }, [open, reset])
 
   const submitForm = useMemo(
     () => createSheetSubmit(handleSubmit),
@@ -143,6 +178,9 @@ export function ReceivablePaymentSheet({
     const payload = buildReceivablePaymentBody({
       ...values,
       ...(excessHandling ? { excessHandling } : {}),
+      ...(excessHandling === "APPLY_TO_RECEIVABLE" && targetReceivableId
+        ? { targetReceivableId }
+        : {}),
     })
     if (!payload.ok) {
       appToast.error({ text1: payload.error })
@@ -154,6 +192,7 @@ export function ReceivablePaymentSheet({
         body: payload.body,
       })
       appToast.success({ text1: "Cobro registrado" })
+      clearExcessChoice()
       onOpenChange(false)
     } catch (error) {
       appToast.error({ text1: financeErrorMessage(error) })
@@ -164,7 +203,7 @@ export function ReceivablePaymentSheet({
     <>
       <BottomSheet
         open={open}
-        onOpenChange={requestOpenChange}
+        onOpenChange={handleOpenChange}
         pending={pending}
         title="Registrar cobro"
         description={
@@ -176,7 +215,7 @@ export function ReceivablePaymentSheet({
               type="button"
               variant="outline"
               className="flex-1"
-              onClick={() => requestOpenChange(false)}
+              onClick={() => handleOpenChange(false)}
             >
               <XIcon className="size-4 shrink-0" />
               Cancelar
@@ -187,7 +226,8 @@ export function ReceivablePaymentSheet({
               type="button"
               disabled={
                 createMutation.isPending ||
-                (exceedsOutstanding && excessHandling === null)
+                (exceedsOutstanding && excessHandling === null) ||
+                targetMissing
               }
               className="flex-1"
               onClick={onSubmit}
@@ -232,7 +272,7 @@ export function ReceivablePaymentSheet({
                 }
               >
                 <CoinsIcon className="size-4 shrink-0" />
-                {`Todo ${formatFinanceMoney(outstanding, display)}`}
+                {`Todo ${formatFinanceMoney(outstanding, receivableDisplay)}`}
               </Button>
               <Button
                 type="button"
@@ -252,13 +292,13 @@ export function ReceivablePaymentSheet({
           {exceedsOutstanding && outstanding !== undefined ? (
             <div className="flex flex-col gap-2 rounded-2xl border border-border p-3">
               <p className="text-sm font-semibold">
-                Sobra {formatFinanceMoney(excessAmount, display)}
+                Sobra {formatFinanceMoney(excessAmount, receivableDisplay)}
               </p>
               <p className="text-sm text-muted-foreground">
                 Elige qué hacer con la diferencia.
               </p>
               <div className="flex flex-wrap gap-2">
-                {EXCESS_OPTIONS.map((option) => {
+                {excessOptions.map((option) => {
                   const Icon = option.icon
                   return (
                     <Button
@@ -268,7 +308,10 @@ export function ReceivablePaymentSheet({
                         excessHandling === option.value ? "default" : "outline"
                       }
                       size="sm"
-                      onClick={() => setExcessHandling(option.value)}
+                      onClick={() => {
+                        setExcessHandling(option.value)
+                        setTargetReceivableId(null)
+                      }}
                     >
                       <Icon className="size-4 shrink-0" />
                       {option.label}
@@ -276,6 +319,36 @@ export function ReceivablePaymentSheet({
                   )
                 })}
               </div>
+              {excessHandling === "APPLY_TO_RECEIVABLE" ? (
+                <div className="flex flex-col gap-2">
+                  <p className="text-sm font-medium">Cobro que recibe</p>
+                  {targetOptions.map((option) => (
+                    <Button
+                      key={option.id}
+                      type="button"
+                      variant={
+                        targetReceivableId === option.id ? "default" : "outline"
+                      }
+                      size="sm"
+                      className="justify-between"
+                      onClick={() => setTargetReceivableId(option.id)}
+                    >
+                      <span className="truncate">{option.debtorName}</span>
+                      <span className="tabular-nums">
+                        {formatFinanceMoney(
+                          String(option.pending),
+                          receivableDisplay
+                        )}
+                      </span>
+                    </Button>
+                  ))}
+                  {targetMissing ? (
+                    <p className="text-xs text-muted-foreground">
+                      Elige el cobro que recibe la diferencia.
+                    </p>
+                  ) : null}
+                </div>
+              ) : null}
             </div>
           ) : null}
           <Controller

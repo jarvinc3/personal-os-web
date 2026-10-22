@@ -1,90 +1,62 @@
 "use client"
 
-import {
-  BrandLogo,
-  CardNetworkMark,
-} from "@/src/modules/finance/shared/components/brand-logo"
 import { FinanceGate } from "@/src/modules/finance/finance-gate"
 import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
 import { MissingRecord } from "@/src/modules/finance/shared/components/layout/missing-record"
-import { LinkTransactionSheet } from "@/src/modules/finance/transactions/components/link-transaction-sheet"
+import { DeleteRecordDialog } from "@/src/modules/finance/shared/components/delete-record-dialog"
+import { RecordOptionsSheet } from "@/src/modules/finance/shared/components/record-options-sheet"
+import { showUndoToast } from "@/src/modules/finance/shared/components/undo-toast"
+import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
+import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
 import { useUnlinkTransaction } from "@/src/modules/finance/shared/hooks/use-transaction-link"
 import {
   useConfirmTransaction,
+  useConfirmTransfer,
   useDeleteTransaction,
   useMarkNotDuplicate,
   useMergeTransaction,
   useRestoreTransaction,
   useReverseTransaction,
+  useReverseTransfer,
   useTransaction,
   useUnconfirmTransaction,
+  useUnconfirmTransfer,
 } from "@/src/modules/finance/shared/hooks/use-transactions"
-import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
 import {
   financeErrorMessage,
   financeLoadErrorMessage,
 } from "@/src/modules/finance/shared/lib/finance-error"
-import { showUndoToast } from "@/src/modules/finance/shared/components/undo-toast"
-import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
-import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 import {
-  canReverseTransaction,
+  formatFinanceMoney,
+  type FinanceMoneyDisplay,
+} from "@/src/modules/finance/shared/lib/money"
+import {
   formatTransactionDate,
   isTransferTransaction,
-  movementSign,
-  transferDirectionLabel,
 } from "@/src/modules/finance/shared/lib/transactions-query"
-import {
-  FINANCE_TRANSACTION_STATUS_LABEL,
-  FINANCE_TRANSACTION_TYPE_LABEL,
-  type FinanceTransaction,
-  type FinanceTransactionType,
-} from "@/src/modules/finance/shared/types/entities"
-import { DeleteRecordDialog } from "@/src/modules/finance/shared/components/delete-record-dialog"
-import { RecordOptionsSheet } from "@/src/modules/finance/shared/components/record-options-sheet"
+import { LinkTransactionSheet } from "@/src/modules/finance/transactions/components/link-transaction-sheet"
+import { TransactionConfirmAlert } from "@/src/modules/finance/transactions/components/transaction-confirm-alert"
+import { TransactionDetailActions } from "@/src/modules/finance/transactions/components/transaction-detail-actions"
+import { TransactionDetailFacts } from "@/src/modules/finance/transactions/components/transaction-detail-facts"
+import { TransactionDetailLinks } from "@/src/modules/finance/transactions/components/transaction-detail-links"
+import { TransactionReversalNotice } from "@/src/modules/finance/transactions/components/transaction-reversal-notice"
+import { canEditTransaction } from "@/src/modules/finance/transactions/lib/transaction-edit"
+import { ChatLauncherButton, useRegisterChatContext } from "@/src/modules/ai"
 import { LoadingView } from "@/src/shared/components/layout/loading-view"
-import { SettingsSection } from "@/src/shared/components/layout/settings-section"
 import { Button } from "@/src/shared/components/ui/button"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/src/shared/components/ui/alert-dialog"
-import { Spinner } from "@/src/shared/components/ui/spinner"
-import { SummaryItem, SummarySection } from "@/src/shared/components/ui/summary"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
-import { ChatLauncherButton, useRegisterChatContext } from "@/src/modules/ai"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { ACCENT_FALLBACK_COLOR } from "@/src/shared/lib/accent-gradient"
 import { appToast } from "@/src/shared/lib/app-toast"
 import {
   ArrowLeftRightIcon,
-  CopyIcon,
-  ExternalLinkIcon,
-  GitMergeIcon,
-  LinkIcon,
   MoreVerticalIcon,
   PencilIcon,
-  RotateCcwIcon,
-  TargetIcon,
   Trash2Icon,
-  UnlinkIcon,
-  XIcon,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useMemo, useState } from "react"
-
-import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
-import {
-  canEditTransaction,
-  canUnlockTransaction,
-} from "@/src/modules/finance/transactions/lib/transaction-edit"
 
 type FinanceTransactionDetailProps = {
   transactionId: string
@@ -100,42 +72,64 @@ export function TransactionDetailScreen({
   )
 }
 
-function typeLabel(type: string): string {
-  if (type in FINANCE_TRANSACTION_TYPE_LABEL) {
-    return FINANCE_TRANSACTION_TYPE_LABEL[type as FinanceTransactionType]
-  }
-  return type
-}
-
-function canConfirm(transaction: FinanceTransaction): boolean {
-  return transaction.status === "PENDING"
-}
-
-function canUnlock(transaction: FinanceTransaction): boolean {
-  return (
-    !isTransferTransaction(transaction) && canUnlockTransaction(transaction)
-  )
-}
-
 function TransactionDetailScreenBody({
   transactionId,
 }: FinanceTransactionDetailProps) {
   const router = useRouter()
-  const { isEnabled, config } = useFinanceEnabled()
+  const { isEnabled, config, formatLocale } = useFinanceEnabled()
   const display: FinanceMoneyDisplay = {
     currency: config.baseCurrency,
     showCents: config.display.showCents,
     compactNumbers: config.display.compactNumbers,
+    locale: formatLocale,
   }
 
   const detailQuery = useTransaction(isEnabled, transactionId)
   const confirmMutation = useConfirmTransaction()
+  const confirmTransferMutation = useConfirmTransfer()
   const unconfirmMutation = useUnconfirmTransaction()
+  const unconfirmTransferMutation = useUnconfirmTransfer()
   const reverseMutation = useReverseTransaction()
+  const reverseTransferMutation = useReverseTransfer()
   const unlinkMutation = useUnlinkTransaction()
   const deleteMutation = useDeleteTransaction()
   const mergeMutation = useMergeTransaction()
   const notDuplicateMutation = useMarkNotDuplicate()
+  const restoreMutation = useRestoreTransaction()
+  const { open: openOptionsSheet, setOpen: setOpenOptionsSheet } =
+    useSheetParam(FINANCE_SHEET_KEYS.transactionOptions)
+
+  const tx = detailQuery.data
+
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  const [linkOpen, setLinkOpen] = useState(false)
+  const [mergeOpen, setMergeOpen] = useState(false)
+  const [unlinkOpen, setUnlinkOpen] = useState(false)
+  const [unconfirmOpen, setUnconfirmOpen] = useState(false)
+  const [reverseOpen, setReverseOpen] = useState(false)
+
+  useRegisterChatContext(
+    tx
+      ? {
+          moduleSlug: "finance",
+          screen: "transaction-detail",
+          entityRef: {
+            type: isTransferTransaction(tx) ? "transfer" : "transaction",
+            id: tx.id,
+          },
+          entityLabel: tx.description ?? tx.merchant ?? "Movimiento",
+        }
+      : null
+  )
+
+  const isMutating =
+    confirmMutation.isPending ||
+    confirmTransferMutation.isPending ||
+    unconfirmMutation.isPending ||
+    unconfirmTransferMutation.isPending ||
+    reverseMutation.isPending ||
+    reverseTransferMutation.isPending ||
+    deleteMutation.isPending
 
   async function onMerge() {
     if (!tx?.possibleDuplicateOfId) {
@@ -164,38 +158,21 @@ function TransactionDetailScreenBody({
       appToast.error({ text1: financeErrorMessage(error) })
     }
   }
-  const restoreMutation = useRestoreTransaction()
-  const { open: openOptionsSheet, setOpen: setOpenOptionsSheet } =
-    useSheetParam(FINANCE_SHEET_KEYS.transactionOptions)
-
-  const tx = detailQuery.data
-
-  useRegisterChatContext(
-    tx
-      ? {
-          moduleSlug: "finance",
-          screen: "transaction-detail",
-          entityRef: {
-            type: isTransferTransaction(tx) ? "transfer" : "transaction",
-            id: tx.id,
-          },
-          entityLabel: tx.description ?? tx.merchant ?? "Movimiento",
-        }
-      : null
-  )
-  const isMutating =
-    confirmMutation.isPending ||
-    unconfirmMutation.isPending ||
-    reverseMutation.isPending ||
-    deleteMutation.isPending
 
   async function onConfirm() {
     if (!tx) {
       return
     }
+    const isTransfer = isTransferTransaction(tx)
     try {
-      await confirmMutation.mutateAsync(tx.id)
-      appToast.success({ text1: "Movimiento confirmado" })
+      await (isTransfer
+        ? confirmTransferMutation.mutateAsync(tx.id)
+        : confirmMutation.mutateAsync(tx.id))
+      appToast.success({
+        text1: isTransfer
+          ? "Transferencia confirmada"
+          : "Movimiento confirmado",
+      })
     } catch (error) {
       appToast.error({ text1: financeErrorMessage(error) })
     }
@@ -205,9 +182,16 @@ function TransactionDetailScreenBody({
     if (!tx) {
       return
     }
+    const isTransfer = isTransferTransaction(tx)
     try {
-      await unconfirmMutation.mutateAsync(tx.id)
-      appToast.success({ text1: "Movimiento desbloqueado para editar" })
+      await (isTransfer
+        ? unconfirmTransferMutation.mutateAsync(tx.id)
+        : unconfirmMutation.mutateAsync(tx.id))
+      appToast.success({
+        text1: isTransfer
+          ? "Transferencia desbloqueada para editar"
+          : "Movimiento desbloqueado para editar",
+      })
     } catch (error) {
       appToast.error({ text1: financeErrorMessage(error) })
     }
@@ -217,18 +201,18 @@ function TransactionDetailScreenBody({
     if (!tx) {
       return
     }
+    const isTransfer = isTransferTransaction(tx)
     try {
-      await reverseMutation.mutateAsync(tx.id)
-      appToast.success({ text1: "Movimiento reversado" })
+      await (isTransfer
+        ? reverseTransferMutation.mutateAsync(tx.id)
+        : reverseMutation.mutateAsync(tx.id))
+      appToast.success({
+        text1: isTransfer ? "Transferencia reversada" : "Movimiento reversado",
+      })
     } catch (error) {
       appToast.error({ text1: financeErrorMessage(error) })
     }
   }
-
-  const [confirmOpen, setConfirmOpen] = useState(false)
-  const [linkOpen, setLinkOpen] = useState(false)
-  const [mergeOpen, setMergeOpen] = useState(false)
-  const [unlinkOpen, setUnlinkOpen] = useState(false)
 
   async function onUnlink() {
     if (!tx) {
@@ -308,6 +292,48 @@ function TransactionDetailScreenBody({
     )
   }
 
+  const affectedAccountLabel = tx.cardName
+    ? `la tarjeta ${tx.cardName}`
+    : tx.accountName
+      ? `la cuenta ${tx.accountName}`
+      : "la cuenta del movimiento"
+  const formattedAmount = formatFinanceMoney(tx.amount, {
+    ...display,
+    currency: tx.currency,
+  })
+
+  const options = [
+    ...(canEditTransaction(tx) && !isTransferTransaction(tx)
+      ? [
+          {
+            id: "edit",
+            title: "Editar movimiento",
+            icon: PencilIcon,
+            onPress: () =>
+              router.push(APP_ROUTES.app.financeTransactionEdit(tx.id)),
+          },
+        ]
+      : []),
+    ...(isTransferTransaction(tx) && tx.status === "PENDING"
+      ? [
+          {
+            id: "edit-transfer",
+            title: "Editar transferencia",
+            icon: PencilIcon,
+            onPress: () =>
+              router.push(APP_ROUTES.app.financeTransferEdit(tx.id)),
+          },
+        ]
+      : []),
+    {
+      id: "delete",
+      title: "Eliminar",
+      icon: Trash2Icon,
+      destructive: true,
+      onPress: () => setConfirmOpen(true),
+    },
+  ]
+
   return (
     <>
       {detailQuery.error ? (
@@ -320,401 +346,115 @@ function TransactionDetailScreenBody({
         </div>
       ) : null}
 
-      {tx.possibleDuplicateOfId ? (
-        <div className="mx-4 mb-3">
-          <SummarySection title="¿Duplicado?" icon={CopyIcon}>
-            <p className="px-1 text-sm text-muted-foreground">
-              Puede ser el mismo hecho que otro movimiento.
-            </p>
-            <div className="flex gap-2 px-1">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                disabled={mergeMutation.isPending}
-                onClick={() => setMergeOpen(true)}
-              >
-                <GitMergeIcon className="size-4 shrink-0" />
-                Unir
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                disabled={notDuplicateMutation.isPending}
-                onClick={() => void onNotDuplicate()}
-              >
-                <XIcon className="size-4 shrink-0" />
-                No es duplicado
-              </Button>
-            </div>
-          </SummarySection>
-        </div>
-      ) : null}
+      <TransactionDetailLinks
+        transaction={tx}
+        merging={mergeMutation.isPending}
+        markingNotDuplicate={notDuplicateMutation.isPending}
+        unlinking={unlinkMutation.isPending}
+        onOpenMerge={() => setMergeOpen(true)}
+        onMarkNotDuplicate={() => void onNotDuplicate()}
+        onOpenLink={() => setLinkOpen(true)}
+        onOpenUnlink={() => setUnlinkOpen(true)}
+      />
 
-      {!isTransferTransaction(tx) ? (
-        <div className="mx-4 mb-3">
-          <SummarySection title="Planificación" icon={TargetIcon}>
-            {tx.planningLink ? (
-              <>
-                <p className="px-1 text-sm font-medium">
-                  {tx.planningLink.label}
-                </p>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="self-start"
-                  disabled={unlinkMutation.isPending}
-                  onClick={() => setUnlinkOpen(true)}
-                >
-                  <UnlinkIcon className="size-4 shrink-0" />
-                  Quitar vínculo
-                </Button>
-              </>
-            ) : (
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="self-start"
-                onClick={() => setLinkOpen(true)}
-              >
-                <LinkIcon className="size-4 shrink-0" />
-                Vincular a cuota, cobro o meta
-              </Button>
-            )}
-          </SummarySection>
-        </div>
-      ) : null}
-
-      {tx.status === "REVERSED" ? (
-        <div className="mx-4 mb-3">
-          <SummarySection title="Revertido" icon={RotateCcwIcon}>
-            <p className="px-1 text-sm text-muted-foreground">
-              {tx.source === "EMAIL"
-                ? "El banco devolvió este movimiento y el saldo volvió a su lugar."
-                : "El saldo de este movimiento volvió a su lugar."}
-            </p>
-            {tx.linkedTransactionId ? (
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="self-start"
-                onClick={() =>
-                  router.push(
-                    APP_ROUTES.app.financeTransaction(tx.linkedTransactionId!)
-                  )
-                }
-              >
-                <ExternalLinkIcon className="size-4 shrink-0" />
-                Ver movimiento original
-              </Button>
-            ) : null}
-          </SummarySection>
-        </div>
-      ) : null}
+      <TransactionReversalNotice
+        transaction={tx}
+        onOpenOriginal={(id) =>
+          router.push(APP_ROUTES.app.financeTransaction(id))
+        }
+      />
 
       <div className="mx-4 flex flex-col gap-3">
         <p className="text-sm text-muted-foreground">
-          {formatTransactionDate(tx.transactionDate)}
+          {formatTransactionDate(tx.transactionDate, display.locale)}
         </p>
 
-        <SettingsSection title="Detalle">
-          <SummaryItem
-            title="Monto"
-            value={
-              tx.type === "ADJUSTMENT"
-                ? `${movementSign(tx) ?? ""} ${formatFinanceMoney(tx.amount, {
-                    ...display,
-                    currency: tx.currency,
-                  })}`.trim()
-                : formatFinanceMoney(tx.amount, {
-                    ...display,
-                    currency: tx.currency,
-                  })
-            }
-            isLast={false}
-            className="px-3"
-          />
-          <SummaryItem
-            title="En moneda base"
-            value={formatFinanceMoney(tx.amountBaseCurrency, display)}
-            isLast={false}
-            className="px-3"
-          />
-          <SummaryItem
-            title="Tipo"
-            value={typeLabel(tx.type)}
-            isLast={false}
-            className="px-3"
-          />
-          <SummaryItem
-            title="Estado"
-            value={FINANCE_TRANSACTION_STATUS_LABEL[tx.status] ?? tx.status}
-            isLast={false}
-            className="px-3"
-          />
-          {isTransferTransaction(tx) ? (
-            <>
-              <SummaryItem
-                title="Origen"
-                value={tx.accountName ?? tx.cardName ?? "—"}
-                leading={
-                  <span className="inline-flex items-center gap-1">
-                    <BrandLogo
-                      name={tx.accountName ?? tx.cardName ?? "Origen"}
-                      logoUrl={tx.institutionLogoUrl}
-                      size={28}
-                    />
-                    {tx.cardId ? (
-                      <CardNetworkMark
-                        network={tx.network}
-                        logoUrl={tx.networkLogoUrl}
-                        size={28}
-                      />
-                    ) : null}
-                  </span>
-                }
-                isLast={false}
-                className="px-3"
-              />
-              <SummaryItem
-                title="Destino"
-                value={tx.transferToAccountName ?? tx.transferToCardName ?? "—"}
-                leading={
-                  <span className="inline-flex items-center gap-1">
-                    <BrandLogo
-                      name={
-                        tx.transferToAccountName ??
-                        tx.transferToCardName ??
-                        "Destino"
-                      }
-                      logoUrl={tx.transferToInstitutionLogoUrl}
-                      size={28}
-                    />
-                    {tx.transferToCardId ? (
-                      <CardNetworkMark
-                        network={tx.transferToNetwork}
-                        logoUrl={tx.transferToNetworkLogoUrl}
-                        size={28}
-                      />
-                    ) : null}
-                  </span>
-                }
-                isLast={false}
-                className="px-3"
-              />
-              <SummaryItem
-                title="Ruta"
-                value={transferDirectionLabel(tx)}
-                isLast={false}
-                className="px-3"
-              />
-            </>
-          ) : (
-            <>
-              <SummaryItem
-                title="Cuenta"
-                value={tx.accountName ?? "—"}
-                leading={
-                  tx.accountId ? (
-                    <BrandLogo
-                      name={tx.accountName ?? "Cuenta"}
-                      logoUrl={tx.institutionLogoUrl}
-                      size={28}
-                    />
-                  ) : undefined
-                }
-                isLast={false}
-                className="px-3"
-              />
-              <SummaryItem
-                title="Tarjeta"
-                value={tx.cardName ?? "—"}
-                leading={
-                  tx.cardId ? (
-                    <span className="inline-flex items-center gap-1">
-                      <BrandLogo
-                        name={tx.cardName ?? "Tarjeta"}
-                        logoUrl={tx.institutionLogoUrl}
-                        size={28}
-                      />
-                      <CardNetworkMark
-                        network={tx.network}
-                        logoUrl={tx.networkLogoUrl}
-                        size={28}
-                      />
-                    </span>
-                  ) : undefined
-                }
-                isLast={false}
-                className="px-3"
-              />
-            </>
-          )}
-          <SummaryItem
-            title="Comercio"
-            value={tx.merchantName ?? tx.merchant ?? "—"}
-            leading={
-              tx.merchantLogoUrl ? (
-                <BrandLogo
-                  name={tx.merchantName ?? tx.merchant ?? "Comercio"}
-                  logoUrl={tx.merchantLogoUrl}
-                  size={28}
-                />
-              ) : undefined
-            }
-            description={
-              tx.merchantName && tx.merchant ? tx.merchant : undefined
-            }
-            isLast={false}
-            className="px-3"
-          />
-          <SummaryItem
-            title="Descripción"
-            value={tx.description ?? "—"}
-            isLast
-            className="px-3"
-          />
-        </SettingsSection>
+        <TransactionDetailFacts transaction={tx} display={display} />
 
-        {canConfirm(tx) || canReverseTransaction(tx) || canUnlock(tx) ? (
-          <div className="flex flex-col gap-2 sm:flex-row">
-            {canConfirm(tx) ? (
-              <Button
-                type="button"
-                disabled={isMutating}
-                onClick={() => void onConfirm()}
-              >
-                {confirmMutation.isPending ? (
-                  <Spinner data-icon="inline-start" />
-                ) : null}
-                Confirmar
-              </Button>
-            ) : null}
-            {canUnlock(tx) ? (
-              <Button
-                type="button"
-                variant="outline"
-                disabled={isMutating}
-                onClick={() => void onUnconfirm()}
-              >
-                {unconfirmMutation.isPending ? (
-                  <Spinner data-icon="inline-start" />
-                ) : null}
-                Marcar como pendiente
-              </Button>
-            ) : null}
-            {canReverseTransaction(tx) ? (
-              <Button
-                type="button"
-                variant="outline"
-                disabled={isMutating}
-                onClick={() => void onReverse()}
-              >
-                {reverseMutation.isPending ? (
-                  <Spinner data-icon="inline-start" />
-                ) : null}
-                Reversar
-              </Button>
-            ) : null}
-          </div>
-        ) : null}
+        <TransactionDetailActions
+          transaction={tx}
+          busy={isMutating}
+          confirming={
+            confirmMutation.isPending || confirmTransferMutation.isPending
+          }
+          unconfirming={
+            unconfirmMutation.isPending || unconfirmTransferMutation.isPending
+          }
+          reversing={
+            reverseMutation.isPending || reverseTransferMutation.isPending
+          }
+          onConfirm={() => void onConfirm()}
+          onUnconfirm={() => setUnconfirmOpen(true)}
+          onReverse={() => setReverseOpen(true)}
+        />
       </div>
 
       <RecordOptionsSheet
         open={openOptionsSheet}
         onOpenChange={setOpenOptionsSheet}
-        description={formatTransactionDate(tx.transactionDate)}
-        options={[
-          ...(canEditTransaction(tx) && !isTransferTransaction(tx)
-            ? [
-                {
-                  id: "edit",
-                  title: "Editar movimiento",
-                  icon: PencilIcon,
-                  onPress: () =>
-                    router.push(APP_ROUTES.app.financeTransactionEdit(tx.id)),
-                },
-              ]
-            : []),
-          ...(isTransferTransaction(tx)
-            ? [
-                {
-                  id: "edit-transfer",
-                  title: "Editar transferencia",
-                  icon: PencilIcon,
-                  onPress: () =>
-                    router.push(APP_ROUTES.app.financeTransferEdit(tx.id)),
-                },
-              ]
-            : []),
-          {
-            id: "delete",
-            title: "Eliminar",
-            icon: Trash2Icon,
-            destructive: true,
-            onPress: () => setConfirmOpen(true),
-          },
-        ]}
+        description={formatTransactionDate(tx.transactionDate, display.locale)}
+        options={options}
       />
 
       <DeleteRecordDialog
         open={confirmOpen}
         onOpenChange={setConfirmOpen}
-        recordName={tx.merchant ?? tx.description ?? "Movimiento"}
+        recordName={tx.description ?? tx.merchant ?? "Movimiento"}
         pending={deleteMutation.isPending}
-        consequences="El saldo de la cuenta se corrige. No se puede deshacer."
+        consequences={`Se elimina ${formatFinanceMoney(tx.amount, {
+          ...display,
+          currency: tx.currency,
+        })}. El saldo de la cuenta se corrige y no se puede deshacer.`}
         onConfirm={() => void onDelete()}
       />
 
-      <AlertDialog open={mergeOpen} onOpenChange={setMergeOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>¿Unir los movimientos?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Los dos movimientos se unen en uno. No se puede deshacer.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={mergeMutation.isPending}>
-              Cancelar
-            </AlertDialogCancel>
-            <AlertDialogAction
-              variant="destructive"
-              disabled={mergeMutation.isPending}
-              onClick={() => void onMerge()}
-            >
-              Unir
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <TransactionConfirmAlert
+        open={unconfirmOpen}
+        onOpenChange={setUnconfirmOpen}
+        title="¿Marcar como pendiente?"
+        description={`${formattedAmount} deja de contar en el saldo de ${affectedAccountLabel} hasta que se confirme otra vez.`}
+        confirmLabel="Marcar pendiente"
+        pending={
+          unconfirmMutation.isPending || unconfirmTransferMutation.isPending
+        }
+        onConfirm={() => {
+          setUnconfirmOpen(false)
+          void onUnconfirm()
+        }}
+      />
 
-      <AlertDialog open={unlinkOpen} onOpenChange={setUnlinkOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>¿Quitar el vínculo?</AlertDialogTitle>
-            <AlertDialogDescription>
-              El movimiento deja de estar ligado a la planificación.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={unlinkMutation.isPending}>
-              Cancelar
-            </AlertDialogCancel>
-            <AlertDialogAction
-              variant="destructive"
-              disabled={unlinkMutation.isPending}
-              onClick={() => void onUnlink()}
-            >
-              Quitar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <TransactionConfirmAlert
+        open={reverseOpen}
+        onOpenChange={setReverseOpen}
+        title="¿Reversar el movimiento?"
+        description={`Se crea el asiento contrario de ${formattedAmount}. El saldo de ${affectedAccountLabel} se corrige y no se puede deshacer.`}
+        confirmLabel="Reversar"
+        pending={reverseMutation.isPending || reverseTransferMutation.isPending}
+        onConfirm={() => {
+          setReverseOpen(false)
+          void onReverse()
+        }}
+      />
+
+      <TransactionConfirmAlert
+        open={mergeOpen}
+        onOpenChange={setMergeOpen}
+        title="¿Unir los movimientos?"
+        description="Los dos movimientos se unen en uno. No se puede deshacer."
+        confirmLabel="Unir"
+        pending={mergeMutation.isPending}
+        onConfirm={() => void onMerge()}
+      />
+
+      <TransactionConfirmAlert
+        open={unlinkOpen}
+        onOpenChange={setUnlinkOpen}
+        title="¿Quitar el vínculo?"
+        description="El movimiento deja de estar ligado a la planificación."
+        confirmLabel="Quitar"
+        pending={unlinkMutation.isPending}
+        onConfirm={() => void onUnlink()}
+      />
 
       <LinkTransactionSheet
         open={linkOpen}

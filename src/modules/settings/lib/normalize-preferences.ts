@@ -1,4 +1,5 @@
 import { DEFAULT_USER_PREFERENCES } from "@/src/modules/settings/constants/user-settings-defaults"
+import { migrateUserPreferences } from "@/src/modules/settings/lib/migrate-preferences"
 import { mergeWithDefaults } from "@/src/modules/settings/lib/settings-value"
 import type { UserPreferences } from "@/src/modules/settings/types/profile.types"
 
@@ -21,8 +22,10 @@ export function normalizeUserPreferences(
     ) as UserPreferences
   }
 
-  return mergeWithDefaults(
-    raw as Record<string, unknown>,
-    DEFAULT_USER_PREFERENCES as unknown as Record<string, unknown>
-  ) as UserPreferences
+  return migrateUserPreferences(
+    mergeWithDefaults(
+      raw as Record<string, unknown>,
+      DEFAULT_USER_PREFERENCES as unknown as Record<string, unknown>
+    ) as UserPreferences
+  )
 }

@@ -1,6 +1,7 @@
 export { SettingsGate } from "@/src/modules/settings/settings-gate"
 export { SETTINGS_REGISTRY } from "@/src/modules/settings/constants/settings-metadata"
 export { EditQuietHoursSheet } from "@/src/modules/settings/components/sheets/edit-quiet-hours-sheet"
+export { WipeDataSheet } from "@/src/modules/settings/components/sheets/wipe-data-sheet"
 export { normalizeUserPreferences } from "@/src/modules/settings/lib/normalize-preferences"
 export { isWithinQuietHours } from "@/src/modules/settings/lib/quiet-hours"
 export type {
@@ -14,6 +15,7 @@ export { PendingAccountDeletionHandler } from "@/src/modules/settings/components
 export { PendingDataWipeHandler } from "@/src/modules/settings/components/pending-data-wipe-handler"
 export { ReleaseNotes } from "@/src/modules/settings/components/release-notes"
 export { useApplyThemePreference } from "@/src/modules/settings/hooks/use-apply-theme-preference"
+export { useApplyAppearancePreference } from "@/src/modules/settings/hooks/use-apply-appearance-preference"
 export { useAiProviders } from "@/src/modules/settings/hooks/use-ai-providers"
 export { useDeleteAccount } from "@/src/modules/settings/hooks/use-delete-account"
 export { useModuleSheetEnable } from "@/src/modules/settings/hooks/use-module-sheet-enable"

@@ -7,8 +7,11 @@ import {
   currencyForTarget,
   formatCalendarDate,
   formatFinanceDateTimeLabel,
+  hasMoneyCentsInput,
   isLedgerTargetInput,
+  isMoneyAmountInput,
   isPositiveAmountInput,
+  isWithinMaxAmountInput,
   nowDateTimeInput,
   sliceDateInput,
   sliceDateTimeInput,
@@ -66,9 +69,15 @@ describe("sliceDateTimeInput", () => {
 })
 
 describe("wallClockToIso", () => {
-  it("marks the wall clock as UTC", () => {
-    assert.equal(wallClockToIso("2026-09-11T14:05"), "2026-09-11T14:05:00.000Z")
-    assert.equal(wallClockToIso("2026-09-11"), "2026-09-11T00:00:00.000Z")
+  it("turns the wall clock into the instant of the user's zone", () => {
+    assert.equal(
+      wallClockToIso("2026-09-11T14:05", "America/La_Paz"),
+      "2026-09-11T18:05:00.000Z"
+    )
+    assert.equal(
+      wallClockToIso("2026-09-11", "America/La_Paz"),
+      "2026-09-11T04:00:00.000Z"
+    )
   })
 })
 
@@ -86,17 +95,17 @@ describe("formatFinanceDateTimeLabel", () => {
       hour12: true,
     })
     assert.equal(
-      formatFinanceDateTimeLabel("2026-09-18T14:30:00.000Z"),
+      formatFinanceDateTimeLabel("2026-09-18T14:30:00.000Z", "es"),
       `${expectedDate}, ${expectedTime}`
     )
   })
 
   it("shows just the date for midnight or a date without an hour", () => {
     assert.equal(
-      formatFinanceDateTimeLabel("2026-09-18T00:00:00.000Z"),
+      formatFinanceDateTimeLabel("2026-09-18T00:00:00.000Z", "es"),
       expectedDate
     )
-    assert.equal(formatFinanceDateTimeLabel("2026-09-18"), expectedDate)
+    assert.equal(formatFinanceDateTimeLabel("2026-09-18", "es"), expectedDate)
   })
 })
 
@@ -107,14 +116,14 @@ describe("formatCalendarDate", () => {
       month: "short",
       day: "numeric",
     })
-    assert.equal(formatCalendarDate("2026-09-18T00:00:00.000Z"), expected)
-    assert.equal(formatCalendarDate("2026-09-18"), expected)
+    assert.equal(formatCalendarDate("2026-09-18T00:00:00.000Z", "es"), expected)
+    assert.equal(formatCalendarDate("2026-09-18", "es"), expected)
     assert.match(expected, /18/)
     assert.match(expected, /2026/)
   })
 
   it("returns the original string when the date slice is not YYYY-MM-DD", () => {
-    assert.equal(formatCalendarDate("not-a-date"), "not-a-date")
+    assert.equal(formatCalendarDate("not-a-date", "es"), "not-a-date")
   })
 })
 
@@ -171,5 +180,33 @@ describe("isLedgerTargetInput", () => {
       isLedgerTargetInput(encodeLedgerTarget("card", "card-1")),
       true
     )
+  })
+})
+
+describe("hasMoneyCentsInput", () => {
+  it("accepts whole amounts and up to two decimals", () => {
+    assert.equal(hasMoneyCentsInput("10"), true)
+    assert.equal(hasMoneyCentsInput("10.5"), true)
+    assert.equal(hasMoneyCentsInput("10.05"), true)
+  })
+
+  it("rejects a third decimal", () => {
+    assert.equal(hasMoneyCentsInput("10.005"), false)
+  })
+})
+
+describe("isWithinMaxAmountInput", () => {
+  it("accepts an amount on the ceiling and rejects the one above it", () => {
+    assert.equal(isWithinMaxAmountInput("999999999.99"), true)
+    assert.equal(isWithinMaxAmountInput("1000000000"), false)
+  })
+})
+
+describe("isMoneyAmountInput", () => {
+  it("requires cents, a positive value and the ceiling at once", () => {
+    assert.equal(isMoneyAmountInput("10.05"), true)
+    assert.equal(isMoneyAmountInput("10.005"), false)
+    assert.equal(isMoneyAmountInput("0"), false)
+    assert.equal(isMoneyAmountInput("99999999999"), false)
   })
 })

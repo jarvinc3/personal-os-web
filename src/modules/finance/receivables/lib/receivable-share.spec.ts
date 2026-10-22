@@ -20,6 +20,7 @@ import {
   shareSummaryLines,
   shareableReceivables,
   whatsAppShareHref,
+  whatsAppShareMessage,
 } from "./receivable-share.ts"
 
 const DISPLAY: FinanceMoneyDisplay = {
@@ -281,15 +282,54 @@ describe("maskShareUrl", () => {
 })
 
 describe("whatsAppShareHref", () => {
-  it("opens WhatsApp with the greeting and the link", () => {
+  const url = "https://personalos.app/c/abc"
+
+  it("writes the message from the lender with the approved format", () => {
+    const message = whatsAppShareMessage({
+      url,
+      debtorName: "Fernando Carmona",
+      count: 1,
+      pendingLabel: "DOP $9,650.00",
+    })
+
     assert.equal(
-      whatsAppShareHref({
-        url: "https://personalos.app/c/abc",
-        debtorName: "Carlos",
-      }),
-      `https://wa.me/?text=${encodeURIComponent(
-        "Hola Carlos, aquí puedes ver tus cobros: https://personalos.app/c/abc"
-      )}`
+      message,
+      [
+        "Hola Fernando \u{1F44B}",
+        "",
+        "Te comparto el detalle de lo que me debes (1 cobro) \u{1F9FE}",
+        "\u{1F4B0} Pendiente: *DOP $9,650.00*",
+        "",
+        `\u{1F449} ${url}`,
+        "",
+        "Ahí puedes ver cada cobro y lo que ya has abonado. ¡Gracias! \u{1F64C}",
+      ].join("\n")
+    )
+  })
+
+  it("counts several cobros and keeps currencies apart", () => {
+    const message = whatsAppShareMessage({
+      url,
+      debtorName: "Fernando Carmona",
+      count: 3,
+      pendingLabel: "DOP $9,650.00 + USD $120.00",
+    })
+
+    assert.match(message, /\(3 cobros\)/)
+    assert.match(message, /Pendiente: \*DOP \$9,650\.00 \+ USD \$120\.00\*/)
+  })
+
+  it("opens WhatsApp with that message encoded", () => {
+    const input = {
+      url,
+      debtorName: "Carlos Méndez",
+      count: 2,
+      pendingLabel: "DOP $5,500.00",
+    }
+
+    assert.equal(
+      whatsAppShareHref(input),
+      `https://wa.me/?text=${encodeURIComponent(whatsAppShareMessage(input))}`
     )
   })
 })

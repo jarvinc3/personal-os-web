@@ -14,7 +14,8 @@ import {
   RadioGroup,
   RadioGroupItem,
 } from "@/src/shared/components/ui/radio-group"
-import { SummarySection } from "@/src/shared/components/ui/summary"
+import { SummaryItem, SummarySection } from "@/src/shared/components/ui/summary"
+import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { getModule } from "@/src/shared/constants/module-registry"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
@@ -68,7 +69,6 @@ export function AgendaModuleSettingsForm({ onDone }: { onDone: () => void }) {
   })
 
   const defaultView = useWatch({ control, name: "defaultView" })
-  const weekStartsOn = useWatch({ control, name: "weekStartsOn" })
 
   const formValues = useMemo(
     () => ({
@@ -110,6 +110,7 @@ export function AgendaModuleSettingsForm({ onDone }: { onDone: () => void }) {
       },
       { isEnabled: moduleEnable.pendingEnabled }
     )
+    moduleEnable.markSaved()
     appToast.success({
       text1: "Agenda actualizada",
       text2: "Configuración guardada.",
@@ -123,6 +124,7 @@ export function AgendaModuleSettingsForm({ onDone }: { onDone: () => void }) {
         event.preventDefault()
         onSubmit()
       }}
+      submitEmphasis={moduleEnable.isEnabledDirty}
       submitLabel="Guardar"
       submitIcon={SaveIcon}
       isSubmitting={updateMutation.isPending}
@@ -134,6 +136,7 @@ export function AgendaModuleSettingsForm({ onDone }: { onDone: () => void }) {
         state={moduleEnable.state}
         accentColor={MODULE_ACCENT}
         isEnabled={moduleEnable.sheetEnabled}
+        pending={moduleEnable.isEnabledDirty}
         onEnabledChange={moduleEnable.handleEnabledChange}
         disabled={updateMutation.isPending}
       />
@@ -166,29 +169,15 @@ export function AgendaModuleSettingsForm({ onDone }: { onDone: () => void }) {
         </RadioGroup>
       </SummarySection>
       <SummarySection title="Semana inicia" icon={CalendarCog}>
-        <RadioGroup
-          value={weekStartsOn}
-          onValueChange={(v) =>
-            setValue("weekStartsOn", v as "0" | "1", { shouldDirty: true })
-          }
-        >
-          <OptionRow
-            icon={CalendarDays}
-            iconColor={MODULE_ACCENT}
-            label="Lunes"
-            selected={weekStartsOn === "1"}
-            onPress={() => setValue("weekStartsOn", "1", { shouldDirty: true })}
-            trailing={<RadioGroupItem value="1" />}
-          />
-          <OptionRow
-            icon={CalendarDays}
-            iconColor={MODULE_ACCENT}
-            label="Domingo"
-            selected={weekStartsOn === "0"}
-            onPress={() => setValue("weekStartsOn", "0", { shouldDirty: true })}
-            trailing={<RadioGroupItem value="0" />}
-          />
-        </RadioGroup>
+        <SummaryItem
+          href={APP_ROUTES.app.settingsRegional}
+          icon={CalendarCog}
+          accentColor={MODULE_ACCENT}
+          title="Primer día de la semana"
+          description="Se configura en Preferencias › Región."
+          showChevron
+          isLast
+        />
       </SummarySection>
       <SummarySection title="Preferencias" icon={Briefcase}>
         <Controller

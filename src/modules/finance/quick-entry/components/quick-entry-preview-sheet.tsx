@@ -8,6 +8,7 @@ import { appToast } from "@/src/shared/lib/app-toast"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
+import { useUserTimeZone } from "@/src/modules/settings/hooks/use-user-time-zone"
 import { FinanceDateField } from "@/src/modules/finance/shared/components/forms/date-field"
 import { FinanceSegmentedControl } from "@/src/modules/finance/shared/components/forms/form-blocks"
 import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
@@ -63,7 +64,7 @@ export function QuickEntryPreviewSheet({
   parseResult,
 }: QuickEntryPreviewSheetProps) {
   const router = useRouter()
-  const { config } = useFinanceEnabled()
+  const { config, formatLocale } = useFinanceEnabled()
   const accounts = useAccounts(open).data ?? []
   const cards = useCards(open).data ?? []
   const institutions = useInstitutions(open).data ?? []
@@ -71,6 +72,7 @@ export function QuickEntryPreviewSheet({
   const createTransaction = useCreateTransaction()
 
   const draft = parseResult?.draft ?? null
+  const timeZone = useUserTimeZone()
   const [type, setType] = useState<"DEBIT" | "CREDIT">(draft?.type ?? "DEBIT")
   const [amount, setAmount] = useState(draft?.amount ?? "")
   const [categoryId, setCategoryId] = useState(draft?.categoryId ?? "")
@@ -87,6 +89,7 @@ export function QuickEntryPreviewSheet({
     currency: config.baseCurrency,
     showCents: config.display.showCents,
     compactNumbers: config.display.compactNumbers,
+    locale: formatLocale,
   }
   const selectedCategory =
     categories.find((category) => category.id === categoryId) ?? null
@@ -116,7 +119,7 @@ export function QuickEntryPreviewSheet({
       type,
       amount,
       currency: draft?.currency,
-      transactionDate: wallClockToIso(date),
+      transactionDate: wallClockToIso(date, timeZone),
       merchant: merchant || undefined,
       description: description || undefined,
       categoryId: categoryId || undefined,

@@ -1,6 +1,7 @@
 "use client"
 
 import { chatMoneyDisplay } from "@/src/modules/ai/components/blocks/chat-money"
+import { useFormatLocale } from "@/src/modules/settings/hooks/use-format-locale"
 import type { ChatBlock } from "@/src/modules/ai/types/chat.types"
 import { formatFinanceMoney } from "@/src/modules/finance"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
@@ -12,19 +13,20 @@ type ChatLoanSummaryProps = {
   block: Extract<ChatBlock, { type: "loan_summary" }>
 }
 
-function formatDueDate(value: string): string {
+function formatDueDate(value: string, locale: string): string {
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) {
     return value
   }
-  return date.toLocaleDateString("es-DO", {
+  return date.toLocaleDateString(locale, {
     day: "numeric",
     month: "short",
   })
 }
 
 export function ChatLoanSummary({ block }: ChatLoanSummaryProps) {
-  const display = chatMoneyDisplay(block.currency)
+  const locale = useFormatLocale()
+  const display = chatMoneyDisplay(block.currency, locale)
   const installment = block.nextInstallment
 
   return (
@@ -43,7 +45,7 @@ export function ChatLoanSummary({ block }: ChatLoanSummaryProps) {
           <span className="block text-xs text-muted-foreground">
             Cuota {installment.installmentNo}:{" "}
             {formatFinanceMoney(installment.amount, display)} ·{" "}
-            {formatDueDate(installment.dueDate)}
+            {formatDueDate(installment.dueDate, locale)}
           </span>
         ) : null}
       </span>

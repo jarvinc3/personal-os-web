@@ -13,9 +13,11 @@ import { ModuleSectionLayout } from "@/src/shared/components/layout/module-secti
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { useQueryClient } from "@tanstack/react-query"
 import { useCallback, useEffect, type ReactNode } from "react"
+import { useUserTimeZone } from "@/src/modules/settings/hooks/use-user-time-zone"
 
 export function FinanceLayout({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient()
+  const timeZone = useUserTimeZone()
   const { isEnabled, emailSyncEnabled, isProfileLoading } = useFinanceEnabled()
 
   useEffect(() => {
@@ -26,12 +28,12 @@ export function FinanceLayout({ children }: { children: ReactNode }) {
     return scheduleIdle(() => {
       void prefetchFinanceCategories(queryClient)
       void prefetchFinancePlanning(queryClient)
-      void prefetchFinanceCurrentMonth(queryClient)
+      void prefetchFinanceCurrentMonth({ queryClient, timeZone })
       if (emailSyncEnabled) {
         void prefetchFinanceSync(queryClient)
       }
     })
-  }, [emailSyncEnabled, isEnabled, isProfileLoading, queryClient])
+  }, [emailSyncEnabled, isEnabled, isProfileLoading, queryClient, timeZone])
 
   const onItemPrefetch = useCallback(
     (href: string) => {
@@ -45,10 +47,10 @@ export function FinanceLayout({ children }: { children: ReactNode }) {
         void prefetchFinanceCategories(queryClient)
       }
       if (href === APP_ROUTES.app.financeTransactions) {
-        void prefetchFinanceCurrentMonth(queryClient)
+        void prefetchFinanceCurrentMonth({ queryClient, timeZone })
       }
     },
-    [isEnabled, queryClient]
+    [isEnabled, queryClient, timeZone]
   )
 
   return (

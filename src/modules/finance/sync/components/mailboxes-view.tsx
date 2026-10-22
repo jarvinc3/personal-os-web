@@ -127,12 +127,14 @@ function PendingEmailRow({
 }
 
 export function FinanceMailboxesView({ enabled }: { enabled: boolean }) {
-  const { emailSyncEnabled, emailSyncAutomatic, config } = useFinanceEnabled()
+  const { emailSyncEnabled, emailSyncAutomatic, config, formatLocale } =
+    useFinanceEnabled()
   const { run: runSync, pendingSourceId } = useRunEmailSync(emailSyncEnabled)
   const display = {
     currency: config.baseCurrency,
     showCents: config.display.showCents,
     compactNumbers: config.display.compactNumbers,
+    locale: formatLocale,
   }
   const { open: openConnectSheet, setOpen: setOpenConnectSheet } =
     useSheetParam(FINANCE_SHEET_KEYS.connectGmail)

@@ -2,7 +2,7 @@ import {
   FINANCE_TRANSACTIONS_QUERY_KEY,
   type FinancePaginated,
 } from "@/src/modules/finance/shared/types/api"
-import { isoMonthBounds, parseMonthKey, type MonthKey } from "./month-window.ts"
+import { parseMonthKey, type MonthKey } from "./month-window.ts"
 import type {
   FinanceTransaction,
   FinanceTransactionStatus,
@@ -14,6 +14,12 @@ import {
   parseFinanceMoney,
   type FinanceMoneyDisplay,
 } from "./money.ts"
+
+import {
+  instantToZonedWallTime,
+  zonedMonthEnd,
+  zonedMonthStart,
+} from "@/src/shared/lib/zoned-time"
 
 export const FINANCE_TX_FILTER_ALL = "__all__" as const
 export const FINANCE_TX_PAGE_SIZE = 20
@@ -77,8 +83,27 @@ export function buildTransactionsSearchParams(
   return params.toString()
 }
 
+/** The instant the API stored becomes the wall clock the user reads. */
+function toUserWallClock(
+  transaction: FinanceTransaction,
+  timeZone: string
+): FinanceTransaction {
+  return {
+    ...transaction,
+    transactionDate: instantToZonedWallTime(
+      transaction.transactionDate,
+      timeZone
+    ),
+    legs: transaction.legs?.map((leg) => ({
+      ...leg,
+      transactionDate: instantToZonedWallTime(leg.transactionDate, timeZone),
+    })),
+  }
+}
+
 export function transactionsFromPayload(
-  payload: unknown
+  payload: unknown,
+  timeZone: string
 ): FinancePaginated<FinanceTransaction> {
   const empty: FinancePaginated<FinanceTransaction> = {
     items: [],
@@ -97,23 +122,22 @@ export function transactionsFromPayload(
     return empty
   }
   return {
-    items: record.items as FinanceTransaction[],
+    items: (record.items as FinanceTransaction[]).map((item) =>
+      toUserWallClock(item, timeZone)
+    ),
     nextCursor:
       typeof record.nextCursor === "string" ? record.nextCursor : null,
     hasMore: record.hasMore === true,
   }
 }
 
-export function formatTransactionDate(value: string): string {
-  return formatFinanceDateTimeLabel(value)
+export function formatTransactionDate(value: string, locale: string): string {
+  return formatFinanceDateTimeLabel(value, locale)
 }
 
 export function canReverseTransaction(
-  tx: Pick<FinanceTransaction, "status" | "transferGroupId" | "type">
+  tx: Pick<FinanceTransaction, "status">
 ): boolean {
-  if (tx.transferGroupId || tx.type === "TRANSFER") {
-    return false
-  }
   return tx.status === "CONFIRMED"
 }
 
@@ -154,6 +178,14 @@ export function transferDirectionLabel(
   return `${origin} → ${destination}`
 }
 
+export const OPERATION_LEG_ROLE = {
+  SOURCE: "SOURCE",
+  DESTINATION: "DESTINATION",
+  FEE: "FEE",
+} as const
+
+export type FinanceInstrumentRef = { accountId?: string; cardId?: string }
+
 export function movementSign(
   transaction: Pick<FinanceTransaction, "type" | "ledgerAmount">
 ): "+" | "−" | null {
@@ -173,23 +205,150 @@ export function movementSign(
   return null
 }
 
-export function signedAmount(
+/**
+ * Money a movement shows on the instrument it is read from. A cross-currency
+ * transfer credits the destination with the received amount, not the source one.
+ */
+export function movementSideMoney(
   transaction: FinanceTransaction,
+  instrument?: FinanceInstrumentRef
+): { amount: string; currency: string } {
+  const sourceSide = {
+    amount: transaction.amount,
+    currency: transaction.currency,
+  }
+  if (!instrument || !transaction.transferToAmount) {
+    return sourceSide
+  }
+  if (!transaction.transferToCurrency) {
+    return sourceSide
+  }
+  if (transferSignFromInstrument(transaction, instrument) !== "+") {
+    return sourceSide
+  }
+  return {
+    amount: transaction.transferToAmount,
+    currency: transaction.transferToCurrency,
+  }
+}
+
+export function signedAmount({
+  transaction,
+  display,
+  instrument,
+}: {
+  transaction: FinanceTransaction
   display: FinanceMoneyDisplay
-): string {
-  const parsed = parseFinanceMoney(transaction.amount)
+  instrument?: FinanceInstrumentRef
+}): string {
+  const side = movementSideMoney(transaction, instrument)
+  const parsed = parseFinanceMoney(side.amount)
   const formatted = formatFinanceMoney(
     parsed === null ? null : Math.abs(parsed),
-    { ...display, currency: transaction.currency }
+    {
+      ...display,
+      currency: side.currency,
+    }
   )
-  if (isTransferTransaction(transaction)) {
-    return formatted
-  }
-  const sign = movementSign(transaction)
+  const sign = displayedMovementSign(transaction, instrument)
   if (!sign) {
     return formatted
   }
   return `${sign} ${formatted}`
+}
+
+/** Sign of a row: a transfer depends on the account or card it is read from. */
+export function displayedMovementSign(
+  transaction: FinanceTransaction,
+  instrument?: FinanceInstrumentRef
+): "+" | "−" | null {
+  if (!isTransferTransaction(transaction)) {
+    return movementSign(transaction)
+  }
+  if (!instrument) {
+    return null
+  }
+  return transferSignFromInstrument(transaction, instrument)
+}
+
+function legMatchesInstrument(
+  leg: FinanceTransaction,
+  instrument: FinanceInstrumentRef
+): boolean {
+  if (instrument.accountId) {
+    return leg.accountId === instrument.accountId
+  }
+  if (instrument.cardId) {
+    return leg.cardId === instrument.cardId
+  }
+  return false
+}
+
+/** True when the movement moves money into or out of that account or card. */
+export function movementTouchesInstrument(
+  transaction: FinanceTransaction,
+  instrument: FinanceInstrumentRef
+): boolean {
+  if (
+    instrument.accountId &&
+    (transaction.accountId === instrument.accountId ||
+      transaction.transferToAccountId === instrument.accountId)
+  ) {
+    return true
+  }
+  if (
+    instrument.cardId &&
+    (transaction.cardId === instrument.cardId ||
+      transaction.transferToCardId === instrument.cardId)
+  ) {
+    return true
+  }
+  return (transaction.legs ?? []).some((leg) =>
+    legMatchesInstrument(leg, instrument)
+  )
+}
+
+/** Sign of a transfer seen from one account or card: money out is negative. */
+export function transferSignFromInstrument(
+  transaction: FinanceTransaction,
+  instrument: FinanceInstrumentRef
+): "+" | "−" | null {
+  const legs = transaction.legs ?? []
+  if (
+    legs.some(
+      (leg) =>
+        leg.legRole === OPERATION_LEG_ROLE.SOURCE &&
+        legMatchesInstrument(leg, instrument)
+    )
+  ) {
+    return "−"
+  }
+  if (
+    legs.some(
+      (leg) =>
+        leg.legRole === OPERATION_LEG_ROLE.DESTINATION &&
+        legMatchesInstrument(leg, instrument)
+    )
+  ) {
+    return "+"
+  }
+  if (instrument.accountId) {
+    if (transaction.accountId === instrument.accountId) {
+      return "−"
+    }
+    if (transaction.transferToAccountId === instrument.accountId) {
+      return "+"
+    }
+  }
+  if (instrument.cardId) {
+    if (transaction.cardId === instrument.cardId) {
+      return "−"
+    }
+    if (transaction.transferToCardId === instrument.cardId) {
+      return "+"
+    }
+  }
+  return null
 }
 
 type TotalsSource = Pick<
@@ -223,7 +382,10 @@ export function visibleTransactionTotals(
   return items.reduce(
     (totals, item) => {
       for (const leg of item.legs ?? []) {
-        if (leg.legRole !== "FEE" || isInactiveTransactionStatus(leg.status)) {
+        if (
+          leg.legRole !== OPERATION_LEG_ROLE.FEE ||
+          isInactiveTransactionStatus(leg.status)
+        ) {
           continue
         }
         const fee = amountForTotals(leg, currency)
@@ -254,33 +416,39 @@ export function visibleTransactionTotals(
   )
 }
 
-export function timelineMonthQueryKey(month: MonthKey) {
+export function timelineMonthQueryKey(month: MonthKey, timeZone: string) {
   return [
     ...FINANCE_TRANSACTIONS_QUERY_KEY,
     "timeline",
     "month",
     month,
+    timeZone,
   ] as const
 }
 
-export function timelineMonthQuery(
-  month: MonthKey,
+export function timelineMonthQuery({
+  month,
+  get,
+  timeZone,
+}: {
+  month: MonthKey
   get: (path: string) => Promise<unknown>
-) {
+  timeZone: string
+}) {
   const parsed = parseMonthKey(month)
-  const bounds = isoMonthBounds(parsed.year, parsed.month)
   return {
-    queryKey: timelineMonthQueryKey(month),
+    queryKey: timelineMonthQueryKey(month, timeZone),
     staleTime: FINANCE_TIMELINE_STALE_TIME_MS,
     queryFn: () =>
-      fetchAllTransactionPages(
-        {
-          dateFrom: bounds.dateFrom,
-          dateTo: bounds.dateTo,
+      fetchAllTransactionPages({
+        query: {
+          dateFrom: zonedMonthStart(parsed.year, parsed.month, timeZone),
+          dateTo: zonedMonthEnd(parsed.year, parsed.month, timeZone),
           limit: FINANCE_TIMELINE_PAGE_SIZE,
         },
-        get
-      ),
+        get,
+        timeZone,
+      }),
   }
 }
 
@@ -296,17 +464,22 @@ export function mergeTransactionsById<T extends { id: string }>(
   return [...byId.values()]
 }
 
-export async function fetchAllTransactionPages(
-  query: Omit<FinanceTransactionsQuery, "cursor">,
+export async function fetchAllTransactionPages({
+  query,
+  get,
+  timeZone,
+}: {
+  query: Omit<FinanceTransactionsQuery, "cursor">
   get: (path: string) => Promise<unknown>
-): Promise<FinanceTransaction[]> {
+  timeZone: string
+}): Promise<FinanceTransaction[]> {
   const items: FinanceTransaction[] = []
   let cursor: string | undefined
   let pages = 0
   do {
     const search = buildTransactionsSearchParams({ ...query, cursor })
     const payload = await get(`/finance/transactions?${search}`)
-    const listed = transactionsFromPayload(payload)
+    const listed = transactionsFromPayload(payload, timeZone)
     items.push(...listed.items)
     cursor = listed.nextCursor ?? undefined
     pages += 1

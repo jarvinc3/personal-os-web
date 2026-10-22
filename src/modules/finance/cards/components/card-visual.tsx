@@ -7,6 +7,7 @@ import {
 import { FINANCE_CARD_TYPE_LABEL } from "@/src/modules/finance/shared/constants/catalog"
 import type { FinanceCardDisplayBalance } from "@/src/modules/finance/shared/lib/card-balances"
 import { nextCycleNote } from "@/src/modules/finance/shared/lib/card-credit"
+import { cardUtilization } from "@/src/modules/finance/cards/lib/card-utilization"
 import {
   formatFinanceMoney,
   parseFinanceMoney,
@@ -23,7 +24,9 @@ type CardVisualProps = {
 
 export function CardVisual({ card, balances, display }: CardVisualProps) {
   const isCredit = card.type === "CREDIT"
-  const cycleNote = isCredit ? nextCycleNote(card) : null
+  const cycleNote = isCredit
+    ? nextCycleNote({ card, locale: display.locale })
+    : null
 
   return (
     <div className="flex flex-col gap-3">
@@ -100,16 +103,19 @@ export function CardVisual({ card, balances, display }: CardVisualProps) {
             const available = parseFinanceMoney(
               balance.availableCredit ?? balance.balance
             )
-            const creditLimit = parseFinanceMoney(balance.creditLimit ?? null)
-            if (
-              creditLimit === null ||
-              creditLimit <= 0 ||
-              available === null
-            ) {
+            const creditLimitValue = parseFinanceMoney(
+              balance.creditLimit ?? null
+            )
+            if (creditLimitValue === null || available === null) {
               return null
             }
-            const debt = Math.max(0, creditLimit - available)
-            const utilizationPct = Math.min(100, (debt / creditLimit) * 100)
+            const utilization = cardUtilization({
+              available,
+              creditLimit: creditLimitValue,
+            })
+            if (utilization === null) {
+              return null
+            }
             const moneyDisplay = { ...display, currency: balance.currency }
             return (
               <div
@@ -117,7 +123,9 @@ export function CardVisual({ card, balances, display }: CardVisualProps) {
                 className="flex flex-col gap-2 rounded-2xl bg-white/10 p-3 text-white"
               >
                 <div className="flex items-center justify-between gap-3 text-xs text-white/70">
-                  <span>Utilización {Math.round(utilizationPct)}%</span>
+                  <span>
+                    Utilización {Math.round(utilization.utilizationPct)}%
+                  </span>
                   <span>
                     Disponible {formatFinanceMoney(available, moneyDisplay)}
                   </span>
@@ -125,12 +133,20 @@ export function CardVisual({ card, balances, display }: CardVisualProps) {
                 <div className="h-2 w-full overflow-hidden rounded-full bg-white/20">
                   <div
                     className="h-full rounded-full bg-white"
-                    style={{ width: `${utilizationPct}%` }}
+                    style={{
+                      width: `${Math.min(100, utilization.utilizationPct)}%`,
+                    }}
                   />
                 </div>
                 <p className="text-xs text-white/70">
-                  Límite {formatFinanceMoney(creditLimit, moneyDisplay)}
+                  Límite {formatFinanceMoney(creditLimitValue, moneyDisplay)}
                 </p>
+                {utilization.overdraft > 0 ? (
+                  <p className="text-xs font-medium text-white">
+                    Sobregiro{" "}
+                    {formatFinanceMoney(utilization.overdraft, moneyDisplay)}
+                  </p>
+                ) : null}
               </div>
             )
           })

@@ -207,13 +207,32 @@ export function maskShareUrl(url: string): string {
   return `${parsed.host}${parsed.pathname.replace(token, masked)}`
 }
 
-export function whatsAppShareHref({
-  url,
-  debtorName,
-}: {
+type WhatsAppShareInput = {
   url: string
   debtorName: string
-}): string {
-  const text = `Hola ${debtorName.trim()}, aquí puedes ver tus cobros: ${url}`
-  return `${WHATSAPP_SHARE_URL}?text=${encodeURIComponent(text)}`
+  count: number
+  pendingLabel: string
+}
+
+export function whatsAppShareMessage({
+  url,
+  debtorName,
+  count,
+  pendingLabel,
+}: WhatsAppShareInput): string {
+  const countLabel = count === 1 ? "1 cobro" : `${count} cobros`
+  return [
+    `Hola ${debtorFirstName(debtorName)} \u{1F44B}`,
+    "",
+    `Te comparto el detalle de lo que me debes (${countLabel}) \u{1F9FE}`,
+    `\u{1F4B0} Pendiente: *${pendingLabel}*`,
+    "",
+    `\u{1F449} ${url}`,
+    "",
+    `Ahí puedes ver cada cobro y lo que ya has abonado. ¡Gracias! \u{1F64C}`,
+  ].join("\n")
+}
+
+export function whatsAppShareHref(input: WhatsAppShareInput): string {
+  return `${WHATSAPP_SHARE_URL}?text=${encodeURIComponent(whatsAppShareMessage(input))}`
 }

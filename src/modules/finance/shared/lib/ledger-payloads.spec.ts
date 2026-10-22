@@ -192,4 +192,40 @@ describe("buildCreateTransferBody", () => {
     }
     assert.equal(payload.body.destinationPending, true)
   })
+
+  it("sends the rate and the received amount as numbers", () => {
+    const payload = buildCreateTransferBody({
+      fromAccountId: "acc-1",
+      toAccountId: "acc-2",
+      amount: "100",
+      transactionDate: "2026-09-02",
+      exchangeRate: "77.6544",
+      receivedAmount: "7765.44",
+    })
+    assert.equal(payload.ok, true)
+    if (!payload.ok) {
+      return
+    }
+    assert.equal(payload.body.exchangeRate, 77.6544)
+    assert.equal(payload.body.receivedAmount, 7765.44)
+  })
+
+  it("rejects a non-positive rate or received amount", () => {
+    const rate = buildCreateTransferBody({
+      fromAccountId: "acc-1",
+      toAccountId: "acc-2",
+      amount: "100",
+      transactionDate: "2026-09-02",
+      exchangeRate: "0",
+    })
+    assert.equal(rate.ok, false)
+    const received = buildCreateTransferBody({
+      fromAccountId: "acc-1",
+      toAccountId: "acc-2",
+      amount: "100",
+      transactionDate: "2026-09-02",
+      receivedAmount: "0",
+    })
+    assert.equal(received.ok, false)
+  })
 })

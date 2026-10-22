@@ -1,6 +1,6 @@
 import { addDays, endOfWeek, startOfWeek } from "date-fns"
 
-export const FINANCE_CALENDAR_WEEK_STARTS_ON = 0 as const
+import type { WeekStartsOn } from "@/src/modules/settings/types/profile.types"
 
 export type CalendarWeek = {
   id: string
@@ -23,18 +23,22 @@ export function formatClippedWeekLabel(start: Date, end: Date): string {
   return `${shortWeekday(start)} ${start.getDate()} - ${shortWeekday(end)} ${end.getDate()}`
 }
 
-export function weeksForMonth(year: number, month: number): CalendarWeek[] {
-  const monthStart = new Date(year, month - 1, 1)
-  const monthEnd = new Date(year, month, 0)
+export function weeksForMonth(input: {
+  year: number
+  month: number
+  weekStartsOn: WeekStartsOn
+}): CalendarWeek[] {
+  const monthStart = new Date(input.year, input.month - 1, 1)
+  const monthEnd = new Date(input.year, input.month, 0)
   const weeks: CalendarWeek[] = []
   let cursor = startOfWeek(monthStart, {
-    weekStartsOn: FINANCE_CALENDAR_WEEK_STARTS_ON,
+    weekStartsOn: input.weekStartsOn,
   })
   let index = 0
 
   while (cursor.getTime() <= monthEnd.getTime()) {
     const rawEnd = endOfWeek(cursor, {
-      weekStartsOn: FINANCE_CALENDAR_WEEK_STARTS_ON,
+      weekStartsOn: input.weekStartsOn,
     })
     const start =
       cursor.getTime() < monthStart.getTime()
@@ -44,7 +48,7 @@ export function weeksForMonth(year: number, month: number): CalendarWeek[] {
       rawEnd.getTime() > monthEnd.getTime() ? monthEnd : atLocalMidnight(rawEnd)
     index += 1
     weeks.push({
-      id: `${year}-${String(month).padStart(2, "0")}-w${index}`,
+      id: `${input.year}-${String(input.month).padStart(2, "0")}-w${index}`,
       start,
       end,
       label: formatClippedWeekLabel(start, end),

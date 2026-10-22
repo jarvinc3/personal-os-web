@@ -1,15 +1,24 @@
 import type { ModuleConfigBySlug } from "@/src/modules/settings/types/module-config.types"
 import type { UserPreferences } from "@/src/modules/settings/types/profile.types"
+import {
+  DEFAULT_APPEARANCE_STYLE,
+  DEFAULT_PRIMARY_COLOR,
+} from "@/src/shared/appearance"
 
 export const DEFAULT_USER_PREFERENCES: UserPreferences = {
-  version: 1,
+  version: 2,
   theme: {
-    fieldGuide: "Apariencia global (system | light | dark).",
+    fieldGuide: "Apariencia global: claro, oscuro o el del sistema.",
     value: "system",
+    style: DEFAULT_APPEARANCE_STYLE,
+    primaryColor: DEFAULT_PRIMARY_COLOR,
   },
   onboarding: {
     fieldGuide: "Flujo inicial de Personal OS, no de una app.",
     completed: false,
+  },
+  regional: {
+    weekStartsOn: null,
   },
   ai: {
     fieldGuide: "Comportamiento del agente en toda la app.",

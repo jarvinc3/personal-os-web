@@ -3,6 +3,7 @@ import { describe, it } from "node:test"
 
 import {
   annualRateFromInstallment,
+  buildLoanSchedule,
   computeLoanPlan,
   dueDateAfter,
   installmentAmount,
@@ -192,6 +193,32 @@ describe("dueDateAfter", () => {
   })
 })
 
+describe("buildLoanSchedule", () => {
+  const schedule = buildLoanSchedule({
+    principal: 12000,
+    annualRate: 0.24,
+    periods: 12,
+    freq: "MONTHLY",
+  })
+
+  it("adds up to the principal", () => {
+    const principalTotal = schedule.reduce((sum, row) => sum + row.principal, 0)
+    assert.equal(roundToCents(principalTotal), 12000)
+  })
+
+  it("gives every row the instalment except the last, which absorbs rounding", () => {
+    const last = schedule[schedule.length - 1]
+    assert.equal(schedule[0].amount, 1134.72)
+    assert.equal(last.amount, 1134.67)
+  })
+
+  it("keeps the interest of each row equal to its amount minus its principal", () => {
+    for (const row of schedule) {
+      assert.equal(roundToCents(row.amount - row.principal), row.interest)
+    }
+  })
+})
+
 describe("computeLoanPlan", () => {
   const now = new Date(Date.UTC(2026, 5, 1))
 
@@ -210,6 +237,23 @@ describe("computeLoanPlan", () => {
     assert.equal(plan.paidPeriods, 5)
     assert.ok(plan.outstandingBalance < 350000)
     assert.ok(plan.totalInterest > 0)
+  })
+
+  it("totals the interest of the shown instalments instead of the raw quote", () => {
+    const plan = computeLoanPlan({
+      principal: 12000,
+      periods: 12,
+      freq: "MONTHLY",
+      disbursementDate: new Date(Date.UTC(2026, 5, 1)),
+      now,
+      known: "RATE",
+      annualRatePercent: 24,
+    })
+    assert.ok(plan !== null)
+    assert.equal(plan.totalInterest, 1616.59)
+    assert.equal(plan.lastInstallmentAmount, 1134.67)
+    const paid = plan.installmentAmount * 11 + plan.lastInstallmentAmount
+    assert.equal(roundToCents(paid), roundToCents(12000 + plan.totalInterest))
   })
 
   it("solves the rate when the user knows the instalment", () => {

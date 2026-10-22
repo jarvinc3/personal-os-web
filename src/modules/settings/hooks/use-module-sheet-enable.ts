@@ -1,11 +1,14 @@
 "use client"
 
+import { usePendingModuleActivations } from "@/src/modules/settings/hooks/use-pending-module-activations"
 import { useUserModuleConfig } from "@/src/modules/settings/hooks/use-user-module-config"
+import { pendingActivation } from "@/src/modules/settings/lib/module-activation-status"
 import type { ConfigurableModuleSlug } from "@/src/modules/settings/types/module-config.types"
 import { useCallback, useMemo, useState } from "react"
 
 export function useModuleSheetEnable(slug: ConfigurableModuleSlug) {
   const { state, entry } = useUserModuleConfig(slug)
+  const { setPendingActivation } = usePendingModuleActivations()
 
   const savedIsEnabled = entry?.isEnabled ?? false
 
@@ -21,22 +24,33 @@ export function useModuleSheetEnable(slug: ConfigurableModuleSlug) {
     [pendingEnabled, savedIsEnabled, state]
   )
 
-  const handleEnabledChange = useCallback((checked: boolean) => {
-    setPendingEnabled(checked)
-  }, [])
+  const handleEnabledChange = useCallback(
+    (checked: boolean) => {
+      setPendingEnabled(checked)
+      setPendingActivation(slug, pendingActivation(savedIsEnabled, checked))
+    },
+    [savedIsEnabled, setPendingActivation, slug]
+  )
+
+  const markSaved = useCallback(() => {
+    setPendingActivation(slug, null)
+  }, [setPendingActivation, slug])
 
   const syncPendingOnSheetOpen = useCallback(() => {
     setPendingEnabled(
       state === "unconfigured" ? false : Boolean(entry?.isEnabled)
     )
-  }, [entry?.isEnabled, state])
+    setPendingActivation(slug, null)
+  }, [entry?.isEnabled, setPendingActivation, slug, state])
 
   return {
     state,
     sheetEnabled: pendingEnabled,
     pendingEnabled,
     isEnabledDirty,
+    savedIsEnabled,
     handleEnabledChange,
+    markSaved,
     syncPendingOnSheetOpen,
   }
 }

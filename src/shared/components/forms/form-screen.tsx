@@ -3,6 +3,7 @@
 import { Button } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import type { LucideIcon } from "lucide-react"
+import { cn } from "@/src/shared/lib/utils"
 import type { FormEventHandler, ReactNode } from "react"
 
 type FormSubmitIconProps = {
@@ -27,6 +28,8 @@ export type FormScreenProps = {
   submitIcon?: LucideIcon
   isSubmitting: boolean
   submitDisabled: boolean
+  /** Marks the submit as the step that commits a pending change. */
+  submitEmphasis?: boolean
 }
 
 export function FormScreen({
@@ -36,6 +39,7 @@ export function FormScreen({
   submitIcon,
   isSubmitting,
   submitDisabled,
+  submitEmphasis = false,
 }: FormScreenProps) {
   return (
     <form
@@ -44,7 +48,14 @@ export function FormScreen({
     >
       <div className="flex flex-col gap-4">{children}</div>
       <div className="sticky bottom-0 -mx-4 mt-auto border-t bg-background px-4 pt-3 pb-4 md:-mx-6 md:px-6">
-        <Button type="submit" className="h-11 w-full" disabled={submitDisabled}>
+        <Button
+          type="submit"
+          className={cn(
+            "h-11 w-full",
+            submitEmphasis && "ring-2 ring-primary ring-offset-2"
+          )}
+          disabled={submitDisabled}
+        >
           <FormSubmitIcon isSubmitting={isSubmitting} icon={submitIcon} />
           {submitLabel}
         </Button>

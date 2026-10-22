@@ -116,7 +116,7 @@ export function publicShareItemCaption(
       ? `Resta ${formatFinanceMoney(item.pending, money)}`
       : "Cobro completo"
   return item.dueDate
-    ? `${remaining} · Vence ${formatCalendarDate(item.dueDate)}`
+    ? `${remaining} · Vence ${formatCalendarDate(item.dueDate, display.locale)}`
     : remaining
 }
 
@@ -133,10 +133,16 @@ export function publicShareSummaryRows(
       tone: "success",
     },
     { label: "Pendiente", value: formatFinanceMoney(item.pending, money) },
-    { label: "Creado", value: formatCalendarDate(item.createdAt) },
+    {
+      label: "Creado",
+      value: formatCalendarDate(item.createdAt, display.locale),
+    },
   ]
   if (item.dueDate) {
-    rows.push({ label: "Vence", value: formatCalendarDate(item.dueDate) })
+    rows.push({
+      label: "Vence",
+      value: formatCalendarDate(item.dueDate, display.locale),
+    })
   }
   return rows
 }
@@ -149,7 +155,7 @@ export function publicSharePaymentRows(
   return item.payments.map((payment) => ({
     key: `${payment.paidAt}-${payment.amount}`,
     amountLabel: formatFinanceMoney(payment.amount, money),
-    dateLabel: formatCalendarDate(payment.paidAt),
+    dateLabel: formatCalendarDate(payment.paidAt, display.locale),
   }))
 }
 

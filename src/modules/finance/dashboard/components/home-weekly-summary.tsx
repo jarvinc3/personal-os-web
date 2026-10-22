@@ -10,16 +10,16 @@ import { CalendarDaysIcon } from "lucide-react"
 
 const MODULE_ACCENT = getModule("finance").accent
 
-function formatShortDate(value: string): string {
+function formatShortDate(value: string, locale: string): string {
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) {
     return value
   }
-  return date.toLocaleDateString("es-DO", { day: "numeric", month: "short" })
+  return date.toLocaleDateString(locale, { day: "numeric", month: "short" })
 }
 
 export function FinanceHomeWeeklySummary() {
-  const { isEnabled, config } = useFinanceEnabled()
+  const { isEnabled, config, formatLocale } = useFinanceEnabled()
   const summaryQuery = useWeeklySummary(isEnabled)
   const summary = summaryQuery.data
 
@@ -31,6 +31,7 @@ export function FinanceHomeWeeklySummary() {
     currency: summary.currency,
     showCents: config.display.showCents,
     compactNumbers: config.display.compactNumbers,
+    locale: formatLocale,
   }
 
   return (
@@ -77,7 +78,7 @@ export function FinanceHomeWeeklySummary() {
         <SummaryItem
           key={installment.loanId}
           title={installment.lenderName}
-          description={`Cuota · ${formatShortDate(installment.dueDate)}`}
+          description={`Cuota · ${formatShortDate(installment.dueDate, formatLocale)}`}
           value={formatFinanceMoney(installment.amount, display)}
         />
       ))}

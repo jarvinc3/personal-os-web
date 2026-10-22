@@ -69,6 +69,7 @@ export function LoanProgressCard({
   const money = { ...display, currency: loan.currency }
   const { paidOff, progress } = loanProgressSummary(loan)
   const rateLabel = formatRatePercentLabel(loan.interestRate)
+  const title = loan.name?.trim() || loan.lenderName
   const surfaceColor = institution?.color || null
   const tinted = Boolean(surfaceColor)
   const pillClass = tinted
@@ -77,7 +78,7 @@ export function LoanProgressCard({
 
   return (
     <PlanningProgressCard
-      title={loan.lenderName}
+      title={title}
       surfaceColor={surfaceColor}
       decoration={<LoanSurfaceMark tinted={tinted} />}
       description={
@@ -123,7 +124,8 @@ export function LoanProgressCard({
               )}
             >
               <CalendarDaysIcon className="size-3.5 shrink-0" aria-hidden />
-              Próximo pago · {formatCalendarDate(loan.nextDueDate)}
+              Próximo pago ·{" "}
+              {formatCalendarDate(loan.nextDueDate, display.locale)}
             </span>
           ) : null}
         </span>

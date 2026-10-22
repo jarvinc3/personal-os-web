@@ -1,6 +1,7 @@
 "use client"
 
 import { useAuthGuard } from "@/src/modules/auth"
+import { PendingModuleActivationsProvider } from "@/src/modules/settings/hooks/use-pending-module-activations"
 import { LoadingView } from "@/src/shared/components/layout/loading-view"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { useRouter } from "next/navigation"
@@ -20,5 +21,9 @@ export function SettingsGate({ children }: { children: ReactNode }) {
     return <LoadingView variant="screen" />
   }
 
-  return children
+  return (
+    <PendingModuleActivationsProvider>
+      {children}
+    </PendingModuleActivationsProvider>
+  )
 }

@@ -107,8 +107,9 @@ function StatementHeaderCard({
   const money = { ...display, currency: statement.header.currency }
   const period =
     statement.header.periodStart && statement.header.periodEnd
-      ? `${formatCalendarDate(statement.header.periodStart)} — ${formatCalendarDate(
-          statement.header.periodEnd
+      ? `${formatCalendarDate(statement.header.periodStart, display.locale)} — ${formatCalendarDate(
+          statement.header.periodEnd,
+          display.locale
         )}`
       : "Periodo no leído"
   return (
@@ -138,7 +139,7 @@ function StatementHeaderCard({
           <p className="text-muted-foreground">Fecha límite</p>
           <p>
             {statement.header.dueDate
-              ? formatCalendarDate(statement.header.dueDate)
+              ? formatCalendarDate(statement.header.dueDate, display.locale)
               : "—"}
           </p>
         </div>
@@ -157,7 +158,7 @@ function ExtraRow({
   return (
     <SummaryItem
       title={movement.merchant ?? movement.description ?? "Movimiento"}
-      description={formatCalendarDate(movement.date)}
+      description={formatCalendarDate(movement.date, display.locale)}
       value={formatFinanceMoney(movement.amount, {
         ...display,
         currency: movement.currency,
@@ -168,7 +169,7 @@ function ExtraRow({
 
 function StatementImportScreenBody({ importId }: StatementImportScreenProps) {
   const router = useRouter()
-  const { isEnabled, config } = useFinanceEnabled()
+  const { isEnabled, config, formatLocale } = useFinanceEnabled()
   const query = useStatementImport(isEnabled, importId)
   const updateLine = useUpdateStatementLine(importId)
   const apply = useApplyStatementImport(importId)
@@ -180,6 +181,7 @@ function StatementImportScreenBody({ importId }: StatementImportScreenProps) {
     currency: config.baseCurrency,
     showCents: config.display.showCents,
     compactNumbers: config.display.compactNumbers,
+    locale: formatLocale,
   }
 
   usePageHeader(
@@ -333,7 +335,7 @@ function StatementImportScreenBody({ importId }: StatementImportScreenProps) {
               <SummaryItem
                 key={line.id}
                 title={line.description}
-                description={formatCalendarDate(line.date)}
+                description={formatCalendarDate(line.date, display.locale)}
                 value={lineDisplay(display, line)}
                 trailing={
                   applied ? undefined : (
@@ -363,7 +365,10 @@ function StatementImportScreenBody({ importId }: StatementImportScreenProps) {
               <SummaryItem
                 key={line.id}
                 title={line.description}
-                description={[formatCalendarDate(line.date), line.categoryName]
+                description={[
+                  formatCalendarDate(line.date, display.locale),
+                  line.categoryName,
+                ]
                   .filter(Boolean)
                   .join(" · ")}
                 value={lineDisplay(display, line)}

@@ -107,6 +107,14 @@ export function toSubscriptionFormValues(
   }
 }
 
+/** Payments only move a balance when the subscription has a card or an account. */
+export function hasPaymentMethodTarget(values: {
+  cardId: string
+  accountId: string
+}): boolean {
+  return values.cardId !== CATALOG_NONE || values.accountId !== CATALOG_NONE
+}
+
 export function subscriptionPayload(
   values: SubscriptionFormValues
 ): Record<string, unknown> {

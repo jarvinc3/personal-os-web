@@ -7,6 +7,7 @@ import { useTransaction } from "@/src/modules/finance/shared/hooks/use-transacti
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import {
   APP_ROUTES,
+  internalReturnPath,
   parseTransactionFormType,
 } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
@@ -30,6 +31,7 @@ function TransactionCreateScreenBody() {
   const searchParams = useSearchParams()
   const initialType = parseTransactionFormType(searchParams.get("type"))
   const initialDestination = searchParams.get("destination")?.trim() || null
+  const returnTo = internalReturnPath(searchParams.get("returnTo"))
   const search = searchParams.toString()
   const initialPrefill = useMemo(
     () => parseTransactionPrefill(new URLSearchParams(search)),
@@ -42,10 +44,12 @@ function TransactionCreateScreenBody() {
       initialType={initialType}
       initialDestination={initialDestination}
       initialPrefill={initialPrefill}
+      returnTo={returnTo}
     />
   )
 }
 
+/** Only same-origin paths are accepted as the place to return after saving. */
 export function TransactionEditScreen({
   transactionId,
 }: {
@@ -68,15 +72,17 @@ function TransactionFormScreenBody({
   initialType,
   initialDestination = null,
   initialPrefill = EMPTY_TRANSACTION_PREFILL,
+  returnTo = null,
 }: {
   mode: "create" | "edit"
   transactionId?: string
   initialType: "DEBIT" | "CREDIT"
   initialDestination?: string | null
   initialPrefill?: TransactionPrefill
+  returnTo?: string | null
 }) {
   const router = useRouter()
-  const { isEnabled, config } = useFinanceEnabled()
+  const { isEnabled, config, formatLocale } = useFinanceEnabled()
   const [typeOverride, setTypeOverride] = useState<{
     base: "DEBIT" | "CREDIT"
     next: "DEBIT" | "CREDIT"
@@ -116,6 +122,10 @@ function TransactionFormScreenBody({
     router.push(APP_ROUTES.app.financeTransactions)
   }, [router])
 
+  const handleCreated = useCallback(() => {
+    router.push(returnTo ?? APP_ROUTES.app.financeTransactions)
+  }, [router, returnTo])
+
   usePageHeader(
     {
       variant: "secondary",
@@ -150,9 +160,10 @@ function TransactionFormScreenBody({
         currency: config.baseCurrency,
         showCents: config.display.showCents,
         compactNumbers: config.display.compactNumbers,
+        locale: formatLocale,
       }}
       onTypeChange={handleTypeChange}
-      onDone={handleBack}
+      onDone={mode === "edit" ? handleBack : handleCreated}
     />
   )
 }

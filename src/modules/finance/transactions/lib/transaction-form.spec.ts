@@ -28,6 +28,35 @@ describe("transactionSchema", () => {
     )
   })
 
+  it("rejects an amount with more than two decimals", () => {
+    const parsed = transactionSchema.safeParse({
+      ...validTransaction,
+      amount: "10.005",
+    })
+    assert.equal(parsed.success, false)
+    assert.equal(
+      parsed.error?.issues[0]?.message,
+      "Monto con dos decimales como máximo"
+    )
+  })
+
+  it("rejects an amount above the ceiling and names the maximum", () => {
+    const parsed = transactionSchema.safeParse({
+      ...validTransaction,
+      amount: "99999999999",
+    })
+    assert.equal(parsed.success, false)
+    assert.match(parsed.error?.issues[0]?.message ?? "", /máximo permitido/)
+  })
+
+  it("accepts an amount with two decimals", () => {
+    assert.equal(
+      transactionSchema.safeParse({ ...validTransaction, amount: "10.05" })
+        .success,
+      true
+    )
+  })
+
   it("requires a date and an hour", () => {
     assert.equal(
       transactionSchema.safeParse({

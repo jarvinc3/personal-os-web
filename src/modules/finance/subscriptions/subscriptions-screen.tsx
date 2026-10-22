@@ -42,7 +42,7 @@ function SubscriptionsScreenBody() {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
-  const { isEnabled, config } = useFinanceEnabled()
+  const { isEnabled, config, formatLocale } = useFinanceEnabled()
   const [today] = useState(() => new Date())
   const [createOpen, setCreateOpen] = useState(false)
   const filters = useMemo(
@@ -53,6 +53,7 @@ function SubscriptionsScreenBody() {
     currency: config.baseCurrency,
     showCents: config.display.showCents,
     compactNumbers: config.display.compactNumbers,
+    locale: formatLocale,
   }
 
   const upcomingSheet = useSheetParam(FINANCE_SHEET_KEYS.subscriptionUpcoming)
@@ -85,6 +86,7 @@ function SubscriptionsScreenBody() {
         monthlyCost={summary?.monthlyCost ?? "0"}
         annualCost={summary?.annualCost ?? "0"}
         activeCount={summary?.activeCount ?? 0}
+        byCurrency={summary?.byCurrency ?? []}
         baseCurrency={summary?.baseCurrency ?? display.currency}
         badges={badges}
         loading={summaryQuery.isPending && !summary}

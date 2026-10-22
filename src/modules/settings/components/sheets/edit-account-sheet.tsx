@@ -92,12 +92,15 @@ export function EditAccountSheet({
       return
     }
 
-    await updateProfileMutation.mutateAsync(payload)
-    appToast.success({
-      text1: "Cuenta actualizada",
-      text2: "Tu perfil se guardó correctamente.",
-    })
     onOpenChange(false)
+    updateProfileMutation.mutate(payload, {
+      onSuccess: () => {
+        appToast.success({
+          text1: "Cuenta actualizada",
+          text2: "Tu perfil se guardó correctamente.",
+        })
+      },
+    })
   })
 
   return (

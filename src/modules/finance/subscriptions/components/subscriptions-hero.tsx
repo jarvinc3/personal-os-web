@@ -1,7 +1,9 @@
 "use client"
 
 import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
+import { useFormatLocale } from "@/src/modules/settings/hooks/use-format-locale"
 import type { SubscriptionShortcutBadges } from "@/src/modules/finance/subscriptions/lib/subscription-display"
+import type { FinanceSubscriptionCurrencyCost } from "@/src/modules/finance/shared/types/entities"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { Badge } from "@/src/shared/components/ui/badge"
 import { LinkPendingOverlay } from "@/src/shared/components/ui/navigation-pending"
@@ -30,6 +32,7 @@ type SubscriptionsHeroProps = {
   monthlyCost: string
   annualCost: string
   activeCount: number
+  byCurrency: readonly FinanceSubscriptionCurrencyCost[]
   baseCurrency: string
   badges: SubscriptionShortcutBadges
   loading: boolean
@@ -46,6 +49,7 @@ export function SubscriptionsHero({
   monthlyCost,
   annualCost,
   activeCount,
+  byCurrency,
   baseCurrency,
   badges,
   loading,
@@ -53,11 +57,22 @@ export function SubscriptionsHero({
   onAlerts,
   onDetected,
 }: SubscriptionsHeroProps) {
+  const locale = useFormatLocale()
   const display = {
     currency: baseCurrency,
     showCents: false,
     compactNumbers: false,
+    locale,
   }
+  const onlyCurrency = byCurrency.length === 1 ? byCurrency[0] : null
+  const nativeOnly =
+    onlyCurrency && onlyCurrency.currency !== baseCurrency ? onlyCurrency : null
+  const summaryDisplay = {
+    ...display,
+    currency: nativeOnly?.currency ?? baseCurrency,
+  }
+  const summaryMonthlyCost = nativeOnly?.monthlyCost ?? monthlyCost
+  const summaryAnnualCost = nativeOnly?.annualCost ?? annualCost
 
   return (
     <section className="relative flex flex-col gap-4 overflow-hidden px-1 pt-2">
@@ -68,15 +83,42 @@ export function SubscriptionsHero({
         </span>
         {loading ? (
           <Skeleton className="h-10 w-40" />
+        ) : byCurrency.length > 1 ? (
+          <div className="grid w-full grid-cols-2 gap-2">
+            {byCurrency.map((cost) => (
+              <div
+                key={cost.currency}
+                className="flex flex-col items-center rounded-2xl bg-muted/50 px-2 py-1.5"
+              >
+                <span className="text-xs text-muted-foreground">
+                  {cost.currency} · {cost.activeCount} activa
+                  {cost.activeCount === 1 ? "" : "s"}
+                </span>
+                <span className="text-xl font-bold tabular-nums">
+                  {formatFinanceMoney(cost.monthlyCost, {
+                    ...display,
+                    currency: cost.currency,
+                  })}
+                </span>
+                <span className="text-[11px] text-muted-foreground">
+                  {formatFinanceMoney(cost.annualCost, {
+                    ...display,
+                    currency: cost.currency,
+                  })}{" "}
+                  al año
+                </span>
+              </div>
+            ))}
+          </div>
         ) : (
           <p className="text-4xl font-bold tracking-tight tabular-nums">
-            {formatFinanceMoney(monthlyCost, display)}
+            {formatFinanceMoney(summaryMonthlyCost, summaryDisplay)}
           </p>
         )}
         <p className="text-sm text-muted-foreground">
-          {formatFinanceMoney(annualCost, display)} al año · {activeCount}{" "}
-          activa
-          {activeCount === 1 ? "" : "s"}
+          {byCurrency.length > 1
+            ? "Cada moneda va por separado; no se convierten entre sí."
+            : `${formatFinanceMoney(summaryAnnualCost, summaryDisplay)} al año · ${activeCount} activa${activeCount === 1 ? "" : "s"}`}
         </p>
       </div>
 

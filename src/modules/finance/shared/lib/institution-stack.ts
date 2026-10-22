@@ -2,18 +2,26 @@ import { formatFinanceMoney, type FinanceMoneyDisplay } from "./money.ts"
 import { isCashInstitution } from "./cash.ts"
 import type {
   FinanceAccount,
+  FinanceBalanceDrift,
+  FinanceBalanceSheetCurrencySlice,
   FinanceBalanceSheetIssue,
   FinanceBalanceSheetStatus,
   FinanceCard,
   FinanceCashSummary,
   FinanceInstitution,
   FinanceLoan,
+  FinanceReconciliationStatusItem,
 } from "@/src/modules/finance/shared/types/entities"
 
 export type InstitutionStackCounts = {
   accounts: number
   cards: number
   loans: number
+}
+
+export type InstitutionIrregularities = {
+  drift: boolean
+  reconciliation: boolean
 }
 
 export type InstitutionStackItem =
@@ -32,12 +40,16 @@ export type InstitutionStackItem =
       loans: FinanceLoan[]
       /** Cash summary, only set for the system Efectivo institution. */
       cash: FinanceCashSummary | null
+      currencyTotals: FinanceBalanceSheetCurrencySlice[]
+      irregularities: InstitutionIrregularities
     }
   | {
       kind: "cash"
       id: string
       account: FinanceAccount
       balance: string
+      currencyTotals: FinanceBalanceSheetCurrencySlice[]
+      irregularities: InstitutionIrregularities
     }
 
 export type InstitutionBalancePosition = {
@@ -46,7 +58,31 @@ export type InstitutionBalancePosition = {
   netWorth: string | null
   totalAssets: string
   totalLiabilities: string | null
+  byCurrency?: FinanceBalanceSheetCurrencySlice[]
   issues: FinanceBalanceSheetIssue[]
+}
+
+/** Native balance lines for a card or detail hero; empty when a limit is missing. */
+export function institutionBalanceLines({
+  item,
+  display,
+}: {
+  item: InstitutionStackItem
+  display: FinanceMoneyDisplay
+}): Array<{ currency: string; amount: string }> {
+  const hasMissingCreditLimit =
+    item.kind === "institution" &&
+    item.issues.some((issue) => issue.code === "MISSING_CREDIT_LIMIT")
+  if (hasMissingCreditLimit) {
+    return []
+  }
+  return item.currencyTotals.map((total) => ({
+    currency: total.currency,
+    amount: formatFinanceMoney(total.netWorth, {
+      ...display,
+      currency: total.currency,
+    }),
+  }))
 }
 
 export function institutionInitials(name: string): string {
@@ -86,6 +122,37 @@ export function formatStackItemBalance(
   return formatFinanceMoney(item.netWorth, display)
 }
 
+function hasDriftForProduct(
+  drifts: readonly FinanceBalanceDrift[],
+  target: { accountId?: string | null; cardId?: string | null }
+): boolean {
+  return drifts.some(
+    (drift) =>
+      (target.accountId !== undefined &&
+        target.accountId !== null &&
+        drift.accountId === target.accountId) ||
+      (target.cardId !== undefined &&
+        target.cardId !== null &&
+        drift.cardId === target.cardId)
+  )
+}
+
+function hasPendingReconciliationForProduct(
+  reconciliationItems: readonly FinanceReconciliationStatusItem[],
+  target: { accountId?: string | null; cardId?: string | null }
+): boolean {
+  return reconciliationItems.some(
+    (item) =>
+      !item.reconciled &&
+      ((target.accountId !== undefined &&
+        target.accountId !== null &&
+        item.accountId === target.accountId) ||
+        (target.cardId !== undefined &&
+          target.cardId !== null &&
+          item.cardId === target.cardId))
+  )
+}
+
 export function buildInstitutionStackItems(input: {
   institutions: FinanceInstitution[]
   accounts: FinanceAccount[]
@@ -93,6 +160,8 @@ export function buildInstitutionStackItems(input: {
   loans: FinanceLoan[]
   positions?: InstitutionBalancePosition[]
   cash?: FinanceCashSummary
+  drifts?: readonly FinanceBalanceDrift[]
+  reconciliationItems?: readonly FinanceReconciliationStatusItem[]
 }): InstitutionStackItem[] {
   const activeInstitutions = input.institutions.filter((item) => item.isActive)
   const activeAccounts = input.accounts.filter((item) => item.isActive)
@@ -117,6 +186,30 @@ export function buildInstitutionStackItems(input: {
         (loan) => loan.institutionId === institution.id
       )
       const position = positionsById.get(institution.id)
+      const irregularities = {
+        drift:
+          accounts.some((account) =>
+            hasDriftForProduct(input.drifts ?? [], {
+              accountId: account.id,
+            })
+          ) ||
+          cards.some((card) =>
+            hasDriftForProduct(input.drifts ?? [], { cardId: card.id })
+          ),
+        reconciliation:
+          accounts.some((account) =>
+            hasPendingReconciliationForProduct(
+              input.reconciliationItems ?? [],
+              { accountId: account.id }
+            )
+          ) ||
+          cards.some((card) =>
+            hasPendingReconciliationForProduct(
+              input.reconciliationItems ?? [],
+              { cardId: card.id }
+            )
+          ),
+      }
       return {
         kind: "institution",
         id: institution.id,
@@ -135,6 +228,8 @@ export function buildInstitutionStackItems(input: {
         totalLiabilities: position?.totalLiabilities ?? null,
         issues: position?.issues ?? [],
         cash: isCashInstitution(institution) ? (input.cash ?? null) : null,
+        currencyTotals: position?.byCurrency ?? [],
+        irregularities,
       }
     }
   )
@@ -146,6 +241,25 @@ export function buildInstitutionStackItems(input: {
       id: account.id,
       account,
       balance: account.balance,
+      currencyTotals: [
+        {
+          currency: account.currency,
+          assets: account.balance,
+          available: account.balance,
+          receivables: "0",
+          liabilities: "0",
+          netWorth: account.balance,
+        },
+      ],
+      irregularities: {
+        drift: hasDriftForProduct(input.drifts ?? [], {
+          accountId: account.id,
+        }),
+        reconciliation: hasPendingReconciliationForProduct(
+          input.reconciliationItems ?? [],
+          { accountId: account.id }
+        ),
+      },
     }))
 
   return [...institutionItems, ...cashItems]

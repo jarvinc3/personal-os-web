@@ -12,11 +12,21 @@ import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-financ
 import { useInstitutions } from "@/src/modules/finance/shared/hooks/use-institutions"
 import { useLoans } from "@/src/modules/finance/shared/hooks/use-loans"
 import { useMonthExpenseTrend } from "@/src/modules/finance/shared/hooks/use-month-expense-trend"
-import { ReconciliationMonthStatus } from "@/src/modules/finance/reconciliation"
-import { bankChargesQuery } from "@/src/modules/finance/shared/hooks/use-reconciliations"
+import {
+  productDetailHref,
+  reconciliationProductHref,
+} from "@/src/modules/finance/reconciliation/lib/reconciliation-links"
+import type {
+  FinanceBalanceDrift,
+  FinanceReconciliationStatusItem,
+} from "@/src/modules/finance/shared/types/entities"
+import {
+  bankChargesQuery,
+  useReconciliationStatus,
+} from "@/src/modules/finance/shared/hooks/use-reconciliations"
 import { todayDateInput } from "@/src/modules/finance/shared/lib/ledger-form"
 import { bankChargesRange } from "@/src/modules/finance/shared/lib/reconciliation"
-import { BalanceIntegrityAlert } from "@/src/modules/finance/integrity"
+import { IrregularitiesSection } from "@/src/modules/finance/integrity"
 import { recalculationPayload } from "@/src/modules/finance/shared/lib/integrity"
 import {
   useFinanceIntegrity,
@@ -37,11 +47,6 @@ import { ExpandableFab } from "@/src/shared/components/layout/expandable-fab"
 import { SettingsSection } from "@/src/shared/components/layout/settings-section"
 import { Button } from "@/src/shared/components/ui/button"
 import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/src/shared/components/ui/collapsible"
-import {
   Empty,
   EmptyContent,
   EmptyDescription,
@@ -56,7 +61,6 @@ import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { useQueryClient } from "@tanstack/react-query"
 import {
   Building2Icon,
-  ChevronDownIcon,
   LandmarkIcon,
   MailIcon,
   PlusIcon,
@@ -91,6 +95,11 @@ export function FinanceProductsList({
   const categoriesQuery = useCategories(enabled)
   const balanceSheetQuery = useBalanceSheet(enabled)
   const integrityQuery = useFinanceIntegrity(enabled)
+  const reconciliationStatusQuery = useReconciliationStatus(
+    enabled,
+    monthKeyFromDate(new Date())
+  )
+  const reconciliationItems = reconciliationStatusQuery.data?.items
   const recalculateBalance = useRecalculateBalance()
   const {
     open: openAccountSheet,
@@ -131,6 +140,8 @@ export function FinanceProductsList({
         loans: loansQuery.data ?? [],
         positions: balanceSheetQuery.data?.institutions,
         cash: balanceSheetQuery.data?.cash,
+        drifts: integrityQuery.data?.drifts ?? [],
+        reconciliationItems: reconciliationItems ?? [],
       }),
     [
       institutionsQuery.data,
@@ -139,6 +150,8 @@ export function FinanceProductsList({
       loansQuery.data,
       balanceSheetQuery.data?.institutions,
       balanceSheetQuery.data?.cash,
+      integrityQuery.data?.drifts,
+      reconciliationItems,
     ]
   )
 
@@ -166,6 +179,24 @@ export function FinanceProductsList({
     cardsQuery.isPending ||
     loansQuery.isPending ||
     (balanceSheetQuery.isPending && !balanceSheetQuery.data)
+
+  function reconciliationHref(
+    item: FinanceReconciliationStatusItem
+  ): string | null {
+    return reconciliationProductHref({
+      item,
+      accounts: accountsQuery.data ?? [],
+      cards: cardsQuery.data ?? [],
+    })
+  }
+
+  function driftHref(drift: FinanceBalanceDrift): string | null {
+    return productDetailHref({
+      target: { accountId: drift.accountId, cardId: drift.cardId },
+      accounts: accountsQuery.data ?? [],
+      cards: cardsQuery.data ?? [],
+    })
+  }
 
   return (
     <div className="-mt-6 flex flex-col gap-4">
@@ -196,19 +227,17 @@ export function FinanceProductsList({
         hasData={Boolean(balanceSheetQuery.data)}
         netWorth={global?.netWorth ?? null}
         netWorthComplete={global?.status === "COMPLETE"}
+        netWorthHref={APP_ROUTES.app.financeWealth}
+        currencyTotals={balanceSheetQuery.data?.breakdown.byCurrency ?? []}
       />
 
-      <ReconciliationMonthStatus
-        enabled={enabled}
-        month={monthKeyFromDate(new Date())}
-        monthLabel={monthKeyFromDate(new Date())}
-        display={moneyDisplay}
-      />
-
-      <BalanceIntegrityAlert
+      <IrregularitiesSection
         drifts={integrityQuery.data?.drifts ?? []}
+        reconciliationItems={reconciliationItems ?? []}
         display={moneyDisplay}
-        pending={recalculateBalance.isPending}
+        driftHref={driftHref}
+        reconciliationHref={reconciliationHref}
+        recalculatePending={recalculateBalance.isPending}
         onRecalculate={(drift) => {
           recalculateBalance.mutate(recalculationPayload(drift), {
             onSuccess: () => appToast.success({ text1: "Saldo corregido" }),
@@ -257,38 +286,25 @@ export function FinanceProductsList({
             </Empty>
           }
         >
-          <Collapsible
-            defaultOpen
-            className="group/institutions relative z-10 flex flex-col"
-          >
-            <CollapsibleTrigger
-              type="button"
-              className="flex w-full cursor-pointer items-center justify-between gap-2 text-left"
-            >
+          <div className="relative z-10 flex flex-col gap-3">
+            <div className="flex items-center justify-between gap-2">
               <p className="text-lg font-medium text-foreground">
                 Instituciones
               </p>
-              <span className="flex items-center gap-2">
-                {trend ? <FinanceExpenseTrendBadge trend={trend} /> : null}
-                <ChevronDownIcon className="size-4 shrink-0 text-muted-foreground transition-transform duration-200 ease-out group-data-open/institutions:rotate-180" />
-              </span>
-            </CollapsibleTrigger>
-            <CollapsibleContent className="overflow-visible data-ending-style:overflow-hidden data-starting-style:overflow-hidden">
-              <div className="pt-3">
-                <InstitutionSwapStack
-                  items={stackItems}
-                  display={moneyDisplay}
-                  onSelect={(item) => {
-                    if (item.kind === "institution") {
-                      router.push(APP_ROUTES.app.financeInstitution(item.id))
-                      return
-                    }
-                    router.push(APP_ROUTES.app.financeCashAccount(item.id))
-                  }}
-                />
-              </div>
-            </CollapsibleContent>
-          </Collapsible>
+              {trend ? <FinanceExpenseTrendBadge trend={trend} /> : null}
+            </div>
+            <InstitutionSwapStack
+              items={stackItems}
+              display={moneyDisplay}
+              onSelect={(item) => {
+                if (item.kind === "institution") {
+                  router.push(APP_ROUTES.app.financeInstitution(item.id))
+                  return
+                }
+                router.push(APP_ROUTES.app.financeCashAccount(item.id))
+              }}
+            />
+          </div>
         </AsyncRegion>
       </div>
 

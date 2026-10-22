@@ -37,7 +37,7 @@ export function MerchantsScreen() {
 
 function MerchantsScreenBody() {
   const router = useRouter()
-  const { isEnabled, config } = useFinanceEnabled()
+  const { isEnabled, config, formatLocale } = useFinanceEnabled()
   const [search, setSearch] = useState("")
 
   const handleBack = useCallback(() => {
@@ -63,6 +63,7 @@ function MerchantsScreenBody() {
     currency: config.baseCurrency,
     showCents: config.display.showCents,
     compactNumbers: config.display.compactNumbers,
+    locale: formatLocale,
   }
 
   return (

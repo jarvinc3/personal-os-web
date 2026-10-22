@@ -5,7 +5,9 @@ import {
   applyWipeLayerToggle,
   expandWipeLayerSelection,
   sortWipeLayers,
+  toggleWipeGroupLayers,
   WIPE_LAYERS,
+  wipeGroupChecked,
 } from "./wipe-layers.ts"
 
 describe("expandWipeLayerSelection", () => {
@@ -80,5 +82,38 @@ describe("sortWipeLayers", () => {
         WIPE_LAYERS.SETTINGS_DEFAULTS,
       ]
     )
+  })
+})
+
+describe("wipeGroupChecked", () => {
+  const layers = [WIPE_LAYERS.FINANCE_LEDGER, WIPE_LAYERS.FINANCE_CATALOG]
+
+  it("reflects none, all and in between", () => {
+    assert.equal(wipeGroupChecked(layers, []), false)
+    assert.equal(wipeGroupChecked(layers, layers), true)
+    assert.equal(
+      wipeGroupChecked(layers, [WIPE_LAYERS.FINANCE_LEDGER]),
+      "indeterminate"
+    )
+  })
+})
+
+describe("toggleWipeGroupLayers", () => {
+  it("selects every layer of the group with its dependencies", () => {
+    const next = toggleWipeGroupLayers([], [WIPE_LAYERS.FINANCE_CATALOG], true)
+
+    assert.ok(next.includes(WIPE_LAYERS.FINANCE_CATALOG))
+    assert.ok(next.includes(WIPE_LAYERS.FINANCE_LEDGER))
+  })
+
+  it("clears the group and its dependents", () => {
+    const selected = expandWipeLayerSelection([WIPE_LAYERS.FINANCE_CATALOG])
+    const next = toggleWipeGroupLayers(
+      selected,
+      [WIPE_LAYERS.FINANCE_LEDGER],
+      false
+    )
+
+    assert.deepEqual(next, [])
   })
 })

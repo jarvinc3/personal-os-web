@@ -5,10 +5,14 @@ import {
   useNotificationsSocket,
   usePushToken,
 } from "@/src/modules/notifications"
-import { useApplyThemePreference } from "@/src/modules/settings"
+import {
+  useApplyAppearancePreference,
+  useApplyThemePreference,
+} from "@/src/modules/settings"
 
 function AppEffects() {
   useApplyThemePreference()
+  useApplyAppearancePreference()
   useNotificationsSocket()
   useAiSocket()
   usePushToken()

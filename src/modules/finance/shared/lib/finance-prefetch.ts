@@ -77,12 +77,18 @@ async function defaultTransactionsGet<T = unknown>(path: string): Promise<T> {
   return apiGet<T>(path)
 }
 
-export function prefetchFinanceCurrentMonth(
-  queryClient: PrefetchClient,
-  get: FinanceQueryGet = defaultTransactionsGet,
-  now: Date = new Date()
-) {
+export function prefetchFinanceCurrentMonth({
+  queryClient,
+  timeZone,
+  get = defaultTransactionsGet,
+  now = new Date(),
+}: {
+  queryClient: PrefetchClient
+  timeZone: string
+  get?: FinanceQueryGet
+  now?: Date
+}) {
   return queryClient.prefetchQuery(
-    timelineMonthQuery(monthKeyFromDate(now), get)
+    timelineMonthQuery({ month: monthKeyFromDate(now), get, timeZone })
   )
 }

@@ -16,7 +16,7 @@ import {
   ReconciliationSheet,
   ReconciliationsSection,
 } from "@/src/modules/finance/reconciliation"
-import { BalanceIntegrityAlert } from "@/src/modules/finance/integrity"
+import { IrregularitiesSection } from "@/src/modules/finance/integrity"
 import {
   findProductDrifts,
   recalculationPayload,
@@ -25,6 +25,7 @@ import {
   useFinanceIntegrity,
   useRecalculateBalance,
 } from "@/src/modules/finance/shared/hooks/use-integrity"
+import { useReconciliationStatus } from "@/src/modules/finance/shared/hooks/use-reconciliations"
 import { StatementImportButton } from "@/src/modules/finance/shared/components/statement-import-button"
 import { FINANCE_ACCOUNT_TYPE_LABEL } from "@/src/modules/finance/shared/constants/catalog"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
@@ -45,7 +46,10 @@ import {
 } from "@/src/modules/finance/shared/lib/finance-error"
 import { showUndoToast } from "@/src/modules/finance/shared/components/undo-toast"
 import { encodeLedgerTarget } from "@/src/modules/finance/shared/lib/ledger-payloads"
-import { isoMonthBounds } from "@/src/modules/finance/shared/lib/month-window"
+import {
+  isoMonthBounds,
+  monthKeyFromDate,
+} from "@/src/modules/finance/shared/lib/month-window"
 import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 import { visibleTransactionTotals } from "@/src/modules/finance/shared/lib/transactions-query"
 import { DeleteRecordDialog } from "@/src/modules/finance/shared/components/delete-record-dialog"
@@ -72,7 +76,7 @@ import {
   Trash2Icon,
   WalletIcon,
 } from "lucide-react"
-import { useRouter } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { useState } from "react"
 import { Label } from "@/src/shared/components/ui/label"
 
@@ -92,11 +96,13 @@ export function AccountDetailScreen({ accountId }: AccountDetailScreenProps) {
 
 function AccountDetailScreenBody({ accountId }: AccountDetailScreenProps) {
   const router = useRouter()
-  const { isEnabled, config } = useFinanceEnabled()
+  const pathname = usePathname()
+  const { isEnabled, config, formatLocale } = useFinanceEnabled()
   const display = {
     currency: config.baseCurrency,
     showCents: config.display.showCents,
     compactNumbers: config.display.compactNumbers,
+    locale: formatLocale,
   }
 
   const accountsQuery = useAccounts(isEnabled)
@@ -163,6 +169,13 @@ function AccountDetailScreenBody({ accountId }: AccountDetailScreenProps) {
   const accountDrifts = findProductDrifts(integrityQuery.data?.drifts ?? [], {
     accountId,
   })
+  const reconciliationStatusQuery = useReconciliationStatus(
+    isEnabled,
+    monthKeyFromDate(new Date())
+  )
+  const accountReconciliations = (
+    reconciliationStatusQuery.data?.items ?? []
+  ).filter((item) => item.kind === "account" && item.accountId === accountId)
 
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [archiveConfirmOpen, setArchiveConfirmOpen] = useState(false)
@@ -340,10 +353,15 @@ function AccountDetailScreenBody({ accountId }: AccountDetailScreenProps) {
       </div>
 
       <div className="mx-4 -mt-4 flex flex-col gap-3 rounded-3xl bg-background">
-        <BalanceIntegrityAlert
+        <IrregularitiesSection
           drifts={accountDrifts}
+          reconciliationItems={accountReconciliations}
           display={accountDisplay}
-          pending={recalculateBalance.isPending}
+          driftHref={() => null}
+          reconciliationHref={() =>
+            `${pathname}?sheet=${FINANCE_SHEET_KEYS.accountReconciliation}`
+          }
+          recalculatePending={recalculateBalance.isPending}
           onRecalculate={(drift) => {
             recalculateBalance.mutate(recalculationPayload(drift), {
               onSuccess: () => appToast.success({ text1: "Saldo corregido" }),
@@ -361,10 +379,11 @@ function AccountDetailScreenBody({ accountId }: AccountDetailScreenProps) {
           createLabel="Movimiento"
           onCreate={() =>
             router.push(
-              financeTransactionNewHref(
-                "DEBIT",
-                encodeLedgerTarget("account", account.id)
-              )
+              financeTransactionNewHref({
+                type: "DEBIT",
+                destination: encodeLedgerTarget("account", account.id),
+                returnTo: pathname,
+              })
             )
           }
         />

@@ -133,7 +133,7 @@ function CardBalanceSheetForm({
     initialMode(card, defaultCurrency)
   )
   const existingCurrencies = (card?.balances ?? []).map((item) => item.currency)
-  const { config: financeConfig } = useFinanceEnabled()
+  const { config: financeConfig, formatLocale } = useFinanceEnabled()
   const allowedCurrencies = buildFinanceCurrencyOptions(
     defaultCurrency,
     financeConfig.trackedCurrencies
@@ -324,6 +324,7 @@ function CardBalanceSheetForm({
                   currency: item.currency,
                   showCents: display?.showCents ?? true,
                   compactNumbers: display?.compactNumbers ?? false,
+                  locale: formatLocale,
                 })}
               </span>
             </button>
@@ -369,6 +370,7 @@ function CardBalanceSheetForm({
                   currency: selectedCurrency || defaultCurrency,
                   showCents: display?.showCents ?? true,
                   compactNumbers: display?.compactNumbers ?? false,
+                  locale: formatLocale,
                   leadingSign: true,
                 })}
               </span>

@@ -3,16 +3,12 @@ import { z } from "zod"
 import {
   isDateTimeInput,
   isLedgerTargetInput,
-  isPositiveAmountInput,
 } from "@/src/modules/finance/shared/lib/ledger-form"
+import { moneyAmountField } from "./money-amount-field.ts"
 
 export const transactionSchema = z.object({
   type: z.enum(["DEBIT", "CREDIT"]),
-  amount: z
-    .string()
-    .trim()
-    .min(1, "Monto obligatorio")
-    .refine(isPositiveAmountInput, "Monto mayor que cero"),
+  amount: moneyAmountField(),
   currency: z.string().trim().min(3, "Moneda obligatoria").max(3),
   transactionDate: z
     .string()

@@ -34,18 +34,23 @@ import { appToast } from "@/src/shared/lib/app-toast"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
+  BanknoteIcon,
+  CircleAlertIcon,
   NotebookPenIcon,
   PiggyBankIcon,
+  SaveIcon,
   SparklesIcon,
   TargetIcon,
   XIcon,
 } from "lucide-react"
 import { useEffect, useMemo } from "react"
-import { Controller, useForm } from "react-hook-form"
+import { Controller, useForm, useWatch } from "react-hook-form"
 import {
   savingsGoalContributionSchema,
   type SavingsGoalContributionFormValues,
 } from "@/src/modules/finance/savings-goals/lib/savings-goal-contribution-form"
+
+export type SavingsGoalAllocationMode = "CONTRIBUTION" | "WITHDRAWAL"
 
 const EMPTY_FORM: SavingsGoalContributionFormValues = {
   amount: "",
@@ -66,6 +71,7 @@ type SavingsGoalContributionSheetProps = {
   targetDate?: string | null
   /** Account that holds the goal; it is the default origin of the money. */
   goalAccountId?: string | null
+  mode?: SavingsGoalAllocationMode
   pending?: boolean
 }
 
@@ -79,10 +85,11 @@ export function SavingsGoalContributionSheet({
   currentAmount,
   targetDate,
   goalAccountId,
+  mode = "CONTRIBUTION",
   pending = false,
 }: SavingsGoalContributionSheetProps) {
   const createMutation = useCreateSavingsGoalContribution()
-  const { config } = useFinanceEnabled()
+  const { config, formatLocale } = useFinanceEnabled()
   const accountsQuery = useAccounts(open)
   const institutionsQuery = useInstitutions(open)
   const goalCurrency = currency ?? config.baseCurrency
@@ -90,10 +97,14 @@ export function SavingsGoalContributionSheet({
     (account) => account.isActive && account.currency === goalCurrency
   )
   const institutions = institutionsQuery.data ?? []
-  const defaultAccountId =
-    activeAccounts.find((account) => account.id === goalAccountId)?.id ??
-    activeAccounts[0]?.id ??
-    ""
+  const isWithdrawal = mode === "WITHDRAWAL"
+  const defaultAccountId = isWithdrawal
+    ? (activeAccounts.find((account) => account.id !== goalAccountId)?.id ??
+      activeAccounts[0]?.id ??
+      "")
+    : (activeAccounts.find((account) => account.id === goalAccountId)?.id ??
+      activeAccounts[0]?.id ??
+      "")
   const { picker, openPicker, closeHandlerFor } = usePicker<"none" | "account">(
     "none"
   )
@@ -118,9 +129,13 @@ export function SavingsGoalContributionSheet({
 
   useEffect(() => {
     if (open) {
-      reset({ ...EMPTY_FORM, contributedAt: todayDateInput() })
+      reset({
+        ...EMPTY_FORM,
+        kind: mode,
+        contributedAt: todayDateInput(),
+      })
     }
-  }, [open, reset])
+  }, [open, mode, reset])
 
   useEffect(() => {
     if (!open || !defaultAccountId || getValues("accountId")) {
@@ -133,10 +148,26 @@ export function SavingsGoalContributionSheet({
     currency: goalCurrency,
     showCents: config.display.showCents,
     compactNumbers: config.display.compactNumbers,
+    locale: formatLocale,
   }
   const target = parseFinanceMoney(targetAmount)
   const saved = parseFinanceMoney(currentAmount)
   const remaining = target !== null && saved !== null ? target - saved : null
+  const typedAmount = useWatch({ control, name: "amount" })
+  const typedAmountValue = parseFinanceMoney(typedAmount)
+  const withdrawalExceeds =
+    isWithdrawal && typedAmountValue !== null && saved !== null
+      ? typedAmountValue > saved
+      : false
+  const projectedAmount =
+    saved !== null ? saved + (typedAmountValue ?? 0) : null
+  const surplusAfterContribution =
+    !isWithdrawal &&
+    target !== null &&
+    projectedAmount !== null &&
+    projectedAmount > target
+      ? projectedAmount - target
+      : null
   const suggestion = monthlySavingsSuggestion({
     targetAmount,
     currentAmount,
@@ -153,12 +184,18 @@ export function SavingsGoalContributionSheet({
     if (!goalId) {
       return
     }
+    if (withdrawalExceeds) {
+      appToast.error({ text1: "El retiro supera lo disponible" })
+      return
+    }
     const payload = buildSavingsGoalContributionBody({
       amount: values.amount,
       kind: values.kind,
       date: values.contributedAt,
       notes: values.notes,
-      fromAccountId: values.accountId,
+      ...(isWithdrawal
+        ? { toAccountId: values.accountId }
+        : { fromAccountId: values.accountId }),
     })
     if (!payload.ok) {
       appToast.error({ text1: payload.error })
@@ -166,7 +203,9 @@ export function SavingsGoalContributionSheet({
     }
     try {
       await createMutation.mutateAsync({ goalId, body: payload.body })
-      appToast.success({ text1: "Aporte registrado" })
+      appToast.success({
+        text1: isWithdrawal ? "Retiro registrado" : "Aporte registrado",
+      })
       onOpenChange(false)
     } catch (error) {
       appToast.error({ text1: financeErrorMessage(error) })
@@ -179,11 +218,15 @@ export function SavingsGoalContributionSheet({
         open={open}
         onOpenChange={requestOpenChange}
         pending={pending}
-        title="Registrar aporte"
+        title={isWithdrawal ? "Retirar dinero" : "Registrar aporte"}
         description={
-          goalName
-            ? `Se suma al avance de ${goalName}.`
-            : "Se suma al avance de la meta."
+          isWithdrawal
+            ? goalName
+              ? `El dinero sale de la cuenta de ${goalName}.`
+              : "El dinero sale de la cuenta de la meta."
+            : goalName
+              ? `Se suma al avance de ${goalName}.`
+              : "Se suma al avance de la meta."
         }
         actions={{
           close: (
@@ -206,13 +249,20 @@ export function SavingsGoalContributionSheet({
             >
               {createMutation.isPending ? (
                 <Spinner data-icon="inline-start" />
-              ) : null}
-              Registrar
+              ) : isWithdrawal ? (
+                <BanknoteIcon className="size-4 shrink-0" />
+              ) : (
+                <SaveIcon className="size-4 shrink-0" />
+              )}
+              {isWithdrawal ? "Retirar" : "Registrar"}
             </Button>
           ),
         }}
       >
-        <SummarySection title="Aporte" icon={PiggyBankIcon}>
+        <SummarySection
+          title={isWithdrawal ? "Retiro" : "Aporte"}
+          icon={PiggyBankIcon}
+        >
           <Controller
             control={control}
             name="amount"
@@ -231,7 +281,38 @@ export function SavingsGoalContributionSheet({
               />
             )}
           />
-          {remaining !== null && remaining > 0 ? (
+          {withdrawalExceeds ? (
+            <p className="flex items-start gap-1.5 text-xs text-destructive">
+              <CircleAlertIcon className="mt-px size-3.5 shrink-0" />
+              Solo puedes retirar hasta{" "}
+              {formatFinanceMoney(currentAmount ?? "0", display)}.
+            </p>
+          ) : null}
+          {surplusAfterContribution !== null ? (
+            <p className="flex items-start gap-1.5 text-xs text-amber-600 dark:text-amber-500">
+              <CircleAlertIcon className="mt-px size-3.5 shrink-0" />
+              Este aporte deja{" "}
+              {formatFinanceMoney(surplusAfterContribution, display)} por encima
+              de la meta.
+            </p>
+          ) : null}
+          {isWithdrawal ? (
+            <div className="flex flex-wrap gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  setValue("amount", currentAmount ?? "0", {
+                    shouldValidate: true,
+                  })
+                }
+              >
+                <TargetIcon className="size-4 shrink-0" />
+                {`Todo ${formatFinanceMoney(currentAmount ?? "0", display)}`}
+              </Button>
+            </div>
+          ) : remaining !== null && remaining > 0 ? (
             <div className="flex flex-wrap gap-2">
               {suggestion ? (
                 <Button
@@ -273,7 +354,7 @@ export function SavingsGoalContributionSheet({
             render={({ field }) => (
               <Field className="gap-1">
                 <FieldLabel className="text-sm text-muted-foreground">
-                  Cuenta de origen
+                  {isWithdrawal ? "Cuenta de destino" : "Cuenta de origen"}
                 </FieldLabel>
                 <DestinationTrigger
                   destination={
@@ -284,7 +365,11 @@ export function SavingsGoalContributionSheet({
                   accounts={activeAccounts}
                   cards={[]}
                   display={display}
-                  placeholder="Elige la cuenta"
+                  placeholder={
+                    isWithdrawal
+                      ? "Elige la cuenta que recibe"
+                      : "Elige la cuenta"
+                  }
                   onClick={() => openPicker("account")}
                 />
                 {errors.accountId?.message ? (
@@ -320,8 +405,9 @@ export function SavingsGoalContributionSheet({
             )}
           />
           <FinanceHelpText>
-            El aporte aparta dinero de la cuenta, no lo gasta. Si eliges otra
-            cuenta, primero se mueve con una transferencia.
+            {isWithdrawal
+              ? "El retiro mueve el dinero a la cuenta elegida. No cuenta como ingreso ni gasto."
+              : "El aporte aparta dinero de la cuenta, no lo gasta. Si eliges otra cuenta, primero se mueve con una transferencia."}
           </FinanceHelpText>
         </SummarySection>
       </BottomSheet>

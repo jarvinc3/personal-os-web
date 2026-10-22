@@ -100,7 +100,10 @@ export function buildCreateAccountBody(
     return { ok: false, error: "Nombre obligatorio" }
   }
 
-  const institutionId = optionalId(input.institutionId)
+  // Cash always lives in the system "Efectivo"; the API rejects any other
+  // institution, so the form must not send one.
+  const institutionId =
+    input.type === "CASH" ? undefined : optionalId(input.institutionId)
   if (input.type !== "CASH" && !institutionId) {
     return { ok: false, error: "La cuenta necesita una institución" }
   }

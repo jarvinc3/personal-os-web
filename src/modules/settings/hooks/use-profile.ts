@@ -5,6 +5,7 @@ import { mergeAuthUserWithProfile, PROFILE_QUERY_KEY } from "@/src/modules/auth"
 import { DEFAULT_USER_PREFERENCES } from "@/src/modules/settings/constants/user-settings-defaults"
 import { mergeUserPreferences } from "@/src/modules/settings/lib/merge-user-preferences"
 import { normalizeUserPreferences } from "@/src/modules/settings/lib/normalize-preferences"
+import { applyProfilePatch } from "@/src/modules/settings/lib/profile-optimistic"
 import type {
   DeepPartial,
   UpdateProfilePayload,
@@ -15,7 +16,7 @@ import { API_ENDPOINTS } from "@/src/shared/constants/api-endpoints"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { useAppStore } from "@/src/shared/store/app-store"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { useMemo } from "react"
+import { useCallback, useMemo } from "react"
 
 const PROFILE_UPDATE_MUTATION_KEY = ["profile-update"] as const
 const PROFILE_UPDATE_SCOPE = "profile-update"
@@ -49,12 +50,9 @@ export function useProfile() {
       await queryClient.cancelQueries({ queryKey: PROFILE_QUERY_KEY })
       const previousProfile =
         queryClient.getQueryData<UserProfile>(PROFILE_QUERY_KEY)
-      const preferences = payload.preferences
-      if (preferences) {
-        queryClient.setQueryData<UserProfile>(PROFILE_QUERY_KEY, (profile) =>
-          profile ? { ...profile, preferences } : profile
-        )
-      }
+      queryClient.setQueryData<UserProfile>(PROFILE_QUERY_KEY, (profile) =>
+        profile ? applyProfilePatch(profile, payload) : profile
+      )
       return { previousProfile }
     },
     onSuccess: (profile) => {
@@ -80,12 +78,33 @@ export function useProfile() {
     },
   })
 
+  const preferencesFromPatch = useCallback(
+    (patch: DeepPartial<UserPreferences>): UserPreferences => {
+      const current =
+        queryClient.getQueryData<UserProfile>(PROFILE_QUERY_KEY)?.preferences
+      return mergeUserPreferences(current, patch)
+    },
+    [queryClient]
+  )
+
   const updatePreferences = async (patch: DeepPartial<UserPreferences>) => {
-    const current =
-      queryClient.getQueryData<UserProfile>(PROFILE_QUERY_KEY)?.preferences
-    const preferences = mergeUserPreferences(current, patch)
-    await updateProfileMutation.mutateAsync({ preferences })
+    await updateProfileMutation.mutateAsync({
+      preferences: preferencesFromPatch(patch),
+    })
   }
+
+  const savePreferences = useCallback(
+    (
+      patch: DeepPartial<UserPreferences>,
+      options?: { onSuccess?: () => void }
+    ) => {
+      updateProfileMutation.mutate(
+        { preferences: preferencesFromPatch(patch) },
+        { onSuccess: options?.onSuccess }
+      )
+    },
+    [preferencesFromPatch, updateProfileMutation]
+  )
 
   const rawPreferences = profileQuery.data?.preferences
   const preferences = useMemo(
@@ -102,6 +121,7 @@ export function useProfile() {
     profileQuery,
     updateProfileMutation,
     updatePreferences,
+    savePreferences,
     preferences,
     userModules,
   }

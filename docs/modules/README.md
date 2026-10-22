@@ -2,15 +2,16 @@
 
 Implementados en `src/modules/` con rutas en `app/`.
 
-| Módulo        | Código                       | Doc                                         | Rutas                                       |
-| ------------- | ---------------------------- | ------------------------------------------- | ------------------------------------------- |
-| Auth          | `src/modules/auth/`          | [auth/](./auth/README.md)                   | `/login`, `/verify-email`, `/auth/callback` |
-| Settings      | `src/modules/settings/`      | [settings/](./settings/README.md)           | `/settings`                                 |
-| Notifications | `src/modules/notifications/` | [notifications/](./notifications/README.md) | `/notifications`                            |
-| AI            | `src/modules/ai/`            | [ai/](./ai/README.md)                       | `/chat`                                     |
-| Finance       | `src/modules/finance/`       | [finance/](./finance/README.md)             | `/finance/*`                                |
-| Keep Awake    | `src/modules/keep-awake/`    | [keep-awake/](./keep-awake/README.md)       | `/keep-awake`                               |
-| Home          | `src/modules/home/`          | [home/](./home/README.md)                   | `/home`                                     |
+| Módulo          | Código                       | Doc                                         | Rutas                                                  |
+| --------------- | ---------------------------- | ------------------------------------------- | ------------------------------------------------------ |
+| Auth            | `src/modules/auth/`          | [auth/](./auth/README.md)                   | `/login`, `/verify-email`, `/auth/callback`            |
+| Settings        | `src/modules/settings/`      | [settings/](./settings/README.md)           | `/settings`                                            |
+| Notifications   | `src/modules/notifications/` | [notifications/](./notifications/README.md) | `/notifications`                                       |
+| AI              | `src/modules/ai/`            | [ai/](./ai/README.md)                       | `/chat`                                                |
+| Finance         | `src/modules/finance/`       | [finance/](./finance/README.md)             | `/finance/*`                                           |
+| Keep Awake      | `src/modules/keep-awake/`    | [keep-awake/](./keep-awake/README.md)       | `/keep-awake`                                          |
+| Home            | `src/modules/home/`          | [home/](./home/README.md)                   | `/home`                                                |
+| Centro de ayuda | `src/modules/help/`          | [help/](./help/README.md)                   | `/help`, `/help/glossary`, `/help/guides`, `/help/faq` |
 
 ## Solo Settings (sin app routes)
 

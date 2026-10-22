@@ -263,6 +263,8 @@ export function ReceivableShareSheet({
                       href={whatsAppShareHref({
                         url: share.url,
                         debtorName: share.debtorName,
+                        count: receivables.length,
+                        pendingLabel,
                       })}
                       target="_blank"
                       rel="noopener noreferrer"

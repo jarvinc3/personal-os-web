@@ -3,8 +3,12 @@ import { z } from "zod"
 import {
   isLedgerTargetInput,
   isDateTimeInput,
-  isPositiveAmountInput,
+  isPositiveRateInput,
 } from "@/src/modules/finance/shared/lib/ledger-form"
+import {
+  moneyAmountField,
+  optionalMoneyAmountField,
+} from "./money-amount-field.ts"
 
 export const TRANSFER_RAILS = ["SAME_BANK", "ACH", "LBTR", "OTHER"] as const
 export type TransferRail = (typeof TRANSFER_RAILS)[number]
@@ -18,11 +22,7 @@ export const TRANSFER_RAIL_LABEL: Record<TransferRail, string> = {
 
 export const transferSchema = z
   .object({
-    amount: z
-      .string()
-      .trim()
-      .min(1, "Monto obligatorio")
-      .refine(isPositiveAmountInput, "Monto mayor que cero"),
+    amount: moneyAmountField(),
     currency: z.string().trim().min(3, "Moneda obligatoria").max(3),
     transactionDate: z
       .string()
@@ -35,13 +35,15 @@ export const transferSchema = z
     status: z.enum(["PENDING", "CONFIRMED"]),
     destinationPending: z.boolean(),
     rail: z.union([z.literal(""), z.enum(TRANSFER_RAILS)]),
-    feeAmount: z
+    feeAmount: optionalMoneyAmountField("Monto de comisión inválido"),
+    exchangeRate: z
       .string()
       .trim()
       .refine(
-        (value) => value === "" || isPositiveAmountInput(value),
-        "Monto de comisión inválido"
+        (value) => value === "" || isPositiveRateInput(value),
+        "Tasa inválida"
       ),
+    receivedAmount: optionalMoneyAmountField("Monto recibido inválido"),
     description: z.string(),
     notes: z.string(),
   })

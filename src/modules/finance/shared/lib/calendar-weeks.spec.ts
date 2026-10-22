@@ -1,7 +1,14 @@
 import assert from "node:assert/strict"
 import { describe, it } from "node:test"
 
-import { formatClippedWeekLabel, weeksForMonth } from "./calendar-weeks.ts"
+import {
+  formatClippedWeekLabel,
+  weeksForMonth as weeksForMonthAt,
+} from "./calendar-weeks.ts"
+
+function weeksForMonth(year: number, month: number) {
+  return weeksForMonthAt({ year, month, weekStartsOn: 0 })
+}
 
 describe("weeksForMonth", () => {
   it("clips April 2026 from Wednesday 1 to Saturday 4 on the first week", () => {
@@ -29,6 +36,15 @@ describe("weeksForMonth", () => {
     for (const week of weeks) {
       assert.equal(week.start.getMonth(), week.end.getMonth())
     }
+  })
+
+  it("starts the week on Monday when the profile asks for it", () => {
+    const weeks = weeksForMonthAt({
+      year: 2026,
+      month: 4,
+      weekStartsOn: 1,
+    })
+    assert.equal(weeks[0]?.label, "mie 1 - dom 5")
   })
 })
 

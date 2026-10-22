@@ -2,16 +2,360 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
-## [Sin publicar]
+## [0.58.1] - 2026-10-21
+
+### Corregido
+
+- Guardar una preferencia de Apariencia usa la mutación del perfil: si falla la red, la hoja sigue abierta con el aviso y el borrador se puede reintentar o descartar (#160).
+
+## [0.58.0] - 2026-10-21 - Apariencia
+
+### Agregado
+
+- Apariencia separa modo, estilo visual y color primario. El estilo se elige en un selector con vista previa y el registro permite agregar estilos sin tocar componentes (#160).
+- El color primario se elige de una paleta curada o con el selector de color; el texto sobre él se ajusta para mantener contraste (#160).
+- La apariencia se guarda en el perfil con versión y se aplica antes del primer pintado en el mismo dispositivo (#160).
+
+### Corregido
+
+- Cancelar en la hoja de modo cierra la hoja y revierte el cambio, sin salir de Apariencia (#160).
+
+## [0.57.0] - 2026-10-21 - Préstamos y metas
+
+### Agregado
+
+- El asistente de préstamo acepta un nombre o alias opcional y la cuenta donde entró el capital; la lista y el detalle prefieren el alias y muestran la cuenta de desembolso (#181, #182).
+- El detalle de una meta de ahorro muestra su cuenta asociada y el monto apartado, y ofrece **Retirar** con cuenta de destino; el historial distingue aportes y retiros (#188, #189).
+- El detalle de la institución **Efectivo** tiene menú propio, pestañas **Cuentas** y **Préstamos** (solo lectura, préstamos sin banco) y el saldo por moneda vive en el header (#213).
+
+### Cambiado
+
+- El alta de un préstamo avisa cuando el capital no entró a ninguna cuenta.
+- Un retiro mayor a lo apartado se bloquea con el máximo visible.
+- Aportes, retiros y desembolsos refrescan las cuentas y el patrimonio.
+
+## [0.56.1] - 2026-10-21
+
+### Corregido
+
+- El detalle de institución muestra el saldo por moneda cuando hay más de una y, con una sola moneda distinta de la base, lo muestra en esa moneda. El hero, la tarjeta y el detalle usan las mismas líneas nativas.
+
+## [0.56.0] - 2026-10-21 - Operación diaria
+
+### Agregado
+
+- Al registrar un gasto, si su categoría tiene presupuesto vigente y el gasto supera lo disponible, la app muestra el exceso y pide confirmación antes de guardar (#198).
+- Movimientos agrega una sección **Programados** con la próxima cuota de cada préstamo y los próximos cobros de las suscripciones, sin alterar los totales del mes (#210).
+- Productos y Suscripciones agrupan los totales por moneda cuando hay más de una, en vez de mostrar una cifra única convertida (#178, #183).
+
+### Cambiado
+
+- Las tarjetas de institución muestran una línea de balance por moneda; el hero de Productos y el resumen de Suscripciones hacen lo mismo (#178, #183).
+- Los importes de cada moneda se muestran en su propia moneda, sin conversión, y los cobros dudosos siguen fuera del patrimonio.
+
+## [0.55.0] - 2026-10-21 - Patrimonio
+
+### Agregado
+
+- Vista de patrimonio en `/finance/wealth`, con el total, **Disponible** y **Por cobrar**, y el desglose por moneda de cuentas, efectivo, cobros, tarjetas y préstamos (#218, #173).
+- El patrimonio incluye los cobros vigentes y muestra los cobros vencidos hace más de 90 días en un bloque **Dudosos** que no suma; la decisión queda en el ADR-005 (#207).
+- Indicadores **Descuadres** y **Sin conciliar** con sus hojas, la diferencia por producto y las acciones Recalcular y Revisar movimientos (#215).
+- Los «?» de descuadre, conciliación, patrimonio y dudosos abren la entrada del glosario del Centro de ayuda (#229, #219).
+- Las tarjetas de institución y de efectivo muestran un punto rojo si hay descuadre y uno ámbar si falta conciliar (#215).
+
+### Cambiado
+
+- El detalle de cuenta y de tarjeta usa el mismo aviso compacto de irregularidades; se eliminan las cards rojas y los badges sin acción (#215).
+- El detalle de institución muestra los indicadores de sus productos (#215).
+
+## [0.54.2] - 2026-10-21
+
+### Corregido
+
+- Un gasto que deja una cuenta de efectivo en negativo se bloquea con el saldo disponible; en una cuenta bancaria, la app muestra el saldo que quedaría y pide confirmación antes de guardar (#193).
+
+## [0.54.1] - 2026-10-21
+
+### Cambiado
+
+- Interno: el Centro de ayuda comparte el estilo de sus enlaces y normaliza una sola vez el término de la URL. Sin cambio de comportamiento.
+
+## [0.54.0] - 2026-10-21
+
+### Agregado
+
+- Centro de ayuda en `/help` con glosario buscable, guías paso a paso y preguntas frecuentes, con entrada desde Ajustes → Ayuda (#227).
+- Glosario de los conceptos que aparecen en pantalla, con sinónimos, términos relacionados y enlace directo por término en `/help/glossary?term=…` (#228).
+- Guías de instalación en Android, iPhone y escritorio, y primeros pasos (#230).
+- Guías de Finanzas y Ajustes: conectar el correo, conciliar, importar un estado de cuenta, presupuestos, metas de ahorro, préstamos, cobros, tarjetas, suscripciones y notificaciones (#231).
+- Preguntas frecuentes agrupadas por cuenta, finanzas, correo, notificaciones y privacidad; las respuestas enlazan al glosario y a las guías (#232).
+
+### Cambiado
+
+- La sección «Módulos» de Ajustes pasa a llamarse «Apps», como el resto de la interfaz.
+- La búsqueda sin mayúsculas ni acentos vive en `src/shared/lib/search-text.ts` y la comparten Finanzas y el Centro de ayuda.
+
+## [0.53.0] - 2026-10-21
+
+### Agregado
+
+- Preferencias regionales con el primer día de la semana en el perfil: los calendarios lo usan y Finanzas y Agenda dejan de tener su propio ajuste (#223).
+- Zona de peligro en Ajustes de Finanzas para vaciar solo los datos de ese módulo, con confirmación (#226).
+
+### Cambiado
+
+- Las fechas, las tasas, los porcentajes y los montos siguen el idioma y la región del perfil; la entrada de montos acepta coma o punto (#223).
+- Ajustes de Finanzas pasa a una lista corta con accesos a Categorías, Monedas y Conciliación y una hoja por sección; el Guardar sigue siendo único (#225).
+- Privacidad y datos vacía todos los datos desde una hoja con confirmación, sin selector de capas por módulo (#224).
+
+## [0.52.1] - 2026-10-21
+
+### Corregido
+
+- La hoja de Idioma muestra el idioma guardado al abrirse, aunque el perfil termine de cargar después; antes podía quedar seleccionado otro idioma (#222).
+
+## [0.52.0] - 2026-10-21
+
+### Cambiado
+
+- Ajustes se organiza como una lista de secciones: Perfil y cuenta, Preferencias regionales, Apariencia, Asistente IA, Notificaciones, Privacidad y datos, y Módulos. Cada sección abre su propia vista y se vuelve con la flecha (#222).
+- La zona horaria, el idioma y la moneda por defecto quedan en Preferencias regionales; el tema en Apariencia; los canales, el horario silencioso y el push en Notificaciones (#222).
+
+## [0.51.1] - 2026-10-21
+
+### Corregido
+
+- La gráfica de Productos separa activos y deudas: cada grupo suma 100 % por su cuenta, las deudas ocupan la mitad izquierda y el total conserva el signo del patrimonio neto. Con todo en cero muestra un estado vacío (#214).
+
+## [0.51.0] - 2026-10-21
+
+### Agregado
+
+- La lista de Apps dice «Pendiente de guardar» mientras el interruptor del panel está encendido sin guardar. Al guardar pasa a Activo y, si se descarta, vuelve a su estado real (#166).
+
+### Cambiado
+
+- El botón Guardar del panel de una app se destaca y la fila de activación avisa que falta guardar (#166).
+- Salir de los ajustes de una app con una activación sin guardar pide confirmación antes de descartarla (#166).
+
+## [0.50.1] - 2026-10-21
+
+### Corregido
+
+- Los totales de Cobros ya no cuentan un cobro con el monto ilegible como cero: la pantalla falla de forma explícita y nombra el cobro, en vez de mostrar una cifra inventada (#191).
+
+## [0.50.0] - 2026-10-21
+
+### Agregado
+
+- Cobros muestra arriba de la lista el total pendiente y el cobrado de cada moneda; se recalculan al crear o registrar un cobro y una moneda sin cobros no aparece (#191).
+
+### Corregido
+
+- Guardar el perfil cierra la hoja de inmediato y el nombre o el avatar se ven al instante: el PATCH sigue en segundo plano y, si falla, vuelve el valor anterior con un aviso (#168).
+
+## [0.49.6] - 2026-10-21
+
+### Corregido
+
+- «Marcar como pendiente» y «Reversar» piden confirmación antes de tocar el saldo: el aviso nombra el monto y la cuenta o tarjeta afectada, y al cancelar no cambia nada (#195).
+
+## [0.49.5] - 2026-10-21
+
+### Cambiado
+
+- El detalle de una suscripción se parte en encabezado, pestañas de resumen, pagos y precio, y acciones de estado; cada pestaña pide sus propios pagos (#154).
+- La lista de Planificación delega cada pestaña en su componente y el botón de crear en uno propio; la leyenda de lo que falta pasa a una lib con pruebas (#154).
+- Notificaciones separa filtros, lista agrupada, estado vacío, menú y hoja de configuración en archivos propios (#154).
+- El formulario de institución separa el catálogo del primer paso, el paso de productos, la tarjeta de vista previa y las secciones del formulario; la selección por grupos del borrado de datos pasa a una lib con pruebas (#154).
+
+Sin cambio de comportamiento visible.
+
+## [0.49.4] - 2026-10-21
+
+### Cambiado
+
+- La fecha con su interruptor de estado se escribe una sola vez y la usan el formulario de movimiento y el de transferencia; antes cada uno tenía su copia (#154).
+- Las secciones de importe de transferencia y de saldos de tarjeta, y el menú de la institución, reciben sus datos y acciones agrupados en vez de una lista larga de parámetros sueltos (#154).
+
+Sin cambio de comportamiento visible.
+
+## [0.49.3] - 2026-10-21
+
+### Corregido
+
+- Novedades lista la entrada de esta entrega con el sobrante de un cobro y el aviso de sobrepago; 0.49.2 se publicó sin esa entrada (#190, #154).
+
+## [0.49.2] - 2026-10-21
+
+### Corregido
+
+- Un separador de miles en el monto de un cobro deja de leerse como decimal: pagar 3,003 sobre 3,000 avisa que sobran DOP 3.00 en vez de una cifra absurda (#190).
+- El aviso de sobrepago muestra el sobrante en la moneda del cobro y deja elegir a qué otro cobro abierto va la diferencia; antes la opción «A otro cobro» no tenía destinatario y no se podía completar (#190).
+- El aviso ya no ofrece «A otro cobro» cuando no hay otro cobro abierto en esa moneda (#190).
+
+### Cambiado
+
+- Los formularios de movimiento, transferencia y tarjeta, el detalle de institución y el detalle de movimiento se parten en piezas de una sola responsabilidad. Rutas, formularios y mensajes no cambian (#154).
+
+## [0.49.1] - 2026-10-21
+
+### Corregido
+
+- Al pasar una cuenta a tipo Efectivo, el formulario deja la institución en Efectivo en vez de descartar en silencio el banco elegido un momento antes (#172).
+- El formulario de Gasto abre sin el selector de categorías desplegado, así que el campo Comercio queda visible; el selector aparece al tocar la categoría (#177).
+- Al confirmar el monto, el formulario sigue llevando al destino aunque la categoría se haya dejado para después (#177).
+
+## [0.49.0] - 2026-10-21
+
+### Agregado
+
+- La zona horaria del perfil se edita en Ajustes → Cuenta → Zona horaria, con buscador sobre todas las zonas del navegador (#162).
+- La primera vez que se abre la app, la zona se toma del navegador y queda guardada en el perfil; una zona elegida a mano nunca se sobrescribe (#162).
+
+### Corregido
+
+- Los movimientos se envían como instantes reales y se muestran en la zona del usuario, así que el ajuste de saldo que crea la conciliación deja de aparecer con otra hora (#211).
+- El historial de un instrumento y las transferencias muestran la hora en la zona del usuario, no la de UTC (#211).
+
+### Cambiado
+
+- El mes de Movimientos se corta por la zona del usuario en vez de por UTC, así que un movimiento de las 21:00 ya no cae en el mes siguiente (#211).
+
+## [0.48.0] - 2026-10-21
+
+### Agregado
+
+- La sección de instituciones de Productos se despliega en un carrusel horizontal con todas las cards y vuelve a la pila con animación de empaquetar y desempaquetar. La elección se guarda en el navegador y el carrusel arranca en la card que estaba al frente (#209).
+
+### Cambiado
+
+- La pila de instituciones se mueve con un deslizamiento horizontal: a la izquierda avanza, a la derecha retrocede, en bucle y con un rebote al cruzar un extremo; el scroll vertical de la página no la mueve. En escritorio responden las flechas izquierda y derecha, y Enter abre la card frontal (#209).
+- La sección de instituciones deja de ocultarse tras un encabezado colapsable: las cards quedan siempre a la vista y el encabezado solo lleva el título, la tendencia y el botón Desplegar o Apilar (#209).
+
+### Corregido
+
+- Las cards del carrusel de instituciones ya no se superponen y el toque abre la institución que se ve; el hueco entre cards no abre nada (#209).
+- El primer toque después de deslizar la pila abre la institución en vez de perderse (#209).
+
+## [0.47.10] - 2026-10-21
+
+### Corregido
+
+- El historial de una transferencia entre monedas muestra el monto recibido en la moneda de destino, con su signo y la tasa usada; el origen sigue mostrando lo que salió (#171).
+- El monto de un movimiento o de una transferencia se marca en el campo cuando lleva más de dos decimales o pasa del tope permitido, en vez de fallar con un mensaje genérico (#194).
+- Una cuenta de efectivo se guarda en Efectivo aunque el formulario venga de una institución de banco, sin el error genérico de antes (#172).
+
+## [0.47.9] - 2026-10-20
+
+### Cambiado
+
+- Interno: el selector de categorías solo comunica el nombre escrito; el presupuesto crea, elige y cierra. La creación deja de devolver un valor y separa la escritura de la lectura (#199).
+
+## [0.47.8] - 2026-10-20
+
+### Cambiado
+
+- Interno: el encabezado y los chips del banner de conciliación comparten una sola definición, y el alta de la categoría del presupuesto sale de la vista con un nombre propio. Sin cambio de comportamiento.
+
+### Corregido
+
+- El banner de productos sin conciliar desaparece cuando ya no queda ninguno, en vez de quedarse con el mensaje de todo conciliado (#205).
+
+## [0.47.7] - 2026-10-20
+
+### Cambiado
+
+- Interno: el asistente de préstamo se reparte en el cálculo del plan (con pruebas), los componentes de cada paso y un contenedor que solo orquesta (#154).
+
+### Corregido
+
+- El banner de productos sin conciliar muestra la cantidad que lista, resume los que no caben como «+N más» y lleva a conciliar el producto al tocarlo o al tocar un chip (#205).
+- El formulario de presupuesto ya no llega con una categoría elegida y el selector permite crear la categoría que se escribe (#199).
+
+## [0.47.6] - 2026-10-20
+
+### Cambiado
+
+- Interno: el enlace al formulario de movimiento recibe un objeto (`type`, `destination`, `returnTo`), el selector del reparto de conciliación reutiliza sus opciones y el detalle de cuenta nombra el instrumento antes de pintar la fila. Sin cambio visible.
+
+## [0.47.5] - 2026-10-20
+
+### Corregido
+
+- Al guardar un gasto o un ingreso, la app vuelve a Movimientos con el movimiento nuevo. Si el formulario se abrió desde una cuenta o una tarjeta, vuelve a ese detalle con el movimiento en su historial (#202).
+- Una meta de ahorro muestra el avance real por encima del objetivo y el excedente, en vez de quedarse en 100%; el formulario de aporte avisa cuánto quedaría por encima de la meta (#187).
+
+## [0.47.4] - 2026-10-20
 
 ### Agregado
 
 - Skill `archify` en `.agents/skills/archify/` (registrada en `skills-lock.json`) para generar diagramas de arquitectura.
 - Convenciones de issues en `docs/issue-conventions.md` y plantillas `.github/ISSUE_TEMPLATE/`.
+- Convenciones de issues: regla contra issues espejo entre repositorios y secciones «Notas técnicas» y «Definición de terminado» en `docs/issue-conventions.md` y en las plantillas `feature.yml` y `bug.yml`.
 
 ### Cambiado
 
 - `AGENTS.md` y `docs/README.md` enlazan las convenciones de issues y la nueva documentación. Sin cambios visibles en la app.
+- Interno: el detalle de cuenta y de tarjeta reutiliza la fila de Movimientos en vez de su propio render, y el signo de una transferencia sale del instrumento que la muestra.
+
+### Corregido
+
+- El formulario de una suscripción muestra «Cuenta o tarjeta» como campo visible, avisa al guardar cuando queda vacío y el detalle de la suscripción lo indica con la acción de asignarlo (#203).
+- El detalle de una cuenta y de una tarjeta usa el mismo tratamiento que Movimientos: los revertidos aparecen en gris con su badge y las transferencias con signo y color según el lado de la cuenta (#206).
+- El reparto de una conciliación muestra las etiquetas traducidas (Impuesto DGII, Otro) y el monto completo en su campo, sin truncar decimales ni el signo (#208).
+
+## [0.47.3] - 2026-10-20
+
+### Cambiado
+
+- Interno: el inicio del mes financiero sale a su propia sección en `settings/components/`, en vez de viajar dentro de los valores por defecto de captura. Sin cambio visible (#154).
+
+## [0.47.2] - 2026-10-20
+
+### Cambiado
+
+- Interno: el formulario de configuración de Finanzas se reparte en secciones por tema en `settings/components/`; el formulario queda como contenedor del estado y del envío. Sin cambio visible (#154).
+
+### Corregido
+
+- La sección de aplicaciones del sidebar muestra solo las apps activas del usuario, en el orden del registro, y se actualiza al activarlas o apagarlas. Keep Awake sigue fijo (#165).
+- La descripción del panel de Apariencia y las opciones de vista por defecto de Proyectos se leen en español: Tablero, Lista y Cronograma (#167).
+- El detalle de la tarjeta muestra la utilización real por encima del 100% y avisa del sobregiro cuando el disponible queda en negativo (#175).
+- El interés total del resumen del préstamo es la suma de las cuotas mostradas, y la última cuota aparece con su monto ajustado por el redondeo (#180).
+- El diálogo para eliminar un movimiento lo nombra por su descripción e indica el monto antes de confirmar (#196).
+
+## [0.47.1] - 2026-10-20
+
+### Cambiado
+
+- Interno: los tipos de Finanzas se agrupan por dominio en `shared/types/entities/` con un barrel, y el detalle de movimiento separa su bloque de transferencia y el aviso de reversión en componentes propios. Sin cambio visible (#154).
+
+## [0.47.0] - 2026-10-20
+
+### Agregado
+
+- El detalle de una transferencia ofrece Confirmar, Marcar como pendiente y Reversar. Marcar como pendiente devuelve los saldos y habilita la edición; Reversar deshace lo aplicado y deja el registro como revertido (#192).
+- Registrar el pago de una suscripción crea el gasto en su cuenta o tarjeta, lo vincula al historial del pago y avanza el próximo cobro. Sin método de pago no se registra (#197).
+
+### Corregido
+
+- El pago de una tarjeta aparece en Movimientos y en el historial de la cuenta y de la tarjeta; el saldo se puede reconstruir desde el historial (jarvinc3/personal-os-back#176).
+
+## [0.46.0] - 2026-10-20
+
+### Agregado
+
+- El formulario de una transferencia entre monedas muestra la tasa del día, permite escribir otra tasa o el monto que realmente recibiste y enseña cuánto entrará en la cuenta destino antes de guardar. El monto recibido manda sobre la tasa (#169).
+- El detalle de la transferencia muestra monto enviado, monto recibido y tasa. Si no indicaste ninguna, avisa que la tasa es la del día (#169).
+
+## [0.45.9] - 2026-10-20
+
+### Corregido
+
+- Al crear una tarjeta de crédito, la app envía la deuda del formulario como crédito disponible: con «Saldo al corte» 0 la tarjeta nace sin deuda y con el límite completo disponible. Un saldo vacío cuenta como 0 (#174).
+- La tarjeta de Finanzas en el inicio usa el mes completo, igual que Movimientos, así que incluye los movimientos registrados hoy y deja de mostrar 0.00 (#170).
+- El mensaje de WhatsApp de cobros se escribe desde quien presta: saluda por el primer nombre, indica cuántos cobros son y el pendiente de cada moneda, y cierra con el enlace (#161).
 
 ## [0.45.8] - 2026-10-20
 

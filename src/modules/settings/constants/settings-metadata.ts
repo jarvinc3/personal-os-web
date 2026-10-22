@@ -1,3 +1,4 @@
+import { HELP_ACCENT } from "@/src/modules/help"
 import type {
   AIPreferences,
   ThemeValue,
@@ -7,20 +8,24 @@ import {
   Bell,
   BookOpen,
   Bot,
+  CalendarRange,
   ChartBarIcon,
   ClockFading,
   Cpu,
   Eraser,
   Globe,
   Image,
+  Layers,
+  LifeBuoyIcon,
   Mail,
   Monitor,
   Moon,
-  Palette,
+  Pipette,
   ShieldCheck,
   Smartphone,
   Sparkles,
   Sun,
+  SunMoon,
   Trash2,
   User,
   Zap,
@@ -113,9 +118,15 @@ export const SETTINGS_REGISTRY = {
   account: createSection("#037cff", {
     fullName: User,
     avatar: Image,
+    timeZone: Globe,
+    weekStartsOn: CalendarRange,
   }),
   appearance: {
-    ...createSection("#F59E0B", { theme: Palette }),
+    ...createSection("#F59E0B", {
+      theme: SunMoon,
+      style: Layers,
+      primaryColor: Pipette,
+    }),
     themeOptions,
   },
   ai: {
@@ -143,6 +154,9 @@ export const SETTINGS_REGISTRY = {
   }),
   marketing: createSection("#037cff", {
     landingPage: Globe,
+  }),
+  help: createSection(HELP_ACCENT, {
+    center: LifeBuoyIcon,
   }),
   danger: createSection("#EF4444", {
     wipeData: Eraser,

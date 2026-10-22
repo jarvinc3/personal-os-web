@@ -155,16 +155,23 @@ describe("prefetchFinanceCurrentMonth", () => {
   it("writes the current month timeline key into cache", async () => {
     const queryClient = createQueryClient()
     const { get, paths } = createMockGet()
-    await prefetchFinanceCurrentMonth(queryClient, get, new Date(2026, 9, 5))
+    const laPaz = "America/La_Paz"
+    await prefetchFinanceCurrentMonth({
+      queryClient,
+      timeZone: laPaz,
+      get,
+      now: new Date(2026, 9, 5),
+    })
     assert.match(paths[0] ?? "", /\/finance\/transactions\?/)
-    assert.match(paths[0] ?? "", /dateFrom=2026-10-01/)
-    assert.match(paths[0] ?? "", /dateTo=2026-10-31/)
+    assert.match(paths[0] ?? "", /dateFrom=2026-10-01T04%3A00/)
+    assert.match(paths[0] ?? "", /dateTo=2026-11-01T03%3A59/)
     assert.ok(
       queryClient.getQueryState([
         ...FINANCE_TRANSACTIONS_QUERY_KEY,
         "timeline",
         "month",
         "2026-10",
+        laPaz,
       ])
     )
   })

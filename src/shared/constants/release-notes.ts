@@ -12,6 +12,262 @@ export type ReleaseNotesEntry = {
 
 export const RELEASE_NOTES: readonly ReleaseNotesEntry[] = [
   {
+    version: "0.58.1",
+    highlights: [
+      "Si falla el guardado de Apariencia, la hoja sigue abierta con el aviso y puedes reintentar o descartar el cambio.",
+    ],
+  },
+  {
+    version: "0.58.0",
+    highlights: [
+      "Apariencia ahora tiene tres ajustes: modo claro u oscuro, estilo visual y color primario.",
+      "Elige el color primario de una paleta o con el selector; el texto sobre ese color se ajusta solo para que se lea.",
+      "El estilo visual se elige con una vista previa y la app recuerda tu elección al recargar.",
+    ],
+  },
+  {
+    version: "0.57.0",
+    highlights: [
+      "Puedes ponerle un nombre a cada préstamo para distinguirlo, y elegir la cuenta donde entró el dinero: ese saldo sube y el patrimonio no baja por el capital recibido.",
+      "Cada meta de ahorro muestra en qué cuenta vive su dinero, y ahora puedes retirar lo apartado hacia la cuenta que elijas sin borrar el historial.",
+      "La vista de Efectivo queda propia de una institución del sistema: menú con Nueva cuenta, el saldo de cada moneda en el header y una pestaña Préstamos con los préstamos que no están ligados a un banco.",
+    ],
+  },
+  {
+    version: "0.56.1",
+    highlights: [
+      "El detalle de una institución muestra el saldo de cada moneda cuando tiene más de una, y con una sola moneda lo muestra en esa moneda, sin convertir.",
+    ],
+  },
+  {
+    version: "0.56.0",
+    highlights: [
+      "Al registrar un gasto, si te pasas del presupuesto de su categoría, la app te dice cuánto queda de exceso y te deja decidir si lo guardas igual.",
+      "Movimientos muestra los compromisos que ya conoces, como la próxima cuota de un préstamo o el próximo cobro de una suscripción, marcados como programados y sin cambiar los totales.",
+      "Si tienes cuentas o suscripciones en varias monedas, los totales de Productos y Suscripciones se muestran por moneda, sin convertir todo a una sola cifra.",
+    ],
+  },
+  {
+    version: "0.55.0",
+    highlights: [
+      "El patrimonio ahora tiene su propia vista: toca la cifra del balance en Productos para ver cuánto tienes disponible, cuánto te deben y qué debes, separado por moneda.",
+      "Los cobros pendientes suman al patrimonio; los vencidos hace más de 90 días se muestran aparte como dudosos y no suman.",
+      "Los avisos de descuadre y de productos sin conciliar ahora son dos indicadores con su lista y sus acciones, en vez de tarjetas rojas.",
+      "Los botones de ayuda de esos avisos abren el glosario del Centro de ayuda.",
+    ],
+  },
+  {
+    version: "0.54.2",
+    highlights: [
+      "Un gasto ya no deja una cuenta de efectivo en negativo: la app lo bloquea y te dice cuánto tienes disponible.",
+      "En una cuenta bancaria, si el gasto supera el saldo, la app muestra cómo quedaría la cuenta y pide confirmación antes de guardar.",
+    ],
+  },
+  {
+    version: "0.54.1",
+    highlights: [
+      "Sin cambios visibles: el Centro de ayuda queda igual por dentro, con los enlaces y la búsqueda más ordenados.",
+    ],
+  },
+  {
+    version: "0.54.0",
+    highlights: [
+      "Nuevo Centro de ayuda en Ajustes → Ayuda: glosario con buscador, guías paso a paso y preguntas frecuentes.",
+      "Cada término del glosario tiene su propio enlace y las guías y respuestas llevan al término que explican.",
+      "Guías para instalar la app en Android, iPhone y escritorio, y para conectar el correo, conciliar, presupuestar, ahorrar, prestar y cobrar.",
+      "La sección Módulos de Ajustes ahora se llama Apps.",
+    ],
+  },
+  {
+    version: "0.53.0",
+    highlights: [
+      "El primer día de la semana se elige en Preferencias › Región y lo usan los calendarios. Finanzas y Agenda ya no guardan uno propio.",
+      "Las fechas, las tasas y los montos respetan el idioma y la región de tu perfil, y puedes escribir montos con coma o punto.",
+      "Ajustes de Finanzas ahora es una lista corta: Categorías, Monedas y Conciliación, y cada sección abre su propia hoja.",
+      "En Privacidad y datos, vaciar todo abre una hoja que explica qué se borra y pide tu contraseña o tu cuenta de Google.",
+      "Ajustes de Finanzas tiene su propia zona de peligro para vaciar solo los datos de ese módulo.",
+    ],
+  },
+  {
+    version: "0.52.1",
+    highlights: [
+      "La hoja de Idioma muestra el idioma guardado al abrirse, incluso si el perfil tarda en cargar.",
+    ],
+  },
+  {
+    version: "0.52.0",
+    highlights: [
+      "Ajustes ahora es una lista de secciones: Perfil y cuenta, Preferencias regionales, Apariencia, Asistente IA, Notificaciones, Privacidad y datos, y Módulos.",
+      "Cada sección abre su propia pantalla y puedes volver con la flecha; la zona horaria, el idioma y la moneda quedan juntos en Preferencias regionales.",
+    ],
+  },
+  {
+    version: "0.51.1",
+    highlights: [
+      "En Productos, la gráfica ya no se rompe con saldos negativos: lo que tienes va a un lado y lo que debes al otro, cada grupo con su porcentaje.",
+      "El centro sigue mostrando el patrimonio neto con su signo, y si todo está en cero aparece un estado vacío.",
+    ],
+  },
+  {
+    version: "0.51.0",
+    highlights: [
+      "La lista de Apps ya no dice Activo antes de tiempo: mientras el interruptor está encendido sin guardar, esa app aparece como «Pendiente de guardar».",
+      "El botón Guardar se destaca mientras falta guardar y, si sales del panel, la app pide confirmación antes de descartar el cambio.",
+    ],
+  },
+  {
+    version: "0.50.1",
+    highlights: [
+      "Si los datos de un cobro llegan rotos, los totales de Cobros avisan en vez de mostrar una cifra inventada.",
+    ],
+  },
+  {
+    version: "0.50.0",
+    highlights: [
+      "En Cobros ves arriba de la lista cuánto te deben y cuánto ya cobraste, separado por moneda.",
+      "Guardar el perfil ya no espera: el nombre o el avatar cambian al instante y, si algo falla, vuelve el valor anterior con un aviso.",
+    ],
+  },
+  {
+    version: "0.49.6",
+    highlights: [
+      "Marcar un movimiento como pendiente o reversarlo ahora pide confirmación y avisa el monto y la cuenta que cambia.",
+    ],
+  },
+  {
+    version: "0.49.5",
+    highlights: [
+      "Sin cambios visibles: las pantallas de Planificación, Notificaciones, Suscripciones y el formulario de institución quedan iguales por dentro, ordenadas en piezas más pequeñas.",
+    ],
+  },
+  {
+    version: "0.49.4",
+    highlights: [
+      "Sin cambios visibles: los formularios de movimiento y de transferencia comparten internamente la fecha y su interruptor de estado.",
+    ],
+  },
+  {
+    version: "0.49.3",
+    highlights: [
+      "El aviso de sobrepago de un cobro muestra el sobrante real y deja elegir a qué otro cobro va la diferencia.",
+      "Un monto escrito con separador de miles se lee completo: 3,003 sobre 3,000 avisa que sobran 3.00.",
+    ],
+  },
+  {
+    version: "0.49.1",
+    highlights: [
+      "El formulario de Gasto abre completo: la categoría se elige cuando la tocas y el campo Comercio queda a la vista.",
+      "Si pasas una cuenta a Efectivo, la institución queda en Efectivo sin perder lo demás que escribiste.",
+    ],
+  },
+  {
+    version: "0.49.0",
+    highlights: [
+      "Ya puedes elegir tu zona horaria en Ajustes, Cuenta, Zona horaria; la primera vez se toma del navegador.",
+      "Las horas de Finanzas se muestran en tu zona, incluido el ajuste de saldo que crea la conciliación.",
+    ],
+  },
+  {
+    version: "0.48.0",
+    highlights: [
+      "En Productos, las instituciones se mueven con un deslizamiento horizontal y el botón Desplegar las abre en fila para verlas todas.",
+      "La pila vuelve a empezar donde la dejaste y recuerda si prefieres verla apilada o desplegada.",
+    ],
+  },
+  {
+    version: "0.47.10",
+    highlights: [
+      "Al ver una transferencia entre monedas, cada cuenta muestra su propio monto: lo que salió y lo que llegó, con la tasa usada.",
+      "Si un monto lleva más de dos decimales o pasa del máximo, el campo te lo dice antes de guardar.",
+      "Una cuenta de efectivo se guarda siempre en Efectivo, aunque la estés creando desde un banco.",
+    ],
+  },
+  {
+    version: "0.47.9",
+    highlights: [
+      "Al crear una categoría desde el presupuesto, la hoja se cierra y la categoría queda elegida.",
+    ],
+  },
+  {
+    version: "0.47.8",
+    highlights: [
+      "Cuando ya conciliaste todos los productos del mes, el aviso de productos sin conciliar deja de aparecer.",
+    ],
+  },
+  {
+    version: "0.47.7",
+    highlights: [
+      "El aviso de productos sin conciliar cuenta lo mismo que muestra, resume los que sobran con «+N más» y te lleva a conciliar el producto con un toque.",
+      "Al crear un presupuesto ya no aparece una categoría elegida: la eliges tú, y si escribes una que no existe puedes crearla desde el mismo selector.",
+    ],
+  },
+  {
+    version: "0.47.6",
+    highlights: [
+      "Sin cambios visibles: ajustes internos en el formulario de movimientos y en el reparto de conciliación para que sea más fácil mantenerlos.",
+    ],
+  },
+  {
+    version: "0.47.5",
+    highlights: [
+      "Al guardar un gasto o un ingreso vuelves a Movimientos con el movimiento que acabas de registrar. Si abriste el formulario desde una cuenta o una tarjeta, vuelves a esa pantalla con el movimiento en su historial.",
+      "Una meta de ahorro que pasa de su objetivo muestra el avance real y cuánto es el excedente. Al registrar un aporte que se pasa de la meta, la app te avisa antes de guardarlo.",
+    ],
+  },
+  {
+    version: "0.47.4",
+    highlights: [
+      "En el formulario de una suscripción, la cuenta o la tarjeta se ve a simple vista. Si la dejas vacía, la app te avisa: los pagos que registres no moverán ningún saldo hasta que la asignes, y el detalle te deja hacerlo.",
+      "El historial de una cuenta y de una tarjeta marca los movimientos revertidos en gris con su etiqueta, y muestra si una transferencia entró o salió, con signo y color.",
+      "El reparto de una conciliación muestra los nombres en español (Impuesto DGII, Comisión, Otro) y el monto completo, sin cortar los decimales.",
+    ],
+  },
+  {
+    version: "0.47.3",
+    highlights: [
+      "Sin cambios visibles: orden interno de la configuración de Finanzas para que sea más fácil de mantener.",
+    ],
+  },
+  {
+    version: "0.47.2",
+    highlights: [
+      "El menú lateral muestra solo las apps que tienes activas, en el mismo orden de siempre, y se actualiza al encenderlas o apagarlas. Keep Awake sigue fijo.",
+      "La descripción de Apariencia y las opciones de vista de Proyectos ya se leen en español: Tablero, Lista y Cronograma.",
+      "El detalle de la tarjeta muestra la utilización real aunque la deuda pase del límite, y avisa cuánto es el sobregiro.",
+      "El resumen del préstamo cuadra el interés total con las cuotas que ves, y la última cuota aparece con su monto ajustado.",
+      "Al eliminar un movimiento, el diálogo lo nombra por su descripción e indica el monto antes de confirmar.",
+    ],
+  },
+  {
+    version: "0.47.1",
+    highlights: [
+      "Sin cambios visibles: orden interno de los tipos y del detalle de movimiento para que sea más fácil mantenerlos.",
+    ],
+  },
+  {
+    version: "0.47.0",
+    highlights: [
+      "El detalle de una transferencia permite confirmarla, marcarla como pendiente para editarla o reversarla. Al reversar, los saldos vuelven a su lugar.",
+      "Registrar el pago de una suscripción ya crea el gasto en su cuenta o tarjeta y lo cuenta en el mes. Si la suscripción no tiene método de pago, la app te pide asignarlo primero.",
+      "Los pagos de tarjeta aparecen en Movimientos y en el historial de la cuenta y de la tarjeta.",
+    ],
+  },
+  {
+    version: "0.46.0",
+    highlights: [
+      "Al transferir entre monedas ya ves la tasa del día y puedes escribir la que usó el banco o el monto que recibiste. Antes de guardar ves cuánto entrará en la cuenta destino.",
+      "El detalle de la transferencia muestra lo enviado, lo recibido y la tasa. Si dejaste la tasa del día, te avisa que es una estimación.",
+    ],
+  },
+  {
+    version: "0.45.9",
+    highlights: [
+      "Al crear una tarjeta de crédito ya queda con la deuda que escribes, no con el límite completo. Un saldo vacío cuenta como 0.",
+      "La tarjeta de Finanzas del inicio muestra los mismos ingresos y gastos del mes que Movimientos, incluidos los de hoy.",
+      "El mensaje de WhatsApp de cobros saluda por el primer nombre, dice cuántos cobros son y cuánto deben en cada moneda.",
+    ],
+  },
+  {
     version: "0.45.8",
     highlights: [
       "El detalle de un préstamo ya abre siempre: si una cuota llega sin un capital legible, el plan de amortización muestra esa fila y deja el saldo restante en blanco, en vez de caer en una pantalla de error.",

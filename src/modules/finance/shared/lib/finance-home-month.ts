@@ -14,17 +14,21 @@ export type FinanceExpenseTrend = {
 
 const CONSIDERABLE_DROP_PERCENT = -30
 
-const EXPENSE_TREND_PERCENT_FORMATTER = new Intl.NumberFormat("en-US", {
-  style: "percent",
-  minimumFractionDigits: 1,
-  maximumFractionDigits: 1,
-  signDisplay: "exceptZero",
-})
+function expenseTrendPercentFormatter(locale: string) {
+  return new Intl.NumberFormat(locale, {
+    style: "percent",
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+    signDisplay: "exceptZero",
+  })
+}
 
-export function expenseTrend(
-  currentExpenses: string,
+export function expenseTrend(input: {
+  currentExpenses: string
   previousExpenses: string
-): FinanceExpenseTrend | null {
+  locale: string
+}): FinanceExpenseTrend | null {
+  const { currentExpenses, previousExpenses, locale } = input
   const current = parseFinanceMoney(currentExpenses)
   const previous = parseFinanceMoney(previousExpenses)
   if (current === null || previous === null || previous <= 0) {
@@ -41,7 +45,7 @@ export function expenseTrend(
   if (changePercent === 0) {
     return { label: "0%", direction: "flat", tone: "neutral" }
   }
-  const label = EXPENSE_TREND_PERCENT_FORMATTER.format(changePercent / 100)
+  const label = expenseTrendPercentFormatter(locale).format(changePercent / 100)
   if (changePercent > 0) {
     return {
       label,

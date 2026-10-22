@@ -43,7 +43,7 @@ ModuleAppNav = {
 6. Título: o bien `PAGE_TITLES` / `startsWith` en `app-header.tsx`, o `usePageHeader` en la página.
 7. Documentar en `docs/modules/<slug>/` y listar en `docs/modules/README.md`.
 
-Hoy el único `ModuleAppNav` cableado es `FINANCE_APP_NAV`.
+Hoy el único `ModuleAppNav` cableado es `FINANCE_APP_NAV`. El Centro de ayuda (`/help`) tiene rutas propias, pero no es un módulo de producto: no declara nav ni tab bar.
 
 ## Chrome: dos superficies
 

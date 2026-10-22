@@ -126,7 +126,7 @@ export function LoanAmortizationSheet({
                       </span>
                     </td>
                     <td className="py-2 pr-3 whitespace-nowrap text-muted-foreground">
-                      {formatCalendarDate(row.dueDate)}
+                      {formatCalendarDate(row.dueDate, display.locale)}
                     </td>
                     <td className="py-2 pr-3 text-right tabular-nums">
                       {formatFinanceMoney(row.principal, display)}

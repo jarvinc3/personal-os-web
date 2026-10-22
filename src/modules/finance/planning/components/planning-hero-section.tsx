@@ -29,7 +29,7 @@ type FinancePlanningHeroSectionProps = {
 export function FinancePlanningHeroSection({
   activeTab,
 }: FinancePlanningHeroSectionProps) {
-  const { isEnabled, config } = useFinanceEnabled()
+  const { isEnabled, config, formatLocale } = useFinanceEnabled()
   const [displayedTab, setDisplayedTab] = useState<PlanningTab>(activeTab)
 
   const savingsQuery = useSavingsGoals(isEnabled)
@@ -41,6 +41,7 @@ export function FinancePlanningHeroSection({
     currency: config.baseCurrency,
     showCents: config.display.showCents,
     compactNumbers: config.display.compactNumbers,
+    locale: formatLocale,
   }
   const tabItem = planningTabItem(displayedTab)
   const totalSource = {
@@ -71,8 +72,8 @@ export function FinancePlanningHeroSection({
       tabIcon={tabItem.icon}
       tabColor={tabItem.color}
       totalAmount={totalAmount}
-      sendHref={financeTransactionNewHref("DEBIT")}
-      receiveHref={financeTransactionNewHref("CREDIT")}
+      sendHref={financeTransactionNewHref({ type: "DEBIT" })}
+      receiveHref={financeTransactionNewHref({ type: "CREDIT" })}
       transferHref={APP_ROUTES.app.financeTransferNew}
       onCyclePress={() =>
         setDisplayedTab((current) => nextPlanningTab(current))

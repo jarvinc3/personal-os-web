@@ -8,13 +8,19 @@ import {
   formatFinanceMoney,
   type FinanceMoneyDisplay,
 } from "@/src/modules/finance/shared/lib/money"
+import {
+  crossCurrencyRate,
+  transferRateLabel,
+} from "@/src/modules/finance/transactions/lib/transfer-fx"
 import { formatFinanceTimeLabel } from "@/src/modules/finance/shared/lib/ledger-form"
 import {
+  displayedMovementSign,
   isInactiveTransactionStatus,
   isTransferTransaction,
-  movementSign,
+  OPERATION_LEG_ROLE,
   signedAmount,
   transferDirectionLabel,
+  type FinanceInstrumentRef,
 } from "@/src/modules/finance/shared/lib/transactions-query"
 import {
   FINANCE_TRANSACTION_STATUS_LABEL,
@@ -42,6 +48,8 @@ type TransactionMovementRowProps = {
   trailing?: ReactNode
   onPress?: () => void
   href?: string
+  /** Account or card the movement is read from; signs transfers from its side. */
+  instrument?: FinanceInstrumentRef
 }
 
 export function TransactionMovementRow({
@@ -54,6 +62,7 @@ export function TransactionMovementRow({
   trailing,
   onPress,
   href,
+  instrument,
 }: TransactionMovementRowProps) {
   const categoryById = new Map(
     categories.map((category) => [category.id, category] as const)
@@ -73,6 +82,12 @@ export function TransactionMovementRow({
   const color = isTransfer
     ? "#3B82F6"
     : category?.color?.trim() || parent?.color?.trim() || "#64748B"
+  const sign = displayedMovementSign(transaction, instrument)
+  const crossRate =
+    isTransfer && instrument ? crossCurrencyRate(transaction) : null
+  const rateLabel = crossRate
+    ? transferRateLabel({ ...crossRate, locale: display.locale })
+    : null
   const title = isTransfer
     ? transferDirectionLabel(transaction)
     : (transaction.merchantName ??
@@ -80,7 +95,9 @@ export function TransactionMovementRow({
       transaction.description ??
       transaction.accountName ??
       "Movimiento")
-  const feeLeg = transaction.legs?.find((leg) => leg.legRole === "FEE")
+  const feeLeg = transaction.legs?.find(
+    (leg) => leg.legRole === OPERATION_LEG_ROLE.FEE
+  )
   const instrumentLine =
     transaction.accountName || transaction.cardName ? (
       <TransactionInstrument
@@ -144,9 +161,7 @@ export function TransactionMovementRow({
           <ScaleIcon
             className={cn(
               "size-5",
-              movementSign(transaction) === "−"
-                ? "text-destructive"
-                : "text-success"
+              sign === "−" ? "text-destructive" : "text-success"
             )}
           />
         ) : null}
@@ -157,17 +172,18 @@ export function TransactionMovementRow({
         <div className="flex flex-col items-end">
           <span
             className={cn(
-              !isTransfer &&
-                movementSign(transaction) === "−" &&
-                "text-destructive",
-              !isTransfer &&
-                movementSign(transaction) === "+" &&
-                "text-success",
+              sign === "−" && "text-destructive",
+              sign === "+" && "text-success",
               isInactive && "text-muted-foreground line-through opacity-50"
             )}
           >
-            {signedAmount(transaction, display)}
+            {signedAmount({ transaction, display, instrument })}
           </span>
+          {rateLabel ? (
+            <span className="text-[11px] text-muted-foreground tabular-nums">
+              {rateLabel}
+            </span>
+          ) : null}
           {hasStatusBadge ? (
             <span className="flex flex-col items-end gap-1 font-normal">
               {transaction.possibleDuplicateOfId ? (
