@@ -14,7 +14,7 @@ export const RELEASE_NOTES: readonly ReleaseNotesEntry[] = [
   {
     version: "0.58.2",
     highlights: [
-      "Sin cambios visibles: la configuración de desarrollo y los secretos quedan documentados en el repositorio.",
+      "Sin cambios visibles: esta versión solo ajusta detalles internos del proyecto.",
     ],
   },
   {
