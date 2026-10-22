@@ -2,6 +2,18 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.58.0] - 2026-10-21 - Apariencia
+
+### Agregado
+
+- Apariencia separa modo, estilo visual y color primario. El estilo se elige en un selector con vista previa y el registro permite agregar estilos sin tocar componentes (#160).
+- El color primario se elige de una paleta curada o con el selector de color; el texto sobre él se ajusta para mantener contraste (#160).
+- La apariencia se guarda en el perfil con versión y se aplica antes del primer pintado en el mismo dispositivo (#160).
+
+### Corregido
+
+- Cancelar en la hoja de modo cierra la hoja y revierte el cambio, sin salir de Apariencia (#160).
+
 ## [0.57.0] - 2026-10-21 - Préstamos y metas
 
 ### Agregado

@@ -12,6 +12,14 @@ export type ReleaseNotesEntry = {
 
 export const RELEASE_NOTES: readonly ReleaseNotesEntry[] = [
   {
+    version: "0.58.0",
+    highlights: [
+      "Apariencia ahora tiene tres ajustes: modo claro u oscuro, estilo visual y color primario.",
+      "Elige el color primario de una paleta o con el selector; el texto sobre ese color se ajusta solo para que se lea.",
+      "El estilo visual se elige con una vista previa y la app recuerda tu elección al recargar.",
+    ],
+  },
+  {
     version: "0.57.0",
     highlights: [
       "Puedes ponerle un nombre a cada préstamo para distinguirlo, y elegir la cuenta donde entró el dinero: ese saldo sube y el patrimonio no baja por el capital recibido.",
