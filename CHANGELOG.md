@@ -2,6 +2,16 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.58.2] - 2026-10-22
+
+### Agregado
+
+- Interno: `.infisical.json` y `pnpm env:pull` traen las variables locales del proyecto `personal-os`; `docs/operations/runbook.md` documenta que Infisical es la fuente de verdad y que Vercel se llena por sync.
+
+### Eliminado
+
+- Interno: se retira `docs/resumen-issues-2026-10-18.md`, desactualizado.
+
 ## [0.58.1] - 2026-10-21
 
 ### Corregido
