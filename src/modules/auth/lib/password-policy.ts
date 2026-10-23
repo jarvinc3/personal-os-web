@@ -1,7 +1,7 @@
 import { z } from "zod"
 
 /** Mirrors the Supabase Auth password policy configured for the project. */
-export const PASSWORD_MIN_LENGTH = 10
+export const PASSWORD_MIN_LENGTH = 6
 
 export const passwordPolicySchema = z
   .string()
