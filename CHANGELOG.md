@@ -2,6 +2,18 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.58.7] - 2026-10-22
+
+### Corregido
+
+- Las fechas de Finanzas usan la abreviatura española de la app (`18 sep 2026`) en vez de la del ICU (`sept`) o el ISO; el detalle de un cobro, una meta o una suscripción ya no muestra `2026-11-20` (#245).
+- El detalle de un movimiento muestra el comercio tal como se escribió, aunque exista un nombre canónico (#245).
+- Las etiquetas de las celdas de elección y del menú de acciones caben completas en 390 px: «Arrastra sobrante y déficit», «Semestral», «Transferir», «Préstamo» y «Actualizar» dejan de recortarse (#245).
+- La dona del calendario de suscripciones muestra el total completo en vez de truncarlo (#245).
+- La insignia de estado de las cabeceras de color se lee sobre el fondo (#245).
+- Editar una suscripción abre con el selector de fecha cerrado (#245).
+- El formulario de alta de un movimiento mantiene `?type` en la URL acorde con el tipo elegido (#245).
+
 ## [0.58.6] - 2026-10-22
 
 ### Corregido
