@@ -144,7 +144,8 @@ export type FinanceBalanceSheet = {
   global: FinanceBalanceSheetSlice
   institutions: Array<FinanceBalanceSheetSlice & { institutionId: string }>
   cash: FinanceCashSummary
-  breakdown: FinanceBalanceSheetBreakdown
+  /** Absent while the API serving the client predates the per-currency breakdown. */
+  breakdown?: FinanceBalanceSheetBreakdown
 }
 
 export type FinanceAccount = {

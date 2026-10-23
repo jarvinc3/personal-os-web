@@ -4,6 +4,7 @@ import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
 import { receivableTotalsByCurrency } from "@/src/modules/finance/receivables/lib/receivable-totals"
 import type { FinanceReceivable } from "@/src/modules/finance/shared/types/entities"
+import { InfoIcon } from "lucide-react"
 
 type ReceivableTotalsStripProps = {
   receivables: readonly FinanceReceivable[]
@@ -15,8 +16,8 @@ export function ReceivableTotalsStrip({
   receivables,
   display,
 }: ReceivableTotalsStripProps) {
-  const totals = receivableTotalsByCurrency(receivables)
-  if (totals.length === 0) {
+  const { totals, unreadableIds } = receivableTotalsByCurrency(receivables)
+  if (totals.length === 0 && unreadableIds.length === 0) {
     return null
   }
 
@@ -43,6 +44,17 @@ export function ReceivableTotalsStrip({
           </div>
         )
       })}
+
+      {unreadableIds.length > 0 ? (
+        <p className="flex items-start gap-2 text-xs text-muted-foreground">
+          <InfoIcon className="mt-0.5 size-4 shrink-0" />
+          <span>
+            {unreadableIds.length === 1
+              ? "Un cobro no se pudo leer y no suma a los totales."
+              : `${unreadableIds.length} cobros no se pudieron leer y no suman a los totales.`}
+          </span>
+        </p>
+      ) : null}
     </div>
   )
 }

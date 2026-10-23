@@ -7,16 +7,72 @@ export type ReceivableCurrencyTotals = {
   collected: number
 }
 
+export type ReceivableTotals = {
+  totals: ReceivableCurrencyTotals[]
+  /** Receivables the API sent with an unreadable amount; they never sum. */
+  unreadableIds: string[]
+}
+
+export type ReceivableMoney = {
+  amount: number
+  paid: number
+  credit: number
+  writtenOff: number
+}
+
+/**
+ * Every amount a receivable carries, or null when one of them is unreadable.
+ * A single broken amount must not throw and take the whole list down.
+ */
+export function receivableMoney(
+  receivable: FinanceReceivable
+): ReceivableMoney | null {
+  const amount = parseFinanceMoney(receivable.amount)
+  const paid = parseFinanceMoney(receivable.paidAmount)
+  const credit = parseFinanceMoney(receivable.creditBalance)
+  const writtenOff = parseFinanceMoney(receivable.writtenOffAmount)
+  if (
+    amount === null ||
+    paid === null ||
+    credit === null ||
+    writtenOff === null
+  ) {
+    return null
+  }
+  return { amount, paid, credit, writtenOff }
+}
+
+function pendingFromMoney(money: ReceivableMoney): number {
+  return Math.max(
+    0,
+    money.amount - money.paid - money.credit - money.writtenOff
+  )
+}
+
+/** What a receivable still owes after payments, credited and written-off money. */
+export function receivablePendingAmount(
+  receivable: FinanceReceivable
+): number | null {
+  const money = receivableMoney(receivable)
+  return money === null ? null : pendingFromMoney(money)
+}
+
 /**
  * Pending and collected money per currency. A receivable only adds to its own
  * currency, and a partial payment splits between both totals.
  */
 export function receivableTotalsByCurrency(
   receivables: readonly FinanceReceivable[]
-): ReceivableCurrencyTotals[] {
+): ReceivableTotals {
   const byCurrency = new Map<string, ReceivableCurrencyTotals>()
+  const unreadableIds: string[] = []
 
   for (const receivable of receivables) {
+    const money = receivableMoney(receivable)
+    if (money === null) {
+      unreadableIds.push(receivable.id)
+      continue
+    }
     const currency = receivable.currency.toUpperCase()
     const totals = byCurrency.get(currency) ?? {
       currency,
@@ -25,35 +81,13 @@ export function receivableTotalsByCurrency(
     }
     byCurrency.set(currency, {
       currency,
-      pending: totals.pending + pendingAmount(receivable),
-      collected:
-        totals.collected + (parseFinanceMoney(receivable.paidAmount) ?? 0),
+      pending: totals.pending + pendingFromMoney(money),
+      collected: totals.collected + money.paid,
     })
   }
 
-  return [...byCurrency.values()].sort((left, right) =>
+  const totals = [...byCurrency.values()].sort((left, right) =>
     left.currency.localeCompare(right.currency)
   )
-}
-
-function pendingAmount(receivable: FinanceReceivable): number {
-  const amount = requireMoney(receivable, "amount")
-  const paid = requireMoney(receivable, "paidAmount")
-  const credit = requireMoney(receivable, "creditBalance")
-  const writtenOff = requireMoney(receivable, "writtenOffAmount")
-  return Math.max(0, amount - paid - credit - writtenOff)
-}
-
-/** A receivable amount the API always sends; an unreadable one is a bug. */
-function requireMoney(
-  receivable: FinanceReceivable,
-  field: "amount" | "paidAmount" | "creditBalance" | "writtenOffAmount"
-): number {
-  const parsed = parseFinanceMoney(receivable[field])
-  if (parsed === null) {
-    throw new Error(
-      `Cobro ${receivable.id} con ${field} ilegible: "${receivable[field]}"`
-    )
-  }
-  return parsed
+  return { totals, unreadableIds }
 }

@@ -47,6 +47,11 @@ import { ExpandableFab } from "@/src/shared/components/layout/expandable-fab"
 import { SettingsSection } from "@/src/shared/components/layout/settings-section"
 import { Button } from "@/src/shared/components/ui/button"
 import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/src/shared/components/ui/alert"
+import {
   Empty,
   EmptyContent,
   EmptyDescription,
@@ -61,6 +66,7 @@ import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { useQueryClient } from "@tanstack/react-query"
 import {
   Building2Icon,
+  InfoIcon,
   LandmarkIcon,
   MailIcon,
   PlusIcon,
@@ -228,8 +234,19 @@ export function FinanceProductsList({
         netWorth={global?.netWorth ?? null}
         netWorthComplete={global?.status === "COMPLETE"}
         netWorthHref={APP_ROUTES.app.financeWealth}
-        currencyTotals={balanceSheetQuery.data?.breakdown.byCurrency ?? []}
+        currencyTotals={balanceSheetQuery.data?.breakdown?.byCurrency ?? []}
       />
+
+      {balanceSheetQuery.data && !balanceSheetQuery.data.breakdown ? (
+        <Alert>
+          <InfoIcon />
+          <AlertTitle>Sin desglose por moneda</AlertTitle>
+          <AlertDescription>
+            El servidor no envió el desglose del patrimonio. El balance y los
+            productos de la lista siguen disponibles.
+          </AlertDescription>
+        </Alert>
+      ) : null}
 
       <IrregularitiesSection
         drifts={integrityQuery.data?.drifts ?? []}

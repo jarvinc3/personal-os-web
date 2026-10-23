@@ -9,3 +9,4 @@ export {
   shareSelectionDebtor,
   shareSelectionTotals,
 } from "@/src/modules/finance/receivables/lib/receivable-share"
+export { receivableMoney } from "@/src/modules/finance/receivables/lib/receivable-totals"

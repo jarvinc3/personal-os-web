@@ -12,6 +12,11 @@ import { WealthSummary } from "@/src/modules/finance/wealth/components/wealth-su
 import { LoadingView } from "@/src/shared/components/layout/loading-view"
 import { Button } from "@/src/shared/components/ui/button"
 import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/src/shared/components/ui/alert"
+import {
   Empty,
   EmptyContent,
   EmptyDescription,
@@ -22,7 +27,7 @@ import {
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { MODULE_REGISTRY } from "@/src/shared/constants/module-registry"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
-import { LandmarkIcon, PlusIcon } from "lucide-react"
+import { LandmarkIcon, InfoIcon, PlusIcon } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useCallback } from "react"
@@ -80,17 +85,29 @@ function WealthScreenBody() {
   }
 
   const drifts = integrityQuery.data?.drifts ?? []
-  const groups = balanceSheet.breakdown.byCurrency
+  const breakdown = balanceSheet.breakdown
+  const groups = breakdown?.byCurrency ?? []
 
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-4 pb-8">
       <WealthSummary
         global={balanceSheet.global}
-        totals={balanceSheet.breakdown.totals}
+        totals={breakdown?.totals ?? null}
         display={display}
       />
 
-      {groups.length === 0 ? (
+      {breakdown ? null : (
+        <Alert>
+          <InfoIcon />
+          <AlertTitle>Sin desglose por moneda</AlertTitle>
+          <AlertDescription>
+            El servidor no envió el desglose del patrimonio. El balance de
+            arriba sigue disponible, pero no el detalle por producto.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {breakdown && groups.length === 0 ? (
         <Empty className="rounded-3xl border border-border bg-card py-10">
           <EmptyHeader>
             <EmptyMedia variant="icon">

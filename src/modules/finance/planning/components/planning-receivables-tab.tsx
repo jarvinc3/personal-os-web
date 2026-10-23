@@ -5,17 +5,17 @@ import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/lay
 import { PlanningProgressCard } from "@/src/modules/finance/shared/components/planning-progress-card"
 import { formatCalendarDate } from "@/src/modules/finance/shared/lib/ledger-form"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
-import {
-  formatFinanceMoney,
-  parseFinanceMoney,
-} from "@/src/modules/finance/shared/lib/money"
+import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 import {
   amountRatioPct,
   joinPlanningCaption,
 } from "@/src/modules/finance/shared/lib/planning-lists"
 import { FINANCE_RECEIVABLE_STATUS_LABEL } from "@/src/modules/finance/shared/types/entities"
 import type { FinanceReceivable } from "@/src/modules/finance/shared/types/entities"
-import { ReceivableTotalsStrip } from "@/src/modules/finance/receivables"
+import {
+  ReceivableTotalsStrip,
+  receivableMoney,
+} from "@/src/modules/finance/receivables"
 import {
   remainingCaption,
   withCurrency,
@@ -81,8 +81,9 @@ export function PlanningReceivablesTab({
       >
         {receivables.map((item) => {
           const money = withCurrency(display, item.currency)
-          const paid = parseFinanceMoney(item.paidAmount)
-          const total = parseFinanceMoney(item.amount)
+          const readable = receivableMoney(item)
+          const paid = readable?.paid ?? null
+          const total = readable?.amount ?? null
           const tone =
             item.status === "PAID"
               ? "success"
@@ -111,23 +112,29 @@ export function PlanningReceivablesTab({
                   FINANCE_RECEIVABLE_STATUS_LABEL[item.status] ?? item.status,
                 variant: badgeVariant,
               }}
-              progress={amountRatioPct(item.paidAmount, item.amount)}
+              progress={
+                readable ? amountRatioPct(item.paidAmount, item.amount) : null
+              }
               currentHint="Cobrado"
               currentLabel={formatFinanceMoney(item.paidAmount, money)}
               targetHint="Total"
               targetLabel={formatFinanceMoney(item.amount, money)}
-              caption={joinPlanningCaption(
-                remainingCaption({
-                  current: paid,
-                  target: total,
-                  display: money,
-                  reached: "Cobro completo",
-                  prefix: "Resta",
-                }),
-                item.dueDate
-                  ? `Vence ${formatCalendarDate(item.dueDate, display.locale)}`
-                  : undefined
-              )}
+              caption={
+                readable
+                  ? joinPlanningCaption(
+                      remainingCaption({
+                        current: paid,
+                        target: total,
+                        display: money,
+                        reached: "Cobro completo",
+                        prefix: "Resta",
+                      }),
+                      item.dueDate
+                        ? `Vence ${formatCalendarDate(item.dueDate, display.locale)}`
+                        : undefined
+                    )
+                  : "Monto no disponible: el servidor envió un valor ilegible."
+              }
               href={
                 share.active
                   ? undefined
