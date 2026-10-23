@@ -1,13 +1,15 @@
+import { AccountProductRow } from "@/src/modules/finance/shared/components/product-rows"
+import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
+import type { FinanceAccount } from "@/src/modules/finance/shared/types/entities"
 import { OptionRow } from "@/src/shared/components/layout/form-blocks"
 import { getModule } from "@/src/shared/constants/module-registry"
-import { Landmark, Wallet } from "lucide-react"
+import { Wallet } from "lucide-react"
 
 const MODULE_ACCENT = getModule("finance").accent
 
-export type AccountOption = { id: string; name: string; currency: string }
-
 type AccountChoiceListProps = {
-  accounts: AccountOption[]
+  accounts: FinanceAccount[]
+  display: FinanceMoneyDisplay
   selectedId: string
   onSelect: (accountId: string) => void
   noneLabel: string
@@ -15,6 +17,7 @@ type AccountChoiceListProps = {
 
 export function AccountChoiceList({
   accounts,
+  display,
   selectedId,
   onSelect,
   noneLabel,
@@ -30,13 +33,11 @@ export function AccountChoiceList({
         onPress={() => onSelect("")}
       />
       {accounts.map((account) => (
-        <OptionRow
+        <AccountProductRow
           key={account.id}
-          icon={Landmark}
-          iconColor={MODULE_ACCENT}
-          accentColor={MODULE_ACCENT}
-          label={account.name}
-          description={account.currency}
+          account={account}
+          display={display}
+          variant="compact"
           selected={selectedId === account.id}
           onPress={() => onSelect(account.id)}
         />

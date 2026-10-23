@@ -18,7 +18,7 @@ import type {
 } from "@/src/modules/finance/shared/types/entities"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
 import { LinkPendingOverlay } from "@/src/shared/components/ui/navigation-pending"
-import { LockIcon } from "lucide-react"
+import { CheckIcon, LockIcon } from "lucide-react"
 import Link from "next/link"
 
 function InUseLock({ onLightSurface }: { onLightSurface: boolean }) {
@@ -42,6 +42,8 @@ type AccountProductRowProps = {
   onPress?: () => void
   href?: string
   disabled?: boolean
+  /** Ring and check mark while the card is picked in a selector. */
+  selected?: boolean
   /** Variante de la card; la galería /dev/cards la pinta (#272). */
   variant?: "full" | "compact" | "inline"
 }
@@ -52,6 +54,7 @@ export function AccountProductRow({
   onPress,
   href,
   disabled = false,
+  selected = false,
   variant = "full",
 }: AccountProductRowProps) {
   const lastFour = account.accountNumberLast4
@@ -122,7 +125,8 @@ export function AccountProductRow({
     tint
       ? "border-transparent text-white"
       : "border-border bg-card text-foreground",
-    disabled ? "cursor-not-allowed" : PRESSABLE_CLASS
+    disabled ? "cursor-not-allowed" : PRESSABLE_CLASS,
+    selected && "ring-2 ring-primary ring-offset-2 ring-offset-background"
   )
   const style = tint ? { backgroundColor: tint } : undefined
   const content = (
@@ -132,7 +136,7 @@ export function AccountProductRow({
       <BrandLogo
         name={account.institutionName ?? account.name}
         logoUrl={account.institutionLogoUrl}
-        size={compact ? 28 : 44}
+        size={compact ? 32 : 44}
         className={cn("relative z-10 shrink-0", disabled && "opacity-45")}
       />
 
@@ -196,6 +200,11 @@ export function AccountProductRow({
         )}
       </div>
       {disabled ? <InUseLock onLightSurface={!tint} /> : null}
+      {selected && !disabled ? (
+        <span className="relative z-10 inline-flex size-5 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
+          <CheckIcon className="size-3.5" aria-hidden />
+        </span>
+      ) : null}
     </>
   )
 

@@ -36,6 +36,21 @@ export const accountVariants: readonly GalleryVariant[] = [
     ),
   },
   {
+    id: "cuenta-compacta-seleccionada",
+    label: "Compacta seleccionada",
+    propLabel: "selected",
+    height: "≈ 52 px",
+    render: ({ display, notifyTap }) => (
+      <AccountProductRow
+        account={galleryCheckingAccount}
+        display={display}
+        variant="compact"
+        selected
+        onPress={notifyTap}
+      />
+    ),
+  },
+  {
     id: "cuenta-sin-color",
     label: "Completa sin color",
     propLabel: "account.color = null",

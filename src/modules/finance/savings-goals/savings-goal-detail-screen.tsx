@@ -6,6 +6,7 @@ import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/asyn
 import { MissingRecord } from "@/src/modules/finance/shared/components/layout/missing-record"
 import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
 import { FinanceProgressHero } from "@/src/modules/finance/shared/components/layout/progress-hero"
+import { AccountProductRow } from "@/src/modules/finance/shared/components/product-rows"
 import { SavingsGoalContributionSheet } from "@/src/modules/finance/savings-goals/components/savings-goal-contribution-sheet"
 import { SavingsGoalSheet } from "@/src/modules/finance/savings-goals/components/savings-goal-sheet"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
@@ -102,8 +103,10 @@ function SavingsGoalDetailScreenBody({
     (goalsQuery.data ?? []).find((item) => item.id === goalId) ?? null
   const contributions = infiniteListItems(contributionsQuery.data)
   const accounts = accountsQuery.data ?? []
-  const accountName = (id: string | null) =>
-    id ? (accounts.find((account) => account.id === id)?.name ?? null) : null
+  const accountFor = (id: string | null) =>
+    id ? (accounts.find((account) => account.id === id) ?? null) : null
+  const accountName = (id: string | null) => accountFor(id)?.name ?? null
+  const goalAccount = goal ? accountFor(goal.accountId) : null
 
   useRegisterChatContext(
     goal
@@ -268,12 +271,20 @@ function SavingsGoalDetailScreenBody({
 
       <div className="mx-4 mt-3">
         <SummarySection title="Cuenta" icon={WalletIcon}>
-          <SummaryItem
-            title="Cuenta asociada"
-            icon={WalletIcon}
-            value={accountName(goal.accountId) ?? "Sin cuenta"}
-            isLast={false}
-          />
+          {goalAccount ? (
+            <AccountProductRow
+              account={goalAccount}
+              display={display}
+              variant="compact"
+            />
+          ) : (
+            <SummaryItem
+              title="Cuenta asociada"
+              icon={WalletIcon}
+              value="Sin cuenta"
+              isLast={false}
+            />
+          )}
           <SummaryItem
             title="Apartado"
             icon={PiggyBankIcon}
