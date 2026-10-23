@@ -56,6 +56,8 @@ import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { CircleAlertIcon, PencilIcon, WalletIcon } from "lucide-react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
+import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { useMemo, useState } from "react"
 
 type SubscriptionDetailScreenProps = {
@@ -79,10 +81,11 @@ function SubscriptionDetailBody({
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const { isEnabled, config, formatLocale } = useFinanceEnabled()
-  const [editOpen, setEditOpen] = useState(false)
-  const [paymentOpen, setPaymentOpen] = useState(false)
   const [cancelOpen, setCancelOpen] = useState(false)
+  const [pauseOpen, setPauseOpen] = useState(false)
   const [today] = useState(() => new Date())
+  const editSheet = useSheetParam(FINANCE_SHEET_KEYS.subscription)
+  const paymentSheet = useSheetParam(FINANCE_SHEET_KEYS.subscriptionPayment)
   const tab = subscriptionDetailTabFromParam(
     searchParams.get(SUBSCRIPTION_DETAIL_TAB_PARAM)
   )
@@ -106,12 +109,14 @@ function SubscriptionDetailBody({
         className="size-9 rounded-full"
         aria-label="Editar suscripción"
         disabled={!subscription}
-        onClick={() => setEditOpen(true)}
+        onClick={() =>
+          editSheet.setOpen(true, subscription ? subscription.id : null)
+        }
       >
         <PencilIcon className="size-4.5" />
       </Button>
     ),
-    [subscription]
+    [subscription, editSheet]
   )
 
   usePageHeader(
@@ -186,7 +191,7 @@ function SubscriptionDetailBody({
                 type="button"
                 size="sm"
                 variant="outline"
-                onClick={() => setEditOpen(true)}
+                onClick={() => editSheet.setOpen(true, subscription.id)}
               >
                 Asignar
               </Button>
@@ -232,7 +237,7 @@ function SubscriptionDetailBody({
               enabled={isEnabled}
               display={display}
               canRegister={subscription.status !== "CANCELLED"}
-              onRegister={() => setPaymentOpen(true)}
+              onRegister={() => paymentSheet.setOpen(true)}
             />
           </TabsContent>
 
@@ -254,11 +259,7 @@ function SubscriptionDetailBody({
             resume: resumeMutation.isPending,
           }}
           actions={{
-            pause: () =>
-              void runStatusAction(
-                () => pauseMutation.mutateAsync(subscription.id),
-                "Suscripción pausada"
-              ),
+            pause: () => setPauseOpen(true),
             resume: () =>
               void runStatusAction(
                 () => resumeMutation.mutateAsync(subscription.id),
@@ -270,17 +271,49 @@ function SubscriptionDetailBody({
       </div>
 
       <SubscriptionSheet
-        open={editOpen}
-        onOpenChange={setEditOpen}
+        open={editSheet.open}
+        onOpenChange={editSheet.setOpen}
         subscription={subscription}
         display={display}
       />
 
       <SubscriptionPaymentSheet
-        open={paymentOpen}
-        onOpenChange={setPaymentOpen}
+        open={paymentSheet.open}
+        onOpenChange={paymentSheet.setOpen}
         subscription={subscription}
       />
+
+      <AlertDialog open={pauseOpen} onOpenChange={setPauseOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Pausar {subscription.name}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Mientras esté pausada no se registrarán cobros ni recordatorios.
+              Puedes reanudarla cuando quieras.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={pauseMutation.isPending}>
+              Volver
+            </AlertDialogCancel>
+            <AlertDialogAction
+              disabled={pauseMutation.isPending}
+              onClick={() => {
+                void runStatusAction(
+                  () => pauseMutation.mutateAsync(subscription.id),
+                  "Suscripción pausada"
+                )
+                setPauseOpen(false)
+              }}
+            >
+              {pauseMutation.isPending ? (
+                <Spinner data-icon="inline-start" />
+              ) : null}
+              Pausar suscripción
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <AlertDialog open={cancelOpen} onOpenChange={setCancelOpen}>
         <AlertDialogContent>

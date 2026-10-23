@@ -52,7 +52,6 @@ import { usePendingNavigation } from "@/src/shared/components/ui/navigation-pend
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
-import { cn } from "@/src/shared/lib/utils"
 import { UsersIcon, XIcon } from "lucide-react"
 import { usePathname } from "next/navigation"
 import { useMemo } from "react"
@@ -238,14 +237,9 @@ export function FinancePlanningList({
                 <Icon
                   data-icon="inline-start"
                   className="size-5"
-                  style={{ color: isSelected ? "#fff" : color }}
+                  style={{ color: isSelected ? undefined : color }}
                 />
-                <span
-                  className={cn("sr-only text-foreground md:not-sr-only")}
-                  style={{ color: isSelected ? "#fff" : undefined }}
-                >
-                  {label}
-                </span>
+                <span className="sr-only md:not-sr-only">{label}</span>
               </TabsTrigger>
             )
           })}

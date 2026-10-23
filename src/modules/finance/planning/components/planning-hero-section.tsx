@@ -2,7 +2,6 @@
 
 import { FinancePlanningHero } from "@/src/modules/finance/planning/components/planning-hero"
 import {
-  nextPlanningTab,
   planningTabItem,
   planningTabLabel,
   type PlanningTab,
@@ -17,7 +16,6 @@ import {
   APP_ROUTES,
   financeTransactionNewHref,
 } from "@/src/shared/constants/app-routes"
-import { useState } from "react"
 
 const PENDING_TOTAL = "…"
 const UNAVAILABLE_TOTAL = "—"
@@ -30,7 +28,6 @@ export function FinancePlanningHeroSection({
   activeTab,
 }: FinancePlanningHeroSectionProps) {
   const { isEnabled, config, formatLocale } = useFinanceEnabled()
-  const [displayedTab, setDisplayedTab] = useState<PlanningTab>(activeTab)
 
   const savingsQuery = useSavingsGoals(isEnabled)
   const budgetStatusQuery = useBudgetStatus(isEnabled)
@@ -43,20 +40,20 @@ export function FinancePlanningHeroSection({
     compactNumbers: config.display.compactNumbers,
     locale: formatLocale,
   }
-  const tabItem = planningTabItem(displayedTab)
+  const tabItem = planningTabItem(activeTab)
   const totalSource = {
     savings: savingsQuery,
     budgets: budgetStatusQuery,
     receivables: receivablesQuery,
     loans: loansQuery,
-  }[displayedTab]
+  }[activeTab]
   const totalAmount =
     totalSource.isPending && !totalSource.data
       ? PENDING_TOTAL
       : totalSource.isError && !totalSource.data
         ? UNAVAILABLE_TOTAL
         : formatPlanningTabTotal({
-            tab: displayedTab,
+            tab: activeTab,
             input: {
               savings: savingsQuery.data ?? [],
               budgets: budgetStatusQuery.data ?? [],
@@ -68,16 +65,13 @@ export function FinancePlanningHeroSection({
 
   return (
     <FinancePlanningHero
-      tabLabel={planningTabLabel(displayedTab)}
+      tabLabel={planningTabLabel(activeTab)}
       tabIcon={tabItem.icon}
       tabColor={tabItem.color}
       totalAmount={totalAmount}
       sendHref={financeTransactionNewHref({ type: "DEBIT" })}
       receiveHref={financeTransactionNewHref({ type: "CREDIT" })}
       transferHref={APP_ROUTES.app.financeTransferNew}
-      onCyclePress={() =>
-        setDisplayedTab((current) => nextPlanningTab(current))
-      }
     />
   )
 }

@@ -181,6 +181,34 @@ describe("subscriptionCardState", () => {
     assert.equal(cancelled.label, "14 oct")
   })
 
+  it("marks an active subscription whose charge date already passed", () => {
+    const overdue = subscriptionCardState({
+      subscription: subscription({ nextBillingDate: "2026-10-20" }),
+      today: day(2026, 10, 22),
+      windowDays: 5,
+    })
+    assert.equal(overdue.overdue, true)
+
+    const future = subscriptionCardState({
+      subscription: subscription({ nextBillingDate: "2026-10-24" }),
+      today: day(2026, 10, 22),
+      windowDays: 5,
+    })
+    assert.equal(future.overdue, false)
+  })
+
+  it("does not mark a paused subscription as overdue", () => {
+    const paused = subscriptionCardState({
+      subscription: subscription({
+        status: "PAUSED",
+        nextBillingDate: "2026-10-20",
+      }),
+      today: day(2026, 10, 22),
+      windowDays: 5,
+    })
+    assert.equal(paused.overdue, false)
+  })
+
   it("marks a free trial that has not ended", () => {
     assert.equal(
       subscriptionCardState({

@@ -6,7 +6,7 @@ Money: lecturas decimal **strings**; writes **numbers** (`parseFinanceMoney` / `
 
 Query keys: `src/modules/finance/shared/types/api.ts` (`["finance", ...]`). Mutaciones de cuentas/tarjetas/loans/instituciones/txs confirmadas/email assign invalidan `FINANCE_BALANCE_SHEET_QUERY_KEY`.
 
-Tab bar (5): Resumen, Movimientos, Planificación, Suscripciones, Productos. Estadísticas y Comercios `showInTabBar: false` (`shared/constants/nav.ts`). Comercios tiene atajo en Productos. Suscripciones es el gestor (resumen de costo mensual y anual, cobros recurrentes detectados, filtros por estado y moneda, búsqueda e historial de pagos). Cuando hay varias monedas, el resumen muestra el costo de cada una por separado; no convierte a la moneda base. Gmail sync no está en tab bar; vive en `/finance/sync` (atajo desde Productos).
+Tab bar (5): Resumen, Movimientos, Planificación, Suscripciones, Productos. Estadísticas y Comercios `showInTabBar: false` (`shared/constants/nav.ts`). Comercios tiene atajo en Productos. Suscripciones es el gestor (resumen de costo mensual y anual, cobros recurrentes detectados, filtros por estado y moneda, búsqueda e historial de pagos). Una suscripción activa con la fecha de cobro ya pasada se marca «Vencida» en la lista y en el detalle; pausar pide confirmación y reanudar no. Cuando hay varias monedas, el resumen muestra el costo de cada una por separado; no convierte a la moneda base. Gmail sync no está en tab bar; vive en `/finance/sync` (atajo desde Productos).
 
 ## Convenciones de formularios
 

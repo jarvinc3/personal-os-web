@@ -84,7 +84,7 @@ export function buildTransactionsSearchParams(
 }
 
 /** The instant the API stored becomes the wall clock the user reads. */
-function toUserWallClock(
+export function toUserWallClock(
   transaction: FinanceTransaction,
   timeZone: string
 ): FinanceTransaction {

@@ -2,6 +2,7 @@
 
 import { apiDelete, apiGet, apiPatch, apiPost } from "@/src/config/api-client"
 import type { CreateBudgetBody } from "@/src/modules/finance/shared/lib/budget-payloads"
+import { budgetFromListPages } from "@/src/modules/finance/shared/lib/budget-cache"
 import { type FinanceBudgetsQuery } from "@/src/modules/finance/shared/lib/budgets-query"
 import { FINANCE_LIST_PAGE_SIZE } from "@/src/modules/finance/shared/lib/finance-query-options"
 import { useInfiniteFinanceList } from "@/src/modules/finance/shared/hooks/use-infinite-finance-list"
@@ -14,8 +15,16 @@ import type {
   FinanceBudget,
   FinanceTransaction,
 } from "@/src/modules/finance/shared/types/entities"
+import { toUserWallClock } from "@/src/modules/finance/shared/lib/transactions-query"
+import { useUserTimeZone } from "@/src/modules/settings/hooks/use-user-time-zone"
 import { API_ENDPOINTS } from "@/src/shared/constants/api-endpoints"
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+  type InfiniteData,
+  type QueryClient,
+} from "@tanstack/react-query"
 
 function invalidateBudgets(queryClient: ReturnType<typeof useQueryClient>) {
   void queryClient.invalidateQueries({ queryKey: FINANCE_BUDGETS_QUERY_KEY })
@@ -31,19 +40,57 @@ export function useBudgets(enabled: boolean, query: FinanceBudgetsQuery) {
   })
 }
 
+/** Budget the list already fetched, so the detail paints before the network. */
+function budgetFromQueryCache(
+  queryClient: QueryClient,
+  id: string | null
+): FinanceBudget | undefined {
+  if (!id) {
+    return undefined
+  }
+  const cachedLists = queryClient.getQueriesData<
+    InfiniteData<FinancePaginated<FinanceBudget>>
+  >({ queryKey: FINANCE_BUDGETS_QUERY_KEY })
+  for (const [, cached] of cachedLists) {
+    if (!cached) {
+      continue
+    }
+    const found = budgetFromListPages(cached.pages, id)
+    if (found) {
+      return found
+    }
+  }
+  return undefined
+}
+
 export function useBudget(enabled: boolean, id: string | null) {
+  const queryClient = useQueryClient()
   return useQuery({
     queryKey: [...FINANCE_BUDGETS_QUERY_KEY, "detail", id],
     queryFn: () => apiGet<FinanceBudget>(API_ENDPOINTS.FINANCE.BUDGET(id!)),
+    placeholderData: () => budgetFromQueryCache(queryClient, id),
     enabled: enabled && Boolean(id),
   })
 }
 
 export function useBudgetTransactions(enabled: boolean, id: string | null) {
+  const timeZone = useUserTimeZone()
   return useInfiniteFinanceList<FinancePaginated<FinanceTransaction>>({
-    queryKey: [...FINANCE_BUDGETS_QUERY_KEY, "transactions", id ?? ""],
+    queryKey: [
+      ...FINANCE_BUDGETS_QUERY_KEY,
+      "transactions",
+      id ?? "",
+      timeZone,
+    ],
     endpoint: API_ENDPOINTS.FINANCE.BUDGET_TRANSACTIONS(id ?? ""),
     params: { limit: FINANCE_LIST_PAGE_SIZE },
+    select: (data) => ({
+      ...data,
+      pages: data.pages.map((page) => ({
+        ...page,
+        items: page.items.map((item) => toUserWallClock(item, timeZone)),
+      })),
+    }),
     enabled: enabled && Boolean(id),
   })
 }

@@ -7,6 +7,7 @@ import {
   billingMonthLabel,
   cycleProgress,
   subscriptionCycleProgress,
+  subscriptionIsOverdue,
 } from "./subscription-timing.ts"
 
 const day = (year: number, month: number, dayOfMonth: number) =>
@@ -270,5 +271,31 @@ describe("subscriptionCycleProgress", () => {
       day(2026, 11, 20)
     )
     assert.equal(progress.percent, 100)
+  })
+})
+
+describe("subscriptionIsOverdue", () => {
+  it("is true only for an active subscription past its charge date", () => {
+    assert.equal(
+      subscriptionIsOverdue(
+        subscription({ nextBillingDate: "2026-10-20" }),
+        day(2026, 10, 22)
+      ),
+      true
+    )
+    assert.equal(
+      subscriptionIsOverdue(
+        subscription({ nextBillingDate: "2026-10-22" }),
+        day(2026, 10, 22)
+      ),
+      false
+    )
+    assert.equal(
+      subscriptionIsOverdue(
+        subscription({ status: "PAUSED", nextBillingDate: "2026-10-20" }),
+        day(2026, 10, 22)
+      ),
+      false
+    )
   })
 })

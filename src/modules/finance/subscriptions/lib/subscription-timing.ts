@@ -118,6 +118,18 @@ export type BillingLabel = {
  * Copy and highlight of a charge date: `Hoy`, `Mañana` or `en N días` inside
  * the window, the short date outside it.
  */
+/** An active subscription whose next charge date already passed unpaid. */
+export function subscriptionIsOverdue(
+  subscription: FinanceSubscription,
+  today: Date
+): boolean {
+  if (subscription.status !== "ACTIVE") {
+    return false
+  }
+  const next = startOfDay(parseISO(subscription.nextBillingDate))
+  return differenceInCalendarDays(next, startOfDay(today)) < 0
+}
+
 export function billingLabel(input: {
   nextDate: Date | string
   today: Date

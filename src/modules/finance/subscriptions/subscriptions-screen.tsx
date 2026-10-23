@@ -44,7 +44,6 @@ function SubscriptionsScreenBody() {
   const searchParams = useSearchParams()
   const { isEnabled, config, formatLocale } = useFinanceEnabled()
   const [today] = useState(() => new Date())
-  const [createOpen, setCreateOpen] = useState(false)
   const filters = useMemo(
     () => subscriptionFiltersFromSearchParams(searchParams),
     [searchParams]
@@ -56,6 +55,7 @@ function SubscriptionsScreenBody() {
     locale: formatLocale,
   }
 
+  const subscriptionSheet = useSheetParam(FINANCE_SHEET_KEYS.subscription)
   const upcomingSheet = useSheetParam(FINANCE_SHEET_KEYS.subscriptionUpcoming)
   const alertsSheet = useSheetParam(FINANCE_SHEET_KEYS.subscriptionAlerts)
   const detectedSheet = useSheetParam(FINANCE_SHEET_KEYS.subscriptionDetected)
@@ -121,14 +121,14 @@ function SubscriptionsScreenBody() {
             icon: <ReceiptTextIcon className="size-5" aria-hidden />,
             label: "Añadir suscripción",
             color: "bg-blue-500",
-            onClick: () => setCreateOpen(true),
+            onClick: () => subscriptionSheet.setOpen(true, null),
           },
         ]}
       />
 
       <SubscriptionSheet
-        open={createOpen}
-        onOpenChange={setCreateOpen}
+        open={subscriptionSheet.open}
+        onOpenChange={subscriptionSheet.setOpen}
         subscription={null}
         display={display}
       />

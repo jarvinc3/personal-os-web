@@ -13,7 +13,11 @@ import type {
   FinanceSubscriptionStatus,
   FinanceSubscriptionSummary,
 } from "@/src/modules/finance/shared/types/entities"
-import { billingLabel, shortBillingDate } from "./subscription-timing.ts"
+import {
+  billingLabel,
+  shortBillingDate,
+  subscriptionIsOverdue,
+} from "./subscription-timing.ts"
 
 export const BILLING_CYCLE_LABEL: Record<FinanceBillingCycle, string> = {
   WEEKLY: "Semanal",
@@ -110,6 +114,8 @@ export type SubscriptionCardState = {
   label: string
   /** Inside the warning window: amber border and a place in Próximos. */
   inWindow: boolean
+  /** Active subscription whose next charge date already passed. */
+  overdue: boolean
   /** The last charge did not match the expected amount. */
   warnLastCharge: boolean
   /** The free trial has not ended: the amount reads as free. */
@@ -133,6 +139,7 @@ export function subscriptionCardState(input: {
   return {
     label: active ? label.text : shortBillingDate(subscription.nextBillingDate),
     inWindow: active && label.inWindow,
+    overdue: subscriptionIsOverdue(subscription, today),
     warnLastCharge: subscription.lastChargeMismatch,
     onTrial:
       subscription.trialEndsAt !== null &&

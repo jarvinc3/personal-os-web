@@ -11,6 +11,7 @@ import {
   billingMonthLabel,
   shortBillingDate,
   subscriptionCycleProgress,
+  subscriptionIsOverdue,
 } from "@/src/modules/finance/subscriptions/lib/subscription-timing"
 import { Badge } from "@/src/shared/components/ui/badge"
 
@@ -24,6 +25,7 @@ export function SubscriptionDetailHeader({
   today,
 }: SubscriptionDetailHeaderProps) {
   const cycle = subscriptionCycleProgress(subscription, today)
+  const overdue = subscriptionIsOverdue(subscription, today)
 
   return (
     <>
@@ -44,8 +46,12 @@ export function SubscriptionDetailHeader({
             )}
           </p>
         </div>
-        <Badge variant={subscriptionStatusVariant(subscription.status)}>
-          {subscriptionStatusLabel(subscription.status)}
+        <Badge
+          variant={
+            overdue ? "danger" : subscriptionStatusVariant(subscription.status)
+          }
+        >
+          {overdue ? "Vencida" : subscriptionStatusLabel(subscription.status)}
         </Badge>
       </div>
 

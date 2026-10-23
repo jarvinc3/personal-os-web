@@ -96,7 +96,9 @@ export function UpcomingSheet({
             </EmptyMedia>
             <EmptyTitle>Sin cobros próximos</EmptyTitle>
             <EmptyDescription>
-              Ninguna suscripción cobra en los próximos {windowDays} días.
+              Ninguna suscripción cobra en los próximos {windowDays} días. Si
+              alguna tiene la fecha vencida, la verás marcada como «Vencida» en
+              la lista.
             </EmptyDescription>
           </EmptyHeader>
         </Empty>

@@ -113,7 +113,9 @@ export function SubscriptionCard({
         <span className="truncate text-xs text-muted-foreground">
           {paymentMethodLabel(subscription) ?? "Sin método de pago"}
         </span>
-        {subscription.status !== "ACTIVE" ? (
+        {state.overdue ? (
+          <Badge variant="danger">Vencida</Badge>
+        ) : subscription.status !== "ACTIVE" ? (
           <Badge variant={subscriptionStatusVariant(subscription.status)}>
             {subscriptionStatusLabel(subscription.status)}
           </Badge>

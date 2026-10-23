@@ -63,13 +63,3 @@ export function planningTabLabel(tab: PlanningTab): string {
   const item = planningTabItem(tab)
   return `${item.label} · ${item.figure}`
 }
-
-/** The next tab in display order, wrapping around. */
-export function nextPlanningTab(tab: PlanningTab): PlanningTab {
-  const index = PLANNING_TAB_ITEMS.indexOf(planningTabItem(tab))
-  const next = PLANNING_TAB_ITEMS[(index + 1) % PLANNING_TAB_ITEMS.length]
-  if (!next) {
-    throw new Error("Planning tabs are empty")
-  }
-  return next.value
-}
