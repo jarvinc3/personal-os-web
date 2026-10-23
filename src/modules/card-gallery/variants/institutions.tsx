@@ -49,6 +49,21 @@ export const institutionVariants: readonly GalleryVariant[] = [
     ),
   },
   {
+    id: "institucion-compacta-seleccionada",
+    label: "Compacta seleccionada",
+    propLabel: "selected",
+    height: "≈ 68 px",
+    render: ({ notifyTap }) => (
+      <InstitutionWalletCard
+        card={galleryInstitutionCard}
+        variant="compact"
+        detail="none"
+        selected
+        onPress={notifyTap}
+      />
+    ),
+  },
+  {
     id: "institucion-compacta-balance",
     label: "Compacta con balance",
     propLabel: 'variant="compact" · detail="balance"',

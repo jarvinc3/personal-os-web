@@ -1,7 +1,11 @@
 "use client"
 
-import { BrandLogo } from "@/src/modules/finance"
-import { useBalanceSheet } from "@/src/modules/finance"
+import {
+  buildInstitutionCardFromCatalog,
+  buildPlainInstitutionCard,
+  InstitutionWalletCard,
+  useBalanceSheet,
+} from "@/src/modules/finance"
 import { useFinanceEnabled } from "@/src/modules/finance"
 import { useInstitutions } from "@/src/modules/finance"
 import {
@@ -10,17 +14,9 @@ import {
 } from "@/src/modules/finance"
 import type { FinanceBalanceSheetSlice } from "@/src/modules/finance"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
-import {
-  RadioGroup,
-  RadioGroupItem,
-} from "@/src/shared/components/ui/radio-group"
 import { Skeleton } from "@/src/shared/components/ui/skeleton"
-import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
-import { LayersIcon } from "lucide-react"
-import type { ReactNode } from "react"
 
 const ALL_INSTITUTIONS_COLOR = "#0f172a"
-const FALLBACK_INSTITUTION_COLOR = "#1B4332"
 
 type WipeBalanceInstitutionSheetProps = {
   open: boolean
@@ -38,6 +34,19 @@ function balanceLabel(
     return "Balance incompleto"
   }
   return formatFinanceMoney(slice.netWorth, display)
+}
+
+function positionBalanceLines(
+  slice: FinanceBalanceSheetSlice | undefined,
+  display: FinanceMoneyDisplay
+): Array<{ currency: string; amount: string }> {
+  return (slice?.byCurrency ?? []).map((currency) => ({
+    currency: currency.currency,
+    amount: formatFinanceMoney(currency.netWorth, {
+      ...display,
+      currency: currency.currency,
+    }),
+  }))
 }
 
 export function WipeBalanceInstitutionSheet({
@@ -88,75 +97,41 @@ export function WipeBalanceInstitutionSheet({
           ))}
         </div>
       ) : (
-        <RadioGroup
-          value={value}
-          onValueChange={choose}
-          className="flex flex-col gap-2"
-        >
-          <ScopeCard
-            optionValue={allValue}
-            name="Todas las instituciones"
-            color={ALL_INSTITUTIONS_COLOR}
-            balance={balanceLabel(balanceSheetQuery.data?.global, display)}
-            mark={<LayersIcon className="size-5" />}
+        <div className="flex flex-col gap-2">
+          <InstitutionWalletCard
+            card={buildPlainInstitutionCard({
+              name: "Todas las instituciones",
+              color: ALL_INSTITUTIONS_COLOR,
+              balanceAmount: balanceLabel(
+                balanceSheetQuery.data?.global,
+                display
+              ),
+            })}
+            variant="compact"
+            detail="balance"
+            selected={value === allValue}
+            onPress={() => choose(allValue)}
           />
-          {institutions.map((institution) => (
-            <ScopeCard
-              key={institution.id}
-              optionValue={institution.id}
-              name={institution.name}
-              logoUrl={institution.logoUrl}
-              color={institution.color ?? FALLBACK_INSTITUTION_COLOR}
-              balance={balanceLabel(positions.get(institution.id), display)}
-            />
-          ))}
-        </RadioGroup>
+          {institutions.map((institution) => {
+            const position = positions.get(institution.id)
+            return (
+              <InstitutionWalletCard
+                key={institution.id}
+                card={buildInstitutionCardFromCatalog({
+                  institution,
+                  balanceLabel: "Balance",
+                  balanceAmount: balanceLabel(position, display),
+                  balanceLines: positionBalanceLines(position, display),
+                })}
+                variant="compact"
+                detail="balance"
+                selected={value === institution.id}
+                onPress={() => choose(institution.id)}
+              />
+            )
+          })}
+        </div>
       )}
     </BottomSheet>
-  )
-}
-
-function ScopeCard({
-  optionValue,
-  name,
-  logoUrl,
-  color,
-  balance,
-  mark,
-}: {
-  optionValue: string
-  name: string
-  logoUrl?: string | null
-  color: string
-  balance: string
-  mark?: ReactNode
-}) {
-  return (
-    <label
-      className={cn(
-        "flex w-full items-center gap-3 rounded-2xl p-4 text-left text-white",
-        PRESSABLE_CLASS
-      )}
-      style={{ backgroundColor: color }}
-    >
-      {mark ? (
-        <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-full bg-white text-slate-900">
-          {mark}
-        </span>
-      ) : (
-        <BrandLogo name={name} logoUrl={logoUrl} size={40} />
-      )}
-      <span className="min-w-0 flex-1">
-        <span className="block truncate text-base font-semibold">{name}</span>
-        <span className="block truncate text-sm font-medium text-white/80">
-          {balance}
-        </span>
-      </span>
-      <RadioGroupItem
-        value={optionValue}
-        aria-label={name}
-        className="border-white/80 bg-white/10 data-[state=checked]:border-white data-[state=checked]:bg-white data-checked:border-white data-checked:bg-white [&_[data-slot=radio-group-indicator]>span]:bg-slate-900"
-      />
-    </label>
   )
 }

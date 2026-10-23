@@ -12,6 +12,7 @@ export type DestinationPickerGroup =
       id: string
       name: string
       logoUrl: string | null
+      institution: FinanceInstitution
       accounts: FinanceAccount[]
       cards: FinanceCard[]
     }
@@ -52,6 +53,7 @@ export function buildDestinationPickerGroups(input: {
       id: institution.id,
       name: institution.name,
       logoUrl: institution.logoUrl,
+      institution,
       accounts,
       cards,
     })

@@ -9,20 +9,36 @@ import {
   type InstitutionStackItem,
 } from "@/src/modules/finance/shared/lib/institution-stack"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
+import type {
+  FinanceAccount,
+  FinanceInstitution,
+} from "@/src/modules/finance/shared/types/entities"
 
 const FALLBACK_INSTITUTION_COLOR = "#1B4332"
 const FALLBACK_CASH_COLOR = "#334155"
 
+const NO_IRREGULARITIES: InstitutionIrregularities = {
+  drift: false,
+  reconciliation: false,
+}
+
+/** Counts a compact card can show; missing counts stay out of the row. */
+export type InstitutionCardCounts = {
+  accounts: number
+  cards?: number
+  loans?: number
+}
+
 /** Everything a card paints, with no reference to how the stack is arranged. */
 export type InstitutionCardModel = {
-  item: InstitutionStackItem
+  kind: "institution" | "cash"
   name: string
   monogram: string
   logoUrl: string | null
   color: string
   isCash: boolean
   productSummary: string
-  counts: InstitutionStackCounts | null
+  counts: InstitutionCardCounts | null
   balanceLabel: string
   balanceAmount: string
   /** Native balance per currency; multiple lines are never converted. */
@@ -42,7 +58,7 @@ export function buildInstitutionCard(
 
   if (item.kind === "institution") {
     return {
-      item,
+      kind: "institution",
       name: institutionCardName(item),
       monogram: institutionInitials(item.institution.name),
       logoUrl: item.institution.logoUrl,
@@ -59,7 +75,7 @@ export function buildInstitutionCard(
   }
 
   return {
-    item,
+    kind: "cash",
     name: institutionCardName(item),
     monogram: institutionInitials(item.account.name),
     logoUrl: item.account.institutionLogoUrl ?? null,
@@ -71,5 +87,92 @@ export function buildInstitutionCard(
     balanceAmount: formatStackItemBalance(item, display),
     balanceLines,
     irregularities: item.irregularities,
+  }
+}
+
+type CatalogInstitutionCardInput = {
+  institution: FinanceInstitution
+  counts?: InstitutionCardCounts | null
+  balanceLabel?: string
+  balanceAmount?: string
+  balanceLines?: InstitutionCardModel["balanceLines"]
+}
+
+/**
+ * Card for a catalog institution that carries no products or balances, as in
+ * the selectors; the caller opts in to counts and balance lines.
+ */
+export function buildInstitutionCardFromCatalog({
+  institution,
+  counts = null,
+  balanceLabel = "Balance",
+  balanceAmount = "",
+  balanceLines = [],
+}: CatalogInstitutionCardInput): InstitutionCardModel {
+  return {
+    kind: "institution",
+    name: institution.name,
+    monogram: institutionInitials(institution.name),
+    logoUrl: institution.logoUrl,
+    color: institution.color ?? FALLBACK_INSTITUTION_COLOR,
+    isCash: isCashInstitution(institution),
+    productSummary: "",
+    counts,
+    balanceLabel,
+    balanceAmount,
+    balanceLines,
+    irregularities: NO_IRREGULARITIES,
+  }
+}
+
+/** Loose cash account as a destination: same card, banknote badge. */
+export function buildCashCardFromAccount(
+  account: FinanceAccount
+): InstitutionCardModel {
+  return {
+    kind: "cash",
+    name: account.name,
+    monogram: institutionInitials(account.name),
+    logoUrl: null,
+    color: account.color ?? FALLBACK_CASH_COLOR,
+    isCash: true,
+    productSummary: "",
+    counts: null,
+    balanceLabel: "Saldo",
+    balanceAmount: "",
+    balanceLines: [],
+    irregularities: NO_IRREGULARITIES,
+  }
+}
+
+export type { InstitutionStackCounts }
+
+/** Card for an aggregate or placeholder option that is not a catalog institution. */
+export function buildPlainInstitutionCard({
+  name,
+  color,
+  balanceLabel = "Balance",
+  balanceAmount = "",
+  balanceLines = [],
+}: {
+  name: string
+  color: string
+  balanceLabel?: string
+  balanceAmount?: string
+  balanceLines?: InstitutionCardModel["balanceLines"]
+}): InstitutionCardModel {
+  return {
+    kind: "institution",
+    name,
+    monogram: institutionInitials(name),
+    logoUrl: null,
+    color,
+    isCash: false,
+    productSummary: "",
+    counts: null,
+    balanceLabel,
+    balanceAmount,
+    balanceLines,
+    irregularities: NO_IRREGULARITIES,
   }
 }

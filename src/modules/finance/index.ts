@@ -28,6 +28,11 @@ export { useEmailSources } from "./shared/hooks/use-email-sources"
 export { useExchangeRates } from "./shared/hooks/use-exchange-rates"
 export { useFinanceEnabled } from "./shared/hooks/use-finance-enabled"
 export { useInstitutions } from "./shared/hooks/use-institutions"
+export { InstitutionWalletCard } from "./products/components/institution-wallet-card"
+export {
+  buildInstitutionCardFromCatalog,
+  buildPlainInstitutionCard,
+} from "./products/lib/institution-card"
 export { useLoans } from "./shared/hooks/use-loans"
 export { useReceivables } from "./shared/hooks/use-receivables"
 export { useSavingsGoals } from "./shared/hooks/use-savings-goals"
