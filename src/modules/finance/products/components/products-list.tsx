@@ -46,11 +46,7 @@ import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money
 import { ExpandableFab } from "@/src/shared/components/layout/expandable-fab"
 import { SettingsSection } from "@/src/shared/components/layout/settings-section"
 import { Button } from "@/src/shared/components/ui/button"
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from "@/src/shared/components/ui/alert"
+import { MissingBreakdownNotice } from "@/src/modules/finance/shared/components/layout/missing-breakdown-notice"
 import {
   Empty,
   EmptyContent,
@@ -66,7 +62,6 @@ import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { useQueryClient } from "@tanstack/react-query"
 import {
   Building2Icon,
-  InfoIcon,
   LandmarkIcon,
   MailIcon,
   PlusIcon,
@@ -238,14 +233,7 @@ export function FinanceProductsList({
       />
 
       {balanceSheetQuery.data && !balanceSheetQuery.data.breakdown ? (
-        <Alert>
-          <InfoIcon />
-          <AlertTitle>Sin desglose por moneda</AlertTitle>
-          <AlertDescription>
-            El servidor no envió el desglose del patrimonio. El balance y los
-            productos de la lista siguen disponibles.
-          </AlertDescription>
-        </Alert>
+        <MissingBreakdownNotice />
       ) : null}
 
       <IrregularitiesSection

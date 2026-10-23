@@ -49,14 +49,6 @@ function pendingFromMoney(money: ReceivableMoney): number {
   )
 }
 
-/** What a receivable still owes after payments, credited and written-off money. */
-export function receivablePendingAmount(
-  receivable: FinanceReceivable
-): number | null {
-  const money = receivableMoney(receivable)
-  return money === null ? null : pendingFromMoney(money)
-}
-
 /**
  * Pending and collected money per currency. A receivable only adds to its own
  * currency, and a partial payment splits between both totals.

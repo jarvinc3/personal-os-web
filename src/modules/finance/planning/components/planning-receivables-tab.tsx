@@ -84,6 +84,20 @@ export function PlanningReceivablesTab({
           const readable = receivableMoney(item)
           const paid = readable?.paid ?? null
           const total = readable?.amount ?? null
+          const caption = readable
+            ? joinPlanningCaption(
+                remainingCaption({
+                  current: paid,
+                  target: total,
+                  display: money,
+                  reached: "Cobro completo",
+                  prefix: "Resta",
+                }),
+                item.dueDate
+                  ? `Vence ${formatCalendarDate(item.dueDate, display.locale)}`
+                  : undefined
+              )
+            : "Monto no disponible: el servidor envió un valor ilegible."
           const tone =
             item.status === "PAID"
               ? "success"
@@ -119,22 +133,7 @@ export function PlanningReceivablesTab({
               currentLabel={formatFinanceMoney(item.paidAmount, money)}
               targetHint="Total"
               targetLabel={formatFinanceMoney(item.amount, money)}
-              caption={
-                readable
-                  ? joinPlanningCaption(
-                      remainingCaption({
-                        current: paid,
-                        target: total,
-                        display: money,
-                        reached: "Cobro completo",
-                        prefix: "Resta",
-                      }),
-                      item.dueDate
-                        ? `Vence ${formatCalendarDate(item.dueDate, display.locale)}`
-                        : undefined
-                    )
-                  : "Monto no disponible: el servidor envió un valor ilegible."
-              }
+              caption={caption}
               href={
                 share.active
                   ? undefined

@@ -11,11 +11,7 @@ import { WealthCurrencySection } from "@/src/modules/finance/wealth/components/w
 import { WealthSummary } from "@/src/modules/finance/wealth/components/wealth-summary"
 import { LoadingView } from "@/src/shared/components/layout/loading-view"
 import { Button } from "@/src/shared/components/ui/button"
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from "@/src/shared/components/ui/alert"
+import { MissingBreakdownNotice } from "@/src/modules/finance/shared/components/layout/missing-breakdown-notice"
 import {
   Empty,
   EmptyContent,
@@ -27,7 +23,7 @@ import {
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { MODULE_REGISTRY } from "@/src/shared/constants/module-registry"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
-import { LandmarkIcon, InfoIcon, PlusIcon } from "lucide-react"
+import { LandmarkIcon, PlusIcon } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useCallback } from "react"
@@ -96,16 +92,7 @@ function WealthScreenBody() {
         display={display}
       />
 
-      {breakdown ? null : (
-        <Alert>
-          <InfoIcon />
-          <AlertTitle>Sin desglose por moneda</AlertTitle>
-          <AlertDescription>
-            El servidor no envió el desglose del patrimonio. El balance de
-            arriba sigue disponible, pero no el detalle por producto.
-          </AlertDescription>
-        </Alert>
-      )}
+      {breakdown ? null : <MissingBreakdownNotice />}
 
       {breakdown && groups.length === 0 ? (
         <Empty className="rounded-3xl border border-border bg-card py-10">
