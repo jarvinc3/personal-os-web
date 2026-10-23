@@ -12,7 +12,12 @@ import {
 } from "@/src/modules/finance/subscriptions/lib/subscription-display"
 import { subscriptionCycleProgress } from "@/src/modules/finance/subscriptions/lib/subscription-timing"
 import { SubscriptionProgressRing } from "@/src/modules/finance/subscriptions/components/subscription-progress-ring"
-import type { FinanceSubscription } from "@/src/modules/finance/shared/types/entities"
+import { CardProductRow } from "@/src/modules/finance/shared/components/product-rows"
+import type {
+  FinanceAccount,
+  FinanceCard,
+  FinanceSubscription,
+} from "@/src/modules/finance/shared/types/entities"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { Badge } from "@/src/shared/components/ui/badge"
 import { LinkPendingOverlay } from "@/src/shared/components/ui/navigation-pending"
@@ -23,6 +28,9 @@ import Link from "next/link"
 type SubscriptionCardProps = {
   subscription: FinanceSubscription
   display: FinanceMoneyDisplay
+  /** Entities that resolve the payment method into a card. */
+  cards?: readonly FinanceCard[]
+  accounts?: readonly FinanceAccount[]
   today: Date
   /** Warning window in days, from the global setting. */
   windowDays: number
@@ -38,11 +46,18 @@ type SubscriptionCardProps = {
 export function SubscriptionCard({
   subscription,
   display,
+  cards = [],
+  accounts = [],
   today,
   windowDays,
   onPress,
   variant = "full",
 }: SubscriptionCardProps) {
+  const paymentMethod = subscription.paymentMethod
+  const paymentCard =
+    paymentMethod?.type === "CARD"
+      ? (cards.find((card) => card.id === paymentMethod.id) ?? null)
+      : null
   const state = subscriptionCardState({ subscription, today, windowDays })
   const statusBadge = subscriptionStatusBadge(subscription, state.overdue)
   const progress = subscriptionCycleProgress(subscription, today)
@@ -243,9 +258,20 @@ export function SubscriptionCard({
       </div>
 
       <div className="flex items-center justify-between gap-3">
-        <span className="truncate text-xs text-muted-foreground">
-          {paymentMethodLabel(subscription) ?? "Sin método de pago"}
-        </span>
+        {paymentCard ? (
+          <div className="min-w-0 flex-1">
+            <CardProductRow
+              card={paymentCard}
+              accounts={accounts}
+              display={display}
+              variant="compact"
+            />
+          </div>
+        ) : (
+          <span className="truncate text-xs text-muted-foreground">
+            {paymentMethodLabel(subscription) ?? "Sin método de pago"}
+          </span>
+        )}
         {state.overdue || subscription.status !== "ACTIVE" ? (
           <Badge variant={statusBadge.variant}>{statusBadge.label}</Badge>
         ) : null}

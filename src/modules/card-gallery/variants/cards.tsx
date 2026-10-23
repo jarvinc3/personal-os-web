@@ -58,13 +58,29 @@ export const cardVariants: readonly GalleryVariant[] = [
     id: "tarjeta-compacta",
     label: "Compacta",
     propLabel: 'variant="compact"',
-    height: "≈ 100 px",
+    height: "≈ 64 px",
     render: ({ display, notifyTap }) => (
       <CardProductRow
         card={galleryCreditCard}
         accounts={[galleryCheckingAccount]}
         display={display}
         variant="compact"
+        onPress={notifyTap}
+      />
+    ),
+  },
+  {
+    id: "tarjeta-compacta-seleccionada",
+    label: "Compacta seleccionada",
+    propLabel: "selected",
+    height: "≈ 64 px",
+    render: ({ display, notifyTap }) => (
+      <CardProductRow
+        card={galleryCreditCard}
+        accounts={[galleryCheckingAccount]}
+        display={display}
+        variant="compact"
+        selected
         onPress={notifyTap}
       />
     ),
@@ -94,6 +110,21 @@ export const cardVariants: readonly GalleryVariant[] = [
         card={galleryMultiCurrencyCard}
         accounts={[galleryCheckingAccount]}
         display={display}
+        onPress={notifyTap}
+      />
+    ),
+  },
+  {
+    id: "tarjeta-compacta-varias-monedas",
+    label: "Compacta con varias monedas",
+    propLabel: "Primera moneda y «+1»",
+    height: "≈ 64 px",
+    render: ({ display, notifyTap }) => (
+      <CardProductRow
+        card={galleryMultiCurrencyCard}
+        accounts={[galleryCheckingAccount]}
+        display={display}
+        variant="compact"
         onPress={notifyTap}
       />
     ),

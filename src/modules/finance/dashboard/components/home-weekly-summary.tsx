@@ -1,6 +1,9 @@
 "use client"
 
 import { useWeeklySummary } from "@/src/modules/finance/dashboard/hooks/use-weekly-summary"
+import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
+import { useCards } from "@/src/modules/finance/shared/hooks/use-cards"
+import { CardProductRow } from "@/src/modules/finance/shared/components/product-rows"
 import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
 import { Badge } from "@/src/shared/components/ui/badge"
@@ -21,7 +24,11 @@ function formatShortDate(value: string, locale: string): string {
 export function FinanceHomeWeeklySummary() {
   const { isEnabled, config, formatLocale } = useFinanceEnabled()
   const summaryQuery = useWeeklySummary(isEnabled)
+  const cardsQuery = useCards(isEnabled)
+  const accountsQuery = useAccounts(isEnabled)
   const summary = summaryQuery.data
+  const cards = cardsQuery.data ?? []
+  const accounts = accountsQuery.data ?? []
 
   if (!isEnabled || !summary) {
     return null
@@ -83,14 +90,29 @@ export function FinanceHomeWeeklySummary() {
         />
       ))}
 
-      {summary.cardDueDates.map((card) => (
-        <SummaryItem
-          key={card.cardId}
-          title={card.name}
-          description={`Vence el día ${card.dueDay}`}
-          value={card.lastFour ? `…${card.lastFour}` : undefined}
-        />
-      ))}
+      {summary.cardDueDates.map((dueCard) => {
+        const card = cards.find((item) => item.id === dueCard.cardId)
+        if (!card) {
+          return (
+            <SummaryItem
+              key={dueCard.cardId}
+              title={dueCard.name}
+              description={`Vence el día ${dueCard.dueDay}`}
+              value={dueCard.lastFour ? `…${dueCard.lastFour}` : undefined}
+            />
+          )
+        }
+        return (
+          <CardProductRow
+            key={dueCard.cardId}
+            card={card}
+            accounts={accounts}
+            display={display}
+            variant="compact"
+            trailingNote={`Vence el día ${dueCard.dueDay}`}
+          />
+        )
+      })}
 
       {summary.pendingEmails > 0 ? (
         <SummaryItem

@@ -1,6 +1,8 @@
 import { SubscriptionCard } from "@/src/modules/finance/subscriptions/components/subscription-card"
 import { GALLERY_TODAY } from "@/src/modules/card-gallery/mock/display"
 import {
+  galleryCheckingAccount,
+  galleryCreditCard,
   galleryPausedSubscription,
   gallerySubscription,
   galleryTrialSubscription,
@@ -21,6 +23,8 @@ export const subscriptionVariants: readonly GalleryVariant[] = [
       <SubscriptionCard
         subscription={gallerySubscription}
         display={display}
+        cards={[galleryCreditCard]}
+        accounts={[galleryCheckingAccount]}
         today={GALLERY_TODAY}
         windowDays={WINDOW_DAYS}
         onPress={notifyTap}
@@ -36,6 +40,8 @@ export const subscriptionVariants: readonly GalleryVariant[] = [
       <SubscriptionCard
         subscription={galleryWarningSubscription}
         display={display}
+        cards={[galleryCreditCard]}
+        accounts={[galleryCheckingAccount]}
         today={GALLERY_TODAY}
         windowDays={WINDOW_DAYS}
         onPress={notifyTap}
@@ -51,6 +57,8 @@ export const subscriptionVariants: readonly GalleryVariant[] = [
       <SubscriptionCard
         subscription={gallerySubscription}
         display={display}
+        cards={[galleryCreditCard]}
+        accounts={[galleryCheckingAccount]}
         today={GALLERY_TODAY}
         windowDays={WINDOW_DAYS}
         variant="compact"
@@ -67,6 +75,8 @@ export const subscriptionVariants: readonly GalleryVariant[] = [
       <SubscriptionCard
         subscription={gallerySubscription}
         display={display}
+        cards={[galleryCreditCard]}
+        accounts={[galleryCheckingAccount]}
         today={GALLERY_TODAY}
         windowDays={WINDOW_DAYS}
         variant="inline"
@@ -83,6 +93,8 @@ export const subscriptionVariants: readonly GalleryVariant[] = [
       <SubscriptionCard
         subscription={galleryPausedSubscription}
         display={display}
+        cards={[galleryCreditCard]}
+        accounts={[galleryCheckingAccount]}
         today={GALLERY_TODAY}
         windowDays={WINDOW_DAYS}
         onPress={notifyTap}
@@ -98,6 +110,8 @@ export const subscriptionVariants: readonly GalleryVariant[] = [
       <SubscriptionCard
         subscription={galleryTrialSubscription}
         display={display}
+        cards={[galleryCreditCard]}
+        accounts={[galleryCheckingAccount]}
         today={GALLERY_TODAY}
         windowDays={WINDOW_DAYS}
         onPress={notifyTap}
