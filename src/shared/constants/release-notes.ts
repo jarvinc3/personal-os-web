@@ -12,6 +12,13 @@ export type ReleaseNotesEntry = {
 
 export const RELEASE_NOTES: readonly ReleaseNotesEntry[] = [
   {
+    version: "0.58.3",
+    highlights: [
+      "Si tu inicio de sesión o tu registro falla, ahora ves el motivo en español y no un mensaje técnico en inglés.",
+      "Al crear la cuenta, la contraseña debe tener al menos 10 caracteres e incluir mayúsculas, minúsculas y números; el formulario te lo dice antes de enviar.",
+    ],
+  },
+  {
     version: "0.58.2",
     highlights: [
       "Sin cambios visibles: esta versión solo ajusta detalles internos del proyecto.",
