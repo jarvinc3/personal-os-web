@@ -1,7 +1,7 @@
 import assert from "node:assert/strict"
 import { describe, it } from "node:test"
 
-import { translateAuthError } from "@/src/modules/auth/lib/auth-error-messages"
+import { translateAuthError } from "./auth-error-messages.ts"
 
 const FALLBACK = "No se pudo iniciar sesión"
 
@@ -39,7 +39,7 @@ describe("translateAuthError", () => {
         { code: "weak_password", reasons: ["length"] },
         FALLBACK
       ),
-      /al menos 10 caracteres/
+      /al menos 6 caracteres/
     )
     assert.match(
       translateAuthError(
@@ -63,7 +63,7 @@ describe("translateAuthError", () => {
         { code: "weak_password", reasons: ["length", "pwned"] },
         FALLBACK
       ),
-      "La contraseña debe tener al menos 10 caracteres. Esa contraseña apareció en una filtración pública. Elige otra."
+      "La contraseña debe tener al menos 6 caracteres. Esa contraseña apareció en una filtración pública. Elige otra."
     )
   })
 
