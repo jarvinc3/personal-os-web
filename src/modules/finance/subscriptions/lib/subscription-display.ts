@@ -65,6 +65,20 @@ export function subscriptionStatusLabel(
   return SUBSCRIPTION_STATUS_LABEL[status] ?? status
 }
 
+/** Badge a subscription shows: overdue wins over its own status. */
+export function subscriptionStatusBadge(
+  subscription: Pick<FinanceSubscription, "status">,
+  overdue: boolean
+): { label: string; variant: SubscriptionBadgeVariant } {
+  if (overdue) {
+    return { label: "Vencida", variant: "danger" }
+  }
+  return {
+    label: subscriptionStatusLabel(subscription.status),
+    variant: subscriptionStatusVariant(subscription.status),
+  }
+}
+
 /** Tabs of the subscription detail, mirroring the card detail. */
 export const SUBSCRIPTION_DETAIL_TABS = {
   summary: "summary",

@@ -13,6 +13,7 @@ import {
   subscriptionAlertView,
   subscriptionCardState,
   subscriptionDetailTabFromParam,
+  subscriptionStatusBadge,
   subscriptionShortcutBadges,
   subscriptionStatusVariant,
   withSubscriptionDetailTab,
@@ -382,6 +383,22 @@ describe("subscriptionAlertReviewTarget", () => {
     assert.equal(
       subscriptionAlertReviewTarget("ANNUAL_RENEWAL"),
       SUBSCRIPTION_DETAIL_TABS.summary
+    )
+  })
+})
+
+describe("subscriptionStatusBadge", () => {
+  it("shows Vencida over the status when the charge date passed", () => {
+    assert.deepEqual(subscriptionStatusBadge(subscription(), true), {
+      label: "Vencida",
+      variant: "danger",
+    })
+  })
+
+  it("falls back to the status label and variant", () => {
+    assert.deepEqual(
+      subscriptionStatusBadge(subscription({ status: "PAUSED" }), false),
+      { label: "Pausada", variant: "warning" }
     )
   })
 })

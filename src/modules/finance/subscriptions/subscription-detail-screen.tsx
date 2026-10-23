@@ -86,6 +86,7 @@ function SubscriptionDetailBody({
   const [today] = useState(() => new Date())
   const editSheet = useSheetParam(FINANCE_SHEET_KEYS.subscription)
   const paymentSheet = useSheetParam(FINANCE_SHEET_KEYS.subscriptionPayment)
+  const openEditSheet = editSheet.setOpen
   const tab = subscriptionDetailTabFromParam(
     searchParams.get(SUBSCRIPTION_DETAIL_TAB_PARAM)
   )
@@ -109,14 +110,12 @@ function SubscriptionDetailBody({
         className="size-9 rounded-full"
         aria-label="Editar suscripción"
         disabled={!subscription}
-        onClick={() =>
-          editSheet.setOpen(true, subscription ? subscription.id : null)
-        }
+        onClick={() => openEditSheet(true, subscription?.id ?? null)}
       >
         <PencilIcon className="size-4.5" />
       </Button>
     ),
-    [subscription, editSheet]
+    [subscription, openEditSheet]
   )
 
   usePageHeader(

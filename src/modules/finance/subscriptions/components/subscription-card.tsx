@@ -8,8 +8,7 @@ import {
 import {
   billingCycleLabel,
   subscriptionCardState,
-  subscriptionStatusLabel,
-  subscriptionStatusVariant,
+  subscriptionStatusBadge,
 } from "@/src/modules/finance/subscriptions/lib/subscription-display"
 import { subscriptionCycleProgress } from "@/src/modules/finance/subscriptions/lib/subscription-timing"
 import { SubscriptionProgressRing } from "@/src/modules/finance/subscriptions/components/subscription-progress-ring"
@@ -40,6 +39,7 @@ export function SubscriptionCard({
   windowDays,
 }: SubscriptionCardProps) {
   const state = subscriptionCardState({ subscription, today, windowDays })
+  const statusBadge = subscriptionStatusBadge(subscription, state.overdue)
   const progress = subscriptionCycleProgress(subscription, today)
   const money = { ...display, currency: subscription.currency }
   const categoryLabel =
@@ -113,12 +113,8 @@ export function SubscriptionCard({
         <span className="truncate text-xs text-muted-foreground">
           {paymentMethodLabel(subscription) ?? "Sin método de pago"}
         </span>
-        {state.overdue ? (
-          <Badge variant="danger">Vencida</Badge>
-        ) : subscription.status !== "ACTIVE" ? (
-          <Badge variant={subscriptionStatusVariant(subscription.status)}>
-            {subscriptionStatusLabel(subscription.status)}
-          </Badge>
+        {state.overdue || subscription.status !== "ACTIVE" ? (
+          <Badge variant={statusBadge.variant}>{statusBadge.label}</Badge>
         ) : null}
       </div>
       <LinkPendingOverlay />

@@ -4,8 +4,7 @@ import { BrandLogo } from "@/src/modules/finance/shared/components/brand-logo"
 import type { FinanceSubscription } from "@/src/modules/finance/shared/types/entities"
 import {
   billingCycleLabel,
-  subscriptionStatusLabel,
-  subscriptionStatusVariant,
+  subscriptionStatusBadge,
 } from "@/src/modules/finance/subscriptions/lib/subscription-display"
 import {
   billingMonthLabel,
@@ -25,7 +24,10 @@ export function SubscriptionDetailHeader({
   today,
 }: SubscriptionDetailHeaderProps) {
   const cycle = subscriptionCycleProgress(subscription, today)
-  const overdue = subscriptionIsOverdue(subscription, today)
+  const statusBadge = subscriptionStatusBadge(
+    subscription,
+    subscriptionIsOverdue(subscription, today)
+  )
 
   return (
     <>
@@ -46,13 +48,7 @@ export function SubscriptionDetailHeader({
             )}
           </p>
         </div>
-        <Badge
-          variant={
-            overdue ? "danger" : subscriptionStatusVariant(subscription.status)
-          }
-        >
-          {overdue ? "Vencida" : subscriptionStatusLabel(subscription.status)}
-        </Badge>
+        <Badge variant={statusBadge.variant}>{statusBadge.label}</Badge>
       </div>
 
       <div className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-muted/40 px-4 py-2 text-xs text-muted-foreground">
