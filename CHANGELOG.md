@@ -2,6 +2,12 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.58.5] - 2026-10-22
+
+### Cambiado
+
+- Interno: Productos y Patrimonio comparten el aviso de «sin desglose por moneda» y el texto de la tarjeta de un cobro se arma antes del JSX; se retira un helper sin uso (#238). Sin cambio de comportamiento.
+
 ## [0.58.4] - 2026-10-22
 
 ### Corregido

@@ -12,6 +12,12 @@ export type ReleaseNotesEntry = {
 
 export const RELEASE_NOTES: readonly ReleaseNotesEntry[] = [
   {
+    version: "0.58.5",
+    highlights: [
+      "Sin cambios visibles: esta versión solo ordena detalles internos del proyecto.",
+    ],
+  },
+  {
     version: "0.58.4",
     highlights: [
       "Productos, Patrimonio y la pestaña Cobros de Planificación dejan de caer en la pantalla de error cuando la respuesta del servidor viene incompleta: verás un aviso y el resto de la vista sigue funcionando.",
