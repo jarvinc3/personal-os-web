@@ -12,6 +12,9 @@ import type { ReactNode } from "react"
 export type PlanningProgressTone =
   "primary" | "success" | "warning" | "danger" | "info"
 
+/** PROVISIONAL (#272): draft for the card gallery; #290 retires the gallery. */
+export type PlanningProgressVariant = "full" | "compact" | "inline"
+
 type BadgeVariant = VariantProps<typeof badgeVariants>["variant"]
 
 export type PlanningProgressCardProps = {
@@ -36,6 +39,7 @@ export type PlanningProgressCardProps = {
   /** Present only while the list is picking cobros; adds the round check. */
   selection?: { selected: boolean; dimmed?: boolean }
   onLongPress?: () => void
+  variant?: PlanningProgressVariant
 }
 
 const TONE_STROKE: Record<PlanningProgressTone, string> = {
@@ -141,6 +145,7 @@ export function PlanningProgressCard({
   onPress,
   selection,
   onLongPress,
+  variant = "full",
 }: PlanningProgressCardProps) {
   const barWidth = progress === null ? 0 : clampPct(progress)
   const showLeading = Boolean(leading) || Boolean(Icon)
@@ -289,22 +294,140 @@ export function PlanningProgressCard({
   )
 
   const className = cn(
-    "relative flex w-full flex-col gap-3 overflow-hidden rounded-2xl p-3 text-left",
-    surfaceColor ? "text-white" : "bg-muted/50",
-    selection?.selected && "border-2 border-info bg-info/[7%]",
+    "relative flex w-full overflow-hidden text-left",
+    variant === "full" && "flex-col gap-3 rounded-2xl p-3",
+    variant === "compact" && "items-center gap-2.5 rounded-xl p-2.5",
+    variant === "inline" &&
+      "inline-flex max-w-full min-w-0 items-center gap-1.5 align-middle",
+    variant !== "inline" && surfaceColor ? "text-white" : null,
+    variant !== "inline" && !surfaceColor ? "bg-muted/50" : null,
+    selection?.selected &&
+      variant !== "inline" &&
+      "border-2 border-info bg-info/[7%]",
     selection?.dimmed && "opacity-60",
     (href || onPress) &&
       cn(
         PRESSABLE_CLASS,
-        "cursor-pointer",
-        surfaceColor ? "hover:brightness-110" : "hover:bg-muted"
+        variant !== "inline" && "cursor-pointer",
+        variant !== "inline" &&
+          (surfaceColor ? "hover:brightness-110" : "hover:bg-muted")
       )
   )
-  const style = surfaceColor ? { backgroundColor: surfaceColor } : undefined
-  const body = (
+  const style =
+    surfaceColor && variant !== "inline"
+      ? { backgroundColor: surfaceColor }
+      : undefined
+
+  const selectionMark = selection ? (
+    <span
+      aria-hidden="true"
+      className={cn(
+        "flex size-5 shrink-0 items-center justify-center rounded-full border-2",
+        selection.selected
+          ? "border-info bg-info text-white"
+          : "border-border bg-background"
+      )}
+    >
+      {selection.selected ? <CheckIcon className="size-3" /> : null}
+    </span>
+  ) : null
+
+  const compactBody = (
     <>
       {decoration}
-      <span className="relative z-10 flex flex-col gap-3">{content}</span>
+      <span className="relative z-10 flex min-w-0 flex-1 items-center gap-2.5">
+        {showLeading ? (
+          <span
+            className={cn(
+              "relative flex size-8 shrink-0 items-center justify-center rounded-full",
+              tinted || accentColor ? undefined : TONE_ICON[tone],
+              tinted && "bg-transparent"
+            )}
+            style={
+              !tinted && accentColor
+                ? {
+                    backgroundColor: `color-mix(in srgb, ${accentColor} 18%, transparent)`,
+                    color: accentColor,
+                  }
+                : undefined
+            }
+          >
+            {leading ?? (Icon ? <Icon className="size-4" /> : null)}
+          </span>
+        ) : null}
+        <span className="min-w-0 flex-1">
+          <span className="flex items-center justify-between gap-2">
+            <span className="min-w-0 truncate text-sm font-medium">
+              {title}
+            </span>
+            <span className="shrink-0 text-sm font-semibold tabular-nums">
+              {currentLabel}
+            </span>
+          </span>
+          <span
+            className={cn(
+              "mt-0.5 flex items-center justify-between gap-2 text-[11px]",
+              tinted ? "text-white/70" : "text-muted-foreground"
+            )}
+          >
+            <span className="min-w-0 truncate">
+              {badge?.label ?? currentHint}
+            </span>
+            <span className="shrink-0 tabular-nums">
+              {targetHint} {targetLabel}
+            </span>
+          </span>
+          <span
+            className={cn(
+              "mt-1 block h-1 w-full overflow-hidden rounded-full",
+              tinted ? "bg-white/20" : "bg-muted"
+            )}
+          >
+            <span
+              className={cn(
+                "block h-full rounded-full",
+                tinted || accentColor ? undefined : TONE_BAR[tone],
+                tinted && "bg-white"
+              )}
+              style={{
+                width: `${barWidth}%`,
+                backgroundColor: tinted
+                  ? undefined
+                  : (accentColor ?? undefined),
+              }}
+            />
+          </span>
+        </span>
+        {selectionMark}
+      </span>
+    </>
+  )
+
+  const inlineBody = (
+    <span className="relative z-10 flex min-w-0 items-center gap-1.5">
+      {showLeading ? (
+        <span className="flex size-5 shrink-0 items-center justify-center">
+          {leading ?? (Icon ? <Icon className="size-4" /> : null)}
+        </span>
+      ) : null}
+      <span className="min-w-0 truncate text-sm font-medium">{title}</span>
+      {badge ? (
+        <Badge variant={badge.variant ?? "secondary"} className="shrink-0">
+          {badge.label}
+        </Badge>
+      ) : null}
+      {selectionMark}
+    </span>
+  )
+
+  const body = (
+    <>
+      {variant === "full" ? decoration : null}
+      {variant === "compact" ? compactBody : null}
+      {variant === "inline" ? inlineBody : null}
+      {variant === "full" ? (
+        <span className="relative z-10 flex flex-col gap-3">{content}</span>
+      ) : null}
     </>
   )
 

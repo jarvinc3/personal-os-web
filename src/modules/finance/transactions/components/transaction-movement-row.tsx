@@ -37,6 +37,7 @@ import {
   ScaleIcon,
 } from "lucide-react"
 import type { ReactNode } from "react"
+import Link from "next/link"
 
 type TransactionMovementRowProps = {
   transaction: FinanceTransaction
@@ -50,6 +51,80 @@ type TransactionMovementRowProps = {
   href?: string
   /** Account or card the movement is read from; signs transfers from its side. */
   instrument?: FinanceInstrumentRef
+  /** PROVISIONAL (#272): draft for the card gallery; #290 retires the gallery. */
+  variant?: "default" | "compact" | "inline"
+}
+
+function MovementLeading({
+  transaction,
+  icon,
+  isTransfer,
+  sign,
+  title,
+  size,
+}: {
+  transaction: FinanceTransaction
+  icon: string | undefined
+  isTransfer: boolean
+  sign: "+" | "−" | null
+  title: string
+  size: number
+}) {
+  const iconClassName = size > 22 ? "size-5" : "size-4"
+  const emojiClassName = size >= 22 ? "text-base" : "text-sm"
+
+  if (transaction.merchantLogoUrl) {
+    return (
+      <BrandLogo
+        name={title}
+        logoUrl={transaction.merchantLogoUrl}
+        size={size}
+      />
+    )
+  }
+  if (icon) {
+    return (
+      <span className={emojiClassName} aria-hidden>
+        {icon}
+      </span>
+    )
+  }
+  if (isTransfer) {
+    return (
+      <ArrowLeftRightIcon
+        className={cn(iconClassName, "text-info")}
+        aria-hidden
+      />
+    )
+  }
+  if (transaction.type === "DEBIT") {
+    return (
+      <ArrowDownLeftIcon
+        className={cn(iconClassName, "text-destructive")}
+        aria-hidden
+      />
+    )
+  }
+  if (transaction.type === "CREDIT") {
+    return (
+      <ArrowUpRightIcon
+        className={cn(iconClassName, "text-success")}
+        aria-hidden
+      />
+    )
+  }
+  if (transaction.type === "ADJUSTMENT") {
+    return (
+      <ScaleIcon
+        className={cn(
+          iconClassName,
+          sign === "−" ? "text-destructive" : "text-success"
+        )}
+        aria-hidden
+      />
+    )
+  }
+  return null
 }
 
 export function TransactionMovementRow({
@@ -63,6 +138,7 @@ export function TransactionMovementRow({
   onPress,
   href,
   instrument,
+  variant = "default",
 }: TransactionMovementRowProps) {
   const categoryById = new Map(
     categories.map((category) => [category.id, category] as const)
@@ -126,47 +202,74 @@ export function TransactionMovementRow({
     paired ||
     isReversed
 
+  if (variant === "inline") {
+    const mention = (
+      <>
+        <MovementLeading
+          transaction={transaction}
+          icon={icon}
+          isTransfer={isTransfer}
+          sign={sign}
+          title={title}
+          size={16}
+        />
+        <span className="min-w-0 truncate text-sm font-medium">{title}</span>
+      </>
+    )
+    const inlineClassName = cn(
+      "inline-flex max-w-full min-w-0 items-center gap-1.5 align-middle",
+      isInactive && "opacity-50"
+    )
+
+    if (onPress) {
+      return (
+        <button type="button" onClick={onPress} className={inlineClassName}>
+          {mention}
+        </button>
+      )
+    }
+
+    if (href) {
+      return (
+        <Link href={href} className={inlineClassName}>
+          {mention}
+        </Link>
+      )
+    }
+
+    return <span className={inlineClassName}>{mention}</span>
+  }
+
+  const leadingMark = (size: number) => (
+    <span
+      className={cn(
+        "flex items-center justify-center",
+        isInactive && "opacity-50"
+      )}
+    >
+      <MovementLeading
+        transaction={transaction}
+        icon={icon}
+        isTransfer={isTransfer}
+        sign={sign}
+        title={title}
+        size={size}
+      />
+    </span>
+  )
+
   const row = {
     accentColor: color,
     tintRow: Boolean(color),
     title: isInactive ? <span className="opacity-50">{title}</span> : title,
     description:
-      isInactive && description ? (
+      variant === "compact" ? undefined : isInactive && description ? (
         <span className="opacity-50">{description}</span>
       ) : (
         description
       ),
-    leading: (
-      <span
-        className={cn(
-          "flex items-center justify-center",
-          isInactive && "opacity-50"
-        )}
-      >
-        {transaction.merchantLogoUrl ? (
-          <BrandLogo
-            name={title}
-            logoUrl={transaction.merchantLogoUrl}
-            size={28}
-          />
-        ) : icon ? (
-          <span>{icon}</span>
-        ) : isTransfer ? (
-          <ArrowLeftRightIcon className="size-5 text-info" />
-        ) : transaction.type === "DEBIT" ? (
-          <ArrowDownLeftIcon className="size-5 text-destructive" />
-        ) : transaction.type === "CREDIT" ? (
-          <ArrowUpRightIcon className="size-5 text-success" />
-        ) : transaction.type === "ADJUSTMENT" ? (
-          <ScaleIcon
-            className={cn(
-              "size-5",
-              sign === "−" ? "text-destructive" : "text-success"
-            )}
-          />
-        ) : null}
-      </span>
-    ),
+    leading: leadingMark(variant === "compact" ? 22 : 28),
+    className: variant === "compact" ? "gap-2 p-1.5 pl-2" : undefined,
     value: (
       <div className="flex items-center justify-end gap-1">
         <div className="flex flex-col items-end">

@@ -26,6 +26,9 @@ type SubscriptionCardProps = {
   today: Date
   /** Warning window in days, from the global setting. */
   windowDays: number
+  onPress?: () => void
+  /** PROVISIONAL (#272): draft for the card gallery; #290 retires the gallery. */
+  variant?: "full" | "compact" | "inline"
 }
 
 /**
@@ -37,6 +40,8 @@ export function SubscriptionCard({
   display,
   today,
   windowDays,
+  onPress,
+  variant = "full",
 }: SubscriptionCardProps) {
   const state = subscriptionCardState({ subscription, today, windowDays })
   const statusBadge = subscriptionStatusBadge(subscription, state.overdue)
@@ -46,14 +51,142 @@ export function SubscriptionCard({
     subscription.category?.name ??
     billingCycleLabel(subscription.billingCycle, subscription.billingInterval)
 
-  return (
-    <Link
-      href={APP_ROUTES.app.financeSubscription(subscription.id)}
-      className={cn(
-        "relative flex flex-col gap-3 rounded-2xl bg-card p-4 transition-colors hover:bg-muted/40",
+  const shellClassName = cn(
+    "relative flex text-left transition-colors",
+    variant === "full" &&
+      cn(
+        "flex-col gap-3 rounded-2xl bg-card p-4 hover:bg-muted/40",
         state.inWindow ? "border-2 border-warning" : "border border-border"
-      )}
-    >
+      ),
+    variant === "compact" &&
+      cn(
+        "items-center rounded-xl border bg-card p-2.5 hover:bg-muted/40",
+        state.inWindow ? "border-2 border-warning" : "border-border"
+      ),
+    variant === "inline" && "inline-flex max-w-full min-w-0 items-center",
+    onPress && "cursor-pointer"
+  )
+
+  if (variant === "inline") {
+    const inlineBody = (
+      <>
+        <SubscriptionProgressRing
+          percent={progress.percent}
+          size={16}
+          tone={state.inWindow ? "warning" : "primary"}
+        >
+          <BrandLogo
+            name={subscription.name}
+            logoUrl={subscription.logoUrl}
+            size={16}
+          />
+        </SubscriptionProgressRing>
+        <span className="min-w-0 truncate text-sm font-medium">
+          {subscription.name}
+        </span>
+        {state.inWindow ? (
+          <TriangleAlertIcon
+            className="size-3.5 shrink-0 text-warning"
+            aria-hidden
+          />
+        ) : null}
+      </>
+    )
+
+    if (onPress) {
+      return (
+        <button
+          type="button"
+          onClick={onPress}
+          className={cn(shellClassName, "ml-1.5 gap-1.5")}
+        >
+          {inlineBody}
+        </button>
+      )
+    }
+
+    return (
+      <Link
+        href={APP_ROUTES.app.financeSubscription(subscription.id)}
+        className={cn(shellClassName, "ml-1.5 gap-1.5")}
+      >
+        {inlineBody}
+      </Link>
+    )
+  }
+
+  if (variant === "compact") {
+    const compactBody = (
+      <>
+        <SubscriptionProgressRing
+          percent={progress.percent}
+          size={26}
+          tone={state.inWindow ? "warning" : "primary"}
+        >
+          <BrandLogo
+            name={subscription.name}
+            logoUrl={subscription.logoUrl}
+            size={26}
+          />
+        </SubscriptionProgressRing>
+        <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+          <span className="flex items-center justify-between gap-2">
+            <span className="min-w-0 truncate text-sm font-semibold">
+              {subscription.name}
+            </span>
+            <span className="shrink-0 text-sm font-bold tabular-nums">
+              {state.onTrial
+                ? "Gratis"
+                : formatFinanceMoney(subscription.amount, money)}
+            </span>
+          </span>
+          <span className="flex items-center justify-between gap-2 text-[11px] text-muted-foreground">
+            <span className="flex min-w-0 items-center gap-1">
+              {subscription.status !== "ACTIVE" ? (
+                <Badge variant={statusBadge.variant}>{statusBadge.label}</Badge>
+              ) : (
+                <span className="truncate">{categoryLabel}</span>
+              )}
+            </span>
+            <span className="flex shrink-0 items-center gap-1">
+              {state.warnLastCharge ? (
+                <TriangleAlertIcon
+                  className="size-3.5 text-warning"
+                  aria-hidden
+                />
+              ) : null}
+              <span>{state.label}</span>
+            </span>
+          </span>
+        </span>
+      </>
+    )
+
+    if (onPress) {
+      return (
+        <button
+          type="button"
+          onClick={onPress}
+          className={cn(shellClassName, "gap-2.5")}
+        >
+          {compactBody}
+        </button>
+      )
+    }
+
+    return (
+      <Link
+        href={APP_ROUTES.app.financeSubscription(subscription.id)}
+        className={cn(shellClassName, "gap-2.5")}
+      >
+        {compactBody}
+        <LinkPendingOverlay />
+      </Link>
+    )
+  }
+
+  const fullBody = (
+    <>
       <div className="flex items-start gap-3">
         <SubscriptionProgressRing
           percent={progress.percent}
@@ -117,6 +250,23 @@ export function SubscriptionCard({
           <Badge variant={statusBadge.variant}>{statusBadge.label}</Badge>
         ) : null}
       </div>
+    </>
+  )
+
+  if (onPress) {
+    return (
+      <button type="button" onClick={onPress} className={shellClassName}>
+        {fullBody}
+      </button>
+    )
+  }
+
+  return (
+    <Link
+      href={APP_ROUTES.app.financeSubscription(subscription.id)}
+      className={shellClassName}
+    >
+      {fullBody}
       <LinkPendingOverlay />
     </Link>
   )

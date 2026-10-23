@@ -12,6 +12,13 @@ export type ReleaseNotesEntry = {
 
 export const RELEASE_NOTES: readonly ReleaseNotesEntry[] = [
   {
+    version: "0.59.0",
+    highlights: [
+      "Nueva galería provisional para revisar las cards de cada entidad y sus variantes antes de aplicarlas en la app.",
+      "Se abre desde Inicio y usa datos de ejemplo; se retira cuando los diseños estén aprobados.",
+    ],
+  },
+  {
     version: "0.58.9",
     highlights: [
       "Al crear la cuenta o iniciar sesión, la contraseña puede tener 6 caracteres como mínimo, siempre con mayúsculas, minúsculas y números.",

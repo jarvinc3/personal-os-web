@@ -2,6 +2,13 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.59.0] - 2026-10-23
+
+### Agregado
+
+- Galería provisional de cards en `/dev/cards` con todas las entidades del rediseño, sus variantes reales y datos de ejemplo; se abre desde un atajo en Inicio y se retira en #290 (#272).
+- Las cards de institución, cuenta, tarjeta, préstamo, meta, cobro, presupuesto, suscripción, categoría y movimiento aceptan las variantes compacta e inline; sin la prop se ven como antes (#272).
+
 ## [0.58.9] - 2026-10-23
 
 ### Corregido

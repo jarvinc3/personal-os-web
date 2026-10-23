@@ -41,6 +41,8 @@ type AccountProductRowProps = {
   onPress?: () => void
   href?: string
   disabled?: boolean
+  /** PROVISIONAL (#272): draft for the card gallery; #290 retires the gallery. */
+  variant?: "full" | "compact" | "inline"
 }
 
 export function AccountProductRow({
@@ -49,14 +51,73 @@ export function AccountProductRow({
   onPress,
   href,
   disabled = false,
+  variant = "full",
 }: AccountProductRowProps) {
   const lastFour = account.accountNumberLast4
   const subtitle = lastFour
     ? `${FINANCE_ACCOUNT_TYPE_LABEL[account.type]} · •••• ${lastFour}`
     : `${FINANCE_ACCOUNT_TYPE_LABEL[account.type]} · ${account.currency}`
   const tint = account.color
+  const compact = variant === "compact"
+  const inline = variant === "inline"
+
+  if (inline) {
+    const mention = (
+      <>
+        <BrandLogo
+          name={account.institutionName ?? account.name}
+          logoUrl={account.institutionLogoUrl}
+          size={20}
+          className="shrink-0"
+        />
+        <span className="min-w-0 truncate text-sm font-medium">
+          {account.name}
+        </span>
+      </>
+    )
+    const inlineClassName = cn(
+      "inline-flex max-w-full min-w-0 items-center gap-1.5 align-middle",
+      disabled ? "cursor-not-allowed opacity-50" : PRESSABLE_CLASS
+    )
+
+    if (href && !disabled) {
+      return (
+        <Link href={href} className={inlineClassName}>
+          {mention}
+        </Link>
+      )
+    }
+
+    if (onPress) {
+      return (
+        <button
+          type="button"
+          onClick={onPress}
+          disabled={disabled}
+          className={inlineClassName}
+        >
+          {mention}
+        </button>
+      )
+    }
+
+    return (
+      <span
+        className={cn(
+          "inline-flex max-w-full min-w-0 items-center gap-1.5 align-middle",
+          disabled && "opacity-50"
+        )}
+      >
+        {mention}
+      </span>
+    )
+  }
+
   const className = cn(
-    "group relative flex w-full items-center gap-3 overflow-hidden rounded-2xl border p-2 pl-4 text-left",
+    "group relative flex w-full items-center overflow-hidden text-left",
+    compact
+      ? "gap-2 rounded-xl border p-2 pl-3"
+      : "gap-3 rounded-2xl border p-2 pl-4",
     tint
       ? "border-transparent text-white"
       : "border-border bg-card text-foreground",
@@ -79,33 +140,68 @@ export function AccountProductRow({
       <BrandLogo
         name={account.institutionName ?? account.name}
         logoUrl={account.institutionLogoUrl}
-        size={44}
-        className={cn("relative z-10", disabled && "opacity-45")}
+        size={compact ? 28 : 44}
+        className={cn("relative z-10 shrink-0", disabled && "opacity-45")}
       />
 
       <div
         className={cn(
-          "relative z-10 flex min-w-0 flex-1 flex-col gap-1",
+          "relative z-10 flex min-w-0 flex-1 flex-col",
+          compact ? "gap-0.5" : "gap-1",
           disabled && "opacity-45"
         )}
       >
-        <div className="flex flex-col">
-          <p className="truncate font-semibold">{account.name}</p>
+        <div
+          className={cn(
+            "flex min-w-0",
+            compact ? "items-baseline justify-between gap-2" : "flex-col"
+          )}
+        >
           <p
             className={cn(
-              "text-sm",
+              "truncate font-semibold",
+              compact && "text-sm leading-tight"
+            )}
+          >
+            {account.name}
+          </p>
+          {compact ? (
+            <p className="shrink-0 text-[13px] leading-tight font-semibold tabular-nums">
+              {formatFinanceMoney(account.balance, {
+                ...display,
+                currency: account.currency,
+              })}
+            </p>
+          ) : null}
+          {!compact ? (
+            <p
+              className={cn(
+                "truncate",
+                "text-sm",
+                tint ? "text-white/70" : "text-muted-foreground"
+              )}
+            >
+              {subtitle}
+            </p>
+          ) : null}
+        </div>
+        {compact ? (
+          <p
+            className={cn(
+              "truncate text-[11px] leading-tight",
               tint ? "text-white/70" : "text-muted-foreground"
             )}
           >
             {subtitle}
           </p>
-        </div>
-        <p className="font-semibold tabular-nums">
-          {formatFinanceMoney(account.balance, {
-            ...display,
-            currency: account.currency,
-          })}
-        </p>
+        ) : (
+          <p className="font-semibold tabular-nums">
+            {formatFinanceMoney(account.balance, {
+              ...display,
+              currency: account.currency,
+            })}
+          </p>
+        )}
       </div>
       {disabled ? <InUseLock onLightSurface={!tint} /> : null}
     </>
@@ -140,6 +236,8 @@ type CardProductRowProps = {
   onPress?: () => void
   href?: string
   disabled?: boolean
+  /** PROVISIONAL (#272): draft for the card gallery; #290 retires the gallery. */
+  variant?: "full" | "compact" | "inline"
 }
 
 export function CardProductRow({
@@ -149,10 +247,70 @@ export function CardProductRow({
   onPress,
   href,
   disabled = false,
+  variant = "full",
 }: CardProductRowProps) {
   const balances = resolveCardDisplayBalances(card, accounts)
+  const compact = variant === "compact"
+
+  if (variant === "inline") {
+    const mention = (
+      <>
+        <BrandLogo
+          name={card.institutionName}
+          logoUrl={card.institutionLogoUrl}
+          size={20}
+          className="shrink-0"
+        />
+        <span className="min-w-0 truncate text-sm font-medium">
+          {card.name}
+        </span>
+        <span className="shrink-0 text-xs text-muted-foreground tabular-nums">
+          •••• {card.lastFour ?? "····"}
+        </span>
+      </>
+    )
+    const inlineClassName = cn(
+      "inline-flex max-w-full min-w-0 items-center gap-1.5 align-middle",
+      disabled ? "cursor-not-allowed opacity-50" : PRESSABLE_CLASS
+    )
+
+    if (href && !disabled) {
+      return (
+        <Link href={href} className={inlineClassName}>
+          {mention}
+        </Link>
+      )
+    }
+
+    if (onPress) {
+      return (
+        <button
+          type="button"
+          onClick={onPress}
+          disabled={disabled}
+          className={inlineClassName}
+        >
+          {mention}
+        </button>
+      )
+    }
+
+    return (
+      <span
+        className={cn(
+          "inline-flex max-w-full min-w-0 items-center gap-1.5 align-middle",
+          disabled && "opacity-50"
+        )}
+      >
+        {mention}
+      </span>
+    )
+  }
+
   const className = cn(
-    "relative flex w-full flex-col gap-4 overflow-hidden rounded-2xl bg-zinc-900 p-4 text-left text-white",
+    "relative flex w-full flex-col overflow-hidden text-left text-white",
+    compact ? "gap-2 rounded-xl p-2.5" : "gap-4 rounded-2xl bg-zinc-900 p-4",
+    compact && !card.color && "bg-zinc-900",
     disabled ? "cursor-not-allowed" : cn("hover:opacity-95", PRESSABLE_CLASS)
   )
   const style = card.color ? { backgroundColor: card.color } : undefined
@@ -175,8 +333,20 @@ export function CardProductRow({
           disabled && "opacity-45"
         )}
       >
-        <p className="truncate text-sm font-semibold text-white">{card.name}</p>
-        <span className="rounded-full bg-white/15 px-2.5 py-0.5 text-xs font-semibold">
+        <p
+          className={cn(
+            "truncate font-semibold text-white",
+            compact ? "text-sm" : "text-sm"
+          )}
+        >
+          {card.name}
+        </p>
+        <span
+          className={cn(
+            "shrink-0 rounded-full bg-white/15 font-semibold",
+            compact ? "px-2 py-0.5 text-[10px]" : "px-2.5 py-0.5 text-xs"
+          )}
+        >
           {FINANCE_CARD_TYPE_LABEL[card.type]}
         </span>
       </div>
@@ -187,14 +357,32 @@ export function CardProductRow({
           disabled && "opacity-45"
         )}
       >
-        <p className="text-[10px] tracking-[0.14em] text-white/55 uppercase">
+        <p
+          className={cn(
+            "tracking-[0.14em] text-white/55 uppercase",
+            compact ? "text-[9px]" : "text-[10px]"
+          )}
+        >
           {card.type === "CREDIT" ? "Balance disponible" : "Saldo actual"}
         </p>
         {balances.length === 0 ? (
-          <p className="text-xl font-bold tabular-nums">Sin saldo</p>
+          <p
+            className={cn(
+              "font-bold tabular-nums",
+              compact ? "text-base" : "text-xl"
+            )}
+          >
+            Sin saldo
+          </p>
         ) : (
           balances.map((balance) => (
-            <p key={balance.id} className="text-xl font-bold tabular-nums">
+            <p
+              key={balance.id}
+              className={cn(
+                "font-bold tabular-nums",
+                compact ? "text-base leading-tight" : "text-xl"
+              )}
+            >
               {formatFinanceMoney(balance.availableCredit ?? balance.balance, {
                 ...display,
                 currency: balance.currency,
@@ -210,19 +398,21 @@ export function CardProductRow({
           disabled && "opacity-45"
         )}
       >
-        <p className="tracking-[0.2em] text-white/80">
+        <p
+          className={cn("tracking-[0.2em] text-white/80", compact && "text-xs")}
+        >
           •••• {card.lastFour ?? "····"}
         </p>
         <span className="inline-flex items-center gap-1">
           <BrandLogo
             name={card.institutionName}
             logoUrl={card.institutionLogoUrl}
-            size={28}
+            size={compact ? 22 : 28}
           />
           <CardNetworkMark
             network={card.network}
             logoUrl={card.networkLogoUrl}
-            size={28}
+            size={compact ? 22 : 28}
           />
         </span>
       </div>

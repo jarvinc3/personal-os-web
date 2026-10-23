@@ -2,6 +2,7 @@
 
 import { BrandLogo } from "@/src/modules/finance/shared/components/brand-logo"
 import { PlanningProgressCard } from "@/src/modules/finance/shared/components/planning-progress-card"
+import type { PlanningProgressVariant } from "@/src/modules/finance/shared/components/planning-progress-card"
 import { formatRatePercentLabel } from "@/src/modules/finance/shared/lib/interest-rate"
 import { formatCalendarDate } from "@/src/modules/finance/shared/lib/ledger-form"
 import {
@@ -25,7 +26,10 @@ type LoanProgressCardProps = {
     logoUrl?: string | null
     color?: string | null
   } | null
-  href: string
+  href?: string
+  onPress?: () => void
+  /** PROVISIONAL (#272): draft for the card gallery; #290 retires the gallery. */
+  variant?: PlanningProgressVariant
 }
 
 export function LoanSurfaceMark({
@@ -65,6 +69,8 @@ export function LoanProgressCard({
   display,
   institution,
   href,
+  onPress,
+  variant = "full",
 }: LoanProgressCardProps) {
   const money = { ...display, currency: loan.currency }
   const { paidOff, progress } = loanProgressSummary(loan)
@@ -75,6 +81,7 @@ export function LoanProgressCard({
   const pillClass = tinted
     ? "border-transparent bg-white/15 text-white"
     : undefined
+  const logoSize = variant === "full" ? 34 : variant === "compact" ? 22 : 16
 
   return (
     <PlanningProgressCard
@@ -98,7 +105,7 @@ export function LoanProgressCard({
         <BrandLogo
           name={institution?.name ?? loan.lenderName}
           logoUrl={institution?.logoUrl}
-          size={34}
+          size={logoSize}
         />
       }
       tone={paidOff ? "success" : "warning"}
@@ -131,6 +138,8 @@ export function LoanProgressCard({
         </span>
       }
       href={href}
+      onPress={onPress}
+      variant={variant}
     />
   )
 }
