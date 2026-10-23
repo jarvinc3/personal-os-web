@@ -2,6 +2,12 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.58.9] - 2026-10-23
+
+### Corregido
+
+- Registro e inicio de sesión piden 6 caracteres como mínimo, la misma política que Supabase, en vez de 10; el aviso del formulario y el mensaje de error lo dicen igual (#247).
+
 ## [0.58.8] - 2026-10-22
 
 ### Cambiado
@@ -56,7 +62,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 ### Corregido
 
 - Los errores de inicio de sesión y registro se muestran en español según el código de Supabase; las credenciales inválidas no revelan si falló el correo o la contraseña, y un código sin traducir deja el mensaje de respaldo de la operación (#247).
-- Registro e inicio de sesión exigen la misma política que Supabase —6 caracteres con mayúscula, minúscula y número— antes de enviar el formulario, en vez de 8 caracteres sin minúscula (#247).
+- Registro e inicio de sesión exigen la misma política que Supabase —10 caracteres con mayúscula, minúscula y número— antes de enviar el formulario, en vez de 8 caracteres sin minúscula (#247).
 
 ## [0.58.2] - 2026-10-22
 

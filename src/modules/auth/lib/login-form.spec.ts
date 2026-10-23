@@ -2,6 +2,7 @@ import assert from "node:assert/strict"
 import { describe, it } from "node:test"
 
 import { loginFormSchema } from "./login-form.ts"
+import { PASSWORD_MIN_LENGTH } from "./password-policy.ts"
 
 describe("loginFormSchema", () => {
   it("accepts an email and a password that meets the policy", () => {
@@ -18,7 +19,7 @@ describe("loginFormSchema", () => {
     assert.equal(
       loginFormSchema.safeParse({
         email: "ana@example.com",
-        password: "Password1",
+        password: "Pass1".padEnd(PASSWORD_MIN_LENGTH - 1, "a"),
       }).success,
       false
     )

@@ -12,6 +12,12 @@ export type ReleaseNotesEntry = {
 
 export const RELEASE_NOTES: readonly ReleaseNotesEntry[] = [
   {
+    version: "0.58.9",
+    highlights: [
+      "Al crear la cuenta o iniciar sesión, la contraseña puede tener 6 caracteres como mínimo, siempre con mayúsculas, minúsculas y números.",
+    ],
+  },
+  {
     version: "0.58.8",
     highlights: [
       "Sin cambios visibles: esta versión solo ordena detalles internos del proyecto.",
@@ -55,7 +61,7 @@ export const RELEASE_NOTES: readonly ReleaseNotesEntry[] = [
     version: "0.58.3",
     highlights: [
       "Si tu inicio de sesión o tu registro falla, ahora ves el motivo en español y no un mensaje técnico en inglés.",
-      "Al crear la cuenta, la contraseña debe tener al menos 6 caracteres e incluir mayúsculas, minúsculas y números; el formulario te lo dice antes de enviar.",
+      "Al crear la cuenta, la contraseña debe tener al menos 10 caracteres e incluir mayúsculas, minúsculas y números; el formulario te lo dice antes de enviar.",
     ],
   },
   {

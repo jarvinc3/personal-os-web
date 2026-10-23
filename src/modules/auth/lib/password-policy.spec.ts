@@ -8,10 +8,22 @@ describe("passwordPolicySchema", () => {
     assert.equal(passwordPolicySchema.safeParse("Password12").success, true)
   })
 
+  it("accepts a password exactly as long as the policy", () => {
+    const passwordAtMinLength = "Pass1".padEnd(PASSWORD_MIN_LENGTH, "a")
+    assert.equal(passwordAtMinLength.length, PASSWORD_MIN_LENGTH)
+    assert.equal(
+      passwordPolicySchema.safeParse(passwordAtMinLength).success,
+      true
+    )
+  })
+
   it("rejects a password shorter than the policy", () => {
-    const shortPassword = "Passw0rd1"
-    assert.equal(shortPassword.length, PASSWORD_MIN_LENGTH - 1)
-    assert.equal(passwordPolicySchema.safeParse(shortPassword).success, false)
+    const passwordBelowMinLength = "Pass1".padEnd(PASSWORD_MIN_LENGTH - 1, "a")
+    assert.equal(passwordBelowMinLength.length, PASSWORD_MIN_LENGTH - 1)
+    assert.equal(
+      passwordPolicySchema.safeParse(passwordBelowMinLength).success,
+      false
+    )
   })
 
   it("rejects a password without a lowercase letter", () => {
