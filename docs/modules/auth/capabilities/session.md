@@ -22,6 +22,12 @@ Montado en raíz (`AuthBootstrapProvider` → `useAuthBootstrap`):
 
 Google: `loginWithGoogle({ next })` → redirect IdP → `GET /auth/callback?code&next=`. `next` se usa tal cual en el redirect post-exchange (p. ej. `/settings` en delete). Sin `code` o error de exchange → `/login`.
 
+## Errores y contraseña
+
+- El texto de Supabase nunca llega al usuario: cada código conocido tiene su mensaje en español y un código desconocido deja el respaldo de la operación.
+- Credenciales inválidas no dicen si falló el correo o la contraseña.
+- Registro y login exigen antes de enviar la misma política que Supabase: 10 caracteres como mínimo, con mayúscula, minúscula y número.
+
 ## 401
 
 `api-client` en 401 emite `authEvents.emitUnauthorized` (salvo `suppressUnauthorizedEvent`). Bootstrap: clear store, quita `PROFILE_QUERY_KEY`, `signOut`, toast “Sesión expirada”.

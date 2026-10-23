@@ -4,13 +4,23 @@ import { describe, it } from "node:test"
 import { loginFormSchema } from "./login-form.ts"
 
 describe("loginFormSchema", () => {
-  it("accepts an email and a strong password", () => {
+  it("accepts an email and a password that meets the policy", () => {
+    assert.equal(
+      loginFormSchema.safeParse({
+        email: "ana@example.com",
+        password: "Password12",
+      }).success,
+      true
+    )
+  })
+
+  it("rejects a password shorter than the policy", () => {
     assert.equal(
       loginFormSchema.safeParse({
         email: "ana@example.com",
         password: "Password1",
       }).success,
-      true
+      false
     )
   })
 
@@ -18,7 +28,7 @@ describe("loginFormSchema", () => {
     assert.equal(
       loginFormSchema.safeParse({
         email: "ana@example.com",
-        password: "password1",
+        password: "password12",
       }).success,
       false
     )

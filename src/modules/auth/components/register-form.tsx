@@ -1,6 +1,10 @@
 "use client"
 
 import type { RegisterPayload } from "@/src/modules/auth/types/auth.types"
+import {
+  PASSWORD_MIN_LENGTH,
+  passwordPolicySchema,
+} from "@/src/modules/auth/lib/password-policy"
 import { FormTextField } from "@/src/shared/components/layout/form-blocks"
 import {
   Alert,
@@ -19,12 +23,10 @@ const registerSchema = z
   .object({
     fullName: z.string().trim().min(2, "Ingresa tu nombre completo"),
     email: z.string().trim().email("Ingresa un email válido"),
-    password: z
+    password: passwordPolicySchema,
+    confirmPassword: z
       .string()
-      .min(8, "La contraseña debe tener al menos 8 caracteres")
-      .regex(/[A-Z]/, "Debe incluir al menos una mayúscula")
-      .regex(/[0-9]/, "Debe incluir al menos un número"),
-    confirmPassword: z.string().min(8, "Confirma tu contraseña"),
+      .min(PASSWORD_MIN_LENGTH, "Confirma tu contraseña"),
   })
   .refine((values) => values.password === values.confirmPassword, {
     message: "Las contraseñas no coinciden",

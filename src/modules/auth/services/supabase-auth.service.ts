@@ -1,4 +1,5 @@
 import { getSupabaseBrowserClient } from "@/src/config/supabase/client"
+import { translateAuthError } from "@/src/modules/auth/lib/auth-error-messages"
 import type { IAuthService } from "@/src/modules/auth/types/auth-provider.interface"
 import type {
   AuthSession,
@@ -61,7 +62,20 @@ function getAuthErrorMessage(
   error: AuthError | null,
   fallback: string
 ): string {
-  return error?.message ?? fallback
+  if (!error) {
+    return fallback
+  }
+
+  return translateAuthError(
+    { code: error.code, reasons: readWeakPasswordReasons(error) },
+    fallback
+  )
+}
+
+/** Only the weak password error carries `reasons`, and the base type hides it. */
+function readWeakPasswordReasons(error: AuthError): string[] | undefined {
+  const { reasons } = error as AuthError & { reasons?: unknown }
+  return Array.isArray(reasons) ? reasons.map(String) : undefined
 }
 
 class SupabaseAuthService implements IAuthService {
