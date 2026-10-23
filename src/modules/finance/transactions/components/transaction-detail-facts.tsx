@@ -120,11 +120,11 @@ export function TransactionDetailFacts({
       )}
       <SummaryItem
         title="Comercio"
-        value={tx.merchantName ?? tx.merchant ?? "—"}
+        value={tx.merchant ?? tx.merchantName ?? "—"}
         leading={
           tx.merchantLogoUrl ? (
             <BrandLogo
-              name={tx.merchantName ?? tx.merchant ?? "Comercio"}
+              name={tx.merchant ?? tx.merchantName ?? "Comercio"}
               logoUrl={tx.merchantLogoUrl}
               size={28}
             />

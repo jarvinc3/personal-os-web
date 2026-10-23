@@ -485,14 +485,14 @@ export function FinanceTransactionsList({
           },
           {
             icon: <ArrowLeftRightIcon />,
-            label: "Transf...",
+            label: "Transferir",
             onClick: () => router.push(APP_ROUTES.app.financeTransferNew),
             disabled: !enabled || !canTransfer,
             color: "bg-blue-500",
           },
           {
             icon: <RefreshCwIcon />,
-            label: "Actual...",
+            label: "Actualizar",
             onClick: () => {
               void queryClient
                 .invalidateQueries({ queryKey: FINANCE_TRANSACTIONS_QUERY_KEY })

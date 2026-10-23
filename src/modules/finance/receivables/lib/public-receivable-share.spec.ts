@@ -134,7 +134,7 @@ describe("publicShareItemCaption", () => {
   it("shows what is left and when it is due", () => {
     assert.equal(
       publicShareItemCaption(item(), DISPLAY),
-      "Resta DOP $5,500.00 · Vence 30 oct de 2026"
+      "Resta DOP $5,500.00 · Vence 30 oct 2026"
     )
   })
 
@@ -162,8 +162,8 @@ describe("publicShareSummaryRows", () => {
       { label: "Monto total", value: "DOP $8,500.00" },
       { label: "Pagado", value: "DOP $3,000.00", tone: "success" },
       { label: "Pendiente", value: "DOP $5,500.00" },
-      { label: "Creado", value: "12 sept de 2026" },
-      { label: "Vence", value: "30 oct de 2026" },
+      { label: "Creado", value: "12 sep 2026" },
+      { label: "Vence", value: "30 oct 2026" },
     ])
   })
 
@@ -193,12 +193,12 @@ describe("publicSharePaymentRows", () => {
         {
           key: "2026-10-10T12:00:00.000Z-2000.00",
           amountLabel: "DOP $2,000.00",
-          dateLabel: "10 oct de 2026",
+          dateLabel: "10 oct 2026",
         },
         {
           key: "2026-09-25T12:00:00.000Z-1000.00",
           amountLabel: "DOP $1,000.00",
-          dateLabel: "25 sept de 2026",
+          dateLabel: "25 sep 2026",
         },
       ]
     )

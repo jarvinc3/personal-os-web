@@ -6,28 +6,13 @@ import {
   startOfDay,
 } from "date-fns"
 
+import { shortMonthLabel } from "@/src/shared/lib/date-format"
 import type { FinanceSubscription } from "@/src/modules/finance/shared/types/entities"
-
-const MONTH_SHORT = [
-  "ene",
-  "feb",
-  "mar",
-  "abr",
-  "may",
-  "jun",
-  "jul",
-  "ago",
-  "sep",
-  "oct",
-  "nov",
-  "dic",
-] as const
 
 /** `mar 2023`, the month and year a subscription started. */
 export function billingMonthLabel(value: Date | string): string {
   const date = typeof value === "string" ? parseISO(value) : value
-  const month = MONTH_SHORT[date.getMonth()]
-  return `${month} ${date.getFullYear()}`
+  return `${shortMonthLabel(date)} ${date.getFullYear()}`
 }
 
 export type SubscriptionCycleProgress = {
@@ -45,8 +30,7 @@ export type SubscriptionCycleProgress = {
 /** `17 oct`, the short date a card shows outside the warning window. */
 export function shortBillingDate(value: Date | string): string {
   const date = typeof value === "string" ? parseISO(value) : value
-  const month = MONTH_SHORT[date.getMonth()]
-  return `${date.getDate()} ${month}`
+  return `${date.getDate()} ${shortMonthLabel(date)}`
 }
 
 /**

@@ -26,7 +26,9 @@ export function resolveLandingUrl(configuredUrl) {
 }
 
 /** Origen de la landing, sin barra final. */
-export const LANDING_URL = resolveLandingUrl(process.env.NEXT_PUBLIC_LANDING_URL)
+export const LANDING_URL = resolveLandingUrl(
+  process.env.NEXT_PUBLIC_LANDING_URL
+)
 
 /** URL absoluta de una ruta de la landing; `landingUrl()` apunta a su portada. */
 export function landingUrl(path = "/") {

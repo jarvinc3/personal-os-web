@@ -110,7 +110,7 @@ export function FinancePlanningHero({
           <FinancePlanningHeroAction
             href={transferHref}
             icon={ArrowRightLeftIcon}
-            label="Transf."
+            label="Transferir"
             className="rounded-none rounded-r-2xl"
           />
         </div>

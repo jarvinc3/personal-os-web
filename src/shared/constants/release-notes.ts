@@ -12,6 +12,15 @@ export type ReleaseNotesEntry = {
 
 export const RELEASE_NOTES: readonly ReleaseNotesEntry[] = [
   {
+    version: "0.58.7",
+    highlights: [
+      "Las fechas de Finanzas se ven igual en toda la app, con la abreviatura «sep» y sin fechas en formato técnico.",
+      "El comercio de un movimiento se muestra tal como lo escribiste.",
+      "Los nombres de las opciones y del menú de acciones ya no se cortan en el móvil, y el total de la dona de Suscripciones se ve completo.",
+      "Al editar una suscripción, el selector de fecha empieza cerrado.",
+    ],
+  },
+  {
     version: "0.58.6",
     highlights: [
       "La hora de cada movimiento se ve en tu zona horaria en la lista, el detalle y el formulario, y coincide en los tres.",

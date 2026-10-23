@@ -82,11 +82,7 @@ describe("wallClockToIso", () => {
 })
 
 describe("formatFinanceDateTimeLabel", () => {
-  const expectedDate = new Date(2026, 8, 18).toLocaleDateString("es", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  })
+  const expectedDate = "18 sep 2026"
 
   it("adds the hour to the date", () => {
     const expectedTime = new Date(2000, 0, 1, 14, 30).toLocaleTimeString("es", {
@@ -110,16 +106,10 @@ describe("formatFinanceDateTimeLabel", () => {
 })
 
 describe("formatCalendarDate", () => {
-  it("formats YYYY-MM-DD in local time, not the UTC day before", () => {
-    const expected = new Date(2026, 8, 18).toLocaleDateString("es", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    })
+  it("uses the short Spanish month instead of the ICU abbreviation", () => {
+    const expected = "18 sep 2026"
     assert.equal(formatCalendarDate("2026-09-18T00:00:00.000Z", "es"), expected)
     assert.equal(formatCalendarDate("2026-09-18", "es"), expected)
-    assert.match(expected, /18/)
-    assert.match(expected, /2026/)
   })
 
   it("returns the original string when the date slice is not YYYY-MM-DD", () => {

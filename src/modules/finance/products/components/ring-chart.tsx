@@ -259,17 +259,17 @@ export function FinanceRingChart({
             aria-label="Ver desglose del patrimonio"
             className="pointer-events-auto inline-block max-w-full rounded-md outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
-            <span className="block truncate text-lg font-bold text-foreground tabular-nums sm:text-xl">
+            <span className="block max-w-full text-base leading-tight font-bold break-words text-foreground tabular-nums sm:text-lg">
               {centerValue}
             </span>
           </Link>
         ) : (
-          <p className="truncate text-lg font-bold text-foreground tabular-nums sm:text-xl">
+          <p className="max-w-full text-base leading-tight font-bold break-words text-foreground tabular-nums sm:text-lg">
             {centerValue}
           </p>
         )}
         {centerDebt ? (
-          <p className="truncate text-xs font-medium text-muted-foreground sm:text-sm">
+          <p className="text-xs font-medium break-words text-muted-foreground sm:text-sm">
             Deuda {centerDebt}
           </p>
         ) : null}
