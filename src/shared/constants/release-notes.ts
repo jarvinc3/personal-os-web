@@ -12,6 +12,12 @@ export type ReleaseNotesEntry = {
 
 export const RELEASE_NOTES: readonly ReleaseNotesEntry[] = [
   {
+    version: "0.58.8",
+    highlights: [
+      "Sin cambios visibles: esta versión solo ordena detalles internos del proyecto.",
+    ],
+  },
+  {
     version: "0.58.7",
     highlights: [
       "Las fechas de Finanzas se ven igual en toda la app, con la abreviatura «sep» y sin fechas en formato técnico.",

@@ -2,6 +2,12 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.58.8] - 2026-10-22
+
+### Cambiado
+
+- Interno: la insignia de una suscripción se decide en un solo lugar (`subscriptionStatusBadge`), compartida por la tarjeta y el detalle, y el botón de editar depende solo del setter de la hoja (#245). Sin cambio de comportamiento.
+
 ## [0.58.7] - 2026-10-22
 
 ### Corregido
