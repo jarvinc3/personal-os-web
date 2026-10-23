@@ -10,7 +10,7 @@ import type { GalleryVariant } from "@/src/modules/card-gallery/variants/types"
 
 const WINDOW_DAYS = 7
 
-/** PROVISIONAL (#272): variants shown in the card gallery. */
+/** Variantes de la galería /dev/cards (#272). */
 export const subscriptionVariants: readonly GalleryVariant[] = [
   {
     id: "suscripcion-completa",

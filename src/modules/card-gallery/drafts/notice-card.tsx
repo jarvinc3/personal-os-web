@@ -12,10 +12,7 @@ const TONE_CLASS: Record<NoticeTone, string> = {
   info: "border-info/40 bg-info/10 text-info",
 }
 
-/**
- * PROVISIONAL (#272): proposed notice that shows the entity card and its
- * message together (#274, #285). Delete with the gallery in #290.
- */
+/** Aviso que muestra la card de su entidad con el mensaje (#274, #285). */
 export function NoticeCard({
   icon: Icon,
   title,

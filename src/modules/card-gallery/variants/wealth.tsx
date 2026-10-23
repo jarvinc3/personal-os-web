@@ -1,7 +1,7 @@
 import { AccountProductRow } from "@/src/modules/finance/shared/components/product-rows"
 import { CardProductRow } from "@/src/modules/finance/shared/components/product-rows"
 import { LoanProgressCard } from "@/src/modules/finance/loans/components/loan-progress-card"
-import { ReceivableCard } from "@/src/modules/card-gallery/provisional/receivable-card"
+import { ReceivableCard } from "@/src/modules/card-gallery/drafts/receivable-card"
 import { galleryMoney } from "@/src/modules/card-gallery/mock/display"
 import {
   galleryCashAccount,
@@ -48,14 +48,14 @@ function WealthLine({
   )
 }
 
-/** PROVISIONAL (#272): wealth with cards (#285). */
+/** Patrimonio con cards; borrador hasta #285 (#272). */
 export const wealthVariants: readonly GalleryVariant[] = [
   {
     id: "patrimonio-cuenta",
     label: "Cuenta con descuadre",
     propLabel: "AccountProductRow compact",
     height: "≈ 120 px",
-    provisional: true,
+    isDraft: true,
     render: ({ display, notifyTap }) => (
       <WealthLine label="Cuenta" status="Descuadre" tone="danger">
         <AccountProductRow
@@ -72,7 +72,7 @@ export const wealthVariants: readonly GalleryVariant[] = [
     label: "Efectivo",
     propLabel: "AccountProductRow compact",
     height: "≈ 100 px",
-    provisional: true,
+    isDraft: true,
     render: ({ display, notifyTap }) => (
       <WealthLine label="Efectivo">
         <AccountProductRow
@@ -89,7 +89,7 @@ export const wealthVariants: readonly GalleryVariant[] = [
     label: "Tarjeta sin conciliar",
     propLabel: "CardProductRow compact",
     height: "≈ 150 px",
-    provisional: true,
+    isDraft: true,
     render: ({ display, notifyTap }) => (
       <WealthLine label="Tarjeta" status="Sin conciliar" tone="warning">
         <CardProductRow
@@ -107,7 +107,7 @@ export const wealthVariants: readonly GalleryVariant[] = [
     label: "Préstamo",
     propLabel: "LoanProgressCard compact",
     height: "≈ 110 px",
-    provisional: true,
+    isDraft: true,
     render: ({ display, notifyTap }) => (
       <WealthLine label="Préstamo">
         <LoanProgressCard
@@ -128,7 +128,7 @@ export const wealthVariants: readonly GalleryVariant[] = [
     label: "Cobro",
     propLabel: "ReceivableCard compact",
     height: "≈ 110 px",
-    provisional: true,
+    isDraft: true,
     render: ({ display, notifyTap }) => (
       <WealthLine label="Cobro">
         <ReceivableCard
@@ -145,7 +145,7 @@ export const wealthVariants: readonly GalleryVariant[] = [
     label: "Cuenta sin conciliar",
     propLabel: "AccountProductRow compact",
     height: "≈ 120 px",
-    provisional: true,
+    isDraft: true,
     render: ({ display, notifyTap }) => (
       <WealthLine
         label="Cuenta"

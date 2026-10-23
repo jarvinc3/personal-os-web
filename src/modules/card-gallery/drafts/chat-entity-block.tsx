@@ -3,10 +3,7 @@
 import { SparklesIcon } from "lucide-react"
 import type { ReactNode } from "react"
 
-/**
- * PROVISIONAL (#272): chat bubble that wraps a real entity card (#287).
- * Delete with the gallery in #290.
- */
+/** Burbuja del chat que envuelve la card real de una entidad (#287). */
 export function ChatEntityBlock({
   label,
   children,

@@ -9,7 +9,7 @@ type CardGalleryEntityPageProps = {
   params: Promise<{ entity: string }>
 }
 
-/** PROVISIONAL (#272): card gallery entity route, removed in #290. */
+/** Variantes de una entidad de la galería de cards (#272). */
 export default async function CardGalleryEntityPage({
   params,
 }: CardGalleryEntityPageProps) {

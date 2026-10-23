@@ -69,8 +69,7 @@ function HomeScreenBody() {
         </div>
       </SummarySection>
 
-      {/* PROVISIONAL (#272): gallery shortcut, removed in #290. */}
-      <SummarySection icon={FlaskConicalIcon} title="Provisional">
+      <SummarySection icon={FlaskConicalIcon} title="Desarrollo">
         <Button variant="outline" asChild className="w-full justify-start">
           <Link href={APP_ROUTES.app.devCardGallery} className="relative">
             <GalleryVerticalEndIcon className="size-4 shrink-0" aria-hidden />

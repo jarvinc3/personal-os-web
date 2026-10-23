@@ -26,10 +26,7 @@ type GoalCardProps = {
   onPress?: () => void
 }
 
-/**
- * PROVISIONAL (#272): temporary wrapper over `PlanningProgressCard` until
- * #273 extracts `GoalCard`. Delete with the gallery in #290.
- */
+/** Envoltorio sobre `PlanningProgressCard` hasta que #273 extraiga `GoalCard`. */
 export function GoalCard({ goal, display, variant, onPress }: GoalCardProps) {
   const money = withCurrency(display, goal.currency)
   const current = parseFinanceMoney(goal.currentAmount)

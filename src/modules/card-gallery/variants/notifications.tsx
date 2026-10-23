@@ -5,7 +5,7 @@ import {
 } from "@/src/modules/card-gallery/mock/notifications"
 import type { GalleryVariant } from "@/src/modules/card-gallery/variants/types"
 
-/** PROVISIONAL (#272): the existing notification row, read and unread. */
+/** Fila de notificación existente, leída y no leída (#272). */
 export const notificationVariants: readonly GalleryVariant[] = [
   {
     id: "notificacion-no-leida",

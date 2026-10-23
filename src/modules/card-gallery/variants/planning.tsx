@@ -1,6 +1,6 @@
-import { BudgetCard } from "@/src/modules/card-gallery/provisional/budget-card"
-import { GoalCard } from "@/src/modules/card-gallery/provisional/goal-card"
-import { ReceivableCard } from "@/src/modules/card-gallery/provisional/receivable-card"
+import { BudgetCard } from "@/src/modules/card-gallery/drafts/budget-card"
+import { GoalCard } from "@/src/modules/card-gallery/drafts/goal-card"
+import { ReceivableCard } from "@/src/modules/card-gallery/drafts/receivable-card"
 import {
   galleryBudget,
   galleryCompletedGoal,
@@ -11,7 +11,7 @@ import {
 } from "@/src/modules/card-gallery/mock/finance"
 import type { GalleryVariant } from "@/src/modules/card-gallery/variants/types"
 
-/** PROVISIONAL (#272): goal variants until #273 extracts `GoalCard`. */
+/** Variantes de meta; borrador hasta #273 (#272). */
 export const goalVariants: readonly GalleryVariant[] = [
   {
     id: "meta-completa",
@@ -69,7 +69,7 @@ export const goalVariants: readonly GalleryVariant[] = [
   },
 ]
 
-/** PROVISIONAL (#272): receivable variants until #273 extracts `ReceivableCard`. */
+/** Variantes de cobro; borrador hasta #273 (#272). */
 export const receivableVariants: readonly GalleryVariant[] = [
   {
     id: "cobro-completa",
@@ -128,7 +128,7 @@ export const receivableVariants: readonly GalleryVariant[] = [
   },
 ]
 
-/** PROVISIONAL (#272): budget variants until #273 extracts `BudgetCard`. */
+/** Variantes de presupuesto; borrador hasta #273 (#272). */
 export const budgetVariants: readonly GalleryVariant[] = [
   {
     id: "presupuesto-completa",

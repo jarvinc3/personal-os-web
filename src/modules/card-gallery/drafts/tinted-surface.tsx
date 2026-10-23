@@ -1,10 +1,7 @@
 import { cn } from "@/src/shared/lib/utils"
 import type { ReactNode } from "react"
 
-/**
- * PROVISIONAL (#272): draft of the tinted surface that #273 will extract as
- * the shared `EntitySurface`. Delete with the gallery in #290.
- */
+/** Superficie tintada que #273 extraerá como `EntitySurface`. */
 export function TintedSurface({
   color,
   className,

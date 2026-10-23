@@ -26,10 +26,7 @@ const STATUS_ICON: Record<SyncCardStatus, LucideIcon> = {
   pending: ClockIcon,
 }
 
-/**
- * PROVISIONAL (#272): proposed card for inbox, source, pending email and sync
- * history (#286). Delete with the gallery in #290.
- */
+/** Card de bandeja, fuente, correo pendiente e historial; definitiva en #286. */
 export function SyncCard({
   title,
   subtitle,

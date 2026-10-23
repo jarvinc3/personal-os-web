@@ -1,6 +1,6 @@
 import { BrandLogo } from "@/src/modules/finance/shared/components/brand-logo"
-import { MerchantCard } from "@/src/modules/card-gallery/provisional/merchant-card"
-import { TintedSurface } from "@/src/modules/card-gallery/provisional/tinted-surface"
+import { MerchantCard } from "@/src/modules/card-gallery/drafts/merchant-card"
+import { TintedSurface } from "@/src/modules/card-gallery/drafts/tinted-surface"
 import { galleryMoney } from "@/src/modules/card-gallery/mock/display"
 import {
   galleryMerchant,
@@ -18,7 +18,7 @@ const category = {
 const spendLabel = galleryMoney(galleryMerchant.monthSpend)
 const movementsLabel = `${galleryMerchant.monthMovements} movimientos`
 
-/** PROVISIONAL (#272): merchant card is new (#281). */
+/** Card de comercio nueva; borrador hasta #281 (#272). */
 export const merchantVariants: readonly GalleryVariant[] = [
   {
     id: "comercio-completa",
@@ -137,9 +137,9 @@ export const merchantVariants: readonly GalleryVariant[] = [
   {
     id: "comercio-base-tintada",
     label: "Base tintada compartida",
-    propLabel: "TintedSurface (provisional)",
+    propLabel: "TintedSurface (borrador)",
     height: "≈ 100 px",
-    provisional: true,
+    isDraft: true,
     render: () => (
       <TintedSurface color={gallerySuperCategory.color} className="p-4">
         <span className="flex items-center gap-3">

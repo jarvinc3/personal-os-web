@@ -10,7 +10,7 @@ import type { GalleryVariant } from "@/src/modules/card-gallery/variants/types"
 
 const category = gallerySuperCategory
 
-/** PROVISIONAL (#272): variants shown in the card gallery. */
+/** Variantes de la galería /dev/cards (#272). */
 export const categoryVariants: readonly GalleryVariant[] = [
   {
     id: "categoria-fila",

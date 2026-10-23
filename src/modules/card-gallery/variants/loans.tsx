@@ -11,7 +11,7 @@ const tintedInstitution = {
   color: galleryInstitution.color,
 }
 
-/** PROVISIONAL (#272): variants shown in the card gallery. */
+/** Variantes de la galería /dev/cards (#272). */
 export const loanVariants: readonly GalleryVariant[] = [
   {
     id: "prestamo-completa-color",

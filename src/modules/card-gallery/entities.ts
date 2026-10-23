@@ -21,10 +21,7 @@ import {
   WalletIcon,
 } from "lucide-react"
 
-/**
- * PROVISIONAL (#272): catalogue of the card gallery. Delete with this folder
- * in #290.
- */
+/** Catálogo de entidades de la galería /dev/cards (#272). */
 export type CardGalleryEntitySlug =
   | "institucion"
   | "cuenta"

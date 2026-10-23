@@ -28,10 +28,7 @@ type ReceivableCardProps = {
   onPress?: () => void
 }
 
-/**
- * PROVISIONAL (#272): temporary wrapper over `PlanningProgressCard` until
- * #273 extracts `ReceivableCard`. Delete with the gallery in #290.
- */
+/** Envoltorio sobre `PlanningProgressCard` hasta que #273 extraiga `ReceivableCard`. */
 export function ReceivableCard({
   receivable,
   display,

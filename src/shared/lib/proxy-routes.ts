@@ -10,8 +10,8 @@ const PROTECTED_APP_PATH_PREFIXES: readonly string[] = [
   APP_ROUTES.app.health,
   APP_ROUTES.app.finance,
   APP_ROUTES.app.help,
-  // PROVISIONAL (#272): card gallery, removed in #290.
-  APP_ROUTES.app.devCardGallery,
+  // Galerías de referencia (#272).
+  APP_ROUTES.app.dev,
 ]
 
 /** Rutas `(app)` que exigen sesión antes de montar el layout. */

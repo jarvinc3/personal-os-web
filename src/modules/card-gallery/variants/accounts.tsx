@@ -6,7 +6,7 @@ import {
 } from "@/src/modules/card-gallery/mock/finance"
 import type { GalleryVariant } from "@/src/modules/card-gallery/variants/types"
 
-/** PROVISIONAL (#272): variants shown in the card gallery. */
+/** Variantes de la galería /dev/cards (#272). */
 export const accountVariants: readonly GalleryVariant[] = [
   {
     id: "cuenta-completa",

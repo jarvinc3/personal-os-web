@@ -21,6 +21,12 @@ import {
 } from "lucide-react"
 import { useRef } from "react"
 
+/** Los círculos son la marca de las cards de cuentas: esta card marca el fondo con hexágonos inclinados. */
+const HEXAGON_BACKDROP_STYLE = {
+  clipPath: "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)",
+  transform: "rotate(30deg)",
+}
+
 export type InstitutionWalletDetail = "none" | "counts" | "balance"
 
 type InstitutionWalletCardProps = {
@@ -30,7 +36,7 @@ type InstitutionWalletCardProps = {
   onDragActiveChange?: (dragging: boolean) => void
   onCycle?: (delta: number) => void
   onPress?: () => void
-  /** PROVISIONAL (#272): draft for the card gallery; #290 retires the gallery. */
+  /** Variante de la card; la galería /dev/cards la pinta (#272). */
   variant?: "full" | "compact"
   /** What the compact card shows under the name. Ignored by `full`. */
   detail?: InstitutionWalletDetail
@@ -189,7 +195,7 @@ export function InstitutionWalletCard({
     onPress?.()
   }
 
-  // PROVISIONAL (#272): draft for the card gallery; #290 retires the gallery.
+  // Variante compacta de la card; la galería /dev/cards la pinta (#272).
   if (variant === "compact") {
     return (
       <button
@@ -205,8 +211,14 @@ export function InstitutionWalletCard({
         style={{ backgroundColor: card.color }}
       >
         <span aria-hidden className="pointer-events-none absolute inset-0">
-          <span className="absolute -top-8 -right-6 size-24 rounded-full bg-white/20" />
-          <span className="absolute top-6 -right-10 size-28 rounded-full bg-white/10" />
+          <span
+            className="absolute -top-8 -right-6 size-24 bg-white/20"
+            style={HEXAGON_BACKDROP_STYLE}
+          />
+          <span
+            className="absolute top-6 -right-10 size-28 bg-white/10"
+            style={HEXAGON_BACKDROP_STYLE}
+          />
         </span>
 
         {isCash ? (
@@ -288,8 +300,14 @@ export function InstitutionWalletCard({
       style={{ backgroundColor: card.color }}
     >
       <span aria-hidden className="pointer-events-none absolute inset-0">
-        <span className="absolute -top-16 -right-8 size-52 rounded-full bg-white/20" />
-        <span className="absolute top-14 -right-14 size-64 rounded-full bg-white/10" />
+        <span
+          className="absolute -top-16 -right-8 size-52 bg-white/20"
+          style={HEXAGON_BACKDROP_STYLE}
+        />
+        <span
+          className="absolute top-14 -right-14 size-64 bg-white/10"
+          style={HEXAGON_BACKDROP_STYLE}
+        />
       </span>
       <div className="relative z-10 flex items-start justify-between">
         {isCash ? (

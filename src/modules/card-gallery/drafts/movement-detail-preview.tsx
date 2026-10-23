@@ -17,7 +17,7 @@ import type {
   FinanceTransaction,
 } from "@/src/modules/finance/shared/types/entities"
 import { FINANCE_TRANSACTION_STATUS_LABEL } from "@/src/modules/finance/shared/types/entities"
-import { MerchantCard } from "@/src/modules/card-gallery/provisional/merchant-card"
+import { MerchantCard } from "@/src/modules/card-gallery/drafts/merchant-card"
 import { Badge } from "@/src/shared/components/ui/badge"
 
 type MovementDetailPreviewProps = {
@@ -39,10 +39,7 @@ function ProductLabel({ children }: { children: string }) {
   )
 }
 
-/**
- * PROVISIONAL (#272): proposed composition of the movement detail (#283).
- * Delete with the gallery in #290.
- */
+/** Composición propuesta del detalle de movimiento; definitiva en #283. */
 export function MovementDetailPreview({
   transaction,
   category,

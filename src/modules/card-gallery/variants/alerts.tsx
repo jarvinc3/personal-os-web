@@ -1,6 +1,6 @@
 import { AccountProductRow } from "@/src/modules/finance/shared/components/product-rows"
 import { SubscriptionCard } from "@/src/modules/finance/subscriptions/components/subscription-card"
-import { NoticeCard } from "@/src/modules/card-gallery/provisional/notice-card"
+import { NoticeCard } from "@/src/modules/card-gallery/drafts/notice-card"
 import { GALLERY_TODAY } from "@/src/modules/card-gallery/mock/display"
 import {
   galleryBalanceDrift,
@@ -12,14 +12,14 @@ import type { GalleryVariant } from "@/src/modules/card-gallery/variants/types"
 import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 import { BellRingIcon, ScaleIcon, TriangleAlertIcon } from "lucide-react"
 
-/** PROVISIONAL (#272): each notice with the card of its entity. */
+/** Avisos con la card de su entidad (#272). */
 export const alertVariants: readonly GalleryVariant[] = [
   {
     id: "aviso-descuadre",
     label: "Descuadre",
     propLabel: "cuenta compacta + aviso",
     height: "≈ 160 px",
-    provisional: true,
+    isDraft: true,
     render: ({ display, notifyTap }) => (
       <NoticeCard
         icon={TriangleAlertIcon}
@@ -41,7 +41,7 @@ export const alertVariants: readonly GalleryVariant[] = [
     label: "Sin conciliar",
     propLabel: "cuenta compacta + aviso",
     height: "≈ 160 px",
-    provisional: true,
+    isDraft: true,
     render: ({ display, notifyTap }) => (
       <NoticeCard
         icon={ScaleIcon}
@@ -63,7 +63,7 @@ export const alertVariants: readonly GalleryVariant[] = [
     label: "Alerta de suscripción",
     propLabel: "suscripción compacta + aviso",
     height: "≈ 150 px",
-    provisional: true,
+    isDraft: true,
     render: ({ display, notifyTap }) => (
       <NoticeCard
         icon={BellRingIcon}

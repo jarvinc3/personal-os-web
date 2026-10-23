@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation"
 
 import { cardGalleryEntity } from "@/src/modules/card-gallery/entities"
 import type { CardGalleryEntitySlug } from "@/src/modules/card-gallery/entities"
-import { GalleryNotice } from "@/src/modules/card-gallery/gallery-notice"
 import { GalleryTapProvider } from "@/src/modules/card-gallery/gallery-tap"
 import { GalleryVariantRow } from "@/src/modules/card-gallery/variant-row"
 import { GALLERY_DISPLAY } from "@/src/modules/card-gallery/mock/display"
@@ -18,10 +17,7 @@ import {
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
 
-/**
- * PROVISIONAL (#272): every variant of one entity, one per row. Delete with
- * the gallery in #290.
- */
+/** Todas las variantes de una entidad, una por fila (#272). */
 export function EntityGalleryScreen({ slug }: { slug: CardGalleryEntitySlug }) {
   const router = useRouter()
   const entity = cardGalleryEntity(slug)
@@ -35,7 +31,7 @@ export function EntityGalleryScreen({ slug }: { slug: CardGalleryEntitySlug }) {
     {
       variant: "secondary",
       title,
-      subtitle: `${variants.length} variantes · provisional`,
+      subtitle: `${variants.length} variantes`,
       onBack: handleBack,
     },
     [title, variants.length, handleBack]
@@ -44,7 +40,6 @@ export function EntityGalleryScreen({ slug }: { slug: CardGalleryEntitySlug }) {
   if (!entity) {
     return (
       <div className="mx-auto flex max-w-2xl flex-col gap-4 p-4 pb-16 md:px-6">
-        <GalleryNotice />
         <Empty>
           <EmptyHeader>
             <EmptyTitle>Esta entidad no existe en la galería</EmptyTitle>
@@ -57,7 +52,6 @@ export function EntityGalleryScreen({ slug }: { slug: CardGalleryEntitySlug }) {
   return (
     <GalleryTapProvider>
       <div className="mx-auto flex max-w-2xl flex-col gap-4 p-4 pb-16 md:px-6">
-        <GalleryNotice />
         <p className="text-sm text-muted-foreground">{entity.description}</p>
         {variants.map((variant) => (
           <GalleryVariantRow

@@ -44,7 +44,7 @@ export function CategoryCard({
   const empty = variant === "pick"
   const label = name.trim() || "Nueva categoría"
 
-  // PROVISIONAL (#272): draft for the card gallery; #290 retires the gallery.
+  // Variante compacta de la card; la galería /dev/cards la pinta (#272).
   if (variant === "chip" || variant === "inline") {
     const chip = variant === "chip"
     const content = (

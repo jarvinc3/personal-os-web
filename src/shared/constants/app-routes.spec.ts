@@ -84,8 +84,9 @@ describe("finance route constants", () => {
   })
 })
 
-describe("card gallery route constants", () => {
-  it("keeps the provisional gallery routes", () => {
+describe("gallery route constants", () => {
+  it("keeps the gallery routes", () => {
+    assert.equal(APP_ROUTES.app.dev, "/dev")
     assert.equal(APP_ROUTES.app.devCardGallery, "/dev/cards")
     assert.equal(
       APP_ROUTES.app.devCardGalleryEntity("cuenta"),

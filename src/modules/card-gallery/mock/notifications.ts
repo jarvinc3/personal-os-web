@@ -1,9 +1,6 @@
 import type { NotificationRecord } from "@/src/modules/notifications/types/notification.types"
 
-/**
- * PROVISIONAL (#272): fake notifications for the card gallery. Removed with
- * this folder in #290.
- */
+/** Notificaciones falsas de la galería. */
 export const galleryUnreadNotification: NotificationRecord = {
   id: "notification-unread",
   userId: "user-ejemplo",

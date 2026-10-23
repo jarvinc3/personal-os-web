@@ -1,6 +1,6 @@
 import { TransactionMovementRow } from "@/src/modules/finance/transactions/components/transaction-movement-row"
-import { MovementDetailPreview } from "@/src/modules/card-gallery/provisional/movement-detail-preview"
-import { statementMovementToTransaction } from "@/src/modules/card-gallery/provisional/statement-movement"
+import { MovementDetailPreview } from "@/src/modules/card-gallery/drafts/movement-detail-preview"
+import { statementMovementToTransaction } from "@/src/modules/card-gallery/drafts/statement-movement"
 import {
   galleryCategories,
   galleryCheckingAccount,
@@ -24,7 +24,7 @@ const statementTransaction = statementMovementToTransaction({
   card: galleryCreditCard,
 })
 
-/** PROVISIONAL (#272): variants shown in the card gallery. */
+/** Variantes de la galería /dev/cards (#272). */
 export const movementVariants: readonly GalleryVariant[] = [
   {
     id: "movimiento-gasto",
@@ -172,14 +172,14 @@ export const movementVariants: readonly GalleryVariant[] = [
   },
 ]
 
-/** PROVISIONAL (#272): proposed composition of the movement detail (#283). */
+/** Composición del detalle de movimiento; borrador hasta #283 (#272). */
 export const movementDetailVariants: readonly GalleryVariant[] = [
   {
     id: "detalle-movimiento",
     label: "Encabezado y cards compactas",
-    propLabel: "Composición provisional",
+    propLabel: "Composición (borrador)",
     height: "≈ 420 px",
-    provisional: true,
+    isDraft: true,
     render: ({ display, notifyTap }) => (
       <MovementDetailPreview
         transaction={galleryGroceryMovement}
@@ -195,14 +195,14 @@ export const movementDetailVariants: readonly GalleryVariant[] = [
   },
 ]
 
-/** PROVISIONAL (#272): same row fed by the statement model (#284). */
+/** La misma fila con el modelo del estado de cuenta; borrador hasta #284 (#272). */
 export const statementMovementVariants: readonly GalleryVariant[] = [
   {
     id: "estado-cuenta-fila",
     label: "Fila de estado de cuenta",
-    propLabel: "statementMovementToTransaction (provisional)",
+    propLabel: "statementMovementToTransaction (borrador)",
     height: "≈ 64 px",
-    provisional: true,
+    isDraft: true,
     render: ({ display, notifyTap }) => (
       <TransactionMovementRow
         transaction={statementTransaction}
@@ -217,7 +217,7 @@ export const statementMovementVariants: readonly GalleryVariant[] = [
     label: "Fila compacta del estado de cuenta",
     propLabel: 'adapter · variant="compact"',
     height: "≈ 48 px",
-    provisional: true,
+    isDraft: true,
     render: ({ display, notifyTap }) => (
       <TransactionMovementRow
         transaction={statementTransaction}

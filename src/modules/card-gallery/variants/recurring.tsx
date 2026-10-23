@@ -1,4 +1,4 @@
-import { MerchantCard } from "@/src/modules/card-gallery/provisional/merchant-card"
+import { MerchantCard } from "@/src/modules/card-gallery/drafts/merchant-card"
 import { galleryMoney } from "@/src/modules/card-gallery/mock/display"
 import {
   galleryMerchant,
@@ -9,14 +9,14 @@ import type { GalleryVariant } from "@/src/modules/card-gallery/variants/types"
 import { Button } from "@/src/shared/components/ui/button"
 import { CheckIcon } from "lucide-react"
 
-/** PROVISIONAL (#272): detected recurring merchant with its action. */
+/** Recurrente detectado con su acción; borrador hasta #286 (#272). */
 export const recurringVariants: readonly GalleryVariant[] = [
   {
     id: "recurrente-confirmar",
     label: "Comercio compacto con Confirmar",
     propLabel: "MerchantCard compact + acción",
     height: "≈ 110 px",
-    provisional: true,
+    isDraft: true,
     render: ({ notifyTap }) => (
       <div className="flex flex-col gap-2 rounded-2xl border border-border bg-card p-2">
         <MerchantCard
@@ -48,7 +48,7 @@ export const recurringVariants: readonly GalleryVariant[] = [
     label: "Comercio completo detectado",
     propLabel: "MerchantCard full",
     height: "≈ 190 px",
-    provisional: true,
+    isDraft: true,
     render: ({ notifyTap }) => (
       <div className="flex flex-col gap-2 rounded-2xl border border-border bg-card p-2">
         <MerchantCard

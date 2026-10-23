@@ -1,7 +1,7 @@
 "use client"
 
 import { BrandLogo } from "@/src/modules/finance/shared/components/brand-logo"
-import { TintedSurface } from "@/src/modules/card-gallery/provisional/tinted-surface"
+import { TintedSurface } from "@/src/modules/card-gallery/drafts/tinted-surface"
 import { Badge } from "@/src/shared/components/ui/badge"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
 
@@ -42,10 +42,7 @@ function CategoryPill({ category }: { category: MerchantCategory }) {
   )
 }
 
-/**
- * PROVISIONAL (#272): proposed merchant card, tinted with its category color.
- * Merchant has no production card yet (#281); delete with the gallery in #290.
- */
+/** Card de comercio propuesta, tintada con su categoría; definitiva en #281. */
 export function MerchantCard({
   name,
   logoUrl,

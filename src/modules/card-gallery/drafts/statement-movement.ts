@@ -36,11 +36,7 @@ function parseStatementStatus(status: string): FinanceTransactionStatus {
   }
 }
 
-/**
- * PROVISIONAL (#272): proposal of the adapter that feeds a statement row with
- * the shared movement row (#282, #284). The statement model has no category
- * and no base amount yet; the gallery only paints it. Delete in #290.
- */
+/** Adaptador de la fila de movimiento para el estado de cuenta (#282, #284). */
 export function statementMovementToTransaction({
   movement,
   card,

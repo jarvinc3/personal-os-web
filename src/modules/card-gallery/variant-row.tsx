@@ -7,10 +7,7 @@ import { Badge } from "@/src/shared/components/ui/badge"
 import { SummarySection } from "@/src/shared/components/ui/summary"
 import { BoxIcon } from "lucide-react"
 
-/**
- * PROVISIONAL (#272): label plus live card for one variant. Delete with the
- * gallery in #290.
- */
+/** Etiqueta y card real de una variante (#272). */
 export function GalleryVariantRow({
   variant,
   display,
@@ -23,7 +20,7 @@ export function GalleryVariantRow({
   return (
     <SummarySection
       title={variant.label}
-      subtitle={`${variant.propLabel}${variant.provisional ? " · Provisional" : ""}`}
+      subtitle={`${variant.propLabel}${variant.isDraft ? " · Borrador" : ""}`}
       icon={BoxIcon}
       right={<Badge variant="secondary">{variant.height}</Badge>}
     >

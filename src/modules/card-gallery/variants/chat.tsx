@@ -2,8 +2,8 @@ import { AccountProductRow } from "@/src/modules/finance/shared/components/produ
 import { CardProductRow } from "@/src/modules/finance/shared/components/product-rows"
 import { LoanProgressCard } from "@/src/modules/finance/loans/components/loan-progress-card"
 import { TransactionMovementRow } from "@/src/modules/finance/transactions/components/transaction-movement-row"
-import { BudgetCard } from "@/src/modules/card-gallery/provisional/budget-card"
-import { ChatEntityBlock } from "@/src/modules/card-gallery/provisional/chat-entity-block"
+import { BudgetCard } from "@/src/modules/card-gallery/drafts/budget-card"
+import { ChatEntityBlock } from "@/src/modules/card-gallery/drafts/chat-entity-block"
 import {
   galleryBudget,
   galleryCategories,
@@ -15,14 +15,14 @@ import {
 } from "@/src/modules/card-gallery/mock/finance"
 import type { GalleryVariant } from "@/src/modules/card-gallery/variants/types"
 
-/** PROVISIONAL (#272): chat blocks with the complete entity (#287). */
+/** Bloques del chat con la entidad completa; borrador hasta #287 (#272). */
 export const chatVariants: readonly GalleryVariant[] = [
   {
     id: "chat-movimiento",
     label: "Movimiento",
     propLabel: "TransactionMovementRow full",
     height: "≈ 110 px",
-    provisional: true,
+    isDraft: true,
     render: ({ display, notifyTap }) => (
       <ChatEntityBlock label="Movimiento encontrado">
         <TransactionMovementRow
@@ -39,7 +39,7 @@ export const chatVariants: readonly GalleryVariant[] = [
     label: "Presupuesto",
     propLabel: "BudgetCard full",
     height: "≈ 180 px",
-    provisional: true,
+    isDraft: true,
     render: ({ display, notifyTap }) => (
       <ChatEntityBlock label="Presupuesto">
         <BudgetCard
@@ -55,7 +55,7 @@ export const chatVariants: readonly GalleryVariant[] = [
     label: "Préstamo",
     propLabel: "LoanProgressCard full",
     height: "≈ 180 px",
-    provisional: true,
+    isDraft: true,
     render: ({ display, notifyTap }) => (
       <ChatEntityBlock label="Préstamo">
         <LoanProgressCard
@@ -75,7 +75,7 @@ export const chatVariants: readonly GalleryVariant[] = [
     label: "Cuenta",
     propLabel: "AccountProductRow full",
     height: "≈ 100 px",
-    provisional: true,
+    isDraft: true,
     render: ({ display, notifyTap }) => (
       <ChatEntityBlock label="Cuenta">
         <AccountProductRow
@@ -91,7 +91,7 @@ export const chatVariants: readonly GalleryVariant[] = [
     label: "Tarjeta",
     propLabel: "CardProductRow full",
     height: "≈ 150 px",
-    provisional: true,
+    isDraft: true,
     render: ({ display, notifyTap }) => (
       <ChatEntityBlock label="Tarjeta">
         <CardProductRow

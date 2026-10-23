@@ -24,10 +24,7 @@ import { subscriptionVariants } from "@/src/modules/card-gallery/variants/subscr
 import { syncVariants } from "@/src/modules/card-gallery/variants/sync"
 import { wealthVariants } from "@/src/modules/card-gallery/variants/wealth"
 
-/**
- * PROVISIONAL (#272): every entity and its variants. Delete with the gallery
- * in #290.
- */
+/** Variantes de cada entidad, en el orden en que se muestran (#272). */
 const CARD_GALLERY_VARIANTS: Record<
   CardGalleryEntitySlug,
   readonly GalleryVariant[]

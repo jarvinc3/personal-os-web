@@ -23,9 +23,7 @@ import type {
 } from "@/src/modules/finance/shared/types/entities"
 import { GALLERY_DISPLAY } from "@/src/modules/card-gallery/mock/display"
 
-/**
- * PROVISIONAL (#272): fake entities for the card gallery. No API call, no
- * reads of the user profile. Removed with this folder in #290.
+/** Entidades falsas de la galería: sin API ni perfil del usuario.
  *
  * Category icons are escaped code points because the app stores category
  * glyphs as data, not decoration.

@@ -1,6 +1,5 @@
 "use client"
 
-import { GalleryNotice } from "@/src/modules/card-gallery/gallery-notice"
 import { CARD_GALLERY_ENTITIES } from "@/src/modules/card-gallery/entities"
 import { cardGalleryVariants } from "@/src/modules/card-gallery/variants/registry"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
@@ -8,22 +7,19 @@ import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { SummaryItem, SummarySection } from "@/src/shared/components/ui/summary"
 import { LayoutGridIcon } from "lucide-react"
 
-/**
- * PROVISIONAL (#272): list of every entity in the card gallery. Delete with
- * the gallery in #290.
- */
+/** Lista de entidades de la galería /dev/cards (#272). */
 export function CardGalleryScreen() {
   usePageHeader({
     title: "Galería de cards",
-    subtitle: "Provisional",
+    subtitle: "Referencia visual",
   })
 
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-4 p-4 pb-16 md:px-6">
-      <GalleryNotice />
       <p className="text-sm text-muted-foreground">
         Cards reales con datos de ejemplo. Toca una entidad para ver todas sus
-        variantes, una por fila. Esta galería se retira en #290.
+        variantes, una por fila. Los cambios de diseño se hacen en el componente
+        real.
       </p>
       <SummarySection title="Entidades" icon={LayoutGridIcon}>
         {CARD_GALLERY_ENTITIES.map((entity, index) => {

@@ -27,7 +27,7 @@ type SubscriptionCardProps = {
   /** Warning window in days, from the global setting. */
   windowDays: number
   onPress?: () => void
-  /** PROVISIONAL (#272): draft for the card gallery; #290 retires the gallery. */
+  /** Variante de la card; la galería /dev/cards la pinta (#272). */
   variant?: "full" | "compact" | "inline"
 }
 

@@ -9,10 +9,7 @@ type GalleryTapContextValue = {
 
 const GalleryTapContext = createContext<GalleryTapContextValue | null>(null)
 
-/**
- * PROVISIONAL (#272): taps inside the gallery never navigate; they only show
- * "Toque simulado". Delete with the gallery in #290.
- */
+/** Los toques en la galería no navegan: muestran "Toque simulado". */
 export function GalleryTapProvider({ children }: { children: ReactNode }) {
   const [notice, setNotice] = useState<string | null>(null)
 

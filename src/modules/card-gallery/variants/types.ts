@@ -7,15 +7,12 @@ export type GalleryRenderContext = {
   notifyTap: () => void
 }
 
-/**
- * PROVISIONAL (#272): one row of an entity screen. Delete with the gallery in
- * #290.
- */
+/** Una fila de la pantalla de una entidad (#272). */
 export type GalleryVariant = {
   id: string
   label: string
   propLabel: string
   height: string
-  provisional?: boolean
+  isDraft?: boolean
   render: (context: GalleryRenderContext) => ReactNode
 }

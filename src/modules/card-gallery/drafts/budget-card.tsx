@@ -49,10 +49,7 @@ type BudgetCardProps = {
   onPress?: () => void
 }
 
-/**
- * PROVISIONAL (#272): temporary wrapper over `PlanningProgressCard` until
- * #273 extracts `BudgetCard`. Delete with the gallery in #290.
- */
+/** Envoltorio sobre `PlanningProgressCard` hasta que #273 extraiga `BudgetCard`. */
 export function BudgetCard({
   budget,
   display,
