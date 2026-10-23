@@ -1,23 +1,10 @@
 "use client"
 
+import { GoalCard } from "@/src/modules/finance/savings-goals"
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
 import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
-import { PlanningProgressCard } from "@/src/modules/finance/shared/components/planning-progress-card"
-import { formatCalendarDate } from "@/src/modules/finance/shared/lib/ledger-form"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
-import {
-  formatFinanceMoney,
-  parseFinanceMoney,
-} from "@/src/modules/finance/shared/lib/money"
-import {
-  amountRatioPct,
-  joinPlanningCaption,
-} from "@/src/modules/finance/shared/lib/planning-lists"
 import type { FinanceSavingsGoal } from "@/src/modules/finance/shared/types/entities"
-import {
-  remainingCaption,
-  withCurrency,
-} from "@/src/modules/finance/planning/lib/planning-captions"
 import { Button } from "@/src/shared/components/ui/button"
 import {
   Empty,
@@ -68,42 +55,14 @@ export function PlanningSavingsTab({
         </Empty>
       }
     >
-      {goals.map((goal) => {
-        const money = withCurrency(display, goal.currency)
-        const current = parseFinanceMoney(goal.currentAmount)
-        const target = parseFinanceMoney(goal.targetAmount)
-        return (
-          <PlanningProgressCard
-            key={goal.id}
-            title={goal.name}
-            description={goal.description ?? undefined}
-            icon={PiggyBankIcon}
-            tone={goal.isCompleted ? "success" : "info"}
-            badge={{
-              label: goal.isCompleted ? "Completada" : "En curso",
-              variant: goal.isCompleted ? "success" : "info",
-            }}
-            progress={amountRatioPct(goal.currentAmount, goal.targetAmount)}
-            currentHint="Ahorrado"
-            currentLabel={formatFinanceMoney(goal.currentAmount, money)}
-            targetHint="Meta"
-            targetLabel={formatFinanceMoney(goal.targetAmount, money)}
-            caption={joinPlanningCaption(
-              remainingCaption({
-                current,
-                target,
-                display: money,
-                reached: "Meta alcanzada",
-                prefix: "Faltan",
-              }),
-              goal.targetDate
-                ? `Para ${formatCalendarDate(goal.targetDate, display.locale)}`
-                : undefined
-            )}
-            href={APP_ROUTES.app.financeSavingsGoal(goal.id)}
-          />
-        )
-      })}
+      {goals.map((goal) => (
+        <GoalCard
+          key={goal.id}
+          goal={goal}
+          display={display}
+          href={APP_ROUTES.app.financeSavingsGoal(goal.id)}
+        />
+      ))}
     </AsyncRegion>
   )
 }

@@ -1,6 +1,6 @@
-import { BudgetCard } from "@/src/modules/card-gallery/drafts/budget-card"
-import { GoalCard } from "@/src/modules/card-gallery/drafts/goal-card"
-import { ReceivableCard } from "@/src/modules/card-gallery/drafts/receivable-card"
+import { BudgetCard } from "@/src/modules/finance/budgets"
+import { ReceivableCard } from "@/src/modules/finance/receivables"
+import { GoalCard } from "@/src/modules/finance/savings-goals"
 import {
   galleryBudget,
   galleryCompletedGoal,
@@ -11,7 +11,7 @@ import {
 } from "@/src/modules/card-gallery/mock/finance"
 import type { GalleryVariant } from "@/src/modules/card-gallery/variants/types"
 
-/** Variantes de meta; borrador hasta #273 (#272). */
+/** Variantes de meta (#272). */
 export const goalVariants: readonly GalleryVariant[] = [
   {
     id: "meta-completa",
@@ -69,7 +69,7 @@ export const goalVariants: readonly GalleryVariant[] = [
   },
 ]
 
-/** Variantes de cobro; borrador hasta #273 (#272). */
+/** Variantes de cobro (#272). */
 export const receivableVariants: readonly GalleryVariant[] = [
   {
     id: "cobro-completa",
@@ -78,7 +78,7 @@ export const receivableVariants: readonly GalleryVariant[] = [
     height: "≈ 160 px",
     render: ({ display, notifyTap }) => (
       <ReceivableCard
-        receivable={galleryReceivable}
+        source={{ kind: "receivable", receivable: galleryReceivable }}
         display={display}
         onPress={notifyTap}
       />
@@ -91,7 +91,7 @@ export const receivableVariants: readonly GalleryVariant[] = [
     height: "≈ 64 px",
     render: ({ display, notifyTap }) => (
       <ReceivableCard
-        receivable={galleryReceivable}
+        source={{ kind: "receivable", receivable: galleryReceivable }}
         display={display}
         variant="compact"
         onPress={notifyTap}
@@ -105,7 +105,7 @@ export const receivableVariants: readonly GalleryVariant[] = [
     height: "≈ 28 px",
     render: ({ display, notifyTap }) => (
       <ReceivableCard
-        receivable={galleryReceivable}
+        source={{ kind: "receivable", receivable: galleryReceivable }}
         display={display}
         variant="inline"
         onPress={notifyTap}
@@ -119,16 +119,16 @@ export const receivableVariants: readonly GalleryVariant[] = [
     height: "≈ 160 px",
     render: ({ display, notifyTap }) => (
       <ReceivableCard
-        receivable={galleryReceivable}
+        source={{ kind: "receivable", receivable: galleryReceivable }}
         display={display}
-        selected
+        selection={{ selected: true }}
         onPress={notifyTap}
       />
     ),
   },
 ]
 
-/** Variantes de presupuesto; borrador hasta #273 (#272). */
+/** Variantes de presupuesto (#272). */
 export const budgetVariants: readonly GalleryVariant[] = [
   {
     id: "presupuesto-completa",

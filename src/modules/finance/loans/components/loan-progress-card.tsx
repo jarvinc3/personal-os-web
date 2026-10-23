@@ -1,5 +1,6 @@
 "use client"
 
+import { EntitySurface } from "@/src/modules/finance/shared/components/entity-surface"
 import { BrandLogo } from "@/src/modules/finance/shared/components/brand-logo"
 import { PlanningProgressCard } from "@/src/modules/finance/shared/components/planning-progress-card"
 import type { PlanningProgressVariant } from "@/src/modules/finance/shared/components/planning-progress-card"
@@ -41,26 +42,11 @@ export function LoanSurfaceMark({
 }) {
   const header = size === "header"
   return (
-    <span aria-hidden className="pointer-events-none absolute inset-0">
-      <span
-        className={cn(
-          "absolute",
-          header ? "-top-16 -right-10 size-72" : "-top-8 -right-6 size-40",
-          tinted ? "bg-white/20" : "bg-foreground/10"
-        )}
-        style={{ clipPath: "polygon(50% 0%, 100% 100%, 0% 100%)" }}
-      />
-      <span
-        className={cn(
-          "absolute",
-          header
-            ? "right-20 -bottom-20 size-52"
-            : "right-16 -bottom-10 size-28",
-          tinted ? "bg-black/20" : "bg-foreground/15"
-        )}
-        style={{ clipPath: "polygon(50% 100%, 0% 0%, 100% 0%)" }}
-      />
-    </span>
+    <EntitySurface
+      shape="triangles"
+      size={header ? "lg" : "md"}
+      tinted={tinted}
+    />
   )
 }
 

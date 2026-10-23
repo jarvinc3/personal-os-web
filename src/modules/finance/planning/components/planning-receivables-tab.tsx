@@ -2,24 +2,12 @@
 
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
 import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
-import { PlanningProgressCard } from "@/src/modules/finance/shared/components/planning-progress-card"
-import { formatCalendarDate } from "@/src/modules/finance/shared/lib/ledger-form"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
-import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
-import {
-  amountRatioPct,
-  joinPlanningCaption,
-} from "@/src/modules/finance/shared/lib/planning-lists"
-import { FINANCE_RECEIVABLE_STATUS_LABEL } from "@/src/modules/finance/shared/types/entities"
 import type { FinanceReceivable } from "@/src/modules/finance/shared/types/entities"
 import {
+  ReceivableCard,
   ReceivableTotalsStrip,
-  receivableMoney,
 } from "@/src/modules/finance/receivables"
-import {
-  remainingCaption,
-  withCurrency,
-} from "@/src/modules/finance/planning/lib/planning-captions"
 import type { useReceivableShareMode } from "@/src/modules/finance/planning/hooks/use-receivable-share-mode"
 import { Button } from "@/src/shared/components/ui/button"
 import {
@@ -80,60 +68,15 @@ export function PlanningReceivablesTab({
         }
       >
         {receivables.map((item) => {
-          const money = withCurrency(display, item.currency)
-          const readable = receivableMoney(item)
-          const paid = readable?.paid ?? null
-          const total = readable?.amount ?? null
-          const caption = readable
-            ? joinPlanningCaption(
-                remainingCaption({
-                  current: paid,
-                  target: total,
-                  display: money,
-                  reached: "Cobro completo",
-                  prefix: "Resta",
-                }),
-                item.dueDate
-                  ? `Vence ${formatCalendarDate(item.dueDate, display.locale)}`
-                  : undefined
-              )
-            : "Monto no disponible: el servidor envió un valor ilegible."
-          const tone =
-            item.status === "PAID"
-              ? "success"
-              : item.status === "PARTIAL"
-                ? "info"
-                : "warning"
-          const badgeVariant =
-            item.status === "PAID"
-              ? "success"
-              : item.status === "PARTIAL"
-                ? "info"
-                : "warning"
           const dimmed =
             share.active &&
             shareDebtor !== null &&
             item.debtorName !== shareDebtor
           return (
-            <PlanningProgressCard
+            <ReceivableCard
               key={item.id}
-              title={item.debtorName}
-              description={item.description ?? undefined}
-              icon={HandshakeIcon}
-              tone={tone}
-              badge={{
-                label:
-                  FINANCE_RECEIVABLE_STATUS_LABEL[item.status] ?? item.status,
-                variant: badgeVariant,
-              }}
-              progress={
-                readable ? amountRatioPct(item.paidAmount, item.amount) : null
-              }
-              currentHint="Cobrado"
-              currentLabel={formatFinanceMoney(item.paidAmount, money)}
-              targetHint="Total"
-              targetLabel={formatFinanceMoney(item.amount, money)}
-              caption={caption}
+              source={{ kind: "receivable", receivable: item }}
+              display={display}
               href={
                 share.active
                   ? undefined

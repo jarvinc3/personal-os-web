@@ -8,6 +8,7 @@ import {
   isWalletDragOnly,
   walletGestureDelta,
 } from "@/src/modules/finance/shared/lib/wallet-gesture"
+import { EntitySurface } from "@/src/modules/finance/shared/components/entity-surface"
 import { PendingSurface } from "@/src/shared/components/ui/navigation-pending"
 import { cn } from "@/src/shared/lib/utils"
 import { motion } from "framer-motion"
@@ -20,12 +21,6 @@ import {
   type LucideIcon,
 } from "lucide-react"
 import { useRef } from "react"
-
-/** Los círculos son la marca de las cards de cuentas: esta card marca el fondo con hexágonos inclinados. */
-const HEXAGON_BACKDROP_STYLE = {
-  clipPath: "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)",
-  transform: "rotate(30deg)",
-}
 
 export type InstitutionWalletDetail = "none" | "counts" | "balance"
 
@@ -210,16 +205,7 @@ export function InstitutionWalletCard({
         )}
         style={{ backgroundColor: card.color }}
       >
-        <span aria-hidden className="pointer-events-none absolute inset-0">
-          <span
-            className="absolute -top-8 -right-6 size-24 bg-white/20"
-            style={HEXAGON_BACKDROP_STYLE}
-          />
-          <span
-            className="absolute top-6 -right-10 size-28 bg-white/10"
-            style={HEXAGON_BACKDROP_STYLE}
-          />
-        </span>
+        <EntitySurface shape="hexagons" size="sm" />
 
         {isCash ? (
           <span
@@ -299,16 +285,7 @@ export function InstitutionWalletCard({
       )}
       style={{ backgroundColor: card.color }}
     >
-      <span aria-hidden className="pointer-events-none absolute inset-0">
-        <span
-          className="absolute -top-16 -right-8 size-52 bg-white/20"
-          style={HEXAGON_BACKDROP_STYLE}
-        />
-        <span
-          className="absolute top-14 -right-14 size-64 bg-white/10"
-          style={HEXAGON_BACKDROP_STYLE}
-        />
-      </span>
+      <EntitySurface shape="hexagons" />
       <div className="relative z-10 flex items-start justify-between">
         {isCash ? (
           <span

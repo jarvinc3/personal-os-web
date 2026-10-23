@@ -1,7 +1,7 @@
 import { cn } from "@/src/shared/lib/utils"
 import type { ReactNode } from "react"
 
-/** Superficie tintada que #273 extraerá como `EntitySurface`. */
+/** Superficie tintada con el color de la categoría; borrador hasta #281. */
 export function TintedSurface({
   color,
   className,

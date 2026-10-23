@@ -1,7 +1,7 @@
 import { AccountProductRow } from "@/src/modules/finance/shared/components/product-rows"
 import { CardProductRow } from "@/src/modules/finance/shared/components/product-rows"
 import { LoanProgressCard } from "@/src/modules/finance/loans/components/loan-progress-card"
-import { ReceivableCard } from "@/src/modules/card-gallery/drafts/receivable-card"
+import { ReceivableCard } from "@/src/modules/finance/receivables"
 import { galleryMoney } from "@/src/modules/card-gallery/mock/display"
 import {
   galleryCashAccount,
@@ -128,11 +128,10 @@ export const wealthVariants: readonly GalleryVariant[] = [
     label: "Cobro",
     propLabel: "ReceivableCard compact",
     height: "≈ 110 px",
-    isDraft: true,
     render: ({ display, notifyTap }) => (
       <WealthLine label="Cobro">
         <ReceivableCard
-          receivable={galleryReceivable}
+          source={{ kind: "receivable", receivable: galleryReceivable }}
           display={display}
           variant="compact"
           onPress={notifyTap}

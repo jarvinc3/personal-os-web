@@ -17,6 +17,11 @@ export type PlanningProgressVariant = "full" | "compact" | "inline"
 
 type BadgeVariant = VariantProps<typeof badgeVariants>["variant"]
 
+export type PlanningProgressBadge = {
+  label: string
+  variant?: BadgeVariant
+}
+
 export type PlanningProgressCardProps = {
   title: string
   description?: ReactNode
@@ -27,7 +32,7 @@ export type PlanningProgressCardProps = {
   /** Solid wash for product cards that belong to an institution. */
   surfaceColor?: string | null
   decoration?: ReactNode
-  badge?: { label: string; variant?: BadgeVariant }
+  badge?: PlanningProgressBadge
   progress: number | null
   currentHint: string
   currentLabel: string

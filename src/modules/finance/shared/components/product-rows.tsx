@@ -1,5 +1,6 @@
 "use client"
 
+import { EntitySurface } from "@/src/modules/finance/shared/components/entity-surface"
 import {
   BrandLogo,
   CardNetworkMark,
@@ -126,16 +127,7 @@ export function AccountProductRow({
   const style = tint ? { backgroundColor: tint } : undefined
   const content = (
     <>
-      <span
-        aria-hidden
-        className={cn(
-          "pointer-events-none absolute inset-0",
-          disabled && "opacity-45"
-        )}
-      >
-        <span className="absolute -top-10 -right-8 size-28 rounded-full bg-white/25" />
-        <span className="absolute right-10 -bottom-12 size-24 rounded-full bg-black/15" />
-      </span>
+      <EntitySurface className={cn(disabled && "opacity-45")} />
 
       <BrandLogo
         name={account.institutionName ?? account.name}
@@ -316,16 +308,7 @@ export function CardProductRow({
   const style = card.color ? { backgroundColor: card.color } : undefined
   const content = (
     <>
-      <span
-        aria-hidden
-        className={cn(
-          "pointer-events-none absolute inset-0",
-          disabled && "opacity-45"
-        )}
-      >
-        <span className="absolute top-[-45%] right-[-12%] h-[190%] w-[38%] rotate-22 bg-black/20" />
-        <span className="absolute bottom-[-55%] left-[-18%] h-28 w-[62%] -rotate-6 rounded-4xl bg-white/15" />
-      </span>
+      <EntitySurface shape="slashes" className={cn(disabled && "opacity-45")} />
 
       <div
         className={cn(
