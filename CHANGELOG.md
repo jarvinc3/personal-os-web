@@ -2,6 +2,17 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.58.4] - 2026-10-22
+
+### Corregido
+
+- Productos, Patrimonio y la pestaña Cobros de Planificación ya no caen en la pantalla de error cuando la respuesta del API viene incompleta: si falta el desglose por moneda, la vista muestra el balance disponible y un aviso; un cobro con un monto ilegible se marca como no disponible y no suma a los totales, sin tumbar los demás (#238).
+- La cifra de gastado de un presupuesto coincide con la lista de sus movimientos porque ahora el servidor la suma al leer, no la toma de un contador guardado (back#172, web#239).
+
+### Cambiado
+
+- Next.js sube a 16.4.2 y `eslint-config-next` a la misma versión; la auditoría de producción deja de reportar avisos críticos y altos de Next.js (#236).
+
 ## [0.58.3] - 2026-10-22
 
 ### Corregido

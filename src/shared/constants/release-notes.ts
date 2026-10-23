@@ -12,6 +12,15 @@ export type ReleaseNotesEntry = {
 
 export const RELEASE_NOTES: readonly ReleaseNotesEntry[] = [
   {
+    version: "0.58.4",
+    highlights: [
+      "Productos, Patrimonio y la pestaña Cobros de Planificación dejan de caer en la pantalla de error cuando la respuesta del servidor viene incompleta: verás un aviso y el resto de la vista sigue funcionando.",
+      "Un cobro con un monto ilegible se marca como no disponible y ya no tumba la lista; tampoco suma a los totales.",
+      "El gastado de un presupuesto coincide siempre con la lista de gastos de su periodo.",
+      "Actualizamos la base del cliente a una versión corregida por seguridad.",
+    ],
+  },
+  {
     version: "0.58.3",
     highlights: [
       "Si tu inicio de sesión o tu registro falla, ahora ves el motivo en español y no un mensaje técnico en inglés.",
