@@ -2,6 +2,20 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.58.6] - 2026-10-22
+
+### Corregido
+
+- La hora de un movimiento se muestra en la zona horaria del perfil en la lista, el detalle y el formulario, con la misma hora y el mismo día local cerca de la medianoche (#240).
+- La cabecera de Planificación resume siempre la pestaña activa y la pestaña activa se lee con el contraste del tema, sin blanco forzado sobre el indicador claro (#241).
+- Una suscripción activa con la fecha de cobro pasada se marca «Vencida» en la lista y en el detalle, y la hoja de próximos cobros aclara qué revisar cuando no hay cobros futuros (#242).
+- Pausar una suscripción pide confirmación con el mismo diálogo que cancelar; reanudar sigue siendo inmediato (#243).
+- El detalle de un presupuesto pinta su cabecera con los datos que la lista ya trajo y consulta el detalle y sus movimientos en paralelo (#244).
+
+### Cambiado
+
+- Las hojas de crear y editar suscripción y la de registrar un pago se abren por la URL, no solo con estado local, igual que el resto de hojas de Finanzas (#243).
+
 ## [0.58.5] - 2026-10-22
 
 ### Cambiado

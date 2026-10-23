@@ -12,6 +12,16 @@ export type ReleaseNotesEntry = {
 
 export const RELEASE_NOTES: readonly ReleaseNotesEntry[] = [
   {
+    version: "0.58.6",
+    highlights: [
+      "La hora de cada movimiento se ve en tu zona horaria en la lista, el detalle y el formulario, y coincide en los tres.",
+      "En Planificación, la cabecera muestra siempre el resumen de la pestaña en la que estás y la pestaña activa se lee bien.",
+      "Una suscripción activa con la fecha de cobro pasada aparece marcada como «Vencida».",
+      "Pausar una suscripción ahora pide confirmación; reanudarla no.",
+      "El detalle de un presupuesto muestra su cabecera al instante y carga sus gastos en segundo plano.",
+    ],
+  },
+  {
     version: "0.58.5",
     highlights: [
       "Sin cambios visibles: esta versión solo ordena detalles internos del proyecto.",
