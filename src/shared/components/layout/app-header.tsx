@@ -50,6 +50,7 @@ const PAGE_TITLES: Record<string, string> = {
   [APP_ROUTES.app.settings]: "Ajustes",
   [APP_ROUTES.app.notifications]: "Notificaciones",
   [APP_ROUTES.app.keepAwake]: "Keep Awake",
+  [APP_ROUTES.app.intelligence]: "Inteligencia",
 }
 
 function resolvePageTitle(pathname: string): string {
@@ -64,6 +65,9 @@ function resolvePageTitle(pathname: string): string {
   }
   if (pathname.startsWith(APP_ROUTES.app.keepAwake)) {
     return "Keep Awake"
+  }
+  if (pathname.startsWith(APP_ROUTES.app.intelligence)) {
+    return "Inteligencia"
   }
   if (pathname.startsWith(APP_ROUTES.app.finance)) {
     return financeSectionTitle(pathname) ?? "Finanzas"

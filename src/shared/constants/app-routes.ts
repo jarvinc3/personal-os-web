@@ -30,6 +30,8 @@ export const APP_ROUTES = {
     agenda: "/agenda",
     projects: "/projects",
     health: "/health",
+    intelligence: "/intelligence",
+    intelligenceAdminRoles: "/intelligence/admin/roles",
     finance: "/finance",
     financeOverview: "/finance/overview",
     financeStatistics: "/finance/statistics",

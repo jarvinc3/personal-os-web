@@ -1,0 +1,368 @@
+"use client"
+
+import { useIntelligenceMessage } from "@/src/modules/intelligence/hooks/use-intelligence"
+import { InfiniteListSentinel } from "@/src/shared/components/ui/infinite-list-sentinel"
+import { Button } from "@/src/shared/components/ui/button"
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/src/shared/components/ui/empty"
+import { Skeleton } from "@/src/shared/components/ui/skeleton"
+import { SummaryItem, SummarySection } from "@/src/shared/components/ui/summary"
+import { usePageHeader } from "@/src/shared/hooks/use-page-header"
+import { formatDateTime } from "@/src/shared/lib/date-format"
+import {
+  AlertCircle,
+  BrainCircuit,
+  CheckCircle2,
+  Clock3,
+  Inbox,
+  LoaderCircle,
+  Mail,
+  RefreshCw,
+  ShieldCheck,
+  Unplug,
+  X,
+} from "lucide-react"
+import { useCallback, useMemo, useState } from "react"
+import { useIntelligence } from "./hooks/use-intelligence"
+
+export function IntelligenceScreen() {
+  return <IntelligenceScreenBody />
+}
+
+function IntelligenceScreenBody() {
+  const { dashboardQuery, messagesQuery, connectMutation, syncMutation } =
+    useIntelligence()
+  const [selectedMessageId, setSelectedMessageId] = useState<string | null>(
+    null
+  )
+  usePageHeader({ title: "Inteligencia" })
+
+  const messages = useMemo(
+    () => messagesQuery.data?.pages.flatMap((page) => page.items) ?? [],
+    [messagesQuery.data?.pages]
+  )
+  const { fetchNextPage, hasNextPage, isFetchingNextPage } = messagesQuery
+  const loadMore = useCallback(() => {
+    if (hasNextPage && !isFetchingNextPage) {
+      void fetchNextPage()
+    }
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage])
+
+  if (dashboardQuery.isPending) {
+    return (
+      <main className="mx-auto flex w-full max-w-4xl flex-col gap-5 p-4 pb-10 md:px-6">
+        <Skeleton className="h-28 w-full rounded-2xl" />
+        <Skeleton className="h-16 w-full rounded-2xl" />
+        <Skeleton className="h-80 w-full rounded-2xl" />
+      </main>
+    )
+  }
+
+  if (dashboardQuery.isError || !dashboardQuery.data) {
+    return (
+      <main className="mx-auto flex w-full max-w-4xl flex-col gap-5 p-4 pb-10 md:px-6">
+        <SummarySection title="Inteligencia" icon={BrainCircuit}>
+          <Empty>
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <AlertCircle aria-hidden="true" />
+              </EmptyMedia>
+              <EmptyTitle>No se pudo cargar Inteligencia</EmptyTitle>
+              <EmptyDescription>
+                Revisa tu conexión e inténtalo otra vez.
+              </EmptyDescription>
+            </EmptyHeader>
+            <Button type="button" onClick={() => void dashboardQuery.refetch()}>
+              <RefreshCw aria-hidden="true" /> Reintentar
+            </Button>
+          </Empty>
+        </SummarySection>
+      </main>
+    )
+  }
+
+  const dashboard = dashboardQuery.data
+  const connected = dashboard.connection.connected
+
+  return (
+    <main className="mx-auto flex w-full max-w-4xl flex-col gap-5 p-4 pb-10 md:px-6">
+      <SummarySection
+        title="Fuente de correo"
+        subtitle="Gmail permanece aislado en tu cuenta."
+        icon={Mail}
+        right={
+          connected ? (
+            <span role="img" aria-label="Gmail conectado">
+              <CheckCircle2
+                className="size-5 text-emerald-600"
+                aria-hidden="true"
+              />
+            </span>
+          ) : (
+            <span role="img" aria-label="Gmail desconectado">
+              <Unplug
+                className="size-5 text-muted-foreground"
+                aria-hidden="true"
+              />
+            </span>
+          )
+        }
+      >
+        {connected ? (
+          <>
+            <SummaryItem
+              title={dashboard.connection.emailAddress}
+              description={
+                dashboard.connection.lastSyncedAt
+                  ? `Última sincronización: ${formatDateTime(dashboard.connection.lastSyncedAt)}`
+                  : "La sincronización inicial está pendiente."
+              }
+              icon={Mail}
+              value={`${dashboard.counters.importedMessages} mensajes`}
+              isLast={!dashboard.connection.lastSyncErrorCode}
+            />
+            {dashboard.connection.lastSyncErrorCode ? (
+              <div
+                className="flex items-center gap-2 px-2 text-sm text-destructive"
+                role="status"
+              >
+                <AlertCircle className="size-4 shrink-0" aria-hidden="true" />
+                No se pudo sincronizar. Vuelve a conectar Gmail o reintenta.
+              </div>
+            ) : null}
+            <div className="flex justify-end px-2 pb-1">
+              <Button
+                type="button"
+                onClick={() => syncMutation.mutate()}
+                disabled={syncMutation.isPending}
+              >
+                {syncMutation.isPending ? (
+                  <LoaderCircle className="animate-spin" aria-hidden="true" />
+                ) : (
+                  <RefreshCw aria-hidden="true" />
+                )}
+                Sincronizar ahora
+              </Button>
+            </div>
+          </>
+        ) : (
+          <Empty>
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <Mail aria-hidden="true" />
+              </EmptyMedia>
+              <EmptyTitle>Conecta tu correo</EmptyTitle>
+              <EmptyDescription>
+                El bootstrap empieza el 1 de enero de 2026. Puedes revocar el
+                consentimiento desde Privacidad.
+              </EmptyDescription>
+            </EmptyHeader>
+            <Button
+              type="button"
+              onClick={() => connectMutation.mutate()}
+              disabled={connectMutation.isPending}
+            >
+              {connectMutation.isPending ? (
+                <LoaderCircle className="animate-spin" aria-hidden="true" />
+              ) : (
+                <Mail aria-hidden="true" />
+              )}
+              Conectar Gmail
+            </Button>
+          </Empty>
+        )}
+      </SummarySection>
+
+      <SummarySection title="Corpus personal" icon={Inbox}>
+        <SummaryItem
+          title="Mensajes importados"
+          description="Contenido canónico persistido para esta cuenta."
+          icon={Inbox}
+          value={String(dashboard.counters.importedMessages)}
+        />
+        <SummaryItem
+          title="Últimos 30 días"
+          description="Mensajes recibidos en el periodo."
+          icon={Clock3}
+          value={String(dashboard.counters.recentMessages)}
+          isLast
+        />
+      </SummarySection>
+
+      {dashboard.role === "ADMIN" ? (
+        <SummaryItem
+          title="Administrar roles"
+          description="Consulta y cambia los roles de Inteligencia."
+          icon={ShieldCheck}
+          href="/intelligence/admin/roles"
+          showChevron
+          isLast
+        />
+      ) : null}
+
+      {connected ? (
+        <SummarySection title="Mensajes" subtitle="Solo lectura" icon={Mail}>
+          {messagesQuery.isPending ? (
+            <div
+              className="flex flex-col gap-2 p-2"
+              aria-label="Cargando mensajes"
+            >
+              <Skeleton className="h-14 w-full" />
+              <Skeleton className="h-14 w-full" />
+              <Skeleton className="h-14 w-full" />
+            </div>
+          ) : messagesQuery.isError ? (
+            <Empty>
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <AlertCircle aria-hidden="true" />
+                </EmptyMedia>
+                <EmptyTitle>No se pudieron cargar los mensajes</EmptyTitle>
+                <EmptyDescription>
+                  Los mensajes ya cargados siguen disponibles.
+                </EmptyDescription>
+              </EmptyHeader>
+              <Button
+                type="button"
+                onClick={() => void messagesQuery.refetch()}
+              >
+                <RefreshCw aria-hidden="true" /> Reintentar
+              </Button>
+            </Empty>
+          ) : messages.length === 0 ? (
+            <Empty>
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <Inbox aria-hidden="true" />
+                </EmptyMedia>
+                <EmptyTitle>Aún no hay mensajes</EmptyTitle>
+                <EmptyDescription>
+                  La sincronización agregará aquí el correo desde 2026.
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
+          ) : (
+            <>
+              {messages.map((message) => (
+                <SummaryItem
+                  key={message.id}
+                  title={message.subject}
+                  description={`${message.fromAddress} · ${formatDateTime(message.receivedAt)}`}
+                  icon={Mail}
+                  onPress={() => setSelectedMessageId(message.id)}
+                  showChevron
+                />
+              ))}
+              <InfiniteListSentinel
+                hasNextPage={Boolean(messagesQuery.hasNextPage)}
+                isFetchingNextPage={messagesQuery.isFetchingNextPage}
+                onLoadMore={loadMore}
+              />
+            </>
+          )}
+        </SummarySection>
+      ) : null}
+
+      {selectedMessageId ? (
+        <IntelligenceMessageDetail
+          messageId={selectedMessageId}
+          onClose={() => setSelectedMessageId(null)}
+        />
+      ) : null}
+    </main>
+  )
+}
+
+function IntelligenceMessageDetail({
+  messageId,
+  onClose,
+}: {
+  messageId: string
+  onClose: () => void
+}) {
+  const { data, isPending, isError, refetch } =
+    useIntelligenceMessage(messageId)
+
+  return (
+    <SummarySection
+      title="Detalle del mensaje"
+      icon={Mail}
+      right={
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          onClick={onClose}
+          aria-label="Cerrar detalle"
+        >
+          <X aria-hidden="true" />
+        </Button>
+      }
+    >
+      {isPending ? (
+        <div className="flex flex-col gap-2 p-2">
+          <Skeleton className="h-6 w-2/3" />
+          <Skeleton className="h-32 w-full" />
+        </div>
+      ) : isError || !data ? (
+        <Empty>
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <AlertCircle aria-hidden="true" />
+            </EmptyMedia>
+            <EmptyTitle>No se pudo cargar el mensaje</EmptyTitle>
+            <EmptyDescription>
+              El contenido no está disponible ahora.
+            </EmptyDescription>
+          </EmptyHeader>
+          <Button type="button" onClick={() => void refetch()}>
+            <RefreshCw aria-hidden="true" /> Reintentar
+          </Button>
+        </Empty>
+      ) : (
+        <div className="flex flex-col gap-4 p-2">
+          <div>
+            <h3 className="font-medium">{data.subject}</h3>
+            <p className="text-sm text-muted-foreground">
+              {data.fromAddress} · {formatDateTime(data.receivedAt)}
+            </p>
+          </div>
+          <MessageRepresentation
+            title="Canónica"
+            value={data.content?.canonicalBody}
+          />
+          <MessageRepresentation
+            title="Saneada"
+            value={data.content?.sanitizedBody}
+          />
+          <MessageRepresentation
+            title="Cruda (retención limitada)"
+            value={data.content?.rawBody}
+          />
+        </div>
+      )}
+    </SummarySection>
+  )
+}
+
+function MessageRepresentation({
+  title,
+  value,
+}: {
+  title: string
+  value: string | null | undefined
+}) {
+  return (
+    <section className="flex flex-col gap-1">
+      <h4 className="text-xs font-medium text-muted-foreground">{title}</h4>
+      <pre className="max-h-80 overflow-auto rounded-lg bg-muted p-3 font-sans text-sm break-words whitespace-pre-wrap">
+        {value || "No disponible"}
+      </pre>
+    </section>
+  )
+}

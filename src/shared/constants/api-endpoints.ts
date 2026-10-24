@@ -23,6 +23,16 @@ export const API_ENDPOINTS = {
     DEACTIVATE_PUSH_TOKEN: (token: string) =>
       `/notifications/push-tokens/${token}`,
   },
+  INTELLIGENCE: {
+    DASHBOARD: "/intelligence",
+    MESSAGES: "/intelligence/messages",
+    MESSAGE: (id: string) => `/intelligence/messages/${encodeURIComponent(id)}`,
+    CONNECT_EMAIL: "/intelligence/email/connect",
+    SYNC_EMAIL: "/intelligence/email/sync",
+    CONSENT: "/ai/preferences/consent",
+    ROLES: "/ai/admin/roles",
+    ROLE: (userId: string) => `/ai/admin/roles/${encodeURIComponent(userId)}`,
+  },
   FINANCE: {
     INSTITUTIONS: "/finance/institutions",
     INSTITUTION: (id: string) => `/finance/institutions/${id}`,

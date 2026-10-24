@@ -38,6 +38,7 @@ import { cn } from "@/src/shared/lib/utils"
 import type { ModuleNavItem, ModuleSlug } from "@/src/shared/types/module-nav"
 import {
   BellIcon,
+  BrainCircuit,
   ChevronRight,
   Home,
   LogOutIcon,
@@ -58,6 +59,11 @@ const navItems = {
       title: "Inicio",
       url: APP_ROUTES.app.home,
       icon: Home,
+    },
+    {
+      title: "Inteligencia",
+      url: APP_ROUTES.app.intelligence,
+      icon: BrainCircuit,
     },
     {
       title: "Ajustes",

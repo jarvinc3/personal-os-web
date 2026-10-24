@@ -14,6 +14,8 @@ import {
   SettingsSection,
 } from "@/src/shared/components/layout/settings-section"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
+import { useAiConsent } from "@/src/modules/intelligence"
+import { BrainCircuit } from "lucide-react"
 
 export function PrivacySettingsScreen() {
   return (
@@ -32,6 +34,7 @@ function PrivacySettingsScreenBody() {
   const { open: openWipeAllSheet, setOpen: setOpenWipeAllSheet } =
     useSheetParam("wipe-all-data-sheet")
   const displayEmail = profileQuery.data?.email ?? user?.email ?? ""
+  const { consentQuery, consentMutation } = useAiConsent()
 
   return (
     <SettingsSecondaryPage title="Privacidad y datos">
@@ -63,6 +66,26 @@ function PrivacySettingsScreenBody() {
           accentColor={SETTINGS_REGISTRY.privacy.accent}
           {...SETTINGS_REGISTRY.privacy.rows.crashReports}
         />
+        <SettingsRow
+          label="Contribuir al conocimiento global de IA"
+          description="Permite usar mensajes saneados para mejorar el conocimiento compartido. Puedes revocarlo cuando quieras."
+          switchValue={consentQuery.data?.contributeToGlobalKnowledge ?? true}
+          onSwitchChange={(checked) => consentMutation.mutate(checked)}
+          disabled={
+            consentQuery.isPending ||
+            consentMutation.isPending ||
+            consentQuery.isError
+          }
+          isLast
+          icon={BrainCircuit}
+          accentColor="#8b5cf6"
+        />
+        {consentQuery.isError ? (
+          <p className="px-3 text-xs text-destructive" role="status">
+            No se pudo cargar el consentimiento. Intenta volver a abrir esta
+            página.
+          </p>
+        ) : null}
       </SettingsSection>
 
       <SettingsSection

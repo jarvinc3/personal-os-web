@@ -11,6 +11,7 @@ Implementados en `src/modules/` con rutas en `app/`.
 | Finance         | `src/modules/finance/`       | [finance/](./finance/README.md)             | `/finance/*`                                           |
 | Keep Awake      | `src/modules/keep-awake/`    | [keep-awake/](./keep-awake/README.md)       | `/keep-awake`                                          |
 | Home            | `src/modules/home/`          | [home/](./home/README.md)                   | `/home`                                                |
+| Inteligencia    | `src/modules/intelligence/`  | [intelligence/](./intelligence/README.md)   | `/intelligence`                                        |
 | Centro de ayuda | `src/modules/help/`          | [help/](./help/README.md)                   | `/help`, `/help/glossary`, `/help/guides`, `/help/faq` |
 
 ## Solo Settings (sin app routes)

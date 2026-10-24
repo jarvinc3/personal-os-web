@@ -22,6 +22,11 @@ describe("resolveRouteRedirect", () => {
     assert.equal(resolveRouteRedirect("/finance/transactions", false), "/login")
     assert.equal(resolveRouteRedirect("/settings/profile", false), "/login")
     assert.equal(resolveRouteRedirect("/agenda", false), "/login")
+    assert.equal(resolveRouteRedirect("/intelligence", false), "/login")
+    assert.equal(
+      resolveRouteRedirect("/intelligence/admin/roles", false),
+      "/login"
+    )
   })
 
   it("leaves protected routes and public routes untouched", () => {
@@ -43,6 +48,8 @@ describe("isProtectedAppPath", () => {
     assert.equal(isProtectedAppPath("/agenda"), true)
     assert.equal(isProtectedAppPath("/projects"), true)
     assert.equal(isProtectedAppPath("/health"), true)
+    assert.equal(isProtectedAppPath("/intelligence"), true)
+    assert.equal(isProtectedAppPath("/intelligence/admin/roles"), true)
     assert.equal(isProtectedAppPath("/dev"), true)
     assert.equal(isProtectedAppPath("/dev/cards"), true)
     assert.equal(isProtectedAppPath("/dev/cards/cuenta"), true)
