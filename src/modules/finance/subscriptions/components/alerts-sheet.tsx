@@ -1,24 +1,29 @@
 "use client"
 
-import { BrandLogo } from "@/src/modules/finance/shared/components/brand-logo"
 import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
 import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
+import { NoticeCard } from "@/src/modules/finance/shared/components/notice-card"
+import type { NoticeTone } from "@/src/modules/finance/shared/components/notice-card"
 import {
   useDismissAllSubscriptionAlerts,
+  useSubscription,
   useSubscriptionAlerts,
 } from "@/src/modules/finance/shared/hooks/use-subscriptions"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
+import { SubscriptionCard } from "@/src/modules/finance/subscriptions/components/subscription-card"
 import {
   subscriptionAlertReviewTarget,
   subscriptionAlertView,
 } from "@/src/modules/finance/subscriptions/lib/subscription-display"
-import type { FinanceSubscriptionAlert } from "@/src/modules/finance/shared/types/entities"
+import type {
+  FinanceSubscriptionAlert,
+  FinanceSubscriptionAlertKind,
+} from "@/src/modules/finance/shared/types/entities"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
 import { Badge } from "@/src/shared/components/ui/badge"
 import { Button } from "@/src/shared/components/ui/button"
-import { LinkPendingOverlay } from "@/src/shared/components/ui/navigation-pending"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import {
   Empty,
@@ -30,17 +35,38 @@ import {
 import { appToast } from "@/src/shared/lib/app-toast"
 import {
   BellOffIcon,
+  CalendarClockIcon,
   CheckCheckIcon,
-  ChevronRightIcon,
+  CircleAlertIcon,
+  ClockIcon,
+  TrendingUpIcon,
+  TriangleAlertIcon,
   XIcon,
+  type LucideIcon,
 } from "lucide-react"
-import Link from "next/link"
+import { useRouter } from "next/navigation"
+
+type AlertNotice = {
+  icon: LucideIcon
+  tone: NoticeTone
+}
+
+const ALERT_NOTICE: Record<FinanceSubscriptionAlertKind, AlertNotice> = {
+  PRICE_INCREASE: { icon: TrendingUpIcon, tone: "warning" },
+  AMOUNT_MISMATCH: { icon: TriangleAlertIcon, tone: "warning" },
+  TRIAL_ENDING: { icon: ClockIcon, tone: "info" },
+  ANNUAL_RENEWAL: { icon: CalendarClockIcon, tone: "info" },
+  MISSED_CHARGE: { icon: CircleAlertIcon, tone: "danger" },
+}
 
 type AlertsSheetProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
   isEnabled: boolean
   display: FinanceMoneyDisplay
+  today: Date
+  /** Warning window in days, from the global setting. */
+  windowDays: number
 }
 
 /** Price and charge alerts, with a per-alert review and a dismiss-all. */
@@ -49,7 +75,10 @@ export function AlertsSheet({
   onOpenChange,
   isEnabled,
   display,
+  today,
+  windowDays,
 }: AlertsSheetProps) {
+  const router = useRouter()
   const query = useSubscriptionAlerts(isEnabled && open)
   const dismissAll = useDismissAllSubscriptionAlerts()
   const alerts = query.data ?? []
@@ -67,6 +96,14 @@ export function AlertsSheet({
     } catch (error) {
       appToast.error({ text1: financeErrorMessage(error) })
     }
+  }
+
+  function reviewAlert(alert: FinanceSubscriptionAlert) {
+    const target = subscriptionAlertReviewTarget(alert.kind)
+    onOpenChange(false)
+    router.push(
+      `${APP_ROUTES.app.financeSubscription(alert.subscriptionId)}?tab=${target}`
+    )
   }
 
   return (
@@ -125,11 +162,14 @@ export function AlertsSheet({
       ) : null}
       <div className="flex flex-col gap-2">
         {alerts.map((alert) => (
-          <AlertRow
+          <SubscriptionAlertNotice
             key={alert.id}
             alert={alert}
             display={display}
-            onReview={() => onOpenChange(false)}
+            today={today}
+            windowDays={windowDays}
+            isEnabled={isEnabled && open}
+            onReview={() => reviewAlert(alert)}
           />
         ))}
       </div>
@@ -137,36 +177,50 @@ export function AlertsSheet({
   )
 }
 
-type AlertRowProps = {
+type SubscriptionAlertNoticeProps = {
   alert: FinanceSubscriptionAlert
   display: FinanceMoneyDisplay
+  today: Date
+  windowDays: number
+  isEnabled: boolean
   onReview: () => void
 }
 
-function AlertRow({ alert, display, onReview }: AlertRowProps) {
+function SubscriptionAlertNotice({
+  alert,
+  display,
+  today,
+  windowDays,
+  isEnabled,
+  onReview,
+}: SubscriptionAlertNoticeProps) {
+  const subscriptionQuery = useSubscription(isEnabled, alert.subscriptionId)
   const view = subscriptionAlertView({ alert, display })
-  const target = subscriptionAlertReviewTarget(alert.kind)
+  const notice = ALERT_NOTICE[alert.kind]
+  const subscription = subscriptionQuery.data ?? null
+
   return (
-    <Link
-      href={`${APP_ROUTES.app.financeSubscription(alert.subscriptionId)}?tab=${target}`}
-      onClick={onReview}
-      className="relative flex items-center gap-3 rounded-2xl border border-border p-3"
+    <NoticeCard
+      icon={notice.icon}
+      tone={notice.tone}
+      title={view.title}
+      description={view.description}
+      trailing={
+        view.badge ? (
+          <Badge variant={view.badgeVariant}>{view.badge}</Badge>
+        ) : null
+      }
     >
-      <BrandLogo name={alert.subscriptionName} size={32} />
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-medium">{view.title}</p>
-        <p className="truncate text-xs text-muted-foreground">
-          {view.description}
-        </p>
-      </div>
-      {view.badge ? (
-        <Badge variant={view.badgeVariant}>{view.badge}</Badge>
+      {subscription ? (
+        <SubscriptionCard
+          subscription={subscription}
+          display={display}
+          today={today}
+          windowDays={windowDays}
+          variant="compact"
+          onPress={onReview}
+        />
       ) : null}
-      <span className="flex items-center gap-1 text-xs font-medium text-primary">
-        Revisar
-        <ChevronRightIcon className="size-3.5" aria-hidden />
-      </span>
-      <LinkPendingOverlay />
-    </Link>
+    </NoticeCard>
   )
 }

@@ -13,6 +13,7 @@ import type {
   FinanceSubscriptionStatus,
   FinanceSubscriptionSummary,
 } from "@/src/modules/finance/shared/types/entities"
+import type { SubscriptionCardSource } from "./subscription-card-source.ts"
 import {
   billingLabel,
   shortBillingDate,
@@ -137,7 +138,7 @@ export type SubscriptionCardState = {
 }
 
 export function subscriptionCardState(input: {
-  subscription: FinanceSubscription
+  subscription: SubscriptionCardSource
   today: Date
   windowDays: number
 }): SubscriptionCardState {

@@ -12,18 +12,20 @@ const TONE_CLASS: Record<NoticeTone, string> = {
   info: "border-info/40 bg-info/10 text-info",
 }
 
-/** Aviso que muestra la card de su entidad con el mensaje (#274, #285). */
+/** Aviso que muestra la card de su entidad con el mensaje (#279). */
 export function NoticeCard({
   icon: Icon,
   title,
   description,
   tone = "warning",
+  trailing,
   children,
 }: {
   icon: LucideIcon
   title: string
   description: string
   tone?: NoticeTone
+  trailing?: ReactNode
   children?: ReactNode
 }) {
   return (
@@ -36,10 +38,11 @@ export function NoticeCard({
         )}
       >
         <Icon className="mt-0.5 size-4 shrink-0" aria-hidden />
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <p className="text-sm font-medium">{title}</p>
           <p className="text-xs opacity-80">{description}</p>
         </div>
+        {trailing ? <div className="shrink-0">{trailing}</div> : null}
       </div>
     </div>
   )

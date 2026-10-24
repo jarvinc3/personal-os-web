@@ -21,6 +21,8 @@ import {
   type MonthKey,
 } from "@/src/modules/finance/shared/lib/month-window"
 import { FinanceRingChart } from "@/src/modules/finance/products/components/ring-chart"
+import { SubscriptionCard } from "@/src/modules/finance/subscriptions/components/subscription-card"
+import { upcomingChargeToCardSource } from "@/src/modules/finance/subscriptions/lib/subscription-card-source"
 import { buildSubscriptionSlices } from "@/src/modules/finance/subscriptions/lib/subscription-view"
 import {
   subscriptionCalendarWeeks,
@@ -29,7 +31,6 @@ import {
   subscriptionChargeSummaryLabel,
   subscriptionRestOfMonth,
 } from "@/src/modules/finance/subscriptions/lib/subscription-calendar"
-import { billingLabel } from "@/src/modules/finance/subscriptions/lib/subscription-timing"
 import { FinanceMonthPicker } from "@/src/modules/finance/transactions/components/month-picker"
 import { useWeekStartsOn } from "@/src/modules/settings/hooks/use-week-starts-on"
 import {
@@ -39,7 +40,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
-import { SummaryItem, SummarySection } from "@/src/shared/components/ui/summary"
+import { SummarySection } from "@/src/shared/components/ui/summary"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { cn } from "@/src/shared/lib/utils"
 import { CalendarDaysIcon, CalendarOffIcon, TagsIcon } from "lucide-react"
@@ -248,29 +249,14 @@ function SubscriptionsCalendarBody() {
             </EmptyHeader>
           </Empty>
         ) : (
-          restOfMonth.map((charge, index) => (
-            <SummaryItem
+          restOfMonth.map((charge) => (
+            <SubscriptionCard
               key={charge.id}
-              leading={
-                <BrandLogo
-                  name={charge.name}
-                  logoUrl={charge.logoUrl}
-                  size={32}
-                />
-              }
-              title={charge.name}
-              description={
-                billingLabel({
-                  nextDate: charge.date,
-                  today,
-                  windowDays,
-                }).text
-              }
-              value={formatFinanceMoney(charge.amount, {
-                ...display,
-                currency: charge.currency,
-              })}
-              isLast={index === restOfMonth.length - 1}
+              subscription={upcomingChargeToCardSource(charge)}
+              display={display}
+              today={today}
+              windowDays={windowDays}
+              variant="compact"
             />
           ))
         )}

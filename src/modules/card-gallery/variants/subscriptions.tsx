@@ -3,6 +3,7 @@ import { GALLERY_TODAY } from "@/src/modules/card-gallery/mock/display"
 import {
   galleryCheckingAccount,
   galleryCreditCard,
+  galleryOverdueSubscription,
   galleryPausedSubscription,
   gallerySubscription,
   galleryTrialSubscription,
@@ -57,12 +58,104 @@ export const subscriptionVariants: readonly GalleryVariant[] = [
       <SubscriptionCard
         subscription={gallerySubscription}
         display={display}
-        cards={[galleryCreditCard]}
-        accounts={[galleryCheckingAccount]}
         today={GALLERY_TODAY}
         windowDays={WINDOW_DAYS}
         variant="compact"
         onPress={notifyTap}
+      />
+    ),
+  },
+  {
+    id: "suscripcion-compacta-aviso",
+    label: "Compacta en ventana de aviso",
+    propLabel: "nextBillingDate dentro de la ventana",
+    height: "≈ 60 px",
+    render: ({ display, notifyTap }) => (
+      <SubscriptionCard
+        subscription={galleryWarningSubscription}
+        display={display}
+        today={GALLERY_TODAY}
+        windowDays={WINDOW_DAYS}
+        variant="compact"
+        onPress={notifyTap}
+      />
+    ),
+  },
+  {
+    id: "suscripcion-compacta-pausada",
+    label: "Compacta pausada",
+    propLabel: 'status="PAUSED"',
+    height: "≈ 60 px",
+    render: ({ display }) => (
+      <SubscriptionCard
+        subscription={galleryPausedSubscription}
+        display={display}
+        today={GALLERY_TODAY}
+        windowDays={WINDOW_DAYS}
+        variant="compact"
+      />
+    ),
+  },
+  {
+    id: "suscripcion-compacta-vencida",
+    label: "Compacta vencida",
+    propLabel: "nextBillingDate pasada y activa",
+    height: "≈ 60 px",
+    render: ({ display }) => (
+      <SubscriptionCard
+        subscription={galleryOverdueSubscription}
+        display={display}
+        today={GALLERY_TODAY}
+        windowDays={WINDOW_DAYS}
+        variant="compact"
+      />
+    ),
+  },
+  {
+    id: "suscripcion-compacta-gratis",
+    label: "Compacta gratis",
+    propLabel: "trialEndsAt futuro",
+    height: "≈ 60 px",
+    render: ({ display, notifyTap }) => (
+      <SubscriptionCard
+        subscription={galleryTrialSubscription}
+        display={display}
+        today={GALLERY_TODAY}
+        windowDays={WINDOW_DAYS}
+        variant="compact"
+        onPress={notifyTap}
+      />
+    ),
+  },
+  {
+    id: "suscripcion-compacta-seleccionada",
+    label: "Compacta seleccionada",
+    propLabel: "selected",
+    height: "≈ 60 px",
+    render: ({ display }) => (
+      <SubscriptionCard
+        subscription={gallerySubscription}
+        display={display}
+        today={GALLERY_TODAY}
+        windowDays={WINDOW_DAYS}
+        variant="compact"
+        selected
+      />
+    ),
+  },
+  {
+    id: "suscripcion-compacta-deshabilitada",
+    label: "Compacta deshabilitada",
+    propLabel: "disabled",
+    height: "≈ 60 px",
+    render: ({ display }) => (
+      <SubscriptionCard
+        subscription={gallerySubscription}
+        display={display}
+        today={GALLERY_TODAY}
+        windowDays={WINDOW_DAYS}
+        variant="compact"
+        disabled
       />
     ),
   },
@@ -75,8 +168,6 @@ export const subscriptionVariants: readonly GalleryVariant[] = [
       <SubscriptionCard
         subscription={gallerySubscription}
         display={display}
-        cards={[galleryCreditCard]}
-        accounts={[galleryCheckingAccount]}
         today={GALLERY_TODAY}
         windowDays={WINDOW_DAYS}
         variant="inline"

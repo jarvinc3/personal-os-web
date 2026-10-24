@@ -1,6 +1,6 @@
 import { AccountProductRow } from "@/src/modules/finance/shared/components/product-rows"
+import { NoticeCard } from "@/src/modules/finance/shared/components/notice-card"
 import { SubscriptionCard } from "@/src/modules/finance/subscriptions/components/subscription-card"
-import { NoticeCard } from "@/src/modules/card-gallery/drafts/notice-card"
 import { GALLERY_TODAY } from "@/src/modules/card-gallery/mock/display"
 import {
   galleryBalanceDrift,
@@ -10,6 +10,7 @@ import {
 } from "@/src/modules/card-gallery/mock/finance"
 import type { GalleryVariant } from "@/src/modules/card-gallery/variants/types"
 import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
+import { Badge } from "@/src/shared/components/ui/badge"
 import { BellRingIcon, ScaleIcon, TriangleAlertIcon } from "lucide-react"
 
 /** Avisos con la card de su entidad (#272). */
@@ -61,15 +62,15 @@ export const alertVariants: readonly GalleryVariant[] = [
   {
     id: "aviso-suscripcion",
     label: "Alerta de suscripción",
-    propLabel: "suscripción compacta + aviso",
-    height: "≈ 150 px",
-    isDraft: true,
+    propLabel: "aviso + suscripción compacta",
+    height: "≈ 170 px",
     render: ({ display, notifyTap }) => (
       <NoticeCard
         icon={BellRingIcon}
         tone="warning"
-        title="El último cobro no coincide"
-        description="Revisa el monto antes del próximo cargo."
+        title="Suscripción con aviso cobró distinto"
+        description="Esperado DOP $1,499.00 · cobrado DOP $1,799.00 el 24 oct"
+        trailing={<Badge variant="warning">+DOP $300.00</Badge>}
       >
         <SubscriptionCard
           subscription={galleryWarningSubscription}

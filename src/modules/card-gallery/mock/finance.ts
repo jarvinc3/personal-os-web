@@ -504,6 +504,14 @@ export const galleryPausedSubscription: FinanceSubscription = {
   daysUntil: 2,
 }
 
+export const galleryOverdueSubscription: FinanceSubscription = {
+  ...sharedSubscription,
+  id: "sub-vencida",
+  name: "Suscripción vencida",
+  nextBillingDate: "2026-10-18",
+  daysUntil: -5,
+}
+
 export const galleryTrialSubscription: FinanceSubscription = {
   ...sharedSubscription,
   id: "sub-gratis",

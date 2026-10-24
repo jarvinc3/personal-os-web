@@ -147,6 +147,8 @@ function SubscriptionsScreenBody() {
         onOpenChange={alertsSheet.setOpen}
         isEnabled={isEnabled}
         display={display}
+        today={today}
+        windowDays={windowDays}
       />
 
       <DetectedSheet

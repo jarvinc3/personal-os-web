@@ -212,6 +212,7 @@ describe("subscriptionCycleProgress", () => {
       subscription(),
       day(2026, 10, 20)
     )
+    assert.ok(progress)
     assert.equal(progress.startDate.toISOString().slice(0, 10), "2026-10-10")
     assert.equal(progress.endDate.toISOString().slice(0, 10), "2026-11-10")
     assert.equal(progress.cycleDays, 31)
@@ -226,6 +227,7 @@ describe("subscriptionCycleProgress", () => {
       }),
       day(2026, 11, 7)
     )
+    assert.ok(progress)
     assert.equal(progress.startDate.toISOString().slice(0, 10), "2026-11-03")
     assert.equal(progress.cycleDays, 7)
   })
@@ -238,6 +240,7 @@ describe("subscriptionCycleProgress", () => {
       }),
       day(2026, 5, 10)
     )
+    assert.ok(progress)
     assert.equal(progress.startDate.toISOString().slice(0, 10), "2025-11-10")
     assert.equal(progress.cycleDays, 365)
     assert.ok(progress.ratio > 0.4 && progress.ratio < 0.6)
@@ -251,6 +254,7 @@ describe("subscriptionCycleProgress", () => {
       }),
       day(2026, 10, 10)
     )
+    assert.ok(quarterly)
     assert.equal(quarterly.startDate.toISOString().slice(0, 10), "2026-08-10")
     assert.equal(quarterly.cycleDays, 92)
 
@@ -261,8 +265,17 @@ describe("subscriptionCycleProgress", () => {
       }),
       day(2026, 10, 10)
     )
+    assert.ok(semiannual)
     assert.equal(semiannual.startDate.toISOString().slice(0, 10), "2026-05-10")
     assert.equal(semiannual.cycleDays, 184)
+  })
+
+  it("has no progress when the source has no billing cycle", () => {
+    const progress = subscriptionCycleProgress(
+      { ...subscription(), billingCycle: null },
+      day(2026, 10, 20)
+    )
+    assert.equal(progress, null)
   })
 
   it("clamps a charge already past its date to 100 %", () => {
@@ -270,6 +283,7 @@ describe("subscriptionCycleProgress", () => {
       subscription(),
       day(2026, 11, 20)
     )
+    assert.ok(progress)
     assert.equal(progress.percent, 100)
   })
 })

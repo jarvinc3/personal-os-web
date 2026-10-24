@@ -7,7 +7,8 @@ import {
 } from "date-fns"
 
 import { shortMonthLabel } from "@/src/shared/lib/date-format"
-import type { FinanceSubscription } from "@/src/modules/finance/shared/types/entities"
+import type { FinanceBillingCycle } from "@/src/modules/finance/shared/types/entities"
+import type { SubscriptionCardSource } from "./subscription-card-source.ts"
 
 /** `mar 2023`, the month and year a subscription started. */
 export function billingMonthLabel(value: Date | string): string {
@@ -60,10 +61,14 @@ export function cycleProgress(input: {
   }
 }
 
-function cycleStart(subscription: FinanceSubscription): Date {
-  const next = startOfDay(parseISO(subscription.nextBillingDate))
-  const interval = subscription.billingInterval
-  switch (subscription.billingCycle) {
+function cycleStart(input: {
+  billingCycle: FinanceBillingCycle
+  billingInterval: number
+  nextBillingDate: string
+}): Date {
+  const next = startOfDay(parseISO(input.nextBillingDate))
+  const interval = input.billingInterval
+  switch (input.billingCycle) {
     case "WEEKLY":
       return addDays(next, -7 * interval)
     case "MONTHLY":
@@ -79,14 +84,22 @@ function cycleStart(subscription: FinanceSubscription): Date {
 
 /**
  * Cycle progress of a subscription. The anchor is not used so a month-end
- * cycle still measures the real days of that month.
+ * cycle still measures the real days of that month. A charge of the upcoming
+ * endpoint has no cycle to measure, so it has no progress.
  */
 export function subscriptionCycleProgress(
-  subscription: FinanceSubscription,
+  subscription: SubscriptionCardSource,
   now: Date
-): SubscriptionCycleProgress {
+): SubscriptionCycleProgress | null {
+  if (subscription.billingCycle === null) {
+    return null
+  }
   return cycleProgress({
-    start: cycleStart(subscription),
+    start: cycleStart({
+      billingCycle: subscription.billingCycle,
+      billingInterval: subscription.billingInterval,
+      nextBillingDate: subscription.nextBillingDate,
+    }),
     next: parseISO(subscription.nextBillingDate),
     today: now,
   })
@@ -104,7 +117,7 @@ export type BillingLabel = {
  */
 /** An active subscription whose next charge date already passed unpaid. */
 export function subscriptionIsOverdue(
-  subscription: FinanceSubscription,
+  subscription: Pick<SubscriptionCardSource, "status" | "nextBillingDate">,
   today: Date
 ): boolean {
   if (subscription.status !== "ACTIVE") {

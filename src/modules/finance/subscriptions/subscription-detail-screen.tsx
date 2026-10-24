@@ -101,6 +101,7 @@ function SubscriptionDetailBody({
     compactNumbers: config.display.compactNumbers,
     locale: formatLocale,
   }
+  const windowDays = config.subscriptions.reminderDaysBefore
 
   const headerActions = useMemo(
     () => (
@@ -176,7 +177,12 @@ function SubscriptionDetailBody({
       ) : null}
 
       <div className="flex flex-col gap-4">
-        <SubscriptionDetailHeader subscription={subscription} today={today} />
+        <SubscriptionDetailHeader
+          subscription={subscription}
+          display={display}
+          today={today}
+          windowDays={windowDays}
+        />
 
         {subscription.paymentMethod ? null : (
           <Alert variant="destructive">
