@@ -1,13 +1,17 @@
-import { MerchantCard } from "@/src/modules/card-gallery/drafts/merchant-card"
-import { galleryMoney } from "@/src/modules/card-gallery/mock/display"
+import { MerchantCard } from "@/src/modules/finance/merchants/components/merchant-card"
 import {
   galleryMerchant,
-  galleryRecurringPattern,
   gallerySuperCategory,
 } from "@/src/modules/card-gallery/mock/finance"
 import type { GalleryVariant } from "@/src/modules/card-gallery/variants/types"
 import { Button } from "@/src/shared/components/ui/button"
 import { CheckIcon } from "lucide-react"
+
+const category = {
+  name: gallerySuperCategory.name,
+  icon: gallerySuperCategory.icon,
+  color: gallerySuperCategory.color,
+}
 
 /** Recurrente detectado con su acción; borrador hasta #286 (#272). */
 export const recurringVariants: readonly GalleryVariant[] = [
@@ -17,17 +21,12 @@ export const recurringVariants: readonly GalleryVariant[] = [
     propLabel: "MerchantCard compact + acción",
     height: "≈ 110 px",
     isDraft: true,
-    render: ({ notifyTap }) => (
+    render: ({ display, notifyTap }) => (
       <div className="flex flex-col gap-2 rounded-2xl border border-border bg-card p-2">
         <MerchantCard
-          name={galleryRecurringPattern.merchantName}
-          logoUrl={galleryRecurringPattern.logoUrl}
-          category={{
-            name: gallerySuperCategory.name,
-            icon: gallerySuperCategory.icon,
-            color: gallerySuperCategory.color,
-          }}
-          spendLabel={galleryMoney(galleryRecurringPattern.avgAmount)}
+          merchant={galleryMerchant}
+          category={category}
+          display={display}
           variant="compact"
           onPress={notifyTap}
         />
@@ -49,18 +48,12 @@ export const recurringVariants: readonly GalleryVariant[] = [
     propLabel: "MerchantCard full",
     height: "≈ 190 px",
     isDraft: true,
-    render: ({ notifyTap }) => (
+    render: ({ display, notifyTap }) => (
       <div className="flex flex-col gap-2 rounded-2xl border border-border bg-card p-2">
         <MerchantCard
-          name={galleryMerchant.name}
-          logoUrl={galleryMerchant.logoUrl}
-          category={{
-            name: gallerySuperCategory.name,
-            icon: gallerySuperCategory.icon,
-            color: gallerySuperCategory.color,
-          }}
-          spendLabel={galleryMoney(galleryRecurringPattern.avgAmount)}
-          movementsLabel="Recurrente"
+          merchant={galleryMerchant}
+          category={category}
+          display={display}
           onPress={notifyTap}
         />
         <div className="flex items-center justify-between gap-2 px-1">

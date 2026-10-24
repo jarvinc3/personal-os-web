@@ -1,14 +1,14 @@
 "use client"
 
-import { BrandLogo } from "@/src/modules/finance/shared/components/brand-logo"
+import { MerchantCard } from "@/src/modules/finance/merchants/components/merchant-card"
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
 import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
 import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
 import { FinanceGate } from "@/src/modules/finance/finance-gate"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
 import { useMerchants } from "@/src/modules/finance/shared/hooks/use-merchants"
+import { useCategories } from "@/src/modules/finance/shared/hooks/use-categories"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
-import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
 import { merchantMonthParams } from "@/src/modules/finance/merchants/lib/merchant-query"
 import { FormTextField } from "@/src/shared/components/layout/form-blocks"
@@ -22,7 +22,7 @@ import {
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
 import { InfiniteListSentinel } from "@/src/shared/components/ui/infinite-list-sentinel"
-import { SummaryItem, SummarySection } from "@/src/shared/components/ui/summary"
+import { SummarySection } from "@/src/shared/components/ui/summary"
 import { SearchIcon, StoreIcon } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo, useState } from "react"
@@ -59,6 +59,8 @@ function MerchantsScreenBody() {
     dateTo: month.dateTo,
   })
   const items = infiniteListItems(listQuery.data)
+  const categoriesQuery = useCategories(isEnabled)
+  const categories = categoriesQuery.data ?? []
   const display = {
     currency: config.baseCurrency,
     showCents: config.display.showCents,
@@ -105,27 +107,17 @@ function MerchantsScreenBody() {
         }
       >
         <SummarySection title="Comercios" icon={StoreIcon}>
-          {items.map((merchant, index) => (
-            <SummaryItem
+          {items.map((merchant) => (
+            <MerchantCard
               key={merchant.id}
-              title={merchant.name}
-              leading={
-                <BrandLogo
-                  name={merchant.name}
-                  logoUrl={merchant.logoUrl}
-                  size={36}
-                />
+              merchant={merchant}
+              category={
+                categories.find(
+                  (category) => category.id === merchant.categoryId
+                ) ?? null
               }
-              description={
-                merchant.monthMovements > 0
-                  ? `${merchant.monthMovements} movimiento${merchant.monthMovements === 1 ? "" : "s"} este mes`
-                  : "Sin movimientos este mes"
-              }
-              value={formatFinanceMoney(merchant.monthSpend, display)}
+              display={display}
               href={APP_ROUTES.app.financeMerchant(merchant.id)}
-              showChevron
-              isLast={index === items.length - 1}
-              className="px-3"
             />
           ))}
         </SummarySection>

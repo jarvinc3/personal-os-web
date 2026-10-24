@@ -1,7 +1,4 @@
-import { BrandLogo } from "@/src/modules/finance/shared/components/brand-logo"
-import { MerchantCard } from "@/src/modules/card-gallery/drafts/merchant-card"
-import { TintedSurface } from "@/src/modules/card-gallery/drafts/tinted-surface"
-import { galleryMoney } from "@/src/modules/card-gallery/mock/display"
+import { MerchantCard } from "@/src/modules/finance/merchants/components/merchant-card"
 import {
   galleryMerchant,
   galleryMerchantWithoutCategory,
@@ -15,23 +12,18 @@ const category = {
   color: gallerySuperCategory.color,
 }
 
-const spendLabel = galleryMoney(galleryMerchant.monthSpend)
-const movementsLabel = `${galleryMerchant.monthMovements} movimientos`
-
-/** Card de comercio nueva; borrador hasta #281 (#272). */
+/** Variantes de comercio (#272). */
 export const merchantVariants: readonly GalleryVariant[] = [
   {
     id: "comercio-completa",
     label: "Completa con tinte de categoría",
     propLabel: 'variant="full"',
-    height: "≈ 150 px",
-    render: ({ notifyTap }) => (
+    height: "≈ 130 px",
+    render: ({ display, notifyTap }) => (
       <MerchantCard
-        name={galleryMerchant.name}
-        logoUrl={galleryMerchant.logoUrl}
+        merchant={galleryMerchant}
         category={category}
-        spendLabel={spendLabel}
-        movementsLabel={movementsLabel}
+        display={display}
         onPress={notifyTap}
       />
     ),
@@ -40,31 +32,27 @@ export const merchantVariants: readonly GalleryVariant[] = [
     id: "comercio-sin-categoria",
     label: "Sin categoría",
     propLabel: "category = null",
-    height: "≈ 150 px",
-    render: ({ notifyTap }) => (
+    height: "≈ 130 px",
+    render: ({ display, notifyTap }) => (
       <MerchantCard
-        name={galleryMerchantWithoutCategory.name}
-        logoUrl={galleryMerchantWithoutCategory.logoUrl}
+        merchant={galleryMerchantWithoutCategory}
         category={null}
-        spendLabel={galleryMoney(galleryMerchantWithoutCategory.monthSpend)}
-        movementsLabel={`${galleryMerchantWithoutCategory.monthMovements} movimientos`}
+        display={display}
         onPress={notifyTap}
       />
     ),
   },
   {
     id: "comercio-con-alias",
-    label: "Con alias",
-    propLabel: "alias",
+    label: "Cabecera con alias",
+    propLabel: 'size="header"',
     height: "≈ 150 px",
-    render: ({ notifyTap }) => (
+    render: ({ display, notifyTap }) => (
       <MerchantCard
-        name={galleryMerchant.name}
-        logoUrl={galleryMerchant.logoUrl}
-        alias={galleryMerchant.aliases[0]}
+        merchant={galleryMerchant}
         category={category}
-        spendLabel={spendLabel}
-        movementsLabel={movementsLabel}
+        display={display}
+        size="header"
         onPress={notifyTap}
       />
     ),
@@ -73,14 +61,12 @@ export const merchantVariants: readonly GalleryVariant[] = [
     id: "comercio-duplicado",
     label: "Con ¿Duplicado?",
     propLabel: "duplicate",
-    height: "≈ 150 px",
-    render: ({ notifyTap }) => (
+    height: "≈ 130 px",
+    render: ({ display, notifyTap }) => (
       <MerchantCard
-        name={galleryMerchant.name}
-        logoUrl={galleryMerchant.logoUrl}
+        merchant={galleryMerchant}
         category={category}
-        spendLabel={spendLabel}
-        movementsLabel={movementsLabel}
+        display={display}
         duplicate
         onPress={notifyTap}
       />
@@ -90,13 +76,12 @@ export const merchantVariants: readonly GalleryVariant[] = [
     id: "comercio-compacta",
     label: "Compacta",
     propLabel: 'variant="compact"',
-    height: "≈ 60 px",
-    render: ({ notifyTap }) => (
+    height: "≈ 56 px",
+    render: ({ display, notifyTap }) => (
       <MerchantCard
-        name={galleryMerchant.name}
-        logoUrl={galleryMerchant.logoUrl}
+        merchant={galleryMerchant}
         category={category}
-        spendLabel={spendLabel}
+        display={display}
         variant="compact"
         onPress={notifyTap}
       />
@@ -107,11 +92,11 @@ export const merchantVariants: readonly GalleryVariant[] = [
     label: "Inline",
     propLabel: 'variant="inline"',
     height: "≈ 28 px",
-    render: ({ notifyTap }) => (
+    render: ({ display, notifyTap }) => (
       <MerchantCard
-        name={galleryMerchant.name}
-        logoUrl={galleryMerchant.logoUrl}
+        merchant={galleryMerchant}
         category={category}
+        display={display}
         variant="inline"
         onPress={notifyTap}
       />
@@ -121,39 +106,16 @@ export const merchantVariants: readonly GalleryVariant[] = [
     id: "comercio-seleccionada",
     label: "Seleccionada",
     propLabel: "selected",
-    height: "≈ 60 px",
-    render: ({ notifyTap }) => (
+    height: "≈ 56 px",
+    render: ({ display, notifyTap }) => (
       <MerchantCard
-        name={galleryMerchant.name}
-        logoUrl={galleryMerchant.logoUrl}
+        merchant={galleryMerchant}
         category={category}
-        spendLabel={spendLabel}
+        display={display}
         variant="compact"
         selected
         onPress={notifyTap}
       />
-    ),
-  },
-  {
-    id: "comercio-base-tintada",
-    label: "Base tintada compartida",
-    propLabel: "TintedSurface (borrador)",
-    height: "≈ 100 px",
-    isDraft: true,
-    render: () => (
-      <TintedSurface color={gallerySuperCategory.color} className="p-4">
-        <span className="flex items-center gap-3">
-          <BrandLogo name={gallerySuperCategory.name} size={36} />
-          <span className="min-w-0">
-            <span className="block truncate font-semibold">
-              Contenido sobre la base
-            </span>
-            <span className="block truncate text-xs text-muted-foreground">
-              Tinte al 22% del color de la categoría sobre la superficie
-            </span>
-          </span>
-        </span>
-      </TintedSurface>
     ),
   },
 ]

@@ -1,6 +1,5 @@
 "use client"
 
-import { BrandLogo } from "@/src/modules/finance/shared/components/brand-logo"
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
 import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
 import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
@@ -14,8 +13,10 @@ import {
 import { MissingRecord } from "@/src/modules/finance/shared/components/layout/missing-record"
 import { FinanceGate } from "@/src/modules/finance/finance-gate"
 import { MerchantEditSheet } from "@/src/modules/finance/merchants/components/merchant-edit-sheet"
+import { MerchantCard } from "@/src/modules/finance/merchants/components/merchant-card"
 import { merchantMonthParams } from "@/src/modules/finance/merchants/lib/merchant-query"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
+import { useCategories } from "@/src/modules/finance/shared/hooks/use-categories"
 import { useInfiniteFinanceList } from "@/src/modules/finance/shared/hooks/use-infinite-finance-list"
 import {
   useMergeMerchant,
@@ -24,7 +25,6 @@ import {
 } from "@/src/modules/finance/shared/hooks/use-merchants"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import { formatFinanceDateTimeLabel } from "@/src/modules/finance/shared/lib/ledger-form"
-import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
 import { signedAmount } from "@/src/modules/finance/shared/lib/transactions-query"
 import {
@@ -99,6 +99,8 @@ function MerchantDetailBody({ merchantId }: { merchantId: string }) {
     dateTo: month.dateTo,
   })
   const movements = infiniteListItems(movementsQuery.data)
+  const categoriesQuery = useCategories(isEnabled)
+  const categories = categoriesQuery.data ?? []
   const display = {
     currency: config.baseCurrency,
     showCents: config.display.showCents,
@@ -174,27 +176,15 @@ function MerchantDetailBody({ merchantId }: { merchantId: string }) {
 
   return (
     <div className="flex flex-col gap-4">
-      <SummarySection
-        title={merchant.name}
-        icon={StoreIcon}
-        right={
-          <span className="text-sm font-semibold tabular-nums">
-            {formatFinanceMoney(merchant.monthSpend, display)}
-          </span>
+      <MerchantCard
+        merchant={merchant}
+        category={
+          categories.find((category) => category.id === merchant.categoryId) ??
+          null
         }
-      >
-        <div className="flex items-center gap-3 px-1">
-          <BrandLogo
-            name={merchant.name}
-            logoUrl={merchant.logoUrl}
-            size={48}
-          />
-          <p className="truncate text-xs text-muted-foreground">
-            {merchant.monthMovements} movimiento
-            {merchant.monthMovements === 1 ? "" : "s"} este mes
-          </p>
-        </div>
-      </SummarySection>
+        display={display}
+        size="header"
+      />
 
       <div className="flex flex-col gap-2 sm:flex-row">
         <Button
@@ -305,19 +295,18 @@ function MerchantDetailBody({ merchantId }: { merchantId: string }) {
         />
         <div className="rounded-2xl border border-border bg-card">
           {candidates.map((candidate) => (
-            <SummaryItem
+            <MerchantCard
               key={candidate.id}
-              title={candidate.name}
-              leading={
-                <BrandLogo
-                  name={candidate.name}
-                  logoUrl={candidate.logoUrl}
-                  size={32}
-                />
+              merchant={candidate}
+              category={
+                categories.find(
+                  (category) => category.id === candidate.categoryId
+                ) ?? null
               }
+              display={display}
+              variant="compact"
+              selected={mergeTarget?.id === candidate.id}
               onPress={() => setMergeTarget(candidate)}
-              isLast={false}
-              className="px-3"
             />
           ))}
         </div>
