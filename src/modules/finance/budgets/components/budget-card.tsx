@@ -13,6 +13,8 @@ type BudgetCardProps = {
   variant?: PlanningProgressVariant
   href?: string
   onPress?: () => void
+  selected?: boolean
+  disabled?: boolean
 }
 
 export function BudgetCard({
@@ -21,6 +23,8 @@ export function BudgetCard({
   variant,
   href,
   onPress,
+  selected = false,
+  disabled = false,
 }: BudgetCardProps) {
   const model = budgetCardModel(budget, display)
 
@@ -44,6 +48,8 @@ export function BudgetCard({
       caption={model.caption}
       href={href}
       onPress={onPress}
+      selected={selected}
+      disabled={disabled}
       variant={variant}
     />
   )

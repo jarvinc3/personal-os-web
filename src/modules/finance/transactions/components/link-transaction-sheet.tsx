@@ -3,6 +3,8 @@
 import { useLoanInstallments } from "@/src/modules/finance/shared/hooks/use-loan-installments"
 import { useLoans } from "@/src/modules/finance/shared/hooks/use-loans"
 import { LoanProgressCard } from "@/src/modules/finance/loans"
+import { ReceivableCard } from "@/src/modules/finance/receivables"
+import { GoalCard } from "@/src/modules/finance/savings-goals"
 import { useReceivables } from "@/src/modules/finance/shared/hooks/use-receivables"
 import { useSavingsGoals } from "@/src/modules/finance/shared/hooks/use-savings-goals"
 import {
@@ -202,29 +204,19 @@ export function LinkTransactionSheet({
               Sin cobros abiertos.
             </p>
           ) : (
-            <div className="rounded-2xl border border-border bg-card">
-              {receivables.map((receivable, index) => (
-                <SummaryItem
+            <div className="flex flex-col gap-2">
+              {receivables.map((receivable) => (
+                <ReceivableCard
                   key={receivable.id}
-                  title={receivable.debtorName}
-                  description={`Pagado ${formatFinanceMoney(
-                    receivable.paidAmount,
-                    {
-                      ...display,
-                      currency: receivable.currency,
-                    }
-                  )}`}
-                  value={formatFinanceMoney(receivable.amount, {
-                    ...display,
-                    currency: receivable.currency,
-                  })}
+                  source={{ kind: "receivable", receivable }}
+                  display={display}
+                  variant="compact"
                   onPress={() =>
                     submit({
                       kind: "RECEIVABLE_PAYMENT",
                       receivableId: receivable.id,
                     })
                   }
-                  isLast={index === receivables.length - 1}
                 />
               ))}
             </div>
@@ -238,26 +230,19 @@ export function LinkTransactionSheet({
           {goals.length === 0 ? (
             <p className="text-sm text-muted-foreground">Sin metas abiertas.</p>
           ) : (
-            <div className="rounded-2xl border border-border bg-card">
-              {goals.map((goal, index) => (
-                <SummaryItem
+            <div className="flex flex-col gap-2">
+              {goals.map((goal) => (
+                <GoalCard
                   key={goal.id}
-                  title={goal.name}
-                  description={`Meta ${formatFinanceMoney(goal.targetAmount, {
-                    ...display,
-                    currency: goal.currency,
-                  })}`}
-                  value={formatFinanceMoney(goal.currentAmount, {
-                    ...display,
-                    currency: goal.currency,
-                  })}
+                  goal={goal}
+                  display={display}
+                  variant="compact"
                   onPress={() =>
                     submit({
                       kind: "SAVINGS_CONTRIBUTION",
                       goalId: goal.id,
                     })
                   }
-                  isLast={index === goals.length - 1}
                 />
               ))}
             </div>

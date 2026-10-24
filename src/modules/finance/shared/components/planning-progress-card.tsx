@@ -378,6 +378,16 @@ export function PlanningProgressCard({
               {currentLabel}
             </span>
           </span>
+          {description ? (
+            <span
+              className={cn(
+                "mt-0.5 block truncate text-[11px]",
+                tinted ? "text-white/70" : "text-muted-foreground"
+              )}
+            >
+              {description}
+            </span>
+          ) : null}
           <span
             className={cn(
               "mt-0.5 flex items-center justify-between gap-2 text-[11px]",
@@ -393,7 +403,7 @@ export function PlanningProgressCard({
           </span>
           <span
             className={cn(
-              "mt-1 block h-1 w-full overflow-hidden rounded-full",
+              "mt-1 block h-1.5 w-full overflow-hidden rounded-full",
               tinted ? "bg-white/20" : "bg-muted"
             )}
           >

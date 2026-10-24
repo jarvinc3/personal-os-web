@@ -23,6 +23,8 @@ type ReceivableCardProps = {
   onPress?: () => void
   /** Present only while the list is picking cobros; adds the round check. */
   selection?: { selected: boolean; dimmed?: boolean }
+  selected?: boolean
+  disabled?: boolean
   onLongPress?: () => void
 }
 
@@ -33,6 +35,8 @@ export function ReceivableCard({
   href,
   onPress,
   selection,
+  selected = false,
+  disabled = false,
   onLongPress,
 }: ReceivableCardProps) {
   const model =
@@ -55,7 +59,9 @@ export function ReceivableCard({
       caption={model.caption}
       href={href}
       onPress={onPress}
-      selection={selection}
+      selection={selection ?? (selected ? { selected } : undefined)}
+      selected={selected}
+      disabled={disabled}
       onLongPress={onLongPress}
       variant={variant}
     />

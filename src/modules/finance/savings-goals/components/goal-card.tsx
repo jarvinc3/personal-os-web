@@ -13,6 +13,8 @@ type GoalCardProps = {
   variant?: PlanningProgressVariant
   href?: string
   onPress?: () => void
+  selected?: boolean
+  disabled?: boolean
 }
 
 export function GoalCard({
@@ -21,6 +23,8 @@ export function GoalCard({
   variant,
   href,
   onPress,
+  selected = false,
+  disabled = false,
 }: GoalCardProps) {
   const model = goalCardModel(goal, display)
 
@@ -39,6 +43,8 @@ export function GoalCard({
       caption={model.caption}
       href={href}
       onPress={onPress}
+      selected={selected}
+      disabled={disabled}
       variant={variant}
     />
   )
