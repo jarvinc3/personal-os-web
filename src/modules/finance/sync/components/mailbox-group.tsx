@@ -1,8 +1,11 @@
 "use client"
 
 import { BrandLogo } from "@/src/modules/finance/shared/components/brand-logo"
+import { SyncCard } from "@/src/modules/finance/sync/components/sync-card"
+import type { SyncCardStatus } from "@/src/modules/finance/sync/components/sync-card"
 import type {
   FinanceEmailSource,
+  FinanceEmailSyncLog,
   FinanceInstitution,
   FinanceMailbox,
 } from "@/src/modules/finance/shared/types/entities"
@@ -13,6 +16,7 @@ import {
 } from "@/src/shared/components/ui/collapsible"
 import { SummaryItem } from "@/src/shared/components/ui/summary"
 import { formatRelativeTimeFromIso } from "@/src/shared/lib/date-format"
+import { cn } from "@/src/shared/lib/utils"
 import {
   ChevronDownIcon,
   MailIcon,
@@ -40,6 +44,39 @@ function sourceDescription(source: FinanceEmailSource): string {
   return relative ? `${sender} · Sincronizado ${relative}` : sender
 }
 
+function latestLog(source: FinanceEmailSource): FinanceEmailSyncLog | null {
+  return (source.logs ?? []).reduce<FinanceEmailSyncLog | null>(
+    (current, log) =>
+      !current || log.startedAt > current.startedAt ? log : current,
+    null
+  )
+}
+
+function sourceStatus(source: FinanceEmailSource): SyncCardStatus {
+  const log = latestLog(source)
+  if (!log) {
+    return "pending"
+  }
+  if (log.status === "FAILED") {
+    return "error"
+  }
+  if (log.status === "RUNNING") {
+    return "pending"
+  }
+  return "ok"
+}
+
+function mailboxStatus(sources: readonly FinanceEmailSource[]): SyncCardStatus {
+  const statuses = sources.map(sourceStatus)
+  if (statuses.includes("error")) {
+    return "error"
+  }
+  if (statuses.includes("pending")) {
+    return "pending"
+  }
+  return "ok"
+}
+
 export function MailboxGroup({
   mailbox,
   institutions,
@@ -54,11 +91,12 @@ export function MailboxGroup({
 
   if (sources.length === 0) {
     return (
-      <div className="flex flex-col">
-        <SummaryItem
-          title={mailbox.emailAddress}
-          description="Sin instituciones"
+      <div className="flex flex-col gap-2">
+        <SyncCard
           icon={MailIcon}
+          title={mailbox.emailAddress}
+          subtitle="Sin instituciones"
+          status="pending"
           onPress={() => onOpenMailbox(mailbox.id)}
         />
         <SummaryItem
@@ -74,31 +112,28 @@ export function MailboxGroup({
 
   return (
     <Collapsible defaultOpen className="group/mailbox">
-      <div className="flex items-stretch border-b border-border/60 last:border-b-0">
-        <div className="min-w-0 flex-1">
-          <SummaryItem
-            title={mailbox.emailAddress}
-            description={
-              sources.length === 1
-                ? "1 institución"
-                : `${sources.length} instituciones`
-            }
-            icon={MailIcon}
-            isLast
-            onPress={() => onOpenMailbox(mailbox.id)}
-            showChevron={false}
-          />
-        </div>
-        <CollapsibleTrigger
-          type="button"
-          className="flex shrink-0 items-center px-3 text-muted-foreground hover:bg-muted/50"
-          aria-label={`Instituciones de ${mailbox.emailAddress}`}
-        >
-          <ChevronDownIcon className="size-4.5 transition-transform group-data-open/mailbox:rotate-180" />
-        </CollapsibleTrigger>
-      </div>
+      <SyncCard
+        icon={MailIcon}
+        title={mailbox.emailAddress}
+        subtitle={
+          sources.length === 1
+            ? "1 institución"
+            : `${sources.length} instituciones`
+        }
+        status={mailboxStatus(sources)}
+        onPress={() => onOpenMailbox(mailbox.id)}
+        action={
+          <CollapsibleTrigger
+            type="button"
+            className="flex size-9 items-center justify-center rounded-full text-muted-foreground hover:bg-muted/50"
+            aria-label={`Instituciones de ${mailbox.emailAddress}`}
+          >
+            <ChevronDownIcon className="size-4.5 transition-transform group-data-open/mailbox:rotate-180" />
+          </CollapsibleTrigger>
+        }
+      />
       <CollapsibleContent>
-        <div className="flex flex-col pl-7">
+        <div className="mt-2 flex flex-col gap-2 pl-4">
           {sources.map((source) => {
             const title =
               source.label || source.institutionName || "Institución"
@@ -107,38 +142,33 @@ export function MailboxGroup({
             )
             const syncing = syncingSourceId === source.id
             return (
-              <div
+              <SyncCard
                 key={source.id}
-                className="flex items-stretch border-b border-border/60"
-              >
-                <div className="min-w-0 flex-1">
-                  <SummaryItem
-                    title={title}
-                    description={sourceDescription(source)}
-                    leading={
-                      <BrandLogo
-                        name={institution?.name ?? title}
-                        logoUrl={institution?.logoUrl}
-                        size={28}
-                      />
-                    }
-                    onPress={() => onOpenSource(source.id)}
-                    isLast
-                    showChevron={false}
+                leading={
+                  <BrandLogo
+                    name={institution?.name ?? title}
+                    logoUrl={institution?.logoUrl}
+                    size={32}
                   />
-                </div>
-                <button
-                  type="button"
-                  aria-label={`Sincronizar ${title}`}
-                  disabled={!emailSyncEnabled || !source.isActive || syncing}
-                  className="flex shrink-0 items-center px-3 text-primary hover:bg-muted/50 disabled:opacity-50"
-                  onClick={() => onSyncSource(source.id)}
-                >
-                  <RefreshCwIcon
-                    className={`size-4.5 ${syncing ? "animate-spin" : ""}`}
-                  />
-                </button>
-              </div>
+                }
+                title={title}
+                subtitle={sourceDescription(source)}
+                status={sourceStatus(source)}
+                onPress={() => onOpenSource(source.id)}
+                action={
+                  <button
+                    type="button"
+                    aria-label={`Sincronizar ${title}`}
+                    disabled={!emailSyncEnabled || syncing}
+                    className="flex size-9 items-center justify-center rounded-full text-primary hover:bg-muted/50 disabled:opacity-50"
+                    onClick={() => onSyncSource(source.id)}
+                  >
+                    <RefreshCwIcon
+                      className={cn("size-4.5", syncing && "animate-spin")}
+                    />
+                  </button>
+                }
+              />
             )
           })}
           <SummaryItem

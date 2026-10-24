@@ -6,12 +6,12 @@ import {
   formatFinanceMoney,
   type FinanceMoneyDisplay,
 } from "@/src/modules/finance/shared/lib/money"
-import type { FinanceMerchant } from "@/src/modules/finance/shared/types/entities"
 import { Badge } from "@/src/shared/components/ui/badge"
 import { LinkPendingOverlay } from "@/src/shared/components/ui/navigation-pending"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
 import { CheckIcon } from "lucide-react"
 import Link from "next/link"
+import type { ReactNode } from "react"
 
 export type MerchantCardCategory = {
   name: string
@@ -19,8 +19,17 @@ export type MerchantCardCategory = {
   color: string | null
 }
 
+/** What the card paints of a merchant; `FinanceMerchant` satisfies it whole. */
+export type MerchantCardSource = {
+  name: string
+  logoUrl: string | null
+  aliases?: string[]
+  monthSpend?: string
+  monthMovements?: number
+}
+
 type MerchantCardProps = {
-  merchant: FinanceMerchant
+  merchant: MerchantCardSource
   category?: MerchantCardCategory | null
   display: FinanceMoneyDisplay
   variant?: "full" | "compact" | "inline"
@@ -32,6 +41,8 @@ type MerchantCardProps = {
   disabled?: boolean
   href?: string
   onPress?: () => void
+  /** Bajo la compacta: el contexto y la acción de un recurrente confirmable. */
+  footer?: ReactNode
 }
 
 /** Card de comercio: tintada con el color de su categoría (#281). */
@@ -46,15 +57,19 @@ export function MerchantCard({
   disabled = false,
   href,
   onPress,
+  footer,
 }: MerchantCardProps) {
   const tint = category?.color ?? null
   const tintStyle = tint
     ? { backgroundColor: `color-mix(in srgb, ${tint} 10%, var(--card))` }
     : undefined
+  const aliases = merchant.aliases ?? []
   const movementsLabel =
-    merchant.monthMovements > 0
-      ? `${merchant.monthMovements} mov. este mes`
-      : "Sin movimientos este mes"
+    merchant.monthMovements === undefined
+      ? null
+      : merchant.monthMovements > 0
+        ? `${merchant.monthMovements} mov. este mes`
+        : "Sin movimientos este mes"
 
   if (variant === "inline") {
     const mention = (
@@ -130,11 +145,26 @@ export function MerchantCard({
       </>
     )
     const compactClassName = cn(
-      "relative flex w-full items-center gap-2.5 overflow-hidden rounded-xl border p-2.5 text-left",
+      "relative flex w-full overflow-hidden rounded-xl border p-2.5 text-left",
+      footer ? "flex-col" : "items-center gap-2.5",
       tint ? "border-transparent" : "border-border bg-card",
-      disabled ? "cursor-not-allowed opacity-50" : PRESSABLE_CLASS,
+      disabled && "cursor-not-allowed opacity-50",
+      !disabled && !footer && (href || onPress) && PRESSABLE_CLASS,
       selected && "ring-2 ring-primary ring-offset-2 ring-offset-background"
     )
+
+    if (footer) {
+      return (
+        <div className={compactClassName} style={tintStyle}>
+          <span className="flex w-full items-center gap-2.5">
+            {compactBody}
+          </span>
+          <span className="mt-2 flex w-full border-t border-border/60 pt-2">
+            {footer}
+          </span>
+        </div>
+      )
+    }
 
     if (href && !disabled) {
       return (
@@ -150,17 +180,25 @@ export function MerchantCard({
       )
     }
 
+    if (onPress) {
+      return (
+        <button
+          type="button"
+          onClick={onPress}
+          disabled={disabled}
+          className={compactClassName}
+          style={tintStyle}
+          aria-label={`Abrir ${merchant.name}`}
+        >
+          {compactBody}
+        </button>
+      )
+    }
+
     return (
-      <button
-        type="button"
-        onClick={onPress}
-        disabled={disabled}
-        className={compactClassName}
-        style={tintStyle}
-        aria-label={`Abrir ${merchant.name}`}
-      >
+      <div className={compactClassName} style={tintStyle}>
         {compactBody}
-      </button>
+      </div>
     )
   }
 
@@ -178,9 +216,9 @@ export function MerchantCard({
               <span className="font-display block truncate text-base font-semibold">
                 {merchant.name}
               </span>
-              {size === "header" && merchant.aliases.length > 0 ? (
+              {size === "header" && aliases.length > 0 ? (
                 <span className="block truncate text-xs text-muted-foreground">
-                  También: {merchant.aliases.join(", ")}
+                  También: {aliases.join(", ")}
                 </span>
               ) : null}
             </span>
@@ -194,24 +232,29 @@ export function MerchantCard({
               isSystem={false}
               variant="chip"
             />
-            <span className="text-xs text-muted-foreground">
-              {movementsLabel}
-            </span>
+            {movementsLabel ? (
+              <span className="text-xs text-muted-foreground">
+                {movementsLabel}
+              </span>
+            ) : null}
           </span>
         </span>
       </span>
-      <span className="flex items-end justify-between gap-2">
-        <span className="text-xs text-muted-foreground">Gasto del mes</span>
-        <span className="text-base font-semibold tabular-nums">
-          {formatFinanceMoney(merchant.monthSpend, display)}
+      {merchant.monthSpend === undefined ? null : (
+        <span className="flex items-end justify-between gap-2">
+          <span className="text-xs text-muted-foreground">Gasto del mes</span>
+          <span className="text-base font-semibold tabular-nums">
+            {formatFinanceMoney(merchant.monthSpend, display)}
+          </span>
         </span>
-      </span>
+      )}
     </>
   )
   const fullClassName = cn(
     "flex w-full flex-col gap-3 overflow-hidden rounded-2xl border p-4 text-left",
     tint ? "border-transparent" : "border-border bg-card",
-    disabled ? "cursor-not-allowed opacity-50" : PRESSABLE_CLASS,
+    disabled && "cursor-not-allowed opacity-50",
+    !disabled && (href || onPress) && PRESSABLE_CLASS,
     selected && "ring-2 ring-primary ring-offset-2 ring-offset-background"
   )
 
@@ -229,16 +272,24 @@ export function MerchantCard({
     )
   }
 
+  if (onPress) {
+    return (
+      <button
+        type="button"
+        onClick={onPress}
+        disabled={disabled}
+        className={fullClassName}
+        style={tintStyle}
+        aria-label={`Abrir ${merchant.name}`}
+      >
+        {fullBody}
+      </button>
+    )
+  }
+
   return (
-    <button
-      type="button"
-      onClick={onPress}
-      disabled={disabled}
-      className={fullClassName}
-      style={tintStyle}
-      aria-label={`Abrir ${merchant.name}`}
-    >
+    <div className={fullClassName} style={tintStyle}>
       {fullBody}
-    </button>
+    </div>
   )
 }

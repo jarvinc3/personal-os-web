@@ -1,4 +1,4 @@
-import { SyncCard } from "@/src/modules/card-gallery/drafts/sync-card"
+import { SyncCard } from "@/src/modules/finance/sync/components/sync-card"
 import { galleryMoney } from "@/src/modules/card-gallery/mock/display"
 import {
   galleryEmailSource,
@@ -11,14 +11,13 @@ import {
 import type { GalleryVariant } from "@/src/modules/card-gallery/variants/types"
 import { FileWarningIcon, HistoryIcon, InboxIcon, MailIcon } from "lucide-react"
 
-/** Cards de correo, fuente y sincronización; borrador hasta #286 (#272). */
+/** Cards de correo, fuente y sincronización (#286). */
 export const syncVariants: readonly GalleryVariant[] = [
   {
     id: "correo-bandeja",
     label: "Bandeja",
     propLabel: "estado correcto",
     height: "≈ 68 px",
-    isDraft: true,
     render: ({ notifyTap }) => (
       <SyncCard
         icon={InboxIcon}
@@ -35,7 +34,6 @@ export const syncVariants: readonly GalleryVariant[] = [
     label: "Fuente",
     propLabel: "estado correcto",
     height: "≈ 68 px",
-    isDraft: true,
     render: ({ notifyTap }) => (
       <SyncCard
         icon={MailIcon}
@@ -52,7 +50,6 @@ export const syncVariants: readonly GalleryVariant[] = [
     label: "Correo pendiente",
     propLabel: "estado pendiente",
     height: "≈ 68 px",
-    isDraft: true,
     render: ({ notifyTap }) => (
       <SyncCard
         icon={FileWarningIcon}
@@ -69,7 +66,6 @@ export const syncVariants: readonly GalleryVariant[] = [
     label: "Historial correcto",
     propLabel: "log.status = SUCCESS",
     height: "≈ 72 px",
-    isDraft: true,
     render: ({ notifyTap }) => (
       <SyncCard
         icon={HistoryIcon}
@@ -86,7 +82,6 @@ export const syncVariants: readonly GalleryVariant[] = [
     label: "Historial fallido",
     propLabel: "log.status = FAILED",
     height: "≈ 72 px",
-    isDraft: true,
     render: ({ notifyTap }) => (
       <SyncCard
         icon={HistoryIcon}
@@ -103,7 +98,6 @@ export const syncVariants: readonly GalleryVariant[] = [
     label: "Historial pendiente",
     propLabel: "log.status = RUNNING",
     height: "≈ 72 px",
-    isDraft: true,
     render: ({ notifyTap }) => (
       <SyncCard
         icon={HistoryIcon}

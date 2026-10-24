@@ -1,8 +1,8 @@
 "use client"
 
-import { BrandLogo } from "@/src/modules/finance/shared/components/brand-logo"
 import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
 import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
+import { useCategories } from "@/src/modules/finance/shared/hooks/use-categories"
 import { useCreateSubscription } from "@/src/modules/finance/shared/hooks/use-subscriptions"
 import {
   useRecurring,
@@ -10,10 +10,9 @@ import {
 } from "@/src/modules/finance/shared/hooks/use-recurring"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
-import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
-import { recurringFrequencyLabel } from "@/src/modules/finance/subscriptions/lib/recurring-display"
 import { subscriptionPayloadFromPattern } from "@/src/modules/finance/subscriptions/lib/subscription-view"
 import { RecurringArchiveSheet } from "@/src/modules/finance/subscriptions/components/recurring-archive-sheet"
+import { RecurringPatternCard } from "@/src/modules/finance/subscriptions/components/recurring-pattern-card"
 import type { FinanceRecurringPattern } from "@/src/modules/finance/shared/types/entities"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
@@ -48,9 +47,11 @@ export function DetectedSheet({
   const [archiveOpen, setArchiveOpen] = useState(false)
   const [confirmingId, setConfirmingId] = useState<string | null>(null)
   const recurringQuery = useRecurring(isEnabled && open, "SUGGESTED")
+  const categoriesQuery = useCategories(isEnabled && open)
   const updateMutation = useUpdateRecurring()
   const createMutation = useCreateSubscription()
   const patterns = infiniteListItems(recurringQuery.data)
+  const categories = categoriesQuery.data ?? []
 
   async function confirm(pattern: FinanceRecurringPattern) {
     setConfirmingId(pattern.id)
@@ -135,51 +136,39 @@ export function DetectedSheet({
         ) : null}
         <div className="flex flex-col gap-2">
           {patterns.map((pattern) => (
-            <div
+            <RecurringPatternCard
               key={pattern.id}
-              className="flex items-center gap-3 rounded-2xl border border-border p-3"
-            >
-              <BrandLogo
-                name={pattern.merchantName}
-                logoUrl={pattern.logoUrl}
-                size={32}
-              />
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium">
-                  {pattern.merchantName}
-                </p>
-                <p className="truncate text-xs text-muted-foreground">
-                  {formatFinanceMoney(pattern.avgAmount, {
-                    ...display,
-                    currency: pattern.currency,
-                  })}{" "}
-                  · {recurringFrequencyLabel(pattern.frequency).toLowerCase()}
-                </p>
-              </div>
-              <Button
-                type="button"
-                size="sm"
-                disabled={confirmingId === pattern.id}
-                onClick={() => void confirm(pattern)}
-              >
-                {confirmingId === pattern.id ? (
-                  <Spinner className="size-4" />
-                ) : (
-                  <CheckIcon className="size-4 shrink-0" />
-                )}
-                Confirmar
-              </Button>
-              <Button
-                type="button"
-                size="sm"
-                variant="outline"
-                aria-label="Descartar"
-                disabled={updateMutation.isPending}
-                onClick={() => void dismiss(pattern)}
-              >
-                <XIcon className="size-4 shrink-0" />
-              </Button>
-            </div>
+              pattern={pattern}
+              categories={categories}
+              display={display}
+              actions={
+                <>
+                  <Button
+                    type="button"
+                    size="sm"
+                    disabled={confirmingId === pattern.id}
+                    onClick={() => void confirm(pattern)}
+                  >
+                    {confirmingId === pattern.id ? (
+                      <Spinner className="size-4" />
+                    ) : (
+                      <CheckIcon className="size-4 shrink-0" />
+                    )}
+                    Confirmar
+                  </Button>
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant="outline"
+                    aria-label="Descartar"
+                    disabled={updateMutation.isPending}
+                    onClick={() => void dismiss(pattern)}
+                  >
+                    <XIcon className="size-4 shrink-0" />
+                  </Button>
+                </>
+              }
+            />
           ))}
         </div>
         <InfiniteListSentinel
