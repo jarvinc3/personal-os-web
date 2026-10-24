@@ -8,6 +8,10 @@ import { RecordOptionsSheet } from "@/src/modules/finance/shared/components/reco
 import { showUndoToast } from "@/src/modules/finance/shared/components/undo-toast"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
+import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
+import { useCards } from "@/src/modules/finance/shared/hooks/use-cards"
+import { useCategories } from "@/src/modules/finance/shared/hooks/use-categories"
+import { useMerchant } from "@/src/modules/finance/shared/hooks/use-merchants"
 import { useUnlinkTransaction } from "@/src/modules/finance/shared/hooks/use-transaction-link"
 import {
   useConfirmTransaction,
@@ -100,6 +104,20 @@ function TransactionDetailScreenBody({
     useSheetParam(FINANCE_SHEET_KEYS.transactionOptions)
 
   const tx = detailQuery.data
+  const accountsQuery = useAccounts(isEnabled)
+  const cardsQuery = useCards(isEnabled)
+  const categoriesQuery = useCategories(isEnabled)
+  const merchantQuery = useMerchant(isEnabled, tx?.merchantId ?? null)
+  const accounts = accountsQuery.data ?? []
+  const cards = cardsQuery.data ?? []
+  const categories = categoriesQuery.data ?? []
+  const account = tx?.accountId
+    ? (accounts.find((item) => item.id === tx.accountId) ?? null)
+    : null
+  const card = tx?.cardId
+    ? (cards.find((item) => item.id === tx.cardId) ?? null)
+    : null
+  const merchant = merchantQuery.data ?? null
 
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [linkOpen, setLinkOpen] = useState(false)
@@ -369,7 +387,16 @@ function TransactionDetailScreenBody({
           {formatTransactionDate(tx.transactionDate, display.locale)}
         </p>
 
-        <TransactionDetailFacts transaction={tx} display={display} />
+        <TransactionDetailFacts
+          transaction={tx}
+          display={display}
+          categories={categories}
+          accounts={accounts}
+          cards={cards}
+          account={account}
+          card={card}
+          merchant={merchant}
+        />
 
         <TransactionDetailActions
           transaction={tx}

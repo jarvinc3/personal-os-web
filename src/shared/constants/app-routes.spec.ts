@@ -84,6 +84,17 @@ describe("finance route constants", () => {
   })
 })
 
+describe("gallery route constants", () => {
+  it("keeps the gallery routes", () => {
+    assert.equal(APP_ROUTES.app.dev, "/dev")
+    assert.equal(APP_ROUTES.app.devCardGallery, "/dev/cards")
+    assert.equal(
+      APP_ROUTES.app.devCardGalleryEntity("cuenta"),
+      "/dev/cards/cuenta"
+    )
+  })
+})
+
 describe("module placeholder routes", () => {
   it("keeps the coming soon routes", () => {
     assert.equal(APP_ROUTES.app.agenda, "/agenda")

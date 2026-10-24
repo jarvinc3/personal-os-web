@@ -28,10 +28,8 @@ import {
   formatFinanceMoney,
   parseFinanceMoney,
 } from "@/src/modules/finance/shared/lib/money"
-import {
-  amountRatioPct,
-  formatPlanningDate,
-} from "@/src/modules/finance/shared/lib/planning-lists"
+import { formatCalendarDate } from "@/src/modules/finance/shared/lib/ledger-form"
+import { amountRatioPct } from "@/src/modules/finance/shared/lib/planning-lists"
 import {
   FINANCE_RECEIVABLE_STATUS_LABEL,
   FINANCE_RECEIVABLE_STATUS_VARIANT,
@@ -269,7 +267,7 @@ function ReceivableDetailScreenBody({
           outstanding > 0
             ? `Queda por cobrar ${formatFinanceMoney(outstanding, money)}${
                 receivable.dueDate
-                  ? ` · vence ${formatPlanningDate(receivable.dueDate)}`
+                  ? ` · vence ${formatCalendarDate(receivable.dueDate, display.locale)}`
                   : ""
               }`
             : undefined
@@ -318,7 +316,7 @@ function ReceivableDetailScreenBody({
                   key={payment.id}
                   title={formatFinanceMoney(payment.amount, money)}
                   description={[
-                    formatPlanningDate(payment.paidAt),
+                    formatCalendarDate(payment.paidAt, display.locale),
                     payment.account?.name ?? "Cuenta eliminada",
                   ]
                     .filter(Boolean)

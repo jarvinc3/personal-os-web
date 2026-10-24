@@ -54,7 +54,7 @@ export function PlanningCreateFab({
           ) : (
             <HandCoinsIcon className="size-5" />
           ),
-          label: "Prést...",
+          label: "Préstamo",
           onClick: () => onOpenCreate("loans"),
           disabled: !enabled || loanPending,
           color: "bg-amber-600",

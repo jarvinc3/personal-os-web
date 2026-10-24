@@ -26,10 +26,13 @@ import {
 } from "@/src/modules/finance/shared/lib/statement-import"
 import type {
   FinanceStatementImport,
-  FinanceStatementImportExtra,
   FinanceStatementImportLine,
   FinanceStatementLineDecision,
 } from "@/src/modules/finance/shared/types/entities"
+import {
+  fromStatementImportExtra,
+  StatementMovementRow,
+} from "@/src/modules/finance/transactions"
 import { LoadingView } from "@/src/shared/components/layout/loading-view"
 import {
   Alert,
@@ -145,25 +148,6 @@ function StatementHeaderCard({
         </div>
       </div>
     </div>
-  )
-}
-
-function ExtraRow({
-  movement,
-  display,
-}: {
-  movement: FinanceStatementImportExtra
-  display: FinanceMoneyDisplay
-}) {
-  return (
-    <SummaryItem
-      title={movement.merchant ?? movement.description ?? "Movimiento"}
-      description={formatCalendarDate(movement.date, display.locale)}
-      value={formatFinanceMoney(movement.amount, {
-        ...display,
-        currency: movement.currency,
-      })}
-    />
   )
 }
 
@@ -396,11 +380,12 @@ function StatementImportScreenBody({ importId }: StatementImportScreenProps) {
       >
         {statement.extra.length === 0 ? null : (
           <div className="rounded-2xl border border-border bg-card">
-            {statement.extra.map((movement) => (
-              <ExtraRow
+            {statement.extra.map((movement, index) => (
+              <StatementMovementRow
                 key={movement.id}
-                movement={movement}
+                movement={fromStatementImportExtra(movement)}
                 display={display}
+                isLast={index === statement.extra.length - 1}
               />
             ))}
           </div>

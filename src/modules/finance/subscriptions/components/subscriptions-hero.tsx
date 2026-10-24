@@ -18,6 +18,7 @@ import {
   type LucideIcon,
 } from "lucide-react"
 import Link from "next/link"
+import { Button } from "@/src/shared/components/ui/button"
 
 type ShortcutTone = "warning" | "danger" | "info" | "muted"
 
@@ -122,7 +123,7 @@ export function SubscriptionsHero({
         </p>
       </div>
 
-      <div className="grid grid-cols-4 gap-2">
+      <div className="my-4 flex items-center justify-center gap-2">
         <ShortcutButton
           icon={ClockIcon}
           label="Próximos"
@@ -144,18 +145,20 @@ export function SubscriptionsHero({
           count={badges.detected}
           onPress={onDetected}
         />
-        <Link
-          href={APP_ROUTES.app.financeSubscriptionsCalendar}
-          aria-label="Calendario"
-          className={cn(
-            "relative flex flex-col items-center gap-1 rounded-2xl border border-border bg-card px-1 py-3",
-            PRESSABLE_CLASS
-          )}
+        <Button
+          variant="secondary"
+          className="relative flex flex-col items-center gap-1 py-3"
+          asChild
         >
-          <CalendarDaysIcon className="size-5 text-foreground" aria-hidden />
-          <span className="text-xs text-muted-foreground">Calendario</span>
+          <Link
+            href={APP_ROUTES.app.financeSubscriptionsCalendar}
+            aria-label="Calendario"
+          >
+            <CalendarDaysIcon className="size-5 text-foreground" aria-hidden />
+            <span className="text-xs text-muted-foreground">Calendario</span>
+          </Link>
           <LinkPendingOverlay />
-        </Link>
+        </Button>
       </div>
     </section>
   )
@@ -181,13 +184,12 @@ function ShortcutButton({
   onPress,
 }: ShortcutButtonProps) {
   return (
-    <button
-      type="button"
+    <Button
       aria-label={label}
       onClick={onPress}
+      variant="secondary"
       className={cn(
-        "relative flex flex-col items-center gap-1 rounded-2xl border border-border bg-card px-1 py-3",
-        "cursor-pointer transition-colors hover:bg-muted/50",
+        "relative flex flex-col items-center gap-1 py-3",
         PRESSABLE_CLASS
       )}
     >
@@ -204,6 +206,6 @@ function ShortcutButton({
           {count}
         </Badge>
       ) : null}
-    </button>
+    </Button>
   )
 }

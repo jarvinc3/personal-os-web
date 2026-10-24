@@ -13,7 +13,12 @@ import type {
   FinanceSubscriptionStatus,
   FinanceSubscriptionSummary,
 } from "@/src/modules/finance/shared/types/entities"
-import { billingLabel, shortBillingDate } from "./subscription-timing.ts"
+import type { SubscriptionCardSource } from "./subscription-card-source.ts"
+import {
+  billingLabel,
+  shortBillingDate,
+  subscriptionIsOverdue,
+} from "./subscription-timing.ts"
 
 export const BILLING_CYCLE_LABEL: Record<FinanceBillingCycle, string> = {
   WEEKLY: "Semanal",
@@ -59,6 +64,20 @@ export function subscriptionStatusLabel(
   status: FinanceSubscriptionStatus
 ): string {
   return SUBSCRIPTION_STATUS_LABEL[status] ?? status
+}
+
+/** Badge a subscription shows: overdue wins over its own status. */
+export function subscriptionStatusBadge(
+  subscription: Pick<FinanceSubscription, "status">,
+  overdue: boolean
+): { label: string; variant: SubscriptionBadgeVariant } {
+  if (overdue) {
+    return { label: "Vencida", variant: "danger" }
+  }
+  return {
+    label: subscriptionStatusLabel(subscription.status),
+    variant: subscriptionStatusVariant(subscription.status),
+  }
 }
 
 /** Tabs of the subscription detail, mirroring the card detail. */
@@ -110,6 +129,8 @@ export type SubscriptionCardState = {
   label: string
   /** Inside the warning window: amber border and a place in Próximos. */
   inWindow: boolean
+  /** Active subscription whose next charge date already passed. */
+  overdue: boolean
   /** The last charge did not match the expected amount. */
   warnLastCharge: boolean
   /** The free trial has not ended: the amount reads as free. */
@@ -117,7 +138,7 @@ export type SubscriptionCardState = {
 }
 
 export function subscriptionCardState(input: {
-  subscription: FinanceSubscription
+  subscription: SubscriptionCardSource
   today: Date
   windowDays: number
 }): SubscriptionCardState {
@@ -133,6 +154,7 @@ export function subscriptionCardState(input: {
   return {
     label: active ? label.text : shortBillingDate(subscription.nextBillingDate),
     inWindow: active && label.inWindow,
+    overdue: subscriptionIsOverdue(subscription, today),
     warnLastCharge: subscription.lastChargeMismatch,
     onTrial:
       subscription.trialEndsAt !== null &&

@@ -11,7 +11,7 @@ import { TriangleAlertIcon } from "lucide-react"
 
 type WealthSummaryProps = {
   global: FinanceBalanceSheetSlice
-  totals: FinanceBalanceSheetCurrencyTotalsBase
+  totals: FinanceBalanceSheetCurrencyTotalsBase | null
   display: FinanceMoneyDisplay
 }
 
@@ -53,7 +53,7 @@ export function WealthSummary({ global, totals, display }: WealthSummaryProps) {
             <GlossaryHelpButton slug="disponible" />
           </div>
           <p className="mt-1 text-sm font-semibold tabular-nums">
-            {amountLabel(totals.available, display)}
+            {amountLabel(totals?.available ?? null, display)}
           </p>
         </div>
         <div className="rounded-2xl bg-muted/50 px-3 py-2">
@@ -62,7 +62,7 @@ export function WealthSummary({ global, totals, display }: WealthSummaryProps) {
             <GlossaryHelpButton slug="por-cobrar" />
           </div>
           <p className="mt-1 text-sm font-semibold tabular-nums">
-            {amountLabel(totals.receivables, display)}
+            {amountLabel(totals?.receivables ?? null, display)}
           </p>
         </div>
       </div>

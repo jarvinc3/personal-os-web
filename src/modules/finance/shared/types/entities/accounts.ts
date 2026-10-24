@@ -4,6 +4,7 @@ import type {
   FinanceCardType,
   FinanceInstitutionType,
 } from "@/src/modules/finance/shared/constants/catalog"
+import type { FinanceLoan, FinanceReceivable } from "./planning.ts"
 
 export type FinanceAnalyticsSummary = {
   baseCurrency: string
@@ -62,6 +63,9 @@ export type FinanceBalanceSheetReconciliation =
   "RECONCILED" | "PENDING" | "NOT_APPLICABLE"
 
 /** One product in the net-worth breakdown; amounts arrive in its own currency. */
+export type FinanceBalanceSheetLineEntity =
+  FinanceAccount | FinanceCard | FinanceLoan | FinanceReceivable
+
 export type FinanceBalanceSheetLine = {
   id: string
   kind: FinanceBalanceSheetLineKind
@@ -78,6 +82,8 @@ export type FinanceBalanceSheetLine = {
   availableCredit: string | null
   dueDate: string | null
   doubtful: boolean
+  /** The product behind the line, in the same shape as its own endpoint. */
+  entity: FinanceBalanceSheetLineEntity | null
 }
 
 export type FinanceBalanceSheetCurrencyTotals = {
@@ -144,7 +150,8 @@ export type FinanceBalanceSheet = {
   global: FinanceBalanceSheetSlice
   institutions: Array<FinanceBalanceSheetSlice & { institutionId: string }>
   cash: FinanceCashSummary
-  breakdown: FinanceBalanceSheetBreakdown
+  /** Absent while the API serving the client predates the per-currency breakdown. */
+  breakdown?: FinanceBalanceSheetBreakdown
 }
 
 export type FinanceAccount = {

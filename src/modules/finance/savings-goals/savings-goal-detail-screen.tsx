@@ -6,6 +6,7 @@ import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/asyn
 import { MissingRecord } from "@/src/modules/finance/shared/components/layout/missing-record"
 import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
 import { FinanceProgressHero } from "@/src/modules/finance/shared/components/layout/progress-hero"
+import { AccountProductRow } from "@/src/modules/finance/shared/components/product-rows"
 import { SavingsGoalContributionSheet } from "@/src/modules/finance/savings-goals/components/savings-goal-contribution-sheet"
 import { SavingsGoalSheet } from "@/src/modules/finance/savings-goals/components/savings-goal-sheet"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
@@ -27,10 +28,8 @@ import {
   formatFinanceMoney,
   parseFinanceMoney,
 } from "@/src/modules/finance/shared/lib/money"
-import {
-  amountRatioPct,
-  formatPlanningDate,
-} from "@/src/modules/finance/shared/lib/planning-lists"
+import { formatCalendarDate } from "@/src/modules/finance/shared/lib/ledger-form"
+import { amountRatioPct } from "@/src/modules/finance/shared/lib/planning-lists"
 import { DeleteRecordDialog } from "@/src/modules/finance/shared/components/delete-record-dialog"
 import { RecordOptionsSheet } from "@/src/modules/finance/shared/components/record-options-sheet"
 import { LoadingView } from "@/src/shared/components/layout/loading-view"
@@ -104,8 +103,10 @@ function SavingsGoalDetailScreenBody({
     (goalsQuery.data ?? []).find((item) => item.id === goalId) ?? null
   const contributions = infiniteListItems(contributionsQuery.data)
   const accounts = accountsQuery.data ?? []
-  const accountName = (id: string | null) =>
-    id ? (accounts.find((account) => account.id === id)?.name ?? null) : null
+  const accountFor = (id: string | null) =>
+    id ? (accounts.find((account) => account.id === id) ?? null) : null
+  const accountName = (id: string | null) => accountFor(id)?.name ?? null
+  const goalAccount = goal ? accountFor(goal.accountId) : null
 
   useRegisterChatContext(
     goal
@@ -129,7 +130,7 @@ function SavingsGoalDetailScreenBody({
     : null
   const surplus = remaining !== null && remaining < 0 ? -remaining : null
   const targetDateCaption = goal?.targetDate
-    ? ` · meta al ${formatPlanningDate(goal.targetDate)}`
+    ? ` · meta al ${formatCalendarDate(goal.targetDate, display.locale)}`
     : ""
   let footnote: string | undefined
   if (surplus !== null) {
@@ -270,12 +271,20 @@ function SavingsGoalDetailScreenBody({
 
       <div className="mx-4 mt-3">
         <SummarySection title="Cuenta" icon={WalletIcon}>
-          <SummaryItem
-            title="Cuenta asociada"
-            icon={WalletIcon}
-            value={accountName(goal.accountId) ?? "Sin cuenta"}
-            isLast={false}
-          />
+          {goalAccount ? (
+            <AccountProductRow
+              account={goalAccount}
+              display={display}
+              variant="compact"
+            />
+          ) : (
+            <SummaryItem
+              title="Cuenta asociada"
+              icon={WalletIcon}
+              value="Sin cuenta"
+              isLast={false}
+            />
+          )}
           <SummaryItem
             title="Apartado"
             icon={PiggyBankIcon}
@@ -339,7 +348,10 @@ function SavingsGoalDetailScreenBody({
                   title={formatFinanceMoney(contribution.amount, money)}
                   description={[
                     contribution.kind === "WITHDRAWAL" ? "Retiro" : "Aporte",
-                    formatPlanningDate(contribution.contributedAt),
+                    formatCalendarDate(
+                      contribution.contributedAt,
+                      display.locale
+                    ),
                     contribution.kind === "WITHDRAWAL"
                       ? accountName(contribution.destinationAccountId)
                       : null,

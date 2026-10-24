@@ -1,5 +1,6 @@
 "use client"
 
+import { formatCalendarDate } from "@/src/modules/finance/shared/lib/ledger-form"
 import { FinanceDateField } from "@/src/modules/finance/shared/components/forms/date-field"
 import {
   FinanceHelpText,
@@ -216,7 +217,7 @@ export function SavingsGoalSheet({
             <FinanceHelpText>
               {goal.isCompleted ? "Completada" : "En curso"}
               {goal.isCompleted && goal.completedAt
-                ? ` · ${formatPlanningDate(goal.completedAt)}`
+                ? ` · ${formatCalendarDate(goal.completedAt, display.locale)}`
                 : ""}
             </FinanceHelpText>
           ) : null}

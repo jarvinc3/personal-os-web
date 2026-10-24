@@ -7,6 +7,12 @@ import { useForm, useWatch } from "react-hook-form"
 
 import { brandPreviewUrl } from "@/src/modules/finance/shared/components/brand-logo"
 import { FinanceFormScreen } from "@/src/modules/finance/shared/components/forms/form-screen"
+import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
+import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
+import {
+  buildInstitutionCardFromCatalog,
+  InstitutionWalletCard,
+} from "@/src/modules/finance/products"
 import { CountryPickerSheet } from "@/src/modules/finance/shared/components/pickers/country-picker"
 import type { FinanceInstitutionType } from "@/src/modules/finance/shared/constants/catalog"
 import {
@@ -19,7 +25,6 @@ import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-er
 import type { FinanceInstitution } from "@/src/modules/finance/shared/types/entities"
 import { InstitutionCatalogPicker } from "@/src/modules/finance/institutions/components/institution-catalog-picker"
 import { InstitutionFormSections } from "@/src/modules/finance/institutions/components/institution-form-sections"
-import { InstitutionPreviewCard } from "@/src/modules/finance/institutions/components/institution-preview-card"
 import {
   InstitutionProductStep,
   type InstitutionProductChoice,
@@ -102,10 +107,33 @@ export function InstitutionFormScreen({
   const institutionCountry = useWatch({ control, name: "country" })
   const institutionDomain = useWatch({ control, name: "domain" })
   const institutionType = useWatch({ control, name: "type" })
+  const { config, formatLocale } = useFinanceEnabled()
+  const display = {
+    currency: config.baseCurrency,
+    showCents: config.display.showCents,
+    compactNumbers: config.display.compactNumbers,
+    locale: formatLocale,
+  }
 
   const previewLogo =
     brandPreviewUrl(institutionDomain) ??
     (institution?.domain === institutionDomain ? institution?.logoUrl : null)
+  const previewCard = buildInstitutionCardFromCatalog({
+    institution: {
+      id: institution?.id ?? "preview",
+      name: institutionName.trim() || "Nueva institución",
+      type: institutionType,
+      shortName: null,
+      domain: institutionDomain || null,
+      color: institutionColor || null,
+      logoUrl: previewLogo,
+      country: institutionCountry || null,
+      isActive: true,
+      isSystem: false,
+    },
+    counts: { accounts: 0 },
+    balanceAmount: formatFinanceMoney("0", display),
+  })
 
   useEffect(() => {
     if (!isEdit) {
@@ -189,8 +217,7 @@ export function InstitutionFormScreen({
       <InstitutionProductStep
         institutionId={createdId}
         name={institutionName}
-        color={institutionColor}
-        logoUrl={previewLogo}
+        card={previewCard}
         onAddProduct={onAddProduct}
         onSkip={onDone}
       />
@@ -206,11 +233,10 @@ export function InstitutionFormScreen({
         isSubmitting={isPending}
         submitDisabled={!canSave}
       >
-        <InstitutionPreviewCard
-          name={institutionName}
-          color={institutionColor}
-          logoUrl={previewLogo}
-          caption="Vista previa"
+        <InstitutionWalletCard
+          card={previewCard}
+          variant="compact"
+          detail="balance"
         />
         <InstitutionFormSections
           form={{ control, errors, onSelectType: selectType }}

@@ -26,6 +26,8 @@ export const FINANCE_SHEET_KEYS = {
   oauthGmailResult: "oauth-gmail-result",
   linkInstitutionMailbox: "link-institution-mailbox-sheet",
   mailbox: "mailbox-sheet",
+  subscription: "subscription-sheet",
+  subscriptionPayment: "subscription-payment-sheet",
   subscriptionUpcoming: "subscription-upcoming-sheet",
   subscriptionAlerts: "subscription-alerts-sheet",
   subscriptionDetected: "subscription-detected-sheet",

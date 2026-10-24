@@ -1,5 +1,6 @@
 "use client"
 
+import { formatCalendarDate } from "@/src/modules/finance/shared/lib/ledger-form"
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
 import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
 import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
@@ -7,7 +8,6 @@ import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-er
 import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
 import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
-import { formatPlanningDate } from "@/src/modules/finance/shared/lib/planning-lists"
 import { useSubscriptionPayments } from "@/src/modules/finance/shared/hooks/use-subscriptions"
 import type { FinanceSubscriptionPaymentSource } from "@/src/modules/finance/shared/types/entities"
 import { BanknoteArrowDownIcon, HandCoinsIcon } from "lucide-react"
@@ -96,7 +96,7 @@ export function SubscriptionPaymentsTab({
               ...display,
               currency: payment.currency,
             })}
-            description={`${formatPlanningDate(payment.paidAt)} · ${PAYMENT_SOURCE_LABEL[payment.source]}`}
+            description={`${formatCalendarDate(payment.paidAt, display.locale)} · ${PAYMENT_SOURCE_LABEL[payment.source]}`}
             href={
               payment.transaction
                 ? APP_ROUTES.app.financeTransaction(payment.transaction.id)

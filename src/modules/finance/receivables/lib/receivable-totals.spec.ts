@@ -23,7 +23,7 @@ function receivable(overrides: Partial<FinanceReceivable>): FinanceReceivable {
 
 describe("receivableTotalsByCurrency", () => {
   it("keeps each currency apart", () => {
-    const totals = receivableTotalsByCurrency([
+    const { totals } = receivableTotalsByCurrency([
       receivable({ id: "r-1", amount: "3000.00" }),
       receivable({ id: "r-2", amount: "50.00", currency: "USD" }),
     ])
@@ -35,7 +35,7 @@ describe("receivableTotalsByCurrency", () => {
   })
 
   it("moves a full payment from pending to collected", () => {
-    const totals = receivableTotalsByCurrency([
+    const { totals } = receivableTotalsByCurrency([
       receivable({ amount: "3000.00", paidAmount: "3000.00", status: "PAID" }),
     ])
 
@@ -43,7 +43,7 @@ describe("receivableTotalsByCurrency", () => {
   })
 
   it("splits a partial payment between both totals", () => {
-    const totals = receivableTotalsByCurrency([
+    const { totals } = receivableTotalsByCurrency([
       receivable({
         amount: "3000.00",
         paidAmount: "1200.00",
@@ -57,7 +57,9 @@ describe("receivableTotalsByCurrency", () => {
   })
 
   it("leaves out currencies without receivables", () => {
-    const totals = receivableTotalsByCurrency([receivable({ currency: "DOP" })])
+    const { totals } = receivableTotalsByCurrency([
+      receivable({ currency: "DOP" }),
+    ])
 
     assert.deepEqual(
       totals.map((entry) => entry.currency),
@@ -66,7 +68,7 @@ describe("receivableTotalsByCurrency", () => {
   })
 
   it("does not let a written off balance count as pending", () => {
-    const totals = receivableTotalsByCurrency([
+    const { totals } = receivableTotalsByCurrency([
       receivable({ amount: "1000.00", writtenOffAmount: "1000.00" }),
     ])
 
@@ -75,21 +77,28 @@ describe("receivableTotalsByCurrency", () => {
 })
 
 describe("receivableTotalsByCurrency con datos rotos", () => {
-  it("no inventa un cero cuando el monto no se puede leer", () => {
-    assert.throws(
-      () =>
-        receivableTotalsByCurrency([receivable({ id: "r-roto", amount: "" })]),
-      /r-roto con amount ilegible/
-    )
+  it("no suma un cobro con monto ilegible ni rompe el resto", () => {
+    const { totals, unreadableIds } = receivableTotalsByCurrency([
+      receivable({ id: "r-roto", amount: "" }),
+      receivable({ id: "r-bien", amount: "100.00" }),
+    ])
+
+    assert.deepEqual(unreadableIds, ["r-roto"])
+    assert.deepEqual(totals, [{ currency: "DOP", pending: 100, collected: 0 }])
   })
 
-  it("avisa cual cobro trae un pago ilegible", () => {
-    assert.throws(
-      () =>
-        receivableTotalsByCurrency([
-          receivable({ id: "r-pago", paidAmount: "n/a" }),
-        ]),
-      /r-pago con paidAmount ilegible/
-    )
+  it("marca el cobro con un pago ilegible", () => {
+    const { unreadableIds } = receivableTotalsByCurrency([
+      receivable({ id: "r-pago", paidAmount: "n/a" }),
+    ])
+
+    assert.deepEqual(unreadableIds, ["r-pago"])
+  })
+
+  it("devuelve un resultado vacío cuando no hay cobros", () => {
+    assert.deepEqual(receivableTotalsByCurrency([]), {
+      totals: [],
+      unreadableIds: [],
+    })
   })
 })

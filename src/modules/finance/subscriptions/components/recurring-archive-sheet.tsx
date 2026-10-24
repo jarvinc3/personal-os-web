@@ -1,11 +1,10 @@
 "use client"
 
-import { BrandLogo } from "@/src/modules/finance/shared/components/brand-logo"
 import { FinanceSegmentedControl } from "@/src/modules/finance/shared/components/forms/form-blocks"
+import { useCategories } from "@/src/modules/finance/shared/hooks/use-categories"
 import { useRecurring } from "@/src/modules/finance/shared/hooks/use-recurring"
 import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
-import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
-import { recurringFrequencyLabel } from "@/src/modules/finance/subscriptions/lib/recurring-display"
+import { RecurringPatternCard } from "@/src/modules/finance/subscriptions/components/recurring-pattern-card"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
 import type {
   FinanceRecurringStatus,
@@ -41,7 +40,9 @@ export function RecurringArchiveSheet({
 }: RecurringArchiveSheetProps) {
   const [tab, setTab] = useState<"CONFIRMED" | "DISMISSED">("CONFIRMED")
   const query = useRecurring(open, tab)
+  const categoriesQuery = useCategories(open)
   const items = infiniteListItems(query.data)
+  const categories = categoriesQuery.data ?? []
 
   return (
     <BottomSheet
@@ -83,28 +84,12 @@ export function RecurringArchiveSheet({
       ) : null}
       <div className="flex flex-col gap-2">
         {items.map((pattern: FinanceRecurringPattern) => (
-          <div
+          <RecurringPatternCard
             key={pattern.id}
-            className="flex items-center gap-3 rounded-2xl border border-border p-3"
-          >
-            <BrandLogo
-              name={pattern.merchantName}
-              logoUrl={pattern.logoUrl}
-              size={32}
-            />
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-medium">
-                {pattern.merchantName}
-              </p>
-              <p className="truncate text-xs text-muted-foreground">
-                {formatFinanceMoney(pattern.avgAmount, {
-                  ...display,
-                  currency: pattern.currency,
-                })}{" "}
-                · {recurringFrequencyLabel(pattern.frequency).toLowerCase()}
-              </p>
-            </div>
-          </div>
+            pattern={pattern}
+            categories={categories}
+            display={display}
+          />
         ))}
       </div>
     </BottomSheet>

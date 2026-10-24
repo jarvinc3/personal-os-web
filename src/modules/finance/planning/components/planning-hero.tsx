@@ -5,7 +5,6 @@ import {
   ArrowDownLeftIcon,
   ArrowRightLeftIcon,
   ArrowUpRightIcon,
-  ChevronDownIcon,
   type LucideIcon,
 } from "lucide-react"
 import Link from "next/link"
@@ -18,7 +17,6 @@ type FinancePlanningHeroProps = {
   sendHref: string
   receiveHref: string
   transferHref: string
-  onCyclePress?: () => void
   className?: string
 }
 
@@ -79,24 +77,18 @@ export function FinancePlanningHero({
   sendHref,
   receiveHref,
   transferHref,
-  onCyclePress,
   className,
 }: FinancePlanningHeroProps) {
   return (
     <div className={cn("relative overflow-hidden", className)}>
       <FinancePlanningGridPattern />
       <div className="relative flex w-full flex-col gap-3 px-4 pt-4 pb-6">
-        <Button
-          variant="ghost"
-          onClick={onCyclePress}
-          className="flex-row items-center justify-center gap-2 self-center active:opacity-70"
-        >
+        <p className="flex items-center justify-center gap-2 self-center">
           <TabIcon className="size-5" style={{ color: tabColor }} />
           <span className="text-base font-medium text-foreground">
             {tabLabel}
           </span>
-          <ChevronDownIcon className="text-muted-foreground" />
-        </Button>
+        </p>
 
         <h2 className="text-center text-4xl font-bold tracking-tight text-foreground tabular-nums">
           {totalAmount}
@@ -118,7 +110,7 @@ export function FinancePlanningHero({
           <FinancePlanningHeroAction
             href={transferHref}
             icon={ArrowRightLeftIcon}
-            label="Transf."
+            label="Transferir"
             className="rounded-none rounded-r-2xl"
           />
         </div>

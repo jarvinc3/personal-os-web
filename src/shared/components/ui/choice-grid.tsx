@@ -103,7 +103,7 @@ export function ChoiceGrid<T extends string>({
                 </span>
                 <span
                   className={cn(
-                    "truncate font-medium",
+                    "min-w-0 leading-tight font-medium",
                     stacked ? "text-xs" : "text-sm"
                   )}
                 >

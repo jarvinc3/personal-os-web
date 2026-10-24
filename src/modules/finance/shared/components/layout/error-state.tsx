@@ -23,7 +23,7 @@ export function FinanceErrorState({
   isRetrying = false,
 }: FinanceErrorStateProps) {
   return (
-    <Empty className="rounded-2xl border border-danger bg-card p-4 text-danger">
+    <Empty className="rounded-2xl border border-danger bg-card p-2 text-danger">
       <EmptyHeader>
         <EmptyMedia variant="icon">
           <TriangleAlertIcon className="text-danger" />

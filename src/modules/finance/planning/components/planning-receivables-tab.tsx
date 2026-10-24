@@ -2,24 +2,12 @@
 
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
 import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
-import { PlanningProgressCard } from "@/src/modules/finance/shared/components/planning-progress-card"
-import { formatCalendarDate } from "@/src/modules/finance/shared/lib/ledger-form"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
-import {
-  formatFinanceMoney,
-  parseFinanceMoney,
-} from "@/src/modules/finance/shared/lib/money"
-import {
-  amountRatioPct,
-  joinPlanningCaption,
-} from "@/src/modules/finance/shared/lib/planning-lists"
-import { FINANCE_RECEIVABLE_STATUS_LABEL } from "@/src/modules/finance/shared/types/entities"
 import type { FinanceReceivable } from "@/src/modules/finance/shared/types/entities"
-import { ReceivableTotalsStrip } from "@/src/modules/finance/receivables"
 import {
-  remainingCaption,
-  withCurrency,
-} from "@/src/modules/finance/planning/lib/planning-captions"
+  ReceivableCard,
+  ReceivableTotalsStrip,
+} from "@/src/modules/finance/receivables"
 import type { useReceivableShareMode } from "@/src/modules/finance/planning/hooks/use-receivable-share-mode"
 import { Button } from "@/src/shared/components/ui/button"
 import {
@@ -80,54 +68,15 @@ export function PlanningReceivablesTab({
         }
       >
         {receivables.map((item) => {
-          const money = withCurrency(display, item.currency)
-          const paid = parseFinanceMoney(item.paidAmount)
-          const total = parseFinanceMoney(item.amount)
-          const tone =
-            item.status === "PAID"
-              ? "success"
-              : item.status === "PARTIAL"
-                ? "info"
-                : "warning"
-          const badgeVariant =
-            item.status === "PAID"
-              ? "success"
-              : item.status === "PARTIAL"
-                ? "info"
-                : "warning"
           const dimmed =
             share.active &&
             shareDebtor !== null &&
             item.debtorName !== shareDebtor
           return (
-            <PlanningProgressCard
+            <ReceivableCard
               key={item.id}
-              title={item.debtorName}
-              description={item.description ?? undefined}
-              icon={HandshakeIcon}
-              tone={tone}
-              badge={{
-                label:
-                  FINANCE_RECEIVABLE_STATUS_LABEL[item.status] ?? item.status,
-                variant: badgeVariant,
-              }}
-              progress={amountRatioPct(item.paidAmount, item.amount)}
-              currentHint="Cobrado"
-              currentLabel={formatFinanceMoney(item.paidAmount, money)}
-              targetHint="Total"
-              targetLabel={formatFinanceMoney(item.amount, money)}
-              caption={joinPlanningCaption(
-                remainingCaption({
-                  current: paid,
-                  target: total,
-                  display: money,
-                  reached: "Cobro completo",
-                  prefix: "Resta",
-                }),
-                item.dueDate
-                  ? `Vence ${formatCalendarDate(item.dueDate, display.locale)}`
-                  : undefined
-              )}
+              source={{ kind: "receivable", receivable: item }}
+              display={display}
               href={
                 share.active
                   ? undefined

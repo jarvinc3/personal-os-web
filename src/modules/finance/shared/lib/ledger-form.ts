@@ -3,6 +3,7 @@ import type {
   FinanceCard,
 } from "@/src/modules/finance/shared/types/entities"
 import { formatHm24Display12h } from "@/src/shared/types/wheels.type"
+import { shortMonthLabel } from "@/src/shared/lib/date-format"
 import { zonedWallTimeToInstant } from "@/src/shared/lib/zoned-time"
 import { splitLedgerTarget } from "./ledger-payloads.ts"
 import { parseFinanceMoney } from "./money.ts"
@@ -179,11 +180,13 @@ export function formatCalendarDate(value: string, locale: string): string {
   if (Number.isNaN(date.getTime())) {
     return value
   }
-  return date.toLocaleDateString(locale, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  })
+  const dayLabel = new Intl.DateTimeFormat(locale, { day: "numeric" }).format(
+    date
+  )
+  const yearLabel = new Intl.DateTimeFormat(locale, { year: "numeric" }).format(
+    date
+  )
+  return `${dayLabel} ${shortMonthLabel(date)} ${yearLabel}`
 }
 
 export function currencyForTarget(

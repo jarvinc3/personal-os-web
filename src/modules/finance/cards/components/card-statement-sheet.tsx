@@ -32,7 +32,10 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
-import { SummaryItem } from "@/src/shared/components/ui/summary"
+import {
+  fromStatementLine,
+  StatementMovementRow,
+} from "@/src/modules/finance/transactions"
 import { Button } from "@/src/shared/components/ui/button"
 import { FormTextField } from "@/src/shared/components/layout/form-blocks"
 import { appToast } from "@/src/shared/lib/app-toast"
@@ -55,10 +58,6 @@ type CardStatementSheetProps = {
   defaultEditing?: boolean
 }
 
-function movementTitle(movement: FinanceCardStatementMovement): string {
-  return movement.merchant ?? movement.description ?? "Movimiento"
-}
-
 function MovementList({
   movements,
   display,
@@ -74,17 +73,10 @@ function MovementList({
   return (
     <div className="rounded-2xl border border-border bg-card">
       {movements.map((movement, index) => (
-        <SummaryItem
+        <StatementMovementRow
           key={movement.id}
-          title={movementTitle(movement)}
-          description={formatCalendarDate(
-            movement.transactionDate,
-            display.locale
-          )}
-          value={formatFinanceMoney(movement.ledgerAmount, {
-            ...display,
-            currency: movement.ledgerCurrency,
-          })}
+          movement={fromStatementLine(movement)}
+          display={display}
           isLast={index === movements.length - 1}
         />
       ))}

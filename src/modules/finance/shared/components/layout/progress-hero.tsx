@@ -89,7 +89,10 @@ export function FinanceProgressHero(props: FinanceProgressHeroProps) {
                   {title}
                 </h1>
                 {badge ? (
-                  <Badge variant={badge.variant} className="shrink-0">
+                  <Badge
+                    variant={badge.variant}
+                    className="shrink-0 border-white/40 bg-white/95 text-foreground shadow-sm"
+                  >
                     {badge.label}
                   </Badge>
                 ) : null}

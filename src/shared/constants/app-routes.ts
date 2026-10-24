@@ -85,6 +85,10 @@ export const APP_ROUTES = {
     financeSubscriptionsCalendar: "/finance/subscriptions/calendar",
     financeSubscription: (subscriptionId: string) =>
       `/finance/subscriptions/${subscriptionId}`,
+    // Galerías de referencia (#272).
+    dev: "/dev",
+    devCardGallery: "/dev/cards",
+    devCardGalleryEntity: (entitySlug: string) => `/dev/cards/${entitySlug}`,
     settingsFinanceCurrencies: "/settings/finance/currencies",
   },
 } as const

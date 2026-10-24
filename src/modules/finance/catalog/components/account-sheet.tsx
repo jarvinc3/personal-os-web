@@ -6,10 +6,9 @@ import {
   InstitutionTrigger,
 } from "@/src/modules/finance/shared/components/pickers/institution-picker"
 import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
-import {
-  FinancePreviewRow,
-  FinanceSegmentedControl,
-} from "@/src/modules/finance/shared/components/forms/form-blocks"
+import { FinanceSegmentedControl } from "@/src/modules/finance/shared/components/forms/form-blocks"
+import { AccountProductRow } from "@/src/modules/finance/shared/components/product-rows"
+import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
 import {
   CATALOG_NONE,
   FINANCE_ACCOUNT_TYPE_LABEL,
@@ -162,11 +161,39 @@ export function AccountSheet({
   const accountColor = useWatch({ control, name: "color" })
   const accountCurrency = useWatch({ control, name: "currency" })
   const accountNumber = useWatch({ control, name: "accountNumber" })
+  const initialBalance = useWatch({ control, name: "initialBalance" })
   const previewLast4 =
     accountNumber.replace(/\D/g, "").slice(-4) || account?.accountNumberLast4
   const institutionId = useWatch({ control, name: "institutionId" })
   const selectedInstitution =
     institutions.find((item) => item.id === institutionId) ?? null
+  const { config, formatLocale } = useFinanceEnabled()
+  const display = {
+    currency: config.baseCurrency,
+    showCents: config.display.showCents,
+    compactNumbers: config.display.compactNumbers,
+    locale: formatLocale,
+  }
+  const previewBalance = isEdit
+    ? (account?.balance ?? "0")
+    : initialBalance.trim() || "0"
+  const previewAccount: FinanceAccount = {
+    id: account?.id ?? "preview",
+    institutionId: selectedInstitution?.id ?? null,
+    institutionName: selectedInstitution?.name ?? null,
+    institutionLogoUrl: selectedInstitution?.logoUrl ?? null,
+    name: accountName.trim() || "Nueva cuenta",
+    type: accountType,
+    currency: accountCurrency,
+    accountNumberLast4: accountType === "CASH" ? null : (previewLast4 ?? null),
+    balance: previewBalance,
+    earmarkedAmount: "0",
+    freeBalance: previewBalance,
+    color: accountColor || null,
+    isActive: true,
+    createdAt: account?.createdAt ?? "",
+    updatedAt: account?.updatedAt ?? "",
+  }
   const { picker, openPicker, closeHandlerFor } = usePicker<
     "none" | "institution" | "currency"
   >("none")
@@ -315,16 +342,7 @@ export function AccountSheet({
         }}
       >
         <SummarySection title="Cuenta" icon={LandmarkIcon}>
-          <FinancePreviewRow
-            icon={LandmarkIcon}
-            title={accountName.trim() || "Nueva cuenta"}
-            description={
-              accountType !== "CASH" && previewLast4
-                ? `${FINANCE_ACCOUNT_TYPE_LABEL[accountType]} · •••• ${previewLast4}`
-                : `${FINANCE_ACCOUNT_TYPE_LABEL[accountType]} · ${accountCurrency}`
-            }
-            accentColor={accountColor || undefined}
-          />
+          <AccountProductRow account={previewAccount} display={display} />
           <Controller
             control={control}
             name="name"

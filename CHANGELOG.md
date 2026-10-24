@@ -2,6 +2,115 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.61.0] - 2026-10-24
+
+### Agregado
+
+- La suscripción se muestra compacta en los pagos próximos, las alertas y el «Restante del mes» del calendario, y el detalle abre con su card completa (#279).
+- La categoría se muestra como chip con su emoji, su color y su importe donde se menciona: Inicio, el resumen y las cards de suscripción y comercio (#280).
+- El estado de cuenta de una tarjeta y los extras de una importación usan la fila canónica del movimiento, con signo y color (#284).
+- Los recurrentes detectados y su archivo, las bandejas de correo, las fuentes, los correos pendientes y el historial de sincronización se muestran con cards y su estado (#286).
+- Patrimonio muestra la card compacta de cada cuenta, tarjeta, préstamo y cobro, con la deuda de la línea y las marcas de descuadre y conciliación (#285).
+- Las vistas previas de los formularios de institución, tarjeta y cuenta son las cards reales con los valores del borrador (#288).
+
+### Cambiado
+
+- La tabla «entidad → card → variantes» y la regla de una sola fuente de verdad viven en `docs/architecture/ui-components.md` y se enlazan desde `AGENTS.md` (#289).
+- La galería `/dev/cards` ya no anuncia borradores que son cards reales y documenta el chip, la compacta de suscripción, las cards de correo y sincronización y el patrimonio.
+
+## [0.60.1] - 2026-10-23
+
+### Cambiado
+
+- Interno: los modelos de card de meta y presupuesto ya no repiten en comentarios lo que su nombre y su tipo dicen. Sin cambio de comportamiento.
+
+## [0.60.0] - 2026-10-23
+
+### Agregado
+
+- La galería `/dev/cards` es permanente, sin el aviso de provisional, con índice `/dev` y la marca «Borrador» en lo que aún no tiene card definitiva (#272).
+- Institución y efectivo se eligen como card compacta, con conteos, saldos por moneda, selección y estados deshabilitados (#274).
+- La cuenta se muestra con su card compacta cuando es un dato de otra entidad y en «Cuenta o tarjeta» (#275).
+- La tarjeta se muestra compacta en «Cuenta o tarjeta», en los vencimientos de Inicio y en el método de pago de una suscripción (#276).
+- El préstamo se muestra compacto en la vinculación de un movimiento y en la cuota próxima de Inicio (#277).
+- Meta, cobro y presupuesto se muestran compactos en la vinculación de movimientos y en los presupuestos en riesgo de Inicio (#278).
+- Card de comercio con el tinte de su categoría, sus tres niveles y la insignia «¿Duplicado?» (#281).
+- El detalle de un movimiento muestra la categoría como chip y las cards compactas de cuenta, tarjeta y comercio; la transferencia muestra origen y destino (#283).
+
+### Cambiado
+
+- Todos los listados de movimientos usan la misma fila; el chat ya no tiene una propia (#282).
+- Meta, cobro y presupuesto se pintan con su componente y las cards comparten la superficie decorativa, sin cambios visuales (#273).
+
+## [0.59.0] - 2026-10-23
+
+### Agregado
+
+- Galería provisional de cards en `/dev/cards` con todas las entidades del rediseño, sus variantes reales y datos de ejemplo; se abre desde un atajo en Inicio y se retira en #290 (#272).
+- Las cards de institución, cuenta, tarjeta, préstamo, meta, cobro, presupuesto, suscripción, categoría y movimiento aceptan las variantes compacta e inline; sin la prop se ven como antes (#272).
+
+## [0.58.9] - 2026-10-23
+
+### Corregido
+
+- Registro e inicio de sesión piden 6 caracteres como mínimo, la misma política que Supabase, en vez de 10; el aviso del formulario y el mensaje de error lo dicen igual (#247).
+
+## [0.58.8] - 2026-10-22
+
+### Cambiado
+
+- Interno: la insignia de una suscripción se decide en un solo lugar (`subscriptionStatusBadge`), compartida por la tarjeta y el detalle, y el botón de editar depende solo del setter de la hoja (#245). Sin cambio de comportamiento.
+
+## [0.58.7] - 2026-10-22
+
+### Corregido
+
+- Las fechas de Finanzas usan la abreviatura española de la app (`18 sep 2026`) en vez de la del ICU (`sept`) o el ISO; el detalle de un cobro, una meta o una suscripción ya no muestra `2026-11-20` (#245).
+- El detalle de un movimiento muestra el comercio tal como se escribió, aunque exista un nombre canónico (#245).
+- Las etiquetas de las celdas de elección y del menú de acciones caben completas en 390 px: «Arrastra sobrante y déficit», «Semestral», «Transferir», «Préstamo» y «Actualizar» dejan de recortarse (#245).
+- La dona del calendario de suscripciones muestra el total completo en vez de truncarlo (#245).
+- La insignia de estado de las cabeceras de color se lee sobre el fondo (#245).
+- Editar una suscripción abre con el selector de fecha cerrado (#245).
+- El formulario de alta de un movimiento mantiene `?type` en la URL acorde con el tipo elegido (#245).
+
+## [0.58.6] - 2026-10-22
+
+### Corregido
+
+- La hora de un movimiento se muestra en la zona horaria del perfil en la lista, el detalle y el formulario, con la misma hora y el mismo día local cerca de la medianoche (#240).
+- La cabecera de Planificación resume siempre la pestaña activa y la pestaña activa se lee con el contraste del tema, sin blanco forzado sobre el indicador claro (#241).
+- Una suscripción activa con la fecha de cobro pasada se marca «Vencida» en la lista y en el detalle, y la hoja de próximos cobros aclara qué revisar cuando no hay cobros futuros (#242).
+- Pausar una suscripción pide confirmación con el mismo diálogo que cancelar; reanudar sigue siendo inmediato (#243).
+- El detalle de un presupuesto pinta su cabecera con los datos que la lista ya trajo y consulta el detalle y sus movimientos en paralelo (#244).
+
+### Cambiado
+
+- Las hojas de crear y editar suscripción y la de registrar un pago se abren por la URL, no solo con estado local, igual que el resto de hojas de Finanzas (#243).
+
+## [0.58.5] - 2026-10-22
+
+### Cambiado
+
+- Interno: Productos y Patrimonio comparten el aviso de «sin desglose por moneda» y el texto de la tarjeta de un cobro se arma antes del JSX; se retira un helper sin uso (#238). Sin cambio de comportamiento.
+
+## [0.58.4] - 2026-10-22
+
+### Corregido
+
+- Productos, Patrimonio y la pestaña Cobros de Planificación ya no caen en la pantalla de error cuando la respuesta del API viene incompleta: si falta el desglose por moneda, la vista muestra el balance disponible y un aviso; un cobro con un monto ilegible se marca como no disponible y no suma a los totales, sin tumbar los demás (#238).
+- La cifra de gastado de un presupuesto coincide con la lista de sus movimientos porque ahora el servidor la suma al leer, no la toma de un contador guardado (back#172, web#239).
+
+### Cambiado
+
+- Next.js sube a 16.4.2 y `eslint-config-next` a la misma versión; la auditoría de producción deja de reportar avisos críticos y altos de Next.js (#236).
+
+## [0.58.3] - 2026-10-22
+
+### Corregido
+
+- Los errores de inicio de sesión y registro se muestran en español según el código de Supabase; las credenciales inválidas no revelan si falló el correo o la contraseña, y un código sin traducir deja el mensaje de respaldo de la operación (#247).
+- Registro e inicio de sesión exigen la misma política que Supabase —10 caracteres con mayúscula, minúscula y número— antes de enviar el formulario, en vez de 8 caracteres sin minúscula (#247).
+
 ## [0.58.2] - 2026-10-22
 
 ### Agregado

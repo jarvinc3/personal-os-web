@@ -161,50 +161,6 @@ export function FinanceHelpText({ children }: FinanceHelpTextProps) {
   return <p className="text-xs text-muted-foreground">{children}</p>
 }
 
-type FinancePreviewRowProps = {
-  icon?: LucideIcon
-  title: string
-  description?: string
-  accentColor?: string
-}
-
-export function FinancePreviewRow({
-  icon: Icon,
-  title,
-  description,
-  accentColor,
-}: FinancePreviewRowProps) {
-  return (
-    <div className="flex items-center gap-3 rounded-xl border border-border/80 bg-muted/40 px-3 py-2.5">
-      {Icon ? (
-        <span
-          className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted"
-          style={
-            accentColor
-              ? {
-                  backgroundColor: `color-mix(in srgb, ${accentColor} 18%, transparent)`,
-                }
-              : undefined
-          }
-        >
-          <Icon
-            className="size-4"
-            style={accentColor ? { color: accentColor } : undefined}
-          />
-        </span>
-      ) : null}
-      <span className="min-w-0">
-        <span className="block truncate text-sm font-medium">{title}</span>
-        {description ? (
-          <span className="block truncate text-xs text-muted-foreground">
-            {description}
-          </span>
-        ) : null}
-      </span>
-    </div>
-  )
-}
-
 type FinanceSuggestionRowProps = {
   children: ReactNode
   actionLabel?: string

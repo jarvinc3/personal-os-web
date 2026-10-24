@@ -48,7 +48,8 @@ import {
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
 import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
 import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
-import { SummaryItem, SummarySection } from "@/src/shared/components/ui/summary"
+import { SyncCard } from "@/src/modules/finance/sync/components/sync-card"
+import { SummarySection } from "@/src/shared/components/ui/summary"
 import { InfiniteListSentinel } from "@/src/shared/components/ui/infinite-list-sentinel"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
@@ -83,7 +84,6 @@ function pendingRowValue(
 type PendingEmailRowProps = {
   message: FinancePendingEmailMessage
   display: FinanceMoneyDisplay
-  isLast: boolean
   isRetrying: boolean
   onPress: () => void
   onRetry: () => void
@@ -92,20 +92,20 @@ type PendingEmailRowProps = {
 function PendingEmailRow({
   message,
   display,
-  isLast,
   isRetrying,
   onPress,
   onRetry,
 }: PendingEmailRowProps) {
   const title = message.extractedPayload?.merchant ?? message.gmailMessageId
   return (
-    <SummaryItem
-      title={title}
-      value={pendingRowValue(message, display)}
+    <SyncCard
       icon={InboxIcon}
+      title={title}
+      subtitle={message.reason ?? pendingRowValue(message, display)}
+      status={message.reason ? "error" : "pending"}
+      value={message.lastFourHint ? `••${message.lastFourHint}` : undefined}
       onPress={onPress}
-      isLast={isLast}
-      trailing={
+      action={
         <Button
           type="button"
           variant="outline"
@@ -373,12 +373,11 @@ export function FinanceMailboxesView({ enabled }: { enabled: boolean }) {
             </Empty>
           }
         >
-          {pending.map((message, index) => (
+          {pending.map((message) => (
             <PendingEmailRow
               key={message.id}
               message={message}
               display={display}
-              isLast={index === pending.length - 1}
               isRetrying={retryingPendingId === message.id}
               onPress={() => setOpenAssignSheet(true, message.id)}
               onRetry={() => void retryPending(message)}

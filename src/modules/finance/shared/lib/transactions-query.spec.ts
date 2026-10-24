@@ -14,6 +14,7 @@ import {
   timelineMonthQuery,
   timelineMonthQueryKey,
   transactionInstrumentLabel,
+  toUserWallClock,
   transactionsFromPayload,
   transferDirectionLabel,
   transferSignFromInstrument,
@@ -87,6 +88,44 @@ describe("transactionsFromPayload", () => {
       data: { items: [{ id: "hidden" }], nextCursor: "x" },
     })
     assert.deepEqual(nestedData.items, [])
+  })
+})
+
+describe("toUserWallClock", () => {
+  const transaction = {
+    id: "t1",
+    transactionDate: "2026-10-22T12:46:00.000Z",
+    legs: [{ id: "leg-1", transactionDate: "2026-10-22T12:46:00.000Z" }],
+  } as unknown as FinanceTransaction
+
+  it("shows the stored instant as the wall clock of the user's zone", () => {
+    const converted = toUserWallClock(transaction, "America/Santo_Domingo")
+
+    assert.equal(converted.transactionDate, "2026-10-22T08:46")
+    assert.equal(converted.legs?.[0]?.transactionDate, "2026-10-22T08:46")
+  })
+
+  it("keeps the day the user reads when the instant is near midnight", () => {
+    const lateNight = {
+      ...transaction,
+      transactionDate: "2026-10-23T02:30:00.000Z",
+    } as unknown as FinanceTransaction
+
+    const converted = toUserWallClock(lateNight, "America/Santo_Domingo")
+
+    assert.equal(converted.transactionDate, "2026-10-22T22:30")
+  })
+
+  it("keeps a transaction without legs working", () => {
+    const withoutLegs = {
+      id: "t2",
+      transactionDate: "2026-10-22T12:46:00.000Z",
+    } as unknown as FinanceTransaction
+
+    const converted = toUserWallClock(withoutLegs, "America/Santo_Domingo")
+
+    assert.equal(converted.transactionDate, "2026-10-22T08:46")
+    assert.equal(converted.legs, undefined)
   })
 })
 
@@ -180,11 +219,7 @@ describe("visibleTransactionTotals", () => {
 
 describe("formatTransactionDate", () => {
   it("keeps the calendar day of an UTC midnight ISO string", () => {
-    const expected = new Date(2026, 8, 18).toLocaleDateString("es", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    })
+    const expected = "18 sep 2026"
     assert.equal(
       formatTransactionDate("2026-09-18T00:00:00.000Z", "es"),
       expected

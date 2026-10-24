@@ -25,17 +25,15 @@ import {
   financeLoadErrorMessage,
 } from "@/src/modules/finance/shared/lib/finance-error"
 import { showUndoToast } from "@/src/modules/finance/shared/components/undo-toast"
-import { formatCalendarDate } from "@/src/modules/finance/shared/lib/ledger-form"
 import {
   formatFinanceMoney,
   parseFinanceMoney,
 } from "@/src/modules/finance/shared/lib/money"
 import { joinPlanningCaption } from "@/src/modules/finance/shared/lib/planning-lists"
+import { TransactionMovementRow } from "@/src/modules/finance/transactions"
 import {
   FINANCE_BUDGET_PERIOD_LABEL,
-  FINANCE_TRANSACTION_STATUS_LABEL,
   type FinanceBudget,
-  type FinanceTransactionStatus,
 } from "@/src/modules/finance/shared/types/entities"
 import { DeleteRecordDialog } from "@/src/modules/finance/shared/components/delete-record-dialog"
 import { RecordOptionsSheet } from "@/src/modules/finance/shared/components/record-options-sheet"
@@ -48,7 +46,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
-import { SummaryItem, SummarySection } from "@/src/shared/components/ui/summary"
+import { SummarySection } from "@/src/shared/components/ui/summary"
 import { InfiniteListSentinel } from "@/src/shared/components/ui/infinite-list-sentinel"
 import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
@@ -65,8 +63,6 @@ import {
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useMemo, useState } from "react"
-
-const CONFIRMED_STATUS: FinanceTransactionStatus = "CONFIRMED"
 
 function budgetTone(
   pct: number | null,
@@ -109,16 +105,6 @@ function budgetTitle(budget: FinanceBudget): string {
     return budget.name ?? "Sin categoría"
   }
   return list.map((entry) => entry.name).join(", ")
-}
-
-/** Only a status other than confirmed is worth a caption on a movement. */
-function movementStatusCaption(
-  status: FinanceTransactionStatus
-): string | undefined {
-  if (status === CONFIRMED_STATUS) {
-    return undefined
-  }
-  return FINANCE_TRANSACTION_STATUS_LABEL[status]
 }
 
 type FinanceBudgetDetailProps = {
@@ -335,21 +321,13 @@ function BudgetDetailScreenBody({ budgetId }: FinanceBudgetDetailProps) {
               </Empty>
             }
           >
-            {movements.map((movement, index) => (
-              <SummaryItem
+            {movements.map((movement) => (
+              <TransactionMovementRow
                 key={movement.id}
-                title={
-                  movement.merchant ?? movement.description ?? "Movimiento"
-                }
-                description={joinPlanningCaption(
-                  formatCalendarDate(movement.transactionDate, display.locale),
-                  movementStatusCaption(movement.status)
-                )}
-                value={formatFinanceMoney(movement.amount, {
-                  ...display,
-                  currency: movement.currency,
-                })}
-                isLast={index === movements.length - 1}
+                transaction={movement}
+                categories={categories}
+                display={display}
+                href={APP_ROUTES.app.financeTransaction(movement.id)}
               />
             ))}
           </AsyncRegion>

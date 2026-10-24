@@ -12,6 +12,10 @@ Antes de guardar un gasto, `assessExpenseBalance` compara el monto con el saldo 
 
 Si la categoría tiene un presupuesto vigente en la fecha del movimiento y el gasto supera lo disponible, `budgetOverageForExpense` calcula el exceso y un `AlertDialog` pide confirmación antes de guardar. Cancelar conserva el formulario; registrar igual continúa. Solo compara importes en la moneda base, que es la de los presupuestos.
 
+Las fechas se muestran con la abreviatura corta en español de la app (`18 sep 2026`), no con la forma del ICU (`sept`) ni en ISO. El detalle muestra el comercio tal como se escribió, aunque exista un nombre canónico. La URL del formulario de alta refleja el tipo elegido (`?type=DEBIT|CREDIT`).
+
+La hora de un movimiento se lee en la zona horaria del perfil, también si el navegador está en otra zona: la lista, el detalle y el formulario muestran la misma hora del día y el mismo día local cerca de la medianoche (`toUserWallClock` sobre el instante que guarda el API).
+
 La lista de Movimientos suma a cada mes una sección **Programados** con la próxima cuota de cada préstamo y los cobros futuros de las suscripciones. Son avisos: no cambian los saldos ni los totales del mes, y desaparecen cuando el pago registra la siguiente fecha. Una suscripción sin método de pago se distingue en la fila.
 
 Un movimiento `REVERSED` lleva la etiqueta “Revertido” en la lista y el detalle, sin sumar a los totales; si tiene un movimiento vinculado, el detalle enlaza al original.

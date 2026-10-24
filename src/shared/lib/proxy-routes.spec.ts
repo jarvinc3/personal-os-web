@@ -44,6 +44,9 @@ describe("isProtectedAppPath", () => {
     assert.equal(isProtectedAppPath("/agenda"), true)
     assert.equal(isProtectedAppPath("/projects"), true)
     assert.equal(isProtectedAppPath("/health"), true)
+    assert.equal(isProtectedAppPath("/dev"), true)
+    assert.equal(isProtectedAppPath("/dev/cards"), true)
+    assert.equal(isProtectedAppPath("/dev/cards/cuenta"), true)
   })
 
   it("ignores the auth routes", () => {

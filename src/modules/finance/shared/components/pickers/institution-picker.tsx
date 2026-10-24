@@ -1,12 +1,19 @@
 "use client"
 
 import { BrandLogo } from "@/src/modules/finance/shared/components/brand-logo"
+import { InstitutionWalletCard } from "@/src/modules/finance/products/components/institution-wallet-card"
+import {
+  buildInstitutionCardFromCatalog,
+  buildPlainInstitutionCard,
+} from "@/src/modules/finance/products/lib/institution-card"
 import { selectableBankInstitutions } from "@/src/modules/finance/shared/lib/cash"
 import { CATALOG_NONE } from "@/src/modules/finance/shared/constants/catalog"
 import type { FinanceInstitution } from "@/src/modules/finance/shared/types/entities"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
 import { ChevronDownIcon } from "lucide-react"
+
+const CATALOG_NONE_COLOR = "#334155"
 
 type InstitutionTriggerProps = {
   institution: FinanceInstitution | null
@@ -71,60 +78,36 @@ export function InstitutionPickerSheet({
 
   return (
     <BottomSheet open={open} onOpenChange={onOpenChange} title="Institución">
-      {noneLabel ? (
-        <InstitutionRow
-          name={noneLabel}
-          logoUrl={null}
-          selected={value === CATALOG_NONE}
-          onPress={() => choose(CATALOG_NONE)}
-        />
-      ) : null}
-      {selectable.length === 0 ? (
-        <p className="text-sm text-muted-foreground">
-          No hay instituciones en el catálogo.
-        </p>
-      ) : (
-        <div className="flex flex-col gap-2">
-          {selectable.map((institution) => (
-            <InstitutionRow
+      <div className="flex flex-col gap-2">
+        {noneLabel ? (
+          <InstitutionWalletCard
+            card={buildPlainInstitutionCard({
+              name: noneLabel,
+              color: CATALOG_NONE_COLOR,
+            })}
+            variant="compact"
+            detail="none"
+            selected={value === CATALOG_NONE}
+            onPress={() => choose(CATALOG_NONE)}
+          />
+        ) : null}
+        {selectable.length === 0 ? (
+          <p className="text-sm text-muted-foreground">
+            No hay instituciones en el catálogo.
+          </p>
+        ) : (
+          selectable.map((institution) => (
+            <InstitutionWalletCard
               key={institution.id}
-              name={institution.name}
-              logoUrl={institution.logoUrl}
+              card={buildInstitutionCardFromCatalog({ institution })}
+              variant="compact"
+              detail="none"
               selected={value === institution.id}
               onPress={() => choose(institution.id)}
             />
-          ))}
-        </div>
-      )}
+          ))
+        )}
+      </div>
     </BottomSheet>
-  )
-}
-
-function InstitutionRow({
-  name,
-  logoUrl,
-  selected,
-  onPress,
-}: {
-  name: string
-  logoUrl: string | null
-  selected: boolean
-  onPress: () => void
-}) {
-  return (
-    <button
-      type="button"
-      className={cn(
-        "flex w-full items-center gap-3 rounded-2xl border border-border bg-card px-3 py-3 text-left",
-        PRESSABLE_CLASS,
-        selected && "border-primary"
-      )}
-      onClick={onPress}
-    >
-      <BrandLogo name={name} logoUrl={logoUrl} size={28} />
-      <span className="min-w-0 flex-1 truncate text-sm font-medium">
-        {name}
-      </span>
-    </button>
   )
 }

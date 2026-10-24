@@ -7,7 +7,7 @@ import {
   formatFinanceDateTimeLabel,
   formatFinanceMoney,
 } from "@/src/modules/finance"
-import { SummaryItem } from "@/src/shared/components/ui/summary"
+import { MovementRow } from "@/src/modules/finance"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { cn } from "@/src/shared/lib/utils"
 import {
@@ -43,15 +43,13 @@ function rowIcon(snapshot: ChatTransactionSnapshot): ReactNode {
   }
 }
 
-type ChatTransactionRowProps = {
+type ChatMovementRowProps = {
   snapshot: ChatTransactionSnapshot
   isLast: boolean
 }
 
-export function ChatTransactionRow({
-  snapshot,
-  isLast,
-}: ChatTransactionRowProps) {
+/** Adaptador del chat a la fila canónica de movimiento (#282). */
+export function ChatMovementRow({ snapshot, isLast }: ChatMovementRowProps) {
   const locale = useFormatLocale()
   const sign = movementSign(snapshot)
   const instrument = snapshot.cardName ?? snapshot.accountName
@@ -63,7 +61,7 @@ export function ChatTransactionRow({
     .join(" · ")
 
   return (
-    <SummaryItem
+    <MovementRow
       title={
         snapshot.merchant ?? snapshot.description ?? instrument ?? "Movimiento"
       }

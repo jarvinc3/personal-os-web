@@ -6,28 +6,14 @@ import {
   startOfDay,
 } from "date-fns"
 
-import type { FinanceSubscription } from "@/src/modules/finance/shared/types/entities"
-
-const MONTH_SHORT = [
-  "ene",
-  "feb",
-  "mar",
-  "abr",
-  "may",
-  "jun",
-  "jul",
-  "ago",
-  "sep",
-  "oct",
-  "nov",
-  "dic",
-] as const
+import { shortMonthLabel } from "@/src/shared/lib/date-format"
+import type { FinanceBillingCycle } from "@/src/modules/finance/shared/types/entities"
+import type { SubscriptionCardSource } from "./subscription-card-source.ts"
 
 /** `mar 2023`, the month and year a subscription started. */
 export function billingMonthLabel(value: Date | string): string {
   const date = typeof value === "string" ? parseISO(value) : value
-  const month = MONTH_SHORT[date.getMonth()]
-  return `${month} ${date.getFullYear()}`
+  return `${shortMonthLabel(date)} ${date.getFullYear()}`
 }
 
 export type SubscriptionCycleProgress = {
@@ -45,8 +31,7 @@ export type SubscriptionCycleProgress = {
 /** `17 oct`, the short date a card shows outside the warning window. */
 export function shortBillingDate(value: Date | string): string {
   const date = typeof value === "string" ? parseISO(value) : value
-  const month = MONTH_SHORT[date.getMonth()]
-  return `${date.getDate()} ${month}`
+  return `${date.getDate()} ${shortMonthLabel(date)}`
 }
 
 /**
@@ -76,10 +61,14 @@ export function cycleProgress(input: {
   }
 }
 
-function cycleStart(subscription: FinanceSubscription): Date {
-  const next = startOfDay(parseISO(subscription.nextBillingDate))
-  const interval = subscription.billingInterval
-  switch (subscription.billingCycle) {
+function cycleStart(input: {
+  billingCycle: FinanceBillingCycle
+  billingInterval: number
+  nextBillingDate: string
+}): Date {
+  const next = startOfDay(parseISO(input.nextBillingDate))
+  const interval = input.billingInterval
+  switch (input.billingCycle) {
     case "WEEKLY":
       return addDays(next, -7 * interval)
     case "MONTHLY":
@@ -95,14 +84,22 @@ function cycleStart(subscription: FinanceSubscription): Date {
 
 /**
  * Cycle progress of a subscription. The anchor is not used so a month-end
- * cycle still measures the real days of that month.
+ * cycle still measures the real days of that month. A charge of the upcoming
+ * endpoint has no cycle to measure, so it has no progress.
  */
 export function subscriptionCycleProgress(
-  subscription: FinanceSubscription,
+  subscription: SubscriptionCardSource,
   now: Date
-): SubscriptionCycleProgress {
+): SubscriptionCycleProgress | null {
+  if (subscription.billingCycle === null) {
+    return null
+  }
   return cycleProgress({
-    start: cycleStart(subscription),
+    start: cycleStart({
+      billingCycle: subscription.billingCycle,
+      billingInterval: subscription.billingInterval,
+      nextBillingDate: subscription.nextBillingDate,
+    }),
     next: parseISO(subscription.nextBillingDate),
     today: now,
   })
@@ -118,6 +115,18 @@ export type BillingLabel = {
  * Copy and highlight of a charge date: `Hoy`, `Mañana` or `en N días` inside
  * the window, the short date outside it.
  */
+/** An active subscription whose next charge date already passed unpaid. */
+export function subscriptionIsOverdue(
+  subscription: Pick<SubscriptionCardSource, "status" | "nextBillingDate">,
+  today: Date
+): boolean {
+  if (subscription.status !== "ACTIVE") {
+    return false
+  }
+  const next = startOfDay(parseISO(subscription.nextBillingDate))
+  return differenceInCalendarDays(next, startOfDay(today)) < 0
+}
+
 export function billingLabel(input: {
   nextDate: Date | string
   today: Date

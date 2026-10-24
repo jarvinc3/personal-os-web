@@ -46,6 +46,7 @@ import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money
 import { ExpandableFab } from "@/src/shared/components/layout/expandable-fab"
 import { SettingsSection } from "@/src/shared/components/layout/settings-section"
 import { Button } from "@/src/shared/components/ui/button"
+import { MissingBreakdownNotice } from "@/src/modules/finance/shared/components/layout/missing-breakdown-notice"
 import {
   Empty,
   EmptyContent,
@@ -228,8 +229,12 @@ export function FinanceProductsList({
         netWorth={global?.netWorth ?? null}
         netWorthComplete={global?.status === "COMPLETE"}
         netWorthHref={APP_ROUTES.app.financeWealth}
-        currencyTotals={balanceSheetQuery.data?.breakdown.byCurrency ?? []}
+        currencyTotals={balanceSheetQuery.data?.breakdown?.byCurrency ?? []}
       />
+
+      {balanceSheetQuery.data && !balanceSheetQuery.data.breakdown ? (
+        <MissingBreakdownNotice />
+      ) : null}
 
       <IrregularitiesSection
         drifts={integrityQuery.data?.drifts ?? []}

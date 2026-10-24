@@ -1,25 +1,35 @@
 "use client"
 
 import { BrandLogo } from "@/src/modules/finance/shared/components/brand-logo"
-import type { InstitutionStackCounts } from "@/src/modules/finance/shared/lib/institution-stack"
-import type { InstitutionCardModel } from "@/src/modules/finance/products/lib/institution-card"
+import {
+  type InstitutionCardCounts,
+  type InstitutionCardModel,
+} from "@/src/modules/finance/products/lib/institution-card"
 import {
   classifyWalletGesture,
   isWalletDragOnly,
   walletGestureDelta,
 } from "@/src/modules/finance/shared/lib/wallet-gesture"
-import { PendingSurface } from "@/src/shared/components/ui/navigation-pending"
+import { EntitySurface } from "@/src/modules/finance/shared/components/entity-surface"
+import {
+  LinkPendingOverlay,
+  PendingSurface,
+} from "@/src/shared/components/ui/navigation-pending"
 import { cn } from "@/src/shared/lib/utils"
 import { motion } from "framer-motion"
 import {
   BanknoteIcon,
   Building2Icon,
+  CheckIcon,
   CreditCardIcon,
   HandCoinsIcon,
   LandmarkIcon,
   type LucideIcon,
 } from "lucide-react"
+import Link from "next/link"
 import { useRef } from "react"
+
+export type InstitutionWalletDetail = "none" | "counts" | "balance"
 
 type InstitutionWalletCardProps = {
   card: InstitutionCardModel
@@ -28,20 +38,33 @@ type InstitutionWalletCardProps = {
   onDragActiveChange?: (dragging: boolean) => void
   onCycle?: (delta: number) => void
   onPress?: () => void
+  href?: string
+  /** Ring and check mark while the card is picked in a selector. */
+  selected?: boolean
+  disabled?: boolean
+  /** Variante de la card; la galería /dev/cards la pinta (#272). */
+  variant?: "full" | "compact"
+  /** What the compact card shows under the name. Ignored by `full`. */
+  detail?: InstitutionWalletDetail
 }
 
 export function ProductCountItem({
   icon: Icon,
   count,
   label,
+  compact = false,
 }: {
   icon: LucideIcon
   count: number
   label: string
+  compact?: boolean
 }) {
   return (
     <span className="inline-flex items-center gap-1.5" title={label}>
-      <Icon className="size-5" aria-hidden />
+      <Icon
+        className={compact ? "size-3.5 shrink-0" : "size-5 shrink-0"}
+        aria-hidden
+      />
       <span>{count}</span>
     </span>
   )
@@ -75,29 +98,85 @@ function IrregularityMarks({
 
 function InstitutionProductCounts({
   counts,
+  compact = false,
 }: {
-  counts: InstitutionStackCounts
+  counts: InstitutionCardCounts
+  compact?: boolean
 }) {
+  const items = [
+    {
+      key: "accounts",
+      icon: LandmarkIcon,
+      count: counts.accounts,
+      label: "Cuentas",
+    },
+    ...(counts.cards === undefined
+      ? []
+      : [
+          {
+            key: "cards",
+            icon: CreditCardIcon,
+            count: counts.cards,
+            label: "Tarjetas",
+          },
+        ]),
+    ...(counts.loans === undefined
+      ? []
+      : [
+          {
+            key: "loans",
+            icon: HandCoinsIcon,
+            count: counts.loans,
+            label: "Préstamos",
+          },
+        ]),
+  ]
+
   return (
-    <div className="flex items-center gap-3 text-base font-semibold text-white tabular-nums">
-      <ProductCountItem
-        icon={LandmarkIcon}
-        count={counts.accounts}
-        label="Cuentas"
-      />
-      <span className="h-4 w-px bg-white/40" />
-      <ProductCountItem
-        icon={CreditCardIcon}
-        count={counts.cards}
-        label="Tarjetas"
-      />
-      <span className="h-4 w-px bg-white/40" />
-      <ProductCountItem
-        icon={HandCoinsIcon}
-        count={counts.loans}
-        label="Préstamos"
-      />
+    <div
+      className={cn(
+        "flex items-center font-semibold text-white tabular-nums",
+        compact ? "gap-2 text-xs" : "gap-3 text-base"
+      )}
+    >
+      {items.map((item, index) => (
+        <span key={item.key} className="flex items-center gap-2">
+          {index > 0 ? (
+            <span className={cn("w-px bg-white/40", compact ? "h-3" : "h-4")} />
+          ) : null}
+          <ProductCountItem
+            icon={item.icon}
+            count={item.count}
+            label={item.label}
+            compact={compact}
+          />
+        </span>
+      ))}
     </div>
+  )
+}
+
+function InstitutionCompactBalance({ card }: { card: InstitutionCardModel }) {
+  const [first] = card.balanceLines
+  if (!first) {
+    return (
+      <span className="shrink-0 text-right font-mono text-sm font-semibold text-white tabular-nums">
+        {card.balanceAmount}
+      </span>
+    )
+  }
+
+  const extra = card.balanceLines.length - 1
+  return (
+    <span className="flex shrink-0 items-baseline gap-1 text-sm font-semibold text-white tabular-nums">
+      <span className="text-[10px] font-medium text-white/60">
+        {first.currency}
+      </span>
+      <span className="font-mono">{first.amount}</span>
+      {extra > 0 ? (
+        <span className="text-[10px] font-medium text-white/60">+{extra}</span>
+      ) : null}
+    </span>
   )
 }
 
@@ -108,11 +187,16 @@ export function InstitutionWalletCard({
   onDragActiveChange,
   onCycle,
   onPress,
+  href,
+  selected = false,
+  disabled = false,
+  variant = "full",
+  detail = "balance",
 }: InstitutionWalletCardProps) {
   const dropClickRef = useRef(false)
-  const KindIcon =
-    card.item.kind === "institution" ? Building2Icon : CreditCardIcon
-  const canDrag = isFront && !isPending
+  const isCash = card.isCash
+  const KindIcon = card.kind === "institution" ? Building2Icon : CreditCardIcon
+  const canDrag = variant === "full" && isFront && !isPending
 
   function onDragEnd(offsetX: number) {
     const gesture = classifyWalletGesture(offsetX)
@@ -135,6 +219,104 @@ export function InstitutionWalletCard({
       return
     }
     onPress?.()
+  }
+
+  // Variante compacta de la card; la galería /dev/cards la pinta (#272).
+  if (variant === "compact") {
+    const compactClassName = cn(
+      "relative flex w-full cursor-pointer items-center gap-3 overflow-hidden rounded-2xl p-3 text-left text-white outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
+      disabled && "cursor-not-allowed opacity-60",
+      selected && "ring-2 ring-primary ring-offset-2 ring-offset-background",
+      isPending && "pointer-events-none"
+    )
+    const compactContent = (
+      <>
+        <EntitySurface shape="hexagons" size="sm" />
+
+        {isCash ? (
+          <span
+            aria-hidden
+            className="relative z-10 inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-white text-emerald-700"
+          >
+            <BanknoteIcon className="size-5" strokeWidth={2.25} />
+          </span>
+        ) : (
+          <BrandLogo
+            name={card.name || card.monogram}
+            logoUrl={card.logoUrl}
+            size={36}
+            className="relative z-10 shrink-0"
+          />
+        )}
+
+        <span className="relative z-10 flex min-w-0 flex-1 flex-col gap-0.5">
+          <span className="truncate text-sm font-semibold">{card.name}</span>
+          {detail === "counts" && card.counts ? (
+            <InstitutionProductCounts counts={card.counts} compact />
+          ) : null}
+          {detail === "balance" ? (
+            <span className="truncate text-xs text-white/70">
+              {card.balanceLabel}
+            </span>
+          ) : null}
+        </span>
+
+        {detail === "balance" ? (
+          <InstitutionCompactBalance card={card} />
+        ) : null}
+
+        <span className="relative z-10 flex shrink-0 items-center gap-1.5">
+          <IrregularityMarks irregularities={card.irregularities} />
+          {selected ? (
+            <span className="inline-flex size-5 items-center justify-center rounded-full bg-white text-emerald-700">
+              <CheckIcon className="size-3.5" aria-hidden />
+            </span>
+          ) : (
+            <KindIcon
+              className="size-4 shrink-0"
+              style={{ color: "rgba(255,255,255,0.6)" }}
+              aria-hidden
+            />
+          )}
+        </span>
+
+        {isPending ? (
+          <PendingSurface
+            className="rounded-2xl bg-black/45"
+            spinnerClassName="size-6 text-white"
+          />
+        ) : null}
+      </>
+    )
+
+    if (href && !disabled) {
+      return (
+        <Link
+          href={href}
+          aria-label={`Abrir ${card.name}`}
+          className={compactClassName}
+          style={{ backgroundColor: card.color }}
+        >
+          {compactContent}
+          <LinkPendingOverlay />
+        </Link>
+      )
+    }
+
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        disabled={isPending || disabled}
+        aria-busy={isPending || undefined}
+        aria-pressed={selected || undefined}
+        aria-label={`Abrir ${card.name}`}
+        className={compactClassName}
+        style={{ backgroundColor: card.color }}
+      >
+        {compactContent}
+      </button>
+    )
   }
 
   return (
@@ -164,12 +346,9 @@ export function InstitutionWalletCard({
       )}
       style={{ backgroundColor: card.color }}
     >
-      <span aria-hidden className="pointer-events-none absolute inset-0">
-        <span className="absolute -top-16 -right-8 size-52 rounded-full bg-white/20" />
-        <span className="absolute top-14 -right-14 size-64 rounded-full bg-white/10" />
-      </span>
+      <EntitySurface shape="hexagons" />
       <div className="relative z-10 flex items-start justify-between">
-        {card.item.kind === "cash" || card.isCash ? (
+        {isCash ? (
           <span
             aria-hidden
             className="inline-flex size-11 items-center justify-center rounded-full bg-white text-emerald-700"

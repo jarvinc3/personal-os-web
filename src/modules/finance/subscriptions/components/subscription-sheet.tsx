@@ -322,12 +322,7 @@ export function SubscriptionSheet({
           </div>
         </SummarySection>
 
-        <SummarySection
-          title="Detalles opcionales"
-          icon={InfoIcon}
-          collapsible
-          defaultOpen={isEdit}
-        >
+        <SummarySection title="Detalles opcionales" icon={InfoIcon} collapsible>
           <Controller
             control={control}
             name="trialEndsAt"

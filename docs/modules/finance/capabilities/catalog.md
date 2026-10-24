@@ -21,6 +21,17 @@ Totales de `GET /finance/balance-sheet` (no sumar monedas en cliente). Cuentas C
 
 Evidencia: `src/modules/finance/products/`, `src/modules/finance/institutions/`, `src/modules/finance/accounts/`, `src/modules/finance/catalog/`, hooks catalog en `src/modules/finance/shared/hooks/`.
 
+### Cards y variantes
+
+Instituciones, cuentas, tarjetas y categorías se pintan con sus cards. La completa va en listas y detalle; la compacta, cuando la entidad es un dato de otra pantalla; la fila de categoría usa `chip` en las menciones.
+
+- Institución: `InstitutionWalletCard` completa en la pila y el detalle; compacta en los selectores de institución y destino y en la vista previa del formulario (`detail`: `none`, `counts` o `balance`).
+- Cuenta: `AccountProductRow` completa en las listas y el detalle; compacta en los selectores de destino, «Cuenta o tarjeta», el detalle de préstamo o meta y la vista previa del formulario.
+- Tarjeta: `CardProductRow` completa en las listas y el detalle; compacta en «Cuenta o tarjeta», los vencimientos de Inicio, el método de pago de una suscripción y la vista previa. `CardVisual` es la cara de la tarjeta en el detalle y la vista previa.
+- Categoría: `CategoryCard` en `default` para el catálogo, `pick` en los selectores, `chip` en Inicio, el resumen y las cards de suscripción y comercio, e `inline` para menciones en una línea.
+
+Tabla completa: [docs/architecture/ui-components.md#cards-por-entidad](../../../architecture/ui-components.md#cards-por-entidad).
+
 Vistas de detalle (implementadas):
 
 - Cuenta, tarjeta y préstamo son vistas secundarias, igual que institución: header secundario con volver y barra de pestañas oculta (`isFinanceSecondaryView` en `src/modules/finance/finance-gate.tsx`). El contenido de cuenta y tarjeta usa el mismo contenedor redondeado que se solapa bajo el hero.

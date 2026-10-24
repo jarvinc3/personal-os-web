@@ -38,7 +38,7 @@ function PlanningScreenBody() {
 
   return (
     <div className="flex flex-col gap-8">
-      <FinancePlanningHeroSection key={tab} activeTab={tab} />
+      <FinancePlanningHeroSection activeTab={tab} />
       <FinancePlanningList
         tab={tab}
         onTabChange={setTab}

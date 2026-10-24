@@ -13,7 +13,9 @@ import { LoanPrepaymentSheet } from "@/src/modules/finance/loans/components/loan
 import { InstallmentDetailSheet } from "@/src/modules/finance/loans/components/installment-detail-sheet"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
+import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
 import { useInstitutions } from "@/src/modules/finance/shared/hooks/use-institutions"
+import { AccountProductRow } from "@/src/modules/finance/shared/components/product-rows"
 import {
   useLoanInstallments,
   useLoanSchedule,
@@ -110,6 +112,7 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
 
   const loansQuery = useLoans(isEnabled)
   const institutionsQuery = useInstitutions(isEnabled)
+  const accountsQuery = useAccounts(isEnabled)
   const installmentsQuery = useLoanInstallments(isEnabled, loanId)
   const archiveLoan = useArchiveLoan()
   const deleteLoan = useDeleteLoan()
@@ -126,6 +129,13 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
   const institutions = institutionsQuery.data ?? []
   const institution = loan?.institutionId
     ? (institutions.find((item) => item.id === loan.institutionId) ?? null)
+    : null
+  const accounts = accountsQuery.data ?? []
+  const paymentAccount = loan?.accountId
+    ? (accounts.find((item) => item.id === loan.accountId) ?? null)
+    : null
+  const disbursementAccount = loan?.disbursementAccountId
+    ? (accounts.find((item) => item.id === loan.disbursementAccountId) ?? null)
     : null
   const installments = infiniteListItems(installmentsQuery.data)
   const accent = institution?.color ?? ACCENT_FALLBACK_COLOR
@@ -294,23 +304,39 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
             value={institution?.name ?? loan.lenderName}
             isLast={false}
           />
-          <SummaryItem
-            title="Se paga desde"
-            icon={WalletIcon}
-            value={loan.account?.name ?? "Sin cuenta de pago"}
-            isLast={false}
-          />
-          <SummaryItem
-            title="Desembolso"
-            icon={HandCoinsIcon}
-            value={loan.disbursementAccount?.name ?? "Sin cuenta"}
-            description={
-              loan.disbursementAccount
-                ? undefined
-                : "El dinero no entró a ninguna cuenta."
-            }
-            isLast
-          />
+          {paymentAccount ? (
+            <AccountProductRow
+              account={paymentAccount}
+              display={display}
+              variant="compact"
+            />
+          ) : (
+            <SummaryItem
+              title="Se paga desde"
+              icon={WalletIcon}
+              value={loan.account?.name ?? "Sin cuenta de pago"}
+              isLast={false}
+            />
+          )}
+          {disbursementAccount ? (
+            <AccountProductRow
+              account={disbursementAccount}
+              display={display}
+              variant="compact"
+            />
+          ) : (
+            <SummaryItem
+              title="Desembolso"
+              icon={HandCoinsIcon}
+              value={loan.disbursementAccount?.name ?? "Sin cuenta"}
+              description={
+                loan.disbursementAccount
+                  ? undefined
+                  : "El dinero no entró a ninguna cuenta."
+              }
+              isLast
+            />
+          )}
         </SummarySection>
       </div>
 

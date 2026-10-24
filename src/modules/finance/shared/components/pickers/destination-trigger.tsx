@@ -43,6 +43,7 @@ export function DestinationTrigger({
           card={card}
           accounts={accounts}
           display={display}
+          variant="compact"
           onPress={onClick}
         />
       </div>
@@ -55,6 +56,7 @@ export function DestinationTrigger({
         <AccountProductRow
           account={account}
           display={display}
+          variant="compact"
           onPress={onClick}
         />
       </div>

@@ -23,6 +23,7 @@ function line(
     availableCredit: null,
     dueDate: null,
     doubtful: false,
+    entity: null,
     ...partial,
   }
 }

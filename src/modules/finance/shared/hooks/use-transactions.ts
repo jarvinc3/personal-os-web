@@ -15,6 +15,7 @@ import {
   FINANCE_TX_PAGE_SIZE,
   mergeTransactionsById,
   timelineMonthQuery,
+  toUserWallClock,
   type FinanceTransactionsQuery,
 } from "@/src/modules/finance/shared/lib/transactions-query"
 import { intersectIsoDateRange } from "@/src/modules/finance/shared/lib/month-window"
@@ -167,10 +168,12 @@ export function useTransactionSearch(enabled: boolean, search: string) {
 }
 
 export function useTransaction(enabled: boolean, id: string | null) {
+  const timeZone = useUserTimeZone()
   return useQuery({
-    queryKey: [...FINANCE_TRANSACTIONS_QUERY_KEY, "detail", id],
+    queryKey: [...FINANCE_TRANSACTIONS_QUERY_KEY, "detail", id, timeZone],
     queryFn: () =>
       apiGet<FinanceTransaction>(API_ENDPOINTS.FINANCE.TRANSACTION(id!)),
+    select: (transaction) => toUserWallClock(transaction, timeZone),
     enabled: enabled && Boolean(id),
   })
 }

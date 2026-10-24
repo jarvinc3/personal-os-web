@@ -11,7 +11,7 @@ import {
   parseTransactionFormType,
 } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
-import { useRouter, useSearchParams } from "next/navigation"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import {
   EMPTY_TRANSACTION_PREFILL,
@@ -89,9 +89,19 @@ function TransactionFormScreenBody({
   } | null>(null)
   const liveType =
     typeOverride?.base === initialType ? typeOverride.next : initialType
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
   const handleTypeChange = useCallback(
-    (next: "DEBIT" | "CREDIT") => setTypeOverride({ base: initialType, next }),
-    [initialType]
+    (next: "DEBIT" | "CREDIT") => {
+      setTypeOverride({ base: initialType, next })
+      if (mode !== "create") {
+        return
+      }
+      const params = new URLSearchParams(searchParams.toString())
+      params.set("type", next)
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false })
+    },
+    [initialType, mode, pathname, router, searchParams]
   )
   const editingQuery = useTransaction(
     isEnabled && mode === "edit",

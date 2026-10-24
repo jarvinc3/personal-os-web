@@ -17,6 +17,7 @@ import {
   displayedMovementSign,
   isInactiveTransactionStatus,
   isTransferTransaction,
+  MOVEMENT_SIGN_TONE,
   OPERATION_LEG_ROLE,
   signedAmount,
   transferDirectionLabel,
@@ -37,6 +38,7 @@ import {
   ScaleIcon,
 } from "lucide-react"
 import type { ReactNode } from "react"
+import Link from "next/link"
 
 type TransactionMovementRowProps = {
   transaction: FinanceTransaction
@@ -50,6 +52,158 @@ type TransactionMovementRowProps = {
   href?: string
   /** Account or card the movement is read from; signs transfers from its side. */
   instrument?: FinanceInstrumentRef
+  /** Variante de la card; la galería /dev/cards la pinta (#272). */
+  variant?: "default" | "compact" | "inline"
+}
+
+type MovementLeadingProps = {
+  transaction: FinanceTransaction
+  icon: string | undefined
+  isTransfer: boolean
+  sign: "+" | "−" | null
+  title: string
+  size: number
+}
+
+function MovementLeading({
+  transaction,
+  icon,
+  isTransfer,
+  sign,
+  title,
+  size,
+}: MovementLeadingProps) {
+  const emojiClassName = size >= 22 ? "text-base" : "text-sm"
+
+  if (transaction.merchantLogoUrl) {
+    return (
+      <BrandLogo
+        name={title}
+        logoUrl={transaction.merchantLogoUrl}
+        size={size}
+      />
+    )
+  }
+  if (icon) {
+    return (
+      <span className={emojiClassName} aria-hidden>
+        {icon}
+      </span>
+    )
+  }
+  return (
+    <MovementTypeMark
+      type={transaction.type}
+      isTransfer={isTransfer}
+      sign={sign}
+      size={size}
+    />
+  )
+}
+
+/** Type mark of a movement when it has no merchant logo or category emoji. */
+export function MovementTypeMark({
+  type,
+  isTransfer,
+  sign,
+  size = 24,
+}: {
+  type: FinanceTransaction["type"]
+  isTransfer: boolean
+  sign: "+" | "−" | null
+  size?: number
+}) {
+  const iconClassName = size > 22 ? "size-5" : "size-4"
+  if (isTransfer) {
+    return (
+      <ArrowLeftRightIcon
+        className={cn(iconClassName, "text-info")}
+        aria-hidden
+      />
+    )
+  }
+  if (type === "DEBIT") {
+    return (
+      <ArrowDownLeftIcon
+        className={cn(iconClassName, "text-destructive")}
+        aria-hidden
+      />
+    )
+  }
+  if (type === "CREDIT") {
+    return (
+      <ArrowUpRightIcon
+        className={cn(iconClassName, "text-success")}
+        aria-hidden
+      />
+    )
+  }
+  if (type === "ADJUSTMENT") {
+    return (
+      <ScaleIcon
+        className={cn(
+          iconClassName,
+          sign === "−" ? "text-destructive" : "text-success"
+        )}
+        aria-hidden
+      />
+    )
+  }
+  return null
+}
+
+type MovementRowProps = {
+  title: ReactNode
+  description?: ReactNode
+  leading: ReactNode
+  value: ReactNode
+  accentColor?: string
+  tintRow?: boolean
+  className?: string
+  trailing?: ReactNode
+  showChevron?: boolean
+  isLast?: boolean
+  href?: string
+  onPress?: () => void
+}
+
+/** Fila canónica de un movimiento; recibe el modelo ya calculado. */
+export function MovementRow({
+  title,
+  description,
+  leading,
+  value,
+  accentColor,
+  tintRow,
+  className,
+  trailing,
+  showChevron,
+  isLast = true,
+  href,
+  onPress,
+}: MovementRowProps) {
+  const row = {
+    accentColor,
+    tintRow,
+    title,
+    description,
+    leading,
+    value,
+    className,
+    trailing,
+    showChevron,
+    isLast,
+  }
+
+  if (onPress) {
+    return <SummaryItem {...row} onPress={onPress} />
+  }
+
+  if (href) {
+    return <SummaryItem {...row} href={href} />
+  }
+
+  return <SummaryItem {...row} />
 }
 
 export function TransactionMovementRow({
@@ -63,6 +217,7 @@ export function TransactionMovementRow({
   onPress,
   href,
   instrument,
+  variant = "default",
 }: TransactionMovementRowProps) {
   const categoryById = new Map(
     categories.map((category) => [category.id, category] as const)
@@ -126,98 +281,118 @@ export function TransactionMovementRow({
     paired ||
     isReversed
 
-  const row = {
-    accentColor: color,
-    tintRow: Boolean(color),
-    title: isInactive ? <span className="opacity-50">{title}</span> : title,
-    description:
-      isInactive && description ? (
-        <span className="opacity-50">{description}</span>
-      ) : (
-        description
-      ),
-    leading: (
-      <span
-        className={cn(
-          "flex items-center justify-center",
-          isInactive && "opacity-50"
-        )}
-      >
-        {transaction.merchantLogoUrl ? (
-          <BrandLogo
-            name={title}
-            logoUrl={transaction.merchantLogoUrl}
-            size={28}
-          />
-        ) : icon ? (
-          <span>{icon}</span>
-        ) : isTransfer ? (
-          <ArrowLeftRightIcon className="size-5 text-info" />
-        ) : transaction.type === "DEBIT" ? (
-          <ArrowDownLeftIcon className="size-5 text-destructive" />
-        ) : transaction.type === "CREDIT" ? (
-          <ArrowUpRightIcon className="size-5 text-success" />
-        ) : transaction.type === "ADJUSTMENT" ? (
-          <ScaleIcon
-            className={cn(
-              "size-5",
-              sign === "−" ? "text-destructive" : "text-success"
-            )}
-          />
-        ) : null}
-      </span>
-    ),
-    value: (
-      <div className="flex items-center justify-end gap-1">
-        <div className="flex flex-col items-end">
-          <span
-            className={cn(
-              sign === "−" && "text-destructive",
-              sign === "+" && "text-success",
-              isInactive && "text-muted-foreground line-through opacity-50"
-            )}
-          >
-            {signedAmount({ transaction, display, instrument })}
-          </span>
-          {rateLabel ? (
-            <span className="text-[11px] text-muted-foreground tabular-nums">
-              {rateLabel}
-            </span>
-          ) : null}
-          {hasStatusBadge ? (
-            <span className="flex flex-col items-end gap-1 font-normal">
-              {transaction.possibleDuplicateOfId ? (
-                <Badge variant="warning">¿Duplicado?</Badge>
-              ) : null}
-              {partial ? (
-                <Badge variant="warning">
-                  {FINANCE_REVERSAL_PARTIAL_LABEL}
-                </Badge>
-              ) : paired || isReversed ? (
-                <Badge variant="info">
-                  {FINANCE_TRANSACTION_STATUS_LABEL.REVERSED}
-                </Badge>
-              ) : null}
-            </span>
-          ) : null}
-        </div>
-        <TransactionStatusMark
-          status={isReversed || paired ? "REVERSED" : transaction.status}
+  if (variant === "inline") {
+    const mention = (
+      <>
+        <MovementLeading
+          transaction={transaction}
+          icon={icon}
+          isTransfer={isTransfer}
+          sign={sign}
+          title={title}
+          size={16}
         />
-      </div>
-    ),
-    trailing,
-    showChevron,
-    isLast: true as const,
+        <span className="min-w-0 truncate text-sm font-medium">{title}</span>
+      </>
+    )
+    const inlineClassName = cn(
+      "inline-flex max-w-full min-w-0 items-center gap-1.5 align-middle",
+      isInactive && "opacity-50"
+    )
+
+    if (onPress) {
+      return (
+        <button type="button" onClick={onPress} className={inlineClassName}>
+          {mention}
+        </button>
+      )
+    }
+
+    if (href) {
+      return (
+        <Link href={href} className={inlineClassName}>
+          {mention}
+        </Link>
+      )
+    }
+
+    return <span className={inlineClassName}>{mention}</span>
   }
 
-  if (onPress) {
-    return <SummaryItem {...row} onPress={onPress} />
-  }
+  const leadingMark = (size: number) => (
+    <span
+      className={cn(
+        "flex items-center justify-center",
+        isInactive && "opacity-50"
+      )}
+    >
+      <MovementLeading
+        transaction={transaction}
+        icon={icon}
+        isTransfer={isTransfer}
+        sign={sign}
+        title={title}
+        size={size}
+      />
+    </span>
+  )
 
-  if (href) {
-    return <SummaryItem {...row} href={href} />
-  }
-
-  return <SummaryItem {...row} />
+  return (
+    <MovementRow
+      accentColor={color}
+      tintRow={Boolean(color)}
+      title={isInactive ? <span className="opacity-50">{title}</span> : title}
+      description={
+        variant === "compact" ? undefined : isInactive && description ? (
+          <span className="opacity-50">{description}</span>
+        ) : (
+          description
+        )
+      }
+      leading={leadingMark(variant === "compact" ? 22 : 28)}
+      className={variant === "compact" ? "gap-2 p-1.5 pl-2" : undefined}
+      value={
+        <div className="flex items-center justify-end gap-1">
+          <div className="flex flex-col items-end">
+            <span
+              className={cn(
+                sign && MOVEMENT_SIGN_TONE[sign],
+                isInactive && "text-muted-foreground line-through opacity-50"
+              )}
+            >
+              {signedAmount({ transaction, display, instrument })}
+            </span>
+            {rateLabel ? (
+              <span className="text-[11px] text-muted-foreground tabular-nums">
+                {rateLabel}
+              </span>
+            ) : null}
+            {hasStatusBadge ? (
+              <span className="flex flex-col items-end gap-1 font-normal">
+                {transaction.possibleDuplicateOfId ? (
+                  <Badge variant="warning">¿Duplicado?</Badge>
+                ) : null}
+                {partial ? (
+                  <Badge variant="warning">
+                    {FINANCE_REVERSAL_PARTIAL_LABEL}
+                  </Badge>
+                ) : paired || isReversed ? (
+                  <Badge variant="info">
+                    {FINANCE_TRANSACTION_STATUS_LABEL.REVERSED}
+                  </Badge>
+                ) : null}
+              </span>
+            ) : null}
+          </div>
+          <TransactionStatusMark
+            status={isReversed || paired ? "REVERSED" : transaction.status}
+          />
+        </div>
+      }
+      trailing={trailing}
+      showChevron={showChevron}
+      href={href}
+      onPress={onPress}
+    />
+  )
 }

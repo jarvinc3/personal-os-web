@@ -1,5 +1,6 @@
 "use client"
 
+import { formatCalendarDate } from "@/src/modules/finance/shared/lib/ledger-form"
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
 import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
 import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
@@ -8,7 +9,6 @@ import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-er
 import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
 import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
-import { formatPlanningDate } from "@/src/modules/finance/shared/lib/planning-lists"
 import type { FinanceSubscription } from "@/src/modules/finance/shared/types/entities"
 import { billingCycleLabel } from "@/src/modules/finance/subscriptions/lib/subscription-display"
 import {
@@ -109,7 +109,7 @@ export function SubscriptionPriceTab({
           {priceHistory.changes.map((change, index) => (
             <SummaryItem
               key={change.date}
-              title={formatPlanningDate(change.date)}
+              title={formatCalendarDate(change.date, money.locale)}
               description={
                 change.previousAmount === null
                   ? "Inicio"

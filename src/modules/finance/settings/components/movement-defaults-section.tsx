@@ -7,7 +7,9 @@ import { getModule } from "@/src/shared/constants/module-registry"
 import { Calculator, Keyboard, Landmark } from "lucide-react"
 import { Controller, type Control } from "react-hook-form"
 import type { FinanceModuleFormValues } from "@/src/modules/finance/settings/lib/finance-module-form"
-import { AccountChoiceList, type AccountOption } from "./account-choice-list"
+import { AccountChoiceList } from "./account-choice-list"
+import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
+import type { FinanceAccount } from "@/src/modules/finance/shared/types/entities"
 
 const MODULE_ACCENT = getModule("finance").accent
 
@@ -18,12 +20,14 @@ const AMOUNT_ENTRY_OPTIONS = [
 
 type MovementDefaultsSectionProps = {
   control: Control<FinanceModuleFormValues>
-  accounts: AccountOption[]
+  accounts: FinanceAccount[]
+  display: FinanceMoneyDisplay
 }
 
 export function MovementDefaultsSection({
   control,
   accounts,
+  display,
 }: MovementDefaultsSectionProps) {
   return (
     <>
@@ -35,6 +39,7 @@ export function MovementDefaultsSection({
             render={({ field }) => (
               <AccountChoiceList
                 accounts={accounts}
+                display={display}
                 selectedId={field.value}
                 onSelect={field.onChange}
                 noneLabel="Sin cuenta por defecto"

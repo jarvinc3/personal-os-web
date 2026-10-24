@@ -4,11 +4,12 @@ import {
   AccountProductRow,
   CardProductRow,
 } from "@/src/modules/finance/shared/components/product-rows"
-import { BrandLogo } from "@/src/modules/finance/shared/components/brand-logo"
+import { InstitutionWalletCard } from "@/src/modules/finance/products/components/institution-wallet-card"
 import {
-  buildDestinationPickerGroups,
-  type DestinationPickerGroup,
-} from "@/src/modules/finance/shared/lib/destination-picker"
+  buildCashCardFromAccount,
+  buildInstitutionCardFromCatalog,
+} from "@/src/modules/finance/products/lib/institution-card"
+import { buildDestinationPickerGroups } from "@/src/modules/finance/shared/lib/destination-picker"
 import { encodeLedgerTarget } from "@/src/modules/finance/shared/lib/ledger-payloads"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
 import type {
@@ -31,14 +32,7 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/src/shared/components/ui/tabs"
-import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
-import {
-  CreditCardIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  LockIcon,
-  WalletIcon,
-} from "lucide-react"
+import { CreditCardIcon, ChevronLeftIcon, WalletIcon } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 
 type DestinationPickerSheetProps = {
@@ -216,96 +210,44 @@ export function DestinationPickerSheet({
         </p>
       ) : (
         <div className="flex flex-col gap-2">
-          {selectableGroups.map((group) => (
-            <DestinationGroupRow
-              key={`${group.kind}:${group.id}`}
-              group={group}
-              excludeTarget={excludeTarget}
-              accountsOnly={accountsOnly}
-              onInstitution={() => {
-                setTab("accounts")
-                setInstitutionId(group.id)
-              }}
-              onCash={() => {
-                if (group.kind !== "cash") {
-                  return
+          {selectableGroups.map((group) =>
+            group.kind === "cash" ? (
+              <InstitutionWalletCard
+                key={`cash:${group.id}`}
+                card={buildCashCardFromAccount(group.account)}
+                variant="compact"
+                detail="none"
+                disabled={
+                  encodeLedgerTarget("account", group.account.id) ===
+                  excludeTarget
                 }
-                choose(encodeLedgerTarget("account", group.account.id))
-              }}
-            />
-          ))}
+                onPress={() =>
+                  choose(encodeLedgerTarget("account", group.account.id))
+                }
+              />
+            ) : (
+              <InstitutionWalletCard
+                key={`institution:${group.id}`}
+                card={buildInstitutionCardFromCatalog({
+                  institution: group.institution,
+                  counts: accountsOnly
+                    ? { accounts: group.accounts.length }
+                    : {
+                        accounts: group.accounts.length,
+                        cards: group.cards.length,
+                      },
+                })}
+                variant="compact"
+                detail="counts"
+                onPress={() => {
+                  setTab("accounts")
+                  setInstitutionId(group.id)
+                }}
+              />
+            )
+          )}
         </div>
       )}
     </BottomSheet>
-  )
-}
-
-function DestinationGroupRow({
-  group,
-  excludeTarget,
-  accountsOnly,
-  onInstitution,
-  onCash,
-}: {
-  group: DestinationPickerGroup
-  excludeTarget: string | null
-  accountsOnly: boolean
-  onInstitution: () => void
-  onCash: () => void
-}) {
-  if (group.kind === "cash") {
-    const taken =
-      encodeLedgerTarget("account", group.account.id) === excludeTarget
-    return (
-      <button
-        type="button"
-        disabled={taken}
-        className={cn(
-          "relative flex w-full items-center gap-3 rounded-2xl border border-border bg-card px-3 py-3 text-left",
-          taken ? "cursor-not-allowed" : PRESSABLE_CLASS
-        )}
-        onClick={onCash}
-      >
-        <BrandLogo
-          name={group.account.name}
-          size={36}
-          className={taken ? "opacity-45" : undefined}
-        />
-        <span className={cn("min-w-0 flex-1", taken && "opacity-45")}>
-          <span className="block truncate font-medium">
-            {group.account.name}
-          </span>
-          <span className="block text-sm text-muted-foreground">Efectivo</span>
-        </span>
-        {taken ? (
-          <span className="pointer-events-none absolute inset-0 flex items-center justify-center">
-            <LockIcon className="size-7 text-foreground" aria-hidden />
-            <span className="sr-only">En uso</span>
-          </span>
-        ) : null}
-      </button>
-    )
-  }
-
-  return (
-    <button
-      type="button"
-      className={cn(
-        "flex w-full items-center gap-3 rounded-2xl border border-border bg-card px-3 py-3 text-left",
-        PRESSABLE_CLASS
-      )}
-      onClick={onInstitution}
-    >
-      <BrandLogo name={group.name} logoUrl={group.logoUrl} size={36} />
-      <span className="min-w-0 flex-1">
-        <span className="block truncate font-medium">{group.name}</span>
-        <span className="block text-sm text-muted-foreground">
-          {accountsOnly
-            ? `${group.accounts.length} cuentas`
-            : `${group.accounts.length} cuentas · ${group.cards.length} tarjetas`}
-        </span>
-      </span>
-      <ChevronRightIcon className="size-4 text-muted-foreground" />
-    </button>
   )
 }

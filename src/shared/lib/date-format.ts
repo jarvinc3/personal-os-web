@@ -9,6 +9,26 @@ import {
 } from "date-fns"
 import { es } from "date-fns/locale/es"
 
+/** Abreviaturas de mes en español; ICU escribe "sept" en septiembre. */
+export const MONTH_ABBREVIATIONS = [
+  "ene",
+  "feb",
+  "mar",
+  "abr",
+  "may",
+  "jun",
+  "jul",
+  "ago",
+  "sep",
+  "oct",
+  "nov",
+  "dic",
+] as const
+
+export function shortMonthLabel(date: Date): string {
+  return MONTH_ABBREVIATIONS[date.getMonth()] ?? ""
+}
+
 /** Formato canónico para API y preferencias (quiet hours, etc.). */
 export const TIME_API_FORMAT = "HH:mm"
 
@@ -159,7 +179,7 @@ export function formatDate(iso: string): string {
   if (!isValid(date)) {
     return ""
   }
-  return format(date, "d MMM yyyy", { locale: es })
+  return `${format(date, "d")} ${shortMonthLabel(date)} ${format(date, "yyyy")}`
 }
 
 /**
@@ -199,8 +219,8 @@ function formatTimelineDay(date: Date): string {
  * Rango semanal para timeline de finanzas: `jun 01 - 07`.
  */
 export function formatWeekRangeLabel(start: Date, end: Date): string {
-  const startMonth = format(start, "MMM", { locale: es }).toLowerCase()
-  const endMonth = format(end, "MMM", { locale: es }).toLowerCase()
+  const startMonth = shortMonthLabel(start)
+  const endMonth = shortMonthLabel(end)
   const startDay = formatTimelineDay(start)
   const endDay = formatTimelineDay(end)
 
@@ -224,9 +244,8 @@ export function formatDayHeaderLabel(date: Date): string {
   const weekday = format(date, "EEEE", { locale: es })
   const weekdayLabel = weekday.charAt(0).toUpperCase() + weekday.slice(1)
   const day = format(date, "d")
-  const month = format(date, "MMM", { locale: es }).replace(".", "")
-  const monthLabel =
-    month.charAt(0).toUpperCase() + month.slice(1).toLowerCase()
+  const month = shortMonthLabel(date)
+  const monthLabel = month.charAt(0).toUpperCase() + month.slice(1)
   return `${weekdayLabel} ${day} ${monthLabel}.`
 }
 

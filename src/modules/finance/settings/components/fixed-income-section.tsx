@@ -10,7 +10,9 @@ import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms
 import { CalendarDays, CalendarRange, HandCoins } from "lucide-react"
 import { Controller, useWatch, type Control } from "react-hook-form"
 import type { FinanceModuleFormValues } from "@/src/modules/finance/settings/lib/finance-module-form"
-import { AccountChoiceList, type AccountOption } from "./account-choice-list"
+import { AccountChoiceList } from "./account-choice-list"
+import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
+import type { FinanceAccount } from "@/src/modules/finance/shared/types/entities"
 
 const MODULE_ACCENT = getModule("finance").accent
 
@@ -22,13 +24,15 @@ const FREQUENCY_OPTIONS = [
 type FixedIncomeSectionProps = {
   control: Control<FinanceModuleFormValues>
   baseCurrency: string
-  accounts: AccountOption[]
+  accounts: FinanceAccount[]
+  display: FinanceMoneyDisplay
 }
 
 export function FixedIncomeSection({
   control,
   baseCurrency,
   accounts,
+  display,
 }: FixedIncomeSectionProps) {
   const fixedIncomeEnabled = useWatch({
     control,
@@ -107,6 +111,7 @@ export function FixedIncomeSection({
               render={({ field }) => (
                 <AccountChoiceList
                   accounts={accounts}
+                  display={display}
                   selectedId={field.value}
                   onSelect={field.onChange}
                   noneLabel="Sin cuenta"

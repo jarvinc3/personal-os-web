@@ -1,9 +1,8 @@
 "use client"
 
-import {
-  emailOutcomeLabel,
-  syncLogStatusLabel,
-} from "@/src/modules/finance/shared/lib/email-sync-display"
+import { emailOutcomeLabel } from "@/src/modules/finance/shared/lib/email-sync-display"
+import { SyncCard } from "@/src/modules/finance/sync/components/sync-card"
+import type { SyncCardStatus } from "@/src/modules/finance/sync/components/sync-card"
 import type {
   FinanceEmailProcessedMessage,
   FinanceEmailSyncLog,
@@ -21,6 +20,16 @@ import { HistoryIcon, ScrollTextIcon } from "lucide-react"
 
 export type NamedSyncLog = FinanceEmailSyncLog & {
   sourceName: string
+}
+
+function logStatus(status: string): SyncCardStatus {
+  if (status === "FAILED") {
+    return "error"
+  }
+  if (status === "RUNNING") {
+    return "pending"
+  }
+  return "ok"
 }
 
 export function EmailSyncLogList({
@@ -45,19 +54,19 @@ export function EmailSyncLogList({
 
   return (
     <>
-      {logs.map((log, index) => {
+      {logs.map((log) => {
         const when = formatRelativeTimeFromIso(log.startedAt)
         const detail = log.error
           ? log.error
           : `${log.emailsScanned} correos · ${log.transactionsNew} nuevos`
         return (
-          <SummaryItem
+          <SyncCard
             key={log.id}
-            title={`${log.sourceName} · ${syncLogStatusLabel(log.status)}`}
-            description={`${detail}${when ? ` · ${when}` : ""}`}
-            value={syncLogStatusLabel(log.status)}
-            showChevron={false}
-            isLast={index === logs.length - 1}
+            icon={HistoryIcon}
+            title={log.sourceName}
+            subtitle={detail}
+            status={logStatus(log.status)}
+            value={when ?? undefined}
           />
         )
       })}

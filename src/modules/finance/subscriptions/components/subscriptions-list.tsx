@@ -196,6 +196,8 @@ export function SubscriptionsList({
                     key={subscription.id}
                     subscription={subscription}
                     display={display}
+                    cards={cards}
+                    accounts={accounts}
                     today={today}
                     windowDays={windowDays}
                   />

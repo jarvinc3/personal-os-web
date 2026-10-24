@@ -13,6 +13,7 @@ import {
   subscriptionAlertView,
   subscriptionCardState,
   subscriptionDetailTabFromParam,
+  subscriptionStatusBadge,
   subscriptionShortcutBadges,
   subscriptionStatusVariant,
   withSubscriptionDetailTab,
@@ -179,6 +180,34 @@ describe("subscriptionCardState", () => {
     })
     assert.equal(cancelled.inWindow, false)
     assert.equal(cancelled.label, "14 oct")
+  })
+
+  it("marks an active subscription whose charge date already passed", () => {
+    const overdue = subscriptionCardState({
+      subscription: subscription({ nextBillingDate: "2026-10-20" }),
+      today: day(2026, 10, 22),
+      windowDays: 5,
+    })
+    assert.equal(overdue.overdue, true)
+
+    const future = subscriptionCardState({
+      subscription: subscription({ nextBillingDate: "2026-10-24" }),
+      today: day(2026, 10, 22),
+      windowDays: 5,
+    })
+    assert.equal(future.overdue, false)
+  })
+
+  it("does not mark a paused subscription as overdue", () => {
+    const paused = subscriptionCardState({
+      subscription: subscription({
+        status: "PAUSED",
+        nextBillingDate: "2026-10-20",
+      }),
+      today: day(2026, 10, 22),
+      windowDays: 5,
+    })
+    assert.equal(paused.overdue, false)
   })
 
   it("marks a free trial that has not ended", () => {
@@ -354,6 +383,22 @@ describe("subscriptionAlertReviewTarget", () => {
     assert.equal(
       subscriptionAlertReviewTarget("ANNUAL_RENEWAL"),
       SUBSCRIPTION_DETAIL_TABS.summary
+    )
+  })
+})
+
+describe("subscriptionStatusBadge", () => {
+  it("shows Vencida over the status when the charge date passed", () => {
+    assert.deepEqual(subscriptionStatusBadge(subscription(), true), {
+      label: "Vencida",
+      variant: "danger",
+    })
+  })
+
+  it("falls back to the status label and variant", () => {
+    assert.deepEqual(
+      subscriptionStatusBadge(subscription({ status: "PAUSED" }), false),
+      { label: "Pausada", variant: "warning" }
     )
   })
 })

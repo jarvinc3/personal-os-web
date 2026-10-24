@@ -154,6 +154,12 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
   const moduleEnable = useModuleSheetEnable("finance")
   const accountsQuery = useAccounts(isModuleEnabled)
   const accounts = accountsQuery.data ?? []
+  const moneyDisplay = {
+    currency: config.baseCurrency,
+    showCents: config.display.showCents,
+    compactNumbers: config.display.compactNumbers,
+    locale: formatLocale,
+  }
   const [openSheet, setOpenSheet] = useState<FinanceSettingsSheetId | null>(
     null
   )
@@ -377,7 +383,11 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
         openSheet={openSheet}
         onOpenSheetChange={setOpenSheet}
       >
-        <MovementDefaultsSection control={control} accounts={accounts} />
+        <MovementDefaultsSection
+          control={control}
+          accounts={accounts}
+          display={moneyDisplay}
+        />
       </FinanceSettingsSheet>
 
       <FinanceSettingsSheet
@@ -389,6 +399,7 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
           control={control}
           baseCurrency={config.baseCurrency}
           accounts={accounts}
+          display={moneyDisplay}
         />
       </FinanceSettingsSheet>
 

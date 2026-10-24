@@ -12,6 +12,91 @@ export type ReleaseNotesEntry = {
 
 export const RELEASE_NOTES: readonly ReleaseNotesEntry[] = [
   {
+    version: "0.61.0",
+    highlights: [
+      "Las suscripciones se ven compactas en los pagos próximos, las alertas y el calendario.",
+      "La categoría se ve como una píldora con su emoji y su color donde se menciona, y con su importe en Inicio.",
+      "El estado de cuenta y los movimientos que sobran al importar usan la misma fila que Movimientos.",
+      "Los recurrentes detectados, las bandejas de correo y el historial de sincronización se ven con su card y su estado.",
+      "Patrimonio muestra cada producto con su card, su color y sus marcas.",
+      "Las vistas previas de institución, tarjeta y cuenta son las cards reales.",
+    ],
+  },
+  {
+    version: "0.60.1",
+    highlights: [
+      "Sin cambios visibles: esta versión solo ordena detalles internos del proyecto.",
+    ],
+  },
+  {
+    version: "0.60.0",
+    highlights: [
+      "La galería de cards es permanente y ahora se abre desde el índice /dev; muestra las variantes reales de cada entidad.",
+      "Institución, cuenta, tarjeta, préstamo, meta, cobro, presupuesto y comercio se ven en tamaño compacto cuando son un dato de otra pantalla.",
+      "El detalle de un movimiento muestra su categoría y las cards de su cuenta, tarjeta y comercio.",
+    ],
+  },
+  {
+    version: "0.59.0",
+    highlights: [
+      "Nueva galería provisional para revisar las cards de cada entidad y sus variantes antes de aplicarlas en la app.",
+      "Se abre desde Inicio y usa datos de ejemplo; se retira cuando los diseños estén aprobados.",
+    ],
+  },
+  {
+    version: "0.58.9",
+    highlights: [
+      "Al crear la cuenta o iniciar sesión, la contraseña puede tener 6 caracteres como mínimo, siempre con mayúsculas, minúsculas y números.",
+    ],
+  },
+  {
+    version: "0.58.8",
+    highlights: [
+      "Sin cambios visibles: esta versión solo ordena detalles internos del proyecto.",
+    ],
+  },
+  {
+    version: "0.58.7",
+    highlights: [
+      "Las fechas de Finanzas se ven igual en toda la app, con la abreviatura «sep» y sin fechas en formato técnico.",
+      "El comercio de un movimiento se muestra tal como lo escribiste.",
+      "Los nombres de las opciones y del menú de acciones ya no se cortan en el móvil, y el total de la dona de Suscripciones se ve completo.",
+      "Al editar una suscripción, el selector de fecha empieza cerrado.",
+    ],
+  },
+  {
+    version: "0.58.6",
+    highlights: [
+      "La hora de cada movimiento se ve en tu zona horaria en la lista, el detalle y el formulario, y coincide en los tres.",
+      "En Planificación, la cabecera muestra siempre el resumen de la pestaña en la que estás y la pestaña activa se lee bien.",
+      "Una suscripción activa con la fecha de cobro pasada aparece marcada como «Vencida».",
+      "Pausar una suscripción ahora pide confirmación; reanudarla no.",
+      "El detalle de un presupuesto muestra su cabecera al instante y carga sus gastos en segundo plano.",
+    ],
+  },
+  {
+    version: "0.58.5",
+    highlights: [
+      "Sin cambios visibles: esta versión solo ordena detalles internos del proyecto.",
+    ],
+  },
+  {
+    version: "0.58.4",
+    highlights: [
+      "Productos, Patrimonio y la pestaña Cobros de Planificación dejan de caer en la pantalla de error cuando la respuesta del servidor viene incompleta: verás un aviso y el resto de la vista sigue funcionando.",
+      "Un cobro con un monto ilegible se marca como no disponible y ya no tumba la lista; tampoco suma a los totales.",
+      "El gastado de un presupuesto coincide siempre con la lista de gastos de su periodo.",
+      "Actualizamos la base del cliente a una versión corregida por seguridad.",
+    ],
+  },
+  {
+    version: "0.58.3",
+    highlights: [
+      "Si tu inicio de sesión o tu registro falla, ahora ves el motivo en español y no un mensaje técnico en inglés.",
+      "Al crear la cuenta, la contraseña debe tener al menos 10 caracteres e incluir mayúsculas, minúsculas y números; el formulario te lo dice antes de enviar.",
+    ],
+  },
+  {
     version: "0.58.2",
     highlights: [
       "Sin cambios visibles: esta versión solo ajusta detalles internos del proyecto.",

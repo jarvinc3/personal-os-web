@@ -6,24 +6,16 @@ import {
   formatPublicShareUpdatedAt,
   publicShareCountCaption,
   publicShareCurrencyRows,
-  publicShareItemCaption,
-  publicShareItemProgress,
   publicSharePendingTotals,
   type PublicReceivableShareItem,
 } from "@/src/modules/finance/receivables/lib/public-receivable-share"
 import { formatSharePendingTotals } from "@/src/modules/finance/receivables/lib/receivable-share"
+import { ReceivableCard } from "@/src/modules/finance/receivables/components/receivable-card"
 import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
 import { FinanceProgressHero } from "@/src/modules/finance/shared/components/layout/progress-hero"
-import { PlanningProgressCard } from "@/src/modules/finance/shared/components/planning-progress-card"
 import { financeLoadErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
-import { formatCalendarDate } from "@/src/modules/finance/shared/lib/ledger-form"
-import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 import { DEFAULT_LOCALE } from "@/src/modules/settings/lib/locale-options"
 import { usePublicReceivableShare } from "@/src/modules/finance/shared/hooks/use-receivable-shares"
-import {
-  FINANCE_RECEIVABLE_STATUS_LABEL,
-  FINANCE_RECEIVABLE_STATUS_VARIANT,
-} from "@/src/modules/finance/shared/types/entities"
 import { AppLogo } from "@/src/shared/components/brand/app-logo"
 import { LoadingView } from "@/src/shared/components/layout/loading-view"
 import {
@@ -157,30 +149,14 @@ export function PublicReceivableShareScreen({
         </Empty>
       ) : (
         <div className="flex flex-col gap-2">
-          {share.items.map((item) => {
-            const money = { ...PUBLIC_DISPLAY, currency: item.currency }
-            return (
-              <PlanningProgressCard
-                key={item.ref}
-                title={item.concept}
-                description={`Creado ${formatCalendarDate(item.createdAt, DEFAULT_LOCALE)}`}
-                icon={HandshakeIcon}
-                tone={item.status === "PAID" ? "success" : "info"}
-                badge={{
-                  label:
-                    FINANCE_RECEIVABLE_STATUS_LABEL[item.status] ?? item.status,
-                  variant: FINANCE_RECEIVABLE_STATUS_VARIANT[item.status],
-                }}
-                progress={publicShareItemProgress(item)}
-                currentHint="Cobrado"
-                currentLabel={formatFinanceMoney(item.paid, money)}
-                targetHint="Total"
-                targetLabel={formatFinanceMoney(item.amount, money)}
-                caption={publicShareItemCaption(item, PUBLIC_DISPLAY)}
-                onPress={() => setOpenItem(item)}
-              />
-            )
-          })}
+          {share.items.map((item) => (
+            <ReceivableCard
+              key={item.ref}
+              source={{ kind: "shared", item }}
+              display={PUBLIC_DISPLAY}
+              onPress={() => setOpenItem(item)}
+            />
+          ))}
         </div>
       )}
 

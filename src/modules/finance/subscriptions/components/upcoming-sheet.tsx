@@ -1,23 +1,18 @@
 "use client"
 
-import { BrandLogo } from "@/src/modules/finance/shared/components/brand-logo"
 import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
 import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
 import { useSubscriptionsUpcoming } from "@/src/modules/finance/shared/hooks/use-subscriptions"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
-import {
-  formatFinanceMoney,
-  type FinanceMoneyDisplay,
-} from "@/src/modules/finance/shared/lib/money"
+import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
 import {
   subscriptionChargeSummary,
   subscriptionChargeSummaryLabel,
 } from "@/src/modules/finance/subscriptions/lib/subscription-calendar"
-import { billingLabel } from "@/src/modules/finance/subscriptions/lib/subscription-timing"
-import type { FinanceSubscriptionUpcomingCharge } from "@/src/modules/finance/shared/types/entities"
+import { upcomingChargeToCardSource } from "@/src/modules/finance/subscriptions/lib/subscription-card-source"
+import { SubscriptionCard } from "@/src/modules/finance/subscriptions/components/subscription-card"
 import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
 import { Button } from "@/src/shared/components/ui/button"
-import { LinkPendingOverlay } from "@/src/shared/components/ui/navigation-pending"
 import {
   Empty,
   EmptyDescription,
@@ -26,8 +21,6 @@ import {
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
 import { ClockIcon, XIcon } from "lucide-react"
-import Link from "next/link"
-import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 
 type UpcomingSheetProps = {
   open: boolean
@@ -96,19 +89,22 @@ export function UpcomingSheet({
             </EmptyMedia>
             <EmptyTitle>Sin cobros próximos</EmptyTitle>
             <EmptyDescription>
-              Ninguna suscripción cobra en los próximos {windowDays} días.
+              Ninguna suscripción cobra en los próximos {windowDays} días. Si
+              alguna tiene la fecha vencida, la verás marcada como «Vencida» en
+              la lista.
             </EmptyDescription>
           </EmptyHeader>
         </Empty>
       ) : null}
       <div className="flex flex-col gap-2">
         {charges.map((charge) => (
-          <UpcomingChargeRow
+          <SubscriptionCard
             key={charge.id}
-            charge={charge}
+            subscription={upcomingChargeToCardSource(charge)}
             display={display}
             today={today}
             windowDays={windowDays}
+            variant="compact"
           />
         ))}
       </div>
@@ -117,47 +113,5 @@ export function UpcomingSheet({
         Suscripciones
       </p>
     </BottomSheet>
-  )
-}
-
-type UpcomingChargeRowProps = {
-  charge: FinanceSubscriptionUpcomingCharge
-  display: FinanceMoneyDisplay
-  today: Date
-  windowDays: number
-}
-
-function UpcomingChargeRow({
-  charge,
-  display,
-  today,
-  windowDays,
-}: UpcomingChargeRowProps) {
-  const label = billingLabel({ nextDate: charge.date, today, windowDays })
-  const method = charge.paymentMethod
-  const last4 = method?.last4 ? ` ••${method.last4}` : ""
-  return (
-    <Link
-      href={APP_ROUTES.app.financeSubscription(charge.subscriptionId)}
-      className="relative flex items-center gap-3 rounded-2xl border border-warning/50 bg-warning/5 p-3"
-    >
-      <BrandLogo name={charge.name} logoUrl={charge.logoUrl} size={32} />
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-medium">{charge.name}</p>
-        <p className="truncate text-xs text-muted-foreground">
-          {charge.date} · {method ? `${method.name}${last4}` : "Sin método"}
-        </p>
-      </div>
-      <div className="flex flex-col items-end">
-        <span className="text-sm font-semibold tabular-nums">
-          {formatFinanceMoney(charge.amount, {
-            ...display,
-            currency: charge.currency,
-          })}
-        </span>
-        <span className="text-xs font-medium text-warning">{label.text}</span>
-      </div>
-      <LinkPendingOverlay />
-    </Link>
   )
 }

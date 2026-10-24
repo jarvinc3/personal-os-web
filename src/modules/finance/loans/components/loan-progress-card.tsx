@@ -1,7 +1,9 @@
 "use client"
 
+import { EntitySurface } from "@/src/modules/finance/shared/components/entity-surface"
 import { BrandLogo } from "@/src/modules/finance/shared/components/brand-logo"
 import { PlanningProgressCard } from "@/src/modules/finance/shared/components/planning-progress-card"
+import type { PlanningProgressVariant } from "@/src/modules/finance/shared/components/planning-progress-card"
 import { formatRatePercentLabel } from "@/src/modules/finance/shared/lib/interest-rate"
 import { formatCalendarDate } from "@/src/modules/finance/shared/lib/ledger-form"
 import {
@@ -25,7 +27,12 @@ type LoanProgressCardProps = {
     logoUrl?: string | null
     color?: string | null
   } | null
-  href: string
+  href?: string
+  onPress?: () => void
+  selected?: boolean
+  disabled?: boolean
+  /** Variante de la card; la galería /dev/cards la pinta (#272). */
+  variant?: PlanningProgressVariant
 }
 
 export function LoanSurfaceMark({
@@ -37,26 +44,11 @@ export function LoanSurfaceMark({
 }) {
   const header = size === "header"
   return (
-    <span aria-hidden className="pointer-events-none absolute inset-0">
-      <span
-        className={cn(
-          "absolute",
-          header ? "-top-16 -right-10 size-72" : "-top-8 -right-6 size-40",
-          tinted ? "bg-white/20" : "bg-foreground/10"
-        )}
-        style={{ clipPath: "polygon(50% 0%, 100% 100%, 0% 100%)" }}
-      />
-      <span
-        className={cn(
-          "absolute",
-          header
-            ? "right-20 -bottom-20 size-52"
-            : "right-16 -bottom-10 size-28",
-          tinted ? "bg-black/20" : "bg-foreground/15"
-        )}
-        style={{ clipPath: "polygon(50% 100%, 0% 0%, 100% 0%)" }}
-      />
-    </span>
+    <EntitySurface
+      shape="triangles"
+      size={header ? "lg" : "md"}
+      tinted={tinted}
+    />
   )
 }
 
@@ -65,6 +57,10 @@ export function LoanProgressCard({
   display,
   institution,
   href,
+  onPress,
+  selected = false,
+  disabled = false,
+  variant = "full",
 }: LoanProgressCardProps) {
   const money = { ...display, currency: loan.currency }
   const { paidOff, progress } = loanProgressSummary(loan)
@@ -75,6 +71,7 @@ export function LoanProgressCard({
   const pillClass = tinted
     ? "border-transparent bg-white/15 text-white"
     : undefined
+  const logoSize = variant === "full" ? 34 : variant === "compact" ? 22 : 16
 
   return (
     <PlanningProgressCard
@@ -98,7 +95,7 @@ export function LoanProgressCard({
         <BrandLogo
           name={institution?.name ?? loan.lenderName}
           logoUrl={institution?.logoUrl}
-          size={34}
+          size={logoSize}
         />
       }
       tone={paidOff ? "success" : "warning"}
@@ -131,6 +128,11 @@ export function LoanProgressCard({
         </span>
       }
       href={href}
+      onPress={onPress}
+      selection={selected ? { selected } : undefined}
+      selected={selected}
+      disabled={disabled}
+      variant={variant}
     />
   )
 }

@@ -1,6 +1,9 @@
 "use client"
 
-import { InstitutionPreviewCard } from "@/src/modules/finance/institutions/components/institution-preview-card"
+import {
+  InstitutionWalletCard,
+  type InstitutionCardModel,
+} from "@/src/modules/finance/products"
 import { Button } from "@/src/shared/components/ui/button"
 import { SummarySection } from "@/src/shared/components/ui/summary"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
@@ -38,8 +41,7 @@ const PRODUCT_OPTIONS = [
 type InstitutionProductStepProps = {
   institutionId: string
   name: string
-  color: string
-  logoUrl: string | null
+  card: InstitutionCardModel
   onAddProduct?: (
     choice: InstitutionProductChoice,
     institutionId: string
@@ -50,19 +52,13 @@ type InstitutionProductStepProps = {
 export function InstitutionProductStep({
   institutionId,
   name,
-  color,
-  logoUrl,
+  card,
   onAddProduct,
   onSkip,
 }: InstitutionProductStepProps) {
   return (
     <div className="flex flex-col gap-4 pb-4">
-      <InstitutionPreviewCard
-        name={name}
-        color={color}
-        logoUrl={logoUrl}
-        caption="0 productos"
-      />
+      <InstitutionWalletCard card={card} />
       <div className="flex flex-col items-center gap-2 py-2 text-center">
         <span className="flex size-12 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-600">
           <CheckIcon className="size-6" />

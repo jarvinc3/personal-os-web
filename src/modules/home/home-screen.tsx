@@ -13,6 +13,11 @@ import { SummarySection } from "@/src/shared/components/ui/summary"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { BellRing, Brain, Settings, UserIcon } from "lucide-react"
+import {
+  ChevronRightIcon,
+  FlaskConicalIcon,
+  GalleryVerticalEndIcon,
+} from "lucide-react"
 import { LinkPendingOverlay } from "@/src/shared/components/ui/navigation-pending"
 import Link from "next/link"
 
@@ -62,6 +67,17 @@ function HomeScreenBody() {
             </Link>
           </Button>
         </div>
+      </SummarySection>
+
+      <SummarySection icon={FlaskConicalIcon} title="Desarrollo">
+        <Button variant="outline" asChild className="w-full justify-start">
+          <Link href={APP_ROUTES.app.devCardGallery} className="relative">
+            <GalleryVerticalEndIcon className="size-4 shrink-0" aria-hidden />
+            <span className="flex-1 text-left">Galería de cards</span>
+            <ChevronRightIcon className="size-4 shrink-0" aria-hidden />
+            <LinkPendingOverlay />
+          </Link>
+        </Button>
       </SummarySection>
 
       <FinanceHomeMonthSummary />

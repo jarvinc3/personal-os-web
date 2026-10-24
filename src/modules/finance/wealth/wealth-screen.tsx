@@ -11,6 +11,7 @@ import { WealthCurrencySection } from "@/src/modules/finance/wealth/components/w
 import { WealthSummary } from "@/src/modules/finance/wealth/components/wealth-summary"
 import { LoadingView } from "@/src/shared/components/layout/loading-view"
 import { Button } from "@/src/shared/components/ui/button"
+import { MissingBreakdownNotice } from "@/src/modules/finance/shared/components/layout/missing-breakdown-notice"
 import {
   Empty,
   EmptyContent,
@@ -80,17 +81,20 @@ function WealthScreenBody() {
   }
 
   const drifts = integrityQuery.data?.drifts ?? []
-  const groups = balanceSheet.breakdown.byCurrency
+  const breakdown = balanceSheet.breakdown
+  const groups = breakdown?.byCurrency ?? []
 
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-4 pb-8">
       <WealthSummary
         global={balanceSheet.global}
-        totals={balanceSheet.breakdown.totals}
+        totals={breakdown?.totals ?? null}
         display={display}
       />
 
-      {groups.length === 0 ? (
+      {breakdown ? null : <MissingBreakdownNotice />}
+
+      {breakdown && groups.length === 0 ? (
         <Empty className="rounded-3xl border border-border bg-card py-10">
           <EmptyHeader>
             <EmptyMedia variant="icon">
