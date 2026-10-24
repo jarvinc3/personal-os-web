@@ -241,6 +241,8 @@ type CardProductRowProps = {
   selected?: boolean
   /** Extra line under the type, such as the billing day. */
   trailingNote?: string
+  /** Proyección: reemplaza el monto y su etiqueta en la compacta. */
+  balance?: { amount: string; label: string }
   /** Variante de la card; la galería /dev/cards la pinta (#272). */
   variant?: "full" | "compact" | "inline"
 }
@@ -254,6 +256,7 @@ export function CardProductRow({
   disabled = false,
   selected = false,
   trailingNote,
+  balance,
   variant = "full",
 }: CardProductRowProps) {
   const balances = resolveCardDisplayBalances(card, accounts)
@@ -317,17 +320,20 @@ export function CardProductRow({
 
   if (compact) {
     const [firstBalance] = balances
-    const extraCurrencies = balances.length - 1
-    const balanceLabel = card.type === "CREDIT" ? "Disponible" : "Saldo"
-    const amount = firstBalance
-      ? formatFinanceMoney(
-          firstBalance.availableCredit ?? firstBalance.balance,
-          {
-            ...display,
-            currency: firstBalance.currency,
-          }
-        )
-      : "Sin saldo"
+    const extraCurrencies = balance ? 0 : balances.length - 1
+    const balanceLabel =
+      balance?.label ?? (card.type === "CREDIT" ? "Disponible" : "Saldo")
+    const amount =
+      balance?.amount ??
+      (firstBalance
+        ? formatFinanceMoney(
+            firstBalance.availableCredit ?? firstBalance.balance,
+            {
+              ...display,
+              currency: firstBalance.currency,
+            }
+          )
+        : "Sin saldo")
     const compactClassName = cn(
       "relative flex w-full items-center gap-2.5 overflow-hidden rounded-xl p-2.5 text-left text-white",
       !card.color && "bg-zinc-900",

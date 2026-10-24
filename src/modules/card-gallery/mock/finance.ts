@@ -3,6 +3,7 @@ import type { InstitutionStackItem } from "@/src/modules/finance/shared/lib/inst
 import type {
   FinanceAccount,
   FinanceBalanceDrift,
+  FinanceBalanceSheetLine,
   FinanceBudget,
   FinanceCard,
   FinanceCardStatementMovement,
@@ -842,3 +843,96 @@ export const galleryCashCard = buildInstitutionCard(
   cashStackItem({ drift: false, reconciliation: false }),
   GALLERY_DISPLAY
 )
+
+/** Lines of the net-worth breakdown for the wealth gallery (#285). */
+function galleryWealthLine(
+  input: Pick<FinanceBalanceSheetLine, "kind" | "id" | "name" | "entity"> &
+    Partial<FinanceBalanceSheetLine>
+): FinanceBalanceSheetLine {
+  return {
+    description: null,
+    institutionId: null,
+    currency: "DOP",
+    balance: "0",
+    balanceBase: "0",
+    hasDrift: false,
+    driftDifference: null,
+    reconciliation: "RECONCILED",
+    creditLimit: null,
+    availableCredit: null,
+    dueDate: null,
+    doubtful: false,
+    ...input,
+  }
+}
+
+export const galleryAccountWealthLine = galleryWealthLine({
+  kind: "ACCOUNT",
+  id: galleryCheckingAccount.id,
+  name: galleryCheckingAccount.name,
+  institutionId: galleryCheckingAccount.institutionId,
+  currency: galleryCheckingAccount.currency,
+  balance: galleryCheckingAccount.balance,
+  balanceBase: galleryCheckingAccount.balance,
+  hasDrift: true,
+  driftDifference: "125.00",
+  reconciliation: "PENDING",
+  entity: galleryCheckingAccount,
+})
+
+export const galleryCashWealthLine = galleryWealthLine({
+  kind: "CASH",
+  id: galleryCashAccount.id,
+  name: galleryCashAccount.name,
+  currency: galleryCashAccount.currency,
+  balance: galleryCashAccount.balance,
+  balanceBase: galleryCashAccount.balance,
+  entity: galleryCashAccount,
+})
+
+export const galleryCardWealthLine = galleryWealthLine({
+  kind: "CREDIT_CARD",
+  id: galleryCreditCard.id,
+  name: galleryCreditCard.name,
+  institutionId: galleryCreditCard.institutionId,
+  balance: "18000.00",
+  balanceBase: "18000.00",
+  creditLimit: "60000.00",
+  availableCredit: "42000.00",
+  reconciliation: "PENDING",
+  entity: galleryCreditCard,
+})
+
+export const galleryLoanWealthLine = galleryWealthLine({
+  kind: "LOAN",
+  id: galleryLoan.id,
+  name: galleryLoan.name ?? galleryLoan.lenderName,
+  institutionId: galleryLoan.institutionId,
+  currency: galleryLoan.currency,
+  balance: galleryLoan.currentBalance,
+  balanceBase: galleryLoan.currentBalance,
+  entity: galleryLoan,
+})
+
+export const galleryReceivableWealthLine = galleryWealthLine({
+  kind: "RECEIVABLE",
+  id: galleryReceivable.id,
+  name: galleryReceivable.debtorName,
+  currency: galleryReceivable.currency,
+  balance: "10000.00",
+  balanceBase: "10000.00",
+  dueDate: galleryReceivable.dueDate,
+  entity: galleryReceivable,
+})
+
+export const galleryDoubtfulReceivableWealthLine = galleryWealthLine({
+  kind: "RECEIVABLE",
+  id: "receivable-dudoso",
+  name: "Deudor dudoso",
+  currency: "DOP",
+  balance: "4000.00",
+  balanceBase: "4000.00",
+  dueDate: "2026-06-15",
+  doubtful: true,
+  entity: galleryReceivable,
+})
