@@ -29,7 +29,6 @@ export type GoalCardModel = {
   caption?: string
 }
 
-/** Textos, color y progreso de una meta de ahorro. */
 export function goalCardModel(
   goal: FinanceSavingsGoal,
   display: FinanceMoneyDisplay

@@ -66,7 +66,6 @@ function badgeFor(tone: PlanningProgressTone): PlanningProgressBadge {
   return { label: "En curso", variant: "info" }
 }
 
-/** Textos, color y progreso de un presupuesto. */
 export function budgetCardModel(
   budget: FinanceBudget,
   display: FinanceMoneyDisplay
