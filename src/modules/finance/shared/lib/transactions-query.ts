@@ -186,6 +186,12 @@ export const OPERATION_LEG_ROLE = {
 
 export type FinanceInstrumentRef = { accountId?: string; cardId?: string }
 
+/** Text tone of a signed amount: the sign decides the color of the row value. */
+export const MOVEMENT_SIGN_TONE: Record<"+" | "−", string> = {
+  "+": "text-success",
+  "−": "text-destructive",
+}
+
 export function movementSign(
   transaction: Pick<FinanceTransaction, "type" | "ledgerAmount">
 ): "+" | "−" | null {
@@ -232,6 +238,24 @@ export function movementSideMoney(
   }
 }
 
+export function signedMoneyLabel({
+  amount,
+  currency,
+  display,
+  sign,
+}: {
+  amount: string
+  currency: string
+  display: FinanceMoneyDisplay
+  sign: "+" | "−" | null
+}): string {
+  const formatted = formatFinanceMoney(amount, { ...display, currency })
+  if (!sign) {
+    return formatted
+  }
+  return `${sign} ${formatted}`
+}
+
 export function signedAmount({
   transaction,
   display,
@@ -242,19 +266,12 @@ export function signedAmount({
   instrument?: FinanceInstrumentRef
 }): string {
   const side = movementSideMoney(transaction, instrument)
-  const parsed = parseFinanceMoney(side.amount)
-  const formatted = formatFinanceMoney(
-    parsed === null ? null : Math.abs(parsed),
-    {
-      ...display,
-      currency: side.currency,
-    }
-  )
-  const sign = displayedMovementSign(transaction, instrument)
-  if (!sign) {
-    return formatted
-  }
-  return `${sign} ${formatted}`
+  return signedMoneyLabel({
+    amount: side.amount,
+    currency: side.currency,
+    display,
+    sign: displayedMovementSign(transaction, instrument),
+  })
 }
 
 /** Sign of a row: a transfer depends on the account or card it is read from. */

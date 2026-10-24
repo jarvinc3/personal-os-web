@@ -17,6 +17,7 @@ import {
   displayedMovementSign,
   isInactiveTransactionStatus,
   isTransferTransaction,
+  MOVEMENT_SIGN_TONE,
   OPERATION_LEG_ROLE,
   signedAmount,
   transferDirectionLabel,
@@ -55,6 +56,15 @@ type TransactionMovementRowProps = {
   variant?: "default" | "compact" | "inline"
 }
 
+type MovementLeadingProps = {
+  transaction: FinanceTransaction
+  icon: string | undefined
+  isTransfer: boolean
+  sign: "+" | "−" | null
+  title: string
+  size: number
+}
+
 function MovementLeading({
   transaction,
   icon,
@@ -62,15 +72,7 @@ function MovementLeading({
   sign,
   title,
   size,
-}: {
-  transaction: FinanceTransaction
-  icon: string | undefined
-  isTransfer: boolean
-  sign: "+" | "−" | null
-  title: string
-  size: number
-}) {
-  const iconClassName = size > 22 ? "size-5" : "size-4"
+}: MovementLeadingProps) {
   const emojiClassName = size >= 22 ? "text-base" : "text-sm"
 
   if (transaction.merchantLogoUrl) {
@@ -89,6 +91,29 @@ function MovementLeading({
       </span>
     )
   }
+  return (
+    <MovementTypeMark
+      type={transaction.type}
+      isTransfer={isTransfer}
+      sign={sign}
+      size={size}
+    />
+  )
+}
+
+/** Type mark of a movement when it has no merchant logo or category emoji. */
+export function MovementTypeMark({
+  type,
+  isTransfer,
+  sign,
+  size = 24,
+}: {
+  type: FinanceTransaction["type"]
+  isTransfer: boolean
+  sign: "+" | "−" | null
+  size?: number
+}) {
+  const iconClassName = size > 22 ? "size-5" : "size-4"
   if (isTransfer) {
     return (
       <ArrowLeftRightIcon
@@ -97,7 +122,7 @@ function MovementLeading({
       />
     )
   }
-  if (transaction.type === "DEBIT") {
+  if (type === "DEBIT") {
     return (
       <ArrowDownLeftIcon
         className={cn(iconClassName, "text-destructive")}
@@ -105,7 +130,7 @@ function MovementLeading({
       />
     )
   }
-  if (transaction.type === "CREDIT") {
+  if (type === "CREDIT") {
     return (
       <ArrowUpRightIcon
         className={cn(iconClassName, "text-success")}
@@ -113,7 +138,7 @@ function MovementLeading({
       />
     )
   }
-  if (transaction.type === "ADJUSTMENT") {
+  if (type === "ADJUSTMENT") {
     return (
       <ScaleIcon
         className={cn(
@@ -331,8 +356,7 @@ export function TransactionMovementRow({
           <div className="flex flex-col items-end">
             <span
               className={cn(
-                sign === "−" && "text-destructive",
-                sign === "+" && "text-success",
+                sign && MOVEMENT_SIGN_TONE[sign],
                 isInactive && "text-muted-foreground line-through opacity-50"
               )}
             >

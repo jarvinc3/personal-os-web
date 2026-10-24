@@ -1,6 +1,7 @@
 import { TransactionMovementRow } from "@/src/modules/finance/transactions/components/transaction-movement-row"
+import { StatementMovementRow } from "@/src/modules/finance/transactions/components/statement-movement-row"
+import { fromStatementLine } from "@/src/modules/finance/transactions/lib/statement-movement"
 import { MovementDetailPreview } from "@/src/modules/card-gallery/drafts/movement-detail-preview"
-import { statementMovementToTransaction } from "@/src/modules/card-gallery/drafts/statement-movement"
 import {
   galleryCategories,
   galleryCheckingAccount,
@@ -19,10 +20,7 @@ import {
 } from "@/src/modules/card-gallery/mock/finance"
 import type { GalleryVariant } from "@/src/modules/card-gallery/variants/types"
 
-const statementTransaction = statementMovementToTransaction({
-  movement: galleryStatementMovement,
-  card: galleryCreditCard,
-})
+const statementMovementRow = fromStatementLine(galleryStatementMovement)
 
 /** Variantes de la galería /dev/cards (#272). */
 export const movementVariants: readonly GalleryVariant[] = [
@@ -195,37 +193,15 @@ export const movementDetailVariants: readonly GalleryVariant[] = [
   },
 ]
 
-/** La misma fila con el modelo del estado de cuenta; borrador hasta #284 (#272). */
+/** La fila del estado de cuenta sale del adaptador real (#284). */
 export const statementMovementVariants: readonly GalleryVariant[] = [
   {
     id: "estado-cuenta-fila",
     label: "Fila de estado de cuenta",
-    propLabel: "statementMovementToTransaction (borrador)",
+    propLabel: "fromStatementLine",
     height: "≈ 64 px",
-    isDraft: true,
-    render: ({ display, notifyTap }) => (
-      <TransactionMovementRow
-        transaction={statementTransaction}
-        categories={galleryCategories}
-        display={display}
-        onPress={notifyTap}
-      />
-    ),
-  },
-  {
-    id: "estado-cuenta-compacta",
-    label: "Fila compacta del estado de cuenta",
-    propLabel: 'adapter · variant="compact"',
-    height: "≈ 48 px",
-    isDraft: true,
-    render: ({ display, notifyTap }) => (
-      <TransactionMovementRow
-        transaction={statementTransaction}
-        categories={galleryCategories}
-        display={display}
-        variant="compact"
-        onPress={notifyTap}
-      />
+    render: ({ display }) => (
+      <StatementMovementRow movement={statementMovementRow} display={display} />
     ),
   },
 ]
