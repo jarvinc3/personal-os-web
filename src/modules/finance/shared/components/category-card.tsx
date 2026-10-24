@@ -18,6 +18,7 @@ export function CategoryCard({
   color,
   isSystem,
   description,
+  amount,
   onPress,
   leading,
   trailing,
@@ -31,6 +32,8 @@ export function CategoryCard({
   color?: string | null
   isSystem: boolean
   description?: string
+  /** Importe ya formateado del chip; la fila no lo usa. */
+  amount?: string
   onPress?: () => void
   leading?: ReactNode
   trailing?: ReactNode
@@ -64,22 +67,24 @@ export function CategoryCard({
           />
         )}
         <span className="min-w-0 truncate">{label}</span>
-        {description ? (
-          <span className="shrink-0 text-[11px] opacity-70">{description}</span>
+        {chip && amount ? (
+          <span className="shrink-0 text-[11px] font-semibold tabular-nums opacity-80">
+            {amount}
+          </span>
         ) : null}
       </>
     )
     const chipClassName = cn(
       "inline-flex w-fit max-w-full items-center gap-1 text-xs font-medium",
-      chip && "rounded-full border px-2 py-0.5",
+      chip && "h-7 rounded-full px-2.5",
+      chip && !color && "bg-muted",
       disabled && "cursor-not-allowed opacity-50",
       !disabled && onPress && "cursor-pointer"
     )
     const chipStyle =
       chip && color
         ? {
-            backgroundColor: `color-mix(in srgb, ${color} 20%, transparent)`,
-            borderColor: `color-mix(in srgb, ${color} 35%, transparent)`,
+            backgroundColor: `color-mix(in srgb, ${color} 18%, transparent)`,
           }
         : undefined
 

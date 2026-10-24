@@ -1,6 +1,7 @@
 "use client"
 
 import { BrandLogo } from "@/src/modules/finance/shared/components/brand-logo"
+import { CategoryCard } from "@/src/modules/finance/shared/components/category-card"
 import {
   formatFinanceMoney,
   type FinanceMoneyDisplay,
@@ -31,29 +32,6 @@ type MerchantCardProps = {
   disabled?: boolean
   href?: string
   onPress?: () => void
-}
-
-function CategoryChip({
-  category,
-}: {
-  category: MerchantCardCategory | null | undefined
-}) {
-  const label = category?.name ?? "Sin categoría"
-  return (
-    <span
-      className="inline-flex max-w-full items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium"
-      style={
-        category?.color
-          ? {
-              backgroundColor: `color-mix(in srgb, ${category.color} 20%, transparent)`,
-            }
-          : undefined
-      }
-    >
-      {category?.icon ? <span aria-hidden>{category.icon}</span> : null}
-      <span className="truncate">{label}</span>
-    </span>
-  )
 }
 
 /** Card de comercio: tintada con el color de su categoría (#281). */
@@ -209,7 +187,13 @@ export function MerchantCard({
             {duplicate ? <Badge variant="warning">¿Duplicado?</Badge> : null}
           </span>
           <span className="flex flex-wrap items-center gap-1.5">
-            <CategoryChip category={category} />
+            <CategoryCard
+              name={category?.name ?? "Sin categoría"}
+              icon={category?.icon ?? null}
+              color={category?.color ?? null}
+              isSystem={false}
+              variant="chip"
+            />
             <span className="text-xs text-muted-foreground">
               {movementsLabel}
             </span>

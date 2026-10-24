@@ -2,6 +2,7 @@ import {
   CategoryCard,
   subcategoryCountLabel,
 } from "@/src/modules/finance/shared/components/category-card"
+import { galleryMoney } from "@/src/modules/card-gallery/mock/display"
 import {
   galleryHomeCategory,
   gallerySuperCategory,
@@ -46,17 +47,50 @@ export const categoryVariants: readonly GalleryVariant[] = [
   {
     id: "categoria-chip",
     label: "Chip",
-    propLabel: 'variant="chip"',
-    height: "≈ 24 px",
+    propLabel: 'variant="chip" · amount',
+    height: "≈ 28 px",
     render: ({ notifyTap }) => (
       <CategoryCard
         name={category.name}
         icon={category.icon}
         color={category.color}
         isSystem={category.isSystem}
+        amount={galleryMoney("1250.00")}
         variant="chip"
         onPress={notifyTap}
       />
+    ),
+  },
+  {
+    id: "categoria-chip-sin-color",
+    label: "Chip sin color",
+    propLabel: 'variant="chip" · color vacío',
+    height: "≈ 28 px",
+    render: () => (
+      <CategoryCard
+        name="Sin color"
+        icon={null}
+        color={null}
+        isSystem={false}
+        variant="chip"
+      />
+    ),
+  },
+  {
+    id: "categoria-chip-largo",
+    label: "Chip con nombre largo",
+    propLabel: "el nombre se corta con puntos suspensivos",
+    height: "≈ 28 px",
+    render: () => (
+      <div className="w-44">
+        <CategoryCard
+          name="Suscripciones y servicios digitales"
+          icon={category.icon}
+          color={category.color}
+          isSystem={false}
+          variant="chip"
+        />
+      </div>
     ),
   },
   {

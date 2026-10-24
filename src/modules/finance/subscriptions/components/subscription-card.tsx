@@ -1,6 +1,7 @@
 "use client"
 
 import { BrandLogo } from "@/src/modules/finance/shared/components/brand-logo"
+import { CategoryCard } from "@/src/modules/finance/shared/components/category-card"
 import {
   formatFinanceMoney,
   type FinanceMoneyDisplay,
@@ -284,8 +285,6 @@ function FullBody({
   progress,
   selected,
 }: FullBodyProps) {
-  const categoryLabel = cardCategoryLabel(subscription)
-
   return (
     <>
       <div className="flex items-start gap-3">
@@ -302,9 +301,20 @@ function FullBody({
         </SubscriptionProgressRing>
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-semibold">{subscription.name}</p>
-          {categoryLabel ? (
+          {subscription.category ? (
+            <CategoryCard
+              name={subscription.category.name}
+              icon={subscription.category.icon}
+              color={subscription.category.color}
+              isSystem={false}
+              variant="chip"
+            />
+          ) : subscription.billingCycle !== null ? (
             <p className="truncate text-xs text-muted-foreground">
-              {categoryLabel}
+              {billingCycleLabel(
+                subscription.billingCycle,
+                subscription.billingInterval
+              )}
             </p>
           ) : null}
         </div>
@@ -382,22 +392,6 @@ function isMonthlyCharge(subscription: SubscriptionCardSource): boolean {
   return (
     subscription.billingCycle === "MONTHLY" &&
     subscription.billingInterval === 1
-  )
-}
-
-/** Category of the card, or its cycle when the category is missing. */
-function cardCategoryLabel(
-  subscription: SubscriptionCardSource
-): string | null {
-  if (subscription.category?.name) {
-    return subscription.category.name
-  }
-  if (subscription.billingCycle === null) {
-    return null
-  }
-  return billingCycleLabel(
-    subscription.billingCycle,
-    subscription.billingInterval
   )
 }
 

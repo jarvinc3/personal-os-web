@@ -4,6 +4,7 @@ import { useWeeklySummary } from "@/src/modules/finance/dashboard/hooks/use-week
 import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
 import { useCards } from "@/src/modules/finance/shared/hooks/use-cards"
 import { CardProductRow } from "@/src/modules/finance/shared/components/product-rows"
+import { CategoryCard } from "@/src/modules/finance/shared/components/category-card"
 import { LoanProgressCard } from "@/src/modules/finance/loans"
 import { useLoans } from "@/src/modules/finance/shared/hooks/use-loans"
 import { useBudgets } from "@/src/modules/finance/shared/hooks/use-budgets"
@@ -12,7 +13,6 @@ import { FINANCE_BUDGET_PAGE_SIZE } from "@/src/modules/finance/shared/lib/budge
 import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
 import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
-import { Badge } from "@/src/shared/components/ui/badge"
 import { SummaryItem, SummarySection } from "@/src/shared/components/ui/summary"
 import { getModule } from "@/src/shared/constants/module-registry"
 import { CalendarDaysIcon } from "lucide-react"
@@ -77,9 +77,15 @@ export function FinanceHomeWeeklySummary() {
       {summary.topCategories.length > 0 ? (
         <div className="flex flex-wrap gap-1.5">
           {summary.topCategories.map((category) => (
-            <Badge key={category.name} variant="outline" className="text-xs">
-              {category.name} {formatFinanceMoney(category.total, display)}
-            </Badge>
+            <CategoryCard
+              key={category.name}
+              name={category.name}
+              icon={category.icon}
+              color={category.color}
+              isSystem={false}
+              amount={formatFinanceMoney(category.total, display)}
+              variant="chip"
+            />
           ))}
         </div>
       ) : null}

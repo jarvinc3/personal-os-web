@@ -3,6 +3,7 @@
 import { formatCalendarDate } from "@/src/modules/finance/shared/lib/ledger-form"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
 import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
+import { CategoryCard } from "@/src/modules/finance/shared/components/category-card"
 import type { FinanceSubscription } from "@/src/modules/finance/shared/types/entities"
 import { nextChargeLabel } from "@/src/modules/finance/subscriptions/lib/recurring-display"
 import { SummaryItem, SummarySection } from "@/src/shared/components/ui/summary"
@@ -55,7 +56,19 @@ export function SubscriptionSummaryTab({
         <SummaryItem title="Método de pago" value={paymentMethodLabel} />
         <SummaryItem
           title="Categoría"
-          value={subscription.category?.name ?? "Sin categoría"}
+          value={
+            subscription.category ? (
+              <CategoryCard
+                name={subscription.category.name}
+                icon={subscription.category.icon}
+                color={subscription.category.color}
+                isSystem={false}
+                variant="chip"
+              />
+            ) : (
+              "Sin categoría"
+            )
+          }
         />
         {subscription.trialEndsAt ? (
           <SummaryItem
