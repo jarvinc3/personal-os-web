@@ -1,0 +1,21 @@
+---
+description: Every finance entity is painted with its own card and the right density variant; never with a custom row.
+globs: "**/*.{tsx}"
+alwaysApply: true
+---
+
+# Cards por entidad
+
+Una entidad de Finanzas se pinta con su card. No se dibuja una fila propia para mostrarla.
+
+- **Completa** (`variant="full"`, por defecto): listas y cabecera del detalle.
+- **Compacta** (`variant="compact"`): la entidad es un dato de otra cosa (el método de pago de una suscripción, un vencimiento, una vinculación, el resumen de otra entidad).
+- **Inline** (`variant="inline"`): mención dentro de una línea de texto.
+- La variante es una prop del mismo componente; no hay componentes paralelos por densidad.
+- Las cards aceptan `onPress` o `href`, `disabled` y, en selectores, `selected` (anillo de 2 px y marca).
+- Si la entidad no tiene card, se crea la card de su módulo y se añade a `/dev/cards` antes de usarla.
+- Una proyección de otra entidad (una línea de estado de cuenta, un extra importado, el chat) usa un adaptador a la fila canónica (`MovementRow`), no una fila nueva.
+
+Tabla y usos: [docs/architecture/ui-components.md](../../docs/architecture/ui-components.md#cards-por-entidad). Referencia viva: `/dev/cards`.
+
+Incorrecto: un `SummaryItem` nuevo con el logo, el nombre y el monto de una entidad que ya tiene card.

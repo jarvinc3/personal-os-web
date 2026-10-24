@@ -5,7 +5,7 @@ Referencia visual permanente de las cards de cada entidad y sus variantes (#272)
 - Rutas: `/dev` (índice), `/dev/cards` (lista de entidades) y `/dev/cards/<entidad>` (todas las variantes, una por fila).
 - Datos: `mock/`, siempre falsos y con formato de moneda fijo. No llama al back ni lee el perfil.
 - Cards reales: se importan por ruta desde `src/modules`; las variantes viven en la prop `variant` del mismo componente.
-- Borradores: `drafts/` reúne lo que aún no existe en el módulo real (comercio, meta, cobro, presupuesto, base tintada, detalle de movimiento y correo). Se muestran con la marca «Borrador» y desaparecen cuando su sub-issue de #271 los mueve al módulo.
+- Borradores: `drafts/` guarda solo lo que aún no existe como card real: el bloque de chat (#287, bloqueado por el back) y la composición del detalle de movimiento. Se muestran con la marca «Borrador» y desaparecen cuando su sub-issue los mueve al módulo.
 - Variantes de cada entidad: `variants/`; el registro está en `variants/registry.ts`.
 - Toques: no navegan, muestran «Toque simulado».
 
