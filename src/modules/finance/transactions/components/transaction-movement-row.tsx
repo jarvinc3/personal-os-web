@@ -127,6 +127,60 @@ function MovementLeading({
   return null
 }
 
+type MovementRowProps = {
+  title: ReactNode
+  description?: ReactNode
+  leading: ReactNode
+  value: ReactNode
+  accentColor?: string
+  tintRow?: boolean
+  className?: string
+  trailing?: ReactNode
+  showChevron?: boolean
+  isLast?: boolean
+  href?: string
+  onPress?: () => void
+}
+
+/** Fila canónica de un movimiento; recibe el modelo ya calculado. */
+export function MovementRow({
+  title,
+  description,
+  leading,
+  value,
+  accentColor,
+  tintRow,
+  className,
+  trailing,
+  showChevron,
+  isLast = true,
+  href,
+  onPress,
+}: MovementRowProps) {
+  const row = {
+    accentColor,
+    tintRow,
+    title,
+    description,
+    leading,
+    value,
+    className,
+    trailing,
+    showChevron,
+    isLast,
+  }
+
+  if (onPress) {
+    return <SummaryItem {...row} onPress={onPress} />
+  }
+
+  if (href) {
+    return <SummaryItem {...row} href={href} />
+  }
+
+  return <SummaryItem {...row} />
+}
+
 export function TransactionMovementRow({
   transaction,
   categories,
@@ -258,69 +312,63 @@ export function TransactionMovementRow({
     </span>
   )
 
-  const row = {
-    accentColor: color,
-    tintRow: Boolean(color),
-    title: isInactive ? <span className="opacity-50">{title}</span> : title,
-    description:
-      variant === "compact" ? undefined : isInactive && description ? (
-        <span className="opacity-50">{description}</span>
-      ) : (
-        description
-      ),
-    leading: leadingMark(variant === "compact" ? 22 : 28),
-    className: variant === "compact" ? "gap-2 p-1.5 pl-2" : undefined,
-    value: (
-      <div className="flex items-center justify-end gap-1">
-        <div className="flex flex-col items-end">
-          <span
-            className={cn(
-              sign === "−" && "text-destructive",
-              sign === "+" && "text-success",
-              isInactive && "text-muted-foreground line-through opacity-50"
-            )}
-          >
-            {signedAmount({ transaction, display, instrument })}
-          </span>
-          {rateLabel ? (
-            <span className="text-[11px] text-muted-foreground tabular-nums">
-              {rateLabel}
+  return (
+    <MovementRow
+      accentColor={color}
+      tintRow={Boolean(color)}
+      title={isInactive ? <span className="opacity-50">{title}</span> : title}
+      description={
+        variant === "compact" ? undefined : isInactive && description ? (
+          <span className="opacity-50">{description}</span>
+        ) : (
+          description
+        )
+      }
+      leading={leadingMark(variant === "compact" ? 22 : 28)}
+      className={variant === "compact" ? "gap-2 p-1.5 pl-2" : undefined}
+      value={
+        <div className="flex items-center justify-end gap-1">
+          <div className="flex flex-col items-end">
+            <span
+              className={cn(
+                sign === "−" && "text-destructive",
+                sign === "+" && "text-success",
+                isInactive && "text-muted-foreground line-through opacity-50"
+              )}
+            >
+              {signedAmount({ transaction, display, instrument })}
             </span>
-          ) : null}
-          {hasStatusBadge ? (
-            <span className="flex flex-col items-end gap-1 font-normal">
-              {transaction.possibleDuplicateOfId ? (
-                <Badge variant="warning">¿Duplicado?</Badge>
-              ) : null}
-              {partial ? (
-                <Badge variant="warning">
-                  {FINANCE_REVERSAL_PARTIAL_LABEL}
-                </Badge>
-              ) : paired || isReversed ? (
-                <Badge variant="info">
-                  {FINANCE_TRANSACTION_STATUS_LABEL.REVERSED}
-                </Badge>
-              ) : null}
-            </span>
-          ) : null}
+            {rateLabel ? (
+              <span className="text-[11px] text-muted-foreground tabular-nums">
+                {rateLabel}
+              </span>
+            ) : null}
+            {hasStatusBadge ? (
+              <span className="flex flex-col items-end gap-1 font-normal">
+                {transaction.possibleDuplicateOfId ? (
+                  <Badge variant="warning">¿Duplicado?</Badge>
+                ) : null}
+                {partial ? (
+                  <Badge variant="warning">
+                    {FINANCE_REVERSAL_PARTIAL_LABEL}
+                  </Badge>
+                ) : paired || isReversed ? (
+                  <Badge variant="info">
+                    {FINANCE_TRANSACTION_STATUS_LABEL.REVERSED}
+                  </Badge>
+                ) : null}
+              </span>
+            ) : null}
+          </div>
+          <TransactionStatusMark
+            status={isReversed || paired ? "REVERSED" : transaction.status}
+          />
         </div>
-        <TransactionStatusMark
-          status={isReversed || paired ? "REVERSED" : transaction.status}
-        />
-      </div>
-    ),
-    trailing,
-    showChevron,
-    isLast: true as const,
-  }
-
-  if (onPress) {
-    return <SummaryItem {...row} onPress={onPress} />
-  }
-
-  if (href) {
-    return <SummaryItem {...row} href={href} />
-  }
-
-  return <SummaryItem {...row} />
+      }
+      trailing={trailing}
+      showChevron={showChevron}
+      href={href}
+      onPress={onPress}
+    />
+  )
 }

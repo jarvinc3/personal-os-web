@@ -30,6 +30,10 @@ export { useFinanceEnabled } from "./shared/hooks/use-finance-enabled"
 export { useInstitutions } from "./shared/hooks/use-institutions"
 export { InstitutionWalletCard } from "./products/components/institution-wallet-card"
 export {
+  MovementRow,
+  TransactionMovementRow,
+} from "./transactions/components/transaction-movement-row"
+export {
   buildInstitutionCardFromCatalog,
   buildPlainInstitutionCard,
 } from "./products/lib/institution-card"

@@ -14,6 +14,7 @@ import { MissingRecord } from "@/src/modules/finance/shared/components/layout/mi
 import { FinanceGate } from "@/src/modules/finance/finance-gate"
 import { MerchantEditSheet } from "@/src/modules/finance/merchants/components/merchant-edit-sheet"
 import { MerchantCard } from "@/src/modules/finance/merchants/components/merchant-card"
+import { TransactionMovementRow } from "@/src/modules/finance"
 import { merchantMonthParams } from "@/src/modules/finance/merchants/lib/merchant-query"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
 import { useCategories } from "@/src/modules/finance/shared/hooks/use-categories"
@@ -24,9 +25,7 @@ import {
   useMerchants,
 } from "@/src/modules/finance/shared/hooks/use-merchants"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
-import { formatFinanceDateTimeLabel } from "@/src/modules/finance/shared/lib/ledger-form"
 import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
-import { signedAmount } from "@/src/modules/finance/shared/lib/transactions-query"
 import {
   FINANCE_TRANSACTIONS_QUERY_KEY,
   type FinancePaginated,
@@ -51,7 +50,7 @@ import {
 import { Button } from "@/src/shared/components/ui/button"
 import { InfiniteListSentinel } from "@/src/shared/components/ui/infinite-list-sentinel"
 import { Spinner } from "@/src/shared/components/ui/spinner"
-import { SummaryItem, SummarySection } from "@/src/shared/components/ui/summary"
+import { SummarySection } from "@/src/shared/components/ui/summary"
 import { API_ENDPOINTS } from "@/src/shared/constants/api-endpoints"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
@@ -225,26 +224,13 @@ function MerchantDetailBody({ merchantId }: { merchantId: string }) {
             </Empty>
           }
         >
-          {movements.map((transaction, index) => (
-            <SummaryItem
+          {movements.map((transaction) => (
+            <TransactionMovementRow
               key={transaction.id}
-              title={
-                transaction.merchantName ??
-                transaction.merchant ??
-                transaction.description ??
-                "Movimiento"
-              }
-              description={formatFinanceDateTimeLabel(
-                transaction.transactionDate,
-                display.locale
-              )}
-              value={signedAmount({
-                transaction,
-                display: { ...display, currency: transaction.currency },
-              })}
+              transaction={transaction}
+              categories={categories}
+              display={display}
               href={APP_ROUTES.app.financeTransaction(transaction.id)}
-              isLast={index === movements.length - 1}
-              className="px-3"
             />
           ))}
         </AsyncRegion>

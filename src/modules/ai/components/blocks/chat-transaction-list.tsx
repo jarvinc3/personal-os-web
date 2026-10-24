@@ -1,6 +1,6 @@
 "use client"
 
-import { ChatTransactionRow } from "@/src/modules/ai/components/blocks/chat-transaction-row"
+import { ChatMovementRow } from "@/src/modules/ai/components/blocks/chat-movement-row"
 import type { ChatBlock } from "@/src/modules/ai/types/chat.types"
 import { Button } from "@/src/shared/components/ui/button"
 import { LinkPendingOverlay } from "@/src/shared/components/ui/navigation-pending"
@@ -15,7 +15,7 @@ export function ChatTransactionList({ block }: ChatTransactionListProps) {
     <div className="flex flex-col gap-2">
       <div className="rounded-2xl border border-border bg-card p-1">
         {block.items.map((snapshot, index) => (
-          <ChatTransactionRow
+          <ChatMovementRow
             key={snapshot.id}
             snapshot={snapshot}
             isLast={index === block.items.length - 1}

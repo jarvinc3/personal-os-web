@@ -1,6 +1,6 @@
 "use client"
 
-import { ChatTransactionRow } from "@/src/modules/ai/components/blocks/chat-transaction-row"
+import { ChatMovementRow } from "@/src/modules/ai/components/blocks/chat-movement-row"
 import type { ChatBlock } from "@/src/modules/ai/types/chat.types"
 
 type ChatTransactionCardProps = {
@@ -10,7 +10,7 @@ type ChatTransactionCardProps = {
 export function ChatTransactionCard({ block }: ChatTransactionCardProps) {
   return (
     <div className="rounded-2xl border border-border bg-card p-1">
-      <ChatTransactionRow snapshot={block.snapshot} isLast />
+      <ChatMovementRow snapshot={block.snapshot} isLast />
     </div>
   )
 }
