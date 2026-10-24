@@ -15,14 +15,15 @@ Instrucciones para agentes y reviewers que trabajan en el cliente web de Persona
 
 Si una afirmación no está `VERIFICADO`, no la trates como comportamiento vigente: compruébala en código o abre un issue.
 
-## Seguimiento con GitHub Issues
+## Flujo de trabajo obligatorio
 
-El estado, el roadmap y los hallazgos viven en GitHub Issues. Los documentos de trabajo cerrados pasan a [docs/archive/](docs/archive/).
+1. **Antes de codear:** lee el issue correspondiente. Si no existe, busca duplicados y créalo según [docs/issue-conventions.md](docs/issue-conventions.md), agrégalo al Project 3 con Priority `High`, `Medium` o `Low`, y muévelo a `In Progress`.
+2. **Repo y rama:** trabaja directo en `develop` en el repositorio correspondiente. Sin ramas, sin worktrees, sin copias temporales y sin PRs hacia `develop`.
+3. **Límites:** no toques `master`, producción, `.env` ni despliegues; los merges a `master` los decide Jarvin. Las migraciones se ejecutan solo en DEV.
+4. **Antes del commit:** revisa el diff contra los criterios de aceptación del issue, busca huecos o implementaciones faltantes y corrígelos. Luego ejecuta format, lint, typecheck y pruebas.
+5. **Cierre:** commit en español con `Closes #N` o `Refs #N` y push. Después cierra el issue a mano con un comentario y muévelo a `Done` en el Project 3; `Closes` solo cierra el issue cuando el cambio llega a `master`.
 
-- Un cambio resuelve un issue: el cuerpo del commit cierra con `Closes #N` cuando el issue queda resuelto, o `Refs #N` cuando solo avanza. Un commit del monorepo referencia el issue del repo por su número.
-- Lo decidido y no implementado se abre como issue con label `roadmap`; no se deja como `REV-*` suelto en los documentos.
-- Cómo se escribe un issue: [docs/issue-conventions.md](docs/issue-conventions.md) — estructura, título, criterios de aceptación, etiquetas, talla y cierre.
-- La app móvil (`personal-os-app`) está fuera de servicio: no la cites como cliente.
+Lo decidido y no implementado se abre como issue con label `roadmap`; no se deja como `REV-*` suelto en los documentos.
 
 ## Fuentes canónicas
 
@@ -43,6 +44,8 @@ El estado, el roadmap y los hallazgos viven en GitHub Issues. Los documentos de 
 | Cliente HTTP                                 | [docs/infrastructure/api-client.md](docs/infrastructure/api-client.md) — envelope `{ data, meta }`, `ApiError`, 401. No abras otro `fetch`                                    |
 
 Este cliente es **Next.js 16**, no React Native. ADR-001 está resumido en esa frase.
+
+La app móvil (`personal-os-app`) está fuera de servicio: no la cites como cliente.
 
 Al arrancar o diagnosticar el cliente, lee [docs/operations/runbook.md](docs/operations/runbook.md). Al tocar Web Push, lee [docs/infrastructure/web-push.md](docs/infrastructure/web-push.md).
 
