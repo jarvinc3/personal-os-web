@@ -2,6 +2,22 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.61.0] - 2026-10-24
+
+### Agregado
+
+- La suscripción se muestra compacta en los pagos próximos, las alertas y el «Restante del mes» del calendario, y el detalle abre con su card completa (#279).
+- La categoría se muestra como chip con su emoji, su color y su importe donde se menciona: Inicio, el resumen y las cards de suscripción y comercio (#280).
+- El estado de cuenta de una tarjeta y los extras de una importación usan la fila canónica del movimiento, con signo y color (#284).
+- Los recurrentes detectados y su archivo, las bandejas de correo, las fuentes, los correos pendientes y el historial de sincronización se muestran con cards y su estado (#286).
+- Patrimonio muestra la card compacta de cada cuenta, tarjeta, préstamo y cobro, con la deuda de la línea y las marcas de descuadre y conciliación (#285).
+- Las vistas previas de los formularios de institución, tarjeta y cuenta son las cards reales con los valores del borrador (#288).
+
+### Cambiado
+
+- La tabla «entidad → card → variantes» y la regla de una sola fuente de verdad viven en `docs/architecture/ui-components.md` y se enlazan desde `AGENTS.md` (#289).
+- La galería `/dev/cards` ya no anuncia borradores que son cards reales y documenta el chip, la compacta de suscripción, las cards de correo y sincronización y el patrimonio.
+
 ## [0.60.1] - 2026-10-23
 
 ### Cambiado

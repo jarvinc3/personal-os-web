@@ -12,6 +12,17 @@ export type ReleaseNotesEntry = {
 
 export const RELEASE_NOTES: readonly ReleaseNotesEntry[] = [
   {
+    version: "0.61.0",
+    highlights: [
+      "Las suscripciones se ven compactas en los pagos próximos, las alertas y el calendario.",
+      "La categoría se ve como una píldora con su emoji y su color donde se menciona, y con su importe en Inicio.",
+      "El estado de cuenta y los movimientos que sobran al importar usan la misma fila que Movimientos.",
+      "Los recurrentes detectados, las bandejas de correo y el historial de sincronización se ven con su card y su estado.",
+      "Patrimonio muestra cada producto con su card, su color y sus marcas.",
+      "Las vistas previas de institución, tarjeta y cuenta son las cards reales.",
+    ],
+  },
+  {
     version: "0.60.1",
     highlights: [
       "Sin cambios visibles: esta versión solo ordena detalles internos del proyecto.",
