@@ -44,6 +44,9 @@ export type PlanningProgressCardProps = {
   /** Present only while the list is picking cobros; adds the round check. */
   selection?: { selected: boolean; dimmed?: boolean }
   onLongPress?: () => void
+  disabled?: boolean
+  /** Ring and check mark while the card is picked in a selector. */
+  selected?: boolean
   variant?: PlanningProgressVariant
 }
 
@@ -150,6 +153,8 @@ export function PlanningProgressCard({
   onPress,
   selection,
   onLongPress,
+  disabled = false,
+  selected = false,
   variant = "full",
 }: PlanningProgressCardProps) {
   const barWidth = progress === null ? 0 : clampPct(progress)
@@ -310,6 +315,10 @@ export function PlanningProgressCard({
       variant !== "inline" &&
       "border-2 border-info bg-info/[7%]",
     selection?.dimmed && "opacity-60",
+    selected &&
+      variant !== "inline" &&
+      "ring-2 ring-primary ring-offset-2 ring-offset-background",
+    disabled && "pointer-events-none opacity-50",
     (href || onPress) &&
       cn(
         PRESSABLE_CLASS,
@@ -402,6 +411,16 @@ export function PlanningProgressCard({
               }}
             />
           </span>
+          {caption ? (
+            <span
+              className={cn(
+                "mt-0.5 block truncate text-[11px]",
+                tinted ? "text-white/70" : "text-muted-foreground"
+              )}
+            >
+              {caption}
+            </span>
+          ) : null}
         </span>
         {selectionMark}
       </span>
@@ -452,6 +471,7 @@ export function PlanningProgressCard({
         className={className}
         style={style}
         onClick={onPress}
+        disabled={disabled}
         {...pressHandlers}
       >
         {body}

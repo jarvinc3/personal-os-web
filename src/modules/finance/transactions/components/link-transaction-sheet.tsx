@@ -2,6 +2,7 @@
 
 import { useLoanInstallments } from "@/src/modules/finance/shared/hooks/use-loan-installments"
 import { useLoans } from "@/src/modules/finance/shared/hooks/use-loans"
+import { LoanProgressCard } from "@/src/modules/finance/loans"
 import { useReceivables } from "@/src/modules/finance/shared/hooks/use-receivables"
 import { useSavingsGoals } from "@/src/modules/finance/shared/hooks/use-savings-goals"
 import {
@@ -139,16 +140,14 @@ export function LinkTransactionSheet({
     }
     return (
       <div className="rounded-2xl border border-border bg-card">
-        {loans.map((loan, index) => (
-          <SummaryItem
+        {loans.map((loan) => (
+          <LoanProgressCard
             key={loan.id}
-            title={loan.lenderName}
-            description={`Saldo ${formatFinanceMoney(loan.currentBalance, {
-              ...display,
-              currency: loan.currency,
-            })}`}
+            loan={loan}
+            display={display}
+            variant="compact"
+            selected={loan.id === loanId}
             onPress={() => setLoanId(loan.id)}
-            isLast={index === loans.length - 1}
           />
         ))}
       </div>

@@ -4,6 +4,8 @@ import { useWeeklySummary } from "@/src/modules/finance/dashboard/hooks/use-week
 import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
 import { useCards } from "@/src/modules/finance/shared/hooks/use-cards"
 import { CardProductRow } from "@/src/modules/finance/shared/components/product-rows"
+import { LoanProgressCard } from "@/src/modules/finance/loans"
+import { useLoans } from "@/src/modules/finance/shared/hooks/use-loans"
 import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
 import { Badge } from "@/src/shared/components/ui/badge"
@@ -26,9 +28,11 @@ export function FinanceHomeWeeklySummary() {
   const summaryQuery = useWeeklySummary(isEnabled)
   const cardsQuery = useCards(isEnabled)
   const accountsQuery = useAccounts(isEnabled)
+  const loansQuery = useLoans(isEnabled)
   const summary = summaryQuery.data
   const cards = cardsQuery.data ?? []
   const accounts = accountsQuery.data ?? []
+  const loans = loansQuery.data ?? []
 
   if (!isEnabled || !summary) {
     return null
@@ -81,14 +85,27 @@ export function FinanceHomeWeeklySummary() {
         />
       ))}
 
-      {summary.upcomingInstallments.map((installment) => (
-        <SummaryItem
-          key={installment.loanId}
-          title={installment.lenderName}
-          description={`Cuota · ${formatShortDate(installment.dueDate, formatLocale)}`}
-          value={formatFinanceMoney(installment.amount, display)}
-        />
-      ))}
+      {summary.upcomingInstallments.map((installment) => {
+        const loan = loans.find((item) => item.id === installment.loanId)
+        if (!loan) {
+          return (
+            <SummaryItem
+              key={installment.loanId}
+              title={installment.lenderName}
+              description={`Cuota · ${formatShortDate(installment.dueDate, formatLocale)}`}
+              value={formatFinanceMoney(installment.amount, display)}
+            />
+          )
+        }
+        return (
+          <LoanProgressCard
+            key={installment.loanId}
+            loan={loan}
+            display={display}
+            variant="compact"
+          />
+        )
+      })}
 
       {summary.cardDueDates.map((dueCard) => {
         const card = cards.find((item) => item.id === dueCard.cardId)

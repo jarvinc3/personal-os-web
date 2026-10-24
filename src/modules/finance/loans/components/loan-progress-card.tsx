@@ -29,6 +29,8 @@ type LoanProgressCardProps = {
   } | null
   href?: string
   onPress?: () => void
+  selected?: boolean
+  disabled?: boolean
   /** Variante de la card; la galería /dev/cards la pinta (#272). */
   variant?: PlanningProgressVariant
 }
@@ -56,6 +58,8 @@ export function LoanProgressCard({
   institution,
   href,
   onPress,
+  selected = false,
+  disabled = false,
   variant = "full",
 }: LoanProgressCardProps) {
   const money = { ...display, currency: loan.currency }
@@ -125,6 +129,9 @@ export function LoanProgressCard({
       }
       href={href}
       onPress={onPress}
+      selection={selected ? { selected } : undefined}
+      selected={selected}
+      disabled={disabled}
       variant={variant}
     />
   )
