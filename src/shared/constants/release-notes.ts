@@ -12,6 +12,14 @@ export type ReleaseNotesEntry = {
 
 export const RELEASE_NOTES: readonly ReleaseNotesEntry[] = [
   {
+    version: "0.60.0",
+    highlights: [
+      "La galería de cards es permanente y ahora se abre desde el índice /dev; muestra las variantes reales de cada entidad.",
+      "Institución, cuenta, tarjeta, préstamo, meta, cobro, presupuesto y comercio se ven en tamaño compacto cuando son un dato de otra pantalla.",
+      "El detalle de un movimiento muestra su categoría y las cards de su cuenta, tarjeta y comercio.",
+    ],
+  },
+  {
     version: "0.59.0",
     highlights: [
       "Nueva galería provisional para revisar las cards de cada entidad y sus variantes antes de aplicarlas en la app.",

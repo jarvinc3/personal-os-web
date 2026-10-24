@@ -2,6 +2,24 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.60.0] - 2026-10-23
+
+### Agregado
+
+- La galería `/dev/cards` es permanente, sin el aviso de provisional, con índice `/dev` y la marca «Borrador» en lo que aún no tiene card definitiva (#272).
+- Institución y efectivo se eligen como card compacta, con conteos, saldos por moneda, selección y estados deshabilitados (#274).
+- La cuenta se muestra con su card compacta cuando es un dato de otra entidad y en «Cuenta o tarjeta» (#275).
+- La tarjeta se muestra compacta en «Cuenta o tarjeta», en los vencimientos de Inicio y en el método de pago de una suscripción (#276).
+- El préstamo se muestra compacto en la vinculación de un movimiento y en la cuota próxima de Inicio (#277).
+- Meta, cobro y presupuesto se muestran compactos en la vinculación de movimientos y en los presupuestos en riesgo de Inicio (#278).
+- Card de comercio con el tinte de su categoría, sus tres niveles y la insignia «¿Duplicado?» (#281).
+- El detalle de un movimiento muestra la categoría como chip y las cards compactas de cuenta, tarjeta y comercio; la transferencia muestra origen y destino (#283).
+
+### Cambiado
+
+- Todos los listados de movimientos usan la misma fila; el chat ya no tiene una propia (#282).
+- Meta, cobro y presupuesto se pintan con su componente y las cards comparten la superficie decorativa, sin cambios visuales (#273).
+
 ## [0.59.0] - 2026-10-23
 
 ### Agregado
