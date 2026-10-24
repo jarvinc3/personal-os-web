@@ -4,7 +4,6 @@ import { PendingAccountDeletionHandler } from "@/src/modules/settings/components
 import { PendingDataWipeHandler } from "@/src/modules/settings/components/pending-data-wipe-handler"
 import { ReleaseNotes } from "@/src/modules/settings/components/release-notes"
 import { useTimeZoneSync } from "@/src/modules/settings/hooks/use-time-zone-sync"
-import { ChatContextProvider } from "@/src/modules/ai/context/chat-context"
 import { KeepAwakeProvider } from "@/src/modules/keep-awake/context/keep-awake-context"
 import { AppHeader } from "@/src/shared/components/layout/app-header"
 import { AppSidebar } from "@/src/shared/components/layout/app-sidebar"
@@ -35,27 +34,25 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   useTimeZoneSync()
 
   return (
-    <ChatContextProvider>
-      <SidebarProvider>
-        <AppSidebar />
-        <HeaderProvider>
-          <SidebarInset className="h-svh max-h-svh overflow-hidden">
-            <AppHeader />
-            <main
-              ref={mainRef}
-              className="scrollbar-hide min-h-0 flex-1 overflow-auto"
-            >
-              <ResetMainScroll scrollerRef={mainRef} />
-              <KeepAwakeProvider>
-                <PendingAccountDeletionHandler />
-                <PendingDataWipeHandler />
-                <ReleaseNotes />
-                {children}
-              </KeepAwakeProvider>
-            </main>
-          </SidebarInset>
-        </HeaderProvider>
-      </SidebarProvider>
-    </ChatContextProvider>
+    <SidebarProvider>
+      <AppSidebar />
+      <HeaderProvider>
+        <SidebarInset className="h-svh max-h-svh overflow-hidden">
+          <AppHeader />
+          <main
+            ref={mainRef}
+            className="scrollbar-hide min-h-0 flex-1 overflow-auto"
+          >
+            <ResetMainScroll scrollerRef={mainRef} />
+            <KeepAwakeProvider>
+              <PendingAccountDeletionHandler />
+              <PendingDataWipeHandler />
+              <ReleaseNotes />
+              {children}
+            </KeepAwakeProvider>
+          </main>
+        </SidebarInset>
+      </HeaderProvider>
+    </SidebarProvider>
   )
 }

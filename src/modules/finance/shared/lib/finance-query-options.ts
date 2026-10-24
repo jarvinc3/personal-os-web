@@ -3,9 +3,6 @@ import {
   FINANCE_BUDGETS_QUERY_KEY,
   FINANCE_CARDS_QUERY_KEY,
   FINANCE_CATEGORIES_QUERY_KEY,
-  FINANCE_EMAIL_MAILBOXES_QUERY_KEY,
-  FINANCE_EMAIL_MESSAGES_QUERY_KEY,
-  FINANCE_EMAIL_PENDING_QUERY_KEY,
   FINANCE_INSTITUTIONS_QUERY_KEY,
   FINANCE_LOANS_QUERY_KEY,
   FINANCE_RECEIVABLES_QUERY_KEY,
@@ -17,15 +14,11 @@ import type {
   FinanceBudget,
   FinanceCard,
   FinanceCategory,
-  FinanceEmailProcessedMessage,
   FinanceInstitution,
   FinanceLoan,
-  FinanceMailbox,
-  FinancePendingEmailMessage,
   FinanceReceivable,
   FinanceSavingsGoal,
 } from "@/src/modules/finance/shared/types/entities"
-import { asFinanceArray } from "./planning-lists.ts"
 
 export type FinanceQueryGet = <T = unknown>(path: string) => Promise<T>
 
@@ -53,9 +46,6 @@ const PATHS = {
   loans: "/finance/loans",
   receivables: "/finance/receivables",
   budgets: "/finance/budgets",
-  emailMailboxes: "/finance/email-sync/mailboxes",
-  emailPending: "/finance/email-sync/pending",
-  emailMessages: "/finance/email-sync/messages",
 } as const
 
 export type FinanceListParams = Record<
@@ -209,36 +199,6 @@ export function budgetsInfiniteQuery(
     queryKey: [...FINANCE_BUDGETS_QUERY_KEY, "infinite", query],
     endpoint: PATHS.budgets,
     params: { limit: query.limit },
-    get,
-  })
-}
-
-export function emailMailboxesQuery(get: FinanceQueryGet = defaultFinanceGet) {
-  return {
-    queryKey: FINANCE_EMAIL_MAILBOXES_QUERY_KEY,
-    queryFn: async () =>
-      asFinanceArray<FinanceMailbox>(await get(PATHS.emailMailboxes)),
-  }
-}
-
-export function emailPendingQuery(get: FinanceQueryGet = defaultFinanceGet) {
-  return financeInfiniteListQuery<FinancePaginated<FinancePendingEmailMessage>>(
-    {
-      queryKey: FINANCE_EMAIL_PENDING_QUERY_KEY,
-      endpoint: PATHS.emailPending,
-      params: { limit: FINANCE_LIST_PAGE_SIZE },
-      get,
-    }
-  )
-}
-
-export function emailMessagesQuery(get: FinanceQueryGet = defaultFinanceGet) {
-  return financeInfiniteListQuery<
-    FinancePaginated<FinanceEmailProcessedMessage>
-  >({
-    queryKey: FINANCE_EMAIL_MESSAGES_QUERY_KEY,
-    endpoint: PATHS.emailMessages,
-    params: { limit: FINANCE_LIST_PAGE_SIZE },
     get,
   })
 }

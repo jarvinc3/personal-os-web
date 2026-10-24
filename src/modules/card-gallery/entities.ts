@@ -8,7 +8,6 @@ import {
   HandCoinsIcon,
   HandshakeIcon,
   LandmarkIcon,
-  MailIcon,
   PiggyBankIcon,
   ReceiptTextIcon,
   RefreshCwIcon,
@@ -38,7 +37,6 @@ export type CardGalleryEntitySlug =
   | "estado-cuenta"
   | "patrimonio"
   | "recurrente"
-  | "correo"
   | "notificacion"
   | "chat"
   | "avisos"
@@ -140,12 +138,6 @@ export const CARD_GALLERY_ENTITIES: readonly CardGalleryEntity[] = [
     name: "Recurrente detectado",
     description: "Comercio compacto con Confirmar",
     icon: RefreshCwIcon,
-  },
-  {
-    slug: "correo",
-    name: "Correo y syncs",
-    description: "Bandeja, fuente y pendientes",
-    icon: MailIcon,
   },
   {
     slug: "notificacion",

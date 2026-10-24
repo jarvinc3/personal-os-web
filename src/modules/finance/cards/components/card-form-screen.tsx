@@ -1,7 +1,7 @@
 "use client"
 
 import { zodResolver } from "@hookform/resolvers/zod"
-import { FileTextIcon, RefreshCwIcon, SaveIcon, WalletIcon } from "lucide-react"
+import { RefreshCwIcon, SaveIcon, WalletIcon } from "lucide-react"
 import { useEffect, useState } from "react"
 import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form"
 
@@ -65,7 +65,6 @@ import { Button } from "@/src/shared/components/ui/button"
 import { SummarySection } from "@/src/shared/components/ui/summary"
 import { usePicker } from "@/src/shared/hooks/use-picker"
 import { appToast } from "@/src/shared/lib/app-toast"
-import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
 
 const TYPE_OPTIONS = FINANCE_CARD_TYPES.map((value) => ({
   value,
@@ -81,7 +80,6 @@ type CardFormScreenProps = {
   display: FinanceMoneyDisplay
   onDone: () => void
   onUpdateBalance?: (card: FinanceCard) => void
-  onReadStatement?: () => void
 }
 
 export function CardFormScreen({
@@ -93,7 +91,6 @@ export function CardFormScreen({
   display,
   onDone,
   onUpdateBalance,
-  onReadStatement,
 }: CardFormScreenProps) {
   const isEdit = Boolean(card)
   const createMutation = useCreateCard()
@@ -348,27 +345,6 @@ export function CardFormScreen({
 
         {cardType === "CREDIT" ? (
           <CardCycleSection control={control} errors={errors} />
-        ) : null}
-
-        {onReadStatement ? (
-          <button
-            type="button"
-            onClick={onReadStatement}
-            className={cn(
-              "flex items-center gap-3 rounded-2xl border border-border bg-card px-3 py-3 text-left",
-              PRESSABLE_CLASS
-            )}
-          >
-            <FileTextIcon className="size-4.5 shrink-0 text-muted-foreground" />
-            <span className="min-w-0 flex-1">
-              <span className="block text-sm font-medium">
-                Leer de un estado de cuenta
-              </span>
-              <span className="block text-xs text-muted-foreground">
-                PDF o correo del banco: rellena límite, saldo y fechas
-              </span>
-            </span>
-          </button>
         ) : null}
 
         <CardOptionalDetailsSection control={control} openByDefault={isEdit} />

@@ -21,7 +21,6 @@ import {
 } from "@/src/modules/card-gallery/variants/planning"
 import { recurringVariants } from "@/src/modules/card-gallery/variants/recurring"
 import { subscriptionVariants } from "@/src/modules/card-gallery/variants/subscriptions"
-import { syncVariants } from "@/src/modules/card-gallery/variants/sync"
 import { wealthVariants } from "@/src/modules/card-gallery/variants/wealth"
 
 /** Variantes de cada entidad, en el orden en que se muestran (#272). */
@@ -44,7 +43,6 @@ const CARD_GALLERY_VARIANTS: Record<
   "estado-cuenta": statementMovementVariants,
   patrimonio: wealthVariants,
   recurrente: recurringVariants,
-  correo: syncVariants,
   notificacion: notificationVariants,
   chat: chatVariants,
   avisos: alertVariants,

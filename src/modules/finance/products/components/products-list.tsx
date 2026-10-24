@@ -8,7 +8,6 @@ import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
 import { useBalanceSheet } from "@/src/modules/finance/shared/hooks/use-balance-sheet"
 import { useCards } from "@/src/modules/finance/shared/hooks/use-cards"
 import { useCategories } from "@/src/modules/finance/shared/hooks/use-categories"
-import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
 import { useInstitutions } from "@/src/modules/finance/shared/hooks/use-institutions"
 import { useLoans } from "@/src/modules/finance/shared/hooks/use-loans"
 import { useMonthExpenseTrend } from "@/src/modules/finance/shared/hooks/use-month-expense-trend"
@@ -37,10 +36,7 @@ import { useSheetListEntity } from "@/src/modules/finance/shared/hooks/use-sheet
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
 import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
-import {
-  prefetchFinanceCategories,
-  prefetchFinanceSync,
-} from "@/src/modules/finance/shared/lib/finance-prefetch"
+import { prefetchFinanceCategories } from "@/src/modules/finance/shared/lib/finance-prefetch"
 import { buildInstitutionStackItems } from "@/src/modules/finance/shared/lib/institution-stack"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
 import { ExpandableFab } from "@/src/shared/components/layout/expandable-fab"
@@ -63,7 +59,6 @@ import { useQueryClient } from "@tanstack/react-query"
 import {
   Building2Icon,
   LandmarkIcon,
-  MailIcon,
   PlusIcon,
   StoreIcon,
   TagsIcon,
@@ -87,7 +82,6 @@ export function FinanceProductsList({
 }: FinanceProductsListProps) {
   const router = useRouter()
   const queryClient = useQueryClient()
-  const { emailSyncEnabled } = useFinanceEnabled()
   const { trend } = useMonthExpenseTrend(enabled)
   const institutionsQuery = useInstitutions(enabled)
   const accountsQuery = useAccounts(enabled)
@@ -350,29 +344,6 @@ export function FinanceProductsList({
             description="Organiza gastos e ingresos"
             icon={TagsIcon}
             href={APP_ROUTES.app.financeCategories}
-            showChevron
-            isLast={false}
-            className="px-3"
-          />
-        </div>
-
-        <div
-          onPointerEnter={() => {
-            if (emailSyncEnabled) {
-              void prefetchFinanceSync(queryClient)
-            }
-          }}
-          onFocusCapture={() => {
-            if (emailSyncEnabled) {
-              void prefetchFinanceSync(queryClient)
-            }
-          }}
-        >
-          <SummaryItem
-            title="Correos"
-            description="Gmail y notificaciones de bancos"
-            icon={MailIcon}
-            href={APP_ROUTES.app.financeSync}
             showChevron
             isLast={false}
             className="px-3"

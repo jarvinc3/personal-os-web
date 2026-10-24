@@ -1,6 +1,6 @@
 export * from "./entities/transactions.ts"
 export * from "./entities/accounts.ts"
 export * from "./entities/planning.ts"
-export * from "./entities/email.ts"
+export * from "./entities/merchant-recurring.ts"
 export * from "./entities/subscriptions.ts"
 export * from "./entities/reconciliation.ts"

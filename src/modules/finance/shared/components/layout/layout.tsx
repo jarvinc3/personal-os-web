@@ -6,7 +6,6 @@ import {
   prefetchFinanceCategories,
   prefetchFinanceCurrentMonth,
   prefetchFinancePlanning,
-  prefetchFinanceSync,
   scheduleIdle,
 } from "@/src/modules/finance/shared/lib/finance-prefetch"
 import { ModuleSectionLayout } from "@/src/shared/components/layout/module-section-layout"
@@ -18,7 +17,7 @@ import { useUserTimeZone } from "@/src/modules/settings/hooks/use-user-time-zone
 export function FinanceLayout({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient()
   const timeZone = useUserTimeZone()
-  const { isEnabled, emailSyncEnabled, isProfileLoading } = useFinanceEnabled()
+  const { isEnabled, isProfileLoading } = useFinanceEnabled()
 
   useEffect(() => {
     if (!isEnabled || isProfileLoading) {
@@ -29,11 +28,8 @@ export function FinanceLayout({ children }: { children: ReactNode }) {
       void prefetchFinanceCategories(queryClient)
       void prefetchFinancePlanning(queryClient)
       void prefetchFinanceCurrentMonth({ queryClient, timeZone })
-      if (emailSyncEnabled) {
-        void prefetchFinanceSync(queryClient)
-      }
     })
-  }, [emailSyncEnabled, isEnabled, isProfileLoading, queryClient, timeZone])
+  }, [isEnabled, isProfileLoading, queryClient, timeZone])
 
   const onItemPrefetch = useCallback(
     (href: string) => {

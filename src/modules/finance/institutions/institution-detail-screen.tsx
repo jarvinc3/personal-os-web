@@ -13,7 +13,6 @@ import {
   InstitutionProductTabs,
   type InstitutionProductTab,
 } from "@/src/modules/finance/institutions/components/institution-product-tabs"
-import { LinkInstitutionMailboxSheet } from "@/src/modules/finance/sync"
 import { ArchiveRecordDialog } from "@/src/modules/finance/shared/components/archive-record-dialog"
 import { DeleteRecordDialog } from "@/src/modules/finance/shared/components/delete-record-dialog"
 import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
@@ -24,10 +23,6 @@ import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet
 import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
 import { useBalanceSheet } from "@/src/modules/finance/shared/hooks/use-balance-sheet"
 import { useCards } from "@/src/modules/finance/shared/hooks/use-cards"
-import {
-  useEmailMailboxes,
-  useRunEmailSync,
-} from "@/src/modules/finance/shared/hooks/use-email-sources"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
 import {
   useArchiveInstitution,
@@ -55,7 +50,6 @@ import {
 } from "@/src/modules/finance/shared/lib/institution-stack"
 import { recalculationPayload } from "@/src/modules/finance/shared/lib/integrity"
 import { monthKeyFromDate } from "@/src/modules/finance/shared/lib/month-window"
-import { ChatLauncherButton, useRegisterChatContext } from "@/src/modules/ai"
 import { LoadingView } from "@/src/shared/components/layout/loading-view"
 import { Button } from "@/src/shared/components/ui/button"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
@@ -87,8 +81,7 @@ function InstitutionDetailScreenBody({
   institutionId,
 }: InstitutionDetailScreenProps) {
   const router = useRouter()
-  const { isEnabled, config, emailSyncEnabled, formatLocale } =
-    useFinanceEnabled()
+  const { isEnabled, config, formatLocale } = useFinanceEnabled()
   const display = {
     currency: config.baseCurrency,
     showCents: config.display.showCents,
@@ -108,9 +101,6 @@ function InstitutionDetailScreenBody({
   )
   const reconciliationItems = reconciliationStatusQuery.data?.items
   const recalculateBalance = useRecalculateBalance()
-  const mailboxesQuery = useEmailMailboxes(isEnabled && emailSyncEnabled)
-  const { run: runSync, isPending: syncPending } =
-    useRunEmailSync(emailSyncEnabled)
   const archiveInstitution = useArchiveInstitution()
   const deleteInstitution = useDeleteInstitution()
   const restoreInstitution = useRestoreInstitution()
@@ -131,27 +121,9 @@ function InstitutionDetailScreenBody({
     sheetId: cardBalanceSheetId,
     setOpen: setOpenCardBalanceSheet,
   } = useSheetParam(FINANCE_SHEET_KEYS.cardBalance)
-  const { open: openLinkSheet, setOpen: setOpenLinkSheet } = useSheetParam(
-    FINANCE_SHEET_KEYS.linkInstitutionMailbox
-  )
 
   const institutions = institutionsQuery.data ?? []
   const accounts = accountsQuery.data ?? []
-  const mailboxes = mailboxesQuery.data ?? []
-  const linkedSource =
-    mailboxes
-      .flatMap((mailbox) => mailbox.sources)
-      .find(
-        (source) => source.isActive && source.institutionId === institutionId
-      ) ?? null
-  const linkedMailbox = linkedSource
-    ? (mailboxes.find((mailbox) => mailbox.id === linkedSource.connectionId) ??
-      mailboxes.find((mailbox) =>
-        mailbox.sources.some((source) => source.id === linkedSource.id)
-      ) ??
-      null)
-    : null
-
   const moneyDisplay = {
     ...display,
     currency: balanceSheetQuery.data?.baseCurrency ?? display.currency,
@@ -190,17 +162,6 @@ function InstitutionDetailScreenBody({
 
   const accent = institution?.color ?? FALLBACK_COLOR
   const isCash = institution ? isCashInstitution(institution) : false
-
-  useRegisterChatContext(
-    institution
-      ? {
-          moduleSlug: "finance",
-          screen: "institution-detail",
-          entityRef: { type: "institution", id: institution.id },
-          entityLabel: institution.name,
-        }
-      : null
-  )
 
   const handleBack = useCallback(() => {
     router.push(APP_ROUTES.app.financeProducts)
@@ -268,7 +229,6 @@ function InstitutionDetailScreenBody({
   const headerActions = useMemo(
     () => (
       <>
-        <ChatLauncherButton />
         <Button
           variant="outline"
           size="icon"
@@ -384,10 +344,6 @@ function InstitutionDetailScreenBody({
 
   const options = buildInstitutionOptions({
     isCash,
-    linkedMailboxEmail: linkedMailbox?.emailAddress ?? null,
-    hasLinkedSource: Boolean(linkedSource),
-    emailSyncEnabled,
-    syncPending,
     busy: isBusy,
     actions: {
       onEdit: () =>
@@ -401,13 +357,6 @@ function InstitutionDetailScreenBody({
         router.push(
           `${APP_ROUTES.app.financeLoanNew}?institutionId=${institutionId}`
         ),
-      onLinkMailbox: () => setOpenLinkSheet(true),
-      onSyncMailbox: () => {
-        if (!linkedSource) {
-          return
-        }
-        void runSync(linkedSource.id)
-      },
       onArchive: () => setArchiveConfirmOpen(true),
       onDelete: () => setConfirmOpen(true),
     },
@@ -555,15 +504,6 @@ function InstitutionDetailScreenBody({
         card={balancingCard}
         defaultCurrency={config.baseCurrency}
         display={display}
-      />
-
-      <LinkInstitutionMailboxSheet
-        open={openLinkSheet}
-        onOpenChange={setOpenLinkSheet}
-        mailboxes={mailboxes}
-        institutions={institutions}
-        institutionId={institutionId}
-        emailSyncEnabled={emailSyncEnabled}
       />
     </>
   )

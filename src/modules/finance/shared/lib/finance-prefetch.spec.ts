@@ -8,18 +8,13 @@ import {
   prefetchFinanceCategories,
   prefetchFinanceCurrentMonth,
   prefetchFinancePlanning,
-  prefetchFinanceSync,
   scheduleIdle,
 } from "./finance-prefetch.ts"
 import { budgetsInfiniteQuery } from "./finance-query-options.ts"
 import {
   FINANCE_ACCOUNTS_QUERY_KEY,
   FINANCE_BUDGETS_QUERY_KEY,
-  FINANCE_CARDS_QUERY_KEY,
   FINANCE_CATEGORIES_QUERY_KEY,
-  FINANCE_EMAIL_MAILBOXES_QUERY_KEY,
-  FINANCE_EMAIL_MESSAGES_QUERY_KEY,
-  FINANCE_EMAIL_PENDING_QUERY_KEY,
   FINANCE_INSTITUTIONS_QUERY_KEY,
   FINANCE_LOANS_QUERY_KEY,
   FINANCE_RECEIVABLES_QUERY_KEY,
@@ -39,15 +34,6 @@ const PLANNING_KEYS = [
     "infinite",
     { limit: FINANCE_BUDGET_PAGE_SIZE },
   ],
-] as const
-
-const SYNC_KEYS = [
-  FINANCE_INSTITUTIONS_QUERY_KEY,
-  FINANCE_ACCOUNTS_QUERY_KEY,
-  FINANCE_CARDS_QUERY_KEY,
-  FINANCE_EMAIL_MAILBOXES_QUERY_KEY,
-  FINANCE_EMAIL_PENDING_QUERY_KEY,
-  FINANCE_EMAIL_MESSAGES_QUERY_KEY,
 ] as const
 
 function createQueryClient() {
@@ -124,21 +110,6 @@ describe("prefetchFinancePlanning", () => {
       ])?.fetchStatus,
       "idle"
     )
-  })
-})
-
-describe("prefetchFinanceSync", () => {
-  it("writes the 6 sync keys into cache", async () => {
-    const queryClient = createQueryClient()
-    const { get } = createMockGet()
-    await prefetchFinanceSync(queryClient, get)
-
-    for (const key of SYNC_KEYS) {
-      assert.ok(
-        queryClient.getQueryState(key),
-        `missing cache entry for ${JSON.stringify(key)}`
-      )
-    }
   })
 })
 

@@ -104,22 +104,6 @@ export const FINANCE_RECEIVABLE_PAYMENTS_QUERY_KEY = [
   ...FINANCE_QUERY_KEY,
   "receivable-payments",
 ] as const
-export const FINANCE_EMAIL_SOURCES_QUERY_KEY = [
-  ...FINANCE_QUERY_KEY,
-  "email-sources",
-] as const
-export const FINANCE_EMAIL_MAILBOXES_QUERY_KEY = [
-  ...FINANCE_QUERY_KEY,
-  "email-mailboxes",
-] as const
-export const FINANCE_EMAIL_PENDING_QUERY_KEY = [
-  ...FINANCE_QUERY_KEY,
-  "email-pending",
-] as const
-export const FINANCE_EMAIL_MESSAGES_QUERY_KEY = [
-  ...FINANCE_QUERY_KEY,
-  "email-messages",
-] as const
 export const FINANCE_RECYCLE_BIN_QUERY_KEY = [
   ...FINANCE_QUERY_KEY,
   "recycle-bin",

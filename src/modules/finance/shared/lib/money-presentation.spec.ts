@@ -15,19 +15,9 @@ describe("finance money presentations", () => {
     const sources = [
       financeSource("catalog/components/card-balance-sheet.tsx"),
       financeSource("catalog/components/account-sheet.tsx"),
-      financeSource("sync/components/mailboxes-view.tsx"),
-      financeSource("sync/components/assign-email-message-sheet.tsx"),
     ].join("\n")
 
     assert.equal(sources.includes("{item.balance}"), false)
     assert.equal(sources.includes("${created.balance}"), false)
-    assert.equal(
-      sources.includes("${payload.amount} ${payload.currency"),
-      false
-    )
-    assert.equal(
-      sources.includes("${extracted.amount} ${extracted.currency"),
-      false
-    )
   })
 })

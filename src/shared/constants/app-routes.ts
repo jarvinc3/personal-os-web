@@ -16,7 +16,6 @@ export const APP_ROUTES = {
     settingsAccount: "/settings/account",
     settingsRegional: "/settings/regional",
     settingsAppearance: "/settings/appearance",
-    settingsAi: "/settings/ai",
     settingsNotifications: "/settings/notifications",
     settingsPrivacy: "/settings/privacy",
     settingsModules: "/settings/modules",
@@ -26,7 +25,6 @@ export const APP_ROUTES = {
     helpGuides: "/help/guides",
     helpGuide: (slug: string) => `/help/guides/${slug}`,
     helpFaq: "/help/faq",
-    chat: "/chat",
     notifications: "/notifications",
     keepAwake: "/keep-awake",
     agenda: "/agenda",
@@ -42,7 +40,6 @@ export const APP_ROUTES = {
     financeCategories: "/finance/categories",
     financeBankCharges: "/finance/bank-charges",
     financeRecycleBin: "/finance/recycle-bin",
-    financeSync: "/finance/sync",
     financeInstitution: (institutionId: string) =>
       `${FINANCE_INSTITUTIONS_PATH}/${institutionId}`,
     financeInstitutionNew: `${FINANCE_INSTITUTIONS_PATH}/new`,

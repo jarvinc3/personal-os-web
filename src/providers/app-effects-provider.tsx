@@ -1,6 +1,5 @@
 "use client"
 
-import { useAiSocket } from "@/src/modules/ai"
 import {
   useNotificationsSocket,
   usePushToken,
@@ -14,7 +13,6 @@ function AppEffects() {
   useApplyThemePreference()
   useApplyAppearancePreference()
   useNotificationsSocket()
-  useAiSocket()
   usePushToken()
   return null
 }

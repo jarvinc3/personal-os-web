@@ -26,7 +26,6 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { useEffect } from "react"
 import {
   Bell,
-  Bot,
   Globe,
   LayoutGrid,
   LogOut,
@@ -44,8 +43,6 @@ const APP_ENV =
 const LEGACY_SHEET_ROUTES: Record<string, string> = {
   "account-sheet": APP_ROUTES.app.settingsAccount,
   "theme-sheet": APP_ROUTES.app.settingsAppearance,
-  "ai-sheet": APP_ROUTES.app.settingsAi,
-  "ai-provider-sheet": APP_ROUTES.app.settingsAi,
   "quiet-hours-sheet": APP_ROUTES.app.settingsNotifications,
   "time-zone-sheet": APP_ROUTES.app.settingsRegional,
   "delete-account-sheet": APP_ROUTES.app.settingsPrivacy,
@@ -72,13 +69,6 @@ const SETTINGS_MENU = [
     icon: Palette,
     accent: SETTINGS_REGISTRY.appearance.accent,
     href: APP_ROUTES.app.settingsAppearance,
-  },
-  {
-    label: "Asistente IA",
-    description: "Tono, proveedor y confirmaciones.",
-    icon: Bot,
-    accent: SETTINGS_REGISTRY.ai.accent,
-    href: APP_ROUTES.app.settingsAi,
   },
   {
     label: "Notificaciones",

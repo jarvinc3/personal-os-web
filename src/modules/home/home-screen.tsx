@@ -12,7 +12,7 @@ import { Button } from "@/src/shared/components/ui/button"
 import { SummarySection } from "@/src/shared/components/ui/summary"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
-import { BellRing, Brain, Settings, UserIcon } from "lucide-react"
+import { BellRing, Settings, UserIcon } from "lucide-react"
 import {
   ChevronRightIcon,
   FlaskConicalIcon,
@@ -43,14 +43,6 @@ function HomeScreenBody() {
     <div className="mx-auto flex max-w-2xl flex-col gap-6 p-4 pb-16 md:px-6">
       <SummarySection icon={UserIcon} title="Tareas rápidas">
         <div className="grid grid-cols-3 gap-1">
-          <Button variant="outline" asChild>
-            <Link href={APP_ROUTES.app.chat} className="relative">
-              <span className="hidden sm:block">Chat</span>
-              <Brain className="size-4" />
-              <LinkPendingOverlay />
-            </Link>
-          </Button>
-
           <Button variant="outline" asChild>
             <Link href={APP_ROUTES.app.notifications} className="relative">
               <span className="hidden sm:block">Notificaciones</span>

@@ -15,7 +15,6 @@ import { institutionsQuery } from "@/src/modules/finance/shared/lib/finance-quer
 import {
   FINANCE_ACCOUNTS_QUERY_KEY,
   FINANCE_CARDS_QUERY_KEY,
-  FINANCE_EMAIL_SOURCES_QUERY_KEY,
   FINANCE_INSTITUTIONS_QUERY_KEY,
   FINANCE_LOANS_QUERY_KEY,
 } from "@/src/modules/finance/shared/types/api"
@@ -103,9 +102,6 @@ export function useDeleteInstitution() {
       invalidateCatalog(queryClient)
       invalidateFinancePositions(queryClient)
       void queryClient.invalidateQueries({ queryKey: FINANCE_LOANS_QUERY_KEY })
-      void queryClient.invalidateQueries({
-        queryKey: FINANCE_EMAIL_SOURCES_QUERY_KEY,
-      })
     },
   })
 }
@@ -121,9 +117,6 @@ export function useRestoreInstitution() {
       invalidateCatalog(queryClient)
       invalidateFinancePositions(queryClient)
       void queryClient.invalidateQueries({ queryKey: FINANCE_LOANS_QUERY_KEY })
-      void queryClient.invalidateQueries({
-        queryKey: FINANCE_EMAIL_SOURCES_QUERY_KEY,
-      })
     },
   })
 }

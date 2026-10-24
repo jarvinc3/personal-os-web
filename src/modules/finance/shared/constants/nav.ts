@@ -24,7 +24,6 @@ export const FINANCE_NAV_ITEMS: ModuleNavItem[] = [
     icon: LandmarkIcon,
     extraActiveHrefs: [
       APP_ROUTES.app.financeCategories,
-      APP_ROUTES.app.financeSync,
       APP_ROUTES.app.financeBankCharges,
       APP_ROUTES.app.financeMerchants,
       APP_ROUTES.app.financeRecycleBin,

@@ -64,7 +64,6 @@ import {
 } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
-import { ChatLauncherButton, useRegisterChatContext } from "@/src/modules/ai"
 import { appToast } from "@/src/shared/lib/app-toast"
 import {
   ArchiveIcon,
@@ -136,17 +135,6 @@ function AccountDetailScreenBody({ accountId }: AccountDetailScreenProps) {
     ...debitCards.map((item) => ({ cardId: item.id })),
   ]
   const accent = account?.color ?? FALLBACK_COLOR
-
-  useRegisterChatContext(
-    account
-      ? {
-          moduleSlug: "finance",
-          screen: "account-detail",
-          entityRef: { type: "account", id: account.id },
-          entityLabel: account.name,
-        }
-      : null
-  )
 
   const today = new Date()
   const monthChip = format(today, "MMM yyyy", { locale: es })
@@ -234,7 +222,6 @@ function AccountDetailScreenBody({ accountId }: AccountDetailScreenProps) {
       },
       actions: (
         <>
-          <ChatLauncherButton />
           <Button
             variant="outline"
             size="icon"

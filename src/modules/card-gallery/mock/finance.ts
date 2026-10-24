@@ -8,13 +8,9 @@ import type {
   FinanceCard,
   FinanceCardStatementMovement,
   FinanceCategory,
-  FinanceEmailSource,
-  FinanceEmailSyncLog,
   FinanceInstitution,
   FinanceLoan,
-  FinanceMailbox,
   FinanceMerchant,
-  FinancePendingEmailMessage,
   FinanceReceivable,
   FinanceReconciliationStatusItem,
   FinanceRecurringPattern,
@@ -694,85 +690,6 @@ export const galleryReconciliationItem: FinanceReconciliationStatusItem = {
   balance: "125000.00",
   reconciled: false,
   lastReconciledAt: "2026-09-30T12:00:00.000Z",
-}
-
-export const galleryEmailSyncLogOk: FinanceEmailSyncLog = {
-  id: "sync-ok",
-  status: "SUCCESS",
-  error: null,
-  emailsScanned: 12,
-  transactionsNew: 4,
-  startedAt: "2026-10-22T09:00:00.000Z",
-  completedAt: "2026-10-22T09:01:10.000Z",
-}
-
-export const galleryEmailSyncLogError: FinanceEmailSyncLog = {
-  id: "sync-error",
-  status: "FAILED",
-  error: "No se pudo abrir la bandeja",
-  emailsScanned: 0,
-  transactionsNew: 0,
-  startedAt: "2026-10-21T09:00:00.000Z",
-  completedAt: "2026-10-21T09:00:20.000Z",
-}
-
-export const galleryEmailSyncLogPending: FinanceEmailSyncLog = {
-  id: "sync-pending",
-  status: "RUNNING",
-  error: null,
-  emailsScanned: 5,
-  transactionsNew: 1,
-  startedAt: "2026-10-23T09:00:00.000Z",
-  completedAt: null,
-}
-
-export const galleryEmailSource: FinanceEmailSource = {
-  id: "source-ejemplo",
-  connectionId: "mailbox-ejemplo",
-  institutionId: galleryInstitution.id,
-  institutionName: galleryInstitution.name,
-  emailAddress: "notificaciones@bancoejemplo.test",
-  bankSenderEmail: "avisos@bancoejemplo.test",
-  bankSenderEmails: ["avisos@bancoejemplo.test"],
-  bankDomain: "bancoejemplo.test",
-  label: galleryInstitution.name,
-  provider: "GMAIL",
-  isActive: true,
-  lastSyncedAt: "2026-10-22T09:01:10.000Z",
-  createdAt: CREATED_AT,
-  logs: [galleryEmailSyncLogOk, galleryEmailSyncLogError],
-}
-
-export const galleryMailbox: FinanceMailbox = {
-  id: "mailbox-ejemplo",
-  emailAddress: "correo@ejemplo.test",
-  provider: "GMAIL",
-  isActive: true,
-  createdAt: CREATED_AT,
-  sources: [galleryEmailSource],
-}
-
-export const galleryPendingEmail: FinancePendingEmailMessage = {
-  id: "email-pendiente",
-  sourceId: galleryEmailSource.id,
-  gmailMessageId: "msg-ejemplo-1",
-  institutionId: galleryInstitution.id,
-  institutionName: galleryInstitution.name,
-  emailAddress: galleryEmailSource.emailAddress,
-  instrumentHint: galleryCreditCard.name,
-  lastFourHint: galleryCreditCard.lastFour,
-  accountNumberHint: null,
-  extractedPayload: {
-    amount: 1200,
-    currency: "DOP",
-    merchant: "Comercio Ejemplo",
-    description: "Compra con tarjeta",
-    notes: null,
-    type: "DEBIT",
-    movementClass: "CARD",
-  },
-  reason: null,
-  createdAt: "2026-10-22T10:00:00.000Z",
 }
 
 /** Institution models painted by `InstitutionWalletCard`. */

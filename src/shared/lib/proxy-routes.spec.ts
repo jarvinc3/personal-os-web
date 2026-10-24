@@ -36,7 +36,6 @@ describe("isProtectedAppPath", () => {
   it("covers the app sections and their subpaths", () => {
     assert.equal(isProtectedAppPath("/home"), true)
     assert.equal(isProtectedAppPath("/settings"), true)
-    assert.equal(isProtectedAppPath("/chat"), true)
     assert.equal(isProtectedAppPath("/notifications"), true)
     assert.equal(isProtectedAppPath("/keep-awake"), true)
     assert.equal(isProtectedAppPath("/finance"), true)
