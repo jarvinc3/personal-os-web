@@ -23,6 +23,8 @@ Si una afirmación no está `VERIFICADO`, no la trates como comportamiento vigen
 4. **Antes del commit:** revisa el diff contra los criterios de aceptación del issue, busca huecos o implementaciones faltantes y corrígelos. Luego ejecuta format, lint, typecheck y pruebas.
 5. **Cierre:** commit en español con `Closes #N` o `Refs #N` y push. Después cierra el issue a mano con un comentario y muévelo a `Done` en el Project 3; `Closes` solo cierra el issue cuando el cambio llega a `master`.
 
+**Excepción de rama:** la única rama permitida es `refactor/ai-0` (refactor de arquitectura de Codex). Debe mantenerse al día con `develop` y se integra a `develop` por PR, pero el merge lo aprueba y hace Jarvin, nunca el agente. Ningún otro trabajo usa ramas ni PRs.
+
 Lo decidido y no implementado se abre como issue con label `roadmap`; no se deja como `REV-*` suelto en los documentos.
 
 ## Fuentes canónicas
