@@ -2,6 +2,12 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## [0.60.1] - 2026-10-23
+
+### Cambiado
+
+- Interno: los modelos de card de meta y presupuesto ya no repiten en comentarios lo que su nombre y su tipo dicen. Sin cambio de comportamiento.
+
 ## [0.60.0] - 2026-10-23
 
 ### Agregado

@@ -12,6 +12,12 @@ export type ReleaseNotesEntry = {
 
 export const RELEASE_NOTES: readonly ReleaseNotesEntry[] = [
   {
+    version: "0.60.1",
+    highlights: [
+      "Sin cambios visibles: esta versión solo ordena detalles internos del proyecto.",
+    ],
+  },
+  {
     version: "0.60.0",
     highlights: [
       "La galería de cards es permanente y ahora se abre desde el índice /dev; muestra las variantes reales de cada entidad.",
