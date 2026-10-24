@@ -15,7 +15,7 @@ import {
   CardOptionalDetailsSection,
 } from "@/src/modules/finance/cards/components/card-form-sections"
 import { CardIdentitySection } from "@/src/modules/finance/cards/components/card-identity-section"
-import { CardPreview } from "@/src/modules/finance/cards/components/card-preview"
+import { CardVisual } from "@/src/modules/finance/cards/components/card-visual"
 import {
   cardCreateBalanceRows,
   cardSchema,
@@ -30,6 +30,7 @@ import { FinanceFormScreen } from "@/src/modules/finance/shared/components/forms
 import { FinanceSegmentedControl } from "@/src/modules/finance/shared/components/forms/form-blocks"
 import {
   CATALOG_NONE,
+  FINANCE_CARD_NETWORKS,
   FINANCE_CARD_TYPE_LABEL,
   FINANCE_CARD_TYPES,
 } from "@/src/modules/finance/shared/constants/catalog"
@@ -39,7 +40,10 @@ import {
   useUpdateCardBalance,
 } from "@/src/modules/finance/shared/hooks/use-cards"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
-import { canManageCardBalances } from "@/src/modules/finance/shared/lib/card-balances"
+import {
+  canManageCardBalances,
+  type FinanceCardDisplayBalance,
+} from "@/src/modules/finance/shared/lib/card-balances"
 import {
   buildCardBalanceBodies,
   buildCreateCardBody,
@@ -49,7 +53,6 @@ import {
 import { buildFinanceCurrencyOptions } from "@/src/modules/finance/shared/lib/finance-currency"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import {
-  formatFinanceMoney,
   parseFinanceMoney,
   type FinanceMoneyDisplay,
 } from "@/src/modules/finance/shared/lib/money"
@@ -178,6 +181,41 @@ export function CardFormScreen({
     cardType === "CREDIT"
       ? Math.max(0, (previewLimit ?? 0) - (previewAmount ?? 0))
       : (previewAmount ?? 0)
+  const previewNetwork =
+    FINANCE_CARD_NETWORKS.find((network) => network === cardNetwork) ?? null
+  const previewCard: FinanceCard = {
+    id: card?.id ?? "preview",
+    institutionId: selectedInstitution?.id ?? "",
+    institutionName: selectedInstitution?.name ?? "",
+    institutionLogoUrl: selectedInstitution?.logoUrl ?? null,
+    accountId:
+      selectedAccountId && selectedAccountId !== CATALOG_NONE
+        ? selectedAccountId
+        : null,
+    accountName: null,
+    name: cardName.trim() || "Nueva tarjeta",
+    type: cardType,
+    network: previewNetwork,
+    lastFour: lastFour || null,
+    statementClosingDay: null,
+    paymentDueDay: null,
+    nextStatementDate: null,
+    nextPaymentDueDate: null,
+    color: cardColor || null,
+    isActive: true,
+    balances: [],
+  }
+  const previewBalances: FinanceCardDisplayBalance[] = previewBalance
+    ? [
+        {
+          id: "preview",
+          currency: previewCurrency,
+          balance: String(previewValue),
+          availableCredit: cardType === "CREDIT" ? String(previewValue) : null,
+          creditLimit: previewLimit === null ? null : String(previewLimit),
+        },
+      ]
+    : []
 
   const onSubmit = handleSubmit(async (values) => {
     const payload = buildCreateCardBody(values, { isUpdate: isEdit })
@@ -233,16 +271,10 @@ export function CardFormScreen({
         isSubmitting={isPending}
         submitDisabled={!canSave}
       >
-        <CardPreview
-          name={cardName}
-          type={cardType}
-          color={cardColor}
-          network={cardNetwork}
-          lastFour={lastFour}
-          availableText={formatFinanceMoney(String(previewValue), {
-            ...display,
-            currency: previewCurrency,
-          })}
+        <CardVisual
+          card={previewCard}
+          balances={previewBalances}
+          display={display}
         />
 
         <Controller
