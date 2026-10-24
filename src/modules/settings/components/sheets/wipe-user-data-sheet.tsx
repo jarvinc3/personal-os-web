@@ -53,12 +53,10 @@ import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import {
   AlertTriangle,
   Bell,
-  Bot,
   KeyRound,
   Landmark,
   Layers,
   ListChecks,
-  Mail,
   PiggyBank,
   Receipt,
   RotateCcw,
@@ -82,7 +80,6 @@ const WIPE_ACCENT = SETTINGS_REGISTRY.danger.accent
 
 const WIPE_GROUP_ICONS: Record<string, LucideIcon> = {
   Finanzas: Landmark,
-  "Asistente IA": Bot,
   Notificaciones: Bell,
   Configuración: Settings,
 }
@@ -93,8 +90,6 @@ const WIPE_LAYER_ICONS: Record<WipeLayerId, LucideIcon> = {
   [WIPE_LAYERS.FINANCE_PLANNING]: PiggyBank,
   [WIPE_LAYERS.FINANCE_CATEGORIES]: Tags,
   [WIPE_LAYERS.FINANCE_CATALOG]: Landmark,
-  [WIPE_LAYERS.FINANCE_EMAIL_CONNECTIONS]: Mail,
-  [WIPE_LAYERS.AI_SESSIONS]: Bot,
   [WIPE_LAYERS.NOTIFICATIONS]: Bell,
   [WIPE_LAYERS.SETTINGS_DEFAULTS]: RotateCcw,
 }
@@ -452,10 +447,10 @@ export function WipeUserDataView({
         {ledgerSelected ? (
           <Alert>
             <AlertTriangle />
-            <AlertTitle>Gmail</AlertTitle>
+            <AlertTitle>Sincronización bancaria</AlertTitle>
             <AlertDescription>
-              El próximo sync puede volver a importar movimientos. El sync
-              automático se pausará.
+              Los movimientos importados se conservan; la sincronización
+              bancaria no está disponible durante esta etapa.
             </AlertDescription>
           </Alert>
         ) : null}

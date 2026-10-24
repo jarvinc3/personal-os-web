@@ -1,8 +1,5 @@
 const SERVER_ERROR = "No se pudo guardar. Intenta de nuevo."
 const REQUEST_ERROR = "No se pudo guardar. Revisa los datos e intenta de nuevo."
-const GMAIL_TOKEN_PREFIX = "Gmail tokens could not be decrypted"
-const GMAIL_TOKEN_ERROR =
-  "No se pudo leer el acceso a Gmail. Vuelve a conectar la cuenta."
 const MODULE_DISABLED_MESSAGE = "El módulo finance está desactivado"
 const MODULE_DISABLED_ERROR =
   "Finanzas está desactivado. Actívalo para usar esta función."
@@ -72,9 +69,6 @@ const BACKEND_MESSAGE_ES: Record<string, string> = {
   "Category parent would create a cycle": "Esa categoría padre crea un ciclo.",
   "Category type must be EXPENSE or INCOME":
     "El tipo de categoría no es válido.",
-  "Connect Gmail before linking a bank":
-    "Conecta Gmail antes de vincular un banco.",
-  "Connect Gmail first": "Conecta Gmail primero.",
   "Contribution not found": "No encontramos el aporte.",
   "Credit card not found": "No encontramos la tarjeta de crédito.",
   "DEBIT cards require accountId": "Una tarjeta de débito necesita una cuenta.",
@@ -135,9 +129,6 @@ export function translateFinanceError(
   const translated = BACKEND_MESSAGE_ES[message]
   if (translated) {
     return translated
-  }
-  if (message.startsWith(GMAIL_TOKEN_PREFIX)) {
-    return GMAIL_TOKEN_ERROR
   }
   if (message === MODULE_DISABLED_MESSAGE) {
     return MODULE_DISABLED_ERROR

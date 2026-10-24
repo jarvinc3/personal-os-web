@@ -11,9 +11,6 @@ export function useFinanceEnabled() {
     state,
     isEnabled: isModuleEnabled,
     formatLocale,
-    emailSyncEnabled: isModuleEnabled && config.emailSync.enabled,
-    emailSyncAutomatic:
-      isModuleEnabled && config.emailSync.enabled && config.emailSync.automatic,
     isProfileLoading: profileQuery.isLoading,
   }
 }

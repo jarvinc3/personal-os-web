@@ -69,42 +69,6 @@ export const HELP_FAQ_GROUPS: readonly HelpFaqGroup[] = [
     ],
   },
   {
-    slug: "correo",
-    title: "Correo",
-    questions: [
-      {
-        id: "permisos-gmail",
-        question: "¿Qué permisos le doy a Gmail?",
-        answer:
-          "Solo lectura. Finanzas puede leer los correos para buscar avisos del banco, pero no enviar, borrar ni modificar nada.",
-      },
-      {
-        id: "correo-duplicado",
-        question: "¿Se puede importar dos veces el mismo correo?",
-        answer:
-          "No. Cada correo se identifica por una huella única; si ya se importó, no se vuelve a crear el [[movimiento|movimiento]].",
-      },
-      {
-        id: "correo-pendiente",
-        question: "¿Por qué un correo quedó pendiente?",
-        answer:
-          "Porque no se reconoció la cuenta, la tarjeta o el monto. Está en [[Pendientes de asignación|pendiente-de-asignacion]]: reintenta o elige el destino a mano.",
-      },
-      {
-        id: "desconectar-gmail",
-        question: "¿Puedo desconectar Gmail?",
-        answer:
-          "Sí, desde el [[buzón|buzon]]. Se ocultan el buzón y sus bancos; los movimientos ya importados se conservan.",
-      },
-      {
-        id: "frecuencia-sync",
-        question: "¿Cada cuánto se sincroniza el correo?",
-        answer:
-          "Solo si activaste la sincronización automática. Puedes elegir cada 15 minutos, cada hora, cada 6 horas o unas horas fijas. La guía [[Conectar el correo|guia:conectar-el-correo]] explica dónde cambiarlo.",
-      },
-    ],
-  },
-  {
     slug: "notificaciones",
     title: "Notificaciones",
     questions: [
@@ -160,13 +124,7 @@ export const HELP_FAQ_GROUPS: readonly HelpFaqGroup[] = [
         id: "eliminar-cuenta",
         question: "¿Qué pasa si elimino mi cuenta?",
         answer:
-          "Se borran el perfil, las preferencias, los datos financieros, el historial del agente y los tokens de Gmail y push. La app pide tu contraseña o tu cuenta de Google antes de continuar.",
-      },
-      {
-        id: "leer-correos",
-        question: "¿La app lee todos mis correos?",
-        answer:
-          "Solo los de los remitentes que vinculaste a una institución, y solo para convertirlos en movimientos.",
+          "Se borran el perfil, las preferencias, los datos financieros y los tokens push. La app pide tu contraseña o tu cuenta de Google antes de continuar.",
       },
     ],
   },

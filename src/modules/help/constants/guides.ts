@@ -21,7 +21,7 @@ export const HELP_GUIDE_GROUPS: readonly {
   {
     id: "apps",
     title: "Guías de cada app",
-    description: "Correo, conciliación, planificación y avisos.",
+    description: "Finanzas, conciliación, planificación y avisos.",
   },
 ]
 
@@ -133,47 +133,6 @@ export const HELP_GUIDES: readonly HelpGuide[] = [
       {
         title: "Registra tu primer movimiento",
         body: "Toca crear y elige Gasto o Ingreso. Completa categoría, monto, cuenta y fecha. Si te equivocas, edítalo antes de confirmarlo.",
-      },
-      {
-        title: "Conecta tu correo si quieres",
-        body: "Finanzas puede leer los avisos del banco y crear movimientos por ti. Sigue la guía [[Conectar el correo|guia:conectar-el-correo]].",
-      },
-    ],
-  },
-  {
-    slug: "conectar-el-correo",
-    title: "Conectar el correo",
-    summary:
-      "Deja que Finanzas lea los avisos del banco y cree los movimientos por ti.",
-    group: "apps",
-    steps: [
-      {
-        title: "Activa Finanzas y su sincronización",
-        body: "En Ajustes → Apps → Finanzas enciende la app y activa la sincronización por correo. Sin eso, la conexión se rechaza.",
-      },
-      {
-        title: "Abre Correos",
-        body: "En Finanzas → Productos toca el atajo Correos.",
-      },
-      {
-        title: "Conecta Gmail",
-        body: "Toca Conectar Gmail y autoriza el acceso de solo lectura. Al volver, un aviso confirma si la conexión salió bien.",
-      },
-      {
-        title: "Vincula cada banco",
-        body: "Agrega los correos desde los que tu banco manda los avisos y elige la [[institución|institucion]]. Cada institución tiene una sola [[fuente de correo|fuente-de-correo]].",
-      },
-      {
-        title: "Revisa los pendientes",
-        body: "Los correos que no se pudieron convertir quedan en [[Pendientes de asignación|pendiente-de-asignacion]]. Reintenta o elige la cuenta o la tarjeta a mano.",
-      },
-      {
-        title: "Decide el modo y el horario",
-        body: "En Ajustes → Finanzas elige si lo importado se confirma solo o queda por confirmar, y cada cuánto se sincroniza. El mínimo es cada 15 minutos.",
-      },
-      {
-        title: "Desconectar",
-        body: "Desde el [[buzón|buzon]] puedes desconectar Gmail. Se ocultan el buzón y sus bancos, pero los movimientos ya importados se conservan.",
       },
     ],
   },

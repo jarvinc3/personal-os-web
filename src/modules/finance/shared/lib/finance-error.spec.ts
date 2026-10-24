@@ -16,16 +16,6 @@ describe("translateFinanceError", () => {
     )
   })
 
-  it("translates a Gmail token failure by its prefix", () => {
-    assert.equal(
-      translateFinanceError(
-        400,
-        "Gmail tokens could not be decrypted for this source"
-      ),
-      "No se pudo leer el acceso a Gmail. Vuelve a conectar la cuenta."
-    )
-  })
-
   it("translates a disabled module", () => {
     assert.equal(
       translateFinanceError(403, "El módulo finance está desactivado"),

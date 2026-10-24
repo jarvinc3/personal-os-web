@@ -1,30 +1,8 @@
 import type { FinanceModuleConfig } from "@/src/modules/settings/types/module-config.types"
 import { z } from "zod"
 
-const scheduleTimePattern = /^([01]\d|2[0-3]):[0-5]\d$/
 const PAY_DAY_MIN = 1
 const PAY_DAY_MAX = 31
-
-export const EMAIL_SYNC_SCHEDULE_MODES = {
-  INTERVAL: "interval",
-  TIMES: "times",
-} as const
-
-export const MAX_EMAIL_SYNC_TIMES = 8
-export const MIN_EMAIL_SYNC_INTERVAL_MINUTES = 15
-export const DEFAULT_EMAIL_SYNC_INTERVAL_MINUTES = 360
-export const DEFAULT_EMAIL_SYNC_TIMES = ["08:00", "18:00"]
-
-/** Intervalos que ofrece la guía de sincronización al conectar el correo. */
-export const EMAIL_SYNC_INTERVAL_PRESETS = [15, 60, 360] as const
-
-export type EmailSyncScheduleConfig =
-  FinanceModuleConfig["emailSync"]["schedule"]
-
-export type EmailSyncConfigLike = Pick<
-  FinanceModuleConfig["emailSync"],
-  "automatic" | "mode" | "schedule"
->
 
 /** Días de pago separados por coma o espacio, sin repetir y en orden. */
 export function parsePayDays(value: string): number[] {
@@ -41,89 +19,6 @@ export function parsePayDays(value: string): number[] {
         )
     ),
   ].sort((left, right) => left - right)
-}
-
-export function formatSyncIntervalLabel(minutes: number): string {
-  if (minutes < 60) {
-    return `${minutes} min`
-  }
-  const hours = Math.floor(minutes / 60)
-  const leftover = minutes % 60
-  if (leftover === 0) {
-    return `${hours} h`
-  }
-  return `${hours} h ${leftover} min`
-}
-
-export function parseSyncIntervalMinutes(value: string): number {
-  const minutes = Number(value)
-  if (!Number.isInteger(minutes) || minutes < MIN_EMAIL_SYNC_INTERVAL_MINUTES) {
-    return DEFAULT_EMAIL_SYNC_INTERVAL_MINUTES
-  }
-  return minutes
-}
-
-export function nextEmailSyncTime(existing: string[]): string {
-  const taken = new Set(existing)
-  const last = existing.at(-1) ?? DEFAULT_EMAIL_SYNC_TIMES[0]
-  const [hoursText, minutesText = "00"] = last.split(":")
-  let hour = Number(hoursText)
-  for (let step = 0; step < 24; step += 1) {
-    hour = (hour + 1) % 24
-    const candidate = `${String(hour).padStart(2, "0")}:${minutesText}`
-    if (!taken.has(candidate)) {
-      return candidate
-    }
-  }
-  return DEFAULT_EMAIL_SYNC_TIMES[0]
-}
-
-export function emailSyncTimesFromSchedule(
-  schedule: EmailSyncScheduleConfig
-): string[] {
-  if (schedule.mode === "times" && schedule.times.length > 0) {
-    return schedule.times
-  }
-  return [...DEFAULT_EMAIL_SYNC_TIMES]
-}
-
-/** El paso automático ya quedó resuelto cuando `automatic` está encendido. */
-export function isEmailSyncConfigured(
-  config: Pick<EmailSyncConfigLike, "automatic">
-): boolean {
-  return config.automatic
-}
-
-export function emailSyncScheduleLabel(
-  schedule: EmailSyncScheduleConfig
-): string {
-  if (schedule.mode === "interval") {
-    return `Cada ${formatSyncIntervalLabel(schedule.everyMinutes)}`
-  }
-  return `A las ${schedule.times.join(", ")}`
-}
-
-/** Valores propuestos al terminar de conectar Gmail: encender lo automático. */
-export function emailSyncOnboardingDefaults(
-  config: EmailSyncConfigLike
-): Pick<
-  FinanceModuleFormValues,
-  | "emailSyncAutomatic"
-  | "emailSyncMode"
-  | "emailSyncScheduleMode"
-  | "emailSyncEveryMinutes"
-  | "emailSyncTimes"
-> {
-  return {
-    emailSyncAutomatic: true,
-    emailSyncMode: config.mode,
-    emailSyncScheduleMode: config.schedule.mode,
-    emailSyncEveryMinutes:
-      config.schedule.mode === "interval"
-        ? String(config.schedule.everyMinutes)
-        : String(DEFAULT_EMAIL_SYNC_INTERVAL_MINUTES),
-    emailSyncTimes: emailSyncTimesFromSchedule(config.schedule),
-  }
 }
 
 function hasInvalidPayDay(value: string): boolean {
@@ -152,16 +47,6 @@ export const financeModuleSchema = z
     fixedIncomeFrequency: z.enum(["BIWEEKLY", "MONTHLY"]),
     fixedIncomePayDays: z.string(),
     fixedIncomeAccountId: z.string(),
-    emailSyncEnabled: z.boolean(),
-    emailSyncAutomatic: z.boolean(),
-    emailSyncMode: z.enum(["DIRECT", "PENDING"]),
-    emailSyncScheduleMode: z.enum([
-      EMAIL_SYNC_SCHEDULE_MODES.INTERVAL,
-      EMAIL_SYNC_SCHEDULE_MODES.TIMES,
-    ]),
-    emailSyncEveryMinutes: z.string(),
-    emailSyncTimes: z.array(z.string()),
-    autoCategorize: z.boolean(),
     budgetAlerts: z.boolean(),
     aiSuggestions: z.boolean(),
     transactionDetected: z.boolean(),
@@ -178,45 +63,6 @@ export const financeModuleSchema = z
     subscriptionGroupBy: z.enum(["category", "provider", "none"]),
   })
   .superRefine((values, ctx) => {
-    if (values.emailSyncEnabled && values.emailSyncAutomatic) {
-      if (values.emailSyncScheduleMode === EMAIL_SYNC_SCHEDULE_MODES.INTERVAL) {
-        const minutes = Number(values.emailSyncEveryMinutes)
-        if (
-          !Number.isInteger(minutes) ||
-          minutes < MIN_EMAIL_SYNC_INTERVAL_MINUTES
-        ) {
-          ctx.addIssue({
-            code: "custom",
-            path: ["emailSyncEveryMinutes"],
-            message: "Mínimo 15 minutos",
-          })
-        }
-      } else {
-        const times = values.emailSyncTimes
-          .map((time) => time.trim())
-          .filter(Boolean)
-        if (times.length === 0 || times.length > MAX_EMAIL_SYNC_TIMES) {
-          ctx.addIssue({
-            code: "custom",
-            path: ["emailSyncTimes"],
-            message: "Pon de 1 a 8 horas",
-          })
-        } else if (times.some((time) => !scheduleTimePattern.test(time))) {
-          ctx.addIssue({
-            code: "custom",
-            path: ["emailSyncTimes"],
-            message: "Hora no válida",
-          })
-        } else if (new Set(times).size !== times.length) {
-          ctx.addIssue({
-            code: "custom",
-            path: ["emailSyncTimes"],
-            message: "No repitas horas",
-          })
-        }
-      }
-    }
-
     const monthStartDay = Number(values.monthStartDay)
     if (
       !Number.isInteger(monthStartDay) ||
@@ -282,30 +128,6 @@ export const financeModuleSchema = z
 
 export type FinanceModuleFormValues = z.infer<typeof financeModuleSchema>
 
-/** Bloque `emailSync` del parche de configuración a partir del formulario. */
-export function emailSyncPatchFromFormValues(
-  values: FinanceModuleFormValues
-): FinanceModuleConfig["emailSync"] {
-  return {
-    enabled: values.emailSyncEnabled,
-    automatic: values.emailSyncAutomatic,
-    autoCategorize: values.autoCategorize,
-    mode: values.emailSyncMode,
-    schedule:
-      values.emailSyncScheduleMode === EMAIL_SYNC_SCHEDULE_MODES.INTERVAL
-        ? {
-            mode: EMAIL_SYNC_SCHEDULE_MODES.INTERVAL,
-            everyMinutes: Number(values.emailSyncEveryMinutes),
-          }
-        : {
-            mode: EMAIL_SYNC_SCHEDULE_MODES.TIMES,
-            times: values.emailSyncTimes
-              .map((time) => time.trim())
-              .filter(Boolean),
-          },
-  }
-}
-
 /** Bloque `subscriptions` del parche de configuración. */
 export function subscriptionsPatchFromFormValues(
   values: FinanceModuleFormValues
@@ -335,16 +157,6 @@ export function configToFinanceFormValues(
     fixedIncomeFrequency: config.fixedIncome.frequency,
     fixedIncomePayDays: config.fixedIncome.payDays.join(", "),
     fixedIncomeAccountId: config.fixedIncome.accountId ?? "",
-    emailSyncMode: config.emailSync.mode,
-    emailSyncEnabled: config.emailSync.enabled,
-    emailSyncAutomatic: config.emailSync.automatic,
-    emailSyncScheduleMode: config.emailSync.schedule.mode,
-    emailSyncEveryMinutes:
-      config.emailSync.schedule.mode === "interval"
-        ? String(config.emailSync.schedule.everyMinutes)
-        : String(DEFAULT_EMAIL_SYNC_INTERVAL_MINUTES),
-    emailSyncTimes: emailSyncTimesFromSchedule(config.emailSync.schedule),
-    autoCategorize: config.emailSync.autoCategorize,
     budgetAlerts: config.notifications.budgetAlerts,
     aiSuggestions: config.notifications.aiSuggestions,
     transactionDetected: config.notifications.transactionDetected,
