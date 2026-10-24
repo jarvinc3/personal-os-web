@@ -94,13 +94,6 @@ export const DEFAULT_MODULE_CONFIG_BY_SLUG: ModuleConfigBySlug = {
     reports: {
       weeklySummaryDay: 1,
     },
-    emailSync: {
-      enabled: false,
-      automatic: false,
-      autoCategorize: true,
-      mode: "DIRECT",
-      schedule: { mode: "interval", everyMinutes: 360 },
-    },
   },
   agenda: {
     version: 1,

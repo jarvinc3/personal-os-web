@@ -28,7 +28,6 @@ import {
   CalendarRange,
   Coins,
   HandCoins,
-  Mail,
   Repeat,
   SaveIcon,
   Scale,
@@ -42,7 +41,6 @@ import { useRouter } from "next/navigation"
 import { useEffect, useMemo, useState, type ReactNode } from "react"
 import { useForm } from "react-hook-form"
 import { DisplaySection } from "./components/display-section"
-import { EmailSyncSection } from "./components/email-sync-section"
 import { FinancialMonthSection } from "./components/financial-month-section"
 import { FixedIncomeSection } from "./components/fixed-income-section"
 import { MovementDefaultsSection } from "./components/movement-defaults-section"
@@ -50,7 +48,6 @@ import { NotificationsSection } from "./components/notifications-section"
 import { SubscriptionsSection } from "./components/subscriptions-section"
 import {
   configToFinanceFormValues,
-  emailSyncPatchFromFormValues,
   financeModuleSchema,
   parsePayDays,
   subscriptionsPatchFromFormValues,
@@ -84,11 +81,6 @@ const FINANCE_SETTINGS_SHEETS = {
     title: "Suscripciones",
     description: "Avisos y agrupación de cobros.",
     icon: Repeat,
-  },
-  emailSync: {
-    title: "Correo",
-    description: "Sincronización automática y horarios.",
-    icon: Mail,
   },
   notifications: {
     title: "Alertas",
@@ -205,11 +197,6 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
         return config.fixedIncome.enabled ? "Activado" : "Desactivado"
       case "subscriptions":
         return `${config.subscriptions.reminderDaysBefore} días antes`
-      case "emailSync":
-        if (!config.emailSync.enabled) {
-          return "Desactivada"
-        }
-        return config.emailSync.automatic ? "Automática" : "Manual"
       case "notifications": {
         const active = Object.values(config.notifications).filter(
           Boolean
@@ -241,7 +228,6 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
           payDays: parsePayDays(values.fixedIncomePayDays),
           accountId: values.fixedIncomeAccountId || null,
         },
-        emailSync: emailSyncPatchFromFormValues(values),
         subscriptions: subscriptionsPatchFromFormValues(values),
         notifications: {
           budgetAlerts: values.budgetAlerts,
@@ -353,7 +339,7 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
       >
         <SettingsRow
           label="Vaciar datos de Finanzas"
-          description="Movimientos, cuentas, presupuestos, categorías y conexiones de correo."
+          description="Movimientos, cuentas, presupuestos, categorías y productos."
           destructive
           icon={Trash2}
           accentColor={SETTINGS_REGISTRY.danger.accent}
@@ -409,17 +395,6 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
         onOpenSheetChange={setOpenSheet}
       >
         <SubscriptionsSection control={control} />
-      </FinanceSettingsSheet>
-
-      <FinanceSettingsSheet
-        id="emailSync"
-        openSheet={openSheet}
-        onOpenSheetChange={setOpenSheet}
-      >
-        <EmailSyncSection
-          control={control}
-          isSubmitting={updateMutation.isPending}
-        />
       </FinanceSettingsSheet>
 
       <FinanceSettingsSheet

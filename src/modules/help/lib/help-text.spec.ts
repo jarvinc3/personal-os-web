@@ -23,13 +23,13 @@ describe("parseHelpText", () => {
 
   it("reads guide links with the guia prefix", () => {
     assert.deepEqual(
-      parseHelpText("Sigue [[Conectar el correo|guia:conectar-el-correo]]."),
+      parseHelpText("Sigue [[Notificaciones|guia:notificaciones]]."),
       [
         { kind: "text", value: "Sigue " },
         {
           kind: "guide",
-          value: "Conectar el correo",
-          slug: "conectar-el-correo",
+          value: "Notificaciones",
+          slug: "notificaciones",
         },
         { kind: "text", value: "." },
       ]

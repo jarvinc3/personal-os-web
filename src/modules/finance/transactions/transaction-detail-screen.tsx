@@ -45,7 +45,6 @@ import { TransactionDetailFacts } from "@/src/modules/finance/transactions/compo
 import { TransactionDetailLinks } from "@/src/modules/finance/transactions/components/transaction-detail-links"
 import { TransactionReversalNotice } from "@/src/modules/finance/transactions/components/transaction-reversal-notice"
 import { canEditTransaction } from "@/src/modules/finance/transactions/lib/transaction-edit"
-import { ChatLauncherButton, useRegisterChatContext } from "@/src/modules/ai"
 import { LoadingView } from "@/src/shared/components/layout/loading-view"
 import { Button } from "@/src/shared/components/ui/button"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
@@ -125,20 +124,6 @@ function TransactionDetailScreenBody({
   const [unlinkOpen, setUnlinkOpen] = useState(false)
   const [unconfirmOpen, setUnconfirmOpen] = useState(false)
   const [reverseOpen, setReverseOpen] = useState(false)
-
-  useRegisterChatContext(
-    tx
-      ? {
-          moduleSlug: "finance",
-          screen: "transaction-detail",
-          entityRef: {
-            type: isTransferTransaction(tx) ? "transfer" : "transaction",
-            id: tx.id,
-          },
-          entityLabel: tx.description ?? tx.merchant ?? "Movimiento",
-        }
-      : null
-  )
 
   const isMutating =
     confirmMutation.isPending ||
@@ -268,7 +253,6 @@ function TransactionDetailScreenBody({
   const headerActions = useMemo(
     () => (
       <>
-        <ChatLauncherButton />
         <Button
           variant="outline"
           size="icon"

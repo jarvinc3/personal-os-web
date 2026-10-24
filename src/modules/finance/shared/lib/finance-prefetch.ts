@@ -4,11 +4,7 @@ import { FINANCE_BUDGET_PAGE_SIZE } from "./budgets-query.ts"
 import {
   accountsQuery,
   budgetsInfiniteQuery,
-  cardsQuery,
   categoriesQuery,
-  emailMailboxesQuery,
-  emailMessagesQuery,
-  emailPendingQuery,
   institutionsQuery,
   loansQuery,
   receivablesQuery,
@@ -55,20 +51,6 @@ export function prefetchFinancePlanning(
     queryClient.prefetchQuery(receivablesQuery(get)),
     queryClient.prefetchQuery(categoriesQuery(get)),
     queryClient.prefetchInfiniteQuery(budgetsInfiniteQuery(budgetsQuery, get)),
-  ])
-}
-
-export function prefetchFinanceSync(
-  queryClient: PrefetchClient,
-  get?: FinanceQueryGet
-) {
-  return Promise.all([
-    queryClient.prefetchQuery(institutionsQuery(get)),
-    queryClient.prefetchQuery(accountsQuery(get)),
-    queryClient.prefetchQuery(cardsQuery(get)),
-    queryClient.prefetchQuery(emailMailboxesQuery(get)),
-    queryClient.prefetchInfiniteQuery(emailPendingQuery(get)),
-    queryClient.prefetchInfiniteQuery(emailMessagesQuery(get)),
   ])
 }
 

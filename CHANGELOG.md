@@ -2,6 +2,14 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [SemVer](https://semver.org/lang/es/). Reglas y ejemplo en [docs/reference/changelog-guide.md](./docs/reference/changelog-guide.md).
 
+## Unreleased — 0.100.0
+
+### Eliminado
+
+- Se retiran la conversación de IA, sus sesiones y preferencias dedicadas, y la sincronización de Gmail del cliente (#193).
+- Se quitan las consultas, prefetch, formularios, galería y vínculos de navegación que dependían de esas rutas.
+- Se retiran los ajustes, opciones de vaciado y textos de ayuda de Gmail y de historial de chat que el backend ya no ofrece.
+
 ## [0.61.0] - 2026-10-24
 
 ### Agregado

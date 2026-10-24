@@ -59,7 +59,6 @@ function CardCreateScreenBody() {
         locale: formatLocale,
       }}
       onDone={handleBack}
-      onReadStatement={() => router.push(APP_ROUTES.app.financeSync)}
     />
   )
 }
@@ -137,7 +136,6 @@ function CardEditScreenBody({ cardId }: CardEditScreenProps) {
         locale: formatLocale,
       }}
       onDone={handleBack}
-      onReadStatement={() => router.push(APP_ROUTES.app.financeSync)}
       onUpdateBalance={() =>
         router.push(
           `${APP_ROUTES.app.financeInstitutionCard(card.institutionId, card.id)}?sheet=${FINANCE_SHEET_KEYS.cardBalance}`

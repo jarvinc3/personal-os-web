@@ -48,7 +48,6 @@ import { useTransition, type ReactNode } from "react"
 const PAGE_TITLES: Record<string, string> = {
   [APP_ROUTES.app.home]: "Inicio",
   [APP_ROUTES.app.settings]: "Ajustes",
-  [APP_ROUTES.app.chat]: "Agente IA",
   [APP_ROUTES.app.notifications]: "Notificaciones",
   [APP_ROUTES.app.keepAwake]: "Keep Awake",
 }
@@ -59,9 +58,6 @@ function resolvePageTitle(pathname: string): string {
   }
   if (pathname.startsWith(APP_ROUTES.app.settings)) {
     return "Ajustes"
-  }
-  if (pathname.startsWith(APP_ROUTES.app.chat)) {
-    return "Agente IA"
   }
   if (pathname.startsWith(APP_ROUTES.app.notifications)) {
     return "Notificaciones"

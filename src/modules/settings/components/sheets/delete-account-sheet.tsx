@@ -39,8 +39,7 @@ import { useCallback, useEffect, useRef, useState } from "react"
 const DELETED_DATA_ITEMS = [
   "Perfil, preferencias y configuración de apps",
   "Datos financieros, transacciones y presupuestos",
-  "Historial del agente IA y sesiones",
-  "Tokens OAuth de Gmail y fuentes conectadas",
+  "Datos financieros y configuración de apps",
   "Tokens push y alertas",
 ]
 

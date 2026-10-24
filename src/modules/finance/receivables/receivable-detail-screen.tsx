@@ -51,7 +51,6 @@ import { InfiniteListSentinel } from "@/src/shared/components/ui/infinite-list-s
 import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
-import { ChatLauncherButton, useRegisterChatContext } from "@/src/modules/ai"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { appToast } from "@/src/shared/lib/app-toast"
 import {
@@ -105,17 +104,6 @@ function ReceivableDetailScreenBody({
     (receivablesQuery.data ?? []).find((item) => item.id === receivableId) ??
     null
   const payments = infiniteListItems(paymentsQuery.data)
-
-  useRegisterChatContext(
-    receivable
-      ? {
-          moduleSlug: "finance",
-          screen: "receivable-detail",
-          entityRef: { type: "receivable", id: receivable.id },
-          entityLabel: receivable.debtorName,
-        }
-      : null
-  )
   const money = {
     ...display,
     currency: receivable?.currency ?? display.currency,
@@ -191,7 +179,6 @@ function ReceivableDetailScreenBody({
   const headerActions = useMemo(
     () => (
       <>
-        <ChatLauncherButton />
         <Button
           variant="outline"
           size="icon"

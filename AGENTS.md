@@ -97,6 +97,10 @@ No hay excepción por tamaño ni por tipo: un cambio de documentación también 
 
 ## Changelog y versión
 
+Excepción aprobada para AI-0 y sus PRs: usa `0.100.0` unreleased hasta que el
+owner autorice el corte final. No crees tags, releases ni deploys durante este
+trabajo; registra el avance bajo `[Unreleased]`.
+
 Toda sesión de agente cierra con un release: `CHANGELOG.md` actualizado y `version` de `package.json` subida. Antes de escribirlo, lee [docs/reference/changelog-guide.md](docs/reference/changelog-guide.md) completo; ahí están las reglas, las secciones y un ejemplo.
 
 La versión sigue **estrictamente** [docs/versionado.md](docs/versionado.md): beta `0.MINOR.PATCH`, nunca bajar de versión, `1.0.0` solo cuando el usuario lo decida y los hitos de módulo como nombre de release.

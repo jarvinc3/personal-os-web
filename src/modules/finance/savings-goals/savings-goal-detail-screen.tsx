@@ -46,7 +46,6 @@ import { InfiniteListSentinel } from "@/src/shared/components/ui/infinite-list-s
 import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
-import { ChatLauncherButton, useRegisterChatContext } from "@/src/modules/ai"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { appToast } from "@/src/shared/lib/app-toast"
 import {
@@ -107,17 +106,6 @@ function SavingsGoalDetailScreenBody({
     id ? (accounts.find((account) => account.id === id) ?? null) : null
   const accountName = (id: string | null) => accountFor(id)?.name ?? null
   const goalAccount = goal ? accountFor(goal.accountId) : null
-
-  useRegisterChatContext(
-    goal
-      ? {
-          moduleSlug: "finance",
-          screen: "savings-goal-detail",
-          entityRef: { type: "savings_goal", id: goal.id },
-          entityLabel: goal.name,
-        }
-      : null
-  )
   const money = { ...display, currency: goal?.currency ?? display.currency }
   const accent = ACCENT_FALLBACK_COLOR
   const progress = Math.max(
@@ -151,7 +139,6 @@ function SavingsGoalDetailScreenBody({
   const headerActions = useMemo(
     () => (
       <>
-        <ChatLauncherButton />
         <Button
           variant="outline"
           size="icon"

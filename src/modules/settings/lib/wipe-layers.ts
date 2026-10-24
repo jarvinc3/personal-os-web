@@ -4,8 +4,6 @@ export const WIPE_LAYERS = {
   FINANCE_PLANNING: "finance.planning",
   FINANCE_CATEGORIES: "finance.categories",
   FINANCE_CATALOG: "finance.catalog",
-  FINANCE_EMAIL_CONNECTIONS: "finance.emailConnections",
-  AI_SESSIONS: "ai.sessions",
   NOTIFICATIONS: "notifications",
   SETTINGS_DEFAULTS: "settings.defaults",
 } as const
@@ -18,8 +16,6 @@ export const WIPE_LAYER_ORDER: readonly WipeLayerId[] = [
   WIPE_LAYERS.FINANCE_PLANNING,
   WIPE_LAYERS.FINANCE_CATEGORIES,
   WIPE_LAYERS.FINANCE_CATALOG,
-  WIPE_LAYERS.FINANCE_EMAIL_CONNECTIONS,
-  WIPE_LAYERS.AI_SESSIONS,
   WIPE_LAYERS.NOTIFICATIONS,
   WIPE_LAYERS.SETTINGS_DEFAULTS,
 ]
@@ -31,8 +27,6 @@ export const WIPE_LAYER_DEPENDENCIES: Record<WipeLayerId, WipeLayerId[]> = {
   [WIPE_LAYERS.FINANCE_PLANNING]: [],
   [WIPE_LAYERS.FINANCE_CATEGORIES]: [WIPE_LAYERS.FINANCE_PLANNING],
   [WIPE_LAYERS.FINANCE_CATALOG]: [WIPE_LAYERS.FINANCE_LEDGER],
-  [WIPE_LAYERS.FINANCE_EMAIL_CONNECTIONS]: [],
-  [WIPE_LAYERS.AI_SESSIONS]: [],
   [WIPE_LAYERS.NOTIFICATIONS]: [],
   [WIPE_LAYERS.SETTINGS_DEFAULTS]: [],
 }
@@ -43,8 +37,6 @@ export const WIPE_LAYER_LABELS: Record<WipeLayerId, string> = {
   [WIPE_LAYERS.FINANCE_PLANNING]: "Presupuestos, metas y préstamos",
   [WIPE_LAYERS.FINANCE_CATEGORIES]: "Categorías propias",
   [WIPE_LAYERS.FINANCE_CATALOG]: "Instituciones, cuentas y tarjetas",
-  [WIPE_LAYERS.FINANCE_EMAIL_CONNECTIONS]: "Conexiones de Gmail",
-  [WIPE_LAYERS.AI_SESSIONS]: "Historial del asistente IA",
   [WIPE_LAYERS.NOTIFICATIONS]: "Notificaciones y tokens push",
   [WIPE_LAYERS.SETTINGS_DEFAULTS]: "Configuración por defecto",
 }
@@ -60,10 +52,6 @@ export const WIPE_LAYER_DESCRIPTIONS: Record<WipeLayerId, string> = {
     "Borra las categorías que creaste. Las del sistema se conservan.",
   [WIPE_LAYERS.FINANCE_CATALOG]:
     "Borra instituciones, cuentas y tarjetas. Arrastra sus movimientos, préstamos y bancos vigilados.",
-  [WIPE_LAYERS.FINANCE_EMAIL_CONNECTIONS]:
-    "Borra el buzón de Gmail conectado y sus tokens de acceso.",
-  [WIPE_LAYERS.AI_SESSIONS]:
-    "Borra las conversaciones y acciones del asistente IA.",
   [WIPE_LAYERS.NOTIFICATIONS]:
     "Borra el historial de notificaciones y los tokens push.",
   [WIPE_LAYERS.SETTINGS_DEFAULTS]:
@@ -82,7 +70,6 @@ export const FINANCE_WIPE_LAYERS: readonly WipeLayerId[] = [
   WIPE_LAYERS.FINANCE_PLANNING,
   WIPE_LAYERS.FINANCE_CATEGORIES,
   WIPE_LAYERS.FINANCE_CATALOG,
-  WIPE_LAYERS.FINANCE_EMAIL_CONNECTIONS,
 ]
 
 export const WIPE_LAYER_GROUPS: WipeLayerGroup[] = [
@@ -90,7 +77,6 @@ export const WIPE_LAYER_GROUPS: WipeLayerGroup[] = [
     title: "Finanzas",
     layers: [...FINANCE_WIPE_LAYERS],
   },
-  { title: "Asistente IA", layers: [WIPE_LAYERS.AI_SESSIONS] },
   { title: "Notificaciones", layers: [WIPE_LAYERS.NOTIFICATIONS] },
   { title: "Configuración", layers: [WIPE_LAYERS.SETTINGS_DEFAULTS] },
 ]

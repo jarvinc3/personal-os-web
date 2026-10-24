@@ -57,16 +57,6 @@ export type FinanceModuleConfig = {
     /** 0 = domingo … 6 = sábado, en la zona horaria del usuario. */
     weeklySummaryDay: number
   }
-  emailSync: {
-    enabled: boolean
-    automatic: boolean
-    autoCategorize: boolean
-    /** DIRECT confirma lo importado; PENDING lo deja por confirmar. */
-    mode: "DIRECT" | "PENDING"
-    schedule:
-      | { mode: "interval"; everyMinutes: number }
-      | { mode: "times"; times: string[] }
-  }
 }
 
 export type AgendaModuleConfig = {

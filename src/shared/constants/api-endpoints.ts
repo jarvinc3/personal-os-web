@@ -23,16 +23,6 @@ export const API_ENDPOINTS = {
     DEACTIVATE_PUSH_TOKEN: (token: string) =>
       `/notifications/push-tokens/${token}`,
   },
-  AI: {
-    PROVIDERS: "/ai/providers",
-    CHAT: "/ai/chat",
-    CHAT_STREAM: "/ai/chat/stream",
-    SESSIONS: "/ai/sessions",
-    SESSION: (id: string) => `/ai/sessions/${id}`,
-    SESSION_ACTIONS: (id: string) => `/ai/sessions/${id}/actions`,
-    ACTION_EXECUTE: (id: string) => `/ai/actions/${id}/execute`,
-    ACTION_CANCEL: (id: string) => `/ai/actions/${id}/cancel`,
-  },
   FINANCE: {
     INSTITUTIONS: "/finance/institutions",
     INSTITUTION: (id: string) => `/finance/institutions/${id}`,
@@ -118,23 +108,6 @@ export const API_ENDPOINTS = {
     RECEIVABLE_RESTORE: (id: string) => `/finance/receivables/${id}/restore`,
     RECEIVABLE_WRITE_OFF: (id: string) =>
       `/finance/receivables/${id}/write-off`,
-    EMAIL_SOURCES: "/finance/email-sync/sources",
-    EMAIL_SOURCE: (id: string) => `/finance/email-sync/sources/${id}`,
-    EMAIL_SOURCE_SYNC: (id: string) => `/finance/email-sync/sources/${id}/sync`,
-    EMAIL_MAILBOXES: "/finance/email-sync/mailboxes",
-    EMAIL_MAILBOX: (id: string) => `/finance/email-sync/mailboxes/${id}`,
-    EMAIL_PENDING: "/finance/email-sync/pending",
-    EMAIL_MESSAGES: "/finance/email-sync/messages",
-    EMAIL_PENDING_ASSIGN: (id: string) =>
-      `/finance/email-sync/pending/${id}/assign`,
-    EMAIL_PENDING_RETRY: (id: string) =>
-      `/finance/email-sync/pending/${id}/retry`,
-    EMAIL_PENDING_AMOUNT: (id: string) =>
-      `/finance/email-sync/pending/${id}/amount`,
-    EMAIL_SOURCE_DISCOVERED_SENDERS: (id: string) =>
-      `/finance/email-sync/sources/${id}/discovered-senders`,
-    EMAIL_SOURCE_SENDERS: (id: string) =>
-      `/finance/email-sync/sources/${id}/senders`,
     ANALYTICS_SUMMARY: "/finance/analytics/summary",
     ANALYTICS_WEEKLY_SUMMARY: "/finance/analytics/weekly-summary",
     ANALYTICS_SPENDING_BY_CATEGORY: "/finance/analytics/spending-by-category",
@@ -143,8 +116,6 @@ export const API_ENDPOINTS = {
     BANK_CHARGES: "/finance/bank-charges",
     BALANCE_SHEET: "/finance/balance-sheet",
     QUICK_ENTRY_PARSE: "/finance/quick-entry/parse",
-    OAUTH_GOOGLE_URL: "/finance/email-sync/oauth/google/url",
-    OAUTH_GOOGLE_CALLBACK: "/finance/email-sync/oauth/google/callback",
     EXCHANGE_RATES: "/finance/exchange-rates",
     BASE_CURRENCY: "/finance/base-currency",
     MERCHANTS: "/finance/merchants",

@@ -51,7 +51,6 @@ import { InfiniteListSentinel } from "@/src/shared/components/ui/infinite-list-s
 import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
-import { ChatLauncherButton, useRegisterChatContext } from "@/src/modules/ai"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { ACCENT_FALLBACK_COLOR } from "@/src/shared/lib/accent-gradient"
 import { appToast } from "@/src/shared/lib/app-toast"
@@ -161,17 +160,6 @@ function BudgetDetailScreenBody({ budgetId }: FinanceBudgetDetailProps) {
   const budgetTitleText = budget ? budgetTitle(budget) : "Presupuesto"
   const tone = budget ? budgetTone(pct, budget.alertThresholdPct ?? 80) : "info"
   const badge = budgetBadge(tone)
-
-  useRegisterChatContext(
-    budget
-      ? {
-          moduleSlug: "finance",
-          screen: "budget-detail",
-          entityRef: { type: "budget", id: budget.id },
-          entityLabel: budgetTitleText,
-        }
-      : null
-  )
   const deleteBudget = useDeleteBudget()
   const restoreBudget = useRestoreBudget()
   const [optionsOpen, setOptionsOpen] = useState(false)
@@ -201,7 +189,6 @@ function BudgetDetailScreenBody({ budgetId }: FinanceBudgetDetailProps) {
   const headerActions = useMemo(
     () => (
       <>
-        <ChatLauncherButton />
         <Button
           variant="outline"
           size="icon"

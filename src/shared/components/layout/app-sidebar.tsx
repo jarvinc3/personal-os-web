@@ -44,7 +44,6 @@ import {
   type LucideIcon,
   Monitor,
   Settings,
-  SparklesIcon,
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -130,18 +129,6 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton size="md" asChild>
-              <Link href={APP_ROUTES.app.chat} className="relative">
-                <SparklesIcon className="text-destructive" size={16} />
-                Agente IA
-                <LinkPendingOverlay />
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-
         <Separator />
 
         <SidebarMenu>

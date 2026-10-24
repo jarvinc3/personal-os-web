@@ -3,16 +3,13 @@
  *
  * Cursor paginated `{ items, nextCursor, hasMore }` — GET /finance/transactions, GET /finance/budgets
  * Array — accounts, cards, institutions, categories, savings-goals, loans,
- *   receivables, email-sync/sources, spending-by-category, budget-status
+ *   receivables, spending-by-category, budget-status
  * Object — analytics/summary, balance-sheet
  * `{ points }` — analytics/spending-over-time
  *
  * Money fields on **read** are decimal strings. Write DTOs stay numbers.
  * `interestRate` read: string | null. Percentages (`pctUsed`, `alertThresholdPct`) stay number.
  *
- * `POST /finance/email-sync/pending/:id/retry` responds `{ assigned: true, transactionId }`
- *   when the reroute imports the movement, or the pending message when it stays pending.
- *   Same union as `POST /finance/email-sync/pending/:id/assign` and `.../amount`.
  */
 
 export type FinancePaginated<T> = {
@@ -103,22 +100,6 @@ export const FINANCE_SAVINGS_GOAL_CONTRIBUTIONS_QUERY_KEY = [
 export const FINANCE_RECEIVABLE_PAYMENTS_QUERY_KEY = [
   ...FINANCE_QUERY_KEY,
   "receivable-payments",
-] as const
-export const FINANCE_EMAIL_SOURCES_QUERY_KEY = [
-  ...FINANCE_QUERY_KEY,
-  "email-sources",
-] as const
-export const FINANCE_EMAIL_MAILBOXES_QUERY_KEY = [
-  ...FINANCE_QUERY_KEY,
-  "email-mailboxes",
-] as const
-export const FINANCE_EMAIL_PENDING_QUERY_KEY = [
-  ...FINANCE_QUERY_KEY,
-  "email-pending",
-] as const
-export const FINANCE_EMAIL_MESSAGES_QUERY_KEY = [
-  ...FINANCE_QUERY_KEY,
-  "email-messages",
 ] as const
 export const FINANCE_RECYCLE_BIN_QUERY_KEY = [
   ...FINANCE_QUERY_KEY,

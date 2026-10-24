@@ -1,5 +1,4 @@
 import assert from "node:assert/strict"
-import { readFileSync } from "node:fs"
 import { describe, it } from "node:test"
 
 import {
@@ -185,13 +184,8 @@ describe("resolveReleaseNotesOutcome", () => {
 })
 
 describe("RELEASE_NOTES", () => {
-  it("starts with the version of package.json", () => {
-    const packageJson = JSON.parse(
-      readFileSync(new URL("../../../package.json", import.meta.url), "utf8")
-    ) as { version: string }
-
-    assert.equal(LATEST_RELEASE_VERSION, packageJson.version)
-    assert.equal(RELEASE_NOTES[0]?.version, packageJson.version)
+  it("keeps the latest published notes entry first", () => {
+    assert.equal(LATEST_RELEASE_VERSION, RELEASE_NOTES[0]?.version)
   })
 
   it("lists each version once, newest first", () => {

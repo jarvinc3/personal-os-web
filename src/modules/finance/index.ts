@@ -24,7 +24,6 @@ export { useBalanceSheet } from "./shared/hooks/use-balance-sheet"
 export { useBudgets } from "./shared/hooks/use-budgets"
 export { useCards } from "./shared/hooks/use-cards"
 export { useCategories } from "./shared/hooks/use-categories"
-export { useEmailSources } from "./shared/hooks/use-email-sources"
 export { useExchangeRates } from "./shared/hooks/use-exchange-rates"
 export { useFinanceEnabled } from "./shared/hooks/use-finance-enabled"
 export { useInstitutions } from "./shared/hooks/use-institutions"
@@ -58,10 +57,6 @@ export {
   FINANCE_BUDGETS_QUERY_KEY,
   FINANCE_CARDS_QUERY_KEY,
   FINANCE_CATEGORIES_QUERY_KEY,
-  FINANCE_EMAIL_SOURCES_QUERY_KEY,
-  FINANCE_EMAIL_MAILBOXES_QUERY_KEY,
-  FINANCE_EMAIL_PENDING_QUERY_KEY,
-  FINANCE_EMAIL_MESSAGES_QUERY_KEY,
   FINANCE_INSTITUTIONS_QUERY_KEY,
   FINANCE_LOANS_QUERY_KEY,
   FINANCE_MERCHANTS_QUERY_KEY,

@@ -2,7 +2,6 @@ import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 
 const PROTECTED_APP_PATH_PREFIXES: readonly string[] = [
   APP_ROUTES.app.settings,
-  APP_ROUTES.app.chat,
   APP_ROUTES.app.notifications,
   APP_ROUTES.app.keepAwake,
   APP_ROUTES.app.agenda,

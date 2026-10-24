@@ -338,42 +338,6 @@ export const HELP_TERMS: readonly HelpTerm[] = [
     related: ["por-cobrar", "dudosos"],
   },
   {
-    slug: "buzon",
-    term: "Buzón",
-    category: "correo",
-    definition:
-      "Una cuenta de Gmail que conectas para que Finanzas lea los correos de tu banco. Se autoriza solo lectura.",
-    aliases: ["Gmail", "mailbox"],
-    related: ["fuente-de-correo", "correo-bancario"],
-  },
-  {
-    slug: "fuente-de-correo",
-    term: "Fuente de correo",
-    category: "correo",
-    definition:
-      "El vínculo entre un [[buzón|buzon]] y una [[institución|institucion]], con los correos del remitente del banco. Cada institución tiene una sola fuente.",
-    aliases: ["remitente", "fuente"],
-    related: ["buzon", "institucion"],
-  },
-  {
-    slug: "correo-bancario",
-    term: "Correo bancario",
-    category: "correo",
-    definition:
-      "El aviso que manda el banco cuando haces una compra o un pago. Finanzas lo convierte en un [[movimiento|movimiento]] y no importa dos veces el mismo correo.",
-    aliases: ["aviso del banco"],
-    related: ["buzon", "movimiento"],
-  },
-  {
-    slug: "pendiente-de-asignacion",
-    term: "Pendiente de asignación",
-    category: "correo",
-    definition:
-      "Un correo que Finanzas no pudo convertir en [[movimiento|movimiento]] porque no reconoció la cuenta, la tarjeta o el monto. Puedes reintentarlo o asignarle un destino a mano.",
-    aliases: ["pendiente"],
-    related: ["correo-bancario", "movimiento"],
-  },
-  {
     slug: "importar-estado-de-cuenta",
     term: "Importar estado de cuenta",
     category: "correo",

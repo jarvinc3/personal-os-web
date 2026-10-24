@@ -28,11 +28,10 @@ describe("expandWipeLayerSelection", () => {
   it("deduplicates and keeps independent layers", () => {
     assert.deepEqual(
       expandWipeLayerSelection([
-        WIPE_LAYERS.AI_SESSIONS,
-        WIPE_LAYERS.AI_SESSIONS,
+        WIPE_LAYERS.FINANCE_BALANCES,
         WIPE_LAYERS.NOTIFICATIONS,
       ]),
-      [WIPE_LAYERS.AI_SESSIONS, WIPE_LAYERS.NOTIFICATIONS]
+      [WIPE_LAYERS.FINANCE_BALANCES, WIPE_LAYERS.NOTIFICATIONS]
     )
   })
 })
