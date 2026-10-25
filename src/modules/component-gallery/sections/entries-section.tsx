@@ -26,7 +26,7 @@ export function EntriesSection() {
     <>
       <GalleryDemo
         name="FormTextField"
-        from="@/src/shared/components/layout/form-blocks"
+        importPath="@/src/shared/components/layout/form-blocks"
         states="normal, icono, error, contraseña con revelar, deshabilitado"
         note="Todo campo de dato lleva icono líder. La etiqueta va arriba y el error pegado al campo."
       >
@@ -69,7 +69,7 @@ export function EntriesSection() {
 
       <GalleryDemo
         name="InputGroup"
-        from="@/src/shared/components/ui/input-group"
+        importPath="@/src/shared/components/ui/input-group"
         states="búsqueda con icono líder"
         note="El primitivo que envuelve un campo con icono o un botón dentro."
       >
@@ -88,7 +88,7 @@ export function EntriesSection() {
 
       <GalleryDemo
         name="SwitchFieldRow"
-        from="@/src/shared/components/layout/form-blocks"
+        importPath="@/src/shared/components/layout/form-blocks"
         states="encendido, apagado, deshabilitado"
         note="Estado binario en una fila: icono a la izquierda del título y la descripción debajo."
       >

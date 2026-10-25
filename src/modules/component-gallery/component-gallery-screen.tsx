@@ -58,7 +58,7 @@ export function ComponentGalleryScreen() {
 
       {COMPONENT_GALLERY_SECTIONS.map((section) => {
         const Icon = section.icon
-        const Body = COMPONENT_GALLERY_SECTION_BODIES[section.id]
+        const SectionBody = COMPONENT_GALLERY_SECTION_BODIES[section.id]
         return (
           <section
             key={section.id}
@@ -78,7 +78,7 @@ export function ComponentGalleryScreen() {
                 {section.description}
               </p>
             </header>
-            <Body />
+            <SectionBody />
           </section>
         )
       })}

@@ -25,7 +25,7 @@ export function NoticesSection() {
     <>
       <GalleryDemo
         name="Alert"
-        from="@/src/shared/components/ui/alert"
+        importPath="@/src/shared/components/ui/alert"
         states="default, warning, info, destructive, con acción"
         note="Un aviso puntual dentro de un flujo. El error de una sección es FinanceErrorState, no un Alert."
       >
@@ -71,7 +71,7 @@ export function NoticesSection() {
 
       <GalleryDemo
         name="NoticeCard"
-        from="@/src/modules/finance/shared/components/notice-card"
+        importPath="@/src/modules/finance/shared/components/notice-card"
         states="warning, danger, info, con acción a la derecha"
         note="El aviso que acompaña a la card de una entidad, con su tono y un botón de salida."
       >
@@ -107,7 +107,7 @@ export function NoticesSection() {
 
       <GalleryDemo
         name="appToast"
-        from="@/src/shared/lib/app-toast"
+        importPath="@/src/shared/lib/app-toast"
         states="success, error, info, warning"
         note="El toast de una mutación. No es un estado de sección; no mueve el foco y se anuncia solo."
       >

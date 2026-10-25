@@ -25,7 +25,7 @@ export function HeadingsSection() {
     <>
       <GalleryDemo
         name="SummarySection"
-        from="@/src/shared/components/ui/summary"
+        importPath="@/src/shared/components/ui/summary"
         states="título con icono, subtítulo, acción a la derecha"
         note="El encabezado de un bloque en cualquier superficie: lista, formulario, sheet o panel."
       >
@@ -55,7 +55,7 @@ export function HeadingsSection() {
 
       <GalleryDemo
         name="SummarySection collapsible"
-        from="@/src/shared/components/ui/summary"
+        importPath="@/src/shared/components/ui/summary"
         states="abierto, cerrado, con badge en el encabezado"
         note="El bloque se pliega cuando el contenido es secundario, no cuando es la vista principal."
       >
@@ -77,7 +77,7 @@ export function HeadingsSection() {
 
       <GalleryDemo
         name="SummaryGroup"
-        from="@/src/shared/components/ui/summary"
+        importPath="@/src/shared/components/ui/summary"
         states="concepto con línea y descripción"
         note="Une varios controles bajo un mismo concepto dentro de una sección."
       >
@@ -96,7 +96,7 @@ export function HeadingsSection() {
 
       <GalleryDemo
         name="SettingsSection"
-        from="@/src/shared/components/layout/settings-section"
+        importPath="@/src/shared/components/layout/settings-section"
         states="etiqueta corta con acción en el encabezado"
         note="Para un grupo de ajustes. El título va en mayúsculas pequeñas, no como encabezado de página."
       >

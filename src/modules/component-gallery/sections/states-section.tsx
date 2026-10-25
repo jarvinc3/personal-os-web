@@ -24,7 +24,7 @@ export function StatesSection() {
     <>
       <GalleryDemo
         name="Empty"
-        from="@/src/shared/components/ui/empty"
+        importPath="@/src/shared/components/ui/empty"
         states="con icono, con acción, búsqueda sin resultados"
         note="Cero ítems de una colección. No es un párrafo en muted ni un fallo de carga."
       >
@@ -61,7 +61,7 @@ export function StatesSection() {
 
       <GalleryDemo
         name="Skeleton + FinanceListSkeleton"
-        from="@/src/shared/components/ui/skeleton"
+        importPath="@/src/shared/components/ui/skeleton"
         states="esqueleto de fila, lista de tres filas"
         note="Mientras llega la primera tanda, el hueco tiene la forma de lo que va a llegar."
       >
@@ -73,7 +73,7 @@ export function StatesSection() {
 
       <GalleryDemo
         name="Spinner + LoadingView"
-        from="@/src/shared/components/layout/loading-view"
+        importPath="@/src/shared/components/layout/loading-view"
         states="spinner dentro de un botón, página sin forma"
         note="El Spinner suelto solo va dentro de un control o en LoadingView mientras la página no tiene forma."
       >
@@ -90,7 +90,7 @@ export function StatesSection() {
 
       <GalleryDemo
         name="FinanceErrorState"
-        from="@/src/modules/finance/shared/components/layout/error-state"
+        importPath="@/src/modules/finance/shared/components/layout/error-state"
         states="con Reintentar, reintentando"
         note="El fallo de una sección es un estado reintentable en el mismo sitio, no un texto rojo sin salida."
       >

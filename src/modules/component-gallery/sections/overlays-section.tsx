@@ -44,7 +44,7 @@ export function OverlaysSection() {
     <>
       <GalleryDemo
         name="BottomSheet"
-        from="@/src/shared/components/layout/bottom-sheet"
+        importPath="@/src/shared/components/layout/bottom-sheet"
         states="hoja de edición con acciones"
         note="Cada ejemplo se abre con useSheetParam: la URL cambia y Atrás la cierra."
       >
@@ -56,7 +56,7 @@ export function OverlaysSection() {
 
       <GalleryDemo
         name={'BottomSheet variant="floating"'}
-        from="@/src/shared/components/layout/bottom-sheet"
+        importPath="@/src/shared/components/layout/bottom-sheet"
         states="evento: llegó, listo, falló"
         note="Para un aviso de evento, no para un formulario."
       >
@@ -71,7 +71,7 @@ export function OverlaysSection() {
 
       <GalleryDemo
         name="AlertDialog"
-        from="@/src/shared/components/ui/alert-dialog"
+        importPath="@/src/shared/components/ui/alert-dialog"
         states="confirmación de una acción destructiva"
         note="Esc y Cancelar cierran sin ejecutar; el clic afuera no cierra."
       >
@@ -86,7 +86,7 @@ export function OverlaysSection() {
 
       <BottomSheet
         open={editOpen}
-        onOpenChange={(next) => setOpen(next)}
+        onOpenChange={setOpen}
         title="Editar comercio"
         description="Los cambios se guardan al confirmar."
         actions={{
@@ -115,7 +115,7 @@ export function OverlaysSection() {
       <BottomSheet
         variant="floating"
         open={floatingOpen}
-        onOpenChange={(next) => setOpen(next)}
+        onOpenChange={setOpen}
         title="Sincronización completada"
         description="Se importaron 12 movimientos del correo."
         actions={{

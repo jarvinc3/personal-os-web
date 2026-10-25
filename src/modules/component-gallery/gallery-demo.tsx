@@ -4,8 +4,8 @@ import type { ReactNode } from "react"
 type GalleryDemoProps = {
   /** Nombre del componente, como se exporta. */
   name: string
-  /** Ruta de importación real. */
-  from: string
+  /** Ruta de importación real, la que copia quien reutiliza el componente. */
+  importPath: string
   /** Variantes y estados que se ven en el bloque. */
   states: string
   note?: string
@@ -16,7 +16,7 @@ type GalleryDemoProps = {
 /** Ficha de un componente compartido: nombre, ruta y el componente real (#307). */
 export function GalleryDemo({
   name,
-  from,
+  importPath,
   states,
   note,
   className,
@@ -30,7 +30,7 @@ export function GalleryDemo({
           <p className="min-w-0 text-xs text-muted-foreground">{states}</p>
         </div>
         <code className="block w-full overflow-x-auto rounded-md bg-muted px-2 py-1 text-[0.7rem] whitespace-nowrap text-muted-foreground">
-          {from}
+          {importPath}
         </code>
         {note ? (
           <p className="text-xs break-words text-muted-foreground">{note}</p>

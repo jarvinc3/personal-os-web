@@ -27,7 +27,7 @@ export function ChartsSection() {
     <>
       <GalleryDemo
         name="ChartContainer"
-        from="@/src/shared/components/ui/chart"
+        importPath="@/src/shared/components/ui/chart"
         states="barras con tooltip y colores del tema"
         note="El contenedor aplica los colores de serie del tema claro y oscuro y el tooltip compartido."
       >
@@ -45,7 +45,7 @@ export function ChartsSection() {
 
       <GalleryDemo
         name="SubscriptionProgressRing"
-        from="@/src/modules/finance/subscriptions/components/subscription-progress-ring"
+        importPath="@/src/modules/finance/subscriptions/components/subscription-progress-ring"
         states="avance normal, ventana de aviso"
         note="El anillo rodea la marca de la suscripción y pinta el avance de su ciclo."
       >

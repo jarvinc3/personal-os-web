@@ -44,7 +44,7 @@ export function SelectorsSection() {
     <>
       <GalleryDemo
         name="OptionRow"
-        from="@/src/shared/components/layout/form-blocks"
+        importPath="@/src/shared/components/layout/form-blocks"
         states="normal, seleccionada"
         note="Una opción con descripción. La seleccionada lleva el borde del color del módulo."
       >
@@ -70,7 +70,7 @@ export function SelectorsSection() {
 
       <GalleryDemo
         name="ChoiceGrid"
-        from="@/src/shared/components/ui/choice-grid"
+        importPath="@/src/shared/components/ui/choice-grid"
         states="tres opciones, una elegida"
         note="Elección exclusiva de dos a cinco opciones cuyo nombre basta."
       >
@@ -85,7 +85,7 @@ export function SelectorsSection() {
 
       <GalleryDemo
         name="SelectField"
-        from="@/src/shared/components/layout/form-blocks"
+        importPath="@/src/shared/components/layout/form-blocks"
         states="normal, con error, deshabilitado"
         note="Catálogo corto en un select. Un catálogo largo se elige en una hoja."
       >
@@ -119,7 +119,7 @@ export function SelectorsSection() {
 
       <GalleryDemo
         name="ColorPickerSwatch"
-        from="@/src/shared/components/ui/color-picker"
+        importPath="@/src/shared/components/ui/color-picker"
         states="círculo, cuadrado, entrada, deshabilitado"
         note="El color de una categoría o una meta se elige con este control."
       >
@@ -150,7 +150,7 @@ export function SelectorsSection() {
 
       <GalleryDemo
         name="WheelField + TimePairWheels"
-        from="@/src/shared/components/ui/wheel-field"
+        importPath="@/src/shared/components/ui/wheel-field"
         states="Hora · HH:mm 24 h"
         note="La rueda nunca va suelta: siempre dentro de WheelField, que abre el panel a ancho completo y lo cierra con Listo."
       >

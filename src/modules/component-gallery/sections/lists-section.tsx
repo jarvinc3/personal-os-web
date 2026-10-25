@@ -29,7 +29,7 @@ export function ListsSection() {
     <>
       <GalleryDemo
         name="SummarySection + SummaryItem"
-        from="@/src/shared/components/ui/summary"
+        importPath="@/src/shared/components/ui/summary"
         states="enlace, acción, con valor, chevron, última fila, con tinte"
         note="Es el bloque con título de cualquier lista. No se arma con un div de borde a mano."
       >
@@ -73,7 +73,7 @@ export function ListsSection() {
 
       <GalleryDemo
         name="SettingsSection + SettingsRow"
-        from="@/src/shared/components/layout/settings-section"
+        importPath="@/src/shared/components/layout/settings-section"
         states="chevron, switch, destructiva, deshabilitada"
         note="Grupo con etiqueta corta en mayúsculas. La fila con switch lleva icono obligatorio."
       >

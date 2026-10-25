@@ -1,7 +1,10 @@
 "use client"
 
 import { GalleryDemo } from "@/src/modules/component-gallery/gallery-demo"
-import { GALLERY_DISPLAY } from "@/src/modules/component-gallery/mock/values"
+import {
+  GALLERY_ACCENT,
+  GALLERY_DISPLAY,
+} from "@/src/modules/component-gallery/mock/values"
 import { simulatedTap } from "@/src/modules/component-gallery/simulated-tap"
 import { CategoryCard } from "@/src/modules/finance/shared/components/category-card"
 import { FinanceSegmentedControl } from "@/src/modules/finance/shared/components/forms/form-blocks"
@@ -13,10 +16,21 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/src/shared/components/ui/tabs"
-import { ArrowDownLeftIcon, ArrowUpRightIcon } from "lucide-react"
+import {
+  ArrowDownLeftIcon,
+  ArrowUpRightIcon,
+  type LucideIcon,
+} from "lucide-react"
 import { useState } from "react"
 
 type Flow = "expense" | "income"
+
+type FlowSegment = { value: Flow; label: string; icon: LucideIcon }
+
+const FLOW_SEGMENTS: FlowSegment[] = [
+  { value: "expense", label: "Gasto", icon: ArrowDownLeftIcon },
+  { value: "income", label: "Ingreso", icon: ArrowUpRightIcon },
+]
 
 /** Tabs con indicador, controles segmentados y chips (#307). */
 export function TabsSection() {
@@ -27,13 +41,13 @@ export function TabsSection() {
     <>
       <GalleryDemo
         name="Tabs"
-        from="@/src/shared/components/ui/tabs"
+        importPath="@/src/shared/components/ui/tabs"
         states="indicador deslizante; variante line"
         note="En una pantalla de producto el tab se guarda en la query para que Atrás lo recupere. Aquí va sin persistencia."
       >
         <Tabs
           value={tab}
-          onValueChange={(next) => setTab(next)}
+          onValueChange={setTab}
           persist={false}
           className="w-full"
         >
@@ -64,42 +78,33 @@ export function TabsSection() {
 
       <GalleryDemo
         name="FinanceSegmentedControl"
-        from="@/src/modules/finance/shared/components/forms/form-blocks"
+        importPath="@/src/modules/finance/shared/components/forms/form-blocks"
         states="size sm, size lg, deshabilitado"
         note="Segmentos con icono para un filtro corto dentro de un formulario."
       >
         <FinanceSegmentedControl<Flow>
           value={flow}
           onChange={setFlow}
-          options={[
-            { value: "expense", label: "Gasto", icon: ArrowDownLeftIcon },
-            { value: "income", label: "Ingreso", icon: ArrowUpRightIcon },
-          ]}
+          options={FLOW_SEGMENTS}
         />
         <FinanceSegmentedControl<Flow>
           value="income"
           onChange={() => {}}
           size="lg"
           fullWidth
-          options={[
-            { value: "expense", label: "Gasto", icon: ArrowDownLeftIcon },
-            { value: "income", label: "Ingreso", icon: ArrowUpRightIcon },
-          ]}
+          options={FLOW_SEGMENTS}
         />
         <FinanceSegmentedControl<Flow>
           value="expense"
           onChange={() => {}}
           disabled
-          options={[
-            { value: "expense", label: "Gasto", icon: ArrowDownLeftIcon },
-            { value: "income", label: "Ingreso", icon: ArrowUpRightIcon },
-          ]}
+          options={FLOW_SEGMENTS}
         />
       </GalleryDemo>
 
       <GalleryDemo
         name="Badge"
-        from="@/src/shared/components/ui/badge"
+        importPath="@/src/shared/components/ui/badge"
         states="default, secondary, success, warning, info, danger, outline"
         note="Píldoras de estado y conteo. No son un botón."
       >
@@ -116,7 +121,7 @@ export function TabsSection() {
 
       <GalleryDemo
         name="CategoryCard"
-        from="@/src/modules/finance/shared/components/category-card"
+        importPath="@/src/modules/finance/shared/components/category-card"
         states='variant="chip" con importe, sin color, nombre largo'
         note="El chip es la mención de una categoría en una fila o un resumen."
       >
@@ -124,7 +129,7 @@ export function TabsSection() {
           <CategoryCard
             name="Mercado"
             icon={null}
-            color="#0f766e"
+            color={GALLERY_ACCENT}
             isSystem={false}
             amount={formatFinanceMoney("1250.00", GALLERY_DISPLAY)}
             variant="chip"

@@ -21,7 +21,7 @@ export function ActionsSection() {
     <>
       <GalleryDemo
         name="Button"
-        from="@/src/shared/components/ui/button"
+        importPath="@/src/shared/components/ui/button"
         states="default, outline, secondary, ghost, destructive, link"
         note="Todo botón lleva icono. El texto es opcional; si el botón es solo icono, lleva aria-label."
       >
@@ -57,7 +57,7 @@ export function ActionsSection() {
 
       <GalleryDemo
         name="Button"
-        from="@/src/shared/components/ui/button"
+        importPath="@/src/shared/components/ui/button"
         states="sm, default, lg, icon, icon-sm, icon-lg"
         note="El tamaño cambia la altura y el icono, no el color."
       >
@@ -101,7 +101,7 @@ export function ActionsSection() {
 
       <GalleryDemo
         name="Button"
-        from="@/src/shared/components/ui/button"
+        importPath="@/src/shared/components/ui/button"
         states="pending con Spinner, deshabilitado, deshabilitado por envío"
         note="Mientras la acción está pendiente, el botón se deshabilita y muestra el Spinner dentro, no en medio de la sección."
       >
@@ -119,7 +119,7 @@ export function ActionsSection() {
 
       <GalleryDemo
         name="Button asChild"
-        from="@/src/shared/components/ui/button"
+        importPath="@/src/shared/components/ui/button"
         states="navegación con Link"
         note="Navegar es un Link con el estilo del botón, no un botón con router.push."
       >
