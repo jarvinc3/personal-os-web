@@ -55,7 +55,7 @@ Al arrancar o diagnosticar el cliente, lee [docs/operations/runbook.md](docs/ope
 
 Viven en [`.cursor/rules/`](.cursor/rules), una regla por archivo `.mdc`. Rigen para cualquier agente, no solo Cursor: se leen antes de crear o cambiar un control.
 
-Los iconos son obligatorios en la web: todo botón lleva un icono representativo (el texto es opcional) y todo campo lleva icono líder ([`icons-required.mdc`](.cursor/rules/icons-required.mdc)). Las listas usan scroll infinito, no botones de página ([`list-infinite-scroll.mdc`](.cursor/rules/list-infinite-scroll.mdc)).
+Los iconos son obligatorios en la web: todo botón lleva un icono representativo (el texto es opcional) y todo campo lleva icono líder ([`icons-required.mdc`](.cursor/rules/icons-required.mdc)). Las listas usan scroll infinito, no botones de página ([`list-infinite-scroll.mdc`](.cursor/rules/list-infinite-scroll.mdc)). Todo bottom-sheet se abre por ruta con `useSheetParam` ([`sheet-url-route.mdc`](.cursor/rules/sheet-url-route.mdc)); esa regla no lleva prohibición en `eslint.config.mjs` por decisión del proyecto.
 
 Una entidad de Finanzas se pinta con su card y la variante que corresponda: completa en listas y detalle, compacta cuando es un dato de otra cosa, inline en una mención. La tabla de entidades y el detalle viven en [docs/architecture/ui-components.md](docs/architecture/ui-components.md#cards-por-entidad); la regla, en [`entity-cards.mdc`](.cursor/rules/entity-cards.mdc).
 

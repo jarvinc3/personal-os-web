@@ -88,6 +88,29 @@ Un bloque con título en cualquier superficie (formulario, panel, sheet, lista, 
 
 No armar un drawer con `Drawer` crudo si `BottomSheet` cubre el caso (título, description, actions, pending).
 
+### Hoja por ruta
+
+Todo bottom-sheet se abre con la URL, no con un estado local: `useSheetParam(key)` y, cuando la hoja muestra un registro, `sheetId`. En Finanzas la clave sale de `FINANCE_SHEET_KEYS`. Regla completa: [`sheet-url-route.mdc`](../../.cursor/rules/sheet-url-route.mdc).
+
+```tsx
+const category = useSheetParam(FINANCE_SHEET_KEYS.category)
+const editing = useSheetListEntity(
+  category.open,
+  category.sheetId,
+  categoriesQuery.data,
+  categoriesQuery.isPending,
+  category.setOpen
+)
+
+onClick={() => category.setOpen(true, item.id)}
+
+<BottomSheet open={category.open} onOpenChange={category.setOpen}>
+  <CategorySheet category={editing} />
+</BottomSheet>
+```
+
+Un sheet informativo (ayuda, glosario, historial, «Novedades») también lleva ruta, y una hoja anidada (un selector dentro de un formulario que ya está en hoja) usa el segundo parámetro de la URL definido en #251. Un `AlertDialog` de confirmación no lleva ruta: Esc cancela, un clic fuera no cierra. Los sheets que todavía se abren con estado local se convierten en #250.
+
 `ReleaseNotesSheet` es la única hoja global del shell: aparece una vez por versión. La última versión vista vive en el perfil (`lastSeenReleaseVersion`; se marca con `PATCH /users/me/release-notes-seen`), y `localStorage` (`releaseNotesSeenVersion`) queda solo como caché para no mostrarla mientras el perfil carga. En la primera visita la versión actual se marca en silencio, sin hoja. El componente de `src/shared` es presentacional: recibe la versión vista y el marcado desde `ReleaseNotes` (`src/modules/settings`).
 
 Un atajo del `RecordOptionsSheet` que abre otro sheet o navega a otra vista no cierra el menú antes: cerrarlo usa `router.back()`, y ese retroceso cancela la apertura pedida en el mismo click. El sheet nuevo reemplaza al menú en la URL, y la navegación a otra ruta lo desmonta.
@@ -177,6 +200,7 @@ Una regla por archivo `.mdc`; se leen todas antes de crear o cambiar un control.
 | [finance-brand-logo.mdc](../../.cursor/rules/finance-brand-logo.mdc)               | `BrandLogo` / `CardNetworkMark`                                                                        |
 | [finance-money-display.mdc](../../.cursor/rules/finance-money-display.mdc)         | `formatFinanceMoney`                                                                                   |
 | [entity-cards.mdc](../../.cursor/rules/entity-cards.mdc)                           | card de la entidad + `variant` (completa, compacta, inline)                                            |
+| [sheet-url-route.mdc](../../.cursor/rules/sheet-url-route.mdc)                     | `useSheetParam` + `sheetId`; `AlertDialog` sin ruta                                                    |
 
 Molde: `transaction-form.tsx` y `transfer-form.tsx`. No copiar los componentes de Finanzas a otros módulos; sí el patrón.
 

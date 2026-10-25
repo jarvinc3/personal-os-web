@@ -13,6 +13,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Cambiado
 
+- Toda hoja se abre por ruta: la regla vive en `.cursor/rules/sheet-url-route.mdc`, enlazada desde `AGENTS.md`, `ui-components.md` y las reglas de sheets compartidos y de formulario en hoja; los diálogos de confirmación siguen cerrando con Esc y no con clic fuera (#261).
 - Intelligence refleja el avance persistente de Gmail en vivo, explica por qué se detuvo, permite reconectar y vaciar el corpus con confirmación antes de reiniciar desde 2026-01-01 (#205, #318).
 - La espera por límite de Gmail muestra una cuenta regresiva al siguiente reintento y el estado de conexión de las actualizaciones WebSocket (#318).
 - La cola de revisión filtra Todos, Entrenamiento, Validación y Holdout; cada badge cuenta solo mensajes pendientes (#206, #317).
