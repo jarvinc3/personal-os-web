@@ -21,6 +21,16 @@ Totales de `GET /finance/balance-sheet` (no sumar monedas en cliente). Cuentas C
 
 Evidencia: `src/modules/finance/products/`, `src/modules/finance/institutions/`, `src/modules/finance/accounts/`, `src/modules/finance/catalog/`, hooks catalog en `src/modules/finance/shared/hooks/`.
 
+### Comercios
+
+`/finance/merchants` lista los comercios con `MerchantCard` (categoría como chip, marca de «Sugerida» y de «¿Duplicado?») y `/finance/merchants/[id]` muestra el detalle con la misma card en `size="header"`, que incluye los nombres alternativos. La categoría es «sugerida» cuando el back la eligió (`categorySource` `LEARNED` o `KEYWORD`); el sheet de editar (hoja por ruta, `merchant-edit-sheet`) permite confirmarla con el mismo `categoryId` o cambiarla por otra.
+
+El sheet de editar también edita los nombres alternativos (`aliases`), busca la marca del logo con `BrandPicker` (`domain`), permite subir una imagen (`POST /merchants/:id/logo`) y quitar el logo (`DELETE /merchants/:id/logo` más `domain: null`). El selector de tipo de categoría parte del tipo que ya tiene el comercio.
+
+`GET /finance/merchants/:id/duplicates` devuelve los candidatos a duplicado con su motivo (código del back traducido en `merchants/lib/merchant-duplicates.ts`). El detalle avisa «Posible duplicado de …» con «Unir» (abre el sheet de unir con ese candidato elegido) y «No es duplicado» (`POST /duplicates/:otherId/dismiss`, con «Deshacer» en el toast, que llama al `DELETE` del mismo par). El sheet de unir muestra primero «Sugeridos» y debajo la búsqueda. La lista marca con «¿Duplicado?» los comercios con `possibleDuplicates > 0`. Un 409 por nombre repetido se muestra con un enlace al comercio que ya lo tiene (`existingMerchantId` de la respuesta).
+
+Evidencia: `src/modules/finance/merchants/`, hooks en `src/modules/finance/shared/hooks/use-merchants.ts`.
+
 ### Cards y variantes
 
 Instituciones, cuentas, tarjetas y categorías se pintan con sus cards. La completa va en listas y detalle; la compacta, cuando la entidad es un dato de otra pantalla; la fila de categoría usa `chip` en las menciones.

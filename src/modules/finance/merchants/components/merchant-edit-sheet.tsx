@@ -2,7 +2,12 @@
 
 import { z } from "zod"
 
-import { BrandLogo } from "@/src/modules/finance/shared/components/brand-logo"
+import { merchantIdFromConflict } from "@/src/config/api-client.utils"
+import {
+  BrandLogo,
+  brandPreviewUrl,
+} from "@/src/modules/finance/shared/components/brand-logo"
+import { BrandPicker } from "@/src/modules/finance/shared/components/brand-picker"
 import { CategoryTrigger } from "@/src/modules/finance/shared/components/pickers/category-trigger"
 import { CategoryPickerSheet } from "@/src/modules/finance/shared/components/pickers/category-picker-sheet"
 import { FinanceSegmentedControl } from "@/src/modules/finance/shared/components/forms/form-blocks"
@@ -10,29 +15,54 @@ import { CATALOG_NONE } from "@/src/modules/finance/shared/constants/catalog"
 import { useCategories } from "@/src/modules/finance/shared/hooks/use-categories"
 import { useDiscardChanges } from "@/src/modules/finance/shared/hooks/use-discard-changes"
 import {
+  useDeleteMerchantLogo,
   useUpdateMerchant,
   useUploadMerchantLogo,
 } from "@/src/modules/finance/shared/hooks/use-merchants"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
-import type { FinanceCategoryType } from "@/src/modules/finance/shared/types/entities"
-import type { FinanceMerchant } from "@/src/modules/finance/shared/types/entities"
+import type {
+  FinanceCategoryType,
+  FinanceMerchant,
+} from "@/src/modules/finance/shared/types/entities"
+import { hasSuggestedCategory } from "@/src/modules/finance/merchants/lib/merchant-duplicates"
 import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import { FormTextField } from "@/src/shared/components/forms/form-text-field"
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/src/shared/components/ui/alert"
+import { Badge } from "@/src/shared/components/ui/badge"
 import { Button } from "@/src/shared/components/ui/button"
 import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
+import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePicker } from "@/src/shared/hooks/use-picker"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { ImagePlusIcon, SaveIcon, StoreIcon, XIcon } from "lucide-react"
+import {
+  CircleCheckIcon,
+  ImagePlusIcon,
+  PlusIcon,
+  SaveIcon,
+  StoreIcon,
+  TagsIcon,
+  Trash2Icon,
+  XIcon,
+} from "lucide-react"
+import Link from "next/link"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
 
 const merchantSchema = z.object({
   name: z.string().trim().min(1, "Nombre obligatorio").max(120),
   categoryId: z.string(),
+  aliases: z.array(z.string()),
+  /** Brand domain behind the logo: undefined keeps it, null clears it. */
+  domain: z.string().nullish(),
+  removeLogo: z.boolean(),
 })
 
 type MerchantFormValues = z.infer<typeof merchantSchema>
@@ -41,6 +71,16 @@ const CATEGORY_TYPE_OPTIONS = [
   { value: "EXPENSE" as const, label: "Gasto" },
   { value: "INCOME" as const, label: "Ingreso" },
 ]
+
+function formValuesFrom(merchant: FinanceMerchant | null): MerchantFormValues {
+  return {
+    name: merchant?.name ?? "",
+    categoryId: merchant?.categoryId ?? CATALOG_NONE,
+    aliases: merchant?.aliases ?? [],
+    domain: undefined,
+    removeLogo: false,
+  }
+}
 
 type MerchantEditSheetProps = {
   open: boolean
@@ -54,12 +94,19 @@ export function MerchantEditSheet({
   merchant,
 }: MerchantEditSheetProps) {
   const categoriesQuery = useCategories(open)
-  const categories = categoriesQuery.data ?? []
+  const categories = useMemo(
+    () => categoriesQuery.data ?? [],
+    [categoriesQuery.data]
+  )
   const updateMutation = useUpdateMerchant()
   const logoMutation = useUploadMerchantLogo()
+  const deleteLogoMutation = useDeleteMerchantLogo()
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const [categoryType, setCategoryType] =
-    useState<FinanceCategoryType>("EXPENSE")
+  const [pickedType, setPickedType] = useState<FinanceCategoryType | null>(null)
+  const [aliasDraft, setAliasDraft] = useState("")
+  const [conflictMerchantId, setConflictMerchantId] = useState<string | null>(
+    null
+  )
   const { picker, openPicker, closeHandlerFor } = usePicker<
     "none" | "category"
   >("none")
@@ -72,39 +119,60 @@ export function MerchantEditSheet({
     formState: { errors, isDirty },
   } = useForm<MerchantFormValues>({
     resolver: zodResolver(merchantSchema),
-    defaultValues: { name: "", categoryId: CATALOG_NONE },
+    defaultValues: formValuesFrom(merchant),
   })
+
+  function handleOpenChange(next: boolean) {
+    if (!next) {
+      setConflictMerchantId(null)
+      setAliasDraft("")
+    }
+    onOpenChange(next)
+  }
 
   const { requestOpenChange, discardChangesDialog } = useDiscardChanges({
     isDirty,
-    onOpenChange,
+    onOpenChange: handleOpenChange,
   })
 
+  // The form is the only source of the draft: opening it reloads the merchant.
   useEffect(() => {
     if (!open) {
       return
     }
-    reset({
-      name: merchant?.name ?? "",
-      categoryId: merchant?.categoryId ?? CATALOG_NONE,
-    })
+    reset(formValuesFrom(merchant))
   }, [open, merchant, reset])
 
-  const categoryId = useWatch({ control, name: "categoryId" })
-  const name = useWatch({ control, name: "name" })
+  const values = useWatch({ control })
+  const name = values.name ?? ""
+  const aliases = values.aliases ?? []
   const selectedCategory =
-    categories.find((category) => category.id === categoryId) ?? null
-  const isPending = updateMutation.isPending || logoMutation.isPending
+    categories.find((category) => category.id === values.categoryId) ?? null
+  const categoryType: FinanceCategoryType =
+    pickedType ?? selectedCategory?.type ?? "EXPENSE"
+  const isPending =
+    updateMutation.isPending ||
+    logoMutation.isPending ||
+    deleteLogoMutation.isPending
+  const suggested = merchant ? hasSuggestedCategory(merchant) : false
+  const previewDomain =
+    values.domain === undefined ? (merchant?.domain ?? null) : values.domain
+  const previewLogo = values.removeLogo
+    ? null
+    : previewDomain
+      ? brandPreviewUrl(previewDomain)
+      : merchant?.logoUrl
 
   const submitForm = useMemo(
     () => createSheetSubmit(handleSubmit),
     [handleSubmit]
   )
 
-  const onSubmit = submitForm(async (values) => {
+  async function onSubmit(values: MerchantFormValues) {
     if (!merchant) {
       return
     }
+    setConflictMerchantId(null)
     try {
       await updateMutation.mutateAsync({
         id: merchant.id,
@@ -112,14 +180,40 @@ export function MerchantEditSheet({
           name: values.name.trim(),
           categoryId:
             values.categoryId === CATALOG_NONE ? null : values.categoryId,
+          aliases: values.aliases,
+          ...(values.domain === undefined ? {} : { domain: values.domain }),
         },
       })
+      if (values.removeLogo) {
+        await deleteLogoMutation.mutateAsync(merchant.id)
+      }
       appToast.success({ text1: "Comercio actualizado" })
       onOpenChange(false)
     } catch (error) {
+      const existingId = merchantIdFromConflict(error)
+      if (existingId) {
+        setConflictMerchantId(existingId)
+        return
+      }
       appToast.error({ text1: financeErrorMessage(error) })
     }
-  })
+  }
+
+  /** «Confirmar» deja la categoría sugerida como puesta a mano. */
+  async function confirmSuggestedCategory() {
+    if (!merchant?.categoryId) {
+      return
+    }
+    try {
+      await updateMutation.mutateAsync({
+        id: merchant.id,
+        body: { categoryId: merchant.categoryId },
+      })
+      appToast.success({ text1: "Categoría confirmada" })
+    } catch (error) {
+      appToast.error({ text1: financeErrorMessage(error) })
+    }
+  }
 
   async function onPickLogo(file: File | undefined) {
     if (!merchant || !file) {
@@ -127,10 +221,36 @@ export function MerchantEditSheet({
     }
     try {
       await logoMutation.mutateAsync({ id: merchant.id, file })
+      setValue("removeLogo", false)
+      setValue("domain", undefined)
       appToast.success({ text1: "Logo actualizado" })
     } catch (error) {
       appToast.error({ text1: financeErrorMessage(error) })
     }
+  }
+
+  function addAlias() {
+    const next = aliasDraft.trim()
+    if (!next) {
+      return
+    }
+    const repeated = aliases.some(
+      (alias) => alias.trim().toLowerCase() === next.toLowerCase()
+    )
+    if (repeated) {
+      appToast.error({ text1: "Ese nombre ya está en la lista" })
+      return
+    }
+    setValue("aliases", [...aliases, next], { shouldDirty: true })
+    setAliasDraft("")
+  }
+
+  function removeAlias(alias: string) {
+    setValue(
+      "aliases",
+      aliases.filter((entry) => entry !== alias),
+      { shouldDirty: true }
+    )
   }
 
   return (
@@ -140,11 +260,11 @@ export function MerchantEditSheet({
         onOpenChange={requestOpenChange}
         pending={isPending}
         title="Editar comercio"
-        description="Cambia el nombre, el logo y la categoría que se sugiere."
+        description="Cambia el nombre, el logo, la categoría y los nombres alternativos."
         actions={{
           close: (
             <Button
-              key="cancel"
+              type="button"
               variant="outline"
               className="flex-1"
               onClick={() => requestOpenChange(false)}
@@ -155,10 +275,10 @@ export function MerchantEditSheet({
           ),
           submit: (
             <Button
-              key="submit"
+              type="button"
               className="flex-1"
               disabled={isPending || !isDirty || !merchant}
-              onClick={onSubmit}
+              onClick={submitForm(onSubmit)}
             >
               {isPending ? (
                 <Spinner data-icon="inline-start" />
@@ -174,7 +294,7 @@ export function MerchantEditSheet({
           <div className="flex items-center gap-3 rounded-xl border border-border bg-muted/40 px-3 py-2.5">
             <BrandLogo
               name={name.trim() || merchant?.name || "Comercio"}
-              logoUrl={merchant?.logoUrl}
+              logoUrl={previewLogo}
               size={40}
             />
             <div className="min-w-0 flex-1">
@@ -182,7 +302,7 @@ export function MerchantEditSheet({
                 {name.trim() || "Comercio"}
               </p>
               <p className="truncate text-xs text-muted-foreground">
-                {merchant?.normalizedKey ?? "—"}
+                {previewDomain ?? merchant?.normalizedKey ?? "—"}
               </p>
             </div>
             <Button
@@ -193,7 +313,7 @@ export function MerchantEditSheet({
               onClick={() => fileInputRef.current?.click()}
             >
               <ImagePlusIcon className="size-4 shrink-0" />
-              Logo
+              Imagen
             </Button>
             <input
               ref={fileInputRef}
@@ -222,18 +342,111 @@ export function MerchantEditSheet({
             )}
           />
 
+          {conflictMerchantId ? (
+            <Alert variant="destructive">
+              <StoreIcon />
+              <AlertTitle>Ese nombre ya existe</AlertTitle>
+              <AlertDescription>
+                Otro comercio usa ese nombre o uno de sus nombres alternativos.
+              </AlertDescription>
+              <div className="col-start-2 mt-2">
+                <Button asChild size="sm" variant="outline">
+                  <Link
+                    href={APP_ROUTES.app.financeMerchant(conflictMerchantId)}
+                  >
+                    <StoreIcon className="size-4 shrink-0" />
+                    Abrir el comercio existente
+                  </Link>
+                </Button>
+              </div>
+            </Alert>
+          ) : null}
+        </SummarySection>
+
+        <SummarySection title="Logo" icon={ImagePlusIcon}>
+          <BrandPicker
+            onSelect={(brand) => {
+              setValue("domain", brand.domain, { shouldDirty: true })
+              setValue("removeLogo", false, { shouldDirty: true })
+            }}
+          />
+          {previewLogo ? (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={isPending}
+              onClick={() => {
+                setValue("removeLogo", true, { shouldDirty: true })
+                setValue("domain", null, { shouldDirty: true })
+              }}
+            >
+              <Trash2Icon className="size-4 shrink-0" />
+              Quitar logo
+            </Button>
+          ) : null}
+        </SummarySection>
+
+        <SummarySection title="Nombres alternativos" icon={TagsIcon}>
+          {aliases.length === 0 ? (
+            <p className="px-2 text-xs text-muted-foreground">
+              Sin nombres alternativos. Agrega las otras formas en que el banco
+              escribe este comercio.
+            </p>
+          ) : (
+            <div className="flex flex-wrap gap-2 px-2">
+              {aliases.map((alias) => (
+                <span
+                  key={alias}
+                  className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-2.5 py-1 text-xs"
+                >
+                  {alias}
+                  <button
+                    type="button"
+                    aria-label={`Quitar ${alias}`}
+                    className="text-muted-foreground hover:text-destructive"
+                    onClick={() => removeAlias(alias)}
+                  >
+                    <XIcon className="size-3.5" aria-hidden />
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+          <FormTextField
+            icon={TagsIcon}
+            label="Nuevo nombre"
+            value={aliasDraft}
+            onChange={setAliasDraft}
+            onBlur={() => undefined}
+            placeholder="Como aparece en el banco"
+          />
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={!aliasDraft.trim()}
+            onClick={addAlias}
+          >
+            <PlusIcon className="size-4 shrink-0" />
+            Agregar nombre
+          </Button>
+        </SummarySection>
+
+        <SummarySection title="Categoría" icon={StoreIcon}>
           <FinanceSegmentedControl
             value={categoryType}
             onChange={(next) => {
-              setCategoryType(next)
-              setValue("categoryId", CATALOG_NONE)
+              setPickedType(next)
+              setValue("categoryId", CATALOG_NONE, { shouldDirty: true })
             }}
             options={CATEGORY_TYPE_OPTIONS}
           />
 
           <Field className="gap-1">
-            <FieldLabel className="text-sm text-muted-foreground">
+            <FieldLabel className="flex items-center gap-2 text-sm text-muted-foreground">
               Categoría por defecto
+              {suggested ? <Badge variant="warning">Sugerida</Badge> : null}
             </FieldLabel>
             <CategoryTrigger
               category={selectedCategory}
@@ -243,6 +456,19 @@ export function MerchantEditSheet({
               <FieldError>{errors.categoryId.message}</FieldError>
             ) : null}
           </Field>
+
+          {suggested ? (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={isPending}
+              onClick={() => void confirmSuggestedCategory()}
+            >
+              <CircleCheckIcon className="size-4 shrink-0" />
+              Confirmar categoría
+            </Button>
+          ) : null}
         </SummarySection>
       </BottomSheet>
 

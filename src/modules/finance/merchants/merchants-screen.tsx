@@ -10,6 +10,7 @@ import { useMerchants } from "@/src/modules/finance/shared/hooks/use-merchants"
 import { useCategories } from "@/src/modules/finance/shared/hooks/use-categories"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
+import { hasSuggestedCategory } from "@/src/modules/finance/merchants/lib/merchant-duplicates"
 import { merchantMonthParams } from "@/src/modules/finance/merchants/lib/merchant-query"
 import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
@@ -117,6 +118,8 @@ function MerchantsScreenBody() {
                 ) ?? null
               }
               display={display}
+              suggested={hasSuggestedCategory(merchant)}
+              duplicate={(merchant.possibleDuplicates ?? 0) > 0}
               href={APP_ROUTES.app.financeMerchant(merchant.id)}
             />
           ))}

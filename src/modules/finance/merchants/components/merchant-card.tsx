@@ -9,7 +9,7 @@ import {
 import { Badge } from "@/src/shared/components/ui/badge"
 import { LinkPendingOverlay } from "@/src/shared/components/shell/navigation-pending"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
-import { CheckIcon } from "lucide-react"
+import { CheckIcon, CopyIcon } from "lucide-react"
 import Link from "next/link"
 import type { ReactNode } from "react"
 
@@ -37,6 +37,8 @@ type MerchantCardProps = {
   size?: "list" | "header"
   /** The back found other merchants that may be the same one. */
   duplicate?: boolean
+  /** The app chose the category, so it carries the «Sugerida» badge. */
+  suggested?: boolean
   selected?: boolean
   disabled?: boolean
   href?: string
@@ -53,6 +55,7 @@ export function MerchantCard({
   variant = "full",
   size = "list",
   duplicate = false,
+  suggested = false,
   selected = false,
   disabled = false,
   href,
@@ -136,7 +139,12 @@ export function MerchantCard({
             </span>
           ) : null}
         </span>
-        {duplicate ? <Badge variant="warning">¿Duplicado?</Badge> : null}
+        {duplicate ? (
+          <Badge variant="warning">
+            <CopyIcon className="size-3" aria-hidden />
+            ¿Duplicado?
+          </Badge>
+        ) : null}
         {selected ? (
           <span className="inline-flex size-5 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
             <CheckIcon className="size-3.5" aria-hidden />
@@ -222,7 +230,15 @@ export function MerchantCard({
                 </span>
               ) : null}
             </span>
-            {duplicate ? <Badge variant="warning">¿Duplicado?</Badge> : null}
+            <span className="flex shrink-0 items-center gap-1">
+              {suggested ? <Badge variant="info">Sugerida</Badge> : null}
+              {duplicate ? (
+                <Badge variant="warning">
+                  <CopyIcon className="size-3" aria-hidden />
+                  ¿Duplicado?
+                </Badge>
+              ) : null}
+            </span>
           </span>
           <span className="flex flex-wrap items-center gap-1.5">
             <CategoryCard

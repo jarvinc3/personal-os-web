@@ -1,6 +1,12 @@
 "use client"
 
-import { apiGet, apiPatch, apiPost, apiPostForm } from "@/src/config/api-client"
+import {
+  apiDelete,
+  apiGet,
+  apiPatch,
+  apiPost,
+  apiPostForm,
+} from "@/src/config/api-client"
 import { useInfiniteFinanceList } from "@/src/modules/finance/shared/hooks/use-infinite-finance-list"
 import {
   FINANCE_MERCHANTS_QUERY_KEY,
@@ -10,6 +16,7 @@ import {
 } from "@/src/modules/finance/shared/types/api"
 import type {
   FinanceMerchant,
+  FinanceMerchantDuplicate,
   FinanceMerchantSuggestion,
 } from "@/src/modules/finance/shared/types/entities"
 import { API_ENDPOINTS } from "@/src/shared/constants/api-endpoints"
@@ -99,6 +106,50 @@ export function useUploadMerchantLogo() {
         body
       )
     },
+    onSuccess: () => invalidateMerchants(queryClient),
+  })
+}
+
+export function useMerchantDuplicates(enabled: boolean, id: string | null) {
+  return useQuery({
+    queryKey: [...FINANCE_MERCHANTS_QUERY_KEY, "duplicates", id],
+    queryFn: () =>
+      apiGet<FinanceMerchantDuplicate[]>(
+        API_ENDPOINTS.FINANCE.MERCHANT_DUPLICATES(id!)
+      ),
+    enabled: enabled && Boolean(id),
+  })
+}
+
+/** «No es duplicado»: the pair stops being suggested. */
+export function useDismissMerchantDuplicate() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, otherId }: { id: string; otherId: string }) =>
+      apiPost<{ dismissed: boolean }>(
+        API_ENDPOINTS.FINANCE.MERCHANT_DUPLICATE_DISMISS(id, otherId)
+      ),
+    onSuccess: () => invalidateMerchants(queryClient),
+  })
+}
+
+export function useUndoDismissMerchantDuplicate() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, otherId }: { id: string; otherId: string }) =>
+      apiDelete<{ dismissed: boolean }>(
+        API_ENDPOINTS.FINANCE.MERCHANT_DUPLICATE_DISMISS(id, otherId)
+      ),
+    onSuccess: () => invalidateMerchants(queryClient),
+  })
+}
+
+/** Removes the own logo so the initials come back. */
+export function useDeleteMerchantLogo() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) =>
+      apiDelete<FinanceMerchant>(API_ENDPOINTS.FINANCE.MERCHANT_LOGO(id)),
     onSuccess: () => invalidateMerchants(queryClient),
   })
 }
