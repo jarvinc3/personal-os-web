@@ -9,6 +9,14 @@ import {
   walletPositionLabel,
   walletVisibleItems,
   walletWrapDirection,
+  WALLET_DECK_GAP_PX,
+  WALLET_DECK_GUTTER_PX,
+  WALLET_STACK_STEP_OPACITY,
+  WALLET_STACK_STEP_ROTATE_DEG,
+  WALLET_STACK_STEP_SCALE,
+  WALLET_STACK_STEP_X_PX,
+  WALLET_STACK_STEP_Y_PX,
+  walletCardMotion,
 } from "./wallet-stack.ts"
 
 const six = [0, 1, 2, 3, 4, 5]
@@ -72,5 +80,129 @@ describe("walletWrapDirection", () => {
   it("never bounces with one card or without a step", () => {
     assert.equal(walletWrapDirection(0, 1, 1), null)
     assert.equal(walletWrapDirection(0, 0, 6), null)
+  })
+})
+
+describe("walletCardMotion", () => {
+  it("stacks the cards behind the front one in ring order", () => {
+    const front = walletCardMotion({
+      deployed: false,
+      index: 0,
+      frontIndex: 0,
+      total: 6,
+      trackWidth: 352,
+    })
+    const second = walletCardMotion({
+      deployed: false,
+      index: 1,
+      frontIndex: 0,
+      total: 6,
+      trackWidth: 352,
+    })
+
+    assert.deepEqual(front, {
+      x: 0,
+      y: 0,
+      rotate: 0,
+      scale: 1,
+      opacity: 1,
+      zIndex: 30,
+      interactive: true,
+    })
+    assert.equal(second.x, WALLET_STACK_STEP_X_PX)
+    assert.equal(second.y, WALLET_STACK_STEP_Y_PX)
+    assert.equal(second.rotate, WALLET_STACK_STEP_ROTATE_DEG)
+    assert.equal(second.scale, 1 - WALLET_STACK_STEP_SCALE)
+    assert.equal(second.opacity, 1 - WALLET_STACK_STEP_OPACITY)
+    assert.equal(second.interactive, true)
+  })
+
+  it("wraps the stacked offsets around the ring", () => {
+    const last = walletCardMotion({
+      deployed: false,
+      index: 5,
+      frontIndex: 4,
+      total: 6,
+      trackWidth: 352,
+    })
+    const first = walletCardMotion({
+      deployed: false,
+      index: 0,
+      frontIndex: 4,
+      total: 6,
+      trackWidth: 352,
+    })
+
+    assert.equal(last.x, WALLET_STACK_STEP_X_PX)
+    assert.equal(first.x, WALLET_STACK_STEP_X_PX * 2)
+  })
+
+  it("hides and disables the cards that do not fit in the stack", () => {
+    const hidden = walletCardMotion({
+      deployed: false,
+      index: 3,
+      frontIndex: 0,
+      total: 6,
+      trackWidth: 352,
+    })
+
+    assert.equal(hidden.opacity, 0)
+    assert.equal(hidden.interactive, false)
+  })
+
+  it("deploys the front card where the stack left it", () => {
+    const front = walletCardMotion({
+      deployed: true,
+      index: 2,
+      frontIndex: 2,
+      total: 6,
+      trackWidth: 352,
+    })
+
+    assert.deepEqual(front, {
+      x: 0,
+      y: 0,
+      rotate: 0,
+      scale: 1,
+      opacity: 1,
+      zIndex: 30,
+      interactive: true,
+    })
+  })
+
+  it("spreads the deployed cards one card plus the gap apart", () => {
+    const step = 352 - WALLET_DECK_GUTTER_PX * 2 + WALLET_DECK_GAP_PX
+    const next = walletCardMotion({
+      deployed: true,
+      index: 3,
+      frontIndex: 2,
+      total: 6,
+      trackWidth: 352,
+    })
+    const previous = walletCardMotion({
+      deployed: true,
+      index: 1,
+      frontIndex: 2,
+      total: 6,
+      trackWidth: 352,
+    })
+
+    assert.equal(next.x, step)
+    assert.equal(previous.x, -step)
+    assert.equal(next.interactive, true)
+    assert.ok(next.zIndex < 30)
+  })
+
+  it("keeps a finite layout before the container is measured", () => {
+    const unmeasured = walletCardMotion({
+      deployed: true,
+      index: 1,
+      frontIndex: 0,
+      total: 6,
+      trackWidth: 0,
+    })
+
+    assert.ok(Number.isFinite(unmeasured.x))
+    assert.equal(unmeasured.scale, 1)
   })
 })
