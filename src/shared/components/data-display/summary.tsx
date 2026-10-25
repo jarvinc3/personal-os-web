@@ -26,6 +26,8 @@ type SummarySectionProps = {
 type SummaryItemBaseProps = {
   title: ReactNode
   description?: ReactNode
+  /** Two lines instead of one for a description that reads better wrapped. */
+  wrapDescription?: boolean
   value?: ReactNode
   icon?: LucideIcon
   leading?: ReactNode
@@ -174,6 +176,7 @@ export function SummaryGroup({
 export function SummaryItem({
   title,
   description,
+  wrapDescription = false,
   value,
   icon: Icon,
   leading,
@@ -247,7 +250,12 @@ export function SummaryItem({
       <span className="min-w-0 flex-1">
         <span className="block truncate text-sm font-medium">{title}</span>
         {description ? (
-          <span className="block truncate text-xs text-muted-foreground">
+          <span
+            className={cn(
+              "block text-xs text-muted-foreground",
+              wrapDescription ? "line-clamp-2" : "truncate"
+            )}
+          >
             {description}
           </span>
         ) : null}

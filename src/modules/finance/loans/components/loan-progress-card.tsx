@@ -65,6 +65,7 @@ export function LoanProgressCard({
   const money = { ...display, currency: loan.currency }
   const { paidOff, progress } = loanProgressSummary(loan)
   const rateLabel = formatRatePercentLabel(loan.interestRate)
+  const rateBadge = rateLabel === "Sin tasa" ? rateLabel : `${rateLabel} anual`
   const title = loan.name?.trim() || loan.lenderName
   const surfaceColor = institution?.color || null
   const tinted = Boolean(surfaceColor)
@@ -87,7 +88,7 @@ export function LoanProgressCard({
             variant={rateLabel === "Sin tasa" ? "success" : "warning"}
             className={pillClass}
           >
-            {rateLabel}
+            {rateBadge}
           </Badge>
         </span>
       }
@@ -106,6 +107,7 @@ export function LoanProgressCard({
       progress={progress}
       currentHint="Deuda"
       currentLabel={formatFinanceMoney(loan.currentBalance, money)}
+      progressHint="pagado"
       targetHint="Original"
       targetLabel={formatFinanceMoney(loan.originalAmount, money)}
       caption={

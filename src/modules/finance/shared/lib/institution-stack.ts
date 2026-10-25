@@ -96,8 +96,17 @@ export function institutionInitials(name: string): string {
   return `${parts[0]![0] ?? ""}${parts[1]![0] ?? ""}`.toUpperCase()
 }
 
+/** `1 cuenta` / `2 cuentas`: a count never takes the plural of the other one. */
+function countLabel(count: number, singular: string, plural: string): string {
+  return `${count} ${count === 1 ? singular : plural}`
+}
+
 export function formatProductCounts(counts: InstitutionStackCounts): string {
-  return `${counts.accounts} cuentas · ${counts.cards} tarjetas · ${counts.loans} préstamos`
+  return [
+    countLabel(counts.accounts, "cuenta", "cuentas"),
+    countLabel(counts.cards, "tarjeta", "tarjetas"),
+    countLabel(counts.loans, "préstamo", "préstamos"),
+  ].join(" · ")
 }
 
 export function formatStackItemBalance(

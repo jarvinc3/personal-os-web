@@ -34,6 +34,8 @@ export type PlanningProgressCardProps = {
   decoration?: ReactNode
   badge?: PlanningProgressBadge
   progress: number | null
+  /** What the ring percentage measures, under the ring. */
+  progressHint?: string
   currentHint: string
   currentLabel: string
   targetHint: string
@@ -86,49 +88,63 @@ function RingProgress({
   tone,
   accentColor,
   tinted,
+  hint,
 }: {
   value: number | null
   tone: PlanningProgressTone
   accentColor?: string | null
   tinted?: boolean
+  hint?: string
 }) {
   const visual = value === null ? 0 : clampPct(value)
   const offset = RING_CIRCUMFERENCE - (visual / 100) * RING_CIRCUMFERENCE
   const label = value === null ? "—" : `${Math.round(value)}%`
 
   return (
-    <span className="relative grid size-14 shrink-0 place-items-center">
-      <svg className="size-14 -rotate-90" viewBox="0 0 48 48" aria-hidden>
-        <circle
-          cx="24"
-          cy="24"
-          r={RING_RADIUS}
-          fill="none"
-          className={tinted ? "stroke-white/25" : "stroke-muted"}
-          strokeWidth="4"
-        />
-        <circle
-          cx="24"
-          cy="24"
-          r={RING_RADIUS}
-          fill="none"
-          className={tinted || accentColor ? undefined : TONE_STROKE[tone]}
-          style={
-            tinted
-              ? { stroke: "white" }
-              : accentColor
-                ? { stroke: accentColor }
-                : undefined
-          }
-          strokeWidth="4"
-          strokeLinecap="round"
-          strokeDasharray={RING_CIRCUMFERENCE}
-          strokeDashoffset={offset}
-        />
-      </svg>
-      <span className="absolute text-[11px] font-semibold tabular-nums">
-        {label}
+    <span className="flex w-14 shrink-0 flex-col items-center gap-0.5">
+      <span className="relative grid size-14 place-items-center">
+        <svg className="size-14 -rotate-90" viewBox="0 0 48 48" aria-hidden>
+          <circle
+            cx="24"
+            cy="24"
+            r={RING_RADIUS}
+            fill="none"
+            className={tinted ? "stroke-white/25" : "stroke-muted"}
+            strokeWidth="4"
+          />
+          <circle
+            cx="24"
+            cy="24"
+            r={RING_RADIUS}
+            fill="none"
+            className={tinted || accentColor ? undefined : TONE_STROKE[tone]}
+            style={
+              tinted
+                ? { stroke: "white" }
+                : accentColor
+                  ? { stroke: accentColor }
+                  : undefined
+            }
+            strokeWidth="4"
+            strokeLinecap="round"
+            strokeDasharray={RING_CIRCUMFERENCE}
+            strokeDashoffset={offset}
+          />
+        </svg>
+        <span className="absolute text-[11px] font-semibold tabular-nums">
+          {label}
+        </span>
       </span>
+      {hint ? (
+        <span
+          className={cn(
+            "text-[9px] tracking-wide uppercase",
+            tinted ? "text-white/70" : "text-muted-foreground"
+          )}
+        >
+          {hint}
+        </span>
+      ) : null}
     </span>
   )
 }
@@ -144,6 +160,7 @@ export function PlanningProgressCard({
   decoration,
   badge,
   progress,
+  progressHint,
   currentHint,
   currentLabel,
   targetHint,
@@ -234,6 +251,7 @@ export function PlanningProgressCard({
           tone={tone}
           accentColor={accentColor}
           tinted={tinted}
+          hint={progressHint}
         />
       </span>
 

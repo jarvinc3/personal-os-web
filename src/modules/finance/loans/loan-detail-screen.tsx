@@ -383,6 +383,7 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
                   key={installment.id}
                   title={`Cuota ${installment.installmentNo}`}
                   description={`Vence ${formatCalendarDate(installment.dueDate, display.locale)} · Capital ${formatFinanceMoney(installment.principal, money)} · Interés ${formatFinanceMoney(installment.interest, money)}`}
+                  wrapDescription
                   value={formatFinanceMoney(installment.amount, money)}
                   onPress={() => setSelectedInstallment(installment)}
                   trailing={
