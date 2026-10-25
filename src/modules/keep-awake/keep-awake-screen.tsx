@@ -32,7 +32,8 @@ import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { formatClockTimeFromDate } from "@/src/shared/lib/date-format"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
 import { Bell, Copy } from "lucide-react"
-import { useState, useSyncExternalStore } from "react"
+import { useSyncExternalStore } from "react"
+import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 
 function formatSessionStarted(timestamp: number): string {
   return formatClockTimeFromDate(new Date(timestamp))
@@ -75,10 +76,18 @@ function KeepAwakeScreenBody() {
     getReminderSnapshot,
     () => DEFAULT_REMINDER
   )
-  const [helpOpen, setHelpOpen] = useState(false)
-  const [alertOpen, setAlertOpen] = useState(false)
-  const [reminderOpen, setReminderOpen] = useState(false)
-  const [historyOpen, setHistoryOpen] = useState(false)
+  const { open: helpOpen, setOpen: setHelpOpen } = useSheetParam(
+    "keep-awake-help-sheet"
+  )
+  const { open: alertOpen, setOpen: setAlertOpen } = useSheetParam(
+    "keep-awake-alert-sheet"
+  )
+  const { open: reminderOpen, setOpen: setReminderOpen } = useSheetParam(
+    "keep-awake-reminder-sheet"
+  )
+  const { open: historyOpen, setOpen: setHistoryOpen } = useSheetParam(
+    "keep-awake-history-sheet"
+  )
 
   if (!supportsWakeLock) {
     return (

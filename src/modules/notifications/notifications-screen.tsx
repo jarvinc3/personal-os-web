@@ -27,6 +27,8 @@ import {
   parseModuleSlugFromNotificationData,
 } from "@/src/shared/constants/module-registry"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
+import { usePicker } from "@/src/shared/hooks/use-picker"
+import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { SettingsIcon } from "lucide-react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
@@ -47,8 +49,12 @@ function NotificationsScreenBody() {
     useMarkAllNotificationsRead()
   const { updatePreferences } = useProfile()
 
-  const [prefsOpen, setPrefsOpen] = useState(false)
-  const [quietHoursOpen, setQuietHoursOpen] = useState(false)
+  const { open: prefsOpen, setOpen: setPrefsOpen } = useSheetParam(
+    "notification-preferences-sheet"
+  )
+  const { picker, openPicker, closeHandlerFor } = usePicker<
+    "none" | "quiet-hours"
+  >("none")
   const [readFilter, setReadFilter] = useState<NotificationReadFilter>("all")
   const [requestedModuleFilter, setRequestedModuleFilter] =
     useState<ModuleSlug | null>(null)
@@ -185,9 +191,15 @@ function NotificationsScreenBody() {
   const preferencesSheet = (
     <NotificationPreferencesSheet
       open={prefsOpen}
-      quietHoursOpen={quietHoursOpen}
+      quietHoursOpen={picker === "quiet-hours"}
       onOpenChange={setPrefsOpen}
-      onQuietHoursOpenChange={setQuietHoursOpen}
+      onQuietHoursOpenChange={(next) => {
+        if (next) {
+          openPicker("quiet-hours")
+          return
+        }
+        closeHandlerFor("quiet-hours")(false)
+      }}
       onPreferenceToggle={handlePreferenceToggle}
     />
   )
