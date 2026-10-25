@@ -8,15 +8,20 @@ import type {
 import { resolveNotificationsSocketUrl } from "@/src/modules/notifications/lib/notifications-socket-url"
 import { useAppStore } from "@/src/shared/store/app-store"
 import { useQueryClient } from "@tanstack/react-query"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { io } from "socket.io-client"
 
 type SyncUpdatePayload = { state: AiEmailSyncProgress }
+export type AiEmailSocketStatus = "connecting" | "connected" | "disconnected"
 const INTELLIGENCE_QUERY_KEY = ["intelligence", "dashboard"] as const
 
 export function useAiEmailSyncSocket() {
   const userId = useAppStore((state) => state.session?.userId ?? null)
   const queryClient = useQueryClient()
+  const [socketState, setSocketState] = useState<{
+    userId: string | null
+    status: AiEmailSocketStatus
+  }>({ userId: null, status: "connecting" })
 
   useEffect(() => {
     if (!userId) {
@@ -25,12 +30,25 @@ export function useAiEmailSyncSocket() {
 
     let cancelled = false
     let socket: ReturnType<typeof io> | null = null
+    const updateStatus = (status: AiEmailSocketStatus) => {
+      setSocketState({ userId, status })
+    }
 
     void (async () => {
-      const {
-        data: { session },
-      } = await getSupabaseBrowserClient().auth.getSession()
+      let session
+      try {
+        const result = await getSupabaseBrowserClient().auth.getSession()
+        session = result.data.session
+      } catch {
+        if (!cancelled) {
+          updateStatus("disconnected")
+        }
+        return
+      }
       if (!session?.access_token || cancelled) {
+        if (!cancelled) {
+          updateStatus("disconnected")
+        }
         return
       }
 
@@ -72,10 +90,14 @@ export function useAiEmailSyncSocket() {
         }
       })
       socket.on("connect", () => {
+        updateStatus("connected")
         void queryClient.invalidateQueries({
           queryKey: INTELLIGENCE_QUERY_KEY,
         })
       })
+      socket.on("disconnect", () => updateStatus("disconnected"))
+      socket.on("connect_error", () => updateStatus("disconnected"))
+      socket.io.on("reconnect_attempt", () => updateStatus("connecting"))
     })()
 
     return () => {
@@ -84,4 +106,9 @@ export function useAiEmailSyncSocket() {
       socket = null
     }
   }, [userId, queryClient])
+
+  if (!userId) {
+    return "disconnected"
+  }
+  return socketState.userId === userId ? socketState.status : "connecting"
 }

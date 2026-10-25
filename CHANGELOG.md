@@ -14,6 +14,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 ### Cambiado
 
 - Intelligence refleja el avance persistente de Gmail en vivo, explica por qué se detuvo, permite reconectar y vaciar el corpus con confirmación antes de reiniciar desde 2026-01-01 (#205, #318).
+- La espera por límite de Gmail muestra una cuenta regresiva al siguiente reintento y el estado de conexión de las actualizaciones WebSocket (#318).
 - La cola de revisión filtra Todos, Entrenamiento, Validación y Holdout; cada badge cuenta solo mensajes pendientes (#206, #317).
 - Intelligence organiza correo, revisión y análisis en pestañas; resume corpus y particiones en badges, muestra el rango histórico desde el 1 de enero de 2026 y lista los correos en orden ascendente por fecha (#206).
 - La cola de revisión también ordena los correos por fecha recibida ascendente (#206).

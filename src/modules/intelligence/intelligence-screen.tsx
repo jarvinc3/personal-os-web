@@ -45,12 +45,14 @@ import {
   Inbox,
   LoaderCircle,
   Mail,
+  Wifi,
+  WifiOff,
   RefreshCw,
   ShieldCheck,
   Unplug,
   X,
 } from "lucide-react"
-import { useCallback, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { useIntelligence } from "./hooks/use-intelligence"
 import { AiEvidenceSection } from "./components/ai-evidence-section"
 import {
@@ -70,6 +72,7 @@ function IntelligenceScreenBody() {
     connectMutation,
     syncMutation,
     resetMutation,
+    emailSocketStatus,
   } = useIntelligence()
   const [resetDialogOpen, setResetDialogOpen] = useState(false)
   const {
@@ -84,6 +87,12 @@ function IntelligenceScreenBody() {
     [messagesQuery.data?.pages]
   )
   const { fetchNextPage, hasNextPage, isFetchingNextPage } = messagesQuery
+  const retryAt =
+    dashboardQuery.data?.connection.connected &&
+    dashboardQuery.data.connection.syncProgress?.status === "waiting"
+      ? dashboardQuery.data.connection.syncProgress.retryAt
+      : undefined
+  const now = useRetryClock(retryAt)
   const loadMore = useCallback(() => {
     if (hasNextPage && !isFetchingNextPage) {
       void fetchNextPage()
@@ -140,12 +149,43 @@ function IntelligenceScreenBody() {
         icon={Mail}
         right={
           connected ? (
-            <span role="img" aria-label="Gmail conectado">
-              <CheckCircle2
-                className="size-5 text-emerald-600"
-                aria-hidden="true"
-              />
-            </span>
+            <div className="flex items-center gap-2">
+              <Badge
+                variant="outline"
+                className="gap-1.5"
+                aria-live="polite"
+                aria-label={emailSocketStatusLabel(emailSocketStatus)}
+                title={emailSocketStatusLabel(emailSocketStatus)}
+              >
+                {emailSocketStatus === "connected" ? (
+                  <Wifi
+                    className="size-3.5 text-emerald-600"
+                    aria-hidden="true"
+                  />
+                ) : emailSocketStatus === "connecting" ? (
+                  <LoaderCircle
+                    className="size-3.5 animate-spin"
+                    aria-hidden="true"
+                  />
+                ) : (
+                  <WifiOff
+                    className="size-3.5 text-muted-foreground"
+                    aria-hidden="true"
+                  />
+                )}
+                {emailSocketStatus === "connected"
+                  ? "En vivo"
+                  : emailSocketStatus === "connecting"
+                    ? "Conectando"
+                    : "Sin conexión"}
+              </Badge>
+              <span role="img" aria-label="Gmail conectado">
+                <CheckCircle2
+                  className="size-5 text-emerald-600"
+                  aria-hidden="true"
+                />
+              </span>
+            </div>
           ) : (
             <span role="img" aria-label="Gmail desconectado">
               <Unplug
@@ -217,7 +257,7 @@ function IntelligenceScreenBody() {
                   <AlertTitle>Sincronizando correo</AlertTitle>
                   <AlertDescription>
                     {syncProgress?.status === "waiting"
-                      ? `${syncProgress.errorCategory === "rate_limit" ? "Gmail alcanzó su límite temporal de solicitudes" : "Gmail pidió una pausa temporal"}. Reintento ${syncProgress.attempt} de 3${syncProgress.retryAt ? ` a las ${formatDateTime(new Date(syncProgress.retryAt).toISOString())}` : ""}.`
+                      ? `${syncProgress.errorCategory === "rate_limit" ? "Gmail alcanzó su límite temporal de solicitudes" : "Gmail pidió una pausa temporal"}. Reintento ${syncProgress.attempt} de 3${syncProgress.retryAt ? ` en ${formatRetryCountdown(syncProgress.retryAt, now)}` : ""}.`
                       : syncProgress?.status === "retrying"
                         ? `Reintentando con Gmail · intento ${syncProgress.attempt} de 3.`
                         : syncProgress?.status === "running"
@@ -513,6 +553,62 @@ function IntelligenceScreenBody() {
       </AlertDialog>
     </main>
   )
+}
+
+function useRetryClock(retryAt: number | undefined) {
+  const [clock, setClock] = useState<{
+    retryAt: number | undefined
+    now: number | null
+  }>({ retryAt: undefined, now: null })
+
+  useEffect(() => {
+    if (retryAt === undefined) {
+      return
+    }
+
+    const update = () => setClock({ retryAt, now: Date.now() })
+    const initialTimer = window.setTimeout(update, 0)
+    const interval = window.setInterval(update, 1_000)
+    return () => {
+      window.clearTimeout(initialTimer)
+      window.clearInterval(interval)
+    }
+  }, [retryAt])
+
+  if (retryAt === undefined) {
+    return null
+  }
+  if (clock.retryAt !== retryAt) {
+    return null
+  }
+
+  return clock.now
+}
+
+function formatRetryCountdown(retryAt: number, now: number | null) {
+  if (now === null) {
+    return "calculando la espera"
+  }
+  const remainingSeconds = Math.max(0, Math.ceil((retryAt - now) / 1_000))
+  if (remainingSeconds === 0) {
+    return "reintento en curso; esperando respuesta de Gmail"
+  }
+  const minutes = Math.floor(remainingSeconds / 60)
+  const seconds = remainingSeconds % 60
+  return `${minutes}:${String(seconds).padStart(2, "0")}`
+}
+
+function emailSocketStatusLabel(
+  status: "connecting" | "connected" | "disconnected"
+) {
+  switch (status) {
+    case "connected":
+      return "WebSocket conectado; actualizaciones en vivo activas"
+    case "connecting":
+      return "Conectando al WebSocket de actualizaciones"
+    default:
+      return "WebSocket desconectado; no hay actualizaciones en vivo"
+  }
 }
 
 function syncFailureMessage(

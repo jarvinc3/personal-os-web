@@ -25,7 +25,7 @@ export const INTELLIGENCE_MESSAGES_QUERY_KEY = [
 export const INTELLIGENCE_PAGE_SIZE = 50
 
 export function useIntelligence() {
-  useAiEmailSyncSocket()
+  const emailSocketStatus = useAiEmailSyncSocket()
   const session = useAppStore((state) => state.session)
   const queryClient = useQueryClient()
   const dashboardQuery = useQuery({
@@ -124,6 +124,7 @@ export function useIntelligence() {
     connectMutation,
     syncMutation,
     resetMutation,
+    emailSocketStatus,
   }
 }
 
