@@ -15,6 +15,8 @@ export const FINANCE_SHEET_KEYS = {
   loanPayment: "loan-payment-sheet",
   merchantEdit: "merchant-edit-sheet",
   installmentDetail: "installment-detail-sheet",
+  balanceDrifts: "balance-drifts-sheet",
+  pendingReconciliations: "pending-reconciliations-sheet",
   category: "category-sheet",
   transactionOptions: "transaction-options-sheet",
   savings: "savings-sheet",

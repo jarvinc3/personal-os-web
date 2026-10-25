@@ -6,10 +6,10 @@ import { HELP_LINK_CLASS } from "@/src/modules/help/constants/help-ui"
 import { glossaryTermHref } from "@/src/modules/help/lib/help-links"
 import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import { Button } from "@/src/shared/components/ui/button"
+import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
 import { BookOpenIcon, HelpCircleIcon, XIcon } from "lucide-react"
 import Link from "next/link"
-import { useState } from "react"
 
 type GlossaryHelpDialogProps = {
   slug: string
@@ -81,11 +81,14 @@ export function GlossaryHelpButton({
   label,
   className,
 }: GlossaryHelpButtonProps) {
-  const [open, setOpen] = useState(false)
+  // El término viaja en `sheetId`, así el enlace y Atrás devuelven la misma
+  // explicación.
+  const sheet = useSheetParam("glossary-sheet")
   const term = HELP_TERMS.find((candidate) => candidate.slug === slug)
   if (!term) {
     return null
   }
+  const open = sheet.open && sheet.sheetId === slug
 
   return (
     <>
@@ -97,11 +100,19 @@ export function GlossaryHelpButton({
         aria-label={label ?? `Qué significa ${term.term}`}
         aria-haspopup="dialog"
         aria-expanded={open}
-        onClick={() => setOpen(true)}
+        onClick={() => sheet.setOpen(true, slug)}
       >
         <HelpCircleIcon className="size-4" aria-hidden />
       </Button>
-      <GlossaryHelpDialog slug={slug} open={open} onOpenChange={setOpen} />
+      <GlossaryHelpDialog
+        slug={slug}
+        open={open}
+        onOpenChange={(next) => {
+          if (!next) {
+            sheet.setOpen(false)
+          }
+        }}
+      />
     </>
   )
 }

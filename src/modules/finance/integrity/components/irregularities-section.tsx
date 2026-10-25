@@ -12,6 +12,8 @@ import type {
   FinanceReconciliationStatusItem,
 } from "@/src/modules/finance/shared/types/entities"
 import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
+import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -185,8 +187,9 @@ export function IrregularitiesSection({
   recalculatePending,
   className,
 }: IrregularitiesSectionProps) {
-  const [openSheet, setOpenSheet] = useState<"drift" | "reconciliation" | null>(
-    null
+  const driftSheet = useSheetParam(FINANCE_SHEET_KEYS.balanceDrifts)
+  const reconciliationSheet = useSheetParam(
+    FINANCE_SHEET_KEYS.pendingReconciliations
   )
   const [confirmDrift, setConfirmDrift] = useState<FinanceBalanceDrift | null>(
     null
@@ -210,7 +213,7 @@ export function IrregularitiesSection({
                 PRESSABLE_CLASS,
                 "rounded-full text-destructive hover:text-destructive"
               )}
-              onClick={() => setOpenSheet("drift")}
+              onClick={() => driftSheet.setOpen(true)}
             >
               <CircleAlertIcon className="size-4" aria-hidden />
               Descuadres ({drifts.length})
@@ -229,7 +232,7 @@ export function IrregularitiesSection({
                 PRESSABLE_CLASS,
                 "rounded-full text-warning hover:text-warning"
               )}
-              onClick={() => setOpenSheet("reconciliation")}
+              onClick={() => reconciliationSheet.setOpen(true)}
             >
               <ScaleIcon className="size-4" aria-hidden />
               Sin conciliar ({pendingReconciliations.length})
@@ -243,12 +246,8 @@ export function IrregularitiesSection({
       </div>
 
       <BottomSheet
-        open={openSheet === "drift"}
-        onOpenChange={(open) => {
-          if (!open) {
-            setOpenSheet(null)
-          }
-        }}
+        open={driftSheet.open}
+        onOpenChange={driftSheet.setOpen}
         title={`Descuadres (${drifts.length})`}
         description="El saldo guardado no coincide con la suma de los movimientos confirmados."
       >
@@ -271,12 +270,8 @@ export function IrregularitiesSection({
       </BottomSheet>
 
       <BottomSheet
-        open={openSheet === "reconciliation"}
-        onOpenChange={(open) => {
-          if (!open) {
-            setOpenSheet(null)
-          }
-        }}
+        open={reconciliationSheet.open}
+        onOpenChange={reconciliationSheet.setOpen}
         title={`Sin conciliar (${pendingReconciliations.length})`}
         description="Productos que todavía no cerraste contra el banco este mes."
       >
