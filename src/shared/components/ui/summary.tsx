@@ -66,6 +66,8 @@ export function SummarySection({
     ? { backgroundColor: `color-mix(in srgb, ${color} 10%, transparent)` }
     : undefined
 
+  const rootClassName = "rounded-2xl border border-border bg-muted"
+
   const titleContent = (
     <div className="flex min-w-0 items-center gap-2">
       {Icon && (
@@ -74,12 +76,12 @@ export function SummarySection({
           style={color ? { color } : undefined}
         />
       )}
-      <div className="flex flex-col -space-y-0.5">
-        <span className="text-sm font-medium text-muted-foreground">
-          {title}
-        </span>
+      <div className="flex flex-col justify-center -space-y-0.5">
+        <span className="text-sm font-medium text-foreground">{title}</span>
         {subtitle && (
-          <span className="truncate text-xs text-muted">{subtitle}</span>
+          <span className="truncate text-xs text-muted-foreground">
+            {subtitle}
+          </span>
         )}
       </div>
     </div>
@@ -117,8 +119,6 @@ export function SummarySection({
       {children}
     </div>
   )
-
-  const rootClassName = "rounded-2xl border border-border bg-muted"
 
   if (collapsible) {
     return (
@@ -205,16 +205,17 @@ export function SummaryItem({
       : undefined
 
   const rowClassName = cn(
-    "flex w-full items-center gap-3 p-2 text-left transition-all duration-200 hover:rounded-2xl",
+    "flex w-full items-center gap-3 p-2 text-left transition-all duration-200",
     !isInteractive && !isLast && "border-b border-border/60",
-    isInteractive && cn(PRESSABLE_CLASS, "hover:bg-muted/50"),
+    isInteractive &&
+      "rounded-2xl border border-border bg-card/50 hover:bg-muted/50",
     onPress && "cursor-pointer",
     !isInteractive && disabled && "opacity-50",
     className
   )
   const shellClassName = cn(
-    "flex w-full items-stretch overflow-hidden rounded-2xl",
-    !isLast && "border-b border-border/60"
+    PRESSABLE_CLASS,
+    "flex w-full items-stretch overflow-hidden rounded-2xl"
   )
 
   const main = (
