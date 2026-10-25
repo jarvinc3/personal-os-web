@@ -56,6 +56,7 @@ import {
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useIntelligence } from "./hooks/use-intelligence"
 import { AiEvidenceSection } from "./components/ai-evidence-section"
+import { describeVerificationPayload } from "./review-labels"
 import {
   Alert,
   AlertDescription,
@@ -744,7 +745,7 @@ function IntelligenceMessageDetail({
               <SummaryItem
                 key={`verification-${verification.sequence}`}
                 title={`Verificación ${verification.sequence} · ${verification.verdict}`}
-                description={`${verification.verifierRole}${verification.isGroundTruth ? " · verdad de referencia HOLDOUT" : ""}${verification.notes ? ` · ${verification.notes}` : ""}`}
+                description={`${describeVerificationPayload(verification.correctedPayload)} · ${verification.verifierRole}${verification.isGroundTruth ? " · verdad de referencia HOLDOUT" : ""}${verification.notes ? ` · ${verification.notes}` : ""}`}
                 icon={CheckCircle2}
                 isLast={index === data.provenance.verifications.length - 1}
               />

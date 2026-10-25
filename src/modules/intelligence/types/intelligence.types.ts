@@ -116,12 +116,28 @@ export type AiReviewQueuePage = {
   hasMore: boolean
 }
 
+import type {
+  SemanticRoute,
+  SemanticType,
+  TransactionDirection,
+  TransactionKind,
+} from "@/src/modules/intelligence/review-labels"
+
 export type AiHumanVerificationInput = {
   verdict: "CONFIRMED" | "CORRECTED" | "REJECTED"
   relevance?: boolean
-  semanticType?: string
-  routes?: string[]
-  transaction?: Record<string, unknown>
+  semanticType?: SemanticType
+  routes?: SemanticRoute[]
+  transaction?: {
+    kind?: TransactionKind
+    amount?: number
+    currency?: string
+    transactionDate?: string
+    direction?: TransactionDirection
+    merchant?: string
+    bankReference?: string
+    last4?: string
+  }
   notes?: string
 }
 

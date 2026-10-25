@@ -19,6 +19,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Cambiado
 
+- #319: Revisar usa selectores de tipo y chips de dominios, valida el bloque de transacción y muestra las etiquetas en español en el detalle del correo.
 - Cerrar una hoja se pinta una sola vez: el mismo «Cancelar» con su icono en todas, «Cerrar» en las de solo lectura y la acción propia («Limpiar», «Listo», «Ahora no») donde la hoja la necesita; las hojas dejan de copiar el botón (#298).
 - Toda confirmación usa el mismo diálogo: mismo título, descripción y botones, el tono destructivo siempre igual, Esc y Cancelar cierran sin ejecutar y el clic fuera no cierra; el vaciado con contraseña sigue pidiéndola dentro del mismo diálogo (#299).
 - Los montos se leen igual en toda la App: el negativo lleva `−` y el color de negativo, el positivo con signo `+` y el de éxito, el cero queda neutro, y Inicio y Movimientos comparten el mismo mosaico de ingresos y gastos (#300).

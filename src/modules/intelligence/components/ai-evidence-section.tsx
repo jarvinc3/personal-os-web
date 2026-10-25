@@ -1,14 +1,29 @@
 "use client"
 
 import { useMemo, useState } from "react"
+import { useForm, useWatch } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
 import { useAiEvidence } from "@/src/modules/intelligence/hooks/use-ai-evidence"
+import {
+  buildCorrection,
+  REVIEW_FORM_DEFAULTS,
+  reviewFormSchema,
+  ROUTE_LABELS,
+  SEMANTIC_TYPE_LABELS,
+  TRANSACTION_DIRECTION_LABELS,
+  TRANSACTION_KIND_LABELS,
+  type ReviewFormValues,
+  type SemanticRoute,
+  type SemanticType,
+  type TransactionDirection,
+  type TransactionKind,
+} from "@/src/modules/intelligence/review-labels"
 import type {
   AiHumanVerificationInput,
   AiReviewQueueItem,
 } from "@/src/modules/intelligence/types/intelligence.types"
 import { Button } from "@/src/shared/components/ui/button"
 import { Badge } from "@/src/shared/components/ui/badge"
-import { Checkbox } from "@/src/shared/components/ui/checkbox"
 import {
   Empty,
   EmptyDescription,
@@ -16,10 +31,17 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
-import { Field, FieldGroup, FieldLabel } from "@/src/shared/components/ui/field"
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/src/shared/components/ui/field"
 import { Input } from "@/src/shared/components/ui/input"
 import { Textarea } from "@/src/shared/components/ui/textarea"
 import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
+import { DateWheels } from "@/src/shared/components/forms/wheel-picker"
+import { WheelField } from "@/src/shared/components/forms/wheel-field"
 import { Skeleton } from "@/src/shared/components/ui/skeleton"
 import {
   ToggleGroup,
@@ -34,7 +56,7 @@ import {
   SelectValue,
 } from "@/src/shared/components/ui/select"
 import { SummaryItem } from "@/src/shared/components/data-display/summary"
-import { formatDateTime } from "@/src/shared/lib/date-format"
+import { formatDate, formatDateTime } from "@/src/shared/lib/date-format"
 import {
   AlertCircle,
   CalendarDays,
@@ -49,6 +71,9 @@ import {
   RotateCcw,
   Tag,
   X,
+  Hash,
+  ArrowLeftRight,
+  Building2,
 } from "lucide-react"
 
 type AiEvidenceSectionProps = {
@@ -272,41 +297,84 @@ function ReviewMessage({
   onSubmit: (input: AiHumanVerificationInput) => void
 }) {
   const [editing, setEditing] = useState(false)
-  const [relevance, setRelevance] = useState("")
-  const [semanticType, setSemanticType] = useState("")
-  const [routes, setRoutes] = useState("")
-  const [hasTransaction, setHasTransaction] = useState(false)
-  const [amount, setAmount] = useState("")
-  const [currency, setCurrency] = useState("")
-  const [date, setDate] = useState("")
-  const [notes, setNotes] = useState("")
+  const {
+    control,
+    register,
+    setValue,
+    getValues,
+    resetField,
+    formState: { errors },
+  } = useForm<ReviewFormValues>({
+    resolver: zodResolver(reviewFormSchema),
+    mode: "onTouched",
+    defaultValues: REVIEW_FORM_DEFAULTS,
+  })
+  const values = useWatch({ control })
+  const semanticType = values.semanticType ?? ""
+  const selectedRoutes = values.routes ?? []
+  const hasTransaction =
+    semanticType === "FIN_TRANSACTION" ||
+    semanticType === "PURCHASE_RECEIPT" ||
+    semanticType === "SUBSCRIPTION_BILLING"
+  const canCorrect = reviewFormSchema.safeParse(values).success && !disabled
+
+  function selectSemanticType(value: SemanticType) {
+    setValue("semanticType", value, { shouldValidate: true, shouldDirty: true })
+    if (value === "SECURITY_ALERT" || value === "SECURITY_OTP") {
+      setValue(
+        "relevance",
+        value === "SECURITY_ALERT" ? "relevant" : "irrelevant"
+      )
+    } else if (
+      semanticType === "SECURITY_ALERT" ||
+      semanticType === "SECURITY_OTP"
+    ) {
+      resetField("relevance")
+    }
+    if (value !== "FIN_TRANSACTION") {
+      resetField("kind")
+    }
+    if (
+      value !== "FIN_TRANSACTION" &&
+      value !== "PURCHASE_RECEIPT" &&
+      value !== "SUBSCRIPTION_BILLING"
+    ) {
+      for (const field of [
+        "amount",
+        "currency",
+        "transactionDate",
+        "direction",
+        "merchant",
+        "bankReference",
+        "last4",
+      ] as const) {
+        resetField(field)
+      }
+    }
+  }
+
+  function toggleRoute(route: SemanticRoute) {
+    setValue(
+      "routes",
+      selectedRoutes.includes(route)
+        ? selectedRoutes.filter((selected) => selected !== route)
+        : [...selectedRoutes, route],
+      { shouldDirty: true, shouldValidate: true }
+    )
+  }
 
   function submit(verdict: AiHumanVerificationInput["verdict"]) {
-    const input: AiHumanVerificationInput = {
-      verdict,
-      ...(relevance ? { relevance: relevance === "relevant" } : {}),
-      ...(semanticType.trim() ? { semanticType: semanticType.trim() } : {}),
-      ...(routes.trim()
-        ? {
-            routes: routes
-              .split(",")
-              .map((route) => route.trim())
-              .filter(Boolean),
-          }
-        : {}),
-      ...(hasTransaction
-        ? {
-            transaction: {
-              present: true,
-              ...(amount ? { amount } : {}),
-              ...(currency ? { currency: currency.trim().toUpperCase() } : {}),
-              ...(date ? { date } : {}),
-            },
-          }
-        : {}),
-      ...(notes.trim() ? { notes: notes.trim() } : {}),
+    const form = getValues()
+    if (verdict === "CORRECTED") {
+      if (canCorrect) {
+        onSubmit(buildCorrection(form))
+      }
+      return
     }
-    onSubmit(input)
+    onSubmit({
+      verdict,
+      ...(form.notes.trim() ? { notes: form.notes.trim() } : {}),
+    })
   }
 
   const partitionVariant =
@@ -349,13 +417,24 @@ function ReviewMessage({
                   <Tag data-icon="inline-start" className="size-4" /> Relevancia
                 </FieldLabel>
                 <Select
-                  value={relevance}
-                  onValueChange={(value) => setRelevance(value ?? "")}
+                  value={values.relevance ?? ""}
+                  onValueChange={(value) =>
+                    setValue(
+                      "relevance",
+                      (value ?? "") as ReviewFormValues["relevance"],
+                      { shouldDirty: true }
+                    )
+                  }
+                  disabled={
+                    semanticType === "SECURITY_ALERT" ||
+                    semanticType === "SECURITY_OTP"
+                  }
                 >
                   <SelectTrigger
                     id={`relevance-${message.id}`}
                     className="w-full"
                   >
+                    <Tag className="size-4" aria-hidden="true" />
                     <SelectValue placeholder="Sin etiqueta" />
                   </SelectTrigger>
                   <SelectContent>
@@ -371,75 +450,263 @@ function ReviewMessage({
                   <Tag data-icon="inline-start" className="size-4" /> Tipo
                   semántico
                 </FieldLabel>
-                <Input
-                  id={`semantic-${message.id}`}
+                <Select
                   value={semanticType}
-                  onChange={(event) => setSemanticType(event.target.value)}
-                  placeholder="p. ej. recibo, aviso, OTP"
-                />
+                  onValueChange={(value) =>
+                    value && selectSemanticType(value as SemanticType)
+                  }
+                >
+                  <SelectTrigger
+                    id={`semantic-${message.id}`}
+                    className="w-full"
+                  >
+                    <Tag className="size-4" aria-hidden="true" />
+                    <SelectValue placeholder="Elige un tipo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      {(
+                        Object.entries(SEMANTIC_TYPE_LABELS) as [
+                          SemanticType,
+                          string,
+                        ][]
+                      ).map(([value, label]) => (
+                        <SelectItem key={value} value={value}>
+                          {label}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+                {errors.semanticType?.message ? (
+                  <FieldError>{errors.semanticType.message}</FieldError>
+                ) : null}
               </Field>
             </div>
             <Field>
-              <FieldLabel htmlFor={`routes-${message.id}`}>
-                <Layers3 data-icon="inline-start" className="size-4" /> Rutas
+              <FieldLabel>
+                <Layers3 data-icon="inline-start" className="size-4" /> Dominios
               </FieldLabel>
-              <Input
-                id={`routes-${message.id}`}
-                value={routes}
-                onChange={(event) => setRoutes(event.target.value)}
-                placeholder="Separadas por coma"
-              />
-            </Field>
-            <Field orientation="horizontal">
-              <FieldLabel htmlFor={`transaction-${message.id}`}>
-                <Checkbox
-                  id={`transaction-${message.id}`}
-                  checked={hasTransaction}
-                  onCheckedChange={(checked) =>
-                    setHasTransaction(checked === true)
-                  }
-                />
-                Contiene una transacción
-              </FieldLabel>
+              <div
+                className="flex flex-wrap gap-2"
+                role="group"
+                aria-label="Dominios"
+              >
+                {(
+                  Object.entries(ROUTE_LABELS) as [SemanticRoute, string][]
+                ).map(([route, label]) => (
+                  <Button
+                    key={route}
+                    type="button"
+                    size="sm"
+                    variant={
+                      selectedRoutes.includes(route) ? "default" : "outline"
+                    }
+                    aria-pressed={selectedRoutes.includes(route)}
+                    onClick={() => toggleRoute(route)}
+                  >
+                    <Layers3 className="size-4" aria-hidden="true" /> {label}
+                  </Button>
+                ))}
+              </div>
+              {!selectedRoutes.length ? (
+                <p className="text-xs text-muted-foreground">Sin dominios</p>
+              ) : null}
             </Field>
             {hasTransaction ? (
-              <div className="grid gap-3 sm:grid-cols-3">
+              <div className="grid gap-3 sm:grid-cols-2">
+                {semanticType === "FIN_TRANSACTION" ? (
+                  <Field>
+                    <FieldLabel htmlFor={`kind-${message.id}`}>
+                      <ReceiptText className="size-4" aria-hidden="true" /> Tipo
+                      de transacción
+                    </FieldLabel>
+                    <Select
+                      value={values.kind ?? ""}
+                      onValueChange={(value) =>
+                        setValue("kind", (value ?? "") as TransactionKind, {
+                          shouldDirty: true,
+                          shouldValidate: true,
+                        })
+                      }
+                    >
+                      <SelectTrigger
+                        id={`kind-${message.id}`}
+                        className="w-full"
+                      >
+                        <ReceiptText className="size-4" aria-hidden="true" />
+                        <SelectValue placeholder="Elige un tipo" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          {(
+                            Object.entries(TRANSACTION_KIND_LABELS) as [
+                              TransactionKind,
+                              string,
+                            ][]
+                          ).map(([kind, label]) => (
+                            <SelectItem key={kind} value={kind}>
+                              {label}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                    {errors.kind?.message ? (
+                      <FieldError>{errors.kind.message}</FieldError>
+                    ) : null}
+                  </Field>
+                ) : null}
                 <Field>
                   <FieldLabel htmlFor={`amount-${message.id}`}>
                     <ReceiptText data-icon="inline-start" className="size-4" />{" "}
-                    Monto
+                    Monto (opcional)
                   </FieldLabel>
                   <Input
                     id={`amount-${message.id}`}
+                    type="number"
+                    min="0"
+                    step="any"
                     inputMode="decimal"
-                    value={amount}
-                    onChange={(event) => setAmount(event.target.value)}
+                    {...register("amount")}
                   />
+                  {errors.amount?.message ? (
+                    <FieldError>{errors.amount.message}</FieldError>
+                  ) : null}
                 </Field>
                 <Field>
                   <FieldLabel htmlFor={`currency-${message.id}`}>
                     <Coins data-icon="inline-start" className="size-4" /> Moneda
+                    (opcional)
                   </FieldLabel>
                   <Input
                     id={`currency-${message.id}`}
                     maxLength={3}
-                    value={currency}
-                    onChange={(event) => setCurrency(event.target.value)}
-                    placeholder="USD"
+                    placeholder="DOP"
+                    {...register("currency", {
+                      onChange: (event) =>
+                        setValue("currency", event.target.value.toUpperCase()),
+                    })}
+                  />
+                  {errors.currency?.message ? (
+                    <FieldError>{errors.currency.message}</FieldError>
+                  ) : null}
+                </Field>
+                <WheelField
+                  label="Fecha (opcional)"
+                  valueLabel={
+                    values.transactionDate
+                      ? formatDate(values.transactionDate)
+                      : "Sin fecha"
+                  }
+                  icon={CalendarDays}
+                  footer={(close) => (
+                    <div className="mt-3 flex items-center gap-2">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => {
+                          setValue("transactionDate", "", { shouldDirty: true })
+                          close()
+                        }}
+                      >
+                        <X className="size-4" aria-hidden="true" /> Sin fecha
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        className="ml-auto"
+                        disabled={!values.transactionDate}
+                        onClick={close}
+                      >
+                        <Check className="size-4" aria-hidden="true" /> Listo
+                      </Button>
+                    </div>
+                  )}
+                >
+                  <DateWheels
+                    value={values.transactionDate ?? ""}
+                    onChange={(next) =>
+                      setValue("transactionDate", next, { shouldDirty: true })
+                    }
+                  />
+                </WheelField>
+                <Field>
+                  <FieldLabel htmlFor={`direction-${message.id}`}>
+                    <ArrowLeftRight className="size-4" aria-hidden="true" />{" "}
+                    Dirección (opcional)
+                  </FieldLabel>
+                  <Select
+                    value={values.direction ?? ""}
+                    onValueChange={(value) =>
+                      setValue(
+                        "direction",
+                        (value ?? "") as TransactionDirection,
+                        {
+                          shouldDirty: true,
+                        }
+                      )
+                    }
+                  >
+                    <SelectTrigger
+                      id={`direction-${message.id}`}
+                      className="w-full"
+                    >
+                      <ArrowLeftRight className="size-4" aria-hidden="true" />
+                      <SelectValue placeholder="Sin dirección" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        {(
+                          Object.entries(TRANSACTION_DIRECTION_LABELS) as [
+                            TransactionDirection,
+                            string,
+                          ][]
+                        ).map(([direction, label]) => (
+                          <SelectItem key={direction} value={direction}>
+                            {label}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor={`merchant-${message.id}`}>
+                    <Building2 className="size-4" aria-hidden="true" /> Comercio
+                    (opcional)
+                  </FieldLabel>
+                  <Input
+                    id={`merchant-${message.id}`}
+                    {...register("merchant")}
                   />
                 </Field>
                 <Field>
-                  <FieldLabel htmlFor={`date-${message.id}`}>
-                    <CalendarDays data-icon="inline-start" className="size-4" />{" "}
-                    Fecha
+                  <FieldLabel htmlFor={`bank-reference-${message.id}`}>
+                    <Hash className="size-4" aria-hidden="true" /> Referencia
+                    bancaria (opcional)
                   </FieldLabel>
                   <Input
-                    id={`date-${message.id}`}
-                    inputMode="numeric"
-                    value={date}
-                    onChange={(event) => setDate(event.target.value)}
-                    placeholder="AAAA-MM-DD"
+                    id={`bank-reference-${message.id}`}
+                    {...register("bankReference")}
                   />
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor={`last4-${message.id}`}>
+                    <Hash className="size-4" aria-hidden="true" /> Últimos 4
+                    dígitos (opcional)
+                  </FieldLabel>
+                  <Input
+                    id={`last4-${message.id}`}
+                    inputMode="numeric"
+                    maxLength={4}
+                    {...register("last4")}
+                  />
+                  {errors.last4?.message ? (
+                    <FieldError>{errors.last4.message}</FieldError>
+                  ) : null}
                 </Field>
               </div>
             ) : null}
@@ -450,10 +717,12 @@ function ReviewMessage({
               </FieldLabel>
               <Textarea
                 id={`notes-${message.id}`}
-                value={notes}
-                onChange={(event) => setNotes(event.target.value)}
-                placeholder="Obligatorio para rechazar"
+                {...register("notes")}
+                placeholder="Obligatoria para Otro o al rechazar"
               />
+              {errors.notes?.message ? (
+                <FieldError>{errors.notes.message}</FieldError>
+              ) : null}
             </Field>
           </FieldGroup>
           <div className="flex flex-wrap gap-2">
@@ -472,7 +741,7 @@ function ReviewMessage({
               variant="outline"
               className="flex-1"
               onClick={() => submit("CORRECTED")}
-              disabled={disabled}
+              disabled={!canCorrect}
             >
               <Pencil data-icon="inline-start" /> Corregir
             </Button>
@@ -482,7 +751,7 @@ function ReviewMessage({
               variant="destructive"
               className="flex-1"
               onClick={() => submit("REJECTED")}
-              disabled={disabled || !notes.trim()}
+              disabled={disabled || !values.notes?.trim()}
             >
               <X data-icon="inline-start" /> Rechazar
             </Button>

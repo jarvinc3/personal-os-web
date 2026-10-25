@@ -8,4 +8,6 @@ La autorización OAuth solicita acceso de solo lectura. La ruta `/intelligence` 
 
 **Dataset, evidencia y verificación:** [AI-3](../../../../personal-os-back/docs/modules/ai-agent/capabilities/evidence-review.md).
 
+En **Revisión → Revisar**, el tipo se elige entre los trece valores del contrato del backend con nombres en español. Los dominios son cuatro chips de selección múltiple; ninguno marcado envía `routes: []`. Transacción pide `kind` y muestra sus datos opcionales; Recibo / factura y Cobro de suscripción permiten añadir esos datos sin `kind`. Otros tipos no muestran ese bloque. Otro exige nota; Alerta de seguridad y Código de verificación fijan su relevancia. El detalle traduce las etiquetas y muestra «Sin dominios» cuando la lista está vacía.
+
 **Código:** `src/modules/intelligence/`, `app/(app)/intelligence/`.
