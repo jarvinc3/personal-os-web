@@ -10,7 +10,7 @@ import { GalleryVerticalEndIcon, LayersIcon } from "lucide-react"
 export function DevIndexScreen() {
   usePageHeader({
     title: "Desarrollo",
-    subtitle: "Galería de referencia",
+    subtitle: "Galerías de referencia",
   })
 
   return (
