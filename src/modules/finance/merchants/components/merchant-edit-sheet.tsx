@@ -280,17 +280,6 @@ export function MerchantEditSheet({
             : "Cambia el nombre, el logo, la categoría y los nombres alternativos."
         }
         actions={{
-          close: (
-            <Button
-              type="button"
-              variant="outline"
-              className="flex-1"
-              onClick={() => requestOpenChange(false)}
-            >
-              <XIcon className="size-4 shrink-0" />
-              Cancelar
-            </Button>
-          ),
           submit: (
             <Button
               type="button"

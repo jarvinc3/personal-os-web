@@ -9,7 +9,6 @@ import {
   SaveIcon,
   StickyNoteIcon,
   TagIcon,
-  XIcon,
 } from "lucide-react"
 import { useEffect, useMemo } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
@@ -189,17 +188,6 @@ export function SubscriptionSheet({
         title={isEdit ? "Editar suscripción" : "Nueva suscripción"}
         description="Monto fijo, ciclo de facturación y próximo cobro."
         actions={{
-          close: (
-            <Button
-              key="cancel"
-              variant="outline"
-              className="flex-1"
-              onClick={() => requestOpenChange(false)}
-            >
-              <XIcon className="size-4 shrink-0" />
-              Cancelar
-            </Button>
-          ),
           submit: (
             <Button
               key="submit"

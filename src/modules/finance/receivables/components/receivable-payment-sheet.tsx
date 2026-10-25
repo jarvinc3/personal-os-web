@@ -42,7 +42,6 @@ import {
   HandshakeIcon,
   TrendingUpIcon,
   WalletIcon,
-  XIcon,
 } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
@@ -210,17 +209,6 @@ export function ReceivablePaymentSheet({
           debtorName ? `Entra dinero de ${debtorName} a la cuenta.` : undefined
         }
         actions={{
-          close: (
-            <Button
-              type="button"
-              variant="outline"
-              className="flex-1"
-              onClick={() => handleOpenChange(false)}
-            >
-              <XIcon className="size-4 shrink-0" />
-              Cancelar
-            </Button>
-          ),
           submit: (
             <Button
               type="button"

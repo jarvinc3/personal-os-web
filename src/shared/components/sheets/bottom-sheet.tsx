@@ -14,10 +14,14 @@ import {
   DrawerNested,
   DrawerTitle,
 } from "@/src/shared/components/ui/drawer"
+import { Button } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { useIsMobile } from "@/src/shared/hooks/use-mobile"
 import { cn } from "@/src/shared/lib/utils"
+import { XIcon } from "lucide-react"
 import { Fragment, type ReactNode } from "react"
+
+const DEFAULT_CLOSE_LABEL = "Cancelar"
 
 interface BottomSheetProps {
   open: boolean
@@ -36,6 +40,10 @@ interface BottomSheetProps {
     close?: ReactNode
     submit?: ReactNode
   }
+  /** Hides the default close action when the sheet has nothing to cancel. */
+  showClose?: boolean
+  /** Wording of the default close action, e.g. "Cerrar" on a read-only sheet. */
+  closeLabel?: string
 }
 
 export function BottomSheet({
@@ -50,13 +58,28 @@ export function BottomSheet({
   headerAction,
   headerActionAlign = "end",
   actions,
+  showClose = true,
+  closeLabel = DEFAULT_CLOSE_LABEL,
 }: BottomSheetProps) {
   const isMobile = useIsMobile()
   const direction = getBottomSheetDirection(variant, isMobile)
+  const closeAction =
+    actions?.close ??
+    (showClose ? (
+      <Button
+        type="button"
+        variant="outline"
+        className="flex-1"
+        onClick={() => onOpenChange(false)}
+      >
+        <XIcon className="size-4 shrink-0" aria-hidden="true" />
+        {closeLabel}
+      </Button>
+    ) : null)
   const actionEntries = (
     [
       ["delete", actions?.delete],
-      ["close", actions?.close],
+      ["close", closeAction],
       ["submit", actions?.submit],
     ] as const
   ).filter(([, node]) => node != null && node !== false)

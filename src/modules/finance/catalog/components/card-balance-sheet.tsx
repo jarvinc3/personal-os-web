@@ -41,7 +41,7 @@ import { appToast } from "@/src/shared/lib/app-toast"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
 import { cn } from "@/src/shared/lib/utils"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { PlusIcon, SaveIcon, TrashIcon, WalletIcon, XIcon } from "lucide-react"
+import { PlusIcon, SaveIcon, TrashIcon, WalletIcon } from "lucide-react"
 import { useMemo, useState } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import { usePicker } from "@/src/shared/hooks/use-picker"
@@ -279,16 +279,6 @@ function CardBalanceSheetForm({
         title={card ? `Saldos · ${card.name}` : "Saldos de tarjeta"}
         description="El saldo nuevo queda como un reajuste. El límite de crédito se guarda aparte."
         actions={{
-          close: (
-            <Button
-              variant="outline"
-              className="flex-1"
-              onClick={() => requestOpenChange(false)}
-            >
-              <XIcon className="size-4 shrink-0" />
-              Cancelar
-            </Button>
-          ),
           submit: (
             <Button
               disabled={saving || !card}

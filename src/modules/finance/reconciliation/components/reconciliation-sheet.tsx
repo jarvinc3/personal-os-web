@@ -46,7 +46,6 @@ import {
   ScaleIcon,
   TagsIcon,
   Trash2Icon,
-  XIcon,
 } from "lucide-react"
 import { useMemo, useState } from "react"
 
@@ -176,16 +175,6 @@ export function ReconciliationSheet({
       title={`Conciliar · ${target.name}`}
       description="Escribe el saldo que ves en el banco. La diferencia queda como ajustes categorizados."
       actions={{
-        close: (
-          <Button
-            variant="outline"
-            className="flex-1"
-            onClick={() => onOpenChange(false)}
-          >
-            <XIcon className="size-4 shrink-0" />
-            Cancelar
-          </Button>
-        ),
         submit: (
           <Button
             className="flex-1"

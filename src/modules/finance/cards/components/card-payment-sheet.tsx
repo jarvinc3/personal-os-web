@@ -31,7 +31,7 @@ import { Spinner } from "@/src/shared/components/ui/spinner"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { usePicker } from "@/src/shared/hooks/use-picker"
 import { appToast } from "@/src/shared/lib/app-toast"
-import { CoinsIcon, CreditCardIcon, WalletIcon, XIcon } from "lucide-react"
+import { CoinsIcon, CreditCardIcon, WalletIcon } from "lucide-react"
 import { useMemo, useState } from "react"
 import { useUserTimeZone } from "@/src/modules/settings/hooks/use-user-time-zone"
 import { wallClockToIso } from "@/src/modules/finance/shared/lib/ledger-form"
@@ -125,17 +125,6 @@ export function CardPaymentSheet({
         title="Pagar tarjeta"
         description={`Sale de tu cuenta y sube el disponible de ${cardName}.`}
         actions={{
-          close: (
-            <Button
-              type="button"
-              variant="outline"
-              className="flex-1"
-              onClick={() => onOpenChange(false)}
-            >
-              <XIcon className="size-4 shrink-0" />
-              Cancelar
-            </Button>
-          ),
           submit: (
             <Button
               type="button"

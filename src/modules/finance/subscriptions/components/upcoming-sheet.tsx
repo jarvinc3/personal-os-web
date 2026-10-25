@@ -12,7 +12,7 @@ import {
 import { upcomingChargeToCardSource } from "@/src/modules/finance/subscriptions/lib/subscription-card-source"
 import { SubscriptionCard } from "@/src/modules/finance/subscriptions/components/subscription-card"
 import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
-import { Button } from "@/src/shared/components/ui/button"
+
 import {
   Empty,
   EmptyDescription,
@@ -20,7 +20,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
-import { ClockIcon, XIcon } from "lucide-react"
+import { ClockIcon } from "lucide-react"
 
 type UpcomingSheetProps = {
   open: boolean
@@ -56,22 +56,11 @@ export function UpcomingSheet({
 
   return (
     <BottomSheet
+      closeLabel="Cerrar"
       open={open}
       onOpenChange={onOpenChange}
       title="Próximos cobros"
       description={`Próximos ${windowDays} días · ${summaryLabel}`}
-      actions={{
-        close: (
-          <Button
-            variant="outline"
-            className="flex-1"
-            onClick={() => onOpenChange(false)}
-          >
-            <XIcon className="size-4 shrink-0" />
-            Cerrar
-          </Button>
-        ),
-      }}
     >
       {query.isError ? (
         <FinanceErrorState

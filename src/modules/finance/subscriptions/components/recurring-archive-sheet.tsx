@@ -11,9 +11,9 @@ import type {
   FinanceRecurringPattern,
 } from "@/src/modules/finance/shared/types/entities"
 import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
-import { Button } from "@/src/shared/components/ui/button"
+
 import { Spinner } from "@/src/shared/components/ui/spinner"
-import { XIcon } from "lucide-react"
+
 import { useState } from "react"
 
 const ARCHIVE_TABS: {
@@ -46,23 +46,12 @@ export function RecurringArchiveSheet({
 
   return (
     <BottomSheet
+      closeLabel="Cerrar"
       open={open}
       onOpenChange={onOpenChange}
       nested={nested}
       title="Bandeja de recurrentes"
       description="Cobros ya confirmados o descartados."
-      actions={{
-        close: (
-          <Button
-            variant="outline"
-            className="flex-1"
-            onClick={() => onOpenChange(false)}
-          >
-            <XIcon className="size-4 shrink-0" />
-            Cerrar
-          </Button>
-        ),
-      }}
     >
       <FinanceSegmentedControl
         value={tab}

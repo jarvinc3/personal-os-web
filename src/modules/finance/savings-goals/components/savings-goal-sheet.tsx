@@ -47,7 +47,6 @@ import {
   NotebookPenIcon,
   PiggyBankIcon,
   TargetIcon,
-  XIcon,
 } from "lucide-react"
 import { useEffect, useMemo } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
@@ -188,17 +187,6 @@ export function SavingsGoalSheet({
         title={isEdit ? "Editar meta" : "Nueva meta"}
         description="Se marca como completada cuando lo ahorrado alcanza la meta."
         actions={{
-          close: (
-            <Button
-              type="button"
-              variant="outline"
-              className="flex-1"
-              onClick={() => requestOpenChange(false)}
-            >
-              <XIcon className="size-4 shrink-0" />
-              Cancelar
-            </Button>
-          ),
           submit: (
             <Button
               type="button"

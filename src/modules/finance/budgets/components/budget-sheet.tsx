@@ -52,7 +52,7 @@ import { Switch } from "@/src/shared/components/ui/switch"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { CalendarIcon, PiggyBankIcon, XIcon } from "lucide-react"
+import { CalendarIcon, PiggyBankIcon } from "lucide-react"
 import { useEffect, useId, useMemo } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import {
@@ -277,17 +277,6 @@ export function BudgetSheet({
             : "Crea la categoría desde el selector de categorías."
         }
         actions={{
-          close: (
-            <Button
-              type="button"
-              variant="outline"
-              className="flex-1"
-              onClick={() => requestOpenChange(false)}
-            >
-              <XIcon className="size-4 shrink-0" />
-              Cancelar
-            </Button>
-          ),
           submit: (
             <Button
               type="button"

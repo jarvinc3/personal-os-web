@@ -6,9 +6,8 @@ import {
   AlertDescription,
   AlertTitle,
 } from "@/src/shared/components/ui/alert"
-import { Button } from "@/src/shared/components/ui/button"
-import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
-import { MonitorPlay, XIcon } from "lucide-react"
+
+import { MonitorPlay } from "lucide-react"
 
 type KeepAwakeAlertSheetProps = {
   open: boolean
@@ -21,23 +20,11 @@ export function KeepAwakeAlertSheet({
 }: KeepAwakeAlertSheetProps) {
   return (
     <BottomSheet
+      closeLabel="Cerrar"
       open={open}
       onOpenChange={onOpenChange}
       title="Cómo funciona"
       description="Keep Awake mantiene la pantalla despierta en esta ventana."
-      actions={{
-        close: (
-          <Button
-            type="button"
-            variant="outline"
-            className={cn(PRESSABLE_CLASS, "flex-1")}
-            onClick={() => onOpenChange(false)}
-          >
-            <XIcon className="size-4 shrink-0" />
-            Cerrar
-          </Button>
-        ),
-      }}
     >
       <Alert>
         <MonitorPlay />

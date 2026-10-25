@@ -1,7 +1,7 @@
 "use client"
 
 import { zodResolver } from "@hookform/resolvers/zod"
-import { HandCoinsIcon, SaveIcon, XIcon } from "lucide-react"
+import { HandCoinsIcon, SaveIcon } from "lucide-react"
 import { useMemo } from "react"
 import { Controller, useForm } from "react-hook-form"
 import { z } from "zod"
@@ -153,17 +153,6 @@ export function SubscriptionPaymentSheet({
           : "Asigna una cuenta o tarjeta a la suscripción para registrar el pago."
       }
       actions={{
-        close: (
-          <Button
-            key="cancel"
-            variant="outline"
-            className="flex-1"
-            onClick={() => onOpenChange(false)}
-          >
-            <XIcon className="size-4 shrink-0" />
-            Cancelar
-          </Button>
-        ),
         submit: (
           <Button
             key="submit"

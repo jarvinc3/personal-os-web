@@ -38,7 +38,6 @@ import {
   NotebookPenIcon,
   UserIcon,
   WalletIcon,
-  XIcon,
 } from "lucide-react"
 import { useEffect, useMemo } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
@@ -151,17 +150,6 @@ export function ReceivableSheet({
         title={isEdit ? "Editar cobro" : "Nuevo cobro"}
         description="Al marcarlo Pagado se completa el monto con lo que falte."
         actions={{
-          close: (
-            <Button
-              type="button"
-              variant="outline"
-              className="flex-1"
-              onClick={() => requestOpenChange(false)}
-            >
-              <XIcon className="size-4 shrink-0" />
-              Cancelar
-            </Button>
-          ),
           submit: (
             <Button
               type="button"

@@ -2,7 +2,7 @@
 
 import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import { Button } from "@/src/shared/components/ui/button"
-import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
+import { PRESSABLE_CLASS } from "@/src/shared/lib/utils"
 import { formatElapsed } from "@/src/modules/keep-awake/lib/format-elapsed"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { formatClockTimeFromDate } from "@/src/shared/lib/date-format"
@@ -23,7 +23,6 @@ import {
   Pause,
   Square,
   Timer,
-  XIcon,
 } from "lucide-react"
 import { useSyncExternalStore } from "react"
 
@@ -81,23 +80,11 @@ export function KeepAwakeHistorySheet({
 
   return (
     <BottomSheet
+      closeLabel="Cerrar"
       open={open}
       onOpenChange={onOpenChange}
       title="Historial"
       description="Sesiones cerradas recientes."
-      actions={{
-        close: (
-          <Button
-            type="button"
-            variant="outline"
-            className={cn(PRESSABLE_CLASS, "flex-1")}
-            onClick={() => onOpenChange(false)}
-          >
-            <XIcon className="size-4 shrink-0" />
-            Cerrar
-          </Button>
-        ),
-      }}
     >
       {visible.length === 0 && (
         <div className="flex flex-col items-center gap-2 px-4 py-8 text-center">

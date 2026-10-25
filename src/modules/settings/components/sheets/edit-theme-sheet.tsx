@@ -17,7 +17,7 @@ import {
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { appToast } from "@/src/shared/lib/app-toast"
-import { Palette, SaveIcon, XIcon } from "lucide-react"
+import { Palette, SaveIcon } from "lucide-react"
 import { useTheme } from "next-themes"
 import { useCallback } from "react"
 
@@ -66,18 +66,6 @@ export function EditThemeSheet({ open, onOpenChange }: SettingsSheetProps) {
       title="Apariencia"
       description={DEFAULT_USER_PREFERENCES.theme.fieldGuide}
       actions={{
-        close: (
-          <Button
-            variant="outline"
-            className="flex-1"
-            onClick={() => {
-              handleOpenChange(false)
-            }}
-          >
-            <XIcon className="size-4 shrink-0" />
-            Cancelar
-          </Button>
-        ),
         submit: (
           <Button
             className="flex-1"

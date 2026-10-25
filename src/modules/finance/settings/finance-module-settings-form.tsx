@@ -16,7 +16,7 @@ import {
   SettingsSection,
 } from "@/src/shared/components/settings/settings-section"
 import { FormScreen } from "@/src/shared/components/forms/form-screen"
-import { Button } from "@/src/shared/components/ui/button"
+
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { getModule } from "@/src/shared/constants/module-registry"
 import { appToast } from "@/src/shared/lib/app-toast"
@@ -34,7 +34,6 @@ import {
   ScanEyeIcon,
   Tags,
   Trash2,
-  XIcon,
   type LucideIcon,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
@@ -111,22 +110,11 @@ function FinanceSettingsSheet({
 
   return (
     <BottomSheet
+      closeLabel="Cerrar"
       open={openSheet === id}
       onOpenChange={(open) => onOpenSheetChange(open ? id : null)}
       title={sheet.title}
       description={sheet.description}
-      actions={{
-        close: (
-          <Button
-            variant="outline"
-            className="flex-1"
-            onClick={() => onOpenSheetChange(null)}
-          >
-            <XIcon className="size-4 shrink-0" />
-            Cerrar
-          </Button>
-        ),
-      }}
     >
       {children}
     </BottomSheet>

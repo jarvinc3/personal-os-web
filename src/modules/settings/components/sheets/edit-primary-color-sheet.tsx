@@ -24,7 +24,6 @@ import {
   PaletteIcon,
   PipetteIcon,
   SaveIcon,
-  XIcon,
 } from "lucide-react"
 
 const CUSTOM_COLOR_INPUT_ID = "primary-color-custom"
@@ -75,18 +74,6 @@ export function EditPrimaryColorSheet({
       title="Color primario"
       description="Botones, enlaces y acentos de toda la app."
       actions={{
-        close: (
-          <Button
-            variant="outline"
-            className="flex-1"
-            onClick={() => {
-              handleOpenChange(false)
-            }}
-          >
-            <XIcon className="size-4 shrink-0" />
-            Cancelar
-          </Button>
-        ),
         submit: (
           <Button
             className="flex-1"

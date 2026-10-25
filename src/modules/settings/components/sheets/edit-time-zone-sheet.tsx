@@ -4,12 +4,10 @@ import { useProfile } from "@/src/modules/settings/hooks/use-profile"
 import type { SettingsSheetProps } from "@/src/modules/settings/types/sheet.types"
 import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import { FormTextField } from "@/src/shared/components/forms/form-text-field"
-import { Button } from "@/src/shared/components/ui/button"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { cn } from "@/src/shared/lib/utils"
-import { CheckIcon, GlobeIcon, SearchIcon, XIcon } from "lucide-react"
+import { CheckIcon, GlobeIcon, SearchIcon } from "lucide-react"
 import { useMemo, useState } from "react"
-import { useRouter } from "next/navigation"
 
 /** Every zone the browser knows, plus the current one when it lists an alias. */
 function zoneOptions(current: string): string[] {
@@ -21,7 +19,6 @@ function zoneOptions(current: string): string[] {
 }
 
 export function EditTimeZoneSheet({ open, onOpenChange }: SettingsSheetProps) {
-  const router = useRouter()
   const { profileQuery, updateProfileMutation } = useProfile()
   const current = profileQuery.data?.timezone ?? ""
   const [search, setSearch] = useState("")
@@ -56,18 +53,6 @@ export function EditTimeZoneSheet({ open, onOpenChange }: SettingsSheetProps) {
       onOpenChange={onOpenChange}
       title="Zona horaria"
       description="Las fechas y horas de Finanzas se muestran en esta zona."
-      actions={{
-        close: (
-          <Button
-            variant="outline"
-            className="flex-1"
-            onClick={() => router.back()}
-          >
-            <XIcon className="size-4 shrink-0" />
-            Cancelar
-          </Button>
-        ),
-      }}
     >
       <FormTextField
         value={search}

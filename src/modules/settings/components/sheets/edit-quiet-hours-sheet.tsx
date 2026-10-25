@@ -13,8 +13,7 @@ import {
   formatTimeForDisplay,
   normalizeTimeToApi,
 } from "@/src/shared/lib/date-format"
-import { ClockFadingIcon, ClockIcon, XIcon } from "lucide-react"
-import { useRouter } from "next/navigation"
+import { ClockFadingIcon, ClockIcon } from "lucide-react"
 import { useState } from "react"
 
 function normalizeTimeForInput(apiTime: string) {
@@ -27,7 +26,6 @@ export function EditQuietHoursSheet({
 }: SettingsSheetProps) {
   const { preferences, updatePreferences, updateProfileMutation } = useProfile()
   const quietHours = preferences.notifications.quietHours
-  const router = useRouter()
   const [start, setStart] = useState(() =>
     normalizeTimeForInput(quietHours.start)
   )
@@ -77,16 +75,6 @@ export function EditQuietHoursSheet({
       title="Horario silencioso"
       description="Fuera de este rango se respetan los canales globales de notificación."
       actions={{
-        close: (
-          <Button
-            variant="outline"
-            className="flex-1"
-            onClick={() => router.back()}
-          >
-            <XIcon className="size-4 shrink-0" />
-            Cancelar
-          </Button>
-        ),
         submit: (
           <Button
             disabled={!isDirty || updateProfileMutation.isPending}

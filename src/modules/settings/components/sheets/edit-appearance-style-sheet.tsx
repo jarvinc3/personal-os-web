@@ -18,7 +18,7 @@ import {
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { appToast } from "@/src/shared/lib/app-toast"
-import { LayersIcon, SaveIcon, XIcon } from "lucide-react"
+import { LayersIcon, SaveIcon } from "lucide-react"
 
 export function EditAppearanceStyleSheet({
   open,
@@ -61,18 +61,6 @@ export function EditAppearanceStyleSheet({
       title="Estilo visual"
       description="Formas, bordes y sombras de la interfaz."
       actions={{
-        close: (
-          <Button
-            variant="outline"
-            className="flex-1"
-            onClick={() => {
-              handleOpenChange(false)
-            }}
-          >
-            <XIcon className="size-4 shrink-0" />
-            Cancelar
-          </Button>
-        ),
         submit: (
           <Button
             className="flex-1"

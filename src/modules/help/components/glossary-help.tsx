@@ -8,7 +8,7 @@ import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import { Button } from "@/src/shared/components/ui/button"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
-import { BookOpenIcon, HelpCircleIcon, XIcon } from "lucide-react"
+import { BookOpenIcon, HelpCircleIcon } from "lucide-react"
 import Link from "next/link"
 
 type GlossaryHelpDialogProps = {
@@ -30,23 +30,11 @@ export function GlossaryHelpDialog({
 
   return (
     <BottomSheet
+      closeLabel="Cerrar"
       open={open}
       onOpenChange={onOpenChange}
       title={term.term}
       description="Glosario"
-      actions={{
-        close: (
-          <Button
-            type="button"
-            variant="outline"
-            className={cn(PRESSABLE_CLASS, "flex-1")}
-            onClick={() => onOpenChange(false)}
-          >
-            <XIcon className="size-4 shrink-0" />
-            Cerrar
-          </Button>
-        ),
-      }}
     >
       <p className="text-sm leading-relaxed text-muted-foreground">
         <HelpRichText

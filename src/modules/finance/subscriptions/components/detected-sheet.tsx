@@ -87,21 +87,12 @@ export function DetectedSheet({
   return (
     <>
       <BottomSheet
+        closeLabel="Cerrar"
         open={open}
         onOpenChange={onOpenChange}
         title="Detectados del correo"
         description="Cobros repetidos que pueden ser suscripciones"
         actions={{
-          close: (
-            <Button
-              variant="outline"
-              className="flex-1"
-              onClick={() => onOpenChange(false)}
-            >
-              <XIcon className="size-4 shrink-0" />
-              Cerrar
-            </Button>
-          ),
           submit: (
             <Button
               variant="outline"

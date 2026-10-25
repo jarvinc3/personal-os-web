@@ -50,7 +50,6 @@ import {
   MessageCircleIcon,
   ShieldCheckIcon,
   UserIcon,
-  XIcon,
 } from "lucide-react"
 import { useMemo, useState } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
@@ -165,17 +164,7 @@ export function ReceivableShareSheet({
               <CheckIcon className="size-4 shrink-0" />
               Listo
             </Button>
-          ) : (
-            <Button
-              type="button"
-              variant="outline"
-              className="flex-1"
-              onClick={() => onOpenChange(false)}
-            >
-              <XIcon className="size-4 shrink-0" />
-              Cancelar
-            </Button>
-          ),
+          ) : undefined,
           submit: share ? undefined : (
             <Button
               type="button"

@@ -42,7 +42,6 @@ import {
   SaveIcon,
   SparklesIcon,
   TargetIcon,
-  XIcon,
 } from "lucide-react"
 import { useEffect, useMemo } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
@@ -242,17 +241,6 @@ export function SavingsGoalContributionSheet({
               : "Se suma al avance de la meta."
         }
         actions={{
-          close: (
-            <Button
-              type="button"
-              variant="outline"
-              className="flex-1"
-              onClick={() => requestOpenChange(false)}
-            >
-              <XIcon className="size-4 shrink-0" />
-              Cancelar
-            </Button>
-          ),
           submit: (
             <Button
               type="button"

@@ -369,18 +369,6 @@ function MerchantDetailBody({ merchantId }: { merchantId: string }) {
         pending={mergeMutation.isPending}
         title="Unir comercio"
         description="Los movimientos del comercio abierto pasan al que elijas."
-        actions={{
-          close: (
-            <Button
-              variant="outline"
-              className="flex-1"
-              onClick={() => mergeSheet.closeSheet()}
-            >
-              <XIcon className="size-4 shrink-0" />
-              Cancelar
-            </Button>
-          ),
-        }}
       >
         {duplicates.length > 0 ? (
           <div className="flex flex-col gap-2">

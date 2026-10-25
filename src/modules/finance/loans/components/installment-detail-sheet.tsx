@@ -14,7 +14,7 @@ import { Button } from "@/src/shared/components/ui/button"
 import { SummaryItem } from "@/src/shared/components/data-display/summary"
 import { LinkPendingOverlay } from "@/src/shared/components/shell/navigation-pending"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
-import { HandCoinsIcon, ReceiptIcon, XIcon } from "lucide-react"
+import { HandCoinsIcon, ReceiptIcon } from "lucide-react"
 import Link from "next/link"
 
 type InstallmentDetailSheetProps = {
@@ -37,6 +37,7 @@ export function InstallmentDetailSheet({
 }: InstallmentDetailSheetProps) {
   return (
     <BottomSheet
+      closeLabel="Cerrar"
       open={open}
       onOpenChange={onOpenChange}
       title={
@@ -47,19 +48,6 @@ export function InstallmentDetailSheet({
           ? `Vence ${formatCalendarDate(installment.dueDate, display.locale)} · ${FINANCE_LOAN_INSTALLMENT_STATUS_LABEL[installment.status]}`
           : undefined
       }
-      actions={{
-        close: (
-          <Button
-            type="button"
-            variant="outline"
-            className="flex-1"
-            onClick={() => onOpenChange(false)}
-          >
-            <XIcon className="size-4 shrink-0" />
-            Cerrar
-          </Button>
-        ),
-      }}
     >
       {installment ? (
         <div className="flex flex-col gap-4">

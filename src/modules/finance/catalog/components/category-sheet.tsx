@@ -46,7 +46,6 @@ import {
   PaletteIcon,
   SaveIcon,
   TrashIcon,
-  XIcon,
 } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
@@ -242,16 +241,6 @@ export function CategorySheet({
             : undefined
         }
         actions={{
-          close: (
-            <Button
-              variant="outline"
-              className="flex-1"
-              onClick={() => requestOpenChange(false)}
-            >
-              <XIcon className="size-4 shrink-0" />
-              Cancelar
-            </Button>
-          ),
           submit: isSystem ? undefined : (
             <Button disabled={isPending} className="flex-1" onClick={onSubmit}>
               {isPending ? (

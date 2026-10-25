@@ -20,7 +20,7 @@ import { TimePairWheels } from "@/src/shared/components/forms/wheel-picker"
 import { PRESSABLE_CLASS, cn } from "@/src/shared/lib/utils"
 import { type FormEvent, useState } from "react"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
-import { ClockIcon, SaveIcon, Trash2Icon, XIcon } from "lucide-react"
+import { ClockIcon, SaveIcon, Trash2Icon } from "lucide-react"
 
 type KeepAwakeReminderSheetProps = {
   open: boolean
@@ -82,6 +82,7 @@ export function KeepAwakeReminderSheet({
 
   return (
     <BottomSheet
+      closeLabel="Cerrar"
       open={open}
       onOpenChange={onOpenChange}
       title="Recordatorio"
@@ -97,17 +98,6 @@ export function KeepAwakeReminderSheet({
             Quitar
           </Button>
         ) : undefined,
-        close: (
-          <Button
-            type="button"
-            variant="outline"
-            className={cn(PRESSABLE_CLASS, "flex-1")}
-            onClick={() => onOpenChange(false)}
-          >
-            <XIcon className="size-4 shrink-0" />
-            Cerrar
-          </Button>
-        ),
         submit: (
           <Button
             type="submit"

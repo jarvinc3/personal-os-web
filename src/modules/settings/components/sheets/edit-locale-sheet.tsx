@@ -17,7 +17,7 @@ import {
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { appToast } from "@/src/shared/lib/app-toast"
-import { GlobeIcon, XIcon } from "lucide-react"
+import { GlobeIcon } from "lucide-react"
 import { useState } from "react"
 
 const LOCALE_ACCENT = SETTINGS_REGISTRY.account.accent
@@ -56,16 +56,6 @@ export function EditLocaleSheet({ open, onOpenChange }: SettingsSheetProps) {
       title="Idioma"
       description="Cambia el idioma y los formatos regionales de la app."
       actions={{
-        close: (
-          <Button
-            variant="outline"
-            className="flex-1"
-            onClick={() => onOpenChange(false)}
-          >
-            <XIcon className="size-4 shrink-0" />
-            Cancelar
-          </Button>
-        ),
         submit: (
           <Button
             className="flex-1"

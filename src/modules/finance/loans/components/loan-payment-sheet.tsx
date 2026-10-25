@@ -42,7 +42,6 @@ import {
   HandCoinsIcon,
   LandmarkIcon,
   PencilIcon,
-  XIcon,
 } from "lucide-react"
 import { useState } from "react"
 import type { FinanceLoanInstallment } from "@/src/modules/finance/shared/types/entities"
@@ -156,17 +155,6 @@ export function LoanPaymentSheet({
         title="Pagar cuota"
         description={`Paga la cuota pendiente más antigua de ${lenderName}.`}
         actions={{
-          close: (
-            <Button
-              type="button"
-              variant="outline"
-              className="flex-1"
-              onClick={() => onOpenChange(false)}
-            >
-              <XIcon className="size-4 shrink-0" />
-              Cancelar
-            </Button>
-          ),
           submit: (
             <Button
               type="button"

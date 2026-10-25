@@ -37,12 +37,7 @@ import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { API_ENDPOINTS } from "@/src/shared/constants/api-endpoints"
 import { usePicker } from "@/src/shared/hooks/use-picker"
 import { appToast } from "@/src/shared/lib/app-toast"
-import {
-  CalendarClockIcon,
-  CoinsIcon,
-  HandCoinsIcon,
-  XIcon,
-} from "lucide-react"
+import { CalendarClockIcon, CoinsIcon, HandCoinsIcon } from "lucide-react"
 import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 
@@ -143,17 +138,6 @@ export function LoanPrepaymentSheet({
         title="Abonar a capital"
         description={`Reduce la deuda de ${lenderName}.`}
         actions={{
-          close: (
-            <Button
-              type="button"
-              variant="outline"
-              className="flex-1"
-              onClick={() => onOpenChange(false)}
-            >
-              <XIcon className="size-4 shrink-0" />
-              Cancelar
-            </Button>
-          ),
           submit: (
             <Button
               type="button"

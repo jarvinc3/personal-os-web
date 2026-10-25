@@ -17,9 +17,8 @@ import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Contact, Contact2, UserIcon, XIcon } from "lucide-react"
+import { Contact, Contact2, UserIcon } from "lucide-react"
 import Image from "next/image"
-import { useRouter } from "next/navigation"
 import { useMemo, useState } from "react"
 import { Controller, useForm } from "react-hook-form"
 import {
@@ -37,7 +36,6 @@ export function EditAccountSheet({
   email,
 }: EditAccountSheetProps) {
   const { profileQuery, updateProfileMutation } = useProfile()
-  const router = useRouter()
 
   const savedFullName = profileQuery.data?.fullName ?? ""
   const savedAvatarUrl = profileQuery.data?.avatarUrl ?? ""
@@ -108,16 +106,6 @@ export function EditAccountSheet({
       title="Cuenta"
       description="Nombre y avatar de tu perfil."
       actions={{
-        close: (
-          <Button
-            variant="outline"
-            className="flex-1"
-            onClick={() => router.back()}
-          >
-            <XIcon className="size-4 shrink-0" />
-            Cancelar
-          </Button>
-        ),
         submit: (
           <Button
             disabled={!canSave || updateProfileMutation.isPending}

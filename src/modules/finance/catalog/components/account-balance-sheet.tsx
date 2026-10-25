@@ -18,7 +18,7 @@ import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { SaveIcon, ScaleIcon, XIcon } from "lucide-react"
+import { SaveIcon, ScaleIcon } from "lucide-react"
 import { useEffect, useMemo } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import {
@@ -101,16 +101,6 @@ export function AccountBalanceSheet({
         title={account ? `Ajustar saldo · ${account.name}` : "Ajustar saldo"}
         description="El cambio queda como un reajuste. No cuenta como ingreso ni gasto."
         actions={{
-          close: (
-            <Button
-              variant="outline"
-              className="flex-1"
-              onClick={() => requestOpenChange(false)}
-            >
-              <XIcon className="size-4 shrink-0" />
-              Cancelar
-            </Button>
-          ),
           submit: (
             <Button
               className="flex-1"

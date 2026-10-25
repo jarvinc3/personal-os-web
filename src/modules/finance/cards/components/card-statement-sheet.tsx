@@ -157,6 +157,7 @@ export function CardStatementSheet({
 
   return (
     <BottomSheet
+      closeLabel="Cerrar"
       open={open}
       onOpenChange={onOpenChange}
       title="Estado de cuenta"
@@ -171,19 +172,6 @@ export function CardStatementSheet({
             )
           : undefined
       }
-      actions={{
-        close: (
-          <Button
-            type="button"
-            variant="outline"
-            className="flex-1"
-            onClick={() => onOpenChange(false)}
-          >
-            <XIcon className="size-4 shrink-0" />
-            Cerrar
-          </Button>
-        ),
-      }}
       headerAction={
         detail ? (
           <div className="flex items-center gap-2">

@@ -46,14 +46,7 @@ import { appToast } from "@/src/shared/lib/app-toast"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
 import { usePicker } from "@/src/shared/hooks/use-picker"
 import { zodResolver } from "@hookform/resolvers/zod"
-import {
-  HashIcon,
-  LandmarkIcon,
-  Palette,
-  SaveIcon,
-  Star,
-  XIcon,
-} from "lucide-react"
+import { HashIcon, LandmarkIcon, Palette, SaveIcon, Star } from "lucide-react"
 import { useEffect, useMemo } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import {
@@ -311,17 +304,6 @@ export function AccountSheet({
               : "Crea una institución bancaria antes de agregar una cuenta."
         }
         actions={{
-          close: (
-            <Button
-              key="cancel"
-              variant="outline"
-              className="flex-1"
-              onClick={() => requestOpenChange(false)}
-            >
-              <XIcon className="size-4 shrink-0" />
-              Cancelar
-            </Button>
-          ),
           submit: (
             <Button
               key="submit"

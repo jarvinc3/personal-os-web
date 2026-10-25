@@ -8,7 +8,7 @@ import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import { Button } from "@/src/shared/components/ui/button"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { appToast } from "@/src/shared/lib/app-toast"
-import { ArrowRightIcon, FileUpIcon, XIcon } from "lucide-react"
+import { ArrowRightIcon, FileUpIcon } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useRef, useState } from "react"
 import { useEventSheet } from "@/src/shared/hooks/use-event-sheet"
@@ -100,16 +100,6 @@ export function StatementImportButton({
         title="PDF con clave"
         description="Escríbela para leer el estado de cuenta. No la guardamos."
         actions={{
-          close: (
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => passwordSheet.closeSheet()}
-            >
-              <XIcon className="size-4 shrink-0" />
-              Cancelar
-            </Button>
-          ),
           submit: (
             <Button
               type="button"

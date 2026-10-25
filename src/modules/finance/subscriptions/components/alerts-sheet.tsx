@@ -41,7 +41,6 @@ import {
   ClockIcon,
   TrendingUpIcon,
   TriangleAlertIcon,
-  XIcon,
   type LucideIcon,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
@@ -108,21 +107,12 @@ export function AlertsSheet({
 
   return (
     <BottomSheet
+      closeLabel="Cerrar"
       open={open}
       onOpenChange={onOpenChange}
       title="Alertas"
       description="Subidas de precio, cobros que no cuadran y avisos de renovación"
       actions={{
-        close: (
-          <Button
-            variant="outline"
-            className="flex-1"
-            onClick={() => onOpenChange(false)}
-          >
-            <XIcon className="size-4 shrink-0" />
-            Cerrar
-          </Button>
-        ),
         submit: (
           <Button
             className="flex-1"

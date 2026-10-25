@@ -46,7 +46,7 @@ export function OverlaysSection() {
         name="BottomSheet"
         importPath="@/src/shared/components/sheets/bottom-sheet"
         states="hoja de edición con acciones"
-        note="Cada ejemplo se abre con useSheetParam: la URL cambia y Atrás la cierra."
+        note="Cada ejemplo se abre con useSheetParam: la URL cambia y Atrás la cierra. El «Cancelar» lo pinta BottomSheet; el sheet solo declara guardar."
       >
         <Button onClick={() => setOpen(true, EDIT_SHEET_ID)}>
           <StoreIcon />
@@ -90,12 +90,6 @@ export function OverlaysSection() {
         title="Editar comercio"
         description="Los cambios se guardan al confirmar."
         actions={{
-          close: (
-            <Button variant="outline" onClick={() => setOpen(false)}>
-              <XIcon />
-              Cancelar
-            </Button>
-          ),
           submit: (
             <Button onClick={() => simulatedTap("Guardar comercio")}>
               <SaveIcon />
