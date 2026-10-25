@@ -41,6 +41,7 @@ import {
   XIcon,
 } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
+import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { useQueries } from "@tanstack/react-query"
 
 const SEARCH_DEBOUNCE_MS = 300
@@ -82,7 +83,9 @@ export function FinanceInstrumentMovements({
   const [flow, setFlow] = useState<FlowFilter>("ALL")
   const [dateFrom, setDateFrom] = useState("")
   const [dateTo, setDateTo] = useState("")
-  const [filtersOpen, setFiltersOpen] = useState(false)
+  const { open: filtersOpen, setOpen: setFiltersOpen } = useSheetParam(
+    "instrument-movements-filters"
+  )
   const timeZone = useUserTimeZone()
 
   useEffect(() => {

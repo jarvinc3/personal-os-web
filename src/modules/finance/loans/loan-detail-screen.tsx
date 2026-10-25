@@ -37,6 +37,7 @@ import { showUndoToast } from "@/src/modules/finance/shared/components/undo-toas
 import { formatRatePercentLabel } from "@/src/modules/finance/shared/lib/interest-rate"
 import { formatCalendarDate } from "@/src/modules/finance/shared/lib/ledger-form"
 import { nextUnpaidInstallment } from "@/src/modules/finance/shared/lib/loan-payment"
+import { useSheetListEntity } from "@/src/modules/finance/shared/hooks/use-sheet-entity"
 import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 import { loanProgressSummary } from "@/src/modules/finance/shared/lib/planning-lists"
 import {
@@ -153,10 +154,18 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
 
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [archiveConfirmOpen, setArchiveConfirmOpen] = useState(false)
-  const [amortizationOpen, setAmortizationOpen] = useState(false)
-  const [selectedInstallment, setSelectedInstallment] =
-    useState<FinanceLoanInstallment | null>(null)
+  const { open: amortizationOpen, setOpen: setAmortizationOpen } =
+    useSheetParam("loan-amortization-sheet")
+  const installmentSheet = useSheetParam(FINANCE_SHEET_KEYS.installmentDetail)
   const scheduleQuery = useLoanSchedule(amortizationOpen, loanId)
+  const selectedInstallment = useSheetListEntity(
+    installmentSheet.open,
+    installmentSheet.sheetId,
+    installments,
+    installmentsQuery.isPending,
+    installmentSheet.setOpen,
+    true
+  )
 
   async function onArchiveLoan() {
     if (!loan) {
@@ -400,7 +409,7 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
                   description={`Vence ${formatCalendarDate(installment.dueDate, display.locale)} · Capital ${formatFinanceMoney(installment.principal, money)} · Interés ${formatFinanceMoney(installment.interest, money)}`}
                   wrapDescription
                   value={formatFinanceMoney(installment.amount, money)}
-                  onPress={() => setSelectedInstallment(installment)}
+                  onPress={() => installmentSheet.setOpen(true, installment.id)}
                   trailing={
                     <Badge
                       variant={INSTALLMENT_STATUS_VARIANT[installment.status]}
@@ -473,12 +482,8 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
       />
 
       <InstallmentDetailSheet
-        open={selectedInstallment !== null}
-        onOpenChange={(next) => {
-          if (!next) {
-            setSelectedInstallment(null)
-          }
-        }}
+        open={installmentSheet.open}
+        onOpenChange={installmentSheet.setOpen}
         installment={selectedInstallment}
         display={money}
         canPay={
@@ -487,7 +492,7 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
           selectedInstallment.id === nextInstallment.id
         }
         onPay={() => {
-          setSelectedInstallment(null)
+          installmentSheet.setOpen(false)
           setOpenPaymentSheet(true)
         }}
       />

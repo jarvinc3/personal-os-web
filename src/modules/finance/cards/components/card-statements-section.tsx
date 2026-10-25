@@ -31,6 +31,7 @@ import { cn } from "@/src/shared/lib/utils"
 import type { VariantProps } from "class-variance-authority"
 import { CalendarIcon, CalendarPlusIcon, PlusIcon } from "lucide-react"
 import { useState } from "react"
+import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 
 type BadgeVariant = VariantProps<typeof badgeVariants>["variant"]
 
@@ -112,9 +113,7 @@ export function CardStatementsSection({
   isFetchingNextPage,
   onLoadMore,
 }: CardStatementsSectionProps) {
-  const [selectedStatementId, setSelectedStatementId] = useState<string | null>(
-    null
-  )
+  const statementSheet = useSheetParam("card-statement-sheet")
   const [statementEditing, setStatementEditing] = useState(false)
   return (
     <>
@@ -173,7 +172,7 @@ export function CardStatementsSection({
                 className={cn(STATEMENT_CARD_CLASS, "text-left")}
                 onClick={() => {
                   setStatementEditing(false)
-                  setSelectedStatementId(statement.id)
+                  statementSheet.setOpen(true, statement.id)
                 }}
               >
                 <div className="flex items-start justify-between gap-3">
@@ -234,7 +233,7 @@ export function CardStatementsSection({
               className="w-full"
               onClick={() => {
                 setStatementEditing(true)
-                setSelectedStatementId(statements[0]?.id ?? null)
+                statementSheet.setOpen(true, statements[0]?.id ?? null)
               }}
             >
               <CalendarPlusIcon className="size-4 shrink-0" />
@@ -250,14 +249,10 @@ export function CardStatementsSection({
       </AsyncRegion>
       <StatementImportButton cardId={cardId} className="w-full" />
       <CardStatementSheet
-        open={selectedStatementId !== null}
-        onOpenChange={(next) => {
-          if (!next) {
-            setSelectedStatementId(null)
-          }
-        }}
+        open={statementSheet.open}
+        onOpenChange={statementSheet.setOpen}
         cardId={cardId}
-        statementId={selectedStatementId}
+        statementId={statementSheet.sheetId}
         display={display}
         defaultEditing={statementEditing}
       />

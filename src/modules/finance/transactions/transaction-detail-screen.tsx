@@ -119,7 +119,9 @@ function TransactionDetailScreenBody({
   const merchant = merchantQuery.data ?? null
 
   const [confirmOpen, setConfirmOpen] = useState(false)
-  const [linkOpen, setLinkOpen] = useState(false)
+  const { open: linkOpen, setOpen: setLinkOpen } = useSheetParam(
+    "link-transaction-sheet"
+  )
   const [mergeOpen, setMergeOpen] = useState(false)
   const [unlinkOpen, setUnlinkOpen] = useState(false)
   const [unconfirmOpen, setUnconfirmOpen] = useState(false)
