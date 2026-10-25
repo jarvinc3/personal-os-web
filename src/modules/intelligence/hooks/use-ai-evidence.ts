@@ -18,7 +18,10 @@ import {
 
 const EVIDENCE_QUERY_KEY = ["intelligence", "evidence"] as const
 
-export function useAiEvidence(enabled: boolean) {
+export function useAiEvidence(
+  enabled: boolean,
+  view: "review" | "runs" = "review"
+) {
   const session = useAppStore((state) => state.session)
   const queryClient = useQueryClient()
   const active = Boolean(session && enabled)
@@ -26,7 +29,7 @@ export function useAiEvidence(enabled: boolean) {
     queryKey: [...EVIDENCE_QUERY_KEY, "dataset"],
     queryFn: ({ signal }) =>
       apiGet<AiDatasetSummary>(API_ENDPOINTS.INTELLIGENCE.DATASET, signal),
-    enabled: active,
+    enabled: active && view === "review",
   })
   const reviewQueueQuery = useInfiniteQuery({
     queryKey: [...EVIDENCE_QUERY_KEY, "review-queue"],
@@ -43,13 +46,13 @@ export function useAiEvidence(enabled: boolean) {
     },
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (page) => page.nextCursor ?? undefined,
-    enabled: active,
+    enabled: active && view === "review",
   })
   const runsQuery = useQuery({
     queryKey: [...EVIDENCE_QUERY_KEY, "runs"],
     queryFn: ({ signal }) =>
       apiGet<AiAnalysisRunSummary[]>(API_ENDPOINTS.INTELLIGENCE.RUNS, signal),
-    enabled: active,
+    enabled: active && view === "runs",
   })
   const verifyMutation = useMutation({
     mutationFn: ({

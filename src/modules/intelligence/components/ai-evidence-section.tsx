@@ -38,10 +38,8 @@ import {
   AlertCircle,
   CalendarDays,
   Check,
-  CircleHelp,
   Clock3,
   Coins,
-  Database,
   FileCheck2,
   Inbox,
   Layers3,
@@ -55,15 +53,17 @@ import {
 
 type AiEvidenceSectionProps = {
   enabled: boolean
+  view: "review" | "runs"
   onOpenMessage: (messageId: string) => void
 }
 
 export function AiEvidenceSection({
   enabled,
+  view,
   onOpenMessage,
 }: AiEvidenceSectionProps) {
   const { datasetQuery, reviewQueueQuery, runsQuery, verifyMutation } =
-    useAiEvidence(enabled)
+    useAiEvidence(enabled, view)
   const messages = useMemo(
     () => reviewQueueQuery.data?.pages.flatMap((page) => page.items) ?? [],
     [reviewQueueQuery.data?.pages]
@@ -74,61 +74,107 @@ export function AiEvidenceSection({
     return null
   }
 
-  return (
-    <>
+  if (view === "runs") {
+    return (
       <SummarySection
-        title="Dataset de correo EMAIL_V1"
-        subtitle="Particiones deterministas por cuenta; HOLDOUT se conserva como referencia."
-        icon={Database}
+        title="Ejecuciones"
+        subtitle="Versiones y cortes de evidencia usados en cada análisis."
+        icon={Clock3}
       >
-        {datasetQuery.isPending ? (
-          <div
-            className="flex flex-col gap-2 p-2"
-            aria-label="Cargando dataset"
-          >
-            <Skeleton className="h-12 w-full" />
-            <Skeleton className="h-12 w-full" />
+        {runsQuery.isPending ? (
+          <div className="flex flex-col gap-2 p-2" aria-label="Cargando runs">
+            <Skeleton className="h-14 w-full" />
           </div>
-        ) : datasetQuery.isError || !datasetQuery.data ? (
+        ) : runsQuery.isError ? (
           <Empty>
             <EmptyHeader>
               <EmptyMedia variant="icon">
                 <AlertCircle aria-hidden="true" />
               </EmptyMedia>
-              <EmptyTitle>No se pudo cargar el dataset</EmptyTitle>
+              <EmptyTitle>No se pudieron cargar las ejecuciones</EmptyTitle>
               <EmptyDescription>
                 Inténtalo de nuevo en unos momentos.
               </EmptyDescription>
             </EmptyHeader>
-            <Button type="button" onClick={() => void datasetQuery.refetch()}>
-              <RotateCcw data-icon="inline-start" /> Reintentar
-            </Button>
           </Empty>
+        ) : runsQuery.data?.length ? (
+          runsQuery.data.map((run, index) => (
+            <SummaryItem
+              key={run.id}
+              title={`${run.mode} · ${run.status}`}
+              description={`Pipeline ${run.pipelineVersion} · observaciones ${run.observationSequence} · verificaciones ${run.verificationSequence}`}
+              icon={Clock3}
+              value={
+                run.completedAt ? formatDateTime(run.completedAt) : "En curso"
+              }
+              isLast={index === runsQuery.data!.length - 1}
+            />
+          ))
         ) : (
-          <>
-            <SummaryItem
-              title="Entrenamiento"
-              icon={Layers3}
-              value={String(datasetQuery.data.partitions.TRAIN)}
-            />
-            <SummaryItem
-              title="Validación"
-              icon={CircleHelp}
-              value={String(datasetQuery.data.partitions.VALIDATION)}
-            />
-            <SummaryItem
-              title="Holdout · verdad de referencia"
-              icon={FileCheck2}
-              value={String(datasetQuery.data.partitions.HOLDOUT)}
-              isLast
-            />
-          </>
+          <Empty>
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <Clock3 aria-hidden="true" />
+              </EmptyMedia>
+              <EmptyTitle>Aún no hay ejecuciones</EmptyTitle>
+              <EmptyDescription>
+                Aparecerán aquí cuando se ejecute un análisis.
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
         )}
       </SummarySection>
+    )
+  }
+
+  return (
+    <div className="flex flex-col gap-3">
+      {datasetQuery.isPending ? (
+        <div
+          className="flex flex-wrap gap-2"
+          aria-label="Cargando particiones"
+        >
+          <Skeleton className="h-6 w-28 rounded-full" />
+          <Skeleton className="h-6 w-28 rounded-full" />
+          <Skeleton className="h-6 w-28 rounded-full" />
+        </div>
+      ) : datasetQuery.isError || !datasetQuery.data ? (
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-sm text-muted-foreground">
+            No se pudieron cargar las particiones del correo.
+          </p>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={() => void datasetQuery.refetch()}
+          >
+            <RotateCcw data-icon="inline-start" /> Reintentar
+          </Button>
+        </div>
+      ) : (
+        <div
+          className="flex flex-wrap gap-2"
+          aria-label="Particiones del dataset de correo"
+        >
+          <Badge variant="outline">
+            <Layers3 data-icon="inline-start" /> Entrenamiento ·{" "}
+            {datasetQuery.data.partitions.TRAIN}
+          </Badge>
+          <Badge variant="outline">
+            <Inbox data-icon="inline-start" /> Validación ·{" "}
+            {datasetQuery.data.partitions.VALIDATION}
+          </Badge>
+          <Badge variant="info">
+            <FileCheck2 data-icon="inline-start" /> Holdout ·{" "}
+            {datasetQuery.data.partitions.HOLDOUT}
+          </Badge>
+        </div>
+      )}
 
       <SummarySection
         title="Cola de revisión"
-        subtitle="Tus mensajes y tus verificaciones permanecen privados."
+        subtitle="Confirma, corrige o descarta mensajes de tu correo."
         icon={Inbox}
       >
         {reviewQueueQuery.isPending ? (
@@ -200,56 +246,7 @@ export function AiEvidenceSection({
           </>
         )}
       </SummarySection>
-
-      <SummarySection
-        title="Runs de análisis"
-        subtitle="Cada ejecución conserva su configuración y watermark."
-        icon={Clock3}
-      >
-        {runsQuery.isPending ? (
-          <div className="flex flex-col gap-2 p-2" aria-label="Cargando runs">
-            <Skeleton className="h-14 w-full" />
-          </div>
-        ) : runsQuery.isError ? (
-          <Empty>
-            <EmptyHeader>
-              <EmptyMedia variant="icon">
-                <AlertCircle aria-hidden="true" />
-              </EmptyMedia>
-              <EmptyTitle>No se pudieron cargar los runs</EmptyTitle>
-              <EmptyDescription>
-                Inténtalo de nuevo en unos momentos.
-              </EmptyDescription>
-            </EmptyHeader>
-          </Empty>
-        ) : runsQuery.data?.length ? (
-          runsQuery.data.map((run, index) => (
-            <SummaryItem
-              key={run.id}
-              title={`${run.mode} · ${run.status}`}
-              description={`Pipeline ${run.pipelineVersion} · observaciones ${run.observationSequence} · verificaciones ${run.verificationSequence}`}
-              icon={Clock3}
-              value={
-                run.completedAt ? formatDateTime(run.completedAt) : "En curso"
-              }
-              isLast={index === runsQuery.data!.length - 1}
-            />
-          ))
-        ) : (
-          <Empty>
-            <EmptyHeader>
-              <EmptyMedia variant="icon">
-                <Clock3 aria-hidden="true" />
-              </EmptyMedia>
-              <EmptyTitle>Aún no hay runs</EmptyTitle>
-              <EmptyDescription>
-                Se mostrarán aquí cuando se ejecute un análisis.
-              </EmptyDescription>
-            </EmptyHeader>
-          </Empty>
-        )}
-      </SummarySection>
-    </>
+    </div>
   )
 }
 

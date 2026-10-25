@@ -42,7 +42,7 @@ type InstitutionWalletCardProps = {
   /** Ring and check mark while the card is picked in a selector. */
   selected?: boolean
   disabled?: boolean
-  /** Variante de la card; la galería /dev/cards la pinta (#272). */
+  /** Variante de la card; la galería /settings/appearance/cards la pinta (#272). */
   variant?: "full" | "compact"
   /** What the compact card shows under the name. Ignored by `full`. */
   detail?: InstitutionWalletDetail
@@ -221,7 +221,7 @@ export function InstitutionWalletCard({
     onPress?.()
   }
 
-  // Variante compacta de la card; la galería /dev/cards la pinta (#272).
+  // Variante compacta de la card; la galería /settings/appearance/cards la pinta (#272).
   if (variant === "compact") {
     const compactClassName = cn(
       "relative flex w-full cursor-pointer items-center gap-3 overflow-hidden rounded-2xl p-3 text-left text-white outline-none focus-visible:ring-3 focus-visible:ring-ring/50",

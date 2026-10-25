@@ -20,7 +20,7 @@ import {
 import { usePendingNavigation } from "@/src/shared/components/shell/navigation-pending"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
-import { ComponentIcon } from "lucide-react"
+import { ComponentIcon, GalleryVerticalEndIcon } from "lucide-react"
 
 export function AppearanceSettingsScreen() {
   return (
@@ -84,12 +84,20 @@ function AppearanceSettingsScreenBody() {
 
       <SettingsSection title="Referencia">
         <SettingsRow
+          label="Galería de cards"
+          description="Cada entidad con sus variantes."
+          icon={GalleryVerticalEndIcon}
+          accentColor={SETTINGS_REGISTRY.appearance.accent}
+          disabled={isPending}
+          onPress={() => navigate(APP_ROUTES.app.settingsAppearanceCards)}
+        />
+        <SettingsRow
           label="Galería de componentes"
           description="Los componentes compartidos, con datos de ejemplo."
           icon={ComponentIcon}
           accentColor={SETTINGS_REGISTRY.appearance.accent}
           disabled={isPending}
-          onPress={() => navigate(APP_ROUTES.app.devComponentGallery)}
+          onPress={() => navigate(APP_ROUTES.app.settingsAppearanceComponents)}
           isLast
         />
       </SettingsSection>

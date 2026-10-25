@@ -50,10 +50,10 @@ describe("isProtectedAppPath", () => {
     assert.equal(isProtectedAppPath("/health"), true)
     assert.equal(isProtectedAppPath("/intelligence"), true)
     assert.equal(isProtectedAppPath("/intelligence/admin/roles"), true)
-    assert.equal(isProtectedAppPath("/dev"), true)
-    assert.equal(isProtectedAppPath("/dev/cards"), true)
-    assert.equal(isProtectedAppPath("/dev/cards/cuenta"), true)
-    assert.equal(isProtectedAppPath("/dev/components"), true)
+    assert.equal(isProtectedAppPath("/settings/appearance/cards"), true)
+    assert.equal(isProtectedAppPath("/settings/appearance/cards/cuenta"), true)
+    assert.equal(isProtectedAppPath("/settings/appearance/components"), true)
+    assert.equal(isProtectedAppPath("/dev"), false)
   })
 
   it("ignores the auth routes", () => {

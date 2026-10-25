@@ -12,7 +12,7 @@ import type { ReactNode } from "react"
 export type PlanningProgressTone =
   "primary" | "success" | "warning" | "danger" | "info"
 
-/** Variante de la card; la galería /dev/cards la pinta (#272). */
+/** Variante de la card; la galería /settings/appearance/cards la pinta (#272). */
 export type PlanningProgressVariant = "full" | "compact" | "inline"
 
 type BadgeVariant = VariantProps<typeof badgeVariants>["variant"]

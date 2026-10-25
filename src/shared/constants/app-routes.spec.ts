@@ -85,13 +85,18 @@ describe("finance route constants", () => {
 })
 
 describe("gallery route constants", () => {
-  it("keeps the gallery routes", () => {
-    assert.equal(APP_ROUTES.app.dev, "/dev")
-    assert.equal(APP_ROUTES.app.devCardGallery, "/dev/cards")
-    assert.equal(APP_ROUTES.app.devComponentGallery, "/dev/components")
+  it("keeps the gallery routes under appearance", () => {
     assert.equal(
-      APP_ROUTES.app.devCardGalleryEntity("cuenta"),
-      "/dev/cards/cuenta"
+      APP_ROUTES.app.settingsAppearanceCards,
+      "/settings/appearance/cards"
+    )
+    assert.equal(
+      APP_ROUTES.app.settingsAppearanceComponents,
+      "/settings/appearance/components"
+    )
+    assert.equal(
+      APP_ROUTES.app.settingsAppearanceCardEntity("cuenta"),
+      "/settings/appearance/cards/cuenta"
     )
   })
 })

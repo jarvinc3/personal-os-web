@@ -52,7 +52,7 @@ type TransactionMovementRowProps = {
   href?: string
   /** Account or card the movement is read from; signs transfers from its side. */
   instrument?: FinanceInstrumentRef
-  /** Variante de la card; la galería /dev/cards la pinta (#272). */
+  /** Variante de la card; la galería /settings/appearance/cards la pinta (#272). */
   variant?: "default" | "compact" | "inline"
 }
 

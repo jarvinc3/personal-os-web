@@ -16,6 +16,10 @@ export const APP_ROUTES = {
     settingsAccount: "/settings/account",
     settingsRegional: "/settings/regional",
     settingsAppearance: "/settings/appearance",
+    settingsAppearanceCards: "/settings/appearance/cards",
+    settingsAppearanceCardEntity: (entitySlug: string) =>
+      `/settings/appearance/cards/${entitySlug}`,
+    settingsAppearanceComponents: "/settings/appearance/components",
     settingsNotifications: "/settings/notifications",
     settingsPrivacy: "/settings/privacy",
     settingsModules: "/settings/modules",
@@ -84,11 +88,6 @@ export const APP_ROUTES = {
     financeSubscriptionsCalendar: "/finance/subscriptions/calendar",
     financeSubscription: (subscriptionId: string) =>
       `/finance/subscriptions/${subscriptionId}`,
-    // Galerías de referencia (#272, #307).
-    dev: "/dev",
-    devCardGallery: "/dev/cards",
-    devCardGalleryEntity: (entitySlug: string) => `/dev/cards/${entitySlug}`,
-    devComponentGallery: "/dev/components",
     settingsFinanceCurrencies: "/settings/finance/currencies",
   },
 } as const

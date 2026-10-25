@@ -15,7 +15,7 @@ Inventario para agentes. Antes de inventar un control, buscar aquí y en `src/sh
 
 ## Referencia viva
 
-[`/dev/components`](../../src/modules/component-gallery/README.md) monta los componentes compartidos por propósito con datos falsos: entradas y campos, selectores, botones y acciones, diálogos y sheets, tabs y chips, listas y filas, encabezados y secciones, estados, avisos y toasts, montos y fechas, gráficos y anillos. Se abre desde Ajustes → Apariencia; la galería de cards sigue en `/dev/cards`. Antes de crear un control, se busca ahí; si falta, se agrega con su issue. Mantenimiento: [`src/modules/component-gallery/README.md`](../../src/modules/component-gallery/README.md).
+Las galerías de referencia viven en Ajustes → Apariencia, con un atajo para cada una. [`/settings/appearance/components`](../../src/modules/galleries/README.md) monta los componentes compartidos por propósito con datos falsos: entradas y campos, selectores, botones y acciones, diálogos y sheets, tabs y chips, listas y filas, encabezados y secciones, estados, avisos y toasts, montos y fechas, gráficos y anillos. [`/settings/appearance/cards`](../../src/modules/galleries/README.md) monta las cards de cada entidad con sus variantes. Antes de crear un control, se busca ahí; si falta, se agrega con su issue. Mantenimiento: [`src/modules/galleries/README.md`](../../src/modules/galleries/README.md).
 
 ## Fecha y hora — no usar inputs nativos
 
@@ -102,13 +102,13 @@ Keep Awake reminder: [`keep-awake-reminder-sheet.tsx`](../../src/modules/keep-aw
 
 ## Cards por entidad
 
-Una entidad de Finanzas se pinta con su card y la variante que corresponda; nunca con una fila propia. La variante es una prop del mismo componente, no un componente paralelo. Regla obligatoria: [`entity-cards.mdc`](../../.cursor/rules/entity-cards.mdc). Referencia viva: `/dev/cards` ([README](../../src/modules/card-gallery/README.md)).
+Una entidad de Finanzas se pinta con su card y la variante que corresponda; nunca con una fila propia. La variante es una prop del mismo componente, no un componente paralelo. Regla obligatoria: [`entity-cards.mdc`](../../.cursor/rules/entity-cards.mdc). Referencia viva: `/settings/appearance/cards` ([README](../../src/modules/galleries/README.md)).
 
 - **Completa** (`variant="full"`, por defecto): listas y cabecera del detalle.
 - **Compacta** (`variant="compact"`): la entidad es un dato de otra cosa (un vencimiento, un método de pago, una vinculación, un resumen).
 - **Inline** (`variant="inline"`): mención dentro de una línea de texto.
 - Las cards aceptan `onPress` o `href`, `disabled` y, en selectores, `selected` (anillo de 2 px y marca).
-- Si la entidad no tiene card, se crea en su módulo y se añade a `/dev/cards` antes de usarla. Una proyección de otra entidad (una línea de estado de cuenta, un extra importado, el chat) se adapta a la fila canónica; no se dibuja una fila nueva.
+- Si la entidad no tiene card, se crea en su módulo y se añade a la galería `/settings/appearance/cards` antes de usarla. Una proyección de otra entidad (una línea de estado de cuenta, un extra importado, el chat) se adapta a la fila canónica; no se dibuja una fila nueva.
 
 | Entidad                 | Card                                                                                                                                                          | Variantes                                                   | Dónde se usa                                                                                                                                                        |
 | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

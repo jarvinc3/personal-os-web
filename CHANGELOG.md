@@ -6,13 +6,14 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Agregado
 
-- `/dev/components` es una galería permanente de los componentes compartidos por propósito, con su ruta de importación, sus variantes y estados reales; los sheets de ejemplo se abren por la URL para que Atrás los cierre (#307).
-- La galería de componentes se abre desde Ajustes → Apariencia, con un atajo como el de la galería de cards en Inicio, y el índice `/dev` vuelve a listar solo las cards (#314).
+- Las galerías de referencia son permanentes en Ajustes → Apariencia: `/settings/appearance/cards` con las cards de cada entidad y sus variantes, y `/settings/appearance/components` con los componentes compartidos por propósito, su ruta de importación y sus estados; los sheets de ejemplo se abren por la URL para que Atrás los cierre (#307, #314, #316).
+- Ambas galerías se abren solo desde Apariencia; Inicio deja de mostrar la sección «Desarrollo» y desaparece el índice `/dev` (#314, #316).
 - AI-3: `/intelligence` muestra particiones de `EMAIL_V1`, cola paginada para confirmar, corregir o rechazar mensajes, marca HOLDOUT como verdad de referencia y expone historial de runs y procedencia (#206).
 - AI-2: `/intelligence` conecta Gmail con acceso de solo lectura, muestra estado y correo importado por cuenta y permite sincronizar; Privacidad permite revocar la contribución al conocimiento global y ADMIN gestiona roles (#205).
 
 ### Cambiado
 
+- Intelligence organiza correo, revisión y análisis en pestañas; resume corpus y particiones en badges, muestra el rango histórico desde el 1 de enero de 2026 y lista los correos en orden ascendente por fecha (#206).
 - `src/shared/components` se reorganiza por responsabilidad: `ui/` queda solo con shadcn y los componentes propios pasan a `shell/` (con `shell/header/`), `forms/`, `sheets/`, `fab/`, `feedback/`, `data-display/` y `settings/`; `ReleaseNotesSheet` pasa a `src/modules/settings` (#315).
 - Se reescribe el README con banner, funciones por app, stack, arquitectura, scripts y enlaces a los repos hermanos; se añade licencia MIT y archivos de comunidad (CONTRIBUTING, SECURITY y plantilla de PR).
 

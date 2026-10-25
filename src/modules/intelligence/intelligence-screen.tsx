@@ -12,16 +12,24 @@ import {
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
 import { Skeleton } from "@/src/shared/components/ui/skeleton"
+import { Badge } from "@/src/shared/components/ui/badge"
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/src/shared/components/ui/tabs"
 import {
   SummaryItem,
   SummarySection,
 } from "@/src/shared/components/data-display/summary"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
-import { formatDateTime } from "@/src/shared/lib/date-format"
+import { formatDate, formatDateTime } from "@/src/shared/lib/date-format"
 import {
   AlertCircle,
   BrainCircuit,
+  CalendarDays,
   CheckCircle2,
   Clock3,
   Inbox,
@@ -105,8 +113,12 @@ function IntelligenceScreenBody() {
   return (
     <main className="mx-auto flex w-full max-w-4xl flex-col gap-5 p-4 pb-10 md:px-6">
       <SummarySection
-        title="Fuente de correo"
-        subtitle="Gmail permanece aislado en tu cuenta."
+        title={connected ? "Gmail" : "Fuente de correo"}
+        subtitle={
+          connected
+            ? dashboard.connection.emailAddress
+            : "Conecta una cuenta para importar y revisar tus mensajes."
+        }
         icon={Mail}
         right={
           connected ? (
@@ -129,20 +141,22 @@ function IntelligenceScreenBody() {
         {connected ? (
           <>
             <SummaryItem
-              title={dashboard.connection.emailAddress}
+              title="Cuenta conectada"
               description={
                 !dashboard.connection.initialSyncCompletedAt
                   ? dashboard.connection.lastSyncErrorCode
-                    ? `Sincronización detenida`
+                    ? "Sincronización detenida"
                     : dashboard.connection.lastSyncedAt
-                      ? `Sincronización inicial en curso`
+                      ? "Sincronización inicial en curso"
                       : "La sincronización inicial está pendiente."
-                  : dashboard.connection.lastSyncedAt
-                    ? `Última sincronización: ${formatDateTime(dashboard.connection.lastSyncedAt)}`
-                    : "La sincronización inicial está pendiente."
+                  : "Historial inicial completo"
               }
               icon={Mail}
-              value={`${dashboard.counters.importedMessages} mensajes `}
+              value={
+                dashboard.connection.lastSyncedAt
+                  ? formatDateTime(dashboard.connection.lastSyncedAt)
+                  : "Pendiente"
+              }
               isLast={!dashboard.connection.lastSyncErrorCode}
             />
             <div className="flex flex-col gap-2">
@@ -219,21 +233,49 @@ function IntelligenceScreenBody() {
         )}
       </SummarySection>
 
-      <SummarySection title="Corpus personal" icon={Inbox}>
-        <SummaryItem
-          title="Mensajes importados"
-          description="Contenido canónico persistido para esta cuenta."
-          icon={Inbox}
-          value={String(dashboard.counters.importedMessages)}
-        />
-        <SummaryItem
-          title="Últimos 30 días"
-          description="Mensajes recibidos en el periodo."
-          icon={Clock3}
-          value={String(dashboard.counters.recentMessages)}
-          isLast
-        />
-      </SummarySection>
+      {connected ? (
+        <div
+          className="flex flex-wrap gap-2"
+          aria-label="Resumen de cobertura del correo"
+        >
+          <Badge variant="outline">
+            <Mail data-icon="inline-start" />
+            {dashboard.counters.importedMessages} correos
+          </Badge>
+          <Badge variant="outline">
+            <Clock3 data-icon="inline-start" />
+            {dashboard.counters.recentMessages} en 30 días
+          </Badge>
+          <Badge
+            variant={
+              dashboard.connection.initialSyncCompletedAt
+                ? "success"
+                : dashboard.connection.lastSyncErrorCode
+                  ? "warning"
+                  : "secondary"
+            }
+          >
+            <CalendarDays data-icon="inline-start" />
+            {dashboard.connection.initialSyncCompletedAt
+              ? "Histórico completo desde 1 ene 2026"
+              : dashboard.connection.lastSyncErrorCode
+                ? "Histórico detenido · desde 1 ene 2026"
+                : "Importando desde 1 ene 2026"}
+          </Badge>
+          <Badge variant="outline">
+            Primer correo ·{" "}
+            {dashboard.receivedRange.firstMessageAt
+              ? formatDate(dashboard.receivedRange.firstMessageAt)
+              : "—"}
+          </Badge>
+          <Badge variant="outline">
+            Más reciente ·{" "}
+            {dashboard.receivedRange.latestMessageAt
+              ? formatDate(dashboard.receivedRange.latestMessageAt)
+              : "—"}
+          </Badge>
+        </div>
+      ) : null}
 
       {dashboard.role === "ADMIN" ? (
         <SummarySection title="Administración de roles" icon={ShieldCheck}>
@@ -248,13 +290,29 @@ function IntelligenceScreenBody() {
         </SummarySection>
       ) : null}
 
-      <AiEvidenceSection
-        enabled={connected}
-        onOpenMessage={(messageId) => setMessageSheetOpen(true, messageId)}
-      />
-
       {connected ? (
-        <SummarySection title="Mensajes" subtitle="Solo lectura" icon={Mail}>
+        <Tabs
+          defaultValue="messages"
+          persistKey="intelligence-view"
+          className="flex flex-col gap-3"
+        >
+          <TabsList className="w-full rounded-2xl bg-muted">
+            <TabsTrigger value="messages" className="rounded-2xl py-3">
+              <Mail aria-hidden="true" /> Correos
+            </TabsTrigger>
+            <TabsTrigger value="review" className="rounded-2xl py-3">
+              <CheckCircle2 aria-hidden="true" /> Revisión
+            </TabsTrigger>
+            <TabsTrigger value="runs" className="rounded-2xl py-3">
+              <Clock3 aria-hidden="true" /> Análisis
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="messages" className="flex flex-col gap-3">
+            <SummarySection
+              title="Correo"
+              subtitle="Ordenado del más antiguo al más reciente."
+              icon={Mail}
+            >
           {messagesQuery.isPending ? (
             <div
               className="flex flex-col gap-2 p-2"
@@ -313,7 +371,27 @@ function IntelligenceScreenBody() {
               />
             </>
           )}
-        </SummarySection>
+            </SummarySection>
+          </TabsContent>
+          <TabsContent value="review" className="flex flex-col gap-3">
+            <AiEvidenceSection
+              enabled={connected}
+              view="review"
+              onOpenMessage={(messageId) =>
+                setMessageSheetOpen(true, messageId)
+              }
+            />
+          </TabsContent>
+          <TabsContent value="runs" className="flex flex-col gap-3">
+            <AiEvidenceSection
+              enabled={connected}
+              view="runs"
+              onOpenMessage={(messageId) =>
+                setMessageSheetOpen(true, messageId)
+              }
+            />
+          </TabsContent>
+        </Tabs>
       ) : null}
 
       <IntelligenceMessageDetail

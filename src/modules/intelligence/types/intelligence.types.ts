@@ -22,6 +22,10 @@ export type IntelligenceDashboard = {
     recentMessages: number
     bootstrapImportedMessages: number
   }
+  receivedRange: {
+    firstMessageAt: string | null
+    latestMessageAt: string | null
+  }
   role: AiRole
 }
 

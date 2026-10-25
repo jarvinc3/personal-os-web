@@ -45,7 +45,7 @@ type SubscriptionCardProps = {
   disabled?: boolean
   /** Ring and check mark while the card is picked in a selector. */
   selected?: boolean
-  /** Variante de la card; la galería /dev/cards la pinta (#272). */
+  /** Variante de la card; la galería /settings/appearance/cards la pinta (#272). */
   variant?: "full" | "compact" | "inline"
 }
 
