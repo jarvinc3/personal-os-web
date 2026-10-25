@@ -40,7 +40,6 @@ import { prefetchFinanceCategories } from "@/src/modules/finance/shared/lib/fina
 import { buildInstitutionStackItems } from "@/src/modules/finance/shared/lib/institution-stack"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
 import { ExpandableFab } from "@/src/shared/components/fab/expandable-fab"
-import { SettingsSection } from "@/src/shared/components/settings/settings-section"
 import { Button } from "@/src/shared/components/ui/button"
 import { MissingBreakdownNotice } from "@/src/modules/finance/shared/components/layout/missing-breakdown-notice"
 import {
@@ -194,7 +193,7 @@ export function FinanceProductsList({
   }
 
   return (
-    <div className="-mt-6 flex flex-col gap-4">
+    <div className="flex flex-col gap-4">
       {errorMessage ? (
         <FinanceErrorState
           message={errorMessage}
@@ -307,7 +306,8 @@ export function FinanceProductsList({
         </AsyncRegion>
       </div>
 
-      <SettingsSection title="Atajos">
+      <div className="flex flex-col gap-2">
+        <span className="text-sm text-muted-foreground">Atajos</span>
         <div
           onPointerEnter={() => {
             void queryClient.prefetchQuery(
@@ -369,7 +369,7 @@ export function FinanceProductsList({
           isLast
           className="px-3"
         />
-      </SettingsSection>
+      </div>
 
       <ExpandableFab
         label="Crear en productos"

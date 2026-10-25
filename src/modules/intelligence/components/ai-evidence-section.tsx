@@ -33,10 +33,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/src/shared/components/ui/select"
-import {
-  SummaryItem,
-  SummarySection,
-} from "@/src/shared/components/data-display/summary"
+import { SummaryItem } from "@/src/shared/components/data-display/summary"
 import { formatDateTime } from "@/src/shared/lib/date-format"
 import {
   AlertCircle,
@@ -44,9 +41,9 @@ import {
   Check,
   Clock3,
   Coins,
-  Inbox,
   Layers3,
   Mail,
+  NotebookText,
   Pencil,
   ReceiptText,
   RotateCcw,
@@ -87,11 +84,7 @@ export function AiEvidenceSection({
 
   if (view === "runs") {
     return (
-      <SummarySection
-        title="Ejecuciones"
-        subtitle="Versiones y cortes de evidencia usados en cada análisis."
-        icon={Clock3}
-      >
+      <div className="flex flex-col gap-2">
         {runsQuery.isPending ? (
           <div className="flex flex-col gap-2 p-2" aria-label="Cargando runs">
             <Skeleton className="h-14 w-full" />
@@ -134,7 +127,7 @@ export function AiEvidenceSection({
             </EmptyHeader>
           </Empty>
         )}
-      </SummarySection>
+      </div>
     )
   }
 
@@ -193,11 +186,7 @@ export function AiEvidenceSection({
         </ToggleGroup>
       )}
 
-      <SummarySection
-        title="Cola de revisión"
-        subtitle="Desde el correo más antiguo; confirma, corrige o descarta mensajes."
-        icon={Inbox}
-      >
+      <div className="flex flex-col gap-2">
         {reviewQueueQuery.isPending ? (
           <div
             className="flex flex-col gap-2 p-2"
@@ -266,7 +255,7 @@ export function AiEvidenceSection({
             />
           </>
         )}
-      </SummarySection>
+      </div>
     </div>
   )
 }
@@ -324,7 +313,7 @@ function ReviewMessage({
     message.partition === "HOLDOUT" ? "warning" : "secondary"
 
   return (
-    <div className="flex flex-col gap-2 rounded-xl border border-border p-2">
+    <div className="flex flex-col gap-2 rounded-xl border border-border bg-card p-2">
       <div className="flex min-w-0 items-start gap-2">
         <SummaryItem
           title={message.subject || "(sin asunto)"}
@@ -334,20 +323,30 @@ function ReviewMessage({
           showChevron
           className="min-w-0 flex-1"
         />
-        <Badge variant={partitionVariant}>{message.partition}</Badge>
+        <div className="flex flex-col gap-2">
+          <Badge variant={partitionVariant}>{message.partition}</Badge>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={() => setEditing((editing) => !editing)}
+          >
+            <Pencil data-icon="inline-start" /> Revisar
+          </Button>
+        </div>
       </div>
       {message.partition === "HOLDOUT" ? (
         <p className="px-2 text-xs text-muted-foreground">
           La verificación quedará marcada como verdad de referencia.
         </p>
       ) : null}
-      {editing ? (
-        <div className="flex flex-col gap-3 px-2 pb-2">
+      {editing && (
+        <div className="flex flex-col gap-3 rounded-xl border border-border bg-card p-2 px-2 pb-2">
           <FieldGroup className="gap-3">
             <div className="grid gap-3 sm:grid-cols-2">
               <Field>
                 <FieldLabel htmlFor={`relevance-${message.id}`}>
-                  <Tag data-icon="inline-start" /> Relevancia
+                  <Tag data-icon="inline-start" className="size-4" /> Relevancia
                 </FieldLabel>
                 <Select
                   value={relevance}
@@ -369,7 +368,8 @@ function ReviewMessage({
               </Field>
               <Field>
                 <FieldLabel htmlFor={`semantic-${message.id}`}>
-                  <Tag data-icon="inline-start" /> Tipo semántico
+                  <Tag data-icon="inline-start" className="size-4" /> Tipo
+                  semántico
                 </FieldLabel>
                 <Input
                   id={`semantic-${message.id}`}
@@ -381,7 +381,7 @@ function ReviewMessage({
             </div>
             <Field>
               <FieldLabel htmlFor={`routes-${message.id}`}>
-                <Layers3 data-icon="inline-start" /> Rutas
+                <Layers3 data-icon="inline-start" className="size-4" /> Rutas
               </FieldLabel>
               <Input
                 id={`routes-${message.id}`}
@@ -406,7 +406,8 @@ function ReviewMessage({
               <div className="grid gap-3 sm:grid-cols-3">
                 <Field>
                   <FieldLabel htmlFor={`amount-${message.id}`}>
-                    <ReceiptText data-icon="inline-start" /> Monto
+                    <ReceiptText data-icon="inline-start" className="size-4" />{" "}
+                    Monto
                   </FieldLabel>
                   <Input
                     id={`amount-${message.id}`}
@@ -417,7 +418,7 @@ function ReviewMessage({
                 </Field>
                 <Field>
                   <FieldLabel htmlFor={`currency-${message.id}`}>
-                    <Coins data-icon="inline-start" /> Moneda
+                    <Coins data-icon="inline-start" className="size-4" /> Moneda
                   </FieldLabel>
                   <Input
                     id={`currency-${message.id}`}
@@ -429,7 +430,8 @@ function ReviewMessage({
                 </Field>
                 <Field>
                   <FieldLabel htmlFor={`date-${message.id}`}>
-                    <CalendarDays data-icon="inline-start" /> Fecha
+                    <CalendarDays data-icon="inline-start" className="size-4" />{" "}
+                    Fecha
                   </FieldLabel>
                   <Input
                     id={`date-${message.id}`}
@@ -443,6 +445,7 @@ function ReviewMessage({
             ) : null}
             <Field>
               <FieldLabel htmlFor={`notes-${message.id}`}>
+                <NotebookText data-icon="inline-start" className="size-4" />{" "}
                 Nota o motivo del rechazo
               </FieldLabel>
               <Textarea
@@ -457,6 +460,7 @@ function ReviewMessage({
             <Button
               type="button"
               size="sm"
+              className="flex-1"
               onClick={() => submit("CONFIRMED")}
               disabled={disabled}
             >
@@ -466,6 +470,7 @@ function ReviewMessage({
               type="button"
               size="sm"
               variant="outline"
+              className="flex-1"
               onClick={() => submit("CORRECTED")}
               disabled={disabled}
             >
@@ -475,32 +480,13 @@ function ReviewMessage({
               type="button"
               size="sm"
               variant="destructive"
+              className="flex-1"
               onClick={() => submit("REJECTED")}
               disabled={disabled || !notes.trim()}
             >
               <X data-icon="inline-start" /> Rechazar
             </Button>
-            <Button
-              type="button"
-              size="sm"
-              variant="ghost"
-              onClick={() => setEditing(false)}
-              disabled={disabled}
-            >
-              Cancelar
-            </Button>
           </div>
-        </div>
-      ) : (
-        <div className="flex justify-end px-2 pb-1">
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            onClick={() => setEditing(true)}
-          >
-            <Pencil data-icon="inline-start" /> Revisar
-          </Button>
         </div>
       )}
     </div>

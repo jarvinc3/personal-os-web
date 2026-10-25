@@ -40,6 +40,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Corregido
 
+- Productos deja de usar el margen negativo que ocultaba el balance bajo la cabecera y presenta Atajos como una subsección compacta (#262, #297).
 - Cerrar con Atrás la hoja de modo, estilo o color primario descarta el borrador y devuelve la apariencia guardada, igual que «Cancelar» (#160).
 - Los botones de atrás, de opciones y la insignia de las cabeceras de color se leen sobre el fondo, y la decoración de las cards de cuenta ya no se sale como semicírculo gris (#245).
 - «Registrar aporte» muestra el saldo libre de la cuenta de origen, avisa antes de registrar si el monto lo supera y bloquea el envío; el origen por defecto es la cuenta de la meta solo si tiene saldo libre, y el detalle explica «Apartado» con su entrada del glosario (#294).

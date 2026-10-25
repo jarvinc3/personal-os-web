@@ -5,6 +5,7 @@ export type AiEmailSyncProgress = {
     "running" | "waiting" | "retrying" | "scheduled" | "completed" | "failed"
   phase: "bootstrap" | "incremental" | "recovery"
   attempt: number
+  rateLimitRetryCount?: number
   processedThisRun: number
   importedThisRun: number
   batchSize?: number

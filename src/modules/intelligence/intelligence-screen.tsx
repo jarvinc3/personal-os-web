@@ -51,6 +51,7 @@ import {
   ShieldCheck,
   Unplug,
   X,
+  Trash2,
 } from "lucide-react"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useIntelligence } from "./hooks/use-intelligence"
@@ -87,10 +88,12 @@ function IntelligenceScreenBody() {
     [messagesQuery.data?.pages]
   )
   const { fetchNextPage, hasNextPage, isFetchingNextPage } = messagesQuery
+  const queryProgress = dashboardQuery.data?.connection.connected
+    ? dashboardQuery.data.connection.syncProgress
+    : null
   const retryAt =
-    dashboardQuery.data?.connection.connected &&
-    dashboardQuery.data.connection.syncProgress?.status === "waiting"
-      ? dashboardQuery.data.connection.syncProgress.retryAt
+    queryProgress && ["waiting", "retrying"].includes(queryProgress.status)
+      ? queryProgress.retryAt
       : undefined
   const now = useRetryClock(retryAt)
   const loadMore = useCallback(() => {
@@ -223,6 +226,7 @@ function IntelligenceScreenBody() {
                 syncProgress?.status !== "failed"
               }
             />
+
             <div className="flex flex-col gap-2">
               {syncProgress?.status === "failed" ||
               (dashboard.connection.lastSyncErrorCode && !syncProgress) ? (
@@ -248,7 +252,9 @@ function IntelligenceScreenBody() {
                   </AlertDescription>
                 </Alert>
               ) : null}
-              {dashboard.connection.syncInProgress ? (
+              {dashboard.connection.syncInProgress ||
+              syncProgress?.status === "waiting" ||
+              syncProgress?.status === "retrying" ? (
                 <Alert variant="default" role="status">
                   <LoaderCircle
                     className="size-4 shrink-0 animate-spin"
@@ -257,9 +263,9 @@ function IntelligenceScreenBody() {
                   <AlertTitle>Sincronizando correo</AlertTitle>
                   <AlertDescription>
                     {syncProgress?.status === "waiting"
-                      ? `${syncProgress.errorCategory === "rate_limit" ? "Gmail alcanzó su límite temporal de solicitudes" : "Gmail pidió una pausa temporal"}. Reintento ${syncProgress.attempt} de 3${syncProgress.retryAt ? ` en ${formatRetryCountdown(syncProgress.retryAt, now)}` : ""}.`
+                      ? `${syncProgress.errorCategory === "rate_limit" ? "Gmail alcanzó su límite temporal de solicitudes" : "Gmail pidió una pausa temporal"}. Reintento ${syncProgress.attempt} de 3.`
                       : syncProgress?.status === "retrying"
-                        ? `Reintentando con Gmail · intento ${syncProgress.attempt} de 3.`
+                        ? `Enviando reintento a Gmail · intento ${syncProgress.attempt} de 3.`
                         : syncProgress?.status === "running"
                           ? syncProgress.phase === "bootstrap"
                             ? `Leyendo el histórico desde el 1 de enero de 2026 · ${syncProgress.processedThisRun} correos procesados, ${syncProgress.importedThisRun} importados en este lote${syncProgress.totalEstimate ? ` · ${syncProgress.totalEstimate} estimados en total` : ""}.`
@@ -267,6 +273,20 @@ function IntelligenceScreenBody() {
                               ? `Recuperando el cursor y leyendo correos · ${syncProgress.processedThisRun} procesados, ${syncProgress.importedThisRun} importados.`
                               : `Buscando cambios nuevos · ${syncProgress.processedThisRun} procesados, ${syncProgress.importedThisRun} importados.`
                           : `${dashboard.counters.importedMessages} mensajes importados`}
+                    {(syncProgress?.status === "waiting" ||
+                      syncProgress?.status === "retrying") &&
+                    syncProgress.retryAt ? (
+                      <div className="mt-2 flex">
+                        <Badge
+                          variant="secondary"
+                          className="h-7 gap-1.5 px-3 font-mono text-sm tabular-nums"
+                          aria-live="off"
+                        >
+                          <Clock3 className="size-3.5" aria-hidden="true" />
+                          {formatRetryCountdown(syncProgress.retryAt, now)}
+                        </Badge>
+                      </div>
+                    ) : null}
                   </AlertDescription>
                 </Alert>
               ) : null}
@@ -274,6 +294,7 @@ function IntelligenceScreenBody() {
             <div className="flex flex-wrap gap-2">
               <Button
                 type="button"
+                className="flex-1"
                 onClick={() => syncMutation.mutate()}
                 disabled={
                   syncMutation.isPending || dashboard.connection.syncInProgress
@@ -287,11 +308,12 @@ function IntelligenceScreenBody() {
                 )}
                 {syncMutation.isPending || dashboard.connection.syncInProgress
                   ? "Sincronizando…"
-                  : "Sincronizar ahora"}
+                  : "Sincronizar"}
               </Button>
               <Button
                 type="button"
                 variant="outline"
+                className="flex-1"
                 onClick={() => connectMutation.mutate()}
                 disabled={
                   connectMutation.isPending ||
@@ -303,17 +325,19 @@ function IntelligenceScreenBody() {
                 ) : (
                   <Mail aria-hidden="true" />
                 )}
-                Reconectar Gmail
+                Reconectar
               </Button>
               <Button
                 type="button"
                 variant="destructive"
+                className="flex-1"
                 onClick={() => setResetDialogOpen(true)}
                 disabled={
                   resetMutation.isPending || dashboard.connection.syncInProgress
                 }
               >
-                Vaciar y reiniciar
+                <Trash2 aria-hidden="true" />
+                Vaciar
               </Button>
             </div>
           </>
@@ -354,10 +378,26 @@ function IntelligenceScreenBody() {
             <Mail data-icon="inline-start" />
             {dashboard.counters.importedMessages} correos
           </Badge>
+
+          <Badge variant="outline">
+            Primer correo ·{" "}
+            {receivedRange?.firstMessageAt
+              ? formatDate(receivedRange.firstMessageAt)
+              : "Sin dato"}
+          </Badge>
+
+          <Badge variant="outline">
+            Más reciente ·{" "}
+            {receivedRange?.latestMessageAt
+              ? formatDate(receivedRange.latestMessageAt)
+              : "Sin dato"}
+          </Badge>
+
           <Badge variant="outline">
             <Clock3 data-icon="inline-start" />
             {dashboard.counters.recentMessages} en 30 días
           </Badge>
+
           <Badge
             variant={
               dashboard.connection.initialSyncCompletedAt
@@ -381,18 +421,6 @@ function IntelligenceScreenBody() {
                   : syncProgress?.status === "scheduled"
                     ? "Histórico en espera · desde 1 ene 2026"
                     : "Bootstrap pendiente · desde 1 ene 2026"}
-          </Badge>
-          <Badge variant="outline">
-            Primer correo ·{" "}
-            {receivedRange?.firstMessageAt
-              ? formatDate(receivedRange.firstMessageAt)
-              : "Sin dato"}
-          </Badge>
-          <Badge variant="outline">
-            Más reciente ·{" "}
-            {receivedRange?.latestMessageAt
-              ? formatDate(receivedRange.latestMessageAt)
-              : "Sin dato"}
           </Badge>
         </div>
       ) : null}
@@ -425,72 +453,68 @@ function IntelligenceScreenBody() {
               <Clock3 aria-hidden="true" /> Análisis
             </TabsTrigger>
           </TabsList>
+
           <TabsContent value="messages" className="flex flex-col gap-3">
-            <SummarySection
-              title="Correo"
-              subtitle="Ordenado del más antiguo al más reciente."
-              icon={Mail}
-            >
-              {messagesQuery.isPending ? (
-                <div
-                  className="flex flex-col gap-2 p-2"
-                  aria-label="Cargando mensajes"
+            {messagesQuery.isPending ? (
+              <div
+                className="flex flex-col gap-2 p-2"
+                aria-label="Cargando mensajes"
+              >
+                <Skeleton className="h-14 w-full" />
+                <Skeleton className="h-14 w-full" />
+                <Skeleton className="h-14 w-full" />
+              </div>
+            ) : messagesQuery.isError ? (
+              <Empty>
+                <EmptyHeader>
+                  <EmptyMedia variant="icon">
+                    <AlertCircle aria-hidden="true" />
+                  </EmptyMedia>
+                  <EmptyTitle>No se pudieron cargar los mensajes</EmptyTitle>
+                  <EmptyDescription>
+                    Los mensajes ya cargados siguen disponibles.
+                  </EmptyDescription>
+                </EmptyHeader>
+                <Button
+                  type="button"
+                  onClick={() => void messagesQuery.refetch()}
                 >
-                  <Skeleton className="h-14 w-full" />
-                  <Skeleton className="h-14 w-full" />
-                  <Skeleton className="h-14 w-full" />
-                </div>
-              ) : messagesQuery.isError ? (
-                <Empty>
-                  <EmptyHeader>
-                    <EmptyMedia variant="icon">
-                      <AlertCircle aria-hidden="true" />
-                    </EmptyMedia>
-                    <EmptyTitle>No se pudieron cargar los mensajes</EmptyTitle>
-                    <EmptyDescription>
-                      Los mensajes ya cargados siguen disponibles.
-                    </EmptyDescription>
-                  </EmptyHeader>
-                  <Button
-                    type="button"
-                    onClick={() => void messagesQuery.refetch()}
-                  >
-                    <RefreshCw aria-hidden="true" /> Reintentar
-                  </Button>
-                </Empty>
-              ) : messages.length === 0 ? (
-                <Empty>
-                  <EmptyHeader>
-                    <EmptyMedia variant="icon">
-                      <Inbox aria-hidden="true" />
-                    </EmptyMedia>
-                    <EmptyTitle>Aún no hay mensajes</EmptyTitle>
-                    <EmptyDescription>
-                      La sincronización agregará aquí el correo desde 2026.
-                    </EmptyDescription>
-                  </EmptyHeader>
-                </Empty>
-              ) : (
-                <>
-                  {messages.map((message) => (
-                    <SummaryItem
-                      key={message.id}
-                      title={message.subject}
-                      description={`${message.fromAddress} · ${formatDateTime(message.receivedAt)}`}
-                      icon={Mail}
-                      onPress={() => setMessageSheetOpen(true, message.id)}
-                      showChevron
-                    />
-                  ))}
-                  <InfiniteListSentinel
-                    hasNextPage={Boolean(messagesQuery.hasNextPage)}
-                    isFetchingNextPage={messagesQuery.isFetchingNextPage}
-                    onLoadMore={loadMore}
+                  <RefreshCw aria-hidden="true" /> Reintentar
+                </Button>
+              </Empty>
+            ) : messages.length === 0 ? (
+              <Empty>
+                <EmptyHeader>
+                  <EmptyMedia variant="icon">
+                    <Inbox aria-hidden="true" />
+                  </EmptyMedia>
+                  <EmptyTitle>Aún no hay mensajes</EmptyTitle>
+                  <EmptyDescription>
+                    La sincronización agregará aquí el correo desde 2026.
+                  </EmptyDescription>
+                </EmptyHeader>
+              </Empty>
+            ) : (
+              <>
+                {messages.map((message) => (
+                  <SummaryItem
+                    key={message.id}
+                    title={message.subject}
+                    description={`${message.fromAddress} · ${formatDateTime(message.receivedAt)}`}
+                    icon={Mail}
+                    onPress={() => setMessageSheetOpen(true, message.id)}
+                    showChevron
                   />
-                </>
-              )}
-            </SummarySection>
+                ))}
+                <InfiniteListSentinel
+                  hasNextPage={Boolean(messagesQuery.hasNextPage)}
+                  isFetchingNextPage={messagesQuery.isFetchingNextPage}
+                  onLoadMore={loadMore}
+                />
+              </>
+            )}
           </TabsContent>
+
           <TabsContent value="review" className="flex flex-col gap-3">
             <AiEvidenceSection
               enabled={connected}
@@ -500,6 +524,7 @@ function IntelligenceScreenBody() {
               }
             />
           </TabsContent>
+
           <TabsContent value="runs" className="flex flex-col gap-3">
             <AiEvidenceSection
               enabled={connected}
@@ -591,11 +616,11 @@ function formatRetryCountdown(retryAt: number, now: number | null) {
   }
   const remainingSeconds = Math.max(0, Math.ceil((retryAt - now) / 1_000))
   if (remainingSeconds === 0) {
-    return "reintento en curso; esperando respuesta de Gmail"
+    return "Reintento en curso"
   }
   const minutes = Math.floor(remainingSeconds / 60)
   const seconds = remainingSeconds % 60
-  return `${minutes}:${String(seconds).padStart(2, "0")}`
+  return `Reintento en ${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`
 }
 
 function emailSocketStatusLabel(
