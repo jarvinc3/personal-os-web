@@ -19,7 +19,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 - Intelligence organiza correo, revisión y análisis en pestañas; resume corpus y particiones en badges, muestra el rango histórico desde el 1 de enero de 2026 y lista los correos en orden ascendente por fecha (#206).
 - La cola de revisión también ordena los correos por fecha recibida ascendente (#206).
 - `src/shared/components` se reorganiza por responsabilidad: `ui/` queda solo con shadcn y los componentes propios pasan a `shell/` (con `shell/header/`), `forms/`, `sheets/`, `fab/`, `feedback/`, `data-display/` y `settings/`; `ReleaseNotesSheet` pasa a `src/modules/settings` (#315).
-- Se reescribe el README con banner, funciones por app, stack, arquitectura, scripts y enlaces a los repos hermanos; se añade licencia MIT y archivos de comunidad (CONTRIBUTING, SECURITY y plantilla de PR).
+- Se reescribe el README con banner, funciones por app, stack, arquitectura, scripts y enlaces a los repos hermanos; se añade licencia MIT y archivos de comunidad (CONTRIBUTING, SECURITY y plantilla de PR) (#313).
 
 ### Eliminado
 
