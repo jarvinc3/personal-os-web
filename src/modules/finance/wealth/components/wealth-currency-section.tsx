@@ -2,6 +2,7 @@
 
 import { GlossaryHelpButton } from "@/src/modules/help"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
+import { SettingsSection } from "@/src/shared/components/settings/settings-section"
 import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 import type {
   FinanceBalanceDrift,
@@ -61,15 +62,15 @@ export function WealthCurrencySection({
         </p>
       </header>
 
-      <section className="flex flex-col gap-2">
-        <div className="flex items-center justify-between px-1">
-          <h3 className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-            Activos
-          </h3>
+      <SettingsSection
+        title="Activos"
+        bare
+        headerTrailing={
           <span className="text-xs font-semibold tabular-nums">
             {formatFinanceMoney(group.totals.assets, money)}
           </span>
-        </div>
+        }
+      >
         {hasAssets ? (
           <>
             <WealthLineGroup
@@ -101,17 +102,17 @@ export function WealthCurrencySection({
             Sin activos en {group.currency}.
           </p>
         )}
-      </section>
+      </SettingsSection>
 
-      <section className="flex flex-col gap-2">
-        <div className="flex items-center justify-between px-1">
-          <h3 className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-            Deudas
-          </h3>
+      <SettingsSection
+        title="Deudas"
+        bare
+        headerTrailing={
           <span className="text-xs font-semibold tabular-nums">
             {formatFinanceMoney(group.totals.liabilities, money)}
           </span>
-        </div>
+        }
+      >
         {hasLiabilities ? (
           <>
             <WealthLineGroup
@@ -136,7 +137,7 @@ export function WealthCurrencySection({
             Sin deudas en {group.currency}.
           </p>
         )}
-      </section>
+      </SettingsSection>
 
       {hasDoubtful ? (
         <section className="flex flex-col gap-2 rounded-2xl border border-warning/40 bg-warning/10 p-2">

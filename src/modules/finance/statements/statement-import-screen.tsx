@@ -18,6 +18,7 @@ import {
 import { translateFinanceError } from "@/src/modules/finance/shared/lib/finance-error-messages"
 import { formatCalendarDate } from "@/src/modules/finance/shared/lib/ledger-form"
 import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
+import { SettingsSection } from "@/src/shared/components/settings/settings-section"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
 import {
   signedStatementLineAmount,
@@ -86,17 +87,13 @@ function Group({
   children: React.ReactNode
 }) {
   return (
-    <section className="flex flex-col gap-2">
-      <div>
-        <h2 className="font-semibold">{title}</h2>
-        <p className="text-sm text-muted-foreground">{description}</p>
-      </div>
+    <SettingsSection title={title} description={description} bare>
       {children ?? (
         <p className="rounded-2xl border border-dashed border-border p-4 text-sm text-muted-foreground">
           {emptyLabel}
         </p>
       )}
-    </section>
+    </SettingsSection>
   )
 }
 

@@ -1,6 +1,7 @@
 "use client"
 
 import { BrandLogo } from "@/src/modules/finance/shared/components/brand-logo"
+import { DetailHeader } from "@/src/modules/finance/shared/components/layout/progress-hero"
 import { GlossaryHelpButton } from "@/src/modules/help"
 import {
   AccountBalanceSheet,
@@ -283,22 +284,17 @@ function AccountDetailScreenBody({ accountId }: AccountDetailScreenProps) {
             <span className="absolute right-16 -bottom-15 size-48 rounded-full bg-black/15" />
           </span>
           <div className="relative z-10">
-            <div className="flex items-start gap-3">
-              <BrandLogo
-                name={account.institutionName ?? account.name}
-                logoUrl={account.institutionLogoUrl}
-                size={48}
-              />
-              <div className="min-w-0 flex-1">
-                <h1 className="truncate text-2xl font-bold tracking-tight">
-                  {account.name}
-                </h1>
-                <p className="mt-1 text-sm text-white/70">
-                  {FINANCE_ACCOUNT_TYPE_LABEL[account.type]} ·{" "}
-                  {account.currency}
-                </p>
-              </div>
-            </div>
+            <DetailHeader
+              media={
+                <BrandLogo
+                  name={account.institutionName ?? account.name}
+                  logoUrl={account.institutionLogoUrl}
+                  size={48}
+                />
+              }
+              title={account.name}
+              subtitle={`${FINANCE_ACCOUNT_TYPE_LABEL[account.type]} · ${account.currency}`}
+            />
             <div className="mt-8 flex flex-col gap-1 rounded-2xl bg-black/20 px-3 py-2">
               <div className="flex items-center gap-1">
                 <Label className="text-sm text-foreground">Saldo</Label>

@@ -27,6 +27,7 @@ import {
 } from "@/src/shared/components/ui/empty"
 import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
 import { SummaryItem } from "@/src/shared/components/data-display/summary"
+import { SettingsSection } from "@/src/shared/components/settings/settings-section"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { ScaleIcon, Trash2Icon } from "lucide-react"
 import { Button } from "@/src/shared/components/ui/button"
@@ -62,10 +63,11 @@ export function ReconciliationsSection({
   }
 
   return (
-    <section className="flex flex-col gap-3 rounded-3xl bg-background">
-      <h2 className="px-1 text-sm font-semibold text-muted-foreground">
-        Conciliaciones
-      </h2>
+    <SettingsSection
+      title="Conciliaciones"
+      bare
+      className="gap-3 rounded-3xl bg-background"
+    >
       {query.isError ? (
         <FinanceErrorState
           message={financeErrorMessage(query.error)}
@@ -140,6 +142,6 @@ export function ReconciliationsSection({
           onLoadMore={() => void query.fetchNextPage()}
         />
       </AsyncRegion>
-    </section>
+    </SettingsSection>
   )
 }

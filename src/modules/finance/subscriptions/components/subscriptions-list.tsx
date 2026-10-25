@@ -22,6 +22,7 @@ import {
 import { groupSubscriptions } from "@/src/modules/finance/subscriptions/lib/subscription-view"
 import type { FinanceSubscriptionGroupBy } from "@/src/modules/finance/shared/types/entities"
 import { Badge } from "@/src/shared/components/ui/badge"
+import { SettingsSection } from "@/src/shared/components/settings/settings-section"
 import { Button } from "@/src/shared/components/ui/button"
 import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
 import {
@@ -89,15 +90,15 @@ export function SubscriptionsList({
   const groups = groupSubscriptions(items, groupBy)
 
   return (
-    <section className="flex flex-col gap-3">
-      <div className="flex items-center justify-between gap-2">
-        <h2 className="flex items-baseline gap-2 text-sm font-semibold">
-          Mis suscripciones
+    <SettingsSection
+      title="Mis suscripciones"
+      bare
+      className="gap-3"
+      headerTrailing={
+        <div className="flex items-center gap-1">
           <span className="text-sm font-normal text-muted-foreground tabular-nums">
             {items.length}
           </span>
-        </h2>
-        <div className="flex items-center gap-1">
           <Button
             type="button"
             variant="outline"
@@ -126,8 +127,8 @@ export function SubscriptionsList({
             ) : null}
           </Button>
         </div>
-      </div>
-
+      }
+    >
       {chips.length > 0 ? (
         <div className="flex flex-wrap gap-2">
           {chips.map((chip) => (
@@ -213,6 +214,6 @@ export function SubscriptionsList({
         isFetchingNextPage={listQuery.isFetchingNextPage}
         onLoadMore={() => void listQuery.fetchNextPage()}
       />
-    </section>
+    </SettingsSection>
   )
 }

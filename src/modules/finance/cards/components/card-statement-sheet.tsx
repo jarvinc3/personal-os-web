@@ -35,6 +35,7 @@ import {
   fromStatementLine,
   StatementMovementRow,
 } from "@/src/modules/finance/transactions"
+import { SettingsSection } from "@/src/shared/components/settings/settings-section"
 import { Button } from "@/src/shared/components/ui/button"
 import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import { appToast } from "@/src/shared/lib/app-toast"
@@ -300,27 +301,21 @@ export function CardStatementSheet({
               </div>
             </div>
 
-            <div className="flex flex-col gap-2">
-              <h3 className="text-sm font-medium text-muted-foreground">
-                Movimientos del ciclo
-              </h3>
+            <SettingsSection title="Movimientos del ciclo" bare>
               <MovementList
                 movements={detail.movements}
                 display={moneyDisplay}
                 emptyLabel="Sin movimientos en este ciclo."
               />
-            </div>
+            </SettingsSection>
 
-            <div className="flex flex-col gap-2">
-              <h3 className="text-sm font-medium text-muted-foreground">
-                Pagos aplicados
-              </h3>
+            <SettingsSection title="Pagos aplicados" bare>
               <MovementList
                 movements={detail.payments}
                 display={moneyDisplay}
                 emptyLabel="Sin pagos aplicados."
               />
-            </div>
+            </SettingsSection>
           </div>
         ) : null}
       </AsyncRegion>

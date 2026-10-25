@@ -13,6 +13,7 @@ import { formatSharePendingTotals } from "@/src/modules/finance/receivables/lib/
 import { ReceivableCard } from "@/src/modules/finance/receivables/components/receivable-card"
 import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
 import { FinanceProgressHero } from "@/src/modules/finance/shared/components/layout/progress-hero"
+import { SettingsSection } from "@/src/shared/components/settings/settings-section"
 import { financeLoadErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import { DEFAULT_LOCALE } from "@/src/modules/settings/lib/locale-options"
 import { usePublicReceivableShare } from "@/src/modules/finance/shared/hooks/use-receivable-shares"
@@ -132,37 +133,40 @@ export function PublicReceivableShareScreen({
         }))}
       />
 
-      <div className="flex items-center justify-between gap-2">
-        <h2 className="text-lg font-semibold">Detalle</h2>
-        <span className="text-sm text-muted-foreground">
-          {publicShareCountCaption(share.items.length)}
-        </span>
-      </div>
-
-      {share.items.length === 0 ? (
-        <Empty className="py-10">
-          <EmptyHeader>
-            <EmptyMedia variant="icon">
-              <HandshakeIcon />
-            </EmptyMedia>
-            <EmptyTitle>No hay cobros por ver</EmptyTitle>
-            <EmptyDescription>
-              Quien te compartió el link los canceló o los dejó sin efecto.
-            </EmptyDescription>
-          </EmptyHeader>
-        </Empty>
-      ) : (
-        <div className="flex flex-col gap-2">
-          {share.items.map((item) => (
-            <ReceivableCard
-              key={item.ref}
-              source={{ kind: "shared", item }}
-              display={PUBLIC_DISPLAY}
-              onPress={() => itemSheet.setOpen(true, item.ref)}
-            />
-          ))}
-        </div>
-      )}
+      <SettingsSection
+        title="Detalle"
+        bare
+        headerTrailing={
+          <span className="text-sm text-muted-foreground">
+            {publicShareCountCaption(share.items.length)}
+          </span>
+        }
+      >
+        {share.items.length === 0 ? (
+          <Empty className="py-10">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <HandshakeIcon />
+              </EmptyMedia>
+              <EmptyTitle>No hay cobros por ver</EmptyTitle>
+              <EmptyDescription>
+                Quien te compartió el link los canceló o los dejó sin efecto.
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
+        ) : (
+          <div className="flex flex-col gap-2">
+            {share.items.map((item) => (
+              <ReceivableCard
+                key={item.ref}
+                source={{ kind: "shared", item }}
+                display={PUBLIC_DISPLAY}
+                onPress={() => itemSheet.setOpen(true, item.ref)}
+              />
+            ))}
+          </div>
+        )}
+      </SettingsSection>
 
       <div className="flex flex-col items-center gap-2 text-center text-xs text-muted-foreground">
         <p>Toca un cobro para ver su detalle</p>

@@ -26,6 +26,48 @@ type MultipleProgressBars = {
   endCaption?: never
 }
 
+type DetailHeaderProps = {
+  media: ReactNode
+  title: string
+  badge?: { label: string; variant?: BadgeVariant }
+  subtitle?: ReactNode
+}
+
+/**
+ * Encabezado de un detalle: media, título, insignia y subtítulo. Es el mismo
+ * en una cuenta, una institución y cualquier hero que lo necesite.
+ */
+export function DetailHeader({
+  media,
+  title,
+  badge,
+  subtitle,
+}: DetailHeaderProps) {
+  return (
+    <div className="flex items-start gap-3">
+      {media}
+      <div className="min-w-0 flex-1">
+        <div className="flex min-w-0 items-center gap-2">
+          <h1 className="truncate text-2xl font-bold tracking-tight">
+            {title}
+          </h1>
+          {badge ? (
+            <Badge
+              variant={badge.variant}
+              className="shrink-0 border-white/40 bg-white/95 text-foreground shadow-sm"
+            >
+              {badge.label}
+            </Badge>
+          ) : null}
+        </div>
+        {subtitle ? (
+          <div className="mt-1 text-sm text-white/70">{subtitle}</div>
+        ) : null}
+      </div>
+    </div>
+  )
+}
+
 type FinanceProgressHeroProps = {
   accent: string
   media: ReactNode
@@ -81,27 +123,12 @@ export function FinanceProgressHero(props: FinanceProgressHeroProps) {
       >
         {decoration}
         <div className="relative z-10">
-          <div className="flex items-start gap-3">
-            {media}
-            <div className="min-w-0 flex-1">
-              <div className="flex min-w-0 items-center gap-2">
-                <h1 className="truncate text-2xl font-bold tracking-tight">
-                  {title}
-                </h1>
-                {badge ? (
-                  <Badge
-                    variant={badge.variant}
-                    className="shrink-0 border-white/40 bg-white/95 text-foreground shadow-sm"
-                  >
-                    {badge.label}
-                  </Badge>
-                ) : null}
-              </div>
-              {subtitle ? (
-                <p className="mt-1 text-sm text-white/70">{subtitle}</p>
-              ) : null}
-            </div>
-          </div>
+          <DetailHeader
+            media={media}
+            title={title}
+            badge={badge}
+            subtitle={subtitle}
+          />
 
           <p className="mt-8 text-[11px] tracking-wide text-white/60 uppercase">
             {metricLabel}
