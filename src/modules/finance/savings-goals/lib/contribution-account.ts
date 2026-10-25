@@ -8,7 +8,8 @@ function hasFreeBalance(account: FinanceAccount): boolean {
 /**
  * Account a contribution comes from: the goal's own account while it has free
  * balance, and otherwise the first funded account, so the sheet never proposes
- * an account that will be rejected on submit.
+ * an account that will be rejected on submit. Returns `""` only when there is
+ * no account at all; the sheet then shows «falta elegir cuenta».
  */
 export function defaultContributionAccountId(input: {
   accounts: readonly FinanceAccount[]

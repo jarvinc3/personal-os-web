@@ -11,7 +11,8 @@ function roundMoney(value: number): number {
 /**
  * Account a loan payment comes from: the loan's «Se paga desde», and only when
  * it has none, the first account with free balance (preferring the loan's
- * currency).
+ * currency). Returns `""` when no account has free balance: the sheet treats
+ * that as «falta elegir cuenta» and the payload refuses to send it.
  */
 export function defaultLoanPaymentAccountId(input: {
   accounts: readonly FinanceAccount[]
@@ -37,8 +38,7 @@ export function defaultLoanPaymentAccountId(input: {
   return active.find(hasFreeBalance)?.id ?? ""
 }
 
-/** What the installment asks for: principal, interest, insurance, fees and late fee. */
-export function installmentDueTotal(
+/** What the installment asks for: principal, interest, insurance, fees and late fee. */ export function installmentDueTotal(
   installment: FinanceLoanInstallment
 ): number {
   const parts = [
