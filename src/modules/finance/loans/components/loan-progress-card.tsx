@@ -4,6 +4,7 @@ import { EntitySurface } from "@/src/modules/finance/shared/components/entity-su
 import { BrandLogo } from "@/src/modules/finance/shared/components/brand-logo"
 import { PlanningProgressCard } from "@/src/modules/finance/shared/components/planning-progress-card"
 import type { PlanningProgressVariant } from "@/src/modules/finance/shared/components/planning-progress-card"
+import { countLabel } from "@/src/modules/finance/shared/lib/count-label"
 import { formatRatePercentLabel } from "@/src/modules/finance/shared/lib/interest-rate"
 import { formatCalendarDate } from "@/src/modules/finance/shared/lib/ledger-form"
 import {
@@ -113,7 +114,7 @@ export function LoanProgressCard({
       caption={
         <span className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
           <span>
-            {loan.paidInstallments}/{loan.totalInstallments} cuotas
+            {`${loan.paidInstallments}/${countLabel(loan.totalInstallments, "cuota", "cuotas")}`}
           </span>
           {loan.nextDueDate ? (
             <span

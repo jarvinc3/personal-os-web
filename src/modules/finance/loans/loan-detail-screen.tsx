@@ -34,6 +34,7 @@ import {
   financeLoadErrorMessage,
 } from "@/src/modules/finance/shared/lib/finance-error"
 import { showUndoToast } from "@/src/modules/finance/shared/components/undo-toast"
+import { countLabel } from "@/src/modules/finance/shared/lib/count-label"
 import { formatRatePercentLabel } from "@/src/modules/finance/shared/lib/interest-rate"
 import { formatCalendarDate } from "@/src/modules/finance/shared/lib/ledger-form"
 import { nextUnpaidInstallment } from "@/src/modules/finance/shared/lib/loan-payment"
@@ -299,7 +300,7 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
         }
         metricValue={formatFinanceMoney(loan.currentBalance, money)}
         progress={progress}
-        startCaption={`${loan.paidInstallments}/${loan.totalInstallments} cuotas`}
+        startCaption={`${loan.paidInstallments}/${countLabel(loan.totalInstallments, "cuota", "cuotas")}`}
         endCaption={`Original ${formatFinanceMoney(loan.originalAmount, money)}`}
         footnote={
           loan.nextDueDate

@@ -1,3 +1,4 @@
+import { countLabel } from "./count-label.ts"
 import { formatFinanceMoney, type FinanceMoneyDisplay } from "./money.ts"
 import { isCashInstitution } from "./cash.ts"
 import type {
@@ -94,11 +95,6 @@ export function institutionInitials(name: string): string {
     return parts[0]!.slice(0, 2).toUpperCase()
   }
   return `${parts[0]![0] ?? ""}${parts[1]![0] ?? ""}`.toUpperCase()
-}
-
-/** `1 cuenta` / `2 cuentas`: a count never takes the plural of the other one. */
-function countLabel(count: number, singular: string, plural: string): string {
-  return `${count} ${count === 1 ? singular : plural}`
 }
 
 export function formatProductCounts(counts: InstitutionStackCounts): string {

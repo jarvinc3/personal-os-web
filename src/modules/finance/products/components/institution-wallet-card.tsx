@@ -10,6 +10,7 @@ import {
   isWalletDragOnly,
   walletGestureDelta,
 } from "@/src/modules/finance/shared/lib/wallet-gesture"
+import { countLabel } from "@/src/modules/finance/shared/lib/count-label"
 import { EntitySurface } from "@/src/modules/finance/shared/components/entity-surface"
 import {
   LinkPendingOverlay,
@@ -51,21 +52,25 @@ type InstitutionWalletCardProps = {
 export function ProductCountItem({
   icon: Icon,
   count,
-  label,
+  singular,
+  plural,
   compact = false,
 }: {
   icon: LucideIcon
   count: number
-  label: string
+  singular: string
+  plural: string
   compact?: boolean
 }) {
+  const label = countLabel(count, singular, plural)
   return (
     <span className="inline-flex items-center gap-1.5" title={label}>
       <Icon
         className={compact ? "size-3.5 shrink-0" : "size-5 shrink-0"}
         aria-hidden
       />
-      <span>{count}</span>
+      <span aria-hidden>{count}</span>
+      <span className="sr-only">{label}</span>
     </span>
   )
 }
@@ -108,7 +113,8 @@ function InstitutionProductCounts({
       key: "accounts",
       icon: LandmarkIcon,
       count: counts.accounts,
-      label: "Cuentas",
+      singular: "cuenta",
+      plural: "cuentas",
     },
     ...(counts.cards === undefined
       ? []
@@ -117,7 +123,8 @@ function InstitutionProductCounts({
             key: "cards",
             icon: CreditCardIcon,
             count: counts.cards,
-            label: "Tarjetas",
+            singular: "tarjeta",
+            plural: "tarjetas",
           },
         ]),
     ...(counts.loans === undefined
@@ -127,7 +134,8 @@ function InstitutionProductCounts({
             key: "loans",
             icon: HandCoinsIcon,
             count: counts.loans,
-            label: "Préstamos",
+            singular: "préstamo",
+            plural: "préstamos",
           },
         ]),
   ]
@@ -147,7 +155,8 @@ function InstitutionProductCounts({
           <ProductCountItem
             icon={item.icon}
             count={item.count}
-            label={item.label}
+            singular={item.singular}
+            plural={item.plural}
             compact={compact}
           />
         </span>

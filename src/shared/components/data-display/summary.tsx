@@ -26,7 +26,7 @@ type SummarySectionProps = {
 type SummaryItemBaseProps = {
   title: ReactNode
   description?: ReactNode
-  /** Two lines instead of one for a description that reads better wrapped. */
+  /** Wraps the description on as many lines as it needs instead of cutting it. */
   wrapDescription?: boolean
   value?: ReactNode
   icon?: LucideIcon
@@ -253,7 +253,7 @@ export function SummaryItem({
           <span
             className={cn(
               "block text-xs text-muted-foreground",
-              wrapDescription ? "line-clamp-2" : "truncate"
+              wrapDescription ? "break-words whitespace-normal" : "truncate"
             )}
           >
             {description}
