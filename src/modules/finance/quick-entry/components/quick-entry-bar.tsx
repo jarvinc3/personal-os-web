@@ -10,13 +10,14 @@ import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-financ
 import { useQuickEntryParse } from "@/src/modules/finance/quick-entry/hooks/use-quick-entry"
 import type { QuickEntryParseResult } from "@/src/modules/finance/quick-entry/types"
 import { QuickEntryPreviewSheet } from "@/src/modules/finance/quick-entry/components/quick-entry-preview-sheet"
+import { useEventSheet } from "@/src/shared/hooks/use-event-sheet"
 
 /** Quick capture bar. It only parses; the user confirms in the preview sheet. */
 export function QuickEntryBar() {
   const { isEnabled } = useFinanceEnabled()
   const parseMutation = useQuickEntryParse()
   const [text, setText] = useState("")
-  const [previewOpen, setPreviewOpen] = useState(false)
+  const previewSheet = useEventSheet("quick-entry-preview-sheet")
   const [parseResult, setParseResult] = useState<QuickEntryParseResult | null>(
     null
   )
@@ -36,7 +37,7 @@ export function QuickEntryBar() {
       const parsed = await parseMutation.mutateAsync(trimmed)
       setParseResult(parsed)
       setParseId((current) => current + 1)
-      setPreviewOpen(true)
+      previewSheet.openSheet()
     } catch (error) {
       appToast.error({
         text1: "No se pudo interpretar",
@@ -67,8 +68,8 @@ export function QuickEntryBar() {
       </form>
       <QuickEntryPreviewSheet
         key={parseId}
-        open={previewOpen}
-        onOpenChange={setPreviewOpen}
+        open={previewSheet.open}
+        onOpenChange={previewSheet.onOpenChange}
         parseResult={parseResult}
       />
     </div>

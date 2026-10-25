@@ -16,6 +16,8 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Cambiado
 
+- El extracto de tarjeta, la amortización y el detalle de cuota, los filtros de movimientos, «Vincular movimiento» y «PDF con clave» se abren por ruta, con el registro elegido en `sheetId` cuando lo hay; el PDF con clave se cierra solo al recargar porque el archivo no sobrevive (#253).
+- El comercio permite unir desde una hoja por ruta y la vista previa de captura rápida también: las dos se cierran solas al recargar si su contenido no está en la URL (#255).
 - Las hojas de preferencias de notificaciones y de Keep Awake (ayuda, alerta, historial y recordatorio) se abren por ruta; el horario silencioso es un selector anidado de las preferencias y el aviso de recordatorio escribe su clave al dispararse (#258).
 - La bandeja de recurrentes se abre como selector anidado del sheet de detección (`?picker=archive`), el orden y los filtros de suscripciones ya viajan en la URL, y se elimina el sheet `recurring-sheet.tsx`, que no se usaba (#257).
 - Los selectores abiertos desde un sheet (moneda, color, categoría, país, cuenta, institución y calculadora) llevan su propia clave en la URL (`?sheet=…&picker=…`): Atrás cierra solo el selector, el formulario conserva lo escrito y recargar reabre el sheet y su selector (#251).

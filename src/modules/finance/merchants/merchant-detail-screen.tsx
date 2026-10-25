@@ -48,6 +48,7 @@ import {
 } from "@/src/shared/components/ui/alert"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
+import { useEventSheet } from "@/src/shared/hooks/use-event-sheet"
 import { LoadingView } from "@/src/shared/components/feedback/loading-view"
 import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import {
@@ -93,7 +94,8 @@ function MerchantDetailBody({ merchantId }: { merchantId: string }) {
   const { open: editOpen, setOpen: setEditOpen } = useSheetParam(
     FINANCE_SHEET_KEYS.merchantEdit
   )
-  const [mergeOpen, setMergeOpen] = useState(false)
+  const mergeSheet = useEventSheet("merchant-merge-sheet")
+  const mergeOpen = mergeSheet.open
   const [mergeTarget, setMergeTarget] = useState<{
     id: string
     name: string
@@ -179,7 +181,7 @@ function MerchantDetailBody({ merchantId }: { merchantId: string }) {
 
   function onMergeDuplicate(target: { id: string; name: string }) {
     setMergeTarget(target)
-    setMergeOpen(false)
+    mergeSheet.openSheet()
   }
 
   function onDismissDuplicate(target: { id: string; name: string }) {
@@ -208,7 +210,7 @@ function MerchantDetailBody({ merchantId }: { merchantId: string }) {
       })
       appToast.success({ text1: `Unido en ${merged.name}` })
       setMergeTarget(null)
-      setMergeOpen(false)
+      mergeSheet.closeSheet()
       router.replace(APP_ROUTES.app.financeMerchant(merged.id))
     } catch (error) {
       appToast.error({ text1: financeErrorMessage(error) })
@@ -298,7 +300,7 @@ function MerchantDetailBody({ merchantId }: { merchantId: string }) {
           type="button"
           variant="outline"
           className="flex-1"
-          onClick={() => setMergeOpen(true)}
+          onClick={() => mergeSheet.openSheet()}
         >
           <GitMergeIcon className="size-4 shrink-0" />
           Unir con otro comercio
@@ -358,7 +360,7 @@ function MerchantDetailBody({ merchantId }: { merchantId: string }) {
       <BottomSheet
         open={mergeOpen}
         onOpenChange={(next) => {
-          setMergeOpen(next)
+          mergeSheet.onOpenChange(next)
           if (!next) {
             setMergeTarget(null)
             setMergeSearch("")
@@ -372,7 +374,7 @@ function MerchantDetailBody({ merchantId }: { merchantId: string }) {
             <Button
               variant="outline"
               className="flex-1"
-              onClick={() => setMergeOpen(false)}
+              onClick={() => mergeSheet.closeSheet()}
             >
               <XIcon className="size-4 shrink-0" />
               Cancelar
