@@ -1,6 +1,7 @@
 "use client"
 
 import type { UpcomingCardCycle } from "@/src/modules/finance/shared/lib/card-credit"
+import { CardSkeleton } from "@/src/shared/components/feedback/list-skeleton"
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
 import { StatementImportButton } from "@/src/modules/finance/shared/components/statement-import-button"
 import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
@@ -121,12 +122,8 @@ export function CardStatementsSection({
         pending={isPending}
         pendingFallback={
           <div className="flex flex-col gap-3">
-            {[0, 1].map((index) => (
-              <div
-                key={index}
-                className="h-40 animate-pulse rounded-2xl border border-border bg-muted/40"
-              />
-            ))}
+            <CardSkeleton height={40} />
+            <CardSkeleton height={40} />
           </div>
         }
         empty={statements.length === 0 && upcomingCycle === null}

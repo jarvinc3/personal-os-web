@@ -6,7 +6,7 @@ import { useCallback } from "react"
 
 import { FinanceGate } from "@/src/modules/finance/finance-gate"
 import { InstitutionFormScreen } from "@/src/modules/finance/institutions/components/institution-form-screen"
-import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
+import { ErrorState } from "@/src/shared/components/feedback/error-state"
 import { MissingRecord } from "@/src/modules/finance/shared/components/layout/missing-record"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
@@ -115,7 +115,7 @@ function InstitutionEditScreenBody({
 
   if (institutionsQuery.error) {
     return (
-      <FinanceErrorState
+      <ErrorState
         message={financeLoadErrorMessage(institutionsQuery.error)}
         onRetry={() => void institutionsQuery.refetch()}
         isRetrying={institutionsQuery.isFetching}

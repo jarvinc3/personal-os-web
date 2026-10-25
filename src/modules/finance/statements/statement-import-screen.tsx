@@ -2,7 +2,7 @@
 
 import { FinanceGate } from "@/src/modules/finance/finance-gate"
 import { MissingRecord } from "@/src/modules/finance/shared/components/layout/missing-record"
-import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
+import { ErrorState } from "@/src/shared/components/feedback/error-state"
 import { StatementImportButton } from "@/src/modules/finance/shared/components/statement-import-button"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
 import {
@@ -412,7 +412,7 @@ function StatementImportScreenBody({ importId }: StatementImportScreenProps) {
       )}
 
       {query.error ? (
-        <FinanceErrorState
+        <ErrorState
           message={financeLoadErrorMessage(query.error)}
           onRetry={() => void query.refetch()}
           isRetrying={query.isFetching}

@@ -2,8 +2,8 @@
 
 import { FinanceDateField } from "@/src/modules/finance/shared/components/forms/date-field"
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
-import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
-import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
+import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
+import { ErrorState } from "@/src/shared/components/feedback/error-state"
 import { useCategories } from "@/src/modules/finance/shared/hooks/use-categories"
 import { allTransactionsQueryOptions } from "@/src/modules/finance/shared/hooks/use-transactions"
 import { financeLoadErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
@@ -174,7 +174,7 @@ export function FinanceInstrumentMovements({
       ) : null}
 
       {loadErrorMessage ? (
-        <FinanceErrorState
+        <ErrorState
           message={loadErrorMessage}
           onRetry={retryMovements}
           isRetrying={isRetrying}
@@ -183,7 +183,7 @@ export function FinanceInstrumentMovements({
 
       <AsyncRegion
         pending={isPending}
-        pendingFallback={<FinanceListSkeleton rows={4} />}
+        pendingFallback={<ListSkeleton rows={4} />}
         empty={!loadErrorMessage && movements.length === 0}
         emptyFallback={
           <Empty className="py-10">

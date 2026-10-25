@@ -8,7 +8,7 @@ import { FinanceGate } from "@/src/modules/finance/finance-gate"
 import { LoanEditForm } from "@/src/modules/finance/loans/components/loan-edit-form"
 import { LoanWizard } from "@/src/modules/finance/loans/components/loan-wizard"
 import { loanWizardPrefill } from "@/src/modules/finance/loans/lib/loan-form"
-import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
+import { ErrorState } from "@/src/shared/components/feedback/error-state"
 import { MissingRecord } from "@/src/modules/finance/shared/components/layout/missing-record"
 import { CATALOG_NONE } from "@/src/modules/finance/shared/constants/catalog"
 import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
@@ -112,7 +112,7 @@ function LoanEditScreenBody({ loanId }: LoanEditScreenProps) {
 
   if (loansQuery.error) {
     return (
-      <FinanceErrorState
+      <ErrorState
         message={financeLoadErrorMessage(loansQuery.error)}
         onRetry={() => void loansQuery.refetch()}
         isRetrying={loansQuery.isFetching}

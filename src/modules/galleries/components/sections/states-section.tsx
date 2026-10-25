@@ -2,8 +2,11 @@
 
 import { GalleryDemo } from "@/src/modules/galleries/components/gallery-demo"
 import { simulatedTap } from "@/src/modules/galleries/components/simulated-tap"
-import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
-import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
+import { ErrorState } from "@/src/shared/components/feedback/error-state"
+import {
+  CardSkeleton,
+  ListSkeleton,
+} from "@/src/shared/components/feedback/list-skeleton"
 import { LoadingView } from "@/src/shared/components/feedback/loading-view"
 import { Button } from "@/src/shared/components/ui/button"
 import {
@@ -45,8 +48,8 @@ export function StatesSection() {
       <GalleryDemo
         name="Empty"
         importPath="@/src/shared/components/ui/empty"
-        states="con icono, con acción, búsqueda sin resultados"
-        note="Cero ítems de una colección. No es un párrafo en muted ni un fallo de carga."
+        states="con icono, con acción, compacta para un picker"
+        note="Cero ítems de una colección. No es un párrafo en muted ni un fallo de carga. En un picker va con size sm."
       >
         <Empty className="border p-6">
           <EmptyHeader>
@@ -80,15 +83,31 @@ export function StatesSection() {
       </GalleryDemo>
 
       <GalleryDemo
-        name="Skeleton + FinanceListSkeleton"
-        importPath="@/src/shared/components/ui/skeleton"
-        states="esqueleto de fila, lista de tres filas"
-        note="Mientras llega la primera tanda, el hueco tiene la forma de lo que va a llegar."
+        name="Skeleton + ListSkeleton + CardSkeleton"
+        importPath="@/src/shared/components/feedback/list-skeleton"
+        states="esqueleto de fila, lista de tres filas, card de 16/28/40"
+        note="Mientras llega la primera tanda, el hueco tiene la forma de lo que va a llegar. La card sigue la altura de su variante."
       >
         <Skeleton className="h-4 w-32" />
         <div className="rounded-2xl border border-border">
-          <FinanceListSkeleton rows={3} />
+          <ListSkeleton rows={3} />
         </div>
+        <CardSkeleton height={16} />
+        <CardSkeleton height={28} />
+        <CardSkeleton height={40} />
+      </GalleryDemo>
+
+      <GalleryDemo
+        name={'Empty size="sm"'}
+        importPath="@/src/shared/components/ui/empty"
+        states="picker sin resultados"
+        note="En un picker o una búsqueda dentro de un sheet, la Empty compacta reemplaza el texto suelto."
+      >
+        <Empty size="sm" className="border">
+          <EmptyHeader>
+            <EmptyTitle>Ningún país coincide</EmptyTitle>
+          </EmptyHeader>
+        </Empty>
       </GalleryDemo>
 
       <GalleryDemo
@@ -109,19 +128,19 @@ export function StatesSection() {
       </GalleryDemo>
 
       <GalleryDemo
-        name="FinanceErrorState"
+        name="ErrorState"
         importPath="@/src/modules/finance/shared/components/layout/error-state"
         states="con Reintentar, reintentando"
         note="El fallo de una sección es un estado reintentable en el mismo sitio, no un texto rojo sin salida."
       >
         <div className="rounded-2xl border border-border">
-          <FinanceErrorState
+          <ErrorState
             message="El servidor no respondió."
             onRetry={() => simulatedTap("Reintentar")}
           />
         </div>
         <div className="rounded-2xl border border-border">
-          <FinanceErrorState
+          <ErrorState
             message="El servidor no respondió."
             onRetry={() => simulatedTap("Reintentar")}
             isRetrying

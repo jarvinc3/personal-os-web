@@ -4,7 +4,7 @@ import { SegmentedControl } from "@/src/shared/components/forms/segmented-contro
 import { CategoryPickerSheet } from "@/src/modules/finance/shared/components/pickers/category-picker-sheet"
 import { DestinationPickerSheet } from "@/src/modules/finance/shared/components/pickers/destination-picker-sheet"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
-import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
+import { ErrorState } from "@/src/shared/components/feedback/error-state"
 import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
 import { useCards } from "@/src/modules/finance/shared/hooks/use-cards"
 import { useCategories } from "@/src/modules/finance/shared/hooks/use-categories"
@@ -184,7 +184,7 @@ export function SubscriptionFiltersSheet({
           />
         </SettingsSection>
         {previewQuery.error ? (
-          <FinanceErrorState
+          <ErrorState
             message={financeErrorMessage(previewQuery.error)}
             onRetry={() => void previewQuery.refetch()}
             isRetrying={previewQuery.isFetching}

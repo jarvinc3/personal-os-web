@@ -2,7 +2,7 @@
 
 import { TransferForm } from "@/src/modules/finance/transactions/components/transfer-form"
 import { FinanceGate } from "@/src/modules/finance/finance-gate"
-import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
+import { ErrorState } from "@/src/shared/components/feedback/error-state"
 import { MissingRecord } from "@/src/modules/finance/shared/components/layout/missing-record"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
 import { useTransaction } from "@/src/modules/finance/shared/hooks/use-transactions"
@@ -101,7 +101,7 @@ function TransferEditScreenBody({ transactionId }: TransferEditScreenProps) {
 
   if (detailQuery.error) {
     return (
-      <FinanceErrorState
+      <ErrorState
         message={financeLoadErrorMessage(detailQuery.error)}
         onRetry={() => void detailQuery.refetch()}
         isRetrying={detailQuery.isFetching}

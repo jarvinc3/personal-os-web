@@ -1,6 +1,6 @@
 "use client"
 
-import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
+import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
 import { QuickEntryBar } from "@/src/modules/finance/quick-entry"
 import { MonthFlowSummary } from "@/src/modules/finance/shared/components/month-flow-summary"
 import { FinanceMonthPicker } from "@/src/modules/finance/transactions/components/month-picker"
@@ -12,7 +12,7 @@ import { useLoans } from "@/src/modules/finance/shared/hooks/use-loans"
 import { useSubscriptionsUpcoming } from "@/src/modules/finance/shared/hooks/use-subscriptions"
 import { useCategories } from "@/src/modules/finance/shared/hooks/use-categories"
 import { useTimelineTransactions } from "@/src/modules/finance/shared/hooks/use-transactions"
-import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
+import { ErrorState } from "@/src/shared/components/feedback/error-state"
 import {
   financeErrorMessage,
   financeLoadErrorMessage,
@@ -431,7 +431,7 @@ export function FinanceTransactionsList({
       </div>
 
       {timelineQuery.isError ? (
-        <FinanceErrorState
+        <ErrorState
           message={financeLoadErrorMessage(timelineQuery.error)}
           onRetry={() => {
             void queryClient.invalidateQueries({
@@ -443,7 +443,7 @@ export function FinanceTransactionsList({
       ) : null}
 
       {commitmentsError ? (
-        <FinanceErrorState
+        <ErrorState
           message={financeErrorMessage(commitmentsError)}
           onRetry={() => {
             void loansQuery.refetch()
@@ -454,7 +454,7 @@ export function FinanceTransactionsList({
       ) : null}
 
       {timelineQuery.isPending && timelineQuery.items.length === 0 ? (
-        <FinanceListSkeleton rows={4} />
+        <ListSkeleton rows={4} />
       ) : null}
 
       <div ref={timelineRef} className="flex flex-col">

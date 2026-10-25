@@ -1,7 +1,7 @@
 "use client"
 
-import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
-import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
+import { ErrorState } from "@/src/shared/components/feedback/error-state"
+import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
 import { useSubscriptionsUpcoming } from "@/src/modules/finance/shared/hooks/use-subscriptions"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
@@ -63,13 +63,13 @@ export function UpcomingSheet({
       description={`Próximos ${windowDays} días · ${summaryLabel}`}
     >
       {query.isError ? (
-        <FinanceErrorState
+        <ErrorState
           message={financeErrorMessage(query.error)}
           onRetry={() => void query.refetch()}
           isRetrying={query.isFetching}
         />
       ) : null}
-      {query.isPending && !query.data ? <FinanceListSkeleton rows={3} /> : null}
+      {query.isPending && !query.data ? <ListSkeleton rows={3} /> : null}
       {!query.isPending && charges.length === 0 ? (
         <Empty className="py-6">
           <EmptyHeader>

@@ -8,7 +8,7 @@ import {
   AccountSheet,
 } from "@/src/modules/finance/catalog"
 import { FinanceGate } from "@/src/modules/finance/finance-gate"
-import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
+import { ErrorState } from "@/src/shared/components/feedback/error-state"
 import { MissingRecord } from "@/src/modules/finance/shared/components/layout/missing-record"
 import { FinanceInstrumentMovements } from "@/src/modules/finance/transactions"
 import {
@@ -264,7 +264,7 @@ function AccountDetailScreenBody({ accountId }: AccountDetailScreenProps) {
     <>
       {accountsQuery.error ? (
         <div className="mb-3">
-          <FinanceErrorState
+          <ErrorState
             message={financeLoadErrorMessage(accountsQuery.error)}
             onRetry={() => void accountsQuery.refetch()}
             isRetrying={accountsQuery.isFetching}

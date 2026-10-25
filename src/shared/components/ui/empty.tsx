@@ -2,12 +2,20 @@ import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/src/shared/lib/utils"
 
-function Empty({ className, ...props }: React.ComponentProps<"div">) {
+function Empty({
+  className,
+  size = "default",
+  ...props
+}: React.ComponentProps<"div"> & { size?: "default" | "sm" }) {
   return (
     <div
       data-slot="empty"
+      data-size={size}
       className={cn(
-        "flex w-full min-w-0 flex-1 flex-col items-center justify-center gap-4 rounded-lg border-dashed p-12 text-center text-balance",
+        "flex w-full min-w-0 flex-1 flex-col items-center justify-center rounded-lg border-dashed text-center text-balance",
+        size === "sm"
+          ? "gap-2 p-4 [&_[data-slot=empty-description]]:text-xs [&_[data-slot=empty-title]]:text-sm"
+          : "gap-4 p-12",
         className
       )}
       {...props}

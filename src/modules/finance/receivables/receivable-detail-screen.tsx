@@ -1,10 +1,10 @@
 "use client"
 
 import { FinanceGate } from "@/src/modules/finance/finance-gate"
-import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
+import { ErrorState } from "@/src/shared/components/feedback/error-state"
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
 import { MissingRecord } from "@/src/modules/finance/shared/components/layout/missing-record"
-import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
+import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
 import { FinanceProgressHero } from "@/src/modules/finance/shared/components/layout/progress-hero"
 import { ReceivablePaymentSheet } from "@/src/modules/finance/receivables/components/receivable-payment-sheet"
 import { ReceivableSheet } from "@/src/modules/finance/receivables/components/receivable-sheet"
@@ -226,7 +226,7 @@ function ReceivableDetailScreenBody({
     <>
       {receivablesQuery.error ? (
         <div className="mb-3">
-          <FinanceErrorState
+          <ErrorState
             message={financeLoadErrorMessage(receivablesQuery.error)}
             onRetry={() => void receivablesQuery.refetch()}
             isRetrying={receivablesQuery.isFetching}
@@ -272,7 +272,7 @@ function ReceivableDetailScreenBody({
         ) : null}
 
         {paymentsQuery.isError ? (
-          <FinanceErrorState
+          <ErrorState
             message={financeLoadErrorMessage(paymentsQuery.error)}
             onRetry={() => void paymentsQuery.refetch()}
             isRetrying={paymentsQuery.isFetching}
@@ -281,7 +281,7 @@ function ReceivableDetailScreenBody({
 
         <AsyncRegion
           pending={paymentsQuery.isPending}
-          pendingFallback={<FinanceListSkeleton rows={4} />}
+          pendingFallback={<ListSkeleton rows={4} />}
           empty={!paymentsQuery.isError && payments.length === 0}
           emptyFallback={
             <Empty className="py-10">

@@ -1,8 +1,8 @@
 "use client"
 
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
-import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
-import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
+import { ErrorState } from "@/src/shared/components/feedback/error-state"
+import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
 import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
 import { useCards } from "@/src/modules/finance/shared/hooks/use-cards"
 import { useCategories } from "@/src/modules/finance/shared/hooks/use-categories"
@@ -147,7 +147,7 @@ export function SubscriptionsList({
       ) : null}
 
       {listQuery.isError ? (
-        <FinanceErrorState
+        <ErrorState
           message={financeErrorMessage(listQuery.error)}
           onRetry={() => void listQuery.refetch()}
           isRetrying={listQuery.isFetching}
@@ -156,7 +156,7 @@ export function SubscriptionsList({
 
       <AsyncRegion
         pending={listQuery.isPending && !listQuery.data}
-        pendingFallback={<FinanceListSkeleton rows={4} />}
+        pendingFallback={<ListSkeleton rows={4} />}
         empty={items.length === 0}
         emptyFallback={
           <Empty className="py-8">

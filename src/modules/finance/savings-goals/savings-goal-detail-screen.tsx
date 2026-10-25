@@ -2,10 +2,10 @@
 
 import { GlossaryHelpButton } from "@/src/modules/help"
 import { FinanceGate } from "@/src/modules/finance/finance-gate"
-import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
+import { ErrorState } from "@/src/shared/components/feedback/error-state"
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
 import { MissingRecord } from "@/src/modules/finance/shared/components/layout/missing-record"
-import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
+import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
 import { FinanceProgressHero } from "@/src/modules/finance/shared/components/layout/progress-hero"
 import { AccountProductRow } from "@/src/modules/finance/shared/components/product-rows"
 import { SavingsGoalContributionSheet } from "@/src/modules/finance/savings-goals/components/savings-goal-contribution-sheet"
@@ -235,7 +235,7 @@ function SavingsGoalDetailScreenBody({
     <>
       {goalsQuery.error ? (
         <div className="mb-3">
-          <FinanceErrorState
+          <ErrorState
             message={financeLoadErrorMessage(goalsQuery.error)}
             onRetry={() => void goalsQuery.refetch()}
             isRetrying={goalsQuery.isFetching}
@@ -315,7 +315,7 @@ function SavingsGoalDetailScreenBody({
         </div>
 
         {contributionsQuery.isError ? (
-          <FinanceErrorState
+          <ErrorState
             message={financeLoadErrorMessage(contributionsQuery.error)}
             onRetry={() => void contributionsQuery.refetch()}
             isRetrying={contributionsQuery.isFetching}
@@ -324,7 +324,7 @@ function SavingsGoalDetailScreenBody({
 
         <AsyncRegion
           pending={contributionsQuery.isPending}
-          pendingFallback={<FinanceListSkeleton rows={4} />}
+          pendingFallback={<ListSkeleton rows={4} />}
           empty={!contributionsQuery.isError && contributions.length === 0}
           emptyFallback={
             <Empty className="py-10">

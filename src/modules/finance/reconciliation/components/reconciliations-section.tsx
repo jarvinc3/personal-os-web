@@ -1,8 +1,8 @@
 "use client"
 
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
-import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
-import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
+import { ErrorState } from "@/src/shared/components/feedback/error-state"
+import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
 import { showUndoToast } from "@/src/modules/finance/shared/components/undo-toast"
 import type { ReconciliationTarget } from "@/src/modules/finance/shared/hooks/use-reconciliations"
 import {
@@ -69,7 +69,7 @@ export function ReconciliationsSection({
       className="gap-3 rounded-3xl bg-background"
     >
       {query.isError ? (
-        <FinanceErrorState
+        <ErrorState
           message={financeErrorMessage(query.error)}
           onRetry={() => void query.refetch()}
           isRetrying={query.isFetching}
@@ -77,7 +77,7 @@ export function ReconciliationsSection({
       ) : null}
       <AsyncRegion
         pending={query.isPending && !query.data}
-        pendingFallback={<FinanceListSkeleton />}
+        pendingFallback={<ListSkeleton />}
         empty={items.length === 0}
         emptyFallback={
           <Empty className="py-8">

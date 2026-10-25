@@ -1,7 +1,7 @@
 "use client"
 
 import { FinanceGate } from "@/src/modules/finance/finance-gate"
-import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
+import { ErrorState } from "@/src/shared/components/feedback/error-state"
 import { MissingRecord } from "@/src/modules/finance/shared/components/layout/missing-record"
 import { DeleteRecordDialog } from "@/src/modules/finance/shared/components/delete-record-dialog"
 import { RecordOptionsSheet } from "@/src/modules/finance/shared/components/record-options-sheet"
@@ -346,7 +346,7 @@ function TransactionDetailScreenBody({
     <>
       {detailQuery.error ? (
         <div className="mx-4 mb-3">
-          <FinanceErrorState
+          <ErrorState
             message={financeLoadErrorMessage(detailQuery.error)}
             onRetry={() => void detailQuery.refetch()}
             isRetrying={detailQuery.isFetching}

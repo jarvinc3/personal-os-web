@@ -1,3 +1,8 @@
+import {
+  Empty,
+  EmptyHeader,
+  EmptyTitle,
+} from "@/src/shared/components/ui/empty"
 import { AccountProductRow } from "@/src/modules/finance/shared/components/product-rows"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
 import type { FinanceAccount } from "@/src/modules/finance/shared/types/entities"
@@ -43,9 +48,11 @@ export function AccountChoiceList({
         />
       ))}
       {accounts.length === 0 ? (
-        <p className="px-2 text-sm text-muted-foreground">
-          No hay cuentas todavía.
-        </p>
+        <Empty size="sm">
+          <EmptyHeader>
+            <EmptyTitle>No hay cuentas todavía</EmptyTitle>
+          </EmptyHeader>
+        </Empty>
       ) : null}
     </>
   )

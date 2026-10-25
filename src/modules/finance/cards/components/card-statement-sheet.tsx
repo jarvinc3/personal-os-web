@@ -1,8 +1,8 @@
 "use client"
 
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
-import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
-import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
+import { ErrorState } from "@/src/shared/components/feedback/error-state"
+import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
 import {
   useCardStatementDetail,
   useUpdateCardStatement,
@@ -187,7 +187,7 @@ export function CardStatementSheet({
       }
     >
       {detailQuery.isError ? (
-        <FinanceErrorState
+        <ErrorState
           message={financeLoadErrorMessage(detailQuery.error)}
           onRetry={() => void detailQuery.refetch()}
           isRetrying={detailQuery.isFetching}
@@ -196,7 +196,7 @@ export function CardStatementSheet({
 
       <AsyncRegion
         pending={detailQuery.isPending}
-        pendingFallback={<FinanceListSkeleton rows={4} />}
+        pendingFallback={<ListSkeleton rows={4} />}
         empty={!detailQuery.isError && !detail}
         emptyFallback={
           <Empty className="py-10">

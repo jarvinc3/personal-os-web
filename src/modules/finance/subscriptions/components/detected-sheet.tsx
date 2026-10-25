@@ -1,7 +1,7 @@
 "use client"
 
-import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
-import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
+import { ErrorState } from "@/src/shared/components/feedback/error-state"
+import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
 import { useCategories } from "@/src/modules/finance/shared/hooks/use-categories"
 import { useCreateSubscription } from "@/src/modules/finance/shared/hooks/use-subscriptions"
 import {
@@ -106,14 +106,14 @@ export function DetectedSheet({
         }}
       >
         {recurringQuery.isError ? (
-          <FinanceErrorState
+          <ErrorState
             message={financeErrorMessage(recurringQuery.error)}
             onRetry={() => void recurringQuery.refetch()}
             isRetrying={recurringQuery.isFetching}
           />
         ) : null}
         {recurringQuery.isPending && !recurringQuery.data ? (
-          <FinanceListSkeleton rows={3} />
+          <ListSkeleton rows={3} />
         ) : null}
         {!recurringQuery.isPending && patterns.length === 0 ? (
           <Empty className="py-6">

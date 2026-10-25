@@ -1,7 +1,7 @@
 "use client"
 
-import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
-import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
+import { ErrorState } from "@/src/shared/components/feedback/error-state"
+import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
 import { NoticeCard } from "@/src/modules/finance/shared/components/notice-card"
 import type { NoticeTone } from "@/src/modules/finance/shared/components/notice-card"
 import {
@@ -130,13 +130,13 @@ export function AlertsSheet({
       }}
     >
       {query.isError ? (
-        <FinanceErrorState
+        <ErrorState
           message={financeErrorMessage(query.error)}
           onRetry={() => void query.refetch()}
           isRetrying={query.isFetching}
         />
       ) : null}
-      {query.isPending && !query.data ? <FinanceListSkeleton rows={3} /> : null}
+      {query.isPending && !query.data ? <ListSkeleton rows={3} /> : null}
       {!query.isPending && alerts.length === 0 ? (
         <Empty className="py-6">
           <EmptyHeader>

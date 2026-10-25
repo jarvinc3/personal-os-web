@@ -15,7 +15,7 @@ import {
 } from "@/src/modules/finance/institutions/components/institution-product-tabs"
 import { ArchiveRecordDialog } from "@/src/modules/finance/shared/components/archive-record-dialog"
 import { DeleteRecordDialog } from "@/src/modules/finance/shared/components/delete-record-dialog"
-import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
+import { ErrorState } from "@/src/shared/components/feedback/error-state"
 import { MissingRecord } from "@/src/modules/finance/shared/components/layout/missing-record"
 import { RecordOptionsSheet } from "@/src/modules/finance/shared/components/record-options-sheet"
 import { showUndoToast } from "@/src/modules/finance/shared/components/undo-toast"
@@ -366,7 +366,7 @@ function InstitutionDetailScreenBody({
     <>
       {error ? (
         <div className="mb-3">
-          <FinanceErrorState
+          <ErrorState
             message={financeLoadErrorMessage(error)}
             onRetry={() => {
               void institutionsQuery.refetch()

@@ -3,9 +3,9 @@
 import { BudgetSheet } from "@/src/modules/finance/budgets/components/budget-sheet"
 import { FinanceGate } from "@/src/modules/finance/finance-gate"
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
-import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
+import { ErrorState } from "@/src/shared/components/feedback/error-state"
 import { MissingRecord } from "@/src/modules/finance/shared/components/layout/missing-record"
-import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
+import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
 import { FinanceProgressHero } from "@/src/modules/finance/shared/components/layout/progress-hero"
 import type { PlanningProgressTone } from "@/src/modules/finance/shared/components/planning-progress-card"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
@@ -241,7 +241,7 @@ function BudgetDetailScreenBody({ budgetId }: FinanceBudgetDetailProps) {
     <>
       {budgetQuery.error ? (
         <div className="mb-3">
-          <FinanceErrorState
+          <ErrorState
             message={financeLoadErrorMessage(budgetQuery.error)}
             onRetry={() => void budgetQuery.refetch()}
             isRetrying={budgetQuery.isFetching}
@@ -283,7 +283,7 @@ function BudgetDetailScreenBody({ budgetId }: FinanceBudgetDetailProps) {
 
       <div className="mx-4 flex flex-col gap-3">
         {movementsQuery.isError ? (
-          <FinanceErrorState
+          <ErrorState
             message={financeLoadErrorMessage(movementsQuery.error)}
             onRetry={() => void movementsQuery.refetch()}
             isRetrying={movementsQuery.isFetching}
@@ -293,7 +293,7 @@ function BudgetDetailScreenBody({ budgetId }: FinanceBudgetDetailProps) {
         <SummarySection title="Movimientos del periodo" icon={ChartPieIcon}>
           <AsyncRegion
             pending={movementsQuery.isPending}
-            pendingFallback={<FinanceListSkeleton rows={4} />}
+            pendingFallback={<ListSkeleton rows={4} />}
             empty={!movementsQuery.isError && movements.length === 0}
             emptyFallback={
               <Empty className="py-10">

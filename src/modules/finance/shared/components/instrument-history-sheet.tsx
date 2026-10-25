@@ -1,8 +1,8 @@
 "use client"
 
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
-import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
-import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
+import { ErrorState } from "@/src/shared/components/feedback/error-state"
+import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
 import {
   useInstrumentHistory,
   type InstrumentHistoryTarget,
@@ -52,7 +52,7 @@ export function InstrumentHistorySheet({
   return (
     <BottomSheet open={open} onOpenChange={onOpenChange} title="Historial">
       {historyQuery.isError ? (
-        <FinanceErrorState
+        <ErrorState
           message={financeErrorMessage(historyQuery.error)}
           onRetry={() => void historyQuery.refetch()}
           isRetrying={historyQuery.isFetching}
@@ -61,7 +61,7 @@ export function InstrumentHistorySheet({
 
       <AsyncRegion
         pending={historyQuery.isPending && !historyQuery.data}
-        pendingFallback={<FinanceListSkeleton />}
+        pendingFallback={<ListSkeleton />}
         empty={items.length === 0}
         emptyFallback={
           <Empty className="py-8">

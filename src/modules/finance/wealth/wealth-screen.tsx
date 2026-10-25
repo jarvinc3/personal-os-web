@@ -1,7 +1,7 @@
 "use client"
 
 import { FinanceGate } from "@/src/modules/finance/finance-gate"
-import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
+import { ErrorState } from "@/src/shared/components/feedback/error-state"
 import { useBalanceSheet } from "@/src/modules/finance/shared/hooks/use-balance-sheet"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
 import { useFinanceIntegrity } from "@/src/modules/finance/shared/hooks/use-integrity"
@@ -68,7 +68,7 @@ function WealthScreenBody() {
 
   if (balanceSheetQuery.isError && !balanceSheet) {
     return (
-      <FinanceErrorState
+      <ErrorState
         message={financeErrorMessage(balanceSheetQuery.error)}
         onRetry={() => void balanceSheetQuery.refetch()}
         isRetrying={balanceSheetQuery.isFetching}
@@ -133,7 +133,7 @@ function WealthScreenBody() {
       ) : null}
 
       {balanceSheetQuery.isError ? (
-        <FinanceErrorState
+        <ErrorState
           message={financeErrorMessage(balanceSheetQuery.error)}
           onRetry={() => void balanceSheetQuery.refetch()}
           isRetrying={balanceSheetQuery.isFetching}

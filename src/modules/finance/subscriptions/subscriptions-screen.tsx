@@ -1,6 +1,6 @@
 "use client"
 
-import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
+import { ErrorState } from "@/src/shared/components/feedback/error-state"
 import { FinanceGate } from "@/src/modules/finance/finance-gate"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
 import {
@@ -96,7 +96,7 @@ function SubscriptionsScreenBody() {
       />
 
       {summaryQuery.isError ? (
-        <FinanceErrorState
+        <ErrorState
           message={financeErrorMessage(summaryQuery.error)}
           onRetry={() => void summaryQuery.refetch()}
           isRetrying={summaryQuery.isFetching}

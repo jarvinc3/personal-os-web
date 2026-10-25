@@ -3,10 +3,10 @@
 import { BrandLogo } from "@/src/modules/finance/shared/components/brand-logo"
 import { GlossaryHelpButton } from "@/src/modules/help"
 import { FinanceGate } from "@/src/modules/finance/finance-gate"
-import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
+import { ErrorState } from "@/src/shared/components/feedback/error-state"
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
 import { MissingRecord } from "@/src/modules/finance/shared/components/layout/missing-record"
-import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
+import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
 import { FinanceProgressHero } from "@/src/modules/finance/shared/components/layout/progress-hero"
 import { LoanSurfaceMark } from "@/src/modules/finance/loans/components/loan-progress-card"
 import { LoanAmortizationSheet } from "@/src/modules/finance/loans/components/amortization-sheet"
@@ -260,7 +260,7 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
     <>
       {loansQuery.error ? (
         <div className="mb-3">
-          <FinanceErrorState
+          <ErrorState
             message={financeLoadErrorMessage(loansQuery.error)}
             onRetry={() => void loansQuery.refetch()}
             isRetrying={loansQuery.isFetching}
@@ -366,7 +366,7 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
           </Button>
         ) : null}
         {installmentsQuery.isError ? (
-          <FinanceErrorState
+          <ErrorState
             message={financeLoadErrorMessage(installmentsQuery.error)}
             onRetry={() => void installmentsQuery.refetch()}
             isRetrying={installmentsQuery.isFetching}
@@ -375,7 +375,7 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
 
         <AsyncRegion
           pending={installmentsQuery.isPending}
-          pendingFallback={<FinanceListSkeleton rows={5} />}
+          pendingFallback={<ListSkeleton rows={5} />}
           empty={!installmentsQuery.isError && installments.length === 0}
           emptyFallback={
             <Empty className="py-10">

@@ -1,7 +1,7 @@
 "use client"
 
 import { FinanceGate } from "@/src/modules/finance/finance-gate"
-import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
+import { ErrorState } from "@/src/shared/components/feedback/error-state"
 import { MissingRecord } from "@/src/modules/finance/shared/components/layout/missing-record"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
 import {
@@ -164,7 +164,7 @@ function SubscriptionDetailBody({
     <>
       {subscriptionQuery.error ? (
         <div className="mb-3">
-          <FinanceErrorState
+          <ErrorState
             message={financeErrorMessage(subscriptionQuery.error)}
             onRetry={() => void subscriptionQuery.refetch()}
             isRetrying={subscriptionQuery.isFetching}

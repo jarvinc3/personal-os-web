@@ -1,8 +1,8 @@
 "use client"
 
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
-import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
-import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
+import { ErrorState } from "@/src/shared/components/feedback/error-state"
+import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
 import {
   Empty,
   EmptyDescription,
@@ -151,7 +151,7 @@ function MerchantDetailBody({ merchantId }: { merchantId: string }) {
   if (merchantQuery.isError || !merchant) {
     if (merchantQuery.isError) {
       return (
-        <FinanceErrorState
+        <ErrorState
           message={financeErrorMessage(merchantQuery.error)}
           onRetry={() => void merchantQuery.refetch()}
           isRetrying={merchantQuery.isFetching}
@@ -298,7 +298,7 @@ function MerchantDetailBody({ merchantId }: { merchantId: string }) {
       </div>
 
       {movementsQuery.isError ? (
-        <FinanceErrorState
+        <ErrorState
           message={financeErrorMessage(movementsQuery.error)}
           onRetry={() => void movementsQuery.refetch()}
           isRetrying={movementsQuery.isFetching}
@@ -308,7 +308,7 @@ function MerchantDetailBody({ merchantId }: { merchantId: string }) {
       <SummarySection title="Movimientos" icon={StoreIcon}>
         <AsyncRegion
           pending={movementsQuery.isPending && !movementsQuery.data}
-          pendingFallback={<FinanceListSkeleton />}
+          pendingFallback={<ListSkeleton />}
           empty={movements.length === 0}
           emptyFallback={
             <Empty className="py-6">

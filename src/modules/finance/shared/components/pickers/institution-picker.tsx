@@ -9,6 +9,11 @@ import {
 import { selectableBankInstitutions } from "@/src/modules/finance/shared/lib/cash"
 import { CATALOG_NONE } from "@/src/modules/finance/shared/constants/catalog"
 import type { FinanceInstitution } from "@/src/modules/finance/shared/types/entities"
+import {
+  Empty,
+  EmptyHeader,
+  EmptyTitle,
+} from "@/src/shared/components/ui/empty"
 import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
 import { ChevronDownIcon } from "lucide-react"
@@ -92,9 +97,11 @@ export function InstitutionPickerSheet({
           />
         ) : null}
         {selectable.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
-            No hay instituciones en el catálogo.
-          </p>
+          <Empty size="sm">
+            <EmptyHeader>
+              <EmptyTitle>No hay instituciones en el catálogo</EmptyTitle>
+            </EmptyHeader>
+          </Empty>
         ) : (
           selectable.map((institution) => (
             <InstitutionWalletCard

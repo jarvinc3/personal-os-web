@@ -6,7 +6,7 @@ import { useCallback } from "react"
 
 import { FinanceGate } from "@/src/modules/finance/finance-gate"
 import { CardFormScreen } from "@/src/modules/finance/cards/components/card-form-screen"
-import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
+import { ErrorState } from "@/src/shared/components/feedback/error-state"
 import { MissingRecord } from "@/src/modules/finance/shared/components/layout/missing-record"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
@@ -103,7 +103,7 @@ function CardEditScreenBody({ cardId }: CardEditScreenProps) {
 
   if (cardsQuery.error) {
     return (
-      <FinanceErrorState
+      <ErrorState
         message={financeLoadErrorMessage(cardsQuery.error)}
         onRetry={() => void cardsQuery.refetch()}
         isRetrying={cardsQuery.isFetching}

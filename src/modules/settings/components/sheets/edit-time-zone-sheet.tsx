@@ -2,6 +2,11 @@
 
 import { useProfile } from "@/src/modules/settings/hooks/use-profile"
 import type { SettingsSheetProps } from "@/src/modules/settings/types/sheet.types"
+import {
+  Empty,
+  EmptyHeader,
+  EmptyTitle,
+} from "@/src/shared/components/ui/empty"
 import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import { appToast } from "@/src/shared/lib/app-toast"
@@ -87,8 +92,12 @@ export function EditTimeZoneSheet({ open, onOpenChange }: SettingsSheetProps) {
           )
         })}
         {visible.length === 0 ? (
-          <li className="px-2 py-3 text-sm text-muted-foreground">
-            Ninguna zona coincide.
+          <li>
+            <Empty size="sm">
+              <EmptyHeader>
+                <EmptyTitle>Ninguna zona coincide</EmptyTitle>
+              </EmptyHeader>
+            </Empty>
           </li>
         ) : null}
       </ul>

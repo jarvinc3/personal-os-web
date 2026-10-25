@@ -27,7 +27,7 @@ export function NoticesSection() {
         name="Alert"
         importPath="@/src/shared/components/ui/alert"
         states="default, warning, info, destructive, con acción"
-        note="Un aviso puntual dentro de un flujo. El error de una sección es FinanceErrorState, no un Alert."
+        note="Un aviso puntual dentro de un flujo. El error de una sección es ErrorState, no un Alert."
       >
         <Alert>
           <InfoIcon />

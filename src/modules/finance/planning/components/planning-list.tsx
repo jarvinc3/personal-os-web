@@ -1,7 +1,7 @@
 "use client"
 
 import { FinanceBudgetsList } from "@/src/modules/finance/budgets"
-import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
+import { ErrorState } from "@/src/shared/components/feedback/error-state"
 import {
   debtorFirstName,
   formatSharePendingTotals,
@@ -201,7 +201,7 @@ export function FinancePlanningList({
   return (
     <>
       {errorMessage ? (
-        <FinanceErrorState
+        <ErrorState
           message={errorMessage}
           onRetry={() => {
             void savingsQuery.refetch()

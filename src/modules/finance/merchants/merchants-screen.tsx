@@ -2,8 +2,8 @@
 
 import { MerchantCard } from "@/src/modules/finance/merchants/components/merchant-card"
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
-import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
-import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
+import { ErrorState } from "@/src/shared/components/feedback/error-state"
+import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
 import { FinanceGate } from "@/src/modules/finance/finance-gate"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
 import { useMerchants } from "@/src/modules/finance/shared/hooks/use-merchants"
@@ -80,7 +80,7 @@ function MerchantsScreenBody() {
       />
 
       {listQuery.isError ? (
-        <FinanceErrorState
+        <ErrorState
           message={financeErrorMessage(listQuery.error)}
           onRetry={() => void listQuery.refetch()}
           isRetrying={listQuery.isFetching}
@@ -89,7 +89,7 @@ function MerchantsScreenBody() {
 
       <AsyncRegion
         pending={listQuery.isPending && !listQuery.data}
-        pendingFallback={<FinanceListSkeleton />}
+        pendingFallback={<ListSkeleton />}
         empty={items.length === 0}
         emptyFallback={
           <Empty className="py-8">

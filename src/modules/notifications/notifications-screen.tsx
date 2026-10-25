@@ -1,6 +1,7 @@
 "use client"
 
 import { NotificationEmptyState } from "@/src/modules/notifications/components/notification-empty-state"
+import { ErrorState } from "@/src/shared/components/feedback/error-state"
 import { NotificationFilters } from "@/src/modules/notifications/components/notification-filters"
 import { NotificationGroupList } from "@/src/modules/notifications/components/notification-group-list"
 import { NotificationHeaderMenu } from "@/src/modules/notifications/components/notification-header-menu"
@@ -227,6 +228,19 @@ function NotificationsScreenBody() {
     return (
       <div className="mx-auto flex max-w-2xl flex-col gap-4 p-4 pb-16 md:px-6">
         <NotificationListSkeleton />
+        {preferencesSheet}
+      </div>
+    )
+  }
+
+  if (notificationsQuery.isError) {
+    return (
+      <div className="mx-auto flex max-w-2xl flex-col gap-4 p-4 pb-16 md:px-6">
+        <ErrorState
+          message="Revisa tu conexión e inténtalo de nuevo."
+          onRetry={() => void notificationsQuery.refetch()}
+          isRetrying={notificationsQuery.isFetching}
+        />
         {preferencesSheet}
       </div>
     )

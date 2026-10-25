@@ -11,7 +11,7 @@ import {
 } from "@/src/modules/finance/receivables/lib/public-receivable-share"
 import { formatSharePendingTotals } from "@/src/modules/finance/receivables/lib/receivable-share"
 import { ReceivableCard } from "@/src/modules/finance/receivables/components/receivable-card"
-import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
+import { ErrorState } from "@/src/shared/components/feedback/error-state"
 import { FinanceProgressHero } from "@/src/modules/finance/shared/components/layout/progress-hero"
 import { SettingsSection } from "@/src/shared/components/settings/settings-section"
 import { financeLoadErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
@@ -81,7 +81,7 @@ export function PublicReceivableShareScreen({
             </EmptyHeader>
           </Empty>
         ) : (
-          <FinanceErrorState
+          <ErrorState
             message={financeLoadErrorMessage(shareQuery.error)}
             onRetry={() => void shareQuery.refetch()}
             isRetrying={shareQuery.isFetching}

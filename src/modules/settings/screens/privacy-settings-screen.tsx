@@ -1,6 +1,7 @@
 "use client"
 
 import { useAuthGuard } from "@/src/modules/auth"
+import { ErrorState } from "@/src/shared/components/feedback/error-state"
 import { SettingsSecondaryPage } from "@/src/modules/settings/components/layout/settings-secondary-page"
 import { DeleteAccountSheet } from "@/src/modules/settings/components/sheets/delete-account-sheet"
 import { WipeDataSheet } from "@/src/modules/settings/components/sheets/wipe-data-sheet"
@@ -81,10 +82,11 @@ function PrivacySettingsScreenBody() {
           accentColor="#8b5cf6"
         />
         {consentQuery.isError ? (
-          <p className="px-3 text-xs text-destructive" role="status">
-            No se pudo cargar el consentimiento. Intenta volver a abrir esta
-            página.
-          </p>
+          <ErrorState
+            message="No se pudo cargar el consentimiento de analítica."
+            onRetry={() => void consentQuery.refetch()}
+            isRetrying={consentQuery.isFetching}
+          />
         ) : null}
       </SettingsSection>
 

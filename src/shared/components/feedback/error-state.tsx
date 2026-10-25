@@ -11,17 +11,17 @@ import {
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
 
-type FinanceErrorStateProps = {
+type ErrorStateProps = {
   message: string
   onRetry?: () => void
   isRetrying?: boolean
 }
 
-export function FinanceErrorState({
+export function ErrorState({
   message,
   onRetry,
   isRetrying = false,
-}: FinanceErrorStateProps) {
+}: ErrorStateProps) {
   return (
     <Empty className="rounded-2xl border border-destructive bg-card p-2 text-destructive">
       <EmptyHeader>
