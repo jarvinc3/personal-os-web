@@ -11,7 +11,12 @@ import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-financ
 import { useInstitutions } from "@/src/modules/finance/shared/hooks/use-institutions"
 import { useLoanPrepayment } from "@/src/modules/finance/shared/hooks/use-loans"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
-import { formatCalendarDate } from "@/src/modules/finance/shared/lib/ledger-form"
+import {
+  PREPAYMENT_MODE_EXPLANATION,
+  defaultPrepaymentAccountId,
+  prepaymentPreviewLines,
+  type LoanPrepaymentPreview,
+} from "@/src/modules/finance/shared/lib/loan-prepayment"
 import {
   encodeLedgerTarget,
   splitLedgerTarget,
@@ -41,14 +46,6 @@ import {
 import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 
-type PrepaymentPreview = {
-  newBalance: number
-  totalInstallments: number
-  installmentAmount: number
-  interestRemaining: number
-  newEndDate: string
-}
-
 type LoanPrepaymentSheetProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -56,6 +53,10 @@ type LoanPrepaymentSheetProps = {
   lenderName: string
   currency: string
   penaltyPct: string | null
+  /** «Se paga desde» del préstamo: la cuenta que se propone para el abono. */
+  loanAccountId: string | null
+  /** Cuotas actuales del préstamo, para explicar si el plazo cambia. */
+  currentInstallments: number
 }
 
 export function LoanPrepaymentSheet({
@@ -65,6 +66,8 @@ export function LoanPrepaymentSheet({
   lenderName,
   currency,
   penaltyPct,
+  loanAccountId,
+  currentInstallments,
 }: LoanPrepaymentSheetProps) {
   const prepayment = useLoanPrepayment()
   const { config, formatLocale } = useFinanceEnabled()
@@ -81,7 +84,9 @@ export function LoanPrepaymentSheet({
   const { picker, openPicker, closeHandlerFor } = usePicker<"none" | "account">(
     "none"
   )
-  const effectiveAccountId = accountId || accounts[0]?.id || ""
+  const effectiveAccountId =
+    accountId ||
+    defaultPrepaymentAccountId({ accounts, loanAccountId, currency })
   const parsedAmount = parseFinanceMoney(amount)
   const display = {
     currency,
@@ -94,11 +99,19 @@ export function LoanPrepaymentSheet({
     queryKey: ["finance", "loans", loanId, "prepayment-preview", amount, mode],
     enabled: open && parsedAmount !== null && parsedAmount > 0,
     queryFn: () =>
-      apiGet<PrepaymentPreview>(
+      apiGet<LoanPrepaymentPreview>(
         `${API_ENDPOINTS.FINANCE.LOAN_PREPAYMENTS_PREVIEW(loanId)}?amount=${parsedAmount}&mode=${mode}`
       ),
   })
   const preview = previewQuery.data
+  const previewLines = preview
+    ? prepaymentPreviewLines({
+        preview,
+        currentInstallments,
+        mode,
+        display,
+      })
+    : []
 
   const penalty = penaltyPct ? Number(penaltyPct) * (parsedAmount ?? 0) : 0
 
@@ -185,6 +198,7 @@ export function LoanPrepaymentSheet({
               Reducir cuota
             </Button>
           </div>
+          <FinanceHelpText>{PREPAYMENT_MODE_EXPLANATION[mode]}</FinanceHelpText>
           <Field className="gap-1">
             <FieldLabel className="text-sm text-muted-foreground">
               Cuenta de origen
@@ -205,11 +219,9 @@ export function LoanPrepaymentSheet({
               <FieldError>Necesitas una cuenta activa.</FieldError>
             ) : null}
           </Field>
-          {preview ? (
-            <FinanceHelpText>
-              {`Termina el ${formatCalendarDate(preview.newEndDate, display.locale)} · Interés restante ${formatFinanceMoney(preview.interestRemaining, display)}`}
-            </FinanceHelpText>
-          ) : null}
+          {previewLines.map((line) => (
+            <FinanceHelpText key={line}>{line}</FinanceHelpText>
+          ))}
           {penalty > 0 ? (
             <FinanceHelpText>
               {`Penalidad estimada ${formatFinanceMoney(penalty, display)}`}

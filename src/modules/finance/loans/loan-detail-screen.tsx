@@ -483,6 +483,8 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
         lenderName={loan.lenderName}
         currency={loan.currency}
         penaltyPct={loan.prepaymentPenaltyPct}
+        loanAccountId={loan.accountId}
+        currentInstallments={loan.totalInstallments}
       />
 
       <DeleteRecordDialog
