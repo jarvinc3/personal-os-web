@@ -15,6 +15,7 @@ import { CATALOG_NONE } from "@/src/modules/finance/shared/constants/catalog"
 import { useCategories } from "@/src/modules/finance/shared/hooks/use-categories"
 import { useDiscardChanges } from "@/src/modules/finance/shared/hooks/use-discard-changes"
 import {
+  useCreateMerchant,
   useDeleteMerchantLogo,
   useUpdateMerchant,
   useUploadMerchantLogo,
@@ -86,19 +87,27 @@ type MerchantEditSheetProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
   merchant: FinanceMerchant | null
+  /**
+   * «create» uses the same form with no merchant behind: the own logo is
+   * uploaded later, on the merchant that already exists.
+   */
+  mode?: "edit" | "create"
 }
 
 export function MerchantEditSheet({
   open,
   onOpenChange,
   merchant,
+  mode = "edit",
 }: MerchantEditSheetProps) {
+  const isCreate = mode === "create"
   const categoriesQuery = useCategories(open)
   const categories = useMemo(
     () => categoriesQuery.data ?? [],
     [categoriesQuery.data]
   )
   const updateMutation = useUpdateMerchant()
+  const createMutation = useCreateMerchant()
   const logoMutation = useUploadMerchantLogo()
   const deleteLogoMutation = useDeleteMerchantLogo()
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -151,6 +160,7 @@ export function MerchantEditSheet({
   const categoryType: FinanceCategoryType =
     pickedType ?? selectedCategory?.type ?? "EXPENSE"
   const isPending =
+    createMutation.isPending ||
     updateMutation.isPending ||
     logoMutation.isPending ||
     deleteLogoMutation.isPending
@@ -169,20 +179,25 @@ export function MerchantEditSheet({
   )
 
   async function onSubmit(values: MerchantFormValues) {
-    if (!merchant) {
-      return
-    }
     setConflictMerchantId(null)
+    const body = {
+      categoryId: values.categoryId === CATALOG_NONE ? null : values.categoryId,
+      aliases: values.aliases,
+      ...(values.domain === undefined ? {} : { domain: values.domain }),
+    }
     try {
+      if (isCreate) {
+        await createMutation.mutateAsync({ name: values.name.trim(), ...body })
+        appToast.success({ text1: "Comercio creado" })
+        onOpenChange(false)
+        return
+      }
+      if (!merchant) {
+        return
+      }
       await updateMutation.mutateAsync({
         id: merchant.id,
-        body: {
-          name: values.name.trim(),
-          categoryId:
-            values.categoryId === CATALOG_NONE ? null : values.categoryId,
-          aliases: values.aliases,
-          ...(values.domain === undefined ? {} : { domain: values.domain }),
-        },
+        body: { name: values.name.trim(), ...body },
       })
       if (values.removeLogo) {
         await deleteLogoMutation.mutateAsync(merchant.id)
@@ -259,8 +274,12 @@ export function MerchantEditSheet({
         open={open}
         onOpenChange={requestOpenChange}
         pending={isPending}
-        title="Editar comercio"
-        description="Cambia el nombre, el logo, la categoría y los nombres alternativos."
+        title={isCreate ? "Nuevo comercio" : "Editar comercio"}
+        description={
+          isCreate
+            ? "Escribe el nombre y, si quieres, su categoría. El logo propio se añade después, al editar el comercio."
+            : "Cambia el nombre, el logo, la categoría y los nombres alternativos."
+        }
         actions={{
           close: (
             <Button
@@ -277,7 +296,7 @@ export function MerchantEditSheet({
             <Button
               type="button"
               className="flex-1"
-              disabled={isPending || !isDirty || !merchant}
+              disabled={isPending || (!isCreate && (!isDirty || !merchant))}
               onClick={submitForm(onSubmit)}
             >
               {isPending ? (
@@ -305,26 +324,30 @@ export function MerchantEditSheet({
                 {previewDomain ?? merchant?.normalizedKey ?? "—"}
               </p>
             </div>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              disabled={isPending}
-              onClick={() => fileInputRef.current?.click()}
-            >
-              <ImagePlusIcon className="size-4 shrink-0" />
-              Imagen
-            </Button>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/png,image/jpeg,image/webp"
-              className="hidden"
-              onChange={(event) => {
-                void onPickLogo(event.target.files?.[0])
-                event.target.value = ""
-              }}
-            />
+            {isCreate ? null : (
+              <>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={isPending}
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <ImagePlusIcon className="size-4 shrink-0" />
+                  Imagen
+                </Button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  className="hidden"
+                  onChange={(event) => {
+                    void onPickLogo(event.target.files?.[0])
+                    event.target.value = ""
+                  }}
+                />
+              </>
+            )}
           </div>
 
           <Controller
@@ -370,7 +393,7 @@ export function MerchantEditSheet({
               setValue("removeLogo", false, { shouldDirty: true })
             }}
           />
-          {previewLogo ? (
+          {!isCreate && previewLogo ? (
             <Button
               type="button"
               variant="outline"

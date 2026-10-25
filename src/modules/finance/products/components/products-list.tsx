@@ -1,7 +1,8 @@
 "use client"
 
 import { InstitutionSwapStack } from "@/src/modules/finance/products/components/institution-swap-stack"
-import { AccountSheet, CategorySheet } from "@/src/modules/finance/catalog"
+import { CategorySheet } from "@/src/modules/finance/catalog"
+import { MerchantEditSheet } from "@/src/modules/finance/merchants/components/merchant-edit-sheet"
 import { FinanceExpenseTrendBadge } from "@/src/modules/finance/shared/components/expense-trend-badge"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
@@ -62,7 +63,6 @@ import {
   StoreIcon,
   TagsIcon,
   Trash2Icon,
-  WalletIcon,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useMemo } from "react"
@@ -71,13 +71,11 @@ import { FinanceHeroSection } from "@/src/modules/finance/products/components/he
 type FinanceProductsListProps = {
   enabled: boolean
   display: FinanceMoneyDisplay
-  defaultCurrency: string
 }
 
 export function FinanceProductsList({
   enabled,
   display,
-  defaultCurrency,
 }: FinanceProductsListProps) {
   const router = useRouter()
   const queryClient = useQueryClient()
@@ -96,22 +94,12 @@ export function FinanceProductsList({
   const reconciliationItems = reconciliationStatusQuery.data?.items
   const recalculateBalance = useRecalculateBalance()
   const {
-    open: openAccountSheet,
-    sheetId: accountSheetId,
-    setOpen: setOpenAccountSheet,
-  } = useSheetParam(FINANCE_SHEET_KEYS.account)
-  const {
     open: openCategorySheet,
     sheetId: categorySheetId,
     setOpen: setOpenCategorySheet,
   } = useSheetParam(FINANCE_SHEET_KEYS.category)
-  const editingAccount = useSheetListEntity(
-    openAccountSheet,
-    accountSheetId,
-    accountsQuery.data,
-    accountsQuery.isPending,
-    setOpenAccountSheet
-  )
+  const { open: openMerchantSheet, setOpen: setOpenMerchantSheet } =
+    useSheetParam(FINANCE_SHEET_KEYS.merchantCreate)
   const editingCategory = useSheetListEntity(
     openCategorySheet,
     categorySheetId,
@@ -376,21 +364,21 @@ export function FinanceProductsList({
         actions={[
           {
             icon: <Building2Icon className="size-5" />,
-            label: "Instituc...",
+            label: "Institución",
             onClick: () => router.push(APP_ROUTES.app.financeInstitutionNew),
             disabled: !enabled,
             color: "bg-emerald-700",
           },
           {
-            icon: <WalletIcon className="size-5" />,
-            label: "Efectivo",
-            onClick: () => setOpenAccountSheet(true, null),
+            icon: <StoreIcon className="size-5" />,
+            label: "Comercio",
+            onClick: () => setOpenMerchantSheet(true),
             disabled: !enabled,
-            color: "bg-slate-600",
+            color: "bg-sky-700",
           },
           {
             icon: <TagsIcon className="size-5" />,
-            label: "Categor...",
+            label: "Categoría",
             onClick: () => {
               void prefetchFinanceCategories(queryClient)
               setOpenCategorySheet(true, null)
@@ -401,17 +389,11 @@ export function FinanceProductsList({
         ]}
       />
 
-      <AccountSheet
-        open={openAccountSheet}
-        onOpenChange={setOpenAccountSheet}
-        pending={Boolean(accountSheetId) && !editingAccount}
-        account={editingAccount}
-        institutions={institutionsQuery.data ?? []}
-        defaultCurrency={
-          balanceSheetQuery.data?.baseCurrency ?? defaultCurrency
-        }
-        defaultType="CASH"
-        cash={balanceSheetQuery.data?.cash}
+      <MerchantEditSheet
+        mode="create"
+        open={openMerchantSheet}
+        onOpenChange={setOpenMerchantSheet}
+        merchant={null}
       />
 
       <CategorySheet

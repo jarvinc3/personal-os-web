@@ -75,6 +75,23 @@ export function useMerchantSuggest(enabled: boolean, merchant: string) {
   })
 }
 
+export type CreateMerchantBody = {
+  name: string
+  categoryId: string | null
+  aliases: string[]
+  /** Brand domain behind the logo; the own image needs an existing merchant. */
+  domain?: string | null
+}
+
+export function useCreateMerchant() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (body: CreateMerchantBody) =>
+      apiPost<FinanceMerchant>(API_ENDPOINTS.FINANCE.MERCHANTS, body),
+    onSuccess: () => invalidateMerchants(queryClient),
+  })
+}
+
 export function useUpdateMerchant() {
   const queryClient = useQueryClient()
   return useMutation({

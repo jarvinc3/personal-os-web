@@ -2,20 +2,20 @@
 
 Rutas:
 
-| Path                                                         | UI                                                                  |
-| ------------------------------------------------------------ | ------------------------------------------------------------------- |
-| `/finance/products`                                          | Instituciones, cuentas, tarjetas. Atajos Categorías y Correos       |
-| `/finance/institutions/new`                                  | Alta de institución: catálogo, vista previa y siguiente paso        |
-| `/finance/institutions/[institutionId]/edit`                 | Edición de institución, sin el paso de catálogo                     |
-| `/finance/cards/new`                                         | Alta de tarjeta con vista previa                                    |
-| `/finance/cards/[cardId]/edit`                               | Edición de tarjeta                                                  |
-| `/finance/categories`                                        | Categorías                                                          |
-| `/finance/sync`                                              | Buzones Gmail y vínculos de institución (no embebido en el listado) |
-| `/finance/institutions/[institutionId]`                      | Detalle institución; atajo vincular correo                          |
-| `/finance/institutions/[institutionId]/accounts/[accountId]` | Detalle cuenta; suma los movimientos de sus tarjetas de débito      |
-| `/finance/institutions/[institutionId]/cards/[cardId]`       | Detalle tarjeta de crédito: estados de cuenta y movimientos         |
-| `/finance/cash/[accountId]`                                  | Detalle del efectivo sin institución                                |
-| `/finance/loans/[loanId]`                                    | Detalle préstamo: saldo, progreso y cuotas                          |
+| Path                                                         | UI                                                                                                                                                                        |
+| ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/finance/products`                                          | Instituciones, cuentas y tarjetas con el balance. Atajos a cargos bancarios, categorías, comercios y papelera; el botón de crear ofrece institución, comercio y categoría |
+| `/finance/institutions/new`                                  | Alta de institución: catálogo, vista previa y siguiente paso                                                                                                              |
+| `/finance/institutions/[institutionId]/edit`                 | Edición de institución, sin el paso de catálogo                                                                                                                           |
+| `/finance/cards/new`                                         | Alta de tarjeta con vista previa                                                                                                                                          |
+| `/finance/cards/[cardId]/edit`                               | Edición de tarjeta                                                                                                                                                        |
+| `/finance/categories`                                        | Categorías                                                                                                                                                                |
+| `/finance/sync`                                              | Buzones Gmail y vínculos de institución (no embebido en el listado)                                                                                                       |
+| `/finance/institutions/[institutionId]`                      | Detalle institución; atajo vincular correo                                                                                                                                |
+| `/finance/institutions/[institutionId]/accounts/[accountId]` | Detalle cuenta; suma los movimientos de sus tarjetas de débito                                                                                                            |
+| `/finance/institutions/[institutionId]/cards/[cardId]`       | Detalle tarjeta de crédito: estados de cuenta y movimientos                                                                                                               |
+| `/finance/cash/[accountId]`                                  | Detalle del efectivo sin institución                                                                                                                                      |
+| `/finance/loans/[loanId]`                                    | Detalle préstamo: saldo, progreso y cuotas                                                                                                                                |
 
 Totales de `GET /finance/balance-sheet` (no sumar monedas en cliente). Cuentas CHECKING/SAVINGS/INVESTMENT exigen institución; CASH no. Alta cuenta con saldo inicial opcional. Archivo cuenta `PATCH isActive:false`; institución/tarjeta DELETE (409 + `details.dependents`). Saldos tarjeta `POST /cards/:id/balances` números. CREDIT: campo **Balance disponible**, límite obligatorio. Categorías: `icon` un emoji, elegido en un panel con búsqueda o escrito con el teclado; lista con color de la card, FAB de alta y orden solo en memoria. `PATCH` puede cambiar `type` si no hay padre (`parentId: null` desvincula); con padre el tipo no se envía. DELETE system → 404.
 
@@ -26,6 +26,8 @@ Evidencia: `src/modules/finance/products/`, `src/modules/finance/institutions/`,
 `/finance/merchants` lista los comercios con `MerchantCard` (categoría como chip, marca de «Sugerida» y de «¿Duplicado?») y `/finance/merchants/[id]` muestra el detalle con la misma card en `size="header"`, que incluye los nombres alternativos. La categoría es «sugerida» cuando el back la eligió (`categorySource` `LEARNED` o `KEYWORD`); el sheet de editar (hoja por ruta, `merchant-edit-sheet`) permite confirmarla con el mismo `categoryId` o cambiarla por otra.
 
 El sheet de editar también edita los nombres alternativos (`aliases`), busca la marca del logo con `BrandPicker` (`domain`), permite subir una imagen (`POST /merchants/:id/logo`) y quitar el logo (`DELETE /merchants/:id/logo` más `domain: null`). El selector de tipo de categoría parte del tipo que ya tiene el comercio.
+
+El mismo sheet tiene un modo «crear» que abre el atajo «Comercio» del botón de crear en Productos (hoja por ruta, `merchant-create-sheet`): `POST /finance/merchants` con nombre obligatorio de 1 a 120 caracteres, categoría opcional, `domain` de la marca y `aliases`. No ofrece subir logo propio, porque esa imagen se asocia a un comercio que ya existe: se añade después al editarlo. Al guardar avisa «Comercio creado» y cierra la hoja; un 409 por nombre repetido muestra el enlace al comercio que ya lo tiene.
 
 `GET /finance/merchants/:id/duplicates` devuelve los candidatos a duplicado con su motivo (código del back traducido en `merchants/lib/merchant-duplicates.ts`). El detalle avisa «Posible duplicado de …» con «Unir» (abre el sheet de unir con ese candidato elegido) y «No es duplicado» (`POST /duplicates/:otherId/dismiss`, con «Deshacer» en el toast, que llama al `DELETE` del mismo par). El sheet de unir muestra primero «Sugeridos» y debajo la búsqueda. La lista marca con «¿Duplicado?» los comercios con `possibleDuplicates > 0`. Un 409 por nombre repetido se muestra con un enlace al comercio que ya lo tiene (`existingMerchantId` de la respuesta).
 

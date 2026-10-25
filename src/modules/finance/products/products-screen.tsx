@@ -21,11 +21,5 @@ function ProductsScreenBody() {
     locale: formatLocale,
   }
 
-  return (
-    <FinanceProductsList
-      enabled={isEnabled}
-      display={display}
-      defaultCurrency={config.baseCurrency}
-    />
-  )
+  return <FinanceProductsList enabled={isEnabled} display={display} />
 }
