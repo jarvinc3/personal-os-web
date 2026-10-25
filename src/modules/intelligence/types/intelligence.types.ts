@@ -6,6 +6,7 @@ export type IntelligenceDashboard = {
         connected: true
         emailAddress: string
         initialSyncCompletedAt: string | null
+        syncInProgress: boolean
         lastSyncedAt: string | null
         lastRecoverySyncAt: string | null
         lastSyncErrorCode: string | null

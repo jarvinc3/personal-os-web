@@ -38,8 +38,8 @@ export function useIntelligence() {
     refetchInterval: (query) => {
       const connection = query.state.data?.connection
       return connection?.connected &&
-        !connection.initialSyncCompletedAt &&
-        !connection.lastSyncErrorCode
+        (connection.syncInProgress ||
+          (!connection.initialSyncCompletedAt && !connection.lastSyncErrorCode))
         ? 5_000
         : false
     },

@@ -146,18 +146,36 @@ function IntelligenceScreenBody() {
                 continuar.
               </div>
             ) : null}
+            {dashboard.connection.syncInProgress ? (
+              <div
+                className="flex items-center gap-2 px-2 text-sm text-muted-foreground"
+                role="status"
+              >
+                <LoaderCircle
+                  className="size-4 shrink-0 animate-spin"
+                  aria-hidden="true"
+                />
+                Sincronizando correo · {dashboard.counters.importedMessages}{" "}
+                mensajes importados
+              </div>
+            ) : null}
             <div className="flex justify-end px-2 pb-1">
               <Button
                 type="button"
                 onClick={() => syncMutation.mutate()}
-                disabled={syncMutation.isPending}
+                disabled={
+                  syncMutation.isPending || dashboard.connection.syncInProgress
+                }
               >
-                {syncMutation.isPending ? (
+                {syncMutation.isPending ||
+                dashboard.connection.syncInProgress ? (
                   <LoaderCircle className="animate-spin" aria-hidden="true" />
                 ) : (
                   <RefreshCw aria-hidden="true" />
                 )}
-                Sincronizar ahora
+                {syncMutation.isPending || dashboard.connection.syncInProgress
+                  ? "Sincronizando…"
+                  : "Sincronizar ahora"}
               </Button>
             </div>
           </>
