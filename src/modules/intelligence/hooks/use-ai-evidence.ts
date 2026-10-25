@@ -3,7 +3,6 @@
 import { apiGet, apiPost } from "@/src/config/api-client"
 import type {
   AiAnalysisRunSummary,
-  AiDatasetSummary,
   AiHumanVerificationInput,
   AiReviewQueuePage,
 } from "@/src/modules/intelligence/types/intelligence.types"
@@ -20,21 +19,19 @@ const EVIDENCE_QUERY_KEY = ["intelligence", "evidence"] as const
 
 export function useAiEvidence(
   enabled: boolean,
-  view: "review" | "runs" = "review"
+  view: "review" | "runs" = "review",
+  partition: "TRAIN" | "VALIDATION" | "HOLDOUT" | "ALL" = "ALL"
 ) {
   const session = useAppStore((state) => state.session)
   const queryClient = useQueryClient()
   const active = Boolean(session && enabled)
-  const datasetQuery = useQuery({
-    queryKey: [...EVIDENCE_QUERY_KEY, "dataset"],
-    queryFn: ({ signal }) =>
-      apiGet<AiDatasetSummary>(API_ENDPOINTS.INTELLIGENCE.DATASET, signal),
-    enabled: active && view === "review",
-  })
   const reviewQueueQuery = useInfiniteQuery({
-    queryKey: [...EVIDENCE_QUERY_KEY, "review-queue"],
+    queryKey: [...EVIDENCE_QUERY_KEY, "review-queue", partition],
     queryFn: ({ pageParam, signal }) => {
       const params = new URLSearchParams()
+      if (partition !== "ALL") {
+        params.set("partition", partition)
+      }
       if (pageParam) {
         params.set("cursor", pageParam)
       }
@@ -72,5 +69,5 @@ export function useAiEvidence(
     },
   })
 
-  return { datasetQuery, reviewQueueQuery, runsQuery, verifyMutation }
+  return { reviewQueueQuery, runsQuery, verifyMutation }
 }

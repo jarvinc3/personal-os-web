@@ -8,6 +8,8 @@ import type {
 } from "@/src/modules/intelligence/types/intelligence.types"
 import { API_ENDPOINTS } from "@/src/shared/constants/api-endpoints"
 import { useAppStore } from "@/src/shared/store/app-store"
+import { useAiEmailSyncSocket } from "@/src/modules/intelligence/hooks/use-ai-email-sync-socket"
+import { appToast } from "@/src/shared/lib/app-toast"
 import {
   useInfiniteQuery,
   useMutation,
@@ -23,6 +25,7 @@ export const INTELLIGENCE_MESSAGES_QUERY_KEY = [
 export const INTELLIGENCE_PAGE_SIZE = 50
 
 export function useIntelligence() {
+  useAiEmailSyncSocket()
   const session = useAppStore((state) => state.session)
   const queryClient = useQueryClient()
   const dashboardQuery = useQuery({
@@ -86,8 +89,42 @@ export function useIntelligence() {
       ])
     },
   })
+  const resetMutation = useMutation({
+    mutationFn: () =>
+      apiPost<{ connected: boolean; deletedMessages: number }>(
+        API_ENDPOINTS.INTELLIGENCE.RESET_EMAIL,
+        { confirmed: true }
+      ),
+    onSuccess: async ({ deletedMessages }) => {
+      appToast.success({
+        text1: "Correo reiniciado",
+        text2: `${deletedMessages} mensajes eliminados. El histórico volverá a importarse desde el 1 de enero de 2026.`,
+      })
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: INTELLIGENCE_QUERY_KEY }),
+        queryClient.invalidateQueries({
+          queryKey: INTELLIGENCE_MESSAGES_QUERY_KEY,
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["intelligence", "evidence"],
+        }),
+      ])
+    },
+    onError: (error) => {
+      appToast.error({
+        text1: "No se pudo reiniciar el correo",
+        text2: error.message,
+      })
+    },
+  })
 
-  return { dashboardQuery, messagesQuery, connectMutation, syncMutation }
+  return {
+    dashboardQuery,
+    messagesQuery,
+    connectMutation,
+    syncMutation,
+    resetMutation,
+  }
 }
 
 export function useIntelligenceMessage(messageId: string | null) {

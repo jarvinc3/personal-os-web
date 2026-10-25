@@ -1,5 +1,23 @@
 export type AiRole = "USER" | "CONTRIBUTOR" | "ADMIN"
 
+export type AiEmailSyncProgress = {
+  status:
+    "running" | "waiting" | "retrying" | "scheduled" | "completed" | "failed"
+  phase: "bootstrap" | "incremental" | "recovery"
+  attempt: number
+  processedThisRun: number
+  importedThisRun: number
+  batchSize?: number
+  totalEstimate?: number
+  retryAt?: number
+  nextRunAt?: number
+  errorCode?: string
+  errorCategory?:
+    "authorization" | "configuration" | "rate_limit" | "temporary" | "unknown"
+  startedAt: string
+  updatedAt: string
+}
+
 export type IntelligenceDashboard = {
   connection:
     | {
@@ -7,11 +25,7 @@ export type IntelligenceDashboard = {
         emailAddress: string
         initialSyncCompletedAt: string | null
         syncInProgress: boolean
-        syncProgress: {
-          status: "waiting" | "retrying"
-          retryAt?: number
-          attempt: number
-        } | null
+        syncProgress: AiEmailSyncProgress | null
         lastSyncedAt: string | null
         lastRecoverySyncAt: string | null
         lastSyncErrorCode: string | null
@@ -91,6 +105,12 @@ export type AiReviewQueueItem = AiEmailMessageSummary & {
 
 export type AiReviewQueuePage = {
   items: AiReviewQueueItem[]
+  counts: {
+    all: number
+    TRAIN: number
+    VALIDATION: number
+    HOLDOUT: number
+  }
   nextCursor: string | null
   hasMore: boolean
 }

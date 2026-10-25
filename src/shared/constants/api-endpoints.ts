@@ -34,6 +34,7 @@ export const API_ENDPOINTS = {
     RUNS: "/intelligence/runs",
     CONNECT_EMAIL: "/intelligence/email/connect",
     SYNC_EMAIL: "/intelligence/email/sync",
+    RESET_EMAIL: "/intelligence/email/reset",
     CONSENT: "/ai/preferences/consent",
     ROLES: "/ai/admin/roles",
     ROLE: (userId: string) => `/ai/admin/roles/${encodeURIComponent(userId)}`,

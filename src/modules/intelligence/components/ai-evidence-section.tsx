@@ -22,6 +22,10 @@ import { Textarea } from "@/src/shared/components/ui/textarea"
 import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
 import { Skeleton } from "@/src/shared/components/ui/skeleton"
 import {
+  ToggleGroup,
+  ToggleGroupItem,
+} from "@/src/shared/components/ui/toggle-group"
+import {
   Select,
   SelectContent,
   SelectGroup,
@@ -40,7 +44,6 @@ import {
   Check,
   Clock3,
   Coins,
-  FileCheck2,
   Inbox,
   Layers3,
   Mail,
@@ -57,18 +60,26 @@ type AiEvidenceSectionProps = {
   onOpenMessage: (messageId: string) => void
 }
 
+type ReviewPartitionFilter = "ALL" | "TRAIN" | "VALIDATION" | "HOLDOUT"
+
 export function AiEvidenceSection({
   enabled,
   view,
   onOpenMessage,
 }: AiEvidenceSectionProps) {
-  const { datasetQuery, reviewQueueQuery, runsQuery, verifyMutation } =
-    useAiEvidence(enabled, view)
+  const [partitionFilter, setPartitionFilter] =
+    useState<ReviewPartitionFilter>("ALL")
+  const { reviewQueueQuery, runsQuery, verifyMutation } = useAiEvidence(
+    enabled,
+    view,
+    partitionFilter
+  )
   const messages = useMemo(
     () => reviewQueueQuery.data?.pages.flatMap((page) => page.items) ?? [],
     [reviewQueueQuery.data?.pages]
   )
   const { fetchNextPage, hasNextPage, isFetchingNextPage } = reviewQueueQuery
+  const reviewCounts = reviewQueueQuery.data?.pages[0]?.counts
 
   if (!enabled) {
     return null
@@ -129,44 +140,57 @@ export function AiEvidenceSection({
 
   return (
     <div className="flex flex-col gap-3">
-      {datasetQuery.isPending ? (
-        <div className="flex flex-wrap gap-2" aria-label="Cargando particiones">
-          <Skeleton className="h-6 w-28 rounded-full" />
-          <Skeleton className="h-6 w-28 rounded-full" />
-          <Skeleton className="h-6 w-28 rounded-full" />
+      {reviewQueueQuery.isPending ? (
+        <div className="flex flex-wrap gap-2" aria-label="Cargando filtros">
+          <Skeleton className="h-8 w-24 rounded-full" />
+          <Skeleton className="h-8 w-32 rounded-full" />
+          <Skeleton className="h-8 w-28 rounded-full" />
+          <Skeleton className="h-8 w-24 rounded-full" />
         </div>
-      ) : datasetQuery.isError || !datasetQuery.data ? (
-        <div className="flex items-center justify-between gap-2">
-          <p className="text-sm text-muted-foreground">
-            No se pudieron cargar las particiones del correo.
-          </p>
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            onClick={() => void datasetQuery.refetch()}
-          >
-            <RotateCcw data-icon="inline-start" /> Reintentar
-          </Button>
-        </div>
-      ) : (
-        <div
-          className="flex flex-wrap gap-2"
-          aria-label="Particiones del dataset de correo"
+      ) : reviewQueueQuery.isError ? null : (
+        <ToggleGroup
+          value={[partitionFilter]}
+          onValueChange={(next) => {
+            const selected = next[0]
+            if (
+              selected === "ALL" ||
+              selected === "TRAIN" ||
+              selected === "VALIDATION" ||
+              selected === "HOLDOUT"
+            ) {
+              setPartitionFilter(selected)
+            }
+          }}
+          variant="outline"
+          size="sm"
+          aria-label="Filtrar correos por partición"
+          className="w-full flex-wrap justify-start"
         >
-          <Badge variant="outline">
-            <Layers3 data-icon="inline-start" /> Entrenamiento ·{" "}
-            {datasetQuery.data.partitions.TRAIN}
-          </Badge>
-          <Badge variant="outline">
-            <Inbox data-icon="inline-start" /> Validación ·{" "}
-            {datasetQuery.data.partitions.VALIDATION}
-          </Badge>
-          <Badge variant="info">
-            <FileCheck2 data-icon="inline-start" /> Holdout ·{" "}
-            {datasetQuery.data.partitions.HOLDOUT}
-          </Badge>
-        </div>
+          <ToggleGroupItem value="ALL" className="h-8 gap-2 rounded-full px-3">
+            Todos <Badge variant="secondary">{reviewCounts?.all ?? 0}</Badge>
+          </ToggleGroupItem>
+          <ToggleGroupItem
+            value="TRAIN"
+            className="h-8 gap-2 rounded-full px-3"
+          >
+            Entrenamiento{" "}
+            <Badge variant="secondary">{reviewCounts?.TRAIN ?? 0}</Badge>
+          </ToggleGroupItem>
+          <ToggleGroupItem
+            value="VALIDATION"
+            className="h-8 gap-2 rounded-full px-3"
+          >
+            Validación{" "}
+            <Badge variant="secondary">{reviewCounts?.VALIDATION ?? 0}</Badge>
+          </ToggleGroupItem>
+          <ToggleGroupItem
+            value="HOLDOUT"
+            className="h-8 gap-2 rounded-full px-3"
+          >
+            Holdout{" "}
+            <Badge variant="secondary">{reviewCounts?.HOLDOUT ?? 0}</Badge>
+          </ToggleGroupItem>
+        </ToggleGroup>
       )}
 
       <SummarySection

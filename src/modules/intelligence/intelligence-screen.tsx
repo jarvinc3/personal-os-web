@@ -14,6 +14,16 @@ import {
 import { Skeleton } from "@/src/shared/components/ui/skeleton"
 import { Badge } from "@/src/shared/components/ui/badge"
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/src/shared/components/ui/alert-dialog"
+import {
   Tabs,
   TabsContent,
   TabsList,
@@ -40,7 +50,7 @@ import {
   Unplug,
   X,
 } from "lucide-react"
-import { useCallback, useMemo } from "react"
+import { useCallback, useMemo, useState } from "react"
 import { useIntelligence } from "./hooks/use-intelligence"
 import { AiEvidenceSection } from "./components/ai-evidence-section"
 import {
@@ -54,8 +64,14 @@ export function IntelligenceScreen() {
 }
 
 function IntelligenceScreenBody() {
-  const { dashboardQuery, messagesQuery, connectMutation, syncMutation } =
-    useIntelligence()
+  const {
+    dashboardQuery,
+    messagesQuery,
+    connectMutation,
+    syncMutation,
+    resetMutation,
+  } = useIntelligence()
+  const [resetDialogOpen, setResetDialogOpen] = useState(false)
   const {
     open: messageSheetOpen,
     sheetId: selectedMessageId,
@@ -110,6 +126,7 @@ function IntelligenceScreenBody() {
   const dashboard = dashboardQuery.data
   const connected = dashboard.connection.connected
   const receivedRange = dashboard.receivedRange
+  const syncProgress = connected ? dashboard.connection.syncProgress : null
 
   return (
     <main className="mx-auto flex w-full max-w-4xl flex-col gap-5 p-4 pb-10 md:px-6">
@@ -145,10 +162,13 @@ function IntelligenceScreenBody() {
               title="Cuenta conectada"
               description={
                 !dashboard.connection.initialSyncCompletedAt
-                  ? dashboard.connection.lastSyncErrorCode
+                  ? syncProgress?.status === "failed" ||
+                    dashboard.connection.lastSyncErrorCode
                     ? "Sincronización detenida"
                     : dashboard.connection.lastSyncedAt
-                      ? "Sincronización inicial en curso"
+                      ? syncProgress?.status === "scheduled"
+                        ? "Siguiente lote programado"
+                        : "Sincronización inicial en curso"
                       : "La sincronización inicial está pendiente."
                   : "Historial inicial completo"
               }
@@ -158,16 +178,33 @@ function IntelligenceScreenBody() {
                   ? formatDateTime(dashboard.connection.lastSyncedAt)
                   : "Pendiente"
               }
-              isLast={!dashboard.connection.lastSyncErrorCode}
+              isLast={
+                !dashboard.connection.lastSyncErrorCode &&
+                syncProgress?.status !== "failed"
+              }
             />
             <div className="flex flex-col gap-2">
-              {dashboard.connection.lastSyncErrorCode &&
-              !dashboard.connection.syncInProgress ? (
+              {syncProgress?.status === "failed" ||
+              (dashboard.connection.lastSyncErrorCode && !syncProgress) ? (
                 <Alert variant="warning" role="status">
                   <AlertCircle className="size-4 shrink-0" aria-hidden="true" />
-                  <AlertTitle>La sincronización se detuvo.</AlertTitle>
+                  <AlertTitle>La sincronización se detuvo</AlertTitle>
                   <AlertDescription>
-                    Pulsa Sincronizar ahora para continuar.
+                    {syncFailureMessage(syncProgress?.errorCategory)}
+                  </AlertDescription>
+                </Alert>
+              ) : null}
+              {syncProgress?.status === "scheduled" ? (
+                <Alert variant="default" role="status">
+                  <Clock3 className="size-4 shrink-0" aria-hidden="true" />
+                  <AlertTitle>El siguiente lote está programado</AlertTitle>
+                  <AlertDescription>
+                    Este lote importó {syncProgress.importedThisRun} mensajes.
+                    La sincronización continuará automáticamente
+                    {syncProgress.nextRunAt
+                      ? ` alrededor de ${formatDateTime(new Date(syncProgress.nextRunAt).toISOString())}`
+                      : " en el próximo ciclo"}
+                    .
                   </AlertDescription>
                 </Alert>
               ) : null}
@@ -179,32 +216,66 @@ function IntelligenceScreenBody() {
                   />
                   <AlertTitle>Sincronizando correo</AlertTitle>
                   <AlertDescription>
-                    {dashboard.connection.syncProgress?.status === "waiting"
-                      ? `En espera de Gmail por límite temporal · reintento ${dashboard.connection.syncProgress.attempt} de 3`
-                      : dashboard.connection.syncProgress?.status === "retrying"
-                        ? `Reintentando con Gmail · intento ${dashboard.connection.syncProgress.attempt} de 3`
-                        : `${dashboard.counters.importedMessages} mensajes importados`}
+                    {syncProgress?.status === "waiting"
+                      ? `${syncProgress.errorCategory === "rate_limit" ? "Gmail alcanzó su límite temporal de solicitudes" : "Gmail pidió una pausa temporal"}. Reintento ${syncProgress.attempt} de 3${syncProgress.retryAt ? ` a las ${formatDateTime(new Date(syncProgress.retryAt).toISOString())}` : ""}.`
+                      : syncProgress?.status === "retrying"
+                        ? `Reintentando con Gmail · intento ${syncProgress.attempt} de 3.`
+                        : syncProgress?.status === "running"
+                          ? syncProgress.phase === "bootstrap"
+                            ? `Leyendo el histórico desde el 1 de enero de 2026 · ${syncProgress.processedThisRun} correos procesados, ${syncProgress.importedThisRun} importados en este lote${syncProgress.totalEstimate ? ` · ${syncProgress.totalEstimate} estimados en total` : ""}.`
+                            : syncProgress.phase === "recovery"
+                              ? `Recuperando el cursor y leyendo correos · ${syncProgress.processedThisRun} procesados, ${syncProgress.importedThisRun} importados.`
+                              : `Buscando cambios nuevos · ${syncProgress.processedThisRun} procesados, ${syncProgress.importedThisRun} importados.`
+                          : `${dashboard.counters.importedMessages} mensajes importados`}
                   </AlertDescription>
                 </Alert>
               ) : null}
             </div>
-            <Button
-              type="button"
-              className="flex-1"
-              onClick={() => syncMutation.mutate()}
-              disabled={
-                syncMutation.isPending || dashboard.connection.syncInProgress
-              }
-            >
-              {syncMutation.isPending || dashboard.connection.syncInProgress ? (
-                <LoaderCircle className="animate-spin" aria-hidden="true" />
-              ) : (
-                <RefreshCw aria-hidden="true" />
-              )}
-              {syncMutation.isPending || dashboard.connection.syncInProgress
-                ? "Sincronizando…"
-                : "Sincronizar ahora"}
-            </Button>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                type="button"
+                onClick={() => syncMutation.mutate()}
+                disabled={
+                  syncMutation.isPending || dashboard.connection.syncInProgress
+                }
+              >
+                {syncMutation.isPending ||
+                dashboard.connection.syncInProgress ? (
+                  <LoaderCircle className="animate-spin" aria-hidden="true" />
+                ) : (
+                  <RefreshCw aria-hidden="true" />
+                )}
+                {syncMutation.isPending || dashboard.connection.syncInProgress
+                  ? "Sincronizando…"
+                  : "Sincronizar ahora"}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => connectMutation.mutate()}
+                disabled={
+                  connectMutation.isPending ||
+                  dashboard.connection.syncInProgress
+                }
+              >
+                {connectMutation.isPending ? (
+                  <LoaderCircle className="animate-spin" aria-hidden="true" />
+                ) : (
+                  <Mail aria-hidden="true" />
+                )}
+                Reconectar Gmail
+              </Button>
+              <Button
+                type="button"
+                variant="destructive"
+                onClick={() => setResetDialogOpen(true)}
+                disabled={
+                  resetMutation.isPending || dashboard.connection.syncInProgress
+                }
+              >
+                Vaciar y reiniciar
+              </Button>
+            </div>
           </>
         ) : (
           <Empty>
@@ -253,7 +324,8 @@ function IntelligenceScreenBody() {
                 ? "success"
                 : dashboard.connection.syncInProgress
                   ? "info"
-                  : dashboard.connection.lastSyncErrorCode
+                  : syncProgress?.status === "failed" ||
+                      dashboard.connection.lastSyncErrorCode
                     ? "warning"
                     : "secondary"
             }
@@ -263,9 +335,12 @@ function IntelligenceScreenBody() {
               ? "Histórico completo desde 1 ene 2026"
               : dashboard.connection.syncInProgress
                 ? "Importando desde 1 ene 2026"
-                : dashboard.connection.lastSyncErrorCode
+                : syncProgress?.status === "failed" ||
+                    dashboard.connection.lastSyncErrorCode
                   ? "Histórico detenido · desde 1 ene 2026"
-                  : "Bootstrap pendiente · desde 1 ene 2026"}
+                  : syncProgress?.status === "scheduled"
+                    ? "Histórico en espera · desde 1 ene 2026"
+                    : "Bootstrap pendiente · desde 1 ene 2026"}
           </Badge>
           <Badge variant="outline">
             Primer correo ·{" "}
@@ -283,16 +358,14 @@ function IntelligenceScreenBody() {
       ) : null}
 
       {dashboard.role === "ADMIN" ? (
-        <SummarySection title="Administración de roles" icon={ShieldCheck}>
-          <SummaryItem
-            title="Administrar roles"
-            description="Consulta y cambia los roles de Inteligencia."
-            icon={ShieldCheck}
-            href="/intelligence/admin/roles"
-            showChevron
-            isLast
-          />
-        </SummarySection>
+        <SummaryItem
+          title="Administrar roles"
+          description="Consulta y cambia los roles de Inteligencia."
+          icon={ShieldCheck}
+          href="/intelligence/admin/roles"
+          showChevron
+          isLast
+        />
       ) : null}
 
       {connected ? (
@@ -404,8 +477,65 @@ function IntelligenceScreenBody() {
         open={messageSheetOpen}
         onOpenChange={setMessageSheetOpen}
       />
+      <AlertDialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Vaciar el correo importado?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Se borrarán los mensajes importados, sus particiones y revisiones,
+              observaciones y ejecuciones de correo. Gmail seguirá conectado;
+              después volveremos a sincronizar desde el 1 de enero de 2026.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={resetMutation.isPending}>
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              disabled={resetMutation.isPending}
+              onClick={(event) => {
+                event.preventDefault()
+                resetMutation.mutate(undefined, {
+                  onSuccess: () => {
+                    setResetDialogOpen(false)
+                    syncMutation.mutate()
+                  },
+                })
+              }}
+            >
+              {resetMutation.isPending
+                ? "Reiniciando…"
+                : "Vaciar y sincronizar"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </main>
   )
+}
+
+function syncFailureMessage(
+  category:
+    | "authorization"
+    | "configuration"
+    | "rate_limit"
+    | "temporary"
+    | "unknown"
+    | undefined
+) {
+  switch (category) {
+    case "authorization":
+      return "Google ya no acepta esta autorización. Usa Reconectar Gmail para renovar el acceso y continuar."
+    case "configuration":
+      return "La conexión OAuth no está configurada correctamente. Revisa la configuración de Gmail del backend."
+    case "rate_limit":
+      return "Gmail alcanzó su límite temporal. Espera un poco y pulsa Sincronizar ahora para reintentar."
+    case "temporary":
+      return "Gmail o la red no respondió a tiempo. Puedes reintentar la sincronización."
+    default:
+      return "Gmail no pudo completar la solicitud. Reintenta; si vuelve a fallar, reconecta la cuenta."
+  }
 }
 
 function IntelligenceMessageDetail({
