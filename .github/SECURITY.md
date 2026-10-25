@@ -2,7 +2,7 @@
 
 ## Cómo reportar
 
-No abras un issue con los detalles. Escribe a jarvinct3@gmail.com o usa un aviso privado desde la pestaña **Security** del repositorio.
+No abras un issue con los detalles. Escribe a jarvinct3@gmail.com.
 
 Incluye lo siguiente:
 

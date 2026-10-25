@@ -97,7 +97,7 @@ Detalle en [docs/architecture/overview.md](./docs/architecture/overview.md) y re
 | [docs/README.md](./docs/README.md)                         | Mapa completo de la documentación                  |
 | [docs/architecture/](./docs/architecture/README.md)        | App Router, frontera de módulos y UI compartida    |
 | [docs/modules/](./docs/modules/README.md)                  | Una guía por app: alcance, reglas y contratos      |
-| [docs/operations/runbook.md](./docs/operations/runbook.md) | Arranque, diagnóstico y despliegue                 |
+| [docs/operations/runbook.md](./docs/operations/runbook.md) | Arranque, variables y diagnóstico                  |
 | [docs/glosario.md](./docs/glosario.md)                     | Qué se llama App en la interfaz y módulo en código |
 | [AGENTS.md](./AGENTS.md)                                   | Flujo de trabajo y fuentes canónicas               |
 | [docs/issue-conventions.md](./docs/issue-conventions.md)   | Cómo se escriben los issues                        |
