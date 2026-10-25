@@ -7,17 +7,8 @@ import {
   readPendingDataWipe,
 } from "@/src/modules/settings/lib/pending-data-wipe"
 import { WIPE_LAYER_LABELS } from "@/src/modules/settings/lib/wipe-layers"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/src/shared/components/ui/alert-dialog"
-import { Trash2, X } from "lucide-react"
+import { ConfirmDialog } from "@/src/shared/components/feedback/confirm-dialog"
+import { Trash2Icon } from "lucide-react"
 import { useState } from "react"
 
 export function PendingDataWipeHandler() {
@@ -44,45 +35,26 @@ export function PendingDataWipeHandler() {
   }
 
   return (
-    <AlertDialog
+    <ConfirmDialog
       open={confirmOpen}
       onOpenChange={(open) => !open && handleCancel()}
+      tone="danger"
+      icon={Trash2Icon}
+      title="¿Vaciar los datos seleccionados?"
+      description="Confirmaste tu identidad con Google. Esto no se puede deshacer. Se vaciarán:"
+      confirmLabel="Vaciar datos"
+      confirmIcon={Trash2Icon}
+      pending={wipeAfterReauth.isPending}
+      pendingLabel="Vaciando..."
+      onConfirm={handleConfirm}
     >
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>¿Vaciar los datos seleccionados?</AlertDialogTitle>
-          <AlertDialogDescription>
-            Confirmaste tu identidad con Google. Esto no se puede deshacer. Se
-            vaciarán:
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <ul className="flex flex-col gap-2">
-          {pendingWipe?.layers.map((layer) => (
-            <li key={layer} className="text-sm text-muted-foreground">
-              • {WIPE_LAYER_LABELS[layer]}
-            </li>
-          ))}
-        </ul>
-        <AlertDialogFooter className="flex-row">
-          <AlertDialogCancel
-            className="flex-1"
-            disabled={wipeAfterReauth.isPending}
-            onClick={handleCancel}
-          >
-            <X data-icon="inline-start" />
-            Cancelar
-          </AlertDialogCancel>
-          <AlertDialogAction
-            variant="destructive"
-            className="flex-1"
-            disabled={wipeAfterReauth.isPending}
-            onClick={handleConfirm}
-          >
-            <Trash2 data-icon="inline-start" />
-            {wipeAfterReauth.isPending ? "Vaciando..." : "Vaciar datos"}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+      <ul className="flex flex-col gap-2">
+        {pendingWipe?.layers.map((layer) => (
+          <li key={layer} className="text-sm text-muted-foreground">
+            • {WIPE_LAYER_LABELS[layer]}
+          </li>
+        ))}
+      </ul>
+    </ConfirmDialog>
   )
 }

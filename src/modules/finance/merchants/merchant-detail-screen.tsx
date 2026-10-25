@@ -50,20 +50,10 @@ import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { useEventSheet } from "@/src/shared/hooks/use-event-sheet"
 import { LoadingView } from "@/src/shared/components/feedback/loading-view"
+import { ConfirmDialog } from "@/src/shared/components/feedback/confirm-dialog"
 import { FormTextField } from "@/src/shared/components/forms/form-text-field"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/src/shared/components/ui/alert-dialog"
 import { Button } from "@/src/shared/components/ui/button"
 import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
-import { Spinner } from "@/src/shared/components/ui/spinner"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { API_ENDPOINTS } from "@/src/shared/constants/api-endpoints"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
@@ -426,37 +416,19 @@ function MerchantDetailBody({ merchantId }: { merchantId: string }) {
         />
       </BottomSheet>
 
-      <AlertDialog
+      <ConfirmDialog
         open={mergeTarget !== null}
         onOpenChange={(open) => !open && setMergeTarget(null)}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              ¿Unir {merchant.name} en {mergeTarget?.name}?
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              Los movimientos de {merchant.name} pasarán a {mergeTarget?.name}.
-              El comercio original desaparece. No se puede deshacer.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={mergeMutation.isPending}>
-              Cancelar
-            </AlertDialogCancel>
-            <AlertDialogAction
-              variant="destructive"
-              disabled={mergeMutation.isPending}
-              onClick={() => void confirmMerge()}
-            >
-              {mergeMutation.isPending ? (
-                <Spinner data-icon="inline-start" />
-              ) : null}
-              Unir
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        tone="danger"
+        icon={GitMergeIcon}
+        title={`¿Unir ${merchant.name} en ${mergeTarget?.name}?`}
+        description={`Los movimientos de ${merchant.name} pasarán a ${mergeTarget?.name}. El comercio original desaparece. No se puede deshacer.`}
+        confirmLabel="Unir"
+        confirmIcon={GitMergeIcon}
+        pending={mergeMutation.isPending}
+        pendingLabel="Uniendo..."
+        onConfirm={() => void confirmMerge()}
+      />
     </div>
   )
 }

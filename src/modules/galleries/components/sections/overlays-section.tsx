@@ -3,27 +3,11 @@
 import { GalleryDemo } from "@/src/modules/galleries/components/gallery-demo"
 import { simulatedTap } from "@/src/modules/galleries/components/simulated-tap"
 import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { ConfirmDialog } from "@/src/shared/components/feedback/confirm-dialog"
 import { FormTextField } from "@/src/shared/components/forms/form-text-field"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogMedia,
-  AlertDialogTitle,
-} from "@/src/shared/components/ui/alert-dialog"
 import { Button } from "@/src/shared/components/ui/button"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
-import {
-  CircleCheckIcon,
-  SaveIcon,
-  StoreIcon,
-  Trash2Icon,
-  XIcon,
-} from "lucide-react"
+import { CircleCheckIcon, SaveIcon, StoreIcon, Trash2Icon } from "lucide-react"
 import { useState } from "react"
 
 const SHEET_PARAM = "ejemplo"
@@ -70,10 +54,10 @@ export function OverlaysSection() {
       </GalleryDemo>
 
       <GalleryDemo
-        name="AlertDialog"
-        importPath="@/src/shared/components/ui/alert-dialog"
+        name="ConfirmDialog"
+        importPath="@/src/shared/components/feedback/confirm-dialog"
         states="confirmación de una acción destructiva"
-        note="Esc y Cancelar cierran sin ejecutar; el clic afuera no cierra."
+        note="Esc y Cancelar cierran sin ejecutar; el clic afuera no cierra. Botones deshabilitados mientras corre la acción."
       >
         <Button
           variant="destructive"
@@ -127,39 +111,21 @@ export function OverlaysSection() {
         </p>
       </BottomSheet>
 
-      <AlertDialog
+      <ConfirmDialog
         open={confirmOpen}
         onOpenChange={(next) => {
           if (!next) {
             setOpen(false)
           }
         }}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogMedia className="bg-destructive/10 text-destructive">
-              <Trash2Icon />
-            </AlertDialogMedia>
-            <AlertDialogTitle>¿Eliminar el movimiento?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Se quitará de la lista y del saldo de la cuenta.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>
-              <XIcon />
-              Cancelar
-            </AlertDialogCancel>
-            <AlertDialogAction
-              variant="destructive"
-              onClick={() => setOpen(false)}
-            >
-              <Trash2Icon />
-              Eliminar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        tone="danger"
+        icon={Trash2Icon}
+        title="¿Eliminar el movimiento?"
+        description="Se quitará de la lista y del saldo de la cuenta."
+        confirmLabel="Eliminar"
+        confirmIcon={Trash2Icon}
+        onConfirm={() => setOpen(false)}
+      />
     </>
   )
 }

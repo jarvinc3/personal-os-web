@@ -2,18 +2,7 @@
 
 import { ArchiveIcon } from "lucide-react"
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogMedia,
-  AlertDialogTitle,
-} from "@/src/shared/components/ui/alert-dialog"
-import { Spinner } from "@/src/shared/components/ui/spinner"
+import { ConfirmDialog } from "@/src/shared/components/feedback/confirm-dialog"
 
 type ArchiveRecordDialogProps = {
   open: boolean
@@ -31,33 +20,17 @@ export function ArchiveRecordDialog({
   onConfirm,
 }: ArchiveRecordDialogProps) {
   return (
-    <AlertDialog
+    <ConfirmDialog
       open={open}
-      onOpenChange={(nextOpen) => {
-        if (!pending) {
-          onOpenChange(nextOpen)
-        }
-      }}
-    >
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogMedia className="bg-muted text-muted-foreground">
-            <ArchiveIcon />
-          </AlertDialogMedia>
-          <AlertDialogTitle>{`¿Archivar “${recordName}”?`}</AlertDialogTitle>
-          <AlertDialogDescription>
-            Deja de aparecer en las listas. Puedes restaurarlo desde la papelera
-            de reciclaje o con Deshacer.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel disabled={pending}>Cancelar</AlertDialogCancel>
-          <AlertDialogAction disabled={pending} onClick={onConfirm}>
-            {pending ? <Spinner data-icon="inline-start" /> : null}
-            Archivar
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+      onOpenChange={onOpenChange}
+      icon={ArchiveIcon}
+      title={`¿Archivar “${recordName}”?`}
+      description="Deja de aparecer en las listas. Puedes restaurarlo desde la papelera de reciclaje o con Deshacer."
+      confirmLabel="Archivar"
+      confirmIcon={ArchiveIcon}
+      pending={pending}
+      pendingLabel="Archivando..."
+      onConfirm={onConfirm}
+    />
   )
 }

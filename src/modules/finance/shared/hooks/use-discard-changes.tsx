@@ -1,17 +1,9 @@
 "use client"
 
+import { Trash2Icon } from "lucide-react"
 import { useCallback, useState } from "react"
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/src/shared/components/ui/alert-dialog"
+import { ConfirmDialog } from "@/src/shared/components/feedback/confirm-dialog"
 
 type UseDiscardChangesParams = {
   isDirty: boolean
@@ -40,28 +32,20 @@ export function useDiscardChanges({
   )
 
   const discardChangesDialog = (
-    <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>¿Descartar los cambios?</AlertDialogTitle>
-          <AlertDialogDescription>
-            Lo que escribiste no se guardó. Si cierras ahora, se pierde.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Cancelar</AlertDialogCancel>
-          <AlertDialogAction
-            variant="destructive"
-            onClick={() => {
-              setConfirmOpen(false)
-              onOpenChange(false)
-            }}
-          >
-            Descartar
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+    <ConfirmDialog
+      open={confirmOpen}
+      onOpenChange={setConfirmOpen}
+      tone="danger"
+      icon={Trash2Icon}
+      title="¿Descartar los cambios?"
+      description="Lo que escribiste no se guardó. Si cierras ahora, se pierde."
+      confirmLabel="Descartar"
+      confirmIcon={Trash2Icon}
+      onConfirm={() => {
+        setConfirmOpen(false)
+        onOpenChange(false)
+      }}
+    />
   )
 
   return { requestOpenChange, discardChangesDialog }

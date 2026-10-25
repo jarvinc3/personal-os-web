@@ -9,22 +9,13 @@ import { normalizeTrackedCurrencies } from "@/src/modules/finance/shared/lib/fin
 import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 import { useUserModuleConfig } from "@/src/modules/settings/hooks/use-user-module-config"
 import { SettingsSection } from "@/src/shared/components/settings/settings-section"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/src/shared/components/ui/alert-dialog"
+import { ConfirmDialog } from "@/src/shared/components/feedback/confirm-dialog"
 import { Button } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { API_ENDPOINTS } from "@/src/shared/constants/api-endpoints"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { PencilIcon, PlusIcon, Trash2Icon } from "lucide-react"
+import { PencilIcon, PlusIcon, RefreshCwIcon, Trash2Icon } from "lucide-react"
 import { useMemo, useState } from "react"
 
 export function FinanceCurrenciesView() {
@@ -234,64 +225,32 @@ export function FinanceCurrenciesView() {
         onSelect={(code) => void handleAddCurrency(code)}
       />
 
-      <AlertDialog
+      <ConfirmDialog
         open={pendingRemoveCurrency !== null}
         onOpenChange={(open) => !open && setPendingRemoveCurrency(null)}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>¿Quitar {currencyToRemove}?</AlertDialogTitle>
-            <AlertDialogDescription>
-              {currencyToRemove} dejará de mostrarse en Otros. Las transacciones
-              en esa moneda no se borran.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={updateMutation.isPending}>
-              Cancelar
-            </AlertDialogCancel>
-            <AlertDialogAction
-              variant="destructive"
-              disabled={updateMutation.isPending}
-              onClick={(event) => {
-                event.preventDefault()
-                void handleConfirmRemove()
-              }}
-            >
-              {updateMutation.isPending ? "Quitando..." : "Quitar"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        tone="danger"
+        icon={Trash2Icon}
+        title={`¿Quitar ${currencyToRemove}?`}
+        description={`${currencyToRemove} dejará de mostrarse en Otros. Las transacciones en esa moneda no se borran.`}
+        confirmLabel="Quitar"
+        confirmIcon={Trash2Icon}
+        pending={updateMutation.isPending}
+        pendingLabel="Quitando..."
+        onConfirm={() => void handleConfirmRemove()}
+      />
 
-      <AlertDialog
+      <ConfirmDialog
         open={pendingBaseCurrency !== null}
         onOpenChange={(open) => !open && setPendingBaseCurrency(null)}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              ¿Cambiar la moneda principal a {pendingBaseCurrency}?
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              Los importes en moneda base de tus transacciones y presupuestos se
-              recalcularán con las tasas de cada fecha. Si falta una tasa, no se
-              cambia nada.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={changeBaseMutation.isPending}>
-              Cancelar
-            </AlertDialogCancel>
-            <AlertDialogAction
-              disabled={changeBaseMutation.isPending}
-              onClick={handleConfirmChange}
-            >
-              {changeBaseMutation.isPending ? "Cambiando..." : "Cambiar"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        icon={RefreshCwIcon}
+        title={`¿Cambiar la moneda principal a ${pendingBaseCurrency}?`}
+        description="Los importes en moneda base de tus transacciones y presupuestos se recalcularán con las tasas de cada fecha. Si falta una tasa, no se cambia nada."
+        confirmLabel="Cambiar"
+        confirmIcon={RefreshCwIcon}
+        pending={changeBaseMutation.isPending}
+        pendingLabel="Cambiando..."
+        onConfirm={handleConfirmChange}
+      />
     </>
   )
 }

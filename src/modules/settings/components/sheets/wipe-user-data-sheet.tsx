@@ -28,6 +28,7 @@ import {
 } from "@/src/modules/settings/lib/wipe-layers"
 import { AuthServiceError } from "@/src/modules/auth"
 import { WipeBalanceInstitutionSheet } from "@/src/modules/settings/components/sheets/wipe-balance-institution-sheet"
+import { ConfirmDialog } from "@/src/shared/components/feedback/confirm-dialog"
 import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import { SettingsRow } from "@/src/shared/components/settings/settings-section"
 import {
@@ -35,16 +36,6 @@ import {
   AlertDescription,
   AlertTitle,
 } from "@/src/shared/components/ui/alert"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/src/shared/components/ui/alert-dialog"
 import { Button } from "@/src/shared/components/ui/button"
 import { Checkbox } from "@/src/shared/components/ui/checkbox"
 import { Spinner } from "@/src/shared/components/ui/spinner"
@@ -64,7 +55,6 @@ import {
   Settings,
   Tags,
   Trash2,
-  X,
   type LucideIcon,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
@@ -497,7 +487,7 @@ export function WipeUserDataView({
         onSelect={setBalanceScope}
       />
 
-      <AlertDialog
+      <ConfirmDialog
         open={alertOpen}
         onOpenChange={(next) => {
           setAlertOpen(next)
@@ -505,72 +495,47 @@ export function WipeUserDataView({
             clearPassword()
           }
         }}
+        tone="danger"
+        icon={Trash2}
+        wide
+        title={scope ? scope.confirmTitle : "¿Vaciar los datos seleccionados?"}
+        description="Esto no se puede deshacer. Se vaciarán:"
+        confirmLabel="Vaciar datos"
+        confirmIcon={Trash2}
+        pending={wipeMutation.isPending}
+        pendingLabel="Vaciando..."
+        confirmDisabled={!passwordVerified || isVerifyingPassword}
+        onConfirm={handleConfirmWipe}
       >
-        <AlertDialogContent className="sm:max-w-md">
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              {scope ? scope.confirmTitle : "¿Vaciar los datos seleccionados?"}
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              Esto no se puede deshacer. Se vaciarán:
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <ul className="flex flex-col gap-2">
-            {appliedLayers.map((layer) => (
-              <li key={layer} className="text-sm text-muted-foreground">
-                • {WIPE_LAYER_LABELS[layer]}
-                {layer === WIPE_LAYERS.FINANCE_BALANCES
-                  ? ` (${balanceScopeLabel})`
-                  : null}
-              </li>
-            ))}
-          </ul>
-          <SummarySection title="Confirma tu contraseña" icon={KeyRound}>
-            <FormTextField
-              icon={KeyRound}
-              label="Contraseña"
-              type="password"
-              autoComplete="current-password"
-              value={password}
-              onChange={handlePasswordChange}
-              onBlur={() => void handlePasswordBlur()}
-              disabled={wipeMutation.isPending || isVerifyingPassword}
-              error={passwordError}
-              invalid={Boolean(passwordError)}
-            />
-            <div className="rounded-2xl bg-muted px-4 py-3">
-              <p className="text-xs text-muted-foreground">Cuenta</p>
-              <p className="mt-1 text-sm text-muted-foreground">{email}</p>
-            </div>
-          </SummarySection>
-          <AlertDialogFooter className="flex-row">
-            <AlertDialogCancel
-              className="flex-1"
-              disabled={wipeMutation.isPending}
-            >
-              <X data-icon="inline-start" />
-              Cancelar
-            </AlertDialogCancel>
-            <AlertDialogAction
-              variant="destructive"
-              className="flex-1"
-              disabled={
-                !passwordVerified ||
-                isVerifyingPassword ||
-                wipeMutation.isPending
-              }
-              onClick={handleConfirmWipe}
-            >
-              {wipeMutation.isPending || isVerifyingPassword ? (
-                <Spinner data-icon="inline-start" />
-              ) : (
-                <Trash2 data-icon="inline-start" />
-              )}
-              {wipeMutation.isPending ? "Vaciando..." : "Vaciar datos"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        <ul className="flex flex-col gap-2">
+          {appliedLayers.map((layer) => (
+            <li key={layer} className="text-sm text-muted-foreground">
+              • {WIPE_LAYER_LABELS[layer]}
+              {layer === WIPE_LAYERS.FINANCE_BALANCES
+                ? ` (${balanceScopeLabel})`
+                : null}
+            </li>
+          ))}
+        </ul>
+        <SummarySection title="Confirma tu contraseña" icon={KeyRound}>
+          <FormTextField
+            icon={KeyRound}
+            label="Contraseña"
+            type="password"
+            autoComplete="current-password"
+            value={password}
+            onChange={handlePasswordChange}
+            onBlur={() => void handlePasswordBlur()}
+            disabled={wipeMutation.isPending || isVerifyingPassword}
+            error={passwordError}
+            invalid={Boolean(passwordError)}
+          />
+          <div className="rounded-2xl bg-muted px-4 py-3">
+            <p className="text-xs text-muted-foreground">Cuenta</p>
+            <p className="mt-1 text-sm text-muted-foreground">{email}</p>
+          </div>
+        </SummarySection>
+      </ConfirmDialog>
     </>
   )
 }

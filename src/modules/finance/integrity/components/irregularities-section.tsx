@@ -12,18 +12,9 @@ import type {
   FinanceReconciliationStatusItem,
 } from "@/src/modules/finance/shared/types/entities"
 import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { ConfirmDialog } from "@/src/shared/components/feedback/confirm-dialog"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/src/shared/components/ui/alert-dialog"
 import { Button } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
@@ -291,41 +282,27 @@ export function IrregularitiesSection({
         )}
       </BottomSheet>
 
-      <AlertDialog
+      <ConfirmDialog
         open={confirmDrift !== null}
         onOpenChange={(open) => {
           if (!open && !recalculatePending) {
             setConfirmDrift(null)
           }
         }}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>¿Recalcular el saldo?</AlertDialogTitle>
-            <AlertDialogDescription>
-              El saldo guardado se corrige a la suma de los movimientos
-              confirmados. No se crea ningún movimiento.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={recalculatePending}>
-              Cancelar
-            </AlertDialogCancel>
-            <AlertDialogAction
-              disabled={recalculatePending}
-              onClick={() => {
-                if (confirmDrift) {
-                  onRecalculate(confirmDrift)
-                  setConfirmDrift(null)
-                }
-              }}
-            >
-              {recalculatePending ? <Spinner data-icon="inline-start" /> : null}
-              Recalcular
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        icon={RefreshCwIcon}
+        title="¿Recalcular el saldo?"
+        description="El saldo guardado se corrige a la suma de los movimientos confirmados. No se crea ningún movimiento."
+        confirmLabel="Recalcular"
+        confirmIcon={RefreshCwIcon}
+        pending={recalculatePending}
+        pendingLabel="Recalculando..."
+        onConfirm={() => {
+          if (confirmDrift) {
+            onRecalculate(confirmDrift)
+            setConfirmDrift(null)
+          }
+        }}
+      />
     </>
   )
 }

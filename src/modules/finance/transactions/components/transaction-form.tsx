@@ -70,26 +70,18 @@ import {
 import type { TransactionFormValues } from "@/src/modules/finance/transactions/lib/transaction-form"
 import { useUserTimeZone } from "@/src/modules/settings/hooks/use-user-time-zone"
 import { Field, FieldLabel } from "@/src/shared/components/ui/field"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/src/shared/components/ui/alert-dialog"
-import { Spinner } from "@/src/shared/components/ui/spinner"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
+import { ConfirmDialog } from "@/src/shared/components/feedback/confirm-dialog"
 import { usePicker } from "@/src/shared/hooks/use-picker"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
   ArrowDownCircleIcon,
   ArrowUpCircleIcon,
+  CircleAlertIcon,
   LockIcon,
   SaveIcon,
+  TriangleAlertIcon,
 } from "lucide-react"
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
@@ -672,85 +664,63 @@ export function TransactionForm({
         }}
       />
 
-      <AlertDialog
+      <ConfirmDialog
         open={pendingBudgetOverage !== null}
         onOpenChange={(open) => {
           if (!open) {
             setPendingBudgetOverage(null)
           }
         }}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              Este gasto excede el presupuesto
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              {pendingBudgetOverage
-                ? `${pendingBudgetOverage.overage.budget.category}: el exceso queda en ${formatFinanceMoney(pendingBudgetOverage.overage.excess, display)}. ¿Registrar el gasto igual?`
-                : null}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isPending}>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              disabled={isPending}
-              onClick={() => {
-                const pending = pendingBudgetOverage
-                setPendingBudgetOverage(null)
-                if (pending) {
-                  void submitAfterBudgetWarning({
-                    body: pending.body,
-                    values: pending.values,
-                    account: pending.account,
-                  })
-                }
-              }}
-            >
-              {isPending ? <Spinner data-icon="inline-start" /> : null}
-              Registrar igual
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        icon={CircleAlertIcon}
+        title="Este gasto excede el presupuesto"
+        description={
+          pendingBudgetOverage
+            ? `${pendingBudgetOverage.overage.budget.category}: el exceso queda en ${formatFinanceMoney(pendingBudgetOverage.overage.excess, display)}. ¿Registrar el gasto igual?`
+            : null
+        }
+        confirmLabel="Registrar igual"
+        confirmIcon={CircleAlertIcon}
+        pending={isPending}
+        pendingLabel="Registrando..."
+        onConfirm={() => {
+          const pending = pendingBudgetOverage
+          setPendingBudgetOverage(null)
+          if (pending) {
+            void submitAfterBudgetWarning({
+              body: pending.body,
+              values: pending.values,
+              account: pending.account,
+            })
+          }
+        }}
+      />
 
-      <AlertDialog
+      <ConfirmDialog
         open={pendingOverdraft !== null}
         onOpenChange={(open) => {
           if (!open) {
             setPendingOverdraft(null)
           }
         }}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              ¿Registrar un gasto mayor que el saldo?
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              {pendingOverdraft
-                ? `La cuenta ${pendingOverdraft.accountName} quedaría en ${formatFinanceMoney(pendingOverdraft.projectedBalance, { ...display, currency: pendingOverdraft.accountCurrency })}.`
-                : null}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isPending}>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              disabled={isPending}
-              onClick={() => {
-                const pending = pendingOverdraft
-                setPendingOverdraft(null)
-                if (pending) {
-                  void submitTransactionBody(pending.body)
-                }
-              }}
-            >
-              {isPending ? <Spinner data-icon="inline-start" /> : null}
-              {isEdit ? "Guardar" : "Registrar"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        icon={TriangleAlertIcon}
+        title="¿Registrar un gasto mayor que el saldo?"
+        description={
+          pendingOverdraft
+            ? `La cuenta ${pendingOverdraft.accountName} quedaría en ${formatFinanceMoney(pendingOverdraft.projectedBalance, { ...display, currency: pendingOverdraft.accountCurrency })}.`
+            : null
+        }
+        confirmLabel={isEdit ? "Guardar" : "Registrar"}
+        confirmIcon={SaveIcon}
+        pending={isPending}
+        pendingLabel="Guardando..."
+        onConfirm={() => {
+          const pending = pendingOverdraft
+          setPendingOverdraft(null)
+          if (pending) {
+            void submitTransactionBody(pending.body)
+          }
+        }}
+      />
     </>
   )
 }

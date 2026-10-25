@@ -20,17 +20,8 @@ import {
 } from "@/src/modules/finance/shared/hooks/use-receivable-shares"
 import type { FinanceReceivable } from "@/src/modules/finance/shared/types/entities"
 import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { ConfirmDialog } from "@/src/shared/components/feedback/confirm-dialog"
 import { FormTextField } from "@/src/shared/components/forms/form-text-field"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/src/shared/components/ui/alert-dialog"
 import { Badge } from "@/src/shared/components/ui/badge"
 import { Button } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
@@ -303,28 +294,19 @@ export function ReceivableShareSheet({
         ) : null}
       </BottomSheet>
 
-      <AlertDialog open={confirmRevoke} onOpenChange={setConfirmRevoke}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>¿Revocar el link?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Quien lo tenga abierto dejará de ver los cobros.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={revokeShare.isPending}>
-              Cancelar
-            </AlertDialogCancel>
-            <AlertDialogAction
-              variant="destructive"
-              disabled={revokeShare.isPending}
-              onClick={() => void onRevokeLink()}
-            >
-              Revocar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ConfirmDialog
+        open={confirmRevoke}
+        onOpenChange={setConfirmRevoke}
+        tone="danger"
+        icon={BanIcon}
+        title="¿Revocar el link?"
+        description="Quien lo tenga abierto dejará de ver los cobros."
+        confirmLabel="Revocar"
+        confirmIcon={BanIcon}
+        pending={revokeShare.isPending}
+        pendingLabel="Revocando..."
+        onConfirm={() => void onRevokeLink()}
+      />
     </>
   )
 }
