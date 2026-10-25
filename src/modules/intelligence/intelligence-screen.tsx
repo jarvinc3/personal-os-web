@@ -1,6 +1,7 @@
 "use client"
 
 import { useIntelligenceMessage } from "@/src/modules/intelligence/hooks/use-intelligence"
+import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
 import { InfiniteListSentinel } from "@/src/shared/components/ui/infinite-list-sentinel"
 import { Button } from "@/src/shared/components/ui/button"
 import {
@@ -12,6 +13,7 @@ import {
 } from "@/src/shared/components/ui/empty"
 import { Skeleton } from "@/src/shared/components/ui/skeleton"
 import { SummaryItem, SummarySection } from "@/src/shared/components/ui/summary"
+import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { formatDateTime } from "@/src/shared/lib/date-format"
 import {
@@ -27,7 +29,7 @@ import {
   Unplug,
   X,
 } from "lucide-react"
-import { useCallback, useMemo, useState } from "react"
+import { useCallback, useMemo } from "react"
 import { useIntelligence } from "./hooks/use-intelligence"
 
 export function IntelligenceScreen() {
@@ -37,9 +39,11 @@ export function IntelligenceScreen() {
 function IntelligenceScreenBody() {
   const { dashboardQuery, messagesQuery, connectMutation, syncMutation } =
     useIntelligence()
-  const [selectedMessageId, setSelectedMessageId] = useState<string | null>(
-    null
-  )
+  const {
+    open: messageSheetOpen,
+    sheetId: selectedMessageId,
+    setOpen: setMessageSheetOpen,
+  } = useSheetParam("intelligence-message")
   usePageHeader({ title: "Inteligencia" })
 
   const messages = useMemo(
@@ -254,7 +258,7 @@ function IntelligenceScreenBody() {
                   title={message.subject}
                   description={`${message.fromAddress} · ${formatDateTime(message.receivedAt)}`}
                   icon={Mail}
-                  onPress={() => setSelectedMessageId(message.id)}
+                  onPress={() => setMessageSheetOpen(true, message.id)}
                   showChevron
                 />
               ))}
@@ -271,7 +275,8 @@ function IntelligenceScreenBody() {
       {selectedMessageId ? (
         <IntelligenceMessageDetail
           messageId={selectedMessageId}
-          onClose={() => setSelectedMessageId(null)}
+          open={messageSheetOpen}
+          onOpenChange={setMessageSheetOpen}
         />
       ) : null}
     </main>
@@ -280,29 +285,38 @@ function IntelligenceScreenBody() {
 
 function IntelligenceMessageDetail({
   messageId,
-  onClose,
+  open,
+  onOpenChange,
 }: {
   messageId: string
-  onClose: () => void
+  open: boolean
+  onOpenChange: (open: boolean) => void
 }) {
   const { data, isPending, isError, refetch } =
     useIntelligenceMessage(messageId)
 
   return (
-    <SummarySection
-      title="Detalle del mensaje"
-      icon={Mail}
-      right={
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          onClick={onClose}
-          aria-label="Cerrar detalle"
-        >
-          <X aria-hidden="true" />
-        </Button>
+    <BottomSheet
+      open={open}
+      onOpenChange={onOpenChange}
+      title={data?.subject ?? "Detalle del mensaje"}
+      description={
+        data
+          ? `${data.fromAddress} · ${formatDateTime(data.receivedAt)}`
+          : undefined
       }
+      actions={{
+        close: (
+          <Button
+            type="button"
+            variant="outline"
+            className="flex-1"
+            onClick={() => onOpenChange(false)}
+          >
+            <X aria-hidden="true" /> Cerrar
+          </Button>
+        ),
+      }}
     >
       {isPending ? (
         <div className="flex flex-col gap-2 p-2">
@@ -326,12 +340,6 @@ function IntelligenceMessageDetail({
         </Empty>
       ) : (
         <div className="flex flex-col gap-4 p-2">
-          <div>
-            <h3 className="font-medium">{data.subject}</h3>
-            <p className="text-sm text-muted-foreground">
-              {data.fromAddress} · {formatDateTime(data.receivedAt)}
-            </p>
-          </div>
           <MessageRepresentation
             title="Canónica"
             value={data.content?.canonicalBody}
@@ -346,7 +354,7 @@ function IntelligenceMessageDetail({
           />
         </div>
       )}
-    </SummarySection>
+    </BottomSheet>
   )
 }
 
