@@ -14,6 +14,12 @@ export const APPEARANCE_STYLES = [
     label: "Estudio",
     description: "Superficies planas, bordes finos y sombras suaves.",
   },
+  {
+    id: "neo-skeuo",
+    label: "Neo-Skeuo",
+    description:
+      "Papel, tinta y volumen: relieve en dos tonos y radios cortos.",
+  },
 ] as const satisfies readonly AppearanceStyle[]
 
 export type AppearanceStyleId = (typeof APPEARANCE_STYLES)[number]["id"]

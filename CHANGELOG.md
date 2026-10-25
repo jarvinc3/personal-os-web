@@ -6,6 +6,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Agregado
 
+- Neo-Skeuo entra al selector de estilo visual: papel y tinta en claro y oscuro, cuatro superficies (base, elevada, hundida y presionada), tres niveles de sombra y radios de 0, 4, 8 y 12 px. Se elige en Ajustes → Apariencia, se recuerda como cualquier estilo y no toca componentes: las utilidades `shadow-*` y `rounded-*` leen los tokens del estilo. Con cualquier color primario el texto sigue legible (#235).
 - El detalle de un comercio muestra su categoría, sus nombres alternativos y, cuando la app eligió la categoría, la insignia «Sugerida» con «Confirmar»; el sheet de editar permite editar los nombres alternativos, buscar la marca del logo, quitar el logo y parte del tipo de la categoría actual (#263).
 - Los comercios avisan de posibles duplicados: el detalle muestra «Posible duplicado de …» con el motivo, «Unir» y «No es duplicado» (con Deshacer), el sheet de unir lista primero «Sugeridos», la lista marca las filas con candidatos y un nombre repetido enlaza al comercio que ya lo tiene (#264).
 - «Pagar cuota» en el detalle del préstamo y en el sheet de la cuota pendiente más antigua: `LoanPaymentSheet` propone la cuenta «Se paga desde», el total de la cuota con su desglose y, si el monto lo supera, deja elegir entre abonar el excedente a capital o corregir el monto; un pago parcial deja la cuota como parcial (#295).
