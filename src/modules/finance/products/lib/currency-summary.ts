@@ -46,3 +46,23 @@ export function currencyGroupFor(
     null
   )
 }
+
+/**
+ * Currency the ring starts on: the base one when it has something to draw, and
+ * otherwise the first one that does.
+ */
+export function currencyWithBalance(
+  groups: readonly FinanceBalanceSheetCurrencyGroup[],
+  preferred: string
+): string | null {
+  const hasBalance = (group: FinanceBalanceSheetCurrencyGroup) => {
+    const assets = parseFinanceMoney(group.totals.assets) ?? 0
+    const liabilities = parseFinanceMoney(group.totals.liabilities) ?? 0
+    return assets !== 0 || liabilities !== 0
+  }
+  const preferredGroup = currencyGroupFor(groups, preferred)
+  if (preferredGroup && hasBalance(preferredGroup)) {
+    return preferredGroup.currency
+  }
+  return groups.find(hasBalance)?.currency ?? null
+}
