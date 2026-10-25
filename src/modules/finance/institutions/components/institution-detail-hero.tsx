@@ -55,8 +55,7 @@ export function InstitutionDetailHero({
             <ProductCountItem
               icon={LandmarkIcon}
               count={counts.accounts}
-              singular="cuenta"
-              plural="cuentas"
+              noun="account"
             />
             {!isCash ? (
               <>
@@ -64,8 +63,7 @@ export function InstitutionDetailHero({
                 <ProductCountItem
                   icon={CreditCardIcon}
                   count={counts.cards}
-                  singular="tarjeta"
-                  plural="tarjetas"
+                  noun="card"
                 />
               </>
             ) : null}
@@ -73,8 +71,7 @@ export function InstitutionDetailHero({
             <ProductCountItem
               icon={HandCoinsIcon}
               count={counts.loans}
-              singular="préstamo"
-              plural="préstamos"
+              noun="loan"
             />
           </div>
         </div>

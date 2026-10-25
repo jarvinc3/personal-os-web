@@ -10,7 +10,10 @@ import {
   isWalletDragOnly,
   walletGestureDelta,
 } from "@/src/modules/finance/shared/lib/wallet-gesture"
-import { countLabel } from "@/src/modules/finance/shared/lib/count-label"
+import {
+  countLabel,
+  type FinanceCountNoun,
+} from "@/src/modules/finance/shared/lib/count-label"
 import { EntitySurface } from "@/src/modules/finance/shared/components/entity-surface"
 import {
   LinkPendingOverlay,
@@ -52,17 +55,15 @@ type InstitutionWalletCardProps = {
 export function ProductCountItem({
   icon: Icon,
   count,
-  singular,
-  plural,
+  noun,
   compact = false,
 }: {
   icon: LucideIcon
   count: number
-  singular: string
-  plural: string
+  noun: FinanceCountNoun
   compact?: boolean
 }) {
-  const label = countLabel(count, singular, plural)
+  const label = countLabel(count, noun)
   return (
     <span className="inline-flex items-center gap-1.5" title={label}>
       <Icon
@@ -101,6 +102,13 @@ function IrregularityMarks({
   )
 }
 
+type InstitutionCountItem = {
+  key: string
+  icon: LucideIcon
+  count: number
+  noun: FinanceCountNoun
+}
+
 function InstitutionProductCounts({
   counts,
   compact = false,
@@ -108,36 +116,33 @@ function InstitutionProductCounts({
   counts: InstitutionCardCounts
   compact?: boolean
 }) {
-  const items = [
+  const items: InstitutionCountItem[] = [
     {
       key: "accounts",
       icon: LandmarkIcon,
       count: counts.accounts,
-      singular: "cuenta",
-      plural: "cuentas",
+      noun: "account",
     },
     ...(counts.cards === undefined
       ? []
-      : [
+      : ([
           {
             key: "cards",
             icon: CreditCardIcon,
             count: counts.cards,
-            singular: "tarjeta",
-            plural: "tarjetas",
+            noun: "card",
           },
-        ]),
+        ] satisfies InstitutionCountItem[])),
     ...(counts.loans === undefined
       ? []
-      : [
+      : ([
           {
             key: "loans",
             icon: HandCoinsIcon,
             count: counts.loans,
-            singular: "préstamo",
-            plural: "préstamos",
+            noun: "loan",
           },
-        ]),
+        ] satisfies InstitutionCountItem[])),
   ]
 
   return (
@@ -155,8 +160,7 @@ function InstitutionProductCounts({
           <ProductCountItem
             icon={item.icon}
             count={item.count}
-            singular={item.singular}
-            plural={item.plural}
+            noun={item.noun}
             compact={compact}
           />
         </span>

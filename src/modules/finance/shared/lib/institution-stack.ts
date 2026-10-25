@@ -99,9 +99,9 @@ export function institutionInitials(name: string): string {
 
 export function formatProductCounts(counts: InstitutionStackCounts): string {
   return [
-    countLabel(counts.accounts, "cuenta", "cuentas"),
-    countLabel(counts.cards, "tarjeta", "tarjetas"),
-    countLabel(counts.loans, "préstamo", "préstamos"),
+    countLabel(counts.accounts, "account"),
+    countLabel(counts.cards, "card"),
+    countLabel(counts.loans, "loan"),
   ].join(" · ")
 }
 

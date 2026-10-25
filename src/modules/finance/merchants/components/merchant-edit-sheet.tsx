@@ -189,20 +189,19 @@ export function MerchantEditSheet({
       if (isCreate) {
         await createMutation.mutateAsync({ name: values.name.trim(), ...body })
         appToast.success({ text1: "Comercio creado" })
-        onOpenChange(false)
-        return
+      } else {
+        if (!merchant) {
+          return
+        }
+        await updateMutation.mutateAsync({
+          id: merchant.id,
+          body: { name: values.name.trim(), ...body },
+        })
+        if (values.removeLogo) {
+          await deleteLogoMutation.mutateAsync(merchant.id)
+        }
+        appToast.success({ text1: "Comercio actualizado" })
       }
-      if (!merchant) {
-        return
-      }
-      await updateMutation.mutateAsync({
-        id: merchant.id,
-        body: { name: values.name.trim(), ...body },
-      })
-      if (values.removeLogo) {
-        await deleteLogoMutation.mutateAsync(merchant.id)
-      }
-      appToast.success({ text1: "Comercio actualizado" })
       onOpenChange(false)
     } catch (error) {
       const existingId = merchantIdFromConflict(error)

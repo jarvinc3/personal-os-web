@@ -5,11 +5,12 @@ import { countLabel } from "./count-label.ts"
 
 describe("countLabel", () => {
   it("uses the singular for one", () => {
-    assert.equal(countLabel(1, "cuenta", "cuentas"), "1 cuenta")
+    assert.equal(countLabel(1, "account"), "1 cuenta")
+    assert.equal(countLabel(1, "installment"), "1 cuota")
   })
 
   it("uses the plural for zero and more than one", () => {
-    assert.equal(countLabel(0, "cuenta", "cuentas"), "0 cuentas")
-    assert.equal(countLabel(2, "cuenta", "cuentas"), "2 cuentas")
+    assert.equal(countLabel(0, "account"), "0 cuentas")
+    assert.equal(countLabel(2, "loan"), "2 préstamos")
   })
 })

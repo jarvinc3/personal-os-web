@@ -300,7 +300,7 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
         }
         metricValue={formatFinanceMoney(loan.currentBalance, money)}
         progress={progress}
-        startCaption={`${loan.paidInstallments}/${countLabel(loan.totalInstallments, "cuota", "cuotas")}`}
+        startCaption={`${loan.paidInstallments}/${countLabel(loan.totalInstallments, "installment")}`}
         endCaption={`Original ${formatFinanceMoney(loan.originalAmount, money)}`}
         footnote={
           loan.nextDueDate

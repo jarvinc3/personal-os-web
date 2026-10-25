@@ -114,7 +114,7 @@ export function LoanProgressCard({
       caption={
         <span className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
           <span>
-            {`${loan.paidInstallments}/${countLabel(loan.totalInstallments, "cuota", "cuotas")}`}
+            {`${loan.paidInstallments}/${countLabel(loan.totalInstallments, "installment")}`}
           </span>
           {loan.nextDueDate ? (
             <span
