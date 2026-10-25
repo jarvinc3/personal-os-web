@@ -17,6 +17,7 @@ import { CategoryTrigger } from "@/src/modules/finance/shared/components/pickers
 import { DestinationPickerSheet } from "@/src/modules/finance/shared/components/pickers/destination-picker-sheet"
 import { DestinationTrigger } from "@/src/modules/finance/shared/components/pickers/destination-trigger"
 import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
+import { usePicker } from "@/src/shared/hooks/use-picker"
 import { useCards } from "@/src/modules/finance/shared/hooks/use-cards"
 import { useCategories } from "@/src/modules/finance/shared/hooks/use-categories"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
@@ -82,8 +83,9 @@ export function QuickEntryPreviewSheet({
   const [date, setDate] = useState(draft?.date ?? "")
   const [merchant, setMerchant] = useState(draft?.merchant ?? "")
   const [description, setDescription] = useState(draft?.description ?? "")
-  const [categoryPickerOpen, setCategoryPickerOpen] = useState(false)
-  const [destinationPickerOpen, setDestinationPickerOpen] = useState(false)
+  const { picker, openPicker, closeHandlerFor } = usePicker<
+    "none" | "category" | "destination"
+  >("none")
 
   const display = {
     currency: config.baseCurrency,
@@ -162,7 +164,7 @@ export function QuickEntryPreviewSheet({
             </span>
             <CategoryTrigger
               category={selectedCategory}
-              onClick={() => setCategoryPickerOpen(true)}
+              onClick={() => openPicker("category")}
             />
           </div>
 
@@ -175,7 +177,7 @@ export function QuickEntryPreviewSheet({
               accounts={accounts}
               cards={cards}
               display={display}
-              onClick={() => setDestinationPickerOpen(true)}
+              onClick={() => openPicker("destination")}
             />
           </div>
 
@@ -212,9 +214,10 @@ export function QuickEntryPreviewSheet({
         </div>
       </BottomSheet>
 
+      {/* La vista previa se cierra sola al recargar: el selector no vive sin ella. */}
       <CategoryPickerSheet
-        open={categoryPickerOpen}
-        onOpenChange={setCategoryPickerOpen}
+        open={open && picker === "category"}
+        onOpenChange={closeHandlerFor("category")}
         categories={categories}
         categoryType={type === "DEBIT" ? "EXPENSE" : "INCOME"}
         value={categoryId}
@@ -222,8 +225,8 @@ export function QuickEntryPreviewSheet({
       />
 
       <DestinationPickerSheet
-        open={destinationPickerOpen}
-        onOpenChange={setDestinationPickerOpen}
+        open={open && picker === "destination"}
+        onOpenChange={closeHandlerFor("destination")}
         institutions={institutions}
         accounts={accounts}
         cards={cards}

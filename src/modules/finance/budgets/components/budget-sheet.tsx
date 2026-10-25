@@ -42,6 +42,7 @@ import {
   FINANCE_BUDGET_ROLLOVER_LABEL,
   FINANCE_BUDGET_ROLLOVERS,
 } from "@/src/modules/finance/shared/types/entities"
+import { usePicker } from "@/src/shared/hooks/use-picker"
 import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import { Button } from "@/src/shared/components/ui/button"
 import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
@@ -52,7 +53,7 @@ import { appToast } from "@/src/shared/lib/app-toast"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { CalendarIcon, PiggyBankIcon, XIcon } from "lucide-react"
-import { useEffect, useId, useMemo, useState } from "react"
+import { useEffect, useId, useMemo } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import {
   budgetSchema,
@@ -160,7 +161,10 @@ export function BudgetSheet({
     onOpenChange,
   })
   const categoryIds = useWatch({ control, name: "categoryIds" })
-  const [categoryPickerOpen, setCategoryPickerOpen] = useState(false)
+  const { picker, openPicker, closeHandlerFor } = usePicker<
+    "none" | "category"
+  >("none")
+  const closeCategoryPicker = closeHandlerFor("category")
   const selectedCategories = useMemo(
     () =>
       categoryIds
@@ -254,7 +258,7 @@ export function BudgetSheet({
       setValue("categoryIds", [...categoryIds, created.id], {
         shouldValidate: true,
       })
-      setCategoryPickerOpen(false)
+      closeCategoryPicker(false)
     } catch (error) {
       appToast.error({ text1: financeErrorMessage(error) })
     }
@@ -304,7 +308,7 @@ export function BudgetSheet({
             </FieldLabel>
             <CategoryMultiTrigger
               categories={selectedCategories}
-              onClick={() => setCategoryPickerOpen(true)}
+              onClick={() => openPicker("category")}
               onRemove={(categoryId) =>
                 setValue(
                   "categoryIds",
@@ -463,8 +467,8 @@ export function BudgetSheet({
       </BottomSheet>
 
       <CategoryPickerSheet
-        open={categoryPickerOpen}
-        onOpenChange={setCategoryPickerOpen}
+        open={picker === "category"}
+        onOpenChange={closeCategoryPicker}
         categories={categories}
         categoryType="EXPENSE"
         multiple

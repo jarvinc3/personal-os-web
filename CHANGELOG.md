@@ -40,6 +40,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Corregido
 
+- Los selectores de categoría del presupuesto y de categoría y destino de la vista previa de Captura rápida se abren por ruta (`?picker=`): Atrás cierra solo el selector y el formulario conserva lo escrito (#250).
 - Productos deja de usar el margen negativo que ocultaba el balance bajo la cabecera y presenta Atajos como una subsección compacta (#262, #297).
 - Cerrar con Atrás la hoja de modo, estilo o color primario descarta el borrador y devuelve la apariencia guardada, igual que «Cancelar» (#160).
 - Los botones de atrás, de opciones y la insignia de las cabeceras de color se leen sobre el fondo, y la decoración de las cards de cuenta ya no se sale como semicírculo gris (#245).

@@ -11,7 +11,7 @@ Un bottom-sheet se abre con la URL, no con un `useState` local. Así Atrás lo c
 - La clave es una constante del módulo. En Finanzas sale de `FINANCE_SHEET_KEYS` (`src/modules/finance/shared/constants/sheet-keys.ts`). No un literal suelto en el JSX.
 - Hoja de un registro: `setOpen(true, id)` y el contenido lee `sheetId`; para resolverlo sobre una lista o una query, `useSheetListEntity` / `useSheetQueryEntity` (`src/modules/finance/shared/hooks/use-sheet-entity.ts`). Hoja sin registro: `setOpen(true)`.
 - La hoja no recibe `open` desde un estado de la pantalla: el estado vive en la URL.
-- Hoja anidada (moneda, color, categoría, calculadora o cualquier selector abierto desde un formulario que ya está en una hoja) usa el segundo parámetro de la URL definido en #251, para no perder lo escrito en el formulario que la contiene. Abrirla no cierra la de arriba.
+- Hoja anidada (moneda, color, categoría, calculadora o cualquier selector abierto desde un formulario que ya está en una hoja) usa `usePicker` de `@/src/shared/hooks/use-picker`, que suma `?picker=<clave>` a la URL junto con el sheet padre, para no perder lo escrito en el formulario que la contiene. Abrirla no cierra la de arriba.
 - Hoja informativa (ayuda, glosario, «Qué significa conciliar», historial, «Novedades»): también lleva ruta.
 - Hoja que se abre sola, sin toque previo (vista previa de Captura rápida, «Novedades» de la versión): escribe su parámetro al abrirse, igual que las demás.
 - Un `AlertDialog` de confirmación no lleva ruta: Esc cancela y cierra, y un clic fuera no cierra. Ver `confirm-important-changes.mdc`.
