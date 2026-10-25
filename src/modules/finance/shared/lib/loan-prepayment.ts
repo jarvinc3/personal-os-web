@@ -1,8 +1,5 @@
 import { formatCalendarDate } from "./ledger-form.ts"
-import {
-  formatFinanceMoney,
-  type FinanceMoneyDisplay,
-} from "./money.ts"
+import { formatFinanceMoney, type FinanceMoneyDisplay } from "./money.ts"
 import type { LoanPrepaymentMode } from "./planning-payloads.ts"
 
 export const PREPAYMENT_MODE_EXPLANATION: Record<LoanPrepaymentMode, string> = {

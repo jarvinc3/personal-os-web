@@ -62,5 +62,7 @@ export function installmentExcess(amount: number, dueTotal: number): number {
 export function nextUnpaidInstallment(
   installments: readonly FinanceLoanInstallment[]
 ): FinanceLoanInstallment | null {
-  return installments.find((installment) => installment.status !== "PAID") ?? null
+  return (
+    installments.find((installment) => installment.status !== "PAID") ?? null
+  )
 }

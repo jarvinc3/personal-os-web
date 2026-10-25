@@ -141,8 +141,7 @@ export const API_ENDPOINTS = {
     MERCHANT: (id: string) => `/finance/merchants/${id}`,
     MERCHANT_MERGE: (id: string) => `/finance/merchants/${id}/merge`,
     MERCHANT_LOGO: (id: string) => `/finance/merchants/${id}/logo`,
-    MERCHANT_DUPLICATES: (id: string) =>
-      `/finance/merchants/${id}/duplicates`,
+    MERCHANT_DUPLICATES: (id: string) => `/finance/merchants/${id}/duplicates`,
     MERCHANT_DUPLICATE_DISMISS: (id: string, otherId: string) =>
       `/finance/merchants/${id}/duplicates/${otherId}/dismiss`,
     RECURRING: "/finance/recurring",

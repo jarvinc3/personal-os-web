@@ -29,7 +29,8 @@ function merchant(
 }
 
 function candidate(
-  partial: Partial<FinanceMerchantDuplicate> & Pick<FinanceMerchantDuplicate, "id">
+  partial: Partial<FinanceMerchantDuplicate> &
+    Pick<FinanceMerchantDuplicate, "id">
 ): FinanceMerchantDuplicate {
   return {
     name: "Otro",
