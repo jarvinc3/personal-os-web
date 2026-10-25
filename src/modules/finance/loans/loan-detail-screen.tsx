@@ -11,6 +11,7 @@ import { FinanceProgressHero } from "@/src/modules/finance/shared/components/lay
 import { LoanSurfaceMark } from "@/src/modules/finance/loans/components/loan-progress-card"
 import { LoanAmortizationSheet } from "@/src/modules/finance/loans/components/amortization-sheet"
 import { LoanPrepaymentSheet } from "@/src/modules/finance/loans/components/loan-prepayment-sheet"
+import { LoanPaymentSheet } from "@/src/modules/finance/loans/components/loan-payment-sheet"
 import { InstallmentDetailSheet } from "@/src/modules/finance/loans/components/installment-detail-sheet"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
@@ -35,6 +36,7 @@ import {
 import { showUndoToast } from "@/src/modules/finance/shared/components/undo-toast"
 import { formatRatePercentLabel } from "@/src/modules/finance/shared/lib/interest-rate"
 import { formatCalendarDate } from "@/src/modules/finance/shared/lib/ledger-form"
+import { nextUnpaidInstallment } from "@/src/modules/finance/shared/lib/loan-payment"
 import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 import { loanProgressSummary } from "@/src/modules/finance/shared/lib/planning-lists"
 import {
@@ -125,6 +127,8 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
     useSheetParam(FINANCE_SHEET_KEYS.loanOptions)
   const { open: openPrepaymentSheet, setOpen: setOpenPrepaymentSheet } =
     useSheetParam(FINANCE_SHEET_KEYS.loanPrepayment)
+  const { open: openPaymentSheet, setOpen: setOpenPaymentSheet } =
+    useSheetParam(FINANCE_SHEET_KEYS.loanPayment)
 
   const loan =
     (loansQuery.data ?? []).find((item) => item.id === loanId) ?? null
@@ -141,6 +145,7 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
     ? (accounts.find((item) => item.id === loan.disbursementAccountId) ?? null)
     : null
   const installments = infiniteListItems(installmentsQuery.data)
+  const nextInstallment = nextUnpaidInstallment(installments)
   const accent = institution?.color ?? ACCENT_FALLBACK_COLOR
   const money = { ...display, currency: loan?.currency ?? display.currency }
   const summary = loan ? loanProgressSummary(loan) : null
@@ -340,6 +345,16 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
       </div>
 
       <div className="mx-4 flex flex-col gap-3 rounded-3xl bg-background">
+        {nextInstallment ? (
+          <Button
+            type="button"
+            className="w-full"
+            onClick={() => setOpenPaymentSheet(true)}
+          >
+            <HandCoinsIcon className="size-4 shrink-0" />
+            Pagar cuota
+          </Button>
+        ) : null}
         {installmentsQuery.isError ? (
           <FinanceErrorState
             message={financeLoadErrorMessage(installmentsQuery.error)}
@@ -466,6 +481,25 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
         }}
         installment={selectedInstallment}
         display={money}
+        canPay={
+          selectedInstallment !== null &&
+          nextInstallment !== null &&
+          selectedInstallment.id === nextInstallment.id
+        }
+        onPay={() => {
+          setSelectedInstallment(null)
+          setOpenPaymentSheet(true)
+        }}
+      />
+
+      <LoanPaymentSheet
+        open={openPaymentSheet}
+        onOpenChange={setOpenPaymentSheet}
+        loanId={loan.id}
+        lenderName={loan.lenderName}
+        currency={loan.currency}
+        loanAccountId={loan.accountId}
+        installment={nextInstallment}
       />
 
       <LoanAmortizationSheet

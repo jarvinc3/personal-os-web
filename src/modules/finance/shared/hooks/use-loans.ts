@@ -5,6 +5,8 @@ import { loansQuery } from "@/src/modules/finance/shared/lib/finance-query-optio
 import type {
   CreateLoanBody,
   LoanPrepaymentBody,
+  PayLoanInstallmentBody,
+  LoanInstallmentPaymentResult,
 } from "@/src/modules/finance/shared/lib/planning-payloads"
 import {
   FINANCE_ACCOUNTS_QUERY_KEY,
@@ -49,6 +51,24 @@ export function useLoanPrepayment() {
     }) =>
       apiPost<{ prepayment: unknown; loan: FinanceLoan }>(
         API_ENDPOINTS.FINANCE.LOAN_PREPAYMENTS(loanId),
+        body
+      ),
+    onSuccess: () => invalidate(queryClient),
+  })
+}
+
+export function usePayLoanInstallment() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({
+      loanId,
+      body,
+    }: {
+      loanId: string
+      body: PayLoanInstallmentBody
+    }) =>
+      apiPost<LoanInstallmentPaymentResult>(
+        API_ENDPOINTS.FINANCE.LOAN_PAY_NEXT_INSTALLMENT(loanId),
         body
       ),
     onSuccess: () => invalidate(queryClient),

@@ -89,6 +89,50 @@ export function buildLoanPrepaymentBody(input: {
   return { ok: true, body }
 }
 
+export type PayLoanInstallmentBody = {
+  amount: number
+  accountId: string
+  /** Only when the user chose to send the excess to the principal. */
+  excessAsPrepayment?: boolean
+}
+
+export type LoanInstallmentPaymentResult = {
+  installmentNo: number
+  breakdown: {
+    lateFee: number
+    fees: number
+    insurance: number
+    interest: number
+    principal: number
+  }
+  paidAmount: number
+  status: "PAID" | "PARTIAL"
+  currentBalance: number
+}
+
+export function buildPayLoanInstallmentBody(input: {
+  amount: string
+  accountId?: string
+  excessAsPrepayment?: boolean
+}): PayloadResult<PayLoanInstallmentBody> {
+  const amount = parseFinanceMoney(input.amount)
+  if (amount === null || amount <= 0) {
+    return { ok: false, error: "Monto inválido" }
+  }
+  const accountId = optionalId(input.accountId)
+  if (!accountId) {
+    return { ok: false, error: "Elige una cuenta de pago" }
+  }
+  return {
+    ok: true,
+    body: {
+      amount,
+      accountId,
+      ...(input.excessAsPrepayment ? { excessAsPrepayment: true } : {}),
+    },
+  }
+}
+
 export type CreateReceivableBody = {
   debtorName: string
   amount: number

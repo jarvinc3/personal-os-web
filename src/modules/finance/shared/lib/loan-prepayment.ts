@@ -1,11 +1,9 @@
 import { formatCalendarDate } from "./ledger-form.ts"
 import {
   formatFinanceMoney,
-  parseFinanceMoney,
   type FinanceMoneyDisplay,
 } from "./money.ts"
 import type { LoanPrepaymentMode } from "./planning-payloads.ts"
-import type { FinanceAccount } from "@/src/modules/finance/shared/types/entities"
 
 export const PREPAYMENT_MODE_EXPLANATION: Record<LoanPrepaymentMode, string> = {
   REDUCE_TERM: "Pagas la misma cuota y terminas antes.",
@@ -19,34 +17,6 @@ export type LoanPrepaymentPreview = {
   installmentAmount: number
   interestRemaining: number
   newEndDate: string
-}
-
-/**
- * Account an abono comes from: the loan's «Se paga desde», and only when it has
- * none, the first account with free balance.
- */
-export function defaultPrepaymentAccountId(input: {
-  accounts: readonly FinanceAccount[]
-  loanAccountId: string | null
-  currency: string
-}): string {
-  const { accounts, loanAccountId, currency } = input
-  const active = accounts.filter((account) => account.isActive)
-  if (loanAccountId && active.some((account) => account.id === loanAccountId)) {
-    return loanAccountId
-  }
-  const hasFreeBalance = (account: FinanceAccount) =>
-    (parseFinanceMoney(account.freeBalance) ?? 0) > 0
-  const wanted = currency.trim().toUpperCase()
-  const sameCurrency = active.find(
-    (account) =>
-      account.currency.trim().toUpperCase() === wanted &&
-      hasFreeBalance(account)
-  )
-  if (sameCurrency) {
-    return sameCurrency.id
-  }
-  return active.find(hasFreeBalance)?.id ?? ""
 }
 
 /**

@@ -14,7 +14,7 @@ import { Button } from "@/src/shared/components/ui/button"
 import { SummaryItem } from "@/src/shared/components/data-display/summary"
 import { LinkPendingOverlay } from "@/src/shared/components/shell/navigation-pending"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
-import { ReceiptIcon, XIcon } from "lucide-react"
+import { HandCoinsIcon, ReceiptIcon, XIcon } from "lucide-react"
 import Link from "next/link"
 
 type InstallmentDetailSheetProps = {
@@ -22,6 +22,9 @@ type InstallmentDetailSheetProps = {
   onOpenChange: (open: boolean) => void
   installment: FinanceLoanInstallment | null
   display: FinanceMoneyDisplay
+  /** Only the oldest unpaid installment can be paid. */
+  canPay?: boolean
+  onPay?: () => void
 }
 
 export function InstallmentDetailSheet({
@@ -29,6 +32,8 @@ export function InstallmentDetailSheet({
   onOpenChange,
   installment,
   display,
+  canPay = false,
+  onPay,
 }: InstallmentDetailSheetProps) {
   return (
     <BottomSheet
@@ -76,6 +81,13 @@ export function InstallmentDetailSheet({
               />
             ))}
           </div>
+
+          {canPay && onPay ? (
+            <Button type="button" className="w-full" onClick={onPay}>
+              <HandCoinsIcon className="size-4 shrink-0" />
+              Pagar cuota
+            </Button>
+          ) : null}
 
           {installment.transactionId ? (
             <Button asChild variant="outline" className="w-full">

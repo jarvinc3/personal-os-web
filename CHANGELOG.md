@@ -6,6 +6,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Agregado
 
+- «Pagar cuota» en el detalle del préstamo y en el sheet de la cuota pendiente más antigua: `LoanPaymentSheet` propone la cuenta «Se paga desde», el total de la cuota con su desglose y, si el monto lo supera, deja elegir entre abonar el excedente a capital o corregir el monto; un pago parcial deja la cuota como parcial (#295).
 - Las galerías de referencia son permanentes en Ajustes → Apariencia: `/settings/appearance/cards` con las cards de cada entidad y sus variantes, y `/settings/appearance/components` con los componentes compartidos por propósito, su ruta de importación y sus estados; los sheets de ejemplo se abren por la URL para que Atrás los cierre (#307, #314, #316).
 - Ambas galerías se abren solo desde Apariencia; Inicio deja de mostrar la sección «Desarrollo» y desaparece el índice `/dev` (#314, #316).
 - AI-3: `/intelligence` muestra particiones de `EMAIL_V1`, cola paginada para confirmar, corregir o rechazar mensajes, marca HOLDOUT como verdad de referencia y expone historial de runs y procedencia (#206).

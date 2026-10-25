@@ -13,10 +13,10 @@ import { useLoanPrepayment } from "@/src/modules/finance/shared/hooks/use-loans"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import {
   PREPAYMENT_MODE_EXPLANATION,
-  defaultPrepaymentAccountId,
   prepaymentPreviewLines,
   type LoanPrepaymentPreview,
 } from "@/src/modules/finance/shared/lib/loan-prepayment"
+import { defaultLoanPaymentAccountId } from "@/src/modules/finance/shared/lib/loan-payment"
 import {
   encodeLedgerTarget,
   splitLedgerTarget,
@@ -86,7 +86,7 @@ export function LoanPrepaymentSheet({
   )
   const effectiveAccountId =
     accountId ||
-    defaultPrepaymentAccountId({ accounts, loanAccountId, currency })
+    defaultLoanPaymentAccountId({ accounts, loanAccountId, currency })
   const parsedAmount = parseFinanceMoney(amount)
   const display = {
     currency,

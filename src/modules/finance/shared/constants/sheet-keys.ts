@@ -12,6 +12,7 @@ export const FINANCE_SHEET_KEYS = {
   cardPayment: "card-payment-sheet",
   loanOptions: "loan-options-sheet",
   loanPrepayment: "loan-prepayment-sheet",
+  loanPayment: "loan-payment-sheet",
   category: "category-sheet",
   transactionOptions: "transaction-options-sheet",
   savings: "savings-sheet",
