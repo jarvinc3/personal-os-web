@@ -27,6 +27,7 @@ import {
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
 import { appToast } from "@/src/shared/lib/app-toast"
+import { usePicker } from "@/src/shared/hooks/use-picker"
 import { CheckIcon, InboxIcon, XIcon } from "lucide-react"
 import { useState } from "react"
 
@@ -44,7 +45,9 @@ export function DetectedSheet({
   isEnabled,
   display,
 }: DetectedSheetProps) {
-  const [archiveOpen, setArchiveOpen] = useState(false)
+  const { picker, openPicker, closeHandlerFor } = usePicker<"none" | "archive">(
+    "none"
+  )
   const [confirmingId, setConfirmingId] = useState<string | null>(null)
   const recurringQuery = useRecurring(isEnabled && open, "SUGGESTED")
   const categoriesQuery = useCategories(isEnabled && open)
@@ -103,7 +106,7 @@ export function DetectedSheet({
             <Button
               variant="outline"
               className="flex-1"
-              onClick={() => setArchiveOpen(true)}
+              onClick={() => openPicker("archive")}
             >
               <InboxIcon className="size-4 shrink-0" />
               Bandeja completa
@@ -179,8 +182,8 @@ export function DetectedSheet({
       </BottomSheet>
 
       <RecurringArchiveSheet
-        open={archiveOpen}
-        onOpenChange={setArchiveOpen}
+        open={picker === "archive"}
+        onOpenChange={closeHandlerFor("archive")}
         display={display}
         nested
       />

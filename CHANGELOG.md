@@ -16,6 +16,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Cambiado
 
+- La bandeja de recurrentes se abre como selector anidado del sheet de detección (`?picker=archive`), el orden y los filtros de suscripciones ya viajan en la URL, y se elimina el sheet `recurring-sheet.tsx`, que no se usaba (#257).
 - Los selectores abiertos desde un sheet (moneda, color, categoría, país, cuenta, institución y calculadora) llevan su propia clave en la URL (`?sheet=…&picker=…`): Atrás cierra solo el selector, el formulario conserva lo escrito y recargar reabre el sheet y su selector (#251).
 - Productos usa un solo nombre por cifra, con su ayuda del glosario: «Patrimonio neto» en el hero, «Patrimonio» en la institución, «Saldo» en la cuenta, «Disponible» y «Deuda» en la tarjeta y «Deuda» en el préstamo; «Sin conciliar» tiene su propia entrada y lista solo productos con saldo pendiente, sin repetir institución ni moneda (#293).
 - Cada patrón de UI remite a un solo componente canónico: nueva tabla «patrón → componente» en `ui-components.md`, regla `ui-single-source.mdc` y enlaces desde `AGENTS.md` a las galerías de Apariencia (#308).
