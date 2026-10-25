@@ -9,7 +9,7 @@ import type { ApiErrorBody } from "@/src/config/api-client.utils"
 import { getSupabaseBrowserClient } from "@/src/config/supabase/client"
 import { API_BASE_URL } from "@/src/shared/constants/api-endpoints"
 import { authEvents } from "@/src/shared/events/auth-events"
-import { logApiError } from "@/src/shared/lib/log-api-error"
+import { logApiError, logApiRequest } from "@/src/shared/lib/log-api-error"
 export { ApiError } from "@/src/config/api-client.utils"
 
 type ApiEnvelope<T> = {
@@ -150,7 +150,7 @@ export function createApiClient({
           process.env.NODE_ENV === "development" &&
           envelope.meta?.requestId
         ) {
-          console.debug(`[API] ${path} requestId=${envelope.meta.requestId}`)
+          logApiRequest(path, envelope.meta.requestId)
         }
         return envelope.data
       }
