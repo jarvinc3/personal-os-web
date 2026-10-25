@@ -13,6 +13,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Cambiado
 
+- Cada patrón de UI remite a un solo componente canónico: nueva tabla «patrón → componente» en `ui-components.md`, regla `ui-single-source.mdc` y enlaces desde `AGENTS.md` a las galerías de Apariencia (#308).
 - Toda hoja se abre por ruta: la regla vive en `.cursor/rules/sheet-url-route.mdc`, enlazada desde `AGENTS.md`, `ui-components.md` y las reglas de sheets compartidos y de formulario en hoja; los diálogos de confirmación siguen cerrando con Esc y no con clic fuera (#261).
 - Intelligence refleja el avance persistente de Gmail en vivo, explica por qué se detuvo, permite reconectar y vaciar el corpus con confirmación antes de reiniciar desde 2026-01-01 (#205, #318).
 - La espera por límite de Gmail muestra una cuenta regresiva al siguiente reintento y el estado de conexión de las actualizaciones WebSocket (#318).

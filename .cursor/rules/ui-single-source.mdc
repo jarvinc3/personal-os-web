@@ -1,0 +1,24 @@
+---
+description: Every UI pattern uses its one canonical shared component; never build a parallel copy for a single screen.
+alwaysApply: true
+---
+
+# Una sola fuente de verdad (UI)
+
+Antes de crear un control se busca en `docs/architecture/ui-components.md` y en las galerías de Ajustes → Apariencia: `/settings/appearance/components` y `/settings/appearance/cards`.
+
+- Cada patrón se pinta con el componente canónico de la tabla «Una sola fuente de verdad»; no se crea uno paralelo para una vista, ni siquiera uno «pequeño».
+- Un cambio de detalle (texto, icono, color, radio, espaciado) se hace en el componente y se ve en todas partes. No se corrige la copia de una pantalla.
+- Si el componente falta, se crea en el módulo dueño, se exporta por su `index.ts` y se añade a la galería antes de usarlo en una vista.
+- Las cards de entidad siguen la tabla «Cards por entidad» y `entity-cards.mdc`: una proyección se adapta a la fila canónica, no se dibuja una propia.
+- Lo pendiente está en la tabla con su issue (#298 a #306). No se adelanta un componente suelto por fuera de ese issue.
+
+```tsx
+// Mal: una fila nueva solo para esta vista
+<div className="rounded-2xl border bg-card p-4">…</div>
+
+// Bien: el canónico
+<SummarySection title="Cargos bancarios" icon={LandmarkIcon}>
+  …
+</SummarySection>
+```

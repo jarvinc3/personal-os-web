@@ -156,6 +156,33 @@ Una entidad de Finanzas se pinta con su card y la variante que corresponda; nunc
 
 El estado de cuenta de una tarjeta y los extras de una importación no son entidades: la primera fila es un modelo del back y la segunda una proyección de movimientos. Las dos se pintan con `StatementMovementRow` y sus adaptadores (`fromStatementLine`, `fromStatementImportExtra`).
 
+## Una sola fuente de verdad
+
+Un patrón se pinta siempre con el mismo componente. Si cambia un detalle, cambia en el componente y se ve en todas partes; no se crea una copia «más simple» para una vista. Regla obligatoria: [`ui-single-source.mdc`](../../.cursor/rules/ui-single-source.mdc). Referencia viva: `/settings/appearance/components` y `/settings/appearance/cards` ([README](../../src/modules/galleries/README.md)).
+
+| Patrón                                  | Componente canónico                                                                                                                                                                      | Estado                                      |
+| --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
+| Confirmar una acción destructiva        | `AlertDialog` ([`alert-dialog.tsx`](../../src/shared/components/ui/alert-dialog.tsx)); en Finanzas `DeleteRecordDialog`, `ArchiveRecordDialog` y `useDiscardChanges`                     | Completo                                    |
+| Cerrar un sheet                         | `BottomSheet` `actions.close` / `actions.submit` ([`bottom-sheet.tsx`](../../src/shared/components/sheets/bottom-sheet.tsx))                                                             | #298 unifica el «Cancelar» copiado          |
+| Cerrar un sheet con cambios sin guardar | `useDiscardChanges` ([`use-discard-changes.tsx`](../../src/modules/finance/shared/hooks/use-discard-changes.tsx))                                                                        | Completo                                    |
+| Monto en pantalla                       | `formatFinanceMoney` + `tabular-nums` ([`money.ts`](../../src/modules/finance/shared/lib/money.ts)); escribirlo, `FinanceMoneyField`                                                     | #300 une signo y color                      |
+| Fecha y hora                            | Formato: [`date-format.ts`](../../src/shared/lib/date-format.ts). Entrada: `FinanceDateField` / `WheelField`                                                                             | #301 deja un solo módulo de formato         |
+| Encabezado de una ruta                  | `usePageHeader` ([`use-page-header.ts`](../../src/shared/hooks/use-page-header.ts))                                                                                                      | #302 unifica el encabezado de detalle       |
+| Bloque con título                       | `SummarySection` ([`summary.tsx`](../../src/shared/components/data-display/summary.tsx))                                                                                                 | Completo                                    |
+| Chip o píldora                          | `CategoryCard` variante `chip` ([`category-card.tsx`](../../src/modules/finance/shared/components/category-card.tsx))                                                                    | #303 unifica chips y píldoras               |
+| Anillo de progreso                      | `SubscriptionProgressRing` ([`subscription-progress-ring.tsx`](../../src/modules/finance/subscriptions/components/subscription-progress-ring.tsx)); en un detalle, `FinanceProgressHero` | #303 lo generaliza                          |
+| Círculo de icono                        | Ninguno: hoy cada pantalla lo dibuja                                                                                                                                                     | #303                                        |
+| Tabs                                    | `Tabs` con el tab en la query ([`tab-query.ts`](../../src/shared/lib/tab-query.ts)); secciones con ruta, `ModuleSectionLayout`                                                           | #304                                        |
+| Control segmentado                      | `FinanceSegmentedControl` ([`form-blocks.tsx`](../../src/modules/finance/shared/components/forms/form-blocks.tsx))                                                                       | #304                                        |
+| Vacío, carga y error                    | `Empty`, `AsyncRegion`, `FinanceListSkeleton`, `FinanceErrorState`, `LoadingView`                                                                                                        | #305 los lleva fuera de Finanzas            |
+| Aviso en pantalla                       | `Alert` ([`alert.tsx`](../../src/shared/components/ui/alert.tsx)); aviso con entidad, `NoticeCard`                                                                                       | #306                                        |
+| Toast y deshacer                        | `appToast` ([`app-toast.ts`](../../src/shared/lib/app-toast.ts)); con deshacer, `UndoToast`                                                                                              | #306                                        |
+| Selector de periodo                     | `FINANCE_DASHBOARD_PERIOD_OPTIONS` ([`dashboard-period.ts`](../../src/modules/finance/shared/lib/dashboard-period.ts)) + `ChoiceGrid` o `FinanceSegmentedControl`                        | —                                           |
+| Selector de moneda                      | `FinanceCurrencyPickerSheet` + `CurrencyFlag` ([`currency-flag.tsx`](../../src/modules/finance/shared/components/currency-flag.tsx))                                                     | #248 añade el selector compacto de la lista |
+| Card de una entidad                     | La card de su entidad, con `variant`                                                                                                                                                     | Ver [Cards por entidad](#cards-por-entidad) |
+
+Si el componente falta, se crea en el módulo dueño, se exporta por su `index.ts` y se añade a la galería antes de usarlo en una vista. Lo que sigue pendiente está listado con su issue: no se adelanta un componente suelto por fuera de él.
+
 ## Formularios de Finanzas
 
 Viven en `src/modules/finance/shared/components/forms/`. No copiarlos a otros módulos; sí reutilizar el patrón:
@@ -201,6 +228,7 @@ Una regla por archivo `.mdc`; se leen todas antes de crear o cambiar un control.
 | [finance-money-display.mdc](../../.cursor/rules/finance-money-display.mdc)         | `formatFinanceMoney`                                                                                   |
 | [entity-cards.mdc](../../.cursor/rules/entity-cards.mdc)                           | card de la entidad + `variant` (completa, compacta, inline)                                            |
 | [sheet-url-route.mdc](../../.cursor/rules/sheet-url-route.mdc)                     | `useSheetParam` + `sheetId`; `AlertDialog` sin ruta                                                    |
+| [ui-single-source.mdc](../../.cursor/rules/ui-single-source.mdc)                   | la tabla «Una sola fuente de verdad»; galerías de Apariencia                                           |
 
 Molde: `transaction-form.tsx` y `transfer-form.tsx`. No copiar los componentes de Finanzas a otros módulos; sí el patrón.
 
