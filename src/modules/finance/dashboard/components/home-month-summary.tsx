@@ -59,7 +59,7 @@ export function FinanceHomeMonthSummary() {
       <div>
         <Badge variant="outline" className="text-xs">
           <CalendarDaysIcon className="size-4" />
-          {formatMonthYearLabel(now)}
+          {formatMonthYearLabel(now, formatLocale)}
         </Badge>
       </div>
     </SummarySection>

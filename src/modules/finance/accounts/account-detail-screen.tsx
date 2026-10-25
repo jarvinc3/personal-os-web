@@ -1,8 +1,5 @@
 "use client"
 
-import { format } from "date-fns"
-import { es } from "date-fns/locale/es"
-
 import { BrandLogo } from "@/src/modules/finance/shared/components/brand-logo"
 import { GlossaryHelpButton } from "@/src/modules/help"
 import {
@@ -52,6 +49,7 @@ import {
   monthKeyFromDate,
 } from "@/src/modules/finance/shared/lib/month-window"
 import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
+import { shortMonthLabel } from "@/src/shared/lib/date-format"
 import { visibleTransactionTotals } from "@/src/modules/finance/shared/lib/transactions-query"
 import { DeleteRecordDialog } from "@/src/modules/finance/shared/components/delete-record-dialog"
 import { ArchiveRecordDialog } from "@/src/modules/finance/shared/components/archive-record-dialog"
@@ -138,9 +136,8 @@ function AccountDetailScreenBody({ accountId }: AccountDetailScreenProps) {
   const accent = account?.color ?? FALLBACK_COLOR
 
   const today = new Date()
-  const monthChip = format(today, "MMM yyyy", { locale: es })
-    .replace(/\./g, "")
-    .toUpperCase()
+  const monthChip =
+    `${shortMonthLabel(today, formatLocale)} ${today.getFullYear()}`.toUpperCase()
   const monthBounds = isoMonthBounds(today.getFullYear(), today.getMonth() + 1)
   const monthQuery = useAllTransactions(isEnabled, {
     accountId,

@@ -42,6 +42,7 @@ import { LinkPendingOverlay } from "@/src/shared/components/shell/navigation-pen
 import Link from "next/link"
 import { useSyncExternalStore } from "react"
 import { MODULE_REGISTRY } from "@/src/shared/constants/module-registry"
+import { useFormatLocale } from "@/src/modules/settings/hooks/use-format-locale"
 
 const STAT_ICONS: Record<KeepAwakeHomeStat["key"], LucideIcon> = {
   today: Clock,
@@ -56,6 +57,7 @@ const CHIP_ICONS: Record<KeepAwakeHomeChip["key"], LucideIcon> = {
 }
 
 export function KeepAwakeHomeSection() {
+  const locale = useFormatLocale()
   const { phase, elapsedSeconds, remainingSeconds, endsAt, startTimestamp } =
     useKeepAwake()
   const history = useSyncExternalStore(
@@ -82,6 +84,7 @@ export function KeepAwakeHomeSection() {
     history,
     reminder,
     prefs,
+    locale,
   })
 
   return (

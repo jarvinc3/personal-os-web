@@ -11,9 +11,12 @@ import type { FinanceBillingCycle } from "@/src/modules/finance/shared/types/ent
 import type { SubscriptionCardSource } from "./subscription-card-source.ts"
 
 /** `mar 2023`, the month and year a subscription started. */
-export function billingMonthLabel(value: Date | string): string {
+export function billingMonthLabel(
+  value: Date | string,
+  locale: string
+): string {
   const date = typeof value === "string" ? parseISO(value) : value
-  return `${shortMonthLabel(date)} ${date.getFullYear()}`
+  return `${shortMonthLabel(date, locale)} ${date.getFullYear()}`
 }
 
 export type SubscriptionCycleProgress = {
@@ -29,9 +32,9 @@ export type SubscriptionCycleProgress = {
 }
 
 /** `17 oct`, the short date a card shows outside the warning window. */
-export function shortBillingDate(value: Date | string): string {
+export function shortBillingDate(value: Date | string, locale: string): string {
   const date = typeof value === "string" ? parseISO(value) : value
-  return `${date.getDate()} ${shortMonthLabel(date)}`
+  return `${date.getDate()} ${shortMonthLabel(date, locale)}`
 }
 
 /**
@@ -131,6 +134,7 @@ export function billingLabel(input: {
   nextDate: Date | string
   today: Date
   windowDays: number
+  locale: string
 }): BillingLabel {
   const next = startOfDay(
     typeof input.nextDate === "string"
@@ -139,7 +143,7 @@ export function billingLabel(input: {
   )
   const days = differenceInCalendarDays(next, startOfDay(input.today))
   if (days < 0 || days > input.windowDays) {
-    return { text: shortBillingDate(next), inWindow: false }
+    return { text: shortBillingDate(next, input.locale), inWindow: false }
   }
   if (days === 0) {
     return { text: "Hoy", inWindow: true }

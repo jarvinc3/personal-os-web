@@ -117,19 +117,6 @@ export function hm12To24(h12: string, minute: string, period: Period): string {
   return `${String(h).padStart(2, "0")}:${minute}`
 }
 
-/** Texto legible 12 h para UI. */
-export function formatHm24Display12h(hm24: string): string {
-  const [hStr, mStr] = hm24.split(":")
-  const h24 = parseInt(hStr ?? "0", 10)
-  const m = parseInt(snapMinute(mStr ?? "00", 1), 10)
-  const d = new Date(2000, 0, 1, h24, m, 0, 0)
-  return d.toLocaleTimeString("es", {
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-  })
-}
-
 export const HOUR12_OPTIONS = Array.from({ length: 12 }, (_, i) => {
   const n = i + 1
   const v = String(n).padStart(2, "0")

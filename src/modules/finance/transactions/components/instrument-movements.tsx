@@ -128,7 +128,10 @@ export function FinanceInstrumentMovements({
     () => categoriesQuery.data ?? [],
     [categoriesQuery.data]
   )
-  const groups = useMemo(() => groupTransactionsByMonth(movements), [movements])
+  const groups = useMemo(
+    () => groupTransactionsByMonth(movements, display.locale),
+    [movements, display.locale]
+  )
   const filtersActive = flow !== "ALL" || Boolean(dateFrom || dateTo)
   const queryNarrowed = Boolean(search.trim()) || filtersActive
   const isPending = movementQueries.some((query) => query.isPending)

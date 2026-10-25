@@ -21,6 +21,7 @@ import { PRESSABLE_CLASS, cn } from "@/src/shared/lib/utils"
 import { type FormEvent, useState } from "react"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { ClockIcon, SaveIcon, Trash2Icon } from "lucide-react"
+import { useFormatLocale } from "@/src/modules/settings/hooks/use-format-locale"
 
 type KeepAwakeReminderSheetProps = {
   open: boolean
@@ -118,6 +119,7 @@ export function KeepAwakeReminderSheet({
 }
 
 export function KeepAwakeReminderForm({ onSaved }: { onSaved: () => void }) {
+  const locale = useFormatLocale()
   const stored = getReminderSnapshot()
   const [draft, setDraft] = useState(() => createDraft(stored))
   const today = new Date().getDay()
@@ -151,7 +153,7 @@ export function KeepAwakeReminderForm({ onSaved }: { onSaved: () => void }) {
     >
       <SummarySection title="Hora exacta" icon={ClockIcon}>
         <WheelField
-          valueLabel={formatReminderTimeLabel(draft)}
+          valueLabel={formatReminderTimeLabel(draft, locale)}
           icon={ClockIcon}
         >
           <TimePairWheels

@@ -15,6 +15,7 @@ import {
 } from "@/src/shared/lib/date-format"
 import { ClockFadingIcon, ClockIcon } from "lucide-react"
 import { useState } from "react"
+import { useFormatLocale } from "@/src/modules/settings/hooks/use-format-locale"
 
 function normalizeTimeForInput(apiTime: string) {
   return normalizeTimeToApi(apiTime) ?? apiTime
@@ -24,6 +25,7 @@ export function EditQuietHoursSheet({
   open,
   onOpenChange,
 }: SettingsSheetProps) {
+  const locale = useFormatLocale()
   const { preferences, updatePreferences, updateProfileMutation } = useProfile()
   const quietHours = preferences.notifications.quietHours
   const [start, setStart] = useState(() =>
@@ -92,7 +94,7 @@ export function EditQuietHoursSheet({
       <SummarySection title="Horario" icon={ClockFadingIcon}>
         <WheelField
           label="Inicio"
-          valueLabel={formatTimeForDisplay(start)}
+          valueLabel={formatTimeForDisplay(start, locale)}
           icon={ClockIcon}
           disabled={updateProfileMutation.isPending}
         >
@@ -105,7 +107,7 @@ export function EditQuietHoursSheet({
         </WheelField>
         <WheelField
           label="Fin"
-          valueLabel={formatTimeForDisplay(end)}
+          valueLabel={formatTimeForDisplay(end, locale)}
           icon={ClockIcon}
           disabled={updateProfileMutation.isPending}
         >

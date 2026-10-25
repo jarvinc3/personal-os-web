@@ -71,7 +71,12 @@ export function SubscriptionCard({
     paymentMethod?.type === "CARD"
       ? (cards.find((card) => card.id === paymentMethod.id) ?? null)
       : null
-  const state = subscriptionCardState({ subscription, today, windowDays })
+  const state = subscriptionCardState({
+    subscription,
+    today,
+    windowDays,
+    locale: display.locale,
+  })
   const statusBadge = subscriptionStatusBadge(subscription, state.overdue)
   const progress = subscriptionCycleProgress(subscription, today)
   const money = { ...display, currency: subscription.currency }

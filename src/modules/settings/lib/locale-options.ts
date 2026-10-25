@@ -1,4 +1,6 @@
-export const DEFAULT_LOCALE = "es-DO"
+import { DEFAULT_LOCALE } from "@/src/shared/constants/locales"
+
+export { DEFAULT_LOCALE }
 
 export const LOCALE_OPTIONS = [
   {

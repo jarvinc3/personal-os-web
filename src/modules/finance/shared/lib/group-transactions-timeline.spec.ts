@@ -7,7 +7,7 @@ import type { YearMonth } from "./month-window.ts"
 import { monthBannerSrc } from "./month-banners.ts"
 
 function buildTimelineMonths(months: YearMonth[], items: FinanceTransaction[]) {
-  return buildTimeline({ months, items, weekStartsOn: 0 })
+  return buildTimeline({ months, items, weekStartsOn: 0, locale: "es-DO" })
 }
 
 function tx(
@@ -337,6 +337,7 @@ describe("buildTimelineMonths", () => {
   it("starts the month weeks on Monday when the profile asks for it", () => {
     const months = buildTimeline({
       months: [{ year: 2026, month: 4 }],
+      locale: "es-DO",
       items: [
         tx({
           id: "debit-2",

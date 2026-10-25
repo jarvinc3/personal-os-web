@@ -168,8 +168,13 @@ export function FinanceTransactionsList({
   const weekStartsOn = useWeekStartsOn()
   const timeline = useMemo(
     () =>
-      buildTimelineMonths({ months, items: timelineQuery.items, weekStartsOn }),
-    [months, timelineQuery.items, weekStartsOn]
+      buildTimelineMonths({
+        months,
+        items: timelineQuery.items,
+        weekStartsOn,
+        locale: display.locale,
+      }),
+    [months, timelineQuery.items, weekStartsOn, display.locale]
   )
   const activeMonth = timeline.find((month) => month.key === activeMonthKey)
 
@@ -415,6 +420,7 @@ export function FinanceTransactionsList({
           months={months}
           activeMonthKey={activeMonthKey}
           currentMonthKey={currentMonthKey}
+          locale={display.locale}
           onSelect={scrollToMonth}
         />
         <MonthFlowSummary

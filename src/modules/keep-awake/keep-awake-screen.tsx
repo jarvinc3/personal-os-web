@@ -34,9 +34,10 @@ import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
 import { Bell, Copy } from "lucide-react"
 import { useSyncExternalStore } from "react"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
+import { useFormatLocale } from "@/src/modules/settings/hooks/use-format-locale"
 
-function formatSessionStarted(timestamp: number): string {
-  return formatClockTimeFromDate(new Date(timestamp))
+function formatSessionStarted(timestamp: number, locale: string): string {
+  return formatClockTimeFromDate(new Date(timestamp), locale)
 }
 
 export function KeepAwakeScreen() {
@@ -48,6 +49,7 @@ export function KeepAwakeScreen() {
 }
 
 function KeepAwakeScreenBody() {
+  const locale = useFormatLocale()
   const {
     phase,
     elapsedSeconds,
@@ -123,7 +125,7 @@ function KeepAwakeScreenBody() {
           <KeepAwakePanelToolbar
             reminderOpen={reminderOpen}
             reminderActive={reminder.enabled}
-            reminderTime={formatReminderTimeLabel(reminder)}
+            reminderTime={formatReminderTimeLabel(reminder, locale)}
             historyOpen={historyOpen}
             helpOpen={helpOpen}
             alertOpen={alertOpen}
@@ -163,7 +165,7 @@ function KeepAwakeScreenBody() {
               </div>
               {startTimestamp && inSession ? (
                 <span className="text-xs text-muted-foreground">
-                  Desde las {formatSessionStarted(startTimestamp)}
+                  Desde las {formatSessionStarted(startTimestamp, locale)}
                 </span>
               ) : null}
               {reminder.enabled ? (
@@ -172,11 +174,11 @@ function KeepAwakeScreenBody() {
                   variant="secondary"
                   size="sm"
                   className={cn(PRESSABLE_CLASS, "h-7 rounded-full px-3")}
-                  aria-label={`Recordatorio ${formatReminderTimeLabel(reminder)}`}
+                  aria-label={`Recordatorio ${formatReminderTimeLabel(reminder, locale)}`}
                   onClick={() => setReminderOpen(true)}
                 >
                   <Bell data-icon="inline-start" aria-hidden />
-                  {formatReminderTimeLabel(reminder)}
+                  {formatReminderTimeLabel(reminder, locale)}
                 </Button>
               ) : null}
             </div>

@@ -32,6 +32,7 @@ import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { SettingsIcon } from "lucide-react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { useFormatLocale } from "@/src/modules/settings/hooks/use-format-locale"
 
 export function NotificationsScreen() {
   return (
@@ -42,6 +43,7 @@ export function NotificationsScreen() {
 }
 
 function NotificationsScreenBody() {
+  const locale = useFormatLocale()
   const { isInAppEnabled } = useNotificationPreferences()
   const notificationsQuery = useNotifications()
   const markReadMutation = useMarkNotificationRead()
@@ -150,8 +152,8 @@ function NotificationsScreenBody() {
   }, [readFilter, scopedNotifications])
 
   const sections = useMemo(
-    () => groupNotificationsByDate(visibleNotifications),
-    [visibleNotifications]
+    () => groupNotificationsByDate(visibleNotifications, locale),
+    [visibleNotifications, locale]
   )
 
   const handleMarkAllRead = useCallback(() => {

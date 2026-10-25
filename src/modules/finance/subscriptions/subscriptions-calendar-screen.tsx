@@ -153,6 +153,7 @@ function SubscriptionsCalendarBody() {
           months={months}
           activeMonthKey={month}
           currentMonthKey={monthKeyFromDate(today)}
+          locale={display.locale}
           onSelect={setMonth}
         />
         {chargesQuery.isError ? (

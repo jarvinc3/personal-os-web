@@ -25,15 +25,16 @@ import {
   Timer,
 } from "lucide-react"
 import { useSyncExternalStore } from "react"
+import { useFormatLocale } from "@/src/modules/settings/hooks/use-format-locale"
 
 type KeepAwakeHistorySheetProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
 }
 
-function formatRange(entry: KeepAwakeHistoryEntry): string {
-  const start = formatClockTimeFromDate(new Date(entry.startedAt))
-  const end = formatClockTimeFromDate(new Date(entry.endedAt))
+function formatRange(entry: KeepAwakeHistoryEntry, locale: string): string {
+  const start = formatClockTimeFromDate(new Date(entry.startedAt), locale)
+  const end = formatClockTimeFromDate(new Date(entry.endedAt), locale)
   return `${start} – ${end}`
 }
 
@@ -71,6 +72,7 @@ export function KeepAwakeHistorySheet({
   open,
   onOpenChange,
 }: KeepAwakeHistorySheetProps) {
+  const locale = useFormatLocale()
   const entries = useSyncExternalStore(
     subscribeHistory,
     getHistorySnapshot,
@@ -106,7 +108,7 @@ export function KeepAwakeHistorySheet({
             <SummaryItem
               key={entry.id}
               title={formatElapsed(entry.durationSeconds)}
-              description={`${formatRange(entry)} · ${historyEndReasonLabel(entry.endReason)}`}
+              description={`${formatRange(entry, locale)} · ${historyEndReasonLabel(entry.endReason)}`}
               leading={<Icon className="size-5" style={{ color }} />}
               accentColor={color}
               isLast={index === visible.length - 1}

@@ -258,7 +258,10 @@ export function TransactionMovementRow({
     transaction.accountName || transaction.cardName ? (
       <TransactionInstrument
         transaction={transaction}
-        suffix={formatFinanceTimeLabel(transaction.transactionDate)}
+        suffix={formatFinanceTimeLabel(
+          transaction.transactionDate,
+          display.locale
+        )}
       />
     ) : null
   const description =

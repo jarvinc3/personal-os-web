@@ -1,7 +1,6 @@
 "use client"
 
 import { format } from "date-fns"
-import { es } from "date-fns/locale/es"
 import { useEffect, useRef } from "react"
 
 import {
@@ -9,10 +8,11 @@ import {
   type MonthKey,
   type YearMonth,
 } from "@/src/modules/finance/shared/lib/month-window"
+import { shortMonthLabel } from "@/src/shared/lib/date-format"
 import { cn } from "@/src/shared/lib/utils"
 
-function formatMonthPickerChip(date: Date): string {
-  return format(date, "MMM yy", { locale: es }).replace(/\./g, "").toUpperCase()
+function formatMonthPickerChip(date: Date, locale: string): string {
+  return `${shortMonthLabel(date, locale)} ${format(date, "yy")}`.toUpperCase()
 }
 
 function scrollChipIntoCenter(list: HTMLElement, chip: HTMLElement) {
@@ -29,6 +29,7 @@ type FinanceMonthPickerProps = {
   months: YearMonth[]
   activeMonthKey: MonthKey
   currentMonthKey: MonthKey
+  locale: string
   onSelect: (key: MonthKey) => void
 }
 
@@ -36,6 +37,7 @@ export function FinanceMonthPicker({
   months,
   activeMonthKey,
   currentMonthKey,
+  locale,
   onSelect,
 }: FinanceMonthPickerProps) {
   const listRef = useRef<HTMLDivElement>(null)
@@ -84,7 +86,7 @@ export function FinanceMonthPicker({
                   : "text-muted-foreground hover:text-foreground"
             )}
           >
-            {formatMonthPickerChip(date)}
+            {formatMonthPickerChip(date, locale)}
           </button>
         )
       })}

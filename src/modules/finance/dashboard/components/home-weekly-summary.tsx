@@ -18,6 +18,8 @@ import {
   SummarySection,
 } from "@/src/shared/components/data-display/summary"
 import { getModule } from "@/src/shared/constants/module-registry"
+import { formatDayMonth } from "@/src/shared/lib/date-format"
+
 import { CalendarDaysIcon } from "lucide-react"
 
 const MODULE_ACCENT = getModule("finance").accent
@@ -27,7 +29,7 @@ function formatShortDate(value: string, locale: string): string {
   if (Number.isNaN(date.getTime())) {
     return value
   }
-  return date.toLocaleDateString(locale, { day: "numeric", month: "short" })
+  return formatDayMonth(date, locale)
 }
 
 export function FinanceHomeWeeklySummary() {

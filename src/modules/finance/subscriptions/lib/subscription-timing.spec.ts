@@ -62,6 +62,7 @@ describe("billingLabel", () => {
         nextDate: "2026-10-14",
         today: day(2026, 10, 14),
         windowDays: 5,
+        locale: "es-DO",
       }),
       { text: "Hoy", inWindow: true }
     )
@@ -70,6 +71,7 @@ describe("billingLabel", () => {
         nextDate: "2026-10-15",
         today: day(2026, 10, 14),
         windowDays: 5,
+        locale: "es-DO",
       }),
       { text: "Mañana", inWindow: true }
     )
@@ -81,6 +83,7 @@ describe("billingLabel", () => {
         nextDate: "2026-10-18",
         today: day(2026, 10, 14),
         windowDays: 5,
+        locale: "es-DO",
       }),
       { text: "en 4 días", inWindow: true }
     )
@@ -92,6 +95,7 @@ describe("billingLabel", () => {
         nextDate: "2026-10-19",
         today: day(2026, 10, 14),
         windowDays: 5,
+        locale: "es-DO",
       }),
       { text: "en 5 días", inWindow: true }
     )
@@ -103,6 +107,7 @@ describe("billingLabel", () => {
         nextDate: "2026-10-20",
         today: day(2026, 10, 14),
         windowDays: 5,
+        locale: "es-DO",
       }),
       { text: "20 oct", inWindow: false }
     )
@@ -114,6 +119,7 @@ describe("billingLabel", () => {
         nextDate: "2026-10-10",
         today: day(2026, 10, 14),
         windowDays: 5,
+        locale: "es-DO",
       }),
       { text: "10 oct", inWindow: false }
     )
@@ -125,6 +131,7 @@ describe("billingLabel", () => {
         nextDate: "2027-01-02",
         today: day(2026, 12, 31),
         windowDays: 5,
+        locale: "es-DO",
       }),
       { text: "en 2 días", inWindow: true }
     )
@@ -133,6 +140,7 @@ describe("billingLabel", () => {
         nextDate: "2027-01-20",
         today: day(2026, 12, 31),
         windowDays: 5,
+        locale: "es-DO",
       }),
       { text: "20 ene", inWindow: false }
     )
@@ -144,6 +152,7 @@ describe("billingLabel", () => {
         nextDate: "2026-10-24",
         today: day(2026, 10, 14),
         windowDays: 10,
+        locale: "es-DO",
       }).inWindow,
       true
     )
@@ -152,6 +161,7 @@ describe("billingLabel", () => {
         nextDate: "2026-10-24",
         today: day(2026, 10, 14),
         windowDays: 3,
+        locale: "es-DO",
       }).text,
       "24 oct"
     )
@@ -160,8 +170,11 @@ describe("billingLabel", () => {
 
 describe("billingMonthLabel", () => {
   it("writes the month and year of a start date", () => {
-    assert.equal(billingMonthLabel("2023-03-12T00:00:00.000Z"), "mar 2023")
-    assert.equal(billingMonthLabel(new Date(2026, 9, 14)), "oct 2026")
+    assert.equal(
+      billingMonthLabel("2023-03-12T00:00:00.000Z", "es-DO"),
+      "mar 2023"
+    )
+    assert.equal(billingMonthLabel(new Date(2026, 9, 14), "es-DO"), "oct 2026")
   })
 })
 

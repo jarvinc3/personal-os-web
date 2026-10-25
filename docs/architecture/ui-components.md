@@ -31,6 +31,8 @@ Las galerías de referencia viven en Ajustes → Apariencia, con un atajo para c
 | Varios días del mes         | `DayListField`     | Cada día es un `DayWheel`                                                          |
 | 2 a 5 opciones exclusivas   | `ChoiceGrid`       | Celdas con icono en el color del módulo y, al elegir, borde más grueso y check     |
 
+Toda fecha o hora visible sale de `src/shared/lib/date-format.ts`, con el locale del perfil; ninguna pantalla fija `es` ni usa `toLocaleDateString`/`toLocaleTimeString`.
+
 `TimePairWheels`, `DurationWheels` y `DateWheels` no se montan sueltos en una vista. `TimePairWheels` muestra hora 12 h + minutos + periodo a. m./p. m. `DurationWheels` muestra horas 00–24 + minutos, sin periodo. Los minutos se configuran con `minuteStep`: `1` (00–59), `5` o `10`. Convierte reloj con `hm24To12Parts` / `hm12To24` y duración con `durationMinutesToHm` / `hmToDurationMinutes` en `src/shared/types/wheels.type.ts`.
 
 ```tsx
@@ -166,7 +168,7 @@ Un patrón se pinta siempre con el mismo componente. Si cambia un detalle, cambi
 | Cerrar un sheet                         | `BottomSheet` pinta el cierre por defecto; `actions.close` lo reemplaza, `closeLabel` cambia el texto y `showClose={false}` lo quita ([`bottom-sheet.tsx`](../../src/shared/components/sheets/bottom-sheet.tsx)) | Completo                                    |
 | Cerrar un sheet con cambios sin guardar | `useDiscardChanges` ([`use-discard-changes.tsx`](../../src/modules/finance/shared/hooks/use-discard-changes.tsx))                                                                                                | Completo                                    |
 | Monto en pantalla                       | `Money` ([`money.tsx`](../../src/modules/finance/shared/components/money.tsx)) sobre `formatFinanceMoney`; escribirlo, `FinanceMoneyField`                                                                       | Completo                                    |
-| Fecha y hora                            | Formato: [`date-format.ts`](../../src/shared/lib/date-format.ts). Entrada: `FinanceDateField` / `WheelField`                                                                                                     | #301 deja un solo módulo de formato         |
+| Fecha y hora                            | Formato: [`date-format.ts`](../../src/shared/lib/date-format.ts), siempre con el locale del perfil (`dayMonth`, `dayMonthYear`, `monthYear`, `weekday`, `time`). Entrada: `FinanceDateField` / `WheelField`      | Completo                                    |
 | Encabezado de una ruta                  | `usePageHeader` ([`use-page-header.ts`](../../src/shared/hooks/use-page-header.ts))                                                                                                                              | #302 unifica el encabezado de detalle       |
 | Bloque con título                       | `SummarySection` ([`summary.tsx`](../../src/shared/components/data-display/summary.tsx))                                                                                                                         | Completo                                    |
 | Chip o píldora                          | `CategoryCard` variante `chip` ([`category-card.tsx`](../../src/modules/finance/shared/components/category-card.tsx))                                                                                            | #303 unifica chips y píldoras               |

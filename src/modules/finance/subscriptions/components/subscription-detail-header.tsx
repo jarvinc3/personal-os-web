@@ -37,10 +37,12 @@ export function SubscriptionDetailHeader({
       {cycle ? (
         <div className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-muted/40 px-4 py-2 text-xs text-muted-foreground">
           <span>
-            Ciclo {shortBillingDate(cycle.startDate)} –{" "}
-            {shortBillingDate(cycle.endDate)}
+            Ciclo {shortBillingDate(cycle.startDate, display.locale)} –{" "}
+            {shortBillingDate(cycle.endDate, display.locale)}
           </span>
-          <span>Desde {billingMonthLabel(subscription.createdAt)}</span>
+          <span>
+            Desde {billingMonthLabel(subscription.createdAt, display.locale)}
+          </span>
         </div>
       ) : null}
     </>

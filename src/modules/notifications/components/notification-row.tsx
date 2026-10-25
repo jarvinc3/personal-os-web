@@ -8,6 +8,7 @@ import {
 } from "@/src/shared/components/shell/navigation-pending"
 import { formatNotificationListTime } from "@/src/shared/lib/date-format"
 import { cn } from "@/src/shared/lib/utils"
+import { useFormatLocale } from "@/src/modules/settings/hooks/use-format-locale"
 
 type NotificationRowProps = {
   notification: NotificationRecord
@@ -21,8 +22,9 @@ export function NotificationRow({
   href,
 }: NotificationRowProps) {
   const { navigate, isPending } = usePendingNavigation()
+  const locale = useFormatLocale()
   const visual = getNotificationVisual(notification)
-  const timeLabel = formatNotificationListTime(notification.createdAt)
+  const timeLabel = formatNotificationListTime(notification.createdAt, locale)
   const Icon = visual.icon
 
   const handlePress = () => {

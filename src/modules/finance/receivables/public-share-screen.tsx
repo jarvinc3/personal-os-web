@@ -97,7 +97,11 @@ export function PublicReceivableShareScreen({
   const pendingLabel = formatSharePendingTotals(
     publicSharePendingTotals(share.totalsByCurrency, PUBLIC_DISPLAY)
   )
-  const updatedLabel = formatPublicShareUpdatedAt(share.updatedAt, new Date())
+  const updatedLabel = formatPublicShareUpdatedAt(
+    share.updatedAt,
+    new Date(),
+    PUBLIC_DISPLAY.locale
+  )
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 p-4 pb-16 md:px-6">

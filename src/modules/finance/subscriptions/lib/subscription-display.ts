@@ -143,18 +143,22 @@ export function subscriptionCardState(input: {
   subscription: SubscriptionCardSource
   today: Date
   windowDays: number
+  locale: string
 }): SubscriptionCardState {
-  const { subscription, today } = input
+  const { subscription, today, locale } = input
   const label = billingLabel({
     nextDate: subscription.nextBillingDate,
     today,
     windowDays: input.windowDays,
+    locale,
   })
   // A paused or cancelled subscription does not bill, so it never gets the
   // warning highlight or a place in Próximos: it only shows its date.
   const active = subscription.status === "ACTIVE"
   return {
-    label: active ? label.text : shortBillingDate(subscription.nextBillingDate),
+    label: active
+      ? label.text
+      : shortBillingDate(subscription.nextBillingDate, locale),
     inWindow: active && label.inWindow,
     overdue: subscriptionIsOverdue(subscription, today),
     warnLastCharge: subscription.lastChargeMismatch,

@@ -39,6 +39,7 @@ export type KeepAwakeHomeSummaryInput = {
   history: KeepAwakeHistoryEntry[]
   reminder: KeepAwakeReminder
   prefs: KeepAwakePrefs
+  locale: string
   now?: number
 }
 
@@ -122,7 +123,7 @@ export function getKeepAwakeHomeSummary(
       input.reminder.enabled
         ? {
             key: "reminder",
-            label: formatReminderTimeLabel(input.reminder),
+            label: formatReminderTimeLabel(input.reminder, input.locale),
             muted: false,
           }
         : { key: "reminder", label: "Sin aviso", muted: true },
