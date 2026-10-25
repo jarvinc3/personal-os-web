@@ -11,12 +11,15 @@ type ToastPayload = {
   text2?: string
   action?: ToastAction
   duration?: number
+  /** Color de acento; se pinta en el borde izquierdo del aviso. */
+  accent?: string
 }
 
 function toastOptions({
   text2,
   action,
   duration,
+  accent,
 }: Omit<ToastPayload, "text1">) {
   return {
     description: text2,
@@ -24,6 +27,7 @@ function toastOptions({
       ? { action: { label: action.label, onClick: action.onClick } }
       : {}),
     ...(duration !== undefined ? { duration } : {}),
+    ...(accent ? { style: { borderLeft: `3px solid ${accent}` } } : {}),
   }
 }
 

@@ -1,6 +1,7 @@
 "use client"
 
 import { Button } from "@/src/shared/components/ui/button"
+import { ERROR_MESSAGES } from "@/src/shared/lib/error-messages"
 import { RefreshCwIcon, TriangleAlertIcon } from "lucide-react"
 import {
   Empty,
@@ -28,7 +29,7 @@ export function ErrorState({
         <EmptyMedia variant="icon">
           <TriangleAlertIcon className="text-destructive" />
         </EmptyMedia>
-        <EmptyTitle>No se pudieron cargar los datos</EmptyTitle>
+        <EmptyTitle>{ERROR_MESSAGES.load}</EmptyTitle>
         <EmptyDescription>{message}</EmptyDescription>
       </EmptyHeader>
       <EmptyContent>

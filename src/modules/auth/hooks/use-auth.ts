@@ -20,7 +20,7 @@ import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { useAppStore } from "@/src/shared/store/app-store"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useRouter } from "next/navigation"
-import { toast } from "sonner"
+import { appToast } from "@/src/shared/lib/app-toast"
 
 export function useAuth() {
   const queryClient = useQueryClient()
@@ -52,14 +52,20 @@ export function useAuth() {
     mutationFn: (payload: LoginPayload) => supabaseAuthService.login(payload),
     onSuccess: async (payload) => {
       await applySessionWithProfile(payload)
-      toast.success("Sesión iniciada", { description: "Bienvenido de nuevo" })
+      appToast.success({
+        text1: "Sesión iniciada",
+        text2: "Bienvenido de nuevo",
+      })
       router.push(APP_ROUTES.app.home)
     },
     onError: (error) => {
       if (isProfileUnavailableFailure(error)) {
         return
       }
-      toast.error("No se pudo iniciar sesión", { description: error.message })
+      appToast.error({
+        text1: "No se pudo iniciar sesión",
+        text2: error.message,
+      })
     },
   })
 
@@ -80,7 +86,10 @@ export function useAuth() {
         return
       }
 
-      toast.error("No se pudo crear la cuenta", { description: error.message })
+      appToast.error({
+        text1: "No se pudo crear la cuenta",
+        text2: error.message,
+      })
     },
   })
 
@@ -88,8 +97,9 @@ export function useAuth() {
     mutationFn: (options?: { next?: string }) =>
       supabaseAuthService.loginWithGoogle?.(options) ?? Promise.resolve(),
     onError: (error) => {
-      toast.error("No se pudo iniciar el flujo con Google", {
-        description: error.message,
+      appToast.error({
+        text1: "No se pudo iniciar el flujo con Google",
+        text2: error.message,
       })
     },
   })
@@ -101,12 +111,15 @@ export function useAuth() {
     },
     onSuccess: async () => {
       clearAuthState()
-      toast.success("Sesión cerrada")
+      appToast.success({ text1: "Sesión cerrada" })
       await queryClient.clear()
       router.push(APP_ROUTES.auth.login)
     },
     onError: (error) => {
-      toast.error("No se pudo cerrar sesión", { description: error.message })
+      appToast.error({
+        text1: "No se pudo cerrar sesión",
+        text2: error.message,
+      })
     },
   })
 

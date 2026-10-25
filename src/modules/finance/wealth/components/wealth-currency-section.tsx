@@ -2,6 +2,11 @@
 
 import { GlossaryHelpButton } from "@/src/modules/help"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/src/shared/components/ui/alert"
 import { SettingsSection } from "@/src/shared/components/settings/settings-section"
 import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 import type {
@@ -140,31 +145,28 @@ export function WealthCurrencySection({
       </SettingsSection>
 
       {hasDoubtful ? (
-        <section className="flex flex-col gap-2 rounded-2xl border border-warning/40 bg-warning/10 p-2">
-          <div className="flex items-center gap-2 px-1">
-            <TriangleAlertIcon
-              className="size-4 shrink-0 text-warning"
-              aria-hidden
-            />
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium">Cobros dudosos</p>
-              <p className="text-xs text-muted-foreground">
-                Vencidos hace más de 90 días; no suman al patrimonio.
-              </p>
-            </div>
+        <Alert variant="warning" className="gap-2">
+          <TriangleAlertIcon aria-hidden />
+          <AlertTitle className="flex items-center gap-2">
+            Cobros dudosos
             <GlossaryHelpButton slug="dudosos" />
-            <span className="text-sm font-semibold tabular-nums">
+            <span className="ml-auto text-sm font-semibold tabular-nums">
               {formatFinanceMoney(group.totals.doubtfulReceivables, money)}
             </span>
+          </AlertTitle>
+          <AlertDescription>
+            Vencidos hace más de 90 días; no suman al patrimonio.
+          </AlertDescription>
+          <div className="col-span-2">
+            <WealthLineGroup
+              title="Cobros"
+              icon={HandCoinsIcon}
+              lines={group.doubtfulReceivables}
+              display={display}
+              drifts={drifts}
+            />
           </div>
-          <WealthLineGroup
-            title="Cobros"
-            icon={HandCoinsIcon}
-            lines={group.doubtfulReceivables}
-            display={display}
-            drifts={drifts}
-          />
-        </section>
+        </Alert>
       ) : null}
     </section>
   )
