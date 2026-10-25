@@ -123,7 +123,9 @@ function ReceivableDetailScreenBody({
   const restoreReceivable = useRestoreReceivable()
   const updateReceivable = useUpdateReceivable()
   const writeOffReceivable = useWriteOffReceivable()
-  const [optionsOpen, setOptionsOpen] = useState(false)
+  const { open: optionsOpen, setOpen: setOptionsOpen } = useSheetParam(
+    FINANCE_SHEET_KEYS.receivableOptions
+  )
   const [confirmOpen, setConfirmOpen] = useState(false)
 
   async function onWriteOff() {

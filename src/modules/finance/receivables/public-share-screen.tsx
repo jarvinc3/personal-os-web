@@ -31,6 +31,7 @@ import {
 } from "@/src/shared/lib/accent-gradient"
 import { HandshakeIcon, LinkIcon } from "lucide-react"
 import { useState } from "react"
+import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 
 /**
  * Display for a visitor without a session: there are no finance settings to
@@ -51,9 +52,8 @@ export function PublicReceivableShareScreen({
   token,
 }: PublicReceivableShareScreenProps) {
   const shareQuery = usePublicReceivableShare(token)
-  const [openItem, setOpenItem] = useState<PublicReceivableShareItem | null>(
-    null
-  )
+  // El cobro elegido va en `sheetId` (su `ref`), así recargar reabre el mismo.
+  const itemSheet = useSheetParam("public-receivable-detail-sheet")
 
   const share = shareQuery.data
 
@@ -154,7 +154,7 @@ export function PublicReceivableShareScreen({
               key={item.ref}
               source={{ kind: "shared", item }}
               display={PUBLIC_DISPLAY}
-              onPress={() => setOpenItem(item)}
+              onPress={() => itemSheet.setOpen(true, item.ref)}
             />
           ))}
         </div>
@@ -170,13 +170,11 @@ export function PublicReceivableShareScreen({
       </div>
 
       <PublicShareDetailSheet
-        open={Boolean(openItem)}
-        onOpenChange={(open) => {
-          if (!open) {
-            setOpenItem(null)
-          }
-        }}
-        item={openItem}
+        open={itemSheet.open}
+        onOpenChange={itemSheet.setOpen}
+        item={
+          share.items.find((item) => item.ref === itemSheet.sheetId) ?? null
+        }
         ownerFirstName={share.ownerFirstName}
         display={PUBLIC_DISPLAY}
       />

@@ -133,11 +133,15 @@ function SavingsGoalDetailScreenBody({
   const [pendingContributionId, setPendingContributionId] = useState<
     string | null
   >(null)
-  const [contributionMenuId, setContributionMenuId] = useState<string | null>(
-    null
+  const contributionMenuSheet = useSheetParam(
+    FINANCE_SHEET_KEYS.contributionOptions
   )
-  const [optionsOpen, setOptionsOpen] = useState(false)
-  const [withdrawalOpen, setWithdrawalOpen] = useState(false)
+  const { open: optionsOpen, setOpen: setOptionsOpen } = useSheetParam(
+    FINANCE_SHEET_KEYS.savingsOptions
+  )
+  const { open: withdrawalOpen, setOpen: setWithdrawalOpen } = useSheetParam(
+    FINANCE_SHEET_KEYS.savingsWithdrawal
+  )
   const [confirmGoalOpen, setConfirmGoalOpen] = useState(false)
 
   const headerActions = useMemo(
@@ -362,7 +366,9 @@ function SavingsGoalDetailScreenBody({
                       size="icon"
                       aria-label="Opciones del aporte"
                       disabled={deleteContribution.isPending}
-                      onClick={() => setContributionMenuId(contribution.id)}
+                      onClick={() =>
+                        contributionMenuSheet.setOpen(true, contribution.id)
+                      }
                     >
                       <MoreVerticalIcon className="size-4" />
                     </Button>
@@ -457,12 +463,8 @@ function SavingsGoalDetailScreenBody({
       />
 
       <RecordOptionsSheet
-        open={contributionMenuId !== null}
-        onOpenChange={(nextOpen) => {
-          if (!nextOpen) {
-            setContributionMenuId(null)
-          }
-        }}
+        open={contributionMenuSheet.open}
+        onOpenChange={contributionMenuSheet.setOpen}
         title="Aporte"
         options={[
           {
@@ -472,8 +474,8 @@ function SavingsGoalDetailScreenBody({
             destructive: true,
             disabled: deleteContribution.isPending,
             onPress: () => {
-              setPendingContributionId(contributionMenuId)
-              setContributionMenuId(null)
+              setPendingContributionId(contributionMenuSheet.sheetId)
+              contributionMenuSheet.setOpen(false)
             },
           },
         ]}

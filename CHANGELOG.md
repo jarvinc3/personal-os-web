@@ -16,6 +16,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Cambiado
 
+- Los menús de opciones de meta, cobro y presupuesto, el menú de un aporte, el retiro de una meta y el detalle de un cobro compartido se abren por ruta, con el registro en `sheetId` (#254).
 - «Descuadres», «Sin conciliar» y el glosario abren por ruta; el término va en `sheetId`, así Atrás y recargar devuelven la misma explicación (#252).
 - El extracto de tarjeta, la amortización y el detalle de cuota, los filtros de movimientos, «Vincular movimiento» y «PDF con clave» se abren por ruta, con el registro elegido en `sheetId` cuando lo hay; el PDF con clave se cierra solo al recargar porque el archivo no sobrevive (#253).
 - El comercio permite unir desde una hoja por ruta y la vista previa de captura rápida también: las dos se cierran solas al recargar si su contenido no está en la URL (#255).

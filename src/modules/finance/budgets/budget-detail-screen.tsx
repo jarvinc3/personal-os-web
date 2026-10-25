@@ -162,7 +162,9 @@ function BudgetDetailScreenBody({ budgetId }: FinanceBudgetDetailProps) {
   const badge = budgetBadge(tone)
   const deleteBudget = useDeleteBudget()
   const restoreBudget = useRestoreBudget()
-  const [optionsOpen, setOptionsOpen] = useState(false)
+  const { open: optionsOpen, setOpen: setOptionsOpen } = useSheetParam(
+    FINANCE_SHEET_KEYS.budgetOptions
+  )
   const [confirmOpen, setConfirmOpen] = useState(false)
 
   async function onDeleteBudget() {
