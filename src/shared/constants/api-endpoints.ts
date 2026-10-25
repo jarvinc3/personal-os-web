@@ -27,6 +27,11 @@ export const API_ENDPOINTS = {
     DASHBOARD: "/intelligence",
     MESSAGES: "/intelligence/messages",
     MESSAGE: (id: string) => `/intelligence/messages/${encodeURIComponent(id)}`,
+    DATASET: "/intelligence/dataset",
+    REVIEW_QUEUE: "/intelligence/review-queue",
+    VERIFY_MESSAGE: (id: string) =>
+      `/intelligence/messages/${encodeURIComponent(id)}/verifications`,
+    RUNS: "/intelligence/runs",
     CONNECT_EMAIL: "/intelligence/email/connect",
     SYNC_EMAIL: "/intelligence/email/sync",
     CONSENT: "/ai/preferences/consent",

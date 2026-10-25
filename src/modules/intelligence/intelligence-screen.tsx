@@ -31,6 +31,12 @@ import {
 } from "lucide-react"
 import { useCallback, useMemo } from "react"
 import { useIntelligence } from "./hooks/use-intelligence"
+import { AiEvidenceSection } from "./components/ai-evidence-section"
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/src/shared/components/ui/alert"
 
 export function IntelligenceScreen() {
   return <IntelligenceScreenBody />
@@ -124,60 +130,63 @@ function IntelligenceScreenBody() {
               description={
                 !dashboard.connection.initialSyncCompletedAt
                   ? dashboard.connection.lastSyncErrorCode
-                    ? `Sincronización detenida · ${dashboard.counters.importedMessages} mensajes importados`
+                    ? `Sincronización detenida`
                     : dashboard.connection.lastSyncedAt
-                      ? `Sincronización inicial en curso · ${dashboard.counters.importedMessages} mensajes importados`
+                      ? `Sincronización inicial en curso`
                       : "La sincronización inicial está pendiente."
                   : dashboard.connection.lastSyncedAt
                     ? `Última sincronización: ${formatDateTime(dashboard.connection.lastSyncedAt)}`
                     : "La sincronización inicial está pendiente."
               }
               icon={Mail}
-              value={`${dashboard.counters.importedMessages} mensajes`}
+              value={`${dashboard.counters.importedMessages} mensajes `}
               isLast={!dashboard.connection.lastSyncErrorCode}
             />
-            {dashboard.connection.lastSyncErrorCode ? (
-              <div
-                className="flex items-center gap-2 px-2 text-sm text-destructive"
-                role="status"
-              >
-                <AlertCircle className="size-4 shrink-0" aria-hidden="true" />
-                La sincronización se detuvo. Pulsa Sincronizar ahora para
-                continuar.
-              </div>
-            ) : null}
-            {dashboard.connection.syncInProgress ? (
-              <div
-                className="flex items-center gap-2 px-2 text-sm text-muted-foreground"
-                role="status"
-              >
-                <LoaderCircle
-                  className="size-4 shrink-0 animate-spin"
-                  aria-hidden="true"
-                />
-                Sincronizando correo · {dashboard.counters.importedMessages}{" "}
-                mensajes importados
-              </div>
-            ) : null}
-            <div className="flex justify-end px-2 pb-1">
-              <Button
-                type="button"
-                onClick={() => syncMutation.mutate()}
-                disabled={
-                  syncMutation.isPending || dashboard.connection.syncInProgress
-                }
-              >
-                {syncMutation.isPending ||
-                dashboard.connection.syncInProgress ? (
-                  <LoaderCircle className="animate-spin" aria-hidden="true" />
-                ) : (
-                  <RefreshCw aria-hidden="true" />
-                )}
-                {syncMutation.isPending || dashboard.connection.syncInProgress
-                  ? "Sincronizando…"
-                  : "Sincronizar ahora"}
-              </Button>
+            <div className="flex flex-col gap-2">
+              {dashboard.connection.lastSyncErrorCode &&
+              !dashboard.connection.syncInProgress ? (
+                <Alert variant="warning" role="status">
+                  <AlertCircle className="size-4 shrink-0" aria-hidden="true" />
+                  <AlertTitle>La sincronización se detuvo.</AlertTitle>
+                  <AlertDescription>
+                    Pulsa Sincronizar ahora para continuar.
+                  </AlertDescription>
+                </Alert>
+              ) : null}
+              {dashboard.connection.syncInProgress ? (
+                <Alert variant="default" role="status">
+                  <LoaderCircle
+                    className="size-4 shrink-0 animate-spin"
+                    aria-hidden="true"
+                  />
+                  <AlertTitle>Sincronizando correo</AlertTitle>
+                  <AlertDescription>
+                    {dashboard.connection.syncProgress?.status === "waiting"
+                      ? `En espera de Gmail por límite temporal · reintento ${dashboard.connection.syncProgress.attempt} de 3`
+                      : dashboard.connection.syncProgress?.status === "retrying"
+                        ? `Reintentando con Gmail · intento ${dashboard.connection.syncProgress.attempt} de 3`
+                        : `${dashboard.counters.importedMessages} mensajes importados`}
+                  </AlertDescription>
+                </Alert>
+              ) : null}
             </div>
+            <Button
+              type="button"
+              className="flex-1"
+              onClick={() => syncMutation.mutate()}
+              disabled={
+                syncMutation.isPending || dashboard.connection.syncInProgress
+              }
+            >
+              {syncMutation.isPending || dashboard.connection.syncInProgress ? (
+                <LoaderCircle className="animate-spin" aria-hidden="true" />
+              ) : (
+                <RefreshCw aria-hidden="true" />
+              )}
+              {syncMutation.isPending || dashboard.connection.syncInProgress
+                ? "Sincronizando…"
+                : "Sincronizar ahora"}
+            </Button>
           </>
         ) : (
           <Empty>
@@ -224,15 +233,22 @@ function IntelligenceScreenBody() {
       </SummarySection>
 
       {dashboard.role === "ADMIN" ? (
-        <SummaryItem
-          title="Administrar roles"
-          description="Consulta y cambia los roles de Inteligencia."
-          icon={ShieldCheck}
-          href="/intelligence/admin/roles"
-          showChevron
-          isLast
-        />
+        <SummarySection title="Administración de roles" icon={ShieldCheck}>
+          <SummaryItem
+            title="Administrar roles"
+            description="Consulta y cambia los roles de Inteligencia."
+            icon={ShieldCheck}
+            href="/intelligence/admin/roles"
+            showChevron
+            isLast
+          />
+        </SummarySection>
       ) : null}
+
+      <AiEvidenceSection
+        enabled={connected}
+        onOpenMessage={(messageId) => setMessageSheetOpen(true, messageId)}
+      />
 
       {connected ? (
         <SummarySection title="Mensajes" subtitle="Solo lectura" icon={Mail}>
@@ -297,13 +313,11 @@ function IntelligenceScreenBody() {
         </SummarySection>
       ) : null}
 
-      {selectedMessageId ? (
-        <IntelligenceMessageDetail
-          messageId={selectedMessageId}
-          open={messageSheetOpen}
-          onOpenChange={setMessageSheetOpen}
-        />
-      ) : null}
+      <IntelligenceMessageDetail
+        messageId={selectedMessageId ?? ""}
+        open={messageSheetOpen}
+        onOpenChange={setMessageSheetOpen}
+      />
     </main>
   )
 }
@@ -377,6 +391,34 @@ function IntelligenceMessageDetail({
             title="Cruda (retención limitada)"
             value={data.content?.rawBody}
           />
+          <SummarySection
+            title="Procedencia y verificaciones"
+            subtitle="Registros append-only vinculados al correo original."
+          >
+            {data.provenance.observations.map((observation) => (
+              <SummaryItem
+                key={`observation-${observation.sequence}`}
+                title={`Observación ${observation.sequence}`}
+                description={`${observation.knowledgeType} · ${observation.proposedScope} · ${observation.knowledgeKey}`}
+                icon={BrainCircuit}
+              />
+            ))}
+            {data.provenance.verifications.map((verification, index) => (
+              <SummaryItem
+                key={`verification-${verification.sequence}`}
+                title={`Verificación ${verification.sequence} · ${verification.verdict}`}
+                description={`${verification.verifierRole}${verification.isGroundTruth ? " · verdad de referencia HOLDOUT" : ""}${verification.notes ? ` · ${verification.notes}` : ""}`}
+                icon={CheckCircle2}
+                isLast={index === data.provenance.verifications.length - 1}
+              />
+            ))}
+            {!data.provenance.observations.length &&
+            !data.provenance.verifications.length ? (
+              <p className="px-2 text-sm text-muted-foreground">
+                Este correo aún no tiene observaciones ni verificaciones.
+              </p>
+            ) : null}
+          </SummarySection>
         </div>
       )}
     </BottomSheet>
@@ -393,7 +435,7 @@ function MessageRepresentation({
   return (
     <section className="flex flex-col gap-1">
       <h4 className="text-xs font-medium text-muted-foreground">{title}</h4>
-      <pre className="max-h-80 overflow-auto rounded-lg bg-muted p-3 font-sans text-sm break-words whitespace-pre-wrap">
+      <pre className="max-h-80 overflow-auto rounded-lg bg-muted p-3 font-sans text-sm wrap-break-word whitespace-pre-wrap">
         {value || "No disponible"}
       </pre>
     </section>
