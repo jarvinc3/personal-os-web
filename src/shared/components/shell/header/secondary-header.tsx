@@ -36,7 +36,9 @@ export function SecondaryHeader({
         icon={backIcon}
         label={backLabel}
         className={
-          tinted ? "text-white hover:bg-white/15 hover:text-white" : undefined
+          tinted
+            ? "border-white/40 bg-white/20 text-white hover:bg-white/30 hover:text-white"
+            : undefined
         }
       />
       <div className="min-w-0 justify-self-center">
@@ -46,7 +48,7 @@ export function SecondaryHeader({
         className={cn(
           "flex items-center justify-end",
           tinted &&
-            "[&_button]:text-white [&_button]:hover:bg-white/15 [&_button]:hover:text-white"
+            "[&_button]:border-white/40 [&_button]:bg-white/20 [&_button]:text-white [&_button]:hover:bg-white/30 [&_button]:hover:text-white"
         )}
       >
         {actions ?? <span className="size-8" aria-hidden="true" />}

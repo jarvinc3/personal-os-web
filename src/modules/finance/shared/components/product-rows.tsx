@@ -122,6 +122,7 @@ export function AccountProductRow({
 
   const className = cn(
     "group relative flex w-full items-center overflow-hidden text-left",
+    "overflow-hidden",
     compact
       ? "gap-2 rounded-xl border p-2 pl-3"
       : "gap-3 rounded-2xl border p-2 pl-4",
