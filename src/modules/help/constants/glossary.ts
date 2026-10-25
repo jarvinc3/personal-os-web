@@ -302,6 +302,15 @@ export const HELP_TERMS: readonly HelpTerm[] = [
     related: ["meta-de-ahorro", "movimiento"],
   },
   {
+    slug: "apartado",
+    term: "Apartado",
+    category: "planificacion",
+    definition:
+      "El dinero de una [[cuenta|cuenta]] reservado para una [[meta de ahorro|meta-de-ahorro]]. Sigue dentro del [[saldo|saldo]] de la cuenta: solo sale cuando lo retiras o lo gastas.",
+    aliases: ["reservado", "earmarked"],
+    related: ["meta-de-ahorro", "aporte", "saldo"],
+  },
+  {
     slug: "prestamo",
     term: "Préstamo",
     category: "planificacion",

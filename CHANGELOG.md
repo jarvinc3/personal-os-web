@@ -27,6 +27,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Corregido
 
+- «Registrar aporte» muestra el saldo libre de la cuenta de origen, avisa antes de registrar si el monto lo supera y bloquea el envío; el origen por defecto es la cuenta de la meta solo si tiene saldo libre, y el detalle explica «Apartado» con su entrada del glosario (#294).
 - «Abonar a capital» propone la cuenta «Se paga desde» del préstamo, explica qué hace cada modo y la vista previa muestra la cuota nueva, el plazo y la fecha final; cuando el abono no quita una cuota entera, avisa de que el plazo no cambia y baja la última cuota (#296).
 - Planificación y Productos pulen textos: los conteos usan singular y plural («1 cuenta»), la lista de cuotas parte en dos líneas sin cortarse, la card del préstamo etiqueta la tasa («24 % anual») y su anillo dice «pagado», las pestañas de Planificación muestran su nombre y el enlace al Centro de ayuda del glosario cumple contraste (#297).
 - El hero de Productos recupera el anillo y su leyenda, con un selector de moneda: grafica por defecto la base, o la primera con saldo si la base no tiene, y recalcula centro y leyenda con los montos nativos de esa moneda, sin convertir; las tarjetas «Por moneda» pasan debajo como complemento (#248).

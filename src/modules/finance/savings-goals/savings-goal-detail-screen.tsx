@@ -1,5 +1,6 @@
 "use client"
 
+import { GlossaryHelpButton } from "@/src/modules/help"
 import { FinanceGate } from "@/src/modules/finance/finance-gate"
 import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
@@ -260,7 +261,12 @@ function SavingsGoalDetailScreenBody({
       />
 
       <div className="mx-4 mt-3">
-        <SummarySection title="Cuenta" icon={WalletIcon}>
+        <SummarySection
+          title="Cuenta"
+          icon={WalletIcon}
+          subtitle="Donde queda apartado el dinero de la meta"
+          right={<GlossaryHelpButton slug="apartado" />}
+        >
           {goalAccount ? (
             <AccountProductRow
               account={goalAccount}
@@ -278,6 +284,7 @@ function SavingsGoalDetailScreenBody({
           <SummaryItem
             title="Apartado"
             icon={PiggyBankIcon}
+            description="Reservado para la meta; sigue dentro del saldo de la cuenta."
             value={formatFinanceMoney(goal.currentAmount, money)}
             isLast
           />
