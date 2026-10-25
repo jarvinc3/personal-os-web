@@ -1,5 +1,6 @@
 "use client"
 
+import { SegmentedControl } from "@/src/shared/components/forms/segmented-control"
 import { format } from "date-fns"
 import {
   ArrowDownCircleIcon,
@@ -23,10 +24,7 @@ import {
 } from "react-hook-form"
 
 import { FinanceDateField } from "@/src/modules/finance/shared/components/forms/date-field"
-import {
-  FinanceHelpText,
-  FinanceSegmentedControl,
-} from "@/src/modules/finance/shared/components/forms/form-blocks"
+import { FinanceHelpText } from "@/src/modules/finance/shared/components/forms/form-blocks"
 import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
 import { DestinationTrigger } from "@/src/modules/finance/shared/components/pickers/destination-trigger"
 import { InstitutionTrigger } from "@/src/modules/finance/shared/components/pickers/institution-picker"
@@ -253,7 +251,7 @@ export function LoanWizardDetailsStep({
           control={control}
           name="freq"
           render={({ field }) => (
-            <FinanceSegmentedControl
+            <SegmentedControl
               label="Frecuencia"
               value={field.value}
               onChange={(value) =>
@@ -267,7 +265,7 @@ export function LoanWizardDetailsStep({
           control={control}
           name="periods"
           render={({ field }) => (
-            <FinanceSegmentedControl
+            <SegmentedControl
               label="Plazo"
               value={field.value}
               onChange={field.onChange}
@@ -279,7 +277,7 @@ export function LoanWizardDetailsStep({
           control={control}
           name="known"
           render={({ field }) => (
-            <FinanceSegmentedControl
+            <SegmentedControl
               label="Conoces"
               value={field.value}
               onChange={field.onChange}
@@ -412,7 +410,7 @@ export function LoanWizardDetailsStep({
           control={control}
           name="rateType"
           render={({ field }) => (
-            <FinanceSegmentedControl
+            <SegmentedControl
               label="Tipo de tasa"
               value={field.value}
               onChange={(value) =>

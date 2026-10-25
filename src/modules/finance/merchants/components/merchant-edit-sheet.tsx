@@ -10,7 +10,7 @@ import {
 import { BrandPicker } from "@/src/modules/finance/shared/components/brand-picker"
 import { CategoryTrigger } from "@/src/modules/finance/shared/components/pickers/category-trigger"
 import { CategoryPickerSheet } from "@/src/modules/finance/shared/components/pickers/category-picker-sheet"
-import { FinanceSegmentedControl } from "@/src/modules/finance/shared/components/forms/form-blocks"
+import { SegmentedControl } from "@/src/shared/components/forms/segmented-control"
 import { CATALOG_NONE } from "@/src/modules/finance/shared/constants/catalog"
 import { useCategories } from "@/src/modules/finance/shared/hooks/use-categories"
 import { useDiscardChanges } from "@/src/modules/finance/shared/hooks/use-discard-changes"
@@ -445,7 +445,7 @@ export function MerchantEditSheet({
         </SummarySection>
 
         <SummarySection title="Categoría" icon={StoreIcon}>
-          <FinanceSegmentedControl
+          <SegmentedControl
             value={categoryType}
             onChange={(next) => {
               setPickedType(next)

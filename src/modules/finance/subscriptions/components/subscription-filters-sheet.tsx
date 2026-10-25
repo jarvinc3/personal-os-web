@@ -1,6 +1,6 @@
 "use client"
 
-import { FinanceSegmentedControl } from "@/src/modules/finance/shared/components/forms/form-blocks"
+import { SegmentedControl } from "@/src/shared/components/forms/segmented-control"
 import { CategoryPickerSheet } from "@/src/modules/finance/shared/components/pickers/category-picker-sheet"
 import { DestinationPickerSheet } from "@/src/modules/finance/shared/components/pickers/destination-picker-sheet"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
@@ -145,14 +145,14 @@ export function SubscriptionFiltersSheet({
           onChange={(value) => onChange({ ...filters, q: value })}
           placeholder="Buscar suscripción"
         />
-        <FinanceSegmentedControl
+        <SegmentedControl
           label="Estado"
           value={filters.status}
           onChange={(value) => onChange({ ...filters, status: value })}
           options={STATUS_OPTIONS}
           fullWidth
         />
-        <FinanceSegmentedControl
+        <SegmentedControl
           label="Frecuencia"
           value={filters.frequency}
           onChange={(value) => onChange({ ...filters, frequency: value })}

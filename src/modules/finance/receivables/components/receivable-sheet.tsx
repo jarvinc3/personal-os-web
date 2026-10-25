@@ -1,10 +1,8 @@
 "use client"
 
+import { SegmentedControl } from "@/src/shared/components/forms/segmented-control"
 import { FinanceDateField } from "@/src/modules/finance/shared/components/forms/date-field"
-import {
-  FinanceHelpText,
-  FinanceSegmentedControl,
-} from "@/src/modules/finance/shared/components/forms/form-blocks"
+import { FinanceHelpText } from "@/src/modules/finance/shared/components/forms/form-blocks"
 import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
 import { FinanceCurrencyPickerSheet } from "@/src/modules/finance/shared/components/pickers/finance-currency-picker-sheet"
 import {
@@ -183,7 +181,7 @@ export function ReceivableSheet({
               control={control}
               name="status"
               render={({ field }) => (
-                <FinanceSegmentedControl
+                <SegmentedControl
                   label="Estado"
                   value={field.value}
                   onChange={(value) =>

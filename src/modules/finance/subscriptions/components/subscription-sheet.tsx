@@ -25,7 +25,7 @@ import { DestinationPickerSheet } from "@/src/modules/finance/shared/components/
 import { FinanceCurrencyPickerSheet } from "@/src/modules/finance/shared/components/pickers/finance-currency-picker-sheet"
 import { FinanceDateField } from "@/src/modules/finance/shared/components/forms/date-field"
 import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
-import { FinanceSegmentedControl } from "@/src/modules/finance/shared/components/forms/form-blocks"
+import { SegmentedControl } from "@/src/shared/components/forms/segmented-control"
 import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
 import { useCards } from "@/src/modules/finance/shared/hooks/use-cards"
 import { useDiscardChanges } from "@/src/modules/finance/shared/hooks/use-discard-changes"
@@ -254,7 +254,7 @@ export function SubscriptionSheet({
             control={control}
             name="billingCycle"
             render={({ field }) => (
-              <FinanceSegmentedControl
+              <SegmentedControl
                 label="Ciclo"
                 value={field.value}
                 onChange={field.onChange}

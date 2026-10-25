@@ -24,6 +24,12 @@ import { useState } from "react"
 
 type MovementKind = "expense" | "income" | "transfer"
 
+const AVATAR_SWATCHES = Array.from({ length: 8 }, (_, index) => ({
+  value: `avatar-${index}`,
+  label: `Avatar ${index + 1}`,
+  color: ["#0f766e", "#b45309", "#7c3aed", "#be123c"][index % 4],
+}))
+
 const MOVEMENT_KINDS = [
   { value: "expense", label: "Gasto", icon: ArrowDownLeftIcon },
   { value: "income", label: "Ingreso", icon: ArrowUpRightIcon },
@@ -33,6 +39,7 @@ const MOVEMENT_KINDS = [
 /** Filas de opción, celdas de elección, catálogo, color y rueda (#307). */
 export function SelectorsSection() {
   const [kind, setKind] = useState<MovementKind>("expense")
+  const [avatar, setAvatar] = useState(AVATAR_SWATCHES[0].value)
   const [account, setAccount] = useState("ahorros")
   const [institution, setInstitution] = useState("banco-ejemplo")
   const [color, setColor] = useState("#0f766e")
@@ -69,8 +76,8 @@ export function SelectorsSection() {
       <GalleryDemo
         name="ChoiceGrid"
         importPath="@/src/shared/components/forms/choice-grid"
-        states="tres opciones, una elegida"
-        note="Elección exclusiva de dos a cinco opciones cuyo nombre basta."
+        states="tres opciones, una elegida, celdas con imagen en cuatro columnas"
+        note="Elección exclusiva de pocas opciones cuyo nombre basta. Con `media`, la celda es la imagen y la etiqueta queda como nombre accesible."
       >
         <ChoiceGrid
           value={kind}
@@ -78,6 +85,25 @@ export function SelectorsSection() {
           options={MOVEMENT_KINDS}
           ariaLabel="Tipo de movimiento"
           accentColor={GALLERY_ACCENT}
+        />
+        <ChoiceGrid
+          value={avatar}
+          onValueChange={setAvatar}
+          ariaLabel="Avatar"
+          accentColor={GALLERY_ACCENT}
+          columns={4}
+          options={AVATAR_SWATCHES.map((swatch) => ({
+            value: swatch.value,
+            label: swatch.label,
+            media: (
+              <span
+                className="flex size-full items-center justify-center text-xs font-semibold text-white"
+                style={{ backgroundColor: swatch.color }}
+              >
+                {swatch.label.slice(0, 2)}
+              </span>
+            ),
+          }))}
         />
       </GalleryDemo>
 

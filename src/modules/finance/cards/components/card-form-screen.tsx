@@ -27,7 +27,7 @@ import {
   toCardFormValues,
 } from "@/src/modules/finance/cards/lib/card-form-values"
 import { FinanceFormScreen } from "@/src/modules/finance/shared/components/forms/form-screen"
-import { FinanceSegmentedControl } from "@/src/modules/finance/shared/components/forms/form-blocks"
+import { SegmentedControl } from "@/src/shared/components/forms/segmented-control"
 import {
   CATALOG_NONE,
   FINANCE_CARD_NETWORKS,
@@ -278,7 +278,7 @@ export function CardFormScreen({
           control={control}
           name="type"
           render={({ field }) => (
-            <FinanceSegmentedControl
+            <SegmentedControl
               value={field.value}
               onChange={field.onChange}
               options={TYPE_OPTIONS}

@@ -1,7 +1,7 @@
 "use client"
 
 import { CategoryTrigger } from "@/src/modules/finance/shared/components/pickers/category-trigger"
-import { FinanceSegmentedControl } from "@/src/modules/finance/shared/components/forms/form-blocks"
+import { SegmentedControl } from "@/src/shared/components/forms/segmented-control"
 import { FinanceFormScreen } from "@/src/modules/finance/shared/components/forms/form-screen"
 import type { FinanceMoneyFieldHandle } from "@/src/modules/finance/shared/components/forms/money-field"
 import { CATALOG_NONE } from "@/src/modules/finance/shared/constants/catalog"
@@ -541,7 +541,7 @@ export function TransactionForm({
           control={control}
           name="type"
           render={({ field }) => (
-            <FinanceSegmentedControl
+            <SegmentedControl
               value={field.value}
               onChange={(next) => {
                 field.onChange(next)

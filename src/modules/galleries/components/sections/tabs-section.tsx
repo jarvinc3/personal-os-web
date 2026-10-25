@@ -7,7 +7,7 @@ import {
 } from "@/src/modules/galleries/components/mock/values"
 import { simulatedTap } from "@/src/modules/galleries/components/simulated-tap"
 import { CategoryCard } from "@/src/modules/finance/shared/components/category-card"
-import { FinanceSegmentedControl } from "@/src/modules/finance/shared/components/forms/form-blocks"
+import { SegmentedControl } from "@/src/shared/components/forms/segmented-control"
 import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 import { Badge } from "@/src/shared/components/ui/badge"
 import {
@@ -77,24 +77,24 @@ export function TabsSection() {
       </GalleryDemo>
 
       <GalleryDemo
-        name="FinanceSegmentedControl"
-        importPath="@/src/modules/finance/shared/components/forms/form-blocks"
+        name="SegmentedControl"
+        importPath="@/src/shared/components/forms/segmented-control"
         states="size sm, size lg, deshabilitado"
         note="Segmentos con icono para un filtro corto dentro de un formulario."
       >
-        <FinanceSegmentedControl<Flow>
+        <SegmentedControl<Flow>
           value={flow}
           onChange={setFlow}
           options={FLOW_SEGMENTS}
         />
-        <FinanceSegmentedControl<Flow>
+        <SegmentedControl<Flow>
           value="income"
           onChange={() => {}}
           size="lg"
           fullWidth
           options={FLOW_SEGMENTS}
         />
-        <FinanceSegmentedControl<Flow>
+        <SegmentedControl<Flow>
           value="expense"
           onChange={() => {}}
           disabled

@@ -5,7 +5,7 @@ import {
   FINANCE_CARD_NETWORKS,
   CATALOG_NONE,
 } from "@/src/modules/finance/shared/constants/catalog"
-import { FinanceSegmentedControl } from "@/src/modules/finance/shared/components/forms/form-blocks"
+import { SegmentedControl } from "@/src/shared/components/forms/segmented-control"
 import type { CardFormValues } from "@/src/modules/finance/cards/lib/card-form"
 import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import { ColorPickerSwatch } from "@/src/shared/components/forms/color-picker"
@@ -81,7 +81,7 @@ export function CardOptionalDetailsSection({
         control={control}
         name="network"
         render={({ field }) => (
-          <FinanceSegmentedControl
+          <SegmentedControl
             label="Red"
             value={field.value === CATALOG_NONE ? "VISA" : field.value}
             onChange={field.onChange}

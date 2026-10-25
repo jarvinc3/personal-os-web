@@ -3,7 +3,7 @@
 import { CategoryCard } from "@/src/modules/finance/shared/components/category-card"
 import { CategoryEmojiField } from "@/src/modules/finance/catalog/components/category-emoji-field"
 import { suggestCategoryEmojis } from "@/src/modules/finance/catalog/components/category-emoji-catalog"
-import { FinanceSegmentedControl } from "@/src/modules/finance/shared/components/forms/form-blocks"
+import { SegmentedControl } from "@/src/shared/components/forms/segmented-control"
 import { CATALOG_NONE } from "@/src/modules/finance/shared/constants/catalog"
 import {
   useCreateCategory,
@@ -257,7 +257,7 @@ export function CategorySheet({
           control={control}
           name="type"
           render={({ field }) => (
-            <FinanceSegmentedControl
+            <SegmentedControl
               value={field.value}
               onChange={field.onChange}
               options={TYPE_OPTIONS}

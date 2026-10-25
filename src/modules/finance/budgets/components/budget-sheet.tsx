@@ -1,12 +1,12 @@
 "use client"
 
+import { SegmentedControl } from "@/src/shared/components/forms/segmented-control"
 import {
   FinanceDateField,
   formatFinanceDateLabel,
 } from "@/src/modules/finance/shared/components/forms/date-field"
 import {
   FinanceHelpText,
-  FinanceSegmentedControl,
   FinanceSuggestionRow,
 } from "@/src/modules/finance/shared/components/forms/form-blocks"
 import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
@@ -346,7 +346,7 @@ export function BudgetSheet({
             control={control}
             name="alertThresholdPct"
             render={({ field }) => (
-              <FinanceSegmentedControl
+              <SegmentedControl
                 label="Avisarme al"
                 value={field.value}
                 onChange={field.onChange}
@@ -362,7 +362,7 @@ export function BudgetSheet({
             control={control}
             name="periodType"
             render={({ field }) => (
-              <FinanceSegmentedControl
+              <SegmentedControl
                 label="Tipo"
                 value={field.value}
                 onChange={(value) =>
@@ -442,7 +442,7 @@ export function BudgetSheet({
             control={control}
             name="rollover"
             render={({ field }) => (
-              <FinanceSegmentedControl
+              <SegmentedControl
                 label="Arrastre"
                 value={field.value}
                 onChange={(value) =>

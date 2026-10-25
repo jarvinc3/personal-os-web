@@ -16,7 +16,7 @@ import {
   currencyWithBalance,
   receivablesLine,
 } from "@/src/modules/finance/products/lib/currency-summary"
-import { FinanceSegmentedControl } from "@/src/modules/finance/shared/components/forms/form-blocks"
+import { SegmentedControl } from "@/src/shared/components/forms/segmented-control"
 import { GlossaryHelpButton } from "@/src/modules/help"
 import Link from "next/link"
 import { useEffect, useRef, useState } from "react"
@@ -143,7 +143,7 @@ export function FinanceHeroSection({
           <GlossaryHelpButton slug="patrimonio" />
         </div>
         {currencyTotals.length > 1 ? (
-          <FinanceSegmentedControl
+          <SegmentedControl
             label="Moneda del anillo"
             value={activeCurrency}
             onChange={setPickedCurrency}

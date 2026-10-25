@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { useUserTimeZone } from "@/src/modules/settings/hooks/use-user-time-zone"
 import { FinanceDateField } from "@/src/modules/finance/shared/components/forms/date-field"
-import { FinanceSegmentedControl } from "@/src/modules/finance/shared/components/forms/form-blocks"
+import { SegmentedControl } from "@/src/shared/components/forms/segmented-control"
 import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
 import { CategoryPickerSheet } from "@/src/modules/finance/shared/components/pickers/category-picker-sheet"
 import { CategoryTrigger } from "@/src/modules/finance/shared/components/pickers/category-trigger"
@@ -143,7 +143,7 @@ export function QuickEntryPreviewSheet({
     <>
       <BottomSheet open={open} onOpenChange={onOpenChange} title="Vista previa">
         <div className="flex flex-col gap-4">
-          <FinanceSegmentedControl
+          <SegmentedControl
             label="Tipo"
             value={type}
             onChange={setType}

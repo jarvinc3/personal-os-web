@@ -1,16 +1,14 @@
 "use client"
 
-import {
-  AVATAR_OPTIONS,
-  type AvatarOption,
-} from "@/src/modules/settings/constants/avatar-options"
+import { AVATAR_OPTIONS } from "@/src/modules/settings/constants/avatar-options"
+import { SETTINGS_REGISTRY } from "@/src/modules/settings/constants/settings-metadata"
 import { useProfile } from "@/src/modules/settings/hooks/use-profile"
 import { useProfileSheetFormSync } from "@/src/modules/settings/hooks/use-profile-sheet"
 import type { UpdateProfilePayload } from "@/src/modules/settings/types/profile.types"
 import type { SettingsSheetProps } from "@/src/modules/settings/types/sheet.types"
 import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import { FormTextField } from "@/src/shared/components/forms/form-text-field"
-import { SelectionGrid } from "@/src/shared/components/forms/selection-grid"
+import { ChoiceGrid } from "@/src/shared/components/forms/choice-grid"
 import { Button } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
@@ -143,23 +141,26 @@ export function EditAccountSheet({
       </SummarySection>
 
       <SummarySection title="Avatar" icon={Contact2}>
-        <SelectionGrid
-          items={AVATAR_OPTIONS}
+        <ChoiceGrid
           value={selectedAvatarUrl}
           onValueChange={setSelectedAvatarUrl}
-          getItemKey={(item: AvatarOption) => item.id}
-          getItemValue={(item: AvatarOption) => item.url}
-          getItemLabel={(item: AvatarOption) => `Avatar ${Number(item.id) + 1}`}
-          renderCell={(item: AvatarOption) => (
-            <Image
-              src={item.url}
-              alt=""
-              width={80}
-              height={80}
-              className="size-full object-cover"
-              unoptimized
-            />
-          )}
+          ariaLabel="Avatar"
+          accentColor={SETTINGS_REGISTRY.account.accent}
+          columns={4}
+          options={AVATAR_OPTIONS.map((avatar) => ({
+            value: avatar.url,
+            label: `Avatar ${Number(avatar.id) + 1}`,
+            media: (
+              <Image
+                src={avatar.url}
+                alt=""
+                width={80}
+                height={80}
+                className="size-full object-cover"
+                unoptimized
+              />
+            ),
+          }))}
         />
       </SummarySection>
     </BottomSheet>

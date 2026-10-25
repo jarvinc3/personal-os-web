@@ -1,10 +1,8 @@
 "use client"
 
+import { SegmentedControl } from "@/src/shared/components/forms/segmented-control"
 import { FinanceDateField } from "@/src/modules/finance/shared/components/forms/date-field"
-import {
-  FinanceHelpText,
-  FinanceSegmentedControl,
-} from "@/src/modules/finance/shared/components/forms/form-blocks"
+import { FinanceHelpText } from "@/src/modules/finance/shared/components/forms/form-blocks"
 import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
 import { DestinationPickerSheet } from "@/src/modules/finance/shared/components/pickers/destination-picker-sheet"
 import { DestinationTrigger } from "@/src/modules/finance/shared/components/pickers/destination-trigger"
@@ -142,7 +140,7 @@ export function CardPaymentSheet({
       >
         <SummarySection title="Pago" icon={CreditCardIcon}>
           {currencies.length > 1 ? (
-            <FinanceSegmentedControl
+            <SegmentedControl
               label="Moneda"
               value={currency}
               onChange={setCurrency}

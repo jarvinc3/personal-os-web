@@ -1,6 +1,6 @@
 "use client"
 
-import { FinanceSegmentedControl } from "@/src/modules/finance/shared/components/forms/form-blocks"
+import { SegmentedControl } from "@/src/shared/components/forms/segmented-control"
 import { useCategories } from "@/src/modules/finance/shared/hooks/use-categories"
 import { useRecurring } from "@/src/modules/finance/shared/hooks/use-recurring"
 import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
@@ -53,7 +53,7 @@ export function RecurringArchiveSheet({
       title="Bandeja de recurrentes"
       description="Cobros ya confirmados o descartados."
     >
-      <FinanceSegmentedControl
+      <SegmentedControl
         value={tab}
         onChange={setTab}
         options={ARCHIVE_TABS}

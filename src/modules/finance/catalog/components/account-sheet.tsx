@@ -6,7 +6,7 @@ import {
   InstitutionTrigger,
 } from "@/src/modules/finance/shared/components/pickers/institution-picker"
 import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
-import { FinanceSegmentedControl } from "@/src/modules/finance/shared/components/forms/form-blocks"
+import { SegmentedControl } from "@/src/shared/components/forms/segmented-control"
 import { AccountProductRow } from "@/src/modules/finance/shared/components/product-rows"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
 import {
@@ -343,7 +343,7 @@ export function AccountSheet({
               control={control}
               name="type"
               render={({ field }) => (
-                <FinanceSegmentedControl
+                <SegmentedControl
                   label="Tipo"
                   value={field.value}
                   onChange={changeType}

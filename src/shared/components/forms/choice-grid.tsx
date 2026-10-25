@@ -7,11 +7,14 @@ import {
 } from "@/src/shared/components/ui/radio-group"
 import { cn } from "@/src/shared/lib/utils"
 import { type LucideIcon } from "lucide-react"
+import type { ReactNode } from "react"
 
 export type ChoiceGridOption<T extends string> = {
   value: T
   label: string
-  icon: LucideIcon
+  icon?: LucideIcon
+  /** Imagen que reemplaza al icono; la etiqueta queda como nombre accesible. */
+  media?: ReactNode
 }
 
 type ChoiceGridProps<T extends string> = {
@@ -79,37 +82,46 @@ export function ChoiceGrid<T extends string>({
               value={option.value}
               aria-label={option.label}
               className={cn(
-                "relative flex aspect-auto h-auto min-h-11 w-full items-center rounded-xl border border-border bg-card px-2 py-2 text-foreground",
+                "relative flex aspect-auto h-auto min-h-11 w-full items-center rounded-xl border border-border bg-card text-foreground",
                 "after:hidden **:data-[slot=radio-group-indicator]:hidden",
-                "hover:bg-muted/40 data-checked:bg-card data-checked:text-foreground dark:data-checked:bg-card"
+                "hover:bg-muted/40 data-checked:bg-card data-checked:text-foreground dark:data-checked:bg-card",
+                option.media
+                  ? "aspect-square min-h-0 overflow-hidden p-0"
+                  : "px-2 py-2"
               )}
               style={selected ? { borderColor: accentColor } : undefined}
             >
-              <span
-                className={cn(
-                  "flex w-full items-center",
-                  stacked ? "flex-col gap-1" : "gap-2"
-                )}
-              >
-                <span
-                  className="flex size-9 shrink-0 items-center justify-center rounded-md"
-                  style={{ backgroundColor: `${accentColor}1a` }}
-                >
-                  <Icon
-                    className="size-4"
-                    style={{ color: accentColor }}
-                    aria-hidden
-                  />
-                </span>
+              {option.media ? (
+                option.media
+              ) : (
                 <span
                   className={cn(
-                    "min-w-0 leading-tight font-medium",
-                    stacked ? "text-xs" : "text-sm"
+                    "flex w-full items-center",
+                    stacked ? "flex-col gap-1" : "gap-2"
                   )}
                 >
-                  {option.label}
+                  {Icon ? (
+                    <span
+                      className="flex size-9 shrink-0 items-center justify-center rounded-md"
+                      style={{ backgroundColor: `${accentColor}1a` }}
+                    >
+                      <Icon
+                        className="size-4"
+                        style={{ color: accentColor }}
+                        aria-hidden
+                      />
+                    </span>
+                  ) : null}
+                  <span
+                    className={cn(
+                      "min-w-0 leading-tight font-medium",
+                      stacked ? "text-xs" : "text-sm"
+                    )}
+                  >
+                    {option.label}
+                  </span>
                 </span>
-              </span>
+              )}
             </RadioGroupItem>
           )
         })}

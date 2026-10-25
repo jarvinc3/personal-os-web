@@ -2,6 +2,7 @@
 
 import type { NotificationReadFilter } from "@/src/modules/notifications/types/notification.types"
 import type { ModuleSlug } from "@/src/modules/settings"
+import { SegmentedControl } from "@/src/shared/components/forms/segmented-control"
 import { Button } from "@/src/shared/components/ui/button"
 import { getModule } from "@/src/shared/constants/module-registry"
 import { BellDot, CheckCheckIcon, ListIcon } from "lucide-react"
@@ -27,45 +28,24 @@ export function NotificationFilters({
 }: NotificationFiltersProps) {
   return (
     <div className="flex flex-wrap gap-2">
-      <div
-        className="flex flex-wrap gap-2"
-        role="tablist"
-        aria-label="Filtro de notificaciones"
-      >
-        <Button
-          role="tab"
-          aria-selected={readFilter === "all"}
-          variant={readFilter === "all" ? "default" : "outline"}
-          size="sm"
-          className="rounded-full"
-          onClick={() => onReadFilterChange("all")}
-        >
-          <ListIcon className="size-4 shrink-0" />
-          Todas
-        </Button>
-        <Button
-          role="tab"
-          aria-selected={readFilter === "unread"}
-          variant={readFilter === "unread" ? "default" : "outline"}
-          size="sm"
-          className="rounded-full"
-          onClick={() => onReadFilterChange("unread")}
-        >
-          <BellDot className="size-4 shrink-0" />
-          {unreadCount > 0 ? `No leídas (${unreadCount})` : "No leídas"}
-        </Button>
-        <Button
-          role="tab"
-          aria-selected={readFilter === "read"}
-          variant={readFilter === "read" ? "default" : "outline"}
-          size="sm"
-          className="rounded-full"
-          onClick={() => onReadFilterChange("read")}
-        >
-          <CheckCheckIcon className="size-4 shrink-0" />
-          {readCount > 0 ? `Leídas (${readCount})` : "Leídas"}
-        </Button>
-      </div>
+      <SegmentedControl
+        ariaLabel="Filtro de notificaciones"
+        value={readFilter}
+        onChange={onReadFilterChange}
+        options={[
+          { value: "all", label: "Todas", icon: ListIcon },
+          {
+            value: "unread",
+            label: unreadCount > 0 ? `No leídas (${unreadCount})` : "No leídas",
+            icon: BellDot,
+          },
+          {
+            value: "read",
+            label: readCount > 0 ? `Leídas (${readCount})` : "Leídas",
+            icon: CheckCheckIcon,
+          },
+        ]}
+      />
       {moduleOptions.length > 0 ? (
         <div
           className="flex flex-wrap gap-2"
