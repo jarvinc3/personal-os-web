@@ -4,13 +4,13 @@ import { CARD_GALLERY_ENTITIES } from "@/src/modules/card-gallery/entities"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { SummaryItem, SummarySection } from "@/src/shared/components/ui/summary"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
-import { ComponentIcon, GalleryVerticalEndIcon, LayersIcon } from "lucide-react"
+import { GalleryVerticalEndIcon, LayersIcon } from "lucide-react"
 
-/** Índice de las galerías de referencia de la app (#272, #307). */
+/** Índice de las galerías de referencia de la app (#272). */
 export function DevIndexScreen() {
   usePageHeader({
     title: "Desarrollo",
-    subtitle: "Galerías de referencia",
+    subtitle: "Galería de referencia",
   })
 
   return (
@@ -21,7 +21,7 @@ export function DevIndexScreen() {
       </p>
       <SummarySection title="Galerías" icon={LayersIcon}>
         <SummaryItem
-          title="Cards"
+          title="Galería de cards"
           description="Cada entidad con sus variantes: completa, compacta e inline"
           icon={GalleryVerticalEndIcon}
           href={APP_ROUTES.app.devCardGallery}
@@ -30,13 +30,6 @@ export function DevIndexScreen() {
               {CARD_GALLERY_ENTITIES.length}
             </span>
           }
-          showChevron
-        />
-        <SummaryItem
-          title="Componentes"
-          description="Entradas, botones, sheets, listas, estados, montos y gráficos"
-          icon={ComponentIcon}
-          href={APP_ROUTES.app.devComponentGallery}
           showChevron
           isLast
         />

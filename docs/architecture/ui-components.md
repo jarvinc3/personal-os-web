@@ -4,7 +4,7 @@ Inventario para agentes. Antes de inventar un control, buscar aquí y en `src/sh
 
 ## Referencia viva
 
-[`/dev/components`](../../src/modules/component-gallery/README.md) monta los componentes compartidos por propósito con datos falsos: entradas y campos, selectores, botones y acciones, diálogos y sheets, tabs y chips, listas y filas, encabezados y secciones, estados, avisos y toasts, montos y fechas, gráficos y anillos. `/dev` reúne esa galería y la de cards. Antes de crear un control, se busca ahí; si falta, se agrega con su issue. Mantenimiento: [`src/modules/component-gallery/README.md`](../../src/modules/component-gallery/README.md).
+[`/dev/components`](../../src/modules/component-gallery/README.md) monta los componentes compartidos por propósito con datos falsos: entradas y campos, selectores, botones y acciones, diálogos y sheets, tabs y chips, listas y filas, encabezados y secciones, estados, avisos y toasts, montos y fechas, gráficos y anillos. Se abre desde Ajustes → Apariencia; la galería de cards sigue en `/dev/cards`. Antes de crear un control, se busca ahí; si falta, se agrega con su issue. Mantenimiento: [`src/modules/component-gallery/README.md`](../../src/modules/component-gallery/README.md).
 
 ## Fecha y hora — no usar inputs nativos
 

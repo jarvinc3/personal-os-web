@@ -6,7 +6,8 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Agregado
 
-- `/dev/components` es una galería permanente de los componentes compartidos por propósito, con su ruta de importación, sus variantes y estados reales; `/dev` reúne las entradas «Cards» y «Componentes», y los sheets de ejemplo se abren por la URL para que Atrás los cierre (#307).
+- `/dev/components` es una galería permanente de los componentes compartidos por propósito, con su ruta de importación, sus variantes y estados reales; los sheets de ejemplo se abren por la URL para que Atrás los cierre (#307).
+- La galería de componentes se abre desde Ajustes → Apariencia, con un atajo como el de la galería de cards en Inicio, y el índice `/dev` vuelve a listar solo las cards (#314).
 - AI-3: `/intelligence` muestra particiones de `EMAIL_V1`, cola paginada para confirmar, corregir o rechazar mensajes, marca HOLDOUT como verdad de referencia y expone historial de runs y procedencia (#206).
 - AI-2: `/intelligence` conecta Gmail con acceso de solo lectura, muestra estado y correo importado por cuenta y permite sincronizar; Privacidad permite revocar la contribución al conocimiento global y ADMIN gestiona roles (#205).
 

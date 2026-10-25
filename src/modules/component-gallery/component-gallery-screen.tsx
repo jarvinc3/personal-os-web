@@ -15,7 +15,7 @@ const SECTION_ANCHOR_CLASS = `inline-flex items-center gap-1.5 rounded-full bord
 export function ComponentGalleryScreen() {
   const router = useRouter()
   const handleBack = useCallback(() => {
-    router.push(APP_ROUTES.app.dev)
+    router.push(APP_ROUTES.app.settingsAppearance)
   }, [router])
 
   usePageHeader(

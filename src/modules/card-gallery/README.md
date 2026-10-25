@@ -1,6 +1,6 @@
 # Galería de cards
 
-Referencia visual permanente de las cards de cada entidad y sus variantes (#272). Convive en `/dev` con la galería de componentes compartidos.
+Referencia visual permanente de las cards de cada entidad y sus variantes (#272). La galería de componentes compartidos vive en `/dev/components` y se abre desde Ajustes → Apariencia.
 
 - Rutas: `/dev` (índice), `/dev/cards` (lista de entidades) y `/dev/cards/<entidad>` (todas las variantes, una por fila).
 - Datos: `mock/`, siempre falsos y con formato de moneda fijo. No llama al back ni lee el perfil.

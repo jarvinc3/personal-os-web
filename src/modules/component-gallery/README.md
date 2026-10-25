@@ -1,10 +1,10 @@
 # Galería de componentes
 
-Referencia visual permanente de los componentes compartidos, agrupados por propósito (#307). Convive en `/dev` con la galería de cards (#272).
+Referencia visual permanente de los componentes compartidos, agrupados por propósito (#307). Se abre desde Ajustes → Apariencia.
 
-- Rutas: `/dev` (índice con «Cards» y «Componentes») y `/dev/components` (once secciones).
+- Rutas: `/dev/components` (once secciones); el atajo vive en `/settings/appearance`. El índice `/dev` queda para la galería de cards.
 - Secciones: `sections.ts` es la única lista; cada id tiene su cuerpo en `sections/registry.ts`.
-- Cada ficha (`demo.tsx`) muestra el nombre del componente, su ruta de importación real, sus variantes y el componente montado con datos de ejemplo.
+- Cada ficha (`gallery-demo.tsx`) muestra el nombre del componente, su ruta de importación real, sus variantes y el componente montado con datos de ejemplo.
 - Datos: `mock/values.ts`, fijos (moneda y fecha), para no depender del perfil ni del día.
 - Sheets y diálogos: `sections/overlays.tsx` los abre con `useSheetParam` (`?sheet=ejemplo&sheetId=…`), así la URL cambia y Atrás los cierra.
 - Toques: no ejecutan la acción real (`simulated-tap.ts`); muestran «Toque simulado».
