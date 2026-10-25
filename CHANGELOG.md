@@ -8,6 +8,10 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 - AI-2: `/intelligence` conecta Gmail con acceso de solo lectura, muestra estado y correo importado por cuenta y permite sincronizar; Privacidad permite revocar la contribución al conocimiento global y ADMIN gestiona roles (#205).
 
+### Cambiado
+
+- Se reescribe el README con banner, funciones por app, stack, arquitectura, scripts y enlaces a los repos hermanos; se añade licencia MIT y archivos de comunidad (CONTRIBUTING, SECURITY y plantilla de PR).
+
 ### Eliminado
 
 - Se retiran la conversación de IA, sus sesiones y preferencias dedicadas, y la sincronización de Gmail del cliente (#193).
