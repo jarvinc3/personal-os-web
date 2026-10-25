@@ -17,13 +17,23 @@ import { DEFAULT_LOCALE } from "@/src/shared/constants/locales"
  * Nothing fixes `es` on its own: a screen passes the locale it already has.
  */
 const DATE_LOCALES: Record<string, Locale> = {
+  es,
   "es-DO": es,
   "es-ES": es,
+  en: enUS,
   "en-US": enUS,
 }
 
+/**
+ * El perfil guarda el locale como texto libre y la copia de la app está en
+ * español, así que un idioma sin formato propio se pinta en español en vez de
+ * romper la pantalla. Es el único punto de resolución: ninguna otra función
+ * elige un idioma por su cuenta.
+ */
+const FALLBACK_DATE_LOCALE = es
+
 function dateLocale(locale: string): Locale {
-  return DATE_LOCALES[locale] ?? es
+  return DATE_LOCALES[locale] ?? FALLBACK_DATE_LOCALE
 }
 
 function capitalize(value: string): string {
@@ -237,7 +247,11 @@ export function normalizeTimeToApi(input: string): string | null {
   return null
 }
 
-/** Fecha y hora completas (sesiones, historial). */
+/**
+ * Fecha y hora completas (sesiones, historial). El locale es opcional solo para
+ * quien todavía no lo pasa (Intelligence, #317/#318); el resto de pantallas
+ * pasa el del perfil.
+ */
 export function formatDateTime(
   iso: string,
   locale: string = DEFAULT_LOCALE
@@ -249,7 +263,10 @@ export function formatDateTime(
   return `${formatDate(iso, locale)}, ${formatClockTimeFromDate(date, locale)}`
 }
 
-/** Solo fecha corta: `4 oct 2026`. */
+/**
+ * Solo fecha corta: `4 oct 2026`. El locale es opcional solo para quien todavía
+ * no lo pasa (Intelligence, #317/#318); el resto de pantallas pasa el del perfil.
+ */
 export function formatDate(
   iso: string,
   locale: string = DEFAULT_LOCALE

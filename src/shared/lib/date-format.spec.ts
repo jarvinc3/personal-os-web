@@ -64,6 +64,9 @@ describe("day and month labels", () => {
     assert.equal(formatDayMonthYear(september, EN), "18 sep 2026")
     assert.equal(formatMonthYearLabel(september, ES), "Septiembre 2026")
     assert.equal(formatMonthYearLabel(september, EN), "September 2026")
+    // El idioma corto también resuelve, sin depender del idioma de reserva.
+    assert.equal(formatMonthYearLabel(september, "es"), "Septiembre 2026")
+    assert.equal(formatMonthYearLabel(september, "en"), "September 2026")
     assert.equal(
       formatDayHeaderLabel(new Date(2026, 9, 14), ES),
       "Miércoles 14 Oct."
