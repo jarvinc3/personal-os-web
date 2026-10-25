@@ -109,6 +109,7 @@ function IntelligenceScreenBody() {
 
   const dashboard = dashboardQuery.data
   const connected = dashboard.connection.connected
+  const receivedRange = dashboard.receivedRange
 
   return (
     <main className="mx-auto flex w-full max-w-4xl flex-col gap-5 p-4 pb-10 md:px-6">
@@ -268,15 +269,15 @@ function IntelligenceScreenBody() {
           </Badge>
           <Badge variant="outline">
             Primer correo ·{" "}
-            {dashboard.receivedRange.firstMessageAt
-              ? formatDate(dashboard.receivedRange.firstMessageAt)
-              : "—"}
+            {receivedRange?.firstMessageAt
+              ? formatDate(receivedRange.firstMessageAt)
+              : "Sin dato"}
           </Badge>
           <Badge variant="outline">
             Más reciente ·{" "}
-            {dashboard.receivedRange.latestMessageAt
-              ? formatDate(dashboard.receivedRange.latestMessageAt)
-              : "—"}
+            {receivedRange?.latestMessageAt
+              ? formatDate(receivedRange.latestMessageAt)
+              : "Sin dato"}
           </Badge>
         </div>
       ) : null}
