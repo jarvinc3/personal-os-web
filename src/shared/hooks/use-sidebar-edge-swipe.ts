@@ -13,7 +13,7 @@ import { useEffect, useRef } from "react"
  * Components that own a horizontal drag mark themselves with this attribute:
  * the menu never takes the gesture they handle.
  */
-export const SIDEBAR_SWIPE_IGNORE_ATTRIBUTE = "data-sidebar-swipe-ignore"
+const SIDEBAR_SWIPE_IGNORE_ATTRIBUTE = "data-sidebar-swipe-ignore"
 
 /**
  * Sheets, dialogs, pickers and menus unmount when they close, so any match here

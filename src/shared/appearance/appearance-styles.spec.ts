@@ -38,28 +38,26 @@ function requireToken(block: TokenBlock, name: string): string {
   return value
 }
 
+const NEO_BLOCKS = readTokenBlocks(readStyleFile("neo-skeuo.css"))
+
 function requireBlock(
-  blocks: readonly TokenBlock[],
-  matches: (block: TokenBlock) => boolean,
-  name: string
+  name: string,
+  matches: (block: TokenBlock) => boolean
 ): TokenBlock {
-  const block = blocks.find(matches)
+  const block = NEO_BLOCKS.find(matches)
   if (!block) {
     throw new Error(`neo-skeuo.css no declara el bloque ${name}`)
   }
   return block
 }
 
-const NEO_BLOCKS = readTokenBlocks(readStyleFile("neo-skeuo.css"))
 const NEO_LIGHT = requireBlock(
-  NEO_BLOCKS,
-  (block) => block.selector === '[data-style="neo-skeuo"]',
-  "claro"
+  "claro",
+  (block) => block.selector === '[data-style="neo-skeuo"]'
 )
 const NEO_DARK = requireBlock(
-  NEO_BLOCKS,
-  (block) => block.selector.includes(".dark") && block.tokens.size > 0,
-  "oscuro"
+  "oscuro",
+  (block) => block.selector.includes(".dark") && block.tokens.size > 0
 )
 
 /** Pares de texto o control con el fondo sobre el que se leen. */

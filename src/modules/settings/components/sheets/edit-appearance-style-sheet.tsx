@@ -1,6 +1,7 @@
 "use client"
 
 import { AppearanceStylePreview } from "@/src/modules/settings/components/appearance-style-preview"
+import { useAppearanceDraft } from "@/src/modules/settings/hooks/use-appearance-draft"
 import { useProfile } from "@/src/modules/settings/hooks/use-profile"
 import type { SettingsSheetProps } from "@/src/modules/settings/types/sheet.types"
 import {
@@ -18,50 +19,31 @@ import { Spinner } from "@/src/shared/components/ui/spinner"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { LayersIcon, SaveIcon, XIcon } from "lucide-react"
-import { useEffect, useRef, useState } from "react"
 
 export function EditAppearanceStyleSheet({
   open,
   onOpenChange,
 }: SettingsSheetProps) {
   const { savePreferences, preferences, updateProfileMutation } = useProfile()
-  const currentStyle = preferences.theme.style
-  const [draftStyle, setDraftStyle] = useState<AppearanceStyleId | null>(null)
-  const styleValue = draftStyle ?? currentStyle
-  const isDirty = draftStyle !== null && draftStyle !== currentStyle
-
-  // Cada apertura empieza desde lo guardado: el borrador no sobrevive al cierre.
-  const [wasOpen, setWasOpen] = useState(open)
-  if (open !== wasOpen) {
-    setWasOpen(open)
-    if (open) {
-      setDraftStyle(null)
-    }
-  }
-
-  const revertDraft = () => {
-    setDraftStyle(null)
-    applyStyleToDocument(currentStyle)
-  }
+  const draft = useAppearanceDraft({
+    open,
+    savedValue: preferences.theme.style,
+    applyPreview: applyStyleToDocument,
+  })
 
   const handleOpenChange = (nextOpen: boolean) => {
     if (!nextOpen) {
-      revertDraft()
+      draft.revert()
     }
     onOpenChange(nextOpen)
   }
 
-  const handleStyleChange = (value: AppearanceStyleId) => {
-    setDraftStyle(value)
-    applyStyleToDocument(value)
-  }
-
   const handleSave = () => {
     savePreferences(
-      { theme: { style: styleValue } },
+      { theme: { style: draft.value } },
       {
         onSuccess: () => {
-          setDraftStyle(null)
+          draft.clear()
           appToast.success({
             text1: "Estilo actualizado",
             text2: "Tu preferencia de apariencia se guardó.",
@@ -71,21 +53,6 @@ export function EditAppearanceStyleSheet({
       }
     )
   }
-
-  // Atrás cierra la hoja por la URL, sin pasar por `onOpenChange`: el estilo
-  // guardado vuelve igual cuando la hoja deja de estar abierta.
-  const previewAppliedRef = useRef(false)
-  useEffect(() => {
-    if (open) {
-      previewAppliedRef.current = true
-      return
-    }
-    if (!previewAppliedRef.current) {
-      return
-    }
-    previewAppliedRef.current = false
-    applyStyleToDocument(currentStyle)
-  }, [currentStyle, open])
 
   return (
     <BottomSheet
@@ -109,7 +76,7 @@ export function EditAppearanceStyleSheet({
         submit: (
           <Button
             className="flex-1"
-            disabled={!isDirty || updateProfileMutation.isPending}
+            disabled={!draft.isDirty || updateProfileMutation.isPending}
             onClick={handleSave}
           >
             {updateProfileMutation.isPending ? (
@@ -125,9 +92,9 @@ export function EditAppearanceStyleSheet({
       <SummarySection title="Estilos disponibles" icon={LayersIcon}>
         <RadioGroup
           aria-label="Estilo visual"
-          value={styleValue}
+          value={draft.value}
           onValueChange={(value) => {
-            handleStyleChange(value as AppearanceStyleId)
+            draft.change(value as AppearanceStyleId)
           }}
           className="gap-3"
         >

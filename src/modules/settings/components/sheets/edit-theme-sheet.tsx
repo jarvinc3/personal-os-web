@@ -2,6 +2,7 @@
 
 import { SETTINGS_REGISTRY } from "@/src/modules/settings/constants/settings-metadata"
 import { DEFAULT_USER_PREFERENCES } from "@/src/modules/settings/constants/user-settings-defaults"
+import { useAppearanceDraft } from "@/src/modules/settings/hooks/use-appearance-draft"
 import { useProfile } from "@/src/modules/settings/hooks/use-profile"
 import { getSettingValue } from "@/src/modules/settings/lib/settings-value"
 import type { ThemeValue } from "@/src/modules/settings/types/profile.types"
@@ -18,55 +19,36 @@ import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { Palette, SaveIcon, XIcon } from "lucide-react"
 import { useTheme } from "next-themes"
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback } from "react"
 
 export function EditThemeSheet({ open, onOpenChange }: SettingsSheetProps) {
   const { savePreferences, preferences, updateProfileMutation } = useProfile()
   const { setTheme } = useTheme()
-  const currentTheme = getSettingValue<ThemeValue>(preferences.theme)
-  const [draftTheme, setDraftTheme] = useState<ThemeValue | null>(null)
-  const themeValue = draftTheme ?? currentTheme
-  const isDirty = draftTheme !== null && draftTheme !== currentTheme
-
-  // Cada apertura empieza desde lo guardado: el borrador no sobrevive al cierre.
-  const [wasOpen, setWasOpen] = useState(open)
-  if (open !== wasOpen) {
-    setWasOpen(open)
-    if (open) {
-      setDraftTheme(null)
-    }
-  }
-
   const applyTheme = useCallback(
     (theme: ThemeValue) => {
       setTheme(theme === "system" ? "system" : theme)
     },
     [setTheme]
   )
-
-  const revertDraft = useCallback(() => {
-    setDraftTheme(null)
-    applyTheme(currentTheme)
-  }, [applyTheme, currentTheme])
+  const draft = useAppearanceDraft({
+    open,
+    savedValue: getSettingValue<ThemeValue>(preferences.theme),
+    applyPreview: applyTheme,
+  })
 
   const handleOpenChange = (nextOpen: boolean) => {
     if (!nextOpen) {
-      revertDraft()
+      draft.revert()
     }
     onOpenChange(nextOpen)
   }
 
-  const handleThemeChange = (value: ThemeValue) => {
-    setDraftTheme(value)
-    applyTheme(value)
-  }
-
   const handleSave = () => {
     savePreferences(
-      { theme: { value: themeValue } },
+      { theme: { value: draft.value } },
       {
         onSuccess: () => {
-          setDraftTheme(null)
+          draft.clear()
           appToast.success({
             text1: "Tema actualizado",
             text2: "Tu preferencia de apariencia se guardó.",
@@ -76,21 +58,6 @@ export function EditThemeSheet({ open, onOpenChange }: SettingsSheetProps) {
       }
     )
   }
-
-  // Atrás cierra la hoja por la URL, sin pasar por `onOpenChange`: el modo
-  // guardado vuelve igual cuando la hoja deja de estar abierta.
-  const previewAppliedRef = useRef(false)
-  useEffect(() => {
-    if (open) {
-      previewAppliedRef.current = true
-      return
-    }
-    if (!previewAppliedRef.current) {
-      return
-    }
-    previewAppliedRef.current = false
-    applyTheme(currentTheme)
-  }, [applyTheme, currentTheme, open])
 
   return (
     <BottomSheet
@@ -114,7 +81,7 @@ export function EditThemeSheet({ open, onOpenChange }: SettingsSheetProps) {
         submit: (
           <Button
             className="flex-1"
-            disabled={!isDirty || updateProfileMutation.isPending}
+            disabled={!draft.isDirty || updateProfileMutation.isPending}
             onClick={handleSave}
           >
             {updateProfileMutation.isPending ? (
@@ -129,9 +96,9 @@ export function EditThemeSheet({ open, onOpenChange }: SettingsSheetProps) {
     >
       <SummarySection title="Tema" icon={Palette}>
         <RadioGroup
-          value={themeValue}
+          value={draft.value}
           onValueChange={(value) => {
-            handleThemeChange(value as ThemeValue)
+            draft.change(value as ThemeValue)
           }}
         >
           {SETTINGS_REGISTRY.appearance.themeOptions.map((option) => (
@@ -141,8 +108,8 @@ export function EditThemeSheet({ open, onOpenChange }: SettingsSheetProps) {
               iconColor={SETTINGS_REGISTRY.appearance.accent}
               label={option.label}
               description={option.description}
-              selected={themeValue === option.value}
-              onPress={() => handleThemeChange(option.value)}
+              selected={draft.value === option.value}
+              onPress={() => draft.change(option.value)}
               trailing={<RadioGroupItem value={option.value} />}
             />
           ))}

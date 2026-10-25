@@ -119,7 +119,7 @@ export function InstitutionDeck({
     >
       {trackWidth > 0
         ? items.map((item, index) => {
-            const layout = walletCardMotion({
+            const cardMotion = walletCardMotion({
               deployed,
               index,
               frontIndex,
@@ -133,15 +133,15 @@ export function InstitutionDeck({
                 className="absolute top-0 left-4 w-[calc(100%-2rem)]"
                 initial={false}
                 animate={{
-                  x: layout.x,
-                  y: layout.y,
-                  rotate: layout.rotate,
-                  scale: layout.scale,
-                  opacity: layout.opacity,
+                  x: cardMotion.x,
+                  y: cardMotion.y,
+                  rotate: cardMotion.rotate,
+                  scale: cardMotion.scale,
+                  opacity: cardMotion.opacity,
                   zIndex:
                     isFront && isDragging
                       ? WALLET_DRAGGING_Z_INDEX
-                      : layout.zIndex,
+                      : cardMotion.zIndex,
                 }}
                 transition={
                   prefersReducedMotion
@@ -154,7 +154,7 @@ export function InstitutionDeck({
                 }
                 style={{
                   transformOrigin: "bottom center",
-                  pointerEvents: layout.interactive ? "auto" : "none",
+                  pointerEvents: cardMotion.interactive ? "auto" : "none",
                 }}
               >
                 <InstitutionWalletCard
@@ -164,7 +164,7 @@ export function InstitutionDeck({
                   onDragActiveChange={isFront ? setIsDragging : undefined}
                   onCycle={isFront ? onCycle : undefined}
                   onPress={
-                    layout.interactive ? () => openItem(item) : undefined
+                    cardMotion.interactive ? () => openItem(item) : undefined
                   }
                 />
               </motion.div>
