@@ -10,7 +10,7 @@ import type {
   FinanceRecurringStatus,
   FinanceRecurringPattern,
 } from "@/src/modules/finance/shared/types/entities"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import { Button } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { XIcon } from "lucide-react"

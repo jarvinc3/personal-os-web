@@ -7,7 +7,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
-import { LinkPendingOverlay } from "@/src/shared/components/ui/navigation-pending"
+import { LinkPendingOverlay } from "@/src/shared/components/shell/navigation-pending"
 import { ArrowLeftIcon, type LucideIcon } from "lucide-react"
 import Link from "next/link"
 

@@ -30,7 +30,7 @@ import {
   SidebarMenuSubItem,
   useSidebar,
 } from "@/src/shared/components/ui/sidebar"
-import { LinkPendingOverlay } from "@/src/shared/components/ui/navigation-pending"
+import { LinkPendingOverlay } from "@/src/shared/components/shell/navigation-pending"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { enabledAppEntries } from "@/src/shared/lib/enabled-app-nav"
 import { isModuleSectionActive } from "@/src/shared/lib/module-nav-active"
@@ -49,7 +49,7 @@ import {
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useState } from "react"
-import { AppLogo } from "@/src/shared/components/brand/app-logo"
+import { AppLogo } from "@/src/shared/components/shell/app-logo"
 import { Badge } from "@/src/shared/components/ui/badge"
 import { Separator } from "@/src/shared/components/ui/separator"
 

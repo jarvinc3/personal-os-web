@@ -1,8 +1,8 @@
 "use client"
 
 import { useIntelligenceMessage } from "@/src/modules/intelligence/hooks/use-intelligence"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
-import { InfiniteListSentinel } from "@/src/shared/components/ui/infinite-list-sentinel"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
 import { Button } from "@/src/shared/components/ui/button"
 import {
   Empty,
@@ -12,7 +12,10 @@ import {
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
 import { Skeleton } from "@/src/shared/components/ui/skeleton"
-import { SummaryItem, SummarySection } from "@/src/shared/components/ui/summary"
+import {
+  SummaryItem,
+  SummarySection,
+} from "@/src/shared/components/data-display/summary"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { formatDateTime } from "@/src/shared/lib/date-format"

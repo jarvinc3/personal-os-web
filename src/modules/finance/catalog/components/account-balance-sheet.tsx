@@ -11,10 +11,10 @@ import {
   type FinanceMoneyDisplay,
 } from "@/src/modules/finance/shared/lib/money"
 import type { FinanceAccount } from "@/src/modules/finance/shared/types/entities"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import { Button } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
-import { SummarySection } from "@/src/shared/components/ui/summary"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
 import { zodResolver } from "@hookform/resolvers/zod"

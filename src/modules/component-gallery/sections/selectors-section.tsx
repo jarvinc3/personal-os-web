@@ -5,14 +5,12 @@ import {
   GALLERY_ACCENT,
   GALLERY_TIME,
 } from "@/src/modules/component-gallery/mock/values"
-import {
-  OptionRow,
-  SelectField,
-} from "@/src/shared/components/layout/form-blocks"
-import { ChoiceGrid } from "@/src/shared/components/ui/choice-grid"
-import { ColorPickerSwatch } from "@/src/shared/components/ui/color-picker"
-import { WheelField } from "@/src/shared/components/ui/wheel-field"
-import { TimePairWheels } from "@/src/shared/components/ui/wheel-picker"
+import { OptionRow } from "@/src/shared/components/forms/option-row"
+import { SelectField } from "@/src/shared/components/forms/select-field"
+import { ChoiceGrid } from "@/src/shared/components/forms/choice-grid"
+import { ColorPickerSwatch } from "@/src/shared/components/forms/color-picker"
+import { WheelField } from "@/src/shared/components/forms/wheel-field"
+import { TimePairWheels } from "@/src/shared/components/forms/wheel-picker"
 import {
   ArrowDownLeftIcon,
   ArrowLeftRightIcon,
@@ -44,7 +42,7 @@ export function SelectorsSection() {
     <>
       <GalleryDemo
         name="OptionRow"
-        importPath="@/src/shared/components/layout/form-blocks"
+        importPath="@/src/shared/components/forms/option-row"
         states="normal, seleccionada"
         note="Una opción con descripción. La seleccionada lleva el borde del color del módulo."
       >
@@ -70,7 +68,7 @@ export function SelectorsSection() {
 
       <GalleryDemo
         name="ChoiceGrid"
-        importPath="@/src/shared/components/ui/choice-grid"
+        importPath="@/src/shared/components/forms/choice-grid"
         states="tres opciones, una elegida"
         note="Elección exclusiva de dos a cinco opciones cuyo nombre basta."
       >
@@ -85,7 +83,7 @@ export function SelectorsSection() {
 
       <GalleryDemo
         name="SelectField"
-        importPath="@/src/shared/components/layout/form-blocks"
+        importPath="@/src/shared/components/forms/select-field"
         states="normal, con error, deshabilitado"
         note="Catálogo corto en un select. Un catálogo largo se elige en una hoja."
       >
@@ -119,7 +117,7 @@ export function SelectorsSection() {
 
       <GalleryDemo
         name="ColorPickerSwatch"
-        importPath="@/src/shared/components/ui/color-picker"
+        importPath="@/src/shared/components/forms/color-picker"
         states="círculo, cuadrado, entrada, deshabilitado"
         note="El color de una categoría o una meta se elige con este control."
       >
@@ -150,7 +148,7 @@ export function SelectorsSection() {
 
       <GalleryDemo
         name="WheelField + TimePairWheels"
-        importPath="@/src/shared/components/ui/wheel-field"
+        importPath="@/src/shared/components/forms/wheel-field"
         states="Hora · HH:mm 24 h"
         note="La rueda nunca va suelta: siempre dentro de WheelField, que abre el panel a ancho completo y lo cierra con Listo."
       >

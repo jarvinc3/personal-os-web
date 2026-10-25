@@ -4,7 +4,10 @@ import { CARD_GALLERY_ENTITIES } from "@/src/modules/card-gallery/entities"
 import { cardGalleryVariants } from "@/src/modules/card-gallery/variants/registry"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
-import { SummaryItem, SummarySection } from "@/src/shared/components/ui/summary"
+import {
+  SummaryItem,
+  SummarySection,
+} from "@/src/shared/components/data-display/summary"
 import { LayoutGridIcon } from "lucide-react"
 
 /** Lista de entidades de la galería /dev/cards (#272). */

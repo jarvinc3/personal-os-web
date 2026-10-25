@@ -1,7 +1,7 @@
 import { Suspense } from "react"
 
 import { SubscriptionDetailScreen } from "@/src/modules/finance/subscriptions/subscription-detail-screen"
-import { LoadingView } from "@/src/shared/components/layout/loading-view"
+import { LoadingView } from "@/src/shared/components/feedback/loading-view"
 
 type FinanceSubscriptionDetailPageProps = {
   params: Promise<{ subscriptionId: string }>

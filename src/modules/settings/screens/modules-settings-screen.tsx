@@ -3,7 +3,7 @@
 import { SettingsSecondaryPage } from "@/src/modules/settings/components/layout/settings-secondary-page"
 import { ModuleSettingsRows } from "@/src/modules/settings/components/profile-ui"
 import { SettingsGate } from "@/src/modules/settings/settings-gate"
-import { usePendingNavigation } from "@/src/shared/components/ui/navigation-pending"
+import { usePendingNavigation } from "@/src/shared/components/shell/navigation-pending"
 import { settingsModuleHref } from "@/src/shared/constants/app-routes"
 import type { ConfigurableModuleSlug } from "@/src/modules/settings/types/module-config.types"
 

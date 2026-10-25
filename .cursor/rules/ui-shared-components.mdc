@@ -10,7 +10,7 @@ Antes de crear un control, leer [docs/architecture/ui-components.md](docs/archit
 
 **Fecha y hora:** nunca `<input type="time|date">` ni `Input` con esos types.
 
-Toda rueda en una pantalla usa la misma fila que `FinanceDateField`: `WheelField` en `@/src/shared/components/ui/wheel-field`. La fila cerrada muestra icono, valor y chevron. Al abrirla, el panel ocupa todo el ancho del bloque y el pie lleva los atajos a la izquierda y `Listo` abajo a la derecha. `Listo` se habilita cuando hay un valor y, al pulsarlo, cierra el panel. Un control junto al disparador va en `aside`. `DateWheels`, `TimePairWheels`, `DurationWheels` y la rueda interna de `DayWheel` no se renderizan sueltas: solo como contenido de ese panel.
+Toda rueda en una pantalla usa la misma fila que `FinanceDateField`: `WheelField` en `@/src/shared/components/forms/wheel-field`. La fila cerrada muestra icono, valor y chevron. Al abrirla, el panel ocupa todo el ancho del bloque y el pie lleva los atajos a la izquierda y `Listo` abajo a la derecha. `Listo` se habilita cuando hay un valor y, al pulsarlo, cierra el panel. Un control junto al disparador va en `aside`. `DateWheels`, `TimePairWheels`, `DurationWheels` y la rueda interna de `DayWheel` no se renderizan sueltas: solo como contenido de ese panel.
 
 - Hora de reloj → `TimePairWheels` (`HH:mm` 24 h) dentro de `WheelField`
 - Duración horas+minutos → `DurationWheels` (`HH:mm` de duración) dentro de `WheelField`. No usar `TimePairWheels` (incluye a. m./p. m.)
@@ -23,7 +23,7 @@ Toda rueda en una pantalla usa la misma fila que `FinanceDateField`: `WheelField
 
 **Chrome:** `BottomSheet` para edición/secundario; `BottomSheet variant="floating"` para un evento. `SummarySection` para todo bloque con título; `SettingsSection` para un grupo con etiqueta corta; `SummaryItem` para filas. El grupo de filas no se arma con un `div` de borde a mano (`ui-row-group.mdc`). `Fab` para una acción primaria; `Empty*` para vacíos; `ColorPickerSwatch` para color. En Finanzas, la marca de una entidad es `BrandLogo` (`finance-brand-logo.mdc`) y un importe en pantalla es `formatFinanceMoney` (`finance-money-display.mdc`).
 
-**Bloque con título:** en formularios, paneles, sheets, listas, chat y cualquier otra vista, el chrome es `SummarySection` (`title` + `icon`) desde `@/src/shared/components/ui/summary`. El cuerpo puede ser campos, filas `SummaryItem`, un gráfico o `Empty`. `Card`, `CardHeader`, `CardTitle`, `CardDescription`, `CardContent` y `CardFooter` no se importan en pantallas de producto. `src/shared/components/ui/card.tsx` es el primitivo y no sustituye a `SummarySection`. El agrupado de campos de un formulario sigue en `form-sections.mdc`.
+**Bloque con título:** en formularios, paneles, sheets, listas, chat y cualquier otra vista, el chrome es `SummarySection` (`title` + `icon`) desde `@/src/shared/components/data-display/summary`. El cuerpo puede ser campos, filas `SummaryItem`, un gráfico o `Empty`. `Card`, `CardHeader`, `CardTitle`, `CardDescription`, `CardContent` y `CardFooter` no se importan en pantallas de producto. `src/shared/components/ui/card.tsx` es el primitivo y no sustituye a `SummarySection`. El agrupado de campos de un formulario sigue en `form-sections.mdc`.
 
 ```tsx
 <SummarySection title="Cargos bancarios" icon={LandmarkIcon}>

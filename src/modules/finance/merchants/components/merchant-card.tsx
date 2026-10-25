@@ -7,7 +7,7 @@ import {
   type FinanceMoneyDisplay,
 } from "@/src/modules/finance/shared/lib/money"
 import { Badge } from "@/src/shared/components/ui/badge"
-import { LinkPendingOverlay } from "@/src/shared/components/ui/navigation-pending"
+import { LinkPendingOverlay } from "@/src/shared/components/shell/navigation-pending"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
 import { CheckIcon } from "lucide-react"
 import Link from "next/link"

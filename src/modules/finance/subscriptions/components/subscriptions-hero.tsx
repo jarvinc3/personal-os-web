@@ -6,7 +6,7 @@ import type { SubscriptionShortcutBadges } from "@/src/modules/finance/subscript
 import type { FinanceSubscriptionCurrencyCost } from "@/src/modules/finance/shared/types/entities"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { Badge } from "@/src/shared/components/ui/badge"
-import { LinkPendingOverlay } from "@/src/shared/components/ui/navigation-pending"
+import { LinkPendingOverlay } from "@/src/shared/components/shell/navigation-pending"
 import { Skeleton } from "@/src/shared/components/ui/skeleton"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
 import {

@@ -4,7 +4,7 @@ import * as Sentry from "@sentry/nextjs"
 import { RefreshCwIcon } from "lucide-react"
 import { useEffect } from "react"
 
-import { AppLogo } from "@/src/shared/components/brand/app-logo"
+import { AppLogo } from "@/src/shared/components/shell/app-logo"
 import { Button } from "@/src/shared/components/ui/button"
 
 export default function Error({

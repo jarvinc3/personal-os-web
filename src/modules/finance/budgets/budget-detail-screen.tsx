@@ -37,7 +37,7 @@ import {
 } from "@/src/modules/finance/shared/types/entities"
 import { DeleteRecordDialog } from "@/src/modules/finance/shared/components/delete-record-dialog"
 import { RecordOptionsSheet } from "@/src/modules/finance/shared/components/record-options-sheet"
-import { LoadingView } from "@/src/shared/components/layout/loading-view"
+import { LoadingView } from "@/src/shared/components/feedback/loading-view"
 import { Button } from "@/src/shared/components/ui/button"
 import {
   Empty,
@@ -46,8 +46,8 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
-import { SummarySection } from "@/src/shared/components/ui/summary"
-import { InfiniteListSentinel } from "@/src/shared/components/ui/infinite-list-sentinel"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
+import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
 import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"

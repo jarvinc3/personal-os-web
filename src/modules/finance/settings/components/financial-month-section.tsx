@@ -1,8 +1,8 @@
-import { DayWheel } from "@/src/shared/components/ui/wheel-picker"
+import { DayWheel } from "@/src/shared/components/forms/wheel-picker"
 import {
   SummaryGroup,
   SummarySection,
-} from "@/src/shared/components/ui/summary"
+} from "@/src/shared/components/data-display/summary"
 import { CalendarRange } from "lucide-react"
 import { Controller, type Control } from "react-hook-form"
 import type { FinanceModuleFormValues } from "@/src/modules/finance/settings/lib/finance-module-form"

@@ -12,8 +12,8 @@ import {
 import { setPendingAccountDeletion } from "@/src/modules/settings/lib/pending-account-deletion"
 import { resolveReauthConfirmMode } from "@/src/modules/settings/lib/wipe-confirm"
 import type { SettingsSheetProps } from "@/src/modules/settings/types/sheet.types"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
-import { FormTextField } from "@/src/shared/components/layout/form-blocks"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import {
   Alert,
   AlertDescription,
@@ -31,7 +31,7 @@ import {
 } from "@/src/shared/components/ui/alert-dialog"
 import { Button } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
-import { SummarySection } from "@/src/shared/components/ui/summary"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { AlertTriangle, KeyRound, Trash2, X } from "lucide-react"
 import { useCallback, useEffect, useRef, useState } from "react"

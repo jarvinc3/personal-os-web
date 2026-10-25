@@ -50,7 +50,7 @@ import {
 } from "@/src/modules/finance/shared/lib/institution-stack"
 import { recalculationPayload } from "@/src/modules/finance/shared/lib/integrity"
 import { monthKeyFromDate } from "@/src/modules/finance/shared/lib/month-window"
-import { LoadingView } from "@/src/shared/components/layout/loading-view"
+import { LoadingView } from "@/src/shared/components/feedback/loading-view"
 import { Button } from "@/src/shared/components/ui/button"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"

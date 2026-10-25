@@ -11,7 +11,7 @@ import { useCategories } from "@/src/modules/finance/shared/hooks/use-categories
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
 import { merchantMonthParams } from "@/src/modules/finance/merchants/lib/merchant-query"
-import { FormTextField } from "@/src/shared/components/layout/form-blocks"
+import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import {
@@ -21,8 +21,8 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
-import { InfiniteListSentinel } from "@/src/shared/components/ui/infinite-list-sentinel"
-import { SummarySection } from "@/src/shared/components/ui/summary"
+import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { SearchIcon, StoreIcon } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo, useState } from "react"

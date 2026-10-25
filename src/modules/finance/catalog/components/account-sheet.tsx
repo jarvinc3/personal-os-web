@@ -32,17 +32,15 @@ import type {
   FinanceCashSummary,
   FinanceInstitution,
 } from "@/src/modules/finance/shared/types/entities"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
-import {
-  FormTextField,
-  SwitchFieldRow,
-} from "@/src/shared/components/layout/form-blocks"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { FormTextField } from "@/src/shared/components/forms/form-text-field"
+import { SwitchFieldRow } from "@/src/shared/components/forms/switch-field-row"
 import { Button } from "@/src/shared/components/ui/button"
 import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
-import { ColorPickerSwatch } from "@/src/shared/components/ui/color-picker"
+import { ColorPickerSwatch } from "@/src/shared/components/forms/color-picker"
 import { Label } from "@/src/shared/components/ui/label"
 import { Spinner } from "@/src/shared/components/ui/spinner"
-import { SummarySection } from "@/src/shared/components/ui/summary"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { getModule } from "@/src/shared/constants/module-registry"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"

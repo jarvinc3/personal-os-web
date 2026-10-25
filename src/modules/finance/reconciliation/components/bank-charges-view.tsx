@@ -19,7 +19,10 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
-import { SummaryItem, SummarySection } from "@/src/shared/components/ui/summary"
+import {
+  SummaryItem,
+  SummarySection,
+} from "@/src/shared/components/data-display/summary"
 import { Building2Icon, LandmarkIcon, TagsIcon } from "lucide-react"
 
 type BankChargesViewProps = {

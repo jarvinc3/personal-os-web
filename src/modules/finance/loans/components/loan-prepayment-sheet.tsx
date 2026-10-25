@@ -24,11 +24,11 @@ import {
   buildLoanPrepaymentBody,
   type LoanPrepaymentMode,
 } from "@/src/modules/finance/shared/lib/planning-payloads"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import { Button } from "@/src/shared/components/ui/button"
 import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
 import { Spinner } from "@/src/shared/components/ui/spinner"
-import { SummarySection } from "@/src/shared/components/ui/summary"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { API_ENDPOINTS } from "@/src/shared/constants/api-endpoints"
 import { usePicker } from "@/src/shared/hooks/use-picker"
 import { appToast } from "@/src/shared/lib/app-toast"

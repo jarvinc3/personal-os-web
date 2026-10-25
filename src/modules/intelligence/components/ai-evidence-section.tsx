@@ -19,7 +19,7 @@ import {
 import { Field, FieldGroup, FieldLabel } from "@/src/shared/components/ui/field"
 import { Input } from "@/src/shared/components/ui/input"
 import { Textarea } from "@/src/shared/components/ui/textarea"
-import { InfiniteListSentinel } from "@/src/shared/components/ui/infinite-list-sentinel"
+import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
 import { Skeleton } from "@/src/shared/components/ui/skeleton"
 import {
   Select,
@@ -29,7 +29,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/src/shared/components/ui/select"
-import { SummaryItem, SummarySection } from "@/src/shared/components/ui/summary"
+import {
+  SummaryItem,
+  SummarySection,
+} from "@/src/shared/components/data-display/summary"
 import { formatDateTime } from "@/src/shared/lib/date-format"
 import {
   AlertCircle,

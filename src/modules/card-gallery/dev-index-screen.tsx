@@ -2,7 +2,10 @@
 
 import { CARD_GALLERY_ENTITIES } from "@/src/modules/card-gallery/entities"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
-import { SummaryItem, SummarySection } from "@/src/shared/components/ui/summary"
+import {
+  SummaryItem,
+  SummarySection,
+} from "@/src/shared/components/data-display/summary"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { GalleryVerticalEndIcon, LayersIcon } from "lucide-react"
 

@@ -2,8 +2,8 @@
 
 import type { LucideIcon } from "lucide-react"
 
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
-import { SummaryItem } from "@/src/shared/components/ui/summary"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { SummaryItem } from "@/src/shared/components/data-display/summary"
 
 export type RecordOption = {
   id: string

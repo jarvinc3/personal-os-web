@@ -8,7 +8,7 @@ import {
   APP_ROUTES,
   settingsModuleHref,
 } from "@/src/shared/constants/app-routes"
-import { LoadingView } from "@/src/shared/components/layout/loading-view"
+import { LoadingView } from "@/src/shared/components/feedback/loading-view"
 import { Button } from "@/src/shared/components/ui/button"
 import {
   Empty,
@@ -20,7 +20,7 @@ import {
 } from "@/src/shared/components/ui/empty"
 import { useHeaderContext } from "@/src/shared/context/header-context"
 import { LandmarkIcon, SettingsIcon } from "lucide-react"
-import { LinkPendingOverlay } from "@/src/shared/components/ui/navigation-pending"
+import { LinkPendingOverlay } from "@/src/shared/components/shell/navigation-pending"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { useEffect, useLayoutEffect, type ReactNode } from "react"

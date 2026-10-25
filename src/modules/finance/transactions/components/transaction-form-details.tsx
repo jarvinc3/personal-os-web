@@ -1,7 +1,7 @@
 "use client"
 
-import { FormTextField } from "@/src/shared/components/layout/form-blocks"
-import { SummarySection } from "@/src/shared/components/ui/summary"
+import { FormTextField } from "@/src/shared/components/forms/form-text-field"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
 import type { TransactionFormValues } from "@/src/modules/finance/transactions/lib/transaction-form"
 import { FileTextIcon, InfoIcon, NotebookPenIcon } from "lucide-react"
 import { Controller, type Control } from "react-hook-form"

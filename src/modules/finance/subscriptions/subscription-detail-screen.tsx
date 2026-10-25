@@ -26,7 +26,7 @@ import {
   withSubscriptionDetailTab,
   type SubscriptionDetailTab,
 } from "@/src/modules/finance/subscriptions/lib/subscription-display"
-import { LoadingView } from "@/src/shared/components/layout/loading-view"
+import { LoadingView } from "@/src/shared/components/feedback/loading-view"
 import {
   Alert,
   AlertAction,

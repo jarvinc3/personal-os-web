@@ -1,6 +1,6 @@
 "use client"
 
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import { useSyncExternalStore } from "react"
 import {
   DEFAULT_REMINDER,
@@ -15,11 +15,11 @@ import {
   type KeepAwakeReminder,
 } from "@/src/modules/keep-awake/lib/reminders"
 import { Button } from "@/src/shared/components/ui/button"
-import { WheelField } from "@/src/shared/components/ui/wheel-field"
-import { TimePairWheels } from "@/src/shared/components/ui/wheel-picker"
+import { WheelField } from "@/src/shared/components/forms/wheel-field"
+import { TimePairWheels } from "@/src/shared/components/forms/wheel-picker"
 import { PRESSABLE_CLASS, cn } from "@/src/shared/lib/utils"
 import { type FormEvent, useState } from "react"
-import { SummarySection } from "@/src/shared/components/ui/summary"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { ClockIcon, SaveIcon, Trash2Icon, XIcon } from "lucide-react"
 
 type KeepAwakeReminderSheetProps = {

@@ -2,12 +2,12 @@
 
 import { useProfile } from "@/src/modules/settings/hooks/use-profile"
 import type { SettingsSheetProps } from "@/src/modules/settings/types/sheet.types"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import { Button } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
-import { SummarySection } from "@/src/shared/components/ui/summary"
-import { WheelField } from "@/src/shared/components/ui/wheel-field"
-import { TimePairWheels } from "@/src/shared/components/ui/wheel-picker"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
+import { WheelField } from "@/src/shared/components/forms/wheel-field"
+import { TimePairWheels } from "@/src/shared/components/forms/wheel-picker"
 import { appToast } from "@/src/shared/lib/app-toast"
 import {
   formatTimeForDisplay,

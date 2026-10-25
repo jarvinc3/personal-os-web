@@ -8,7 +8,7 @@ import { currencyDisplayName } from "@/src/modules/finance/shared/lib/currency-d
 import { normalizeTrackedCurrencies } from "@/src/modules/finance/shared/lib/finance-currency"
 import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 import { useUserModuleConfig } from "@/src/modules/settings/hooks/use-user-module-config"
-import { SettingsSection } from "@/src/shared/components/layout/settings-section"
+import { SettingsSection } from "@/src/shared/components/settings/settings-section"
 import {
   AlertDialog,
   AlertDialogAction,

@@ -14,7 +14,7 @@ import { EntitySurface } from "@/src/modules/finance/shared/components/entity-su
 import {
   LinkPendingOverlay,
   PendingSurface,
-} from "@/src/shared/components/ui/navigation-pending"
+} from "@/src/shared/components/shell/navigation-pending"
 import { cn } from "@/src/shared/lib/utils"
 import { motion } from "framer-motion"
 import {

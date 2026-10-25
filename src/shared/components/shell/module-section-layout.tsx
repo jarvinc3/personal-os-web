@@ -1,7 +1,7 @@
 "use client"
 
-import { ModuleFabProvider } from "@/src/shared/components/layout/module-fab-context"
-import { ModuleTabBar } from "@/src/shared/components/layout/module-tab-bar"
+import { ModuleFabProvider } from "@/src/shared/components/fab/module-fab-context"
+import { ModuleTabBar } from "@/src/shared/components/shell/module-tab-bar"
 import { useHeaderContext } from "@/src/shared/context/header-context"
 import { cn } from "@/src/shared/lib/utils"
 import type { ModuleNavItem } from "@/src/shared/types/module-nav"

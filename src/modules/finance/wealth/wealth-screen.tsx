@@ -9,7 +9,7 @@ import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-er
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
 import { WealthCurrencySection } from "@/src/modules/finance/wealth/components/wealth-currency-section"
 import { WealthSummary } from "@/src/modules/finance/wealth/components/wealth-summary"
-import { LoadingView } from "@/src/shared/components/layout/loading-view"
+import { LoadingView } from "@/src/shared/components/feedback/loading-view"
 import { Button } from "@/src/shared/components/ui/button"
 import { MissingBreakdownNotice } from "@/src/modules/finance/shared/components/layout/missing-breakdown-notice"
 import {

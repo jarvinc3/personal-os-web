@@ -4,7 +4,7 @@ import {
   FLOATING_SHEET_CONTENT_CLASS,
   getBottomSheetDirection,
   type BottomSheetVariant,
-} from "@/src/shared/components/layout/bottom-sheet-variant"
+} from "@/src/shared/components/sheets/bottom-sheet-variant"
 import {
   Drawer,
   DrawerContent,

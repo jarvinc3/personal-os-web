@@ -5,8 +5,8 @@ import { PendingDataWipeHandler } from "@/src/modules/settings/components/pendin
 import { ReleaseNotes } from "@/src/modules/settings/components/release-notes"
 import { useTimeZoneSync } from "@/src/modules/settings/hooks/use-time-zone-sync"
 import { KeepAwakeProvider } from "@/src/modules/keep-awake/context/keep-awake-context"
-import { AppHeader } from "@/src/shared/components/layout/app-header"
-import { AppSidebar } from "@/src/shared/components/layout/app-sidebar"
+import { AppHeader } from "@/src/shared/components/shell/header/app-header"
+import { AppSidebar } from "@/src/shared/components/shell/app-sidebar"
 import {
   SidebarInset,
   SidebarProvider,

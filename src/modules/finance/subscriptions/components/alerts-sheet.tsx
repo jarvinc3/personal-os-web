@@ -21,7 +21,7 @@ import type {
   FinanceSubscriptionAlertKind,
 } from "@/src/modules/finance/shared/types/entities"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import { Badge } from "@/src/shared/components/ui/badge"
 import { Button } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"

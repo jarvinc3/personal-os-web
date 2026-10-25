@@ -1,6 +1,6 @@
 "use client"
 
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import { Button } from "@/src/shared/components/ui/button"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
 import { formatElapsed } from "@/src/modules/keep-awake/lib/format-elapsed"
@@ -14,7 +14,7 @@ import {
   type KeepAwakeHistoryEntry,
   type SessionEndReason,
 } from "@/src/modules/keep-awake/lib/session-history"
-import { SummaryItem } from "@/src/shared/components/ui/summary"
+import { SummaryItem } from "@/src/shared/components/data-display/summary"
 import {
   ClockIcon,
   Copy,

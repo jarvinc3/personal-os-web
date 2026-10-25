@@ -1,6 +1,6 @@
 "use client"
 
-import { SummaryItem } from "@/src/shared/components/ui/summary"
+import { SummaryItem } from "@/src/shared/components/data-display/summary"
 import { cn } from "@/src/shared/lib/utils"
 import { LockIcon, TagsIcon, UserIcon } from "lucide-react"
 import type { ReactNode } from "react"

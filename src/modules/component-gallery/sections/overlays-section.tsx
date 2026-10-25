@@ -2,8 +2,8 @@
 
 import { GalleryDemo } from "@/src/modules/component-gallery/gallery-demo"
 import { simulatedTap } from "@/src/modules/component-gallery/simulated-tap"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
-import { FormTextField } from "@/src/shared/components/layout/form-blocks"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -44,7 +44,7 @@ export function OverlaysSection() {
     <>
       <GalleryDemo
         name="BottomSheet"
-        importPath="@/src/shared/components/layout/bottom-sheet"
+        importPath="@/src/shared/components/sheets/bottom-sheet"
         states="hoja de edición con acciones"
         note="Cada ejemplo se abre con useSheetParam: la URL cambia y Atrás la cierra."
       >
@@ -56,7 +56,7 @@ export function OverlaysSection() {
 
       <GalleryDemo
         name={'BottomSheet variant="floating"'}
-        importPath="@/src/shared/components/layout/bottom-sheet"
+        importPath="@/src/shared/components/sheets/bottom-sheet"
         states="evento: llegó, listo, falló"
         note="Para un aviso de evento, no para un formulario."
       >

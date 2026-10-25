@@ -2,7 +2,7 @@
 
 import { HelpRichText } from "@/src/modules/help/components/help-rich-text"
 import type { HelpFaqGroup } from "@/src/modules/help/types/help.types"
-import { SettingsSection } from "@/src/shared/components/layout/settings-section"
+import { SettingsSection } from "@/src/shared/components/settings/settings-section"
 import {
   Collapsible,
   CollapsibleContent,

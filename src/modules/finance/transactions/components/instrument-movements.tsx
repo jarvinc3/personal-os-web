@@ -15,7 +15,7 @@ import {
 } from "@/src/modules/finance/shared/lib/transactions-query"
 import type { FinanceTransactionType } from "@/src/modules/finance/shared/types/entities"
 import { TransactionMovementRow } from "@/src/modules/finance/transactions/components/transaction-movement-row"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import { Button } from "@/src/shared/components/ui/button"
 import { Input } from "@/src/shared/components/ui/input"
 import {

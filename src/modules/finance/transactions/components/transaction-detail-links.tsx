@@ -3,7 +3,7 @@
 import type { FinanceTransaction } from "@/src/modules/finance/shared/types/entities"
 import { isTransferTransaction } from "@/src/modules/finance/shared/lib/transactions-query"
 import { Button } from "@/src/shared/components/ui/button"
-import { SummarySection } from "@/src/shared/components/ui/summary"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
 import {
   CopyIcon,
   GitMergeIcon,

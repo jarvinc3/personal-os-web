@@ -8,7 +8,7 @@ import {
 import { cn } from "@/src/shared/lib/utils"
 import { Check } from "lucide-react"
 import { useCallback, useId, useRef, useState } from "react"
-import { Button } from "./button"
+import { Button } from "@/src/shared/components/ui/button"
 
 const PRESET_COLORS = [
   "#ef4444",

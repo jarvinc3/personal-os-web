@@ -10,11 +10,11 @@ import { useModuleSheetEnable } from "@/src/modules/settings/hooks/use-module-sh
 import { useProfileSheetFormSync } from "@/src/modules/settings/hooks/use-profile-sheet"
 import { useUserModuleConfig } from "@/src/modules/settings/hooks/use-user-module-config"
 import { FINANCE_WIPE_LAYERS } from "@/src/modules/settings/lib/wipe-layers"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import {
   SettingsRow,
   SettingsSection,
-} from "@/src/shared/components/layout/settings-section"
+} from "@/src/shared/components/settings/settings-section"
 import { FormScreen } from "@/src/shared/components/forms/form-screen"
 import { Button } from "@/src/shared/components/ui/button"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"

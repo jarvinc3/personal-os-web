@@ -1,7 +1,7 @@
 import { Suspense } from "react"
 
 import { MerchantDetailScreen } from "@/src/modules/finance/merchants/merchant-detail-screen"
-import { LoadingView } from "@/src/shared/components/layout/loading-view"
+import { LoadingView } from "@/src/shared/components/feedback/loading-view"
 
 type FinanceMerchantDetailPageProps = {
   params: Promise<{ merchantId: string }>

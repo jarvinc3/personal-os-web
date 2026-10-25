@@ -13,7 +13,10 @@ import { FINANCE_BUDGET_PAGE_SIZE } from "@/src/modules/finance/shared/lib/budge
 import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
 import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
-import { SummaryItem, SummarySection } from "@/src/shared/components/ui/summary"
+import {
+  SummaryItem,
+  SummarySection,
+} from "@/src/shared/components/data-display/summary"
 import { getModule } from "@/src/shared/constants/module-registry"
 import { CalendarDaysIcon } from "lucide-react"
 

@@ -23,7 +23,7 @@ import {
   FINANCE_CARD_STATEMENT_STATUS_LABEL,
   type FinanceCardStatementMovement,
 } from "@/src/modules/finance/shared/types/entities"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import {
   Empty,
   EmptyDescription,
@@ -36,7 +36,7 @@ import {
   StatementMovementRow,
 } from "@/src/modules/finance/transactions"
 import { Button } from "@/src/shared/components/ui/button"
-import { FormTextField } from "@/src/shared/components/layout/form-blocks"
+import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import { appToast } from "@/src/shared/lib/app-toast"
 import {
   CalendarIcon,

@@ -25,8 +25,8 @@ import type {
 import { TransactionTransferDetails } from "@/src/modules/finance/transactions/components/transaction-transfer-details"
 import { transactionTypeLabel } from "@/src/modules/finance/transactions/lib/transaction-detail"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
-import { SettingsSection } from "@/src/shared/components/layout/settings-section"
-import { SummaryItem } from "@/src/shared/components/ui/summary"
+import { SettingsSection } from "@/src/shared/components/settings/settings-section"
+import { SummaryItem } from "@/src/shared/components/data-display/summary"
 
 type TransactionDetailFactsProps = {
   transaction: FinanceTransaction

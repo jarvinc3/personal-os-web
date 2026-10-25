@@ -46,7 +46,7 @@ import { DeleteRecordDialog } from "@/src/modules/finance/shared/components/dele
 import { ArchiveRecordDialog } from "@/src/modules/finance/shared/components/archive-record-dialog"
 import { RecordOptionsSheet } from "@/src/modules/finance/shared/components/record-options-sheet"
 import { InstrumentHistorySheet } from "@/src/modules/finance/shared/components/instrument-history-sheet"
-import { LoadingView } from "@/src/shared/components/layout/loading-view"
+import { LoadingView } from "@/src/shared/components/feedback/loading-view"
 import { Button } from "@/src/shared/components/ui/button"
 import {
   Tabs,

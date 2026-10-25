@@ -45,7 +45,7 @@ import { TransactionDetailFacts } from "@/src/modules/finance/transactions/compo
 import { TransactionDetailLinks } from "@/src/modules/finance/transactions/components/transaction-detail-links"
 import { TransactionReversalNotice } from "@/src/modules/finance/transactions/components/transaction-reversal-notice"
 import { canEditTransaction } from "@/src/modules/finance/transactions/lib/transaction-edit"
-import { LoadingView } from "@/src/shared/components/layout/loading-view"
+import { LoadingView } from "@/src/shared/components/feedback/loading-view"
 import { Button } from "@/src/shared/components/ui/button"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"

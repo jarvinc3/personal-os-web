@@ -2,7 +2,7 @@ import {
   useModuleTabBarVisible,
   useRegisterModuleFab,
   type ModuleFabAction,
-} from "@/src/shared/components/layout/module-fab-context"
+} from "@/src/shared/components/fab/module-fab-context"
 import { AnimatePresence, motion } from "framer-motion"
 import { Plus } from "lucide-react"
 import { useState } from "react"

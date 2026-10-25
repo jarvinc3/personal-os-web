@@ -1,9 +1,9 @@
 "use client"
 
 import type { TransferFormValues } from "@/src/modules/finance/transactions/lib/transfer-form"
-import { FormTextField } from "@/src/shared/components/layout/form-blocks"
+import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import { Field, FieldLabel } from "@/src/shared/components/ui/field"
-import { SummarySection } from "@/src/shared/components/ui/summary"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { Switch } from "@/src/shared/components/ui/switch"
 import {
   FileTextIcon,

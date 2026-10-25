@@ -1,10 +1,8 @@
 "use client"
 
 import { GalleryDemo } from "@/src/modules/component-gallery/gallery-demo"
-import {
-  FormTextField,
-  SwitchFieldRow,
-} from "@/src/shared/components/layout/form-blocks"
+import { FormTextField } from "@/src/shared/components/forms/form-text-field"
+import { SwitchFieldRow } from "@/src/shared/components/forms/switch-field-row"
 import {
   InputGroup,
   InputGroupAddon,
@@ -26,7 +24,7 @@ export function EntriesSection() {
     <>
       <GalleryDemo
         name="FormTextField"
-        importPath="@/src/shared/components/layout/form-blocks"
+        importPath="@/src/shared/components/forms/form-text-field"
         states="normal, icono, error, contraseña con revelar, deshabilitado"
         note="Todo campo de dato lleva icono líder. La etiqueta va arriba y el error pegado al campo."
       >
@@ -88,7 +86,7 @@ export function EntriesSection() {
 
       <GalleryDemo
         name="SwitchFieldRow"
-        importPath="@/src/shared/components/layout/form-blocks"
+        importPath="@/src/shared/components/forms/switch-field-row"
         states="encendido, apagado, deshabilitado"
         note="Estado binario en una fila: icono a la izquierda del título y la descripción debajo."
       >

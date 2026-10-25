@@ -1,7 +1,7 @@
 "use client"
 
 import { Badge, badgeVariants } from "@/src/shared/components/ui/badge"
-import { LinkPendingOverlay } from "@/src/shared/components/ui/navigation-pending"
+import { LinkPendingOverlay } from "@/src/shared/components/shell/navigation-pending"
 import { useLongPress } from "@/src/shared/hooks/use-long-press"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
 import type { VariantProps } from "class-variance-authority"

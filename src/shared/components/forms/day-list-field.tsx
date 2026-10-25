@@ -2,7 +2,7 @@
 
 import { Button } from "@/src/shared/components/ui/button"
 import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
-import { DayWheel } from "@/src/shared/components/ui/wheel-picker"
+import { DayWheel } from "@/src/shared/components/forms/wheel-picker"
 import {
   CalendarDays,
   PlusIcon,

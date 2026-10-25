@@ -1,7 +1,7 @@
 import { Suspense } from "react"
 
 import { StatementImportScreen } from "@/src/modules/finance/statements/statement-import-screen"
-import { LoadingView } from "@/src/shared/components/layout/loading-view"
+import { LoadingView } from "@/src/shared/components/feedback/loading-view"
 
 type FinanceStatementImportPageProps = {
   params: Promise<{ importId: string }>

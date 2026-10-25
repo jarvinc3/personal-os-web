@@ -19,8 +19,8 @@ import {
   useRevokeReceivableShare,
 } from "@/src/modules/finance/shared/hooks/use-receivable-shares"
 import type { FinanceReceivable } from "@/src/modules/finance/shared/types/entities"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
-import { FormTextField } from "@/src/shared/components/layout/form-blocks"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -34,7 +34,10 @@ import {
 import { Badge } from "@/src/shared/components/ui/badge"
 import { Button } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
-import { SummaryItem, SummarySection } from "@/src/shared/components/ui/summary"
+import {
+  SummaryItem,
+  SummarySection,
+} from "@/src/shared/components/data-display/summary"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
 import { zodResolver } from "@hookform/resolvers/zod"

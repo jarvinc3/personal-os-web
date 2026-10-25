@@ -17,7 +17,7 @@ import type {
   FinanceCard,
 } from "@/src/modules/finance/shared/types/entities"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
-import { LinkPendingOverlay } from "@/src/shared/components/ui/navigation-pending"
+import { LinkPendingOverlay } from "@/src/shared/components/shell/navigation-pending"
 import { CheckIcon, LockIcon } from "lucide-react"
 import Link from "next/link"
 

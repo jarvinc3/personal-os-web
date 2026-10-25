@@ -26,7 +26,7 @@ import type {
   FinanceCategory,
   FinanceCategoryType,
 } from "@/src/modules/finance/shared/types/entities"
-import { Fab } from "@/src/shared/components/layout/fab"
+import { Fab } from "@/src/shared/components/fab/fab"
 import {
   Collapsible,
   CollapsibleContent,

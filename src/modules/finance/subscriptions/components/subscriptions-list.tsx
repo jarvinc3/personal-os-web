@@ -23,7 +23,7 @@ import { groupSubscriptions } from "@/src/modules/finance/subscriptions/lib/subs
 import type { FinanceSubscriptionGroupBy } from "@/src/modules/finance/shared/types/entities"
 import { Badge } from "@/src/shared/components/ui/badge"
 import { Button } from "@/src/shared/components/ui/button"
-import { InfiniteListSentinel } from "@/src/shared/components/ui/infinite-list-sentinel"
+import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
 import {
   Empty,
   EmptyDescription,

@@ -16,8 +16,8 @@ import { FinanceProgressHero } from "@/src/modules/finance/shared/components/lay
 import { financeLoadErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import { DEFAULT_LOCALE } from "@/src/modules/settings/lib/locale-options"
 import { usePublicReceivableShare } from "@/src/modules/finance/shared/hooks/use-receivable-shares"
-import { AppLogo } from "@/src/shared/components/brand/app-logo"
-import { LoadingView } from "@/src/shared/components/layout/loading-view"
+import { AppLogo } from "@/src/shared/components/shell/app-logo"
+import { LoadingView } from "@/src/shared/components/feedback/loading-view"
 import {
   Empty,
   EmptyDescription,

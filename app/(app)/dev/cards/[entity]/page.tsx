@@ -3,7 +3,7 @@ import { Suspense } from "react"
 
 import { EntityGalleryScreen } from "@/src/modules/card-gallery/entity-gallery-screen"
 import { isCardGalleryEntitySlug } from "@/src/modules/card-gallery/entities"
-import { LoadingView } from "@/src/shared/components/layout/loading-view"
+import { LoadingView } from "@/src/shared/components/feedback/loading-view"
 
 type CardGalleryEntityPageProps = {
   params: Promise<{ entity: string }>

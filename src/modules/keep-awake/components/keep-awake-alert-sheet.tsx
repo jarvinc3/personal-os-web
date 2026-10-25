@@ -1,6 +1,6 @@
 "use client"
 
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import {
   Alert,
   AlertDescription,

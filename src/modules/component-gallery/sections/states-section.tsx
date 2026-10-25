@@ -4,7 +4,7 @@ import { GalleryDemo } from "@/src/modules/component-gallery/gallery-demo"
 import { simulatedTap } from "@/src/modules/component-gallery/simulated-tap"
 import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
 import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
-import { LoadingView } from "@/src/shared/components/layout/loading-view"
+import { LoadingView } from "@/src/shared/components/feedback/loading-view"
 import { Button } from "@/src/shared/components/ui/button"
 import {
   Empty,
@@ -73,7 +73,7 @@ export function StatesSection() {
 
       <GalleryDemo
         name="Spinner + LoadingView"
-        importPath="@/src/shared/components/layout/loading-view"
+        importPath="@/src/shared/components/feedback/loading-view"
         states="spinner dentro de un botón, página sin forma"
         note="El Spinner suelto solo va dentro de un control o en LoadingView mientras la página no tiene forma."
       >

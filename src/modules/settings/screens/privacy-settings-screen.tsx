@@ -12,7 +12,7 @@ import { SettingsGate } from "@/src/modules/settings/settings-gate"
 import {
   SettingsRow,
   SettingsSection,
-} from "@/src/shared/components/layout/settings-section"
+} from "@/src/shared/components/settings/settings-section"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { useAiConsent } from "@/src/modules/intelligence"
 import { BrainCircuit } from "lucide-react"

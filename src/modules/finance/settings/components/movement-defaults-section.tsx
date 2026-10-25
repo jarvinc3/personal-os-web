@@ -1,8 +1,8 @@
-import { ChoiceGrid } from "@/src/shared/components/ui/choice-grid"
+import { ChoiceGrid } from "@/src/shared/components/forms/choice-grid"
 import {
   SummaryGroup,
   SummarySection,
-} from "@/src/shared/components/ui/summary"
+} from "@/src/shared/components/data-display/summary"
 import { getModule } from "@/src/shared/constants/module-registry"
 import { Calculator, Keyboard, Landmark } from "lucide-react"
 import { Controller, type Control } from "react-hook-form"

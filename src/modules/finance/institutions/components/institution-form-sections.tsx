@@ -8,12 +8,12 @@ import {
   type FinanceInstitutionType,
 } from "@/src/modules/finance/shared/constants/catalog"
 import type { InstitutionFormValues } from "@/src/modules/finance/institutions/lib/institution-form"
-import { FormTextField } from "@/src/shared/components/layout/form-blocks"
+import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import { Button } from "@/src/shared/components/ui/button"
-import { ColorPickerSwatch } from "@/src/shared/components/ui/color-picker"
+import { ColorPickerSwatch } from "@/src/shared/components/forms/color-picker"
 import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
 import { Label } from "@/src/shared/components/ui/label"
-import { SummarySection } from "@/src/shared/components/ui/summary"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
 import {
   BanknoteIcon,

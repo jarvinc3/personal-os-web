@@ -1,7 +1,7 @@
 import { AccountProductRow } from "@/src/modules/finance/shared/components/product-rows"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
 import type { FinanceAccount } from "@/src/modules/finance/shared/types/entities"
-import { OptionRow } from "@/src/shared/components/layout/form-blocks"
+import { OptionRow } from "@/src/shared/components/forms/option-row"
 import { getModule } from "@/src/shared/constants/module-registry"
 import { Wallet } from "lucide-react"
 

@@ -9,7 +9,7 @@ import { SettingsGate } from "@/src/modules/settings/settings-gate"
 import {
   SettingsRow,
   SettingsSection,
-} from "@/src/shared/components/layout/settings-section"
+} from "@/src/shared/components/settings/settings-section"
 import {
   Avatar,
   AvatarFallback,

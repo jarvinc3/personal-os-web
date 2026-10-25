@@ -9,10 +9,10 @@ import {
   FINANCE_LOAN_INSTALLMENT_STATUS_LABEL,
   type FinanceLoanInstallment,
 } from "@/src/modules/finance/shared/types/entities"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import { Button } from "@/src/shared/components/ui/button"
-import { SummaryItem } from "@/src/shared/components/ui/summary"
-import { LinkPendingOverlay } from "@/src/shared/components/ui/navigation-pending"
+import { SummaryItem } from "@/src/shared/components/data-display/summary"
+import { LinkPendingOverlay } from "@/src/shared/components/shell/navigation-pending"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { ReceiptIcon, XIcon } from "lucide-react"
 import Link from "next/link"

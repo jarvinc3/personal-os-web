@@ -11,7 +11,7 @@ import {
 } from "@/src/modules/finance/subscriptions/lib/subscription-calendar"
 import { upcomingChargeToCardSource } from "@/src/modules/finance/subscriptions/lib/subscription-card-source"
 import { SubscriptionCard } from "@/src/modules/finance/subscriptions/components/subscription-card"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import { Button } from "@/src/shared/components/ui/button"
 import {
   Empty,

@@ -18,7 +18,10 @@ import {
 import { SubscriptionPriceChart } from "@/src/modules/finance/subscriptions/components/subscription-price-chart"
 import { useMemo } from "react"
 import { LineChartIcon } from "lucide-react"
-import { SummaryItem, SummarySection } from "@/src/shared/components/ui/summary"
+import {
+  SummaryItem,
+  SummarySection,
+} from "@/src/shared/components/data-display/summary"
 import { Badge } from "@/src/shared/components/ui/badge"
 import {
   Empty,

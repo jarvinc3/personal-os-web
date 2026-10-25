@@ -5,8 +5,8 @@ import { HELP_ACCENT } from "@/src/modules/help/constants/help-ui"
 import {
   SettingsRow,
   SettingsSection,
-} from "@/src/shared/components/layout/settings-section"
-import { usePendingNavigation } from "@/src/shared/components/ui/navigation-pending"
+} from "@/src/shared/components/settings/settings-section"
+import { usePendingNavigation } from "@/src/shared/components/shell/navigation-pending"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import {

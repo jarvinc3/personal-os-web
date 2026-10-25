@@ -8,7 +8,7 @@ import {
   prefetchFinancePlanning,
   scheduleIdle,
 } from "@/src/modules/finance/shared/lib/finance-prefetch"
-import { ModuleSectionLayout } from "@/src/shared/components/layout/module-section-layout"
+import { ModuleSectionLayout } from "@/src/shared/components/shell/module-section-layout"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { useQueryClient } from "@tanstack/react-query"
 import { useCallback, useEffect, type ReactNode } from "react"

@@ -6,12 +6,12 @@ import type {
   ModuleSlug,
 } from "@/src/modules/settings/types/module-config.types"
 import { DEFAULT_MODULE_CONFIG_BY_SLUG } from "@/src/modules/settings/constants/user-settings-defaults"
-import { SettingsSection } from "@/src/shared/components/layout/settings-section"
+import { SettingsSection } from "@/src/shared/components/settings/settings-section"
 import { Button } from "@/src/shared/components/ui/button"
 import {
   PendingSurface,
   usePendingNavigation,
-} from "@/src/shared/components/ui/navigation-pending"
+} from "@/src/shared/components/shell/navigation-pending"
 import { Separator } from "@/src/shared/components/ui/separator"
 import { Switch } from "@/src/shared/components/ui/switch"
 import {

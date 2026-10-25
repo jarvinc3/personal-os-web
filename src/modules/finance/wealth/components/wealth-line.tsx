@@ -18,7 +18,7 @@ import type {
   FinanceLoan,
   FinanceReceivable,
 } from "@/src/modules/finance/shared/types/entities"
-import { SummaryItem } from "@/src/shared/components/ui/summary"
+import { SummaryItem } from "@/src/shared/components/data-display/summary"
 import {
   BanknoteIcon,
   CreditCardIcon,

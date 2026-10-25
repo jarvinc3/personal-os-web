@@ -7,7 +7,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
-import { LinkPendingOverlay } from "@/src/shared/components/ui/navigation-pending"
+import { LinkPendingOverlay } from "@/src/shared/components/shell/navigation-pending"
 import { settingsModuleHref } from "@/src/shared/constants/app-routes"
 import { getModule } from "@/src/shared/constants/module-registry"
 import type { ModuleSlug } from "@/src/shared/types/module-nav"

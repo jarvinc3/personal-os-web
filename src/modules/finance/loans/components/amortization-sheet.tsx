@@ -11,7 +11,7 @@ import {
   FINANCE_LOAN_INSTALLMENT_STATUS_LABEL,
   type FinanceLoanInstallment,
 } from "@/src/modules/finance/shared/types/entities"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import { Badge } from "@/src/shared/components/ui/badge"
 import { Button } from "@/src/shared/components/ui/button"
 import {

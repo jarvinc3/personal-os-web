@@ -44,7 +44,7 @@ git push origin v0.20.1
 
 1. El proyecto se marca como **beta** hasta `1.0.0`:
    - `README.md` de cada repo: línea `**Estado:** beta (0.x)`;
-   - web: insignia "Beta" junto al nombre "Personal OS" en la barra lateral (`src/shared/components/layout/app-sidebar.tsx`).
+   - web: insignia "Beta" junto al nombre "Personal OS" en la barra lateral (`src/shared/components/shell/app-sidebar.tsx`).
 2. No se quita ni se oculta la marca de beta mientras la versión sea `0.x`.
 3. Al pasar a `1.0.0` (y solo entonces) se quita la marca en el README y en la UI.
 

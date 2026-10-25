@@ -8,14 +8,14 @@ import { SettingsGate } from "@/src/modules/settings/settings-gate"
 import {
   SettingsRow,
   SettingsSection,
-} from "@/src/shared/components/layout/settings-section"
+} from "@/src/shared/components/settings/settings-section"
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
 } from "@/src/shared/components/ui/avatar"
 import { Badge } from "@/src/shared/components/ui/badge"
-import { usePendingNavigation } from "@/src/shared/components/ui/navigation-pending"
+import { usePendingNavigation } from "@/src/shared/components/shell/navigation-pending"
 import {
   APP_ROUTES,
   settingsModuleHref,

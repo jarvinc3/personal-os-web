@@ -1,7 +1,7 @@
 "use client"
 
 import { Button } from "@/src/shared/components/ui/button"
-import { FormTextField } from "@/src/shared/components/layout/form-blocks"
+import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { SparklesIcon } from "lucide-react"
 import { useState, type FormEvent } from "react"

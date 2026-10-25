@@ -27,7 +27,7 @@ import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useMemo, useState } from "react"
-import { ExpandableFab } from "@/src/shared/components/layout/expandable-fab"
+import { ExpandableFab } from "@/src/shared/components/fab/expandable-fab"
 import { ReceiptTextIcon } from "lucide-react"
 
 export function SubscriptionsScreen() {

@@ -54,9 +54,9 @@ import {
   loanSchema,
   type LoanFormValues,
 } from "@/src/modules/finance/loans/lib/loan-form"
-import { FormTextField } from "@/src/shared/components/layout/form-blocks"
+import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import { Field, FieldLabel } from "@/src/shared/components/ui/field"
-import { SummarySection } from "@/src/shared/components/ui/summary"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { usePicker } from "@/src/shared/hooks/use-picker"
 import { appToast } from "@/src/shared/lib/app-toast"
 

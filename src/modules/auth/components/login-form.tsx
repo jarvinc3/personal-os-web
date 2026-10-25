@@ -1,7 +1,7 @@
 "use client"
 
 import type { LoginPayload } from "@/src/modules/auth/types/auth.types"
-import { FormTextField } from "@/src/shared/components/layout/form-blocks"
+import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import {
   Alert,
   AlertDescription,

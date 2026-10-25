@@ -8,14 +8,12 @@ import { useProfile } from "@/src/modules/settings/hooks/use-profile"
 import { useProfileSheetFormSync } from "@/src/modules/settings/hooks/use-profile-sheet"
 import type { UpdateProfilePayload } from "@/src/modules/settings/types/profile.types"
 import type { SettingsSheetProps } from "@/src/modules/settings/types/sheet.types"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
-import {
-  FormTextField,
-  SelectionGrid,
-} from "@/src/shared/components/layout/form-blocks"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { FormTextField } from "@/src/shared/components/forms/form-text-field"
+import { SelectionGrid } from "@/src/shared/components/forms/selection-grid"
 import { Button } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
-import { SummarySection } from "@/src/shared/components/ui/summary"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
 import { zodResolver } from "@hookform/resolvers/zod"

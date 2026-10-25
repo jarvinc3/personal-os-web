@@ -9,7 +9,7 @@ import {
   subscribeReminder,
   writeReminder,
 } from "@/src/modules/keep-awake/lib/reminders"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import { Button } from "@/src/shared/components/ui/button"
 import { PRESSABLE_CLASS, cn } from "@/src/shared/lib/utils"
 import { Bell, CheckIcon, XIcon } from "lucide-react"

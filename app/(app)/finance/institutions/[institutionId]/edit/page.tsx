@@ -1,7 +1,7 @@
 import { Suspense } from "react"
 
 import { InstitutionEditScreen } from "@/src/modules/finance/institutions/institution-form-pages"
-import { LoadingView } from "@/src/shared/components/layout/loading-view"
+import { LoadingView } from "@/src/shared/components/feedback/loading-view"
 
 type FinanceInstitutionEditPageProps = {
   params: Promise<{ institutionId: string }>

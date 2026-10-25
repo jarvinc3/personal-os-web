@@ -62,7 +62,7 @@ import type {
   FinanceInstitution,
 } from "@/src/modules/finance/shared/types/entities"
 import { Button } from "@/src/shared/components/ui/button"
-import { SummarySection } from "@/src/shared/components/ui/summary"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { usePicker } from "@/src/shared/hooks/use-picker"
 import { appToast } from "@/src/shared/lib/app-toast"
 

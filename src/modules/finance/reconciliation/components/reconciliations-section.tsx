@@ -25,8 +25,8 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
-import { InfiniteListSentinel } from "@/src/shared/components/ui/infinite-list-sentinel"
-import { SummaryItem } from "@/src/shared/components/ui/summary"
+import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
+import { SummaryItem } from "@/src/shared/components/data-display/summary"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { ScaleIcon, Trash2Icon } from "lucide-react"
 import { Button } from "@/src/shared/components/ui/button"

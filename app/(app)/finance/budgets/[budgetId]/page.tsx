@@ -1,7 +1,7 @@
 import { Suspense } from "react"
 
 import { BudgetDetailScreen } from "@/src/modules/finance/budgets/budget-detail-screen"
-import { LoadingView } from "@/src/shared/components/layout/loading-view"
+import { LoadingView } from "@/src/shared/components/feedback/loading-view"
 
 type FinanceBudgetDetailPageProps = {
   params: Promise<{ budgetId: string }>

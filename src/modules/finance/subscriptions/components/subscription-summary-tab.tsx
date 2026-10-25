@@ -6,7 +6,10 @@ import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 import { CategoryCard } from "@/src/modules/finance/shared/components/category-card"
 import type { FinanceSubscription } from "@/src/modules/finance/shared/types/entities"
 import { nextChargeLabel } from "@/src/modules/finance/subscriptions/lib/recurring-display"
-import { SummaryItem, SummarySection } from "@/src/shared/components/ui/summary"
+import {
+  SummaryItem,
+  SummarySection,
+} from "@/src/shared/components/data-display/summary"
 import { ExternalLinkIcon, ReceiptIcon, WalletIcon } from "lucide-react"
 
 type SubscriptionSummaryTabProps = {

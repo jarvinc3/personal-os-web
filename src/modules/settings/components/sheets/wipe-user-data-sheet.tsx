@@ -28,8 +28,8 @@ import {
 } from "@/src/modules/settings/lib/wipe-layers"
 import { AuthServiceError } from "@/src/modules/auth"
 import { WipeBalanceInstitutionSheet } from "@/src/modules/settings/components/sheets/wipe-balance-institution-sheet"
-import { FormTextField } from "@/src/shared/components/layout/form-blocks"
-import { SettingsRow } from "@/src/shared/components/layout/settings-section"
+import { FormTextField } from "@/src/shared/components/forms/form-text-field"
+import { SettingsRow } from "@/src/shared/components/settings/settings-section"
 import {
   Alert,
   AlertDescription,
@@ -48,7 +48,7 @@ import {
 import { Button } from "@/src/shared/components/ui/button"
 import { Checkbox } from "@/src/shared/components/ui/checkbox"
 import { Spinner } from "@/src/shared/components/ui/spinner"
-import { SummarySection } from "@/src/shared/components/ui/summary"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import {
   AlertTriangle,

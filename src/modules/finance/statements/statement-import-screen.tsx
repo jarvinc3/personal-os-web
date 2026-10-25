@@ -33,7 +33,7 @@ import {
   fromStatementImportExtra,
   StatementMovementRow,
 } from "@/src/modules/finance/transactions"
-import { LoadingView } from "@/src/shared/components/layout/loading-view"
+import { LoadingView } from "@/src/shared/components/feedback/loading-view"
 import {
   Alert,
   AlertDescription,
@@ -41,7 +41,7 @@ import {
 } from "@/src/shared/components/ui/alert"
 import { Button } from "@/src/shared/components/ui/button"
 import { Checkbox } from "@/src/shared/components/ui/checkbox"
-import { SummaryItem } from "@/src/shared/components/ui/summary"
+import { SummaryItem } from "@/src/shared/components/data-display/summary"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { appToast } from "@/src/shared/lib/app-toast"

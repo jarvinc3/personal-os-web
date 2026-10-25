@@ -40,7 +40,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
-import { SummarySection } from "@/src/shared/components/ui/summary"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { cn } from "@/src/shared/lib/utils"
 import { CalendarDaysIcon, CalendarOffIcon, TagsIcon } from "lucide-react"

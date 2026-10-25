@@ -6,7 +6,7 @@ import {
   APP_ROUTES,
   isFinanceTransferFormType,
 } from "@/src/shared/constants/app-routes"
-import { LoadingView } from "@/src/shared/components/layout/loading-view"
+import { LoadingView } from "@/src/shared/components/feedback/loading-view"
 
 type FinanceTransactionNewPageProps = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>

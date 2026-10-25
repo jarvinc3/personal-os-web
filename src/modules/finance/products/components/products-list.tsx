@@ -39,8 +39,8 @@ import { FinanceErrorState } from "@/src/modules/finance/shared/components/layou
 import { prefetchFinanceCategories } from "@/src/modules/finance/shared/lib/finance-prefetch"
 import { buildInstitutionStackItems } from "@/src/modules/finance/shared/lib/institution-stack"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
-import { ExpandableFab } from "@/src/shared/components/layout/expandable-fab"
-import { SettingsSection } from "@/src/shared/components/layout/settings-section"
+import { ExpandableFab } from "@/src/shared/components/fab/expandable-fab"
+import { SettingsSection } from "@/src/shared/components/settings/settings-section"
 import { Button } from "@/src/shared/components/ui/button"
 import { MissingBreakdownNotice } from "@/src/modules/finance/shared/components/layout/missing-breakdown-notice"
 import {
@@ -51,7 +51,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
-import { SummaryItem } from "@/src/shared/components/ui/summary"
+import { SummaryItem } from "@/src/shared/components/data-display/summary"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"

@@ -1,6 +1,6 @@
 "use client"
 
-import { LinkPendingOverlay } from "@/src/shared/components/ui/navigation-pending"
+import { LinkPendingOverlay } from "@/src/shared/components/shell/navigation-pending"
 import { ChevronDownIcon, ChevronRightIcon, LucideIcon } from "lucide-react"
 import Link from "next/link"
 import { ComponentProps, ReactNode } from "react"
@@ -9,8 +9,8 @@ import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "./collapsible"
-import { Separator } from "./separator"
+} from "@/src/shared/components/ui/collapsible"
+import { Separator } from "@/src/shared/components/ui/separator"
 
 type SummarySectionProps = {
   title?: string

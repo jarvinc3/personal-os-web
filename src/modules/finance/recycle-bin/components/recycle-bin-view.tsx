@@ -24,9 +24,9 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
-import { SettingsSection } from "@/src/shared/components/layout/settings-section"
-import { SummaryItem } from "@/src/shared/components/ui/summary"
-import { InfiniteListSentinel } from "@/src/shared/components/ui/infinite-list-sentinel"
+import { SettingsSection } from "@/src/shared/components/settings/settings-section"
+import { SummaryItem } from "@/src/shared/components/data-display/summary"
+import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
 import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
 import {
   Tabs,

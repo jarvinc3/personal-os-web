@@ -2,8 +2,8 @@
 
 import { Button } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
-import { FormTextField } from "@/src/shared/components/layout/form-blocks"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { useRouter } from "next/navigation"

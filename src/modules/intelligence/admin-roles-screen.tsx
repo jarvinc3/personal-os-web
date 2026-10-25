@@ -11,7 +11,10 @@ import {
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
 import { Skeleton } from "@/src/shared/components/ui/skeleton"
-import { SummaryItem, SummarySection } from "@/src/shared/components/ui/summary"
+import {
+  SummaryItem,
+  SummarySection,
+} from "@/src/shared/components/data-display/summary"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { AlertCircle, RefreshCw, ShieldCheck, UserRound } from "lucide-react"
 

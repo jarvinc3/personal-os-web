@@ -5,11 +5,11 @@ import {
   SUBSCRIPTION_SORT_LABEL,
   type SubscriptionSort,
 } from "@/src/modules/finance/subscriptions/lib/subscription-filters"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import {
   SettingsRow,
   SettingsSection,
-} from "@/src/shared/components/layout/settings-section"
+} from "@/src/shared/components/settings/settings-section"
 import { Button } from "@/src/shared/components/ui/button"
 import {
   ArrowDownWideNarrowIcon,

@@ -3,7 +3,7 @@
 import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
 import type { CardFormValues } from "@/src/modules/finance/cards/lib/card-form"
 import { Button } from "@/src/shared/components/ui/button"
-import { SummarySection } from "@/src/shared/components/ui/summary"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { PlusIcon, TrashIcon, WalletIcon } from "lucide-react"
 import {
   Controller,

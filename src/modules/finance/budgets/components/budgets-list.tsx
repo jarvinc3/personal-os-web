@@ -27,7 +27,7 @@ import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/lay
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { ChartPieIcon, PlusIcon } from "lucide-react"
 import { Button } from "@/src/shared/components/ui/button"
-import { InfiniteListSentinel } from "@/src/shared/components/ui/infinite-list-sentinel"
+import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
 import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
 
 type FinanceBudgetsListProps = {

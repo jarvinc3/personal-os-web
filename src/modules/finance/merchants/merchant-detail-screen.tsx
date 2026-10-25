@@ -34,9 +34,9 @@ import type {
   FinanceMerchant,
   FinanceTransaction,
 } from "@/src/modules/finance/shared/types/entities"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
-import { LoadingView } from "@/src/shared/components/layout/loading-view"
-import { FormTextField } from "@/src/shared/components/layout/form-blocks"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { LoadingView } from "@/src/shared/components/feedback/loading-view"
+import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -48,9 +48,9 @@ import {
   AlertDialogTitle,
 } from "@/src/shared/components/ui/alert-dialog"
 import { Button } from "@/src/shared/components/ui/button"
-import { InfiniteListSentinel } from "@/src/shared/components/ui/infinite-list-sentinel"
+import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
 import { Spinner } from "@/src/shared/components/ui/spinner"
-import { SummarySection } from "@/src/shared/components/ui/summary"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { API_ENDPOINTS } from "@/src/shared/constants/api-endpoints"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"

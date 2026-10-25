@@ -11,7 +11,7 @@ import {
 } from "@/src/modules/finance/shared/lib/amount-calculator"
 import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 import { useFormatLocale } from "@/src/modules/settings/hooks/use-format-locale"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import { Button } from "@/src/shared/components/ui/button"
 import { cn } from "@/src/shared/lib/utils"
 import { CheckIcon, DeleteIcon } from "lucide-react"

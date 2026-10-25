@@ -18,7 +18,7 @@ import {
   formatFinanceMoney,
   type FinanceMoneyDisplay,
 } from "@/src/modules/finance/shared/lib/money"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import {
   Empty,
   EmptyDescription,
@@ -26,8 +26,8 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
-import { InfiniteListSentinel } from "@/src/shared/components/ui/infinite-list-sentinel"
-import { SummaryItem } from "@/src/shared/components/ui/summary"
+import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
+import { SummaryItem } from "@/src/shared/components/data-display/summary"
 import { HistoryIcon, Settings2Icon } from "lucide-react"
 import { instantToZonedWallTime } from "@/src/shared/lib/zoned-time"
 import { useUserTimeZone } from "@/src/modules/settings/hooks/use-user-time-zone"

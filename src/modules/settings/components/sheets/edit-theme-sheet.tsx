@@ -6,15 +6,15 @@ import { useProfile } from "@/src/modules/settings/hooks/use-profile"
 import { getSettingValue } from "@/src/modules/settings/lib/settings-value"
 import type { ThemeValue } from "@/src/modules/settings/types/profile.types"
 import type { SettingsSheetProps } from "@/src/modules/settings/types/sheet.types"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
-import { OptionRow } from "@/src/shared/components/layout/form-blocks"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { OptionRow } from "@/src/shared/components/forms/option-row"
 import { Button } from "@/src/shared/components/ui/button"
 import {
   RadioGroup,
   RadioGroupItem,
 } from "@/src/shared/components/ui/radio-group"
 import { Spinner } from "@/src/shared/components/ui/spinner"
-import { SummarySection } from "@/src/shared/components/ui/summary"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { Palette, SaveIcon, XIcon } from "lucide-react"
 import { useTheme } from "next-themes"

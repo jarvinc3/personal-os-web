@@ -48,12 +48,13 @@ import {
   type LoanWizardValues,
 } from "@/src/modules/finance/loans/lib/loan-form"
 import type { LoanPlan } from "@/src/modules/finance/loans/lib/loan-wizard"
-import {
-  FormTextField,
-  OptionRow,
-} from "@/src/shared/components/layout/form-blocks"
+import { FormTextField } from "@/src/shared/components/forms/form-text-field"
+import { OptionRow } from "@/src/shared/components/forms/option-row"
 import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
-import { SummaryItem, SummarySection } from "@/src/shared/components/ui/summary"
+import {
+  SummaryItem,
+  SummarySection,
+} from "@/src/shared/components/data-display/summary"
 import { Button } from "@/src/shared/components/ui/button"
 import { cn } from "@/src/shared/lib/utils"
 

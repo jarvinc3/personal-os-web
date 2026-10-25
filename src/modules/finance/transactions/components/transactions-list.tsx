@@ -44,7 +44,7 @@ import {
   shouldFollowScroll,
 } from "@/src/modules/finance/shared/lib/timeline-scroll"
 import { FINANCE_TRANSACTIONS_QUERY_KEY } from "@/src/modules/finance/shared/types/api"
-import { ExpandableFab } from "@/src/shared/components/layout/expandable-fab"
+import { ExpandableFab } from "@/src/shared/components/fab/expandable-fab"
 import {
   APP_ROUTES,
   financeTransactionNewHref,

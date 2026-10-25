@@ -1,7 +1,7 @@
 "use client"
 
-import { useModuleFabRegistration } from "@/src/shared/components/layout/module-fab-context"
-import { LinkPendingOverlay } from "@/src/shared/components/ui/navigation-pending"
+import { useModuleFabRegistration } from "@/src/shared/components/fab/module-fab-context"
+import { LinkPendingOverlay } from "@/src/shared/components/shell/navigation-pending"
 import { isModuleSectionActive } from "@/src/shared/lib/module-nav-active"
 import { cn } from "@/src/shared/lib/utils"
 import type { ModuleNavItem } from "@/src/shared/types/module-nav"

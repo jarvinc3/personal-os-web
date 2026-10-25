@@ -9,7 +9,7 @@ import {
 import { selectableBankInstitutions } from "@/src/modules/finance/shared/lib/cash"
 import { CATALOG_NONE } from "@/src/modules/finance/shared/constants/catalog"
 import type { FinanceInstitution } from "@/src/modules/finance/shared/types/entities"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
 import { ChevronDownIcon } from "lucide-react"
 

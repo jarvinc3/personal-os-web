@@ -4,7 +4,7 @@ import * as WheelPickerPrimitive from "@ncdai/react-wheel-picker"
 import type { ComponentProps, ReactNode } from "react"
 import { useMemo } from "react"
 
-import { WheelField } from "@/src/shared/components/ui/wheel-field"
+import { WheelField } from "@/src/shared/components/forms/wheel-field"
 import { cn } from "@/src/shared/lib/utils"
 import { CalendarDaysIcon, type LucideIcon } from "lucide-react"
 

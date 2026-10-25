@@ -15,10 +15,10 @@ import { RecurringArchiveSheet } from "@/src/modules/finance/subscriptions/compo
 import { RecurringPatternCard } from "@/src/modules/finance/subscriptions/components/recurring-pattern-card"
 import type { FinanceRecurringPattern } from "@/src/modules/finance/shared/types/entities"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import { Button } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
-import { InfiniteListSentinel } from "@/src/shared/components/ui/infinite-list-sentinel"
+import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
 import {
   Empty,
   EmptyDescription,

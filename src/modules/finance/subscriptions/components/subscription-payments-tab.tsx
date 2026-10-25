@@ -11,7 +11,10 @@ import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 import { useSubscriptionPayments } from "@/src/modules/finance/shared/hooks/use-subscriptions"
 import type { FinanceSubscriptionPaymentSource } from "@/src/modules/finance/shared/types/entities"
 import { BanknoteArrowDownIcon, HandCoinsIcon } from "lucide-react"
-import { SummaryItem, SummarySection } from "@/src/shared/components/ui/summary"
+import {
+  SummaryItem,
+  SummarySection,
+} from "@/src/shared/components/data-display/summary"
 import { Button } from "@/src/shared/components/ui/button"
 import {
   Empty,
@@ -20,7 +23,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
-import { InfiniteListSentinel } from "@/src/shared/components/ui/infinite-list-sentinel"
+import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 
 const PAYMENT_SOURCE_LABEL: Record<FinanceSubscriptionPaymentSource, string> = {

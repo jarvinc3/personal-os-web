@@ -10,8 +10,8 @@ import { Button } from "@/src/shared/components/ui/button"
 import {
   DateWheels,
   TimePairWheels,
-} from "@/src/shared/components/ui/wheel-picker"
-import { WheelField } from "@/src/shared/components/ui/wheel-field"
+} from "@/src/shared/components/forms/wheel-picker"
+import { WheelField } from "@/src/shared/components/forms/wheel-field"
 import { formatHm24Display12h, parseDate } from "@/src/shared/types/wheels.type"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
 import {

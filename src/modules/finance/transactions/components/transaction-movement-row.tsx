@@ -29,7 +29,7 @@ import {
   type FinanceTransaction,
 } from "@/src/modules/finance/shared/types/entities"
 import { Badge } from "@/src/shared/components/ui/badge"
-import { SummaryItem } from "@/src/shared/components/ui/summary"
+import { SummaryItem } from "@/src/shared/components/data-display/summary"
 import { cn } from "@/src/shared/lib/utils"
 import {
   ArrowDownLeftIcon,

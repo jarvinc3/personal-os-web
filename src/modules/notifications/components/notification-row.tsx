@@ -5,7 +5,7 @@ import type { NotificationRecord } from "@/src/modules/notifications/types/notif
 import {
   PendingSurface,
   usePendingNavigation,
-} from "@/src/shared/components/ui/navigation-pending"
+} from "@/src/shared/components/shell/navigation-pending"
 import { formatNotificationListTime } from "@/src/shared/lib/date-format"
 import { cn } from "@/src/shared/lib/utils"
 
