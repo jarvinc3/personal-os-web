@@ -23,6 +23,10 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 - `src/shared/components` se reorganiza por responsabilidad: `ui/` queda solo con shadcn y los componentes propios pasan a `shell/` (con `shell/header/`), `forms/`, `sheets/`, `fab/`, `feedback/`, `data-display/` y `settings/`; `ReleaseNotesSheet` pasa a `src/modules/settings` (#315).
 - Se reescribe el README con banner, funciones por app, stack, arquitectura, scripts y enlaces a los repos hermanos; se añade licencia MIT y archivos de comunidad (CONTRIBUTING, SECURITY y plantilla de PR) (#313).
 
+### Corregido
+
+- La fila de una tarjeta de crédito en Productos muestra utilización, deuda y límite junto al disponible, y conserva «Balance incompleto» cuando falta el límite; el cálculo de deuda pasa a `shared/lib/card-balances.ts` para que la fila y el detalle de la tarjeta usen la misma regla (#292).
+
 ### Eliminado
 
 - Se retiran la conversación de IA, sus sesiones y preferencias dedicadas, y la sincronización de Gmail del cliente (#193).

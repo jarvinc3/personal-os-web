@@ -9,7 +9,10 @@ import {
   FINANCE_ACCOUNT_TYPE_LABEL,
   FINANCE_CARD_TYPE_LABEL,
 } from "@/src/modules/finance/shared/constants/catalog"
-import { resolveCardDisplayBalances } from "@/src/modules/finance/shared/lib/card-balances"
+import {
+  cardCreditFacts,
+  resolveCardDisplayBalances,
+} from "@/src/modules/finance/shared/lib/card-balances"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
 import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 import type {
@@ -435,6 +438,7 @@ export function CardProductRow({
     "relative flex w-full flex-col gap-4 overflow-hidden rounded-2xl bg-zinc-900 p-4 text-left text-white",
     disabled ? "cursor-not-allowed" : cn("hover:opacity-95", PRESSABLE_CLASS)
   )
+  const isCredit = card.type === "CREDIT"
   const content = (
     <>
       <EntitySurface shape="slashes" className={cn(disabled && "opacity-45")} />
@@ -463,19 +467,44 @@ export function CardProductRow({
             "text-[10px]"
           )}
         >
-          {card.type === "CREDIT" ? "Balance disponible" : "Saldo actual"}
+          {isCredit ? "Balance disponible" : "Saldo actual"}
         </p>
         {balances.length === 0 ? (
           <p className="text-xl font-bold tabular-nums">Sin saldo</p>
         ) : (
-          balances.map((balance) => (
-            <p key={balance.id} className="text-xl font-bold tabular-nums">
-              {formatFinanceMoney(balance.availableCredit ?? balance.balance, {
-                ...display,
-                currency: balance.currency,
-              })}
-            </p>
-          ))
+          balances.map((balance) => {
+            const facts = isCredit ? cardCreditFacts(balance) : null
+            const moneyDisplay = {
+              ...display,
+              currency: balance.currency,
+            }
+            return (
+              <div key={balance.id} className="flex flex-col">
+                <p className="text-xl font-bold tabular-nums">
+                  {formatFinanceMoney(
+                    balance.availableCredit ?? balance.balance,
+                    moneyDisplay
+                  )}
+                </p>
+                {!isCredit ? null : facts ? (
+                  <>
+                    <p className="text-[11px] text-white/70 tabular-nums">
+                      Utilización {Math.round(facts.utilizationPct)}% · Deuda{" "}
+                      {formatFinanceMoney(facts.debt, moneyDisplay)}
+                    </p>
+                    <p className="text-[11px] text-white/60 tabular-nums">
+                      Límite{" "}
+                      {formatFinanceMoney(facts.creditLimit, moneyDisplay)}
+                    </p>
+                  </>
+                ) : (
+                  <p className="text-[11px] text-white/70">
+                    Balance incompleto
+                  </p>
+                )}
+              </div>
+            )
+          })
         )}
       </div>
 

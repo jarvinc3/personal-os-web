@@ -5,9 +5,11 @@ import {
   CardNetworkMark,
 } from "@/src/modules/finance/shared/components/brand-logo"
 import { FINANCE_CARD_TYPE_LABEL } from "@/src/modules/finance/shared/constants/catalog"
-import type { FinanceCardDisplayBalance } from "@/src/modules/finance/shared/lib/card-balances"
+import {
+  cardUtilization,
+  type FinanceCardDisplayBalance,
+} from "@/src/modules/finance/shared/lib/card-balances"
 import { nextCycleNote } from "@/src/modules/finance/shared/lib/card-credit"
-import { cardUtilization } from "@/src/modules/finance/cards/lib/card-utilization"
 import {
   formatFinanceMoney,
   parseFinanceMoney,
