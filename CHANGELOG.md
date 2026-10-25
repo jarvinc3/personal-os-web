@@ -13,6 +13,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 - Ambas galerías se abren solo desde Apariencia; Inicio deja de mostrar la sección «Desarrollo» y desaparece el índice `/dev` (#314, #316).
 - AI-3: `/intelligence` muestra particiones de `EMAIL_V1`, cola paginada para confirmar, corregir o rechazar mensajes, marca HOLDOUT como verdad de referencia y expone historial de runs y procedencia (#206).
 - AI-2: `/intelligence` conecta Gmail con acceso de solo lectura, muestra estado y correo importado por cuenta y permite sincronizar; Privacidad permite revocar la contribución al conocimiento global y ADMIN gestiona roles (#205).
+- El menú lateral del móvil se abre con un deslizamiento a la derecha que empieza en los 32 px del borde izquierdo, además del botón del encabezado y Ctrl/Cmd + B; un gesto vertical, uno que empieza fuera del borde o dentro de pestañas, pila de instituciones, selector de meses y ruedas de fecha no lo abre, y el clic que sigue a la apertura se descarta. Los textos del panel y del botón pasan a español, y con movimiento reducido el panel cambia sin animación (#265).
 
 ### Cambiado
 

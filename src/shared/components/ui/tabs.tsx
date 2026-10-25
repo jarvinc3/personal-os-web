@@ -164,6 +164,7 @@ function Tabs({
       {...props}
       ref={rootRef}
       data-slot="tabs"
+      data-sidebar-swipe-ignore=""
       data-orientation={orientation}
       orientation={orientation}
       value={isControlled ? resolvedValue : undefined}

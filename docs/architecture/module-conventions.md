@@ -54,6 +54,15 @@ Hoy el único `ModuleAppNav` cableado es `FINANCE_APP_NAV`. El Centro de ayuda (
 
 Regla de activo: `isModuleSectionActive(item, pathname)` — href (+ hijos si no `matchExact`) o `extraActiveHrefs`.
 
+### Menú lateral en móvil
+
+Menos de 768 px, `Sidebar` pinta un `Drawer` de `vaul` con dirección izquierda. Se abre con el botón del header, con Ctrl/Cmd + B o con un deslizamiento a la derecha que empieza dentro de los 32 px del borde izquierdo (`useSidebarEdgeSwipe`, montado en `PrimaryHeader` solo cuando el trigger visible). La decisión del gesto y sus constantes viven en `src/shared/lib/sidebar-edge-swipe.ts`, con su `.spec.ts`.
+
+- Solo cuenta como gesto un movimiento horizontal de menos de 30° respecto de la horizontal, hacia la derecha, de 48 px o un lanzamiento de 0,4 px/ms con al menos 24 px. Un retroceso de más de 12 px lo cancela.
+- No actúa con una hoja, un diálogo, un picker o un menú abierto, ni donde el toque empieza dentro de un componente con desplazamiento horizontal ya movido a la derecha de su inicio. Pestañas, pila de instituciones, selector de meses y ruedas de fecha además se marcan con `data-sidebar-swipe-ignore`.
+- El gesto no deja «clic fantasma»: el clic que sigue a la apertura se descarta.
+- Con `prefers-reduced-motion: reduce` el panel y su fondo cambian de estado sin animación (`app/globals.css`).
+
 Finanzas (VERIFICADO runtime 2026-09-15):
 
 | Ítem               | Tab bar | Sidebar | `matchExact` / extra                            |

@@ -56,6 +56,7 @@ export function FinanceMonthPicker({
       ref={listRef}
       role="tablist"
       aria-label="Meses"
+      data-sidebar-swipe-ignore=""
       className="mx-2 flex snap-x snap-mandatory scrollbar-none gap-2 overflow-x-auto md:mx-0"
     >
       {months.map((slot) => {

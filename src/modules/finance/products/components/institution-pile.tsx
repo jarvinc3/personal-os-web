@@ -77,7 +77,7 @@ export function InstitutionPile({
   }
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col" data-sidebar-swipe-ignore="">
       <div
         className={cn(
           "relative h-80 outline-none focus-visible:ring-3 focus-visible:ring-ring/50",

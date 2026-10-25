@@ -2,6 +2,7 @@ import { HeaderUserMenu } from "@/src/shared/components/shell/header/header-user
 import { NotificationBell } from "@/src/shared/components/shell/header/notification-bell"
 import { Separator } from "@/src/shared/components/ui/separator"
 import { SidebarTrigger } from "@/src/shared/components/ui/sidebar"
+import { useSidebarEdgeSwipe } from "@/src/shared/hooks/use-sidebar-edge-swipe"
 import type { ReactNode } from "react"
 
 type PrimaryHeaderProps = {
@@ -19,6 +20,8 @@ export function PrimaryHeader({
   showNotificationBell,
   showUserMenu,
 }: PrimaryHeaderProps) {
+  useSidebarEdgeSwipe(showSidebarTrigger)
+
   return (
     <div className="s flex w-full items-center gap-1 px-4 lg:px-6">
       {showSidebarTrigger ? (

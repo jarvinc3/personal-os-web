@@ -58,7 +58,7 @@ function WheelPickerWrapper({
   // @ncdai/WheelPickerWrapper only forwards className + children (no spread). Vaul reads
   // data-vaul-no-drag on an ancestor via closest(), so we wrap explicitly.
   return (
-    <div data-vaul-no-drag="">
+    <div data-vaul-no-drag="" data-sidebar-swipe-ignore="">
       <WheelPickerPrimitive.WheelPickerWrapper
         className={cn(
           // Altura de cada columna (hijos directos con data-rwp del paquete)
