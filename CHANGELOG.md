@@ -25,6 +25,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Corregido
 
+- El resumen de Productos muestra una línea «Por cobrar» por moneda con los cobros pendientes que ya suman al total, con su entrada del glosario, para que el total cuadre con las instituciones; los dudosos no se suman (#291).
 - La fila de una tarjeta de crédito en Productos muestra utilización, deuda y límite junto al disponible, y conserva «Balance incompleto» cuando falta el límite; el cálculo de deuda pasa a `shared/lib/card-balances.ts` para que la fila y el detalle de la tarjeta usen la misma regla (#292).
 
 ### Eliminado

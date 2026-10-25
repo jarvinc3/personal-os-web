@@ -11,6 +11,11 @@ import {
   buildRingStackSlices,
   hasDrawableRingBalance,
 } from "@/src/modules/finance/shared/lib/ring-stack"
+import {
+  currencyGroupFor,
+  receivablesLine,
+} from "@/src/modules/finance/products/lib/currency-summary"
+import { GlossaryHelpButton } from "@/src/modules/help"
 import Link from "next/link"
 import { useEffect, useRef, useState } from "react"
 import {
@@ -80,6 +85,12 @@ export function FinanceHeroSection({
   }
 
   const onlyCurrency = currencyTotals.length === 1 ? currencyTotals[0] : null
+  const baseGroup = currencyGroupFor(currencyTotals, display.currency)
+  const receivablesGroup = onlyCurrency ?? baseGroup
+  const baseReceivables =
+    receivablesGroup === null
+      ? null
+      : receivablesLine(receivablesGroup, display)
   const showsGroupedBalances =
     currencyTotals.length > 1 ||
     (onlyCurrency !== null && onlyCurrency.currency !== display.currency)
@@ -92,25 +103,37 @@ export function FinanceHeroSection({
             : "Balance total"}
         </p>
         <div className="grid grid-cols-2 gap-2">
-          {currencyTotals.map((group) => (
-            <Link
-              key={group.currency}
-              href={netWorthHref}
-              aria-label={`Ver el desglose del patrimonio en ${group.currency}`}
-              className="flex flex-col gap-1 rounded-2xl border border-border bg-card px-3 py-2 outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              <span className="text-xs text-muted-foreground">
-                {group.currency}
-              </span>
-              <span className="text-xl font-bold tracking-tight tabular-nums">
-                {formatFinanceMoney(group.totals.netWorth, {
-                  ...display,
-                  currency: group.currency,
-                  leadingSign: true,
-                })}
-              </span>
-            </Link>
-          ))}
+          {currencyTotals.map((group) => {
+            const receivables = receivablesLine(group, display)
+            return (
+              <div
+                key={group.currency}
+                className="flex flex-col gap-1 rounded-2xl border border-border bg-card px-3 py-2"
+              >
+                <span className="text-xs text-muted-foreground">
+                  {group.currency}
+                </span>
+                <Link
+                  href={netWorthHref}
+                  aria-label={`Ver el desglose del patrimonio en ${group.currency}`}
+                  className="rounded-md text-xl font-bold tracking-tight tabular-nums outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  {formatFinanceMoney(group.totals.netWorth, {
+                    ...display,
+                    currency: group.currency,
+                    leadingSign: true,
+                  })}
+                </Link>
+                {receivables ? (
+                  <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                    Por cobrar
+                    <span className="tabular-nums">{receivables}</span>
+                    <GlossaryHelpButton slug="por-cobrar" />
+                  </span>
+                ) : null}
+              </div>
+            )
+          })}
         </div>
         <p className="text-xs text-muted-foreground">
           {currencyTotals.length > 1
@@ -166,28 +189,44 @@ export function FinanceHeroSection({
             Sin saldos para graficar
           </p>
         ) : null}
+        {baseReceivables ? (
+          <span className="flex items-center gap-1 text-xs text-muted-foreground">
+            Por cobrar
+            <span className="tabular-nums">{baseReceivables}</span>
+            <GlossaryHelpButton slug="por-cobrar" />
+          </span>
+        ) : null}
       </div>
     )
   }
 
   return (
-    <div ref={heroRef} className="flex items-center gap-3 pt-4 sm:gap-6">
-      <FinanceRingChart
-        slices={slices}
-        activeKey={activeKey}
-        onSelect={toggleSlice}
-        centerLabel={centerLabel}
-        centerValue={centerValue}
-        centerDebt={centerDebt}
-        centerHref={netWorthHref}
-        className="w-2/5 shrink-0 sm:w-44"
-      />
-      <FinanceRingLegend
-        slices={slices}
-        activeKey={activeKey}
-        onSelect={toggleSlice}
-        className="min-w-0 flex-1"
-      />
+    <div className="flex flex-col gap-2">
+      <div ref={heroRef} className="flex items-center gap-3 pt-4 sm:gap-6">
+        <FinanceRingChart
+          slices={slices}
+          activeKey={activeKey}
+          onSelect={toggleSlice}
+          centerLabel={centerLabel}
+          centerValue={centerValue}
+          centerDebt={centerDebt}
+          centerHref={netWorthHref}
+          className="w-2/5 shrink-0 sm:w-44"
+        />
+        <FinanceRingLegend
+          slices={slices}
+          activeKey={activeKey}
+          onSelect={toggleSlice}
+          className="min-w-0 flex-1"
+        />
+      </div>
+      {baseReceivables ? (
+        <span className="flex items-center gap-1 px-2 text-xs text-muted-foreground">
+          Por cobrar
+          <span className="tabular-nums">{baseReceivables}</span>
+          <GlossaryHelpButton slug="por-cobrar" />
+        </span>
+      ) : null}
     </div>
   )
 }
