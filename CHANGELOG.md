@@ -17,6 +17,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Cambiado
 
+- «Novedades» lista todas las versiones con cambios visibles que no has visto, de la más nueva a la más antigua y con su número como encabezado, en lugar de solo la última: las versiones que solo dicen «Sin cambios visibles» no aparecen, si todas son así no se abre nada, y con más de diez se muestran las diez más recientes y cuántas quedan fuera. La hoja se abre por ruta (`?sheet=release-notes-sheet`), espera si otra hoja ocupa la URL y marca la versión actual al cerrarla, con Atrás o con «Entendido» (#260).
 - Los menús de opciones de meta, cobro y presupuesto, el menú de un aporte, el retiro de una meta y el detalle de un cobro compartido se abren por ruta, con el registro en `sheetId` (#254).
 - «Descuadres», «Sin conciliar» y el glosario abren por ruta; el término va en `sheetId`, así Atrás y recargar devuelven la misma explicación (#252).
 - El extracto de tarjeta, la amortización y el detalle de cuota, los filtros de movimientos, «Vincular movimiento» y «PDF con clave» se abren por ruta, con el registro elegido en `sheetId` cuando lo hay; el PDF con clave se cierra solo al recargar porque el archivo no sobrevive (#253).

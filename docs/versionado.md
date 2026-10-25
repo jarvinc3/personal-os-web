@@ -88,8 +88,11 @@ Incorrecto: `## [2.0.0] - Agenda` o `## [3.0.0] - Proyectos`.
 
 1. Cada release agrega una entrada en `src/shared/constants/release-notes.ts`, arriba del arreglo, con la misma versión que `package.json`. Va en español de usuario (se dice **App**, nunca módulo) y explica qué cambió para quien usa la app, no el detalle técnico.
 2. `LATEST_RELEASE_VERSION` es la versión de la primera entrada y debe coincidir con `package.json`; la prueba `src/shared/lib/release-notes.spec.ts` lo verifica.
-3. La hoja se muestra una sola vez por versión: compara `LATEST_RELEASE_VERSION` con `lastSeenReleaseVersion` del perfil (`GET /users/me`). Al cerrarla se marca como vista con `PATCH /users/me/release-notes-seen`. En la **primera visita** (`null`) la versión actual se marca en silencio, sin hoja; una versión sin notas curadas también se marca en silencio. `localStorage` (clave `releaseNotesSeenVersion`) queda solo como caché para no mostrar la hoja mientras responde el perfil.
-4. La hoja vive en el shell autenticado (`app/(app)/layout.tsx`): no aparece en rutas públicas.
+3. La hoja muestra todas las versiones con cambios posteriores a `lastSeenReleaseVersion` del perfil (`GET /users/me`) y hasta la versión actual, de la más nueva a la más vieja, cada una con su número de versión como encabezado. La comparación es por número de versión (semver), no por posición en la lista, así que funciona aunque la versión vista no tenga entrada propia.
+   - Las versiones cuya única nota empieza por «Sin cambios visibles» no se listan. Si todas las versiones no vistas son así, la versión actual se marca como vista en silencio y la hoja no aparece.
+   - Si hay más de 10 versiones con cambios visibles sin ver, la hoja muestra las 10 más recientes y una línea con cuántas versiones anteriores quedan fuera.
+   - Al cerrarla se marca como vista la versión actual, no solo la mostrada, con `PATCH /users/me/release-notes-seen`. En la **primera visita** (`null`) la versión actual se marca en silencio, sin hoja. `localStorage` (clave `releaseNotesSeenVersion`) queda solo como caché para no mostrar la hoja mientras responde el perfil.
+4. La hoja vive en el shell autenticado (`app/(app)/layout.tsx`): no aparece en rutas públicas. Se abre por ruta (`?sheet=release-notes-sheet`), que ella misma escribe cuando hay novedades sin ver; si al entrar ya hay otra hoja en la URL, espera a que se cierre. Atrás y «Entendido» la cierran y marcan la versión actual.
 
 ## Lista de verificación del agente
 

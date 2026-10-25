@@ -13,7 +13,7 @@ import {
 } from "@/src/shared/components/ui/sidebar"
 import { HeaderProvider } from "@/src/shared/context/header-context"
 import { usePathname } from "next/navigation"
-import { useLayoutEffect, useRef } from "react"
+import { useLayoutEffect, useRef, Suspense } from "react"
 
 function ResetMainScroll({
   scrollerRef,
@@ -47,7 +47,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <KeepAwakeProvider>
               <PendingAccountDeletionHandler />
               <PendingDataWipeHandler />
-              <ReleaseNotes />
+              {/* La hoja lee la URL para abrirse por ruta; el resto del shell no espera por ella. */}
+              <Suspense fallback={null}>
+                <ReleaseNotes />
+              </Suspense>
               {children}
             </KeepAwakeProvider>
           </main>

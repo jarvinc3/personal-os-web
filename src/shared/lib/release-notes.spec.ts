@@ -9,7 +9,8 @@ import {
 
 import {
   RELEASE_NOTES_SEEN_VERSION_KEY,
-  findReleaseNotesEntry,
+  compareReleaseVersions,
+  hasVisibleReleaseNotes,
   readCachedSeenVersion,
   resolveReleaseNotesOutcome,
   writeCachedSeenVersion,
@@ -37,6 +38,19 @@ function createStorage(
   }
 }
 
+function quiet(version: string): ReleaseNotesEntry {
+  return {
+    version,
+    highlights: [
+      "Sin cambios visibles: esta versión solo ordena detalles internos.",
+    ],
+  }
+}
+
+function visible(version: string): ReleaseNotesEntry {
+  return { version, highlights: [`Nota de ${version}`] }
+}
+
 describe("readCachedSeenVersion / writeCachedSeenVersion", () => {
   it("roundtrips the seen version under the storage key", () => {
     const storage = createStorage()
@@ -52,10 +66,37 @@ describe("readCachedSeenVersion / writeCachedSeenVersion", () => {
   })
 })
 
-describe("findReleaseNotesEntry", () => {
-  it("finds the entry by version and returns null when missing", () => {
-    assert.equal(findReleaseNotesEntry(ENTRIES, "0.39.0")?.version, "0.39.0")
-    assert.equal(findReleaseNotesEntry(ENTRIES, "1.0.0"), null)
+describe("compareReleaseVersions", () => {
+  it("orders by number, not by text", () => {
+    assert.ok(compareReleaseVersions("0.58.10", "0.58.9") > 0)
+    assert.ok(compareReleaseVersions("0.58.9", "0.58.10") < 0)
+    assert.ok(compareReleaseVersions("0.59.0", "0.58.99") > 0)
+    assert.ok(compareReleaseVersions("0.58.8", "0.58.8") === 0)
+  })
+
+  it("fails on a version that is not X.Y.Z", () => {
+    assert.throws(() => compareReleaseVersions("0.58", "0.58.8"))
+    assert.throws(() => compareReleaseVersions("0.58.8", "v0.58.8"))
+  })
+})
+
+describe("hasVisibleReleaseNotes", () => {
+  it("hides a version whose notes only report an internal change", () => {
+    assert.equal(hasVisibleReleaseNotes(quiet("0.39.0")), false)
+  })
+
+  it("keeps a version with at least one visible note", () => {
+    assert.equal(hasVisibleReleaseNotes(visible("0.40.0")), true)
+    assert.equal(
+      hasVisibleReleaseNotes({
+        version: "0.40.0",
+        highlights: [
+          "Sin cambios visibles: detalle interno.",
+          "Hay una pantalla nueva.",
+        ],
+      }),
+      true
+    )
   })
 })
 
@@ -120,7 +161,7 @@ describe("resolveReleaseNotesOutcome", () => {
     )
   })
 
-  it("shows the notes when the seen version is older", () => {
+  it("shows every unseen version with visible notes, newest first", () => {
     assert.deepEqual(
       resolveReleaseNotesOutcome({
         serverSeenVersion: "0.39.0",
@@ -128,8 +169,93 @@ describe("resolveReleaseNotesOutcome", () => {
         currentVersion: CURRENT_VERSION,
         entries: ENTRIES,
       }),
-      { action: "show", entry: ENTRIES[0] }
+      {
+        action: "show",
+        sinceVersion: "0.39.0",
+        entries: [ENTRIES[0]],
+        olderCount: 0,
+      }
     )
+  })
+
+  it("lists the versions between the seen one and the current one", () => {
+    const entries = [
+      visible("0.58.8"),
+      quiet("0.58.7"),
+      visible("0.58.6"),
+      visible("0.58.5"),
+      visible("0.58.2"),
+    ]
+
+    assert.deepEqual(
+      resolveReleaseNotesOutcome({
+        serverSeenVersion: "0.58.2",
+        cachedSeenVersion: null,
+        currentVersion: "0.58.8",
+        entries,
+      }),
+      {
+        action: "show",
+        sinceVersion: "0.58.2",
+        entries: [entries[0], entries[2], entries[3]],
+        olderCount: 0,
+      }
+    )
+  })
+
+  it("orders by version number even when the seen one has no entry", () => {
+    const entries = [visible("0.58.10"), visible("0.58.9"), visible("0.58.8")]
+
+    assert.deepEqual(
+      resolveReleaseNotesOutcome({
+        serverSeenVersion: "0.58.8",
+        cachedSeenVersion: null,
+        currentVersion: "0.58.10",
+        entries,
+      }),
+      {
+        action: "show",
+        sinceVersion: "0.58.8",
+        entries: [entries[0], entries[1]],
+        olderCount: 0,
+      }
+    )
+  })
+
+  it("marks the version in silence when nothing unseen has visible notes", () => {
+    const entries = [quiet("0.40.0"), quiet("0.39.1"), visible("0.39.0")]
+
+    assert.deepEqual(
+      resolveReleaseNotesOutcome({
+        serverSeenVersion: "0.39.0",
+        cachedSeenVersion: null,
+        currentVersion: "0.40.0",
+        entries,
+      }),
+      { action: "mark-seen" }
+    )
+  })
+
+  it("keeps the ten newest versions and counts the rest", () => {
+    const entries = Array.from({ length: 13 }, (_, index) =>
+      visible(`0.${60 - index}.0`)
+    )
+
+    const outcome = resolveReleaseNotesOutcome({
+      serverSeenVersion: "0.47.0",
+      cachedSeenVersion: null,
+      currentVersion: "0.60.0",
+      entries,
+    })
+
+    assert.equal(outcome.action, "show")
+    if (outcome.action !== "show") {
+      return
+    }
+    assert.equal(outcome.entries.length, 10)
+    assert.equal(outcome.entries[0].version, "0.60.0")
+    assert.equal(outcome.entries[9].version, "0.51.0")
+    assert.equal(outcome.olderCount, 3)
   })
 
   it("does nothing when the current version was already seen", () => {
@@ -144,7 +270,16 @@ describe("resolveReleaseNotesOutcome", () => {
     )
   })
 
-  it("marks the version in silence when it has no curated notes", () => {
+  it("marks the version in silence when there are no notes after it", () => {
+    assert.deepEqual(
+      resolveReleaseNotesOutcome({
+        serverSeenVersion: "0.41.0",
+        cachedSeenVersion: null,
+        currentVersion: "0.41.0",
+        entries: ENTRIES,
+      }),
+      { action: "none" }
+    )
     assert.deepEqual(
       resolveReleaseNotesOutcome({
         serverSeenVersion: "0.39.0",
@@ -152,7 +287,12 @@ describe("resolveReleaseNotesOutcome", () => {
         currentVersion: "0.41.0",
         entries: ENTRIES,
       }),
-      { action: "mark-seen" }
+      {
+        action: "show",
+        sinceVersion: "0.39.0",
+        entries: [ENTRIES[0]],
+        olderCount: 0,
+      }
     )
   })
 
@@ -168,7 +308,12 @@ describe("resolveReleaseNotesOutcome", () => {
         serverSeenVersion: readCachedSeenVersion(storage),
         cachedSeenVersion: readCachedSeenVersion(storage),
       }),
-      { action: "show", entry: ENTRIES[0] }
+      {
+        action: "show",
+        sinceVersion: "0.39.0",
+        entries: [ENTRIES[0]],
+        olderCount: 0,
+      }
     )
 
     writeCachedSeenVersion(storage, options.currentVersion)
@@ -192,6 +337,12 @@ describe("RELEASE_NOTES", () => {
     const versions = RELEASE_NOTES.map((entry) => entry.version)
 
     assert.equal(new Set(versions).size, versions.length)
+    for (let index = 1; index < versions.length; index += 1) {
+      assert.ok(
+        compareReleaseVersions(versions[index - 1], versions[index]) > 0,
+        `${versions[index - 1]} debe ir antes de ${versions[index]}`
+      )
+    }
   })
 
   it("writes at least one highlight per version", () => {
