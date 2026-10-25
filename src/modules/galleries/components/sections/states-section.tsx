@@ -14,6 +14,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
+import { IconBadge } from "@/src/shared/components/ui/icon-badge"
 import { Skeleton } from "@/src/shared/components/ui/skeleton"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { PlusIcon, SearchXIcon, WalletIcon } from "lucide-react"
@@ -22,6 +23,25 @@ import { PlusIcon, SearchXIcon, WalletIcon } from "lucide-react"
 export function StatesSection() {
   return (
     <>
+      <GalleryDemo
+        name="IconBadge"
+        importPath="@/src/shared/components/ui/icon-badge"
+        states="tonos del sistema, color de entidad, emoji"
+        note="El círculo con icono y tono. No se dibuja a mano en cada fila."
+      >
+        <div className="flex flex-wrap items-center gap-3">
+          <IconBadge icon={WalletIcon} tone="primary" />
+          <IconBadge icon={WalletIcon} tone="success" size={40} />
+          <IconBadge icon={WalletIcon} tone="warning" size={32} />
+          <IconBadge icon={WalletIcon} color="#0f766e" />
+          <IconBadge size={40}>
+            <span className="text-[20px] leading-none" aria-hidden>
+              🍔
+            </span>
+          </IconBadge>
+        </div>
+      </GalleryDemo>
+
       <GalleryDemo
         name="Empty"
         importPath="@/src/shared/components/ui/empty"

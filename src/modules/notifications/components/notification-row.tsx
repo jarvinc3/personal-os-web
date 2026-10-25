@@ -6,6 +6,7 @@ import {
   PendingSurface,
   usePendingNavigation,
 } from "@/src/shared/components/shell/navigation-pending"
+import { IconBadge } from "@/src/shared/components/ui/icon-badge"
 import { formatNotificationListTime } from "@/src/shared/lib/date-format"
 import { cn } from "@/src/shared/lib/utils"
 import { useFormatLocale } from "@/src/modules/settings/hooks/use-format-locale"
@@ -45,21 +46,13 @@ export function NotificationRow({
         !notification.isRead && "bg-muted/40"
       )}
     >
-      <div
-        className="flex size-12 shrink-0 items-center justify-center rounded-full border-2"
-        style={{
-          backgroundColor: `${visual.accent}1A`,
-          borderColor: `${visual.accent}33`,
-        }}
-      >
+      <IconBadge icon={Icon ?? undefined} color={visual.accent}>
         {visual.emoji ? (
           <span className="text-[22px] leading-none" aria-hidden>
             {visual.emoji}
           </span>
-        ) : Icon ? (
-          <Icon className="size-[22px]" style={{ color: visual.accent }} />
-        ) : null}
-      </div>
+        ) : undefined}
+      </IconBadge>
 
       <div className="flex min-w-0 flex-1 flex-col gap-1 pr-1">
         <p

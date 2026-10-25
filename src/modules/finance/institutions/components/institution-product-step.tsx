@@ -5,6 +5,7 @@ import {
   type InstitutionCardModel,
 } from "@/src/modules/finance/products"
 import { Button } from "@/src/shared/components/ui/button"
+import { IconBadge } from "@/src/shared/components/ui/icon-badge"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
 import {
@@ -60,9 +61,9 @@ export function InstitutionProductStep({
     <div className="flex flex-col gap-4 pb-4">
       <InstitutionWalletCard card={card} />
       <div className="flex flex-col items-center gap-2 py-2 text-center">
-        <span className="flex size-12 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-600">
+        <IconBadge tone="success" size={48}>
           <CheckIcon className="size-6" />
-        </span>
+        </IconBadge>
         <p className="text-base font-medium">{name} lista</p>
         <p className="text-sm text-muted-foreground">
           ¿Agregamos tu primer producto?

@@ -1,6 +1,7 @@
 "use client"
 
 import { BrandLogo } from "@/src/modules/finance/shared/components/brand-logo"
+import { IconBadge } from "@/src/shared/components/ui/icon-badge"
 import {
   type InstitutionCardCounts,
   type InstitutionCardModel,
@@ -247,12 +248,13 @@ export function InstitutionWalletCard({
         <EntitySurface shape="hexagons" size="sm" />
 
         {isCash ? (
-          <span
-            aria-hidden
-            className="relative z-10 inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-white text-emerald-700"
-          >
-            <BanknoteIcon className="size-5" strokeWidth={2.25} />
-          </span>
+          <IconBadge size={36} className="relative z-10 bg-white">
+            <BanknoteIcon
+              className="size-5 text-emerald-700"
+              strokeWidth={2.25}
+              aria-hidden
+            />
+          </IconBadge>
         ) : (
           <BrandLogo
             name={card.name || card.monogram}
@@ -281,9 +283,9 @@ export function InstitutionWalletCard({
         <span className="relative z-10 flex shrink-0 items-center gap-1.5">
           <IrregularityMarks irregularities={card.irregularities} />
           {selected ? (
-            <span className="inline-flex size-5 items-center justify-center rounded-full bg-white text-emerald-700">
-              <CheckIcon className="size-3.5" aria-hidden />
-            </span>
+            <IconBadge size={20} className="bg-white">
+              <CheckIcon className="size-3.5 text-emerald-700" aria-hidden />
+            </IconBadge>
           ) : (
             <KindIcon
               className="size-4 shrink-0"
@@ -362,12 +364,13 @@ export function InstitutionWalletCard({
       <EntitySurface shape="hexagons" />
       <div className="relative z-10 flex items-start justify-between">
         {isCash ? (
-          <span
-            aria-hidden
-            className="inline-flex size-11 items-center justify-center rounded-full bg-white text-emerald-700"
-          >
-            <BanknoteIcon className="size-7" strokeWidth={2.25} />
-          </span>
+          <IconBadge size={44} className="bg-white">
+            <BanknoteIcon
+              className="size-7 text-emerald-700"
+              strokeWidth={2.25}
+              aria-hidden
+            />
+          </IconBadge>
         ) : (
           <BrandLogo
             name={card.name || card.monogram}

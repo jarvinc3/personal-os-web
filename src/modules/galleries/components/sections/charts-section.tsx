@@ -3,6 +3,7 @@
 import { GalleryDemo } from "@/src/modules/galleries/components/gallery-demo"
 import { BrandLogo } from "@/src/modules/finance/shared/components/brand-logo"
 import { SubscriptionProgressRing } from "@/src/modules/finance/subscriptions/components/subscription-progress-ring"
+import { ProgressRing } from "@/src/shared/components/ui/progress-ring"
 import {
   ChartContainer,
   ChartTooltip,
@@ -41,6 +42,35 @@ export function ChartsSection() {
             <Bar dataKey="amount" fill="var(--color-amount)" radius={4} />
           </BarChart>
         </ChartContainer>
+      </GalleryDemo>
+
+      <GalleryDemo
+        name="ProgressRing"
+        importPath="@/src/shared/components/ui/progress-ring"
+        states="avance bajo, medio y completo; con color de entidad"
+        note="El único anillo de una sola medida. El de suscripciones y el de una meta lo usan; el gráfico de varios segmentos es otro componente."
+      >
+        <div className="flex flex-wrap items-center gap-4">
+          <ProgressRing
+            value={25}
+            size={56}
+            thickness={4}
+            arcClassName="stroke-primary"
+          >
+            <span className="text-[11px] font-semibold tabular-nums">25%</span>
+          </ProgressRing>
+          <ProgressRing
+            value={70}
+            size={56}
+            thickness={4}
+            arcClassName="stroke-success"
+          >
+            <span className="text-[11px] font-semibold tabular-nums">70%</span>
+          </ProgressRing>
+          <ProgressRing value={100} size={56} thickness={4} color="#0f766e">
+            <span className="text-[11px] font-semibold tabular-nums">100%</span>
+          </ProgressRing>
+        </div>
       </GalleryDemo>
 
       <GalleryDemo

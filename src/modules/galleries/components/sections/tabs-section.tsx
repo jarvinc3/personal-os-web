@@ -105,7 +105,7 @@ export function TabsSection() {
       <GalleryDemo
         name="Badge"
         importPath="@/src/shared/components/ui/badge"
-        states="default, secondary, success, warning, info, danger, outline"
+        states="default, secondary, success, warning, info, danger, tinted, outline"
         note="Píldoras de estado y conteo. No son un botón."
       >
         <div className="flex flex-wrap gap-2">
@@ -115,6 +115,9 @@ export function TabsSection() {
           <Badge variant="warning">Por vencer</Badge>
           <Badge variant="info">Nuevo</Badge>
           <Badge variant="danger">Vencido</Badge>
+          <Badge variant="tinted" className="bg-accent">
+            Tinted
+          </Badge>
           <Badge variant="outline">Outline</Badge>
         </div>
       </GalleryDemo>

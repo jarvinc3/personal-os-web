@@ -20,6 +20,7 @@ import type {
   FinanceCard,
 } from "@/src/modules/finance/shared/types/entities"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
+import { Badge } from "@/src/shared/components/ui/badge"
 import { LinkPendingOverlay } from "@/src/shared/components/shell/navigation-pending"
 import { CheckIcon, LockIcon } from "lucide-react"
 import Link from "next/link"
@@ -451,9 +452,7 @@ export function CardProductRow({
         )}
       >
         <p className="truncate text-sm font-semibold text-white">{card.name}</p>
-        <span className="shrink-0 rounded-full bg-white/15 px-2.5 py-0.5 text-xs font-semibold">
-          {FINANCE_CARD_TYPE_LABEL[card.type]}
-        </span>
+        <Badge variant="tinted">{FINANCE_CARD_TYPE_LABEL[card.type]}</Badge>
       </div>
 
       <div

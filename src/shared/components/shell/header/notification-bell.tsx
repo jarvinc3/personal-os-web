@@ -5,9 +5,9 @@ import {
   useUnreadNotificationCount,
 } from "@/src/modules/notifications"
 import { LinkPendingOverlay } from "@/src/shared/components/shell/navigation-pending"
+import { Badge } from "@/src/shared/components/ui/badge"
 import { Button } from "@/src/shared/components/ui/button"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
-import { cn } from "@/src/shared/lib/utils"
 import { BellIcon } from "lucide-react"
 import Link from "next/link"
 
@@ -25,13 +25,12 @@ export function NotificationBell() {
       >
         <BellIcon />
         {unreadCount > 0 ? (
-          <span
-            className={cn(
-              "absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-medium text-white"
-            )}
+          <Badge
+            variant="destructive"
+            className="absolute -top-1 -right-1 h-4 min-w-4 border-transparent bg-destructive px-1 text-[10px] text-white tabular-nums"
           >
             {unreadCount > 9 ? "9+" : String(unreadCount)}
-          </span>
+          </Badge>
         ) : null}
         <LinkPendingOverlay />
       </Link>

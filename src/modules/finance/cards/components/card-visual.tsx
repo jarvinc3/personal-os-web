@@ -17,6 +17,7 @@ import {
   type FinanceMoneyDisplay,
 } from "@/src/modules/finance/shared/lib/money"
 import type { FinanceCard } from "@/src/modules/finance/shared/types/entities"
+import { Badge } from "@/src/shared/components/ui/badge"
 import { cn } from "@/src/shared/lib/utils"
 
 type CardVisualProps = {
@@ -47,9 +48,7 @@ export function CardVisual({ card, balances, display }: CardVisualProps) {
 
         <div className="relative z-10 flex items-center justify-between gap-3">
           <p className="truncate text-sm font-semibold">{card.name}</p>
-          <span className="rounded-full bg-white/15 px-2.5 py-0.5 text-xs font-semibold">
-            {FINANCE_CARD_TYPE_LABEL[card.type]}
-          </span>
+          <Badge variant="tinted">{FINANCE_CARD_TYPE_LABEL[card.type]}</Badge>
         </div>
 
         <div className="relative z-10 flex flex-col gap-1">

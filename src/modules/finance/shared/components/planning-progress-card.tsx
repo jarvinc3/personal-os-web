@@ -1,6 +1,7 @@
 "use client"
 
 import { Badge, badgeVariants } from "@/src/shared/components/ui/badge"
+import { ProgressRing } from "@/src/shared/components/ui/progress-ring"
 import { LinkPendingOverlay } from "@/src/shared/components/shell/navigation-pending"
 import { useLongPress } from "@/src/shared/hooks/use-long-press"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
@@ -76,9 +77,6 @@ const TONE_ICON: Record<PlanningProgressTone, string> = {
   info: "bg-info/15 text-info",
 }
 
-const RING_RADIUS = 18
-const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS
-
 function clampPct(value: number): number {
   return Math.min(100, Math.max(0, value))
 }
@@ -96,45 +94,20 @@ function RingProgress({
   tinted?: boolean
   hint?: string
 }) {
-  const visual = value === null ? 0 : clampPct(value)
-  const offset = RING_CIRCUMFERENCE - (visual / 100) * RING_CIRCUMFERENCE
   const label = value === null ? "—" : `${Math.round(value)}%`
 
   return (
     <span className="flex w-14 shrink-0 flex-col items-center gap-0.5">
-      <span className="relative grid size-14 place-items-center">
-        <svg className="size-14 -rotate-90" viewBox="0 0 48 48" aria-hidden>
-          <circle
-            cx="24"
-            cy="24"
-            r={RING_RADIUS}
-            fill="none"
-            className={tinted ? "stroke-white/25" : "stroke-muted"}
-            strokeWidth="4"
-          />
-          <circle
-            cx="24"
-            cy="24"
-            r={RING_RADIUS}
-            fill="none"
-            className={tinted || accentColor ? undefined : TONE_STROKE[tone]}
-            style={
-              tinted
-                ? { stroke: "white" }
-                : accentColor
-                  ? { stroke: accentColor }
-                  : undefined
-            }
-            strokeWidth="4"
-            strokeLinecap="round"
-            strokeDasharray={RING_CIRCUMFERENCE}
-            strokeDashoffset={offset}
-          />
-        </svg>
-        <span className="absolute text-[11px] font-semibold tabular-nums">
-          {label}
-        </span>
-      </span>
+      <ProgressRing
+        value={value === null ? 0 : clampPct(value)}
+        size={56}
+        thickness={4}
+        arcClassName={TONE_STROKE[tone]}
+        color={tinted ? "white" : (accentColor ?? undefined)}
+        trackClassName={tinted ? "stroke-white/25" : "stroke-muted"}
+      >
+        <span className="text-[11px] font-semibold tabular-nums">{label}</span>
+      </ProgressRing>
       {hint ? (
         <span
           className={cn(
