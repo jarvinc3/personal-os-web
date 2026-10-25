@@ -19,6 +19,16 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Cambiado
 
+- Cerrar una hoja se pinta una sola vez: el mismo «Cancelar» con su icono en todas, «Cerrar» en las de solo lectura y la acción propia («Limpiar», «Listo», «Ahora no») donde la hoja la necesita; las hojas dejan de copiar el botón (#298).
+- Toda confirmación usa el mismo diálogo: mismo título, descripción y botones, el tono destructivo siempre igual, Esc y Cancelar cierran sin ejecutar y el clic fuera no cierra; el vaciado con contraseña sigue pidiéndola dentro del mismo diálogo (#299).
+- Los montos se leen igual en toda la App: el negativo lleva `−` y el color de negativo, el positivo con signo `+` y el de éxito, el cero queda neutro, y Inicio y Movimientos comparten el mismo mosaico de ingresos y gastos (#300).
+- Las fechas y las horas siguen el idioma del perfil en cualquier pantalla: un solo módulo de formato, sin `es` fijo ni fechas escritas a mano (#301).
+- Los detalles de cuenta, institución y progreso comparten el mismo encabezado (media, título, insignia y subtítulo), y los títulos de sección de conciliaciones, suscripciones, patrimonio, corte de tarjeta, enlace público y estado de cuenta importado usan la tipografía de sección (#302).
+- Las píldoras, los anillos de progreso y los círculos de icono son componentes únicos: la píldora del tipo de tarjeta es la misma en la card completa y en la fila, el contador de no leídas es un badge y los anillos de una meta y de una suscripción comparten el mismo anillo (#303).
+- Los controles de pestañas y segmentados son uno solo: los filtros de notificaciones usan el control segmentado y el avatar de «Editar cuenta» se elige en la misma rejilla de opciones, en cuatro columnas; el carrusel de meses queda como control propio (#304).
+- Los estados vacíos, de carga y de error son compartidos: un picker sin resultados muestra el vacío compacto, las cards en carga usan el mismo esqueleto y Notificaciones y Ajustes › Privacidad ofrecen «Reintentar» cuando falla la carga (#305).
+- Los avisos y los toasts van por el mismo camino: ningún módulo habla con el toast por su cuenta, el aviso de advertencia usa la variante de advertencia y un mismo fallo dice el mismo texto en cualquier pantalla (#306).
+
 - La pila de instituciones de Productos y su vista desplegada son ahora un solo contenedor: **Desplegar** y **Apilar** mueven cada card entre las dos disposiciones sin desmontarla y la card al frente es la que queda centrada; las flechas y los indicadores viven debajo de las cards, se pintan una vez y no se reinician al alternar. En la vista desplegada las flechas, los indicadores y el arrastre de la card centrada cambian de institución, de una en una, y con movimiento reducido el cambio es inmediato (#249).
 - «Novedades» lista todas las versiones con cambios visibles que no has visto, de la más nueva a la más antigua y con su número como encabezado, en lugar de solo la última: las versiones que solo dicen «Sin cambios visibles» no aparecen, si todas son así no se abre nada, y con más de diez se muestran las diez más recientes y cuántas quedan fuera. La hoja se abre por ruta (`?sheet=release-notes-sheet`), espera si otra hoja ocupa la URL y marca la versión actual al cerrarla, con Atrás o con «Entendido» (#260).
 - Los menús de opciones de meta, cobro y presupuesto, el menú de un aporte, el retiro de una meta y el detalle de un cobro compartido se abren por ruta, con el registro en `sheetId` (#254).
@@ -53,6 +63,8 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 - La fila de una tarjeta de crédito en Productos muestra utilización, deuda y límite junto al disponible, y conserva «Balance incompleto» cuando falta el límite; el cálculo de deuda pasa a `shared/lib/card-balances.ts` para que la fila y el detalle de la tarjeta usen la misma regla (#292).
 
 ### Eliminado
+
+- Se retiran `SelectionGrid`, el módulo de formato de fechas sin uso, el mosaico duplicado de Inicio y Movimientos y el diálogo de confirmación propio de los movimientos, reemplazados por sus componentes compartidos (#300, #301, #304, #306).
 
 - Se retiran la conversación de IA, sus sesiones y preferencias dedicadas, y la sincronización de Gmail del cliente (#193).
 - Se quitan las consultas, prefetch, formularios, galería y vínculos de navegación que dependían de esas rutas.
