@@ -250,17 +250,21 @@ function IntelligenceScreenBody() {
             variant={
               dashboard.connection.initialSyncCompletedAt
                 ? "success"
-                : dashboard.connection.lastSyncErrorCode
-                  ? "warning"
-                  : "secondary"
+                : dashboard.connection.syncInProgress
+                  ? "info"
+                  : dashboard.connection.lastSyncErrorCode
+                    ? "warning"
+                    : "secondary"
             }
           >
             <CalendarDays data-icon="inline-start" />
             {dashboard.connection.initialSyncCompletedAt
               ? "Histórico completo desde 1 ene 2026"
-              : dashboard.connection.lastSyncErrorCode
-                ? "Histórico detenido · desde 1 ene 2026"
-                : "Importando desde 1 ene 2026"}
+              : dashboard.connection.syncInProgress
+                ? "Importando desde 1 ene 2026"
+                : dashboard.connection.lastSyncErrorCode
+                  ? "Histórico detenido · desde 1 ene 2026"
+                  : "Bootstrap pendiente · desde 1 ene 2026"}
           </Badge>
           <Badge variant="outline">
             Primer correo ·{" "}
@@ -313,64 +317,64 @@ function IntelligenceScreenBody() {
               subtitle="Ordenado del más antiguo al más reciente."
               icon={Mail}
             >
-          {messagesQuery.isPending ? (
-            <div
-              className="flex flex-col gap-2 p-2"
-              aria-label="Cargando mensajes"
-            >
-              <Skeleton className="h-14 w-full" />
-              <Skeleton className="h-14 w-full" />
-              <Skeleton className="h-14 w-full" />
-            </div>
-          ) : messagesQuery.isError ? (
-            <Empty>
-              <EmptyHeader>
-                <EmptyMedia variant="icon">
-                  <AlertCircle aria-hidden="true" />
-                </EmptyMedia>
-                <EmptyTitle>No se pudieron cargar los mensajes</EmptyTitle>
-                <EmptyDescription>
-                  Los mensajes ya cargados siguen disponibles.
-                </EmptyDescription>
-              </EmptyHeader>
-              <Button
-                type="button"
-                onClick={() => void messagesQuery.refetch()}
-              >
-                <RefreshCw aria-hidden="true" /> Reintentar
-              </Button>
-            </Empty>
-          ) : messages.length === 0 ? (
-            <Empty>
-              <EmptyHeader>
-                <EmptyMedia variant="icon">
-                  <Inbox aria-hidden="true" />
-                </EmptyMedia>
-                <EmptyTitle>Aún no hay mensajes</EmptyTitle>
-                <EmptyDescription>
-                  La sincronización agregará aquí el correo desde 2026.
-                </EmptyDescription>
-              </EmptyHeader>
-            </Empty>
-          ) : (
-            <>
-              {messages.map((message) => (
-                <SummaryItem
-                  key={message.id}
-                  title={message.subject}
-                  description={`${message.fromAddress} · ${formatDateTime(message.receivedAt)}`}
-                  icon={Mail}
-                  onPress={() => setMessageSheetOpen(true, message.id)}
-                  showChevron
-                />
-              ))}
-              <InfiniteListSentinel
-                hasNextPage={Boolean(messagesQuery.hasNextPage)}
-                isFetchingNextPage={messagesQuery.isFetchingNextPage}
-                onLoadMore={loadMore}
-              />
-            </>
-          )}
+              {messagesQuery.isPending ? (
+                <div
+                  className="flex flex-col gap-2 p-2"
+                  aria-label="Cargando mensajes"
+                >
+                  <Skeleton className="h-14 w-full" />
+                  <Skeleton className="h-14 w-full" />
+                  <Skeleton className="h-14 w-full" />
+                </div>
+              ) : messagesQuery.isError ? (
+                <Empty>
+                  <EmptyHeader>
+                    <EmptyMedia variant="icon">
+                      <AlertCircle aria-hidden="true" />
+                    </EmptyMedia>
+                    <EmptyTitle>No se pudieron cargar los mensajes</EmptyTitle>
+                    <EmptyDescription>
+                      Los mensajes ya cargados siguen disponibles.
+                    </EmptyDescription>
+                  </EmptyHeader>
+                  <Button
+                    type="button"
+                    onClick={() => void messagesQuery.refetch()}
+                  >
+                    <RefreshCw aria-hidden="true" /> Reintentar
+                  </Button>
+                </Empty>
+              ) : messages.length === 0 ? (
+                <Empty>
+                  <EmptyHeader>
+                    <EmptyMedia variant="icon">
+                      <Inbox aria-hidden="true" />
+                    </EmptyMedia>
+                    <EmptyTitle>Aún no hay mensajes</EmptyTitle>
+                    <EmptyDescription>
+                      La sincronización agregará aquí el correo desde 2026.
+                    </EmptyDescription>
+                  </EmptyHeader>
+                </Empty>
+              ) : (
+                <>
+                  {messages.map((message) => (
+                    <SummaryItem
+                      key={message.id}
+                      title={message.subject}
+                      description={`${message.fromAddress} · ${formatDateTime(message.receivedAt)}`}
+                      icon={Mail}
+                      onPress={() => setMessageSheetOpen(true, message.id)}
+                      showChevron
+                    />
+                  ))}
+                  <InfiniteListSentinel
+                    hasNextPage={Boolean(messagesQuery.hasNextPage)}
+                    isFetchingNextPage={messagesQuery.isFetchingNextPage}
+                    onLoadMore={loadMore}
+                  />
+                </>
+              )}
             </SummarySection>
           </TabsContent>
           <TabsContent value="review" className="flex flex-col gap-3">

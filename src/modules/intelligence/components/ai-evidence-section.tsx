@@ -130,10 +130,7 @@ export function AiEvidenceSection({
   return (
     <div className="flex flex-col gap-3">
       {datasetQuery.isPending ? (
-        <div
-          className="flex flex-wrap gap-2"
-          aria-label="Cargando particiones"
-        >
+        <div className="flex flex-wrap gap-2" aria-label="Cargando particiones">
           <Skeleton className="h-6 w-28 rounded-full" />
           <Skeleton className="h-6 w-28 rounded-full" />
           <Skeleton className="h-6 w-28 rounded-full" />
