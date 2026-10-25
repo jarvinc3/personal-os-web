@@ -171,7 +171,7 @@ export function AiEvidenceSection({
 
       <SummarySection
         title="Cola de revisión"
-        subtitle="Confirma, corrige o descarta mensajes de tu correo."
+        subtitle="Desde el correo más antiguo; confirma, corrige o descarta mensajes."
         icon={Inbox}
       >
         {reviewQueueQuery.isPending ? (
