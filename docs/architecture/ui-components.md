@@ -2,6 +2,10 @@
 
 Inventario para agentes. Antes de inventar un control, buscar aquí y en `src/shared/components/`. Evidencia: archivos citados. Estado: `VERIFICADO` en código 2026-09-18.
 
+## Referencia viva
+
+[`/dev/components`](../../src/modules/component-gallery/README.md) monta los componentes compartidos por propósito con datos falsos: entradas y campos, selectores, botones y acciones, diálogos y sheets, tabs y chips, listas y filas, encabezados y secciones, estados, avisos y toasts, montos y fechas, gráficos y anillos. `/dev` reúne esa galería y la de cards. Antes de crear un control, se busca ahí; si falta, se agrega con su issue. Mantenimiento: [`src/modules/component-gallery/README.md`](../../src/modules/component-gallery/README.md).
+
 ## Fecha y hora — no usar inputs nativos
 
 **Prohibido** en UI de producto: `<input type="time">`, `<input type="date">`, y `Input` con esos `type`. La rueda vive en [`src/shared/components/ui/wheel-picker.tsx`](../../src/shared/components/ui/wheel-picker.tsx). En pantalla siempre va dentro de [`WheelField`](../../src/shared/components/ui/wheel-field.tsx): la misma fila que `FinanceDateField`.

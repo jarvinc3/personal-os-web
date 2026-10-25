@@ -88,6 +88,7 @@ describe("gallery route constants", () => {
   it("keeps the gallery routes", () => {
     assert.equal(APP_ROUTES.app.dev, "/dev")
     assert.equal(APP_ROUTES.app.devCardGallery, "/dev/cards")
+    assert.equal(APP_ROUTES.app.devComponentGallery, "/dev/components")
     assert.equal(
       APP_ROUTES.app.devCardGalleryEntity("cuenta"),
       "/dev/cards/cuenta"
