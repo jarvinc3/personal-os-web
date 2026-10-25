@@ -18,7 +18,7 @@ import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { Palette, SaveIcon, XIcon } from "lucide-react"
 import { useTheme } from "next-themes"
-import { useCallback, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 
 export function EditThemeSheet({ open, onOpenChange }: SettingsSheetProps) {
   const { savePreferences, preferences, updateProfileMutation } = useProfile()
@@ -27,6 +27,15 @@ export function EditThemeSheet({ open, onOpenChange }: SettingsSheetProps) {
   const [draftTheme, setDraftTheme] = useState<ThemeValue | null>(null)
   const themeValue = draftTheme ?? currentTheme
   const isDirty = draftTheme !== null && draftTheme !== currentTheme
+
+  // Cada apertura empieza desde lo guardado: el borrador no sobrevive al cierre.
+  const [wasOpen, setWasOpen] = useState(open)
+  if (open !== wasOpen) {
+    setWasOpen(open)
+    if (open) {
+      setDraftTheme(null)
+    }
+  }
 
   const applyTheme = useCallback(
     (theme: ThemeValue) => {
@@ -67,6 +76,21 @@ export function EditThemeSheet({ open, onOpenChange }: SettingsSheetProps) {
       }
     )
   }
+
+  // Atrás cierra la hoja por la URL, sin pasar por `onOpenChange`: el modo
+  // guardado vuelve igual cuando la hoja deja de estar abierta.
+  const previewAppliedRef = useRef(false)
+  useEffect(() => {
+    if (open) {
+      previewAppliedRef.current = true
+      return
+    }
+    if (!previewAppliedRef.current) {
+      return
+    }
+    previewAppliedRef.current = false
+    applyTheme(currentTheme)
+  }, [applyTheme, currentTheme, open])
 
   return (
     <BottomSheet

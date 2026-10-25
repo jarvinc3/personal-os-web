@@ -39,6 +39,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Corregido
 
+- Cerrar con Atrás la hoja de modo, estilo o color primario descarta el borrador y devuelve la apariencia guardada, igual que «Cancelar» (#160).
 - Los botones de atrás, de opciones y la insignia de las cabeceras de color se leen sobre el fondo, y la decoración de las cards de cuenta ya no se sale como semicírculo gris (#245).
 - «Registrar aporte» muestra el saldo libre de la cuenta de origen, avisa antes de registrar si el monto lo supera y bloquea el envío; el origen por defecto es la cuenta de la meta solo si tiene saldo libre, y el detalle explica «Apartado» con su entrada del glosario (#294).
 - «Abonar a capital» propone la cuenta «Se paga desde» del préstamo, explica qué hace cada modo y la vista previa muestra la cuota nueva, el plazo y la fecha final; cuando el abono no quita una cuota entera, avisa de que el plazo no cambia y baja la última cuota (#296).

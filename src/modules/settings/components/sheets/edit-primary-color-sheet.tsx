@@ -25,7 +25,7 @@ import {
   SaveIcon,
   XIcon,
 } from "lucide-react"
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 
 const CUSTOM_COLOR_INPUT_ID = "primary-color-custom"
 
@@ -39,6 +39,15 @@ export function EditPrimaryColorSheet({
   const colorValue = draftColor ?? currentColor
   const isDirty = draftColor !== null && draftColor !== currentColor
   const currentOption = findPrimaryColor(colorValue)
+
+  // Cada apertura empieza desde lo guardado: el borrador no sobrevive al cierre.
+  const [wasOpen, setWasOpen] = useState(open)
+  if (open !== wasOpen) {
+    setWasOpen(open)
+    if (open) {
+      setDraftColor(null)
+    }
+  }
 
   const revertDraft = () => {
     setDraftColor(null)
@@ -73,6 +82,21 @@ export function EditPrimaryColorSheet({
       }
     )
   }
+
+  // Atrás cierra la hoja por la URL, sin pasar por `onOpenChange`: el color
+  // guardado vuelve igual cuando la hoja deja de estar abierta.
+  const previewAppliedRef = useRef(false)
+  useEffect(() => {
+    if (open) {
+      previewAppliedRef.current = true
+      return
+    }
+    if (!previewAppliedRef.current) {
+      return
+    }
+    previewAppliedRef.current = false
+    applyPrimaryColorToDocument(currentColor)
+  }, [currentColor, open])
 
   return (
     <BottomSheet

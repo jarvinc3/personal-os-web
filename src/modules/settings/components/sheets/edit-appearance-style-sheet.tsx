@@ -18,7 +18,7 @@ import { Spinner } from "@/src/shared/components/ui/spinner"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { LayersIcon, SaveIcon, XIcon } from "lucide-react"
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 
 export function EditAppearanceStyleSheet({
   open,
@@ -29,6 +29,15 @@ export function EditAppearanceStyleSheet({
   const [draftStyle, setDraftStyle] = useState<AppearanceStyleId | null>(null)
   const styleValue = draftStyle ?? currentStyle
   const isDirty = draftStyle !== null && draftStyle !== currentStyle
+
+  // Cada apertura empieza desde lo guardado: el borrador no sobrevive al cierre.
+  const [wasOpen, setWasOpen] = useState(open)
+  if (open !== wasOpen) {
+    setWasOpen(open)
+    if (open) {
+      setDraftStyle(null)
+    }
+  }
 
   const revertDraft = () => {
     setDraftStyle(null)
@@ -62,6 +71,21 @@ export function EditAppearanceStyleSheet({
       }
     )
   }
+
+  // Atrás cierra la hoja por la URL, sin pasar por `onOpenChange`: el estilo
+  // guardado vuelve igual cuando la hoja deja de estar abierta.
+  const previewAppliedRef = useRef(false)
+  useEffect(() => {
+    if (open) {
+      previewAppliedRef.current = true
+      return
+    }
+    if (!previewAppliedRef.current) {
+      return
+    }
+    previewAppliedRef.current = false
+    applyStyleToDocument(currentStyle)
+  }, [currentStyle, open])
 
   return (
     <BottomSheet
