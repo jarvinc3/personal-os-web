@@ -32,7 +32,7 @@ type FinanceProgressHeroProps = {
   title: string
   badge?: { label: string; variant?: BadgeVariant }
   subtitle?: ReactNode
-  metricLabel: string
+  metricLabel: ReactNode
   metricValue: string
   footnote?: ReactNode
   decoration?: ReactNode

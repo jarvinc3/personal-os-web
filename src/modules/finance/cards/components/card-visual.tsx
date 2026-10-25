@@ -4,6 +4,7 @@ import {
   BrandLogo,
   CardNetworkMark,
 } from "@/src/modules/finance/shared/components/brand-logo"
+import { GlossaryHelpButton } from "@/src/modules/help"
 import { FINANCE_CARD_TYPE_LABEL } from "@/src/modules/finance/shared/constants/catalog"
 import {
   cardUtilization,
@@ -53,7 +54,7 @@ export function CardVisual({ card, balances, display }: CardVisualProps) {
 
         <div className="relative z-10 flex flex-col gap-1">
           <p className="text-[10px] tracking-[0.14em] text-white/55 uppercase">
-            {isCredit ? "Balance" : "Saldo actual"}
+            {isCredit ? "Disponible" : "Saldo"}
           </p>
           {balances.length === 0 ? (
             <p className="text-3xl font-bold">Sin saldo</p>
@@ -140,8 +141,12 @@ export function CardVisual({ card, balances, display }: CardVisualProps) {
                     }}
                   />
                 </div>
-                <p className="text-xs text-white/70">
+                <p className="flex items-center gap-1 text-xs text-white/70">
                   Límite {formatFinanceMoney(creditLimitValue, moneyDisplay)}
+                  <GlossaryHelpButton
+                    slug="limite-de-credito"
+                    className="text-white/70 hover:text-white"
+                  />
                 </p>
                 {utilization.overdraft > 0 ? (
                   <p className="text-xs font-medium text-white">

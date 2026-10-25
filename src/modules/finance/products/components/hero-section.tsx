@@ -97,11 +97,14 @@ export function FinanceHeroSection({
   if (showsGroupedBalances && netWorthComplete) {
     return (
       <div className="flex flex-col gap-2 px-2 pb-2">
-        <p className="text-[11px] font-medium tracking-[0.16em] text-muted-foreground uppercase">
-          {currencyTotals.length > 1
-            ? "Balance total por moneda"
-            : "Balance total"}
-        </p>
+        <div className="flex items-center gap-1">
+          <p className="text-[11px] font-medium tracking-[0.16em] text-muted-foreground uppercase">
+            {currencyTotals.length > 1
+              ? "Patrimonio neto por moneda"
+              : "Patrimonio neto"}
+          </p>
+          <GlossaryHelpButton slug="patrimonio" />
+        </div>
         <div className="grid grid-cols-2 gap-2">
           {currencyTotals.map((group) => {
             const receivables = receivablesLine(group, display)
@@ -174,9 +177,12 @@ export function FinanceHeroSection({
   if (!hasChart) {
     return (
       <div className="flex flex-col items-center gap-1 px-2 pb-2">
-        <p className="text-[11px] font-medium tracking-[0.16em] text-muted-foreground uppercase">
-          Balance total
-        </p>
+        <div className="flex items-center gap-1">
+          <p className="text-[11px] font-medium tracking-[0.16em] text-muted-foreground uppercase">
+            Patrimonio neto
+          </p>
+          <GlossaryHelpButton slug="patrimonio" />
+        </div>
         <Link
           href={netWorthHref}
           aria-label="Ver desglose del patrimonio"

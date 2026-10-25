@@ -101,7 +101,7 @@ describe("buildInstitutionCard", () => {
 
     const card = buildInstitutionCard(item!, display)
 
-    assert.equal(card.balanceLabel, "Balance por moneda")
+    assert.equal(card.balanceLabel, "Patrimonio por moneda")
     assert.deepEqual(
       card.balanceLines.map((line) => line.currency),
       ["DOP", "USD"]

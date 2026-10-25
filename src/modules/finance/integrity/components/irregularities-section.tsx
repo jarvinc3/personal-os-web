@@ -3,6 +3,10 @@
 import { GlossaryHelpButton } from "@/src/modules/help"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
 import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
+import {
+  pendingReconciliationItems,
+  reconciliationSubtitle,
+} from "@/src/modules/finance/shared/lib/reconciliation-pending"
 import type {
   FinanceBalanceDrift,
   FinanceReconciliationStatusItem,
@@ -67,12 +71,8 @@ function ReconciliationCard({
       </span>
       <span className="min-w-0 flex-1">
         <span className="block truncate text-sm font-medium">{item.name}</span>
-        <span className="block truncate text-xs text-muted-foreground">
-          {item.institutionName ?? "Sin institución"} · {item.currency} ·{" "}
-          {formatFinanceMoney(item.balance, {
-            ...display,
-            currency: item.currency,
-          })}
+        <span className="block truncate text-xs text-muted-foreground tabular-nums">
+          {reconciliationSubtitle(item, display)}
         </span>
       </span>
       {href ? (
@@ -191,9 +191,7 @@ export function IrregularitiesSection({
   const [confirmDrift, setConfirmDrift] = useState<FinanceBalanceDrift | null>(
     null
   )
-  const pendingReconciliations = reconciliationItems.filter(
-    (item) => !item.reconciled
-  )
+  const pendingReconciliations = pendingReconciliationItems(reconciliationItems)
 
   if (drifts.length === 0 && pendingReconciliations.length === 0) {
     return null
@@ -237,8 +235,8 @@ export function IrregularitiesSection({
               Sin conciliar ({pendingReconciliations.length})
             </Button>
             <GlossaryHelpButton
-              slug="conciliar"
-              label="Qué significa conciliar"
+              slug="sin-conciliar"
+              label="Qué significa sin conciliar"
             />
           </div>
         ) : null}

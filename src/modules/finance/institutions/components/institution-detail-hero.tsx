@@ -1,6 +1,7 @@
 "use client"
 
 import { BrandLogo } from "@/src/modules/finance/shared/components/brand-logo"
+import { GlossaryHelpButton } from "@/src/modules/help"
 import type { InstitutionStackCounts } from "@/src/modules/finance/shared/lib/institution-stack"
 import type { FinanceInstitution } from "@/src/modules/finance/shared/types/entities"
 import { ProductCountItem } from "@/src/modules/finance/products"
@@ -77,7 +78,10 @@ export function InstitutionDetailHero({
       </div>
 
       <div className="mt-8 flex flex-col gap-1 rounded-2xl bg-black/20 px-3 py-2">
-        <Label className="text-sm text-foreground">Saldo</Label>
+        <div className="flex items-center gap-1">
+          <Label className="text-sm text-foreground">Patrimonio</Label>
+          <GlossaryHelpButton slug="patrimonio" />
+        </div>
         {balanceLines.length === 0 ? (
           <p className="text-3xl font-bold tracking-tight tabular-nums">
             {balanceText}

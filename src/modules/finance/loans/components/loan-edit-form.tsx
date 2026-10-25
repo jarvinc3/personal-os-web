@@ -269,7 +269,7 @@ export function LoanEditForm({
             name="currentBalance"
             render={({ field }) => (
               <FinanceMoneyField
-                label="Saldo actual"
+                label="Deuda actual"
                 amount={field.value}
                 onAmountChange={field.onChange}
                 onAmountCommit={(next) => {

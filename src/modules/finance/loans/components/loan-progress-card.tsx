@@ -104,7 +104,7 @@ export function LoanProgressCard({
         variant: paidOff ? "success" : "warning",
       }}
       progress={progress}
-      currentHint="Saldo"
+      currentHint="Deuda"
       currentLabel={formatFinanceMoney(loan.currentBalance, money)}
       targetHint="Original"
       targetLabel={formatFinanceMoney(loan.originalAmount, money)}

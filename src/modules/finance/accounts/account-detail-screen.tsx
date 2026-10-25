@@ -4,6 +4,7 @@ import { format } from "date-fns"
 import { es } from "date-fns/locale/es"
 
 import { BrandLogo } from "@/src/modules/finance/shared/components/brand-logo"
+import { GlossaryHelpButton } from "@/src/modules/help"
 import {
   AccountBalanceSheet,
   AccountSheet,
@@ -302,7 +303,13 @@ function AccountDetailScreenBody({ accountId }: AccountDetailScreenProps) {
               </div>
             </div>
             <div className="mt-8 flex flex-col gap-1 rounded-2xl bg-black/20 px-3 py-2">
-              <Label className="text-sm text-foreground">Saldo</Label>
+              <div className="flex items-center gap-1">
+                <Label className="text-sm text-foreground">Saldo</Label>
+                <GlossaryHelpButton
+                  slug="saldo"
+                  className="text-white/70 hover:text-white"
+                />
+              </div>
               <p className="text-3xl font-bold tracking-tight tabular-nums">
                 {formatFinanceMoney(account.balance, accountDisplay)}
               </p>

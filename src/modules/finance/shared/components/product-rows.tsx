@@ -467,7 +467,7 @@ export function CardProductRow({
             "text-[10px]"
           )}
         >
-          {isCredit ? "Balance disponible" : "Saldo actual"}
+          {isCredit ? "Disponible" : "Saldo"}
         </p>
         {balances.length === 0 ? (
           <p className="text-xl font-bold tabular-nums">Sin saldo</p>

@@ -1,6 +1,7 @@
 "use client"
 
 import { BrandLogo } from "@/src/modules/finance/shared/components/brand-logo"
+import { GlossaryHelpButton } from "@/src/modules/help"
 import { FinanceGate } from "@/src/modules/finance/finance-gate"
 import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
@@ -273,7 +274,15 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
         ]
           .filter(Boolean)
           .join(" · ")}
-        metricLabel="Saldo"
+        metricLabel={
+          <span className="flex items-center gap-1">
+            Deuda
+            <GlossaryHelpButton
+              slug="deuda"
+              className="text-white/70 hover:text-white"
+            />
+          </span>
+        }
         metricValue={formatFinanceMoney(loan.currentBalance, money)}
         progress={progress}
         startCaption={`${loan.paidInstallments}/${loan.totalInstallments} cuotas`}
@@ -322,7 +331,7 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
               description={
                 loan.disbursementAccount
                   ? undefined
-                  : "El dinero no entró a ninguna cuenta."
+                  : "El dinero no entró a ninguna cuenta, así que la deuda resta del patrimonio sin un saldo que la compense."
               }
               isLast
             />
