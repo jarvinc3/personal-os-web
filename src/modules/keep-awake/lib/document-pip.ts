@@ -67,8 +67,8 @@ export function copyStylesToPip(targetDoc: Document): void {
     "--muted",
     "--muted-foreground",
     "--border",
+    "--destructive",
     "--success",
-    "--danger",
     "--warning",
     "--font-sans",
   ]

@@ -24,7 +24,7 @@ type ShortcutTone = "warning" | "danger" | "info" | "muted"
 
 const TONE_CLASS: Record<ShortcutTone, string> = {
   warning: "text-warning",
-  danger: "text-danger",
+  danger: "text-destructive",
   info: "text-info",
   muted: "text-muted-foreground",
 }

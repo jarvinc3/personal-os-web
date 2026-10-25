@@ -3,6 +3,8 @@ import { differenceInCalendarDays, parseISO, startOfDay } from "date-fns"
 import {
   financeMoneyDifference,
   formatFinanceMoney,
+  moneySign,
+  signedFinanceMoney,
   type FinanceMoneyDisplay,
 } from "@/src/modules/finance/shared/lib/money"
 import type {
@@ -195,7 +197,7 @@ function money(value: string | null, display: FinanceMoneyDisplay): string {
 }
 
 function signedMoney(value: number, display: FinanceMoneyDisplay): string {
-  return formatFinanceMoney(value, { ...display, leadingSign: true })
+  return signedFinanceMoney(value, display, moneySign(value))
 }
 function countdown(daysUntil: number | null): string | null {
   if (daysUntil === null) {

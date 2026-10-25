@@ -56,7 +56,7 @@ const TONE_STROKE: Record<PlanningProgressTone, string> = {
   primary: "stroke-primary",
   success: "stroke-success",
   warning: "stroke-warning",
-  danger: "stroke-danger",
+  danger: "stroke-destructive",
   info: "stroke-info",
 }
 
@@ -64,7 +64,7 @@ const TONE_BAR: Record<PlanningProgressTone, string> = {
   primary: "bg-primary",
   success: "bg-success",
   warning: "bg-warning",
-  danger: "bg-danger",
+  danger: "bg-destructive",
   info: "bg-info",
 }
 
@@ -72,7 +72,7 @@ const TONE_ICON: Record<PlanningProgressTone, string> = {
   primary: "bg-primary/15 text-primary",
   success: "bg-success/15 text-success",
   warning: "bg-warning/15 text-warning",
-  danger: "bg-danger/15 text-danger",
+  danger: "bg-destructive/15 text-destructive",
   info: "bg-info/15 text-info",
 }
 

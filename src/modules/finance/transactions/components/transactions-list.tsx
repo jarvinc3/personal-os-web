@@ -2,7 +2,7 @@
 
 import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
 import { QuickEntryBar } from "@/src/modules/finance/quick-entry"
-import { FinanceFlowPills } from "@/src/modules/finance/transactions/components/flow-pills"
+import { MonthFlowSummary } from "@/src/modules/finance/shared/components/month-flow-summary"
 import { FinanceMonthPicker } from "@/src/modules/finance/transactions/components/month-picker"
 import { FinanceMonthSection } from "@/src/modules/finance/transactions/components/month-section"
 import { FinanceTransactionSearch } from "@/src/modules/finance/transactions/components/transaction-search"
@@ -417,9 +417,9 @@ export function FinanceTransactionsList({
           currentMonthKey={currentMonthKey}
           onSelect={scrollToMonth}
         />
-        <FinanceFlowPills
-          income={activeMonth?.totals.income ?? 0}
-          expenses={activeMonth?.totals.expenses ?? 0}
+        <MonthFlowSummary
+          income={activeMonth?.totals.income}
+          expenses={activeMonth?.totals.expenses}
           display={display}
         />
       </div>

@@ -23,10 +23,10 @@ export function FinanceErrorState({
   isRetrying = false,
 }: FinanceErrorStateProps) {
   return (
-    <Empty className="rounded-2xl border border-danger bg-card p-2 text-danger">
+    <Empty className="rounded-2xl border border-destructive bg-card p-2 text-destructive">
       <EmptyHeader>
         <EmptyMedia variant="icon">
-          <TriangleAlertIcon className="text-danger" />
+          <TriangleAlertIcon className="text-destructive" />
         </EmptyMedia>
         <EmptyTitle>No se pudieron cargar los datos</EmptyTitle>
         <EmptyDescription>{message}</EmptyDescription>

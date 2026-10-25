@@ -11,6 +11,7 @@ import {
 } from "@/src/modules/galleries/components/mock/values"
 import { FinanceDateField } from "@/src/modules/finance/shared/components/forms/date-field"
 import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
+import { Money } from "@/src/modules/finance/shared/components/money"
 import {
   formatFinanceMoney,
   type FinanceMoneyDisplay,
@@ -83,6 +84,55 @@ export function MoneyAndDatesSection() {
               </dd>
             </div>
           ))}
+        </dl>
+      </GalleryDemo>
+
+      <GalleryDemo
+        name="Money"
+        importPath="@/src/modules/finance/shared/components/money"
+        states="ingreso, gasto, cero, sin tono"
+        note="Un monto se pinta con Money: el negativo lleva − (U+2212) y el token de negativo, el cero queda neutro y el signo nunca se escribe a mano."
+      >
+        <dl className="flex flex-col gap-1 text-sm">
+          <div className="flex items-center justify-between gap-3">
+            <dt className="text-muted-foreground">Ingreso</dt>
+            <dd>
+              <Money
+                value={GALLERY_AMOUNTS.income}
+                display={GALLERY_DISPLAY}
+                showSign
+                tone="auto"
+              />
+            </dd>
+          </div>
+          <div className="flex items-center justify-between gap-3">
+            <dt className="text-muted-foreground">Gasto</dt>
+            <dd>
+              <Money
+                value={GALLERY_AMOUNTS.expense}
+                display={GALLERY_DISPLAY}
+                showSign
+                tone="auto"
+              />
+            </dd>
+          </div>
+          <div className="flex items-center justify-between gap-3">
+            <dt className="text-muted-foreground">Cero</dt>
+            <dd>
+              <Money
+                value={GALLERY_AMOUNTS.zero}
+                display={GALLERY_DISPLAY}
+                showSign
+                tone="auto"
+              />
+            </dd>
+          </div>
+          <div className="flex items-center justify-between gap-3">
+            <dt className="text-muted-foreground">Sin tono</dt>
+            <dd>
+              <Money value={GALLERY_AMOUNTS.large} display={GALLERY_DISPLAY} />
+            </dd>
+          </div>
         </dl>
       </GalleryDemo>
 

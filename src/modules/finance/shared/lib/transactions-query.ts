@@ -10,8 +10,8 @@ import type {
 } from "@/src/modules/finance/shared/types/entities"
 import { formatFinanceDateTimeLabel } from "./ledger-form.ts"
 import {
-  formatFinanceMoney,
   parseFinanceMoney,
+  signedFinanceMoney,
   type FinanceMoneyDisplay,
 } from "./money.ts"
 
@@ -186,12 +186,6 @@ export const OPERATION_LEG_ROLE = {
 
 export type FinanceInstrumentRef = { accountId?: string; cardId?: string }
 
-/** Text tone of a signed amount: the sign decides the color of the row value. */
-export const MOVEMENT_SIGN_TONE: Record<"+" | "−", string> = {
-  "+": "text-success",
-  "−": "text-destructive",
-}
-
 export function movementSign(
   transaction: Pick<FinanceTransaction, "type" | "ledgerAmount">
 ): "+" | "−" | null {
@@ -249,11 +243,7 @@ export function signedMoneyLabel({
   display: FinanceMoneyDisplay
   sign: "+" | "−" | null
 }): string {
-  const formatted = formatFinanceMoney(amount, { ...display, currency })
-  if (!sign) {
-    return formatted
-  }
-  return `${sign} ${formatted}`
+  return signedFinanceMoney(amount, { ...display, currency }, sign)
 }
 
 export function signedAmount({

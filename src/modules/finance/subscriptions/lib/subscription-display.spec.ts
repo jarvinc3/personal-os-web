@@ -323,7 +323,7 @@ describe("subscriptionAlertView", () => {
       view.description,
       "Esperado DOP $140 · cobrado DOP $165 el 2026-10-14"
     )
-    assert.equal(view.badge, "+DOP $25")
+    assert.equal(view.badge, "+ DOP $25")
     assert.equal(view.badgeVariant, "warning")
   })
 

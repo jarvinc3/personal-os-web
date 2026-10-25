@@ -55,7 +55,6 @@
   --color-surface: var(--surface);
   --color-success: var(--success);
   --color-warning: var(--warning);
-  --color-danger: var(--danger);
   --color-info: var(--info);
   --animate-search-flash: search-flash 0.7s ease-out;
   --shadow-2xs: var(--surface-shadow-2xs);

@@ -2,17 +2,13 @@
 
 import { formatCalendarDate } from "@/src/modules/finance/shared/lib/ledger-form"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
-import {
-  MOVEMENT_SIGN_TONE,
-  movementSign,
-  signedMoneyLabel,
-} from "@/src/modules/finance/shared/lib/transactions-query"
+import { movementSign } from "@/src/modules/finance/shared/lib/transactions-query"
+import { Money } from "@/src/modules/finance/shared/components/money"
 import {
   MovementRow,
   MovementTypeMark,
 } from "@/src/modules/finance/transactions/components/transaction-movement-row"
 import type { StatementMovementRowModel } from "@/src/modules/finance/transactions/lib/statement-movement"
-import { cn } from "@/src/shared/lib/utils"
 
 type StatementMovementRowProps = {
   movement: StatementMovementRowModel
@@ -43,14 +39,12 @@ export function StatementMovementRow({
         />
       }
       value={
-        <span className={cn(sign && MOVEMENT_SIGN_TONE[sign])}>
-          {signedMoneyLabel({
-            amount: movement.amount,
-            currency: movement.currency,
-            display,
-            sign,
-          })}
-        </span>
+        <Money
+          value={movement.amount}
+          display={{ ...display, currency: movement.currency }}
+          sign={sign ?? undefined}
+          tone="auto"
+        />
       }
       isLast={isLast}
     />

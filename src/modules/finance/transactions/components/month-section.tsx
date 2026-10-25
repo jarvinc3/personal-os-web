@@ -6,16 +6,15 @@ import {
   formatCalendarDate,
   formatFinanceDateTimeLabel,
 } from "@/src/modules/finance/shared/lib/ledger-form"
+import { Money } from "@/src/modules/finance/shared/components/money"
 import type { ReversalGroup } from "@/src/modules/finance/transactions/lib/group-reversals"
 import type { ScheduledCommitment } from "@/src/modules/finance/transactions/lib/scheduled-commitments"
+import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
 import {
-  formatFinanceMoney,
-  type FinanceMoneyDisplay,
-} from "@/src/modules/finance/shared/lib/money"
-import {
+  displayedMovementSign,
   isInactiveTransactionStatus,
   isTransferTransaction,
-  signedAmount,
+  movementSideMoney,
 } from "@/src/modules/finance/shared/lib/transactions-query"
 import type {
   FinanceCategory,
@@ -103,6 +102,8 @@ function ReversalLeg({ leg, roleLabel, display, isLast }: ReversalLegProps) {
     leg.cardName ??
     "Movimiento"
   const isInactive = isInactiveTransactionStatus(leg.status)
+  const side = movementSideMoney(leg)
+  const sign = displayedMovementSign(leg)
   return (
     <SummaryItem
       title={roleLabel}
@@ -111,7 +112,12 @@ function ReversalLeg({ leg, roleLabel, display, isLast }: ReversalLegProps) {
         <span
           className={cn(isInactive && "text-muted-foreground line-through")}
         >
-          {signedAmount({ transaction: leg, display })}
+          <Money
+            value={side.amount}
+            display={{ ...display, currency: side.currency }}
+            sign={sign ?? undefined}
+            tone="auto"
+          />
         </span>
       }
       href={APP_ROUTES.app.financeTransaction(leg.id)}
@@ -144,10 +150,12 @@ function ScheduledCommitments({
             title={commitment.name}
             description={`${commitment.kind === "LOAN" ? "Cuota de préstamo" : "Suscripción"} · ${formatCalendarDate(commitment.date, display.locale)}${commitment.hasPaymentMethod ? "" : " · Sin método de pago"}`}
             icon={commitment.kind === "LOAN" ? HandCoinsIcon : RepeatIcon}
-            value={formatFinanceMoney(commitment.amount, {
-              ...display,
-              currency: commitment.currency,
-            })}
+            value={
+              <Money
+                value={commitment.amount}
+                display={{ ...display, currency: commitment.currency }}
+              />
+            }
             href={
               commitment.kind === "LOAN"
                 ? APP_ROUTES.app.financeLoan(commitment.referenceId)
@@ -255,14 +263,15 @@ export function FinanceMonthSection({
                   <p
                     className={cn(
                       "text-xs font-medium tabular-nums",
-                      day.net > 0 && "text-success",
-                      day.net < 0 && "text-destructive",
                       day.net === 0 && "text-muted-foreground"
                     )}
                   >
-                    {day.net === 0
-                      ? formatFinanceMoney(0, display)
-                      : `${day.net > 0 ? "+" : "−"} ${formatFinanceMoney(Math.abs(day.net), display)}`}
+                    <Money
+                      value={day.net}
+                      display={display}
+                      showSign
+                      tone="auto"
+                    />
                   </p>
                 </h4>
                 <div className="flex flex-col gap-2">
