@@ -122,9 +122,15 @@ function IntelligenceScreenBody() {
             <SummaryItem
               title={dashboard.connection.emailAddress}
               description={
-                dashboard.connection.lastSyncedAt
-                  ? `Última sincronización: ${formatDateTime(dashboard.connection.lastSyncedAt)}`
-                  : "La sincronización inicial está pendiente."
+                !dashboard.connection.initialSyncCompletedAt
+                  ? dashboard.connection.lastSyncErrorCode
+                    ? `Sincronización detenida · ${dashboard.counters.importedMessages} mensajes importados`
+                    : dashboard.connection.lastSyncedAt
+                      ? `Sincronización inicial en curso · ${dashboard.counters.importedMessages} mensajes importados`
+                      : "La sincronización inicial está pendiente."
+                  : dashboard.connection.lastSyncedAt
+                    ? `Última sincronización: ${formatDateTime(dashboard.connection.lastSyncedAt)}`
+                    : "La sincronización inicial está pendiente."
               }
               icon={Mail}
               value={`${dashboard.counters.importedMessages} mensajes`}
@@ -136,7 +142,8 @@ function IntelligenceScreenBody() {
                 role="status"
               >
                 <AlertCircle className="size-4 shrink-0" aria-hidden="true" />
-                No se pudo sincronizar. Vuelve a conectar Gmail o reintenta.
+                La sincronización se detuvo. Pulsa Sincronizar ahora para
+                continuar.
               </div>
             ) : null}
             <div className="flex justify-end px-2 pb-1">

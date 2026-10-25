@@ -35,6 +35,14 @@ export function useIntelligence() {
     enabled: Boolean(session),
     staleTime: 15_000,
     refetchOnWindowFocus: true,
+    refetchInterval: (query) => {
+      const connection = query.state.data?.connection
+      return connection?.connected &&
+        !connection.initialSyncCompletedAt &&
+        !connection.lastSyncErrorCode
+        ? 5_000
+        : false
+    },
   })
   const messagesQuery = useInfiniteQuery({
     queryKey: INTELLIGENCE_MESSAGES_QUERY_KEY,
@@ -66,7 +74,9 @@ export function useIntelligence() {
   })
   const syncMutation = useMutation({
     mutationFn: () =>
-      apiPost<{ imported: number }>(API_ENDPOINTS.INTELLIGENCE.SYNC_EMAIL),
+      apiPost<{ connected: boolean; syncStarted: boolean }>(
+        API_ENDPOINTS.INTELLIGENCE.SYNC_EMAIL
+      ),
     onSuccess: async () => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: INTELLIGENCE_QUERY_KEY }),
