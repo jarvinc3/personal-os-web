@@ -1,10 +1,15 @@
 "use client"
 
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useEffect } from "react"
+import { useEffect, type ReactNode } from "react"
 import { useForm, useWatch } from "react-hook-form"
 import { useIntelligenceMessage } from "@/src/modules/intelligence/hooks/use-intelligence"
+import { useReviewShortcutListener } from "@/src/modules/intelligence/hooks/use-review-shortcuts"
 import { shortMessageId } from "@/src/modules/intelligence/message-id"
+import {
+  REVIEW_SHORTCUT_HELP,
+  type ReviewShortcut,
+} from "@/src/modules/intelligence/review-shortcuts"
 import {
   buildCorrection,
   RELEVANCE_LABELS,
@@ -75,6 +80,11 @@ import {
   X,
 } from "lucide-react"
 
+type ReviewSheetShortcuts = {
+  onNext: () => void
+  onPrevious: () => void
+}
+
 type ReviewSheetProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -82,6 +92,11 @@ type ReviewSheetProps = {
   partition?: AiReviewQueueItem["partition"]
   pendingVerdict?: AiHumanVerificationInput["verdict"]
   onSubmit: (messageId: string, input: AiHumanVerificationInput) => void
+  /** Posición y navegación encima del formulario, en el modo foco. */
+  formHeader?: ReactNode
+  /** Activa los atajos de teclado y su ayuda visible. */
+  shortcuts?: ReviewSheetShortcuts
+  closeLabel?: string
 }
 
 export function ReviewSheet({
@@ -91,6 +106,9 @@ export function ReviewSheet({
   partition,
   pendingVerdict,
   onSubmit,
+  formHeader,
+  shortcuts,
+  closeLabel = "Cerrar sin verificar",
 }: ReviewSheetProps) {
   const messageQuery = useIntelligenceMessage(messageId)
   const message = messageQuery.data
@@ -187,6 +205,43 @@ export function ReviewSheet({
 
   const fieldId = messageId ?? "review"
 
+  function focusField(fieldName: string) {
+    document.getElementById(fieldName)?.focus()
+  }
+
+  function handleShortcut(shortcut: ReviewShortcut) {
+    if (shortcut === "next") {
+      shortcuts?.onNext()
+      return
+    }
+    if (shortcut === "previous") {
+      shortcuts?.onPrevious()
+      return
+    }
+    if (shortcut === "confirm") {
+      submit("CONFIRMED")
+      return
+    }
+    if (shortcut === "correct") {
+      if (!canCorrect) {
+        focusField(`semantic-${fieldId}`)
+        return
+      }
+      submit("CORRECTED")
+      return
+    }
+    if (!getValues().notes.trim()) {
+      focusField(`notes-${fieldId}`)
+      return
+    }
+    submit("REJECTED")
+  }
+
+  useReviewShortcutListener({
+    enabled: open && shortcuts !== undefined,
+    onShortcut: handleShortcut,
+  })
+
   return (
     <BottomSheet
       open={open}
@@ -204,7 +259,7 @@ export function ReviewSheet({
           type="button"
           variant="ghost"
           size="icon"
-          aria-label="Cerrar sin verificar"
+          aria-label={closeLabel}
           onClick={() => onOpenChange(false)}
         >
           <X aria-hidden="true" />
@@ -271,96 +326,104 @@ export function ReviewSheet({
           rawBody={message?.content?.rawBody}
           onRetry={() => void messageQuery.refetch()}
         />
-        <FieldGroup className="gap-3">
-          <div className="grid gap-3 sm:grid-cols-2">
+        <div className="flex flex-col gap-3">
+          {formHeader}
+          {shortcuts ? <ReviewShortcutHelp /> : null}
+          <FieldGroup className="gap-3">
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Field>
+                <FieldLabel htmlFor={`relevance-${fieldId}`}>
+                  <Tag data-icon="inline-start" className="size-4" /> Relevancia
+                </FieldLabel>
+                <Select
+                  value={values.relevance ?? ""}
+                  onValueChange={(value) =>
+                    setValue(
+                      "relevance",
+                      (value ?? "") as ReviewFormValues["relevance"],
+                      { shouldDirty: true }
+                    )
+                  }
+                  disabled={
+                    semanticType === "SECURITY_ALERT" ||
+                    semanticType === "SECURITY_OTP"
+                  }
+                >
+                  <SelectTrigger id={`relevance-${fieldId}`} className="w-full">
+                    <Tag className="size-4" aria-hidden="true" />
+                    <SelectValue placeholder="Sin etiqueta">
+                      {(value: string | null) =>
+                        reviewSelectLabel(
+                          value,
+                          RELEVANCE_LABELS,
+                          "Sin etiqueta"
+                        )
+                      }
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectItem value="relevant">Relevante</SelectItem>
+                      <SelectItem value="irrelevant">No relevante</SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </Field>
+              <Field>
+                <FieldLabel htmlFor={`semantic-${fieldId}`}>
+                  <Tag data-icon="inline-start" className="size-4" /> Tipo
+                  semántico
+                </FieldLabel>
+                <Select
+                  value={semanticType}
+                  onValueChange={(value) =>
+                    value && selectSemanticType(value as SemanticType)
+                  }
+                >
+                  <SelectTrigger id={`semantic-${fieldId}`} className="w-full">
+                    <Tag className="size-4" aria-hidden="true" />
+                    <SelectValue placeholder="Elige un tipo">
+                      {(value: string | null) =>
+                        reviewSelectLabel(
+                          value,
+                          SEMANTIC_TYPE_LABELS,
+                          "Elige un tipo"
+                        )
+                      }
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      {(
+                        Object.entries(SEMANTIC_TYPE_LABELS) as [
+                          SemanticType,
+                          string,
+                        ][]
+                      ).map(([value, label]) => (
+                        <SelectItem key={value} value={value}>
+                          {label}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+                {errors.semanticType?.message ? (
+                  <FieldError>{errors.semanticType.message}</FieldError>
+                ) : null}
+              </Field>
+            </div>
             <Field>
-              <FieldLabel htmlFor={`relevance-${fieldId}`}>
-                <Tag data-icon="inline-start" className="size-4" /> Relevancia
+              <FieldLabel>
+                <Layers3 data-icon="inline-start" className="size-4" /> Dominios
               </FieldLabel>
-              <Select
-                value={values.relevance ?? ""}
-                onValueChange={(value) =>
-                  setValue(
-                    "relevance",
-                    (value ?? "") as ReviewFormValues["relevance"],
-                    { shouldDirty: true }
-                  )
-                }
-                disabled={
-                  semanticType === "SECURITY_ALERT" ||
-                  semanticType === "SECURITY_OTP"
-                }
+              <div
+                className="flex flex-wrap gap-2"
+                role="group"
+                aria-label="Dominios"
               >
-                <SelectTrigger id={`relevance-${fieldId}`} className="w-full">
-                  <Tag className="size-4" aria-hidden="true" />
-                  <SelectValue placeholder="Sin etiqueta">
-                    {(value: string | null) =>
-                      reviewSelectLabel(value, RELEVANCE_LABELS, "Sin etiqueta")
-                    }
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectItem value="relevant">Relevante</SelectItem>
-                    <SelectItem value="irrelevant">No relevante</SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </Field>
-            <Field>
-              <FieldLabel htmlFor={`semantic-${fieldId}`}>
-                <Tag data-icon="inline-start" className="size-4" /> Tipo
-                semántico
-              </FieldLabel>
-              <Select
-                value={semanticType}
-                onValueChange={(value) =>
-                  value && selectSemanticType(value as SemanticType)
-                }
-              >
-                <SelectTrigger id={`semantic-${fieldId}`} className="w-full">
-                  <Tag className="size-4" aria-hidden="true" />
-                  <SelectValue placeholder="Elige un tipo">
-                    {(value: string | null) =>
-                      reviewSelectLabel(
-                        value,
-                        SEMANTIC_TYPE_LABELS,
-                        "Elige un tipo"
-                      )
-                    }
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    {(
-                      Object.entries(SEMANTIC_TYPE_LABELS) as [
-                        SemanticType,
-                        string,
-                      ][]
-                    ).map(([value, label]) => (
-                      <SelectItem key={value} value={value}>
-                        {label}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-              {errors.semanticType?.message ? (
-                <FieldError>{errors.semanticType.message}</FieldError>
-              ) : null}
-            </Field>
-          </div>
-          <Field>
-            <FieldLabel>
-              <Layers3 data-icon="inline-start" className="size-4" /> Dominios
-            </FieldLabel>
-            <div
-              className="flex flex-wrap gap-2"
-              role="group"
-              aria-label="Dominios"
-            >
-              {(Object.entries(ROUTE_LABELS) as [SemanticRoute, string][]).map(
-                ([route, label]) => (
+                {(
+                  Object.entries(ROUTE_LABELS) as [SemanticRoute, string][]
+                ).map(([route, label]) => (
                   <Button
                     key={route}
                     type="button"
@@ -373,38 +436,163 @@ export function ReviewSheet({
                   >
                     <Layers3 className="size-4" aria-hidden="true" /> {label}
                   </Button>
-                )
-              )}
-            </div>
-            {!selectedRoutes.length ? (
-              <p className="text-xs text-muted-foreground">Sin dominios</p>
-            ) : null}
-          </Field>
-          {hasTransaction ? (
-            <div className="grid gap-3 sm:grid-cols-2">
-              {semanticType === "FIN_TRANSACTION" ? (
+                ))}
+              </div>
+              {!selectedRoutes.length ? (
+                <p className="text-xs text-muted-foreground">Sin dominios</p>
+              ) : null}
+            </Field>
+            {hasTransaction ? (
+              <div className="grid gap-3 sm:grid-cols-2">
+                {semanticType === "FIN_TRANSACTION" ? (
+                  <Field>
+                    <FieldLabel htmlFor={`kind-${fieldId}`}>
+                      <ReceiptText className="size-4" aria-hidden="true" /> Tipo
+                      de transacción
+                    </FieldLabel>
+                    <Select
+                      value={values.kind ?? ""}
+                      onValueChange={(value) =>
+                        setValue("kind", (value ?? "") as TransactionKind, {
+                          shouldDirty: true,
+                          shouldValidate: true,
+                        })
+                      }
+                    >
+                      <SelectTrigger id={`kind-${fieldId}`} className="w-full">
+                        <ReceiptText className="size-4" aria-hidden="true" />
+                        <SelectValue placeholder="Elige un tipo">
+                          {(value: string | null) =>
+                            reviewSelectLabel(
+                              value,
+                              TRANSACTION_KIND_LABELS,
+                              "Elige un tipo"
+                            )
+                          }
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          {(
+                            Object.entries(TRANSACTION_KIND_LABELS) as [
+                              TransactionKind,
+                              string,
+                            ][]
+                          ).map(([kind, label]) => (
+                            <SelectItem key={kind} value={kind}>
+                              {label}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                    {errors.kind?.message ? (
+                      <FieldError>{errors.kind.message}</FieldError>
+                    ) : null}
+                  </Field>
+                ) : null}
                 <Field>
-                  <FieldLabel htmlFor={`kind-${fieldId}`}>
-                    <ReceiptText className="size-4" aria-hidden="true" /> Tipo
-                    de transacción
+                  <FieldLabel htmlFor={`amount-${fieldId}`}>
+                    <ReceiptText data-icon="inline-start" className="size-4" />{" "}
+                    Monto (opcional)
+                  </FieldLabel>
+                  <Input
+                    id={`amount-${fieldId}`}
+                    type="number"
+                    min="0"
+                    step="any"
+                    inputMode="decimal"
+                    {...register("amount")}
+                  />
+                  {errors.amount?.message ? (
+                    <FieldError>{errors.amount.message}</FieldError>
+                  ) : null}
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor={`currency-${fieldId}`}>
+                    <Coins data-icon="inline-start" className="size-4" /> Moneda
+                    (opcional)
+                  </FieldLabel>
+                  <Input
+                    id={`currency-${fieldId}`}
+                    maxLength={3}
+                    placeholder="DOP"
+                    {...register("currency", {
+                      onChange: (event) =>
+                        setValue("currency", event.target.value.toUpperCase()),
+                    })}
+                  />
+                  {errors.currency?.message ? (
+                    <FieldError>{errors.currency.message}</FieldError>
+                  ) : null}
+                </Field>
+                <WheelField
+                  label="Fecha (opcional)"
+                  valueLabel={
+                    values.transactionDate
+                      ? formatDate(values.transactionDate)
+                      : "Sin fecha"
+                  }
+                  icon={CalendarDays}
+                  footer={(close) => (
+                    <div className="mt-3 flex items-center gap-2">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => {
+                          setValue("transactionDate", "", { shouldDirty: true })
+                          close()
+                        }}
+                      >
+                        <X className="size-4" aria-hidden="true" /> Sin fecha
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        className="ml-auto"
+                        disabled={!values.transactionDate}
+                        onClick={close}
+                      >
+                        <Check className="size-4" aria-hidden="true" /> Listo
+                      </Button>
+                    </div>
+                  )}
+                >
+                  <DateWheels
+                    value={values.transactionDate ?? ""}
+                    onChange={(next) =>
+                      setValue("transactionDate", next, { shouldDirty: true })
+                    }
+                  />
+                </WheelField>
+                <Field>
+                  <FieldLabel htmlFor={`direction-${fieldId}`}>
+                    <ArrowLeftRight className="size-4" aria-hidden="true" />{" "}
+                    Dirección (opcional)
                   </FieldLabel>
                   <Select
-                    value={values.kind ?? ""}
+                    value={values.direction ?? ""}
                     onValueChange={(value) =>
-                      setValue("kind", (value ?? "") as TransactionKind, {
-                        shouldDirty: true,
-                        shouldValidate: true,
-                      })
+                      setValue(
+                        "direction",
+                        (value ?? "") as TransactionDirection,
+                        { shouldDirty: true }
+                      )
                     }
                   >
-                    <SelectTrigger id={`kind-${fieldId}`} className="w-full">
-                      <ReceiptText className="size-4" aria-hidden="true" />
-                      <SelectValue placeholder="Elige un tipo">
+                    <SelectTrigger
+                      id={`direction-${fieldId}`}
+                      className="w-full"
+                    >
+                      <ArrowLeftRight className="size-4" aria-hidden="true" />
+                      <SelectValue placeholder="Sin dirección">
                         {(value: string | null) =>
                           reviewSelectLabel(
                             value,
-                            TRANSACTION_KIND_LABELS,
-                            "Elige un tipo"
+                            TRANSACTION_DIRECTION_LABELS,
+                            "Sin dirección"
                           )
                         }
                       </SelectValue>
@@ -412,193 +600,92 @@ export function ReviewSheet({
                     <SelectContent>
                       <SelectGroup>
                         {(
-                          Object.entries(TRANSACTION_KIND_LABELS) as [
-                            TransactionKind,
+                          Object.entries(TRANSACTION_DIRECTION_LABELS) as [
+                            TransactionDirection,
                             string,
                           ][]
-                        ).map(([kind, label]) => (
-                          <SelectItem key={kind} value={kind}>
+                        ).map(([direction, label]) => (
+                          <SelectItem key={direction} value={direction}>
                             {label}
                           </SelectItem>
                         ))}
                       </SelectGroup>
                     </SelectContent>
                   </Select>
-                  {errors.kind?.message ? (
-                    <FieldError>{errors.kind.message}</FieldError>
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor={`merchant-${fieldId}`}>
+                    <Building2 className="size-4" aria-hidden="true" /> Comercio
+                    (opcional)
+                  </FieldLabel>
+                  <Input id={`merchant-${fieldId}`} {...register("merchant")} />
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor={`bank-reference-${fieldId}`}>
+                    <Hash className="size-4" aria-hidden="true" /> Referencia
+                    bancaria (opcional)
+                  </FieldLabel>
+                  <Input
+                    id={`bank-reference-${fieldId}`}
+                    {...register("bankReference")}
+                  />
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor={`last4-${fieldId}`}>
+                    <Hash className="size-4" aria-hidden="true" /> Últimos 4
+                    dígitos (opcional)
+                  </FieldLabel>
+                  <Input
+                    id={`last4-${fieldId}`}
+                    inputMode="numeric"
+                    maxLength={4}
+                    {...register("last4")}
+                  />
+                  {errors.last4?.message ? (
+                    <FieldError>{errors.last4.message}</FieldError>
                   ) : null}
                 </Field>
-              ) : null}
-              <Field>
-                <FieldLabel htmlFor={`amount-${fieldId}`}>
-                  <ReceiptText data-icon="inline-start" className="size-4" />{" "}
-                  Monto (opcional)
-                </FieldLabel>
-                <Input
-                  id={`amount-${fieldId}`}
-                  type="number"
-                  min="0"
-                  step="any"
-                  inputMode="decimal"
-                  {...register("amount")}
-                />
-                {errors.amount?.message ? (
-                  <FieldError>{errors.amount.message}</FieldError>
-                ) : null}
-              </Field>
-              <Field>
-                <FieldLabel htmlFor={`currency-${fieldId}`}>
-                  <Coins data-icon="inline-start" className="size-4" /> Moneda
-                  (opcional)
-                </FieldLabel>
-                <Input
-                  id={`currency-${fieldId}`}
-                  maxLength={3}
-                  placeholder="DOP"
-                  {...register("currency", {
-                    onChange: (event) =>
-                      setValue("currency", event.target.value.toUpperCase()),
-                  })}
-                />
-                {errors.currency?.message ? (
-                  <FieldError>{errors.currency.message}</FieldError>
-                ) : null}
-              </Field>
-              <WheelField
-                label="Fecha (opcional)"
-                valueLabel={
-                  values.transactionDate
-                    ? formatDate(values.transactionDate)
-                    : "Sin fecha"
-                }
-                icon={CalendarDays}
-                footer={(close) => (
-                  <div className="mt-3 flex items-center gap-2">
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => {
-                        setValue("transactionDate", "", { shouldDirty: true })
-                        close()
-                      }}
-                    >
-                      <X className="size-4" aria-hidden="true" /> Sin fecha
-                    </Button>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      className="ml-auto"
-                      disabled={!values.transactionDate}
-                      onClick={close}
-                    >
-                      <Check className="size-4" aria-hidden="true" /> Listo
-                    </Button>
-                  </div>
-                )}
-              >
-                <DateWheels
-                  value={values.transactionDate ?? ""}
-                  onChange={(next) =>
-                    setValue("transactionDate", next, { shouldDirty: true })
-                  }
-                />
-              </WheelField>
-              <Field>
-                <FieldLabel htmlFor={`direction-${fieldId}`}>
-                  <ArrowLeftRight className="size-4" aria-hidden="true" />{" "}
-                  Dirección (opcional)
-                </FieldLabel>
-                <Select
-                  value={values.direction ?? ""}
-                  onValueChange={(value) =>
-                    setValue(
-                      "direction",
-                      (value ?? "") as TransactionDirection,
-                      { shouldDirty: true }
-                    )
-                  }
-                >
-                  <SelectTrigger id={`direction-${fieldId}`} className="w-full">
-                    <ArrowLeftRight className="size-4" aria-hidden="true" />
-                    <SelectValue placeholder="Sin dirección">
-                      {(value: string | null) =>
-                        reviewSelectLabel(
-                          value,
-                          TRANSACTION_DIRECTION_LABELS,
-                          "Sin dirección"
-                        )
-                      }
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      {(
-                        Object.entries(TRANSACTION_DIRECTION_LABELS) as [
-                          TransactionDirection,
-                          string,
-                        ][]
-                      ).map(([direction, label]) => (
-                        <SelectItem key={direction} value={direction}>
-                          {label}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </Field>
-              <Field>
-                <FieldLabel htmlFor={`merchant-${fieldId}`}>
-                  <Building2 className="size-4" aria-hidden="true" /> Comercio
-                  (opcional)
-                </FieldLabel>
-                <Input id={`merchant-${fieldId}`} {...register("merchant")} />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor={`bank-reference-${fieldId}`}>
-                  <Hash className="size-4" aria-hidden="true" /> Referencia
-                  bancaria (opcional)
-                </FieldLabel>
-                <Input
-                  id={`bank-reference-${fieldId}`}
-                  {...register("bankReference")}
-                />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor={`last4-${fieldId}`}>
-                  <Hash className="size-4" aria-hidden="true" /> Últimos 4
-                  dígitos (opcional)
-                </FieldLabel>
-                <Input
-                  id={`last4-${fieldId}`}
-                  inputMode="numeric"
-                  maxLength={4}
-                  {...register("last4")}
-                />
-                {errors.last4?.message ? (
-                  <FieldError>{errors.last4.message}</FieldError>
-                ) : null}
-              </Field>
-            </div>
-          ) : null}
-          <Field>
-            <FieldLabel htmlFor={`notes-${fieldId}`}>
-              <NotebookText data-icon="inline-start" className="size-4" /> Nota
-              o motivo del rechazo
-            </FieldLabel>
-            <Textarea
-              id={`notes-${fieldId}`}
-              {...register("notes")}
-              placeholder="Obligatoria para Otro o al rechazar"
-            />
-            {errors.notes?.message ? (
-              <FieldError>{errors.notes.message}</FieldError>
+              </div>
             ) : null}
-          </Field>
-        </FieldGroup>
+            <Field>
+              <FieldLabel htmlFor={`notes-${fieldId}`}>
+                <NotebookText data-icon="inline-start" className="size-4" />{" "}
+                Nota o motivo del rechazo
+              </FieldLabel>
+              <Textarea
+                id={`notes-${fieldId}`}
+                {...register("notes")}
+                placeholder="Obligatoria para Otro o al rechazar"
+              />
+              {errors.notes?.message ? (
+                <FieldError>{errors.notes.message}</FieldError>
+              ) : null}
+            </Field>
+          </FieldGroup>
+        </div>
       </div>
     </BottomSheet>
+  )
+}
+
+function ReviewShortcutHelp() {
+  return (
+    <div
+      className="flex flex-wrap items-center gap-x-3 gap-y-1"
+      aria-label="Atajos de teclado"
+    >
+      {REVIEW_SHORTCUT_HELP.map((shortcut) => (
+        <span
+          key={shortcut.key}
+          className="inline-flex items-center gap-1 text-xs text-muted-foreground"
+        >
+          <kbd className="rounded border border-border bg-muted px-1.5 font-mono text-[0.7rem] leading-5">
+            {shortcut.key}
+          </kbd>
+          {shortcut.label}
+        </span>
+      ))}
+    </div>
   )
 }
 

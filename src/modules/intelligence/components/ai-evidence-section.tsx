@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 import { useAiEvidence } from "@/src/modules/intelligence/hooks/use-ai-evidence"
 import { shortMessageId } from "@/src/modules/intelligence/message-id"
 import type {
@@ -9,6 +9,7 @@ import type {
 } from "@/src/modules/intelligence/types/intelligence.types"
 import { INTELLIGENCE_SHEET_KEYS } from "@/src/modules/intelligence/constants/sheet-keys"
 import { ReviewSheet } from "@/src/modules/intelligence/components/review-sheet"
+import { ReviewFocusSheet } from "@/src/modules/intelligence/components/review-focus-sheet"
 import { Badge } from "@/src/shared/components/ui/badge"
 import { Button } from "@/src/shared/components/ui/button"
 import {
@@ -32,6 +33,7 @@ import {
   AlertCircle,
   Check,
   Clock3,
+  Focus,
   Mail,
   Pencil,
   RotateCcw,
@@ -58,6 +60,7 @@ export function AiEvidenceSection({
     partitionFilter
   )
   const review = useSheetParam(INTELLIGENCE_SHEET_KEYS.review)
+  const focus = useSheetParam(INTELLIGENCE_SHEET_KEYS.focus)
   const messages = useMemo(
     () => reviewQueueQuery.data?.pages.flatMap((page) => page.items) ?? [],
     [reviewQueueQuery.data?.pages]
@@ -67,21 +70,42 @@ export function AiEvidenceSection({
   const reviewedMessage = messages.find(
     (message) => message.id === review.sheetId
   )
+  const loadMore = useCallback(() => {
+    if (hasNextPage && !isFetchingNextPage) {
+      void fetchNextPage()
+    }
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage])
 
-  async function submitVerification(
-    messageId: string,
+  async function verifyMessage({
+    messageId,
+    input,
+    onVerified,
+  }: {
+    messageId: string
     input: AiHumanVerificationInput
-  ) {
+    onVerified?: () => void
+  }) {
     try {
       await verifyMutation.mutateAsync({ messageId, input })
       appToast.success({ text1: "Verificación guardada" })
-      review.setOpen(false)
+      onVerified?.()
     } catch (error) {
       appToast.error({
         text1: "No se pudo guardar la verificación",
         text2: error instanceof Error ? error.message : "Inténtalo otra vez.",
       })
     }
+  }
+
+  function submitVerification(
+    messageId: string,
+    input: AiHumanVerificationInput
+  ) {
+    void verifyMessage({
+      messageId,
+      input,
+      onVerified: () => review.setOpen(false),
+    })
   }
 
   if (!enabled) {
@@ -193,6 +217,18 @@ export function AiEvidenceSection({
       )}
 
       <div className="flex flex-col gap-2">
+        {messages.length ? (
+          <div className="flex justify-end">
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={() => focus.setOpen(true)}
+            >
+              <Focus data-icon="inline-start" /> Modo foco
+            </Button>
+          </div>
+        ) : null}
         {reviewQueueQuery.isPending ? (
           <div
             className="flex flex-col gap-2 p-2"
@@ -244,11 +280,7 @@ export function AiEvidenceSection({
             <InfiniteListSentinel
               hasNextPage={Boolean(hasNextPage)}
               isFetchingNextPage={isFetchingNextPage}
-              onLoadMore={() => {
-                if (hasNextPage && !isFetchingNextPage) {
-                  void fetchNextPage()
-                }
-              }}
+              onLoadMore={loadMore}
             />
           </>
         )}
@@ -260,11 +292,32 @@ export function AiEvidenceSection({
         messageId={review.sheetId ?? null}
         partition={reviewedMessage?.partition}
         pendingVerdict={
-          verifyMutation.isPending
+          verifyMutation.isPending &&
+          verifyMutation.variables?.messageId === review.sheetId
             ? verifyMutation.variables?.input.verdict
             : undefined
         }
         onSubmit={submitVerification}
+      />
+
+      <ReviewFocusSheet
+        open={focus.open}
+        onOpenChange={focus.setOpen}
+        messages={messages}
+        hasNextPage={Boolean(hasNextPage)}
+        isFetchingNextPage={isFetchingNextPage}
+        onLoadMore={loadMore}
+        pending={
+          verifyMutation.isPending && verifyMutation.variables
+            ? {
+                messageId: verifyMutation.variables.messageId,
+                verdict: verifyMutation.variables.input.verdict,
+              }
+            : undefined
+        }
+        onSubmit={(messageId, input) =>
+          void verifyMessage({ messageId, input })
+        }
       />
     </div>
   )
