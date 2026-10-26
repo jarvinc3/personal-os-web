@@ -12,7 +12,7 @@ Ruta: `/settings` (`settings-screen.tsx`). Sheets `?sheet=`.
 | Notificaciones | `EditQuietHoursSheet`                                                 | `preferences.notifications.quietHours`                                     |
 | Módulos        | `EditFinanceSheet` etc.                                               | PATCH `/users/me/modules/:slug`                                            |
 | Peligro        | `DeleteAccountSheet`                                                  | DELETE `/users/me`                                                         |
-| Peligro        | `WipeUserDataSheet`                                                   | POST `/users/me/data/wipe`                                                 |
+| Peligro        | `WipeDataSheet`                                                       | `GET /users/me/data/branches` + POST `/users/me/data/wipe`                 |
 | Moneda         | `FinanceCurrenciesView` (`/settings/finance/currencies`)              | `config.baseCurrency` + `trackedCurrencies`; POST `/finance/base-currency` |
 
 `/settings/finance` (`FinanceModuleSettingsForm`): módulo encendido, enlace a moneda principal y monedas seguidas, ingreso fijo (monto, frecuencia, días de pago y cuenta), cuenta por defecto para gastos y transferencias, entrada de monto (teclado o calculadora), inicio de semana, período del panel, visualización, mes financiero, recordatorios de tarjeta, correo (sincronización, modo directo o pendiente y enlace a Bancos y remitentes) y alertas del módulo. Todo vive en `module_config.finance`.
@@ -25,7 +25,7 @@ Apariencia tiene tres ejes independientes: modo (`preferences.theme.value`), est
 
 Las preferencias se guardan con `PATCH /users/me` desde `useProfile().updatePreferences`: la caché se actualiza de forma optimista antes del envío, cada parche se calcula sobre la última caché, las mutaciones se serializan por `scope` y un fallo restaura el perfil anterior con su toast. Cada pantalla envía solo la hoja que cambia, no el objeto completo de preferencias.
 
-Vaciar datos: `wipe-layers.ts` (espejo del back: ids, labels, dependencias catalog → ledger y categories → planning), `pending-data-wipe.ts` + `PendingDataWipeHandler` para el reauth con Google. Reauth con Google vía `loginWithGoogleMutation`; la sesión nunca se cierra.
+Vaciar datos: `useDataBranches` lee `GET /users/me/data/branches` (identificador, etiqueta, conteo y lo que arrastra cada rama) y `WipeUserDataView` pinta la misma lista en Ajustes de cada app (solo sus ramas) y en Privacidad (todas agrupadas por app). `wipe-branches.ts` expande lo que arrastra la selección y calcula los conteos que se envían; `wipe-branch-texts.ts` es el único mapa de etiquetas, descripciones, iconos, unidad y tema por identificador. El vaciado envía `POST /users/me/data/wipe` con `branches` y `expectedCounts`; un 409 refresca la lista y pide confirmar otra vez. `pending-data-wipe.ts` + `PendingDataWipeHandler` conservan la selección durante el reauth con Google. Reauth con Google vía `loginWithGoogleMutation`; la sesión nunca se cierra.
 
 > [!WARNING]
 > **REV-WEB-010** (`CONTRADICE_CODIGO`) — citaba `module-settings-ui.ts` (no existe; hay `module-settings-state.ts`) y “Drawer”. [registro archivado](../../archive/review-register.md)

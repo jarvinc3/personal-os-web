@@ -9,6 +9,7 @@ export const API_ENDPOINTS = {
     GET_ME: "/users/me",
     UPDATE_ME: "/users/me",
     DELETE_ME: "/users/me",
+    DATA_BRANCHES: "/users/me/data/branches",
     WIPE_DATA: "/users/me/data/wipe",
     MODULE: (slug: string) => `/users/me/modules/${slug}`,
     RELEASE_NOTES_SEEN: "/users/me/release-notes-seen",

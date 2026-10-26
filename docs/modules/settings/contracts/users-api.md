@@ -11,7 +11,8 @@ Este cliente:
 | Versión vista Novedades | `PATCH /users/me/release-notes-seen` | `useMarkReleaseNotesSeen`          |
 | Módulo                  | `PATCH /users/me/modules/:slug`      | `useUserModuleConfig`              |
 | Borrar cuenta           | `DELETE /users/me`                   | `useDeleteAccount` (reauth previa) |
-| Vaciar datos por capas  | `POST /users/me/data/wipe`           | `useWipeUserData` (reauth previa)  |
+| Ramas de datos          | `GET /users/me/data/branches`        | `useDataBranches`                  |
+| Vaciar ramas de datos   | `POST /users/me/data/wipe`           | `useWipeUserData` (reauth previa)  |
 | Providers IA            | `GET /ai/providers`                  | `useAiProviders`                   |
 
 Defaults mergeados en cliente: `src/modules/settings/constants/user-settings-defaults.ts` (`normalizePreferences`, `normalizeModuleConfig`). El backend también mergea; el cliente re-normaliza para UI estable.

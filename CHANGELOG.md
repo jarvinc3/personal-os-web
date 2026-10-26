@@ -18,6 +18,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 - AI-3: `/intelligence` muestra particiones de `EMAIL_V1`, cola paginada para confirmar, corregir o rechazar mensajes, marca HOLDOUT como verdad de referencia y expone historial de runs y procedencia (#206).
 - AI-2: `/intelligence` conecta Gmail con acceso de solo lectura, muestra estado y correo importado por cuenta y permite sincronizar; Privacidad permite revocar la contribución al conocimiento global y ADMIN gestiona roles (#205).
 - El menú lateral del móvil se abre con un deslizamiento a la derecha que empieza en los 32 px del borde izquierdo, además del botón del encabezado y Ctrl/Cmd + B; un gesto vertical, uno que empieza fuera del borde o dentro de pestañas, pila de instituciones, selector de meses y ruedas de fecha no lo abre, y el clic que sigue a la apertura se descarta. Los textos del panel y del botón pasan a español, y con movimiento reducido el panel cambia sin animación (#265).
+- Los Ajustes de cada app y Privacidad vacían por ramas: la lista muestra el nombre, el conteo y lo que arrastra cada rama, agrupada por tema en Finanzas y por app en Privacidad; una rama con datos se marca con su casilla, las que arrastra se bloquean con su conteo y un 409 refresca la lista antes de confirmar. Los ajustes de Finanzas solo ofrecen sus ramas y las apps sin datos no muestran la zona de peligro (#270).
 
 ### Cambiado
 
@@ -59,6 +60,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 - La cola de revisión también ordena los correos por fecha recibida ascendente (#206).
 - `src/shared/components` se reorganiza por responsabilidad: `ui/` queda solo con shadcn y los componentes propios pasan a `shell/` (con `shell/header/`), `forms/`, `sheets/`, `fab/`, `feedback/`, `data-display/` y `settings/`; `ReleaseNotesSheet` pasa a `src/modules/settings` (#315).
 - Se reescribe el README con banner, funciones por app, stack, arquitectura, scripts y enlaces a los repos hermanos; se añade licencia MIT y archivos de comunidad (CONTRIBUTING, SECURITY y plantilla de PR) (#313).
+- El cliente deja de repetir los identificadores y las dependencias del vaciado: se retira `wipe-layers.ts` y la lista usa `GET /users/me/data/branches` con los conteos y lo que arrastra cada rama; las etiquetas, descripciones e iconos viven en un solo mapa de textos por identificador (#270).
 
 ### Corregido
 

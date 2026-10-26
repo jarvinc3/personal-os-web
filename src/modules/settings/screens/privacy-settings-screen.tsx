@@ -8,7 +8,6 @@ import { WipeDataSheet } from "@/src/modules/settings/components/sheets/wipe-dat
 import { SETTINGS_REGISTRY } from "@/src/modules/settings/constants/settings-metadata"
 import { SETTINGS_SHEET_KEYS } from "@/src/modules/settings/constants/sheet-keys"
 import { usePreferenceToggle } from "@/src/modules/settings/hooks/use-preference-toggle"
-import { WIPE_LAYER_ORDER } from "@/src/modules/settings/lib/wipe-layers"
 import { useProfile } from "@/src/modules/settings/hooks/use-profile"
 import { SettingsGate } from "@/src/modules/settings/settings-gate"
 import {
@@ -97,7 +96,7 @@ function PrivacySettingsScreenBody() {
       >
         <SettingsRow
           label="Vaciar todos los datos"
-          description="Borra el contenido de todas las apps y vuelve la configuración a sus valores por defecto."
+          description="Elige qué ramas de datos vaciar de todas las apps."
           destructive
           onPress={() => setOpenWipeAllSheet(true)}
           accentColor={SETTINGS_REGISTRY.danger.accent}
@@ -119,11 +118,7 @@ function PrivacySettingsScreenBody() {
         onOpenChange={setOpenWipeAllSheet}
         email={displayEmail}
         title="Vaciar todos los datos"
-        description="Borra el contenido de todas las apps. La cuenta se conserva."
-        scope={{
-          layers: WIPE_LAYER_ORDER,
-          confirmTitle: "¿Vaciar todos los datos?",
-        }}
+        description="Borra las ramas de datos que elijas. La cuenta se conserva."
       />
       <DeleteAccountSheet
         open={openDeleteAccountSheet}
