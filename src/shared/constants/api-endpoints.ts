@@ -36,6 +36,12 @@ export const API_ENDPOINTS = {
     CONNECT_EMAIL: "/intelligence/email/connect",
     SYNC_EMAIL: "/intelligence/email/sync",
     RESET_EMAIL: "/intelligence/email/reset",
+    KNOWLEDGE: "/intelligence/knowledge",
+    KNOWLEDGE_ADMIN_QUEUE: "/intelligence/knowledge/admin/queue",
+    KNOWLEDGE_REVERT: (knowledgeId: string) =>
+      `/intelligence/knowledge/admin/${encodeURIComponent(knowledgeId)}/revert`,
+    KNOWLEDGE_EXPORT: "/intelligence/knowledge/me/export",
+    KNOWLEDGE_DELETE: "/intelligence/knowledge/me",
     CONSENT: "/ai/preferences/consent",
     ROLES: "/ai/admin/roles",
     ROLE: (userId: string) => `/ai/admin/roles/${encodeURIComponent(userId)}`,
