@@ -7,11 +7,14 @@ import { FINANCE_DASHBOARD_PERIOD_OPTIONS } from "@/src/modules/finance/shared/l
 import { ModuleSheetEnableRow } from "@/src/modules/settings/components/profile-ui"
 import { SETTINGS_SHEET_KEYS, WipeDataSheet } from "@/src/modules/settings"
 import { SETTINGS_REGISTRY } from "@/src/modules/settings/constants/settings-metadata"
+import { useDataBranches } from "@/src/modules/settings/hooks/use-data-branches"
 import { useModuleSheetEnable } from "@/src/modules/settings/hooks/use-module-sheet-enable"
 import { useProfileSheetFormSync } from "@/src/modules/settings/hooks/use-profile-sheet"
 import { useUserModuleConfig } from "@/src/modules/settings/hooks/use-user-module-config"
-import { FINANCE_WIPE_LAYERS } from "@/src/modules/settings/lib/wipe-layers"
+import { findAppBranches } from "@/src/modules/settings/lib/wipe-branches"
+import { DATA_APP } from "@/src/modules/settings/types/wipe.types"
 import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { ErrorState } from "@/src/shared/components/feedback/error-state"
 import {
   SettingsRow,
   SettingsSection,
@@ -136,6 +139,8 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
     profileQuery,
   } = useUserModuleConfig("finance")
   const moduleEnable = useModuleSheetEnable("finance")
+  const branchesQuery = useDataBranches()
+  const financeBranches = findAppBranches(branchesQuery.data, DATA_APP.FINANCE)
   const accountsQuery = useAccounts(isModuleEnabled)
   const accounts = accountsQuery.data ?? []
   const moneyDisplay = {
@@ -344,20 +349,28 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
         }}
       />
 
-      <SettingsSection
-        title="Zona de peligro"
-        description="Borra solo los datos de Finanzas. La cuenta y sus preferencias se conservan."
-      >
-        <SettingsRow
-          label="Vaciar datos de Finanzas"
-          description="Movimientos, cuentas, presupuestos, categorías y productos."
-          destructive
-          icon={Trash2}
-          accentColor={SETTINGS_REGISTRY.danger.accent}
-          onPress={() => wipeSheet.setOpen(true)}
-          isLast
+      {branchesQuery.isPending ? null : branchesQuery.isError ? (
+        <ErrorState
+          message="No se pudieron cargar las ramas de datos de Finanzas."
+          onRetry={() => void branchesQuery.refetch()}
+          isRetrying={branchesQuery.isFetching}
         />
-      </SettingsSection>
+      ) : financeBranches.length > 0 ? (
+        <SettingsSection
+          title="Zona de peligro"
+          description="Borra solo las ramas de Finanzas que elijas. La cuenta y sus preferencias se conservan."
+        >
+          <SettingsRow
+            label="Vaciar datos de Finanzas"
+            description="Elige qué ramas vaciar: movimientos, productos, planificación, comercios y correo."
+            destructive
+            icon={Trash2}
+            accentColor={SETTINGS_REGISTRY.danger.accent}
+            onPress={() => wipeSheet.setOpen(true)}
+            isLast
+          />
+        </SettingsSection>
+      ) : null}
 
       <FinanceSettingsSheet
         id="display"
@@ -420,12 +433,9 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
         open={wipeSheet.open}
         onOpenChange={wipeSheet.setOpen}
         email={profileQuery.data?.email ?? ""}
+        app={DATA_APP.FINANCE}
         title="Vaciar datos de Finanzas"
-        description="Borra solo los datos de Finanzas. La cuenta se conserva."
-        scope={{
-          layers: FINANCE_WIPE_LAYERS,
-          confirmTitle: "¿Vaciar los datos de Finanzas?",
-        }}
+        description="Elige las ramas de Finanzas que quieres vaciar. La cuenta se conserva."
       />
     </FormScreen>
   )

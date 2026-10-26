@@ -1,9 +1,13 @@
 "use client"
 
-import { useAuth } from "@/src/modules/auth"
+import { ApiError } from "@/src/config/api-client"
+import { AuthServiceError, useAuth } from "@/src/modules/auth"
 import { useInstitutions } from "@/src/modules/finance"
-import { SETTINGS_REGISTRY } from "@/src/modules/settings/constants/settings-metadata"
 import { SETTINGS_SHEET_KEYS } from "@/src/modules/settings/constants/sheet-keys"
+import { WipeBranchList } from "@/src/modules/settings/components/wipe-branch-list"
+import { WipeBalanceInstitutionSheet } from "@/src/modules/settings/components/sheets/wipe-balance-institution-sheet"
+import { useDataBranches } from "@/src/modules/settings/hooks/use-data-branches"
+import { useFormatLocale } from "@/src/modules/settings/hooks/use-format-locale"
 import {
   reauthenticateWithPassword,
   useWipeUserData,
@@ -14,108 +18,69 @@ import {
   isGoogleOnlyAccount,
 } from "@/src/modules/settings/lib/auth-providers"
 import { setPendingDataWipe } from "@/src/modules/settings/lib/pending-data-wipe"
-import { resolveReauthConfirmMode } from "@/src/modules/settings/lib/wipe-confirm"
 import {
-  applyWipeLayerToggle,
-  toggleWipeGroupLayers,
-  wipeGroupChecked,
-  expandWipeLayerSelection,
-  sortWipeLayers,
-  WIPE_LAYER_DESCRIPTIONS,
-  WIPE_LAYER_GROUPS,
-  WIPE_LAYER_LABELS,
-  WIPE_LAYERS,
-  type WipeLayerId,
-} from "@/src/modules/settings/lib/wipe-layers"
-import { AuthServiceError } from "@/src/modules/auth"
-import { WipeBalanceInstitutionSheet } from "@/src/modules/settings/components/sheets/wipe-balance-institution-sheet"
+  allSelectableBranchesSelected,
+  branchesOf,
+  buildWipeSections,
+  expandWipeSelection,
+  expectedBranchCounts,
+  toggleAllBranchSelection,
+  toggleBranchSelection,
+} from "@/src/modules/settings/lib/wipe-branches"
+import {
+  wipeAppCopy,
+  wipeBranchCopy,
+} from "@/src/modules/settings/lib/wipe-branch-texts"
+import { resolveReauthConfirmMode } from "@/src/modules/settings/lib/wipe-confirm"
+import { FINANCE_BALANCES_BRANCH } from "@/src/modules/settings/types/wipe.types"
 import { ConfirmDialog } from "@/src/shared/components/feedback/confirm-dialog"
+import { ErrorState } from "@/src/shared/components/feedback/error-state"
 import { usePicker } from "@/src/shared/hooks/use-picker"
 import { FormTextField } from "@/src/shared/components/forms/form-text-field"
-import { SettingsRow } from "@/src/shared/components/settings/settings-section"
 import {
   Alert,
   AlertDescription,
   AlertTitle,
 } from "@/src/shared/components/ui/alert"
 import { Button } from "@/src/shared/components/ui/button"
-import { Checkbox } from "@/src/shared/components/ui/checkbox"
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/src/shared/components/ui/empty"
+import { Skeleton } from "@/src/shared/components/ui/skeleton"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
-import {
-  AlertTriangle,
-  Bell,
-  KeyRound,
-  Landmark,
-  Layers,
-  ListChecks,
-  PiggyBank,
-  Receipt,
-  RotateCcw,
-  Scale,
-  Settings,
-  Tags,
-  Trash2,
-  type LucideIcon,
-} from "lucide-react"
-import { useRouter } from "next/navigation"
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-
-const ALL_WIPE_LAYERS = sortWipeLayers(
-  WIPE_LAYER_GROUPS.flatMap((group) => group.layers)
-)
+import { AlertTriangle, Eraser, KeyRound, Trash2 } from "lucide-react"
+import { useCallback, useEffect, useRef, useState } from "react"
 
 const ALL_INSTITUTIONS = "all"
-
-const WIPE_ACCENT = SETTINGS_REGISTRY.danger.accent
-
-const WIPE_GROUP_ICONS: Record<string, LucideIcon> = {
-  Finanzas: Landmark,
-  Notificaciones: Bell,
-  Configuración: Settings,
-}
-
-const WIPE_LAYER_ICONS: Record<WipeLayerId, LucideIcon> = {
-  [WIPE_LAYERS.FINANCE_LEDGER]: Receipt,
-  [WIPE_LAYERS.FINANCE_BALANCES]: Scale,
-  [WIPE_LAYERS.FINANCE_PLANNING]: PiggyBank,
-  [WIPE_LAYERS.FINANCE_CATEGORIES]: Tags,
-  [WIPE_LAYERS.FINANCE_CATALOG]: Landmark,
-  [WIPE_LAYERS.NOTIFICATIONS]: Bell,
-  [WIPE_LAYERS.SETTINGS_DEFAULTS]: RotateCcw,
-}
-
-export type WipeScope = {
-  layers: readonly WipeLayerId[]
-  /** Title of the last confirmation for this scope. */
-  confirmTitle: string
-}
 
 type WipeInstitutionPicker =
   "none" | typeof SETTINGS_SHEET_KEYS.wipeBalanceInstitution
 
 type WipeUserDataViewProps = {
   email: string
-  /** Fixed scope: the per-module picker stays hidden and only these layers are wiped. */
-  scope?: WipeScope
+  /** Restricts the list to one app; the global privacy view omits it. */
+  app?: string
   onWiped?: () => void
 }
 
 export function WipeUserDataView({
   email,
-  scope,
+  app,
   onWiped,
 }: WipeUserDataViewProps) {
-  const fixedLayers = scope?.layers
-  const router = useRouter()
   const wipeMutation = useWipeUserData()
   const { loginWithGoogleMutation } = useAuth()
   const institutionsQuery = useInstitutions(true)
+  const formatLocale = useFormatLocale()
+  const branchesQuery = useDataBranches()
 
-  const [selected, setSelected] = useState<WipeLayerId[]>(() =>
-    fixedLayers ? [...fixedLayers] : []
-  )
+  const [selected, setSelected] = useState<string[]>([])
   const [balanceScope, setBalanceScope] = useState(ALL_INSTITUTIONS)
   const institutionPicker = usePicker<WipeInstitutionPicker>("none")
   const [password, setPassword] = useState("")
@@ -123,6 +88,7 @@ export function WipeUserDataView({
   const [verifiedPassword, setVerifiedPassword] = useState<string | null>(null)
   const [isVerifyingPassword, setIsVerifyingPassword] = useState(false)
   const [alertOpen, setAlertOpen] = useState(false)
+  const [countsChanged, setCountsChanged] = useState(false)
   const [canWipeInApp, setCanWipeInApp] = useState<boolean | null>(null)
   const [isGoogleOnly, setIsGoogleOnly] = useState(false)
   const [isLoadingProviders, setIsLoadingProviders] = useState(false)
@@ -130,15 +96,39 @@ export function WipeUserDataView({
   const passwordVerified =
     verifiedPassword !== null && verifiedPassword === password.trim()
 
-  const appliedLayers = useMemo(
-    () => expandWipeLayerSelection(selected),
-    [selected]
+  const groups = branchesQuery.data ?? []
+  const branches = branchesOf(groups, app)
+  const branchById = new Map(branches.map((branch) => [branch.id, branch]))
+  const effectiveSelected = selected.filter(
+    (branchId) => (branchById.get(branchId)?.count ?? 0) > 0
   )
-  const allSelected = selected.length === ALL_WIPE_LAYERS.length
-  const ledgerSelected = selected.includes(WIPE_LAYERS.FINANCE_LEDGER)
-  const balancesSelected = selected.includes(WIPE_LAYERS.FINANCE_BALANCES)
-  const catalogSelected = selected.includes(WIPE_LAYERS.FINANCE_CATALOG)
-  const categoriesSelected = selected.includes(WIPE_LAYERS.FINANCE_CATEGORIES)
+  const appliedIds = expandWipeSelection({
+    branches,
+    selected: effectiveSelected,
+  })
+  const appliedBranches = appliedIds.flatMap((branchId) => {
+    const branch = branchById.get(branchId)
+    return branch ? [branch] : []
+  })
+  const expectedCounts = expectedBranchCounts({
+    branches,
+    selected: appliedIds,
+  })
+  const sections = buildWipeSections({
+    groups,
+    selected: effectiveSelected,
+    locale: formatLocale,
+    app,
+  })
+  const appliedRows = sections
+    .flatMap((section) => section.rows)
+    .filter((row) => appliedIds.includes(row.branch.id))
+  const hasSelection = effectiveSelected.length > 0
+  const allSelected = allSelectableBranchesSelected({
+    branches,
+    selected: effectiveSelected,
+  })
+  const balancesApplied = appliedIds.includes(FINANCE_BALANCES_BRANCH)
 
   const balanceScopeLabel =
     balanceScope === ALL_INSTITUTIONS
@@ -148,7 +138,7 @@ export function WipeUserDataView({
         )?.name ?? "Todas las instituciones")
 
   const balanceInstitutionId =
-    balancesSelected && balanceScope !== ALL_INSTITUTIONS
+    balancesApplied && balanceScope !== ALL_INSTITUTIONS
       ? balanceScope
       : undefined
 
@@ -183,28 +173,37 @@ export function WipeUserDataView({
     )(false)
   }
 
-  const handleToggleLayer = (layer: WipeLayerId, checked: boolean) => {
-    setSelected((current) => applyWipeLayerToggle(current, layer, checked))
-    if (!checked && layer === WIPE_LAYERS.FINANCE_BALANCES) {
+  const keepInstitutionPickerInSync = (nextSelected: readonly string[]) => {
+    const stillWipesBalances = expandWipeSelection({
+      branches,
+      selected: nextSelected,
+    }).includes(FINANCE_BALANCES_BRANCH)
+    if (!stillWipesBalances) {
       closeInstitutionPicker()
     }
+  }
+
+  const handleToggleBranch = (branchId: string, checked: boolean) => {
+    const next = toggleBranchSelection({
+      branches,
+      selected: effectiveSelected,
+      branchId,
+      checked,
+    })
+    setSelected(next)
+    setCountsChanged(false)
+    keepInstitutionPickerInSync(next)
   }
 
   const handleToggleAll = (checked: boolean) => {
-    setSelected(checked ? ALL_WIPE_LAYERS : [])
-    if (!checked) {
-      closeInstitutionPicker()
-    }
-  }
-
-  const handleToggleGroup = (
-    layers: readonly WipeLayerId[],
-    checked: boolean
-  ) => {
-    setSelected((current) => toggleWipeGroupLayers(current, layers, checked))
-    if (!checked && layers.includes(WIPE_LAYERS.FINANCE_BALANCES)) {
-      closeInstitutionPicker()
-    }
+    const next = toggleAllBranchSelection({
+      branches,
+      selected: effectiveSelected,
+      checked,
+    })
+    setSelected(next)
+    setCountsChanged(false)
+    keepInstitutionPickerInSync(next)
   }
 
   const clearPassword = () => {
@@ -215,10 +214,11 @@ export function WipeUserDataView({
   }
 
   const handleContinue = () => {
-    if (selected.length === 0) {
+    if (appliedIds.length === 0) {
       return
     }
     clearPassword()
+    setCountsChanged(false)
     setAlertOpen(true)
   }
 
@@ -230,18 +230,29 @@ export function WipeUserDataView({
       {
         email,
         password,
-        layers: appliedLayers,
-        balanceInstitutionId,
         skipReauth: true,
+        branches: appliedIds,
+        expectedCounts,
+        ...(balanceInstitutionId ? { balanceInstitutionId } : {}),
+        branchLabels: Object.fromEntries(
+          appliedBranches.map((branch) => [
+            branch.id,
+            wipeBranchCopy(branch).label,
+          ])
+        ),
       },
       {
         onSuccess: () => {
           setAlertOpen(false)
-          if (onWiped) {
-            onWiped()
+          onWiped?.()
+        },
+        onError: (error) => {
+          if (!(error instanceof ApiError) || error.status !== 409) {
             return
           }
-          router.push(APP_ROUTES.app.settings)
+          setAlertOpen(false)
+          clearPassword()
+          setCountsChanged(true)
         },
       }
     )
@@ -284,9 +295,16 @@ export function WipeUserDataView({
   }
 
   const handleGoogleReauth = () => {
+    if (appliedBranches.length === 0) {
+      return
+    }
     setPendingDataWipe({
-      layers: appliedLayers,
-      balanceInstitutionId,
+      branches: appliedBranches.map((branch) => ({
+        id: branch.id,
+        label: wipeBranchCopy(branch).label,
+        count: branch.count,
+      })),
+      ...(balanceInstitutionId ? { balanceInstitutionId } : {}),
     })
     loginWithGoogleMutation.mutate({ next: APP_ROUTES.app.settings })
   }
@@ -296,6 +314,10 @@ export function WipeUserDataView({
     canConfirmInApp: canWipeInApp,
     isGoogleOnly,
   })
+
+  const confirmTitle = app
+    ? `¿Vaciar los datos de ${wipeAppCopy(app).label}?`
+    : "¿Vaciar todos los datos?"
 
   const confirmAction =
     confirmMode === "pending" ? (
@@ -307,7 +329,7 @@ export function WipeUserDataView({
       <Button
         variant="destructive"
         className="w-full"
-        disabled={selected.length === 0 || loginWithGoogleMutation.isPending}
+        disabled={appliedIds.length === 0 || loginWithGoogleMutation.isPending}
         onClick={handleGoogleReauth}
       >
         {loginWithGoogleMutation.isPending ? (
@@ -323,7 +345,7 @@ export function WipeUserDataView({
       <Button
         variant="destructive"
         className="w-full"
-        disabled={selected.length === 0 || wipeMutation.isPending}
+        disabled={appliedIds.length === 0 || wipeMutation.isPending}
         onClick={handleContinue}
       >
         {wipeMutation.isPending ? (
@@ -338,135 +360,62 @@ export function WipeUserDataView({
   return (
     <>
       <div className="flex flex-col gap-4">
-        {fixedLayers ? (
-          <SummarySection title="Se borrará" icon={Layers}>
-            <ul className="flex flex-col gap-2">
-              {fixedLayers.map((layer) => (
-                <li
-                  key={layer}
-                  className="text-sm leading-relaxed text-muted-foreground"
-                >
-                  • {WIPE_LAYER_LABELS[layer]}
-                </li>
-              ))}
-            </ul>
-          </SummarySection>
-        ) : (
-          <>
-            <SummarySection title="Capas" icon={Layers}>
-              <SettingsRow
-                label="Seleccionar todo (excepto cuenta)"
-                description="Marca todas las capas disponibles."
-                icon={ListChecks}
-                accentColor={WIPE_ACCENT}
-                trailing={
-                  <Checkbox
-                    checked={allSelected}
-                    onCheckedChange={(value) => handleToggleAll(value === true)}
-                    disabled={wipeMutation.isPending}
-                    aria-label="Seleccionar todo (excepto cuenta)"
-                  />
-                }
-                disabled={wipeMutation.isPending}
-                isLast
-              />
-            </SummarySection>
-
-            {WIPE_LAYER_GROUPS.map((group) => (
-              <SummarySection
-                key={group.title}
-                title={group.title}
-                icon={WIPE_GROUP_ICONS[group.title]}
-                right={
-                  group.layers.length > 1 ? (
-                    <Checkbox
-                      checked={
-                        wipeGroupChecked(group.layers, selected) === true
-                      }
-                      indeterminate={
-                        wipeGroupChecked(group.layers, selected) ===
-                        "indeterminate"
-                      }
-                      onCheckedChange={(value) =>
-                        handleToggleGroup(group.layers, value === true)
-                      }
-                      disabled={wipeMutation.isPending}
-                      aria-label={`Seleccionar ${group.title}`}
-                    />
-                  ) : null
-                }
-              >
-                {group.layers.map((layer, index) => {
-                  const requiredByCatalog =
-                    layer === WIPE_LAYERS.FINANCE_LEDGER && catalogSelected
-                  const requiredByCategories =
-                    layer === WIPE_LAYERS.FINANCE_PLANNING && categoriesSelected
-                  const disabled =
-                    requiredByCatalog ||
-                    requiredByCategories ||
-                    wipeMutation.isPending
-                  return (
-                    <div key={layer}>
-                      <SettingsRow
-                        label={WIPE_LAYER_LABELS[layer]}
-                        description={WIPE_LAYER_DESCRIPTIONS[layer]}
-                        icon={WIPE_LAYER_ICONS[layer]}
-                        accentColor={WIPE_ACCENT}
-                        trailing={
-                          <Checkbox
-                            checked={selected.includes(layer)}
-                            onCheckedChange={(value) =>
-                              handleToggleLayer(layer, value === true)
-                            }
-                            disabled={disabled}
-                            aria-label={WIPE_LAYER_LABELS[layer]}
-                          />
-                        }
-                        disabled={disabled}
-                        isLast={
-                          index === group.layers.length - 1 &&
-                          !(
-                            layer === WIPE_LAYERS.FINANCE_BALANCES &&
-                            balancesSelected
-                          )
-                        }
-                      />
-                      {layer === WIPE_LAYERS.FINANCE_BALANCES &&
-                      balancesSelected ? (
-                        <SettingsRow
-                          label="Institución"
-                          value={balanceScopeLabel}
-                          icon={Landmark}
-                          accentColor={WIPE_ACCENT}
-                          onPress={() =>
-                            institutionPicker.openPicker(
-                              SETTINGS_SHEET_KEYS.wipeBalanceInstitution
-                            )
-                          }
-                          disabled={wipeMutation.isPending}
-                          isLast
-                        />
-                      ) : null}
-                    </div>
-                  )
-                })}
-              </SummarySection>
-            ))}
-          </>
-        )}
-
-        {ledgerSelected ? (
+        {countsChanged ? (
           <Alert>
             <AlertTriangle />
-            <AlertTitle>Sincronización bancaria</AlertTitle>
+            <AlertTitle>Los conteos cambiaron</AlertTitle>
             <AlertDescription>
-              Los movimientos importados se conservan; la sincronización
-              bancaria no está disponible durante esta etapa.
+              La lista se actualizó con lo que hay ahora. Revisa cuánto se
+              borrará y confirma otra vez.
             </AlertDescription>
           </Alert>
         ) : null}
 
-        {confirmMode === "google" ? (
+        {branchesQuery.isPending ? (
+          <div className="flex flex-col gap-2" aria-hidden>
+            {Array.from({ length: 4 }, (_, index) => (
+              <Skeleton key={index} className="h-16 w-full rounded-2xl" />
+            ))}
+          </div>
+        ) : branchesQuery.isError ? (
+          <ErrorState
+            message="No se pudieron cargar las ramas de datos."
+            onRetry={() => void branchesQuery.refetch()}
+            isRetrying={branchesQuery.isFetching}
+          />
+        ) : branches.length === 0 ? (
+          <Empty className="rounded-2xl border border-border bg-card">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <Eraser />
+              </EmptyMedia>
+              <EmptyTitle>Sin datos que vaciar</EmptyTitle>
+              <EmptyDescription>
+                {app
+                  ? "Esta app no tiene ramas de datos."
+                  : "No hay ramas de datos que vaciar."}
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
+        ) : (
+          <WipeBranchList
+            sections={sections}
+            appliedIds={appliedIds}
+            allSelected={allSelected}
+            hasSelection={hasSelection}
+            disabled={wipeMutation.isPending}
+            balanceScopeLabel={balanceScopeLabel}
+            onToggleAll={handleToggleAll}
+            onToggleBranch={handleToggleBranch}
+            onPickInstitution={() =>
+              institutionPicker.openPicker(
+                SETTINGS_SHEET_KEYS.wipeBalanceInstitution
+              )
+            }
+          />
+        )}
+
+        {branches.length > 0 && confirmMode === "google" ? (
           <Alert variant="destructive">
             <AlertTriangle />
             <AlertTitle>Cuenta vinculada con Google</AlertTitle>
@@ -477,7 +426,7 @@ export function WipeUserDataView({
           </Alert>
         ) : null}
 
-        {confirmMode === "unavailable" ? (
+        {branches.length > 0 && confirmMode === "unavailable" ? (
           <Alert variant="destructive">
             <AlertTriangle />
             <AlertTitle>No se puede confirmar</AlertTitle>
@@ -488,16 +437,19 @@ export function WipeUserDataView({
           </Alert>
         ) : null}
 
-        <Alert variant="destructive">
-          <KeyRound />
-          <AlertTitle>Esto no se puede deshacer</AlertTitle>
-          <AlertDescription>
-            No hay papelera ni copia de seguridad. Los datos vaciados no
-            vuelven.
-          </AlertDescription>
-        </Alert>
-
-        {confirmAction}
+        {branches.length > 0 ? (
+          <>
+            <Alert variant="destructive">
+              <KeyRound />
+              <AlertTitle>Esto no se puede deshacer</AlertTitle>
+              <AlertDescription>
+                No hay papelera ni copia de seguridad. Los datos vaciados no
+                vuelven.
+              </AlertDescription>
+            </Alert>
+            {confirmAction}
+          </>
+        ) : null}
       </div>
 
       <WipeBalanceInstitutionSheet
@@ -524,7 +476,7 @@ export function WipeUserDataView({
         tone="danger"
         icon={Trash2}
         wide
-        title={scope ? scope.confirmTitle : "¿Vaciar los datos seleccionados?"}
+        title={confirmTitle}
         description="Esto no se puede deshacer. Se vaciarán:"
         confirmLabel="Vaciar datos"
         confirmIcon={Trash2}
@@ -533,13 +485,16 @@ export function WipeUserDataView({
         confirmDisabled={!passwordVerified || isVerifyingPassword}
         onConfirm={handleConfirmWipe}
       >
-        <ul className="flex flex-col gap-2">
-          {appliedLayers.map((layer) => (
-            <li key={layer} className="text-sm text-muted-foreground">
-              • {WIPE_LAYER_LABELS[layer]}
-              {layer === WIPE_LAYERS.FINANCE_BALANCES
-                ? ` (${balanceScopeLabel})`
-                : null}
+        <ul className="flex max-h-60 flex-col gap-2 overflow-y-auto pr-1">
+          {appliedRows.map((row) => (
+            <li key={row.branch.id} className="text-sm text-muted-foreground">
+              • {row.label} · {row.countLabel}
+              {row.draggedByLabel
+                ? ` (se vacía junto con ${row.draggedByLabel})`
+                : ""}
+              {row.branch.id === FINANCE_BALANCES_BRANCH
+                ? ` · ${balanceScopeLabel}`
+                : ""}
             </li>
           ))}
         </ul>
