@@ -29,6 +29,14 @@ const TONE_CLASS: Record<ShortcutTone, string> = {
   muted: "text-muted-foreground",
 }
 
+/**
+ * Atajo del hero: tarjeta clara con borde. No usa el relleno de `secondary`
+ * porque en Estudio claro ese gris es el mismo color que la etiqueta, y el alto
+ * fijo del botón recortaba la etiqueta.
+ */
+const SHORTCUT_TILE_CLASS =
+  "relative h-auto flex-col items-center gap-1 bg-card py-3 dark:bg-card"
+
 type SubscriptionsHeroProps = {
   monthlyCost: string
   annualCost: string
@@ -145,15 +153,10 @@ export function SubscriptionsHero({
           count={badges.detected}
           onPress={onDetected}
         />
-        <Button
-          variant="secondary"
-          className="relative flex flex-col items-center gap-1 py-3"
-          asChild
-        >
+        <Button variant="outline" className={SHORTCUT_TILE_CLASS} asChild>
           <Link
             href={APP_ROUTES.app.financeSubscriptionsCalendar}
             aria-label="Calendario"
-            className="relative"
           >
             <CalendarDaysIcon className="size-5 text-foreground" aria-hidden />
             <span className="text-xs text-muted-foreground">Calendario</span>
@@ -188,11 +191,8 @@ function ShortcutButton({
     <Button
       aria-label={label}
       onClick={onPress}
-      variant="secondary"
-      className={cn(
-        "relative flex flex-col items-center gap-1 py-3",
-        PRESSABLE_CLASS
-      )}
+      variant="outline"
+      className={cn(SHORTCUT_TILE_CLASS, PRESSABLE_CLASS)}
     >
       <Icon className={cn("size-5", TONE_CLASS[tone])} aria-hidden />
       <span className="text-xs text-muted-foreground">{label}</span>
