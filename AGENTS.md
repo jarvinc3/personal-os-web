@@ -18,12 +18,12 @@ Si una afirmación no está `VERIFICADO`, no la trates como comportamiento vigen
 ## Flujo de trabajo obligatorio
 
 1. **Antes de codear:** lee el issue correspondiente. Si no existe, busca duplicados y créalo según [docs/issue-conventions.md](docs/issue-conventions.md), agrégalo al Project 3 con Priority `High`, `Medium` o `Low`, y muévelo a `In Progress`.
-2. **Repo y rama:** trabaja directo en `develop` en el repositorio correspondiente. Sin ramas, sin worktrees, sin copias temporales y sin PRs hacia `develop`.
+2. **Repo y rama:** trabaja en una rama corta por issue (`fix/<n>-<slug>`, `feat/<n>-<slug>`) o por fase del refactor (`refactor/<fase>`), dentro de una copia temporal en `C:\dev\personal\personal-os\temp\` creada con `git worktree add`. Nunca trabajes en la carpeta principal del repo ni compartas una copia con otro agente. Commitea solo tus archivos (`git add <rutas>`, nunca `git add -A`). Integra a `develop` por PR cuando el CI pase.
 3. **Límites:** no toques `master`, producción, `.env` ni despliegues; los merges a `master` los decide Jarvin. Las migraciones se ejecutan solo en DEV.
 4. **Antes del commit:** revisa el diff contra los criterios de aceptación del issue, busca huecos o implementaciones faltantes y corrígelos. Luego ejecuta format, lint, typecheck y pruebas.
 5. **Cierre:** commit en español con `Closes #N` o `Refs #N` y push. Después cierra el issue a mano con un comentario y muévelo a `Done` en el Project 3; `Closes` solo cierra el issue cuando el cambio llega a `master`.
 
-**Excepción de rama:** la única rama permitida es `refactor/ai-0` (refactor de arquitectura de Codex). Debe mantenerse al día con `develop` y se integra a `develop` por PR, pero el merge lo aprueba y hace Jarvin, nunca el agente. Ningún otro trabajo usa ramas ni PRs.
+**Limpieza al terminar:** al integrar la rama, bórrala (local y remota), elimina la copia de `temp` (`git worktree remove` y `git worktree prune`) y pon al día `develop` y la carpeta principal del repo en el workspace (`git pull`). Los merges a `master` y los deploys siguen siendo decisión de Jarvin.
 
 Lo decidido y no implementado se abre como issue con label `roadmap`; no se deja como `REV-*` suelto en los documentos.
 
