@@ -199,6 +199,7 @@ export function ReconciliationSheet({
           </span>
         </p>
         <FinanceMoneyField
+          calculatorKey="reconciliation-real-balance"
           label="Saldo real del banco"
           amount={realBalance}
           onAmountChange={setRealBalance}
@@ -296,6 +297,7 @@ export function ReconciliationSheet({
                 ) : null}
               </div>
               <FinanceMoneyField
+                calculatorKey="reconciliation-line-amount"
                 label="Monto"
                 amount={line.amount}
                 onAmountChange={(value) => updateLine(index, { amount: value })}

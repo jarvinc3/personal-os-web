@@ -39,6 +39,7 @@ export function TransactionAmountField({
       name="amount"
       render={({ field }) => (
         <FinanceMoneyField
+          calculatorKey="transaction-amount"
           amount={field.value}
           onAmountChange={field.onChange}
           onAmountCommit={(next) => {

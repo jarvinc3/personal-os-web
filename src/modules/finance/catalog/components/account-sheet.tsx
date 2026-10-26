@@ -413,6 +413,7 @@ export function AccountSheet({
               name="initialBalance"
               render={({ field }) => (
                 <FinanceMoneyField
+                  calculatorKey="account-opening-balance"
                   label="Saldo inicial"
                   amount={field.value}
                   onAmountChange={field.onChange}

@@ -67,6 +67,7 @@ export function TransferFxSection({
         name="receivedAmount"
         render={({ field }) => (
           <FinanceMoneyField
+            calculatorKey="transfer-received-amount"
             label="Monto recibido"
             amount={field.value}
             onAmountChange={field.onChange}

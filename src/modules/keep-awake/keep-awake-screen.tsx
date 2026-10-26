@@ -94,7 +94,10 @@ function KeepAwakeScreenBody() {
   if (!supportsWakeLock) {
     return (
       <KeepAwakeLayout>
-        <KeepAwakeUnsupported />
+        <KeepAwakeUnsupported
+          historyOpen={historyOpen}
+          onHistoryOpenChange={setHistoryOpen}
+        />
       </KeepAwakeLayout>
     )
   }

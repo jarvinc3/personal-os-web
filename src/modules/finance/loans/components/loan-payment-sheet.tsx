@@ -217,6 +217,7 @@ export function LoanPaymentSheet({
 
             <SummarySection title="Pago" icon={HandCoinsIcon}>
               <FinanceMoneyField
+                calculatorKey="loan-payment-amount"
                 label="Monto"
                 amount={writtenAmount}
                 onAmountChange={(next) => {

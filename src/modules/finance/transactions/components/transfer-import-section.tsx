@@ -52,6 +52,7 @@ export function TransferImportSection({
         name="amount"
         render={({ field }) => (
           <FinanceMoneyField
+            calculatorKey="transfer-amount"
             amount={field.value}
             onAmountChange={field.onChange}
             onAmountCommit={(next) => {

@@ -63,6 +63,7 @@ export function FixedIncomeSection({
             name="fixedIncomeAmount"
             render={({ field, fieldState }) => (
               <FinanceMoneyField
+                calculatorKey="fixed-income-amount"
                 label="Monto"
                 amount={field.value}
                 onAmountChange={field.onChange}

@@ -214,6 +214,7 @@ export function ReceivableSheet({
             name="amount"
             render={({ field }) => (
               <FinanceMoneyField
+                calculatorKey="receivable-amount"
                 label="Monto"
                 amount={field.value}
                 onAmountChange={field.onChange}
@@ -234,6 +235,7 @@ export function ReceivableSheet({
             render={({ field }) => (
               <div className="flex flex-col gap-1">
                 <FinanceMoneyField
+                  calculatorKey="receivable-collected"
                   label="Cobrado"
                   amount={field.value}
                   onAmountChange={field.onChange}

@@ -144,6 +144,7 @@ export function AccountBalanceSheet({
             name="balance"
             render={({ field }) => (
               <FinanceMoneyField
+                calculatorKey="account-balance-amount"
                 label="Saldo nuevo"
                 amount={field.value}
                 onAmountChange={field.onChange}

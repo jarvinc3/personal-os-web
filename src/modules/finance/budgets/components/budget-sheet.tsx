@@ -315,6 +315,7 @@ export function BudgetSheet({
             name="amountLimit"
             render={({ field }) => (
               <FinanceMoneyField
+                calculatorKey="budget-amount"
                 label="Tope"
                 amount={field.value}
                 onAmountChange={field.onChange}

@@ -50,6 +50,7 @@ export function CardBalancesSection({
             name={`balances.${index}.creditLimit`}
             render={({ field }) => (
               <FinanceMoneyField
+                calculatorKey="card-limit"
                 label="Límite"
                 amount={field.value}
                 onAmountChange={field.onChange}
@@ -69,6 +70,7 @@ export function CardBalancesSection({
             name={`balances.${index}.balance`}
             render={({ field }) => (
               <FinanceMoneyField
+                calculatorKey="card-statement-balance"
                 label="Saldo al corte"
                 amount={field.value}
                 onAmountChange={field.onChange}

@@ -261,6 +261,7 @@ export function SavingsGoalSheet({
             name="targetAmount"
             render={({ field }) => (
               <FinanceMoneyField
+                calculatorKey="savings-goal-target"
                 label="Meta"
                 amount={field.value}
                 onAmountChange={field.onChange}
@@ -280,6 +281,7 @@ export function SavingsGoalSheet({
             name="currentAmount"
             render={({ field }) => (
               <FinanceMoneyField
+                calculatorKey="savings-goal-saved"
                 label="Ahorrado"
                 amount={field.value}
                 onAmountChange={field.onChange}
