@@ -210,8 +210,23 @@ export function createApiClient({
       config
     )
 
+  /** DELETE with a confirmation body, for endpoints that require one. */
+  const apiDeleteWithBody = <T>(
+    path: string,
+    body?: unknown,
+    config?: ApiRequestConfig
+  ) =>
+    request<T>(
+      path,
+      {
+        method: "DELETE",
+        body: body ? JSON.stringify(body) : undefined,
+      },
+      config
+    )
+
   const apiDelete = <T>(path: string, config?: ApiRequestConfig) =>
-    request<T>(path, { method: "DELETE" }, config)
+    apiDeleteWithBody<T>(path, undefined, config)
 
   const apiPostForm = <T>(
     path: string,
@@ -219,7 +234,14 @@ export function createApiClient({
     config?: ApiRequestConfig
   ) => request<T>(path, { method: "POST", body }, config)
 
-  return { apiGet, apiPost, apiPatch, apiDelete, apiPostForm }
+  return {
+    apiGet,
+    apiPost,
+    apiPatch,
+    apiDelete,
+    apiDeleteWithBody,
+    apiPostForm,
+  }
 }
 
 const defaultApiClient = createApiClient({
@@ -231,4 +253,5 @@ export const apiGet = defaultApiClient.apiGet
 export const apiPost = defaultApiClient.apiPost
 export const apiPatch = defaultApiClient.apiPatch
 export const apiDelete = defaultApiClient.apiDelete
+export const apiDeleteWithBody = defaultApiClient.apiDeleteWithBody
 export const apiPostForm = defaultApiClient.apiPostForm
