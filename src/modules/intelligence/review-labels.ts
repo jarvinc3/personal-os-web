@@ -37,6 +37,19 @@ export const TRANSACTION_DIRECTION_LABELS = {
   TRANSFER: "Transferencia",
 } as const
 
+export const RELEVANCE_LABELS = {
+  relevant: "Relevante",
+  irrelevant: "No relevante",
+} as const
+
+export function reviewSelectLabel<T extends Record<string, string>>(
+  value: string | null,
+  labels: T,
+  placeholder: string
+): string {
+  return value && value in labels ? labels[value as keyof T] : placeholder
+}
+
 export type SemanticType = keyof typeof SEMANTIC_TYPE_LABELS
 export type SemanticRoute = keyof typeof ROUTE_LABELS
 export type TransactionKind = keyof typeof TRANSACTION_KIND_LABELS

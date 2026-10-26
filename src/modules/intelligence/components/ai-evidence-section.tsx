@@ -6,7 +6,9 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useAiEvidence } from "@/src/modules/intelligence/hooks/use-ai-evidence"
 import {
   buildCorrection,
+  RELEVANCE_LABELS,
   REVIEW_FORM_DEFAULTS,
+  reviewSelectLabel,
   reviewFormSchema,
   ROUTE_LABELS,
   SEMANTIC_TYPE_LABELS,
@@ -435,7 +437,15 @@ function ReviewMessage({
                     className="w-full"
                   >
                     <Tag className="size-4" aria-hidden="true" />
-                    <SelectValue placeholder="Sin etiqueta" />
+                    <SelectValue placeholder="Sin etiqueta">
+                      {(value: string | null) =>
+                        reviewSelectLabel(
+                          value,
+                          RELEVANCE_LABELS,
+                          "Sin etiqueta"
+                        )
+                      }
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
@@ -461,7 +471,15 @@ function ReviewMessage({
                     className="w-full"
                   >
                     <Tag className="size-4" aria-hidden="true" />
-                    <SelectValue placeholder="Elige un tipo" />
+                    <SelectValue placeholder="Elige un tipo">
+                      {(value: string | null) =>
+                        reviewSelectLabel(
+                          value,
+                          SEMANTIC_TYPE_LABELS,
+                          "Elige un tipo"
+                        )
+                      }
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
@@ -535,7 +553,15 @@ function ReviewMessage({
                         className="w-full"
                       >
                         <ReceiptText className="size-4" aria-hidden="true" />
-                        <SelectValue placeholder="Elige un tipo" />
+                        <SelectValue placeholder="Elige un tipo">
+                          {(value: string | null) =>
+                            reviewSelectLabel(
+                              value,
+                              TRANSACTION_KIND_LABELS,
+                              "Elige un tipo"
+                            )
+                          }
+                        </SelectValue>
                       </SelectTrigger>
                       <SelectContent>
                         <SelectGroup>
@@ -655,7 +681,15 @@ function ReviewMessage({
                       className="w-full"
                     >
                       <ArrowLeftRight className="size-4" aria-hidden="true" />
-                      <SelectValue placeholder="Sin dirección" />
+                      <SelectValue placeholder="Sin dirección">
+                        {(value: string | null) =>
+                          reviewSelectLabel(
+                            value,
+                            TRANSACTION_DIRECTION_LABELS,
+                            "Sin dirección"
+                          )
+                        }
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       <SelectGroup>

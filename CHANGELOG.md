@@ -52,6 +52,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Corregido
 
+- Los selectores de Revisar muestran el nombre en español después de elegir relevancia, tipo de correo, tipo de transacción o dirección (#319).
 - Los selectores de categoría del presupuesto y de categoría y destino de la vista previa de Captura rápida se abren por ruta (`?picker=`): Atrás cierra solo el selector y el formulario conserva lo escrito (#250).
 - Productos deja de usar el margen negativo que ocultaba el balance bajo la cabecera y presenta Atajos como una subsección compacta (#262, #297).
 - Cerrar con Atrás la hoja de modo, estilo o color primario descarta el borrador y devuelve la apariencia guardada, igual que «Cancelar» (#160).
