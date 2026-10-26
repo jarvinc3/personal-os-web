@@ -152,6 +152,7 @@ export function QuickEntryPreviewSheet({
           />
 
           <FinanceMoneyField
+            calculatorKey="quick-entry-amount"
             amount={amount}
             onAmountChange={setAmount}
             onAmountCommit={setAmount}

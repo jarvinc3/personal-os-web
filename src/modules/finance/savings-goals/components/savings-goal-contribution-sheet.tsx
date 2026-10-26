@@ -269,6 +269,7 @@ export function SavingsGoalContributionSheet({
             name="amount"
             render={({ field }) => (
               <FinanceMoneyField
+                calculatorKey="savings-contribution-amount"
                 label="Monto"
                 amount={field.value}
                 onAmountChange={field.onChange}

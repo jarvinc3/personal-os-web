@@ -234,6 +234,7 @@ export function ReceivablePaymentSheet({
             name="amount"
             render={({ field }) => (
               <FinanceMoneyField
+                calculatorKey="receivable-payment-amount"
                 label="Monto"
                 amount={field.value}
                 onAmountChange={field.onChange}

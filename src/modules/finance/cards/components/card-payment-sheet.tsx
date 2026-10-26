@@ -151,6 +151,7 @@ export function CardPaymentSheet({
             />
           ) : null}
           <FinanceMoneyField
+            calculatorKey="card-payment-amount"
             label="Monto"
             amount={amount}
             onAmountChange={setAmount}

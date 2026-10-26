@@ -327,6 +327,7 @@ function CardBalanceSheetForm({
             name="balance"
             render={({ field }) => (
               <FinanceMoneyField
+                calculatorKey="card-balance-amount"
                 label="Saldo"
                 amount={field.value}
                 onAmountChange={field.onChange}
@@ -363,6 +364,7 @@ function CardBalanceSheetForm({
               name="creditLimit"
               render={({ field }) => (
                 <FinanceMoneyField
+                  calculatorKey="card-credit-limit"
                   label="Límite de crédito"
                   amount={field.value}
                   onAmountChange={field.onChange}

@@ -237,6 +237,7 @@ export function SubscriptionSheet({
             name="amount"
             render={({ field }) => (
               <FinanceMoneyField
+                calculatorKey="subscription-amount"
                 amount={field.value}
                 onAmountChange={field.onChange}
                 onAmountCommit={field.onChange}

@@ -248,6 +248,7 @@ export function LoanEditForm({
             name="originalAmount"
             render={({ field }) => (
               <FinanceMoneyField
+                calculatorKey="loan-original-amount"
                 label="Monto original"
                 amount={field.value}
                 onAmountChange={field.onChange}
@@ -267,6 +268,7 @@ export function LoanEditForm({
             name="currentBalance"
             render={({ field }) => (
               <FinanceMoneyField
+                calculatorKey="loan-current-debt"
                 label="Deuda actual"
                 amount={field.value}
                 onAmountChange={field.onChange}
@@ -285,6 +287,7 @@ export function LoanEditForm({
             name="installmentAmount"
             render={({ field }) => (
               <FinanceMoneyField
+                calculatorKey="loan-installment"
                 label="Cuota"
                 amount={field.value}
                 onAmountChange={field.onChange}

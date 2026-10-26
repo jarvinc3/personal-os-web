@@ -155,6 +155,7 @@ export function LoanPrepaymentSheet({
       >
         <SummarySection title="Abono" icon={HandCoinsIcon}>
           <FinanceMoneyField
+            calculatorKey="loan-prepayment-amount"
             label="Monto"
             amount={amount}
             onAmountChange={setAmount}

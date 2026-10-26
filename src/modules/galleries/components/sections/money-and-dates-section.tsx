@@ -143,18 +143,21 @@ export function MoneyAndDatesSection() {
         note="Escribir un monto es este campo, no un Input. El modo calculadora vive dentro del mismo control."
       >
         <FinanceMoneyField
+          calculatorKey="gallery-amount"
           amount={amount}
           onAmountChange={setAmount}
           onAmountCommit={setAmount}
           currency="DOP"
         />
         <FinanceMoneyField
+          calculatorKey="gallery-negative"
           amount="-1850.00"
           onAmountChange={() => {}}
           onAmountCommit={() => {}}
           amountError="El monto no puede ser negativo"
         />
         <FinanceMoneyField
+          calculatorKey="gallery-zero"
           amount="0.00"
           onAmountChange={() => {}}
           onAmountCommit={() => {}}

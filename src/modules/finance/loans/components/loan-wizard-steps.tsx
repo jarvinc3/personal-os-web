@@ -233,6 +233,7 @@ export function LoanWizardDetailsStep({
           name="amount"
           render={({ field }) => (
             <FinanceMoneyField
+              calculatorKey="loan-wizard-principal"
               label="¿Cuánto te prestaron?"
               amount={field.value}
               onAmountChange={field.onChange}
@@ -307,6 +308,7 @@ export function LoanWizardDetailsStep({
             name="installment"
             render={({ field }) => (
               <FinanceMoneyField
+                calculatorKey="loan-wizard-installment"
                 label="Cuota"
                 amount={field.value}
                 onAmountChange={field.onChange}
@@ -425,6 +427,7 @@ export function LoanWizardDetailsStep({
           name="insuranceAmount"
           render={({ field }) => (
             <FinanceMoneyField
+              calculatorKey="loan-wizard-insurance"
               label="Seguro mensual (opcional)"
               amount={field.value}
               onAmountChange={field.onChange}

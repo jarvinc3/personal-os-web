@@ -93,7 +93,7 @@ No armar un drawer con `Drawer` crudo si `BottomSheet` cubre el caso (título, d
 
 ### Hoja por ruta
 
-Todo bottom-sheet se abre con la URL, no con un estado local: `useSheetParam(key)` y, cuando la hoja muestra un registro, `sheetId`. En Finanzas la clave sale de `FINANCE_SHEET_KEYS`. Regla completa: [`sheet-url-route.mdc`](../../.cursor/rules/sheet-url-route.mdc).
+Todo bottom-sheet se abre con la URL, no con un estado local: `useSheetParam(key)` y, cuando la hoja muestra un registro, `sheetId`. En Finanzas la clave sale de `FINANCE_SHEET_KEYS`; en Ajustes, de `SETTINGS_SHEET_KEYS`, que comparten Privacidad y Finanzas para el vaciado (`wipeData`). Regla completa: [`sheet-url-route.mdc`](../../.cursor/rules/sheet-url-route.mdc).
 
 ```tsx
 const category = useSheetParam(FINANCE_SHEET_KEYS.category)
@@ -112,7 +112,7 @@ onClick={() => category.setOpen(true, item.id)}
 </BottomSheet>
 ```
 
-Un sheet informativo (ayuda, glosario, historial, «Novedades») también lleva ruta, y una hoja anidada (un selector dentro de un formulario que ya está en hoja) usa el segundo parámetro (`?picker=<clave>`) con `usePicker` de `src/shared/hooks/use-picker` (#251). Un `AlertDialog` de confirmación no lleva ruta: Esc cancela, un clic fuera no cierra. Los sheets que todavía se abren con estado local se convierten en #250.
+Un sheet informativo (ayuda, glosario, historial, «Novedades») también lleva ruta, y una hoja anidada (un selector dentro de un formulario que ya está en hoja) usa el segundo parámetro (`?picker=<clave>`) con `usePicker` de `src/shared/hooks/use-picker` (#251). Un `AlertDialog` de confirmación no lleva ruta: Esc cancela, un clic fuera no cierra. Las claves de los ajustes de Finanzas también son constantes (`financeSettingsDisplay`, `financeSettingsMonth`, `financeSettingsMovements`, `financeSettingsFixedIncome`, `financeSettingsSubscriptions` y `financeSettingsNotifications`), y la calculadora de importes usa una clave por monto (`?picker=calculator-<monto>`, por ejemplo `calculator-card-limit`): dos montos visibles a la vez no comparten clave, así se abre solo la calculadora del campo pulsado. Una hoja nueva se abre siempre por ruta.
 
 `ReleaseNotesSheet` es la única hoja global del shell: aparece una vez por versión. La última versión vista vive en el perfil (`lastSeenReleaseVersion`; se marca con `PATCH /users/me/release-notes-seen`), y `localStorage` (`releaseNotesSeenVersion`) queda solo como caché para no mostrarla mientras el perfil carga. En la primera visita la versión actual se marca en silencio, sin hoja. El componente de `src/shared` es presentacional: recibe la versión vista y el marcado desde `ReleaseNotes` (`src/modules/settings`).
 

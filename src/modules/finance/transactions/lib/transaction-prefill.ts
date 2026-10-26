@@ -42,6 +42,24 @@ export function parseTransactionPrefill(
   }
 }
 
+const PREFILL_QUERY_ORDER = Object.values(PREFILL_QUERY_KEYS)
+
+/**
+ * Query canónica del prefill, en orden fijo. Deja fuera `picker`, `sheet` y
+ * `sheetId`: abrir o cerrar una hoja no es un prefill nuevo y no debe reiniciar
+ * el formulario que la contiene.
+ */
+export function readTransactionPrefillQuery(params: URLSearchParams): string {
+  const prefillParams = new URLSearchParams()
+  for (const key of PREFILL_QUERY_ORDER) {
+    const value = params.get(key)
+    if (value !== null) {
+      prefillParams.set(key, value)
+    }
+  }
+  return prefillParams.toString()
+}
+
 export type TransactionFormParamsInput = {
   type: string
   destination?: string
