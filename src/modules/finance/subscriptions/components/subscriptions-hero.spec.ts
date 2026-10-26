@@ -3,162 +3,74 @@ import { readdirSync, readFileSync } from "node:fs"
 import { dirname, join } from "node:path"
 import { describe, it } from "node:test"
 import { fileURLToPath } from "node:url"
+import ts from "typescript"
 
 /**
- * `Button asChild` clones its only child (`Slot`), and throws during render
- * when it finds two. That is how Suscripciones stopped rendering (#324): the
- * calendar shortcut left `LinkPendingOverlay` as a sibling of the `Link`.
+ * `Button asChild` clones its only child through `Slot`, which throws during
+ * render when it finds two. That is how Suscripciones stopped rendering (#324):
+ * the calendar shortcut left `LinkPendingOverlay` as a sibling of the `Link`.
  *
- * A render test cannot run here (the runner only strips types, not JSX), so the
- * guard reads the components: every `asChild` in the feature must have exactly
- * one direct child.
+ * A render test cannot run here (the runner strips types, not JSX), so the
+ * guard parses the components with the TypeScript parser and counts the direct
+ * children of every element that carries `asChild`.
  */
-const FEATURE_ROOT = join(dirname(fileURLToPath(import.meta.url)))
+const FEATURE_ROOT = dirname(fileURLToPath(import.meta.url))
+const AS_CHILD_ATTRIBUTE = "asChild"
 
-function jsxTagEnd(source: string, start: number): number {
-  let braces = 0
-  let quote: string | null = null
-  for (let index = start; index < source.length; index += 1) {
-    const char = source[index]
-    if (quote) {
-      if (char === quote) {
-        quote = null
-      }
-      continue
-    }
-    if (char === '"' || char === "'" || char === "`") {
-      quote = char
-      continue
-    }
-    if (char === "{") {
-      braces += 1
-      continue
-    }
-    if (char === "}") {
-      braces -= 1
-      continue
-    }
-    if (char === ">" && braces === 0) {
-      return index
-    }
-  }
-  return -1
+type JsxSource = {
+  file: string
+  source: string
 }
 
-function jsxExpressionEnd(source: string, start: number): number {
-  let depth = 0
-  let quote: string | null = null
-  for (let index = start; index < source.length; index += 1) {
-    const char = source[index]
-    if (quote) {
-      if (char === quote) {
-        quote = null
-      }
-      continue
-    }
-    if (char === '"' || char === "'" || char === "`") {
-      quote = char
-      continue
-    }
-    if (char === "{") {
-      depth += 1
-      continue
-    }
-    if (char === "}") {
-      depth -= 1
-      if (depth === 0) {
-        return index
-      }
-    }
+/** Returns a child only when React would actually render it. */
+function isRendered(child: ts.JsxChild): boolean {
+  if (ts.isJsxText(child)) {
+    return child.text.trim() !== ""
   }
-  return source.length - 1
+  if (ts.isJsxExpression(child)) {
+    return child.expression !== undefined
+  }
+  return true
 }
 
-/** Direct children of the element whose opening tag ends at `openEnd`. */
-function directChildren(
-  source: string,
-  openEnd: number,
-  name: string
-): string[] {
-  const children: string[] = []
-  const open: string[] = []
-  let index = openEnd + 1
-  while (index < source.length) {
-    const char = source[index]
-    if (char === "{") {
-      const end = jsxExpressionEnd(source, index)
-      if (open.length === 0) {
-        children.push(source.slice(index, end + 1))
-      }
-      index = end + 1
-      continue
-    }
-    if (char === "<") {
-      if (source[index + 1] === "/") {
-        const end = source.indexOf(">", index)
-        const closing = source.slice(index + 2, end).trim()
-        if (open.length === 0 && closing === name) {
-          return children
-        }
-        open.pop()
-        index = end + 1
-        continue
-      }
-      const end = jsxTagEnd(source, index)
-      if (end === -1) {
-        return children
-      }
-      const selfClosing = source[end - 1] === "/"
-      const childName = source.slice(index + 1, end).split(/[\s>/]/)[0] ?? ""
-      if (open.length === 0) {
-        children.push(source.slice(index, end + 1))
-      }
-      if (!selfClosing) {
-        open.push(childName)
-      }
-      index = end + 1
-      continue
-    }
-    if (open.length === 0 && char.trim()) {
-      let end = index
-      while (
-        end < source.length &&
-        source[end] !== "<" &&
-        source[end] !== "{"
-      ) {
-        end += 1
-      }
-      children.push(source.slice(index, end).trim())
-      index = end
-      continue
-    }
-    index += 1
-  }
-  return children
+function renderedChildren(children: ts.NodeArray<ts.JsxChild>): ts.JsxChild[] {
+  return children.filter(isRendered)
 }
 
-/** Child count of every `asChild` element declared in a component source. */
-function asChildChildCounts(source: string): number[] {
+function hasAsChild(attributes: ts.JsxAttributes): boolean {
+  return attributes.properties.some(
+    (property) =>
+      ts.isJsxAttribute(property) &&
+      property.name.getText() === AS_CHILD_ATTRIBUTE
+  )
+}
+
+/** Child count of every element that carries `asChild`, in source order. */
+function asChildChildCounts({ file, source }: JsxSource): number[] {
   const counts: number[] = []
-  let offset = 0
-  for (const line of source.split("\n")) {
-    const inline = /<[A-Z][A-Za-z.]*[^>]*\basChild\b[^>]*>/.test(line)
-    const ownLine = line.trim() === "asChild"
-    if (inline || ownLine) {
-      const at = offset + line.indexOf("asChild")
-      const tagStart = source.lastIndexOf("<", at)
-      const openEnd = jsxTagEnd(source, tagStart)
-      const name = source.slice(tagStart + 1, openEnd).split(/[\s>/]/)[0] ?? ""
-      counts.push(directChildren(source, openEnd, name).length)
+  const visit = (node: ts.Node): void => {
+    if (ts.isJsxElement(node) && hasAsChild(node.openingElement.attributes)) {
+      counts.push(renderedChildren(node.children).length)
     }
-    offset += line.length + 1
+    if (ts.isJsxSelfClosingElement(node) && hasAsChild(node.attributes)) {
+      counts.push(0)
+    }
+    ts.forEachChild(node, visit)
   }
+  visit(
+    ts.createSourceFile(
+      file,
+      source,
+      ts.ScriptTarget.Latest,
+      true,
+      ts.ScriptKind.TSX
+    )
+  )
   return counts
 }
 
-function featureSources(): Array<{ file: string; source: string }> {
-  return readdirSync(FEATURE_ROOT, { recursive: true })
-    .map((entry) => String(entry))
+function featureSources(): JsxSource[] {
+  return readdirSync(FEATURE_ROOT, { recursive: true, encoding: "utf8" })
     .filter((entry) => entry.endsWith(".tsx"))
     .map((entry) => ({
       file: entry,
@@ -167,22 +79,51 @@ function featureSources(): Array<{ file: string; source: string }> {
 }
 
 describe("subscriptions hero", () => {
-  it("detects a second child next to the link, the shape that broke the view", () => {
-    const broken = `<Button variant="secondary" asChild>
-  <Link href="/x">
-    <CanendarIcon />
-    <span>Calendario</span>
-  </Link>
-  <LinkPendingOverlay />
-</Button>`
-    assert.deepEqual(asChildChildCounts(broken), [2])
+  it("counts the second child that broke the view", () => {
+    const broken = `const view = (
+  <Button variant="secondary" asChild>
+    <Link href="/finance/subscriptions/calendar">
+      <CalendarDaysIcon />
+      <span>Calendario</span>
+    </Link>
+    <LinkPendingOverlay />
+  </Button>
+)`
+    assert.deepEqual(
+      asChildChildCounts({ file: "broken.tsx", source: broken }),
+      [2]
+    )
+  })
+
+  it("ignores whitespace and comments, which render nothing", () => {
+    const spaced = `const view = (
+  <Button variant="secondary" asChild>
+    {/* el aviso vive dentro del enlace */}
+    <Link href="/finance/subscriptions/calendar">
+      <span>Calendario</span>
+    </Link>
+  </Button>
+)`
+    assert.deepEqual(
+      asChildChildCounts({ file: "spaced.tsx", source: spaced }),
+      [1]
+    )
   })
 
   it("keeps one child per asChild element in the feature", () => {
-    const offenders = featureSources()
-      .map(({ file, source }) => ({
+    const inspected = featureSources().map((source) => ({
+      file: source.file,
+      counts: asChildChildCounts(source),
+    }))
+    const scanned = inspected.reduce(
+      (total, { counts }) => total + counts.length,
+      0
+    )
+    assert.ok(scanned > 0, "the feature still has asChild elements to guard")
+    const offenders = inspected
+      .map(({ file, counts }) => ({
         file,
-        counts: asChildChildCounts(source).filter((count) => count !== 1),
+        counts: counts.filter((count) => count !== 1),
       }))
       .filter(({ counts }) => counts.length > 0)
     assert.deepEqual(offenders, [])
