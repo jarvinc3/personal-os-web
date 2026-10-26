@@ -52,6 +52,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Corregido
 
+- Movimientos abre el selector de mes en el mes actual aunque la pantalla monte después de cargar el perfil: el primer centrado del chip es inmediato y ya no se queda al principio de la tira (#325).
 - Suscripciones vuelve a cargar: el atajo Calendario pinta su indicador de espera dentro del enlace, así el botón deja de romper la vista (#324).
 - Los selectores de Revisar muestran el nombre en español después de elegir relevancia, tipo de correo, tipo de transacción o dirección (#319).
 - Los selectores de categoría del presupuesto y de categoría y destino de la vista previa de Captura rápida se abren por ruta (`?picker=`): Atrás cierra solo el selector y el formulario conserva lo escrito (#250).
