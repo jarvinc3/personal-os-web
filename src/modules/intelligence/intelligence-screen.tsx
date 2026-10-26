@@ -58,6 +58,7 @@ import {
 } from "lucide-react"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useIntelligence } from "./hooks/use-intelligence"
+import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { AiEvidenceSection } from "./components/ai-evidence-section"
 import { describeVerificationPayload } from "./review-labels"
 import {
@@ -456,15 +457,35 @@ function IntelligenceScreenBody() {
         )}
       </SummarySection>
 
-      {dashboard.role === "ADMIN" ? (
+      <SummarySection title="Conocimiento" icon={BrainCircuit}>
         <SummaryItem
-          title="Administrar roles"
-          description="Consulta y cambia los roles de Inteligencia."
-          icon={ShieldCheck}
-          href="/intelligence/admin/roles"
+          title="Explorar conocimiento"
+          description="Consulta, exporta y borra lo que la IA aprendió de tus correos."
+          icon={BrainCircuit}
+          href={APP_ROUTES.app.intelligenceKnowledge}
           showChevron
           isLast
         />
+      </SummarySection>
+
+      {dashboard.role === "ADMIN" ? (
+        <SummarySection title="Administración" icon={ShieldCheck}>
+          <SummaryItem
+            title="Administrar roles"
+            description="Consulta y cambia los roles de Inteligencia."
+            icon={ShieldCheck}
+            href={APP_ROUTES.app.intelligenceAdminRoles}
+            showChevron
+          />
+          <SummaryItem
+            title="Cola de conocimiento"
+            description="Revisa y revierte el conocimiento global."
+            icon={BrainCircuit}
+            href={APP_ROUTES.app.intelligenceAdminKnowledge}
+            showChevron
+            isLast
+          />
+        </SummarySection>
       ) : null}
 
       {connected ? (

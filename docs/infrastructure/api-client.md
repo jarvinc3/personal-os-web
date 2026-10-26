@@ -2,6 +2,7 @@
 
 - Base URL: `NEXT_PUBLIC_API_URL` + `NEXT_PUBLIC_API_PREFIX` → `src/config/api-base-url.ts` (lanza si falta URL).
 - Client: `src/config/api-client.ts` — Bearer desde sesión Supabase; extrae `data` del envelope `{ data, meta }`.
+- Helpers: `apiGet`, `apiPost`, `apiPatch`, `apiDelete`, `apiDeleteWithBody` (DELETE con cuerpo, p. ej. `{ "confirmed": true }`) y `apiPostForm`.
 - Endpoints: `src/shared/constants/api-endpoints.ts`.
 - Errores: `ApiError`; `meta.requestId`/`path` si existen.
 - 401 → sign-out via `auth-events` + toast.

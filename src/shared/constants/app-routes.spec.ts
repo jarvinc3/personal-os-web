@@ -109,6 +109,20 @@ describe("module placeholder routes", () => {
   })
 })
 
+describe("intelligence route constants", () => {
+  it("keeps the knowledge routes under intelligence", () => {
+    assert.equal(APP_ROUTES.app.intelligence, "/intelligence")
+    assert.equal(
+      APP_ROUTES.app.intelligenceKnowledge,
+      "/intelligence/knowledge"
+    )
+    assert.equal(
+      APP_ROUTES.app.intelligenceAdminKnowledge,
+      "/intelligence/admin/knowledge"
+    )
+  })
+})
+
 describe("isFinanceTransferFormType", () => {
   it("detects only the transfer type", () => {
     assert.equal(isFinanceTransferFormType("TRANSFER"), true)
