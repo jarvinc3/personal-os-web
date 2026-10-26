@@ -1,6 +1,7 @@
 "use client"
 
 import { apiGet, apiPost } from "@/src/config/api-client"
+import { removeReviewQueueItem } from "@/src/modules/intelligence/review-queue"
 import type {
   AiAnalysisRunSummary,
   AiHumanVerificationInput,
@@ -13,9 +14,15 @@ import {
   useMutation,
   useQuery,
   useQueryClient,
+  type InfiniteData,
+  type QueryKey,
 } from "@tanstack/react-query"
 
 const EVIDENCE_QUERY_KEY = ["intelligence", "evidence"] as const
+const REVIEW_QUEUE_QUERY_KEY = [...EVIDENCE_QUERY_KEY, "review-queue"] as const
+
+type ReviewQueueData = InfiniteData<AiReviewQueuePage>
+type ReviewQueueSnapshot = Array<[QueryKey, ReviewQueueData | undefined]>
 
 export function useAiEvidence(
   enabled: boolean,
@@ -26,7 +33,7 @@ export function useAiEvidence(
   const queryClient = useQueryClient()
   const active = Boolean(session && enabled)
   const reviewQueueQuery = useInfiniteQuery({
-    queryKey: [...EVIDENCE_QUERY_KEY, "review-queue", partition],
+    queryKey: [...REVIEW_QUEUE_QUERY_KEY, partition],
     queryFn: ({ pageParam, signal }) => {
       const params = new URLSearchParams()
       if (partition !== "ALL") {
@@ -59,9 +66,25 @@ export function useAiEvidence(
       messageId: string
       input: AiHumanVerificationInput
     }) => apiPost(API_ENDPOINTS.INTELLIGENCE.VERIFY_MESSAGE(messageId), input),
-    onSuccess: async (_, { messageId }) => {
+    onMutate: async ({ messageId }) => {
+      await queryClient.cancelQueries({ queryKey: REVIEW_QUEUE_QUERY_KEY })
+      const previous = queryClient.getQueriesData<ReviewQueueData>({
+        queryKey: REVIEW_QUEUE_QUERY_KEY,
+      }) satisfies ReviewQueueSnapshot
+      queryClient.setQueriesData<ReviewQueueData>(
+        { queryKey: REVIEW_QUEUE_QUERY_KEY },
+        (queue) => removeReviewQueueItem(queue, messageId)
+      )
+      return { previous }
+    },
+    onError: (_error, _variables, context) => {
+      for (const [queryKey, data] of context?.previous ?? []) {
+        queryClient.setQueryData(queryKey, data)
+      }
+    },
+    onSettled: async (_, __, { messageId }) => {
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: [...EVIDENCE_QUERY_KEY] }),
+        queryClient.invalidateQueries({ queryKey: EVIDENCE_QUERY_KEY }),
         queryClient.invalidateQueries({
           queryKey: ["intelligence", "message", messageId],
         }),

@@ -1,6 +1,8 @@
 "use client"
 
 import { useIntelligenceMessage } from "@/src/modules/intelligence/hooks/use-intelligence"
+import { INTELLIGENCE_SHEET_KEYS } from "@/src/modules/intelligence/constants/sheet-keys"
+import { shortMessageId } from "@/src/modules/intelligence/message-id"
 import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
 import { Button } from "@/src/shared/components/ui/button"
@@ -45,6 +47,7 @@ import {
   Inbox,
   LoaderCircle,
   Mail,
+  FileText,
   Wifi,
   WifiOff,
   RefreshCw,
@@ -81,7 +84,7 @@ function IntelligenceScreenBody() {
     open: messageSheetOpen,
     sheetId: selectedMessageId,
     setOpen: setMessageSheetOpen,
-  } = useSheetParam("intelligence-message")
+  } = useSheetParam(INTELLIGENCE_SHEET_KEYS.message)
   usePageHeader({ title: "Inteligencia" })
 
   const messages = useMemo(
@@ -140,6 +143,18 @@ function IntelligenceScreenBody() {
   const connected = dashboard.connection.connected
   const receivedRange = dashboard.receivedRange
   const syncProgress = connected ? dashboard.connection.syncProgress : null
+  const connection = dashboard.connection
+  const syncFailed =
+    (connection.connected && Boolean(connection.lastSyncErrorCode)) ||
+    syncProgress?.status === "failed"
+  const syncWaiting =
+    syncProgress?.status === "waiting" || syncProgress?.status === "retrying"
+  const syncing =
+    (connection.connected &&
+      (connection.syncInProgress ||
+        (!connection.initialSyncCompletedAt && !syncFailed))) ||
+    syncProgress?.status === "running" ||
+    syncProgress?.status === "scheduled"
 
   return (
     <main className="mx-auto flex w-full max-w-4xl flex-col gap-5 p-4 pb-10 md:px-6">
@@ -147,10 +162,16 @@ function IntelligenceScreenBody() {
         title={connected ? "Gmail" : "Fuente de correo"}
         subtitle={
           connected
-            ? dashboard.connection.emailAddress
+            ? connectionSubtitle({
+                emailAddress: dashboard.connection.emailAddress,
+                syncFailed,
+                syncWaiting,
+                syncing,
+              })
             : "Conecta una cuenta para importar y revisar tus mensajes."
         }
         icon={Mail}
+        collapsible={connected}
         right={
           connected ? (
             <div className="flex items-center gap-2">
@@ -183,11 +204,25 @@ function IntelligenceScreenBody() {
                     ? "Conectando"
                     : "Sin conexión"}
               </Badge>
-              <span role="img" aria-label="Gmail conectado">
-                <CheckCircle2
-                  className="size-5 text-emerald-600"
-                  aria-hidden="true"
-                />
+              <span
+                role="img"
+                aria-label={
+                  syncFailed
+                    ? "Gmail conectado con la sincronización detenida"
+                    : "Gmail conectado"
+                }
+              >
+                {syncFailed ? (
+                  <AlertCircle
+                    className="size-5 text-amber-600"
+                    aria-hidden="true"
+                  />
+                ) : (
+                  <CheckCircle2
+                    className="size-5 text-emerald-600"
+                    aria-hidden="true"
+                  />
+                )}
               </span>
             </div>
           ) : (
@@ -341,6 +376,57 @@ function IntelligenceScreenBody() {
                 Vaciar
               </Button>
             </div>
+            <div
+              className="flex flex-wrap gap-2"
+              aria-label="Resumen de cobertura del correo"
+            >
+              <Badge variant="outline">
+                <Mail data-icon="inline-start" />
+                {dashboard.counters.importedMessages} correos
+              </Badge>
+
+              <Badge variant="outline">
+                Primer correo ·{" "}
+                {receivedRange?.firstMessageAt
+                  ? formatDate(receivedRange.firstMessageAt)
+                  : "Sin dato"}
+              </Badge>
+
+              <Badge variant="outline">
+                Más reciente ·{" "}
+                {receivedRange?.latestMessageAt
+                  ? formatDate(receivedRange.latestMessageAt)
+                  : "Sin dato"}
+              </Badge>
+
+              <Badge variant="outline">
+                <Clock3 data-icon="inline-start" />
+                {dashboard.counters.recentMessages} en 30 días
+              </Badge>
+
+              <Badge
+                variant={
+                  dashboard.connection.initialSyncCompletedAt
+                    ? "success"
+                    : dashboard.connection.syncInProgress
+                      ? "info"
+                      : syncFailed
+                        ? "warning"
+                        : "secondary"
+                }
+              >
+                <CalendarDays data-icon="inline-start" />
+                {dashboard.connection.initialSyncCompletedAt
+                  ? "Histórico completo desde 1 ene 2026"
+                  : dashboard.connection.syncInProgress
+                    ? "Importando desde 1 ene 2026"
+                    : syncFailed
+                      ? "Histórico detenido · desde 1 ene 2026"
+                      : syncProgress?.status === "scheduled"
+                        ? "Histórico en espera · desde 1 ene 2026"
+                        : "Bootstrap pendiente · desde 1 ene 2026"}
+              </Badge>
+            </div>
           </>
         ) : (
           <Empty>
@@ -369,62 +455,6 @@ function IntelligenceScreenBody() {
           </Empty>
         )}
       </SummarySection>
-
-      {connected ? (
-        <div
-          className="flex flex-wrap gap-2"
-          aria-label="Resumen de cobertura del correo"
-        >
-          <Badge variant="outline">
-            <Mail data-icon="inline-start" />
-            {dashboard.counters.importedMessages} correos
-          </Badge>
-
-          <Badge variant="outline">
-            Primer correo ·{" "}
-            {receivedRange?.firstMessageAt
-              ? formatDate(receivedRange.firstMessageAt)
-              : "Sin dato"}
-          </Badge>
-
-          <Badge variant="outline">
-            Más reciente ·{" "}
-            {receivedRange?.latestMessageAt
-              ? formatDate(receivedRange.latestMessageAt)
-              : "Sin dato"}
-          </Badge>
-
-          <Badge variant="outline">
-            <Clock3 data-icon="inline-start" />
-            {dashboard.counters.recentMessages} en 30 días
-          </Badge>
-
-          <Badge
-            variant={
-              dashboard.connection.initialSyncCompletedAt
-                ? "success"
-                : dashboard.connection.syncInProgress
-                  ? "info"
-                  : syncProgress?.status === "failed" ||
-                      dashboard.connection.lastSyncErrorCode
-                    ? "warning"
-                    : "secondary"
-            }
-          >
-            <CalendarDays data-icon="inline-start" />
-            {dashboard.connection.initialSyncCompletedAt
-              ? "Histórico completo desde 1 ene 2026"
-              : dashboard.connection.syncInProgress
-                ? "Importando desde 1 ene 2026"
-                : syncProgress?.status === "failed" ||
-                    dashboard.connection.lastSyncErrorCode
-                  ? "Histórico detenido · desde 1 ene 2026"
-                  : syncProgress?.status === "scheduled"
-                    ? "Histórico en espera · desde 1 ene 2026"
-                    : "Bootstrap pendiente · desde 1 ene 2026"}
-          </Badge>
-        </div>
-      ) : null}
 
       {dashboard.role === "ADMIN" ? (
         <SummaryItem
@@ -501,6 +531,7 @@ function IntelligenceScreenBody() {
                   <SummaryItem
                     key={message.id}
                     title={message.subject}
+                    wrapTitle
                     description={`${message.fromAddress} · ${formatDateTime(message.receivedAt)}`}
                     icon={Mail}
                     onPress={() => setMessageSheetOpen(true, message.id)}
@@ -624,6 +655,29 @@ function formatRetryCountdown(retryAt: number, now: number | null) {
   return `Reintento en ${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`
 }
 
+function connectionSubtitle({
+  emailAddress,
+  syncFailed,
+  syncWaiting,
+  syncing,
+}: {
+  emailAddress: string
+  syncFailed: boolean
+  syncWaiting: boolean
+  syncing: boolean
+}) {
+  if (syncFailed) {
+    return `${emailAddress} · Sincronización detenida`
+  }
+  if (syncWaiting) {
+    return `${emailAddress} · Esperando reintento de Gmail`
+  }
+  if (syncing) {
+    return `${emailAddress} · Importando desde 1 ene 2026`
+  }
+  return `${emailAddress} · Histórico completo`
+}
+
 function emailSocketStatusLabel(
   status: "connecting" | "connected" | "disconnected"
 ) {
@@ -679,7 +733,7 @@ function IntelligenceMessageDetail({
       title={data?.subject ?? "Detalle del mensaje"}
       description={
         data
-          ? `${data.fromAddress} · ${formatDateTime(data.receivedAt)}`
+          ? `${data.fromAddress} · ${formatDateTime(data.receivedAt)} · #${shortMessageId(data.id)}`
           : undefined
       }
       actions={{
@@ -725,10 +779,15 @@ function IntelligenceMessageDetail({
             title="Saneada"
             value={data.content?.sanitizedBody}
           />
-          <MessageRepresentation
+          <SummarySection
             title="Cruda (retención limitada)"
-            value={data.content?.rawBody}
-          />
+            icon={FileText}
+            collapsible
+          >
+            <pre className="max-h-80 overflow-auto rounded-lg bg-muted p-3 font-sans text-sm wrap-break-word whitespace-pre-wrap">
+              {data.content?.rawBody || "No disponible"}
+            </pre>
+          </SummarySection>
           <SummarySection
             title="Procedencia y verificaciones"
             subtitle="Registros append-only vinculados al correo original."

@@ -19,6 +19,11 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Cambiado
 
+- La cola de revisión de Inteligencia deja ver el primer correo al abrir la vista en móvil: Gmail y las insignias de cobertura pasan a una sección plegada que resume la cuenta y el estado de la sincronización en una línea, y el asunto se lee completo en dos líneas sin que la etiqueta de partición lo tape (#323).
+- Revisar abre el formulario en un panel por ruta (`?sheet=intelligence-review`), con la vista previa del correo al lado desde `md` y arriba en móvil, en lugar de expandirse dentro de la fila; la lista no cambia de posición (#323).
+- La fila sale de la cola en cuanto se envía la verificación, sin esperar al servidor, y los conteos bajan con ella; si el envío falla, la fila vuelve y un aviso lo explica (#323).
+- Cada correo muestra un ID corto (`#3f9a1c7e`) en la cola y en el detalle, para distinguir dos con el mismo asunto, remitente y minuto (#323).
+- `BottomSheet` acepta `size="wide"`: desde `md` el drawer derecho se ensancha para mostrar dos columnas y en móvil baja como cualquier hoja; el ejemplo vive en la galería de Apariencia (#323).
 - #319: Revisar usa selectores de tipo y chips de dominios, valida el bloque de transacción y muestra las etiquetas en español en el detalle del correo.
 - Cerrar una hoja se pinta una sola vez: el mismo «Cancelar» con su icono en todas, «Cerrar» en las de solo lectura y la acción propia («Limpiar», «Listo», «Ahora no») donde la hoja la necesita; las hojas dejan de copiar el botón (#298).
 - Toda confirmación usa el mismo diálogo: mismo título, descripción y botones, el tono destructivo siempre igual, Esc y Cancelar cierran sin ejecutar y el clic fuera no cierra; el vaciado con contraseña sigue pidiéndola dentro del mismo diálogo (#299).
@@ -52,6 +57,8 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Corregido
 
+- El detalle de una verificación CORRECTED muestra la Relevancia corregida junto al tipo semántico y los dominios (#323).
+- La sección «Cruda» del detalle del correo empieza plegada y se despliega al pulsarla (#323).
 - Movimientos abre el selector de mes en el mes actual aunque la pantalla monte después de cargar el perfil: el primer centrado del chip es inmediato y ya no se queda al principio de la tira (#325).
 - Los atajos del hero de Suscripciones vuelven a la tarjeta clara con borde y dejan de recortar su etiqueta: se leen completos en claro y oscuro, en reposo y con hover (#326).
 - Suscripciones vuelve a cargar: el atajo Calendario pinta su indicador de espera dentro del enlace, así el botón deja de romper la vista (#324).
