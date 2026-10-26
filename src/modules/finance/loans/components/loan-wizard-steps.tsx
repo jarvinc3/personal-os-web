@@ -1,5 +1,6 @@
 "use client"
 
+import { SegmentedControl } from "@/src/shared/components/forms/segmented-control"
 import { format } from "date-fns"
 import {
   ArrowDownCircleIcon,
@@ -23,10 +24,7 @@ import {
 } from "react-hook-form"
 
 import { FinanceDateField } from "@/src/modules/finance/shared/components/forms/date-field"
-import {
-  FinanceHelpText,
-  FinanceSegmentedControl,
-} from "@/src/modules/finance/shared/components/forms/form-blocks"
+import { FinanceHelpText } from "@/src/modules/finance/shared/components/forms/form-blocks"
 import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
 import { DestinationTrigger } from "@/src/modules/finance/shared/components/pickers/destination-trigger"
 import { InstitutionTrigger } from "@/src/modules/finance/shared/components/pickers/institution-picker"
@@ -48,12 +46,13 @@ import {
   type LoanWizardValues,
 } from "@/src/modules/finance/loans/lib/loan-form"
 import type { LoanPlan } from "@/src/modules/finance/loans/lib/loan-wizard"
-import {
-  FormTextField,
-  OptionRow,
-} from "@/src/shared/components/layout/form-blocks"
+import { FormTextField } from "@/src/shared/components/forms/form-text-field"
+import { OptionRow } from "@/src/shared/components/forms/option-row"
 import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
-import { SummaryItem, SummarySection } from "@/src/shared/components/ui/summary"
+import {
+  SummaryItem,
+  SummarySection,
+} from "@/src/shared/components/data-display/summary"
 import { Button } from "@/src/shared/components/ui/button"
 import { cn } from "@/src/shared/lib/utils"
 
@@ -234,6 +233,7 @@ export function LoanWizardDetailsStep({
           name="amount"
           render={({ field }) => (
             <FinanceMoneyField
+              calculatorKey="loan-wizard-principal"
               label="¿Cuánto te prestaron?"
               amount={field.value}
               onAmountChange={field.onChange}
@@ -252,7 +252,7 @@ export function LoanWizardDetailsStep({
           control={control}
           name="freq"
           render={({ field }) => (
-            <FinanceSegmentedControl
+            <SegmentedControl
               label="Frecuencia"
               value={field.value}
               onChange={(value) =>
@@ -266,7 +266,7 @@ export function LoanWizardDetailsStep({
           control={control}
           name="periods"
           render={({ field }) => (
-            <FinanceSegmentedControl
+            <SegmentedControl
               label="Plazo"
               value={field.value}
               onChange={field.onChange}
@@ -278,7 +278,7 @@ export function LoanWizardDetailsStep({
           control={control}
           name="known"
           render={({ field }) => (
-            <FinanceSegmentedControl
+            <SegmentedControl
               label="Conoces"
               value={field.value}
               onChange={field.onChange}
@@ -308,6 +308,7 @@ export function LoanWizardDetailsStep({
             name="installment"
             render={({ field }) => (
               <FinanceMoneyField
+                calculatorKey="loan-wizard-installment"
                 label="Cuota"
                 amount={field.value}
                 onAmountChange={field.onChange}
@@ -411,7 +412,7 @@ export function LoanWizardDetailsStep({
           control={control}
           name="rateType"
           render={({ field }) => (
-            <FinanceSegmentedControl
+            <SegmentedControl
               label="Tipo de tasa"
               value={field.value}
               onChange={(value) =>
@@ -426,6 +427,7 @@ export function LoanWizardDetailsStep({
           name="insuranceAmount"
           render={({ field }) => (
             <FinanceMoneyField
+              calculatorKey="loan-wizard-insurance"
               label="Seguro mensual (opcional)"
               amount={field.value}
               onAmountChange={field.onChange}

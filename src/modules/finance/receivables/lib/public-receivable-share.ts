@@ -1,7 +1,10 @@
-import { format, isSameDay, parseISO, subDays } from "date-fns"
-import { es } from "date-fns/locale/es"
+import { isSameDay, parseISO, subDays } from "date-fns"
 
 import { formatCalendarDate } from "@/src/modules/finance/shared/lib/ledger-form"
+import {
+  formatClockTimeFromDate,
+  formatDayMonth,
+} from "@/src/shared/lib/date-format"
 import {
   formatFinanceMoney,
   parseFinanceMoney,
@@ -164,18 +167,22 @@ export function publicShareDetailDescription(ownerFirstName: string): string {
 }
 
 /** `Actualizado hoy, 7:30 p. m.`, `Actualizado ayer, …` or `Actualizado el 12 sep`. */
-export function formatPublicShareUpdatedAt(iso: string, now: Date): string {
+export function formatPublicShareUpdatedAt(
+  iso: string,
+  now: Date,
+  locale: string
+): string {
   const date = parseISO(iso)
   if (Number.isNaN(date.getTime())) {
     return ""
   }
   if (isSameDay(date, now)) {
-    return `Actualizado hoy, ${format(date, "hh:mm aaaa", { locale: es })}`
+    return `Actualizado hoy, ${formatClockTimeFromDate(date, locale)}`
   }
   if (isSameDay(date, subDays(now, 1))) {
-    return `Actualizado ayer, ${format(date, "hh:mm aaaa", { locale: es })}`
+    return `Actualizado ayer, ${formatClockTimeFromDate(date, locale)}`
   }
-  return `Actualizado el ${format(date, "d MMM", { locale: es })}`
+  return `Actualizado el ${formatDayMonth(date, locale)}`
 }
 
 export function publicShareCountCaption(count: number): string {

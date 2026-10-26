@@ -1,5 +1,6 @@
 "use client"
 
+import { useAppearanceDraft } from "@/src/modules/settings/hooks/use-appearance-draft"
 import { useProfile } from "@/src/modules/settings/hooks/use-profile"
 import type { SettingsSheetProps } from "@/src/modules/settings/types/sheet.types"
 import {
@@ -10,11 +11,11 @@ import {
   PRIMARY_COLORS,
   readableTextColor,
 } from "@/src/shared/appearance"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import { FieldLabel } from "@/src/shared/components/ui/field"
 import { Button } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
-import { SummarySection } from "@/src/shared/components/ui/summary"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { cn } from "@/src/shared/lib/utils"
 import {
@@ -23,9 +24,7 @@ import {
   PaletteIcon,
   PipetteIcon,
   SaveIcon,
-  XIcon,
 } from "lucide-react"
-import { useState } from "react"
 
 const CUSTOM_COLOR_INPUT_ID = "primary-color-custom"
 
@@ -34,36 +33,30 @@ export function EditPrimaryColorSheet({
   onOpenChange,
 }: SettingsSheetProps) {
   const { savePreferences, preferences, updateProfileMutation } = useProfile()
-  const currentColor = preferences.theme.primaryColor
-  const [draftColor, setDraftColor] = useState<string | null>(null)
-  const colorValue = draftColor ?? currentColor
-  const isDirty = draftColor !== null && draftColor !== currentColor
-  const currentOption = findPrimaryColor(colorValue)
-
-  const revertDraft = () => {
-    setDraftColor(null)
-    applyPrimaryColorToDocument(currentColor)
-  }
+  const draft = useAppearanceDraft({
+    open,
+    savedValue: preferences.theme.primaryColor,
+    applyPreview: applyPrimaryColorToDocument,
+  })
+  const currentOption = findPrimaryColor(draft.value)
 
   const handleOpenChange = (nextOpen: boolean) => {
     if (!nextOpen) {
-      revertDraft()
+      draft.revert()
     }
     onOpenChange(nextOpen)
   }
 
   const handleColorChange = (value: string) => {
-    const normalized = normalizeHexColor(value) ?? DEFAULT_PRIMARY_COLOR
-    setDraftColor(normalized)
-    applyPrimaryColorToDocument(normalized)
+    draft.change(normalizeHexColor(value) ?? DEFAULT_PRIMARY_COLOR)
   }
 
   const handleSave = () => {
     savePreferences(
-      { theme: { primaryColor: colorValue } },
+      { theme: { primaryColor: draft.value } },
       {
         onSuccess: () => {
-          setDraftColor(null)
+          draft.clear()
           appToast.success({
             text1: "Color primario actualizado",
             text2: "Tu preferencia de apariencia se guardó.",
@@ -81,22 +74,10 @@ export function EditPrimaryColorSheet({
       title="Color primario"
       description="Botones, enlaces y acentos de toda la app."
       actions={{
-        close: (
-          <Button
-            variant="outline"
-            className="flex-1"
-            onClick={() => {
-              handleOpenChange(false)
-            }}
-          >
-            <XIcon className="size-4 shrink-0" />
-            Cancelar
-          </Button>
-        ),
         submit: (
           <Button
             className="flex-1"
-            disabled={!isDirty || updateProfileMutation.isPending}
+            disabled={!draft.isDirty || updateProfileMutation.isPending}
             onClick={handleSave}
           >
             {updateProfileMutation.isPending ? (
@@ -112,7 +93,7 @@ export function EditPrimaryColorSheet({
       <SummarySection title="Paleta" icon={PaletteIcon}>
         <div className="grid grid-cols-4 gap-3">
           {PRIMARY_COLORS.map((option) => {
-            const selected = option.hex === colorValue
+            const selected = option.hex === draft.value
 
             return (
               <div
@@ -167,13 +148,13 @@ export function EditPrimaryColorSheet({
           <span
             aria-hidden
             className="size-8 shrink-0 rounded-full border border-border"
-            style={{ backgroundColor: colorValue }}
+            style={{ backgroundColor: draft.value }}
           />
           <input
             id={CUSTOM_COLOR_INPUT_ID}
             aria-label="Color primario personalizado"
             type="color"
-            value={colorValue.toLowerCase()}
+            value={draft.value.toLowerCase()}
             onChange={(event) => {
               handleColorChange(event.target.value)
             }}
@@ -188,7 +169,7 @@ export function EditPrimaryColorSheet({
             Texto sobre el color primario
           </div>
           <span className="text-xs text-muted-foreground">
-            {currentOption?.label ?? "Personalizado"} · {colorValue}
+            {currentOption?.label ?? "Personalizado"} · {draft.value}
           </span>
         </div>
       </SummarySection>

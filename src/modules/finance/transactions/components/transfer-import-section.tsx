@@ -7,7 +7,7 @@ import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money
 import { LedgerDateStatusField } from "@/src/modules/finance/transactions/components/ledger-date-status-field"
 import { TransferFxSection } from "@/src/modules/finance/transactions/components/transfer-fx-section"
 import type { TransferFormValues } from "@/src/modules/finance/transactions/lib/transfer-form"
-import { SummarySection } from "@/src/shared/components/ui/summary"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { ArrowUpDownIcon } from "lucide-react"
 import type { RefObject } from "react"
 import { Controller, type Control, type FieldErrors } from "react-hook-form"
@@ -52,6 +52,7 @@ export function TransferImportSection({
         name="amount"
         render={({ field }) => (
           <FinanceMoneyField
+            calculatorKey="transfer-amount"
             amount={field.value}
             onAmountChange={field.onChange}
             onAmountCommit={(next) => {

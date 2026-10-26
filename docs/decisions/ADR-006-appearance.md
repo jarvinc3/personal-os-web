@@ -24,7 +24,7 @@ Neo-Skeuo se aprobó con la condición de que la arquitectura soportara una list
 - Toda pantalla cuelga del layout raíz, que declara `data-style`. Un estilo sin archivo no pinta tokens; el registro y el script validan el id.
 - La primera visita en un dispositivo nuevo muestra la apariencia por defecto hasta que responde el perfil; en recargas del mismo dispositivo no hay parpadeo.
 - El color primario no cambia los acentos propios de cada app ni los colores semánticos (éxito, aviso, peligro).
-- Neo-Skeuo queda en #235. Su archivo CSS solo agrega tokens; no cambia el registro del selector.
+- Neo-Skeuo entró como segundo estilo con su propio archivo de tokens (papel, tinta, superficies base/elevada/hundida/presionada y escala de radios 0/4/8/12 px). No tocó componentes: las utilidades `shadow-*` de Tailwind consumen `--surface-shadow-*` desde `app/globals.css`, y las de radio consumen `--radius-ratio-*`.
 - El modo sigue con `next-themes`; el estilo y el color los aplica el cliente y el script del primer pintado.
 
 ## Evidencia

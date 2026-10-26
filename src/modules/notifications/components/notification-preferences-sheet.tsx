@@ -7,17 +7,18 @@ import {
   SETTINGS_REGISTRY,
   useProfile,
 } from "@/src/modules/settings"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import {
   SettingsRow,
   SettingsSection,
-} from "@/src/shared/components/layout/settings-section"
+} from "@/src/shared/components/settings/settings-section"
 import { Button } from "@/src/shared/components/ui/button"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { formatTimeRange } from "@/src/shared/lib/date-format"
-import { LinkPendingOverlay } from "@/src/shared/components/ui/navigation-pending"
+import { LinkPendingOverlay } from "@/src/shared/components/shell/navigation-pending"
 import { SettingsIcon } from "lucide-react"
 import Link from "next/link"
+import { useFormatLocale } from "@/src/modules/settings/hooks/use-format-locale"
 
 type NotificationPreferenceToggle = (
   patch: Parameters<ReturnType<typeof useProfile>["updatePreferences"]>[0],
@@ -39,6 +40,7 @@ export function NotificationPreferencesSheet({
   onQuietHoursOpenChange,
   onPreferenceToggle,
 }: NotificationPreferencesSheetProps) {
+  const locale = useFormatLocale()
   const { preferences } = useProfile()
   const quietHours = preferences.notifications.quietHours
 
@@ -123,7 +125,11 @@ export function NotificationPreferencesSheet({
           {quietHours.enabled ? (
             <SettingsRow
               label="Rango horario"
-              value={formatTimeRange(quietHours.start, quietHours.end)}
+              value={formatTimeRange({
+                start: quietHours.start,
+                end: quietHours.end,
+                locale,
+              })}
               onPress={() => onQuietHoursOpenChange(true)}
               {...SETTINGS_REGISTRY.notifications.rows.quietHoursSchedule}
             />

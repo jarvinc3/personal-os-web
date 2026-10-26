@@ -196,8 +196,10 @@ function Sidebar({
           }
         >
           <DrawerHeader className="sr-only">
-            <DrawerTitle>Sidebar</DrawerTitle>
-            <DrawerDescription>Displays the mobile sidebar.</DrawerDescription>
+            <DrawerTitle>Menú de la app</DrawerTitle>
+            <DrawerDescription>
+              Secciones y ajustes de la app.
+            </DrawerDescription>
           </DrawerHeader>
           <div className="flex h-full w-full flex-col">{children}</div>
         </DrawerContent>
@@ -276,7 +278,7 @@ function SidebarTrigger({
         strokeWidth={2}
         className="cn-rtl-flip"
       />
-      <span className="sr-only">Toggle Sidebar</span>
+      <span className="sr-only">Abrir o cerrar el menú</span>
     </Button>
   )
 }
@@ -288,10 +290,10 @@ function SidebarRail({ className, ...props }: React.ComponentProps<"button">) {
     <button
       data-sidebar="rail"
       data-slot="sidebar-rail"
-      aria-label="Toggle Sidebar"
+      aria-label="Abrir o cerrar el menú"
       tabIndex={-1}
       onClick={toggleSidebar}
-      title="Toggle Sidebar"
+      title="Abrir o cerrar el menú"
       className={cn(
         "absolute inset-y-0 z-20 hidden w-4 transition-all ease-linear group-data-[side=left]:-right-4 group-data-[side=right]:left-0 after:absolute after:inset-y-0 after:inset-s-1/2 after:w-0.5 hover:after:bg-sidebar-border sm:flex ltr:-translate-x-1/2 rtl:-translate-x-1/2",
         "in-data-[side=left]:cursor-w-resize in-data-[side=right]:cursor-e-resize",

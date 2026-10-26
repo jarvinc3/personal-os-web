@@ -1,8 +1,8 @@
 "use client"
 
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
-import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
-import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
+import { ErrorState } from "@/src/shared/components/feedback/error-state"
+import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
 import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
 import { useCards } from "@/src/modules/finance/shared/hooks/use-cards"
 import { useCategories } from "@/src/modules/finance/shared/hooks/use-categories"
@@ -22,8 +22,9 @@ import {
 import { groupSubscriptions } from "@/src/modules/finance/subscriptions/lib/subscription-view"
 import type { FinanceSubscriptionGroupBy } from "@/src/modules/finance/shared/types/entities"
 import { Badge } from "@/src/shared/components/ui/badge"
+import { SettingsSection } from "@/src/shared/components/settings/settings-section"
 import { Button } from "@/src/shared/components/ui/button"
-import { InfiniteListSentinel } from "@/src/shared/components/ui/infinite-list-sentinel"
+import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
 import {
   Empty,
   EmptyDescription,
@@ -89,15 +90,15 @@ export function SubscriptionsList({
   const groups = groupSubscriptions(items, groupBy)
 
   return (
-    <section className="flex flex-col gap-3">
-      <div className="flex items-center justify-between gap-2">
-        <h2 className="flex items-baseline gap-2 text-sm font-semibold">
-          Mis suscripciones
+    <SettingsSection
+      title="Mis suscripciones"
+      bare
+      className="gap-3"
+      headerTrailing={
+        <div className="flex items-center gap-1">
           <span className="text-sm font-normal text-muted-foreground tabular-nums">
             {items.length}
           </span>
-        </h2>
-        <div className="flex items-center gap-1">
           <Button
             type="button"
             variant="outline"
@@ -126,8 +127,8 @@ export function SubscriptionsList({
             ) : null}
           </Button>
         </div>
-      </div>
-
+      }
+    >
       {chips.length > 0 ? (
         <div className="flex flex-wrap gap-2">
           {chips.map((chip) => (
@@ -146,7 +147,7 @@ export function SubscriptionsList({
       ) : null}
 
       {listQuery.isError ? (
-        <FinanceErrorState
+        <ErrorState
           message={financeErrorMessage(listQuery.error)}
           onRetry={() => void listQuery.refetch()}
           isRetrying={listQuery.isFetching}
@@ -155,7 +156,7 @@ export function SubscriptionsList({
 
       <AsyncRegion
         pending={listQuery.isPending && !listQuery.data}
-        pendingFallback={<FinanceListSkeleton rows={4} />}
+        pendingFallback={<ListSkeleton rows={4} />}
         empty={items.length === 0}
         emptyFallback={
           <Empty className="py-8">
@@ -213,6 +214,6 @@ export function SubscriptionsList({
         isFetchingNextPage={listQuery.isFetchingNextPage}
         onLoadMore={() => void listQuery.fetchNextPage()}
       />
-    </section>
+    </SettingsSection>
   )
 }

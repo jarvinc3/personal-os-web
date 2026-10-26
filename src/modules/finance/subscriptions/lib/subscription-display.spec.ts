@@ -132,6 +132,7 @@ describe("subscriptionCardState", () => {
       subscription: subscription(),
       today: day(2026, 10, 14),
       windowDays: 5,
+      locale: "es-DO",
     })
     assert.equal(state.label, "Hoy")
     assert.equal(state.inWindow, true)
@@ -142,6 +143,7 @@ describe("subscriptionCardState", () => {
       subscription: subscription({ nextBillingDate: "2026-10-22" }),
       today: day(2026, 10, 14),
       windowDays: 5,
+      locale: "es-DO",
     })
     assert.equal(state.label, "22 oct")
     assert.equal(state.inWindow, false)
@@ -153,6 +155,7 @@ describe("subscriptionCardState", () => {
         subscription: subscription({ lastChargeMismatch: true }),
         today: day(2026, 10, 14),
         windowDays: 5,
+        locale: "es-DO",
       }).warnLastCharge,
       true
     )
@@ -166,6 +169,7 @@ describe("subscriptionCardState", () => {
       }),
       today: day(2026, 10, 14),
       windowDays: 5,
+      locale: "es-DO",
     })
     assert.equal(paused.inWindow, false)
     assert.equal(paused.label, "15 oct")
@@ -177,6 +181,7 @@ describe("subscriptionCardState", () => {
       }),
       today: day(2026, 10, 14),
       windowDays: 5,
+      locale: "es-DO",
     })
     assert.equal(cancelled.inWindow, false)
     assert.equal(cancelled.label, "14 oct")
@@ -187,6 +192,7 @@ describe("subscriptionCardState", () => {
       subscription: subscription({ nextBillingDate: "2026-10-20" }),
       today: day(2026, 10, 22),
       windowDays: 5,
+      locale: "es-DO",
     })
     assert.equal(overdue.overdue, true)
 
@@ -194,6 +200,7 @@ describe("subscriptionCardState", () => {
       subscription: subscription({ nextBillingDate: "2026-10-24" }),
       today: day(2026, 10, 22),
       windowDays: 5,
+      locale: "es-DO",
     })
     assert.equal(future.overdue, false)
   })
@@ -206,6 +213,7 @@ describe("subscriptionCardState", () => {
       }),
       today: day(2026, 10, 22),
       windowDays: 5,
+      locale: "es-DO",
     })
     assert.equal(paused.overdue, false)
   })
@@ -216,6 +224,7 @@ describe("subscriptionCardState", () => {
         subscription: subscription({ trialEndsAt: "2026-10-28" }),
         today: day(2026, 10, 14),
         windowDays: 5,
+        locale: "es-DO",
       }).onTrial,
       true
     )
@@ -224,6 +233,7 @@ describe("subscriptionCardState", () => {
         subscription: subscription({ trialEndsAt: "2026-10-01" }),
         today: day(2026, 10, 14),
         windowDays: 5,
+        locale: "es-DO",
       }).onTrial,
       false
     )
@@ -323,7 +333,7 @@ describe("subscriptionAlertView", () => {
       view.description,
       "Esperado DOP $140 · cobrado DOP $165 el 2026-10-14"
     )
-    assert.equal(view.badge, "+DOP $25")
+    assert.equal(view.badge, "+ DOP $25")
     assert.equal(view.badgeVariant, "warning")
   })
 

@@ -1,10 +1,11 @@
 "use client"
 
+import { GlossaryHelpButton } from "@/src/modules/help"
 import { FinanceGate } from "@/src/modules/finance/finance-gate"
-import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
+import { ErrorState } from "@/src/shared/components/feedback/error-state"
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
 import { MissingRecord } from "@/src/modules/finance/shared/components/layout/missing-record"
-import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
+import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
 import { FinanceProgressHero } from "@/src/modules/finance/shared/components/layout/progress-hero"
 import { AccountProductRow } from "@/src/modules/finance/shared/components/product-rows"
 import { SavingsGoalContributionSheet } from "@/src/modules/finance/savings-goals/components/savings-goal-contribution-sheet"
@@ -32,7 +33,7 @@ import { formatCalendarDate } from "@/src/modules/finance/shared/lib/ledger-form
 import { amountRatioPct } from "@/src/modules/finance/shared/lib/planning-lists"
 import { DeleteRecordDialog } from "@/src/modules/finance/shared/components/delete-record-dialog"
 import { RecordOptionsSheet } from "@/src/modules/finance/shared/components/record-options-sheet"
-import { LoadingView } from "@/src/shared/components/layout/loading-view"
+import { LoadingView } from "@/src/shared/components/feedback/loading-view"
 import { Button } from "@/src/shared/components/ui/button"
 import {
   Empty,
@@ -41,8 +42,11 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
-import { SummaryItem, SummarySection } from "@/src/shared/components/ui/summary"
-import { InfiniteListSentinel } from "@/src/shared/components/ui/infinite-list-sentinel"
+import {
+  SummaryItem,
+  SummarySection,
+} from "@/src/shared/components/data-display/summary"
+import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
 import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
@@ -129,11 +133,15 @@ function SavingsGoalDetailScreenBody({
   const [pendingContributionId, setPendingContributionId] = useState<
     string | null
   >(null)
-  const [contributionMenuId, setContributionMenuId] = useState<string | null>(
-    null
+  const contributionMenuSheet = useSheetParam(
+    FINANCE_SHEET_KEYS.contributionOptions
   )
-  const [optionsOpen, setOptionsOpen] = useState(false)
-  const [withdrawalOpen, setWithdrawalOpen] = useState(false)
+  const { open: optionsOpen, setOpen: setOptionsOpen } = useSheetParam(
+    FINANCE_SHEET_KEYS.savingsOptions
+  )
+  const { open: withdrawalOpen, setOpen: setWithdrawalOpen } = useSheetParam(
+    FINANCE_SHEET_KEYS.savingsWithdrawal
+  )
   const [confirmGoalOpen, setConfirmGoalOpen] = useState(false)
 
   const headerActions = useMemo(
@@ -227,7 +235,7 @@ function SavingsGoalDetailScreenBody({
     <>
       {goalsQuery.error ? (
         <div className="mb-3">
-          <FinanceErrorState
+          <ErrorState
             message={financeLoadErrorMessage(goalsQuery.error)}
             onRetry={() => void goalsQuery.refetch()}
             isRetrying={goalsQuery.isFetching}
@@ -257,7 +265,12 @@ function SavingsGoalDetailScreenBody({
       />
 
       <div className="mx-4 mt-3">
-        <SummarySection title="Cuenta" icon={WalletIcon}>
+        <SummarySection
+          title="Cuenta"
+          icon={WalletIcon}
+          subtitle="Donde queda apartado el dinero de la meta"
+          right={<GlossaryHelpButton slug="apartado" />}
+        >
           {goalAccount ? (
             <AccountProductRow
               account={goalAccount}
@@ -275,6 +288,7 @@ function SavingsGoalDetailScreenBody({
           <SummaryItem
             title="Apartado"
             icon={PiggyBankIcon}
+            description="Reservado para la meta; sigue dentro del saldo de la cuenta."
             value={formatFinanceMoney(goal.currentAmount, money)}
             isLast
           />
@@ -301,7 +315,7 @@ function SavingsGoalDetailScreenBody({
         </div>
 
         {contributionsQuery.isError ? (
-          <FinanceErrorState
+          <ErrorState
             message={financeLoadErrorMessage(contributionsQuery.error)}
             onRetry={() => void contributionsQuery.refetch()}
             isRetrying={contributionsQuery.isFetching}
@@ -310,7 +324,7 @@ function SavingsGoalDetailScreenBody({
 
         <AsyncRegion
           pending={contributionsQuery.isPending}
-          pendingFallback={<FinanceListSkeleton rows={4} />}
+          pendingFallback={<ListSkeleton rows={4} />}
           empty={!contributionsQuery.isError && contributions.length === 0}
           emptyFallback={
             <Empty className="py-10">
@@ -352,7 +366,9 @@ function SavingsGoalDetailScreenBody({
                       size="icon"
                       aria-label="Opciones del aporte"
                       disabled={deleteContribution.isPending}
-                      onClick={() => setContributionMenuId(contribution.id)}
+                      onClick={() =>
+                        contributionMenuSheet.setOpen(true, contribution.id)
+                      }
                     >
                       <MoreVerticalIcon className="size-4" />
                     </Button>
@@ -447,12 +463,8 @@ function SavingsGoalDetailScreenBody({
       />
 
       <RecordOptionsSheet
-        open={contributionMenuId !== null}
-        onOpenChange={(nextOpen) => {
-          if (!nextOpen) {
-            setContributionMenuId(null)
-          }
-        }}
+        open={contributionMenuSheet.open}
+        onOpenChange={contributionMenuSheet.setOpen}
         title="Aporte"
         options={[
           {
@@ -462,8 +474,8 @@ function SavingsGoalDetailScreenBody({
             destructive: true,
             disabled: deleteContribution.isPending,
             onPress: () => {
-              setPendingContributionId(contributionMenuId)
-              setContributionMenuId(null)
+              setPendingContributionId(contributionMenuSheet.sheetId)
+              contributionMenuSheet.setOpen(false)
             },
           },
         ]}

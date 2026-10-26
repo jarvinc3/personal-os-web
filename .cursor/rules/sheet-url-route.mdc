@@ -1,0 +1,38 @@
+---
+description: Every bottom sheet opens through the URL with useSheetParam; confirmation dialogs never take a route.
+alwaysApply: true
+---
+
+# Hoja por ruta
+
+Un bottom-sheet se abre con la URL, no con un `useState` local. Así Atrás lo cierra y la hoja se puede enlazar.
+
+- Abrir y cerrar: `useSheetParam(key)` de `@/src/shared/hooks/use-sheet-params`. Devuelve `{ open, sheetId, setOpen }` y escribe `?sheet=<clave>` y, si hay registro, `?sheetId=<id>`.
+- La clave es una constante del módulo. En Finanzas sale de `FINANCE_SHEET_KEYS` (`src/modules/finance/shared/constants/sheet-keys.ts`) y en Ajustes de `SETTINGS_SHEET_KEYS` (`src/modules/settings/constants/sheet-keys.ts`), que Privacidad y Finanzas comparten para el vaciado. No un literal suelto en el JSX.
+- Hoja de un registro: `setOpen(true, id)` y el contenido lee `sheetId`; para resolverlo sobre una lista o una query, `useSheetListEntity` / `useSheetQueryEntity` (`src/modules/finance/shared/hooks/use-sheet-entity.ts`). Hoja sin registro: `setOpen(true)`.
+- La hoja no recibe `open` desde un estado de la pantalla: el estado vive en la URL.
+- Hoja anidada (moneda, color, categoría, calculadora o cualquier selector abierto desde un formulario que ya está en una hoja) usa `usePicker` de `@/src/shared/hooks/use-picker`, que suma `?picker=<clave>` a la URL junto con el sheet padre, para no perder lo escrito en el formulario que la contiene. Abrirla no cierra la de arriba.
+- Hoja informativa (ayuda, glosario, «Qué significa conciliar», historial, «Novedades»): también lleva ruta.
+- Hoja que se abre sola, sin toque previo (vista previa de Captura rápida, «Novedades» de la versión): escribe su parámetro al abrirse, igual que las demás.
+- Un `AlertDialog` de confirmación no lleva ruta: Esc cancela y cierra, y un clic fuera no cierra. Ver `confirm-important-changes.mdc`.
+- Excepciones: los primitivos (`bottom-sheet.tsx`, `drawer.tsx`, `alert-dialog.tsx`, `select.tsx`, `wheel-picker.tsx`), el panel de emojis dentro del formulario (`category-emoji-field.tsx`) y el menú lateral móvil (`sidebar.tsx`, #265).
+- Sin prohibición en ESLint ni prueba automática: es decisión del proyecto (#261).
+
+No agregar hojas nuevas con estado local. Si encuentras una, conviértela a ruta con `useSheetParam` o a `usePicker` si es anidada.
+
+```tsx
+const category = useSheetParam(FINANCE_SHEET_KEYS.category)
+const editing = useSheetListEntity(
+  category.open,
+  category.sheetId,
+  categoriesQuery.data,
+  categoriesQuery.isPending,
+  category.setOpen
+)
+
+onClick={() => category.setOpen(true, item.id)}
+
+<BottomSheet open={category.open} onOpenChange={category.setOpen}>
+  <CategorySheet category={editing} />
+</BottomSheet>
+```

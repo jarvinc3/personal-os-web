@@ -1,8 +1,8 @@
 "use client"
 
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
-import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
-import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
+import { ErrorState } from "@/src/shared/components/feedback/error-state"
+import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
 import { useBankCharges } from "@/src/modules/finance/shared/hooks/use-reconciliations"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
@@ -19,7 +19,10 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
-import { SummaryItem, SummarySection } from "@/src/shared/components/ui/summary"
+import {
+  SummaryItem,
+  SummarySection,
+} from "@/src/shared/components/data-display/summary"
 import { Building2Icon, LandmarkIcon, TagsIcon } from "lucide-react"
 
 type BankChargesViewProps = {
@@ -44,7 +47,7 @@ export function BankChargesView({
 
   if (query.isError) {
     return (
-      <FinanceErrorState
+      <ErrorState
         message={financeErrorMessage(query.error)}
         onRetry={() => void query.refetch()}
         isRetrying={query.isFetching}
@@ -55,7 +58,7 @@ export function BankChargesView({
   return (
     <AsyncRegion
       pending={query.isPending}
-      pendingFallback={<FinanceListSkeleton rows={4} />}
+      pendingFallback={<ListSkeleton rows={4} />}
       empty={!charges || charges.count === 0}
       emptyFallback={
         <Empty className="py-8">

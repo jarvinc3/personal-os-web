@@ -2,16 +2,17 @@
 
 import { MerchantCard } from "@/src/modules/finance/merchants/components/merchant-card"
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
-import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
-import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
+import { ErrorState } from "@/src/shared/components/feedback/error-state"
+import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
 import { FinanceGate } from "@/src/modules/finance/finance-gate"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
 import { useMerchants } from "@/src/modules/finance/shared/hooks/use-merchants"
 import { useCategories } from "@/src/modules/finance/shared/hooks/use-categories"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
+import { hasSuggestedCategory } from "@/src/modules/finance/merchants/lib/merchant-duplicates"
 import { merchantMonthParams } from "@/src/modules/finance/merchants/lib/merchant-query"
-import { FormTextField } from "@/src/shared/components/layout/form-blocks"
+import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import {
@@ -21,8 +22,8 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
-import { InfiniteListSentinel } from "@/src/shared/components/ui/infinite-list-sentinel"
-import { SummarySection } from "@/src/shared/components/ui/summary"
+import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { SearchIcon, StoreIcon } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo, useState } from "react"
@@ -79,7 +80,7 @@ function MerchantsScreenBody() {
       />
 
       {listQuery.isError ? (
-        <FinanceErrorState
+        <ErrorState
           message={financeErrorMessage(listQuery.error)}
           onRetry={() => void listQuery.refetch()}
           isRetrying={listQuery.isFetching}
@@ -88,7 +89,7 @@ function MerchantsScreenBody() {
 
       <AsyncRegion
         pending={listQuery.isPending && !listQuery.data}
-        pendingFallback={<FinanceListSkeleton />}
+        pendingFallback={<ListSkeleton />}
         empty={items.length === 0}
         emptyFallback={
           <Empty className="py-8">
@@ -117,6 +118,8 @@ function MerchantsScreenBody() {
                 ) ?? null
               }
               display={display}
+              suggested={hasSuggestedCategory(merchant)}
+              duplicate={(merchant.possibleDuplicates ?? 0) > 0}
               href={APP_ROUTES.app.financeMerchant(merchant.id)}
             />
           ))}

@@ -12,28 +12,19 @@ import {
 import { setPendingAccountDeletion } from "@/src/modules/settings/lib/pending-account-deletion"
 import { resolveReauthConfirmMode } from "@/src/modules/settings/lib/wipe-confirm"
 import type { SettingsSheetProps } from "@/src/modules/settings/types/sheet.types"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
-import { FormTextField } from "@/src/shared/components/layout/form-blocks"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { ConfirmDialog } from "@/src/shared/components/feedback/confirm-dialog"
+import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import {
   Alert,
   AlertDescription,
   AlertTitle,
 } from "@/src/shared/components/ui/alert"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/src/shared/components/ui/alert-dialog"
 import { Button } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
-import { SummarySection } from "@/src/shared/components/ui/summary"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
-import { AlertTriangle, KeyRound, Trash2, X } from "lucide-react"
+import { AlertTriangle, KeyRound, Trash2 } from "lucide-react"
 import { useCallback, useEffect, useRef, useState } from "react"
 
 const DELETED_DATA_ITEMS = [
@@ -255,7 +246,7 @@ export function DeleteAccountSheet({
         ) : null}
       </BottomSheet>
 
-      <AlertDialog
+      <ConfirmDialog
         open={alertOpen}
         onOpenChange={(next) => {
           setAlertOpen(next)
@@ -263,65 +254,37 @@ export function DeleteAccountSheet({
             clearPassword()
           }
         }}
+        tone="danger"
+        icon={Trash2}
+        wide
+        title="¿Eliminar tu cuenta permanentemente?"
+        description={`Se borrarán todos los datos asociados a ${email}. Esta acción no se puede deshacer.`}
+        confirmLabel="Eliminar cuenta"
+        confirmIcon={Trash2}
+        pending={deleteAfterReauth.isPending}
+        pendingLabel="Eliminando..."
+        confirmDisabled={!passwordVerified || isVerifyingPassword}
+        onConfirm={handleConfirmDelete}
       >
-        <AlertDialogContent className="sm:max-w-md">
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              ¿Eliminar tu cuenta permanentemente?
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              Se borrarán todos los datos asociados a {email}. Esta acción no se
-              puede deshacer.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <SummarySection title="Confirma tu contraseña" icon={KeyRound}>
-            <FormTextField
-              icon={KeyRound}
-              label="Contraseña"
-              type="password"
-              autoComplete="current-password"
-              value={password}
-              onChange={handlePasswordChange}
-              onBlur={() => void handlePasswordBlur()}
-              disabled={deleteAfterReauth.isPending || isVerifyingPassword}
-              error={passwordError}
-              invalid={Boolean(passwordError)}
-            />
-            <div className="rounded-2xl bg-muted px-4 py-3">
-              <p className="text-xs text-muted-foreground">Cuenta</p>
-              <p className="mt-1 text-sm text-muted-foreground">{email}</p>
-            </div>
-          </SummarySection>
-          <AlertDialogFooter className="flex-row">
-            <AlertDialogCancel
-              className="flex-1"
-              disabled={deleteAfterReauth.isPending}
-            >
-              <X data-icon="inline-start" />
-              Cancelar
-            </AlertDialogCancel>
-            <AlertDialogAction
-              variant="destructive"
-              className="flex-1"
-              disabled={
-                !passwordVerified ||
-                isVerifyingPassword ||
-                deleteAfterReauth.isPending
-              }
-              onClick={handleConfirmDelete}
-            >
-              {deleteAfterReauth.isPending || isVerifyingPassword ? (
-                <Spinner data-icon="inline-start" />
-              ) : (
-                <Trash2 data-icon="inline-start" />
-              )}
-              {deleteAfterReauth.isPending
-                ? "Eliminando..."
-                : "Eliminar cuenta"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        <SummarySection title="Confirma tu contraseña" icon={KeyRound}>
+          <FormTextField
+            icon={KeyRound}
+            label="Contraseña"
+            type="password"
+            autoComplete="current-password"
+            value={password}
+            onChange={handlePasswordChange}
+            onBlur={() => void handlePasswordBlur()}
+            disabled={deleteAfterReauth.isPending || isVerifyingPassword}
+            error={passwordError}
+            invalid={Boolean(passwordError)}
+          />
+          <div className="rounded-2xl bg-muted px-4 py-3">
+            <p className="text-xs text-muted-foreground">Cuenta</p>
+            <p className="mt-1 text-sm text-muted-foreground">{email}</p>
+          </div>
+        </SummarySection>
+      </ConfirmDialog>
     </>
   )
 }

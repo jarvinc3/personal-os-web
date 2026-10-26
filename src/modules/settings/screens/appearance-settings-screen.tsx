@@ -16,8 +16,11 @@ import { findAppearanceStyle, findPrimaryColor } from "@/src/shared/appearance"
 import {
   SettingsRow,
   SettingsSection,
-} from "@/src/shared/components/layout/settings-section"
+} from "@/src/shared/components/settings/settings-section"
+import { usePendingNavigation } from "@/src/shared/components/shell/navigation-pending"
+import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
+import { ComponentIcon, GalleryVerticalEndIcon } from "lucide-react"
 
 export function AppearanceSettingsScreen() {
   return (
@@ -29,6 +32,7 @@ export function AppearanceSettingsScreen() {
 
 function AppearanceSettingsScreenBody() {
   const { preferences } = useProfile()
+  const { navigate, isPending } = usePendingNavigation()
   const { open: openThemeSheet, setOpen: setOpenThemeSheet } =
     useSheetParam("theme-sheet")
   const { open: openStyleSheet, setOpen: setOpenStyleSheet } =
@@ -75,6 +79,26 @@ function AppearanceSettingsScreenBody() {
             />
           }
           {...SETTINGS_REGISTRY.appearance.rows.primaryColor}
+        />
+      </SettingsSection>
+
+      <SettingsSection title="Referencia">
+        <SettingsRow
+          label="Galería de cards"
+          description="Cada entidad con sus variantes."
+          icon={GalleryVerticalEndIcon}
+          accentColor={SETTINGS_REGISTRY.appearance.accent}
+          disabled={isPending}
+          onPress={() => navigate(APP_ROUTES.app.settingsAppearanceCards)}
+        />
+        <SettingsRow
+          label="Galería de componentes"
+          description="Los componentes compartidos, con datos de ejemplo."
+          icon={ComponentIcon}
+          accentColor={SETTINGS_REGISTRY.appearance.accent}
+          disabled={isPending}
+          onPress={() => navigate(APP_ROUTES.app.settingsAppearanceComponents)}
+          isLast
         />
       </SettingsSection>
 

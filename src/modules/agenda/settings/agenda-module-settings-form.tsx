@@ -5,16 +5,17 @@ import { useModuleSheetEnable } from "@/src/modules/settings/hooks/use-module-sh
 import { useProfileSheetFormSync } from "@/src/modules/settings/hooks/use-profile-sheet"
 import { useUserModuleConfig } from "@/src/modules/settings/hooks/use-user-module-config"
 import type { AgendaModuleConfig } from "@/src/modules/settings/types/module-config.types"
-import {
-  OptionRow,
-  SwitchFieldRow,
-} from "@/src/shared/components/layout/form-blocks"
+import { OptionRow } from "@/src/shared/components/forms/option-row"
+import { SwitchFieldRow } from "@/src/shared/components/forms/switch-field-row"
 import { FormScreen } from "@/src/shared/components/forms/form-screen"
 import {
   RadioGroup,
   RadioGroupItem,
 } from "@/src/shared/components/ui/radio-group"
-import { SummaryItem, SummarySection } from "@/src/shared/components/ui/summary"
+import {
+  SummaryItem,
+  SummarySection,
+} from "@/src/shared/components/data-display/summary"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { getModule } from "@/src/shared/constants/module-registry"
 import { appToast } from "@/src/shared/lib/app-toast"

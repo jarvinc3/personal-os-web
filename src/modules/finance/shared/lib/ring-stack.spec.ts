@@ -17,6 +17,22 @@ const display: FinanceMoneyDisplay = {
   compactNumbers: false,
 }
 
+function currencySlice(input: {
+  currency: string
+  assets: string
+  liabilities?: string | null
+  netWorth: string
+}) {
+  return {
+    currency: input.currency,
+    assets: input.assets,
+    available: input.assets,
+    receivables: "0",
+    liabilities: input.liabilities ?? "0",
+    netWorth: input.netWorth,
+  }
+}
+
 function institutionItem(partial: {
   id: string
   name: string
@@ -25,6 +41,7 @@ function institutionItem(partial: {
   totalLiabilities?: string | null
   color?: string | null
   logoUrl?: string | null
+  currency?: string
 }): Extract<InstitutionStackItem, { kind: "institution" }> {
   const institution: FinanceInstitution = {
     id: partial.id,
@@ -34,6 +51,7 @@ function institutionItem(partial: {
     country: null,
     isActive: true,
   }
+  const currency = partial.currency ?? "DOP"
   return {
     kind: "institution",
     id: partial.id,
@@ -48,7 +66,17 @@ function institutionItem(partial: {
     cards: [],
     loans: [],
     cash: null,
-    currencyTotals: [],
+    currencyTotals:
+      partial.netWorth === null
+        ? []
+        : [
+            currencySlice({
+              currency,
+              assets: partial.totalAssets ?? "0",
+              liabilities: partial.totalLiabilities ?? "0",
+              netWorth: partial.netWorth,
+            }),
+          ],
     irregularities: { drift: false, reconciliation: false },
   }
 }
@@ -78,7 +106,13 @@ function cashItem(partial: {
     id: partial.id,
     account,
     balance: partial.balance,
-    currencyTotals: [],
+    currencyTotals: [
+      currencySlice({
+        currency: partial.currency ?? "DOP",
+        assets: partial.balance,
+        netWorth: partial.balance,
+      }),
+    ],
     irregularities: { drift: false, reconciliation: false },
   }
 }
@@ -239,31 +273,33 @@ describe("buildRingStackSlices", () => {
     assert.equal(slices[0]?.percent, 100)
   })
 
-  it("leaves the cash ring unmeasured when the currencies differ", () => {
-    const slices = buildRingStackSlices(
-      [
-        cashItem({
-          id: "c1",
-          name: "Billetera",
-          balance: "100",
-          currency: "DOP",
-        }),
-        cashItem({
-          id: "c2",
-          name: "Cuenta USD",
-          balance: "50",
-          currency: "USD",
-        }),
-      ],
-      display
-    )
+  it("adds only the cash of the graphed currency", () => {
+    const items = [
+      cashItem({
+        id: "c1",
+        name: "Billetera",
+        balance: "100",
+        currency: "DOP",
+      }),
+      cashItem({
+        id: "c2",
+        name: "Cuenta USD",
+        balance: "50",
+        currency: "USD",
+      }),
+    ]
 
-    assert.equal(slices[0]?.amountLabel, "Balance incompleto")
-    assert.equal(slices[0]?.signedValue, 0)
-    assert.equal(slices[0]?.percent, 0)
+    const dopSlices = buildRingStackSlices(items, display)
+    assert.equal(dopSlices[0]?.signedValue, 100)
+    assert.equal(dopSlices[0]?.percent, 100)
+    assert.match(dopSlices[0]?.amountLabel ?? "", /DOP/)
+
+    const usdSlices = buildRingStackSlices(items, display, "USD")
+    assert.equal(usdSlices[0]?.signedValue, 50)
+    assert.match(usdSlices[0]?.amountLabel ?? "", /USD/)
   })
 
-  it("leaves the cash ring unmeasured when the cash is not in the base currency", () => {
+  it("has no cash ring when the currency has no cash", () => {
     const slices = buildRingStackSlices(
       [
         cashItem({
@@ -276,8 +312,7 @@ describe("buildRingStackSlices", () => {
       display
     )
 
-    assert.equal(slices[0]?.amountLabel, "Balance incompleto")
-    assert.equal(slices[0]?.signedValue, 0)
+    assert.deepEqual(slices, [])
   })
 
   it("draws the debt as the pale part of the same arc", () => {
@@ -470,6 +505,8 @@ describe("hasDrawableRingBalance", () => {
 function cashInstitutionItem(totalBase: string) {
   return {
     ...institutionItem({ id: "cash", name: "Efectivo", netWorth: null }),
+    status: "COMPLETE" as const,
+    netWorth: totalBase,
     institution: {
       id: "cash",
       name: "Efectivo",
@@ -487,11 +524,18 @@ function cashInstitutionItem(totalBase: string) {
       status: "COMPLETE" as const,
       byCurrency: [],
     },
+    currencyTotals: [
+      currencySlice({
+        currency: "DOP",
+        assets: totalBase,
+        netWorth: totalBase,
+      }),
+    ],
   }
 }
 
 describe("cash institution ring", () => {
-  it("sizes the Efectivo ring from the converted cash total", () => {
+  it("sizes the Efectivo ring from its native cash amounts", () => {
     const slices = buildRingStackSlices([cashInstitutionItem("1600")], display)
     const slice = slices.find((entry) => entry.key === "institution-cash")
 

@@ -1,6 +1,7 @@
 "use client"
 
 import { BrandLogo } from "@/src/modules/finance/shared/components/brand-logo"
+import { IconBadge } from "@/src/shared/components/ui/icon-badge"
 import {
   type InstitutionCardCounts,
   type InstitutionCardModel,
@@ -10,11 +11,15 @@ import {
   isWalletDragOnly,
   walletGestureDelta,
 } from "@/src/modules/finance/shared/lib/wallet-gesture"
+import {
+  countLabel,
+  type FinanceCountNoun,
+} from "@/src/modules/finance/shared/lib/count-label"
 import { EntitySurface } from "@/src/modules/finance/shared/components/entity-surface"
 import {
   LinkPendingOverlay,
   PendingSurface,
-} from "@/src/shared/components/ui/navigation-pending"
+} from "@/src/shared/components/shell/navigation-pending"
 import { cn } from "@/src/shared/lib/utils"
 import { motion } from "framer-motion"
 import {
@@ -42,7 +47,7 @@ type InstitutionWalletCardProps = {
   /** Ring and check mark while the card is picked in a selector. */
   selected?: boolean
   disabled?: boolean
-  /** Variante de la card; la galería /dev/cards la pinta (#272). */
+  /** Variante de la card; la galería /settings/appearance/cards la pinta (#272). */
   variant?: "full" | "compact"
   /** What the compact card shows under the name. Ignored by `full`. */
   detail?: InstitutionWalletDetail
@@ -51,21 +56,23 @@ type InstitutionWalletCardProps = {
 export function ProductCountItem({
   icon: Icon,
   count,
-  label,
+  noun,
   compact = false,
 }: {
   icon: LucideIcon
   count: number
-  label: string
+  noun: FinanceCountNoun
   compact?: boolean
 }) {
+  const label = countLabel(count, noun)
   return (
     <span className="inline-flex items-center gap-1.5" title={label}>
       <Icon
         className={compact ? "size-3.5 shrink-0" : "size-5 shrink-0"}
         aria-hidden
       />
-      <span>{count}</span>
+      <span aria-hidden>{count}</span>
+      <span className="sr-only">{label}</span>
     </span>
   )
 }
@@ -96,6 +103,13 @@ function IrregularityMarks({
   )
 }
 
+type InstitutionCountItem = {
+  key: string
+  icon: LucideIcon
+  count: number
+  noun: FinanceCountNoun
+}
+
 function InstitutionProductCounts({
   counts,
   compact = false,
@@ -103,33 +117,33 @@ function InstitutionProductCounts({
   counts: InstitutionCardCounts
   compact?: boolean
 }) {
-  const items = [
+  const items: InstitutionCountItem[] = [
     {
       key: "accounts",
       icon: LandmarkIcon,
       count: counts.accounts,
-      label: "Cuentas",
+      noun: "account",
     },
     ...(counts.cards === undefined
       ? []
-      : [
+      : ([
           {
             key: "cards",
             icon: CreditCardIcon,
             count: counts.cards,
-            label: "Tarjetas",
+            noun: "card",
           },
-        ]),
+        ] satisfies InstitutionCountItem[])),
     ...(counts.loans === undefined
       ? []
-      : [
+      : ([
           {
             key: "loans",
             icon: HandCoinsIcon,
             count: counts.loans,
-            label: "Préstamos",
+            noun: "loan",
           },
-        ]),
+        ] satisfies InstitutionCountItem[])),
   ]
 
   return (
@@ -147,7 +161,7 @@ function InstitutionProductCounts({
           <ProductCountItem
             icon={item.icon}
             count={item.count}
-            label={item.label}
+            noun={item.noun}
             compact={compact}
           />
         </span>
@@ -221,7 +235,7 @@ export function InstitutionWalletCard({
     onPress?.()
   }
 
-  // Variante compacta de la card; la galería /dev/cards la pinta (#272).
+  // Variante compacta de la card; la galería /settings/appearance/cards la pinta (#272).
   if (variant === "compact") {
     const compactClassName = cn(
       "relative flex w-full cursor-pointer items-center gap-3 overflow-hidden rounded-2xl p-3 text-left text-white outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
@@ -234,12 +248,13 @@ export function InstitutionWalletCard({
         <EntitySurface shape="hexagons" size="sm" />
 
         {isCash ? (
-          <span
-            aria-hidden
-            className="relative z-10 inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-white text-emerald-700"
-          >
-            <BanknoteIcon className="size-5" strokeWidth={2.25} />
-          </span>
+          <IconBadge size={36} className="relative z-10 bg-white">
+            <BanknoteIcon
+              className="size-5 text-emerald-700"
+              strokeWidth={2.25}
+              aria-hidden
+            />
+          </IconBadge>
         ) : (
           <BrandLogo
             name={card.name || card.monogram}
@@ -268,9 +283,9 @@ export function InstitutionWalletCard({
         <span className="relative z-10 flex shrink-0 items-center gap-1.5">
           <IrregularityMarks irregularities={card.irregularities} />
           {selected ? (
-            <span className="inline-flex size-5 items-center justify-center rounded-full bg-white text-emerald-700">
-              <CheckIcon className="size-3.5" aria-hidden />
-            </span>
+            <IconBadge size={20} className="bg-white">
+              <CheckIcon className="size-3.5 text-emerald-700" aria-hidden />
+            </IconBadge>
           ) : (
             <KindIcon
               className="size-4 shrink-0"
@@ -349,12 +364,13 @@ export function InstitutionWalletCard({
       <EntitySurface shape="hexagons" />
       <div className="relative z-10 flex items-start justify-between">
         {isCash ? (
-          <span
-            aria-hidden
-            className="inline-flex size-11 items-center justify-center rounded-full bg-white text-emerald-700"
-          >
-            <BanknoteIcon className="size-7" strokeWidth={2.25} />
-          </span>
+          <IconBadge size={44} className="bg-white">
+            <BanknoteIcon
+              className="size-7 text-emerald-700"
+              strokeWidth={2.25}
+              aria-hidden
+            />
+          </IconBadge>
         ) : (
           <BrandLogo
             name={card.name || card.monogram}

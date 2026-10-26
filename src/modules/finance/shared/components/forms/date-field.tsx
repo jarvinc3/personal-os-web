@@ -2,6 +2,11 @@
 
 import { useFormatLocale } from "@/src/modules/settings/hooks/use-format-locale"
 import {
+  formatDayMonthYear,
+  formatShortClockTime,
+} from "@/src/shared/lib/date-format"
+
+import {
   formatCalendarDate,
   nowDateTimeInput,
   todayDateInput,
@@ -10,9 +15,9 @@ import { Button } from "@/src/shared/components/ui/button"
 import {
   DateWheels,
   TimePairWheels,
-} from "@/src/shared/components/ui/wheel-picker"
-import { WheelField } from "@/src/shared/components/ui/wheel-field"
-import { formatHm24Display12h, parseDate } from "@/src/shared/types/wheels.type"
+} from "@/src/shared/components/forms/wheel-picker"
+import { WheelField } from "@/src/shared/components/forms/wheel-field"
+import { parseDate } from "@/src/shared/types/wheels.type"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
 import {
   CalendarIcon,
@@ -58,11 +63,7 @@ export function formatFinanceDateLabel(value: string, locale: string): string {
   if (Number.isNaN(date.getTime())) {
     return "Elegir fecha"
   }
-  return date.toLocaleDateString(locale, {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  })
+  return formatDayMonthYear(date, locale)
 }
 
 export function FinanceDateField({
@@ -87,7 +88,7 @@ export function FinanceDateField({
   const [step, setStep] = useState<DateStep>(DATE_STEP)
   const valueLabel = hasValue
     ? withTime
-      ? `${formatCalendarDate(value, formatLocale)}, ${formatHm24Display12h(timeValue)}`
+      ? `${formatCalendarDate(value, formatLocale)}, ${formatShortClockTime(timeValue, formatLocale)}`
       : formatFinanceDateLabel(value, formatLocale)
     : optional
       ? "Sin fecha"

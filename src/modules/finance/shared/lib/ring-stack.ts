@@ -1,14 +1,12 @@
 import type { InstitutionStackItem } from "./institution-stack.ts"
-import {
-  formatStackItemBalance,
-  institutionInitials,
-} from "./institution-stack.ts"
+import { institutionInitials } from "./institution-stack.ts"
 import { decimalAmount, decimalPercent, sumDecimals } from "./decimal.ts"
 import {
   formatFinanceMoney,
   parseFinanceMoney,
   type FinanceMoneyDisplay,
 } from "./money.ts"
+import type { FinanceBalanceSheetCurrencySlice } from "@/src/modules/finance/shared/types/entities"
 
 const FALLBACK_COLORS = [
   "var(--chart-1)",
@@ -98,24 +96,24 @@ function debtLabelFor(
   return formatFinanceMoney(debtValue, display)
 }
 
-function institutionCandidate(
+/** The native amounts of one currency: the ring never converts between them. */
+function nativeSlice(
+  item: InstitutionStackItem,
+  currency: string
+): FinanceBalanceSheetCurrencySlice | null {
+  const wanted = currency.trim().toUpperCase()
+  return (
+    item.currencyTotals.find(
+      (slice) => slice.currency.trim().toUpperCase() === wanted
+    ) ?? null
+  )
+}
+
+/** A ring with nothing to draw: the legend still explains why it is empty. */
+function unmeasuredInstitutionCandidate(
   item: Extract<InstitutionStackItem, { kind: "institution" }>,
-  index: number,
-  display: FinanceMoneyDisplay
+  index: number
 ): RingCandidate {
-  const cash = item.cash
-  const measured = cash
-    ? cash.status === "COMPLETE" && cash.totalBase !== null
-    : item.status === "COMPLETE"
-  const assetsAmount = measured
-    ? (parseFinanceMoney(cash ? cash.totalBase : item.totalAssets) ?? 0)
-    : 0
-  const liabilitiesAmount =
-    !cash && measured ? (parseFinanceMoney(item.totalLiabilities) ?? 0) : 0
-  // A negative amount belongs to the opposite group.
-  const assetsValue =
-    Math.max(assetsAmount, 0) + Math.max(-liabilitiesAmount, 0)
-  const debtValue = Math.max(-assetsAmount, 0) + Math.max(liabilitiesAmount, 0)
   return {
     key: `institution-${item.id}`,
     kind: "institution",
@@ -124,38 +122,9 @@ function institutionCandidate(
     logoUrl: item.institution.logoUrl?.trim() || null,
     color:
       item.institution.color?.trim() ||
-      (cash
+      (item.cash
         ? CASH_RING_COLOR
         : FALLBACK_COLORS[index % FALLBACK_COLORS.length]!),
-    signedValue: measured
-      ? (parseFinanceMoney(cash ? cash.totalBase : item.netWorth) ?? 0)
-      : 0,
-    amountLabel: formatStackItemBalance(item, display),
-    assetsValue,
-    debtValue,
-    debtLabel: debtLabelFor(debtValue, display),
-  }
-}
-
-/** The ring is in the base currency; mixed cash cannot be added in the client (ADR-002). */
-function cashSharesBaseCurrency(
-  items: readonly Extract<InstitutionStackItem, { kind: "cash" }>[],
-  display: FinanceMoneyDisplay
-): boolean {
-  const baseCurrency = display.currency.trim().toUpperCase()
-  return items.every(
-    (item) => item.account.currency.trim().toUpperCase() === baseCurrency
-  )
-}
-
-function unmeasuredCashCandidate(): RingCandidate {
-  return {
-    key: CASH_RING_KEY,
-    kind: "cash",
-    name: CASH_RING_NAME,
-    monogram: institutionInitials(CASH_RING_NAME),
-    logoUrl: null,
-    color: CASH_RING_COLOR,
     signedValue: 0,
     amountLabel: UNMEASURED_BALANCE_LABEL,
     assetsValue: 0,
@@ -164,22 +133,71 @@ function unmeasuredCashCandidate(): RingCandidate {
   }
 }
 
+function institutionCandidate(
+  item: Extract<InstitutionStackItem, { kind: "institution" }>,
+  index: number,
+  display: FinanceMoneyDisplay,
+  currency: string
+): RingCandidate | null {
+  const slice = nativeSlice(item, currency)
+  if (slice === null) {
+    // Products in other currencies have no ring here; a balance that cannot be
+    // measured keeps a 0 % ring so the legend can explain it.
+    return item.currencyTotals.length > 0
+      ? null
+      : unmeasuredInstitutionCandidate(item, index)
+  }
+  const moneyDisplay = { ...display, currency }
+  const assetsAmount = parseFinanceMoney(slice.assets) ?? 0
+  const liabilitiesAmount = parseFinanceMoney(slice.liabilities) ?? 0
+  // A negative amount belongs to the opposite group.
+  const assetsValue =
+    Math.max(assetsAmount, 0) + Math.max(-liabilitiesAmount, 0)
+  const debtValue = Math.max(-assetsAmount, 0) + Math.max(liabilitiesAmount, 0)
+  const netWorth = parseFinanceMoney(slice.netWorth) ?? 0
+  return {
+    key: `institution-${item.id}`,
+    kind: "institution",
+    name: item.institution.name,
+    monogram: institutionInitials(item.institution.name),
+    logoUrl: item.institution.logoUrl?.trim() || null,
+    color:
+      item.institution.color?.trim() ||
+      (item.cash
+        ? CASH_RING_COLOR
+        : FALLBACK_COLORS[index % FALLBACK_COLORS.length]!),
+    signedValue: netWorth,
+    amountLabel:
+      item.status === "COMPLETE"
+        ? formatFinanceMoney(netWorth, moneyDisplay)
+        : UNMEASURED_BALANCE_LABEL,
+    assetsValue,
+    debtValue,
+    debtLabel: debtLabelFor(debtValue, moneyDisplay),
+  }
+}
+
+/** One ring for every loose cash account of the currency; none when it has none. */
 function cashCandidate(
   items: readonly InstitutionStackItem[],
-  display: FinanceMoneyDisplay
+  display: FinanceMoneyDisplay,
+  currency: string
 ): RingCandidate | null {
   const cashItems = items.filter(
     (item): item is Extract<InstitutionStackItem, { kind: "cash" }> =>
       item.kind === "cash"
   )
-  if (cashItems.length === 0) {
+  const cashSlices = cashItems
+    .map((item) => nativeSlice(item, currency))
+    .filter(
+      (slice): slice is FinanceBalanceSheetCurrencySlice => slice !== null
+    )
+  if (cashSlices.length === 0) {
     return null
   }
-  if (!cashSharesBaseCurrency(cashItems, display)) {
-    return unmeasuredCashCandidate()
-  }
+  const moneyDisplay = { ...display, currency }
   const netValue = decimalAmount(
-    sumDecimals(cashItems.map((item) => item.balance))
+    sumDecimals(cashSlices.map((slice) => slice.netWorth))
   )
   // Cash in the red is money owed, so it takes the pale side of the arc.
   const assetsValue = Math.max(netValue, 0)
@@ -192,29 +210,34 @@ function cashCandidate(
     logoUrl: null,
     color: CASH_RING_COLOR,
     signedValue: netValue,
-    amountLabel: formatFinanceMoney(netValue, display),
+    amountLabel: formatFinanceMoney(netValue, moneyDisplay),
     assetsValue,
     debtValue,
-    debtLabel: debtLabelFor(debtValue, display),
+    debtLabel: debtLabelFor(debtValue, moneyDisplay),
   }
 }
 
 /**
  * Maps wallet stack items into one ring per institution plus a single ring for
- * every orphan cash account. Assets and debts are separate groups: each arc is
- * the slice's share of its own group, so each group adds up to 100 %. Items
- * without a measurable balance keep their ring at 0 % instead of disappearing.
+ * every orphan cash account, all in the native amounts of `currency` (the base
+ * one by default): nothing is converted in the client (ADR-002). An institution
+ * without products in that currency has no ring there. Assets and debts are
+ * separate groups: each arc is the slice's share of its own group, so each group
+ * adds up to 100 %.
  */
 export function buildRingStackSlices(
   items: readonly InstitutionStackItem[],
-  display: FinanceMoneyDisplay
+  display: FinanceMoneyDisplay,
+  currency: string = display.currency
 ): RingStackSlice[] {
-  const institutionCandidates = items.flatMap((item, index) =>
-    item.kind === "institution"
-      ? [institutionCandidate(item, index, display)]
-      : []
-  )
-  const cash = cashCandidate(items, display)
+  const institutionCandidates = items.flatMap((item, index) => {
+    if (item.kind !== "institution") {
+      return []
+    }
+    const candidate = institutionCandidate(item, index, display, currency)
+    return candidate === null ? [] : [candidate]
+  })
+  const cash = cashCandidate(items, display, currency)
   const candidates = cash
     ? [...institutionCandidates, cash]
     : institutionCandidates

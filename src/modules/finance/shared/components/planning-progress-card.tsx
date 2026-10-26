@@ -1,7 +1,8 @@
 "use client"
 
 import { Badge, badgeVariants } from "@/src/shared/components/ui/badge"
-import { LinkPendingOverlay } from "@/src/shared/components/ui/navigation-pending"
+import { ProgressRing } from "@/src/shared/components/ui/progress-ring"
+import { LinkPendingOverlay } from "@/src/shared/components/shell/navigation-pending"
 import { useLongPress } from "@/src/shared/hooks/use-long-press"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
 import type { VariantProps } from "class-variance-authority"
@@ -12,7 +13,7 @@ import type { ReactNode } from "react"
 export type PlanningProgressTone =
   "primary" | "success" | "warning" | "danger" | "info"
 
-/** Variante de la card; la galería /dev/cards la pinta (#272). */
+/** Variante de la card; la galería /settings/appearance/cards la pinta (#272). */
 export type PlanningProgressVariant = "full" | "compact" | "inline"
 
 type BadgeVariant = VariantProps<typeof badgeVariants>["variant"]
@@ -34,6 +35,8 @@ export type PlanningProgressCardProps = {
   decoration?: ReactNode
   badge?: PlanningProgressBadge
   progress: number | null
+  /** What the ring percentage measures, under the ring. */
+  progressHint?: string
   currentHint: string
   currentLabel: string
   targetHint: string
@@ -54,7 +57,7 @@ const TONE_STROKE: Record<PlanningProgressTone, string> = {
   primary: "stroke-primary",
   success: "stroke-success",
   warning: "stroke-warning",
-  danger: "stroke-danger",
+  danger: "stroke-destructive",
   info: "stroke-info",
 }
 
@@ -62,7 +65,7 @@ const TONE_BAR: Record<PlanningProgressTone, string> = {
   primary: "bg-primary",
   success: "bg-success",
   warning: "bg-warning",
-  danger: "bg-danger",
+  danger: "bg-destructive",
   info: "bg-info",
 }
 
@@ -70,12 +73,9 @@ const TONE_ICON: Record<PlanningProgressTone, string> = {
   primary: "bg-primary/15 text-primary",
   success: "bg-success/15 text-success",
   warning: "bg-warning/15 text-warning",
-  danger: "bg-danger/15 text-danger",
+  danger: "bg-destructive/15 text-destructive",
   info: "bg-info/15 text-info",
 }
-
-const RING_RADIUS = 18
-const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS
 
 function clampPct(value: number): number {
   return Math.min(100, Math.max(0, value))
@@ -86,49 +86,38 @@ function RingProgress({
   tone,
   accentColor,
   tinted,
+  hint,
 }: {
   value: number | null
   tone: PlanningProgressTone
   accentColor?: string | null
   tinted?: boolean
+  hint?: string
 }) {
-  const visual = value === null ? 0 : clampPct(value)
-  const offset = RING_CIRCUMFERENCE - (visual / 100) * RING_CIRCUMFERENCE
   const label = value === null ? "—" : `${Math.round(value)}%`
 
   return (
-    <span className="relative grid size-14 shrink-0 place-items-center">
-      <svg className="size-14 -rotate-90" viewBox="0 0 48 48" aria-hidden>
-        <circle
-          cx="24"
-          cy="24"
-          r={RING_RADIUS}
-          fill="none"
-          className={tinted ? "stroke-white/25" : "stroke-muted"}
-          strokeWidth="4"
-        />
-        <circle
-          cx="24"
-          cy="24"
-          r={RING_RADIUS}
-          fill="none"
-          className={tinted || accentColor ? undefined : TONE_STROKE[tone]}
-          style={
-            tinted
-              ? { stroke: "white" }
-              : accentColor
-                ? { stroke: accentColor }
-                : undefined
-          }
-          strokeWidth="4"
-          strokeLinecap="round"
-          strokeDasharray={RING_CIRCUMFERENCE}
-          strokeDashoffset={offset}
-        />
-      </svg>
-      <span className="absolute text-[11px] font-semibold tabular-nums">
-        {label}
-      </span>
+    <span className="flex w-14 shrink-0 flex-col items-center gap-0.5">
+      <ProgressRing
+        value={value === null ? 0 : clampPct(value)}
+        size={56}
+        thickness={4}
+        arcClassName={TONE_STROKE[tone]}
+        color={tinted ? "white" : (accentColor ?? undefined)}
+        trackClassName={tinted ? "stroke-white/25" : "stroke-muted"}
+      >
+        <span className="text-[11px] font-semibold tabular-nums">{label}</span>
+      </ProgressRing>
+      {hint ? (
+        <span
+          className={cn(
+            "text-[9px] tracking-wide uppercase",
+            tinted ? "text-white/70" : "text-muted-foreground"
+          )}
+        >
+          {hint}
+        </span>
+      ) : null}
     </span>
   )
 }
@@ -144,6 +133,7 @@ export function PlanningProgressCard({
   decoration,
   badge,
   progress,
+  progressHint,
   currentHint,
   currentLabel,
   targetHint,
@@ -234,6 +224,7 @@ export function PlanningProgressCard({
           tone={tone}
           accentColor={accentColor}
           tinted={tinted}
+          hint={progressHint}
         />
       </span>
 

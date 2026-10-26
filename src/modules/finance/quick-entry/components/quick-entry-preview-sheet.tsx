@@ -2,21 +2,22 @@
 
 import { Button } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
-import { FormTextField } from "@/src/shared/components/layout/form-blocks"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { useUserTimeZone } from "@/src/modules/settings/hooks/use-user-time-zone"
 import { FinanceDateField } from "@/src/modules/finance/shared/components/forms/date-field"
-import { FinanceSegmentedControl } from "@/src/modules/finance/shared/components/forms/form-blocks"
+import { SegmentedControl } from "@/src/shared/components/forms/segmented-control"
 import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
 import { CategoryPickerSheet } from "@/src/modules/finance/shared/components/pickers/category-picker-sheet"
 import { CategoryTrigger } from "@/src/modules/finance/shared/components/pickers/category-trigger"
 import { DestinationPickerSheet } from "@/src/modules/finance/shared/components/pickers/destination-picker-sheet"
 import { DestinationTrigger } from "@/src/modules/finance/shared/components/pickers/destination-trigger"
 import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
+import { usePicker } from "@/src/shared/hooks/use-picker"
 import { useCards } from "@/src/modules/finance/shared/hooks/use-cards"
 import { useCategories } from "@/src/modules/finance/shared/hooks/use-categories"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
@@ -82,8 +83,9 @@ export function QuickEntryPreviewSheet({
   const [date, setDate] = useState(draft?.date ?? "")
   const [merchant, setMerchant] = useState(draft?.merchant ?? "")
   const [description, setDescription] = useState(draft?.description ?? "")
-  const [categoryPickerOpen, setCategoryPickerOpen] = useState(false)
-  const [destinationPickerOpen, setDestinationPickerOpen] = useState(false)
+  const { picker, openPicker, closeHandlerFor } = usePicker<
+    "none" | "category" | "destination"
+  >("none")
 
   const display = {
     currency: config.baseCurrency,
@@ -141,7 +143,7 @@ export function QuickEntryPreviewSheet({
     <>
       <BottomSheet open={open} onOpenChange={onOpenChange} title="Vista previa">
         <div className="flex flex-col gap-4">
-          <FinanceSegmentedControl
+          <SegmentedControl
             label="Tipo"
             value={type}
             onChange={setType}
@@ -150,6 +152,7 @@ export function QuickEntryPreviewSheet({
           />
 
           <FinanceMoneyField
+            calculatorKey="quick-entry-amount"
             amount={amount}
             onAmountChange={setAmount}
             onAmountCommit={setAmount}
@@ -162,7 +165,7 @@ export function QuickEntryPreviewSheet({
             </span>
             <CategoryTrigger
               category={selectedCategory}
-              onClick={() => setCategoryPickerOpen(true)}
+              onClick={() => openPicker("category")}
             />
           </div>
 
@@ -175,7 +178,7 @@ export function QuickEntryPreviewSheet({
               accounts={accounts}
               cards={cards}
               display={display}
-              onClick={() => setDestinationPickerOpen(true)}
+              onClick={() => openPicker("destination")}
             />
           </div>
 
@@ -212,9 +215,10 @@ export function QuickEntryPreviewSheet({
         </div>
       </BottomSheet>
 
+      {/* La vista previa se cierra sola al recargar: el selector no vive sin ella. */}
       <CategoryPickerSheet
-        open={categoryPickerOpen}
-        onOpenChange={setCategoryPickerOpen}
+        open={open && picker === "category"}
+        onOpenChange={closeHandlerFor("category")}
         categories={categories}
         categoryType={type === "DEBIT" ? "EXPENSE" : "INCOME"}
         value={categoryId}
@@ -222,8 +226,8 @@ export function QuickEntryPreviewSheet({
       />
 
       <DestinationPickerSheet
-        open={destinationPickerOpen}
-        onOpenChange={setDestinationPickerOpen}
+        open={open && picker === "destination"}
+        onOpenChange={closeHandlerFor("destination")}
         institutions={institutions}
         accounts={accounts}
         cards={cards}

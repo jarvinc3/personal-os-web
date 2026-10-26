@@ -484,3 +484,9 @@ export const RELEASE_NOTES: readonly ReleaseNotesEntry[] = [
 
 /** Versión de la app que la hoja compara con la última vista. Sigue a `package.json`. */
 export const LATEST_RELEASE_VERSION = RELEASE_NOTES[0].version
+
+/**
+ * Texto con el que se escribe una nota que solo cuenta un cambio interno: no se
+ * anuncia como novedad, así que la versión queda fuera de la hoja «Novedades».
+ */
+export const RELEASE_NOTES_QUIET_PREFIX = "Sin cambios visibles"

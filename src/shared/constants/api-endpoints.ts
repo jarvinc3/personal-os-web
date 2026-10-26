@@ -9,6 +9,7 @@ export const API_ENDPOINTS = {
     GET_ME: "/users/me",
     UPDATE_ME: "/users/me",
     DELETE_ME: "/users/me",
+    DATA_BRANCHES: "/users/me/data/branches",
     WIPE_DATA: "/users/me/data/wipe",
     MODULE: (slug: string) => `/users/me/modules/${slug}`,
     RELEASE_NOTES_SEEN: "/users/me/release-notes-seen",
@@ -22,6 +23,28 @@ export const API_ENDPOINTS = {
     PUSH_TOKENS: "/notifications/push-tokens",
     DEACTIVATE_PUSH_TOKEN: (token: string) =>
       `/notifications/push-tokens/${token}`,
+  },
+  INTELLIGENCE: {
+    DASHBOARD: "/intelligence",
+    MESSAGES: "/intelligence/messages",
+    MESSAGE: (id: string) => `/intelligence/messages/${encodeURIComponent(id)}`,
+    DATASET: "/intelligence/dataset",
+    REVIEW_QUEUE: "/intelligence/review-queue",
+    VERIFY_MESSAGE: (id: string) =>
+      `/intelligence/messages/${encodeURIComponent(id)}/verifications`,
+    RUNS: "/intelligence/runs",
+    CONNECT_EMAIL: "/intelligence/email/connect",
+    SYNC_EMAIL: "/intelligence/email/sync",
+    RESET_EMAIL: "/intelligence/email/reset",
+    KNOWLEDGE: "/intelligence/knowledge",
+    KNOWLEDGE_ADMIN_QUEUE: "/intelligence/knowledge/admin/queue",
+    KNOWLEDGE_REVERT: (knowledgeId: string) =>
+      `/intelligence/knowledge/admin/${encodeURIComponent(knowledgeId)}/revert`,
+    KNOWLEDGE_EXPORT: "/intelligence/knowledge/me/export",
+    KNOWLEDGE_DELETE: "/intelligence/knowledge/me",
+    CONSENT: "/ai/preferences/consent",
+    ROLES: "/ai/admin/roles",
+    ROLE: (userId: string) => `/ai/admin/roles/${encodeURIComponent(userId)}`,
   },
   FINANCE: {
     INSTITUTIONS: "/finance/institutions",
@@ -96,6 +119,8 @@ export const API_ENDPOINTS = {
     LOAN_INSTALLMENTS: (id: string) => `/finance/loans/${id}/installments`,
     LOAN_SCHEDULE: (id: string) => `/finance/loans/${id}/schedule`,
     LOAN_PREPAYMENTS: (id: string) => `/finance/loans/${id}/prepayments`,
+    LOAN_PAY_NEXT_INSTALLMENT: (id: string) =>
+      `/finance/loans/${id}/pay-next-installment`,
     LOAN_PREPAYMENTS_PREVIEW: (id: string) =>
       `/finance/loans/${id}/prepayments/preview`,
     RECEIVABLES: "/finance/receivables",
@@ -123,6 +148,9 @@ export const API_ENDPOINTS = {
     MERCHANT: (id: string) => `/finance/merchants/${id}`,
     MERCHANT_MERGE: (id: string) => `/finance/merchants/${id}/merge`,
     MERCHANT_LOGO: (id: string) => `/finance/merchants/${id}/logo`,
+    MERCHANT_DUPLICATES: (id: string) => `/finance/merchants/${id}/duplicates`,
+    MERCHANT_DUPLICATE_DISMISS: (id: string, otherId: string) =>
+      `/finance/merchants/${id}/duplicates/${otherId}/dismiss`,
     RECURRING: "/finance/recurring",
     RECURRING_UPCOMING: "/finance/recurring/upcoming",
     RECURRING_PATTERN: (id: string) => `/finance/recurring/${id}`,

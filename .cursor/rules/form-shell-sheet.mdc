@@ -5,7 +5,7 @@ alwaysApply: true
 
 # Formulario en sheet
 
-Un formulario dentro de `BottomSheet` no usa la barra de la página: usa las acciones del sheet.
+Un formulario dentro de `BottomSheet` no usa la barra de la página: usa las acciones del sheet. La hoja y su cierre se abren por ruta: [`sheet-url-route.mdc`](./sheet-url-route.mdc).
 
 - Pie del sheet: `actions.close` a la izquierda ("Cancelar" con `XIcon`) y `actions.submit` a la derecha ("Guardar" con `SaveIcon`). Ambos deshabilitados mientras corre la mutación.
 - El submit muestra `Spinner` y cambia el texto a "Guardando..." mientras envía.

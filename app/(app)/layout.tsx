@@ -5,15 +5,15 @@ import { PendingDataWipeHandler } from "@/src/modules/settings/components/pendin
 import { ReleaseNotes } from "@/src/modules/settings/components/release-notes"
 import { useTimeZoneSync } from "@/src/modules/settings/hooks/use-time-zone-sync"
 import { KeepAwakeProvider } from "@/src/modules/keep-awake/context/keep-awake-context"
-import { AppHeader } from "@/src/shared/components/layout/app-header"
-import { AppSidebar } from "@/src/shared/components/layout/app-sidebar"
+import { AppHeader } from "@/src/shared/components/shell/header/app-header"
+import { AppSidebar } from "@/src/shared/components/shell/app-sidebar"
 import {
   SidebarInset,
   SidebarProvider,
 } from "@/src/shared/components/ui/sidebar"
 import { HeaderProvider } from "@/src/shared/context/header-context"
 import { usePathname } from "next/navigation"
-import { useLayoutEffect, useRef } from "react"
+import { useLayoutEffect, useRef, Suspense } from "react"
 
 function ResetMainScroll({
   scrollerRef,
@@ -47,7 +47,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <KeepAwakeProvider>
               <PendingAccountDeletionHandler />
               <PendingDataWipeHandler />
-              <ReleaseNotes />
+              {/* La hoja lee la URL para abrirse por ruta; el resto del shell no espera por ella. */}
+              <Suspense fallback={null}>
+                <ReleaseNotes />
+              </Suspense>
               {children}
             </KeepAwakeProvider>
           </main>

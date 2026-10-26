@@ -67,7 +67,7 @@ export function buildInstitutionCard(
       productSummary: formatProductCounts(item.counts),
       counts: item.counts,
       balanceLabel:
-        balanceLines.length > 1 ? "Balance por moneda" : "Balance consolidado",
+        balanceLines.length > 1 ? "Patrimonio por moneda" : "Patrimonio",
       balanceAmount: formatStackItemBalance(item, display),
       balanceLines,
       irregularities: item.irregularities,

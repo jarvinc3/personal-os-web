@@ -4,16 +4,20 @@ import {
   BrandLogo,
   CardNetworkMark,
 } from "@/src/modules/finance/shared/components/brand-logo"
+import { GlossaryHelpButton } from "@/src/modules/help"
 import { FINANCE_CARD_TYPE_LABEL } from "@/src/modules/finance/shared/constants/catalog"
-import type { FinanceCardDisplayBalance } from "@/src/modules/finance/shared/lib/card-balances"
+import {
+  cardUtilization,
+  type FinanceCardDisplayBalance,
+} from "@/src/modules/finance/shared/lib/card-balances"
 import { nextCycleNote } from "@/src/modules/finance/shared/lib/card-credit"
-import { cardUtilization } from "@/src/modules/finance/cards/lib/card-utilization"
 import {
   formatFinanceMoney,
   parseFinanceMoney,
   type FinanceMoneyDisplay,
 } from "@/src/modules/finance/shared/lib/money"
 import type { FinanceCard } from "@/src/modules/finance/shared/types/entities"
+import { Badge } from "@/src/shared/components/ui/badge"
 import { cn } from "@/src/shared/lib/utils"
 
 type CardVisualProps = {
@@ -44,14 +48,12 @@ export function CardVisual({ card, balances, display }: CardVisualProps) {
 
         <div className="relative z-10 flex items-center justify-between gap-3">
           <p className="truncate text-sm font-semibold">{card.name}</p>
-          <span className="rounded-full bg-white/15 px-2.5 py-0.5 text-xs font-semibold">
-            {FINANCE_CARD_TYPE_LABEL[card.type]}
-          </span>
+          <Badge variant="tinted">{FINANCE_CARD_TYPE_LABEL[card.type]}</Badge>
         </div>
 
         <div className="relative z-10 flex flex-col gap-1">
           <p className="text-[10px] tracking-[0.14em] text-white/55 uppercase">
-            {isCredit ? "Balance" : "Saldo actual"}
+            {isCredit ? "Disponible" : "Saldo"}
           </p>
           {balances.length === 0 ? (
             <p className="text-3xl font-bold">Sin saldo</p>
@@ -138,8 +140,12 @@ export function CardVisual({ card, balances, display }: CardVisualProps) {
                     }}
                   />
                 </div>
-                <p className="text-xs text-white/70">
+                <p className="flex items-center gap-1 text-xs text-white/70">
                   Límite {formatFinanceMoney(creditLimitValue, moneyDisplay)}
+                  <GlossaryHelpButton
+                    slug="limite-de-credito"
+                    className="text-white/70 hover:text-white"
+                  />
                 </p>
                 {utilization.overdraft > 0 ? (
                   <p className="text-xs font-medium text-white">

@@ -1,8 +1,8 @@
 "use client"
 
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import { Button } from "@/src/shared/components/ui/button"
-import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
+import { PRESSABLE_CLASS } from "@/src/shared/lib/utils"
 import { formatElapsed } from "@/src/modules/keep-awake/lib/format-elapsed"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { formatClockTimeFromDate } from "@/src/shared/lib/date-format"
@@ -14,7 +14,7 @@ import {
   type KeepAwakeHistoryEntry,
   type SessionEndReason,
 } from "@/src/modules/keep-awake/lib/session-history"
-import { SummaryItem } from "@/src/shared/components/ui/summary"
+import { SummaryItem } from "@/src/shared/components/data-display/summary"
 import {
   ClockIcon,
   Copy,
@@ -23,18 +23,18 @@ import {
   Pause,
   Square,
   Timer,
-  XIcon,
 } from "lucide-react"
 import { useSyncExternalStore } from "react"
+import { useFormatLocale } from "@/src/modules/settings/hooks/use-format-locale"
 
 type KeepAwakeHistorySheetProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
 }
 
-function formatRange(entry: KeepAwakeHistoryEntry): string {
-  const start = formatClockTimeFromDate(new Date(entry.startedAt))
-  const end = formatClockTimeFromDate(new Date(entry.endedAt))
+function formatRange(entry: KeepAwakeHistoryEntry, locale: string): string {
+  const start = formatClockTimeFromDate(new Date(entry.startedAt), locale)
+  const end = formatClockTimeFromDate(new Date(entry.endedAt), locale)
   return `${start} – ${end}`
 }
 
@@ -72,6 +72,7 @@ export function KeepAwakeHistorySheet({
   open,
   onOpenChange,
 }: KeepAwakeHistorySheetProps) {
+  const locale = useFormatLocale()
   const entries = useSyncExternalStore(
     subscribeHistory,
     getHistorySnapshot,
@@ -81,23 +82,11 @@ export function KeepAwakeHistorySheet({
 
   return (
     <BottomSheet
+      closeLabel="Cerrar"
       open={open}
       onOpenChange={onOpenChange}
       title="Historial"
       description="Sesiones cerradas recientes."
-      actions={{
-        close: (
-          <Button
-            type="button"
-            variant="outline"
-            className={cn(PRESSABLE_CLASS, "flex-1")}
-            onClick={() => onOpenChange(false)}
-          >
-            <XIcon className="size-4 shrink-0" />
-            Cerrar
-          </Button>
-        ),
-      }}
     >
       {visible.length === 0 && (
         <div className="flex flex-col items-center gap-2 px-4 py-8 text-center">
@@ -119,7 +108,7 @@ export function KeepAwakeHistorySheet({
             <SummaryItem
               key={entry.id}
               title={formatElapsed(entry.durationSeconds)}
-              description={`${formatRange(entry)} · ${historyEndReasonLabel(entry.endReason)}`}
+              description={`${formatRange(entry, locale)} · ${historyEndReasonLabel(entry.endReason)}`}
               leading={<Icon className="size-5" style={{ color }} />}
               accentColor={color}
               isLast={index === visible.length - 1}

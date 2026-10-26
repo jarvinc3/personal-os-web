@@ -1,7 +1,7 @@
 "use client"
 
-import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
-import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
+import { ErrorState } from "@/src/shared/components/feedback/error-state"
+import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
 import { useCategories } from "@/src/modules/finance/shared/hooks/use-categories"
 import { useCreateSubscription } from "@/src/modules/finance/shared/hooks/use-subscriptions"
 import {
@@ -15,10 +15,10 @@ import { RecurringArchiveSheet } from "@/src/modules/finance/subscriptions/compo
 import { RecurringPatternCard } from "@/src/modules/finance/subscriptions/components/recurring-pattern-card"
 import type { FinanceRecurringPattern } from "@/src/modules/finance/shared/types/entities"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import { Button } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
-import { InfiniteListSentinel } from "@/src/shared/components/ui/infinite-list-sentinel"
+import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
 import {
   Empty,
   EmptyDescription,
@@ -27,6 +27,7 @@ import {
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
 import { appToast } from "@/src/shared/lib/app-toast"
+import { usePicker } from "@/src/shared/hooks/use-picker"
 import { CheckIcon, InboxIcon, XIcon } from "lucide-react"
 import { useState } from "react"
 
@@ -44,7 +45,9 @@ export function DetectedSheet({
   isEnabled,
   display,
 }: DetectedSheetProps) {
-  const [archiveOpen, setArchiveOpen] = useState(false)
+  const { picker, openPicker, closeHandlerFor } = usePicker<"none" | "archive">(
+    "none"
+  )
   const [confirmingId, setConfirmingId] = useState<string | null>(null)
   const recurringQuery = useRecurring(isEnabled && open, "SUGGESTED")
   const categoriesQuery = useCategories(isEnabled && open)
@@ -84,26 +87,17 @@ export function DetectedSheet({
   return (
     <>
       <BottomSheet
+        closeLabel="Cerrar"
         open={open}
         onOpenChange={onOpenChange}
         title="Detectados del correo"
         description="Cobros repetidos que pueden ser suscripciones"
         actions={{
-          close: (
-            <Button
-              variant="outline"
-              className="flex-1"
-              onClick={() => onOpenChange(false)}
-            >
-              <XIcon className="size-4 shrink-0" />
-              Cerrar
-            </Button>
-          ),
           submit: (
             <Button
               variant="outline"
               className="flex-1"
-              onClick={() => setArchiveOpen(true)}
+              onClick={() => openPicker("archive")}
             >
               <InboxIcon className="size-4 shrink-0" />
               Bandeja completa
@@ -112,14 +106,14 @@ export function DetectedSheet({
         }}
       >
         {recurringQuery.isError ? (
-          <FinanceErrorState
+          <ErrorState
             message={financeErrorMessage(recurringQuery.error)}
             onRetry={() => void recurringQuery.refetch()}
             isRetrying={recurringQuery.isFetching}
           />
         ) : null}
         {recurringQuery.isPending && !recurringQuery.data ? (
-          <FinanceListSkeleton rows={3} />
+          <ListSkeleton rows={3} />
         ) : null}
         {!recurringQuery.isPending && patterns.length === 0 ? (
           <Empty className="py-6">
@@ -179,8 +173,8 @@ export function DetectedSheet({
       </BottomSheet>
 
       <RecurringArchiveSheet
-        open={archiveOpen}
-        onOpenChange={setArchiveOpen}
+        open={picker === "archive"}
+        onOpenChange={closeHandlerFor("archive")}
         display={display}
         nested
       />

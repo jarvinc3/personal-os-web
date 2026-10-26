@@ -1,19 +1,15 @@
 "use client"
 
-import {
-  WipeUserDataView,
-  type WipeScope,
-} from "@/src/modules/settings/components/sheets/wipe-user-data-sheet"
+import { WipeUserDataView } from "@/src/modules/settings/components/sheets/wipe-user-data-sheet"
 import type { SettingsSheetProps } from "@/src/modules/settings/types/sheet.types"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
-import { Button } from "@/src/shared/components/ui/button"
-import { XIcon } from "lucide-react"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 
 type WipeDataSheetProps = SettingsSheetProps & {
   email: string
   title: string
   description: string
-  scope: WipeScope
+  /** Only the branches of this app; omit it to wipe every app. */
+  app?: string
 }
 
 export function WipeDataSheet({
@@ -22,7 +18,7 @@ export function WipeDataSheet({
   email,
   title,
   description,
-  scope,
+  app,
 }: WipeDataSheetProps) {
   return (
     <BottomSheet
@@ -30,22 +26,10 @@ export function WipeDataSheet({
       onOpenChange={onOpenChange}
       title={title}
       description={description}
-      actions={{
-        close: (
-          <Button
-            variant="outline"
-            className="flex-1"
-            onClick={() => onOpenChange(false)}
-          >
-            <XIcon className="size-4 shrink-0" />
-            Cancelar
-          </Button>
-        ),
-      }}
     >
       <WipeUserDataView
         email={email}
-        scope={scope}
+        app={app}
         onWiped={() => onOpenChange(false)}
       />
     </BottomSheet>

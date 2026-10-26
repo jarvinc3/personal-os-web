@@ -1,7 +1,7 @@
 "use client"
 
 import { zodResolver } from "@hookform/resolvers/zod"
-import { HandCoinsIcon, SaveIcon, XIcon } from "lucide-react"
+import { HandCoinsIcon, SaveIcon } from "lucide-react"
 import { useMemo } from "react"
 import { Controller, useForm } from "react-hook-form"
 import { z } from "zod"
@@ -22,10 +22,10 @@ import {
 } from "@/src/modules/finance/shared/lib/ledger-form"
 import { useUserTimeZone } from "@/src/modules/settings/hooks/use-user-time-zone"
 import type { FinanceSubscription } from "@/src/modules/finance/shared/types/entities"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import { Button } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
-import { SummarySection } from "@/src/shared/components/ui/summary"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
 
@@ -153,17 +153,6 @@ export function SubscriptionPaymentSheet({
           : "Asigna una cuenta o tarjeta a la suscripción para registrar el pago."
       }
       actions={{
-        close: (
-          <Button
-            key="cancel"
-            variant="outline"
-            className="flex-1"
-            onClick={() => onOpenChange(false)}
-          >
-            <XIcon className="size-4 shrink-0" />
-            Cancelar
-          </Button>
-        ),
         submit: (
           <Button
             key="submit"
@@ -187,6 +176,7 @@ export function SubscriptionPaymentSheet({
           name="amount"
           render={({ field }) => (
             <FinanceMoneyField
+              calculatorKey="subscription-payment-amount"
               amount={field.value}
               onAmountChange={field.onChange}
               onAmountCommit={field.onChange}

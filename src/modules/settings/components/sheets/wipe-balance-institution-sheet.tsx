@@ -13,7 +13,7 @@ import {
   type FinanceMoneyDisplay,
 } from "@/src/modules/finance"
 import type { FinanceBalanceSheetSlice } from "@/src/modules/finance"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import { Skeleton } from "@/src/shared/components/ui/skeleton"
 
 const ALL_INSTITUTIONS_COLOR = "#0f172a"

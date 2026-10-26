@@ -159,9 +159,12 @@ export function formatReminderTime(reminder: KeepAwakeReminder): string {
   return `${pad(reminder.hour)}:${pad(reminder.minute)}`
 }
 
-/** Clock label for UI (12 h). */
-export function formatReminderTimeLabel(reminder: KeepAwakeReminder): string {
-  return formatTimeForDisplay(formatReminderTime(reminder))
+/** Clock label for UI, in the locale of the profile. */
+export function formatReminderTimeLabel(
+  reminder: KeepAwakeReminder,
+  locale: string
+): string {
+  return formatTimeForDisplay(formatReminderTime(reminder), locale)
 }
 
 let reminderCacheRaw: string | null | undefined

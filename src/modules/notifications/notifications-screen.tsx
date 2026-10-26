@@ -1,6 +1,8 @@
 "use client"
 
 import { NotificationEmptyState } from "@/src/modules/notifications/components/notification-empty-state"
+import { ErrorState } from "@/src/shared/components/feedback/error-state"
+import { ERROR_MESSAGES } from "@/src/shared/lib/error-messages"
 import { NotificationFilters } from "@/src/modules/notifications/components/notification-filters"
 import { NotificationGroupList } from "@/src/modules/notifications/components/notification-group-list"
 import { NotificationHeaderMenu } from "@/src/modules/notifications/components/notification-header-menu"
@@ -27,9 +29,12 @@ import {
   parseModuleSlugFromNotificationData,
 } from "@/src/shared/constants/module-registry"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
+import { usePicker } from "@/src/shared/hooks/use-picker"
+import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { SettingsIcon } from "lucide-react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { useFormatLocale } from "@/src/modules/settings/hooks/use-format-locale"
 
 export function NotificationsScreen() {
   return (
@@ -40,6 +45,7 @@ export function NotificationsScreen() {
 }
 
 function NotificationsScreenBody() {
+  const locale = useFormatLocale()
   const { isInAppEnabled } = useNotificationPreferences()
   const notificationsQuery = useNotifications()
   const markReadMutation = useMarkNotificationRead()
@@ -47,8 +53,12 @@ function NotificationsScreenBody() {
     useMarkAllNotificationsRead()
   const { updatePreferences } = useProfile()
 
-  const [prefsOpen, setPrefsOpen] = useState(false)
-  const [quietHoursOpen, setQuietHoursOpen] = useState(false)
+  const { open: prefsOpen, setOpen: setPrefsOpen } = useSheetParam(
+    "notification-preferences-sheet"
+  )
+  const { picker, openPicker, closeHandlerFor } = usePicker<
+    "none" | "quiet-hours"
+  >("none")
   const [readFilter, setReadFilter] = useState<NotificationReadFilter>("all")
   const [requestedModuleFilter, setRequestedModuleFilter] =
     useState<ModuleSlug | null>(null)
@@ -144,8 +154,8 @@ function NotificationsScreenBody() {
   }, [readFilter, scopedNotifications])
 
   const sections = useMemo(
-    () => groupNotificationsByDate(visibleNotifications),
-    [visibleNotifications]
+    () => groupNotificationsByDate(visibleNotifications, locale),
+    [visibleNotifications, locale]
   )
 
   const handleMarkAllRead = useCallback(() => {
@@ -185,9 +195,15 @@ function NotificationsScreenBody() {
   const preferencesSheet = (
     <NotificationPreferencesSheet
       open={prefsOpen}
-      quietHoursOpen={quietHoursOpen}
+      quietHoursOpen={picker === "quiet-hours"}
       onOpenChange={setPrefsOpen}
-      onQuietHoursOpenChange={setQuietHoursOpen}
+      onQuietHoursOpenChange={(next) => {
+        if (next) {
+          openPicker("quiet-hours")
+          return
+        }
+        closeHandlerFor("quiet-hours")(false)
+      }}
       onPreferenceToggle={handlePreferenceToggle}
     />
   )
@@ -213,6 +229,19 @@ function NotificationsScreenBody() {
     return (
       <div className="mx-auto flex max-w-2xl flex-col gap-4 p-4 pb-16 md:px-6">
         <NotificationListSkeleton />
+        {preferencesSheet}
+      </div>
+    )
+  }
+
+  if (notificationsQuery.isError) {
+    return (
+      <div className="mx-auto flex max-w-2xl flex-col gap-4 p-4 pb-16 md:px-6">
+        <ErrorState
+          message={ERROR_MESSAGES.loadHint}
+          onRetry={() => void notificationsQuery.refetch()}
+          isRetrying={notificationsQuery.isFetching}
+        />
         {preferencesSheet}
       </div>
     )

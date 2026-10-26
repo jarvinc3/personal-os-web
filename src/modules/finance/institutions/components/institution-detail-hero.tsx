@@ -1,9 +1,11 @@
 "use client"
 
 import { BrandLogo } from "@/src/modules/finance/shared/components/brand-logo"
+import { GlossaryHelpButton } from "@/src/modules/help"
 import type { InstitutionStackCounts } from "@/src/modules/finance/shared/lib/institution-stack"
 import type { FinanceInstitution } from "@/src/modules/finance/shared/types/entities"
 import { ProductCountItem } from "@/src/modules/finance/products"
+import { DetailHeader } from "@/src/modules/finance/shared/components/layout/progress-hero"
 import { Button } from "@/src/shared/components/ui/button"
 import { cn } from "@/src/shared/lib/utils"
 import { Label } from "@/src/shared/components/ui/label"
@@ -40,21 +42,21 @@ export function InstitutionDetailHero({
       className="rounded-b-3xl p-4 text-white md:p-6"
       style={{ background: accent }}
     >
-      <div className="flex items-center gap-3">
-        <BrandLogo
-          name={institution.name}
-          logoUrl={institution.logoUrl}
-          size={48}
-        />
-        <div className="flex min-w-0 flex-1 flex-col gap-1">
-          <h1 className="truncate text-2xl font-bold tracking-tight">
-            {institution.name}
-          </h1>
+      <DetailHeader
+        media={
+          <BrandLogo
+            name={institution.name}
+            logoUrl={institution.logoUrl}
+            size={48}
+          />
+        }
+        title={institution.name}
+        subtitle={
           <div className="flex items-center gap-3 text-base font-semibold text-white tabular-nums">
             <ProductCountItem
               icon={LandmarkIcon}
               count={counts.accounts}
-              label="Cuentas"
+              noun="account"
             />
             {!isCash ? (
               <>
@@ -62,7 +64,7 @@ export function InstitutionDetailHero({
                 <ProductCountItem
                   icon={CreditCardIcon}
                   count={counts.cards}
-                  label="Tarjetas"
+                  noun="card"
                 />
               </>
             ) : null}
@@ -70,14 +72,17 @@ export function InstitutionDetailHero({
             <ProductCountItem
               icon={HandCoinsIcon}
               count={counts.loans}
-              label="Préstamos"
+              noun="loan"
             />
           </div>
-        </div>
-      </div>
+        }
+      />
 
       <div className="mt-8 flex flex-col gap-1 rounded-2xl bg-black/20 px-3 py-2">
-        <Label className="text-sm text-foreground">Saldo</Label>
+        <div className="flex items-center gap-1">
+          <Label className="text-sm text-foreground">Patrimonio</Label>
+          <GlossaryHelpButton slug="patrimonio" />
+        </div>
         {balanceLines.length === 0 ? (
           <p className="text-3xl font-bold tracking-tight tabular-nums">
             {balanceText}

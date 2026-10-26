@@ -3,6 +3,8 @@ export type ApiErrorBody = {
   code?: string
   path?: string
   requestId?: string
+  /** Sent with a merchant name conflict: the merchant that already has it. */
+  existingMerchantId?: string | null
 }
 
 export class ApiError extends Error {
@@ -10,13 +12,15 @@ export class ApiError extends Error {
   readonly code?: string
   readonly requestId?: string
   readonly path?: string
+  readonly existingMerchantId?: string | null
 
   constructor(
     status: number,
     message: string,
     code?: string,
     requestId?: string,
-    path?: string
+    path?: string,
+    details?: { existingMerchantId?: string | null }
   ) {
     super(message)
     this.name = "ApiError"
@@ -24,7 +28,13 @@ export class ApiError extends Error {
     this.code = code
     this.requestId = requestId
     this.path = path
+    this.existingMerchantId = details?.existingMerchantId ?? null
   }
+}
+
+/** Merchant whose name already exists, when the API said so. */
+export function merchantIdFromConflict(error: unknown): string | null {
+  return error instanceof ApiError ? (error.existingMerchantId ?? null) : null
 }
 
 export function isApiEnvelope<T>(
@@ -84,7 +94,8 @@ export function mapStatusToError(
           "La operación ya se está procesando o se repitió; inténtalo más tarde",
         code ?? "CONFLICT",
         requestId,
-        path
+        path,
+        { existingMerchantId: body.existingMerchantId ?? null }
       )
     default:
       if (status >= 500) {

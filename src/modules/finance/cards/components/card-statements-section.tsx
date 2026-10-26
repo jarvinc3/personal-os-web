@@ -1,9 +1,10 @@
 "use client"
 
 import type { UpcomingCardCycle } from "@/src/modules/finance/shared/lib/card-credit"
+import { CardSkeleton } from "@/src/shared/components/feedback/list-skeleton"
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
 import { StatementImportButton } from "@/src/modules/finance/shared/components/statement-import-button"
-import { InfiniteListSentinel } from "@/src/shared/components/ui/infinite-list-sentinel"
+import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
 import { CardStatementSheet } from "@/src/modules/finance/cards/components/card-statement-sheet"
 import { formatCalendarDate } from "@/src/modules/finance/shared/lib/ledger-form"
 import { useFormatLocale } from "@/src/modules/settings/hooks/use-format-locale"
@@ -31,6 +32,7 @@ import { cn } from "@/src/shared/lib/utils"
 import type { VariantProps } from "class-variance-authority"
 import { CalendarIcon, CalendarPlusIcon, PlusIcon } from "lucide-react"
 import { useState } from "react"
+import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 
 type BadgeVariant = VariantProps<typeof badgeVariants>["variant"]
 
@@ -112,9 +114,7 @@ export function CardStatementsSection({
   isFetchingNextPage,
   onLoadMore,
 }: CardStatementsSectionProps) {
-  const [selectedStatementId, setSelectedStatementId] = useState<string | null>(
-    null
-  )
+  const statementSheet = useSheetParam("card-statement-sheet")
   const [statementEditing, setStatementEditing] = useState(false)
   return (
     <>
@@ -122,12 +122,8 @@ export function CardStatementsSection({
         pending={isPending}
         pendingFallback={
           <div className="flex flex-col gap-3">
-            {[0, 1].map((index) => (
-              <div
-                key={index}
-                className="h-40 animate-pulse rounded-2xl border border-border bg-muted/40"
-              />
-            ))}
+            <CardSkeleton height={40} />
+            <CardSkeleton height={40} />
           </div>
         }
         empty={statements.length === 0 && upcomingCycle === null}
@@ -173,7 +169,7 @@ export function CardStatementsSection({
                 className={cn(STATEMENT_CARD_CLASS, "text-left")}
                 onClick={() => {
                   setStatementEditing(false)
-                  setSelectedStatementId(statement.id)
+                  statementSheet.setOpen(true, statement.id)
                 }}
               >
                 <div className="flex items-start justify-between gap-3">
@@ -234,7 +230,7 @@ export function CardStatementsSection({
               className="w-full"
               onClick={() => {
                 setStatementEditing(true)
-                setSelectedStatementId(statements[0]?.id ?? null)
+                statementSheet.setOpen(true, statements[0]?.id ?? null)
               }}
             >
               <CalendarPlusIcon className="size-4 shrink-0" />
@@ -250,14 +246,10 @@ export function CardStatementsSection({
       </AsyncRegion>
       <StatementImportButton cardId={cardId} className="w-full" />
       <CardStatementSheet
-        open={selectedStatementId !== null}
-        onOpenChange={(next) => {
-          if (!next) {
-            setSelectedStatementId(null)
-          }
-        }}
+        open={statementSheet.open}
+        onOpenChange={statementSheet.setOpen}
         cardId={cardId}
-        statementId={selectedStatementId}
+        statementId={statementSheet.sheetId}
         display={display}
         defaultEditing={statementEditing}
       />

@@ -1,8 +1,8 @@
 "use client"
 
-import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
+import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
 import { QuickEntryBar } from "@/src/modules/finance/quick-entry"
-import { FinanceFlowPills } from "@/src/modules/finance/transactions/components/flow-pills"
+import { MonthFlowSummary } from "@/src/modules/finance/shared/components/month-flow-summary"
 import { FinanceMonthPicker } from "@/src/modules/finance/transactions/components/month-picker"
 import { FinanceMonthSection } from "@/src/modules/finance/transactions/components/month-section"
 import { FinanceTransactionSearch } from "@/src/modules/finance/transactions/components/transaction-search"
@@ -12,7 +12,7 @@ import { useLoans } from "@/src/modules/finance/shared/hooks/use-loans"
 import { useSubscriptionsUpcoming } from "@/src/modules/finance/shared/hooks/use-subscriptions"
 import { useCategories } from "@/src/modules/finance/shared/hooks/use-categories"
 import { useTimelineTransactions } from "@/src/modules/finance/shared/hooks/use-transactions"
-import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
+import { ErrorState } from "@/src/shared/components/feedback/error-state"
 import {
   financeErrorMessage,
   financeLoadErrorMessage,
@@ -44,7 +44,7 @@ import {
   shouldFollowScroll,
 } from "@/src/modules/finance/shared/lib/timeline-scroll"
 import { FINANCE_TRANSACTIONS_QUERY_KEY } from "@/src/modules/finance/shared/types/api"
-import { ExpandableFab } from "@/src/shared/components/layout/expandable-fab"
+import { ExpandableFab } from "@/src/shared/components/fab/expandable-fab"
 import {
   APP_ROUTES,
   financeTransactionNewHref,
@@ -168,8 +168,13 @@ export function FinanceTransactionsList({
   const weekStartsOn = useWeekStartsOn()
   const timeline = useMemo(
     () =>
-      buildTimelineMonths({ months, items: timelineQuery.items, weekStartsOn }),
-    [months, timelineQuery.items, weekStartsOn]
+      buildTimelineMonths({
+        months,
+        items: timelineQuery.items,
+        weekStartsOn,
+        locale: display.locale,
+      }),
+    [months, timelineQuery.items, weekStartsOn, display.locale]
   )
   const activeMonth = timeline.find((month) => month.key === activeMonthKey)
 
@@ -415,17 +420,18 @@ export function FinanceTransactionsList({
           months={months}
           activeMonthKey={activeMonthKey}
           currentMonthKey={currentMonthKey}
+          locale={display.locale}
           onSelect={scrollToMonth}
         />
-        <FinanceFlowPills
-          income={activeMonth?.totals.income ?? 0}
-          expenses={activeMonth?.totals.expenses ?? 0}
+        <MonthFlowSummary
+          income={activeMonth?.totals.income}
+          expenses={activeMonth?.totals.expenses}
           display={display}
         />
       </div>
 
       {timelineQuery.isError ? (
-        <FinanceErrorState
+        <ErrorState
           message={financeLoadErrorMessage(timelineQuery.error)}
           onRetry={() => {
             void queryClient.invalidateQueries({
@@ -437,7 +443,7 @@ export function FinanceTransactionsList({
       ) : null}
 
       {commitmentsError ? (
-        <FinanceErrorState
+        <ErrorState
           message={financeErrorMessage(commitmentsError)}
           onRetry={() => {
             void loansQuery.refetch()
@@ -448,7 +454,7 @@ export function FinanceTransactionsList({
       ) : null}
 
       {timelineQuery.isPending && timelineQuery.items.length === 0 ? (
-        <FinanceListSkeleton rows={4} />
+        <ListSkeleton rows={4} />
       ) : null}
 
       <div ref={timelineRef} className="flex flex-col">

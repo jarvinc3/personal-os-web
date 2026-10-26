@@ -1,8 +1,8 @@
 "use client"
 
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
-import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
-import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
+import { ErrorState } from "@/src/shared/components/feedback/error-state"
+import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
 import {
   useCardStatementDetail,
   useUpdateCardStatement,
@@ -23,7 +23,7 @@ import {
   FINANCE_CARD_STATEMENT_STATUS_LABEL,
   type FinanceCardStatementMovement,
 } from "@/src/modules/finance/shared/types/entities"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import {
   Empty,
   EmptyDescription,
@@ -35,8 +35,9 @@ import {
   fromStatementLine,
   StatementMovementRow,
 } from "@/src/modules/finance/transactions"
+import { SettingsSection } from "@/src/shared/components/settings/settings-section"
 import { Button } from "@/src/shared/components/ui/button"
-import { FormTextField } from "@/src/shared/components/layout/form-blocks"
+import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import { appToast } from "@/src/shared/lib/app-toast"
 import {
   CalendarIcon,
@@ -157,6 +158,7 @@ export function CardStatementSheet({
 
   return (
     <BottomSheet
+      closeLabel="Cerrar"
       open={open}
       onOpenChange={onOpenChange}
       title="Estado de cuenta"
@@ -171,19 +173,6 @@ export function CardStatementSheet({
             )
           : undefined
       }
-      actions={{
-        close: (
-          <Button
-            type="button"
-            variant="outline"
-            className="flex-1"
-            onClick={() => onOpenChange(false)}
-          >
-            <XIcon className="size-4 shrink-0" />
-            Cerrar
-          </Button>
-        ),
-      }}
       headerAction={
         detail ? (
           <div className="flex items-center gap-2">
@@ -198,7 +187,7 @@ export function CardStatementSheet({
       }
     >
       {detailQuery.isError ? (
-        <FinanceErrorState
+        <ErrorState
           message={financeLoadErrorMessage(detailQuery.error)}
           onRetry={() => void detailQuery.refetch()}
           isRetrying={detailQuery.isFetching}
@@ -207,7 +196,7 @@ export function CardStatementSheet({
 
       <AsyncRegion
         pending={detailQuery.isPending}
-        pendingFallback={<FinanceListSkeleton rows={4} />}
+        pendingFallback={<ListSkeleton rows={4} />}
         empty={!detailQuery.isError && !detail}
         emptyFallback={
           <Empty className="py-10">
@@ -312,27 +301,21 @@ export function CardStatementSheet({
               </div>
             </div>
 
-            <div className="flex flex-col gap-2">
-              <h3 className="text-sm font-medium text-muted-foreground">
-                Movimientos del ciclo
-              </h3>
+            <SettingsSection title="Movimientos del ciclo" bare>
               <MovementList
                 movements={detail.movements}
                 display={moneyDisplay}
                 emptyLabel="Sin movimientos en este ciclo."
               />
-            </div>
+            </SettingsSection>
 
-            <div className="flex flex-col gap-2">
-              <h3 className="text-sm font-medium text-muted-foreground">
-                Pagos aplicados
-              </h3>
+            <SettingsSection title="Pagos aplicados" bare>
               <MovementList
                 movements={detail.payments}
                 display={moneyDisplay}
                 emptyLabel="Sin pagos aplicados."
               />
-            </div>
+            </SettingsSection>
           </div>
         ) : null}
       </AsyncRegion>

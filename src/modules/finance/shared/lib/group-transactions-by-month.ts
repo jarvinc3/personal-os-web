@@ -23,7 +23,8 @@ function compareNewestFirst(
 }
 
 export function groupTransactionsByMonth(
-  items: readonly FinanceTransaction[]
+  items: readonly FinanceTransaction[],
+  locale: string
 ): TransactionMonthGroup[] {
   const byMonth = new Map<string, FinanceTransaction[]>()
   for (const item of items) {
@@ -48,7 +49,7 @@ export function groupTransactionsByMonth(
       const [year, month] = key.split("-").map(Number)
       return {
         key,
-        label: formatMonthYearLabel(new Date(year, month - 1, 1)),
+        label: formatMonthYearLabel(new Date(year, month - 1, 1), locale),
         income: totals.income,
         expenses: totals.expenses,
         items: sorted,

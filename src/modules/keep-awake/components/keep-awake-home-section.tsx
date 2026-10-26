@@ -24,7 +24,7 @@ import {
 } from "@/src/modules/keep-awake/lib/session-history"
 import { Badge } from "@/src/shared/components/ui/badge"
 import { Button } from "@/src/shared/components/ui/button"
-import { SummarySection } from "@/src/shared/components/ui/summary"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { cn } from "@/src/shared/lib/utils"
 import {
@@ -38,10 +38,11 @@ import {
   Timer,
   type LucideIcon,
 } from "lucide-react"
-import { LinkPendingOverlay } from "@/src/shared/components/ui/navigation-pending"
+import { LinkPendingOverlay } from "@/src/shared/components/shell/navigation-pending"
 import Link from "next/link"
 import { useSyncExternalStore } from "react"
 import { MODULE_REGISTRY } from "@/src/shared/constants/module-registry"
+import { useFormatLocale } from "@/src/modules/settings/hooks/use-format-locale"
 
 const STAT_ICONS: Record<KeepAwakeHomeStat["key"], LucideIcon> = {
   today: Clock,
@@ -56,6 +57,7 @@ const CHIP_ICONS: Record<KeepAwakeHomeChip["key"], LucideIcon> = {
 }
 
 export function KeepAwakeHomeSection() {
+  const locale = useFormatLocale()
   const { phase, elapsedSeconds, remainingSeconds, endsAt, startTimestamp } =
     useKeepAwake()
   const history = useSyncExternalStore(
@@ -82,6 +84,7 @@ export function KeepAwakeHomeSection() {
     history,
     reminder,
     prefs,
+    locale,
   })
 
   return (

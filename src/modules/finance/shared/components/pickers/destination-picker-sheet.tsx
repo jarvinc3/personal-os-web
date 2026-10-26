@@ -17,7 +17,7 @@ import type {
   FinanceCard,
   FinanceInstitution,
 } from "@/src/modules/finance/shared/types/entities"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import {
   Empty,
   EmptyDescription,

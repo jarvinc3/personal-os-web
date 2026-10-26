@@ -9,7 +9,7 @@ import type { ApiErrorBody } from "@/src/config/api-client.utils"
 import { getSupabaseBrowserClient } from "@/src/config/supabase/client"
 import { API_BASE_URL } from "@/src/shared/constants/api-endpoints"
 import { authEvents } from "@/src/shared/events/auth-events"
-import { logApiError } from "@/src/shared/lib/log-api-error"
+import { logApiError, logApiRequest } from "@/src/shared/lib/log-api-error"
 export { ApiError } from "@/src/config/api-client.utils"
 
 type ApiEnvelope<T> = {
@@ -150,7 +150,7 @@ export function createApiClient({
           process.env.NODE_ENV === "development" &&
           envelope.meta?.requestId
         ) {
-          console.debug(`[API] ${path} requestId=${envelope.meta.requestId}`)
+          logApiRequest(path, envelope.meta.requestId)
         }
         return envelope.data
       }
@@ -210,8 +210,23 @@ export function createApiClient({
       config
     )
 
+  /** DELETE with a confirmation body, for endpoints that require one. */
+  const apiDeleteWithBody = <T>(
+    path: string,
+    body?: unknown,
+    config?: ApiRequestConfig
+  ) =>
+    request<T>(
+      path,
+      {
+        method: "DELETE",
+        body: body ? JSON.stringify(body) : undefined,
+      },
+      config
+    )
+
   const apiDelete = <T>(path: string, config?: ApiRequestConfig) =>
-    request<T>(path, { method: "DELETE" }, config)
+    apiDeleteWithBody<T>(path, undefined, config)
 
   const apiPostForm = <T>(
     path: string,
@@ -219,7 +234,14 @@ export function createApiClient({
     config?: ApiRequestConfig
   ) => request<T>(path, { method: "POST", body }, config)
 
-  return { apiGet, apiPost, apiPatch, apiDelete, apiPostForm }
+  return {
+    apiGet,
+    apiPost,
+    apiPatch,
+    apiDelete,
+    apiDeleteWithBody,
+    apiPostForm,
+  }
 }
 
 const defaultApiClient = createApiClient({
@@ -231,4 +253,5 @@ export const apiGet = defaultApiClient.apiGet
 export const apiPost = defaultApiClient.apiPost
 export const apiPatch = defaultApiClient.apiPatch
 export const apiDelete = defaultApiClient.apiDelete
+export const apiDeleteWithBody = defaultApiClient.apiDeleteWithBody
 export const apiPostForm = defaultApiClient.apiPostForm

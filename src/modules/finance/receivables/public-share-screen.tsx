@@ -11,13 +11,14 @@ import {
 } from "@/src/modules/finance/receivables/lib/public-receivable-share"
 import { formatSharePendingTotals } from "@/src/modules/finance/receivables/lib/receivable-share"
 import { ReceivableCard } from "@/src/modules/finance/receivables/components/receivable-card"
-import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
+import { ErrorState } from "@/src/shared/components/feedback/error-state"
 import { FinanceProgressHero } from "@/src/modules/finance/shared/components/layout/progress-hero"
+import { SettingsSection } from "@/src/shared/components/settings/settings-section"
 import { financeLoadErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import { DEFAULT_LOCALE } from "@/src/modules/settings/lib/locale-options"
 import { usePublicReceivableShare } from "@/src/modules/finance/shared/hooks/use-receivable-shares"
-import { AppLogo } from "@/src/shared/components/brand/app-logo"
-import { LoadingView } from "@/src/shared/components/layout/loading-view"
+import { AppLogo } from "@/src/shared/components/shell/app-logo"
+import { LoadingView } from "@/src/shared/components/feedback/loading-view"
 import {
   Empty,
   EmptyDescription,
@@ -31,6 +32,7 @@ import {
 } from "@/src/shared/lib/accent-gradient"
 import { HandshakeIcon, LinkIcon } from "lucide-react"
 import { useState } from "react"
+import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 
 /**
  * Display for a visitor without a session: there are no finance settings to
@@ -51,9 +53,8 @@ export function PublicReceivableShareScreen({
   token,
 }: PublicReceivableShareScreenProps) {
   const shareQuery = usePublicReceivableShare(token)
-  const [openItem, setOpenItem] = useState<PublicReceivableShareItem | null>(
-    null
-  )
+  // El cobro elegido va en `sheetId` (su `ref`), así recargar reabre el mismo.
+  const itemSheet = useSheetParam("public-receivable-detail-sheet")
 
   const share = shareQuery.data
 
@@ -80,7 +81,7 @@ export function PublicReceivableShareScreen({
             </EmptyHeader>
           </Empty>
         ) : (
-          <FinanceErrorState
+          <ErrorState
             message={financeLoadErrorMessage(shareQuery.error)}
             onRetry={() => void shareQuery.refetch()}
             isRetrying={shareQuery.isFetching}
@@ -97,7 +98,11 @@ export function PublicReceivableShareScreen({
   const pendingLabel = formatSharePendingTotals(
     publicSharePendingTotals(share.totalsByCurrency, PUBLIC_DISPLAY)
   )
-  const updatedLabel = formatPublicShareUpdatedAt(share.updatedAt, new Date())
+  const updatedLabel = formatPublicShareUpdatedAt(
+    share.updatedAt,
+    new Date(),
+    PUBLIC_DISPLAY.locale
+  )
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 p-4 pb-16 md:px-6">
@@ -128,37 +133,40 @@ export function PublicReceivableShareScreen({
         }))}
       />
 
-      <div className="flex items-center justify-between gap-2">
-        <h2 className="text-lg font-semibold">Detalle</h2>
-        <span className="text-sm text-muted-foreground">
-          {publicShareCountCaption(share.items.length)}
-        </span>
-      </div>
-
-      {share.items.length === 0 ? (
-        <Empty className="py-10">
-          <EmptyHeader>
-            <EmptyMedia variant="icon">
-              <HandshakeIcon />
-            </EmptyMedia>
-            <EmptyTitle>No hay cobros por ver</EmptyTitle>
-            <EmptyDescription>
-              Quien te compartió el link los canceló o los dejó sin efecto.
-            </EmptyDescription>
-          </EmptyHeader>
-        </Empty>
-      ) : (
-        <div className="flex flex-col gap-2">
-          {share.items.map((item) => (
-            <ReceivableCard
-              key={item.ref}
-              source={{ kind: "shared", item }}
-              display={PUBLIC_DISPLAY}
-              onPress={() => setOpenItem(item)}
-            />
-          ))}
-        </div>
-      )}
+      <SettingsSection
+        title="Detalle"
+        bare
+        headerTrailing={
+          <span className="text-sm text-muted-foreground">
+            {publicShareCountCaption(share.items.length)}
+          </span>
+        }
+      >
+        {share.items.length === 0 ? (
+          <Empty className="py-10">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <HandshakeIcon />
+              </EmptyMedia>
+              <EmptyTitle>No hay cobros por ver</EmptyTitle>
+              <EmptyDescription>
+                Quien te compartió el link los canceló o los dejó sin efecto.
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
+        ) : (
+          <div className="flex flex-col gap-2">
+            {share.items.map((item) => (
+              <ReceivableCard
+                key={item.ref}
+                source={{ kind: "shared", item }}
+                display={PUBLIC_DISPLAY}
+                onPress={() => itemSheet.setOpen(true, item.ref)}
+              />
+            ))}
+          </div>
+        )}
+      </SettingsSection>
 
       <div className="flex flex-col items-center gap-2 text-center text-xs text-muted-foreground">
         <p>Toca un cobro para ver su detalle</p>
@@ -170,13 +178,11 @@ export function PublicReceivableShareScreen({
       </div>
 
       <PublicShareDetailSheet
-        open={Boolean(openItem)}
-        onOpenChange={(open) => {
-          if (!open) {
-            setOpenItem(null)
-          }
-        }}
-        item={openItem}
+        open={itemSheet.open}
+        onOpenChange={itemSheet.setOpen}
+        item={
+          share.items.find((item) => item.ref === itemSheet.sheetId) ?? null
+        }
         ownerFirstName={share.ownerFirstName}
         display={PUBLIC_DISPLAY}
       />

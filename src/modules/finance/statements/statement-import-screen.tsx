@@ -2,7 +2,7 @@
 
 import { FinanceGate } from "@/src/modules/finance/finance-gate"
 import { MissingRecord } from "@/src/modules/finance/shared/components/layout/missing-record"
-import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
+import { ErrorState } from "@/src/shared/components/feedback/error-state"
 import { StatementImportButton } from "@/src/modules/finance/shared/components/statement-import-button"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
 import {
@@ -18,6 +18,7 @@ import {
 import { translateFinanceError } from "@/src/modules/finance/shared/lib/finance-error-messages"
 import { formatCalendarDate } from "@/src/modules/finance/shared/lib/ledger-form"
 import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
+import { SettingsSection } from "@/src/shared/components/settings/settings-section"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
 import {
   signedStatementLineAmount,
@@ -33,7 +34,7 @@ import {
   fromStatementImportExtra,
   StatementMovementRow,
 } from "@/src/modules/finance/transactions"
-import { LoadingView } from "@/src/shared/components/layout/loading-view"
+import { LoadingView } from "@/src/shared/components/feedback/loading-view"
 import {
   Alert,
   AlertDescription,
@@ -41,7 +42,7 @@ import {
 } from "@/src/shared/components/ui/alert"
 import { Button } from "@/src/shared/components/ui/button"
 import { Checkbox } from "@/src/shared/components/ui/checkbox"
-import { SummaryItem } from "@/src/shared/components/ui/summary"
+import { SummaryItem } from "@/src/shared/components/data-display/summary"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { appToast } from "@/src/shared/lib/app-toast"
@@ -86,17 +87,13 @@ function Group({
   children: React.ReactNode
 }) {
   return (
-    <section className="flex flex-col gap-2">
-      <div>
-        <h2 className="font-semibold">{title}</h2>
-        <p className="text-sm text-muted-foreground">{description}</p>
-      </div>
+    <SettingsSection title={title} description={description} bare>
       {children ?? (
         <p className="rounded-2xl border border-dashed border-border p-4 text-sm text-muted-foreground">
           {emptyLabel}
         </p>
       )}
-    </section>
+    </SettingsSection>
   )
 }
 
@@ -415,7 +412,7 @@ function StatementImportScreenBody({ importId }: StatementImportScreenProps) {
       )}
 
       {query.error ? (
-        <FinanceErrorState
+        <ErrorState
           message={financeLoadErrorMessage(query.error)}
           onRetry={() => void query.refetch()}
           isRetrying={query.isFetching}

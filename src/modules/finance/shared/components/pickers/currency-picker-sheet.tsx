@@ -9,8 +9,13 @@ import { currencyDisplayName } from "@/src/modules/finance/shared/lib/currency-d
 import { foldSearchText } from "@/src/shared/lib/search-text"
 import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 import { useFormatLocale } from "@/src/modules/settings/hooks/use-format-locale"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
-import { FormTextField } from "@/src/shared/components/layout/form-blocks"
+import {
+  Empty,
+  EmptyHeader,
+  EmptyTitle,
+} from "@/src/shared/components/ui/empty"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
 import { CheckIcon, SearchIcon } from "lucide-react"
@@ -150,13 +155,17 @@ export function CurrencyPickerSheet({
           <Spinner />
         </div>
       ) : listed.length === 0 ? (
-        <p className="py-6 text-center text-sm text-muted-foreground">
-          No hay otras monedas.
-        </p>
+        <Empty size="sm">
+          <EmptyHeader>
+            <EmptyTitle>No hay otras monedas</EmptyTitle>
+          </EmptyHeader>
+        </Empty>
       ) : visible.length === 0 ? (
-        <p className="py-6 text-center text-sm text-muted-foreground">
-          Ninguna moneda coincide.
-        </p>
+        <Empty size="sm">
+          <EmptyHeader>
+            <EmptyTitle>Ninguna moneda coincide</EmptyTitle>
+          </EmptyHeader>
+        </Empty>
       ) : (
         <div className="flex flex-col gap-2">
           {visible.map((code) => {

@@ -1,8 +1,8 @@
 "use client"
 
 import { TransactionMovementRow } from "@/src/modules/finance/transactions/components/transaction-movement-row"
-import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
-import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
+import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
+import { ErrorState } from "@/src/shared/components/feedback/error-state"
 import { useTransactionSearch } from "@/src/modules/finance/shared/hooks/use-transactions"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
@@ -179,13 +179,13 @@ export function FinanceTransactionSearch({
                 className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto overscroll-contain p-2"
               >
                 {resultsQuery.isError ? (
-                  <FinanceErrorState
+                  <ErrorState
                     message={financeErrorMessage(resultsQuery.error)}
                     onRetry={() => void resultsQuery.refetch()}
                     isRetrying={resultsQuery.isFetching}
                   />
                 ) : resultsQuery.isPending ? (
-                  <FinanceListSkeleton rows={3} />
+                  <ListSkeleton rows={3} />
                 ) : items.length === 0 ? (
                   <Empty className="py-6">
                     <EmptyHeader>

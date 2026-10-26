@@ -45,6 +45,29 @@ describe("readableTextColor", () => {
     }
   })
 
+  it("keeps AA contrast for a custom color too", () => {
+    const trickyColors = [
+      "#777777",
+      "#808080",
+      "#767676",
+      "#000000",
+      "#FFFFFF",
+      "#FF0000",
+      "#00FF00",
+      "#3F6A9A",
+      "#D6C5B3",
+    ]
+
+    for (const color of trickyColors) {
+      const contrast = contrastRatio(color, readableTextColor(color))
+
+      assert.ok(
+        contrast >= 4.5,
+        `${color} quedó con contraste ${contrast.toFixed(2)}`
+      )
+    }
+  })
+
   it("measures the maximum contrast between black and white", () => {
     assert.equal(contrastRatio(BLACK_TEXT, WHITE_TEXT).toFixed(2), "21.00")
   })

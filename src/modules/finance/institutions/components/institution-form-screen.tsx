@@ -14,6 +14,7 @@ import {
   InstitutionWalletCard,
 } from "@/src/modules/finance/products"
 import { CountryPickerSheet } from "@/src/modules/finance/shared/components/pickers/country-picker"
+import { usePicker } from "@/src/shared/hooks/use-picker"
 import type { FinanceInstitutionType } from "@/src/modules/finance/shared/constants/catalog"
 import {
   useCreateInstitution,
@@ -81,7 +82,9 @@ export function InstitutionFormScreen({
   const [filter, setFilter] = useState<InstitutionCatalogFilter>("bank")
   const [logoFile, setLogoFile] = useState<File | null>(null)
   const [createdId, setCreatedId] = useState<string | null>(null)
-  const [countryOpen, setCountryOpen] = useState(false)
+  const { picker, openPicker, closeHandlerFor } = usePicker<"none" | "country">(
+    "none"
+  )
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const {
@@ -251,7 +254,7 @@ export function InstitutionFormScreen({
             onPick: () => fileInputRef.current?.click(),
             onClear: clearLogo,
           }}
-          onOpenCountry={() => setCountryOpen(true)}
+          onOpenCountry={() => openPicker("country")}
         />
       </FinanceFormScreen>
 
@@ -264,8 +267,8 @@ export function InstitutionFormScreen({
       />
 
       <CountryPickerSheet
-        open={countryOpen}
-        onOpenChange={setCountryOpen}
+        open={picker === "country"}
+        onOpenChange={closeHandlerFor("country")}
         value={institutionCountry}
         onSelect={(next) => setValue("country", next, { shouldValidate: true })}
       />

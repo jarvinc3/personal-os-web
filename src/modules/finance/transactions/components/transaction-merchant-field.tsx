@@ -1,6 +1,6 @@
 "use client"
 
-import { FormTextField } from "@/src/shared/components/layout/form-blocks"
+import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import type { FinanceMerchantSuggestion } from "@/src/modules/finance/shared/types/entities"
 import type { TransactionFormValues } from "@/src/modules/finance/transactions/lib/transaction-form"
 import type { MovementType } from "@/src/modules/finance/transactions/lib/transaction-form-values"

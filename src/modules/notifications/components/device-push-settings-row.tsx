@@ -2,7 +2,7 @@
 
 import { useWebPushPermissions } from "@/src/modules/notifications/hooks/use-web-push-permissions"
 import { SETTINGS_REGISTRY } from "@/src/modules/settings"
-import { SettingsRow } from "@/src/shared/components/layout/settings-section"
+import { SettingsRow } from "@/src/shared/components/settings/settings-section"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { useCallback } from "react"
 

@@ -1,26 +1,31 @@
 "use client"
 
 import { FinanceIntegritySettingsSection } from "@/src/modules/finance/integrity"
+import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
 import { FINANCE_DASHBOARD_PERIOD_OPTIONS } from "@/src/modules/finance/shared/lib/dashboard-period"
 import { ModuleSheetEnableRow } from "@/src/modules/settings/components/profile-ui"
-import { WipeDataSheet } from "@/src/modules/settings"
+import { SETTINGS_SHEET_KEYS, WipeDataSheet } from "@/src/modules/settings"
 import { SETTINGS_REGISTRY } from "@/src/modules/settings/constants/settings-metadata"
+import { useDataBranches } from "@/src/modules/settings/hooks/use-data-branches"
 import { useModuleSheetEnable } from "@/src/modules/settings/hooks/use-module-sheet-enable"
 import { useProfileSheetFormSync } from "@/src/modules/settings/hooks/use-profile-sheet"
 import { useUserModuleConfig } from "@/src/modules/settings/hooks/use-user-module-config"
-import { FINANCE_WIPE_LAYERS } from "@/src/modules/settings/lib/wipe-layers"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+import { findAppBranches } from "@/src/modules/settings/lib/wipe-branches"
+import { DATA_APP } from "@/src/modules/settings/types/wipe.types"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { ErrorState } from "@/src/shared/components/feedback/error-state"
 import {
   SettingsRow,
   SettingsSection,
-} from "@/src/shared/components/layout/settings-section"
+} from "@/src/shared/components/settings/settings-section"
 import { FormScreen } from "@/src/shared/components/forms/form-screen"
-import { Button } from "@/src/shared/components/ui/button"
+
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { getModule } from "@/src/shared/constants/module-registry"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
+import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
   ArrowLeftRight,
@@ -34,11 +39,10 @@ import {
   ScanEyeIcon,
   Tags,
   Trash2,
-  XIcon,
   type LucideIcon,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { useEffect, useMemo, useState, type ReactNode } from "react"
+import { useEffect, useMemo, type ReactNode } from "react"
 import { useForm } from "react-hook-form"
 import { DisplaySection } from "./components/display-section"
 import { FinancialMonthSection } from "./components/financial-month-section"
@@ -94,39 +98,30 @@ const FINANCE_SETTINGS_SHEETS = {
 
 type FinanceSettingsSheetId = keyof typeof FINANCE_SETTINGS_SHEETS
 
+type SheetControl = ReturnType<typeof useSheetParam>
+
 type FinanceSettingsSheetProps = {
   id: FinanceSettingsSheetId
-  openSheet: FinanceSettingsSheetId | null
-  onOpenSheetChange: (sheet: FinanceSettingsSheetId | null) => void
+  open: boolean
+  onOpenChange: (open: boolean) => void
   children: ReactNode
 }
 
 function FinanceSettingsSheet({
   id,
-  openSheet,
-  onOpenSheetChange,
+  open,
+  onOpenChange,
   children,
 }: FinanceSettingsSheetProps) {
   const sheet = FINANCE_SETTINGS_SHEETS[id]
 
   return (
     <BottomSheet
-      open={openSheet === id}
-      onOpenChange={(open) => onOpenSheetChange(open ? id : null)}
+      closeLabel="Cerrar"
+      open={open}
+      onOpenChange={onOpenChange}
       title={sheet.title}
       description={sheet.description}
-      actions={{
-        close: (
-          <Button
-            variant="outline"
-            className="flex-1"
-            onClick={() => onOpenSheetChange(null)}
-          >
-            <XIcon className="size-4 shrink-0" />
-            Cerrar
-          </Button>
-        ),
-      }}
     >
       {children}
     </BottomSheet>
@@ -144,6 +139,8 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
     profileQuery,
   } = useUserModuleConfig("finance")
   const moduleEnable = useModuleSheetEnable("finance")
+  const branchesQuery = useDataBranches()
+  const financeBranches = findAppBranches(branchesQuery.data, DATA_APP.FINANCE)
   const accountsQuery = useAccounts(isModuleEnabled)
   const accounts = accountsQuery.data ?? []
   const moneyDisplay = {
@@ -152,10 +149,29 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
     compactNumbers: config.display.compactNumbers,
     locale: formatLocale,
   }
-  const [openSheet, setOpenSheet] = useState<FinanceSettingsSheetId | null>(
-    null
+  const displaySheet = useSheetParam(FINANCE_SHEET_KEYS.financeSettingsDisplay)
+  const monthSheet = useSheetParam(FINANCE_SHEET_KEYS.financeSettingsMonth)
+  const movementsSheet = useSheetParam(
+    FINANCE_SHEET_KEYS.financeSettingsMovements
   )
-  const [wipeSheetOpen, setWipeSheetOpen] = useState(false)
+  const fixedIncomeSheet = useSheetParam(
+    FINANCE_SHEET_KEYS.financeSettingsFixedIncome
+  )
+  const subscriptionsSheet = useSheetParam(
+    FINANCE_SHEET_KEYS.financeSettingsSubscriptions
+  )
+  const notificationsSheet = useSheetParam(
+    FINANCE_SHEET_KEYS.financeSettingsNotifications
+  )
+  const wipeSheet = useSheetParam(SETTINGS_SHEET_KEYS.wipeData)
+  const settingsSheets: Record<FinanceSettingsSheetId, SheetControl> = {
+    display: displaySheet,
+    month: monthSheet,
+    movements: movementsSheet,
+    fixedIncome: fixedIncomeSheet,
+    subscriptions: subscriptionsSheet,
+    notifications: notificationsSheet,
+  }
 
   const {
     control,
@@ -317,7 +333,7 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
             value={describeSheet(id)}
             icon={FINANCE_SETTINGS_SHEETS[id].icon}
             accentColor={MODULE_ACCENT}
-            onPress={() => setOpenSheet(id)}
+            onPress={() => settingsSheets[id].setOpen(true)}
             isLast={index === sheetIds.length - 1}
           />
         ))}
@@ -333,41 +349,49 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
         }}
       />
 
-      <SettingsSection
-        title="Zona de peligro"
-        description="Borra solo los datos de Finanzas. La cuenta y sus preferencias se conservan."
-      >
-        <SettingsRow
-          label="Vaciar datos de Finanzas"
-          description="Movimientos, cuentas, presupuestos, categorías y productos."
-          destructive
-          icon={Trash2}
-          accentColor={SETTINGS_REGISTRY.danger.accent}
-          onPress={() => setWipeSheetOpen(true)}
-          isLast
+      {branchesQuery.isPending ? null : branchesQuery.isError ? (
+        <ErrorState
+          message="No se pudieron cargar las ramas de datos de Finanzas."
+          onRetry={() => void branchesQuery.refetch()}
+          isRetrying={branchesQuery.isFetching}
         />
-      </SettingsSection>
+      ) : financeBranches.length > 0 ? (
+        <SettingsSection
+          title="Zona de peligro"
+          description="Borra solo las ramas de Finanzas que elijas. La cuenta y sus preferencias se conservan."
+        >
+          <SettingsRow
+            label="Vaciar datos de Finanzas"
+            description="Elige qué ramas vaciar: movimientos, productos, planificación, comercios y correo."
+            destructive
+            icon={Trash2}
+            accentColor={SETTINGS_REGISTRY.danger.accent}
+            onPress={() => wipeSheet.setOpen(true)}
+            isLast
+          />
+        </SettingsSection>
+      ) : null}
 
       <FinanceSettingsSheet
         id="display"
-        openSheet={openSheet}
-        onOpenSheetChange={setOpenSheet}
+        open={displaySheet.open}
+        onOpenChange={displaySheet.setOpen}
       >
         <DisplaySection control={control} baseCurrency={config.baseCurrency} />
       </FinanceSettingsSheet>
 
       <FinanceSettingsSheet
         id="month"
-        openSheet={openSheet}
-        onOpenSheetChange={setOpenSheet}
+        open={monthSheet.open}
+        onOpenChange={monthSheet.setOpen}
       >
         <FinancialMonthSection control={control} />
       </FinanceSettingsSheet>
 
       <FinanceSettingsSheet
         id="movements"
-        openSheet={openSheet}
-        onOpenSheetChange={setOpenSheet}
+        open={movementsSheet.open}
+        onOpenChange={movementsSheet.setOpen}
       >
         <MovementDefaultsSection
           control={control}
@@ -378,8 +402,8 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
 
       <FinanceSettingsSheet
         id="fixedIncome"
-        openSheet={openSheet}
-        onOpenSheetChange={setOpenSheet}
+        open={fixedIncomeSheet.open}
+        onOpenChange={fixedIncomeSheet.setOpen}
       >
         <FixedIncomeSection
           control={control}
@@ -391,30 +415,27 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
 
       <FinanceSettingsSheet
         id="subscriptions"
-        openSheet={openSheet}
-        onOpenSheetChange={setOpenSheet}
+        open={subscriptionsSheet.open}
+        onOpenChange={subscriptionsSheet.setOpen}
       >
         <SubscriptionsSection control={control} />
       </FinanceSettingsSheet>
 
       <FinanceSettingsSheet
         id="notifications"
-        openSheet={openSheet}
-        onOpenSheetChange={setOpenSheet}
+        open={notificationsSheet.open}
+        onOpenChange={notificationsSheet.setOpen}
       >
         <NotificationsSection control={control} />
       </FinanceSettingsSheet>
 
       <WipeDataSheet
-        open={wipeSheetOpen}
-        onOpenChange={setWipeSheetOpen}
+        open={wipeSheet.open}
+        onOpenChange={wipeSheet.setOpen}
         email={profileQuery.data?.email ?? ""}
+        app={DATA_APP.FINANCE}
         title="Vaciar datos de Finanzas"
-        description="Borra solo los datos de Finanzas. La cuenta se conserva."
-        scope={{
-          layers: FINANCE_WIPE_LAYERS,
-          confirmTitle: "¿Vaciar los datos de Finanzas?",
-        }}
+        description="Elige las ramas de Finanzas que quieres vaciar. La cuenta se conserva."
       />
     </FormScreen>
   )

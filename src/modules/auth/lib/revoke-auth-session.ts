@@ -3,7 +3,7 @@ import { getSupabaseBrowserClient } from "@/src/config/supabase/client"
 import { resolveRevokeMessages } from "@/src/modules/auth/lib/auth-errors"
 import { PROFILE_QUERY_KEY } from "@/src/modules/auth/lib/hydrate-auth-user"
 import { useAppStore } from "@/src/shared/store/app-store"
-import { toast } from "sonner"
+import { appToast } from "@/src/shared/lib/app-toast"
 
 type RevokeAuthSessionOptions = {
   message?: string
@@ -18,5 +18,5 @@ export async function revokeAuthSession(options?: RevokeAuthSessionOptions) {
     .catch(() => undefined)
 
   const messages = resolveRevokeMessages(options)
-  toast.error(messages.title, { description: messages.description })
+  appToast.error({ text1: messages.title, text2: messages.description })
 }

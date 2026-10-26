@@ -11,7 +11,7 @@ import {
   transferRateLabel,
 } from "@/src/modules/finance/transactions/lib/transfer-fx"
 import type { TransferFormValues } from "@/src/modules/finance/transactions/lib/transfer-form"
-import { FormTextField } from "@/src/shared/components/layout/form-blocks"
+import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import { ArrowUpDownIcon } from "lucide-react"
 import { Controller, type Control, type FieldErrors } from "react-hook-form"
 
@@ -67,6 +67,7 @@ export function TransferFxSection({
         name="receivedAmount"
         render={({ field }) => (
           <FinanceMoneyField
+            calculatorKey="transfer-received-amount"
             label="Monto recibido"
             amount={field.value}
             onAmountChange={field.onChange}

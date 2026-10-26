@@ -3,9 +3,9 @@
 import { BudgetSheet } from "@/src/modules/finance/budgets/components/budget-sheet"
 import { FinanceGate } from "@/src/modules/finance/finance-gate"
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
-import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
+import { ErrorState } from "@/src/shared/components/feedback/error-state"
 import { MissingRecord } from "@/src/modules/finance/shared/components/layout/missing-record"
-import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
+import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
 import { FinanceProgressHero } from "@/src/modules/finance/shared/components/layout/progress-hero"
 import type { PlanningProgressTone } from "@/src/modules/finance/shared/components/planning-progress-card"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
@@ -37,7 +37,7 @@ import {
 } from "@/src/modules/finance/shared/types/entities"
 import { DeleteRecordDialog } from "@/src/modules/finance/shared/components/delete-record-dialog"
 import { RecordOptionsSheet } from "@/src/modules/finance/shared/components/record-options-sheet"
-import { LoadingView } from "@/src/shared/components/layout/loading-view"
+import { LoadingView } from "@/src/shared/components/feedback/loading-view"
 import { Button } from "@/src/shared/components/ui/button"
 import {
   Empty,
@@ -46,8 +46,8 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
-import { SummarySection } from "@/src/shared/components/ui/summary"
-import { InfiniteListSentinel } from "@/src/shared/components/ui/infinite-list-sentinel"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
+import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
 import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
@@ -162,7 +162,9 @@ function BudgetDetailScreenBody({ budgetId }: FinanceBudgetDetailProps) {
   const badge = budgetBadge(tone)
   const deleteBudget = useDeleteBudget()
   const restoreBudget = useRestoreBudget()
-  const [optionsOpen, setOptionsOpen] = useState(false)
+  const { open: optionsOpen, setOpen: setOptionsOpen } = useSheetParam(
+    FINANCE_SHEET_KEYS.budgetOptions
+  )
   const [confirmOpen, setConfirmOpen] = useState(false)
 
   async function onDeleteBudget() {
@@ -239,7 +241,7 @@ function BudgetDetailScreenBody({ budgetId }: FinanceBudgetDetailProps) {
     <>
       {budgetQuery.error ? (
         <div className="mb-3">
-          <FinanceErrorState
+          <ErrorState
             message={financeLoadErrorMessage(budgetQuery.error)}
             onRetry={() => void budgetQuery.refetch()}
             isRetrying={budgetQuery.isFetching}
@@ -281,7 +283,7 @@ function BudgetDetailScreenBody({ budgetId }: FinanceBudgetDetailProps) {
 
       <div className="mx-4 flex flex-col gap-3">
         {movementsQuery.isError ? (
-          <FinanceErrorState
+          <ErrorState
             message={financeLoadErrorMessage(movementsQuery.error)}
             onRetry={() => void movementsQuery.refetch()}
             isRetrying={movementsQuery.isFetching}
@@ -291,7 +293,7 @@ function BudgetDetailScreenBody({ budgetId }: FinanceBudgetDetailProps) {
         <SummarySection title="Movimientos del periodo" icon={ChartPieIcon}>
           <AsyncRegion
             pending={movementsQuery.isPending}
-            pendingFallback={<FinanceListSkeleton rows={4} />}
+            pendingFallback={<ListSkeleton rows={4} />}
             empty={!movementsQuery.isError && movements.length === 0}
             emptyFallback={
               <Empty className="py-10">

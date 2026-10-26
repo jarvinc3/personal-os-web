@@ -17,9 +17,9 @@ import { SettingsGate } from "@/src/modules/settings/settings-gate"
 import {
   SettingsRow,
   SettingsSection,
-} from "@/src/shared/components/layout/settings-section"
+} from "@/src/shared/components/settings/settings-section"
 import { settingsModuleHref } from "@/src/shared/constants/app-routes"
-import { usePendingNavigation } from "@/src/shared/components/ui/navigation-pending"
+import { usePendingNavigation } from "@/src/shared/components/shell/navigation-pending"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { Coins, Globe } from "lucide-react"
 

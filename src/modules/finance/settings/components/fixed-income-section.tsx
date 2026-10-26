@@ -1,10 +1,10 @@
-import { SwitchFieldRow } from "@/src/shared/components/layout/form-blocks"
-import { ChoiceGrid } from "@/src/shared/components/ui/choice-grid"
-import { DayListField } from "@/src/shared/components/ui/day-list-field"
+import { SwitchFieldRow } from "@/src/shared/components/forms/switch-field-row"
+import { ChoiceGrid } from "@/src/shared/components/forms/choice-grid"
+import { DayListField } from "@/src/shared/components/forms/day-list-field"
 import {
   SummaryGroup,
   SummarySection,
-} from "@/src/shared/components/ui/summary"
+} from "@/src/shared/components/data-display/summary"
 import { getModule } from "@/src/shared/constants/module-registry"
 import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
 import { CalendarDays, CalendarRange, HandCoins } from "lucide-react"
@@ -63,6 +63,7 @@ export function FixedIncomeSection({
             name="fixedIncomeAmount"
             render={({ field, fieldState }) => (
               <FinanceMoneyField
+                calculatorKey="fixed-income-amount"
                 label="Monto"
                 amount={field.value}
                 onAmountChange={field.onChange}

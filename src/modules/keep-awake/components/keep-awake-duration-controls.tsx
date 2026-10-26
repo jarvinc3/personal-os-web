@@ -15,8 +15,8 @@ import {
   PopoverTrigger,
 } from "@/src/shared/components/ui/popover"
 import { Separator } from "@/src/shared/components/ui/separator"
-import { WheelField } from "@/src/shared/components/ui/wheel-field"
-import { DurationWheels } from "@/src/shared/components/ui/wheel-picker"
+import { WheelField } from "@/src/shared/components/forms/wheel-field"
+import { DurationWheels } from "@/src/shared/components/forms/wheel-picker"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
 import {
   durationMinutesToHm,

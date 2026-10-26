@@ -12,7 +12,7 @@ import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money
 import { BalanceIntegrityAlert } from "@/src/modules/finance/integrity/components/balance-integrity-alert"
 import { Button } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
-import { SummarySection } from "@/src/shared/components/ui/summary"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { appToast } from "@/src/shared/lib/app-toast"
 
 type FinanceIntegritySettingsSectionProps = {

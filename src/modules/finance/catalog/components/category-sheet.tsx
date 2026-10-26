@@ -3,7 +3,7 @@
 import { CategoryCard } from "@/src/modules/finance/shared/components/category-card"
 import { CategoryEmojiField } from "@/src/modules/finance/catalog/components/category-emoji-field"
 import { suggestCategoryEmojis } from "@/src/modules/finance/catalog/components/category-emoji-catalog"
-import { FinanceSegmentedControl } from "@/src/modules/finance/shared/components/forms/form-blocks"
+import { SegmentedControl } from "@/src/shared/components/forms/segmented-control"
 import { CATALOG_NONE } from "@/src/modules/finance/shared/constants/catalog"
 import {
   useCreateCategory,
@@ -25,15 +25,15 @@ import type {
 import { DeleteRecordDialog } from "@/src/modules/finance/shared/components/delete-record-dialog"
 import { CategoryPickerSheet } from "@/src/modules/finance/shared/components/pickers/category-picker-sheet"
 import { CategoryTrigger } from "@/src/modules/finance/shared/components/pickers/category-trigger"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
-import { FormTextField } from "@/src/shared/components/layout/form-blocks"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import { Button } from "@/src/shared/components/ui/button"
-import { ColorPickerSwatch } from "@/src/shared/components/ui/color-picker"
+import { ColorPickerSwatch } from "@/src/shared/components/forms/color-picker"
 import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
 import { Label } from "@/src/shared/components/ui/label"
 import { Separator } from "@/src/shared/components/ui/separator"
 import { Spinner } from "@/src/shared/components/ui/spinner"
-import { SummarySection } from "@/src/shared/components/ui/summary"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { usePicker } from "@/src/shared/hooks/use-picker"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
@@ -46,7 +46,6 @@ import {
   PaletteIcon,
   SaveIcon,
   TrashIcon,
-  XIcon,
 } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
@@ -242,16 +241,6 @@ export function CategorySheet({
             : undefined
         }
         actions={{
-          close: (
-            <Button
-              variant="outline"
-              className="flex-1"
-              onClick={() => requestOpenChange(false)}
-            >
-              <XIcon className="size-4 shrink-0" />
-              Cancelar
-            </Button>
-          ),
           submit: isSystem ? undefined : (
             <Button disabled={isPending} className="flex-1" onClick={onSubmit}>
               {isPending ? (
@@ -268,7 +257,7 @@ export function CategorySheet({
           control={control}
           name="type"
           render={({ field }) => (
-            <FinanceSegmentedControl
+            <SegmentedControl
               value={field.value}
               onChange={field.onChange}
               options={TYPE_OPTIONS}

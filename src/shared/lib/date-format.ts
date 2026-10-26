@@ -1,16 +1,47 @@
 import {
   format,
-  formatDistanceToNow,
   isToday,
   isValid,
   isYesterday,
   parse,
   parseISO,
+  type Locale,
 } from "date-fns"
+import { enUS } from "date-fns/locale/en-US"
 import { es } from "date-fns/locale/es"
 
+import { DEFAULT_LOCALE } from "@/src/shared/constants/locales"
+
+/**
+ * Every date the app shows is formatted here, with the locale of the profile.
+ * Nothing fixes `es` on its own: a screen passes the locale it already has.
+ */
+const DATE_LOCALES: Record<string, Locale> = {
+  es,
+  "es-DO": es,
+  "es-ES": es,
+  en: enUS,
+  "en-US": enUS,
+}
+
+/**
+ * El perfil guarda el locale como texto libre y la copia de la app está en
+ * español, así que un idioma sin formato propio se pinta en español en vez de
+ * romper la pantalla. Es el único punto de resolución: ninguna otra función
+ * elige un idioma por su cuenta.
+ */
+const FALLBACK_DATE_LOCALE = es
+
+function dateLocale(locale: string): Locale {
+  return DATE_LOCALES[locale] ?? FALLBACK_DATE_LOCALE
+}
+
+function capitalize(value: string): string {
+  return value.charAt(0).toUpperCase() + value.slice(1)
+}
+
 /** Abreviaturas de mes en español; ICU escribe "sept" en septiembre. */
-export const MONTH_ABBREVIATIONS = [
+const MONTH_ABBREVIATIONS = [
   "ene",
   "feb",
   "mar",
@@ -25,15 +56,68 @@ export const MONTH_ABBREVIATIONS = [
   "dic",
 ] as const
 
-export function shortMonthLabel(date: Date): string {
-  return MONTH_ABBREVIATIONS[date.getMonth()] ?? ""
+export function shortMonthLabel(date: Date, locale: string): string {
+  if (locale.startsWith("es")) {
+    return MONTH_ABBREVIATIONS[date.getMonth()] ?? ""
+  }
+  return format(date, "MMM", { locale: dateLocale(locale) }).toLowerCase()
 }
 
-/** Formato canónico para API y preferencias (quiet hours, etc.). */
-export const TIME_API_FORMAT = "HH:mm"
+/** `4 oct` */
+export function formatDayMonth(date: Date, locale: string): string {
+  if (!isValid(date)) {
+    return ""
+  }
+  return `${format(date, "d")} ${shortMonthLabel(date, locale)}`
+}
 
-/** Formato legible en español: 12 h con a.m. / p.m. (ej. `10:00 p.m.`). */
-export const TIME_DISPLAY_FORMAT = "hh:mm aaaa"
+/** `4 oct 2026` */
+export function formatDayMonthYear(date: Date, locale: string): string {
+  if (!isValid(date)) {
+    return ""
+  }
+  return `${formatDayMonth(date, locale)} ${format(date, "yyyy")}`
+}
+
+/** `Octubre 2026` */
+export function formatMonthYearLabel(date: Date, locale: string): string {
+  return capitalize(format(date, "MMMM yyyy", { locale: dateLocale(locale) }))
+}
+
+/** `Miércoles 14 Oct.` */
+export function formatDayHeaderLabel(date: Date, locale: string): string {
+  const resolved = dateLocale(locale)
+  const weekdayLabel = capitalize(format(date, "EEEE", { locale: resolved }))
+  const day = format(date, "d")
+  const monthLabel = capitalize(shortMonthLabel(date, locale))
+  return `${weekdayLabel} ${day} ${monthLabel}.`
+}
+
+/** `jun 01 - 07` */
+export function formatWeekRangeLabel({
+  start,
+  end,
+  locale,
+}: {
+  start: Date
+  end: Date
+  locale: string
+}): string {
+  const startMonth = shortMonthLabel(start, locale)
+  const endMonth = shortMonthLabel(end, locale)
+  const startDay = format(start, "dd")
+  const endDay = format(end, "dd")
+
+  if (startMonth === endMonth) {
+    return `${startMonth} ${startDay} - ${endDay}`
+  }
+
+  return `${startMonth} ${startDay} - ${endMonth} ${endDay}`
+}
+
+const TIME_API_FORMAT = "HH:mm"
+
+const TIME_DISPLAY_FORMAT = "hh:mm aaaa"
 
 const TIME_REFERENCE_DATE = new Date(2000, 0, 1, 0, 0, 0, 0)
 
@@ -89,32 +173,49 @@ function parseSpanish12hInput(input: string): Date | null {
   return date
 }
 
+/** Hora de un `Date` para UI, en el formato del locale. */
+export function formatClockTimeFromDate(date: Date, locale: string): string {
+  if (!isValid(date)) {
+    return ""
+  }
+  return format(date, TIME_DISPLAY_FORMAT, { locale: dateLocale(locale) })
+}
+
 /**
  * Convierte `HH:mm` del backend a texto para UI (p. ej. `22:00` → `10:00 p.m.`).
  */
-export function formatTimeForDisplay(apiTime: string): string {
+export function formatTimeForDisplay(apiTime: string, locale: string): string {
   const date = parseApiTimeToDate(apiTime)
   if (!date) {
     return apiTime
   }
-  return format(date, TIME_DISPLAY_FORMAT, { locale: es })
+  return formatClockTimeFromDate(date, locale)
 }
 
-/**
- * Hora de un `Date` para UI (12 h, español).
- */
-export function formatClockTimeFromDate(date: Date): string {
-  if (!isValid(date)) {
-    return ""
+/** `2:30 p.m.`: hora corta del reloj, sin cero a la izquierda. */
+export function formatShortClockTime(apiTime: string, locale: string): string {
+  const date = parseApiTimeToDate(apiTime)
+  if (!date) {
+    return apiTime
   }
-  return format(date, TIME_DISPLAY_FORMAT, { locale: es })
+  return new Intl.DateTimeFormat(locale, {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  }).format(date)
 }
 
-/**
- * Rango horario en español para listas y ajustes.
- */
-export function formatTimeRange(start: string, end: string): string {
-  return `${formatTimeForDisplay(start)} – ${formatTimeForDisplay(end)}`
+/** Rango horario para listas y ajustes. */
+export function formatTimeRange({
+  start,
+  end,
+  locale,
+}: {
+  start: string
+  end: string
+  locale: string
+}): string {
+  return `${formatTimeForDisplay(start, locale)} – ${formatTimeForDisplay(end, locale)}`
 }
 
 /**
@@ -147,50 +248,46 @@ export function normalizeTimeToApi(input: string): string | null {
 }
 
 /**
- * Tiempo relativo en español (notificaciones, actividad reciente).
+ * Fecha y hora completas (sesiones, historial). El locale es opcional solo para
+ * quien todavía no lo pasa (Intelligence, #317/#318); el resto de pantallas
+ * pasa el del perfil.
  */
-export function formatRelativeTimeFromIso(iso: string): string {
+export function formatDateTime(
+  iso: string,
+  locale: string = DEFAULT_LOCALE
+): string {
   const date = parseISO(iso)
   if (!isValid(date)) {
     return ""
   }
-  if (Date.now() - date.getTime() < 45_000) {
-    return "Ahora"
-  }
-  return formatDistanceToNow(date, { addSuffix: true, locale: es })
+  return `${formatDate(iso, locale)}, ${formatClockTimeFromDate(date, locale)}`
 }
 
 /**
- * Fecha y hora completas (sesiones, historial).
+ * Solo fecha corta: `4 oct 2026`. El locale es opcional solo para quien todavía
+ * no lo pasa (Intelligence, #317/#318); el resto de pantallas pasa el del perfil.
  */
-export function formatDateTime(iso: string): string {
+export function formatDate(
+  iso: string,
+  locale: string = DEFAULT_LOCALE
+): string {
   const date = parseISO(iso)
   if (!isValid(date)) {
     return ""
   }
-  return format(date, "d 'de' MMMM yyyy, hh:mm aaaa", { locale: es })
+  return formatDayMonthYear(date, locale)
 }
 
-/**
- * Solo fecha corta.
- */
-export function formatDate(iso: string): string {
+/** Hora en listas de notificaciones. */
+export function formatNotificationListTime(
+  iso: string,
+  locale: string
+): string {
   const date = parseISO(iso)
   if (!isValid(date)) {
     return ""
   }
-  return `${format(date, "d")} ${shortMonthLabel(date)} ${format(date, "yyyy")}`
-}
-
-/**
- * Hora en listas de notificaciones (12 h, español).
- */
-export function formatNotificationListTime(iso: string): string {
-  const date = parseISO(iso)
-  if (!isValid(date)) {
-    return ""
-  }
-  return format(date, TIME_DISPLAY_FORMAT, { locale: es })
+  return formatClockTimeFromDate(date, locale)
 }
 
 export type NotificationDateSectionKey = "today" | "yesterday" | string
@@ -211,48 +308,15 @@ export function getNotificationDateSectionKey(
   return format(date, "yyyy-MM-dd")
 }
 
-function formatTimelineDay(date: Date): string {
-  return String(date.getDate()).padStart(2, "0")
-}
-
-/**
- * Rango semanal para timeline de finanzas: `jun 01 - 07`.
- */
-export function formatWeekRangeLabel(start: Date, end: Date): string {
-  const startMonth = shortMonthLabel(start)
-  const endMonth = shortMonthLabel(end)
-  const startDay = formatTimelineDay(start)
-  const endDay = formatTimelineDay(end)
-
-  if (startMonth === endMonth) {
-    return `${startMonth} ${startDay} - ${endDay}`
-  }
-
-  return `${startMonth} ${startDay} - ${endMonth} ${endDay}`
-}
-
-/**
- * Etiqueta de mes para banners: `Junio 2026`.
- */
-export function formatMonthYearLabel(date: Date): string {
-  const label = format(date, "MMMM yyyy", { locale: es })
-  return label.charAt(0).toUpperCase() + label.slice(1)
-}
-
-/** Encabezado de día en timeline: `Miércoles 14 Oct.`. */
-export function formatDayHeaderLabel(date: Date): string {
-  const weekday = format(date, "EEEE", { locale: es })
-  const weekdayLabel = weekday.charAt(0).toUpperCase() + weekday.slice(1)
-  const day = format(date, "d")
-  const month = shortMonthLabel(date)
-  const monthLabel = month.charAt(0).toUpperCase() + month.slice(1)
-  return `${weekdayLabel} ${day} ${monthLabel}.`
-}
-
-export function formatNotificationDateSectionLabel(
-  sectionKey: NotificationDateSectionKey,
+export function formatNotificationDateSectionLabel({
+  sectionKey,
+  locale,
+  referenceIso,
+}: {
+  sectionKey: NotificationDateSectionKey
+  locale: string
   referenceIso?: string
-): string {
+}): string {
   if (sectionKey === "today") {
     return "Hoy"
   }
@@ -265,5 +329,5 @@ export function formatNotificationDateSectionLabel(
   if (!isValid(date)) {
     return sectionKey
   }
-  return format(date, "d 'de' MMMM yyyy", { locale: es })
+  return format(date, "PPP", { locale: dateLocale(locale) })
 }

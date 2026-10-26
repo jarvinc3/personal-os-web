@@ -1,10 +1,8 @@
 "use client"
 
+import { SegmentedControl } from "@/src/shared/components/forms/segmented-control"
 import { FinanceDateField } from "@/src/modules/finance/shared/components/forms/date-field"
-import {
-  FinanceHelpText,
-  FinanceSegmentedControl,
-} from "@/src/modules/finance/shared/components/forms/form-blocks"
+import { FinanceHelpText } from "@/src/modules/finance/shared/components/forms/form-blocks"
 import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
 import { FinanceCurrencyPickerSheet } from "@/src/modules/finance/shared/components/pickers/finance-currency-picker-sheet"
 import {
@@ -23,11 +21,11 @@ import {
   FINANCE_RECEIVABLE_STATUS_LABEL,
   FINANCE_RECEIVABLE_STATUSES,
 } from "@/src/modules/finance/shared/types/entities"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
-import { FormTextField } from "@/src/shared/components/layout/form-blocks"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import { Button } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
-import { SummarySection } from "@/src/shared/components/ui/summary"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
 import { usePicker } from "@/src/shared/hooks/use-picker"
@@ -38,7 +36,6 @@ import {
   NotebookPenIcon,
   UserIcon,
   WalletIcon,
-  XIcon,
 } from "lucide-react"
 import { useEffect, useMemo } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
@@ -151,17 +148,6 @@ export function ReceivableSheet({
         title={isEdit ? "Editar cobro" : "Nuevo cobro"}
         description="Al marcarlo Pagado se completa el monto con lo que falte."
         actions={{
-          close: (
-            <Button
-              type="button"
-              variant="outline"
-              className="flex-1"
-              onClick={() => requestOpenChange(false)}
-            >
-              <XIcon className="size-4 shrink-0" />
-              Cancelar
-            </Button>
-          ),
           submit: (
             <Button
               type="button"
@@ -195,7 +181,7 @@ export function ReceivableSheet({
               control={control}
               name="status"
               render={({ field }) => (
-                <FinanceSegmentedControl
+                <SegmentedControl
                   label="Estado"
                   value={field.value}
                   onChange={(value) =>
@@ -228,6 +214,7 @@ export function ReceivableSheet({
             name="amount"
             render={({ field }) => (
               <FinanceMoneyField
+                calculatorKey="receivable-amount"
                 label="Monto"
                 amount={field.value}
                 onAmountChange={field.onChange}
@@ -248,6 +235,7 @@ export function ReceivableSheet({
             render={({ field }) => (
               <div className="flex flex-col gap-1">
                 <FinanceMoneyField
+                  calculatorKey="receivable-collected"
                   label="Cobrado"
                   amount={field.value}
                   onAmountChange={field.onChange}

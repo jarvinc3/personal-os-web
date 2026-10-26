@@ -14,8 +14,13 @@ import type {
   FinanceCategory,
   FinanceCategoryType,
 } from "@/src/modules/finance/shared/types/entities"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
-import { FormTextField } from "@/src/shared/components/layout/form-blocks"
+import {
+  Empty,
+  EmptyHeader,
+  EmptyTitle,
+} from "@/src/shared/components/ui/empty"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import {
   Collapsible,
   CollapsibleContent,
@@ -190,13 +195,17 @@ export function CategoryPickerSheet(props: CategoryPickerSheetProps) {
       ) : null}
 
       {groups.length === 0 ? (
-        <p className="text-sm text-muted-foreground">
-          No hay categorías de este tipo.
-        </p>
+        <Empty size="sm">
+          <EmptyHeader>
+            <EmptyTitle>No hay categorías de este tipo</EmptyTitle>
+          </EmptyHeader>
+        </Empty>
       ) : hits.length === 0 && !showNone ? (
-        <p className="text-sm text-muted-foreground">
-          Ninguna categoría coincide.
-        </p>
+        <Empty size="sm">
+          <EmptyHeader>
+            <EmptyTitle>Ninguna categoría coincide</EmptyTitle>
+          </EmptyHeader>
+        </Empty>
       ) : (
         <div className="flex flex-col gap-2">
           {hits.map((hit) => {

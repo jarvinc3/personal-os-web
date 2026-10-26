@@ -4,16 +4,14 @@ import { ModuleSheetEnableRow } from "@/src/modules/settings/components/profile-
 import { useModuleSheetEnable } from "@/src/modules/settings/hooks/use-module-sheet-enable"
 import { useProfileSheetFormSync } from "@/src/modules/settings/hooks/use-profile-sheet"
 import { useUserModuleConfig } from "@/src/modules/settings/hooks/use-user-module-config"
-import {
-  OptionRow,
-  SwitchFieldRow,
-} from "@/src/shared/components/layout/form-blocks"
+import { OptionRow } from "@/src/shared/components/forms/option-row"
+import { SwitchFieldRow } from "@/src/shared/components/forms/switch-field-row"
 import { FormScreen } from "@/src/shared/components/forms/form-screen"
 import {
   RadioGroup,
   RadioGroupItem,
 } from "@/src/shared/components/ui/radio-group"
-import { SummarySection } from "@/src/shared/components/ui/summary"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { getModule } from "@/src/shared/constants/module-registry"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"

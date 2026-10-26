@@ -128,8 +128,9 @@ export function buildTimelineMonths(input: {
   months: YearMonth[]
   items: FinanceTransaction[]
   weekStartsOn: WeekStartsOn
+  locale: string
 }): TimelineMonth[] {
-  const { months, items, weekStartsOn } = input
+  const { months, items, weekStartsOn, locale } = input
   const renderedMonthKeys = new Set(
     months.map((slot) => monthKey(slot.year, slot.month))
   )
@@ -165,7 +166,7 @@ export function buildTimelineMonths(input: {
           const totals = visibleTransactionTotals(dayItems)
           return {
             dateKey: dayKey,
-            label: formatDayHeaderLabel(date),
+            label: formatDayHeaderLabel(date, locale),
             net: totals.income - totals.expenses,
             items: dayItems,
             rows: dayGroups,
@@ -178,7 +179,7 @@ export function buildTimelineMonths(input: {
       key,
       year: slot.year,
       month: slot.month,
-      label: formatMonthYearLabel(monthDate),
+      label: formatMonthYearLabel(monthDate, locale),
       bannerSrc: monthBannerSrc(slot.month),
       totals: visibleTransactionTotals(monthItems),
       weeks,

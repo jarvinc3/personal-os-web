@@ -1,10 +1,10 @@
 "use client"
 
-import { FinanceSegmentedControl } from "@/src/modules/finance/shared/components/forms/form-blocks"
+import { SegmentedControl } from "@/src/shared/components/forms/segmented-control"
 import { CategoryPickerSheet } from "@/src/modules/finance/shared/components/pickers/category-picker-sheet"
 import { DestinationPickerSheet } from "@/src/modules/finance/shared/components/pickers/destination-picker-sheet"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
-import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
+import { ErrorState } from "@/src/shared/components/feedback/error-state"
 import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
 import { useCards } from "@/src/modules/finance/shared/hooks/use-cards"
 import { useCategories } from "@/src/modules/finance/shared/hooks/use-categories"
@@ -23,13 +23,13 @@ import {
 } from "@/src/modules/finance/subscriptions/lib/subscription-filters"
 import { SubscriptionSortSheet } from "@/src/modules/finance/subscriptions/components/subscription-sort-sheet"
 import type { FinanceSubscriptionStatus } from "@/src/modules/finance/shared/types/entities"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import { Button } from "@/src/shared/components/ui/button"
-import { FormTextField } from "@/src/shared/components/layout/form-blocks"
+import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import {
   SettingsRow,
   SettingsSection,
-} from "@/src/shared/components/layout/settings-section"
+} from "@/src/shared/components/settings/settings-section"
 import {
   ArrowDownWideNarrowIcon,
   CreditCardIcon,
@@ -145,14 +145,14 @@ export function SubscriptionFiltersSheet({
           onChange={(value) => onChange({ ...filters, q: value })}
           placeholder="Buscar suscripción"
         />
-        <FinanceSegmentedControl
+        <SegmentedControl
           label="Estado"
           value={filters.status}
           onChange={(value) => onChange({ ...filters, status: value })}
           options={STATUS_OPTIONS}
           fullWidth
         />
-        <FinanceSegmentedControl
+        <SegmentedControl
           label="Frecuencia"
           value={filters.frequency}
           onChange={(value) => onChange({ ...filters, frequency: value })}
@@ -184,7 +184,7 @@ export function SubscriptionFiltersSheet({
           />
         </SettingsSection>
         {previewQuery.error ? (
-          <FinanceErrorState
+          <ErrorState
             message={financeErrorMessage(previewQuery.error)}
             onRetry={() => void previewQuery.refetch()}
             isRetrying={previewQuery.isFetching}

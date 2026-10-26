@@ -14,8 +14,8 @@ import {
   groupHelpTerms,
   hasHelpSearch,
 } from "@/src/modules/help/lib/help-search"
-import { FormTextField } from "@/src/shared/components/layout/form-blocks"
-import { SettingsSection } from "@/src/shared/components/layout/settings-section"
+import { FormTextField } from "@/src/shared/components/forms/form-text-field"
+import { SettingsSection } from "@/src/shared/components/settings/settings-section"
 import {
   Empty,
   EmptyDescription,

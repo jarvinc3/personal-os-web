@@ -3,11 +3,58 @@ import { describe, it } from "node:test"
 
 import {
   buildLoanBody,
+  buildPayLoanInstallmentBody,
   buildReceivableBody,
   buildReceivablePaymentBody,
   buildSavingsGoalBody,
   buildSavingsGoalContributionBody,
 } from "./planning-payloads.ts"
+
+describe("buildPayLoanInstallmentBody", () => {
+  it("sends the amount and the payment account", () => {
+    const payload = buildPayLoanInstallmentBody({
+      amount: "1134.72",
+      accountId: "acc-1",
+    })
+
+    assert.equal(payload.ok, true)
+    if (!payload.ok) {
+      return
+    }
+    assert.equal(payload.body.amount, 1134.72)
+    assert.equal(payload.body.accountId, "acc-1")
+    assert.equal(payload.body.excessAsPrepayment, undefined)
+  })
+
+  it("marks the excess as prepayment only when it was chosen", () => {
+    const payload = buildPayLoanInstallmentBody({
+      amount: "1200",
+      accountId: "acc-1",
+      excessAsPrepayment: true,
+    })
+
+    assert.equal(payload.ok, true)
+    if (!payload.ok) {
+      return
+    }
+    assert.equal(payload.body.excessAsPrepayment, true)
+  })
+
+  it("rejects a missing amount or account", () => {
+    assert.equal(
+      buildPayLoanInstallmentBody({ amount: "", accountId: "acc-1" }).ok,
+      false
+    )
+    assert.equal(
+      buildPayLoanInstallmentBody({ amount: "0", accountId: "acc-1" }).ok,
+      false
+    )
+    assert.equal(
+      buildPayLoanInstallmentBody({ amount: "100", accountId: "" }).ok,
+      false
+    )
+  })
+})
 
 describe("buildLoanBody", () => {
   const base = {

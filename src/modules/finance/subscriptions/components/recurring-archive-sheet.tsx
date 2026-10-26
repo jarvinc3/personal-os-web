@@ -1,6 +1,6 @@
 "use client"
 
-import { FinanceSegmentedControl } from "@/src/modules/finance/shared/components/forms/form-blocks"
+import { SegmentedControl } from "@/src/shared/components/forms/segmented-control"
 import { useCategories } from "@/src/modules/finance/shared/hooks/use-categories"
 import { useRecurring } from "@/src/modules/finance/shared/hooks/use-recurring"
 import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
@@ -10,10 +10,10 @@ import type {
   FinanceRecurringStatus,
   FinanceRecurringPattern,
 } from "@/src/modules/finance/shared/types/entities"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
-import { Button } from "@/src/shared/components/ui/button"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+
 import { Spinner } from "@/src/shared/components/ui/spinner"
-import { XIcon } from "lucide-react"
+
 import { useState } from "react"
 
 const ARCHIVE_TABS: {
@@ -46,25 +46,14 @@ export function RecurringArchiveSheet({
 
   return (
     <BottomSheet
+      closeLabel="Cerrar"
       open={open}
       onOpenChange={onOpenChange}
       nested={nested}
       title="Bandeja de recurrentes"
       description="Cobros ya confirmados o descartados."
-      actions={{
-        close: (
-          <Button
-            variant="outline"
-            className="flex-1"
-            onClick={() => onOpenChange(false)}
-          >
-            <XIcon className="size-4 shrink-0" />
-            Cerrar
-          </Button>
-        ),
-      }}
     >
-      <FinanceSegmentedControl
+      <SegmentedControl
         value={tab}
         onChange={setTab}
         options={ARCHIVE_TABS}

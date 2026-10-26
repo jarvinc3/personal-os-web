@@ -15,14 +15,20 @@ Instrucciones para agentes y reviewers que trabajan en el cliente web de Persona
 
 Si una afirmación no está `VERIFICADO`, no la trates como comportamiento vigente: compruébala en código o abre un issue.
 
-## Seguimiento con GitHub Issues
+## Flujo de trabajo obligatorio
 
-El estado, el roadmap y los hallazgos viven en GitHub Issues. Los documentos de trabajo cerrados pasan a [docs/archive/](docs/archive/).
+1. **Antes de codear:** lee el issue correspondiente. Si no existe, busca duplicados y créalo según [docs/issue-conventions.md](docs/issue-conventions.md), agrégalo al Project 3 con Priority `High`, `Medium` o `Low`, y muévelo a `In Progress`.
+2. **Repo y rama:** trabaja en una rama corta por issue (`fix/<n>-<slug>`, `feat/<n>-<slug>`) o por fase del refactor (`refactor/<fase>`), dentro de una copia temporal en `C:\dev\personal\personal-os\temp\` creada con `git worktree add`. Nunca trabajes en la carpeta principal del repo ni compartas una copia con otro agente. Commitea solo tus archivos (`git add <rutas>`, nunca `git add -A`). Integra a `develop` por PR: el CI debe pasar y, en la web, QA prueba la preview de Vercel del PR y deja su OK en un comentario; recién ahí el agente hace el merge. En el back (sin preview) alcanza con el CI en verde, y QA lo verifica en `develop` justo después del merge.
+   - **Alias fijo de QA:** antes de pedir QA, Developer apunta con el conector de Vercel el alias fijo `qa-personal-os.vercel.app` a la preview del PR. QA prueba solo en ese alias, con un único login guardado. En el alias hay un solo PR a la vez. El alias está incluido en `CORS_ORIGIN_PATTERNS` del back de develop.
+3. **Límites:** no toques `master`, producción, `.env` ni despliegues; los merges a `master` los decide Jarvin. Las migraciones se ejecutan solo en DEV.
+4. **Antes del commit:** revisa el diff contra los criterios de aceptación del issue, busca huecos o implementaciones faltantes y corrígelos. Luego ejecuta format, lint, typecheck y pruebas.
+5. **Cierre:** commit en español con `Closes #N` o `Refs #N` y push. Después cierra el issue a mano con un comentario y muévelo a `Done` en el Project 3; `Closes` solo cierra el issue cuando el cambio llega a `master`.
 
-- Un cambio resuelve un issue: el cuerpo del commit cierra con `Closes #N` cuando el issue queda resuelto, o `Refs #N` cuando solo avanza. Un commit del monorepo referencia el issue del repo por su número.
-- Lo decidido y no implementado se abre como issue con label `roadmap`; no se deja como `REV-*` suelto en los documentos.
-- Cómo se escribe un issue: [docs/issue-conventions.md](docs/issue-conventions.md) — estructura, título, criterios de aceptación, etiquetas, talla y cierre.
-- La app móvil (`personal-os-app`) está fuera de servicio: no la cites como cliente.
+**Limpieza al terminar:** al integrar la rama, bórrala (local y remota), elimina la copia de `temp` (`git worktree remove` y `git worktree prune`) y pon al día `develop` y la carpeta principal del repo en el workspace (`git pull`). Los merges a `master` y los deploys siguen siendo decisión de Jarvin.
+
+**Credenciales:** nunca adivines ni pruebes contraseñas, tokens o claves (bases de datos, APIs, cuentas). Usa solo las credenciales que el repo documenta o que Jarvin entregó; si falta una, detente y pregunta. Nunca imprimas ni commitees secretos.
+
+Lo decidido y no implementado se abre como issue con label `roadmap`; no se deja como `REV-*` suelto en los documentos.
 
 ## Fuentes canónicas
 
@@ -44,13 +50,15 @@ El estado, el roadmap y los hallazgos viven en GitHub Issues. Los documentos de 
 
 Este cliente es **Next.js 16**, no React Native. ADR-001 está resumido en esa frase.
 
+La app móvil (`personal-os-app`) está fuera de servicio: no la cites como cliente.
+
 Al arrancar o diagnosticar el cliente, lee [docs/operations/runbook.md](docs/operations/runbook.md). Al tocar Web Push, lee [docs/infrastructure/web-push.md](docs/infrastructure/web-push.md).
 
 ## Reglas de UI
 
 Viven en [`.cursor/rules/`](.cursor/rules), una regla por archivo `.mdc`. Rigen para cualquier agente, no solo Cursor: se leen antes de crear o cambiar un control.
 
-Los iconos son obligatorios en la web: todo botón lleva un icono representativo (el texto es opcional) y todo campo lleva icono líder ([`icons-required.mdc`](.cursor/rules/icons-required.mdc)). Las listas usan scroll infinito, no botones de página ([`list-infinite-scroll.mdc`](.cursor/rules/list-infinite-scroll.mdc)).
+Los iconos son obligatorios en la web: todo botón lleva un icono representativo (el texto es opcional) y todo campo lleva icono líder ([`icons-required.mdc`](.cursor/rules/icons-required.mdc)). Las listas usan scroll infinito, no botones de página ([`list-infinite-scroll.mdc`](.cursor/rules/list-infinite-scroll.mdc)). Todo bottom-sheet se abre por ruta con `useSheetParam`, un selector anidado suma `?picker=` con `usePicker` y una confirmación no lleva ruta ([`sheet-url-route.mdc`](.cursor/rules/sheet-url-route.mdc)); esa regla no lleva prohibición en `eslint.config.mjs` por decisión del proyecto. Cada patrón usa su componente canónico: la tabla patrón → componente está en [ui-components.md](docs/architecture/ui-components.md#una-sola-fuente-de-verdad), las galerías de Ajustes → Apariencia (`/settings/appearance/components` y `/settings/appearance/cards`) son la referencia viva, y la regla es [`ui-single-source.mdc`](.cursor/rules/ui-single-source.mdc).
 
 Una entidad de Finanzas se pinta con su card y la variante que corresponda: completa en listas y detalle, compacta cuando es un dato de otra cosa, inline en una mención. La tabla de entidades y el detalle viven en [docs/architecture/ui-components.md](docs/architecture/ui-components.md#cards-por-entidad); la regla, en [`entity-cards.mdc`](.cursor/rules/entity-cards.mdc).
 

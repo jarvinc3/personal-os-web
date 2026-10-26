@@ -2,8 +2,8 @@
 
 import { formatCalendarDate } from "@/src/modules/finance/shared/lib/ledger-form"
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
-import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
-import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
+import { ErrorState } from "@/src/shared/components/feedback/error-state"
+import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
@@ -11,7 +11,10 @@ import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 import { useSubscriptionPayments } from "@/src/modules/finance/shared/hooks/use-subscriptions"
 import type { FinanceSubscriptionPaymentSource } from "@/src/modules/finance/shared/types/entities"
 import { BanknoteArrowDownIcon, HandCoinsIcon } from "lucide-react"
-import { SummaryItem, SummarySection } from "@/src/shared/components/ui/summary"
+import {
+  SummaryItem,
+  SummarySection,
+} from "@/src/shared/components/data-display/summary"
 import { Button } from "@/src/shared/components/ui/button"
 import {
   Empty,
@@ -20,7 +23,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
-import { InfiniteListSentinel } from "@/src/shared/components/ui/infinite-list-sentinel"
+import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 
 const PAYMENT_SOURCE_LABEL: Record<FinanceSubscriptionPaymentSource, string> = {
@@ -64,7 +67,7 @@ export function SubscriptionPaymentsTab({
       }
     >
       {paymentsQuery.isError ? (
-        <FinanceErrorState
+        <ErrorState
           message={financeErrorMessage(paymentsQuery.error)}
           onRetry={() => void paymentsQuery.refetch()}
           isRetrying={paymentsQuery.isFetching}
@@ -72,7 +75,7 @@ export function SubscriptionPaymentsTab({
       ) : null}
       <AsyncRegion
         pending={paymentsQuery.isPending && !paymentsQuery.data}
-        pendingFallback={<FinanceListSkeleton rows={3} />}
+        pendingFallback={<ListSkeleton rows={3} />}
         empty={payments.length === 0}
         emptyFallback={
           <Empty className="py-8">

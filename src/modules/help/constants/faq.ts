@@ -106,13 +106,13 @@ export const HELP_FAQ_GROUPS: readonly HelpFaqGroup[] = [
         id: "vaciar-todo",
         question: "¿Qué borra «Vaciar todos los datos»?",
         answer:
-          "Borra el contenido de todas las apps, el historial del agente y las conexiones de correo, y devuelve los ajustes a sus valores por defecto. La cuenta sigue existiendo.",
+          "En Ajustes › Privacidad › Vaciar todos los datos ves las ramas de cada app con lo que hay en cada una. Marcas las que quieras; al marcar una se vacían también las que dependen de ella, con su conteo a la vista. La cuenta sigue existiendo y lo vaciado no se puede recuperar.",
       },
       {
         id: "vaciar-finanzas",
         question: "¿Puedo vaciar solo Finanzas?",
         answer:
-          "Sí. En Ajustes → Apps → Finanzas, al final, está Vaciar datos de Finanzas. Pide confirmación y no toca las demás apps.",
+          "Sí. En Ajustes › Apps › Finanzas, al final, Vaciar datos de Finanzas lista sus ramas —movimientos, productos, planificación, comercios y correo— con su conteo y lo que arrastra cada una. Eliges, confirmas con tu contraseña o tu cuenta de Google y no toca las demás apps.",
       },
       {
         id: "recuperar-vaciado",

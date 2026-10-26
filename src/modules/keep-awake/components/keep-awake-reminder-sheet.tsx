@@ -1,6 +1,6 @@
 "use client"
 
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import { useSyncExternalStore } from "react"
 import {
   DEFAULT_REMINDER,
@@ -15,12 +15,13 @@ import {
   type KeepAwakeReminder,
 } from "@/src/modules/keep-awake/lib/reminders"
 import { Button } from "@/src/shared/components/ui/button"
-import { WheelField } from "@/src/shared/components/ui/wheel-field"
-import { TimePairWheels } from "@/src/shared/components/ui/wheel-picker"
+import { WheelField } from "@/src/shared/components/forms/wheel-field"
+import { TimePairWheels } from "@/src/shared/components/forms/wheel-picker"
 import { PRESSABLE_CLASS, cn } from "@/src/shared/lib/utils"
 import { type FormEvent, useState } from "react"
-import { SummarySection } from "@/src/shared/components/ui/summary"
-import { ClockIcon, SaveIcon, Trash2Icon, XIcon } from "lucide-react"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
+import { ClockIcon, SaveIcon, Trash2Icon } from "lucide-react"
+import { useFormatLocale } from "@/src/modules/settings/hooks/use-format-locale"
 
 type KeepAwakeReminderSheetProps = {
   open: boolean
@@ -82,6 +83,7 @@ export function KeepAwakeReminderSheet({
 
   return (
     <BottomSheet
+      closeLabel="Cerrar"
       open={open}
       onOpenChange={onOpenChange}
       title="Recordatorio"
@@ -97,17 +99,6 @@ export function KeepAwakeReminderSheet({
             Quitar
           </Button>
         ) : undefined,
-        close: (
-          <Button
-            type="button"
-            variant="outline"
-            className={cn(PRESSABLE_CLASS, "flex-1")}
-            onClick={() => onOpenChange(false)}
-          >
-            <XIcon className="size-4 shrink-0" />
-            Cerrar
-          </Button>
-        ),
         submit: (
           <Button
             type="submit"
@@ -128,6 +119,7 @@ export function KeepAwakeReminderSheet({
 }
 
 export function KeepAwakeReminderForm({ onSaved }: { onSaved: () => void }) {
+  const locale = useFormatLocale()
   const stored = getReminderSnapshot()
   const [draft, setDraft] = useState(() => createDraft(stored))
   const today = new Date().getDay()
@@ -161,7 +153,7 @@ export function KeepAwakeReminderForm({ onSaved }: { onSaved: () => void }) {
     >
       <SummarySection title="Hora exacta" icon={ClockIcon}>
         <WheelField
-          valueLabel={formatReminderTimeLabel(draft)}
+          valueLabel={formatReminderTimeLabel(draft, locale)}
           icon={ClockIcon}
         >
           <TimePairWheels

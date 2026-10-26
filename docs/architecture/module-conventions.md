@@ -9,7 +9,7 @@ Equivalente backend: `personal-os-back/docs/architecture/modules.md` (capas Nest
 1. Organizar por **feature** bajo `src/modules/<slug>/`. `app/` solo monta páginas delgadas que importan el módulo.
 2. Un módulo con **≥2 pantallas** declara `ModuleAppNav` (`items` = secciones) y envuelve páginas con `ModuleSectionLayout`.
 3. Un módulo **hoja** (Keep Awake) no tiene `items`: fila plana en el sidebar y layout propio, sin tab bar.
-4. **No** copiar un tab bar solo de finance. El chrome vive en `src/shared/components/layout/`.
+4. **No** copiar un tab bar solo de finance. El chrome vive en `src/shared/components/shell/`.
 5. El título de página lo pinta el **shell header** (`AppHeader` + `usePageHeader`). No duplicar un H1 hero con el mismo título.
 6. Contratos de dominio/API se enlazan al backend; este repo documenta rutas, UX y consumo.
 7. Un módulo **hoja** sigue el UX de Keep Awake (hero + sheets). Un módulo **con secciones** sigue Finanzas (rutas + tab bar). No mezclar: tabs locales no sustituyen ni a las rutas ni al hero.
@@ -38,9 +38,9 @@ ModuleAppNav = {
 1. Constantes de nav en el módulo (`src/modules/<slug>/constants/nav.ts`).
 2. Layout del módulo que pasa a `ModuleSectionLayout` solo los ítems con `showInTabBar !== false`.
 3. Cada `app/(app)/<slug>/**/page.tsx` monta la screen por ruta directa; la screen compone con ese layout (o un layout de ruta).
-4. Cablear `ModuleAppNav` en `src/shared/components/layout/app-sidebar.tsx` bajo **Aplicaciones**.
+4. Cablear `ModuleAppNav` en `src/shared/components/shell/app-sidebar.tsx` bajo **Aplicaciones**.
 5. Añadir el prefijo de ruta a `proxy.ts` (`isProtectedAppPath`) y a `APP_ROUTES`.
-6. Título: o bien `PAGE_TITLES` / `startsWith` en `app-header.tsx`, o `usePageHeader` en la página.
+6. Título: o bien `PAGE_TITLES` / `startsWith` en `shell/header/page-title.ts`, o `usePageHeader` en la página.
 7. Documentar en `docs/modules/<slug>/` y listar en `docs/modules/README.md`.
 
 Hoy el único `ModuleAppNav` cableado es `FINANCE_APP_NAV`. El Centro de ayuda (`/help`) tiene rutas propias, pero no es un módulo de producto: no declara nav ni tab bar.
@@ -53,6 +53,15 @@ Hoy el único `ModuleAppNav` cableado es `FINANCE_APP_NAV`. El Centro de ayuda (
 | Tab bar móvil   | `ModuleTabBar` vía `ModuleSectionLayout` | `md:hidden`, fijo abajo, siempre visible (no se oculta al scroll). Filtra `showInTabBar === false`.                                                                       |
 
 Regla de activo: `isModuleSectionActive(item, pathname)` — href (+ hijos si no `matchExact`) o `extraActiveHrefs`.
+
+### Menú lateral en móvil
+
+Menos de 768 px, `Sidebar` pinta un `Drawer` de `vaul` con dirección izquierda. Se abre con el botón del header, con Ctrl/Cmd + B o con un deslizamiento a la derecha que empieza dentro de los 32 px del borde izquierdo (`useSidebarEdgeSwipe`, montado en `PrimaryHeader` solo cuando el trigger visible). La decisión del gesto y sus constantes viven en `src/shared/lib/sidebar-edge-swipe.ts`, con su `.spec.ts`.
+
+- Solo cuenta como gesto un movimiento horizontal de menos de 30° respecto de la horizontal, hacia la derecha, de 48 px o un lanzamiento de 0,4 px/ms con al menos 24 px. Un retroceso de más de 12 px lo cancela.
+- No actúa con una hoja, un diálogo, un picker o un menú abierto, ni donde el toque empieza dentro de un componente con desplazamiento horizontal ya movido a la derecha de su inicio. Pestañas, pila de instituciones, selector de meses y ruedas de fecha además se marcan con `data-sidebar-swipe-ignore`.
+- El gesto no deja «clic fantasma»: el clic que sigue a la apertura se descarta.
+- Con `prefers-reduced-motion: reduce` el panel y su fondo cambian de estado sin animación (`app/globals.css`).
 
 Finanzas (VERIFICADO runtime 2026-09-15):
 
@@ -189,7 +198,7 @@ Keep Awake y Home **no** son slugs de `MODULE_REGISTRY`.
 - [ ] Con secciones: `ModuleAppNav` + `ModuleSectionLayout`; sin copiar tab bar de finance.
 - [ ] Hoja: sin `items`; fila sidebar.
 - [ ] Header vía shell / `usePageHeader`; sin título duplicado en el body.
-- [ ] Título en `app-header.tsx` o header hook.
+- [ ] Título en `shell/header/page-title.ts` o header hook.
 - [ ] Docs en `docs/modules/<slug>/` siguiendo [_templates/module](../_templates/module/README.md).
 - [ ] Specs de match de nav si hay `extraActiveHrefs` / `matchExact`.
 
@@ -205,8 +214,8 @@ Hoja (además):
 
 - Tipos: `src/shared/types/module-nav.ts`
 - Match: `src/shared/lib/module-nav-active.ts` + `module-nav-active.spec.ts`
-- Layout: `module-section-layout.tsx`, `module-tab-bar.tsx`, `app-sidebar.tsx`, `app-header.tsx`
+- Layout: `shell/module-section-layout.tsx`, `shell/module-tab-bar.tsx`, `shell/app-sidebar.tsx`, `shell/header/app-header.tsx`
 - Finance: `src/modules/finance/constants/nav.ts`, `components/layout/finance-layout.tsx`
 - Keep Awake (hoja): `KeepAwakeLayout`, `src/modules/keep-awake/keep-awake-screen.tsx`
 - Shell autenticado: `app/(app)/layout.tsx`
-- Placeholder: `src/shared/components/layout/module-coming-soon.tsx`
+- Placeholder: `src/shared/components/feedback/module-coming-soon.tsx`

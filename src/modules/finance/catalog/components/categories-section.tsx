@@ -6,8 +6,8 @@ import {
 } from "@/src/modules/finance/shared/components/category-card"
 import { CategorySheet } from "@/src/modules/finance/catalog/components/category-sheet"
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
-import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
-import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
+import { ErrorState } from "@/src/shared/components/feedback/error-state"
+import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import {
   useCategories,
@@ -26,7 +26,7 @@ import type {
   FinanceCategory,
   FinanceCategoryType,
 } from "@/src/modules/finance/shared/types/entities"
-import { Fab } from "@/src/shared/components/layout/fab"
+import { Fab } from "@/src/shared/components/fab/fab"
 import {
   Collapsible,
   CollapsibleContent,
@@ -319,7 +319,7 @@ export function FinanceCategoriesSection({
         </Tabs>
         <div>
           {errorMessage ? (
-            <FinanceErrorState
+            <ErrorState
               message={errorMessage}
               onRetry={() => void categoriesQuery.refetch()}
               isRetrying={categoriesQuery.isFetching}
@@ -327,7 +327,7 @@ export function FinanceCategoriesSection({
           ) : null}
           <AsyncRegion
             pending={categoriesQuery.isPending}
-            pendingFallback={<FinanceListSkeleton />}
+            pendingFallback={<ListSkeleton />}
             empty={groups.length === 0}
             emptyFallback={
               <Empty>

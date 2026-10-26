@@ -23,25 +23,16 @@ import {
   type FinanceMoneyDisplay,
 } from "@/src/modules/finance/shared/lib/money"
 import type { FinanceCard } from "@/src/modules/finance/shared/types/entities"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/src/shared/components/ui/alert-dialog"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { ConfirmDialog } from "@/src/shared/components/feedback/confirm-dialog"
 import { Button } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
-import { SummarySection } from "@/src/shared/components/ui/summary"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
 import { cn } from "@/src/shared/lib/utils"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { PlusIcon, SaveIcon, TrashIcon, WalletIcon, XIcon } from "lucide-react"
+import { PlusIcon, SaveIcon, TrashIcon, WalletIcon } from "lucide-react"
 import { useMemo, useState } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import { usePicker } from "@/src/shared/hooks/use-picker"
@@ -279,16 +270,6 @@ function CardBalanceSheetForm({
         title={card ? `Saldos · ${card.name}` : "Saldos de tarjeta"}
         description="El saldo nuevo queda como un reajuste. El límite de crédito se guarda aparte."
         actions={{
-          close: (
-            <Button
-              variant="outline"
-              className="flex-1"
-              onClick={() => requestOpenChange(false)}
-            >
-              <XIcon className="size-4 shrink-0" />
-              Cancelar
-            </Button>
-          ),
           submit: (
             <Button
               disabled={saving || !card}
@@ -346,6 +327,7 @@ function CardBalanceSheetForm({
             name="balance"
             render={({ field }) => (
               <FinanceMoneyField
+                calculatorKey="card-balance-amount"
                 label="Saldo"
                 amount={field.value}
                 onAmountChange={field.onChange}
@@ -382,6 +364,7 @@ function CardBalanceSheetForm({
               name="creditLimit"
               render={({ field }) => (
                 <FinanceMoneyField
+                  calculatorKey="card-credit-limit"
                   label="Límite de crédito"
                   amount={field.value}
                   onAmountChange={field.onChange}
@@ -412,35 +395,19 @@ function CardBalanceSheetForm({
 
       {discardChangesDialog}
 
-      <AlertDialog
+      <ConfirmDialog
         open={confirmDeleteOpen}
-        onOpenChange={(next) => {
-          if (!deleteBalanceMutation.isPending) {
-            setConfirmDeleteOpen(next)
-          }
-        }}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>¿Eliminar {mode.currency}?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Se quita ese saldo de la tarjeta. No se puede deshacer.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleteBalanceMutation.isPending}>
-              Cancelar
-            </AlertDialogCancel>
-            <AlertDialogAction
-              variant="destructive"
-              disabled={deleteBalanceMutation.isPending}
-              onClick={() => void deleteCurrency()}
-            >
-              Eliminar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        onOpenChange={setConfirmDeleteOpen}
+        tone="danger"
+        icon={TrashIcon}
+        title={`¿Eliminar ${mode.currency}?`}
+        description="Se quita ese saldo de la tarjeta. No se puede deshacer."
+        confirmLabel="Eliminar"
+        confirmIcon={TrashIcon}
+        pending={deleteBalanceMutation.isPending}
+        pendingLabel="Eliminando..."
+        onConfirm={() => void deleteCurrency()}
+      />
 
       <FinanceCurrencyPickerSheet
         open={picker === "currency"}

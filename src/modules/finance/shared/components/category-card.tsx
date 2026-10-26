@@ -1,6 +1,6 @@
 "use client"
 
-import { SummaryItem } from "@/src/shared/components/ui/summary"
+import { SummaryItem } from "@/src/shared/components/data-display/summary"
 import { cn } from "@/src/shared/lib/utils"
 import { LockIcon, TagsIcon, UserIcon } from "lucide-react"
 import type { ReactNode } from "react"
@@ -47,7 +47,7 @@ export function CategoryCard({
   const empty = variant === "pick"
   const label = name.trim() || "Nueva categoría"
 
-  // Variante compacta de la card; la galería /dev/cards la pinta (#272).
+  // Variante compacta de la card; la galería /settings/appearance/cards la pinta (#272).
   if (variant === "chip" || variant === "inline") {
     const chip = variant === "chip"
     const content = (

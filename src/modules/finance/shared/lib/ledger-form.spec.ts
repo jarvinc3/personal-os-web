@@ -85,23 +85,21 @@ describe("formatFinanceDateTimeLabel", () => {
   const expectedDate = "18 sep 2026"
 
   it("adds the hour to the date", () => {
-    const expectedTime = new Date(2000, 0, 1, 14, 30).toLocaleTimeString("es", {
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: true,
-    })
     assert.equal(
-      formatFinanceDateTimeLabel("2026-09-18T14:30:00.000Z", "es"),
-      `${expectedDate}, ${expectedTime}`
+      formatFinanceDateTimeLabel("2026-09-18T14:30:00.000Z", "es-DO"),
+      `${expectedDate}, 2:30 p. m.`
     )
   })
 
   it("shows just the date for midnight or a date without an hour", () => {
     assert.equal(
-      formatFinanceDateTimeLabel("2026-09-18T00:00:00.000Z", "es"),
+      formatFinanceDateTimeLabel("2026-09-18T00:00:00.000Z", "es-DO"),
       expectedDate
     )
-    assert.equal(formatFinanceDateTimeLabel("2026-09-18", "es"), expectedDate)
+    assert.equal(
+      formatFinanceDateTimeLabel("2026-09-18", "es-DO"),
+      expectedDate
+    )
   })
 })
 

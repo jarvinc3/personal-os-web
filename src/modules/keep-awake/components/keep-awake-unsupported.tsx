@@ -12,11 +12,16 @@ import {
 } from "@/src/shared/components/ui/empty"
 import { PRESSABLE_CLASS } from "@/src/shared/lib/utils"
 import { History, MonitorOff } from "lucide-react"
-import { useState } from "react"
 
-export function KeepAwakeUnsupported() {
-  const [historyOpen, setHistoryOpen] = useState(false)
+type KeepAwakeUnsupportedProps = {
+  historyOpen: boolean
+  onHistoryOpenChange: (open: boolean) => void
+}
 
+export function KeepAwakeUnsupported({
+  historyOpen,
+  onHistoryOpenChange,
+}: KeepAwakeUnsupportedProps) {
   return (
     <>
       <Empty>
@@ -38,14 +43,17 @@ export function KeepAwakeUnsupported() {
             className={PRESSABLE_CLASS}
             aria-haspopup="dialog"
             aria-expanded={historyOpen}
-            onClick={() => setHistoryOpen(true)}
+            onClick={() => onHistoryOpenChange(true)}
           >
             <History data-icon="inline-start" />
             Historial
           </Button>
         </EmptyContent>
       </Empty>
-      <KeepAwakeHistorySheet open={historyOpen} onOpenChange={setHistoryOpen} />
+      <KeepAwakeHistorySheet
+        open={historyOpen}
+        onOpenChange={onHistoryOpenChange}
+      />
     </>
   )
 }

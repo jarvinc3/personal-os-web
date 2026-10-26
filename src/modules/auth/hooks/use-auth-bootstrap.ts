@@ -11,7 +11,7 @@ import { authEvents } from "@/src/shared/events/auth-events"
 import { useAppStore } from "@/src/shared/store/app-store"
 import type { Session } from "@supabase/supabase-js"
 import { useEffect, useRef } from "react"
-import { toast } from "sonner"
+import { appToast } from "@/src/shared/lib/app-toast"
 
 const AUTH_CALLBACK_DEFER_MS = 0
 const BOOTSTRAP_FALLBACK_MS = 3_000
@@ -127,8 +127,9 @@ export function useAuthBootstrap() {
       clearAuthState()
       void queryClient.removeQueries({ queryKey: PROFILE_QUERY_KEY })
       void supabase.auth.signOut()
-      toast.info("Sesión expirada", {
-        description: "Inicia sesión de nuevo para continuar.",
+      appToast.info({
+        text1: "Sesión expirada",
+        text2: "Inicia sesión de nuevo para continuar.",
       })
     })
 

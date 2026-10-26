@@ -1,7 +1,7 @@
 "use client"
 
 import { FinanceBudgetsList } from "@/src/modules/finance/budgets"
-import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
+import { ErrorState } from "@/src/shared/components/feedback/error-state"
 import {
   debtorFirstName,
   formatSharePendingTotals,
@@ -48,7 +48,7 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/src/shared/components/ui/tabs"
-import { usePendingNavigation } from "@/src/shared/components/ui/navigation-pending"
+import { usePendingNavigation } from "@/src/shared/components/shell/navigation-pending"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
@@ -201,7 +201,7 @@ export function FinancePlanningList({
   return (
     <>
       {errorMessage ? (
-        <FinanceErrorState
+        <ErrorState
           message={errorMessage}
           onRetry={() => {
             void savingsQuery.refetch()
@@ -232,14 +232,14 @@ export function FinancePlanningList({
               <TabsTrigger
                 key={value}
                 value={value}
-                className="rounded-xl py-2"
+                className="gap-1.5 rounded-xl px-2 py-2"
               >
                 <Icon
                   data-icon="inline-start"
-                  className="size-5"
+                  className="size-5 shrink-0"
                   style={{ color: isSelected ? undefined : color }}
                 />
-                <span className="sr-only md:not-sr-only">{label}</span>
+                <span className="truncate text-xs">{label}</span>
               </TabsTrigger>
             )
           })}

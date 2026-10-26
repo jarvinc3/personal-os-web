@@ -1,10 +1,10 @@
 "use client"
 
 import { FinanceGate } from "@/src/modules/finance/finance-gate"
-import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
+import { ErrorState } from "@/src/shared/components/feedback/error-state"
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
 import { MissingRecord } from "@/src/modules/finance/shared/components/layout/missing-record"
-import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
+import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
 import { FinanceProgressHero } from "@/src/modules/finance/shared/components/layout/progress-hero"
 import { ReceivablePaymentSheet } from "@/src/modules/finance/receivables/components/receivable-payment-sheet"
 import { ReceivableSheet } from "@/src/modules/finance/receivables/components/receivable-sheet"
@@ -36,7 +36,7 @@ import {
 } from "@/src/modules/finance/shared/types/entities"
 import { DeleteRecordDialog } from "@/src/modules/finance/shared/components/delete-record-dialog"
 import { RecordOptionsSheet } from "@/src/modules/finance/shared/components/record-options-sheet"
-import { LoadingView } from "@/src/shared/components/layout/loading-view"
+import { LoadingView } from "@/src/shared/components/feedback/loading-view"
 import { Badge } from "@/src/shared/components/ui/badge"
 import { Button } from "@/src/shared/components/ui/button"
 import {
@@ -46,8 +46,8 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
-import { SummaryItem } from "@/src/shared/components/ui/summary"
-import { InfiniteListSentinel } from "@/src/shared/components/ui/infinite-list-sentinel"
+import { SummaryItem } from "@/src/shared/components/data-display/summary"
+import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
 import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
@@ -123,7 +123,9 @@ function ReceivableDetailScreenBody({
   const restoreReceivable = useRestoreReceivable()
   const updateReceivable = useUpdateReceivable()
   const writeOffReceivable = useWriteOffReceivable()
-  const [optionsOpen, setOptionsOpen] = useState(false)
+  const { open: optionsOpen, setOpen: setOptionsOpen } = useSheetParam(
+    FINANCE_SHEET_KEYS.receivableOptions
+  )
   const [confirmOpen, setConfirmOpen] = useState(false)
 
   async function onWriteOff() {
@@ -224,7 +226,7 @@ function ReceivableDetailScreenBody({
     <>
       {receivablesQuery.error ? (
         <div className="mb-3">
-          <FinanceErrorState
+          <ErrorState
             message={financeLoadErrorMessage(receivablesQuery.error)}
             onRetry={() => void receivablesQuery.refetch()}
             isRetrying={receivablesQuery.isFetching}
@@ -270,7 +272,7 @@ function ReceivableDetailScreenBody({
         ) : null}
 
         {paymentsQuery.isError ? (
-          <FinanceErrorState
+          <ErrorState
             message={financeLoadErrorMessage(paymentsQuery.error)}
             onRetry={() => void paymentsQuery.refetch()}
             isRetrying={paymentsQuery.isFetching}
@@ -279,7 +281,7 @@ function ReceivableDetailScreenBody({
 
         <AsyncRegion
           pending={paymentsQuery.isPending}
-          pendingFallback={<FinanceListSkeleton rows={4} />}
+          pendingFallback={<ListSkeleton rows={4} />}
           empty={!paymentsQuery.isError && payments.length === 0}
           emptyFallback={
             <Empty className="py-10">

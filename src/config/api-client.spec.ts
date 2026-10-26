@@ -68,6 +68,23 @@ describe("api client idempotency key", () => {
     assert.equal(new Set(keys).size, 4)
   })
 
+  it("sends a DELETE body when the endpoint asks for confirmation", async () => {
+    const { client, calls } = createClient([
+      jsonResponse({ data: { deleted: true } }),
+    ])
+
+    const deletion = await client.apiDeleteWithBody<{ deleted: boolean }>(
+      "/intelligence/knowledge/me",
+      { confirmed: true }
+    )
+
+    assert.deepEqual(deletion, { deleted: true })
+    assert.equal(calls.length, 1)
+    assert.equal(calls[0].init?.method, "DELETE")
+    assert.equal(calls[0].init?.body, JSON.stringify({ confirmed: true }))
+    assert.match(idempotencyKeyOf(calls[0]) ?? "", UUID_PATTERN)
+  })
+
   it("does not send the header on GET", async () => {
     const { client, calls } = createClient([jsonResponse({ data: {} })])
 

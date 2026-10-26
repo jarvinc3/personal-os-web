@@ -16,6 +16,7 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 import {
   EMPTY_TRANSACTION_PREFILL,
   parseTransactionPrefill,
+  readTransactionPrefillQuery,
   type TransactionPrefill,
 } from "@/src/modules/finance/transactions/lib/transaction-prefill"
 
@@ -32,10 +33,14 @@ function TransactionCreateScreenBody() {
   const initialType = parseTransactionFormType(searchParams.get("type"))
   const initialDestination = searchParams.get("destination")?.trim() || null
   const returnTo = internalReturnPath(searchParams.get("returnTo"))
-  const search = searchParams.toString()
+  const prefillQuery = useMemo(
+    () =>
+      readTransactionPrefillQuery(new URLSearchParams(searchParams.toString())),
+    [searchParams]
+  )
   const initialPrefill = useMemo(
-    () => parseTransactionPrefill(new URLSearchParams(search)),
-    [search]
+    () => parseTransactionPrefill(new URLSearchParams(prefillQuery)),
+    [prefillQuery]
   )
 
   return (

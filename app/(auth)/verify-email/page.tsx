@@ -1,5 +1,5 @@
 import { VerifyEmailScreen } from "@/src/modules/auth/verify-email-screen"
-import { LoadingView } from "@/src/shared/components/layout/loading-view"
+import { LoadingView } from "@/src/shared/components/feedback/loading-view"
 import type { Metadata } from "next"
 import { Suspense } from "react"
 

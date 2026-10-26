@@ -44,7 +44,7 @@ export function PipPanel({ phase, timerDisplay, onToggle }: PipPanelProps) {
           <span
             className={cn(
               "size-1.5 rounded-full",
-              isLive ? "bg-success" : isPaused ? "bg-warning" : "bg-danger"
+              isLive ? "bg-success" : isPaused ? "bg-warning" : "bg-destructive"
             )}
             aria-hidden
           />
@@ -74,7 +74,7 @@ export function PipPanel({ phase, timerDisplay, onToggle }: PipPanelProps) {
             ? "bg-success text-white hover:bg-success/90"
             : isPaused
               ? undefined
-              : "bg-danger text-white hover:bg-danger/90"
+              : "bg-destructive text-white hover:bg-destructive/90"
         )}
         aria-pressed={isLive}
         aria-label={toggleLabel}

@@ -11,9 +11,9 @@ import {
   FINANCE_LOAN_INSTALLMENT_STATUS_LABEL,
   type FinanceLoanInstallment,
 } from "@/src/modules/finance/shared/types/entities"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import { Badge } from "@/src/shared/components/ui/badge"
-import { Button } from "@/src/shared/components/ui/button"
+
 import {
   Empty,
   EmptyDescription,
@@ -23,7 +23,7 @@ import {
 } from "@/src/shared/components/ui/empty"
 import type { VariantProps } from "class-variance-authority"
 import { badgeVariants } from "@/src/shared/components/ui/badge"
-import { CalendarClockIcon, XIcon } from "lucide-react"
+import { CalendarClockIcon } from "lucide-react"
 
 type BadgeVariant = VariantProps<typeof badgeVariants>["variant"]
 
@@ -59,23 +59,11 @@ export function LoanAmortizationSheet({
 
   return (
     <BottomSheet
+      closeLabel="Cerrar"
       open={open}
       onOpenChange={onOpenChange}
       title="Plan de amortización"
       description="Capital, interés y saldo restante de cada cuota"
-      actions={{
-        close: (
-          <Button
-            type="button"
-            variant="outline"
-            className="flex-1"
-            onClick={() => onOpenChange(false)}
-          >
-            <XIcon className="size-4 shrink-0" />
-            Cerrar
-          </Button>
-        ),
-      }}
     >
       {plan.length === 0 ? (
         <Empty className="py-6">

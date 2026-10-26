@@ -4,8 +4,16 @@ export type FinanceMoneyDisplay = {
   compactNumbers: boolean
   /** Locale for digits, separators and the date labels beside the amount. */
   locale: string
-  /** When true, prefixes `+` / `-` before the currency code (e.g. `+DOP $10`). */
+  /** When true, prefixes `+` / `−` before the currency code (e.g. `+DOP $10`). */
   leadingSign?: boolean
+}
+
+export type MoneySign = "+" | "−"
+
+/** Text tone of a signed amount: the sign decides the color. */
+export const MONEY_SIGN_TONE: Record<MoneySign, string> = {
+  "+": "text-success",
+  "−": "text-destructive",
 }
 
 /** Digits and a single decimal point. Commas become dots. Letters are dropped. */
@@ -115,6 +123,13 @@ export function narrowCurrencySymbol(currency: string): string | null {
   return currencyGlyph(currency, symbol)
 }
 
+function leadingSignPrefix(amount: number): string {
+  if (amount === 0) {
+    return ""
+  }
+  return amount < 0 ? "−" : "+"
+}
+
 export function formatFinanceMoney(
   value: string | number | null | undefined,
   display: FinanceMoneyDisplay
@@ -139,11 +154,10 @@ export function formatFinanceMoney(
     }).format(Math.abs(amount))
 
     if (display.leadingSign) {
-      const sign = amount < 0 ? "-" : "+"
-      return `${sign}${currency} ${symbol}${formattedAmount}`
+      return `${leadingSignPrefix(amount)}${currency} ${symbol}${formattedAmount}`
     }
 
-    const sign = amount < 0 ? "-" : ""
+    const sign = amount < 0 ? "−" : ""
     return `${currency} ${sign}${symbol}${formattedAmount}`
   } catch {
     return "—"
@@ -155,6 +169,34 @@ export function formatCompactFinanceMoney(
   display: FinanceMoneyDisplay
 ): string {
   return formatFinanceMoney(value, { ...display, compactNumbers: true })
+}
+
+/** Sign of an amount: `null` for zero and for an amount that cannot be read. */
+export function moneySign(
+  value: string | number | null | undefined
+): MoneySign | null {
+  const amount = parseFinanceMoney(value)
+  if (amount === null || amount === 0) {
+    return null
+  }
+  return amount > 0 ? "+" : "−"
+}
+
+/**
+ * Amount with its sign in front and the currency after it: `+ DOP $1,200` or
+ * `− DOP $1,200`. Without a sign it is the plain formatted amount.
+ */
+export function signedFinanceMoney(
+  value: string | number | null | undefined,
+  display: FinanceMoneyDisplay,
+  sign: MoneySign | null
+): string {
+  if (!sign) {
+    return formatFinanceMoney(value, display)
+  }
+  const amount = parseFinanceMoney(value)
+  const absolute = amount === null ? null : Math.abs(amount)
+  return `${sign} ${formatFinanceMoney(absolute, display)}`
 }
 
 /**

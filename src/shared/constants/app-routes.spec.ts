@@ -85,12 +85,18 @@ describe("finance route constants", () => {
 })
 
 describe("gallery route constants", () => {
-  it("keeps the gallery routes", () => {
-    assert.equal(APP_ROUTES.app.dev, "/dev")
-    assert.equal(APP_ROUTES.app.devCardGallery, "/dev/cards")
+  it("keeps the gallery routes under appearance", () => {
     assert.equal(
-      APP_ROUTES.app.devCardGalleryEntity("cuenta"),
-      "/dev/cards/cuenta"
+      APP_ROUTES.app.settingsAppearanceCards,
+      "/settings/appearance/cards"
+    )
+    assert.equal(
+      APP_ROUTES.app.settingsAppearanceComponents,
+      "/settings/appearance/components"
+    )
+    assert.equal(
+      APP_ROUTES.app.settingsAppearanceCardEntity("cuenta"),
+      "/settings/appearance/cards/cuenta"
     )
   })
 })
@@ -100,6 +106,20 @@ describe("module placeholder routes", () => {
     assert.equal(APP_ROUTES.app.agenda, "/agenda")
     assert.equal(APP_ROUTES.app.projects, "/projects")
     assert.equal(APP_ROUTES.app.health, "/health")
+  })
+})
+
+describe("intelligence route constants", () => {
+  it("keeps the knowledge routes under intelligence", () => {
+    assert.equal(APP_ROUTES.app.intelligence, "/intelligence")
+    assert.equal(
+      APP_ROUTES.app.intelligenceKnowledge,
+      "/intelligence/knowledge"
+    )
+    assert.equal(
+      APP_ROUTES.app.intelligenceAdminKnowledge,
+      "/intelligence/admin/knowledge"
+    )
   })
 })
 

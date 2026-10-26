@@ -18,10 +18,10 @@ import {
   formatFinanceMoney,
   type FinanceMoneyDisplay,
 } from "@/src/modules/finance/shared/lib/money"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import { Button } from "@/src/shared/components/ui/button"
-import { InfiniteListSentinel } from "@/src/shared/components/ui/infinite-list-sentinel"
-import { SummaryItem } from "@/src/shared/components/ui/summary"
+import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
+import { SummaryItem } from "@/src/shared/components/data-display/summary"
 import {
   Tabs,
   TabsContent,

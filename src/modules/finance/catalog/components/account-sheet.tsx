@@ -6,7 +6,7 @@ import {
   InstitutionTrigger,
 } from "@/src/modules/finance/shared/components/pickers/institution-picker"
 import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
-import { FinanceSegmentedControl } from "@/src/modules/finance/shared/components/forms/form-blocks"
+import { SegmentedControl } from "@/src/shared/components/forms/segmented-control"
 import { AccountProductRow } from "@/src/modules/finance/shared/components/product-rows"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
 import {
@@ -32,30 +32,21 @@ import type {
   FinanceCashSummary,
   FinanceInstitution,
 } from "@/src/modules/finance/shared/types/entities"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
-import {
-  FormTextField,
-  SwitchFieldRow,
-} from "@/src/shared/components/layout/form-blocks"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { FormTextField } from "@/src/shared/components/forms/form-text-field"
+import { SwitchFieldRow } from "@/src/shared/components/forms/switch-field-row"
 import { Button } from "@/src/shared/components/ui/button"
 import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
-import { ColorPickerSwatch } from "@/src/shared/components/ui/color-picker"
+import { ColorPickerSwatch } from "@/src/shared/components/forms/color-picker"
 import { Label } from "@/src/shared/components/ui/label"
 import { Spinner } from "@/src/shared/components/ui/spinner"
-import { SummarySection } from "@/src/shared/components/ui/summary"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { getModule } from "@/src/shared/constants/module-registry"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
 import { usePicker } from "@/src/shared/hooks/use-picker"
 import { zodResolver } from "@hookform/resolvers/zod"
-import {
-  HashIcon,
-  LandmarkIcon,
-  Palette,
-  SaveIcon,
-  Star,
-  XIcon,
-} from "lucide-react"
+import { HashIcon, LandmarkIcon, Palette, SaveIcon, Star } from "lucide-react"
 import { useEffect, useMemo } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import {
@@ -313,17 +304,6 @@ export function AccountSheet({
               : "Crea una institución bancaria antes de agregar una cuenta."
         }
         actions={{
-          close: (
-            <Button
-              key="cancel"
-              variant="outline"
-              className="flex-1"
-              onClick={() => requestOpenChange(false)}
-            >
-              <XIcon className="size-4 shrink-0" />
-              Cancelar
-            </Button>
-          ),
           submit: (
             <Button
               key="submit"
@@ -363,7 +343,7 @@ export function AccountSheet({
               control={control}
               name="type"
               render={({ field }) => (
-                <FinanceSegmentedControl
+                <SegmentedControl
                   label="Tipo"
                   value={field.value}
                   onChange={changeType}
@@ -433,6 +413,7 @@ export function AccountSheet({
               name="initialBalance"
               render={({ field }) => (
                 <FinanceMoneyField
+                  calculatorKey="account-opening-balance"
                   label="Saldo inicial"
                   amount={field.value}
                   onAmountChange={field.onChange}

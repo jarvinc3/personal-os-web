@@ -1,15 +1,17 @@
 "use client"
 
 import { BrandLogo } from "@/src/modules/finance/shared/components/brand-logo"
+import { GlossaryHelpButton } from "@/src/modules/help"
 import { FinanceGate } from "@/src/modules/finance/finance-gate"
-import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
+import { ErrorState } from "@/src/shared/components/feedback/error-state"
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
 import { MissingRecord } from "@/src/modules/finance/shared/components/layout/missing-record"
-import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
+import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
 import { FinanceProgressHero } from "@/src/modules/finance/shared/components/layout/progress-hero"
 import { LoanSurfaceMark } from "@/src/modules/finance/loans/components/loan-progress-card"
 import { LoanAmortizationSheet } from "@/src/modules/finance/loans/components/amortization-sheet"
 import { LoanPrepaymentSheet } from "@/src/modules/finance/loans/components/loan-prepayment-sheet"
+import { LoanPaymentSheet } from "@/src/modules/finance/loans/components/loan-payment-sheet"
 import { InstallmentDetailSheet } from "@/src/modules/finance/loans/components/installment-detail-sheet"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
@@ -32,8 +34,11 @@ import {
   financeLoadErrorMessage,
 } from "@/src/modules/finance/shared/lib/finance-error"
 import { showUndoToast } from "@/src/modules/finance/shared/components/undo-toast"
+import { countLabel } from "@/src/modules/finance/shared/lib/count-label"
 import { formatRatePercentLabel } from "@/src/modules/finance/shared/lib/interest-rate"
 import { formatCalendarDate } from "@/src/modules/finance/shared/lib/ledger-form"
+import { nextUnpaidInstallment } from "@/src/modules/finance/shared/lib/loan-payment"
+import { useSheetListEntity } from "@/src/modules/finance/shared/hooks/use-sheet-entity"
 import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 import { loanProgressSummary } from "@/src/modules/finance/shared/lib/planning-lists"
 import {
@@ -44,7 +49,7 @@ import {
 import { DeleteRecordDialog } from "@/src/modules/finance/shared/components/delete-record-dialog"
 import { ArchiveRecordDialog } from "@/src/modules/finance/shared/components/archive-record-dialog"
 import { RecordOptionsSheet } from "@/src/modules/finance/shared/components/record-options-sheet"
-import { LoadingView } from "@/src/shared/components/layout/loading-view"
+import { LoadingView } from "@/src/shared/components/feedback/loading-view"
 import { Badge } from "@/src/shared/components/ui/badge"
 import { Button } from "@/src/shared/components/ui/button"
 import {
@@ -55,8 +60,11 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
-import { SummaryItem, SummarySection } from "@/src/shared/components/ui/summary"
-import { InfiniteListSentinel } from "@/src/shared/components/ui/infinite-list-sentinel"
+import {
+  SummaryItem,
+  SummarySection,
+} from "@/src/shared/components/data-display/summary"
+import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
 import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
@@ -121,6 +129,8 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
     useSheetParam(FINANCE_SHEET_KEYS.loanOptions)
   const { open: openPrepaymentSheet, setOpen: setOpenPrepaymentSheet } =
     useSheetParam(FINANCE_SHEET_KEYS.loanPrepayment)
+  const { open: openPaymentSheet, setOpen: setOpenPaymentSheet } =
+    useSheetParam(FINANCE_SHEET_KEYS.loanPayment)
 
   const loan =
     (loansQuery.data ?? []).find((item) => item.id === loanId) ?? null
@@ -137,6 +147,7 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
     ? (accounts.find((item) => item.id === loan.disbursementAccountId) ?? null)
     : null
   const installments = infiniteListItems(installmentsQuery.data)
+  const nextInstallment = nextUnpaidInstallment(installments)
   const accent = institution?.color ?? ACCENT_FALLBACK_COLOR
   const money = { ...display, currency: loan?.currency ?? display.currency }
   const summary = loan ? loanProgressSummary(loan) : null
@@ -144,10 +155,18 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
 
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [archiveConfirmOpen, setArchiveConfirmOpen] = useState(false)
-  const [amortizationOpen, setAmortizationOpen] = useState(false)
-  const [selectedInstallment, setSelectedInstallment] =
-    useState<FinanceLoanInstallment | null>(null)
+  const { open: amortizationOpen, setOpen: setAmortizationOpen } =
+    useSheetParam("loan-amortization-sheet")
+  const installmentSheet = useSheetParam(FINANCE_SHEET_KEYS.installmentDetail)
   const scheduleQuery = useLoanSchedule(amortizationOpen, loanId)
+  const selectedInstallment = useSheetListEntity(
+    installmentSheet.open,
+    installmentSheet.sheetId,
+    installments,
+    installmentsQuery.isPending,
+    installmentSheet.setOpen,
+    true
+  )
 
   async function onArchiveLoan() {
     if (!loan) {
@@ -241,7 +260,7 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
     <>
       {loansQuery.error ? (
         <div className="mb-3">
-          <FinanceErrorState
+          <ErrorState
             message={financeLoadErrorMessage(loansQuery.error)}
             onRetry={() => void loansQuery.refetch()}
             isRetrying={loansQuery.isFetching}
@@ -270,10 +289,18 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
         ]
           .filter(Boolean)
           .join(" · ")}
-        metricLabel="Saldo"
+        metricLabel={
+          <span className="flex items-center gap-1">
+            Deuda
+            <GlossaryHelpButton
+              slug="deuda"
+              className="text-white/70 hover:text-white"
+            />
+          </span>
+        }
         metricValue={formatFinanceMoney(loan.currentBalance, money)}
         progress={progress}
-        startCaption={`${loan.paidInstallments}/${loan.totalInstallments} cuotas`}
+        startCaption={`${loan.paidInstallments}/${countLabel(loan.totalInstallments, "installment")}`}
         endCaption={`Original ${formatFinanceMoney(loan.originalAmount, money)}`}
         footnote={
           loan.nextDueDate
@@ -319,7 +346,7 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
               description={
                 loan.disbursementAccount
                   ? undefined
-                  : "El dinero no entró a ninguna cuenta."
+                  : "El dinero no entró a ninguna cuenta, así que la deuda resta del patrimonio sin un saldo que la compense."
               }
               isLast
             />
@@ -328,8 +355,18 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
       </div>
 
       <div className="mx-4 flex flex-col gap-3 rounded-3xl bg-background">
+        {nextInstallment ? (
+          <Button
+            type="button"
+            className="w-full"
+            onClick={() => setOpenPaymentSheet(true)}
+          >
+            <HandCoinsIcon className="size-4 shrink-0" />
+            Pagar cuota
+          </Button>
+        ) : null}
         {installmentsQuery.isError ? (
-          <FinanceErrorState
+          <ErrorState
             message={financeLoadErrorMessage(installmentsQuery.error)}
             onRetry={() => void installmentsQuery.refetch()}
             isRetrying={installmentsQuery.isFetching}
@@ -338,7 +375,7 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
 
         <AsyncRegion
           pending={installmentsQuery.isPending}
-          pendingFallback={<FinanceListSkeleton rows={5} />}
+          pendingFallback={<ListSkeleton rows={5} />}
           empty={!installmentsQuery.isError && installments.length === 0}
           emptyFallback={
             <Empty className="py-10">
@@ -371,8 +408,9 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
                   key={installment.id}
                   title={`Cuota ${installment.installmentNo}`}
                   description={`Vence ${formatCalendarDate(installment.dueDate, display.locale)} · Capital ${formatFinanceMoney(installment.principal, money)} · Interés ${formatFinanceMoney(installment.interest, money)}`}
+                  wrapDescription
                   value={formatFinanceMoney(installment.amount, money)}
-                  onPress={() => setSelectedInstallment(installment)}
+                  onPress={() => installmentSheet.setOpen(true, installment.id)}
                   trailing={
                     <Badge
                       variant={INSTALLMENT_STATUS_VARIANT[installment.status]}
@@ -445,14 +483,29 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
       />
 
       <InstallmentDetailSheet
-        open={selectedInstallment !== null}
-        onOpenChange={(next) => {
-          if (!next) {
-            setSelectedInstallment(null)
-          }
-        }}
+        open={installmentSheet.open}
+        onOpenChange={installmentSheet.setOpen}
         installment={selectedInstallment}
         display={money}
+        canPay={
+          selectedInstallment !== null &&
+          nextInstallment !== null &&
+          selectedInstallment.id === nextInstallment.id
+        }
+        onPay={() => {
+          installmentSheet.setOpen(false)
+          setOpenPaymentSheet(true)
+        }}
+      />
+
+      <LoanPaymentSheet
+        open={openPaymentSheet}
+        onOpenChange={setOpenPaymentSheet}
+        loanId={loan.id}
+        lenderName={loan.lenderName}
+        currency={loan.currency}
+        loanAccountId={loan.accountId}
+        installment={nextInstallment}
       />
 
       <LoanAmortizationSheet
@@ -470,6 +523,8 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
         lenderName={loan.lenderName}
         currency={loan.currency}
         penaltyPct={loan.prepaymentPenaltyPct}
+        loanAccountId={loan.accountId}
+        currentInstallments={loan.totalInstallments}
       />
 
       <DeleteRecordDialog

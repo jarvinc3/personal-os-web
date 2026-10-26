@@ -25,7 +25,7 @@ import type {
 } from "@/src/modules/finance/shared/types/entities"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { Badge } from "@/src/shared/components/ui/badge"
-import { LinkPendingOverlay } from "@/src/shared/components/ui/navigation-pending"
+import { LinkPendingOverlay } from "@/src/shared/components/shell/navigation-pending"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
 import { CheckIcon, TriangleAlertIcon } from "lucide-react"
 import Link from "next/link"
@@ -45,7 +45,7 @@ type SubscriptionCardProps = {
   disabled?: boolean
   /** Ring and check mark while the card is picked in a selector. */
   selected?: boolean
-  /** Variante de la card; la galería /dev/cards la pinta (#272). */
+  /** Variante de la card; la galería /settings/appearance/cards la pinta (#272). */
   variant?: "full" | "compact" | "inline"
 }
 
@@ -71,7 +71,12 @@ export function SubscriptionCard({
     paymentMethod?.type === "CARD"
       ? (cards.find((card) => card.id === paymentMethod.id) ?? null)
       : null
-  const state = subscriptionCardState({ subscription, today, windowDays })
+  const state = subscriptionCardState({
+    subscription,
+    today,
+    windowDays,
+    locale: display.locale,
+  })
   const statusBadge = subscriptionStatusBadge(subscription, state.overdue)
   const progress = subscriptionCycleProgress(subscription, today)
   const money = { ...display, currency: subscription.currency }

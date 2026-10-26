@@ -5,8 +5,13 @@ import {
   countryName,
 } from "@/src/modules/finance/shared/lib/countries"
 import { foldSearchText } from "@/src/shared/lib/search-text"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
-import { FormTextField } from "@/src/shared/components/layout/form-blocks"
+import {
+  Empty,
+  EmptyHeader,
+  EmptyTitle,
+} from "@/src/shared/components/ui/empty"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
 import { CheckIcon, ChevronDownIcon, GlobeIcon, SearchIcon } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
@@ -91,9 +96,11 @@ export function CountryPickerSheet({
         />
       </div>
       {visible.length === 0 ? (
-        <p className="py-6 text-center text-sm text-muted-foreground">
-          Ningún país coincide.
-        </p>
+        <Empty size="sm">
+          <EmptyHeader>
+            <EmptyTitle>Ningún país coincide</EmptyTitle>
+          </EmptyHeader>
+        </Empty>
       ) : (
         <div className="flex flex-col gap-2">
           {visible.map((option) => {

@@ -3,14 +3,15 @@
 import { ApiError } from "@/src/config/api-client"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import { useUploadStatementImport } from "@/src/modules/finance/shared/hooks/use-statement-import"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
-import { FormTextField } from "@/src/shared/components/layout/form-blocks"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import { Button } from "@/src/shared/components/ui/button"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { appToast } from "@/src/shared/lib/app-toast"
-import { ArrowRightIcon, FileUpIcon, XIcon } from "lucide-react"
+import { ArrowRightIcon, FileUpIcon } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useRef, useState } from "react"
+import { useEventSheet } from "@/src/shared/hooks/use-event-sheet"
 
 const PASSWORD_REQUIRED_CODE = "STATEMENT_PASSWORD_REQUIRED"
 
@@ -34,7 +35,8 @@ export function StatementImportButton({
   const upload = useUploadStatementImport()
   const [lockedFile, setLockedFile] = useState<File | null>(null)
   const [password, setPassword] = useState("")
-  const [passwordOpen, setPasswordOpen] = useState(false)
+  // El archivo elegido no sobrevive a una recarga: la hoja se cierra sola.
+  const passwordSheet = useEventSheet("statement-password-sheet")
 
   async function send(file: File, pdfPassword?: string) {
     try {
@@ -44,14 +46,14 @@ export function StatementImportButton({
         file,
         password: pdfPassword,
       })
-      setPasswordOpen(false)
+      passwordSheet.closeSheet()
       setPassword("")
       setLockedFile(null)
       router.push(APP_ROUTES.app.financeStatementImport(importId))
     } catch (error) {
       if (error instanceof ApiError && error.code === PASSWORD_REQUIRED_CODE) {
         setLockedFile(file)
-        setPasswordOpen(true)
+        passwordSheet.openSheet()
         if (pdfPassword) {
           appToast.error({ text1: "La clave no es correcta." })
         }
@@ -88,9 +90,9 @@ export function StatementImportButton({
         {upload.isPending ? "Leyendo el PDF..." : label}
       </Button>
       <BottomSheet
-        open={passwordOpen}
+        open={passwordSheet.open}
         onOpenChange={(open) => {
-          setPasswordOpen(open)
+          passwordSheet.onOpenChange(open)
           if (!open) {
             setPassword("")
           }
@@ -98,16 +100,6 @@ export function StatementImportButton({
         title="PDF con clave"
         description="Escríbela para leer el estado de cuenta. No la guardamos."
         actions={{
-          close: (
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => setPasswordOpen(false)}
-            >
-              <XIcon className="size-4 shrink-0" />
-              Cancelar
-            </Button>
-          ),
           submit: (
             <Button
               type="button"

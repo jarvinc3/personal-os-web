@@ -1,27 +1,22 @@
 "use client"
 
-import {
-  AVATAR_OPTIONS,
-  type AvatarOption,
-} from "@/src/modules/settings/constants/avatar-options"
+import { AVATAR_OPTIONS } from "@/src/modules/settings/constants/avatar-options"
+import { SETTINGS_REGISTRY } from "@/src/modules/settings/constants/settings-metadata"
 import { useProfile } from "@/src/modules/settings/hooks/use-profile"
 import { useProfileSheetFormSync } from "@/src/modules/settings/hooks/use-profile-sheet"
 import type { UpdateProfilePayload } from "@/src/modules/settings/types/profile.types"
 import type { SettingsSheetProps } from "@/src/modules/settings/types/sheet.types"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
-import {
-  FormTextField,
-  SelectionGrid,
-} from "@/src/shared/components/layout/form-blocks"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { FormTextField } from "@/src/shared/components/forms/form-text-field"
+import { ChoiceGrid } from "@/src/shared/components/forms/choice-grid"
 import { Button } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
-import { SummarySection } from "@/src/shared/components/ui/summary"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Contact, Contact2, UserIcon, XIcon } from "lucide-react"
+import { Contact, Contact2, UserIcon } from "lucide-react"
 import Image from "next/image"
-import { useRouter } from "next/navigation"
 import { useMemo, useState } from "react"
 import { Controller, useForm } from "react-hook-form"
 import {
@@ -39,7 +34,6 @@ export function EditAccountSheet({
   email,
 }: EditAccountSheetProps) {
   const { profileQuery, updateProfileMutation } = useProfile()
-  const router = useRouter()
 
   const savedFullName = profileQuery.data?.fullName ?? ""
   const savedAvatarUrl = profileQuery.data?.avatarUrl ?? ""
@@ -110,16 +104,6 @@ export function EditAccountSheet({
       title="Cuenta"
       description="Nombre y avatar de tu perfil."
       actions={{
-        close: (
-          <Button
-            variant="outline"
-            className="flex-1"
-            onClick={() => router.back()}
-          >
-            <XIcon className="size-4 shrink-0" />
-            Cancelar
-          </Button>
-        ),
         submit: (
           <Button
             disabled={!canSave || updateProfileMutation.isPending}
@@ -157,23 +141,26 @@ export function EditAccountSheet({
       </SummarySection>
 
       <SummarySection title="Avatar" icon={Contact2}>
-        <SelectionGrid
-          items={AVATAR_OPTIONS}
+        <ChoiceGrid
           value={selectedAvatarUrl}
           onValueChange={setSelectedAvatarUrl}
-          getItemKey={(item: AvatarOption) => item.id}
-          getItemValue={(item: AvatarOption) => item.url}
-          getItemLabel={(item: AvatarOption) => `Avatar ${Number(item.id) + 1}`}
-          renderCell={(item: AvatarOption) => (
-            <Image
-              src={item.url}
-              alt=""
-              width={80}
-              height={80}
-              className="size-full object-cover"
-              unoptimized
-            />
-          )}
+          ariaLabel="Avatar"
+          accentColor={SETTINGS_REGISTRY.account.accent}
+          columns={4}
+          options={AVATAR_OPTIONS.map((avatar) => ({
+            value: avatar.url,
+            label: `Avatar ${Number(avatar.id) + 1}`,
+            media: (
+              <Image
+                src={avatar.url}
+                alt=""
+                width={80}
+                height={80}
+                className="size-full object-cover"
+                unoptimized
+              />
+            ),
+          }))}
         />
       </SummarySection>
     </BottomSheet>

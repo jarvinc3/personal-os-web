@@ -5,7 +5,7 @@ import {
   PASSWORD_MIN_LENGTH,
   passwordPolicySchema,
 } from "@/src/modules/auth/lib/password-policy"
-import { FormTextField } from "@/src/shared/components/layout/form-blocks"
+import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import {
   Alert,
   AlertDescription,

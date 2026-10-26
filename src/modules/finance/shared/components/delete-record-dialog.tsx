@@ -3,19 +3,8 @@
 import { ArchiveIcon, Trash2Icon } from "lucide-react"
 import type { ReactNode } from "react"
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogMedia,
-  AlertDialogTitle,
-} from "@/src/shared/components/ui/alert-dialog"
+import { ConfirmDialog } from "@/src/shared/components/feedback/confirm-dialog"
 import { Button } from "@/src/shared/components/ui/button"
-import { Spinner } from "@/src/shared/components/ui/spinner"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
 
 type DeleteRecordArchive = {
@@ -44,46 +33,31 @@ export function DeleteRecordDialog({
   archive,
 }: DeleteRecordDialogProps) {
   return (
-    <AlertDialog
+    <ConfirmDialog
       open={open}
-      onOpenChange={(nextOpen) => {
-        if (!pending) {
-          onOpenChange(nextOpen)
-        }
-      }}
+      onOpenChange={onOpenChange}
+      tone="danger"
+      icon={Trash2Icon}
+      title={`¿Eliminar “${recordName}”?`}
+      description={consequences}
+      confirmLabel="Eliminar"
+      confirmIcon={Trash2Icon}
+      pending={pending}
+      pendingLabel="Eliminando..."
+      onConfirm={onConfirm}
     >
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogMedia className="bg-destructive/10 text-destructive">
-            <Trash2Icon />
-          </AlertDialogMedia>
-          <AlertDialogTitle>{`¿Eliminar “${recordName}”?`}</AlertDialogTitle>
-          <AlertDialogDescription>{consequences}</AlertDialogDescription>
-        </AlertDialogHeader>
-        {archive ? (
-          <Button
-            type="button"
-            variant="outline"
-            disabled={pending || archive.pending}
-            className={cn("justify-start", PRESSABLE_CLASS)}
-            onClick={archive.onArchive}
-          >
-            <ArchiveIcon className="size-4 shrink-0" />
-            {archive.label}
-          </Button>
-        ) : null}
-        <AlertDialogFooter>
-          <AlertDialogCancel disabled={pending}>Cancelar</AlertDialogCancel>
-          <AlertDialogAction
-            variant="destructive"
-            disabled={pending}
-            onClick={onConfirm}
-          >
-            {pending ? <Spinner data-icon="inline-start" /> : null}
-            Eliminar
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+      {archive ? (
+        <Button
+          type="button"
+          variant="outline"
+          disabled={pending || archive.pending}
+          className={cn("justify-start", PRESSABLE_CLASS)}
+          onClick={archive.onArchive}
+        >
+          <ArchiveIcon className="size-4 shrink-0" aria-hidden="true" />
+          {archive.label}
+        </Button>
+      ) : null}
+    </ConfirmDialog>
   )
 }

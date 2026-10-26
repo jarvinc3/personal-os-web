@@ -32,10 +32,12 @@ import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { formatClockTimeFromDate } from "@/src/shared/lib/date-format"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
 import { Bell, Copy } from "lucide-react"
-import { useState, useSyncExternalStore } from "react"
+import { useSyncExternalStore } from "react"
+import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
+import { useFormatLocale } from "@/src/modules/settings/hooks/use-format-locale"
 
-function formatSessionStarted(timestamp: number): string {
-  return formatClockTimeFromDate(new Date(timestamp))
+function formatSessionStarted(timestamp: number, locale: string): string {
+  return formatClockTimeFromDate(new Date(timestamp), locale)
 }
 
 export function KeepAwakeScreen() {
@@ -47,6 +49,7 @@ export function KeepAwakeScreen() {
 }
 
 function KeepAwakeScreenBody() {
+  const locale = useFormatLocale()
   const {
     phase,
     elapsedSeconds,
@@ -75,15 +78,26 @@ function KeepAwakeScreenBody() {
     getReminderSnapshot,
     () => DEFAULT_REMINDER
   )
-  const [helpOpen, setHelpOpen] = useState(false)
-  const [alertOpen, setAlertOpen] = useState(false)
-  const [reminderOpen, setReminderOpen] = useState(false)
-  const [historyOpen, setHistoryOpen] = useState(false)
+  const { open: helpOpen, setOpen: setHelpOpen } = useSheetParam(
+    "keep-awake-help-sheet"
+  )
+  const { open: alertOpen, setOpen: setAlertOpen } = useSheetParam(
+    "keep-awake-alert-sheet"
+  )
+  const { open: reminderOpen, setOpen: setReminderOpen } = useSheetParam(
+    "keep-awake-reminder-sheet"
+  )
+  const { open: historyOpen, setOpen: setHistoryOpen } = useSheetParam(
+    "keep-awake-history-sheet"
+  )
 
   if (!supportsWakeLock) {
     return (
       <KeepAwakeLayout>
-        <KeepAwakeUnsupported />
+        <KeepAwakeUnsupported
+          historyOpen={historyOpen}
+          onHistoryOpenChange={setHistoryOpen}
+        />
       </KeepAwakeLayout>
     )
   }
@@ -114,7 +128,7 @@ function KeepAwakeScreenBody() {
           <KeepAwakePanelToolbar
             reminderOpen={reminderOpen}
             reminderActive={reminder.enabled}
-            reminderTime={formatReminderTimeLabel(reminder)}
+            reminderTime={formatReminderTimeLabel(reminder, locale)}
             historyOpen={historyOpen}
             helpOpen={helpOpen}
             alertOpen={alertOpen}
@@ -154,7 +168,7 @@ function KeepAwakeScreenBody() {
               </div>
               {startTimestamp && inSession ? (
                 <span className="text-xs text-muted-foreground">
-                  Desde las {formatSessionStarted(startTimestamp)}
+                  Desde las {formatSessionStarted(startTimestamp, locale)}
                 </span>
               ) : null}
               {reminder.enabled ? (
@@ -163,11 +177,11 @@ function KeepAwakeScreenBody() {
                   variant="secondary"
                   size="sm"
                   className={cn(PRESSABLE_CLASS, "h-7 rounded-full px-3")}
-                  aria-label={`Recordatorio ${formatReminderTimeLabel(reminder)}`}
+                  aria-label={`Recordatorio ${formatReminderTimeLabel(reminder, locale)}`}
                   onClick={() => setReminderOpen(true)}
                 >
                   <Bell data-icon="inline-start" aria-hidden />
-                  {formatReminderTimeLabel(reminder)}
+                  {formatReminderTimeLabel(reminder, locale)}
                 </Button>
               ) : null}
             </div>

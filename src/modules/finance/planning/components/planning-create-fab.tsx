@@ -2,7 +2,7 @@
 
 import type { PlanningTab } from "@/src/modules/finance/planning/lib/planning-tabs"
 import { Spinner } from "@/src/shared/components/ui/spinner"
-import { ExpandableFab } from "@/src/shared/components/layout/expandable-fab"
+import { ExpandableFab } from "@/src/shared/components/fab/expandable-fab"
 import {
   ChartPieIcon,
   HandCoinsIcon,

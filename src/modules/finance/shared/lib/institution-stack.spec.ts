@@ -100,10 +100,17 @@ describe("institutionInitials", () => {
 })
 
 describe("formatProductCounts", () => {
-  it("formats Spanish counts", () => {
+  it("uses the singular for one product", () => {
     assert.equal(
-      formatProductCounts({ accounts: 2, cards: 1, loans: 0 }),
-      "2 cuentas · 1 tarjetas · 0 préstamos"
+      formatProductCounts({ accounts: 1, cards: 1, loans: 1 }),
+      "1 cuenta · 1 tarjeta · 1 préstamo"
+    )
+  })
+
+  it("uses the plural from two products on", () => {
+    assert.equal(
+      formatProductCounts({ accounts: 2, cards: 3, loans: 0 }),
+      "2 cuentas · 3 tarjetas · 0 préstamos"
     )
   })
 })

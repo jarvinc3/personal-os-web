@@ -9,12 +9,12 @@ import {
   FINANCE_LOAN_INSTALLMENT_STATUS_LABEL,
   type FinanceLoanInstallment,
 } from "@/src/modules/finance/shared/types/entities"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import { Button } from "@/src/shared/components/ui/button"
-import { SummaryItem } from "@/src/shared/components/ui/summary"
-import { LinkPendingOverlay } from "@/src/shared/components/ui/navigation-pending"
+import { SummaryItem } from "@/src/shared/components/data-display/summary"
+import { LinkPendingOverlay } from "@/src/shared/components/shell/navigation-pending"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
-import { ReceiptIcon, XIcon } from "lucide-react"
+import { HandCoinsIcon, ReceiptIcon } from "lucide-react"
 import Link from "next/link"
 
 type InstallmentDetailSheetProps = {
@@ -22,6 +22,9 @@ type InstallmentDetailSheetProps = {
   onOpenChange: (open: boolean) => void
   installment: FinanceLoanInstallment | null
   display: FinanceMoneyDisplay
+  /** Only the oldest unpaid installment can be paid. */
+  canPay?: boolean
+  onPay?: () => void
 }
 
 export function InstallmentDetailSheet({
@@ -29,9 +32,12 @@ export function InstallmentDetailSheet({
   onOpenChange,
   installment,
   display,
+  canPay = false,
+  onPay,
 }: InstallmentDetailSheetProps) {
   return (
     <BottomSheet
+      closeLabel="Cerrar"
       open={open}
       onOpenChange={onOpenChange}
       title={
@@ -42,19 +48,6 @@ export function InstallmentDetailSheet({
           ? `Vence ${formatCalendarDate(installment.dueDate, display.locale)} · ${FINANCE_LOAN_INSTALLMENT_STATUS_LABEL[installment.status]}`
           : undefined
       }
-      actions={{
-        close: (
-          <Button
-            type="button"
-            variant="outline"
-            className="flex-1"
-            onClick={() => onOpenChange(false)}
-          >
-            <XIcon className="size-4 shrink-0" />
-            Cerrar
-          </Button>
-        ),
-      }}
     >
       {installment ? (
         <div className="flex flex-col gap-4">
@@ -76,6 +69,13 @@ export function InstallmentDetailSheet({
               />
             ))}
           </div>
+
+          {canPay && onPay ? (
+            <Button type="button" className="w-full" onClick={onPay}>
+              <HandCoinsIcon className="size-4 shrink-0" />
+              Pagar cuota
+            </Button>
+          ) : null}
 
           {installment.transactionId ? (
             <Button asChild variant="outline" className="w-full">

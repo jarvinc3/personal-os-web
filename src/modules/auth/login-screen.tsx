@@ -10,9 +10,9 @@ import {
   RegisterForm,
   type RegisterFormHandle,
 } from "@/src/modules/auth/components/register-form"
-import { AppLogo } from "@/src/shared/components/brand/app-logo"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
-import { LoadingView } from "@/src/shared/components/layout/loading-view"
+import { AppLogo } from "@/src/shared/components/shell/app-logo"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { LoadingView } from "@/src/shared/components/feedback/loading-view"
 import { Button } from "@/src/shared/components/ui/button"
 import { appAssets } from "@/src/shared/constants/app-assets"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"

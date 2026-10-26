@@ -1,9 +1,9 @@
-import { ChoiceGrid } from "@/src/shared/components/ui/choice-grid"
-import { DayWheel } from "@/src/shared/components/ui/wheel-picker"
+import { ChoiceGrid } from "@/src/shared/components/forms/choice-grid"
+import { DayWheel } from "@/src/shared/components/forms/wheel-picker"
 import {
   SummaryGroup,
   SummarySection,
-} from "@/src/shared/components/ui/summary"
+} from "@/src/shared/components/data-display/summary"
 import { getModule } from "@/src/shared/constants/module-registry"
 import {
   BellRing,

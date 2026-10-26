@@ -1,7 +1,7 @@
 "use client"
 
 import { FinanceGate } from "@/src/modules/finance/finance-gate"
-import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
+import { ErrorState } from "@/src/shared/components/feedback/error-state"
 import { MissingRecord } from "@/src/modules/finance/shared/components/layout/missing-record"
 import { DeleteRecordDialog } from "@/src/modules/finance/shared/components/delete-record-dialog"
 import { RecordOptionsSheet } from "@/src/modules/finance/shared/components/record-options-sheet"
@@ -39,13 +39,13 @@ import {
   isTransferTransaction,
 } from "@/src/modules/finance/shared/lib/transactions-query"
 import { LinkTransactionSheet } from "@/src/modules/finance/transactions/components/link-transaction-sheet"
-import { TransactionConfirmAlert } from "@/src/modules/finance/transactions/components/transaction-confirm-alert"
 import { TransactionDetailActions } from "@/src/modules/finance/transactions/components/transaction-detail-actions"
 import { TransactionDetailFacts } from "@/src/modules/finance/transactions/components/transaction-detail-facts"
 import { TransactionDetailLinks } from "@/src/modules/finance/transactions/components/transaction-detail-links"
 import { TransactionReversalNotice } from "@/src/modules/finance/transactions/components/transaction-reversal-notice"
 import { canEditTransaction } from "@/src/modules/finance/transactions/lib/transaction-edit"
-import { LoadingView } from "@/src/shared/components/layout/loading-view"
+import { LoadingView } from "@/src/shared/components/feedback/loading-view"
+import { ConfirmDialog } from "@/src/shared/components/feedback/confirm-dialog"
 import { Button } from "@/src/shared/components/ui/button"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
@@ -54,9 +54,13 @@ import { ACCENT_FALLBACK_COLOR } from "@/src/shared/lib/accent-gradient"
 import { appToast } from "@/src/shared/lib/app-toast"
 import {
   ArrowLeftRightIcon,
+  ClockIcon,
+  GitMergeIcon,
   MoreVerticalIcon,
   PencilIcon,
+  RotateCcwIcon,
   Trash2Icon,
+  UnlinkIcon,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useMemo, useState } from "react"
@@ -119,7 +123,9 @@ function TransactionDetailScreenBody({
   const merchant = merchantQuery.data ?? null
 
   const [confirmOpen, setConfirmOpen] = useState(false)
-  const [linkOpen, setLinkOpen] = useState(false)
+  const { open: linkOpen, setOpen: setLinkOpen } = useSheetParam(
+    "link-transaction-sheet"
+  )
   const [mergeOpen, setMergeOpen] = useState(false)
   const [unlinkOpen, setUnlinkOpen] = useState(false)
   const [unconfirmOpen, setUnconfirmOpen] = useState(false)
@@ -340,7 +346,7 @@ function TransactionDetailScreenBody({
     <>
       {detailQuery.error ? (
         <div className="mx-4 mb-3">
-          <FinanceErrorState
+          <ErrorState
             message={financeLoadErrorMessage(detailQuery.error)}
             onRetry={() => void detailQuery.refetch()}
             isRetrying={detailQuery.isFetching}
@@ -419,51 +425,63 @@ function TransactionDetailScreenBody({
         onConfirm={() => void onDelete()}
       />
 
-      <TransactionConfirmAlert
+      <ConfirmDialog
         open={unconfirmOpen}
         onOpenChange={setUnconfirmOpen}
+        icon={ClockIcon}
         title="¿Marcar como pendiente?"
         description={`${formattedAmount} deja de contar en el saldo de ${affectedAccountLabel} hasta que se confirme otra vez.`}
         confirmLabel="Marcar pendiente"
+        confirmIcon={ClockIcon}
         pending={
           unconfirmMutation.isPending || unconfirmTransferMutation.isPending
         }
+        pendingLabel="Marcando..."
         onConfirm={() => {
           setUnconfirmOpen(false)
           void onUnconfirm()
         }}
       />
 
-      <TransactionConfirmAlert
+      <ConfirmDialog
         open={reverseOpen}
         onOpenChange={setReverseOpen}
+        icon={RotateCcwIcon}
         title="¿Reversar el movimiento?"
         description={`Se crea el asiento contrario de ${formattedAmount}. El saldo de ${affectedAccountLabel} se corrige y no se puede deshacer.`}
         confirmLabel="Reversar"
+        confirmIcon={RotateCcwIcon}
         pending={reverseMutation.isPending || reverseTransferMutation.isPending}
+        pendingLabel="Reversando..."
         onConfirm={() => {
           setReverseOpen(false)
           void onReverse()
         }}
       />
 
-      <TransactionConfirmAlert
+      <ConfirmDialog
         open={mergeOpen}
         onOpenChange={setMergeOpen}
+        icon={GitMergeIcon}
         title="¿Unir los movimientos?"
         description="Los dos movimientos se unen en uno. No se puede deshacer."
         confirmLabel="Unir"
+        confirmIcon={GitMergeIcon}
         pending={mergeMutation.isPending}
+        pendingLabel="Uniendo..."
         onConfirm={() => void onMerge()}
       />
 
-      <TransactionConfirmAlert
+      <ConfirmDialog
         open={unlinkOpen}
         onOpenChange={setUnlinkOpen}
+        icon={UnlinkIcon}
         title="¿Quitar el vínculo?"
         description="El movimiento deja de estar ligado a la planificación."
         confirmLabel="Quitar"
+        confirmIcon={UnlinkIcon}
         pending={unlinkMutation.isPending}
+        pendingLabel="Quitando..."
         onConfirm={() => void onUnlink()}
       />
 

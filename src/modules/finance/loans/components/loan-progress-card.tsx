@@ -4,6 +4,7 @@ import { EntitySurface } from "@/src/modules/finance/shared/components/entity-su
 import { BrandLogo } from "@/src/modules/finance/shared/components/brand-logo"
 import { PlanningProgressCard } from "@/src/modules/finance/shared/components/planning-progress-card"
 import type { PlanningProgressVariant } from "@/src/modules/finance/shared/components/planning-progress-card"
+import { countLabel } from "@/src/modules/finance/shared/lib/count-label"
 import { formatRatePercentLabel } from "@/src/modules/finance/shared/lib/interest-rate"
 import { formatCalendarDate } from "@/src/modules/finance/shared/lib/ledger-form"
 import {
@@ -31,7 +32,7 @@ type LoanProgressCardProps = {
   onPress?: () => void
   selected?: boolean
   disabled?: boolean
-  /** Variante de la card; la galería /dev/cards la pinta (#272). */
+  /** Variante de la card; la galería /settings/appearance/cards la pinta (#272). */
   variant?: PlanningProgressVariant
 }
 
@@ -65,6 +66,7 @@ export function LoanProgressCard({
   const money = { ...display, currency: loan.currency }
   const { paidOff, progress } = loanProgressSummary(loan)
   const rateLabel = formatRatePercentLabel(loan.interestRate)
+  const rateBadge = rateLabel === "Sin tasa" ? rateLabel : `${rateLabel} anual`
   const title = loan.name?.trim() || loan.lenderName
   const surfaceColor = institution?.color || null
   const tinted = Boolean(surfaceColor)
@@ -87,7 +89,7 @@ export function LoanProgressCard({
             variant={rateLabel === "Sin tasa" ? "success" : "warning"}
             className={pillClass}
           >
-            {rateLabel}
+            {rateBadge}
           </Badge>
         </span>
       }
@@ -104,14 +106,15 @@ export function LoanProgressCard({
         variant: paidOff ? "success" : "warning",
       }}
       progress={progress}
-      currentHint="Saldo"
+      currentHint="Deuda"
       currentLabel={formatFinanceMoney(loan.currentBalance, money)}
+      progressHint="pagado"
       targetHint="Original"
       targetLabel={formatFinanceMoney(loan.originalAmount, money)}
       caption={
         <span className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
           <span>
-            {loan.paidInstallments}/{loan.totalInstallments} cuotas
+            {`${loan.paidInstallments}/${countLabel(loan.totalInstallments, "installment")}`}
           </span>
           {loan.nextDueDate ? (
             <span

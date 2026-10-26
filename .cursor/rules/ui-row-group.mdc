@@ -8,8 +8,8 @@ alwaysApply: true
 
 Varias filas `SummaryItem` (o `SettingsRow`) viven dentro de un contenedor que ya existe. No se envuelven en un `div` con `rounded-2xl border border-border bg-card`.
 
-- Bloque con título e icono → `SummarySection` (`src/shared/components/ui/summary.tsx`). El cuerpo ya pinta la card. Las filas van directo adentro.
-- Grupo con etiqueta corta, sin icono en el encabezado («Atajos», «Detalle») → `SettingsSection` (`src/shared/components/layout/settings-section.tsx`).
+- Bloque con título e icono → `SummarySection` (`src/shared/components/data-display/summary.tsx`). El cuerpo ya pinta la card. Las filas van directo adentro.
+- Grupo con etiqueta corta, sin icono en el encabezado («Atajos», «Detalle») → `SettingsSection` (`src/shared/components/settings/settings-section.tsx`).
 
 Una fila suelta que es un disparador (picker, botón) puede llevar su propio borde. Esta regla es para el grupo.
 

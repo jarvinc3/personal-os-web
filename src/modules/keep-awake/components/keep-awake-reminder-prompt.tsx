@@ -9,11 +9,13 @@ import {
   subscribeReminder,
   writeReminder,
 } from "@/src/modules/keep-awake/lib/reminders"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import { Button } from "@/src/shared/components/ui/button"
+import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { PRESSABLE_CLASS, cn } from "@/src/shared/lib/utils"
 import { Bell, CheckIcon, XIcon } from "lucide-react"
 import { useEffect, useState } from "react"
+import { useFormatLocale } from "@/src/modules/settings/hooks/use-format-locale"
 
 function notifyReminder() {
   if (typeof Notification === "undefined") {
@@ -36,7 +38,12 @@ export function KeepAwakeReminderPrompt({
 }: {
   onConfirm: () => void
 }) {
-  const [promptOpen, setPromptOpen] = useState(false)
+  const locale = useFormatLocale()
+  // Se abre por un evento, no por un toque: al dispararse escribe su clave en
+  // la URL, así Atrás lo cierra y recargar no lo pierde a medias.
+  const { open: promptOpen, setOpen: setPromptOpen } = useSheetParam(
+    "keep-awake-reminder-prompt"
+  )
   const [dueLabel, setDueLabel] = useState("")
 
   useEffect(() => {
@@ -50,7 +57,7 @@ export function KeepAwakeReminderPrompt({
         return
       }
       writeReminder(markReminderFired(current, now))
-      setDueLabel(formatReminderTimeLabel(current))
+      setDueLabel(formatReminderTimeLabel(current, locale))
       setPromptOpen(true)
       notifyReminder()
     }
@@ -94,7 +101,7 @@ export function KeepAwakeReminderPrompt({
       unsub()
       document.removeEventListener("visibilitychange", onVisible)
     }
-  }, [])
+  }, [locale])
 
   return (
     <BottomSheet

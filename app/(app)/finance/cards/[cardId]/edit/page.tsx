@@ -1,7 +1,7 @@
 import { Suspense } from "react"
 
 import { CardEditScreen } from "@/src/modules/finance/cards/card-form-pages"
-import { LoadingView } from "@/src/shared/components/layout/loading-view"
+import { LoadingView } from "@/src/shared/components/feedback/loading-view"
 
 type FinanceCardEditPageProps = {
   params: Promise<{ cardId: string }>

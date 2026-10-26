@@ -1,6 +1,12 @@
 export const SHEET_QUERY_KEY = "sheet"
 export const SHEET_ID_QUERY_KEY = "sheetId"
 
+/**
+ * Second parameter for the picker opened from a sheet: it keeps the parent in
+ * place, so Back closes only the picker and the form keeps what was written.
+ */
+export const SHEET_PICKER_QUERY_KEY = "picker"
+
 type SearchParamsLike = {
   get(name: string): string | null
   toString(): string
@@ -89,11 +95,57 @@ function writeSheet(
   id: string | null | undefined
 ) {
   params.set(SHEET_QUERY_KEY, key)
+  // A new sheet never inherits the picker of the previous one.
+  params.delete(SHEET_PICKER_QUERY_KEY)
   if (id) {
     params.set(SHEET_ID_QUERY_KEY, id)
   } else {
     params.delete(SHEET_ID_QUERY_KEY)
   }
+}
+
+/** Picker opened on top of the active sheet; null when there is none. */
+export function readPickerKey(searchParams: SearchParamsLike): string | null {
+  return searchParams.get(SHEET_PICKER_QUERY_KEY)
+}
+
+/**
+ * Opens or closes the picker of a sheet. Opening pushes a history entry so Back
+ * closes only the picker; switching from another picker replaces it.
+ */
+export function resolvePickerNavigation(input: {
+  pathname: string
+  searchParams: SearchParamsLike
+  key: string
+  open: boolean
+  wasPushed: boolean
+}): SheetNavResult {
+  const current = input.searchParams.get(SHEET_PICKER_QUERY_KEY)
+
+  if (input.open) {
+    if (current === input.key) {
+      return { action: "noop" }
+    }
+    const next = cloneParams(input.searchParams)
+    next.set(SHEET_PICKER_QUERY_KEY, input.key)
+    const url = toUrl(input.pathname, next)
+    if (current === null) {
+      return { action: "push", url }
+    }
+    return { action: "replace", url }
+  }
+
+  if (current !== input.key) {
+    return { action: "noop" }
+  }
+
+  if (input.wasPushed) {
+    return { action: "back" }
+  }
+
+  const next = cloneParams(input.searchParams)
+  next.delete(SHEET_PICKER_QUERY_KEY)
+  return { action: "replace", url: toUrl(input.pathname, next) }
 }
 
 export function resolveSheetNavigation(input: {
@@ -140,5 +192,6 @@ export function resolveSheetNavigation(input: {
   const next = cloneParams(input.searchParams)
   next.delete(SHEET_QUERY_KEY)
   next.delete(SHEET_ID_QUERY_KEY)
+  next.delete(SHEET_PICKER_QUERY_KEY)
   return { action: "replace", url: toUrl(input.pathname, next) }
 }

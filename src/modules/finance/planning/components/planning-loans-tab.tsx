@@ -1,7 +1,7 @@
 "use client"
 
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
-import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
+import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
 import { LoanProgressCard } from "@/src/modules/finance/loans"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
 import type {
@@ -41,7 +41,7 @@ export function PlanningLoansTab({
   return (
     <AsyncRegion
       pending={pending}
-      pendingFallback={<FinanceListSkeleton />}
+      pendingFallback={<ListSkeleton />}
       empty={loans.length === 0}
       emptyFallback={
         <Empty className="py-8">

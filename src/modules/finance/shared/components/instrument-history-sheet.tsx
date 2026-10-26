@@ -1,8 +1,8 @@
 "use client"
 
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
-import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
-import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
+import { ErrorState } from "@/src/shared/components/feedback/error-state"
+import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
 import {
   useInstrumentHistory,
   type InstrumentHistoryTarget,
@@ -18,7 +18,7 @@ import {
   formatFinanceMoney,
   type FinanceMoneyDisplay,
 } from "@/src/modules/finance/shared/lib/money"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import {
   Empty,
   EmptyDescription,
@@ -26,8 +26,8 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
-import { InfiniteListSentinel } from "@/src/shared/components/ui/infinite-list-sentinel"
-import { SummaryItem } from "@/src/shared/components/ui/summary"
+import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
+import { SummaryItem } from "@/src/shared/components/data-display/summary"
 import { HistoryIcon, Settings2Icon } from "lucide-react"
 import { instantToZonedWallTime } from "@/src/shared/lib/zoned-time"
 import { useUserTimeZone } from "@/src/modules/settings/hooks/use-user-time-zone"
@@ -52,7 +52,7 @@ export function InstrumentHistorySheet({
   return (
     <BottomSheet open={open} onOpenChange={onOpenChange} title="Historial">
       {historyQuery.isError ? (
-        <FinanceErrorState
+        <ErrorState
           message={financeErrorMessage(historyQuery.error)}
           onRetry={() => void historyQuery.refetch()}
           isRetrying={historyQuery.isFetching}
@@ -61,7 +61,7 @@ export function InstrumentHistorySheet({
 
       <AsyncRegion
         pending={historyQuery.isPending && !historyQuery.data}
-        pendingFallback={<FinanceListSkeleton />}
+        pendingFallback={<ListSkeleton />}
         empty={items.length === 0}
         emptyFallback={
           <Empty className="py-8">

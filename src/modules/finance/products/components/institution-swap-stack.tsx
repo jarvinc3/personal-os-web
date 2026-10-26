@@ -1,7 +1,7 @@
 "use client"
 
-import { InstitutionCarousel } from "@/src/modules/finance/products/components/institution-carousel"
-import { InstitutionPile } from "@/src/modules/finance/products/components/institution-pile"
+import { InstitutionDeck } from "@/src/modules/finance/products/components/institution-deck"
+import { institutionCardName } from "@/src/modules/finance/products/lib/institution-card"
 import {
   readInstitutionView,
   writeInstitutionView,
@@ -21,7 +21,12 @@ import {
 } from "@/src/modules/finance/shared/lib/wallet-stack"
 import { Button } from "@/src/shared/components/ui/button"
 import { cn } from "@/src/shared/lib/utils"
-import { GalleryHorizontalIcon, LayersIcon } from "lucide-react"
+import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  GalleryHorizontalIcon,
+  LayersIcon,
+} from "lucide-react"
 import { useState } from "react"
 
 type InstitutionSwapStackProps = {
@@ -64,7 +69,8 @@ export function InstitutionSwapStack({
   }
 
   const frontIndex = walletFrontIndex(cycleOffset, items.length)
-  const showToggle = items.length > 1
+  const showCycleChrome = items.length > 1
+  const isDeployed = view === "carousel"
 
   function persistFront(nextOffset: number) {
     const nextFront = items[walletFrontIndex(nextOffset, items.length)]
@@ -93,49 +99,79 @@ export function InstitutionSwapStack({
     setView(next)
   }
 
-  const isCarousel = view === "carousel"
-
   return (
     <div className={cn("flex flex-col gap-3", className)}>
-      {showToggle ? (
+      {showCycleChrome ? (
         <div className="flex items-center justify-end">
           <Button
             type="button"
             variant="ghost"
             size="sm"
-            aria-expanded={isCarousel}
+            aria-expanded={isDeployed}
             onClick={toggleView}
           >
-            {isCarousel ? (
+            {isDeployed ? (
               <LayersIcon className="size-4 shrink-0" />
             ) : (
               <GalleryHorizontalIcon className="size-4 shrink-0" />
             )}
-            {isCarousel ? "Apilar" : "Desplegar"}
+            {isDeployed ? "Apilar" : "Desplegar"}
           </Button>
         </div>
       ) : null}
 
-      {isCarousel ? (
-        <div className="min-h-80">
-          <InstitutionCarousel
-            items={items}
-            display={display}
-            activeIndex={frontIndex}
-            onSelect={onSelect}
-          />
+      <InstitutionDeck
+        items={items}
+        display={display}
+        cycleOffset={cycleOffset}
+        deployed={isDeployed}
+        bouncing={bouncing}
+        onCycle={cycleBy}
+        onSelect={onSelect}
+      />
+
+      {showCycleChrome ? (
+        <div className="flex flex-col items-center gap-2 px-2">
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              aria-label="Institución anterior"
+              onClick={() => cycleBy(-1)}
+            >
+              <ChevronLeftIcon />
+            </Button>
+            <div className="flex items-center gap-1.5">
+              {items.map((item, index) => {
+                const isFront = index === frontIndex
+                return (
+                  <button
+                    key={stackItemKey(item)}
+                    type="button"
+                    aria-label={institutionCardName(item)}
+                    aria-current={isFront ? "true" : undefined}
+                    className={cn(
+                      "size-2 rounded-full transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring/50",
+                      isFront ? "bg-foreground" : "bg-muted-foreground/40"
+                    )}
+                    onClick={() => showItemAt(index)}
+                  />
+                )
+              })}
+            </div>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              aria-label="Siguiente institución"
+              onClick={() => cycleBy(1)}
+            >
+              <ChevronRightIcon />
+            </Button>
+          </div>
         </div>
-      ) : (
-        <InstitutionPile
-          items={items}
-          display={display}
-          cycleOffset={cycleOffset}
-          bouncing={bouncing}
-          onCycle={cycleBy}
-          onShowItem={showItemAt}
-          onSelect={onSelect}
-        />
-      )}
+      ) : null}
     </div>
   )
 }

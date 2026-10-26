@@ -1,6 +1,6 @@
 "use client"
 
-import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
+import { ErrorState } from "@/src/shared/components/feedback/error-state"
 import { FinanceGate } from "@/src/modules/finance/finance-gate"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
 import {
@@ -27,7 +27,7 @@ import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useMemo, useState } from "react"
-import { ExpandableFab } from "@/src/shared/components/layout/expandable-fab"
+import { ExpandableFab } from "@/src/shared/components/fab/expandable-fab"
 import { ReceiptTextIcon } from "lucide-react"
 
 export function SubscriptionsScreen() {
@@ -96,7 +96,7 @@ function SubscriptionsScreenBody() {
       />
 
       {summaryQuery.isError ? (
-        <FinanceErrorState
+        <ErrorState
           message={financeErrorMessage(summaryQuery.error)}
           onRetry={() => void summaryQuery.refetch()}
           isRetrying={summaryQuery.isFetching}

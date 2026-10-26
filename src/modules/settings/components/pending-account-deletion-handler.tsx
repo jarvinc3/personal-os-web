@@ -6,17 +6,8 @@ import {
   clearPendingAccountDeletion,
   PENDING_ACCOUNT_DELETION_KEY,
 } from "@/src/modules/settings/lib/pending-account-deletion"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/src/shared/components/ui/alert-dialog"
-import { Trash2, X } from "lucide-react"
+import { ConfirmDialog } from "@/src/shared/components/feedback/confirm-dialog"
+import { Trash2Icon } from "lucide-react"
 import { useState } from "react"
 
 function readPendingAccountDeletion(): boolean {
@@ -47,42 +38,19 @@ export function PendingAccountDeletionHandler() {
   }
 
   return (
-    <AlertDialog
+    <ConfirmDialog
       open={confirmOpen}
       onOpenChange={(open) => !open && handleCancel()}
-    >
-      <AlertDialogContent className="sm:max-w-md">
-        <AlertDialogHeader>
-          <AlertDialogTitle>
-            ¿Eliminar tu cuenta permanentemente?
-          </AlertDialogTitle>
-          <AlertDialogDescription>
-            Confirmaste tu identidad con Google. Esta acción borrará todos tus
-            datos y no se puede deshacer.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter className="flex-row">
-          <AlertDialogCancel
-            className="flex-1"
-            disabled={deleteAfterReauth.isPending}
-            onClick={handleCancel}
-          >
-            <X data-icon="inline-start" />
-            Cancelar
-          </AlertDialogCancel>
-          <AlertDialogAction
-            variant="destructive"
-            className="flex-1"
-            disabled={deleteAfterReauth.isPending}
-            onClick={handleConfirm}
-          >
-            {deleteAfterReauth.isPending ? null : (
-              <Trash2 data-icon="inline-start" />
-            )}
-            {deleteAfterReauth.isPending ? "Eliminando..." : "Eliminar cuenta"}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+      tone="danger"
+      icon={Trash2Icon}
+      wide
+      title="¿Eliminar tu cuenta permanentemente?"
+      description="Confirmaste tu identidad con Google. Esta acción borrará todos tus datos y no se puede deshacer."
+      confirmLabel="Eliminar cuenta"
+      confirmIcon={Trash2Icon}
+      pending={deleteAfterReauth.isPending}
+      pendingLabel="Eliminando..."
+      onConfirm={handleConfirm}
+    />
   )
 }

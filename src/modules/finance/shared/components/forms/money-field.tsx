@@ -13,11 +13,15 @@ import {
 } from "@/src/shared/components/ui/field"
 import { InputGroupButton } from "@/src/shared/components/ui/input-group"
 import { cn } from "@/src/shared/lib/utils"
+import { usePicker } from "@/src/shared/hooks/use-picker"
 import { CalculatorIcon, KeyboardIcon } from "lucide-react"
 import { useImperativeHandle, useRef, useState } from "react"
 import type { RefObject } from "react"
 
 type AmountEntryMode = "keyboard" | "calculator"
+
+const CALCULATOR_PICKER = "calculator"
+const NO_PICKER = "none"
 
 export type FinanceMoneyFieldHandle = {
   focusAmount: () => void
@@ -32,6 +36,8 @@ type FinanceMoneyFieldProps = {
   amountError?: string
   label?: string
   disabled?: boolean
+  /** Clave del monto en la ruta de la calculadora; distinta por monto visible. */
+  calculatorKey: string
   /** Moneda cuyo símbolo se dibuja antes del monto. */
   currency?: string
   /** Cuando existe, un botón al lado abre el selector de moneda. */
@@ -52,6 +58,7 @@ export function FinanceMoneyField({
   amountError,
   label = "Cantidad",
   disabled,
+  calculatorKey,
   currency,
   onCurrencyPress,
   currencyError,
@@ -61,7 +68,8 @@ export function FinanceMoneyField({
 }: FinanceMoneyFieldProps) {
   const [localEntryMode, setLocalEntryMode] =
     useState<AmountEntryMode>("keyboard")
-  const [calculatorOpen, setCalculatorOpen] = useState(false)
+  const { picker, openPicker, closeHandlerFor } = usePicker<string>(NO_PICKER)
+  const calculatorPickerKey = `${CALCULATOR_PICKER}-${calculatorKey}`
   const activeEntryMode = entryMode ?? localEntryMode
   const usingCalculator = activeEntryMode === "calculator"
   const showsCurrencyButton = Boolean(onCurrencyPress)
@@ -72,13 +80,13 @@ export function FinanceMoneyField({
     () => ({
       focusAmount() {
         if (usingCalculator) {
-          setCalculatorOpen(true)
+          openPicker(calculatorPickerKey)
           return
         }
         inputRef.current?.focus()
       },
     }),
-    [usingCalculator]
+    [usingCalculator, openPicker, calculatorPickerKey]
   )
 
   function changeEntryMode(next: AmountEntryMode) {
@@ -88,13 +96,13 @@ export function FinanceMoneyField({
 
   function openCalculator() {
     changeEntryMode("calculator")
-    setCalculatorOpen(true)
+    openPicker(calculatorPickerKey)
   }
 
   function toggleEntryMode() {
     if (usingCalculator) {
       changeEntryMode("keyboard")
-      setCalculatorOpen(false)
+      closeHandlerFor(calculatorPickerKey)(false)
       return
     }
     openCalculator()
@@ -162,8 +170,8 @@ export function FinanceMoneyField({
       </FieldGroup>
 
       <AmountCalculatorSheet
-        open={calculatorOpen}
-        onOpenChange={setCalculatorOpen}
+        open={picker === calculatorPickerKey}
+        onOpenChange={closeHandlerFor(calculatorPickerKey)}
         amount={amount}
         currency={currency ?? ""}
         onCommit={onAmountCommit}

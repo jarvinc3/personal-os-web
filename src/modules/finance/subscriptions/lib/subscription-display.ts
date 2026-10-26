@@ -3,6 +3,8 @@ import { differenceInCalendarDays, parseISO, startOfDay } from "date-fns"
 import {
   financeMoneyDifference,
   formatFinanceMoney,
+  moneySign,
+  signedFinanceMoney,
   type FinanceMoneyDisplay,
 } from "@/src/modules/finance/shared/lib/money"
 import type {
@@ -141,18 +143,22 @@ export function subscriptionCardState(input: {
   subscription: SubscriptionCardSource
   today: Date
   windowDays: number
+  locale: string
 }): SubscriptionCardState {
-  const { subscription, today } = input
+  const { subscription, today, locale } = input
   const label = billingLabel({
     nextDate: subscription.nextBillingDate,
     today,
     windowDays: input.windowDays,
+    locale,
   })
   // A paused or cancelled subscription does not bill, so it never gets the
   // warning highlight or a place in Próximos: it only shows its date.
   const active = subscription.status === "ACTIVE"
   return {
-    label: active ? label.text : shortBillingDate(subscription.nextBillingDate),
+    label: active
+      ? label.text
+      : shortBillingDate(subscription.nextBillingDate, locale),
     inWindow: active && label.inWindow,
     overdue: subscriptionIsOverdue(subscription, today),
     warnLastCharge: subscription.lastChargeMismatch,
@@ -195,7 +201,7 @@ function money(value: string | null, display: FinanceMoneyDisplay): string {
 }
 
 function signedMoney(value: number, display: FinanceMoneyDisplay): string {
-  return formatFinanceMoney(value, { ...display, leadingSign: true })
+  return signedFinanceMoney(value, display, moneySign(value))
 }
 function countdown(daysUntil: number | null): string | null {
   if (daysUntil === null) {

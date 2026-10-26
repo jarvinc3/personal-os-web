@@ -1,8 +1,8 @@
 "use client"
 
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
-import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
-import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
+import { ErrorState } from "@/src/shared/components/feedback/error-state"
+import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
 import { BrandLogo } from "@/src/modules/finance/shared/components/brand-logo"
 import { FinanceGate } from "@/src/modules/finance/finance-gate"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
@@ -40,7 +40,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
-import { SummarySection } from "@/src/shared/components/ui/summary"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { cn } from "@/src/shared/lib/utils"
 import { CalendarDaysIcon, CalendarOffIcon, TagsIcon } from "lucide-react"
@@ -153,10 +153,11 @@ function SubscriptionsCalendarBody() {
           months={months}
           activeMonthKey={month}
           currentMonthKey={monthKeyFromDate(today)}
+          locale={display.locale}
           onSelect={setMonth}
         />
         {chargesQuery.isError ? (
-          <FinanceErrorState
+          <ErrorState
             message={financeErrorMessage(chargesQuery.error)}
             onRetry={() => void chargesQuery.refetch()}
             isRetrying={chargesQuery.isFetching}
@@ -164,7 +165,7 @@ function SubscriptionsCalendarBody() {
         ) : null}
         <AsyncRegion
           pending={chargesReady}
-          pendingFallback={<FinanceListSkeleton rows={6} />}
+          pendingFallback={<ListSkeleton rows={6} />}
           empty={false}
           emptyFallback={null}
         >
@@ -264,14 +265,14 @@ function SubscriptionsCalendarBody() {
 
       <SummarySection title="Distribución por categoría" icon={TagsIcon}>
         {breakdownQuery.isError ? (
-          <FinanceErrorState
+          <ErrorState
             message={financeErrorMessage(breakdownQuery.error)}
             onRetry={() => void breakdownQuery.refetch()}
             isRetrying={breakdownQuery.isFetching}
           />
         ) : null}
         {summaryQuery.isError ? (
-          <FinanceErrorState
+          <ErrorState
             message={financeErrorMessage(summaryQuery.error)}
             onRetry={() => void summaryQuery.refetch()}
             isRetrying={summaryQuery.isFetching}
@@ -279,7 +280,7 @@ function SubscriptionsCalendarBody() {
         ) : null}
         <AsyncRegion
           pending={breakdownQuery.isPending && !breakdownQuery.data}
-          pendingFallback={<FinanceListSkeleton rows={3} />}
+          pendingFallback={<ListSkeleton rows={3} />}
           empty={slices.length === 0}
           emptyFallback={
             <Empty className="py-6">

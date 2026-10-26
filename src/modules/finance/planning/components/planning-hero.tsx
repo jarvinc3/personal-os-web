@@ -1,5 +1,5 @@
 import { Button } from "@/src/shared/components/ui/button"
-import { LinkPendingOverlay } from "@/src/shared/components/ui/navigation-pending"
+import { LinkPendingOverlay } from "@/src/shared/components/shell/navigation-pending"
 import { cn } from "@/src/shared/lib/utils"
 import {
   ArrowDownLeftIcon,

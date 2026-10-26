@@ -3,21 +3,18 @@
 import { GlossaryHelpButton } from "@/src/modules/help"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
 import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
+import {
+  pendingReconciliationItems,
+  reconciliationSubtitle,
+} from "@/src/modules/finance/shared/lib/reconciliation-pending"
 import type {
   FinanceBalanceDrift,
   FinanceReconciliationStatusItem,
 } from "@/src/modules/finance/shared/types/entities"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/src/shared/components/ui/alert-dialog"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { ConfirmDialog } from "@/src/shared/components/feedback/confirm-dialog"
+import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
+import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { Button } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
@@ -67,12 +64,8 @@ function ReconciliationCard({
       </span>
       <span className="min-w-0 flex-1">
         <span className="block truncate text-sm font-medium">{item.name}</span>
-        <span className="block truncate text-xs text-muted-foreground">
-          {item.institutionName ?? "Sin institución"} · {item.currency} ·{" "}
-          {formatFinanceMoney(item.balance, {
-            ...display,
-            currency: item.currency,
-          })}
+        <span className="block truncate text-xs text-muted-foreground tabular-nums">
+          {reconciliationSubtitle(item, display)}
         </span>
       </span>
       {href ? (
@@ -185,15 +178,14 @@ export function IrregularitiesSection({
   recalculatePending,
   className,
 }: IrregularitiesSectionProps) {
-  const [openSheet, setOpenSheet] = useState<"drift" | "reconciliation" | null>(
-    null
+  const driftSheet = useSheetParam(FINANCE_SHEET_KEYS.balanceDrifts)
+  const reconciliationSheet = useSheetParam(
+    FINANCE_SHEET_KEYS.pendingReconciliations
   )
   const [confirmDrift, setConfirmDrift] = useState<FinanceBalanceDrift | null>(
     null
   )
-  const pendingReconciliations = reconciliationItems.filter(
-    (item) => !item.reconciled
-  )
+  const pendingReconciliations = pendingReconciliationItems(reconciliationItems)
 
   if (drifts.length === 0 && pendingReconciliations.length === 0) {
     return null
@@ -212,7 +204,7 @@ export function IrregularitiesSection({
                 PRESSABLE_CLASS,
                 "rounded-full text-destructive hover:text-destructive"
               )}
-              onClick={() => setOpenSheet("drift")}
+              onClick={() => driftSheet.setOpen(true)}
             >
               <CircleAlertIcon className="size-4" aria-hidden />
               Descuadres ({drifts.length})
@@ -231,26 +223,22 @@ export function IrregularitiesSection({
                 PRESSABLE_CLASS,
                 "rounded-full text-warning hover:text-warning"
               )}
-              onClick={() => setOpenSheet("reconciliation")}
+              onClick={() => reconciliationSheet.setOpen(true)}
             >
               <ScaleIcon className="size-4" aria-hidden />
               Sin conciliar ({pendingReconciliations.length})
             </Button>
             <GlossaryHelpButton
-              slug="conciliar"
-              label="Qué significa conciliar"
+              slug="sin-conciliar"
+              label="Qué significa sin conciliar"
             />
           </div>
         ) : null}
       </div>
 
       <BottomSheet
-        open={openSheet === "drift"}
-        onOpenChange={(open) => {
-          if (!open) {
-            setOpenSheet(null)
-          }
-        }}
+        open={driftSheet.open}
+        onOpenChange={driftSheet.setOpen}
         title={`Descuadres (${drifts.length})`}
         description="El saldo guardado no coincide con la suma de los movimientos confirmados."
       >
@@ -273,12 +261,8 @@ export function IrregularitiesSection({
       </BottomSheet>
 
       <BottomSheet
-        open={openSheet === "reconciliation"}
-        onOpenChange={(open) => {
-          if (!open) {
-            setOpenSheet(null)
-          }
-        }}
+        open={reconciliationSheet.open}
+        onOpenChange={reconciliationSheet.setOpen}
         title={`Sin conciliar (${pendingReconciliations.length})`}
         description="Productos que todavía no cerraste contra el banco este mes."
       >
@@ -298,41 +282,27 @@ export function IrregularitiesSection({
         )}
       </BottomSheet>
 
-      <AlertDialog
+      <ConfirmDialog
         open={confirmDrift !== null}
         onOpenChange={(open) => {
           if (!open && !recalculatePending) {
             setConfirmDrift(null)
           }
         }}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>¿Recalcular el saldo?</AlertDialogTitle>
-            <AlertDialogDescription>
-              El saldo guardado se corrige a la suma de los movimientos
-              confirmados. No se crea ningún movimiento.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={recalculatePending}>
-              Cancelar
-            </AlertDialogCancel>
-            <AlertDialogAction
-              disabled={recalculatePending}
-              onClick={() => {
-                if (confirmDrift) {
-                  onRecalculate(confirmDrift)
-                  setConfirmDrift(null)
-                }
-              }}
-            >
-              {recalculatePending ? <Spinner data-icon="inline-start" /> : null}
-              Recalcular
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        icon={RefreshCwIcon}
+        title="¿Recalcular el saldo?"
+        description="El saldo guardado se corrige a la suma de los movimientos confirmados. No se crea ningún movimiento."
+        confirmLabel="Recalcular"
+        confirmIcon={RefreshCwIcon}
+        pending={recalculatePending}
+        pendingLabel="Recalculando..."
+        onConfirm={() => {
+          if (confirmDrift) {
+            onRecalculate(confirmDrift)
+            setConfirmDrift(null)
+          }
+        }}
+      />
     </>
   )
 }

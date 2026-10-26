@@ -221,7 +221,8 @@ describe("formatPublicShareUpdatedAt", () => {
     assert.equal(
       formatPublicShareUpdatedAt(
         new Date(2026, 9, 16, 15, 30).toISOString(),
-        now
+        now,
+        "es-DO"
       ),
       "Actualizado hoy, 03:30 p.m."
     )
@@ -231,7 +232,8 @@ describe("formatPublicShareUpdatedAt", () => {
     assert.equal(
       formatPublicShareUpdatedAt(
         new Date(2026, 9, 15, 15, 30).toISOString(),
-        now
+        now,
+        "es-DO"
       ),
       "Actualizado ayer, 03:30 p.m."
     )
@@ -241,14 +243,15 @@ describe("formatPublicShareUpdatedAt", () => {
     assert.equal(
       formatPublicShareUpdatedAt(
         new Date(2026, 8, 12, 15, 30).toISOString(),
-        now
+        now,
+        "es-DO"
       ),
       "Actualizado el 12 sep"
     )
   })
 
   it("returns an empty label for an unreadable date", () => {
-    assert.equal(formatPublicShareUpdatedAt("", now), "")
+    assert.equal(formatPublicShareUpdatedAt("", now, "es-DO"), "")
   })
 })
 

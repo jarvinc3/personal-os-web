@@ -3,6 +3,7 @@
 import { TransactionInstrument } from "@/src/modules/finance/transactions/components/transaction-instrument"
 import { TransactionStatusMark } from "@/src/modules/finance/transactions/components/transaction-status-mark"
 import { BrandLogo } from "@/src/modules/finance/shared/components/brand-logo"
+import { Money } from "@/src/modules/finance/shared/components/money"
 import { FINANCE_REVERSAL_PARTIAL_LABEL } from "@/src/modules/finance/transactions/lib/group-reversals"
 import {
   formatFinanceMoney,
@@ -17,9 +18,8 @@ import {
   displayedMovementSign,
   isInactiveTransactionStatus,
   isTransferTransaction,
-  MOVEMENT_SIGN_TONE,
+  movementSideMoney,
   OPERATION_LEG_ROLE,
-  signedAmount,
   transferDirectionLabel,
   type FinanceInstrumentRef,
 } from "@/src/modules/finance/shared/lib/transactions-query"
@@ -29,7 +29,7 @@ import {
   type FinanceTransaction,
 } from "@/src/modules/finance/shared/types/entities"
 import { Badge } from "@/src/shared/components/ui/badge"
-import { SummaryItem } from "@/src/shared/components/ui/summary"
+import { SummaryItem } from "@/src/shared/components/data-display/summary"
 import { cn } from "@/src/shared/lib/utils"
 import {
   ArrowDownLeftIcon,
@@ -52,7 +52,7 @@ type TransactionMovementRowProps = {
   href?: string
   /** Account or card the movement is read from; signs transfers from its side. */
   instrument?: FinanceInstrumentRef
-  /** Variante de la card; la galería /dev/cards la pinta (#272). */
+  /** Variante de la card; la galería /settings/appearance/cards la pinta (#272). */
   variant?: "default" | "compact" | "inline"
 }
 
@@ -238,6 +238,7 @@ export function TransactionMovementRow({
     ? "#3B82F6"
     : category?.color?.trim() || parent?.color?.trim() || "#64748B"
   const sign = displayedMovementSign(transaction, instrument)
+  const side = movementSideMoney(transaction, instrument)
   const crossRate =
     isTransfer && instrument ? crossCurrencyRate(transaction) : null
   const rateLabel = crossRate
@@ -257,7 +258,10 @@ export function TransactionMovementRow({
     transaction.accountName || transaction.cardName ? (
       <TransactionInstrument
         transaction={transaction}
-        suffix={formatFinanceTimeLabel(transaction.transactionDate)}
+        suffix={formatFinanceTimeLabel(
+          transaction.transactionDate,
+          display.locale
+        )}
       />
     ) : null
   const description =
@@ -356,11 +360,15 @@ export function TransactionMovementRow({
           <div className="flex flex-col items-end">
             <span
               className={cn(
-                sign && MOVEMENT_SIGN_TONE[sign],
                 isInactive && "text-muted-foreground line-through opacity-50"
               )}
             >
-              {signedAmount({ transaction, display, instrument })}
+              <Money
+                value={side.amount}
+                display={{ ...display, currency: side.currency }}
+                sign={sign ?? undefined}
+                tone="auto"
+              />
             </span>
             {rateLabel ? (
               <span className="text-[11px] text-muted-foreground tabular-nums">

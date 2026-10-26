@@ -24,7 +24,8 @@ function sectionSortIndex(key: NotificationDateSectionKey): number {
 }
 
 export function groupNotificationsByDate(
-  items: NotificationRecord[]
+  items: NotificationRecord[],
+  locale: string
 ): NotificationListSection[] {
   const buckets = new Map<NotificationDateSectionKey, NotificationRecord[]>()
 
@@ -45,7 +46,11 @@ export function groupNotificationsByDate(
     })
     .map(([key, data]) => ({
       key,
-      title: formatNotificationDateSectionLabel(key, data[0]?.createdAt),
+      title: formatNotificationDateSectionLabel({
+        sectionKey: key,
+        locale,
+        referenceIso: data[0]?.createdAt,
+      }),
       data: data.sort(
         (a, b) =>
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()

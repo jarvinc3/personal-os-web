@@ -2,62 +2,53 @@
 
 import { SETTINGS_REGISTRY } from "@/src/modules/settings/constants/settings-metadata"
 import { DEFAULT_USER_PREFERENCES } from "@/src/modules/settings/constants/user-settings-defaults"
+import { useAppearanceDraft } from "@/src/modules/settings/hooks/use-appearance-draft"
 import { useProfile } from "@/src/modules/settings/hooks/use-profile"
 import { getSettingValue } from "@/src/modules/settings/lib/settings-value"
 import type { ThemeValue } from "@/src/modules/settings/types/profile.types"
 import type { SettingsSheetProps } from "@/src/modules/settings/types/sheet.types"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
-import { OptionRow } from "@/src/shared/components/layout/form-blocks"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { OptionRow } from "@/src/shared/components/forms/option-row"
 import { Button } from "@/src/shared/components/ui/button"
 import {
   RadioGroup,
   RadioGroupItem,
 } from "@/src/shared/components/ui/radio-group"
 import { Spinner } from "@/src/shared/components/ui/spinner"
-import { SummarySection } from "@/src/shared/components/ui/summary"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { appToast } from "@/src/shared/lib/app-toast"
-import { Palette, SaveIcon, XIcon } from "lucide-react"
+import { Palette, SaveIcon } from "lucide-react"
 import { useTheme } from "next-themes"
-import { useCallback, useState } from "react"
+import { useCallback } from "react"
 
 export function EditThemeSheet({ open, onOpenChange }: SettingsSheetProps) {
   const { savePreferences, preferences, updateProfileMutation } = useProfile()
   const { setTheme } = useTheme()
-  const currentTheme = getSettingValue<ThemeValue>(preferences.theme)
-  const [draftTheme, setDraftTheme] = useState<ThemeValue | null>(null)
-  const themeValue = draftTheme ?? currentTheme
-  const isDirty = draftTheme !== null && draftTheme !== currentTheme
-
   const applyTheme = useCallback(
     (theme: ThemeValue) => {
       setTheme(theme === "system" ? "system" : theme)
     },
     [setTheme]
   )
-
-  const revertDraft = useCallback(() => {
-    setDraftTheme(null)
-    applyTheme(currentTheme)
-  }, [applyTheme, currentTheme])
+  const draft = useAppearanceDraft({
+    open,
+    savedValue: getSettingValue<ThemeValue>(preferences.theme),
+    applyPreview: applyTheme,
+  })
 
   const handleOpenChange = (nextOpen: boolean) => {
     if (!nextOpen) {
-      revertDraft()
+      draft.revert()
     }
     onOpenChange(nextOpen)
   }
 
-  const handleThemeChange = (value: ThemeValue) => {
-    setDraftTheme(value)
-    applyTheme(value)
-  }
-
   const handleSave = () => {
     savePreferences(
-      { theme: { value: themeValue } },
+      { theme: { value: draft.value } },
       {
         onSuccess: () => {
-          setDraftTheme(null)
+          draft.clear()
           appToast.success({
             text1: "Tema actualizado",
             text2: "Tu preferencia de apariencia se guardó.",
@@ -75,22 +66,10 @@ export function EditThemeSheet({ open, onOpenChange }: SettingsSheetProps) {
       title="Apariencia"
       description={DEFAULT_USER_PREFERENCES.theme.fieldGuide}
       actions={{
-        close: (
-          <Button
-            variant="outline"
-            className="flex-1"
-            onClick={() => {
-              handleOpenChange(false)
-            }}
-          >
-            <XIcon className="size-4 shrink-0" />
-            Cancelar
-          </Button>
-        ),
         submit: (
           <Button
             className="flex-1"
-            disabled={!isDirty || updateProfileMutation.isPending}
+            disabled={!draft.isDirty || updateProfileMutation.isPending}
             onClick={handleSave}
           >
             {updateProfileMutation.isPending ? (
@@ -105,9 +84,9 @@ export function EditThemeSheet({ open, onOpenChange }: SettingsSheetProps) {
     >
       <SummarySection title="Tema" icon={Palette}>
         <RadioGroup
-          value={themeValue}
+          value={draft.value}
           onValueChange={(value) => {
-            handleThemeChange(value as ThemeValue)
+            draft.change(value as ThemeValue)
           }}
         >
           {SETTINGS_REGISTRY.appearance.themeOptions.map((option) => (
@@ -117,8 +96,8 @@ export function EditThemeSheet({ open, onOpenChange }: SettingsSheetProps) {
               iconColor={SETTINGS_REGISTRY.appearance.accent}
               label={option.label}
               description={option.description}
-              selected={themeValue === option.value}
-              onPress={() => handleThemeChange(option.value)}
+              selected={draft.value === option.value}
+              onPress={() => draft.change(option.value)}
               trailing={<RadioGroupItem value={option.value} />}
             />
           ))}

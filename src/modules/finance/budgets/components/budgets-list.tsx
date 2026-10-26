@@ -22,12 +22,12 @@ import {
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
-import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
-import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
+import { ErrorState } from "@/src/shared/components/feedback/error-state"
+import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { ChartPieIcon, PlusIcon } from "lucide-react"
 import { Button } from "@/src/shared/components/ui/button"
-import { InfiniteListSentinel } from "@/src/shared/components/ui/infinite-list-sentinel"
+import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
 import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
 
 type FinanceBudgetsListProps = {
@@ -70,7 +70,7 @@ export function FinanceBudgetsList({
   return (
     <div className="flex flex-col gap-6">
       {listQuery.isError ? (
-        <FinanceErrorState
+        <ErrorState
           message={financeErrorMessage(listQuery.error)}
           onRetry={() => void listQuery.refetch()}
           isRetrying={listQuery.isFetching}
@@ -80,7 +80,7 @@ export function FinanceBudgetsList({
       <div className="flex flex-col gap-2">
         <AsyncRegion
           pending={listQuery.isPending && !listQuery.data}
-          pendingFallback={<FinanceListSkeleton />}
+          pendingFallback={<ListSkeleton />}
           empty={items.length === 0}
           emptyFallback={
             <Empty className="py-8">

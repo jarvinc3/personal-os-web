@@ -8,7 +8,7 @@ import type {
 import { useFormatLocale } from "@/src/modules/settings/hooks/use-format-locale"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
 import { transferDirectionLabel } from "@/src/modules/finance/shared/lib/transactions-query"
-import { SummaryItem } from "@/src/shared/components/ui/summary"
+import { SummaryItem } from "@/src/shared/components/data-display/summary"
 
 import {
   crossCurrencyRate,

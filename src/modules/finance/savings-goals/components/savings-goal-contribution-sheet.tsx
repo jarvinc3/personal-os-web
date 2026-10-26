@@ -23,12 +23,13 @@ import {
 } from "@/src/modules/finance/shared/lib/money"
 import { monthlySavingsSuggestion } from "@/src/modules/finance/shared/lib/planning-lists"
 import { buildSavingsGoalContributionBody } from "@/src/modules/finance/shared/lib/planning-payloads"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
-import { FormTextField } from "@/src/shared/components/layout/form-blocks"
+import { defaultContributionAccountId } from "@/src/modules/finance/savings-goals/lib/contribution-account"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import { Button } from "@/src/shared/components/ui/button"
 import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
 import { Spinner } from "@/src/shared/components/ui/spinner"
-import { SummarySection } from "@/src/shared/components/ui/summary"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { usePicker } from "@/src/shared/hooks/use-picker"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
@@ -41,7 +42,6 @@ import {
   SaveIcon,
   SparklesIcon,
   TargetIcon,
-  XIcon,
 } from "lucide-react"
 import { useEffect, useMemo } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
@@ -102,9 +102,10 @@ export function SavingsGoalContributionSheet({
     ? (activeAccounts.find((account) => account.id !== goalAccountId)?.id ??
       activeAccounts[0]?.id ??
       "")
-    : (activeAccounts.find((account) => account.id === goalAccountId)?.id ??
-      activeAccounts[0]?.id ??
-      "")
+    : defaultContributionAccountId({
+        accounts: activeAccounts,
+        goalAccountId: goalAccountId ?? null,
+      })
   const { picker, openPicker, closeHandlerFor } = usePicker<"none" | "account">(
     "none"
   )
@@ -154,7 +155,18 @@ export function SavingsGoalContributionSheet({
   const saved = parseFinanceMoney(currentAmount)
   const remaining = target !== null && saved !== null ? target - saved : null
   const typedAmount = useWatch({ control, name: "amount" })
+  const selectedAccountId = useWatch({ control, name: "accountId" })
   const typedAmountValue = parseFinanceMoney(typedAmount)
+  const originAccount =
+    activeAccounts.find((account) => account.id === selectedAccountId) ?? null
+  const originFreeBalance =
+    !isWithdrawal && originAccount
+      ? parseFinanceMoney(originAccount.freeBalance)
+      : null
+  const exceedsFreeBalance =
+    originFreeBalance !== null &&
+    typedAmountValue !== null &&
+    typedAmountValue > originFreeBalance
   const withdrawalExceeds =
     isWithdrawal && typedAmountValue !== null && saved !== null
       ? typedAmountValue > saved
@@ -229,21 +241,10 @@ export function SavingsGoalContributionSheet({
               : "Se suma al avance de la meta."
         }
         actions={{
-          close: (
-            <Button
-              type="button"
-              variant="outline"
-              className="flex-1"
-              onClick={() => requestOpenChange(false)}
-            >
-              <XIcon className="size-4 shrink-0" />
-              Cancelar
-            </Button>
-          ),
           submit: (
             <Button
               type="button"
-              disabled={createMutation.isPending}
+              disabled={createMutation.isPending || exceedsFreeBalance}
               className="flex-1"
               onClick={onSubmit}
             >
@@ -268,6 +269,7 @@ export function SavingsGoalContributionSheet({
             name="amount"
             render={({ field }) => (
               <FinanceMoneyField
+                calculatorKey="savings-contribution-amount"
                 label="Monto"
                 amount={field.value}
                 onAmountChange={field.onChange}
@@ -281,6 +283,18 @@ export function SavingsGoalContributionSheet({
               />
             )}
           />
+          {originFreeBalance !== null ? (
+            <p className="text-xs text-muted-foreground">
+              {`Saldo libre en ${originAccount?.name ?? "la cuenta"}: ${formatFinanceMoney(originFreeBalance, display)}`}
+            </p>
+          ) : null}
+          {exceedsFreeBalance ? (
+            <p className="flex items-start gap-1.5 text-xs text-destructive">
+              <CircleAlertIcon className="mt-px size-3.5 shrink-0" />
+              El monto supera el saldo libre de esa cuenta. Baja el monto o
+              elige otra cuenta de origen.
+            </p>
+          ) : null}
           {withdrawalExceeds ? (
             <p className="flex items-start gap-1.5 text-xs text-destructive">
               <CircleAlertIcon className="mt-px size-3.5 shrink-0" />
@@ -407,7 +421,7 @@ export function SavingsGoalContributionSheet({
           <FinanceHelpText>
             {isWithdrawal
               ? "El retiro mueve el dinero a la cuenta elegida. No cuenta como ingreso ni gasto."
-              : "El aporte aparta dinero de la cuenta, no lo gasta. Si eliges otra cuenta, primero se mueve con una transferencia."}
+              : "El origen es la cuenta de donde sale el dinero; la cuenta de la meta es donde queda apartado, y el aporte no lo gasta: sigue en su saldo."}
           </FinanceHelpText>
         </SummarySection>
       </BottomSheet>

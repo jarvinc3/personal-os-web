@@ -10,9 +10,9 @@ import type {
   FinanceInstitution,
 } from "@/src/modules/finance/shared/types/entities"
 import type { CardFormValues } from "@/src/modules/finance/cards/lib/card-form"
-import { FormTextField } from "@/src/shared/components/layout/form-blocks"
+import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
-import { SummarySection } from "@/src/shared/components/ui/summary"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { CreditCardIcon, HashIcon } from "lucide-react"
 import { Controller, type Control, type FieldErrors } from "react-hook-form"
 

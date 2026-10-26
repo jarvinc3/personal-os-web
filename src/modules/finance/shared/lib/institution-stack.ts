@@ -1,3 +1,4 @@
+import { countLabel } from "./count-label.ts"
 import { formatFinanceMoney, type FinanceMoneyDisplay } from "./money.ts"
 import { isCashInstitution } from "./cash.ts"
 import type {
@@ -97,7 +98,11 @@ export function institutionInitials(name: string): string {
 }
 
 export function formatProductCounts(counts: InstitutionStackCounts): string {
-  return `${counts.accounts} cuentas · ${counts.cards} tarjetas · ${counts.loans} préstamos`
+  return [
+    countLabel(counts.accounts, "account"),
+    countLabel(counts.cards, "card"),
+    countLabel(counts.loans, "loan"),
+  ].join(" · ")
 }
 
 export function formatStackItemBalance(

@@ -1,7 +1,7 @@
 "use client"
 
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
-import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
+import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
 import type { FinanceReceivable } from "@/src/modules/finance/shared/types/entities"
 import {
@@ -45,7 +45,7 @@ export function PlanningReceivablesTab({
       )}
       <AsyncRegion
         pending={pending}
-        pendingFallback={<FinanceListSkeleton />}
+        pendingFallback={<ListSkeleton />}
         empty={receivables.length === 0}
         emptyFallback={
           <Empty className="py-8">

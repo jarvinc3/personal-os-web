@@ -2,8 +2,10 @@ import type {
   FinanceAccount,
   FinanceCard,
 } from "@/src/modules/finance/shared/types/entities"
-import { formatHm24Display12h } from "@/src/shared/types/wheels.type"
-import { shortMonthLabel } from "@/src/shared/lib/date-format"
+import {
+  formatDayMonthYear,
+  formatShortClockTime,
+} from "@/src/shared/lib/date-format"
 import { zonedWallTimeToInstant } from "@/src/shared/lib/zoned-time"
 import { splitLedgerTarget } from "./ledger-payloads.ts"
 import { parseFinanceMoney } from "./money.ts"
@@ -143,7 +145,10 @@ export function wallClockToIso(value: string, timeZone: string): string {
  * Hour as readable text, or null. Midnight means no hour was recorded, which
  * is every row saved before the forms asked for one.
  */
-export function formatFinanceTimeLabel(value: string): string | null {
+export function formatFinanceTimeLabel(
+  value: string,
+  locale: string
+): string | null {
   const dateTime = value.match(DATE_TIME_INPUT)
   if (!dateTime) {
     return null
@@ -152,7 +157,7 @@ export function formatFinanceTimeLabel(value: string): string | null {
   if (hour === "00:00") {
     return null
   }
-  return formatHm24Display12h(hour)
+  return formatShortClockTime(hour, locale)
 }
 
 /** Date plus hour, when the value carries one. */
@@ -161,7 +166,7 @@ export function formatFinanceDateTimeLabel(
   locale: string
 ): string {
   const date = formatCalendarDate(value, locale)
-  const time = formatFinanceTimeLabel(value)
+  const time = formatFinanceTimeLabel(value, locale)
   if (!time) {
     return date
   }
@@ -180,13 +185,7 @@ export function formatCalendarDate(value: string, locale: string): string {
   if (Number.isNaN(date.getTime())) {
     return value
   }
-  const dayLabel = new Intl.DateTimeFormat(locale, { day: "numeric" }).format(
-    date
-  )
-  const yearLabel = new Intl.DateTimeFormat(locale, { year: "numeric" }).format(
-    date
-  )
-  return `${dayLabel} ${shortMonthLabel(date)} ${yearLabel}`
+  return formatDayMonthYear(date, locale)
 }
 
 export function currencyForTarget(

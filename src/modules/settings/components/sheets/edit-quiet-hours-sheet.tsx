@@ -2,20 +2,20 @@
 
 import { useProfile } from "@/src/modules/settings/hooks/use-profile"
 import type { SettingsSheetProps } from "@/src/modules/settings/types/sheet.types"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import { Button } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
-import { SummarySection } from "@/src/shared/components/ui/summary"
-import { WheelField } from "@/src/shared/components/ui/wheel-field"
-import { TimePairWheels } from "@/src/shared/components/ui/wheel-picker"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
+import { WheelField } from "@/src/shared/components/forms/wheel-field"
+import { TimePairWheels } from "@/src/shared/components/forms/wheel-picker"
 import { appToast } from "@/src/shared/lib/app-toast"
 import {
   formatTimeForDisplay,
   normalizeTimeToApi,
 } from "@/src/shared/lib/date-format"
-import { ClockFadingIcon, ClockIcon, XIcon } from "lucide-react"
-import { useRouter } from "next/navigation"
+import { ClockFadingIcon, ClockIcon } from "lucide-react"
 import { useState } from "react"
+import { useFormatLocale } from "@/src/modules/settings/hooks/use-format-locale"
 
 function normalizeTimeForInput(apiTime: string) {
   return normalizeTimeToApi(apiTime) ?? apiTime
@@ -25,9 +25,9 @@ export function EditQuietHoursSheet({
   open,
   onOpenChange,
 }: SettingsSheetProps) {
+  const locale = useFormatLocale()
   const { preferences, updatePreferences, updateProfileMutation } = useProfile()
   const quietHours = preferences.notifications.quietHours
-  const router = useRouter()
   const [start, setStart] = useState(() =>
     normalizeTimeForInput(quietHours.start)
   )
@@ -77,16 +77,6 @@ export function EditQuietHoursSheet({
       title="Horario silencioso"
       description="Fuera de este rango se respetan los canales globales de notificación."
       actions={{
-        close: (
-          <Button
-            variant="outline"
-            className="flex-1"
-            onClick={() => router.back()}
-          >
-            <XIcon className="size-4 shrink-0" />
-            Cancelar
-          </Button>
-        ),
         submit: (
           <Button
             disabled={!isDirty || updateProfileMutation.isPending}
@@ -104,7 +94,7 @@ export function EditQuietHoursSheet({
       <SummarySection title="Horario" icon={ClockFadingIcon}>
         <WheelField
           label="Inicio"
-          valueLabel={formatTimeForDisplay(start)}
+          valueLabel={formatTimeForDisplay(start, locale)}
           icon={ClockIcon}
           disabled={updateProfileMutation.isPending}
         >
@@ -117,7 +107,7 @@ export function EditQuietHoursSheet({
         </WheelField>
         <WheelField
           label="Fin"
-          valueLabel={formatTimeForDisplay(end)}
+          valueLabel={formatTimeForDisplay(end, locale)}
           icon={ClockIcon}
           disabled={updateProfileMutation.isPending}
         >

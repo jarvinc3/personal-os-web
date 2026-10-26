@@ -1,0 +1,45 @@
+"use client"
+
+import { ModuleFabProvider } from "@/src/shared/components/fab/module-fab-context"
+import { ModuleTabBar } from "@/src/shared/components/shell/module-tab-bar"
+import { useHeaderContext } from "@/src/shared/context/header-context"
+import { cn } from "@/src/shared/lib/utils"
+import type { ModuleNavItem } from "@/src/shared/types/module-nav"
+import type { ReactNode } from "react"
+
+type ModuleSectionLayoutProps = {
+  children: ReactNode
+  items: ModuleNavItem[]
+  ariaLabel: string
+  onItemPrefetch?: (href: string) => void
+}
+
+export function ModuleSectionLayout({
+  children,
+  items,
+  ariaLabel,
+  onItemPrefetch,
+}: ModuleSectionLayoutProps) {
+  const { config } = useHeaderContext()
+  const hideTabBar = config.variant === "secondary"
+
+  return (
+    <ModuleFabProvider tabBarVisible={!hideTabBar}>
+      <div
+        className={cn(
+          "mx-auto flex w-full max-w-5xl flex-col gap-6 p-4 md:px-6 md:pb-16",
+          hideTabBar ? "pb-4" : "pb-[calc(6rem+env(safe-area-inset-bottom))]"
+        )}
+      >
+        {children}
+        {hideTabBar ? null : (
+          <ModuleTabBar
+            items={items}
+            ariaLabel={ariaLabel}
+            onItemPrefetch={onItemPrefetch}
+          />
+        )}
+      </div>
+    </ModuleFabProvider>
+  )
+}

@@ -13,8 +13,13 @@ import { FINANCE_BUDGET_PAGE_SIZE } from "@/src/modules/finance/shared/lib/budge
 import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
 import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
-import { SummaryItem, SummarySection } from "@/src/shared/components/ui/summary"
+import {
+  SummaryItem,
+  SummarySection,
+} from "@/src/shared/components/data-display/summary"
 import { getModule } from "@/src/shared/constants/module-registry"
+import { formatDayMonth } from "@/src/shared/lib/date-format"
+
 import { CalendarDaysIcon } from "lucide-react"
 
 const MODULE_ACCENT = getModule("finance").accent
@@ -24,7 +29,7 @@ function formatShortDate(value: string, locale: string): string {
   if (Number.isNaN(date.getTime())) {
     return value
   }
-  return date.toLocaleDateString(locale, { day: "numeric", month: "short" })
+  return formatDayMonth(date, locale)
 }
 
 export function FinanceHomeWeeklySummary() {

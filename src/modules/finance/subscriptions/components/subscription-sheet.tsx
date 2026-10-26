@@ -9,7 +9,6 @@ import {
   SaveIcon,
   StickyNoteIcon,
   TagIcon,
-  XIcon,
 } from "lucide-react"
 import { useEffect, useMemo } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
@@ -26,7 +25,7 @@ import { DestinationPickerSheet } from "@/src/modules/finance/shared/components/
 import { FinanceCurrencyPickerSheet } from "@/src/modules/finance/shared/components/pickers/finance-currency-picker-sheet"
 import { FinanceDateField } from "@/src/modules/finance/shared/components/forms/date-field"
 import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
-import { FinanceSegmentedControl } from "@/src/modules/finance/shared/components/forms/form-blocks"
+import { SegmentedControl } from "@/src/shared/components/forms/segmented-control"
 import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
 import { useCards } from "@/src/modules/finance/shared/hooks/use-cards"
 import { useDiscardChanges } from "@/src/modules/finance/shared/hooks/use-discard-changes"
@@ -54,12 +53,12 @@ import {
   type SubscriptionFormValues,
 } from "@/src/modules/finance/subscriptions/lib/subscription-form"
 import type { FinanceSubscription } from "@/src/modules/finance/shared/types/entities"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
-import { FormTextField } from "@/src/shared/components/layout/form-blocks"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import { Button } from "@/src/shared/components/ui/button"
 import { Field, FieldLabel } from "@/src/shared/components/ui/field"
 import { Spinner } from "@/src/shared/components/ui/spinner"
-import { SummarySection } from "@/src/shared/components/ui/summary"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { usePicker } from "@/src/shared/hooks/use-picker"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
@@ -189,17 +188,6 @@ export function SubscriptionSheet({
         title={isEdit ? "Editar suscripción" : "Nueva suscripción"}
         description="Monto fijo, ciclo de facturación y próximo cobro."
         actions={{
-          close: (
-            <Button
-              key="cancel"
-              variant="outline"
-              className="flex-1"
-              onClick={() => requestOpenChange(false)}
-            >
-              <XIcon className="size-4 shrink-0" />
-              Cancelar
-            </Button>
-          ),
           submit: (
             <Button
               key="submit"
@@ -249,6 +237,7 @@ export function SubscriptionSheet({
             name="amount"
             render={({ field }) => (
               <FinanceMoneyField
+                calculatorKey="subscription-amount"
                 amount={field.value}
                 onAmountChange={field.onChange}
                 onAmountCommit={field.onChange}
@@ -266,7 +255,7 @@ export function SubscriptionSheet({
             control={control}
             name="billingCycle"
             render={({ field }) => (
-              <FinanceSegmentedControl
+              <SegmentedControl
                 label="Ciclo"
                 value={field.value}
                 onChange={field.onChange}

@@ -5,7 +5,7 @@ import { CardPaymentSheet } from "@/src/modules/finance/cards/components/card-pa
 import { CardVisual } from "@/src/modules/finance/cards/components/card-visual"
 import { CardBalanceSheet } from "@/src/modules/finance/catalog"
 import { FinanceGate } from "@/src/modules/finance/finance-gate"
-import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
+import { ErrorState } from "@/src/shared/components/feedback/error-state"
 import { MissingRecord } from "@/src/modules/finance/shared/components/layout/missing-record"
 import { FinanceInstrumentMovements } from "@/src/modules/finance/transactions"
 import {
@@ -46,7 +46,7 @@ import { DeleteRecordDialog } from "@/src/modules/finance/shared/components/dele
 import { ArchiveRecordDialog } from "@/src/modules/finance/shared/components/archive-record-dialog"
 import { RecordOptionsSheet } from "@/src/modules/finance/shared/components/record-options-sheet"
 import { InstrumentHistorySheet } from "@/src/modules/finance/shared/components/instrument-history-sheet"
-import { LoadingView } from "@/src/shared/components/layout/loading-view"
+import { LoadingView } from "@/src/shared/components/feedback/loading-view"
 import { Button } from "@/src/shared/components/ui/button"
 import {
   Tabs,
@@ -270,7 +270,7 @@ function CardDetailScreenBody({ cardId }: CardDetailScreenProps) {
     <>
       {cardsQuery.error ? (
         <div className="mb-3">
-          <FinanceErrorState
+          <ErrorState
             message={financeLoadErrorMessage(cardsQuery.error)}
             onRetry={() => void cardsQuery.refetch()}
             isRetrying={cardsQuery.isFetching}
@@ -325,7 +325,7 @@ function CardDetailScreenBody({ cardId }: CardDetailScreenProps) {
             </TabsList>
             <TabsContent value={CARD_DETAIL_TABS.statements}>
               {statementsQuery.isError ? (
-                <FinanceErrorState
+                <ErrorState
                   message={financeLoadErrorMessage(statementsQuery.error)}
                   onRetry={() => void statementsQuery.refetch()}
                   isRetrying={statementsQuery.isFetching}

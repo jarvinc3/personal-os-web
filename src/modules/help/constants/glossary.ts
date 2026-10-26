@@ -138,6 +138,14 @@ export const HELP_TERMS: readonly HelpTerm[] = [
     related: ["ajuste-de-saldo", "descuadre"],
   },
   {
+    slug: "sin-conciliar",
+    term: "Sin conciliar",
+    category: "dinero",
+    definition:
+      "Un producto con saldo distinto de cero cuyo saldo todavía no comparaste con el banco este mes. Se concilia a fin de mes; mientras tanto aparece en «Sin conciliar» y no cambia ningún saldo.",
+    related: ["conciliar", "saldo"],
+  },
+  {
     slug: "cuenta",
     term: "Cuenta",
     category: "productos",
@@ -292,6 +300,15 @@ export const HELP_TERMS: readonly HelpTerm[] = [
       "El dinero que apartas para una [[meta de ahorro|meta-de-ahorro]]. Sale de una cuenta y crea un [[movimiento|movimiento]]; si lo borras, el movimiento se revierte.",
     aliases: ["contribución"],
     related: ["meta-de-ahorro", "movimiento"],
+  },
+  {
+    slug: "apartado",
+    term: "Apartado",
+    category: "planificacion",
+    definition:
+      "El dinero de una [[cuenta|cuenta]] reservado para una [[meta de ahorro|meta-de-ahorro]]. Sigue dentro del [[saldo|saldo]] de la cuenta: solo sale cuando lo retiras o lo gastas.",
+    aliases: ["reservado", "earmarked"],
+    related: ["meta-de-ahorro", "aporte", "saldo"],
   },
   {
     slug: "prestamo",

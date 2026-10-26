@@ -3,6 +3,8 @@ import { describe, it } from "node:test"
 
 import {
   mergeOptimisticSheetParam,
+  readPickerKey,
+  resolvePickerNavigation,
   resolveSheetNavigation,
 } from "./sheet-navigation.ts"
 
@@ -123,6 +125,34 @@ describe("resolveSheetNavigation", () => {
     })
   })
 
+  it("drops the picker when another sheet opens", () => {
+    const result = resolveSheetNavigation({
+      pathname: path,
+      searchParams: params("sheet=account-sheet&picker=currency"),
+      key: "category-sheet",
+      open: true,
+      wasPushed: true,
+    })
+    assert.deepEqual(result, {
+      action: "replace",
+      url: "/finance/products?sheet=category-sheet",
+    })
+  })
+
+  it("removes the picker when closing a deep link", () => {
+    const result = resolveSheetNavigation({
+      pathname: path,
+      searchParams: params("sheet=account-sheet&picker=currency"),
+      key: "account-sheet",
+      open: false,
+      wasPushed: false,
+    })
+    assert.deepEqual(result, {
+      action: "replace",
+      url: "/finance/products",
+    })
+  })
+
   it("removes sheetId when closing a deep link", () => {
     const result = resolveSheetNavigation({
       pathname: "/finance/transactions",
@@ -161,6 +191,94 @@ describe("resolveSheetNavigation", () => {
       action: "push",
       url: "/finance/sync?success=true&sheet=email-source-sheet&sheetId=src-1",
     })
+  })
+})
+
+describe("resolvePickerNavigation", () => {
+  it("opens the picker on top of the sheet and keeps it", () => {
+    const result = resolvePickerNavigation({
+      pathname: path,
+      searchParams: params("sheet=account-sheet&sheetId=acc-1"),
+      key: "currency",
+      open: true,
+      wasPushed: false,
+    })
+    assert.deepEqual(result, {
+      action: "push",
+      url: "/finance/products?sheet=account-sheet&sheetId=acc-1&picker=currency",
+    })
+  })
+
+  it("closes only the picker", () => {
+    const result = resolvePickerNavigation({
+      pathname: path,
+      searchParams: params("sheet=account-sheet&picker=currency"),
+      key: "currency",
+      open: false,
+      wasPushed: false,
+    })
+    assert.deepEqual(result, {
+      action: "replace",
+      url: "/finance/products?sheet=account-sheet",
+    })
+  })
+
+  it("closes a pushed picker with back", () => {
+    const result = resolvePickerNavigation({
+      pathname: path,
+      searchParams: params("sheet=account-sheet&picker=currency"),
+      key: "currency",
+      open: false,
+      wasPushed: true,
+    })
+    assert.deepEqual(result, { action: "back" })
+  })
+
+  it("replaces one picker with another", () => {
+    const result = resolvePickerNavigation({
+      pathname: path,
+      searchParams: params("sheet=account-sheet&picker=color"),
+      key: "currency",
+      open: true,
+      wasPushed: true,
+    })
+    assert.deepEqual(result, {
+      action: "replace",
+      url: "/finance/products?sheet=account-sheet&picker=currency",
+    })
+  })
+
+  it("is a noop when the picker is already open or another one is", () => {
+    assert.deepEqual(
+      resolvePickerNavigation({
+        pathname: path,
+        searchParams: params("sheet=account-sheet&picker=currency"),
+        key: "currency",
+        open: true,
+        wasPushed: true,
+      }),
+      { action: "noop" }
+    )
+    assert.deepEqual(
+      resolvePickerNavigation({
+        pathname: path,
+        searchParams: params("sheet=account-sheet&picker=color"),
+        key: "currency",
+        open: false,
+        wasPushed: true,
+      }),
+      { action: "noop" }
+    )
+  })
+})
+
+describe("readPickerKey", () => {
+  it("reads the picker and stays null without one", () => {
+    assert.equal(
+      readPickerKey(params("sheet=account-sheet&picker=currency")),
+      "currency"
+    )
+    assert.equal(readPickerKey(params("sheet=account-sheet")), null)
   })
 })
 

@@ -1,12 +1,12 @@
 "use client"
 
+import { SegmentedControl } from "@/src/shared/components/forms/segmented-control"
 import {
   FinanceDateField,
   formatFinanceDateLabel,
 } from "@/src/modules/finance/shared/components/forms/date-field"
 import {
   FinanceHelpText,
-  FinanceSegmentedControl,
   FinanceSuggestionRow,
 } from "@/src/modules/finance/shared/components/forms/form-blocks"
 import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
@@ -42,17 +42,18 @@ import {
   FINANCE_BUDGET_ROLLOVER_LABEL,
   FINANCE_BUDGET_ROLLOVERS,
 } from "@/src/modules/finance/shared/types/entities"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+import { usePicker } from "@/src/shared/hooks/use-picker"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import { Button } from "@/src/shared/components/ui/button"
 import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
 import { Spinner } from "@/src/shared/components/ui/spinner"
-import { SummarySection } from "@/src/shared/components/ui/summary"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { Switch } from "@/src/shared/components/ui/switch"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { CalendarIcon, PiggyBankIcon, XIcon } from "lucide-react"
-import { useEffect, useId, useMemo, useState } from "react"
+import { CalendarIcon, PiggyBankIcon } from "lucide-react"
+import { useEffect, useId, useMemo } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import {
   budgetSchema,
@@ -160,7 +161,10 @@ export function BudgetSheet({
     onOpenChange,
   })
   const categoryIds = useWatch({ control, name: "categoryIds" })
-  const [categoryPickerOpen, setCategoryPickerOpen] = useState(false)
+  const { picker, openPicker, closeHandlerFor } = usePicker<
+    "none" | "category"
+  >("none")
+  const closeCategoryPicker = closeHandlerFor("category")
   const selectedCategories = useMemo(
     () =>
       categoryIds
@@ -254,7 +258,7 @@ export function BudgetSheet({
       setValue("categoryIds", [...categoryIds, created.id], {
         shouldValidate: true,
       })
-      setCategoryPickerOpen(false)
+      closeCategoryPicker(false)
     } catch (error) {
       appToast.error({ text1: financeErrorMessage(error) })
     }
@@ -273,17 +277,6 @@ export function BudgetSheet({
             : "Crea la categoría desde el selector de categorías."
         }
         actions={{
-          close: (
-            <Button
-              type="button"
-              variant="outline"
-              className="flex-1"
-              onClick={() => requestOpenChange(false)}
-            >
-              <XIcon className="size-4 shrink-0" />
-              Cancelar
-            </Button>
-          ),
           submit: (
             <Button
               type="button"
@@ -304,7 +297,7 @@ export function BudgetSheet({
             </FieldLabel>
             <CategoryMultiTrigger
               categories={selectedCategories}
-              onClick={() => setCategoryPickerOpen(true)}
+              onClick={() => openPicker("category")}
               onRemove={(categoryId) =>
                 setValue(
                   "categoryIds",
@@ -322,6 +315,7 @@ export function BudgetSheet({
             name="amountLimit"
             render={({ field }) => (
               <FinanceMoneyField
+                calculatorKey="budget-amount"
                 label="Tope"
                 amount={field.value}
                 onAmountChange={field.onChange}
@@ -353,7 +347,7 @@ export function BudgetSheet({
             control={control}
             name="alertThresholdPct"
             render={({ field }) => (
-              <FinanceSegmentedControl
+              <SegmentedControl
                 label="Avisarme al"
                 value={field.value}
                 onChange={field.onChange}
@@ -369,7 +363,7 @@ export function BudgetSheet({
             control={control}
             name="periodType"
             render={({ field }) => (
-              <FinanceSegmentedControl
+              <SegmentedControl
                 label="Tipo"
                 value={field.value}
                 onChange={(value) =>
@@ -449,7 +443,7 @@ export function BudgetSheet({
             control={control}
             name="rollover"
             render={({ field }) => (
-              <FinanceSegmentedControl
+              <SegmentedControl
                 label="Arrastre"
                 value={field.value}
                 onChange={(value) =>
@@ -463,8 +457,8 @@ export function BudgetSheet({
       </BottomSheet>
 
       <CategoryPickerSheet
-        open={categoryPickerOpen}
-        onOpenChange={setCategoryPickerOpen}
+        open={picker === "category"}
+        onOpenChange={closeCategoryPicker}
         categories={categories}
         categoryType="EXPENSE"
         multiple

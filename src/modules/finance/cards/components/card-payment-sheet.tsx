@@ -1,10 +1,8 @@
 "use client"
 
+import { SegmentedControl } from "@/src/shared/components/forms/segmented-control"
 import { FinanceDateField } from "@/src/modules/finance/shared/components/forms/date-field"
-import {
-  FinanceHelpText,
-  FinanceSegmentedControl,
-} from "@/src/modules/finance/shared/components/forms/form-blocks"
+import { FinanceHelpText } from "@/src/modules/finance/shared/components/forms/form-blocks"
 import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
 import { DestinationPickerSheet } from "@/src/modules/finance/shared/components/pickers/destination-picker-sheet"
 import { DestinationTrigger } from "@/src/modules/finance/shared/components/pickers/destination-trigger"
@@ -24,14 +22,14 @@ import {
   formatFinanceMoney,
   parseFinanceMoney,
 } from "@/src/modules/finance/shared/lib/money"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import { Button } from "@/src/shared/components/ui/button"
 import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
 import { Spinner } from "@/src/shared/components/ui/spinner"
-import { SummarySection } from "@/src/shared/components/ui/summary"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { usePicker } from "@/src/shared/hooks/use-picker"
 import { appToast } from "@/src/shared/lib/app-toast"
-import { CoinsIcon, CreditCardIcon, WalletIcon, XIcon } from "lucide-react"
+import { CoinsIcon, CreditCardIcon, WalletIcon } from "lucide-react"
 import { useMemo, useState } from "react"
 import { useUserTimeZone } from "@/src/modules/settings/hooks/use-user-time-zone"
 import { wallClockToIso } from "@/src/modules/finance/shared/lib/ledger-form"
@@ -125,17 +123,6 @@ export function CardPaymentSheet({
         title="Pagar tarjeta"
         description={`Sale de tu cuenta y sube el disponible de ${cardName}.`}
         actions={{
-          close: (
-            <Button
-              type="button"
-              variant="outline"
-              className="flex-1"
-              onClick={() => onOpenChange(false)}
-            >
-              <XIcon className="size-4 shrink-0" />
-              Cancelar
-            </Button>
-          ),
           submit: (
             <Button
               type="button"
@@ -153,7 +140,7 @@ export function CardPaymentSheet({
       >
         <SummarySection title="Pago" icon={CreditCardIcon}>
           {currencies.length > 1 ? (
-            <FinanceSegmentedControl
+            <SegmentedControl
               label="Moneda"
               value={currency}
               onChange={setCurrency}
@@ -164,6 +151,7 @@ export function CardPaymentSheet({
             />
           ) : null}
           <FinanceMoneyField
+            calculatorKey="card-payment-amount"
             label="Monto"
             amount={amount}
             onAmountChange={setAmount}

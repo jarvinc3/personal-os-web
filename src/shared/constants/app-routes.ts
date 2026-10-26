@@ -16,6 +16,12 @@ export const APP_ROUTES = {
     settingsAccount: "/settings/account",
     settingsRegional: "/settings/regional",
     settingsAppearance: "/settings/appearance",
+    settingsAppearanceCards: "/settings/appearance/cards",
+    settingsAppearanceCardEntity: (entitySlug: string) =>
+      `/settings/appearance/cards/${entitySlug}`,
+    settingsAppearanceComponents: "/settings/appearance/components",
+    settingsAppearanceComponentSection: (sectionId: string) =>
+      `/settings/appearance/components/${sectionId}`,
     settingsNotifications: "/settings/notifications",
     settingsPrivacy: "/settings/privacy",
     settingsModules: "/settings/modules",
@@ -30,6 +36,10 @@ export const APP_ROUTES = {
     agenda: "/agenda",
     projects: "/projects",
     health: "/health",
+    intelligence: "/intelligence",
+    intelligenceKnowledge: "/intelligence/knowledge",
+    intelligenceAdminRoles: "/intelligence/admin/roles",
+    intelligenceAdminKnowledge: "/intelligence/admin/knowledge",
     finance: "/finance",
     financeOverview: "/finance/overview",
     financeStatistics: "/finance/statistics",
@@ -82,10 +92,6 @@ export const APP_ROUTES = {
     financeSubscriptionsCalendar: "/finance/subscriptions/calendar",
     financeSubscription: (subscriptionId: string) =>
       `/finance/subscriptions/${subscriptionId}`,
-    // Galerías de referencia (#272).
-    dev: "/dev",
-    devCardGallery: "/dev/cards",
-    devCardGalleryEntity: (entitySlug: string) => `/dev/cards/${entitySlug}`,
     settingsFinanceCurrencies: "/settings/finance/currencies",
   },
 } as const

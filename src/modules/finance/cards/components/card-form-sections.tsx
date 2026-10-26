@@ -5,11 +5,11 @@ import {
   FINANCE_CARD_NETWORKS,
   CATALOG_NONE,
 } from "@/src/modules/finance/shared/constants/catalog"
-import { FinanceSegmentedControl } from "@/src/modules/finance/shared/components/forms/form-blocks"
+import { SegmentedControl } from "@/src/shared/components/forms/segmented-control"
 import type { CardFormValues } from "@/src/modules/finance/cards/lib/card-form"
-import { FormTextField } from "@/src/shared/components/layout/form-blocks"
-import { ColorPickerSwatch } from "@/src/shared/components/ui/color-picker"
-import { SummarySection } from "@/src/shared/components/ui/summary"
+import { FormTextField } from "@/src/shared/components/forms/form-text-field"
+import { ColorPickerSwatch } from "@/src/shared/components/forms/color-picker"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { Label } from "@/src/shared/components/ui/label"
 import { CalendarDays, CircleAlert } from "lucide-react"
 import { Controller, type Control, type FieldErrors } from "react-hook-form"
@@ -81,7 +81,7 @@ export function CardOptionalDetailsSection({
         control={control}
         name="network"
         render={({ field }) => (
-          <FinanceSegmentedControl
+          <SegmentedControl
             label="Red"
             value={field.value === CATALOG_NONE ? "VISA" : field.value}
             onChange={field.onChange}

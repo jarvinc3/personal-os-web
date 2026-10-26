@@ -26,11 +26,11 @@ import {
 } from "@/src/modules/finance/shared/lib/money"
 import { buildReceivablePaymentBody } from "@/src/modules/finance/shared/lib/planning-payloads"
 import { receivableTargets } from "@/src/modules/finance/receivables/lib/receivable-targets"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import { Button } from "@/src/shared/components/ui/button"
 import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
 import { Spinner } from "@/src/shared/components/ui/spinner"
-import { SummarySection } from "@/src/shared/components/ui/summary"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
 import { usePicker } from "@/src/shared/hooks/use-picker"
@@ -42,7 +42,6 @@ import {
   HandshakeIcon,
   TrendingUpIcon,
   WalletIcon,
-  XIcon,
 } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
@@ -210,17 +209,6 @@ export function ReceivablePaymentSheet({
           debtorName ? `Entra dinero de ${debtorName} a la cuenta.` : undefined
         }
         actions={{
-          close: (
-            <Button
-              type="button"
-              variant="outline"
-              className="flex-1"
-              onClick={() => handleOpenChange(false)}
-            >
-              <XIcon className="size-4 shrink-0" />
-              Cancelar
-            </Button>
-          ),
           submit: (
             <Button
               type="button"
@@ -246,6 +234,7 @@ export function ReceivablePaymentSheet({
             name="amount"
             render={({ field }) => (
               <FinanceMoneyField
+                calculatorKey="receivable-payment-amount"
                 label="Monto"
                 amount={field.value}
                 onAmountChange={field.onChange}

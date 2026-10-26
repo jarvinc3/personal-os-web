@@ -2,8 +2,8 @@
 
 import { formatCalendarDate } from "@/src/modules/finance/shared/lib/ledger-form"
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
-import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
-import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
+import { ErrorState } from "@/src/shared/components/feedback/error-state"
+import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
 import { useSubscriptionPayments } from "@/src/modules/finance/shared/hooks/use-subscriptions"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
@@ -18,7 +18,10 @@ import {
 import { SubscriptionPriceChart } from "@/src/modules/finance/subscriptions/components/subscription-price-chart"
 import { useMemo } from "react"
 import { LineChartIcon } from "lucide-react"
-import { SummaryItem, SummarySection } from "@/src/shared/components/ui/summary"
+import {
+  SummaryItem,
+  SummarySection,
+} from "@/src/shared/components/data-display/summary"
 import { Badge } from "@/src/shared/components/ui/badge"
 import {
   Empty,
@@ -69,7 +72,7 @@ export function SubscriptionPriceTab({
       }
     >
       {paymentsQuery.isError ? (
-        <FinanceErrorState
+        <ErrorState
           message={financeErrorMessage(paymentsQuery.error)}
           onRetry={() => void paymentsQuery.refetch()}
           isRetrying={paymentsQuery.isFetching}
@@ -77,7 +80,7 @@ export function SubscriptionPriceTab({
       ) : null}
       <AsyncRegion
         pending={paymentsQuery.isPending && !paymentsQuery.data}
-        pendingFallback={<FinanceListSkeleton rows={3} />}
+        pendingFallback={<ListSkeleton rows={3} />}
         empty={priceHistory.series.length === 0}
         emptyFallback={
           <Empty className="py-8">

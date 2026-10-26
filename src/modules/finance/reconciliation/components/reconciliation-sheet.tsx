@@ -27,7 +27,7 @@ import {
   type FinanceReconciliationKind,
   type FinanceReconciliationLineDraft,
 } from "@/src/modules/finance/shared/types/entities"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import { Button } from "@/src/shared/components/ui/button"
 import {
   Select,
@@ -37,7 +37,7 @@ import {
   SelectValue,
 } from "@/src/shared/components/ui/select"
 import { Spinner } from "@/src/shared/components/ui/spinner"
-import { SummarySection } from "@/src/shared/components/ui/summary"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { appToast } from "@/src/shared/lib/app-toast"
 import {
   LandmarkIcon,
@@ -46,7 +46,6 @@ import {
   ScaleIcon,
   TagsIcon,
   Trash2Icon,
-  XIcon,
 } from "lucide-react"
 import { useMemo, useState } from "react"
 
@@ -176,16 +175,6 @@ export function ReconciliationSheet({
       title={`Conciliar · ${target.name}`}
       description="Escribe el saldo que ves en el banco. La diferencia queda como ajustes categorizados."
       actions={{
-        close: (
-          <Button
-            variant="outline"
-            className="flex-1"
-            onClick={() => onOpenChange(false)}
-          >
-            <XIcon className="size-4 shrink-0" />
-            Cancelar
-          </Button>
-        ),
         submit: (
           <Button
             className="flex-1"
@@ -210,6 +199,7 @@ export function ReconciliationSheet({
           </span>
         </p>
         <FinanceMoneyField
+          calculatorKey="reconciliation-real-balance"
           label="Saldo real del banco"
           amount={realBalance}
           onAmountChange={setRealBalance}
@@ -307,6 +297,7 @@ export function ReconciliationSheet({
                 ) : null}
               </div>
               <FinanceMoneyField
+                calculatorKey="reconciliation-line-amount"
                 label="Monto"
                 amount={line.amount}
                 onAmountChange={(value) => updateLine(index, { amount: value })}

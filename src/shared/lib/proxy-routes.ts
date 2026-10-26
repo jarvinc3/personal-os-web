@@ -7,10 +7,9 @@ const PROTECTED_APP_PATH_PREFIXES: readonly string[] = [
   APP_ROUTES.app.agenda,
   APP_ROUTES.app.projects,
   APP_ROUTES.app.health,
+  APP_ROUTES.app.intelligence,
   APP_ROUTES.app.finance,
   APP_ROUTES.app.help,
-  // Galerías de referencia (#272).
-  APP_ROUTES.app.dev,
 ]
 
 /** Rutas `(app)` que exigen sesión antes de montar el layout. */

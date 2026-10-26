@@ -1,5 +1,7 @@
-const SERVER_ERROR = "No se pudo guardar. Intenta de nuevo."
-const REQUEST_ERROR = "No se pudo guardar. Revisa los datos e intenta de nuevo."
+import { ERROR_MESSAGES } from "@/src/shared/lib/error-messages"
+
+const SERVER_ERROR = ERROR_MESSAGES.server
+const REQUEST_ERROR = ERROR_MESSAGES.request
 const MODULE_DISABLED_MESSAGE = "El módulo finance está desactivado"
 const MODULE_DISABLED_ERROR =
   "Finanzas está desactivado. Actívalo para usar esta función."

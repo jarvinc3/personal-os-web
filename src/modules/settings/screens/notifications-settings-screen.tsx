@@ -13,9 +13,10 @@ import { SettingsGate } from "@/src/modules/settings/settings-gate"
 import {
   SettingsRow,
   SettingsSection,
-} from "@/src/shared/components/layout/settings-section"
+} from "@/src/shared/components/settings/settings-section"
 import { formatTimeRange } from "@/src/shared/lib/date-format"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
+import { useFormatLocale } from "@/src/modules/settings/hooks/use-format-locale"
 
 export function NotificationsSettingsScreen() {
   return (
@@ -26,6 +27,7 @@ export function NotificationsSettingsScreen() {
 }
 
 function NotificationsSettingsScreenBody() {
+  const locale = useFormatLocale()
   const { preferences } = useProfile()
   const togglePreference = usePreferenceToggle()
   const { open: openQuietHoursSheet, setOpen: setOpenQuietHoursSheet } =
@@ -120,7 +122,11 @@ function NotificationsSettingsScreenBody() {
         {quietHours.enabled ? (
           <SettingsRow
             label="Rango horario"
-            value={formatTimeRange(quietHours.start, quietHours.end)}
+            value={formatTimeRange({
+              start: quietHours.start,
+              end: quietHours.end,
+              locale,
+            })}
             onPress={() => setOpenQuietHoursSheet(true)}
             isLast
             accentColor={SETTINGS_REGISTRY.notifications.accent}

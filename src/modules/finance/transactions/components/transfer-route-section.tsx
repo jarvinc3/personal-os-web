@@ -7,7 +7,7 @@ import type {
   FinanceCard,
 } from "@/src/modules/finance/shared/types/entities"
 import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
-import { SummarySection } from "@/src/shared/components/ui/summary"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { ArrowLeftRightIcon } from "lucide-react"
 
 type TransferRouteSectionProps = {

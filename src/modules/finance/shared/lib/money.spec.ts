@@ -6,8 +6,10 @@ import {
   financeMoneyDifference,
   formatCompactFinanceMoney,
   formatFinanceMoney,
+  moneySign,
   parseFinanceMoney,
   sanitizeAmountInput,
+  signedFinanceMoney,
 } from "./money.ts"
 
 describe("sanitizeAmountInput", () => {
@@ -145,7 +147,7 @@ describe("formatFinanceMoney", () => {
     assert.equal(formatFinanceMoney("10", { ...display, currency: "" }), "—")
   })
 
-  it("prefixes + or - before the currency when leadingSign is set", () => {
+  it("prefixes + or − before the currency when leadingSign is set", () => {
     const display = {
       currency: "DOP",
       showCents: true,
@@ -153,8 +155,33 @@ describe("formatFinanceMoney", () => {
       leadingSign: true,
     }
     assert.equal(formatFinanceMoney("491.00", display), "+DOP $491.00")
-    assert.equal(formatFinanceMoney("-159.00", display), "-DOP $159.00")
-    assert.equal(formatFinanceMoney("0", display), "+DOP $0.00")
+    assert.equal(formatFinanceMoney("-159.00", display), "−DOP $159.00")
+    assert.equal(formatFinanceMoney("0", display), "DOP $0.00")
+  })
+})
+
+describe("moneySign", () => {
+  it("reads the sign of the amount and leaves zero without one", () => {
+    assert.equal(moneySign("491.00"), "+")
+    assert.equal(moneySign(-159), "−")
+    assert.equal(moneySign("0"), null)
+    assert.equal(moneySign(null), null)
+    assert.equal(moneySign("nope"), null)
+  })
+})
+
+describe("signedFinanceMoney", () => {
+  const display = { currency: "DOP", showCents: true, compactNumbers: false }
+
+  it("puts the sign before the amount and keeps the value absolute", () => {
+    assert.equal(signedFinanceMoney("-159.00", display, "−"), "− DOP $159.00")
+    assert.equal(signedFinanceMoney("159.00", display, "−"), "− DOP $159.00")
+    assert.equal(signedFinanceMoney("491.00", display, "+"), "+ DOP $491.00")
+  })
+
+  it("falls back to the plain amount when there is no sign", () => {
+    assert.equal(signedFinanceMoney("159.00", display, null), "DOP $159.00")
+    assert.equal(signedFinanceMoney(null, display, "+"), "+ —")
   })
 })
 

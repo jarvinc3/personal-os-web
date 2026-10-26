@@ -13,7 +13,8 @@ import type {
   FinanceDeletedType,
 } from "@/src/modules/finance/shared/types/api"
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
-import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
+import { CardSkeleton } from "@/src/shared/components/feedback/list-skeleton"
+import { ErrorState } from "@/src/shared/components/feedback/error-state"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import { formatCalendarDate } from "@/src/modules/finance/shared/lib/ledger-form"
 import { Button } from "@/src/shared/components/ui/button"
@@ -24,9 +25,9 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
-import { SettingsSection } from "@/src/shared/components/layout/settings-section"
-import { SummaryItem } from "@/src/shared/components/ui/summary"
-import { InfiniteListSentinel } from "@/src/shared/components/ui/infinite-list-sentinel"
+import { SettingsSection } from "@/src/shared/components/settings/settings-section"
+import { SummaryItem } from "@/src/shared/components/data-display/summary"
+import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
 import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
 import {
   Tabs,
@@ -151,7 +152,7 @@ export function RecycleBinView() {
 
   if (recycleBinQuery.isError) {
     return (
-      <FinanceErrorState
+      <ErrorState
         message={financeErrorMessage(recycleBinQuery.error)}
         onRetry={() => void recycleBinQuery.refetch()}
         isRetrying={recycleBinQuery.isFetching}
@@ -241,12 +242,9 @@ export function RecycleBinView() {
       pending={recycleBinQuery.isPending}
       pendingFallback={
         <div className="flex flex-col gap-2">
-          {[0, 1, 2].map((index) => (
-            <div
-              key={index}
-              className="h-16 animate-pulse rounded-2xl border border-border bg-muted/40"
-            />
-          ))}
+          <CardSkeleton height={16} />
+          <CardSkeleton height={16} />
+          <CardSkeleton height={16} />
         </div>
       }
       empty={archived.length === 0 && deleted.length === 0}

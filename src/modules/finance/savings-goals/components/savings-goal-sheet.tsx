@@ -32,12 +32,12 @@ import {
 import { todayDateInput } from "@/src/modules/finance/shared/lib/ledger-form"
 import { buildSavingsGoalBody } from "@/src/modules/finance/shared/lib/planning-payloads"
 import type { FinanceSavingsGoal } from "@/src/modules/finance/shared/types/entities"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
-import { FormTextField } from "@/src/shared/components/layout/form-blocks"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import { Button } from "@/src/shared/components/ui/button"
 import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
 import { Spinner } from "@/src/shared/components/ui/spinner"
-import { SummarySection } from "@/src/shared/components/ui/summary"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
 import { usePicker } from "@/src/shared/hooks/use-picker"
@@ -47,7 +47,6 @@ import {
   NotebookPenIcon,
   PiggyBankIcon,
   TargetIcon,
-  XIcon,
 } from "lucide-react"
 import { useEffect, useMemo } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
@@ -188,17 +187,6 @@ export function SavingsGoalSheet({
         title={isEdit ? "Editar meta" : "Nueva meta"}
         description="Se marca como completada cuando lo ahorrado alcanza la meta."
         actions={{
-          close: (
-            <Button
-              type="button"
-              variant="outline"
-              className="flex-1"
-              onClick={() => requestOpenChange(false)}
-            >
-              <XIcon className="size-4 shrink-0" />
-              Cancelar
-            </Button>
-          ),
           submit: (
             <Button
               type="button"
@@ -273,6 +261,7 @@ export function SavingsGoalSheet({
             name="targetAmount"
             render={({ field }) => (
               <FinanceMoneyField
+                calculatorKey="savings-goal-target"
                 label="Meta"
                 amount={field.value}
                 onAmountChange={field.onChange}
@@ -292,6 +281,7 @@ export function SavingsGoalSheet({
             name="currentAmount"
             render={({ field }) => (
               <FinanceMoneyField
+                calculatorKey="savings-goal-saved"
                 label="Ahorrado"
                 amount={field.value}
                 onAmountChange={field.onChange}

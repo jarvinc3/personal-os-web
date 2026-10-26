@@ -1,7 +1,7 @@
 "use client"
 
-import { FinanceErrorState } from "@/src/modules/finance/shared/components/layout/error-state"
-import { FinanceListSkeleton } from "@/src/modules/finance/shared/components/layout/list-skeleton"
+import { ErrorState } from "@/src/shared/components/feedback/error-state"
+import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
 import { NoticeCard } from "@/src/modules/finance/shared/components/notice-card"
 import type { NoticeTone } from "@/src/modules/finance/shared/components/notice-card"
 import {
@@ -21,7 +21,7 @@ import type {
   FinanceSubscriptionAlertKind,
 } from "@/src/modules/finance/shared/types/entities"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
-import { BottomSheet } from "@/src/shared/components/layout/bottom-sheet"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import { Badge } from "@/src/shared/components/ui/badge"
 import { Button } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
@@ -41,7 +41,6 @@ import {
   ClockIcon,
   TrendingUpIcon,
   TriangleAlertIcon,
-  XIcon,
   type LucideIcon,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
@@ -108,21 +107,12 @@ export function AlertsSheet({
 
   return (
     <BottomSheet
+      closeLabel="Cerrar"
       open={open}
       onOpenChange={onOpenChange}
       title="Alertas"
       description="Subidas de precio, cobros que no cuadran y avisos de renovación"
       actions={{
-        close: (
-          <Button
-            variant="outline"
-            className="flex-1"
-            onClick={() => onOpenChange(false)}
-          >
-            <XIcon className="size-4 shrink-0" />
-            Cerrar
-          </Button>
-        ),
         submit: (
           <Button
             className="flex-1"
@@ -140,13 +130,13 @@ export function AlertsSheet({
       }}
     >
       {query.isError ? (
-        <FinanceErrorState
+        <ErrorState
           message={financeErrorMessage(query.error)}
           onRetry={() => void query.refetch()}
           isRetrying={query.isFetching}
         />
       ) : null}
-      {query.isPending && !query.data ? <FinanceListSkeleton rows={3} /> : null}
+      {query.isPending && !query.data ? <ListSkeleton rows={3} /> : null}
       {!query.isPending && alerts.length === 0 ? (
         <Empty className="py-6">
           <EmptyHeader>
