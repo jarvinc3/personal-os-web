@@ -400,7 +400,7 @@ La prioridad expresa impacto y urgencia, no dificultad técnica. La talla expres
 - **M**: toca un contrato HTTP, una migración o más de un paquete del workspace.
 - **L**: cruza back y web, o no cabe en un PR revisable. Pártelo en sub-issues.
 
-No se estiman horas ni se registra tiempo: el repositorio mide releases, no jornadas.
+No se estiman horas: el repositorio mide releases, no jornadas. Las fechas de inicio y cierre se registran en el proyecto (ver «Proyecto y estados»).
 
 ## Proyecto y estados
 
@@ -415,6 +415,7 @@ Reglas:
 - Un issue en `Done` sin PR necesita un comentario que diga cómo se verificó.
 - Un issue cerrado sin implementar se cierra como `not planned` y no pasa por `Done`.
 - La columna no sustituye al cuerpo: si el estado cambió, el comentario dice qué cambió.
+- Al pasar a `In Progress` se llena **Start date** con el día en que empieza el trabajo. El campo **Closed** lo llena GitHub al cerrar el issue, así que siempre se cierra el issue (no basta con moverlo a `Done`). Los estados y estas fechas los lleva el Project Manager, y quien arranca un issue le avisa.
 
 ## Dependencias y sub-issues
 
