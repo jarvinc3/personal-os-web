@@ -3,6 +3,7 @@
 import { apiPost } from "@/src/config/api-client"
 import { CurrencyFlag } from "@/src/modules/finance/shared/components/currency-flag"
 import { CurrencyPickerSheet } from "@/src/modules/finance/shared/components/pickers/currency-picker-sheet"
+import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import { useExchangeRates } from "@/src/modules/finance/shared/hooks/use-exchange-rates"
 import { currencyDisplayName } from "@/src/modules/finance/shared/lib/currency-display-name"
 import { normalizeTrackedCurrencies } from "@/src/modules/finance/shared/lib/finance-currency"
@@ -14,6 +15,7 @@ import { Button } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { API_ENDPOINTS } from "@/src/shared/constants/api-endpoints"
 import { appToast } from "@/src/shared/lib/app-toast"
+import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { PencilIcon, PlusIcon, RefreshCwIcon, Trash2Icon } from "lucide-react"
 import { useMemo, useState } from "react"
@@ -23,8 +25,10 @@ export function FinanceCurrenciesView() {
     useUserModuleConfig("finance")
   const queryClient = useQueryClient()
 
-  const [changePickerOpen, setChangePickerOpen] = useState(false)
-  const [addPickerOpen, setAddPickerOpen] = useState(false)
+  const changeBaseCurrencySheet = useSheetParam(
+    FINANCE_SHEET_KEYS.changeBaseCurrency
+  )
+  const addCurrencySheet = useSheetParam(FINANCE_SHEET_KEYS.addCurrency)
   const [pendingBaseCurrency, setPendingBaseCurrency] = useState<string | null>(
     null
   )
@@ -125,7 +129,7 @@ export function FinanceCurrenciesView() {
             size="sm"
             aria-label="Cambiar moneda principal"
             disabled={isSaving}
-            onClick={() => setChangePickerOpen(true)}
+            onClick={() => changeBaseCurrencySheet.setOpen(true)}
           >
             <PencilIcon className="size-4 shrink-0" />
             Cambiar
@@ -142,7 +146,7 @@ export function FinanceCurrenciesView() {
             size="sm"
             aria-label="Agregar moneda"
             disabled={isSaving}
-            onClick={() => setAddPickerOpen(true)}
+            onClick={() => addCurrencySheet.setOpen(true)}
           >
             <PlusIcon className="size-4" />
             Agregar moneda
@@ -204,8 +208,8 @@ export function FinanceCurrenciesView() {
       </SettingsSection>
 
       <CurrencyPickerSheet
-        open={changePickerOpen}
-        onOpenChange={setChangePickerOpen}
+        open={changeBaseCurrencySheet.open}
+        onOpenChange={changeBaseCurrencySheet.setOpen}
         value={baseCurrency}
         enabled
         codes={trackedCurrencies}
@@ -214,8 +218,8 @@ export function FinanceCurrenciesView() {
         onSelect={(code) => setPendingBaseCurrency(code)}
       />
       <CurrencyPickerSheet
-        open={addPickerOpen}
-        onOpenChange={setAddPickerOpen}
+        open={addCurrencySheet.open}
+        onOpenChange={addCurrencySheet.setOpen}
         value=""
         enabled
         title="Agregar moneda"

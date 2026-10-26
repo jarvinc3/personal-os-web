@@ -6,6 +6,7 @@ import { SettingsSecondaryPage } from "@/src/modules/settings/components/layout/
 import { DeleteAccountSheet } from "@/src/modules/settings/components/sheets/delete-account-sheet"
 import { WipeDataSheet } from "@/src/modules/settings/components/sheets/wipe-data-sheet"
 import { SETTINGS_REGISTRY } from "@/src/modules/settings/constants/settings-metadata"
+import { SETTINGS_SHEET_KEYS } from "@/src/modules/settings/constants/sheet-keys"
 import { usePreferenceToggle } from "@/src/modules/settings/hooks/use-preference-toggle"
 import { WIPE_LAYER_ORDER } from "@/src/modules/settings/lib/wipe-layers"
 import { useProfile } from "@/src/modules/settings/hooks/use-profile"
@@ -31,9 +32,9 @@ function PrivacySettingsScreenBody() {
   const { preferences, profileQuery } = useProfile()
   const togglePreference = usePreferenceToggle()
   const { open: openDeleteAccountSheet, setOpen: setOpenDeleteAccountSheet } =
-    useSheetParam("delete-account-sheet")
+    useSheetParam(SETTINGS_SHEET_KEYS.deleteAccount)
   const { open: openWipeAllSheet, setOpen: setOpenWipeAllSheet } =
-    useSheetParam("wipe-all-data-sheet")
+    useSheetParam(SETTINGS_SHEET_KEYS.wipeData)
   const displayEmail = profileQuery.data?.email ?? user?.email ?? ""
   const { consentQuery, consentMutation } = useAiConsent()
 
