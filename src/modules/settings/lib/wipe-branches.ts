@@ -166,6 +166,38 @@ export function allSelectableBranchesSelected({
   )
 }
 
+export type ResolvedWipeSelection = {
+  selectedIds: string[]
+  appliedIds: string[]
+  appliedBranches: DataBranch[]
+  expectedCounts: Record<string, number>
+}
+
+/**
+ * What the user picked, once zero-count rows are dropped and each branch drags
+ * the ones the API says it needs. The view reads this contract, not the steps.
+ */
+export function resolveWipeSelection({
+  branches,
+  selected,
+}: BranchSelectionInput): ResolvedWipeSelection {
+  const branchById = new Map(branches.map((branch) => [branch.id, branch]))
+  const selectedIds = selected.filter(
+    (branchId) => (branchById.get(branchId)?.count ?? 0) > 0
+  )
+  const appliedIds = expandWipeSelection({ branches, selected: selectedIds })
+
+  return {
+    selectedIds,
+    appliedIds,
+    appliedBranches: appliedIds.flatMap((branchId) => {
+      const branch = branchById.get(branchId)
+      return branch ? [branch] : []
+    }),
+    expectedCounts: expectedBranchCounts({ branches, selected: appliedIds }),
+  }
+}
+
 /** Counts the user saw, for the branches that will run. */
 export function expectedBranchCounts({
   branches,
@@ -230,7 +262,7 @@ type BuildSectionsInput = {
   app?: string
 }
 
-type SectionContext = {
+type WipeRowContext = {
   branches: readonly DataBranch[]
   selected: readonly string[]
   parents: ReadonlyMap<string, string>
@@ -245,7 +277,7 @@ export function buildWipeSections({
 }: BuildSectionsInput): WipeSection[] {
   const visibleGroups = groups.filter((group) => !app || group.app === app)
   const branches = visibleGroups.flatMap((group) => group.branches)
-  const context: SectionContext = {
+  const rowContext: WipeRowContext = {
     branches,
     selected,
     parents: draggedBranchParents({ branches, selected }),
@@ -253,13 +285,13 @@ export function buildWipeSections({
   }
 
   if (app === DATA_APP.FINANCE) {
-    return financeThemeSections(context, branches)
+    return financeThemeSections(rowContext, branches)
   }
-  return visibleGroups.map((group) => appSection(context, group))
+  return visibleGroups.map((group) => appSection(rowContext, group))
 }
 
 function appSection(
-  context: SectionContext,
+  rowContext: WipeRowContext,
   group: DataAppBranches
 ): WipeSection {
   const appCopy = wipeAppCopy(group.app)
@@ -269,37 +301,36 @@ function appSection(
     icon: appCopy.icon,
     rows:
       group.app === DATA_APP.FINANCE
-        ? financeThemeRows(context, group.branches, true)
-        : group.branches.map((branch) => branchRow(context, branch)),
+        ? financeRowsWithThemeHeadings(rowContext, group.branches)
+        : group.branches.map((branch) => branchRow({ rowContext, branch })),
   }
 }
 
 function financeThemeSections(
-  context: SectionContext,
+  rowContext: WipeRowContext,
   branches: readonly DataBranch[]
 ): WipeSection[] {
   return orderedFinanceThemes(branches).map((theme) => ({
     key: theme.id,
     title: theme.label,
     icon: theme.icon,
-    rows: theme.branches.map((branch) => branchRow(context, branch)),
+    rows: theme.branches.map((branch) => branchRow({ rowContext, branch })),
   }))
 }
 
-function financeThemeRows(
-  context: SectionContext,
-  branches: readonly DataBranch[],
-  withHeadings: boolean
+function financeRowsWithThemeHeadings(
+  rowContext: WipeRowContext,
+  branches: readonly DataBranch[]
 ): WipeRow[] {
   return orderedFinanceThemes(branches).flatMap((theme) =>
     theme.branches.map((branch, index) =>
-      branchRow(
-        context,
+      branchRow({
+        rowContext,
         branch,
-        withHeadings && index === 0
-          ? { label: theme.label, icon: theme.icon }
-          : undefined
-      )
+        ...(index === 0
+          ? { heading: { label: theme.label, icon: theme.icon } }
+          : {}),
+      })
     )
   )
 }
@@ -321,15 +352,17 @@ function orderedFinanceThemes(
   })
 }
 
-function branchRow(
-  context: SectionContext,
-  branch: DataBranch,
+type BranchRowInput = {
+  rowContext: WipeRowContext
+  branch: DataBranch
   heading?: WipeRowHeading
-): WipeRow {
-  const copy = wipeBranchCopy(branch)
-  const draggedBy = context.parents.get(branch.id)
+}
+
+function branchRow({ rowContext, branch, heading }: BranchRowInput): WipeRow {
+  const branchCopy = wipeBranchCopy(branch)
+  const draggedBy = rowContext.parents.get(branch.id)
   const draggedByBranch = draggedBy
-    ? context.branches.find((candidate) => candidate.id === draggedBy)
+    ? rowContext.branches.find((candidate) => candidate.id === draggedBy)
     : undefined
   const draggedByLabel = draggedByBranch
     ? wipeBranchCopy(draggedByBranch).label
@@ -337,17 +370,17 @@ function branchRow(
 
   return {
     branch,
-    label: copy.label,
-    ...(copy.description ? { description: copy.description } : {}),
-    icon: copy.icon,
-    checked: context.selected.includes(branch.id) || draggedBy !== undefined,
+    label: branchCopy.label,
+    ...(branchCopy.description ? { description: branchCopy.description } : {}),
+    icon: branchCopy.icon,
+    checked: rowContext.selected.includes(branch.id) || draggedBy !== undefined,
     locked: draggedBy !== undefined,
     selectable: branch.count > 0,
     ...(draggedByLabel ? { draggedByLabel } : {}),
     countLabel: formatBranchCount({
       branchId: branch.id,
       count: branch.count,
-      locale: context.locale,
+      locale: rowContext.locale,
     }),
     ...(heading ? { heading } : {}),
   }

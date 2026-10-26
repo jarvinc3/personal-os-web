@@ -49,6 +49,7 @@ export function readPendingDataWipe(): PendingDataWipe | null {
       balanceInstitutionId?: unknown
     }
   } catch {
+    // A stale or hand-edited value is not a pending wipe: nothing to confirm.
     return null
   }
 

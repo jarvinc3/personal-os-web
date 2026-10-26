@@ -23,7 +23,7 @@ import {
   branchesOf,
   buildWipeSections,
   expandWipeSelection,
-  expectedBranchCounts,
+  resolveWipeSelection,
   toggleAllBranchSelection,
   toggleBranchSelection,
 } from "@/src/modules/settings/lib/wipe-branches"
@@ -98,35 +98,21 @@ export function WipeUserDataView({
 
   const groups = branchesQuery.data ?? []
   const branches = branchesOf(groups, app)
-  const branchById = new Map(branches.map((branch) => [branch.id, branch]))
-  const effectiveSelected = selected.filter(
-    (branchId) => (branchById.get(branchId)?.count ?? 0) > 0
-  )
-  const appliedIds = expandWipeSelection({
-    branches,
-    selected: effectiveSelected,
-  })
-  const appliedBranches = appliedIds.flatMap((branchId) => {
-    const branch = branchById.get(branchId)
-    return branch ? [branch] : []
-  })
-  const expectedCounts = expectedBranchCounts({
-    branches,
-    selected: appliedIds,
-  })
+  const { selectedIds, appliedIds, appliedBranches, expectedCounts } =
+    resolveWipeSelection({ branches, selected })
   const sections = buildWipeSections({
     groups,
-    selected: effectiveSelected,
+    selected: selectedIds,
     locale: formatLocale,
     app,
   })
   const appliedRows = sections
     .flatMap((section) => section.rows)
     .filter((row) => appliedIds.includes(row.branch.id))
-  const hasSelection = effectiveSelected.length > 0
+  const hasSelection = selectedIds.length > 0
   const allSelected = allSelectableBranchesSelected({
     branches,
-    selected: effectiveSelected,
+    selected: selectedIds,
   })
   const balancesApplied = appliedIds.includes(FINANCE_BALANCES_BRANCH)
 
@@ -186,7 +172,7 @@ export function WipeUserDataView({
   const handleToggleBranch = (branchId: string, checked: boolean) => {
     const next = toggleBranchSelection({
       branches,
-      selected: effectiveSelected,
+      selected: selectedIds,
       branchId,
       checked,
     })
@@ -198,7 +184,7 @@ export function WipeUserDataView({
   const handleToggleAll = (checked: boolean) => {
     const next = toggleAllBranchSelection({
       branches,
-      selected: effectiveSelected,
+      selected: selectedIds,
       checked,
     })
     setSelected(next)

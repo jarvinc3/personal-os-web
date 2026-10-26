@@ -27,19 +27,39 @@ import {
 
 import { DATA_APP } from "@/src/modules/settings/types/wipe.types"
 
-const OTHER_FINANCE_THEME = "other"
 const FALLBACK_ICON = Database
 
-export const FINANCE_BRANCH_THEMES = [
-  { id: "movements", label: "Movimientos y saldos", icon: ArrowLeftRight },
-  { id: "products", label: "Productos", icon: Landmark },
-  { id: "planning", label: "Planificación", icon: PiggyBank },
-  { id: "directory", label: "Comercios y categorías", icon: Store },
-  { id: "mail", label: "Correo", icon: Mail },
-] as const
+export const FINANCE_BRANCH_THEME = {
+  MOVEMENTS: "movements",
+  PRODUCTS: "products",
+  PLANNING: "planning",
+  DIRECTORY: "directory",
+  MAIL: "mail",
+  OTHER: "other",
+} as const
 
 export type FinanceBranchThemeId =
-  (typeof FINANCE_BRANCH_THEMES)[number]["id"] | typeof OTHER_FINANCE_THEME
+  (typeof FINANCE_BRANCH_THEME)[keyof typeof FINANCE_BRANCH_THEME]
+
+export const FINANCE_BRANCH_THEMES = [
+  {
+    id: FINANCE_BRANCH_THEME.MOVEMENTS,
+    label: "Movimientos y saldos",
+    icon: ArrowLeftRight,
+  },
+  { id: FINANCE_BRANCH_THEME.PRODUCTS, label: "Productos", icon: Landmark },
+  {
+    id: FINANCE_BRANCH_THEME.PLANNING,
+    label: "Planificación",
+    icon: PiggyBank,
+  },
+  {
+    id: FINANCE_BRANCH_THEME.DIRECTORY,
+    label: "Comercios y categorías",
+    icon: Store,
+  },
+  { id: FINANCE_BRANCH_THEME.MAIL, label: "Correo", icon: Mail },
+] as const
 
 export type FinanceBranchTheme = {
   id: FinanceBranchThemeId
@@ -48,7 +68,7 @@ export type FinanceBranchTheme = {
 }
 
 export const OTHER_FINANCE_THEME_ITEM: FinanceBranchTheme = {
-  id: OTHER_FINANCE_THEME,
+  id: FINANCE_BRANCH_THEME.OTHER,
   label: "Otras ramas",
   icon: FALLBACK_ICON,
 }
@@ -74,7 +94,7 @@ export const WIPE_BRANCH_TEXTS: Record<string, WipeBranchText> = {
     description:
       "Conciliaciones con sus ajustes y descuadres detectados. Los movimientos de ajuste se conservan.",
     icon: Scale,
-    theme: "movements",
+    theme: FINANCE_BRANCH_THEME.MOVEMENTS,
     unit: { singular: "conciliación", plural: "conciliaciones" },
   },
   "finance.transactions": {
@@ -82,7 +102,7 @@ export const WIPE_BRANCH_TEXTS: Record<string, WipeBranchText> = {
     description:
       "Movimientos de todo tipo. Deja las cuentas en cero y el disponible de las tarjetas en su límite.",
     icon: ArrowLeftRight,
-    theme: "movements",
+    theme: FINANCE_BRANCH_THEME.MOVEMENTS,
     unit: { singular: "movimiento", plural: "movimientos" },
   },
   "finance.balances": {
@@ -90,7 +110,7 @@ export const WIPE_BRANCH_TEXTS: Record<string, WipeBranchText> = {
     description:
       "Pone en cero las cuentas y devuelve el disponible de las tarjetas a su límite. No borra filas.",
     icon: Gauge,
-    theme: "movements",
+    theme: FINANCE_BRANCH_THEME.MOVEMENTS,
     unit: { singular: "saldo", plural: "saldos" },
   },
   "finance.cards": {
@@ -98,7 +118,7 @@ export const WIPE_BRANCH_TEXTS: Record<string, WipeBranchText> = {
     description:
       "Tarjetas con sus saldos. Las suscripciones quedan sin tarjeta.",
     icon: CreditCard,
-    theme: "products",
+    theme: FINANCE_BRANCH_THEME.PRODUCTS,
     unit: { singular: "tarjeta", plural: "tarjetas" },
   },
   "finance.accounts": {
@@ -106,14 +126,14 @@ export const WIPE_BRANCH_TEXTS: Record<string, WipeBranchText> = {
     description:
       "Cuentas con sus movimientos. Metas, cobros y suscripciones quedan sin cuenta.",
     icon: Wallet,
-    theme: "products",
+    theme: FINANCE_BRANCH_THEME.PRODUCTS,
     unit: { singular: "cuenta", plural: "cuentas" },
   },
   "finance.institutions": {
     label: "Instituciones",
     description: "Instituciones que no son de sistema: «Efectivo» se conserva.",
     icon: Landmark,
-    theme: "products",
+    theme: FINANCE_BRANCH_THEME.PRODUCTS,
     unit: { singular: "institución", plural: "instituciones" },
   },
   "finance.statements": {
@@ -121,7 +141,7 @@ export const WIPE_BRANCH_TEXTS: Record<string, WipeBranchText> = {
     description:
       "Estados de cuenta importados y sus importaciones. Las tarjetas siguen existiendo.",
     icon: FileText,
-    theme: "products",
+    theme: FINANCE_BRANCH_THEME.PRODUCTS,
     unit: { singular: "estado de cuenta", plural: "estados de cuenta" },
   },
   "finance.subscriptions": {
@@ -129,7 +149,7 @@ export const WIPE_BRANCH_TEXTS: Record<string, WipeBranchText> = {
     description:
       "Suscripciones con sus pagos y alertas descartadas. Los movimientos siguen.",
     icon: Repeat,
-    theme: "planning",
+    theme: FINANCE_BRANCH_THEME.PLANNING,
     unit: { singular: "suscripción", plural: "suscripciones" },
   },
   "finance.recurring": {
@@ -137,7 +157,7 @@ export const WIPE_BRANCH_TEXTS: Record<string, WipeBranchText> = {
     description:
       "Patrones recurrentes detectados. Las suscripciones conservan sus datos.",
     icon: RefreshCcw,
-    theme: "directory",
+    theme: FINANCE_BRANCH_THEME.DIRECTORY,
     unit: { singular: "patrón", plural: "patrones" },
   },
   "finance.merchants": {
@@ -145,42 +165,42 @@ export const WIPE_BRANCH_TEXTS: Record<string, WipeBranchText> = {
     description:
       "Comercios con sus alias. Movimientos y recurrentes conservan el texto, sin comercio.",
     icon: Store,
-    theme: "directory",
+    theme: FINANCE_BRANCH_THEME.DIRECTORY,
     unit: { singular: "comercio", plural: "comercios" },
   },
   "finance.categories": {
     label: "Categorías propias",
     description: "Categorías creadas por ti. Las del sistema se conservan.",
     icon: Tags,
-    theme: "directory",
+    theme: FINANCE_BRANCH_THEME.DIRECTORY,
     unit: { singular: "categoría", plural: "categorías" },
   },
   "finance.loans": {
     label: "Préstamos",
     description: "Préstamos con sus cuotas y pagos anticipados.",
     icon: Banknote,
-    theme: "planning",
+    theme: FINANCE_BRANCH_THEME.PLANNING,
     unit: { singular: "préstamo", plural: "préstamos" },
   },
   "finance.savingsGoals": {
     label: "Metas de ahorro",
     description: "Metas con sus aportes.",
     icon: PiggyBank,
-    theme: "planning",
+    theme: FINANCE_BRANCH_THEME.PLANNING,
     unit: { singular: "meta", plural: "metas" },
   },
   "finance.receivables": {
     label: "Cobros",
     description: "Cobros con sus compartidos y pagos.",
     icon: HandCoins,
-    theme: "planning",
+    theme: FINANCE_BRANCH_THEME.PLANNING,
     unit: { singular: "cobro", plural: "cobros" },
   },
   "finance.budgets": {
     label: "Presupuestos",
     description: "Presupuestos con sus categorías y alertas.",
     icon: Coins,
-    theme: "planning",
+    theme: FINANCE_BRANCH_THEME.PLANNING,
     unit: { singular: "presupuesto", plural: "presupuestos" },
   },
   "finance.emailMessages": {
@@ -188,14 +208,14 @@ export const WIPE_BRANCH_TEXTS: Record<string, WipeBranchText> = {
     description:
       "Correos importados y la bitácora de sincronización. Los movimientos creados siguen.",
     icon: Inbox,
-    theme: "mail",
+    theme: FINANCE_BRANCH_THEME.MAIL,
     unit: { singular: "correo", plural: "correos" },
   },
   "finance.emailConnections": {
     label: "Conexiones de Gmail",
     description: "Conexión de Gmail con sus fuentes, mensajes y tokens.",
     icon: Mail,
-    theme: "mail",
+    theme: FINANCE_BRANCH_THEME.MAIL,
     unit: { singular: "conexión", plural: "conexiones" },
   },
   "ai.inferences": {
@@ -257,7 +277,8 @@ export function wipeBranchCopy(branch: {
 }
 
 export function financeBranchThemeOf(branchId: string): FinanceBranchTheme {
-  const themeId = WIPE_BRANCH_TEXTS[branchId]?.theme ?? OTHER_FINANCE_THEME
+  const themeId =
+    WIPE_BRANCH_TEXTS[branchId]?.theme ?? FINANCE_BRANCH_THEME.OTHER
   return (
     FINANCE_BRANCH_THEMES.find((theme) => theme.id === themeId) ??
     OTHER_FINANCE_THEME_ITEM

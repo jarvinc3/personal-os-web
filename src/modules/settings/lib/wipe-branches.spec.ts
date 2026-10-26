@@ -10,6 +10,7 @@ import {
   expectedBranchCounts,
   findAppBranches,
   formatBranchCount,
+  resolveWipeSelection,
   selectableBranchIds,
   toggleAllBranchSelection,
   toggleBranchSelection,
@@ -241,6 +242,34 @@ describe("selection payload", () => {
       }),
       []
     )
+  })
+
+  it("resolves the rows that will run from the picked branches", () => {
+    const selected = resolveWipeSelection({
+      branches: FINANCE_BRANCHES,
+      selected: ["finance.merchants", "finance.categories"],
+    })
+
+    assert.deepEqual(selected.selectedIds, ["finance.categories"])
+    assert.deepEqual(selected.appliedIds, [
+      "finance.budgets",
+      "finance.categories",
+    ])
+    assert.deepEqual(
+      selected.appliedBranches.map((branch) => branch.id),
+      ["finance.budgets", "finance.categories"]
+    )
+    assert.deepEqual(selected.expectedCounts, {
+      "finance.budgets": 2,
+      "finance.categories": 3,
+    })
+
+    const empty = resolveWipeSelection({
+      branches: FINANCE_BRANCHES,
+      selected: ["finance.merchants"],
+    })
+    assert.deepEqual(empty.appliedIds, [])
+    assert.deepEqual(empty.expectedCounts, {})
   })
 
   it("finds the selected branch that drags each locked row", () => {
