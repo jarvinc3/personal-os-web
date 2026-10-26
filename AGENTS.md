@@ -25,6 +25,8 @@ Si una afirmación no está `VERIFICADO`, no la trates como comportamiento vigen
 
 **Limpieza al terminar:** al integrar la rama, bórrala (local y remota), elimina la copia de `temp` (`git worktree remove` y `git worktree prune`) y pon al día `develop` y la carpeta principal del repo en el workspace (`git pull`). Los merges a `master` y los deploys siguen siendo decisión de Jarvin.
 
+**Credenciales:** nunca adivines ni pruebes contraseñas, tokens o claves (bases de datos, APIs, cuentas). Usa solo las credenciales que el repo documenta o que Jarvin entregó; si falta una, detente y pregunta. Nunca imprimas ni commitees secretos.
+
 Lo decidido y no implementado se abre como issue con label `roadmap`; no se deja como `REV-*` suelto en los documentos.
 
 ## Fuentes canónicas
