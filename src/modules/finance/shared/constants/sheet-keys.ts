@@ -38,6 +38,14 @@ export const FINANCE_SHEET_KEYS = {
   subscriptionAlerts: "subscription-alerts-sheet",
   subscriptionDetected: "subscription-detected-sheet",
   subscriptionFilters: "subscription-filters-sheet",
+  changeBaseCurrency: "change-base-currency-sheet",
+  addCurrency: "add-currency-sheet",
+  financeSettingsDisplay: "finance-settings-display-sheet",
+  financeSettingsMonth: "finance-settings-month-sheet",
+  financeSettingsMovements: "finance-settings-movements-sheet",
+  financeSettingsFixedIncome: "finance-settings-fixed-income-sheet",
+  financeSettingsSubscriptions: "finance-settings-subscriptions-sheet",
+  financeSettingsNotifications: "finance-settings-notifications-sheet",
 } as const
 
 export type FinanceSheetKey =

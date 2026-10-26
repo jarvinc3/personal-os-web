@@ -3,6 +3,7 @@
 import { useAuth } from "@/src/modules/auth"
 import { useInstitutions } from "@/src/modules/finance"
 import { SETTINGS_REGISTRY } from "@/src/modules/settings/constants/settings-metadata"
+import { SETTINGS_SHEET_KEYS } from "@/src/modules/settings/constants/sheet-keys"
 import {
   reauthenticateWithPassword,
   useWipeUserData,
@@ -29,6 +30,7 @@ import {
 import { AuthServiceError } from "@/src/modules/auth"
 import { WipeBalanceInstitutionSheet } from "@/src/modules/settings/components/sheets/wipe-balance-institution-sheet"
 import { ConfirmDialog } from "@/src/shared/components/feedback/confirm-dialog"
+import { usePicker } from "@/src/shared/hooks/use-picker"
 import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import { SettingsRow } from "@/src/shared/components/settings/settings-section"
 import {
@@ -90,6 +92,9 @@ export type WipeScope = {
   confirmTitle: string
 }
 
+type WipeInstitutionPicker =
+  "none" | typeof SETTINGS_SHEET_KEYS.wipeBalanceInstitution
+
 type WipeUserDataViewProps = {
   email: string
   /** Fixed scope: the per-module picker stays hidden and only these layers are wiped. */
@@ -112,7 +117,7 @@ export function WipeUserDataView({
     fixedLayers ? [...fixedLayers] : []
   )
   const [balanceScope, setBalanceScope] = useState(ALL_INSTITUTIONS)
-  const [institutionSheetOpen, setInstitutionSheetOpen] = useState(false)
+  const institutionPicker = usePicker<WipeInstitutionPicker>("none")
   const [password, setPassword] = useState("")
   const [passwordError, setPasswordError] = useState<string>()
   const [verifiedPassword, setVerifiedPassword] = useState<string | null>(null)
@@ -141,9 +146,6 @@ export function WipeUserDataView({
       : (institutionsQuery.data?.find(
           (institution) => institution.id === balanceScope
         )?.name ?? "Todas las instituciones")
-  if (!balancesSelected && institutionSheetOpen) {
-    setInstitutionSheetOpen(false)
-  }
 
   const balanceInstitutionId =
     balancesSelected && balanceScope !== ALL_INSTITUTIONS
@@ -175,12 +177,24 @@ export function WipeUserDataView({
     void loadAuthProviders()
   }, [loadAuthProviders])
 
+  const closeInstitutionPicker = () => {
+    institutionPicker.closeHandlerFor(
+      SETTINGS_SHEET_KEYS.wipeBalanceInstitution
+    )(false)
+  }
+
   const handleToggleLayer = (layer: WipeLayerId, checked: boolean) => {
     setSelected((current) => applyWipeLayerToggle(current, layer, checked))
+    if (!checked && layer === WIPE_LAYERS.FINANCE_BALANCES) {
+      closeInstitutionPicker()
+    }
   }
 
   const handleToggleAll = (checked: boolean) => {
     setSelected(checked ? ALL_WIPE_LAYERS : [])
+    if (!checked) {
+      closeInstitutionPicker()
+    }
   }
 
   const handleToggleGroup = (
@@ -188,6 +202,9 @@ export function WipeUserDataView({
     checked: boolean
   ) => {
     setSelected((current) => toggleWipeGroupLayers(current, layers, checked))
+    if (!checked && layers.includes(WIPE_LAYERS.FINANCE_BALANCES)) {
+      closeInstitutionPicker()
+    }
   }
 
   const clearPassword = () => {
@@ -421,7 +438,11 @@ export function WipeUserDataView({
                           value={balanceScopeLabel}
                           icon={Landmark}
                           accentColor={WIPE_ACCENT}
-                          onPress={() => setInstitutionSheetOpen(true)}
+                          onPress={() =>
+                            institutionPicker.openPicker(
+                              SETTINGS_SHEET_KEYS.wipeBalanceInstitution
+                            )
+                          }
                           disabled={wipeMutation.isPending}
                           isLast
                         />
@@ -480,8 +501,13 @@ export function WipeUserDataView({
       </div>
 
       <WipeBalanceInstitutionSheet
-        open={institutionSheetOpen}
-        onOpenChange={setInstitutionSheetOpen}
+        open={
+          institutionPicker.picker ===
+          SETTINGS_SHEET_KEYS.wipeBalanceInstitution
+        }
+        onOpenChange={institutionPicker.closeHandlerFor(
+          SETTINGS_SHEET_KEYS.wipeBalanceInstitution
+        )}
         value={balanceScope}
         allValue={ALL_INSTITUTIONS}
         onSelect={setBalanceScope}

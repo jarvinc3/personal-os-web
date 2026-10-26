@@ -1,5 +1,6 @@
 export { SettingsGate } from "@/src/modules/settings/settings-gate"
 export { SETTINGS_REGISTRY } from "@/src/modules/settings/constants/settings-metadata"
+export { SETTINGS_SHEET_KEYS } from "@/src/modules/settings/constants/sheet-keys"
 export { EditQuietHoursSheet } from "@/src/modules/settings/components/sheets/edit-quiet-hours-sheet"
 export { WipeDataSheet } from "@/src/modules/settings/components/sheets/wipe-data-sheet"
 export { normalizeUserPreferences } from "@/src/modules/settings/lib/normalize-preferences"

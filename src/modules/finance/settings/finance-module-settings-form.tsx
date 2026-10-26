@@ -1,10 +1,11 @@
 "use client"
 
 import { FinanceIntegritySettingsSection } from "@/src/modules/finance/integrity"
+import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
 import { FINANCE_DASHBOARD_PERIOD_OPTIONS } from "@/src/modules/finance/shared/lib/dashboard-period"
 import { ModuleSheetEnableRow } from "@/src/modules/settings/components/profile-ui"
-import { WipeDataSheet } from "@/src/modules/settings"
+import { SETTINGS_SHEET_KEYS, WipeDataSheet } from "@/src/modules/settings"
 import { SETTINGS_REGISTRY } from "@/src/modules/settings/constants/settings-metadata"
 import { useModuleSheetEnable } from "@/src/modules/settings/hooks/use-module-sheet-enable"
 import { useProfileSheetFormSync } from "@/src/modules/settings/hooks/use-profile-sheet"
@@ -21,6 +22,7 @@ import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { getModule } from "@/src/shared/constants/module-registry"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
+import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
   ArrowLeftRight,
@@ -37,7 +39,7 @@ import {
   type LucideIcon,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { useEffect, useMemo, useState, type ReactNode } from "react"
+import { useEffect, useMemo, type ReactNode } from "react"
 import { useForm } from "react-hook-form"
 import { DisplaySection } from "./components/display-section"
 import { FinancialMonthSection } from "./components/financial-month-section"
@@ -93,17 +95,19 @@ const FINANCE_SETTINGS_SHEETS = {
 
 type FinanceSettingsSheetId = keyof typeof FINANCE_SETTINGS_SHEETS
 
+type SheetControl = ReturnType<typeof useSheetParam>
+
 type FinanceSettingsSheetProps = {
   id: FinanceSettingsSheetId
-  openSheet: FinanceSettingsSheetId | null
-  onOpenSheetChange: (sheet: FinanceSettingsSheetId | null) => void
+  open: boolean
+  onOpenChange: (open: boolean) => void
   children: ReactNode
 }
 
 function FinanceSettingsSheet({
   id,
-  openSheet,
-  onOpenSheetChange,
+  open,
+  onOpenChange,
   children,
 }: FinanceSettingsSheetProps) {
   const sheet = FINANCE_SETTINGS_SHEETS[id]
@@ -111,8 +115,8 @@ function FinanceSettingsSheet({
   return (
     <BottomSheet
       closeLabel="Cerrar"
-      open={openSheet === id}
-      onOpenChange={(open) => onOpenSheetChange(open ? id : null)}
+      open={open}
+      onOpenChange={onOpenChange}
       title={sheet.title}
       description={sheet.description}
     >
@@ -140,10 +144,29 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
     compactNumbers: config.display.compactNumbers,
     locale: formatLocale,
   }
-  const [openSheet, setOpenSheet] = useState<FinanceSettingsSheetId | null>(
-    null
+  const displaySheet = useSheetParam(FINANCE_SHEET_KEYS.financeSettingsDisplay)
+  const monthSheet = useSheetParam(FINANCE_SHEET_KEYS.financeSettingsMonth)
+  const movementsSheet = useSheetParam(
+    FINANCE_SHEET_KEYS.financeSettingsMovements
   )
-  const [wipeSheetOpen, setWipeSheetOpen] = useState(false)
+  const fixedIncomeSheet = useSheetParam(
+    FINANCE_SHEET_KEYS.financeSettingsFixedIncome
+  )
+  const subscriptionsSheet = useSheetParam(
+    FINANCE_SHEET_KEYS.financeSettingsSubscriptions
+  )
+  const notificationsSheet = useSheetParam(
+    FINANCE_SHEET_KEYS.financeSettingsNotifications
+  )
+  const wipeSheet = useSheetParam(SETTINGS_SHEET_KEYS.wipeData)
+  const settingsSheets: Record<FinanceSettingsSheetId, SheetControl> = {
+    display: displaySheet,
+    month: monthSheet,
+    movements: movementsSheet,
+    fixedIncome: fixedIncomeSheet,
+    subscriptions: subscriptionsSheet,
+    notifications: notificationsSheet,
+  }
 
   const {
     control,
@@ -305,7 +328,7 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
             value={describeSheet(id)}
             icon={FINANCE_SETTINGS_SHEETS[id].icon}
             accentColor={MODULE_ACCENT}
-            onPress={() => setOpenSheet(id)}
+            onPress={() => settingsSheets[id].setOpen(true)}
             isLast={index === sheetIds.length - 1}
           />
         ))}
@@ -331,31 +354,31 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
           destructive
           icon={Trash2}
           accentColor={SETTINGS_REGISTRY.danger.accent}
-          onPress={() => setWipeSheetOpen(true)}
+          onPress={() => wipeSheet.setOpen(true)}
           isLast
         />
       </SettingsSection>
 
       <FinanceSettingsSheet
         id="display"
-        openSheet={openSheet}
-        onOpenSheetChange={setOpenSheet}
+        open={displaySheet.open}
+        onOpenChange={displaySheet.setOpen}
       >
         <DisplaySection control={control} baseCurrency={config.baseCurrency} />
       </FinanceSettingsSheet>
 
       <FinanceSettingsSheet
         id="month"
-        openSheet={openSheet}
-        onOpenSheetChange={setOpenSheet}
+        open={monthSheet.open}
+        onOpenChange={monthSheet.setOpen}
       >
         <FinancialMonthSection control={control} />
       </FinanceSettingsSheet>
 
       <FinanceSettingsSheet
         id="movements"
-        openSheet={openSheet}
-        onOpenSheetChange={setOpenSheet}
+        open={movementsSheet.open}
+        onOpenChange={movementsSheet.setOpen}
       >
         <MovementDefaultsSection
           control={control}
@@ -366,8 +389,8 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
 
       <FinanceSettingsSheet
         id="fixedIncome"
-        openSheet={openSheet}
-        onOpenSheetChange={setOpenSheet}
+        open={fixedIncomeSheet.open}
+        onOpenChange={fixedIncomeSheet.setOpen}
       >
         <FixedIncomeSection
           control={control}
@@ -379,23 +402,23 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
 
       <FinanceSettingsSheet
         id="subscriptions"
-        openSheet={openSheet}
-        onOpenSheetChange={setOpenSheet}
+        open={subscriptionsSheet.open}
+        onOpenChange={subscriptionsSheet.setOpen}
       >
         <SubscriptionsSection control={control} />
       </FinanceSettingsSheet>
 
       <FinanceSettingsSheet
         id="notifications"
-        openSheet={openSheet}
-        onOpenSheetChange={setOpenSheet}
+        open={notificationsSheet.open}
+        onOpenChange={notificationsSheet.setOpen}
       >
         <NotificationsSection control={control} />
       </FinanceSettingsSheet>
 
       <WipeDataSheet
-        open={wipeSheetOpen}
-        onOpenChange={setWipeSheetOpen}
+        open={wipeSheet.open}
+        onOpenChange={wipeSheet.setOpen}
         email={profileQuery.data?.email ?? ""}
         title="Vaciar datos de Finanzas"
         description="Borra solo los datos de Finanzas. La cuenta se conserva."
