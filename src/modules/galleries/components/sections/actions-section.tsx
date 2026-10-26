@@ -2,11 +2,13 @@
 
 import { GalleryDemo } from "@/src/modules/galleries/components/gallery-demo"
 import { simulatedTap } from "@/src/modules/galleries/components/simulated-tap"
+import { PendingSurface } from "@/src/shared/components/shell/navigation-pending"
 import { Button } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import {
   ChevronLeftIcon,
+  ChevronRightIcon,
   EllipsisVerticalIcon,
   PencilIcon,
   PlusIcon,
@@ -129,6 +131,33 @@ export function ActionsSection() {
             Volver a Apariencia
           </Link>
         </Button>
+      </GalleryDemo>
+
+      <GalleryDemo
+        name="PendingSurface"
+        importPath="@/src/shared/components/shell/navigation-pending"
+        states="en reposo y con la navegación pendiente"
+        note="LinkPendingOverlay monta esta superficie dentro de un Link de Next mientras la navegación está pendiente. Aquí se pinta fija para poder verla."
+      >
+        <div className="flex flex-wrap items-center gap-3">
+          <Button
+            variant="outline"
+            onClick={() => simulatedTap("Abrir detalle")}
+          >
+            <ChevronRightIcon />
+            Abrir detalle
+          </Button>
+          <div className="relative overflow-hidden rounded-lg">
+            <Button
+              variant="outline"
+              onClick={() => simulatedTap("Abrir detalle")}
+            >
+              <ChevronRightIcon />
+              Abrir detalle
+            </Button>
+            <PendingSurface />
+          </div>
+        </div>
       </GalleryDemo>
     </>
   )

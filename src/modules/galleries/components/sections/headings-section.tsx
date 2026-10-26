@@ -3,6 +3,8 @@
 import { GalleryDemo } from "@/src/modules/galleries/components/gallery-demo"
 import { GALLERY_ACCENT } from "@/src/modules/galleries/components/mock/values"
 import { simulatedTap } from "@/src/modules/galleries/components/simulated-tap"
+import { BrandLogo } from "@/src/modules/finance/shared/components/brand-logo"
+import { DetailHeader } from "@/src/modules/finance/shared/components/layout/progress-hero"
 import { SettingsSection } from "@/src/shared/components/settings/settings-section"
 import { Badge } from "@/src/shared/components/ui/badge"
 import { Button } from "@/src/shared/components/ui/button"
@@ -119,6 +121,30 @@ export function HeadingsSection() {
             Aquí van las filas del grupo.
           </div>
         </SettingsSection>
+      </GalleryDemo>
+
+      <GalleryDemo
+        name="DetailHeader"
+        importPath="@/src/modules/finance/shared/components/layout/progress-hero"
+        states="con insignia y subtítulo, sin insignia"
+        note="Encabezado de un detalle sobre color: media, título, insignia y subtítulo. Es el mismo en una cuenta, una institución o una suscripción."
+      >
+        <div
+          className="flex flex-col gap-4 rounded-2xl p-4 text-white"
+          style={{ backgroundColor: GALLERY_ACCENT }}
+        >
+          <DetailHeader
+            media={<BrandLogo name="Cuenta Ejemplo" size={48} />}
+            title="Ahorro programado"
+            badge={{ label: "Activa" }}
+            subtitle="Ahorro · DOP"
+          />
+          <DetailHeader
+            media={<BrandLogo name="Institución Ejemplo" size={48} />}
+            title="Banco Ejemplo"
+            subtitle="Cuenta principal"
+          />
+        </div>
       </GalleryDemo>
     </>
   )
