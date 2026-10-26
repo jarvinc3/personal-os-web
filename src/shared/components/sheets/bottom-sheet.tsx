@@ -3,6 +3,8 @@
 import {
   FLOATING_SHEET_CONTENT_CLASS,
   getBottomSheetDirection,
+  WIDE_SHEET_CONTENT_CLASS,
+  type BottomSheetSize,
   type BottomSheetVariant,
 } from "@/src/shared/components/sheets/bottom-sheet-variant"
 import {
@@ -26,6 +28,8 @@ const DEFAULT_CLOSE_LABEL = "Cancelar"
 interface BottomSheetProps {
   open: boolean
   variant?: BottomSheetVariant
+  /** `wide` ensancha el drawer derecho desde `md` para mostrar dos columnas. */
+  size?: BottomSheetSize
   /** Stacks this sheet on top of the drawer that renders it. */
   nested?: boolean
   onOpenChange: (open: boolean) => void
@@ -49,6 +53,7 @@ interface BottomSheetProps {
 export function BottomSheet({
   open,
   variant = "default",
+  size = "default",
   nested = false,
   onOpenChange,
   title,
@@ -87,7 +92,10 @@ export function BottomSheet({
   return (
     <Root direction={direction} open={open} onOpenChange={onOpenChange}>
       <DrawerContent
-        className={cn(variant === "floating" && FLOATING_SHEET_CONTENT_CLASS)}
+        className={cn(
+          variant === "floating" && FLOATING_SHEET_CONTENT_CLASS,
+          variant === "default" && size === "wide" && WIDE_SHEET_CONTENT_CLASS
+        )}
       >
         <DrawerHeader className="relative border-b">
           <DrawerTitle className={headerAction ? "px-20" : undefined}>

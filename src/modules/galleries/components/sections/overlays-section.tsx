@@ -7,12 +7,19 @@ import { ConfirmDialog } from "@/src/shared/components/feedback/confirm-dialog"
 import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import { Button } from "@/src/shared/components/ui/button"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
-import { CircleCheckIcon, SaveIcon, StoreIcon, Trash2Icon } from "lucide-react"
+import {
+  CircleCheckIcon,
+  FileTextIcon,
+  SaveIcon,
+  StoreIcon,
+  Trash2Icon,
+} from "lucide-react"
 import { useState } from "react"
 
 const SHEET_PARAM = "ejemplo"
 const EDIT_SHEET_ID = "editar"
 const FLOATING_SHEET_ID = "flotante"
+const WIDE_SHEET_ID = "ancha"
 const CONFIRM_DIALOG_ID = "confirmar"
 
 /** Hojas y confirmaciones abiertas por la URL (#307). */
@@ -22,6 +29,7 @@ export function OverlaysSection() {
 
   const editOpen = open && sheetId === EDIT_SHEET_ID
   const floatingOpen = open && sheetId === FLOATING_SHEET_ID
+  const wideOpen = open && sheetId === WIDE_SHEET_ID
   const confirmOpen = open && sheetId === CONFIRM_DIALOG_ID
 
   return (
@@ -50,6 +58,18 @@ export function OverlaysSection() {
         >
           <CircleCheckIcon />
           Abrir hoja flotante
+        </Button>
+      </GalleryDemo>
+
+      <GalleryDemo
+        name={'BottomSheet size="wide"'}
+        importPath="@/src/shared/components/sheets/bottom-sheet"
+        states="panel ancho desde md, con dos columnas"
+        note="Para una vista previa al lado del formulario. En móvil la hoja baja como cualquier otra y las columnas se apilan."
+      >
+        <Button variant="outline" onClick={() => setOpen(true, WIDE_SHEET_ID)}>
+          <FileTextIcon />
+          Abrir panel ancho
         </Button>
       </GalleryDemo>
 
@@ -88,6 +108,34 @@ export function OverlaysSection() {
           onChange={setName}
           icon={StoreIcon}
         />
+      </BottomSheet>
+
+      <BottomSheet
+        open={wideOpen}
+        onOpenChange={setOpen}
+        size="wide"
+        title="Panel ancho"
+        description="Vista previa a la izquierda y formulario a la derecha desde md."
+        actions={{
+          submit: (
+            <Button onClick={() => simulatedTap("Guardar panel ancho")}>
+              <SaveIcon />
+              Guardar
+            </Button>
+          ),
+        }}
+      >
+        <div className="grid gap-4 md:grid-cols-2">
+          <p className="rounded-lg bg-muted p-3 text-sm text-muted-foreground">
+            Vista previa del registro.
+          </p>
+          <FormTextField
+            label="Nombre"
+            value={name}
+            onChange={setName}
+            icon={StoreIcon}
+          />
+        </div>
       </BottomSheet>
 
       <BottomSheet

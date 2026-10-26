@@ -228,6 +228,9 @@ export function describeVerificationPayload(payload: unknown): string {
   }
   const value = payload as Record<string, unknown>
   const parts: string[] = []
+  if (typeof value.relevance === "boolean") {
+    parts.push(RELEVANCE_LABELS[value.relevance ? "relevant" : "irrelevant"])
+  }
   if (
     typeof value.semanticType === "string" &&
     value.semanticType in SEMANTIC_TYPE_LABELS

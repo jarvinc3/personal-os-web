@@ -135,4 +135,15 @@ describe("revisión humana de correo", () => {
       /Transacción · Sin dominios · Pendiente · 1250 · DOP · Débito/
     )
   })
+
+  it("muestra la relevancia corregida junto al resto de etiquetas", () => {
+    assert.equal(describeVerificationPayload({ relevance: true }), "Relevante")
+    assert.match(
+      describeVerificationPayload({
+        relevance: false,
+        semanticType: "MARKETING",
+      }),
+      /^No relevante · Publicidad \/ newsletter/
+    )
+  })
 })
