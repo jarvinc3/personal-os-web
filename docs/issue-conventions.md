@@ -415,6 +415,8 @@ Reglas:
 - Un issue en `Done` sin PR necesita un comentario que diga cómo se verificó.
 - Un issue cerrado sin implementar se cierra como `not planned` y no pasa por `Done`.
 - La columna no sustituye al cuerpo: si el estado cambió, el comentario dice qué cambió.
+- Al pasar un issue a `In Progress` se llena el campo **Start date** del Project 3 con la fecha de ese día. Lo hace P-OS Proyect Manager.
+- La fecha de cierre (**Closed**) la registra GitHub automáticamente al cerrar el issue. Ningún issue se cierra sin ella: ciérralo siempre en GitHub, no solo moviéndolo de columna.
 
 ## Dependencias y sub-issues
 
