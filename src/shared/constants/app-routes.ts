@@ -20,6 +20,8 @@ export const APP_ROUTES = {
     settingsAppearanceCardEntity: (entitySlug: string) =>
       `/settings/appearance/cards/${entitySlug}`,
     settingsAppearanceComponents: "/settings/appearance/components",
+    settingsAppearanceComponentSection: (sectionId: string) =>
+      `/settings/appearance/components/${sectionId}`,
     settingsNotifications: "/settings/notifications",
     settingsPrivacy: "/settings/privacy",
     settingsModules: "/settings/modules",
