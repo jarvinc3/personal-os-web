@@ -1,19 +1,34 @@
 "use client"
 
-import { useCallback } from "react"
+import { useCallback, useState } from "react"
 import { useRouter } from "next/navigation"
+import { LayoutGridIcon, SearchIcon, SearchXIcon } from "lucide-react"
 
+import { searchComponentGallerySections } from "@/src/modules/galleries/components/component-gallery-search"
 import { COMPONENT_GALLERY_SECTIONS } from "@/src/modules/galleries/components/sections"
-import { COMPONENT_GALLERY_SECTION_BODIES } from "@/src/modules/galleries/components/sections/registry"
+import {
+  SummaryItem,
+  SummarySection,
+} from "@/src/shared/components/data-display/summary"
+import { FormTextField } from "@/src/shared/components/forms/form-text-field"
+import { Button } from "@/src/shared/components/ui/button"
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/src/shared/components/ui/empty"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
-import { PRESSABLE_CLASS } from "@/src/shared/lib/utils"
 
-const SECTION_ANCHOR_CLASS = `inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium whitespace-nowrap text-foreground ${PRESSABLE_CLASS}`
-
-/** Todos los componentes compartidos, por propósito (#307). */
+/** Categorías de la galería de componentes (#307, #341). */
 export function ComponentGalleryScreen() {
   const router = useRouter()
+  const [search, setSearch] = useState("")
+  const matches = searchComponentGallerySections(search)
+  const searching = search.trim().length > 0
+
   const handleBack = useCallback(() => {
     router.push(APP_ROUTES.app.settingsAppearance)
   }, [router])
@@ -22,14 +37,14 @@ export function ComponentGalleryScreen() {
     {
       variant: "secondary",
       title: "Componentes",
-      subtitle: `${COMPONENT_GALLERY_SECTIONS.length} secciones`,
+      subtitle: `${COMPONENT_GALLERY_SECTIONS.length} categorías`,
       onBack: handleBack,
     },
     [handleBack]
   )
 
   return (
-    <div className="mx-auto flex max-w-2xl min-w-0 flex-col gap-6 p-4 pb-16 md:px-6">
+    <div className="mx-auto flex max-w-2xl min-w-0 flex-col gap-4 p-4 pb-16 md:px-6">
       <p className="text-sm text-muted-foreground">
         Referencia visual de los componentes reales, con datos de ejemplo. Nada
         aquí lee ni escribe datos del usuario ni llama al back: los toques
@@ -37,51 +52,66 @@ export function ComponentGalleryScreen() {
         todavía y su issue lo agrega.
       </p>
 
-      <nav
-        aria-label="Secciones de la galería"
-        className="-mx-4 min-w-0 overflow-x-auto px-4 pb-1"
-      >
-        <ul className="flex w-max gap-2">
-          {COMPONENT_GALLERY_SECTIONS.map((section) => {
+      <FormTextField
+        icon={SearchIcon}
+        type="search"
+        value={search}
+        onChange={setSearch}
+        placeholder="Buscar componente o categoría"
+        ariaLabel="Buscar en la galería de componentes"
+        autoComplete="off"
+      />
+
+      {matches.length === 0 ? (
+        <Empty>
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <SearchXIcon aria-hidden="true" />
+            </EmptyMedia>
+            <EmptyTitle>Sin resultados</EmptyTitle>
+            <EmptyDescription>
+              Ninguna categoría ni componente coincide con «{search.trim()}».
+            </EmptyDescription>
+          </EmptyHeader>
+          <Button type="button" variant="outline" onClick={() => setSearch("")}>
+            Limpiar búsqueda
+          </Button>
+        </Empty>
+      ) : (
+        <SummarySection title="Categorías" icon={LayoutGridIcon}>
+          {matches.map(({ section, matchedDemos }, index) => {
             const Icon = section.icon
+            const description =
+              searching && matchedDemos.length
+                ? `Coincidencias: ${[...new Set(matchedDemos)].join(", ")}`
+                : section.description
             return (
-              <li key={section.id} className="min-w-0">
-                <a href={`#${section.id}`} className={SECTION_ANCHOR_CLASS}>
-                  <Icon className="size-3.5 shrink-0" aria-hidden />
-                  {section.title}
-                </a>
-              </li>
+              <SummaryItem
+                key={section.id}
+                title={section.title}
+                description={description}
+                wrapDescription
+                icon={Icon}
+                href={APP_ROUTES.app.settingsAppearanceComponentSection(
+                  section.id
+                )}
+                value={
+                  <span className="flex flex-col items-end">
+                    <span className="font-semibold tabular-nums">
+                      {section.demos.length}
+                    </span>
+                    <span className="text-[10px] font-normal text-muted-foreground">
+                      fichas
+                    </span>
+                  </span>
+                }
+                showChevron
+                isLast={index === matches.length - 1}
+              />
             )
           })}
-        </ul>
-      </nav>
-
-      {COMPONENT_GALLERY_SECTIONS.map((section) => {
-        const Icon = section.icon
-        const SectionBody = COMPONENT_GALLERY_SECTION_BODIES[section.id]
-        return (
-          <section
-            key={section.id}
-            id={section.id}
-            aria-labelledby={`${section.id}-title`}
-            className="flex scroll-mt-24 flex-col gap-3"
-          >
-            <header className="flex min-w-0 flex-col gap-0.5">
-              <h2
-                id={`${section.id}-title`}
-                className="flex items-center gap-2 text-base font-semibold text-foreground"
-              >
-                <Icon className="size-4 shrink-0" aria-hidden />
-                {section.title}
-              </h2>
-              <p className="text-sm text-muted-foreground">
-                {section.description}
-              </p>
-            </header>
-            <SectionBody />
-          </section>
-        )
-      })}
+        </SummarySection>
+      )}
     </div>
   )
 }
