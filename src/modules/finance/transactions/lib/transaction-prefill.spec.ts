@@ -4,6 +4,7 @@ import { describe, it } from "node:test"
 import {
   buildTransactionFormParams,
   parseTransactionPrefill,
+  readTransactionPrefillQuery,
 } from "./transaction-prefill.ts"
 
 describe("parseTransactionPrefill", () => {
@@ -36,6 +37,49 @@ describe("parseTransactionPrefill", () => {
       merchant: "",
       description: "",
     })
+  })
+})
+
+describe("readTransactionPrefillQuery", () => {
+  it("mantiene el prefill al abrir y cerrar la calculadora por ruta", () => {
+    const base = new URLSearchParams({
+      type: "DEBIT",
+      merchant: "Café",
+      amount: "250",
+    })
+    const withPickers = new URLSearchParams(base)
+    withPickers.set("picker", "calculator-transaction-amount")
+    withPickers.set("sheet", "transaction-amount-sheet")
+    withPickers.set("sheetId", "abc")
+
+    assert.equal(
+      readTransactionPrefillQuery(withPickers),
+      readTransactionPrefillQuery(base)
+    )
+
+    withPickers.delete("picker")
+    assert.equal(
+      readTransactionPrefillQuery(withPickers),
+      readTransactionPrefillQuery(base)
+    )
+  })
+
+  it("devuelve el mismo texto aunque la URL ordene las claves distinto", () => {
+    assert.equal(
+      readTransactionPrefillQuery(
+        new URLSearchParams("merchant=Caf%C3%A9&amount=250")
+      ),
+      readTransactionPrefillQuery(
+        new URLSearchParams("amount=250&merchant=Caf%C3%A9")
+      )
+    )
+  })
+
+  it("cambia cuando cambia un valor del prefill", () => {
+    assert.notEqual(
+      readTransactionPrefillQuery(new URLSearchParams({ merchant: "Café" })),
+      readTransactionPrefillQuery(new URLSearchParams({ merchant: "Pan" }))
+    )
   })
 })
 
