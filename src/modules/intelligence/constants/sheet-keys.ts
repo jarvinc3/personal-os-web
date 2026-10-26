@@ -2,4 +2,5 @@
 export const INTELLIGENCE_SHEET_KEYS = {
   message: "intelligence-message",
   review: "intelligence-review",
+  focus: "intelligence-focus",
 } as const
