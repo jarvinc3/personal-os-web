@@ -153,11 +153,12 @@ export function SubscriptionsHero({
           <Link
             href={APP_ROUTES.app.financeSubscriptionsCalendar}
             aria-label="Calendario"
+            className="relative"
           >
             <CalendarDaysIcon className="size-5 text-foreground" aria-hidden />
             <span className="text-xs text-muted-foreground">Calendario</span>
+            <LinkPendingOverlay />
           </Link>
-          <LinkPendingOverlay />
         </Button>
       </div>
     </section>
