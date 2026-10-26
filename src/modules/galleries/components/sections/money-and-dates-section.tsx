@@ -11,6 +11,7 @@ import {
 } from "@/src/modules/galleries/components/mock/values"
 import { FinanceDateField } from "@/src/modules/finance/shared/components/forms/date-field"
 import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
+import { CurrencyFlag } from "@/src/modules/finance/shared/components/currency-flag"
 import { Money } from "@/src/modules/finance/shared/components/money"
 import {
   formatFinanceMoney,
@@ -190,6 +191,22 @@ export function MoneyAndDatesSection() {
           onChange={() => {}}
           disabled
         />
+      </GalleryDemo>
+
+      <GalleryDemo
+        name="CurrencyFlag"
+        importPath="@/src/modules/finance/shared/components/currency-flag"
+        states="DOP, USD, EUR, MXN"
+        note="Bandera rasterizada junto al código ISO. La usa el selector de moneda y cualquier fila que muestre una moneda."
+      >
+        <div className="flex flex-wrap items-center gap-3">
+          {["DOP", "USD", "EUR", "MXN"].map((code) => (
+            <span key={code} className="flex items-center gap-1.5 text-sm">
+              <CurrencyFlag code={code} />
+              {code}
+            </span>
+          ))}
+        </div>
       </GalleryDemo>
     </>
   )

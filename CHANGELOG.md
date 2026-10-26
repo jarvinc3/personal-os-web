@@ -21,6 +21,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Cambiado
 
+- La galería de componentes suma fichas de `DetailHeader`, `CurrencyFlag` y `PendingSurface`, y `docs/architecture/ui-components.md` deja de contradecirse: el monto en pantalla es `Money` (dentro de un texto suelto, `formatFinanceMoney`), el deshacer es `showUndoToast` y el control segmentado es `SegmentedControl`; los canónicos que no se pueden montar aislados quedan explicados (#309).
 - La cola de revisión de Inteligencia deja ver el primer correo al abrir la vista en móvil: Gmail y las insignias de cobertura pasan a una sección plegada que resume la cuenta y el estado de la sincronización en una línea, y el asunto se lee completo en dos líneas sin que la etiqueta de partición lo tape (#323).
 - Revisar abre el formulario en un panel por ruta (`?sheet=intelligence-review`), con la vista previa del correo al lado desde `md` y arriba en móvil, en lugar de expandirse dentro de la fila; la lista no cambia de posición (#323).
 - La fila sale de la cola en cuanto se envía la verificación, sin esperar al servidor, y los conteos bajan con ella; si el envío falla, la fila vuelve y un aviso lo explica (#323).
