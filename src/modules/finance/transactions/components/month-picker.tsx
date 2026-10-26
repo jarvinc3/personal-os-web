@@ -1,13 +1,17 @@
 "use client"
 
 import { format } from "date-fns"
-import { useEffect, useRef } from "react"
+import { useLayoutEffect, useRef } from "react"
 
 import {
   monthKey,
   type MonthKey,
   type YearMonth,
 } from "@/src/modules/finance/shared/lib/month-window"
+import {
+  centeredScrollLeft,
+  monthPickerScrollBehavior,
+} from "@/src/modules/finance/transactions/lib/month-picker-scroll"
 import { shortMonthLabel } from "@/src/shared/lib/date-format"
 import { cn } from "@/src/shared/lib/utils"
 
@@ -15,14 +19,22 @@ function formatMonthPickerChip(date: Date, locale: string): string {
   return `${shortMonthLabel(date, locale)} ${format(date, "yy")}`.toUpperCase()
 }
 
-function scrollChipIntoCenter(list: HTMLElement, chip: HTMLElement) {
+function scrollChipIntoCenter(input: {
+  list: HTMLElement
+  chip: HTMLElement
+  behavior: ScrollBehavior
+}) {
+  const { list, chip, behavior } = input
   const listRect = list.getBoundingClientRect()
   const chipRect = chip.getBoundingClientRect()
-  const left =
-    list.scrollLeft +
-    (chipRect.left - listRect.left) -
-    (list.clientWidth - chip.clientWidth) / 2
-  list.scrollTo({ left, behavior: "smooth" })
+  const left = centeredScrollLeft({
+    listScrollLeft: list.scrollLeft,
+    listLeft: listRect.left,
+    listWidth: list.clientWidth,
+    chipLeft: chipRect.left,
+    chipWidth: chip.clientWidth,
+  })
+  list.scrollTo({ left, behavior })
 }
 
 type FinanceMonthPickerProps = {
@@ -41,8 +53,9 @@ export function FinanceMonthPicker({
   onSelect,
 }: FinanceMonthPickerProps) {
   const listRef = useRef<HTMLDivElement>(null)
+  const hasCentered = useRef(false)
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const list = listRef.current
     const chip = list?.querySelector<HTMLElement>(
       `[data-month-chip="${activeMonthKey}"]`
@@ -50,7 +63,12 @@ export function FinanceMonthPicker({
     if (!list || !chip) {
       return
     }
-    scrollChipIntoCenter(list, chip)
+    scrollChipIntoCenter({
+      list,
+      chip,
+      behavior: monthPickerScrollBehavior(hasCentered.current),
+    })
+    hasCentered.current = true
   }, [activeMonthKey])
 
   return (
