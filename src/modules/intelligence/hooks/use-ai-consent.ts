@@ -27,7 +27,9 @@ export function useAiConsent() {
       queryClient.setQueryData(AI_CONSENT_QUERY_KEY, consent)
       appToast.success({
         text1: "Consentimiento actualizado",
-        text2: "El cambio se aplicará al próximo rebuild del conocimiento.",
+        text2: consent.contributeToGlobalKnowledge
+          ? "Tu evidencia contribuirá en el próximo rebuild del conocimiento."
+          : "Tu evidencia ya no contribuye al conocimiento global.",
       })
     },
     onError: (error) => {
