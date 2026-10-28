@@ -66,6 +66,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Corregido
 
+- El formulario de `/login` se pinta desde el HTML y queda deshabilitado —con «Preparando…» en el botón— hasta que React hidrata: antes el primer pintado era solo un spinner y un clic en ese hueco no hacía nada ni mostraba error. Login y registro son formularios reales, así Enter envía desde la contraseña y el aviso del navegador «Password field is not contained in a form» desaparece (#345).
 - El detalle de una verificación CORRECTED muestra la Relevancia corregida junto al tipo semántico y los dominios (#323).
 - La sección «Cruda» del detalle del correo empieza plegada y se despliega al pulsarla (#323).
 - Movimientos abre el selector de mes en el mes actual aunque la pantalla monte después de cargar el perfil: el primer centrado del chip es inmediato y ya no se queda al principio de la tira (#325).
