@@ -1,15 +1,17 @@
 "use client"
 
+import { resolveAuthFormGate } from "@/src/modules/auth/lib/auth-form-gate"
 import { Button } from "@/src/shared/components/ui/button"
 import { Separator } from "@/src/shared/components/ui/separator"
 import { Spinner } from "@/src/shared/components/ui/spinner"
+import { useHydrated } from "@/src/shared/hooks/use-hydrated"
 import { ExternalLink, ChevronRightIcon } from "lucide-react"
 
 type AuthFormFooterProps = {
+  formId: string
   primaryLabel: string
   primaryPendingLabel: string
   isPrimaryPending: boolean
-  onPrimaryPress: () => void
   isGooglePending: boolean
   onGooglePress: () => void
   switchPrompt: string
@@ -18,28 +20,36 @@ type AuthFormFooterProps = {
 }
 
 export function AuthFormFooter({
+  formId,
   primaryLabel,
   primaryPendingLabel,
   isPrimaryPending,
-  onPrimaryPress,
   isGooglePending,
   onGooglePress,
   switchPrompt,
   switchAction,
   onSwitchPress,
 }: AuthFormFooterProps) {
-  const isBusy = isPrimaryPending || isGooglePending
+  const hydrated = useHydrated()
+  const gate = resolveAuthFormGate({
+    hydrated,
+    isPending: isPrimaryPending,
+    isGooglePending,
+    idleLabel: primaryLabel,
+    pendingLabel: primaryPendingLabel,
+  })
 
   return (
     <div className="flex flex-col gap-4 pt-2">
       <Button
         type="submit"
+        form={formId}
         className="h-12 rounded-full"
-        disabled={isBusy}
-        onClick={onPrimaryPress}
+        disabled={gate.isLocked}
+        aria-busy={gate.primaryBusy || undefined}
       >
-        {isPrimaryPending ? primaryPendingLabel : primaryLabel}
-        {isPrimaryPending ? (
+        {gate.primaryLabel}
+        {gate.primaryBusy ? (
           <Spinner data-icon="inline-start" />
         ) : (
           <ChevronRightIcon className="size-4 shrink-0" />
@@ -51,7 +61,7 @@ export function AuthFormFooter({
       <Button
         type="button"
         className="h-12 rounded-full"
-        disabled={isBusy}
+        disabled={gate.isLocked}
         onClick={onGooglePress}
         variant="outline"
       >
@@ -66,7 +76,7 @@ export function AuthFormFooter({
       <Button
         type="button"
         className="h-9"
-        disabled={isBusy}
+        disabled={gate.isLocked}
         onClick={onSwitchPress}
         variant="link"
       >

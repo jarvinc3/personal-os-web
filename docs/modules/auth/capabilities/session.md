@@ -22,6 +22,8 @@ Montado en raíz (`AuthBootstrapProvider` → `useAuthBootstrap`):
 
 Google: `loginWithGoogle({ next })` → redirect IdP → `GET /auth/callback?code&next=`. `next` se usa tal cual en el redirect post-exchange (p. ej. `/settings` en delete). Sin `code` o error de exchange → `/login`.
 
+El formulario se pinta desde el HTML: la pantalla no lee la URL y los sheets de móvil viven en su propio `Suspense` con `useSheetParam`. Mientras React hidrata, campos y botones están deshabilitados y el botón principal dice «Preparando…» (`useHydrated` + `resolveAuthFormGate`); antes el formulario no existía en el primer pintado y un clic en ese hueco se perdía sin error (#345). `LoginForm` y `RegisterForm` son `<form>` reales con `type="submit"`, así Enter envía desde la contraseña y el correo solo mueve el foco a la contraseña.
+
 ## Errores y contraseña
 
 - El texto de Supabase nunca llega al usuario: cada código conocido tiene su mensaje en español y un código desconocido deja el respaldo de la operación.
@@ -48,5 +50,6 @@ Google: `loginWithGoogle({ next })` → redirect IdP → `GET /auth/callback?cod
 - `AC-AUTH-001` — Given JWT válido y fila `users`, When login, Then store tiene `user.profile` y navegación a `/home`.
 - `AC-AUTH-002` — Given 401 del API sin `suppressUnauthorizedEvent`, When `apiGet`/`apiPost`, Then sign-out + toast “Sesión expirada”.
 - `AC-AUTH-003` — Given `/users/me` 404/4xx/5xx o body sin `id`+`email`, When hidratar, Then no queda sesión de app.
+- `AC-AUTH-004` — Given el HTML de `/login` antes de hidratar, When el usuario intenta escribir o enviar, Then los controles están deshabilitados y el envío no se pierde en silencio.
 
 Evidencia: `use-auth.ts`, `use-auth-bootstrap.ts`, `hydrate-auth-user.ts`, `app/auth/callback/route.ts`, `proxy.ts`.
