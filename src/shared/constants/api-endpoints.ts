@@ -34,6 +34,7 @@ export const API_ENDPOINTS = {
       `/intelligence/messages/${encodeURIComponent(id)}/verifications`,
     RUNS: "/intelligence/runs",
     CONNECT_EMAIL: "/intelligence/email/connect",
+    OAUTH_DIAGNOSTICS: "/intelligence/email/oauth/diagnostics",
     SYNC_EMAIL: "/intelligence/email/sync",
     RESET_EMAIL: "/intelligence/email/reset",
     KNOWLEDGE: "/intelligence/knowledge",
