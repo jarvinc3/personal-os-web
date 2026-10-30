@@ -67,6 +67,8 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Corregido
 
+- La lista de correos de Inteligencia deja de pedir todas las páginas cargadas al recibir un evento de sincronización o al volver a la ventana: conserva lo cargado, ofrece «Hay correos nuevos» para recargar desde la primera página, limita a una la petición de página siguiente en vuelo y, ante un 429, mantiene la lista visible, espera `Retry-After` o un retroceso acotado y se recupera sin recargar (#351).
+
 - La vista previa de Revisión y Modo foco decodifica las entidades HTML y descarta los caracteres invisibles del cuerpo saneado; un correo que empieza con `&#847;` o `&shy;` ya no muestra solo el primer número visible (#337).
 - La cola ADMIN de Conocimiento solo pide `/knowledge/admin/queue` cuando el rol es ADMIN; un usuario normal ve el aviso de permisos sin generar un 403 en la consola (#347).
 - Inteligencia comparte un solo canal en vivo con las notificaciones de la app, renueva el token de Supabase y se reconecta si el servidor cierra la conexión; el progreso de Gmail sigue llegando aunque las notificaciones dentro de la app estén apagadas (#350).

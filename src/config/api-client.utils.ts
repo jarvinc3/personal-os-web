@@ -13,6 +13,7 @@ export class ApiError extends Error {
   readonly requestId?: string
   readonly path?: string
   readonly existingMerchantId?: string | null
+  readonly retryAfterMs: number | null
 
   constructor(
     status: number,
@@ -20,7 +21,10 @@ export class ApiError extends Error {
     code?: string,
     requestId?: string,
     path?: string,
-    details?: { existingMerchantId?: string | null }
+    details?: {
+      existingMerchantId?: string | null
+      retryAfterMs?: number | null
+    }
   ) {
     super(message)
     this.name = "ApiError"
@@ -29,6 +33,7 @@ export class ApiError extends Error {
     this.requestId = requestId
     this.path = path
     this.existingMerchantId = details?.existingMerchantId ?? null
+    this.retryAfterMs = details?.retryAfterMs ?? null
   }
 }
 
@@ -50,10 +55,30 @@ export function isTransientError(error: unknown): boolean {
   return true
 }
 
+export function parseRetryAfterHeader(
+  value: string | null,
+  now = Date.now()
+): number | undefined {
+  if (!value) {
+    return undefined
+  }
+  const normalized = value.trim()
+  const seconds = Number(normalized)
+  if (Number.isFinite(seconds) && seconds >= 0) {
+    return Math.round(seconds * 1_000)
+  }
+  const retryAt = Date.parse(normalized)
+  if (Number.isNaN(retryAt)) {
+    return undefined
+  }
+  return Math.max(0, retryAt - now)
+}
+
 export function mapStatusToError(
   status: number,
   body: ApiErrorBody,
-  fallbackPath?: string
+  fallbackPath?: string,
+  retryAfterMs?: number
 ): ApiError {
   const messageFromBody =
     typeof body.message === "string" ? body.message : undefined
@@ -96,6 +121,15 @@ export function mapStatusToError(
         requestId,
         path,
         { existingMerchantId: body.existingMerchantId ?? null }
+      )
+    case 429:
+      return new ApiError(
+        429,
+        messageFromBody ?? "Demasiadas solicitudes, espera un momento",
+        code ?? "TOO_MANY_REQUESTS",
+        requestId,
+        path,
+        { retryAfterMs }
       )
     default:
       if (status >= 500) {

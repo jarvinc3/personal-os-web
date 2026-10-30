@@ -17,6 +17,7 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query"
+import { useCallback, useRef } from "react"
 
 export const INTELLIGENCE_QUERY_KEY = ["intelligence", "dashboard"] as const
 export const INTELLIGENCE_MESSAGES_QUERY_KEY = [
@@ -33,7 +34,12 @@ function fetchIntelligenceDashboard(signal: AbortSignal) {
 }
 
 export function useIntelligence() {
-  const emailSocketStatus = useAiEmailSyncSocket()
+  const {
+    status: emailSocketStatus,
+    hasPendingMessageUpdates,
+    markMessagesPending,
+    acknowledgeMessages,
+  } = useAiEmailSyncSocket()
   const session = useAppStore((state) => state.session)
   const queryClient = useQueryClient()
   const dashboardQuery = useQuery({
@@ -88,8 +94,30 @@ export function useIntelligence() {
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (page) => page.nextCursor ?? undefined,
     enabled: Boolean(session && dashboardQuery.data?.connection.connected),
-    staleTime: 15_000,
+    retry: false,
+    staleTime: Infinity,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   })
+  const nextPageRequestRef = useRef(false)
+  const fetchNextMessagesPage = messagesQuery.fetchNextPage
+  const loadNextMessagesPage = useCallback(async () => {
+    if (nextPageRequestRef.current) {
+      return
+    }
+    nextPageRequestRef.current = true
+    try {
+      await fetchNextMessagesPage()
+    } finally {
+      nextPageRequestRef.current = false
+    }
+  }, [fetchNextMessagesPage])
+  const refreshMessages = useCallback(async () => {
+    acknowledgeMessages()
+    await queryClient.resetQueries({
+      queryKey: INTELLIGENCE_MESSAGES_QUERY_KEY,
+    })
+  }, [acknowledgeMessages, queryClient])
   const connectMutation = useMutation({
     mutationFn: () =>
       apiPost<{ authorizationUrl: string }>(
@@ -105,12 +133,10 @@ export function useIntelligence() {
         API_ENDPOINTS.INTELLIGENCE.SYNC_EMAIL
       ),
     onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: INTELLIGENCE_QUERY_KEY }),
-        queryClient.invalidateQueries({
-          queryKey: INTELLIGENCE_MESSAGES_QUERY_KEY,
-        }),
-      ])
+      await queryClient.invalidateQueries({
+        queryKey: INTELLIGENCE_QUERY_KEY,
+      })
+      markMessagesPending()
     },
   })
   const resetMutation = useMutation({
@@ -126,13 +152,14 @@ export function useIntelligence() {
       })
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: INTELLIGENCE_QUERY_KEY }),
-        queryClient.invalidateQueries({
+        queryClient.resetQueries({
           queryKey: INTELLIGENCE_MESSAGES_QUERY_KEY,
         }),
         queryClient.invalidateQueries({
           queryKey: ["intelligence", "evidence"],
         }),
       ])
+      acknowledgeMessages()
     },
     onError: (error) => {
       appToast.error({
@@ -146,6 +173,9 @@ export function useIntelligence() {
     dashboardQuery,
     oauthDiagnosticsQuery,
     messagesQuery,
+    hasPendingMessageUpdates,
+    refreshMessages,
+    loadNextMessagesPage,
     connectMutation,
     syncMutation,
     resetMutation,

@@ -56,8 +56,13 @@ import {
   X,
   Trash2,
 } from "lucide-react"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useIntelligence } from "./hooks/use-intelligence"
+import {
+  getMessagesRateLimitError,
+  MESSAGES_RATE_LIMIT_MAX_AUTO_RETRIES,
+  messagesRateLimitDelayMs,
+} from "./messages-rate-limit"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { AiEvidenceSection } from "./components/ai-evidence-section"
 import { describeVerificationPayload } from "./review-labels"
@@ -78,6 +83,9 @@ function IntelligenceScreenBody() {
     dashboardQuery,
     oauthDiagnosticsQuery,
     messagesQuery,
+    hasPendingMessageUpdates,
+    refreshMessages,
+    loadNextMessagesPage,
     connectMutation,
     syncMutation,
     resetMutation,
@@ -95,7 +103,26 @@ function IntelligenceScreenBody() {
     () => messagesQuery.data?.pages.flatMap((page) => page.items) ?? [],
     [messagesQuery.data?.pages]
   )
-  const { fetchNextPage, hasNextPage, isFetchingNextPage } = messagesQuery
+  const {
+    hasNextPage,
+    isFetching: isFetchingMessages,
+    isFetchingNextPage,
+    refetch: refetchMessages,
+  } = messagesQuery
+  const messagesRateLimitError = getMessagesRateLimitError(messagesQuery.error)
+  const messagesRateLimitAttemptsRef = useRef(0)
+  const messagesRetryInProgress = isFetchingMessages || isFetchingNextPage
+  const retryMessages = useCallback(() => {
+    if (hasNextPage && messages.length > 0) {
+      void loadNextMessagesPage()
+      return
+    }
+    void refetchMessages()
+  }, [hasNextPage, loadNextMessagesPage, messages.length, refetchMessages])
+  const retryMessagesNow = useCallback(() => {
+    messagesRateLimitAttemptsRef.current = 0
+    retryMessages()
+  }, [retryMessages])
   const queryProgress = dashboardQuery.data?.connection.connected
     ? dashboardQuery.data.connection.syncProgress
     : null
@@ -104,11 +131,43 @@ function IntelligenceScreenBody() {
       ? queryProgress.retryAt
       : undefined
   const now = useRetryClock(retryAt)
-  const loadMore = useCallback(() => {
-    if (hasNextPage && !isFetchingNextPage) {
-      void fetchNextPage()
+  useEffect(() => {
+    if (!messagesRateLimitError) {
+      messagesRateLimitAttemptsRef.current = 0
+      return
     }
-  }, [fetchNextPage, hasNextPage, isFetchingNextPage])
+    if (
+      messagesRetryInProgress ||
+      messagesRateLimitAttemptsRef.current >=
+        MESSAGES_RATE_LIMIT_MAX_AUTO_RETRIES
+    ) {
+      return
+    }
+    const timer = window.setTimeout(
+      () => {
+        messagesRateLimitAttemptsRef.current += 1
+        retryMessages()
+      },
+      messagesRateLimitDelayMs({
+        error: messagesRateLimitError,
+        attempt: messagesRateLimitAttemptsRef.current,
+      })
+    )
+    return () => {
+      window.clearTimeout(timer)
+    }
+  }, [messagesRateLimitError, messagesRetryInProgress, retryMessages])
+  const loadMore = useCallback(() => {
+    if (!hasNextPage || isFetchingNextPage || messagesQuery.error) {
+      return
+    }
+    void loadNextMessagesPage()
+  }, [
+    hasNextPage,
+    isFetchingNextPage,
+    loadNextMessagesPage,
+    messagesQuery.error,
+  ])
 
   if (dashboardQuery.isPending) {
     return (
@@ -577,7 +636,29 @@ function IntelligenceScreenBody() {
           </TabsList>
 
           <TabsContent value="messages" className="flex flex-col gap-3">
-            {messagesQuery.isPending ? (
+            {messagesRateLimitError ? (
+              <Alert variant="warning" role="status">
+                <AlertCircle className="size-4 shrink-0" aria-hidden="true" />
+                <AlertTitle>Demasiadas solicitudes a la lista</AlertTitle>
+                <AlertDescription>
+                  {messagesRetryInProgress
+                    ? "La lista conserva los correos cargados. Reintentando sin recargar."
+                    : "La lista conserva los correos cargados. El API limitó las solicitudes; se reintentará con una espera acotada o puedes reintentar ahora."}
+                </AlertDescription>
+                <AlertAction>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={retryMessagesNow}
+                    disabled={messagesRetryInProgress}
+                  >
+                    <RefreshCw aria-hidden="true" /> Reintentar
+                  </Button>
+                </AlertAction>
+              </Alert>
+            ) : null}
+            {messagesQuery.isPending && messages.length === 0 ? (
               <div
                 className="flex flex-col gap-2 p-2"
                 aria-label="Cargando mensajes"
@@ -586,7 +667,9 @@ function IntelligenceScreenBody() {
                 <Skeleton className="h-14 w-full" />
                 <Skeleton className="h-14 w-full" />
               </div>
-            ) : messagesQuery.isError ? (
+            ) : messages.length === 0 &&
+              messagesQuery.isError &&
+              !messagesRateLimitError ? (
               <Empty>
                 <EmptyHeader>
                   <EmptyMedia variant="icon">
@@ -597,27 +680,47 @@ function IntelligenceScreenBody() {
                     Los mensajes ya cargados siguen disponibles.
                   </EmptyDescription>
                 </EmptyHeader>
-                <Button
-                  type="button"
-                  onClick={() => void messagesQuery.refetch()}
-                >
+                <Button type="button" onClick={() => void refetchMessages()}>
                   <RefreshCw aria-hidden="true" /> Reintentar
                 </Button>
               </Empty>
             ) : messages.length === 0 ? (
-              <Empty>
-                <EmptyHeader>
-                  <EmptyMedia variant="icon">
-                    <Inbox aria-hidden="true" />
-                  </EmptyMedia>
-                  <EmptyTitle>Aún no hay mensajes</EmptyTitle>
-                  <EmptyDescription>
-                    La sincronización agregará aquí el correo desde 2026.
-                  </EmptyDescription>
-                </EmptyHeader>
-              </Empty>
+              messagesRateLimitError ? null : (
+                <Empty>
+                  <EmptyHeader>
+                    <EmptyMedia variant="icon">
+                      <Inbox aria-hidden="true" />
+                    </EmptyMedia>
+                    <EmptyTitle>Aún no hay mensajes</EmptyTitle>
+                    <EmptyDescription>
+                      La sincronización agregará aquí el correo desde 2026.
+                    </EmptyDescription>
+                  </EmptyHeader>
+                </Empty>
+              )
             ) : (
               <>
+                {hasPendingMessageUpdates ? (
+                  <Alert variant="default" role="status">
+                    <Mail className="size-4 shrink-0" aria-hidden="true" />
+                    <AlertTitle>Hay correos nuevos</AlertTitle>
+                    <AlertDescription>
+                      La sincronización terminó. Actualiza la lista; se
+                      recargará desde la primera página.
+                    </AlertDescription>
+                    <AlertAction>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => void refreshMessages()}
+                        disabled={messagesRetryInProgress}
+                      >
+                        <RefreshCw aria-hidden="true" /> Actualizar
+                      </Button>
+                    </AlertAction>
+                  </Alert>
+                ) : null}
                 {messages.map((message) => (
                   <SummaryItem
                     key={message.id}
@@ -630,8 +733,8 @@ function IntelligenceScreenBody() {
                   />
                 ))}
                 <InfiniteListSentinel
-                  hasNextPage={Boolean(messagesQuery.hasNextPage)}
-                  isFetchingNextPage={messagesQuery.isFetchingNextPage}
+                  hasNextPage={Boolean(hasNextPage) && !messagesQuery.error}
+                  isFetchingNextPage={isFetchingNextPage}
                   onLoadMore={loadMore}
                 />
               </>
