@@ -67,7 +67,6 @@ export function NotificationsSocketProvider({
       auth: { token: tokenRef.current },
       transports: ["websocket"],
     })
-    socketRef.current = socket
 
     for (const [event, handlers] of handlersRef.current) {
       for (const handler of handlers) {
@@ -133,6 +132,7 @@ export function NotificationsSocketProvider({
       socketRef.current = null
     }
     const socket = socketRef.current ?? createSocket()
+    socketRef.current = socket
     socketUserIdRef.current = userId
     updateSocketAuth(socket, token)
     if (socket.disconnected && !socket.active) {
