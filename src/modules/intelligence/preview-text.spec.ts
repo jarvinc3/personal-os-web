@@ -14,6 +14,13 @@ describe("limpieza de la vista previa del correo", () => {
     )
   })
 
+  it("conserva las entidades con nombre desconocidas", () => {
+    assert.equal(
+      cleanPreviewText("&copy; 2026 &unknown; texto"),
+      "&copy; 2026 &unknown; texto"
+    )
+  })
+
   it("elimina espacios de ancho cero y caracteres de control", () => {
     assert.equal(
       cleanPreviewText("&#x200B;Recibo\u00a0&#8203;de pago"),

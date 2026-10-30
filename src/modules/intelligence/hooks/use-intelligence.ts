@@ -4,6 +4,7 @@ import { apiGet, apiPost } from "@/src/config/api-client"
 import type {
   AiEmailMessageDetail,
   AiEmailMessagesPage,
+  AiEmailOAuthDiagnostics,
   IntelligenceDashboard,
 } from "@/src/modules/intelligence/types/intelligence.types"
 import { API_ENDPOINTS } from "@/src/shared/constants/api-endpoints"
@@ -24,28 +25,51 @@ export const INTELLIGENCE_MESSAGES_QUERY_KEY = [
 ] as const
 export const INTELLIGENCE_PAGE_SIZE = 50
 
+function fetchIntelligenceDashboard(signal: AbortSignal) {
+  return apiGet<IntelligenceDashboard>(
+    API_ENDPOINTS.INTELLIGENCE.DASHBOARD,
+    signal
+  )
+}
+
 export function useIntelligence() {
   const emailSocketStatus = useAiEmailSyncSocket()
   const session = useAppStore((state) => state.session)
   const queryClient = useQueryClient()
   const dashboardQuery = useQuery({
     queryKey: INTELLIGENCE_QUERY_KEY,
-    queryFn: ({ signal }) =>
-      apiGet<IntelligenceDashboard>(
-        API_ENDPOINTS.INTELLIGENCE.DASHBOARD,
-        signal
-      ),
+    queryFn: ({ signal }) => fetchIntelligenceDashboard(signal),
     enabled: Boolean(session),
     staleTime: 15_000,
     refetchOnWindowFocus: true,
     refetchInterval: (query) => {
       const connection = query.state.data?.connection
-      return connection?.connected &&
-        (connection.syncInProgress ||
-          (!connection.initialSyncCompletedAt && !connection.lastSyncErrorCode))
+      if (!connection?.connected) {
+        return false
+      }
+      if (
+        connection.lastSyncErrorCode ||
+        connection.syncProgress?.status === "failed"
+      ) {
+        return 30_000
+      }
+      return connection.syncInProgress ||
+        (!connection.initialSyncCompletedAt && !connection.lastSyncErrorCode)
         ? 5_000
         : false
     },
+  })
+  const oauthDiagnosticsQuery = useQuery({
+    queryKey: ["intelligence", "oauth-diagnostics"],
+    queryFn: ({ signal }) =>
+      apiGet<AiEmailOAuthDiagnostics>(
+        API_ENDPOINTS.INTELLIGENCE.OAUTH_DIAGNOSTICS,
+        signal
+      ),
+    enabled: Boolean(session && dashboardQuery.data?.connection.connected),
+    staleTime: 60_000,
+    refetchInterval: (query) =>
+      query.state.data?.configured === false ? 60_000 : false,
   })
   const messagesQuery = useInfiniteQuery({
     queryKey: INTELLIGENCE_MESSAGES_QUERY_KEY,
@@ -120,12 +144,25 @@ export function useIntelligence() {
 
   return {
     dashboardQuery,
+    oauthDiagnosticsQuery,
     messagesQuery,
     connectMutation,
     syncMutation,
     resetMutation,
     emailSocketStatus,
   }
+}
+
+export function useIntelligenceRole() {
+  const session = useAppStore((state) => state.session)
+
+  return useQuery({
+    queryKey: INTELLIGENCE_QUERY_KEY,
+    queryFn: ({ signal }) => fetchIntelligenceDashboard(signal),
+    enabled: Boolean(session),
+    staleTime: 60_000,
+    select: (dashboard) => dashboard.role,
+  })
 }
 
 export function useIntelligenceMessage(messageId: string | null) {

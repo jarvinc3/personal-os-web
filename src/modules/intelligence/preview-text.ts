@@ -41,8 +41,8 @@ export function cleanPreviewText(value: string | null): string {
     .replace(/&#(\d+);/g, (_, decimal: string) =>
       decodeCodePoint(Number(decimal))
     )
-    .replace(/&([a-z][a-z0-9]+);/gi, (_, name: string) => {
-      return NAMED_ENTITIES[name.toLowerCase()] ?? ""
+    .replace(/&([a-z][a-z0-9]+);/gi, (entity, name: string) => {
+      return NAMED_ENTITIES[name.toLowerCase()] ?? entity
     })
     .replace(INVISIBLE_CHARACTERS, "")
     .replace(/\u00a0/g, " ")

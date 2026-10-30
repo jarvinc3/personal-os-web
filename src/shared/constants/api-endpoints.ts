@@ -34,10 +34,13 @@ export const API_ENDPOINTS = {
       `/intelligence/messages/${encodeURIComponent(id)}/verifications`,
     RUNS: "/intelligence/runs",
     CONNECT_EMAIL: "/intelligence/email/connect",
+    OAUTH_DIAGNOSTICS: "/intelligence/email/oauth/diagnostics",
     SYNC_EMAIL: "/intelligence/email/sync",
     RESET_EMAIL: "/intelligence/email/reset",
     KNOWLEDGE: "/intelligence/knowledge",
     KNOWLEDGE_ADMIN_QUEUE: "/intelligence/knowledge/admin/queue",
+    KNOWLEDGE_PROMOTE: (knowledgeId: string) =>
+      `/intelligence/knowledge/admin/${encodeURIComponent(knowledgeId)}/promote`,
     KNOWLEDGE_REVERT: (knowledgeId: string) =>
       `/intelligence/knowledge/admin/${encodeURIComponent(knowledgeId)}/revert`,
     KNOWLEDGE_EXPORT: "/intelligence/knowledge/me/export",

@@ -158,6 +158,10 @@ export function canRevertKnowledge(item: KnowledgeItem): boolean {
   return item.scope === "GLOBAL" && item.state === "STABLE"
 }
 
+export function canPromoteKnowledge(item: KnowledgeItem): boolean {
+  return item.scope === "GLOBAL" && item.state === "REVIEW_REQUIRED"
+}
+
 export function groupKnowledgeByState(
   items: readonly KnowledgeItem[]
 ): KnowledgeStateGroup[] {
