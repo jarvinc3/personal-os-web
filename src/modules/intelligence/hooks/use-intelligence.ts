@@ -4,6 +4,7 @@ import { apiGet, apiPost } from "@/src/config/api-client"
 import type {
   AiEmailMessageDetail,
   AiEmailMessagesPage,
+  AiEmailOAuthDiagnostics,
   IntelligenceDashboard,
 } from "@/src/modules/intelligence/types/intelligence.types"
 import { API_ENDPOINTS } from "@/src/shared/constants/api-endpoints"
@@ -40,12 +41,32 @@ export function useIntelligence() {
     refetchOnWindowFocus: true,
     refetchInterval: (query) => {
       const connection = query.state.data?.connection
-      return connection?.connected &&
-        (connection.syncInProgress ||
-          (!connection.initialSyncCompletedAt && !connection.lastSyncErrorCode))
+      if (!connection?.connected) {
+        return false
+      }
+      if (
+        connection.lastSyncErrorCode ||
+        connection.syncProgress?.status === "failed"
+      ) {
+        return 30_000
+      }
+      return connection.syncInProgress ||
+        (!connection.initialSyncCompletedAt && !connection.lastSyncErrorCode)
         ? 5_000
         : false
     },
+  })
+  const oauthDiagnosticsQuery = useQuery({
+    queryKey: ["intelligence", "oauth-diagnostics"],
+    queryFn: ({ signal }) =>
+      apiGet<AiEmailOAuthDiagnostics>(
+        API_ENDPOINTS.INTELLIGENCE.OAUTH_DIAGNOSTICS,
+        signal
+      ),
+    enabled: Boolean(session && dashboardQuery.data?.connection.connected),
+    staleTime: 60_000,
+    refetchInterval: (query) =>
+      query.state.data?.configured === false ? 60_000 : false,
   })
   const messagesQuery = useInfiniteQuery({
     queryKey: INTELLIGENCE_MESSAGES_QUERY_KEY,
@@ -120,6 +141,7 @@ export function useIntelligence() {
 
   return {
     dashboardQuery,
+    oauthDiagnosticsQuery,
     messagesQuery,
     connectMutation,
     syncMutation,
