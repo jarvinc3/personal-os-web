@@ -1,6 +1,7 @@
 "use client"
 
 import {
+  NotificationsSocketProvider,
   useNotificationsSocket,
   usePushToken,
 } from "@/src/modules/notifications"
@@ -23,9 +24,9 @@ export function AppEffectsProvider({
   children: React.ReactNode
 }) {
   return (
-    <>
+    <NotificationsSocketProvider>
       <AppEffects />
       {children}
-    </>
+    </NotificationsSocketProvider>
   )
 }

@@ -8,7 +8,7 @@
 4. Ícono y color: categoría del movimiento (`data.categoryIcon` / `data.categoryColor`) con respaldo al módulo.
 5. Tap fila → `PATCH /notifications/:id/read`; si `data.transactionId`, abre `TransactionDetailSheet`.
 6. Menú header → marcar todas / abrir prefs (canales + quiet hours sheet).
-7. Si `channels.inApp=false`, el backend devuelve lista vacía; el socket **no** se conecta (`useNotificationsSocket` exige `isInAppEnabled`).
+7. Si `channels.inApp=false`, el backend devuelve lista vacía y no se muestra el toast; el canal compartido sigue conectado con la sesión para que el progreso de Gmail llegue a Inteligencia.
 
 ## Header
 

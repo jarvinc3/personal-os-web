@@ -10,6 +10,12 @@ export {
   useNotifications,
 } from "@/src/modules/notifications/hooks/use-notifications"
 export { useNotificationsSocket } from "@/src/modules/notifications/hooks/use-notifications-socket"
+export {
+  NotificationsSocketProvider,
+  useNotificationsSocketEvent,
+  useNotificationsSocketStatus,
+  type NotificationsSocketStatus,
+} from "@/src/modules/notifications/providers/notifications-socket-provider"
 export { usePushToken } from "@/src/modules/notifications/hooks/use-push-token"
 export { usePushTokenStatus } from "@/src/modules/notifications/hooks/use-push-token-status"
 export {
