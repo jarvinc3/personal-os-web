@@ -38,6 +38,8 @@ export const API_ENDPOINTS = {
     RESET_EMAIL: "/intelligence/email/reset",
     KNOWLEDGE: "/intelligence/knowledge",
     KNOWLEDGE_ADMIN_QUEUE: "/intelligence/knowledge/admin/queue",
+    KNOWLEDGE_PROMOTE: (knowledgeId: string) =>
+      `/intelligence/knowledge/admin/${encodeURIComponent(knowledgeId)}/promote`,
     KNOWLEDGE_REVERT: (knowledgeId: string) =>
       `/intelligence/knowledge/admin/${encodeURIComponent(knowledgeId)}/revert`,
     KNOWLEDGE_EXPORT: "/intelligence/knowledge/me/export",

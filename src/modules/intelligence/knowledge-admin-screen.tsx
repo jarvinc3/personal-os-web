@@ -3,9 +3,11 @@
 import { ApiError } from "@/src/config/api-client"
 import { KnowledgeItemRow } from "@/src/modules/intelligence/components/knowledge-item-row"
 import { KnowledgeListSkeleton } from "@/src/modules/intelligence/components/knowledge-list-skeleton"
+import { KnowledgePromoteDialog } from "@/src/modules/intelligence/components/knowledge-promote-dialog"
 import { KnowledgeRevertDialog } from "@/src/modules/intelligence/components/knowledge-revert-dialog"
 import { useKnowledgeAdminQueue } from "@/src/modules/intelligence/hooks/use-knowledge"
 import {
+  canPromoteKnowledge,
   canRevertKnowledge,
   groupKnowledgeByState,
 } from "@/src/modules/intelligence/knowledge"
@@ -51,6 +53,7 @@ export function KnowledgeAdminScreen() {
   usePageHeader({ title: "Cola de conocimiento" })
   const queueQuery = useKnowledgeAdminQueue()
   const [reverting, setReverting] = useState<KnowledgeItem | null>(null)
+  const [promoting, setPromoting] = useState<KnowledgeItem | null>(null)
 
   const queueItems = queueQuery.data ?? []
   const groups = groupKnowledgeByState(queueItems)
@@ -74,9 +77,9 @@ export function KnowledgeAdminScreen() {
               </EmptyMedia>
               <EmptyTitle>Solo administradores</EmptyTitle>
               <EmptyDescription>
-                Necesitas el rol ADMIN para ver y revertir el conocimiento
-                global. El conocimiento personal de otros usuarios nunca se
-                muestra aquí.
+                Necesitas el rol ADMIN para ver, promover y revertir el
+                conocimiento global. El conocimiento personal de otros usuarios
+                nunca se muestra aquí.
               </EmptyDescription>
             </EmptyHeader>
           </Empty>
@@ -120,16 +123,30 @@ export function KnowledgeAdminScreen() {
                   isLast={index === group.items.length - 1}
                   showState={false}
                   trailing={
-                    canRevertKnowledge(item) ? (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setReverting(item)}
-                      >
-                        <Undo2 data-icon="inline-start" />
-                        Revertir
-                      </Button>
+                    canPromoteKnowledge(item) || canRevertKnowledge(item) ? (
+                      <div className="flex flex-wrap justify-end gap-2">
+                        {canPromoteKnowledge(item) ? (
+                          <Button
+                            type="button"
+                            size="sm"
+                            onClick={() => setPromoting(item)}
+                          >
+                            <ShieldCheck data-icon="inline-start" />
+                            Promover
+                          </Button>
+                        ) : null}
+                        {canRevertKnowledge(item) ? (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setReverting(item)}
+                          >
+                            <Undo2 data-icon="inline-start" />
+                            Revertir
+                          </Button>
+                        ) : null}
+                      </div>
                     ) : undefined
                   }
                 />
@@ -139,6 +156,10 @@ export function KnowledgeAdminScreen() {
         })
       )}
 
+      <KnowledgePromoteDialog
+        item={promoting}
+        onClose={() => setPromoting(null)}
+      />
       <KnowledgeRevertDialog
         item={reverting}
         onClose={() => setReverting(null)}
