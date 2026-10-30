@@ -16,6 +16,8 @@ El formulario de Revisar vive en un panel por ruta (`?sheet=intelligence-review&
 
 La cabecera de la vista deja la cola a la vista: Gmail y las insignias de cobertura viven en una sección plegada que resume la cuenta y el estado de la sincronización en una línea.
 
+El progreso de Gmail usa el mismo canal `/notifications` que las notificaciones de la app: una sola conexión por sesión. El canal actualiza `socket.auth` cuando cambia el token de Supabase y, si el servidor lo cierra, renueva el token y vuelve a conectar. El progreso llega aunque las notificaciones dentro de la app estén apagadas; en ese caso solo se omite el toast.
+
 El **modo foco** (`?sheet=intelligence-focus`) revisa un correo a la vez con el mismo panel: la posición y las flechas anterior y siguiente van encima del formulario, y los atajos C, E, R, J y K se muestran en la ayuda visible. Las teclas no actúan mientras se escribe en un campo de texto ni con un selector abierto, y con Ctrl, Cmd o Alt tampoco. Verificar avanza solo al siguiente pendiente: la fila sale de la cola y el correo siguiente ocupa su lugar. Rechazar sin motivo mueve el foco al campo del motivo y no rechaza; Corregir exige al menos una etiqueta, como en la cola. Si la cola se acaba, la hoja muestra el estado de cola terminada, y salir con Esc o con la X devuelve a la lista sin cambiar su posición ni el filtro de partición.
 
 **Código:** `src/modules/intelligence/`, `app/(app)/intelligence/`.
