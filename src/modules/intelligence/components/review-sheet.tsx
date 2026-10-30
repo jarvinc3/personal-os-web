@@ -6,6 +6,7 @@ import { useForm, useWatch } from "react-hook-form"
 import { useIntelligenceMessage } from "@/src/modules/intelligence/hooks/use-intelligence"
 import { useReviewShortcutListener } from "@/src/modules/intelligence/hooks/use-review-shortcuts"
 import { shortMessageId } from "@/src/modules/intelligence/message-id"
+import { cleanPreviewText } from "@/src/modules/intelligence/preview-text"
 import {
   REVIEW_SHORTCUT_HELP,
   type ReviewShortcut,
@@ -770,7 +771,7 @@ function ReviewPreview({
         </p>
       ) : null}
       <div className="max-h-52 overflow-auto rounded-lg bg-muted p-3 text-sm wrap-break-word whitespace-pre-wrap md:max-h-96">
-        {sanitizedBody || "Sin contenido"}
+        {cleanPreviewText(sanitizedBody) || "Sin contenido"}
       </div>
       <SummarySection
         title="Cruda (retención limitada)"

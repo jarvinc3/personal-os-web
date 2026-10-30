@@ -66,6 +66,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Corregido
 
+- La vista previa de Revisión y Modo foco decodifica las entidades HTML y descarta los caracteres invisibles del cuerpo saneado; un correo que empieza con `&#847;` o `&shy;` ya no muestra solo el primer número visible (#337).
 - El aviso al revocar la contribución al conocimiento global confirma que la evidencia ya no contribuye; al activarla, que contribuirá en el próximo rebuild (#239).
 - El formulario de `/login` se pinta desde el HTML y queda deshabilitado —con «Preparando…» en el botón— hasta que React hidrata: antes el primer pintado era solo un spinner y un clic en ese hueco no hacía nada ni mostraba error. Login y registro son formularios reales, así Enter envía desde la contraseña y el aviso del navegador «Password field is not contained in a form» desaparece (#345).
 - El detalle de una verificación CORRECTED muestra la Relevancia corregida junto al tipo semántico y los dominios (#323).
