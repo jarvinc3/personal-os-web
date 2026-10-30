@@ -28,6 +28,5 @@ describe("limpieza de la vista previa del correo", () => {
   it("devuelve vacío si no hay texto visible", () => {
     assert.equal(cleanPreviewText("&#847; &shy; &#8203;"), "")
     assert.equal(cleanPreviewText(null), "")
-    assert.equal(cleanPreviewText(undefined), "")
   })
 })

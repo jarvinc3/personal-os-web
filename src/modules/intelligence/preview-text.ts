@@ -30,7 +30,7 @@ function decodeCodePoint(codePoint: number): string {
  * the start of a message. The preview decodes and drops them so the visible
  * text starts at the first real character.
  */
-export function cleanPreviewText(value: string | null | undefined): string {
+export function cleanPreviewText(value: string | null): string {
   if (!value) {
     return ""
   }

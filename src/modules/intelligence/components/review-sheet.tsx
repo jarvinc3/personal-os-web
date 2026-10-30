@@ -771,7 +771,7 @@ function ReviewPreview({
         </p>
       ) : null}
       <div className="max-h-52 overflow-auto rounded-lg bg-muted p-3 text-sm wrap-break-word whitespace-pre-wrap md:max-h-96">
-        {cleanPreviewText(sanitizedBody) || "Sin contenido"}
+        {cleanPreviewText(sanitizedBody ?? null) || "Sin contenido"}
       </div>
       <SummarySection
         title="Cruda (retención limitada)"
