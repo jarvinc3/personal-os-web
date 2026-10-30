@@ -67,6 +67,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Corregido
 
+- La cola ADMIN de Conocimiento solo pide `/knowledge/admin/queue` cuando el rol es ADMIN; un usuario normal ve el aviso de permisos sin generar un 403 en la consola (#347).
 - Inteligencia comparte un solo canal en vivo con las notificaciones de la app, renueva el token de Supabase y se reconecta si el servidor cierra la conexión; el progreso de Gmail sigue llegando aunque las notificaciones dentro de la app estén apagadas (#350).
 - Inteligencia separa el historial inicial del estado de la última sincronización: muestra la causa, el código y la hora del intento fallido, solo ofrece reconectar ante un rechazo de autorización, avisa si la configuración OAuth está incompleta y etiqueta el canal en vivo como canal de actualizaciones; mientras hay un error visible, la vista se refresca cada 30 s aunque el canal esté desconectado (#349).
 - El aviso al revocar la contribución al conocimiento global confirma que la evidencia ya no contribuye; al activarla, que contribuirá en el próximo rebuild (#239).

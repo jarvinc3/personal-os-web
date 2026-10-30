@@ -53,7 +53,7 @@ export function useKnowledge() {
   })
 }
 
-export function useKnowledgeAdminQueue() {
+export function useKnowledgeAdminQueue(enabled: boolean) {
   const session = useAppStore((state) => state.session)
 
   return useQuery({
@@ -63,7 +63,7 @@ export function useKnowledgeAdminQueue() {
         API_ENDPOINTS.INTELLIGENCE.KNOWLEDGE_ADMIN_QUEUE,
         signal
       ),
-    enabled: Boolean(session),
+    enabled: Boolean(session && enabled),
     retry: shouldRetryKnowledgeQuery,
   })
 }

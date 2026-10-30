@@ -25,17 +25,20 @@ export const INTELLIGENCE_MESSAGES_QUERY_KEY = [
 ] as const
 export const INTELLIGENCE_PAGE_SIZE = 50
 
+function fetchIntelligenceDashboard(signal: AbortSignal) {
+  return apiGet<IntelligenceDashboard>(
+    API_ENDPOINTS.INTELLIGENCE.DASHBOARD,
+    signal
+  )
+}
+
 export function useIntelligence() {
   const emailSocketStatus = useAiEmailSyncSocket()
   const session = useAppStore((state) => state.session)
   const queryClient = useQueryClient()
   const dashboardQuery = useQuery({
     queryKey: INTELLIGENCE_QUERY_KEY,
-    queryFn: ({ signal }) =>
-      apiGet<IntelligenceDashboard>(
-        API_ENDPOINTS.INTELLIGENCE.DASHBOARD,
-        signal
-      ),
+    queryFn: ({ signal }) => fetchIntelligenceDashboard(signal),
     enabled: Boolean(session),
     staleTime: 15_000,
     refetchOnWindowFocus: true,
@@ -148,6 +151,18 @@ export function useIntelligence() {
     resetMutation,
     emailSocketStatus,
   }
+}
+
+export function useIntelligenceRole() {
+  const session = useAppStore((state) => state.session)
+
+  return useQuery({
+    queryKey: INTELLIGENCE_QUERY_KEY,
+    queryFn: ({ signal }) => fetchIntelligenceDashboard(signal),
+    enabled: Boolean(session),
+    staleTime: 60_000,
+    select: (dashboard) => dashboard.role,
+  })
 }
 
 export function useIntelligenceMessage(messageId: string | null) {

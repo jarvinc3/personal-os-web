@@ -6,6 +6,7 @@ import { KnowledgeListSkeleton } from "@/src/modules/intelligence/components/kno
 import { KnowledgePromoteDialog } from "@/src/modules/intelligence/components/knowledge-promote-dialog"
 import { KnowledgeRevertDialog } from "@/src/modules/intelligence/components/knowledge-revert-dialog"
 import { useKnowledgeAdminQueue } from "@/src/modules/intelligence/hooks/use-knowledge"
+import { useIntelligenceRole } from "@/src/modules/intelligence/hooks/use-intelligence"
 import {
   canPromoteKnowledge,
   canRevertKnowledge,
@@ -51,20 +52,23 @@ function QueueSection({ children }: { children: ReactNode }) {
 
 export function KnowledgeAdminScreen() {
   usePageHeader({ title: "Cola de conocimiento" })
-  const queueQuery = useKnowledgeAdminQueue()
+  const roleQuery = useIntelligenceRole()
+  const isAdmin = roleQuery.data === "ADMIN"
+  const queueQuery = useKnowledgeAdminQueue(isAdmin)
   const [reverting, setReverting] = useState<KnowledgeItem | null>(null)
   const [promoting, setPromoting] = useState<KnowledgeItem | null>(null)
 
   const queueItems = queueQuery.data ?? []
   const groups = groupKnowledgeByState(queueItems)
   const forbidden =
-    queueQuery.isError &&
-    queueQuery.error instanceof ApiError &&
-    queueQuery.error.status === 403
+    (roleQuery.isSuccess && !isAdmin) ||
+    (queueQuery.isError &&
+      queueQuery.error instanceof ApiError &&
+      queueQuery.error.status === 403)
 
   return (
     <main className="mx-auto flex w-full max-w-4xl flex-col gap-5 p-4 pb-10 md:px-6">
-      {queueQuery.isPending ? (
+      {roleQuery.isPending || (isAdmin && queueQuery.isPending) ? (
         <QueueSection>
           <KnowledgeListSkeleton />
         </QueueSection>
@@ -84,12 +88,17 @@ export function KnowledgeAdminScreen() {
             </EmptyHeader>
           </Empty>
         </QueueSection>
-      ) : queueQuery.isError ? (
+      ) : roleQuery.isError || queueQuery.isError ? (
         <QueueSection>
           <ErrorState
             message="No se pudo cargar la cola de conocimiento."
-            onRetry={() => void queueQuery.refetch()}
-            isRetrying={queueQuery.isFetching}
+            onRetry={() => {
+              void roleQuery.refetch()
+              if (isAdmin) {
+                void queueQuery.refetch()
+              }
+            }}
+            isRetrying={roleQuery.isFetching || queueQuery.isFetching}
           />
         </QueueSection>
       ) : groups.length === 0 ? (
