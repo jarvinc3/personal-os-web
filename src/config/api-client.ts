@@ -3,6 +3,7 @@ import {
   isApiEnvelope,
   isTransientError,
   mapStatusToError,
+  parseRetryAfterHeader,
   sleep,
 } from "@/src/config/api-client.utils"
 import type { ApiErrorBody } from "@/src/config/api-client.utils"
@@ -128,7 +129,15 @@ export function createApiClient({
         const errorBody = (await response
           .json()
           .catch(() => ({}))) as ApiErrorBody
-        const apiError = mapStatusToError(response.status, errorBody, path)
+        const retryAfterMs = parseRetryAfterHeader(
+          response.headers.get("Retry-After")
+        )
+        const apiError = mapStatusToError(
+          response.status,
+          errorBody,
+          path,
+          retryAfterMs
+        )
         logApiError(apiError, path)
 
         if (response.status === 401 && !config?.suppressUnauthorizedEvent) {

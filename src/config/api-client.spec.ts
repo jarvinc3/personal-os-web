@@ -14,10 +14,14 @@ type RecordedCall = {
   init: RequestInit | undefined
 }
 
-function jsonResponse(body: unknown, status = 200): Response {
+function jsonResponse(
+  body: unknown,
+  status = 200,
+  headers: Record<string, string> = {}
+): Response {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...headers },
   })
 }
 
@@ -120,6 +124,26 @@ describe("api client idempotency key", () => {
     const keys = calls.map(idempotencyKeyOf)
     assert.equal(calls.length, 2)
     assert.notEqual(keys[0], keys[1])
+  })
+
+  it("does not retry a 429 and exposes Retry-After", async () => {
+    const { client, calls } = createClient([
+      jsonResponse({ message: "Too many requests" }, 429, {
+        "Retry-After": "3",
+      }),
+    ])
+
+    await assert.rejects(
+      () => client.apiGet("/intelligence/messages?limit=50"),
+      (error: unknown) => {
+        assert.ok(error instanceof Error)
+        assert.equal((error as { status?: number }).status, 429)
+        assert.equal((error as { retryAfterMs?: number }).retryAfterMs, 3_000)
+        assert.match(error.message, /Too many requests/)
+        return true
+      }
+    )
+    assert.equal(calls.length, 1)
   })
 
   it("does not retry a 409 and surfaces it as ApiError", async () => {
