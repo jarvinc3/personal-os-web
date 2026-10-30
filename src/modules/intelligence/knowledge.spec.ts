@@ -2,6 +2,7 @@ import assert from "node:assert/strict"
 import { describe, it } from "node:test"
 
 import {
+  canPromoteKnowledge,
   canRevertKnowledge,
   groupKnowledgeByState,
   knowledgeCountsLabel,
@@ -188,6 +189,33 @@ describe("knowledge counts", () => {
       knowledgeCountsLabel(global),
       "3 correos · 2 verificaciones · 2 usuarios"
     )
+  })
+})
+
+describe("canPromoteKnowledge", () => {
+  it("only promotes global knowledge pending review", () => {
+    const pending = knowledgeItem({
+      id: "g10",
+      scope: "GLOBAL",
+      knowledgeType: "EMAIL_DOMAIN",
+      state: "REVIEW_REQUIRED",
+    })
+    const stable = knowledgeItem({
+      id: "g11",
+      scope: "GLOBAL",
+      knowledgeType: "EMAIL_DOMAIN",
+      state: "STABLE",
+    })
+    const personal = knowledgeItem({
+      id: "p4",
+      scope: "USER",
+      knowledgeType: "EMAIL_DOMAIN",
+      state: "REVIEW_REQUIRED",
+    })
+
+    assert.equal(canPromoteKnowledge(pending), true)
+    assert.equal(canPromoteKnowledge(stable), false)
+    assert.equal(canPromoteKnowledge(personal), false)
   })
 })
 

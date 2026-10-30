@@ -6,6 +6,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Agregado
 
+- La cola ADMIN de Conocimiento permite promover una fila global en revisión: queda activa como promovida por un administrador, el rebuild la conserva y una reversión posterior la vuelve a bloquear (#246).
 - Inteligencia estrena **Conocimiento** (`/intelligence/knowledge`): lista el conocimiento personal y el GLOBAL estable con su clave, etiqueta y estado, sin remitentes ni datos de transacción en GLOBAL; exporta solo el conocimiento personal en JSON y borra todos los datos de IA con una confirmación que detalla correos, análisis, consentimiento y conexión de Gmail. La cola `/intelligence/admin/knowledge` (rol ADMIN) agrupa el conocimiento global por estado y permite revertir promociones, que quedan bloqueadas (#327).
 - Inteligencia › Revisión estrena modo foco (`?sheet=intelligence-focus`): un correo a la vez con su vista previa junto al formulario, atajos de teclado con ayuda visible —C Confirmar, E Corregir, R Rechazar, J y K siguiente y anterior, Esc para salir—, salto automático al siguiente pendiente al verificar, el mismo filtro de partición de la cola y un estado de cola terminada al final; salir del foco deja la lista en el mismo punto (#322).
 - En el modo foco, Rechazar sin motivo lleva el foco al campo del motivo y no rechaza, y Corregir exige al menos una etiqueta cambiada, igual que en la cola (#322).
