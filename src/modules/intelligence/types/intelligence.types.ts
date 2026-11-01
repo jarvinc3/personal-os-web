@@ -112,6 +112,23 @@ export type AiReviewQueueItem = AiEmailMessageSummary & {
   partition: "TRAIN" | "VALIDATION" | "HOLDOUT"
 }
 
+export type AiReviewGroup = {
+  fromAddress: string
+  templateFingerprint: string | null
+  total: number
+  pending: number
+  pendingHoldout: number
+  sampleSubjects: string[]
+}
+
+export type AiReviewGroupsPage = {
+  items: AiReviewGroup[]
+  page: number
+  pageSize: number
+  totalGroups: number
+  hasMore: boolean
+}
+
 export type AiReviewQueuePage = {
   items: AiReviewQueueItem[]
   counts: {
@@ -147,6 +164,24 @@ export type AiHumanVerificationInput = {
     last4?: string
   }
   notes?: string
+}
+
+export type AiReviewGroupVerdict = "CONFIRMED" | "CORRECTED"
+
+/** El lote identifica el grupo por remitente y huella, sin transacción ni nota. */
+export type AiReviewGroupVerificationInput = {
+  verdict: AiReviewGroupVerdict
+  fromAddress: string
+  templateFingerprint: string | null
+  relevance?: boolean
+  semanticType?: SemanticType
+  routes?: SemanticRoute[]
+}
+
+export type AiReviewGroupVerificationResult = {
+  verified: number
+  holdoutExcluded: number
+  alreadyVerified: number
 }
 
 export type AiAnalysisRunSummary = {
