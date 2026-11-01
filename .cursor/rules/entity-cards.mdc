@@ -14,7 +14,7 @@ Una entidad de Finanzas se pinta con su card. No se dibuja una fila propia para 
 - La variante es una prop del mismo componente; no hay componentes paralelos por densidad.
 - Las cards aceptan `onPress` o `href`, `disabled` y, en selectores, `selected` (anillo de 2 px y marca).
 - Si la entidad no tiene card, se crea la card de su módulo y se añade a `/settings/appearance/cards` antes de usarla.
-- Una proyección de otra entidad (una línea de estado de cuenta, un extra importado, el chat) usa un adaptador a la fila canónica (`MovementRow`), no una fila nueva.
+- Una proyección de otra entidad (una línea de estado de cuenta, un extra importado) usa un adaptador a la fila canónica (`MovementRow`), no una fila nueva.
 
 Tabla y usos: [docs/architecture/ui-components.md](../../docs/architecture/ui-components.md#cards-por-entidad). Referencia viva: `/settings/appearance/cards`.
 
