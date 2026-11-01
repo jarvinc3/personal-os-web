@@ -65,6 +65,7 @@ import {
 } from "./messages-rate-limit"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { AiEvidenceSection } from "./components/ai-evidence-section"
+import { ReviewSection } from "./components/review-section"
 import { describeVerificationPayload } from "./review-labels"
 import { describeSyncFailure, resolveDashboardSyncFailure } from "./sync-status"
 import {
@@ -742,9 +743,8 @@ function IntelligenceScreenBody() {
           </TabsContent>
 
           <TabsContent value="review" className="flex flex-col gap-3">
-            <AiEvidenceSection
+            <ReviewSection
               enabled={connected}
-              view="review"
               onOpenMessage={(messageId) =>
                 setMessageSheetOpen(true, messageId)
               }

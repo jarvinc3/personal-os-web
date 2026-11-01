@@ -30,6 +30,8 @@ export const API_ENDPOINTS = {
     MESSAGE: (id: string) => `/intelligence/messages/${encodeURIComponent(id)}`,
     DATASET: "/intelligence/dataset",
     REVIEW_QUEUE: "/intelligence/review-queue",
+    REVIEW_GROUPS: "/intelligence/review-groups",
+    VERIFY_REVIEW_GROUP: "/intelligence/review-groups/verifications",
     VERIFY_MESSAGE: (id: string) =>
       `/intelligence/messages/${encodeURIComponent(id)}/verifications`,
     RUNS: "/intelligence/runs",

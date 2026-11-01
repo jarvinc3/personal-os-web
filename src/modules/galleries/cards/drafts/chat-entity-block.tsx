@@ -3,7 +3,7 @@
 import { SparklesIcon } from "lucide-react"
 import type { ReactNode } from "react"
 
-/** Burbuja del chat que envuelve la card real de una entidad (#287). */
+/** Burbuja de referencia para los bloques del chat; la web no tiene chat desde AI-0. */
 export function ChatEntityBlock({
   label,
   children,
