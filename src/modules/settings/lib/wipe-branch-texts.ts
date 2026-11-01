@@ -110,9 +110,17 @@ export const WIPE_BRANCH_TEXTS: Record<string, WipeBranchText> = {
     unit: { singular: "saldo", plural: "saldos" },
   },
   "finance.cards": {
-    label: "Tarjetas",
+    label: "Tarjetas de crédito",
     description:
-      "Tarjetas con sus saldos. Las suscripciones quedan sin tarjeta.",
+      "Tarjetas de crédito con sus saldos. Las suscripciones quedan sin tarjeta.",
+    icon: CreditCard,
+    theme: FINANCE_BRANCH_THEME.PRODUCTS,
+    unit: { singular: "tarjeta", plural: "tarjetas" },
+  },
+  "finance.debitCards": {
+    label: "Tarjetas de débito",
+    description:
+      "Tarjetas de débito vinculadas a una cuenta; se borran con ella.",
     icon: CreditCard,
     theme: FINANCE_BRANCH_THEME.PRODUCTS,
     unit: { singular: "tarjeta", plural: "tarjetas" },
@@ -120,7 +128,7 @@ export const WIPE_BRANCH_TEXTS: Record<string, WipeBranchText> = {
   "finance.accounts": {
     label: "Cuentas, incluido el efectivo",
     description:
-      "Cuentas con sus movimientos. Metas, cobros y suscripciones quedan sin cuenta.",
+      "Cuentas con sus movimientos y sus tarjetas de débito. Metas, cobros y suscripciones quedan sin cuenta.",
     icon: Wallet,
     theme: FINANCE_BRANCH_THEME.PRODUCTS,
     unit: { singular: "cuenta", plural: "cuentas" },
