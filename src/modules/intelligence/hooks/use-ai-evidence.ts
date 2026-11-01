@@ -2,6 +2,10 @@
 
 import { apiGet, apiPost } from "@/src/config/api-client"
 import { removeReviewQueueItem } from "@/src/modules/intelligence/review-queue"
+import {
+  reviewQueueApiSearchParams,
+  type ReviewQueueApiQuery,
+} from "@/src/modules/intelligence/review-queue-filters"
 import type {
   AiAnalysisRunSummary,
   AiHumanVerificationInput,
@@ -27,18 +31,15 @@ type ReviewQueueSnapshot = Array<[QueryKey, ReviewQueueData | undefined]>
 export function useAiEvidence(
   enabled: boolean,
   view: "review" | "runs" = "review",
-  partition: "TRAIN" | "VALIDATION" | "HOLDOUT" | "ALL" = "ALL"
+  apiQuery: ReviewQueueApiQuery = {}
 ) {
   const session = useAppStore((state) => state.session)
   const queryClient = useQueryClient()
   const active = Boolean(session && enabled)
   const reviewQueueQuery = useInfiniteQuery({
-    queryKey: [...REVIEW_QUEUE_QUERY_KEY, partition],
+    queryKey: [...REVIEW_QUEUE_QUERY_KEY, apiQuery],
     queryFn: ({ pageParam, signal }) => {
-      const params = new URLSearchParams()
-      if (partition !== "ALL") {
-        params.set("partition", partition)
-      }
+      const params = reviewQueueApiSearchParams(apiQuery)
       if (pageParam) {
         params.set("cursor", pageParam)
       }

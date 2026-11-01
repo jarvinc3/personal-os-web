@@ -19,6 +19,8 @@ function queueItem(
     processingStatus: "INGESTED",
     contentFingerprint: "fingerprint",
     partition,
+    status: "PENDING",
+    verification: null,
   }
 }
 
