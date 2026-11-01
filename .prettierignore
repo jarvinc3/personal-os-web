@@ -6,3 +6,4 @@ coverage/
 pnpm-lock.yaml
 .pnpm-store/
 .agents/
+src/config/api-contract/api-schema.ts
