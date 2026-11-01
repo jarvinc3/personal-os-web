@@ -24,6 +24,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Cambiado
 
+- Los tipos de request y de respuesta del cliente se generan desde el contrato OpenAPI del back: `pnpm api:contract` refresca la copia versionada, `pnpm api:generate` escribe `src/config/api-contract/api-schema.ts` y `pnpm typecheck` falla si el contrato no está disponible. Conocimiento y los montos del balance patrimonial ya salen del contrato; las respuestas que el back todavía no describe siguen a mano (personal-os-back#263) (#155).
 - La galería de componentes usa una lista de categorías con icono, descripción y conteo de fichas, con buscador por nombre de componente, y cada categoría abre su vista por ruta (`/settings/appearance/components/<categoría>`) con botón atrás; el deslizador horizontal desaparece (#341).
 - La galería de componentes suma fichas de `DetailHeader`, `CurrencyFlag` y `PendingSurface`, y `docs/architecture/ui-components.md` deja de contradecirse: el monto en pantalla es `Money` (dentro de un texto suelto, `formatFinanceMoney`), el deshacer es `showUndoToast` y el control segmentado es `SegmentedControl`; los canónicos que no se pueden montar aislados quedan explicados (#309).
 - La cola de revisión de Inteligencia deja ver el primer correo al abrir la vista en móvil: Gmail y las insignias de cobertura pasan a una sección plegada que resume la cuenta y el estado de la sincronización en una línea, y el asunto se lee completo en dos líneas sin que la etiqueta de partición lo tape (#323).
