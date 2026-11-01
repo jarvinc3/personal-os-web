@@ -70,6 +70,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Corregido
 
+- El vaciado de datos valida la contraseña con un botón «Verificar» que habilita «Vaciar datos» al terminar; ya no depende de que el campo pierda el foco (#365).
 - El FAQ de Ayuda y el subtítulo de Vaciar datos de Finanzas dejan de anunciar una rama «Correo»: AI-0 retiró los correos importados y las conexiones de Gmail de las ramas, el cliente ya no guarda sus etiquetas y el correo importado se vacía desde Inteligencia (#269).
 - La lista de correos de Inteligencia deja de pedir todas las páginas cargadas al recibir un evento de sincronización o al volver a la ventana: conserva lo cargado, ofrece «Hay correos nuevos» para recargar desde la primera página, limita a una la petición de página siguiente en vuelo y, ante un 429, mantiene la lista visible, espera `Retry-After` o un retroceso acotado y se recupera sin recargar (#351).
 
