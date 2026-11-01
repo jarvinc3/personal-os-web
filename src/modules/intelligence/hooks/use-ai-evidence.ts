@@ -18,7 +18,7 @@ import {
   type QueryKey,
 } from "@tanstack/react-query"
 
-const EVIDENCE_QUERY_KEY = ["intelligence", "evidence"] as const
+export const EVIDENCE_QUERY_KEY = ["intelligence", "evidence"] as const
 const REVIEW_QUEUE_QUERY_KEY = [...EVIDENCE_QUERY_KEY, "review-queue"] as const
 
 type ReviewQueueData = InfiniteData<AiReviewQueuePage>
