@@ -43,15 +43,15 @@ type ReviewGroupBatchSheetProps = {
   onApply: (input: AiReviewGroupVerificationInput) => void
 }
 
-/** Remonta el formulario cuando cambia el grupo, la hoja o el resultado. */
+/** Remonta el formulario cuando cambia el grupo o llega el resultado. */
 export function ReviewGroupBatchSheet(props: ReviewGroupBatchSheetProps) {
-  const state = props.result
+  const bodyKey = props.result
     ? "result"
     : props.group
       ? reviewGroupKey(props.group)
       : "pending"
 
-  return <ReviewGroupBatchSheetBody key={state} {...props} />
+  return <ReviewGroupBatchSheetBody key={bodyKey} {...props} />
 }
 
 function ReviewGroupBatchSheetBody({
