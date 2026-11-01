@@ -8,9 +8,7 @@ import {
   FileText,
   Gauge,
   HandCoins,
-  Inbox,
   Landmark,
-  Mail,
   PiggyBank,
   RefreshCcw,
   Repeat,
@@ -34,7 +32,6 @@ export const FINANCE_BRANCH_THEME = {
   PRODUCTS: "products",
   PLANNING: "planning",
   DIRECTORY: "directory",
-  MAIL: "mail",
   OTHER: "other",
 } as const
 
@@ -58,7 +55,6 @@ export const FINANCE_BRANCH_THEMES = [
     label: "Comercios y categorías",
     icon: Store,
   },
-  { id: FINANCE_BRANCH_THEME.MAIL, label: "Correo", icon: Mail },
 ] as const
 
 export type FinanceBranchTheme = {
@@ -114,9 +110,17 @@ export const WIPE_BRANCH_TEXTS: Record<string, WipeBranchText> = {
     unit: { singular: "saldo", plural: "saldos" },
   },
   "finance.cards": {
-    label: "Tarjetas",
+    label: "Tarjetas de crédito",
     description:
-      "Tarjetas con sus saldos. Las suscripciones quedan sin tarjeta.",
+      "Tarjetas de crédito con sus saldos. Las suscripciones quedan sin tarjeta.",
+    icon: CreditCard,
+    theme: FINANCE_BRANCH_THEME.PRODUCTS,
+    unit: { singular: "tarjeta", plural: "tarjetas" },
+  },
+  "finance.debitCards": {
+    label: "Tarjetas de débito",
+    description:
+      "Tarjetas de débito vinculadas a una cuenta; se borran con ella.",
     icon: CreditCard,
     theme: FINANCE_BRANCH_THEME.PRODUCTS,
     unit: { singular: "tarjeta", plural: "tarjetas" },
@@ -124,7 +128,7 @@ export const WIPE_BRANCH_TEXTS: Record<string, WipeBranchText> = {
   "finance.accounts": {
     label: "Cuentas, incluido el efectivo",
     description:
-      "Cuentas con sus movimientos. Metas, cobros y suscripciones quedan sin cuenta.",
+      "Cuentas con sus movimientos y sus tarjetas de débito. Metas, cobros y suscripciones quedan sin cuenta.",
     icon: Wallet,
     theme: FINANCE_BRANCH_THEME.PRODUCTS,
     unit: { singular: "cuenta", plural: "cuentas" },
@@ -202,21 +206,6 @@ export const WIPE_BRANCH_TEXTS: Record<string, WipeBranchText> = {
     icon: Coins,
     theme: FINANCE_BRANCH_THEME.PLANNING,
     unit: { singular: "presupuesto", plural: "presupuestos" },
-  },
-  "finance.emailMessages": {
-    label: "Correos importados",
-    description:
-      "Correos importados y la bitácora de sincronización. Los movimientos creados siguen.",
-    icon: Inbox,
-    theme: FINANCE_BRANCH_THEME.MAIL,
-    unit: { singular: "correo", plural: "correos" },
-  },
-  "finance.emailConnections": {
-    label: "Conexiones de Gmail",
-    description: "Conexión de Gmail con sus fuentes, mensajes y tokens.",
-    icon: Mail,
-    theme: FINANCE_BRANCH_THEME.MAIL,
-    unit: { singular: "conexión", plural: "conexiones" },
   },
   "ai.inferences": {
     label: "Historial de uso de IA",

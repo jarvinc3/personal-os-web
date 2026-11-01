@@ -15,7 +15,7 @@ import {
 } from "@/src/modules/galleries/cards/mock/finance"
 import type { GalleryVariant } from "@/src/modules/galleries/cards/variants/types"
 
-/** Bloques del chat con la entidad completa; borrador hasta #287 (#272). */
+/** Bloques del chat con la entidad completa; referencia hasta el rediseño de chat (AI-9). */
 export const chatVariants: readonly GalleryVariant[] = [
   {
     id: "chat-movimiento",

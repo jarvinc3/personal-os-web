@@ -362,7 +362,7 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
         >
           <SettingsRow
             label="Vaciar datos de Finanzas"
-            description="Elige qué ramas vaciar: movimientos, productos, planificación, comercios y correo."
+            description="Elige qué ramas vaciar: movimientos y saldos, productos, planificación, y comercios y categorías."
             destructive
             icon={Trash2}
             accentColor={SETTINGS_REGISTRY.danger.accent}

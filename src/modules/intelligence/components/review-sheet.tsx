@@ -3,6 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useEffect, type ReactNode } from "react"
 import { useForm, useWatch } from "react-hook-form"
+import { ReviewLabelFields } from "@/src/modules/intelligence/components/review-label-fields"
 import { useIntelligenceMessage } from "@/src/modules/intelligence/hooks/use-intelligence"
 import { useReviewShortcutListener } from "@/src/modules/intelligence/hooks/use-review-shortcuts"
 import { shortMessageId } from "@/src/modules/intelligence/message-id"
@@ -13,12 +14,10 @@ import {
 } from "@/src/modules/intelligence/review-shortcuts"
 import {
   buildCorrection,
-  RELEVANCE_LABELS,
   REVIEW_FORM_DEFAULTS,
   reviewFormSchema,
   reviewSelectLabel,
-  ROUTE_LABELS,
-  SEMANTIC_TYPE_LABELS,
+  SEMANTIC_TYPES,
   TRANSACTION_DIRECTION_LABELS,
   TRANSACTION_KIND_LABELS,
   type ReviewFormValues,
@@ -72,12 +71,10 @@ import {
   Coins,
   FileText,
   Hash,
-  Layers3,
   NotebookText,
   Pencil,
   ReceiptText,
   RefreshCw,
-  Tag,
   X,
 } from "lucide-react"
 
@@ -331,118 +328,20 @@ export function ReviewSheet({
           {formHeader}
           {shortcuts ? <ReviewShortcutHelp /> : null}
           <FieldGroup className="gap-3">
-            <div className="grid gap-3 sm:grid-cols-2">
-              <Field>
-                <FieldLabel htmlFor={`relevance-${fieldId}`}>
-                  <Tag data-icon="inline-start" className="size-4" /> Relevancia
-                </FieldLabel>
-                <Select
-                  value={values.relevance ?? ""}
-                  onValueChange={(value) =>
-                    setValue(
-                      "relevance",
-                      (value ?? "") as ReviewFormValues["relevance"],
-                      { shouldDirty: true }
-                    )
-                  }
-                  disabled={
-                    semanticType === "SECURITY_ALERT" ||
-                    semanticType === "SECURITY_OTP"
-                  }
-                >
-                  <SelectTrigger id={`relevance-${fieldId}`} className="w-full">
-                    <Tag className="size-4" aria-hidden="true" />
-                    <SelectValue placeholder="Sin etiqueta">
-                      {(value: string | null) =>
-                        reviewSelectLabel(
-                          value,
-                          RELEVANCE_LABELS,
-                          "Sin etiqueta"
-                        )
-                      }
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectItem value="relevant">Relevante</SelectItem>
-                      <SelectItem value="irrelevant">No relevante</SelectItem>
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </Field>
-              <Field>
-                <FieldLabel htmlFor={`semantic-${fieldId}`}>
-                  <Tag data-icon="inline-start" className="size-4" /> Tipo
-                  semántico
-                </FieldLabel>
-                <Select
-                  value={semanticType}
-                  onValueChange={(value) =>
-                    value && selectSemanticType(value as SemanticType)
-                  }
-                >
-                  <SelectTrigger id={`semantic-${fieldId}`} className="w-full">
-                    <Tag className="size-4" aria-hidden="true" />
-                    <SelectValue placeholder="Elige un tipo">
-                      {(value: string | null) =>
-                        reviewSelectLabel(
-                          value,
-                          SEMANTIC_TYPE_LABELS,
-                          "Elige un tipo"
-                        )
-                      }
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      {(
-                        Object.entries(SEMANTIC_TYPE_LABELS) as [
-                          SemanticType,
-                          string,
-                        ][]
-                      ).map(([value, label]) => (
-                        <SelectItem key={value} value={value}>
-                          {label}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-                {errors.semanticType?.message ? (
-                  <FieldError>{errors.semanticType.message}</FieldError>
-                ) : null}
-              </Field>
-            </div>
-            <Field>
-              <FieldLabel>
-                <Layers3 data-icon="inline-start" className="size-4" /> Dominios
-              </FieldLabel>
-              <div
-                className="flex flex-wrap gap-2"
-                role="group"
-                aria-label="Dominios"
-              >
-                {(
-                  Object.entries(ROUTE_LABELS) as [SemanticRoute, string][]
-                ).map(([route, label]) => (
-                  <Button
-                    key={route}
-                    type="button"
-                    size="sm"
-                    variant={
-                      selectedRoutes.includes(route) ? "default" : "outline"
-                    }
-                    aria-pressed={selectedRoutes.includes(route)}
-                    onClick={() => toggleRoute(route)}
-                  >
-                    <Layers3 className="size-4" aria-hidden="true" /> {label}
-                  </Button>
-                ))}
-              </div>
-              {!selectedRoutes.length ? (
-                <p className="text-xs text-muted-foreground">Sin dominios</p>
-              ) : null}
-            </Field>
+            <ReviewLabelFields
+              fieldId={fieldId}
+              relevance={values.relevance ?? ""}
+              semanticType={semanticType}
+              routes={selectedRoutes}
+              semanticTypes={SEMANTIC_TYPES}
+              relevanceError={errors.relevance?.message}
+              semanticTypeError={errors.semanticType?.message}
+              onRelevanceChange={(relevance) =>
+                setValue("relevance", relevance, { shouldDirty: true })
+              }
+              onSemanticTypeChange={selectSemanticType}
+              onToggleRoute={toggleRoute}
+            />
             {hasTransaction ? (
               <div className="grid gap-3 sm:grid-cols-2">
                 {semanticType === "FIN_TRANSACTION" ? (

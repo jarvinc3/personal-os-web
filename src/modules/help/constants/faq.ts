@@ -112,7 +112,7 @@ export const HELP_FAQ_GROUPS: readonly HelpFaqGroup[] = [
         id: "vaciar-finanzas",
         question: "¿Puedo vaciar solo Finanzas?",
         answer:
-          "Sí. En Ajustes › Apps › Finanzas, al final, Vaciar datos de Finanzas lista sus ramas —movimientos, productos, planificación, comercios y correo— con su conteo y lo que arrastra cada una. Eliges, confirmas con tu contraseña o tu cuenta de Google y no toca las demás apps.",
+          "Sí. En Ajustes › Apps › Finanzas, al final, Vaciar datos de Finanzas lista sus ramas —movimientos y saldos, productos, planificación, y comercios y categorías— con su conteo y lo que arrastra cada una. Eliges, confirmas con tu contraseña o tu cuenta de Google y no toca las demás apps. El correo importado se vacía desde Inteligencia.",
       },
       {
         id: "recuperar-vaciado",

@@ -65,8 +65,10 @@ export type TransactionDirection = NonNullable<
   components["schemas"]["HumanVerificationTransactionDto"]["direction"]
 >
 
-const semanticTypes = Object.keys(SEMANTIC_TYPE_LABELS) as SemanticType[]
-const routes = Object.keys(ROUTE_LABELS) as SemanticRoute[]
+export const SEMANTIC_TYPES = Object.keys(
+  SEMANTIC_TYPE_LABELS
+) as SemanticType[]
+export const SEMANTIC_ROUTES = Object.keys(ROUTE_LABELS) as SemanticRoute[]
 const transactionKinds = Object.keys(
   TRANSACTION_KIND_LABELS
 ) as TransactionKind[]
@@ -76,9 +78,9 @@ const transactionDirections = Object.keys(
 
 export const reviewFormSchema = z
   .object({
-    semanticType: z.enum(semanticTypes).or(z.literal("")),
+    semanticType: z.enum(SEMANTIC_TYPES).or(z.literal("")),
     relevance: z.enum(["", "relevant", "irrelevant"]),
-    routes: z.array(z.enum(routes)),
+    routes: z.array(z.enum(SEMANTIC_ROUTES)),
     kind: z.enum(transactionKinds).or(z.literal("")),
     amount: z.string(),
     currency: z.string(),

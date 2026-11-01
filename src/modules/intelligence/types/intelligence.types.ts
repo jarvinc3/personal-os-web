@@ -110,6 +110,37 @@ export type AiDatasetSummary = {
 
 export type AiReviewQueueItem = AiEmailMessageSummary & {
   partition: "TRAIN" | "VALIDATION" | "HOLDOUT"
+  /** Estado de la última verificación; sin verificación es `PENDING`. */
+  status: AiReviewStatus
+  /** Última verificación del correo, o `null` si sigue pendiente. */
+  verification: AiReviewVerification | null
+}
+
+export type AiReviewStatus = "PENDING" | "CONFIRMED" | "CORRECTED" | "REJECTED"
+
+export type AiReviewVerification = {
+  verdict: Exclude<AiReviewStatus, "PENDING">
+  /** Etiquetas corregidas tal como las guardó el back (`correctedPayload`). */
+  labels: unknown
+  notes: string | null
+  createdAt: string
+}
+
+export type AiReviewGroup = {
+  fromAddress: string
+  templateFingerprint: string | null
+  total: number
+  pending: number
+  pendingHoldout: number
+  sampleSubjects: string[]
+}
+
+export type AiReviewGroupsPage = {
+  items: AiReviewGroup[]
+  page: number
+  pageSize: number
+  totalGroups: number
+  hasMore: boolean
 }
 
 export type AiReviewQueuePage = {
@@ -147,6 +178,24 @@ export type AiHumanVerificationInput = {
     last4?: string
   }
   notes?: string
+}
+
+export type AiReviewGroupVerdict = "CONFIRMED" | "CORRECTED"
+
+/** El lote identifica el grupo por remitente y huella, sin transacción ni nota. */
+export type AiReviewGroupVerificationInput = {
+  verdict: AiReviewGroupVerdict
+  fromAddress: string
+  templateFingerprint: string | null
+  relevance?: boolean
+  semanticType?: SemanticType
+  routes?: SemanticRoute[]
+}
+
+export type AiReviewGroupVerificationResult = {
+  verified: number
+  holdoutExcluded: number
+  alreadyVerified: number
 }
 
 export type AiAnalysisRunSummary = {
