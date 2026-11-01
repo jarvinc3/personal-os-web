@@ -53,7 +53,7 @@ export function useKnowledge() {
   })
 }
 
-export function useKnowledgeAdminQueue() {
+export function useKnowledgeAdminQueue(enabled: boolean) {
   const session = useAppStore((state) => state.session)
 
   return useQuery({
@@ -63,7 +63,7 @@ export function useKnowledgeAdminQueue() {
         API_ENDPOINTS.INTELLIGENCE.KNOWLEDGE_ADMIN_QUEUE,
         signal
       ),
-    enabled: Boolean(session),
+    enabled: Boolean(session && enabled),
     retry: shouldRetryKnowledgeQuery,
   })
 }
@@ -126,6 +126,40 @@ export function useDeleteKnowledge() {
       appToast.error({
         text1: "No se pudieron borrar los datos de IA",
         text2: error.message,
+      })
+    },
+  })
+}
+
+export function usePromoteKnowledge() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (knowledgeId: string) =>
+      apiPost<KnowledgeItem>(
+        API_ENDPOINTS.INTELLIGENCE.KNOWLEDGE_PROMOTE(knowledgeId)
+      ),
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: KNOWLEDGE_QUERY_KEY }),
+        queryClient.invalidateQueries({
+          queryKey: KNOWLEDGE_ADMIN_QUEUE_QUERY_KEY,
+        }),
+      ])
+      appToast.success({
+        text1: "Conocimiento promovido",
+        text2: "Quedó activo y se aplicará a los usuarios.",
+      })
+    },
+    onError: (error) => {
+      appToast.error({
+        text1: "No se pudo promover",
+        text2:
+          error instanceof ApiError && error.status === 409
+            ? "Ese conocimiento ya no está en revisión."
+            : error instanceof ApiError && error.status === 404
+              ? "Ese conocimiento ya no existe."
+              : error.message,
       })
     },
   })

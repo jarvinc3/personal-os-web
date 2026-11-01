@@ -1,114 +1,74 @@
 "use client"
 
-import { getSupabaseBrowserClient } from "@/src/config/supabase/client"
 import type {
   AiEmailSyncProgress,
   IntelligenceDashboard,
 } from "@/src/modules/intelligence/types/intelligence.types"
-import { resolveNotificationsSocketUrl } from "@/src/modules/notifications/lib/notifications-socket-url"
-import { useAppStore } from "@/src/shared/store/app-store"
+import {
+  useNotificationsSocketEvent,
+  useNotificationsSocketStatus,
+} from "@/src/modules/notifications"
 import { useQueryClient } from "@tanstack/react-query"
-import { useEffect, useState } from "react"
-import { io } from "socket.io-client"
+import { useCallback, useState } from "react"
 
 type SyncUpdatePayload = { state: AiEmailSyncProgress }
-export type AiEmailSocketStatus = "connecting" | "connected" | "disconnected"
 const INTELLIGENCE_QUERY_KEY = ["intelligence", "dashboard"] as const
+const SYNC_EVENT_STATUSES: ReadonlySet<AiEmailSyncProgress["status"]> = new Set(
+  ["scheduled", "completed", "failed"]
+)
 
 export function useAiEmailSyncSocket() {
-  const userId = useAppStore((state) => state.session?.userId ?? null)
   const queryClient = useQueryClient()
-  const [socketState, setSocketState] = useState<{
-    userId: string | null
-    status: AiEmailSocketStatus
-  }>({ userId: null, status: "connecting" })
+  const status = useNotificationsSocketStatus()
+  const [hasPendingMessageUpdates, setHasPendingMessageUpdates] =
+    useState(false)
+  const markMessagesPending = useCallback(
+    () => setHasPendingMessageUpdates(true),
+    []
+  )
+  const acknowledgeMessages = useCallback(
+    () => setHasPendingMessageUpdates(false),
+    []
+  )
 
-  useEffect(() => {
-    if (!userId) {
-      return
-    }
-
-    let cancelled = false
-    let socket: ReturnType<typeof io> | null = null
-    const updateStatus = (status: AiEmailSocketStatus) => {
-      setSocketState({ userId, status })
-    }
-
-    void (async () => {
-      let session
-      try {
-        const result = await getSupabaseBrowserClient().auth.getSession()
-        session = result.data.session
-      } catch {
-        if (!cancelled) {
-          updateStatus("disconnected")
-        }
-        return
-      }
-      if (!session?.access_token || cancelled) {
-        if (!cancelled) {
-          updateStatus("disconnected")
-        }
-        return
-      }
-
-      socket = io(`${resolveNotificationsSocketUrl()}/notifications`, {
-        auth: { token: session.access_token },
-        transports: ["websocket"],
-        forceNew: true,
-      })
-      socket.on("ai.email.sync.updated", ({ state }: SyncUpdatePayload) => {
-        queryClient.setQueryData<IntelligenceDashboard>(
-          INTELLIGENCE_QUERY_KEY,
-          (dashboard) => {
-            if (!dashboard?.connection.connected) {
-              return dashboard
-            }
-            return {
-              ...dashboard,
-              connection: {
-                ...dashboard.connection,
-                syncProgress: state,
-                syncInProgress: ["running", "waiting", "retrying"].includes(
-                  state.status
-                ),
-              },
-            }
+  useNotificationsSocketEvent<SyncUpdatePayload>(
+    "ai.email.sync.updated",
+    ({ state }) => {
+      queryClient.setQueryData<IntelligenceDashboard>(
+        INTELLIGENCE_QUERY_KEY,
+        (dashboard) => {
+          if (!dashboard?.connection.connected) {
+            return dashboard
           }
-        )
-
-        if (["scheduled", "completed", "failed"].includes(state.status)) {
-          void queryClient.invalidateQueries({
-            queryKey: INTELLIGENCE_QUERY_KEY,
-          })
-          void queryClient.invalidateQueries({
-            queryKey: ["intelligence", "messages"],
-          })
-          void queryClient.invalidateQueries({
-            queryKey: ["intelligence", "evidence"],
-          })
+          return {
+            ...dashboard,
+            connection: {
+              ...dashboard.connection,
+              syncProgress: state,
+              syncInProgress: ["running", "waiting", "retrying"].includes(
+                state.status
+              ),
+            },
+          }
         }
-      })
-      socket.on("connect", () => {
-        updateStatus("connected")
+      )
+
+      if (SYNC_EVENT_STATUSES.has(state.status)) {
         void queryClient.invalidateQueries({
           queryKey: INTELLIGENCE_QUERY_KEY,
         })
-      })
-      socket.on("disconnect", () => updateStatus("disconnected"))
-      socket.on("connect_error", () => updateStatus("disconnected"))
-      socket.io.on("reconnect_attempt", () => updateStatus("connecting"))
-    })()
-
-    return () => {
-      cancelled = true
-      socket?.disconnect()
-      socket = null
+        void queryClient.invalidateQueries({
+          queryKey: ["intelligence", "evidence"],
+        })
+        markMessagesPending()
+      }
     }
-  }, [userId, queryClient])
+  )
 
-  if (!userId) {
-    return "disconnected"
+  return {
+    status,
+    hasPendingMessageUpdates,
+    markMessagesPending,
+    acknowledgeMessages,
   }
-  return socketState.userId === userId ? socketState.status : "connecting"
 }

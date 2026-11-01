@@ -13,6 +13,7 @@ export type AiEmailSyncProgress = {
   retryAt?: number
   nextRunAt?: number
   errorCode?: string
+  providerErrorCode?: string
   errorCategory?:
     "authorization" | "configuration" | "rate_limit" | "temporary" | "unknown"
   startedAt: string
@@ -42,6 +43,13 @@ export type IntelligenceDashboard = {
     latestMessageAt: string | null
   }
   role: AiRole
+}
+
+export type AiEmailOAuthDiagnostics = {
+  configured: boolean
+  provider: "GMAIL"
+  scopes: string[]
+  status: "ready" | "missing_oauth_configuration"
 }
 
 export type AiEmailMessageSummary = {

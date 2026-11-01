@@ -6,6 +6,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Agregado
 
+- La cola ADMIN de Conocimiento permite promover una fila global en revisión: queda activa como promovida por un administrador, el rebuild la conserva y una reversión posterior la vuelve a bloquear (#246).
 - Inteligencia › Revisión estrena búsqueda y filtros: pestañas **Pendientes** y **Revisados** con filtro por estado, asunto, remitente, rango de días, partición y orden por fecha; en Revisados cada correo muestra su última verificación con etiquetas o motivo y fecha. Los filtros se combinan, se conservan al paginar y en la URL, y el estado vacío los enumera con un botón para limpiarlos (#321; consume el contrato de back #219).
 - Inteligencia estrena **Conocimiento** (`/intelligence/knowledge`): lista el conocimiento personal y el GLOBAL estable con su clave, etiqueta y estado, sin remitentes ni datos de transacción en GLOBAL; exporta solo el conocimiento personal en JSON y borra todos los datos de IA con una confirmación que detalla correos, análisis, consentimiento y conexión de Gmail. La cola `/intelligence/admin/knowledge` (rol ADMIN) agrupa el conocimiento global por estado y permite revertir promociones, que quedan bloqueadas (#327).
 - Inteligencia › Revisión estrena modo foco (`?sheet=intelligence-focus`): un correo a la vez con su vista previa junto al formulario, atajos de teclado con ayuda visible —C Confirmar, E Corregir, R Rechazar, J y K siguiente y anterior, Esc para salir—, salto automático al siguiente pendiente al verificar, el mismo filtro de partición de la cola y un estado de cola terminada al final; salir del foco deja la lista en el mismo punto (#322).
@@ -67,6 +68,12 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Corregido
 
+- La lista de correos de Inteligencia deja de pedir todas las páginas cargadas al recibir un evento de sincronización o al volver a la ventana: conserva lo cargado, ofrece «Hay correos nuevos» para recargar desde la primera página, limita a una la petición de página siguiente en vuelo y, ante un 429, mantiene la lista visible, espera `Retry-After` o un retroceso acotado y se recupera sin recargar (#351).
+
+- La vista previa de Revisión y Modo foco decodifica las entidades HTML y descarta los caracteres invisibles del cuerpo saneado; un correo que empieza con `&#847;` o `&shy;` ya no muestra solo el primer número visible (#337).
+- La cola ADMIN de Conocimiento solo pide `/knowledge/admin/queue` cuando el rol es ADMIN; un usuario normal ve el aviso de permisos sin generar un 403 en la consola (#347).
+- Inteligencia comparte un solo canal en vivo con las notificaciones de la app, renueva el token de Supabase y se reconecta si el servidor cierra la conexión; el progreso de Gmail sigue llegando aunque las notificaciones dentro de la app estén apagadas (#350).
+- Inteligencia separa el historial inicial del estado de la última sincronización: muestra la causa, el código y la hora del intento fallido, solo ofrece reconectar ante un rechazo de autorización, avisa si la configuración OAuth está incompleta y etiqueta el canal en vivo como canal de actualizaciones; mientras hay un error visible, la vista se refresca cada 30 s aunque el canal esté desconectado (#349).
 - El aviso al revocar la contribución al conocimiento global confirma que la evidencia ya no contribuye; al activarla, que contribuirá en el próximo rebuild (#239).
 - El formulario de `/login` se pinta desde el HTML y queda deshabilitado —con «Preparando…» en el botón— hasta que React hidrata: antes el primer pintado era solo un spinner y un clic en ese hueco no hacía nada ni mostraba error. Login y registro son formularios reales, así Enter envía desde la contraseña y el aviso del navegador «Password field is not contained in a form» desaparece (#345).
 - El detalle de una verificación CORRECTED muestra la Relevancia corregida junto al tipo semántico y los dominios (#323).

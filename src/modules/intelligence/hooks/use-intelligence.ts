@@ -4,6 +4,7 @@ import { apiGet, apiPost } from "@/src/config/api-client"
 import type {
   AiEmailMessageDetail,
   AiEmailMessagesPage,
+  AiEmailOAuthDiagnostics,
   IntelligenceDashboard,
 } from "@/src/modules/intelligence/types/intelligence.types"
 import { API_ENDPOINTS } from "@/src/shared/constants/api-endpoints"
@@ -16,6 +17,7 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query"
+import { useCallback, useRef } from "react"
 
 export const INTELLIGENCE_QUERY_KEY = ["intelligence", "dashboard"] as const
 export const INTELLIGENCE_MESSAGES_QUERY_KEY = [
@@ -24,28 +26,56 @@ export const INTELLIGENCE_MESSAGES_QUERY_KEY = [
 ] as const
 export const INTELLIGENCE_PAGE_SIZE = 50
 
+function fetchIntelligenceDashboard(signal: AbortSignal) {
+  return apiGet<IntelligenceDashboard>(
+    API_ENDPOINTS.INTELLIGENCE.DASHBOARD,
+    signal
+  )
+}
+
 export function useIntelligence() {
-  const emailSocketStatus = useAiEmailSyncSocket()
+  const {
+    status: emailSocketStatus,
+    hasPendingMessageUpdates,
+    markMessagesPending,
+    acknowledgeMessages,
+  } = useAiEmailSyncSocket()
   const session = useAppStore((state) => state.session)
   const queryClient = useQueryClient()
   const dashboardQuery = useQuery({
     queryKey: INTELLIGENCE_QUERY_KEY,
-    queryFn: ({ signal }) =>
-      apiGet<IntelligenceDashboard>(
-        API_ENDPOINTS.INTELLIGENCE.DASHBOARD,
-        signal
-      ),
+    queryFn: ({ signal }) => fetchIntelligenceDashboard(signal),
     enabled: Boolean(session),
     staleTime: 15_000,
     refetchOnWindowFocus: true,
     refetchInterval: (query) => {
       const connection = query.state.data?.connection
-      return connection?.connected &&
-        (connection.syncInProgress ||
-          (!connection.initialSyncCompletedAt && !connection.lastSyncErrorCode))
+      if (!connection?.connected) {
+        return false
+      }
+      if (
+        connection.lastSyncErrorCode ||
+        connection.syncProgress?.status === "failed"
+      ) {
+        return 30_000
+      }
+      return connection.syncInProgress ||
+        (!connection.initialSyncCompletedAt && !connection.lastSyncErrorCode)
         ? 5_000
         : false
     },
+  })
+  const oauthDiagnosticsQuery = useQuery({
+    queryKey: ["intelligence", "oauth-diagnostics"],
+    queryFn: ({ signal }) =>
+      apiGet<AiEmailOAuthDiagnostics>(
+        API_ENDPOINTS.INTELLIGENCE.OAUTH_DIAGNOSTICS,
+        signal
+      ),
+    enabled: Boolean(session && dashboardQuery.data?.connection.connected),
+    staleTime: 60_000,
+    refetchInterval: (query) =>
+      query.state.data?.configured === false ? 60_000 : false,
   })
   const messagesQuery = useInfiniteQuery({
     queryKey: INTELLIGENCE_MESSAGES_QUERY_KEY,
@@ -64,8 +94,30 @@ export function useIntelligence() {
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (page) => page.nextCursor ?? undefined,
     enabled: Boolean(session && dashboardQuery.data?.connection.connected),
-    staleTime: 15_000,
+    retry: false,
+    staleTime: Infinity,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   })
+  const nextPageRequestRef = useRef(false)
+  const fetchNextMessagesPage = messagesQuery.fetchNextPage
+  const loadNextMessagesPage = useCallback(async () => {
+    if (nextPageRequestRef.current) {
+      return
+    }
+    nextPageRequestRef.current = true
+    try {
+      await fetchNextMessagesPage()
+    } finally {
+      nextPageRequestRef.current = false
+    }
+  }, [fetchNextMessagesPage])
+  const refreshMessages = useCallback(async () => {
+    acknowledgeMessages()
+    await queryClient.resetQueries({
+      queryKey: INTELLIGENCE_MESSAGES_QUERY_KEY,
+    })
+  }, [acknowledgeMessages, queryClient])
   const connectMutation = useMutation({
     mutationFn: () =>
       apiPost<{ authorizationUrl: string }>(
@@ -81,12 +133,10 @@ export function useIntelligence() {
         API_ENDPOINTS.INTELLIGENCE.SYNC_EMAIL
       ),
     onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: INTELLIGENCE_QUERY_KEY }),
-        queryClient.invalidateQueries({
-          queryKey: INTELLIGENCE_MESSAGES_QUERY_KEY,
-        }),
-      ])
+      await queryClient.invalidateQueries({
+        queryKey: INTELLIGENCE_QUERY_KEY,
+      })
+      markMessagesPending()
     },
   })
   const resetMutation = useMutation({
@@ -102,13 +152,14 @@ export function useIntelligence() {
       })
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: INTELLIGENCE_QUERY_KEY }),
-        queryClient.invalidateQueries({
+        queryClient.resetQueries({
           queryKey: INTELLIGENCE_MESSAGES_QUERY_KEY,
         }),
         queryClient.invalidateQueries({
           queryKey: ["intelligence", "evidence"],
         }),
       ])
+      acknowledgeMessages()
     },
     onError: (error) => {
       appToast.error({
@@ -120,12 +171,28 @@ export function useIntelligence() {
 
   return {
     dashboardQuery,
+    oauthDiagnosticsQuery,
     messagesQuery,
+    hasPendingMessageUpdates,
+    refreshMessages,
+    loadNextMessagesPage,
     connectMutation,
     syncMutation,
     resetMutation,
     emailSocketStatus,
   }
+}
+
+export function useIntelligenceRole() {
+  const session = useAppStore((state) => state.session)
+
+  return useQuery({
+    queryKey: INTELLIGENCE_QUERY_KEY,
+    queryFn: ({ signal }) => fetchIntelligenceDashboard(signal),
+    enabled: Boolean(session),
+    staleTime: 60_000,
+    select: (dashboard) => dashboard.role,
+  })
 }
 
 export function useIntelligenceMessage(messageId: string | null) {

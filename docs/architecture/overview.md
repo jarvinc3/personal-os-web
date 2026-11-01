@@ -64,7 +64,7 @@ Rutas protegidas (`isProtectedAppPath`): home, settings, chat, notifications, ke
 1. `QueryProvider`
 2. `AuthBootstrapProvider`
 3. `ThemeProvider`
-4. `AppEffectsProvider` — tema, sockets notif/IA, registro Web Push (`usePushToken`)
+4. `AppEffectsProvider` — tema, canal compartido de notificaciones y progreso de IA, registro Web Push (`usePushToken`)
 5. Tooltip / Toaster
 
 `app/(app)/layout.tsx`: `SidebarProvider` → `AppSidebar` → `HeaderProvider` → `AppHeader` + `main` → `KeepAwakeProvider` + `PendingAccountDeletionHandler`.

@@ -56,13 +56,20 @@ import {
   X,
   Trash2,
 } from "lucide-react"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useIntelligence } from "./hooks/use-intelligence"
+import {
+  getMessagesRateLimitError,
+  MESSAGES_RATE_LIMIT_MAX_AUTO_RETRIES,
+  messagesRateLimitDelayMs,
+} from "./messages-rate-limit"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { AiEvidenceSection } from "./components/ai-evidence-section"
 import { describeVerificationPayload } from "./review-labels"
+import { describeSyncFailure, resolveDashboardSyncFailure } from "./sync-status"
 import {
   Alert,
+  AlertAction,
   AlertDescription,
   AlertTitle,
 } from "@/src/shared/components/ui/alert"
@@ -74,7 +81,11 @@ export function IntelligenceScreen() {
 function IntelligenceScreenBody() {
   const {
     dashboardQuery,
+    oauthDiagnosticsQuery,
     messagesQuery,
+    hasPendingMessageUpdates,
+    refreshMessages,
+    loadNextMessagesPage,
     connectMutation,
     syncMutation,
     resetMutation,
@@ -92,7 +103,26 @@ function IntelligenceScreenBody() {
     () => messagesQuery.data?.pages.flatMap((page) => page.items) ?? [],
     [messagesQuery.data?.pages]
   )
-  const { fetchNextPage, hasNextPage, isFetchingNextPage } = messagesQuery
+  const {
+    hasNextPage,
+    isFetching: isFetchingMessages,
+    isFetchingNextPage,
+    refetch: refetchMessages,
+  } = messagesQuery
+  const messagesRateLimitError = getMessagesRateLimitError(messagesQuery.error)
+  const messagesRateLimitAttemptsRef = useRef(0)
+  const messagesRetryInProgress = isFetchingMessages || isFetchingNextPage
+  const retryMessages = useCallback(() => {
+    if (hasNextPage && messages.length > 0) {
+      void loadNextMessagesPage()
+      return
+    }
+    void refetchMessages()
+  }, [hasNextPage, loadNextMessagesPage, messages.length, refetchMessages])
+  const retryMessagesNow = useCallback(() => {
+    messagesRateLimitAttemptsRef.current = 0
+    retryMessages()
+  }, [retryMessages])
   const queryProgress = dashboardQuery.data?.connection.connected
     ? dashboardQuery.data.connection.syncProgress
     : null
@@ -101,11 +131,43 @@ function IntelligenceScreenBody() {
       ? queryProgress.retryAt
       : undefined
   const now = useRetryClock(retryAt)
-  const loadMore = useCallback(() => {
-    if (hasNextPage && !isFetchingNextPage) {
-      void fetchNextPage()
+  useEffect(() => {
+    if (!messagesRateLimitError) {
+      messagesRateLimitAttemptsRef.current = 0
+      return
     }
-  }, [fetchNextPage, hasNextPage, isFetchingNextPage])
+    if (
+      messagesRetryInProgress ||
+      messagesRateLimitAttemptsRef.current >=
+        MESSAGES_RATE_LIMIT_MAX_AUTO_RETRIES
+    ) {
+      return
+    }
+    const timer = window.setTimeout(
+      () => {
+        messagesRateLimitAttemptsRef.current += 1
+        retryMessages()
+      },
+      messagesRateLimitDelayMs({
+        error: messagesRateLimitError,
+        attempt: messagesRateLimitAttemptsRef.current,
+      })
+    )
+    return () => {
+      window.clearTimeout(timer)
+    }
+  }, [messagesRateLimitError, messagesRetryInProgress, retryMessages])
+  const loadMore = useCallback(() => {
+    if (!hasNextPage || isFetchingNextPage || messagesQuery.error) {
+      return
+    }
+    void loadNextMessagesPage()
+  }, [
+    hasNextPage,
+    isFetchingNextPage,
+    loadNextMessagesPage,
+    messagesQuery.error,
+  ])
 
   if (dashboardQuery.isPending) {
     return (
@@ -143,19 +205,32 @@ function IntelligenceScreenBody() {
   const dashboard = dashboardQuery.data
   const connected = dashboard.connection.connected
   const receivedRange = dashboard.receivedRange
-  const syncProgress = connected ? dashboard.connection.syncProgress : null
   const connection = dashboard.connection
-  const syncFailed =
-    (connection.connected && Boolean(connection.lastSyncErrorCode)) ||
-    syncProgress?.status === "failed"
+  const syncProgress = connection.connected ? connection.syncProgress : null
+  const oauthIncomplete =
+    connection.connected && oauthDiagnosticsQuery.data?.configured === false
+  const syncFailure = resolveDashboardSyncFailure({
+    connection,
+    progress: syncProgress,
+  })
+  const syncFailed = Boolean(syncFailure)
+  const syncWarning = syncFailed || oauthIncomplete
   const syncWaiting =
-    syncProgress?.status === "waiting" || syncProgress?.status === "retrying"
+    !oauthIncomplete &&
+    (syncProgress?.status === "waiting" || syncProgress?.status === "retrying")
   const syncing =
-    (connection.connected &&
+    !syncWarning &&
+    ((connection.connected &&
       (connection.syncInProgress ||
         (!connection.initialSyncCompletedAt && !syncFailed))) ||
-    syncProgress?.status === "running" ||
-    syncProgress?.status === "scheduled"
+      syncProgress?.status === "running" ||
+      syncProgress?.status === "scheduled")
+  const attemptedAt = syncFailure?.occurredAt
+    ? formatDateTime(syncFailure.occurredAt)
+    : null
+  const failureCopy = syncFailure
+    ? describeSyncFailure(syncFailure, attemptedAt)
+    : null
 
   return (
     <main className="mx-auto flex w-full max-w-4xl flex-col gap-5 p-4 pb-10 md:px-6">
@@ -165,6 +240,7 @@ function IntelligenceScreenBody() {
           connected
             ? connectionSubtitle({
                 emailAddress: dashboard.connection.emailAddress,
+                oauthIncomplete,
                 syncFailed,
                 syncWaiting,
                 syncing,
@@ -200,20 +276,22 @@ function IntelligenceScreenBody() {
                   />
                 )}
                 {emailSocketStatus === "connected"
-                  ? "En vivo"
+                  ? "Canal en vivo"
                   : emailSocketStatus === "connecting"
-                    ? "Conectando"
-                    : "Sin conexión"}
+                    ? "Conectando canal"
+                    : "Canal sin conexión"}
               </Badge>
               <span
                 role="img"
                 aria-label={
-                  syncFailed
-                    ? "Gmail conectado con la sincronización detenida"
-                    : "Gmail conectado"
+                  oauthIncomplete
+                    ? "Gmail conectado con configuración OAuth incompleta"
+                    : syncFailed
+                      ? "Gmail conectado con la última sincronización fallida"
+                      : "Gmail conectado"
                 }
               >
-                {syncFailed ? (
+                {syncWarning ? (
                   <AlertCircle
                     className="size-5 text-amber-600"
                     aria-hidden="true"
@@ -239,43 +317,95 @@ function IntelligenceScreenBody() {
         {connected ? (
           <>
             <SummaryItem
-              title="Cuenta conectada"
+              title="Historial inicial"
               description={
-                !dashboard.connection.initialSyncCompletedAt
-                  ? syncProgress?.status === "failed" ||
-                    dashboard.connection.lastSyncErrorCode
-                    ? "Sincronización detenida"
-                    : dashboard.connection.lastSyncedAt
-                      ? syncProgress?.status === "scheduled"
-                        ? "Siguiente lote programado"
-                        : "Sincronización inicial en curso"
-                      : "La sincronización inicial está pendiente."
-                  : "Historial inicial completo"
+                dashboard.connection.initialSyncCompletedAt
+                  ? "Completo desde 1 ene 2026"
+                  : syncWarning
+                    ? "Incompleto · la sincronización se detuvo"
+                    : syncing
+                      ? "Importando desde 1 ene 2026"
+                      : "Pendiente"
               }
-              icon={Mail}
+              icon={CalendarDays}
               value={
-                dashboard.connection.lastSyncedAt
-                  ? formatDateTime(dashboard.connection.lastSyncedAt)
-                  : "Pendiente"
+                receivedRange?.firstMessageAt
+                  ? formatDate(receivedRange.firstMessageAt)
+                  : "Sin correos"
               }
-              isLast={
-                !dashboard.connection.lastSyncErrorCode &&
-                syncProgress?.status !== "failed"
+            />
+            <SummaryItem
+              title="Última sincronización"
+              description={
+                oauthIncomplete
+                  ? "No puede correr: falta configuración OAuth"
+                  : syncFailed
+                    ? "Falló"
+                    : syncWaiting
+                      ? "Esperando reintento de Gmail"
+                      : syncProgress?.status === "running"
+                        ? "En curso"
+                        : syncProgress?.status === "scheduled"
+                          ? "Correcta; siguiente lote programado"
+                          : dashboard.connection.lastSyncedAt
+                            ? "Correcta"
+                            : "Sin intentos"
               }
+              icon={RefreshCw}
+              value={
+                syncFailure?.occurredAt
+                  ? formatDateTime(syncFailure.occurredAt)
+                  : dashboard.connection.lastSyncedAt
+                    ? formatDateTime(dashboard.connection.lastSyncedAt)
+                    : "Pendiente"
+              }
+              isLast
             />
 
             <div className="flex flex-col gap-2">
-              {syncProgress?.status === "failed" ||
-              (dashboard.connection.lastSyncErrorCode && !syncProgress) ? (
+              {oauthIncomplete ? (
                 <Alert variant="warning" role="status">
                   <AlertCircle className="size-4 shrink-0" aria-hidden="true" />
-                  <AlertTitle>La sincronización se detuvo</AlertTitle>
+                  <AlertTitle>Configuración OAuth incompleta</AlertTitle>
                   <AlertDescription>
-                    {syncFailureMessage(syncProgress?.errorCategory)}
+                    El backend no tiene completas las variables de Gmail. La
+                    sincronización automática no puede correr y la cuenta no
+                    está al día. Revisa la configuración y reinicia el API; no
+                    hace falta reconectar.
+                    {failureCopy
+                      ? ` Último intento: ${attemptedAt ?? "sin hora"} · código ${syncFailure?.code}.`
+                      : null}
                   </AlertDescription>
                 </Alert>
+              ) : failureCopy ? (
+                <Alert variant="warning" role="status">
+                  <AlertCircle className="size-4 shrink-0" aria-hidden="true" />
+                  <AlertTitle>{failureCopy.title}</AlertTitle>
+                  <AlertDescription>{failureCopy.description}</AlertDescription>
+                  {failureCopy.offerReconnect ? (
+                    <AlertAction>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => connectMutation.mutate()}
+                        disabled={connectMutation.isPending}
+                      >
+                        {connectMutation.isPending ? (
+                          <LoaderCircle
+                            className="animate-spin"
+                            aria-hidden="true"
+                          />
+                        ) : (
+                          <Mail aria-hidden="true" />
+                        )}
+                        Reconectar
+                      </Button>
+                    </AlertAction>
+                  ) : null}
+                </Alert>
               ) : null}
-              {syncProgress?.status === "scheduled" ? (
+              {syncProgress?.status === "scheduled" && !oauthIncomplete ? (
                 <Alert variant="default" role="status">
                   <Clock3 className="size-4 shrink-0" aria-hidden="true" />
                   <AlertTitle>El siguiente lote está programado</AlertTitle>
@@ -289,9 +419,8 @@ function IntelligenceScreenBody() {
                   </AlertDescription>
                 </Alert>
               ) : null}
-              {dashboard.connection.syncInProgress ||
-              syncProgress?.status === "waiting" ||
-              syncProgress?.status === "retrying" ? (
+              {!oauthIncomplete &&
+              (dashboard.connection.syncInProgress || syncWaiting) ? (
                 <Alert variant="default" role="status">
                   <LoaderCircle
                     className="size-4 shrink-0 animate-spin"
@@ -411,17 +540,17 @@ function IntelligenceScreenBody() {
                     ? "success"
                     : dashboard.connection.syncInProgress
                       ? "info"
-                      : syncFailed
+                      : syncWarning
                         ? "warning"
                         : "secondary"
                 }
               >
                 <CalendarDays data-icon="inline-start" />
                 {dashboard.connection.initialSyncCompletedAt
-                  ? "Histórico completo desde 1 ene 2026"
+                  ? "Histórico inicial completo · desde 1 ene 2026"
                   : dashboard.connection.syncInProgress
                     ? "Importando desde 1 ene 2026"
-                    : syncFailed
+                    : syncWarning
                       ? "Histórico detenido · desde 1 ene 2026"
                       : syncProgress?.status === "scheduled"
                         ? "Histórico en espera · desde 1 ene 2026"
@@ -507,7 +636,29 @@ function IntelligenceScreenBody() {
           </TabsList>
 
           <TabsContent value="messages" className="flex flex-col gap-3">
-            {messagesQuery.isPending ? (
+            {messagesRateLimitError ? (
+              <Alert variant="warning" role="status">
+                <AlertCircle className="size-4 shrink-0" aria-hidden="true" />
+                <AlertTitle>Demasiadas solicitudes a la lista</AlertTitle>
+                <AlertDescription>
+                  {messagesRetryInProgress
+                    ? "La lista conserva los correos cargados. Reintentando sin recargar."
+                    : "La lista conserva los correos cargados. El API limitó las solicitudes; se reintentará con una espera acotada o puedes reintentar ahora."}
+                </AlertDescription>
+                <AlertAction>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={retryMessagesNow}
+                    disabled={messagesRetryInProgress}
+                  >
+                    <RefreshCw aria-hidden="true" /> Reintentar
+                  </Button>
+                </AlertAction>
+              </Alert>
+            ) : null}
+            {messagesQuery.isPending && messages.length === 0 ? (
               <div
                 className="flex flex-col gap-2 p-2"
                 aria-label="Cargando mensajes"
@@ -516,7 +667,9 @@ function IntelligenceScreenBody() {
                 <Skeleton className="h-14 w-full" />
                 <Skeleton className="h-14 w-full" />
               </div>
-            ) : messagesQuery.isError ? (
+            ) : messages.length === 0 &&
+              messagesQuery.isError &&
+              !messagesRateLimitError ? (
               <Empty>
                 <EmptyHeader>
                   <EmptyMedia variant="icon">
@@ -527,27 +680,47 @@ function IntelligenceScreenBody() {
                     Los mensajes ya cargados siguen disponibles.
                   </EmptyDescription>
                 </EmptyHeader>
-                <Button
-                  type="button"
-                  onClick={() => void messagesQuery.refetch()}
-                >
+                <Button type="button" onClick={() => void refetchMessages()}>
                   <RefreshCw aria-hidden="true" /> Reintentar
                 </Button>
               </Empty>
             ) : messages.length === 0 ? (
-              <Empty>
-                <EmptyHeader>
-                  <EmptyMedia variant="icon">
-                    <Inbox aria-hidden="true" />
-                  </EmptyMedia>
-                  <EmptyTitle>Aún no hay mensajes</EmptyTitle>
-                  <EmptyDescription>
-                    La sincronización agregará aquí el correo desde 2026.
-                  </EmptyDescription>
-                </EmptyHeader>
-              </Empty>
+              messagesRateLimitError ? null : (
+                <Empty>
+                  <EmptyHeader>
+                    <EmptyMedia variant="icon">
+                      <Inbox aria-hidden="true" />
+                    </EmptyMedia>
+                    <EmptyTitle>Aún no hay mensajes</EmptyTitle>
+                    <EmptyDescription>
+                      La sincronización agregará aquí el correo desde 2026.
+                    </EmptyDescription>
+                  </EmptyHeader>
+                </Empty>
+              )
             ) : (
               <>
+                {hasPendingMessageUpdates ? (
+                  <Alert variant="default" role="status">
+                    <Mail className="size-4 shrink-0" aria-hidden="true" />
+                    <AlertTitle>Hay correos nuevos</AlertTitle>
+                    <AlertDescription>
+                      La sincronización terminó. Actualiza la lista; se
+                      recargará desde la primera página.
+                    </AlertDescription>
+                    <AlertAction>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => void refreshMessages()}
+                        disabled={messagesRetryInProgress}
+                      >
+                        <RefreshCw aria-hidden="true" /> Actualizar
+                      </Button>
+                    </AlertAction>
+                  </Alert>
+                ) : null}
                 {messages.map((message) => (
                   <SummaryItem
                     key={message.id}
@@ -560,8 +733,8 @@ function IntelligenceScreenBody() {
                   />
                 ))}
                 <InfiniteListSentinel
-                  hasNextPage={Boolean(messagesQuery.hasNextPage)}
-                  isFetchingNextPage={messagesQuery.isFetchingNextPage}
+                  hasNextPage={Boolean(hasNextPage) && !messagesQuery.error}
+                  isFetchingNextPage={isFetchingNextPage}
                   onLoadMore={loadMore}
                 />
               </>
@@ -678,17 +851,22 @@ function formatRetryCountdown(retryAt: number, now: number | null) {
 
 function connectionSubtitle({
   emailAddress,
+  oauthIncomplete,
   syncFailed,
   syncWaiting,
   syncing,
 }: {
   emailAddress: string
+  oauthIncomplete: boolean
   syncFailed: boolean
   syncWaiting: boolean
   syncing: boolean
 }) {
+  if (oauthIncomplete) {
+    return `${emailAddress} · Configuración OAuth incompleta`
+  }
   if (syncFailed) {
-    return `${emailAddress} · Sincronización detenida`
+    return `${emailAddress} · Última sincronización fallida`
   }
   if (syncWaiting) {
     return `${emailAddress} · Esperando reintento de Gmail`
@@ -696,7 +874,7 @@ function connectionSubtitle({
   if (syncing) {
     return `${emailAddress} · Importando desde 1 ene 2026`
   }
-  return `${emailAddress} · Histórico completo`
+  return `${emailAddress} · Sin errores recientes`
 }
 
 function emailSocketStatusLabel(
@@ -704,34 +882,11 @@ function emailSocketStatusLabel(
 ) {
   switch (status) {
     case "connected":
-      return "WebSocket conectado; actualizaciones en vivo activas"
+      return "Canal de actualizaciones en vivo. No indica la salud de Gmail."
     case "connecting":
-      return "Conectando al WebSocket de actualizaciones"
+      return "Conectando el canal de actualizaciones. No indica la salud de Gmail."
     default:
-      return "WebSocket desconectado; no hay actualizaciones en vivo"
-  }
-}
-
-function syncFailureMessage(
-  category:
-    | "authorization"
-    | "configuration"
-    | "rate_limit"
-    | "temporary"
-    | "unknown"
-    | undefined
-) {
-  switch (category) {
-    case "authorization":
-      return "Google ya no acepta esta autorización. Usa Reconectar Gmail para renovar el acceso y continuar."
-    case "configuration":
-      return "La conexión OAuth no está configurada correctamente. Revisa la configuración de Gmail del backend."
-    case "rate_limit":
-      return "Gmail alcanzó su límite temporal. Espera un poco y pulsa Sincronizar ahora para reintentar."
-    case "temporary":
-      return "Gmail o la red no respondió a tiempo. Puedes reintentar la sincronización."
-    default:
-      return "Gmail no pudo completar la solicitud. Reintenta; si vuelve a fallar, reconecta la cuenta."
+      return "Canal de actualizaciones sin conexión. No indica la salud de Gmail."
   }
 }
 

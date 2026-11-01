@@ -26,15 +26,21 @@ export function InfiniteListSentinel({
   idleLabel = "Cargar más",
 }: InfiniteListSentinelProps) {
   const sentinelRef = useRef<HTMLDivElement | null>(null)
+  const requestedRef = useRef(false)
   const canLoadMore = hasNextPage && !isFetchingNextPage
 
   useEffect(() => {
     const sentinel = sentinelRef.current
     if (!sentinel || !canLoadMore) {
+      requestedRef.current = false
       return
     }
     const observer = new IntersectionObserver((entries) => {
-      if (entries.some((entry) => entry.isIntersecting)) {
+      if (
+        entries.some((entry) => entry.isIntersecting) &&
+        !requestedRef.current
+      ) {
+        requestedRef.current = true
         onLoadMore()
       }
     })
@@ -53,7 +59,13 @@ export function InfiniteListSentinel({
         variant="ghost"
         size="sm"
         disabled={isFetchingNextPage}
-        onClick={onLoadMore}
+        onClick={() => {
+          if (requestedRef.current) {
+            return
+          }
+          requestedRef.current = true
+          onLoadMore()
+        }}
       >
         {isFetchingNextPage ? (
           <Spinner className="size-4" />
