@@ -1,3 +1,4 @@
+import type { operations } from "@/src/config/api-contract/api-schema"
 import type {
   FinanceAccountType,
   FinanceCardNetwork,
@@ -5,6 +6,22 @@ import type {
   FinanceInstitutionType,
 } from "@/src/modules/finance/shared/constants/catalog"
 import type { FinanceLoan, FinanceReceivable } from "./planning.ts"
+
+/**
+ * Respuesta del balance patrimonial tal como la publica el contrato. El
+ * contrato no marca campos como `required`, así que el cliente declara los que
+ * el API siempre envía con `ContractField`.
+ */
+type ContractBalanceSheet =
+  operations["BalanceSheetController_get"]["responses"][200]["content"]["application/json"]
+type ContractGlobalBalance = NonNullable<ContractBalanceSheet["global"]>
+type ContractAssets = NonNullable<ContractGlobalBalance["assets"]>
+type ContractLiabilities = NonNullable<ContractGlobalBalance["liabilities"]>
+type ContractCurrencySlice = Required<
+  NonNullable<ContractGlobalBalance["byCurrency"]>[number]
+>
+
+type ContractField<Value> = Exclude<Value, undefined>
 
 export type FinanceAnalyticsSummary = {
   baseCurrency: string
@@ -20,37 +37,32 @@ export type FinanceAnalyticsSummary = {
   }
 }
 
-export type FinanceBalanceSheetStatus = "COMPLETE" | "INCOMPLETE"
+export type FinanceBalanceSheetStatus = NonNullable<
+  ContractGlobalBalance["status"]
+>
 
 export type FinanceBalanceSheetIssue =
   | { code: "MISSING_CREDIT_LIMIT"; cardId: string; currency: string }
   | { code: "MISSING_RATE"; currency: string }
 
-export type FinanceBalanceSheetCurrencySlice = {
-  currency: string
-  assets: string
-  available: string
-  receivables: string
-  liabilities: string
-  netWorth: string
-}
+export type FinanceBalanceSheetCurrencySlice = ContractCurrencySlice
 
 export type FinanceBalanceSheetSlice = {
   status: FinanceBalanceSheetStatus
   assets: {
     /** All account balances on the base currency, cash included. */
-    accounts: string
+    accounts: ContractField<ContractAssets["accounts"]>
     /** Informational subset of `accounts`; never add it again. */
-    cash: string
-    receivables: string
+    cash: ContractField<ContractAssets["cash"]>
+    receivables: ContractField<ContractAssets["receivables"]>
   }
   liabilities: {
-    creditCards: string | null
-    loans: string
+    creditCards: ContractField<ContractLiabilities["creditCards"]>
+    loans: ContractField<ContractLiabilities["loans"]>
   }
-  totalAssets: string
-  totalLiabilities: string | null
-  netWorth: string | null
+  totalAssets: ContractField<ContractGlobalBalance["totalAssets"]>
+  totalLiabilities: ContractField<ContractGlobalBalance["totalLiabilities"]>
+  netWorth: ContractField<ContractGlobalBalance["netWorth"]>
   /** Native totals per currency; no conversion. */
   byCurrency: FinanceBalanceSheetCurrencySlice[]
   issues: FinanceBalanceSheetIssue[]

@@ -187,6 +187,8 @@ const eslintConfig = defineConfig([
     // Agent skill templates (not application source)
     ".agents/**",
     ".claude/**",
+    // Tipos generados desde el contrato OpenAPI (pnpm api:generate)
+    "src/config/api-contract/api-schema.ts",
   ]),
   {
     settings: {

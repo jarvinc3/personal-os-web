@@ -4,6 +4,7 @@
 - Client: `src/config/api-client.ts` — Bearer desde sesión Supabase; extrae `data` del envelope `{ data, meta }`.
 - Helpers: `apiGet`, `apiPost`, `apiPatch`, `apiDelete`, `apiDeleteWithBody` (DELETE con cuerpo, p. ej. `{ "confirmed": true }`) y `apiPostForm`.
 - Endpoints: `src/shared/constants/api-endpoints.ts`.
+- Tipos del API: se generan desde el contrato OpenAPI del back; ver [api-contract.md](./api-contract.md).
 - Errores: `ApiError`; `meta.requestId`/`path` si existen.
 - 401 → sign-out via `auth-events` + toast.
 

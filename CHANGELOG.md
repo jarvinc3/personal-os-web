@@ -26,6 +26,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Cambiado
 
+- Los tipos de request y de respuesta del cliente se generan desde el contrato OpenAPI del back: `pnpm api:contract` refresca la copia versionada, `pnpm api:generate` escribe `src/config/api-contract/api-schema.ts` y `pnpm typecheck` falla si el contrato no está disponible. Conocimiento y los montos del balance patrimonial ya salen del contrato; las respuestas que el back todavía no describe siguen a mano (personal-os-back#263) (#155).
 - La tabla «entidad → card → variantes» ya refleja el patrimonio con las cards compactas de cada producto y aclara que la web no tiene chat desde AI-0: el bloque del chat queda como referencia de la galería hasta su rediseño (AI-9) (#271).
 - La galería de componentes usa una lista de categorías con icono, descripción y conteo de fichas, con buscador por nombre de componente, y cada categoría abre su vista por ruta (`/settings/appearance/components/<categoría>`) con botón atrás; el deslizador horizontal desaparece (#341).
 - La galería de componentes suma fichas de `DetailHeader`, `CurrencyFlag` y `PendingSurface`, y `docs/architecture/ui-components.md` deja de contradecirse: el monto en pantalla es `Money` (dentro de un texto suelto, `formatFinanceMoney`), el deshacer es `showUndoToast` y el control segmentado es `SegmentedControl`; los canónicos que no se pueden montar aislados quedan explicados (#309).

@@ -1,7 +1,9 @@
 import { z } from "zod"
+import type { components } from "@/src/config/api-contract/api-schema"
 import type { AiHumanVerificationInput } from "./types/intelligence.types"
 
-// Valores de CreateHumanVerificationDto en el OpenAPI de personal-os-back#217.
+// Los valores de estas etiquetas son los del contrato del back
+// (CreateHumanVerificationDto); los tipos se derivan de los generados.
 export const SEMANTIC_TYPE_LABELS = {
   FIN_TRANSACTION: "Transacción",
   PURCHASE_RECEIPT: "Recibo / factura",
@@ -50,10 +52,18 @@ export function reviewSelectLabel<T extends Record<string, string>>(
   return value && value in labels ? labels[value as keyof T] : placeholder
 }
 
-export type SemanticType = keyof typeof SEMANTIC_TYPE_LABELS
-export type SemanticRoute = keyof typeof ROUTE_LABELS
-export type TransactionKind = keyof typeof TRANSACTION_KIND_LABELS
-export type TransactionDirection = keyof typeof TRANSACTION_DIRECTION_LABELS
+export type SemanticType = NonNullable<
+  components["schemas"]["CreateHumanVerificationDto"]["semanticType"]
+>
+export type SemanticRoute = NonNullable<
+  components["schemas"]["CreateHumanVerificationDto"]["routes"]
+>[number]
+export type TransactionKind = NonNullable<
+  components["schemas"]["HumanVerificationTransactionDto"]["kind"]
+>
+export type TransactionDirection = NonNullable<
+  components["schemas"]["HumanVerificationTransactionDto"]["direction"]
+>
 
 export const SEMANTIC_TYPES = Object.keys(
   SEMANTIC_TYPE_LABELS
