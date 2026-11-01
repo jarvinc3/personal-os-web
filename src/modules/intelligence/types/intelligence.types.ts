@@ -102,6 +102,20 @@ export type AiDatasetSummary = {
 
 export type AiReviewQueueItem = AiEmailMessageSummary & {
   partition: "TRAIN" | "VALIDATION" | "HOLDOUT"
+  /** Estado de la última verificación; sin verificación es `PENDING`. */
+  status: AiReviewStatus
+  /** Última verificación del correo, o `null` si sigue pendiente. */
+  verification: AiReviewVerification | null
+}
+
+export type AiReviewStatus = "PENDING" | "CONFIRMED" | "CORRECTED" | "REJECTED"
+
+export type AiReviewVerification = {
+  verdict: Exclude<AiReviewStatus, "PENDING">
+  /** Etiquetas corregidas tal como las guardó el back (`correctedPayload`). */
+  labels: unknown
+  notes: string | null
+  createdAt: string
 }
 
 export type AiReviewQueuePage = {
