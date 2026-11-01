@@ -24,6 +24,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Cambiado
 
+- La tabla «entidad → card → variantes» ya refleja el patrimonio con las cards compactas de cada producto y aclara que la web no tiene chat desde AI-0: el bloque del chat queda como referencia de la galería hasta su rediseño (AI-9) (#271).
 - La galería de componentes usa una lista de categorías con icono, descripción y conteo de fichas, con buscador por nombre de componente, y cada categoría abre su vista por ruta (`/settings/appearance/components/<categoría>`) con botón atrás; el deslizador horizontal desaparece (#341).
 - La galería de componentes suma fichas de `DetailHeader`, `CurrencyFlag` y `PendingSurface`, y `docs/architecture/ui-components.md` deja de contradecirse: el monto en pantalla es `Money` (dentro de un texto suelto, `formatFinanceMoney`), el deshacer es `showUndoToast` y el control segmentado es `SegmentedControl`; los canónicos que no se pueden montar aislados quedan explicados (#309).
 - La cola de revisión de Inteligencia deja ver el primer correo al abrir la vista en móvil: Gmail y las insignias de cobertura pasan a una sección plegada que resume la cuenta y el estado de la sincronización en una línea, y el asunto se lee completo en dos líneas sin que la etiqueta de partición lo tape (#323).
