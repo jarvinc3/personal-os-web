@@ -73,6 +73,8 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Corregido
 
+- Cerrar el detalle de un correo de Inteligencia reescribe la URL en vez de retroceder: Atrás ya no sale de Inteligencia ni reabre el panel, y la vista se queda en Revisión con el panel cerrado (#376).
+- El detalle de un correo muestra las representaciones «Canónica» y «Saneada» completas, sin el recorte de 320 px con scroll interno que las dejaba a medias; el panel es el único que se desplaza (#376).
 - Cuando el API marca que la conexión de Gmail necesita reconectar, Inteligencia lo dice en el subtítulo de la cuenta y en la última sincronización («Reconecta Gmail», «Detenida: reconecta Gmail») y el aviso del último fallo titula «Reconecta Gmail»; no se agrega un aviso aparte (#375).
 - El vaciado de datos valida la contraseña con un botón «Verificar» que habilita «Vaciar datos» al terminar; ya no depende de que el campo pierda el foco (#365).
 - Cuando la contraseña del vaciado o de eliminar la cuenta no coincide, el aviso se muestra en español con el mapeo de errores de Auth de la app, sin mensajes en inglés del proveedor (#365).
