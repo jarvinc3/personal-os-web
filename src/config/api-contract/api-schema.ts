@@ -368,6 +368,38 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/api/intelligence/review-groups": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["AiEvidenceController_reviewGroups"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/intelligence/review-groups/verifications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["AiEvidenceController_verifyReviewGroup"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/intelligence/messages/{messageId}/verifications": {
         parameters: {
             query?: never;
@@ -445,6 +477,23 @@ export type paths = {
         put?: never;
         /** Reconstruir la proyección desde un corte REPEATABLE READ */
         post: operations["AiKnowledgeController_rebuild"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/intelligence/knowledge/admin/{knowledgeId}/promote": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Promover manualmente conocimiento GLOBAL en revisión */
+        post: operations["AiKnowledgeController_promote"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2678,10 +2727,117 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/api/intelligence/signals": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["AiSignalsController_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/intelligence/signals/{signalId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["AiSignalsController_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/ai/conversations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Listar las conversaciones propias */
+        get: operations["AiConversationController_list"];
+        put?: never;
+        /** Crear una conversación privada del agente */
+        post: operations["AiConversationController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/ai/conversations/{conversationId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Recuperar una conversación propia */
+        get: operations["AiConversationController_get"];
+        put?: never;
+        post?: never;
+        /** Borrar una conversación propia y sus mensajes */
+        delete: operations["AiConversationController_remove"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/ai/conversations/{conversationId}/messages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Enviar un mensaje y ejecutar capacidades de lectura disponibles */
+        post: operations["AiConversationController_sendMessage"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 };
 export type webhooks = Record<string, never>;
 export type components = {
     schemas: {
+        UserModuleResponseDto: {
+            slug: string;
+            isEnabled: boolean;
+            config: Record<string, never>;
+            /** Format: date-time */
+            enabledAt: string;
+        };
+        UserProfileResponseDto: {
+            id: string;
+            email: string;
+            fullName: string;
+            avatarUrl: string | null;
+            timezone: string;
+            locale: string;
+            preferences: Record<string, never>;
+            lastSeenReleaseVersion: string | null;
+            userModules: components["schemas"]["UserModuleResponseDto"][];
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
         UpdateProfileDto: {
             fullName?: string;
             timezone?: string;
@@ -2702,6 +2858,25 @@ export type components = {
             /** @description Enable or disable the module for this user */
             isEnabled?: boolean;
         };
+        DeleteAccountResponseDto: {
+            success: boolean;
+            authCleanupPending: boolean;
+        };
+        DataBranchIncludeResponseDto: {
+            id: string;
+            count: number;
+        };
+        DataBranchCountResponseDto: {
+            id: string;
+            label: string;
+            count: number;
+            includes: components["schemas"]["DataBranchIncludeResponseDto"][];
+        };
+        DataAppBranchesResponseDto: {
+            /** @enum {string} */
+            app: "finance" | "ai" | "notifications" | "settings";
+            branches: components["schemas"]["DataBranchCountResponseDto"][];
+        };
         WipeUserDataDto: {
             /**
              * @description Data branches to wipe, as returned by GET /users/me/data/branches
@@ -2718,9 +2893,281 @@ export type components = {
             /** @description Institution whose accounts to zero and whose credit cards to restore to their limit. Applies only to finance.balances. */
             balanceInstitutionId?: string;
         };
+        WipeUserDataResponseDto: {
+            success: boolean;
+            requestedBranches: string[];
+            appliedBranches: string[];
+            counts: {
+                [key: string]: number;
+            };
+        };
+        AuthSessionResponseDto: {
+            sub: string;
+            email: string | null;
+            role: string | null;
+        };
+        AiRoleUserResponseDto: {
+            id: string;
+            email: string;
+            fullName: string;
+            /** @enum {string} */
+            role: "USER" | "CONTRIBUTOR" | "ADMIN";
+            /** Format: date-time */
+            grantedAt: string | null;
+            /** Format: date-time */
+            updatedAt: string | null;
+        };
         UpdateAiRoleDto: Record<string, never>;
+        AiRoleAssignmentResponseDto: {
+            userId: string;
+            /** @enum {string} */
+            role: "USER" | "CONTRIBUTOR" | "ADMIN";
+            grantedBy: string | null;
+            /** Format: date-time */
+            grantedAt: string;
+        };
+        AiConsentResponseDto: {
+            contributeToGlobalKnowledge: boolean;
+            /** Format: date-time */
+            contributionConsentAt: string;
+        };
         UpdateConsentDto: Record<string, never>;
+        AiEmailLastAttemptResponseDto: {
+            /** Format: date-time */
+            startedAt: string | null;
+            /** Format: date-time */
+            finishedAt: string | null;
+            /** @enum {string|null} */
+            result: "SUCCEEDED" | "FAILED" | "INTERRUPTED" | null;
+            errorCode: string | null;
+            errorCategory: string | null;
+            importedCount: number | null;
+            phase: string | null;
+        };
+        AiEmailLastFailureResponseDto: {
+            /** Format: date-time */
+            finishedAt: string | null;
+            errorCode: string | null;
+            errorCategory: string | null;
+            importedCount: number | null;
+            phase: string | null;
+        };
+        AiEmailSyncProgressResponseDto: {
+            /** @enum {string} */
+            status: "running" | "waiting" | "retrying" | "scheduled" | "completed" | "failed";
+            /** @enum {string} */
+            phase: "bootstrap" | "incremental" | "recovery";
+            attempt: number;
+            rateLimitRetryCount?: number;
+            processedThisRun: number;
+            importedThisRun: number;
+            batchSize?: number;
+            totalEstimate?: number;
+            retryAt?: number;
+            nextRunAt?: number;
+            errorCode?: string;
+            providerErrorCode?: string;
+            recoveryRange?: {
+                from?: string;
+                to?: string;
+            };
+            /** @enum {string} */
+            errorCategory?: "authorization" | "configuration" | "rate_limit" | "temporary" | "unknown";
+            /** Format: date-time */
+            startedAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        AiEmailConnectionResponseDto: {
+            connected: boolean;
+            emailAddress?: string;
+            /** Format: date-time */
+            initialSyncCompletedAt?: string | null;
+            /** Format: date-time */
+            lastSyncedAt?: string | null;
+            /** Format: date-time */
+            lastRecoverySyncAt?: string | null;
+            lastSyncErrorCode?: string | null;
+            lastAttempt?: components["schemas"]["AiEmailLastAttemptResponseDto"] | null;
+            lastFailure?: components["schemas"]["AiEmailLastFailureResponseDto"] | null;
+            requiresReconnect?: boolean;
+            syncProgress?: components["schemas"]["AiEmailSyncProgressResponseDto"] | null;
+            syncInProgress?: boolean;
+        };
+        AiEmailCountersResponseDto: {
+            importedMessages: number;
+            recentMessages: number;
+            bootstrapImportedMessages: number;
+        };
+        AiEmailReceivedRangeResponseDto: {
+            /** Format: date-time */
+            firstMessageAt: string | null;
+            /** Format: date-time */
+            latestMessageAt: string | null;
+        };
+        AiEmailDashboardResponseDto: {
+            connection: components["schemas"]["AiEmailConnectionResponseDto"];
+            counters: components["schemas"]["AiEmailCountersResponseDto"];
+            receivedRange: components["schemas"]["AiEmailReceivedRangeResponseDto"];
+            /** @enum {string} */
+            role: "USER" | "CONTRIBUTOR" | "ADMIN";
+        };
+        AiEmailMessageSummaryResponseDto: {
+            id: string;
+            /** Format: date-time */
+            receivedAt: string;
+            fromAddress: string;
+            fromDomain: string;
+            subject: string;
+            /** @enum {string} */
+            processingStatus: "INGESTED" | "QUEUED" | "PROCESSED" | "REVIEW_REQUIRED" | "FAILED";
+            contentFingerprint: string;
+        };
+        AiEmailMessagePageResponseDto: {
+            items: components["schemas"]["AiEmailMessageSummaryResponseDto"][];
+            hasMore: boolean;
+            nextCursor: string | null;
+        };
+        AiEmailContentResponseDto: {
+            messageId: string;
+            rawBody: string | null;
+            sanitizedBody: string | null;
+            canonicalBody: string | null;
+            snippet: string | null;
+            /** Format: date-time */
+            retentionExpiresAt: string | null;
+        };
+        AiKnowledgeObservationResponseDto: {
+            /** @example 1 */
+            sequence: string;
+            runId: string | null;
+            knowledgeType: string;
+            knowledgeKey: string;
+            proposedScope: string;
+            payload: Record<string, never> | null;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        AiHumanVerificationResponseDto: {
+            /** @example 1 */
+            sequence: string;
+            /** @enum {string} */
+            verifierRole: "USER" | "CONTRIBUTOR" | "ADMIN";
+            /** @enum {string} */
+            verdict: "CONFIRMED" | "CORRECTED" | "REJECTED";
+            correctedPayload: Record<string, never> | null;
+            notes: string | null;
+            isGroundTruth: boolean;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        AiEmailMessageProvenanceResponseDto: {
+            observations: components["schemas"]["AiKnowledgeObservationResponseDto"][];
+            verifications: components["schemas"]["AiHumanVerificationResponseDto"][];
+        };
+        AiEmailMessageResponseDto: {
+            id: string;
+            /** Format: date-time */
+            receivedAt: string;
+            fromAddress: string;
+            fromDomain: string;
+            subject: string;
+            /** @enum {string} */
+            processingStatus: "INGESTED" | "QUEUED" | "PROCESSED" | "REVIEW_REQUIRED" | "FAILED";
+            contentFingerprint: string;
+            userId: string;
+            connectionId: string;
+            providerMessageId: string;
+            providerThreadId: string | null;
+            templateFingerprint: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            content: components["schemas"]["AiEmailContentResponseDto"] | null;
+            provenance: components["schemas"]["AiEmailMessageProvenanceResponseDto"];
+        };
+        AiEmailConnectResponseDto: {
+            authorizationUrl: string;
+        };
+        AiEmailSyncResponseDto: {
+            connected: boolean;
+            syncStarted: boolean;
+        };
         ResetEmailCorpusDto: Record<string, never>;
+        AiEmailResetResponseDto: {
+            connected: boolean;
+            deletedMessages: number;
+        };
+        AiEmailDiagnosticsResponseDto: {
+            configured: boolean;
+            /** @example GMAIL */
+            provider: string;
+            scopes: string[];
+            /** @enum {string} */
+            status: "ready" | "missing_oauth_configuration";
+        };
+        AiDatasetPartitionsResponseDto: {
+            TRAIN: number;
+            VALIDATION: number;
+            HOLDOUT: number;
+        };
+        AiDatasetResponseDto: {
+            id: string;
+            name: string;
+            partitions: components["schemas"]["AiDatasetPartitionsResponseDto"];
+        };
+        AiReviewItemVerificationResponseDto: {
+            /** @enum {string} */
+            verdict: "CONFIRMED" | "CORRECTED" | "REJECTED";
+            labels: Record<string, never> | null;
+            notes: string | null;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        AiReviewQueueItemResponseDto: {
+            id: string;
+            /** Format: date-time */
+            receivedAt: string;
+            fromAddress: string;
+            fromDomain: string;
+            subject: string;
+            contentFingerprint: string;
+            processingStatus: string;
+            /** @enum {string} */
+            partition: "TRAIN" | "VALIDATION" | "HOLDOUT";
+            /** @enum {string} */
+            status: "PENDING" | "CONFIRMED" | "CORRECTED" | "REJECTED";
+            verification: components["schemas"]["AiReviewItemVerificationResponseDto"] | null;
+        };
+        AiReviewQueueCountsResponseDto: {
+            all: number;
+            TRAIN: number;
+            VALIDATION: number;
+            HOLDOUT: number;
+        };
+        AiReviewQueueResponseDto: {
+            items: components["schemas"]["AiReviewQueueItemResponseDto"][];
+            counts: components["schemas"]["AiReviewQueueCountsResponseDto"];
+            hasMore: boolean;
+            nextCursor: string | null;
+        };
+        AiReviewGroupResponseDto: {
+            fromAddress: string;
+            templateFingerprint: string | null;
+            total: number;
+            pending: number;
+            pendingHoldout: number;
+            sampleSubjects: string[];
+            sampleMessageIds: string[];
+        };
+        AiReviewGroupsPageResponseDto: {
+            items: components["schemas"]["AiReviewGroupResponseDto"][];
+            page: number;
+            pageSize: number;
+            totalGroups: number;
+            hasMore: boolean;
+        };
         HumanVerificationTransactionDto: {
             /** @enum {string} */
             kind?: "TRANSACTION" | "PENDING" | "NOT_TRANSACTION";
@@ -2735,11 +3182,75 @@ export type components = {
             bankReference?: string;
             last4?: string;
         };
+        CreateReviewGroupVerificationDto: {
+            /** @enum {string} */
+            semanticType?: "FIN_TRANSACTION" | "PURCHASE_RECEIPT" | "SUBSCRIPTION_BILLING" | "FIN_STATEMENT_NOTICE" | "FIN_ACCOUNT_NOTICE" | "SECURITY_OTP" | "SECURITY_ALERT" | "TECH_NOTIFICATION" | "JOB" | "CALENDAR_EVENT" | "MARKETING" | "SOCIAL" | "OTHER";
+            routes?: ("FINANCE" | "SUBSCRIPTIONS" | "CALENDAR" | "SECURITY")[];
+            transaction?: components["schemas"]["HumanVerificationTransactionDto"];
+            /** @enum {string} */
+            verdict: "CONFIRMED" | "CORRECTED";
+            /** @example notifications@github.com */
+            fromAddress: string;
+            /** @description Huella de la plantilla de asunto del grupo. Null agrupa los correos del remitente sin huella. */
+            templateFingerprint?: Record<string, never> | null;
+        };
+        AiReviewGroupVerificationResultResponseDto: {
+            verified: number;
+            holdoutExcluded: number;
+            alreadyVerified: number;
+        };
         CreateHumanVerificationDto: {
             /** @enum {string} */
             semanticType?: "FIN_TRANSACTION" | "PURCHASE_RECEIPT" | "SUBSCRIPTION_BILLING" | "FIN_STATEMENT_NOTICE" | "FIN_ACCOUNT_NOTICE" | "SECURITY_OTP" | "SECURITY_ALERT" | "TECH_NOTIFICATION" | "JOB" | "CALENDAR_EVENT" | "MARKETING" | "SOCIAL" | "OTHER";
             routes?: ("FINANCE" | "SUBSCRIPTIONS" | "CALENDAR" | "SECURITY")[];
             transaction?: components["schemas"]["HumanVerificationTransactionDto"];
+            /** @enum {string} */
+            verdict: "CONFIRMED" | "CORRECTED" | "REJECTED";
+        };
+        AiMessageVerificationResponseDto: {
+            /** @example 1 */
+            sequence: string;
+            /** @enum {string} */
+            verifierRole: "USER" | "CONTRIBUTOR" | "ADMIN";
+            targetType: string;
+            targetId: string | null;
+            /** @enum {string} */
+            verdict: "CONFIRMED" | "CORRECTED" | "REJECTED";
+            correctedPayload: Record<string, never> | null;
+            notes: string | null;
+            isGroundTruth: boolean;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        AiAnalysisRunResponseDto: {
+            id: string;
+            datasetId: string;
+            /** @enum {string} */
+            mode: "ANALYZE_ONLY" | "EVALUATE" | "IMPORT";
+            /** @enum {string} */
+            status: "RUNNING" | "COMPLETED" | "FAILED";
+            /** @example 1 */
+            observationSequence: string;
+            /** @example 1 */
+            verificationSequence: string;
+            /** @example 1 */
+            consentRevision: string;
+            /** @enum {string} */
+            reproductionStatus: "COMPLETE" | "INCOMPLETE";
+            missingEvidence: Record<string, never>;
+            projectorVersion: string;
+            policyVersion: string;
+            pipelineVersion: string;
+            detectorVersion: string | null;
+            promptVersion: string | null;
+            schemaVersion: string | null;
+            configuration: Record<string, never>;
+            metrics: Record<string, never> | null;
+            /** Format: date-time */
+            startedAt: string;
+            /** Format: date-time */
+            completedAt: string | null;
+            error: string | null;
         };
         KnowledgeTransactionDto: {
             /**
@@ -2832,12 +3343,67 @@ export type components = {
             detachedVerifications: number;
             detachedObservations: number;
         };
+        ExchangeRateResponseDto: {
+            /** @example USD */
+            currency: string;
+            /** @example 58.50 */
+            rate: string | null;
+        };
+        ExchangeRatesResponseDto: {
+            /** @example DOP */
+            baseCurrency: string;
+            /**
+             * Format: date
+             * @example 2026-11-01
+             */
+            date: string;
+            rates: components["schemas"]["ExchangeRateResponseDto"][];
+        };
         ChangeBaseCurrencyDto: {
             /**
              * @description New ISO-3 base currency
              * @example USD
              */
             baseCurrency: string;
+        };
+        ChangeBaseCurrencyResponseDto: {
+            /** @example USD */
+            baseCurrency: string;
+            /** @example DOP */
+            previousBaseCurrency: string;
+            rebasedTransactions: number;
+            rebasedBudgets: number;
+        };
+        AccountResponseDto: {
+            id: string;
+            institutionId: string | null;
+            institutionName: string | null;
+            institutionLogoUrl: string | null;
+            institutionColor: string | null;
+            name: string;
+            /** @enum {string} */
+            type: "CHECKING" | "SAVINGS" | "CASH" | "INVESTMENT";
+            /** @example DOP */
+            currency: string;
+            accountNumberLast4: string | null;
+            isDefaultForInstitution: boolean;
+            /** @example 1500.00 */
+            balance: string;
+            /** @example 0.00 */
+            earmarkedAmount: string;
+            /** @example 1500.00 */
+            freeBalance: string;
+            color: string | null;
+            isActive: boolean;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        AccountPageResponseDto: {
+            items: components["schemas"]["AccountResponseDto"][];
+            nextCursor: string | null;
+            hasMore: boolean;
         };
         CreateAccountDto: {
             /** @description Required for CHECKING, SAVINGS, and INVESTMENT. Optional for CASH. */
@@ -2859,6 +3425,23 @@ export type components = {
             /** @description When true, this account is the fallback ledger target for emails from this institution that have no account digits. */
             isDefaultForInstitution?: boolean;
         };
+        InstrumentHistoryItemDto: {
+            id: string;
+            /** @example ADJUSTMENT */
+            kind: string;
+            /** Format: date-time */
+            at: string;
+            /** @example 1500.00 */
+            amount: string | null;
+            /** @example DOP */
+            currency: string | null;
+            payload: Record<string, never>;
+        };
+        InstrumentHistoryPageResponseDto: {
+            items: components["schemas"]["InstrumentHistoryItemDto"][];
+            nextCursor: string | null;
+            hasMore: boolean;
+        };
         UpdateAccountDto: {
             /** @description Required for CHECKING, SAVINGS, and INVESTMENT. Optional for CASH. */
             institutionId?: string;
@@ -2879,6 +3462,34 @@ export type components = {
             /** @description When true, this account is the fallback ledger target for emails from this institution that have no account digits. */
             isDefaultForInstitution?: boolean;
             isActive?: boolean;
+        };
+        SuccessResponseDto: {
+            /** @example true */
+            success: boolean;
+        };
+        InstitutionResponseDto: {
+            id: string;
+            name: string;
+            /**
+             * @description bank | credit_union | digital_wallet | broker | cash | other
+             * @example bank
+             */
+            type: string;
+            shortName: string | null;
+            sortOrder: number;
+            domain: string | null;
+            color: string | null;
+            logoUrl: string | null;
+            /** @example DO */
+            country: string;
+            isActive: boolean;
+            /** @description System institutions such as «Efectivo» cannot be edited. */
+            isSystem: boolean;
+        };
+        InstitutionPageResponseDto: {
+            items: components["schemas"]["InstitutionResponseDto"][];
+            nextCursor: string | null;
+            hasMore: boolean;
         };
         CreateInstitutionDto: {
             name: string;
@@ -2912,6 +3523,51 @@ export type components = {
             /** @description Brand domain, for example bhd.com.do */
             domain?: Record<string, never>;
             isActive?: boolean;
+        };
+        CardBalanceResponseDto: {
+            id: string;
+            /** @example DOP */
+            currency: string;
+            /** @example 1500.00 */
+            balance: string;
+            /** @example 50000.00 */
+            creditLimit: string | null;
+            /** @example 48500.00 */
+            availableCredit: string | null;
+        };
+        CardResponseDto: {
+            id: string;
+            institutionId: string;
+            institutionName: string;
+            institutionLogoUrl: string | null;
+            institutionColor: string | null;
+            networkLogoUrl: string | null;
+            accountId: string | null;
+            /** @description Linked account name; only debit cards have one. */
+            accountName: string | null;
+            name: string;
+            /** @enum {string} */
+            type: "CREDIT" | "DEBIT";
+            /** @enum {string|null} */
+            network: "VISA" | "MASTERCARD" | "AMEX" | "DISCOVER" | "OTHER" | null;
+            /** @example 4242 */
+            lastFour: string | null;
+            /** @example 15 */
+            statementClosingDay: number | null;
+            /** @example 5 */
+            paymentDueDay: number | null;
+            /** Format: date */
+            nextStatementDate: string | null;
+            /** Format: date */
+            nextPaymentDueDate: string | null;
+            color: string | null;
+            isActive: boolean;
+            balances: components["schemas"]["CardBalanceResponseDto"][];
+        };
+        CardPageResponseDto: {
+            items: components["schemas"]["CardResponseDto"][];
+            nextCursor: string | null;
+            hasMore: boolean;
         };
         CreateCardDto: {
             institutionId: string;
@@ -2952,6 +3608,16 @@ export type components = {
             currency: string;
             creditLimit: number;
         };
+        CardBalanceMutationResponseDto: {
+            id: string;
+            cardId: string;
+            /** @example DOP */
+            currency: string;
+            /** @example 1500.00 */
+            balance: string;
+            /** @example 50000.00 */
+            creditLimit: string | null;
+        };
         UpdateCardBalanceDto: {
             /**
              * @description ISO 4217 currency code
@@ -2960,6 +3626,22 @@ export type components = {
             currency: string;
             balance: number;
             creditLimit?: number;
+        };
+        CategoryResponseDto: {
+            id: string;
+            userId: string | null;
+            name: string;
+            icon: string | null;
+            color: string | null;
+            parentId: string | null;
+            isSystem: boolean;
+            systemKind: string | null;
+            /** @enum {string} */
+            type: "EXPENSE" | "INCOME";
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
         };
         CreateCategoryDto: {
             name: string;
@@ -2985,6 +3667,198 @@ export type components = {
             type: "EXPENSE" | "INCOME" | "TRANSFER";
             parentId?: string | null;
         };
+        PlanningLinkResponseDto: {
+            /** @enum {string} */
+            kind: "TRANSFER" | "LOAN_INSTALLMENT" | "RECEIVABLE_PAYMENT" | "SAVINGS_CONTRIBUTION";
+            targetId: string;
+            label: string;
+        };
+        TransactionOperationLegResponseDto: {
+            id: string;
+            accountId: string | null;
+            accountName: string | null;
+            cardId: string | null;
+            cardName: string | null;
+            /** @enum {string} */
+            type: "DEBIT" | "CREDIT" | "TRANSFER" | "ADJUSTMENT" | "CARD_PAYMENT";
+            /** @example 1500.00 */
+            amount: string;
+            /** @example 1500.00 */
+            ledgerAmount: string;
+            /** @example 1500.00 */
+            amountBaseCurrency: string;
+            /** @example DOP */
+            currency: string;
+            /** @example DOP */
+            ledgerCurrency?: string | null;
+            /** @example 1.00 */
+            exchangeRate: string;
+            merchant: string | null;
+            merchantId: string | null;
+            merchantName: string | null;
+            merchantLogoUrl: string | null;
+            description: string | null;
+            /** Format: date-time */
+            transactionDate: string;
+            /** @enum {string} */
+            status: "PENDING" | "CONFIRMED" | "CANCELLED" | "DECLINED" | "REVERSED";
+            /** @enum {string} */
+            editable: "FULL" | "METADATA" | "NOTES" | "NONE";
+            /** @enum {string} */
+            source: "MANUAL" | "EMAIL" | "AI";
+            categoryId: string | null;
+            notes: string | null;
+            transferGroupId: string | null;
+            transferToAccountId: string | null;
+            transferToAccountName: string | null;
+            transferToCardId: string | null;
+            transferToCardName: string | null;
+            /** @example 1500.00 */
+            transferToAmount: string | null;
+            /** @example DOP */
+            transferToCurrency: string | null;
+            transferEstimated: boolean;
+            institutionLogoUrl: string | null;
+            network: string | null;
+            networkLogoUrl: string | null;
+            transferToInstitutionLogoUrl: string | null;
+            transferToNetwork: string | null;
+            transferToNetworkLogoUrl: string | null;
+            linkedTransactionId: string | null;
+            possibleDuplicateOfId: string | null;
+            planningLink?: components["schemas"]["PlanningLinkResponseDto"] | null;
+            aiMetadata?: Record<string, never> | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** @example SOURCE */
+            legRole: string | null;
+        };
+        TransactionOperationResponseDto: {
+            id: string;
+            accountId: string | null;
+            accountName: string | null;
+            cardId: string | null;
+            cardName: string | null;
+            /** @enum {string} */
+            type: "DEBIT" | "CREDIT" | "TRANSFER" | "ADJUSTMENT" | "CARD_PAYMENT";
+            /** @example 1500.00 */
+            amount: string;
+            /** @example 1500.00 */
+            ledgerAmount: string;
+            /** @example 1500.00 */
+            amountBaseCurrency: string;
+            /** @example DOP */
+            currency: string;
+            /** @example DOP */
+            ledgerCurrency?: string | null;
+            /** @example 1.00 */
+            exchangeRate: string;
+            merchant: string | null;
+            merchantId: string | null;
+            merchantName: string | null;
+            merchantLogoUrl: string | null;
+            description: string | null;
+            /** Format: date-time */
+            transactionDate: string;
+            /** @enum {string} */
+            status: "PENDING" | "CONFIRMED" | "CANCELLED" | "DECLINED" | "REVERSED";
+            /** @enum {string} */
+            editable: "FULL" | "METADATA" | "NOTES" | "NONE";
+            /** @enum {string} */
+            source: "MANUAL" | "EMAIL" | "AI";
+            categoryId: string | null;
+            notes: string | null;
+            transferGroupId: string | null;
+            transferToAccountId: string | null;
+            transferToAccountName: string | null;
+            transferToCardId: string | null;
+            transferToCardName: string | null;
+            /** @example 1500.00 */
+            transferToAmount: string | null;
+            /** @example DOP */
+            transferToCurrency: string | null;
+            transferEstimated: boolean;
+            institutionLogoUrl: string | null;
+            network: string | null;
+            networkLogoUrl: string | null;
+            transferToInstitutionLogoUrl: string | null;
+            transferToNetwork: string | null;
+            transferToNetworkLogoUrl: string | null;
+            linkedTransactionId: string | null;
+            possibleDuplicateOfId: string | null;
+            planningLink?: components["schemas"]["PlanningLinkResponseDto"] | null;
+            aiMetadata?: Record<string, never> | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** @enum {string} */
+            kind: "OPERATION";
+            /** @enum {string} */
+            operationType: "TRANSFER";
+            legs: components["schemas"]["TransactionOperationLegResponseDto"][];
+        };
+        TransactionResponseDto: {
+            id: string;
+            accountId: string | null;
+            accountName: string | null;
+            cardId: string | null;
+            cardName: string | null;
+            /** @enum {string} */
+            type: "DEBIT" | "CREDIT" | "TRANSFER" | "ADJUSTMENT" | "CARD_PAYMENT";
+            /** @example 1500.00 */
+            amount: string;
+            /** @example 1500.00 */
+            ledgerAmount: string;
+            /** @example 1500.00 */
+            amountBaseCurrency: string;
+            /** @example DOP */
+            currency: string;
+            /** @example DOP */
+            ledgerCurrency?: string | null;
+            /** @example 1.00 */
+            exchangeRate: string;
+            merchant: string | null;
+            merchantId: string | null;
+            merchantName: string | null;
+            merchantLogoUrl: string | null;
+            description: string | null;
+            /** Format: date-time */
+            transactionDate: string;
+            /** @enum {string} */
+            status: "PENDING" | "CONFIRMED" | "CANCELLED" | "DECLINED" | "REVERSED";
+            /** @enum {string} */
+            editable: "FULL" | "METADATA" | "NOTES" | "NONE";
+            /** @enum {string} */
+            source: "MANUAL" | "EMAIL" | "AI";
+            categoryId: string | null;
+            notes: string | null;
+            transferGroupId: string | null;
+            transferToAccountId: string | null;
+            transferToAccountName: string | null;
+            transferToCardId: string | null;
+            transferToCardName: string | null;
+            /** @example 1500.00 */
+            transferToAmount: string | null;
+            /** @example DOP */
+            transferToCurrency: string | null;
+            transferEstimated: boolean;
+            institutionLogoUrl: string | null;
+            network: string | null;
+            networkLogoUrl: string | null;
+            transferToInstitutionLogoUrl: string | null;
+            transferToNetwork: string | null;
+            transferToNetworkLogoUrl: string | null;
+            linkedTransactionId: string | null;
+            possibleDuplicateOfId: string | null;
+            planningLink?: components["schemas"]["PlanningLinkResponseDto"] | null;
+            aiMetadata?: Record<string, never> | null;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        TransactionPageResponseDto: {
+            items: (components["schemas"]["TransactionResponseDto"] | components["schemas"]["TransactionOperationResponseDto"])[];
+            nextCursor: string | null;
+            hasMore: boolean;
+        };
         AdjustBalanceDto: {
             accountId?: string;
             cardId?: string;
@@ -2992,6 +3866,12 @@ export type components = {
             currency?: string;
             /** @description Target balance after the adjustment */
             balance: number;
+        };
+        AdjustBalanceResponseDto: {
+            adjusted: boolean;
+            /** @example 1500 */
+            balance: number;
+            transaction: components["schemas"]["TransactionResponseDto"] | null;
         };
         CreateTransactionDto: {
             accountId?: string;
@@ -3014,6 +3894,12 @@ export type components = {
              * @enum {string}
              */
             status: "PENDING" | "CONFIRMED" | "CANCELLED" | "DECLINED" | "REVERSED";
+        };
+        DeleteResponseDto: {
+            /** @example true */
+            success: boolean;
+            /** @description Id para deshacer el borrado */
+            undoId: string;
         };
         MergeTransactionDto: {
             /** @description Movement to keep */
@@ -3053,6 +3939,12 @@ export type components = {
             exchangeRate?: number;
             /** @description Monto que entra en la cuenta de destino, en su moneda */
             receivedAmount?: number;
+        };
+        TransferResponseDto: {
+            transferGroupId: string;
+            debit: components["schemas"]["TransactionResponseDto"];
+            credit: components["schemas"]["TransactionResponseDto"];
+            suggestGoalId?: string;
         };
         UpdateTransferDto: {
             fromAccountId?: string;
@@ -3123,6 +4015,35 @@ export type components = {
             status: "PENDING" | "CONFIRMED" | "CANCELLED";
             statementId?: string;
         };
+        MerchantListItemResponseDto: {
+            id: string;
+            name: string;
+            normalizedKey: string;
+            aliases: string[];
+            categoryId: string | null;
+            /** @enum {string|null} */
+            categorySource: "MANUAL" | "LEARNED" | "KEYWORD" | null;
+            domain: string | null;
+            logoUrl: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** @example 1500.00 */
+            monthSpend: string;
+            monthMovements: number;
+            possibleDuplicates: number;
+        };
+        MerchantPageResponseDto: {
+            items: components["schemas"]["MerchantListItemResponseDto"][];
+            nextCursor: string | null;
+            hasMore: boolean;
+        };
+        MerchantSuggestResponseDto: {
+            merchantId: string;
+            name: string;
+            categoryId: string | null;
+            /** @enum {string|null} */
+            categorySource: "MANUAL" | "LEARNED" | "KEYWORD" | null;
+        };
         CreateMerchantDto: {
             /** @example Supermercado Nacional */
             name: string;
@@ -3131,6 +4052,35 @@ export type components = {
             domain?: Record<string, never> | null;
             /** @description Other names the merchant appears with */
             aliases?: string[];
+        };
+        MerchantResponseDto: {
+            id: string;
+            name: string;
+            normalizedKey: string;
+            aliases: string[];
+            categoryId: string | null;
+            /** @enum {string|null} */
+            categorySource: "MANUAL" | "LEARNED" | "KEYWORD" | null;
+            domain: string | null;
+            logoUrl: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** @example 1500.00 */
+            monthSpend: string;
+            monthMovements: number;
+        };
+        MerchantDuplicateResponseDto: {
+            id: string;
+            name: string;
+            logoUrl: string | null;
+            /** @example 1500.00 */
+            monthSpend: string;
+            monthMovements: number;
+            /** @enum {string} */
+            reason: "SAME_KEY" | "ALIAS_MATCH" | "TRAILING_NUMBER" | "NAME_CONTAINED" | "SIMILAR_NAME";
+        };
+        MerchantDuplicateDismissResponseDto: {
+            dismissed: boolean;
         };
         UpdateMerchantDto: {
             name?: string;
@@ -3144,12 +4094,181 @@ export type components = {
             /** @description Merchant that keeps the movements */
             targetId: string;
         };
+        SubscriptionCategoryResponseDto: {
+            id: string;
+            name: string;
+            icon: string | null;
+            color: string | null;
+        };
+        PaymentMethodResponseDto: {
+            /** @enum {string} */
+            type: "CARD" | "ACCOUNT";
+            id: string;
+            name: string;
+            institution: string | null;
+            last4: string | null;
+            logoUrl: string | null;
+        };
+        SubscriptionResponseDto: {
+            id: string;
+            name: string;
+            normalizedKey: string;
+            domain: string | null;
+            logoUrl: string | null;
+            /** @example 1500.00 */
+            amount: string;
+            /** @example DOP */
+            currency: string;
+            /** @enum {string} */
+            billingCycle: "WEEKLY" | "MONTHLY" | "QUARTERLY" | "SEMIANNUAL" | "YEARLY";
+            billingInterval: number;
+            /** Format: date */
+            anchorDate: string;
+            /** Format: date */
+            nextBillingDate: string;
+            /** Format: date */
+            trialEndsAt: string | null;
+            /** @enum {string} */
+            status: "ACTIVE" | "PAUSED" | "CANCELLED";
+            /** Format: date-time */
+            pausedAt: string | null;
+            /** Format: date-time */
+            cancelledAt: string | null;
+            reminderDaysBefore: number;
+            lastChargeMismatch: boolean;
+            /** @example 1500.00 */
+            lastPaymentAmount: string | null;
+            /** Format: date */
+            lastRemindedFor: string | null;
+            cardId: string | null;
+            cardName: string | null;
+            accountId: string | null;
+            accountName: string | null;
+            categoryId: string | null;
+            category: components["schemas"]["SubscriptionCategoryResponseDto"] | null;
+            paymentMethod: components["schemas"]["PaymentMethodResponseDto"] | null;
+            manageUrl: string | null;
+            notes: string | null;
+            sourcePatternId: string | null;
+            /** @example 125.00 */
+            monthlyEquivalent: string;
+            /** @example 1500.00 */
+            annualEquivalent: string;
+            daysUntil: number;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        SubscriptionPageResponseDto: {
+            items: components["schemas"]["SubscriptionResponseDto"][];
+            nextCursor: string | null;
+            hasMore: boolean;
+        };
+        SubscriptionCurrencyCostResponseDto: {
+            /** @example DOP */
+            currency: string;
+            /** @example 125.00 */
+            monthlyCost: string;
+            /** @example 1500.00 */
+            annualCost: string;
+            activeCount: number;
+        };
+        SubscriptionTrendResponseDto: {
+            /** @enum {string} */
+            direction: "up" | "down" | "flat";
+            percent: number;
+        };
+        SubscriptionSummaryResponseDto: {
+            /** @example DOP */
+            baseCurrency: string;
+            activeCount: number;
+            /** @example 125.00 */
+            monthlyCost: string;
+            /** @example 1500.00 */
+            annualCost: string;
+            byCurrency: components["schemas"]["SubscriptionCurrencyCostResponseDto"][];
+            /** @example 125.00 */
+            previousMonthlyCost: string;
+            /** @example 125.00 */
+            realSpendThisMonth: string;
+            /** @example 125.00 */
+            realSpendPreviousMonth: string;
+            trend: components["schemas"]["SubscriptionTrendResponseDto"] | null;
+            pendingDetectedCount: number;
+            /** @example 0.00 */
+            cancelledAnnualSavings: string;
+            reminderWindowDays: number;
+            upcoming: components["schemas"]["SubscriptionResponseDto"][];
+        };
+        SubscriptionBreakdownItemResponseDto: {
+            key: string;
+            label: string;
+            color: string | null;
+            count: number;
+            /** @example 125.00 */
+            amount: string;
+        };
+        SubscriptionBreakdownResponseDto: {
+            /** @example DOP */
+            baseCurrency: string;
+            /** @enum {string} */
+            by: "category" | "instrument" | "currency";
+            items: components["schemas"]["SubscriptionBreakdownItemResponseDto"][];
+        };
+        SubscriptionUpcomingItemResponseDto: {
+            id: string;
+            subscriptionId: string;
+            name: string;
+            logoUrl: string | null;
+            /** @example 1500.00 */
+            amount: string;
+            /** @example DOP */
+            currency: string;
+            /** Format: date */
+            date: string;
+            daysUntil: number;
+            paymentMethod: components["schemas"]["PaymentMethodResponseDto"] | null;
+        };
+        SubscriptionUpcomingResponseDto: {
+            /** Format: date */
+            from: string;
+            /** Format: date */
+            to: string;
+            items: components["schemas"]["SubscriptionUpcomingItemResponseDto"][];
+        };
+        SubscriptionAlertResponseDto: {
+            id: string;
+            /** @enum {string} */
+            kind: "PRICE_INCREASE" | "AMOUNT_MISMATCH" | "TRIAL_ENDING" | "ANNUAL_RENEWAL" | "MISSED_CHARGE";
+            subscriptionId: string;
+            subscriptionName: string;
+            /** Format: date */
+            date: string;
+            /** @example DOP */
+            currency: string;
+            /** @example 1500.00 */
+            amount: string | null;
+            /** @example 1500.00 */
+            previousAmount: string | null;
+            /** @example 1500.00 */
+            expectedAmount: string | null;
+            percent: number | null;
+            daysUntil: number | null;
+        };
+        SubscriptionDismissedAlertsResponseDto: {
+            dismissed: number;
+        };
         DismissSubscriptionAlertDto: {
             /** @enum {string} */
             kind: "PRICE_INCREASE" | "AMOUNT_MISMATCH" | "TRIAL_ENDING" | "ANNUAL_RENEWAL" | "MISSED_CHARGE";
             subscriptionId: string;
             /** @description Alert occurrence date (ISO date) */
             alertDate: string;
+        };
+        SubscriptionDismissedAlertResponseDto: {
+            id: string;
+            dismissed: boolean;
         };
         CreateSubscriptionDto: {
             name: string;
@@ -3206,6 +4325,36 @@ export type components = {
             /** @enum {string} */
             status?: "ACTIVE" | "PAUSED" | "CANCELLED";
         };
+        SubscriptionPaymentTransactionResponseDto: {
+            id: string;
+            merchant: string | null;
+            /** @example 1500.00 */
+            amount: string;
+            /** @example DOP */
+            currency: string;
+            /** Format: date-time */
+            transactionDate: string;
+            accountName: string | null;
+            cardName: string | null;
+        };
+        SubscriptionPaymentResponseDto: {
+            id: string;
+            /** @example 1500.00 */
+            amount: string;
+            /** @example DOP */
+            currency: string;
+            /** Format: date-time */
+            paidAt: string;
+            /** @enum {string} */
+            source: "AUTO" | "MANUAL";
+            transactionId: string | null;
+            transaction: components["schemas"]["SubscriptionPaymentTransactionResponseDto"] | null;
+        };
+        SubscriptionPaymentPageResponseDto: {
+            items: components["schemas"]["SubscriptionPaymentResponseDto"][];
+            nextCursor: string | null;
+            hasMore: boolean;
+        };
         CreateSubscriptionPaymentDto: {
             amount?: number;
             currency?: string;
@@ -3213,6 +4362,101 @@ export type components = {
             paidAt?: string;
             /** @description Ledger movement to link */
             transactionId?: string;
+        };
+        SubscriptionManualPaymentResponseDto: {
+            id: string;
+            /** @example 1500.00 */
+            amount: string;
+            /** @example DOP */
+            currency: string;
+            /** Format: date-time */
+            paidAt: string;
+            /** @enum {string} */
+            source: "AUTO" | "MANUAL";
+        };
+        SubscriptionLogoResponseDto: {
+            logoUrl: string | null;
+        };
+        CardStatementResponseDto: {
+            id: string;
+            /** @example DOP */
+            currency: string;
+            /** Format: date-time */
+            cycleStart: string;
+            /** Format: date-time */
+            cycleEnd: string;
+            /** Format: date-time */
+            dueDate: string | null;
+            /** @example 25000.00 */
+            closingBalance: string;
+            /** @example 2500.00 */
+            minimumPayment: string;
+            /** @enum {string|null} */
+            minimumSource: "IMPORTED" | "ESTIMATED" | "MANUAL" | null;
+            /** @example 0.00 */
+            paidAmount: string;
+            /** @example 25000.00 */
+            remaining: string;
+            /** @enum {string} */
+            status: "OPEN" | "CLOSED" | "PARTIAL" | "MINIMUM_PAID" | "PAID" | "OVERDUE";
+        };
+        CardStatementPageResponseDto: {
+            items: components["schemas"]["CardStatementResponseDto"][];
+            nextCursor: string | null;
+            hasMore: boolean;
+        };
+        StatementTransactionResponseDto: {
+            id: string;
+            accountId: string | null;
+            cardId: string | null;
+            userId: string;
+            categoryId: string | null;
+            importReference: string | null;
+            externalReference: string | null;
+            institutionId: string | null;
+            possibleDuplicateOfId: string | null;
+            /** @enum {string} */
+            type: "DEBIT" | "CREDIT" | "TRANSFER" | "ADJUSTMENT" | "CARD_PAYMENT";
+            /** @example 1500.00 */
+            amount: string;
+            /** @example 1500.00 */
+            ledgerAmount: string;
+            /** @example 1500.00 */
+            amountBaseCurrency: string;
+            /** @example DOP */
+            currency: string;
+            /** @example DOP */
+            ledgerCurrency: string;
+            /** @example 1 */
+            exchangeRate: string;
+            isEstimated: boolean;
+            merchant: string | null;
+            merchantId: string | null;
+            description: string | null;
+            /** Format: date-time */
+            transactionDate: string;
+            transferGroupId: string | null;
+            linkedTransactionId: string | null;
+            /** @enum {string} */
+            status: "PENDING" | "CONFIRMED" | "CANCELLED" | "DECLINED" | "REVERSED";
+            isRecurring: boolean;
+            aiMetadata: Record<string, never>;
+            notes: string | null;
+            /** @enum {string} */
+            source: "MANUAL" | "EMAIL" | "AI";
+            /** @enum {string|null} */
+            legRole: "SOURCE" | "DESTINATION" | "FEE" | null;
+            /** @enum {string|null} */
+            rail: "SAME_BANK" | "ACH" | "LBTR" | "OTHER" | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        CardStatementDetailResponseDto: {
+            statement: components["schemas"]["CardStatementResponseDto"];
+            movements: components["schemas"]["StatementTransactionResponseDto"][];
+            payments: components["schemas"]["StatementTransactionResponseDto"][];
         };
         UpdateCardStatementDto: {
             minimumPayment?: number;
@@ -3223,6 +4467,102 @@ export type components = {
             /** @description PDF password; never stored or logged */
             password?: string;
         };
+        StatementImportCreatedResponseDto: {
+            importId: string;
+        };
+        StatementImportTargetResponseDto: {
+            /** @enum {string} */
+            kind: "CARD" | "ACCOUNT";
+            id: string;
+            name: string;
+            /** @example DOP */
+            currency: string;
+        };
+        StatementImportHeaderResponseDto: {
+            /** @example DOP */
+            currency: string;
+            /** Format: date */
+            periodStart: string | null;
+            /** Format: date */
+            periodEnd: string | null;
+            /** Format: date */
+            dueDate: string | null;
+            /** @example 1000.00 */
+            previousBalance: string | null;
+            /** @example 2500.00 */
+            closingBalance: string | null;
+            /** @example 250.00 */
+            minimumPayment: string | null;
+        };
+        StatementImportPeriodResponseDto: {
+            /** Format: date-time */
+            from: string;
+            /** Format: date-time */
+            to: string;
+        };
+        StatementImportCountsResponseDto: {
+            lines: number;
+            matched: number;
+            missing: number;
+            extra: number;
+        };
+        StatementImportLineResponseDto: {
+            id: string;
+            /** Format: date */
+            date: string;
+            description: string;
+            /** @example 150.00 */
+            amount: string;
+            /** @example DOP */
+            currency: string;
+            /** @enum {string} */
+            type: "DEBIT" | "CREDIT";
+            reference: string | null;
+            /** @enum {string} */
+            decision: "MATCH" | "CREATE" | "IGNORE";
+            categoryId: string | null;
+            categoryName: string | null;
+            transactionId: string | null;
+        };
+        StatementImportExtraResponseDto: {
+            id: string;
+            /** Format: date-time */
+            date: string;
+            description: string | null;
+            merchant: string | null;
+            /** @example 150.00 */
+            amount: string;
+            /** @example DOP */
+            currency: string;
+            /** @enum {string} */
+            type: "DEBIT" | "CREDIT" | "TRANSFER" | "ADJUSTMENT" | "CARD_PAYMENT";
+        };
+        StatementImportAdjustmentResponseDto: {
+            /** @example 150.00 */
+            amount: string;
+            /** @example DOP */
+            currency: string;
+        };
+        StatementImportResponseDto: {
+            id: string;
+            /** @enum {string} */
+            status: "PARSING" | "READY" | "APPLIED" | "FAILED" | "DISCARDED";
+            error: string | null;
+            failureReason: string | null;
+            target: components["schemas"]["StatementImportTargetResponseDto"];
+            header: components["schemas"]["StatementImportHeaderResponseDto"];
+            period: components["schemas"]["StatementImportPeriodResponseDto"] | null;
+            counts: components["schemas"]["StatementImportCountsResponseDto"];
+            lines: components["schemas"]["StatementImportLineResponseDto"][];
+            extra: components["schemas"]["StatementImportExtraResponseDto"][];
+            /** @example 0.00 */
+            difference: string | null;
+            adjustment: components["schemas"]["StatementImportAdjustmentResponseDto"] | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            appliedAt: string | null;
+        };
         UpdateStatementLineDto: {
             /** @enum {string} */
             decision?: "MATCH" | "CREATE" | "IGNORE";
@@ -3231,6 +4571,52 @@ export type components = {
         ApplyStatementImportDto: {
             /** @description Create an adjustment for the remaining balance difference */
             adjust?: boolean;
+        };
+        CategorySummaryResponseDto: {
+            id: string;
+            name: string;
+            color: string | null;
+            icon: string | null;
+        };
+        BudgetResponseDto: {
+            id: string;
+            userId: string;
+            categoryId: string | null;
+            name: string | null;
+            includeChildren: boolean;
+            /** @enum {string} */
+            rollover: "NONE" | "SURPLUS" | "SURPLUS_AND_DEFICIT";
+            /** @example 0.00 */
+            carriedOver: string;
+            recurring: boolean;
+            /** @enum {string} */
+            periodType: "MONTHLY" | "BIWEEKLY" | "CUSTOM";
+            /** Format: date-time */
+            periodStart: string;
+            /** Format: date-time */
+            periodEnd: string;
+            /** @example 1500.00 */
+            amountLimit: string;
+            /** @example 1500.00 */
+            amountSpent: string;
+            /** @example 80 */
+            alertThresholdPct: number;
+            /** @enum {string} */
+            aiSuggestionStatus: "NONE" | "PENDING" | "ACCEPTED" | "REJECTED";
+            aiSuggestionPayload: Record<string, never> | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            category: components["schemas"]["CategoryResponseDto"] | null;
+            categories: components["schemas"]["CategorySummaryResponseDto"][];
+            /** @example 1500.00 */
+            effectiveLimit: string;
+        };
+        BudgetPageResponseDto: {
+            items: components["schemas"]["BudgetResponseDto"][];
+            nextCursor: string | null;
+            hasMore: boolean;
         };
         CreateBudgetDto: {
             name?: string;
@@ -3274,6 +4660,38 @@ export type components = {
             /** @default false */
             recurring: boolean;
         };
+        SavingsGoalResponseDto: {
+            id: string;
+            userId: string;
+            name: string;
+            description: string | null;
+            /** @example 1500.00 */
+            targetAmount: string;
+            /** @example 1500.00 */
+            currentAmount: string;
+            /** @example DOP */
+            currency: string;
+            /** Format: date-time */
+            targetDate: string | null;
+            icon: string | null;
+            color: string | null;
+            accountId: string | null;
+            /** @enum {string} */
+            mode: "EARMARK" | "DEDICATED";
+            spendReducesProgress: boolean;
+            isCompleted: boolean;
+            /** Format: date-time */
+            completedAt: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        SavingsGoalPageResponseDto: {
+            items: components["schemas"]["SavingsGoalResponseDto"][];
+            nextCursor: string | null;
+            hasMore: boolean;
+        };
         CreateSavingsGoalDto: {
             name: string;
             description?: string;
@@ -3293,6 +4711,28 @@ export type components = {
             currentAmount?: number;
             /** @default true */
             spendReducesProgress: boolean;
+        };
+        SavingsGoalContributionResponseDto: {
+            id: string;
+            goalId: string;
+            /** @example 1500.00 */
+            amount: string;
+            /** Format: date-time */
+            contributedAt: string;
+            accountId: string | null;
+            destinationAccountId: string | null;
+            transactionId: string | null;
+            /** @enum {string} */
+            kind: "CONTRIBUTION" | "WITHDRAWAL";
+            transferGroupId: string | null;
+            notes: string | null;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        SavingsGoalContributionPageResponseDto: {
+            items: components["schemas"]["SavingsGoalContributionResponseDto"][];
+            nextCursor: string | null;
+            hasMore: boolean;
         };
         CreateSavingsGoalAllocationDto: {
             /**
@@ -3328,6 +4768,59 @@ export type components = {
             targetDate?: string | null;
             /** @default true */
             spendReducesProgress: boolean;
+        };
+        LoanReferenceDto: {
+            id: string;
+            name: string;
+        };
+        LoanResponseDto: {
+            id: string;
+            userId: string;
+            institutionId: string | null;
+            accountId: string | null;
+            name: string | null;
+            lenderName: string;
+            /** @example 100000.00 */
+            originalAmount: string;
+            /** @example 75000.00 */
+            currentBalance: string;
+            /** @example DOP */
+            currency: string;
+            /** @example 8500.00 */
+            installmentAmount: string;
+            /** @enum {string} */
+            installmentFreq: "WEEKLY" | "BIWEEKLY" | "MONTHLY";
+            totalInstallments: number;
+            paidInstallments: number;
+            /** Format: date-time */
+            nextDueDate: string;
+            /** @example 0.1800 */
+            interestRate: string | null;
+            /** @enum {string} */
+            rateType: "FIXED" | "VARIABLE";
+            /** @example 500.00 */
+            insuranceAmount: string | null;
+            lateFeePolicy: Record<string, never> | null;
+            /** @example 0.0200 */
+            prepaymentPenaltyPct: string | null;
+            /** Format: date-time */
+            disbursementDate: string | null;
+            disbursementAccountId: string | null;
+            disbursementTransactionId: string | null;
+            notes: string | null;
+            isActive: boolean;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            account: components["schemas"]["LoanReferenceDto"] | null;
+            disbursementAccount: components["schemas"]["LoanReferenceDto"] | null;
+            institution: components["schemas"]["LoanReferenceDto"] | null;
+        };
+        LoanPageResponseDto: {
+            items: components["schemas"]["LoanResponseDto"][];
+            nextCursor: string | null;
+            hasMore: boolean;
         };
         CreateLoanDto: {
             /** @description Alias opcional para distinguir préstamos del mismo prestamista. */
@@ -3366,11 +4859,70 @@ export type components = {
             /** @description Cuenta que recibe el capital desembolsado. Se acredita al crear el préstamo. */
             disbursementAccountId?: string;
         };
+        LoanInstallmentResponseDto: {
+            id: string;
+            loanId: string;
+            installmentNo: number;
+            /** Format: date-time */
+            dueDate: string;
+            /** @example 8500.00 */
+            amount: string;
+            /** @example 7000.00 */
+            principal: string;
+            /** @example 1500.00 */
+            interest: string;
+            /** @example 0.00 */
+            insurance: string;
+            /** @example 0.00 */
+            fees: string;
+            /** @example 0.00 */
+            lateFee: string;
+            /** @example 0.00 */
+            paidAmount: string;
+            /** @enum {string} */
+            status: "PENDING" | "PARTIAL" | "PAID" | "OVERDUE";
+            /** Format: date-time */
+            paidAt: string | null;
+            transactionId: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        LoanInstallmentPageResponseDto: {
+            items: components["schemas"]["LoanInstallmentResponseDto"][];
+            nextCursor: string | null;
+            hasMore: boolean;
+        };
         PayLoanInstallmentDto: {
             amount?: number;
             accountId?: string;
             /** @default false */
             excessAsPrepayment: boolean;
+        };
+        LoanPaymentBreakdownDto: {
+            /** @example 0.00 */
+            lateFee: number;
+            /** @example 0.00 */
+            fees: number;
+            /** @example 0.00 */
+            insurance: number;
+            /** @example 1500.00 */
+            interest: number;
+            /** @example 7000.00 */
+            principal: number;
+            /** @example 8500.00 */
+            applied: number;
+        };
+        LoanInstallmentPaymentResponseDto: {
+            installmentNo: number;
+            breakdown: components["schemas"]["LoanPaymentBreakdownDto"];
+            /** @example 8500.00 */
+            paidAmount: number;
+            /** @enum {string} */
+            status: "PAID" | "PARTIAL";
+            /** @example 66500.00 */
+            currentBalance: number;
         };
         LoanPrepaymentDto: {
             amount: number;
@@ -3379,6 +4931,38 @@ export type components = {
             mode: "REDUCE_TERM" | "REDUCE_INSTALLMENT";
             date?: string;
             penaltyAmount?: number;
+        };
+        LoanPrepaymentResponseDto: {
+            id: string;
+            loanId: string;
+            /** @example 5000.00 */
+            amount: string;
+            /** @example 100.00 */
+            penalty: string;
+            /** @enum {string} */
+            mode: "REDUCE_TERM" | "REDUCE_PAYMENT";
+            /** Format: date-time */
+            paidAt: string;
+            transactionId: string | null;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        LoanPrepaymentResultResponseDto: {
+            prepayment: components["schemas"]["LoanPrepaymentResponseDto"];
+            loan: components["schemas"]["LoanResponseDto"];
+            schedulePreview: components["schemas"]["LoanInstallmentResponseDto"][];
+        };
+        LoanPrepaymentPreviewResponseDto: {
+            /** @example 70000.00 */
+            newBalance: number;
+            /** @example 10 */
+            totalInstallments: number;
+            /** @example 8200.00 */
+            installmentAmount: number;
+            /** @example 12000.00 */
+            interestRemaining: number;
+            /** Format: date-time */
+            newEndDate: string;
         };
         UpdateLoanDto: {
             /** @description Alias opcional para distinguir préstamos del mismo prestamista. */
@@ -3416,6 +5000,38 @@ export type components = {
             disbursementDate?: Record<string, never>;
             isActive?: boolean;
         };
+        ReceivableResponseDto: {
+            id: string;
+            userId: string;
+            debtorName: string;
+            description: string | null;
+            /** @example 1500.00 */
+            amount: string;
+            /** @example 1500.00 */
+            paidAmount: string;
+            /** @example DOP */
+            currency: string;
+            /** Format: date-time */
+            dueDate: string | null;
+            /** @enum {string} */
+            status: "PENDING" | "PARTIAL" | "PAID" | "CANCELLED" | "WRITTEN_OFF";
+            /** @example 0.00 */
+            creditBalance: string;
+            /** @example 0.00 */
+            writtenOffAmount: string;
+            /** Format: date-time */
+            writtenOffAt: string | null;
+            notes: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        ReceivablePageResponseDto: {
+            items: components["schemas"]["ReceivableResponseDto"][];
+            nextCursor: string | null;
+            hasMore: boolean;
+        };
         CreateReceivableDto: {
             debtorName: string;
             description: string;
@@ -3433,6 +5049,29 @@ export type components = {
              */
             currency: string;
             dueDate?: string;
+        };
+        ReceivablePaymentResponseDto: {
+            id: string;
+            receivableId: string;
+            /** @example 1500.00 */
+            amount: string;
+            /** @example 1500.00 */
+            appliedAmount: string;
+            /** @example 0.00 */
+            excessAmount: string;
+            excessHandling: string | null;
+            /** Format: date-time */
+            paidAt: string;
+            accountId: string | null;
+            transactionId: string | null;
+            notes: string | null;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        ReceivablePaymentPageResponseDto: {
+            items: components["schemas"]["ReceivablePaymentResponseDto"][];
+            nextCursor: string | null;
+            hasMore: boolean;
         };
         CreateReceivablePaymentDto: {
             amount: number;
@@ -3496,6 +5135,156 @@ export type components = {
             /** @description References to resolve, at most 50 per call */
             refs: components["schemas"]["EntityReferenceDto"][];
         };
+        WeeklySummaryTopCategoryResponseDto: {
+            name: string;
+            icon: string | null;
+            color: string | null;
+            /** @example 1500.00 */
+            total: string;
+        };
+        WeeklySummaryBudgetRiskResponseDto: {
+            id: string;
+            name: string;
+            pctUsed: number;
+            /** @example 1500.00 */
+            spent: string;
+            /** @example 1500.00 */
+            limit: string;
+        };
+        WeeklySummaryInstallmentResponseDto: {
+            loanId: string;
+            lenderName: string;
+            /** @example 1500.00 */
+            amount: string;
+            /** @example DOP */
+            currency: string;
+            /** Format: date */
+            dueDate: string;
+        };
+        WeeklySummaryCardDueResponseDto: {
+            cardId: string;
+            name: string;
+            lastFour: string | null;
+            dueDay: number;
+        };
+        WeeklySummaryResponseDto: {
+            /** Format: date */
+            weekStart: string;
+            /** Format: date */
+            weekEnd: string;
+            /** @example DOP */
+            currency: string;
+            /** @example 1500.00 */
+            expenses: string;
+            /** @example 1500.00 */
+            averageExpenses: string;
+            topCategories: components["schemas"]["WeeklySummaryTopCategoryResponseDto"][];
+            budgetsAtRisk: components["schemas"]["WeeklySummaryBudgetRiskResponseDto"][];
+            upcomingInstallments: components["schemas"]["WeeklySummaryInstallmentResponseDto"][];
+            cardDueDates: components["schemas"]["WeeklySummaryCardDueResponseDto"][];
+            pendingEmails: number;
+        };
+        AnalyticsBalanceIssueResponseDto: {
+            /** @enum {string} */
+            code: "MISSING_CREDIT_LIMIT" | "MISSING_RATE";
+            cardId?: string;
+            /** @example DOP */
+            currency: string;
+        };
+        AnalyticsSummaryTotalsResponseDto: {
+            /** @example 1500.00 */
+            accountBalance: string;
+            /** @example 0.00 */
+            cardDebt: string | null;
+            /** @example 1500.00 */
+            income: string;
+            /** @example 1500.00 */
+            expenses: string;
+        };
+        AnalyticsSummaryResponseDto: {
+            /** @example 1500.00 */
+            netWorth: string | null;
+            /** @example 1500.00 */
+            cashFlow: string;
+            /** @example DOP */
+            baseCurrency: string;
+            /** @enum {string} */
+            balanceStatus: "COMPLETE" | "INCOMPLETE";
+            balanceIssues: components["schemas"]["AnalyticsBalanceIssueResponseDto"][];
+            totals: components["schemas"]["AnalyticsSummaryTotalsResponseDto"];
+        };
+        SpendingByCategoryResponseDto: {
+            categoryId: string | null;
+            name: string;
+            color: string | null;
+            icon: string | null;
+            /** @example 1500.00 */
+            total: string;
+        };
+        BudgetStatusResponseDto: {
+            id: string;
+            categoryId: string | null;
+            category: string;
+            color: string | null;
+            icon: string | null;
+            /** @enum {string} */
+            periodType: "MONTHLY" | "BIWEEKLY" | "CUSTOM";
+            /** Format: date */
+            periodStart: string;
+            /** Format: date */
+            periodEnd: string;
+            /** @example 1500.00 */
+            amountLimit: string;
+            /** @example 1500.00 */
+            amountSpent: string;
+            pctUsed: number;
+            threshold: number;
+        };
+        SpendingOverTimePointResponseDto: {
+            /** Format: date */
+            date: string;
+            /** @example 1500.00 */
+            expenses: string;
+            /** @example 1500.00 */
+            income: string;
+        };
+        SpendingOverTimeResponseDto: {
+            points: components["schemas"]["SpendingOverTimePointResponseDto"][];
+        };
+        RecurringPatternResponseDto: {
+            id: string;
+            merchantId: string | null;
+            merchant: string;
+            merchantName: string;
+            logoUrl: string | null;
+            categoryId: string | null;
+            /** @example 1500.00 */
+            avgAmount: string;
+            /** @example DOP */
+            currency: string;
+            /** @example 30 */
+            frequency: number;
+            /** Format: date */
+            nextExpectedDate: string;
+            /** Format: date-time */
+            lastSeenAt: string | null;
+            /** @enum {string} */
+            status: "SUGGESTED" | "CONFIRMED" | "DISMISSED";
+            /** @enum {string} */
+            kind: "SUBSCRIPTION" | "BILL" | "INCOME" | "OTHER";
+            confidenceScore: number;
+            amountTolerancePct: number;
+            /** @example 125.00 */
+            monthlyEquivalent: string;
+            /** @example 1500.00 */
+            annualEquivalent: string;
+            daysUntil: number;
+        };
+        RecurringPageResponseDto: {
+            items: components["schemas"]["RecurringPatternResponseDto"][];
+            nextCursor: string | null;
+            hasMore: boolean;
+        };
         CreateRecurringDto: {
             /** @description Raw merchant text */
             merchant?: string;
@@ -3537,6 +5326,26 @@ export type components = {
             /** @description Balance shown by the bank app */
             realBalance: number;
         };
+        SuggestedAdjustmentResponseDto: {
+            /** @enum {string} */
+            kind: "IMPUESTO_DGII" | "COMISION" | "CARGO_PLASTICO" | "INTERES" | "OTRO";
+            /** @example 150.00 */
+            amount: string;
+        };
+        ReconciliationPreviewResponseDto: {
+            accountId: string | null;
+            cardId: string | null;
+            /** @example DOP */
+            currency: string;
+            name: string;
+            /** @example 1500.00 */
+            appBalance: string;
+            /** @example 1500.00 */
+            realBalance: string;
+            /** @example 0.00 */
+            difference: string;
+            suggestedAdjustments: components["schemas"]["SuggestedAdjustmentResponseDto"][];
+        };
         ReconciliationAdjustmentDto: {
             /** @enum {string} */
             kind: "IMPUESTO_DGII" | "COMISION" | "CARGO_PLASTICO" | "INTERES" | "OTRO";
@@ -3555,6 +5364,116 @@ export type components = {
             adjustments?: components["schemas"]["ReconciliationAdjustmentDto"][];
             note?: string;
         };
+        ReconciliationAdjustmentResponseDto: {
+            id: string;
+            /** @enum {string} */
+            kind: "IMPUESTO_DGII" | "COMISION" | "CARGO_PLASTICO" | "INTERES" | "OTRO";
+            /** @example 1500.00 */
+            amount: string;
+            transactionId: string;
+        };
+        ReconciliationResponseDto: {
+            id: string;
+            accountId: string | null;
+            cardId: string | null;
+            /** @example DOP */
+            currency: string;
+            /**
+             * Format: date
+             * @example 2026-11-01
+             */
+            asOfDate: string;
+            /** @example 1500.00 */
+            appBalance: string;
+            /** @example 1500.00 */
+            realBalance: string;
+            /** @example 0.00 */
+            difference: string;
+            note: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            adjustments: components["schemas"]["ReconciliationAdjustmentResponseDto"][];
+        };
+        ReconciliationStatusItemResponseDto: {
+            key: string;
+            /** @enum {string} */
+            kind: "account" | "card";
+            accountId: string | null;
+            cardId: string | null;
+            /** @example DOP */
+            currency: string;
+            name: string;
+            institutionName: string | null;
+            /** @example 1500.00 */
+            balance: string;
+            reconciled: boolean;
+            /** Format: date-time */
+            lastReconciledAt: string | null;
+        };
+        ReconciliationStatusResponseDto: {
+            /** @example 2026-11 */
+            month: string;
+            items: components["schemas"]["ReconciliationStatusItemResponseDto"][];
+            reconciledCount: number;
+            pendingCount: number;
+        };
+        ReconciliationPageResponseDto: {
+            items: components["schemas"]["ReconciliationResponseDto"][];
+            nextCursor: string | null;
+            hasMore: boolean;
+        };
+        BankChargesMonthResponseDto: {
+            /** @example 2026-11 */
+            month: string;
+            /** @example 1500.00 */
+            total: string;
+            count: number;
+        };
+        BankChargesInstitutionResponseDto: {
+            name: string;
+            /** @example 1500.00 */
+            total: string;
+            count: number;
+        };
+        BankChargesKindResponseDto: {
+            kind: string;
+            /** @example 1500.00 */
+            total: string;
+            count: number;
+        };
+        BankChargesResponseDto: {
+            /** Format: date */
+            from: string;
+            /** Format: date */
+            to: string;
+            /** @example 1500.00 */
+            total: string;
+            count: number;
+            byMonth: components["schemas"]["BankChargesMonthResponseDto"][];
+            byInstitution: components["schemas"]["BankChargesInstitutionResponseDto"][];
+            byKind: components["schemas"]["BankChargesKindResponseDto"][];
+        };
+        BalanceDriftResponseDto: {
+            id: string;
+            accountId: string | null;
+            cardId: string | null;
+            /** @example DOP */
+            currency: string;
+            name: string | null;
+            /** @example 1500.00 */
+            storedBalance: string;
+            /** @example 1500.00 */
+            expectedBalance: string;
+            /** @example 0.00 */
+            difference: string;
+            /** Format: date-time */
+            detectedAt: string;
+            /** Format: date-time */
+            resolvedAt: string | null;
+        };
+        IntegrityCheckResponseDto: {
+            drifts: components["schemas"]["BalanceDriftResponseDto"][];
+        };
         RecalculateBalanceDto: {
             /** @description Account to recalculate */
             accountId?: string;
@@ -3566,6 +5485,15 @@ export type components = {
              */
             currency?: string;
         };
+        IntegrityRecalculateResponseDto: {
+            corrected: boolean;
+            accountId: string | null;
+            cardId: string | null;
+            /** @example DOP */
+            currency: string;
+            /** @example 1500.00 */
+            balance: string;
+        };
         ParseQuickEntryDto: {
             /**
              * @description Short natural-language sentence to turn into a draft.
@@ -3573,9 +5501,125 @@ export type components = {
              */
             text: string;
         };
+        QuickEntryDraftResponseDto: {
+            /** @enum {string} */
+            type: "DEBIT" | "CREDIT";
+            /** @example 1500.00 */
+            amount: string;
+            /** @example DOP */
+            currency: string;
+            categoryId: string | null;
+            accountId: string | null;
+            cardId: string | null;
+            /** Format: date */
+            date: string;
+            merchant: string | null;
+            description: string | null;
+        };
+        QuickEntryParseResponseDto: {
+            draft: components["schemas"]["QuickEntryDraftResponseDto"];
+            /** @example 0.9 */
+            confidence: number;
+            missing: string[];
+        };
         CreateReceivableShareDto: {
             receivableIds: string[];
             debtorName: string;
+        };
+        PublicShareCurrencyTotalResponseDto: {
+            /** @example DOP */
+            currency: string;
+            /** @example 1500.00 */
+            amount: string;
+            /** @example 1500.00 */
+            paid: string;
+            /** @example 0.00 */
+            pending: string;
+        };
+        PublicSharePaymentResponseDto: {
+            /** Format: date-time */
+            paidAt: string;
+            /** @example 1500.00 */
+            amount: string;
+        };
+        PublicShareItemResponseDto: {
+            ref: string;
+            concept: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            dueDate: string | null;
+            /** @example 1500.00 */
+            amount: string;
+            /** @example 1500.00 */
+            paid: string;
+            /** @example 0.00 */
+            pending: string;
+            /** @example DOP */
+            currency: string;
+            /** @enum {string} */
+            status: "PENDING" | "PARTIAL" | "PAID" | "CANCELLED" | "WRITTEN_OFF";
+            note: string | null;
+            payments: components["schemas"]["PublicSharePaymentResponseDto"][];
+        };
+        PublicReceivableShareResponseDto: {
+            ownerFirstName: string;
+            debtorName: string;
+            /** Format: date-time */
+            updatedAt: string;
+            totalsByCurrency: components["schemas"]["PublicShareCurrencyTotalResponseDto"][];
+            items: components["schemas"]["PublicShareItemResponseDto"][];
+        };
+        ArchivedEntityResponseDto: {
+            /** @enum {string} */
+            type: "institution" | "account" | "card" | "loan";
+            id: string;
+            label: string;
+            logoUrl: string | null;
+        };
+        PendingDeletionResponseDto: {
+            /** @enum {string} */
+            type: "account" | "budget" | "card" | "category" | "institution" | "loan" | "receivable" | "reconciliation" | "savingsGoal" | "transaction";
+            id: string;
+            label: string;
+            logoUrl: string | null;
+            /** Format: date-time */
+            deletedAt: string;
+            sizeBytes: number;
+        };
+        RecycleBinResponseDto: {
+            archived: components["schemas"]["ArchivedEntityResponseDto"][];
+            items: components["schemas"]["PendingDeletionResponseDto"][];
+            nextCursor: string | null;
+            hasMore: boolean;
+        };
+        NotificationResponseDto: {
+            id: string;
+            userId: string;
+            type: string;
+            /** @enum {string} */
+            channel: "PUSH" | "IN_APP" | "EMAIL";
+            title: string;
+            body: string;
+            data: Record<string, never>;
+            isRead: boolean;
+            /** Format: date-time */
+            scheduledAt: string | null;
+            /** Format: date-time */
+            sentAt: string | null;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        NotificationPageResponseDto: {
+            items: components["schemas"]["NotificationResponseDto"][];
+            nextCursor: string | null;
+            hasMore: boolean;
+        };
+        UnreadNotificationsResponseDto: {
+            count: number;
+        };
+        MarkAllReadResponseDto: {
+            updated: number;
         };
         CreateNotificationDto: {
             type: string;
@@ -3593,39 +5637,96 @@ export type components = {
             platform: "ios" | "android" | "web";
             token: string;
         };
+        PushTokenResponseDto: {
+            id: string;
+            userId: string;
+            platform: string;
+            token: string;
+            isActive: boolean;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        NotificationSuccessResponseDto: {
+            success: boolean;
+        };
         CompareAnalysisRunsDto: {
             firstRunId: string;
             secondRunId: string;
         };
-        AiAnalysisRunResponseDto: {
+        AiSignalEvidenceResponseDto: {
+            /** @example EMAIL_CLASSIFICATION */
+            sourceType: string;
+            sourceId: string;
+            excerpt: {
+                [key: string]: unknown;
+            };
+            /** Format: date-time */
+            createdAt: string;
+        };
+        AiSignalResponseDto: {
             id: string;
-            datasetId: string;
+            type: string;
+            domain: string;
             /** @enum {string} */
-            mode: "ANALYZE_ONLY" | "EVALUATE" | "IMPORT";
-            /** @enum {string} */
-            status: "RUNNING" | "COMPLETED" | "FAILED";
-            /** @example 1 */
-            observationSequence: string;
-            /** @example 1 */
-            verificationSequence: string;
-            /** @example 1 */
-            consentRevision: string;
-            /** @enum {string} */
-            reproductionStatus: "COMPLETE" | "INCOMPLETE";
-            missingEvidence: Record<string, never>;
-            projectorVersion: string;
-            policyVersion: string;
-            pipelineVersion: string;
-            detectorVersion: string | null;
-            promptVersion: string | null;
-            schemaVersion: string | null;
-            configuration: Record<string, never>;
-            metrics: Record<string, never> | null;
+            status: "DETECTED" | "VALIDATED" | "ROUTED" | "CONSUMED" | "DISMISSED" | "SUPERSEDED" | "FAILED";
+            sourceType: string;
+            sourceId: string;
+            payload: {
+                [key: string]: unknown;
+            };
+            correlationKey: string;
             /** Format: date-time */
-            startedAt: string;
+            occurredAt: string;
             /** Format: date-time */
-            completedAt: string | null;
-            error: string | null;
+            detectedAt: string;
+            confidence?: number | null;
+            evidence: components["schemas"]["AiSignalEvidenceResponseDto"][];
+        };
+        AiSignalListResponseDto: {
+            data: components["schemas"]["AiSignalResponseDto"][];
+        };
+        AiConversationCreatedDto: {
+            id: string;
+            title: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        AiConversationSummaryDto: {
+            id: string;
+            title: string;
+            messageCount: number;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        AiConversationMessageDto: {
+            /** @enum {string} */
+            role: "user" | "assistant";
+            content: string;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        AiConversationDetailDto: {
+            id: string;
+            title: string;
+            messages: components["schemas"]["AiConversationMessageDto"][];
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        SendAiConversationMessageDto: {
+            /** @example ¿Cuánto gasté este mes? */
+            content: string;
+        };
+        AiConversationAnswerDto: {
+            conversationId: string;
+            answer: string;
+            provider: string;
+            model: string;
         };
     };
     responses: never;
@@ -3740,7 +5841,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["UserProfileResponseDto"];
+                };
             };
         };
     };
@@ -3758,7 +5861,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["DeleteAccountResponseDto"];
+                };
             };
         };
     };
@@ -3780,7 +5885,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["UserProfileResponseDto"];
+                };
             };
         };
     };
@@ -3802,7 +5909,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["UserProfileResponseDto"];
+                };
             };
         };
     };
@@ -3826,7 +5935,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["UserProfileResponseDto"];
+                };
             };
         };
     };
@@ -3844,7 +5955,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["DataAppBranchesResponseDto"][];
+                };
             };
         };
     };
@@ -3866,7 +5979,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["WipeUserDataResponseDto"];
+                };
             };
         };
     };
@@ -3884,7 +5999,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["AuthSessionResponseDto"];
+                };
             };
         };
     };
@@ -3901,7 +6018,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["AiRoleUserResponseDto"][];
+                };
             };
         };
     };
@@ -3924,7 +6043,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["AiRoleAssignmentResponseDto"];
+                };
             };
         };
     };
@@ -3941,7 +6062,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["AiConsentResponseDto"];
+                };
             };
         };
     };
@@ -3962,7 +6085,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["AiConsentResponseDto"];
+                };
             };
         };
     };
@@ -3979,7 +6104,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["AiEmailDashboardResponseDto"];
+                };
             };
         };
     };
@@ -3998,7 +6125,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["AiEmailMessagePageResponseDto"];
+                };
             };
         };
     };
@@ -4017,7 +6146,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["AiEmailMessageResponseDto"];
+                };
             };
         };
     };
@@ -4034,7 +6165,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["AiEmailConnectResponseDto"];
+                };
             };
         };
     };
@@ -4051,7 +6184,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["AiEmailSyncResponseDto"];
+                };
             };
         };
     };
@@ -4072,7 +6207,22 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["AiEmailResetResponseDto"];
+                };
+            };
+            /** @description GMAIL_NOT_CONNECTED si no hay conexión; GMAIL_SYNC_IN_PROGRESS si hay una sincronización activa o esperando cuota. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        code?: "GMAIL_NOT_CONNECTED" | "GMAIL_SYNC_IN_PROGRESS";
+                        message?: string;
+                    };
+                };
             };
         };
     };
@@ -4106,7 +6256,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["AiEmailDiagnosticsResponseDto"];
+                };
             };
         };
     };
@@ -4123,15 +6275,30 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["AiDatasetResponseDto"];
+                };
             };
         };
     };
     AiEvidenceController_reviewQueue: {
         parameters: {
-            query: {
-                cursor: string;
-                partition: string;
+            query?: {
+                /** @description Cursor opaco de la página anterior */
+                cursor?: string;
+                partition?: "TRAIN" | "VALIDATION" | "HOLDOUT";
+                /** @description Estados separados por coma; sin filtro la cola devuelve solo PENDING */
+                status?: ("PENDING" | "CONFIRMED" | "CORRECTED" | "REJECTED")[];
+                /** @description Remitente exacto, sin distinguir mayúsculas */
+                fromAddress?: string;
+                /** @description Texto contenido en el asunto, sin distinguir mayúsculas */
+                subject?: string;
+                /** @description Primer día recibido (AAAA-MM-DD), completo en la zona del usuario */
+                dateFrom?: string;
+                /** @description Último día recibido (AAAA-MM-DD), completo en la zona del usuario */
+                dateTo?: string;
+                /** @description Fecha recibida, del más viejo al más nuevo o al revés */
+                order?: "OLDEST" | "NEWEST";
                 /** @description Only uncertain or unclassified messages */
                 uncertain?: boolean;
             };
@@ -4145,7 +6312,54 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["AiReviewQueueResponseDto"];
+                };
+            };
+        };
+    };
+    AiEvidenceController_reviewGroups: {
+        parameters: {
+            query?: {
+                page?: number;
+                pageSize?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AiReviewGroupsPageResponseDto"];
+                };
+            };
+        };
+    };
+    AiEvidenceController_verifyReviewGroup: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateReviewGroupVerificationDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AiReviewGroupVerificationResultResponseDto"];
+                };
             };
         };
     };
@@ -4168,7 +6382,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["AiMessageVerificationResponseDto"];
+                };
             };
         };
     };
@@ -4185,7 +6401,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["AiAnalysisRunResponseDto"][];
+                };
             };
         };
     };
@@ -4243,6 +6461,34 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["KnowledgeRebuildDto"];
                 };
+            };
+        };
+    };
+    AiKnowledgeController_promote: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                knowledgeId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KnowledgeItemDto"];
+                };
+            };
+            /** @description Conocimiento GLOBAL no encontrado */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -4350,7 +6596,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": string[];
+                };
             };
         };
     };
@@ -4372,7 +6620,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ExchangeRatesResponseDto"];
+                };
             };
         };
     };
@@ -4393,7 +6643,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ChangeBaseCurrencyResponseDto"];
+                };
             };
         };
     };
@@ -4410,7 +6662,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["AccountPageResponseDto"];
+                };
             };
         };
     };
@@ -4431,7 +6685,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["AccountResponseDto"];
+                };
             };
         };
     };
@@ -4450,7 +6706,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["AccountResponseDto"];
+                };
             };
         };
     };
@@ -4469,7 +6727,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SuccessResponseDto"];
+                };
             };
         };
     };
@@ -4492,7 +6752,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["AccountResponseDto"];
+                };
             };
         };
     };
@@ -4511,7 +6773,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["InstrumentHistoryPageResponseDto"];
+                };
             };
         };
     };
@@ -4526,11 +6790,13 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            201: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SuccessResponseDto"];
+                };
             };
         };
     };
@@ -4547,7 +6813,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["InstitutionPageResponseDto"];
+                };
             };
         };
     };
@@ -4568,7 +6836,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["InstitutionResponseDto"];
+                };
             };
         };
     };
@@ -4583,11 +6853,13 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            201: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["InstitutionResponseDto"];
+                };
             };
         };
     };
@@ -4606,7 +6878,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SuccessResponseDto"];
+                };
             };
         };
     };
@@ -4629,7 +6903,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["InstitutionResponseDto"];
+                };
             };
         };
     };
@@ -4644,11 +6920,13 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            201: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SuccessResponseDto"];
+                };
             };
         };
     };
@@ -4665,7 +6943,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["CardPageResponseDto"];
+                };
             };
         };
     };
@@ -4686,7 +6966,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["CardResponseDto"];
+                };
             };
         };
     };
@@ -4705,7 +6987,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["CardResponseDto"];
+                };
             };
         };
     };
@@ -4724,7 +7008,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SuccessResponseDto"];
+                };
             };
         };
     };
@@ -4747,7 +7033,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["CardResponseDto"];
+                };
             };
         };
     };
@@ -4766,7 +7054,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["InstrumentHistoryPageResponseDto"];
+                };
             };
         };
     };
@@ -4781,11 +7071,13 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            201: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SuccessResponseDto"];
+                };
             };
         };
     };
@@ -4808,7 +7100,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["CardBalanceMutationResponseDto"];
+                };
             };
         };
     };
@@ -4831,7 +7125,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["CardBalanceMutationResponseDto"];
+                };
             };
         };
     };
@@ -4851,7 +7147,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SuccessResponseDto"];
+                };
             };
         };
     };
@@ -4870,7 +7168,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["CategoryResponseDto"][];
+                };
             };
         };
     };
@@ -4891,7 +7191,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["CategoryResponseDto"];
+                };
             };
         };
     };
@@ -4910,7 +7212,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SuccessResponseDto"];
+                };
             };
         };
     };
@@ -4933,7 +7237,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["CategoryResponseDto"];
+                };
             };
         };
     };
@@ -4952,7 +7258,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SuccessResponseDto"];
+                };
             };
         };
     };
@@ -4983,7 +7291,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["TransactionPageResponseDto"];
+                };
             };
         };
     };
@@ -5004,7 +7314,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["TransactionResponseDto"];
+                };
             };
         };
     };
@@ -5025,7 +7337,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["AdjustBalanceResponseDto"];
+                };
             };
         };
     };
@@ -5044,7 +7358,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["TransactionResponseDto"];
+                };
             };
         };
     };
@@ -5063,7 +7379,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["DeleteResponseDto"];
+                };
             };
         };
     };
@@ -5082,7 +7400,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["TransactionResponseDto"];
+                };
             };
         };
     };
@@ -5097,11 +7417,13 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            201: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SuccessResponseDto"];
+                };
             };
         };
     };
@@ -5116,11 +7438,13 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            201: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["TransactionResponseDto"];
+                };
             };
         };
     };
@@ -5135,11 +7459,13 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            201: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["TransactionResponseDto"];
+                };
             };
         };
     };
@@ -5154,11 +7480,13 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            201: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["TransactionResponseDto"];
+                };
             };
         };
     };
@@ -5177,11 +7505,13 @@ export interface operations {
             };
         };
         responses: {
-            201: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SuccessResponseDto"];
+                };
             };
         };
     };
@@ -5196,11 +7526,13 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            201: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SuccessResponseDto"];
+                };
             };
         };
     };
@@ -5221,7 +7553,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["TransferResponseDto"];
+                };
             };
         };
     };
@@ -5240,7 +7574,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["DeleteResponseDto"];
+                };
             };
         };
     };
@@ -5263,7 +7599,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SuccessResponseDto"];
+                };
             };
         };
     };
@@ -5278,11 +7616,13 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            201: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SuccessResponseDto"];
+                };
             };
         };
     };
@@ -5297,11 +7637,13 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            201: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SuccessResponseDto"];
+                };
             };
         };
     };
@@ -5316,11 +7658,13 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            201: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SuccessResponseDto"];
+                };
             };
         };
     };
@@ -5341,7 +7685,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["TransferResponseDto"];
+                };
             };
         };
     };
@@ -5360,7 +7706,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["DeleteResponseDto"];
+                };
             };
         };
     };
@@ -5383,7 +7731,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SuccessResponseDto"];
+                };
             };
         };
     };
@@ -5398,11 +7748,13 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            201: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SuccessResponseDto"];
+                };
             };
         };
     };
@@ -5417,11 +7769,13 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            201: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SuccessResponseDto"];
+                };
             };
         };
     };
@@ -5444,7 +7798,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["MerchantPageResponseDto"];
+                };
             };
         };
     };
@@ -5465,7 +7821,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["MerchantResponseDto"];
+                };
             };
         };
     };
@@ -5485,7 +7843,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["MerchantSuggestResponseDto"] | null;
+                };
             };
         };
     };
@@ -5504,7 +7864,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["MerchantResponseDto"];
+                };
             };
         };
     };
@@ -5527,7 +7889,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["MerchantResponseDto"];
+                };
             };
         };
     };
@@ -5546,7 +7910,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["MerchantDuplicateResponseDto"][];
+                };
             };
         };
     };
@@ -5566,7 +7932,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["MerchantDuplicateDismissResponseDto"];
+                };
             };
         };
     };
@@ -5586,7 +7954,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["MerchantDuplicateDismissResponseDto"];
+                };
             };
         };
     };
@@ -5609,7 +7979,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["MerchantResponseDto"];
+                };
             };
         };
     };
@@ -5628,7 +8000,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["MerchantResponseDto"];
+                };
             };
         };
     };
@@ -5647,7 +8021,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["MerchantResponseDto"];
+                };
             };
         };
     };
@@ -5698,7 +8074,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SubscriptionPageResponseDto"];
+                };
             };
         };
     };
@@ -5719,7 +8097,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SubscriptionResponseDto"];
+                };
             };
         };
     };
@@ -5736,7 +8116,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SubscriptionSummaryResponseDto"];
+                };
             };
         };
     };
@@ -5755,7 +8137,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SubscriptionBreakdownResponseDto"];
+                };
             };
         };
     };
@@ -5778,7 +8162,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SubscriptionUpcomingResponseDto"];
+                };
             };
         };
     };
@@ -5795,7 +8181,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SubscriptionAlertResponseDto"][];
+                };
             };
         };
     };
@@ -5812,7 +8200,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SubscriptionDismissedAlertsResponseDto"];
+                };
             };
         };
     };
@@ -5833,7 +8223,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SubscriptionDismissedAlertResponseDto"];
+                };
             };
         };
     };
@@ -5852,7 +8244,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SubscriptionResponseDto"];
+                };
             };
         };
     };
@@ -5875,7 +8269,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SubscriptionResponseDto"];
+                };
             };
         };
     };
@@ -5894,7 +8290,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SubscriptionResponseDto"];
+                };
             };
         };
     };
@@ -5913,7 +8311,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SubscriptionResponseDto"];
+                };
             };
         };
     };
@@ -5932,7 +8332,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SubscriptionResponseDto"];
+                };
             };
         };
     };
@@ -5951,7 +8353,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SubscriptionPaymentPageResponseDto"];
+                };
             };
         };
     };
@@ -5974,7 +8378,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SubscriptionManualPaymentResponseDto"];
+                };
             };
         };
     };
@@ -5993,7 +8399,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SubscriptionLogoResponseDto"];
+                };
             };
         };
     };
@@ -6012,7 +8420,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["CardStatementPageResponseDto"];
+                };
             };
         };
     };
@@ -6032,7 +8442,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["CardStatementDetailResponseDto"];
+                };
             };
         };
     };
@@ -6056,7 +8468,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SuccessResponseDto"];
+                };
             };
         };
     };
@@ -6079,7 +8493,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["StatementImportCreatedResponseDto"];
+                };
             };
         };
     };
@@ -6102,7 +8518,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["StatementImportCreatedResponseDto"];
+                };
             };
         };
     };
@@ -6121,7 +8539,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["StatementImportResponseDto"];
+                };
             };
         };
     };
@@ -6140,7 +8560,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SuccessResponseDto"];
+                };
             };
         };
     };
@@ -6164,7 +8586,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["StatementImportResponseDto"];
+                };
             };
         };
     };
@@ -6187,7 +8611,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["StatementImportResponseDto"];
+                };
             };
         };
     };
@@ -6204,7 +8630,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["BudgetPageResponseDto"];
+                };
             };
         };
     };
@@ -6225,7 +8653,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["BudgetResponseDto"];
+                };
             };
         };
     };
@@ -6244,7 +8674,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["BudgetResponseDto"];
+                };
             };
         };
     };
@@ -6263,7 +8695,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SuccessResponseDto"];
+                };
             };
         };
     };
@@ -6286,7 +8720,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["BudgetResponseDto"];
+                };
             };
         };
     };
@@ -6305,7 +8741,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["TransactionPageResponseDto"];
+                };
             };
         };
     };
@@ -6324,7 +8762,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SuccessResponseDto"];
+                };
             };
         };
     };
@@ -6341,7 +8781,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SavingsGoalPageResponseDto"];
+                };
             };
         };
     };
@@ -6362,7 +8804,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SavingsGoalResponseDto"];
+                };
             };
         };
     };
@@ -6381,7 +8825,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SavingsGoalResponseDto"];
+                };
             };
         };
     };
@@ -6400,7 +8846,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SuccessResponseDto"];
+                };
             };
         };
     };
@@ -6423,7 +8871,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SavingsGoalResponseDto"];
+                };
             };
         };
     };
@@ -6442,7 +8892,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SavingsGoalContributionPageResponseDto"];
+                };
             };
         };
     };
@@ -6465,7 +8917,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SavingsGoalContributionResponseDto"];
+                };
             };
         };
     };
@@ -6485,7 +8939,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SuccessResponseDto"];
+                };
             };
         };
     };
@@ -6504,7 +8960,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SavingsGoalContributionPageResponseDto"];
+                };
             };
         };
     };
@@ -6527,7 +8985,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SavingsGoalContributionResponseDto"];
+                };
             };
         };
     };
@@ -6547,7 +9007,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SuccessResponseDto"];
+                };
             };
         };
     };
@@ -6566,7 +9028,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SuccessResponseDto"];
+                };
             };
         };
     };
@@ -6583,7 +9047,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["LoanPageResponseDto"];
+                };
             };
         };
     };
@@ -6604,7 +9070,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["LoanResponseDto"];
+                };
             };
         };
     };
@@ -6623,7 +9091,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["LoanResponseDto"];
+                };
             };
         };
     };
@@ -6642,7 +9112,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SuccessResponseDto"];
+                };
             };
         };
     };
@@ -6665,7 +9137,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["LoanResponseDto"];
+                };
             };
         };
     };
@@ -6684,7 +9158,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["LoanInstallmentPageResponseDto"];
+                };
             };
         };
     };
@@ -6703,7 +9179,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["LoanInstallmentResponseDto"][];
+                };
             };
         };
     };
@@ -6726,7 +9204,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["LoanInstallmentPaymentResponseDto"];
+                };
             };
         };
     };
@@ -6749,7 +9229,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["LoanPrepaymentResultResponseDto"];
+                };
             };
         };
     };
@@ -6771,7 +9253,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["LoanPrepaymentPreviewResponseDto"];
+                };
             };
         };
     };
@@ -6786,11 +9270,13 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            201: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SuccessResponseDto"];
+                };
             };
         };
     };
@@ -6807,7 +9293,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ReceivablePageResponseDto"];
+                };
             };
         };
     };
@@ -6828,7 +9316,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ReceivableResponseDto"];
+                };
             };
         };
     };
@@ -6847,7 +9337,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ReceivableResponseDto"];
+                };
             };
         };
     };
@@ -6866,7 +9358,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SuccessResponseDto"];
+                };
             };
         };
     };
@@ -6889,7 +9383,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ReceivableResponseDto"];
+                };
             };
         };
     };
@@ -6908,7 +9404,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ReceivablePaymentPageResponseDto"];
+                };
             };
         };
     };
@@ -6931,7 +9429,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ReceivablePaymentResponseDto"];
+                };
             };
         };
     };
@@ -6954,7 +9454,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SuccessResponseDto"];
+                };
             };
         };
     };
@@ -6977,7 +9479,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SuccessResponseDto"];
+                };
             };
         };
     };
@@ -6996,7 +9500,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SuccessResponseDto"];
+                };
             };
         };
     };
@@ -7019,7 +9525,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["PlanningLinkResponseDto"];
+                };
             };
         };
     };
@@ -7038,7 +9546,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SuccessResponseDto"];
+                };
             };
         };
     };
@@ -7140,7 +9650,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": ((components["schemas"]["TransactionResponseDto"] | components["schemas"]["AccountResponseDto"] | components["schemas"]["CardResponseDto"] | components["schemas"]["LoanResponseDto"] | components["schemas"]["BudgetResponseDto"] | components["schemas"]["SavingsGoalResponseDto"] | components["schemas"]["ReceivableResponseDto"] | components["schemas"]["SubscriptionResponseDto"] | components["schemas"]["MerchantResponseDto"] | components["schemas"]["CategoryResponseDto"]) | null)[];
+                };
             };
         };
     };
@@ -7159,7 +9671,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["WeeklySummaryResponseDto"];
+                };
             };
         };
     };
@@ -7179,7 +9693,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["AnalyticsSummaryResponseDto"];
+                };
             };
         };
     };
@@ -7199,7 +9715,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SpendingByCategoryResponseDto"][];
+                };
             };
         };
     };
@@ -7216,7 +9734,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["BudgetStatusResponseDto"][];
+                };
             };
         };
     };
@@ -7237,7 +9757,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SpendingOverTimeResponseDto"];
+                };
             };
         };
     };
@@ -7256,7 +9778,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["RecurringPageResponseDto"];
+                };
             };
         };
     };
@@ -7277,7 +9801,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["RecurringPatternResponseDto"];
+                };
             };
         };
     };
@@ -7296,7 +9822,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["RecurringPatternResponseDto"][];
+                };
             };
         };
     };
@@ -7319,7 +9847,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["RecurringPatternResponseDto"];
+                };
             };
         };
     };
@@ -7340,7 +9870,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ReconciliationPreviewResponseDto"];
+                };
             };
         };
     };
@@ -7360,7 +9892,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ReconciliationPageResponseDto"];
+                };
             };
         };
     };
@@ -7381,7 +9915,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ReconciliationResponseDto"];
+                };
             };
         };
     };
@@ -7401,7 +9937,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ReconciliationStatusResponseDto"];
+                };
             };
         };
     };
@@ -7420,7 +9958,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ReconciliationResponseDto"];
+                };
             };
         };
     };
@@ -7439,7 +9979,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["DeleteResponseDto"];
+                };
             };
         };
     };
@@ -7458,7 +10000,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SuccessResponseDto"];
+                };
             };
         };
     };
@@ -7481,7 +10025,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["BankChargesResponseDto"];
+                };
             };
         };
     };
@@ -7503,7 +10049,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["IntegrityCheckResponseDto"];
+                };
             };
         };
     };
@@ -7524,7 +10072,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["IntegrityRecalculateResponseDto"];
+                };
             };
         };
     };
@@ -7545,7 +10095,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["QuickEntryParseResponseDto"];
+                };
             };
         };
     };
@@ -7640,7 +10192,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["PublicReceivableShareResponseDto"];
+                };
             };
         };
     };
@@ -7657,7 +10211,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["RecycleBinResponseDto"];
+                };
             };
         };
     };
@@ -7677,7 +10233,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["NotificationPageResponseDto"];
+                };
             };
         };
     };
@@ -7698,7 +10256,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["NotificationResponseDto"] | null;
+                };
             };
         };
     };
@@ -7715,7 +10275,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["UnreadNotificationsResponseDto"];
+                };
             };
         };
     };
@@ -7732,7 +10294,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["MarkAllReadResponseDto"];
+                };
             };
         };
     };
@@ -7751,7 +10315,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["NotificationResponseDto"];
+                };
             };
         };
     };
@@ -7772,7 +10338,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["PushTokenResponseDto"];
+                };
             };
         };
     };
@@ -7791,7 +10359,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["NotificationSuccessResponseDto"];
+                };
             };
         };
     };
@@ -7810,7 +10380,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["NotificationSuccessResponseDto"];
+                };
             };
         };
     };
@@ -7863,6 +10435,188 @@ export interface operations {
                         } | null;
                     };
                 };
+            };
+        };
+    };
+    AiSignalsController_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AiSignalListResponseDto"];
+                };
+            };
+        };
+    };
+    AiSignalsController_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                signalId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AiSignalResponseDto"];
+                };
+            };
+        };
+    };
+    AiConversationController_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AiConversationSummaryDto"][];
+                };
+            };
+        };
+    };
+    AiConversationController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AiConversationCreatedDto"];
+                };
+            };
+        };
+    };
+    AiConversationController_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                conversationId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AiConversationDetailDto"];
+                };
+            };
+            /** @description Conversación no encontrada */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AiConversationController_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                conversationId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        deleted?: boolean;
+                    };
+                };
+            };
+            /** @description Conversación no encontrada */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AiConversationController_sendMessage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                conversationId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SendAiConversationMessageDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AiConversationAnswerDto"];
+                };
+            };
+            /** @description Mensaje vacío o demasiado largo */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Conversación no encontrada */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Inferencia no disponible */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

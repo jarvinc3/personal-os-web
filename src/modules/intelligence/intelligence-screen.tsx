@@ -65,6 +65,7 @@ import {
 } from "./messages-rate-limit"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { AiEvidenceSection } from "./components/ai-evidence-section"
+import { EmailSignalSection } from "./components/email-signal-section"
 import { ReviewSection } from "./components/review-section"
 import {
   describeVerificationPayload,
@@ -101,7 +102,7 @@ function IntelligenceScreenBody() {
     open: messageSheetOpen,
     sheetId: selectedMessageId,
     setOpen: setMessageSheetOpen,
-  } = useSheetParam(INTELLIGENCE_SHEET_KEYS.message)
+  } = useSheetParam(INTELLIGENCE_SHEET_KEYS.message, { closeMode: "replace" })
   usePageHeader({ title: "Inteligencia" })
 
   const messages = useMemo(
@@ -1005,6 +1006,7 @@ function IntelligenceMessageDetail({
               </p>
             ) : null}
           </SummarySection>
+          <EmailSignalSection message={data} />
           <SummarySection
             title="Procedencia y verificaciones"
             subtitle="Registros append-only vinculados al correo original."
@@ -1142,7 +1144,7 @@ function MessageRepresentation({
   return (
     <section className="flex flex-col gap-1">
       <h4 className="text-xs font-medium text-muted-foreground">{title}</h4>
-      <pre className="max-h-80 overflow-auto rounded-lg bg-muted p-3 font-sans text-sm wrap-break-word whitespace-pre-wrap">
+      <pre className="rounded-lg bg-muted p-3 font-sans text-sm wrap-break-word whitespace-pre-wrap">
         {value || "No disponible"}
       </pre>
     </section>

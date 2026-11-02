@@ -6,6 +6,7 @@ import {
   readSheetSearch,
   resolveSheetNavigation,
   type OptimisticSheetParam,
+  type SheetCloseMode,
   SHEET_QUERY_KEY,
 } from "@/src/shared/lib/sheet-navigation"
 
@@ -23,14 +24,25 @@ function wasSheetPushed(pathname: string) {
   return sheetPushedByPath.get(pathname) === true
 }
 
-function navigateSheetUrl(
-  router: ReturnType<typeof useRouter>,
-  pathname: string,
-  searchParams: { get(name: string): string | null; toString(): string },
-  sheetKey: string,
-  open: boolean,
+type NavigateSheetUrlInput = {
+  router: ReturnType<typeof useRouter>
+  pathname: string
+  searchParams: { get(name: string): string | null; toString(): string }
+  sheetKey: string
+  open: boolean
   id?: string | null
-) {
+  closeMode?: SheetCloseMode
+}
+
+function navigateSheetUrl({
+  router,
+  pathname,
+  searchParams,
+  sheetKey,
+  open,
+  id,
+  closeMode = "back",
+}: NavigateSheetUrlInput) {
   const decision = resolveSheetNavigation({
     pathname,
     searchParams,
@@ -38,6 +50,7 @@ function navigateSheetUrl(
     open,
     id,
     wasPushed: wasSheetPushed(pathname),
+    closeMode,
   })
 
   switch (decision.action) {
@@ -56,7 +69,10 @@ function navigateSheetUrl(
   }
 }
 
-export function useSheetParam(key: string) {
+export function useSheetParam(
+  key: string,
+  { closeMode = "back" }: { closeMode?: SheetCloseMode } = {}
+) {
   const searchParams = useSearchParams()
   const router = useRouter()
   const pathname = usePathname()
@@ -89,9 +105,17 @@ export function useSheetParam(key: string) {
         sheetId: id === undefined ? current.sheetId : id,
         from,
       })
-      navigateSheetUrl(router, pathname, searchParams, key, value, id)
+      navigateSheetUrl({
+        router,
+        pathname,
+        searchParams,
+        sheetKey: key,
+        open: value,
+        id,
+        closeMode,
+      })
     },
-    [searchParams, key, router, pathname, optimistic]
+    [searchParams, key, router, pathname, optimistic, closeMode]
   )
 
   return { open: merged.open, sheetId: merged.sheetId, setOpen }

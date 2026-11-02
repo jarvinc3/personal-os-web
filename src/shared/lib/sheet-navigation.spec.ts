@@ -111,6 +111,38 @@ describe("resolveSheetNavigation", () => {
     assert.deepEqual(result, { action: "back" })
   })
 
+  it("closes a pushed sheet with replace when the sheet must keep the entry", () => {
+    const navigation = resolveSheetNavigation({
+      pathname: path,
+      searchParams: params("sheet=account-sheet&sheetId=acc-1"),
+      key: "account-sheet",
+      open: false,
+      wasPushed: true,
+      closeMode: "replace",
+    })
+    assert.deepEqual(navigation, {
+      action: "replace",
+      url: "/finance/products",
+    })
+  })
+
+  it("keeps unrelated query params when the pushed sheet closes with replace", () => {
+    const navigation = resolveSheetNavigation({
+      pathname: "/intelligence",
+      searchParams: params(
+        "intelligence-view=review&sheet=intelligence-message&sheetId=m-1"
+      ),
+      key: "intelligence-message",
+      open: false,
+      wasPushed: true,
+      closeMode: "replace",
+    })
+    assert.deepEqual(navigation, {
+      action: "replace",
+      url: "/intelligence?intelligence-view=review",
+    })
+  })
+
   it("closes a deep-linked sheet with replace and keeps other params", () => {
     const result = resolveSheetNavigation({
       pathname: "/finance/sync",

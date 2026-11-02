@@ -26,13 +26,13 @@ export function useModuleSheetNav() {
 
   const setModuleOpen = useCallback(
     (slug: ModuleSlug, open: boolean) => {
-      navigateSheetUrl(
+      navigateSheetUrl({
         router,
         pathname,
         searchParams,
-        MODULE_SHEET_PARAM_KEYS[slug],
-        open
-      )
+        sheetKey: MODULE_SHEET_PARAM_KEYS[slug],
+        open,
+      })
     },
     [searchParams, router, pathname]
   )

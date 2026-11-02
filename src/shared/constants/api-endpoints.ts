@@ -37,6 +37,8 @@ export const API_ENDPOINTS = {
     RUNS: "/intelligence/runs",
     EVALUATE_RUNS: "/intelligence/runs/evaluate",
     COMPARE_RUNS: "/intelligence/runs/compare",
+    SIGNAL: (signalId: string) =>
+      `/intelligence/signals/${encodeURIComponent(signalId)}`,
     CONNECT_EMAIL: "/intelligence/email/connect",
     OAUTH_DIAGNOSTICS: "/intelligence/email/oauth/diagnostics",
     SYNC_EMAIL: "/intelligence/email/sync",
