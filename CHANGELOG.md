@@ -6,6 +6,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Agregado
 
+- Inteligencia muestra el avance de clasificación de correos, la próxima corrida tras un fallo de clasificación y un aviso de sincronización estancada que permite reintentar sin pedir reconectar Gmail (#391; contrato de back #299).
 - El detalle de un movimiento muestra la señal de correo que lo originó y enlaza al correo de origen; los movimientos sin señal explican que no tienen trazabilidad de correo (#214).
 - El detalle de un correo de Inteligencia suma la sección **Señal detectada** con el tipo, el estado, la confianza y una fila por ruta del payload, y la evidencia que la sostuvo —remitente, asunto, fecha del correo y la regla del clasificador con su proveedor y modelo—; el vacío explica si el correo no tiene señal, si la clasificación sigue pendiente o si falló, y la vista no crea ni modifica movimientos en Finanzas (#383; consume el contrato de back #210).
 - Cada correo de muestra de un grupo de revisión abre su detalle desde la propia vista de grupos, sin cambiar de pestaña; si el contrato no trae el id de una muestra, su asunto queda sin enlace. Consume `sampleMessageIds` del back (#359, jarvinc3/personal-os-back#279).

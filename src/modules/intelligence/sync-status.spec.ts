@@ -1,7 +1,9 @@
 import assert from "node:assert/strict"
 import { describe, it } from "node:test"
 import {
+  describeScheduledClassification,
   describeSyncFailure,
+  describeSyncProgress,
   resolveDashboardSyncFailure,
   resolveSyncFailure,
   type SyncFailure,
@@ -45,6 +47,58 @@ const progress = (
 })
 
 describe("estado de sincronización de Gmail", () => {
+  it("muestra el progreso exacto de clasificación pendiente", () => {
+    assert.equal(
+      describeSyncProgress(
+        progress({
+          status: "running",
+          phase: "classifying",
+          processedThisRun: 120,
+          totalEstimate: 4000,
+        })
+      ),
+      "Clasificando correos pendientes · 120 de 4000."
+    )
+  })
+
+  it("describe clasificación sin inventar cifras ausentes", () => {
+    const missingEstimate = {
+      ...progress({ status: "running", phase: "classifying" }),
+      totalEstimate: undefined,
+    } as AiEmailSyncProgress
+    const missingProcessedCount = {
+      ...progress({ status: "running", phase: "classifying" }),
+      processedThisRun: undefined,
+    } as unknown as AiEmailSyncProgress
+
+    assert.equal(
+      describeSyncProgress(missingEstimate),
+      "Clasificando correos pendientes."
+    )
+    assert.equal(
+      describeSyncProgress(missingProcessedCount),
+      "Clasificando correos pendientes."
+    )
+  })
+
+  it("explica que el atraso de clasificación seguirá en la próxima corrida", () => {
+    assert.match(
+      describeScheduledClassification(
+        progress({
+          status: "scheduled",
+          errorCode: "classification_failed",
+        })
+      ) ?? "",
+      /continuará en la próxima corrida.*correos que ya se importaron siguen disponibles/
+    )
+    assert.equal(
+      describeScheduledClassification(
+        progress({ status: "scheduled", errorCode: "other_error" })
+      ),
+      null
+    )
+  })
+
   it("prefiere el código del proveedor guardado para el reintento", () => {
     const failure = resolveSyncFailure({
       progress: progress({
@@ -164,6 +218,23 @@ describe("estado de sincronización de Gmail", () => {
     assert.equal(copy.title, "La sincronización se interrumpió")
     assert.equal(copy.offerReconnect, false)
     assert.match(copy.description, /reinició/)
+  })
+
+  it("ofrece sincronizar de nuevo si se estanca, sin pedir reconexión", () => {
+    const copy = describeSyncFailure({
+      failure: {
+        code: "sync_stalled",
+        category: "temporary",
+        occurredAt: "2026-10-30T12:05:00.000Z",
+      },
+      attemptedAt: "30 oct 2026, 12:05",
+      requiresReconnect: false,
+    })
+
+    assert.equal(copy.title, "La sincronización se quedó sin avance")
+    assert.equal(copy.offerReconnect, false)
+    assert.match(copy.description, /volver a sincronizar/)
+    assert.doesNotMatch(copy.description, /Reconecta Gmail/)
   })
 
   it("muestra el código y la hora cuando la causa es desconocida", () => {

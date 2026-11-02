@@ -55,7 +55,9 @@ export function useIntelligence() {
       }
       if (
         connection.lastSyncErrorCode ||
-        connection.syncProgress?.status === "failed"
+        connection.syncProgress?.status === "failed" ||
+        (connection.syncProgress?.status === "scheduled" &&
+          connection.syncProgress.errorCode === "classification_failed")
       ) {
         return 30_000
       }
