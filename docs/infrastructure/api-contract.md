@@ -39,11 +39,12 @@ type BalanceSheet =
 - Si el cliente necesita un nombre propio, lo declara como alias del tipo generado. Ejemplo: `src/modules/intelligence/types/knowledge.types.ts` mantiene `KnowledgeItem` apuntando a `KnowledgeItemDto`.
 - Un tipo escrito a mano que duplique uno generado se elimina y se usa el generado.
 - El contrato no marca `required` en las respuestas. Los campos llegan tipados como opcionales salvo que el schema los exija; cuando el cliente requiere un campo de una respuesta, lo declara con un alias local (`ContractField` en `src/modules/finance/shared/types/entities/accounts.ts`). La web no agrega `required` al contrato: eso se corrige en el back.
+- Cuando el contrato todavía no describe un campo que el back ya acepta, el cliente lo declara en un alias local del tipo generado. Es el caso de `relevance` y `notes` en las verificaciones y de `templateFingerprint` como texto en la verificación por grupo.
 - Los montos son texto decimal (`string`); `null` significa "sin datos". Ver [ADR-002](../decisions/ADR-002-money-strings.md).
 
 ## Cobertura del contrato
 
-En la copia actual del contrato (161 rutas y 244 schemas) 203 de las 209 respuestas 2xx traen schema. Las señales de correo de AI-7 se leen con los tipos generados (`components["schemas"]["AiSignalResponseDto"]`); el resto de Inteligencia sigue con tipos a mano que ahora duplican un schema generado, y su migración vive en #384. Las respuestas que el contrato todavía no describe siguen a mano hasta que el back publique los schemas ([personal-os-back#263](https://github.com/jarvinc3/personal-os-back/issues/263)).
+En la copia actual del contrato (161 rutas y 244 schemas) 203 de las 209 respuestas 2xx traen schema. Las señales de correo de AI-7 se leen con los tipos generados (`components["schemas"]["AiSignalResponseDto"]`) y el resto de Inteligencia ya usa un alias de `components["schemas"]` para cada tipo del módulo. Las respuestas que el contrato todavía no describe siguen a mano hasta que el back publique los schemas ([personal-os-back#263](https://github.com/jarvinc3/personal-os-back/issues/263)).
 
 ## Pruebas
 

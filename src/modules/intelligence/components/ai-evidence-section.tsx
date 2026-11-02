@@ -312,7 +312,7 @@ export function AiEvidenceSection({
                         {metricLabel(key)}
                       </dt>
                       <dd>
-                        {value === null
+                        {value == null
                           ? "—"
                           : `${value > 0 ? "+" : ""}${(value * 100).toFixed(1)} pp`}
                       </dd>
