@@ -24,6 +24,7 @@ import {
   signalTypeLabel,
   type MissingSignalKind,
 } from "@/src/modules/intelligence/signals"
+import type { EmailSignal } from "@/src/modules/intelligence/types/signal.types"
 import {
   SummaryGroup,
   SummaryItem,
@@ -50,94 +51,25 @@ const MISSING_SIGNAL_ICONS: Record<MissingSignalKind, typeof Radar> = {
   none: Radar,
 }
 
+type EmailSignalMessage = {
+  id: string
+  subject: string
+  fromAddress: string
+  receivedAt: string
+  processingStatus: string
+}
+
 type EmailSignalSectionProps = {
-  message: {
-    id: string
-    subject: string
-    fromAddress: string
-    receivedAt: string
-    processingStatus: string
-  }
+  message: EmailSignalMessage
 }
 
 export function EmailSignalSection({ message }: EmailSignalSectionProps) {
-  const signalQuery = useEmailSignal(message.id)
-
-  if (signalQuery.isPending) {
-    return (
-      <SummarySection
-        title={SECTION_TITLE}
-        subtitle={SECTION_SUBTITLE}
-        icon={Radar}
-      >
-        <div
-          className="flex flex-col gap-2 p-2"
-          aria-label="Cargando la señal del correo"
-        >
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-10 w-full" />
-        </div>
-      </SummarySection>
-    )
-  }
-
-  if (signalQuery.isError) {
-    return (
-      <SummarySection
-        title={SECTION_TITLE}
-        subtitle={SECTION_SUBTITLE}
-        icon={Radar}
-      >
-        <Empty size="sm">
-          <EmptyHeader>
-            <EmptyMedia variant="icon">
-              <AlertCircle aria-hidden="true" />
-            </EmptyMedia>
-            <EmptyTitle>No se pudo cargar la señal</EmptyTitle>
-            <EmptyDescription>
-              El correo sigue disponible; reintenta la lectura.
-            </EmptyDescription>
-          </EmptyHeader>
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            onClick={() => void signalQuery.refetch()}
-          >
-            <RotateCcw aria-hidden="true" /> Reintentar
-          </Button>
-        </Empty>
-      </SummarySection>
-    )
-  }
-
-  const signal = signalQuery.data
-
-  if (!signal) {
-    const missing = missingSignalState(message.processingStatus)
-    const MissingIcon = MISSING_SIGNAL_ICONS[missing.kind]
-
-    return (
-      <SummarySection
-        title={SECTION_TITLE}
-        subtitle={SECTION_SUBTITLE}
-        icon={Radar}
-      >
-        <Empty size="sm">
-          <EmptyHeader>
-            <EmptyMedia variant="icon">
-              <MissingIcon aria-hidden="true" />
-            </EmptyMedia>
-            <EmptyTitle>{missing.title}</EmptyTitle>
-            <EmptyDescription>{missing.description}</EmptyDescription>
-          </EmptyHeader>
-        </Empty>
-      </SummarySection>
-    )
-  }
-
-  const routes = signalRouteRows(signal)
-  const hasEvidence = signal.evidence.length > 0
+  const {
+    data: signal,
+    isPending,
+    isError,
+    refetch,
+  } = useEmailSignal(message.id)
 
   return (
     <SummarySection
@@ -145,6 +77,79 @@ export function EmailSignalSection({ message }: EmailSignalSectionProps) {
       subtitle={SECTION_SUBTITLE}
       icon={Radar}
     >
+      {isPending ? (
+        <SignalSkeleton />
+      ) : isError ? (
+        <SignalLoadError onRetry={() => void refetch()} />
+      ) : signal ? (
+        <SignalDetail message={message} signal={signal} />
+      ) : (
+        <SignalMissing processingStatus={message.processingStatus} />
+      )}
+    </SummarySection>
+  )
+}
+
+function SignalSkeleton() {
+  return (
+    <div
+      className="flex flex-col gap-2 p-2"
+      aria-label="Cargando la señal del correo"
+    >
+      <Skeleton className="h-10 w-full" />
+      <Skeleton className="h-10 w-full" />
+    </div>
+  )
+}
+
+function SignalLoadError({ onRetry }: { onRetry: () => void }) {
+  return (
+    <Empty size="sm">
+      <EmptyHeader>
+        <EmptyMedia variant="icon">
+          <AlertCircle aria-hidden="true" />
+        </EmptyMedia>
+        <EmptyTitle>No se pudo cargar la señal</EmptyTitle>
+        <EmptyDescription>
+          El correo sigue disponible; reintenta la lectura.
+        </EmptyDescription>
+      </EmptyHeader>
+      <Button type="button" size="sm" variant="outline" onClick={onRetry}>
+        <RotateCcw aria-hidden="true" /> Reintentar
+      </Button>
+    </Empty>
+  )
+}
+
+function SignalMissing({ processingStatus }: { processingStatus: string }) {
+  const missingSignal = missingSignalState(processingStatus)
+  const MissingIcon = MISSING_SIGNAL_ICONS[missingSignal.kind]
+
+  return (
+    <Empty size="sm">
+      <EmptyHeader>
+        <EmptyMedia variant="icon">
+          <MissingIcon aria-hidden="true" />
+        </EmptyMedia>
+        <EmptyTitle>{missingSignal.title}</EmptyTitle>
+        <EmptyDescription>{missingSignal.description}</EmptyDescription>
+      </EmptyHeader>
+    </Empty>
+  )
+}
+
+function SignalDetail({
+  message,
+  signal,
+}: {
+  message: EmailSignalMessage
+  signal: EmailSignal
+}) {
+  const routes = signalRouteRows(signal)
+  const hasEvidence = signal.evidence.length > 0
+
+  return (
+    <>
       <SummaryItem
         title={signalTypeLabel(signal.type)}
         description={`Detectada ${formatDateTime(signal.detectedAt)} · ${formatSignalConfidence(signal.confidence)}`}
@@ -152,11 +157,11 @@ export function EmailSignalSection({ message }: EmailSignalSectionProps) {
         icon={ShieldCheck}
         isLast={!routes.length && !hasEvidence}
       />
-      {routes.map((row, index) => (
+      {routes.map((route, index) => (
         <SummaryItem
-          key={row.route}
-          title={row.title}
-          description={row.description}
+          key={route.route}
+          title={route.title}
+          description={route.description}
           icon={RouteIcon}
           isLast={index === routes.length - 1 && !hasEvidence}
         />
@@ -192,6 +197,6 @@ export function EmailSignalSection({ message }: EmailSignalSectionProps) {
           ))}
         </SummaryGroup>
       ) : null}
-    </SummarySection>
+    </>
   )
 }
