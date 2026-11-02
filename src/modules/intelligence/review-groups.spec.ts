@@ -6,6 +6,7 @@ import {
   canCorrectReviewGroup,
   countLabel,
   pendingOutsideHoldout,
+  resolveReviewGroupsSectionState,
   REVIEW_GROUP_SEMANTIC_TYPES,
   reviewGroupBatchResultLines,
   reviewGroupBatchSchema,
@@ -246,6 +247,41 @@ describe("grupos de revisión", () => {
         { subject: "Revisión de seguridad de <n>", messageId: null },
         { subject: "Nueva actividad", messageId: null },
       ]
+    )
+  })
+
+  it("muestra el estado sin Gmail aunque la consulta siga pendiente", () => {
+    assert.equal(
+      resolveReviewGroupsSectionState({
+        enabled: false,
+        isPending: true,
+        isError: true,
+        groupCount: 0,
+      }),
+      "disconnected"
+    )
+  })
+
+  it("elige carga, error, vacío y lista en ese orden", () => {
+    const readyInput = {
+      enabled: true,
+      isPending: false,
+      isError: false,
+      groupCount: 0,
+    }
+
+    assert.equal(
+      resolveReviewGroupsSectionState({ ...readyInput, isPending: true }),
+      "loading"
+    )
+    assert.equal(
+      resolveReviewGroupsSectionState({ ...readyInput, isError: true }),
+      "error"
+    )
+    assert.equal(resolveReviewGroupsSectionState(readyInput), "empty")
+    assert.equal(
+      resolveReviewGroupsSectionState({ ...readyInput, groupCount: 2 }),
+      "ready"
     )
   })
 })

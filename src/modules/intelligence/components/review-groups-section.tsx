@@ -7,6 +7,7 @@ import { useReviewGroups } from "@/src/modules/intelligence/hooks/use-review-gro
 import {
   canBatchReviewGroup,
   countLabel,
+  resolveReviewGroupsSectionState,
   reviewGroupBatchResultLines,
   reviewGroupKey,
   reviewGroupSamples,
@@ -68,6 +69,12 @@ export function ReviewGroupsSection({
   const { fetchNextPage, hasNextPage, isFetchingNextPage } = groupsQuery
   const selectedGroup =
     groups.find((group) => reviewGroupKey(group) === sheetId) ?? null
+  const sectionState = resolveReviewGroupsSectionState({
+    enabled,
+    isPending: groupsQuery.isPending,
+    isError: groupsQuery.isError,
+    groupCount: groups.length,
+  })
   const sheetVerification =
     appliedBatch !== null && appliedBatch.groupKey === sheetId
       ? appliedBatch.verification
@@ -125,7 +132,7 @@ export function ReviewGroupsSection({
     }
   }
 
-  if (!enabled) {
+  if (sectionState === "disconnected") {
     return (
       <Empty>
         <EmptyHeader>
@@ -144,7 +151,7 @@ export function ReviewGroupsSection({
 
   return (
     <div className="flex flex-col gap-2">
-      {groupsQuery.isPending ? (
+      {sectionState === "loading" ? (
         <div className="flex flex-col gap-2 p-2" aria-label="Cargando grupos">
           <span className="text-xs text-muted-foreground">
             Cargando grupos…
@@ -153,7 +160,7 @@ export function ReviewGroupsSection({
           <Skeleton className="h-20 w-full" />
           <Skeleton className="h-20 w-full" />
         </div>
-      ) : groupsQuery.isError ? (
+      ) : sectionState === "error" ? (
         <Empty>
           <EmptyHeader>
             <EmptyMedia variant="icon">
@@ -168,7 +175,7 @@ export function ReviewGroupsSection({
             <RotateCcw data-icon="inline-start" /> Reintentar
           </Button>
         </Empty>
-      ) : groups.length === 0 ? (
+      ) : sectionState === "empty" ? (
         <Empty>
           <EmptyHeader>
             <EmptyMedia variant="icon">
