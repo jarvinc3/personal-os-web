@@ -1,6 +1,8 @@
 # AI (web)
 
-Código: `src/modules/ai/`.
+> **Histórico.** La web no tiene módulo de IA ni ruta `/chat` desde AI-0. Estos documentos describen el chat retirado y se conservan como referencia para AI-9; los contratos del back siguen vigentes.
+
+Estos documentos no describen código vigente: no existe `src/modules/ai/`. El rediseño del chat llega con AI-9.
 
 | Documento                                                                    | Contenido                      |
 | ---------------------------------------------------------------------------- | ------------------------------ |

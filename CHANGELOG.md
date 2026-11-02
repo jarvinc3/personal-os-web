@@ -26,6 +26,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Cambiado
 
+- La documentación de AI y de Inicio describe la web sin chat: el chat queda marcado como histórico hasta AI-9, `/chat` desaparece de las rutas y de la tabla de módulos, y el inicio deja de anunciar un atajo que no existe (#362).
 - Los tipos de request y de respuesta del cliente se generan desde el contrato OpenAPI del back: `pnpm api:contract` refresca la copia versionada, `pnpm api:generate` escribe `src/config/api-contract/api-schema.ts` y `pnpm typecheck` falla si el contrato no está disponible. Conocimiento y los montos del balance patrimonial ya salen del contrato; las respuestas que el back todavía no describe siguen a mano (personal-os-back#263) (#155).
 - La tabla «entidad → card → variantes» ya refleja el patrimonio con las cards compactas de cada producto y aclara que la web no tiene chat desde AI-0: el bloque del chat queda como referencia de la galería hasta su rediseño (AI-9) (#271).
 - La galería de componentes usa una lista de categorías con icono, descripción y conteo de fichas, con buscador por nombre de componente, y cada categoría abre su vista por ruta (`/settings/appearance/components/<categoría>`) con botón atrás; el deslizador horizontal desaparece (#341).

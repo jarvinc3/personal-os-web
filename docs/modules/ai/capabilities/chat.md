@@ -1,5 +1,7 @@
 # Capacidad: chat y streaming
 
+> **Histórico.** El chat y su streaming se retiraron de la web en AI-0; se conservan como referencia para AI-9.
+
 ## Envío
 
 1. `clientMessageId` = UUID (idempotencia backend); el hook genera uno si el caller no lo pasa.

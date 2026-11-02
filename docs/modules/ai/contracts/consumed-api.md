@@ -1,5 +1,7 @@
 # AI — contrato (consumo)
 
+> **Histórico.** Lo consumía el chat retirado en AI-0; los contratos del back siguen vigentes y se conservan como referencia para AI-9.
+
 Dueño: `personal-os-back/docs/modules/ai-agent/contracts/http.md`.
 
 | Cliente                                                | Backend                                                 |

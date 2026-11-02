@@ -1,5 +1,7 @@
 # Capacidad: contexto de módulo y acciones
 
+> **Histórico.** El chat y su selector de módulo se retiraron de la web en AI-0; se conservan como referencia para AI-9.
+
 ## Selector
 
 `CHAT_MODULE_OPTIONS`: `general`, `agenda`, `projects`, `health`, `finance`. `POST /ai/sessions` omite `moduleSlug` si es `general`; `contextType` sí se envía (`general` u otro slug). Query `?module=finance` preselecciona.

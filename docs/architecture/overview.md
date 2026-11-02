@@ -12,7 +12,7 @@ Browser  →  proxy.ts (sesión Supabase)
 ## Principios vigentes (producto)
 
 - Multi-usuario: el API exige JWT; el cliente hidrata `GET /users/me`.
-- IA integrada: chat en `/chat` con tools del backend.
+- IA del back disponible para pantallas concretas; la web no tiene chat desde AI-0 y su rediseño llega con AI-9.
 - Módulos desacoplados en `src/modules/` con chrome compartido ([module-conventions.md](./module-conventions.md)).
 - Automatización (Gmail) se opera desde Finance UI; las reglas viven en el backend.
 
@@ -55,7 +55,7 @@ Papeles de archivo (ruta, screen, cuerpo, UI, regla), nombres, gate/header y cap
 
 `/` redirige a `/home` con sesión y a `/login` sin ella. La landing (Astro) vive en el repo `personal-os-landing`; aquí solo quedan redirecciones permanentes a sus rutas públicas. Las reglas de redirección están en `src/shared/lib/proxy-routes.ts` y las aplica `proxy.ts`.
 
-Rutas protegidas (`isProtectedAppPath`): home, settings, chat, notifications, keep-awake, finance (y subpaths).
+Rutas protegidas (`isProtectedAppPath`): home, settings, notifications, keep-awake, agenda, projects, health, intelligence, finance y help (y subpaths).
 
 ## Providers (árbol)
 
@@ -73,12 +73,12 @@ Detalle de sesión: [../infrastructure/auth-session.md](../infrastructure/auth-s
 
 ## Módulos (docs atómicos)
 
-| Área                                | Doc                                                             |
-| ----------------------------------- | --------------------------------------------------------------- |
-| Auth (bootstrap, guards, 401)       | [../modules/auth/](../modules/auth/README.md)                   |
-| Notifications (inbox, socket, push) | [../modules/notifications/](../modules/notifications/README.md) |
-| AI (`/chat`, stream, acciones)      | [../modules/ai/](../modules/ai/README.md)                       |
-| Settings, Home, Finance, Keep Awake | [../modules/](../modules/README.md)                             |
+| Área                                           | Doc                                                             |
+| ---------------------------------------------- | --------------------------------------------------------------- |
+| Auth (bootstrap, guards, 401)                  | [../modules/auth/](../modules/auth/README.md)                   |
+| Notifications (inbox, socket, push)            | [../modules/notifications/](../modules/notifications/README.md) |
+| AI (histórico; chat retirado, vuelve con AI-9) | [../modules/ai/](../modules/ai/README.md)                       |
+| Settings, Home, Finance, Keep Awake            | [../modules/](../modules/README.md)                             |
 
 ## Errores y observabilidad
 
