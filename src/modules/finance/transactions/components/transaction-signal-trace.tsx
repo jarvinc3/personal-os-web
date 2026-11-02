@@ -39,7 +39,10 @@ export function TransactionSignalTrace({
               description={trace.sourceEmailMessageId}
               value="Ver correo"
               icon={MailIcon}
-              href={sourceEmailDetailHref(trace.sourceEmailMessageId)}
+              href={sourceEmailDetailHref(
+                trace.sourceEmailMessageId,
+                transaction.id
+              )}
               isLast
             />
           ) : (
