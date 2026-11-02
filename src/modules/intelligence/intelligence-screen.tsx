@@ -66,7 +66,11 @@ import {
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { AiEvidenceSection } from "./components/ai-evidence-section"
 import { ReviewSection } from "./components/review-section"
-import { describeVerificationPayload } from "./review-labels"
+import {
+  describeVerificationPayload,
+  ROUTE_LABELS,
+  SEMANTIC_TYPE_LABELS,
+} from "./review-labels"
 import { describeSyncFailure, resolveDashboardSyncFailure } from "./sync-status"
 import {
   Alert,
@@ -980,6 +984,28 @@ function IntelligenceMessageDetail({
             </pre>
           </SummarySection>
           <SummarySection
+            title="Clasificación del mensaje"
+            subtitle="Propuesta para revisión; no crea movimientos en Finanzas."
+          >
+            {data.provenance.observations
+              .filter((item) => item.knowledgeType === "EMAIL_CLASSIFICATION")
+              .map((item) => (
+                <SummaryItem
+                  key={`classification-${item.sequence}`}
+                  title={`Ruta ${classificationRoute(item.payload)} · ${classificationType(item.payload)}`}
+                  description={describeClassification(item.payload)}
+                  icon={BrainCircuit}
+                />
+              ))}
+            {!data.provenance.observations.some(
+              (item) => item.knowledgeType === "EMAIL_CLASSIFICATION"
+            ) ? (
+              <p className="px-2 text-sm text-muted-foreground">
+                Este mensaje aún no tiene una clasificación.
+              </p>
+            ) : null}
+          </SummarySection>
+          <SummarySection
             title="Procedencia y verificaciones"
             subtitle="Registros append-only vinculados al correo original."
           >
@@ -1011,6 +1037,99 @@ function IntelligenceMessageDetail({
       )}
     </BottomSheet>
   )
+}
+
+function classificationPayload(payload: unknown): Record<string, unknown> {
+  if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
+    return {}
+  }
+  return payload as Record<string, unknown>
+}
+
+function classificationRoute(payload: unknown): string {
+  const value = classificationPayload(payload).route
+  if (typeof value !== "string" || value === "NONE") {
+    return "Sin dominio"
+  }
+  return value in ROUTE_LABELS
+    ? ROUTE_LABELS[value as keyof typeof ROUTE_LABELS]
+    : value
+}
+
+function classificationType(payload: unknown): string {
+  const label = classificationPayload(payload).label
+  if (!label || typeof label !== "object" || Array.isArray(label)) {
+    return "sin tipo"
+  }
+  const value = (label as Record<string, unknown>).semanticType
+  return typeof value === "string" && value in SEMANTIC_TYPE_LABELS
+    ? SEMANTIC_TYPE_LABELS[value as keyof typeof SEMANTIC_TYPE_LABELS]
+    : typeof value === "string"
+      ? value
+      : "sin tipo"
+}
+
+function describeClassification(payload: unknown): string {
+  const value = classificationPayload(payload)
+  const method =
+    value.method === "KNOWLEDGE"
+      ? "Conocimiento guardado"
+      : value.method === "DETERMINISTIC"
+        ? "Parser determinista"
+        : value.method === "MODEL"
+          ? "Modelo con validación"
+          : "Método desconocido"
+  const confidence =
+    typeof value.confidence === "number"
+      ? `confianza ${Math.round(value.confidence * 100)}%`
+      : "confianza desconocida"
+  const provider = typeof value.provider === "string" ? value.provider : null
+  const model = typeof value.model === "string" ? value.model : null
+  const label =
+    value.label &&
+    typeof value.label === "object" &&
+    !Array.isArray(value.label)
+      ? (value.label as Record<string, unknown>)
+      : null
+  const relevance =
+    typeof label?.relevance === "boolean"
+      ? label.relevance
+        ? "relevante"
+        : "no relevante"
+      : null
+  const transaction =
+    label?.transaction &&
+    typeof label.transaction === "object" &&
+    !Array.isArray(label.transaction)
+      ? Object.entries(label.transaction as Record<string, unknown>)
+          .map(([key, item]) => `${key}: ${String(item)}`)
+          .join(", ")
+      : null
+  const used = Array.isArray(value.knowledgeUsed)
+    ? value.knowledgeUsed
+        .map((item) => {
+          if (!item || typeof item !== "object") {
+            return null
+          }
+          const entry = item as Record<string, unknown>
+          return [entry.scope, entry.knowledgeType, entry.knowledgeKey]
+            .filter((part) => typeof part === "string")
+            .join(" ")
+        })
+        .filter(Boolean)
+        .join(", ")
+    : ""
+  return [
+    method,
+    confidence,
+    relevance,
+    provider,
+    model,
+    transaction,
+    used ? `conocimiento: ${used}` : "sin conocimiento aplicado",
+  ]
+    .filter(Boolean)
+    .join(" · ")
 }
 
 function MessageRepresentation({
