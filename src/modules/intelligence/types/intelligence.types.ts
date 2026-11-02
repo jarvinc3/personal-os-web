@@ -1,236 +1,80 @@
-export type AiRole = "USER" | "CONTRIBUTOR" | "ADMIN"
+import type { components } from "@/src/config/api-contract/api-schema"
 
-export type AiEmailSyncProgress = {
-  status:
-    "running" | "waiting" | "retrying" | "scheduled" | "completed" | "failed"
-  phase: "bootstrap" | "incremental" | "recovery"
-  attempt: number
-  rateLimitRetryCount?: number
-  processedThisRun: number
-  importedThisRun: number
-  batchSize?: number
-  totalEstimate?: number
-  retryAt?: number
-  nextRunAt?: number
-  errorCode?: string
-  providerErrorCode?: string
-  errorCategory?:
-    "authorization" | "configuration" | "rate_limit" | "temporary" | "unknown"
-  startedAt: string
-  updatedAt: string
+type AiSchemas = components["schemas"]
+
+/** Nombres del cliente para los tipos que publica el contrato del back. */
+export type AiRole = AiSchemas["AiRoleUserResponseDto"]["role"]
+export type AiEmailSyncProgress = AiSchemas["AiEmailSyncProgressResponseDto"]
+export type AiEmailOAuthDiagnostics = AiSchemas["AiEmailDiagnosticsResponseDto"]
+export type AiEmailMessageSummary =
+  AiSchemas["AiEmailMessageSummaryResponseDto"]
+export type AiEmailMessagesPage = AiSchemas["AiEmailMessagePageResponseDto"]
+export type AiEmailMessageDetail = AiSchemas["AiEmailMessageResponseDto"]
+export type AiDatasetSummary = AiSchemas["AiDatasetResponseDto"]
+export type AiReviewQueueItem = AiSchemas["AiReviewQueueItemResponseDto"]
+export type AiReviewStatus = AiReviewQueueItem["status"]
+export type AiReviewVerification =
+  AiSchemas["AiReviewItemVerificationResponseDto"]
+export type AiReviewGroup = AiSchemas["AiReviewGroupResponseDto"]
+export type AiReviewGroupsPage = AiSchemas["AiReviewGroupsPageResponseDto"]
+export type AiReviewQueuePage = AiSchemas["AiReviewQueueResponseDto"]
+export type AiReviewGroupVerdict =
+  AiSchemas["CreateReviewGroupVerificationDto"]["verdict"]
+export type AiReviewGroupVerificationResult =
+  AiSchemas["AiReviewGroupVerificationResultResponseDto"]
+export type AiAnalysisRunSummary = AiSchemas["AiAnalysisRunResponseDto"]
+export type AiConsent = AiSchemas["AiConsentResponseDto"]
+export type AiRoleRow = AiSchemas["AiRoleUserResponseDto"]
+
+type ContractField<Value> = Exclude<Value, undefined>
+
+type AiEmailConnection = AiSchemas["AiEmailConnectionResponseDto"]
+
+/**
+ * El contrato solo exige `connected`; la pantalla lee estos campos cuando la
+ * cuenta está conectada. El alias local los declara sin agregarlos al contrato.
+ */
+type ConnectedEmailConnection = AiEmailConnection & {
+  connected: true
+  emailAddress: ContractField<AiEmailConnection["emailAddress"]>
+  initialSyncCompletedAt: ContractField<
+    AiEmailConnection["initialSyncCompletedAt"]
+  >
+  lastRecoverySyncAt: ContractField<AiEmailConnection["lastRecoverySyncAt"]>
+  lastSyncedAt: ContractField<AiEmailConnection["lastSyncedAt"]>
+  lastSyncErrorCode: ContractField<AiEmailConnection["lastSyncErrorCode"]>
+  requiresReconnect: ContractField<AiEmailConnection["requiresReconnect"]>
+  syncInProgress: ContractField<AiEmailConnection["syncInProgress"]>
+  syncProgress: ContractField<AiEmailConnection["syncProgress"]>
 }
 
-export type IntelligenceDashboard = {
-  connection:
-    | {
-        connected: true
-        emailAddress: string
-        initialSyncCompletedAt: string | null
-        syncInProgress: boolean
-        syncProgress: AiEmailSyncProgress | null
-        lastSyncedAt: string | null
-        lastRecoverySyncAt: string | null
-        lastSyncErrorCode: string | null
-        requiresReconnect: boolean
-      }
-    | { connected: false }
-  counters: {
-    importedMessages: number
-    recentMessages: number
-    bootstrapImportedMessages: number
+type DisconnectedEmailConnection = AiEmailConnection & { connected: false }
+
+export type IntelligenceDashboard = Omit<
+  AiSchemas["AiEmailDashboardResponseDto"],
+  "connection"
+> & {
+  connection: ConnectedEmailConnection | DisconnectedEmailConnection
+}
+
+/**
+ * El back acepta `relevance` y `notes`, pero el contrato todavía no los
+ * describe; el cliente los declara aquí. Hueco del contrato, no de la web.
+ */
+export type AiHumanVerificationInput =
+  AiSchemas["CreateHumanVerificationDto"] & {
+    relevance?: boolean
+    notes?: string
   }
-  receivedRange?: {
-    firstMessageAt: string | null
-    latestMessageAt: string | null
-  }
-  role: AiRole
-}
 
-export type AiEmailOAuthDiagnostics = {
-  configured: boolean
-  provider: "GMAIL"
-  scopes: string[]
-  status: "ready" | "missing_oauth_configuration"
-}
-
-export type AiEmailMessageSummary = {
-  id: string
-  receivedAt: string
-  fromAddress: string
-  fromDomain: string
-  subject: string
-  processingStatus: string
-  contentFingerprint: string
-}
-
-export type AiEmailMessagesPage = {
-  items: AiEmailMessageSummary[]
-  nextCursor: string | null
-  hasMore: boolean
-}
-
-export type AiEmailMessageDetail = AiEmailMessageSummary & {
-  userId: string
-  connectionId: string
-  providerMessageId: string
-  providerThreadId: string | null
-  content: {
-    rawBody: string | null
-    sanitizedBody: string | null
-    canonicalBody: string | null
-    snippet: string | null
-    retentionExpiresAt: string | null
-  } | null
-  provenance: {
-    observations: Array<{
-      sequence: string
-      runId: string | null
-      knowledgeType: string
-      knowledgeKey: string
-      proposedScope: string
-      payload: unknown
-      createdAt: string
-    }>
-    verifications: Array<{
-      sequence: string
-      verifierRole: AiRole
-      verdict: "CONFIRMED" | "CORRECTED" | "REJECTED"
-      correctedPayload: unknown
-      notes: string | null
-      isGroundTruth: boolean
-      createdAt: string
-    }>
-  }
-}
-
-export type AiDatasetSummary = {
-  id: string
-  name: "EMAIL_V1"
-  partitions: { TRAIN: number; VALIDATION: number; HOLDOUT: number }
-}
-
-export type AiReviewQueueItem = AiEmailMessageSummary & {
-  partition: "TRAIN" | "VALIDATION" | "HOLDOUT"
-  /** Estado de la última verificación; sin verificación es `PENDING`. */
-  status: AiReviewStatus
-  /** Última verificación del correo, o `null` si sigue pendiente. */
-  verification: AiReviewVerification | null
-}
-
-export type AiReviewStatus = "PENDING" | "CONFIRMED" | "CORRECTED" | "REJECTED"
-
-export type AiReviewVerification = {
-  verdict: Exclude<AiReviewStatus, "PENDING">
-  /** Etiquetas corregidas tal como las guardó el back (`correctedPayload`). */
-  labels: unknown
-  notes: string | null
-  createdAt: string
-}
-
-export type AiReviewGroup = {
-  fromAddress: string
-  templateFingerprint: string | null
-  total: number
-  pending: number
-  pendingHoldout: number
-  sampleSubjects: string[]
-  /** Opcional mientras el back que sirve la preview no publique los ids. */
-  sampleMessageIds?: string[]
-}
-
-export type AiReviewGroupsPage = {
-  items: AiReviewGroup[]
-  page: number
-  pageSize: number
-  totalGroups: number
-  hasMore: boolean
-}
-
-export type AiReviewQueuePage = {
-  items: AiReviewQueueItem[]
-  counts: {
-    all: number
-    TRAIN: number
-    VALIDATION: number
-    HOLDOUT: number
-  }
-  nextCursor: string | null
-  hasMore: boolean
-}
-
-import type {
-  SemanticRoute,
-  SemanticType,
-  TransactionDirection,
-  TransactionKind,
-} from "@/src/modules/intelligence/review-labels"
-
-export type AiHumanVerificationInput = {
-  verdict: "CONFIRMED" | "CORRECTED" | "REJECTED"
-  relevance?: boolean
-  semanticType?: SemanticType
-  routes?: SemanticRoute[]
-  transaction?: {
-    kind?: TransactionKind
-    amount?: number
-    currency?: string
-    transactionDate?: string
-    direction?: TransactionDirection
-    merchant?: string
-    bankReference?: string
-    last4?: string
-  }
-  notes?: string
-}
-
-export type AiReviewGroupVerdict = "CONFIRMED" | "CORRECTED"
-
-/** El lote identifica el grupo por remitente y huella, sin transacción ni nota. */
-export type AiReviewGroupVerificationInput = {
-  verdict: AiReviewGroupVerdict
-  fromAddress: string
+/**
+ * El contrato publica `templateFingerprint` como objeto y no describe
+ * `relevance`; el back los recibe como string nullable y booleano.
+ */
+export type AiReviewGroupVerificationInput = Omit<
+  AiSchemas["CreateReviewGroupVerificationDto"],
+  "templateFingerprint"
+> & {
   templateFingerprint: string | null
   relevance?: boolean
-  semanticType?: SemanticType
-  routes?: SemanticRoute[]
-}
-
-export type AiReviewGroupVerificationResult = {
-  verified: number
-  holdoutExcluded: number
-  alreadyVerified: number
-}
-
-export type AiAnalysisRunSummary = {
-  id: string
-  datasetId: string
-  mode: "ANALYZE_ONLY" | "EVALUATE" | "IMPORT"
-  status: "RUNNING" | "COMPLETED" | "FAILED"
-  observationSequence: string
-  verificationSequence: string
-  projectorVersion: string
-  policyVersion: string
-  pipelineVersion: string
-  detectorVersion: string | null
-  promptVersion: string | null
-  schemaVersion: string | null
-  configuration: unknown
-  metrics: unknown
-  startedAt: string
-  completedAt: string | null
-  error: string | null
-}
-
-export type AiConsent = {
-  contributeToGlobalKnowledge: boolean
-  contributionConsentAt: string
-}
-
-export type AiRoleRow = {
-  id: string
-  email: string
-  fullName: string
-  role: AiRole
-  grantedAt: string | null
-  updatedAt: string | null
 }

@@ -28,6 +28,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Cambiado
 
+- Los tipos de Inteligencia se leen desde el contrato OpenAPI del back: cada tipo del módulo pasa a un alias de `components["schemas"]` y solo quedan locales los campos que el contrato todavía no describe (`relevance`, `notes` y `templateFingerprint`). Un cambio del back ahora rompe el typecheck en lugar de la pantalla, sin cambios visibles en las pantallas (#384).
 - El contrato OpenAPI versionado pasa a la copia de `develop` del back: 161 rutas y 244 schemas, con 203 de las 209 respuestas 2xx descritas. La señal del correo ya se lee con tipos generados; el resto de los tipos a mano de Inteligencia se migra en #384 (#383).
 - La documentación de AI y de Inicio describe la web sin chat: el chat queda marcado como histórico hasta AI-9, `/chat` desaparece de las rutas y de la tabla de módulos, y el inicio deja de anunciar un atajo que no existe (#362).
 - Los tipos de request y de respuesta del cliente se generan desde el contrato OpenAPI del back: `pnpm api:contract` refresca la copia versionada, `pnpm api:generate` escribe `src/config/api-contract/api-schema.ts` y `pnpm typecheck` falla si el contrato no está disponible. Conocimiento y los montos del balance patrimonial ya salen del contrato; las respuestas que el back todavía no describe siguen a mano (personal-os-back#263) (#155).
