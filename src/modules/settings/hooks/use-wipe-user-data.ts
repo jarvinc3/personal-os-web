@@ -3,7 +3,7 @@
 import { ApiError, apiPost } from "@/src/config/api-client"
 import { getSupabaseBrowserClient } from "@/src/config/supabase/client"
 import { clearPrefs } from "@/src/modules/keep-awake"
-import { AuthServiceError } from "@/src/modules/auth"
+import { AuthServiceError, translateAuthError } from "@/src/modules/auth"
 import { DATA_BRANCHES_QUERY_KEY } from "@/src/modules/settings/hooks/use-data-branches"
 import {
   SETTINGS_DEFAULTS_BRANCH,
@@ -46,7 +46,10 @@ export async function reauthenticateWithPassword(
 
   if (reauthError) {
     throw new AuthServiceError(
-      reauthError.message || "La contraseña no es correcta.",
+      translateAuthError(
+        { code: reauthError.code },
+        "La contraseña no es correcta."
+      ),
       reauthError.code,
       reauthError
     )
