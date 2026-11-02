@@ -67,10 +67,15 @@ export function resolveSyncFailure({
   }
 }
 
-export function describeSyncFailure(
-  failure: SyncFailure,
+export function describeSyncFailure({
+  failure,
+  attemptedAt,
+  requiresReconnect = false,
+}: {
+  failure: SyncFailure
   attemptedAt: string | null
-): SyncFailureCopy {
+  requiresReconnect?: boolean
+}): SyncFailureCopy {
   const at = attemptedAt ? ` el ${attemptedAt}` : ""
   if (failure.code === "worker_interrupted") {
     return {
@@ -81,12 +86,20 @@ export function describeSyncFailure(
   }
 
   switch (failure.category) {
-    case "authorization":
-      return {
-        title: "Gmail rechazó la autorización",
-        description: `Google rechazó el acceso${at} con el código ${failure.code}. Usa Reconectar Gmail para renovar la autorización.`,
-        offerReconnect: true,
-      }
+    case "authorization": {
+      const rejection = `Google rechazó el acceso${at} con el código ${failure.code}.`
+      return requiresReconnect
+        ? {
+            title: "Reconecta Gmail",
+            description: `${rejection} La sincronización automática está detenida hasta que reconectes Gmail.`,
+            offerReconnect: true,
+          }
+        : {
+            title: "Gmail rechazó la autorización",
+            description: `${rejection} Usa Reconectar Gmail para renovar la autorización.`,
+            offerReconnect: true,
+          }
+    }
     case "configuration":
       return {
         title: "Falta configuración OAuth",

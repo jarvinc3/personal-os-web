@@ -27,6 +27,7 @@ const connectedState = (
   lastSyncedAt: "2026-10-30T12:00:00.000Z",
   lastRecoverySyncAt: null,
   lastSyncErrorCode: null,
+  requiresReconnect: false,
   ...overrides,
 })
 
@@ -99,18 +100,35 @@ describe("estado de sincronización de Gmail", () => {
   })
 
   it("ofrece reconectar solo cuando Google rechazó la autorización", () => {
-    const copy = describeSyncFailure(
-      {
+    const copy = describeSyncFailure({
+      failure: {
         code: "invalid_grant",
         category: "authorization",
         occurredAt: "2026-10-30T12:05:00.000Z",
       },
-      "30 oct 2026, 12:05"
-    )
+      attemptedAt: "30 oct 2026, 12:05",
+    })
 
+    assert.equal(copy.title, "Gmail rechazó la autorización")
     assert.equal(copy.offerReconnect, true)
     assert.match(copy.description, /invalid_grant/)
     assert.match(copy.description, /30 oct 2026, 12:05/)
+  })
+
+  it("pide reconectar cuando la conexión lo requiere", () => {
+    const copy = describeSyncFailure({
+      failure: {
+        code: "invalid_grant",
+        category: "authorization",
+        occurredAt: "2026-10-30T12:05:00.000Z",
+      },
+      attemptedAt: "30 oct 2026, 12:05",
+      requiresReconnect: true,
+    })
+
+    assert.equal(copy.title, "Reconecta Gmail")
+    assert.equal(copy.offerReconnect, true)
+    assert.match(copy.description, /sincronización automática está detenida/)
   })
 
   it("no presenta reconectar como remedio para configuración o límite", () => {
@@ -126,7 +144,7 @@ describe("estado de sincronización de Gmail", () => {
         occurredAt: null,
       },
     ] satisfies SyncFailure[]) {
-      const copy = describeSyncFailure(failure, null)
+      const copy = describeSyncFailure({ failure, attemptedAt: null })
 
       assert.equal(copy.offerReconnect, false)
       assert.match(copy.description, new RegExp(failure.code))
@@ -134,14 +152,14 @@ describe("estado de sincronización de Gmail", () => {
   })
 
   it("distingue un reinicio del API de un fallo de Gmail", () => {
-    const copy = describeSyncFailure(
-      {
+    const copy = describeSyncFailure({
+      failure: {
         code: "worker_interrupted",
         category: "temporary",
         occurredAt: "2026-10-30T12:05:00.000Z",
       },
-      "30 oct 2026, 12:05"
-    )
+      attemptedAt: "30 oct 2026, 12:05",
+    })
 
     assert.equal(copy.title, "La sincronización se interrumpió")
     assert.equal(copy.offerReconnect, false)
@@ -149,14 +167,14 @@ describe("estado de sincronización de Gmail", () => {
   })
 
   it("muestra el código y la hora cuando la causa es desconocida", () => {
-    const copy = describeSyncFailure(
-      {
+    const copy = describeSyncFailure({
+      failure: {
         code: "mystery_failure",
         category: "unknown",
         occurredAt: "2026-10-30T12:05:00.000Z",
       },
-      "30 oct 2026, 12:05"
-    )
+      attemptedAt: "30 oct 2026, 12:05",
+    })
 
     assert.equal(copy.offerReconnect, false)
     assert.match(copy.description, /mystery_failure/)

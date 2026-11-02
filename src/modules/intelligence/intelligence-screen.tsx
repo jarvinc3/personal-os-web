@@ -207,6 +207,7 @@ function IntelligenceScreenBody() {
   const connected = dashboard.connection.connected
   const receivedRange = dashboard.receivedRange
   const connection = dashboard.connection
+  const requiresReconnect = connection.connected && connection.requiresReconnect
   const syncProgress = connection.connected ? connection.syncProgress : null
   const oauthIncomplete =
     connection.connected && oauthDiagnosticsQuery.data?.configured === false
@@ -215,7 +216,7 @@ function IntelligenceScreenBody() {
     progress: syncProgress,
   })
   const syncFailed = Boolean(syncFailure)
-  const syncWarning = syncFailed || oauthIncomplete
+  const syncWarning = syncFailed || oauthIncomplete || requiresReconnect
   const syncWaiting =
     !oauthIncomplete &&
     (syncProgress?.status === "waiting" || syncProgress?.status === "retrying")
@@ -230,7 +231,11 @@ function IntelligenceScreenBody() {
     ? formatDateTime(syncFailure.occurredAt)
     : null
   const failureCopy = syncFailure
-    ? describeSyncFailure(syncFailure, attemptedAt)
+    ? describeSyncFailure({
+        failure: syncFailure,
+        attemptedAt,
+        requiresReconnect,
+      })
     : null
 
   return (
@@ -241,6 +246,7 @@ function IntelligenceScreenBody() {
           connected
             ? connectionSubtitle({
                 emailAddress: dashboard.connection.emailAddress,
+                requiresReconnect,
                 oauthIncomplete,
                 syncFailed,
                 syncWaiting,
@@ -287,9 +293,11 @@ function IntelligenceScreenBody() {
                 aria-label={
                   oauthIncomplete
                     ? "Gmail conectado con configuración OAuth incompleta"
-                    : syncFailed
-                      ? "Gmail conectado con la última sincronización fallida"
-                      : "Gmail conectado"
+                    : requiresReconnect
+                      ? "Gmail conectado y requiere reconexión"
+                      : syncFailed
+                        ? "Gmail conectado con la última sincronización fallida"
+                        : "Gmail conectado"
                 }
               >
                 {syncWarning ? (
@@ -340,17 +348,19 @@ function IntelligenceScreenBody() {
               description={
                 oauthIncomplete
                   ? "No puede correr: falta configuración OAuth"
-                  : syncFailed
-                    ? "Falló"
-                    : syncWaiting
-                      ? "Esperando reintento de Gmail"
-                      : syncProgress?.status === "running"
-                        ? "En curso"
-                        : syncProgress?.status === "scheduled"
-                          ? "Correcta; siguiente lote programado"
-                          : dashboard.connection.lastSyncedAt
-                            ? "Correcta"
-                            : "Sin intentos"
+                  : requiresReconnect
+                    ? "Detenida: reconecta Gmail"
+                    : syncFailed
+                      ? "Falló"
+                      : syncWaiting
+                        ? "Esperando reintento de Gmail"
+                        : syncProgress?.status === "running"
+                          ? "En curso"
+                          : syncProgress?.status === "scheduled"
+                            ? "Correcta; siguiente lote programado"
+                            : dashboard.connection.lastSyncedAt
+                              ? "Correcta"
+                              : "Sin intentos"
               }
               icon={RefreshCw}
               value={
@@ -851,12 +861,14 @@ function formatRetryCountdown(retryAt: number, now: number | null) {
 
 function connectionSubtitle({
   emailAddress,
+  requiresReconnect,
   oauthIncomplete,
   syncFailed,
   syncWaiting,
   syncing,
 }: {
   emailAddress: string
+  requiresReconnect: boolean
   oauthIncomplete: boolean
   syncFailed: boolean
   syncWaiting: boolean
@@ -864,6 +876,9 @@ function connectionSubtitle({
 }) {
   if (oauthIncomplete) {
     return `${emailAddress} · Configuración OAuth incompleta`
+  }
+  if (requiresReconnect) {
+    return `${emailAddress} · Reconecta Gmail`
   }
   if (syncFailed) {
     return `${emailAddress} · Última sincronización fallida`
