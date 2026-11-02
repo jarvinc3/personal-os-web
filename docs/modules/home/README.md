@@ -1,6 +1,6 @@
 # Home
 
-Página de inicio post-login: saludo con nombre de perfil y atajos a notificaciones, chat, ajustes, finanzas y Keep Awake. No es `ModuleAppNav`; no tiene tab bar.
+Página de inicio post-login: saludo con nombre de perfil, atajos a notificaciones y ajustes, y las secciones de Finanzas, entrada rápida y Keep Awake. No es `ModuleAppNav`; no tiene tab bar.
 
 ## Alcance
 
@@ -21,7 +21,7 @@ Página de inicio post-login: saludo con nombre de perfil y atajos a notificacio
 
 1. Guard de auth; loading → `LoadingView`.
 2. Título de header = nombre.
-3. Cards: Notificaciones, Agente IA, Configuración, Finanzas, Keep Awake.
+3. Atajos: Notificaciones y Configuración; debajo, resumen mensual y semanal de Finanzas, entrada rápida y Keep Awake.
 
 | ID           | Condición                 | Resultado                                                                                 | Evidencia                                         |
 | ------------ | ------------------------- | ----------------------------------------------------------------------------------------- | ------------------------------------------------- |
@@ -30,7 +30,7 @@ Página de inicio post-login: saludo con nombre de perfil y atajos a notificacio
 
 ## Criterios
 
-- `AC-HOM-001` — Given sesión, When `/home`, Then atajos a notifications, chat, settings, finance, keep-awake. Runtime 2026-09-15: verificado.
+- `AC-HOM-001` — Given sesión, When `/home`, Then atajos a notificaciones y ajustes, resumen de Finanzas, entrada rápida y Keep Awake. Runtime 2026-09-15: verificado.
 
 ## Evidencia
 

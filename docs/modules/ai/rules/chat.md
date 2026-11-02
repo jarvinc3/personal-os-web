@@ -1,5 +1,7 @@
 # AI — reglas de cliente
 
+> **Histórico.** Reglas del chat retirado en AI-0; se conservan como referencia para AI-9.
+
 | ID          | Condición                                                    | Resultado                                                      | Evidencia              |
 | ----------- | ------------------------------------------------------------ | -------------------------------------------------------------- | ---------------------- |
 | `BR-AI-001` | Slug de `?module=` desconocido                               | `parseModuleChatSlug` → `general`                              | `chat.types.ts`        |

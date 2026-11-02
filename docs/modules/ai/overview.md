@@ -1,5 +1,7 @@
 # AI — overview
 
+> **Histórico.** Describe el chat retirado en AI-0; no hay código vigente en `src/modules/ai/` ni ruta `/chat`. Se conserva como referencia para AI-9.
+
 ## Propósito
 
 UI del agente central: sesiones, streaming, cards de confirmación, selector de contexto, insights por socket.
