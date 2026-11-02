@@ -6,10 +6,12 @@ import {
   canCorrectReviewGroup,
   countLabel,
   pendingOutsideHoldout,
+  resolveReviewGroupsSectionState,
   REVIEW_GROUP_SEMANTIC_TYPES,
   reviewGroupBatchResultLines,
   reviewGroupBatchSchema,
   reviewGroupKey,
+  reviewGroupSamples,
 } from "@/src/modules/intelligence/review-groups"
 import type { AiReviewGroup } from "@/src/modules/intelligence/types/intelligence.types"
 
@@ -21,6 +23,7 @@ function reviewGroup(overrides: Partial<AiReviewGroup> = {}): AiReviewGroup {
     pending: 100,
     pendingHoldout: 9,
     sampleSubjects: ["Revisión de seguridad de <n>", "Nueva actividad"],
+    sampleMessageIds: ["g0", "g1"],
     ...overrides,
   }
 }
@@ -211,5 +214,74 @@ describe("grupos de revisión", () => {
     assert.equal(countLabel(1, "correo", "correos"), "1 correo")
     assert.equal(countLabel(0, "correo", "correos"), "0 correos")
     assert.equal(countLabel(91, "correo", "correos"), "91 correos")
+  })
+
+  it("empareja cada muestra con su correo", () => {
+    assert.deepEqual(reviewGroupSamples(reviewGroup()), [
+      { subject: "Revisión de seguridad de <n>", messageId: "g0" },
+      { subject: "Nueva actividad", messageId: "g1" },
+    ])
+  })
+
+  it("deja sin enlace la muestra cuyo id no llegó", () => {
+    assert.deepEqual(
+      reviewGroupSamples(reviewGroup({ sampleMessageIds: ["g0"] })),
+      [
+        { subject: "Revisión de seguridad de <n>", messageId: "g0" },
+        { subject: "Nueva actividad", messageId: null },
+      ]
+    )
+    assert.deepEqual(
+      reviewGroupSamples(reviewGroup({ sampleMessageIds: [] })),
+      [
+        { subject: "Revisión de seguridad de <n>", messageId: null },
+        { subject: "Nueva actividad", messageId: null },
+      ]
+    )
+  })
+
+  it("deja sin enlace las muestras cuando el contrato no trae los ids", () => {
+    assert.deepEqual(
+      reviewGroupSamples(reviewGroup({ sampleMessageIds: undefined })),
+      [
+        { subject: "Revisión de seguridad de <n>", messageId: null },
+        { subject: "Nueva actividad", messageId: null },
+      ]
+    )
+  })
+
+  it("muestra el estado sin Gmail aunque la consulta siga pendiente", () => {
+    assert.equal(
+      resolveReviewGroupsSectionState({
+        enabled: false,
+        isPending: true,
+        isError: true,
+        groupCount: 0,
+      }),
+      "disconnected"
+    )
+  })
+
+  it("elige carga, error, vacío y lista en ese orden", () => {
+    const readyInput = {
+      enabled: true,
+      isPending: false,
+      isError: false,
+      groupCount: 0,
+    }
+
+    assert.equal(
+      resolveReviewGroupsSectionState({ ...readyInput, isPending: true }),
+      "loading"
+    )
+    assert.equal(
+      resolveReviewGroupsSectionState({ ...readyInput, isError: true }),
+      "error"
+    )
+    assert.equal(resolveReviewGroupsSectionState(readyInput), "empty")
+    assert.equal(
+      resolveReviewGroupsSectionState({ ...readyInput, groupCount: 2 }),
+      "ready"
+    )
   })
 })

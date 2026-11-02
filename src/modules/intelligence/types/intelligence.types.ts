@@ -133,6 +133,8 @@ export type AiReviewGroup = {
   pending: number
   pendingHoldout: number
   sampleSubjects: string[]
+  /** Opcional mientras el back que sirve la preview no publique los ids. */
+  sampleMessageIds?: string[]
 }
 
 export type AiReviewGroupsPage = {

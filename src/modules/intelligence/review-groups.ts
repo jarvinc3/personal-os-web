@@ -139,6 +139,51 @@ export function countLabel(
   return `${count} ${count === 1 ? singular : plural}`
 }
 
+export type ReviewGroupSample = {
+  subject: string
+  messageId: string | null
+}
+
+export type ReviewGroupsSectionState =
+  "disconnected" | "loading" | "error" | "empty" | "ready"
+
+type ReviewGroupsSectionInput = {
+  enabled: boolean
+  isPending: boolean
+  isError: boolean
+  groupCount: number
+}
+
+/** Sin Gmail conectado la sección explica la conexión, aunque la consulta siga pendiente. */
+export function resolveReviewGroupsSectionState({
+  enabled,
+  isPending,
+  isError,
+  groupCount,
+}: ReviewGroupsSectionInput): ReviewGroupsSectionState {
+  if (!enabled) {
+    return "disconnected"
+  }
+  if (isPending) {
+    return "loading"
+  }
+  if (isError) {
+    return "error"
+  }
+  return groupCount === 0 ? "empty" : "ready"
+}
+
+/**
+ * Empareja cada asunto de muestra con su correo. Si el contrato no trae el id
+ * en esa posición, el asunto se queda sin enlace en vez de abrir otro correo.
+ */
+export function reviewGroupSamples(group: AiReviewGroup): ReviewGroupSample[] {
+  return group.sampleSubjects.map((subject, index) => ({
+    subject,
+    messageId: group.sampleMessageIds?.[index] ?? null,
+  }))
+}
+
 export function reviewGroupBatchResultLines(
   result: AiReviewGroupVerificationResult
 ): string[] {
