@@ -54,7 +54,13 @@ import { Skeleton } from "@/src/shared/components/ui/skeleton"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
-import { AlertTriangle, Eraser, KeyRound, Trash2 } from "lucide-react"
+import {
+  AlertTriangle,
+  Eraser,
+  KeyRound,
+  ShieldCheck,
+  Trash2,
+} from "lucide-react"
 import { useCallback, useEffect, useRef, useState } from "react"
 
 const ALL_INSTITUTIONS = "all"
@@ -251,10 +257,9 @@ export function WipeUserDataView({
     setPasswordError(undefined)
   }
 
-  const handlePasswordBlur = async () => {
-    const current = passwordRef.current.trim()
+  const handleVerifyPassword = async () => {
+    const current = password.trim()
     if (!current) {
-      setVerifiedPassword(null)
       return
     }
     setIsVerifyingPassword(true)
@@ -492,11 +497,38 @@ export function WipeUserDataView({
             autoComplete="current-password"
             value={password}
             onChange={handlePasswordChange}
-            onBlur={() => void handlePasswordBlur()}
             disabled={wipeMutation.isPending || isVerifyingPassword}
             error={passwordError}
             invalid={Boolean(passwordError)}
           />
+          <Button
+            type="button"
+            variant="outline"
+            className="h-10 w-full"
+            disabled={
+              !password.trim() ||
+              passwordVerified ||
+              isVerifyingPassword ||
+              wipeMutation.isPending
+            }
+            onClick={() => void handleVerifyPassword()}
+          >
+            {isVerifyingPassword ? (
+              <Spinner data-icon="inline-start" />
+            ) : (
+              <ShieldCheck data-icon="inline-start" />
+            )}
+            {passwordVerified
+              ? "Contraseña verificada"
+              : isVerifyingPassword
+                ? "Verificando..."
+                : "Verificar"}
+          </Button>
+          {passwordVerified ? (
+            <p className="px-1 text-xs text-muted-foreground" role="status">
+              Contraseña verificada. Ya puedes vaciar los datos.
+            </p>
+          ) : null}
           <div className="rounded-2xl bg-muted px-4 py-3">
             <p className="text-xs text-muted-foreground">Cuenta</p>
             <p className="mt-1 text-sm text-muted-foreground">{email}</p>
