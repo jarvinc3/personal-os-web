@@ -2644,6 +2644,40 @@ export type paths = {
         patch: operations["NotificationsController_deactivatePushTokenLegacy"];
         trace?: never;
     };
+    "/api/intelligence/runs/evaluate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Evaluate frozen email HOLDOUT */
+        post: operations["AiEvidenceController_evaluate"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/intelligence/runs/compare": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Compare evaluation runs */
+        post: operations["AiEvidenceController_compare"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 };
 export type webhooks = Record<string, never>;
 export type components = {
@@ -3559,6 +3593,40 @@ export type components = {
             platform: "ios" | "android" | "web";
             token: string;
         };
+        CompareAnalysisRunsDto: {
+            firstRunId: string;
+            secondRunId: string;
+        };
+        AiAnalysisRunResponseDto: {
+            id: string;
+            datasetId: string;
+            /** @enum {string} */
+            mode: "ANALYZE_ONLY" | "EVALUATE" | "IMPORT";
+            /** @enum {string} */
+            status: "RUNNING" | "COMPLETED" | "FAILED";
+            /** @example 1 */
+            observationSequence: string;
+            /** @example 1 */
+            verificationSequence: string;
+            /** @example 1 */
+            consentRevision: string;
+            /** @enum {string} */
+            reproductionStatus: "COMPLETE" | "INCOMPLETE";
+            missingEvidence: Record<string, never>;
+            projectorVersion: string;
+            policyVersion: string;
+            pipelineVersion: string;
+            detectorVersion: string | null;
+            promptVersion: string | null;
+            schemaVersion: string | null;
+            configuration: Record<string, never>;
+            metrics: Record<string, never> | null;
+            /** Format: date-time */
+            startedAt: string;
+            /** Format: date-time */
+            completedAt: string | null;
+            error: string | null;
+        };
     };
     responses: never;
     parameters: never;
@@ -4064,6 +4132,8 @@ export interface operations {
             query: {
                 cursor: string;
                 partition: string;
+                /** @description Only uncertain or unclassified messages */
+                uncertain?: boolean;
             };
             header?: never;
             path?: never;
@@ -7741,6 +7811,58 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    AiEvidenceController_evaluate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Evaluation run */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AiAnalysisRunResponseDto"];
+                };
+            };
+        };
+    };
+    AiEvidenceController_compare: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CompareAnalysisRunsDto"];
+            };
+        };
+        responses: {
+            /** @description Run comparison and metric deltas */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        comparable: boolean;
+                        warning?: string | null;
+                        first: components["schemas"]["AiAnalysisRunResponseDto"];
+                        second: components["schemas"]["AiAnalysisRunResponseDto"];
+                        deltas?: {
+                            [key: string]: number | null;
+                        } | null;
+                    };
+                };
             };
         };
     };

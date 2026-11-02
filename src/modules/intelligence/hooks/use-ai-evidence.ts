@@ -9,6 +9,7 @@ import {
 import type {
   AiAnalysisRunSummary,
   AiHumanVerificationInput,
+  AiRunComparison,
   AiReviewQueuePage,
 } from "@/src/modules/intelligence/types/intelligence.types"
 import { API_ENDPOINTS } from "@/src/shared/constants/api-endpoints"
@@ -59,6 +60,30 @@ export function useAiEvidence(
       apiGet<AiAnalysisRunSummary[]>(API_ENDPOINTS.INTELLIGENCE.RUNS, signal),
     enabled: active && view === "runs",
   })
+  const evaluateMutation = useMutation({
+    mutationFn: () =>
+      apiPost<AiAnalysisRunSummary>(
+        API_ENDPOINTS.INTELLIGENCE.EVALUATE_RUNS,
+        {}
+      ),
+    onSettled: () =>
+      queryClient.invalidateQueries({
+        queryKey: [...EVIDENCE_QUERY_KEY, "runs"],
+      }),
+  })
+  const compareMutation = useMutation({
+    mutationFn: ({
+      firstRunId,
+      secondRunId,
+    }: {
+      firstRunId: string
+      secondRunId: string
+    }) =>
+      apiPost<AiRunComparison>(API_ENDPOINTS.INTELLIGENCE.COMPARE_RUNS, {
+        firstRunId,
+        secondRunId,
+      }),
+  })
   const verifyMutation = useMutation({
     mutationFn: ({
       messageId,
@@ -93,5 +118,11 @@ export function useAiEvidence(
     },
   })
 
-  return { reviewQueueQuery, runsQuery, verifyMutation }
+  return {
+    reviewQueueQuery,
+    runsQuery,
+    verifyMutation,
+    evaluateMutation,
+    compareMutation,
+  }
 }

@@ -633,6 +633,15 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "uncertain",
+            "in": "query",
+            "required": false,
+            "description": "Only uncertain or unclassified messages",
+            "schema": {
+              "type": "boolean"
+            }
           }
         ],
         "responses": {
@@ -6566,6 +6575,96 @@
           "notifications"
         ]
       }
+    },
+    "/api/intelligence/runs/evaluate": {
+      "post": {
+        "tags": [
+          "intelligence-evidence"
+        ],
+        "operationId": "AiEvidenceController_evaluate",
+        "summary": "Evaluate frozen email HOLDOUT",
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Evaluation run",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiAnalysisRunResponseDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/intelligence/runs/compare": {
+      "post": {
+        "tags": [
+          "intelligence-evidence"
+        ],
+        "operationId": "AiEvidenceController_compare",
+        "summary": "Compare evaluation runs",
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompareAnalysisRunsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Run comparison and metric deltas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "comparable",
+                    "first",
+                    "second"
+                  ],
+                  "properties": {
+                    "comparable": {
+                      "type": "boolean"
+                    },
+                    "warning": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "first": {
+                      "$ref": "#/components/schemas/AiAnalysisRunResponseDto"
+                    },
+                    "second": {
+                      "$ref": "#/components/schemas/AiAnalysisRunResponseDto"
+                    },
+                    "deltas": {
+                      "type": "object",
+                      "nullable": true,
+                      "additionalProperties": {
+                        "type": "number",
+                        "nullable": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "info": {
@@ -9062,6 +9161,133 @@
         "required": [
           "platform",
           "token"
+        ]
+      },
+      "CompareAnalysisRunsDto": {
+        "type": "object",
+        "required": [
+          "firstRunId",
+          "secondRunId"
+        ],
+        "properties": {
+          "firstRunId": {
+            "type": "string"
+          },
+          "secondRunId": {
+            "type": "string"
+          }
+        }
+      },
+      "AiAnalysisRunResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "datasetId": {
+            "type": "string"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "ANALYZE_ONLY",
+              "EVALUATE",
+              "IMPORT"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "RUNNING",
+              "COMPLETED",
+              "FAILED"
+            ]
+          },
+          "observationSequence": {
+            "type": "string",
+            "example": "1"
+          },
+          "verificationSequence": {
+            "type": "string",
+            "example": "1"
+          },
+          "consentRevision": {
+            "type": "string",
+            "example": "1"
+          },
+          "reproductionStatus": {
+            "type": "string",
+            "enum": [
+              "COMPLETE",
+              "INCOMPLETE"
+            ]
+          },
+          "missingEvidence": {
+            "type": "object"
+          },
+          "projectorVersion": {
+            "type": "string"
+          },
+          "policyVersion": {
+            "type": "string"
+          },
+          "pipelineVersion": {
+            "type": "string"
+          },
+          "detectorVersion": {
+            "type": "string",
+            "nullable": true
+          },
+          "promptVersion": {
+            "type": "string",
+            "nullable": true
+          },
+          "schemaVersion": {
+            "type": "string",
+            "nullable": true
+          },
+          "configuration": {
+            "type": "object"
+          },
+          "metrics": {
+            "type": "object",
+            "nullable": true
+          },
+          "startedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "completedAt": {
+            "type": "string",
+            "nullable": true,
+            "format": "date-time"
+          },
+          "error": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "datasetId",
+          "mode",
+          "status",
+          "observationSequence",
+          "verificationSequence",
+          "consentRevision",
+          "reproductionStatus",
+          "missingEvidence",
+          "projectorVersion",
+          "policyVersion",
+          "pipelineVersion",
+          "detectorVersion",
+          "promptVersion",
+          "schemaVersion",
+          "configuration",
+          "metrics",
+          "startedAt",
+          "completedAt",
+          "error"
         ]
       }
     }
