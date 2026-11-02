@@ -1,7 +1,10 @@
 "use client"
 
+import { useRouter, useSearchParams } from "next/navigation"
 import { useIntelligenceMessage } from "@/src/modules/intelligence/hooks/use-intelligence"
 import { INTELLIGENCE_SHEET_KEYS } from "@/src/modules/intelligence/constants/sheet-keys"
+import { MESSAGE_RETURN_TRANSACTION_QUERY_KEY } from "@/src/modules/intelligence/constants"
+import { shouldReturnToTransactionOnMessageClose } from "@/src/modules/intelligence/lib/message-return"
 import { shortMessageId } from "@/src/modules/intelligence/message-id"
 import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
@@ -85,6 +88,8 @@ export function IntelligenceScreen() {
 }
 
 function IntelligenceScreenBody() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
   const {
     dashboardQuery,
     oauthDiagnosticsQuery,
@@ -103,6 +108,21 @@ function IntelligenceScreenBody() {
     sheetId: selectedMessageId,
     setOpen: setMessageSheetOpen,
   } = useSheetParam(INTELLIGENCE_SHEET_KEYS.message, { closeMode: "replace" })
+  const returnToTransactionId = searchParams.get(
+    MESSAGE_RETURN_TRANSACTION_QUERY_KEY
+  )
+  const handleMessageSheetOpenChange = useCallback(
+    (open: boolean) => {
+      if (
+        shouldReturnToTransactionOnMessageClose(open, returnToTransactionId)
+      ) {
+        router.back()
+        return
+      }
+      setMessageSheetOpen(open)
+    },
+    [returnToTransactionId, router, setMessageSheetOpen]
+  )
   usePageHeader({ title: "Inteligencia" })
 
   const messages = useMemo(
@@ -781,7 +801,7 @@ function IntelligenceScreenBody() {
       <IntelligenceMessageDetail
         messageId={selectedMessageId ?? ""}
         open={messageSheetOpen}
-        onOpenChange={setMessageSheetOpen}
+        onOpenChange={handleMessageSheetOpenChange}
       />
       <AlertDialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
         <AlertDialogContent>

@@ -32,3 +32,13 @@ test("builds a URL to the source email detail sheet", () => {
     "/intelligence?sheet=intelligence-message&sheetId=message%2Fwith+space"
   )
 })
+
+test("keeps the movement id as return context when linking its source email", () => {
+  assert.equal(
+    sourceEmailDetailHref(
+      "message-456",
+      "ea10b793-8239-5366-abb5-6743c01a3f8f"
+    ),
+    "/intelligence?sheet=intelligence-message&sheetId=message-456&returnToTransactionId=ea10b793-8239-5366-abb5-6743c01a3f8f"
+  )
+})
