@@ -133,6 +133,7 @@ export type AiReviewGroup = {
   pending: number
   pendingHoldout: number
   sampleSubjects: string[]
+  sampleMessageIds: string[]
 }
 
 export type AiReviewGroupsPage = {

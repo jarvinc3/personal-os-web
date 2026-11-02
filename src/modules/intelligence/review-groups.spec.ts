@@ -10,6 +10,7 @@ import {
   reviewGroupBatchResultLines,
   reviewGroupBatchSchema,
   reviewGroupKey,
+  reviewGroupSamples,
 } from "@/src/modules/intelligence/review-groups"
 import type { AiReviewGroup } from "@/src/modules/intelligence/types/intelligence.types"
 
@@ -21,6 +22,7 @@ function reviewGroup(overrides: Partial<AiReviewGroup> = {}): AiReviewGroup {
     pending: 100,
     pendingHoldout: 9,
     sampleSubjects: ["Revisión de seguridad de <n>", "Nueva actividad"],
+    sampleMessageIds: ["g0", "g1"],
     ...overrides,
   }
 }
@@ -211,5 +213,29 @@ describe("grupos de revisión", () => {
     assert.equal(countLabel(1, "correo", "correos"), "1 correo")
     assert.equal(countLabel(0, "correo", "correos"), "0 correos")
     assert.equal(countLabel(91, "correo", "correos"), "91 correos")
+  })
+
+  it("empareja cada muestra con su correo", () => {
+    assert.deepEqual(reviewGroupSamples(reviewGroup()), [
+      { subject: "Revisión de seguridad de <n>", messageId: "g0" },
+      { subject: "Nueva actividad", messageId: "g1" },
+    ])
+  })
+
+  it("deja sin enlace la muestra cuyo id no llegó", () => {
+    assert.deepEqual(
+      reviewGroupSamples(reviewGroup({ sampleMessageIds: ["g0"] })),
+      [
+        { subject: "Revisión de seguridad de <n>", messageId: "g0" },
+        { subject: "Nueva actividad", messageId: null },
+      ]
+    )
+    assert.deepEqual(
+      reviewGroupSamples(reviewGroup({ sampleMessageIds: [] })),
+      [
+        { subject: "Revisión de seguridad de <n>", messageId: null },
+        { subject: "Nueva actividad", messageId: null },
+      ]
+    )
   })
 })

@@ -62,7 +62,7 @@ export function ReviewSection({ enabled, onOpenMessage }: ReviewSectionProps) {
         fullWidth
       />
       {view === "groups" ? (
-        <ReviewGroupsSection enabled={enabled} />
+        <ReviewGroupsSection enabled={enabled} onOpenMessage={onOpenMessage} />
       ) : (
         <AiEvidenceSection
           enabled={enabled}

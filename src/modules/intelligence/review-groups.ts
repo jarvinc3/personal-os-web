@@ -139,6 +139,22 @@ export function countLabel(
   return `${count} ${count === 1 ? singular : plural}`
 }
 
+export type ReviewGroupSample = {
+  subject: string
+  messageId: string | null
+}
+
+/**
+ * Empareja cada asunto de muestra con su correo. Si el contrato no trae el id
+ * en esa posición, el asunto se queda sin enlace en vez de abrir otro correo.
+ */
+export function reviewGroupSamples(group: AiReviewGroup): ReviewGroupSample[] {
+  return group.sampleSubjects.map((subject, index) => ({
+    subject,
+    messageId: group.sampleMessageIds[index] ?? null,
+  }))
+}
+
 export function reviewGroupBatchResultLines(
   result: AiReviewGroupVerificationResult
 ): string[] {

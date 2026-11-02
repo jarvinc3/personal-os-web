@@ -9,6 +9,7 @@ import {
   countLabel,
   reviewGroupBatchResultLines,
   reviewGroupKey,
+  reviewGroupSamples,
 } from "@/src/modules/intelligence/review-groups"
 import type {
   AiReviewGroup,
@@ -29,10 +30,11 @@ import {
 import { Skeleton } from "@/src/shared/components/ui/skeleton"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { appToast } from "@/src/shared/lib/app-toast"
-import { AlertCircle, Layers3, RotateCcw, Tags } from "lucide-react"
+import { AlertCircle, Layers3, Mail, RotateCcw, Tags } from "lucide-react"
 
 type ReviewGroupsSectionProps = {
   enabled: boolean
+  onOpenMessage: (messageId: string) => void
 }
 
 type AppliedBatch = {
@@ -40,7 +42,10 @@ type AppliedBatch = {
   verification: AiReviewGroupVerificationResult
 }
 
-export function ReviewGroupsSection({ enabled }: ReviewGroupsSectionProps) {
+export function ReviewGroupsSection({
+  enabled,
+  onOpenMessage,
+}: ReviewGroupsSectionProps) {
   const { groupsQuery, batchMutation } = useReviewGroups(enabled)
   const {
     open: sheetOpen,
@@ -159,6 +164,7 @@ export function ReviewGroupsSection({ enabled }: ReviewGroupsSectionProps) {
               key={reviewGroupKey(group)}
               group={group}
               onTag={() => openGroup(group)}
+              onOpenMessage={onOpenMessage}
             />
           ))}
           <InfiniteListSentinel
@@ -187,56 +193,96 @@ export function ReviewGroupsSection({ enabled }: ReviewGroupsSectionProps) {
 function ReviewGroupRow({
   group,
   onTag,
+  onOpenMessage,
 }: {
   group: AiReviewGroup
   onTag: () => void
+  onOpenMessage: (messageId: string) => void
 }) {
   const canBatch = canBatchReviewGroup(group)
+  const samples = reviewGroupSamples(group)
 
   return (
-    <SummaryItem
-      title={group.fromAddress}
-      wrapTitle
-      description={
-        <span className="block">
-          {countLabel(group.total, "correo", "correos")}
-          {group.sampleSubjects.length
-            ? ` · ${group.sampleSubjects.join(" · ")}`
-            : ""}
-        </span>
-      }
-      wrapDescription
-      icon={Layers3}
-      onPress={canBatch ? onTag : undefined}
-      showChevron={canBatch}
-      trailing={
-        <div className="flex flex-col items-end gap-2">
-          <div className="flex flex-wrap justify-end gap-1">
-            <Badge variant="secondary">
-              {countLabel(group.pending, "pendiente", "pendientes")}
-            </Badge>
-            {group.pendingHoldout > 0 ? (
-              <Badge variant="warning">
-                {countLabel(group.pendingHoldout, "HOLDOUT", "HOLDOUT")}
+    <div className="overflow-hidden rounded-2xl border border-border bg-card/50">
+      <SummaryItem
+        className="rounded-none border-0 bg-transparent"
+        title={group.fromAddress}
+        wrapTitle
+        description={countLabel(group.total, "correo", "correos")}
+        icon={Layers3}
+        onPress={canBatch ? onTag : undefined}
+        showChevron={canBatch}
+        trailing={
+          <div className="flex flex-col items-end gap-2">
+            <div className="flex flex-wrap justify-end gap-1">
+              <Badge variant="secondary">
+                {countLabel(group.pending, "pendiente", "pendientes")}
               </Badge>
-            ) : null}
+              {group.pendingHoldout > 0 ? (
+                <Badge variant="warning">
+                  {countLabel(group.pendingHoldout, "HOLDOUT", "HOLDOUT")}
+                </Badge>
+              ) : null}
+            </div>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={onTag}
+              disabled={!canBatch}
+            >
+              <Tags data-icon="inline-start" /> Etiquetar
+            </Button>
+            {canBatch ? null : (
+              <span className="text-xs text-muted-foreground">
+                Solo HOLDOUT: revisa uno a uno
+              </span>
+            )}
           </div>
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            onClick={onTag}
-            disabled={!canBatch}
-          >
-            <Tags data-icon="inline-start" /> Etiquetar
-          </Button>
-          {canBatch ? null : (
-            <span className="text-xs text-muted-foreground">
-              Solo HOLDOUT: revisa uno a uno
+        }
+      />
+      {samples.length > 0 ? (
+        <ReviewGroupSamples samples={samples} onOpenMessage={onOpenMessage} />
+      ) : null}
+    </div>
+  )
+}
+
+function ReviewGroupSamples({
+  samples,
+  onOpenMessage,
+}: {
+  samples: ReturnType<typeof reviewGroupSamples>
+  onOpenMessage: (messageId: string) => void
+}) {
+  return (
+    <div className="flex flex-wrap gap-1 border-t border-border/60 px-2 py-1.5">
+      {samples.map((sample, index) => {
+        const messageId = sample.messageId
+        if (!messageId) {
+          return (
+            <span
+              key={`${sample.subject}-${index}`}
+              className="truncate px-1.5 py-0.5 text-xs text-muted-foreground"
+            >
+              {sample.subject || "(sin asunto)"}
             </span>
-          )}
-        </div>
-      }
-    />
+          )
+        }
+        return (
+          <Button
+            key={`${messageId}-${index}`}
+            type="button"
+            size="xs"
+            variant="ghost"
+            className="max-w-full justify-start"
+            onClick={() => onOpenMessage(messageId)}
+          >
+            <Mail data-icon="inline-start" />
+            <span className="truncate">{sample.subject || "(sin asunto)"}</span>
+          </Button>
+        )
+      })}
+    </div>
   )
 }
