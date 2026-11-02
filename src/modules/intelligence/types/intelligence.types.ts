@@ -7,7 +7,12 @@ type AiSchemas = components["schemas"]
 
 /** Nombres del cliente para los tipos que publica el contrato del back. */
 export type AiRole = AiSchemas["AiRoleUserResponseDto"]["role"]
-export type AiEmailSyncProgress = AiSchemas["AiEmailSyncProgressResponseDto"]
+type AiEmailSyncProgressContract = AiSchemas["AiEmailSyncProgressResponseDto"]
+
+/** El DTO del back ya publica esta fase; el swagger versionado aún no la enumera. */
+export type AiEmailSyncProgress = Omit<AiEmailSyncProgressContract, "phase"> & {
+  phase: AiEmailSyncProgressContract["phase"] | "classifying"
+}
 export type AiEmailOAuthDiagnostics = AiSchemas["AiEmailDiagnosticsResponseDto"]
 export type AiEmailMessageSummary =
   AiSchemas["AiEmailMessageSummaryResponseDto"]
@@ -40,7 +45,7 @@ type AiEmailConnection = AiSchemas["AiEmailConnectionResponseDto"]
  * El contrato solo exige `connected`; la pantalla lee estos campos cuando la
  * cuenta estÃ¡ conectada. El alias local los declara sin agregarlos al contrato.
  */
-type ConnectedEmailConnection = AiEmailConnection & {
+type ConnectedEmailConnection = Omit<AiEmailConnection, "syncProgress"> & {
   connected: true
   emailAddress: ContractField<AiEmailConnection["emailAddress"]>
   initialSyncCompletedAt: ContractField<
@@ -51,7 +56,7 @@ type ConnectedEmailConnection = AiEmailConnection & {
   lastSyncErrorCode: ContractField<AiEmailConnection["lastSyncErrorCode"]>
   requiresReconnect: ContractField<AiEmailConnection["requiresReconnect"]>
   syncInProgress: ContractField<AiEmailConnection["syncInProgress"]>
-  syncProgress: ContractField<AiEmailConnection["syncProgress"]>
+  syncProgress: AiEmailSyncProgress | null
 }
 
 type DisconnectedEmailConnection = AiEmailConnection & { connected: false }

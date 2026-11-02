@@ -75,7 +75,12 @@ import {
   ROUTE_LABELS,
   SEMANTIC_TYPE_LABELS,
 } from "./review-labels"
-import { describeSyncFailure, resolveDashboardSyncFailure } from "./sync-status"
+import {
+  describeScheduledClassification,
+  describeSyncFailure,
+  describeSyncProgress,
+  resolveDashboardSyncFailure,
+} from "./sync-status"
 import {
   Alert,
   AlertAction,
@@ -382,7 +387,9 @@ function IntelligenceScreenBody() {
                         : syncProgress?.status === "running"
                           ? "En curso"
                           : syncProgress?.status === "scheduled"
-                            ? "Correcta; siguiente lote programado"
+                            ? syncProgress.errorCode === "classification_failed"
+                              ? "Clasificación pendiente"
+                              : "Correcta; siguiente lote programado"
                             : dashboard.connection.lastSyncedAt
                               ? "Correcta"
                               : "Sin intentos"
@@ -444,19 +451,38 @@ function IntelligenceScreenBody() {
               {syncProgress?.status === "scheduled" && !oauthIncomplete ? (
                 <Alert variant="default" role="status">
                   <Clock3 className="size-4 shrink-0" aria-hidden="true" />
-                  <AlertTitle>El siguiente lote está programado</AlertTitle>
+                  <AlertTitle>
+                    {syncProgress.errorCode === "classification_failed"
+                      ? "Clasificación pendiente"
+                      : "El siguiente lote está programado"}
+                  </AlertTitle>
                   <AlertDescription>
-                    Este lote importó {syncProgress.importedThisRun} mensajes.
-                    La sincronización continuará automáticamente
-                    {syncProgress.nextRunAt
-                      ? ` alrededor de ${formatDateTime(new Date(syncProgress.nextRunAt).toISOString())}`
-                      : " en el próximo ciclo"}
-                    .
+                    {describeScheduledClassification(syncProgress) ? (
+                      <>
+                        {describeScheduledClassification(syncProgress)} La
+                        próxima corrida está programada
+                        {syncProgress.nextRunAt
+                          ? ` alrededor de ${formatDateTime(new Date(syncProgress.nextRunAt).toISOString())}`
+                          : " para el próximo ciclo"}
+                        .
+                      </>
+                    ) : (
+                      <>
+                        Este lote importó {syncProgress.importedThisRun}{" "}
+                        mensajes. La sincronización continuará automáticamente
+                        {syncProgress.nextRunAt
+                          ? ` alrededor de ${formatDateTime(new Date(syncProgress.nextRunAt).toISOString())}`
+                          : " en el próximo ciclo"}
+                        .
+                      </>
+                    )}
                   </AlertDescription>
                 </Alert>
               ) : null}
               {!oauthIncomplete &&
-              (dashboard.connection.syncInProgress || syncWaiting) ? (
+              (dashboard.connection.syncInProgress ||
+                syncWaiting ||
+                syncProgress?.status === "running") ? (
                 <Alert variant="default" role="status">
                   <LoaderCircle
                     className="size-4 shrink-0 animate-spin"
@@ -469,11 +495,7 @@ function IntelligenceScreenBody() {
                       : syncProgress?.status === "retrying"
                         ? `Enviando reintento a Gmail · intento ${syncProgress.attempt} de 3.`
                         : syncProgress?.status === "running"
-                          ? syncProgress.phase === "bootstrap"
-                            ? `Leyendo el histórico desde el 1 de enero de 2026 · ${syncProgress.processedThisRun} correos procesados, ${syncProgress.importedThisRun} importados en este lote${syncProgress.totalEstimate ? ` · ${syncProgress.totalEstimate} estimados en total` : ""}.`
-                            : syncProgress.phase === "recovery"
-                              ? `Recuperando el cursor y leyendo correos · ${syncProgress.processedThisRun} procesados, ${syncProgress.importedThisRun} importados.`
-                              : `Buscando cambios nuevos · ${syncProgress.processedThisRun} procesados, ${syncProgress.importedThisRun} importados.`
+                          ? describeSyncProgress(syncProgress)
                           : `${dashboard.counters.importedMessages} mensajes importados`}
                     {(syncProgress?.status === "waiting" ||
                       syncProgress?.status === "retrying") &&

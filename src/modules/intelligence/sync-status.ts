@@ -15,6 +15,34 @@ export type SyncFailureCopy = {
   offerReconnect: boolean
 }
 
+export function describeSyncProgress(progress: AiEmailSyncProgress): string {
+  if (progress.phase === "classifying") {
+    return typeof progress.processedThisRun === "number" &&
+      typeof progress.totalEstimate === "number"
+      ? `Clasificando correos pendientes · ${progress.processedThisRun} de ${progress.totalEstimate}.`
+      : "Clasificando correos pendientes."
+  }
+
+  if (progress.phase === "bootstrap") {
+    return `Leyendo el histórico desde el 1 de enero de 2026 · ${progress.processedThisRun} correos procesados, ${progress.importedThisRun} importados en este lote${progress.totalEstimate ? ` · ${progress.totalEstimate} estimados en total` : ""}.`
+  }
+
+  if (progress.phase === "recovery") {
+    return `Recuperando el cursor y leyendo correos · ${progress.processedThisRun} procesados, ${progress.importedThisRun} importados.`
+  }
+
+  return `Buscando cambios nuevos · ${progress.processedThisRun} procesados, ${progress.importedThisRun} importados.`
+}
+
+export function describeScheduledClassification(
+  progress: AiEmailSyncProgress
+): string | null {
+  return progress.status === "scheduled" &&
+    progress.errorCode === "classification_failed"
+    ? "La clasificación tuvo un problema y continuará en la próxima corrida. Los correos que ya se importaron siguen disponibles."
+    : null
+}
+
 type SyncFailureInput = {
   progress: AiEmailSyncProgress | null
   lastSyncErrorCode: string | null
@@ -77,6 +105,14 @@ export function describeSyncFailure({
   requiresReconnect?: boolean
 }): SyncFailureCopy {
   const at = attemptedAt ? ` el ${attemptedAt}` : ""
+  if (failure.code === "sync_stalled") {
+    return {
+      title: "La sincronización se quedó sin avance",
+      description: `No se detectó progreso en Gmail${at}. Puedes volver a sincronizar; no hace falta reconectar Gmail.`,
+      offerReconnect: false,
+    }
+  }
+
   if (failure.code === "worker_interrupted") {
     return {
       title: "La sincronización se interrumpió",
