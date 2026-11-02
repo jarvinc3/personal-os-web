@@ -6,6 +6,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Agregado
 
+- El detalle de un correo de Inteligencia suma la sección **Señal detectada** con el tipo, el estado, la confianza y una fila por ruta del payload, y la evidencia que la sostuvo —remitente, asunto, fecha del correo y la regla del clasificador con su proveedor y modelo—; el vacío explica si el correo no tiene señal, si la clasificación sigue pendiente o si falló, y la vista no crea ni modifica movimientos en Finanzas (#383; consume el contrato de back #210).
 - Cada correo de muestra de un grupo de revisión abre su detalle desde la propia vista de grupos, sin cambiar de pestaña; si el contrato no trae el id de una muestra, su asunto queda sin enlace. Consume `sampleMessageIds` del back (#359, jarvinc3/personal-os-back#279).
 - Inteligencia › Revisión estrena la vista de **grupos**: cada grupo reúne los correos de un remitente y una plantilla con su total, sus pendientes, sus pendientes HOLDOUT y hasta tres asuntos de muestra, ordenados por pendientes y con scroll infinito. Etiquetar un grupo abre una hoja por ruta con relevancia, tipo y dominios; «Confirmar» registra el acierto y «Corregir» guarda las etiquetas elegidas, y un diálogo avisa cuántos correos se verificarán y cuántos HOLDOUT quedan fuera del lote. Tras aplicar, la hoja muestra verificados y excluidos, los grupos y los conteos de la cola se actualizan, y un grupo con solo HOLDOUT no permite lote. Rechazar sigue siendo uno a uno (#320).
 - La cola ADMIN de Conocimiento permite promover una fila global en revisión: queda activa como promovida por un administrador, el rebuild la conserva y una reversión posterior la vuelve a bloquear (#246).
@@ -27,6 +28,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Cambiado
 
+- El contrato OpenAPI versionado pasa a la copia de `develop` del back: 161 rutas y 244 schemas, con 203 de las 209 respuestas 2xx descritas. La señal del correo ya se lee con tipos generados; el resto de los tipos a mano de Inteligencia se migra en #384 (#383).
 - La documentación de AI y de Inicio describe la web sin chat: el chat queda marcado como histórico hasta AI-9, `/chat` desaparece de las rutas y de la tabla de módulos, y el inicio deja de anunciar un atajo que no existe (#362).
 - Los tipos de request y de respuesta del cliente se generan desde el contrato OpenAPI del back: `pnpm api:contract` refresca la copia versionada, `pnpm api:generate` escribe `src/config/api-contract/api-schema.ts` y `pnpm typecheck` falla si el contrato no está disponible. Conocimiento y los montos del balance patrimonial ya salen del contrato; las respuestas que el back todavía no describe siguen a mano (personal-os-back#263) (#155).
 - La tabla «entidad → card → variantes» ya refleja el patrimonio con las cards compactas de cada producto y aclara que la web no tiene chat desde AI-0: el bloque del chat queda como referencia de la galería hasta su rediseño (AI-9) (#271).

@@ -43,7 +43,7 @@ type BalanceSheet =
 
 ## Cobertura del contrato
 
-En la copia actual del contrato (154 rutas y 74 schemas) solo 10 de las 202 respuestas 2xx traen schema: health (3), conocimiento de IA (6) y balance patrimonial. Las demás solo traen descripción, así que sus tipos de lectura siguen a mano hasta que el back publique los schemas ([personal-os-back#263](https://github.com/jarvinc3/personal-os-back/issues/263)).
+En la copia actual del contrato (161 rutas y 244 schemas) 203 de las 209 respuestas 2xx traen schema. Las señales de correo de AI-7 se leen con los tipos generados (`components["schemas"]["AiSignalResponseDto"]`); el resto de Inteligencia sigue con tipos a mano que ahora duplican un schema generado, y su migración vive en #384. Las respuestas que el contrato todavía no describe siguen a mano hasta que el back publique los schemas ([personal-os-back#263](https://github.com/jarvinc3/personal-os-back/issues/263)).
 
 ## Pruebas
 
