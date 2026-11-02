@@ -1,44 +1,80 @@
 name: CI
 
-# Corre en el runner propio (PC casa) para no gastar minutos de GitHub Actions.
+# Checks y build corren en ubuntu-latest en paralelo. El job `test` conserva
+# el estado único de la CI y espera a que ambos terminen.
 on:
   push:
     branches: [main, master, develop]
   pull_request:
     branches: [main, master, develop]
 
+permissions:
+  contents: read
+  pull-requests: read
+
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
-jobs:
-  test:
-    runs-on: [self-hosted, personal-os]
-    timeout-minutes: 30
-    defaults:
-      run:
-        shell: pwsh
-    env:
-      # Evita CRLF en el checkout de Windows sin tocar la config global de git
-      GIT_CONFIG_COUNT: '1'
-      GIT_CONFIG_KEY_0: core.autocrlf
-      GIT_CONFIG_VALUE_0: 'false'
+env:
+  # Evita CRLF en el checkout de Windows sin tocar la config global de git
+  GIT_CONFIG_COUNT: "2"
+  GIT_CONFIG_KEY_0: core.autocrlf
+  GIT_CONFIG_VALUE_0: "false"
+  GIT_CONFIG_KEY_1: core.longpaths
+  GIT_CONFIG_VALUE_1: "true"
 
+jobs:
+  changes:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      code: ${{ steps.filter.outputs.code }}
+    steps:
+      - id: filter
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const files = await github.paginate(github.rest.pulls.listFiles, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              per_page: 100,
+            });
+            const code = files.some(
+              (file) =>
+                !file.filename.endsWith('.md') &&
+                !file.filename.startsWith('docs/'),
+            );
+            core.setOutput('code', String(code));
+
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PNPM_STORE_DIR: /home/runner/.pnpm-store
     steps:
       - uses: actions/checkout@v4
 
       - uses: pnpm/action-setup@v4
         with:
-          # Carpeta temporal por job: evita choques con el pnpm global de la PC y entre runners
           dest: ${{ runner.temp }}/setup-pnpm
+
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-          cache: pnpm
-          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.PNPM_STORE_DIR }}
+          key: pnpm-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            pnpm-${{ runner.os }}-
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --store-dir "$PNPM_STORE_DIR"
 
       - name: Audit production dependencies (non-blocking)
         continue-on-error: true
@@ -56,6 +92,44 @@ jobs:
       - name: Unit tests with coverage
         run: pnpm run --if-present test:coverage
 
+  build:
+    needs: changes
+    if: always() && (github.event_name != 'pull_request' || needs.changes.outputs.code == 'true')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PNPM_STORE_DIR: /home/runner/.pnpm-store
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          dest: ${{ runner.temp }}/setup-pnpm
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.PNPM_STORE_DIR }}
+          key: pnpm-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            pnpm-${{ runner.os }}-
+
+      - name: Cache Next build
+        uses: actions/cache@v4
+        with:
+          path: .next/cache
+          key: next-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.sha }}
+          restore-keys: |
+            next-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-
+            next-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --store-dir "$PNPM_STORE_DIR"
+
       - name: Build
         run: pnpm run build
         env:
@@ -66,3 +140,12 @@ jobs:
           NEXT_PUBLIC_APP_NAME: Personal OS
           NEXT_PUBLIC_URL: http://localhost:3000
           NEXT_PUBLIC_APP_URL: http://localhost:3000
+
+  test:
+    needs: [checks, build]
+    if: always() && needs.checks.result == 'success' && (needs.build.result == 'success' || needs.build.result == 'skipped')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Confirmar checks y build
+        run: echo "Checks y build completados"

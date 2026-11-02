@@ -81,10 +81,10 @@ describe("contrato OpenAPI", () => {
   it("toma el contrato del back por OPENAPI_SPEC_PATH", () => {
     assert.equal(
       resolveContractSourcePath(
-        { OPENAPI_SPEC_PATH: "C:/otro/contrato.json" },
+        { OPENAPI_SPEC_PATH: "otro/contrato.json" },
         TEMP_DIRECTORY
       ),
-      join("C:", "otro", "contrato.json")
+      join(TEMP_DIRECTORY, "otro", "contrato.json")
     )
   })
 
