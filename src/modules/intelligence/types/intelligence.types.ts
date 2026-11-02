@@ -31,6 +31,7 @@ export type IntelligenceDashboard = {
         lastSyncedAt: string | null
         lastRecoverySyncAt: string | null
         lastSyncErrorCode: string | null
+        requiresReconnect: boolean
       }
     | { connected: false }
   counters: {
