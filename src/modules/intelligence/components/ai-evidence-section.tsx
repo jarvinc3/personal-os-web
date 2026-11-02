@@ -133,12 +133,15 @@ export function AiEvidenceSection({
   const activeFilters = activeReviewFilters(filters)
   const [subjectDraft, setSubjectDraft] = useState(filters.subject)
   const [editingSubject, setEditingSubject] = useState(false)
+  const [selectedRunIds, setSelectedRunIds] = useState<string[]>([])
   const subjectValue = editingSubject ? subjectDraft : filters.subject
-  const { reviewQueueQuery, runsQuery, verifyMutation } = useAiEvidence(
-    enabled,
-    view,
-    reviewQueueApiQuery(filters)
-  )
+  const {
+    reviewQueueQuery,
+    runsQuery,
+    verifyMutation,
+    evaluateMutation,
+    compareMutation,
+  } = useAiEvidence(enabled, view, reviewQueueApiQuery(filters))
   const review = useSheetParam(INTELLIGENCE_SHEET_KEYS.review)
   const focus = useSheetParam(INTELLIGENCE_SHEET_KEYS.focus)
   const filtersSheet = useSheetParam(INTELLIGENCE_SHEET_KEYS.reviewFilters)
@@ -255,6 +258,71 @@ export function AiEvidenceSection({
   if (view === "runs") {
     return (
       <div className="flex flex-col gap-2">
+        <div className="flex flex-wrap gap-2">
+          <Button
+            type="button"
+            disabled={evaluateMutation.isPending}
+            onClick={() =>
+              evaluateMutation.mutate(undefined, {
+                onSuccess: () =>
+                  appToast.success({ text1: "Evaluación HOLDOUT completada" }),
+                onError: () =>
+                  appToast.error({ text1: "No se pudo evaluar HOLDOUT" }),
+              })
+            }
+          >
+            {evaluateMutation.isPending ? "Evaluando…" : "Evaluar HOLDOUT"}
+          </Button>
+          {selectedRunIds.length === 2 ? (
+            <Button
+              type="button"
+              variant="outline"
+              disabled={compareMutation.isPending}
+              onClick={() =>
+                compareMutation.mutate({
+                  firstRunId: selectedRunIds[0],
+                  secondRunId: selectedRunIds[1],
+                })
+              }
+            >
+              {compareMutation.isPending
+                ? "Comparando…"
+                : "Comparar seleccionados"}
+            </Button>
+          ) : null}
+        </div>
+        {compareMutation.data ? (
+          <section aria-live="polite" className="rounded-lg border p-3 text-sm">
+            <h3 className="font-medium">
+              {compareMutation.data.comparable
+                ? "Runs comparables"
+                : "Comparación no comparable"}
+            </h3>
+            {compareMutation.data.warning ? (
+              <p className="text-muted-foreground">
+                {compareMutation.data.warning}
+              </p>
+            ) : null}
+            {compareMutation.data.deltas ? (
+              <dl className="mt-2 grid grid-cols-2 gap-2">
+                {Object.entries(compareMutation.data.deltas).map(
+                  ([key, value]) => (
+                    <div key={key}>
+                      <dt className="text-muted-foreground">
+                        {metricLabel(key)}
+                      </dt>
+                      <dd>
+                        {value == null
+                          ? "—"
+                          : `${value > 0 ? "+" : ""}${(value * 100).toFixed(1)} pp`}
+                      </dd>
+                    </div>
+                  )
+                )}
+              </dl>
+            ) : null}
+          </section>
+        ) : null}
         {runsQuery.isPending ? (
           <div className="flex flex-col gap-2 p-2" aria-label="Cargando runs">
             <Skeleton className="h-14 w-full" />
@@ -273,16 +341,74 @@ export function AiEvidenceSection({
           </Empty>
         ) : runsQuery.data?.length ? (
           runsQuery.data.map((run, index) => (
-            <SummaryItem
+            <div
               key={run.id}
-              title={`${run.mode} · ${run.status}`}
-              description={`Pipeline ${run.pipelineVersion} · observaciones ${run.observationSequence} · verificaciones ${run.verificationSequence}`}
-              icon={Clock3}
-              value={
-                run.completedAt ? formatDateTime(run.completedAt) : "En curso"
-              }
-              isLast={index === runsQuery.data!.length - 1}
-            />
+              className="flex items-center gap-2 rounded-lg border px-2"
+            >
+              <Button
+                type="button"
+                variant={
+                  selectedRunIds.includes(run.id) ? "secondary" : "ghost"
+                }
+                size="sm"
+                aria-pressed={selectedRunIds.includes(run.id)}
+                aria-label={`Seleccionar run ${run.id} para comparar`}
+                onClick={() =>
+                  setSelectedRunIds((current) =>
+                    current.includes(run.id)
+                      ? current.filter((id) => id !== run.id)
+                      : current.length < 2
+                        ? [...current, run.id]
+                        : [current[1], run.id]
+                  )
+                }
+              >
+                {selectedRunIds.includes(run.id) ? (
+                  <Check aria-hidden="true" />
+                ) : (
+                  "Comparar"
+                )}
+              </Button>
+              <div className="min-w-0 flex-1">
+                <SummaryItem
+                  key={run.id}
+                  title={`${run.mode} · ${run.status}`}
+                  description={`Pipeline ${run.pipelineVersion} · observaciones ${run.observationSequence} · verificaciones ${run.verificationSequence}`}
+                  icon={Clock3}
+                  value={
+                    run.completedAt
+                      ? formatDateTime(run.completedAt)
+                      : "En curso"
+                  }
+                  isLast={index === runsQuery.data!.length - 1}
+                />
+                {run.mode === "EVALUATE" &&
+                run.metrics &&
+                typeof run.metrics === "object" ? (
+                  <p className="px-2 pb-2 text-xs text-muted-foreground">
+                    {formatRunMetrics(run.metrics)}
+                  </p>
+                ) : null}
+                {run.mode === "EVALUATE" && run.status === "COMPLETED" ? (
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    disabled={evaluateMutation.isPending}
+                    onClick={() =>
+                      evaluateMutation.mutate(undefined, {
+                        onSuccess: () =>
+                          appToast.success({
+                            text1: "Nuevo run HOLDOUT creado",
+                          }),
+                      })
+                    }
+                  >
+                    Reejecutar
+                  </Button>
+                ) : null}
+              </div>
+            </div>
           ))
         ) : (
           <Empty>
@@ -338,6 +464,15 @@ export function AiEvidenceSection({
       ) : null}
 
       <div className="flex items-center gap-2">
+        <Button
+          type="button"
+          size="sm"
+          variant={filters.uncertain ? "secondary" : "outline"}
+          aria-pressed={filters.uncertain}
+          onClick={() => changeFilters({ uncertain: !filters.uncertain })}
+        >
+          Inciertos
+        </Button>
         <div className="relative min-w-0 flex-1">
           <Search
             className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
@@ -508,6 +643,36 @@ export function AiEvidenceSection({
   )
 }
 
+function metricLabel(key: string) {
+  const labels: Record<string, string> = {
+    transactionRecall: "Recall transaccional",
+    precision: "Precisión",
+    deterministicCoverage: "Cobertura determinista",
+    modelFallbackRate: "Fallback al modelo",
+    unknownRate: "Desconocidos",
+  }
+  return labels[key] ?? key
+}
+
+function formatRunMetrics(metrics: unknown) {
+  if (!metrics || typeof metrics !== "object") {
+    return ""
+  }
+  const values = metrics as Record<string, unknown>
+  return [
+    "transactionRecall",
+    "precision",
+    "deterministicCoverage",
+    "modelFallbackRate",
+    "unknownRate",
+  ]
+    .map(
+      (key) =>
+        `${metricLabel(key)} ${typeof values[key] === "number" ? `${((values[key] as number) * 100).toFixed(1)}%` : "—"}`
+    )
+    .join(" · ")
+}
+
 function ReviewPartitionFilter({
   value,
   counts,
@@ -642,6 +807,8 @@ function describeActiveFilters(
         return `partición ${PARTITION_LABELS[filter.value]}`
       case "status":
         return `estado ${STATUS_LABELS[filter.value]}`
+      case "uncertain":
+        return "solo incertidumbre (confianza < 70 % o sin predicción)"
     }
   })
   return `Filtros activos: ${parts.join(" · ")}`

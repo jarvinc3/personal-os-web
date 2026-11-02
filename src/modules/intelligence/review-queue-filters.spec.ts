@@ -47,6 +47,7 @@ describe("filtros de la cola de revisión", () => {
         sender: "notificaciones@github.com",
         dateFrom: "2026-10-01",
         dateTo: "2026-10-03",
+        uncertain: false,
       }
     )
   })
@@ -195,6 +196,10 @@ describe("filtros de la cola de revisión", () => {
         dateTo: "2026-10-03",
         order: "NEWEST",
       }
+    )
+    assert.equal(
+      reviewQueueApiQuery(filtersWith({ uncertain: true })).uncertain,
+      true
     )
     assert.deepEqual(reviewQueueApiQuery(REVIEW_QUEUE_FILTER_DEFAULTS), {})
   })

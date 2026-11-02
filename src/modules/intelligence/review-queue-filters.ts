@@ -38,6 +38,7 @@ export type ReviewQueueFilters = {
   /** Día `YYYY-MM-DD`, completo en la zona del perfil. */
   dateFrom: string
   dateTo: string
+  uncertain: boolean
 }
 
 /** Parámetros del contrato de `GET /intelligence/review-queue` (back #219). */
@@ -49,6 +50,7 @@ export type ReviewQueueApiQuery = {
   dateFrom?: string
   dateTo?: string
   order?: ReviewQueueOrderFilter
+  uncertain?: boolean
 }
 
 export type ActiveReviewFilter =
@@ -59,6 +61,7 @@ export type ActiveReviewFilter =
   | { kind: "order"; value: "NEWEST" }
   | { kind: "partition"; value: Exclude<ReviewQueuePartitionFilter, "ALL"> }
   | { kind: "status"; value: Exclude<ReviewQueueStatusFilter, "ALL"> }
+  | { kind: "uncertain" }
 
 export const REVIEW_QUEUE_FILTER_KEYS = {
   tab: "queue",
@@ -69,6 +72,7 @@ export const REVIEW_QUEUE_FILTER_KEYS = {
   sender: "sender",
   dateFrom: "from",
   dateTo: "to",
+  uncertain: "uncertain",
 } as const
 
 export const REVIEW_QUEUE_FILTER_DEFAULTS: ReviewQueueFilters = {
@@ -80,6 +84,7 @@ export const REVIEW_QUEUE_FILTER_DEFAULTS: ReviewQueueFilters = {
   sender: "",
   dateFrom: "",
   dateTo: "",
+  uncertain: false,
 }
 
 const REVIEWED_STATUSES: readonly AiReviewStatus[] = [
@@ -150,6 +155,7 @@ export function readReviewQueueFilters(search: {
     ),
     dateFrom: orderedDays.from,
     dateTo: orderedDays.to,
+    uncertain: search.get(REVIEW_QUEUE_FILTER_KEYS.uncertain) === "true",
   }
 }
 
@@ -197,6 +203,12 @@ export function reviewQueueFiltersHref(
   writeFilter(next, REVIEW_QUEUE_FILTER_KEYS.sender, nextFilters.sender, "")
   writeFilter(next, REVIEW_QUEUE_FILTER_KEYS.dateFrom, nextFilters.dateFrom, "")
   writeFilter(next, REVIEW_QUEUE_FILTER_KEYS.dateTo, nextFilters.dateTo, "")
+  writeFilter(
+    next,
+    REVIEW_QUEUE_FILTER_KEYS.uncertain,
+    String(nextFilters.uncertain),
+    "false"
+  )
 
   const nextHref = toHref(pathname, next)
   const currentHref = toHref(pathname, current)
@@ -246,6 +258,9 @@ export function reviewQueueApiQuery(
   if (filters.order === "NEWEST") {
     query.order = filters.order
   }
+  if (filters.uncertain) {
+    query.uncertain = true
+  }
   return query
 }
 
@@ -273,6 +288,9 @@ export function reviewQueueApiSearchParams(
   }
   if (query.order) {
     params.set("order", query.order)
+  }
+  if (query.uncertain) {
+    params.set("uncertain", "true")
   }
   return params
 }
@@ -315,6 +333,9 @@ export function activeReviewFilters(
   }
   if (filters.tab === "reviewed" && filters.status !== "ALL") {
     active.push({ kind: "status", value: filters.status })
+  }
+  if (filters.uncertain) {
+    active.push({ kind: "uncertain" })
   }
   return active
 }

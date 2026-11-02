@@ -8332,6 +8332,197 @@
           "intelligence"
         ]
       }
+    },
+    "/api/ai/conversations": {
+      "post": {
+        "operationId": "AiConversationController_create",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiConversationCreatedDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Crear una conversación privada del agente",
+        "tags": [
+          "ai-agent"
+        ]
+      },
+      "get": {
+        "operationId": "AiConversationController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AiConversationSummaryDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Listar las conversaciones propias",
+        "tags": [
+          "ai-agent"
+        ]
+      }
+    },
+    "/api/ai/conversations/{conversationId}": {
+      "get": {
+        "operationId": "AiConversationController_get",
+        "parameters": [
+          {
+            "name": "conversationId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiConversationDetailDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Conversación no encontrada"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Recuperar una conversación propia",
+        "tags": [
+          "ai-agent"
+        ]
+      },
+      "delete": {
+        "operationId": "AiConversationController_remove",
+        "parameters": [
+          {
+            "name": "conversationId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "deleted": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Conversación no encontrada"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Borrar una conversación propia y sus mensajes",
+        "tags": [
+          "ai-agent"
+        ]
+      }
+    },
+    "/api/ai/conversations/{conversationId}/messages": {
+      "post": {
+        "operationId": "AiConversationController_sendMessage",
+        "parameters": [
+          {
+            "name": "conversationId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendAiConversationMessageDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiConversationAnswerDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Mensaje vacío o demasiado largo"
+          },
+          "404": {
+            "description": "Conversación no encontrada"
+          },
+          "503": {
+            "description": "Inferencia no disponible"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Enviar un mensaje y ejecutar capacidades de lectura disponibles",
+        "tags": [
+          "ai-agent"
+        ]
+      }
     }
   },
   "info": {
@@ -18165,6 +18356,151 @@
         },
         "required": [
           "data"
+        ]
+      },
+      "AiConversationCreatedDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "AiConversationSummaryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "messageCount": {
+            "type": "number"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "messageCount",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "AiConversationMessageDto": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": [
+              "user",
+              "assistant"
+            ]
+          },
+          "content": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "role",
+          "content",
+          "createdAt"
+        ]
+      },
+      "AiConversationDetailDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "messages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AiConversationMessageDto"
+            }
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "messages",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "SendAiConversationMessageDto": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "string",
+            "example": "¿Cuánto gasté este mes?"
+          }
+        },
+        "required": [
+          "content"
+        ]
+      },
+      "AiConversationAnswerDto": {
+        "type": "object",
+        "properties": {
+          "conversationId": {
+            "type": "string"
+          },
+          "answer": {
+            "type": "string"
+          },
+          "provider": {
+            "type": "string"
+          },
+          "model": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "conversationId",
+          "answer",
+          "provider",
+          "model"
         ]
       }
     }

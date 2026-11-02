@@ -1,4 +1,7 @@
-import type { components } from "@/src/config/api-contract/api-schema"
+﻿import type {
+  components,
+  operations,
+} from "@/src/config/api-contract/api-schema"
 
 type AiSchemas = components["schemas"]
 
@@ -26,13 +29,16 @@ export type AiAnalysisRunSummary = AiSchemas["AiAnalysisRunResponseDto"]
 export type AiConsent = AiSchemas["AiConsentResponseDto"]
 export type AiRoleRow = AiSchemas["AiRoleUserResponseDto"]
 
+export type AiRunComparison =
+  operations["AiEvidenceController_compare"]["responses"]["201"]["content"]["application/json"]
+
 type ContractField<Value> = Exclude<Value, undefined>
 
 type AiEmailConnection = AiSchemas["AiEmailConnectionResponseDto"]
 
 /**
  * El contrato solo exige `connected`; la pantalla lee estos campos cuando la
- * cuenta está conectada. El alias local los declara sin agregarlos al contrato.
+ * cuenta estÃ¡ conectada. El alias local los declara sin agregarlos al contrato.
  */
 type ConnectedEmailConnection = AiEmailConnection & {
   connected: true
@@ -58,8 +64,8 @@ export type IntelligenceDashboard = Omit<
 }
 
 /**
- * El back acepta `relevance` y `notes`, pero el contrato todavía no los
- * describe; el cliente los declara aquí. Hueco del contrato, no de la web.
+ * El back acepta `relevance` y `notes`, pero el contrato todavÃ­a no los
+ * describe; el cliente los declara aquÃ­. Hueco del contrato, no de la web.
  */
 export type AiHumanVerificationInput =
   AiSchemas["CreateHumanVerificationDto"] & {
