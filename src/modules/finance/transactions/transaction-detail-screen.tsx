@@ -41,6 +41,7 @@ import {
 import { LinkTransactionSheet } from "@/src/modules/finance/transactions/components/link-transaction-sheet"
 import { TransactionDetailActions } from "@/src/modules/finance/transactions/components/transaction-detail-actions"
 import { TransactionDetailFacts } from "@/src/modules/finance/transactions/components/transaction-detail-facts"
+import { TransactionSignalTrace } from "@/src/modules/finance/transactions/components/transaction-signal-trace"
 import { TransactionDetailLinks } from "@/src/modules/finance/transactions/components/transaction-detail-links"
 import { TransactionReversalNotice } from "@/src/modules/finance/transactions/components/transaction-reversal-notice"
 import { canEditTransaction } from "@/src/modules/finance/transactions/lib/transaction-edit"
@@ -387,6 +388,8 @@ function TransactionDetailScreenBody({
           card={card}
           merchant={merchant}
         />
+
+        <TransactionSignalTrace transaction={tx} />
 
         <TransactionDetailActions
           transaction={tx}
