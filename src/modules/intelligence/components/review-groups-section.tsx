@@ -30,7 +30,14 @@ import {
 import { Skeleton } from "@/src/shared/components/ui/skeleton"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { appToast } from "@/src/shared/lib/app-toast"
-import { AlertCircle, Layers3, Mail, RotateCcw, Tags } from "lucide-react"
+import {
+  AlertCircle,
+  Layers3,
+  Mail,
+  RotateCcw,
+  Tags,
+  Unplug,
+} from "lucide-react"
 
 type ReviewGroupsSectionProps = {
   enabled: boolean
@@ -118,13 +125,29 @@ export function ReviewGroupsSection({
   }
 
   if (!enabled) {
-    return null
+    return (
+      <Empty>
+        <EmptyHeader>
+          <EmptyMedia variant="icon">
+            <Unplug aria-hidden="true" />
+          </EmptyMedia>
+          <EmptyTitle>Conecta Gmail para revisar</EmptyTitle>
+          <EmptyDescription>
+            Los grupos aparecen cuando hay correos importados de una cuenta
+            conectada.
+          </EmptyDescription>
+        </EmptyHeader>
+      </Empty>
+    )
   }
 
   return (
     <div className="flex flex-col gap-2">
       {groupsQuery.isPending ? (
         <div className="flex flex-col gap-2 p-2" aria-label="Cargando grupos">
+          <span className="text-xs text-muted-foreground">
+            Cargando grupos…
+          </span>
           <Skeleton className="h-20 w-full" />
           <Skeleton className="h-20 w-full" />
           <Skeleton className="h-20 w-full" />
