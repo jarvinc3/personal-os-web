@@ -65,6 +65,7 @@ import {
 } from "./messages-rate-limit"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { AiEvidenceSection } from "./components/ai-evidence-section"
+import { EmailSignalSection } from "./components/email-signal-section"
 import { ReviewSection } from "./components/review-section"
 import {
   describeVerificationPayload,
@@ -1005,6 +1006,7 @@ function IntelligenceMessageDetail({
               </p>
             ) : null}
           </SummarySection>
+          <EmailSignalSection message={data} />
           <SummarySection
             title="Procedencia y verificaciones"
             subtitle="Registros append-only vinculados al correo original."
