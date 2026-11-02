@@ -2759,6 +2759,59 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/api/ai/conversations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Listar las conversaciones propias */
+        get: operations["AiConversationController_list"];
+        put?: never;
+        /** Crear una conversación privada del agente */
+        post: operations["AiConversationController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/ai/conversations/{conversationId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Recuperar una conversación propia */
+        get: operations["AiConversationController_get"];
+        put?: never;
+        post?: never;
+        /** Borrar una conversación propia y sus mensajes */
+        delete: operations["AiConversationController_remove"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/ai/conversations/{conversationId}/messages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Enviar un mensaje y ejecutar capacidades de lectura disponibles */
+        post: operations["AiConversationController_sendMessage"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 };
 export type webhooks = Record<string, never>;
 export type components = {
@@ -5631,6 +5684,49 @@ export type components = {
         };
         AiSignalListResponseDto: {
             data: components["schemas"]["AiSignalResponseDto"][];
+        };
+        AiConversationCreatedDto: {
+            id: string;
+            title: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        AiConversationSummaryDto: {
+            id: string;
+            title: string;
+            messageCount: number;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        AiConversationMessageDto: {
+            /** @enum {string} */
+            role: "user" | "assistant";
+            content: string;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        AiConversationDetailDto: {
+            id: string;
+            title: string;
+            messages: components["schemas"]["AiConversationMessageDto"][];
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        SendAiConversationMessageDto: {
+            /** @example ¿Cuánto gasté este mes? */
+            content: string;
+        };
+        AiConversationAnswerDto: {
+            conversationId: string;
+            answer: string;
+            provider: string;
+            model: string;
         };
     };
     responses: never;
@@ -10379,6 +10475,148 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["AiSignalResponseDto"];
                 };
+            };
+        };
+    };
+    AiConversationController_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AiConversationSummaryDto"][];
+                };
+            };
+        };
+    };
+    AiConversationController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AiConversationCreatedDto"];
+                };
+            };
+        };
+    };
+    AiConversationController_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                conversationId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AiConversationDetailDto"];
+                };
+            };
+            /** @description Conversación no encontrada */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AiConversationController_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                conversationId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        deleted?: boolean;
+                    };
+                };
+            };
+            /** @description Conversación no encontrada */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AiConversationController_sendMessage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                conversationId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SendAiConversationMessageDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AiConversationAnswerDto"];
+                };
+            };
+            /** @description Mensaje vacío o demasiado largo */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Conversación no encontrada */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Inferencia no disponible */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

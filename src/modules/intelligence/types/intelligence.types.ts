@@ -208,6 +208,8 @@ export type AiAnalysisRunSummary = {
   status: "RUNNING" | "COMPLETED" | "FAILED"
   observationSequence: string
   verificationSequence: string
+  consentRevision?: string
+  reproductionStatus?: string
   projectorVersion: string
   policyVersion: string
   pipelineVersion: string
@@ -219,6 +221,14 @@ export type AiAnalysisRunSummary = {
   startedAt: string
   completedAt: string | null
   error: string | null
+}
+
+export type AiRunComparison = {
+  comparable: boolean
+  warning: string | null
+  first: AiAnalysisRunSummary
+  second: AiAnalysisRunSummary
+  deltas: Record<string, number | null> | null
 }
 
 export type AiConsent = {
