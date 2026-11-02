@@ -97,7 +97,7 @@ function IntelligenceScreenBody() {
     open: messageSheetOpen,
     sheetId: selectedMessageId,
     setOpen: setMessageSheetOpen,
-  } = useSheetParam(INTELLIGENCE_SHEET_KEYS.message)
+  } = useSheetParam(INTELLIGENCE_SHEET_KEYS.message, { closeMode: "replace" })
   usePageHeader({ title: "Inteligencia" })
 
   const messages = useMemo(
@@ -1008,7 +1008,7 @@ function MessageRepresentation({
   return (
     <section className="flex flex-col gap-1">
       <h4 className="text-xs font-medium text-muted-foreground">{title}</h4>
-      <pre className="max-h-80 overflow-auto rounded-lg bg-muted p-3 font-sans text-sm wrap-break-word whitespace-pre-wrap">
+      <pre className="rounded-lg bg-muted p-3 font-sans text-sm wrap-break-word whitespace-pre-wrap">
         {value || "No disponible"}
       </pre>
     </section>

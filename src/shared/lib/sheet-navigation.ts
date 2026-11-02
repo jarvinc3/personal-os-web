@@ -18,6 +18,13 @@ export type SheetNavResult =
   | { action: "replace"; url: string }
   | { action: "back" }
 
+/**
+ * Cómo cierra una hoja abierta con `push`: `back` consume la entrada de
+ * historial y Atrás sigue saliendo de la vista; `replace` la reescribe sin
+ * consumirla, así que Atrás se queda en la vista con la hoja cerrada.
+ */
+export type SheetCloseMode = "back" | "replace"
+
 export type SheetSearchSnapshot = {
   sheetKey: string | null
   sheetId: string | null
@@ -155,6 +162,7 @@ export function resolveSheetNavigation(input: {
   open: boolean
   id?: string | null
   wasPushed: boolean
+  closeMode?: SheetCloseMode
 }): SheetNavResult {
   const currentSheet = input.searchParams.get(SHEET_QUERY_KEY)
   const currentId = input.searchParams.get(SHEET_ID_QUERY_KEY)
@@ -185,7 +193,7 @@ export function resolveSheetNavigation(input: {
     return { action: "noop" }
   }
 
-  if (input.wasPushed) {
+  if (input.wasPushed && input.closeMode !== "replace") {
     return { action: "back" }
   }
 
