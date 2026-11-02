@@ -151,7 +151,7 @@ export type ReviewGroupSample = {
 export function reviewGroupSamples(group: AiReviewGroup): ReviewGroupSample[] {
   return group.sampleSubjects.map((subject, index) => ({
     subject,
-    messageId: group.sampleMessageIds[index] ?? null,
+    messageId: group.sampleMessageIds?.[index] ?? null,
   }))
 }
 

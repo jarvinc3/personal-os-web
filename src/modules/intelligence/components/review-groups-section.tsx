@@ -10,6 +10,7 @@ import {
   reviewGroupBatchResultLines,
   reviewGroupKey,
   reviewGroupSamples,
+  type ReviewGroupSample,
 } from "@/src/modules/intelligence/review-groups"
 import type {
   AiReviewGroup,
@@ -275,7 +276,7 @@ function ReviewGroupSamples({
   samples,
   onOpenMessage,
 }: {
-  samples: ReturnType<typeof reviewGroupSamples>
+  samples: ReviewGroupSample[]
   onOpenMessage: (messageId: string) => void
 }) {
   return (

@@ -238,4 +238,14 @@ describe("grupos de revisión", () => {
       ]
     )
   })
+
+  it("deja sin enlace las muestras cuando el contrato no trae los ids", () => {
+    assert.deepEqual(
+      reviewGroupSamples(reviewGroup({ sampleMessageIds: undefined })),
+      [
+        { subject: "Revisión de seguridad de <n>", messageId: null },
+        { subject: "Nueva actividad", messageId: null },
+      ]
+    )
+  })
 })
