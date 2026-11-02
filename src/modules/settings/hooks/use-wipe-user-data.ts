@@ -5,6 +5,7 @@ import { getSupabaseBrowserClient } from "@/src/config/supabase/client"
 import { clearPrefs } from "@/src/modules/keep-awake"
 import { AuthServiceError, translateAuthError } from "@/src/modules/auth"
 import { DATA_BRANCHES_QUERY_KEY } from "@/src/modules/settings/hooks/use-data-branches"
+import { wipeSummary } from "@/src/modules/settings/lib/wipe-summary"
 import {
   SETTINGS_DEFAULTS_BRANCH,
   type WipeUserDataResult,
@@ -13,8 +14,8 @@ import { API_ENDPOINTS } from "@/src/shared/constants/api-endpoints"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 
-/** Branches named in the toast before it summarizes the rest. */
-const NAMED_BRANCH_LIMIT = 4
+/** Duración del aviso: el cierre de la hoja no debe taparlo. */
+const WIPE_TOAST_DURATION_MS = 8000
 
 export type WipeUserDataPayload = {
   email: string
@@ -71,41 +72,21 @@ type WipeSummaryInput = {
   branchLabels?: Record<string, string>
 }
 
-function wipeSummary({
-  wipeResult,
-  branchLabels,
-}: WipeSummaryInput): string | undefined {
-  const labels = wipeResult.appliedBranches.map(
-    (branchId) => branchLabels?.[branchId] ?? branchId
-  )
-  if (labels.length === 0) {
-    return undefined
-  }
-  const named =
-    labels.length > NAMED_BRANCH_LIMIT
-      ? `${labels.slice(0, NAMED_BRANCH_LIMIT - 1).join(", ")} y ${
-          labels.length - NAMED_BRANCH_LIMIT + 1
-        } más`
-      : labels.join(", ")
-  const rows = Object.values(wipeResult.counts).reduce(
-    (total, count) => total + count,
-    0
-  )
-  return `${named} · ${rows} filas afectadas.`
-}
-
 export function useWipeUserData() {
   const queryClient = useQueryClient()
 
   const finishWipe = ({ wipeResult, branchLabels }: WipeSummaryInput): void => {
+    // El aviso se publica antes de invalidar la caché: el refresco completo de
+    // las consultas no debe retrasarlo ni hacerlo pasar desapercibido.
+    appToast.success({
+      text1: "Datos vaciados",
+      text2: wipeSummary({ wipeResult, branchLabels }),
+      duration: WIPE_TOAST_DURATION_MS,
+    })
     if (wipeResult.appliedBranches.includes(SETTINGS_DEFAULTS_BRANCH)) {
       clearPrefs()
     }
     void queryClient.invalidateQueries()
-    appToast.success({
-      text1: "Datos vaciados",
-      text2: wipeSummary({ wipeResult, branchLabels }),
-    })
   }
 
   const handleError = (error: unknown): void => {
