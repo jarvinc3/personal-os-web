@@ -8,7 +8,7 @@ alwaysApply: true
 Un bottom-sheet se abre con la URL, no con un `useState` local. Así Atrás lo cierra y la hoja se puede enlazar.
 
 - Abrir y cerrar: `useSheetParam(key)` de `@/src/shared/hooks/use-sheet-params`. Devuelve `{ open, sheetId, setOpen }` y escribe `?sheet=<clave>` y, si hay registro, `?sheetId=<id>`.
-- Cerrar sin consumir el historial: `useSheetParam(key, { closeMode: "replace" })`. El cierre reescribe la URL en vez de retroceder, así Atrás después de cerrar se queda en la vista. Es para el detalle de un correo abierto desde una lista con pestaña o filtros; el resto de las hojas mantiene el retroceso, que es lo que documenta esta regla.
+- Cerrar sin consumir el historial: `useSheetParam(key, { closeMode: "replace" })` reescribe la URL en vez de retroceder, así Atrás después del cierre se queda en la vista. Solo lo usa el detalle de un correo de Inteligencia; el resto de las hojas cierra con retroceso.
 - La clave es una constante del módulo. En Finanzas sale de `FINANCE_SHEET_KEYS` (`src/modules/finance/shared/constants/sheet-keys.ts`) y en Ajustes de `SETTINGS_SHEET_KEYS` (`src/modules/settings/constants/sheet-keys.ts`), que Privacidad y Finanzas comparten para el vaciado. No un literal suelto en el JSX.
 - Hoja de un registro: `setOpen(true, id)` y el contenido lee `sheetId`; para resolverlo sobre una lista o una query, `useSheetListEntity` / `useSheetQueryEntity` (`src/modules/finance/shared/hooks/use-sheet-entity.ts`). Hoja sin registro: `setOpen(true)`.
 - La hoja no recibe `open` desde un estado de la pantalla: el estado vive en la URL.
