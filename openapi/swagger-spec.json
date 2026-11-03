@@ -371,7 +371,7 @@
         ]
       }
     },
-    "/api/ai/admin/roles": {
+    "/api/intelligence/admin/roles": {
       "get": {
         "operationId": "AiRolesController_list",
         "parameters": [],
@@ -400,7 +400,7 @@
         ]
       }
     },
-    "/api/ai/admin/roles/{userId}": {
+    "/api/intelligence/admin/roles/{userId}": {
       "patch": {
         "operationId": "AiRolesController_update",
         "parameters": [
@@ -445,7 +445,7 @@
         ]
       }
     },
-    "/api/ai/preferences/consent": {
+    "/api/intelligence/preferences/consent": {
       "get": {
         "operationId": "AiConsentController_get",
         "parameters": [],
@@ -8333,7 +8333,7 @@
         ]
       }
     },
-    "/api/ai/conversations": {
+    "/api/intelligence/conversations": {
       "post": {
         "operationId": "AiConversationController_create",
         "parameters": [],
@@ -8356,7 +8356,7 @@
         ],
         "summary": "Crear una conversación privada del agente",
         "tags": [
-          "ai-agent"
+          "intelligence-conversations"
         ]
       },
       "get": {
@@ -8384,11 +8384,11 @@
         ],
         "summary": "Listar las conversaciones propias",
         "tags": [
-          "ai-agent"
+          "intelligence-conversations"
         ]
       }
     },
-    "/api/ai/conversations/{conversationId}": {
+    "/api/intelligence/conversations/{conversationId}": {
       "get": {
         "operationId": "AiConversationController_get",
         "parameters": [
@@ -8423,7 +8423,7 @@
         ],
         "summary": "Recuperar una conversación propia",
         "tags": [
-          "ai-agent"
+          "intelligence-conversations"
         ]
       },
       "delete": {
@@ -8465,11 +8465,11 @@
         ],
         "summary": "Borrar una conversación propia y sus mensajes",
         "tags": [
-          "ai-agent"
+          "intelligence-conversations"
         ]
       }
     },
-    "/api/ai/conversations/{conversationId}/messages": {
+    "/api/intelligence/conversations/{conversationId}/messages": {
       "post": {
         "operationId": "AiConversationController_sendMessage",
         "parameters": [
@@ -8520,7 +8520,7 @@
         ],
         "summary": "Enviar un mensaje y ejecutar capacidades de lectura disponibles",
         "tags": [
-          "ai-agent"
+          "intelligence-conversations"
         ]
       }
     }
@@ -8553,8 +8553,7 @@
       "description": ""
     },
     {
-      "name": "ai-agent",
-      "description": ""
+      "name": "intelligence"
     }
   ],
   "servers": [],

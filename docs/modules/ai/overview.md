@@ -6,7 +6,7 @@
 
 UI del agente central: sesiones, streaming, cards de confirmación, selector de contexto, insights por socket.
 
-Código: `src/modules/ai/` (docs en `docs/modules/ai/`, no `ai-agent`).
+Código: `src/modules/ai/` (histórico; el módulo del back se llama `intelligence` desde el issue #307).
 
 ## Alcance
 

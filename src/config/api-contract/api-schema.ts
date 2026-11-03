@@ -160,7 +160,7 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
-    "/api/ai/admin/roles": {
+    "/api/intelligence/admin/roles": {
         parameters: {
             query?: never;
             header?: never;
@@ -176,7 +176,7 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
-    "/api/ai/admin/roles/{userId}": {
+    "/api/intelligence/admin/roles/{userId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -192,7 +192,7 @@ export type paths = {
         patch: operations["AiRolesController_update"];
         trace?: never;
     };
-    "/api/ai/preferences/consent": {
+    "/api/intelligence/preferences/consent": {
         parameters: {
             query?: never;
             header?: never;
@@ -2759,7 +2759,7 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
-    "/api/ai/conversations": {
+    "/api/intelligence/conversations": {
         parameters: {
             query?: never;
             header?: never;
@@ -2777,7 +2777,7 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
-    "/api/ai/conversations/{conversationId}": {
+    "/api/intelligence/conversations/{conversationId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -2795,7 +2795,7 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
-    "/api/ai/conversations/{conversationId}/messages": {
+    "/api/intelligence/conversations/{conversationId}/messages": {
         parameters: {
             query?: never;
             header?: never;

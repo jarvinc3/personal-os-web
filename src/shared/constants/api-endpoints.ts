@@ -51,9 +51,10 @@ export const API_ENDPOINTS = {
       `/intelligence/knowledge/admin/${encodeURIComponent(knowledgeId)}/revert`,
     KNOWLEDGE_EXPORT: "/intelligence/knowledge/me/export",
     KNOWLEDGE_DELETE: "/intelligence/knowledge/me",
-    CONSENT: "/ai/preferences/consent",
-    ROLES: "/ai/admin/roles",
-    ROLE: (userId: string) => `/ai/admin/roles/${encodeURIComponent(userId)}`,
+    CONSENT: "/intelligence/preferences/consent",
+    ROLES: "/intelligence/admin/roles",
+    ROLE: (userId: string) =>
+      `/intelligence/admin/roles/${encodeURIComponent(userId)}`,
   },
   FINANCE: {
     INSTITUTIONS: "/finance/institutions",

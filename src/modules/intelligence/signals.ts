@@ -38,7 +38,7 @@ const FAILED_CLASSIFICATION_STATUS = "FAILED"
 /**
  * El contrato no busca señales por correo: las lista y las entrega por id. El
  * back arma el id de la señal como "email-" más el id del mensaje en
- * packages/ai-agent/src/intelligence/email/ai-email-classification.service.ts
+ * packages/intelligence/src/email/ai-email-classification.service.ts
  * (`const signalId = ...`), así que la web reconstruye ese id en vez de pedir
  * la lista y filtrarla por el correo.
  */
