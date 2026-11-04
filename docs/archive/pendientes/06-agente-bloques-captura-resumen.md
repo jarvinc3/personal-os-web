@@ -2,7 +2,7 @@
 
 ## Estado verificado
 
-- `ChatBlock` solo tiene `markdown` y `action` (`ai-agent/src/shared/ai.types.ts`); la web renderiza esos dos en `chat-message-renderer.tsx` (`chat-markdown-block.tsx`, `chat-action-card.tsx`).
+- `ChatBlock` solo tiene `markdown` y `action` (`packages/intelligence/src/shared/ai.types.ts`); la web renderiza esos dos en `chat-message-renderer.tsx` (`chat-markdown-block.tsx`, `chat-action-card.tsx`).
 - No hay captura rápida en lenguaje natural ni resumen semanal. `notifications.monthlyReport` existe como ajuste, pero no hay un resumen semanal.
 
 ## 6a · Bloques visuales
