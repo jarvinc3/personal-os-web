@@ -30,6 +30,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Cambiado
 
+- #362: aclara que el chat, `/chat` y su renderer pertenecen al runtime retirado; conserva la guía como referencia histórica y delimita la sintaxis Markdown como código.
 - Consentimiento y administración de roles llaman a `/api/intelligence/*`; la copia OpenAPI se sincroniza con el back tras unificar el módulo como `intelligence`, y las notas históricas apuntan a la ruta actual del paquete (jarvinc3/personal-os-back#307, #398).
 - Los tipos de Inteligencia se leen desde el contrato OpenAPI del back: cada tipo del módulo pasa a un alias de `components["schemas"]` y solo quedan locales los campos que el contrato todavía no describe (`relevance`, `notes` y `templateFingerprint`). Un cambio del back ahora rompe el typecheck en lugar de la pantalla, sin cambios visibles en las pantallas (#384).
 - El contrato OpenAPI versionado pasa a la copia de `develop` del back: 161 rutas y 244 schemas, con 203 de las 209 respuestas 2xx descritas. La señal del correo ya se lee con tipos generados; el resto de los tipos a mano de Inteligencia se migra en #384 (#383).
