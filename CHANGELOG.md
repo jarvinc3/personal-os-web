@@ -79,6 +79,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Corregido
 
+- #289: retira de la tabla la referencia a la card de sincronización de Finanzas que ya no existe y señala el estado integrado actual de Gmail en Intelligence.
 - Al cerrar desde un movimiento importado la hoja del correo de origen, se vuelve al detalle del movimiento y se conserva el estado de navegación (#389).
 - Cerrar el detalle de un correo de Inteligencia reescribe la URL en vez de retroceder: Atrás ya no sale de Inteligencia ni reabre el panel, y la vista se queda en Revisión con el panel cerrado (#376).
 - El detalle de un correo muestra las representaciones «Canónica» y «Saneada» completas, sin el recorte de 320 px con scroll interno que las dejaba a medias; el panel es el único que se desplaza (#376).
