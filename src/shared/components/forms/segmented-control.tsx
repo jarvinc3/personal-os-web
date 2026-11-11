@@ -29,6 +29,7 @@ type SegmentedControlProps<T extends string> = {
   error?: string
   size?: "sm" | "lg"
   fullWidth?: boolean
+  orientation?: "horizontal" | "vertical"
 }
 
 /**
@@ -45,6 +46,7 @@ export function SegmentedControl<T extends string>({
   error,
   size = "sm",
   fullWidth = false,
+  orientation = "horizontal",
 }: SegmentedControlProps<T>) {
   return (
     <Field data-invalid={error ? true : undefined} className="gap-1">
@@ -60,9 +62,13 @@ export function SegmentedControl<T extends string>({
         }}
         variant="outline"
         size={size === "lg" ? "lg" : "sm"}
+        orientation={orientation}
         aria-label={label ?? ariaLabel}
         disabled={disabled}
-        className={cn(fullWidth && "w-full")}
+        className={cn(
+          fullWidth && "w-full",
+          orientation === "vertical" && "flex-col items-stretch"
+        )}
       >
         {options.map((option) => {
           const OptionIcon = option.icon
@@ -73,7 +79,8 @@ export function SegmentedControl<T extends string>({
               className={cn(
                 "rounded-full",
                 SEGMENT_PRESSED_CLASS,
-                fullWidth && "h-11 flex-1 text-base"
+                fullWidth && "h-11 flex-1 text-base",
+                orientation === "vertical" && "w-full flex-none justify-start"
               )}
             >
               {OptionIcon ? <OptionIcon /> : null}

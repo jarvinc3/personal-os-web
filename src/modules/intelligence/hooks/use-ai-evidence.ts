@@ -1,6 +1,10 @@
 "use client"
 
 import { apiGet, apiPost } from "@/src/config/api-client"
+import {
+  EVIDENCE_QUERY_KEY,
+  REVIEW_GROUPS_QUERY_KEY,
+} from "@/src/modules/intelligence/constants/query-keys"
 import { removeReviewQueueItem } from "@/src/modules/intelligence/review-queue"
 import {
   reviewQueueApiSearchParams,
@@ -11,6 +15,8 @@ import type {
   AiHumanVerificationInput,
   AiRunComparison,
   AiReviewQueuePage,
+  AiReviewSelectionVerificationInput,
+  AiReviewSelectionVerificationResult,
 } from "@/src/modules/intelligence/types/intelligence.types"
 import { API_ENDPOINTS } from "@/src/shared/constants/api-endpoints"
 import { useAppStore } from "@/src/shared/store/app-store"
@@ -23,7 +29,7 @@ import {
   type QueryKey,
 } from "@tanstack/react-query"
 
-export const EVIDENCE_QUERY_KEY = ["intelligence", "evidence"] as const
+export { EVIDENCE_QUERY_KEY } from "@/src/modules/intelligence/constants/query-keys"
 const REVIEW_QUEUE_QUERY_KEY = [...EVIDENCE_QUERY_KEY, "review-queue"] as const
 
 type ReviewQueueData = InfiniteData<AiReviewQueuePage>
@@ -117,11 +123,28 @@ export function useAiEvidence(
       ])
     },
   })
+  const verifySelectionMutation = useMutation({
+    mutationFn: (input: AiReviewSelectionVerificationInput) =>
+      apiPost<AiReviewSelectionVerificationResult>(
+        API_ENDPOINTS.INTELLIGENCE.VERIFY_REVIEW_SELECTION,
+        input
+      ),
+    onSettled: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: EVIDENCE_QUERY_KEY }),
+        queryClient.invalidateQueries({ queryKey: REVIEW_GROUPS_QUERY_KEY }),
+        queryClient.invalidateQueries({
+          queryKey: ["intelligence", "message"],
+        }),
+      ])
+    },
+  })
 
   return {
     reviewQueueQuery,
     runsQuery,
     verifyMutation,
+    verifySelectionMutation,
     evaluateMutation,
     compareMutation,
   }

@@ -432,6 +432,38 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/api/intelligence/runs/evaluate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["AiEvidenceController_evaluate"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/intelligence/runs/compare": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["AiEvidenceController_compare"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/intelligence/knowledge": {
         parameters: {
             query?: never;
@@ -546,6 +578,142 @@ export type paths = {
         post?: never;
         /** Borrar inmediatamente los datos AI propios y dejar lápidas estructurales elegibles */
         delete: operations["AiKnowledgeController_remove"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/intelligence/signals": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["AiSignalsController_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/intelligence/signals/{signalId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["AiSignalsController_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/intelligence/conversations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Listar las conversaciones propias */
+        get: operations["AiConversationController_list"];
+        put?: never;
+        /** Crear una conversación privada del agente */
+        post: operations["AiConversationController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/intelligence/conversations/{conversationId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Recuperar una conversación propia */
+        get: operations["AiConversationController_get"];
+        put?: never;
+        post?: never;
+        /** Borrar una conversación propia y sus mensajes */
+        delete: operations["AiConversationController_remove"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/intelligence/conversations/{conversationId}/messages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Enviar un mensaje y ejecutar capacidades de lectura disponibles */
+        post: operations["AiConversationController_sendMessage"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/intelligence/actions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Listar acciones propias del agente */
+        get: operations["AiActionsController_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/intelligence/actions/{actionId}/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Confirmar una acción pendiente del agente */
+        post: operations["AiActionsController_confirm"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/intelligence/actions/{actionId}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cancelar una acción pendiente del agente */
+        post: operations["AiActionsController_cancel"];
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -2693,7 +2861,7 @@ export type paths = {
         patch: operations["NotificationsController_deactivatePushTokenLegacy"];
         trace?: never;
     };
-    "/api/intelligence/runs/evaluate": {
+    "/api/intelligence/messages/verifications/batch": {
         parameters: {
             query?: never;
             header?: never;
@@ -2702,110 +2870,7 @@ export type paths = {
         };
         get?: never;
         put?: never;
-        /** Evaluate frozen email HOLDOUT */
-        post: operations["AiEvidenceController_evaluate"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/intelligence/runs/compare": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Compare evaluation runs */
-        post: operations["AiEvidenceController_compare"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/intelligence/signals": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["AiSignalsController_list"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/intelligence/signals/{signalId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["AiSignalsController_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/intelligence/conversations": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Listar las conversaciones propias */
-        get: operations["AiConversationController_list"];
-        put?: never;
-        /** Crear una conversación privada del agente */
-        post: operations["AiConversationController_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/intelligence/conversations/{conversationId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Recuperar una conversación propia */
-        get: operations["AiConversationController_get"];
-        put?: never;
-        post?: never;
-        /** Borrar una conversación propia y sus mensajes */
-        delete: operations["AiConversationController_remove"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/intelligence/conversations/{conversationId}/messages": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Enviar un mensaje y ejecutar capacidades de lectura disponibles */
-        post: operations["AiConversationController_sendMessage"];
+        post: operations["AiEvidenceController_verifyReviewSelection"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2956,7 +3021,7 @@ export type components = {
             /** @enum {string} */
             status: "running" | "waiting" | "retrying" | "scheduled" | "completed" | "failed";
             /** @enum {string} */
-            phase: "bootstrap" | "incremental" | "recovery";
+            phase: "bootstrap" | "incremental" | "recovery" | "classifying";
             attempt: number;
             rateLimitRetryCount?: number;
             processedThisRun: number;
@@ -3065,6 +3130,19 @@ export type components = {
             observations: components["schemas"]["AiKnowledgeObservationResponseDto"][];
             verifications: components["schemas"]["AiHumanVerificationResponseDto"][];
         };
+        AiEmailClassificationResponseDto: {
+            route: string;
+            relevance: boolean;
+            semanticType: string;
+            transaction: Record<string, never> | null;
+            confidence: number;
+            decisionPath: string;
+            knowledgeUsed: Record<string, never>[];
+            provider: string | null;
+            model: string | null;
+            /** Format: date-time */
+            createdAt: string;
+        };
         AiEmailMessageResponseDto: {
             id: string;
             /** Format: date-time */
@@ -3080,12 +3158,17 @@ export type components = {
             providerMessageId: string;
             providerThreadId: string | null;
             templateFingerprint: string | null;
+            classification: Record<string, never> | null;
+            classificationPath: string | null;
+            classificationProvider: string | null;
+            classificationModel: string | null;
             /** Format: date-time */
             createdAt: string;
             /** Format: date-time */
             updatedAt: string;
             content: components["schemas"]["AiEmailContentResponseDto"] | null;
             provenance: components["schemas"]["AiEmailMessageProvenanceResponseDto"];
+            classifications: components["schemas"]["AiEmailClassificationResponseDto"][];
         };
         AiEmailConnectResponseDto: {
             authorizationUrl: string;
@@ -3138,6 +3221,10 @@ export type components = {
             partition: "TRAIN" | "VALIDATION" | "HOLDOUT";
             /** @enum {string} */
             status: "PENDING" | "CONFIRMED" | "CORRECTED" | "REJECTED";
+            /** @enum {string|null} */
+            semanticType: "FIN_TRANSACTION" | "PURCHASE_RECEIPT" | "SUBSCRIPTION_BILLING" | "FIN_STATEMENT_NOTICE" | "FIN_ACCOUNT_NOTICE" | "SECURITY_OTP" | "SECURITY_ALERT" | "TECH_NOTIFICATION" | "JOB" | "CALENDAR_EVENT" | "MARKETING" | "SOCIAL" | "OTHER" | null;
+            routes: ("FINANCE" | "SUBSCRIPTIONS" | "CALENDAR" | "SECURITY")[];
+            confidence: number | null;
             verification: components["schemas"]["AiReviewItemVerificationResponseDto"] | null;
         };
         AiReviewQueueCountsResponseDto: {
@@ -3183,10 +3270,12 @@ export type components = {
             last4?: string;
         };
         CreateReviewGroupVerificationDto: {
+            relevance?: boolean;
             /** @enum {string} */
             semanticType?: "FIN_TRANSACTION" | "PURCHASE_RECEIPT" | "SUBSCRIPTION_BILLING" | "FIN_STATEMENT_NOTICE" | "FIN_ACCOUNT_NOTICE" | "SECURITY_OTP" | "SECURITY_ALERT" | "TECH_NOTIFICATION" | "JOB" | "CALENDAR_EVENT" | "MARKETING" | "SOCIAL" | "OTHER";
             routes?: ("FINANCE" | "SUBSCRIPTIONS" | "CALENDAR" | "SECURITY")[];
             transaction?: components["schemas"]["HumanVerificationTransactionDto"];
+            notes?: string;
             /** @enum {string} */
             verdict: "CONFIRMED" | "CORRECTED";
             /** @example notifications@github.com */
@@ -3198,12 +3287,16 @@ export type components = {
             verified: number;
             holdoutExcluded: number;
             alreadyVerified: number;
+            /** @description Correos de la misma plantilla reencolados y reclasificados con la etiqueta verificada. */
+            requeued: number;
         };
         CreateHumanVerificationDto: {
+            relevance?: boolean;
             /** @enum {string} */
             semanticType?: "FIN_TRANSACTION" | "PURCHASE_RECEIPT" | "SUBSCRIPTION_BILLING" | "FIN_STATEMENT_NOTICE" | "FIN_ACCOUNT_NOTICE" | "SECURITY_OTP" | "SECURITY_ALERT" | "TECH_NOTIFICATION" | "JOB" | "CALENDAR_EVENT" | "MARKETING" | "SOCIAL" | "OTHER";
             routes?: ("FINANCE" | "SUBSCRIPTIONS" | "CALENDAR" | "SECURITY")[];
             transaction?: components["schemas"]["HumanVerificationTransactionDto"];
+            notes?: string;
             /** @enum {string} */
             verdict: "CONFIRMED" | "CORRECTED" | "REJECTED";
         };
@@ -3219,6 +3312,8 @@ export type components = {
             correctedPayload: Record<string, never> | null;
             notes: string | null;
             isGroundTruth: boolean;
+            /** @description Correos de la misma plantilla reencolados y reclasificados con la etiqueta verificada. */
+            requeued: number;
             /** Format: date-time */
             createdAt: string;
         };
@@ -3251,6 +3346,10 @@ export type components = {
             /** Format: date-time */
             completedAt: string | null;
             error: string | null;
+        };
+        CompareAnalysisRunsDto: {
+            firstRunId: string;
+            secondRunId: string;
         };
         KnowledgeTransactionDto: {
             /**
@@ -3342,6 +3441,120 @@ export type components = {
             deletedMessages: number;
             detachedVerifications: number;
             detachedObservations: number;
+        };
+        AiSignalEvidenceResponseDto: {
+            /** @example EMAIL_CLASSIFICATION */
+            sourceType: string;
+            sourceId: string;
+            excerpt: Record<string, never>;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        AiSignalResponseDto: {
+            id: string;
+            type: string;
+            domain: string;
+            /** @enum {string} */
+            status: "DETECTED" | "VALIDATED" | "ROUTED" | "CONSUMED" | "DISMISSED" | "SUPERSEDED" | "FAILED";
+            sourceType: string;
+            sourceId: string;
+            payload: Record<string, never>;
+            correlationKey: string;
+            /** Format: date-time */
+            occurredAt: string;
+            /** Format: date-time */
+            detectedAt: string;
+            confidence?: number;
+            evidence: components["schemas"]["AiSignalEvidenceResponseDto"][];
+        };
+        AiSignalListResponseDto: {
+            data: components["schemas"]["AiSignalResponseDto"][];
+        };
+        AiConversationCreatedDto: {
+            id: string;
+            title: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        AiConversationSummaryDto: {
+            id: string;
+            title: string;
+            messageCount: number;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        AiConversationMessageDto: {
+            /** @enum {string} */
+            role: "user" | "assistant";
+            content: string;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        AiConversationDetailDto: {
+            id: string;
+            title: string;
+            messages: components["schemas"]["AiConversationMessageDto"][];
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        SendAiConversationMessageDto: {
+            /** @example ¿Cuánto gasté este mes? */
+            content: string;
+        };
+        AiConversationActionDto: {
+            id: string;
+            actionType: string;
+            targetModule: string;
+            /** @enum {string} */
+            policy: "AUTO_ALLOWED" | "CONFIRM_REQUIRED" | "FORBIDDEN";
+            /** @enum {string} */
+            status: "PENDING" | "RUNNING" | "SUCCESS" | "FAILED" | "CANCELLED";
+            /** @enum {string} */
+            outcome: "PENDING_CONFIRMATION" | "EXECUTED" | "ALREADY_EXECUTED" | "ALREADY_CLAIMED" | "FORBIDDEN" | "FAILED" | "CANCELLED";
+            payload: {
+                [key: string]: unknown;
+            };
+            result: {
+                [key: string]: unknown;
+            } | null;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        AiConversationAnswerDto: {
+            conversationId: string;
+            answer: string;
+            provider: string;
+            model: string;
+            actions?: components["schemas"]["AiConversationActionDto"][];
+        };
+        AiActionDto: {
+            id: string;
+            actionType: string;
+            targetModule: string;
+            /** @enum {string} */
+            policy: "AUTO_ALLOWED" | "CONFIRM_REQUIRED" | "FORBIDDEN";
+            /** @enum {string} */
+            status: "PENDING" | "RUNNING" | "SUCCESS" | "FAILED" | "CANCELLED";
+            payload: {
+                [key: string]: unknown;
+            };
+            result: {
+                [key: string]: unknown;
+            } | null;
+            /** Format: date-time */
+            createdAt: string;
+            executedAt: Record<string, never> | null;
+        };
+        AiActionResultDto: {
+            /** @enum {string} */
+            outcome: "PENDING_CONFIRMATION" | "EXECUTED" | "ALREADY_EXECUTED" | "ALREADY_CLAIMED" | "FORBIDDEN" | "FAILED" | "CANCELLED";
+            action: components["schemas"]["AiActionDto"];
         };
         ExchangeRateResponseDto: {
             /** @example USD */
@@ -5649,84 +5862,22 @@ export type components = {
         NotificationSuccessResponseDto: {
             success: boolean;
         };
-        CompareAnalysisRunsDto: {
-            firstRunId: string;
-            secondRunId: string;
-        };
-        AiSignalEvidenceResponseDto: {
-            /** @example EMAIL_CLASSIFICATION */
-            sourceType: string;
-            sourceId: string;
-            excerpt: {
-                [key: string]: unknown;
-            };
-            /** Format: date-time */
-            createdAt: string;
-        };
-        AiSignalResponseDto: {
-            id: string;
-            type: string;
-            domain: string;
+        CreateReviewSelectionVerificationDto: {
+            relevance?: boolean;
             /** @enum {string} */
-            status: "DETECTED" | "VALIDATED" | "ROUTED" | "CONSUMED" | "DISMISSED" | "SUPERSEDED" | "FAILED";
-            sourceType: string;
-            sourceId: string;
-            payload: {
-                [key: string]: unknown;
-            };
-            correlationKey: string;
-            /** Format: date-time */
-            occurredAt: string;
-            /** Format: date-time */
-            detectedAt: string;
-            confidence?: number | null;
-            evidence: components["schemas"]["AiSignalEvidenceResponseDto"][];
-        };
-        AiSignalListResponseDto: {
-            data: components["schemas"]["AiSignalResponseDto"][];
-        };
-        AiConversationCreatedDto: {
-            id: string;
-            title: string;
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            updatedAt: string;
-        };
-        AiConversationSummaryDto: {
-            id: string;
-            title: string;
-            messageCount: number;
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            updatedAt: string;
-        };
-        AiConversationMessageDto: {
+            semanticType?: "FIN_TRANSACTION" | "PURCHASE_RECEIPT" | "SUBSCRIPTION_BILLING" | "FIN_STATEMENT_NOTICE" | "FIN_ACCOUNT_NOTICE" | "SECURITY_OTP" | "SECURITY_ALERT" | "TECH_NOTIFICATION" | "JOB" | "CALENDAR_EVENT" | "MARKETING" | "SOCIAL" | "OTHER";
+            routes?: ("FINANCE" | "SUBSCRIPTIONS" | "CALENDAR" | "SECURITY")[];
+            transaction?: components["schemas"]["HumanVerificationTransactionDto"];
+            notes?: string;
+            messageIds: string[];
             /** @enum {string} */
-            role: "user" | "assistant";
-            content: string;
-            /** Format: date-time */
-            createdAt: string;
+            verdict: "CONFIRMED" | "CORRECTED" | "REJECTED";
         };
-        AiConversationDetailDto: {
-            id: string;
-            title: string;
-            messages: components["schemas"]["AiConversationMessageDto"][];
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            updatedAt: string;
-        };
-        SendAiConversationMessageDto: {
-            /** @example ¿Cuánto gasté este mes? */
-            content: string;
-        };
-        AiConversationAnswerDto: {
-            conversationId: string;
-            answer: string;
-            provider: string;
-            model: string;
+        AiReviewSelectionVerificationResponseDto: {
+            verified: number;
+            alreadyVerified: number;
+            /** @description Correos reencolados y reclasificados después de registrar la selección. */
+            requeued: number;
         };
     };
     responses: never;
@@ -6284,6 +6435,12 @@ export interface operations {
     AiEvidenceController_reviewQueue: {
         parameters: {
             query?: {
+                semanticType?: "FIN_TRANSACTION" | "PURCHASE_RECEIPT" | "SUBSCRIPTION_BILLING" | "FIN_STATEMENT_NOTICE" | "FIN_ACCOUNT_NOTICE" | "SECURITY_OTP" | "SECURITY_ALERT" | "TECH_NOTIFICATION" | "JOB" | "CALENDAR_EVENT" | "MARKETING" | "SOCIAL" | "OTHER";
+                route?: "FINANCE" | "SUBSCRIPTIONS" | "CALENDAR" | "SECURITY";
+                confidenceMin?: number;
+                confidenceMax?: number;
+                /** @description Solo mensajes inciertos o sin predicción */
+                uncertain?: boolean;
                 /** @description Cursor opaco de la página anterior */
                 cursor?: string;
                 partition?: "TRAIN" | "VALIDATION" | "HOLDOUT";
@@ -6297,10 +6454,8 @@ export interface operations {
                 dateFrom?: string;
                 /** @description Último día recibido (AAAA-MM-DD), completo en la zona del usuario */
                 dateTo?: string;
-                /** @description Fecha recibida, del más viejo al más nuevo o al revés */
-                order?: "OLDEST" | "NEWEST";
-                /** @description Only uncertain or unclassified messages */
-                uncertain?: boolean;
+                /** @description OLDEST/NEWEST por fecha recibida o IMPACT por tamaño de grupo, remitente nuevo y confianza */
+                order?: "OLDEST" | "NEWEST" | "IMPACT";
             };
             header?: never;
             path?: never;
@@ -6321,6 +6476,7 @@ export interface operations {
     AiEvidenceController_reviewGroups: {
         parameters: {
             query?: {
+                order?: "IMPACT";
                 page?: number;
                 pageSize?: number;
             };
@@ -6404,6 +6560,46 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["AiAnalysisRunResponseDto"][];
                 };
+            };
+        };
+    };
+    AiEvidenceController_evaluate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AiAnalysisRunResponseDto"];
+                };
+            };
+        };
+    };
+    AiEvidenceController_compare: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CompareAnalysisRunsDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -6580,6 +6776,249 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    AiSignalsController_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AiSignalListResponseDto"];
+                };
+            };
+        };
+    };
+    AiSignalsController_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                signalId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AiSignalResponseDto"];
+                };
+            };
+        };
+    };
+    AiConversationController_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AiConversationSummaryDto"][];
+                };
+            };
+        };
+    };
+    AiConversationController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AiConversationCreatedDto"];
+                };
+            };
+        };
+    };
+    AiConversationController_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                conversationId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AiConversationDetailDto"];
+                };
+            };
+            /** @description Conversación no encontrada */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AiConversationController_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                conversationId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        deleted?: boolean;
+                    };
+                };
+            };
+            /** @description Conversación no encontrada */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AiConversationController_sendMessage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                conversationId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SendAiConversationMessageDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AiConversationAnswerDto"];
+                };
+            };
+            /** @description Mensaje vacío o demasiado largo */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Conversación no encontrada */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Inferencia no disponible */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AiActionsController_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AiActionDto"][];
+                };
+            };
+        };
+    };
+    AiActionsController_confirm: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                actionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AiActionResultDto"];
+                };
+            };
+        };
+    };
+    AiActionsController_cancel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                actionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AiActionResultDto"];
+                };
             };
         };
     };
@@ -10386,27 +10825,7 @@ export interface operations {
             };
         };
     };
-    AiEvidenceController_evaluate: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Evaluation run */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AiAnalysisRunResponseDto"];
-                };
-            };
-        };
-    };
-    AiEvidenceController_compare: {
+    AiEvidenceController_verifyReviewSelection: {
         parameters: {
             query?: never;
             header?: never;
@@ -10415,177 +10834,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["CompareAnalysisRunsDto"];
-            };
-        };
-        responses: {
-            /** @description Run comparison and metric deltas */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        comparable: boolean;
-                        warning?: string | null;
-                        first: components["schemas"]["AiAnalysisRunResponseDto"];
-                        second: components["schemas"]["AiAnalysisRunResponseDto"];
-                        deltas?: {
-                            [key: string]: number | null;
-                        } | null;
-                    };
-                };
-            };
-        };
-    };
-    AiSignalsController_list: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AiSignalListResponseDto"];
-                };
-            };
-        };
-    };
-    AiSignalsController_get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                signalId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AiSignalResponseDto"];
-                };
-            };
-        };
-    };
-    AiConversationController_list: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AiConversationSummaryDto"][];
-                };
-            };
-        };
-    };
-    AiConversationController_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AiConversationCreatedDto"];
-                };
-            };
-        };
-    };
-    AiConversationController_get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                conversationId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AiConversationDetailDto"];
-                };
-            };
-            /** @description Conversación no encontrada */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    AiConversationController_remove: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                conversationId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        deleted?: boolean;
-                    };
-                };
-            };
-            /** @description Conversación no encontrada */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    AiConversationController_sendMessage: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                conversationId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["SendAiConversationMessageDto"];
+                "application/json": components["schemas"]["CreateReviewSelectionVerificationDto"];
             };
         };
         responses: {
@@ -10594,29 +10843,8 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AiConversationAnswerDto"];
+                    "application/json": components["schemas"]["AiReviewSelectionVerificationResponseDto"];
                 };
-            };
-            /** @description Mensaje vacío o demasiado largo */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Conversación no encontrada */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Inferencia no disponible */
-            503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };

@@ -4,6 +4,8 @@ export type { ModuleSlug }
 
 /** keepAwake is a module without user settings, so it has no stored config. */
 export type ConfigurableModuleSlug = Exclude<ModuleSlug, "keepAwake">
+/** `ai` tiene configuración propia, pero no representa una app navegable. */
+export type ModuleConfigSlug = ConfigurableModuleSlug | "ai"
 
 export type FinanceModuleConfig = {
   version: number
@@ -103,25 +105,34 @@ export type HealthModuleConfig = {
   }
 }
 
+export type AiModuleConfig = {
+  version: number
+  fieldGuide: string
+  email: {
+    reviewConfidenceThreshold: number
+    acceptVerifiedSenders: boolean
+  }
+}
+
 export type ModuleConfigBySlug = {
   finance: FinanceModuleConfig
   agenda: AgendaModuleConfig
   projects: ProjectsModuleConfig
   health: HealthModuleConfig
+  ai: AiModuleConfig
 }
 
-export type ModuleConfig<
-  S extends ConfigurableModuleSlug = ConfigurableModuleSlug,
-> = ModuleConfigBySlug[S]
+export type ModuleConfig<S extends ModuleConfigSlug = ModuleConfigSlug> =
+  ModuleConfigBySlug[S]
 
 export type UserModuleEntry = {
-  slug: ModuleSlug
+  slug: ModuleSlug | "ai"
   isEnabled: boolean
   config: ModuleConfig
   enabledAt: string
 }
 
-export type DeepPartialModuleConfig<S extends ConfigurableModuleSlug> = {
+export type DeepPartialModuleConfig<S extends ModuleConfigSlug> = {
   [K in keyof ModuleConfig<S>]?: ModuleConfig<S>[K] extends object
     ? Partial<ModuleConfig<S>[K]>
     : ModuleConfig<S>[K]

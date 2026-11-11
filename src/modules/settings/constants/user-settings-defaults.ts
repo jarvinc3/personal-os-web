@@ -137,4 +137,12 @@ export const DEFAULT_MODULE_CONFIG_BY_SLUG: ModuleConfigBySlug = {
       weeklySummary: false,
     },
   },
+  ai: {
+    version: 1,
+    fieldGuide: "Configuración de clasificación y revisión de correo.",
+    email: {
+      reviewConfidenceThreshold: 0.7,
+      acceptVerifiedSenders: false,
+    },
+  },
 }

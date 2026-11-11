@@ -5,4 +5,6 @@ export const INTELLIGENCE_SHEET_KEYS = {
   reviewGroup: "intelligence-review-group",
   focus: "intelligence-focus",
   reviewFilters: "intelligence-review-filters",
+  reviewSelection: "intelligence-review-selection",
+  reviewSettings: "intelligence-review-settings",
 } as const

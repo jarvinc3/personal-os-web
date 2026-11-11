@@ -6,22 +6,40 @@ import {
   ArrowUpNarrowWideIcon,
   CalendarDaysIcon,
   CheckIcon,
+  CircleHelpIcon,
   EraserIcon,
+  InboxIcon,
+  Layers3Icon,
   MailIcon,
+  SlidersHorizontalIcon,
+  SparklesIcon,
+  TagsIcon,
   XIcon,
 } from "lucide-react"
 
+import {
+  ROUTE_LABELS,
+  SEMANTIC_TYPE_LABELS,
+} from "@/src/modules/intelligence/review-labels"
 import { useFormatLocale } from "@/src/modules/settings/hooks/use-format-locale"
-import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { SegmentedControl } from "@/src/shared/components/forms/segmented-control"
 import { FormTextField } from "@/src/shared/components/forms/form-text-field"
+import { SelectField } from "@/src/shared/components/forms/select-field"
+import { SwitchFieldRow } from "@/src/shared/components/forms/switch-field-row"
 import { WheelField } from "@/src/shared/components/forms/wheel-field"
 import { DateWheels } from "@/src/shared/components/forms/wheel-picker"
+import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import { Button } from "@/src/shared/components/ui/button"
 import {
   formatReviewDay,
+  patchReviewQueueDraft,
   reviewQueueDatePatch,
-  REVIEW_QUEUE_ORDER_FILTERS,
+  REVIEW_QUEUE_FILTER_DEFAULTS,
+  REVIEW_QUEUE_PARTITION_FILTERS,
+  REVIEW_QUEUE_ROUTE_FILTERS,
+  REVIEW_QUEUE_SEMANTIC_TYPE_FILTERS,
+  REVIEW_QUEUE_STATUS_FILTERS,
   type ReviewQueueFilters,
   type ReviewQueueOrderFilter,
 } from "@/src/modules/intelligence/review-queue-filters"
@@ -33,7 +51,44 @@ const ORDER_OPTIONS: {
 }[] = [
   { value: "OLDEST", label: "Más antiguos", icon: ArrowUpNarrowWideIcon },
   { value: "NEWEST", label: "Más recientes", icon: ArrowDownWideNarrowIcon },
+  { value: "IMPACT", label: "Mayor impacto", icon: SparklesIcon },
 ]
+
+const STATUS_OPTIONS = REVIEW_QUEUE_STATUS_FILTERS.map((value) => ({
+  value,
+  label:
+    value === "ALL"
+      ? "Todos"
+      : value === "CONFIRMED"
+        ? "Confirmados"
+        : value === "CORRECTED"
+          ? "Corregidos"
+          : "Rechazados",
+}))
+
+const PARTITION_OPTIONS = REVIEW_QUEUE_PARTITION_FILTERS.map((value) => ({
+  value,
+  label:
+    value === "ALL"
+      ? "Todas"
+      : value === "TRAIN"
+        ? "Entrenamiento"
+        : value === "VALIDATION"
+          ? "Validación"
+          : "Holdout",
+}))
+
+const SEMANTIC_TYPE_OPTIONS = REVIEW_QUEUE_SEMANTIC_TYPE_FILTERS.map(
+  (value) => ({
+    value,
+    label: value === "ALL" ? "Todos los tipos" : SEMANTIC_TYPE_LABELS[value],
+  })
+)
+
+const ROUTE_OPTIONS = REVIEW_QUEUE_ROUTE_FILTERS.map((value) => ({
+  value,
+  label: value === "ALL" ? "Todos los dominios" : ROUTE_LABELS[value],
+}))
 
 type ReviewFiltersSheetProps = {
   open: boolean
@@ -42,25 +97,9 @@ type ReviewFiltersSheetProps = {
   onApply: (patch: Partial<ReviewQueueFilters>) => void
 }
 
-/**
- * Filtros secundarios de la cola: remitente, rango de días y orden. Se editan
- * en un borrador y se aplican juntos al cerrar la hoja, para no cambiar la
- * lista ni la URL con cada tecla.
- */
-export function ReviewFiltersSheet({
-  open,
-  onOpenChange,
-  filters,
-  onApply,
-}: ReviewFiltersSheetProps) {
+export function ReviewFiltersSheet(props: ReviewFiltersSheetProps) {
   return (
-    <ReviewFiltersSheetForm
-      key={open ? "open" : "closed"}
-      open={open}
-      onOpenChange={onOpenChange}
-      filters={filters}
-      onApply={onApply}
-    />
+    <ReviewFiltersSheetForm key={props.open ? "open" : "closed"} {...props} />
   )
 }
 
@@ -71,26 +110,41 @@ function ReviewFiltersSheetForm({
   onApply,
 }: ReviewFiltersSheetProps) {
   const formatLocale = useFormatLocale()
-  const [sender, setSender] = useState(filters.sender)
-  const [dateFrom, setDateFrom] = useState(filters.dateFrom)
-  const [dateTo, setDateTo] = useState(filters.dateTo)
-  const [order, setOrder] = useState(filters.order)
+  const [draft, setDraft] = useState(filters)
+  const [confidenceMin, setConfidenceMin] = useState(
+    toConfidencePercent(filters.confidenceMin)
+  )
+  const [confidenceMax, setConfidenceMax] = useState(
+    toConfidencePercent(filters.confidenceMax)
+  )
+  const [confidenceError, setConfidenceError] = useState<string | null>(null)
+
+  function patchDraft(patch: Partial<ReviewQueueFilters>) {
+    setDraft((current) => patchReviewQueueDraft(current, patch))
+  }
 
   function changeDate(field: "dateFrom" | "dateTo", day: string) {
-    const patch = reviewQueueDatePatch(field, day, {
-      ...filters,
-      dateFrom,
-      dateTo,
-    })
-    setDateFrom(patch.dateFrom ?? dateFrom)
-    setDateTo(patch.dateTo ?? dateTo)
+    setDraft((current) =>
+      patchReviewQueueDraft(current, reviewQueueDatePatch(field, day, current))
+    )
   }
 
   function clearDraft() {
-    setSender("")
-    setDateFrom("")
-    setDateTo("")
-    setOrder(REVIEW_QUEUE_ORDER_FILTERS[0])
+    setDraft({ ...REVIEW_QUEUE_FILTER_DEFAULTS, tab: filters.tab })
+    setConfidenceMin("")
+    setConfidenceMax("")
+    setConfidenceError(null)
+  }
+
+  function applyDraft() {
+    const min = parseConfidencePercent(confidenceMin)
+    const max = parseConfidencePercent(confidenceMax)
+    if (min === undefined || max === undefined) {
+      setConfidenceError("Usa un porcentaje entre 0 y 100")
+      return
+    }
+    setConfidenceError(null)
+    onApply({ ...draft, confidenceMin: min, confidenceMax: max })
   }
 
   return (
@@ -98,57 +152,149 @@ function ReviewFiltersSheetForm({
       open={open}
       onOpenChange={onOpenChange}
       title="Filtros de revisión"
-      description="Se aplican a la cola de la pestaña actual."
+      description="Combina filtros para acotar los correos de esta pestaña."
       actions={{
-        submit: (
+        close: (
           <Button
             type="button"
-            onClick={() => onApply({ sender, dateFrom, dateTo, order })}
+            variant="outline"
+            className="flex-1"
+            onClick={() => onOpenChange(false)}
           >
+            <XIcon data-icon="inline-start" /> Cancelar
+          </Button>
+        ),
+        submit: (
+          <Button type="button" className="flex-1" onClick={applyDraft}>
             <CheckIcon data-icon="inline-start" /> Aplicar
           </Button>
         ),
       }}
     >
-      <FormTextField
-        label="Remitente"
-        icon={MailIcon}
-        placeholder="notificaciones@banco.com"
-        autoComplete="off"
-        value={sender}
-        onChange={setSender}
-        onKeyDown={(event) => {
-          if (event.key === "Enter") {
-            event.preventDefault()
-            onApply({ sender, dateFrom, dateTo, order })
-          }
-        }}
-      />
+      <div className="flex flex-col gap-4">
+        <SummarySection title="Cola" icon={InboxIcon}>
+          {filters.tab === "reviewed" ? (
+            <SelectField
+              label="Estado"
+              icon={CheckIcon}
+              value={draft.status}
+              onChange={(value) =>
+                patchDraft({ status: value as ReviewQueueFilters["status"] })
+              }
+              options={STATUS_OPTIONS}
+            />
+          ) : null}
+          <SelectField
+            label="Conjunto"
+            icon={Layers3Icon}
+            value={draft.partition}
+            onChange={(value) =>
+              patchDraft({
+                partition: value as ReviewQueueFilters["partition"],
+              })
+            }
+            options={PARTITION_OPTIONS}
+          />
+          <SegmentedControl
+            label="Orden"
+            value={draft.order}
+            onChange={(order) => patchDraft({ order })}
+            options={ORDER_OPTIONS}
+            orientation="vertical"
+            fullWidth
+          />
+        </SummarySection>
 
-      <ReviewDateField
-        label="Desde"
-        value={dateFrom}
-        locale={formatLocale}
-        onChange={(day) => changeDate("dateFrom", day)}
-      />
-      <ReviewDateField
-        label="Hasta"
-        value={dateTo}
-        locale={formatLocale}
-        onChange={(day) => changeDate("dateTo", day)}
-      />
+        <SummarySection title="Correo" icon={MailIcon}>
+          <FormTextField
+            label="Remitente"
+            icon={MailIcon}
+            autoComplete="off"
+            value={draft.sender}
+            onChange={(sender) => patchDraft({ sender })}
+          />
+          <FormTextField
+            label="Asunto"
+            icon={MailIcon}
+            autoComplete="off"
+            value={draft.subject}
+            onChange={(subject) => patchDraft({ subject })}
+          />
+        </SummarySection>
 
-      <SegmentedControl
-        label="Orden"
-        value={order}
-        onChange={setOrder}
-        options={ORDER_OPTIONS}
-        fullWidth
-      />
+        <SummarySection title="Fecha del correo" icon={CalendarDaysIcon}>
+          <ReviewDateField
+            label="Desde"
+            value={draft.dateFrom}
+            locale={formatLocale}
+            onChange={(day) => changeDate("dateFrom", day)}
+          />
+          <ReviewDateField
+            label="Hasta"
+            value={draft.dateTo}
+            locale={formatLocale}
+            onChange={(day) => changeDate("dateTo", day)}
+          />
+        </SummarySection>
 
-      <Button type="button" variant="outline" onClick={clearDraft}>
-        <EraserIcon data-icon="inline-start" /> Limpiar filtros
-      </Button>
+        <SummarySection title="Clasificación" icon={TagsIcon}>
+          <SelectField
+            label="Tipo semántico"
+            icon={TagsIcon}
+            value={draft.semanticType}
+            onChange={(value) =>
+              patchDraft({
+                semanticType: value as ReviewQueueFilters["semanticType"],
+              })
+            }
+            options={SEMANTIC_TYPE_OPTIONS}
+          />
+          <SelectField
+            label="Dominio"
+            icon={Layers3Icon}
+            value={draft.route}
+            onChange={(value) =>
+              patchDraft({ route: value as ReviewQueueFilters["route"] })
+            }
+            options={ROUTE_OPTIONS}
+          />
+          <div className="grid gap-3 sm:grid-cols-2">
+            <FormTextField
+              label="Confianza mínima (%)"
+              icon={SlidersHorizontalIcon}
+              type="number"
+              min={0}
+              max={100}
+              step={0.1}
+              value={confidenceMin}
+              onChange={setConfidenceMin}
+              error={confidenceError ?? undefined}
+            />
+            <FormTextField
+              label="Confianza máxima (%)"
+              icon={SlidersHorizontalIcon}
+              type="number"
+              min={0}
+              max={100}
+              step={0.1}
+              value={confidenceMax}
+              onChange={setConfidenceMax}
+              error={confidenceError ?? undefined}
+            />
+          </div>
+          <SwitchFieldRow
+            label="Solo inciertos"
+            description="Muestra correos con baja confianza o sin predicción."
+            checked={draft.uncertain}
+            onCheckedChange={(uncertain) => patchDraft({ uncertain })}
+            icon={CircleHelpIcon}
+          />
+        </SummarySection>
+
+        <Button type="button" variant="outline" onClick={clearDraft}>
+          <EraserIcon data-icon="inline-start" /> Limpiar filtros
+        </Button>
+      </div>
     </BottomSheet>
   )
 }
@@ -202,6 +348,21 @@ function ReviewDateField({
       />
     </WheelField>
   )
+}
+
+function toConfidencePercent(value: number | null): string {
+  return value === null ? "" : String(Number((value * 100).toFixed(2)))
+}
+
+function parseConfidencePercent(value: string): number | null | undefined {
+  if (!value.trim()) {
+    return null
+  }
+  const percent = Number(value)
+  if (!Number.isFinite(percent) || percent < 0 || percent > 100) {
+    return undefined
+  }
+  return Number((percent / 100).toFixed(4))
 }
 
 /** `YYYY-MM-DD` de hoy en el reloj local, que es el día que elige la rueda. */

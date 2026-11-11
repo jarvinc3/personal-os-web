@@ -89,9 +89,12 @@ export function AppSidebar() {
   const { logoutMutation } = useAuth()
   const { userModules } = useProfile()
 
-  const enabledSlugs = userModules
-    .filter((module) => module.isEnabled)
-    .map((module) => module.slug)
+  const enabledSlugs = userModules.reduce<ModuleSlug[]>((slugs, module) => {
+    if (module.isEnabled && module.slug !== "ai") {
+      slugs.push(module.slug)
+    }
+    return slugs
+  }, [])
   const applications = [
     ...enabledAppEntries(enabledSlugs).map((entry) => ({
       title: entry.label,

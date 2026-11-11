@@ -787,6 +787,72 @@
         "operationId": "AiEvidenceController_reviewQueue",
         "parameters": [
           {
+            "name": "semanticType",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "FIN_TRANSACTION",
+                "PURCHASE_RECEIPT",
+                "SUBSCRIPTION_BILLING",
+                "FIN_STATEMENT_NOTICE",
+                "FIN_ACCOUNT_NOTICE",
+                "SECURITY_OTP",
+                "SECURITY_ALERT",
+                "TECH_NOTIFICATION",
+                "JOB",
+                "CALENDAR_EVENT",
+                "MARKETING",
+                "SOCIAL",
+                "OTHER"
+              ]
+            }
+          },
+          {
+            "name": "route",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "FINANCE",
+                "SUBSCRIPTIONS",
+                "CALENDAR",
+                "SECURITY"
+              ]
+            }
+          },
+          {
+            "name": "confidenceMin",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 0,
+              "maximum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "confidenceMax",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 0,
+              "maximum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "uncertain",
+            "required": false,
+            "in": "query",
+            "description": "Solo mensajes inciertos o sin predicción",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
             "name": "cursor",
             "required": false,
             "in": "query",
@@ -869,23 +935,15 @@
             "name": "order",
             "required": false,
             "in": "query",
-            "description": "Fecha recibida, del más viejo al más nuevo o al revés",
+            "description": "OLDEST/NEWEST por fecha recibida o IMPACT por tamaño de grupo, remitente nuevo y confianza",
             "schema": {
               "default": "OLDEST",
               "type": "string",
               "enum": [
                 "OLDEST",
-                "NEWEST"
+                "NEWEST",
+                "IMPACT"
               ]
-            }
-          },
-          {
-            "name": "uncertain",
-            "in": "query",
-            "required": false,
-            "description": "Only uncertain or unclassified messages",
-            "schema": {
-              "type": "boolean"
             }
           }
         ],
@@ -915,6 +973,18 @@
       "get": {
         "operationId": "AiEvidenceController_reviewGroups",
         "parameters": [
+          {
+            "name": "order",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "IMPACT",
+              "type": "string",
+              "enum": [
+                "IMPACT"
+              ]
+            }
+          },
           {
             "name": "page",
             "required": false,
@@ -1057,6 +1127,61 @@
                 }
               }
             }
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "tags": [
+          "intelligence-evidence"
+        ]
+      }
+    },
+    "/api/intelligence/runs/evaluate": {
+      "post": {
+        "operationId": "AiEvidenceController_evaluate",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiAnalysisRunResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "tags": [
+          "intelligence-evidence"
+        ]
+      }
+    },
+    "/api/intelligence/runs/compare": {
+      "post": {
+        "operationId": "AiEvidenceController_compare",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompareAnalysisRunsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
           }
         },
         "security": [
@@ -1357,6 +1482,360 @@
         "summary": "Borrar inmediatamente los datos AI propios y dejar lápidas estructurales elegibles",
         "tags": [
           "intelligence-knowledge"
+        ]
+      }
+    },
+    "/api/intelligence/signals": {
+      "get": {
+        "operationId": "AiSignalsController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiSignalListResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "tags": [
+          "intelligence"
+        ]
+      }
+    },
+    "/api/intelligence/signals/{signalId}": {
+      "get": {
+        "operationId": "AiSignalsController_get",
+        "parameters": [
+          {
+            "name": "signalId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiSignalResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "tags": [
+          "intelligence"
+        ]
+      }
+    },
+    "/api/intelligence/conversations": {
+      "post": {
+        "operationId": "AiConversationController_create",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiConversationCreatedDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Crear una conversación privada del agente",
+        "tags": [
+          "intelligence-conversations"
+        ]
+      },
+      "get": {
+        "operationId": "AiConversationController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AiConversationSummaryDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Listar las conversaciones propias",
+        "tags": [
+          "intelligence-conversations"
+        ]
+      }
+    },
+    "/api/intelligence/conversations/{conversationId}": {
+      "get": {
+        "operationId": "AiConversationController_get",
+        "parameters": [
+          {
+            "name": "conversationId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiConversationDetailDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Conversación no encontrada"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Recuperar una conversación propia",
+        "tags": [
+          "intelligence-conversations"
+        ]
+      },
+      "delete": {
+        "operationId": "AiConversationController_remove",
+        "parameters": [
+          {
+            "name": "conversationId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "deleted": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Conversación no encontrada"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Borrar una conversación propia y sus mensajes",
+        "tags": [
+          "intelligence-conversations"
+        ]
+      }
+    },
+    "/api/intelligence/conversations/{conversationId}/messages": {
+      "post": {
+        "operationId": "AiConversationController_sendMessage",
+        "parameters": [
+          {
+            "name": "conversationId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendAiConversationMessageDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiConversationAnswerDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Mensaje vacío o demasiado largo"
+          },
+          "404": {
+            "description": "Conversación no encontrada"
+          },
+          "503": {
+            "description": "Inferencia no disponible"
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Enviar un mensaje y ejecutar capacidades de lectura disponibles",
+        "tags": [
+          "intelligence-conversations"
+        ]
+      }
+    },
+    "/api/intelligence/actions": {
+      "get": {
+        "operationId": "AiActionsController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AiActionDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Listar acciones propias del agente",
+        "tags": [
+          "intelligence-actions"
+        ]
+      }
+    },
+    "/api/intelligence/actions/{actionId}/confirm": {
+      "post": {
+        "operationId": "AiActionsController_confirm",
+        "parameters": [
+          {
+            "name": "actionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiActionResultDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Confirmar una acción pendiente del agente",
+        "tags": [
+          "intelligence-actions"
+        ]
+      }
+    },
+    "/api/intelligence/actions/{actionId}/cancel": {
+      "post": {
+        "operationId": "AiActionsController_cancel",
+        "parameters": [
+          {
+            "name": "actionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiActionResultDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "summary": "Cancelar una acción pendiente del agente",
+        "tags": [
+          "intelligence-actions"
         ]
       }
     },
@@ -8182,312 +8661,16 @@
         ]
       }
     },
-    "/api/intelligence/runs/evaluate": {
+    "/api/intelligence/messages/verifications/batch": {
       "post": {
-        "tags": [
-          "intelligence-evidence"
-        ],
-        "operationId": "AiEvidenceController_evaluate",
-        "summary": "Evaluate frozen email HOLDOUT",
-        "security": [
-          {
-            "access-token": []
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": "Evaluation run",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AiAnalysisRunResponseDto"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/intelligence/runs/compare": {
-      "post": {
-        "tags": [
-          "intelligence-evidence"
-        ],
-        "operationId": "AiEvidenceController_compare",
-        "summary": "Compare evaluation runs",
-        "security": [
-          {
-            "access-token": []
-          }
-        ],
+        "operationId": "AiEvidenceController_verifyReviewSelection",
+        "parameters": [],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CompareAnalysisRunsDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Run comparison and metric deltas",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "required": [
-                    "comparable",
-                    "first",
-                    "second"
-                  ],
-                  "properties": {
-                    "comparable": {
-                      "type": "boolean"
-                    },
-                    "warning": {
-                      "type": "string",
-                      "nullable": true
-                    },
-                    "first": {
-                      "$ref": "#/components/schemas/AiAnalysisRunResponseDto"
-                    },
-                    "second": {
-                      "$ref": "#/components/schemas/AiAnalysisRunResponseDto"
-                    },
-                    "deltas": {
-                      "type": "object",
-                      "nullable": true,
-                      "additionalProperties": {
-                        "type": "number",
-                        "nullable": true
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/intelligence/signals": {
-      "get": {
-        "operationId": "AiSignalsController_list",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AiSignalListResponseDto"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "access-token": []
-          }
-        ],
-        "tags": [
-          "intelligence"
-        ]
-      }
-    },
-    "/api/intelligence/signals/{signalId}": {
-      "get": {
-        "operationId": "AiSignalsController_get",
-        "parameters": [
-          {
-            "name": "signalId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AiSignalResponseDto"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "access-token": []
-          }
-        ],
-        "tags": [
-          "intelligence"
-        ]
-      }
-    },
-    "/api/intelligence/conversations": {
-      "post": {
-        "operationId": "AiConversationController_create",
-        "parameters": [],
-        "responses": {
-          "201": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AiConversationCreatedDto"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "access-token": []
-          }
-        ],
-        "summary": "Crear una conversación privada del agente",
-        "tags": [
-          "intelligence-conversations"
-        ]
-      },
-      "get": {
-        "operationId": "AiConversationController_list",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/AiConversationSummaryDto"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "access-token": []
-          }
-        ],
-        "summary": "Listar las conversaciones propias",
-        "tags": [
-          "intelligence-conversations"
-        ]
-      }
-    },
-    "/api/intelligence/conversations/{conversationId}": {
-      "get": {
-        "operationId": "AiConversationController_get",
-        "parameters": [
-          {
-            "name": "conversationId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AiConversationDetailDto"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Conversación no encontrada"
-          }
-        },
-        "security": [
-          {
-            "access-token": []
-          }
-        ],
-        "summary": "Recuperar una conversación propia",
-        "tags": [
-          "intelligence-conversations"
-        ]
-      },
-      "delete": {
-        "operationId": "AiConversationController_remove",
-        "parameters": [
-          {
-            "name": "conversationId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "deleted": {
-                      "type": "boolean"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Conversación no encontrada"
-          }
-        },
-        "security": [
-          {
-            "access-token": []
-          }
-        ],
-        "summary": "Borrar una conversación propia y sus mensajes",
-        "tags": [
-          "intelligence-conversations"
-        ]
-      }
-    },
-    "/api/intelligence/conversations/{conversationId}/messages": {
-      "post": {
-        "operationId": "AiConversationController_sendMessage",
-        "parameters": [
-          {
-            "name": "conversationId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SendAiConversationMessageDto"
+                "$ref": "#/components/schemas/CreateReviewSelectionVerificationDto"
               }
             }
           }
@@ -8498,19 +8681,10 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiConversationAnswerDto"
+                  "$ref": "#/components/schemas/AiReviewSelectionVerificationResponseDto"
                 }
               }
             }
-          },
-          "400": {
-            "description": "Mensaje vacío o demasiado largo"
-          },
-          "404": {
-            "description": "Conversación no encontrada"
-          },
-          "503": {
-            "description": "Inferencia no disponible"
           }
         },
         "security": [
@@ -8518,9 +8692,8 @@
             "access-token": []
           }
         ],
-        "summary": "Enviar un mensaje y ejecutar capacidades de lectura disponibles",
         "tags": [
-          "intelligence-conversations"
+          "intelligence-evidence"
         ]
       }
     }
@@ -8553,7 +8726,8 @@
       "description": ""
     },
     {
-      "name": "intelligence"
+      "name": "intelligence",
+      "description": ""
     }
   ],
   "servers": [],
@@ -9053,7 +9227,8 @@
             "enum": [
               "bootstrap",
               "incremental",
-              "recovery"
+              "recovery",
+              "classifying"
             ]
           },
           "attempt": {
@@ -9470,6 +9645,62 @@
           "verifications"
         ]
       },
+      "AiEmailClassificationResponseDto": {
+        "type": "object",
+        "properties": {
+          "route": {
+            "type": "string"
+          },
+          "relevance": {
+            "type": "boolean"
+          },
+          "semanticType": {
+            "type": "string"
+          },
+          "transaction": {
+            "type": "object",
+            "nullable": true
+          },
+          "confidence": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "decisionPath": {
+            "type": "string"
+          },
+          "knowledgeUsed": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "provider": {
+            "type": "string",
+            "nullable": true
+          },
+          "model": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "route",
+          "relevance",
+          "semanticType",
+          "transaction",
+          "confidence",
+          "decisionPath",
+          "knowledgeUsed",
+          "provider",
+          "model",
+          "createdAt"
+        ]
+      },
       "AiEmailMessageResponseDto": {
         "type": "object",
         "properties": {
@@ -9519,6 +9750,22 @@
             "type": "string",
             "nullable": true
           },
+          "classification": {
+            "type": "object",
+            "nullable": true
+          },
+          "classificationPath": {
+            "type": "string",
+            "nullable": true
+          },
+          "classificationProvider": {
+            "type": "string",
+            "nullable": true
+          },
+          "classificationModel": {
+            "type": "string",
+            "nullable": true
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time"
@@ -9538,6 +9785,12 @@
           },
           "provenance": {
             "$ref": "#/components/schemas/AiEmailMessageProvenanceResponseDto"
+          },
+          "classifications": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AiEmailClassificationResponseDto"
+            }
           }
         },
         "required": [
@@ -9553,10 +9806,15 @@
           "providerMessageId",
           "providerThreadId",
           "templateFingerprint",
+          "classification",
+          "classificationPath",
+          "classificationProvider",
+          "classificationModel",
           "createdAt",
           "updatedAt",
           "content",
-          "provenance"
+          "provenance",
+          "classifications"
         ]
       },
       "AiEmailConnectResponseDto": {
@@ -9746,6 +10004,43 @@
               "REJECTED"
             ]
           },
+          "semanticType": {
+            "type": "string",
+            "enum": [
+              "FIN_TRANSACTION",
+              "PURCHASE_RECEIPT",
+              "SUBSCRIPTION_BILLING",
+              "FIN_STATEMENT_NOTICE",
+              "FIN_ACCOUNT_NOTICE",
+              "SECURITY_OTP",
+              "SECURITY_ALERT",
+              "TECH_NOTIFICATION",
+              "JOB",
+              "CALENDAR_EVENT",
+              "MARKETING",
+              "SOCIAL",
+              "OTHER"
+            ],
+            "nullable": true
+          },
+          "routes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "FINANCE",
+                "SUBSCRIPTIONS",
+                "CALENDAR",
+                "SECURITY"
+              ]
+            }
+          },
+          "confidence": {
+            "type": "number",
+            "nullable": true,
+            "minimum": 0,
+            "maximum": 1
+          },
           "verification": {
             "nullable": true,
             "type": "object",
@@ -9766,6 +10061,9 @@
           "processingStatus",
           "partition",
           "status",
+          "semanticType",
+          "routes",
+          "confidence",
           "verification"
         ]
       },
@@ -9938,6 +10236,9 @@
       "CreateReviewGroupVerificationDto": {
         "type": "object",
         "properties": {
+          "relevance": {
+            "type": "boolean"
+          },
           "semanticType": {
             "type": "string",
             "enum": [
@@ -9970,6 +10271,10 @@
           },
           "transaction": {
             "$ref": "#/components/schemas/HumanVerificationTransactionDto"
+          },
+          "notes": {
+            "type": "string",
+            "maxLength": 2000
           },
           "verdict": {
             "type": "string",
@@ -10004,17 +10309,25 @@
           },
           "alreadyVerified": {
             "type": "number"
+          },
+          "requeued": {
+            "type": "number",
+            "description": "Correos de la misma plantilla reencolados y reclasificados con la etiqueta verificada."
           }
         },
         "required": [
           "verified",
           "holdoutExcluded",
-          "alreadyVerified"
+          "alreadyVerified",
+          "requeued"
         ]
       },
       "CreateHumanVerificationDto": {
         "type": "object",
         "properties": {
+          "relevance": {
+            "type": "boolean"
+          },
           "semanticType": {
             "type": "string",
             "enum": [
@@ -10047,6 +10360,10 @@
           },
           "transaction": {
             "$ref": "#/components/schemas/HumanVerificationTransactionDto"
+          },
+          "notes": {
+            "type": "string",
+            "maxLength": 2000
           },
           "verdict": {
             "type": "string",
@@ -10102,6 +10419,10 @@
           "isGroundTruth": {
             "type": "boolean"
           },
+          "requeued": {
+            "type": "number",
+            "description": "Correos de la misma plantilla reencolados y reclasificados con la etiqueta verificada."
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time"
@@ -10116,6 +10437,7 @@
           "correctedPayload",
           "notes",
           "isGroundTruth",
+          "requeued",
           "createdAt"
         ]
       },
@@ -10229,6 +10551,21 @@
           "startedAt",
           "completedAt",
           "error"
+        ]
+      },
+      "CompareAnalysisRunsDto": {
+        "type": "object",
+        "properties": {
+          "firstRunId": {
+            "type": "string"
+          },
+          "secondRunId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "firstRunId",
+          "secondRunId"
         ]
       },
       "KnowledgeTransactionDto": {
@@ -10529,6 +10866,416 @@
           "deletedMessages",
           "detachedVerifications",
           "detachedObservations"
+        ]
+      },
+      "AiSignalEvidenceResponseDto": {
+        "type": "object",
+        "properties": {
+          "sourceType": {
+            "type": "string",
+            "example": "EMAIL_CLASSIFICATION"
+          },
+          "sourceId": {
+            "type": "string"
+          },
+          "excerpt": {
+            "type": "object"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "sourceType",
+          "sourceId",
+          "excerpt",
+          "createdAt"
+        ]
+      },
+      "AiSignalResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "domain": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "DETECTED",
+              "VALIDATED",
+              "ROUTED",
+              "CONSUMED",
+              "DISMISSED",
+              "SUPERSEDED",
+              "FAILED"
+            ]
+          },
+          "sourceType": {
+            "type": "string"
+          },
+          "sourceId": {
+            "type": "string"
+          },
+          "payload": {
+            "type": "object"
+          },
+          "correlationKey": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "detectedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "confidence": {
+            "type": "number"
+          },
+          "evidence": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AiSignalEvidenceResponseDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "domain",
+          "status",
+          "sourceType",
+          "sourceId",
+          "payload",
+          "correlationKey",
+          "occurredAt",
+          "detectedAt",
+          "evidence"
+        ]
+      },
+      "AiSignalListResponseDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AiSignalResponseDto"
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "AiConversationCreatedDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "AiConversationSummaryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "messageCount": {
+            "type": "number"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "messageCount",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "AiConversationMessageDto": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": [
+              "user",
+              "assistant"
+            ]
+          },
+          "content": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "role",
+          "content",
+          "createdAt"
+        ]
+      },
+      "AiConversationDetailDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "messages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AiConversationMessageDto"
+            }
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "messages",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "SendAiConversationMessageDto": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "string",
+            "example": "¿Cuánto gasté este mes?"
+          }
+        },
+        "required": [
+          "content"
+        ]
+      },
+      "AiConversationActionDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "actionType": {
+            "type": "string"
+          },
+          "targetModule": {
+            "type": "string"
+          },
+          "policy": {
+            "type": "string",
+            "enum": [
+              "AUTO_ALLOWED",
+              "CONFIRM_REQUIRED",
+              "FORBIDDEN"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "RUNNING",
+              "SUCCESS",
+              "FAILED",
+              "CANCELLED"
+            ]
+          },
+          "outcome": {
+            "type": "string",
+            "enum": [
+              "PENDING_CONFIRMATION",
+              "EXECUTED",
+              "ALREADY_EXECUTED",
+              "ALREADY_CLAIMED",
+              "FORBIDDEN",
+              "FAILED",
+              "CANCELLED"
+            ]
+          },
+          "payload": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "result": {
+            "type": "object",
+            "additionalProperties": true,
+            "nullable": true
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "actionType",
+          "targetModule",
+          "policy",
+          "status",
+          "outcome",
+          "payload",
+          "result",
+          "createdAt"
+        ]
+      },
+      "AiConversationAnswerDto": {
+        "type": "object",
+        "properties": {
+          "conversationId": {
+            "type": "string"
+          },
+          "answer": {
+            "type": "string"
+          },
+          "provider": {
+            "type": "string"
+          },
+          "model": {
+            "type": "string"
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AiConversationActionDto"
+            }
+          }
+        },
+        "required": [
+          "conversationId",
+          "answer",
+          "provider",
+          "model"
+        ]
+      },
+      "AiActionDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "actionType": {
+            "type": "string"
+          },
+          "targetModule": {
+            "type": "string"
+          },
+          "policy": {
+            "type": "string",
+            "enum": [
+              "AUTO_ALLOWED",
+              "CONFIRM_REQUIRED",
+              "FORBIDDEN"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "RUNNING",
+              "SUCCESS",
+              "FAILED",
+              "CANCELLED"
+            ]
+          },
+          "payload": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "result": {
+            "type": "object",
+            "additionalProperties": true,
+            "nullable": true
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "executedAt": {
+            "type": "object",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "actionType",
+          "targetModule",
+          "policy",
+          "status",
+          "payload",
+          "result",
+          "createdAt",
+          "executedAt"
+        ]
+      },
+      "AiActionResultDto": {
+        "type": "object",
+        "properties": {
+          "outcome": {
+            "type": "string",
+            "enum": [
+              "PENDING_CONFIRMATION",
+              "EXECUTED",
+              "ALREADY_EXECUTED",
+              "ALREADY_CLAIMED",
+              "FORBIDDEN",
+              "FAILED",
+              "CANCELLED"
+            ]
+          },
+          "action": {
+            "$ref": "#/components/schemas/AiActionDto"
+          }
+        },
+        "required": [
+          "outcome",
+          "action"
         ]
       },
       "ExchangeRateResponseDto": {
@@ -18232,274 +18979,90 @@
           "success"
         ]
       },
-      "CompareAnalysisRunsDto": {
-        "type": "object",
-        "required": [
-          "firstRunId",
-          "secondRunId"
-        ],
-        "properties": {
-          "firstRunId": {
-            "type": "string"
-          },
-          "secondRunId": {
-            "type": "string"
-          }
-        }
-      },
-      "AiSignalEvidenceResponseDto": {
+      "CreateReviewSelectionVerificationDto": {
         "type": "object",
         "properties": {
-          "sourceType": {
-            "type": "string",
-            "example": "EMAIL_CLASSIFICATION"
+          "relevance": {
+            "type": "boolean"
           },
-          "sourceId": {
-            "type": "string"
-          },
-          "excerpt": {
-            "type": "object",
-            "additionalProperties": true
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        },
-        "required": [
-          "sourceType",
-          "sourceId",
-          "excerpt",
-          "createdAt"
-        ]
-      },
-      "AiSignalResponseDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "type": {
-            "type": "string"
-          },
-          "domain": {
-            "type": "string"
-          },
-          "status": {
+          "semanticType": {
             "type": "string",
             "enum": [
-              "DETECTED",
-              "VALIDATED",
-              "ROUTED",
-              "CONSUMED",
-              "DISMISSED",
-              "SUPERSEDED",
-              "FAILED"
+              "FIN_TRANSACTION",
+              "PURCHASE_RECEIPT",
+              "SUBSCRIPTION_BILLING",
+              "FIN_STATEMENT_NOTICE",
+              "FIN_ACCOUNT_NOTICE",
+              "SECURITY_OTP",
+              "SECURITY_ALERT",
+              "TECH_NOTIFICATION",
+              "JOB",
+              "CALENDAR_EVENT",
+              "MARKETING",
+              "SOCIAL",
+              "OTHER"
             ]
           },
-          "sourceType": {
-            "type": "string"
-          },
-          "sourceId": {
-            "type": "string"
-          },
-          "payload": {
-            "type": "object",
-            "additionalProperties": true
-          },
-          "correlationKey": {
-            "type": "string"
-          },
-          "occurredAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "detectedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "confidence": {
-            "type": "number",
-            "nullable": true
-          },
-          "evidence": {
+          "routes": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/AiSignalEvidenceResponseDto"
+              "type": "string",
+              "enum": [
+                "FINANCE",
+                "SUBSCRIPTIONS",
+                "CALENDAR",
+                "SECURITY"
+              ]
             }
-          }
-        },
-        "required": [
-          "id",
-          "type",
-          "domain",
-          "status",
-          "sourceType",
-          "sourceId",
-          "payload",
-          "correlationKey",
-          "occurredAt",
-          "detectedAt",
-          "evidence"
-        ]
-      },
-      "AiSignalListResponseDto": {
-        "type": "object",
-        "properties": {
-          "data": {
+          },
+          "transaction": {
+            "$ref": "#/components/schemas/HumanVerificationTransactionDto"
+          },
+          "notes": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "messageIds": {
+            "minItems": 1,
+            "maxItems": 20,
+            "uniqueItems": true,
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/AiSignalResponseDto"
+              "type": "string"
             }
+          },
+          "verdict": {
+            "type": "string",
+            "enum": [
+              "CONFIRMED",
+              "CORRECTED",
+              "REJECTED"
+            ]
           }
         },
         "required": [
-          "data"
+          "messageIds",
+          "verdict"
         ]
       },
-      "AiConversationCreatedDto": {
+      "AiReviewSelectionVerificationResponseDto": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "string"
-          },
-          "title": {
-            "type": "string"
-          },
-          "createdAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "updatedAt": {
-            "format": "date-time",
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "title",
-          "createdAt",
-          "updatedAt"
-        ]
-      },
-      "AiConversationSummaryDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "title": {
-            "type": "string"
-          },
-          "messageCount": {
+          "verified": {
             "type": "number"
           },
-          "createdAt": {
-            "format": "date-time",
-            "type": "string"
+          "alreadyVerified": {
+            "type": "number"
           },
-          "updatedAt": {
-            "format": "date-time",
-            "type": "string"
+          "requeued": {
+            "type": "number",
+            "description": "Correos reencolados y reclasificados después de registrar la selección."
           }
         },
         "required": [
-          "id",
-          "title",
-          "messageCount",
-          "createdAt",
-          "updatedAt"
-        ]
-      },
-      "AiConversationMessageDto": {
-        "type": "object",
-        "properties": {
-          "role": {
-            "type": "string",
-            "enum": [
-              "user",
-              "assistant"
-            ]
-          },
-          "content": {
-            "type": "string"
-          },
-          "createdAt": {
-            "format": "date-time",
-            "type": "string"
-          }
-        },
-        "required": [
-          "role",
-          "content",
-          "createdAt"
-        ]
-      },
-      "AiConversationDetailDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "title": {
-            "type": "string"
-          },
-          "messages": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/AiConversationMessageDto"
-            }
-          },
-          "createdAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "updatedAt": {
-            "format": "date-time",
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "title",
-          "messages",
-          "createdAt",
-          "updatedAt"
-        ]
-      },
-      "SendAiConversationMessageDto": {
-        "type": "object",
-        "properties": {
-          "content": {
-            "type": "string",
-            "example": "¿Cuánto gasté este mes?"
-          }
-        },
-        "required": [
-          "content"
-        ]
-      },
-      "AiConversationAnswerDto": {
-        "type": "object",
-        "properties": {
-          "conversationId": {
-            "type": "string"
-          },
-          "answer": {
-            "type": "string"
-          },
-          "provider": {
-            "type": "string"
-          },
-          "model": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "conversationId",
-          "answer",
-          "provider",
-          "model"
+          "verified",
+          "alreadyVerified",
+          "requeued"
         ]
       }
     }

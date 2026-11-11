@@ -34,6 +34,9 @@ type FormTextFieldProps = {
   inputRef?: Ref<HTMLInputElement>
   revealable?: boolean
   maxLength?: number
+  min?: number | string
+  max?: number | string
+  step?: number | string
   className?: string
 }
 
@@ -54,6 +57,9 @@ export function FormTextField({
   inputRef,
   revealable = false,
   maxLength,
+  min,
+  max,
+  step,
   className,
 }: FormTextFieldProps) {
   const fieldId = useId()
@@ -84,6 +90,9 @@ export function FormTextField({
           ref={inputRef}
           id={fieldId}
           type={inputType}
+          min={min}
+          max={max}
+          step={step}
           value={value}
           maxLength={maxLength}
           onChange={(event) => onChange(event.target.value)}

@@ -32,6 +32,7 @@ export const API_ENDPOINTS = {
     REVIEW_QUEUE: "/intelligence/review-queue",
     REVIEW_GROUPS: "/intelligence/review-groups",
     VERIFY_REVIEW_GROUP: "/intelligence/review-groups/verifications",
+    VERIFY_REVIEW_SELECTION: "/intelligence/messages/verifications/batch",
     VERIFY_MESSAGE: (id: string) =>
       `/intelligence/messages/${encodeURIComponent(id)}/verifications`,
     RUNS: "/intelligence/runs",

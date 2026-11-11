@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import {
   AlertCircle,
@@ -12,32 +12,42 @@ import {
   Inbox,
   ListFilter,
   RotateCcw,
-  Search,
+  Settings2,
+  X,
 } from "lucide-react"
 
 import { useAiEvidence } from "@/src/modules/intelligence/hooks/use-ai-evidence"
 import type {
   AiHumanVerificationInput,
-  AiReviewQueuePage,
+  AiReviewSelectionVerificationInput,
 } from "@/src/modules/intelligence/types/intelligence.types"
+import { shortMessageId } from "@/src/modules/intelligence/message-id"
 import { INTELLIGENCE_SHEET_KEYS } from "@/src/modules/intelligence/constants/sheet-keys"
 import { ReviewSheet } from "@/src/modules/intelligence/components/review-sheet"
 import { ReviewFocusSheet } from "@/src/modules/intelligence/components/review-focus-sheet"
 import { ReviewFiltersSheet } from "@/src/modules/intelligence/components/review-filters-sheet"
+import { ReviewSelectionSheet } from "@/src/modules/intelligence/components/review-selection-sheet"
+import { ReviewSettingsSheet } from "@/src/modules/intelligence/components/review-settings-sheet"
 import { ReviewQueueRow } from "@/src/modules/intelligence/components/review-queue-row"
+import {
+  ROUTE_LABELS,
+  SEMANTIC_TYPE_LABELS,
+} from "@/src/modules/intelligence/review-labels"
+import {
+  REVIEW_SELECTION_MAX_MESSAGES,
+  reviewSelectionResultLines,
+  toggleReviewSelection,
+} from "@/src/modules/intelligence/review-selection"
 import {
   activeReviewFilters,
   clearReviewFilters,
   formatReviewDay,
-  isReviewQueuePartitionFilter,
-  isReviewQueueStatusFilter,
   readReviewQueueFilters,
+  removeReviewFilter,
   reviewQueueApiQuery,
   reviewQueueFiltersHref,
   type ActiveReviewFilter,
   type ReviewQueueFilters,
-  type ReviewQueuePartitionFilter,
-  type ReviewQueueStatusFilter,
   type ReviewQueueTab,
 } from "@/src/modules/intelligence/review-queue-filters"
 import { useFormatLocale } from "@/src/modules/settings/hooks/use-format-locale"
@@ -46,6 +56,7 @@ import { SummaryItem } from "@/src/shared/components/data-display/summary"
 import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
 import { Badge } from "@/src/shared/components/ui/badge"
 import { Button } from "@/src/shared/components/ui/button"
+import { Checkbox } from "@/src/shared/components/ui/checkbox"
 import {
   Empty,
   EmptyContent,
@@ -54,12 +65,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
-import { Input } from "@/src/shared/components/ui/input"
 import { Skeleton } from "@/src/shared/components/ui/skeleton"
-import {
-  ToggleGroup,
-  ToggleGroupItem,
-} from "@/src/shared/components/ui/toggle-group"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { formatDateTime } from "@/src/shared/lib/date-format"
 import {
@@ -67,8 +73,6 @@ import {
   SHEET_QUERY_KEY,
 } from "@/src/shared/lib/sheet-navigation"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
-
-const SEARCH_DEBOUNCE_MS = 300
 
 const TAB_OPTIONS: {
   value: ReviewQueueTab
@@ -79,28 +83,8 @@ const TAB_OPTIONS: {
   { value: "reviewed", label: "Revisados", icon: CheckCircle2 },
 ]
 
-const STATUS_OPTIONS: {
-  value: ReviewQueueStatusFilter
-  label: string
-}[] = [
-  { value: "ALL", label: "Todos" },
-  { value: "CONFIRMED", label: "Confirmados" },
-  { value: "CORRECTED", label: "Corregidos" },
-  { value: "REJECTED", label: "Rechazados" },
-]
-
-const PARTITION_OPTIONS: {
-  value: ReviewQueuePartitionFilter
-  label: string
-}[] = [
-  { value: "ALL", label: "Todos" },
-  { value: "TRAIN", label: "Entrenamiento" },
-  { value: "VALIDATION", label: "Validación" },
-  { value: "HOLDOUT", label: "Holdout" },
-]
-
 const PARTITION_LABELS: Record<
-  Exclude<ReviewQueuePartitionFilter, "ALL">,
+  Exclude<ReviewQueueFilters["partition"], "ALL">,
   string
 > = {
   TRAIN: "Entrenamiento",
@@ -108,7 +92,10 @@ const PARTITION_LABELS: Record<
   HOLDOUT: "Holdout",
 }
 
-const STATUS_LABELS: Record<Exclude<ReviewQueueStatusFilter, "ALL">, string> = {
+const STATUS_LABELS: Record<
+  Exclude<ReviewQueueFilters["status"], "ALL">,
+  string
+> = {
   CONFIRMED: "confirmado",
   CORRECTED: "corregido",
   REJECTED: "rechazado",
@@ -131,29 +118,36 @@ export function AiEvidenceSection({
   const formatLocale = useFormatLocale()
   const filters = readReviewQueueFilters(searchParams)
   const activeFilters = activeReviewFilters(filters)
-  const [subjectDraft, setSubjectDraft] = useState(filters.subject)
-  const [editingSubject, setEditingSubject] = useState(false)
   const [selectedRunIds, setSelectedRunIds] = useState<string[]>([])
-  const subjectValue = editingSubject ? subjectDraft : filters.subject
+  const [selectionMode, setSelectionMode] = useState(false)
+  const [selectedMessageIds, setSelectedMessageIds] = useState<string[]>([])
   const {
     reviewQueueQuery,
     runsQuery,
     verifyMutation,
+    verifySelectionMutation,
     evaluateMutation,
     compareMutation,
   } = useAiEvidence(enabled, view, reviewQueueApiQuery(filters))
   const review = useSheetParam(INTELLIGENCE_SHEET_KEYS.review)
   const focus = useSheetParam(INTELLIGENCE_SHEET_KEYS.focus)
   const filtersSheet = useSheetParam(INTELLIGENCE_SHEET_KEYS.reviewFilters)
+  const selectionSheet = useSheetParam(INTELLIGENCE_SHEET_KEYS.reviewSelection)
+  const settingsSheet = useSheetParam(INTELLIGENCE_SHEET_KEYS.reviewSettings)
   const messages = useMemo(
     () => reviewQueueQuery.data?.pages.flatMap((page) => page.items) ?? [],
     [reviewQueueQuery.data?.pages]
   )
   const { fetchNextPage, hasNextPage, isFetchingNextPage } = reviewQueueQuery
-  const reviewCounts = reviewQueueQuery.data?.pages[0]?.counts
   const reviewedMessage = messages.find(
     (message) => message.id === review.sheetId
   )
+  const selectedMessages = messages.filter((message) =>
+    selectedMessageIds.includes(message.id)
+  )
+  const selectedHoldoutCount = selectedMessages.filter(
+    (message) => message.partition === "HOLDOUT"
+  ).length
   const loadMore = useCallback(() => {
     if (hasNextPage && !isFetchingNextPage) {
       void fetchNextPage()
@@ -162,61 +156,52 @@ export function AiEvidenceSection({
 
   const changeFilters = useCallback(
     (patch: Partial<ReviewQueueFilters>) => {
+      setSelectedMessageIds([])
+      setSelectionMode(false)
+      const normalizedPatch =
+        patch.tab === "pending" ? { ...patch, status: "ALL" as const } : patch
       const href = reviewQueueFiltersHref(
         pathname,
         searchParams.toString(),
-        patch
+        normalizedPatch
       )
       if (href) {
         router.replace(href, { scroll: false })
       }
     },
-    [pathname, router, searchParams]
+    [pathname, router, searchParams, setSelectedMessageIds, setSelectionMode]
   )
 
   // Aplicar cierra la hoja en la misma navegación: un `router.back()` normal
   // volvería a los filtros anteriores al abrirla.
   const applyFilters = useCallback(
     (patch: Partial<ReviewQueueFilters>) => {
+      setSelectedMessageIds([])
+      setSelectionMode(false)
       const base = new URLSearchParams(searchParams.toString())
       base.delete(SHEET_QUERY_KEY)
       base.delete(SHEET_ID_QUERY_KEY)
-      const href = reviewQueueFiltersHref(pathname, base.toString(), patch)
+      const normalizedPatch =
+        patch.tab === "pending" ? { ...patch, status: "ALL" as const } : patch
+      const href = reviewQueueFiltersHref(
+        pathname,
+        base.toString(),
+        normalizedPatch
+      )
       const query = base.toString()
       router.replace(href ?? (query ? `${pathname}?${query}` : pathname), {
         scroll: false,
       })
     },
-    [pathname, router, searchParams]
+    [pathname, router, searchParams, setSelectedMessageIds, setSelectionMode]
   )
 
-  useEffect(() => {
-    if (!editingSubject || subjectDraft.trim() === filters.subject) {
-      return
-    }
-    const timer = window.setTimeout(() => {
-      changeFilters({ subject: subjectDraft })
-    }, SEARCH_DEBOUNCE_MS)
-    return () => window.clearTimeout(timer)
-  }, [editingSubject, subjectDraft, filters.subject, changeFilters])
-
-  function startEditingSubject() {
-    if (editingSubject) {
-      return
-    }
-    setSubjectDraft(filters.subject)
-    setEditingSubject(true)
-  }
-
-  function commitSubject() {
-    setEditingSubject(false)
-    changeFilters({ subject: subjectDraft })
-  }
-
   function clearFilters() {
-    setSubjectDraft("")
-    setEditingSubject(false)
     changeFilters(clearReviewFilters(filters))
+  }
+
+  function removeFilter(filter: ActiveReviewFilter) {
+    changeFilters(removeReviewFilter(filters, filter))
   }
 
   async function verifyMessage({
@@ -249,6 +234,24 @@ export function AiEvidenceSection({
       input,
       onVerified: () => review.setOpen(false),
     })
+  }
+
+  async function verifySelection(input: AiReviewSelectionVerificationInput) {
+    try {
+      const result = await verifySelectionMutation.mutateAsync(input)
+      setSelectedMessageIds([])
+      setSelectionMode(false)
+      selectionSheet.setOpen(false)
+      appToast.success({
+        text1: "Selección verificada",
+        text2: reviewSelectionResultLines(result).join(" · "),
+      })
+    } catch (error) {
+      appToast.error({
+        text1: "No se pudo verificar la selección",
+        text2: error instanceof Error ? error.message : "Inténtalo otra vez.",
+      })
+    }
   }
 
   if (!enabled) {
@@ -312,7 +315,7 @@ export function AiEvidenceSection({
                         {metricLabel(key)}
                       </dt>
                       <dd>
-                        {value == null
+                        {typeof value !== "number"
                           ? "—"
                           : `${value > 0 ? "+" : ""}${(value * 100).toFixed(1)} pp`}
                       </dd>
@@ -437,68 +440,7 @@ export function AiEvidenceSection({
         fullWidth
       />
 
-      {filters.tab === "reviewed" ? (
-        <ToggleGroup
-          value={[filters.status]}
-          onValueChange={(next) => {
-            const selected = next[0]
-            if (isReviewQueueStatusFilter(selected)) {
-              changeFilters({ status: selected })
-            }
-          }}
-          variant="outline"
-          size="sm"
-          aria-label="Filtrar correos por estado de la última verificación"
-          className="w-full flex-wrap justify-start"
-        >
-          {STATUS_OPTIONS.map((option) => (
-            <ToggleGroupItem
-              key={option.value}
-              value={option.value}
-              className="h-8 gap-2 rounded-full px-3"
-            >
-              {option.label}
-            </ToggleGroupItem>
-          ))}
-        </ToggleGroup>
-      ) : null}
-
-      <div className="flex items-center gap-2">
-        <Button
-          type="button"
-          size="sm"
-          variant={filters.uncertain ? "secondary" : "outline"}
-          aria-pressed={filters.uncertain}
-          onClick={() => changeFilters({ uncertain: !filters.uncertain })}
-        >
-          Inciertos
-        </Button>
-        <div className="relative min-w-0 flex-1">
-          <Search
-            className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
-            aria-hidden="true"
-          />
-          <Input
-            type="search"
-            value={subjectValue}
-            onFocus={startEditingSubject}
-            onChange={(event) => setSubjectDraft(event.target.value)}
-            onBlur={commitSubject}
-            onKeyDown={(event) => {
-              if (event.key === "Enter") {
-                event.preventDefault()
-                commitSubject()
-                event.currentTarget.blur()
-              }
-              if (event.key === "Escape") {
-                setSubjectDraft(filters.subject)
-              }
-            }}
-            placeholder="Buscar"
-            aria-label="Buscar por asunto"
-            className="pl-9"
-          />
-        </div>
+      <div className="flex flex-wrap items-center gap-2">
         <Button
           type="button"
           variant="outline"
@@ -510,13 +452,37 @@ export function AiEvidenceSection({
             <Badge variant="secondary">{activeFilters.length}</Badge>
           ) : null}
         </Button>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => settingsSheet.setOpen(true)}
+        >
+          <Settings2 data-icon="inline-start" /> Ajustes
+        </Button>
       </div>
 
       {activeFilters.length ? (
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="min-w-0 text-xs wrap-break-word text-muted-foreground">
-            {describeActiveFilters(activeFilters, formatLocale)}
-          </span>
+        <div
+          className="flex flex-wrap items-center gap-2"
+          aria-label="Filtros activos"
+        >
+          {activeFilters.map((filter) => {
+            const label = describeActiveFilter(filter, formatLocale)
+            return (
+              <Button
+                key={`${filter.kind}:${"value" in filter ? filter.value : "on"}`}
+                type="button"
+                size="sm"
+                variant="secondary"
+                aria-label={`Quitar filtro ${label}`}
+                onClick={() => removeFilter(filter)}
+              >
+                {label}
+                <X className="size-3.5" aria-hidden="true" />
+              </Button>
+            )
+          })}
           <Button
             type="button"
             size="sm"
@@ -528,16 +494,9 @@ export function AiEvidenceSection({
         </div>
       ) : null}
 
-      <ReviewPartitionFilter
-        value={filters.partition}
-        counts={reviewCounts}
-        showCounts={filters.tab === "pending" && Boolean(reviewCounts)}
-        onChange={(partition) => changeFilters({ partition })}
-      />
-
       <div className="flex flex-col gap-2">
         {messages.length && filters.tab === "pending" ? (
-          <div className="flex justify-end">
+          <div className="flex flex-wrap justify-between gap-2">
             <Button
               type="button"
               size="sm"
@@ -546,6 +505,40 @@ export function AiEvidenceSection({
             >
               <Focus data-icon="inline-start" /> Modo foco
             </Button>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                type="button"
+                size="sm"
+                variant={selectionMode ? "secondary" : "outline"}
+                aria-pressed={selectionMode}
+                onClick={() => {
+                  if (selectionMode) {
+                    setSelectedMessageIds([])
+                  }
+                  setSelectionMode(!selectionMode)
+                }}
+              >
+                {selectionMode ? (
+                  <X data-icon="inline-start" />
+                ) : (
+                  <Check data-icon="inline-start" />
+                )}
+                {selectionMode ? "Cancelar selección" : "Seleccionar"}
+              </Button>
+              {selectionMode ? (
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={() => selectionSheet.setOpen(true)}
+                  disabled={selectedMessageIds.length === 0}
+                >
+                  <CheckCircle2 data-icon="inline-start" /> Verificar
+                  {selectedMessageIds.length
+                    ? ` (${selectedMessageIds.length})`
+                    : " selección"}
+                </Button>
+              ) : null}
+            </div>
           </div>
         ) : null}
         {reviewQueueQuery.isPending ? (
@@ -582,14 +575,41 @@ export function AiEvidenceSection({
           />
         ) : (
           <>
-            {messages.map((message) => (
-              <ReviewQueueRow
-                key={message.id}
-                message={message}
-                onOpenMessage={onOpenMessage}
-                onReview={() => review.setOpen(true, message.id)}
-              />
-            ))}
+            {messages.map((message) => {
+              const selected = selectedMessageIds.includes(message.id)
+              const row = (
+                <ReviewQueueRow
+                  message={message}
+                  onOpenMessage={onOpenMessage}
+                  onReview={() => review.setOpen(true, message.id)}
+                />
+              )
+              return selectionMode ? (
+                <div key={message.id} className="flex items-start gap-2">
+                  <Checkbox
+                    checked={selected}
+                    disabled={
+                      selectedMessageIds.length >=
+                        REVIEW_SELECTION_MAX_MESSAGES && !selected
+                    }
+                    aria-label={`Seleccionar correo ${shortMessageId(message.id)}`}
+                    className="mt-5"
+                    onCheckedChange={() =>
+                      setSelectedMessageIds((current) =>
+                        toggleReviewSelection(
+                          current,
+                          message.id,
+                          REVIEW_SELECTION_MAX_MESSAGES
+                        )
+                      )
+                    }
+                  />
+                  <div className="min-w-0 flex-1">{row}</div>
+                </div>
+              ) : (
+                <div key={message.id}>{row}</div>
+              )
+            })}
             <InfiniteListSentinel
               hasNextPage={Boolean(hasNextPage)}
               isFetchingNextPage={isFetchingNextPage}
@@ -639,6 +659,23 @@ export function AiEvidenceSection({
         filters={filters}
         onApply={applyFilters}
       />
+      <ReviewSelectionSheet
+        open={selectionSheet.open}
+        onOpenChange={selectionSheet.setOpen}
+        messageIds={selectedMessageIds}
+        holdoutCount={selectedHoldoutCount}
+        pending={verifySelectionMutation.isPending}
+        pendingVerdict={
+          verifySelectionMutation.isPending
+            ? verifySelectionMutation.variables?.verdict
+            : undefined
+        }
+        onApply={(input) => void verifySelection(input)}
+      />
+      <ReviewSettingsSheet
+        open={settingsSheet.open}
+        onOpenChange={settingsSheet.setOpen}
+      />
     </div>
   )
 }
@@ -671,60 +708,6 @@ function formatRunMetrics(metrics: unknown) {
         `${metricLabel(key)} ${typeof values[key] === "number" ? `${((values[key] as number) * 100).toFixed(1)}%` : "—"}`
     )
     .join(" · ")
-}
-
-function ReviewPartitionFilter({
-  value,
-  counts,
-  showCounts,
-  onChange,
-}: {
-  value: ReviewQueuePartitionFilter
-  counts: AiReviewQueuePage["counts"] | undefined
-  /** Los conteos del API son de pendientes: en Revisados solo filtran. */
-  showCounts: boolean
-  onChange: (value: ReviewQueuePartitionFilter) => void
-}) {
-  return (
-    <ToggleGroup
-      value={[value]}
-      onValueChange={(next) => {
-        const selected = next[0]
-        if (isReviewQueuePartitionFilter(selected)) {
-          onChange(selected)
-        }
-      }}
-      variant="outline"
-      size="sm"
-      aria-label="Filtrar correos por partición"
-      className="w-full flex-wrap justify-start"
-    >
-      {PARTITION_OPTIONS.map((option) => (
-        <ToggleGroupItem
-          key={option.value}
-          value={option.value}
-          className="h-8 gap-2 rounded-full px-3"
-        >
-          {option.label}
-          {showCounts ? (
-            <Badge variant="secondary">
-              {partitionCount(counts, option.value)}
-            </Badge>
-          ) : null}
-        </ToggleGroupItem>
-      ))}
-    </ToggleGroup>
-  )
-}
-
-function partitionCount(
-  counts: AiReviewQueuePage["counts"] | undefined,
-  partition: ReviewQueuePartitionFilter
-): number {
-  if (!counts) {
-    return 0
-  }
-  return partition === "ALL" ? counts.all : counts[partition]
 }
 
 function ReviewQueueEmpty({
@@ -791,25 +774,42 @@ function describeActiveFilters(
   activeFilters: ActiveReviewFilter[],
   locale: string
 ): string {
-  const parts = activeFilters.map((filter) => {
-    switch (filter.kind) {
-      case "subject":
-        return `asunto «${filter.value}»`
-      case "sender":
-        return `remitente ${filter.value}`
-      case "dateFrom":
-        return `desde el ${formatReviewDay(filter.value, locale)}`
-      case "dateTo":
-        return `hasta el ${formatReviewDay(filter.value, locale)}`
-      case "order":
-        return "más recientes primero"
-      case "partition":
-        return `partición ${PARTITION_LABELS[filter.value]}`
-      case "status":
-        return `estado ${STATUS_LABELS[filter.value]}`
-      case "uncertain":
-        return "solo incertidumbre (confianza < 70 % o sin predicción)"
-    }
-  })
+  const parts = activeFilters.map((filter) =>
+    describeActiveFilter(filter, locale)
+  )
   return `Filtros activos: ${parts.join(" · ")}`
+}
+
+function describeActiveFilter(
+  filter: ActiveReviewFilter,
+  locale: string
+): string {
+  switch (filter.kind) {
+    case "subject":
+      return `Asunto: ${filter.value}`
+    case "sender":
+      return `Remitente: ${filter.value}`
+    case "dateFrom":
+      return `Desde ${formatReviewDay(filter.value, locale)}`
+    case "dateTo":
+      return `Hasta ${formatReviewDay(filter.value, locale)}`
+    case "order":
+      return filter.value === "IMPACT"
+        ? "Mayor impacto"
+        : "Más recientes primero"
+    case "semanticType":
+      return `Tipo: ${SEMANTIC_TYPE_LABELS[filter.value]}`
+    case "route":
+      return `Dominio: ${ROUTE_LABELS[filter.value]}`
+    case "confidenceMin":
+      return `Confianza ≥ ${Math.round(filter.value * 100)} %`
+    case "confidenceMax":
+      return `Confianza ≤ ${Math.round(filter.value * 100)} %`
+    case "partition":
+      return `Conjunto: ${PARTITION_LABELS[filter.value]}`
+    case "status":
+      return `Estado: ${STATUS_LABELS[filter.value]}`
+    case "uncertain":
+      return "Solo inciertos"
+  }
 }
