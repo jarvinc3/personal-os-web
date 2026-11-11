@@ -1,7 +1,10 @@
 "use client"
 
 import { apiGet, apiPost } from "@/src/config/api-client"
-import { EVIDENCE_QUERY_KEY } from "@/src/modules/intelligence/hooks/use-ai-evidence"
+import {
+  EVIDENCE_QUERY_KEY,
+  REVIEW_GROUPS_QUERY_KEY,
+} from "@/src/modules/intelligence/constants/query-keys"
 import { REVIEW_GROUPS_PAGE_SIZE } from "@/src/modules/intelligence/review-groups"
 import type {
   AiReviewGroupsPage,
@@ -16,10 +19,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query"
 
-export const REVIEW_GROUPS_QUERY_KEY = [
-  "intelligence",
-  "review-groups",
-] as const
+export { REVIEW_GROUPS_QUERY_KEY } from "@/src/modules/intelligence/constants/query-keys"
 
 export function useReviewGroups(enabled: boolean) {
   const session = useAppStore((state) => state.session)

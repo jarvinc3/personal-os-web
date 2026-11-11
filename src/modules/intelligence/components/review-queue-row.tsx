@@ -3,7 +3,10 @@
 import { Mail, Pencil } from "lucide-react"
 
 import { shortMessageId } from "@/src/modules/intelligence/message-id"
-import { describeVerificationPayload } from "@/src/modules/intelligence/review-labels"
+import {
+  describeVerificationPayload,
+  SEMANTIC_TYPE_LABELS,
+} from "@/src/modules/intelligence/review-labels"
 import type {
   AiReviewQueueItem,
   AiReviewStatus,
@@ -48,6 +51,13 @@ export function ReviewQueueRow({
 }: ReviewQueueRowProps) {
   const reviewed = message.status !== "PENDING"
   const verification = message.verification
+  const semanticType = message.semanticType
+    ? SEMANTIC_TYPE_LABELS[message.semanticType]
+    : "Sin tipo"
+  const confidence =
+    message.confidence === null
+      ? "Sin dato"
+      : `${Math.round(message.confidence * 100)} %`
   return (
     <SummaryItem
       title={message.subject || "(sin asunto)"}
@@ -57,6 +67,9 @@ export function ReviewQueueRow({
           <span>
             {message.fromAddress} · {formatDateTime(message.receivedAt)} · #
             {shortMessageId(message.id)}
+          </span>
+          <span>
+            Tipo semántico: {semanticType} · Confianza: {confidence}
           </span>
           {verification ? (
             <span className="text-foreground">

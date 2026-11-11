@@ -1,7 +1,4 @@
-﻿import type {
-  components,
-  operations,
-} from "@/src/config/api-contract/api-schema"
+﻿import type { components } from "@/src/config/api-contract/api-schema"
 
 type AiSchemas = components["schemas"]
 
@@ -30,12 +27,31 @@ export type AiReviewGroupVerdict =
   AiSchemas["CreateReviewGroupVerificationDto"]["verdict"]
 export type AiReviewGroupVerificationResult =
   AiSchemas["AiReviewGroupVerificationResultResponseDto"]
+type AiReviewSelectionVerificationContract =
+  AiSchemas["CreateReviewSelectionVerificationDto"]
+export type AiReviewSelectionVerificationInput = Omit<
+  AiReviewSelectionVerificationContract,
+  "verdict"
+> & {
+  verdict: Extract<
+    AiReviewSelectionVerificationContract["verdict"],
+    "CONFIRMED" | "CORRECTED"
+  >
+}
+export type AiReviewSelectionVerificationResult =
+  AiSchemas["AiReviewSelectionVerificationResponseDto"]
 export type AiAnalysisRunSummary = AiSchemas["AiAnalysisRunResponseDto"]
 export type AiConsent = AiSchemas["AiConsentResponseDto"]
 export type AiRoleRow = AiSchemas["AiRoleUserResponseDto"]
 
-export type AiRunComparison =
-  operations["AiEvidenceController_compare"]["responses"]["201"]["content"]["application/json"]
+/** La respuesta real existe en el servicio, pero el DTO OpenAPI del back no la publica todavía. */
+export type AiRunComparison = {
+  comparable: boolean
+  warning: string | null
+  first: AiAnalysisRunSummary
+  second: AiAnalysisRunSummary
+  deltas: Record<string, number | null> | null
+}
 
 type ContractField<Value> = Exclude<Value, undefined>
 

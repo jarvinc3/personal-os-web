@@ -7,6 +7,7 @@ import {
   clearReviewFilters,
   formatReviewDay,
   readReviewQueueFilters,
+  removeReviewFilter,
   reviewQueueApiQuery,
   reviewQueueApiSearchParams,
   reviewQueueDatePatch,
@@ -45,10 +46,40 @@ describe("filtros de la cola de revisión", () => {
         partition: "HOLDOUT",
         subject: "aviso de seguridad",
         sender: "notificaciones@github.com",
+        semanticType: "ALL",
+        route: "ALL",
+        confidenceMin: null,
+        confidenceMax: null,
         dateFrom: "2026-10-01",
         dateTo: "2026-10-03",
         uncertain: false,
       }
+    )
+  })
+
+  it("lee los filtros semánticos y el rango de confianza", () => {
+    assert.deepEqual(
+      readReviewQueueFilters(
+        search(
+          "semanticType=FIN_TRANSACTION&route=FINANCE&confidenceMin=0.7&confidenceMax=0.95&order=IMPACT"
+        )
+      ),
+      {
+        ...REVIEW_QUEUE_FILTER_DEFAULTS,
+        semanticType: "FIN_TRANSACTION",
+        route: "FINANCE",
+        confidenceMin: 0.7,
+        confidenceMax: 0.95,
+        order: "IMPACT",
+      }
+    )
+    assert.deepEqual(
+      readReviewQueueFilters(
+        search(
+          "semanticType=UNKNOWN&route=BOGUS&confidenceMin=2&confidenceMax=nope"
+        )
+      ),
+      { ...REVIEW_QUEUE_FILTER_DEFAULTS }
     )
   })
 
@@ -114,6 +145,16 @@ describe("filtros de la cola de revisión", () => {
       ),
       "/intelligence?sheet=intelligence-message&sheetId=correo-1&partition=TRAIN"
     )
+    assert.equal(
+      reviewQueueFiltersHref("/intelligence", "sheet=review-filters", {
+        semanticType: "FIN_TRANSACTION",
+        route: "FINANCE",
+        confidenceMin: 0.7,
+        confidenceMax: 0.95,
+        order: "IMPACT",
+      }),
+      "/intelligence?sheet=review-filters&order=IMPACT&semanticType=FIN_TRANSACTION&route=FINANCE&confidenceMin=0.7&confidenceMax=0.95"
+    )
   })
 
   it("no navega si el valor ya está aplicado", () => {
@@ -173,6 +214,17 @@ describe("filtros de la cola de revisión", () => {
     )
   })
 
+  it("envía el orden de impacto al API", () => {
+    assert.equal(
+      reviewQueueApiQuery(filtersWith({ order: "IMPACT" })).order,
+      "IMPACT"
+    )
+    assert.equal(
+      reviewQueueApiSearchParams({ order: "IMPACT" }).get("order"),
+      "IMPACT"
+    )
+  })
+
   it("traduce los filtros al contrato del API", () => {
     assert.deepEqual(
       reviewQueueApiQuery(
@@ -185,6 +237,11 @@ describe("filtros de la cola de revisión", () => {
           dateFrom: "2026-10-01",
           dateTo: "2026-10-03",
           order: "NEWEST",
+          semanticType: "FIN_TRANSACTION",
+          route: "FINANCE",
+          confidenceMin: 0.7,
+          confidenceMax: 0.95,
+          uncertain: true,
         })
       ),
       {
@@ -195,6 +252,11 @@ describe("filtros de la cola de revisión", () => {
         dateFrom: "2026-10-01",
         dateTo: "2026-10-03",
         order: "NEWEST",
+        semanticType: "FIN_TRANSACTION",
+        route: "FINANCE",
+        confidenceMin: 0.7,
+        confidenceMax: 0.95,
+        uncertain: true,
       }
     )
     assert.equal(
@@ -212,12 +274,20 @@ describe("filtros de la cola de revisión", () => {
       dateFrom: "2026-10-01",
       dateTo: "2026-10-03",
       order: "NEWEST",
+      semanticType: "FIN_TRANSACTION",
+      route: "FINANCE",
+      confidenceMin: 0.7,
+      confidenceMax: 0.95,
     })
 
     assert.equal(params.get("status"), "CONFIRMED,CORRECTED")
     assert.equal(params.get("subject"), "aviso de seguridad")
     assert.equal(params.get("fromAddress"), "banco@example.com")
     assert.equal(params.get("order"), "NEWEST")
+    assert.equal(params.get("semanticType"), "FIN_TRANSACTION")
+    assert.equal(params.get("route"), "FINANCE")
+    assert.equal(params.get("confidenceMin"), "0.7")
+    assert.equal(params.get("confidenceMax"), "0.95")
   })
 
   it("enumera los filtros activos para el estado vacío", () => {
@@ -233,6 +303,11 @@ describe("filtros de la cola de revisión", () => {
           dateFrom: "2026-10-01",
           dateTo: "2026-10-03",
           order: "NEWEST",
+          semanticType: "FIN_TRANSACTION",
+          route: "FINANCE",
+          confidenceMin: 0.7,
+          confidenceMax: 0.95,
+          uncertain: true,
         })
       ),
       [
@@ -241,8 +316,13 @@ describe("filtros de la cola de revisión", () => {
         { kind: "dateFrom", value: "2026-10-01" },
         { kind: "dateTo", value: "2026-10-03" },
         { kind: "order", value: "NEWEST" },
+        { kind: "semanticType", value: "FIN_TRANSACTION" },
+        { kind: "route", value: "FINANCE" },
+        { kind: "confidenceMin", value: 0.7 },
+        { kind: "confidenceMax", value: 0.95 },
         { kind: "partition", value: "TRAIN" },
         { kind: "status", value: "REJECTED" },
+        { kind: "uncertain" },
       ]
     )
     assert.deepEqual(
@@ -267,6 +347,38 @@ describe("filtros de la cola de revisión", () => {
         })
       ),
       { ...REVIEW_QUEUE_FILTER_DEFAULTS, tab: "reviewed" }
+    )
+  })
+
+  it("quita un filtro activo sin modificar los demás", () => {
+    const filters = filtersWith({
+      tab: "reviewed",
+      status: "REJECTED",
+      subject: "aviso",
+      semanticType: "FIN_TRANSACTION",
+      route: "FINANCE",
+      confidenceMin: 0.7,
+      uncertain: true,
+    })
+
+    assert.deepEqual(
+      removeReviewFilter(filters, {
+        kind: "semanticType",
+        value: "FIN_TRANSACTION",
+      }),
+      { ...filters, semanticType: "ALL" }
+    )
+    assert.deepEqual(
+      removeReviewFilter(filters, { kind: "confidenceMin", value: 0.7 }),
+      { ...filters, confidenceMin: null }
+    )
+    assert.deepEqual(removeReviewFilter(filters, { kind: "uncertain" }), {
+      ...filters,
+      uncertain: false,
+    })
+    assert.deepEqual(
+      removeReviewFilter(filters, { kind: "status", value: "REJECTED" }),
+      { ...filters, status: "ALL" }
     )
   })
 
