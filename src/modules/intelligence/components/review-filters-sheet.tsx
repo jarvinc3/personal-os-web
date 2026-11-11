@@ -32,8 +32,8 @@ import { DateWheels } from "@/src/shared/components/forms/wheel-picker"
 import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import { Button } from "@/src/shared/components/ui/button"
 import {
-  applyReviewQueueFilterPatch,
   formatReviewDay,
+  patchReviewQueueDraft,
   reviewQueueDatePatch,
   REVIEW_QUEUE_FILTER_DEFAULTS,
   REVIEW_QUEUE_PARTITION_FILTERS,
@@ -120,15 +120,12 @@ function ReviewFiltersSheetForm({
   const [confidenceError, setConfidenceError] = useState<string | null>(null)
 
   function patchDraft(patch: Partial<ReviewQueueFilters>) {
-    setDraft((current) => applyReviewQueueFilterPatch(current, patch))
+    setDraft((current) => patchReviewQueueDraft(current, patch))
   }
 
   function changeDate(field: "dateFrom" | "dateTo", day: string) {
     setDraft((current) =>
-      applyReviewQueueFilterPatch(
-        current,
-        reviewQueueDatePatch(field, day, current)
-      )
+      patchReviewQueueDraft(current, reviewQueueDatePatch(field, day, current))
     )
   }
 
@@ -203,6 +200,7 @@ function ReviewFiltersSheetForm({
             value={draft.order}
             onChange={(order) => patchDraft({ order })}
             options={ORDER_OPTIONS}
+            orientation="vertical"
             fullWidth
           />
         </SummarySection>

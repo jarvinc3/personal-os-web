@@ -269,6 +269,17 @@ export function applyReviewQueueFilterPatch(
 }
 
 /**
+ * Une un cambio en el borrador de la hoja sin recortar el texto: recortar en
+ * cada tecla borra el espacio que separa la palabra que se está escribiendo.
+ */
+export function patchReviewQueueDraft(
+  draft: ReviewQueueFilters,
+  patch: Partial<ReviewQueueFilters>
+): ReviewQueueFilters {
+  return { ...draft, ...patch }
+}
+
+/**
  * URL con el cambio aplicado, o `null` si nada cambió. Conserva el resto de
  * parámetros de la ruta (pestaña superior, hojas) y no escribe los valores por
  * defecto.

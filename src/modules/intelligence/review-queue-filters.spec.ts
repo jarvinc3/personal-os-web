@@ -6,6 +6,7 @@ import {
   applyReviewQueueFilterPatch,
   clearReviewFilters,
   formatReviewDay,
+  patchReviewQueueDraft,
   readReviewQueueFilters,
   removeReviewFilter,
   reviewQueueApiQuery,
@@ -128,6 +129,19 @@ describe("filtros de la cola de revisión", () => {
     assert.equal(next.sender, "banco@example.com")
     assert.equal(filters.subject, "aviso")
     assert.equal(filters.sender, "")
+  })
+
+  it("conserva el texto tal como se escribe en el borrador de la hoja", () => {
+    const draft = filtersWith({ subject: "Full", sender: "banco" })
+    const next = patchReviewQueueDraft(draft, {
+      subject: "Full ",
+      sender: "banco ",
+    })
+
+    assert.equal(next.subject, "Full ")
+    assert.equal(next.sender, "banco ")
+    assert.equal(draft.subject, "Full")
+    assert.equal(draft.sender, "banco")
   })
 
   it("arma la URL del cambio y conserva el resto de parámetros", () => {
