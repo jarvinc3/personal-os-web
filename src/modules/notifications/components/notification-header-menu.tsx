@@ -25,15 +25,17 @@ export function NotificationHeaderMenu({
 }: NotificationHeaderMenuProps) {
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="outline"
-          size="icon"
-          className="size-9 rounded-full"
-          aria-label="Opciones de notificaciones"
-        >
-          <MoreVerticalIcon />
-        </Button>
+      <DropdownMenuTrigger
+        render={
+          <Button
+            variant="outline"
+            size="icon"
+            className="size-9 rounded-full"
+            aria-label="Opciones de notificaciones"
+          />
+        }
+      >
+        <MoreVerticalIcon />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="min-w-56">
         <DropdownMenuGroup className="space-y-1">

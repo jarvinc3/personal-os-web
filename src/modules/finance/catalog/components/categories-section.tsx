@@ -46,6 +46,7 @@ import {
   TabsTrigger,
 } from "@/src/shared/components/ui/tabs"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
+import { useTabsBehavior } from "@/src/shared/hooks/use-tabs-behavior"
 import { appToast } from "@/src/shared/lib/app-toast"
 import {
   ChevronDownIcon,
@@ -238,6 +239,14 @@ export function FinanceCategoriesSection({
   editable,
 }: CategoriesSectionProps) {
   const [listType, setListType] = useState<FinanceCategoryType>("EXPENSE")
+  const tabsBehavior = useTabsBehavior({
+    value: listType,
+    onValueChange: (next) => {
+      if (next === "EXPENSE" || next === "INCOME") {
+        setListType(next)
+      }
+    },
+  })
   const [orderIds, setOrderIds] = useState<string[]>([])
   const [unlinkingId, setUnlinkingId] = useState<string | null>(null)
   const categoriesQuery = useCategories(enabled)
@@ -297,15 +306,7 @@ export function FinanceCategoriesSection({
   return (
     <>
       <div className="flex flex-col gap-3">
-        <Tabs
-          value={listType}
-          onValueChange={(next) => {
-            if (next === "EXPENSE" || next === "INCOME") {
-              setListType(next)
-            }
-          }}
-          className="w-full gap-0"
-        >
+        <Tabs {...tabsBehavior} className="w-full gap-0">
           <TabsList className="h-auto w-full rounded-2xl p-1" variant="default">
             <TabsTrigger value="EXPENSE" className="rounded-xl px-3 py-2">
               Gastos

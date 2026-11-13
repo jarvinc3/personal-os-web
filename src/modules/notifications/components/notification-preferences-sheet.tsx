@@ -12,7 +12,8 @@ import {
   SettingsRow,
   SettingsSection,
 } from "@/src/shared/components/settings/settings-section"
-import { Button } from "@/src/shared/components/ui/button"
+import { buttonVariants } from "@/src/shared/components/ui/button"
+import { cn } from "@/src/shared/lib/utils"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { formatTimeRange } from "@/src/shared/lib/date-format"
 import { LinkPendingOverlay } from "@/src/shared/components/shell/navigation-pending"
@@ -137,13 +138,19 @@ export function NotificationPreferencesSheet({
           <DevicePushSettingsRow isLast />
         </SettingsSection>
 
-        <Button variant="outline" className="w-full" asChild>
-          <Link href={APP_ROUTES.app.settings} className="relative">
-            <SettingsIcon className="size-4 shrink-0" />
-            Ir a Ajustes completos
-            <LinkPendingOverlay />
-          </Link>
-        </Button>
+        <Link
+          href={APP_ROUTES.app.settings}
+          className={cn(
+            buttonVariants({
+              variant: "outline",
+              className: "relative w-full",
+            })
+          )}
+        >
+          <SettingsIcon className="size-4 shrink-0" />
+          Ir a Ajustes completos
+          <LinkPendingOverlay />
+        </Link>
       </BottomSheet>
 
       <EditQuietHoursSheet

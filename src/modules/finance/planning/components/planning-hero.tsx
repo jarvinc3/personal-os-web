@@ -1,4 +1,4 @@
-import { Button } from "@/src/shared/components/ui/button"
+import { buttonVariants } from "@/src/shared/components/ui/button"
 import { LinkPendingOverlay } from "@/src/shared/components/shell/navigation-pending"
 import { cn } from "@/src/shared/lib/utils"
 import {
@@ -34,17 +34,18 @@ function FinancePlanningHeroAction({
   className,
 }: FinancePlanningHeroActionProps) {
   return (
-    <Button
-      asChild
-      variant="outline"
-      className={cn("relative flex-1", className)}
+    <Link
+      href={href}
+      className={cn(
+        buttonVariants({ variant: "outline" }),
+        "relative flex-1",
+        className
+      )}
     >
-      <Link href={href}>
-        <Icon className="text-foreground" />
-        <span className="text-base font-semibold text-foreground">{label}</span>
-        <LinkPendingOverlay />
-      </Link>
-    </Button>
+      <Icon className="text-foreground" />
+      <span className="text-base font-semibold text-foreground">{label}</span>
+      <LinkPendingOverlay />
+    </Link>
   )
 }
 

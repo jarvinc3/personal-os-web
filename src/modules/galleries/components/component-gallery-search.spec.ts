@@ -41,7 +41,7 @@ describe("buscador de la galería de componentes", () => {
       "Button",
       "Button",
       "Button",
-      "Button asChild",
+      "Button con Link",
     ])
   })
 

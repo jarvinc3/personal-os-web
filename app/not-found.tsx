@@ -1,5 +1,6 @@
 import { AppLogo } from "@/src/shared/components/shell/app-logo"
-import { Button } from "@/src/shared/components/ui/button"
+import { buttonVariants } from "@/src/shared/components/ui/button"
+import { cn } from "@/src/shared/lib/utils"
 import { landingUrl } from "@/src/shared/constants/landing.mjs"
 import { ArrowLeftIcon, MailIcon } from "lucide-react"
 import type { Metadata } from "next"
@@ -44,27 +45,33 @@ export default function NotFound() {
         </div>
 
         <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:justify-center">
-          <Button
-            asChild
-            size="lg"
-            className="shadow-[4px_4px_0px_0px_#111827] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none"
+          <a
+            href={landingUrl()}
+            className={cn(
+              buttonVariants({
+                size: "lg",
+                className:
+                  "relative shadow-[4px_4px_0px_0px_#111827] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none",
+              })
+            )}
           >
-            <a href={landingUrl()} className="relative">
-              <ArrowLeftIcon className="size-4 shrink-0" />
-              Volver al inicio
-            </a>
-          </Button>
-          <Button
-            asChild
-            variant="outline"
-            size="lg"
-            className="border-2 border-text shadow-[4px_4px_0px_0px_#111827] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none"
+            <ArrowLeftIcon className="size-4 shrink-0" />
+            Volver al inicio
+          </a>
+          <a
+            href={landingUrl("/contact")}
+            className={cn(
+              buttonVariants({
+                variant: "outline",
+                size: "lg",
+                className:
+                  "relative border-2 border-text shadow-[4px_4px_0px_0px_#111827] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none",
+              })
+            )}
           >
-            <a href={landingUrl("/contact")} className="relative">
-              <MailIcon className="size-4 shrink-0" />
-              Contactar soporte
-            </a>
-          </Button>
+            <MailIcon className="size-4 shrink-0" />
+            Contactar soporte
+          </a>
         </div>
       </div>
     </div>

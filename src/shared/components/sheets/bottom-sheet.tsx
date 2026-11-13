@@ -13,7 +13,6 @@ import {
   DrawerDescription,
   DrawerFooter,
   DrawerHeader,
-  DrawerNested,
   DrawerTitle,
 } from "@/src/shared/components/ui/drawer"
 import { Button } from "@/src/shared/components/ui/button"
@@ -30,8 +29,6 @@ interface BottomSheetProps {
   variant?: BottomSheetVariant
   /** `wide` ensancha el drawer derecho desde `md` para mostrar dos columnas. */
   size?: BottomSheetSize
-  /** Stacks this sheet on top of the drawer that renders it. */
-  nested?: boolean
   onOpenChange: (open: boolean) => void
   title: string
   description?: string
@@ -54,7 +51,6 @@ export function BottomSheet({
   open,
   variant = "default",
   size = "default",
-  nested = false,
   onOpenChange,
   title,
   description,
@@ -67,7 +63,7 @@ export function BottomSheet({
   closeLabel = DEFAULT_CLOSE_LABEL,
 }: BottomSheetProps) {
   const isMobile = useIsMobile()
-  const direction = getBottomSheetDirection(variant, isMobile)
+  const swipeDirection = getBottomSheetDirection(variant, isMobile)
   const closeAction =
     actions?.close ??
     (showClose ? (
@@ -88,9 +84,12 @@ export function BottomSheet({
       ["submit", actions?.submit],
     ] as const
   ).filter(([, node]) => node != null && node !== false)
-  const Root = nested ? DrawerNested : Drawer
   return (
-    <Root direction={direction} open={open} onOpenChange={onOpenChange}>
+    <Drawer
+      swipeDirection={swipeDirection}
+      open={open}
+      onOpenChange={onOpenChange}
+    >
       <DrawerContent
         className={cn(
           variant === "floating" && FLOATING_SHEET_CONTENT_CLASS,
@@ -122,7 +121,7 @@ export function BottomSheet({
         </DrawerHeader>
 
         <div
-          data-vaul-no-drag=""
+          data-base-ui-swipe-ignore=""
           className="scrollbar-hide flex flex-col gap-4 overflow-y-auto p-4"
         >
           {pending ? (
@@ -142,6 +141,6 @@ export function BottomSheet({
           </DrawerFooter>
         )}
       </DrawerContent>
-    </Root>
+    </Drawer>
   )
 }

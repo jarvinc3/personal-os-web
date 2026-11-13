@@ -29,6 +29,7 @@ import {
   TabsTrigger,
 } from "@/src/shared/components/ui/tabs"
 import { appToast } from "@/src/shared/lib/app-toast"
+import { useTabsBehavior } from "@/src/shared/hooks/use-tabs-behavior"
 import { ChevronLeftIcon } from "lucide-react"
 import { useState } from "react"
 
@@ -57,6 +58,13 @@ export function LinkTransactionSheet({
 }: LinkTransactionSheetProps) {
   const [tab, setTab] = useState<LinkTab>(LINK_TABS.installment)
   const [loanId, setLoanId] = useState<string | null>(null)
+  const tabsBehavior = useTabsBehavior({
+    value: tab,
+    onValueChange: (value) => {
+      setTab(value as LinkTab)
+      setLoanId(null)
+    },
+  })
   const loansQuery = useLoans(open)
   const receivablesQuery = useReceivables(open)
   const goalsQuery = useSavingsGoals(open)
@@ -163,13 +171,7 @@ export function LinkTransactionSheet({
       title="Vincular movimiento"
       description="No crea dinero nuevo: registra el efecto en la planificación."
     >
-      <Tabs
-        value={tab}
-        onValueChange={(value) => {
-          setTab(value as LinkTab)
-          setLoanId(null)
-        }}
-      >
+      <Tabs {...tabsBehavior}>
         <TabsList className="w-full">
           <TabsTrigger value={LINK_TABS.installment}>Cuota</TabsTrigger>
           <TabsTrigger value={LINK_TABS.receivable}>Cobro</TabsTrigger>

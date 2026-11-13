@@ -67,7 +67,7 @@ export const COMPONENT_GALLERY_SECTIONS: readonly ComponentGallerySection[] = [
     title: "Botones y acciones",
     description: "Variantes, tamaños, icono solo y pending",
     icon: MousePointerClickIcon,
-    demos: ["Button", "Button", "Button", "Button asChild", "PendingSurface"],
+    demos: ["Button", "Button", "Button", "Button con Link", "PendingSurface"],
   },
   {
     id: "overlays",
@@ -117,7 +117,7 @@ export const COMPONENT_GALLERY_SECTIONS: readonly ComponentGallerySection[] = [
       "IconBadge",
       "Empty",
       "Skeleton + ListSkeleton + CardSkeleton",
-      'Empty size="sm"',
+      "Empty compacta",
       "Spinner + LoadingView",
       "ErrorState",
     ],

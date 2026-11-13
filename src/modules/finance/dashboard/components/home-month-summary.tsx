@@ -5,7 +5,8 @@ import { MonthFlowSummary } from "@/src/modules/finance/shared/components/month-
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
 import { useMonthExpenseTrend } from "@/src/modules/finance/shared/hooks/use-month-expense-trend"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
-import { Button } from "@/src/shared/components/ui/button"
+import { buttonVariants } from "@/src/shared/components/ui/button"
+import { cn } from "@/src/shared/lib/utils"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { formatMonthYearLabel } from "@/src/shared/lib/date-format"
@@ -40,13 +41,19 @@ export function FinanceHomeMonthSummary() {
       right={
         <>
           {trend ? <FinanceExpenseTrendBadge trend={trend} /> : null}
-          <Button asChild variant="ghost" className="h-6">
-            <Link href={APP_ROUTES.app.finance} className="relative">
-              <span className="sr-only">Abrir Finanzas</span>
-              <ChevronRight className="size-4" />
-              <LinkPendingOverlay />
-            </Link>
-          </Button>
+          <Link
+            href={APP_ROUTES.app.finance}
+            className={cn(
+              buttonVariants({
+                variant: "ghost",
+                className: "relative h-6",
+              })
+            )}
+          >
+            <span className="sr-only">Abrir Finanzas</span>
+            <ChevronRight className="size-4" />
+            <LinkPendingOverlay />
+          </Link>
         </>
       }
     >

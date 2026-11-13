@@ -5,55 +5,85 @@ import { describe, it } from "node:test"
 import { fileURLToPath } from "node:url"
 import ts from "typescript"
 
-/**
- * `Button asChild` clones its only child through `Slot`, which throws during
- * render when it finds two. That is how Suscripciones stopped rendering (#324):
- * the calendar shortcut left `LinkPendingOverlay` as a sibling of the `Link`.
- *
- * A render test cannot run here (the runner strips types, not JSX), so the
- * guard parses the components with the TypeScript parser and counts the direct
- * children of every element that carries `asChild`.
- */
 const FEATURE_ROOT = dirname(fileURLToPath(import.meta.url))
-const AS_CHILD_ATTRIBUTE = "asChild"
+const LINK_TAG = "Link"
+const LINK_PENDING_OVERLAY_TAG = "LinkPendingOverlay"
 
 type JsxSource = {
   file: string
   source: string
 }
 
-/** Returns a child only when React would actually render it. */
-function isRendered(child: ts.JsxChild): boolean {
-  if (ts.isJsxText(child)) {
-    return child.text.trim() !== ""
-  }
-  if (ts.isJsxExpression(child)) {
-    return child.expression !== undefined
-  }
-  return true
+type StyledLinkComposition = {
+  href: string
+  buttonStyled: boolean
+  pendingOverlayCount: number
 }
 
-function renderedChildren(children: ts.NodeArray<ts.JsxChild>): ts.JsxChild[] {
-  return children.filter(isRendered)
-}
-
-function hasAsChild(attributes: ts.JsxAttributes): boolean {
-  return attributes.properties.some(
-    (property) =>
-      ts.isJsxAttribute(property) &&
-      property.name.getText() === AS_CHILD_ATTRIBUTE
+function jsxAttributeExpression(
+  attributes: ts.JsxAttributes,
+  name: string
+): ts.Expression | undefined {
+  const attribute = attributes.properties.find(
+    (property): property is ts.JsxAttribute =>
+      ts.isJsxAttribute(property) && property.name.getText() === name
   )
+  const initializer = attribute?.initializer
+
+  if (!initializer) {
+    return undefined
+  }
+  if (ts.isStringLiteral(initializer)) {
+    return initializer
+  }
+  if (!ts.isJsxExpression(initializer)) {
+    return undefined
+  }
+
+  return initializer.expression
 }
 
-/** Child count of every element that carries `asChild`, in source order. */
-function asChildChildCounts({ file, source }: JsxSource): number[] {
-  const counts: number[] = []
+function jsxAttributeText(attributes: ts.JsxAttributes, name: string): string {
+  const expression = jsxAttributeExpression(attributes, name)
+
+  if (!expression) {
+    return ""
+  }
+
+  return ts.isStringLiteral(expression) ? expression.text : expression.getText()
+}
+
+function isPendingOverlay(child: ts.JsxChild): boolean {
+  if (ts.isJsxElement(child)) {
+    return child.openingElement.tagName.getText() === LINK_PENDING_OVERLAY_TAG
+  }
+  if (ts.isJsxSelfClosingElement(child)) {
+    return child.tagName.getText() === LINK_PENDING_OVERLAY_TAG
+  }
+  return false
+}
+
+function styledLinkCompositions({
+  file,
+  source,
+}: JsxSource): StyledLinkComposition[] {
+  const compositions: StyledLinkComposition[] = []
   const visit = (node: ts.Node): void => {
-    if (ts.isJsxElement(node) && hasAsChild(node.openingElement.attributes)) {
-      counts.push(renderedChildren(node.children).length)
-    }
-    if (ts.isJsxSelfClosingElement(node) && hasAsChild(node.attributes)) {
-      counts.push(0)
+    if (
+      ts.isJsxElement(node) &&
+      node.openingElement.tagName.getText() === LINK_TAG
+    ) {
+      const href = jsxAttributeText(node.openingElement.attributes, "href")
+      const classNameExpression = jsxAttributeExpression(
+        node.openingElement.attributes,
+        "className"
+      )
+      compositions.push({
+        href,
+        buttonStyled:
+          classNameExpression?.getText().includes("buttonVariants") ?? false,
+        pendingOverlayCount: node.children.filter(isPendingOverlay).length,
+      })
     }
     ts.forEachChild(node, visit)
   }
@@ -66,7 +96,7 @@ function asChildChildCounts({ file, source }: JsxSource): number[] {
       ts.ScriptKind.TSX
     )
   )
-  return counts
+  return compositions
 }
 
 function featureSources(): JsxSource[] {
@@ -79,53 +109,37 @@ function featureSources(): JsxSource[] {
 }
 
 describe("subscriptions hero", () => {
-  it("counts the second child that broke the view", () => {
-    const broken = `const view = (
-  <Button variant="secondary" asChild>
-    <Link href="/finance/subscriptions/calendar">
-      <CalendarDaysIcon />
-      <span>Calendario</span>
-    </Link>
+  it("styles a direct calendar Link and keeps its pending surface", () => {
+    const composition = `const view = (
+  <Link
+    href="/finance/subscriptions/calendar"
+    className={cn(buttonVariants({ variant: "outline" }))}
+  >
+    <CalendarDaysIcon />
+    <span>Calendario</span>
     <LinkPendingOverlay />
-  </Button>
+  </Link>
 )`
     assert.deepEqual(
-      asChildChildCounts({ file: "broken.tsx", source: broken }),
-      [2]
+      styledLinkCompositions({ file: "fixture.tsx", source: composition }),
+      [
+        {
+          href: "/finance/subscriptions/calendar",
+          buttonStyled: true,
+          pendingOverlayCount: 1,
+        },
+      ]
     )
   })
 
-  it("ignores whitespace and comments, which render nothing", () => {
-    const spaced = `const view = (
-  <Button variant="secondary" asChild>
-    {/* el aviso vive dentro del enlace */}
-    <Link href="/finance/subscriptions/calendar">
-      <span>Calendario</span>
-    </Link>
-  </Button>
-)`
-    assert.deepEqual(
-      asChildChildCounts({ file: "spaced.tsx", source: spaced }),
-      [1]
+  it("keeps the calendar shortcut as a styled Link with its pending surface", () => {
+    const compositions = featureSources().flatMap(styledLinkCompositions)
+    const calendarShortcut = compositions.find(({ href }) =>
+      href.includes("financeSubscriptionsCalendar")
     )
-  })
 
-  it("keeps one child per asChild element in the feature", () => {
-    const inspected = featureSources().map((source) => ({
-      file: source.file,
-      counts: asChildChildCounts(source),
-    }))
-    const scanned = inspected.reduce(
-      (total, { counts }) => total + counts.length,
-      0
-    )
-    assert.ok(scanned > 0, "the feature still has asChild elements to guard")
-    const offenders = inspected
-      .map(({ file, counts }) => ({
-        file,
-        counts: counts.filter((count) => count !== 1),
-      }))
-      .filter(({ counts }) => counts.length > 0)
-    assert.deepEqual(offenders, [])
+    assert.ok(calendarShortcut, "the calendar shortcut remains in the feature")
+    assert.equal(calendarShortcut.buttonStyled, true)
+    assert.equal(calendarShortcut.pendingOverlayCount, 1)
   })
 })

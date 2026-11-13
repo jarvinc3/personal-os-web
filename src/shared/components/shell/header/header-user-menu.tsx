@@ -42,20 +42,23 @@ export function HeaderUserMenu() {
   return (
     <DropdownMenu>
       {/* Fixed id: the auto-generated one changes between server and client and breaks hydration. */}
-      <DropdownMenuTrigger asChild id="user-menu-trigger">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="rounded-full"
-          aria-label="Menú de usuario"
-        >
-          <Avatar className="size-9 rounded-full">
-            <AvatarImage src={avatarUrl} alt={displayName} />
-            <AvatarFallback className="rounded-lg">
-              {displayName.slice(0, 2).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
-        </Button>
+      <DropdownMenuTrigger
+        id="user-menu-trigger"
+        render={
+          <Button
+            variant="ghost"
+            size="icon"
+            className="rounded-full"
+            aria-label="Menú de usuario"
+          />
+        }
+      >
+        <Avatar className="size-9 rounded-full">
+          <AvatarImage src={avatarUrl} alt={displayName} />
+          <AvatarFallback className="rounded-lg">
+            {displayName.slice(0, 2).toUpperCase()}
+          </AvatarFallback>
+        </Avatar>
       </DropdownMenuTrigger>
       <DropdownMenuContent
         className="min-w-56"
@@ -85,34 +88,47 @@ export function HeaderUserMenu() {
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup className="flex flex-col gap-2">
-          <DropdownMenuItem asChild>
-            <Link href={APP_ROUTES.app.notifications} className="relative">
-              <BellIcon />
-              Notificaciones
-              <LinkPendingOverlay />
-            </Link>
+          <DropdownMenuItem
+            render={
+              <Link href={APP_ROUTES.app.notifications} className="relative" />
+            }
+          >
+            <BellIcon />
+            Notificaciones
+            <LinkPendingOverlay />
           </DropdownMenuItem>
           {moduleSettings && moduleSlug ? (
             <DropdownMenuItem
-              asChild
-              active={pathname === settingsModuleHref(moduleSlug)}
+              render={
+                <Link
+                  href={settingsModuleHref(moduleSlug)}
+                  className="relative"
+                />
+              }
+              className={
+                pathname === settingsModuleHref(moduleSlug)
+                  ? "bg-accent text-accent-foreground"
+                  : undefined
+              }
             >
-              <Link href={settingsModuleHref(moduleSlug)} className="relative">
-                <SettingsIcon />
-                Ajustes de {moduleSettings.label}
-                <LinkPendingOverlay />
-              </Link>
+              <SettingsIcon />
+              Ajustes de {moduleSettings.label}
+              <LinkPendingOverlay />
             </DropdownMenuItem>
           ) : null}
           <DropdownMenuItem
-            asChild
-            active={pathname === APP_ROUTES.app.settings}
+            render={
+              <Link href={APP_ROUTES.app.settings} className="relative" />
+            }
+            className={
+              pathname === APP_ROUTES.app.settings
+                ? "bg-accent text-accent-foreground"
+                : undefined
+            }
           >
-            <Link href={APP_ROUTES.app.settings} className="relative">
-              <SettingsIcon />
-              Configuración
-              <LinkPendingOverlay />
-            </Link>
+            <SettingsIcon />
+            Configuración
+            <LinkPendingOverlay />
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />

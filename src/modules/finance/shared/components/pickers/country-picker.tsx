@@ -6,6 +6,7 @@ import {
 } from "@/src/modules/finance/shared/lib/countries"
 import { foldSearchText } from "@/src/shared/lib/search-text"
 import {
+  EMPTY_COMPACT_CLASS_NAME,
   Empty,
   EmptyHeader,
   EmptyTitle,
@@ -96,7 +97,7 @@ export function CountryPickerSheet({
         />
       </div>
       {visible.length === 0 ? (
-        <Empty size="sm">
+        <Empty className={EMPTY_COMPACT_CLASS_NAME}>
           <EmptyHeader>
             <EmptyTitle>Ningún país coincide</EmptyTitle>
           </EmptyHeader>

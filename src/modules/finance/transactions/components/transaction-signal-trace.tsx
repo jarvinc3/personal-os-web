@@ -1,5 +1,6 @@
 import { GitBranchIcon, MailIcon } from "lucide-react"
 import {
+  EMPTY_COMPACT_CLASS_NAME,
   Empty,
   EmptyDescription,
   EmptyHeader,
@@ -55,7 +56,7 @@ export function TransactionSignalTrace({
           )}
         </>
       ) : (
-        <Empty size="sm" className="border-0">
+        <Empty className={`${EMPTY_COMPACT_CLASS_NAME} border-0`}>
           <EmptyHeader>
             <EmptyMedia variant="icon">
               <MailIcon aria-hidden="true" />

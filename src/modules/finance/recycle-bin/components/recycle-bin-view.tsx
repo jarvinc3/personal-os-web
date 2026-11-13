@@ -36,6 +36,7 @@ import {
   TabsTrigger,
 } from "@/src/shared/components/ui/tabs"
 import { appToast } from "@/src/shared/lib/app-toast"
+import { useTabsBehavior } from "@/src/shared/hooks/use-tabs-behavior"
 import {
   ArchiveIcon,
   ArrowLeftRightIcon,
@@ -146,6 +147,7 @@ export function RecycleBinView() {
   const { isEnabled } = useFinanceEnabled()
   const recycleBinQuery = useRecycleBin(isEnabled)
   const restore = useRecycleBinRestore()
+  const tabsBehavior = useTabsBehavior({ defaultValue: "archived" })
 
   const archived = recycleBinQuery.data?.pages[0]?.archived ?? []
   const deleted = infiniteListItems(recycleBinQuery.data)
@@ -255,7 +257,7 @@ export function RecycleBinView() {
         />
       }
     >
-      <Tabs defaultValue="archived" className="flex flex-col gap-4">
+      <Tabs {...tabsBehavior} className="flex flex-col gap-4">
         <TabsList className="w-full rounded-2xl bg-muted">
           <TabsTrigger value="archived" className="rounded-2xl py-3">
             <ArchiveIcon className="size-4 shrink-0" />

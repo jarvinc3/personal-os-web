@@ -43,6 +43,7 @@ import { showUndoToast } from "@/src/modules/finance/shared/components/undo-toas
 import { encodeLedgerTarget } from "@/src/modules/finance/shared/lib/ledger-payloads"
 import { monthKeyFromDate } from "@/src/modules/finance/shared/lib/month-window"
 import { DeleteRecordDialog } from "@/src/modules/finance/shared/components/delete-record-dialog"
+import { useTabsBehavior } from "@/src/shared/hooks/use-tabs-behavior"
 import { ArchiveRecordDialog } from "@/src/modules/finance/shared/components/archive-record-dialog"
 import { RecordOptionsSheet } from "@/src/modules/finance/shared/components/record-options-sheet"
 import { InstrumentHistorySheet } from "@/src/modules/finance/shared/components/instrument-history-sheet"
@@ -104,6 +105,10 @@ function CardDetailScreenBody({ cardId }: CardDetailScreenProps) {
     locale: formatLocale,
   }
   const [tab, setTab] = useState<CardDetailTab>(CARD_DETAIL_TABS.statements)
+  const tabsBehavior = useTabsBehavior({
+    value: tab,
+    onValueChange: (value) => setTab(value as CardDetailTab),
+  })
 
   const cardsQuery = useCards(isEnabled)
   const accountsQuery = useAccounts(isEnabled)
@@ -304,11 +309,7 @@ function CardDetailScreenBody({ cardId }: CardDetailScreenProps) {
           }}
         />
         {isCredit ? (
-          <Tabs
-            className="flex w-full flex-col gap-4 p-1.5"
-            value={tab}
-            onValueChange={(value) => setTab(value as CardDetailTab)}
-          >
+          <Tabs {...tabsBehavior} className="flex w-full flex-col gap-4 p-1.5">
             <TabsList className="w-full rounded-2xl bg-background">
               <TabsTrigger
                 value={CARD_DETAIL_TABS.statements}

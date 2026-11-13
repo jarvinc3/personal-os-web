@@ -10,6 +10,7 @@ import { foldSearchText } from "@/src/shared/lib/search-text"
 import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 import { useFormatLocale } from "@/src/modules/settings/hooks/use-format-locale"
 import {
+  EMPTY_COMPACT_CLASS_NAME,
   Empty,
   EmptyHeader,
   EmptyTitle,
@@ -155,13 +156,13 @@ export function CurrencyPickerSheet({
           <Spinner />
         </div>
       ) : listed.length === 0 ? (
-        <Empty size="sm">
+        <Empty className={EMPTY_COMPACT_CLASS_NAME}>
           <EmptyHeader>
             <EmptyTitle>No hay otras monedas</EmptyTitle>
           </EmptyHeader>
         </Empty>
       ) : visible.length === 0 ? (
-        <Empty size="sm">
+        <Empty className={EMPTY_COMPACT_CLASS_NAME}>
           <EmptyHeader>
             <EmptyTitle>Ninguna moneda coincide</EmptyTitle>
           </EmptyHeader>

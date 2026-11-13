@@ -10,7 +10,8 @@ import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money
 import { WealthCurrencySection } from "@/src/modules/finance/wealth/components/wealth-currency-section"
 import { WealthSummary } from "@/src/modules/finance/wealth/components/wealth-summary"
 import { LoadingView } from "@/src/shared/components/feedback/loading-view"
-import { Button } from "@/src/shared/components/ui/button"
+import { buttonVariants } from "@/src/shared/components/ui/button"
+import { cn } from "@/src/shared/lib/utils"
 import { MissingBreakdownNotice } from "@/src/modules/finance/shared/components/layout/missing-breakdown-notice"
 import {
   Empty,
@@ -107,12 +108,13 @@ function WealthScreenBody() {
             </EmptyDescription>
           </EmptyHeader>
           <EmptyContent>
-            <Button asChild>
-              <Link href={APP_ROUTES.app.financeProducts}>
-                <PlusIcon className="size-4 shrink-0" />
-                Ir a Productos
-              </Link>
-            </Button>
+            <Link
+              href={APP_ROUTES.app.financeProducts}
+              className={cn(buttonVariants({}))}
+            >
+              <PlusIcon className="size-4 shrink-0" />
+              Ir a Productos
+            </Link>
           </EmptyContent>
         </Empty>
       ) : (

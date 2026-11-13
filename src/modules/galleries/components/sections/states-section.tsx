@@ -10,6 +10,7 @@ import {
 import { LoadingView } from "@/src/shared/components/feedback/loading-view"
 import { Button } from "@/src/shared/components/ui/button"
 import {
+  EMPTY_COMPACT_CLASS_NAME,
   Empty,
   EmptyContent,
   EmptyDescription,
@@ -98,12 +99,12 @@ export function StatesSection() {
       </GalleryDemo>
 
       <GalleryDemo
-        name={'Empty size="sm"'}
+        name="Empty compacta"
         importPath="@/src/shared/components/ui/empty"
         states="picker sin resultados"
-        note="En un picker o una búsqueda dentro de un sheet, la Empty compacta reemplaza el texto suelto."
+        note="En un picker, usa clases compactas para no desplazar los controles."
       >
-        <Empty size="sm" className="border">
+        <Empty className={`${EMPTY_COMPACT_CLASS_NAME} border`}>
           <EmptyHeader>
             <EmptyTitle>Ningún país coincide</EmptyTitle>
           </EmptyHeader>

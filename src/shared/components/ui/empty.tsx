@@ -1,21 +1,15 @@
 import { cva, type VariantProps } from "class-variance-authority"
+import { cn } from "cn"
 
-import { cn } from "@/src/shared/lib/utils"
+export const EMPTY_COMPACT_CLASS_NAME =
+  "gap-2 rounded-lg p-4 [&_[data-slot=empty-description]]:text-xs [&_[data-slot=empty-title]]:text-sm"
 
-function Empty({
-  className,
-  size = "default",
-  ...props
-}: React.ComponentProps<"div"> & { size?: "default" | "sm" }) {
+function Empty({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="empty"
-      data-size={size}
       className={cn(
-        "flex w-full min-w-0 flex-1 flex-col items-center justify-center rounded-lg border-dashed text-center text-balance",
-        size === "sm"
-          ? "gap-2 p-4 [&_[data-slot=empty-description]]:text-xs [&_[data-slot=empty-title]]:text-sm"
-          : "gap-4 p-12",
+        "flex w-full min-w-0 flex-1 flex-col items-center justify-center gap-4 rounded-3xl border-dashed p-12 text-center text-balance",
         className
       )}
       {...props}
@@ -39,7 +33,7 @@ const emptyMediaVariants = cva(
     variants: {
       variant: {
         default: "bg-transparent",
-        icon: "flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted text-foreground [&_svg:not([class*='size-'])]:size-6",
+        icon: "flex size-10 shrink-0 items-center justify-center rounded-xl bg-muted text-foreground [&_svg:not([class*='size-'])]:size-5",
       },
     },
     defaultVariants: {
@@ -104,9 +98,9 @@ function EmptyContent({ className, ...props }: React.ComponentProps<"div">) {
 
 export {
   Empty,
-  EmptyContent,
-  EmptyDescription,
   EmptyHeader,
-  EmptyMedia,
   EmptyTitle,
+  EmptyDescription,
+  EmptyContent,
+  EmptyMedia,
 }

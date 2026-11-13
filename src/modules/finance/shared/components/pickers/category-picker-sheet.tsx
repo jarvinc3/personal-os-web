@@ -15,6 +15,7 @@ import type {
   FinanceCategoryType,
 } from "@/src/modules/finance/shared/types/entities"
 import {
+  EMPTY_COMPACT_CLASS_NAME,
   Empty,
   EmptyHeader,
   EmptyTitle,
@@ -195,13 +196,13 @@ export function CategoryPickerSheet(props: CategoryPickerSheetProps) {
       ) : null}
 
       {groups.length === 0 ? (
-        <Empty size="sm">
+        <Empty className={EMPTY_COMPACT_CLASS_NAME}>
           <EmptyHeader>
             <EmptyTitle>No hay categorías de este tipo</EmptyTitle>
           </EmptyHeader>
         </Empty>
       ) : hits.length === 0 && !showNone ? (
-        <Empty size="sm">
+        <Empty className={EMPTY_COMPACT_CLASS_NAME}>
           <EmptyHeader>
             <EmptyTitle>Ninguna categoría coincide</EmptyTitle>
           </EmptyHeader>

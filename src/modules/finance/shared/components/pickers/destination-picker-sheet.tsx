@@ -33,6 +33,7 @@ import {
   TabsTrigger,
 } from "@/src/shared/components/ui/tabs"
 import { CreditCardIcon, ChevronLeftIcon, WalletIcon } from "lucide-react"
+import { useTabsBehavior } from "@/src/shared/hooks/use-tabs-behavior"
 import { useEffect, useMemo, useState } from "react"
 
 type DestinationPickerSheetProps = {
@@ -62,6 +63,15 @@ export function DestinationPickerSheet({
 }: DestinationPickerSheetProps) {
   const [institutionId, setInstitutionId] = useState<string | null>(null)
   const [tab, setTab] = useState("accounts")
+  const tabsBehavior = useTabsBehavior({
+    value: tab,
+    onValueChange: (next) => {
+      if (typeof next === "string") {
+        setTab(next)
+      }
+    },
+    persist: false,
+  })
   const groups = useMemo(
     () => buildDestinationPickerGroups({ institutions, accounts, cards }),
     [institutions, accounts, cards]
@@ -123,15 +133,7 @@ export function DestinationPickerSheet({
       }
     >
       {selected?.kind === "institution" ? (
-        <Tabs
-          persist={false}
-          value={tab}
-          onValueChange={(next) => {
-            if (typeof next === "string") {
-              setTab(next)
-            }
-          }}
-        >
+        <Tabs {...tabsBehavior}>
           <TabsList className="h-auto w-full rounded-2xl p-1">
             <TabsTrigger value="accounts" className="rounded-xl px-3 py-2">
               Cuentas

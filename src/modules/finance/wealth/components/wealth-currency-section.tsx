@@ -3,6 +3,7 @@
 import { GlossaryHelpButton } from "@/src/modules/help"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
 import {
+  ALERT_TONE_CLASS_NAME,
   Alert,
   AlertDescription,
   AlertTitle,
@@ -145,7 +146,10 @@ export function WealthCurrencySection({
       </SettingsSection>
 
       {hasDoubtful ? (
-        <Alert variant="warning" className="gap-2">
+        <Alert
+          variant="default"
+          className={`gap-2 ${ALERT_TONE_CLASS_NAME.warning}`}
+        >
           <TriangleAlertIcon aria-hidden />
           <AlertTitle className="flex items-center gap-2">
             Cobros dudosos

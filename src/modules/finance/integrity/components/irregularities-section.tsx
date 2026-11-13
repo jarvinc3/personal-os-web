@@ -15,7 +15,7 @@ import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import { ConfirmDialog } from "@/src/shared/components/feedback/confirm-dialog"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
-import { Button } from "@/src/shared/components/ui/button"
+import { Button, buttonVariants } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
 import {
@@ -155,12 +155,13 @@ function DriftCard({
           Recalcular
         </Button>
         {href ? (
-          <Button asChild size="sm" variant="ghost">
-            <Link href={href}>
-              <ChevronRightIcon className="size-4 shrink-0" aria-hidden />
-              Revisar movimientos
-            </Link>
-          </Button>
+          <Link
+            href={href}
+            className={cn(buttonVariants({ size: "sm", variant: "ghost" }))}
+          >
+            <ChevronRightIcon className="size-4 shrink-0" aria-hidden />
+            Revisar movimientos
+          </Link>
         ) : null}
       </div>
     </div>

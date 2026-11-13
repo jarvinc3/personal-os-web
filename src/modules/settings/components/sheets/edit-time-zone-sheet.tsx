@@ -3,6 +3,7 @@
 import { useProfile } from "@/src/modules/settings/hooks/use-profile"
 import type { SettingsSheetProps } from "@/src/modules/settings/types/sheet.types"
 import {
+  EMPTY_COMPACT_CLASS_NAME,
   Empty,
   EmptyHeader,
   EmptyTitle,
@@ -93,7 +94,7 @@ export function EditTimeZoneSheet({ open, onOpenChange }: SettingsSheetProps) {
         })}
         {visible.length === 0 ? (
           <li>
-            <Empty size="sm">
+            <Empty className={EMPTY_COMPACT_CLASS_NAME}>
               <EmptyHeader>
                 <EmptyTitle>Ninguna zona coincide</EmptyTitle>
               </EmptyHeader>

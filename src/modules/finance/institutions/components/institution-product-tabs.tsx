@@ -20,6 +20,7 @@ import {
   TabsTrigger,
 } from "@/src/shared/components/ui/tabs"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
+import { useTabsBehavior } from "@/src/shared/hooks/use-tabs-behavior"
 import { CreditCardIcon, HandCoinsIcon, LandmarkIcon } from "lucide-react"
 
 export type InstitutionProductTab = "accounts" | "cards" | "loans"
@@ -58,14 +59,14 @@ export function InstitutionProductTabs({
 }: InstitutionProductTabsProps) {
   const institutionId = institution.id
   const loans = isCash ? cashLoans : products.loans
+  const tabsBehavior = useTabsBehavior({
+    value: tab,
+    onValueChange: onTabChange,
+  })
 
   return (
     <div className="mx-4 flex flex-col gap-3 rounded-3xl bg-background">
-      <Tabs
-        className="flex w-full flex-col gap-4 p-1.5"
-        value={tab}
-        onValueChange={onTabChange}
-      >
+      <Tabs {...tabsBehavior} className="flex w-full flex-col gap-4 p-1.5">
         <TabsList className="w-full rounded-2xl bg-background">
           <TabsTrigger value="accounts" className="rounded-2xl py-4">
             <LandmarkIcon className="size-4 shrink-0" />

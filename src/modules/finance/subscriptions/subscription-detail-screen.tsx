@@ -43,6 +43,7 @@ import {
 } from "@/src/shared/components/ui/tabs"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
+import { useTabsBehavior } from "@/src/shared/hooks/use-tabs-behavior"
 import { appToast } from "@/src/shared/lib/app-toast"
 import {
   CircleAlertIcon,
@@ -142,6 +143,11 @@ function SubscriptionDetailBody({
     router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false })
   }
 
+  const tabsBehavior = useTabsBehavior({
+    value: tab,
+    onValueChange: (value) => selectDetailTab(value as SubscriptionDetailTab),
+  })
+
   if (subscriptionQuery.isPending && !subscription) {
     return <LoadingView />
   }
@@ -200,13 +206,7 @@ function SubscriptionDetailBody({
           </Alert>
         )}
 
-        <Tabs
-          className="flex w-full flex-col gap-4"
-          value={tab}
-          onValueChange={(value) =>
-            selectDetailTab(value as SubscriptionDetailTab)
-          }
-        >
+        <Tabs {...tabsBehavior} className="flex w-full flex-col gap-4">
           <TabsList className="w-full rounded-2xl bg-background">
             <TabsTrigger
               value={SUBSCRIPTION_DETAIL_TABS.summary}

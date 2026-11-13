@@ -10,6 +10,7 @@ import { selectableBankInstitutions } from "@/src/modules/finance/shared/lib/cas
 import { CATALOG_NONE } from "@/src/modules/finance/shared/constants/catalog"
 import type { FinanceInstitution } from "@/src/modules/finance/shared/types/entities"
 import {
+  EMPTY_COMPACT_CLASS_NAME,
   Empty,
   EmptyHeader,
   EmptyTitle,
@@ -97,7 +98,7 @@ export function InstitutionPickerSheet({
           />
         ) : null}
         {selectable.length === 0 ? (
-          <Empty size="sm">
+          <Empty className={EMPTY_COMPACT_CLASS_NAME}>
             <EmptyHeader>
               <EmptyTitle>No hay instituciones en el catálogo</EmptyTitle>
             </EmptyHeader>

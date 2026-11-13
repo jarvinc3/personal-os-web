@@ -52,6 +52,7 @@ import { usePendingNavigation } from "@/src/shared/components/shell/navigation-p
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
+import { useTabsBehavior } from "@/src/shared/hooks/use-tabs-behavior"
 import { UsersIcon, XIcon } from "lucide-react"
 import { usePathname } from "next/navigation"
 import { useMemo } from "react"
@@ -181,6 +182,15 @@ export function FinancePlanningList({
     }
   }
 
+  const tabsBehavior = useTabsBehavior({
+    value: tab,
+    onValueChange: (value) => {
+      if (isPlanningTab(value)) {
+        changeTab(value)
+      }
+    },
+  })
+
   function openCreate(next: PlanningTab) {
     onTabChange(next)
     if (next === "savings") {
@@ -216,15 +226,7 @@ export function FinancePlanningList({
         />
       ) : null}
 
-      <Tabs
-        value={tab}
-        onValueChange={(value) => {
-          if (isPlanningTab(value)) {
-            changeTab(value)
-          }
-        }}
-        className="w-full gap-6"
-      >
+      <Tabs {...tabsBehavior} className="w-full gap-6">
         <TabsList className="h-auto w-full justify-start overflow-x-auto rounded-2xl p-1">
           {PLANNING_TAB_ITEMS.map(({ value, label, icon: Icon, color }) => {
             const isSelected = tab === value

@@ -1,4 +1,5 @@
 import {
+  EMPTY_COMPACT_CLASS_NAME,
   Empty,
   EmptyHeader,
   EmptyTitle,
@@ -48,7 +49,7 @@ export function AccountChoiceList({
         />
       ))}
       {accounts.length === 0 ? (
-        <Empty size="sm">
+        <Empty className={EMPTY_COMPACT_CLASS_NAME}>
           <EmptyHeader>
             <EmptyTitle>No hay cuentas todavía</EmptyTitle>
           </EmptyHeader>

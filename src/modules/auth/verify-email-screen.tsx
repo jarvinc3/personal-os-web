@@ -1,7 +1,8 @@
 "use client"
 
 import { getSupabaseBrowserClient } from "@/src/config/supabase/client"
-import { Button } from "@/src/shared/components/ui/button"
+import { Button, buttonVariants } from "@/src/shared/components/ui/button"
+import { cn } from "@/src/shared/lib/utils"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { ArrowLeftIcon, MailIcon } from "lucide-react"
@@ -74,13 +75,16 @@ function VerifyEmailScreenBody() {
         {isResending ? "Enviando..." : "Reenviar correo"}
       </Button>
 
-      <Button variant="ghost" asChild>
-        <Link href={APP_ROUTES.auth.login} className="relative">
-          <ArrowLeftIcon className="size-4 shrink-0" />
-          Volver al inicio
-          <LinkPendingOverlay />
-        </Link>
-      </Button>
+      <Link
+        href={APP_ROUTES.auth.login}
+        className={cn(
+          buttonVariants({ variant: "ghost", className: "relative" })
+        )}
+      >
+        <ArrowLeftIcon className="size-4 shrink-0" />
+        Volver al inicio
+        <LinkPendingOverlay />
+      </Link>
     </div>
   )
 }

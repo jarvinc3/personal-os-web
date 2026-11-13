@@ -40,6 +40,7 @@ import {
 } from "@/src/shared/components/data-display/summary"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
+import { useTabsBehavior } from "@/src/shared/hooks/use-tabs-behavior"
 import { formatDate, formatDateTime } from "@/src/shared/lib/date-format"
 import {
   AlertCircle,
@@ -82,6 +83,7 @@ import {
   resolveDashboardSyncFailure,
 } from "./sync-status"
 import {
+  ALERT_TONE_CLASS_NAME,
   Alert,
   AlertAction,
   AlertDescription,
@@ -108,6 +110,10 @@ function IntelligenceScreenBody() {
     emailSocketStatus,
   } = useIntelligence()
   const [resetDialogOpen, setResetDialogOpen] = useState(false)
+  const tabsBehavior = useTabsBehavior({
+    defaultValue: "messages",
+    persistKey: "intelligence-view",
+  })
   const {
     open: messageSheetOpen,
     sheetId: selectedMessageId,
@@ -407,7 +413,11 @@ function IntelligenceScreenBody() {
 
             <div className="flex flex-col gap-2">
               {oauthIncomplete ? (
-                <Alert variant="warning" role="status">
+                <Alert
+                  variant="default"
+                  className={ALERT_TONE_CLASS_NAME.warning}
+                  role="status"
+                >
                   <AlertCircle className="size-4 shrink-0" aria-hidden="true" />
                   <AlertTitle>Configuración OAuth incompleta</AlertTitle>
                   <AlertDescription>
@@ -421,7 +431,11 @@ function IntelligenceScreenBody() {
                   </AlertDescription>
                 </Alert>
               ) : failureCopy ? (
-                <Alert variant="warning" role="status">
+                <Alert
+                  variant="default"
+                  className={ALERT_TONE_CLASS_NAME.warning}
+                  role="status"
+                >
                   <AlertCircle className="size-4 shrink-0" aria-hidden="true" />
                   <AlertTitle>{failureCopy.title}</AlertTitle>
                   <AlertDescription>{failureCopy.description}</AlertDescription>
@@ -676,11 +690,7 @@ function IntelligenceScreenBody() {
       ) : null}
 
       {connected ? (
-        <Tabs
-          defaultValue="messages"
-          persistKey="intelligence-view"
-          className="flex flex-col gap-3"
-        >
+        <Tabs {...tabsBehavior} className="flex flex-col gap-3">
           <TabsList className="w-full rounded-2xl bg-muted">
             <TabsTrigger value="messages" className="rounded-2xl py-3">
               <Mail aria-hidden="true" /> Correos
@@ -695,7 +705,11 @@ function IntelligenceScreenBody() {
 
           <TabsContent value="messages" className="flex flex-col gap-3">
             {messagesRateLimitError ? (
-              <Alert variant="warning" role="status">
+              <Alert
+                variant="default"
+                className={ALERT_TONE_CLASS_NAME.warning}
+                role="status"
+              >
                 <AlertCircle className="size-4 shrink-0" aria-hidden="true" />
                 <AlertTitle>Demasiadas solicitudes a la lista</AlertTitle>
                 <AlertDescription>

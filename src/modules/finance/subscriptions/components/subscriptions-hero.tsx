@@ -18,7 +18,7 @@ import {
   type LucideIcon,
 } from "lucide-react"
 import Link from "next/link"
-import { Button } from "@/src/shared/components/ui/button"
+import { Button, buttonVariants } from "@/src/shared/components/ui/button"
 
 type ShortcutTone = "warning" | "danger" | "info" | "muted"
 
@@ -153,16 +153,20 @@ export function SubscriptionsHero({
           count={badges.detected}
           onPress={onDetected}
         />
-        <Button variant="outline" className={SHORTCUT_TILE_CLASS} asChild>
-          <Link
-            href={APP_ROUTES.app.financeSubscriptionsCalendar}
-            aria-label="Calendario"
-          >
-            <CalendarDaysIcon className="size-5 text-foreground" aria-hidden />
-            <span className="text-xs text-muted-foreground">Calendario</span>
-            <LinkPendingOverlay />
-          </Link>
-        </Button>
+        <Link
+          href={APP_ROUTES.app.financeSubscriptionsCalendar}
+          aria-label="Calendario"
+          className={cn(
+            buttonVariants({
+              variant: "outline",
+              className: SHORTCUT_TILE_CLASS,
+            })
+          )}
+        >
+          <CalendarDaysIcon className="size-5 text-foreground" aria-hidden />
+          <span className="text-xs text-muted-foreground">Calendario</span>
+          <LinkPendingOverlay />
+        </Link>
       </div>
     </section>
   )

@@ -86,8 +86,15 @@ const APP_SECTIONS: Partial<Record<ModuleSlug, ModuleNavItem[]>> = {
 }
 
 export function AppSidebar() {
+  const { isMobile, setOpenMobile } = useSidebar()
   const { logoutMutation } = useAuth()
   const { userModules } = useProfile()
+
+  function closeSidebarOnNavigate() {
+    if (isMobile) {
+      setOpenMobile(false)
+    }
+  }
 
   const enabledSlugs = userModules.reduce<ModuleSlug[]>((slugs, module) => {
     if (module.isEnabled && module.slug !== "ai") {
@@ -114,18 +121,24 @@ export function AppSidebar() {
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild>
-              <Link href={APP_ROUTES.app.home} className="relative">
-                <AppLogo size="xs" className="rounded" />
-                <span className="text-base font-semibold">Personal OS</span>
-                <Badge
-                  variant="info"
-                  className="ml-auto group-data-[collapsible=icon]:hidden"
-                >
-                  Beta
-                </Badge>
-                <LinkPendingOverlay />
-              </Link>
+            <SidebarMenuButton
+              render={
+                <Link
+                  href={APP_ROUTES.app.home}
+                  className="relative"
+                  onClick={closeSidebarOnNavigate}
+                />
+              }
+            >
+              <AppLogo size="xs" className="rounded" />
+              <span className="text-base font-semibold">Personal OS</span>
+              <Badge
+                variant="info"
+                className="ml-auto group-data-[collapsible=icon]:hidden"
+              >
+                Beta
+              </Badge>
+              <LinkPendingOverlay />
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
@@ -143,9 +156,12 @@ export function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
-              onClick={() => logoutMutation.mutate()}
-              variant="destructive"
-              size="md"
+              onClick={() => {
+                closeSidebarOnNavigate()
+                logoutMutation.mutate()
+              }}
+              size="default"
+              className="hover:text-destructive-foreground h-9 bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:hover:bg-destructive/30 dark:focus-visible:ring-destructive/40 [&_svg]:text-destructive"
             >
               <LogOutIcon className="text-destructive" size={16} />
               Cerrar sesión
@@ -172,6 +188,13 @@ function NavMain({
   items: NavMainItem[]
 }) {
   const pathname = usePathname()
+  const { isMobile, setOpenMobile } = useSidebar()
+
+  function closeSidebarOnNavigate() {
+    if (isMobile) {
+      setOpenMobile(false)
+    }
+  }
 
   return (
     <SidebarGroup>
@@ -187,12 +210,21 @@ function NavMain({
             if (!hasSections) {
               return (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton isActive={isUnderRoot} size="md" asChild>
-                    <Link href={item.url} className="relative">
-                      {item.icon && <item.icon />}
-                      <span>{item.title}</span>
-                      <LinkPendingOverlay />
-                    </Link>
+                  <SidebarMenuButton
+                    isActive={isUnderRoot}
+                    size="default"
+                    className="h-9"
+                    render={
+                      <Link
+                        href={item.url}
+                        className="relative"
+                        onClick={closeSidebarOnNavigate}
+                      />
+                    }
+                  >
+                    {item.icon && <item.icon />}
+                    <span>{item.title}</span>
+                    <LinkPendingOverlay />
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               )
@@ -224,23 +256,32 @@ function NavMainCollapsibleItem({
 }) {
   const [isOpen, setIsOpen] = useState(isUnderRoot)
   const sections = item.items ?? []
-  const { isMobile, state } = useSidebar()
+  const { isMobile, setOpenMobile, state } = useSidebar()
   const showSectionsMenu = !isMobile && state === "collapsed"
+
+  function closeSidebarOnNavigate() {
+    if (isMobile) {
+      setOpenMobile(false)
+    }
+  }
 
   if (showSectionsMenu) {
     return (
       <SidebarMenuItem>
         <DropdownMenu>
-          <DropdownMenuTrigger asChild id={`nav-menu-${item.url.slice(1)}`}>
-            <SidebarMenuButton
-              isActive={isUnderRoot}
-              closeSidebarOnClick={false}
-              size="md"
-              aria-label={item.title}
-            >
-              {item.icon && <item.icon />}
-              <span>{item.title}</span>
-            </SidebarMenuButton>
+          <DropdownMenuTrigger
+            id={`nav-menu-${item.url.slice(1)}`}
+            render={
+              <SidebarMenuButton
+                isActive={isUnderRoot}
+                size="default"
+                className="h-9"
+                aria-label={item.title}
+              />
+            }
+          >
+            {item.icon && <item.icon />}
+            <span>{item.title}</span>
           </DropdownMenuTrigger>
           <DropdownMenuContent
             side="right"
@@ -252,14 +293,16 @@ function NavMainCollapsibleItem({
             {sections.map((section) => (
               <DropdownMenuItem
                 key={section.href}
-                asChild
-                active={isModuleSectionActive(section, pathname)}
+                render={<Link href={section.href} className="relative" />}
+                className={
+                  isModuleSectionActive(section, pathname)
+                    ? "bg-accent text-accent-foreground"
+                    : undefined
+                }
               >
-                <Link href={section.href} className="relative">
-                  {section.icon && <section.icon />}
-                  <span>{section.label}</span>
-                  <LinkPendingOverlay />
-                </Link>
+                {section.icon && <section.icon />}
+                <span>{section.label}</span>
+                <LinkPendingOverlay />
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>
@@ -273,8 +316,8 @@ function NavMainCollapsibleItem({
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <SidebarMenuButton
           isActive={isUnderRoot}
-          closeSidebarOnClick={false}
-          size="md"
+          size="default"
+          className="h-9"
           aria-expanded={isOpen}
           onClick={() => setIsOpen((open) => !open)}
         >
@@ -293,14 +336,18 @@ function NavMainCollapsibleItem({
             {sections.map((section) => (
               <SidebarMenuSubItem key={section.href}>
                 <SidebarMenuSubButton
-                  asChild
+                  render={
+                    <Link
+                      href={section.href}
+                      className="relative"
+                      onClick={closeSidebarOnNavigate}
+                    />
+                  }
                   isActive={isModuleSectionActive(section, pathname)}
                 >
-                  <Link href={section.href} className="relative">
-                    {section.icon && <section.icon />}
-                    <span>{section.label}</span>
-                    <LinkPendingOverlay />
-                  </Link>
+                  {section.icon && <section.icon />}
+                  <span>{section.label}</span>
+                  <LinkPendingOverlay />
                 </SidebarMenuSubButton>
               </SidebarMenuSubItem>
             ))}

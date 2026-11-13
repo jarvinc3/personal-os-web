@@ -3,11 +3,11 @@ export type BottomSheetVariant = "default" | "floating"
 export function getBottomSheetDirection(
   variant: BottomSheetVariant,
   isMobile: boolean
-): "bottom" | "right" {
+): "down" | "right" {
   if (variant === "floating") {
-    return "bottom"
+    return "down"
   }
-  return isMobile ? "bottom" : "right"
+  return isMobile ? "down" : "right"
 }
 
 export type BottomSheetSize = "default" | "wide"
@@ -17,7 +17,7 @@ export type BottomSheetSize = "default" | "wide"
  * one, and from `md` up it takes room for a preview beside the form.
  */
 export const WIDE_SHEET_CONTENT_CLASS =
-  "data-[vaul-drawer-direction=right]:md:max-w-2xl"
+  "data-[swipe-direction=right]:md:max-w-2xl"
 
 export const FLOATING_SHEET_CONTENT_CLASS =
-  "mx-auto w-[calc(100%-2rem)] max-w-md overflow-hidden rounded-xl border data-[vaul-drawer-direction=bottom]:bottom-4 data-[vaul-drawer-direction=bottom]:rounded-xl"
+  "mx-auto w-[calc(100%-2rem)] max-w-md overflow-hidden rounded-xl border data-[swipe-direction=down]:bottom-4 data-[swipe-direction=down]:rounded-xl"

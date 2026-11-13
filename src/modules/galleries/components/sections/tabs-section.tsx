@@ -16,6 +16,7 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/src/shared/components/ui/tabs"
+import { useTabsBehavior } from "@/src/shared/hooks/use-tabs-behavior"
 import {
   ArrowDownLeftIcon,
   ArrowUpRightIcon,
@@ -36,6 +37,15 @@ const FLOW_SEGMENTS: FlowSegment[] = [
 export function TabsSection() {
   const [tab, setTab] = useState("gastos")
   const [flow, setFlow] = useState<Flow>("expense")
+  const tabsBehavior = useTabsBehavior({
+    value: tab,
+    onValueChange: setTab,
+    persist: false,
+  })
+  const lineTabsBehavior = useTabsBehavior({
+    defaultValue: "uno",
+    persist: false,
+  })
 
   return (
     <>
@@ -45,12 +55,7 @@ export function TabsSection() {
         states="indicador deslizante; variante line"
         note="En una pantalla de producto el tab se guarda en la query para que Atrás lo recupere. Aquí va sin persistencia."
       >
-        <Tabs
-          value={tab}
-          onValueChange={setTab}
-          persist={false}
-          className="w-full"
-        >
+        <Tabs {...tabsBehavior} className="w-full">
           <TabsList className="w-full">
             <TabsTrigger value="gastos">Gastos</TabsTrigger>
             <TabsTrigger value="ingresos">Ingresos</TabsTrigger>
@@ -67,7 +72,7 @@ export function TabsSection() {
           </TabsContent>
         </Tabs>
 
-        <Tabs defaultValue="uno" persist={false}>
+        <Tabs {...lineTabsBehavior}>
           <TabsList variant="line">
             <TabsTrigger value="uno">Uno</TabsTrigger>
             <TabsTrigger value="dos">Dos</TabsTrigger>

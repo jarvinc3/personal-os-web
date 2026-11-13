@@ -85,99 +85,95 @@ export function DetectedSheet({
   }
 
   return (
-    <>
-      <BottomSheet
-        closeLabel="Cerrar"
-        open={open}
-        onOpenChange={onOpenChange}
-        title="Detectados del correo"
-        description="Cobros repetidos que pueden ser suscripciones"
-        actions={{
-          submit: (
-            <Button
-              variant="outline"
-              className="flex-1"
-              onClick={() => openPicker("archive")}
-            >
-              <InboxIcon className="size-4 shrink-0" />
-              Bandeja completa
-            </Button>
-          ),
-        }}
-      >
-        {recurringQuery.isError ? (
-          <ErrorState
-            message={financeErrorMessage(recurringQuery.error)}
-            onRetry={() => void recurringQuery.refetch()}
-            isRetrying={recurringQuery.isFetching}
-          />
-        ) : null}
-        {recurringQuery.isPending && !recurringQuery.data ? (
-          <ListSkeleton rows={3} />
-        ) : null}
-        {!recurringQuery.isPending && patterns.length === 0 ? (
-          <Empty className="py-6">
-            <EmptyHeader>
-              <EmptyMedia variant="icon">
-                <InboxIcon />
-              </EmptyMedia>
-              <EmptyTitle>Sin cobros por confirmar</EmptyTitle>
-              <EmptyDescription>
-                No hay cobros repetidos detectados en el correo.
-              </EmptyDescription>
-            </EmptyHeader>
-          </Empty>
-        ) : null}
-        <div className="flex flex-col gap-2">
-          {patterns.map((pattern) => (
-            <RecurringPatternCard
-              key={pattern.id}
-              pattern={pattern}
-              categories={categories}
-              display={display}
-              actions={
-                <>
-                  <Button
-                    type="button"
-                    size="sm"
-                    disabled={confirmingId === pattern.id}
-                    onClick={() => void confirm(pattern)}
-                  >
-                    {confirmingId === pattern.id ? (
-                      <Spinner className="size-4" />
-                    ) : (
-                      <CheckIcon className="size-4 shrink-0" />
-                    )}
-                    Confirmar
-                  </Button>
-                  <Button
-                    type="button"
-                    size="icon"
-                    variant="outline"
-                    aria-label="Descartar"
-                    disabled={updateMutation.isPending}
-                    onClick={() => void dismiss(pattern)}
-                  >
-                    <XIcon className="size-4 shrink-0" />
-                  </Button>
-                </>
-              }
-            />
-          ))}
-        </div>
-        <InfiniteListSentinel
-          hasNextPage={recurringQuery.hasNextPage}
-          isFetchingNextPage={recurringQuery.isFetchingNextPage}
-          onLoadMore={() => void recurringQuery.fetchNextPage()}
+    <BottomSheet
+      closeLabel="Cerrar"
+      open={open}
+      onOpenChange={onOpenChange}
+      title="Detectados del correo"
+      description="Cobros repetidos que pueden ser suscripciones"
+      actions={{
+        submit: (
+          <Button
+            variant="outline"
+            className="flex-1"
+            onClick={() => openPicker("archive")}
+          >
+            <InboxIcon className="size-4 shrink-0" />
+            Bandeja completa
+          </Button>
+        ),
+      }}
+    >
+      {recurringQuery.isError ? (
+        <ErrorState
+          message={financeErrorMessage(recurringQuery.error)}
+          onRetry={() => void recurringQuery.refetch()}
+          isRetrying={recurringQuery.isFetching}
         />
-      </BottomSheet>
-
+      ) : null}
+      {recurringQuery.isPending && !recurringQuery.data ? (
+        <ListSkeleton rows={3} />
+      ) : null}
+      {!recurringQuery.isPending && patterns.length === 0 ? (
+        <Empty className="py-6">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <InboxIcon />
+            </EmptyMedia>
+            <EmptyTitle>Sin cobros por confirmar</EmptyTitle>
+            <EmptyDescription>
+              No hay cobros repetidos detectados en el correo.
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
+      ) : null}
+      <div className="flex flex-col gap-2">
+        {patterns.map((pattern) => (
+          <RecurringPatternCard
+            key={pattern.id}
+            pattern={pattern}
+            categories={categories}
+            display={display}
+            actions={
+              <>
+                <Button
+                  type="button"
+                  size="sm"
+                  disabled={confirmingId === pattern.id}
+                  onClick={() => void confirm(pattern)}
+                >
+                  {confirmingId === pattern.id ? (
+                    <Spinner className="size-4" />
+                  ) : (
+                    <CheckIcon className="size-4 shrink-0" />
+                  )}
+                  Confirmar
+                </Button>
+                <Button
+                  type="button"
+                  size="icon"
+                  variant="outline"
+                  aria-label="Descartar"
+                  disabled={updateMutation.isPending}
+                  onClick={() => void dismiss(pattern)}
+                >
+                  <XIcon className="size-4 shrink-0" />
+                </Button>
+              </>
+            }
+          />
+        ))}
+      </div>
+      <InfiniteListSentinel
+        hasNextPage={recurringQuery.hasNextPage}
+        isFetchingNextPage={recurringQuery.isFetchingNextPage}
+        onLoadMore={() => void recurringQuery.fetchNextPage()}
+      />
       <RecurringArchiveSheet
         open={picker === "archive"}
         onOpenChange={closeHandlerFor("archive")}
         display={display}
-        nested
       />
-    </>
+    </BottomSheet>
   )
 }

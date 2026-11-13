@@ -9,7 +9,8 @@ import {
   settingsModuleHref,
 } from "@/src/shared/constants/app-routes"
 import { LoadingView } from "@/src/shared/components/feedback/loading-view"
-import { Button } from "@/src/shared/components/ui/button"
+import { buttonVariants } from "@/src/shared/components/ui/button"
+import { cn } from "@/src/shared/lib/utils"
 import {
   Empty,
   EmptyContent,
@@ -89,13 +90,14 @@ export function FinanceGate({ children }: { children: ReactNode }) {
             </EmptyDescription>
           </EmptyHeader>
           <EmptyContent>
-            <Button asChild>
-              <Link href={SETTINGS_FINANCE_HREF} className="relative">
-                <SettingsIcon className="size-4 shrink-0" />
-                Activar en Ajustes
-                <LinkPendingOverlay />
-              </Link>
-            </Button>
+            <Link
+              href={SETTINGS_FINANCE_HREF}
+              className={cn(buttonVariants({ className: "relative" }))}
+            >
+              <SettingsIcon className="size-4 shrink-0" />
+              Activar en Ajustes
+              <LinkPendingOverlay />
+            </Link>
           </EmptyContent>
         </Empty>
       </div>

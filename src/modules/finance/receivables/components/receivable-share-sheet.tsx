@@ -23,13 +23,14 @@ import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import { ConfirmDialog } from "@/src/shared/components/feedback/confirm-dialog"
 import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import { Badge } from "@/src/shared/components/ui/badge"
-import { Button } from "@/src/shared/components/ui/button"
+import { Button, buttonVariants } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import {
   SummaryItem,
   SummarySection,
 } from "@/src/shared/components/data-display/summary"
 import { appToast } from "@/src/shared/lib/app-toast"
+import { cn } from "@/src/shared/lib/utils"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
@@ -237,25 +238,22 @@ export function ReceivableShareSheet({
                     <CopyIcon className="size-4 shrink-0" />
                     Copiar
                   </Button>
-                  <Button
-                    type="button"
-                    asChild
-                    className={WHATSAPP_BUTTON_CLASS}
+                  <a
+                    href={whatsAppShareHref({
+                      url: share.url,
+                      debtorName: share.debtorName,
+                      count: receivables.length,
+                      pendingLabel,
+                    })}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={cn(
+                      buttonVariants({ className: WHATSAPP_BUTTON_CLASS })
+                    )}
                   >
-                    <a
-                      href={whatsAppShareHref({
-                        url: share.url,
-                        debtorName: share.debtorName,
-                        count: receivables.length,
-                        pendingLabel,
-                      })}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <MessageCircleIcon className="size-4 shrink-0" />
-                      WhatsApp
-                    </a>
-                  </Button>
+                    <MessageCircleIcon className="size-4 shrink-0" />
+                    WhatsApp
+                  </a>
                 </div>
               ) : null}
             </SummarySection>

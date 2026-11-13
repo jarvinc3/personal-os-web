@@ -34,7 +34,8 @@ import {
   AlertTitle,
 } from "@/src/shared/components/ui/alert"
 import { Badge } from "@/src/shared/components/ui/badge"
-import { Button } from "@/src/shared/components/ui/button"
+import { Button, buttonVariants } from "@/src/shared/components/ui/button"
+import { cn } from "@/src/shared/lib/utils"
 import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
@@ -361,14 +362,15 @@ export function MerchantEditSheet({
                 Otro comercio usa ese nombre o uno de sus nombres alternativos.
               </AlertDescription>
               <div className="col-start-2 mt-2">
-                <Button asChild size="sm" variant="outline">
-                  <Link
-                    href={APP_ROUTES.app.financeMerchant(conflictMerchantId)}
-                  >
-                    <StoreIcon className="size-4 shrink-0" />
-                    Abrir el comercio existente
-                  </Link>
-                </Button>
+                <Link
+                  href={APP_ROUTES.app.financeMerchant(conflictMerchantId)}
+                  className={cn(
+                    buttonVariants({ size: "sm", variant: "outline" })
+                  )}
+                >
+                  <StoreIcon className="size-4 shrink-0" />
+                  Abrir el comercio existente
+                </Link>
               </div>
             </Alert>
           ) : null}

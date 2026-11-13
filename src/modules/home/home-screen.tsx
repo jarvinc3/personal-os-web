@@ -8,7 +8,8 @@ import {
 } from "@/src/modules/finance"
 import { KeepAwakeHomeSection } from "@/src/modules/keep-awake"
 import { useProfile } from "@/src/modules/settings"
-import { Button } from "@/src/shared/components/ui/button"
+import { buttonVariants } from "@/src/shared/components/ui/button"
+import { cn } from "@/src/shared/lib/utils"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
@@ -38,21 +39,27 @@ function HomeScreenBody() {
     <div className="mx-auto flex max-w-2xl flex-col gap-6 p-4 pb-16 md:px-6">
       <SummarySection icon={UserIcon} title="Tareas rápidas">
         <div className="grid grid-cols-3 gap-1">
-          <Button variant="outline" asChild>
-            <Link href={APP_ROUTES.app.notifications} className="relative">
-              <span className="hidden sm:block">Notificaciones</span>
-              <BellRing className="size-4" />
-              <LinkPendingOverlay />
-            </Link>
-          </Button>
+          <Link
+            href={APP_ROUTES.app.notifications}
+            className={cn(
+              buttonVariants({ variant: "outline", className: "relative" })
+            )}
+          >
+            <span className="hidden sm:block">Notificaciones</span>
+            <BellRing className="size-4" />
+            <LinkPendingOverlay />
+          </Link>
 
-          <Button variant="outline" asChild>
-            <Link href={APP_ROUTES.app.settings} className="relative">
-              <span className="hidden sm:block">Configuración</span>
-              <Settings className="size-4" />
-              <LinkPendingOverlay />
-            </Link>
-          </Button>
+          <Link
+            href={APP_ROUTES.app.settings}
+            className={cn(
+              buttonVariants({ variant: "outline", className: "relative" })
+            )}
+          >
+            <span className="hidden sm:block">Configuración</span>
+            <Settings className="size-4" />
+            <LinkPendingOverlay />
+          </Link>
         </div>
       </SummarySection>
 

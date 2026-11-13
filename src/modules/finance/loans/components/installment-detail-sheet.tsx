@@ -10,7 +10,8 @@ import {
   type FinanceLoanInstallment,
 } from "@/src/modules/finance/shared/types/entities"
 import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
-import { Button } from "@/src/shared/components/ui/button"
+import { Button, buttonVariants } from "@/src/shared/components/ui/button"
+import { cn } from "@/src/shared/lib/utils"
 import { SummaryItem } from "@/src/shared/components/data-display/summary"
 import { LinkPendingOverlay } from "@/src/shared/components/shell/navigation-pending"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
@@ -78,18 +79,21 @@ export function InstallmentDetailSheet({
           ) : null}
 
           {installment.transactionId ? (
-            <Button asChild variant="outline" className="w-full">
-              <Link
-                href={APP_ROUTES.app.financeTransaction(
-                  installment.transactionId
-                )}
-                className="relative"
-              >
-                <ReceiptIcon className="size-4 shrink-0" />
-                Ver movimiento
-                <LinkPendingOverlay spinnerClassName="size-4" />
-              </Link>
-            </Button>
+            <Link
+              href={APP_ROUTES.app.financeTransaction(
+                installment.transactionId
+              )}
+              className={cn(
+                buttonVariants({
+                  variant: "outline",
+                  className: "relative w-full",
+                })
+              )}
+            >
+              <ReceiptIcon className="size-4 shrink-0" />
+              Ver movimiento
+              <LinkPendingOverlay spinnerClassName="size-4" />
+            </Link>
           ) : null}
         </div>
       ) : null}

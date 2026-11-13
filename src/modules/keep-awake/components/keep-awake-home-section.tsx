@@ -23,7 +23,7 @@ import {
   subscribeHistory,
 } from "@/src/modules/keep-awake/lib/session-history"
 import { Badge } from "@/src/shared/components/ui/badge"
-import { Button } from "@/src/shared/components/ui/button"
+import { buttonVariants } from "@/src/shared/components/ui/button"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { cn } from "@/src/shared/lib/utils"
@@ -95,13 +95,19 @@ export function KeepAwakeHomeSection() {
       right={
         <>
           <KeepAwakeStatusBadge status={summary.status} />
-          <Button asChild variant="ghost" className="h-6">
-            <Link href={APP_ROUTES.app.keepAwake} className="relative">
-              <span className="sr-only">Abrir Keep Awake</span>
-              <ChevronRight className="size-4" />
-              <LinkPendingOverlay />
-            </Link>
-          </Button>
+          <Link
+            href={APP_ROUTES.app.keepAwake}
+            className={cn(
+              buttonVariants({
+                variant: "ghost",
+                className: "relative h-6",
+              })
+            )}
+          >
+            <span className="sr-only">Abrir Keep Awake</span>
+            <ChevronRight className="size-4" />
+            <LinkPendingOverlay />
+          </Link>
         </>
       }
     >

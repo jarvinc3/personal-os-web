@@ -2,7 +2,9 @@
 
 import {
   Popover,
-  PopoverContent,
+  PopoverPopup,
+  PopoverPortal,
+  PopoverPositioner,
   PopoverTrigger,
 } from "@/src/shared/components/ui/popover"
 import { cn } from "@/src/shared/lib/utils"
@@ -98,59 +100,58 @@ export function ColorPickerSwatch({
           />
         }
       />
-      <PopoverContent
-        container={portalContainerRef}
-        className="mb-1 w-60 p-3"
-        side="bottom"
-        align="start"
-      >
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium">Selecciona un color</span>
-            <div
-              className="size-6 rounded border"
-              style={{ backgroundColor: color }}
-            />
-          </div>
+      <PopoverPortal container={portalContainerRef}>
+        <PopoverPositioner side="bottom" align="start">
+          <PopoverPopup className="mb-1 w-60 p-3">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Selecciona un color</span>
+                <div
+                  className="size-6 rounded border"
+                  style={{ backgroundColor: color }}
+                />
+              </div>
 
-          <div className="grid grid-cols-6 gap-2">
-            {PRESET_COLORS.map((presetColor) => (
-              <button
-                type="button"
-                disabled={disabled}
-                key={presetColor}
-                onClick={() => handleColorChange(presetColor)}
-                className="relative aspect-square size-8 rounded-md border-2 transition-all hover:scale-110"
-                style={{
-                  backgroundColor: presetColor,
-                  borderColor:
-                    color === presetColor
-                      ? "hsl(var(--foreground))"
-                      : "transparent",
-                }}
-              >
-                {color === presetColor && (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <Check className="h-4 w-4 text-white drop-shadow-md" />
-                  </div>
-                )}
-              </button>
-            ))}
-          </div>
+              <div className="grid grid-cols-6 gap-2">
+                {PRESET_COLORS.map((presetColor) => (
+                  <button
+                    type="button"
+                    disabled={disabled}
+                    key={presetColor}
+                    onClick={() => handleColorChange(presetColor)}
+                    className="relative aspect-square size-8 rounded-md border-2 transition-all hover:scale-110"
+                    style={{
+                      backgroundColor: presetColor,
+                      borderColor:
+                        color === presetColor
+                          ? "hsl(var(--foreground))"
+                          : "transparent",
+                    }}
+                  >
+                    {color === presetColor && (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <Check className="h-4 w-4 text-white drop-shadow-md" />
+                      </div>
+                    )}
+                  </button>
+                ))}
+              </div>
 
-          <div className="border-t pt-2">
-            <label htmlFor={customInputId}>Color personalizado</label>
-            <input
-              id={customInputId}
-              type="color"
-              value={color}
-              disabled={disabled}
-              onChange={(e) => handleColorChange(e.target.value)}
-              className="h-8 w-full cursor-pointer rounded-md"
-            />
-          </div>
-        </div>
-      </PopoverContent>
+              <div className="border-t pt-2">
+                <label htmlFor={customInputId}>Color personalizado</label>
+                <input
+                  id={customInputId}
+                  type="color"
+                  value={color}
+                  disabled={disabled}
+                  onChange={(e) => handleColorChange(e.target.value)}
+                  className="h-8 w-full cursor-pointer rounded-md"
+                />
+              </div>
+            </div>
+          </PopoverPopup>
+        </PopoverPositioner>
+      </PopoverPortal>
     </Popover>
   )
 }

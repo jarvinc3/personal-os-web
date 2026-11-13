@@ -32,6 +32,7 @@ import {
 } from "@/src/shared/components/data-display/summary"
 import { Button } from "@/src/shared/components/ui/button"
 import {
+  EMPTY_COMPACT_CLASS_NAME,
   Empty,
   EmptyDescription,
   EmptyHeader,
@@ -104,7 +105,7 @@ function SignalSkeleton() {
 
 function SignalLoadError({ onRetry }: { onRetry: () => void }) {
   return (
-    <Empty size="sm">
+    <Empty className={EMPTY_COMPACT_CLASS_NAME}>
       <EmptyHeader>
         <EmptyMedia variant="icon">
           <AlertCircle aria-hidden="true" />
@@ -126,7 +127,7 @@ function SignalMissing({ processingStatus }: { processingStatus: string }) {
   const MissingIcon = MISSING_SIGNAL_ICONS[missingSignal.kind]
 
   return (
-    <Empty size="sm">
+    <Empty className={EMPTY_COMPACT_CLASS_NAME}>
       <EmptyHeader>
         <EmptyMedia variant="icon">
           <MissingIcon aria-hidden="true" />

@@ -1,4 +1,5 @@
-import { Button } from "@/src/shared/components/ui/button"
+import { buttonVariants } from "@/src/shared/components/ui/button"
+import { cn } from "@/src/shared/lib/utils"
 import {
   Empty,
   EmptyContent,
@@ -36,13 +37,14 @@ export function ModuleComingSoon({ slug }: ModuleComingSoonProps) {
           </EmptyDescription>
         </EmptyHeader>
         <EmptyContent>
-          <Button asChild>
-            <Link href={settingsModuleHref(slug)} className="relative">
-              <SettingsIcon className="size-4 shrink-0" />
-              Abrir Ajustes
-              <LinkPendingOverlay />
-            </Link>
-          </Button>
+          <Link
+            href={settingsModuleHref(slug)}
+            className={cn(buttonVariants({ className: "relative" }))}
+          >
+            <SettingsIcon className="size-4 shrink-0" />
+            Abrir Ajustes
+            <LinkPendingOverlay />
+          </Link>
         </EmptyContent>
       </Empty>
     </div>

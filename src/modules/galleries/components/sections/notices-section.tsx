@@ -3,6 +3,7 @@
 import { GalleryDemo } from "@/src/modules/galleries/components/gallery-demo"
 import { NoticeCard } from "@/src/modules/finance/shared/components/notice-card"
 import {
+  ALERT_TONE_CLASS_NAME,
   Alert,
   AlertAction,
   AlertDescription,
@@ -36,14 +37,14 @@ export function NoticesSection() {
             Los importes se muestran en la moneda de la cuenta.
           </AlertDescription>
         </Alert>
-        <Alert variant="warning">
+        <Alert variant="default" className={ALERT_TONE_CLASS_NAME.warning}>
           <TriangleAlertIcon />
           <AlertTitle>Presupuesto cerca del límite</AlertTitle>
           <AlertDescription>
             Te queda el 12 % del monto del mes.
           </AlertDescription>
         </Alert>
-        <Alert variant="info">
+        <Alert variant="default" className={ALERT_TONE_CLASS_NAME.info}>
           <InfoIcon />
           <AlertTitle>Importación en curso</AlertTitle>
           <AlertDescription>

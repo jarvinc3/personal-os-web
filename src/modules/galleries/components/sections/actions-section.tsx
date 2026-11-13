@@ -3,7 +3,8 @@
 import { GalleryDemo } from "@/src/modules/galleries/components/gallery-demo"
 import { simulatedTap } from "@/src/modules/galleries/components/simulated-tap"
 import { PendingSurface } from "@/src/shared/components/shell/navigation-pending"
-import { Button } from "@/src/shared/components/ui/button"
+import { Button, buttonVariants } from "@/src/shared/components/ui/button"
+import { cn } from "@/src/shared/lib/utils"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import {
@@ -120,17 +121,18 @@ export function ActionsSection() {
       </GalleryDemo>
 
       <GalleryDemo
-        name="Button asChild"
+        name="Button con Link"
         importPath="@/src/shared/components/ui/button"
         states="navegación con Link"
         note="Navegar es un Link con el estilo del botón, no un botón con router.push."
       >
-        <Button asChild variant="outline">
-          <Link href={APP_ROUTES.app.settingsAppearance}>
-            <ChevronLeftIcon />
-            Volver a Apariencia
-          </Link>
-        </Button>
+        <Link
+          href={APP_ROUTES.app.settingsAppearance}
+          className={cn(buttonVariants({ variant: "outline" }))}
+        >
+          <ChevronLeftIcon />
+          Volver a Apariencia
+        </Link>
       </GalleryDemo>
 
       <GalleryDemo
