@@ -88,8 +88,10 @@ function ProposalApprovalScreenBody({
   const accounts = accountsQuery.data ?? []
   const cards = cardsQuery.data ?? []
   const proposal = proposals.find((item) => item.id === proposalId) ?? null
-  const resolvedFlow =
-    flow ?? (proposal ? initialApprovalState({ proposal, institutions }) : null)
+  const initialFlow = proposal
+    ? initialApprovalState({ proposal, institutions })
+    : null
+  const resolvedFlow = flow ?? initialFlow
   const step = resolvedFlow?.step ?? "institution"
   const institution = resolvedFlow?.institution ?? null
   const createdProductId = resolvedFlow?.createdProductId ?? null
@@ -132,9 +134,7 @@ function ProposalApprovalScreenBody({
     update: (state: ProposalApprovalState) => ProposalApprovalState
   ) {
     setFlow((current) => {
-      const base =
-        current ??
-        (proposal ? initialApprovalState({ proposal, institutions }) : null)
+      const base = current ?? initialFlow
       return base ? update(base) : current
     })
   }

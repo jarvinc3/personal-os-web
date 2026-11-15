@@ -47,7 +47,7 @@ import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
 import { usePicker } from "@/src/shared/hooks/use-picker"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { HashIcon, LandmarkIcon, Palette, SaveIcon, Star } from "lucide-react"
-import { useEffect, useMemo } from "react"
+import { useEffect, useMemo, useRef } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import {
   accountSchemaFor,
@@ -256,15 +256,21 @@ export function AccountSheet({
     }
   }, [open, initialValues, reset])
 
+  const appliedInstitutionId = useRef(selectedInstitutionId)
   useEffect(() => {
     if (
       !open ||
       !selectedInstitutionId ||
-      selectedInstitutionId === institutionId
+      appliedInstitutionId.current === selectedInstitutionId
     ) {
       return
     }
-    setValue("institutionId", selectedInstitutionId, { shouldValidate: true })
+    appliedInstitutionId.current = selectedInstitutionId
+    if (selectedInstitutionId !== institutionId) {
+      setValue("institutionId", selectedInstitutionId, {
+        shouldValidate: true,
+      })
+    }
   }, [open, selectedInstitutionId, institutionId, setValue])
 
   useEffect(() => {

@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod"
 import { RefreshCwIcon, SaveIcon, WalletIcon } from "lucide-react"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form"
 
 import { CardBalancesSection } from "@/src/modules/finance/cards/components/card-balances-section"
@@ -181,8 +181,16 @@ export function CardFormScreen({
     }
   }, [accounts, selectedAccountId, formInstitutionId, setValue])
 
+  const appliedInstitutionId = useRef(chosenInstitutionId)
   useEffect(() => {
-    if (!chosenInstitutionId || chosenInstitutionId === formInstitutionId) {
+    if (
+      !chosenInstitutionId ||
+      appliedInstitutionId.current === chosenInstitutionId
+    ) {
+      return
+    }
+    appliedInstitutionId.current = chosenInstitutionId
+    if (chosenInstitutionId === formInstitutionId) {
       return
     }
     setValue("institutionId", chosenInstitutionId, {
