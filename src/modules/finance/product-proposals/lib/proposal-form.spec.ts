@@ -118,7 +118,7 @@ describe("toProposalFormValues", () => {
     )
   })
 
-  it("does not keep a stored number when the draft has none", () => {
+  it("does not ask to remove a number the draft does not have", () => {
     assert.equal(
       toProposalFormValues(accountProposal()).clearAccountNumber,
       false

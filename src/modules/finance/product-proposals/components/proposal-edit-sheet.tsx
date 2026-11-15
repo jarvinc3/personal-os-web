@@ -192,7 +192,7 @@ export function ProposalEditSheet({
     () => createSheetSubmit(handleSubmit),
     [handleSubmit]
   )
-  function removeStoredNumber() {
+  function requestStoredNumberRemoval() {
     setValue("accountNumber", "", { shouldDirty: true })
     setValue("clearAccountNumber", true, {
       shouldDirty: true,
@@ -367,7 +367,7 @@ export function ProposalEditSheet({
                       type="button"
                       variant="outline"
                       className="w-full"
-                      onClick={removeStoredNumber}
+                      onClick={requestStoredNumberRemoval}
                     >
                       <EraserIcon className="size-4 shrink-0" aria-hidden />
                       Quitar número guardado
