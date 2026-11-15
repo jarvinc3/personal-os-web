@@ -53,6 +53,7 @@ import {
   accountSchemaFor,
   type AccountFormValues,
 } from "@/src/modules/finance/catalog/lib/account-form"
+import { resolveAccountFormReset } from "@/src/modules/finance/catalog/lib/account-form-session"
 
 const TYPE_OPTIONS = FINANCE_ACCOUNT_TYPES.map((value) => ({
   value,
@@ -250,11 +251,22 @@ export function AccountSheet({
     }
   }
 
+  const accountId = account?.id ?? null
+  const appliedFormSession = useRef<string | null>(null)
+  // Reinicia solo al abrir la hoja o al cambiar de cuenta: cambiar de
+  // institución conserva lo escrito y solo sincroniza `institutionId`.
   useEffect(() => {
-    if (open) {
-      reset(initialValues)
+    const nextReset = resolveAccountFormReset({
+      session: { open, accountId },
+      appliedSession: appliedFormSession.current,
+      initialValues,
+    })
+    appliedFormSession.current = nextReset.appliedSession
+    if (!nextReset.values) {
+      return
     }
-  }, [open, initialValues, reset])
+    reset(nextReset.values)
+  }, [open, accountId, initialValues, reset])
 
   const appliedInstitutionId = useRef(selectedInstitutionId)
   useEffect(() => {
