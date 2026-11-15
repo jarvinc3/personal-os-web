@@ -207,7 +207,7 @@ export function DestinationPickerSheet({
       ) : selectableGroups.length === 0 ? (
         <p className="text-sm text-muted-foreground">
           {accountsOnly
-            ? "Crea una cuenta antes de registrar una transferencia."
+            ? "Crea una cuenta para poder elegirla."
             : "Crea una cuenta o una tarjeta antes de registrar un movimiento."}
         </p>
       ) : (

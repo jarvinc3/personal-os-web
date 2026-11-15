@@ -19,6 +19,7 @@ import {
   goalVariants,
   receivableVariants,
 } from "@/src/modules/galleries/cards/variants/planning"
+import { proposalVariants } from "@/src/modules/galleries/cards/variants/proposal"
 import { recurringVariants } from "@/src/modules/galleries/cards/variants/recurring"
 import { subscriptionVariants } from "@/src/modules/galleries/cards/variants/subscriptions"
 import { wealthVariants } from "@/src/modules/galleries/cards/variants/wealth"
@@ -43,6 +44,7 @@ const CARD_GALLERY_VARIANTS: Record<
   "estado-cuenta": statementMovementVariants,
   patrimonio: wealthVariants,
   recurrente: recurringVariants,
+  detectado: proposalVariants,
   notificacion: notificationVariants,
   chat: chatVariants,
   avisos: alertVariants,

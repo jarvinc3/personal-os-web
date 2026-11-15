@@ -7,6 +7,8 @@ export const FINANCE_COUNT_NOUNS = {
   card: { singular: "tarjeta", plural: "tarjetas" },
   loan: { singular: "préstamo", plural: "préstamos" },
   installment: { singular: "cuota", plural: "cuotas" },
+  message: { singular: "correo", plural: "correos" },
+  proposal: { singular: "propuesta", plural: "propuestas" },
 } as const
 
 export type FinanceCountNoun = keyof typeof FINANCE_COUNT_NOUNS

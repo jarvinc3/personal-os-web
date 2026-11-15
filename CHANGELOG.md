@@ -6,6 +6,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Agregado
 
+- Productos estrena **Detectados en correos** (`/finance/products/email-proposals`): las cuentas y tarjetas que el back detecta en los correos guardados quedan como propuestas con su evidencia, se editan antes de aprobar y se aprueban o descartan una por una; aprobar crea o reutiliza el producto y descartar no crea nada. «Buscar en correos» resume cuántos correos revisó y qué encontró, el filtro por estado vive en la URL y la fila de Productos cuenta las pendientes. Una cuenta se aprueba solo con los últimos 4 dígitos y una tarjeta de débito exige su cuenta (#410; contrato de back #368).
 - Inteligencia muestra el avance de clasificación de correos, la próxima corrida tras un fallo de clasificación y un aviso de sincronización estancada que permite reintentar sin pedir reconectar Gmail (#391; contrato de back #299).
 - El detalle de un movimiento muestra la señal de correo que lo originó y enlaza al correo de origen; los movimientos sin señal explican que no tienen trazabilidad de correo (#214).
 - El detalle de un correo de Inteligencia suma la sección **Señal detectada** con el tipo, el estado, la confianza y una fila por ruta del payload, y la evidencia que la sostuvo —remitente, asunto, fecha del correo y la regla del clasificador con su proveedor y modelo—; el vacío explica si el correo no tiene señal, si la clasificación sigue pendiente o si falló, y la vista no crea ni modifica movimientos en Finanzas (#383; consume el contrato de back #210).

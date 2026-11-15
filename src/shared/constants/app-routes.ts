@@ -44,6 +44,7 @@ export const APP_ROUTES = {
     financeOverview: "/finance/overview",
     financeStatistics: "/finance/statistics",
     financeProducts: "/finance/products",
+    financeProductProposals: "/finance/products/email-proposals",
     financeWealth: "/finance/wealth",
     financeInstitutions: FINANCE_INSTITUTIONS_PATH,
     financeCash: FINANCE_CASH_PATH,

@@ -1,6 +1,7 @@
 "use client"
 
 import { InstitutionSwapStack } from "@/src/modules/finance/products/components/institution-swap-stack"
+import { ProposalsEntry } from "@/src/modules/finance/product-proposals"
 import { CategorySheet } from "@/src/modules/finance/catalog"
 import { MerchantEditSheet } from "@/src/modules/finance/merchants/components/merchant-edit-sheet"
 import { FinanceExpenseTrendBadge } from "@/src/modules/finance/shared/components/expense-trend-badge"
@@ -290,6 +291,8 @@ export function FinanceProductsList({
           </div>
         </AsyncRegion>
       </div>
+
+      <ProposalsEntry isEnabled={enabled} />
 
       <div className="flex flex-col gap-2">
         <span className="text-sm text-muted-foreground">Atajos</span>
