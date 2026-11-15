@@ -21,17 +21,18 @@ const LAST_FOUR_PATTERN = /^\d{4}$/
 const MIN_ACCOUNT_NUMBER_DIGITS = 4
 const MAX_ACCOUNT_NUMBER_DIGITS = 34
 
-/** El back no acepta `network` nulo al editar: sin red detectada se propone «Otra». */
-export const DEFAULT_PROPOSAL_NETWORK: FinanceCardNetwork = "OTHER"
-
 export type ProposalFormValues = {
   name: string
+  /** "" mientras el correo no dijo el tipo y el usuario no lo eligió. */
   type: string
   currency: string
   lastFour: string
-  network: FinanceCardNetwork
+  /** "" cuando el correo no detectó red; solo se manda la que el usuario elija. */
+  network: FinanceCardNetwork | ""
   accountId: string | null
   accountNumber: string
+  /** Quita el número completo guardado con `accountNumber: null`. */
+  clearAccountNumber: boolean
   institutionName: string
   institutionType: EmailProductProposalInstitutionType
   institutionCountry: string
@@ -66,16 +67,17 @@ export function toProposalFormValues(
   const draft = proposal.draft
   const type =
     proposal.productType === "ACCOUNT"
-      ? (draft.accountType ?? "CHECKING")
-      : (draft.cardType ?? "CREDIT")
+      ? (draft.accountType ?? "")
+      : (draft.cardType ?? "")
   return {
     name: draft.name,
     type,
     currency: draft.currency,
     lastFour: draft.lastFour,
-    network: draft.network ?? DEFAULT_PROPOSAL_NETWORK,
+    network: draft.network ?? "",
     accountId: draft.accountId,
     accountNumber: "",
+    clearAccountNumber: false,
     institutionName: draft.institution.name,
     institutionType: proposalInstitutionType(draft.institution.type),
     institutionCountry: draft.institution.country.trim().toUpperCase(),
@@ -85,12 +87,13 @@ export function toProposalFormValues(
 
 const baseProposalFormSchema = z.object({
   name: z.string().trim().min(1, "Nombre obligatorio").max(120),
-  type: z.string().trim().min(1, "Elige el tipo"),
+  type: z.string().trim(),
   currency: z.string().trim(),
   lastFour: z.string().trim().regex(LAST_FOUR_PATTERN, "Deben ser 4 dígitos"),
-  network: z.enum(FINANCE_CARD_NETWORKS),
+  network: z.union([z.enum(FINANCE_CARD_NETWORKS), z.literal("")]),
   accountId: z.string().nullable(),
   accountNumber: z.string().trim(),
+  clearAccountNumber: z.boolean(),
   institutionName: z.string().trim().min(1, "Institución obligatoria").max(120),
   institutionType: z.enum(EMAIL_PRODUCT_PROPOSAL_INSTITUTION_TYPES),
   institutionCountry: z
@@ -170,7 +173,7 @@ function addStoredNumberIssue({
   proposal: EmailProductProposal
   ctx: ProposalFormCtx
 }) {
-  if (!proposal.draft.accountNumberProvided) {
+  if (!proposal.draft.accountNumberProvided || values.clearAccountNumber) {
     return
   }
   if (values.lastFour === proposal.draft.lastFour) {
@@ -237,7 +240,9 @@ export function buildProposalPatch({
       currency: values.currency.toUpperCase(),
       ...institution,
     }
-    if (values.accountNumber) {
+    if (values.clearAccountNumber) {
+      body.accountNumber = null
+    } else if (values.accountNumber) {
       body.accountNumber = values.accountNumber
     }
     return body
@@ -252,8 +257,9 @@ export function buildProposalPatch({
     accountId: values.accountId,
     ...institution,
   }
-  // Sin red detectada, el formulario propone «Otra»: solo se manda si cambió.
-  if (values.network !== proposal.draft.network) {
+  // Sin red detectada el formulario queda sin elegir: solo se manda la que el
+  // usuario elija, y nunca una que el correo no dijo.
+  if (values.network && values.network !== proposal.draft.network) {
     body.network = values.network
   }
   return body

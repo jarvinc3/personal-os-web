@@ -91,9 +91,10 @@ describe("toProposalFormValues", () => {
       type: "SAVINGS",
       currency: "DOP",
       lastFour: "5678",
-      network: "OTHER",
+      network: "",
       accountId: null,
       accountNumber: "",
+      clearAccountNumber: false,
       institutionName: "BHD",
       institutionType: "bank",
       institutionCountry: "DO",
@@ -108,12 +109,19 @@ describe("toProposalFormValues", () => {
     assert.equal(values.accountId, "account-1")
   })
 
-  it("proposes a type when the email did not detect one", () => {
+  it("leaves the type empty when the email did not detect one", () => {
     const values = toProposalFormValues(accountProposal({ accountType: null }))
-    assert.equal(values.type, "CHECKING")
+    assert.equal(values.type, "")
     assert.equal(
       toProposalFormValues(cardProposal({ cardType: null })).type,
-      "CREDIT"
+      ""
+    )
+  })
+
+  it("does not keep a stored number when the draft has none", () => {
+    assert.equal(
+      toProposalFormValues(accountProposal()).clearAccountNumber,
+      false
     )
   })
 
@@ -175,6 +183,23 @@ describe("proposalFormSchemaFor", () => {
     ])
   })
 
+  it("blocks saving until the user chooses the missing type", () => {
+    const account = accountProposal({ accountType: null })
+    assert.deepEqual(issuesOf(account, toProposalFormValues(account)), [
+      "type:Elige el tipo de cuenta",
+    ])
+    const card = cardProposal({ cardType: null })
+    assert.deepEqual(issuesOf(card, toProposalFormValues(card)), [
+      "type:Elige el tipo de tarjeta",
+    ])
+  })
+
+  it("accepts the type once the user chooses it", () => {
+    const proposal = accountProposal({ accountType: null })
+    const values = { ...toProposalFormValues(proposal), type: "INVESTMENT" }
+    assert.deepEqual(issuesOf(proposal, values), [])
+  })
+
   it("accepts a full number that ends in the last four", () => {
     const proposal = accountProposal()
     const values = {
@@ -219,6 +244,21 @@ describe("proposalFormSchemaFor", () => {
       accountNumber: "001122331234",
     }
     assert.deepEqual(issuesOf(proposal, values), [])
+  })
+
+  it("accepts clearing the stored number with a new last four", () => {
+    const proposal = accountProposal({ accountNumberProvided: true })
+    const values = {
+      ...toProposalFormValues(proposal),
+      lastFour: "1234",
+      clearAccountNumber: true,
+    }
+    assert.deepEqual(issuesOf(proposal, values), [])
+  })
+
+  it("accepts a card without the network the email did not detect", () => {
+    const proposal = cardProposal({ network: null })
+    assert.deepEqual(issuesOf(proposal, toProposalFormValues(proposal)), [])
   })
 
   it("does not ask for the full number when the four digits stay", () => {
@@ -270,6 +310,28 @@ describe("buildProposalPatch", () => {
     assert.equal(body.currency, "USD")
   })
 
+  it("clears the stored number with null when the user removes it", () => {
+    const proposal = accountProposal({ accountNumberProvided: true })
+    const body = buildProposalPatch({
+      proposal,
+      values: { ...toProposalFormValues(proposal), clearAccountNumber: true },
+    })
+    assert.equal(body.accountNumber, null)
+  })
+
+  it("prefers clearing over a number left in the field", () => {
+    const proposal = accountProposal({ accountNumberProvided: true })
+    const body = buildProposalPatch({
+      proposal,
+      values: {
+        ...toProposalFormValues(proposal),
+        accountNumber: "001122335678",
+        clearAccountNumber: true,
+      },
+    })
+    assert.equal(body.accountNumber, null)
+  })
+
   it("clears the domain when the field is empty", () => {
     const proposal = accountProposal()
     const body = buildProposalPatch({
@@ -315,13 +377,22 @@ describe("buildProposalPatch", () => {
     assert.equal(changed.network, "MASTERCARD")
   })
 
-  it("sends the chosen network when the email did not detect one", () => {
+  it("sends no network when the email did not detect one", () => {
     const proposal = cardProposal({ network: null })
     const body = buildProposalPatch({
       proposal,
       values: toProposalFormValues(proposal),
     })
-    assert.equal(body.network, "OTHER")
+    assert.equal("network" in body, false)
+  })
+
+  it("sends the network the user picks on a card without detection", () => {
+    const proposal = cardProposal({ network: null })
+    const body = buildProposalPatch({
+      proposal,
+      values: { ...toProposalFormValues(proposal), network: "AMEX" },
+    })
+    assert.equal(body.network, "AMEX")
   })
 
   it("can clear the account of a credit card", () => {

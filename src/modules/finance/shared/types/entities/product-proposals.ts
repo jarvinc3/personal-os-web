@@ -104,7 +104,7 @@ export type UpdateEmailProductProposalBody = {
   cardType?: EmailProductProposalCardType
   currency?: string
   lastFour?: string
-  accountNumber?: string
+  accountNumber?: string | null
   network?: FinanceCardNetwork
   accountId?: string | null
   institutionName?: string

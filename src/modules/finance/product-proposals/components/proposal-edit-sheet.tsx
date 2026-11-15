@@ -60,6 +60,7 @@ import {
   ChevronDownIcon,
   CoinsIcon,
   CreditCardIcon,
+  EraserIcon,
   HashIcon,
   InfoIcon,
   LandmarkIcon,
@@ -70,6 +71,7 @@ import {
   SmartphoneIcon,
   TrendingUpIcon,
   TypeIcon,
+  Undo2Icon,
   UsersIcon,
   WalletIcon,
   XIcon,
@@ -176,6 +178,10 @@ export function ProposalEditSheet({
     "none" | "account" | "currency" | "country"
   >("none")
   const accountId = useWatch({ control, name: "accountId" })
+  const clearAccountNumber = useWatch({
+    control,
+    name: "clearAccountNumber",
+  })
   const currency = useWatch({ control, name: "currency" })
   const institutionCountry = useWatch({ control, name: "institutionCountry" })
   const destination = accountId ? encodeLedgerTarget("account", accountId) : ""
@@ -186,6 +192,14 @@ export function ProposalEditSheet({
     () => createSheetSubmit(handleSubmit),
     [handleSubmit]
   )
+  function removeStoredNumber() {
+    setValue("accountNumber", "", { shouldDirty: true })
+    setValue("clearAccountNumber", true, {
+      shouldDirty: true,
+      shouldValidate: true,
+    })
+  }
+
   const onSubmit = submitForm(async (values) => {
     try {
       await updateMutation.mutateAsync({
@@ -305,28 +319,62 @@ export function ProposalEditSheet({
                   <ChevronDownIcon className="size-4 shrink-0 text-muted-foreground" />
                 </button>
               </Field>
-              <Controller
-                control={control}
-                name="accountNumber"
-                render={({ field }) => (
-                  <FormTextField
-                    icon={LockIcon}
-                    label="Número completo (opcional)"
-                    value={field.value}
-                    onChange={field.onChange}
-                    onBlur={field.onBlur}
-                    error={errors.accountNumber?.message}
-                    description={
-                      proposal.draft.accountNumberProvided
-                        ? "Ya hay un número guardado. Escríbelo solo si quieres cambiarlo."
-                        : "Basta con los últimos 4 dígitos. El número nunca se muestra."
+              {clearAccountNumber ? (
+                <div className="flex items-center justify-between gap-2 rounded-2xl border border-border bg-card px-3 py-2">
+                  <span className="min-w-0 flex-1 text-xs text-muted-foreground">
+                    El número completo guardado se quitará al guardar.
+                  </span>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      setValue("clearAccountNumber", false, {
+                        shouldDirty: true,
+                      })
                     }
-                    inputMode="numeric"
-                    autoComplete="off"
-                    maxLength={48}
+                  >
+                    <Undo2Icon className="size-4 shrink-0" aria-hidden />
+                    Conservar
+                  </Button>
+                </div>
+              ) : (
+                <>
+                  <Controller
+                    control={control}
+                    name="accountNumber"
+                    render={({ field }) => (
+                      <FormTextField
+                        icon={LockIcon}
+                        label="Número completo (opcional)"
+                        value={field.value}
+                        onChange={field.onChange}
+                        onBlur={field.onBlur}
+                        error={errors.accountNumber?.message}
+                        description={
+                          proposal.draft.accountNumberProvided
+                            ? "Ya hay un número guardado. Escríbelo solo si quieres cambiarlo."
+                            : "Basta con los últimos 4 dígitos. El número nunca se muestra."
+                        }
+                        inputMode="numeric"
+                        autoComplete="off"
+                        maxLength={48}
+                      />
+                    )}
                   />
-                )}
-              />
+                  {proposal.draft.accountNumberProvided ? (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full"
+                      onClick={removeStoredNumber}
+                    >
+                      <EraserIcon className="size-4 shrink-0" aria-hidden />
+                      Quitar número guardado
+                    </Button>
+                  ) : null}
+                </>
+              )}
             </>
           ) : (
             <>
@@ -338,7 +386,7 @@ export function ProposalEditSheet({
                   control={control}
                   name="network"
                   render={({ field }) => (
-                    <ChoiceGrid<FinanceCardNetwork>
+                    <ChoiceGrid<FinanceCardNetwork | "">
                       ariaLabel="Red de la tarjeta"
                       accentColor={accentColor}
                       value={field.value}
