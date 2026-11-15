@@ -66,7 +66,7 @@ import {
   Trash2Icon,
 } from "lucide-react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { useCallback, useMemo, useState } from "react"
+import { useCallback, useState } from "react"
 
 /** Propuestas que se montan de entrada; el resto entra al bajar. */
 const PROPOSALS_PAGE_SIZE = 12
@@ -106,10 +106,7 @@ function ProductProposalsScreenBody() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const { isEnabled, config, formatLocale } = useFinanceEnabled()
-  const status = useMemo(
-    () => proposalStatusFromSearchParams(searchParams),
-    [searchParams]
-  )
+  const status = proposalStatusFromSearchParams(searchParams)
   const [discovery, setDiscovery] =
     useState<EmailProductProposalDiscovery | null>(null)
   const [approvingId, setApprovingId] = useState<string | null>(null)
@@ -235,7 +232,7 @@ function ProductProposalsScreenBody() {
         <Button
           type="button"
           className="w-full"
-          disabled={discoverMutation.isPending || !isEnabled}
+          disabled={discoverMutation.isPending}
           onClick={() => void runDiscovery()}
         >
           {discoverMutation.isPending ? (

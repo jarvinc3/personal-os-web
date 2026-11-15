@@ -3,6 +3,7 @@
 import { useEmailProductProposals } from "@/src/modules/finance/shared/hooks/use-email-product-proposals"
 import { countLabel } from "@/src/modules/finance/shared/lib/count-label"
 import { isProposalEndpointUnavailable } from "@/src/modules/finance/product-proposals/lib/proposal-error"
+import { DEFAULT_PROPOSAL_STATUS } from "@/src/modules/finance/product-proposals/lib/proposal-status"
 import { SummaryItem } from "@/src/shared/components/data-display/summary"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { MailSearchIcon } from "lucide-react"
@@ -16,7 +17,10 @@ type ProposalsEntryProps = {
  * tiene los endpoints (producción) para no dejar una fila que lleva a un 404.
  */
 export function ProposalsEntry({ isEnabled }: ProposalsEntryProps) {
-  const proposalsQuery = useEmailProductProposals(isEnabled, "PENDING")
+  const proposalsQuery = useEmailProductProposals(
+    isEnabled,
+    DEFAULT_PROPOSAL_STATUS
+  )
 
   if (isProposalEndpointUnavailable(proposalsQuery.error)) {
     return null

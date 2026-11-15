@@ -30,12 +30,13 @@ export const PROPOSAL_STATUS_BADGE_LABEL: Record<
 function isProposalStatus(
   value: string | null
 ): value is EmailProductProposalStatus {
-  return EMAIL_PRODUCT_PROPOSAL_STATUSES.includes(
-    value as EmailProductProposalStatus
-  )
+  if (!value) {
+    return false
+  }
+  return EMAIL_PRODUCT_PROPOSAL_STATUSES.some((status) => status === value)
 }
 
-/** Un estado desconocido en la URL vuelve a pendientes. */
+/** El estado llega por la URL, que se comparte y se recarga: uno desconocido vuelve a pendientes. */
 export function proposalStatusFromSearchParams(searchParams: {
   get: (name: string) => string | null
 }): EmailProductProposalStatus {

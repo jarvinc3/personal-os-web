@@ -100,6 +100,34 @@ const PROPOSAL_INSTITUTION_TYPE_ICON: Record<
   other: ShapesIcon,
 }
 
+const ACCOUNT_TYPE_OPTIONS = EMAIL_PRODUCT_PROPOSAL_ACCOUNT_TYPES.map(
+  (value) => ({
+    value,
+    label: FINANCE_ACCOUNT_TYPE_LABEL[value],
+    icon: ACCOUNT_TYPE_ICON[value],
+  })
+)
+
+const CARD_TYPE_OPTIONS = EMAIL_PRODUCT_PROPOSAL_CARD_TYPES.map((value) => ({
+  value,
+  label: FINANCE_CARD_TYPE_LABEL[value],
+  icon: CARD_TYPE_ICON[value],
+}))
+
+const NETWORK_OPTIONS = FINANCE_CARD_NETWORKS.map((value) => ({
+  value,
+  label: FINANCE_CARD_NETWORK_LABEL[value],
+  icon: CreditCardIcon,
+}))
+
+const INSTITUTION_TYPE_OPTIONS = EMAIL_PRODUCT_PROPOSAL_INSTITUTION_TYPES.map(
+  (value) => ({
+    value,
+    label: FINANCE_INSTITUTION_TYPE_LABEL[value],
+    icon: PROPOSAL_INSTITUTION_TYPE_ICON[value],
+  })
+)
+
 type ProposalEditSheetProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -152,38 +180,7 @@ export function ProposalEditSheet({
   const institutionCountry = useWatch({ control, name: "institutionCountry" })
   const destination = accountId ? encodeLedgerTarget("account", accountId) : ""
 
-  const typeOptions = useMemo(() => {
-    if (isAccount) {
-      return EMAIL_PRODUCT_PROPOSAL_ACCOUNT_TYPES.map((value) => ({
-        value,
-        label: FINANCE_ACCOUNT_TYPE_LABEL[value],
-        icon: ACCOUNT_TYPE_ICON[value],
-      }))
-    }
-    return EMAIL_PRODUCT_PROPOSAL_CARD_TYPES.map((value) => ({
-      value,
-      label: FINANCE_CARD_TYPE_LABEL[value],
-      icon: CARD_TYPE_ICON[value],
-    }))
-  }, [isAccount])
-  const networkOptions = useMemo(
-    () =>
-      FINANCE_CARD_NETWORKS.map((value) => ({
-        value,
-        label: FINANCE_CARD_NETWORK_LABEL[value],
-        icon: CreditCardIcon,
-      })),
-    []
-  )
-  const institutionTypeOptions = useMemo(
-    () =>
-      EMAIL_PRODUCT_PROPOSAL_INSTITUTION_TYPES.map((value) => ({
-        value,
-        label: FINANCE_INSTITUTION_TYPE_LABEL[value],
-        icon: PROPOSAL_INSTITUTION_TYPE_ICON[value],
-      })),
-    []
-  )
+  const typeOptions = isAccount ? ACCOUNT_TYPE_OPTIONS : CARD_TYPE_OPTIONS
 
   const submitForm = useMemo(
     () => createSheetSubmit(handleSubmit),
@@ -271,6 +268,22 @@ export function ProposalEditSheet({
               />
             )}
           />
+          <Controller
+            control={control}
+            name="lastFour"
+            render={({ field }) => (
+              <FormTextField
+                icon={HashIcon}
+                label="Últimos 4 dígitos"
+                value={field.value}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+                error={errors.lastFour?.message}
+                inputMode="numeric"
+                maxLength={4}
+              />
+            )}
+          />
           {isAccount ? (
             <>
               <Field className="gap-1">
@@ -292,22 +305,6 @@ export function ProposalEditSheet({
                   <ChevronDownIcon className="size-4 shrink-0 text-muted-foreground" />
                 </button>
               </Field>
-              <Controller
-                control={control}
-                name="lastFour"
-                render={({ field }) => (
-                  <FormTextField
-                    icon={HashIcon}
-                    label="Últimos 4 dígitos"
-                    value={field.value}
-                    onChange={field.onChange}
-                    onBlur={field.onBlur}
-                    error={errors.lastFour?.message}
-                    inputMode="numeric"
-                    maxLength={4}
-                  />
-                )}
-              />
               <Controller
                 control={control}
                 name="accountNumber"
@@ -333,22 +330,6 @@ export function ProposalEditSheet({
             </>
           ) : (
             <>
-              <Controller
-                control={control}
-                name="lastFour"
-                render={({ field }) => (
-                  <FormTextField
-                    icon={HashIcon}
-                    label="Últimos 4 dígitos"
-                    value={field.value}
-                    onChange={field.onChange}
-                    onBlur={field.onBlur}
-                    error={errors.lastFour?.message}
-                    inputMode="numeric"
-                    maxLength={4}
-                  />
-                )}
-              />
               <Field className="gap-1">
                 <FieldLabel className="text-sm text-muted-foreground">
                   Red
@@ -362,7 +343,7 @@ export function ProposalEditSheet({
                       accentColor={accentColor}
                       value={field.value}
                       onValueChange={field.onChange}
-                      options={networkOptions}
+                      options={NETWORK_OPTIONS}
                     />
                   )}
                 />
@@ -412,7 +393,7 @@ export function ProposalEditSheet({
                   accentColor={accentColor}
                   value={field.value}
                   onValueChange={field.onChange}
-                  options={institutionTypeOptions}
+                  options={INSTITUTION_TYPE_OPTIONS}
                 />
               )}
             />

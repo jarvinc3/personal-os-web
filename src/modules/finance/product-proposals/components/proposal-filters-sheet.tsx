@@ -3,32 +3,30 @@
 import { SegmentedControl } from "@/src/shared/components/forms/segmented-control"
 import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import { PROPOSAL_STATUS_LABEL } from "@/src/modules/finance/product-proposals/lib/proposal-status"
-import type { EmailProductProposalStatus } from "@/src/modules/finance/shared/types/entities"
+import {
+  EMAIL_PRODUCT_PROPOSAL_STATUSES,
+  type EmailProductProposalStatus,
+} from "@/src/modules/finance/shared/types/entities"
 import {
   CheckCircle2Icon,
   ClockIcon,
   LoaderCircleIcon,
   XCircleIcon,
+  type LucideIcon,
 } from "lucide-react"
 
-const STATUS_OPTIONS = [
-  { value: "PENDING", label: PROPOSAL_STATUS_LABEL.PENDING, icon: ClockIcon },
-  {
-    value: "APPROVING",
-    label: PROPOSAL_STATUS_LABEL.APPROVING,
-    icon: LoaderCircleIcon,
-  },
-  {
-    value: "APPROVED",
-    label: PROPOSAL_STATUS_LABEL.APPROVED,
-    icon: CheckCircle2Icon,
-  },
-  {
-    value: "DISCARDED",
-    label: PROPOSAL_STATUS_LABEL.DISCARDED,
-    icon: XCircleIcon,
-  },
-] as const
+const STATUS_ICON: Record<EmailProductProposalStatus, LucideIcon> = {
+  PENDING: ClockIcon,
+  APPROVING: LoaderCircleIcon,
+  APPROVED: CheckCircle2Icon,
+  DISCARDED: XCircleIcon,
+}
+
+const STATUS_OPTIONS = EMAIL_PRODUCT_PROPOSAL_STATUSES.map((status) => ({
+  value: status,
+  label: PROPOSAL_STATUS_LABEL[status],
+  icon: STATUS_ICON[status],
+}))
 
 type ProposalFiltersSheetProps = {
   open: boolean
@@ -60,7 +58,7 @@ export function ProposalFiltersSheet({
         fullWidth
         value={status}
         onChange={onChange}
-        options={[...STATUS_OPTIONS]}
+        options={STATUS_OPTIONS}
       />
     </BottomSheet>
   )
