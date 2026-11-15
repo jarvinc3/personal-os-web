@@ -6,11 +6,17 @@ export type AccountFormSession = {
   accountId: string | null
 }
 
-export type AccountFormReset = {
+export type AccountFormResetPlan = {
   /** Sesión ya aplicada, para la siguiente comprobación. */
   appliedSession: string | null
   /** Valores con los que reiniciar, o `null` para dejar el formulario tal cual. */
   values: AccountFormValues | null
+}
+
+export type AccountFormResetInput = {
+  session: AccountFormSession
+  appliedSession: string | null
+  initialValues: AccountFormValues
 }
 
 const NEW_ACCOUNT_SESSION = "new-account"
@@ -24,11 +30,7 @@ export function resolveAccountFormReset({
   session,
   appliedSession,
   initialValues,
-}: {
-  session: AccountFormSession
-  appliedSession: string | null
-  initialValues: AccountFormValues
-}): AccountFormReset {
+}: AccountFormResetInput): AccountFormResetPlan {
   if (!session.open) {
     return { appliedSession: null, values: null }
   }
