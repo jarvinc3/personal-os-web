@@ -45,6 +45,10 @@ export type EmailProductProposalInstitution = {
   type: string
   domain: string | null
   country: string
+  /** Institución compatible del usuario; solo cuando hay exactamente una. */
+  matchedInstitutionId: string | null
+  /** Todas las compatibles; dos o más indican ambigüedad. */
+  matchedInstitutionIds: string[]
 }
 
 export type EmailProductProposalDraft = {
@@ -80,6 +84,13 @@ export type EmailProductProposal = {
   id: string
   productType: EmailProductProposalProductType
   status: EmailProductProposalStatus
+  /**
+   * Producto activo compatible que ya existe; se vincula con
+   * `approve { productId }`. Solo cuando hay exactamente uno.
+   */
+  matchedProductId: string | null
+  /** Productos activos compatibles; dos o más indican ambigüedad. */
+  matchedProductIds: string[]
   draft: EmailProductProposalDraft
   approvedProductId: string | null
   createdAt: string
@@ -95,20 +106,4 @@ export type EmailProductProposalDiscovery = {
   evidenceAdded: number
   ignored: number
   proposals: EmailProductProposal[]
-}
-
-/** Campos que `PATCH /:proposalId` acepta antes de aprobar la propuesta. */
-export type UpdateEmailProductProposalBody = {
-  name?: string
-  accountType?: EmailProductProposalAccountType
-  cardType?: EmailProductProposalCardType
-  currency?: string
-  lastFour?: string
-  accountNumber?: string | null
-  network?: FinanceCardNetwork
-  accountId?: string | null
-  institutionName?: string
-  institutionType?: EmailProductProposalInstitutionType
-  institutionDomain?: string | null
-  institutionCountry?: string
 }

@@ -23,6 +23,8 @@ function proposalOf(
     productType: "ACCOUNT",
     status: "PENDING",
     approvedProductId: null,
+    matchedProductId: null,
+    matchedProductIds: [],
     createdAt: "2026-10-01T12:00:00.000Z",
     evidence: [],
     draft: {
@@ -39,6 +41,8 @@ function proposalOf(
         type: "bank",
         domain: "bhd.com.do",
         country: "DO",
+        matchedInstitutionId: null,
+        matchedInstitutionIds: [],
       },
       accountNumberProvided: false,
     },
@@ -91,7 +95,7 @@ describe("proposalTypeLabel", () => {
           draft: { ...proposalOf().draft, accountType: null },
         })
       ),
-      "Sin tipo"
+      "Falta elegir el tipo"
     )
   })
 })

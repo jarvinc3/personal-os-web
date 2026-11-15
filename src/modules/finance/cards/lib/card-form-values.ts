@@ -6,24 +6,34 @@ export function emptyBalanceRow(currency: string) {
   return { currency, balance: "", creditLimit: "" }
 }
 
+export type CardFormPrefill = {
+  name?: string
+  type?: CardFormValues["type"]
+  lastFour?: string
+  network?: string
+  accountId?: string
+}
+
 type ToCardFormValuesInput = {
   card: FinanceCard | null
   defaultCurrency: string
   defaultInstitutionId: string
+  prefill?: CardFormPrefill
 }
 
 export function toCardFormValues({
   card,
   defaultCurrency,
   defaultInstitutionId,
+  prefill = {},
 }: ToCardFormValuesInput): CardFormValues {
   return {
-    name: card?.name ?? "",
-    type: card?.type ?? "CREDIT",
+    name: card?.name ?? prefill.name ?? "",
+    type: card?.type ?? prefill.type ?? "CREDIT",
     institutionId: card?.institutionId ?? defaultInstitutionId,
-    accountId: card?.accountId ?? CATALOG_NONE,
-    network: card?.network ?? "VISA",
-    lastFour: card?.lastFour ?? "",
+    accountId: card?.accountId ?? prefill.accountId ?? CATALOG_NONE,
+    network: card?.network ?? prefill.network ?? "VISA",
+    lastFour: card?.lastFour ?? prefill.lastFour ?? "",
     statementClosingDay: card?.statementClosingDay
       ? String(card.statementClosingDay)
       : "",

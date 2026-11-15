@@ -25,6 +25,7 @@ import {
 import {
   emptyBalanceRow,
   toCardFormValues,
+  type CardFormPrefill,
 } from "@/src/modules/finance/cards/lib/card-form-values"
 import { FinanceFormScreen } from "@/src/modules/finance/shared/components/forms/form-screen"
 import { SegmentedControl } from "@/src/shared/components/forms/segmented-control"
@@ -77,8 +78,12 @@ type CardFormScreenProps = {
   accounts: FinanceAccount[]
   defaultCurrency: string
   defaultInstitutionId?: string
+  /** Valores del correo para el alta desde una propuesta. */
+  prefill?: CardFormPrefill
   display: FinanceMoneyDisplay
   onDone: () => void
+  /** Alta desde una propuesta: entrega la tarjeta creada. */
+  onCreated?: (card: FinanceCard) => void
   onUpdateBalance?: (card: FinanceCard) => void
 }
 
@@ -88,8 +93,10 @@ export function CardFormScreen({
   accounts,
   defaultCurrency,
   defaultInstitutionId,
+  prefill = {},
   display,
   onDone,
+  onCreated,
   onUpdateBalance,
 }: CardFormScreenProps) {
   const isEdit = Boolean(card)
@@ -117,6 +124,7 @@ export function CardFormScreen({
       card,
       defaultCurrency,
       defaultInstitutionId: resolvedDefaultInstitutionId,
+      prefill,
     }),
   })
 
@@ -252,6 +260,10 @@ export function CardFormScreen({
           failedCurrencies,
         })
         appToast[message.kind]({ text1: message.text1, text2: message.text2 })
+        if (onCreated) {
+          onCreated(created)
+          return
+        }
       }
       onDone()
     } catch (error) {

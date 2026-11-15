@@ -1,7 +1,7 @@
 "use client"
 
 import { ProposalCard } from "@/src/modules/finance/product-proposals/components/proposal-card"
-import { ProposalEditSheet } from "@/src/modules/finance/product-proposals/components/proposal-edit-sheet"
+import { sortProposalsForReview } from "@/src/modules/finance/product-proposals/lib/proposal-approval"
 import { ProposalFiltersSheet } from "@/src/modules/finance/product-proposals/components/proposal-filters-sheet"
 import {
   discoveryLimitNote,
@@ -18,17 +18,16 @@ import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/asyn
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
 import {
-  useApproveEmailProductProposal,
   useDiscardEmailProductProposal,
   useDiscoverEmailProductProposals,
   useEmailProductProposals,
 } from "@/src/modules/finance/shared/hooks/use-email-product-proposals"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
-import { useInstitutions } from "@/src/modules/finance/shared/hooks/use-institutions"
-import { useSheetListEntity } from "@/src/modules/finance/shared/hooks/use-sheet-entity"
-import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
+import {
+  financeErrorMessage,
+  financeLoadErrorMessage,
+} from "@/src/modules/finance/shared/lib/finance-error"
 import type {
-  EmailProductProposal,
   EmailProductProposalDiscovery,
   EmailProductProposalStatus,
 } from "@/src/modules/finance/shared/types/entities"
@@ -109,33 +108,22 @@ function ProductProposalsScreenBody() {
   const status = proposalStatusFromSearchParams(searchParams)
   const [discovery, setDiscovery] =
     useState<EmailProductProposalDiscovery | null>(null)
-  const [approvingId, setApprovingId] = useState<string | null>(null)
   const [discardingId, setDiscardingId] = useState<string | null>(null)
   const [pendingDiscardId, setPendingDiscardId] = useState<string | null>(null)
   const [visibleCount, setVisibleCount] = useState(PROPOSALS_PAGE_SIZE)
 
   const filtersSheet = useSheetParam(FINANCE_SHEET_KEYS.proposalFilters)
-  const editSheet = useSheetParam(FINANCE_SHEET_KEYS.proposalEdit)
   const proposalsQuery = useEmailProductProposals(isEnabled, status)
   const accountsQuery = useAccounts(isEnabled)
-  const institutionsQuery = useInstitutions(isEnabled)
   const discoverMutation = useDiscoverEmailProductProposals()
-  const approveMutation = useApproveEmailProductProposal()
   const discardMutation = useDiscardEmailProductProposal()
 
   const proposals = proposalsQuery.data ?? []
   const accounts = accountsQuery.data ?? []
-  const institutions = institutionsQuery.data ?? []
-  const shown = proposals.slice(0, visibleCount)
+  const ordered = sortProposalsForReview(proposals)
+  const shown = ordered.slice(0, visibleCount)
   const emptyCopy = EMPTY_COPY[status]
   const unavailable = isProposalEndpointUnavailable(proposalsQuery.error)
-  const editing = useSheetListEntity(
-    editSheet.open,
-    editSheet.sheetId,
-    proposals,
-    proposalsQuery.isPending,
-    editSheet.setOpen
-  )
   const pendingDiscard =
     proposals.find((proposal) => proposal.id === pendingDiscardId) ?? null
   const limitNote = discovery ? discoveryLimitNote(discovery) : null
@@ -177,22 +165,6 @@ function ProductProposalsScreenBody() {
     }
   }
 
-  async function approve(proposal: EmailProductProposal) {
-    setApprovingId(proposal.id)
-    try {
-      const approved = await approveMutation.mutateAsync(proposal.id)
-      appToast.success({
-        text1: approved.approval?.duplicate
-          ? "Ese producto ya existía"
-          : "Producto aprobado",
-      })
-    } catch (error) {
-      appToast.error({ text1: financeErrorMessage(error) })
-    } finally {
-      setApprovingId(null)
-    }
-  }
-
   async function discardPending() {
     if (!pendingDiscard) {
       return
@@ -226,8 +198,9 @@ function ProductProposalsScreenBody() {
     <div className="flex flex-col gap-4">
       <SummarySection title="Propuestas de correo" icon={MailSearchIcon}>
         <p className="px-1 text-sm text-muted-foreground">
-          Revisa los correos guardados y propone las cuentas y tarjetas que
-          aparezcan. Nada se crea hasta que lo apruebes.
+          Sugerencias a partir de correos de BHD ya guardados que no se pudieron
+          asignar a un producto. No se lee Gmail en vivo. Nada se crea hasta que
+          lo apruebes.
         </p>
         <Button
           type="button"
@@ -266,7 +239,7 @@ function ProductProposalsScreenBody() {
 
       {proposalsQuery.isError && !unavailable ? (
         <ErrorState
-          message={financeErrorMessage(proposalsQuery.error)}
+          message={financeLoadErrorMessage(proposalsQuery.error)}
           onRetry={() => void proposalsQuery.refetch()}
           isRetrying={proposalsQuery.isFetching}
         />
@@ -296,10 +269,10 @@ function ProductProposalsScreenBody() {
               accounts={accounts}
               display={display}
               locale={formatLocale}
-              approving={approvingId === proposal.id}
               discarding={discardingId === proposal.id}
-              onApprove={() => void approve(proposal)}
-              onEdit={() => editSheet.setOpen(true, proposal.id)}
+              reviewHref={APP_ROUTES.app.financeProductProposalApproval(
+                proposal.id
+              )}
               onDiscard={() => setPendingDiscardId(proposal.id)}
             />
           ))}
@@ -319,17 +292,6 @@ function ProductProposalsScreenBody() {
         status={status}
         onChange={changeStatus}
       />
-
-      {editing ? (
-        <ProposalEditSheet
-          open={editSheet.open}
-          onOpenChange={editSheet.setOpen}
-          proposal={editing}
-          accounts={accounts}
-          institutions={institutions}
-          display={display}
-        />
-      ) : null}
 
       <ConfirmDialog
         open={Boolean(pendingDiscard)}

@@ -34,6 +34,25 @@ describe("cardSchema", () => {
     )
   })
 
+  it("requires an account for a debit card", () => {
+    assert.equal(
+      cardSchema.safeParse({
+        ...validCard,
+        type: "DEBIT",
+        accountId: "__none__",
+      }).success,
+      false
+    )
+    assert.equal(
+      cardSchema.safeParse({
+        ...validCard,
+        type: "DEBIT",
+        accountId: "acc-1",
+      }).success,
+      true
+    )
+  })
+
   it("rejects a credit row with an invalid balance", () => {
     assert.equal(
       cardSchema.safeParse({

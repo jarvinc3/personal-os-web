@@ -59,21 +59,29 @@ const TYPE_OPTIONS = FINANCE_ACCOUNT_TYPES.map((value) => ({
   label: FINANCE_ACCOUNT_TYPE_LABEL[value],
 }))
 
+type AccountSheetPrefill = {
+  name?: string
+  type?: AccountFormValues["type"]
+  currency?: string
+  lastFour?: string
+}
+
 function toFormValues(
   account: FinanceAccount | null,
   defaultCurrency: string,
   defaultInstitutionId: string,
-  defaultType: AccountFormValues["type"] = "CHECKING"
+  defaultType: AccountFormValues["type"] = "CHECKING",
+  prefill: AccountSheetPrefill = {}
 ): AccountFormValues {
-  const type = account?.type ?? defaultType
+  const type = account?.type ?? prefill.type ?? defaultType
   return {
-    name: account?.name ?? "",
+    name: account?.name ?? prefill.name ?? "",
     type,
-    currency: account?.currency ?? defaultCurrency,
+    currency: account?.currency ?? prefill.currency ?? defaultCurrency,
     institutionId:
       account?.institutionId ??
       (type === "CASH" ? CATALOG_NONE : defaultInstitutionId),
-    accountNumber: "",
+    accountNumber: account ? "" : (prefill.lastFour ?? ""),
     color: account?.color ?? "",
     initialBalance: "",
     isDefaultForInstitution: account?.isDefaultForInstitution ?? false,
@@ -93,6 +101,12 @@ type AccountSheetProps = {
   /** Cash summary, so a new currency offers the default "Efectivo <moneda>" name. */
   cash?: FinanceCashSummary
   pending?: boolean
+  /** Valores del correo para el alta desde una propuesta. */
+  prefill?: AccountSheetPrefill
+  /** Basta con los últimos 4 dígitos: no se exige el número completo. */
+  lastFourOnly?: boolean
+  /** Alta desde una propuesta: entrega la cuenta creada, sin cerrar la hoja. */
+  onCreated?: (account: FinanceAccount) => void
 }
 
 export function AccountSheet({
@@ -106,6 +120,9 @@ export function AccountSheet({
   lockType = false,
   cash,
   pending = false,
+  prefill = {},
+  lastFourOnly = false,
+  onCreated,
 }: AccountSheetProps) {
   const isEdit = Boolean(account)
   const createMutation = useCreateAccount()
@@ -121,8 +138,40 @@ export function AccountSheet({
     defaultInstitutionId ?? institutions[0]?.id ?? CATALOG_NONE
 
   const accountResolver = useMemo(
-    () => zodResolver(accountSchemaFor({ isEdit })),
-    [isEdit]
+    () =>
+      zodResolver(
+        accountSchemaFor({ isEdit, allowLastFourOnly: lastFourOnly })
+      ),
+    [isEdit, lastFourOnly]
+  )
+  const prefillName = prefill.name
+  const prefillType = prefill.type
+  const prefillCurrency = prefill.currency
+  const prefillLastFour = prefill.lastFour
+  const initialValues = useMemo(
+    () =>
+      toFormValues(
+        account,
+        defaultCurrency,
+        resolvedDefaultInstitutionId,
+        defaultType,
+        {
+          name: prefillName,
+          type: prefillType,
+          currency: prefillCurrency,
+          lastFour: prefillLastFour,
+        }
+      ),
+    [
+      account,
+      defaultCurrency,
+      resolvedDefaultInstitutionId,
+      defaultType,
+      prefillName,
+      prefillType,
+      prefillCurrency,
+      prefillLastFour,
+    ]
   )
 
   const {
@@ -135,12 +184,7 @@ export function AccountSheet({
     formState: { errors, isDirty },
   } = useForm<AccountFormValues>({
     resolver: accountResolver,
-    defaultValues: toFormValues(
-      account,
-      defaultCurrency,
-      resolvedDefaultInstitutionId,
-      defaultType
-    ),
+    defaultValues: initialValues,
   })
 
   const { requestOpenChange, discardChangesDialog } = useDiscardChanges({
@@ -202,23 +246,9 @@ export function AccountSheet({
 
   useEffect(() => {
     if (open) {
-      reset(
-        toFormValues(
-          account,
-          defaultCurrency,
-          resolvedDefaultInstitutionId,
-          defaultType
-        )
-      )
+      reset(initialValues)
     }
-  }, [
-    open,
-    account,
-    defaultCurrency,
-    resolvedDefaultInstitutionId,
-    defaultType,
-    reset,
-  ])
+  }, [open, initialValues, reset])
 
   useEffect(() => {
     if (!open || !lockType || isEdit || accountType !== "CASH") {
@@ -259,7 +289,7 @@ export function AccountSheet({
         accountNumber:
           accountValues.type === "CASH" ? "" : accountValues.accountNumber,
       },
-      { isUpdate: isEdit }
+      { isUpdate: isEdit, lastFourOnly }
     )
     if (!payload.ok) {
       appToast.error({ text1: payload.error })
@@ -282,6 +312,10 @@ export function AccountSheet({
           })
         }
         appToast.success({ text1: "Cuenta creada" })
+        if (onCreated) {
+          onCreated(created)
+          return
+        }
       }
       onOpenChange(false)
     } catch (error) {
@@ -387,6 +421,11 @@ export function AccountSheet({
                       isEdit && account?.accountNumberLast4
                         ? `Deja vacío para conservar •••• ${account.accountNumberLast4}`
                         : "0123456789"
+                    }
+                    description={
+                      lastFourOnly && !isEdit
+                        ? "Basta con los últimos 4 dígitos; el número completo es opcional."
+                        : undefined
                     }
                   />
                 )}

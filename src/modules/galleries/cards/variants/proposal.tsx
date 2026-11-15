@@ -20,10 +20,8 @@ export const proposalVariants: readonly GalleryVariant[] = [
         accounts={[galleryCheckingAccount]}
         display={display}
         locale={display.locale}
-        approving={false}
         discarding={false}
-        onApprove={notifyTap}
-        onEdit={notifyTap}
+        onReview={notifyTap}
         onDiscard={notifyTap}
       />
     ),
@@ -39,10 +37,8 @@ export const proposalVariants: readonly GalleryVariant[] = [
         accounts={[galleryCheckingAccount]}
         display={display}
         locale={display.locale}
-        approving={false}
         discarding={false}
-        onApprove={notifyTap}
-        onEdit={notifyTap}
+        onReview={notifyTap}
         onDiscard={notifyTap}
       />
     ),
@@ -58,10 +54,8 @@ export const proposalVariants: readonly GalleryVariant[] = [
         accounts={[galleryCheckingAccount]}
         display={display}
         locale={display.locale}
-        approving={false}
         discarding={false}
-        onApprove={notifyTap}
-        onEdit={notifyTap}
+        onReview={notifyTap}
         onDiscard={notifyTap}
       />
     ),

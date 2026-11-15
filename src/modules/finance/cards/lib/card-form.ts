@@ -1,6 +1,9 @@
 import { z } from "zod"
 
-import { FINANCE_CARD_TYPES } from "@/src/modules/finance/shared/constants/catalog"
+import {
+  CATALOG_NONE,
+  FINANCE_CARD_TYPES,
+} from "@/src/modules/finance/shared/constants/catalog"
 import type { CardBalanceInput } from "@/src/modules/finance/shared/lib/catalog-payloads"
 import { parseFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 import type { FinanceAccount } from "@/src/modules/finance/shared/types/entities"
@@ -35,6 +38,16 @@ export const cardSchema = z
     balances: z.array(balanceRowSchema),
   })
   .superRefine((values, ctx) => {
+    if (
+      values.type === "DEBIT" &&
+      (!values.accountId || values.accountId === CATALOG_NONE)
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["accountId"],
+        message: "La tarjeta de débito necesita una cuenta",
+      })
+    }
     if (values.type !== "CREDIT") {
       return
     }

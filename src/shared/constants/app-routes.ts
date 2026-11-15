@@ -45,6 +45,8 @@ export const APP_ROUTES = {
     financeStatistics: "/finance/statistics",
     financeProducts: "/finance/products",
     financeProductProposals: "/finance/products/email-proposals",
+    financeProductProposalApproval: (proposalId: string) =>
+      `/finance/products/email-proposals/${proposalId}/approve`,
     financeWealth: "/finance/wealth",
     financeInstitutions: FINANCE_INSTITUTIONS_PATH,
     financeCash: FINANCE_CASH_PATH,

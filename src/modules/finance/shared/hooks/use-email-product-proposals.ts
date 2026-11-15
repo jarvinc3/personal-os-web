@@ -1,6 +1,6 @@
 "use client"
 
-import { apiGet, apiPatch, apiPost } from "@/src/config/api-client"
+import { apiGet, apiPost } from "@/src/config/api-client"
 import { invalidateFinancePositions } from "./use-balance-sheet"
 import { buildFinanceQueryPath } from "@/src/modules/finance/shared/lib/finance-query-options"
 import {
@@ -11,7 +11,6 @@ import type {
   EmailProductProposal,
   EmailProductProposalDiscovery,
   EmailProductProposalStatus,
-  UpdateEmailProductProposalBody,
 } from "@/src/modules/finance/shared/types/entities"
 import { API_ENDPOINTS } from "@/src/shared/constants/api-endpoints"
 import {
@@ -57,31 +56,19 @@ export function useDiscoverEmailProductProposals() {
   })
 }
 
-export function useUpdateEmailProductProposal() {
+export function useApproveEmailProductProposal() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: ({
       proposalId,
-      body,
+      productId,
     }: {
       proposalId: string
-      body: UpdateEmailProductProposalBody
+      productId: string
     }) =>
-      apiPatch<EmailProductProposal>(
-        API_ENDPOINTS.INTELLIGENCE.EMAIL_PRODUCT_PROPOSAL(proposalId),
-        body
-      ),
-    onSuccess: () => invalidateProposals(queryClient),
-  })
-}
-
-export function useApproveEmailProductProposal() {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: (proposalId: string) =>
       apiPost<EmailProductProposal>(
         API_ENDPOINTS.INTELLIGENCE.EMAIL_PRODUCT_PROPOSAL_APPROVE(proposalId),
-        {}
+        { productId }
       ),
     onSuccess: () => {
       invalidateProposals(queryClient)
