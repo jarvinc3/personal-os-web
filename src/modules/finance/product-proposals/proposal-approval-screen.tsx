@@ -11,8 +11,8 @@ import {
   accountApprovalPrefill,
   cardApprovalPrefill,
   initialApprovalStep,
-  initialInstitutionId,
   institutionApprovalPrefill,
+  resolveApprovalInstitution,
   type ProposalApprovalStep,
 } from "@/src/modules/finance/product-proposals/lib/proposal-approval"
 import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
@@ -93,10 +93,13 @@ function ProposalApprovalScreenBody({
   const accounts = accountsQuery.data ?? []
   const cards = cardsQuery.data ?? []
   const proposal = proposals.find((item) => item.id === proposalId) ?? null
+  const compatibleInstitution = proposal
+    ? resolveApprovalInstitution({ proposal, institutions })
+    : null
   const initialFlow = proposal
     ? {
         step: initialApprovalStep({ proposal, institutions }),
-        institutionId: initialInstitutionId({ proposal, institutions }),
+        institutionId: compatibleInstitution?.id ?? null,
       }
     : null
   const step = flow?.step ?? initialFlow?.step ?? "institution"
@@ -104,7 +107,12 @@ function ProposalApprovalScreenBody({
     flow?.institutionId ?? initialFlow?.institutionId ?? null
   const institution =
     institutions.find((item) => item.id === institutionId) ??
-    (createdInstitution?.id === institutionId ? createdInstitution : null)
+    (createdInstitution?.id === institutionId ? createdInstitution : null) ??
+    (compatibleInstitution?.id === institutionId ? compatibleInstitution : null)
+  const formInstitutions =
+    institution && !institutions.some((item) => item.id === institution.id)
+      ? [institution, ...institutions]
+      : institutions
   const isAccount = proposal?.productType === "ACCOUNT"
   const matchedProductId =
     proposal?.matchedProductId &&
@@ -147,7 +155,9 @@ function ProposalApprovalScreenBody({
   }
 
   function chooseInstitutionById(nextInstitutionId: string) {
-    const selected = institutions.find((item) => item.id === nextInstitutionId)
+    const selected = formInstitutions.find(
+      (item) => item.id === nextInstitutionId
+    )
     if (selected) {
       chooseInstitution(selected)
     }
@@ -252,7 +262,7 @@ function ProposalApprovalScreenBody({
         <InstitutionPickerSheet
           open={picker === "institution"}
           onOpenChange={closeHandlerFor("institution")}
-          institutions={institutions}
+          institutions={formInstitutions}
           value={institutionId ?? ""}
           onSelect={chooseInstitutionById}
         />
@@ -318,7 +328,7 @@ function ProposalApprovalScreenBody({
             }
           }}
           account={null}
-          institutions={institutions}
+          institutions={formInstitutions}
           defaultCurrency={proposal.draft.currency || config.baseCurrency}
           defaultInstitutionId={institution.id}
           prefill={accountApprovalPrefill(proposal)}
@@ -329,7 +339,7 @@ function ProposalApprovalScreenBody({
         <CardFormScreen
           key={institution.id}
           card={null}
-          institutions={institutions}
+          institutions={formInstitutions}
           accounts={accounts}
           defaultCurrency={proposal.draft.currency || config.baseCurrency}
           defaultInstitutionId={institution.id}
@@ -343,7 +353,7 @@ function ProposalApprovalScreenBody({
       <InstitutionPickerSheet
         open={picker === "institution"}
         onOpenChange={closeHandlerFor("institution")}
-        institutions={institutions}
+        institutions={formInstitutions}
         value={institutionId ?? ""}
         onSelect={chooseInstitutionById}
       />

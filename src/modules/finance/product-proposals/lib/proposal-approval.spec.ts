@@ -5,10 +5,10 @@ import {
   accountApprovalPrefill,
   cardApprovalPrefill,
   initialApprovalStep,
-  initialInstitutionId,
   institutionApprovalPrefill,
   proposalInstitutionType,
   proposalReviewHint,
+  resolveApprovalInstitution,
   sortProposalsForReview,
 } from "./proposal-approval.ts"
 import type {
@@ -173,39 +173,44 @@ describe("cardApprovalPrefill", () => {
   })
 })
 
-describe("initialInstitutionId", () => {
-  it("selects the compatible institution the user has", () => {
+describe("resolveApprovalInstitution", () => {
+  it("returns the compatible institution the user has", () => {
+    const known = institutionOf()
     assert.equal(
-      initialInstitutionId({
+      resolveApprovalInstitution({
         proposal: proposalOf(),
-        institutions: [institutionOf()],
+        institutions: [known],
       }),
-      "institution-bhd"
+      known
     )
   })
 
-  it("reuses the compatible institution even when archived", () => {
-    assert.equal(
-      initialInstitutionId({
-        proposal: proposalOf(),
-        institutions: [institutionOf({ isActive: false })],
-      }),
-      "institution-bhd"
-    )
-  })
-
-  it("returns null when there is no match or it is not in the list", () => {
-    assert.equal(
-      initialInstitutionId({
-        proposal: cardProposal(),
-        institutions: [institutionOf()],
-      }),
-      null
-    )
-    assert.equal(
-      initialInstitutionId({
+  it("rebuilds a compatible institution the active list does not include", () => {
+    assert.deepEqual(
+      resolveApprovalInstitution({
         proposal: proposalOf(),
         institutions: [],
+      }),
+      {
+        id: "institution-bhd",
+        name: "BHD",
+        type: "bank",
+        shortName: null,
+        domain: "bhd.com.do",
+        color: null,
+        logoUrl: null,
+        country: "DO",
+        isActive: false,
+        isSystem: false,
+      }
+    )
+  })
+
+  it("returns null when the proposal has no compatible institution", () => {
+    assert.equal(
+      resolveApprovalInstitution({
+        proposal: cardProposal(),
+        institutions: [institutionOf()],
       }),
       null
     )
@@ -218,6 +223,16 @@ describe("initialApprovalStep", () => {
       initialApprovalStep({
         proposal: proposalOf(),
         institutions: [institutionOf()],
+      }),
+      "product"
+    )
+  })
+
+  it("skips the step even when the match is not in the active list", () => {
+    assert.equal(
+      initialApprovalStep({
+        proposal: proposalOf(),
+        institutions: [],
       }),
       "product"
     )

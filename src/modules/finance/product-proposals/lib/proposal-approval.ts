@@ -83,22 +83,37 @@ export function cardApprovalPrefill(
 
 /**
  * La institución compatible se reutiliza aunque esté archivada: crear otra
- * duplicaría la que el usuario ya tiene.
+ * duplicaría la que el usuario ya tiene. La lista de la web solo trae activas,
+ * así que una compatibilidad ausente se reconstruye con los datos del correo.
  */
-export function initialInstitutionId({
+export function resolveApprovalInstitution({
   proposal,
   institutions,
 }: {
   proposal: EmailProductProposal
   institutions: readonly FinanceInstitution[]
-}): string | null {
-  const matched = proposal.draft.institution.matchedInstitutionId
-  if (!matched) {
+}): FinanceInstitution | null {
+  const matchedId = proposal.draft.institution.matchedInstitutionId
+  if (!matchedId) {
     return null
   }
-  return institutions.some((institution) => institution.id === matched)
-    ? matched
-    : null
+  const known = institutions.find((institution) => institution.id === matchedId)
+  if (known) {
+    return known
+  }
+  const draftInstitution = proposal.draft.institution
+  return {
+    id: matchedId,
+    name: draftInstitution.name,
+    type: proposalInstitutionType(draftInstitution.type),
+    shortName: null,
+    domain: draftInstitution.domain,
+    color: null,
+    logoUrl: null,
+    country: draftInstitution.country.trim().toUpperCase(),
+    isActive: false,
+    isSystem: false,
+  }
 }
 
 /** Con la institución resuelta no hay primer paso: se abre el producto. */
@@ -109,7 +124,7 @@ export function initialApprovalStep({
   proposal: EmailProductProposal
   institutions: readonly FinanceInstitution[]
 }): ProposalApprovalStep {
-  return initialInstitutionId({ proposal, institutions })
+  return resolveApprovalInstitution({ proposal, institutions })
     ? "product"
     : "institution"
 }
