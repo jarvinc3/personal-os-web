@@ -44,6 +44,12 @@ type WizardStep = "catalog" | "form" | "next"
 
 type InstitutionFormScreenProps = {
   institution?: FinanceInstitution | null
+  /** Valores del correo para el alta desde una propuesta. */
+  prefill?: Partial<InstitutionFormValues>
+  /** Abre el formulario sin el catálogo (paso a paso de propuestas). */
+  startAtForm?: boolean
+  /** Alta desde una propuesta: entrega la institución creada. */
+  onCreated?: (institution: FinanceInstitution) => void
   onDone: () => void
   onAddProduct?: (
     choice: InstitutionProductChoice,
@@ -52,21 +58,28 @@ type InstitutionFormScreenProps = {
 }
 
 function toFormValues(
-  institution: FinanceInstitution | null
+  institution: FinanceInstitution | null,
+  prefill: Partial<InstitutionFormValues> = {}
 ): InstitutionFormValues {
   return {
-    name: institution?.name ?? "",
-    color: institution?.color ?? "",
-    country: institution?.country ?? "DO",
-    type: institution?.type ?? "bank",
-    shortName: institution?.shortName ?? "",
-    sortOrder: String(institution?.sortOrder ?? 0),
-    domain: institution?.domain ?? "",
+    name: institution?.name ?? prefill.name ?? "",
+    color: institution?.color ?? prefill.color ?? "",
+    country: institution?.country ?? prefill.country ?? "DO",
+    type: institution?.type ?? prefill.type ?? "bank",
+    shortName: institution?.shortName ?? prefill.shortName ?? "",
+    sortOrder:
+      institution?.sortOrder !== undefined
+        ? String(institution.sortOrder)
+        : (prefill.sortOrder ?? "0"),
+    domain: institution?.domain ?? prefill.domain ?? "",
   }
 }
 
 export function InstitutionFormScreen({
   institution = null,
+  prefill = {},
+  startAtForm = false,
+  onCreated,
   onDone,
   onAddProduct,
 }: InstitutionFormScreenProps) {
@@ -78,7 +91,9 @@ export function InstitutionFormScreen({
     createMutation.isPending ||
     updateMutation.isPending ||
     uploadMutation.isPending
-  const [step, setStep] = useState<WizardStep>(isEdit ? "form" : "catalog")
+  const [step, setStep] = useState<WizardStep>(
+    isEdit || startAtForm ? "form" : "catalog"
+  )
   const [filter, setFilter] = useState<InstitutionCatalogFilter>("bank")
   const [logoFile, setLogoFile] = useState<File | null>(null)
   const [createdId, setCreatedId] = useState<string | null>(null)
@@ -96,7 +111,7 @@ export function InstitutionFormScreen({
   } = useForm<InstitutionFormValues>({
     mode: "onTouched",
     resolver: zodResolver(institutionSchema),
-    defaultValues: toFormValues(institution),
+    defaultValues: toFormValues(institution, prefill),
   })
 
   const formValues = useWatch({ control })
@@ -142,8 +157,8 @@ export function InstitutionFormScreen({
     if (!isEdit) {
       return
     }
-    reset(toFormValues(institution))
-  }, [isEdit, institution, reset])
+    reset(toFormValues(institution, prefill))
+  }, [isEdit, institution, prefill, reset])
 
   function applyCatalogEntry(entry: InstitutionCatalogEntry) {
     reset({
@@ -195,6 +210,10 @@ export function InstitutionFormScreen({
       })
       if (institution) {
         onDone()
+        return
+      }
+      if (onCreated) {
+        onCreated(saved)
         return
       }
       setCreatedId(saved.id)

@@ -4,8 +4,8 @@ import { AccountProductRow } from "@/src/modules/finance/shared/components/produ
 import { BrandLogo } from "@/src/modules/finance/shared/components/brand-logo"
 import { countLabel } from "@/src/modules/finance/shared/lib/count-label"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
+import { proposalReviewHint } from "@/src/modules/finance/product-proposals/lib/proposal-approval"
 import { PROPOSAL_STATUS_BADGE_LABEL } from "@/src/modules/finance/product-proposals/lib/proposal-status"
-import { proposalApprovalReadiness } from "@/src/modules/finance/product-proposals/lib/proposal-review"
 import {
   proposalEvidenceRows,
   proposalKindLabel,
@@ -18,16 +18,19 @@ import type {
 } from "@/src/modules/finance/shared/types/entities"
 import { Badge } from "@/src/shared/components/ui/badge"
 import { Button } from "@/src/shared/components/ui/button"
+import { buttonVariants } from "@/src/shared/components/ui/button"
+import { LinkPendingOverlay } from "@/src/shared/components/shell/navigation-pending"
 import { Spinner } from "@/src/shared/components/ui/spinner"
+import { cn } from "@/src/shared/lib/utils"
 import {
-  CheckIcon,
+  ArrowRightIcon,
   HashIcon,
   MailIcon,
-  PencilIcon,
   ShieldCheckIcon,
   WalletIcon,
   XIcon,
 } from "lucide-react"
+import Link from "next/link"
 
 const STATUS_BADGE_VARIANT: Record<
   EmailProductProposalStatus,
@@ -39,34 +42,39 @@ const STATUS_BADGE_VARIANT: Record<
   DISCARDED: "outline",
 }
 
-type ProposalCardProps = {
+type ProposalCardBaseProps = {
   proposal: EmailProductProposal
   accounts: readonly FinanceAccount[]
   display: FinanceMoneyDisplay
   locale: string
-  approving: boolean
   discarding: boolean
-  onApprove: () => void
-  onEdit: () => void
   onDiscard: () => void
 }
 
+type ProposalCardProps = ProposalCardBaseProps &
+  (
+    | {
+        /** Paso a paso de aprobación con los formularios nativos. */
+        reviewHref: string
+        onReview?: never
+      }
+    | { reviewHref?: never; onReview: () => void }
+  )
+
 /**
- * Una propuesta detectada en el correo con su evidencia y sus acciones. No es
- * una entidad del catálogo: es un borrador que espera la aprobación explícita.
+ * Una propuesta detectada en el correo con su evidencia. No es una entidad del
+ * catálogo: es un borrador que se revisa y aprueba en un paso a paso.
  */
 export function ProposalCard({
   proposal,
   accounts,
   display,
   locale,
-  approving,
   discarding,
-  onApprove,
-  onEdit,
+  reviewHref,
+  onReview,
   onDiscard,
 }: ProposalCardProps) {
-  const readiness = proposalApprovalReadiness(proposal)
   const evidence = proposalEvidenceRows({
     evidence: proposal.evidence,
     locale,
@@ -74,7 +82,7 @@ export function ProposalCard({
   const hiddenEvidence = proposal.evidence.length - evidence.length
   const account = accounts.find((item) => item.id === proposal.draft.accountId)
   const pending = proposal.status === "PENDING"
-  const busy = approving || discarding
+  const hint = pending ? proposalReviewHint(proposal) : null
   const institutionName = proposal.draft.institution.name.trim()
 
   return (
@@ -157,43 +165,35 @@ export function ProposalCard({
         ) : null}
       </div>
 
-      {pending && !readiness.ready ? (
-        <p className="text-xs text-muted-foreground">
-          {readiness.reason}. Edita la propuesta para completarlo.
-        </p>
-      ) : null}
+      {hint ? <p className="text-xs text-muted-foreground">{hint}</p> : null}
 
       {pending ? (
         <div className="flex items-center gap-2">
-          <Button
-            type="button"
-            className="flex-1"
-            disabled={!readiness.ready || busy}
-            onClick={onApprove}
-          >
-            {approving ? (
-              <Spinner className="size-4" />
-            ) : (
-              <CheckIcon className="size-4 shrink-0" aria-hidden />
-            )}
-            Aprobar
-          </Button>
-          <Button
-            type="button"
-            size="icon"
-            variant="outline"
-            aria-label="Editar propuesta"
-            disabled={busy}
-            onClick={onEdit}
-          >
-            <PencilIcon className="size-4 shrink-0" aria-hidden />
-          </Button>
+          {reviewHref ? (
+            <Link
+              href={reviewHref}
+              className={cn(buttonVariants({ className: "relative flex-1" }))}
+            >
+              <ArrowRightIcon className="size-4 shrink-0" aria-hidden />
+              Revisar y aprobar
+              <LinkPendingOverlay />
+            </Link>
+          ) : (
+            <Button
+              type="button"
+              className="flex-1"
+              onClick={() => onReview?.()}
+            >
+              <ArrowRightIcon className="size-4 shrink-0" aria-hidden />
+              Revisar y aprobar
+            </Button>
+          )}
           <Button
             type="button"
             size="icon"
             variant="outline"
             aria-label="Descartar propuesta"
-            disabled={busy}
+            disabled={discarding}
             onClick={onDiscard}
           >
             {discarding ? (

@@ -47,8 +47,6 @@ export const API_ENDPOINTS = {
     EMAIL_PRODUCT_PROPOSALS: "/intelligence/email/product-proposals",
     EMAIL_PRODUCT_PROPOSAL_DISCOVER:
       "/intelligence/email/product-proposals/discover",
-    EMAIL_PRODUCT_PROPOSAL: (proposalId: string) =>
-      `/intelligence/email/product-proposals/${encodeURIComponent(proposalId)}`,
     EMAIL_PRODUCT_PROPOSAL_APPROVE: (proposalId: string) =>
       `/intelligence/email/product-proposals/${encodeURIComponent(proposalId)}/approve`,
     EMAIL_PRODUCT_PROPOSAL_DISCARD: (proposalId: string) =>

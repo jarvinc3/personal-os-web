@@ -352,6 +352,8 @@ export const galleryAccountProposal: EmailProductProposal = {
   productType: "ACCOUNT",
   status: "PENDING",
   approvedProductId: null,
+  matchedProductId: null,
+  matchedProductIds: [],
   createdAt: CREATED_AT,
   evidence: [
     {
@@ -385,6 +387,8 @@ export const galleryAccountProposal: EmailProductProposal = {
       type: "bank",
       domain: galleryInstitution.domain ?? null,
       country: "DO",
+      matchedInstitutionId: null,
+      matchedInstitutionIds: [],
     },
     accountNumberProvided: false,
   },
@@ -395,6 +399,8 @@ export const galleryCardProposal: EmailProductProposal = {
   productType: "CARD",
   status: "PENDING",
   approvedProductId: null,
+  matchedProductId: null,
+  matchedProductIds: [],
   createdAt: CREATED_AT,
   evidence: [
     {
@@ -420,6 +426,8 @@ export const galleryCardProposal: EmailProductProposal = {
       type: "bank",
       domain: galleryInstitution.domain ?? null,
       country: "DO",
+      matchedInstitutionId: null,
+      matchedInstitutionIds: [],
     },
     accountNumberProvided: false,
   },

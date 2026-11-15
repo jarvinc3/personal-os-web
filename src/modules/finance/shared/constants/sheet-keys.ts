@@ -38,7 +38,6 @@ export const FINANCE_SHEET_KEYS = {
   subscriptionAlerts: "subscription-alerts-sheet",
   subscriptionDetected: "subscription-detected-sheet",
   subscriptionFilters: "subscription-filters-sheet",
-  proposalEdit: "product-proposal-sheet",
   proposalFilters: "product-proposal-filters-sheet",
   changeBaseCurrency: "change-base-currency-sheet",
   addCurrency: "add-currency-sheet",

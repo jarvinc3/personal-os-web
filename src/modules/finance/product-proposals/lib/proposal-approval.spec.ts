@@ -1,0 +1,427 @@
+import assert from "node:assert/strict"
+import { describe, it } from "node:test"
+
+import {
+  accountApprovalPrefill,
+  cardApprovalPrefill,
+  chooseApprovalInstitution,
+  failApproval,
+  initialApprovalState,
+  institutionApprovalPrefill,
+  matchedApprovalProduct,
+  proposalInstitutionType,
+  proposalReviewHint,
+  resolveApprovalInstitution,
+  retryProductId,
+  sortProposalsForReview,
+  startApproval,
+} from "./proposal-approval.ts"
+import type {
+  EmailProductProposal,
+  FinanceAccount,
+  FinanceCard,
+  FinanceInstitution,
+} from "@/src/modules/finance/shared/types/entities.ts"
+
+function institutionOf(
+  overrides: Partial<FinanceInstitution> = {}
+): FinanceInstitution {
+  return {
+    id: "institution-bhd",
+    name: "BHD",
+    type: "bank",
+    color: null,
+    logoUrl: null,
+    country: "DO",
+    isActive: true,
+    ...overrides,
+  }
+}
+
+function proposalOf(
+  overrides: Partial<EmailProductProposal> = {}
+): EmailProductProposal {
+  return {
+    id: "proposal-1",
+    productType: "ACCOUNT",
+    status: "PENDING",
+    approvedProductId: null,
+    createdAt: "2026-10-01T12:00:00.000Z",
+    evidence: [],
+    matchedProductId: null,
+    matchedProductIds: [],
+    draft: {
+      productType: "ACCOUNT",
+      name: "Ahorros BHD",
+      lastFour: "0016",
+      currency: "DOP",
+      accountType: "SAVINGS",
+      cardType: null,
+      network: null,
+      accountId: null,
+      accountNumberProvided: false,
+      institution: {
+        name: "BHD",
+        type: "bank",
+        domain: "bhd.com.do",
+        country: "DO",
+        matchedInstitutionId: "institution-bhd",
+        matchedInstitutionIds: ["institution-bhd"],
+      },
+    },
+    ...overrides,
+  }
+}
+
+function cardProposal(
+  draft: Partial<EmailProductProposal["draft"]> = {},
+  overrides: Partial<EmailProductProposal> = {}
+): EmailProductProposal {
+  return proposalOf({
+    ...overrides,
+    productType: "CARD",
+    draft: {
+      ...proposalOf().draft,
+      productType: "CARD",
+      accountType: null,
+      cardType: "DEBIT",
+      lastFour: "6506",
+      network: "VISA",
+      institution: {
+        ...proposalOf().draft.institution,
+        matchedInstitutionId: null,
+        matchedInstitutionIds: [],
+      },
+      ...draft,
+    },
+  })
+}
+
+describe("proposalInstitutionType", () => {
+  it("keeps a type the contract lists", () => {
+    assert.equal(proposalInstitutionType("credit_union"), "credit_union")
+  })
+
+  it("edits an unknown type as other", () => {
+    assert.equal(proposalInstitutionType("cooperative"), "other")
+  })
+})
+
+describe("institutionApprovalPrefill", () => {
+  it("prefills the native institution form from the draft", () => {
+    assert.deepEqual(institutionApprovalPrefill(proposalOf()), {
+      name: "BHD",
+      type: "bank",
+      country: "DO",
+      domain: "bhd.com.do",
+    })
+  })
+
+  it("normalizes the country and an unknown type", () => {
+    const proposal = proposalOf({
+      draft: {
+        ...proposalOf().draft,
+        institution: {
+          ...proposalOf().draft.institution,
+          type: "cooperative",
+          country: "do",
+          domain: null,
+        },
+      },
+    })
+    assert.deepEqual(institutionApprovalPrefill(proposal), {
+      name: "BHD",
+      type: "other",
+      country: "DO",
+      domain: "",
+    })
+  })
+})
+
+describe("accountApprovalPrefill", () => {
+  it("prefills name, type, currency and the four digits", () => {
+    assert.deepEqual(accountApprovalPrefill(proposalOf()), {
+      name: "Ahorros BHD",
+      type: "SAVINGS",
+      currency: "DOP",
+      lastFour: "0016",
+    })
+  })
+
+  it("leaves the type for the user when the email did not say it", () => {
+    assert.equal(
+      accountApprovalPrefill(
+        proposalOf({
+          draft: { ...proposalOf().draft, accountType: null },
+        })
+      ).type,
+      undefined
+    )
+  })
+})
+
+describe("cardApprovalPrefill", () => {
+  it("prefills the card with its type, four digits and network", () => {
+    assert.deepEqual(cardApprovalPrefill(cardProposal()), {
+      name: "Ahorros BHD",
+      type: "DEBIT",
+      lastFour: "6506",
+      network: "VISA",
+      accountId: undefined,
+    })
+  })
+
+  it("leaves the type and the network to the native form when missing", () => {
+    const prefill = cardApprovalPrefill(
+      cardProposal({ cardType: null, network: null })
+    )
+    assert.equal(prefill.type, undefined)
+    assert.equal(prefill.network, undefined)
+  })
+})
+
+describe("resolveApprovalInstitution", () => {
+  it("returns the compatible institution the user has", () => {
+    const known = institutionOf()
+    assert.equal(
+      resolveApprovalInstitution({
+        proposal: proposalOf(),
+        institutions: [known],
+      }),
+      known
+    )
+  })
+
+  it("rebuilds a compatible institution the active list does not include", () => {
+    assert.deepEqual(
+      resolveApprovalInstitution({
+        proposal: proposalOf(),
+        institutions: [],
+      }),
+      {
+        id: "institution-bhd",
+        name: "BHD",
+        type: "bank",
+        shortName: null,
+        domain: "bhd.com.do",
+        color: null,
+        logoUrl: null,
+        country: "DO",
+        isActive: false,
+        isSystem: false,
+      }
+    )
+  })
+
+  it("returns null when the proposal has no compatible institution", () => {
+    assert.equal(
+      resolveApprovalInstitution({
+        proposal: cardProposal(),
+        institutions: [institutionOf()],
+      }),
+      null
+    )
+  })
+})
+
+describe("sortProposalsForReview", () => {
+  it("puts accounts before cards and keeps the rest of the order", () => {
+    const cardA = cardProposal({}, { id: "card-a" })
+    const accountA = proposalOf({ id: "account-a" })
+    const cardB = cardProposal({}, { id: "card-b" })
+    const accountB = proposalOf({ id: "account-b" })
+
+    assert.deepEqual(
+      sortProposalsForReview([cardA, accountA, cardB, accountB]).map(
+        (proposal) => proposal.id
+      ),
+      ["account-a", "account-b", "card-a", "card-b"]
+    )
+  })
+})
+
+describe("proposalReviewHint", () => {
+  it("asks for the type when the email did not say it", () => {
+    assert.equal(
+      proposalReviewHint(
+        proposalOf({
+          draft: { ...proposalOf().draft, accountType: null },
+        })
+      ),
+      "Falta elegir el tipo."
+    )
+    assert.equal(
+      proposalReviewHint(cardProposal({ cardType: null })),
+      "Falta elegir el tipo."
+    )
+  })
+
+  it("asks for a debit card account first", () => {
+    assert.equal(
+      proposalReviewHint(cardProposal({ accountId: null })),
+      "Necesita una cuenta; apruébala primero."
+    )
+  })
+
+  it("stays silent when everything needed is there", () => {
+    assert.equal(proposalReviewHint(proposalOf()), null)
+    assert.equal(
+      proposalReviewHint(cardProposal({ accountId: "account-1" })),
+      null
+    )
+    assert.equal(proposalReviewHint(cardProposal({ cardType: "CREDIT" })), null)
+  })
+})
+
+function accountOf(overrides: Partial<FinanceAccount> = {}): FinanceAccount {
+  return {
+    id: "account-1",
+    institutionId: "institution-bhd",
+    institutionName: "BHD",
+    institutionLogoUrl: null,
+    name: "Ahorros",
+    type: "SAVINGS",
+    currency: "DOP",
+    accountNumberLast4: "0016",
+    balance: "0",
+    earmarkedAmount: "0",
+    freeBalance: "0",
+    color: null,
+    isActive: true,
+    createdAt: "",
+    updatedAt: "",
+    ...overrides,
+  }
+}
+
+function cardOf(overrides: Partial<FinanceCard> = {}): FinanceCard {
+  return {
+    id: "card-1",
+    institutionId: "institution-bhd",
+    institutionName: "BHD",
+    accountId: null,
+    accountName: null,
+    name: "Visa",
+    type: "CREDIT",
+    network: "VISA",
+    lastFour: "6506",
+    statementClosingDay: null,
+    paymentDueDay: null,
+    nextStatementDate: null,
+    nextPaymentDueDate: null,
+    color: null,
+    isActive: true,
+    balances: [],
+    ...overrides,
+  }
+}
+
+describe("initialApprovalState", () => {
+  it("opens the product step when the institution is resolved", () => {
+    const state = initialApprovalState({
+      proposal: proposalOf(),
+      institutions: [institutionOf()],
+    })
+    assert.equal(state.step, "product")
+    assert.equal(state.institution?.id, "institution-bhd")
+    assert.equal(state.createdProductId, null)
+    assert.equal(state.approvalError, null)
+  })
+
+  it("skips the step when the match is not in the active list", () => {
+    const state = initialApprovalState({
+      proposal: proposalOf(),
+      institutions: [],
+    })
+    assert.equal(state.step, "product")
+    assert.equal(state.institution?.id, "institution-bhd")
+  })
+
+  it("starts with the institution when there is no match", () => {
+    const state = initialApprovalState({
+      proposal: cardProposal(),
+      institutions: [institutionOf()],
+    })
+    assert.equal(state.step, "institution")
+    assert.equal(state.institution, null)
+  })
+})
+
+describe("approval flow transitions", () => {
+  function stateOf() {
+    return initialApprovalState({
+      proposal: proposalOf(),
+      institutions: [institutionOf()],
+    })
+  }
+
+  it("changing the institution keeps the rest of the flow", () => {
+    const before = startApproval(stateOf(), "account-1")
+    const after = chooseApprovalInstitution(
+      before,
+      institutionOf({ id: "institution-other", name: "Otro" })
+    )
+    assert.equal(after.step, "product")
+    assert.equal(after.institution?.id, "institution-other")
+    assert.equal(after.createdProductId, "account-1")
+  })
+
+  it("retries the same product after a failed approval", () => {
+    const started = startApproval(stateOf(), "account-1")
+    const failed = failApproval(started, "Producto no encontrado")
+    assert.equal(failed.createdProductId, "account-1")
+    assert.equal(retryProductId(failed), "account-1")
+    assert.equal(retryProductId(started), null)
+  })
+})
+
+describe("matchedApprovalProduct", () => {
+  it("returns the matching account of the chosen institution", () => {
+    const proposal = proposalOf({ matchedProductId: "account-1" })
+    const matched = matchedApprovalProduct({
+      proposal,
+      institutionId: "institution-bhd",
+      accounts: [accountOf()],
+      cards: [],
+    })
+    assert.equal(matched?.id, "account-1")
+    assert.equal(matched?.account?.id, "account-1")
+  })
+
+  it("does not offer the product under another compatible institution", () => {
+    const proposal = proposalOf({ matchedProductId: "account-1" })
+    assert.equal(
+      matchedApprovalProduct({
+        proposal,
+        institutionId: "institution-other",
+        accounts: [accountOf()],
+        cards: [],
+      }),
+      null
+    )
+  })
+
+  it("does not offer a product that is not in the loaded lists", () => {
+    const proposal = proposalOf({ matchedProductId: "account-1" })
+    assert.equal(
+      matchedApprovalProduct({
+        proposal,
+        institutionId: "institution-bhd",
+        accounts: [],
+        cards: [],
+      }),
+      null
+    )
+  })
+
+  it("returns the matching card of the chosen institution", () => {
+    const proposal = cardProposal({ accountId: "account-1" })
+    const matched = matchedApprovalProduct({
+      proposal: { ...proposal, matchedProductId: "card-1" },
+      institutionId: "institution-bhd",
+      accounts: [],
+      cards: [cardOf()],
+    })
+    assert.equal(matched?.card?.id, "card-1")
+  })
+})

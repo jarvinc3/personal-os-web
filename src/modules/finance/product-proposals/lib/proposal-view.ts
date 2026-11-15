@@ -25,12 +25,12 @@ export function proposalKindLabel(
 export function proposalTypeLabel(proposal: EmailProductProposal): string {
   if (proposal.productType === "ACCOUNT") {
     if (!proposal.draft.accountType) {
-      return "Sin tipo"
+      return "Falta elegir el tipo"
     }
     return FINANCE_ACCOUNT_TYPE_LABEL[proposal.draft.accountType]
   }
   if (!proposal.draft.cardType) {
-    return "Sin tipo"
+    return "Falta elegir el tipo"
   }
   return FINANCE_CARD_TYPE_LABEL[proposal.draft.cardType]
 }

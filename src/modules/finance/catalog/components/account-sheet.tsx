@@ -47,33 +47,42 @@ import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
 import { usePicker } from "@/src/shared/hooks/use-picker"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { HashIcon, LandmarkIcon, Palette, SaveIcon, Star } from "lucide-react"
-import { useEffect, useMemo } from "react"
+import { useEffect, useMemo, useRef } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import {
   accountSchemaFor,
   type AccountFormValues,
 } from "@/src/modules/finance/catalog/lib/account-form"
+import { resolveAccountFormReset } from "@/src/modules/finance/catalog/lib/account-form-session"
 
 const TYPE_OPTIONS = FINANCE_ACCOUNT_TYPES.map((value) => ({
   value,
   label: FINANCE_ACCOUNT_TYPE_LABEL[value],
 }))
 
+type AccountSheetPrefill = {
+  name?: string
+  type?: AccountFormValues["type"]
+  currency?: string
+  lastFour?: string
+}
+
 function toFormValues(
   account: FinanceAccount | null,
   defaultCurrency: string,
   defaultInstitutionId: string,
-  defaultType: AccountFormValues["type"] = "CHECKING"
+  defaultType: AccountFormValues["type"] = "CHECKING",
+  prefill: AccountSheetPrefill = {}
 ): AccountFormValues {
-  const type = account?.type ?? defaultType
+  const type = account?.type ?? prefill.type ?? defaultType
   return {
-    name: account?.name ?? "",
+    name: account?.name ?? prefill.name ?? "",
     type,
-    currency: account?.currency ?? defaultCurrency,
+    currency: account?.currency ?? prefill.currency ?? defaultCurrency,
     institutionId:
       account?.institutionId ??
       (type === "CASH" ? CATALOG_NONE : defaultInstitutionId),
-    accountNumber: "",
+    accountNumber: account ? "" : (prefill.lastFour ?? ""),
     color: account?.color ?? "",
     initialBalance: "",
     isDefaultForInstitution: account?.isDefaultForInstitution ?? false,
@@ -93,6 +102,16 @@ type AccountSheetProps = {
   /** Cash summary, so a new currency offers the default "Efectivo <moneda>" name. */
   cash?: FinanceCashSummary
   pending?: boolean
+  /** Valores del correo para el alta desde una propuesta. */
+  prefill?: AccountSheetPrefill
+  /** Basta con los últimos 4 dígitos: no se exige el número completo. */
+  lastFourOnly?: boolean
+  /** Alta desde una propuesta: entrega la cuenta creada, sin cerrar la hoja. */
+  onCreated?: (account: FinanceAccount) => void
+  /** Institución elegida fuera de la hoja; se sincroniza sin perder el resto. */
+  selectedInstitutionId?: string
+  /** Una propuesta nunca crea la cuenta de Efectivo. */
+  excludeCash?: boolean
 }
 
 export function AccountSheet({
@@ -106,6 +125,11 @@ export function AccountSheet({
   lockType = false,
   cash,
   pending = false,
+  prefill = {},
+  lastFourOnly = false,
+  onCreated,
+  selectedInstitutionId,
+  excludeCash = false,
 }: AccountSheetProps) {
   const isEdit = Boolean(account)
   const createMutation = useCreateAccount()
@@ -124,6 +148,38 @@ export function AccountSheet({
     () => zodResolver(accountSchemaFor({ isEdit })),
     [isEdit]
   )
+  const typeOptions = excludeCash
+    ? TYPE_OPTIONS.filter((option) => option.value !== "CASH")
+    : TYPE_OPTIONS
+  const prefillName = prefill.name
+  const prefillType = prefill.type
+  const prefillCurrency = prefill.currency
+  const prefillLastFour = prefill.lastFour
+  const initialValues = useMemo(
+    () =>
+      toFormValues(
+        account,
+        defaultCurrency,
+        resolvedDefaultInstitutionId,
+        defaultType,
+        {
+          name: prefillName,
+          type: prefillType,
+          currency: prefillCurrency,
+          lastFour: prefillLastFour,
+        }
+      ),
+    [
+      account,
+      defaultCurrency,
+      resolvedDefaultInstitutionId,
+      defaultType,
+      prefillName,
+      prefillType,
+      prefillCurrency,
+      prefillLastFour,
+    ]
+  )
 
   const {
     control,
@@ -135,12 +191,7 @@ export function AccountSheet({
     formState: { errors, isDirty },
   } = useForm<AccountFormValues>({
     resolver: accountResolver,
-    defaultValues: toFormValues(
-      account,
-      defaultCurrency,
-      resolvedDefaultInstitutionId,
-      defaultType
-    ),
+    defaultValues: initialValues,
   })
 
   const { requestOpenChange, discardChangesDialog } = useDiscardChanges({
@@ -200,25 +251,39 @@ export function AccountSheet({
     }
   }
 
+  const accountId = account?.id ?? null
+  const appliedFormSession = useRef<string | null>(null)
+  // Reinicia solo al abrir la hoja o al cambiar de cuenta: cambiar de
+  // institución conserva lo escrito y solo sincroniza `institutionId`.
   useEffect(() => {
-    if (open) {
-      reset(
-        toFormValues(
-          account,
-          defaultCurrency,
-          resolvedDefaultInstitutionId,
-          defaultType
-        )
-      )
+    const resetPlan = resolveAccountFormReset({
+      session: { open, accountId },
+      appliedSession: appliedFormSession.current,
+      initialValues,
+    })
+    appliedFormSession.current = resetPlan.appliedSession
+    if (!resetPlan.values) {
+      return
     }
-  }, [
-    open,
-    account,
-    defaultCurrency,
-    resolvedDefaultInstitutionId,
-    defaultType,
-    reset,
-  ])
+    reset(resetPlan.values)
+  }, [open, accountId, initialValues, reset])
+
+  const appliedInstitutionId = useRef(selectedInstitutionId)
+  useEffect(() => {
+    if (
+      !open ||
+      !selectedInstitutionId ||
+      appliedInstitutionId.current === selectedInstitutionId
+    ) {
+      return
+    }
+    appliedInstitutionId.current = selectedInstitutionId
+    if (selectedInstitutionId !== institutionId) {
+      setValue("institutionId", selectedInstitutionId, {
+        shouldValidate: true,
+      })
+    }
+  }, [open, selectedInstitutionId, institutionId, setValue])
 
   useEffect(() => {
     if (!open || !lockType || isEdit || accountType !== "CASH") {
@@ -259,7 +324,7 @@ export function AccountSheet({
         accountNumber:
           accountValues.type === "CASH" ? "" : accountValues.accountNumber,
       },
-      { isUpdate: isEdit }
+      { isUpdate: isEdit, lastFourOnly }
     )
     if (!payload.ok) {
       appToast.error({ text1: payload.error })
@@ -276,12 +341,27 @@ export function AccountSheet({
         const created = await createMutation.mutateAsync(payload.body)
         const parsedInitialBalance = parseFinanceMoney(initialBalance)
         if (parsedInitialBalance !== null && parsedInitialBalance > 0) {
-          await adjustBalance.mutateAsync({
-            accountId: created.id,
-            balance: parsedInitialBalance,
-          })
+          try {
+            await adjustBalance.mutateAsync({
+              accountId: created.id,
+              balance: parsedInitialBalance,
+            })
+          } catch (error) {
+            // La cuenta ya existe: en el paso a paso se aprueba ese id y el
+            // saldo se corrige después, sin repetir el alta.
+            if (onCreated) {
+              appToast.error({ text1: financeErrorMessage(error) })
+              onCreated(created)
+              return
+            }
+            throw error
+          }
         }
         appToast.success({ text1: "Cuenta creada" })
+        if (onCreated) {
+          onCreated(created)
+          return
+        }
       }
       onOpenChange(false)
     } catch (error) {
@@ -347,7 +427,7 @@ export function AccountSheet({
                   label="Tipo"
                   value={field.value}
                   onChange={changeType}
-                  options={TYPE_OPTIONS}
+                  options={typeOptions}
                 />
               )}
             />
@@ -387,6 +467,11 @@ export function AccountSheet({
                       isEdit && account?.accountNumberLast4
                         ? `Deja vacío para conservar •••• ${account.accountNumberLast4}`
                         : "0123456789"
+                    }
+                    description={
+                      lastFourOnly && !isEdit
+                        ? "Basta con los últimos 4 dígitos; el número completo es opcional."
+                        : undefined
                     }
                   />
                 )}

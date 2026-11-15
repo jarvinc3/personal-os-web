@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod"
 import { RefreshCwIcon, SaveIcon, WalletIcon } from "lucide-react"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form"
 
 import { CardBalancesSection } from "@/src/modules/finance/cards/components/card-balances-section"
@@ -25,6 +25,7 @@ import {
 import {
   emptyBalanceRow,
   toCardFormValues,
+  type CardFormPrefill,
 } from "@/src/modules/finance/cards/lib/card-form-values"
 import { FinanceFormScreen } from "@/src/modules/finance/shared/components/forms/form-screen"
 import { SegmentedControl } from "@/src/shared/components/forms/segmented-control"
@@ -77,8 +78,14 @@ type CardFormScreenProps = {
   accounts: FinanceAccount[]
   defaultCurrency: string
   defaultInstitutionId?: string
+  /** Valores del correo para el alta desde una propuesta. */
+  prefill?: CardFormPrefill
   display: FinanceMoneyDisplay
   onDone: () => void
+  /** Alta desde una propuesta: entrega la tarjeta creada. */
+  onCreated?: (card: FinanceCard) => void
+  /** Institución elegida fuera del formulario; se sincroniza sin reiniciarlo. */
+  selectedInstitutionId?: string
   onUpdateBalance?: (card: FinanceCard) => void
 }
 
@@ -88,9 +95,12 @@ export function CardFormScreen({
   accounts,
   defaultCurrency,
   defaultInstitutionId,
+  prefill = {},
   display,
   onDone,
+  onCreated,
   onUpdateBalance,
+  selectedInstitutionId: chosenInstitutionId,
 }: CardFormScreenProps) {
   const isEdit = Boolean(card)
   const createMutation = useCreateCard()
@@ -117,6 +127,7 @@ export function CardFormScreen({
       card,
       defaultCurrency,
       defaultInstitutionId: resolvedDefaultInstitutionId,
+      prefill,
     }),
   })
 
@@ -127,7 +138,7 @@ export function CardFormScreen({
   } = useFieldArray({ control, name: "balances" })
 
   const cardType = useWatch({ control, name: "type" })
-  const selectedInstitutionId = useWatch({ control, name: "institutionId" })
+  const formInstitutionId = useWatch({ control, name: "institutionId" })
   const selectedAccountId = useWatch({ control, name: "accountId" })
   const watchedBalances = useWatch({ control, name: "balances" })
   const cardName = useWatch({ control, name: "name" })
@@ -135,10 +146,10 @@ export function CardFormScreen({
   const cardColor = useWatch({ control, name: "color" })
   const lastFour = useWatch({ control, name: "lastFour" })
   const selectedInstitution =
-    institutions.find((item) => item.id === selectedInstitutionId) ?? null
+    institutions.find((item) => item.id === formInstitutionId) ?? null
   const institutionAccounts = institutionAccountOptions(
     accounts,
-    selectedInstitutionId
+    formInstitutionId
   )
   const hasInstitutions = institutions.length > 0
   const { picker, openPicker, closeHandlerFor } =
@@ -163,12 +174,31 @@ export function CardFormScreen({
     }
     const accountIsOffered = institutionAccountOptions(
       accounts,
-      selectedInstitutionId
+      formInstitutionId
     ).some((account) => account.id === selectedAccountId)
     if (!accountIsOffered) {
       setValue("accountId", CATALOG_NONE)
     }
-  }, [accounts, selectedAccountId, selectedInstitutionId, setValue])
+  }, [accounts, selectedAccountId, formInstitutionId, setValue])
+
+  const appliedInstitutionId = useRef(chosenInstitutionId)
+  useEffect(() => {
+    if (
+      !chosenInstitutionId ||
+      appliedInstitutionId.current === chosenInstitutionId
+    ) {
+      return
+    }
+    appliedInstitutionId.current = chosenInstitutionId
+    if (chosenInstitutionId === formInstitutionId) {
+      return
+    }
+    setValue("institutionId", chosenInstitutionId, {
+      shouldValidate: true,
+      shouldDirty: true,
+    })
+    setValue("accountId", CATALOG_NONE, { shouldValidate: true })
+  }, [chosenInstitutionId, formInstitutionId, setValue])
 
   const previewBalance = watchedBalances?.[0]
   const previewCurrency = previewBalance?.currency ?? defaultCurrency
@@ -252,6 +282,10 @@ export function CardFormScreen({
           failedCurrencies,
         })
         appToast[message.kind]({ text1: message.text1, text2: message.text2 })
+        if (onCreated) {
+          onCreated(created)
+          return
+        }
       }
       onDone()
     } catch (error) {
@@ -362,7 +396,7 @@ export function CardFormScreen({
         institutions={institutions}
         institutionAccounts={institutionAccounts}
         display={display}
-        selectedInstitutionId={selectedInstitutionId}
+        selectedInstitutionId={formInstitutionId}
         defaultCurrency={defaultCurrency}
         currencyRowValue={
           currencyRowIndex !== null

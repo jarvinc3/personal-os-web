@@ -13,6 +13,8 @@ export type CreateAccountBody = {
   type: FinanceAccountType
   institutionId?: string
   accountNumber?: string
+  /** Solo los últimos 4, sin número completo (endpoints nativos). */
+  accountNumberLast4?: string
   currency?: string
   color?: string | null
   isDefaultForInstitution?: boolean
@@ -93,7 +95,7 @@ export function buildCreateAccountBody(
     color?: string
     isDefaultForInstitution?: boolean
   },
-  options?: { isUpdate?: boolean }
+  options?: { isUpdate?: boolean; lastFourOnly?: boolean }
 ): PayloadResult<CreateAccountBody> {
   const name = input.name.trim()
   if (!name) {
@@ -110,6 +112,7 @@ export function buildCreateAccountBody(
 
   const accountNumber = digitsOnly(input.accountNumber)
   const isUpdate = options?.isUpdate === true
+  const lastFourOnly = options?.lastFourOnly === true
   if (input.type === "CASH") {
     if (accountNumber) {
       return { ok: false, error: "El efectivo no usa número de cuenta" }
@@ -132,7 +135,9 @@ export function buildCreateAccountBody(
   if (institutionId) {
     body.institutionId = institutionId
   }
-  if (accountNumber) {
+  if (accountNumber.length === 4 && lastFourOnly && !isUpdate) {
+    body.accountNumberLast4 = accountNumber
+  } else if (accountNumber) {
     body.accountNumber = accountNumber
   }
 

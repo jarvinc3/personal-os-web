@@ -41,6 +41,18 @@ describe("accountSchema", () => {
     )
   })
 
+  it("accepts only the four digits as the number on create", () => {
+    assert.equal(
+      accountSchema.safeParse({
+        ...validCashAccount,
+        type: "CHECKING",
+        institutionId: "inst-1",
+        accountNumber: "0016",
+      }).success,
+      true
+    )
+  })
+
   it("accepts an edit that keeps the stored number", () => {
     assert.equal(
       editAccountSchema.safeParse({
