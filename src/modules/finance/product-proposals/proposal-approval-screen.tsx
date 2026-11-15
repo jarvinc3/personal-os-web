@@ -10,10 +10,14 @@ import { FinanceGate } from "@/src/modules/finance/finance-gate"
 import {
   accountApprovalPrefill,
   cardApprovalPrefill,
-  initialApprovalStep,
+  chooseApprovalInstitution,
+  failApproval,
+  initialApprovalState,
   institutionApprovalPrefill,
-  resolveApprovalInstitution,
-  type ProposalApprovalStep,
+  matchedApprovalProduct,
+  retryProductId,
+  startApproval,
+  type ProposalApprovalState,
 } from "@/src/modules/finance/product-proposals/lib/proposal-approval"
 import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
 import { useCards } from "@/src/modules/finance/shared/hooks/use-cards"
@@ -64,11 +68,6 @@ export function ProposalApprovalScreen({
   )
 }
 
-type ApprovalFlow = {
-  step: ProposalApprovalStep
-  institutionId: string | null
-}
-
 function ProposalApprovalScreenBody({
   proposalId,
 }: ProposalApprovalScreenProps) {
@@ -82,53 +81,33 @@ function ProposalApprovalScreenBody({
   const { picker, openPicker, closeHandlerFor } = usePicker<
     "none" | "institution"
   >("none")
-  const [flow, setFlow] = useState<ApprovalFlow | null>(null)
-  const [createdInstitution, setCreatedInstitution] =
-    useState<FinanceInstitution | null>(null)
-  const [createdProductId, setCreatedProductId] = useState<string | null>(null)
-  const [approvalError, setApprovalError] = useState<string | null>(null)
+  const [flow, setFlow] = useState<ProposalApprovalState | null>(null)
 
   const proposals = proposalsQuery.data ?? []
   const institutions = institutionsQuery.data ?? []
   const accounts = accountsQuery.data ?? []
   const cards = cardsQuery.data ?? []
   const proposal = proposals.find((item) => item.id === proposalId) ?? null
-  const compatibleInstitution = proposal
-    ? resolveApprovalInstitution({ proposal, institutions })
-    : null
-  const initialFlow = proposal
-    ? {
-        step: initialApprovalStep({ proposal, institutions }),
-        institutionId: compatibleInstitution?.id ?? null,
-      }
-    : null
-  const step = flow?.step ?? initialFlow?.step ?? "institution"
-  const institutionId =
-    flow?.institutionId ?? initialFlow?.institutionId ?? null
-  const institution =
-    institutions.find((item) => item.id === institutionId) ??
-    (createdInstitution?.id === institutionId ? createdInstitution : null) ??
-    (compatibleInstitution?.id === institutionId ? compatibleInstitution : null)
+  const resolvedFlow =
+    flow ?? (proposal ? initialApprovalState({ proposal, institutions }) : null)
+  const step = resolvedFlow?.step ?? "institution"
+  const institution = resolvedFlow?.institution ?? null
+  const createdProductId = resolvedFlow?.createdProductId ?? null
+  const approvalError = resolvedFlow?.approvalError ?? null
+  const retryId = resolvedFlow ? retryProductId(resolvedFlow) : null
   const formInstitutions =
     institution && !institutions.some((item) => item.id === institution.id)
       ? [institution, ...institutions]
       : institutions
+  const matchedProduct = proposal
+    ? matchedApprovalProduct({
+        proposal,
+        institutionId: institution?.id ?? null,
+        accounts,
+        cards,
+      })
+    : null
   const isAccount = proposal?.productType === "ACCOUNT"
-  const matchedProductId =
-    proposal?.matchedProductId &&
-    institutionId &&
-    proposal.draft.institution.matchedInstitutionIds.includes(institutionId)
-      ? proposal.matchedProductId
-      : null
-  const matchedAccount =
-    matchedProductId && isAccount
-      ? (accounts.find((account) => account.id === matchedProductId) ?? null)
-      : null
-  const matchedCard =
-    matchedProductId && !isAccount
-      ? (cards.find((card) => card.id === matchedProductId) ?? null)
-      : null
-  const canChangeInstitution = Boolean(institution)
   const display = {
     currency: config.baseCurrency,
     showCents: config.display.showCents,
@@ -149,9 +128,19 @@ function ProposalApprovalScreenBody({
     [backToList]
   )
 
+  function updateFlow(
+    update: (state: ProposalApprovalState) => ProposalApprovalState
+  ) {
+    setFlow((current) => {
+      const base =
+        current ??
+        (proposal ? initialApprovalState({ proposal, institutions }) : null)
+      return base ? update(base) : current
+    })
+  }
+
   function chooseInstitution(next: FinanceInstitution) {
-    setCreatedInstitution(next)
-    setFlow({ step: "product", institutionId: next.id })
+    updateFlow((current) => chooseApprovalInstitution(current, next))
   }
 
   function chooseInstitutionById(nextInstitutionId: string) {
@@ -164,14 +153,13 @@ function ProposalApprovalScreenBody({
   }
 
   async function approveProduct(productId: string) {
-    setCreatedProductId(productId)
-    setApprovalError(null)
+    updateFlow((current) => startApproval(current, productId))
     try {
       await approveMutation.mutateAsync({ proposalId, productId })
       appToast.success({ text1: "Producto aprobado" })
       backToList()
     } catch (error) {
-      setApprovalError(financeErrorMessage(error))
+      updateFlow((current) => failApproval(current, financeErrorMessage(error)))
     }
   }
 
@@ -216,7 +204,11 @@ function ProposalApprovalScreenBody({
         {approvalError ? (
           <ErrorState
             message={approvalError}
-            onRetry={() => void approveProduct(createdProductId)}
+            onRetry={() => {
+              if (retryId) {
+                void approveProduct(retryId)
+              }
+            }}
             isRetrying={approveMutation.isPending}
           />
         ) : null}
@@ -263,7 +255,7 @@ function ProposalApprovalScreenBody({
           open={picker === "institution"}
           onOpenChange={closeHandlerFor("institution")}
           institutions={formInstitutions}
-          value={institutionId ?? ""}
+          value={institution?.id ?? ""}
           onSelect={chooseInstitutionById}
         />
       </div>
@@ -276,30 +268,31 @@ function ProposalApprovalScreenBody({
         <p className="px-1 text-sm">
           <span className="font-medium">{institution.name}</span>
         </p>
-        {canChangeInstitution ? (
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full"
-            onClick={() => openPicker("institution")}
-          >
-            <LandmarkIcon className="size-4 shrink-0" aria-hidden />
-            Cambiar institución
-          </Button>
-        ) : null}
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full"
+          onClick={() => openPicker("institution")}
+        >
+          <LandmarkIcon className="size-4 shrink-0" aria-hidden />
+          Cambiar institución
+        </Button>
       </SummarySection>
 
-      {matchedProductId && (matchedAccount || matchedCard) ? (
+      {matchedProduct ? (
         <SummarySection
           title="Producto existente"
           icon={isAccount ? WalletIcon : CreditCardIcon}
         >
-          {matchedAccount ? (
-            <AccountProductRow account={matchedAccount} display={display} />
+          {matchedProduct.account ? (
+            <AccountProductRow
+              account={matchedProduct.account}
+              display={display}
+            />
           ) : null}
-          {matchedCard ? (
+          {matchedProduct.card ? (
             <CardProductRow
-              card={matchedCard}
+              card={matchedProduct.card}
               accounts={accounts}
               display={display}
             />
@@ -312,7 +305,7 @@ function ProposalApprovalScreenBody({
             type="button"
             className="w-full"
             disabled={approveMutation.isPending}
-            onClick={() => void approveProduct(matchedProductId)}
+            onClick={() => void approveProduct(matchedProduct.id)}
           >
             <Link2Icon className="size-4 shrink-0" aria-hidden />
             Vincular a producto existente
@@ -320,7 +313,6 @@ function ProposalApprovalScreenBody({
         </SummarySection>
       ) : isAccount ? (
         <AccountSheet
-          key={institution.id}
           open
           onOpenChange={(open) => {
             if (!open) {
@@ -329,18 +321,20 @@ function ProposalApprovalScreenBody({
           }}
           account={null}
           institutions={formInstitutions}
+          selectedInstitutionId={institution.id}
           defaultCurrency={proposal.draft.currency || config.baseCurrency}
           defaultInstitutionId={institution.id}
           prefill={accountApprovalPrefill(proposal)}
           lastFourOnly
+          excludeCash
           onCreated={(account) => void approveProduct(account.id)}
         />
       ) : (
         <CardFormScreen
-          key={institution.id}
           card={null}
           institutions={formInstitutions}
           accounts={accounts}
+          selectedInstitutionId={institution.id}
           defaultCurrency={proposal.draft.currency || config.baseCurrency}
           defaultInstitutionId={institution.id}
           prefill={cardApprovalPrefill(proposal)}
@@ -354,7 +348,7 @@ function ProposalApprovalScreenBody({
         open={picker === "institution"}
         onOpenChange={closeHandlerFor("institution")}
         institutions={formInstitutions}
-        value={institutionId ?? ""}
+        value={institution.id}
         onSelect={chooseInstitutionById}
       />
     </div>

@@ -6,6 +6,8 @@ import {
   EMAIL_PRODUCT_PROPOSAL_INSTITUTION_TYPES,
   type EmailProductProposal,
   type EmailProductProposalInstitutionType,
+  type FinanceAccount,
+  type FinanceCard,
   type FinanceInstitution,
 } from "@/src/modules/finance/shared/types/entities"
 
@@ -116,19 +118,6 @@ export function resolveApprovalInstitution({
   }
 }
 
-/** Con la institución resuelta no hay primer paso: se abre el producto. */
-export function initialApprovalStep({
-  proposal,
-  institutions,
-}: {
-  proposal: EmailProductProposal
-  institutions: readonly FinanceInstitution[]
-}): ProposalApprovalStep {
-  return resolveApprovalInstitution({ proposal, institutions })
-    ? "product"
-    : "institution"
-}
-
 /** Las cuentas primero: una tarjeta de débito necesita una cuenta. */
 export function sortProposalsForReview(
   proposals: readonly EmailProductProposal[]
@@ -158,4 +147,90 @@ export function proposalReviewHint(
     return "Falta elegir el tipo."
   }
   return null
+}
+
+export type ProposalApprovalState = {
+  step: ProposalApprovalStep
+  institution: FinanceInstitution | null
+  createdProductId: string | null
+  approvalError: string | null
+}
+
+export function initialApprovalState({
+  proposal,
+  institutions,
+}: {
+  proposal: EmailProductProposal
+  institutions: readonly FinanceInstitution[]
+}): ProposalApprovalState {
+  const institution = resolveApprovalInstitution({ proposal, institutions })
+  return {
+    step: institution ? "product" : "institution",
+    institution,
+    createdProductId: null,
+    approvalError: null,
+  }
+}
+
+/** Cambiar de institución conserva lo ya escrito en los formularios nativos. */
+export function chooseApprovalInstitution(
+  state: ProposalApprovalState,
+  institution: FinanceInstitution
+): ProposalApprovalState {
+  return { ...state, step: "product", institution, approvalError: null }
+}
+
+export function startApproval(
+  state: ProposalApprovalState,
+  productId: string
+): ProposalApprovalState {
+  return { ...state, createdProductId: productId, approvalError: null }
+}
+
+export function failApproval(
+  state: ProposalApprovalState,
+  message: string
+): ProposalApprovalState {
+  return { ...state, approvalError: message }
+}
+
+/** Reintentar aprueba el mismo producto: nunca se crea otro. */
+export function retryProductId(state: ProposalApprovalState): string | null {
+  return state.approvalError ? state.createdProductId : null
+}
+
+/**
+ * Producto existente que se puede vincular: tiene que ser el del tipo de la
+ * propuesta y pertenecer a la institución elegida, aunque haya varias
+ * compatibles.
+ */
+export function matchedApprovalProduct({
+  proposal,
+  institutionId,
+  accounts,
+  cards,
+}: {
+  proposal: EmailProductProposal
+  institutionId: string | null
+  accounts: readonly FinanceAccount[]
+  cards: readonly FinanceCard[]
+}): {
+  id: string
+  account: FinanceAccount | null
+  card: FinanceCard | null
+} | null {
+  const matchedId = proposal.matchedProductId
+  if (!matchedId || !institutionId) {
+    return null
+  }
+  if (proposal.productType === "ACCOUNT") {
+    const account = accounts.find((item) => item.id === matchedId) ?? null
+    return account && account.institutionId === institutionId
+      ? { id: account.id, account, card: null }
+      : null
+  }
+  const card = cards.find((item) => item.id === matchedId) ?? null
+  return card && card.institutionId === institutionId
+    ? { id: card.id, account: null, card }
+    : null
 }

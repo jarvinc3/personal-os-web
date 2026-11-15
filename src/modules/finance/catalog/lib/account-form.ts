@@ -12,11 +12,7 @@ const ACCOUNT_NUMBER_DIGITS = "Número de cuenta: 4 a 34 dígitos"
  * On edit the number is optional: empty keeps the stored one, because the API
  * never returns the full number (only `accountNumberLast4`).
  */
-export function accountSchemaFor(options: {
-  isEdit: boolean
-  /** El paso a paso de propuestas admite solo los últimos 4 dígitos. */
-  allowLastFourOnly?: boolean
-}) {
+export function accountSchemaFor(options: { isEdit: boolean }) {
   return z
     .object({
       name: z.string().trim().min(1, "Nombre obligatorio").max(120),
@@ -44,7 +40,7 @@ export function accountSchemaFor(options: {
       }
       const digits = values.accountNumber.replace(/\D/g, "")
       if (digits.length === 0) {
-        if (!options.isEdit && !options.allowLastFourOnly) {
+        if (!options.isEdit) {
           ctx.addIssue({
             code: "custom",
             path: ["accountNumber"],

@@ -118,7 +118,7 @@ export function buildCreateAccountBody(
       return { ok: false, error: "El efectivo no usa número de cuenta" }
     }
   } else if (accountNumber.length === 0) {
-    if (!isUpdate && !lastFourOnly) {
+    if (!isUpdate) {
       return {
         ok: false,
         error: "Número de cuenta obligatorio (4 a 34 dígitos)",

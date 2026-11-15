@@ -39,6 +39,59 @@ describe("buildCreateAccountBody", () => {
     })
   })
 
+  it("sends the last four alone in the proposal mode", () => {
+    const result = buildCreateAccountBody(
+      {
+        name: "Ahorros",
+        type: "SAVINGS",
+        institutionId: "inst-1",
+        accountNumber: "0016",
+      },
+      { lastFourOnly: true }
+    )
+    assert.equal(result.ok, true)
+    if (!result.ok) {
+      return
+    }
+    assert.deepEqual(result.body, {
+      name: "Ahorros",
+      type: "SAVINGS",
+      institutionId: "inst-1",
+      accountNumberLast4: "0016",
+    })
+  })
+
+  it("keeps a longer number as the full number in the proposal mode", () => {
+    const result = buildCreateAccountBody(
+      {
+        name: "Ahorros",
+        type: "SAVINGS",
+        institutionId: "inst-1",
+        accountNumber: "001122335678",
+      },
+      { lastFourOnly: true }
+    )
+    assert.equal(result.ok, true)
+    if (!result.ok) {
+      return
+    }
+    assert.equal(result.body.accountNumber, "001122335678")
+    assert.equal("accountNumberLast4" in result.body, false)
+  })
+
+  it("still rejects an empty number in the proposal mode", () => {
+    const result = buildCreateAccountBody(
+      {
+        name: "Ahorros",
+        type: "SAVINGS",
+        institutionId: "inst-1",
+        accountNumber: "",
+      },
+      { lastFourOnly: true }
+    )
+    assert.equal(result.ok, false)
+  })
+
   it("rejects non-CASH accounts without an institution", () => {
     const none = buildCreateAccountBody({
       name: "Ahorros",

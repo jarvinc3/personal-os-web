@@ -4,15 +4,22 @@ import { describe, it } from "node:test"
 import {
   accountApprovalPrefill,
   cardApprovalPrefill,
-  initialApprovalStep,
+  chooseApprovalInstitution,
+  failApproval,
+  initialApprovalState,
   institutionApprovalPrefill,
+  matchedApprovalProduct,
   proposalInstitutionType,
   proposalReviewHint,
   resolveApprovalInstitution,
+  retryProductId,
   sortProposalsForReview,
+  startApproval,
 } from "./proposal-approval.ts"
 import type {
   EmailProductProposal,
+  FinanceAccount,
+  FinanceCard,
   FinanceInstitution,
 } from "@/src/modules/finance/shared/types/entities.ts"
 
@@ -217,38 +224,6 @@ describe("resolveApprovalInstitution", () => {
   })
 })
 
-describe("initialApprovalStep", () => {
-  it("skips the institution step when it is resolved", () => {
-    assert.equal(
-      initialApprovalStep({
-        proposal: proposalOf(),
-        institutions: [institutionOf()],
-      }),
-      "product"
-    )
-  })
-
-  it("skips the step even when the match is not in the active list", () => {
-    assert.equal(
-      initialApprovalStep({
-        proposal: proposalOf(),
-        institutions: [],
-      }),
-      "product"
-    )
-  })
-
-  it("starts with the institution when it is not", () => {
-    assert.equal(
-      initialApprovalStep({
-        proposal: cardProposal(),
-        institutions: [institutionOf()],
-      }),
-      "institution"
-    )
-  })
-})
-
 describe("sortProposalsForReview", () => {
   it("puts accounts before cards and keeps the rest of the order", () => {
     const cardA = cardProposal({}, { id: "card-a" })
@@ -295,5 +270,158 @@ describe("proposalReviewHint", () => {
       null
     )
     assert.equal(proposalReviewHint(cardProposal({ cardType: "CREDIT" })), null)
+  })
+})
+
+function accountOf(overrides: Partial<FinanceAccount> = {}): FinanceAccount {
+  return {
+    id: "account-1",
+    institutionId: "institution-bhd",
+    institutionName: "BHD",
+    institutionLogoUrl: null,
+    name: "Ahorros",
+    type: "SAVINGS",
+    currency: "DOP",
+    accountNumberLast4: "0016",
+    balance: "0",
+    earmarkedAmount: "0",
+    freeBalance: "0",
+    color: null,
+    isActive: true,
+    createdAt: "",
+    updatedAt: "",
+    ...overrides,
+  }
+}
+
+function cardOf(overrides: Partial<FinanceCard> = {}): FinanceCard {
+  return {
+    id: "card-1",
+    institutionId: "institution-bhd",
+    institutionName: "BHD",
+    accountId: null,
+    accountName: null,
+    name: "Visa",
+    type: "CREDIT",
+    network: "VISA",
+    lastFour: "6506",
+    statementClosingDay: null,
+    paymentDueDay: null,
+    nextStatementDate: null,
+    nextPaymentDueDate: null,
+    color: null,
+    isActive: true,
+    balances: [],
+    ...overrides,
+  }
+}
+
+describe("initialApprovalState", () => {
+  it("opens the product step when the institution is resolved", () => {
+    const state = initialApprovalState({
+      proposal: proposalOf(),
+      institutions: [institutionOf()],
+    })
+    assert.equal(state.step, "product")
+    assert.equal(state.institution?.id, "institution-bhd")
+    assert.equal(state.createdProductId, null)
+    assert.equal(state.approvalError, null)
+  })
+
+  it("skips the step when the match is not in the active list", () => {
+    const state = initialApprovalState({
+      proposal: proposalOf(),
+      institutions: [],
+    })
+    assert.equal(state.step, "product")
+    assert.equal(state.institution?.id, "institution-bhd")
+  })
+
+  it("starts with the institution when there is no match", () => {
+    const state = initialApprovalState({
+      proposal: cardProposal(),
+      institutions: [institutionOf()],
+    })
+    assert.equal(state.step, "institution")
+    assert.equal(state.institution, null)
+  })
+})
+
+describe("approval flow transitions", () => {
+  function stateOf() {
+    return initialApprovalState({
+      proposal: proposalOf(),
+      institutions: [institutionOf()],
+    })
+  }
+
+  it("changing the institution keeps the rest of the flow", () => {
+    const before = startApproval(stateOf(), "account-1")
+    const after = chooseApprovalInstitution(
+      before,
+      institutionOf({ id: "institution-other", name: "Otro" })
+    )
+    assert.equal(after.step, "product")
+    assert.equal(after.institution?.id, "institution-other")
+    assert.equal(after.createdProductId, "account-1")
+  })
+
+  it("retries the same product after a failed approval", () => {
+    const started = startApproval(stateOf(), "account-1")
+    const failed = failApproval(started, "Producto no encontrado")
+    assert.equal(failed.createdProductId, "account-1")
+    assert.equal(retryProductId(failed), "account-1")
+    assert.equal(retryProductId(started), null)
+  })
+})
+
+describe("matchedApprovalProduct", () => {
+  it("returns the matching account of the chosen institution", () => {
+    const proposal = proposalOf({ matchedProductId: "account-1" })
+    const matched = matchedApprovalProduct({
+      proposal,
+      institutionId: "institution-bhd",
+      accounts: [accountOf()],
+      cards: [],
+    })
+    assert.equal(matched?.id, "account-1")
+    assert.equal(matched?.account?.id, "account-1")
+  })
+
+  it("does not offer the product under another compatible institution", () => {
+    const proposal = proposalOf({ matchedProductId: "account-1" })
+    assert.equal(
+      matchedApprovalProduct({
+        proposal,
+        institutionId: "institution-other",
+        accounts: [accountOf()],
+        cards: [],
+      }),
+      null
+    )
+  })
+
+  it("does not offer a product that is not in the loaded lists", () => {
+    const proposal = proposalOf({ matchedProductId: "account-1" })
+    assert.equal(
+      matchedApprovalProduct({
+        proposal,
+        institutionId: "institution-bhd",
+        accounts: [],
+        cards: [],
+      }),
+      null
+    )
+  })
+
+  it("returns the matching card of the chosen institution", () => {
+    const proposal = cardProposal({ accountId: "account-1" })
+    const matched = matchedApprovalProduct({
+      proposal: { ...proposal, matchedProductId: "card-1" },
+      institutionId: "institution-bhd",
+      accounts: [],
+      cards: [cardOf()],
+    })
+    assert.equal(matched?.card?.id, "card-1")
   })
 })

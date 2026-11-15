@@ -107,6 +107,10 @@ type AccountSheetProps = {
   lastFourOnly?: boolean
   /** Alta desde una propuesta: entrega la cuenta creada, sin cerrar la hoja. */
   onCreated?: (account: FinanceAccount) => void
+  /** Institución elegida fuera de la hoja; se sincroniza sin perder el resto. */
+  selectedInstitutionId?: string
+  /** Una propuesta nunca crea la cuenta de Efectivo. */
+  excludeCash?: boolean
 }
 
 export function AccountSheet({
@@ -123,6 +127,8 @@ export function AccountSheet({
   prefill = {},
   lastFourOnly = false,
   onCreated,
+  selectedInstitutionId,
+  excludeCash = false,
 }: AccountSheetProps) {
   const isEdit = Boolean(account)
   const createMutation = useCreateAccount()
@@ -138,12 +144,12 @@ export function AccountSheet({
     defaultInstitutionId ?? institutions[0]?.id ?? CATALOG_NONE
 
   const accountResolver = useMemo(
-    () =>
-      zodResolver(
-        accountSchemaFor({ isEdit, allowLastFourOnly: lastFourOnly })
-      ),
-    [isEdit, lastFourOnly]
+    () => zodResolver(accountSchemaFor({ isEdit })),
+    [isEdit]
   )
+  const typeOptions = excludeCash
+    ? TYPE_OPTIONS.filter((option) => option.value !== "CASH")
+    : TYPE_OPTIONS
   const prefillName = prefill.name
   const prefillType = prefill.type
   const prefillCurrency = prefill.currency
@@ -251,6 +257,17 @@ export function AccountSheet({
   }, [open, initialValues, reset])
 
   useEffect(() => {
+    if (
+      !open ||
+      !selectedInstitutionId ||
+      selectedInstitutionId === institutionId
+    ) {
+      return
+    }
+    setValue("institutionId", selectedInstitutionId, { shouldValidate: true })
+  }, [open, selectedInstitutionId, institutionId, setValue])
+
+  useEffect(() => {
     if (!open || !lockType || isEdit || accountType !== "CASH") {
       return
     }
@@ -306,10 +323,21 @@ export function AccountSheet({
         const created = await createMutation.mutateAsync(payload.body)
         const parsedInitialBalance = parseFinanceMoney(initialBalance)
         if (parsedInitialBalance !== null && parsedInitialBalance > 0) {
-          await adjustBalance.mutateAsync({
-            accountId: created.id,
-            balance: parsedInitialBalance,
-          })
+          try {
+            await adjustBalance.mutateAsync({
+              accountId: created.id,
+              balance: parsedInitialBalance,
+            })
+          } catch (error) {
+            // La cuenta ya existe: en el paso a paso se aprueba ese id y el
+            // saldo se corrige después, sin repetir el alta.
+            if (onCreated) {
+              appToast.error({ text1: financeErrorMessage(error) })
+              onCreated(created)
+              return
+            }
+            throw error
+          }
         }
         appToast.success({ text1: "Cuenta creada" })
         if (onCreated) {
@@ -381,7 +409,7 @@ export function AccountSheet({
                   label="Tipo"
                   value={field.value}
                   onChange={changeType}
-                  options={TYPE_OPTIONS}
+                  options={typeOptions}
                 />
               )}
             />
