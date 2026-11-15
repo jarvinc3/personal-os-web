@@ -13,4 +13,11 @@ describe("countLabel", () => {
     assert.equal(countLabel(0, "account"), "0 cuentas")
     assert.equal(countLabel(2, "loan"), "2 préstamos")
   })
+
+  it("counts emails and proposals for the detected products", () => {
+    assert.equal(countLabel(1, "message"), "1 correo")
+    assert.equal(countLabel(3, "message"), "3 correos")
+    assert.equal(countLabel(1, "proposal"), "1 propuesta")
+    assert.equal(countLabel(0, "proposal"), "0 propuestas")
+  })
 })

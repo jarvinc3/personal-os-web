@@ -1,6 +1,11 @@
 "use client"
 
-import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+} from "@/src/shared/components/ui/field"
 import {
   InputGroup,
   InputGroupAddon,
@@ -12,6 +17,7 @@ import { Eye, EyeOff, KeyRound, type LucideIcon } from "lucide-react"
 import {
   useId,
   useState,
+  type ComponentProps,
   type HTMLInputTypeAttribute,
   type KeyboardEventHandler,
   type Ref,
@@ -24,10 +30,13 @@ type FormTextFieldProps = {
   onBlur?: () => void
   onKeyDown?: KeyboardEventHandler<HTMLInputElement>
   placeholder?: string
+  /** Texto de ayuda bajo el campo; el error va después. */
+  description?: string
   disabled?: boolean
   error?: string
   invalid?: boolean
   type?: HTMLInputTypeAttribute
+  inputMode?: ComponentProps<"input">["inputMode"]
   autoComplete?: string
   ariaLabel?: string
   icon?: LucideIcon
@@ -47,10 +56,12 @@ export function FormTextField({
   onBlur,
   onKeyDown,
   placeholder,
+  description,
   disabled,
   error,
   invalid,
   type = "text",
+  inputMode,
   autoComplete,
   ariaLabel,
   icon: Icon,
@@ -90,6 +101,7 @@ export function FormTextField({
           ref={inputRef}
           id={fieldId}
           type={inputType}
+          inputMode={inputMode}
           min={min}
           max={max}
           step={step}
@@ -120,6 +132,7 @@ export function FormTextField({
           </InputGroupAddon>
         ) : null}
       </InputGroup>
+      {description ? <FieldDescription>{description}</FieldDescription> : null}
       {error ? <FieldError>{error}</FieldError> : null}
     </Field>
   )

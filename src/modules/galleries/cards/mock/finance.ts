@@ -1,6 +1,7 @@
 import { buildInstitutionCard } from "@/src/modules/finance/products/lib/institution-card"
 import type { InstitutionStackItem } from "@/src/modules/finance/shared/lib/institution-stack"
 import type {
+  EmailProductProposal,
   FinanceAccount,
   FinanceBalanceDrift,
   FinanceBalanceSheetLine,
@@ -344,6 +345,96 @@ export const galleryRecurringPattern: FinanceRecurringPattern = {
   monthlyEquivalent: "1250.00",
   annualEquivalent: "15000.00",
   daysUntil: 23,
+}
+
+export const galleryAccountProposal: EmailProductProposal = {
+  id: "proposal-cuenta",
+  productType: "ACCOUNT",
+  status: "PENDING",
+  approvedProductId: null,
+  createdAt: CREATED_AT,
+  evidence: [
+    {
+      messageId: "message-cuenta-2",
+      fromDomain: "bancoejemplo.test",
+      subject: "Tu cuenta de ahorros está lista",
+      receivedAt: "2026-10-18T12:00:00.000Z",
+      match: {},
+      createdAt: "2026-10-18T12:00:00.000Z",
+    },
+    {
+      messageId: "message-cuenta-1",
+      fromDomain: "bancoejemplo.test",
+      subject: "Bienvenido a tu cuenta de ahorros",
+      receivedAt: "2026-10-12T12:00:00.000Z",
+      match: {},
+      createdAt: "2026-10-12T12:00:00.000Z",
+    },
+  ],
+  draft: {
+    productType: "ACCOUNT",
+    name: "Ahorros Ejemplo",
+    lastFour: "7788",
+    currency: "DOP",
+    accountType: "SAVINGS",
+    cardType: null,
+    network: null,
+    accountId: null,
+    institution: {
+      name: galleryInstitution.name,
+      type: "bank",
+      domain: galleryInstitution.domain ?? null,
+      country: "DO",
+    },
+    accountNumberProvided: false,
+  },
+}
+
+export const galleryCardProposal: EmailProductProposal = {
+  id: "proposal-tarjeta",
+  productType: "CARD",
+  status: "PENDING",
+  approvedProductId: null,
+  createdAt: CREATED_AT,
+  evidence: [
+    {
+      messageId: "message-tarjeta-1",
+      fromDomain: "bancoejemplo.test",
+      subject: "Tu nueva tarjeta terminada en 4321",
+      receivedAt: "2026-10-16T12:00:00.000Z",
+      match: {},
+      createdAt: "2026-10-16T12:00:00.000Z",
+    },
+  ],
+  draft: {
+    productType: "CARD",
+    name: "Visa Ejemplo",
+    lastFour: "4321",
+    currency: "DOP",
+    accountType: null,
+    cardType: "CREDIT",
+    network: "VISA",
+    accountId: galleryCheckingAccount.id,
+    institution: {
+      name: galleryInstitution.name,
+      type: "bank",
+      domain: galleryInstitution.domain ?? null,
+      country: "DO",
+    },
+    accountNumberProvided: false,
+  },
+}
+
+export const galleryApprovedProposal: EmailProductProposal = {
+  ...galleryAccountProposal,
+  id: "proposal-aprobada",
+  status: "APPROVED",
+  approvedProductId: galleryNeutralAccount.id,
+  approval: {
+    duplicate: false,
+    productId: galleryNeutralAccount.id,
+    reevaluatedSignals: 2,
+  },
 }
 
 export const gallerySavingsGoal: FinanceSavingsGoal = {

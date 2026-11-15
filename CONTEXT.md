@@ -101,6 +101,9 @@ La cuenta o tarjeta a la que se refiere un correo bancario.
 **Mensaje pendiente** (`PendingEmailMessage`)
 Un correo ya leído por el extractor que espera asignarse a un movimiento. `instrumentHint`, `lastFourHint` y `accountNumberHint` apuntan al instrumento del correo.
 
+**Propuesta de producto** (`EmailProductProposal`)
+La cuenta o tarjeta que un correo bancario sugiere, con la evidencia de sus correos y un borrador editable. No existe en el catálogo hasta que el usuario la aprueba; descartarla no crea nada. _Avoid_: "producto detectado" o "sugerencia" para el registro.
+
 ## Otros módulos
 
 **Notificación** (`Notification`)

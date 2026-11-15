@@ -8,6 +8,8 @@ Query keys: `src/modules/finance/shared/types/api.ts` (`["finance", ...]`). Muta
 
 Tab bar (5): Resumen, Movimientos, Planificación, Suscripciones, Productos. Estadísticas y Comercios `showInTabBar: false` (`shared/constants/nav.ts`). Comercios tiene atajo en Productos. Suscripciones es el gestor (resumen de costo mensual y anual, cobros recurrentes detectados, filtros por estado y moneda, búsqueda e historial de pagos). Una suscripción activa con la fecha de cobro ya pasada se marca «Vencida» en la lista y en el detalle; pausar pide confirmación y reanudar no. Al editar no se abre el selector de fecha por adelantado. Cuando hay varias monedas, el resumen muestra el costo de cada una por separado; no convierte a la moneda base. Gmail sync no está en tab bar; vive en `/finance/sync` (atajo desde Productos).
 
+Productos tiene el atajo **Detectados en correos** (`/finance/products/email-proposals`): las cuentas y tarjetas que el back detecta en los correos guardados como propuestas. Con el filtro por defecto en pendientes, cada propuesta muestra su evidencia, se edita en una hoja por ruta y se aprueba o descarta; aprobar es lo único que crea el producto. La fila del atajo cuenta las pendientes y desaparece si el entorno responde 404 (producción).
+
 ## Convenciones de formularios
 
 - Alta y edición comparten la pieza: el `mode` decide título, CTA y texto de ayuda. El alta se habilita por validez del esquema; la edición, solo si hay cambios (`isDirty`).

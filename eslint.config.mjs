@@ -114,6 +114,7 @@ const FINANCE_CAPABILITIES = [
   "institutions",
   "loans",
   "planning",
+  "product-proposals",
   "products",
   "receivables",
   "savings-goals",

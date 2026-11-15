@@ -28,6 +28,10 @@ export const FINANCE_ACCOUNTS_QUERY_KEY = [
   ...FINANCE_QUERY_KEY,
   "accounts",
 ] as const
+export const FINANCE_EMAIL_PRODUCT_PROPOSALS_QUERY_KEY = [
+  ...FINANCE_QUERY_KEY,
+  "email-product-proposals",
+] as const
 export const FINANCE_CURRENCIES_QUERY_KEY = [
   ...FINANCE_QUERY_KEY,
   "currencies",

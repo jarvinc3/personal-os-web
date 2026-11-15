@@ -11,6 +11,7 @@ Rutas:
 | `/finance/cards/[cardId]/edit`                               | Edición de tarjeta                                                                                                                                                        |
 | `/finance/categories`                                        | Categorías                                                                                                                                                                |
 | `/finance/sync`                                              | Buzones Gmail y vínculos de institución (no embebido en el listado)                                                                                                       |
+| `/finance/products/email-proposals`                          | Propuestas de cuentas y tarjetas detectadas en correos: evidencia, edición del borrador, aprobar, descartar y filtrar por estado                                          |
 | `/finance/institutions/[institutionId]`                      | Detalle institución; atajo vincular correo                                                                                                                                |
 | `/finance/institutions/[institutionId]/accounts/[accountId]` | Detalle cuenta; suma los movimientos de sus tarjetas de débito                                                                                                            |
 | `/finance/institutions/[institutionId]/cards/[cardId]`       | Detalle tarjeta de crédito: estados de cuenta y movimientos                                                                                                               |
@@ -20,6 +21,14 @@ Rutas:
 Totales de `GET /finance/balance-sheet` (no sumar monedas en cliente). Cuentas CHECKING/SAVINGS/INVESTMENT exigen institución; CASH no. Alta cuenta con saldo inicial opcional. Archivo cuenta `PATCH isActive:false`; institución/tarjeta DELETE (409 + `details.dependents`). Saldos tarjeta `POST /cards/:id/balances` números. CREDIT: campo **Balance disponible**, límite obligatorio. Categorías: `icon` un emoji, elegido en un panel con búsqueda o escrito con el teclado; lista con color de la card, FAB de alta y orden solo en memoria. `PATCH` puede cambiar `type` si no hay padre (`parentId: null` desvincula); con padre el tipo no se envía. DELETE system → 404.
 
 Evidencia: `src/modules/finance/products/`, `src/modules/finance/institutions/`, `src/modules/finance/accounts/`, `src/modules/finance/catalog/`, hooks catalog en `src/modules/finance/shared/hooks/`.
+
+### Propuestas de productos detectadas en correos
+
+`/finance/products/email-proposals` lista las cuentas y tarjetas que el back detecta en los correos guardados (contrato de back #368) sin crearlas. Abre en pendientes; el filtro por estado vive en la URL (`?status=`). «Buscar en correos» llama a `discover` y resume cuántos correos revisó, cuántas propuestas creó, a cuántos sumó evidencia y cuántos ignoró, con el aviso del tope cuando lo alcanza.
+
+Cada `ProposalCard` muestra el borrador, la institución, sus últimos 4 dígitos, si hay número completo guardado y hasta tres correos de evidencia con asunto, remitente y fecha. Aprobar está en la tarjeta y solo se habilita cuando el back lo aceptaría: tipo elegido, cuatro dígitos y, en una tarjeta de débito, su cuenta. Editar abre una hoja por ruta (`product-proposal-sheet`) que solo manda campos del tipo del producto; la moneda, el número completo y la cuenta de la tarjeta se eligen con los selectores compartidos. Descartar pide confirmación y no crea nada. Aprobar invalida propuestas, cuentas, tarjetas, instituciones y balance: el producto aparece en Productos y un duplicado del back se avisa en el toast.
+
+La fila «Detectados en correos» de Productos lleva el conteo de pendientes y se esconde cuando el endpoint responde 404 (producción). Evidencia: `src/modules/finance/product-proposals/`, hooks en `src/modules/finance/shared/hooks/use-email-product-proposals.ts`.
 
 ### Comercios
 
