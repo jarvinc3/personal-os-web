@@ -196,7 +196,7 @@ function ReviewGroupBatchSheetBody({
           <SummarySection title="Asuntos de muestra" icon={FileText}>
             <ul className="list-disc py-2 pr-2 pl-6 text-sm text-muted-foreground">
               {group.sampleSubjects.map((subject) => (
-                <li key={subject} className="break-words">
+                <li key={subject} className="wrap-break-word">
                   {subject || "(sin asunto)"}
                 </li>
               ))}

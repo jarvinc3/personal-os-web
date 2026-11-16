@@ -71,6 +71,7 @@ function MobileAuthEntry({ auth }: { auth: AuthActions }) {
         title="Iniciar sesión"
         description="Accede con email o Google."
         open={openLoginSheet}
+        showClose={false}
         onOpenChange={setOpenLoginSheet}
       >
         <LoginForm
@@ -98,6 +99,7 @@ function MobileAuthEntry({ auth }: { auth: AuthActions }) {
         title="Crear cuenta"
         description="Regístrate para empezar."
         open={openRegisterSheet}
+        showClose={false}
         onOpenChange={setOpenRegisterSheet}
       >
         <RegisterForm

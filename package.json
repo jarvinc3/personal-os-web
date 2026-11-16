@@ -6,7 +6,7 @@
   "license": "MIT",
   "type": "module",
   "private": true,
-  "packageManager": "pnpm@12.11.2",
+  "packageManager": "pnpm@12.18.0",
   "scripts": {
     "dev": "next dev --turbopack",
     "env:pull": "infisical export --env=dev --path=/web > .env",

@@ -84,14 +84,17 @@ export function FormTextField({
     <Field
       data-invalid={hasError ? true : undefined}
       data-disabled={disabled ? true : undefined}
-      className="gap-1"
+      className="gap-0.5"
     >
       {label ? (
-        <FieldLabel htmlFor={fieldId} className="text-sm text-muted-foreground">
+        <FieldLabel
+          htmlFor={fieldId}
+          className="pl-2 text-sm text-muted-foreground"
+        >
           {label}
         </FieldLabel>
       ) : null}
-      <InputGroup className={cn("h-10 overflow-hidden", className)}>
+      <InputGroup className={cn("h-10 overflow-hidden px-1", className)}>
         {FieldIcon ? (
           <InputGroupAddon align="inline-start">
             <FieldIcon className="text-muted-foreground" />

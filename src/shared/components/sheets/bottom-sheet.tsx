@@ -96,10 +96,18 @@ export function BottomSheet({
           variant === "default" && size === "wide" && WIDE_SHEET_CONTENT_CLASS
         )}
       >
-        <DrawerHeader className="relative border-b">
+        <DrawerHeader className="relative -space-y-2 pb-4">
           <DrawerTitle className={headerAction ? "px-20" : undefined}>
             {pending ? "Cargando" : title}
           </DrawerTitle>
+          <DrawerDescription
+            className={cn(
+              "text-muted-foreground",
+              !pending && description ? "" : "hidden"
+            )}
+          >
+            {description}
+          </DrawerDescription>
           {headerAction && !pending ? (
             <div
               className={cn(
@@ -110,14 +118,6 @@ export function BottomSheet({
               {headerAction}
             </div>
           ) : null}
-          <DrawerDescription
-            className={cn(
-              "text-muted-foreground",
-              !pending && description ? "" : "hidden"
-            )}
-          >
-            {description}
-          </DrawerDescription>
         </DrawerHeader>
 
         <div
@@ -134,7 +134,7 @@ export function BottomSheet({
         </div>
 
         {actionEntries.length > 0 && !pending && (
-          <DrawerFooter className="flex w-full flex-row justify-end gap-2 border-t">
+          <DrawerFooter className="mt-4 flex w-full flex-row items-center justify-end gap-2 pt-4">
             {actionEntries.map(([actionName, node]) => (
               <Fragment key={actionName}>{node}</Fragment>
             ))}
