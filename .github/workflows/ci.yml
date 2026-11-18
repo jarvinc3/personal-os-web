@@ -1,35 +1,94 @@
 name: CI
 
+# Los jobs corren en la PC de casa (runner self-hosted de Windows) mientras
+# GitHub Actions está bloqueado por facturación. El runner es dedicado:
+# conserva node_modules entre corridas y usa el store de pnpm de la máquina.
+# Los PRs usan pull_request_target: corre el workflow de la rama base, así que
+# un fork no puede quitar la guarda de head.repo. Solo los PRs del mismo
+# repositorio hacen checkout del head en el runner.
 on:
   push:
     branches: [main, master, develop]
-  pull_request:
+  pull_request_target:
     branches: [main, master, develop]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Evita CRLF en el checkout de Windows sin tocar la config global de git
+  GIT_CONFIG_COUNT: "2"
+  GIT_CONFIG_KEY_0: core.autocrlf
+  GIT_CONFIG_VALUE_0: "false"
+  GIT_CONFIG_KEY_1: core.longpaths
+  GIT_CONFIG_VALUE_1: "true"
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-
+  changes:
+    if: github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: [self-hosted, personal-os]
+    timeout-minutes: 5
+    outputs:
+      code: ${{ steps.filter.outputs.code }}
     steps:
+      - id: filter
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const files = await github.paginate(github.rest.pulls.listFiles, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              per_page: 100,
+            });
+            const code = files.some(
+              (file) =>
+                !file.filename.endsWith('.md') &&
+                !file.filename.startsWith('docs/'),
+            );
+            core.setOutput('code', String(code));
+
+  checks:
+    if: github.event_name != 'pull_request_target' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: [self-hosted, personal-os]
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      # Conserva node_modules entre corridas para evitar los hardlinks lentos de
+      # Windows; el resto del workspace se limpia.
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          clean: false
+
+      - name: Limpiar el workspace salvo node_modules
+        run: git clean -fdx -e node_modules
 
       - uses: pnpm/action-setup@v4
+        with:
+          dest: ${{ runner.temp }}/setup-pnpm
 
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-          cache: pnpm
-          cache-dependency-path: pnpm-lock.yaml
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --store-dir "$env:LOCALAPPDATA\pnpm\store"
 
       - name: Audit production dependencies (non-blocking)
         continue-on-error: true
         run: pnpm audit --prod --audit-level=high
 
       - name: Typecheck
-        run: pnpm exec tsc --noEmit
+        run: pnpm run typecheck
 
       - name: Lint
         run: pnpm run lint
@@ -39,6 +98,34 @@ jobs:
 
       - name: Unit tests with coverage
         run: pnpm run --if-present test:coverage
+
+  build:
+    needs: changes
+    if: always() && (github.event_name != 'pull_request_target' || (github.event.pull_request.head.repo.full_name == github.repository && needs.changes.outputs.code == 'true'))
+    runs-on: [self-hosted, personal-os]
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          clean: false
+
+      - name: Limpiar el workspace salvo node_modules
+        run: git clean -fdx -e node_modules
+
+      - uses: pnpm/action-setup@v4
+        with:
+          dest: ${{ runner.temp }}/setup-pnpm
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --store-dir "$env:LOCALAPPDATA\pnpm\store"
 
       - name: Build
         run: pnpm run build
@@ -50,3 +137,15 @@ jobs:
           NEXT_PUBLIC_APP_NAME: Personal OS
           NEXT_PUBLIC_URL: http://localhost:3000
           NEXT_PUBLIC_APP_URL: http://localhost:3000
+
+  test:
+    needs: [checks, build]
+    if: always() && (github.event_name != 'pull_request_target' || github.event.pull_request.head.repo.full_name == github.repository) && needs.checks.result == 'success' && (needs.build.result == 'success' || needs.build.result == 'skipped')
+    runs-on: [self-hosted, personal-os]
+    timeout-minutes: 5
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - name: Confirmar checks y build
+        run: echo "Checks y build completados"
