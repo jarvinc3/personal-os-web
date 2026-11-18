@@ -1,7 +1,8 @@
 name: CI
 
-# Checks y build corren en ubuntu-latest en paralelo. El job `test` conserva
-# el estado único de la CI y espera a que ambos terminen.
+# Los jobs corren en la PC de casa (runner self-hosted de Windows) mientras
+# GitHub Actions está bloqueado por facturación. El runner es dedicado:
+# conserva node_modules entre corridas y usa el store de pnpm de la máquina.
 on:
   push:
     branches: [main, master, develop]
@@ -27,7 +28,7 @@ env:
 jobs:
   changes:
     if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, personal-os]
     timeout-minutes: 5
     outputs:
       code: ${{ steps.filter.outputs.code }}
@@ -50,12 +51,20 @@ jobs:
             core.setOutput('code', String(code));
 
   checks:
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    env:
-      PNPM_STORE_DIR: /home/runner/.pnpm-store
+    runs-on: [self-hosted, personal-os]
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: pwsh
     steps:
+      # Conserva node_modules entre corridas para evitar los hardlinks lentos de
+      # Windows; el resto del workspace se limpia.
       - uses: actions/checkout@v4
+        with:
+          clean: false
+
+      - name: Limpiar el workspace salvo node_modules
+        run: git clean -fdx -e node_modules
 
       - uses: pnpm/action-setup@v4
         with:
@@ -65,16 +74,8 @@ jobs:
         with:
           node-version: 24
 
-      - name: Cache pnpm store
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.PNPM_STORE_DIR }}
-          key: pnpm-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            pnpm-${{ runner.os }}-
-
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile --store-dir "$PNPM_STORE_DIR"
+        run: pnpm install --frozen-lockfile --store-dir "$env:LOCALAPPDATA\pnpm\store"
 
       - name: Audit production dependencies (non-blocking)
         continue-on-error: true
@@ -95,12 +96,18 @@ jobs:
   build:
     needs: changes
     if: always() && (github.event_name != 'pull_request' || needs.changes.outputs.code == 'true')
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    env:
-      PNPM_STORE_DIR: /home/runner/.pnpm-store
+    runs-on: [self-hosted, personal-os]
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: pwsh
     steps:
       - uses: actions/checkout@v4
+        with:
+          clean: false
+
+      - name: Limpiar el workspace salvo node_modules
+        run: git clean -fdx -e node_modules
 
       - uses: pnpm/action-setup@v4
         with:
@@ -110,25 +117,8 @@ jobs:
         with:
           node-version: 24
 
-      - name: Cache pnpm store
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.PNPM_STORE_DIR }}
-          key: pnpm-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            pnpm-${{ runner.os }}-
-
-      - name: Cache Next build
-        uses: actions/cache@v4
-        with:
-          path: .next/cache
-          key: next-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.sha }}
-          restore-keys: |
-            next-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-
-            next-${{ runner.os }}-
-
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile --store-dir "$PNPM_STORE_DIR"
+        run: pnpm install --frozen-lockfile --store-dir "$env:LOCALAPPDATA\pnpm\store"
 
       - name: Build
         run: pnpm run build
@@ -144,8 +134,11 @@ jobs:
   test:
     needs: [checks, build]
     if: always() && needs.checks.result == 'success' && (needs.build.result == 'success' || needs.build.result == 'skipped')
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, personal-os]
     timeout-minutes: 5
+    defaults:
+      run:
+        shell: pwsh
     steps:
       - name: Confirmar checks y build
         run: echo "Checks y build completados"
