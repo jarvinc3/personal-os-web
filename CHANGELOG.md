@@ -4,6 +4,10 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ## Unreleased — 0.100.0
 
+### Seguridad
+
+- Next.js y `eslint-config-next` se actualizan a 16.4.6 para salir de la versión afectada por el aviso de seguridad publicado (#430).
+
 ### Agregado
 
 - El pago de tarjeta registrado a mano pide confirmación cuando el back responde 409 `CARD_PAYMENT_POSSIBLE_DUPLICATE`: el diálogo muestra el monto, la fecha, la cuenta de origen y la tarjeta del pago importado que se le parece, y solo guarda al confirmar con `duplicateAcknowledged: true`. Cancelar no registra nada y, sin coincidencia, el flujo no cambia (#423; contrato de back #389).
