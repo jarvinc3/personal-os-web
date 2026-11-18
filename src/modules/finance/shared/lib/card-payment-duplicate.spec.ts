@@ -2,7 +2,13 @@ import assert from "node:assert/strict"
 import { describe, it } from "node:test"
 
 import { ApiError } from "@/src/config/api-client.utils.ts"
-import { cardPaymentDuplicateFromError } from "./card-payment-duplicate.ts"
+import type { CreateCardPaymentBody } from "@/src/modules/finance/shared/lib/ledger-payloads.ts"
+import {
+  cardPaymentDuplicateDateLabel,
+  cardPaymentDuplicateFromError,
+  nextCardPaymentDuplicateDialog,
+  type CardPaymentDuplicateDialog,
+} from "./card-payment-duplicate.ts"
 
 function conflictError(
   code: string,
@@ -82,5 +88,88 @@ describe("cardPaymentDuplicateFromError", () => {
       currency: null,
       transactionDate: null,
     })
+  })
+})
+
+describe("cardPaymentDuplicateDateLabel", () => {
+  it("pinta la fecha en la zona del perfil, no en UTC", () => {
+    const label = cardPaymentDuplicateDateLabel(
+      {
+        amount: "2500",
+        currency: "DOP",
+        transactionDate: "2026-11-11T02:30:00.000Z",
+      },
+      { timeZone: "America/Santo_Domingo", locale: "es-DO" }
+    )
+
+    assert.equal(label, "10 nov 2026")
+  })
+
+  it("no devuelve fecha cuando el candidato no la trae", () => {
+    assert.equal(
+      cardPaymentDuplicateDateLabel(
+        { amount: null, currency: null, transactionDate: null },
+        { timeZone: "America/Santo_Domingo", locale: "es-DO" }
+      ),
+      null
+    )
+  })
+})
+
+describe("nextCardPaymentDuplicateDialog", () => {
+  const body: CreateCardPaymentBody = {
+    fromAccountId: "account-1",
+    cardId: "card-1",
+    amount: 2500,
+    currency: "DOP",
+    transactionDate: "2026-11-11T02:30:00.000Z",
+  }
+  const candidate = {
+    amount: "2500",
+    currency: "DOP",
+    transactionDate: "2026-11-10T14:30:00.000Z",
+  }
+
+  it("abre el diálogo con el cuerpo enviado y el candidato", () => {
+    const dialog = nextCardPaymentDuplicateDialog(null, {
+      type: "CONFLICT",
+      body,
+      candidate,
+    })
+
+    assert.deepEqual(dialog, { body, candidate })
+  })
+
+  it("conserva el candidato cuando el segundo POST falla", () => {
+    const dialog = nextCardPaymentDuplicateDialog(null, {
+      type: "CONFLICT",
+      body,
+      candidate,
+    })
+
+    const afterFailure = nextCardPaymentDuplicateDialog(dialog, {
+      type: "ACKNOWLEDGEMENT_FAILED",
+    })
+
+    assert.equal(afterFailure, dialog)
+    assert.deepEqual(afterFailure, { body, candidate })
+  })
+
+  it("cierra el diálogo al cancelar sin reenviar", () => {
+    const dialog: CardPaymentDuplicateDialog = { body, candidate }
+
+    assert.equal(
+      nextCardPaymentDuplicateDialog(dialog, { type: "CANCELLED" }),
+      null
+    )
+  })
+
+  it("cierra el diálogo cuando el pago confirmado se guarda", () => {
+    const dialog: CardPaymentDuplicateDialog = { body, candidate }
+
+    assert.equal(
+      nextCardPaymentDuplicateDialog(dialog, { type: "CONFIRMED" }),
+      null
+    )
   })
 })

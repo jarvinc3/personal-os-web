@@ -12,12 +12,12 @@ import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-financ
 import { useInstitutions } from "@/src/modules/finance/shared/hooks/use-institutions"
 import { useCreateCardPayment } from "@/src/modules/finance/shared/hooks/use-transactions"
 import {
+  cardPaymentDuplicateDateLabel,
   cardPaymentDuplicateFromError,
-  type CardPaymentDuplicate,
+  nextCardPaymentDuplicateDialog,
 } from "@/src/modules/finance/shared/lib/card-payment-duplicate"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import {
-  formatCalendarDate,
   todayDateInput,
   wallClockToIso,
 } from "@/src/modules/finance/shared/lib/ledger-form"
@@ -25,7 +25,6 @@ import {
   buildCreateCardPaymentBody,
   encodeLedgerTarget,
   splitLedgerTarget,
-  type CreateCardPaymentBody,
 } from "@/src/modules/finance/shared/lib/ledger-payloads"
 import {
   formatFinanceMoney,
@@ -50,7 +49,7 @@ import {
   TriangleAlertIcon,
   WalletIcon,
 } from "lucide-react"
-import { useMemo, useState } from "react"
+import { useMemo, useReducer, useState } from "react"
 import { useUserTimeZone } from "@/src/modules/settings/hooks/use-user-time-zone"
 
 type CardPaymentSheetProps = {
@@ -88,10 +87,10 @@ export function CardPaymentSheet({
   const [transactionDate, setTransactionDate] = useState(todayDateInput())
   const timeZone = useUserTimeZone()
   const [amountError, setAmountError] = useState<string | null>(null)
-  const [pendingDuplicate, setPendingDuplicate] = useState<{
-    body: CreateCardPaymentBody
-    candidate: CardPaymentDuplicate
-  } | null>(null)
+  const [pendingDuplicate, dispatchDuplicate] = useReducer(
+    nextCardPaymentDuplicateDialog,
+    null
+  )
   const { picker, openPicker, closeHandlerFor } = usePicker<"none" | "account">(
     "none"
   )
@@ -135,7 +134,7 @@ export function CardPaymentSheet({
     } catch (error) {
       const candidate = cardPaymentDuplicateFromError(error)
       if (candidate) {
-        setPendingDuplicate({ body: payload.body, candidate })
+        dispatchDuplicate({ type: "CONFLICT", body: payload.body, candidate })
         return
       }
       appToast.error({ text1: financeErrorMessage(error) })
@@ -153,9 +152,10 @@ export function CardPaymentSheet({
         duplicateAcknowledged: true,
       })
       appToast.success({ text1: "Pago registrado" })
-      setPendingDuplicate(null)
+      dispatchDuplicate({ type: "CONFIRMED" })
       onOpenChange(false)
     } catch (error) {
+      dispatchDuplicate({ type: "ACKNOWLEDGEMENT_FAILED" })
       appToast.error({ text1: financeErrorMessage(error) })
     }
   }
@@ -280,7 +280,7 @@ export function CardPaymentSheet({
         open={pendingDuplicate !== null}
         onOpenChange={(open) => {
           if (!open) {
-            setPendingDuplicate(null)
+            dispatchDuplicate({ type: "CANCELLED" })
           }
         }}
         icon={TriangleAlertIcon}
@@ -291,6 +291,7 @@ export function CardPaymentSheet({
         pending={createMutation.isPending}
         pendingLabel="Registrando..."
         onConfirm={() => void confirmDuplicate()}
+        closeOnConfirm={false}
         wide
       >
         {pendingDuplicate ? (
@@ -307,12 +308,10 @@ export function CardPaymentSheet({
               title="Fecha"
               icon={CalendarIcon}
               value={
-                pendingDuplicate.candidate.transactionDate
-                  ? formatCalendarDate(
-                      pendingDuplicate.candidate.transactionDate,
-                      formatLocale
-                    )
-                  : "—"
+                cardPaymentDuplicateDateLabel(pendingDuplicate.candidate, {
+                  timeZone,
+                  locale: formatLocale,
+                }) ?? "—"
               }
             />
             <SummaryItem

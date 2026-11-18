@@ -1,4 +1,7 @@
 import { ApiError } from "@/src/config/api-client.utils"
+import { formatCalendarDate } from "@/src/modules/finance/shared/lib/ledger-form"
+import type { CreateCardPaymentBody } from "@/src/modules/finance/shared/lib/ledger-payloads"
+import { instantToZonedDate } from "@/src/shared/lib/zoned-time"
 
 const CONFLICT_STATUS = 409
 const CARD_PAYMENT_POSSIBLE_DUPLICATE = "CARD_PAYMENT_POSSIBLE_DUPLICATE"
@@ -41,5 +44,57 @@ export function cardPaymentDuplicateFromError(
     amount: readText(candidate, "amount"),
     currency: readText(candidate, "currency"),
     transactionDate: readText(candidate, "transactionDate"),
+  }
+}
+
+/**
+ * El ledger muestra las fechas en la zona del perfil; el 409 manda el instante
+ * en UTC y sin convertir podría caer en otro día.
+ */
+export function cardPaymentDuplicateDateLabel(
+  candidate: CardPaymentDuplicate,
+  { timeZone, locale }: { timeZone: string; locale: string }
+): string | null {
+  if (!candidate.transactionDate) {
+    return null
+  }
+  return formatCalendarDate(
+    instantToZonedDate(candidate.transactionDate, timeZone),
+    locale
+  )
+}
+
+export type CardPaymentDuplicateDialog = {
+  /** El cuerpo enviado, para reenviarlo igual con la confirmación. */
+  body: CreateCardPaymentBody
+  candidate: CardPaymentDuplicate
+} | null
+
+export type CardPaymentDuplicateEvent =
+  | {
+      type: "CONFLICT"
+      body: CreateCardPaymentBody
+      candidate: CardPaymentDuplicate
+    }
+  | { type: "CANCELLED" }
+  | { type: "CONFIRMED" }
+  | { type: "ACKNOWLEDGEMENT_FAILED" }
+
+/**
+ * El diálogo sigue abierto hasta que el reenvío confirmado termina: un fallo
+ * conserva el candidato para reintentar, y solo cancelar o guardar lo cierran.
+ */
+export function nextCardPaymentDuplicateDialog(
+  current: CardPaymentDuplicateDialog,
+  event: CardPaymentDuplicateEvent
+): CardPaymentDuplicateDialog {
+  switch (event.type) {
+    case "CONFLICT":
+      return { body: event.body, candidate: event.candidate }
+    case "ACKNOWLEDGEMENT_FAILED":
+      return current
+    case "CANCELLED":
+    case "CONFIRMED":
+      return null
   }
 }
