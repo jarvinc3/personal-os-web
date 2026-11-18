@@ -105,3 +105,14 @@ export function emailImportScopeLabel(
   }
   return parts.length > 0 ? parts.join(" · ") : null
 }
+
+/** ¿El borrador difiere de lo que ya tenía la conexión? */
+export function emailConnectHasChanges(
+  current: { choice: string; senderFilter: string },
+  initial: { choice: string; senderFilter: string }
+): boolean {
+  return (
+    current.choice !== initial.choice ||
+    current.senderFilter !== initial.senderFilter
+  )
+}

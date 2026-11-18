@@ -5,6 +5,7 @@ import {
   KEEP_EMAIL_IMPORT_PERIOD,
   canConnectGmail,
   emailConnectBody,
+  emailConnectHasChanges,
   emailImportScopeLabel,
   emailImportStartLabel,
   normalizeSenderFilter,
@@ -117,5 +118,37 @@ describe("emailImportScopeLabel", () => {
 
   it("sin corte ni filtro no hay alcance", () => {
     assert.equal(emailImportScopeLabel({}, "es-DO"), null)
+  })
+})
+
+describe("emailConnectHasChanges", () => {
+  it("no hay cambios con el borrador inicial", () => {
+    assert.equal(
+      emailConnectHasChanges(
+        { choice: KEEP_EMAIL_IMPORT_PERIOD, senderFilter: "bhd.com.do" },
+        { choice: KEEP_EMAIL_IMPORT_PERIOD, senderFilter: "bhd.com.do" }
+      ),
+      false
+    )
+  })
+
+  it("detecta un período distinto", () => {
+    assert.equal(
+      emailConnectHasChanges(
+        { choice: "TODAY", senderFilter: "" },
+        { choice: KEEP_EMAIL_IMPORT_PERIOD, senderFilter: "" }
+      ),
+      true
+    )
+  })
+
+  it("detecta un filtro distinto o borrado", () => {
+    assert.equal(
+      emailConnectHasChanges(
+        { choice: "TODAY", senderFilter: "" },
+        { choice: "TODAY", senderFilter: "bhd.com.do" }
+      ),
+      true
+    )
   })
 })
