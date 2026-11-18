@@ -7,4 +7,5 @@ export const INTELLIGENCE_SHEET_KEYS = {
   reviewFilters: "intelligence-review-filters",
   reviewSelection: "intelligence-review-selection",
   reviewSettings: "intelligence-review-settings",
+  emailConnect: "intelligence-email-connect",
 } as const
