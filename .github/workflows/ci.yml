@@ -3,6 +3,8 @@ name: CI
 # Los jobs corren en la PC de casa (runner self-hosted de Windows) mientras
 # GitHub Actions está bloqueado por facturación. El runner es dedicado:
 # conserva node_modules entre corridas y usa el store de pnpm de la máquina.
+# Un PR de un fork no corre aquí: solo los PRs del mismo repositorio llegan al
+# runner self-hosted, que conserva estado entre corridas.
 on:
   push:
     branches: [main, master, develop]
@@ -27,7 +29,7 @@ env:
 
 jobs:
   changes:
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
     runs-on: [self-hosted, personal-os]
     timeout-minutes: 5
     outputs:
@@ -51,6 +53,7 @@ jobs:
             core.setOutput('code', String(code));
 
   checks:
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: [self-hosted, personal-os]
     timeout-minutes: 30
     defaults:
@@ -95,7 +98,7 @@ jobs:
 
   build:
     needs: changes
-    if: always() && (github.event_name != 'pull_request' || needs.changes.outputs.code == 'true')
+    if: always() && (github.event_name != 'pull_request' || (github.event.pull_request.head.repo.full_name == github.repository && needs.changes.outputs.code == 'true'))
     runs-on: [self-hosted, personal-os]
     timeout-minutes: 30
     defaults:
@@ -133,7 +136,7 @@ jobs:
 
   test:
     needs: [checks, build]
-    if: always() && needs.checks.result == 'success' && (needs.build.result == 'success' || needs.build.result == 'skipped')
+    if: always() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && needs.checks.result == 'success' && (needs.build.result == 'success' || needs.build.result == 'skipped')
     runs-on: [self-hosted, personal-os]
     timeout-minutes: 5
     defaults:
