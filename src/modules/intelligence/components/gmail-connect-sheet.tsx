@@ -17,8 +17,8 @@ import {
   EMAIL_IMPORT_PERIODS,
   EMAIL_IMPORT_PERIOD_LABELS,
   KEEP_EMAIL_IMPORT_PERIOD,
-  canConnectGmail,
   emailConnectBody,
+  emailConnectSchema,
   emailConnectHasChanges,
   emailImportStartLabel,
   type EmailConnectBody,
@@ -33,6 +33,7 @@ import {
   type SegmentOption,
 } from "@/src/shared/components/forms/segmented-control"
 import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { appToast } from "@/src/shared/lib/app-toast"
 import { Button } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 
@@ -80,9 +81,11 @@ function GmailConnectSheetForm({
   const [choice, setChoice] = useState<PeriodValue>(initialChoice)
   const [sender, setSender] = useState(initialSender)
   const [discardOpen, setDiscardOpen] = useState(false)
-  const selectedChoice: EmailImportPeriodChoice | null =
-    choice === "" ? null : choice
-  const canSubmit = canConnectGmail({ reconnect, choice: selectedChoice })
+  const validation = emailConnectSchema({ reconnect }).safeParse({
+    choice,
+    senderFilter: sender,
+  })
+  const canSubmit = validation.success
   const hasChanges = emailConnectHasChanges(
     { choice, senderFilter: sender },
     { choice: initialChoice, senderFilter: initialSender }
@@ -105,8 +108,22 @@ function GmailConnectSheetForm({
   ]
 
   function submit() {
+    const parsed = emailConnectSchema({ reconnect }).safeParse({
+      choice,
+      senderFilter: sender,
+    })
+    if (!parsed.success) {
+      appToast.error({
+        text1:
+          parsed.error.issues[0]?.message ?? "Revisa el período y el filtro.",
+      })
+      return
+    }
     onConnect(
-      emailConnectBody({ choice: selectedChoice, senderFilter: sender })
+      emailConnectBody({
+        choice: parsed.data.choice,
+        senderFilter: parsed.data.senderFilter,
+      })
     )
   }
 

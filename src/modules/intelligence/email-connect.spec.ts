@@ -3,8 +3,8 @@ import { describe, it } from "node:test"
 
 import {
   KEEP_EMAIL_IMPORT_PERIOD,
-  canConnectGmail,
   emailConnectBody,
+  emailConnectSchema,
   emailConnectHasChanges,
   emailImportScopeLabel,
   emailImportStartLabel,
@@ -49,32 +49,56 @@ describe("emailConnectBody", () => {
       }
     )
   })
-
-  it("sin elección no envía período y no pide filtro", () => {
-    assert.deepEqual(emailConnectBody({ choice: null, senderFilter: "" }), {
-      senderFilter: null,
-    })
-  })
 })
 
-describe("canConnectGmail", () => {
+describe("emailConnectSchema", () => {
   it("una conexión nueva exige elegir un período", () => {
-    assert.equal(canConnectGmail({ reconnect: false, choice: null }), false)
+    const schema = emailConnectSchema({ reconnect: false })
+
     assert.equal(
-      canConnectGmail({ reconnect: false, choice: KEEP_EMAIL_IMPORT_PERIOD }),
+      schema.safeParse({ choice: "", senderFilter: "" }).success,
       false
     )
     assert.equal(
-      canConnectGmail({ reconnect: false, choice: "LAST_3_MONTHS" }),
+      schema.safeParse({
+        choice: KEEP_EMAIL_IMPORT_PERIOD,
+        senderFilter: "",
+      }).success,
+      false
+    )
+    assert.equal(
+      schema.safeParse({ choice: "LAST_3_MONTHS", senderFilter: "" }).success,
       true
     )
   })
 
-  it("una reconexión puede mantener el período guardado", () => {
-    assert.equal(canConnectGmail({ reconnect: true, choice: null }), true)
+  it("una reconexión admite mantener el período guardado", () => {
     assert.equal(
-      canConnectGmail({ reconnect: true, choice: KEEP_EMAIL_IMPORT_PERIOD }),
+      emailConnectSchema({ reconnect: true }).safeParse({
+        choice: KEEP_EMAIL_IMPORT_PERIOD,
+        senderFilter: "bhd.com.do",
+      }).success,
       true
+    )
+  })
+
+  it("recorta el filtro y limita su largo", () => {
+    const schema = emailConnectSchema({ reconnect: true })
+    const parsed = schema.safeParse({
+      choice: KEEP_EMAIL_IMPORT_PERIOD,
+      senderFilter: "  bhd.com.do ",
+    })
+
+    assert.equal(parsed.success, true)
+    if (parsed.success) {
+      assert.equal(parsed.data.senderFilter, "bhd.com.do")
+    }
+    assert.equal(
+      schema.safeParse({
+        choice: KEEP_EMAIL_IMPORT_PERIOD,
+        senderFilter: "x".repeat(254),
+      }).success,
+      false
     )
   })
 })

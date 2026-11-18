@@ -1,3 +1,5 @@
+import { z } from "zod"
+
 import { formatDayMonthYear } from "@/src/shared/lib/date-format"
 
 /** Períodos que acepta `POST /intelligence/email/connect`. */
@@ -37,30 +39,34 @@ export function emailConnectBody({
   choice,
   senderFilter,
 }: {
-  choice: EmailImportPeriodChoice | null
+  choice: EmailImportPeriodChoice
   senderFilter: string
 }): EmailConnectBody {
   const body: EmailConnectBody = {
     senderFilter: normalizeSenderFilter(senderFilter),
   }
-  if (choice !== null && choice !== KEEP_EMAIL_IMPORT_PERIOD) {
+  if (choice !== KEEP_EMAIL_IMPORT_PERIOD) {
     body.period = choice
   }
   return body
 }
 
-/** Una conexión nueva exige período; una reconexión puede mantener el guardado. */
-export function canConnectGmail({
-  reconnect,
-  choice,
-}: {
-  reconnect: boolean
-  choice: EmailImportPeriodChoice | null
-}): boolean {
-  if (reconnect) {
-    return true
-  }
-  return choice !== null && choice !== KEEP_EMAIL_IMPORT_PERIOD
+const EMAIL_IMPORT_PERIOD_CHOICES = [
+  KEEP_EMAIL_IMPORT_PERIOD,
+  ...EMAIL_IMPORT_PERIODS,
+] as const
+
+/**
+ * Una sola validación para habilitar el botón y para el envío: una conexión
+ * nueva exige un período y la reconexión admite mantener el guardado.
+ */
+export function emailConnectSchema({ reconnect }: { reconnect: boolean }) {
+  return z.object({
+    choice: reconnect
+      ? z.enum(EMAIL_IMPORT_PERIOD_CHOICES)
+      : z.enum(EMAIL_IMPORT_PERIODS),
+    senderFilter: z.string().trim().max(253, "El filtro es demasiado largo"),
+  })
 }
 
 /** La fecha guardada es un corte UTC: se pinta por su día, sin mover la zona. */
