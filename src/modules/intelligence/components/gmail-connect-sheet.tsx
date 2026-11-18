@@ -135,6 +135,9 @@ function GmailConnectSheetForm({
   }
 
   function requestClose() {
+    if (pending) {
+      return
+    }
     if (hasChanges) {
       setDiscardOpen(true)
       return
@@ -151,7 +154,6 @@ function GmailConnectSheetForm({
             requestClose()
           }
         }}
-        pending={pending}
         title={reconnect ? "Reconectar Gmail" : "Conectar Gmail"}
         description={
           reconnect
@@ -202,6 +204,7 @@ function GmailConnectSheetForm({
             options={periodOptions}
             orientation="vertical"
             fullWidth
+            disabled={pending}
           />
           {reconnect && currentStart ? (
             <p className="px-1 text-sm text-muted-foreground">
@@ -217,6 +220,7 @@ function GmailConnectSheetForm({
             value={sender}
             onChange={setSender}
             onBlur={() => setSenderTouched(true)}
+            disabled={pending}
             maxLength={253}
             error={senderError}
             placeholder="bhd.com.do"
