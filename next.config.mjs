@@ -81,6 +81,7 @@ const nextConfig = {
   },
 
   experimental: {
+    agentUpgrade: "security",
     optimizePackageImports: ["@hugeicons/core-free-icons"],
   },
 
