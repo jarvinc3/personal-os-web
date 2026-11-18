@@ -20,6 +20,7 @@ import {
   receivableVariants,
 } from "@/src/modules/galleries/cards/variants/planning"
 import { proposalVariants } from "@/src/modules/galleries/cards/variants/proposal"
+import { importReviewVariants } from "@/src/modules/galleries/cards/variants/import-review"
 import { recurringVariants } from "@/src/modules/galleries/cards/variants/recurring"
 import { subscriptionVariants } from "@/src/modules/galleries/cards/variants/subscriptions"
 import { wealthVariants } from "@/src/modules/galleries/cards/variants/wealth"
@@ -45,6 +46,7 @@ const CARD_GALLERY_VARIANTS: Record<
   patrimonio: wealthVariants,
   recurrente: recurringVariants,
   detectado: proposalVariants,
+  "import-en-revision": importReviewVariants,
   notificacion: notificationVariants,
   chat: chatVariants,
   avisos: alertVariants,

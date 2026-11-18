@@ -16,6 +16,7 @@ import {
   readImportReviewCandidate,
   readImportReviewItem,
 } from "./import-review-view.ts"
+import { importReviewEndpointPayload } from "./import-review.fixtures.ts"
 
 const display: FinanceMoneyDisplay = {
   currency: "DOP",
@@ -41,56 +42,56 @@ function candidateOf(
   }
 }
 
+const emptyCandidate: ImportReviewCandidate = {
+  amount: null,
+  currency: null,
+  transactionDate: null,
+  suggestedTransactionDate: null,
+  merchant: null,
+  bankReference: null,
+  movementClass: null,
+  last4: null,
+  accountNumberLast4: null,
+}
+
 describe("readImportReviewCandidate", () => {
-  it("keeps only the fields the queue paints", () => {
-    const candidate = readImportReviewCandidate({
-      amount: 2500,
-      currency: "DOP",
-      transactionDate: "2026-11-10T14:30:00.000Z",
-      suggestedTransactionDate: "2026-11-09T00:00:00.000Z",
-      merchant: "Supermercado",
-      bankReference: "REF-1",
-      movementClass: "PURCHASE",
-      last4: "4821",
-      accountNumberLast4: "0016",
-      direction: "DEBIT",
-      confidence: 0.8,
-    })
+  it("reads the transaction inside the candidate returned by the endpoint", () => {
+    const candidate = readImportReviewCandidate(
+      importReviewEndpointPayload[0].candidate
+    )
 
     assert.deepEqual(candidate, {
-      amount: 2500,
+      amount: 1250,
       currency: "DOP",
       transactionDate: "2026-11-10T14:30:00.000Z",
-      suggestedTransactionDate: "2026-11-09T00:00:00.000Z",
-      merchant: "Supermercado",
-      bankReference: "REF-1",
+      suggestedTransactionDate: null,
+      merchant: "Supermercado Ejemplo",
+      bankReference: "REF-8891",
       movementClass: "PURCHASE",
       last4: "4821",
-      accountNumberLast4: "0016",
+      accountNumberLast4: null,
     })
   })
 
-  it("returns nulls for a missing or malformed candidate", () => {
-    for (const value of [null, undefined, "texto", 42, []]) {
-      assert.deepEqual(readImportReviewCandidate(value), {
-        amount: null,
-        currency: null,
-        transactionDate: null,
-        suggestedTransactionDate: null,
-        merchant: null,
-        bankReference: null,
-        movementClass: null,
-        last4: null,
-        accountNumberLast4: null,
-      })
+  it("returns nulls when the candidate has no transaction", () => {
+    const candidatesWithoutTransaction: unknown[] = [
+      null,
+      undefined,
+      "texto",
+      42,
+      [],
+      { relevance: true, routes: ["FINANCE"], confidence: 0.92 },
+      { transaction: [] },
+    ]
+
+    for (const value of candidatesWithoutTransaction) {
+      assert.deepEqual(readImportReviewCandidate(value), emptyCandidate)
     }
   })
 
   it("rejects wrong types instead of coercing them", () => {
     const candidate = readImportReviewCandidate({
-      amount: "2500",
-      currency: 123,
-      merchant: "   ",
+      transaction: { amount: "2500", currency: 123, merchant: "   " },
     })
 
     assert.equal(candidate.amount, null)
@@ -100,22 +101,20 @@ describe("readImportReviewCandidate", () => {
 })
 
 describe("readImportReviewItem", () => {
-  it("validates the candidate and keeps the signal data", () => {
-    const item = readImportReviewItem({
-      id: "import-1",
-      signalId: "signal-1",
-      sourceEmailMessageId: "message-1",
-      reviewReason: "NO_LEDGER_TARGET",
-      candidate: { amount: 2500, merchant: "Supermercado" },
-      createdAt: "2026-11-10T15:00:00.000Z",
-      updatedAt: "2026-11-10T15:00:00.000Z",
-    })
+  it("unwraps the transaction and keeps the signal data", () => {
+    const item = readImportReviewItem(importReviewEndpointPayload[1])
 
-    assert.equal(item.id, "import-1")
-    assert.equal(item.reviewReason, "NO_LEDGER_TARGET")
+    assert.equal(item.id, "import-2")
+    assert.equal(item.reviewReason, "CARD_PAYMENT_SOURCE_ACCOUNT_AMBIGUOUS")
     assert.equal(item.candidate.amount, 2500)
-    assert.equal(item.candidate.merchant, "Supermercado")
-    assert.equal(item.candidate.bankReference, null)
+    assert.equal(item.candidate.currency, "DOP")
+    assert.equal(item.candidate.last4, "4821")
+    assert.equal(item.candidate.accountNumberLast4, "0016")
+    assert.equal(
+      item.candidate.suggestedTransactionDate,
+      "2026-11-11T00:00:00.000Z"
+    )
+    assert.equal(item.candidate.merchant, null)
   })
 })
 

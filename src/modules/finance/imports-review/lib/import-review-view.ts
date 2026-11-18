@@ -88,16 +88,33 @@ function readAmount(
 }
 
 /**
+ * El back guarda la señal completa en `candidate`, así que los datos del
+ * movimiento viven en `candidate.transaction`. Un candidato sin esa transacción
+ * no aporta nada: no se leen campos de la raíz.
+ */
+function readCandidateTransaction(value: unknown): Record<string, unknown> {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return {}
+  }
+  const transaction = (value as Record<string, unknown>).transaction
+  if (
+    typeof transaction !== "object" ||
+    transaction === null ||
+    Array.isArray(transaction)
+  ) {
+    return {}
+  }
+  return transaction as Record<string, unknown>
+}
+
+/**
  * El candidato llega como JSON del correo: se valida una vez y la vista confía
  * en el resultado. Un campo ausente o de otro tipo queda en null.
  */
 export function readImportReviewCandidate(
   value: unknown
 ): ImportReviewCandidate {
-  const source =
-    typeof value === "object" && value !== null && !Array.isArray(value)
-      ? (value as Record<string, unknown>)
-      : {}
+  const source = readCandidateTransaction(value)
   return {
     amount: readAmount(source, "amount"),
     currency: readText(source, "currency"),
