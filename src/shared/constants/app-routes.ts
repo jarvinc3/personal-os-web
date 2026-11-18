@@ -52,6 +52,7 @@ export const APP_ROUTES = {
     financeCash: FINANCE_CASH_PATH,
     financeCategories: "/finance/categories",
     financeBankCharges: "/finance/bank-charges",
+    financeImportsReview: "/finance/imports/review",
     financeRecycleBin: "/finance/recycle-bin",
     financeInstitution: (institutionId: string) =>
       `${FINANCE_INSTITUTIONS_PATH}/${institutionId}`,
