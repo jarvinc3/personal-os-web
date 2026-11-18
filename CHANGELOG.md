@@ -6,6 +6,8 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Agregado
 
+- El pago de tarjeta registrado a mano pide confirmación cuando el back responde 409 `CARD_PAYMENT_POSSIBLE_DUPLICATE`: el diálogo muestra el monto, la fecha, la cuenta de origen y la tarjeta del pago importado que se le parece, y solo guarda al confirmar con `duplicateAcknowledged: true`. Cancelar no registra nada y, sin coincidencia, el flujo no cambia (#423; contrato de back #389).
+
 - Productos estrena **Imports del correo** (`/finance/imports/review`): la cola de correos que quedaron en revisión con su motivo y los datos del movimiento detectado —monto, fecha, comercio, referencia y el producto por sus últimos 4—, separada de las propuestas de productos. La fila de Productos cuenta los pendientes y se esconde cuando el entorno no tiene el endpoint; la pantalla tiene estados de carga, vacío y error reintentable (#424; contrato de back #383).
 
 - Productos › **Detectados en correos** aprueba con un paso a paso de formularios nativos: la institución se salta si el back marca una compatible y, si no, se crea con el formulario de siempre; el producto se crea con el alta nativa de cuenta o tarjeta, prellenada desde el correo (una cuenta basta con los últimos 4 dígitos) y con su vista previa. Cuando el back marca un producto existente, la propuesta ofrece **Vincular a producto existente** con `approve { productId }`, sin crear otra. Si el approve falla, se reintenta solo con ese id. Se retira el formulario propio y el `PATCH` desde la web, las cuentas se listan antes que las tarjetas, se avisa qué falta en cada débito, los errores de carga usan el mensaje de Finanzas y la pantalla explica el origen de los correos (#413; back #374).
