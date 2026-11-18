@@ -88,6 +88,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Corregido
 
+- #431: el CI usa `pull_request_target` para los PRs, así que la guarda que bloquea PRs de fork corre desde la rama base y un fork no puede quitarla; solo los PRs del mismo repositorio hacen checkout del head en `pc-casa-web`.
 - #289: retira de la tabla la referencia a la card de sincronización de Finanzas que ya no existe y señala el estado integrado actual de Gmail en Intelligence.
 - Al cerrar desde un movimiento importado la hoja del correo de origen, se vuelve al detalle del movimiento y se conserva el estado de navegación (#389).
 - Cerrar el detalle de un correo de Inteligencia reescribe la URL en vez de retroceder: Atrás ya no sale de Inteligencia ni reabre el panel, y la vista se queda en Revisión con el panel cerrado (#376).
