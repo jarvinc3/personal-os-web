@@ -155,13 +155,13 @@ describe("importReviewAmountLabel", () => {
     assert.match(importReviewAmountLabel(candidateOf(), display) ?? "", /2,500/)
   })
 
-  it("uses the display currency when the candidate has none", () => {
+  it("omits the amount when the candidate has no currency", () => {
     const label = importReviewAmountLabel(
       candidateOf({ currency: null }),
       display
     )
 
-    assert.match(label ?? "", /DOP/)
+    assert.equal(label, null)
   })
 
   it("returns null without an amount", () => {

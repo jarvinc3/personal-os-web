@@ -134,16 +134,20 @@ export function importReviewMovementLabel(
   return IMPORT_REVIEW_MOVEMENT_LABELS[movementClass] ?? null
 }
 
+/**
+ * Sin moneda no hay importe que mostrar: pintarlo en la moneda base inventaría
+ * una denominación que el correo no trae.
+ */
 export function importReviewAmountLabel(
   candidate: ImportReviewCandidate,
   display: FinanceMoneyDisplay
 ): string | null {
-  if (candidate.amount === null) {
+  if (candidate.amount === null || !candidate.currency) {
     return null
   }
   return formatFinanceMoney(candidate.amount, {
     ...display,
-    currency: candidate.currency ?? display.currency,
+    currency: candidate.currency,
   })
 }
 
