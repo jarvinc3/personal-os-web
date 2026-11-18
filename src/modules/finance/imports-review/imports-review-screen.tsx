@@ -121,7 +121,10 @@ function ImportsReviewScreenBody() {
             <ImportReviewCard key={item.id} item={item} display={display} />
           ))}
         </div>
+        {/* El centinela guarda su propio «ya pedí más»: se remonta por lote
+            para que el scroll siga pidiendo el siguiente. */}
         <InfiniteListSentinel
+          key={visibleCount}
           hasNextPage={shown.length < items.length}
           isFetchingNextPage={false}
           onLoadMore={() =>
