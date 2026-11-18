@@ -39,6 +39,8 @@ export type CreateCardPaymentBody = {
   currency?: string
   transactionDate: string
   notes?: string
+  /** Confirma un pago parecido a uno importado (409 del back). */
+  duplicateAcknowledged?: boolean
 }
 
 /** A completed movement only accepts its non-monetary fields. */

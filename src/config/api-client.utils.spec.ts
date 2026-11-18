@@ -1,6 +1,9 @@
 import assert from "node:assert/strict"
 import { describe, it } from "node:test"
-import { parseRetryAfterHeader } from "@/src/config/api-client.utils"
+import {
+  mapStatusToError,
+  parseRetryAfterHeader,
+} from "@/src/config/api-client.utils"
 
 describe("Retry-After", () => {
   it("lee la espera en segundos", () => {
@@ -22,5 +25,36 @@ describe("Retry-After", () => {
     assert.equal(parseRetryAfterHeader(null), undefined)
     assert.equal(parseRetryAfterHeader(""), undefined)
     assert.equal(parseRetryAfterHeader("later"), undefined)
+  })
+})
+
+describe("mapStatusToError", () => {
+  it("lleva los details del cuerpo al error", () => {
+    const error = mapStatusToError(409, {
+      message: "Ya hay un pago parecido importado por correo.",
+      code: "CARD_PAYMENT_POSSIBLE_DUPLICATE",
+      path: "/api/finance/card-payments",
+      details: {
+        matchedBy: "SIMILAR",
+        candidate: { amount: "2500", currency: "DOP" },
+      },
+    })
+
+    assert.equal(error.status, 409)
+    assert.equal(error.code, "CARD_PAYMENT_POSSIBLE_DUPLICATE")
+    assert.deepEqual(error.details, {
+      matchedBy: "SIMILAR",
+      candidate: { amount: "2500", currency: "DOP" },
+    })
+  })
+
+  it("conserva el comercio que ya tiene el nombre", () => {
+    const error = mapStatusToError(409, {
+      message: "Ese nombre ya existe",
+      existingMerchantId: "merchant-1",
+    })
+
+    assert.equal(error.existingMerchantId, "merchant-1")
+    assert.equal(error.details, null)
   })
 })

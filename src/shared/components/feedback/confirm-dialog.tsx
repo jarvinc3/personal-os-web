@@ -3,6 +3,8 @@
 import { XIcon, type LucideIcon } from "lucide-react"
 import type { ReactNode } from "react"
 
+import { Button } from "@/src/shared/components/ui/button"
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -39,6 +41,8 @@ type ConfirmDialogProps = {
   confirmDisabled?: boolean
   /** Caja ancha, para un diálogo con un formulario dentro. */
   wide?: boolean
+  /** Deja el diálogo abierto al confirmar para una acción asíncrona; lo cierra el caller. */
+  closeOnConfirm?: boolean
   children?: ReactNode
 }
 
@@ -61,8 +65,20 @@ export function ConfirmDialog({
   cancelLabel = CANCEL_LABEL,
   confirmDisabled = false,
   wide = false,
+  closeOnConfirm = true,
   children,
 }: ConfirmDialogProps) {
+  const actionContent = (
+    <>
+      {pending ? (
+        <Spinner data-icon="inline-start" />
+      ) : (
+        <ConfirmIcon className="size-4 shrink-0" aria-hidden="true" />
+      )}
+      {pending && pendingLabel ? pendingLabel : confirmLabel}
+    </>
+  )
+
   return (
     <AlertDialog
       open={open}
@@ -94,18 +110,23 @@ export function ConfirmDialog({
             <XIcon className="size-4 shrink-0" aria-hidden="true" />
             {cancelLabel}
           </AlertDialogCancel>
-          <AlertDialogAction
-            variant={tone === "danger" ? "destructive" : "default"}
-            disabled={pending || confirmDisabled}
-            onClick={onConfirm}
-          >
-            {pending ? (
-              <Spinner data-icon="inline-start" />
-            ) : (
-              <ConfirmIcon className="size-4 shrink-0" aria-hidden="true" />
-            )}
-            {pending && pendingLabel ? pendingLabel : confirmLabel}
-          </AlertDialogAction>
+          {closeOnConfirm ? (
+            <AlertDialogAction
+              variant={tone === "danger" ? "destructive" : "default"}
+              disabled={pending || confirmDisabled}
+              onClick={onConfirm}
+            >
+              {actionContent}
+            </AlertDialogAction>
+          ) : (
+            <Button
+              variant={tone === "danger" ? "destructive" : "default"}
+              disabled={pending || confirmDisabled}
+              onClick={onConfirm}
+            >
+              {actionContent}
+            </Button>
+          )}
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
