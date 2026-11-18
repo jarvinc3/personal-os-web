@@ -11,28 +11,47 @@ import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
 import { useInstitutions } from "@/src/modules/finance/shared/hooks/use-institutions"
 import { useCreateCardPayment } from "@/src/modules/finance/shared/hooks/use-transactions"
-import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
-import { todayDateInput } from "@/src/modules/finance/shared/lib/ledger-form"
-import { buildCreateCardPaymentBody } from "@/src/modules/finance/shared/lib/ledger-payloads"
 import {
+  cardPaymentDuplicateFromError,
+  type CardPaymentDuplicate,
+} from "@/src/modules/finance/shared/lib/card-payment-duplicate"
+import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
+import {
+  formatCalendarDate,
+  todayDateInput,
+  wallClockToIso,
+} from "@/src/modules/finance/shared/lib/ledger-form"
+import {
+  buildCreateCardPaymentBody,
   encodeLedgerTarget,
   splitLedgerTarget,
+  type CreateCardPaymentBody,
 } from "@/src/modules/finance/shared/lib/ledger-payloads"
 import {
   formatFinanceMoney,
   parseFinanceMoney,
 } from "@/src/modules/finance/shared/lib/money"
 import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { ConfirmDialog } from "@/src/shared/components/feedback/confirm-dialog"
 import { Button } from "@/src/shared/components/ui/button"
 import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
 import { Spinner } from "@/src/shared/components/ui/spinner"
-import { SummarySection } from "@/src/shared/components/data-display/summary"
+import {
+  SummaryItem,
+  SummarySection,
+} from "@/src/shared/components/data-display/summary"
 import { usePicker } from "@/src/shared/hooks/use-picker"
 import { appToast } from "@/src/shared/lib/app-toast"
-import { CoinsIcon, CreditCardIcon, WalletIcon } from "lucide-react"
+import {
+  CalendarIcon,
+  CoinsIcon,
+  CreditCardIcon,
+  PlusIcon,
+  TriangleAlertIcon,
+  WalletIcon,
+} from "lucide-react"
 import { useMemo, useState } from "react"
 import { useUserTimeZone } from "@/src/modules/settings/hooks/use-user-time-zone"
-import { wallClockToIso } from "@/src/modules/finance/shared/lib/ledger-form"
 
 type CardPaymentSheetProps = {
   open: boolean
@@ -69,6 +88,10 @@ export function CardPaymentSheet({
   const [transactionDate, setTransactionDate] = useState(todayDateInput())
   const timeZone = useUserTimeZone()
   const [amountError, setAmountError] = useState<string | null>(null)
+  const [pendingDuplicate, setPendingDuplicate] = useState<{
+    body: CreateCardPaymentBody
+    candidate: CardPaymentDuplicate
+  } | null>(null)
   const { picker, openPicker, closeHandlerFor } = usePicker<"none" | "account">(
     "none"
   )
@@ -89,6 +112,9 @@ export function CardPaymentSheet({
   )
 
   const effectiveAccountId = accountId || accounts[0]?.id || ""
+  const sourceAccountName =
+    accounts.find((account) => account.id === effectiveAccountId)?.name ??
+    "Cuenta de origen"
 
   async function onSubmit() {
     const payload = buildCreateCardPaymentBody({
@@ -105,6 +131,29 @@ export function CardPaymentSheet({
     try {
       await createMutation.mutateAsync(payload.body)
       appToast.success({ text1: "Pago registrado" })
+      onOpenChange(false)
+    } catch (error) {
+      const candidate = cardPaymentDuplicateFromError(error)
+      if (candidate) {
+        setPendingDuplicate({ body: payload.body, candidate })
+        return
+      }
+      appToast.error({ text1: financeErrorMessage(error) })
+    }
+  }
+
+  /** Reenvía el mismo pago confirmando que no es el duplicado del importado. */
+  async function confirmDuplicate() {
+    if (!pendingDuplicate) {
+      return
+    }
+    try {
+      await createMutation.mutateAsync({
+        ...pendingDuplicate.body,
+        duplicateAcknowledged: true,
+      })
+      appToast.success({ text1: "Pago registrado" })
+      setPendingDuplicate(null)
       onOpenChange(false)
     } catch (error) {
       appToast.error({ text1: financeErrorMessage(error) })
@@ -226,6 +275,60 @@ export function CardPaymentSheet({
           setAccountId(splitLedgerTarget(next).accountId ?? "")
         }
       />
+
+      <ConfirmDialog
+        open={pendingDuplicate !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setPendingDuplicate(null)
+          }
+        }}
+        icon={TriangleAlertIcon}
+        title="Ya hay un pago parecido"
+        description="Ese pago llegó por correo y todavía no está registrado a mano. Si continúas, quedan dos pagos con los mismos datos."
+        confirmLabel="Registrar igual"
+        confirmIcon={PlusIcon}
+        pending={createMutation.isPending}
+        pendingLabel="Registrando..."
+        onConfirm={() => void confirmDuplicate()}
+        wide
+      >
+        {pendingDuplicate ? (
+          <div className="flex flex-col">
+            <SummaryItem
+              title="Monto"
+              icon={CoinsIcon}
+              value={formatFinanceMoney(pendingDuplicate.candidate.amount, {
+                ...display,
+                currency: pendingDuplicate.candidate.currency ?? "",
+              })}
+            />
+            <SummaryItem
+              title="Fecha"
+              icon={CalendarIcon}
+              value={
+                pendingDuplicate.candidate.transactionDate
+                  ? formatCalendarDate(
+                      pendingDuplicate.candidate.transactionDate,
+                      formatLocale
+                    )
+                  : "—"
+              }
+            />
+            <SummaryItem
+              title="Cuenta de origen"
+              icon={WalletIcon}
+              value={sourceAccountName}
+            />
+            <SummaryItem
+              title="Tarjeta"
+              icon={CreditCardIcon}
+              value={cardName}
+              isLast
+            />
+          </div>
+        ) : null}
+      </ConfirmDialog>
     </>
   )
 }

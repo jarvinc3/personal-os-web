@@ -5,6 +5,15 @@ export type ApiErrorBody = {
   requestId?: string
   /** Sent with a merchant name conflict: the merchant that already has it. */
   existingMerchantId?: string | null
+  /** Contexto extra del fallo; hoy el 409 del pago de tarjeta trae el candidato. */
+  details?: unknown
+}
+
+function readResponseDetails(value: unknown): Record<string, unknown> | null {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return null
+  }
+  return value as Record<string, unknown>
 }
 
 export class ApiError extends Error {
@@ -14,6 +23,8 @@ export class ApiError extends Error {
   readonly path?: string
   readonly existingMerchantId?: string | null
   readonly retryAfterMs: number | null
+  /** Cuerpo `details` del error, cuando el back lo manda. */
+  readonly details: Record<string, unknown> | null
 
   constructor(
     status: number,
@@ -21,9 +32,10 @@ export class ApiError extends Error {
     code?: string,
     requestId?: string,
     path?: string,
-    details?: {
+    extras?: {
       existingMerchantId?: string | null
       retryAfterMs?: number | null
+      responseDetails?: Record<string, unknown> | null
     }
   ) {
     super(message)
@@ -32,8 +44,9 @@ export class ApiError extends Error {
     this.code = code
     this.requestId = requestId
     this.path = path
-    this.existingMerchantId = details?.existingMerchantId ?? null
-    this.retryAfterMs = details?.retryAfterMs ?? null
+    this.existingMerchantId = extras?.existingMerchantId ?? null
+    this.retryAfterMs = extras?.retryAfterMs ?? null
+    this.details = extras?.responseDetails ?? null
   }
 }
 
@@ -120,7 +133,10 @@ export function mapStatusToError(
         code ?? "CONFLICT",
         requestId,
         path,
-        { existingMerchantId: body.existingMerchantId ?? null }
+        {
+          existingMerchantId: body.existingMerchantId ?? null,
+          responseDetails: readResponseDetails(body.details),
+        }
       )
     case 429:
       return new ApiError(
