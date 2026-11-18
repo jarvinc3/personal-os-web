@@ -8,6 +8,7 @@ export const FINANCE_COUNT_NOUNS = {
   loan: { singular: "préstamo", plural: "préstamos" },
   installment: { singular: "cuota", plural: "cuotas" },
   message: { singular: "correo", plural: "correos" },
+  import: { singular: "import", plural: "imports" },
   proposal: { singular: "propuesta", plural: "propuestas" },
 } as const
 
