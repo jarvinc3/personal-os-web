@@ -2,6 +2,7 @@
 
 import { InstitutionSwapStack } from "@/src/modules/finance/products/components/institution-swap-stack"
 import { ProposalsEntry } from "@/src/modules/finance/product-proposals"
+import { ImportsReviewEntry } from "@/src/modules/finance/imports-review"
 import { CategorySheet } from "@/src/modules/finance/catalog"
 import { MerchantEditSheet } from "@/src/modules/finance/merchants/components/merchant-edit-sheet"
 import { FinanceExpenseTrendBadge } from "@/src/modules/finance/shared/components/expense-trend-badge"
@@ -293,6 +294,8 @@ export function FinanceProductsList({
       </div>
 
       <ProposalsEntry isEnabled={enabled} />
+
+      <ImportsReviewEntry isEnabled={enabled} />
 
       <div className="flex flex-col gap-2">
         <span className="text-sm text-muted-foreground">Atajos</span>

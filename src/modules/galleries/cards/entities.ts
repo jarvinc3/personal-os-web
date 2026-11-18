@@ -9,6 +9,7 @@ import {
   HandshakeIcon,
   LandmarkIcon,
   MailSearchIcon,
+  MailWarningIcon,
   PiggyBankIcon,
   ReceiptTextIcon,
   RefreshCwIcon,
@@ -39,6 +40,7 @@ export type CardGalleryEntitySlug =
   | "patrimonio"
   | "recurrente"
   | "detectado"
+  | "import-en-revision"
   | "notificacion"
   | "chat"
   | "avisos"
@@ -146,6 +148,12 @@ export const CARD_GALLERY_ENTITIES: readonly CardGalleryEntity[] = [
     name: "Propuesta de producto",
     description: "Cuenta, tarjeta y aprobada",
     icon: MailSearchIcon,
+  },
+  {
+    slug: "import-en-revision",
+    name: "Import en revisión",
+    description: "Compra, transferencia, pago y sin moneda",
+    icon: MailWarningIcon,
   },
   {
     slug: "notificacion",

@@ -101,6 +101,7 @@ export const API_ENDPOINTS = {
     TRANSACTIONS: "/finance/transactions",
     TRANSFERS: "/finance/transfers",
     CARD_PAYMENTS: "/finance/card-payments",
+    IMPORTS_REVIEW: "/finance/imports/review",
     TRANSFER: (id: string) => `/finance/transfers/${id}`,
     TRANSFER_UNCONFIRM: (id: string) => `/finance/transfers/${id}/unconfirm`,
     TRANSFER_CONFIRM: (id: string) => `/finance/transfers/${id}/confirm`,

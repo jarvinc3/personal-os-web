@@ -18,6 +18,7 @@ import type {
   FinanceSavingsGoal,
   FinanceSubscription,
   FinanceTransaction,
+  ImportReviewItem,
 } from "@/src/modules/finance/shared/types/entities"
 import { GALLERY_DISPLAY } from "@/src/modules/galleries/cards/mock/display"
 
@@ -952,3 +953,83 @@ export const galleryDoubtfulReceivableWealthLine = galleryWealthLine({
   doubtful: true,
   entity: galleryReceivable,
 })
+
+export const galleryReviewPurchase: ImportReviewItem = {
+  id: "import-compra",
+  signalId: "signal-compra",
+  sourceEmailMessageId: "message-compra",
+  reviewReason: "NO_LEDGER_TARGET",
+  candidate: {
+    amount: 1250,
+    currency: "DOP",
+    transactionDate: "2026-10-20T15:30:00.000Z",
+    suggestedTransactionDate: null,
+    merchant: "Supermercado Ejemplo",
+    bankReference: "REF-8891",
+    movementClass: "PURCHASE",
+    last4: "4821",
+    accountNumberLast4: null,
+  },
+  createdAt: "2026-10-20T15:31:00.000Z",
+  updatedAt: "2026-10-20T15:31:00.000Z",
+}
+
+export const galleryReviewTransfer: ImportReviewItem = {
+  id: "import-transferencia",
+  signalId: "signal-transferencia",
+  sourceEmailMessageId: "message-transferencia",
+  reviewReason: "TRANSFER_ACCOUNT_AMBIGUOUS",
+  candidate: {
+    amount: 8000,
+    currency: "DOP",
+    transactionDate: "2026-10-21T09:15:00.000Z",
+    suggestedTransactionDate: null,
+    merchant: null,
+    bankReference: "F-TRA-1",
+    movementClass: "TRANSFER_OUT",
+    last4: null,
+    accountNumberLast4: "0016",
+  },
+  createdAt: "2026-10-21T09:16:00.000Z",
+  updatedAt: "2026-10-21T09:16:00.000Z",
+}
+
+export const galleryReviewCardPayment: ImportReviewItem = {
+  id: "import-pago-tarjeta",
+  signalId: "signal-pago-tarjeta",
+  sourceEmailMessageId: "message-pago-tarjeta",
+  reviewReason: "CARD_PAYMENT_POSSIBLE_DUPLICATE",
+  candidate: {
+    amount: 2500,
+    currency: "DOP",
+    transactionDate: "2026-10-22T18:00:00.000Z",
+    suggestedTransactionDate: null,
+    merchant: null,
+    bankReference: "PAY-335",
+    movementClass: "CARD_PAYMENT",
+    last4: "4821",
+    accountNumberLast4: "0016",
+  },
+  createdAt: "2026-10-22T18:02:00.000Z",
+  updatedAt: "2026-10-22T18:02:00.000Z",
+}
+
+export const galleryReviewMissingCurrency: ImportReviewItem = {
+  id: "import-sin-moneda",
+  signalId: "signal-sin-moneda",
+  sourceEmailMessageId: "message-sin-moneda",
+  reviewReason: "CURRENCY_MISSING",
+  candidate: {
+    amount: 100,
+    currency: null,
+    transactionDate: "2026-10-23T10:00:00.000Z",
+    suggestedTransactionDate: null,
+    merchant: "Farmacia Ejemplo",
+    bankReference: null,
+    movementClass: "PURCHASE",
+    last4: "4821",
+    accountNumberLast4: null,
+  },
+  createdAt: "2026-10-23T10:01:00.000Z",
+  updatedAt: "2026-10-23T10:01:00.000Z",
+}
