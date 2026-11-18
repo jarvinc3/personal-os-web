@@ -6,6 +6,10 @@ import { INTELLIGENCE_SHEET_KEYS } from "@/src/modules/intelligence/constants/sh
 import { MESSAGE_RETURN_TRANSACTION_QUERY_KEY } from "@/src/modules/intelligence/constants"
 import { shouldReturnToTransactionOnMessageClose } from "@/src/modules/intelligence/lib/message-return"
 import { shortMessageId } from "@/src/modules/intelligence/message-id"
+import { GmailConnectSheet } from "@/src/modules/intelligence/components/gmail-connect-sheet"
+import { emailImportScopeLabel } from "@/src/modules/intelligence/email-connect"
+import { useFormatLocale } from "@/src/modules/settings/hooks/use-format-locale"
+import { appToast } from "@/src/shared/lib/app-toast"
 import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
 import { Button } from "@/src/shared/components/ui/button"
@@ -119,6 +123,8 @@ function IntelligenceScreenBody() {
     sheetId: selectedMessageId,
     setOpen: setMessageSheetOpen,
   } = useSheetParam(INTELLIGENCE_SHEET_KEYS.message, { closeMode: "replace" })
+  const connectSheet = useSheetParam(INTELLIGENCE_SHEET_KEYS.emailConnect)
+  const formatLocale = useFormatLocale()
   const returnToTransactionId = searchParams.get(
     MESSAGE_RETURN_TRANSACTION_QUERY_KEY
   )
@@ -243,6 +249,14 @@ function IntelligenceScreenBody() {
   const connected = dashboard.connection.connected
   const receivedRange = dashboard.receivedRange
   const connection = dashboard.connection
+  const importScope =
+    emailImportScopeLabel(
+      {
+        importStartAt: connection.connected ? connection.importStartAt : null,
+        senderFilter: connection.connected ? connection.senderFilter : null,
+      },
+      formatLocale
+    ) ?? "desde el 1 de enero de 2026"
   const requiresReconnect = connection.connected && connection.requiresReconnect
   const syncProgress = connection.connected ? connection.syncProgress : null
   const oauthIncomplete =
@@ -365,11 +379,11 @@ function IntelligenceScreenBody() {
               title="Historial inicial"
               description={
                 dashboard.connection.initialSyncCompletedAt
-                  ? "Completo desde 1 ene 2026"
+                  ? `Completo ${importScope}`
                   : syncWarning
                     ? "Incompleto · la sincronización se detuvo"
                     : syncing
-                      ? "Importando desde 1 ene 2026"
+                      ? `Importando ${importScope}`
                       : "Pendiente"
               }
               icon={CalendarDays}
@@ -445,7 +459,7 @@ function IntelligenceScreenBody() {
                         type="button"
                         size="sm"
                         variant="outline"
-                        onClick={() => connectMutation.mutate()}
+                        onClick={() => connectSheet.setOpen(true)}
                         disabled={connectMutation.isPending}
                       >
                         {connectMutation.isPending ? (
@@ -552,7 +566,7 @@ function IntelligenceScreenBody() {
                 type="button"
                 variant="outline"
                 className="flex-1"
-                onClick={() => connectMutation.mutate()}
+                onClick={() => connectSheet.setOpen(true)}
                 disabled={
                   connectMutation.isPending ||
                   dashboard.connection.syncInProgress
@@ -638,13 +652,13 @@ function IntelligenceScreenBody() {
               </EmptyMedia>
               <EmptyTitle>Conecta tu correo</EmptyTitle>
               <EmptyDescription>
-                El bootstrap empieza el 1 de enero de 2026. Puedes revocar el
+                Elige desde cuándo importar antes de conectar. Puedes revocar el
                 consentimiento desde Privacidad.
               </EmptyDescription>
             </EmptyHeader>
             <Button
               type="button"
-              onClick={() => connectMutation.mutate()}
+              onClick={() => connectSheet.setOpen(true)}
               disabled={connectMutation.isPending}
             >
               {connectMutation.isPending ? (
@@ -839,6 +853,26 @@ function IntelligenceScreenBody() {
         open={messageSheetOpen}
         onOpenChange={handleMessageSheetOpenChange}
       />
+      <GmailConnectSheet
+        open={connectSheet.open}
+        onOpenChange={connectSheet.setOpen}
+        reconnect={connection.connected}
+        importStartAt={connection.connected ? connection.importStartAt : null}
+        senderFilter={connection.connected ? connection.senderFilter : null}
+        pending={connectMutation.isPending}
+        onConnect={(body) =>
+          connectMutation.mutate(body, {
+            onError: (error) => {
+              appToast.error({
+                text1:
+                  error instanceof Error && error.message
+                    ? error.message
+                    : "No se pudo iniciar la conexión con Gmail",
+              })
+            },
+          })
+        }
+      />
       <AlertDialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -846,7 +880,7 @@ function IntelligenceScreenBody() {
             <AlertDialogDescription>
               Se borrarán los mensajes importados, sus particiones y revisiones,
               observaciones y ejecuciones de correo. Gmail seguirá conectado;
-              después volveremos a sincronizar desde el 1 de enero de 2026.
+              después volveremos a sincronizar {importScope}.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

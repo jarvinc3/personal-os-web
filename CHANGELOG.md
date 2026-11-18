@@ -10,6 +10,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Agregado
 
+- Intelligence › Gmail pide el período de importación al conectar (hoy, último mes o últimos 3 meses) y un filtro de remitente opcional; ambos viajan a `POST /intelligence/email/connect`, el estado de la conexión muestra el corte y el filtro guardados, y al reconectar se conservan salvo que se elija otro período o se borre el filtro (#421; contrato de back #382).
 - El pago de tarjeta registrado a mano pide confirmación cuando el back responde 409 `CARD_PAYMENT_POSSIBLE_DUPLICATE`: el diálogo muestra el monto, la fecha, la cuenta de origen y la tarjeta del pago importado que se le parece, y solo guarda al confirmar con `duplicateAcknowledged: true`. Cancelar no registra nada y, sin coincidencia, el flujo no cambia (#423; contrato de back #389).
 
 - Productos estrena **Imports del correo** (`/finance/imports/review`): la cola de correos que quedaron en revisión con su motivo y los datos del movimiento detectado —monto, fecha, comercio, referencia y el producto por sus últimos 4—, separada de las propuestas de productos. La fila de Productos cuenta los pendientes y se esconde cuando el entorno no tiene el endpoint; la pantalla tiene estados de carga, vacío y error reintentable (#424; contrato de back #383).
