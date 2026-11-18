@@ -81,11 +81,18 @@ function GmailConnectSheetForm({
   const [choice, setChoice] = useState<PeriodValue>(initialChoice)
   const [sender, setSender] = useState(initialSender)
   const [discardOpen, setDiscardOpen] = useState(false)
-  const validation = emailConnectSchema({ reconnect }).safeParse({
+  const [senderTouched, setSenderTouched] = useState(false)
+  const connectSchema = emailConnectSchema({ reconnect })
+  const validation = connectSchema.safeParse({
     choice,
     senderFilter: sender,
   })
   const canSubmit = validation.success
+  const senderResult = connectSchema.shape.senderFilter.safeParse(sender)
+  const senderError =
+    senderTouched && !senderResult.success
+      ? senderResult.error.issues[0]?.message
+      : undefined
   const hasChanges = emailConnectHasChanges(
     { choice, senderFilter: sender },
     { choice: initialChoice, senderFilter: initialSender }
@@ -209,6 +216,9 @@ function GmailConnectSheetForm({
             label="Solo este dominio"
             value={sender}
             onChange={setSender}
+            onBlur={() => setSenderTouched(true)}
+            maxLength={253}
+            error={senderError}
             placeholder="bhd.com.do"
             description="Limita la importación a ese dominio y sus subdominios. Déjalo vacío para importar de todos."
             icon={GlobeIcon}
