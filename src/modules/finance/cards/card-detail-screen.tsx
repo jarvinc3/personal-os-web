@@ -452,8 +452,7 @@ function CardDetailScreenBody({ cardId }: CardDetailScreenProps) {
       <CardPaymentSheet
         open={openCardPaymentSheet}
         onOpenChange={setOpenCardPaymentSheet}
-        cardId={card.id}
-        cardName={card.name}
+        card={card}
         currencies={balances.map((balance) => balance.currency)}
         defaultCurrency={config.baseCurrency}
         minimumPayment={statements[0]?.minimumPayment}

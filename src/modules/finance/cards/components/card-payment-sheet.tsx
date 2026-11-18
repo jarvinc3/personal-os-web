@@ -6,6 +6,10 @@ import { FinanceHelpText } from "@/src/modules/finance/shared/components/forms/f
 import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
 import { DestinationPickerSheet } from "@/src/modules/finance/shared/components/pickers/destination-picker-sheet"
 import { DestinationTrigger } from "@/src/modules/finance/shared/components/pickers/destination-trigger"
+import {
+  AccountProductRow,
+  CardProductRow,
+} from "@/src/modules/finance/shared/components/product-rows"
 import { CATALOG_NONE } from "@/src/modules/finance/shared/constants/catalog"
 import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
@@ -50,13 +54,13 @@ import {
   WalletIcon,
 } from "lucide-react"
 import { useMemo, useReducer, useState } from "react"
+import type { FinanceCard } from "@/src/modules/finance/shared/types/entities"
 import { useUserTimeZone } from "@/src/modules/settings/hooks/use-user-time-zone"
 
 type CardPaymentSheetProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
-  cardId: string
-  cardName: string
+  card: FinanceCard
   currencies: readonly string[]
   defaultCurrency: string
   minimumPayment?: string
@@ -66,13 +70,14 @@ type CardPaymentSheetProps = {
 export function CardPaymentSheet({
   open,
   onOpenChange,
-  cardId,
-  cardName,
+  card,
   currencies,
   defaultCurrency,
   minimumPayment,
   closingBalance,
 }: CardPaymentSheetProps) {
+  const cardId = card.id
+  const cardName = card.name
   const createMutation = useCreateCardPayment()
   const { config, formatLocale } = useFinanceEnabled()
   const accountsQuery = useAccounts(open)
@@ -111,9 +116,8 @@ export function CardPaymentSheet({
   )
 
   const effectiveAccountId = accountId || accounts[0]?.id || ""
-  const sourceAccountName =
-    accounts.find((account) => account.id === effectiveAccountId)?.name ??
-    "Cuenta de origen"
+  const sourceAccount =
+    accounts.find((account) => account.id === effectiveAccountId) ?? null
 
   async function onSubmit() {
     const payload = buildCreateCardPaymentBody({
@@ -295,36 +299,51 @@ export function CardPaymentSheet({
         wide
       >
         {pendingDuplicate ? (
-          <div className="flex flex-col">
-            <SummaryItem
-              title="Monto"
-              icon={CoinsIcon}
-              value={formatFinanceMoney(pendingDuplicate.candidate.amount, {
-                ...display,
-                currency: pendingDuplicate.candidate.currency ?? "",
-              })}
-            />
-            <SummaryItem
-              title="Fecha"
-              icon={CalendarIcon}
-              value={
-                cardPaymentDuplicateDateLabel(pendingDuplicate.candidate, {
-                  timeZone,
-                  locale: formatLocale,
-                }) ?? "—"
-              }
-            />
-            <SummaryItem
-              title="Cuenta de origen"
-              icon={WalletIcon}
-              value={sourceAccountName}
-            />
-            <SummaryItem
-              title="Tarjeta"
-              icon={CreditCardIcon}
-              value={cardName}
-              isLast
-            />
+          <div className="flex flex-col gap-2">
+            <div className="flex flex-col">
+              <SummaryItem
+                title="Monto"
+                icon={CoinsIcon}
+                value={formatFinanceMoney(pendingDuplicate.candidate.amount, {
+                  ...display,
+                  currency: pendingDuplicate.candidate.currency ?? "",
+                })}
+              />
+              <SummaryItem
+                title="Fecha"
+                icon={CalendarIcon}
+                value={
+                  cardPaymentDuplicateDateLabel(pendingDuplicate.candidate, {
+                    timeZone,
+                    locale: formatLocale,
+                  }) ?? "—"
+                }
+                isLast
+              />
+            </div>
+            <div className="flex flex-col gap-1">
+              <span className="px-1 text-xs text-muted-foreground">
+                Cuenta de origen
+              </span>
+              {sourceAccount ? (
+                <AccountProductRow
+                  account={sourceAccount}
+                  display={display}
+                  variant="compact"
+                />
+              ) : null}
+            </div>
+            <div className="flex flex-col gap-1">
+              <span className="px-1 text-xs text-muted-foreground">
+                Tarjeta
+              </span>
+              <CardProductRow
+                card={card}
+                accounts={accounts}
+                display={display}
+                variant="compact"
+              />
+            </div>
           </div>
         ) : null}
       </ConfirmDialog>
