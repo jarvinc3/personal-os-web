@@ -8,6 +8,7 @@ import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/asyn
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
 import { financeLoadErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import { ErrorState } from "@/src/shared/components/feedback/error-state"
+import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
 import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
 import {
   Alert,
@@ -26,7 +27,10 @@ import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { InfoIcon, MailSearchIcon, MailWarningIcon } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { useCallback } from "react"
+import { useCallback, useState } from "react"
+
+/** Cards que se montan de entrada; el resto entra al bajar. */
+const IMPORTS_PAGE_SIZE = 12
 
 export function ImportsReviewScreen() {
   return (
@@ -41,6 +45,8 @@ function ImportsReviewScreenBody() {
   const { isEnabled, config, formatLocale } = useFinanceEnabled()
   const queueQuery = useImportReviewQueue(isEnabled)
   const items = queueQuery.data ?? []
+  const [visibleCount, setVisibleCount] = useState(IMPORTS_PAGE_SIZE)
+  const shown = items.slice(0, visibleCount)
   const unavailable = isImportReviewEndpointUnavailable(queueQuery.error)
   const display = {
     currency: config.baseCurrency,
@@ -111,10 +117,17 @@ function ImportsReviewScreenBody() {
         }
       >
         <div className="flex flex-col gap-2">
-          {items.map((item) => (
+          {shown.map((item) => (
             <ImportReviewCard key={item.id} item={item} display={display} />
           ))}
         </div>
+        <InfiniteListSentinel
+          hasNextPage={shown.length < items.length}
+          isFetchingNextPage={false}
+          onLoadMore={() =>
+            setVisibleCount((current) => current + IMPORTS_PAGE_SIZE)
+          }
+        />
       </AsyncRegion>
     </div>
   )
