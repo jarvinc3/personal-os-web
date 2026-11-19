@@ -6,7 +6,7 @@ import {
   analysisRunStatusLabel,
   describeVerification,
   knowledgeScopeLabel,
-  latestVerification,
+  latestBySequence,
   observationTypeLabel,
   verificationVerdictLabel,
   verifierActorLabel,
@@ -43,17 +43,17 @@ describe("etiquetas de análisis", () => {
   })
 })
 
-describe("latestVerification", () => {
-  it("elige la verificación de secuencia más alta", () => {
+describe("latestBySequence", () => {
+  it("elige el registro de secuencia más alta", () => {
     const older = { sequence: "7", verdict: "CONFIRMED" }
     const newer = { sequence: "12", verdict: "CORRECTED" }
 
-    assert.equal(latestVerification([newer, older]), newer)
-    assert.equal(latestVerification([older, newer]), newer)
+    assert.equal(latestBySequence([newer, older]), newer)
+    assert.equal(latestBySequence([older, newer]), newer)
   })
 
-  it("sin verificaciones no hay revisión que mostrar", () => {
-    assert.equal(latestVerification([]), undefined)
+  it("sin registros no hay nada que mostrar", () => {
+    assert.equal(latestBySequence([]), undefined)
   })
 })
 

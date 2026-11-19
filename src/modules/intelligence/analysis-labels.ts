@@ -65,17 +65,15 @@ export function observationTypeLabel(knowledgeType: string): string {
   return labelFrom(OBSERVATION_TYPE_LABELS, knowledgeType)
 }
 
-/** La verificación más reciente por secuencia: es la que manda en el resumen. */
-export function latestVerification<T extends { sequence: string }>(
-  verifications: readonly T[]
+/** El registro más reciente por secuencia: manda en el resumen del correo. */
+export function latestBySequence<T extends { sequence: string }>(
+  records: readonly T[]
 ): T | undefined {
-  return verifications.reduce<T | undefined>((latest, verification) => {
+  return records.reduce<T | undefined>((latest, record) => {
     if (!latest) {
-      return verification
+      return record
     }
-    return Number(verification.sequence) > Number(latest.sequence)
-      ? verification
-      : latest
+    return Number(record.sequence) > Number(latest.sequence) ? record : latest
   }, undefined)
 }
 

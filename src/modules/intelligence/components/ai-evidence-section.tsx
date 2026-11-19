@@ -302,7 +302,7 @@ export function AiEvidenceSection({
           <section aria-live="polite" className="rounded-lg border p-3 text-sm">
             <h3 className="font-medium">
               {compareMutation.data.comparable
-                ? "Runs comparables"
+                ? "Análisis comparables"
                 : "Comparación no comparable"}
             </h3>
             {compareMutation.data.warning ? (
@@ -359,7 +359,7 @@ export function AiEvidenceSection({
                 }
                 size="sm"
                 aria-pressed={selectedRunIds.includes(run.id)}
-                aria-label={`Seleccionar run ${run.id} para comparar`}
+                aria-label={`Seleccionar análisis ${run.id} para comparar`}
                 onClick={() =>
                   setSelectedRunIds((current) =>
                     current.includes(run.id)
@@ -406,7 +406,7 @@ export function AiEvidenceSection({
                       evaluateMutation.mutate(undefined, {
                         onSuccess: () =>
                           appToast.success({
-                            text1: "Nuevo run HOLDOUT creado",
+                            text1: "Nuevo análisis HOLDOUT creado",
                           }),
                       })
                     }

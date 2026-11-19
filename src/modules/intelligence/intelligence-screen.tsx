@@ -79,7 +79,7 @@ import { ReviewSection } from "./components/review-section"
 import {
   describeVerification,
   knowledgeScopeLabel,
-  latestVerification,
+  latestBySequence,
   observationTypeLabel,
   verifierActorLabel,
   verificationVerdictLabel,
@@ -1021,8 +1021,9 @@ function IntelligenceMessageDetail({
       (item) => item.knowledgeType === "EMAIL_CLASSIFICATION"
     ) ?? []
   const lastVerification = data
-    ? latestVerification(data.provenance.verifications)
+    ? latestBySequence(data.provenance.verifications)
     : undefined
+  const lastClassification = latestBySequence(classificationObservations)
 
   return (
     <BottomSheet
@@ -1078,8 +1079,8 @@ function IntelligenceMessageDetail({
             <SummaryItem
               title="Clasificación automática"
               description={
-                classificationObservations.length
-                  ? `${classificationType(classificationObservations[0].payload)} · ${classificationRoute(classificationObservations[0].payload)}`
+                lastClassification
+                  ? `${classificationType(lastClassification.payload)} · ${classificationRoute(lastClassification.payload)}`
                   : "Todavía no tiene clasificación automática."
               }
               icon={BrainCircuit}
