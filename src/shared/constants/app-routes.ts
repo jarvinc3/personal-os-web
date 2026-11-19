@@ -22,6 +22,8 @@ export const APP_ROUTES = {
     settingsAppearanceComponents: "/settings/appearance/components",
     settingsAppearanceComponentSection: (sectionId: string) =>
       `/settings/appearance/components/${sectionId}`,
+    settingsAppearanceComponent: (sectionId: string, componentId: string) =>
+      `/settings/appearance/components/${sectionId}/${componentId}`,
     settingsNotifications: "/settings/notifications",
     settingsPrivacy: "/settings/privacy",
     settingsModules: "/settings/modules",

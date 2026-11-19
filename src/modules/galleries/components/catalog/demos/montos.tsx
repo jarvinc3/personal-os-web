@@ -1,6 +1,14 @@
-"use client"
+import { useState } from "react"
 
-import { GalleryDemo } from "@/src/modules/galleries/components/gallery-demo"
+import { FinanceDateField } from "@/src/modules/finance/shared/components/forms/date-field"
+import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
+import { CurrencyFlag } from "@/src/modules/finance/shared/components/currency-flag"
+import { Money } from "@/src/modules/finance/shared/components/money"
+import { BrandLogo } from "@/src/modules/finance/shared/components/brand-logo"
+import {
+  formatFinanceMoney,
+  type FinanceMoneyDisplay,
+} from "@/src/modules/finance/shared/lib/money"
 import {
   GALLERY_AMOUNTS,
   GALLERY_COMPACT_DISPLAY,
@@ -9,15 +17,8 @@ import {
   GALLERY_DISPLAY,
   GALLERY_NO_CENTS_DISPLAY,
 } from "@/src/modules/galleries/components/mock/values"
-import { FinanceDateField } from "@/src/modules/finance/shared/components/forms/date-field"
-import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
-import { CurrencyFlag } from "@/src/modules/finance/shared/components/currency-flag"
-import { Money } from "@/src/modules/finance/shared/components/money"
-import {
-  formatFinanceMoney,
-  type FinanceMoneyDisplay,
-} from "@/src/modules/finance/shared/lib/money"
-import { useState } from "react"
+
+import type { GalleryDemoMap } from "@/src/modules/galleries/components/catalog/types"
 
 type FormattedAmount = {
   key: string
@@ -59,21 +60,71 @@ const FORMATTED_AMOUNTS: FormattedAmount[] = [
   },
 ]
 
-/** Importes formateados y campos de monto y fecha (#307). */
-export function MoneyAndDatesSection() {
+function MoneyFieldDemo() {
   const [amount, setAmount] = useState("1850.00")
+
+  return (
+    <div className="flex w-full flex-col gap-3">
+      <FinanceMoneyField
+        calculatorKey="gallery-amount"
+        amount={amount}
+        onAmountChange={setAmount}
+        onAmountCommit={setAmount}
+        currency="DOP"
+      />
+      <FinanceMoneyField
+        calculatorKey="gallery-negative"
+        amount="-1850.00"
+        onAmountChange={() => {}}
+        onAmountCommit={() => {}}
+        amountError="El monto no puede ser negativo"
+      />
+      <FinanceMoneyField
+        calculatorKey="gallery-zero"
+        amount="0.00"
+        onAmountChange={() => {}}
+        onAmountCommit={() => {}}
+        disabled
+      />
+    </div>
+  )
+}
+
+function DateFieldDemo() {
   const [date, setDate] = useState(GALLERY_DATE)
   const [dateTime, setDateTime] = useState(GALLERY_DATE_TIME)
 
   return (
-    <>
-      <GalleryDemo
-        name="formatFinanceMoney"
-        importPath="@/src/modules/finance/shared/lib/money"
-        states="con centavos, sin centavos, compacto, negativo, cero"
-        note="El importe se pinta con tabular-nums y el formato del usuario. Nunca con toLocaleString ni el string crudo."
-      >
-        <dl className="flex flex-col gap-1 text-sm">
+    <div className="flex w-full flex-col gap-3">
+      <FinanceDateField label="Fecha" value={date} onChange={setDate} />
+      <FinanceDateField
+        label="Fecha y hora"
+        value={dateTime}
+        onChange={setDateTime}
+        withTime
+      />
+      <FinanceDateField
+        label="Fecha de corte"
+        value={GALLERY_DATE}
+        onChange={() => {}}
+        error="Elige una fecha posterior"
+      />
+      <FinanceDateField
+        label="Fecha fija"
+        value={GALLERY_DATE}
+        onChange={() => {}}
+        disabled
+      />
+    </div>
+  )
+}
+
+export const montosDemos: GalleryDemoMap = {
+  "format-finance-money": [
+    {
+      label: "Con centavos, sin centavos, compacto, negativo y cero",
+      node: (
+        <dl className="flex w-full flex-col gap-1 text-sm">
           {FORMATTED_AMOUNTS.map((row) => (
             <div
               key={row.key}
@@ -86,15 +137,14 @@ export function MoneyAndDatesSection() {
             </div>
           ))}
         </dl>
-      </GalleryDemo>
-
-      <GalleryDemo
-        name="Money"
-        importPath="@/src/modules/finance/shared/components/money"
-        states="ingreso, gasto, cero, sin tono"
-        note="Un monto se pinta con Money: el negativo lleva − (U+2212) y el token de negativo, el cero queda neutro y el signo nunca se escribe a mano."
-      >
-        <dl className="flex flex-col gap-1 text-sm">
+      ),
+    },
+  ],
+  money: [
+    {
+      label: "Ingreso, gasto, cero y sin tono",
+      node: (
+        <dl className="flex w-full flex-col gap-1 text-sm">
           <div className="flex items-center justify-between gap-3">
             <dt className="text-muted-foreground">Ingreso</dt>
             <dd>
@@ -135,70 +185,25 @@ export function MoneyAndDatesSection() {
             </dd>
           </div>
         </dl>
-      </GalleryDemo>
-
-      <GalleryDemo
-        name="FinanceMoneyField"
-        importPath="@/src/modules/finance/shared/components/forms/money-field"
-        states="normal, con moneda, con error, deshabilitado"
-        note="Escribir un monto es este campo, no un Input. El modo calculadora vive dentro del mismo control."
-      >
-        <FinanceMoneyField
-          calculatorKey="gallery-amount"
-          amount={amount}
-          onAmountChange={setAmount}
-          onAmountCommit={setAmount}
-          currency="DOP"
-        />
-        <FinanceMoneyField
-          calculatorKey="gallery-negative"
-          amount="-1850.00"
-          onAmountChange={() => {}}
-          onAmountCommit={() => {}}
-          amountError="El monto no puede ser negativo"
-        />
-        <FinanceMoneyField
-          calculatorKey="gallery-zero"
-          amount="0.00"
-          onAmountChange={() => {}}
-          onAmountCommit={() => {}}
-          disabled
-        />
-      </GalleryDemo>
-
-      <GalleryDemo
-        name="FinanceDateField"
-        importPath="@/src/modules/finance/shared/components/forms/date-field"
-        states="fecha, fecha y hora, con error, deshabilitado"
-        note="La rueda de fecha se monta con este campo. No existe un input nativo de fecha."
-      >
-        <FinanceDateField label="Fecha" value={date} onChange={setDate} />
-        <FinanceDateField
-          label="Fecha y hora"
-          value={dateTime}
-          onChange={setDateTime}
-          withTime
-        />
-        <FinanceDateField
-          label="Fecha de corte"
-          value={GALLERY_DATE}
-          onChange={() => {}}
-          error="Elige una fecha posterior"
-        />
-        <FinanceDateField
-          label="Fecha fija"
-          value={GALLERY_DATE}
-          onChange={() => {}}
-          disabled
-        />
-      </GalleryDemo>
-
-      <GalleryDemo
-        name="CurrencyFlag"
-        importPath="@/src/modules/finance/shared/components/currency-flag"
-        states="DOP, USD, EUR, MXN"
-        note="Bandera rasterizada junto al código ISO. La usa el selector de moneda y cualquier fila que muestre una moneda."
-      >
+      ),
+    },
+  ],
+  "finance-money-field": [
+    {
+      label: "Normal, con error y deshabilitado",
+      node: <MoneyFieldDemo />,
+    },
+  ],
+  "finance-date-field": [
+    {
+      label: "Fecha, fecha y hora, error y deshabilitado",
+      node: <DateFieldDemo />,
+    },
+  ],
+  "currency-flag": [
+    {
+      label: "DOP, USD, EUR y MXN",
+      node: (
         <div className="flex flex-wrap items-center gap-3">
           {["DOP", "USD", "EUR", "MXN"].map((code) => (
             <span key={code} className="flex items-center gap-1.5 text-sm">
@@ -207,7 +212,20 @@ export function MoneyAndDatesSection() {
             </span>
           ))}
         </div>
-      </GalleryDemo>
-    </>
-  )
+      ),
+    },
+  ],
+  "brand-logo": [
+    {
+      label: "Con imagen, sin imagen y tamaños",
+      node: (
+        <div className="flex flex-wrap items-center gap-3">
+          <BrandLogo name="Banco Ejemplo" size={40} />
+          <BrandLogo name="Institución Ejemplo" size={48} />
+          <BrandLogo name="Suscripción Ejemplo" size={24} />
+          <BrandLogo name="Comercio" size={36} />
+        </div>
+      ),
+    },
+  ],
 }

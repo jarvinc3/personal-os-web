@@ -8,6 +8,10 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 - Next.js y `eslint-config-next` se actualizan a 16.4.6 para salir de la versión afectada por el aviso de seguridad publicado (#430).
 
+### Cambiado
+
+- La galería de Ajustes → Apariencia documenta todos los componentes de `src/shared/components/ui/` y los wrappers de dominio con una página por componente: vista previa y código, descripción, cuándo usarlo y cuándo no, uso copiable, composición, variantes y estados, y API. El índice busca por nombre, categoría y subcomponente; la Ola 0 suma Item, Marker, Command, Combobox, Accordion, ButtonGroup y Attachment, mueve IconBadge y ProgressRing a `data-display`, borra `Sheet` (el sidebar móvil usa `Drawer`) y lleva el estado activo primario a ToggleGroup (#415, #416, #417).
+
 ### Agregado
 
 - Intelligence › Gmail pide el período de importación al conectar (hoy, último mes o últimos 3 meses) y un filtro de remitente opcional; ambos viajan a `POST /intelligence/email/connect`, el estado de la conexión muestra el corte y el filtro guardados, y al reconectar se conservan salvo que se elija otro período o se borre el filtro (#421; contrato de back #382).
