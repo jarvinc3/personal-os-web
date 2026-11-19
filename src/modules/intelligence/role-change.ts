@@ -6,19 +6,17 @@ export const ROLE_LABELS: Record<AiRole, string> = {
   ADMIN: "Administrador",
 }
 
+const BASE_CAPABILITIES = [
+  "Ver su propio correo, su conocimiento y sus verificaciones",
+  "Exportar y borrar sus datos de IA",
+] as const
+
 /** Lo que cada rol agrega sobre el anterior; se explica al cambiarlo. */
 export const ROLE_CAPABILITIES: Record<AiRole, readonly string[]> = {
-  USER: [
-    "Ver su propio correo, su conocimiento y sus verificaciones",
-    "Exportar y borrar sus datos de IA",
-  ],
-  CONTRIBUTOR: [
-    "Ver su propio correo, su conocimiento y sus verificaciones",
-    "Exportar y borrar sus datos de IA",
-  ],
+  USER: BASE_CAPABILITIES,
+  CONTRIBUTOR: BASE_CAPABILITIES,
   ADMIN: [
-    "Ver su propio correo, su conocimiento y sus verificaciones",
-    "Exportar y borrar sus datos de IA",
+    ...BASE_CAPABILITIES,
     "Revisar el conocimiento global: promover, revertir y cambiar roles",
   ],
 }
