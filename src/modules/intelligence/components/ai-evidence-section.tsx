@@ -67,6 +67,10 @@ import {
 } from "@/src/shared/components/ui/empty"
 import { Skeleton } from "@/src/shared/components/ui/skeleton"
 import { appToast } from "@/src/shared/lib/app-toast"
+import {
+  analysisRunModeLabel,
+  analysisRunStatusLabel,
+} from "@/src/modules/intelligence/analysis-labels"
 import { formatDateTime } from "@/src/shared/lib/date-format"
 import {
   SHEET_ID_QUERY_KEY,
@@ -298,7 +302,7 @@ export function AiEvidenceSection({
           <section aria-live="polite" className="rounded-lg border p-3 text-sm">
             <h3 className="font-medium">
               {compareMutation.data.comparable
-                ? "Runs comparables"
+                ? "Análisis comparables"
                 : "Comparación no comparable"}
             </h3>
             {compareMutation.data.warning ? (
@@ -355,7 +359,7 @@ export function AiEvidenceSection({
                 }
                 size="sm"
                 aria-pressed={selectedRunIds.includes(run.id)}
-                aria-label={`Seleccionar run ${run.id} para comparar`}
+                aria-label={`Seleccionar análisis ${run.id} para comparar`}
                 onClick={() =>
                   setSelectedRunIds((current) =>
                     current.includes(run.id)
@@ -375,8 +379,8 @@ export function AiEvidenceSection({
               <div className="min-w-0 flex-1">
                 <SummaryItem
                   key={run.id}
-                  title={`${run.mode} · ${run.status}`}
-                  description={`Pipeline ${run.pipelineVersion} · observaciones ${run.observationSequence} · verificaciones ${run.verificationSequence}`}
+                  title={`${analysisRunModeLabel(run.mode)} · ${analysisRunStatusLabel(run.status)}`}
+                  description={`Proceso ${run.pipelineVersion} · ${run.observationSequence} observaciones · ${run.verificationSequence} verificaciones`}
                   icon={Clock3}
                   value={
                     run.completedAt
@@ -402,7 +406,7 @@ export function AiEvidenceSection({
                       evaluateMutation.mutate(undefined, {
                         onSuccess: () =>
                           appToast.success({
-                            text1: "Nuevo run HOLDOUT creado",
+                            text1: "Nuevo análisis HOLDOUT creado",
                           }),
                       })
                     }

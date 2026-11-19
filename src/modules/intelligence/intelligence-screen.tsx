@@ -43,6 +43,14 @@ import {
   SummarySection,
 } from "@/src/shared/components/data-display/summary"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
+import { FormTextField } from "@/src/shared/components/forms/form-text-field"
+import { SelectField } from "@/src/shared/components/forms/select-field"
+import {
+  ALL_MESSAGE_STATUSES,
+  filterLoadedMessages,
+  MESSAGE_STATUS_LABELS,
+  type MessageStatusFilter,
+} from "@/src/modules/intelligence/message-filters"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { useTabsBehavior } from "@/src/shared/hooks/use-tabs-behavior"
 import { formatDate, formatDateTime } from "@/src/shared/lib/date-format"
@@ -53,8 +61,10 @@ import {
   CheckCircle2,
   Clock3,
   Inbox,
+  ListFilter,
   LoaderCircle,
   Mail,
+  Search,
   FileText,
   Wifi,
   WifiOff,
@@ -71,15 +81,20 @@ import {
   MESSAGES_RATE_LIMIT_MAX_AUTO_RETRIES,
   messagesRateLimitDelayMs,
 } from "./messages-rate-limit"
+import { cn } from "@/src/shared/lib/utils"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { AiEvidenceSection } from "./components/ai-evidence-section"
 import { EmailSignalSection } from "./components/email-signal-section"
 import { ReviewSection } from "./components/review-section"
 import {
-  describeVerificationPayload,
-  ROUTE_LABELS,
-  SEMANTIC_TYPE_LABELS,
-} from "./review-labels"
+  describeVerification,
+  knowledgeScopeLabel,
+  latestBySequence,
+  observationTypeLabel,
+  verifierActorLabel,
+  verificationVerdictLabel,
+} from "./analysis-labels"
+import { ROUTE_LABELS, SEMANTIC_TYPE_LABELS } from "./review-labels"
 import {
   describeScheduledClassification,
   describeSyncFailure,
@@ -114,6 +129,9 @@ function IntelligenceScreenBody() {
     emailSocketStatus,
   } = useIntelligence()
   const [resetDialogOpen, setResetDialogOpen] = useState(false)
+  const [messageQuery, setMessageQuery] = useState("")
+  const [messageStatus, setMessageStatus] =
+    useState<MessageStatusFilter>(ALL_MESSAGE_STATUSES)
   const tabsBehavior = useTabsBehavior({
     defaultValue: "messages",
     persistKey: "intelligence-view",
@@ -146,6 +164,16 @@ function IntelligenceScreenBody() {
     () => messagesQuery.data?.pages.flatMap((page) => page.items) ?? [],
     [messagesQuery.data?.pages]
   )
+  const visibleMessages = filterLoadedMessages({
+    messages,
+    query: messageQuery,
+    status: messageStatus,
+  })
+  const messageFiltersActive =
+    messageQuery.trim().length > 0 || messageStatus !== ALL_MESSAGE_STATUSES
+  const reviewRequiredCount = messages.filter(
+    (message) => message.processingStatus === "REVIEW_REQUIRED"
+  ).length
   const {
     hasNextPage,
     isFetching: isFetchingMessages,
@@ -807,7 +835,75 @@ function IntelligenceScreenBody() {
                     </AlertAction>
                   </Alert>
                 ) : null}
-                {messages.map((message) => (
+                <div className="flex flex-col gap-2">
+                  <p className="px-1 text-xs text-muted-foreground">
+                    {messages.length}{" "}
+                    {messages.length === 1
+                      ? "correo cargado"
+                      : "correos cargados"}{" "}
+                    · {reviewRequiredCount} en revisión entre los cargados
+                  </p>
+                  <FormTextField
+                    value={messageQuery}
+                    onChange={setMessageQuery}
+                    placeholder="Buscar por asunto o remitente"
+                    ariaLabel="Buscar correos cargados"
+                    icon={Search}
+                    maxLength={120}
+                  />
+                  <SelectField
+                    label="Estado del correo"
+                    value={messageStatus}
+                    onChange={(value) =>
+                      setMessageStatus(value as MessageStatusFilter)
+                    }
+                    icon={ListFilter}
+                    options={[
+                      {
+                        value: ALL_MESSAGE_STATUSES,
+                        label: "Todos los estados",
+                      },
+                      ...(
+                        Object.keys(MESSAGE_STATUS_LABELS) as Array<
+                          keyof typeof MESSAGE_STATUS_LABELS
+                        >
+                      ).map((status) => ({
+                        value: status,
+                        label: MESSAGE_STATUS_LABELS[status],
+                      })),
+                    ]}
+                  />
+                  {messageFiltersActive ? (
+                    <p className="px-1 text-xs leading-relaxed text-muted-foreground">
+                      Se filtra entre los correos ya cargados. Carga más correos
+                      para ampliar la búsqueda.
+                    </p>
+                  ) : null}
+                </div>
+                {messageFiltersActive && visibleMessages.length === 0 ? (
+                  <Empty>
+                    <EmptyHeader>
+                      <EmptyMedia variant="icon">
+                        <Search aria-hidden="true" />
+                      </EmptyMedia>
+                      <EmptyTitle>Ningún correo cargado coincide</EmptyTitle>
+                      <EmptyDescription>
+                        Cambia el texto o el estado, o limpia los filtros para
+                        ver la lista completa.
+                      </EmptyDescription>
+                    </EmptyHeader>
+                    <Button
+                      type="button"
+                      onClick={() => {
+                        setMessageQuery("")
+                        setMessageStatus(ALL_MESSAGE_STATUSES)
+                      }}
+                    >
+                      <X aria-hidden="true" /> Limpiar filtros
+                    </Button>
+                  </Empty>
+                ) : null}
+                {visibleMessages.map((message) => (
                   <SummaryItem
                     key={message.id}
                     title={message.subject}
@@ -819,10 +915,35 @@ function IntelligenceScreenBody() {
                   />
                 ))}
                 <InfiniteListSentinel
-                  hasNextPage={Boolean(hasNextPage) && !messagesQuery.error}
+                  hasNextPage={
+                    Boolean(hasNextPage) &&
+                    !messagesQuery.error &&
+                    !messageFiltersActive
+                  }
                   isFetchingNextPage={isFetchingNextPage}
                   onLoadMore={loadMore}
                 />
+                {messageFiltersActive && hasNextPage ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full"
+                    onClick={loadMore}
+                    disabled={isFetchingNextPage}
+                  >
+                    {isFetchingNextPage ? (
+                      <LoaderCircle
+                        className="animate-spin"
+                        aria-hidden="true"
+                      />
+                    ) : (
+                      <RefreshCw aria-hidden="true" />
+                    )}
+                    {isFetchingNextPage
+                      ? "Cargando correos..."
+                      : "Cargar más correos"}
+                  </Button>
+                ) : null}
               </>
             )}
           </TabsContent>
@@ -1011,6 +1132,14 @@ function IntelligenceMessageDetail({
 }) {
   const { data, isPending, isError, refetch } =
     useIntelligenceMessage(messageId)
+  const classificationObservations =
+    data?.provenance.observations.filter(
+      (item) => item.knowledgeType === "EMAIL_CLASSIFICATION"
+    ) ?? []
+  const lastVerification = data
+    ? latestBySequence(data.provenance.verifications)
+    : undefined
+  const lastClassification = latestBySequence(classificationObservations)
 
   return (
     <BottomSheet
@@ -1058,40 +1187,67 @@ function IntelligenceMessageDetail({
         </Empty>
       ) : (
         <div className="flex flex-col gap-4 p-2">
-          <MessageRepresentation
-            title="Canónica"
-            value={data.content?.canonicalBody}
-          />
-          <MessageRepresentation
-            title="Saneada"
-            value={data.content?.sanitizedBody}
-          />
           <SummarySection
-            title="Cruda (retención limitada)"
+            title="Resumen"
+            subtitle="Qué pasó con este correo, en una línea."
+            icon={ShieldCheck}
+          >
+            <SummaryItem
+              title="Clasificación automática"
+              description={
+                lastClassification
+                  ? `${classificationType(lastClassification.payload)} · ${classificationRoute(lastClassification.payload)}`
+                  : "Todavía no tiene clasificación automática."
+              }
+              icon={BrainCircuit}
+            />
+            <SummaryItem
+              title="Revisión de una persona"
+              description={
+                lastVerification
+                  ? `${verificationVerdictLabel(lastVerification.verdict)} por ${verifierActorLabel(lastVerification.verifierRole)} · ${formatDateTime(lastVerification.createdAt)}`
+                  : "Todavía sin revisión de una persona."
+              }
+              icon={CheckCircle2}
+              isLast
+            />
+          </SummarySection>
+          <SummarySection
+            title="Detalles técnicos"
+            subtitle="Las tres versiones del texto y de dónde salieron."
             icon={FileText}
             collapsible
           >
-            <pre className="max-h-80 overflow-auto rounded-lg bg-muted p-3 font-sans text-sm wrap-break-word whitespace-pre-wrap">
-              {data.content?.rawBody || "No disponible"}
-            </pre>
+            <MessageRepresentation
+              title="Canónica"
+              description="Texto normalizado que usa la clasificación."
+              value={data.content?.canonicalBody}
+            />
+            <MessageRepresentation
+              title="Saneada"
+              description="Sin datos personales que se puedan reutilizar."
+              value={data.content?.sanitizedBody}
+            />
+            <MessageRepresentation
+              title="Cruda"
+              description="Cuerpo original tal como llegó, con retención limitada."
+              value={data.content?.rawBody}
+              scrolls
+            />
           </SummarySection>
           <SummarySection
             title="Clasificación del mensaje"
             subtitle="Propuesta para revisión; no crea movimientos en Finanzas."
           >
-            {data.provenance.observations
-              .filter((item) => item.knowledgeType === "EMAIL_CLASSIFICATION")
-              .map((item) => (
-                <SummaryItem
-                  key={`classification-${item.sequence}`}
-                  title={`Ruta ${classificationRoute(item.payload)} · ${classificationType(item.payload)}`}
-                  description={describeClassification(item.payload)}
-                  icon={BrainCircuit}
-                />
-              ))}
-            {!data.provenance.observations.some(
-              (item) => item.knowledgeType === "EMAIL_CLASSIFICATION"
-            ) ? (
+            {classificationObservations.map((item) => (
+              <SummaryItem
+                key={`classification-${item.sequence}`}
+                title={`Ruta ${classificationRoute(item.payload)} · ${classificationType(item.payload)}`}
+                description={describeClassification(item.payload)}
+                icon={BrainCircuit}
+              />
+            ))}
+            {!classificationObservations.length ? (
               <p className="px-2 text-sm text-muted-foreground">
                 Este mensaje aún no tiene una clasificación.
               </p>
@@ -1100,21 +1256,27 @@ function IntelligenceMessageDetail({
           <EmailSignalSection message={data} />
           <SummarySection
             title="Procedencia y verificaciones"
-            subtitle="Registros append-only vinculados al correo original."
+            subtitle="Registros que no se editan ni se borran, ligados al correo original."
           >
             {data.provenance.observations.map((observation) => (
               <SummaryItem
                 key={`observation-${observation.sequence}`}
-                title={`Observación ${observation.sequence}`}
-                description={`${observation.knowledgeType} · ${observation.proposedScope} · ${observation.knowledgeKey}`}
+                title={`Observación ${observation.sequence} · ${observationTypeLabel(observation.knowledgeType)}`}
+                description={`${knowledgeScopeLabel(observation.proposedScope)} · ${observation.knowledgeKey}`}
                 icon={BrainCircuit}
               />
             ))}
             {data.provenance.verifications.map((verification, index) => (
               <SummaryItem
                 key={`verification-${verification.sequence}`}
-                title={`Verificación ${verification.sequence} · ${verification.verdict}`}
-                description={`${describeVerificationPayload(verification.correctedPayload)} · ${verification.verifierRole}${verification.isGroundTruth ? " · verdad de referencia HOLDOUT" : ""}${verification.notes ? ` · ${verification.notes}` : ""}`}
+                title={`Verificación ${verification.sequence}`}
+                description={describeVerification({
+                  verdict: verification.verdict,
+                  verifierRole: verification.verifierRole,
+                  isGroundTruth: verification.isGroundTruth,
+                  notes: verification.notes,
+                  correctedPayload: verification.correctedPayload,
+                })}
                 icon={CheckCircle2}
                 isLast={index === data.provenance.verifications.length - 1}
               />
@@ -1227,15 +1389,28 @@ function describeClassification(payload: unknown): string {
 
 function MessageRepresentation({
   title,
+  description,
   value,
+  scrolls = false,
 }: {
   title: string
+  description?: string
   value: string | null | undefined
+  /** Cuerpos largos o crudos se leen en su propia caja, sin estirar la hoja. */
+  scrolls?: boolean
 }) {
   return (
     <section className="flex flex-col gap-1">
       <h4 className="text-xs font-medium text-muted-foreground">{title}</h4>
-      <pre className="rounded-lg bg-muted p-3 font-sans text-sm wrap-break-word whitespace-pre-wrap">
+      {description ? (
+        <p className="text-xs text-muted-foreground">{description}</p>
+      ) : null}
+      <pre
+        className={cn(
+          "rounded-lg bg-muted p-3 font-sans text-sm wrap-break-word whitespace-pre-wrap",
+          scrolls && "max-h-80 overflow-auto"
+        )}
+      >
         {value || "No disponible"}
       </pre>
     </section>

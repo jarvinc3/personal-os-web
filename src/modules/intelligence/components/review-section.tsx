@@ -54,6 +54,11 @@ export function ReviewSection({ enabled, onOpenMessage }: ReviewSectionProps) {
 
   return (
     <div className="flex flex-col gap-3">
+      <p className="px-1 text-sm leading-relaxed text-muted-foreground">
+        Aquí están los correos que la IA no pudo resolver con confianza.
+        Confirma la propuesta si es correcta o corrígela con las etiquetas; los
+        correos de muestra (HOLDOUT) no entran en los lotes.
+      </p>
       <SegmentedControl
         ariaLabel="Vista de revisión"
         value={view}

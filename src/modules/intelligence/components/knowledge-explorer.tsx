@@ -27,7 +27,8 @@ export function KnowledgeExplorer() {
     <div className="flex flex-col gap-3">
       {!knowledgeQuery.isPending && !knowledgeQuery.isError && !empty ? (
         <p className="px-1 text-xs leading-relaxed text-muted-foreground">
-          No ves los ítems en revisión: los gestiona un administrador.
+          Lo que está en revisión no lo ves: lo revisa un administrador, que
+          puede promoverlo al conocimiento global o revertirlo.
         </p>
       ) : null}
 
@@ -90,7 +91,10 @@ export function KnowledgeExplorer() {
         </>
       )}
 
-      <KnowledgeDataActions canExport={personal.length > 0} />
+      <KnowledgeDataActions
+        canExport={personal.length > 0}
+        personalKnowledgeCount={personal.length}
+      />
     </div>
   )
 }
