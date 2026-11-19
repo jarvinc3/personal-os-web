@@ -21,9 +21,13 @@ const DELETE_CONSEQUENCES = [
 
 type KnowledgeDataActionsProps = {
   canExport: boolean
+  personalKnowledgeCount: number
 }
 
-export function KnowledgeDataActions({ canExport }: KnowledgeDataActionsProps) {
+export function KnowledgeDataActions({
+  canExport,
+  personalKnowledgeCount,
+}: KnowledgeDataActionsProps) {
   const exportMutation = useExportKnowledge()
   const deleteMutation = useDeleteKnowledge()
   const [deleteOpen, setDeleteOpen] = useState(false)
@@ -69,7 +73,7 @@ export function KnowledgeDataActions({ canExport }: KnowledgeDataActionsProps) {
         icon={Trash2}
         wide
         title="¿Borrar todos tus datos de IA?"
-        description="Es inmediato y no se puede deshacer. Se borrarán:"
+        description={`Es inmediato y no se puede deshacer. Se borrarán tus ${personalKnowledgeCount} ${personalKnowledgeCount === 1 ? "elemento" : "elementos"} de conocimiento personal y también:`}
         confirmLabel="Borrar datos de IA"
         confirmIcon={Trash2}
         pending={deleteMutation.isPending}
