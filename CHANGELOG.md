@@ -10,6 +10,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Agregado
 
+- Ajustes estrena **Uso** (`/settings/usage`): consumo y costo de la clasificación de correos con gráficas por día y por hora, restante de la carga inicial, del tope diario de tokens y del costo global, y desglose por banco y tipo de clasificación. El rango es hoy, 7 o 30 días; la vista avisa al 80 % del costo global y muestra la pausa con el reinicio UTC al 100 %. No muestra contenido de correos ni recalcula el costo (#426; consume el contrato de back #408 y #415).
 - Intelligence › Gmail pide el período de importación al conectar (hoy, último mes o últimos 3 meses) y un filtro de remitente opcional; ambos viajan a `POST /intelligence/email/connect`, el estado de la conexión muestra el corte y el filtro guardados, y al reconectar se conservan salvo que se elija otro período o se borre el filtro (#421; contrato de back #382).
 - El pago de tarjeta registrado a mano pide confirmación cuando el back responde 409 `CARD_PAYMENT_POSSIBLE_DUPLICATE`: el diálogo muestra el monto, la fecha, la cuenta de origen y la tarjeta del pago importado que se le parece, y solo guarda al confirmar con `duplicateAcknowledged: true`. Cancelar no registra nada y, sin coincidencia, el flujo no cambia (#423; contrato de back #389).
 

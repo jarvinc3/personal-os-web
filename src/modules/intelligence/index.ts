@@ -1,7 +1,37 @@
 export { useAiConsent } from "./hooks/use-ai-consent"
+export { useEmailUsage } from "./hooks/use-email-usage"
+export {
+  DEFAULT_USAGE_DAYS,
+  USAGE_RANGES,
+  fillDailyUsage,
+  fillHourlyUsage,
+  formatUsageCost,
+  formatUsageCostAxis,
+  formatUsageCount,
+  formatUsagePercent,
+  formatUsageReset,
+  initialBudgetProgress,
+  isUsageDays,
+  nextUtcDailyReset,
+  usageCostTone,
+  usageProgress,
+  usageRangeCaption,
+  usageTotalTokens,
+  usageTypeLabel,
+  type UsageCostTone,
+  type UsageDays,
+  type UsageProgress,
+} from "./usage-summary"
 export type {
   AiConsent,
   AiEmailMessageDetail,
   AiEmailMessageSummary,
   AiRole,
+  EmailUsageBank,
+  EmailUsageBucket,
+  EmailUsageCostStatus,
+  EmailUsageDay,
+  EmailUsageHour,
+  EmailUsageSummary,
+  EmailUsageType,
 } from "./types/intelligence.types"
