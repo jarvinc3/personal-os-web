@@ -104,7 +104,7 @@ import {
   verificationVerdictLabel,
 } from "./analysis-labels"
 import { ROUTE_LABELS, SEMANTIC_TYPE_LABELS } from "./review-labels"
-import { resolveGmailStatus } from "./gmail-status"
+import { resolveGmailStatus, type GmailStatus } from "./gmail-status"
 import { describeSyncFailure, resolveDashboardSyncFailure } from "./sync-status"
 import {
   ALERT_TONE_CLASS_NAME,
@@ -384,24 +384,19 @@ function IntelligenceScreenBody() {
                       : "Canal sin conexión"}
                 </Badge>
               ) : null}
-              <span role="img" aria-label={gmailStatus.title}>
-                {gmailStatus.tone === "warning" ? (
-                  <AlertCircle
-                    className="size-5 text-amber-600"
-                    aria-hidden="true"
-                  />
-                ) : gmailStatus.state === "syncing" ||
-                  gmailStatus.state === "classifying" ? (
-                  <LoaderCircle
-                    className="size-5 animate-spin text-muted-foreground"
-                    aria-hidden="true"
-                  />
-                ) : (
-                  <CheckCircle2
-                    className="size-5 text-emerald-600"
-                    aria-hidden="true"
-                  />
-                )}
+              <span
+                role="img"
+                aria-label={gmailStatus.title}
+                className={
+                  gmailStatus.tone === "warning"
+                    ? "text-amber-600"
+                    : gmailStatus.state === "syncing" ||
+                        gmailStatus.state === "classifying"
+                      ? "text-muted-foreground"
+                      : "text-emerald-600"
+                }
+              >
+                <GmailStatusGlyph status={gmailStatus} className="size-5" />
               </span>
             </div>
           ) : (
@@ -425,17 +420,10 @@ function IntelligenceScreenBody() {
               }
               role="status"
             >
-              {gmailStatus.state === "syncing" ||
-              gmailStatus.state === "classifying" ? (
-                <LoaderCircle
-                  className="size-4 shrink-0 animate-spin"
-                  aria-hidden="true"
-                />
-              ) : gmailStatus.tone === "warning" ? (
-                <AlertCircle className="size-4 shrink-0" aria-hidden="true" />
-              ) : (
-                <CheckCircle2 className="size-4 shrink-0" aria-hidden="true" />
-              )}
+              <GmailStatusGlyph
+                status={gmailStatus}
+                className="size-4 shrink-0"
+              />
               <AlertTitle>{gmailStatus.title}</AlertTitle>
               <AlertDescription>
                 {gmailStatus.description}
@@ -969,6 +957,28 @@ function formatRetryCountdown(retryAt: number, now: number | null) {
   const minutes = Math.floor(remainingSeconds / 60)
   const seconds = remainingSeconds % 60
   return `Reintento en ${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`
+}
+
+/** El icono del estado; el color lo pone quien lo contiene. */
+function GmailStatusGlyph({
+  status,
+  className,
+}: {
+  status: GmailStatus
+  className?: string
+}) {
+  if (status.tone === "warning") {
+    return <AlertCircle className={className} aria-hidden="true" />
+  }
+  if (status.state === "syncing" || status.state === "classifying") {
+    return (
+      <LoaderCircle
+        className={cn("animate-spin", className)}
+        aria-hidden="true"
+      />
+    )
+  }
+  return <CheckCircle2 className={className} aria-hidden="true" />
 }
 
 function emailSocketStatusLabel(

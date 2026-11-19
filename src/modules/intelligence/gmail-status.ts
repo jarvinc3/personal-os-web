@@ -24,6 +24,9 @@ export type GmailStatus = {
   tone: "warning" | "info" | undefined
 }
 
+/** Intentos que hace la sincronización antes de esperar al próximo ciclo. */
+const SYNC_RETRY_ATTEMPTS = 3
+
 export const GMAIL_PRIMARY_ACTION_LABELS: Record<GmailPrimaryAction, string> = {
   connect: "Conectar Gmail",
   reconnect: "Reconectar",
@@ -188,10 +191,10 @@ function syncingDescription({
     return "Leyendo el histórico de Gmail. Puedes seguir usando la vista mientras termina."
   }
   if (progress.status === "waiting") {
-    return `Gmail pidió una pausa temporal. Reintento ${progress.attempt} de 3.`
+    return `Gmail pidió una pausa temporal. Reintento ${progress.attempt} de ${SYNC_RETRY_ATTEMPTS}.`
   }
   if (progress.status === "retrying") {
-    return `Enviando reintento a Gmail · intento ${progress.attempt} de 3.`
+    return `Enviando reintento a Gmail · intento ${progress.attempt} de ${SYNC_RETRY_ATTEMPTS}.`
   }
   if (progress.status === "scheduled") {
     return nextRunLabel
