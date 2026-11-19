@@ -8,10 +8,6 @@ import {
 import { cn } from "@/src/shared/lib/utils"
 import type { LucideIcon } from "lucide-react"
 
-/** El preset del proyecto no trae un estado pulsado con el color primario. */
-const SEGMENT_PRESSED_CLASS =
-  "aria-pressed:bg-primary aria-pressed:text-primary-foreground aria-pressed:hover:bg-primary/80"
-
 export type SegmentOption<T extends string> = {
   value: T
   label: string
@@ -78,7 +74,6 @@ export function SegmentedControl<T extends string>({
               value={option.value}
               className={cn(
                 "rounded-full",
-                SEGMENT_PRESSED_CLASS,
                 fullWidth && "h-11 flex-1 text-base",
                 orientation === "vertical" && "w-full flex-none justify-start"
               )}

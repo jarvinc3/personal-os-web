@@ -3,7 +3,7 @@
 import { GalleryDemo } from "@/src/modules/galleries/components/gallery-demo"
 import { BrandLogo } from "@/src/modules/finance/shared/components/brand-logo"
 import { SubscriptionProgressRing } from "@/src/modules/finance/subscriptions/components/subscription-progress-ring"
-import { ProgressRing } from "@/src/shared/components/ui/progress-ring"
+import { ProgressRing } from "@/src/shared/components/data-display/progress-ring"
 import {
   ChartContainer,
   ChartTooltip,
@@ -46,7 +46,7 @@ export function ChartsSection() {
 
       <GalleryDemo
         name="ProgressRing"
-        importPath="@/src/shared/components/ui/progress-ring"
+        importPath="@/src/shared/components/data-display/progress-ring"
         states="avance bajo, medio y completo; con color de entidad"
         note="El único anillo de una sola medida. El de suscripciones y el de una meta lo usan; el gráfico de varios segmentos es otro componente."
       >

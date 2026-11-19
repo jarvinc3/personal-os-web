@@ -18,7 +18,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
-import { IconBadge } from "@/src/shared/components/ui/icon-badge"
+import { IconBadge } from "@/src/shared/components/data-display/icon-badge"
 import { Skeleton } from "@/src/shared/components/ui/skeleton"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { PlusIcon, SearchXIcon, WalletIcon } from "lucide-react"
@@ -29,7 +29,7 @@ export function StatesSection() {
     <>
       <GalleryDemo
         name="IconBadge"
-        importPath="@/src/shared/components/ui/icon-badge"
+        importPath="@/src/shared/components/data-display/icon-badge"
         states="tonos del sistema, color de entidad, emoji"
         note="El círculo con icono y tono. No se dibuja a mano en cada fila."
       >

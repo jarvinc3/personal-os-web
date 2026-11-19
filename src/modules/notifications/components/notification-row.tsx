@@ -6,7 +6,7 @@ import {
   PendingSurface,
   usePendingNavigation,
 } from "@/src/shared/components/shell/navigation-pending"
-import { IconBadge } from "@/src/shared/components/ui/icon-badge"
+import { IconBadge } from "@/src/shared/components/data-display/icon-badge"
 import { formatNotificationListTime } from "@/src/shared/lib/date-format"
 import { cn } from "@/src/shared/lib/utils"
 import { useFormatLocale } from "@/src/modules/settings/hooks/use-format-locale"
