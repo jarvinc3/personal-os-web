@@ -43,6 +43,14 @@ import {
   SummarySection,
 } from "@/src/shared/components/data-display/summary"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
+import { FormTextField } from "@/src/shared/components/forms/form-text-field"
+import { SelectField } from "@/src/shared/components/forms/select-field"
+import {
+  ALL_MESSAGE_STATUSES,
+  filterLoadedMessages,
+  MESSAGE_STATUS_LABELS,
+  type MessageStatusFilter,
+} from "@/src/modules/intelligence/message-filters"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { useTabsBehavior } from "@/src/shared/hooks/use-tabs-behavior"
 import { formatDate, formatDateTime } from "@/src/shared/lib/date-format"
@@ -53,8 +61,10 @@ import {
   CheckCircle2,
   Clock3,
   Inbox,
+  ListFilter,
   LoaderCircle,
   Mail,
+  Search,
   FileText,
   Wifi,
   WifiOff,
@@ -119,6 +129,9 @@ function IntelligenceScreenBody() {
     emailSocketStatus,
   } = useIntelligence()
   const [resetDialogOpen, setResetDialogOpen] = useState(false)
+  const [messageQuery, setMessageQuery] = useState("")
+  const [messageStatus, setMessageStatus] =
+    useState<MessageStatusFilter>(ALL_MESSAGE_STATUSES)
   const tabsBehavior = useTabsBehavior({
     defaultValue: "messages",
     persistKey: "intelligence-view",
@@ -151,6 +164,16 @@ function IntelligenceScreenBody() {
     () => messagesQuery.data?.pages.flatMap((page) => page.items) ?? [],
     [messagesQuery.data?.pages]
   )
+  const visibleMessages = filterLoadedMessages({
+    messages,
+    query: messageQuery,
+    status: messageStatus,
+  })
+  const messageFiltersActive =
+    messageQuery.trim().length > 0 || messageStatus !== ALL_MESSAGE_STATUSES
+  const reviewRequiredCount = messages.filter(
+    (message) => message.processingStatus === "REVIEW_REQUIRED"
+  ).length
   const {
     hasNextPage,
     isFetching: isFetchingMessages,
@@ -812,7 +835,75 @@ function IntelligenceScreenBody() {
                     </AlertAction>
                   </Alert>
                 ) : null}
-                {messages.map((message) => (
+                <div className="flex flex-col gap-2">
+                  <p className="px-1 text-xs text-muted-foreground">
+                    {messages.length}{" "}
+                    {messages.length === 1
+                      ? "correo cargado"
+                      : "correos cargados"}{" "}
+                    · {reviewRequiredCount} en revisión entre los cargados
+                  </p>
+                  <FormTextField
+                    value={messageQuery}
+                    onChange={setMessageQuery}
+                    placeholder="Buscar por asunto o remitente"
+                    ariaLabel="Buscar correos cargados"
+                    icon={Search}
+                    maxLength={120}
+                  />
+                  <SelectField
+                    label="Estado del correo"
+                    value={messageStatus}
+                    onChange={(value) =>
+                      setMessageStatus(value as MessageStatusFilter)
+                    }
+                    icon={ListFilter}
+                    options={[
+                      {
+                        value: ALL_MESSAGE_STATUSES,
+                        label: "Todos los estados",
+                      },
+                      ...(
+                        Object.keys(MESSAGE_STATUS_LABELS) as Array<
+                          keyof typeof MESSAGE_STATUS_LABELS
+                        >
+                      ).map((status) => ({
+                        value: status,
+                        label: MESSAGE_STATUS_LABELS[status],
+                      })),
+                    ]}
+                  />
+                  {messageFiltersActive ? (
+                    <p className="px-1 text-xs leading-relaxed text-muted-foreground">
+                      Se filtra entre los correos ya cargados. Carga más correos
+                      para ampliar la búsqueda.
+                    </p>
+                  ) : null}
+                </div>
+                {messageFiltersActive && visibleMessages.length === 0 ? (
+                  <Empty>
+                    <EmptyHeader>
+                      <EmptyMedia variant="icon">
+                        <Search aria-hidden="true" />
+                      </EmptyMedia>
+                      <EmptyTitle>Ningún correo cargado coincide</EmptyTitle>
+                      <EmptyDescription>
+                        Cambia el texto o el estado, o limpia los filtros para
+                        ver la lista completa.
+                      </EmptyDescription>
+                    </EmptyHeader>
+                    <Button
+                      type="button"
+                      onClick={() => {
+                        setMessageQuery("")
+                        setMessageStatus(ALL_MESSAGE_STATUSES)
+                      }}
+                    >
+                      <X aria-hidden="true" /> Limpiar filtros
+                    </Button>
+                  </Empty>
+                ) : null}
+                {visibleMessages.map((message) => (
                   <SummaryItem
                     key={message.id}
                     title={message.subject}
@@ -824,10 +915,35 @@ function IntelligenceScreenBody() {
                   />
                 ))}
                 <InfiniteListSentinel
-                  hasNextPage={Boolean(hasNextPage) && !messagesQuery.error}
+                  hasNextPage={
+                    Boolean(hasNextPage) &&
+                    !messagesQuery.error &&
+                    !messageFiltersActive
+                  }
                   isFetchingNextPage={isFetchingNextPage}
                   onLoadMore={loadMore}
                 />
+                {messageFiltersActive && hasNextPage ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full"
+                    onClick={loadMore}
+                    disabled={isFetchingNextPage}
+                  >
+                    {isFetchingNextPage ? (
+                      <LoaderCircle
+                        className="animate-spin"
+                        aria-hidden="true"
+                      />
+                    ) : (
+                      <RefreshCw aria-hidden="true" />
+                    )}
+                    {isFetchingNextPage
+                      ? "Cargando correos..."
+                      : "Cargar más correos"}
+                  </Button>
+                ) : null}
               </>
             )}
           </TabsContent>
