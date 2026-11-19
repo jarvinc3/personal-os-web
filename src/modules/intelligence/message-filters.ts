@@ -5,6 +5,7 @@ export const MESSAGE_STATUS_LABELS = {
   PROCESSED: "Procesado",
   REVIEW_REQUIRED: "En revisión",
   FAILED: "Falló",
+  DISCARDED: "Descartado",
 } as const
 
 export type MessageStatus = keyof typeof MESSAGE_STATUS_LABELS

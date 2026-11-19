@@ -1,7 +1,10 @@
 import assert from "node:assert/strict"
 import { describe, it } from "node:test"
 
-import { filterLoadedMessages } from "./message-filters.ts"
+import {
+  filterLoadedMessages,
+  MESSAGE_STATUS_LABELS,
+} from "./message-filters.ts"
 
 const messages = [
   {
@@ -80,6 +83,26 @@ describe("filterLoadedMessages", () => {
     assert.deepEqual(
       filterLoadedMessages({ messages, query: "inexistente", status: "ALL" }),
       []
+    )
+  })
+
+  it("ofrece el estado Descartado y filtra por él", () => {
+    const discarded = [
+      {
+        subject: "Aviso de tienda",
+        fromAddress: "hola@tienda.com",
+        processingStatus: "DISCARDED",
+      },
+    ]
+
+    assert.equal(MESSAGE_STATUS_LABELS.DISCARDED, "Descartado")
+    assert.deepEqual(
+      filterLoadedMessages({
+        messages: discarded,
+        query: "",
+        status: "DISCARDED",
+      }),
+      discarded
     )
   })
 })
