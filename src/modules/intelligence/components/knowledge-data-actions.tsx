@@ -13,7 +13,7 @@ import { useState } from "react"
 
 const DELETE_CONSEQUENCES = [
   "Los correos importados y sus cuerpos.",
-  "Tu conocimiento personal y tus inferencias.",
+  "Tus inferencias y sus resultados.",
   "Los runs y el dataset de análisis.",
   "La conexión de Gmail y sus tokens.",
   "El consentimiento para contribuir al conocimiento global.",
@@ -73,7 +73,7 @@ export function KnowledgeDataActions({
         icon={Trash2}
         wide
         title="¿Borrar todos tus datos de IA?"
-        description={`Es inmediato y no se puede deshacer. Se borrarán tus ${personalKnowledgeCount} ${personalKnowledgeCount === 1 ? "elemento" : "elementos"} de conocimiento personal y también:`}
+        description={`Es inmediato y no se puede deshacer. Se borrarán tus ${personalKnowledgeCount} ${personalKnowledgeCount === 1 ? "elemento" : "elementos"} de conocimiento personal —los que ves y los que están en revisión— y también:`}
         confirmLabel="Borrar datos de IA"
         confirmIcon={Trash2}
         pending={deleteMutation.isPending}

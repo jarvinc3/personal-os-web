@@ -29,7 +29,7 @@ type RoleChangeRequest = {
   role: AiRole
 }
 
-function accountName({ account }: { account: AiRoleRow }): string {
+function accountName(account: AiRoleRow): string {
   return account.fullName || account.email
 }
 
@@ -82,7 +82,7 @@ export function AdminRolesScreen() {
           rolesQuery.data.map((account, index) => (
             <SummaryItem
               key={account.id}
-              title={accountName({ account })}
+              title={accountName(account)}
               description={`${account.email} · ${ROLE_LABELS[account.role]}`}
               icon={UserRound}
               isLast={index === rolesQuery.data!.length - 1}
@@ -120,6 +120,11 @@ export function AdminRolesScreen() {
             />
           ))
         )}
+        <p className="px-2 text-xs leading-relaxed text-muted-foreground">
+          Colaborador no agrega permisos sobre Usuario: el aporte al
+          conocimiento global lo decide el consentimiento de cada cuenta en
+          Privacidad y datos.
+        </p>
       </SummarySection>
 
       <ConfirmDialog
@@ -131,19 +136,20 @@ export function AdminRolesScreen() {
         }}
         icon={ShieldCheck}
         wide
-        title={`¿Cambiar a ${request ? ROLE_LABELS[request.role] : ""} la cuenta de ${request ? accountName(request) : ""}?`}
+        title={`¿Cambiar a ${request ? ROLE_LABELS[request.role] : ""} la cuenta de ${request ? accountName(request.account) : ""}?`}
         description="El cambio se aplica de inmediato. Cancelar deja el rol como está."
         confirmLabel="Cambiar rol"
         confirmIcon={ShieldCheck}
         pending={updateRoleMutation.isPending}
         pendingLabel="Cambiando..."
+        closeOnConfirm={false}
         onConfirm={() => {
           if (!request) {
             return
           }
           updateRoleMutation.mutate(
             { userId: request.account.id, role: request.role },
-            { onSuccess: () => setRequest(null) }
+            { onSettled: () => setRequest(null) }
           )
         }}
       >

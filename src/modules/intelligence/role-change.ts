@@ -15,12 +15,10 @@ export const ROLE_CAPABILITIES: Record<AiRole, readonly string[]> = {
   CONTRIBUTOR: [
     "Ver su propio correo, su conocimiento y sus verificaciones",
     "Exportar y borrar sus datos de IA",
-    "Aportar patrones anónimos al conocimiento global",
   ],
   ADMIN: [
     "Ver su propio correo, su conocimiento y sus verificaciones",
     "Exportar y borrar sus datos de IA",
-    "Aportar patrones anónimos al conocimiento global",
     "Revisar el conocimiento global: promover, revertir y cambiar roles",
   ],
 }
