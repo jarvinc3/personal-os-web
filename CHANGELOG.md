@@ -43,6 +43,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Cambiado
 
+- #393: la tarjeta de Gmail muestra un solo estado con una acción principal según el caso —«Reconectar» si el acceso venció, «Sincronizar» al día— y el resto de acciones pasa a «Más acciones», con vaciar siempre como destructiva. La clasificación muestra su avance y el importado no se lee como cero mientras tanto; el canal en vivo solo aparece con la conexión sana.
 - #396: el detalle del correo abre con un resumen —clasificación automática y revisión de una persona— y deja las versiones Canónica, Saneada y Cruda bajo «Detalles técnicos», cada una explicada. Observaciones, verificaciones y análisis muestran tipo, alcance, veredicto, rol, modo y estado en español (`analysis-labels.ts`). Sin cambio de contrato.
 - #394: al abrir el detalle del correo el foco inicial va al asunto en el título del panel, que queda enfocable con `tabIndex={-1}`, y al cerrar vuelve a la fila que lo abrió. La trampa de foco y Escape siguen siendo del `Drawer` de base-ui. Sin cambio visual.
 - #395: cambiar un rol pide confirmación, enumera lo que la cuenta podrá hacer y lo que dejará de poder —solo Administrador suma la revisión del conocimiento global; Colaborador no agrega permisos sobre Usuario— y el diálogo espera a que la petición termine. El borrado de datos de IA dice cuántos elementos de conocimiento personal se borran, los visibles y los que están en revisión. Promover y revertir ya explicaban su consecuencia, y cada acción confirmada avisa el resultado.

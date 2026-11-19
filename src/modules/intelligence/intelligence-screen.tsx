@@ -23,6 +23,14 @@ import {
 import { Skeleton } from "@/src/shared/components/ui/skeleton"
 import { Badge } from "@/src/shared/components/ui/badge"
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/src/shared/components/ui/dropdown-menu"
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -64,6 +72,7 @@ import {
   ListFilter,
   LoaderCircle,
   Mail,
+  MoreHorizontal,
   Search,
   FileText,
   Wifi,
@@ -95,12 +104,8 @@ import {
   verificationVerdictLabel,
 } from "./analysis-labels"
 import { ROUTE_LABELS, SEMANTIC_TYPE_LABELS } from "./review-labels"
-import {
-  describeScheduledClassification,
-  describeSyncFailure,
-  describeSyncProgress,
-  resolveDashboardSyncFailure,
-} from "./sync-status"
+import { resolveGmailStatus } from "./gmail-status"
+import { describeSyncFailure, resolveDashboardSyncFailure } from "./sync-status"
 import {
   ALERT_TONE_CLASS_NAME,
   Alert,
@@ -293,18 +298,6 @@ function IntelligenceScreenBody() {
     connection,
     progress: syncProgress,
   })
-  const syncFailed = Boolean(syncFailure)
-  const syncWarning = syncFailed || oauthIncomplete || requiresReconnect
-  const syncWaiting =
-    !oauthIncomplete &&
-    (syncProgress?.status === "waiting" || syncProgress?.status === "retrying")
-  const syncing =
-    !syncWarning &&
-    ((connection.connected &&
-      (connection.syncInProgress ||
-        (!connection.initialSyncCompletedAt && !syncFailed))) ||
-      syncProgress?.status === "running" ||
-      syncProgress?.status === "scheduled")
   const attemptedAt = syncFailure?.occurredAt
     ? formatDateTime(syncFailure.occurredAt)
     : null
@@ -316,71 +309,91 @@ function IntelligenceScreenBody() {
       })
     : null
 
+  const nextRunLabel = syncProgress?.nextRunAt
+    ? formatDateTime(new Date(syncProgress.nextRunAt).toISOString())
+    : null
+  const gmailStatus = resolveGmailStatus({
+    connected,
+    requiresReconnect,
+    oauthIncomplete,
+    failure: failureCopy,
+    progress: syncProgress,
+    initialSyncCompletedAt: connection.initialSyncCompletedAt ?? null,
+    syncInProgress: Boolean(connection.syncInProgress),
+    lastSyncedAtLabel: connection.lastSyncedAt
+      ? formatDateTime(connection.lastSyncedAt)
+      : null,
+    nextRunLabel,
+  })
+  const primaryAction = gmailStatus.primaryAction
+  const primaryActionBusy =
+    primaryAction === "sync"
+      ? syncMutation.isPending
+      : connectMutation.isPending
+  const runPrimaryAction = () => {
+    if (primaryAction === "sync") {
+      syncMutation.mutate()
+      return
+    }
+    connectSheet.setOpen(true)
+  }
+
   return (
     <main className="mx-auto flex w-full max-w-4xl flex-col gap-5 p-4 pb-10 md:px-6">
       <SummarySection
         title={connected ? "Gmail" : "Fuente de correo"}
         subtitle={
           connected
-            ? connectionSubtitle({
-                emailAddress: dashboard.connection.emailAddress,
-                requiresReconnect,
-                oauthIncomplete,
-                syncFailed,
-                syncWaiting,
-                syncing,
-              })
+            ? `${dashboard.connection.emailAddress ?? "Cuenta conectada"} · ${gmailStatus.title}`
             : "Conecta una cuenta para importar y revisar tus mensajes."
         }
         icon={Mail}
         collapsible={connected}
+        defaultOpen={gmailStatus.state !== "up_to_date"}
         right={
           connected ? (
             <div className="flex items-center gap-2">
-              <Badge
-                variant="outline"
-                className="gap-1.5"
-                aria-live="polite"
-                aria-label={emailSocketStatusLabel(emailSocketStatus)}
-                title={emailSocketStatusLabel(emailSocketStatus)}
-              >
-                {emailSocketStatus === "connected" ? (
-                  <Wifi
-                    className="size-3.5 text-emerald-600"
-                    aria-hidden="true"
-                  />
-                ) : emailSocketStatus === "connecting" ? (
-                  <LoaderCircle
-                    className="size-3.5 animate-spin"
-                    aria-hidden="true"
-                  />
-                ) : (
-                  <WifiOff
-                    className="size-3.5 text-muted-foreground"
-                    aria-hidden="true"
-                  />
-                )}
-                {emailSocketStatus === "connected"
-                  ? "Canal en vivo"
-                  : emailSocketStatus === "connecting"
-                    ? "Conectando canal"
-                    : "Canal sin conexión"}
-              </Badge>
-              <span
-                role="img"
-                aria-label={
-                  oauthIncomplete
-                    ? "Gmail conectado con configuración OAuth incompleta"
-                    : requiresReconnect
-                      ? "Gmail conectado y requiere reconexión"
-                      : syncFailed
-                        ? "Gmail conectado con la última sincronización fallida"
-                        : "Gmail conectado"
-                }
-              >
-                {syncWarning ? (
+              {gmailStatus.showsLiveChannel ? (
+                <Badge
+                  variant="outline"
+                  className="gap-1.5"
+                  aria-live="polite"
+                  aria-label={emailSocketStatusLabel(emailSocketStatus)}
+                  title={emailSocketStatusLabel(emailSocketStatus)}
+                >
+                  {emailSocketStatus === "connected" ? (
+                    <Wifi
+                      className="size-3.5 text-emerald-600"
+                      aria-hidden="true"
+                    />
+                  ) : emailSocketStatus === "connecting" ? (
+                    <LoaderCircle
+                      className="size-3.5 animate-spin"
+                      aria-hidden="true"
+                    />
+                  ) : (
+                    <WifiOff
+                      className="size-3.5 text-muted-foreground"
+                      aria-hidden="true"
+                    />
+                  )}
+                  {emailSocketStatus === "connected"
+                    ? "Canal en vivo"
+                    : emailSocketStatus === "connecting"
+                      ? "Conectando canal"
+                      : "Canal sin conexión"}
+                </Badge>
+              ) : null}
+              <span role="img" aria-label={gmailStatus.title}>
+                {gmailStatus.tone === "warning" ? (
                   <AlertCircle
                     className="size-5 text-amber-600"
+                    aria-hidden="true"
+                  />
+                ) : gmailStatus.state === "syncing" ||
+                  gmailStatus.state === "classifying" ? (
+                  <LoaderCircle
+                    className="size-5 animate-spin text-muted-foreground"
                     aria-hidden="true"
                   />
                 ) : (
@@ -403,223 +416,69 @@ function IntelligenceScreenBody() {
       >
         {connected ? (
           <>
-            <SummaryItem
-              title="Historial inicial"
-              description={
-                dashboard.connection.initialSyncCompletedAt
-                  ? `Completo ${importScope}`
-                  : syncWarning
-                    ? "Incompleto · la sincronización se detuvo"
-                    : syncing
-                      ? `Importando ${importScope}`
-                      : "Pendiente"
+            <Alert
+              variant="default"
+              className={
+                gmailStatus.tone
+                  ? ALERT_TONE_CLASS_NAME[gmailStatus.tone]
+                  : undefined
               }
-              icon={CalendarDays}
-              value={
-                receivedRange?.firstMessageAt
-                  ? formatDate(receivedRange.firstMessageAt)
-                  : "Sin correos"
-              }
-            />
-            <SummaryItem
-              title="Última sincronización"
-              description={
-                oauthIncomplete
-                  ? "No puede correr: falta configuración OAuth"
-                  : requiresReconnect
-                    ? "Detenida: reconecta Gmail"
-                    : syncFailed
-                      ? "Falló"
-                      : syncWaiting
-                        ? "Esperando reintento de Gmail"
-                        : syncProgress?.status === "running"
-                          ? "En curso"
-                          : syncProgress?.status === "scheduled"
-                            ? syncProgress.errorCode === "classification_failed"
-                              ? "Clasificación pendiente"
-                              : "Correcta; siguiente lote programado"
-                            : dashboard.connection.lastSyncedAt
-                              ? "Correcta"
-                              : "Sin intentos"
-              }
-              icon={RefreshCw}
-              value={
-                syncFailure?.occurredAt
-                  ? formatDateTime(syncFailure.occurredAt)
-                  : dashboard.connection.lastSyncedAt
-                    ? formatDateTime(dashboard.connection.lastSyncedAt)
-                    : "Pendiente"
-              }
-              isLast
-            />
-
-            <div className="flex flex-col gap-2">
-              {oauthIncomplete ? (
-                <Alert
-                  variant="default"
-                  className={ALERT_TONE_CLASS_NAME.warning}
-                  role="status"
-                >
-                  <AlertCircle className="size-4 shrink-0" aria-hidden="true" />
-                  <AlertTitle>Configuración OAuth incompleta</AlertTitle>
-                  <AlertDescription>
-                    El backend no tiene completas las variables de Gmail. La
-                    sincronización automática no puede correr y la cuenta no
-                    está al día. Revisa la configuración y reinicia el API; no
-                    hace falta reconectar.
-                    {failureCopy
-                      ? ` Último intento: ${attemptedAt ?? "sin hora"} · código ${syncFailure?.code}.`
-                      : null}
-                  </AlertDescription>
-                </Alert>
-              ) : failureCopy ? (
-                <Alert
-                  variant="default"
-                  className={ALERT_TONE_CLASS_NAME.warning}
-                  role="status"
-                >
-                  <AlertCircle className="size-4 shrink-0" aria-hidden="true" />
-                  <AlertTitle>{failureCopy.title}</AlertTitle>
-                  <AlertDescription>{failureCopy.description}</AlertDescription>
-                  {failureCopy.offerReconnect ? (
-                    <AlertAction>
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        onClick={() => connectSheet.setOpen(true)}
-                        disabled={connectMutation.isPending}
-                      >
-                        {connectMutation.isPending ? (
-                          <LoaderCircle
-                            className="animate-spin"
-                            aria-hidden="true"
-                          />
-                        ) : (
-                          <Mail aria-hidden="true" />
-                        )}
-                        Reconectar
-                      </Button>
-                    </AlertAction>
-                  ) : null}
-                </Alert>
-              ) : null}
-              {syncProgress?.status === "scheduled" && !oauthIncomplete ? (
-                <Alert variant="default" role="status">
-                  <Clock3 className="size-4 shrink-0" aria-hidden="true" />
-                  <AlertTitle>
-                    {syncProgress.errorCode === "classification_failed"
-                      ? "Clasificación pendiente"
-                      : "El siguiente lote está programado"}
-                  </AlertTitle>
-                  <AlertDescription>
-                    {describeScheduledClassification(syncProgress) ? (
-                      <>
-                        {describeScheduledClassification(syncProgress)} La
-                        próxima corrida está programada
-                        {syncProgress.nextRunAt
-                          ? ` alrededor de ${formatDateTime(new Date(syncProgress.nextRunAt).toISOString())}`
-                          : " para el próximo ciclo"}
-                        .
-                      </>
+              role="status"
+            >
+              {gmailStatus.state === "syncing" ||
+              gmailStatus.state === "classifying" ? (
+                <LoaderCircle
+                  className="size-4 shrink-0 animate-spin"
+                  aria-hidden="true"
+                />
+              ) : gmailStatus.tone === "warning" ? (
+                <AlertCircle className="size-4 shrink-0" aria-hidden="true" />
+              ) : (
+                <CheckCircle2 className="size-4 shrink-0" aria-hidden="true" />
+              )}
+              <AlertTitle>{gmailStatus.title}</AlertTitle>
+              <AlertDescription>
+                {gmailStatus.description}
+                {(syncProgress?.status === "waiting" ||
+                  syncProgress?.status === "retrying") &&
+                syncProgress.retryAt ? (
+                  <span className="mt-2 flex">
+                    <Badge
+                      variant="secondary"
+                      className="h-7 gap-1.5 px-3 font-mono text-sm tabular-nums"
+                      aria-live="off"
+                    >
+                      <Clock3 className="size-3.5" aria-hidden="true" />
+                      {formatRetryCountdown(syncProgress.retryAt, now)}
+                    </Badge>
+                  </span>
+                ) : null}
+              </AlertDescription>
+              {primaryAction ? (
+                <AlertAction>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={runPrimaryAction}
+                    disabled={primaryActionBusy}
+                  >
+                    {primaryActionBusy ? (
+                      <LoaderCircle
+                        className="animate-spin"
+                        aria-hidden="true"
+                      />
+                    ) : primaryAction === "sync" ? (
+                      <RefreshCw aria-hidden="true" />
                     ) : (
-                      <>
-                        Este lote importó {syncProgress.importedThisRun}{" "}
-                        mensajes. La sincronización continuará automáticamente
-                        {syncProgress.nextRunAt
-                          ? ` alrededor de ${formatDateTime(new Date(syncProgress.nextRunAt).toISOString())}`
-                          : " en el próximo ciclo"}
-                        .
-                      </>
+                      <Mail aria-hidden="true" />
                     )}
-                  </AlertDescription>
-                </Alert>
+                    {gmailStatus.primaryLabel}
+                  </Button>
+                </AlertAction>
               ) : null}
-              {!oauthIncomplete &&
-              (dashboard.connection.syncInProgress ||
-                syncWaiting ||
-                syncProgress?.status === "running") ? (
-                <Alert variant="default" role="status">
-                  <LoaderCircle
-                    className="size-4 shrink-0 animate-spin"
-                    aria-hidden="true"
-                  />
-                  <AlertTitle>Sincronizando correo</AlertTitle>
-                  <AlertDescription>
-                    {syncProgress?.status === "waiting"
-                      ? `${syncProgress.errorCategory === "rate_limit" ? "Gmail alcanzó su límite temporal de solicitudes" : "Gmail pidió una pausa temporal"}. Reintento ${syncProgress.attempt} de 3.`
-                      : syncProgress?.status === "retrying"
-                        ? `Enviando reintento a Gmail · intento ${syncProgress.attempt} de 3.`
-                        : syncProgress?.status === "running"
-                          ? describeSyncProgress(syncProgress)
-                          : `${dashboard.counters.importedMessages} mensajes importados`}
-                    {(syncProgress?.status === "waiting" ||
-                      syncProgress?.status === "retrying") &&
-                    syncProgress.retryAt ? (
-                      <div className="mt-2 flex">
-                        <Badge
-                          variant="secondary"
-                          className="h-7 gap-1.5 px-3 font-mono text-sm tabular-nums"
-                          aria-live="off"
-                        >
-                          <Clock3 className="size-3.5" aria-hidden="true" />
-                          {formatRetryCountdown(syncProgress.retryAt, now)}
-                        </Badge>
-                      </div>
-                    ) : null}
-                  </AlertDescription>
-                </Alert>
-              ) : null}
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <Button
-                type="button"
-                className="flex-1"
-                onClick={() => syncMutation.mutate()}
-                disabled={
-                  syncMutation.isPending || dashboard.connection.syncInProgress
-                }
-              >
-                {syncMutation.isPending ||
-                dashboard.connection.syncInProgress ? (
-                  <LoaderCircle className="animate-spin" aria-hidden="true" />
-                ) : (
-                  <RefreshCw aria-hidden="true" />
-                )}
-                {syncMutation.isPending || dashboard.connection.syncInProgress
-                  ? "Sincronizando…"
-                  : "Sincronizar"}
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                className="flex-1"
-                onClick={() => connectSheet.setOpen(true)}
-                disabled={
-                  connectMutation.isPending ||
-                  dashboard.connection.syncInProgress
-                }
-              >
-                {connectMutation.isPending ? (
-                  <LoaderCircle className="animate-spin" aria-hidden="true" />
-                ) : (
-                  <Mail aria-hidden="true" />
-                )}
-                Reconectar
-              </Button>
-              <Button
-                type="button"
-                variant="destructive"
-                className="flex-1"
-                onClick={() => setResetDialogOpen(true)}
-                disabled={
-                  resetMutation.isPending || dashboard.connection.syncInProgress
-                }
-              >
-                <Trash2 aria-hidden="true" />
-                Vaciar
-              </Button>
-            </div>
+            </Alert>
+
             <div
               className="flex flex-wrap gap-2"
               aria-label="Resumen de cobertura del correo"
@@ -650,26 +509,63 @@ function IntelligenceScreenBody() {
 
               <Badge
                 variant={
-                  dashboard.connection.initialSyncCompletedAt
+                  connection.initialSyncCompletedAt
                     ? "success"
-                    : dashboard.connection.syncInProgress
-                      ? "info"
-                      : syncWarning
-                        ? "warning"
-                        : "secondary"
+                    : gmailStatus.tone === "warning"
+                      ? "warning"
+                      : "secondary"
                 }
               >
                 <CalendarDays data-icon="inline-start" />
-                {dashboard.connection.initialSyncCompletedAt
-                  ? "Histórico inicial completo · desde 1 ene 2026"
-                  : dashboard.connection.syncInProgress
-                    ? "Importando desde 1 ene 2026"
-                    : syncWarning
-                      ? "Histórico detenido · desde 1 ene 2026"
-                      : syncProgress?.status === "scheduled"
-                        ? "Histórico en espera · desde 1 ene 2026"
-                        : "Bootstrap pendiente · desde 1 ene 2026"}
+                {connection.initialSyncCompletedAt
+                  ? `Histórico inicial completo ${importScope}`
+                  : `Importando ${importScope}`}
               </Badge>
+            </div>
+
+            <div className="flex justify-end">
+              <DropdownMenu>
+                <DropdownMenuTrigger
+                  render={<Button type="button" variant="outline" size="sm" />}
+                >
+                  <MoreHorizontal aria-hidden="true" />
+                  Más acciones
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="min-w-56">
+                  <DropdownMenuGroup>
+                    <DropdownMenuItem
+                      disabled={
+                        syncMutation.isPending ||
+                        connection.syncInProgress ||
+                        gmailStatus.state === "syncing" ||
+                        gmailStatus.state === "classifying"
+                      }
+                      onClick={() => syncMutation.mutate()}
+                    >
+                      <RefreshCw />
+                      Sincronizar ahora
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      disabled={connectMutation.isPending}
+                      onClick={() => connectSheet.setOpen(true)}
+                    >
+                      <Mail />
+                      Reconectar Gmail
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      variant="destructive"
+                      disabled={
+                        resetMutation.isPending || connection.syncInProgress
+                      }
+                      onClick={() => setResetDialogOpen(true)}
+                    >
+                      <Trash2 />
+                      Vaciar correo importado
+                    </DropdownMenuItem>
+                  </DropdownMenuGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </>
         ) : (
@@ -1073,39 +969,6 @@ function formatRetryCountdown(retryAt: number, now: number | null) {
   const minutes = Math.floor(remainingSeconds / 60)
   const seconds = remainingSeconds % 60
   return `Reintento en ${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`
-}
-
-function connectionSubtitle({
-  emailAddress,
-  requiresReconnect,
-  oauthIncomplete,
-  syncFailed,
-  syncWaiting,
-  syncing,
-}: {
-  emailAddress: string
-  requiresReconnect: boolean
-  oauthIncomplete: boolean
-  syncFailed: boolean
-  syncWaiting: boolean
-  syncing: boolean
-}) {
-  if (oauthIncomplete) {
-    return `${emailAddress} · Configuración OAuth incompleta`
-  }
-  if (requiresReconnect) {
-    return `${emailAddress} · Reconecta Gmail`
-  }
-  if (syncFailed) {
-    return `${emailAddress} · Última sincronización fallida`
-  }
-  if (syncWaiting) {
-    return `${emailAddress} · Esperando reintento de Gmail`
-  }
-  if (syncing) {
-    return `${emailAddress} · Importando desde 1 ene 2026`
-  }
-  return `${emailAddress} · Sin errores recientes`
 }
 
 function emailSocketStatusLabel(
