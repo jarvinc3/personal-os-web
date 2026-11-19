@@ -90,7 +90,10 @@ export function KnowledgeExplorer() {
         </>
       )}
 
-      <KnowledgeDataActions canExport={personal.length > 0} />
+      <KnowledgeDataActions
+        canExport={personal.length > 0}
+        personalKnowledgeCount={personal.length}
+      />
     </div>
   )
 }
