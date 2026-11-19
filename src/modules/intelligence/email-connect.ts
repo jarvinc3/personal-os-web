@@ -56,6 +56,18 @@ const EMAIL_IMPORT_PERIOD_CHOICES = [
   ...EMAIL_IMPORT_PERIODS,
 ] as const
 
+/** Largo máximo que acepta `ConnectGmailDto.senderFilter` en el back. */
+export const SENDER_FILTER_MAX_LENGTH = 120
+
+/** Dominio sin `@` ni espacios, con al menos un punto: el patrón del back. */
+const SENDER_FILTER_PATTERN =
+  /^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$/i
+
+/** Un filtro vacío significa «todos los remitentes» y es válido. */
+function isSenderFilterDomain(value: string): boolean {
+  return value.length === 0 || SENDER_FILTER_PATTERN.test(value)
+}
+
 /**
  * Una sola validación para habilitar el botón y para el envío: una conexión
  * nueva exige un período y la reconexión admite mantener el guardado.
@@ -65,7 +77,13 @@ export function emailConnectSchema({ reconnect }: { reconnect: boolean }) {
     choice: reconnect
       ? z.enum(EMAIL_IMPORT_PERIOD_CHOICES)
       : z.enum(EMAIL_IMPORT_PERIODS),
-    senderFilter: z.string().trim().max(253, "El filtro es demasiado largo"),
+    senderFilter: z
+      .string()
+      .trim()
+      .max(SENDER_FILTER_MAX_LENGTH, "El filtro es demasiado largo")
+      .refine(isSenderFilterDomain, {
+        message: "Escribe un dominio válido, por ejemplo bhd.com.do",
+      }),
   })
 }
 

@@ -3,6 +3,7 @@ import { describe, it } from "node:test"
 
 import {
   KEEP_EMAIL_IMPORT_PERIOD,
+  SENDER_FILTER_MAX_LENGTH,
   emailConnectBody,
   emailConnectSchema,
   emailConnectHasChanges,
@@ -82,7 +83,7 @@ describe("emailConnectSchema", () => {
     )
   })
 
-  it("recorta el filtro y limita su largo", () => {
+  it("recorta el filtro y limita su largo al de la API", () => {
     const schema = emailConnectSchema({ reconnect: true })
     const parsed = schema.safeParse({
       choice: KEEP_EMAIL_IMPORT_PERIOD,
@@ -93,13 +94,45 @@ describe("emailConnectSchema", () => {
     if (parsed.success) {
       assert.equal(parsed.data.senderFilter, "bhd.com.do")
     }
-    assert.equal(
-      schema.safeParse({
-        choice: KEEP_EMAIL_IMPORT_PERIOD,
-        senderFilter: "x".repeat(254),
-      }).success,
-      false
+    const tooLong = schema.shape.senderFilter.safeParse(
+      "x".repeat(SENDER_FILTER_MAX_LENGTH + 1)
     )
+
+    assert.equal(tooLong.success, false)
+    if (!tooLong.success) {
+      assert.equal(
+        tooLong.error.issues[0]?.message,
+        "El filtro es demasiado largo"
+      )
+    }
+  })
+
+  it("exige un dominio con punto, como la API", () => {
+    const acceptsSender = emailConnectSchema({
+      reconnect: false,
+    }).shape.senderFilter.safeParse
+
+    assert.equal(acceptsSender("").success, true)
+    assert.equal(acceptsSender("bhd.com.do").success, true)
+    assert.equal(acceptsSender(" alerts.bhd.com.do ").success, true)
+
+    for (const invalid of [
+      "banco x",
+      "@bhd.com",
+      "bhd..com",
+      "bhd.com.do,",
+      "-bhd.com",
+    ]) {
+      const invalidParse = acceptsSender(invalid)
+
+      assert.equal(invalidParse.success, false)
+      if (!invalidParse.success) {
+        assert.equal(
+          invalidParse.error.issues[0]?.message,
+          "Escribe un dominio válido, por ejemplo bhd.com.do"
+        )
+      }
+    }
   })
 })
 

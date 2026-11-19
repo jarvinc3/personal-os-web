@@ -93,6 +93,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Corregido
 
+- #437: el filtro de remitente de conectar Gmail valida el mismo patrón de dominio y el mismo máximo de 120 caracteres que la API antes de habilitar «Conectar», y el campo explica qué corregir. Antes, un texto que no era un dominio o que pasaba de 120 caracteres se enviaba y volvía como error 400.
 - #431: el CI corre en el runner self-hosted con `pull_request`; los PRs usan el workflow del merge y el push a `develop` o `master` el de la rama.
 - #289: retira de la tabla la referencia a la card de sincronización de Finanzas que ya no existe y señala el estado integrado actual de Gmail en Intelligence.
 - Al cerrar desde un movimiento importado la hoja del correo de origen, se vuelve al detalle del movimiento y se conserva el estado de navegación (#389).

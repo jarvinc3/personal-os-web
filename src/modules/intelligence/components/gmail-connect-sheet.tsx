@@ -17,6 +17,7 @@ import {
   EMAIL_IMPORT_PERIODS,
   EMAIL_IMPORT_PERIOD_LABELS,
   KEEP_EMAIL_IMPORT_PERIOD,
+  SENDER_FILTER_MAX_LENGTH,
   emailConnectBody,
   emailConnectSchema,
   emailConnectHasChanges,
@@ -221,7 +222,7 @@ function GmailConnectSheetForm({
             onChange={setSender}
             onBlur={() => setSenderTouched(true)}
             disabled={pending}
-            maxLength={253}
+            maxLength={SENDER_FILTER_MAX_LENGTH}
             error={senderError}
             placeholder="bhd.com.do"
             description="Limita la importación a ese dominio y sus subdominios. Déjalo vacío para importar de todos."
