@@ -71,15 +71,20 @@ import {
   MESSAGES_RATE_LIMIT_MAX_AUTO_RETRIES,
   messagesRateLimitDelayMs,
 } from "./messages-rate-limit"
+import { cn } from "@/src/shared/lib/utils"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { AiEvidenceSection } from "./components/ai-evidence-section"
 import { EmailSignalSection } from "./components/email-signal-section"
 import { ReviewSection } from "./components/review-section"
 import {
-  describeVerificationPayload,
-  ROUTE_LABELS,
-  SEMANTIC_TYPE_LABELS,
-} from "./review-labels"
+  describeVerification,
+  knowledgeScopeLabel,
+  latestBySequence,
+  observationTypeLabel,
+  verifierActorLabel,
+  verificationVerdictLabel,
+} from "./analysis-labels"
+import { ROUTE_LABELS, SEMANTIC_TYPE_LABELS } from "./review-labels"
 import {
   describeScheduledClassification,
   describeSyncFailure,
@@ -1011,11 +1016,20 @@ function IntelligenceMessageDetail({
 }) {
   const { data, isPending, isError, refetch } =
     useIntelligenceMessage(messageId)
+  const classificationObservations =
+    data?.provenance.observations.filter(
+      (item) => item.knowledgeType === "EMAIL_CLASSIFICATION"
+    ) ?? []
+  const lastVerification = data
+    ? latestBySequence(data.provenance.verifications)
+    : undefined
+  const lastClassification = latestBySequence(classificationObservations)
 
   return (
     <BottomSheet
       open={open}
       onOpenChange={onOpenChange}
+      focusTitleOnOpen
       title={data?.subject ?? "Detalle del mensaje"}
       description={
         data
@@ -1057,40 +1071,67 @@ function IntelligenceMessageDetail({
         </Empty>
       ) : (
         <div className="flex flex-col gap-4 p-2">
-          <MessageRepresentation
-            title="Canónica"
-            value={data.content?.canonicalBody}
-          />
-          <MessageRepresentation
-            title="Saneada"
-            value={data.content?.sanitizedBody}
-          />
           <SummarySection
-            title="Cruda (retención limitada)"
+            title="Resumen"
+            subtitle="Qué pasó con este correo, en una línea."
+            icon={ShieldCheck}
+          >
+            <SummaryItem
+              title="Clasificación automática"
+              description={
+                lastClassification
+                  ? `${classificationType(lastClassification.payload)} · ${classificationRoute(lastClassification.payload)}`
+                  : "Todavía no tiene clasificación automática."
+              }
+              icon={BrainCircuit}
+            />
+            <SummaryItem
+              title="Revisión de una persona"
+              description={
+                lastVerification
+                  ? `${verificationVerdictLabel(lastVerification.verdict)} por ${verifierActorLabel(lastVerification.verifierRole)} · ${formatDateTime(lastVerification.createdAt)}`
+                  : "Todavía sin revisión de una persona."
+              }
+              icon={CheckCircle2}
+              isLast
+            />
+          </SummarySection>
+          <SummarySection
+            title="Detalles técnicos"
+            subtitle="Las tres versiones del texto y de dónde salieron."
             icon={FileText}
             collapsible
           >
-            <pre className="max-h-80 overflow-auto rounded-lg bg-muted p-3 font-sans text-sm wrap-break-word whitespace-pre-wrap">
-              {data.content?.rawBody || "No disponible"}
-            </pre>
+            <MessageRepresentation
+              title="Canónica"
+              description="Texto normalizado que usa la clasificación."
+              value={data.content?.canonicalBody}
+            />
+            <MessageRepresentation
+              title="Saneada"
+              description="Sin datos personales que se puedan reutilizar."
+              value={data.content?.sanitizedBody}
+            />
+            <MessageRepresentation
+              title="Cruda"
+              description="Cuerpo original tal como llegó, con retención limitada."
+              value={data.content?.rawBody}
+              scrolls
+            />
           </SummarySection>
           <SummarySection
             title="Clasificación del mensaje"
             subtitle="Propuesta para revisión; no crea movimientos en Finanzas."
           >
-            {data.provenance.observations
-              .filter((item) => item.knowledgeType === "EMAIL_CLASSIFICATION")
-              .map((item) => (
-                <SummaryItem
-                  key={`classification-${item.sequence}`}
-                  title={`Ruta ${classificationRoute(item.payload)} · ${classificationType(item.payload)}`}
-                  description={describeClassification(item.payload)}
-                  icon={BrainCircuit}
-                />
-              ))}
-            {!data.provenance.observations.some(
-              (item) => item.knowledgeType === "EMAIL_CLASSIFICATION"
-            ) ? (
+            {classificationObservations.map((item) => (
+              <SummaryItem
+                key={`classification-${item.sequence}`}
+                title={`Ruta ${classificationRoute(item.payload)} · ${classificationType(item.payload)}`}
+                description={describeClassification(item.payload)}
+                icon={BrainCircuit}
+              />
+            ))}
+            {!classificationObservations.length ? (
               <p className="px-2 text-sm text-muted-foreground">
                 Este mensaje aún no tiene una clasificación.
               </p>
@@ -1099,21 +1140,27 @@ function IntelligenceMessageDetail({
           <EmailSignalSection message={data} />
           <SummarySection
             title="Procedencia y verificaciones"
-            subtitle="Registros append-only vinculados al correo original."
+            subtitle="Registros que no se editan ni se borran, ligados al correo original."
           >
             {data.provenance.observations.map((observation) => (
               <SummaryItem
                 key={`observation-${observation.sequence}`}
-                title={`Observación ${observation.sequence}`}
-                description={`${observation.knowledgeType} · ${observation.proposedScope} · ${observation.knowledgeKey}`}
+                title={`Observación ${observation.sequence} · ${observationTypeLabel(observation.knowledgeType)}`}
+                description={`${knowledgeScopeLabel(observation.proposedScope)} · ${observation.knowledgeKey}`}
                 icon={BrainCircuit}
               />
             ))}
             {data.provenance.verifications.map((verification, index) => (
               <SummaryItem
                 key={`verification-${verification.sequence}`}
-                title={`Verificación ${verification.sequence} · ${verification.verdict}`}
-                description={`${describeVerificationPayload(verification.correctedPayload)} · ${verification.verifierRole}${verification.isGroundTruth ? " · verdad de referencia HOLDOUT" : ""}${verification.notes ? ` · ${verification.notes}` : ""}`}
+                title={`Verificación ${verification.sequence}`}
+                description={describeVerification({
+                  verdict: verification.verdict,
+                  verifierRole: verification.verifierRole,
+                  isGroundTruth: verification.isGroundTruth,
+                  notes: verification.notes,
+                  correctedPayload: verification.correctedPayload,
+                })}
                 icon={CheckCircle2}
                 isLast={index === data.provenance.verifications.length - 1}
               />
@@ -1226,15 +1273,28 @@ function describeClassification(payload: unknown): string {
 
 function MessageRepresentation({
   title,
+  description,
   value,
+  scrolls = false,
 }: {
   title: string
+  description?: string
   value: string | null | undefined
+  /** Cuerpos largos o crudos se leen en su propia caja, sin estirar la hoja. */
+  scrolls?: boolean
 }) {
   return (
     <section className="flex flex-col gap-1">
       <h4 className="text-xs font-medium text-muted-foreground">{title}</h4>
-      <pre className="rounded-lg bg-muted p-3 font-sans text-sm wrap-break-word whitespace-pre-wrap">
+      {description ? (
+        <p className="text-xs text-muted-foreground">{description}</p>
+      ) : null}
+      <pre
+        className={cn(
+          "rounded-lg bg-muted p-3 font-sans text-sm wrap-break-word whitespace-pre-wrap",
+          scrolls && "max-h-80 overflow-auto"
+        )}
+      >
         {value || "No disponible"}
       </pre>
     </section>
