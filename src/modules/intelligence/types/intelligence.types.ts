@@ -54,6 +54,44 @@ export type AiRunComparison = {
   deltas: Record<string, number | null> | null
 }
 
+/**
+ * El contrato no describe la respuesta de `GET /intelligence/email/usage`.
+ * Los campos son los que devuelve el servicio; hueco del contrato (back#263).
+ */
+export type EmailUsageBucket = {
+  calls: number
+  inputTokens: number
+  outputTokens: number
+  costUsd: number
+}
+
+export type EmailUsageDay = EmailUsageBucket & { day: string }
+export type EmailUsageHour = EmailUsageBucket & { hour: number }
+export type EmailUsageBank = EmailUsageBucket & { bank: string }
+export type EmailUsageType = EmailUsageBucket & { type: string }
+
+export type EmailUsageCostStatus = "OK" | "ALERT" | "PAUSED"
+
+export type EmailUsageSummary = {
+  range: { days: number; from: string; to: string }
+  totals: EmailUsageBucket & { succeeded: number; failed: number }
+  byDay: EmailUsageDay[]
+  byHour: EmailUsageHour[]
+  byBank: EmailUsageBank[]
+  byType: EmailUsageType[]
+  caps: {
+    perMinute: number
+    initial: { limit: number; remaining: number }
+    daily: { limitTokens: number; usedTokens: number }
+    globalCost: {
+      limitUsd: number
+      usedUsd: number
+      alertRatio: number
+      status: EmailUsageCostStatus
+    }
+  }
+}
+
 type ContractField<Value> = Exclude<Value, undefined>
 
 type AiEmailConnection = AiSchemas["AiEmailConnectionResponseDto"]

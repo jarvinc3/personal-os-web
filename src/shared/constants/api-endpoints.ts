@@ -44,6 +44,7 @@ export const API_ENDPOINTS = {
     OAUTH_DIAGNOSTICS: "/intelligence/email/oauth/diagnostics",
     SYNC_EMAIL: "/intelligence/email/sync",
     RESET_EMAIL: "/intelligence/email/reset",
+    EMAIL_USAGE: "/intelligence/email/usage",
     EMAIL_PRODUCT_PROPOSALS: "/intelligence/email/product-proposals",
     EMAIL_PRODUCT_PROPOSAL_DISCOVER:
       "/intelligence/email/product-proposals/discover",

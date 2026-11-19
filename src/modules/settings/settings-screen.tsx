@@ -26,6 +26,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { useEffect } from "react"
 import {
   Bell,
+  Gauge,
   Globe,
   LayoutGrid,
   LogOut,
@@ -83,6 +84,13 @@ const SETTINGS_MENU = [
     icon: ShieldCheck,
     accent: SETTINGS_REGISTRY.privacy.accent,
     href: APP_ROUTES.app.settingsPrivacy,
+  },
+  {
+    label: "Uso",
+    description: "Consumo y costo de la clasificación de correos.",
+    icon: Gauge,
+    accent: SETTINGS_REGISTRY.ai.accent,
+    href: APP_ROUTES.app.settingsUsage,
   },
   {
     label: "Apps",

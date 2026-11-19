@@ -23,6 +23,7 @@ export const APP_ROUTES = {
     settingsAppearanceComponentSection: (sectionId: string) =>
       `/settings/appearance/components/${sectionId}`,
     settingsNotifications: "/settings/notifications",
+    settingsUsage: "/settings/usage",
     settingsPrivacy: "/settings/privacy",
     settingsModules: "/settings/modules",
     settingsWipeData: "/settings/wipe-data",
