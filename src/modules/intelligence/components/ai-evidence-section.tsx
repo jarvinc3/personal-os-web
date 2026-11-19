@@ -67,6 +67,10 @@ import {
 } from "@/src/shared/components/ui/empty"
 import { Skeleton } from "@/src/shared/components/ui/skeleton"
 import { appToast } from "@/src/shared/lib/app-toast"
+import {
+  analysisRunModeLabel,
+  analysisRunStatusLabel,
+} from "@/src/modules/intelligence/analysis-labels"
 import { formatDateTime } from "@/src/shared/lib/date-format"
 import {
   SHEET_ID_QUERY_KEY,
@@ -375,8 +379,8 @@ export function AiEvidenceSection({
               <div className="min-w-0 flex-1">
                 <SummaryItem
                   key={run.id}
-                  title={`${run.mode} · ${run.status}`}
-                  description={`Pipeline ${run.pipelineVersion} · observaciones ${run.observationSequence} · verificaciones ${run.verificationSequence}`}
+                  title={`${analysisRunModeLabel(run.mode)} · ${analysisRunStatusLabel(run.status)}`}
+                  description={`Proceso ${run.pipelineVersion} · ${run.observationSequence} observaciones · ${run.verificationSequence} verificaciones`}
                   icon={Clock3}
                   value={
                     run.completedAt
