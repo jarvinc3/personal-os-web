@@ -841,7 +841,7 @@ function IntelligenceScreenBody() {
                     {messages.length === 1
                       ? "correo cargado"
                       : "correos cargados"}{" "}
-                    · {reviewRequiredCount} en revisión
+                    · {reviewRequiredCount} en revisión entre los cargados
                   </p>
                   <FormTextField
                     value={messageQuery}
@@ -915,10 +915,35 @@ function IntelligenceScreenBody() {
                   />
                 ))}
                 <InfiniteListSentinel
-                  hasNextPage={Boolean(hasNextPage) && !messagesQuery.error}
+                  hasNextPage={
+                    Boolean(hasNextPage) &&
+                    !messagesQuery.error &&
+                    !messageFiltersActive
+                  }
                   isFetchingNextPage={isFetchingNextPage}
                   onLoadMore={loadMore}
                 />
+                {messageFiltersActive && hasNextPage ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full"
+                    onClick={loadMore}
+                    disabled={isFetchingNextPage}
+                  >
+                    {isFetchingNextPage ? (
+                      <LoaderCircle
+                        className="animate-spin"
+                        aria-hidden="true"
+                      />
+                    ) : (
+                      <RefreshCw aria-hidden="true" />
+                    )}
+                    {isFetchingNextPage
+                      ? "Cargando correos..."
+                      : "Cargar más correos"}
+                  </Button>
+                ) : null}
               </>
             )}
           </TabsContent>

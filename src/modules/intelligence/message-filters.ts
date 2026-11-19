@@ -11,10 +11,6 @@ export type MessageStatus = keyof typeof MESSAGE_STATUS_LABELS
 export const ALL_MESSAGE_STATUSES = "ALL" as const
 export type MessageStatusFilter = MessageStatus | typeof ALL_MESSAGE_STATUSES
 
-export function messageStatusLabel(status: string): string {
-  return MESSAGE_STATUS_LABELS[status as MessageStatus] ?? status
-}
-
 type FilterableMessage = {
   subject: string
   fromAddress: string

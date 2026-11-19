@@ -1,7 +1,7 @@
 import assert from "node:assert/strict"
 import { describe, it } from "node:test"
 
-import { filterLoadedMessages, messageStatusLabel } from "./message-filters.ts"
+import { filterLoadedMessages } from "./message-filters.ts"
 
 const messages = [
   {
@@ -20,13 +20,6 @@ const messages = [
     processingStatus: "FAILED",
   },
 ]
-
-describe("messageStatusLabel", () => {
-  it("traduce el estado y deja el código si no lo conoce", () => {
-    assert.equal(messageStatusLabel("REVIEW_REQUIRED"), "En revisión")
-    assert.equal(messageStatusLabel("OTRO"), "OTRO")
-  })
-})
 
 describe("filterLoadedMessages", () => {
   it("sin texto ni estado devuelve todos los cargados", () => {
