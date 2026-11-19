@@ -1,6 +1,7 @@
 "use client"
 
 import { apiGet, apiPost } from "@/src/config/api-client"
+import type { EmailConnectBody } from "@/src/modules/intelligence/email-connect"
 import type {
   AiEmailMessageDetail,
   AiEmailMessagesPage,
@@ -121,9 +122,10 @@ export function useIntelligence() {
     })
   }, [acknowledgeMessages, queryClient])
   const connectMutation = useMutation({
-    mutationFn: () =>
+    mutationFn: (body: EmailConnectBody) =>
       apiPost<{ authorizationUrl: string }>(
-        API_ENDPOINTS.INTELLIGENCE.CONNECT_EMAIL
+        API_ENDPOINTS.INTELLIGENCE.CONNECT_EMAIL,
+        body
       ),
     onSuccess: ({ authorizationUrl }) => {
       window.location.assign(authorizationUrl)

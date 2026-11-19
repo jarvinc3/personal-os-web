@@ -4,8 +4,13 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ## Unreleased — 0.100.0
 
+### Seguridad
+
+- Next.js y `eslint-config-next` se actualizan a 16.4.6 para salir de la versión afectada por el aviso de seguridad publicado (#430).
+
 ### Agregado
 
+- Intelligence › Gmail pide el período de importación al conectar (hoy, último mes o últimos 3 meses) y un filtro de remitente opcional; ambos viajan a `POST /intelligence/email/connect`, el estado de la conexión muestra el corte y el filtro guardados, y al reconectar se conservan salvo que se elija otro período o se borre el filtro (#421; contrato de back #382).
 - El pago de tarjeta registrado a mano pide confirmación cuando el back responde 409 `CARD_PAYMENT_POSSIBLE_DUPLICATE`: el diálogo muestra el monto, la fecha, la cuenta de origen y la tarjeta del pago importado que se le parece, y solo guarda al confirmar con `duplicateAcknowledged: true`. Cancelar no registra nada y, sin coincidencia, el flujo no cambia (#423; contrato de back #389).
 
 - Productos estrena **Imports del correo** (`/finance/imports/review`): la cola de correos que quedaron en revisión con su motivo y los datos del movimiento detectado —monto, fecha, comercio, referencia y el producto por sus últimos 4—, separada de las propuestas de productos. La fila de Productos cuenta los pendientes y se esconde cuando el entorno no tiene el endpoint; la pantalla tiene estados de carga, vacío y error reintentable (#424; contrato de back #383).
@@ -88,6 +93,8 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Corregido
 
+- #437: el filtro de remitente de conectar Gmail valida el mismo patrón de dominio y el mismo máximo de 120 caracteres que la API antes de habilitar «Conectar», y el campo explica qué corregir. Antes, un texto que no era un dominio o que pasaba de 120 caracteres se enviaba y volvía como error 400.
+- #431: el CI corre en el runner self-hosted con `pull_request`; los PRs usan el workflow del merge y el push a `develop` o `master` el de la rama.
 - #289: retira de la tabla la referencia a la card de sincronización de Finanzas que ya no existe y señala el estado integrado actual de Gmail en Intelligence.
 - Al cerrar desde un movimiento importado la hoja del correo de origen, se vuelve al detalle del movimiento y se conserva el estado de navegación (#389).
 - Cerrar el detalle de un correo de Inteligencia reescribe la URL en vez de retroceder: Atrás ya no sale de Inteligencia ni reabre el panel, y la vista se queda en Revisión con el panel cerrado (#376).

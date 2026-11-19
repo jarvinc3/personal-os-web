@@ -72,6 +72,9 @@ type ConnectedEmailConnection = Omit<AiEmailConnection, "syncProgress"> & {
   lastSyncErrorCode: ContractField<AiEmailConnection["lastSyncErrorCode"]>
   requiresReconnect: ContractField<AiEmailConnection["requiresReconnect"]>
   syncInProgress: ContractField<AiEmailConnection["syncInProgress"]>
+  /** El contrato de #382 los devuelve; el DTO OpenAPI todavía no los describe. */
+  importStartAt: string | null
+  senderFilter: string | null
   syncProgress: AiEmailSyncProgress | null
 }
 
