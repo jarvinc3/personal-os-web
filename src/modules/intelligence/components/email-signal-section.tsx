@@ -2,6 +2,7 @@
 
 import {
   AlertCircle,
+  Ban,
   CalendarDays,
   Clock3,
   FileSearch,
@@ -49,6 +50,7 @@ const SECTION_SUBTITLE =
 const MISSING_SIGNAL_ICONS: Record<MissingSignalKind, typeof Radar> = {
   pending: Clock3,
   failed: AlertCircle,
+  discarded: Ban,
   none: Radar,
 }
 

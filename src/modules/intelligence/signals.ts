@@ -34,6 +34,7 @@ const EVIDENCE_SOURCE_LABELS: Record<string, string> = {
 
 const PENDING_CLASSIFICATION_STATUSES = new Set(["INGESTED", "QUEUED"])
 const FAILED_CLASSIFICATION_STATUS = "FAILED"
+const DISCARDED_CLASSIFICATION_STATUS = "DISCARDED"
 
 /**
  * El contrato no busca señales por correo: las lista y las entrega por id. El
@@ -107,7 +108,7 @@ export function evidenceRuleLabel(evidence: EmailSignalEvidence): string {
   return rule || "Sin regla registrada"
 }
 
-export type MissingSignalKind = "pending" | "failed" | "none"
+export type MissingSignalKind = "pending" | "failed" | "discarded" | "none"
 
 export type MissingSignalState = {
   kind: MissingSignalKind
@@ -134,6 +135,15 @@ export function missingSignalState(
       title: "La clasificación falló",
       description:
         "El correo no se pudo clasificar, así que no se publicó ninguna señal.",
+    }
+  }
+
+  if (processingStatus === DISCARDED_CLASSIFICATION_STATUS) {
+    return {
+      kind: "discarded",
+      title: "Correo descartado",
+      description:
+        "El remitente no es un banco del piloto y el texto no alcanzó para clasificarlo, así que no se publicó ninguna señal.",
     }
   }
 
