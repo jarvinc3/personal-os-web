@@ -43,6 +43,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Cambiado
 
+- #445: el contrato OpenAPI se regenera desde el back de `develop` (181 rutas y 291 schemas, con el estado `DISCARDED`) y el estado del correo usa el valor generado en `signals.ts` y en `MESSAGE_STATUS_LABELS`; el estado vacío de la señal deja de comparar la cadena suelta. Sin cambio visible (back #408, #414 y #415).
 - #393: la tarjeta de Gmail muestra un solo estado con una acción principal según el caso —«Reconectar» si el acceso venció, «Sincronizar» al día— y el resto de acciones pasa a «Más acciones», con vaciar siempre como destructiva. La clasificación muestra su avance y el importado no se lee como cero mientras tanto; el canal en vivo solo aparece con la conexión sana.
 - #396: el detalle del correo abre con un resumen —clasificación automática y revisión de una persona— y deja las versiones Canónica, Saneada y Cruda bajo «Detalles técnicos», cada una explicada. Observaciones, verificaciones y análisis muestran tipo, alcance, veredicto, rol, modo y estado en español (`analysis-labels.ts`). Sin cambio de contrato.
 - #394: al abrir el detalle del correo el foco inicial va al asunto en el título del panel, que queda enfocable con `tabIndex={-1}`, y al cerrar vuelve a la fila que lo abrió. La trampa de foco y Escape siguen siendo del `Drawer` de base-ui. Sin cambio visual.

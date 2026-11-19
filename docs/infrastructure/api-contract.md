@@ -44,7 +44,7 @@ type BalanceSheet =
 
 ## Cobertura del contrato
 
-En la copia actual del contrato (161 rutas y 244 schemas) 203 de las 209 respuestas 2xx traen schema. Las señales de correo de AI-7 se leen con los tipos generados (`components["schemas"]["AiSignalResponseDto"]`) y el resto de Inteligencia ya usa un alias de `components["schemas"]` para cada tipo del módulo. Las respuestas que el contrato todavía no describe siguen a mano hasta que el back publique los schemas ([personal-os-back#263](https://github.com/jarvinc3/personal-os-back/issues/263)).
+En la copia actual del contrato (181 rutas y 291 schemas) 223 de las 231 respuestas 2xx traen schema. Las señales de correo de AI-7 se leen con los tipos generados (`components["schemas"]["AiSignalResponseDto"]`) y el resto de Inteligencia ya usa un alias de `components["schemas"]` para cada tipo del módulo. Las respuestas que el contrato todavía no describe siguen a mano hasta que el back publique los schemas ([personal-os-back#263](https://github.com/jarvinc3/personal-os-back/issues/263)).
 
 ## Pruebas
 

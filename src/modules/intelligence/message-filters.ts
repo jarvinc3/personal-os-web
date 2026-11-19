@@ -1,3 +1,5 @@
+import type { AiEmailMessageStatus } from "@/src/modules/intelligence/types/intelligence.types"
+
 /** Estados de análisis que puede tener un correo (`processingStatus`). */
 export const MESSAGE_STATUS_LABELS = {
   INGESTED: "Recibido",
@@ -6,16 +8,16 @@ export const MESSAGE_STATUS_LABELS = {
   REVIEW_REQUIRED: "En revisión",
   FAILED: "Falló",
   DISCARDED: "Descartado",
-} as const
+} as const satisfies Record<AiEmailMessageStatus, string>
 
-export type MessageStatus = keyof typeof MESSAGE_STATUS_LABELS
+export type MessageStatus = AiEmailMessageStatus
 export const ALL_MESSAGE_STATUSES = "ALL" as const
 export type MessageStatusFilter = MessageStatus | typeof ALL_MESSAGE_STATUSES
 
 type FilterableMessage = {
   subject: string
   fromAddress: string
-  processingStatus: string
+  processingStatus: AiEmailMessageStatus
 }
 
 /**

@@ -256,6 +256,22 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/api/intelligence/email/sample-import": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["AiIntelligenceController_sampleImportRun"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/intelligence/email/connect": {
         parameters: {
             query?: never;
@@ -282,6 +298,22 @@ export type paths = {
         get?: never;
         put?: never;
         post: operations["AiIntelligenceController_syncNow"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/intelligence/email/sync-bhd": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["AiIntelligenceController_syncBhd"];
         delete?: never;
         options?: never;
         head?: never;
@@ -330,6 +362,103 @@ export type paths = {
         get: operations["AiIntelligenceController_diagnostics"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/intelligence/email/usage": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Uso y costo de clasificación por día, hora, banco y tipo */
+        get: operations["EmailUsageController_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/intelligence/email/product-proposals/discover": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["EmailProductProposalsController_discover"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/intelligence/email/product-proposals": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["EmailProductProposalsController_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/intelligence/email/product-proposals/{proposalId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["EmailProductProposalsController_update"];
+        trace?: never;
+    };
+    "/api/intelligence/email/product-proposals/{proposalId}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["EmailProductProposalsController_approve"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/intelligence/email/product-proposals/{proposalId}/discard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["EmailProductProposalsController_discard"];
         delete?: never;
         options?: never;
         head?: never;
@@ -394,6 +523,22 @@ export type paths = {
         get?: never;
         put?: never;
         post: operations["AiEvidenceController_verifyReviewGroup"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/intelligence/messages/verifications/batch": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["AiEvidenceController_verifyReviewSelection"];
         delete?: never;
         options?: never;
         head?: never;
@@ -633,6 +778,23 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/api/intelligence/conversations/latest": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Recuperar la conversación propia más reciente de un contexto */
+        get: operations["AiConversationController_latest"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/intelligence/conversations/{conversationId}": {
         parameters: {
             query?: never;
@@ -713,6 +875,74 @@ export type paths = {
         put?: never;
         /** Cancelar una acción pendiente del agente */
         post: operations["AiActionsController_cancel"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/intelligence/view-suggestions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Listar las sugerencias activas de la vista del usuario */
+        get: operations["ViewSuggestionsController_resolveForView"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/intelligence/view-suggestions/{suggestionId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Descartar una sugerencia propia de forma persistente */
+        delete: operations["ViewSuggestionsController_dismiss"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/finance/imports/review": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Imports de correo que esperan una decisión humana */
+        get: operations["ImportReviewController_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/finance/imports/review/{id}/resolve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Fija fecha o destino, enlaza el reverso o descarta un import */
+        post: operations["ImportReviewController_resolve"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2861,22 +3091,6 @@ export type paths = {
         patch: operations["NotificationsController_deactivatePushTokenLegacy"];
         trace?: never;
     };
-    "/api/intelligence/messages/verifications/batch": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["AiEvidenceController_verifyReviewSelection"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
 };
 export type webhooks = Record<string, never>;
 export type components = {
@@ -3046,6 +3260,13 @@ export type components = {
         AiEmailConnectionResponseDto: {
             connected: boolean;
             emailAddress?: string;
+            /**
+             * Format: date-time
+             * @description Fecha UTC desde la que se importa correo. Null sin elección.
+             */
+            importStartAt?: string | null;
+            /** @description Dominio de remitente que limita la importación. */
+            senderFilter?: string | null;
             /** Format: date-time */
             initialSyncCompletedAt?: string | null;
             /** Format: date-time */
@@ -3085,7 +3306,7 @@ export type components = {
             fromDomain: string;
             subject: string;
             /** @enum {string} */
-            processingStatus: "INGESTED" | "QUEUED" | "PROCESSED" | "REVIEW_REQUIRED" | "FAILED";
+            processingStatus: "INGESTED" | "QUEUED" | "PROCESSED" | "REVIEW_REQUIRED" | "DISCARDED" | "FAILED";
             contentFingerprint: string;
         };
         AiEmailMessagePageResponseDto: {
@@ -3151,7 +3372,7 @@ export type components = {
             fromDomain: string;
             subject: string;
             /** @enum {string} */
-            processingStatus: "INGESTED" | "QUEUED" | "PROCESSED" | "REVIEW_REQUIRED" | "FAILED";
+            processingStatus: "INGESTED" | "QUEUED" | "PROCESSED" | "REVIEW_REQUIRED" | "DISCARDED" | "FAILED";
             contentFingerprint: string;
             userId: string;
             connectionId: string;
@@ -3170,12 +3391,148 @@ export type components = {
             provenance: components["schemas"]["AiEmailMessageProvenanceResponseDto"];
             classifications: components["schemas"]["AiEmailClassificationResponseDto"][];
         };
+        EmailSampleImportDto: Record<string, never>;
+        AiEmailSampleSelectionDto: {
+            /** @enum {string} */
+            mode: "IDS" | "SENDER_WINDOW";
+            requested: number;
+            included: number;
+            cap: number;
+            sender?: string;
+            /** Format: date-time */
+            dateFrom?: string;
+            /** Format: date-time */
+            dateTo?: string;
+        };
+        AiEmailSampleExecutedDto: {
+            applied: number;
+            alreadyApplied: number;
+            reviewRequired: number;
+            rejected: number;
+        };
+        AiEmailSampleSummaryDto: {
+            included: number;
+            notFound: number;
+            wouldPublishSignal?: number;
+            wouldCreateMovement?: number;
+            reviewRequired?: number;
+            executed?: components["schemas"]["AiEmailSampleExecutedDto"];
+        };
+        AiEmailSampleClassificationDto: {
+            semanticType: string;
+            confidence: number;
+            /** @enum {string} */
+            method: "KNOWLEDGE" | "DETERMINISTIC" | "MODEL";
+            movementClass: string | null;
+            kind: string | null;
+            amount: number | null;
+            currency: string | null;
+            /** Format: date-time */
+            transactionDate: string | null;
+            direction: string | null;
+        };
+        AiEmailSampleHintsDto: {
+            bankReference: string | null;
+            merchant: string | null;
+            last4: string | null;
+        };
+        AiEmailSampleSignalDto: {
+            published: boolean;
+            reason?: string;
+        };
+        AiEmailSampleMovementDto: {
+            accountId: string | null;
+            cardId: string | null;
+            amount: number;
+            currency: string;
+            /** @enum {string} */
+            type: "DEBIT" | "CREDIT";
+            status: string;
+            /** Format: date-time */
+            transactionDate: string;
+            description: string;
+            categoryId: string | null;
+            legRole: string | null;
+            externalReference: string | null;
+            importReference: string;
+        };
+        AiEmailSampleCardPaymentDto: {
+            sourceAccountId: string;
+            cardId: string;
+            amount: number;
+            currency: string;
+            status: string;
+            /** Format: date-time */
+            transactionDate: string;
+            description: string;
+            externalReference: string | null;
+            importReference: string;
+        };
+        AiEmailSamplePredictionDto: {
+            /** @enum {string} */
+            outcome: "APPLIED" | "ALREADY_APPLIED" | "REVIEW_REQUIRED" | "REJECTED" | "UNAVAILABLE";
+            reason?: string;
+            reviewReasons?: string[];
+            movement?: components["schemas"]["AiEmailSampleMovementDto"];
+            cardPayment?: components["schemas"]["AiEmailSampleCardPaymentDto"];
+        };
+        AiEmailSampleExecutionDto: {
+            /** @enum {string} */
+            outcome: "APPLIED" | "ALREADY_APPLIED" | "REVIEW_REQUIRED" | "REJECTED" | "UNAVAILABLE";
+            reason?: string;
+            transactionId: string | null;
+        };
+        AiEmailSampleItemDto: {
+            messageId: string;
+            /** @enum {string} */
+            status: "INCLUDED" | "NOT_FOUND";
+            fromAddress: string | null;
+            fromDomain: string | null;
+            /** Format: date-time */
+            receivedAt: string | null;
+            provider: string | null;
+            model: string | null;
+            classification: components["schemas"]["AiEmailSampleClassificationDto"] | null;
+            classificationUnavailableReason?: string;
+            hints: components["schemas"]["AiEmailSampleHintsDto"] | null;
+            signal: components["schemas"]["AiEmailSampleSignalDto"];
+            prediction: components["schemas"]["AiEmailSamplePredictionDto"] | null;
+            execution?: components["schemas"]["AiEmailSampleExecutionDto"];
+        };
+        AiEmailSampleImportResponseDto: {
+            dryRun: boolean;
+            selection: components["schemas"]["AiEmailSampleSelectionDto"];
+            summary: components["schemas"]["AiEmailSampleSummaryDto"];
+            items: components["schemas"]["AiEmailSampleItemDto"][];
+        };
+        ConnectGmailDto: {
+            /**
+             * @description Desde cuándo importar: hoy, el último mes o los últimos 3 meses.
+             * @enum {string}
+             */
+            period?: "TODAY" | "LAST_MONTH" | "LAST_3_MONTHS";
+            /**
+             * @description Limita la importación a un dominio de remitente.
+             * @example bhd.com.do
+             */
+            senderFilter?: Record<string, never>;
+        };
         AiEmailConnectResponseDto: {
             authorizationUrl: string;
         };
         AiEmailSyncResponseDto: {
             connected: boolean;
             syncStarted: boolean;
+        };
+        SyncBhdScopeDto: Record<string, never>;
+        SyncBhdResponseDto: {
+            connected: boolean;
+            query: string;
+            found: number;
+            imported: number;
+            skipped: number;
+            nextPageToken: string | null;
+            estimatedTotal: number | null;
         };
         ResetEmailCorpusDto: Record<string, never>;
         AiEmailResetResponseDto: {
@@ -3189,6 +3546,125 @@ export type components = {
             scopes: string[];
             /** @enum {string} */
             status: "ready" | "missing_oauth_configuration";
+        };
+        DiscoverEmailProductProposalsDto: {
+            messageIds?: string[];
+            /** @default 200 */
+            limit: number;
+        };
+        EmailProductProposalInstitutionResponseDto: {
+            name: string;
+            /** @enum {string} */
+            type: "bank" | "credit_union" | "digital_wallet" | "broker" | "other";
+            domain: Record<string, never> | null;
+            country: string;
+            /**
+             * Format: uuid
+             * @description Institución compatible del usuario (dominio o nombre normalizado); solo cuando hay exactamente una.
+             */
+            matchedInstitutionId: Record<string, never> | null;
+            /** @description Todas las instituciones compatibles. Dos o más indican ambigüedad. */
+            matchedInstitutionIds: string[];
+        };
+        EmailProductProposalDraftResponseDto: {
+            /** @enum {string} */
+            productType: "ACCOUNT" | "CARD";
+            name: string;
+            /** @example 5678 */
+            lastFour: string;
+            currency: string;
+            /** @enum {string|null} */
+            accountType: "CHECKING" | "SAVINGS" | "INVESTMENT" | null;
+            /** @enum {string|null} */
+            cardType: "CREDIT" | "DEBIT" | null;
+            /** @enum {string|null} */
+            network: "VISA" | "MASTERCARD" | "AMEX" | "DISCOVER" | "OTHER" | null;
+            /** Format: uuid */
+            accountId: Record<string, never> | null;
+            institution: components["schemas"]["EmailProductProposalInstitutionResponseDto"];
+            /** @description Indica si hay un número completo cifrado en la propuesta. */
+            accountNumberProvided: boolean;
+        };
+        EmailProductProposalEvidenceResponseDto: {
+            /** Format: uuid */
+            messageId: string;
+            fromDomain: string;
+            subject: string;
+            /** Format: date-time */
+            receivedAt: string;
+            match: {
+                [key: string]: unknown;
+            };
+            /** Format: date-time */
+            createdAt: string;
+        };
+        EmailProductProposalResponseDto: {
+            /** Format: uuid */
+            id: string;
+            /** @enum {string} */
+            productType: "ACCOUNT" | "CARD";
+            /** @enum {string} */
+            status: "PENDING" | "APPROVING" | "APPROVED" | "DISCARDED";
+            /**
+             * Format: uuid
+             * @description Producto activo compatible que ya existe; se vincula con approve { productId }. Solo cuando hay exactamente uno.
+             */
+            matchedProductId: Record<string, never> | null;
+            /** @description Productos activos compatibles. Dos o más indican ambigüedad y no se vinculan solos. */
+            matchedProductIds: string[];
+            draft: components["schemas"]["EmailProductProposalDraftResponseDto"];
+            /** Format: uuid */
+            approvedProductId: Record<string, never> | null;
+            /** Format: date-time */
+            createdAt: string;
+            evidence: components["schemas"]["EmailProductProposalEvidenceResponseDto"][];
+            approval?: {
+                duplicate?: boolean;
+                /** Format: uuid */
+                productId?: string;
+                reevaluatedSignals?: number;
+            };
+        };
+        DiscoverEmailProductProposalsResponseDto: {
+            scanned: number;
+            limit: number;
+            limitReached: boolean;
+            created: number;
+            evidenceAdded: number;
+            ignored: number;
+            /** @description Correos con un producto que ya existe, activo, en una institución compatible. */
+            alreadyExists: number;
+            /** @description Correos con varios productos compatibles: no se crea propuesta. */
+            ambiguous: number;
+            proposals: components["schemas"]["EmailProductProposalResponseDto"][];
+        };
+        UpdateEmailProductProposalDto: {
+            name?: string;
+            /** @enum {string} */
+            accountType?: "CHECKING" | "SAVINGS" | "INVESTMENT";
+            /** @enum {string} */
+            cardType?: "CREDIT" | "DEBIT";
+            /** @example DOP */
+            currency?: string;
+            /** @example 5678 */
+            lastFour?: string;
+            accountNumber?: Record<string, never> | null;
+            /** @enum {string} */
+            network?: "VISA" | "MASTERCARD" | "AMEX" | "DISCOVER" | "OTHER";
+            /** Format: uuid */
+            accountId?: Record<string, never> | null;
+            institutionName?: string;
+            /** @enum {string} */
+            institutionType?: "bank" | "credit_union" | "digital_wallet" | "broker" | "other";
+            institutionDomain?: Record<string, never> | null;
+            institutionCountry?: string;
+        };
+        ApproveEmailProductProposalDto: {
+            /**
+             * Format: uuid
+             * @description Producto creado con POST /finance/accounts o /finance/cards. Sin él, el back crea el producto desde el borrador (comportamiento anterior).
+             */
+            productId?: string;
         };
         AiDatasetPartitionsResponseDto: {
             TRAIN: number;
@@ -3263,11 +3739,23 @@ export type components = {
             currency?: string;
             /** Format: date-time */
             transactionDate?: string;
+            /** Format: date-time */
+            suggestedTransactionDate?: string;
+            /** @enum {string} */
+            suggestedTransactionDateSource?: "EMAIL_HEADER";
             /** @enum {string} */
             direction?: "DEBIT" | "CREDIT" | "TRANSFER";
             merchant?: string;
             bankReference?: string;
             last4?: string;
+            /** @description Terminación de la cuenta propia de origen; en una transferencia es la única pista de cuenta. */
+            accountNumberLast4?: string;
+            /** @enum {string} */
+            movementClass?: "PURCHASE" | "INCOME" | "PAYROLL" | "ATM_WITHDRAWAL" | "TRANSFER_OUT" | "TRANSFER_IN" | "CARD_PAYMENT" | "FEE" | "REFUND" | "OTHER";
+            /** @description Referencia del movimiento original de un reverso. */
+            reverseOfBankReference?: string;
+            /** @description Id del correo original de un reverso. */
+            reverseOfEmailMessageId?: string;
         };
         CreateReviewGroupVerificationDto: {
             relevance?: boolean;
@@ -3288,6 +3776,23 @@ export type components = {
             holdoutExcluded: number;
             alreadyVerified: number;
             /** @description Correos de la misma plantilla reencolados y reclasificados con la etiqueta verificada. */
+            requeued: number;
+        };
+        CreateReviewSelectionVerificationDto: {
+            relevance?: boolean;
+            /** @enum {string} */
+            semanticType?: "FIN_TRANSACTION" | "PURCHASE_RECEIPT" | "SUBSCRIPTION_BILLING" | "FIN_STATEMENT_NOTICE" | "FIN_ACCOUNT_NOTICE" | "SECURITY_OTP" | "SECURITY_ALERT" | "TECH_NOTIFICATION" | "JOB" | "CALENDAR_EVENT" | "MARKETING" | "SOCIAL" | "OTHER";
+            routes?: ("FINANCE" | "SUBSCRIPTIONS" | "CALENDAR" | "SECURITY")[];
+            transaction?: components["schemas"]["HumanVerificationTransactionDto"];
+            notes?: string;
+            messageIds: string[];
+            /** @enum {string} */
+            verdict: "CONFIRMED" | "CORRECTED" | "REJECTED";
+        };
+        AiReviewSelectionVerificationResponseDto: {
+            verified: number;
+            alreadyVerified: number;
+            /** @description Correos reencolados y reclasificados después de registrar la selección. */
             requeued: number;
         };
         CreateHumanVerificationDto: {
@@ -3368,6 +3873,16 @@ export type components = {
             bankReference?: string;
             /** @example 4821 */
             last4?: string;
+            /** @example 9012 */
+            accountNumberLast4?: string;
+            /** @enum {string} */
+            movementClass?: "PURCHASE" | "INCOME" | "PAYROLL" | "ATM_WITHDRAWAL" | "TRANSFER_OUT" | "TRANSFER_IN" | "CARD_PAYMENT" | "FEE" | "REFUND" | "OTHER";
+            /** Format: date-time */
+            suggestedTransactionDate?: string;
+            /** @enum {string} */
+            suggestedTransactionDateSource?: "EMAIL_HEADER";
+            reverseOfBankReference?: string;
+            reverseOfEmailMessageId?: string;
         };
         KnowledgeLabelDto: {
             relevance?: boolean;
@@ -3470,6 +3985,25 @@ export type components = {
         AiSignalListResponseDto: {
             data: components["schemas"]["AiSignalResponseDto"][];
         };
+        AiInvocationEntityRefDto: {
+            /** @enum {string} */
+            type: "transaction" | "account" | "card" | "loan" | "budget" | "savings_goal" | "receivable" | "subscription" | "merchant" | "category";
+            /** Format: uuid */
+            id: string;
+        };
+        AiInvocationContextDto: {
+            /** @example /finance/products/transactions */
+            route: string;
+            view?: string;
+            sheet?: string;
+            entityRef?: components["schemas"]["AiInvocationEntityRefDto"];
+            filters?: {
+                [key: string]: unknown;
+            };
+        };
+        CreateAiConversationDto: {
+            context?: components["schemas"]["AiInvocationContextDto"];
+        };
         AiConversationCreatedDto: {
             id: string;
             title: string;
@@ -3497,15 +4031,20 @@ export type components = {
         AiConversationDetailDto: {
             id: string;
             title: string;
+            context?: components["schemas"]["AiInvocationContextDto"] | null;
             messages: components["schemas"]["AiConversationMessageDto"][];
             /** Format: date-time */
             createdAt: string;
             /** Format: date-time */
             updatedAt: string;
         };
+        AiConversationLatestDto: {
+            conversation: components["schemas"]["AiConversationDetailDto"] | null;
+        };
         SendAiConversationMessageDto: {
             /** @example ¿Cuánto gasté este mes? */
             content: string;
+            context?: components["schemas"]["AiInvocationContextDto"];
         };
         AiConversationActionDto: {
             id: string;
@@ -3555,6 +4094,68 @@ export type components = {
             /** @enum {string} */
             outcome: "PENDING_CONFIRMATION" | "EXECUTED" | "ALREADY_EXECUTED" | "ALREADY_CLAIMED" | "FORBIDDEN" | "FAILED" | "CANCELLED";
             action: components["schemas"]["AiActionDto"];
+        };
+        ViewSuggestionActionDto: {
+            id: string;
+            actionType: string;
+            targetModule: string;
+            /** @enum {string} */
+            policy: "AUTO_ALLOWED" | "CONFIRM_REQUIRED" | "FORBIDDEN";
+            /** @enum {string} */
+            status: "PENDING" | "RUNNING" | "SUCCESS" | "FAILED" | "CANCELLED";
+            payload: Record<string, never>;
+        };
+        ViewSuggestionDto: {
+            id: string;
+            label: string;
+            prompt: string;
+            action?: components["schemas"]["ViewSuggestionActionDto"] | null;
+        };
+        ViewSuggestionsListDto: {
+            suggestions: components["schemas"]["ViewSuggestionDto"][];
+        };
+        ViewSuggestionDismissedDto: {
+            dismissed: boolean;
+        };
+        ImportReviewItemResponseDto: {
+            id: string;
+            signalId: string;
+            sourceEmailMessageId: string;
+            reviewReason: string | null;
+            candidate: Record<string, never>;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        ResolveImportReviewDto: {
+            /**
+             * @description SET_DATE fija la fecha, SET_DESTINATION elige cuenta o tarjeta, LINK_REVERSAL enlaza el original y DISCARD descarta el import.
+             * @enum {string}
+             */
+            action: "SET_DATE" | "SET_DESTINATION" | "LINK_REVERSAL" | "DISCARD";
+            /**
+             * Format: date-time
+             * @description Fecha de operación para SET_DATE
+             */
+            transactionDate?: string;
+            /** @description Cuenta de destino para SET_DESTINATION */
+            accountId?: string;
+            /** @description Tarjeta de destino para SET_DESTINATION */
+            cardId?: string;
+            /** @description Movimiento original para LINK_REVERSAL */
+            originalTransactionId?: string;
+            /** @description Motivo obligatorio para DISCARD */
+            reason?: string;
+        };
+        ImportReviewResolutionResponseDto: {
+            id: string;
+            /** @enum {string} */
+            status: "IMPORTED" | "DUPLICATE" | "REVERSED" | "DISMISSED";
+            /** @enum {string} */
+            outcome: "IMPORTED" | "DUPLICATE" | "REVERSED" | "DISMISSED";
+            transactionId: string | null;
+            reviewReason: string | null;
         };
         ExchangeRateResponseDto: {
             /** @example USD */
@@ -3625,17 +4226,22 @@ export type components = {
             /** @enum {string} */
             type: "CHECKING" | "SAVINGS" | "CASH" | "INVESTMENT";
             /**
-             * @description Required for CHECKING, SAVINGS, and INVESTMENT. Must be omitted for CASH.
+             * @description Optional full account number for CHECKING, SAVINGS, and INVESTMENT; when supplied it is encrypted at rest.
              * @example 001122335678
              */
             accountNumber?: string;
+            /**
+             * @description Last four digits for CHECKING, SAVINGS, and INVESTMENT accounts when the full number is unavailable. Must match accountNumber when both are supplied.
+             * @example 5678
+             */
+            accountNumberLast4?: string;
             /**
              * @default DOP
              * @example DOP
              */
             currency: string;
             color?: string;
-            /** @description When true, this account is the fallback ledger target for emails from this institution that have no account digits. */
+            /** @description When true, this account is the fallback ledger target for imported movements from this institution that have no account digits. */
             isDefaultForInstitution?: boolean;
         };
         InstrumentHistoryItemDto: {
@@ -3662,17 +4268,22 @@ export type components = {
             /** @enum {string} */
             type?: "CHECKING" | "SAVINGS" | "CASH" | "INVESTMENT";
             /**
-             * @description Required for CHECKING, SAVINGS, and INVESTMENT. Must be omitted for CASH.
+             * @description Optional full account number for CHECKING, SAVINGS, and INVESTMENT; when supplied it is encrypted at rest.
              * @example 001122335678
              */
             accountNumber?: string;
+            /**
+             * @description Last four digits for CHECKING, SAVINGS, and INVESTMENT accounts when the full number is unavailable. Must match accountNumber when both are supplied.
+             * @example 5678
+             */
+            accountNumberLast4?: string;
             /**
              * @default DOP
              * @example DOP
              */
             currency: string;
             color?: string;
-            /** @description When true, this account is the fallback ledger target for emails from this institution that have no account digits. */
+            /** @description When true, this account is the fallback ledger target for imported movements from this institution that have no account digits. */
             isDefaultForInstitution?: boolean;
             isActive?: boolean;
         };
@@ -4208,6 +4819,11 @@ export type components = {
              */
             status: "PENDING" | "CONFIRMED" | "CANCELLED";
             statementId?: string;
+            /**
+             * @description Confirma el pago aunque ya exista uno importado por correo con los mismos datos.
+             * @default false
+             */
+            duplicateAcknowledged: boolean;
         };
         UpdateCardPaymentDto: {
             fromAccountId?: string;
@@ -4227,6 +4843,11 @@ export type components = {
              */
             status: "PENDING" | "CONFIRMED" | "CANCELLED";
             statementId?: string;
+            /**
+             * @description Confirma el pago aunque ya exista uno importado por correo con los mismos datos.
+             * @default false
+             */
+            duplicateAcknowledged: boolean;
         };
         MerchantListItemResponseDto: {
             id: string;
@@ -5862,23 +6483,6 @@ export type components = {
         NotificationSuccessResponseDto: {
             success: boolean;
         };
-        CreateReviewSelectionVerificationDto: {
-            relevance?: boolean;
-            /** @enum {string} */
-            semanticType?: "FIN_TRANSACTION" | "PURCHASE_RECEIPT" | "SUBSCRIPTION_BILLING" | "FIN_STATEMENT_NOTICE" | "FIN_ACCOUNT_NOTICE" | "SECURITY_OTP" | "SECURITY_ALERT" | "TECH_NOTIFICATION" | "JOB" | "CALENDAR_EVENT" | "MARKETING" | "SOCIAL" | "OTHER";
-            routes?: ("FINANCE" | "SUBSCRIPTIONS" | "CALENDAR" | "SECURITY")[];
-            transaction?: components["schemas"]["HumanVerificationTransactionDto"];
-            notes?: string;
-            messageIds: string[];
-            /** @enum {string} */
-            verdict: "CONFIRMED" | "CORRECTED" | "REJECTED";
-        };
-        AiReviewSelectionVerificationResponseDto: {
-            verified: number;
-            alreadyVerified: number;
-            /** @description Correos reencolados y reclasificados después de registrar la selección. */
-            requeued: number;
-        };
     };
     responses: never;
     parameters: never;
@@ -6263,8 +6867,13 @@ export interface operations {
     };
     AiIntelligenceController_messages: {
         parameters: {
-            query: {
-                cursor: string;
+            query?: {
+                /** @description Texto contenido en el asunto o el remitente, sin distinguir mayúsculas */
+                q?: string;
+                /** @description Estado del correo importado */
+                status?: "INGESTED" | "QUEUED" | "PROCESSED" | "REVIEW_REQUIRED" | "FAILED";
+                /** @description Cursor opaco de la página anterior */
+                cursor?: string;
             };
             header?: never;
             path?: never;
@@ -6303,6 +6912,29 @@ export interface operations {
             };
         };
     };
+    AiIntelligenceController_sampleImportRun: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EmailSampleImportDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AiEmailSampleImportResponseDto"];
+                };
+            };
+        };
+    };
     AiIntelligenceController_connect: {
         parameters: {
             query?: never;
@@ -6310,7 +6942,11 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConnectGmailDto"];
+            };
+        };
         responses: {
             201: {
                 headers: {
@@ -6337,6 +6973,29 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AiEmailSyncResponseDto"];
+                };
+            };
+        };
+    };
+    AiIntelligenceController_syncBhd: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SyncBhdScopeDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SyncBhdResponseDto"];
                 };
             };
         };
@@ -6409,6 +7068,146 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AiEmailDiagnosticsResponseDto"];
+                };
+            };
+        };
+    };
+    EmailUsageController_get: {
+        parameters: {
+            query: {
+                days: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Uso agregado y restante de los topes */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    EmailProductProposalsController_discover: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DiscoverEmailProductProposalsDto"];
+            };
+        };
+        responses: {
+            /** @description Propuestas detectadas en correos persistidos. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DiscoverEmailProductProposalsResponseDto"];
+                };
+            };
+        };
+    };
+    EmailProductProposalsController_list: {
+        parameters: {
+            query?: {
+                status?: "PENDING" | "APPROVING" | "APPROVED" | "DISCARDED";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Propuestas y evidencia de sus correos de origen. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmailProductProposalResponseDto"][];
+                };
+            };
+        };
+    };
+    EmailProductProposalsController_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                proposalId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateEmailProductProposalDto"];
+            };
+        };
+        responses: {
+            /** @description Propuesta editable antes de aprobarla. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmailProductProposalResponseDto"];
+                };
+            };
+        };
+    };
+    EmailProductProposalsController_approve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                proposalId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["ApproveEmailProductProposalDto"];
+            };
+        };
+        responses: {
+            /** @description Vincula el producto indicado (o lo crea desde el borrador sin cuerpo) y reevalúa señales. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmailProductProposalResponseDto"];
+                };
+            };
+        };
+    };
+    EmailProductProposalsController_discard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                proposalId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Descarta una propuesta pendiente. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmailProductProposalResponseDto"];
                 };
             };
         };
@@ -6515,6 +7314,29 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AiReviewGroupVerificationResultResponseDto"];
+                };
+            };
+        };
+    };
+    AiEvidenceController_verifyReviewSelection: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateReviewSelectionVerificationDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AiReviewSelectionVerificationResponseDto"];
                 };
             };
         };
@@ -6845,7 +7667,11 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateAiConversationDto"];
+            };
+        };
         responses: {
             201: {
                 headers: {
@@ -6854,6 +7680,42 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["AiConversationCreatedDto"];
                 };
+            };
+            /** @description Contexto inválido o entidad no accesible */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AiConversationController_latest: {
+        parameters: {
+            query: {
+                /** @description SHA-256 hex de la clave de contexto canónica */
+                context: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AiConversationLatestDto"];
+                };
+            };
+            /** @description La clave de contexto debe ser SHA-256 hexadecimal */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -7018,6 +7880,111 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AiActionResultDto"];
+                };
+            };
+        };
+    };
+    ViewSuggestionsController_resolveForView: {
+        parameters: {
+            query: {
+                /** @description Ruta de la vista; la clave no incluye filtros ni entidad */
+                route: string;
+                /** @description Vista dentro de la ruta */
+                view?: string;
+                /** @description Sheet abierto sobre la ruta */
+                sheet?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ViewSuggestionsListDto"];
+                };
+            };
+            /** @description Ruta o vista inválida, o vista y sheet a la vez */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ViewSuggestionsController_dismiss: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                suggestionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ViewSuggestionDismissedDto"];
+                };
+            };
+            /** @description Sugerencia no encontrada */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ImportReviewController_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImportReviewItemResponseDto"][];
+                };
+            };
+        };
+    };
+    ImportReviewController_resolve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResolveImportReviewDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImportReviewResolutionResponseDto"];
                 };
             };
         };
@@ -10821,29 +11788,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["NotificationSuccessResponseDto"];
-                };
-            };
-        };
-    };
-    AiEvidenceController_verifyReviewSelection: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateReviewSelectionVerificationDto"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AiReviewSelectionVerificationResponseDto"];
                 };
             };
         };
