@@ -182,6 +182,11 @@ describe("estado vacío de la señal", () => {
     assert.equal(missingSignalState("FAILED").title, "La clasificación falló")
   })
 
+  it("explica que el correo quedó descartado fuera del piloto", () => {
+    assert.equal(missingSignalState("DISCARDED").kind, "discarded")
+    assert.equal(missingSignalState("DISCARDED").title, "Correo descartado")
+  })
+
   it("dice que el correo no originó señal cuando ya está clasificado", () => {
     assert.equal(missingSignalState("PROCESSED").kind, "none")
     assert.equal(missingSignalState("PROCESSED").title, "Sin señal")
