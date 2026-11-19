@@ -1016,6 +1016,7 @@ function IntelligenceMessageDetail({
     <BottomSheet
       open={open}
       onOpenChange={onOpenChange}
+      focusTitleOnOpen
       title={data?.subject ?? "Detalle del mensaje"}
       description={
         data

@@ -19,8 +19,9 @@ import { Button } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { useIsMobile } from "@/src/shared/hooks/use-mobile"
 import { cn } from "@/src/shared/lib/utils"
+import { resolveSheetTitleFocus } from "@/src/shared/components/sheets/sheet-focus"
 import { XIcon } from "lucide-react"
-import { Fragment, type ReactNode } from "react"
+import { Fragment, useRef, type ReactNode } from "react"
 
 const DEFAULT_CLOSE_LABEL = "Cancelar"
 
@@ -45,6 +46,8 @@ interface BottomSheetProps {
   showClose?: boolean
   /** Wording of the default close action, e.g. "Cerrar" on a read-only sheet. */
   closeLabel?: string
+  /** Lleva el foco inicial al título de la hoja en vez del contenedor del popup. */
+  focusTitleOnOpen?: boolean
 }
 
 export function BottomSheet({
@@ -61,9 +64,12 @@ export function BottomSheet({
   actions,
   showClose = true,
   closeLabel = DEFAULT_CLOSE_LABEL,
+  focusTitleOnOpen = false,
 }: BottomSheetProps) {
   const isMobile = useIsMobile()
   const swipeDirection = getBottomSheetDirection(variant, isMobile)
+  const titleRef = useRef<HTMLHeadingElement>(null)
+  const sheetFocus = resolveSheetTitleFocus(focusTitleOnOpen)
   const closeAction =
     actions?.close ??
     (showClose ? (
@@ -91,13 +97,18 @@ export function BottomSheet({
       onOpenChange={onOpenChange}
     >
       <DrawerContent
+        initialFocus={sheetFocus.focusesTitle ? titleRef : undefined}
         className={cn(
           variant === "floating" && FLOATING_SHEET_CONTENT_CLASS,
           variant === "default" && size === "wide" && WIDE_SHEET_CONTENT_CLASS
         )}
       >
         <DrawerHeader className="relative -space-y-2 pb-4">
-          <DrawerTitle className={headerAction ? "px-20" : undefined}>
+          <DrawerTitle
+            ref={titleRef}
+            tabIndex={sheetFocus.titleTabIndex}
+            className={headerAction ? "px-20" : undefined}
+          >
             {pending ? "Cargando" : title}
           </DrawerTitle>
           <DrawerDescription

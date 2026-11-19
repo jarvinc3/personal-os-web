@@ -43,7 +43,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Cambiado
 
-- #394: la documentación de Inteligencia describe el foco accesible del panel de detalle del correo —el foco entra al abrir, no sale con Tab, Escape cierra y vuelve a la fila de origen— y de qué pieza depende (`Drawer` modal de base-ui). Sin cambios de comportamiento.
+- #394: al abrir el detalle del correo el foco inicial va al asunto en el título del panel, que queda enfocable con `tabIndex={-1}`, y al cerrar vuelve a la fila que lo abrió. La trampa de foco y Escape siguen siendo del `Drawer` de base-ui. Sin cambio visual.
 - #362: aclara que el chat, `/chat` y su renderer pertenecen al runtime retirado; conserva la guía como referencia histórica y delimita la sintaxis Markdown como código.
 - Consentimiento y administración de roles llaman a `/api/intelligence/*`; la copia OpenAPI se sincroniza con el back tras unificar el módulo como `intelligence`, y las notas históricas apuntan a la ruta actual del paquete (jarvinc3/personal-os-back#307, #398).
 - Los tipos de Inteligencia se leen desde el contrato OpenAPI del back: cada tipo del módulo pasa a un alias de `components["schemas"]` y solo quedan locales los campos que el contrato todavía no describe (`relevance`, `notes` y `templateFingerprint`). Un cambio del back ahora rompe el typecheck en lugar de la pantalla, sin cambios visibles en las pantallas (#384).
