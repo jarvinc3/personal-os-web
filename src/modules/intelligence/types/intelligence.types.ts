@@ -13,6 +13,7 @@ export type AiEmailSyncProgress = Omit<AiEmailSyncProgressContract, "phase"> & {
 export type AiEmailOAuthDiagnostics = AiSchemas["AiEmailDiagnosticsResponseDto"]
 export type AiEmailMessageSummary =
   AiSchemas["AiEmailMessageSummaryResponseDto"]
+export type AiEmailMessageStatus = AiEmailMessageSummary["processingStatus"]
 export type AiEmailMessagesPage = AiSchemas["AiEmailMessagePageResponseDto"]
 export type AiEmailMessageDetail = AiSchemas["AiEmailMessageResponseDto"]
 export type AiDatasetSummary = AiSchemas["AiDatasetResponseDto"]

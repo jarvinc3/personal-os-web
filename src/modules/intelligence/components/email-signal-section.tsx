@@ -25,6 +25,7 @@ import {
   signalTypeLabel,
   type MissingSignalKind,
 } from "@/src/modules/intelligence/signals"
+import type { AiEmailMessageDetail } from "@/src/modules/intelligence/types/intelligence.types"
 import type { EmailSignal } from "@/src/modules/intelligence/types/signal.types"
 import {
   SummaryGroup,
@@ -54,13 +55,10 @@ const MISSING_SIGNAL_ICONS: Record<MissingSignalKind, typeof Radar> = {
   none: Radar,
 }
 
-type EmailSignalMessage = {
-  id: string
-  subject: string
-  fromAddress: string
-  receivedAt: string
-  processingStatus: string
-}
+type EmailSignalMessage = Pick<
+  AiEmailMessageDetail,
+  "id" | "subject" | "fromAddress" | "receivedAt" | "processingStatus"
+>
 
 type EmailSignalSectionProps = {
   message: EmailSignalMessage
@@ -124,7 +122,11 @@ function SignalLoadError({ onRetry }: { onRetry: () => void }) {
   )
 }
 
-function SignalMissing({ processingStatus }: { processingStatus: string }) {
+function SignalMissing({
+  processingStatus,
+}: {
+  processingStatus: EmailSignalMessage["processingStatus"]
+}) {
   const missingSignal = missingSignalState(processingStatus)
   const MissingIcon = MISSING_SIGNAL_ICONS[missingSignal.kind]
 

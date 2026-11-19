@@ -2,6 +2,7 @@ import {
   ROUTE_LABELS,
   SEMANTIC_TYPE_LABELS,
 } from "@/src/modules/intelligence/review-labels"
+import type { AiEmailMessageStatus } from "@/src/modules/intelligence/types/intelligence.types"
 import type {
   EmailSignal,
   EmailSignalEvidence,
@@ -32,9 +33,12 @@ const EVIDENCE_SOURCE_LABELS: Record<string, string> = {
   EMAIL_CLASSIFICATION: "Clasificación del correo",
 }
 
-const PENDING_CLASSIFICATION_STATUSES = new Set(["INGESTED", "QUEUED"])
-const FAILED_CLASSIFICATION_STATUS = "FAILED"
-const DISCARDED_CLASSIFICATION_STATUS = "DISCARDED"
+const PENDING_CLASSIFICATION_STATUSES = new Set<AiEmailMessageStatus>([
+  "INGESTED",
+  "QUEUED",
+])
+const FAILED_CLASSIFICATION_STATUS: AiEmailMessageStatus = "FAILED"
+const DISCARDED_CLASSIFICATION_STATUS: AiEmailMessageStatus = "DISCARDED"
 
 /**
  * El contrato no busca señales por correo: las lista y las entrega por id. El
@@ -118,7 +122,7 @@ export type MissingSignalState = {
 
 /** Un correo sin señal no es un hueco: la clasificación pendiente se explica aparte. */
 export function missingSignalState(
-  processingStatus: string
+  processingStatus: AiEmailMessageStatus
 ): MissingSignalState {
   if (PENDING_CLASSIFICATION_STATUSES.has(processingStatus)) {
     return {
