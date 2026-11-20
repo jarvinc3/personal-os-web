@@ -48,6 +48,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Cambiado
 
+- Las pruebas de la web pueden renderizar componentes `.tsx` con `react-dom/server` y el loader de TSX; la vista Uso cubre sus estados de carga, vacío y error con pruebas que afirman los textos y el botón de reintento (#450).
 - Uso: las series por día y por hora suman una tabla accesible; el reinicio y su etiqueta usan la hora del servidor, la vista se refresca al cruzar la medianoche UTC y reintenta con un tope si el servidor sigue en el día anterior; el icono del estado vacío queda decorativo (Refs #426; hallazgos de PI-REV).
 - #445: el contrato OpenAPI se regenera desde el back de `develop` (181 rutas y 291 schemas, con el estado `DISCARDED`) y el estado del correo usa el valor generado en `signals.ts` y en `MESSAGE_STATUS_LABELS`; el estado vacío de la señal deja de comparar la cadena suelta. Sin cambio visible (back #408, #414 y #415).
 - #393: la tarjeta de Gmail muestra un solo estado con una acción principal según el caso —«Reconectar» si el acceso venció, «Sincronizar» al día— y el resto de acciones pasa a «Más acciones», con vaciar siempre como destructiva. La clasificación muestra su avance y el importado no se lee como cero mientras tanto; el canal en vivo solo aparece con la conexión sana.
