@@ -30,6 +30,23 @@ const AgentChatLauncherContext = createContext<AgentChatLauncherValue | null>(
   null
 )
 
+const MISSING_PROVIDER = "AgentChatLauncherProvider is missing"
+
+/**
+ * Fuera del shell autenticado no hay host del agente: los controles se ocultan
+ * con `available: false`. Si alguien intenta usarlo igual, falla en el acto en
+ * vez de simular que abrió el overlay.
+ */
+const UNAVAILABLE_LAUNCHER: AgentChatLauncherValue = {
+  available: false,
+  launch: () => {
+    throw new Error(MISSING_PROVIDER)
+  },
+  register: () => {
+    throw new Error(MISSING_PROVIDER)
+  },
+}
+
 /**
  * El shell pide abrir el overlay y el host de Inteligencia registra cómo.
  * Así el tab bar, el FAB y las hojas no importan el feature.
@@ -80,13 +97,7 @@ export function AgentChatLauncherProvider({
 }
 
 export function useAgentChatLauncher(): AgentChatLauncherValue {
-  return (
-    useContext(AgentChatLauncherContext) ?? {
-      available: false,
-      launch: () => {},
-      register: () => () => {},
-    }
-  )
+  return useContext(AgentChatLauncherContext) ?? UNAVAILABLE_LAUNCHER
 }
 
 export function AgentChatTriggerButton({
