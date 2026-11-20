@@ -21,16 +21,20 @@ import Link from "next/link"
 
 type GlossaryTermDefinitionProps = {
   term: HelpTerm
+  showTermTitle: boolean
   onNavigate: () => void
 }
 
 function GlossaryTermDefinition({
   term,
+  showTermTitle,
   onNavigate,
 }: GlossaryTermDefinitionProps) {
   return (
-    <article className="flex flex-col gap-1">
-      <h3 className="text-sm font-semibold text-foreground">{term.term}</h3>
+    <article className={cn("flex flex-col", showTermTitle ? "gap-1" : "gap-4")}>
+      {showTermTitle ? (
+        <h3 className="text-sm font-semibold text-foreground">{term.term}</h3>
+      ) : null}
       <p className="text-sm leading-relaxed text-muted-foreground">
         <HelpRichText text={term.definition} onNavigate={onNavigate} />
       </p>
@@ -88,6 +92,7 @@ function GlossaryTermsDialog({
           <GlossaryTermDefinition
             key={term.slug}
             term={term}
+            showTermTitle={!singleTerm}
             onNavigate={() => onOpenChange(false)}
           />
         ))}
