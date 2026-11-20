@@ -11,8 +11,11 @@ import {
   formatUsageReset,
   initialBudgetProgress,
   isUsageDays,
+  nextUsageReset,
   nextUtcDailyReset,
   usageCostTone,
+  usageRefreshDelay,
+  usageResetReached,
   usageProgress,
   usageRangeCaption,
   usageTotalTokens,
@@ -146,6 +149,42 @@ describe("nextUtcDailyReset", () => {
     assert.equal(
       nextUtcDailyReset(new Date("2026-11-20T00:00:00.000Z")).toISOString(),
       "2026-11-21T00:00:00.000Z"
+    )
+  })
+})
+
+describe("reinicio del uso", () => {
+  it("calcula el reinicio siguiente a la hora del servidor", () => {
+    assert.equal(
+      nextUsageReset("2026-11-19T23:00:00.000Z").toISOString(),
+      "2026-11-20T00:00:00.000Z"
+    )
+  })
+
+  it("espera el reinicio más un minuto de margen", () => {
+    assert.equal(
+      usageRefreshDelay({
+        serverNow: "2026-11-19T23:00:00.000Z",
+        clientNow: Date.parse("2026-11-19T23:00:00.000Z"),
+      }),
+      3_660_000
+    )
+  })
+
+  it("detecta si el servidor ya pasó el reinicio esperado", () => {
+    assert.equal(
+      usageResetReached({
+        previousServerNow: "2026-11-19T23:00:00.000Z",
+        serverNow: "2026-11-20T00:00:30.000Z",
+      }),
+      true
+    )
+    assert.equal(
+      usageResetReached({
+        previousServerNow: "2026-11-19T23:00:00.000Z",
+        serverNow: "2026-11-19T23:59:00.000Z",
+      }),
+      false
     )
   })
 })
