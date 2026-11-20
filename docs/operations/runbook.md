@@ -50,9 +50,9 @@ App típica: `http://localhost:3000`. CORS del API debe incluir ese origin.
 
 ## Pruebas
 
-`pnpm test` corre node:test con `scripts/alias-register.mjs` y `scripts/tsx-register.mjs`; el segundo compila los `.tsx` con el `typescript` del repo, así que una prueba `.spec.ts` puede importar un componente y renderizarlo con `react-dom/server` (`renderToStaticMarkup`). No hay jsdom ni Testing Library. `pnpm test:coverage` usa el mismo setup y aplica los umbrales de `package.json`.
+`pnpm test` corre node:test con `scripts/test-env.mjs` (variables públicas de prueba), `scripts/alias-register.mjs` (alias `@/`, relativos sin extensión y subpaths de `next/*`) y `scripts/tsx-register.mjs` (compila los `.tsx` con el `typescript` del repo, stubea los `.css` y deja source maps para la cobertura). Una prueba `.spec.ts` puede importar una pantalla completa; para renderizarla, las que usan hooks de router necesitan props o un stub. No hay jsdom ni Testing Library. `pnpm test:coverage` usa el mismo setup y aplica los umbrales de `package.json`.
 
-Los estados de una pantalla se prueban afirmando textos, roles y el botón de reintento, sin snapshots de HTML completo. Ejemplo: `src/modules/settings/components/usage/usage-state-view.spec.ts`.
+Los estados de una pantalla se prueban afirmando textos, roles y el botón de reintento, sin snapshots de HTML completo. Ejemplos: `src/modules/settings/components/usage/usage-state-view.spec.ts` y `src/shared/lib/tsx-loader.spec.ts`.
 
 ## Troubleshooting
 
