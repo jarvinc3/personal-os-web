@@ -1,3 +1,4 @@
+export { AgentChatHost } from "./components/agent-chat-host"
 export { useAiConsent } from "./hooks/use-ai-consent"
 export { useEmailUsage } from "./hooks/use-email-usage"
 export {

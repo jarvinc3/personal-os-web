@@ -7,6 +7,7 @@ import {
   resolveSheetNavigation,
   type OptimisticSheetParam,
   type SheetCloseMode,
+  type SheetExtraParams,
   SHEET_QUERY_KEY,
 } from "@/src/shared/lib/sheet-navigation"
 
@@ -31,6 +32,9 @@ type NavigateSheetUrlInput = {
   sheetKey: string
   open: boolean
   id?: string | null
+  extraParams?: SheetExtraParams
+  clearParams?: readonly string[]
+  pushOver?: boolean
   closeMode?: SheetCloseMode
 }
 
@@ -41,6 +45,9 @@ function navigateSheetUrl({
   sheetKey,
   open,
   id,
+  extraParams,
+  clearParams,
+  pushOver,
   closeMode = "back",
 }: NavigateSheetUrlInput) {
   const decision = resolveSheetNavigation({
@@ -49,6 +56,9 @@ function navigateSheetUrl({
     key: sheetKey,
     open,
     id,
+    extraParams,
+    clearParams,
+    pushOver,
     wasPushed: wasSheetPushed(pathname),
     closeMode,
   })
@@ -71,7 +81,15 @@ function navigateSheetUrl({
 
 export function useSheetParam(
   key: string,
-  { closeMode = "back" }: { closeMode?: SheetCloseMode } = {}
+  {
+    closeMode = "back",
+    clearParams,
+    pushOver = false,
+  }: {
+    closeMode?: SheetCloseMode
+    clearParams?: readonly string[]
+    pushOver?: boolean
+  } = {}
 ) {
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -97,7 +115,7 @@ export function useSheetParam(
   }, [searchParams, pathname])
 
   const setOpen = useCallback(
-    (value: boolean, id?: string | null) => {
+    (value: boolean, id?: string | null, extraParams?: SheetExtraParams) => {
       const from = readSheetSearch(searchParams)
       const current = mergeOptimisticSheetParam(key, from, optimistic)
       setOptimistic({
@@ -112,10 +130,22 @@ export function useSheetParam(
         sheetKey: key,
         open: value,
         id,
+        extraParams,
+        clearParams,
+        pushOver,
         closeMode,
       })
     },
-    [searchParams, key, router, pathname, optimistic, closeMode]
+    [
+      searchParams,
+      key,
+      router,
+      pathname,
+      optimistic,
+      clearParams,
+      pushOver,
+      closeMode,
+    ]
   )
 
   return { open: merged.open, sheetId: merged.sheetId, setOpen }

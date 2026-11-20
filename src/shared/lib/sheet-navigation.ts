@@ -12,6 +12,9 @@ type SearchParamsLike = {
   toString(): string
 }
 
+/** Params that a sheet owns beyond `sheet`/`sheetId`/`picker`, e.g. its context. */
+export type SheetExtraParams = Record<string, string | null>
+
 export type SheetNavResult =
   | { action: "noop" }
   | { action: "push"; url: string }
@@ -111,6 +114,37 @@ function writeSheet(
   }
 }
 
+function applyExtraParams(
+  params: URLSearchParams,
+  extraParams: SheetExtraParams | undefined
+): void {
+  for (const [key, value] of Object.entries(extraParams ?? {})) {
+    if (value === null) {
+      params.delete(key)
+    } else {
+      params.set(key, value)
+    }
+  }
+}
+
+function hasExtraParamChanges(
+  params: URLSearchParams,
+  extraParams: SheetExtraParams | undefined
+): boolean {
+  return Object.entries(extraParams ?? {}).some(([key, value]) => {
+    return (params.get(key) ?? null) !== value
+  })
+}
+
+function removeParams(
+  params: URLSearchParams,
+  keys: readonly string[] | undefined
+): void {
+  for (const key of keys ?? []) {
+    params.delete(key)
+  }
+}
+
 /** Picker opened on top of the active sheet; null when there is none. */
 export function readPickerKey(searchParams: SearchParamsLike): string | null {
   return searchParams.get(SHEET_PICKER_QUERY_KEY)
@@ -161,6 +195,10 @@ export function resolveSheetNavigation(input: {
   key: string
   open: boolean
   id?: string | null
+  extraParams?: SheetExtraParams
+  clearParams?: readonly string[]
+  /** Abre una capa nueva aunque ya haya otra hoja abierta (overlay global). */
+  pushOver?: boolean
   wasPushed: boolean
   closeMode?: SheetCloseMode
 }): SheetNavResult {
@@ -169,21 +207,26 @@ export function resolveSheetNavigation(input: {
 
   if (input.open) {
     if (currentSheet === input.key) {
-      if (input.id === undefined) {
-        return { action: "noop" }
-      }
-      if ((currentId ?? null) === (input.id ?? null)) {
+      const idChanged =
+        input.id !== undefined && (currentId ?? null) !== (input.id ?? null)
+      const extrasChanged = hasExtraParamChanges(
+        new URLSearchParams(input.searchParams.toString()),
+        input.extraParams
+      )
+      if (!idChanged && !extrasChanged) {
         return { action: "noop" }
       }
       const next = cloneParams(input.searchParams)
       writeSheet(next, input.key, input.id)
+      applyExtraParams(next, input.extraParams)
       return { action: "replace", url: toUrl(input.pathname, next) }
     }
 
     const next = cloneParams(input.searchParams)
     writeSheet(next, input.key, input.id)
+    applyExtraParams(next, input.extraParams)
     const url = toUrl(input.pathname, next)
-    if (currentSheet === null) {
+    if (currentSheet === null || input.pushOver) {
       return { action: "push", url }
     }
     return { action: "replace", url }
@@ -201,5 +244,6 @@ export function resolveSheetNavigation(input: {
   next.delete(SHEET_QUERY_KEY)
   next.delete(SHEET_ID_QUERY_KEY)
   next.delete(SHEET_PICKER_QUERY_KEY)
+  removeParams(next, input.clearParams)
   return { action: "replace", url: toUrl(input.pathname, next) }
 }

@@ -15,6 +15,10 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/src/shared/components/ui/drawer"
+import {
+  AgentChatTriggerButton,
+  useAgentChatLauncher,
+} from "@/src/shared/components/agent-chat/agent-chat-launcher"
 import { Button } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { useIsMobile } from "@/src/shared/hooks/use-mobile"
@@ -48,6 +52,10 @@ interface BottomSheetProps {
   closeLabel?: string
   /** Lleva el foco inicial al título de la hoja en vez del contenedor del popup. */
   focusTitleOnOpen?: boolean
+  /** El botón del agente se oculta en hojas internas del propio overlay. */
+  showAgentTrigger?: boolean
+  /** Sube la capa cuando la hoja se abre sobre otro overlay. */
+  layerClassName?: string
 }
 
 export function BottomSheet({
@@ -65,8 +73,11 @@ export function BottomSheet({
   showClose = true,
   closeLabel = DEFAULT_CLOSE_LABEL,
   focusTitleOnOpen = false,
+  showAgentTrigger = true,
+  layerClassName,
 }: BottomSheetProps) {
   const isMobile = useIsMobile()
+  const agentChat = useAgentChatLauncher()
   const swipeDirection = getBottomSheetDirection(variant, isMobile)
   const titleRef = useRef<HTMLHeadingElement>(null)
   const sheetFocus = resolveSheetTitleFocus(focusTitleOnOpen)
@@ -83,6 +94,11 @@ export function BottomSheet({
         {closeLabel}
       </Button>
     ) : null)
+  const agentAction =
+    showAgentTrigger && !pending && agentChat.available ? (
+      <AgentChatTriggerButton />
+    ) : null
+  const headerActionVisible = Boolean(headerAction || agentAction)
   const actionEntries = (
     [
       ["delete", actions?.delete],
@@ -98,6 +114,7 @@ export function BottomSheet({
     >
       <DrawerContent
         initialFocus={sheetFocus.focusesTitle ? titleRef : undefined}
+        layerClassName={layerClassName}
         className={cn(
           variant === "floating" && FLOATING_SHEET_CONTENT_CLASS,
           variant === "default" && size === "wide" && WIDE_SHEET_CONTENT_CLASS
@@ -107,7 +124,7 @@ export function BottomSheet({
           <DrawerTitle
             ref={titleRef}
             tabIndex={sheetFocus.titleTabIndex}
-            className={headerAction ? "px-20" : undefined}
+            className={headerActionVisible ? "px-20" : undefined}
           >
             {pending ? "Cargando" : title}
           </DrawerTitle>
@@ -119,14 +136,15 @@ export function BottomSheet({
           >
             {description}
           </DrawerDescription>
-          {headerAction && !pending ? (
-            <div
-              className={cn(
-                "absolute top-1/2 -translate-y-1/2",
-                headerActionAlign === "start" ? "left-3" : "right-3"
-              )}
-            >
+          {headerActionAlign === "start" && headerAction && !pending ? (
+            <div className="absolute top-1/2 left-3 -translate-y-1/2">
               {headerAction}
+            </div>
+          ) : null}
+          {headerActionVisible && !pending ? (
+            <div className="absolute top-1/2 right-3 flex -translate-y-1/2 items-center gap-1">
+              {headerActionAlign === "end" ? headerAction : null}
+              {agentAction}
             </div>
           ) : null}
         </DrawerHeader>

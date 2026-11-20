@@ -3,6 +3,7 @@
 import { ModuleFabProvider } from "@/src/shared/components/fab/module-fab-context"
 import { ModuleTabBar } from "@/src/shared/components/shell/module-tab-bar"
 import { useHeaderContext } from "@/src/shared/context/header-context"
+import { useRegisterTabBarVisible } from "@/src/shared/context/tab-bar-context"
 import { cn } from "@/src/shared/lib/utils"
 import type { ModuleNavItem } from "@/src/shared/types/module-nav"
 import type { ReactNode } from "react"
@@ -22,6 +23,7 @@ export function ModuleSectionLayout({
 }: ModuleSectionLayoutProps) {
   const { config } = useHeaderContext()
   const hideTabBar = config.variant === "secondary"
+  useRegisterTabBarVisible(!hideTabBar)
 
   return (
     <ModuleFabProvider tabBarVisible={!hideTabBar}>
