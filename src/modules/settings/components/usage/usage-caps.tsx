@@ -37,11 +37,11 @@ const COST_ARC_BY_STATUS: Record<EmailUsageCostStatus, string> = {
 
 type UsageCapsProps = {
   caps: EmailUsageSummary["caps"]
-  serverNow: Date
+  now: Date
   locale: string
 }
 
-export function UsageCaps({ caps, serverNow, locale }: UsageCapsProps) {
+export function UsageCaps({ caps, now, locale }: UsageCapsProps) {
   const initial = initialBudgetProgress(caps.initial)
   const daily = usageProgress({
     limit: caps.daily.limitTokens,
@@ -51,7 +51,7 @@ export function UsageCaps({ caps, serverNow, locale }: UsageCapsProps) {
     limit: caps.globalCost.limitUsd,
     used: caps.globalCost.usedUsd,
   })
-  const resetLabel = formatUsageReset(nextUtcDailyReset(serverNow), locale)
+  const resetLabel = formatUsageReset(nextUtcDailyReset(now), locale)
 
   return (
     <div className="flex flex-col gap-3">

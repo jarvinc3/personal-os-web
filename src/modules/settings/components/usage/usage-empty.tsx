@@ -14,7 +14,7 @@ export function UsageEmpty() {
     <Empty className="rounded-2xl border border-border bg-card p-6">
       <EmptyHeader>
         <EmptyMedia variant="icon">
-          <ChartColumnIcon />
+          <ChartColumnIcon aria-hidden="true" />
         </EmptyMedia>
         <EmptyTitle>Sin clasificaciones en este rango</EmptyTitle>
         <EmptyDescription>

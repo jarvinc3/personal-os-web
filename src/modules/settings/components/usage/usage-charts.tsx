@@ -113,6 +113,7 @@ function UsagePeriodCharts({ rows, period, locale }: UsagePeriodChartsProps) {
 
   return (
     <>
+      <UsageDataTable rows={rows} period={period} locale={locale} />
       {period === "hour" ? (
         <p className="px-1 text-xs text-muted-foreground">
           Cada barra suma la misma hora (UTC) de todos los días del rango.
@@ -245,6 +246,39 @@ function UsagePeriodCharts({ rows, period, locale }: UsagePeriodChartsProps) {
         </ChartContainer>
       </UsageChartCard>
     </>
+  )
+}
+
+function UsageDataTable({ rows, period, locale }: UsagePeriodChartsProps) {
+  const caption =
+    period === "day"
+      ? "Datos de uso por día"
+      : "Datos de uso por hora del día (UTC)"
+
+  return (
+    <table className="sr-only">
+      <caption>{caption}</caption>
+      <thead>
+        <tr>
+          <th scope="col">Período</th>
+          <th scope="col">Llamadas</th>
+          <th scope="col">Tokens de entrada</th>
+          <th scope="col">Tokens de salida</th>
+          <th scope="col">Costo</th>
+        </tr>
+      </thead>
+      <tbody>
+        {rows.map((row) => (
+          <tr key={row.label}>
+            <th scope="row">{row.label}</th>
+            <td>{formatUsageCount(row.calls, locale)}</td>
+            <td>{formatUsageCount(row.inputTokens, locale)}</td>
+            <td>{formatUsageCount(row.outputTokens, locale)}</td>
+            <td>{formatUsageCost(row.costUsd, locale)}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
   )
 }
 

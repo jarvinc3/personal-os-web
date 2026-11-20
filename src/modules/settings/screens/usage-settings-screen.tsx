@@ -6,6 +6,7 @@ import {
   fillDailyUsage,
   fillHourlyUsage,
   isUsageDays,
+  nextUtcDailyReset,
   usageRangeCaption,
   useEmailUsage,
   type UsageDays,
@@ -23,7 +24,7 @@ import { ErrorState } from "@/src/shared/components/feedback/error-state"
 import { SegmentedControl } from "@/src/shared/components/forms/segmented-control"
 import { DEFAULT_LOCALE } from "@/src/shared/constants/locales"
 import { CalendarDaysIcon, CalendarRangeIcon, SunIcon } from "lucide-react"
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 
 type UsageRangeValue = `${UsageDays}`
 
@@ -52,7 +53,30 @@ function UsageSettingsScreenBody() {
   const { profileQuery } = useProfile()
   const locale = profileQuery.data?.locale ?? DEFAULT_LOCALE
   const usageQuery = useEmailUsage(days)
+  const { refetch } = usageQuery
   const summary = usageQuery.data
+
+  // Los contadores del back se reinician a medianoche UTC; la vista se refresca
+  // una vez al cruzar el día para que la pausa y el reinicio no queden viejos.
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout>
+
+    const schedule = () => {
+      const now = Date.now()
+      const resetAt = nextUtcDailyReset(new Date(now)).getTime()
+      timer = setTimeout(
+        () => {
+          void refetch()
+          schedule()
+        },
+        Math.max(1_000, resetAt - now + 1_000)
+      )
+    }
+
+    schedule()
+
+    return () => clearTimeout(timer)
+  }, [refetch])
 
   const daily = useMemo(
     () =>
@@ -105,11 +129,7 @@ function UsageSettingsScreenBody() {
             rangeLabel={usageRangeCaption(days)}
             locale={locale}
           />
-          <UsageCaps
-            caps={summary.caps}
-            serverNow={new Date(summary.range.to)}
-            locale={locale}
-          />
+          <UsageCaps caps={summary.caps} now={new Date()} locale={locale} />
           {summary.totals.calls === 0 ? (
             <UsageEmpty />
           ) : (
