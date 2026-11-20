@@ -18,6 +18,16 @@ const TabBarVisibilityContext = createContext<TabBarVisibilityValue | null>(
   null
 )
 
+const MISSING_PROVIDER = "TabBarVisibilityProvider is missing"
+
+function useTabBarContext(): TabBarVisibilityValue {
+  const context = useContext(TabBarVisibilityContext)
+  if (!context) {
+    throw new Error(MISSING_PROVIDER)
+  }
+  return context
+}
+
 /** El overlay necesita saber si la vista actual tiene tab bar para su animación. */
 export function TabBarVisibilityProvider({
   children,
@@ -35,16 +45,13 @@ export function TabBarVisibilityProvider({
 }
 
 export function useTabBarVisible(): boolean {
-  return useContext(TabBarVisibilityContext)?.visible ?? false
+  return useTabBarContext().visible
 }
 
 export function useRegisterTabBarVisible(visible: boolean): void {
-  const setVisible = useContext(TabBarVisibilityContext)?.setVisible
+  const { setVisible } = useTabBarContext()
 
   useLayoutEffect(() => {
-    if (!setVisible) {
-      return
-    }
     setVisible(visible)
     return () => setVisible(false)
   }, [setVisible, visible])
