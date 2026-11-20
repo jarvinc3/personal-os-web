@@ -18,12 +18,10 @@ import { SettingsSecondaryPage } from "@/src/modules/settings/components/layout/
 import { UsageBreakdowns } from "@/src/modules/settings/components/usage/usage-breakdowns"
 import { UsageCaps } from "@/src/modules/settings/components/usage/usage-caps"
 import { UsageCharts } from "@/src/modules/settings/components/usage/usage-charts"
-import { UsageEmpty } from "@/src/modules/settings/components/usage/usage-empty"
-import { UsageSkeleton } from "@/src/modules/settings/components/usage/usage-skeleton"
+import { UsageStateView } from "@/src/modules/settings/components/usage/usage-state-view"
 import { UsageTotals } from "@/src/modules/settings/components/usage/usage-totals"
 import { useProfile } from "@/src/modules/settings/hooks/use-profile"
 import { SettingsGate } from "@/src/modules/settings/settings-gate"
-import { ErrorState } from "@/src/shared/components/feedback/error-state"
 import { SegmentedControl } from "@/src/shared/components/forms/segmented-control"
 import { DEFAULT_LOCALE } from "@/src/shared/constants/locales"
 import { CalendarDaysIcon, CalendarRangeIcon, SunIcon } from "lucide-react"
@@ -149,11 +147,11 @@ function UsageSettingsScreenBody() {
         fullWidth
       />
 
-      {usageQuery.isPending ? <UsageSkeleton /> : null}
+      {usageQuery.isPending ? <UsageStateView state="loading" /> : null}
 
       {usageQuery.isError ? (
-        <ErrorState
-          message="No se pudo cargar el uso de clasificación."
+        <UsageStateView
+          state="error"
           onRetry={() => void usageQuery.refetch()}
           isRetrying={usageQuery.isFetching}
         />
@@ -172,7 +170,7 @@ function UsageSettingsScreenBody() {
             locale={locale}
           />
           {summary.totals.calls === 0 ? (
-            <UsageEmpty />
+            <UsageStateView state="empty" />
           ) : (
             <>
               <UsageCharts daily={daily} hourly={hourly} locale={locale} />

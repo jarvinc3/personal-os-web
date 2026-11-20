@@ -48,6 +48,12 @@ Sin acceso a Infisical, copia `.env.example` a `.env.local` y ajusta los valores
 
 App típica: `http://localhost:3000`. CORS del API debe incluir ese origin.
 
+## Pruebas
+
+`pnpm test` corre node:test con `scripts/alias-register.mjs` y `scripts/tsx-register.mjs`; el segundo compila los `.tsx` con el `typescript` del repo, así que una prueba `.spec.ts` puede importar un componente y renderizarlo con `react-dom/server` (`renderToStaticMarkup`). No hay jsdom ni Testing Library. `pnpm test:coverage` usa el mismo setup y aplica los umbrales de `package.json`.
+
+Los estados de una pantalla se prueban afirmando textos, roles y el botón de reintento, sin snapshots de HTML completo. Ejemplo: `src/modules/settings/components/usage/usage-state-view.spec.ts`.
+
 ## Troubleshooting
 
 - API 401 → sign-out automático.
