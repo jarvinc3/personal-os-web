@@ -1,6 +1,7 @@
 # Inteligencia
 
 **Overlay de chat:** [agent-overlay.md](./agent-overlay.md) describe la apertura por URL, el contexto de la vista, las conversaciones y el streaming (#407).
+**Sugerencias por vista:** [view-suggestions.md](./view-suggestions.md) describe la fila exterior e interior, el ocultado por sesión y el descarte persistente (#408).
 
 AI-2 ofrece una vista privada de Gmail, detalle de mensajes con representaciones cruda, saneada y canónica, consentimiento revocable y administración de roles `USER`, `CONTRIBUTOR` y `ADMIN`. AI-3 agrega particiones deterministas de `EMAIL_V1`, una cola paginada para etiquetar y verificar correo, marcas de verdad de referencia para HOLDOUT, historial de runs y procedencia visible en el detalle. La vista resume el estado y rango de fechas del bootstrap en badges, y agrupa correo, revisión y análisis en pestañas; la lista de mensajes empieza por los más antiguos.
 

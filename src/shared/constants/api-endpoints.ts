@@ -66,6 +66,9 @@ export const API_ENDPOINTS = {
     CONVERSATION_LATEST: "/intelligence/conversations/latest",
     CONVERSATION_MESSAGES: (conversationId: string) =>
       `/intelligence/conversations/${encodeURIComponent(conversationId)}/messages`,
+    VIEW_SUGGESTIONS: "/intelligence/view-suggestions",
+    VIEW_SUGGESTION: (suggestionId: string) =>
+      `/intelligence/view-suggestions/${encodeURIComponent(suggestionId)}`,
     CONSENT: "/intelligence/preferences/consent",
     ROLES: "/intelligence/admin/roles",
     ROLE: (userId: string) =>

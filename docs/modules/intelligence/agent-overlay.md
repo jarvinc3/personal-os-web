@@ -31,6 +31,10 @@ El contexto se serializa en base64url para que recargar la página reabra el mis
 - Un chat nuevo usa el contexto actual por defecto y permite quitarlo antes del primer mensaje. Sin contexto, la conversación no se agrupa por la vista.
 - El título sale del primer mensaje; el header lo muestra cuando existe.
 
+## Sugerencias
+
+La fila de sugerencias activas se monta encima del composer. Cada badge lleva su X y pide confirmación antes de descartarlo; la fila exterior, sobre el tab bar, oculta la fila solo para la sesión. Tocar un badge abre o usa la sugerencia con su prompt en el composer. Detalle: [view-suggestions.md](./view-suggestions.md) (#408, back #358).
+
 ## Respuesta y estados
 
 - El envío usa `POST /intelligence/conversations/:id/messages` con `stream: true` y un `clientMessageId` UUID por turno. El back responde SSE (`start`, `status`, `chunk`, `reset`, `done`, `error`); el cliente pinta los trozos en el mismo mensaje y limpia el texto parcial cuando llega `reset`.
