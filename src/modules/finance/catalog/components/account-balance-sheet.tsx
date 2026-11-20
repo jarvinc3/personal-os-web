@@ -4,6 +4,8 @@ import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms
 import { useAdjustBalance } from "@/src/modules/finance/shared/hooks/use-balance-adjustment"
 import { useDiscardChanges } from "@/src/modules/finance/shared/hooks/use-discard-changes"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
+import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
+import { SheetHelpAction } from "@/src/modules/help"
 import {
   financeMoneyDifference,
   formatFinanceMoney,
@@ -97,6 +99,9 @@ export function AccountBalanceSheet({
       <BottomSheet
         open={open}
         onOpenChange={requestOpenChange}
+        helpAction={
+          <SheetHelpAction sheetKey={FINANCE_SHEET_KEYS.accountBalance} />
+        }
         pending={mutation.isPending}
         title={account ? `Ajustar saldo · ${account.name}` : "Ajustar saldo"}
         description="El cambio queda como un reajuste. No cuenta como ingreso ni gasto."

@@ -12,6 +12,7 @@ import {
 } from "react"
 
 import { Button } from "@/src/shared/components/ui/button"
+import { cn } from "@/src/shared/lib/utils"
 
 export type AgentChatLaunchOptions = {
   suggestionId?: string
@@ -103,9 +104,11 @@ export function useAgentChatLauncher(): AgentChatLauncherValue {
 export function AgentChatTriggerButton({
   label = "Preguntar al agente",
   className,
+  withLabel = false,
 }: {
   label?: string
   className?: string
+  withLabel?: boolean
 }) {
   const { available, launch } = useAgentChatLauncher()
 
@@ -117,16 +120,17 @@ export function AgentChatTriggerButton({
     <Button
       type="button"
       variant="outline"
-      size="icon-sm"
+      size={withLabel ? "default" : "icon-sm"}
       aria-label={label}
       data-agent-chat-opener=""
       onClick={(event) => {
         event.currentTarget.focus()
         launch()
       }}
-      className={className}
+      className={cn(withLabel && "w-full", className)}
     >
       <SparklesIcon />
+      {withLabel ? label : null}
     </Button>
   )
 }

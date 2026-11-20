@@ -12,6 +12,8 @@ import {
 import { upcomingChargeToCardSource } from "@/src/modules/finance/subscriptions/lib/subscription-card-source"
 import { SubscriptionCard } from "@/src/modules/finance/subscriptions/components/subscription-card"
 import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
+import { SheetHelpAction } from "@/src/modules/help"
 
 import {
   Empty,
@@ -59,6 +61,9 @@ export function UpcomingSheet({
       closeLabel="Cerrar"
       open={open}
       onOpenChange={onOpenChange}
+      helpAction={
+        <SheetHelpAction sheetKey={FINANCE_SHEET_KEYS.subscriptionUpcoming} />
+      }
       title="Próximos cobros"
       description={`Próximos ${windowDays} días · ${summaryLabel}`}
     >

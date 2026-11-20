@@ -22,6 +22,8 @@ import type {
 } from "@/src/modules/finance/shared/types/entities"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
+import { SheetHelpAction } from "@/src/modules/help"
 import { Badge } from "@/src/shared/components/ui/badge"
 import { Button } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
@@ -110,6 +112,9 @@ export function AlertsSheet({
       closeLabel="Cerrar"
       open={open}
       onOpenChange={onOpenChange}
+      helpAction={
+        <SheetHelpAction sheetKey={FINANCE_SHEET_KEYS.subscriptionAlerts} />
+      }
       title="Alertas"
       description="Subidas de precio, cobros que no cuadran y avisos de renovación"
       actions={{

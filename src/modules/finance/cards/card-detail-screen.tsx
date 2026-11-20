@@ -463,6 +463,7 @@ function CardDetailScreenBody({ cardId }: CardDetailScreenProps) {
         onOpenChange={setOpenHistorySheet}
         target={{ kind: "card", id: card.id }}
         display={cardDisplay}
+        helpSheetKey={FINANCE_SHEET_KEYS.cardHistory}
       />
       <ReconciliationSheet
         open={openReconciliationSheet}
@@ -475,6 +476,7 @@ function CardDetailScreenBody({ cardId }: CardDetailScreenProps) {
           balance: primaryBalance?.balance ?? "0",
         }}
         display={cardDisplay}
+        helpSheetKey={FINANCE_SHEET_KEYS.cardReconciliation}
       />
     </>
   )

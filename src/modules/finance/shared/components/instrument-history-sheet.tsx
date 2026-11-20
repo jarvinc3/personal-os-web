@@ -8,6 +8,7 @@ import {
   type InstrumentHistoryTarget,
 } from "@/src/modules/finance/shared/hooks/use-instrument-history"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
+import { SheetHelpAction, type SheetGlossaryKey } from "@/src/modules/help"
 import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
 import {
   instrumentHistoryLabel,
@@ -37,6 +38,7 @@ type InstrumentHistorySheetProps = {
   onOpenChange: (open: boolean) => void
   target: InstrumentHistoryTarget
   display: FinanceMoneyDisplay
+  helpSheetKey: SheetGlossaryKey
 }
 
 export function InstrumentHistorySheet({
@@ -44,13 +46,19 @@ export function InstrumentHistorySheet({
   onOpenChange,
   target,
   display,
+  helpSheetKey,
 }: InstrumentHistorySheetProps) {
   const historyQuery = useInstrumentHistory(open, target)
   const timeZone = useUserTimeZone()
   const items = infiniteListItems(historyQuery.data)
 
   return (
-    <BottomSheet open={open} onOpenChange={onOpenChange} title="Historial">
+    <BottomSheet
+      open={open}
+      onOpenChange={onOpenChange}
+      title="Historial"
+      helpAction={<SheetHelpAction sheetKey={helpSheetKey} />}
+    >
       {historyQuery.isError ? (
         <ErrorState
           message={financeErrorMessage(historyQuery.error)}

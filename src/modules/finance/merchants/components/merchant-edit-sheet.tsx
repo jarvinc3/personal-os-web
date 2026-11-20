@@ -27,6 +27,8 @@ import type {
 } from "@/src/modules/finance/shared/types/entities"
 import { hasSuggestedCategory } from "@/src/modules/finance/merchants/lib/merchant-duplicates"
 import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
+import { SheetHelpAction } from "@/src/modules/help"
 import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import {
   Alert,
@@ -273,6 +275,15 @@ export function MerchantEditSheet({
       <BottomSheet
         open={open}
         onOpenChange={requestOpenChange}
+        helpAction={
+          <SheetHelpAction
+            sheetKey={
+              isCreate
+                ? FINANCE_SHEET_KEYS.merchantCreate
+                : FINANCE_SHEET_KEYS.merchantEdit
+            }
+          />
+        }
         pending={isPending}
         title={isCreate ? "Nuevo comercio" : "Editar comercio"}
         description={

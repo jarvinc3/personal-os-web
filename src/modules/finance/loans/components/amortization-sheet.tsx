@@ -12,6 +12,8 @@ import {
   type FinanceLoanInstallment,
 } from "@/src/modules/finance/shared/types/entities"
 import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
+import { SheetHelpAction } from "@/src/modules/help"
 import { Badge } from "@/src/shared/components/ui/badge"
 
 import {
@@ -62,6 +64,9 @@ export function LoanAmortizationSheet({
       closeLabel="Cerrar"
       open={open}
       onOpenChange={onOpenChange}
+      helpAction={
+        <SheetHelpAction sheetKey={FINANCE_SHEET_KEYS.loanAmortization} />
+      }
       title="Plan de amortización"
       description="Capital, interés y saldo restante de cada cuota"
     >

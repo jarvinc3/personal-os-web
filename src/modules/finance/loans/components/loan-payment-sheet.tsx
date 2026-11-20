@@ -26,6 +26,8 @@ import {
 } from "@/src/modules/finance/shared/lib/money"
 import { buildPayLoanInstallmentBody } from "@/src/modules/finance/shared/lib/planning-payloads"
 import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
+import { SheetHelpAction } from "@/src/modules/help"
 import {
   Alert,
   AlertDescription,
@@ -151,6 +153,9 @@ export function LoanPaymentSheet({
           }
           onOpenChange(next)
         }}
+        helpAction={
+          <SheetHelpAction sheetKey={FINANCE_SHEET_KEYS.loanPayment} />
+        }
         pending={payment.isPending}
         title="Pagar cuota"
         description={`Paga la cuota pendiente más antigua de ${lenderName}.`}

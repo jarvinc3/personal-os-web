@@ -11,6 +11,8 @@ import {
   CardProductRow,
 } from "@/src/modules/finance/shared/components/product-rows"
 import { CATALOG_NONE } from "@/src/modules/finance/shared/constants/catalog"
+import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
+import { SheetHelpAction } from "@/src/modules/help"
 import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
 import { useInstitutions } from "@/src/modules/finance/shared/hooks/use-institutions"
@@ -172,6 +174,9 @@ export function CardPaymentSheet({
       <BottomSheet
         open={open}
         onOpenChange={onOpenChange}
+        helpAction={
+          <SheetHelpAction sheetKey={FINANCE_SHEET_KEYS.cardPayment} />
+        }
         pending={createMutation.isPending}
         title="Pagar tarjeta"
         description={`Sale de tu cuenta y sube el disponible de ${cardName}.`}

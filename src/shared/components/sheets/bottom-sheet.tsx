@@ -41,6 +41,8 @@ interface BottomSheetProps {
   children: ReactNode
   headerAction?: ReactNode
   headerActionAlign?: "start" | "end"
+  /** Acción de ayuda del header; reemplaza el botón del agente. */
+  helpAction?: ReactNode
   actions?: {
     delete?: ReactNode
     close?: ReactNode
@@ -69,6 +71,7 @@ export function BottomSheet({
   children,
   headerAction,
   headerActionAlign = "end",
+  helpAction,
   actions,
   showClose = true,
   closeLabel = DEFAULT_CLOSE_LABEL,
@@ -95,10 +98,10 @@ export function BottomSheet({
       </Button>
     ) : null)
   const agentAction =
-    showAgentTrigger && !pending && agentChat.available ? (
+    showAgentTrigger && !pending && !helpAction && agentChat.available ? (
       <AgentChatTriggerButton />
     ) : null
-  const headerActionVisible = Boolean(headerAction || agentAction)
+  const headerActionVisible = Boolean(headerAction || helpAction || agentAction)
   const actionEntries = (
     [
       ["delete", actions?.delete],
@@ -144,6 +147,7 @@ export function BottomSheet({
           {headerActionVisible && !pending ? (
             <div className="absolute top-1/2 right-3 flex -translate-y-1/2 items-center gap-1">
               {headerActionAlign === "end" ? headerAction : null}
+              {helpAction}
               {agentAction}
             </div>
           ) : null}

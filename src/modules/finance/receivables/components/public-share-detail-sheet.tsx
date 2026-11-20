@@ -11,6 +11,8 @@ import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
 import { FINANCE_RECEIVABLE_STATUS_LABEL } from "@/src/modules/finance/shared/types/entities"
 import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
+import { SheetHelpAction } from "@/src/modules/help"
 import { Badge } from "@/src/shared/components/ui/badge"
 import {
   Empty,
@@ -64,6 +66,9 @@ export function PublicShareDetailSheet({
     <BottomSheet
       open={open}
       onOpenChange={onOpenChange}
+      helpAction={
+        <SheetHelpAction sheetKey={FINANCE_SHEET_KEYS.publicReceivableDetail} />
+      }
       title={item.concept}
       description={publicShareDetailDescription(ownerFirstName)}
     >

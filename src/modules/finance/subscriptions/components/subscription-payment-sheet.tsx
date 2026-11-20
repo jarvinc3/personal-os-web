@@ -23,6 +23,8 @@ import {
 import { useUserTimeZone } from "@/src/modules/settings/hooks/use-user-time-zone"
 import type { FinanceSubscription } from "@/src/modules/finance/shared/types/entities"
 import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
+import { SheetHelpAction } from "@/src/modules/help"
 import { Button } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
@@ -145,6 +147,9 @@ export function SubscriptionPaymentSheet({
     <BottomSheet
       open={open}
       onOpenChange={onOpenChange}
+      helpAction={
+        <SheetHelpAction sheetKey={FINANCE_SHEET_KEYS.subscriptionPayment} />
+      }
       pending={saving}
       title="Registrar pago"
       description={

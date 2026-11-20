@@ -7,6 +7,7 @@ import {
   useReconciliationPreview,
 } from "@/src/modules/finance/shared/hooks/use-reconciliations"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
+import { SheetHelpAction, type SheetGlossaryKey } from "@/src/modules/help"
 import { todayDateInput } from "@/src/modules/finance/shared/lib/ledger-form"
 import {
   formatFinanceMoney,
@@ -68,6 +69,7 @@ type ReconciliationSheetProps = {
   onOpenChange: (open: boolean) => void
   target: ReconciliationSheetTarget
   display: FinanceMoneyDisplay
+  helpSheetKey: SheetGlossaryKey
 }
 
 export function ReconciliationSheet({
@@ -75,6 +77,7 @@ export function ReconciliationSheet({
   onOpenChange,
   target,
   display,
+  helpSheetKey,
 }: ReconciliationSheetProps) {
   const createMutation = useCreateReconciliation()
   const [realBalance, setRealBalance] = useState(target.balance)
@@ -172,6 +175,7 @@ export function ReconciliationSheet({
       open={open}
       onOpenChange={onOpenChange}
       pending={createMutation.isPending}
+      helpAction={<SheetHelpAction sheetKey={helpSheetKey} />}
       title={`Conciliar · ${target.name}`}
       description="Escribe el saldo que ves en el banco. La diferencia queda como ajustes categorizados."
       actions={{

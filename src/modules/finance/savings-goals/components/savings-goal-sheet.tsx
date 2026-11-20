@@ -33,6 +33,8 @@ import { todayDateInput } from "@/src/modules/finance/shared/lib/ledger-form"
 import { buildSavingsGoalBody } from "@/src/modules/finance/shared/lib/planning-payloads"
 import type { FinanceSavingsGoal } from "@/src/modules/finance/shared/types/entities"
 import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
+import { SheetHelpAction } from "@/src/modules/help"
 import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import { Button } from "@/src/shared/components/ui/button"
 import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
@@ -183,6 +185,7 @@ export function SavingsGoalSheet({
       <BottomSheet
         open={open}
         onOpenChange={requestOpenChange}
+        helpAction={<SheetHelpAction sheetKey={FINANCE_SHEET_KEYS.savings} />}
         pending={pending}
         title={isEdit ? "Editar meta" : "Nueva meta"}
         description="Se marca como completada cuando lo ahorrado alcanza la meta."

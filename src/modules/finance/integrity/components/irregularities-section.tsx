@@ -1,6 +1,6 @@
 "use client"
 
-import { GlossaryHelpButton } from "@/src/modules/help"
+import { GlossaryHelpButton, SheetHelpAction } from "@/src/modules/help"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
 import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 import {
@@ -240,6 +240,9 @@ export function IrregularitiesSection({
       <BottomSheet
         open={driftSheet.open}
         onOpenChange={driftSheet.setOpen}
+        helpAction={
+          <SheetHelpAction sheetKey={FINANCE_SHEET_KEYS.balanceDrifts} />
+        }
         title={`Descuadres (${drifts.length})`}
         description="El saldo guardado no coincide con la suma de los movimientos confirmados."
       >
@@ -264,6 +267,11 @@ export function IrregularitiesSection({
       <BottomSheet
         open={reconciliationSheet.open}
         onOpenChange={reconciliationSheet.setOpen}
+        helpAction={
+          <SheetHelpAction
+            sheetKey={FINANCE_SHEET_KEYS.pendingReconciliations}
+          />
+        }
         title={`Sin conciliar (${pendingReconciliations.length})`}
         description="Productos que todavía no cerraste contra el banco este mes."
       >

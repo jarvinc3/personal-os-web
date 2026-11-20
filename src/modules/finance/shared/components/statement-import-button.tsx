@@ -4,6 +4,8 @@ import { ApiError } from "@/src/config/api-client"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import { useUploadStatementImport } from "@/src/modules/finance/shared/hooks/use-statement-import"
 import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
+import { SheetHelpAction } from "@/src/modules/help"
 import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import { Button } from "@/src/shared/components/ui/button"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
@@ -97,6 +99,9 @@ export function StatementImportButton({
             setPassword("")
           }
         }}
+        helpAction={
+          <SheetHelpAction sheetKey={FINANCE_SHEET_KEYS.statementPassword} />
+        }
         title="PDF con clave"
         description="Escríbela para leer el estado de cuenta. No la guardamos."
         actions={{
