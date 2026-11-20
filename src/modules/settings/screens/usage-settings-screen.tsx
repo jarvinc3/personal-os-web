@@ -5,9 +5,12 @@ import {
   USAGE_RANGES,
   fillDailyUsage,
   fillHourlyUsage,
+  USAGE_RESET_MAX_RETRIES,
+  USAGE_RESET_RETRY_MS,
   isUsageDays,
-  nextUtcDailyReset,
   usageRangeCaption,
+  usageRefreshDelay,
+  usageResetReached,
   useEmailUsage,
   type UsageDays,
 } from "@/src/modules/intelligence"
@@ -65,31 +68,46 @@ function UsageSettingsScreenBody() {
       return
     }
 
-    const serverNow = Date.parse(summary.range.to)
-    const resetAt = nextUtcDailyReset(new Date(serverNow)).getTime()
     let timer: ReturnType<typeof setTimeout>
     let cancelled = false
 
-    const refreshAtReset = async () => {
-      const result = await refetch()
+    const schedule = (serverNow: string) => {
+      const delay = usageRefreshDelay({ serverNow, clientNow: Date.now() })
 
-      if (cancelled) {
-        return
+      const refreshAtReset = async (attempt: number) => {
+        const result = await refetch()
+
+        if (cancelled) {
+          return
+        }
+
+        const nextServerNow = result.data?.range.to
+
+        if (
+          nextServerNow &&
+          usageResetReached({
+            previousServerNow: serverNow,
+            serverNow: nextServerNow,
+          })
+        ) {
+          schedule(nextServerNow)
+          return
+        }
+
+        if (attempt >= USAGE_RESET_MAX_RETRIES) {
+          return
+        }
+
+        timer = setTimeout(
+          () => void refreshAtReset(attempt + 1),
+          USAGE_RESET_RETRY_MS
+        )
       }
 
-      const nextServerNow = result.data ? Date.parse(result.data.range.to) : 0
-
-      if (nextServerNow >= resetAt) {
-        return
-      }
-
-      timer = setTimeout(() => void refreshAtReset(), 60_000)
+      timer = setTimeout(() => void refreshAtReset(1), delay)
     }
 
-    timer = setTimeout(
-      () => void refreshAtReset(),
-      Math.max(1_000, resetAt - Date.now() + 60_000)
-    )
+    schedule(summary.range.to)
 
     return () => {
       cancelled = true
@@ -148,7 +166,11 @@ function UsageSettingsScreenBody() {
             rangeLabel={usageRangeCaption(days)}
             locale={locale}
           />
-          <UsageCaps caps={summary.caps} now={new Date()} locale={locale} />
+          <UsageCaps
+            caps={summary.caps}
+            now={new Date(summary.range.to)}
+            locale={locale}
+          />
           {summary.totals.calls === 0 ? (
             <UsageEmpty />
           ) : (

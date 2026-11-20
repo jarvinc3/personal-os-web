@@ -132,10 +132,56 @@ export function initialBudgetProgress({
   return usageProgress({ limit, used: limit - remaining })
 }
 
+export const USAGE_RESET_MARGIN_MS = 60_000
+export const USAGE_RESET_RETRY_MS = 60_000
+export const USAGE_RESET_MAX_RETRIES = 5
+
 /** Los topes diarios se reinician a medianoche UTC, como los cuenta el back. */
 export function nextUtcDailyReset(now: Date): Date {
   return new Date(
     Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1)
+  )
+}
+
+/** Reinicio que sigue a una hora del servidor. */
+export function nextUsageReset(serverNow: string): Date {
+  const serverTime = Date.parse(serverNow)
+
+  if (Number.isNaN(serverTime)) {
+    throw new Error(`Hora del servidor inválida: ${serverNow}`)
+  }
+
+  return nextUtcDailyReset(new Date(serverTime))
+}
+
+/** Espera hasta el reinicio más el margen; el día nunca sale del reloj del cliente. */
+export function usageRefreshDelay({
+  serverNow,
+  clientNow,
+  marginMs = USAGE_RESET_MARGIN_MS,
+}: {
+  serverNow: string
+  clientNow: number
+  marginMs?: number
+}): number {
+  const resetAt = nextUsageReset(serverNow).getTime()
+
+  return Math.max(1_000, resetAt - clientNow + marginMs)
+}
+
+/** Si una respuesta del servidor ya pasó el reinicio que esperaba el temporizador. */
+export function usageResetReached({
+  previousServerNow,
+  serverNow,
+}: {
+  previousServerNow: string
+  serverNow: string
+}): boolean {
+  const serverTime = Date.parse(serverNow)
+
+  return (
+    !Number.isNaN(serverTime) &&
+    serverTime >= nextUsageReset(previousServerNow).getTime()
   )
 }
 
