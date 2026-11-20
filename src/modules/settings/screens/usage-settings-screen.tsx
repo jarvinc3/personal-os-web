@@ -58,25 +58,44 @@ function UsageSettingsScreenBody() {
 
   // Los contadores del back se reinician a medianoche UTC; la vista se refresca
   // una vez al cruzar el día para que la pausa y el reinicio no queden viejos.
+  // El día sale de la hora del servidor y, si el reloj del navegador va
+  // adelantado, se reintenta un minuto después.
   useEffect(() => {
-    let timer: ReturnType<typeof setTimeout>
-
-    const schedule = () => {
-      const now = Date.now()
-      const resetAt = nextUtcDailyReset(new Date(now)).getTime()
-      timer = setTimeout(
-        () => {
-          void refetch()
-          schedule()
-        },
-        Math.max(1_000, resetAt - now + 1_000)
-      )
+    if (!summary) {
+      return
     }
 
-    schedule()
+    const serverNow = Date.parse(summary.range.to)
+    const resetAt = nextUtcDailyReset(new Date(serverNow)).getTime()
+    let timer: ReturnType<typeof setTimeout>
+    let cancelled = false
 
-    return () => clearTimeout(timer)
-  }, [refetch])
+    const refreshAtReset = async () => {
+      const result = await refetch()
+
+      if (cancelled) {
+        return
+      }
+
+      const nextServerNow = result.data ? Date.parse(result.data.range.to) : 0
+
+      if (nextServerNow >= resetAt) {
+        return
+      }
+
+      timer = setTimeout(() => void refreshAtReset(), 60_000)
+    }
+
+    timer = setTimeout(
+      () => void refreshAtReset(),
+      Math.max(1_000, resetAt - Date.now() + 60_000)
+    )
+
+    return () => {
+      cancelled = true
+      clearTimeout(timer)
+    }
+  }, [refetch, summary])
 
   const daily = useMemo(
     () =>
