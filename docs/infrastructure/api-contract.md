@@ -4,21 +4,23 @@ Los tipos de request y de respuesta del cliente salen del contrato OpenAPI que p
 
 ## Piezas
 
-| Pieza           | Ruta                                               | Qué es                                                                                  |
-| --------------- | -------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| Contrato        | `openapi/swagger-spec.json`                        | Copia del `swagger-spec.json` del back. La usan la generación y el CI.                  |
-| Generador       | `src/config/api-contract/generate.ts`              | Convierte el contrato en tipos con `openapi-typescript`.                                |
-| Tipos generados | `src/config/api-contract/api-schema.ts`            | Archivo generado. ESLint y Prettier lo ignoran.                                         |
-| Comprobaciones  | `src/config/api-contract/api-schema.assertions.ts` | Afirmaciones que resuelve `pnpm typecheck`, entre ellas que el monto sea texto decimal. |
-| Sincronización  | `src/config/api-contract/sync-contract.ts`         | Copia el contrato del back a `openapi/swagger-spec.json`.                               |
+| Pieza           | Ruta                                               | Qué es                                                                                                                                       |
+| --------------- | -------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| Contrato        | `openapi/swagger-spec.json`                        | Contrato versionado del cliente: entrada de la generación y del CI. Se sincroniza desde el contrato del back cuando ese archivo está al día. |
+| Generador       | `src/config/api-contract/generate.ts`              | Convierte el contrato en tipos con `openapi-typescript`.                                                                                     |
+| Tipos generados | `src/config/api-contract/api-schema.ts`            | Archivo generado. ESLint y Prettier lo ignoran.                                                                                              |
+| Comprobaciones  | `src/config/api-contract/api-schema.assertions.ts` | Afirmaciones que resuelve `pnpm typecheck`, entre ellas que el monto sea texto decimal.                                                      |
+| Sincronización  | `src/config/api-contract/sync-contract.ts`         | Copia el contrato del back a `openapi/swagger-spec.json`.                                                                                    |
 
 ## Comandos
 
-- `pnpm api:contract` copia el contrato desde el repo hermano `personal-os-back` del workspace, tanto en la copia principal como en una copia de `temp/<rama>`, o desde `OPENAPI_SPEC_PATH`. Falla si el archivo no existe.
+- `pnpm api:contract` copia el `swagger-spec.json` del repo hermano `personal-os-back` del workspace, tanto en la copia principal como en una copia de `temp/<rama>`, o desde `OPENAPI_SPEC_PATH`. Falla si el archivo no existe.
+- Solo es seguro correr `pnpm api:contract` cuando el back regeneró su archivo. Si el archivo del back está atrasado, la copia revierte el contrato del cliente: pasó con el archivo del 15/11 ([personal-os-back#375](https://github.com/jarvinc3/personal-os-back/issues/375)), sin `DISCARDED`, y por eso el contrato actual se generó desde el código del back en #445 y el back lo regeneró en [personal-os-back#419](https://github.com/jarvinc3/personal-os-back/issues/419).
+- Antes de correrlo, confirmá que el back publicó su contrato y que cada estado de correo del archivo nuevo existe en `MESSAGE_STATUS_LABELS`, que declara sus claves con `satisfies`: un estado nuevo no compila hasta agregar su etiqueta.
 - `pnpm api:generate` escribe `src/config/api-contract/api-schema.ts`.
 - `pnpm typecheck` ejecuta la generación antes de `tsc`; falla si el contrato no está disponible. CI corre ese script.
 
-Para actualizar el contrato: `pnpm api:contract && pnpm api:generate` y commitea el contrato y el archivo generado en el mismo cambio.
+Para actualizar el contrato: `pnpm api:contract && pnpm api:generate`, revisá el diff de los dos archivos y commitea en el mismo cambio los ajustes de tipos del cliente que el contrato nuevo exija.
 
 ## Cómo se consumen
 
@@ -46,7 +48,7 @@ El contrato versionado todavía no publica `clientMessageId` ni `stream` del env
 
 ## Cobertura del contrato
 
-En la copia actual del contrato (181 rutas y 291 schemas) 223 de las 231 respuestas 2xx traen schema. Las señales de correo de AI-7 se leen con los tipos generados (`components["schemas"]["AiSignalResponseDto"]`) y el resto de Inteligencia ya usa un alias de `components["schemas"]` para cada tipo del módulo. Las respuestas que el contrato todavía no describe siguen a mano hasta que el back publique los schemas ([personal-os-back#263](https://github.com/jarvinc3/personal-os-back/issues/263)).
+En la copia actual del contrato (181 rutas y 291 schemas) 223 de las 231 respuestas 2xx traen schema. La copia se generó desde el código del back en #445; el archivo del back publica 183 rutas y 296 schemas desde [personal-os-back#419](https://github.com/jarvinc3/personal-os-back/issues/419), con `CLASSIFYING` entre los estados del correo. Igualarlas es un cambio aparte: `pnpm api:contract && pnpm api:generate` más los tipos del cliente que cambien. Las señales de correo de AI-7 se leen con los tipos generados (`components["schemas"]["AiSignalResponseDto"]`) y el resto de Inteligencia ya usa un alias de `components["schemas"]` para cada tipo del módulo. Las respuestas que el contrato todavía no describe siguen a mano hasta que el back publique los schemas ([personal-os-back#263](https://github.com/jarvinc3/personal-os-back/issues/263)).
 
 ## Pruebas
 
