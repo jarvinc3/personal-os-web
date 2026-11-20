@@ -10,6 +10,8 @@ import {
   type FinanceLoanInstallment,
 } from "@/src/modules/finance/shared/types/entities"
 import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
+import { SheetHelpAction } from "@/src/modules/help"
 import { Button, buttonVariants } from "@/src/shared/components/ui/button"
 import { cn } from "@/src/shared/lib/utils"
 import { SummaryItem } from "@/src/shared/components/data-display/summary"
@@ -41,6 +43,9 @@ export function InstallmentDetailSheet({
       closeLabel="Cerrar"
       open={open}
       onOpenChange={onOpenChange}
+      helpAction={
+        <SheetHelpAction sheetKey={FINANCE_SHEET_KEYS.installmentDetail} />
+      }
       title={
         installment ? `Cuota ${installment.installmentNo}` : "Detalle de cuota"
       }

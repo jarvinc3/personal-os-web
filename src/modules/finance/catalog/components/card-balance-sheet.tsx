@@ -10,6 +10,8 @@ import {
 } from "@/src/modules/finance/shared/hooks/use-cards"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
 import { useDiscardChanges } from "@/src/modules/finance/shared/hooks/use-discard-changes"
+import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
+import { SheetHelpAction } from "@/src/modules/help"
 import {
   buildCardBalanceBody,
   nextUnusedCurrency,
@@ -266,6 +268,9 @@ function CardBalanceSheetForm({
       <BottomSheet
         open={open}
         onOpenChange={requestOpenChange}
+        helpAction={
+          <SheetHelpAction sheetKey={FINANCE_SHEET_KEYS.cardBalance} />
+        }
         pending={pending || saving}
         title={card ? `Saldos · ${card.name}` : "Saldos de tarjeta"}
         description="El saldo nuevo queda como un reajuste. El límite de crédito se guarda aparte."

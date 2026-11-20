@@ -26,6 +26,8 @@ import { DeleteRecordDialog } from "@/src/modules/finance/shared/components/dele
 import { CategoryPickerSheet } from "@/src/modules/finance/shared/components/pickers/category-picker-sheet"
 import { CategoryTrigger } from "@/src/modules/finance/shared/components/pickers/category-trigger"
 import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
+import { SheetHelpAction } from "@/src/modules/help"
 import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import { Button } from "@/src/shared/components/ui/button"
 import { ColorPickerSwatch } from "@/src/shared/components/forms/color-picker"
@@ -227,6 +229,7 @@ export function CategorySheet({
       <BottomSheet
         open={open}
         onOpenChange={requestOpenChange}
+        helpAction={<SheetHelpAction sheetKey={FINANCE_SHEET_KEYS.category} />}
         pending={pending}
         title={
           isEdit

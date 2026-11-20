@@ -25,6 +25,8 @@ import { monthlySavingsSuggestion } from "@/src/modules/finance/shared/lib/plann
 import { buildSavingsGoalContributionBody } from "@/src/modules/finance/shared/lib/planning-payloads"
 import { defaultContributionAccountId } from "@/src/modules/finance/savings-goals/lib/contribution-account"
 import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
+import { SheetHelpAction } from "@/src/modules/help"
 import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import { Button } from "@/src/shared/components/ui/button"
 import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
@@ -229,6 +231,15 @@ export function SavingsGoalContributionSheet({
       <BottomSheet
         open={open}
         onOpenChange={requestOpenChange}
+        helpAction={
+          <SheetHelpAction
+            sheetKey={
+              isWithdrawal
+                ? FINANCE_SHEET_KEYS.savingsWithdrawal
+                : FINANCE_SHEET_KEYS.savingsContribution
+            }
+          />
+        }
         pending={pending}
         title={isWithdrawal ? "Retirar dinero" : "Registrar aporte"}
         description={

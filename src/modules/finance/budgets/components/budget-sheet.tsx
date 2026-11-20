@@ -44,6 +44,8 @@ import {
 } from "@/src/modules/finance/shared/types/entities"
 import { usePicker } from "@/src/shared/hooks/use-picker"
 import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
+import { SheetHelpAction } from "@/src/modules/help"
 import { Button } from "@/src/shared/components/ui/button"
 import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
 import { Spinner } from "@/src/shared/components/ui/spinner"
@@ -269,6 +271,7 @@ export function BudgetSheet({
       <BottomSheet
         open={open}
         onOpenChange={requestOpenChange}
+        helpAction={<SheetHelpAction sheetKey={FINANCE_SHEET_KEYS.budget} />}
         pending={pending}
         title={isEdit ? "Editar presupuesto" : "Nuevo presupuesto"}
         description={

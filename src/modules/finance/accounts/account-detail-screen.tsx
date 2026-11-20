@@ -469,6 +469,7 @@ function AccountDetailScreenBody({ accountId }: AccountDetailScreenProps) {
         onOpenChange={setOpenHistorySheet}
         target={{ kind: "account", id: account.id }}
         display={accountDisplay}
+        helpSheetKey={FINANCE_SHEET_KEYS.accountHistory}
       />
       <ReconciliationSheet
         open={openReconciliationSheet}
@@ -481,6 +482,7 @@ function AccountDetailScreenBody({ accountId }: AccountDetailScreenProps) {
           balance: account.balance,
         }}
         display={accountDisplay}
+        helpSheetKey={FINANCE_SHEET_KEYS.accountReconciliation}
       />
     </>
   )

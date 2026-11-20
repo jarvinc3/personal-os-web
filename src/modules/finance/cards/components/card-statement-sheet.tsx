@@ -24,6 +24,8 @@ import {
   type FinanceCardStatementMovement,
 } from "@/src/modules/finance/shared/types/entities"
 import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
+import { SheetHelpAction } from "@/src/modules/help"
 import {
   Empty,
   EmptyDescription,
@@ -161,6 +163,9 @@ export function CardStatementSheet({
       closeLabel="Cerrar"
       open={open}
       onOpenChange={onOpenChange}
+      helpAction={
+        <SheetHelpAction sheetKey={FINANCE_SHEET_KEYS.cardStatement} />
+      }
       title="Estado de cuenta"
       description={
         detail

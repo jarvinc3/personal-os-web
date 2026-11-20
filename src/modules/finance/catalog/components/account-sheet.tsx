@@ -9,6 +9,8 @@ import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms
 import { SegmentedControl } from "@/src/shared/components/forms/segmented-control"
 import { AccountProductRow } from "@/src/modules/finance/shared/components/product-rows"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
+import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
+import { SheetHelpAction } from "@/src/modules/help"
 import {
   CATALOG_NONE,
   FINANCE_ACCOUNT_TYPE_LABEL,
@@ -374,6 +376,7 @@ export function AccountSheet({
       <BottomSheet
         open={open}
         onOpenChange={requestOpenChange}
+        helpAction={<SheetHelpAction sheetKey={FINANCE_SHEET_KEYS.account} />}
         pending={pending}
         title={isEdit ? "Editar cuenta" : "Nueva cuenta"}
         description={

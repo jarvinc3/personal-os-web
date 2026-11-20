@@ -54,6 +54,8 @@ import {
 } from "@/src/modules/finance/subscriptions/lib/subscription-form"
 import type { FinanceSubscription } from "@/src/modules/finance/shared/types/entities"
 import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
+import { SheetHelpAction } from "@/src/modules/help"
 import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import { Button } from "@/src/shared/components/ui/button"
 import { Field, FieldLabel } from "@/src/shared/components/ui/field"
@@ -184,6 +186,9 @@ export function SubscriptionSheet({
       <BottomSheet
         open={open}
         onOpenChange={requestOpenChange}
+        helpAction={
+          <SheetHelpAction sheetKey={FINANCE_SHEET_KEYS.subscription} />
+        }
         pending={isPending}
         title={isEdit ? "Editar suscripción" : "Nueva suscripción"}
         description="Monto fijo, ciclo de facturación y próximo cobro."
