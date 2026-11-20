@@ -1,9 +1,16 @@
 "use client"
 
-import { HistoryIcon, PlusIcon, SparklesIcon, XIcon } from "lucide-react"
+import {
+  HistoryIcon,
+  PlusIcon,
+  SparklesIcon,
+  Trash2Icon,
+  XIcon,
+} from "lucide-react"
 import {
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
   type TouchEvent,
@@ -12,21 +19,29 @@ import {
 import { AgentChatComposer } from "@/src/modules/intelligence/components/agent-chat-composer"
 import { AgentChatHistorySheet } from "@/src/modules/intelligence/components/agent-chat-history-sheet"
 import { AgentChatMessage } from "@/src/modules/intelligence/components/agent-chat-message"
+import { ViewSuggestionsRow } from "@/src/modules/intelligence/components/view-suggestions-row"
 import {
   useAgentConversation,
   useCreateAgentConversation,
   useLatestAgentConversation,
   useSendAgentMessage,
 } from "@/src/modules/intelligence/hooks/use-agent-chat"
+import {
+  useDismissViewSuggestion,
+  useViewSuggestions,
+} from "@/src/modules/intelligence/hooks/use-view-suggestions"
 import { agentContextLabel } from "@/src/modules/intelligence/lib/agent-chat-context"
+import { viewSuggestionScopeFromContext } from "@/src/modules/intelligence/lib/view-suggestions"
 import type {
   AgentChatUiMessage,
   AgentConversationDetail,
   AgentConversationSummary,
   AgentInvocationContext,
 } from "@/src/modules/intelligence/types/agent-chat.types"
+import type { ViewSuggestion } from "@/src/modules/intelligence/types/view-suggestions.types"
 import { AGENT_CHAT_HISTORY_PICKER } from "@/src/modules/intelligence/constants/agent-chat"
 import { useTabBarVisible } from "@/src/shared/context/tab-bar-context"
+import { ConfirmDialog } from "@/src/shared/components/feedback/confirm-dialog"
 import { Badge } from "@/src/shared/components/ui/badge"
 import { Button } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
@@ -35,6 +50,7 @@ import { cn } from "@/src/shared/lib/utils"
 
 const PULL_CLOSE_DISTANCE = 72
 const PULL_MAX_DISTANCE = 120
+const NO_VIEW_SUGGESTIONS: ViewSuggestion[] = []
 
 function isAbortError(error: unknown): boolean {
   return error instanceof DOMException && error.name === "AbortError"
@@ -61,12 +77,16 @@ function toUiMessages(
 export function AgentChatOverlay({
   conversationId,
   initialContext,
+  suggestionId,
+  onSuggestionConsumed,
   onSelectConversation,
   onNewChat,
   onClose,
 }: {
   conversationId: string | null
   initialContext: AgentInvocationContext
+  suggestionId: string | null
+  onSuggestionConsumed: () => void
   onSelectConversation: (conversationId: string) => void
   onNewChat: () => void
   onClose: () => void
@@ -103,6 +123,12 @@ export function AgentChatOverlay({
   } | null>(null)
   const [contextEnabled, setContextEnabled] = useState(true)
   const [pullDistance, setPullDistance] = useState(0)
+  const [selectedSuggestionId, setSelectedSuggestionId] = useState<
+    string | null
+  >(null)
+  const [dismissTarget, setDismissTarget] = useState<ViewSuggestion | null>(
+    null
+  )
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const listRef = useRef<HTMLDivElement>(null)
   const endRef = useRef<HTMLDivElement>(null)
@@ -112,8 +138,17 @@ export function AgentChatOverlay({
   const touchStartRef = useRef<number | null>(null)
   const pullDistanceRef = useRef(0)
   const stickToBottomRef = useRef(true)
+  const consumedSuggestionRef = useRef<string | null>(null)
+  const suggestionScope = useMemo(
+    () => viewSuggestionScopeFromContext(initialContext),
+    [initialContext]
+  )
+  const suggestionsQuery = useViewSuggestions(suggestionScope, true)
+  const suggestions = suggestionsQuery.data?.suggestions ?? NO_VIEW_SUGGESTIONS
+  const dismissSuggestion = useDismissViewSuggestion()
 
   const historyOpen = history.picker === AGENT_CHAT_HISTORY_PICKER
+  const secondaryModalOpen = historyOpen || dismissTarget !== null
   const isLoadingConversation =
     Boolean(conversationId) &&
     conversationQuery.isPending &&
@@ -154,7 +189,7 @@ export function AgentChatOverlay({
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (historyOpen) {
+      if (secondaryModalOpen) {
         return
       }
       if (event.key === "Escape") {
@@ -183,7 +218,32 @@ export function AgentChatOverlay({
     }
     window.addEventListener("keydown", onKeyDown)
     return () => window.removeEventListener("keydown", onKeyDown)
-  }, [historyOpen, onClose])
+  }, [secondaryModalOpen, onClose])
+
+  useEffect(() => {
+    if (!suggestionId || consumedSuggestionRef.current === suggestionId) {
+      return
+    }
+    if (suggestionsQuery.isPending) {
+      return
+    }
+    const suggestion = suggestions.find((item) => item.id === suggestionId)
+    if (suggestion) {
+      // La sugerencia llega por la URL y se resuelve cuando carga la query.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setDraft((current) =>
+        current.trim().length > 0 ? current : suggestion.prompt
+      )
+      setSelectedSuggestionId(suggestion.id)
+    }
+    consumedSuggestionRef.current = suggestionId
+    onSuggestionConsumed()
+  }, [
+    suggestionId,
+    suggestions,
+    suggestionsQuery.isPending,
+    onSuggestionConsumed,
+  ])
 
   useEffect(() => {
     const previous = document.body.style.overflow
@@ -366,6 +426,27 @@ export function AgentChatOverlay({
     [conversationId, history, onSelectConversation]
   )
 
+  const confirmDismissSuggestion = useCallback(async () => {
+    if (!dismissTarget) {
+      return
+    }
+    try {
+      await dismissSuggestion.mutateAsync(dismissTarget.id)
+      setDismissTarget(null)
+      if (selectedSuggestionId === dismissTarget.id) {
+        setSelectedSuggestionId(null)
+      }
+    } catch {
+      // El hook muestra el error y deja el diálogo abierto para reintentar.
+    }
+  }, [dismissSuggestion, dismissTarget, selectedSuggestionId])
+
+  const handleSelectSuggestion = useCallback((suggestion: ViewSuggestion) => {
+    setDraft(suggestion.prompt)
+    setSelectedSuggestionId(suggestion.id)
+    inputRef.current?.focus()
+  }, [])
+
   const handleNewChat = useCallback(() => {
     const alreadyNew = !conversationId
     abortRef.current?.abort()
@@ -376,6 +457,8 @@ export function AgentChatOverlay({
     setDraft("")
     setRetry(null)
     setContextEnabled(true)
+    setSelectedSuggestionId(null)
+    setDismissTarget(null)
     setNewChat(true)
     onNewChat()
     if (alreadyNew) {
@@ -585,8 +668,17 @@ export function AgentChatOverlay({
           )}
         >
           <div className="mx-auto flex w-full max-w-3xl flex-col gap-1.5">
-            {/* #408 monta aquí la fila de sugerencias. */}
-            <div data-slot="agent-chat-suggestions" />
+            {suggestions.length > 0 ? (
+              <div className="mb-1.5">
+                <ViewSuggestionsRow
+                  suggestions={suggestions}
+                  variant="overlay"
+                  selectedId={selectedSuggestionId}
+                  onSelect={handleSelectSuggestion}
+                  onRequestDismiss={setDismissTarget}
+                />
+              </div>
+            ) : null}
             {pending && pendingStatus ? (
               <p
                 className="flex items-center gap-1.5 text-xs text-muted-foreground"
@@ -613,6 +705,30 @@ export function AgentChatOverlay({
         activeConversationId={activeConversationId}
         onSelect={handleSelectConversation}
         onNewChat={handleNewChat}
+      />
+
+      <ConfirmDialog
+        open={dismissTarget !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setDismissTarget(null)
+          }
+        }}
+        title="¿Descartar esta sugerencia?"
+        description={
+          dismissTarget
+            ? `«${dismissTarget.label}» dejará de aparecer en esta vista.`
+            : ""
+        }
+        confirmLabel="Descartar"
+        confirmIcon={Trash2Icon}
+        icon={SparklesIcon}
+        tone="danger"
+        layerClassName="z-[100]"
+        pending={dismissSuggestion.isPending}
+        pendingLabel="Descartando..."
+        closeOnConfirm={false}
+        onConfirm={() => void confirmDismissSuggestion()}
       />
     </>
   )

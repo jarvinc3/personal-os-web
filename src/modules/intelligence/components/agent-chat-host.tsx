@@ -9,16 +9,23 @@ import {
   AGENT_CHAT_SUGGESTION_PARAM,
 } from "@/src/modules/intelligence/constants/agent-chat"
 import { AgentChatOverlay } from "@/src/modules/intelligence/components/agent-chat-overlay"
+import { ViewSuggestionsBar } from "@/src/modules/intelligence/components/view-suggestions-bar"
 import {
   buildAgentInvocationContext,
   decodeAgentContext,
   encodeAgentContext,
 } from "@/src/modules/intelligence/lib/agent-chat-context"
+import {
+  buildViewSuggestionScope,
+  viewSuggestionScopeKey,
+} from "@/src/modules/intelligence/lib/view-suggestions"
 import type { AgentChatLaunchOptions } from "@/src/shared/components/agent-chat/agent-chat-launcher"
 import { useAgentChatLauncher } from "@/src/shared/components/agent-chat/agent-chat-launcher"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
+import { useTabBarVisible } from "@/src/shared/context/tab-bar-context"
 import {
   SHEET_ID_QUERY_KEY,
+  SHEET_PICKER_QUERY_KEY,
   SHEET_QUERY_KEY,
   type SheetExtraParams,
 } from "@/src/shared/lib/sheet-navigation"
@@ -31,6 +38,7 @@ const CLEAR_OVERLAY_PARAMS = [
 export function AgentChatHost() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
+  const tabBarVisible = useTabBarVisible()
   const { register } = useAgentChatLauncher()
   const overlay = useSheetParam(AGENT_CHAT_SHEET_KEY, {
     clearParams: CLEAR_OVERLAY_PARAMS,
@@ -54,6 +62,16 @@ export function AgentChatHost() {
     () => buildAgentInvocationContext({ pathname, searchParams }),
     [pathname, searchParams]
   )
+
+  const suggestionScope = useMemo(
+    () => buildViewSuggestionScope({ pathname, searchParams }),
+    [pathname, searchParams]
+  )
+  const showSuggestionsBar =
+    !overlay.open &&
+    tabBarVisible &&
+    searchParams.get(SHEET_QUERY_KEY) === null &&
+    searchParams.get(SHEET_PICKER_QUERY_KEY) === null
 
   const overlayRef = useRef(overlay)
   const currentContextRef = useRef(currentContext)
@@ -141,17 +159,33 @@ export function AgentChatHost() {
     overlay.setOpen(true, null)
   }, [overlay])
 
-  if (!overlay.open) {
-    return null
-  }
+  const consumeSuggestion = useCallback(() => {
+    const currentOverlay = overlayRef.current
+    currentOverlay.setOpen(true, currentOverlay.sheetId, {
+      [AGENT_CHAT_SUGGESTION_PARAM]: null,
+    })
+  }, [])
 
   return (
-    <AgentChatOverlay
-      conversationId={overlay.sheetId}
-      initialContext={initialContext}
-      onSelectConversation={selectConversation}
-      onNewChat={startNewChat}
-      onClose={close}
-    />
+    <>
+      {showSuggestionsBar ? (
+        <ViewSuggestionsBar
+          key={viewSuggestionScopeKey(suggestionScope)}
+          scope={suggestionScope}
+          onSelect={(suggestion) => open({ suggestionId: suggestion.id })}
+        />
+      ) : null}
+      {overlay.open ? (
+        <AgentChatOverlay
+          conversationId={overlay.sheetId}
+          initialContext={initialContext}
+          suggestionId={searchParams.get(AGENT_CHAT_SUGGESTION_PARAM)}
+          onSuggestionConsumed={consumeSuggestion}
+          onSelectConversation={selectConversation}
+          onNewChat={startNewChat}
+          onClose={close}
+        />
+      ) : null}
+    </>
   )
 }
