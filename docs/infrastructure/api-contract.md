@@ -42,6 +42,8 @@ type BalanceSheet =
 - Cuando el contrato todavía no describe un campo que el back ya acepta, el cliente lo declara en un alias local del tipo generado. Es el caso de `relevance` y `notes` en las verificaciones y de `templateFingerprint` como texto en la verificación por grupo.
 - Los montos son texto decimal (`string`); `null` significa "sin datos". Ver [ADR-002](../decisions/ADR-002-money-strings.md).
 
+El contrato versionado todavía no publica `clientMessageId` ni `stream` del envío de mensajes del agente (back #421). El overlay los declara como alias local en `src/modules/intelligence/types/agent-chat.types.ts` y los elimina cuando la copia OpenAPI se sincronice.
+
 ## Cobertura del contrato
 
 En la copia actual del contrato (181 rutas y 291 schemas) 223 de las 231 respuestas 2xx traen schema. Las señales de correo de AI-7 se leen con los tipos generados (`components["schemas"]["AiSignalResponseDto"]`) y el resto de Inteligencia ya usa un alias de `components["schemas"]` para cada tipo del módulo. Las respuestas que el contrato todavía no describe siguen a mano hasta que el back publique los schemas ([personal-os-back#263](https://github.com/jarvinc3/personal-os-back/issues/263)).

@@ -379,4 +379,66 @@ describe("mergeOptimisticSheetParam", () => {
       dropOptimistic: true,
     })
   })
+  it("opens with extra params owned by the sheet", () => {
+    const result = resolveSheetNavigation({
+      pathname: "/finance/transactions",
+      searchParams: params("month=2026-11"),
+      key: "agent-chat",
+      open: true,
+      extraParams: { agentContext: "ctx", suggestion: null },
+      wasPushed: false,
+    })
+    assert.deepEqual(result, {
+      action: "push",
+      url: "/finance/transactions?month=2026-11&sheet=agent-chat&agentContext=ctx",
+    })
+  })
+
+  it("pushes the overlay over an open sheet so Back returns to it", () => {
+    const result = resolveSheetNavigation({
+      pathname: "/finance/transactions",
+      searchParams: params("sheet=transaction-options-sheet&sheetId=tx-1"),
+      key: "agent-chat",
+      open: true,
+      extraParams: { agentContext: "ctx" },
+      pushOver: true,
+      wasPushed: true,
+    })
+    assert.deepEqual(result, {
+      action: "push",
+      url: "/finance/transactions?sheet=agent-chat&agentContext=ctx",
+    })
+  })
+
+  it("updates extra params on the open sheet without a new id", () => {
+    const result = resolveSheetNavigation({
+      pathname: "/finance/transactions",
+      searchParams: params("sheet=agent-chat&agentContext=old"),
+      key: "agent-chat",
+      open: true,
+      extraParams: { agentContext: "new" },
+      wasPushed: true,
+    })
+    assert.deepEqual(result, {
+      action: "replace",
+      url: "/finance/transactions?sheet=agent-chat&agentContext=new",
+    })
+  })
+
+  it("clears owned params when a deep-linked sheet closes", () => {
+    const result = resolveSheetNavigation({
+      pathname: "/finance/transactions",
+      searchParams: params(
+        "sheet=agent-chat&agentContext=ctx&suggestion=s-1&month=2026-11"
+      ),
+      key: "agent-chat",
+      open: false,
+      clearParams: ["agentContext", "suggestion"],
+      wasPushed: false,
+    })
+    assert.deepEqual(result, {
+      action: "replace",
+      url: "/finance/transactions?month=2026-11",
+    })
+  })
 })

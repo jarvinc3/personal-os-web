@@ -60,6 +60,12 @@ export const API_ENDPOINTS = {
       `/intelligence/knowledge/admin/${encodeURIComponent(knowledgeId)}/revert`,
     KNOWLEDGE_EXPORT: "/intelligence/knowledge/me/export",
     KNOWLEDGE_DELETE: "/intelligence/knowledge/me",
+    CONVERSATIONS: "/intelligence/conversations",
+    CONVERSATION: (conversationId: string) =>
+      `/intelligence/conversations/${encodeURIComponent(conversationId)}`,
+    CONVERSATION_LATEST: "/intelligence/conversations/latest",
+    CONVERSATION_MESSAGES: (conversationId: string) =>
+      `/intelligence/conversations/${encodeURIComponent(conversationId)}/messages`,
     CONSENT: "/intelligence/preferences/consent",
     ROLES: "/intelligence/admin/roles",
     ROLE: (userId: string) =>

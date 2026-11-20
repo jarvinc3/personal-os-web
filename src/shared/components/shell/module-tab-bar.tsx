@@ -1,12 +1,15 @@
 "use client"
 
 import { useModuleFabRegistration } from "@/src/shared/components/fab/module-fab-context"
+import { useAgentChatLauncher } from "@/src/shared/components/agent-chat/agent-chat-launcher"
 import { LinkPendingOverlay } from "@/src/shared/components/shell/navigation-pending"
 import { isModuleSectionActive } from "@/src/shared/lib/module-nav-active"
+import { ProgressRing } from "@/src/shared/components/ui/progress-ring"
+import { useHoldProgress } from "@/src/shared/hooks/use-hold-progress"
 import { cn } from "@/src/shared/lib/utils"
 import type { ModuleNavItem } from "@/src/shared/types/module-nav"
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion"
-import { Plus } from "lucide-react"
+import { Plus, SparklesIcon } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useEffect, useState } from "react"
@@ -72,6 +75,17 @@ export function ModuleTabBar({
   const reduceMotion = useReducedMotion() === true
   const registration = useModuleFabRegistration()
   const [menuOpenPath, setMenuOpenPath] = useState<string | null>(null)
+  const agentChat = useAgentChatLauncher()
+  const longPress = useHoldProgress({
+    disabled: !agentChat.available,
+    onLongPress: () => {
+      if (!agentChat.available) {
+        return
+      }
+      setMenuOpenPath(null)
+      agentChat.launch()
+    },
+  })
 
   const actions = registration?.actions ?? []
   const hasMenu = actions.length > 0
@@ -255,13 +269,27 @@ export function ModuleTabBar({
               type="button"
               aria-expanded={menuOpen}
               aria-label={menuOpen ? "Cerrar acciones" : registration?.label}
-              onClick={() =>
+              onClick={() => {
+                if (longPress.consumeSuppressedClick()) {
+                  return
+                }
                 setMenuOpenPath((current) =>
                   current === pathname ? null : pathname
                 )
-              }
-              className="flex size-12 shrink-0 items-center justify-center rounded-full bg-background text-foreground shadow-lg ring-1 ring-border"
+              }}
+              {...longPress.handlers}
+              className="relative flex size-12 shrink-0 touch-none items-center justify-center rounded-full bg-background text-foreground shadow-lg ring-1 ring-border select-none"
             >
+              {longPress.progress > 0 ? (
+                <ProgressRing
+                  value={longPress.progress}
+                  size={48}
+                  thickness={2}
+                  arcClassName="stroke-primary"
+                  trackClassName="stroke-transparent"
+                  className="pointer-events-none absolute inset-0"
+                />
+              ) : null}
               <motion.span
                 className="flex items-center justify-center"
                 initial={false}
@@ -270,6 +298,15 @@ export function ModuleTabBar({
               >
                 <Plus className="size-5" />
               </motion.span>
+            </button>
+          ) : agentChat.available ? (
+            <button
+              type="button"
+              aria-label="Abrir el agente"
+              onClick={() => agentChat.launch()}
+              className="flex size-12 shrink-0 items-center justify-center rounded-full bg-background text-foreground shadow-lg ring-1 ring-border"
+            >
+              <SparklesIcon className="size-5" aria-hidden />
             </button>
           ) : null}
         </div>

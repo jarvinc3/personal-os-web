@@ -88,12 +88,12 @@ Usos `secondary`: detalle institución/cash, categorías, Correos, inbox de noti
 
 ## Layouts
 
-| Módulo               | Layout                                   | Tab bar       |
-| -------------------- | ---------------------------------------- | ------------- |
-| Finance              | `FinanceLayout` → `ModuleSectionLayout`  | sí (filtrado) |
-| Keep Awake           | `KeepAwakeLayout` (max-width, padding)   | no            |
-| Home / Settings      | padding local en la página               | no            |
-| Chat / Notifications | página propia; notifications `secondary` | no            |
+| Módulo               | Layout                                            | Tab bar       |
+| -------------------- | ------------------------------------------------- | ------------- |
+| Finance              | `FinanceLayout` → `ModuleSectionLayout`           | sí (filtrado) |
+| Keep Awake           | `KeepAwakeLayout` (max-width, padding)            | no            |
+| Home / Settings      | padding local en la página                        | no            |
+| Chat / Notifications | chat en overlay global; notifications `secondary` | no            |
 
 `KeepAwakeProvider` está en `app/(app)/layout.tsx`: el lock **sobrevive** la navegación entre módulos autenticados.
 

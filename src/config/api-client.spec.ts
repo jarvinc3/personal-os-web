@@ -167,3 +167,54 @@ describe("api client idempotency key", () => {
     assert.equal(calls.length, 1)
   })
 })
+
+describe("apiPostEventStream", () => {
+  it("sends the body as a POST and returns the raw stream", async () => {
+    const encoder = new TextEncoder()
+    const stream = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(encoder.encode("event: chunk"))
+        controller.close()
+      },
+    })
+    const { client, calls } = createClient([
+      new Response(stream, {
+        status: 200,
+        headers: { "Content-Type": "text/event-stream" },
+      }),
+    ])
+
+    const body = await client.apiPostEventStream(
+      "/intelligence/conversations/c-1/messages",
+      { content: "hola", stream: true }
+    )
+
+    assert.equal(await new Response(body).text(), "event: chunk")
+    assert.equal(calls.length, 1)
+    assert.equal(calls[0].init?.method, "POST")
+    assert.equal(
+      calls[0].init?.body,
+      JSON.stringify({ content: "hola", stream: true })
+    )
+    const headers = new Headers(calls[0].init?.headers)
+    assert.equal(headers.get("Accept"), "text/event-stream")
+    assert.equal(headers.get("Idempotency-Key"), null)
+  })
+
+  it("maps a non-2xx response to ApiError", async () => {
+    const { client } = createClient([
+      jsonResponse(
+        { message: "El clientMessageId ya se usó", code: "CONFLICT" },
+        409
+      ),
+    ])
+
+    await assert.rejects(
+      client.apiPostEventStream("/intelligence/conversations/c-1/messages", {}),
+      (error: unknown) =>
+        error instanceof Error &&
+        error.name === "ApiError" &&
+        (error as { status: number }).status === 409
+    )
+  })
+})
