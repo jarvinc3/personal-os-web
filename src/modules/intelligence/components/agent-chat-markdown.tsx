@@ -1,6 +1,7 @@
 "use client"
 
 import { cn } from "@/src/shared/lib/utils"
+import { resolveChatLinkTarget } from "@/src/modules/intelligence/lib/chat-link-target"
 import { LinkPendingOverlay } from "@/src/shared/components/shell/navigation-pending"
 import Link from "next/link"
 import type { ReactNode } from "react"
@@ -101,13 +102,16 @@ function renderInline(text: string, keyPrefix: string): ReactNode[] {
     const link = part.match(/^\[([^\]]+)\]\(([^)]+)\)$/)
     if (link) {
       const label = link[1]
-      const url = link[2]
+      const target = resolveChatLinkTarget(link[2])
       const linkClass = "font-medium underline underline-offset-2 break-words"
-      if (url.startsWith("/")) {
+      if (target.kind === "text") {
+        return <span key={`${keyPrefix}-${partIndex}`}>{label}</span>
+      }
+      if (target.kind === "app") {
         return (
           <Link
             key={`${keyPrefix}-${partIndex}`}
-            href={url}
+            href={target.href}
             className={cn(linkClass, "relative")}
           >
             {label}
@@ -118,9 +122,9 @@ function renderInline(text: string, keyPrefix: string): ReactNode[] {
       return (
         <a
           key={`${keyPrefix}-${partIndex}`}
-          href={url}
-          target="_blank"
-          rel="noreferrer"
+          href={target.href}
+          target={target.kind === "external" ? "_blank" : undefined}
+          rel={target.kind === "external" ? "noreferrer" : undefined}
           className={linkClass}
         >
           {label}
