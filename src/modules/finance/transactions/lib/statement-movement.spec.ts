@@ -45,6 +45,36 @@ describe("fromStatementLine", () => {
     assert.equal(row.type, "DEBIT")
   })
 
+  it("falls back to the movement amount when the ledger fields are empty", () => {
+    const row = fromStatementLine({
+      ...line,
+      ledgerAmount: "",
+      ledgerCurrency: "",
+    })
+
+    assert.equal(row.amount, "1200.00")
+    assert.equal(row.currency, "USD")
+  })
+
+  it("falls back to the movement amount when the ledger currency is missing", () => {
+    const row = fromStatementLine({ ...line, ledgerCurrency: "" })
+
+    assert.equal(row.amount, "1200.00")
+    assert.equal(row.currency, "USD")
+  })
+
+  it("leaves the amount empty when neither source is readable", () => {
+    const row = fromStatementLine({
+      ...line,
+      amount: "",
+      currency: "",
+      ledgerAmount: "",
+      ledgerCurrency: "",
+    })
+
+    assert.equal(row.amount, null)
+  })
+
   it("uses the description when the line has no merchant", () => {
     const row = fromStatementLine({ ...line, merchant: null })
 
