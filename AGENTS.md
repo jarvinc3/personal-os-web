@@ -152,7 +152,7 @@ Sentry corre en cliente, servidor y edge (`instrumentation*.ts`, `sentry.*.confi
 - [ ] `agenda` / `projects` / `health` solo tienen sheets en Settings hasta que existan rutas en `app/`.
 - [ ] Keep Awake es client-only: no inventar endpoints.
 - [ ] Si tocaste UI, leíste [`.cursor/rules/`](.cursor/rules) y cumples cada regla.
-- [ ] Si cambiaste código, leíste [CODING_GUIDELINES.md](CODING_GUIDELINES.md).
+- [ ] Si cambiaste código, leíste [CODING_GUIDELINES.md](CODING_GUIDELINES.md) y el cambio cumple sus límites, su tipado, sus reglas de componentes y sus reglas de accesibilidad.
 - [ ] Si el cambio coincide con un disparador de Skills, leíste ese `SKILL.md`.
 - [ ] Si el runtime contradice el doc, abre un issue con el detalle.
 - [ ] Correr los cuatro comandos de pruebas obligatorias; un test en rojo bloquea el cierre.
