@@ -21,6 +21,8 @@ export type ModuleFabAction = {
 export type ModuleFabRegistration = {
   label: string
   actions: ModuleFabAction[]
+  /** El botón vive en móvil y el contenido debe dejarle espacio abajo. */
+  mobileVisible?: boolean
 }
 
 type Listener = () => void
@@ -84,10 +86,6 @@ function getNothing() {
   return null
 }
 
-function getNoFab() {
-  return false
-}
-
 export function useModuleFabRegistration() {
   const context = useContext(ModuleFabContext)
   return useSyncExternalStore(
@@ -99,17 +97,6 @@ export function useModuleFabRegistration() {
 
 export function useModuleTabBarVisible() {
   return useContext(ModuleFabContext)?.tabBarVisible ?? false
-}
-
-/** Si la vista registró un botón flotante, para reservarle su carril. */
-export function useHasModuleFab(): boolean {
-  const context = useContext(ModuleFabContext)
-
-  return useSyncExternalStore(
-    context?.store.subscribe ?? subscribeNothing,
-    () => context?.store.get() !== null,
-    getNoFab
-  )
 }
 
 export function useRegisterModuleFab(registration: ModuleFabRegistration) {

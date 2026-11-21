@@ -2,7 +2,7 @@
 
 import {
   ModuleFabProvider,
-  useHasModuleFab,
+  useModuleFabRegistration,
 } from "@/src/shared/components/fab/module-fab-context"
 import { ModuleTabBar } from "@/src/shared/components/shell/module-tab-bar"
 import { useHeaderContext } from "@/src/shared/context/header-context"
@@ -53,16 +53,22 @@ function ModuleSectionContent({
   onItemPrefetch,
   hideTabBar,
 }: ModuleSectionContentProps) {
-  // El botón flotante vive en la esquina inferior derecha de escritorio: sin su
-  // carril tapa badges y contadores de las filas que pasan por debajo.
-  const hasFab = useHasModuleFab()
+  // El botón flotante vive en la esquina inferior derecha: sin su carril tapa
+  // badges y contadores de las filas que pasan por debajo.
+  const fab = useModuleFabRegistration()
+  const hasFab = fab !== null
+  const needsMobileFabSpace = !hideTabBar && fab?.mobileVisible === true
 
   return (
     <div
       className={cn(
         "mx-auto flex w-full max-w-5xl flex-col gap-6 p-4 md:pb-16",
         hasFab ? "md:pr-20 md:pl-6" : "md:px-6",
-        hideTabBar ? "pb-4" : "pb-[calc(6rem+env(safe-area-inset-bottom))]"
+        hideTabBar
+          ? "pb-4"
+          : needsMobileFabSpace
+            ? "pb-[calc(9rem+env(safe-area-inset-bottom))]"
+            : "pb-[calc(6rem+env(safe-area-inset-bottom))]"
       )}
     >
       {children}
