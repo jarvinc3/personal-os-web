@@ -55,7 +55,6 @@ import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import { SelectField } from "@/src/shared/components/forms/select-field"
 import {
   ALL_MESSAGE_STATUSES,
-  filterLoadedMessages,
   MESSAGE_STATUS_LABELS,
   type MessageStatusFilter,
 } from "@/src/modules/intelligence/message-filters"
@@ -121,6 +120,9 @@ export function IntelligenceScreen() {
 function IntelligenceScreenBody() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const [messageQuery, setMessageQuery] = useState("")
+  const [messageStatus, setMessageStatus] =
+    useState<MessageStatusFilter>(ALL_MESSAGE_STATUSES)
   const {
     dashboardQuery,
     oauthDiagnosticsQuery,
@@ -132,11 +134,10 @@ function IntelligenceScreenBody() {
     syncMutation,
     resetMutation,
     emailSocketStatus,
-  } = useIntelligence()
+  } = useIntelligence({
+    messageFilter: { query: messageQuery, status: messageStatus },
+  })
   const [resetDialogOpen, setResetDialogOpen] = useState(false)
-  const [messageQuery, setMessageQuery] = useState("")
-  const [messageStatus, setMessageStatus] =
-    useState<MessageStatusFilter>(ALL_MESSAGE_STATUSES)
   const tabsBehavior = useTabsBehavior({
     defaultValue: "messages",
     persistKey: "intelligence-view",
@@ -169,11 +170,6 @@ function IntelligenceScreenBody() {
     () => messagesQuery.data?.pages.flatMap((page) => page.items) ?? [],
     [messagesQuery.data?.pages]
   )
-  const visibleMessages = filterLoadedMessages({
-    messages,
-    query: messageQuery,
-    status: messageStatus,
-  })
   const messageFiltersActive =
     messageQuery.trim().length > 0 || messageStatus !== ALL_MESSAGE_STATUSES
   const reviewRequiredCount = messages.filter(
@@ -722,16 +718,14 @@ function IntelligenceScreenBody() {
                 <div className="flex flex-col gap-2">
                   <p className="px-1 text-xs text-muted-foreground">
                     {messages.length}{" "}
-                    {messages.length === 1
-                      ? "correo cargado"
-                      : "correos cargados"}{" "}
-                    · {reviewRequiredCount} en revisión entre los cargados
+                    {messages.length === 1 ? "correo" : "correos"} ·{" "}
+                    {reviewRequiredCount} en revisión
                   </p>
                   <FormTextField
                     value={messageQuery}
                     onChange={setMessageQuery}
                     placeholder="Buscar por asunto o remitente"
-                    ariaLabel="Buscar correos cargados"
+                    ariaLabel="Buscar correos"
                     icon={Search}
                     maxLength={120}
                   />
@@ -759,12 +753,11 @@ function IntelligenceScreenBody() {
                   />
                   {messageFiltersActive ? (
                     <p className="px-1 text-xs leading-relaxed text-muted-foreground">
-                      Se filtra entre los correos ya cargados. Carga más correos
-                      para ampliar la búsqueda.
+                      La búsqueda cubre todos los correos, no solo los cargados.
                     </p>
                   ) : null}
                 </div>
-                {messageFiltersActive && visibleMessages.length === 0 ? (
+                {messageFiltersActive && messages.length === 0 ? (
                   <Empty>
                     <EmptyHeader>
                       <EmptyMedia variant="icon">
@@ -787,7 +780,7 @@ function IntelligenceScreenBody() {
                     </Button>
                   </Empty>
                 ) : null}
-                {visibleMessages.map((message) => (
+                {messages.map((message) => (
                   <SummaryItem
                     key={message.id}
                     title={message.subject}
@@ -799,34 +792,32 @@ function IntelligenceScreenBody() {
                   />
                 ))}
                 <InfiniteListSentinel
-                  hasNextPage={
-                    Boolean(hasNextPage) &&
-                    !messagesQuery.error &&
-                    !messageFiltersActive
-                  }
+                  hasNextPage={Boolean(hasNextPage) && !messagesQuery.error}
                   isFetchingNextPage={isFetchingNextPage}
                   onLoadMore={loadMore}
                 />
-                {messageFiltersActive && hasNextPage ? (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="w-full"
-                    onClick={loadMore}
-                    disabled={isFetchingNextPage}
-                  >
-                    {isFetchingNextPage ? (
-                      <LoaderCircle
-                        className="animate-spin"
-                        aria-hidden="true"
-                      />
-                    ) : (
-                      <RefreshCw aria-hidden="true" />
-                    )}
-                    {isFetchingNextPage
-                      ? "Cargando correos..."
-                      : "Cargar más correos"}
-                  </Button>
+                {messagesQuery.isError && messages.length > 0 ? (
+                  <Alert variant="default" role="status">
+                    <AlertCircle
+                      className="size-4 shrink-0"
+                      aria-hidden="true"
+                    />
+                    <AlertTitle>No se pudieron cargar más correos</AlertTitle>
+                    <AlertDescription>
+                      La lista conserva los correos que ya tenías.
+                    </AlertDescription>
+                    <AlertAction>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => void loadNextMessagesPage()}
+                        disabled={isFetchingNextPage}
+                      >
+                        <RefreshCw aria-hidden="true" /> Reintentar
+                      </Button>
+                    </AlertAction>
+                  </Alert>
                 ) : null}
               </>
             )}
