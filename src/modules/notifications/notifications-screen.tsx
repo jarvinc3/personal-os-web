@@ -7,6 +7,7 @@ import { NotificationFilters } from "@/src/modules/notifications/components/noti
 import { NotificationGroupList } from "@/src/modules/notifications/components/notification-group-list"
 import { NotificationHeaderMenu } from "@/src/modules/notifications/components/notification-header-menu"
 import { NotificationListSkeleton } from "@/src/modules/notifications/components/notification-list-skeleton"
+import { NotificationLoadMore } from "@/src/modules/notifications/components/notification-load-more"
 import { NotificationPreferencesSheet } from "@/src/modules/notifications/components/notification-preferences-sheet"
 import {
   useMarkAllNotificationsRead,
@@ -22,7 +23,6 @@ import type {
 } from "@/src/modules/notifications/types/notification.types"
 import { useProfile, type ModuleSlug } from "@/src/modules/settings"
 import { Button } from "@/src/shared/components/ui/button"
-import { Spinner } from "@/src/shared/components/ui/spinner"
 import {
   MODULE_SLUGS_ORDER,
   getModule,
@@ -33,7 +33,7 @@ import { usePicker } from "@/src/shared/hooks/use-picker"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { SettingsIcon } from "lucide-react"
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 import { useFormatLocale } from "@/src/modules/settings/hooks/use-format-locale"
 
 export function NotificationsScreen() {
@@ -85,23 +85,6 @@ function NotificationsScreenBody() {
     () => notificationsQuery.data?.pages.flatMap((page) => page.items) ?? [],
     [notificationsQuery.data?.pages]
   )
-
-  const loadMoreRef = useRef<HTMLDivElement | null>(null)
-  const fetchNextPage = notificationsQuery.fetchNextPage
-  const hasNextPage = notificationsQuery.hasNextPage
-  useEffect(() => {
-    const sentinel = loadMoreRef.current
-    if (!sentinel || !hasNextPage) {
-      return
-    }
-    const observer = new IntersectionObserver((entries) => {
-      if (entries.some((entry) => entry.isIntersecting)) {
-        void fetchNextPage()
-      }
-    })
-    observer.observe(sentinel)
-    return () => observer.disconnect()
-  }, [fetchNextPage, hasNextPage])
 
   const moduleOptions = useMemo(() => {
     const present = new Set<ModuleSlug>()
@@ -275,16 +258,12 @@ function NotificationsScreenBody() {
         />
       )}
 
-      {hasNextPage || notificationsQuery.isFetchingNextPage ? (
-        <div
-          ref={loadMoreRef}
-          className="flex h-10 items-center justify-center"
-        >
-          {notificationsQuery.isFetchingNextPage ? (
-            <Spinner className="size-4" />
-          ) : null}
-        </div>
-      ) : null}
+      <NotificationLoadMore
+        hasNextPage={notificationsQuery.hasNextPage}
+        isFetchingNextPage={notificationsQuery.isFetchingNextPage}
+        hasError={Boolean(notificationsQuery.error)}
+        onLoadMore={() => void notificationsQuery.fetchNextPage()}
+      />
 
       {preferencesSheet}
     </div>
