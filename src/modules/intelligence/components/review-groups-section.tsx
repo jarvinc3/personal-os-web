@@ -20,6 +20,7 @@ import type {
 } from "@/src/modules/intelligence/types/intelligence.types"
 import { SummaryItem } from "@/src/shared/components/data-display/summary"
 import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
+import { InfiniteListErrorFooter } from "@/src/shared/components/feedback/infinite-list-error-footer"
 import { Badge } from "@/src/shared/components/ui/badge"
 import { Button } from "@/src/shared/components/ui/button"
 import {
@@ -32,6 +33,7 @@ import {
 import { Skeleton } from "@/src/shared/components/ui/skeleton"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { appToast } from "@/src/shared/lib/app-toast"
+import { resolveInfiniteListErrorState } from "@/src/shared/lib/infinite-list-error"
 import {
   AlertCircle,
   Layers3,
@@ -67,6 +69,10 @@ export function ReviewGroupsSection({
     [groupsQuery.data?.pages]
   )
   const { fetchNextPage, hasNextPage, isFetchingNextPage } = groupsQuery
+  const groupsErrorState = resolveInfiniteListErrorState({
+    hasError: groupsQuery.isError,
+    itemCount: groups.length,
+  })
   const selectedGroup =
     groups.find((group) => reviewGroupKey(group) === sheetId) ?? null
   const sectionState = resolveReviewGroupsSectionState({
@@ -198,11 +204,19 @@ export function ReviewGroupsSection({
               onOpenMessage={onOpenMessage}
             />
           ))}
-          <InfiniteListSentinel
-            hasNextPage={Boolean(hasNextPage)}
-            isFetchingNextPage={isFetchingNextPage}
-            onLoadMore={loadMore}
-          />
+          {groupsErrorState === "inline" ? (
+            <InfiniteListErrorFooter
+              title="No se pudieron cargar más grupos"
+              isRetrying={isFetchingNextPage}
+              onRetry={loadMore}
+            />
+          ) : (
+            <InfiniteListSentinel
+              hasNextPage={Boolean(hasNextPage)}
+              isFetchingNextPage={isFetchingNextPage}
+              onLoadMore={loadMore}
+            />
+          )}
         </>
       )}
 

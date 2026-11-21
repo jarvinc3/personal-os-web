@@ -167,7 +167,7 @@ export function resolveReviewGroupsSectionState({
   if (isPending) {
     return "loading"
   }
-  if (isError) {
+  if (isError && groupCount === 0) {
     return "error"
   }
   return groupCount === 0 ? "empty" : "ready"
