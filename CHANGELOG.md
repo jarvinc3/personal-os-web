@@ -50,8 +50,6 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Cambiado
 
-- jarvinc3/personal-os-back#470: el CI comprueba la deriva del contrato OpenAPI en cada PR y en `develop`. El job `contract` clona `personal-os-back` con el secreto de solo lectura `BACK_REPO_TOKEN`, lee su `swagger-spec.json` y falla si `openapi/swagger-spec.json` no coincide, indicando qué ruta, operación o esquema cambió y cómo regenerarlo; sin el secreto, el job falla con un mensaje que lo nombra. No compara `info` porque cambia con cada release y no describe lo que el cliente envía.
-- #521: `CODING_GUIDELINES.md` suma tipado estricto, uniones y `switch` exhaustivo, límites medibles, async, nombres y pruebas, más reglas de componentes (tamaño, props tipadas, uno por archivo), de rendimiento (memo, listas largas, carga diferida) y de accesibilidad (etiquetas y foco al abrir y cerrar sheets), con ejemplos de React y Next de este repo. Las reglas que se pueden detectar entran en `eslint.config.mjs` como `warn`, y los tipos que necesitan se resuelven con `tsconfig.eslint.json`, así que el lint sigue en verde. `AGENTS.md` refuerza la comprobación de la guía en su checklist.
 - #493: el flujo de trabajo versiona `scripts/project3.ps1` y la regla «Project 3 siempre al día»; los issues nuevos entran al tablero al crearse y `check` exige `Cancelado` para los cerrados como `not planned`, con el id de esa opción resuelto por nombre.
 - El setup de pruebas de #450 resuelve pantallas con `next/*` y relativos sin extensión, stubea los `.css`, mapea la cobertura con source maps y exige el reintento en el estado de error de Uso (Refs #450; hallazgos de PI-REV).
 - Las pruebas de la web pueden renderizar componentes `.tsx` con `react-dom/server` y el loader de TSX; la vista Uso cubre sus estados de carga, vacío y error con pruebas que afirman los textos y el botón de reintento (#450).
@@ -112,6 +110,10 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Corregido
 
+- #519: el hero de una tarjeta de crédito sobregirada muestra la deuda con su etiqueta, no el disponible negativo; una tarjeta con límite disponible sigue mostrando «Disponible» y una de débito, «Saldo».
+- #520: la pestaña Correos de Inteligencia muestra el total de correos en revisión que devuelve la cola, no solo los de la página cargada; mientras el total no está disponible, el texto no lo presenta como cero.
+- #511: los totales de Ingresos y Egresos del mes en el detalle de una cuenta incluyen los movimientos de sus tarjetas de débito, igual que la lista de la pantalla, y el hero aclara que no cuentan las transferencias.
+- #510: las filas de «Movimientos del ciclo» de un estado de cuenta muestran el monto cuando el API no trae el importe del ledger pero sí el original, y si no hay ninguno muestran una raya sin el signo suelto.
 - #498: las listas de Notificaciones, Papelera, la cola de revisión y los grupos de revisión conservan las filas cargadas cuando falla la siguiente tanda o un refresco en segundo plano; el fallo se avisa al pie con reintento (`InfiniteListErrorFooter`) y solo sin filas se cambia la lista por el estado de error completo.
 - #509: la cabecera de una hoja reserva el ancho de sus acciones y de la ayuda del glosario, así el título y el subtítulo ya no quedan debajo de los botones en móvil ni en el panel lateral. El subtítulo usa el espacio libre y parte en varias líneas cuando hace falta.
 - #507: el historial de conversaciones del agente solo se abre cuando se pide; el chat ya no queda cubierto por una hoja vacía al abrirlo desde una institución, un movimiento o Suscripciones.

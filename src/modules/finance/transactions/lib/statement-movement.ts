@@ -3,12 +3,14 @@ import type {
   FinanceStatementImportExtra,
   FinanceTransactionType,
 } from "@/src/modules/finance/shared/types/entities"
+import { parseFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 
 /** Data the statement row paints; a bank line is not an entity of the app. */
 export type StatementMovementRowModel = {
   title: string
   date: string
-  amount: string
+  /** Null when neither the ledger nor the original amount can be read. */
+  amount: string | null
   currency: string
   type: FinanceTransactionType
 }
@@ -35,15 +37,50 @@ function statementTitle(movement: {
   return movement.merchant ?? movement.description ?? "Movimiento"
 }
 
+type StatementMoney = {
+  amount: string | null
+  currency: string
+}
+
+function readableMoney(
+  amount: string | null | undefined,
+  currency: string | null | undefined
+): StatementMoney | null {
+  if (amount === null || amount === undefined) {
+    return null
+  }
+  if (parseFinanceMoney(amount) === null || !currency?.trim()) {
+    return null
+  }
+  return { amount, currency }
+}
+
+/**
+ * The ledger amount is the one the card owes; a line without it still shows its
+ * original amount instead of a stray sign over a dash.
+ */
+function statementRowMoney(
+  movement: FinanceCardStatementMovement
+): StatementMoney {
+  return (
+    readableMoney(movement.ledgerAmount, movement.ledgerCurrency) ??
+    readableMoney(movement.amount, movement.currency) ?? {
+      amount: null,
+      currency: movement.currency,
+    }
+  )
+}
+
 /** One line of a card statement as the canonical movement row (#284). */
 export function fromStatementLine(
   movement: FinanceCardStatementMovement
 ): StatementMovementRowModel {
+  const money = statementRowMoney(movement)
   return {
     title: statementTitle(movement),
     date: movement.transactionDate,
-    amount: movement.ledgerAmount,
-    currency: movement.ledgerCurrency,
+    amount: money.amount,
+    currency: money.currency,
     type: statementType(movement.type),
   }
 }
