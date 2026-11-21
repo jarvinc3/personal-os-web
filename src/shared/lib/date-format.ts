@@ -248,9 +248,8 @@ export function normalizeTimeToApi(input: string): string | null {
 }
 
 /**
- * Fecha y hora completas (sesiones, historial). El locale es opcional solo para
- * quien todavía no lo pasa (Intelligence, #317/#318); el resto de pantallas
- * pasa el del perfil.
+ * Fecha y hora completas (sesiones, historial). Las pantallas pasan el locale
+ * del perfil; el valor por defecto queda para llamadas internas y pruebas.
  */
 export function formatDateTime(
   iso: string,
@@ -264,8 +263,8 @@ export function formatDateTime(
 }
 
 /**
- * Solo fecha corta: `4 oct 2026`. El locale es opcional solo para quien todavía
- * no lo pasa (Intelligence, #317/#318); el resto de pantallas pasa el del perfil.
+ * Solo fecha corta: `4 oct 2026`. Las pantallas pasan el locale del perfil; el
+ * valor por defecto queda para llamadas internas y pruebas.
  */
 export function formatDate(
   iso: string,

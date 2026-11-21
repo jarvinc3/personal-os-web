@@ -296,7 +296,7 @@ function IntelligenceScreenBody() {
     progress: syncProgress,
   })
   const attemptedAt = syncFailure?.occurredAt
-    ? formatDateTime(syncFailure.occurredAt)
+    ? formatDateTime(syncFailure.occurredAt, formatLocale)
     : null
   const failureCopy = syncFailure
     ? describeSyncFailure({
@@ -307,7 +307,10 @@ function IntelligenceScreenBody() {
     : null
 
   const nextRunLabel = syncProgress?.nextRunAt
-    ? formatDateTime(new Date(syncProgress.nextRunAt).toISOString())
+    ? formatDateTime(
+        new Date(syncProgress.nextRunAt).toISOString(),
+        formatLocale
+      )
     : null
   const gmailStatus = resolveGmailStatus({
     connected,
@@ -318,7 +321,7 @@ function IntelligenceScreenBody() {
     initialSyncCompletedAt: connection.initialSyncCompletedAt ?? null,
     syncInProgress: Boolean(connection.syncInProgress),
     lastSyncedAtLabel: connection.lastSyncedAt
-      ? formatDateTime(connection.lastSyncedAt)
+      ? formatDateTime(connection.lastSyncedAt, formatLocale)
       : null,
     nextRunLabel,
   })
@@ -476,14 +479,14 @@ function IntelligenceScreenBody() {
               <Badge variant="outline">
                 Primer correo ·{" "}
                 {receivedRange?.firstMessageAt
-                  ? formatDate(receivedRange.firstMessageAt)
+                  ? formatDate(receivedRange.firstMessageAt, formatLocale)
                   : "Sin dato"}
               </Badge>
 
               <Badge variant="outline">
                 Más reciente ·{" "}
                 {receivedRange?.latestMessageAt
-                  ? formatDate(receivedRange.latestMessageAt)
+                  ? formatDate(receivedRange.latestMessageAt, formatLocale)
                   : "Sin dato"}
               </Badge>
 
@@ -782,7 +785,7 @@ function IntelligenceScreenBody() {
                     key={message.id}
                     title={message.subject}
                     wrapTitle
-                    description={`${message.fromAddress} · ${formatDateTime(message.receivedAt)}`}
+                    description={`${message.fromAddress} · ${formatDateTime(message.receivedAt, formatLocale)}`}
                     icon={Mail}
                     onPress={() => setMessageSheetOpen(true, message.id)}
                     showChevron
@@ -993,6 +996,7 @@ function IntelligenceMessageDetail({
 }) {
   const { data, isPending, isError, refetch } =
     useIntelligenceMessage(messageId)
+  const formatLocale = useFormatLocale()
   const classificationObservations =
     data?.provenance.observations.filter(
       (item) => item.knowledgeType === "EMAIL_CLASSIFICATION"
@@ -1010,7 +1014,7 @@ function IntelligenceMessageDetail({
       title={data?.subject ?? "Detalle del mensaje"}
       description={
         data
-          ? `${data.fromAddress} · ${formatDateTime(data.receivedAt)} · #${shortMessageId(data.id)}`
+          ? `${data.fromAddress} · ${formatDateTime(data.receivedAt, formatLocale)} · #${shortMessageId(data.id)}`
           : undefined
       }
       actions={{
@@ -1066,7 +1070,7 @@ function IntelligenceMessageDetail({
               title="Revisión de una persona"
               description={
                 lastVerification
-                  ? `${verificationVerdictLabel(lastVerification.verdict)} por ${verifierActorLabel(lastVerification.verifierRole)} · ${formatDateTime(lastVerification.createdAt)}`
+                  ? `${verificationVerdictLabel(lastVerification.verdict)} por ${verifierActorLabel(lastVerification.verifierRole)} · ${formatDateTime(lastVerification.createdAt, formatLocale)}`
                   : "Todavía sin revisión de una persona."
               }
               icon={CheckCircle2}
