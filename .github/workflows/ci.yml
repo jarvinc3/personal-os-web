@@ -100,7 +100,9 @@ jobs:
   # el nombre viejo y el API responde 400 (pasó con personal-os-back#436).
   contract:
     runs-on: [self-hosted, personal-os]
-    timeout-minutes: 10
+    # El runner es una sola PC y comparte turno con otros jobs: 10 minutos
+    # cancelaban el job en los pasos de cierre cuando la máquina iba cargada.
+    timeout-minutes: 20
     defaults:
       run:
         shell: pwsh
