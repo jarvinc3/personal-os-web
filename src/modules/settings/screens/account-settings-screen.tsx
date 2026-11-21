@@ -4,6 +4,7 @@ import { useAuth, useAuthGuard } from "@/src/modules/auth"
 import { SettingsSecondaryPage } from "@/src/modules/settings/components/layout/settings-secondary-page"
 import { EditAccountSheet } from "@/src/modules/settings/components/sheets/edit-account-sheet"
 import { SETTINGS_REGISTRY } from "@/src/modules/settings/constants/settings-metadata"
+import { SETTINGS_SHEET_KEYS } from "@/src/modules/settings/constants/sheet-keys"
 import { useProfile } from "@/src/modules/settings/hooks/use-profile"
 import { SettingsGate } from "@/src/modules/settings/settings-gate"
 import {
@@ -35,7 +36,7 @@ function AccountSettingsScreenBody() {
   const displayName = profile?.fullName ?? user?.fullName ?? "Usuario"
   const displayEmail = profile?.email ?? user?.email ?? ""
   const { open: openAccountSheet, setOpen: setOpenAccountSheet } =
-    useSheetParam("account-sheet")
+    useSheetParam(SETTINGS_SHEET_KEYS.account)
 
   return (
     <SettingsSecondaryPage title="Perfil y cuenta">

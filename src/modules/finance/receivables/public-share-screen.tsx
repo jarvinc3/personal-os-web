@@ -7,7 +7,6 @@ import {
   publicShareCountCaption,
   publicShareCurrencyRows,
   publicSharePendingTotals,
-  type PublicReceivableShareItem,
 } from "@/src/modules/finance/receivables/lib/public-receivable-share"
 import { formatSharePendingTotals } from "@/src/modules/finance/receivables/lib/receivable-share"
 import { ReceivableCard } from "@/src/modules/finance/receivables/components/receivable-card"
@@ -16,6 +15,7 @@ import { FinanceProgressHero } from "@/src/modules/finance/shared/components/lay
 import { SettingsSection } from "@/src/shared/components/settings/settings-section"
 import { financeLoadErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import { DEFAULT_LOCALE } from "@/src/modules/settings/lib/locale-options"
+import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import { usePublicReceivableShare } from "@/src/modules/finance/shared/hooks/use-receivable-shares"
 import { AppLogo } from "@/src/shared/components/shell/app-logo"
 import { LoadingView } from "@/src/shared/components/feedback/loading-view"
@@ -31,7 +31,6 @@ import {
   accentSurfaceGradient,
 } from "@/src/shared/lib/accent-gradient"
 import { HandshakeIcon, LinkIcon } from "lucide-react"
-import { useState } from "react"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 
 /**
@@ -54,7 +53,7 @@ export function PublicReceivableShareScreen({
 }: PublicReceivableShareScreenProps) {
   const shareQuery = usePublicReceivableShare(token)
   // El cobro elegido va en `sheetId` (su `ref`), así recargar reabre el mismo.
-  const itemSheet = useSheetParam("public-receivable-detail-sheet")
+  const itemSheet = useSheetParam(FINANCE_SHEET_KEYS.publicReceivableDetail)
 
   const share = shareQuery.data
 

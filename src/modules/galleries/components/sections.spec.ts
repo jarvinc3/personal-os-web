@@ -111,13 +111,13 @@ test("las fichas declaradas son las que pinta cada sección", () => {
   }
 })
 
-test("las fichas de las once secciones suman 45", () => {
+test("las fichas de las once secciones suman 47", () => {
   assert.equal(
     COMPONENT_GALLERY_SECTIONS.reduce(
       (total, section) => total + section.demos.length,
       0
     ),
-    45
+    47
   )
 })
 

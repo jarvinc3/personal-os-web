@@ -5,6 +5,7 @@ import { EditLocaleSheet } from "@/src/modules/settings/components/sheets/edit-l
 import { EditTimeZoneSheet } from "@/src/modules/settings/components/sheets/edit-time-zone-sheet"
 import { EditWeekStartSheet } from "@/src/modules/settings/components/sheets/edit-week-start-sheet"
 import { SETTINGS_REGISTRY } from "@/src/modules/settings/constants/settings-metadata"
+import { SETTINGS_SHEET_KEYS } from "@/src/modules/settings/constants/sheet-keys"
 import { useProfile } from "@/src/modules/settings/hooks/use-profile"
 import { useUserModuleConfig } from "@/src/modules/settings/hooks/use-user-module-config"
 import { useWeekStartsOn } from "@/src/modules/settings/hooks/use-week-starts-on"
@@ -38,11 +39,12 @@ function RegionalSettingsScreenBody() {
   const { config } = useUserModuleConfig("finance")
   const { navigate, isPending } = usePendingNavigation()
   const { open: openTimeZoneSheet, setOpen: setOpenTimeZoneSheet } =
-    useSheetParam("time-zone-sheet")
-  const { open: openLocaleSheet, setOpen: setOpenLocaleSheet } =
-    useSheetParam("locale-sheet")
+    useSheetParam(SETTINGS_SHEET_KEYS.timeZone)
+  const { open: openLocaleSheet, setOpen: setOpenLocaleSheet } = useSheetParam(
+    SETTINGS_SHEET_KEYS.locale
+  )
   const { open: openWeekStartSheet, setOpen: setOpenWeekStartSheet } =
-    useSheetParam("week-start-sheet")
+    useSheetParam(SETTINGS_SHEET_KEYS.weekStart)
 
   const profile = profileQuery.data
   const timeZone = profile?.timezone?.trim() || "Sin definir"

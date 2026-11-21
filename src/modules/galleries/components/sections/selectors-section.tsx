@@ -10,11 +10,13 @@ import { SelectField } from "@/src/shared/components/forms/select-field"
 import { ChoiceGrid } from "@/src/shared/components/forms/choice-grid"
 import { ColorPickerSwatch } from "@/src/shared/components/forms/color-picker"
 import { WheelField } from "@/src/shared/components/forms/wheel-field"
+import { DayListField } from "@/src/shared/components/forms/day-list-field"
 import { TimePairWheels } from "@/src/shared/components/forms/wheel-picker"
 import {
   ArrowDownLeftIcon,
   ArrowLeftRightIcon,
   ArrowUpRightIcon,
+  CalendarDaysIcon,
   ClockIcon,
   LandmarkIcon,
   PaletteIcon,
@@ -44,6 +46,7 @@ export function SelectorsSection() {
   const [institution, setInstitution] = useState("banco-ejemplo")
   const [color, setColor] = useState("#0f766e")
   const [time, setTime] = useState(GALLERY_TIME)
+  const [days, setDays] = useState("1 15")
 
   return (
     <>
@@ -181,6 +184,20 @@ export function SelectorsSection() {
         <WheelField label="Hora" valueLabel={time} icon={ClockIcon}>
           <TimePairWheels value={time} minuteStep={5} onChange={setTime} />
         </WheelField>
+      </GalleryDemo>
+
+      <GalleryDemo
+        name="DayListField"
+        importPath="@/src/shared/components/forms/day-list-field"
+        states="dos días, día agregado"
+        note="Varios días del mes; cada uno se abre con DayWheel. Se usa para los días de pago del ingreso fijo."
+      >
+        <DayListField
+          label="Días de pago"
+          icon={CalendarDaysIcon}
+          value={days}
+          onChange={setDays}
+        />
       </GalleryDemo>
     </>
   )
