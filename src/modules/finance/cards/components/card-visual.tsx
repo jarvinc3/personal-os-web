@@ -7,6 +7,7 @@ import {
 import { GlossaryHelpButton } from "@/src/modules/help"
 import { FINANCE_CARD_TYPE_LABEL } from "@/src/modules/finance/shared/constants/catalog"
 import {
+  cardDisplayAmount,
   cardUtilization,
   type FinanceCardDisplayBalance,
 } from "@/src/modules/finance/shared/lib/card-balances"
@@ -59,14 +60,7 @@ export function CardVisual({ card, balances, display }: CardVisualProps) {
             <p className="text-3xl font-bold">Sin saldo</p>
           ) : (
             balances.map((balance) => {
-              const available = parseFinanceMoney(
-                balance.availableCredit ?? balance.balance
-              )
-              const creditLimit = parseFinanceMoney(balance.creditLimit ?? null)
-              const amount =
-                isCredit && available !== null && creditLimit !== null
-                  ? Math.max(0, creditLimit - available)
-                  : available
+              const amount = cardDisplayAmount(balance)
               return (
                 <p key={balance.id} className="text-3xl font-bold tabular-nums">
                   {amount === null
@@ -102,9 +96,7 @@ export function CardVisual({ card, balances, display }: CardVisualProps) {
 
       {isCredit
         ? balances.map((balance) => {
-            const available = parseFinanceMoney(
-              balance.availableCredit ?? balance.balance
-            )
+            const available = cardDisplayAmount(balance)
             const creditLimitValue = parseFinanceMoney(
               balance.creditLimit ?? null
             )

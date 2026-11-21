@@ -46,7 +46,7 @@ Cada usuario tiene una institución de sistema "Efectivo" (`type: cash`, `isSyst
 ### Tarjetas de crédito
 
 - Pago de tarjeta: `CARD_PAYMENT` desde una cuenta (`card-payment-sheet.tsx`).
-- Crédito disponible por moneda: el back expone `availableCredit` en la respuesta de la tarjeta (`balance` confirmado menos los movimientos `PENDING`) y la web lo muestra en la barra de uso del detalle y en Productos. Sin límite no hay disponible.
+- Crédito disponible por moneda: el back expone `availableCredit` en la respuesta de la tarjeta (`balance` confirmado menos los movimientos `PENDING`) y la web lo muestra en el hero y la barra de uso del detalle y en Productos. Sin límite no hay disponible.
 - Corte automático: el job diario cierra los ciclos vencidos y crea un estado por moneda, con saldo al corte, mínimo y fecha límite. El corte manual (`card-statement-sheet.tsx`) queda como respaldo para cargar los datos del banco.
 - Próximo corte y pago: la tarjeta trae `nextStatementDate` y `nextPaymentDueDate`, y el detalle muestra la cuenta regresiva.
 - Recordatorio de pago: `CardPaymentRemindersScheduler` emite `finance.card_payment.due` `reminders.cardDueDaysBefore` días antes (default 3), una sola vez por corte y sin enviarlo si ya está pagado.
