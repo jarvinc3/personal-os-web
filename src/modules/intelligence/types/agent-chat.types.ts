@@ -29,9 +29,11 @@ export type AgentInvocationContext = Omit<
   entityRef?: AgentInvocationEntityRef
 }
 
-/** El contrato versionado aún no publica `clientMessageId` ni `stream`. */
-export type AgentSendMessageBody = {
-  content: string
+/** El contrato ya publica el envío; el cliente fija `stream` y el id del turno. */
+export type AgentSendMessageBody = Omit<
+  AiSchemas["SendAiConversationMessageDto"],
+  "clientMessageId" | "stream" | "context"
+> & {
   clientMessageId: string
   stream: true
   context?: AgentInvocationContext
