@@ -14,6 +14,7 @@
     "start": "next start",
     "lint": "eslint",
     "api:contract": "node --experimental-strip-types src/config/api-contract/sync-contract-cli.ts",
+    "api:contract:check": "node --experimental-strip-types src/config/api-contract/check-contract-cli.ts",
     "api:generate": "node --experimental-strip-types src/config/api-contract/generate-cli.ts",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,md}\"",
