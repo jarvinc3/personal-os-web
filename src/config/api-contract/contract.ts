@@ -57,18 +57,41 @@ function resolveWorkspaceRoot(cwd: string): string {
 
 export function readApiContract(path = API_CONTRACT_PATH): ApiContract {
   const absolutePath = resolveApiContractPath(path)
-  let rawContract: string
 
+  return parseApiContract(
+    readContractText({
+      path: absolutePath,
+      failureMessage: `No se encontró el contrato OpenAPI en ${absolutePath}. Ejecuta \`pnpm api:contract\` para copiarlo desde personal-os-back.`,
+    }),
+    absolutePath
+  )
+}
+
+/** Lee el contrato que publica el back; la ruta la resuelve el llamador. */
+export function readContractFile(path: string): ApiContract {
+  const absolutePath = resolve(path)
+
+  return parseApiContract(
+    readContractText({
+      path: absolutePath,
+      failureMessage: `No se encontró el contrato del back en ${absolutePath}. Clona personal-os-back junto a este repo o define OPENAPI_SPEC_PATH.`,
+    }),
+    absolutePath
+  )
+}
+
+function readContractText({
+  path,
+  failureMessage,
+}: {
+  path: string
+  failureMessage: string
+}): string {
   try {
-    rawContract = readFileSync(absolutePath, "utf8")
+    return readFileSync(path, "utf8")
   } catch (error) {
-    throw new Error(
-      `No se encontró el contrato OpenAPI en ${absolutePath}. Ejecuta \`pnpm api:contract\` para copiarlo desde personal-os-back.`,
-      { cause: error }
-    )
+    throw new Error(failureMessage, { cause: error })
   }
-
-  return parseApiContract(rawContract, absolutePath)
 }
 
 export function parseApiContract(
