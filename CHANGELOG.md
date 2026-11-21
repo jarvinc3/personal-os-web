@@ -111,6 +111,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Corregido
 
+- #509: la cabecera de una hoja reserva el ancho de sus acciones y de la ayuda del glosario, así el título y el subtítulo ya no quedan debajo de los botones en móvil ni en el panel lateral. El subtítulo usa el espacio libre y parte en varias líneas cuando hace falta.
 - #507: el historial de conversaciones del agente solo se abre cuando se pide; el chat ya no queda cubierto por una hoja vacía al abrirlo desde una institución, un movimiento o Suscripciones.
 - #471: los cuatro tabs de Planificación caben completos en 390 px con el icono encima del texto, y en Análisis cada fila deja el icono y el título primero con «Comparar» como acción al final, ya con icono.
 - #469: el botón flotante de Finanzas reserva su carril derecho en escritorio y deja de tapar el badge de variación de Instituciones y los contadores al final de las filas en Productos, Movimientos, Planificación y Suscripciones.
