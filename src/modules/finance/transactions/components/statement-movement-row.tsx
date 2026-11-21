@@ -22,10 +22,13 @@ export function StatementMovementRow({
   display,
   isLast = true,
 }: StatementMovementRowProps) {
-  const sign = movementSign({
-    type: movement.type,
-    ledgerAmount: movement.amount,
-  })
+  const sign =
+    movement.amount === null
+      ? null
+      : movementSign({
+          type: movement.type,
+          ledgerAmount: movement.amount,
+        })
 
   return (
     <MovementRow
