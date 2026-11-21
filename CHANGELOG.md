@@ -110,6 +110,12 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Corregido
 
+- #505: `robots.txt` deja de anunciar `/sitemap.xml`; la app es privada y no publica un sitemap.
+- #519: el hero de una tarjeta de crédito sobregirada muestra la deuda con su etiqueta, no el disponible negativo; una tarjeta con límite disponible sigue mostrando «Disponible» y una de débito, «Saldo».
+- #520: la pestaña Correos de Inteligencia muestra el total de correos en revisión que devuelve la cola, no solo los de la página cargada; mientras el total no está disponible, el texto no lo presenta como cero.
+- #511: los totales de Ingresos y Egresos del mes en el detalle de una cuenta incluyen los movimientos de sus tarjetas de débito, igual que la lista de la pantalla, y el hero aclara que no cuentan las transferencias.
+- #510: las filas de «Movimientos del ciclo» de un estado de cuenta muestran el monto cuando el API no trae el importe del ledger pero sí el original, y si no hay ninguno muestran una raya sin el signo suelto.
+- #509: la cabecera de una hoja reserva el ancho de sus acciones y de la ayuda del glosario, así el título y el subtítulo ya no quedan debajo de los botones en móvil ni en el panel lateral. El subtítulo usa el espacio libre y parte en varias líneas cuando hace falta.
 - #507: el historial de conversaciones del agente solo se abre cuando se pide; el chat ya no queda cubierto por una hoja vacía al abrirlo desde una institución, un movimiento o Suscripciones.
 - #471: los cuatro tabs de Planificación caben completos en 390 px con el icono encima del texto, y en Análisis cada fila deja el icono y el título primero con «Comparar» como acción al final, ya con icono.
 - #469: el botón flotante de Finanzas reserva su carril derecho en escritorio y deja de tapar el badge de variación de Instituciones y los contadores al final de las filas en Productos, Movimientos, Planificación y Suscripciones.
