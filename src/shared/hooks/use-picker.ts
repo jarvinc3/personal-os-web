@@ -18,6 +18,9 @@ type PickerState<TPicker extends string> = {
  * Una sola hoja abierta a la vez, con su clave en la URL (`?picker=`), para que
  * Atrás cierre solo el selector y el formulario que lo contiene no pierda lo
  * escrito. `closePicker` ignora el cierre de una hoja que ya fue reemplazada.
+ *
+ * `closed` es el valor que se devuelve cuando no hay picker en la URL: pasa un
+ * centinela como `"none"`, nunca una clave real, o esa hoja parecerá abierta.
  */
 const pushedPickerByPath = new Map<string, boolean>()
 
