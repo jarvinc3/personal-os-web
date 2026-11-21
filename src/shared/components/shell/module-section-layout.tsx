@@ -1,6 +1,9 @@
 "use client"
 
-import { ModuleFabProvider } from "@/src/shared/components/fab/module-fab-context"
+import {
+  ModuleFabProvider,
+  useHasModuleFab,
+} from "@/src/shared/components/fab/module-fab-context"
 import { ModuleTabBar } from "@/src/shared/components/shell/module-tab-bar"
 import { useHeaderContext } from "@/src/shared/context/header-context"
 import { useRegisterTabBarVisible } from "@/src/shared/context/tab-bar-context"
@@ -27,21 +30,49 @@ export function ModuleSectionLayout({
 
   return (
     <ModuleFabProvider tabBarVisible={!hideTabBar}>
-      <div
-        className={cn(
-          "mx-auto flex w-full max-w-5xl flex-col gap-6 p-4 md:px-6 md:pb-16",
-          hideTabBar ? "pb-4" : "pb-[calc(6rem+env(safe-area-inset-bottom))]"
-        )}
+      <ModuleSectionContent
+        items={items}
+        ariaLabel={ariaLabel}
+        onItemPrefetch={onItemPrefetch}
+        hideTabBar={hideTabBar}
       >
         {children}
-        {hideTabBar ? null : (
-          <ModuleTabBar
-            items={items}
-            ariaLabel={ariaLabel}
-            onItemPrefetch={onItemPrefetch}
-          />
-        )}
-      </div>
+      </ModuleSectionContent>
     </ModuleFabProvider>
+  )
+}
+
+type ModuleSectionContentProps = ModuleSectionLayoutProps & {
+  hideTabBar: boolean
+}
+
+function ModuleSectionContent({
+  children,
+  items,
+  ariaLabel,
+  onItemPrefetch,
+  hideTabBar,
+}: ModuleSectionContentProps) {
+  // El botón flotante vive en la esquina inferior derecha de escritorio: sin su
+  // carril tapa badges y contadores de las filas que pasan por debajo.
+  const hasFab = useHasModuleFab()
+
+  return (
+    <div
+      className={cn(
+        "mx-auto flex w-full max-w-5xl flex-col gap-6 p-4 md:pb-16",
+        hasFab ? "md:pr-20 md:pl-6" : "md:px-6",
+        hideTabBar ? "pb-4" : "pb-[calc(6rem+env(safe-area-inset-bottom))]"
+      )}
+    >
+      {children}
+      {hideTabBar ? null : (
+        <ModuleTabBar
+          items={items}
+          ariaLabel={ariaLabel}
+          onItemPrefetch={onItemPrefetch}
+        />
+      )}
+    </div>
   )
 }

@@ -109,6 +109,10 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Corregido
 
+- #471: los cuatro tabs de Planificación caben completos en 390 px con el icono encima del texto, y en Análisis cada fila deja el icono y el título primero con «Comparar» como acción al final, ya con icono.
+- #469: el botón flotante de Finanzas reserva su carril derecho en escritorio y deja de tapar el badge de variación de Instituciones y los contadores al final de las filas en Productos, Movimientos, Planificación y Suscripciones.
+- #467: Uso agrupa el desglose **por remitente** en vez de presentar dominios como bancos, describe la pantalla sin hablar del back, pinta el reinicio con el formato de fecha de la app y muestra «< US$0.0001» cuando el costo existe pero queda por debajo de la precisión visible.
+- #466: los programados de Movimientos muestran el badge «Programado» dentro de la fila, el texto secundario pasa a otra línea en vez de cortarse y las tarjetas de Ingresos y Gastos del resumen del mes dejan de tocar los bordes en móvil.
 - #464: la cara de la tarjeta de crédito en el detalle muestra el disponible (`availableCredit`) bajo «Disponible», no la deuda. Un sobregiro sale negativo, igual que en la barra de utilización y en Productos, y la tarjeta de débito sigue mostrando «Saldo». El hero, la barra y las filas leen el mismo valor (`cardDisplayAmount`).
 - #449: la guía del contrato (`docs/infrastructure/api-contract.md`) explica de dónde sale la copia versionada y cuándo es seguro sincronizarla: `pnpm api:contract` solo después de que el back regenere su `swagger-spec.json`, y con los tipos del cliente actualizados en el mismo cambio. La copia actual (181 rutas y 291 schemas) se generó desde el código del back en #445; el back publica 183 rutas y 296 schemas desde personal-os-back#419.
 - El detalle de un correo descartado explica que el remitente no es un banco del piloto y que el texto no alcanzó para clasificarlo, con su icono y su título propios, en vez de mostrarlo como «Sin señal» (#402; contrato de back #408).

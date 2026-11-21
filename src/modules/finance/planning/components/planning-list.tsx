@@ -234,14 +234,16 @@ export function FinancePlanningList({
               <TabsTrigger
                 key={value}
                 value={value}
-                className="gap-1.5 rounded-xl px-2 py-2"
+                className="gap-1 rounded-xl px-1 py-1.5 max-sm:flex-col max-sm:gap-0.5"
               >
                 <Icon
                   data-icon="inline-start"
                   className="size-5 shrink-0"
                   style={{ color: isSelected ? undefined : color }}
                 />
-                <span className="truncate text-xs">{label}</span>
+                <span className="text-xs leading-tight max-sm:text-[11px]">
+                  {label}
+                </span>
               </TabsTrigger>
             )
           })}

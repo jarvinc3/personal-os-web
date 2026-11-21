@@ -224,12 +224,18 @@ describe("etiquetas y formato", () => {
     assert.match(formatUsagePercent(100, "es-DO"), /100\s?%/)
   })
 
-  it("pinta el reinicio en UTC", () => {
+  it("avisa cuando el costo existe pero queda bajo la precisión visible", () => {
+    assert.match(formatUsageCost(0.00004, "es-DO"), /^<\s*US\$0[.,]0001$/)
+    assert.equal(formatUsageCost(0, "es-DO").startsWith("<"), false)
+    assert.equal(formatUsageCost(0.0005, "es-DO").startsWith("<"), false)
+  })
+
+  it("pinta el reinicio en UTC con el formato de fecha de la app", () => {
     const label = formatUsageReset(
       new Date("2026-11-20T00:00:00.000Z"),
       "es-DO"
     )
-    assert.match(label, /20\/11\/2026/)
+    assert.match(label, /20 nov 2026/)
     assert.match(label, /00:00/)
     assert.match(label, /UTC$/)
   })

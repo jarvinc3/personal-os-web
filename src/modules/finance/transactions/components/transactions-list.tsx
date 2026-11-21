@@ -423,11 +423,13 @@ export function FinanceTransactionsList({
           locale={display.locale}
           onSelect={scrollToMonth}
         />
-        <MonthFlowSummary
-          income={activeMonth?.totals.income}
-          expenses={activeMonth?.totals.expenses}
-          display={display}
-        />
+        <div className="mx-2 md:mx-0">
+          <MonthFlowSummary
+            income={activeMonth?.totals.income}
+            expenses={activeMonth?.totals.expenses}
+            display={display}
+          />
+        </div>
       </div>
 
       {timelineQuery.isError ? (

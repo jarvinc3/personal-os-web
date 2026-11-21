@@ -148,13 +148,17 @@ function ScheduledCommitments({
           <SummaryItem
             key={commitment.id}
             title={commitment.name}
+            wrapDescription
             description={`${commitment.kind === "LOAN" ? "Cuota de préstamo" : "Suscripción"} · ${formatCalendarDate(commitment.date, display.locale)}${commitment.hasPaymentMethod ? "" : " · Sin método de pago"}`}
             icon={commitment.kind === "LOAN" ? HandCoinsIcon : RepeatIcon}
             value={
-              <Money
-                value={commitment.amount}
-                display={{ ...display, currency: commitment.currency }}
-              />
+              <span className="flex flex-col items-end gap-1">
+                <Money
+                  value={commitment.amount}
+                  display={{ ...display, currency: commitment.currency }}
+                />
+                <Badge variant="warning">Programado</Badge>
+              </span>
             }
             href={
               commitment.kind === "LOAN"
@@ -162,7 +166,6 @@ function ScheduledCommitments({
                 : APP_ROUTES.app.financeSubscription(commitment.referenceId)
             }
             isLast={index === commitments.length - 1}
-            trailing={<Badge variant="warning">Programado</Badge>}
           />
         ))}
       </SummarySection>

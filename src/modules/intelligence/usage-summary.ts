@@ -5,6 +5,7 @@ import type {
   EmailUsageDay,
   EmailUsageHour,
 } from "@/src/modules/intelligence/types/intelligence.types"
+import { formatDayMonthYear } from "@/src/shared/lib/date-format"
 
 const MS_PER_DAY = 86_400_000
 const HOURS_PER_DAY = 24
@@ -218,19 +219,39 @@ export function formatUsagePercent(percent: number, locale: string): string {
   }).format(percent / 100)
 }
 
+const USAGE_COST_CURRENCY = "USD"
+const SMALL_COST_FRACTION_DIGITS = 4
+const REGULAR_COST_FRACTION_DIGITS = 2
+/** Costo más pequeño que la pantalla puede mostrar con cuatro decimales. */
+const SMALLEST_VISIBLE_COST = 0.0001
+
 function usageCostFractionDigits(value: number): number {
-  return Math.abs(value) < 1 ? 4 : 2
+  return Math.abs(value) < 1
+    ? SMALL_COST_FRACTION_DIGITS
+    : REGULAR_COST_FRACTION_DIGITS
 }
 
-export function formatUsageCost(value: number, locale: string): string {
-  const fractionDigits = usageCostFractionDigits(value)
-
+function usageCostFormatter(locale: string, fractionDigits: number) {
   return new Intl.NumberFormat(locale, {
     style: "currency",
-    currency: "USD",
+    currency: USAGE_COST_CURRENCY,
     minimumFractionDigits: fractionDigits,
     maximumFractionDigits: fractionDigits,
-  }).format(value)
+  })
+}
+
+/** Un costo mayor que cero que redondea a cero se lee como «< US$0.0001». */
+export function formatUsageCost(value: number, locale: string): string {
+  const fractionDigits = usageCostFractionDigits(value)
+  const formatter = usageCostFormatter(locale, fractionDigits)
+  const isBelowPrecision =
+    value !== 0 && Math.abs(value) < 0.5 * 10 ** -fractionDigits
+
+  if (isBelowPrecision) {
+    return `< ${formatter.format(SMALLEST_VISIBLE_COST)}`
+  }
+
+  return formatter.format(value)
 }
 
 /** Sin símbolo para los ejes de las gráficas; el título dice que es USD. */
@@ -244,15 +265,15 @@ export function formatUsageCostAxis(value: number, locale: string): string {
 }
 
 export function formatUsageReset(resetAt: Date, locale: string): string {
-  const formatted = new Intl.DateTimeFormat(locale, {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    hourCycle: "h23",
-    timeZone: "UTC",
-  }).format(resetAt)
+  // El reinicio se cuenta en UTC: la fecha se arma con esas partes para que el
+  // formato de la app no la corra un día en un reloj detrás de UTC.
+  const utcDay = new Date(
+    resetAt.getUTCFullYear(),
+    resetAt.getUTCMonth(),
+    resetAt.getUTCDate()
+  )
+  const hours = String(resetAt.getUTCHours()).padStart(2, "0")
+  const minutes = String(resetAt.getUTCMinutes()).padStart(2, "0")
 
-  return `${formatted} UTC`
+  return `${formatDayMonthYear(utcDay, locale)}, ${hours}:${minutes} UTC`
 }
