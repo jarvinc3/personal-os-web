@@ -1,14 +1,7 @@
 "use client"
 
+import { InfiniteListErrorFooter } from "@/src/shared/components/feedback/infinite-list-error-footer"
 import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
-import {
-  Alert,
-  AlertAction,
-  AlertDescription,
-  AlertTitle,
-} from "@/src/shared/components/ui/alert"
-import { Button } from "@/src/shared/components/ui/button"
-import { AlertCircleIcon, RotateCcwIcon } from "lucide-react"
 
 type NotificationLoadMoreProps = {
   hasNextPage: boolean
@@ -29,25 +22,12 @@ export function NotificationLoadMore({
 }: NotificationLoadMoreProps) {
   if (hasError) {
     return (
-      <Alert variant="default" role="status">
-        <AlertCircleIcon className="size-4 shrink-0" aria-hidden="true" />
-        <AlertTitle>No se pudieron cargar más notificaciones</AlertTitle>
-        <AlertDescription>
-          La lista conserva los avisos que ya tenías.
-        </AlertDescription>
-        <AlertAction>
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            onClick={onLoadMore}
-            disabled={isFetchingNextPage}
-          >
-            <RotateCcwIcon aria-hidden="true" />
-            Reintentar
-          </Button>
-        </AlertAction>
-      </Alert>
+      <InfiniteListErrorFooter
+        title="No se pudieron cargar más notificaciones"
+        description="La lista conserva los avisos que ya tenías."
+        isRetrying={isFetchingNextPage}
+        onRetry={onLoadMore}
+      />
     )
   }
 
