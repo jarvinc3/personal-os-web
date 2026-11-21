@@ -111,6 +111,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Corregido
 
+- #498: las listas de Notificaciones, Papelera, la cola de revisión y los grupos de revisión conservan las filas cargadas cuando falla la siguiente tanda o un refresco en segundo plano; el fallo se avisa al pie con reintento (`InfiniteListErrorFooter`) y solo sin filas se cambia la lista por el estado de error completo.
 - #507: el historial de conversaciones del agente solo se abre cuando se pide; el chat ya no queda cubierto por una hoja vacía al abrirlo desde una institución, un movimiento o Suscripciones.
 - #471: los cuatro tabs de Planificación caben completos en 390 px con el icono encima del texto, y en Análisis cada fila deja el icono y el título primero con «Comparar» como acción al final, ya con icono.
 - #469: el botón flotante de Finanzas reserva su carril derecho en escritorio y deja de tapar el badge de variación de Instituciones y los contadores al final de las filas en Productos, Movimientos, Planificación y Suscripciones.
