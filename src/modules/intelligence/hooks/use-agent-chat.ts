@@ -1,16 +1,22 @@
 "use client"
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query"
 
 import { apiGet, apiPost, apiPostEventStream } from "@/src/config/api-client"
 import { API_ENDPOINTS } from "@/src/shared/constants/api-endpoints"
 import { useAppStore } from "@/src/shared/store/app-store"
 import { agentInvocationContextKey } from "@/src/modules/intelligence/lib/agent-chat-context"
+import { buildAgentConversationsPath } from "@/src/modules/intelligence/lib/agent-conversations-request"
 import { readAgentStream } from "@/src/modules/intelligence/lib/agent-chat-stream"
 import type {
   AgentConversationCreated,
   AgentConversationDetail,
-  AgentConversationSummary,
+  AgentConversationPage,
   AgentInvocationContext,
   AgentSendMessageBody,
   AgentStreamEvent,
@@ -54,13 +60,15 @@ export function useLatestAgentConversation(
 export function useAgentConversations(enabled: boolean) {
   const session = useAppStore((state) => state.session)
 
-  return useQuery({
+  return useInfiniteQuery({
     queryKey: [...AGENT_CHAT_QUERY_KEY, "list"],
-    queryFn: ({ signal }) =>
-      apiGet<AgentConversationSummary[]>(
-        API_ENDPOINTS.INTELLIGENCE.CONVERSATIONS,
+    queryFn: ({ pageParam, signal }) =>
+      apiGet<AgentConversationPage>(
+        buildAgentConversationsPath({ cursor: pageParam }),
         signal
       ),
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (page) => page.nextCursor ?? undefined,
     enabled: Boolean(session && enabled),
   })
 }

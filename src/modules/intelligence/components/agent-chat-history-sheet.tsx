@@ -12,6 +12,7 @@ import { useAgentConversations } from "@/src/modules/intelligence/hooks/use-agen
 import type { AgentConversationSummary } from "@/src/modules/intelligence/types/agent-chat.types"
 import { useFormatLocale } from "@/src/modules/settings/hooks/use-format-locale"
 import { SummaryItem } from "@/src/shared/components/data-display/summary"
+import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
 import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import { Alert, AlertDescription } from "@/src/shared/components/ui/alert"
 import { Button } from "@/src/shared/components/ui/button"
@@ -41,7 +42,7 @@ export function AgentChatHistorySheet({
 }) {
   const conversations = useAgentConversations(open)
   const locale = useFormatLocale()
-  const items = conversations.data ?? []
+  const items = conversations.data?.pages.flatMap((page) => page.items) ?? []
 
   return (
     <BottomSheet
@@ -71,13 +72,13 @@ export function AgentChatHistorySheet({
         ),
       }}
     >
-      {conversations.isPending ? (
+      {conversations.isPending && items.length === 0 ? (
         <div className="flex flex-col gap-2" aria-hidden>
           {Array.from({ length: 5 }, (_, index) => (
             <Skeleton key={index} className="h-14 w-full rounded-2xl" />
           ))}
         </div>
-      ) : conversations.isError ? (
+      ) : conversations.isError && items.length === 0 ? (
         <Alert variant="destructive">
           <AlertDescription className="flex flex-col gap-3">
             <span>No se pudieron cargar las conversaciones.</span>
@@ -126,6 +127,31 @@ export function AgentChatHistorySheet({
               )}
             />
           ))}
+          <InfiniteListSentinel
+            hasNextPage={
+              Boolean(conversations.hasNextPage) && !conversations.error
+            }
+            isFetchingNextPage={conversations.isFetchingNextPage}
+            onLoadMore={() => void conversations.fetchNextPage()}
+          />
+          {conversations.error ? (
+            <Alert variant="destructive">
+              <AlertDescription className="flex flex-col gap-3">
+                <span>No se pudieron cargar más conversaciones.</span>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="w-fit"
+                  disabled={conversations.isFetchingNextPage}
+                  onClick={() => void conversations.fetchNextPage()}
+                >
+                  <RotateCcwIcon />
+                  Reintentar
+                </Button>
+              </AlertDescription>
+            </Alert>
+          ) : null}
         </div>
       )}
     </BottomSheet>

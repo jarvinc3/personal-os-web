@@ -272,6 +272,22 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/api/intelligence/email/sample-import/{jobId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["AiIntelligenceController_sampleImportStatus"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/intelligence/email/connect": {
         parameters: {
             query?: never;
@@ -767,7 +783,7 @@ export type paths = {
             path?: never;
             cookie?: never;
         };
-        /** Listar las conversaciones propias */
+        /** Listar las conversaciones propias por cursor */
         get: operations["AiConversationController_list"];
         put?: never;
         /** Crear una conversación privada del agente */
@@ -822,7 +838,7 @@ export type paths = {
         };
         get?: never;
         put?: never;
-        /** Enviar un mensaje y ejecutar capacidades de lectura disponibles */
+        /** Enviar un mensaje, ejecutar capacidades y responder JSON o text/event-stream */
         post: operations["AiConversationController_sendMessage"];
         delete?: never;
         options?: never;
@@ -910,6 +926,22 @@ export type paths = {
         post?: never;
         /** Descartar una sugerencia propia de forma persistente */
         delete: operations["ViewSuggestionsController_dismiss"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/intelligence/proactive-suggestions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["ProactiveSuggestionsController_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -3306,7 +3338,7 @@ export type components = {
             fromDomain: string;
             subject: string;
             /** @enum {string} */
-            processingStatus: "INGESTED" | "QUEUED" | "PROCESSED" | "REVIEW_REQUIRED" | "DISCARDED" | "FAILED";
+            processingStatus: "INGESTED" | "QUEUED" | "CLASSIFYING" | "PROCESSED" | "REVIEW_REQUIRED" | "DISCARDED" | "FAILED";
             contentFingerprint: string;
         };
         AiEmailMessagePageResponseDto: {
@@ -3372,7 +3404,7 @@ export type components = {
             fromDomain: string;
             subject: string;
             /** @enum {string} */
-            processingStatus: "INGESTED" | "QUEUED" | "PROCESSED" | "REVIEW_REQUIRED" | "DISCARDED" | "FAILED";
+            processingStatus: "INGESTED" | "QUEUED" | "CLASSIFYING" | "PROCESSED" | "REVIEW_REQUIRED" | "DISCARDED" | "FAILED";
             contentFingerprint: string;
             userId: string;
             connectionId: string;
@@ -3392,6 +3424,10 @@ export type components = {
             classifications: components["schemas"]["AiEmailClassificationResponseDto"][];
         };
         EmailSampleImportDto: Record<string, never>;
+        AiEmailSampleImportProgressDto: {
+            processed: number;
+            total: number;
+        };
         AiEmailSampleSelectionDto: {
             /** @enum {string} */
             mode: "IDS" | "SENDER_WINDOW";
@@ -3504,6 +3540,18 @@ export type components = {
             selection: components["schemas"]["AiEmailSampleSelectionDto"];
             summary: components["schemas"]["AiEmailSampleSummaryDto"];
             items: components["schemas"]["AiEmailSampleItemDto"][];
+        };
+        AiEmailSampleImportJobResponseDto: {
+            id: string;
+            /** @enum {string} */
+            status: "QUEUED" | "RUNNING" | "COMPLETED" | "FAILED";
+            dryRun: boolean;
+            progress: components["schemas"]["AiEmailSampleImportProgressDto"];
+            result: components["schemas"]["AiEmailSampleImportResponseDto"] | null;
+            error: string | null;
+            createdAt: string;
+            startedAt: string | null;
+            finishedAt: string | null;
         };
         ConnectGmailDto: {
             /**
@@ -4021,6 +4069,11 @@ export type components = {
             /** Format: date-time */
             updatedAt: string;
         };
+        AiConversationPageDto: {
+            items: components["schemas"]["AiConversationSummaryDto"][];
+            nextCursor: string | null;
+            hasMore: boolean;
+        };
         AiConversationMessageDto: {
             /** @enum {string} */
             role: "user" | "assistant";
@@ -4044,6 +4097,10 @@ export type components = {
         SendAiConversationMessageDto: {
             /** @example ¿Cuánto gasté este mes? */
             content: string;
+            /** @description Identidad del turno para reintentar sin duplicar el mensaje del usuario */
+            clientMessageId?: string;
+            /** @description Responde text/event-stream con los eventos del turno */
+            stream?: boolean;
             context?: components["schemas"]["AiInvocationContextDto"];
         };
         AiConversationActionDto: {
@@ -4116,6 +4173,23 @@ export type components = {
         };
         ViewSuggestionDismissedDto: {
             dismissed: boolean;
+        };
+        ProactiveSuggestionDto: {
+            id: string;
+            signalId: string;
+            signalType: string;
+            title: string;
+            body: string;
+            actionId: string | null;
+            createdAt: string;
+        };
+        ProactiveSuggestionLimitsDto: {
+            discarded: number;
+            windowStartedAt: string | null;
+        };
+        ProactiveSuggestionsResponseDto: {
+            suggestions: components["schemas"]["ProactiveSuggestionDto"][];
+            limits: components["schemas"]["ProactiveSuggestionLimitsDto"];
         };
         ImportReviewItemResponseDto: {
             id: string;
@@ -6874,6 +6948,8 @@ export interface operations {
                 status?: "INGESTED" | "QUEUED" | "PROCESSED" | "REVIEW_REQUIRED" | "FAILED";
                 /** @description Cursor opaco de la página anterior */
                 cursor?: string;
+                /** @description Cantidad de correos por página */
+                limit?: number;
             };
             header?: never;
             path?: never;
@@ -6925,12 +7001,33 @@ export interface operations {
             };
         };
         responses: {
-            201: {
+            202: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AiEmailSampleImportResponseDto"];
+                    "application/json": components["schemas"]["AiEmailSampleImportJobResponseDto"];
+                };
+            };
+        };
+    };
+    AiIntelligenceController_sampleImportStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                jobId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AiEmailSampleImportJobResponseDto"];
                 };
             };
         };
@@ -7643,7 +7740,12 @@ export interface operations {
     };
     AiConversationController_list: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Cantidad de conversaciones por página */
+                limit?: number;
+                /** @description Cursor opaco de la página anterior */
+                cursor?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -7655,8 +7757,15 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AiConversationSummaryDto"][];
+                    "application/json": components["schemas"]["AiConversationPageDto"];
                 };
+            };
+            /** @description Cursor o límite inválido */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -7792,6 +7901,13 @@ export interface operations {
             };
         };
         responses: {
+            /** @description Flujo text/event-stream con start, status, chunk, reset, done y error cuando stream=true */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
             201: {
                 headers: {
                     [name: string]: unknown;
@@ -7945,6 +8061,25 @@ export interface operations {
             };
         };
     };
+    ProactiveSuggestionsController_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProactiveSuggestionsResponseDto"];
+                };
+            };
+        };
+    };
     ImportReviewController_list: {
         parameters: {
             query?: never;
@@ -8013,8 +8148,8 @@ export interface operations {
             query: {
                 /** @description ISO-3 base currency */
                 base: string;
-                /** @description Comma-separated ISO-3 currency codes */
-                quotes: string;
+                /** @description Comma-separated ISO-3 currency codes, at most 20 */
+                quotes: string[];
             };
             header?: never;
             path?: never;
@@ -8029,6 +8164,13 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExchangeRatesResponseDto"];
                 };
+            };
+            /** @description Base o quotes inválidos, o más de 20 monedas */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
