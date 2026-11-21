@@ -67,7 +67,7 @@ export function readApiContract(path = API_CONTRACT_PATH): ApiContract {
   )
 }
 
-/** Lee el contrato que publica el back; la ruta la resuelve el llamador. */
+/** Lee el contrato que publica el back, en una ruta absoluta o relativa. */
 export function readContractFile(path: string): ApiContract {
   const absolutePath = resolve(path)
 

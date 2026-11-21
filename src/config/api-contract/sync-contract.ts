@@ -17,7 +17,7 @@ export function syncApiContract({
   destinationPath = API_CONTRACT_PATH,
 }: SyncApiContractInput): void {
   const destination = resolve(process.cwd(), destinationPath)
-  const contract = readContractFile(resolve(process.cwd(), sourcePath))
+  const contract = readContractFile(sourcePath)
 
   mkdirSync(dirname(destination), { recursive: true })
   writeFileSync(destination, `${JSON.stringify(contract, null, 2)}\n`, "utf8")
