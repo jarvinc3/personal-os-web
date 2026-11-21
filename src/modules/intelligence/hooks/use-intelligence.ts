@@ -2,6 +2,11 @@
 
 import { apiGet, apiPost } from "@/src/config/api-client"
 import type { EmailConnectBody } from "@/src/modules/intelligence/email-connect"
+import {
+  buildMessagesPath,
+  normalizeMessagesFilter,
+  type MessagesFilter,
+} from "@/src/modules/intelligence/lib/messages-request"
 import type {
   AiEmailMessageDetail,
   AiEmailMessagesPage,
@@ -25,7 +30,6 @@ export const INTELLIGENCE_MESSAGES_QUERY_KEY = [
   "intelligence",
   "messages",
 ] as const
-export const INTELLIGENCE_PAGE_SIZE = 50
 
 function fetchIntelligenceDashboard(signal: AbortSignal) {
   return apiGet<IntelligenceDashboard>(
@@ -34,7 +38,11 @@ function fetchIntelligenceDashboard(signal: AbortSignal) {
   )
 }
 
-export function useIntelligence() {
+export function useIntelligence({
+  messageFilter,
+}: {
+  messageFilter: MessagesFilter
+}) {
   const {
     status: emailSocketStatus,
     hasPendingMessageUpdates,
@@ -80,20 +88,14 @@ export function useIntelligence() {
     refetchInterval: (query) =>
       query.state.data?.configured === false ? 60_000 : false,
   })
+  const messagesFilter = normalizeMessagesFilter(messageFilter)
   const messagesQuery = useInfiniteQuery({
-    queryKey: INTELLIGENCE_MESSAGES_QUERY_KEY,
-    queryFn: ({ pageParam, signal }) => {
-      const params = new URLSearchParams({
-        limit: String(INTELLIGENCE_PAGE_SIZE),
-      })
-      if (pageParam) {
-        params.set("cursor", pageParam)
-      }
-      return apiGet<AiEmailMessagesPage>(
-        `${API_ENDPOINTS.INTELLIGENCE.MESSAGES}?${params.toString()}`,
+    queryKey: [...INTELLIGENCE_MESSAGES_QUERY_KEY, messagesFilter],
+    queryFn: ({ pageParam, signal }) =>
+      apiGet<AiEmailMessagesPage>(
+        buildMessagesPath({ ...messagesFilter, cursor: pageParam }),
         signal
-      )
-    },
+      ),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (page) => page.nextCursor ?? undefined,
     enabled: Boolean(session && dashboardQuery.data?.connection.connected),
