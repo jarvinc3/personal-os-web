@@ -227,6 +227,7 @@ describe("etiquetas y formato", () => {
   it("avisa cuando el costo existe pero queda bajo la precisión visible", () => {
     assert.match(formatUsageCost(0.00004, "es-DO"), /^<\s*US\$0[.,]0001$/)
     assert.equal(formatUsageCost(0, "es-DO").startsWith("<"), false)
+    assert.equal(formatUsageCost(0.00005, "es-DO").startsWith("<"), false)
     assert.equal(formatUsageCost(0.0005, "es-DO").startsWith("<"), false)
   })
 

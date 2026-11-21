@@ -222,8 +222,6 @@ export function formatUsagePercent(percent: number, locale: string): string {
 const USAGE_COST_CURRENCY = "USD"
 const SMALL_COST_FRACTION_DIGITS = 4
 const REGULAR_COST_FRACTION_DIGITS = 2
-/** Costo más pequeño que la pantalla puede mostrar con cuatro decimales. */
-const SMALLEST_VISIBLE_COST = 0.0001
 
 function usageCostFractionDigits(value: number): number {
   return Math.abs(value) < 1
@@ -231,24 +229,19 @@ function usageCostFractionDigits(value: number): number {
     : REGULAR_COST_FRACTION_DIGITS
 }
 
-function usageCostFormatter(locale: string, fractionDigits: number) {
-  return new Intl.NumberFormat(locale, {
+/** Un costo mayor que cero que redondea a cero se lee como «< US$0.0001». */
+export function formatUsageCost(value: number, locale: string): string {
+  const fractionDigits = usageCostFractionDigits(value)
+  const smallestVisibleCost = 10 ** -fractionDigits
+  const formatter = new Intl.NumberFormat(locale, {
     style: "currency",
     currency: USAGE_COST_CURRENCY,
     minimumFractionDigits: fractionDigits,
     maximumFractionDigits: fractionDigits,
   })
-}
 
-/** Un costo mayor que cero que redondea a cero se lee como «< US$0.0001». */
-export function formatUsageCost(value: number, locale: string): string {
-  const fractionDigits = usageCostFractionDigits(value)
-  const formatter = usageCostFormatter(locale, fractionDigits)
-  const isBelowPrecision =
-    value !== 0 && Math.abs(value) < 0.5 * 10 ** -fractionDigits
-
-  if (isBelowPrecision) {
-    return `< ${formatter.format(SMALLEST_VISIBLE_COST)}`
+  if (value !== 0 && Math.abs(value) < smallestVisibleCost / 2) {
+    return `< ${formatter.format(smallestVisibleCost)}`
   }
 
   return formatter.format(value)
