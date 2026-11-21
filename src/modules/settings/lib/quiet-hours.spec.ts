@@ -22,7 +22,7 @@ describe("isWithinQuietHours", () => {
     )
   })
 
-  it("ignora un horario que no se puede leer", () => {
+  it("no abre ventana silenciosa cuando el horario guardado no se puede leer", () => {
     const now = new Date("2026-01-15T23:30:00Z")
 
     assert.equal(
@@ -64,7 +64,7 @@ describe("isWithinQuietHours", () => {
   })
 
   it("incluye el inicio y excluye el fin de una ventana diurna", () => {
-    const window = {
+    const dayWindow = {
       enabled: true,
       start: "09:00",
       end: "17:00",
@@ -72,15 +72,24 @@ describe("isWithinQuietHours", () => {
     }
 
     assert.equal(
-      isWithinQuietHours({ ...window, now: new Date("2026-01-15T09:00:00Z") }),
+      isWithinQuietHours({
+        ...dayWindow,
+        now: new Date("2026-01-15T09:00:00Z"),
+      }),
       true
     )
     assert.equal(
-      isWithinQuietHours({ ...window, now: new Date("2026-01-15T16:59:00Z") }),
+      isWithinQuietHours({
+        ...dayWindow,
+        now: new Date("2026-01-15T16:59:00Z"),
+      }),
       true
     )
     assert.equal(
-      isWithinQuietHours({ ...window, now: new Date("2026-01-15T17:00:00Z") }),
+      isWithinQuietHours({
+        ...dayWindow,
+        now: new Date("2026-01-15T17:00:00Z"),
+      }),
       false
     )
   })
@@ -99,12 +108,15 @@ describe("isWithinQuietHours", () => {
 
   it("usa la zona del perfil, no la del equipo", () => {
     const now = new Date("2026-01-15T16:30:00Z")
-    const window = { enabled: true, start: "12:00", end: "14:00" }
+    const middayWindow = { enabled: true, start: "12:00", end: "14:00" }
 
-    assert.equal(isWithinQuietHours({ ...window, timezone: "UTC", now }), false)
+    assert.equal(
+      isWithinQuietHours({ ...middayWindow, timezone: "UTC", now }),
+      false
+    )
     assert.equal(
       isWithinQuietHours({
-        ...window,
+        ...middayWindow,
         timezone: "America/Santo_Domingo",
         now,
       }),
