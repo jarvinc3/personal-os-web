@@ -94,6 +94,58 @@ jobs:
       - name: Unit tests with coverage
         run: pnpm run --if-present test:coverage
 
+  # El contrato del cliente es una copia de swagger-spec.json del back. Este job
+  # compara las dos versiones en cada PR: si el back cambia una ruta, un
+  # parámetro o un esquema y la copia no se regenera, el cliente sigue enviando
+  # el nombre viejo y el API responde 400 (pasó con personal-os-back#436).
+  contract:
+    runs-on: [self-hosted, personal-os]
+    # El runner es una sola PC y comparte turno con otros jobs: 10 minutos
+    # cancelaban el job en los pasos de cierre cuando la máquina iba cargada.
+    timeout-minutes: 20
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          clean: false
+
+      - name: Limpiar el workspace salvo node_modules
+        run: git clean -fdx -e node_modules
+
+      - name: Comprobar el secreto BACK_REPO_TOKEN
+        env:
+          BACK_REPO_TOKEN: ${{ secrets.BACK_REPO_TOKEN }}
+        run: |
+          if (-not $env:BACK_REPO_TOKEN) {
+            throw 'Falta el secreto BACK_REPO_TOKEN en este repo. El gate del contrato OpenAPI necesita un token de solo lectura de personal-os-back para leer su swagger-spec.json. Créalo en Settings > Secrets and variables > Actions y vuelve a correr el job.'
+          }
+
+      - name: Traer el contrato vigente del back
+        uses: actions/checkout@v4
+        with:
+          repository: jarvinc3/personal-os-back
+          ref: develop
+          token: ${{ secrets.BACK_REPO_TOKEN }}
+          path: .back-contract
+          sparse-checkout: swagger-spec.json
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@v4
+        with:
+          dest: ${{ runner.temp }}/setup-pnpm
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Comparar el contrato versionado con el del back
+        env:
+          OPENAPI_SPEC_PATH: ${{ github.workspace }}/.back-contract/swagger-spec.json
+        run: pnpm api:contract:check
+
   build:
     needs: changes
     if: always() && (github.event_name != 'pull_request' || needs.changes.outputs.code == 'true')
