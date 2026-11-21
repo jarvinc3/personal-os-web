@@ -1,5 +1,5 @@
 import { cva, type VariantProps } from "class-variance-authority"
-import { cn } from "cn"
+import { cn } from "@/src/shared/lib/utils"
 
 export const EMPTY_COMPACT_CLASS_NAME =
   "gap-2 rounded-lg p-4 [&_[data-slot=empty-description]]:text-xs [&_[data-slot=empty-title]]:text-sm"
