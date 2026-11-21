@@ -50,6 +50,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Cambiado
 
+- #502: la galería de cards deja de marcar como borrador las variantes de aviso y la composición del detalle de movimiento, que ya son la referencia vigente del producto.
 - #493: el flujo de trabajo versiona `scripts/project3.ps1` y la regla «Project 3 siempre al día»; los issues nuevos entran al tablero al crearse y `check` exige `Cancelado` para los cerrados como `not planned`, con el id de esa opción resuelto por nombre.
 - El setup de pruebas de #450 resuelve pantallas con `next/*` y relativos sin extensión, stubea los `.css`, mapea la cobertura con source maps y exige el reintento en el estado de error de Uso (Refs #450; hallazgos de PI-REV).
 - Las pruebas de la web pueden renderizar componentes `.tsx` con `react-dom/server` y el loader de TSX; la vista Uso cubre sus estados de carga, vacío y error con pruebas que afirman los textos y el botón de reintento (#450).
