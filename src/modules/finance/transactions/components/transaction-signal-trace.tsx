@@ -30,7 +30,8 @@ export function TransactionSignalTrace({
         <>
           <SummaryItem
             title="Señal de correo"
-            value={trace.signalId}
+            description={trace.signalId}
+            wrapDescription
             icon={GitBranchIcon}
             isLast={!trace.sourceEmailMessageId}
           />

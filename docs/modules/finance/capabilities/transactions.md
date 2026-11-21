@@ -20,8 +20,10 @@ La lista de Movimientos suma a cada mes una sección **Programados** con la pró
 
 Un movimiento `REVERSED` lleva la etiqueta “Revertido” en la lista y el detalle, sin sumar a los totales; si tiene un movimiento vinculado, el detalle enlaza al original.
 
+El detalle pinta la fila de la cuenta o de la tarjeta solo cuando el movimiento la tiene: un movimiento con tarjeta no muestra «Cuenta: Sin cuenta» ni uno con cuenta muestra «Tarjeta: Sin tarjeta». Si el producto no está en el catálogo cargado, la fila usa el nombre que trae el movimiento.
+
 El detalle muestra `planningLink` y permite vincular el movimiento a una cuota de préstamo, un cobro o una meta (`POST/DELETE /transactions/:id/link`). Vincular no crea un movimiento nuevo y quitar el vínculo revierte el efecto.
 
-Cuando el movimiento se importó desde una señal, el detalle muestra su id de señal y el correo de origen usando `aiMetadata.signalId` y `aiMetadata.sourceEmailMessageId`. El correo abre su detalle por la hoja de Inteligencia en la URL; cerrar la hoja vuelve al movimiento de origen. Si el movimiento no tiene señal, la sección explica que no hay trazabilidad de correo.
+Cuando el movimiento se importó desde una señal, el detalle muestra su id de señal y el correo de origen usando `aiMetadata.signalId` y `aiMetadata.sourceEmailMessageId`. El correo abre su detalle por la hoja de Inteligencia en la URL; cerrar la hoja vuelve al movimiento de origen. Si el movimiento no tiene señal, la sección explica que no hay trazabilidad de correo. El id de la señal va debajo de «Señal de correo» y se parte en varias líneas en móvil, así que la etiqueta se lee completa.
 
 Evidencia: `src/modules/finance/transactions/`, `src/modules/finance/shared/hooks/use-transactions.ts`, `src/modules/finance/shared/lib/ledger-form.ts` + specs.

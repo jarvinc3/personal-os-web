@@ -135,14 +135,14 @@ export function TransactionDetailFacts({
               display={display}
               variant="compact"
             />
-          ) : (
+          ) : tx.accountName ? (
             <SummaryItem
               title="Cuenta"
-              value={tx.accountName ?? "Sin cuenta"}
+              value={tx.accountName}
               isLast={false}
               className="px-3"
             />
-          )}
+          ) : null}
           {card ? (
             <CardProductRow
               card={card}
@@ -150,14 +150,14 @@ export function TransactionDetailFacts({
               display={display}
               variant="compact"
             />
-          ) : (
+          ) : tx.cardName ? (
             <SummaryItem
               title="Tarjeta"
-              value={tx.cardName ?? "Sin tarjeta"}
+              value={tx.cardName}
               isLast={false}
               className="px-3"
             />
-          )}
+          ) : null}
           {merchant ? (
             <MerchantCard
               merchant={merchant}
