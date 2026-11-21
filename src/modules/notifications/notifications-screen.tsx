@@ -180,7 +180,7 @@ function NotificationsScreenBody() {
         onOpenPreferences={() => setPrefsOpen(true)}
       />
     ),
-    [handleMarkAllRead, isMarkAllPending, notifications.length]
+    [handleMarkAllRead, isMarkAllPending, notifications.length, setPrefsOpen]
   )
 
   usePageHeader(

@@ -101,7 +101,7 @@ export function KeepAwakeReminderPrompt({
       unsub()
       document.removeEventListener("visibilitychange", onVisible)
     }
-  }, [locale])
+  }, [locale, setPromptOpen])
 
   return (
     <BottomSheet
