@@ -7,6 +7,7 @@ import {
 import { SettingsSecondaryPage } from "@/src/modules/settings/components/layout/settings-secondary-page"
 import { EditQuietHoursSheet } from "@/src/modules/settings/components/sheets/edit-quiet-hours-sheet"
 import { SETTINGS_REGISTRY } from "@/src/modules/settings/constants/settings-metadata"
+import { SETTINGS_SHEET_KEYS } from "@/src/modules/settings/constants/sheet-keys"
 import { usePreferenceToggle } from "@/src/modules/settings/hooks/use-preference-toggle"
 import { useProfile } from "@/src/modules/settings/hooks/use-profile"
 import { SettingsGate } from "@/src/modules/settings/settings-gate"
@@ -31,7 +32,7 @@ function NotificationsSettingsScreenBody() {
   const { preferences } = useProfile()
   const togglePreference = usePreferenceToggle()
   const { open: openQuietHoursSheet, setOpen: setOpenQuietHoursSheet } =
-    useSheetParam("quiet-hours-sheet")
+    useSheetParam(SETTINGS_SHEET_KEYS.quietHours)
   const quietHours = preferences.notifications.quietHours
 
   return (

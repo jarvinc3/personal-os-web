@@ -6,6 +6,7 @@ import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/asyn
 import { StatementImportButton } from "@/src/modules/finance/shared/components/statement-import-button"
 import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
 import { CardStatementSheet } from "@/src/modules/finance/cards/components/card-statement-sheet"
+import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import { formatCalendarDate } from "@/src/modules/finance/shared/lib/ledger-form"
 import { useFormatLocale } from "@/src/modules/settings/hooks/use-format-locale"
 import {
@@ -114,7 +115,7 @@ export function CardStatementsSection({
   isFetchingNextPage,
   onLoadMore,
 }: CardStatementsSectionProps) {
-  const statementSheet = useSheetParam("card-statement-sheet")
+  const statementSheet = useSheetParam(FINANCE_SHEET_KEYS.cardStatement)
   const [statementEditing, setStatementEditing] = useState(false)
   return (
     <>

@@ -60,6 +60,7 @@ export const COMPONENT_GALLERY_SECTIONS: readonly ComponentGallerySection[] = [
       "SelectField",
       "ColorPickerSwatch",
       "WheelField + TimePairWheels",
+      "DayListField",
     ],
   },
   {
@@ -120,6 +121,7 @@ export const COMPONENT_GALLERY_SECTIONS: readonly ComponentGallerySection[] = [
       "Empty compacta",
       "Spinner + LoadingView",
       "ErrorState",
+      "ModuleComingSoon",
     ],
   },
   {

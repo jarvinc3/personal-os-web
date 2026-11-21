@@ -1,11 +1,5 @@
 import type { Metadata, Viewport } from "next"
-import {
-  IBM_Plex_Mono,
-  Noto_Sans,
-  Geist,
-  Public_Sans,
-  Nunito_Sans,
-} from "next/font/google"
+import { IBM_Plex_Mono, Public_Sans, Nunito_Sans } from "next/font/google"
 
 import { appMetadata } from "@/src/shared/constants/app-metadata"
 import { AppEffectsProvider } from "@/src/providers/app-effects-provider"

@@ -13,7 +13,7 @@ Toda vista que renderiza una lista trae más filas a medida que el usuario baja.
 - Un fallo al traer la siguiente tanda muestra un aviso con reintento y no rompe lo ya cargado.
 - El tamaño de tanda es un valor único y con nombre (`limit`), no un número suelto por vista.
 
-En código, una lista paginada es `useInfiniteQuery` de TanStack Query con `getNextPageParam`, y el disparador de scroll es un `IntersectionObserver` sobre un centinela al final de la lista. No uses `useState` de página ni botones de paginación. Molde de la mecánica: `src/modules/notifications/hooks/use-notifications.ts` (ya usa `useInfiniteQuery`; le falta disparar por scroll).
+En código, una lista paginada es `useInfiniteQuery` de TanStack Query con `getNextPageParam`, y el disparador de scroll es un `IntersectionObserver` sobre un centinela al final de la lista. No uses `useState` de página ni botones de paginación. Molde de la mecánica: `useInfiniteQuery` con el centinela compartido `InfiniteListSentinel` (`src/shared/components/feedback/infinite-list-sentinel.tsx`).
 
 ## Contrato del API
 

@@ -8,6 +8,7 @@ import {
   ListSkeleton,
 } from "@/src/shared/components/feedback/list-skeleton"
 import { LoadingView } from "@/src/shared/components/feedback/loading-view"
+import { ModuleComingSoon } from "@/src/shared/components/feedback/module-coming-soon"
 import { Button } from "@/src/shared/components/ui/button"
 import {
   EMPTY_COMPACT_CLASS_NAME,
@@ -147,6 +148,15 @@ export function StatesSection() {
             isRetrying
           />
         </div>
+      </GalleryDemo>
+
+      <GalleryDemo
+        name="ModuleComingSoon"
+        importPath="@/src/shared/components/feedback/module-coming-soon"
+        states="app sin pantallas propias"
+        note="La app está activa y configurable, pero sus vistas todavía no existen. Lleva a Ajustes."
+      >
+        <ModuleComingSoon slug="agenda" />
       </GalleryDemo>
     </>
   )

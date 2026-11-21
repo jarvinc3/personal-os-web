@@ -4,6 +4,7 @@ import { EditAppearanceStyleSheet } from "@/src/modules/settings/components/shee
 import { EditPrimaryColorSheet } from "@/src/modules/settings/components/sheets/edit-primary-color-sheet"
 import { SettingsSecondaryPage } from "@/src/modules/settings/components/layout/settings-secondary-page"
 import { EditThemeSheet } from "@/src/modules/settings/components/sheets/edit-theme-sheet"
+import { SETTINGS_SHEET_KEYS } from "@/src/modules/settings/constants/sheet-keys"
 import {
   getThemeOptionLabel,
   SETTINGS_REGISTRY,
@@ -33,12 +34,14 @@ export function AppearanceSettingsScreen() {
 function AppearanceSettingsScreenBody() {
   const { preferences } = useProfile()
   const { navigate, isPending } = usePendingNavigation()
-  const { open: openThemeSheet, setOpen: setOpenThemeSheet } =
-    useSheetParam("theme-sheet")
-  const { open: openStyleSheet, setOpen: setOpenStyleSheet } =
-    useSheetParam("style-sheet")
+  const { open: openThemeSheet, setOpen: setOpenThemeSheet } = useSheetParam(
+    SETTINGS_SHEET_KEYS.theme
+  )
+  const { open: openStyleSheet, setOpen: setOpenStyleSheet } = useSheetParam(
+    SETTINGS_SHEET_KEYS.style
+  )
   const { open: openColorSheet, setOpen: setOpenColorSheet } = useSheetParam(
-    "primary-color-sheet"
+    SETTINGS_SHEET_KEYS.primaryColor
   )
   const themeValue = getSettingValue<ThemeValue>(preferences.theme)
   const { style, primaryColor } = preferences.theme
