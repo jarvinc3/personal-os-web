@@ -284,4 +284,15 @@ describe("grupos de revisión", () => {
       "ready"
     )
   })
+
+  it("mantiene los grupos cargados cuando falla la siguiente tanda", () => {
+    const state = resolveReviewGroupsSectionState({
+      enabled: true,
+      isPending: false,
+      isError: true,
+      groupCount: 2,
+    })
+
+    assert.equal(state, "ready")
+  })
 })
