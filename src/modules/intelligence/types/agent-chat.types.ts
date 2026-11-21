@@ -4,6 +4,7 @@ type AiSchemas = components["schemas"]
 
 /** Nombres del feature para los DTO de conversaciones del contrato. */
 export type AgentConversationSummary = AiSchemas["AiConversationSummaryDto"]
+export type AgentConversationPage = AiSchemas["AiConversationPageDto"]
 export type AgentConversationDetail = AiSchemas["AiConversationDetailDto"]
 export type AgentConversationMessage = AiSchemas["AiConversationMessageDto"]
 export type AgentConversationCreated = AiSchemas["AiConversationCreatedDto"]

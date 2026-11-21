@@ -55,6 +55,7 @@ import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import { SelectField } from "@/src/shared/components/forms/select-field"
 import {
   ALL_MESSAGE_STATUSES,
+  MESSAGE_STATUS_FILTERS,
   MESSAGE_STATUS_LABELS,
   type MessageStatusFilter,
 } from "@/src/modules/intelligence/message-filters"
@@ -741,11 +742,7 @@ function IntelligenceScreenBody() {
                         value: ALL_MESSAGE_STATUSES,
                         label: "Todos los estados",
                       },
-                      ...(
-                        Object.keys(MESSAGE_STATUS_LABELS) as Array<
-                          keyof typeof MESSAGE_STATUS_LABELS
-                        >
-                      ).map((status) => ({
+                      ...MESSAGE_STATUS_FILTERS.map((status) => ({
                         value: status,
                         label: MESSAGE_STATUS_LABELS[status],
                       })),
