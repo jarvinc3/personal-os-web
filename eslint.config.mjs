@@ -56,9 +56,8 @@ function escapeRegExp(value) {
   return value.replace(/[.*+?^${}()|[\]/\\]/g, "\\$&")
 }
 
-const SETTINGS_ALLOWED_SOURCES = SETTINGS_DIRECT_IMPORT_ALLOWED.map(
-  escapeRegExp
-).join("|")
+const SETTINGS_ALLOWED_SOURCES =
+  SETTINGS_DIRECT_IMPORT_ALLOWED.map(escapeRegExp).join("|")
 
 const SETTINGS_DEEP_IMPORT_RESTRICTION = {
   selector: `ImportDeclaration[source.value=/^@\\/src\\/modules\\/settings\\/.+/]:not([source.value=/^(${SETTINGS_ALLOWED_SOURCES})(\\/.*)?$/])`,
@@ -206,6 +205,42 @@ const eslintConfig = defineConfig([
       ],
     },
   },
+  // Reglas de forma de CODING_GUIDELINES.md. Entran en `warn` para señalar el
+  // backlog existente sin romper el CI; se suben a `error` cuando esté limpio.
+  {
+    files: ["**/*.{ts,tsx}"],
+    languageOptions: {
+      parserOptions: {
+        // Los tipos viven en tsconfig.eslint.json porque el tsconfig de la app
+        // excluye los .spec.ts y las reglas con tipos los necesitan.
+        project: ["./tsconfig.eslint.json"],
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
+    rules: {
+      "@typescript-eslint/no-explicit-any": "warn",
+      "@typescript-eslint/switch-exhaustiveness-check": "warn",
+      "no-nested-ternary": "warn",
+      "max-depth": ["warn", 4],
+      complexity: ["warn", 12],
+    },
+  },
+  {
+    // El tamaño y las promesas se miden sobre el código de producción: un spec
+    // declara bloques largos por diseño y `test()` devuelve una promesa.
+    files: ["**/*.{ts,tsx}"],
+    ignores: ["**/*.spec.ts"],
+    rules: {
+      "max-lines-per-function": ["warn", 120],
+      "max-lines": [
+        "warn",
+        { max: 300, skipBlankLines: true, skipComments: true },
+      ],
+      "max-params": ["warn", 3],
+      "@typescript-eslint/no-floating-promises": "warn",
+      "@typescript-eslint/no-misused-promises": "warn",
+    },
+  },
   {
     // Los .spec.ts quedan exentos de la regla de imports absolutos.
     files: ["**/*.spec.ts"],
@@ -218,7 +253,12 @@ const eslintConfig = defineConfig([
   // Settings: los genéricos se importan por ruta directa solo desde los caminos
   // de la lista; dentro de settings rige la frontera normal.
   {
-    files: ["src/shared/**/*.{ts,tsx}", "src/providers/**/*.{ts,tsx}", "src/config/**/*.{ts,tsx}", "src/modules/**/*.{ts,tsx}"],
+    files: [
+      "src/shared/**/*.{ts,tsx}",
+      "src/providers/**/*.{ts,tsx}",
+      "src/config/**/*.{ts,tsx}",
+      "src/modules/**/*.{ts,tsx}",
+    ],
     ignores: ["src/modules/settings/**", "**/*.spec.ts"],
     rules: {
       "no-restricted-syntax": [
