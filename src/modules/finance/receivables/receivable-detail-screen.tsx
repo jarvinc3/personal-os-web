@@ -192,7 +192,7 @@ function ReceivableDetailScreenBody({
         </Button>
       </>
     ),
-    []
+    [setOptionsOpen]
   )
 
   usePageHeader(
