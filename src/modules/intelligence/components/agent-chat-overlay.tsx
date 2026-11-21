@@ -100,7 +100,7 @@ export function AgentChatOverlay({
     initialContext,
     !conversationId && !newChat
   )
-  const history = usePicker(AGENT_CHAT_HISTORY_PICKER)
+  const history = usePicker<"none" | typeof AGENT_CHAT_HISTORY_PICKER>("none")
 
   const activeConversation =
     conversationQuery.data ??
