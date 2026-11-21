@@ -54,6 +54,8 @@ Hoy el único `ModuleAppNav` cableado es `FINANCE_APP_NAV`. El Centro de ayuda (
 
 Regla de activo: `isModuleSectionActive(item, pathname)` — href (+ hijos si no `matchExact`) o `extraActiveHrefs`.
 
+En escritorio, `ModuleSectionLayout` reserva 80 px a la derecha cuando la vista registra un botón flotante (`ExpandableFab`), para que el FAB no tape badges ni contadores de las filas que pasan por debajo. En móvil el FAB cuelga del tab bar y el carril no aplica.
+
 ### Menú lateral en móvil
 
 Menos de 768 px, `Sidebar` pinta un `Drawer` de `vaul` con dirección izquierda. Se abre con el botón del header, con Ctrl/Cmd + B o con un deslizamiento a la derecha que empieza dentro de los 32 px del borde izquierdo (`useSidebarEdgeSwipe`, montado en `PrimaryHeader` solo cuando el trigger visible). La decisión del gesto y sus constantes viven en `src/shared/lib/sidebar-edge-swipe.ts`, con su `.spec.ts`.

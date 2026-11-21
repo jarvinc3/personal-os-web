@@ -9,6 +9,7 @@ import {
   Clock3,
   Eraser,
   Focus,
+  GitCompareArrows,
   Inbox,
   ListFilter,
   RotateCcw,
@@ -352,30 +353,6 @@ export function AiEvidenceSection({
               key={run.id}
               className="flex items-center gap-2 rounded-lg border px-2"
             >
-              <Button
-                type="button"
-                variant={
-                  selectedRunIds.includes(run.id) ? "secondary" : "ghost"
-                }
-                size="sm"
-                aria-pressed={selectedRunIds.includes(run.id)}
-                aria-label={`Seleccionar análisis ${run.id} para comparar`}
-                onClick={() =>
-                  setSelectedRunIds((current) =>
-                    current.includes(run.id)
-                      ? current.filter((id) => id !== run.id)
-                      : current.length < 2
-                        ? [...current, run.id]
-                        : [current[1], run.id]
-                  )
-                }
-              >
-                {selectedRunIds.includes(run.id) ? (
-                  <Check aria-hidden="true" />
-                ) : (
-                  "Comparar"
-                )}
-              </Button>
               <div className="min-w-0 flex-1">
                 <SummaryItem
                   key={run.id}
@@ -396,6 +373,35 @@ export function AiEvidenceSection({
                     {formatRunMetrics(run.metrics)}
                   </p>
                 ) : null}
+              </div>
+              <div className="flex shrink-0 flex-col items-end gap-1">
+                <Button
+                  type="button"
+                  variant={
+                    selectedRunIds.includes(run.id) ? "secondary" : "ghost"
+                  }
+                  size="sm"
+                  aria-pressed={selectedRunIds.includes(run.id)}
+                  aria-label={`Seleccionar análisis ${run.id} para comparar`}
+                  onClick={() =>
+                    setSelectedRunIds((current) =>
+                      current.includes(run.id)
+                        ? current.filter((id) => id !== run.id)
+                        : current.length < 2
+                          ? [...current, run.id]
+                          : [current[1], run.id]
+                    )
+                  }
+                >
+                  {selectedRunIds.includes(run.id) ? (
+                    <Check aria-hidden="true" />
+                  ) : (
+                    <>
+                      <GitCompareArrows aria-hidden="true" />
+                      Comparar
+                    </>
+                  )}
+                </Button>
                 {run.mode === "EVALUATE" && run.status === "COMPLETED" ? (
                   <Button
                     type="button"
@@ -411,6 +417,7 @@ export function AiEvidenceSection({
                       })
                     }
                   >
+                    <RotateCcw aria-hidden="true" />
                     Reejecutar
                   </Button>
                 ) : null}

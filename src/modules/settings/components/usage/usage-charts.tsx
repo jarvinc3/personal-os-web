@@ -202,7 +202,7 @@ function UsagePeriodCharts({ rows, period, locale }: UsagePeriodChartsProps) {
 
       <UsageChartCard
         title="Costo estimado"
-        description="Costo registrado por el back, en USD."
+        description="Lo que costó clasificar los correos, en USD."
         icon={CircleDollarSignIcon}
       >
         <ChartContainer

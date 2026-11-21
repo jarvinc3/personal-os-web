@@ -33,8 +33,8 @@ export function UsageBreakdowns({
     <div className="flex flex-col gap-6">
       {byBank.length ? (
         <SettingsSection
-          title="Por banco"
-          description="Dominio del remitente; suma el total de clasificaciones."
+          title="Por remitente"
+          description="Se agrupan por quién envió cada correo clasificado."
         >
           {byBank.map((bucket, index) => (
             <UsageBreakdownRow
@@ -51,7 +51,7 @@ export function UsageBreakdowns({
       {byType.length ? (
         <SettingsSection
           title="Por tipo de clasificación"
-          description="Tipo semántico que asignó el clasificador."
+          description="Qué clase de correo es cada uno."
         >
           {byType.map((bucket, index) => (
             <UsageBreakdownRow

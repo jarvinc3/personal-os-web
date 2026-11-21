@@ -32,7 +32,7 @@ export function UsageTotals({ totals, rangeLabel, locale }: UsageTotalsProps) {
       />
       <SettingsRow
         label="Costo estimado"
-        description="Sale del registro de llamadas; la vista no lo recalcula."
+        description="Lo que costó clasificar los correos del rango."
         value={formatUsageCost(totals.costUsd, locale)}
         isLast
       />

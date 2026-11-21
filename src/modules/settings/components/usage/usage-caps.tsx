@@ -57,7 +57,7 @@ export function UsageCaps({ caps, now, locale }: UsageCapsProps) {
     <div className="flex flex-col gap-3">
       <SettingsSection
         title="Topes"
-        description="El consumo y el restante salen del back; los topes diarios se reinician a las 00:00 UTC."
+        description="Los topes diarios se reinician a las 00:00 UTC."
       >
         <UsageCapRow
           label="Carga inicial"
