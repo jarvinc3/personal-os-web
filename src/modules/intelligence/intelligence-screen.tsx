@@ -85,6 +85,7 @@ import {
 } from "lucide-react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useIntelligence } from "./hooks/use-intelligence"
+import { useReviewRequiredCount } from "./hooks/use-ai-evidence"
 import {
   getMessagesRateLimitError,
   MESSAGES_RATE_LIMIT_MAX_AUTO_RETRIES,
@@ -138,6 +139,9 @@ function IntelligenceScreenBody() {
   } = useIntelligence({
     messageFilter: { query: messageQuery, status: messageStatus },
   })
+  const reviewRequiredCountQuery = useReviewRequiredCount(
+    Boolean(dashboardQuery.data?.connection.connected)
+  )
   const [resetDialogOpen, setResetDialogOpen] = useState(false)
   const tabsBehavior = useTabsBehavior({
     defaultValue: "messages",
@@ -173,9 +177,7 @@ function IntelligenceScreenBody() {
   )
   const messageFiltersActive =
     messageQuery.trim().length > 0 || messageStatus !== ALL_MESSAGE_STATUSES
-  const reviewRequiredCount = messages.filter(
-    (message) => message.processingStatus === "REVIEW_REQUIRED"
-  ).length
+  const reviewRequiredCount = reviewRequiredCountQuery.data
   const {
     hasNextPage,
     isFetching: isFetchingMessages,
@@ -719,8 +721,10 @@ function IntelligenceScreenBody() {
                 <div className="flex flex-col gap-2">
                   <p className="px-1 text-xs text-muted-foreground">
                     {messages.length}{" "}
-                    {messages.length === 1 ? "correo" : "correos"} ·{" "}
-                    {reviewRequiredCount} en revisión
+                    {messages.length === 1 ? "correo" : "correos"}
+                    {reviewRequiredCount === undefined
+                      ? null
+                      : ` · ${reviewRequiredCount} en revisión`}
                   </p>
                   <FormTextField
                     value={messageQuery}
