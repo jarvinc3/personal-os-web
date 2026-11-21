@@ -32,6 +32,7 @@ import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { usePicker } from "@/src/shared/hooks/use-picker"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { appToast } from "@/src/shared/lib/app-toast"
+import { resolveInfiniteListErrorState } from "@/src/shared/lib/infinite-list-error"
 import { SettingsIcon } from "lucide-react"
 import { useCallback, useMemo, useState } from "react"
 import { useFormatLocale } from "@/src/modules/settings/hooks/use-format-locale"
@@ -85,6 +86,11 @@ function NotificationsScreenBody() {
     () => notificationsQuery.data?.pages.flatMap((page) => page.items) ?? [],
     [notificationsQuery.data?.pages]
   )
+
+  const notificationsErrorState = resolveInfiniteListErrorState({
+    hasError: notificationsQuery.isError,
+    itemCount: notifications.length,
+  })
 
   const moduleOptions = useMemo(() => {
     const present = new Set<ModuleSlug>()
@@ -217,7 +223,7 @@ function NotificationsScreenBody() {
     )
   }
 
-  if (notificationsQuery.isError) {
+  if (notificationsErrorState === "full") {
     return (
       <div className="mx-auto flex max-w-2xl flex-col gap-4 p-4 pb-16 md:px-6">
         <ErrorState
