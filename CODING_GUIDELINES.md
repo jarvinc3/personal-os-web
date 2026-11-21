@@ -181,18 +181,18 @@ El schema Zod del input es el contrato. Se parsea en el borde: el formulario o e
 
 **Sin `any`.** Apaga todas las comprobaciones sobre el valor y se propaga a cada caller. `@typescript-eslint/no-explicit-any` está activo.
 
-**`unknown` en el borde, validado antes de usarlo.** Un dato que viene de fuera (respuesta del API, `localStorage`, un mensaje del navegador) es `unknown` hasta que un schema demuestra su forma.
+**`unknown` en el borde, validado antes de usarlo.** Un dato que viene de fuera (el input de un formulario, un payload del API, `localStorage`) es `unknown` hasta que un schema demuestra su forma.
 
 ```ts
 // Mal — el cast convierte un fallo de runtime en un fallo silencioso
-const cached = JSON.parse(raw) as FinanceBudget[]
+const values = input as BudgetFormValues
 
-// Bien — unknown hasta que Zod demuestra la forma
-const parsed = budgetsSchema.safeParse(JSON.parse(raw))
+// Bien — unknown hasta que el schema demuestra la forma
+const parsed = budgetSchema.safeParse(input)
 if (!parsed.success) {
-  throw new Error(`Presupuestos guardados inválidos: ${parsed.error.message}`)
+  throw new Error(`Presupuesto inválido: ${parsed.error.message}`)
 }
-const cached: FinanceBudget[] = parsed.data
+const values: BudgetFormValues = parsed.data
 ```
 
 **`as` solo con el motivo escrito.** Un cast es una promesa al compilador de que sabes más que él. Si el motivo no cabe en una línea, el cast esconde un problema de diseño.
@@ -479,13 +479,13 @@ function BudgetCard({
   display,
 }: {
   budget: FinanceBudget
-  display: Display
+  display: FinanceMoneyDisplay
 }) {}
 
 // Bien — el tipo tiene nombre, se exporta si otro bloque lo compone
 type BudgetCardProps = {
   budget: FinanceBudget
-  display: DisplayConfig
+  display: FinanceMoneyDisplay
   onOpen?: (budget: FinanceBudget) => void
 }
 
@@ -570,7 +570,7 @@ El foco inicial por defecto lo elige base-ui. Cuando la hoja es de lectura y el 
 
 - El primer campo de un formulario es el foco natural al abrir; no hace falta pedirlo.
 - Al cerrar, el foco vuelve a quien abrió la hoja. Si la acción que abrió la hoja ya no existe (la fila se borró), el foco se va a un punto estable de la pantalla y no al `body`.
-- Un sheet abierto por ruta (`useSheetParams`) se abre y se cierra con el botón atrás del navegador. No cierres con `router.push` a mano ni dejes la URL con el parámetro abierto y la hoja cerrada.
+- Un sheet abierto por ruta (`useSheetParam`) se abre y se cierra con el botón atrás del navegador. No cierres con `router.push` a mano ni dejes la URL con el parámetro abierto y la hoja cerrada.
 - Una hoja no anidada dentro de otra hoja salvo el caso de un selector, que ya resuelve `?picker=` en [`.cursor/rules/sheet-url-route.mdc`](.cursor/rules/sheet-url-route.mdc).
 - Un backdrop que se cierra con click también se cierra con `Escape`, y el botón de cerrar es alcanzable con teclado.
 
