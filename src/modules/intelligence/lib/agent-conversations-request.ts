@@ -7,7 +7,7 @@ export const AGENT_CONVERSATIONS_PAGE_SIZE = 20
 export function buildAgentConversationsPath({
   cursor,
 }: {
-  cursor?: string | null
+  cursor?: string
 }): string {
   const params = new URLSearchParams({
     limit: String(AGENT_CONVERSATIONS_PAGE_SIZE),

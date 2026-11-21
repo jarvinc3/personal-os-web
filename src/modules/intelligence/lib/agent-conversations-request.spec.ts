@@ -24,10 +24,7 @@ describe("buildAgentConversationsPath", () => {
   })
 
   it("sin cursor no manda el parámetro", () => {
-    assert.doesNotMatch(
-      buildAgentConversationsPath({ cursor: null }),
-      /cursor=/
-    )
+    assert.doesNotMatch(buildAgentConversationsPath({}), /cursor=/)
     assert.doesNotMatch(buildAgentConversationsPath({ cursor: "" }), /cursor=/)
   })
 })

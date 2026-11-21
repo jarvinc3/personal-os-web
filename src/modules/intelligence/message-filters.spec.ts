@@ -20,11 +20,5 @@ describe("MESSAGE_STATUS_FILTERS", () => {
       [...MESSAGE_STATUS_FILTERS],
       ["INGESTED", "QUEUED", "PROCESSED", "REVIEW_REQUIRED", "FAILED"]
     )
-    assert.ok(
-      !(MESSAGE_STATUS_FILTERS as readonly string[]).includes("CLASSIFYING")
-    )
-    assert.ok(
-      !(MESSAGE_STATUS_FILTERS as readonly string[]).includes("DISCARDED")
-    )
   })
 })
