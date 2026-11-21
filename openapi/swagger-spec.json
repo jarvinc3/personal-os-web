@@ -12824,7 +12824,8 @@
               "receivable",
               "subscription",
               "merchant",
-              "category"
+              "category",
+              "institution"
             ]
           },
           "id": {
@@ -19435,7 +19436,8 @@
               "receivable",
               "subscription",
               "merchant",
-              "category"
+              "category",
+              "institution"
             ],
             "description": "Finance product the reference points at"
           },

@@ -4035,7 +4035,7 @@ export type components = {
         };
         AiInvocationEntityRefDto: {
             /** @enum {string} */
-            type: "transaction" | "account" | "card" | "loan" | "budget" | "savings_goal" | "receivable" | "subscription" | "merchant" | "category";
+            type: "transaction" | "account" | "card" | "loan" | "budget" | "savings_goal" | "receivable" | "subscription" | "merchant" | "category" | "institution";
             /** Format: uuid */
             id: string;
         };
@@ -6035,7 +6035,7 @@ export type components = {
              * @description Finance product the reference points at
              * @enum {string}
              */
-            type: "transaction" | "account" | "card" | "loan" | "budget" | "savingsGoal" | "receivable" | "subscription" | "merchant" | "category";
+            type: "transaction" | "account" | "card" | "loan" | "budget" | "savingsGoal" | "receivable" | "subscription" | "merchant" | "category" | "institution";
             /** Format: uuid */
             id: string;
         };
