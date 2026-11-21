@@ -38,7 +38,8 @@ import {
 import { useCards } from "@/src/modules/finance/shared/hooks/use-cards"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
 import { useInstitutions } from "@/src/modules/finance/shared/hooks/use-institutions"
-import { useAllTransactions } from "@/src/modules/finance/shared/hooks/use-transactions"
+import { allTransactionsQueryOptions } from "@/src/modules/finance/shared/hooks/use-transactions"
+import { useUserTimeZone } from "@/src/modules/settings/hooks/use-user-time-zone"
 import {
   financeErrorMessage,
   financeLoadErrorMessage,
@@ -51,7 +52,10 @@ import {
 } from "@/src/modules/finance/shared/lib/month-window"
 import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 import { shortMonthLabel } from "@/src/shared/lib/date-format"
-import { visibleTransactionTotals } from "@/src/modules/finance/shared/lib/transactions-query"
+import {
+  visibleTransactionTotals,
+  mergeTransactionsById,
+} from "@/src/modules/finance/shared/lib/transactions-query"
 import { DeleteRecordDialog } from "@/src/modules/finance/shared/components/delete-record-dialog"
 import { ArchiveRecordDialog } from "@/src/modules/finance/shared/components/archive-record-dialog"
 import { RecordOptionsSheet } from "@/src/modules/finance/shared/components/record-options-sheet"
@@ -76,6 +80,7 @@ import {
   WalletIcon,
 } from "lucide-react"
 import { usePathname, useRouter } from "next/navigation"
+import { useQueries } from "@tanstack/react-query"
 import { useState } from "react"
 import { Label } from "@/src/shared/components/ui/label"
 
@@ -140,17 +145,19 @@ function AccountDetailScreenBody({ accountId }: AccountDetailScreenProps) {
   const monthChip =
     `${shortMonthLabel(today, formatLocale)} ${today.getFullYear()}`.toUpperCase()
   const monthBounds = isoMonthBounds(today.getFullYear(), today.getMonth() + 1)
-  const monthQuery = useAllTransactions(isEnabled, {
-    accountId,
-    dateFrom: monthBounds.dateFrom,
-    dateTo: monthBounds.dateTo,
+  const timeZone = useUserTimeZone()
+  const monthQueries = useQueries({
+    queries: movementSources.map((source) => ({
+      ...allTransactionsQueryOptions({ ...monthBounds, ...source }, timeZone),
+      enabled: isEnabled,
+    })),
   })
   const accountDisplay = {
     ...display,
     currency: account?.currency ?? display.currency,
   }
   const monthTotals = visibleTransactionTotals(
-    monthQuery.data ?? [],
+    mergeTransactionsById(monthQueries.map((query) => query.data ?? [])),
     accountDisplay.currency
   )
   const accountDrifts = findProductDrifts(integrityQuery.data?.drifts ?? [], {
@@ -335,6 +342,9 @@ function AccountDetailScreenBody({ accountId }: AccountDetailScreenProps) {
                 </p>
               </div>
             </div>
+            <p className="mt-2 text-[11px] text-white/60">
+              Los totales no incluyen transferencias.
+            </p>
           </div>
         </div>
       </div>
