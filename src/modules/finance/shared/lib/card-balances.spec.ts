@@ -4,6 +4,7 @@ import type { FinanceAccount, FinanceCard } from "../types/entities.ts"
 import {
   canManageCardBalances,
   cardCreditFacts,
+  cardDisplayAmount,
   cardUtilization,
   resolveCardDisplayBalances,
 } from "./card-balances.ts"
@@ -71,6 +72,56 @@ describe("resolveCardDisplayBalances", () => {
     assert.deepEqual(
       resolveCardDisplayBalances(card({ balances: [balance] }), [account]),
       [balance]
+    )
+  })
+})
+
+describe("cardDisplayAmount", () => {
+  it("shows the available credit, not the debt, for a credit card", () => {
+    assert.equal(
+      cardDisplayAmount({
+        id: "balance-1",
+        currency: "DOP",
+        balance: "-22526.58",
+        creditLimit: "62000.00",
+        availableCredit: "-22526.58",
+      }),
+      -22526.58
+    )
+  })
+
+  it("keeps a positive available credit as it comes", () => {
+    assert.equal(
+      cardDisplayAmount({
+        id: "balance-1",
+        currency: "DOP",
+        balance: "0.00",
+        creditLimit: "62000.00",
+        availableCredit: "39500.00",
+      }),
+      39500
+    )
+  })
+
+  it("shows the balance of a debit card", () => {
+    assert.equal(
+      cardDisplayAmount({
+        id: "balance-1",
+        currency: "DOP",
+        balance: "24500",
+      }),
+      24500
+    )
+  })
+
+  it("returns null for a value that cannot be read", () => {
+    assert.equal(
+      cardDisplayAmount({
+        id: "balance-1",
+        currency: "DOP",
+        balance: "abc",
+      }),
+      null
     )
   })
 })

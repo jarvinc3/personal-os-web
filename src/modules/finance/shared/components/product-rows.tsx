@@ -11,6 +11,7 @@ import {
 } from "@/src/modules/finance/shared/constants/catalog"
 import {
   cardCreditFacts,
+  cardDisplayAmount,
   resolveCardDisplayBalances,
 } from "@/src/modules/finance/shared/lib/card-balances"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
@@ -331,13 +332,10 @@ export function CardProductRow({
     const amount =
       balance?.amount ??
       (firstBalance
-        ? formatFinanceMoney(
-            firstBalance.availableCredit ?? firstBalance.balance,
-            {
-              ...display,
-              currency: firstBalance.currency,
-            }
-          )
+        ? formatFinanceMoney(cardDisplayAmount(firstBalance), {
+            ...display,
+            currency: firstBalance.currency,
+          })
         : "Sin saldo")
     const compactClassName = cn(
       "relative flex w-full items-center gap-2.5 overflow-hidden rounded-xl p-2.5 text-left text-white",
@@ -481,10 +479,7 @@ export function CardProductRow({
             return (
               <div key={balance.id} className="flex flex-col">
                 <p className="text-xl font-bold tabular-nums">
-                  {formatFinanceMoney(
-                    balance.availableCredit ?? balance.balance,
-                    moneyDisplay
-                  )}
+                  {formatFinanceMoney(cardDisplayAmount(balance), moneyDisplay)}
                 </p>
                 {!isCredit ? null : facts ? (
                   <>

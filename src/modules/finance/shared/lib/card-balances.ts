@@ -28,6 +28,17 @@ export type CardCreditFacts = CardUtilization & {
 }
 
 /**
+ * Amount a card shows for one currency: the available credit the API projects
+ * for a credit card, or the balance for a debit card. The hero, the
+ * utilization bar and the product rows read this same value.
+ */
+export function cardDisplayAmount(
+  balance: FinanceCardDisplayBalance
+): number | null {
+  return parseFinanceMoney(balance.availableCredit ?? balance.balance)
+}
+
+/**
  * A negative available credit means the card owes more than its limit, so the
  * debt grows and the utilization goes past 100% instead of stopping there.
  */
@@ -55,9 +66,7 @@ export function cardUtilization(input: {
 export function cardCreditFacts(
   balance: FinanceCardDisplayBalance
 ): CardCreditFacts | null {
-  const available = parseFinanceMoney(
-    balance.availableCredit ?? balance.balance
-  )
+  const available = cardDisplayAmount(balance)
   const creditLimit = parseFinanceMoney(balance.creditLimit ?? null)
   if (available === null || creditLimit === null) {
     return null
