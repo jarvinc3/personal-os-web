@@ -50,9 +50,9 @@ App típica: `http://localhost:3000`. CORS del API debe incluir ese origin.
 
 ## Pruebas
 
-`pnpm test` corre node:test con `scripts/test-env.mjs` (variables públicas de prueba), `scripts/alias-register.mjs` (alias `@/`, relativos sin extensión y subpaths de `next/*`) y `scripts/tsx-register.mjs` (compila los `.tsx` con el `typescript` del repo, stubea los `.css` y deja source maps para la cobertura). Una prueba `.spec.ts` puede importar una pantalla completa; para renderizarla, las que usan hooks de router necesitan props o un stub. No hay jsdom ni Testing Library. `pnpm test:coverage` usa el mismo setup y aplica los umbrales de `package.json`.
+`pnpm test` corre node:test con `scripts/test-env.mjs` (variables públicas de prueba), `scripts/alias-register.mjs` (alias `@/`, relativos sin extensión y subpaths de `next/*`) y `scripts/tsx-register.mjs` (compila los `.tsx` con el `typescript` del repo, stubea los `.css` y deja source maps para la cobertura). Una prueba `.spec.ts` puede importar una pantalla completa; para renderizarla, las que usan hooks de router necesitan props o un stub. Las pruebas que simulan interacción usan jsdom: `installTestDom` (`src/shared/lib/fixtures/test-dom.ts`) monta el DOM, renderiza con `act` y expone `pressKey` y `waitForScreen`, y `TestNextRouter` (`src/shared/lib/fixtures/test-next-router.tsx`) da los contextos de `next/navigation`. Instala el DOM antes de importar `react-dom/client` o `next/dynamic`: ambos deciden al cargar si hay navegador. No hay Testing Library. `pnpm test:coverage` usa el mismo setup y aplica los umbrales de `package.json`.
 
-Los estados de una pantalla se prueban afirmando textos, roles y el botón de reintento, sin snapshots de HTML completo. Ejemplos: `src/modules/settings/components/usage/usage-state-view.spec.ts` y `src/shared/lib/tsx-loader.spec.ts`.
+Los estados de una pantalla se prueban afirmando textos, roles y el botón de reintento, sin snapshots de HTML completo. Ejemplos: `src/modules/settings/components/usage/usage-state-view.spec.ts` y `src/shared/lib/tsx-loader.spec.ts`. La prueba que abre el chat del agente como el usuario, `src/modules/intelligence/components/agent-chat-host.spec.ts`, monta el host con sus proveedores, pulsa Ctrl/Cmd+K y espera la hoja.
 
 ## Troubleshooting
 
