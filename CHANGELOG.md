@@ -50,6 +50,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Cambiado
 
+- #560: el ayudante que arma la URL de la hoja abierta se llama `buildOpenedSheetParams`, con verbo primero como los demás del archivo, y el comentario de `clearParams` dice que se aplica al cerrar reescribiendo la URL. Sin cambio de comportamiento.
 - #550: el relleno inferior de `ModuleSectionLayout` sale de una función con guard clauses en vez de un ternario anidado. Las tres clases y sus condiciones no cambian; solo desaparece el aviso de `no-nested-ternary`.
 - #504: el overlay del agente y su historial se cargan bajo demanda, así una ruta autenticada no descarga ese trozo hasta que se abre el chat; el árbol queda con una sola librería de animación (`framer-motion`) y el reorden de categorías usa su mismo primitivo.
 - #501: las cinco hojas de Finanzas que todavía abrían con una clave literal usan `FINANCE_SHEET_KEYS`; el abridor y el glosario comparten el mismo valor y cambiar una clave en la constante los mueve a la vez.

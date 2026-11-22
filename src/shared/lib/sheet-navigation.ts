@@ -146,7 +146,7 @@ function removeParams(
 }
 
 /** URL de la hoja abierta: su clave, sin los parámetros de la vista, y con los suyos. */
-function openedSheetParams(input: {
+function buildOpenedSheetParams(input: {
   searchParams: SearchParamsLike
   key: string
   id?: string | null
@@ -233,11 +233,11 @@ export function resolveSheetNavigation(input: {
       if (!idChanged && !extrasChanged) {
         return { action: "noop" }
       }
-      const next = openedSheetParams(input)
+      const next = buildOpenedSheetParams(input)
       return { action: "replace", url: toUrl(input.pathname, next) }
     }
 
-    const next = openedSheetParams(input)
+    const next = buildOpenedSheetParams(input)
     const url = toUrl(input.pathname, next)
     if (currentSheet === null || input.pushOver) {
       return { action: "push", url }

@@ -91,7 +91,7 @@ export function useSheetParam(
     pushOver = false,
   }: {
     closeMode?: SheetCloseMode
-    /** Params de la hoja que se descartan al cerrarla sin historial. */
+    /** Params de la hoja que se descartan al cerrarla reescribiendo la URL, sin retroceder. */
     clearParams?: readonly string[]
     /** Params de la vista que la hoja no lleva: se descartan al abrirla. */
     clearOnOpen?: readonly string[]
