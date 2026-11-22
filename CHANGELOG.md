@@ -52,6 +52,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Cambiado
 
+- #565: Ajustes deja en `lib` el cálculo de Uso (rango y series) y las preferencias de Notificaciones con sus pruebas; el vaciado por ramas se parte en selección, conteos y secciones detrás del mismo índice exportado. Sin cambio de comportamiento.
 - #576: la suite estrena un DOM de pruebas con jsdom (`installTestDom` y `TestNextRouter`) y la prueba del chat del agente abre la hoja con Ctrl/Cmd+K y comprueba que aparece el overlay, en vez de solo verificar que el componente es una función.
 - #567: los formularios de ajustes de Agenda, Salud y Proyectos marcan con `void` la promesa del envío, como el resto de formularios del repo, para que ESLint no la trate como suelta. Sin cambio de texto ni de manejo de errores.
 - #564: la lógica no visual de Inteligencia sale de la pantalla: el contexto del agente, el sondeo del panel, el estado de la lista de correos, las etiquetas del canal en vivo y la descripción de la clasificación viven en `lib` con sus pruebas, y el estado del canal ya maneja `disconnected` sin `default` silencioso. Sin cambio de comportamiento.
