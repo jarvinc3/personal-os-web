@@ -2,6 +2,11 @@
 
 import { getSupabaseBrowserClient } from "@/src/config/supabase/client"
 import { resolveNotificationsSocketUrl } from "@/src/modules/notifications/lib/notifications-socket-url"
+import {
+  addSocketSubscription,
+  attachSocketSubscriptions,
+  type NotificationsSocketHandler,
+} from "@/src/modules/notifications/lib/notifications-socket-subscriptions"
 import { useAppStore } from "@/src/shared/store/app-store"
 import {
   createContext,
@@ -17,8 +22,6 @@ import { io, type Socket } from "socket.io-client"
 
 export type NotificationsSocketStatus =
   "connecting" | "connected" | "disconnected"
-
-type NotificationsSocketHandler = (payload: unknown) => void
 
 type NotificationsSocketContextValue = {
   status: NotificationsSocketStatus
@@ -68,11 +71,10 @@ export function NotificationsSocketProvider({
       transports: ["websocket"],
     })
 
-    for (const [event, handlers] of handlersRef.current) {
-      for (const handler of handlers) {
-        socket.on(event, handler)
-      }
-    }
+    attachSocketSubscriptions({
+      handlers: handlersRef.current,
+      socket,
+    })
 
     socket.on("connect", () => {
       reconnectAttemptsRef.current = 0
@@ -98,23 +100,13 @@ export function NotificationsSocketProvider({
   }, [reconnectWithFreshToken])
 
   const subscribe = useCallback(
-    (event: string, handler: NotificationsSocketHandler) => {
-      let handlers = handlersRef.current.get(event)
-      if (!handlers) {
-        handlers = new Set()
-        handlersRef.current.set(event, handlers)
-      }
-      handlers.add(handler)
-      socketRef.current?.on(event, handler)
-
-      return () => {
-        handlers?.delete(handler)
-        if (handlers?.size === 0) {
-          handlersRef.current.delete(event)
-        }
-        socketRef.current?.off(event, handler)
-      }
-    },
+    (event: string, handler: NotificationsSocketHandler) =>
+      addSocketSubscription({
+        handlers: handlersRef.current,
+        socketRef,
+        event,
+        handler,
+      }),
     []
   )
 
