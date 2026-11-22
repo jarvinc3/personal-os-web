@@ -115,6 +115,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Corregido
 
+- #552: la guía de la capacidad Catálogo nombra el «Saldo del corte» como la etiqueta vigente de `remaining`, avisa de que es acumulativo y deja de afirmar que la API no expone el pago mínimo: el contrato publica `minimumPayment` y `minimumSource` desde antes.
 - #548: la guía del contrato deja de afirmar que `institution` no está en el contrato. `AiInvocationEntityRefDto` lo enumera desde #499 y el cliente no conserva ningún alias local para ese tipo; la frase ahora describe qué sale de `SendAiConversationMessageDto` y qué acota `AgentInvocationContext`.
 - #499: el agente abre desde una institución sin que la conversación falle. El `entityRef` de tipo `institution` ya existe en el contrato del back, así que la web deja de agregarlo por su cuenta y el tipo sale del `api-schema` generado; una prueba comprueba que todo tipo que arma el contexto está en `AiInvocationEntityRefDto`.
 - #505: `robots.txt` deja de anunciar `/sitemap.xml`; la app es privada y no publica un sitemap.
