@@ -113,7 +113,7 @@ export function ProjectsModuleSettingsForm({ onDone }: { onDone: () => void }) {
     <FormScreen
       onSubmit={(event) => {
         event.preventDefault()
-        onSubmit()
+        void onSubmit()
       }}
       submitEmphasis={moduleEnable.isEnabledDirty}
       submitLabel="Guardar"
