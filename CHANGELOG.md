@@ -121,6 +121,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 - #503: todas las fechas visibles de Inteligencia usan el locale del perfil; la bandeja, la hoja de revisión, la señal de correo y las ejecuciones dejan de caer en `es-DO`.
 - #508: el botón de crear categoría reserva su carril como los demás botones flotantes; en móvil la lista deja espacio para que la última fila y sus acciones no queden debajo.
 - #512: el «Restante» de un corte pasa a llamarse «Saldo del corte» y la lista y la hoja aclaran que los cortes son acumulativos, para que no se sumen como deudas independientes.
+- #514: la etiqueta «Patrimonio» del detalle de Efectivo se lee en blanco sobre la cabecera, y las filas de cuenta sin color dejan de pintar el círculo gris de la decoración; el detalle usa la misma fila canónica con o sin color.
 - #519: el hero de una tarjeta de crédito sobregirada muestra la deuda con su etiqueta, no el disponible negativo; una tarjeta con límite disponible sigue mostrando «Disponible» y una de débito, «Saldo».
 - #520: la pestaña Correos de Inteligencia muestra el total de correos en revisión que devuelve la cola, no solo los de la página cargada; mientras el total no está disponible, el texto no lo presenta como cero.
 - #511: los totales de Ingresos y Egresos del mes en el detalle de una cuenta incluyen los movimientos de sus tarjetas de débito, igual que la lista de la pantalla, y el hero aclara que no cuentan las transferencias.

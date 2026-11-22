@@ -137,7 +137,7 @@ export function AccountProductRow({
   const style = tint ? { backgroundColor: tint } : undefined
   const content = (
     <>
-      <EntitySurface className={cn(disabled && "opacity-45")} />
+      {tint ? <EntitySurface className={cn(disabled && "opacity-45")} /> : null}
 
       <BrandLogo
         name={account.institutionName ?? account.name}
