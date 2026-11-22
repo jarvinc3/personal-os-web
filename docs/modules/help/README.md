@@ -20,7 +20,7 @@ La entrada está en Ajustes → Ayuda. Las rutas exigen sesión (`proxy.ts`). La
 
 ## Glosario
 
-`HELP_TERMS` (`src/modules/help/constants/glossary.ts`) es la única fuente de los términos. `/help/glossary` los lista con buscador y `?term=slug` resalta una entrada. `GlossaryHelpButton` abre un término en una hoja (`?sheet=glossary-sheet&sheetId=slug`) junto a los conceptos de las pantallas de Finanzas.
+`HELP_TERMS` (`src/modules/help/constants/glossary.ts`) es la única fuente de los términos. `/help/glossary` los lista con buscador y `?term=slug` resalta una entrada. `GlossaryHelpButton` abre un término en una hoja con `?picker=sheet-glossary:<slug>`, el mismo esquema que usa el header de una hoja para sus conceptos.
 
 El botón de la derecha del header de una hoja es adaptable:
 
