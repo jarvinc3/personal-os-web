@@ -120,6 +120,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 - #548: la guía del contrato deja de afirmar que `institution` no está en el contrato. `AiInvocationEntityRefDto` lo enumera desde #499 y el cliente no conserva ningún alias local para ese tipo; la frase ahora describe qué sale de `SendAiConversationMessageDto` y qué acota `AgentInvocationContext`.
 - #499: el agente abre desde una institución sin que la conversación falle. El `entityRef` de tipo `institution` ya existe en el contrato del back, así que la web deja de agregarlo por su cuenta y el tipo sale del `api-schema` generado; una prueba comprueba que todo tipo que arma el contexto está en `AiInvocationEntityRefDto`.
 - #516: la fila de trazabilidad de un movimiento muestra la etiqueta «Señal de correo» completa y deja el identificador en una línea secundaria con prefijo `ID`, sin mezclarlo con la etiqueta.
+- #517: la barra de tabs de Planificación no muestra un scroll vertical en móvil; los cuatro tabs conservan el icono encima del texto y su altura se ajusta al contenido.
 - #505: `robots.txt` deja de anunciar `/sitemap.xml`; la app es privada y no publica un sitemap.
 - #503: todas las fechas visibles de Inteligencia usan el locale del perfil; la bandeja, la hoja de revisión, la señal de correo y las ejecuciones dejan de caer en `es-DO`.
 - #508: el botón de crear categoría reserva su carril como los demás botones flotantes; en móvil la lista deja espacio para que la última fila y sus acciones no queden debajo.
