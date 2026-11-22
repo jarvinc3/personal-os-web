@@ -3,41 +3,22 @@
 import { useCallback, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { ChevronRightIcon, SearchIcon, SearchXIcon, XIcon } from "lucide-react"
+import { ChevronRightIcon } from "lucide-react"
 
-import { GALLERY_COMPONENT_METAS } from "@/src/modules/galleries/components/catalog/manifest"
 import {
   groupGalleryMatches,
   searchGalleryComponents,
 } from "@/src/modules/galleries/components/catalog/search"
+import { GALLERY_COMPONENT_METAS } from "@/src/modules/galleries/components/catalog/manifest"
+import { GalleryComponentRow } from "@/src/modules/galleries/components/gallery-component-row"
+import { GallerySearchEmpty } from "@/src/modules/galleries/components/gallery-search-empty"
+import { GallerySearchField } from "@/src/modules/galleries/components/gallery-search-field"
 import { LinkPendingOverlay } from "@/src/shared/components/shell/navigation-pending"
-import { Button } from "@/src/shared/components/ui/button"
-import { Badge } from "@/src/shared/components/ui/badge"
-import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "@/src/shared/components/ui/empty"
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-} from "@/src/shared/components/ui/input-group"
-import {
-  Item,
-  ItemActions,
-  ItemContent,
-  ItemDescription,
-  ItemGroup,
-  ItemMedia,
-  ItemTitle,
-} from "@/src/shared/components/ui/item"
+import { ItemGroup } from "@/src/shared/components/ui/item"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 
-/** Índice con búsqueda de todos los componentes de la galería (#417). */
+/** Índice con búsqueda de todos los componentes de la galería (#417, #597). */
 export function ComponentGalleryScreen() {
   const router = useRouter()
   const [search, setSearch] = useState("")
@@ -49,16 +30,18 @@ export function ComponentGalleryScreen() {
     router.push(APP_ROUTES.app.settingsAppearance)
   }, [router])
 
+  const subtitle = searching
+    ? `${matches.length} resultados`
+    : `${GALLERY_COMPONENT_METAS.length} componentes`
+
   usePageHeader(
     {
       variant: "secondary",
       title: "Componentes",
-      subtitle: searching
-        ? `${matches.length} resultados`
-        : `${GALLERY_COMPONENT_METAS.length} componentes`,
+      subtitle,
       onBack: handleBack,
     },
-    [matches.length, searching, handleBack]
+    [subtitle, handleBack]
   )
 
   return (
@@ -69,36 +52,18 @@ export function ComponentGalleryScreen() {
         aquí lee ni escribe datos del usuario ni llama al back.
       </p>
 
-      <InputGroup className="h-10">
-        <InputGroupAddon align="inline-start">
-          <SearchIcon className="text-muted-foreground" />
-        </InputGroupAddon>
-        <InputGroupInput
-          type="search"
-          value={search}
-          onChange={(event) => setSearch(event.target.value)}
-          placeholder="Buscar componente"
-          aria-label="Buscar en la galería de componentes"
-          autoComplete="off"
-        />
-      </InputGroup>
+      <GallerySearchField
+        value={search}
+        onValueChange={setSearch}
+        label="Buscar en la galería de componentes"
+        placeholder="Buscar componente"
+      />
 
       {matches.length === 0 ? (
-        <Empty>
-          <EmptyHeader>
-            <EmptyMedia variant="icon">
-              <SearchXIcon aria-hidden="true" />
-            </EmptyMedia>
-            <EmptyTitle>Sin resultados</EmptyTitle>
-            <EmptyDescription>
-              Ningún componente coincide con «{search.trim()}».
-            </EmptyDescription>
-          </EmptyHeader>
-          <Button type="button" variant="outline" onClick={() => setSearch("")}>
-            <XIcon />
-            Limpiar búsqueda
-          </Button>
-        </Empty>
+        <GallerySearchEmpty
+          term={search.trim()}
+          onClear={() => setSearch("")}
+        />
       ) : (
         <div className="flex min-w-0 flex-col gap-5">
           {groups.map(({ category, components }) => {
@@ -126,33 +91,12 @@ export function ComponentGalleryScreen() {
                 </div>
                 <ItemGroup className="gap-2">
                   {components.map((doc) => (
-                    <Item
+                    <GalleryComponentRow
                       key={`${doc.category}-${doc.id}`}
-                      render={
-                        <Link href={componentRoute(doc)} className="relative" />
-                      }
-                      className="items-center"
-                    >
-                      <ItemMedia variant="icon">
-                        <Icon />
-                      </ItemMedia>
-                      <ItemContent className="min-w-0">
-                        <ItemTitle>{doc.name}</ItemTitle>
-                        <ItemDescription>{doc.description}</ItemDescription>
-                        <code className="block truncate text-[0.7rem] text-muted-foreground">
-                          {doc.importPath}
-                        </code>
-                      </ItemContent>
-                      <ItemActions>
-                        <Badge
-                          variant={doc.kind === "ui" ? "secondary" : "outline"}
-                        >
-                          {doc.kind === "ui" ? "shadcn" : "dominio"}
-                        </Badge>
-                        <ChevronRightIcon className="size-4 shrink-0 text-muted-foreground" />
-                      </ItemActions>
-                      <LinkPendingOverlay />
-                    </Item>
+                      doc={doc}
+                      icon={Icon}
+                      query={search}
+                    />
                   ))}
                 </ItemGroup>
               </section>
@@ -162,8 +106,4 @@ export function ComponentGalleryScreen() {
       )}
     </div>
   )
-}
-
-function componentRoute(doc: { category: string; id: string }): string {
-  return APP_ROUTES.app.settingsAppearanceComponent(doc.category, doc.id)
 }
