@@ -133,12 +133,19 @@ function unmeasuredInstitutionCandidate(
   }
 }
 
-function institutionCandidate(
-  item: Extract<InstitutionStackItem, { kind: "institution" }>,
-  index: number,
-  display: FinanceMoneyDisplay,
+type InstitutionCandidateInput = {
+  item: Extract<InstitutionStackItem, { kind: "institution" }>
+  index: number
+  display: FinanceMoneyDisplay
   currency: string
-): RingCandidate | null {
+}
+
+function institutionCandidate({
+  item,
+  index,
+  display,
+  currency,
+}: InstitutionCandidateInput): RingCandidate | null {
   const slice = nativeSlice(item, currency)
   if (slice === null) {
     // Products in other currencies have no ring here; a balance that cannot be
@@ -234,7 +241,7 @@ export function buildRingStackSlices(
     if (item.kind !== "institution") {
       return []
     }
-    const candidate = institutionCandidate(item, index, display, currency)
+    const candidate = institutionCandidate({ item, index, display, currency })
     return candidate === null ? [] : [candidate]
   })
   const cash = cashCandidate(items, display, currency)

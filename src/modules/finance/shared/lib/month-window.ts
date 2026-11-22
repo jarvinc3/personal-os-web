@@ -118,12 +118,19 @@ export function previousMonthsBounds(
   }
 }
 
-export function intersectIsoDateRange(
-  windowFrom: string,
-  windowTo: string,
-  filterFrom?: string,
+type IsoDateWindow = {
+  windowFrom: string
+  windowTo: string
+  filterFrom?: string
   filterTo?: string
-): { dateFrom: string; dateTo: string } | null {
+}
+
+export function intersectIsoDateRange({
+  windowFrom,
+  windowTo,
+  filterFrom,
+  filterTo,
+}: IsoDateWindow): { dateFrom: string; dateTo: string } | null {
   const dateFrom =
     filterFrom && filterFrom > windowFrom ? filterFrom : windowFrom
   const dateTo = filterTo && filterTo < windowTo ? filterTo : windowTo

@@ -118,21 +118,21 @@ describe("formatCalendarDate", () => {
 describe("currencyForTarget", () => {
   it("prefers the account or first card balance currency", () => {
     assert.equal(
-      currencyForTarget(
-        encodeLedgerTarget("account", "acc-1"),
-        [{ id: "acc-1", currency: "USD" } as never],
-        [],
-        "DOP"
-      ),
+      currencyForTarget({
+        destination: encodeLedgerTarget("account", "acc-1"),
+        accounts: [{ id: "acc-1", currency: "USD" } as never],
+        cards: [],
+        fallback: "DOP",
+      }),
       "USD"
     )
     assert.equal(
-      currencyForTarget(
-        encodeLedgerTarget("card", "card-1"),
-        [],
-        [{ id: "card-1", balances: [{ currency: "EUR" }] } as never],
-        "DOP"
-      ),
+      currencyForTarget({
+        destination: encodeLedgerTarget("card", "card-1"),
+        accounts: [],
+        cards: [{ id: "card-1", balances: [{ currency: "EUR" }] } as never],
+        fallback: "DOP",
+      }),
       "EUR"
     )
   })

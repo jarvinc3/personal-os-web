@@ -55,6 +55,21 @@ describe("budgetCardModel", () => {
     assert.match(String(exceeded.caption), /^Excedido /)
   })
 
+  it("prefers the category list over the single category", () => {
+    const model = budgetCardModel(
+      {
+        ...BUDGET,
+        categories: [
+          { id: "category-2", name: "Transporte", icon: null, color: null },
+          { id: "category-3", name: "Casa", icon: null, color: null },
+        ],
+      },
+      DISPLAY
+    )
+
+    assert.equal(model.title, "Transporte, Casa")
+  })
+
   it("falls back to the budget name when there is no category", () => {
     const model = budgetCardModel(
       { ...BUDGET, name: "General", category: null },

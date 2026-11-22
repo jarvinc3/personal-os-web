@@ -79,12 +79,12 @@ export function useTimelineTransactions(
   })
   const yearQueries = useQueries({
     queries: years.map((year) => {
-      const intersection = intersectIsoDateRange(
-        `${year}-01-01`,
-        `${year}-12-31`,
-        filters.dateFrom,
-        filters.dateTo
-      )
+      const intersection = intersectIsoDateRange({
+        windowFrom: `${year}-01-01`,
+        windowTo: `${year}-12-31`,
+        filterFrom: filters.dateFrom,
+        filterTo: filters.dateTo,
+      })
       return {
         queryKey: [
           ...FINANCE_TRANSACTIONS_QUERY_KEY,

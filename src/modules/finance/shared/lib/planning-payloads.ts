@@ -151,6 +151,23 @@ function optionalTrimmed(value: string | undefined): string | undefined {
   return trimmed ? trimmed : undefined
 }
 
+/**
+ * Nombre del préstamo en el body: en un update, sin nombre explícito se manda
+ * vacío para borrarlo; en un alta se omite.
+ */
+function loanNameField(
+  name: string | undefined,
+  isUpdate: boolean | undefined
+): { name?: string } {
+  if (name) {
+    return { name }
+  }
+  if (isUpdate) {
+    return { name: "" }
+  }
+  return {}
+}
+
 function optionalId(value: string | undefined): string | undefined {
   const trimmed = optionalTrimmed(value)
   if (!trimmed || trimmed === CATALOG_NONE) {
@@ -357,7 +374,7 @@ export function buildLoanBody(
     totalInstallments: totalInstallments.body,
     nextDueDate: nextDue.body,
     ...(paidInstallments !== undefined ? { paidInstallments } : {}),
-    ...(name ? { name } : options?.isUpdate ? { name: "" } : {}),
+    ...loanNameField(name, options?.isUpdate),
     ...(institutionId ? { institutionId } : {}),
     ...(accountId ? { accountId } : {}),
     ...(disbursementAccountId ? { disbursementAccountId } : {}),
