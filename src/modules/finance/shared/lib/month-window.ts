@@ -28,8 +28,12 @@ export function initialMonthRange(now: Date = new Date()): {
   const current = startOfMonth(now)
   return {
     from: addMonths(current, -FINANCE_TIMELINE_INITIAL_MONTH_RADIUS),
-    to: addMonths(current, FINANCE_TIMELINE_INITIAL_MONTH_RADIUS),
+    to: nextMonthStart(now),
   }
+}
+
+function nextMonthStart(now: Date): Date {
+  return addMonths(startOfMonth(now), 1)
 }
 
 export function listYearMonths(from: Date, to: Date): YearMonth[] {
@@ -53,10 +57,15 @@ function monthsBetween(from: Date, to: Date): number {
   )
 }
 
-export function extendMonthRange(
-  range: { from: Date; to: Date },
+export function extendMonthRange({
+  range,
+  active,
+  now,
+}: {
+  range: { from: Date; to: Date }
   active: Date
-): { from: Date; to: Date } {
+  now: Date
+}): { from: Date; to: Date } {
   const from = startOfMonth(range.from)
   const to = startOfMonth(range.to)
   const activeMonth = startOfMonth(active)
@@ -66,7 +75,10 @@ export function extendMonthRange(
     nextFrom = addMonths(activeMonth, -FINANCE_TIMELINE_EXTEND_MONTHS)
   }
   if (monthsBetween(activeMonth, to) <= FINANCE_TIMELINE_EXTEND_WHEN_WITHIN) {
-    nextTo = addMonths(activeMonth, FINANCE_TIMELINE_EXTEND_MONTHS)
+    const wanted = addMonths(activeMonth, FINANCE_TIMELINE_EXTEND_MONTHS)
+    const cap = nextMonthStart(now)
+    const capped = wanted.getTime() > cap.getTime() ? cap : wanted
+    nextTo = capped.getTime() < to.getTime() ? to : capped
   }
   return { from: nextFrom, to: nextTo }
 }
