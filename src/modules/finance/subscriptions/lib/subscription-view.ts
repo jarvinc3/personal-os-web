@@ -124,18 +124,28 @@ export function buildSubscriptionSlices(
   })
 }
 
+/** Frecuencia del patrón en días → ciclo de cobro que acepta el contrato. */
+function recurringSchedule(frequency: number): {
+  billingCycle: string
+  billingInterval: number
+} {
+  if (frequency === 365) {
+    return { billingCycle: "YEARLY", billingInterval: 1 }
+  }
+  if (frequency === 7) {
+    return { billingCycle: "WEEKLY", billingInterval: 1 }
+  }
+  if (frequency === 14) {
+    return { billingCycle: "WEEKLY", billingInterval: 2 }
+  }
+  return { billingCycle: "MONTHLY", billingInterval: 1 }
+}
+
 /** Create payload that turns a detected recurring charge into a subscription. */
 export function subscriptionPayloadFromPattern(
   pattern: FinanceRecurringPattern
 ): Record<string, unknown> {
-  const schedule =
-    pattern.frequency === 365
-      ? { billingCycle: "YEARLY", billingInterval: 1 }
-      : pattern.frequency === 7
-        ? { billingCycle: "WEEKLY", billingInterval: 1 }
-        : pattern.frequency === 14
-          ? { billingCycle: "WEEKLY", billingInterval: 2 }
-          : { billingCycle: "MONTHLY", billingInterval: 1 }
+  const schedule = recurringSchedule(pattern.frequency)
   return {
     name: pattern.merchantName,
     amount: Number(pattern.avgAmount),

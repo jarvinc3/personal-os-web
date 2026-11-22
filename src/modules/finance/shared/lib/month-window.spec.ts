@@ -111,21 +111,21 @@ describe("isoMonthBounds", () => {
 describe("intersectIsoDateRange", () => {
   it("clips a year window to filter dates", () => {
     assert.deepEqual(
-      intersectIsoDateRange(
-        "2026-01-01",
-        "2026-12-31",
-        "2026-03-01",
-        "2026-03-31"
-      ),
+      intersectIsoDateRange({
+        windowFrom: "2026-01-01",
+        windowTo: "2026-12-31",
+        filterFrom: "2026-03-01",
+        filterTo: "2026-03-31",
+      }),
       { dateFrom: "2026-03-01", dateTo: "2026-03-31" }
     )
     assert.equal(
-      intersectIsoDateRange(
-        "2025-01-01",
-        "2025-12-31",
-        "2026-03-01",
-        "2026-03-31"
-      ),
+      intersectIsoDateRange({
+        windowFrom: "2025-01-01",
+        windowTo: "2025-12-31",
+        filterFrom: "2026-03-01",
+        filterTo: "2026-03-31",
+      }),
       null
     )
   })

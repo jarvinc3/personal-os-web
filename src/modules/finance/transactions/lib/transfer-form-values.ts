@@ -4,6 +4,20 @@ import { encodeLedgerTarget } from "@/src/modules/finance/shared/lib/ledger-payl
 import type { FinanceTransaction } from "@/src/modules/finance/shared/types/entities"
 import type { TransferFormValues } from "@/src/modules/finance/transactions/lib/transfer-form"
 
+/** Destino del ledger canónico: la cuenta manda y la tarjeta es la alternativa. */
+function transferLedgerTarget(
+  accountId: string | null | undefined,
+  cardId: string | null | undefined
+): string {
+  if (accountId) {
+    return encodeLedgerTarget("account", accountId)
+  }
+  if (cardId) {
+    return encodeLedgerTarget("card", cardId)
+  }
+  return CATALOG_NONE
+}
+
 export function transferDefaults(
   transfer: FinanceTransaction | null,
   defaultCurrency: string
@@ -12,16 +26,11 @@ export function transferDefaults(
     amount: transfer?.amount ?? "",
     currency: transfer?.currency ?? defaultCurrency,
     transactionDate: sliceDateTimeInput(transfer?.transactionDate),
-    fromTarget: transfer?.accountId
-      ? encodeLedgerTarget("account", transfer.accountId)
-      : transfer?.cardId
-        ? encodeLedgerTarget("card", transfer.cardId)
-        : CATALOG_NONE,
-    toTarget: transfer?.transferToAccountId
-      ? encodeLedgerTarget("account", transfer.transferToAccountId)
-      : transfer?.transferToCardId
-        ? encodeLedgerTarget("card", transfer.transferToCardId)
-        : CATALOG_NONE,
+    fromTarget: transferLedgerTarget(transfer?.accountId, transfer?.cardId),
+    toTarget: transferLedgerTarget(
+      transfer?.transferToAccountId,
+      transfer?.transferToCardId
+    ),
     status: transfer?.status === "PENDING" ? "PENDING" : "CONFIRMED",
     destinationPending: false,
     rail: "",

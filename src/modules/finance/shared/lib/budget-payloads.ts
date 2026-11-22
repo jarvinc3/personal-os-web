@@ -81,6 +81,21 @@ export function budgetPctUsed(
   return (amountSpent / amountLimit) * 100
 }
 
+/** Ids de categoría que viajan en el body: el arreglo manda sobre la categoría suelta. */
+function budgetCategoryIds(input: {
+  categoryId?: string
+  categoryIds?: string[]
+}): string[] {
+  if (input.categoryIds && input.categoryIds.length > 0) {
+    return input.categoryIds
+  }
+  const singleCategoryId = input.categoryId?.trim()
+  if (singleCategoryId) {
+    return [singleCategoryId]
+  }
+  return []
+}
+
 export function buildCreateBudgetBody(input: {
   categoryId?: string
   categoryIds?: string[]
@@ -96,12 +111,7 @@ export function buildCreateBudgetBody(input: {
   if (!PERIODS.includes(input.periodType as CreateBudgetPeriod)) {
     return { ok: false, error: "Periodo inválido" }
   }
-  const categoryIds =
-    input.categoryIds && input.categoryIds.length > 0
-      ? input.categoryIds
-      : input.categoryId?.trim()
-        ? [input.categoryId.trim()]
-        : []
+  const categoryIds = budgetCategoryIds(input)
   if (categoryIds.length === 0) {
     return { ok: false, error: "Elige una categoría" }
   }

@@ -50,6 +50,35 @@ describe("buildCreateBudgetBody", () => {
     assert.equal(builtBody.body.recurring, true)
   })
 
+  it("prefers the listed ids over the single category and trims it", () => {
+    const listed = buildCreateBudgetBody({
+      categoryId: "cat-9",
+      categoryIds: ["cat-1", "cat-2"],
+      periodType: "MONTHLY",
+      periodStart: "2026-09-01",
+      periodEnd: "2026-09-30",
+      amountLimit: "100",
+    })
+    assert.equal(listed.ok, true)
+    if (!listed.ok) {
+      return
+    }
+    assert.deepEqual(listed.body.categoryIds, ["cat-1", "cat-2"])
+
+    const trimmed = buildCreateBudgetBody({
+      categoryId: "  cat-1  ",
+      periodType: "MONTHLY",
+      periodStart: "2026-09-01",
+      periodEnd: "2026-09-30",
+      amountLimit: "100",
+    })
+    assert.equal(trimmed.ok, true)
+    if (!trimmed.ok) {
+      return
+    }
+    assert.deepEqual(trimmed.body.categoryIds, ["cat-1"])
+  })
+
   it("rejects missing category, inverted dates, and NaN money", () => {
     assert.equal(
       buildCreateBudgetBody({
