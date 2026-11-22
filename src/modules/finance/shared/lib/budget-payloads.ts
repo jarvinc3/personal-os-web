@@ -81,11 +81,13 @@ export function budgetPctUsed(
   return (amountSpent / amountLimit) * 100
 }
 
-/** Ids de categoría que viajan en el body: el arreglo manda sobre la categoría suelta. */
-function budgetCategoryIds(input: {
+type BudgetCategoryIdsInput = {
   categoryId?: string
   categoryIds?: string[]
-}): string[] {
+}
+
+/** Ids de categoría que viajan en el body: el arreglo manda sobre la categoría suelta. */
+function budgetCategoryIds(input: BudgetCategoryIdsInput): string[] {
   if (input.categoryIds && input.categoryIds.length > 0) {
     return input.categoryIds
   }

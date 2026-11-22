@@ -188,17 +188,19 @@ export function formatCalendarDate(value: string, locale: string): string {
   return formatDayMonthYear(date, locale)
 }
 
+type CurrencyForTargetInput = {
+  destination: string
+  accounts: readonly FinanceAccount[]
+  cards: readonly FinanceCard[]
+  fallback: string
+}
+
 export function currencyForTarget({
   destination,
   accounts,
   cards,
   fallback,
-}: {
-  destination: string
-  accounts: readonly FinanceAccount[]
-  cards: readonly FinanceCard[]
-  fallback: string
-}): string {
+}: CurrencyForTargetInput): string {
   const target = splitLedgerTarget(destination)
   const account = accounts.find((item) => item.id === target.accountId)
   if (account?.currency) {
