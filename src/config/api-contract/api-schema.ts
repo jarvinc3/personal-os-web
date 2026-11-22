@@ -29,7 +29,7 @@ export type paths = {
             path?: never;
             cookie?: never;
         };
-        /** Startup probe (database, JWKS, optional Redis). Public; response omits dependency details. */
+        /** Startup probe (database, JWKS with timeout and cache, optional Redis). Public; response omits dependency details. */
         get: operations["HealthController_startup"];
         put?: never;
         post?: never;
@@ -46,7 +46,7 @@ export type paths = {
             path?: never;
             cookie?: never;
         };
-        /** Readiness probe (database, JWKS, optional Redis). Public for load balancers; response omits dependency details. */
+        /** Readiness probe (database, optional Redis). Public for load balancers; response omits dependency details. */
         get: operations["HealthController_readiness"];
         put?: never;
         post?: never;
@@ -4035,7 +4035,7 @@ export type components = {
         };
         AiInvocationEntityRefDto: {
             /** @enum {string} */
-            type: "transaction" | "account" | "card" | "loan" | "budget" | "savings_goal" | "receivable" | "subscription" | "merchant" | "category";
+            type: "transaction" | "account" | "card" | "loan" | "budget" | "savings_goal" | "receivable" | "subscription" | "merchant" | "category" | "institution";
             /** Format: uuid */
             id: string;
         };
@@ -6035,7 +6035,7 @@ export type components = {
              * @description Finance product the reference points at
              * @enum {string}
              */
-            type: "transaction" | "account" | "card" | "loan" | "budget" | "savingsGoal" | "receivable" | "subscription" | "merchant" | "category";
+            type: "transaction" | "account" | "card" | "loan" | "budget" | "savingsGoal" | "receivable" | "subscription" | "merchant" | "category" | "institution";
             /** Format: uuid */
             id: string;
         };
