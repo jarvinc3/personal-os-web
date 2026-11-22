@@ -51,6 +51,7 @@ import { Button } from "@/src/shared/components/ui/button"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
+import { TAB_QUERY_KEY } from "@/src/shared/hooks/use-tabs-behavior"
 import { ACCENT_FALLBACK_COLOR } from "@/src/shared/lib/accent-gradient"
 import { appToast } from "@/src/shared/lib/app-toast"
 import {
@@ -105,7 +106,9 @@ function TransactionDetailScreenBody({
   const notDuplicateMutation = useMarkNotDuplicate()
   const restoreMutation = useRestoreTransaction()
   const { open: openOptionsSheet, setOpen: setOpenOptionsSheet } =
-    useSheetParam(FINANCE_SHEET_KEYS.transactionOptions)
+    useSheetParam(FINANCE_SHEET_KEYS.transactionOptions, {
+      clearParams: [TAB_QUERY_KEY],
+    })
 
   const tx = detailQuery.data
   const accountsQuery = useAccounts(isEnabled)

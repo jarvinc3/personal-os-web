@@ -124,6 +124,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 - #512: el «Restante» de un corte pasa a llamarse «Saldo del corte» y la lista y la hoja aclaran que los cortes son acumulativos, para que no se sumen como deudas independientes.
 - #514: la etiqueta «Patrimonio» del detalle de Efectivo se lee en blanco sobre la cabecera, y las filas de cuenta sin color dejan de pintar el círculo gris de la decoración; el detalle usa la misma fila canónica con o sin color.
 - #513: en móvil, Productos apila el anillo y su leyenda para que los nombres y montos se lean completos, y las tarjetas por moneda pasan a una columna con el monto sin partir la moneda de la cifra.
+- #515: la hoja de opciones de un movimiento deja de arrastrar `tab=installment` en la URL, y el glosario se abre siempre con el mismo `?picker=sheet-glossary:<clave>`, sea un término suelto o los conceptos de una hoja.
 - #519: el hero de una tarjeta de crédito sobregirada muestra la deuda con su etiqueta, no el disponible negativo; una tarjeta con límite disponible sigue mostrando «Disponible» y una de débito, «Saldo».
 - #520: la pestaña Correos de Inteligencia muestra el total de correos en revisión que devuelve la cola, no solo los de la página cargada; mientras el total no está disponible, el texto no lo presenta como cero.
 - #511: los totales de Ingresos y Egresos del mes en el detalle de una cuenta incluyen los movimientos de sus tarjetas de débito, igual que la lista de la pantalla, y el hero aclara que no cuentan las transferencias.
