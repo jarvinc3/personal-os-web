@@ -128,7 +128,7 @@ function TransactionDetailScreenBody({
 
   const [confirmOpen, setConfirmOpen] = useState(false)
   const { open: linkOpen, setOpen: setLinkOpen } = useSheetParam(
-    "link-transaction-sheet"
+    FINANCE_SHEET_KEYS.linkTransaction
   )
   const [mergeOpen, setMergeOpen] = useState(false)
   const [unlinkOpen, setUnlinkOpen] = useState(false)

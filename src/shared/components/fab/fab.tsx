@@ -1,6 +1,7 @@
 import { PlusIcon } from "lucide-react"
 
 import { useAgentChatLauncher } from "@/src/shared/components/agent-chat/agent-chat-launcher"
+import { useRegisterModuleFab } from "@/src/shared/components/fab/module-fab-context"
 import { ProgressRing } from "@/src/shared/components/ui/progress-ring"
 import { useHoldProgress } from "@/src/shared/hooks/use-hold-progress"
 
@@ -14,6 +15,7 @@ export function Fab({
   disabled?: boolean
 }) {
   const agentChat = useAgentChatLauncher()
+  useRegisterModuleFab({ label, actions: [], mobileVisible: true })
   const longPress = useHoldProgress({
     disabled: !agentChat.available,
     onLongPress: () => {

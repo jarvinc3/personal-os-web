@@ -367,7 +367,7 @@ export function AiEvidenceSection({
                   icon={Clock3}
                   value={
                     run.completedAt
-                      ? formatDateTime(run.completedAt)
+                      ? formatDateTime(run.completedAt, formatLocale)
                       : "En curso"
                   }
                   isLast={index === runsQuery.data!.length - 1}
