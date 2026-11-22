@@ -8,7 +8,6 @@ import {
   GALLERY_COMPONENT_METAS,
   GALLERY_METAS_BY_CATEGORY,
 } from "./components/catalog/manifest.ts"
-import { GALLERY_DEMOS } from "./components/catalog/demos/index.ts"
 import {
   COMPONENT_GALLERY_SECTIONS,
   componentGallerySection,
@@ -49,6 +48,24 @@ function demoIdsInFile(file: string): string[] {
   const mapSource = source.slice(start + marker.length)
   const matches = mapSource.matchAll(/^ {2}"?([a-z0-9-]+)"?:\s*\[/gm)
   return [...matches].map((match) => match[1])
+}
+
+/** Cada bloque de demo con su id, para revisar su código sin cargar React. */
+function demoBlocks(file: string): { id: string; body: string }[] {
+  const source = readFileSync(join(DEMOS_DIR, file), "utf8")
+  const marker = "GalleryDemoMap = {"
+  const start = source.indexOf(marker)
+  assert.ok(start >= 0, `${file} no declara un GalleryDemoMap`)
+  const mapSource = source.slice(start + marker.length)
+  const entries = [...mapSource.matchAll(/^ {2}"?([a-z0-9-]+)"?:\s*\[/gm)]
+
+  return entries.map((entry, index) => {
+    const from = entry.index ?? 0
+    const nextEntry = entries[index + 1]
+    const to = nextEntry?.index ?? mapSource.length
+
+    return { id: entry[1], body: mapSource.slice(from, to) }
+  })
 }
 
 function importPathExists(importPath: string): boolean {
@@ -163,20 +180,27 @@ test("resuelve una categoría por su id y rechaza las demás", () => {
 })
 
 test("cada demo trae el código exacto de lo que pinta", () => {
-  for (const [id, demos] of Object.entries(GALLERY_DEMOS)) {
-    for (const demo of demos) {
+  for (const section of COMPONENT_GALLERY_SECTIONS) {
+    for (const block of demoBlocks(DEMO_FILES[section.id])) {
+      const codes = [...block.body.matchAll(/code:\s*`([\s\S]*?)`/g)]
       assert.ok(
-        demo.code.trim().length > 0,
-        `${id}: «${demo.label}» sin código`
+        codes.length > 0,
+        `${section.id}/${block.id} no declara el código de su demo`
       )
-      assert.ok(
-        !/^<[A-Za-z]+Demo\s*\/>$/.test(demo.code.trim()),
-        `${id}: «${demo.label}» muestra el ayudante en vez del componente`
-      )
-      assert.ok(
-        !demo.code.includes("GALLERY_"),
-        `${id}: «${demo.label}» usa constantes internas de la galería`
-      )
+      for (const [, code] of codes) {
+        assert.ok(
+          code.trim().length > 0,
+          `${section.id}/${block.id} sin código`
+        )
+        assert.ok(
+          !/^<[A-Za-z]+Demo\s*\/>$/.test(code.trim()),
+          `${section.id}/${block.id} muestra el ayudante en vez del componente`
+        )
+        assert.ok(
+          !code.includes("GALLERY_"),
+          `${section.id}/${block.id} usa constantes internas de la galería`
+        )
+      }
     }
   }
 })
