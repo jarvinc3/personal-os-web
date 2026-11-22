@@ -52,6 +52,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Cambiado
 
+- #594: Home mueve a `lib` la precedencia del nombre del saludo —perfil, usuario de sesión y genérico— con una prueba por caso; la pantalla solo la usa. Sin cambio de comportamiento.
 - #563: los datos del Centro de Ayuda se parten por categoría y por área (`glossary/*.ts` y `guides/*.ts`); `glossary.ts` y `guides.ts` quedan como índice con el mismo orden y ningún archivo pasa de 300 líneas. Sin cambio de textos ni de comportamiento.
 - #592: el registro de suscripciones del socket de Notificaciones se encapsula y deja de mutar el mapa del proveedor, y el toggle de preferencias resuelve su promesa al terminar el guardado. Sin cambio de comportamiento.
 - #566: Notificaciones deja en `lib` el texto del vacío, el estado de la pantalla, el filtro y los conteos de la lista, el estado de la fila de push y las suscripciones del socket, con una prueba por caso; la pantalla y el proveedor solo orquestan y la baja del socket sigue limpiando cada evento. Sin cambio de comportamiento.
