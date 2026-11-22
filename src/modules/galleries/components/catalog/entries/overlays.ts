@@ -26,8 +26,7 @@ const sheet = useSheetParam(FINANCE_SHEET_KEYS.category)
   {children}
 </BottomSheet>`,
     subcomponents: [],
-    anatomy:
-      "<BottomSheet open onOpenChange title description actions>{children}</BottomSheet>",
+    anatomy: [{ name: "BottomSheet" }],
     variants: [
       { name: "variant", values: "default, floating" },
       { name: "size", values: "default, wide" },
@@ -80,8 +79,7 @@ const sheet = useSheetParam(FINANCE_SHEET_KEYS.category)
   onConfirm={onConfirm}
 />`,
     subcomponents: [],
-    anatomy:
-      "<ConfirmDialog open onOpenChange title description confirmLabel confirmIcon />",
+    anatomy: [{ name: "ConfirmDialog" }],
     variants: [
       { name: "tone", values: "default, danger" },
       { name: "states", values: "normal, pending, disabled" },
@@ -155,8 +153,21 @@ const sheet = useSheetParam(FINANCE_SHEET_KEYS.category)
       "AlertDialogAction",
       "AlertDialogCancel",
     ],
-    anatomy:
-      "<AlertDialog><AlertDialogTrigger /><AlertDialogContent><AlertDialogHeader /><AlertDialogFooter /></AlertDialogContent></AlertDialog>",
+    anatomy: [
+      {
+        name: "AlertDialog",
+        children: [
+          { name: "AlertDialogTrigger" },
+          {
+            name: "AlertDialogContent",
+            children: [
+              { name: "AlertDialogHeader" },
+              { name: "AlertDialogFooter" },
+            ],
+          },
+        ],
+      },
+    ],
     variants: [
       { name: "size (Content)", values: "default, sm" },
       { name: "variant (Action)", values: "default, destructive, outline" },
@@ -207,8 +218,18 @@ const sheet = useSheetParam(FINANCE_SHEET_KEYS.category)
       "DialogFooter",
       "DialogClose",
     ],
-    anatomy:
-      "<Dialog><DialogTrigger /><DialogContent><DialogHeader /><DialogFooter /></DialogContent></Dialog>",
+    anatomy: [
+      {
+        name: "Dialog",
+        children: [
+          { name: "DialogTrigger" },
+          {
+            name: "DialogContent",
+            children: [{ name: "DialogHeader" }, { name: "DialogFooter" }],
+          },
+        ],
+      },
+    ],
     variants: [{ name: "showCloseButton", values: "true, false" }],
     props: [
       {
@@ -261,8 +282,17 @@ const sheet = useSheetParam(FINANCE_SHEET_KEYS.category)
       "DrawerClose",
       "DrawerSwipeHandle",
     ],
-    anatomy:
-      "<Drawer><DrawerContent><DrawerHeader /><DrawerFooter /></DrawerContent></Drawer>",
+    anatomy: [
+      {
+        name: "Drawer",
+        children: [
+          {
+            name: "DrawerContent",
+            children: [{ name: "DrawerHeader" }, { name: "DrawerFooter" }],
+          },
+        ],
+      },
+    ],
     variants: [
       { name: "swipeDirection", values: "down, up, left, right" },
       { name: "showSwipeHandle / snapPoints", values: "opcionales" },
@@ -319,8 +349,15 @@ const sheet = useSheetParam(FINANCE_SHEET_KEYS.category)
       "PopoverPortal",
       "PopoverPositioner",
     ],
-    anatomy:
-      "<Popover><PopoverTrigger /><PopoverContent><PopoverHeader /></PopoverContent></Popover>",
+    anatomy: [
+      {
+        name: "Popover",
+        children: [
+          { name: "PopoverTrigger" },
+          { name: "PopoverContent", children: [{ name: "PopoverHeader" }] },
+        ],
+      },
+    ],
     variants: [
       {
         name: "side / align",
@@ -372,8 +409,23 @@ const sheet = useSheetParam(FINANCE_SHEET_KEYS.category)
       "DropdownMenuShortcut",
       "DropdownMenuSub",
     ],
-    anatomy:
-      "<DropdownMenu><DropdownMenuTrigger /><DropdownMenuContent><DropdownMenuGroup><DropdownMenuItem /></DropdownMenuGroup></DropdownMenuContent></DropdownMenu>",
+    anatomy: [
+      {
+        name: "DropdownMenu",
+        children: [
+          { name: "DropdownMenuTrigger" },
+          {
+            name: "DropdownMenuContent",
+            children: [
+              {
+                name: "DropdownMenuGroup",
+                children: [{ name: "DropdownMenuItem" }],
+              },
+            ],
+          },
+        ],
+      },
+    ],
     variants: [
       { name: "variant (Item)", values: "default, destructive" },
       { name: "estados", values: "open, closed, checked, disabled" },
@@ -425,8 +477,21 @@ const sheet = useSheetParam(FINANCE_SHEET_KEYS.category)
       "CommandSeparator",
       "CommandDialog",
     ],
-    anatomy:
-      "<Command><CommandInput /><CommandList><CommandEmpty /><CommandGroup><CommandItem /></CommandGroup></CommandList></Command>",
+    anatomy: [
+      {
+        name: "Command",
+        children: [
+          { name: "CommandInput" },
+          {
+            name: "CommandList",
+            children: [
+              { name: "CommandEmpty" },
+              { name: "CommandGroup", children: [{ name: "CommandItem" }] },
+            ],
+          },
+        ],
+      },
+    ],
     variants: [
       {
         name: "CommandDialog",
@@ -466,8 +531,17 @@ const sheet = useSheetParam(FINANCE_SHEET_KEYS.category)
   </Tooltip>
 </TooltipProvider>`,
     subcomponents: ["TooltipTrigger", "TooltipContent", "TooltipProvider"],
-    anatomy:
-      "<TooltipProvider><Tooltip><TooltipTrigger /><TooltipContent /></Tooltip></TooltipProvider>",
+    anatomy: [
+      {
+        name: "TooltipProvider",
+        children: [
+          {
+            name: "Tooltip",
+            children: [{ name: "TooltipTrigger" }, { name: "TooltipContent" }],
+          },
+        ],
+      },
+    ],
     variants: [
       {
         name: "side / align",
@@ -527,8 +601,25 @@ const sheet = useSheetParam(FINANCE_SHEET_KEYS.category)
       "SidebarInset",
       "SidebarSeparator",
     ],
-    anatomy:
-      "<SidebarProvider><Sidebar><SidebarHeader /><SidebarContent><SidebarGroup><SidebarMenu /></SidebarGroup></SidebarContent></Sidebar></SidebarProvider>",
+    anatomy: [
+      {
+        name: "SidebarProvider",
+        children: [
+          {
+            name: "Sidebar",
+            children: [
+              { name: "SidebarHeader" },
+              {
+                name: "SidebarContent",
+                children: [
+                  { name: "SidebarGroup", children: [{ name: "SidebarMenu" }] },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ],
     variants: [
       { name: "collapsible", values: "offcanvas, icon, none" },
       { name: "variant", values: "sidebar, floating, inset" },

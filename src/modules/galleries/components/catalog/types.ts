@@ -5,10 +5,20 @@ import type { ComponentGallerySectionId } from "@/src/modules/galleries/componen
 /** Origen del componente: primitivo de shadcn o wrapper de dominio. */
 export type GalleryComponentKind = "ui" | "domain"
 
-/** Un ejemplo real que se pinta en la vista previa. */
+/**
+ * Un ejemplo real que se pinta en la vista previa, con el código exacto de lo
+ * que muestra para que se pueda copiar sin reescribirlo.
+ */
 export type GalleryDemoItem = {
   label: string
   node: ReactNode
+  code: string
+}
+
+/** Un elemento de la composición y los que cuelgan de él. */
+export type GalleryAnatomyNode = {
+  name: string
+  children?: readonly GalleryAnatomyNode[]
 }
 
 /** Una propiedad del componente con sus valores posibles. */
@@ -39,10 +49,9 @@ export type GalleryComponentMeta = {
   whenNotToUse: string
   importPath: string
   snippet: string
-  /** Código del ejemplo de la vista previa; por defecto, el snippet. */
-  demoCode?: string
   subcomponents: readonly string[]
-  anatomy: string
+  /** Composición del componente, de la raíz a las hojas. */
+  anatomy: readonly GalleryAnatomyNode[]
   variants: readonly GalleryVariantGroup[]
   props: readonly GalleryProp[]
 }

@@ -23,8 +23,8 @@ Cada sub-issue de #271 actualiza su entrada con las variantes definitivas del co
 
 El catálogo vive en `components/catalog/` y tiene dos piezas separadas:
 
-1. **Metadatos** en `catalog/entries/<categoría>.ts`: nombre, categoría, descripción, cuándo usarlo y cuándo no, snippet, subcomponentes, anatomía, variantes, props e import. Sin JSX, para que las pruebas crucen el catálogo con `/ui/` sin ejecutar React.
-2. **Vista previa** en `catalog/demos/<categoría>.tsx`: un mapa `id → demos` con componentes reales. Monta el componente real; no hay maquetas aparte.
+1. **Metadatos** en `catalog/entries/<categoría>.ts`: nombre, categoría, descripción, cuándo usarlo y cuándo no, snippet, subcomponentes, anatomía, variantes, props e import. Sin JSX, para que las pruebas crucen el catálogo con `/ui/` sin ejecutar React. La anatomía es un árbol de `{ name, children }` y la ficha lo dibuja con `anatomyTree`.
+2. **Vista previa** en `catalog/demos/<categoría>.tsx`: un mapa `id → demos` con componentes reales. Monta el componente real; no hay maquetas aparte. Cada demo lleva su `code`: el código exacto que se pinta, con sus props y sus datos, sin constantes internas (`GALLERY_*`) ni ayudantes `*Demo`.
 3. Añade la ficha a la categoría que le corresponde por propósito. Si el componente abre una hoja o un drawer, el ejemplo se abre por ruta con `useSheetParam`.
 4. Muestra sus variantes y estados principales: normal, seleccionado, deshabilitado, error y pending.
 5. Las pruebas de `sections.spec.ts` comprueban que cada archivo de `/ui/` tenga su ficha, que la ruta de import exista y que los ids de los demos coincidan con los del catálogo.

@@ -21,7 +21,7 @@ import { SaveIcon } from "lucide-react"
   Guardar
 </Button>`,
     subcomponents: [],
-    anatomy: "<Button variant size><Icon />Texto</Button>",
+    anatomy: [{ name: "Button" }],
     variants: [
       {
         name: "variant",
@@ -65,7 +65,16 @@ import { SaveIcon } from "lucide-react"
   <Button variant="outline">Más</Button>
 </ButtonGroup>`,
     subcomponents: ["ButtonGroupText", "ButtonGroupSeparator"],
-    anatomy: "<ButtonGroup><Button /><Button /></ButtonGroup>",
+    anatomy: [
+      {
+        name: "ButtonGroup",
+        children: [
+          { name: "Button" },
+          { name: "ButtonGroupText" },
+          { name: "ButtonGroupSeparator" },
+        ],
+      },
+    ],
     variants: [{ name: "orientation", values: "horizontal, vertical" }],
     props: [
       {
@@ -92,7 +101,7 @@ import { SaveIcon } from "lucide-react"
   <SaveIcon />
 </Toggle>`,
     subcomponents: ["toggleVariants"],
-    anatomy: "<Toggle variant size pressed onPressedChange />",
+    anatomy: [{ name: "Toggle" }],
     variants: [
       { name: "variant", values: "default, outline" },
       { name: "size", values: "sm, default, lg" },
@@ -137,7 +146,7 @@ import { SaveIcon } from "lucide-react"
   <ToggleGroupItem value="income">Ingreso</ToggleGroupItem>
 </ToggleGroup>`,
     subcomponents: ["ToggleGroupItem"],
-    anatomy: "<ToggleGroup><ToggleGroupItem /></ToggleGroup>",
+    anatomy: [{ name: "ToggleGroup", children: [{ name: "ToggleGroupItem" }] }],
     variants: [
       { name: "multiple", values: "false (exclusivo), true" },
       { name: "variant", values: "default, outline" },
@@ -178,7 +187,7 @@ import { SaveIcon } from "lucide-react"
 
 <SegmentedControl value={value} onChange={setValue} options={options} />`,
     subcomponents: [],
-    anatomy: "<SegmentedControl value onChange options size fullWidth />",
+    anatomy: [{ name: "SegmentedControl" }],
     variants: [
       { name: "size", values: "sm, lg" },
       { name: "orientation", values: "horizontal, vertical" },
@@ -226,7 +235,7 @@ import { SaveIcon } from "lucide-react"
   <LinkPendingOverlay />
 </Link>`,
     subcomponents: ["LinkPendingOverlay"],
-    anatomy: "<LinkPendingOverlay />",
+    anatomy: [{ name: "LinkPendingOverlay" }],
     variants: [{ name: "states", values: "idle, pending" }],
     props: [
       {

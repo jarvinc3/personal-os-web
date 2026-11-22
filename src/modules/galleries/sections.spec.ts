@@ -50,6 +50,24 @@ function demoIdsInFile(file: string): string[] {
   return [...matches].map((match) => match[1])
 }
 
+/** Cada bloque de demo con su id, para revisar su código sin cargar React. */
+function demoBlocks(file: string): { id: string; body: string }[] {
+  const source = readFileSync(join(DEMOS_DIR, file), "utf8")
+  const marker = "GalleryDemoMap = {"
+  const start = source.indexOf(marker)
+  assert.ok(start >= 0, `${file} no declara un GalleryDemoMap`)
+  const mapSource = source.slice(start + marker.length)
+  const entries = [...mapSource.matchAll(/^ {2}"?([a-z0-9-]+)"?:\s*\[/gm)]
+
+  return entries.map((entry, index) => {
+    const from = entry.index ?? 0
+    const nextEntry = entries[index + 1]
+    const to = nextEntry?.index ?? mapSource.length
+
+    return { id: entry[1], body: mapSource.slice(from, to) }
+  })
+}
+
 function importPathExists(importPath: string): boolean {
   const relative = importPath.replace(/^@\//, "")
   const resolved = join(REPO_ROOT, relative)
@@ -159,4 +177,42 @@ test("resuelve una categoría por su id y rechaza las demás", () => {
     () => componentGallerySection("inexistente" as "entradas"),
     /Sección de la galería desconocida/
   )
+})
+
+test("cada demo trae el código exacto de lo que pinta", () => {
+  for (const section of COMPONENT_GALLERY_SECTIONS) {
+    for (const block of demoBlocks(DEMO_FILES[section.id])) {
+      const codes = [...block.body.matchAll(/code:\s*`([\s\S]*?)`/g)]
+      assert.ok(
+        codes.length > 0,
+        `${section.id}/${block.id} no declara el código de su demo`
+      )
+      for (const [, code] of codes) {
+        assert.ok(
+          code.trim().length > 0,
+          `${section.id}/${block.id} sin código`
+        )
+        assert.ok(
+          !/^<[A-Za-z]+Demo\s*\/>$/.test(code.trim()),
+          `${section.id}/${block.id} muestra el ayudante en vez del componente`
+        )
+        assert.ok(
+          !code.includes("GALLERY_"),
+          `${section.id}/${block.id} usa constantes internas de la galería`
+        )
+      }
+    }
+  }
+})
+
+test("cada ficha declara su anatomía con nombres", () => {
+  for (const meta of GALLERY_COMPONENT_METAS) {
+    assert.ok(meta.anatomy.length > 0, `${meta.id} sin anatomía`)
+    for (const root of meta.anatomy) {
+      assert.ok(
+        root.name.trim().length > 0,
+        `${meta.id} tiene un nodo sin nombre`
+      )
+    }
+  }
 })

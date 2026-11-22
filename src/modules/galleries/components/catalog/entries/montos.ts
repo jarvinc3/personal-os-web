@@ -19,8 +19,7 @@ export const montosDocs: readonly GalleryComponentMeta[] = [
   {formatFinanceMoney(amount, display)}
 </span>`,
     subcomponents: [],
-    anatomy:
-      "formatFinanceMoney(amount, { currency, showCents, compactNumbers, locale })",
+    anatomy: [{ name: "formatFinanceMoney" }],
     variants: [
       {
         name: "display",
@@ -55,7 +54,7 @@ export const montosDocs: readonly GalleryComponentMeta[] = [
 
 <Money value={amount} display={display} showSign tone="auto" />`,
     subcomponents: [],
-    anatomy: "<Money value display showSign tone />",
+    anatomy: [{ name: "Money" }],
     variants: [
       { name: "tone", values: "auto, none" },
       { name: "showSign", values: "true, false" },
@@ -105,8 +104,7 @@ export const montosDocs: readonly GalleryComponentMeta[] = [
   currency="DOP"
 />`,
     subcomponents: [],
-    anatomy:
-      "<FinanceMoneyField calculatorKey amount onAmountChange onAmountCommit />",
+    anatomy: [{ name: "FinanceMoneyField" }],
     variants: [
       { name: "entryMode", values: "keyboard, calculator" },
       { name: "states", values: "normal, invalid, disabled" },
@@ -151,7 +149,7 @@ export const montosDocs: readonly GalleryComponentMeta[] = [
 
 <FinanceDateField label="Fecha" value={date} onChange={setDate} />`,
     subcomponents: [],
-    anatomy: "<FinanceDateField label value onChange withTime />",
+    anatomy: [{ name: "FinanceDateField" }],
     variants: [
       { name: "withTime", values: "false (fecha), true (fecha y hora)" },
       { name: "states", values: "normal, invalid, disabled, optional" },
@@ -197,7 +195,7 @@ export const montosDocs: readonly GalleryComponentMeta[] = [
   DOP
 </span>`,
     subcomponents: [],
-    anatomy: "<CurrencyFlag code />",
+    anatomy: [{ name: "CurrencyFlag" }],
     variants: [
       { name: "code", values: "ISO 4217 de cualquier moneda con región" },
     ],
@@ -230,7 +228,7 @@ export const montosDocs: readonly GalleryComponentMeta[] = [
 
 <BrandLogo name={entity.name} logoUrl={entity.logoUrl} size={40} />`,
     subcomponents: [],
-    anatomy: "<BrandLogo name logoUrl size />",
+    anatomy: [{ name: "BrandLogo" }],
     variants: [
       { name: "size", values: "24, 36, 40, 48 (px)" },
       { name: "states", values: "con logo, sin logo, logo que falla" },
