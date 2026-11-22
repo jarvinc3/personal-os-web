@@ -5,11 +5,14 @@ import {
   getNotificationPermission,
   isWebPushSupported,
 } from "@/src/modules/notifications/lib/web-push-support"
+import type {
+  PushRegistrationError,
+  WebPushPermissionStatus,
+} from "@/src/modules/notifications/lib/device-push-row"
 import { useAppStore } from "@/src/shared/store/app-store"
 import { useCallback, useEffect, useState } from "react"
 
-export type WebPushPermissionStatus =
-  "unsupported" | "default" | "granted" | "denied"
+export type { WebPushPermissionStatus } from "@/src/modules/notifications/lib/device-push-row"
 
 export type RequestWebPushPermissionResult =
   | { ok: true; token: string }
@@ -31,9 +34,8 @@ export function useWebPushPermissions() {
   const [permissionStatus, setPermissionStatus] =
     useState<WebPushPermissionStatus>("default")
   const [isRequesting, setIsRequesting] = useState(false)
-  const [registrationError, setRegistrationError] = useState<
-    "vapid-not-configured" | "push-service-unavailable" | "unknown" | null
-  >(null)
+  const [registrationError, setRegistrationError] =
+    useState<PushRegistrationError>(null)
 
   const refreshStatus = useCallback(() => {
     if (!isWebPushSupported()) {
