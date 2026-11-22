@@ -112,6 +112,16 @@ describe("contentSecurityPolicy", () => {
     assert.equal(directives.get("script-src"), `'self' 'nonce-${TEST_NONCE}'`)
   })
 
+  it("permite los orígenes de avatar que ya usa la app", () => {
+    const directives = directivesOf(
+      contentSecurityPolicy({ nonce: TEST_NONCE, isDevelopment: false })
+    )
+    const imgSources = (directives.get("img-src") ?? "").split(" ")
+
+    assert.ok(imgSources.includes("https://www.gravatar.com"))
+    assert.ok(imgSources.includes("https://*.googleusercontent.com"))
+  })
+
   it("en preview permite la barra de Vercel sin abrir otros marcos", () => {
     const directives = directivesOf(
       contentSecurityPolicy({

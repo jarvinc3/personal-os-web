@@ -120,6 +120,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Corregido
 
+- #574: la CSP permite las imágenes de avatar que la app ya usaba: `www.gravatar.com` para las opciones de Ajustes → Cuenta y `*.googleusercontent.com` para la foto de quien entra con Google, que desde #569 quedaban bloqueadas por `img-src`.
 - #571: la primera vez que se abre el chat del agente se ve un esqueleto con la forma de la hoja (cabecera, mensajes y composer) mientras llega el trozo que la carga bajo demanda, en vez de nada; anuncia «Cargando el chat» y mantiene el diálogo con su nombre.
 - #557: la guía de Ayuda documenta el esquema vigente del glosario, `?picker=sheet-glossary:<clave>`, el mismo que usa el header de una hoja.
 - #556: la hoja de opciones de un movimiento deja fuera `tab` de la URL al abrirse. `useSheetParam` estrena `clearOnOpen`, que descarta esos parámetros de la vista antes de escribir la hoja; `clearParams` solo limpiaba al cerrar una hoja abierta por enlace directo, así que la URL conservaba `tab=installment`.
