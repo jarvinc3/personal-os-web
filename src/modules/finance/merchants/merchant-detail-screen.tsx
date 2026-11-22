@@ -84,7 +84,7 @@ function MerchantDetailBody({ merchantId }: { merchantId: string }) {
   const { open: editOpen, setOpen: setEditOpen } = useSheetParam(
     FINANCE_SHEET_KEYS.merchantEdit
   )
-  const mergeSheet = useEventSheet("merchant-merge-sheet")
+  const mergeSheet = useEventSheet(FINANCE_SHEET_KEYS.merchantMerge)
   const mergeOpen = mergeSheet.open
   const [mergeTarget, setMergeTarget] = useState<{
     id: string
