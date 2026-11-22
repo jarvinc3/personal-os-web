@@ -14,33 +14,48 @@ import {
 } from "./month-window.ts"
 
 describe("initialMonthRange", () => {
-  it("spans 12 months before and after September 2026", () => {
+  it("spans 12 months back and stops at the next month", () => {
     const range = initialMonthRange(new Date(2026, 8, 22))
     assert.equal(range.from.getFullYear(), 2025)
     assert.equal(range.from.getMonth(), 8)
     assert.equal(range.from.getDate(), 1)
-    assert.equal(range.to.getFullYear(), 2027)
-    assert.equal(range.to.getMonth(), 8)
+    assert.equal(range.to.getFullYear(), 2026)
+    assert.equal(range.to.getMonth(), 9)
     assert.equal(range.to.getDate(), 1)
   })
 })
 
 describe("extendMonthRange", () => {
-  it("extends the far edge by 12 months from the active month", () => {
+  it("extends the far edge but never past the next month", () => {
     const range = {
       from: new Date(2025, 8, 1),
-      to: new Date(2027, 8, 1),
+      to: new Date(2027, 6, 1),
     }
-    const next = extendMonthRange(range, new Date(2027, 7, 1))
+    const next = extendMonthRange({
+      range,
+      active: new Date(2027, 6, 1),
+      now: new Date(2027, 6, 15),
+    })
     assert.equal(next.from.getFullYear(), 2025)
     assert.equal(next.from.getMonth(), 8)
-    assert.equal(next.to.getFullYear(), 2028)
+    assert.equal(next.to.getFullYear(), 2027)
     assert.equal(next.to.getMonth(), 7)
     assert.equal(next.to.getDate(), 1)
-    assert.deepEqual(
-      yearsTouched(range.from, next.to),
-      [2025, 2026, 2027, 2028]
-    )
+    assert.deepEqual(yearsTouched(range.from, next.to), [2025, 2026, 2027])
+  })
+
+  it("does not extend into empty future months", () => {
+    const range = {
+      from: new Date(2025, 8, 1),
+      to: new Date(2026, 11, 1),
+    }
+    const next = extendMonthRange({
+      range,
+      active: new Date(2028, 0, 1),
+      now: new Date(2026, 10, 20),
+    })
+    assert.equal(next.to.getFullYear(), 2026)
+    assert.equal(next.to.getMonth(), 11)
   })
 
   it("does not shrink when the active month is in the middle", () => {
@@ -48,7 +63,11 @@ describe("extendMonthRange", () => {
       from: new Date(2025, 8, 1),
       to: new Date(2027, 8, 1),
     }
-    const next = extendMonthRange(range, new Date(2026, 8, 1))
+    const next = extendMonthRange({
+      range,
+      active: new Date(2026, 8, 1),
+      now: new Date(2026, 8, 1),
+    })
     assert.equal(next.from.getTime(), range.from.getTime())
     assert.equal(next.to.getTime(), range.to.getTime())
   })
