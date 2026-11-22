@@ -8,13 +8,12 @@ import { glossaryTermsForSlugs } from "@/src/modules/help/lib/glossary-terms"
 import { glossaryTermHref } from "@/src/modules/help/lib/help-links"
 import {
   glossarySlugsForSheet,
-  sheetGlossaryPickerKey,
+  glossaryPickerKey,
 } from "@/src/modules/help/lib/sheet-glossary"
 import type { HelpTerm } from "@/src/modules/help/types/help.types"
 import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import { Button } from "@/src/shared/components/ui/button"
 import { usePicker } from "@/src/shared/hooks/use-picker"
-import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
 import { BookOpenIcon, HelpCircleIcon } from "lucide-react"
 import Link from "next/link"
@@ -108,27 +107,6 @@ function GlossaryTermsDialog({
   )
 }
 
-type GlossaryHelpDialogProps = {
-  slug: string
-  open: boolean
-  onOpenChange: (open: boolean) => void
-}
-
-/** Reads the term from the glossary so the explanation is written once. */
-export function GlossaryHelpDialog({
-  slug,
-  open,
-  onOpenChange,
-}: GlossaryHelpDialogProps) {
-  return (
-    <GlossaryTermsDialog
-      slugs={[slug]}
-      open={open}
-      onOpenChange={onOpenChange}
-    />
-  )
-}
-
 type GlossaryHelpButtonProps = {
   slug: string
   label?: string
@@ -141,15 +119,14 @@ export function GlossaryHelpButton({
   label,
   className,
 }: GlossaryHelpButtonProps) {
-  // El término viaja en `sheetId`, así el enlace y Atrás devuelven la misma
-  // explicación.
-  const sheet = useSheetParam("glossary-sheet")
+  const glossaryPicker = usePicker<string>("")
+  const pickerKey = glossaryPickerKey(slug)
   const terms = glossaryTermsForSlugs([slug])
   if (terms.length === 0) {
     return null
   }
   const term = terms[0]
-  const open = sheet.open && sheet.sheetId === slug
+  const open = glossaryPicker.picker === pickerKey
 
   return (
     <>
@@ -161,18 +138,14 @@ export function GlossaryHelpButton({
         aria-label={label ?? `Qué significa ${term.term}`}
         aria-haspopup="dialog"
         aria-expanded={open}
-        onClick={() => sheet.setOpen(true, slug)}
+        onClick={() => glossaryPicker.openPicker(pickerKey)}
       >
         <HelpCircleIcon className="size-4" aria-hidden />
       </Button>
-      <GlossaryHelpDialog
-        slug={slug}
+      <SheetGlossaryDialog
+        slugs={[slug]}
         open={open}
-        onOpenChange={(next) => {
-          if (!next) {
-            sheet.setOpen(false)
-          }
-        }}
+        onOpenChange={glossaryPicker.closeHandlerFor(pickerKey)}
       />
     </>
   )
@@ -212,7 +185,7 @@ type SheetHelpActionProps = {
 export function SheetHelpAction({ sheetKey, className }: SheetHelpActionProps) {
   const slugs = glossarySlugsForSheet(sheetKey)
   const glossaryPicker = usePicker<string>("")
-  const pickerKey = sheetGlossaryPickerKey(sheetKey)
+  const pickerKey = glossaryPickerKey(sheetKey)
   const open = glossaryPicker.picker === pickerKey
 
   if (slugs.length === 0) {
