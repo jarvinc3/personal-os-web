@@ -54,7 +54,7 @@ import {
   TagsIcon,
   UnlinkIcon,
 } from "lucide-react"
-import { Reorder, useDragControls } from "motion/react"
+import { Reorder, useDragControls } from "framer-motion"
 import { useMemo, useState, type PointerEvent, type ReactNode } from "react"
 
 type CategoriesSectionProps = {
