@@ -115,6 +115,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Corregido
 
+- #557: la guía de Ayuda documenta el esquema vigente del glosario, `?picker=sheet-glossary:<clave>`, el mismo que usa el header de una hoja.
 - #554: la guía de la capacidad Catálogo describe la disposición vigente del hero del patrimonio: fila con el anillo a `sm:w-44` en escritorio y columnas apiladas en teléfono, desde #543.
 - #552: la guía de la capacidad Catálogo nombra el «Saldo del corte» como la etiqueta vigente de `remaining`, avisa de que es acumulativo y deja de afirmar que la API no expone el pago mínimo: el contrato publica `minimumPayment` y `minimumSource` desde antes.
 - #548: la guía del contrato deja de afirmar que `institution` no está en el contrato. `AiInvocationEntityRefDto` lo enumera desde #499 y el cliente no conserva ningún alias local para ese tipo; la frase ahora describe qué sale de `SendAiConversationMessageDto` y qué acota `AgentInvocationContext`.
