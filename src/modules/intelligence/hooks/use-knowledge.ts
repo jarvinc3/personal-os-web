@@ -41,6 +41,16 @@ function shouldRetryKnowledgeQuery(
   return failureCount < 2
 }
 
+function promoteKnowledgeErrorMessage(error: Error): string {
+  if (error instanceof ApiError && error.status === 409) {
+    return "Ese conocimiento ya no está en revisión."
+  }
+  if (error instanceof ApiError && error.status === 404) {
+    return "Ese conocimiento ya no existe."
+  }
+  return error.message
+}
+
 export function useKnowledge() {
   const session = useAppStore((state) => state.session)
 
@@ -154,12 +164,7 @@ export function usePromoteKnowledge() {
     onError: (error) => {
       appToast.error({
         text1: "No se pudo promover",
-        text2:
-          error instanceof ApiError && error.status === 409
-            ? "Ese conocimiento ya no está en revisión."
-            : error instanceof ApiError && error.status === 404
-              ? "Ese conocimiento ya no existe."
-              : error.message,
+        text2: promoteKnowledgeErrorMessage(error),
       })
     },
   })
