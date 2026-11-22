@@ -145,6 +145,21 @@ function removeParams(
   }
 }
 
+/** URL de la hoja abierta: su clave, sin los parámetros de la vista, y con los suyos. */
+function openedSheetParams(input: {
+  searchParams: SearchParamsLike
+  key: string
+  id?: string | null
+  clearOnOpen?: readonly string[]
+  extraParams?: SheetExtraParams
+}): URLSearchParams {
+  const params = cloneParams(input.searchParams)
+  writeSheet(params, input.key, input.id)
+  removeParams(params, input.clearOnOpen)
+  applyExtraParams(params, input.extraParams)
+  return params
+}
+
 /** Picker opened on top of the active sheet; null when there is none. */
 export function readPickerKey(searchParams: SearchParamsLike): string | null {
   return searchParams.get(SHEET_PICKER_QUERY_KEY)
@@ -197,6 +212,8 @@ export function resolveSheetNavigation(input: {
   id?: string | null
   extraParams?: SheetExtraParams
   clearParams?: readonly string[]
+  /** Params de la vista que la hoja no lleva: se descartan al abrirla. */
+  clearOnOpen?: readonly string[]
   /** Abre una capa nueva aunque ya haya otra hoja abierta (overlay global). */
   pushOver?: boolean
   wasPushed: boolean
@@ -216,15 +233,11 @@ export function resolveSheetNavigation(input: {
       if (!idChanged && !extrasChanged) {
         return { action: "noop" }
       }
-      const next = cloneParams(input.searchParams)
-      writeSheet(next, input.key, input.id)
-      applyExtraParams(next, input.extraParams)
+      const next = openedSheetParams(input)
       return { action: "replace", url: toUrl(input.pathname, next) }
     }
 
-    const next = cloneParams(input.searchParams)
-    writeSheet(next, input.key, input.id)
-    applyExtraParams(next, input.extraParams)
+    const next = openedSheetParams(input)
     const url = toUrl(input.pathname, next)
     if (currentSheet === null || input.pushOver) {
       return { action: "push", url }

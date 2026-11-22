@@ -59,6 +59,38 @@ describe("resolveSheetNavigation", () => {
     })
   })
 
+  it("drops the view params the sheet does not carry when it opens", () => {
+    const openedSheet = resolveSheetNavigation({
+      pathname: "/finance/transactions/981aa69a",
+      searchParams: params("tab=installment&month=2026-11"),
+      key: "transaction-options-sheet",
+      open: true,
+      id: "981aa69a",
+      clearOnOpen: ["tab"],
+      wasPushed: false,
+    })
+    assert.deepEqual(openedSheet, {
+      action: "push",
+      url: "/finance/transactions/981aa69a?month=2026-11&sheet=transaction-options-sheet&sheetId=981aa69a",
+    })
+  })
+
+  it("keeps the sheet extras after dropping the view params", () => {
+    const openedWithContext = resolveSheetNavigation({
+      pathname: path,
+      searchParams: params("tab=installment"),
+      key: "agent-chat",
+      open: true,
+      extraParams: { agentContext: "ctx" },
+      clearOnOpen: ["tab"],
+      wasPushed: false,
+    })
+    assert.deepEqual(openedWithContext, {
+      action: "push",
+      url: "/finance/products?sheet=agent-chat&agentContext=ctx",
+    })
+  })
+
   it("replaces sheetId on the same sheet", () => {
     const result = resolveSheetNavigation({
       pathname: path,
