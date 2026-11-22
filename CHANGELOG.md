@@ -52,6 +52,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 - #504: el overlay del agente y su historial se cargan bajo demanda, así una ruta autenticada no descarga ese trozo hasta que se abre el chat; el árbol queda con una sola librería de animación (`framer-motion`) y el reorden de categorías usa su mismo primitivo.
 - #501: las cinco hojas de Finanzas que todavía abrían con una clave literal usan `FINANCE_SHEET_KEYS`; el abridor y el glosario comparten el mismo valor y cambiar una clave en la constante los mueve a la vez.
+- #506: la guía del contrato refleja que `SendAiConversationMessageDto` ya publica `clientMessageId` y `stream`, y `AgentSendMessageBody` sale del DTO generado sin duplicar sus campos.
 - #502: la galería de cards deja de marcar como borrador las variantes de aviso y la composición del detalle de movimiento, que ya son la referencia vigente del producto.
 - #493: el flujo de trabajo versiona `scripts/project3.ps1` y la regla «Project 3 siempre al día»; los issues nuevos entran al tablero al crearse y `check` exige `Cancelado` para los cerrados como `not planned`, con el id de esa opción resuelto por nombre.
 - El setup de pruebas de #450 resuelve pantallas con `next/*` y relativos sin extensión, stubea los `.css`, mapea la cobertura con source maps y exige el reintento en el estado de error de Uso (Refs #450; hallazgos de PI-REV).
