@@ -35,6 +35,24 @@ const REVIEW_QUEUE_QUERY_KEY = [...EVIDENCE_QUERY_KEY, "review-queue"] as const
 type ReviewQueueData = InfiniteData<AiReviewQueuePage>
 type ReviewQueueSnapshot = Array<[QueryKey, ReviewQueueData | undefined]>
 
+/**
+ * Total pending messages in review, independent of the message list page. The
+ * queue returns its counts on the first request, without filters.
+ */
+export function useReviewRequiredCount(enabled: boolean) {
+  const session = useAppStore((state) => state.session)
+  return useQuery({
+    queryKey: [...REVIEW_QUEUE_QUERY_KEY, "required-count"],
+    queryFn: ({ signal }) =>
+      apiGet<AiReviewQueuePage>(
+        API_ENDPOINTS.INTELLIGENCE.REVIEW_QUEUE,
+        signal
+      ),
+    select: (page) => page.counts.all,
+    enabled: Boolean(session && enabled),
+  })
+}
+
 export function useAiEvidence(
   enabled: boolean,
   view: "review" | "runs" = "review",
