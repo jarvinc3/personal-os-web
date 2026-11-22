@@ -16,7 +16,7 @@ export const entradasDocs: readonly GalleryComponentMeta[] = [
 
 <Input placeholder="Nombre de la etiqueta" />`,
     subcomponents: [],
-    anatomy: "<Input type value onChange aria-invalid />",
+    anatomy: [{ name: "Input" }],
     variants: [
       { name: "type", values: "text, email, password, search, number" },
       { name: "states", values: "normal, focus, invalid, disabled" },
@@ -52,7 +52,7 @@ export const entradasDocs: readonly GalleryComponentMeta[] = [
 
 <Textarea placeholder="Notas del movimiento" rows={3} />`,
     subcomponents: [],
-    anatomy: "<Textarea rows value onChange />",
+    anatomy: [{ name: "Textarea" }],
     variants: [
       { name: "rows", values: "2, 3, 4" },
       { name: "states", values: "normal, focus, invalid, disabled" },
@@ -86,7 +86,7 @@ import { Label } from "@/src/shared/components/ui/label"
 <Label htmlFor="name">Comercio</Label>
 <Input id="name" />`,
     subcomponents: [],
-    anatomy: '<Label htmlFor="name">Comercio</Label>',
+    anatomy: [{ name: "Label" }],
     variants: [{ name: "states", values: "normal, disabled por el control" }],
     props: [
       {
@@ -130,8 +130,17 @@ import { Label } from "@/src/shared/components/ui/label"
       "FieldContent",
       "FieldTitle",
     ],
-    anatomy:
-      "<Field><FieldLabel /><Input /><FieldDescription /><FieldError /></Field>",
+    anatomy: [
+      {
+        name: "Field",
+        children: [
+          { name: "FieldLabel" },
+          { name: "Input" },
+          { name: "FieldDescription" },
+          { name: "FieldError" },
+        ],
+      },
+    ],
     variants: [
       { name: "orientation", values: "vertical, horizontal, responsive" },
       { name: "states", values: "normal, invalid, disabled" },
@@ -164,7 +173,7 @@ import { Label } from "@/src/shared/components/ui/label"
 <Checkbox id="remember" defaultChecked />
 <Label htmlFor="remember">Recordar destino</Label>`,
     subcomponents: [],
-    anatomy: "<Checkbox checked onCheckedChange disabled />",
+    anatomy: [{ name: "Checkbox" }],
     variants: [
       { name: "states", values: "checked, unchecked, indeterminate, disabled" },
     ],
@@ -203,7 +212,12 @@ import { Label } from "@/src/shared/components/ui/label"
   <Label htmlFor="savings">Tema claro</Label>
 </RadioGroup>`,
     subcomponents: ["RadioGroupItem"],
-    anatomy: "<RadioGroup><RadioGroupItem /><Label /></RadioGroup>",
+    anatomy: [
+      {
+        name: "RadioGroup",
+        children: [{ name: "RadioGroupItem" }, { name: "Label" }],
+      },
+    ],
     variants: [
       { name: "value", values: "controlado o defaultValue" },
       { name: "states", values: "normal, selected, disabled" },
@@ -240,7 +254,7 @@ import { Label } from "@/src/shared/components/ui/label"
 
 <Switch checked={enabled} onCheckedChange={setEnabled} />`,
     subcomponents: [],
-    anatomy: "<Switch checked onCheckedChange disabled />",
+    anatomy: [{ name: "Switch" }],
     variants: [{ name: "states", values: "on, off, disabled, focus" }],
     props: [
       {
@@ -282,8 +296,7 @@ import { Label } from "@/src/shared/components/ui/label"
   onCheckedChange={setNotify}
 />`,
     subcomponents: [],
-    anatomy:
-      "<SwitchFieldRow icon label description checked onCheckedChange />",
+    anatomy: [{ name: "SwitchFieldRow" }],
     variants: [
       { name: "states", values: "checked, unchecked, disabled" },
       { name: "accentColor", values: "color del módulo cuando está activo" },
@@ -336,8 +349,16 @@ import { Label } from "@/src/shared/components/ui/label"
       "InputGroupInput",
       "InputGroupTextarea",
     ],
-    anatomy:
-      "<InputGroup><InputGroupAddon /><InputGroupInput /><InputGroupButton /></InputGroup>",
+    anatomy: [
+      {
+        name: "InputGroup",
+        children: [
+          { name: "InputGroupAddon" },
+          { name: "InputGroupInput" },
+          { name: "InputGroupButton" },
+        ],
+      },
+    ],
     variants: [
       {
         name: "align",
@@ -379,7 +400,7 @@ import { Label } from "@/src/shared/components/ui/label"
   icon={StoreIcon}
 />`,
     subcomponents: [],
-    anatomy: "<FormTextField label value onChange icon error revealable />",
+    anatomy: [{ name: "FormTextField" }],
     variants: [
       { name: "states", values: "normal, invalid, disabled, revealable" },
       { name: "type", values: "text, email, password, search" },
@@ -446,8 +467,15 @@ import { Label } from "@/src/shared/components/ui/label"
       "SelectScrollUpButton",
       "SelectScrollDownButton",
     ],
-    anatomy:
-      "<Select><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem /></SelectContent></Select>",
+    anatomy: [
+      {
+        name: "Select",
+        children: [
+          { name: "SelectTrigger", children: [{ name: "SelectValue" }] },
+          { name: "SelectContent", children: [{ name: "SelectItem" }] },
+        ],
+      },
+    ],
     variants: [
       { name: "size", values: "sm, default" },
       { name: "states", values: "normal, open, invalid, disabled" },
@@ -512,8 +540,16 @@ import { Label } from "@/src/shared/components/ui/label"
       "AttachmentAction",
       "AttachmentTrigger",
     ],
-    anatomy:
-      "<Attachment><AttachmentMedia /><AttachmentContent /><AttachmentActions /></Attachment>",
+    anatomy: [
+      {
+        name: "Attachment",
+        children: [
+          { name: "AttachmentMedia" },
+          { name: "AttachmentContent" },
+          { name: "AttachmentActions" },
+        ],
+      },
+    ],
     variants: [
       { name: "state", values: "idle, uploading, processing, error, done" },
       { name: "size", values: "default, sm, xs" },
@@ -583,8 +619,20 @@ import { Label } from "@/src/shared/components/ui/label"
       "ComboboxTrigger",
       "ComboboxValue",
     ],
-    anatomy:
-      "<Combobox items><ComboboxInput /><ComboboxContent><ComboboxList><ComboboxItem /></ComboboxList></ComboboxContent></Combobox>",
+    anatomy: [
+      {
+        name: "Combobox",
+        children: [
+          { name: "ComboboxInput" },
+          {
+            name: "ComboboxContent",
+            children: [
+              { name: "ComboboxList", children: [{ name: "ComboboxItem" }] },
+            ],
+          },
+        ],
+      },
+    ],
     variants: [
       { name: "mode", values: "single, multiple con ComboboxChips" },
       { name: "states", values: "closed, open, empty, disabled" },

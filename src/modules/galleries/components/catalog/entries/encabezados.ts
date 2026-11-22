@@ -22,8 +22,7 @@ export const encabezadosDocs: readonly GalleryComponentMeta[] = [
   <SummaryItem title="Movimientos" value="12" />
 </SummarySection>`,
     subcomponents: [],
-    anatomy:
-      "<SummarySection title icon subtitle right collapsible><SummaryItem /></SummarySection>",
+    anatomy: [{ name: "SummarySection", children: [{ name: "SummaryItem" }] }],
     variants: [
       { name: "collapsible", values: "false, true con defaultOpen" },
       { name: "color", values: "acento del módulo en icono y fondo" },
@@ -68,7 +67,7 @@ export const encabezadosDocs: readonly GalleryComponentMeta[] = [
   {rows}
 </SummaryGroup>`,
     subcomponents: [],
-    anatomy: "<SummaryGroup title description>{rows}</SummaryGroup>",
+    anatomy: [{ name: "SummaryGroup" }],
     variants: [{ name: "description", values: "opcional, debajo del título" }],
     props: [
       {
@@ -101,8 +100,7 @@ export const encabezadosDocs: readonly GalleryComponentMeta[] = [
   {rows}
 </SettingsSection>`,
     subcomponents: [],
-    anatomy:
-      "<SettingsSection title description headerTrailing bare>{rows}</SettingsSection>",
+    anatomy: [{ name: "SettingsSection" }],
     variants: [
       { name: "bare", values: "false (card propia), true (sin card)" },
       { name: "headerTrailing", values: "acción a la derecha del título" },
@@ -145,7 +143,7 @@ export const encabezadosDocs: readonly GalleryComponentMeta[] = [
   subtitle={subtitle}
 />`,
     subcomponents: [],
-    anatomy: "<DetailHeader media title badge subtitle />",
+    anatomy: [{ name: "DetailHeader" }],
     variants: [
       { name: "badge", values: "sin insignia, con label y variant" },
       { name: "media", values: "BrandLogo u otro nodo de 48 px" },
@@ -189,8 +187,15 @@ export const encabezadosDocs: readonly GalleryComponentMeta[] = [
   <CollapsibleContent>…</CollapsibleContent>
 </Collapsible>`,
     subcomponents: ["CollapsibleTrigger", "CollapsibleContent"],
-    anatomy:
-      "<Collapsible><CollapsibleTrigger /><CollapsibleContent /></Collapsible>",
+    anatomy: [
+      {
+        name: "Collapsible",
+        children: [
+          { name: "CollapsibleTrigger" },
+          { name: "CollapsibleContent" },
+        ],
+      },
+    ],
     variants: [
       { name: "defaultOpen", values: "false, true" },
       { name: "states", values: "open, closed, disabled" },

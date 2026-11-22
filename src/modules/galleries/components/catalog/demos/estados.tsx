@@ -28,6 +28,19 @@ export const estadosDemos: GalleryDemoMap = {
   "icon-badge": [
     {
       label: "Tonos, color de entidad y contenido propio",
+      code: `
+<div className="flex flex-wrap items-center gap-3">
+  <IconBadge icon={WalletIcon} tone="primary" />
+  <IconBadge icon={WalletIcon} tone="success" size={40} />
+  <IconBadge icon={WalletIcon} tone="warning" size={32} />
+  <IconBadge icon={WalletIcon} color="#0f766e" />
+  <IconBadge size={40}>
+    <span className="text-sm font-semibold" aria-hidden>
+      AB
+    </span>
+  </IconBadge>
+</div>
+`,
       node: (
         <div className="flex flex-wrap items-center gap-3">
           <IconBadge icon={WalletIcon} tone="primary" />
@@ -46,6 +59,43 @@ export const estadosDemos: GalleryDemoMap = {
   empty: [
     {
       label: "Con acción, sin resultados y compacta",
+      code: `
+<div className="flex w-full flex-col gap-3">
+  <Empty className="border p-6">
+    <EmptyHeader>
+      <EmptyMedia variant="icon">
+        <WalletIcon />
+      </EmptyMedia>
+      <EmptyTitle>Sin cuentas todavía</EmptyTitle>
+      <EmptyDescription>
+        Agrega una cuenta para ver su saldo y sus movimientos.
+      </EmptyDescription>
+    </EmptyHeader>
+    <EmptyContent>
+      <Button size="sm" onClick={() => simulatedTap("Agregar cuenta")}>
+        <PlusIcon />
+        Agregar cuenta
+      </Button>
+    </EmptyContent>
+  </Empty>
+  <Empty className="border p-6">
+    <EmptyHeader>
+      <EmptyMedia variant="icon">
+        <SearchXIcon />
+      </EmptyMedia>
+      <EmptyTitle>La búsqueda no encontró nada</EmptyTitle>
+      <EmptyDescription>
+        Prueba con otro nombre o con un monto menor.
+      </EmptyDescription>
+    </EmptyHeader>
+  </Empty>
+  <Empty className={cn(EMPTY_COMPACT_CLASS_NAME, "border")}>
+    <EmptyHeader>
+      <EmptyTitle>Ningún país coincide</EmptyTitle>
+    </EmptyHeader>
+  </Empty>
+</div>
+`,
       node: (
         <div className="flex w-full flex-col gap-3">
           <Empty className="border p-6">
@@ -88,6 +138,12 @@ export const estadosDemos: GalleryDemoMap = {
   skeleton: [
     {
       label: "Línea y bloque",
+      code: `
+<div className="flex w-full flex-col gap-2">
+  <Skeleton className="h-4 w-32" />
+  <Skeleton className="h-20 w-full rounded-2xl" />
+</div>
+`,
       node: (
         <div className="flex w-full flex-col gap-2">
           <Skeleton className="h-4 w-32" />
@@ -99,6 +155,11 @@ export const estadosDemos: GalleryDemoMap = {
   "list-skeleton": [
     {
       label: "Tres filas",
+      code: `
+<div className="w-full rounded-2xl border border-border">
+  <ListSkeleton rows={3} />
+</div>
+`,
       node: (
         <div className="w-full rounded-2xl border border-border">
           <ListSkeleton rows={3} />
@@ -109,6 +170,13 @@ export const estadosDemos: GalleryDemoMap = {
   "card-skeleton": [
     {
       label: "Alturas 16, 28 y 40",
+      code: `
+<div className="flex w-full flex-col gap-3">
+  <CardSkeleton height={16} />
+  <CardSkeleton height={28} />
+  <CardSkeleton height={40} />
+</div>
+`,
       node: (
         <div className="flex w-full flex-col gap-3">
           <CardSkeleton height={16} />
@@ -121,6 +189,11 @@ export const estadosDemos: GalleryDemoMap = {
   "loading-view": [
     {
       label: "Inline",
+      code: `
+<div className="w-full rounded-2xl border border-border">
+  <LoadingView variant="inline" />
+</div>
+`,
       node: (
         <div className="w-full rounded-2xl border border-border">
           <LoadingView variant="inline" />
@@ -131,6 +204,23 @@ export const estadosDemos: GalleryDemoMap = {
   "error-state": [
     {
       label: "Con Reintentar y reintentando",
+      code: `
+<div className="flex w-full flex-col gap-3">
+  <div className="rounded-2xl border border-border">
+    <ErrorState
+      message="El servidor no respondió."
+      onRetry={() => simulatedTap("Reintentar")}
+    />
+  </div>
+  <div className="rounded-2xl border border-border">
+    <ErrorState
+      message="El servidor no respondió."
+      onRetry={() => simulatedTap("Reintentar")}
+      isRetrying
+    />
+  </div>
+</div>
+`,
       node: (
         <div className="flex w-full flex-col gap-3">
           <div className="rounded-2xl border border-border">
@@ -153,6 +243,12 @@ export const estadosDemos: GalleryDemoMap = {
   spinner: [
     {
       label: "Dentro de un botón",
+      code: `
+<Button disabled size="sm">
+  <Spinner />
+  Cargando
+</Button>
+`,
       node: (
         <Button disabled size="sm">
           <Spinner />
@@ -164,6 +260,9 @@ export const estadosDemos: GalleryDemoMap = {
   "module-coming-soon": [
     {
       label: "App activa sin sus pantallas",
+      code: `
+<ModuleComingSoon slug="agenda" />
+`,
       node: <ModuleComingSoon slug="agenda" />,
     },
   ],

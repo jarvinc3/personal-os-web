@@ -40,8 +40,19 @@ import { InboxIcon } from "lucide-react"
       "ItemHeader",
       "ItemFooter",
     ],
-    anatomy:
-      "<Item><ItemMedia /><ItemContent><ItemTitle /><ItemDescription /></ItemContent><ItemActions /></Item>",
+    anatomy: [
+      {
+        name: "Item",
+        children: [
+          { name: "ItemMedia" },
+          {
+            name: "ItemContent",
+            children: [{ name: "ItemTitle" }, { name: "ItemDescription" }],
+          },
+          { name: "ItemActions" },
+        ],
+      },
+    ],
     variants: [
       { name: "variant", values: "default, outline, muted" },
       { name: "size", values: "default, sm, xs" },
@@ -91,7 +102,12 @@ import { InboxIcon } from "lucide-react"
   <MarkerContent>Sincronización en curso</MarkerContent>
 </Marker>`,
     subcomponents: ["MarkerIcon", "MarkerContent"],
-    anatomy: "<Marker><MarkerIcon /><MarkerContent /></Marker>",
+    anatomy: [
+      {
+        name: "Marker",
+        children: [{ name: "MarkerIcon" }, { name: "MarkerContent" }],
+      },
+    ],
     variants: [{ name: "variant", values: "default, separator, border" }],
     props: [
       {
@@ -129,7 +145,7 @@ import { FileTextIcon } from "lucide-react"
   href={href}
 />`,
     subcomponents: [],
-    anatomy: "<SummaryItem icon title description value href onPress />",
+    anatomy: [{ name: "SummaryItem" }],
     variants: [
       {
         name: "href / onPress",
@@ -182,8 +198,7 @@ import { FileTextIcon } from "lucide-react"
   onSwitchChange={setNotifications}
 />`,
     subcomponents: [],
-    anatomy:
-      "<SettingsRow icon label description value switchValue onSwitchChange />",
+    anatomy: [{ name: "SettingsRow" }],
     variants: [
       { name: "modo", values: "navegación (onPress), switch, link externo" },
       { name: "states", values: "normal, destructive, disabled" },
@@ -236,8 +251,20 @@ import { FileTextIcon } from "lucide-react"
   </AccordionItem>
 </Accordion>`,
     subcomponents: ["AccordionItem", "AccordionTrigger", "AccordionContent"],
-    anatomy:
-      "<Accordion><AccordionItem><AccordionTrigger /><AccordionContent /></AccordionItem></Accordion>",
+    anatomy: [
+      {
+        name: "Accordion",
+        children: [
+          {
+            name: "AccordionItem",
+            children: [
+              { name: "AccordionTrigger" },
+              { name: "AccordionContent" },
+            ],
+          },
+        ],
+      },
+    ],
     variants: [
       { name: "openMultiple", values: "false, true" },
       { name: "states", values: "open, closed, disabled" },
@@ -282,7 +309,12 @@ import { FileTextIcon } from "lucide-react"
       "AvatarGroupCount",
       "AvatarBadge",
     ],
-    anatomy: "<Avatar><AvatarImage /><AvatarFallback /></Avatar>",
+    anatomy: [
+      {
+        name: "Avatar",
+        children: [{ name: "AvatarImage" }, { name: "AvatarFallback" }],
+      },
+    ],
     variants: [
       { name: "size", values: "sm, default, lg" },
       { name: "states", values: "image, fallback, missing image" },

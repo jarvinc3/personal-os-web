@@ -25,7 +25,16 @@ export const avisosDocs: readonly GalleryComponentMeta[] = [
   <AlertDescription>Los movimientos aparecen al terminar.</AlertDescription>
 </Alert>`,
     subcomponents: ["AlertTitle", "AlertDescription", "AlertAction"],
-    anatomy: "<Alert><AlertTitle /><AlertDescription /><AlertAction /></Alert>",
+    anatomy: [
+      {
+        name: "Alert",
+        children: [
+          { name: "AlertTitle" },
+          { name: "AlertDescription" },
+          { name: "AlertAction" },
+        ],
+      },
+    ],
     variants: [
       { name: "variant", values: "default, destructive" },
       { name: "tono", values: "ALERT_TONE_CLASS_NAME.warning, .info" },
@@ -64,7 +73,7 @@ export const avisosDocs: readonly GalleryComponentMeta[] = [
   tone="warning"
 />`,
     subcomponents: [],
-    anatomy: "<NoticeCard icon title description tone trailing />",
+    anatomy: [{ name: "NoticeCard" }],
     variants: [
       { name: "tone", values: "warning, danger, info" },
       { name: "trailing", values: "acción a la derecha" },
@@ -103,7 +112,7 @@ export const avisosDocs: readonly GalleryComponentMeta[] = [
 
 appToast.success({ text1: "Movimiento guardado" })`,
     subcomponents: ["showUndoToast"],
-    anatomy: "appToast.success({ text1, text2? })",
+    anatomy: [{ name: "appToast" }],
     variants: [
       { name: "tipo", values: "success, error, info, warning" },
       { name: "undo", values: "showUndoToast para una acción reversible" },
@@ -137,7 +146,7 @@ appToast.success({ text1: "Movimiento guardado" })`,
 
 <Toaster />`,
     subcomponents: [],
-    anatomy: "<Toaster />",
+    anatomy: [{ name: "Toaster" }],
     variants: [
       {
         name: "position",

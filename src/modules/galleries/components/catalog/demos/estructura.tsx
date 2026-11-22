@@ -19,6 +19,22 @@ export const estructuraDemos: GalleryDemoMap = {
   card: [
     {
       label: "Card completa",
+      code: `
+<Card className="w-full max-w-sm">
+  <CardHeader>
+    <CardTitle>Resumen del mes</CardTitle>
+    <CardDescription>Movimientos y pendientes</CardDescription>
+  </CardHeader>
+  <CardContent>
+    <span className="text-lg font-semibold">12 movimientos</span>
+  </CardContent>
+  <CardFooter>
+    <span className="text-xs text-muted-foreground">
+      Actualizado hoy
+    </span>
+  </CardFooter>
+</Card>
+`,
       node: (
         <Card className="w-full max-w-sm">
           <CardHeader>
@@ -38,6 +54,16 @@ export const estructuraDemos: GalleryDemoMap = {
     },
     {
       label: "Tamaño sm",
+      code: `
+<Card size="sm" className="w-full max-w-sm">
+  <CardTitle>Ajustes rápidos</CardTitle>
+  <CardContent>
+    <span className="text-sm text-muted-foreground">
+      Apariencia y avisos
+    </span>
+  </CardContent>
+</Card>
+`,
       node: (
         <Card size="sm" className="w-full max-w-sm">
           <CardTitle>Ajustes rápidos</CardTitle>
@@ -53,6 +79,18 @@ export const estructuraDemos: GalleryDemoMap = {
   separator: [
     {
       label: "Horizontal y vertical",
+      code: `
+<div className="flex w-full flex-col gap-3">
+  <span className="text-sm">Movimientos</span>
+  <Separator />
+  <span className="text-sm">Presupuestos</span>
+  <div className="flex h-10 items-center gap-3 text-sm">
+    <span>Gastos</span>
+    <Separator orientation="vertical" />
+    <span>Ingresos</span>
+  </div>
+</div>
+`,
       node: (
         <div className="flex w-full flex-col gap-3">
           <span className="text-sm">Movimientos</span>
@@ -70,6 +108,20 @@ export const estructuraDemos: GalleryDemoMap = {
   "scroll-area": [
     {
       label: "Lista con scroll",
+      code: `
+<ScrollArea className="h-40 w-full rounded-2xl border border-border p-3">
+  <div className="flex flex-col gap-2">
+    {Array.from({ length: 12 }, (_, index) => (
+      <div
+        key={index}
+        className="rounded-xl bg-muted/60 px-3 py-2 text-sm"
+      >
+        Movimiento {index + 1}
+      </div>
+    ))}
+  </div>
+</ScrollArea>
+`,
       node: (
         <ScrollArea className="h-40 w-full rounded-2xl border border-border p-3">
           <div className="flex flex-col gap-2">
@@ -89,6 +141,13 @@ export const estructuraDemos: GalleryDemoMap = {
   "code-block": [
     {
       label: "Con título y copiar",
+      code: `
+<CodeBlock className="w-full">
+  <CodeBlockContent>
+    {\`const total = formatFinanceMoney(amount, display)\`}
+  </CodeBlockContent>
+</CodeBlock>
+`,
       node: (
         <CodeBlock className="w-full">
           <CodeBlockContent>

@@ -12,6 +12,8 @@ import {
 
 import type { GalleryComponentDoc } from "@/src/modules/galleries/components/catalog/types"
 import { HighlightedCode } from "@/src/modules/galleries/components/highlighted-code"
+import { anatomyTree } from "@/src/modules/galleries/lib/anatomy"
+import { splitSnippet } from "@/src/modules/galleries/lib/snippet"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { Badge } from "@/src/shared/components/ui/badge"
 import {
@@ -67,10 +69,12 @@ function PreviewFrame({
 }
 
 /**
- * Orden de shadcn: vista previa y código, descripción, uso copiable,
- * composición, variantes y estados, y API con la ruta de importación.
+ * Orden de shadcn: vista previa y su código exacto, descripción, uso copiable
+ * en dos bloques, composición en árbol, variantes y estados, y API.
  */
 export function ComponentDocTemplate({ doc }: { doc: GalleryComponentDoc }) {
+  const { importCode, usageCode } = splitSnippet(doc.snippet)
+
   return (
     <div className="flex flex-col gap-4">
       <SummarySection title="Vista previa" icon={EyeIcon}>
@@ -89,7 +93,15 @@ export function ComponentDocTemplate({ doc }: { doc: GalleryComponentDoc }) {
             </div>
           </TabsContent>
           <TabsContent value="code">
-            <CodeSample code={doc.demoCode ?? doc.snippet} title={doc.name} />
+            <div className="flex flex-col gap-3">
+              {doc.demos.map((demo) => (
+                <CodeSample
+                  key={demo.label}
+                  code={demo.code}
+                  title={demo.label}
+                />
+              ))}
+            </div>
           </TabsContent>
         </Tabs>
       </SummarySection>
@@ -109,8 +121,11 @@ export function ComponentDocTemplate({ doc }: { doc: GalleryComponentDoc }) {
       </SummarySection>
 
       <SummarySection title="Uso" icon={CodeIcon}>
-        <div className="p-2">
-          <CodeSample code={doc.snippet} title="uso" />
+        <div className="flex flex-col gap-3 p-2">
+          {importCode.length > 0 ? (
+            <CodeSample code={importCode} title="importación" />
+          ) : null}
+          <CodeSample code={usageCode} title="uso" />
         </div>
       </SummarySection>
 
@@ -124,12 +139,10 @@ export function ComponentDocTemplate({ doc }: { doc: GalleryComponentDoc }) {
                 </Badge>
               ))}
             </div>
-          ) : (
-            <p className="text-sm text-muted-foreground">
-              No tiene subcomponentes.
-            </p>
-          )}
-          <CodeSample code={doc.anatomy} title="anatomía" />
+          ) : null}
+          <pre className="w-full min-w-0 overflow-x-auto rounded-md bg-muted p-3 font-mono text-[0.7rem] leading-relaxed text-muted-foreground">
+            {anatomyTree(doc.anatomy)}
+          </pre>
         </div>
       </SummarySection>
 

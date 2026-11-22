@@ -27,7 +27,15 @@ export const tabsDocs: readonly GalleryComponentMeta[] = [
   <TabsContent value="expenses">…</TabsContent>
 </Tabs>`,
     subcomponents: ["TabsList", "TabsTrigger", "TabsContent"],
-    anatomy: "<Tabs><TabsList><TabsTrigger /></TabsList><TabsContent /></Tabs>",
+    anatomy: [
+      {
+        name: "Tabs",
+        children: [
+          { name: "TabsList", children: [{ name: "TabsTrigger" }] },
+          { name: "TabsContent" },
+        ],
+      },
+    ],
     variants: [
       { name: "variant (TabsList)", values: "default, line" },
       { name: "orientation", values: "horizontal, vertical" },
@@ -66,7 +74,7 @@ export const tabsDocs: readonly GalleryComponentMeta[] = [
 
 <Badge variant="warning">Por vencer</Badge>`,
     subcomponents: [],
-    anatomy: "<Badge variant><Icon />Texto</Badge>",
+    anatomy: [{ name: "Badge" }],
     variants: [
       {
         name: "variant",
@@ -111,7 +119,7 @@ export const tabsDocs: readonly GalleryComponentMeta[] = [
   onPress={onPress}
 />`,
     subcomponents: [],
-    anatomy: "<CategoryCard name icon color isSystem variant amount />",
+    anatomy: [{ name: "CategoryCard" }],
     variants: [
       { name: "variant", values: "default, pick, chip, inline" },
       { name: "states", values: "normal, selected, disabled" },

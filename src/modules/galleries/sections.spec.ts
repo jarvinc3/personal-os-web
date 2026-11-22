@@ -8,6 +8,7 @@ import {
   GALLERY_COMPONENT_METAS,
   GALLERY_METAS_BY_CATEGORY,
 } from "./components/catalog/manifest.ts"
+import { GALLERY_DEMOS } from "./components/catalog/demos/index.ts"
 import {
   COMPONENT_GALLERY_SECTIONS,
   componentGallerySection,
@@ -159,4 +160,35 @@ test("resuelve una categoría por su id y rechaza las demás", () => {
     () => componentGallerySection("inexistente" as "entradas"),
     /Sección de la galería desconocida/
   )
+})
+
+test("cada demo trae el código exacto de lo que pinta", () => {
+  for (const [id, demos] of Object.entries(GALLERY_DEMOS)) {
+    for (const demo of demos) {
+      assert.ok(
+        demo.code.trim().length > 0,
+        `${id}: «${demo.label}» sin código`
+      )
+      assert.ok(
+        !/^<[A-Za-z]+Demo\s*\/>$/.test(demo.code.trim()),
+        `${id}: «${demo.label}» muestra el ayudante en vez del componente`
+      )
+      assert.ok(
+        !demo.code.includes("GALLERY_"),
+        `${id}: «${demo.label}» usa constantes internas de la galería`
+      )
+    }
+  }
+})
+
+test("cada ficha declara su anatomía con nombres", () => {
+  for (const meta of GALLERY_COMPONENT_METAS) {
+    assert.ok(meta.anatomy.length > 0, `${meta.id} sin anatomía`)
+    for (const root of meta.anatomy) {
+      assert.ok(
+        root.name.trim().length > 0,
+        `${meta.id} tiene un nodo sin nombre`
+      )
+    }
+  }
 })

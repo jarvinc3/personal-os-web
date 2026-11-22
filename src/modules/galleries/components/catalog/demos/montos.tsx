@@ -123,6 +123,21 @@ export const montosDemos: GalleryDemoMap = {
   "format-finance-money": [
     {
       label: "Con centavos, sin centavos, compacto, negativo y cero",
+      code: `
+<dl className="flex w-full flex-col gap-1 text-sm">
+  {FORMATTED_AMOUNTS.map((row) => (
+    <div
+      key={row.key}
+      className="flex items-center justify-between gap-3"
+    >
+      <dt className="text-muted-foreground">{row.label}</dt>
+      <dd className="tabular-nums">
+        {formatFinanceMoney(row.amount, row.display)}
+      </dd>
+    </div>
+  ))}
+</dl>
+`,
       node: (
         <dl className="flex w-full flex-col gap-1 text-sm">
           {FORMATTED_AMOUNTS.map((row) => (
@@ -143,6 +158,49 @@ export const montosDemos: GalleryDemoMap = {
   money: [
     {
       label: "Ingreso, gasto, cero y sin tono",
+      code: `
+<dl className="flex w-full flex-col gap-1 text-sm">
+  <div className="flex items-center justify-between gap-3">
+    <dt className="text-muted-foreground">Ingreso</dt>
+    <dd>
+      <Money
+        value={"12500.00"}
+        display={{ currency: "DOP", showCents: true, compactNumbers: false, locale: "es-DO" }}
+        showSign
+        tone="auto"
+      />
+    </dd>
+  </div>
+  <div className="flex items-center justify-between gap-3">
+    <dt className="text-muted-foreground">Gasto</dt>
+    <dd>
+      <Money
+        value={"-1850.00"}
+        display={{ currency: "DOP", showCents: true, compactNumbers: false, locale: "es-DO" }}
+        showSign
+        tone="auto"
+      />
+    </dd>
+  </div>
+  <div className="flex items-center justify-between gap-3">
+    <dt className="text-muted-foreground">Cero</dt>
+    <dd>
+      <Money
+        value={"0.00"}
+        display={{ currency: "DOP", showCents: true, compactNumbers: false, locale: "es-DO" }}
+        showSign
+        tone="auto"
+      />
+    </dd>
+  </div>
+  <div className="flex items-center justify-between gap-3">
+    <dt className="text-muted-foreground">Sin tono</dt>
+    <dd>
+      <Money value={"1250000.00"} display={{ currency: "DOP", showCents: true, compactNumbers: false, locale: "es-DO" }} />
+    </dd>
+  </div>
+</dl>
+`,
       node: (
         <dl className="flex w-full flex-col gap-1 text-sm">
           <div className="flex items-center justify-between gap-3">
@@ -191,18 +249,81 @@ export const montosDemos: GalleryDemoMap = {
   "finance-money-field": [
     {
       label: "Normal, con error y deshabilitado",
+      code: `
+const [amount, setAmount] = useState("1850.00")
+
+<div className="flex w-full flex-col gap-3">
+  <FinanceMoneyField
+    calculatorKey="gallery-amount"
+    amount={amount}
+    onAmountChange={setAmount}
+    onAmountCommit={setAmount}
+    currency="DOP"
+  />
+  <FinanceMoneyField
+    calculatorKey="gallery-negative"
+    amount="-1850.00"
+    onAmountChange={() => {}}
+    onAmountCommit={() => {}}
+    amountError="El monto no puede ser negativo"
+  />
+  <FinanceMoneyField
+    calculatorKey="gallery-zero"
+    amount="0.00"
+    onAmountChange={() => {}}
+    onAmountCommit={() => {}}
+    disabled
+  />
+</div>
+`,
       node: <MoneyFieldDemo />,
     },
   ],
   "finance-date-field": [
     {
       label: "Fecha, fecha y hora, error y deshabilitado",
+      code: `
+const [date, setDate] = useState("2026-10-23")
+const [dateTime, setDateTime] = useState("2026-10-23T09:30")
+
+<div className="flex w-full flex-col gap-3">
+  <FinanceDateField label="Fecha" value={date} onChange={setDate} />
+  <FinanceDateField
+    label="Fecha y hora"
+    value={dateTime}
+    onChange={setDateTime}
+    withTime
+  />
+  <FinanceDateField
+    label="Fecha de corte"
+    value="2026-10-23"
+    onChange={() => {}}
+    error="Elige una fecha posterior"
+  />
+  <FinanceDateField
+    label="Fecha fija"
+    value="2026-10-23"
+    onChange={() => {}}
+    disabled
+  />
+</div>
+`,
       node: <DateFieldDemo />,
     },
   ],
   "currency-flag": [
     {
       label: "DOP, USD, EUR y MXN",
+      code: `
+<div className="flex flex-wrap items-center gap-3">
+  {["DOP", "USD", "EUR", "MXN"].map((code) => (
+    <span key={code} className="flex items-center gap-1.5 text-sm">
+      <CurrencyFlag code={code} />
+      {code}
+    </span>
+  ))}
+</div>
+`,
       node: (
         <div className="flex flex-wrap items-center gap-3">
           {["DOP", "USD", "EUR", "MXN"].map((code) => (
@@ -218,6 +339,14 @@ export const montosDemos: GalleryDemoMap = {
   "brand-logo": [
     {
       label: "Con imagen, sin imagen y tamaños",
+      code: `
+<div className="flex flex-wrap items-center gap-3">
+  <BrandLogo name="Banco Ejemplo" size={40} />
+  <BrandLogo name="Institución Ejemplo" size={48} />
+  <BrandLogo name="Suscripción Ejemplo" size={24} />
+  <BrandLogo name="Comercio" size={36} />
+</div>
+`,
       node: (
         <div className="flex flex-wrap items-center gap-3">
           <BrandLogo name="Banco Ejemplo" size={40} />

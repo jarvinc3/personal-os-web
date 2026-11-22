@@ -17,7 +17,7 @@ export const estadosDocs: readonly GalleryComponentMeta[] = [
 
 <IconBadge icon={WalletIcon} tone="primary" />`,
     subcomponents: [],
-    anatomy: "<IconBadge icon tone color size />",
+    anatomy: [{ name: "IconBadge" }],
     variants: [
       {
         name: "tone",
@@ -82,8 +82,22 @@ export const estadosDocs: readonly GalleryComponentMeta[] = [
       "EmptyDescription",
       "EmptyContent",
     ],
-    anatomy:
-      "<Empty><EmptyHeader><EmptyMedia /><EmptyTitle /><EmptyDescription /></EmptyHeader><EmptyContent /></Empty>",
+    anatomy: [
+      {
+        name: "Empty",
+        children: [
+          {
+            name: "EmptyHeader",
+            children: [
+              { name: "EmptyMedia" },
+              { name: "EmptyTitle" },
+              { name: "EmptyDescription" },
+            ],
+          },
+          { name: "EmptyContent" },
+        ],
+      },
+    ],
     variants: [
       { name: "variant (EmptyMedia)", values: "default, icon" },
       {
@@ -120,7 +134,7 @@ export const estadosDocs: readonly GalleryComponentMeta[] = [
 
 <Skeleton className="h-4 w-32" />`,
     subcomponents: [],
-    anatomy: "<Skeleton className />",
+    anatomy: [{ name: "Skeleton" }],
     variants: [
       { name: "className", values: "alto, ancho y radio de la forma real" },
     ],
@@ -147,7 +161,7 @@ export const estadosDocs: readonly GalleryComponentMeta[] = [
 
 <ListSkeleton rows={3} />`,
     subcomponents: [],
-    anatomy: "<ListSkeleton rows />",
+    anatomy: [{ name: "ListSkeleton" }],
     variants: [{ name: "rows", values: "número de filas a dibujar" }],
     props: [
       {
@@ -170,7 +184,7 @@ export const estadosDocs: readonly GalleryComponentMeta[] = [
 
 <CardSkeleton height={28} />`,
     subcomponents: [],
-    anatomy: "<CardSkeleton height />",
+    anatomy: [{ name: "CardSkeleton" }],
     variants: [{ name: "height", values: "16, 28, 40 (unidades del layout)" }],
     props: [
       {
@@ -195,7 +209,7 @@ export const estadosDocs: readonly GalleryComponentMeta[] = [
 
 <LoadingView variant="inline" />`,
     subcomponents: [],
-    anatomy: "<LoadingView variant />",
+    anatomy: [{ name: "LoadingView" }],
     variants: [{ name: "variant", values: "screen, inline" }],
     props: [
       {
@@ -220,7 +234,7 @@ export const estadosDocs: readonly GalleryComponentMeta[] = [
 
 <ErrorState message="El servidor no respondió." onRetry={onRetry} />`,
     subcomponents: [],
-    anatomy: "<ErrorState message onRetry isRetrying />",
+    anatomy: [{ name: "ErrorState" }],
     variants: [{ name: "states", values: "error, reintentando" }],
     props: [
       {
@@ -258,7 +272,7 @@ export const estadosDocs: readonly GalleryComponentMeta[] = [
   Cargando
 </Button>`,
     subcomponents: [],
-    anatomy: "<Spinner />",
+    anatomy: [{ name: "Spinner" }],
     variants: [{ name: "className", values: "tamaño y color del contexto" }],
     props: [
       {
@@ -284,7 +298,7 @@ export const estadosDocs: readonly GalleryComponentMeta[] = [
 
 <ModuleComingSoon slug="agenda" />`,
     subcomponents: [],
-    anatomy: "<ModuleComingSoon slug />",
+    anatomy: [{ name: "ModuleComingSoon" }],
     variants: [
       {
         name: "slug",

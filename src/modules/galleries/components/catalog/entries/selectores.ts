@@ -24,7 +24,7 @@ export const selectoresDocs: readonly GalleryComponentMeta[] = [
   onPress={onPress}
 />`,
     subcomponents: [],
-    anatomy: "<OptionRow icon label description selected onPress />",
+    anatomy: [{ name: "OptionRow" }],
     variants: [
       {
         name: "states",
@@ -72,7 +72,7 @@ export const selectoresDocs: readonly GalleryComponentMeta[] = [
   accentColor={accent}
 />`,
     subcomponents: [],
-    anatomy: "<ChoiceGrid value onValueChange options accentColor columns />",
+    anatomy: [{ name: "ChoiceGrid" }],
     variants: [
       { name: "columns", values: "2, 3, 4" },
       { name: "media", values: "icono por opción o una media propia" },
@@ -117,7 +117,7 @@ export const selectoresDocs: readonly GalleryComponentMeta[] = [
   options={options}
 />`,
     subcomponents: [],
-    anatomy: "<SelectField label value onChange icon options error />",
+    anatomy: [{ name: "SelectField" }],
     variants: [
       { name: "states", values: "normal, invalid, disabled" },
       { name: "mark", values: "ReactNode opcional junto a cada opción" },
@@ -154,7 +154,7 @@ export const selectoresDocs: readonly GalleryComponentMeta[] = [
 
 <ColorPickerSwatch id="category-color" variant="circle" value={color} onChange={setColor} />`,
     subcomponents: [],
-    anatomy: "<ColorPickerSwatch id variant value onChange disabled />",
+    anatomy: [{ name: "ColorPickerSwatch" }],
     variants: [
       { name: "variant", values: "circle, square" },
       { name: "states", values: "normal, selected, disabled" },
@@ -196,7 +196,16 @@ import { TimePairWheels } from "@/src/shared/components/forms/wheel-picker"
   <TimePairWheels value={time} minuteStep={5} onChange={setTime} />
 </WheelField>`,
     subcomponents: [],
-    anatomy: "<WheelField label valueLabel icon aside><Wheels /></WheelField>",
+    anatomy: [
+      {
+        name: "WheelField",
+        children: [
+          { name: "DateWheels" },
+          { name: "TimePairWheels" },
+          { name: "DurationWheels" },
+        ],
+      },
+    ],
     variants: [
       { name: "valueLabel", values: "texto de la fila cerrada" },
       { name: "aside", values: "control junto al disparador" },
@@ -234,7 +243,7 @@ import { TimePairWheels } from "@/src/shared/components/forms/wheel-picker"
 
 <TimePairWheels value="09:30" minuteStep={5} onChange={setTime} />`,
     subcomponents: [],
-    anatomy: "<TimePairWheels value minuteStep onChange />",
+    anatomy: [{ name: "TimePairWheels" }],
     variants: [
       { name: "minuteStep", values: "1, 5, 10" },
       { name: "value", values: "HH:mm en 24 h" },
@@ -273,8 +282,7 @@ import { TimePairWheels } from "@/src/shared/components/forms/wheel-picker"
   onChange={setDays}
 />`,
     subcomponents: [],
-    anatomy:
-      "<DayListField label value onChange icon min max error disabled />",
+    anatomy: [{ name: "DayListField" }],
     variants: [
       {
         name: "states",

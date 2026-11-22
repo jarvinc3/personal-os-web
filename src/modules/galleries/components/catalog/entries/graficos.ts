@@ -33,8 +33,21 @@ export const graficosDocs: readonly GalleryComponentMeta[] = [
       "ChartLegendContent",
       "ChartStyle",
     ],
-    anatomy:
-      "<ChartContainer config><BarChart><XAxis /><ChartTooltip /><Bar /></BarChart></ChartContainer>",
+    anatomy: [
+      {
+        name: "ChartContainer",
+        children: [
+          {
+            name: "BarChart",
+            children: [
+              { name: "XAxis" },
+              { name: "ChartTooltip" },
+              { name: "Bar" },
+            ],
+          },
+        ],
+      },
+    ],
     variants: [
       { name: "config", values: "label y color por serie" },
       { name: "tipo", values: "bar, line, area, pie" },
@@ -70,7 +83,7 @@ export const graficosDocs: readonly GalleryComponentMeta[] = [
   <span className="tabular-nums">70%</span>
 </ProgressRing>`,
     subcomponents: [],
-    anatomy: "<ProgressRing value size thickness arcClassName color />",
+    anatomy: [{ name: "ProgressRing" }],
     variants: [
       { name: "value", values: "0 a 100; fuera de rango se recorta" },
       {
@@ -118,8 +131,9 @@ export const graficosDocs: readonly GalleryComponentMeta[] = [
   <BrandLogo name={name} size={40} />
 </SubscriptionProgressRing>`,
     subcomponents: [],
-    anatomy:
-      "<SubscriptionProgressRing percent size tone><BrandLogo /></SubscriptionProgressRing>",
+    anatomy: [
+      { name: "SubscriptionProgressRing", children: [{ name: "BrandLogo" }] },
+    ],
     variants: [
       { name: "tone", values: "default, warning" },
       { name: "size", values: "40, 24" },

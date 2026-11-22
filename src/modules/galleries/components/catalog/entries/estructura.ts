@@ -47,7 +47,16 @@ export const estructuraDocs: readonly GalleryComponentMeta[] = [
       "CardContent",
       "CardFooter",
     ],
-    anatomy: "<Card><CardHeader /><CardContent /><CardFooter /></Card>",
+    anatomy: [
+      {
+        name: "Card",
+        children: [
+          { name: "CardHeader" },
+          { name: "CardContent" },
+          { name: "CardFooter" },
+        ],
+      },
+    ],
     variants: [
       { name: "size", values: "default, sm" },
       { name: "className", values: "ajustes de ancho y composición" },
@@ -81,7 +90,7 @@ export const estructuraDocs: readonly GalleryComponentMeta[] = [
 
 <Separator />`,
     subcomponents: [],
-    anatomy: '<Separator orientation="horizontal" />',
+    anatomy: [{ name: "Separator" }],
     variants: [{ name: "orientation", values: "horizontal, vertical" }],
     props: [
       {
@@ -113,7 +122,7 @@ export const estructuraDocs: readonly GalleryComponentMeta[] = [
   <div className="flex flex-col gap-2">{rows}</div>
 </ScrollArea>`,
     subcomponents: ["ScrollBar"],
-    anatomy: '<ScrollArea><ScrollBar orientation="vertical" /></ScrollArea>',
+    anatomy: [{ name: "ScrollArea", children: [{ name: "ScrollBar" }] }],
     variants: [
       {
         name: "orientation",
@@ -155,8 +164,12 @@ export const estructuraDocs: readonly GalleryComponentMeta[] = [
       "CodeBlockLine",
       "CodeBlockFooter",
     ],
-    anatomy:
-      "<CodeBlock><CodeBlockHeader /><CodeBlockContent>{code}</CodeBlockContent></CodeBlock>",
+    anatomy: [
+      {
+        name: "CodeBlock",
+        children: [{ name: "CodeBlockHeader" }, { name: "CodeBlockContent" }],
+      },
+    ],
     variants: [
       { name: "variant", values: "default, destructive" },
       { name: "size", values: "default, sm" },
