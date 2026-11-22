@@ -43,6 +43,7 @@ import {
 } from "@/src/shared/components/ui/empty"
 import { Skeleton } from "@/src/shared/components/ui/skeleton"
 import { formatDateTime } from "@/src/shared/lib/date-format"
+import { useFormatLocale } from "@/src/modules/settings/hooks/use-format-locale"
 
 const SECTION_TITLE = "Señal detectada"
 const SECTION_SUBTITLE =
@@ -150,6 +151,7 @@ function SignalDetail({
   message: EmailSignalMessage
   signal: EmailSignal
 }) {
+  const formatLocale = useFormatLocale()
   const routes = signalRouteRows(signal)
   const hasEvidence = signal.evidence.length > 0
 
@@ -157,7 +159,7 @@ function SignalDetail({
     <>
       <SummaryItem
         title={signalTypeLabel(signal.type)}
-        description={`Detectada ${formatDateTime(signal.detectedAt)} · ${formatSignalConfidence(signal.confidence)}`}
+        description={`Detectada ${formatDateTime(signal.detectedAt, formatLocale)} · ${formatSignalConfidence(signal.confidence)}`}
         value={signalStatusLabel(signal.status)}
         icon={ShieldCheck}
         isLast={!routes.length && !hasEvidence}
@@ -187,7 +189,7 @@ function SignalDetail({
           />
           <SummaryItem
             title="Fecha del correo"
-            description={formatDateTime(message.receivedAt)}
+            description={formatDateTime(message.receivedAt, formatLocale)}
             icon={CalendarDays}
           />
           {signal.evidence.map((evidence, index) => (
