@@ -38,7 +38,7 @@ export function StatementImportButton({
   const [lockedFile, setLockedFile] = useState<File | null>(null)
   const [password, setPassword] = useState("")
   // El archivo elegido no sobrevive a una recarga: la hoja se cierra sola.
-  const passwordSheet = useEventSheet("statement-password-sheet")
+  const passwordSheet = useEventSheet(FINANCE_SHEET_KEYS.statementPassword)
 
   async function send(file: File, pdfPassword?: string) {
     try {

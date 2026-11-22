@@ -7,6 +7,7 @@ import { SparklesIcon } from "lucide-react"
 import { useState, type FormEvent } from "react"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
+import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import { useQuickEntryParse } from "@/src/modules/finance/quick-entry/hooks/use-quick-entry"
 import type { QuickEntryParseResult } from "@/src/modules/finance/quick-entry/types"
 import { QuickEntryPreviewSheet } from "@/src/modules/finance/quick-entry/components/quick-entry-preview-sheet"
@@ -17,7 +18,7 @@ export function QuickEntryBar() {
   const { isEnabled } = useFinanceEnabled()
   const parseMutation = useQuickEntryParse()
   const [text, setText] = useState("")
-  const previewSheet = useEventSheet("quick-entry-preview-sheet")
+  const previewSheet = useEventSheet(FINANCE_SHEET_KEYS.quickEntryPreview)
   const [parseResult, setParseResult] = useState<QuickEntryParseResult | null>(
     null
   )
