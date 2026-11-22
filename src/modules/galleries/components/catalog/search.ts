@@ -23,6 +23,21 @@ function asMatch(doc: GalleryComponentMeta): GalleryComponentMatch {
   return { doc, category: componentGallerySection(doc.category) }
 }
 
+function matchesQuery(doc: GalleryComponentMeta, needle: string): boolean {
+  const category = componentGallerySection(doc.category)
+  return matches(
+    [
+      doc.name,
+      doc.description,
+      doc.whenToUse,
+      doc.importPath,
+      category.title,
+      ...doc.subcomponents,
+    ],
+    needle
+  )
+}
+
 /**
  * Filtra el catálogo por nombre, descripción, categoría, subcomponentes o ruta
  * de importación, sin acentos ni mayúsculas. Sin búsqueda devuelve todo.
@@ -35,20 +50,9 @@ export function searchGalleryComponents(
     return GALLERY_COMPONENT_METAS.map(asMatch)
   }
 
-  return GALLERY_COMPONENT_METAS.filter((doc) => {
-    const category = componentGallerySection(doc.category)
-    return matches(
-      [
-        doc.name,
-        doc.description,
-        doc.whenToUse,
-        doc.importPath,
-        category.title,
-        ...doc.subcomponents,
-      ],
-      needle
-    )
-  }).map(asMatch)
+  return GALLERY_COMPONENT_METAS.filter((doc) => matchesQuery(doc, needle)).map(
+    asMatch
+  )
 }
 
 /** Agrupa las coincidencias por categoría, en el orden de la galería. */
@@ -83,4 +87,22 @@ export function galleryMatchesInCategory(
     doc,
     category,
   }))
+}
+
+/**
+ * Fichas de una categoría que coinciden con la búsqueda, con el mismo criterio
+ * que el índice. Sin búsqueda devuelve todas las de la categoría.
+ */
+export function searchGalleryComponentsInCategory(
+  categoryId: string,
+  query: string
+): readonly GalleryComponentMatch[] {
+  const needle = foldSearchText(query)
+  const categoryMatches = galleryMatchesInCategory(categoryId)
+
+  if (!needle) {
+    return categoryMatches
+  }
+
+  return categoryMatches.filter((match) => matchesQuery(match.doc, needle))
 }

@@ -12,6 +12,8 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Cambiado
 
+- La búsqueda de la galería de Ajustes → Apariencia resalta el fragmento que coincide en el nombre y la descripción de cada resultado, con el mismo criterio que el filtro (sin acentos ni mayúsculas), y cada categoría tiene su propio buscador con su estado vacío y su contador «N de M fichas» (#597).
+
 - La ficha de la galería de Ajustes → Apariencia muestra el código exacto de cada ejemplo (tab Código), separa la importación del uso en dos bloques con su propio botón de copiar y dibuja la composición como árbol de texto monoespaciado (#598).
 
 - La galería de Ajustes → Apariencia documenta todos los componentes de `src/shared/components/ui/` y los wrappers de dominio con una página por componente: vista previa y código, descripción, cuándo usarlo y cuándo no, uso copiable, composición, variantes y estados, y API. El índice busca por nombre, categoría y subcomponente; la Ola 0 suma Item, Marker, Command, Combobox, Accordion, ButtonGroup y Attachment, mueve IconBadge y ProgressRing a `data-display`, borra `Sheet` (el sidebar móvil usa `Drawer`) y lleva el estado activo primario a ToggleGroup (#415, #416, #417).
