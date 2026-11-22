@@ -3,6 +3,7 @@ import { describe, it } from "node:test"
 
 import {
   formatClockTimeFromDate,
+  formatDate,
   formatDayHeaderLabel,
   formatDayMonth,
   formatDayMonthYear,
@@ -75,5 +76,10 @@ describe("day and month labels", () => {
       formatDayHeaderLabel(new Date(2026, 9, 14), EN),
       "Wednesday 14 Oct."
     )
+  })
+
+  it("formats a full date with the profile locale", () => {
+    assert.equal(formatDate("2026-12-18T12:00:00.000Z", EN), "18 dec 2026")
+    assert.equal(formatDate("2026-12-18T12:00:00.000Z", ES), "18 dic 2026")
   })
 })

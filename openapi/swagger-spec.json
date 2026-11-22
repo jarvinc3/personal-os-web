@@ -66,7 +66,7 @@
             "description": "One or more startup checks failed (no dependency details)"
           }
         },
-        "summary": "Startup probe (database, JWKS, optional Redis). Public; response omits dependency details.",
+        "summary": "Startup probe (database, JWKS with timeout and cache, optional Redis). Public; response omits dependency details.",
         "tags": [
           "health"
         ]
@@ -101,7 +101,7 @@
             "description": "One or more readiness checks failed (no dependency details)"
           }
         },
-        "summary": "Readiness probe (database, JWKS, optional Redis). Public for load balancers; response omits dependency details.",
+        "summary": "Readiness probe (database, optional Redis). Public for load balancers; response omits dependency details.",
         "tags": [
           "health"
         ]
@@ -578,7 +578,7 @@
               "minimum": 1,
               "maximum": 100,
               "default": 50,
-              "type": "number"
+              "type": "integer"
             }
           }
         ],
@@ -2594,6 +2594,7 @@
             "in": "query",
             "description": "Comma-separated ISO-3 currency codes, at most 20",
             "schema": {
+              "maxItems": 20,
               "example": "USD,EUR",
               "type": "array",
               "items": {
@@ -12824,7 +12825,8 @@
               "receivable",
               "subscription",
               "merchant",
-              "category"
+              "category",
+              "institution"
             ]
           },
           "id": {
@@ -19435,7 +19437,8 @@
               "receivable",
               "subscription",
               "merchant",
-              "category"
+              "category",
+              "institution"
             ],
             "description": "Finance product the reference points at"
           },

@@ -20,7 +20,6 @@ export const alertVariants: readonly GalleryVariant[] = [
     label: "Descuadre",
     propLabel: "cuenta compacta + aviso",
     height: "≈ 160 px",
-    isDraft: true,
     render: ({ display, notifyTap }) => (
       <NoticeCard
         icon={TriangleAlertIcon}
@@ -42,7 +41,6 @@ export const alertVariants: readonly GalleryVariant[] = [
     label: "Sin conciliar",
     propLabel: "cuenta compacta + aviso",
     height: "≈ 160 px",
-    isDraft: true,
     render: ({ display, notifyTap }) => (
       <NoticeCard
         icon={ScaleIcon}

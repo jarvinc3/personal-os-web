@@ -50,7 +50,11 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Cambiado
 
+- #550: el relleno inferior de `ModuleSectionLayout` sale de una función con guard clauses en vez de un ternario anidado. Las tres clases y sus condiciones no cambian; solo desaparece el aviso de `no-nested-ternary`.
 - #504: el overlay del agente y su historial se cargan bajo demanda, así una ruta autenticada no descarga ese trozo hasta que se abre el chat; el árbol queda con una sola librería de animación (`framer-motion`) y el reorden de categorías usa su mismo primitivo.
+- #501: las cinco hojas de Finanzas que todavía abrían con una clave literal usan `FINANCE_SHEET_KEYS`; el abridor y el glosario comparten el mismo valor y cambiar una clave en la constante los mueve a la vez.
+- #506: la guía del contrato refleja que `SendAiConversationMessageDto` ya publica `clientMessageId` y `stream`, y `AgentSendMessageBody` sale del DTO generado sin duplicar sus campos.
+- #502: la galería de cards deja de marcar como borrador las variantes de aviso y la composición del detalle de movimiento, que ya son la referencia vigente del producto.
 - #493: el flujo de trabajo versiona `scripts/project3.ps1` y la regla «Project 3 siempre al día»; los issues nuevos entran al tablero al crearse y `check` exige `Cancelado` para los cerrados como `not planned`, con el id de esa opción resuelto por nombre.
 - El setup de pruebas de #450 resuelve pantallas con `next/*` y relativos sin extensión, stubea los `.css`, mapea la cobertura con source maps y exige el reintento en el estado de error de Uso (Refs #450; hallazgos de PI-REV).
 - Las pruebas de la web pueden renderizar componentes `.tsx` con `react-dom/server` y el loader de TSX; la vista Uso cubre sus estados de carga, vacío y error con pruebas que afirman los textos y el botón de reintento (#450).
@@ -111,8 +115,17 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Corregido
 
+- #552: la guía de la capacidad Catálogo nombra el «Saldo del corte» como la etiqueta vigente de `remaining`, avisa de que es acumulativo y deja de afirmar que la API no expone el pago mínimo: el contrato publica `minimumPayment` y `minimumSource` desde antes.
+- #548: la guía del contrato deja de afirmar que `institution` no está en el contrato. `AiInvocationEntityRefDto` lo enumera desde #499 y el cliente no conserva ningún alias local para ese tipo; la frase ahora describe qué sale de `SendAiConversationMessageDto` y qué acota `AgentInvocationContext`.
+- #499: el agente abre desde una institución sin que la conversación falle. El `entityRef` de tipo `institution` ya existe en el contrato del back, así que la web deja de agregarlo por su cuenta y el tipo sale del `api-schema` generado; una prueba comprueba que todo tipo que arma el contexto está en `AiInvocationEntityRefDto`.
 - #516: la fila de trazabilidad de un movimiento muestra la etiqueta «Señal de correo» completa y deja el identificador en una línea secundaria con prefijo `ID`, sin mezclarlo con la etiqueta.
 - #505: `robots.txt` deja de anunciar `/sitemap.xml`; la app es privada y no publica un sitemap.
+- #503: todas las fechas visibles de Inteligencia usan el locale del perfil; la bandeja, la hoja de revisión, la señal de correo y las ejecuciones dejan de caer en `es-DO`.
+- #508: el botón de crear categoría reserva su carril como los demás botones flotantes; en móvil la lista deja espacio para que la última fila y sus acciones no queden debajo.
+- #512: el «Restante» de un corte pasa a llamarse «Saldo del corte» y la lista y la hoja aclaran que los cortes son acumulativos, para que no se sumen como deudas independientes.
+- #514: la etiqueta «Patrimonio» del detalle de Efectivo se lee en blanco sobre la cabecera, y las filas de cuenta sin color dejan de pintar el círculo gris de la decoración; el detalle usa la misma fila canónica con o sin color.
+- #513: en móvil, Productos apila el anillo y su leyenda para que los nombres y montos se lean completos, y las tarjetas por moneda pasan a una columna con el monto sin partir la moneda de la cifra.
+- #515: la hoja de opciones de un movimiento deja de arrastrar `tab=installment` en la URL, y el glosario se abre siempre con el mismo `?picker=sheet-glossary:<clave>`, sea un término suelto o los conceptos de una hoja.
 - #519: el hero de una tarjeta de crédito sobregirada muestra la deuda con su etiqueta, no el disponible negativo; una tarjeta con límite disponible sigue mostrando «Disponible» y una de débito, «Saldo».
 - #520: la pestaña Correos de Inteligencia muestra el total de correos en revisión que devuelve la cola, no solo los de la página cargada; mientras el total no está disponible, el texto no lo presenta como cero.
 - #511: los totales de Ingresos y Egresos del mes en el detalle de una cuenta incluyen los movimientos de sus tarjetas de débito, igual que la lista de la pantalla, y el hero aclara que no cuentan las transferencias.

@@ -153,12 +153,12 @@ export function RecycleBinView() {
 
   const archived = recycleBinQuery.data?.pages[0]?.archived ?? []
   const deleted = infiniteListItems(recycleBinQuery.data)
-  const errorState = resolveInfiniteListErrorState({
+  const recycleBinErrorState = resolveInfiniteListErrorState({
     hasError: recycleBinQuery.isError,
     itemCount: archived.length + deleted.length,
   })
 
-  if (errorState === "full") {
+  if (recycleBinErrorState === "full") {
     return (
       <ErrorState
         message={financeErrorMessage(recycleBinQuery.error)}
@@ -308,7 +308,7 @@ export function RecycleBinView() {
               )}
             </SettingsSection>
           )}
-          {errorState === "inline" ? (
+          {recycleBinErrorState === "inline" ? (
             <InfiniteListErrorFooter
               title="No se pudieron cargar más registros"
               isRetrying={recycleBinQuery.isFetchingNextPage}

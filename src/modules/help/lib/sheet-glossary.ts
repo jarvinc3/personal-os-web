@@ -19,6 +19,6 @@ export function glossarySlugsForSheet(sheetKey: string): readonly string[] {
 }
 
 /** La hoja anidada viaja en `?picker=` para que Atrás cierre solo el glosario. */
-export function sheetGlossaryPickerKey(sheetKey: string): string {
-  return `${SHEET_GLOSSARY_PICKER_PREFIX}${sheetKey}`
+export function glossaryPickerKey(key: string): string {
+  return `${SHEET_GLOSSARY_PICKER_PREFIX}${key}`
 }

@@ -62,6 +62,7 @@ import { Skeleton } from "@/src/shared/components/ui/skeleton"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { Textarea } from "@/src/shared/components/ui/textarea"
 import { formatDate, formatDateTime } from "@/src/shared/lib/date-format"
+import { useFormatLocale } from "@/src/modules/settings/hooks/use-format-locale"
 import {
   AlertCircle,
   ArrowLeftRight,
@@ -108,6 +109,7 @@ export function ReviewSheet({
   shortcuts,
   closeLabel = "Cerrar sin verificar",
 }: ReviewSheetProps) {
+  const formatLocale = useFormatLocale()
   const messageQuery = useIntelligenceMessage(messageId)
   const message = messageQuery.data
   const {
@@ -249,7 +251,7 @@ export function ReviewSheet({
       title={message?.subject || "Revisar correo"}
       description={
         message
-          ? `${message.fromAddress} · ${formatDateTime(message.receivedAt)} · #${shortMessageId(message.id)}`
+          ? `${message.fromAddress} · ${formatDateTime(message.receivedAt, formatLocale)} · #${shortMessageId(message.id)}`
           : undefined
       }
       headerAction={
@@ -430,7 +432,7 @@ export function ReviewSheet({
                   label="Fecha (opcional)"
                   valueLabel={
                     values.transactionDate
-                      ? formatDate(values.transactionDate)
+                      ? formatDate(values.transactionDate, formatLocale)
                       : "Sin fecha"
                   }
                   icon={CalendarDays}
@@ -614,6 +616,7 @@ function ReviewPreview({
   rawBody,
   onRetry,
 }: ReviewPreviewProps) {
+  const formatLocale = useFormatLocale()
   if (isPending) {
     return (
       <div className="flex flex-col gap-2" aria-label="Cargando el correo">
@@ -661,7 +664,8 @@ function ReviewPreview({
           {subject || "(sin asunto)"}
         </p>
         <p className="text-xs wrap-break-word text-muted-foreground">
-          {fromAddress} · {receivedAt ? formatDateTime(receivedAt) : ""}
+          {fromAddress} ·{" "}
+          {receivedAt ? formatDateTime(receivedAt, formatLocale) : ""}
         </p>
       </div>
       {partition === "HOLDOUT" ? (
