@@ -96,11 +96,11 @@ export function useProfile() {
   const savePreferences = useCallback(
     (
       patch: DeepPartial<UserPreferences>,
-      options?: { onSuccess?: () => void }
+      options?: { onSuccess?: () => void; onError?: () => void }
     ) => {
       updateProfileMutation.mutate(
         { preferences: preferencesFromPatch(patch) },
-        { onSuccess: options?.onSuccess }
+        { onSuccess: options?.onSuccess, onError: options?.onError }
       )
     },
     [preferencesFromPatch, updateProfileMutation]
