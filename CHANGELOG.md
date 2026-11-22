@@ -116,6 +116,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 - #499: el agente abre desde una institución sin que la conversación falle. El `entityRef` de tipo `institution` ya existe en el contrato del back, así que la web deja de agregarlo por su cuenta y el tipo sale del `api-schema` generado; una prueba comprueba que todo tipo que arma el contexto está en `AiInvocationEntityRefDto`.
 - #505: `robots.txt` deja de anunciar `/sitemap.xml`; la app es privada y no publica un sitemap.
 - #503: todas las fechas visibles de Inteligencia usan el locale del perfil; la bandeja, la hoja de revisión, la señal de correo y las ejecuciones dejan de caer en `es-DO`.
+- #508: el botón de crear categoría reserva su carril como los demás botones flotantes; en móvil la lista deja espacio para que la última fila y sus acciones no queden debajo.
 - #519: el hero de una tarjeta de crédito sobregirada muestra la deuda con su etiqueta, no el disponible negativo; una tarjeta con límite disponible sigue mostrando «Disponible» y una de débito, «Saldo».
 - #520: la pestaña Correos de Inteligencia muestra el total de correos en revisión que devuelve la cola, no solo los de la página cargada; mientras el total no está disponible, el texto no lo presenta como cero.
 - #511: los totales de Ingresos y Egresos del mes en el detalle de una cuenta incluyen los movimientos de sus tarjetas de débito, igual que la lista de la pantalla, y el hero aclara que no cuentan las transferencias.
