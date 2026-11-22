@@ -4,7 +4,7 @@ Herramienta de referencia visual, permanente y visible en producción. Se abre s
 
 - `cards/`: cards reales de cada entidad con sus variantes (#272). Rutas: `/settings/appearance/cards` y `/settings/appearance/cards/<entidad>`.
 - `components/`: componentes compartidos por propósito (#307, #341, #417). Rutas:
-  - `/settings/appearance/components`: índice con búsqueda de todos los componentes de `src/shared/components/ui/` y de los wrappers de dominio.
+  - `/settings/appearance/components`: índice con búsqueda de todos los componentes de `src/shared/components/ui/` y de los wrappers de dominio. La búsqueda resalta lo que coincide y cada categoría tiene su propio buscador.
   - `/settings/appearance/components/<categoría>`: fichas de una categoría.
   - `/settings/appearance/components/<categoría>/<componente>`: documentación del componente con vista previa y código, descripción, uso copiable, composición, variantes y estados, y API.
 - Datos: `cards/mock/` y `components/mock/`, siempre falsos y con formato de moneda y fecha fijos. No dependen del perfil ni del día.
@@ -27,5 +27,5 @@ El catálogo vive en `components/catalog/` y tiene dos piezas separadas:
 2. **Vista previa** en `catalog/demos/<categoría>.tsx`: un mapa `id → demos` con componentes reales. Monta el componente real; no hay maquetas aparte.
 3. Añade la ficha a la categoría que le corresponde por propósito. Si el componente abre una hoja o un drawer, el ejemplo se abre por ruta con `useSheetParam`.
 4. Muestra sus variantes y estados principales: normal, seleccionado, deshabilitado, error y pending.
-5. Las pruebas de `components/sections.spec.ts` comprueban que cada archivo de `/ui/` tenga su ficha, que la ruta de import exista y que los ids de los demos coincidan con los del catálogo.
+5. Las pruebas de `sections.spec.ts` comprueban que cada archivo de `/ui/` tenga su ficha, que la ruta de import exista y que los ids de los demos coincidan con los del catálogo.
 6. Comprueba a 360 px, en claro y oscuro, que no hay desbordes y que el texto se lee.
