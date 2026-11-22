@@ -9,6 +9,7 @@ import {
   AGENT_CHAT_SHEET_KEY,
   AGENT_CHAT_SUGGESTION_PARAM,
 } from "@/src/modules/intelligence/constants/agent-chat"
+import { AgentChatOverlaySkeleton } from "@/src/modules/intelligence/components/agent-chat-overlay-skeleton"
 import { ViewSuggestionsBar } from "@/src/modules/intelligence/components/view-suggestions-bar"
 import {
   buildAgentInvocationContext,
@@ -41,7 +42,7 @@ const AgentChatOverlay = dynamic(
     import("@/src/modules/intelligence/components/agent-chat-overlay").then(
       (module) => module.AgentChatOverlay
     ),
-  { ssr: false, loading: () => null }
+  { ssr: false, loading: () => <AgentChatOverlaySkeleton /> }
 )
 
 export function AgentChatHost() {

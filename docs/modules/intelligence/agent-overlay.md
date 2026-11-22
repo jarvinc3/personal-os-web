@@ -13,6 +13,7 @@ El chat con el agente es una superficie global de la web autenticada. Se abre de
 
 ## Aspecto y cierre
 
+- El overlay se carga bajo demanda; mientras llega el trozo, se pinta un esqueleto con la misma estructura (cabecera, mensajes y composer) que anuncia «Cargando el chat» y conserva el nombre del diálogo (#571).
 - Fondo desenfocado sobre toda la pantalla, también sobre un sheet. Con `prefers-reduced-motion` se reduce la animación y con `prefers-reduced-transparency` se pinta opaco y sin desenfoque.
 - Panel de altura completa. En una vista con tab bar, el composer ocupa el lugar del tab bar y el `+` se cambia por enviar; en una vista sin tab bar, el composer sube desde abajo con otra animación.
 - Se cierra con la X, Esc, Atrás y un tirón hacia abajo desde el inicio de la lista. No se cierra al tocar el fondo ni al desplazar el chat.

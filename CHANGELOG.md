@@ -116,6 +116,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Corregido
 
+- #571: la primera vez que se abre el chat del agente se ve un esqueleto con la forma de la hoja (cabecera, mensajes y composer) mientras llega el trozo que la carga bajo demanda, en vez de nada; anuncia «Cargando el chat» y mantiene el diálogo con su nombre.
 - #557: la guía de Ayuda documenta el esquema vigente del glosario, `?picker=sheet-glossary:<clave>`, el mismo que usa el header de una hoja.
 - #556: la hoja de opciones de un movimiento deja fuera `tab` de la URL al abrirse. `useSheetParam` estrena `clearOnOpen`, que descarta esos parámetros de la vista antes de escribir la hoja; `clearParams` solo limpiaba al cerrar una hoja abierta por enlace directo, así que la URL conservaba `tab=installment`.
 - #554: la guía de la capacidad Catálogo describe la disposición vigente del hero del patrimonio: fila con el anillo a `sm:w-44` en escritorio y columnas apiladas en teléfono, desde #543.
