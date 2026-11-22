@@ -3,8 +3,7 @@
 import { getSupabaseBrowserClient } from "@/src/config/supabase/client"
 import { resolveNotificationsSocketUrl } from "@/src/modules/notifications/lib/notifications-socket-url"
 import {
-  addSocketSubscription,
-  attachSocketSubscriptions,
+  createNotificationsSocketSubscriptions,
   type NotificationsSocketHandler,
 } from "@/src/modules/notifications/lib/notifications-socket-subscriptions"
 import { useAppStore } from "@/src/shared/store/app-store"
@@ -47,7 +46,7 @@ export function NotificationsSocketProvider({
   const socketUserIdRef = useRef<string | null>(null)
   const reconnectAttemptsRef = useRef(0)
   const tokenRef = useRef<string | null>(token)
-  const handlersRef = useRef(new Map<string, Set<NotificationsSocketHandler>>())
+  const [subscriptions] = useState(createNotificationsSocketSubscriptions)
 
   const reconnectWithFreshToken = useCallback(async (socket: Socket) => {
     try {
@@ -71,10 +70,7 @@ export function NotificationsSocketProvider({
       transports: ["websocket"],
     })
 
-    attachSocketSubscriptions({
-      handlers: handlersRef.current,
-      socket,
-    })
+    subscriptions.attach(socket)
 
     socket.on("connect", () => {
       reconnectAttemptsRef.current = 0
@@ -97,17 +93,12 @@ export function NotificationsSocketProvider({
     socket.io.on("reconnect_attempt", () => setStatus("connecting"))
 
     return socket
-  }, [reconnectWithFreshToken])
+  }, [reconnectWithFreshToken, subscriptions])
 
   const subscribe = useCallback(
     (event: string, handler: NotificationsSocketHandler) =>
-      addSocketSubscription({
-        handlers: handlersRef.current,
-        socketRef,
-        event,
-        handler,
-      }),
-    []
+      subscriptions.subscribe(event, handler),
+    [subscriptions]
   )
 
   useEffect(() => {

@@ -1,50 +1,50 @@
 export type NotificationsSocketHandler = (payload: unknown) => void
 
-type SocketSubscriptionInput = {
-  handlers: Map<string, Set<NotificationsSocketHandler>>
-  socketRef: { current: Pick<SocketLike, "on" | "off"> | null }
-  event: string
-  handler: NotificationsSocketHandler
-}
-
 type SocketLike = {
   on(event: string, handler: NotificationsSocketHandler): void
   off(event: string, handler: NotificationsSocketHandler): void
 }
 
-export function addSocketSubscription({
-  handlers,
-  socketRef,
-  event,
-  handler,
-}: SocketSubscriptionInput): () => void {
-  let eventHandlers = handlers.get(event)
-  if (!eventHandlers) {
-    eventHandlers = new Set()
-    handlers.set(event, eventHandlers)
-  }
-  eventHandlers.add(handler)
-  socketRef.current?.on(event, handler)
-
-  return () => {
-    eventHandlers?.delete(handler)
-    if (eventHandlers?.size === 0) {
-      handlers.delete(event)
-    }
-    socketRef.current?.off(event, handler)
-  }
+export type NotificationsSocketSubscriptions = {
+  subscribe: (event: string, handler: NotificationsSocketHandler) => () => void
+  attach: (socket: SocketLike) => void
 }
 
-export function attachSocketSubscriptions({
-  handlers,
-  socket,
-}: {
-  handlers: ReadonlyMap<string, ReadonlySet<NotificationsSocketHandler>>
-  socket: SocketLike
-}): void {
-  for (const [event, eventHandlers] of handlers) {
-    for (const handler of eventHandlers) {
-      socket.on(event, handler)
+/**
+ * El registro vive con el proveedor: guarda los handlers por evento y los
+ * vuelve a enganchar cuando cambia el socket. La baja usa el socket activo,
+ * no una copia vieja.
+ */
+export function createNotificationsSocketSubscriptions(): NotificationsSocketSubscriptions {
+  const handlersByEvent = new Map<string, Set<NotificationsSocketHandler>>()
+  let activeSocket: SocketLike | null = null
+
+  const subscribe = (event: string, handler: NotificationsSocketHandler) => {
+    let handlers = handlersByEvent.get(event)
+    if (!handlers) {
+      handlers = new Set()
+      handlersByEvent.set(event, handlers)
+    }
+    handlers.add(handler)
+    activeSocket?.on(event, handler)
+
+    return () => {
+      handlers?.delete(handler)
+      if (handlers?.size === 0) {
+        handlersByEvent.delete(event)
+      }
+      activeSocket?.off(event, handler)
     }
   }
+
+  const attach = (socket: SocketLike) => {
+    activeSocket = socket
+    for (const [event, handlers] of handlersByEvent) {
+      for (const handler of handlers) {
+        socket.on(event, handler)
+      }
+    }
+  }
+
+  return { subscribe, attach }
 }
