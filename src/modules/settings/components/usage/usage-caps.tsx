@@ -22,7 +22,7 @@ import {
   AlertDescription,
   AlertTitle,
 } from "@/src/shared/components/ui/alert"
-import { ProgressRing } from "@/src/shared/components/ui/progress-ring"
+import { ProgressRing } from "@/src/shared/components/data-display/progress-ring"
 import { TriangleAlertIcon } from "lucide-react"
 
 const RING_SIZE = 44

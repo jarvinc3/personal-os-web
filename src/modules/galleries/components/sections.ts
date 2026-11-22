@@ -5,6 +5,7 @@ import {
   ChartPieIcon,
   CircleDotIcon,
   CoinsIcon,
+  LayersIcon,
   ListIcon,
   MousePointerClickIcon,
   PanelsTopLeftIcon,
@@ -13,7 +14,7 @@ import {
   TypeIcon,
 } from "lucide-react"
 
-/** Secciones de la galería /settings/appearance/components (#307, #341). */
+/** Categorías de la galería /settings/appearance/components (#307, #341, #417). */
 export type ComponentGallerySectionId =
   | "entradas"
   | "selectores"
@@ -26,130 +27,92 @@ export type ComponentGallerySectionId =
   | "avisos"
   | "montos"
   | "graficos"
+  | "estructura"
 
 export type ComponentGallerySection = {
   id: ComponentGallerySectionId
   title: string
   description: string
   icon: LucideIcon
-  /**
-   * Nombres de las fichas de la sección, en el orden en que se pintan. De aquí
-   * salen el conteo de la lista y el buscador; un test comprueba que coincidan
-   * con los `name` de los `GalleryDemo` de cada sección.
-   */
-  demos: readonly string[]
 }
 
-/** Una sección por propósito, en el orden en que se leen en el móvil. */
+/**
+ * Una categoría por propósito, en el orden en que se leen en el móvil. Las
+ * fichas de cada categoría viven en el catálogo (`catalog/entries`), que es la
+ * única fuente del índice, del buscador y de cada página de componente.
+ */
 export const COMPONENT_GALLERY_SECTIONS: readonly ComponentGallerySection[] = [
   {
     id: "entradas",
     title: "Entradas y campos",
-    description: "Texto, áreas, contraseña y switches de formulario",
+    description: "Texto, áreas, casillas, radios y switches de formulario",
     icon: TextCursorInputIcon,
-    demos: ["FormTextField", "InputGroup", "SwitchFieldRow"],
   },
   {
     id: "selectores",
     title: "Selectores",
-    description: "Filas de opción, celdas de elección y ruedas",
+    description: "Filas de opción, celdas de elección, catálogo y ruedas",
     icon: CircleDotIcon,
-    demos: [
-      "OptionRow",
-      "ChoiceGrid",
-      "SelectField",
-      "ColorPickerSwatch",
-      "WheelField + TimePairWheels",
-      "DayListField",
-    ],
   },
   {
     id: "acciones",
     title: "Botones y acciones",
-    description: "Variantes, tamaños, icono solo y pending",
+    description: "Variantes, tamaños, grupos y pending",
     icon: MousePointerClickIcon,
-    demos: ["Button", "Button", "Button", "Button con Link", "PendingSurface"],
   },
   {
     id: "overlays",
     title: "Diálogos y sheets",
-    description: "Hoja de edición, hoja flotante y confirmación",
+    description: "Hoja de edición, hoja flotante, menús y confirmación",
     icon: PanelsTopLeftIcon,
-    demos: [
-      "BottomSheet",
-      'BottomSheet variant="floating"',
-      'BottomSheet size="wide"',
-      "ConfirmDialog",
-    ],
   },
   {
     id: "tabs",
     title: "Tabs y chips",
-    description: "Tabs con indicador, segmentos y badges",
+    description: "Tabs con indicador, segmentos, badges y categorías",
     icon: TagsIcon,
-    demos: ["Tabs", "SegmentedControl", "Badge", "CategoryCard"],
   },
   {
     id: "listas",
     title: "Listas y filas",
     description: "Filas con icono, valor, chevron y switch",
     icon: ListIcon,
-    demos: ["SummarySection + SummaryItem", "SettingsSection + SettingsRow"],
   },
   {
     id: "encabezados",
     title: "Encabezados y secciones",
     description: "Bloques con título, subtítulo y grupo",
     icon: TypeIcon,
-    demos: [
-      "SummarySection",
-      "SummarySection collapsible",
-      "SummaryGroup",
-      "SettingsSection",
-      "DetailHeader",
-    ],
   },
   {
     id: "estados",
     title: "Estados",
-    description: "Vacío, carga y error reintentable",
+    description: "Vacío, carga, error y progreso",
     icon: ActivityIcon,
-    demos: [
-      "IconBadge",
-      "Empty",
-      "Skeleton + ListSkeleton + CardSkeleton",
-      "Empty compacta",
-      "Spinner + LoadingView",
-      "ErrorState",
-      "ModuleComingSoon",
-    ],
   },
   {
     id: "avisos",
     title: "Avisos y toasts",
     description: "Alertas en línea, avisos con tono y toasts",
     icon: BellRingIcon,
-    demos: ["Alert", "NoticeCard", "appToast"],
   },
   {
     id: "montos",
     title: "Montos y fechas",
-    description: "Importes formateados, campo de monto, fecha y hora",
+    description: "Importes formateados, campo de monto, fecha y moneda",
     icon: CoinsIcon,
-    demos: [
-      "formatFinanceMoney",
-      "Money",
-      "FinanceMoneyField",
-      "FinanceDateField",
-      "CurrencyFlag",
-    ],
   },
   {
     id: "graficos",
     title: "Gráficos y anillos",
-    description: "Gráficos de barras y anillo de progreso",
+    description: "Gráficos de barras y anillos de progreso",
     icon: ChartPieIcon,
-    demos: ["ChartContainer", "ProgressRing", "SubscriptionProgressRing"],
+  },
+  {
+    id: "estructura",
+    title: "Estructura",
+    description: "Tarjetas, separadores, scroll y bloques de código",
+    icon: LayersIcon,
   },
 ]
 

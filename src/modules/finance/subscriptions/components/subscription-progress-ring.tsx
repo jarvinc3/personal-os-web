@@ -1,6 +1,6 @@
 "use client"
 
-import { ProgressRing } from "@/src/shared/components/ui/progress-ring"
+import { ProgressRing } from "@/src/shared/components/data-display/progress-ring"
 import { cn } from "@/src/shared/lib/utils"
 import type { ReactNode } from "react"
 

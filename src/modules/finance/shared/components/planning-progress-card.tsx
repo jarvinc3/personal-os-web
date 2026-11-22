@@ -1,7 +1,7 @@
 "use client"
 
 import { Badge, badgeVariants } from "@/src/shared/components/ui/badge"
-import { ProgressRing } from "@/src/shared/components/ui/progress-ring"
+import { ProgressRing } from "@/src/shared/components/data-display/progress-ring"
 import { LinkPendingOverlay } from "@/src/shared/components/shell/navigation-pending"
 import { useLongPress } from "@/src/shared/hooks/use-long-press"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"

@@ -4,8 +4,8 @@
  * bajo `.dark [data-style="<id>"]` para servir también a las vistas previas.
  */
 [data-style="studio"] {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
+  --background: hsl(51, 19%, 93%);
+  --foreground:  hsl(0, 0%, 7%);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
@@ -57,8 +57,8 @@
 
 .dark [data-style="studio"],
 .dark[data-style="studio"] {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
+  --background: hsl(0, 0%, 7%);
+  --foreground: hsl(51, 19%, 93%);
   --card: oklch(0.205 0 0);
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);

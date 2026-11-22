@@ -1,7 +1,7 @@
 "use client"
 
 import { BrandLogo } from "@/src/modules/finance/shared/components/brand-logo"
-import { IconBadge } from "@/src/shared/components/ui/icon-badge"
+import { IconBadge } from "@/src/shared/components/data-display/icon-badge"
 import {
   type InstitutionCardCounts,
   type InstitutionCardModel,

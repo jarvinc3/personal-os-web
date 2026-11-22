@@ -8,15 +8,15 @@ import { cn } from "@/src/shared/lib/utils"
 
 import { useIsMobile } from "@/src/shared/hooks/use-mobile"
 import { Button } from "@/src/shared/components/ui/button"
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/src/shared/components/ui/drawer"
 import { Input } from "@/src/shared/components/ui/input"
 import { Separator } from "@/src/shared/components/ui/separator"
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "@/src/shared/components/ui/sheet"
 import { Skeleton } from "@/src/shared/components/ui/skeleton"
 import {
   Tooltip,
@@ -181,27 +181,34 @@ function Sidebar({
 
   if (isMobile) {
     return (
-      <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
-        <SheetContent
+      <Drawer
+        open={openMobile}
+        onOpenChange={setOpenMobile}
+        swipeDirection={side}
+        {...props}
+      >
+        <DrawerContent
           dir={dir}
           data-sidebar="sidebar"
           data-slot="sidebar"
           data-mobile="true"
-          className="w-(--sidebar-width) bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
+          className="rounded-none! border-0! bg-sidebar! p-0 text-sidebar-foreground"
           style={
             {
               "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
+              "--drawer-content-width": SIDEBAR_WIDTH_MOBILE,
+              "--drawer-height": "100svh",
+              "--drawer-inset": "0px",
             } as React.CSSProperties
           }
-          side={side}
         >
-          <SheetHeader className="sr-only">
-            <SheetTitle>Sidebar</SheetTitle>
-            <SheetDescription>Displays the mobile sidebar.</SheetDescription>
-          </SheetHeader>
+          <DrawerHeader className="sr-only">
+            <DrawerTitle>Sidebar</DrawerTitle>
+            <DrawerDescription>Displays the mobile sidebar.</DrawerDescription>
+          </DrawerHeader>
           <div className="flex h-full w-full flex-col">{children}</div>
-        </SheetContent>
-      </Sheet>
+        </DrawerContent>
+      </Drawer>
     )
   }
 

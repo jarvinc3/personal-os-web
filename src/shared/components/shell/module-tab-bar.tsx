@@ -4,7 +4,7 @@ import { useModuleFabRegistration } from "@/src/shared/components/fab/module-fab
 import { useAgentChatLauncher } from "@/src/shared/components/agent-chat/agent-chat-launcher"
 import { LinkPendingOverlay } from "@/src/shared/components/shell/navigation-pending"
 import { isModuleSectionActive } from "@/src/shared/lib/module-nav-active"
-import { ProgressRing } from "@/src/shared/components/ui/progress-ring"
+import { ProgressRing } from "@/src/shared/components/data-display/progress-ring"
 import { useHoldProgress } from "@/src/shared/hooks/use-hold-progress"
 import { cn } from "@/src/shared/lib/utils"
 import type { ModuleNavItem } from "@/src/shared/types/module-nav"

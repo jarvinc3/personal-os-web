@@ -5,7 +5,7 @@ import {
   type InstitutionCardModel,
 } from "@/src/modules/finance/products"
 import { Button } from "@/src/shared/components/ui/button"
-import { IconBadge } from "@/src/shared/components/ui/icon-badge"
+import { IconBadge } from "@/src/shared/components/data-display/icon-badge"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
 import {
