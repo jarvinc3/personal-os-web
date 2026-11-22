@@ -3,14 +3,7 @@
 import {
   DEFAULT_USAGE_DAYS,
   USAGE_RANGES,
-  fillDailyUsage,
-  fillHourlyUsage,
-  USAGE_RESET_MAX_RETRIES,
-  USAGE_RESET_RETRY_MS,
-  isUsageDays,
   usageRangeCaption,
-  usageRefreshDelay,
-  usageResetReached,
   useEmailUsage,
   type UsageDays,
 } from "@/src/modules/intelligence"
@@ -21,11 +14,16 @@ import { UsageCharts } from "@/src/modules/settings/components/usage/usage-chart
 import { UsageStateView } from "@/src/modules/settings/components/usage/usage-state-view"
 import { UsageTotals } from "@/src/modules/settings/components/usage/usage-totals"
 import { useProfile } from "@/src/modules/settings/hooks/use-profile"
+import { useUsageResetRefresh } from "@/src/modules/settings/hooks/use-usage-reset-refresh"
+import {
+  resolveUsageChartSeries,
+  resolveUsageRangeDays,
+} from "@/src/modules/settings/lib/usage-range"
 import { SettingsGate } from "@/src/modules/settings/settings-gate"
 import { SegmentedControl } from "@/src/shared/components/forms/segmented-control"
 import { DEFAULT_LOCALE } from "@/src/shared/constants/locales"
 import { CalendarDaysIcon, CalendarRangeIcon, SunIcon } from "lucide-react"
-import { useEffect, useMemo, useState } from "react"
+import { useMemo, useState } from "react"
 
 type UsageRangeValue = `${UsageDays}`
 
@@ -57,81 +55,16 @@ function UsageSettingsScreenBody() {
   const { refetch } = usageQuery
   const summary = usageQuery.data
 
-  // Los contadores del back se reinician a medianoche UTC; la vista se refresca
-  // una vez al cruzar el día para que la pausa y el reinicio no queden viejos.
-  // El día sale de la hora del servidor y, si el reloj del navegador va
-  // adelantado, se reintenta un minuto después.
-  useEffect(() => {
-    if (!summary) {
-      return
-    }
+  useUsageResetRefresh({ summary, refetch })
 
-    let timer: ReturnType<typeof setTimeout>
-    let cancelled = false
-
-    const schedule = (serverNow: string) => {
-      const delay = usageRefreshDelay({ serverNow, clientNow: Date.now() })
-
-      const refreshAtReset = async (attempt: number) => {
-        const result = await refetch()
-
-        if (cancelled) {
-          return
-        }
-
-        const nextServerNow = result.data?.range.to
-
-        if (
-          nextServerNow &&
-          usageResetReached({
-            previousServerNow: serverNow,
-            serverNow: nextServerNow,
-          })
-        ) {
-          schedule(nextServerNow)
-          return
-        }
-
-        if (attempt >= USAGE_RESET_MAX_RETRIES) {
-          return
-        }
-
-        timer = setTimeout(
-          () => void refreshAtReset(attempt + 1),
-          USAGE_RESET_RETRY_MS
-        )
-      }
-
-      timer = setTimeout(() => void refreshAtReset(1), delay)
-    }
-
-    schedule(summary.range.to)
-
-    return () => {
-      cancelled = true
-      clearTimeout(timer)
-    }
-  }, [refetch, summary])
-
-  const daily = useMemo(
-    () =>
-      summary
-        ? fillDailyUsage({
-            byDay: summary.byDay,
-            from: summary.range.from,
-            to: summary.range.to,
-          })
-        : [],
-    [summary]
-  )
-  const hourly = useMemo(
-    () => (summary ? fillHourlyUsage(summary.byHour) : []),
+  const { daily, hourly } = useMemo(
+    () => resolveUsageChartSeries(summary),
     [summary]
   )
 
   function handleRangeChange(value: UsageRangeValue) {
-    const nextDays = Number(value)
-    if (!isUsageDays(nextDays)) {
+    const nextDays = resolveUsageRangeDays(value)
+    if (nextDays === null) {
       return
     }
     setDays(nextDays)
