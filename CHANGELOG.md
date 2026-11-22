@@ -111,6 +111,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Corregido
 
+- #517: la barra de tabs de Planificación no muestra un scroll vertical en móvil; los cuatro tabs conservan el icono encima del texto y su altura se ajusta al contenido.
 - #505: `robots.txt` deja de anunciar `/sitemap.xml`; la app es privada y no publica un sitemap.
 - #519: el hero de una tarjeta de crédito sobregirada muestra la deuda con su etiqueta, no el disponible negativo; una tarjeta con límite disponible sigue mostrando «Disponible» y una de débito, «Saldo».
 - #520: la pestaña Correos de Inteligencia muestra el total de correos en revisión que devuelve la cola, no solo los de la página cargada; mientras el total no está disponible, el texto no lo presenta como cero.

@@ -227,14 +227,14 @@ export function FinancePlanningList({
       ) : null}
 
       <Tabs {...tabsBehavior} className="w-full gap-6">
-        <TabsList className="h-auto w-full justify-start overflow-x-auto rounded-2xl p-1">
+        <TabsList className="h-auto w-full justify-start overflow-x-auto overflow-y-hidden rounded-2xl p-1">
           {PLANNING_TAB_ITEMS.map(({ value, label, icon: Icon, color }) => {
             const isSelected = tab === value
             return (
               <TabsTrigger
                 key={value}
                 value={value}
-                className="gap-1 rounded-xl px-1 py-1.5 max-sm:flex-col max-sm:gap-0.5"
+                className="gap-1 rounded-xl px-1 py-1.5 max-sm:h-auto max-sm:flex-col max-sm:gap-0.5"
               >
                 <Icon
                   data-icon="inline-start"
