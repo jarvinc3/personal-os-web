@@ -82,6 +82,7 @@ import {
   Unplug,
   X,
   Trash2,
+  type LucideIcon,
 } from "lucide-react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useIntelligence } from "./hooks/use-intelligence"
@@ -104,7 +105,17 @@ import {
   verifierActorLabel,
   verificationVerdictLabel,
 } from "./analysis-labels"
-import { ROUTE_LABELS, SEMANTIC_TYPE_LABELS } from "./review-labels"
+import {
+  classificationRouteLabel,
+  classificationTypeLabel,
+  describeClassification,
+} from "./lib/classification-description"
+import {
+  emailSocketStatusLabel,
+  emailSocketStatusText,
+  type EmailSocketStatus,
+} from "./lib/intelligence-labels"
+import { resolveMessagesListState } from "./lib/messages-list-state"
 import { resolveGmailStatus, type GmailStatus } from "./gmail-status"
 import { describeSyncFailure, resolveDashboardSyncFailure } from "./sync-status"
 import {
@@ -185,6 +196,12 @@ function IntelligenceScreenBody() {
     refetch: refetchMessages,
   } = messagesQuery
   const messagesRateLimitError = getMessagesRateLimitError(messagesQuery.error)
+  const messagesListState = resolveMessagesListState({
+    isPending: messagesQuery.isPending,
+    isError: messagesQuery.isError,
+    hasRateLimitError: Boolean(messagesRateLimitError),
+    messageCount: messages.length,
+  })
   const messagesRateLimitAttemptsRef = useRef(0)
   const messagesRetryInProgress = isFetchingMessages || isFetchingNextPage
   const retryMessages = useCallback(() => {
@@ -332,6 +349,13 @@ function IntelligenceScreenBody() {
     primaryAction === "sync"
       ? syncMutation.isPending
       : connectMutation.isPending
+  const PrimaryActionIcon = primaryAction === "sync" ? RefreshCw : Mail
+  const SocketStatusIcon = EMAIL_SOCKET_ICONS[emailSocketStatus]
+  const socketStatusIconClass = EMAIL_SOCKET_ICON_CLASSES[emailSocketStatus]
+  const importVariant = importBadgeVariant({
+    initialSyncCompletedAt: connection.initialSyncCompletedAt,
+    tone: gmailStatus.tone,
+  })
   const runPrimaryAction = () => {
     if (primaryAction === "sync") {
       syncMutation.mutate()
@@ -363,40 +387,17 @@ function IntelligenceScreenBody() {
                   aria-label={emailSocketStatusLabel(emailSocketStatus)}
                   title={emailSocketStatusLabel(emailSocketStatus)}
                 >
-                  {emailSocketStatus === "connected" ? (
-                    <Wifi
-                      className="size-3.5 text-emerald-600"
-                      aria-hidden="true"
-                    />
-                  ) : emailSocketStatus === "connecting" ? (
-                    <LoaderCircle
-                      className="size-3.5 animate-spin"
-                      aria-hidden="true"
-                    />
-                  ) : (
-                    <WifiOff
-                      className="size-3.5 text-muted-foreground"
-                      aria-hidden="true"
-                    />
-                  )}
-                  {emailSocketStatus === "connected"
-                    ? "Canal en vivo"
-                    : emailSocketStatus === "connecting"
-                      ? "Conectando canal"
-                      : "Canal sin conexión"}
+                  <SocketStatusIcon
+                    className={socketStatusIconClass}
+                    aria-hidden="true"
+                  />
+                  {emailSocketStatusText(emailSocketStatus)}
                 </Badge>
               ) : null}
               <span
                 role="img"
                 aria-label={gmailStatus.title}
-                className={
-                  gmailStatus.tone === "warning"
-                    ? "text-amber-600"
-                    : gmailStatus.state === "syncing" ||
-                        gmailStatus.state === "classifying"
-                      ? "text-muted-foreground"
-                      : "text-emerald-600"
-                }
+                className={gmailStatusToneClass(gmailStatus)}
               >
                 <GmailStatusGlyph status={gmailStatus} className="size-5" />
               </span>
@@ -458,10 +459,8 @@ function IntelligenceScreenBody() {
                         className="animate-spin"
                         aria-hidden="true"
                       />
-                    ) : primaryAction === "sync" ? (
-                      <RefreshCw aria-hidden="true" />
                     ) : (
-                      <Mail aria-hidden="true" />
+                      <PrimaryActionIcon aria-hidden="true" />
                     )}
                     {gmailStatus.primaryLabel}
                   </Button>
@@ -497,15 +496,7 @@ function IntelligenceScreenBody() {
                 {dashboard.counters.recentMessages} en 30 días
               </Badge>
 
-              <Badge
-                variant={
-                  connection.initialSyncCompletedAt
-                    ? "success"
-                    : gmailStatus.tone === "warning"
-                      ? "warning"
-                      : "secondary"
-                }
-              >
+              <Badge variant={importVariant}>
                 <CalendarDays data-icon="inline-start" />
                 {connection.initialSyncCompletedAt
                   ? `Histórico inicial completo ${importScope}`
@@ -658,7 +649,7 @@ function IntelligenceScreenBody() {
                 </AlertAction>
               </Alert>
             ) : null}
-            {messagesQuery.isPending && messages.length === 0 ? (
+            {messagesListState === "loading" ? (
               <div
                 className="flex flex-col gap-2 p-2"
                 aria-label="Cargando mensajes"
@@ -667,9 +658,8 @@ function IntelligenceScreenBody() {
                 <Skeleton className="h-14 w-full" />
                 <Skeleton className="h-14 w-full" />
               </div>
-            ) : messages.length === 0 &&
-              messagesQuery.isError &&
-              !messagesRateLimitError ? (
+            ) : null}
+            {messagesListState === "error" ? (
               <Empty>
                 <EmptyHeader>
                   <EmptyMedia variant="icon">
@@ -684,21 +674,21 @@ function IntelligenceScreenBody() {
                   <RefreshCw aria-hidden="true" /> Reintentar
                 </Button>
               </Empty>
-            ) : messages.length === 0 ? (
-              messagesRateLimitError ? null : (
-                <Empty>
-                  <EmptyHeader>
-                    <EmptyMedia variant="icon">
-                      <Inbox aria-hidden="true" />
-                    </EmptyMedia>
-                    <EmptyTitle>Aún no hay mensajes</EmptyTitle>
-                    <EmptyDescription>
-                      La sincronización agregará aquí el correo desde 2026.
-                    </EmptyDescription>
-                  </EmptyHeader>
-                </Empty>
-              )
-            ) : (
+            ) : null}
+            {messagesListState === "empty" ? (
+              <Empty>
+                <EmptyHeader>
+                  <EmptyMedia variant="icon">
+                    <Inbox aria-hidden="true" />
+                  </EmptyMedia>
+                  <EmptyTitle>Aún no hay mensajes</EmptyTitle>
+                  <EmptyDescription>
+                    La sincronización agregará aquí el correo desde 2026.
+                  </EmptyDescription>
+                </EmptyHeader>
+              </Empty>
+            ) : null}
+            {messagesListState === "list" ? (
               <>
                 {hasPendingMessageUpdates ? (
                   <Alert variant="default" role="status">
@@ -824,7 +814,7 @@ function IntelligenceScreenBody() {
                   </Alert>
                 ) : null}
               </>
-            )}
+            ) : null}
           </TabsContent>
 
           <TabsContent value="review" className="flex flex-col gap-3">
@@ -954,6 +944,44 @@ function formatRetryCountdown(retryAt: number, now: number | null) {
   return `Reintento en ${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`
 }
 
+const EMAIL_SOCKET_ICONS = {
+  connected: Wifi,
+  connecting: LoaderCircle,
+  disconnected: WifiOff,
+} satisfies Record<EmailSocketStatus, LucideIcon>
+
+const EMAIL_SOCKET_ICON_CLASSES = {
+  connected: "size-3.5 text-emerald-600",
+  connecting: "size-3.5 animate-spin",
+  disconnected: "size-3.5 text-muted-foreground",
+} satisfies Record<EmailSocketStatus, string>
+
+function gmailStatusToneClass(status: GmailStatus): string {
+  if (status.tone === "warning") {
+    return "text-amber-600"
+  }
+  if (status.state === "syncing" || status.state === "classifying") {
+    return "text-muted-foreground"
+  }
+  return "text-emerald-600"
+}
+
+function importBadgeVariant({
+  initialSyncCompletedAt,
+  tone,
+}: {
+  initialSyncCompletedAt: string | null | undefined
+  tone: GmailStatus["tone"]
+}): "success" | "warning" | "secondary" {
+  if (initialSyncCompletedAt) {
+    return "success"
+  }
+  if (tone === "warning") {
+    return "warning"
+  }
+  return "secondary"
+}
+
 /** El icono del estado; el color lo pone quien lo contiene. */
 function GmailStatusGlyph({
   status,
@@ -974,19 +1002,6 @@ function GmailStatusGlyph({
     )
   }
   return <CheckCircle2 className={className} aria-hidden="true" />
-}
-
-function emailSocketStatusLabel(
-  status: "connecting" | "connected" | "disconnected"
-) {
-  switch (status) {
-    case "connected":
-      return "Canal de actualizaciones en vivo. No indica la salud de Gmail."
-    case "connecting":
-      return "Conectando el canal de actualizaciones. No indica la salud de Gmail."
-    default:
-      return "Canal de actualizaciones sin conexión. No indica la salud de Gmail."
-  }
 }
 
 function IntelligenceMessageDetail({
@@ -1039,7 +1054,8 @@ function IntelligenceMessageDetail({
           <Skeleton className="h-6 w-2/3" />
           <Skeleton className="h-32 w-full" />
         </div>
-      ) : isError || !data ? (
+      ) : null}
+      {!isPending && (isError || !data) ? (
         <Empty>
           <EmptyHeader>
             <EmptyMedia variant="icon">
@@ -1054,7 +1070,8 @@ function IntelligenceMessageDetail({
             <RefreshCw aria-hidden="true" /> Reintentar
           </Button>
         </Empty>
-      ) : (
+      ) : null}
+      {!isPending && !isError && data ? (
         <div className="flex flex-col gap-4 p-2">
           <SummarySection
             title="Resumen"
@@ -1065,7 +1082,7 @@ function IntelligenceMessageDetail({
               title="Clasificación automática"
               description={
                 lastClassification
-                  ? `${classificationType(lastClassification.payload)} · ${classificationRoute(lastClassification.payload)}`
+                  ? `${classificationTypeLabel(lastClassification.payload)} · ${classificationRouteLabel(lastClassification.payload)}`
                   : "Todavía no tiene clasificación automática."
               }
               icon={BrainCircuit}
@@ -1111,7 +1128,7 @@ function IntelligenceMessageDetail({
             {classificationObservations.map((item) => (
               <SummaryItem
                 key={`classification-${item.sequence}`}
-                title={`Ruta ${classificationRoute(item.payload)} · ${classificationType(item.payload)}`}
+                title={`Ruta ${classificationRouteLabel(item.payload)} · ${classificationTypeLabel(item.payload)}`}
                 description={describeClassification(item.payload)}
                 icon={BrainCircuit}
               />
@@ -1158,102 +1175,9 @@ function IntelligenceMessageDetail({
             ) : null}
           </SummarySection>
         </div>
-      )}
+      ) : null}
     </BottomSheet>
   )
-}
-
-function classificationPayload(payload: unknown): Record<string, unknown> {
-  if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
-    return {}
-  }
-  return payload as Record<string, unknown>
-}
-
-function classificationRoute(payload: unknown): string {
-  const value = classificationPayload(payload).route
-  if (typeof value !== "string" || value === "NONE") {
-    return "Sin dominio"
-  }
-  return value in ROUTE_LABELS
-    ? ROUTE_LABELS[value as keyof typeof ROUTE_LABELS]
-    : value
-}
-
-function classificationType(payload: unknown): string {
-  const label = classificationPayload(payload).label
-  if (!label || typeof label !== "object" || Array.isArray(label)) {
-    return "sin tipo"
-  }
-  const value = (label as Record<string, unknown>).semanticType
-  return typeof value === "string" && value in SEMANTIC_TYPE_LABELS
-    ? SEMANTIC_TYPE_LABELS[value as keyof typeof SEMANTIC_TYPE_LABELS]
-    : typeof value === "string"
-      ? value
-      : "sin tipo"
-}
-
-function describeClassification(payload: unknown): string {
-  const value = classificationPayload(payload)
-  const method =
-    value.method === "KNOWLEDGE"
-      ? "Conocimiento guardado"
-      : value.method === "DETERMINISTIC"
-        ? "Parser determinista"
-        : value.method === "MODEL"
-          ? "Modelo con validación"
-          : "Método desconocido"
-  const confidence =
-    typeof value.confidence === "number"
-      ? `confianza ${Math.round(value.confidence * 100)}%`
-      : "confianza desconocida"
-  const provider = typeof value.provider === "string" ? value.provider : null
-  const model = typeof value.model === "string" ? value.model : null
-  const label =
-    value.label &&
-    typeof value.label === "object" &&
-    !Array.isArray(value.label)
-      ? (value.label as Record<string, unknown>)
-      : null
-  const relevance =
-    typeof label?.relevance === "boolean"
-      ? label.relevance
-        ? "relevante"
-        : "no relevante"
-      : null
-  const transaction =
-    label?.transaction &&
-    typeof label.transaction === "object" &&
-    !Array.isArray(label.transaction)
-      ? Object.entries(label.transaction as Record<string, unknown>)
-          .map(([key, item]) => `${key}: ${String(item)}`)
-          .join(", ")
-      : null
-  const used = Array.isArray(value.knowledgeUsed)
-    ? value.knowledgeUsed
-        .map((item) => {
-          if (!item || typeof item !== "object") {
-            return null
-          }
-          const entry = item as Record<string, unknown>
-          return [entry.scope, entry.knowledgeType, entry.knowledgeKey]
-            .filter((part) => typeof part === "string")
-            .join(" ")
-        })
-        .filter(Boolean)
-        .join(", ")
-    : ""
-  return [
-    method,
-    confidence,
-    relevance,
-    provider,
-    model,
-    transaction,
-    used ? `conocimiento: ${used}` : "sin conocimiento aplicado",
-  ]
-    .filter(Boolean)
-    .join(" · ")
 }
 
 function MessageRepresentation({

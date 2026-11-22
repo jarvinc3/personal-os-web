@@ -1,12 +1,13 @@
 import { AGENT_CHAT_CONTEXT_PARAM } from "@/src/modules/intelligence/constants/agent-chat"
+import {
+  buildEntityRef,
+  readRouteEntity,
+} from "@/src/modules/intelligence/lib/agent-route-entity"
 import type {
   AgentInvocationContext,
   AgentInvocationEntityRef,
   AgentInvocationEntityType,
 } from "@/src/modules/intelligence/types/agent-chat.types"
-
-const UUID_PATTERN =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 const FILTER_EXCLUDED_KEYS = new Set([
   "sheet",
@@ -74,67 +75,6 @@ type SearchParamsLike = {
   toString(): string
 }
 
-function isUuid(value: string | undefined): value is string {
-  return Boolean(value && UUID_PATTERN.test(value))
-}
-
-function entity(
-  type: AgentInvocationEntityType,
-  id: string | undefined
-): AgentInvocationEntityRef | undefined {
-  return isUuid(id) ? { type, id } : undefined
-}
-
-function readRouteEntity(
-  pathname: string
-): AgentInvocationEntityRef | undefined {
-  const segments = pathname
-    .split("/")
-    .filter(Boolean)
-    .map((segment) => decodeURIComponent(segment))
-  if (segments[0] !== "finance") {
-    return undefined
-  }
-
-  if (segments[1] === "transactions") {
-    return entity("transaction", segments[2])
-  }
-  if (segments[1] === "institutions") {
-    if (segments[3] === "accounts") {
-      return entity("account", segments[4])
-    }
-    if (segments[3] === "cards") {
-      return entity("card", segments[4])
-    }
-    if (segments[2] === "new") {
-      return undefined
-    }
-    return entity("institution", segments[2])
-  }
-  if (segments[1] === "cash") {
-    return entity("account", segments[2])
-  }
-  if (segments[1] === "loans" && segments[2] !== "new") {
-    return entity("loan", segments[2])
-  }
-  if (segments[1] === "budgets") {
-    return entity("budget", segments[2])
-  }
-  if (segments[1] === "savings-goals") {
-    return entity("savings_goal", segments[2])
-  }
-  if (segments[1] === "receivables") {
-    return entity("receivable", segments[2])
-  }
-  if (segments[1] === "subscriptions" && segments[2] !== "calendar") {
-    return entity("subscription", segments[2])
-  }
-  if (segments[1] === "merchants") {
-    return entity("merchant", segments[2])
-  }
-  return undefined
-}
-
 function readSheetEntity(
   sheet: string | null,
   sheetId: string | null
@@ -143,7 +83,7 @@ function readSheetEntity(
     return undefined
   }
   const type = SHEET_ENTITY_TYPES[sheet]
-  return type ? entity(type, sheetId ?? undefined) : undefined
+  return type ? buildEntityRef(type, sheetId ?? undefined) : undefined
 }
 
 function readFilters(
@@ -167,6 +107,20 @@ function readFilters(
   return Object.keys(filters).length > 0 ? filters : undefined
 }
 
+/** La vista del contexto es la hoja abierta o, si no hay, la pestaña activa. */
+function resolveSheetOrView(
+  sheet: string | null,
+  tab: string | null
+): Pick<AgentInvocationContext, "sheet" | "view"> {
+  if (sheet) {
+    return { sheet }
+  }
+  if (tab) {
+    return { view: tab }
+  }
+  return {}
+}
+
 /** Contexto que viaja al agente al abrir o enviar un mensaje. */
 export function buildAgentInvocationContext({
   pathname,
@@ -180,7 +134,7 @@ export function buildAgentInvocationContext({
   const tab = searchParams.get("tab")
   const context: AgentInvocationContext = {
     route: pathname || "/",
-    ...(activeSheet ? { sheet: activeSheet } : tab ? { view: tab } : {}),
+    ...resolveSheetOrView(activeSheet, tab),
   }
 
   const entityRef =
@@ -246,6 +200,16 @@ export function decodeAgentContext(
   }
 }
 
+function compareRouteLabels(left: string, right: string): number {
+  if (left < right) {
+    return -1
+  }
+  if (left > right) {
+    return 1
+  }
+  return 0
+}
+
 export function agentContextLabel(
   context: AgentInvocationContext | null | undefined
 ): string {
@@ -272,7 +236,7 @@ function canonicalize(value: unknown): unknown {
   if (value && typeof value === "object") {
     return Object.fromEntries(
       Object.entries(value)
-        .sort(([left], [right]) => (left < right ? -1 : left > right ? 1 : 0))
+        .sort(([left], [right]) => compareRouteLabels(left, right))
         .map(([key, item]) => [key, canonicalize(item)])
     )
   }

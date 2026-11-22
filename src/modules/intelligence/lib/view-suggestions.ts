@@ -33,8 +33,21 @@ export function buildViewSuggestionScope({
   const tab = searchParams.get("tab")
   return {
     route: pathname || "/",
-    ...(activeSheet ? { sheet: activeSheet } : tab ? { view: tab } : {}),
+    ...resolveSheetOrView(activeSheet, tab),
   }
+}
+
+function resolveSheetOrView(
+  sheet: string | null,
+  tab: string | null
+): Pick<ViewSuggestionScope, "sheet" | "view"> {
+  if (sheet) {
+    return { sheet }
+  }
+  if (tab) {
+    return { view: tab }
+  }
+  return {}
 }
 
 export function viewSuggestionScopeFromContext(

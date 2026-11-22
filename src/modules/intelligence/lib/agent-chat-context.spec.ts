@@ -144,6 +144,38 @@ describe("buildAgentInvocationContext", () => {
     assert.equal(card.entityRef?.type, "card")
   })
 
+  it("reads the entity of every finance detail route", () => {
+    const routes = [
+      { section: "transactions", type: "transaction" },
+      { section: "institutions", type: "institution" },
+      { section: "cash", type: "account" },
+      { section: "loans", type: "loan" },
+      { section: "budgets", type: "budget" },
+      { section: "savings-goals", type: "savings_goal" },
+      { section: "receivables", type: "receivable" },
+      { section: "subscriptions", type: "subscription" },
+      { section: "merchants", type: "merchant" },
+    ] as const
+
+    for (const route of routes) {
+      const context = buildAgentInvocationContext({
+        pathname: `/finance/${route.section}/${TRANSACTION_ID}`,
+        searchParams: params(),
+      })
+
+      assert.equal(context.entityRef?.type, route.type, route.section)
+    }
+  })
+
+  it("does not invent an entity on the subscriptions calendar", () => {
+    const context = buildAgentInvocationContext({
+      pathname: "/finance/subscriptions/calendar",
+      searchParams: params(),
+    })
+
+    assert.equal(context.entityRef, undefined)
+  })
+
   it("does not invent an entity for a create route", () => {
     const context = buildAgentInvocationContext({
       pathname: "/finance/transactions/new",
