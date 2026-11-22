@@ -21,6 +21,7 @@ Las cabeceras fijas salen de `src/config/security-headers.mjs`, que importa `nex
 - `script-src 'self' 'nonce-<n>'`: Next lee el nonce de la cabecera `Content-Security-Policy` de la petición y lo pone en sus scripts; `app/layout.tsx` se lo pasa al script de apariencia y a `next-themes`. Sin `'unsafe-inline'` ni `'strict-dynamic'`; los scripts de Vercel Analytics y los chunks de Sentry cargan del propio origen.
 - `connect-src` toma del entorno el API (también por `wss`, que usa socket.io), Supabase y el origen del DSN de Sentry. `img-src` suma Supabase, `img.logo.dev` y `flagcdn.com`.
 - En desarrollo se agregan `'unsafe-eval'` y `ws:` para el recargado en caliente de Turbopack. Producción agrega `upgrade-insecure-requests`.
+- En las previews de Vercel (`VERCEL_ENV=preview`) se permiten los orígenes de su barra (`vercel.live` y su WebSocket) y el marco de la barra, porque la inyecta en cada carga; sin eso la consola muestra una violación. Producción y desarrollo no los permiten.
 
 ## Coste: todas las rutas son dinámicas
 

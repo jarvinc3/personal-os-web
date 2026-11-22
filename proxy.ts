@@ -13,6 +13,7 @@ export async function proxy(request: NextRequest) {
   const policy = contentSecurityPolicy({
     nonce,
     isDevelopment: process.env.NODE_ENV !== "production",
+    isVercelPreview: process.env.VERCEL_ENV === "preview",
     apiUrl: process.env.NEXT_PUBLIC_API_URL,
     supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
     sentryDsn: process.env.NEXT_PUBLIC_SENTRY_DSN,

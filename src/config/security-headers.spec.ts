@@ -81,6 +81,7 @@ describe("contentSecurityPolicy", () => {
     assert.equal(directives.get("default-src"), "'self'")
     assert.equal(directives.get("script-src"), `'self' 'nonce-${TEST_NONCE}'`)
     assert.equal(directives.get("frame-ancestors"), "'none'")
+    assert.equal(directives.get("frame-src"), "'none'")
     assert.equal(directives.has("upgrade-insecure-requests"), true)
   })
 
@@ -109,6 +110,24 @@ describe("contentSecurityPolicy", () => {
     assert.equal(directives.get("style-src"), "'self' 'unsafe-inline'")
     assert.equal(directives.get("connect-src"), "'self'")
     assert.equal(directives.get("script-src"), `'self' 'nonce-${TEST_NONCE}'`)
+  })
+
+  it("en preview permite la barra de Vercel sin abrir otros marcos", () => {
+    const directives = directivesOf(
+      contentSecurityPolicy({
+        nonce: TEST_NONCE,
+        isDevelopment: false,
+        isVercelPreview: true,
+      })
+    )
+
+    assert.match(directives.get("script-src") ?? "", /https:\/\/vercel\.live/)
+    assert.match(
+      directives.get("connect-src") ?? "",
+      /wss:\/\/ws-us3\.pusher\.com/
+    )
+    assert.equal(directives.get("frame-src"), "https://vercel.live")
+    assert.equal(directives.get("frame-ancestors"), "'none'")
   })
 
   it("en desarrollo permite eval y WebSocket para el recargado en caliente", () => {

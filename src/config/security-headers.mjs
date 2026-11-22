@@ -12,6 +12,11 @@ const PRODUCTION_HSTS = "max-age=63072000; includeSubDomains"
 // En desarrollo Vercel Analytics carga su script de depuración desde su CDN;
 // en producción el script es del propio origen.
 const VERCEL_ANALYTICS_DEBUG_ORIGIN = "https://va.vercel-scripts.com"
+// La barra de Vercel se inyecta en las previews y pide su script, estilos,
+// tipografías y un WebSocket de comentarios.
+const VERCEL_LIVE_ORIGIN = "https://vercel.live"
+const VERCEL_TOOLBAR_WEBSOCKET_ORIGIN = "wss://ws-us3.pusher.com"
+const VERCEL_ASSETS_ORIGIN = "https://assets.vercel.com"
 
 /**
  * Cabeceras que no dependen de la petición. `next.config.mjs` las pone en todas
@@ -54,6 +59,7 @@ export function createNonce() {
  * @param {{
  *   nonce: string,
  *   isDevelopment: boolean,
+ *   isVercelPreview: boolean,
  *   apiUrl?: string,
  *   supabaseUrl?: string,
  *   sentryDsn?: string,
@@ -63,6 +69,7 @@ export function createNonce() {
 export function contentSecurityPolicy({
   nonce,
   isDevelopment,
+  isVercelPreview,
   apiUrl,
   supabaseUrl,
   sentryDsn,
@@ -102,21 +109,34 @@ export function contentSecurityPolicy({
     imageSources.push(supabaseOrigin)
   }
 
+  const styleSources = ["'self'", "'unsafe-inline'"]
+  const fontSources = ["'self'", "data:"]
+  let frameSources = ["'none'"]
+
+  if (isVercelPreview) {
+    scriptSources.push(VERCEL_LIVE_ORIGIN)
+    connectSources.push(VERCEL_LIVE_ORIGIN, VERCEL_TOOLBAR_WEBSOCKET_ORIGIN)
+    imageSources.push(VERCEL_LIVE_ORIGIN, "https://vercel.com")
+    styleSources.push(VERCEL_LIVE_ORIGIN)
+    fontSources.push(VERCEL_LIVE_ORIGIN, VERCEL_ASSETS_ORIGIN)
+    frameSources = [VERCEL_LIVE_ORIGIN]
+  }
+
   const directives = [
     "default-src 'self'",
     `script-src ${scriptSources.join(" ")}`,
     // Excepción documentada: framer-motion escribe atributos style y chart.tsx
     // inyecta un <style> con variables por gráfico; no se pueden hashear. Los
     // scripts siguen exigiendo nonce.
-    "style-src 'self' 'unsafe-inline'",
+    `style-src ${styleSources.join(" ")}`,
     `img-src ${imageSources.join(" ")}`,
-    "font-src 'self' data:",
+    `font-src ${fontSources.join(" ")}`,
     `connect-src ${connectSources.join(" ")}`,
     "object-src 'none'",
     "base-uri 'none'",
     "form-action 'self'",
     "frame-ancestors 'none'",
-    "frame-src 'none'",
+    `frame-src ${frameSources.join(" ")}`,
     "manifest-src 'self'",
     "worker-src 'self'",
   ]
