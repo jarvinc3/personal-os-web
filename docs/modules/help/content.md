@@ -2,12 +2,12 @@
 
 Todos los textos viven en `src/modules/help/constants/`:
 
-| Archivo          | Contenido                                               |
-| ---------------- | ------------------------------------------------------- |
-| `glossary.ts`    | Términos, categorías, sinónimos y términos relacionados |
-| `guides.ts`      | Grupos y pasos de las guías                             |
-| `faq.ts`         | Grupos de preguntas y respuestas                        |
-| `sheet-terms.ts` | Qué términos explica cada hoja de Finanzas              |
+| Archivo          | Contenido                                                                  |
+| ---------------- | -------------------------------------------------------------------------- |
+| `glossary.ts`    | Índice de términos y categorías; cada categoría vive en `glossary/<id>.ts` |
+| `guides.ts`      | Índice de grupos; cada área de las guías vive en `guides/<área>.ts`        |
+| `faq.ts`         | Grupos de preguntas y respuestas                                           |
+| `sheet-terms.ts` | Qué términos explica cada hoja de Finanzas                                 |
 
 No se escribe copy de estas pantallas en los `.tsx`.
 

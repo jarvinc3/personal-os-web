@@ -20,7 +20,7 @@ La entrada está en Ajustes → Ayuda. Las rutas exigen sesión (`proxy.ts`). La
 
 ## Glosario
 
-`HELP_TERMS` (`src/modules/help/constants/glossary.ts`) es la única fuente de los términos. `/help/glossary` los lista con buscador y `?term=slug` resalta una entrada. `GlossaryHelpButton` abre un término en una hoja con `?picker=sheet-glossary:<slug>`, el mismo esquema que usa el header de una hoja para sus conceptos.
+`HELP_TERMS` (`src/modules/help/constants/glossary.ts`) es la única fuente de los términos. El índice los arma por categoría desde `glossary/<id>.ts` y conserva el orden; lo mismo hace `guides.ts` con las áreas de `guides/`. `/help/glossary` los lista con buscador y `?term=slug` resalta una entrada. `GlossaryHelpButton` abre un término en una hoja con `?picker=sheet-glossary:<slug>`, el mismo esquema que usa el header de una hoja para sus conceptos.
 
 El botón de la derecha del header de una hoja es adaptable:
 
