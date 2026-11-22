@@ -46,6 +46,23 @@ type ModuleSectionContentProps = ModuleSectionLayoutProps & {
   hideTabBar: boolean
 }
 
+/** Relleno inferior del contenido: deja aire para el tab bar y para el botón flotante. */
+function contentBottomPadding({
+  hideTabBar,
+  needsMobileFabSpace,
+}: {
+  hideTabBar: boolean
+  needsMobileFabSpace: boolean
+}): string {
+  if (hideTabBar) {
+    return "pb-4"
+  }
+  if (needsMobileFabSpace) {
+    return "pb-[calc(9rem+env(safe-area-inset-bottom))]"
+  }
+  return "pb-[calc(6rem+env(safe-area-inset-bottom))]"
+}
+
 function ModuleSectionContent({
   children,
   items,
@@ -64,11 +81,7 @@ function ModuleSectionContent({
       className={cn(
         "mx-auto flex w-full max-w-5xl flex-col gap-6 p-4 md:pb-16",
         hasFab ? "md:pr-20 md:pl-6" : "md:px-6",
-        hideTabBar
-          ? "pb-4"
-          : needsMobileFabSpace
-            ? "pb-[calc(9rem+env(safe-area-inset-bottom))]"
-            : "pb-[calc(6rem+env(safe-area-inset-bottom))]"
+        contentBottomPadding({ hideTabBar, needsMobileFabSpace })
       )}
     >
       {children}
