@@ -50,6 +50,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Cambiado
 
+- #504: el overlay del agente y su historial se cargan bajo demanda, así una ruta autenticada no descarga ese trozo hasta que se abre el chat; el árbol queda con una sola librería de animación (`framer-motion`) y el reorden de categorías usa su mismo primitivo.
 - #501: las cinco hojas de Finanzas que todavía abrían con una clave literal usan `FINANCE_SHEET_KEYS`; el abridor y el glosario comparten el mismo valor y cambiar una clave en la constante los mueve a la vez.
 - #493: el flujo de trabajo versiona `scripts/project3.ps1` y la regla «Project 3 siempre al día»; los issues nuevos entran al tablero al crearse y `check` exige `Cancelado` para los cerrados como `not planned`, con el id de esa opción resuelto por nombre.
 - El setup de pruebas de #450 resuelve pantallas con `next/*` y relativos sin extensión, stubea los `.css`, mapea la cobertura con source maps y exige el reintento en el estado de error de Uso (Refs #450; hallazgos de PI-REV).
@@ -111,6 +112,8 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Corregido
 
+- #499: el agente abre desde una institución sin que la conversación falle. El `entityRef` de tipo `institution` ya existe en el contrato del back, así que la web deja de agregarlo por su cuenta y el tipo sale del `api-schema` generado; una prueba comprueba que todo tipo que arma el contexto está en `AiInvocationEntityRefDto`.
+- #505: `robots.txt` deja de anunciar `/sitemap.xml`; la app es privada y no publica un sitemap.
 - #519: el hero de una tarjeta de crédito sobregirada muestra la deuda con su etiqueta, no el disponible negativo; una tarjeta con límite disponible sigue mostrando «Disponible» y una de débito, «Saldo».
 - #520: la pestaña Correos de Inteligencia muestra el total de correos en revisión que devuelve la cola, no solo los de la página cargada; mientras el total no está disponible, el texto no lo presenta como cero.
 - #511: los totales de Ingresos y Egresos del mes en el detalle de una cuenta incluyen los movimientos de sus tarjetas de débito, igual que la lista de la pantalla, y el hero aclara que no cuentan las transferencias.
