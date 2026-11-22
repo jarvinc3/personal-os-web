@@ -107,7 +107,7 @@ function TransactionDetailScreenBody({
   const restoreMutation = useRestoreTransaction()
   const { open: openOptionsSheet, setOpen: setOpenOptionsSheet } =
     useSheetParam(FINANCE_SHEET_KEYS.transactionOptions, {
-      clearParams: [TAB_QUERY_KEY],
+      clearOnOpen: [TAB_QUERY_KEY],
     })
 
   const tx = detailQuery.data

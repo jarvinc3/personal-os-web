@@ -34,6 +34,7 @@ type NavigateSheetUrlInput = {
   id?: string | null
   extraParams?: SheetExtraParams
   clearParams?: readonly string[]
+  clearOnOpen?: readonly string[]
   pushOver?: boolean
   closeMode?: SheetCloseMode
 }
@@ -47,6 +48,7 @@ function navigateSheetUrl({
   id,
   extraParams,
   clearParams,
+  clearOnOpen,
   pushOver,
   closeMode = "back",
 }: NavigateSheetUrlInput) {
@@ -58,6 +60,7 @@ function navigateSheetUrl({
     id,
     extraParams,
     clearParams,
+    clearOnOpen,
     pushOver,
     wasPushed: wasSheetPushed(pathname),
     closeMode,
@@ -84,10 +87,14 @@ export function useSheetParam(
   {
     closeMode = "back",
     clearParams,
+    clearOnOpen,
     pushOver = false,
   }: {
     closeMode?: SheetCloseMode
+    /** Params de la hoja que se descartan al cerrarla sin historial. */
     clearParams?: readonly string[]
+    /** Params de la vista que la hoja no lleva: se descartan al abrirla. */
+    clearOnOpen?: readonly string[]
     pushOver?: boolean
   } = {}
 ) {
@@ -132,6 +139,7 @@ export function useSheetParam(
         id,
         extraParams,
         clearParams,
+        clearOnOpen,
         pushOver,
         closeMode,
       })
@@ -143,6 +151,7 @@ export function useSheetParam(
       pathname,
       optimistic,
       clearParams,
+      clearOnOpen,
       pushOver,
       closeMode,
     ]
