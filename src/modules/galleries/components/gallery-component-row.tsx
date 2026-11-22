@@ -23,7 +23,6 @@ type GalleryComponentRowProps = {
   query: string
 }
 
-/** Fila de una ficha con su nombre y su descripción resaltados por la búsqueda. */
 export function GalleryComponentRow({
   doc,
   icon: Icon,
