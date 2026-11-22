@@ -1,5 +1,6 @@
 import assert from "node:assert/strict"
 import { createHash } from "node:crypto"
+import { readFileSync } from "node:fs"
 import { describe, it } from "node:test"
 
 import {
@@ -17,6 +18,62 @@ const INSTITUTION_ID = "00000000-0000-4000-8000-000000000003"
 function params(query = "") {
   return new URLSearchParams(query)
 }
+
+const CONTRACT_PATH = "openapi/swagger-spec.json"
+
+/** Enum que el back publica y valida, leído del contrato versionado. */
+function contractEntityTypes(): string[] {
+  const contract = JSON.parse(readFileSync(CONTRACT_PATH, "utf8")) as {
+    components: {
+      schemas: {
+        AiInvocationEntityRefDto: {
+          properties: { type: { enum: string[] } }
+        }
+      }
+    }
+  }
+
+  return contract.components.schemas.AiInvocationEntityRefDto.properties.type
+    .enum
+}
+
+/** Entidades que la web puede armar hoy, por ruta y por hoja. */
+function producedEntityTypes(): string[] {
+  const routes = [
+    `/finance/transactions/${TRANSACTION_ID}`,
+    `/finance/institutions/${INSTITUTION_ID}`,
+    `/finance/institutions/${INSTITUTION_ID}/accounts/${ACCOUNT_ID}`,
+    `/finance/institutions/${INSTITUTION_ID}/cards/${ACCOUNT_ID}`,
+  ]
+  const sheets = ["institution-options-sheet", "transaction-options-sheet"]
+
+  return [
+    ...routes.map(
+      (pathname) =>
+        buildAgentInvocationContext({ pathname, searchParams: params() })
+          .entityRef?.type
+    ),
+    ...sheets.map(
+      (sheet) =>
+        buildAgentInvocationContext({
+          pathname: "/finance/institutions",
+          searchParams: params(`sheet=${sheet}&sheetId=${INSTITUTION_ID}`),
+        }).entityRef?.type
+    ),
+  ].filter((type): type is string => Boolean(type))
+}
+
+describe("contexto de entidad aceptado por el contrato", () => {
+  it("todo tipo que arma la web existe en AiInvocationEntityRefDto", () => {
+    const accepted = contractEntityTypes()
+    const produced = producedEntityTypes()
+
+    assert.ok(produced.includes("institution"))
+    for (const type of produced) {
+      assert.ok(accepted.includes(type), `El contrato no acepta ${type}`)
+    }
+  })
+})
 
 describe("buildAgentInvocationContext", () => {
   it("reads the route, sheet and filters without internal params", () => {

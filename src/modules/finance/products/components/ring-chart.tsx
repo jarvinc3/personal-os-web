@@ -334,7 +334,7 @@ export function FinanceRingLegend({
                 <span className="truncate text-sm font-semibold text-foreground sm:text-base">
                   {slice.name}
                 </span>
-                <span className="truncate text-xs text-muted-foreground sm:text-sm">
+                <span className="text-xs whitespace-nowrap text-muted-foreground sm:text-sm">
                   {slice.amountLabel}
                 </span>
               </span>

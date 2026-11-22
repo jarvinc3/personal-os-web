@@ -157,7 +157,10 @@ export function FinanceHeroSection({
 
       {hasChart ? (
         <div className="flex flex-col gap-2">
-          <div ref={heroRef} className="flex items-center gap-3 px-2 sm:gap-6">
+          <div
+            ref={heroRef}
+            className="flex flex-col gap-3 px-2 sm:flex-row sm:items-center sm:gap-6"
+          >
             <FinanceRingChart
               slices={slices}
               activeKey={activeKey}
@@ -166,7 +169,7 @@ export function FinanceHeroSection({
               centerValue={centerValue}
               centerDebt={centerDebt}
               centerHref={netWorthHref}
-              className="w-2/5 shrink-0 sm:w-44"
+              className="w-full shrink-0 sm:w-44"
             />
             <FinanceRingLegend
               slices={slices}
@@ -215,7 +218,7 @@ export function FinanceHeroSection({
       {showsCurrencyCards ? (
         <div className="flex flex-col gap-2 px-2 pb-2">
           <p className={HERO_LABEL_CLASS}>Por moneda</p>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             {currencyTotals.map((group) => {
               const receivables = receivablesLine(group, display)
               const groupTotal =
@@ -237,7 +240,7 @@ export function FinanceHeroSection({
                   <Link
                     href={netWorthHref}
                     aria-label={`Ver el desglose del patrimonio en ${group.currency}`}
-                    className="rounded-md text-xl font-bold tracking-tight tabular-nums outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    className="rounded-md text-xl font-bold tracking-tight whitespace-nowrap tabular-nums outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
                     {groupTotal}
                   </Link>

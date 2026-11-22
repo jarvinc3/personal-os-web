@@ -80,8 +80,11 @@ export function InstitutionDetailHero({
 
       <div className="mt-8 flex flex-col gap-1 rounded-2xl bg-black/20 px-3 py-2">
         <div className="flex items-center gap-1">
-          <Label className="text-sm text-foreground">Patrimonio</Label>
-          <GlossaryHelpButton slug="patrimonio" />
+          <Label className="text-sm text-white">Patrimonio</Label>
+          <GlossaryHelpButton
+            slug="patrimonio"
+            className="text-white/70 hover:text-white"
+          />
         </div>
         {balanceLines.length === 0 ? (
           <p className="text-3xl font-bold tracking-tight tabular-nums">
