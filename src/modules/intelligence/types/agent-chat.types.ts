@@ -13,9 +13,8 @@ export type AgentConversationAction = AiSchemas["AiConversationActionDto"]
 type ContractInvocationContext = AiSchemas["AiInvocationContextDto"]
 type ContractInvocationEntityRef = AiSchemas["AiInvocationEntityRefDto"]
 
-/** El contrato no enumera `institution`, aunque el back sí la resuelve. */
-export type AgentInvocationEntityType =
-  ContractInvocationEntityRef["type"] | "institution"
+/** Tipo de entidad del contexto que el contrato publica y el API acepta. */
+export type AgentInvocationEntityType = ContractInvocationEntityRef["type"]
 
 export type AgentInvocationEntityRef = {
   type: AgentInvocationEntityType

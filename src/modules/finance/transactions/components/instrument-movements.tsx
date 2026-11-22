@@ -5,6 +5,7 @@ import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/asyn
 import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
 import { ErrorState } from "@/src/shared/components/feedback/error-state"
 import { useCategories } from "@/src/modules/finance/shared/hooks/use-categories"
+import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import { allTransactionsQueryOptions } from "@/src/modules/finance/shared/hooks/use-transactions"
 import { financeLoadErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import { groupTransactionsByMonth } from "@/src/modules/finance/shared/lib/group-transactions-by-month"
@@ -84,7 +85,7 @@ export function FinanceInstrumentMovements({
   const [dateFrom, setDateFrom] = useState("")
   const [dateTo, setDateTo] = useState("")
   const { open: filtersOpen, setOpen: setFiltersOpen } = useSheetParam(
-    "instrument-movements-filters"
+    FINANCE_SHEET_KEYS.instrumentMovementsFilters
   )
   const timeZone = useUserTimeZone()
 
