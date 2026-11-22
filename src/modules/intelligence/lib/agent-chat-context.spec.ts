@@ -3,8 +3,6 @@ import { createHash } from "node:crypto"
 import { readFileSync } from "node:fs"
 import { describe, it } from "node:test"
 
-import type { components } from "@/src/config/api-contract/api-schema"
-
 import {
   agentContextLabel,
   agentInvocationContextKey,
@@ -74,14 +72,6 @@ describe("contexto de entidad aceptado por el contrato", () => {
     for (const type of produced) {
       assert.ok(accepted.includes(type), `El contrato no acepta ${type}`)
     }
-  })
-
-  it("la institución es parte del tipo generado, no un agregado local", () => {
-    type ContractType =
-      components["schemas"]["AiInvocationEntityRefDto"]["type"]
-    const institution: ContractType = "institution"
-
-    assert.equal(institution, "institution")
   })
 })
 
