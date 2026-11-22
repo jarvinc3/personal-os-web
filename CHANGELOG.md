@@ -6,6 +6,8 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Seguridad
 
+- La app autenticada envía una **CSP estricta con nonce por petición** y cabeceras anti-incrustación: `frame-ancestors 'none'`, `X-Frame-Options: DENY`, `nosniff`, `Referrer-Policy`, `Permissions-Policy` y HSTS en producción. Los scripts de Next, Sentry y Analytics cargan del propio origen y el script de apariencia recibe el nonce; la única excepción es `style-src 'unsafe-inline'` (framer-motion y los estilos por gráfico), documentada en `docs/infrastructure/security-headers.md`. El layout raíz lee `headers()` para el nonce, así que todas las rutas pasan a ser dinámicas. Verificado en la preview sin violaciones en consola (#500).
+
 - Next.js y `eslint-config-next` se actualizan a 16.4.6 para salir de la versión afectada por el aviso de seguridad publicado (#430).
 
 ### Agregado
