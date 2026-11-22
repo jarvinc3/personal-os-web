@@ -1,5 +1,6 @@
 "use client"
 
+import dynamic from "next/dynamic"
 import { usePathname, useSearchParams } from "next/navigation"
 import { useCallback, useEffect, useMemo, useRef } from "react"
 
@@ -8,7 +9,6 @@ import {
   AGENT_CHAT_SHEET_KEY,
   AGENT_CHAT_SUGGESTION_PARAM,
 } from "@/src/modules/intelligence/constants/agent-chat"
-import { AgentChatOverlay } from "@/src/modules/intelligence/components/agent-chat-overlay"
 import { ViewSuggestionsBar } from "@/src/modules/intelligence/components/view-suggestions-bar"
 import {
   buildAgentInvocationContext,
@@ -34,6 +34,15 @@ const CLEAR_OVERLAY_PARAMS = [
   AGENT_CHAT_CONTEXT_PARAM,
   AGENT_CHAT_SUGGESTION_PARAM,
 ]
+
+// El historial y el chat no viajan en el trozo inicial de cada ruta autenticada.
+const AgentChatOverlay = dynamic(
+  () =>
+    import("@/src/modules/intelligence/components/agent-chat-overlay").then(
+      (module) => module.AgentChatOverlay
+    ),
+  { ssr: false, loading: () => null }
+)
 
 export function AgentChatHost() {
   const pathname = usePathname()
