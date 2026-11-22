@@ -104,6 +104,9 @@ export function contentSecurityPolicy({
     "blob:",
     "https://img.logo.dev",
     "https://flagcdn.com",
+    // Opciones de avatar de Ajustes → Cuenta y foto de quien entra con Google.
+    "https://www.gravatar.com",
+    "https://*.googleusercontent.com",
   ]
   if (supabaseOrigin) {
     imageSources.push(supabaseOrigin)
