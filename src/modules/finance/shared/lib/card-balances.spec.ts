@@ -4,6 +4,8 @@ import type { FinanceAccount, FinanceCard } from "../types/entities.ts"
 import {
   canManageCardBalances,
   cardCreditFacts,
+  cardDisplayAmount,
+  cardHeroBalance,
   cardUtilization,
   resolveCardDisplayBalances,
 } from "./card-balances.ts"
@@ -71,6 +73,121 @@ describe("resolveCardDisplayBalances", () => {
     assert.deepEqual(
       resolveCardDisplayBalances(card({ balances: [balance] }), [account]),
       [balance]
+    )
+  })
+})
+
+describe("cardDisplayAmount", () => {
+  it("shows the available credit, not the debt, for a credit card", () => {
+    assert.equal(
+      cardDisplayAmount({
+        id: "balance-1",
+        currency: "DOP",
+        balance: "-22526.58",
+        creditLimit: "62000.00",
+        availableCredit: "-22526.58",
+      }),
+      -22526.58
+    )
+  })
+
+  it("keeps a positive available credit as it comes", () => {
+    assert.equal(
+      cardDisplayAmount({
+        id: "balance-1",
+        currency: "DOP",
+        balance: "0.00",
+        creditLimit: "62000.00",
+        availableCredit: "39500.00",
+      }),
+      39500
+    )
+  })
+
+  it("shows the balance of a debit card", () => {
+    assert.equal(
+      cardDisplayAmount({
+        id: "balance-1",
+        currency: "DOP",
+        balance: "24500",
+      }),
+      24500
+    )
+  })
+
+  it("returns null for a value that cannot be read", () => {
+    assert.equal(
+      cardDisplayAmount({
+        id: "balance-1",
+        currency: "DOP",
+        balance: "abc",
+      }),
+      null
+    )
+  })
+})
+
+describe("cardHeroBalance", () => {
+  it("shows the debt of an overspent credit card", () => {
+    const hero = cardHeroBalance(
+      {
+        id: "balance-1",
+        currency: "DOP",
+        balance: "-22526.58",
+        creditLimit: "62000.00",
+        availableCredit: "-22526.58",
+      },
+      "CREDIT"
+    )
+
+    assert.equal(hero.kind, "debt")
+    assert.ok(hero.amount !== null)
+    assert.ok(Math.abs(hero.amount - 84526.58) < 1e-6)
+  })
+
+  it("keeps the available credit when the card has room left", () => {
+    assert.deepEqual(
+      cardHeroBalance(
+        {
+          id: "balance-1",
+          currency: "DOP",
+          balance: "0.00",
+          creditLimit: "62000.00",
+          availableCredit: "39500.00",
+        },
+        "CREDIT"
+      ),
+      { kind: "available", amount: 39500 }
+    )
+  })
+
+  it("keeps the negative available credit without a usable limit", () => {
+    assert.deepEqual(
+      cardHeroBalance(
+        {
+          id: "balance-1",
+          currency: "DOP",
+          balance: "-22526.58",
+          creditLimit: null,
+          availableCredit: "-22526.58",
+        },
+        "CREDIT"
+      ),
+      { kind: "available", amount: -22526.58 }
+    )
+  })
+
+  it("shows the balance of a debit card", () => {
+    assert.deepEqual(
+      cardHeroBalance(
+        {
+          id: "balance-1",
+          currency: "DOP",
+          balance: "24500",
+        },
+        "DEBIT"
+      ),
+      { kind: "balance", amount: 24500 }
     )
   })
 })

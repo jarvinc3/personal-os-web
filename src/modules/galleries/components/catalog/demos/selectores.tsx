@@ -3,6 +3,7 @@ import {
   ArrowDownLeftIcon,
   ArrowLeftRightIcon,
   ArrowUpRightIcon,
+  CalendarDaysIcon,
   ClockIcon,
   MoonIcon,
   PaletteIcon,
@@ -12,6 +13,7 @@ import {
 
 import { ChoiceGrid } from "@/src/shared/components/forms/choice-grid"
 import { ColorPickerSwatch } from "@/src/shared/components/forms/color-picker"
+import { DayListField } from "@/src/shared/components/forms/day-list-field"
 import { OptionRow } from "@/src/shared/components/forms/option-row"
 import { SelectField } from "@/src/shared/components/forms/select-field"
 import { TimePairWheels } from "@/src/shared/components/forms/wheel-picker"
@@ -177,6 +179,19 @@ function WheelFieldDemo() {
   )
 }
 
+function DayListFieldDemo() {
+  const [days, setDays] = useState("1, 15")
+
+  return (
+    <DayListField
+      label="Días de pago"
+      icon={CalendarDaysIcon}
+      value={days}
+      onChange={setDays}
+    />
+  )
+}
+
 export const selectoresDemos: GalleryDemoMap = {
   "option-row": [{ label: "Normal y seleccionada", node: <OptionRowDemo /> }],
   "choice-grid": [
@@ -202,5 +217,8 @@ export const selectoresDemos: GalleryDemoMap = {
   ],
   "time-pair-wheels": [
     { label: "Hora con pasos de 5 minutos", node: <WheelFieldDemo /> },
+  ],
+  "day-list-field": [
+    { label: "Dos días y el botón para agregar", node: <DayListFieldDemo /> },
   ],
 }

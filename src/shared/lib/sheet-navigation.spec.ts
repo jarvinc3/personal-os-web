@@ -59,6 +59,38 @@ describe("resolveSheetNavigation", () => {
     })
   })
 
+  it("drops the view params the sheet does not carry when it opens", () => {
+    const openedSheet = resolveSheetNavigation({
+      pathname: "/finance/transactions/981aa69a",
+      searchParams: params("tab=installment&month=2026-11"),
+      key: "transaction-options-sheet",
+      open: true,
+      id: "981aa69a",
+      clearOnOpen: ["tab"],
+      wasPushed: false,
+    })
+    assert.deepEqual(openedSheet, {
+      action: "push",
+      url: "/finance/transactions/981aa69a?month=2026-11&sheet=transaction-options-sheet&sheetId=981aa69a",
+    })
+  })
+
+  it("keeps the sheet extras after dropping the view params", () => {
+    const openedWithContext = resolveSheetNavigation({
+      pathname: path,
+      searchParams: params("tab=installment"),
+      key: "agent-chat",
+      open: true,
+      extraParams: { agentContext: "ctx" },
+      clearOnOpen: ["tab"],
+      wasPushed: false,
+    })
+    assert.deepEqual(openedWithContext, {
+      action: "push",
+      url: "/finance/products?sheet=agent-chat&agentContext=ctx",
+    })
+  })
+
   it("replaces sheetId on the same sheet", () => {
     const result = resolveSheetNavigation({
       pathname: path,
@@ -377,6 +409,68 @@ describe("mergeOptimisticSheetParam", () => {
       open: false,
       sheetId: null,
       dropOptimistic: true,
+    })
+  })
+  it("opens with extra params owned by the sheet", () => {
+    const result = resolveSheetNavigation({
+      pathname: "/finance/transactions",
+      searchParams: params("month=2026-11"),
+      key: "agent-chat",
+      open: true,
+      extraParams: { agentContext: "ctx", suggestion: null },
+      wasPushed: false,
+    })
+    assert.deepEqual(result, {
+      action: "push",
+      url: "/finance/transactions?month=2026-11&sheet=agent-chat&agentContext=ctx",
+    })
+  })
+
+  it("pushes the overlay over an open sheet so Back returns to it", () => {
+    const result = resolveSheetNavigation({
+      pathname: "/finance/transactions",
+      searchParams: params("sheet=transaction-options-sheet&sheetId=tx-1"),
+      key: "agent-chat",
+      open: true,
+      extraParams: { agentContext: "ctx" },
+      pushOver: true,
+      wasPushed: true,
+    })
+    assert.deepEqual(result, {
+      action: "push",
+      url: "/finance/transactions?sheet=agent-chat&agentContext=ctx",
+    })
+  })
+
+  it("updates extra params on the open sheet without a new id", () => {
+    const result = resolveSheetNavigation({
+      pathname: "/finance/transactions",
+      searchParams: params("sheet=agent-chat&agentContext=old"),
+      key: "agent-chat",
+      open: true,
+      extraParams: { agentContext: "new" },
+      wasPushed: true,
+    })
+    assert.deepEqual(result, {
+      action: "replace",
+      url: "/finance/transactions?sheet=agent-chat&agentContext=new",
+    })
+  })
+
+  it("clears owned params when a deep-linked sheet closes", () => {
+    const result = resolveSheetNavigation({
+      pathname: "/finance/transactions",
+      searchParams: params(
+        "sheet=agent-chat&agentContext=ctx&suggestion=s-1&month=2026-11"
+      ),
+      key: "agent-chat",
+      open: false,
+      clearParams: ["agentContext", "suggestion"],
+      wasPushed: false,
+    })
+    assert.deepEqual(result, {
+      action: "replace",
+      url: "/finance/transactions?month=2026-11",
     })
   })
 })

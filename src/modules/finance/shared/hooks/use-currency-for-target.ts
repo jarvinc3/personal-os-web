@@ -26,7 +26,12 @@ export function useCurrencyForTarget(
     }
     lastTarget.current = target
     onCurrencyChange(
-      currencyForTarget(target, accounts, cards, defaultCurrency)
+      currencyForTarget({
+        destination: target,
+        accounts,
+        cards,
+        fallback: defaultCurrency,
+      })
     )
   }, [enabled, target, accounts, cards, defaultCurrency, onCurrencyChange])
 }

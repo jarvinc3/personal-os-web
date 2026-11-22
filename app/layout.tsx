@@ -1,12 +1,8 @@
 import type { Metadata, Viewport } from "next"
-import {
-  IBM_Plex_Mono,
-  Noto_Sans,
-  Geist,
-  Public_Sans,
-  Nunito_Sans,
-} from "next/font/google"
+import { IBM_Plex_Mono, Public_Sans, Nunito_Sans } from "next/font/google"
+import { headers } from "next/headers"
 
+import { CSP_NONCE_HEADER } from "@/src/config/security-headers.mjs"
 import { appMetadata } from "@/src/shared/constants/app-metadata"
 import { AppEffectsProvider } from "@/src/providers/app-effects-provider"
 import { AuthBootstrapProvider } from "@/src/providers/auth-bootstrap-provider"
@@ -98,11 +94,15 @@ export const viewport: Viewport = {
   themeColor: "oklch(0.145 0 0)",
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  // La CSP del proxy deja el nonce en la petición; los scripts inline lo
+  // necesitan. Leer `headers()` vuelve dinámicas todas las rutas.
+  const nonce = (await headers()).get(CSP_NONCE_HEADER) ?? undefined
+
   return (
     <html
       lang="es"
@@ -117,10 +117,13 @@ export default function RootLayout({
       )}
     >
       <body>
-        <script dangerouslySetInnerHTML={{ __html: APPEARANCE_SCRIPT }} />
+        <script
+          nonce={nonce}
+          dangerouslySetInnerHTML={{ __html: APPEARANCE_SCRIPT }}
+        />
         <QueryProvider>
           <AuthBootstrapProvider>
-            <ThemeProvider defaultTheme="light">
+            <ThemeProvider defaultTheme="light" nonce={nonce}>
               <AppEffectsProvider>
                 <TooltipProvider>
                   <Toaster position="top-center" richColors />

@@ -4,6 +4,8 @@ Cómo se escribe el código de este cliente Next.js. Los papeles de archivo, las
 
 Si este archivo contradice a `AGENTS.md` o a una regla `.mdc`, manda el repo. Aquí no se inventan capas `presentation` / `application` / `infrastructure` / `domain`, ni un port por hook.
 
+Todos los ejemplos son TypeScript de este stack: React y Next con los patrones de este repo.
+
 ## Referencia rápida
 
 | Haz                                                              | No hagas                                                                   |
@@ -29,6 +31,18 @@ Si este archivo contradice a `AGENTS.md` o a una regla `.mdc`, manda el repo. Aq
 | `apiGet` / `apiPost` / `apiDelete` de `src/config/api-client.ts` | Otro `fetch` que vuelva a abrir el envelope `{ data, meta }`               |
 | `<button>` para acciones, `<Link>` para navegar                  | Un `<div onClick>`                                                         |
 | Estado compartible en la URL                                     | Un filtro o tab que se pierde al recargar y solo vive en `useState`        |
+| El tipo del borde, y después confiar en él                       | `any` en cualquier sitio                                                   |
+| `unknown` más `safeParse` en el borde                            | Castear un `unknown` a una forma y esperar que exista                      |
+| `as` con el motivo escrito                                       | `as` para callar al compilador                                             |
+| Unión con `as const` para un conjunto cerrado                    | `enum` de strings para lo mismo                                            |
+| `switch` exhaustivo que termina en `never`                       | Un `default` que se traga el caso nuevo                                    |
+| `readonly` en props y arrays que no te tocan                     | Mutar el array que llegó por prop                                          |
+| Tipo de retorno explícito en lo exportado                        | Que cada caller rederive el contrato                                       |
+| Un objeto de props después de tres props                         | Booleanos sueltos que cambian la forma del componente                      |
+| `await` o `.catch` en toda promesa                               | Una promesa que nadie mira                                                 |
+| `Promise.all` para lo independiente                              | `await` en serie dentro de un bucle                                        |
+| Un componente por archivo                                        | Tres componentes exportados en el mismo `.tsx`                             |
+| El foco vuelve solo al cerrar la hoja                            | Pelear con el foco que base-ui ya gestiona                                 |
 
 ## Principios
 
@@ -78,6 +92,14 @@ No extraigas:
 ### KISS y YAGNI
 
 KISS: la solución elegida se queda simple. YAGNI: no construyas el caso que nadie pidió. Un parámetro, un flag o un hook “por si más adelante” no entra hasta que hay un segundo uso real.
+
+```tsx
+// Mal — dos props que solo existen para un caso que no llegó
+<FinanceSummary data={summary} compact={false} withChart={false} />
+
+// Bien — el caso que existe hoy
+<FinanceSummary data={summary} />
+```
 
 ### Composición
 
@@ -153,6 +175,251 @@ El schema Zod del input es el contrato. Se parsea en el borde: el formulario o e
 
 `schema.safeParse` para habilitar el botón y el parse del submit tienen que ser el mismo schema. La regla del botón deshabilitado está en [`.cursor/rules/form-submit-disabled.mdc`](.cursor/rules/form-submit-disabled.mdc): no uses `formState.isValid`, que nace en `true`.
 
+## TypeScript
+
+### Tipado estricto
+
+**Sin `any`.** Apaga todas las comprobaciones sobre el valor y se propaga a cada caller. `@typescript-eslint/no-explicit-any` está activo.
+
+**`unknown` en el borde, validado antes de usarlo.** Un dato que viene de fuera (el input de un formulario, un payload del API, `localStorage`) es `unknown` hasta que un schema demuestra su forma.
+
+```ts
+// Mal — el cast convierte un fallo de runtime en un fallo silencioso
+const values = input as BudgetFormValues
+
+// Bien — unknown hasta que el schema demuestra la forma
+const parsed = budgetSchema.safeParse(input)
+if (!parsed.success) {
+  throw new Error(`Presupuesto inválido: ${parsed.error.message}`)
+}
+const values: BudgetFormValues = parsed.data
+```
+
+**`as` solo con el motivo escrito.** Un cast es una promesa al compilador de que sabes más que él. Si el motivo no cabe en una línea, el cast esconde un problema de diseño.
+
+```ts
+// Mal — calla al compilador y rompe cuando el contrato cambie
+const body = values as CreateBudgetBody
+
+// Bien — el estrechamiento es local y tiene una razón
+// `buildCreateBudgetBody` ya validó la forma; el genérico del cliente no la puede inferir.
+const body = payload.body as CreateBudgetBody
+```
+
+**`satisfies` para mapas literales.** Comprueba la forma sin ensanchar los literales, así las claves siguen estrechas.
+
+```ts
+// Mal — la anotación ensancha cada clave a string
+const LABEL: Record<FinanceBudgetPeriod, string> = { MONTHLY: "Mensual" }
+
+// Bien — la forma se comprueba y las claves siguen estrechas
+const LABEL = {
+  MONTHLY: "Mensual",
+  WEEKLY: "Semanal",
+  CUSTOM: "Personalizado",
+} satisfies Record<FinanceBudgetPeriod, string>
+```
+
+**`readonly` para lo que no te toca.** Props, arrays de datos y resultados de una función que no debes mutar se declaran `readonly`, y el compilador rechaza la mutación en vez de que la vea el reviewer.
+
+```tsx
+// Mal — el componente puede ordenar el array del caller en su sitio
+type Props = { budgets: FinanceBudget[] }
+
+// Bien — la firma prohíbe la mutación
+type Props = { budgets: readonly FinanceBudget[] }
+```
+
+**Tipo de retorno explícito en lo exportado.** El tipo de retorno es parte del contrato. Si se infiere, un cambio dentro de la función cambia en silencio lo que recibe cada caller.
+
+```ts
+// Mal — el contrato cambia cuando cambia el cuerpo
+export function resolvePeriodLabel(period: FinanceBudgetPeriod) {
+  return LABEL[period]
+}
+
+// Bien — el contrato está escrito
+export function resolvePeriodLabel(period: FinanceBudgetPeriod): string {
+  return LABEL[period]
+}
+```
+
+### Enums, uniones y switch exhaustivo
+
+Para un conjunto cerrado usa un array `as const` o un objeto `as const` con su unión. No añade un objeto en runtime y es el mismo string que manda el API.
+
+```ts
+// Mal — el enum agrega un objeto en runtime para un valor que ya es un string
+export enum FinanceBudgetPeriod {
+  Monthly = "MONTHLY",
+}
+
+// Bien — array const más unión, la misma forma que el contrato
+export const FINANCE_BUDGET_PERIODS = ["MONTHLY", "WEEKLY", "CUSTOM"] as const
+export type FinanceBudgetPeriod = (typeof FINANCE_BUDGET_PERIODS)[number]
+```
+
+Los tipos del API vienen generados desde el contrato OpenAPI. Reutiliza ese tipo en vez de declarar una segunda copia de la misma unión.
+
+Un `switch` sobre una unión termina en `never`. `@typescript-eslint/switch-exhaustiveness-check` avisa del caso que falta; la asignación a `never` convierte el siguiente miembro agregado en un error de compilación.
+
+```ts
+// Mal — el estado nuevo cae en el default y el bug se publica
+switch (status) {
+  case "CONFIRMED":
+    return "Confirmado"
+  case "CANCELLED":
+    return "Cancelado"
+  default:
+    return ""
+}
+
+// Bien — el compilador rechaza el miembro nuevo hasta que se maneje
+switch (status) {
+  case "CONFIRMED":
+    return "Confirmado"
+  case "CANCELLED":
+    return "Cancelado"
+  default: {
+    const unhandled: never = status
+    throw new Error(`Estado no manejado: ${String(unhandled)}`)
+  }
+}
+```
+
+### Límites medibles
+
+Son regla de review primero y de lint después. Los números de abajo son los que `eslint.config.mjs` aplica en `warn`.
+
+| Límite                           | Valor             |
+| -------------------------------- | ----------------- |
+| Líneas por función o componente  | 120               |
+| Líneas por archivo (sin blancos) | 300               |
+| Props o parámetros               | 3, después objeto |
+| Profundidad de anidación         | 4                 |
+| Complejidad ciclomática          | 12                |
+| Ternarios anidados               | ninguno           |
+
+Un componente que pasa de 120 líneas o de complejidad 12 suele esconder dos bloques. Extrae por intención, no por conteo: si el nombre extraído no deja al caller entender el flujo sin leer el cuerpo, la división empeoró el archivo.
+
+**Tres props, después un objeto.** La cuarta prop posicional deja de ser legible, y dos call sites terminan intercambiando el orden.
+
+```tsx
+// Mal — cuatro props, dos de ellas booleanas
+<BudgetCard budget={budget} currency="DOP" showCents compact />
+
+// Bien — un objeto con nombre, cada valor dicho en el call site
+<BudgetCard budget={budget} display={displayConfig} />
+```
+
+**Sin prop booleana que cambia la forma.** Un `true` en el call site no dice nada, y el componente crece con una segunda rama que nadie revisa. Un `variant` nombrado, o dos componentes, dice qué se pinta.
+
+```tsx
+// Mal — el caller tiene que recordar qué significa `true`
+<TransactionRow transaction={row} detailed />
+
+// Bien — la variante tiene nombre
+<TransactionRow transaction={row} variant="detailed" />
+```
+
+**Sin ternarios anidados.** Una expresión condicional se lee. Dos, no.
+
+```tsx
+// Mal
+{
+  kind === "CARD" ? "Tarjeta" : kind === "CASH" ? "Efectivo" : "Cuenta"
+}
+
+// Bien — una tabla lo dice una vez
+{
+  INSTRUMENT_LABEL[kind]
+}
+```
+
+### Async y promesas
+
+**Sin promesas flotantes.** Una promesa que nadie espera rechaza en un rechazo no manejado, lejos de la línea que lo causó. O la esperas, o la devuelves, o la marcas `void` a propósito.
+
+```ts
+// Mal — el error desaparece
+queryClient.invalidateQueries({ queryKey: ["finance", "budgets"] })
+
+// Bien — esperada dentro del flujo que la necesita
+await queryClient.invalidateQueries({ queryKey: ["finance", "budgets"] })
+```
+
+**Sin callback `async` en `forEach`.** `forEach` ignora la promesa devuelta: el bucle termina antes que el trabajo y el primer rechazo se pierde. Usa `for...of` si el orden importa y `Promise.all` con `map` si no.
+
+```ts
+// Mal — el handler resuelve antes de que se guarden las filas
+ids.forEach(async (id) => {
+  await removeBudget(id)
+})
+
+// Bien — en serie cuando cada paso depende del anterior
+for (const id of ids) {
+  await removeBudget(id)
+}
+
+// Bien — en paralelo cuando son independientes
+await Promise.all(ids.map((id) => removeBudget(id)))
+```
+
+**Paraleliza lo independiente.** Dos queries que no dependen entre sí cuestan una ida, no dos. En React, se declaran juntas y TanStack Query las corre en paralelo.
+
+**Un handler `async` no va directo a `onClick`.** `onClick={onSubmit}` con `onSubmit` async devuelve una promesa que React no espera y cuyo rechazo nadie captura. `@typescript-eslint/no-misused-promises` lo detecta.
+
+```tsx
+// Mal — React no espera la promesa y el rechazo queda suelto
+<Button onClick={onSubmit}>Guardar</Button>
+
+// Bien — el handler envuelve la promesa
+<Button onClick={() => void onSubmit()}>Guardar</Button>
+```
+
+### Nombres
+
+| Qué                          | Convención                       | Ejemplo                      |
+| ---------------------------- | -------------------------------- | ---------------------------- |
+| Archivo                      | kebab-case, el rol al final      | `budget-sheet.tsx`           |
+| Componente                   | PascalCase, igual que el archivo | `BudgetSheet`                |
+| Hook                         | camelCase con `use`              | `useFinanceEnabled`          |
+| Función, variable            | camelCase, verbo primero         | `buildCreateBudgetBody`      |
+| Constante, literal de módulo | SCREAMING_SNAKE_CASE             | `FINANCE_BUDGET_PERIODS`     |
+| Booleano                     | `is` / `has` / `can` / `should`  | `isPending`, `hasCategories` |
+| Query key                    | array de strings en kebab-case   | `["finance", "budgets", id]` |
+
+Dentro de la carpeta del módulo no se repite el nombre del módulo: `categories-screen.tsx`, no `finance-categories.tsx`.
+
+Un nombre que necesita el tipo para entenderse es un nombre malo. `budgetIds` se lee sin escribir `Array`.
+
+### Qué hace un buen test
+
+Un test enuncia una conducta, arma el estado mínimo que la produce y falla con un mensaje que nombra la regla rota. En este cliente son `.spec.ts` junto a la regla y corren con `node --test`.
+
+- **Una conducta por `test`.** “arma el body, lo manda y recarga la lista” son tres.
+- **El nombre dice qué se garantiza**, no qué método corrió: `test("rechaza un monto con tres decimales")`, no `test("parseFinanceMoney")`.
+- **Arrange, Act, Assert visibles.** Un helper que arma un fixture válido está bien; uno que esconde la aserción, no.
+- **Prueba el borde de tu código**, no la librería. Si el test solo comprueba que Zod valida, no prueba nada tuyo.
+- **Afirma sobre el resultado observable**: el valor devuelto, el body que se envió, el error que se lanzó. Afirmar el orden interno de llamadas rompe en cada refactor y no demuestra nada.
+- **Una aserción que atrape la regresión** vale más que diez que repiten la implementación.
+- **Todo bug arreglado empieza con el test que falla.** Si el test no falla antes del arreglo, no cubre el bug.
+
+```ts
+test("rechaza un monto con más de dos decimales", () => {
+  const parsed = budgetSchema.safeParse({ amountLimit: "10.001" })
+
+  assert.equal(parsed.success, false)
+})
+
+test("arma el body con el monto como string", () => {
+  const payload = buildCreateBudgetBody(validValues)
+
+  assert.equal(payload.ok, true)
+  assert.equal(payload.body.amountLimit, "2500.00")
+})
+```
+
 ## React y Next.js
 
 `app/` es Server Component salvo la frontera que necesita estado, eventos o el navegador. `"use client"` va en el archivo que cruza esa frontera, antes de los imports. No se copia en cada hijo: todo lo que ese archivo importa entra al bundle del cliente. Un Server Component que solo se pasa como `children` sigue renderizándose en el servidor.
@@ -181,7 +448,7 @@ No uses un efecto para:
 - Reaccionar a un click o a un submit. Eso es el handler.
 - Pedir datos del API. Eso es `useQuery`.
 
-El efecto que se suscribe devuelve la limpieza. No mientas al array de dependencias: si el linter pide un valor, o entra en la lista o se demuestra que no es reactivo (moverlo fuera, leer un primitivo, o un updater `setState(prev => …)`). `useEffectEvent` es solo para la lógica que se dispara desde un efecto y no debe re-dispararlo. No sirve para callar el linter, y no se llama durante el render ni se pasa a un hijo.
+El efecto que se suscribe devuelve la limpieza. No mientas al array de dependencias: si el linter pide un valor, o entra en la lista o se demuestra que no es reactivo (moverlo fuera, leer un primitivo, o un updater `setState(prev => …)`). `useEffectEvent` es solo para la lógica que se dispara desde un efecto y no debe re-dispararlo. No sirve para callar al linter, y no se llama durante el render ni se pasa a un hijo.
 
 ### Hooks y render
 
@@ -191,9 +458,121 @@ La `key` de una lista es un id estable. El índice solo sirve si la lista es est
 
 No leas layout durante el render (`getBoundingClientRect`, `offsetWidth`, `scrollTop`). Eso no es puro y se dispara en cada render.
 
+## Componentes
+
+### Tamaño
+
+Un componente cabe en las 120 líneas de la tabla de límites, y normalmente en menos. Cuando no cabe, el corte casi siempre es el mismo: el bloque con su propio título (`SummarySection`), la fila que se repite y el formulario que se arma aparte.
+
+Un componente que recibe diez props y decide cuatro cosas distintas es dos componentes. Divide por bloque visual, no por línea.
+
+El cuerpo de una screen puede ser largo porque compone bloques: si empieza a calcular, mapear o validar, eso se va al `.ts` o a un componente del bloque.
+
+### Props tipadas
+
+Las props son un `type` con nombre, no un objeto anónimo inline. Cada prop dice qué dato es y si es opcional; lo que no puede faltar no lleva `?`.
+
+```tsx
+// Mal — el tipo se repite en cada uso y no tiene nombre
+function BudgetCard({
+  budget,
+  display,
+}: {
+  budget: FinanceBudget
+  display: FinanceMoneyDisplay
+}) {}
+
+// Bien — el tipo tiene nombre, se exporta si otro bloque lo compone
+type BudgetCardProps = {
+  budget: FinanceBudget
+  display: FinanceMoneyDisplay
+  onOpen?: (budget: FinanceBudget) => void
+}
+
+function BudgetCard({ budget, display, onOpen }: BudgetCardProps) {}
+```
+
+- Un callback recibe el dato que necesita, no el evento, si el caller no va a leer el evento.
+- Un `children` es `ReactNode`. No lo tipes como `JSX.Element`.
+- Si el componente reenvía props a un primitivo, tipa desde el primitivo (`ComponentProps<typeof Button>`) en vez de copiar la lista a mano.
+- Una prop opcional que solo existe para un caso que hoy no se usa no entra.
+
+### Un archivo, un componente
+
+Un `.tsx` exporta un componente y, si hace falta, los tipos de sus props. Los bloques internos que ese componente usa van en su propio archivo cuando tienen nombre y se repiten.
+
+La excepción ya está en `AGENTS.md` y no se toca: `page.tsx` importa la screen, la screen exporta `<Nombre>Screen` y define `<Nombre>ScreenBody` en el mismo archivo. El cuerpo existe para que el gate no ejecute sus hooks.
+
+Un archivo con tres `export function` de componentes distintos no se revisa: el segundo y el tercero no tienen dueño.
+
+## Rendimiento
+
 ### Memo
 
 Este repo no tiene el React Compiler activado. Aun así, `useMemo` y `useCallback` no se ponen por defecto. Úsalos cuando el cálculo es caro y medido, o cuando una referencia nueva re-dispara una query o un efecto. Una función creada en el render y pasada a un hijo sin `memo` no necesita `useCallback`.
+
+```tsx
+// Mal — memo para un cálculo que cuesta nada, y encima sin dependencia real
+const total = useMemo(() => items.length, [items])
+
+// Bien — la referencia nueva re-dispararía la query del historial
+const historyRange = useMemo(() => previousMonthsBounds(new Date(), 3), [])
+```
+
+### Listas largas
+
+Una lista larga no pinta todos los nodos de golpe y no pagina con botones. El contrato está en [`.cursor/rules/list-infinite-scroll.mdc`](.cursor/rules/list-infinite-scroll.mdc): `useInfiniteQuery` con `getNextPageParam`, un `IntersectionObserver` sobre `InfiniteListSentinel` al final, y el tamaño de tanda en un `limit` con nombre.
+
+- La carga siguiente se dispara al acercarse al final, no con un botón “Anterior / Siguiente”.
+- Mientras llega la tanda hay un indicador al pie; cuando no hay más, la lista termina en silencio.
+- Un fallo al traer la siguiente tanda muestra un aviso con reintento y no borra lo ya cargado.
+- Un cálculo por fila (total, saldo, etiqueta) no se repite para cada item si el mismo resultado sirve a toda la lista: se calcula una vez arriba y baja como dato.
+
+### Carga diferida
+
+El corte de este repo es la ruta: cada `page.tsx` importa su screen por ruta directa, así entrar a Finanzas no compila el módulo de IA. No metas la screen de otro módulo en el barrel ni la importes desde un componente compartido, porque arrastra todo su árbol al bundle.
+
+Un panel pesado que no se ve en el primer render no monta hasta que hace falta. Un sheet ya cumple esto por construcción: su contenido solo existe cuando el parámetro de la URL lo abre.
+
+Cuando un bloque pesado sí vive en la primera pantalla (un gráfico, un editor, una librería de terceros), ese es el caso de `next/dynamic` con `ssr: false` en un componente cliente. No lo uses para todo: cada `dynamic` agrega un estado de carga que hay que pintar.
+
+## Accesibilidad
+
+Antes de crear un control, lee `.cursor/rules` y [docs/architecture/ui-components.md](docs/architecture/ui-components.md). Aquí va lo que aplica a cualquier componente.
+
+### Etiquetas
+
+- Todo campo tiene `<label htmlFor>` o, si el texto no se ve, `aria-label`. Un placeholder no es una etiqueta: desaparece al escribir.
+- Un botón con solo icono lleva `aria-label`. Un icono decorativo lleva `aria-hidden="true"`.
+- Un mensaje de error se asocia al campo (`aria-describedby`) y no solo se pinta en rojo.
+- Un toast o un aviso que aparece sin mover el foco va en una región `aria-live="polite"`.
+- HTML semántico antes que ARIA: `nav`, `main`, `button`, encabezados en orden.
+- El foco visible no se apaga. `outline-none` sin un reemplazo `focus-visible` deja el control invisible al teclado.
+
+### Foco al abrir y cerrar un sheet
+
+`BottomSheet` monta un `Drawer` de base-ui, que atrapa el foco dentro, lo mueve al popup al abrir y lo devuelve al elemento que abrió la hoja al cerrar. El componente no lo pelea: no muevas el foco a mano con `ref.focus()` en un `useEffect`, y no desmontes el disparador mientras la hoja está abierta.
+
+El foco inicial por defecto lo elige base-ui. Cuando la hoja es de lectura y el título es lo primero que debe leer el lector de pantalla, pasa `focusTitleOnOpen`; `resolveSheetTitleFocus` agrega el `tabIndex={-1}` que un encabezado necesita para recibir foco por programa.
+
+```tsx
+// Bien — hoja de lectura: el título recibe el foco y se anuncia la descripción
+<BottomSheet
+  open={open}
+  onOpenChange={setOpen}
+  title="Resumen de la cuenta"
+  description="Saldo actual y últimos movimientos"
+  focusTitleOnOpen
+>
+  {content}
+</BottomSheet>
+```
+
+- El primer campo de un formulario es el foco natural al abrir; no hace falta pedirlo.
+- Al cerrar, el foco vuelve a quien abrió la hoja. Si la acción que abrió la hoja ya no existe (la fila se borró), el foco se va a un punto estable de la pantalla y no al `body`.
+- Un sheet abierto por ruta (`useSheetParam`) se abre y se cierra con el botón atrás del navegador. No cierres con `router.push` a mano ni dejes la URL con el parámetro abierto y la hoja cerrada.
+- Una hoja no anidada dentro de otra hoja salvo el caso de un selector, que ya resuelve `?picker=` en [`.cursor/rules/sheet-url-route.mdc`](.cursor/rules/sheet-url-route.mdc).
+- Un backdrop que se cierra con click también se cierra con `Escape`, y el botón de cerrar es alcanzable con teclado.
 
 ## Datos
 
@@ -241,18 +620,46 @@ Estas reglas cubren lo que no está ya en `.cursor/rules`. Si una pantalla repit
 - Acción: `<button>`. Navegación: `<Link>` de Next. Un `<div onClick>` no se abre con teclado, no anuncia rol y no permite abrir en otra pestaña.
 - En la web los iconos son obligatorios: todo botón lleva un icono representativo (el texto es opcional) y todo campo lleva icono líder ([`.cursor/rules/icons-required.mdc`](.cursor/rules/icons-required.mdc)). Un botón que solo tiene icono lleva `aria-label`; un icono decorativo lleva `aria-hidden`.
 - Un campo no lleva placeholder por defecto; solo cuando muestra un ejemplo o un formato ([`.cursor/rules/input-placeholders.mdc`](.cursor/rules/input-placeholders.mdc)).
-- HTML semántico antes que ARIA: `nav`, `main`, `button`, encabezados en orden.
-- El foco visible no se apaga. `outline-none` sin un reemplazo `focus-visible` deja el control invisible al teclado. El anillo usa `:focus-visible`, no `:focus`, para no mostrarlo en cada click.
-- Un toast o un error que aparece sin mover el foco va en una región `aria-live="polite"`.
 - El texto largo tiene `truncate`, `line-clamp` o `break-words`. Un hijo flex que debe truncar lleva `min-w-0`.
 - Una columna de cifras usa `tabular-nums` para que no salte al comparar.
-- Una lista larga trae más filas al bajar (scroll infinito, [`.cursor/rules/list-infinite-scroll.mdc`](.cursor/rules/list-infinite-scroll.mdc)). No usa botones de página y no pinta todos los nodos de golpe.
 - Animá `transform` y `opacity`, con las propiedades nombradas. `transition: all` anima también color, sombra y layout. Respeta `prefers-reduced-motion`.
 - Una imagen con tamaño conocido declara ancho y alto, o el hueco empuja la página al cargar. Lo que está bajo el pliegue no compite con lo que se ve primero.
 - Fechas y números que no son el contrato de money usan `Intl`. No formatees con `toFixed` y un símbolo escrito a mano. Un `Date` renderizado distinto en servidor y cliente rompe la hidratación: o se formatea en el cliente a propósito, o el valor ya viene listo.
 - Un string vacío o un array vacío tienen estado vacío. No dejes un encabezado sobre una lista rota.
 - Una acción destructiva pide confirmación. Esa regla ya está en `confirm-important-changes.mdc`.
 - No desactives el zoom (`user-scalable=no`, `maximum-scale=1`). No uses `autoFocus` salvo el único campo primario de un escritorio.
+
+## Regla de guía a regla de ESLint
+
+Las reglas de abajo están activas en [eslint.config.mjs](eslint.config.mjs). Lo nuevo entra en `warn` hasta que el backlog esté limpio.
+
+| Regla de la guía                               | Regla de ESLint                                  | Nivel |
+| ---------------------------------------------- | ------------------------------------------------ | ----- |
+| Sin `any`                                      | `@typescript-eslint/no-explicit-any`             | warn  |
+| Función o componente de 120 líneas como máximo | `max-lines-per-function`                         | warn  |
+| Archivo de 300 líneas como máximo              | `max-lines`                                      | warn  |
+| Tres props o parámetros, después un objeto     | `max-params`                                     | warn  |
+| Anidación de 4 niveles como máximo             | `max-depth`                                      | warn  |
+| Complejidad ciclomática 12 como máximo         | `complexity`                                     | warn  |
+| Sin ternarios anidados                         | `no-nested-ternary`                              | warn  |
+| Toda promesa esperada o capturada              | `@typescript-eslint/no-floating-promises`        | warn  |
+| Un handler `async` no va directo al JSX        | `@typescript-eslint/no-misused-promises`         | warn  |
+| `switch` exhaustivo, sin `default` silencioso  | `@typescript-eslint/switch-exhaustiveness-check` | warn  |
+| Llaves en todo `if`                            | `curly`                                          | error |
+| Frontera de módulo y de capability             | `no-restricted-imports`                          | error |
+| Imports absolutos, sin `../`                   | `no-restricted-syntax`                           | error |
+| Sin inputs nativos de fecha u hora             | `no-restricted-syntax`                           | error |
+| El submit no se apoya en `formState.isValid`   | `no-restricted-syntax`                           | error |
+| Reglas de hooks y dependencias                 | `react-hooks` (config de Next)                   | error |
+
+Lo revisa una persona, porque no hay regla fiable:
+
+- `as` con el motivo escrito, y `unknown` validado antes de usarlo.
+- `readonly` en props y arrays, y tipo de retorno en lo exportado.
+- Nombres de booleanos (`is` / `has` / `can` / `should`) y props booleanas que cambian la forma.
+- Un componente por archivo, salvo el corte Screen / Body de `AGENTS.md`.
+- Un test que enuncia una conducta y fallaría con la regresión.
+- Foco al abrir y cerrar la hoja, etiquetas y anuncios de `aria-live`.
 
 ## Fuentes
 

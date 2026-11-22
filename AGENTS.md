@@ -17,12 +17,25 @@ Si una afirmación no está `VERIFICADO`, no la trates como comportamiento vigen
 
 ## Flujo de trabajo obligatorio
 
-1. **Antes de codear:** lee el issue correspondiente. Si no existe, busca duplicados y créalo según [docs/issue-conventions.md](docs/issue-conventions.md), agrégalo al Project 3 con Priority `High`, `Medium` o `Low`, y muévelo a `In Progress`.
+1. **Antes de codear:** lee el issue correspondiente. Si no existe, busca duplicados y créalo según [docs/issue-conventions.md](docs/issue-conventions.md). Todo issue nuevo, incluidos los de auditoría y QA, entra al Project 3 en el mismo momento con Status `Todo`, Priority y Size: `pwsh scripts/project3.ps1 new -Repo <back|web> -Number <N> -Priority <High|Medium|Low> -Size <S|M|L>`. Al tomarlo, ejecuta `pwsh scripts/project3.ps1 start -Repo <back|web> -Number <N>`: verifica que esté en el Project 3 con Priority y Size (si falta, pásalos con `-Priority`/`-Size`), lo pone en `In Progress` y llena **Start date** con el día de hoy (UTC-4) si está vacía. No empieces a codear si el comando falla.
 2. **Repo y rama:** trabaja en una rama corta por issue (`fix/<n>-<slug>`, `feat/<n>-<slug>`) o por fase del refactor (`refactor/<fase>`), dentro de una copia temporal en `C:\dev\personal\personal-os\temp\` creada con `git worktree add`. Nunca trabajes en la carpeta principal del repo ni compartas una copia con otro agente. Commitea solo tus archivos (`git add <rutas>`, nunca `git add -A`). Integra a `develop` por PR: el CI debe pasar y, en la web, QA prueba la preview de Vercel del PR y deja su OK en un comentario; recién ahí el agente hace el merge. En el back (sin preview) alcanza con el CI en verde, y QA lo verifica en `develop` justo después del merge.
    - **Alias fijo de QA:** antes de pedir QA, Developer apunta con el conector de Vercel el alias fijo `qa-personal-os.vercel.app` a la preview del PR. QA prueba solo en ese alias, con un único login guardado. En el alias hay un solo PR a la vez. El alias está incluido en `CORS_ORIGIN_PATTERNS` del back de develop.
 3. **Límites:** no toques `master`, producción, `.env` ni despliegues; los merges a `master` los decide Jarvin. Las migraciones se ejecutan solo en DEV.
 4. **Antes del commit:** revisa el diff contra los criterios de aceptación del issue, busca huecos o implementaciones faltantes y corrígelos. Luego ejecuta format, lint, typecheck y pruebas.
-5. **Cierre:** commit en español con `Closes #N` o `Refs #N` y push. Después cierra el issue a mano con un comentario y muévelo a `Done` en el Project 3; `Closes` solo cierra el issue cuando el cambio llega a `master`.
+5. **Cierre:** commit en español con `Closes #N` o `Refs #N` y push. Al abrir el PR, el issue sigue en `In Progress` y el PR también: `pwsh scripts/project3.ps1 start -Repo <r> -Number <N> -Pr <PR>`. Después del merge a `develop`, cierra el issue a mano con un comentario (`gh issue close <N> -R jarvinc3/personal-os-<r> -c "Implementado en #<PR>, CI verde en develop"`) y ejecuta `pwsh scripts/project3.ps1 done -Repo <r> -Number <N> -Pr <PR>`, que exige el issue cerrado, lo pasa a `Done` y pasa el PR a `Done`. La fecha de cierre es el campo **Closed**, que GitHub llena al cerrar; por eso siempre se cierra el issue, no basta con moverlo. `Closes` solo cierra solo cuando el cambio llega a `master`.
+
+### Project 3 siempre al día
+
+- Antes de tomar un issue y después de cada merge: `pwsh scripts/project3.ps1 check`. Debe responder «Project 3 en orden»; si lista desajustes de tus issues, corrígelos antes de seguir y avisa al PM de los ajenos.
+- Reglas que valida: todo issue tiene Status, Priority y Size; issue cerrado (completado) → `Done`; issue cerrado como `not planned` → `Cancelado`; issue abierto nunca en `Done` ni `Cancelado`; `In Progress` siempre con Start date; PR abierto → `In Progress`; PR fusionado → `Done`; ningún issue abierto queda fuera del proyecto.
+- Prioridad y talla según «Prioridad y talla» de `docs/issue-conventions.md` (High = bloquea la entrega u otro trabajo o es de seguridad; Medium por defecto; Low = mejora sin fecha. S = un par de archivos sin migración ni contrato; M = contrato HTTP, migración o más de un paquete; L = cruza back y web o no cabe en un PR: partirlo).
+- Sin el script, los comandos equivalentes son (Project `PVT_kwHOCEz1bc4Bfrj8`):
+  - Agregar: `gh project item-add 3 --owner jarvinc3 --url https://github.com/jarvinc3/personal-os-<r>/issues/<N> --format json` (devuelve el `id` del item).
+  - Item id de un issue existente: `gh api graphql -f query='query{repository(owner:"jarvinc3",name:"personal-os-<r>"){issue(number:<N>){projectItems(first:10){nodes{id project{number}}}}}}'`
+  - Status: `gh project item-edit --project-id PVT_kwHOCEz1bc4Bfrj8 --id <ITEM> --field-id PVTSSF_lAHOCEz1bc4Bfrj8zhZ8v54 --single-select-option-id <Backlog b070983b | Todo 8e44795f | In Progress 52bf9d38 | In review c2e740b7 | Done f4ab08c7 | Cancelado: leer su id con gh project field-list>`
+  - Priority: `--field-id PVTSSF_lAHOCEz1bc4Bfrj8zhZ8wKE --single-select-option-id <High 54221f4c | Medium 76acede5 | Low f0f54546>`
+  - Size: `--field-id PVTSSF_lAHOCEz1bc4Bfrj8zhZ8wKI --single-select-option-id <S fa801935 | M 30acb7ee | L d412f5d6>`
+  - Start date: `--field-id PVTF_lAHOCEz1bc4Bfrj8zhZ8wKQ --date AAAA-MM-DD`
 
 **Limpieza al terminar:** al integrar la rama, bórrala (local y remota), elimina la copia de `temp` (`git worktree remove` y `git worktree prune`) y pon al día `develop` y la carpeta principal del repo en el workspace (`git pull`). Los merges a `master` y los deploys siguen siendo decisión de Jarvin.
 
@@ -139,7 +152,7 @@ Sentry corre en cliente, servidor y edge (`instrumentation*.ts`, `sentry.*.confi
 - [ ] `agenda` / `projects` / `health` solo tienen sheets en Settings hasta que existan rutas en `app/`.
 - [ ] Keep Awake es client-only: no inventar endpoints.
 - [ ] Si tocaste UI, leíste [`.cursor/rules/`](.cursor/rules) y cumples cada regla.
-- [ ] Si cambiaste código, leíste [CODING_GUIDELINES.md](CODING_GUIDELINES.md).
+- [ ] Si cambiaste código, leíste [CODING_GUIDELINES.md](CODING_GUIDELINES.md) y el cambio cumple sus límites, su tipado, sus reglas de componentes y sus reglas de accesibilidad.
 - [ ] Si el cambio coincide con un disparador de Skills, leíste ese `SKILL.md`.
 - [ ] Si el runtime contradice el doc, abre un issue con el detalle.
 - [ ] Correr los cuatro comandos de pruebas obligatorias; un test en rojo bloquea el cierre.

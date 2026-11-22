@@ -2,7 +2,7 @@
 
 - Base URL: `NEXT_PUBLIC_API_URL` + `NEXT_PUBLIC_API_PREFIX` → `src/config/api-base-url.ts` (lanza si falta URL).
 - Client: `src/config/api-client.ts` — Bearer desde sesión Supabase; extrae `data` del envelope `{ data, meta }`.
-- Helpers: `apiGet`, `apiPost`, `apiPatch`, `apiDelete`, `apiDeleteWithBody` (DELETE con cuerpo, p. ej. `{ "confirmed": true }`) y `apiPostForm`.
+- Helpers: `apiGet`, `apiPost`, `apiPatch`, `apiDelete`, `apiDeleteWithBody` (DELETE con cuerpo, p. ej. `{ "confirmed": true }`), `apiPostForm` y `apiPostEventStream` (cuerpo SSE sin reintento automático; el turno se protege con `clientMessageId`).
 - Endpoints: `src/shared/constants/api-endpoints.ts`.
 - Tipos del API: se generan desde el contrato OpenAPI del back; ver [api-contract.md](./api-contract.md).
 - Errores: `ApiError`; `meta.requestId`/`path` si existen.

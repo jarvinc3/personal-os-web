@@ -1,7 +1,43 @@
+export { AgentChatHost } from "./components/agent-chat-host"
 export { useAiConsent } from "./hooks/use-ai-consent"
+export { useEmailUsage } from "./hooks/use-email-usage"
+export {
+  DEFAULT_USAGE_DAYS,
+  USAGE_RANGES,
+  USAGE_RESET_MAX_RETRIES,
+  USAGE_RESET_RETRY_MS,
+  fillDailyUsage,
+  fillHourlyUsage,
+  formatUsageCost,
+  formatUsageCostAxis,
+  formatUsageCount,
+  formatUsagePercent,
+  formatUsageReset,
+  initialBudgetProgress,
+  isUsageDays,
+  nextUsageReset,
+  nextUtcDailyReset,
+  usageCostTone,
+  usageProgress,
+  usageRangeCaption,
+  usageRefreshDelay,
+  usageResetReached,
+  usageTotalTokens,
+  usageTypeLabel,
+  type UsageCostTone,
+  type UsageDays,
+  type UsageProgress,
+} from "./usage-summary"
 export type {
   AiConsent,
   AiEmailMessageDetail,
   AiEmailMessageSummary,
   AiRole,
+  EmailUsageBank,
+  EmailUsageBucket,
+  EmailUsageCostStatus,
+  EmailUsageDay,
+  EmailUsageHour,
+  EmailUsageSummary,
+  EmailUsageType,
 } from "./types/intelligence.types"

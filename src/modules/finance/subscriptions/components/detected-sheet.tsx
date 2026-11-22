@@ -16,6 +16,8 @@ import { RecurringPatternCard } from "@/src/modules/finance/subscriptions/compon
 import type { FinanceRecurringPattern } from "@/src/modules/finance/shared/types/entities"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
 import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
+import { SheetHelpAction } from "@/src/modules/help"
 import { Button } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
@@ -89,6 +91,9 @@ export function DetectedSheet({
       closeLabel="Cerrar"
       open={open}
       onOpenChange={onOpenChange}
+      helpAction={
+        <SheetHelpAction sheetKey={FINANCE_SHEET_KEYS.subscriptionDetected} />
+      }
       title="Detectados del correo"
       description="Cobros repetidos que pueden ser suscripciones"
       actions={{

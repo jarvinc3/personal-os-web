@@ -15,6 +15,7 @@ import type {
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
 import { CardSkeleton } from "@/src/shared/components/feedback/list-skeleton"
 import { ErrorState } from "@/src/shared/components/feedback/error-state"
+import { InfiniteListErrorFooter } from "@/src/shared/components/feedback/infinite-list-error-footer"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import { formatCalendarDate } from "@/src/modules/finance/shared/lib/ledger-form"
 import { Button } from "@/src/shared/components/ui/button"
@@ -29,6 +30,7 @@ import { SettingsSection } from "@/src/shared/components/settings/settings-secti
 import { SummaryItem } from "@/src/shared/components/data-display/summary"
 import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
 import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
+import { resolveInfiniteListErrorState } from "@/src/shared/lib/infinite-list-error"
 import {
   Tabs,
   TabsContent,
@@ -151,8 +153,12 @@ export function RecycleBinView() {
 
   const archived = recycleBinQuery.data?.pages[0]?.archived ?? []
   const deleted = infiniteListItems(recycleBinQuery.data)
+  const recycleBinErrorState = resolveInfiniteListErrorState({
+    hasError: recycleBinQuery.isError,
+    itemCount: archived.length + deleted.length,
+  })
 
-  if (recycleBinQuery.isError) {
+  if (recycleBinErrorState === "full") {
     return (
       <ErrorState
         message={financeErrorMessage(recycleBinQuery.error)}
@@ -302,11 +308,19 @@ export function RecycleBinView() {
               )}
             </SettingsSection>
           )}
-          <InfiniteListSentinel
-            hasNextPage={recycleBinQuery.hasNextPage}
-            isFetchingNextPage={recycleBinQuery.isFetchingNextPage}
-            onLoadMore={() => void recycleBinQuery.fetchNextPage()}
-          />
+          {recycleBinErrorState === "inline" ? (
+            <InfiniteListErrorFooter
+              title="No se pudieron cargar más registros"
+              isRetrying={recycleBinQuery.isFetchingNextPage}
+              onRetry={() => void recycleBinQuery.fetchNextPage()}
+            />
+          ) : (
+            <InfiniteListSentinel
+              hasNextPage={recycleBinQuery.hasNextPage}
+              isFetchingNextPage={recycleBinQuery.isFetchingNextPage}
+              onLoadMore={() => void recycleBinQuery.fetchNextPage()}
+            />
+          )}
         </TabsContent>
       </Tabs>
     </AsyncRegion>

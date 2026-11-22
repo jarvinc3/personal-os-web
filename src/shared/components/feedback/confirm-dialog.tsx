@@ -41,6 +41,8 @@ type ConfirmDialogProps = {
   confirmDisabled?: boolean
   /** Caja ancha, para un diálogo con un formulario dentro. */
   wide?: boolean
+  /** Sube la capa cuando el diálogo se abre sobre otro overlay. */
+  layerClassName?: string
   /** Deja el diálogo abierto al confirmar para una acción asíncrona; lo cierra el caller. */
   closeOnConfirm?: boolean
   children?: ReactNode
@@ -65,6 +67,7 @@ export function ConfirmDialog({
   cancelLabel = CANCEL_LABEL,
   confirmDisabled = false,
   wide = false,
+  layerClassName,
   closeOnConfirm = true,
   children,
 }: ConfirmDialogProps) {
@@ -88,7 +91,10 @@ export function ConfirmDialog({
         }
       }}
     >
-      <AlertDialogContent className={cn(wide && "sm:max-w-md")}>
+      <AlertDialogContent
+        layerClassName={layerClassName}
+        className={cn(wide && "sm:max-w-md")}
+      >
         <AlertDialogHeader>
           {MediaIcon ? (
             <AlertDialogMedia

@@ -15,6 +15,10 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/src/shared/components/ui/drawer"
+import {
+  AgentChatTriggerButton,
+  useAgentChatLauncher,
+} from "@/src/shared/components/agent-chat/agent-chat-launcher"
 import { Button } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { useIsMobile } from "@/src/shared/hooks/use-mobile"
@@ -37,6 +41,8 @@ interface BottomSheetProps {
   children: ReactNode
   headerAction?: ReactNode
   headerActionAlign?: "start" | "end"
+  /** Acción de ayuda del header; reemplaza el botón del agente. */
+  helpAction?: ReactNode
   actions?: {
     delete?: ReactNode
     close?: ReactNode
@@ -48,6 +54,10 @@ interface BottomSheetProps {
   closeLabel?: string
   /** Lleva el foco inicial al título de la hoja en vez del contenedor del popup. */
   focusTitleOnOpen?: boolean
+  /** El botón del agente se oculta en hojas internas del propio overlay. */
+  showAgentTrigger?: boolean
+  /** Sube la capa cuando la hoja se abre sobre otro overlay. */
+  layerClassName?: string
 }
 
 export function BottomSheet({
@@ -61,12 +71,16 @@ export function BottomSheet({
   children,
   headerAction,
   headerActionAlign = "end",
+  helpAction,
   actions,
   showClose = true,
   closeLabel = DEFAULT_CLOSE_LABEL,
   focusTitleOnOpen = false,
+  showAgentTrigger = true,
+  layerClassName,
 }: BottomSheetProps) {
   const isMobile = useIsMobile()
+  const agentChat = useAgentChatLauncher()
   const swipeDirection = getBottomSheetDirection(variant, isMobile)
   const titleRef = useRef<HTMLHeadingElement>(null)
   const sheetFocus = resolveSheetTitleFocus(focusTitleOnOpen)
@@ -83,6 +97,15 @@ export function BottomSheet({
         {closeLabel}
       </Button>
     ) : null)
+  const agentAction =
+    showAgentTrigger && !pending && !helpAction && agentChat.available ? (
+      <AgentChatTriggerButton />
+    ) : null
+  const headerActionVisible = Boolean(headerAction || helpAction || agentAction)
+  const headerActionsOnEnd =
+    headerActionAlign === "end" && headerActionVisible && !pending
+  const titleClassName =
+    headerActionVisible && !headerActionsOnEnd ? "px-20" : undefined
   const actionEntries = (
     [
       ["delete", actions?.delete],
@@ -98,35 +121,48 @@ export function BottomSheet({
     >
       <DrawerContent
         initialFocus={sheetFocus.focusesTitle ? titleRef : undefined}
+        layerClassName={layerClassName}
         className={cn(
           variant === "floating" && FLOATING_SHEET_CONTENT_CLASS,
           variant === "default" && size === "wide" && WIDE_SHEET_CONTENT_CLASS
         )}
       >
-        <DrawerHeader className="relative -space-y-2 pb-4">
-          <DrawerTitle
-            ref={titleRef}
-            tabIndex={sheetFocus.titleTabIndex}
-            className={headerAction ? "px-20" : undefined}
-          >
-            {pending ? "Cargando" : title}
-          </DrawerTitle>
-          <DrawerDescription
-            className={cn(
-              "text-muted-foreground",
-              !pending && description ? "" : "hidden"
-            )}
-          >
-            {description}
-          </DrawerDescription>
-          {headerAction && !pending ? (
-            <div
-              className={cn(
-                "absolute top-1/2 -translate-y-1/2",
-                headerActionAlign === "start" ? "left-3" : "right-3"
-              )}
-            >
+        <DrawerHeader className="relative pb-4">
+          <div className="flex items-start gap-2">
+            <div className="flex min-w-0 flex-1 flex-col -space-y-2">
+              <DrawerTitle
+                ref={titleRef}
+                tabIndex={sheetFocus.titleTabIndex}
+                className={titleClassName}
+              >
+                {pending ? "Cargando" : title}
+              </DrawerTitle>
+              <DrawerDescription
+                className={cn(
+                  "text-muted-foreground",
+                  !pending && description ? "" : "hidden"
+                )}
+              >
+                {description}
+              </DrawerDescription>
+            </div>
+            {headerActionsOnEnd ? (
+              <div className="flex shrink-0 items-center gap-1">
+                {headerAction}
+                {helpAction}
+                {agentAction}
+              </div>
+            ) : null}
+          </div>
+          {headerActionAlign === "start" && headerAction && !pending ? (
+            <div className="absolute top-1/2 left-3 -translate-y-1/2">
               {headerAction}
+            </div>
+          ) : null}
+          {headerActionVisible && !pending && !headerActionsOnEnd ? (
+            <div className="absolute top-1/2 right-3 flex -translate-y-1/2 items-center gap-1">
+              {helpAction}
+              {agentAction}
             </div>
           ) : null}
         </DrawerHeader>

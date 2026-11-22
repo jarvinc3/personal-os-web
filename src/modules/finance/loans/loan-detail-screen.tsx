@@ -156,7 +156,7 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [archiveConfirmOpen, setArchiveConfirmOpen] = useState(false)
   const { open: amortizationOpen, setOpen: setAmortizationOpen } =
-    useSheetParam("loan-amortization-sheet")
+    useSheetParam(FINANCE_SHEET_KEYS.loanAmortization)
   const installmentSheet = useSheetParam(FINANCE_SHEET_KEYS.installmentDetail)
   const scheduleQuery = useLoanSchedule(amortizationOpen, loanId)
   const selectedInstallment = useSheetListEntity(

@@ -44,6 +44,7 @@ export const API_ENDPOINTS = {
     OAUTH_DIAGNOSTICS: "/intelligence/email/oauth/diagnostics",
     SYNC_EMAIL: "/intelligence/email/sync",
     RESET_EMAIL: "/intelligence/email/reset",
+    EMAIL_USAGE: "/intelligence/email/usage",
     EMAIL_PRODUCT_PROPOSALS: "/intelligence/email/product-proposals",
     EMAIL_PRODUCT_PROPOSAL_DISCOVER:
       "/intelligence/email/product-proposals/discover",
@@ -59,6 +60,15 @@ export const API_ENDPOINTS = {
       `/intelligence/knowledge/admin/${encodeURIComponent(knowledgeId)}/revert`,
     KNOWLEDGE_EXPORT: "/intelligence/knowledge/me/export",
     KNOWLEDGE_DELETE: "/intelligence/knowledge/me",
+    CONVERSATIONS: "/intelligence/conversations",
+    CONVERSATION: (conversationId: string) =>
+      `/intelligence/conversations/${encodeURIComponent(conversationId)}`,
+    CONVERSATION_LATEST: "/intelligence/conversations/latest",
+    CONVERSATION_MESSAGES: (conversationId: string) =>
+      `/intelligence/conversations/${encodeURIComponent(conversationId)}/messages`,
+    VIEW_SUGGESTIONS: "/intelligence/view-suggestions",
+    VIEW_SUGGESTION: (suggestionId: string) =>
+      `/intelligence/view-suggestions/${encodeURIComponent(suggestionId)}`,
     CONSENT: "/intelligence/preferences/consent",
     ROLES: "/intelligence/admin/roles",
     ROLE: (userId: string) =>

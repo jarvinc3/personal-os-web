@@ -8,6 +8,7 @@ import {
 } from "@/src/modules/finance"
 import { KeepAwakeHomeSection } from "@/src/modules/keep-awake"
 import { useProfile } from "@/src/modules/settings"
+import { resolveHomeDisplayName } from "@/src/modules/home/lib/display-name"
 import { buttonVariants } from "@/src/shared/components/ui/button"
 import { cn } from "@/src/shared/lib/utils"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
@@ -25,7 +26,10 @@ function HomeScreenBody() {
   const { user } = useAuthGuard()
   const { profileQuery } = useProfile()
   const profile = profileQuery.data
-  const displayName = profile?.fullName ?? user?.fullName ?? "Usuario"
+  const displayName = resolveHomeDisplayName({
+    profileFullName: profile?.fullName,
+    userFullName: user?.fullName,
+  })
 
   usePageHeader(
     {

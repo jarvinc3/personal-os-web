@@ -21,6 +21,8 @@ export type ModuleFabAction = {
 export type ModuleFabRegistration = {
   label: string
   actions: ModuleFabAction[]
+  /** El botón vive en móvil y el contenido debe dejarle espacio abajo. */
+  mobileVisible?: boolean
 }
 
 type Listener = () => void

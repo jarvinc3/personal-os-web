@@ -20,6 +20,8 @@ import {
 } from "@/src/modules/finance/shared/hooks/use-receivable-shares"
 import type { FinanceReceivable } from "@/src/modules/finance/shared/types/entities"
 import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
+import { SheetHelpAction } from "@/src/modules/help"
 import { ConfirmDialog } from "@/src/shared/components/feedback/confirm-dialog"
 import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import { Badge } from "@/src/shared/components/ui/badge"
@@ -144,6 +146,9 @@ export function ReceivableShareSheet({
           }
           onOpenChange(next)
         }}
+        helpAction={
+          <SheetHelpAction sheetKey={FINANCE_SHEET_KEYS.receivableShare} />
+        }
         title="Compartir cobros"
         description="Genera un link para que vea cuánto te debe. No necesita cuenta."
         actions={{

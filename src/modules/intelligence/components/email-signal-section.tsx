@@ -2,6 +2,7 @@
 
 import {
   AlertCircle,
+  Ban,
   CalendarDays,
   Clock3,
   FileSearch,
@@ -24,6 +25,7 @@ import {
   signalTypeLabel,
   type MissingSignalKind,
 } from "@/src/modules/intelligence/signals"
+import type { AiEmailMessageDetail } from "@/src/modules/intelligence/types/intelligence.types"
 import type { EmailSignal } from "@/src/modules/intelligence/types/signal.types"
 import {
   SummaryGroup,
@@ -41,6 +43,7 @@ import {
 } from "@/src/shared/components/ui/empty"
 import { Skeleton } from "@/src/shared/components/ui/skeleton"
 import { formatDateTime } from "@/src/shared/lib/date-format"
+import { useFormatLocale } from "@/src/modules/settings/hooks/use-format-locale"
 
 const SECTION_TITLE = "Señal detectada"
 const SECTION_SUBTITLE =
@@ -49,16 +52,14 @@ const SECTION_SUBTITLE =
 const MISSING_SIGNAL_ICONS: Record<MissingSignalKind, typeof Radar> = {
   pending: Clock3,
   failed: AlertCircle,
+  discarded: Ban,
   none: Radar,
 }
 
-type EmailSignalMessage = {
-  id: string
-  subject: string
-  fromAddress: string
-  receivedAt: string
-  processingStatus: string
-}
+type EmailSignalMessage = Pick<
+  AiEmailMessageDetail,
+  "id" | "subject" | "fromAddress" | "receivedAt" | "processingStatus"
+>
 
 type EmailSignalSectionProps = {
   message: EmailSignalMessage
@@ -122,7 +123,11 @@ function SignalLoadError({ onRetry }: { onRetry: () => void }) {
   )
 }
 
-function SignalMissing({ processingStatus }: { processingStatus: string }) {
+function SignalMissing({
+  processingStatus,
+}: {
+  processingStatus: EmailSignalMessage["processingStatus"]
+}) {
   const missingSignal = missingSignalState(processingStatus)
   const MissingIcon = MISSING_SIGNAL_ICONS[missingSignal.kind]
 
@@ -146,6 +151,7 @@ function SignalDetail({
   message: EmailSignalMessage
   signal: EmailSignal
 }) {
+  const formatLocale = useFormatLocale()
   const routes = signalRouteRows(signal)
   const hasEvidence = signal.evidence.length > 0
 
@@ -153,7 +159,7 @@ function SignalDetail({
     <>
       <SummaryItem
         title={signalTypeLabel(signal.type)}
-        description={`Detectada ${formatDateTime(signal.detectedAt)} · ${formatSignalConfidence(signal.confidence)}`}
+        description={`Detectada ${formatDateTime(signal.detectedAt, formatLocale)} · ${formatSignalConfidence(signal.confidence)}`}
         value={signalStatusLabel(signal.status)}
         icon={ShieldCheck}
         isLast={!routes.length && !hasEvidence}
@@ -183,7 +189,7 @@ function SignalDetail({
           />
           <SummaryItem
             title="Fecha del correo"
-            description={formatDateTime(message.receivedAt)}
+            description={formatDateTime(message.receivedAt, formatLocale)}
             icon={CalendarDays}
           />
           {signal.evidence.map((evidence, index) => (

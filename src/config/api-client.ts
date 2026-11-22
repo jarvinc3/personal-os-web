@@ -243,6 +243,61 @@ export function createApiClient({
     config?: ApiRequestConfig
   ) => request<T>(path, { method: "POST", body }, config)
 
+  /**
+   * POST que devuelve el cuerpo SSE sin esperar a que termine. No reintenta:
+   * un reintento automático después de recibir trozos duplicaría la respuesta.
+   * El turno se protege con el `clientMessageId` del cuerpo.
+   */
+  async function apiPostEventStream(
+    path: string,
+    body: unknown,
+    signal?: AbortSignal
+  ): Promise<ReadableStream<Uint8Array>> {
+    const authHeaders = await getAuthHeaders()
+    const headers = new Headers({
+      "Content-Type": "application/json",
+      Accept: "text/event-stream",
+    })
+    if (authHeaders.Authorization) {
+      headers.set("Authorization", authHeaders.Authorization)
+    }
+
+    const response = await fetchImpl(`${API_BASE_URL}${path}`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(body),
+      signal,
+    })
+
+    if (!response.ok) {
+      const errorBody = (await response
+        .json()
+        .catch(() => ({}))) as ApiErrorBody
+      const apiError = mapStatusToError(
+        response.status,
+        errorBody,
+        path,
+        parseRetryAfterHeader(response.headers.get("Retry-After"))
+      )
+      logApiError(apiError, path)
+      if (response.status === 401) {
+        authEvents.emitUnauthorized()
+      }
+      throw apiError
+    }
+
+    if (!response.body) {
+      throw new ApiError(
+        500,
+        "La respuesta del agente no se puede leer",
+        "STREAM_UNAVAILABLE",
+        undefined,
+        path
+      )
+    }
+    return response.body
+  }
+
   return {
     apiGet,
     apiPost,
@@ -250,6 +305,7 @@ export function createApiClient({
     apiDelete,
     apiDeleteWithBody,
     apiPostForm,
+    apiPostEventStream,
   }
 }
 
@@ -264,3 +320,4 @@ export const apiPatch = defaultApiClient.apiPatch
 export const apiDelete = defaultApiClient.apiDelete
 export const apiDeleteWithBody = defaultApiClient.apiDeleteWithBody
 export const apiPostForm = defaultApiClient.apiPostForm
+export const apiPostEventStream = defaultApiClient.apiPostEventStream

@@ -18,6 +18,15 @@ Rutas:
 
 La entrada está en Ajustes → Ayuda. Las rutas exigen sesión (`proxy.ts`). Las subvistas usan el header secundario; la vuelta regresa a la pantalla anterior y, si no hay historial, al índice.
 
-El botón «?» de Finanzas que debía abrir estos términos (issue web #229) sigue pendiente: depende del desglose del patrimonio (#218) y de los indicadores de descuadre (#215).
+## Glosario
+
+`HELP_TERMS` (`src/modules/help/constants/glossary.ts`) es la única fuente de los términos. El índice los arma por categoría desde `glossary/<id>.ts` y conserva el orden; lo mismo hace `guides.ts` con las áreas de `guides/`. `/help/glossary` los lista con buscador y `?term=slug` resalta una entrada. `GlossaryHelpButton` abre un término en una hoja con `?picker=sheet-glossary:<slug>`, el mismo esquema que usa el header de una hoja para sus conceptos.
+
+El botón de la derecha del header de una hoja es adaptable:
+
+- Si la hoja tiene términos en `SHEET_GLOSSARY_TERMS` (`src/modules/help/constants/sheet-terms.ts`), muestra «?». Abre una hoja anidada con las definiciones y «Preguntar al agente», que abre el overlay de chat con el contexto de la hoja.
+- Si la hoja no tiene términos, muestra el icono del agente y abre el overlay directamente.
+
+La decisión sale solo del mapa, no del agente. El mapa no crea términos: cada slug debe existir en `HELP_TERMS`, y `sheet-glossary.spec.ts` falla si un slug no existe o si se repite un término. Para sumar una hoja, se agrega su clave al mapa y se pasa `helpAction={<SheetHelpAction sheetKey={...} />}` a su `BottomSheet`.
 
 Estado y trabajo pendiente: GitHub Issues del repo.

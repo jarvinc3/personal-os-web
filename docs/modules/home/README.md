@@ -26,7 +26,7 @@ Página de inicio post-login: saludo con nombre de perfil, atajos a notificacion
 | ID           | Condición                 | Resultado                                                                                 | Evidencia                                         |
 | ------------ | ------------------------- | ----------------------------------------------------------------------------------------- | ------------------------------------------------- |
 | `BR-HOM-001` | Finance `isEnabled=false` | El atajo **sigue** yendo a `/finance` (el gate del módulo muestra CTA a Settings; no 404) | `home-screen.tsx`, `useFinanceEnabled` en finance |
-| `BR-HOM-002` | Nombre                    | `profile.fullName` else `user.fullName` else `"Usuario"`                                  | `home-screen.tsx`                                 |
+| `BR-HOM-002` | Nombre                    | `profile.fullName` else `user.fullName` else `"Usuario"`                                  | `lib/display-name.ts` + `display-name.spec.ts`    |
 
 ## Criterios
 
@@ -34,6 +34,6 @@ Página de inicio post-login: saludo con nombre de perfil, atajos a notificacion
 
 ## Evidencia
 
-`src/modules/home/home-screen.tsx`, `app/(app)/home/page.tsx`.
+`src/modules/home/home-screen.tsx`, `src/modules/home/lib/display-name.ts`, `app/(app)/home/page.tsx`.
 
 Estado y trabajo pendiente: GitHub Issues del repo (`roadmap`).

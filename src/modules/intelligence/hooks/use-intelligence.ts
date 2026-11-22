@@ -2,6 +2,12 @@
 
 import { apiGet, apiPost } from "@/src/config/api-client"
 import type { EmailConnectBody } from "@/src/modules/intelligence/email-connect"
+import { resolveEmailSyncRefetchInterval } from "@/src/modules/intelligence/lib/email-sync-polling"
+import {
+  buildMessagesPath,
+  normalizeMessagesFilter,
+  type MessagesFilter,
+} from "@/src/modules/intelligence/lib/messages-request"
 import type {
   AiEmailMessageDetail,
   AiEmailMessagesPage,
@@ -25,7 +31,6 @@ export const INTELLIGENCE_MESSAGES_QUERY_KEY = [
   "intelligence",
   "messages",
 ] as const
-export const INTELLIGENCE_PAGE_SIZE = 50
 
 function fetchIntelligenceDashboard(signal: AbortSignal) {
   return apiGet<IntelligenceDashboard>(
@@ -34,69 +39,51 @@ function fetchIntelligenceDashboard(signal: AbortSignal) {
   )
 }
 
-export function useIntelligence() {
-  const {
-    status: emailSocketStatus,
-    hasPendingMessageUpdates,
-    markMessagesPending,
-    acknowledgeMessages,
-  } = useAiEmailSyncSocket()
-  const session = useAppStore((state) => state.session)
-  const queryClient = useQueryClient()
-  const dashboardQuery = useQuery({
+function useIntelligenceDashboardQuery(isEnabled: boolean) {
+  return useQuery({
     queryKey: INTELLIGENCE_QUERY_KEY,
     queryFn: ({ signal }) => fetchIntelligenceDashboard(signal),
-    enabled: Boolean(session),
+    enabled: isEnabled,
     staleTime: 15_000,
     refetchOnWindowFocus: true,
-    refetchInterval: (query) => {
-      const connection = query.state.data?.connection
-      if (!connection?.connected) {
-        return false
-      }
-      if (
-        connection.lastSyncErrorCode ||
-        connection.syncProgress?.status === "failed" ||
-        (connection.syncProgress?.status === "scheduled" &&
-          connection.syncProgress.errorCode === "classification_failed")
-      ) {
-        return 30_000
-      }
-      return connection.syncInProgress ||
-        (!connection.initialSyncCompletedAt && !connection.lastSyncErrorCode)
-        ? 5_000
-        : false
-    },
+    refetchInterval: (query) =>
+      resolveEmailSyncRefetchInterval(query.state.data?.connection),
   })
-  const oauthDiagnosticsQuery = useQuery({
+}
+
+function useOauthDiagnosticsQuery(isEnabled: boolean) {
+  return useQuery({
     queryKey: ["intelligence", "oauth-diagnostics"],
     queryFn: ({ signal }) =>
       apiGet<AiEmailOAuthDiagnostics>(
         API_ENDPOINTS.INTELLIGENCE.OAUTH_DIAGNOSTICS,
         signal
       ),
-    enabled: Boolean(session && dashboardQuery.data?.connection.connected),
+    enabled: isEnabled,
     staleTime: 60_000,
     refetchInterval: (query) =>
       query.state.data?.configured === false ? 60_000 : false,
   })
+}
+
+function useMessagesQuery({
+  messageFilter,
+  isEnabled,
+}: {
+  messageFilter: MessagesFilter
+  isEnabled: boolean
+}) {
+  const messagesFilter = normalizeMessagesFilter(messageFilter)
   const messagesQuery = useInfiniteQuery({
-    queryKey: INTELLIGENCE_MESSAGES_QUERY_KEY,
-    queryFn: ({ pageParam, signal }) => {
-      const params = new URLSearchParams({
-        limit: String(INTELLIGENCE_PAGE_SIZE),
-      })
-      if (pageParam) {
-        params.set("cursor", pageParam)
-      }
-      return apiGet<AiEmailMessagesPage>(
-        `${API_ENDPOINTS.INTELLIGENCE.MESSAGES}?${params.toString()}`,
+    queryKey: [...INTELLIGENCE_MESSAGES_QUERY_KEY, messagesFilter],
+    queryFn: ({ pageParam, signal }) =>
+      apiGet<AiEmailMessagesPage>(
+        buildMessagesPath({ ...messagesFilter, cursor: pageParam }),
         signal
-      )
-    },
+      ),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (page) => page.nextCursor ?? undefined,
-    enabled: Boolean(session && dashboardQuery.data?.connection.connected),
+    enabled: isEnabled,
     retry: false,
     staleTime: Infinity,
     refetchOnWindowFocus: false,
@@ -115,12 +102,18 @@ export function useIntelligence() {
       nextPageRequestRef.current = false
     }
   }, [fetchNextMessagesPage])
-  const refreshMessages = useCallback(async () => {
-    acknowledgeMessages()
-    await queryClient.resetQueries({
-      queryKey: INTELLIGENCE_MESSAGES_QUERY_KEY,
-    })
-  }, [acknowledgeMessages, queryClient])
+
+  return { messagesQuery, loadNextMessagesPage }
+}
+
+function useEmailSyncMutations({
+  markMessagesPending,
+  acknowledgeMessages,
+}: {
+  markMessagesPending: () => void
+  acknowledgeMessages: () => void
+}) {
+  const queryClient = useQueryClient()
   const connectMutation = useMutation({
     mutationFn: (body: EmailConnectBody) =>
       apiPost<{ authorizationUrl: string }>(
@@ -172,6 +165,43 @@ export function useIntelligence() {
       })
     },
   })
+
+  return { connectMutation, syncMutation, resetMutation }
+}
+
+export function useIntelligence({
+  messageFilter,
+}: {
+  messageFilter: MessagesFilter
+}) {
+  const {
+    status: emailSocketStatus,
+    hasPendingMessageUpdates,
+    markMessagesPending,
+    acknowledgeMessages,
+  } = useAiEmailSyncSocket()
+  const session = useAppStore((state) => state.session)
+  const queryClient = useQueryClient()
+  const isSessionEnabled = Boolean(session)
+  const dashboardQuery = useIntelligenceDashboardQuery(isSessionEnabled)
+  const isEmailConnected =
+    isSessionEnabled && Boolean(dashboardQuery.data?.connection.connected)
+  const oauthDiagnosticsQuery = useOauthDiagnosticsQuery(isEmailConnected)
+  const { messagesQuery, loadNextMessagesPage } = useMessagesQuery({
+    messageFilter,
+    isEnabled: isEmailConnected,
+  })
+  const { connectMutation, syncMutation, resetMutation } =
+    useEmailSyncMutations({
+      markMessagesPending,
+      acknowledgeMessages,
+    })
+  const refreshMessages = useCallback(async () => {
+    acknowledgeMessages()
+    await queryClient.resetQueries({
+      queryKey: INTELLIGENCE_MESSAGES_QUERY_KEY,
+    })
+  }, [acknowledgeMessages, queryClient])
 
   return {
     dashboardQuery,

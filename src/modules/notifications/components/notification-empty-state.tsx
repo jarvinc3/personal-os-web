@@ -1,5 +1,6 @@
 "use client"
 
+import { resolveNotificationEmptyCopy } from "@/src/modules/notifications/lib/notification-empty-copy"
 import type { NotificationReadFilter } from "@/src/modules/notifications/types/notification.types"
 import {
   Empty,
@@ -19,27 +20,7 @@ export function NotificationEmptyState({
   readFilter,
   moduleLabel,
 }: NotificationEmptyStateProps) {
-  const scope = moduleLabel ? ` en ${moduleLabel}` : ""
-  const copy =
-    readFilter === "unread"
-      ? {
-          title: "Todo al día",
-          description: `No tienes notificaciones sin leer${scope}.`,
-        }
-      : readFilter === "read"
-        ? {
-            title: "Nada leído",
-            description: `No tienes notificaciones leídas${scope}.`,
-          }
-        : moduleLabel
-          ? {
-              title: `Sin avisos de ${moduleLabel}`,
-              description: `Cuando ${moduleLabel} tenga algo nuevo, aparecerá aquí.`,
-            }
-          : {
-              title: "Sin notificaciones",
-              description: "Cuando llegue algo, lo verás aquí.",
-            }
+  const copy = resolveNotificationEmptyCopy({ readFilter, moduleLabel })
 
   return (
     <Empty className="border">

@@ -7,8 +7,13 @@ import {
 import { SettingsSecondaryPage } from "@/src/modules/settings/components/layout/settings-secondary-page"
 import { EditQuietHoursSheet } from "@/src/modules/settings/components/sheets/edit-quiet-hours-sheet"
 import { SETTINGS_REGISTRY } from "@/src/modules/settings/constants/settings-metadata"
+import { SETTINGS_SHEET_KEYS } from "@/src/modules/settings/constants/sheet-keys"
 import { usePreferenceToggle } from "@/src/modules/settings/hooks/use-preference-toggle"
 import { useProfile } from "@/src/modules/settings/hooks/use-profile"
+import {
+  channelPreferenceChange,
+  quietHoursPreferenceChange,
+} from "@/src/modules/settings/lib/notification-preference"
 import { SettingsGate } from "@/src/modules/settings/settings-gate"
 import {
   SettingsRow,
@@ -31,7 +36,7 @@ function NotificationsSettingsScreenBody() {
   const { preferences } = useProfile()
   const togglePreference = usePreferenceToggle()
   const { open: openQuietHoursSheet, setOpen: setOpenQuietHoursSheet } =
-    useSheetParam("quiet-hours-sheet")
+    useSheetParam(SETTINGS_SHEET_KEYS.quietHours)
   const quietHours = preferences.notifications.quietHours
 
   return (
@@ -45,16 +50,8 @@ function NotificationsSettingsScreenBody() {
             if (!checked) {
               void deactivatePushTokenIfPresent()
             }
-            togglePreference(
-              {
-                notifications: {
-                  channels: {
-                    push: checked,
-                  },
-                },
-              },
-              "Preferencia de push actualizada."
-            )
+            const change = channelPreferenceChange("push", checked)
+            togglePreference(change.patch, change.successMessage)
           }}
           accentColor={SETTINGS_REGISTRY.notifications.accent}
           {...SETTINGS_REGISTRY.notifications.rows.push}
@@ -63,18 +60,10 @@ function NotificationsSettingsScreenBody() {
           label="Email"
           description="Resumen y avisos por correo."
           switchValue={preferences.notifications.channels.email}
-          onSwitchChange={(checked) =>
-            togglePreference(
-              {
-                notifications: {
-                  channels: {
-                    email: checked,
-                  },
-                },
-              },
-              "Preferencia de email actualizada."
-            )
-          }
+          onSwitchChange={(checked) => {
+            const change = channelPreferenceChange("email", checked)
+            togglePreference(change.patch, change.successMessage)
+          }}
           accentColor={SETTINGS_REGISTRY.notifications.accent}
           {...SETTINGS_REGISTRY.notifications.rows.email}
         />
@@ -82,18 +71,10 @@ function NotificationsSettingsScreenBody() {
           label="In-App"
           description="Avisos dentro de la app."
           switchValue={preferences.notifications.channels.inApp}
-          onSwitchChange={(checked) =>
-            togglePreference(
-              {
-                notifications: {
-                  channels: {
-                    inApp: checked,
-                  },
-                },
-              },
-              "Preferencia in-app actualizada."
-            )
-          }
+          onSwitchChange={(checked) => {
+            const change = channelPreferenceChange("inApp", checked)
+            togglePreference(change.patch, change.successMessage)
+          }}
           isLast
           accentColor={SETTINGS_REGISTRY.notifications.accent}
           {...SETTINGS_REGISTRY.notifications.rows.inApp}
@@ -105,16 +86,10 @@ function NotificationsSettingsScreenBody() {
           label="Horario silencioso"
           description="Pausa los avisos en el rango elegido."
           switchValue={quietHours.enabled}
-          onSwitchChange={(checked) =>
-            togglePreference(
-              {
-                notifications: {
-                  quietHours: { enabled: checked },
-                },
-              },
-              "Horario silencioso actualizado."
-            )
-          }
+          onSwitchChange={(checked) => {
+            const change = quietHoursPreferenceChange(checked)
+            togglePreference(change.patch, change.successMessage)
+          }}
           accentColor={SETTINGS_REGISTRY.notifications.accent}
           {...SETTINGS_REGISTRY.notifications.rows.quietHoursEnabled}
           isLast={!quietHours.enabled}

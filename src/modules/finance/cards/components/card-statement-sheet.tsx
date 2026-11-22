@@ -24,6 +24,8 @@ import {
   type FinanceCardStatementMovement,
 } from "@/src/modules/finance/shared/types/entities"
 import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
+import { SheetHelpAction } from "@/src/modules/help"
 import {
   Empty,
   EmptyDescription,
@@ -161,6 +163,9 @@ export function CardStatementSheet({
       closeLabel="Cerrar"
       open={open}
       onOpenChange={onOpenChange}
+      helpAction={
+        <SheetHelpAction sheetKey={FINANCE_SHEET_KEYS.cardStatement} />
+      }
       title="Estado de cuenta"
       description={
         detail
@@ -293,13 +298,18 @@ export function CardStatementSheet({
               </div>
               <div className="rounded-2xl border border-border bg-card p-3">
                 <p className="text-[11px] tracking-wide text-muted-foreground uppercase">
-                  Restante
+                  Saldo del corte
                 </p>
                 <p className="text-lg font-semibold tabular-nums">
                   {formatFinanceMoney(detail.statement.remaining, moneyDisplay)}
                 </p>
               </div>
             </div>
+
+            <p className="text-xs text-muted-foreground">
+              El saldo del corte es acumulativo: incluye los cortes anteriores y
+              no se suma como una deuda aparte.
+            </p>
 
             <SettingsSection title="Movimientos del ciclo" bare>
               <MovementList

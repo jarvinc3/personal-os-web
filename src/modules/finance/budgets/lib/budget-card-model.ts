@@ -28,16 +28,22 @@ export type BudgetCardModel = {
 }
 
 export function budgetCategoryLabel(budget: FinanceBudget): string {
-  const list =
-    budget.categories && budget.categories.length > 0
-      ? budget.categories
-      : budget.category
-        ? [budget.category]
-        : []
+  const list = budgetCategories(budget)
   if (list.length === 0) {
     return budget.name ?? "Categoría"
   }
   return list.map((category) => category.name).join(", ")
+}
+
+/** Categorías del presupuesto: el arreglo manda sobre la categoría única. */
+function budgetCategories(budget: FinanceBudget): readonly { name: string }[] {
+  if (budget.categories && budget.categories.length > 0) {
+    return budget.categories
+  }
+  if (budget.category) {
+    return [budget.category]
+  }
+  return []
 }
 
 function budgetTone(
@@ -66,6 +72,20 @@ function badgeFor(tone: PlanningProgressTone): PlanningProgressBadge {
   return { label: "En curso", variant: "info" }
 }
 
+/** Texto del saldo: negativo se lee como exceso y sin datos se omite. */
+function budgetRemainingCaption(
+  remaining: number | null,
+  display: FinanceMoneyDisplay
+): string | undefined {
+  if (remaining === null) {
+    return undefined
+  }
+  if (remaining < 0) {
+    return `Excedido ${formatFinanceMoney(Math.abs(remaining), display)}`
+  }
+  return `Quedan ${formatFinanceMoney(remaining, display)}`
+}
+
 export function budgetCardModel(
   budget: FinanceBudget,
   display: FinanceMoneyDisplay
@@ -79,12 +99,7 @@ export function budgetCardModel(
   const spent = parseFinanceMoney(budget.amountSpent)
   const limit = parseFinanceMoney(budget.amountLimit)
   const remaining = spent !== null && limit !== null ? limit - spent : null
-  const remainingLabel =
-    remaining === null
-      ? undefined
-      : remaining < 0
-        ? `Excedido ${formatFinanceMoney(Math.abs(remaining), display)}`
-        : `Quedan ${formatFinanceMoney(remaining, display)}`
+  const remainingLabel = budgetRemainingCaption(remaining, display)
 
   return {
     title: budgetCategoryLabel(budget),

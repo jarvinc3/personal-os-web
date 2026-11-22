@@ -7,7 +7,10 @@ import {
 import { GlossaryHelpButton } from "@/src/modules/help"
 import { FINANCE_CARD_TYPE_LABEL } from "@/src/modules/finance/shared/constants/catalog"
 import {
+  cardDisplayAmount,
+  cardHeroBalance,
   cardUtilization,
+  type CardHeroBalance,
   type FinanceCardDisplayBalance,
 } from "@/src/modules/finance/shared/lib/card-balances"
 import { nextCycleNote } from "@/src/modules/finance/shared/lib/card-credit"
@@ -24,6 +27,12 @@ type CardVisualProps = {
   card: FinanceCard
   balances: readonly FinanceCardDisplayBalance[]
   display: FinanceMoneyDisplay
+}
+
+const CARD_HERO_LABEL: Record<CardHeroBalance["kind"], string> = {
+  balance: "Saldo",
+  available: "Disponible",
+  debt: "Deuda",
 }
 
 export function CardVisual({ card, balances, display }: CardVisualProps) {
@@ -52,30 +61,30 @@ export function CardVisual({ card, balances, display }: CardVisualProps) {
         </div>
 
         <div className="relative z-10 flex flex-col gap-1">
-          <p className="text-[10px] tracking-[0.14em] text-white/55 uppercase">
-            {isCredit ? "Disponible" : "Saldo"}
-          </p>
           {balances.length === 0 ? (
-            <p className="text-3xl font-bold">Sin saldo</p>
+            <>
+              <p className="text-[10px] tracking-[0.14em] text-white/55 uppercase">
+                {isCredit ? "Disponible" : "Saldo"}
+              </p>
+              <p className="text-3xl font-bold">Sin saldo</p>
+            </>
           ) : (
             balances.map((balance) => {
-              const available = parseFinanceMoney(
-                balance.availableCredit ?? balance.balance
-              )
-              const creditLimit = parseFinanceMoney(balance.creditLimit ?? null)
-              const amount =
-                isCredit && available !== null && creditLimit !== null
-                  ? Math.max(0, creditLimit - available)
-                  : available
+              const hero = cardHeroBalance(balance, card.type)
               return (
-                <p key={balance.id} className="text-3xl font-bold tabular-nums">
-                  {amount === null
-                    ? "Sin saldo"
-                    : formatFinanceMoney(amount, {
-                        ...display,
-                        currency: balance.currency,
-                      })}
-                </p>
+                <div key={balance.id} className="flex flex-col gap-1">
+                  <p className="text-[10px] tracking-[0.14em] text-white/55 uppercase">
+                    {CARD_HERO_LABEL[hero.kind]}
+                  </p>
+                  <p className="text-3xl font-bold tabular-nums">
+                    {hero.amount === null
+                      ? "Sin saldo"
+                      : formatFinanceMoney(hero.amount, {
+                          ...display,
+                          currency: balance.currency,
+                        })}
+                  </p>
+                </div>
               )
             })
           )}
@@ -102,9 +111,7 @@ export function CardVisual({ card, balances, display }: CardVisualProps) {
 
       {isCredit
         ? balances.map((balance) => {
-            const available = parseFinanceMoney(
-              balance.availableCredit ?? balance.balance
-            )
+            const available = cardDisplayAmount(balance)
             const creditLimitValue = parseFinanceMoney(
               balance.creditLimit ?? null
             )

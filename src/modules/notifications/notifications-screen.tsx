@@ -1,40 +1,17 @@
 "use client"
 
 import { NotificationEmptyState } from "@/src/modules/notifications/components/notification-empty-state"
-import { ErrorState } from "@/src/shared/components/feedback/error-state"
-import { ERROR_MESSAGES } from "@/src/shared/lib/error-messages"
 import { NotificationFilters } from "@/src/modules/notifications/components/notification-filters"
 import { NotificationGroupList } from "@/src/modules/notifications/components/notification-group-list"
 import { NotificationHeaderMenu } from "@/src/modules/notifications/components/notification-header-menu"
-import { NotificationListSkeleton } from "@/src/modules/notifications/components/notification-list-skeleton"
+import { NotificationLoadMore } from "@/src/modules/notifications/components/notification-load-more"
 import { NotificationPreferencesSheet } from "@/src/modules/notifications/components/notification-preferences-sheet"
-import {
-  useMarkAllNotificationsRead,
-  useMarkNotificationRead,
-} from "@/src/modules/notifications/hooks/use-mark-notification-read"
-import { useNotificationPreferences } from "@/src/modules/notifications/hooks/use-notification-preferences"
-import { useNotifications } from "@/src/modules/notifications/hooks/use-notifications"
-import { groupNotificationsByDate } from "@/src/modules/notifications/lib/group-notifications-by-date"
+import { NotificationsBlockedState } from "@/src/modules/notifications/components/notifications-blocked-state"
+import { useNotificationsScreen } from "@/src/modules/notifications/hooks/use-notifications-screen"
+import { resolveNotificationsScreenState } from "@/src/modules/notifications/lib/notifications-screen-state"
 import { NotificationsGate } from "@/src/modules/notifications/notifications-gate"
-import type {
-  NotificationReadFilter,
-  NotificationRecord,
-} from "@/src/modules/notifications/types/notification.types"
-import { useProfile, type ModuleSlug } from "@/src/modules/settings"
-import { Button } from "@/src/shared/components/ui/button"
-import { Spinner } from "@/src/shared/components/ui/spinner"
-import {
-  MODULE_SLUGS_ORDER,
-  getModule,
-  parseModuleSlugFromNotificationData,
-} from "@/src/shared/constants/module-registry"
+import { getModule } from "@/src/shared/constants/module-registry"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
-import { usePicker } from "@/src/shared/hooks/use-picker"
-import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
-import { appToast } from "@/src/shared/lib/app-toast"
-import { SettingsIcon } from "lucide-react"
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { useFormatLocale } from "@/src/modules/settings/hooks/use-format-locale"
 
 export function NotificationsScreen() {
   return (
@@ -45,158 +22,51 @@ export function NotificationsScreen() {
 }
 
 function NotificationsScreenBody() {
-  const locale = useFormatLocale()
-  const { isInAppEnabled } = useNotificationPreferences()
-  const notificationsQuery = useNotifications()
-  const markReadMutation = useMarkNotificationRead()
-  const { mutateAsync: markAllAsRead, isPending: isMarkAllPending } =
-    useMarkAllNotificationsRead()
-  const { updatePreferences } = useProfile()
-
-  const { open: prefsOpen, setOpen: setPrefsOpen } = useSheetParam(
-    "notification-preferences-sheet"
-  )
-  const { picker, openPicker, closeHandlerFor } = usePicker<
-    "none" | "quiet-hours"
-  >("none")
-  const [readFilter, setReadFilter] = useState<NotificationReadFilter>("all")
-  const [requestedModuleFilter, setRequestedModuleFilter] =
-    useState<ModuleSlug | null>(null)
-
-  const handlePreferenceToggle = useCallback(
-    async (
-      patch: Parameters<typeof updatePreferences>[0],
-      successMessage: string
-    ) => {
-      try {
-        await updatePreferences(patch)
-        appToast.success({
-          text1: "Guardado",
-          text2: successMessage,
-        })
-      } catch {
-        // Toast handled in useProfile mutation
-      }
-    },
-    [updatePreferences]
-  )
-
-  const notifications = useMemo(
-    () => notificationsQuery.data?.pages.flatMap((page) => page.items) ?? [],
-    [notificationsQuery.data?.pages]
-  )
-
-  const loadMoreRef = useRef<HTMLDivElement | null>(null)
-  const fetchNextPage = notificationsQuery.fetchNextPage
-  const hasNextPage = notificationsQuery.hasNextPage
-  useEffect(() => {
-    const sentinel = loadMoreRef.current
-    if (!sentinel || !hasNextPage) {
-      return
-    }
-    const observer = new IntersectionObserver((entries) => {
-      if (entries.some((entry) => entry.isIntersecting)) {
-        void fetchNextPage()
-      }
-    })
-    observer.observe(sentinel)
-    return () => observer.disconnect()
-  }, [fetchNextPage, hasNextPage])
-
-  const moduleOptions = useMemo(() => {
-    const present = new Set<ModuleSlug>()
-    for (const notification of notifications) {
-      const slug = parseModuleSlugFromNotificationData(notification.data)
-      if (slug) {
-        present.add(slug)
-      }
-    }
-    return MODULE_SLUGS_ORDER.filter((slug) => present.has(slug))
-  }, [notifications])
-
-  const moduleFilter =
-    requestedModuleFilter && moduleOptions.includes(requestedModuleFilter)
-      ? requestedModuleFilter
-      : null
-
-  const scopedNotifications = useMemo(
-    () =>
-      moduleFilter
-        ? notifications.filter(
-            (notification) =>
-              parseModuleSlugFromNotificationData(notification.data) ===
-              moduleFilter
-          )
-        : notifications,
-    [moduleFilter, notifications]
-  )
-
-  const unreadCount = useMemo(
-    () =>
-      scopedNotifications.filter((notification) => !notification.isRead).length,
-    [scopedNotifications]
-  )
-
-  const readCount = useMemo(
-    () =>
-      scopedNotifications.filter((notification) => notification.isRead).length,
-    [scopedNotifications]
-  )
-
-  const visibleNotifications = useMemo(() => {
-    if (readFilter === "unread") {
-      return scopedNotifications.filter((notification) => !notification.isRead)
-    }
-    if (readFilter === "read") {
-      return scopedNotifications.filter((notification) => notification.isRead)
-    }
-    return scopedNotifications
-  }, [readFilter, scopedNotifications])
-
-  const sections = useMemo(
-    () => groupNotificationsByDate(visibleNotifications, locale),
-    [visibleNotifications, locale]
-  )
-
-  const handleMarkAllRead = useCallback(() => {
-    void markAllAsRead()
-  }, [markAllAsRead])
-
-  const handleNotificationPress = useCallback(
-    (notification: NotificationRecord) => {
-      if (!notification.isRead) {
-        void markReadMutation.mutateAsync(notification.id)
-      }
-    },
-    [markReadMutation]
-  )
-
-  const headerMenu = useMemo(
-    () => (
-      <NotificationHeaderMenu
-        markAllPending={isMarkAllPending}
-        canMarkAll={notifications.length > 0}
-        onMarkAllRead={handleMarkAllRead}
-        onOpenPreferences={() => setPrefsOpen(true)}
-      />
-    ),
-    [handleMarkAllRead, isMarkAllPending, notifications.length]
-  )
+  const {
+    isInAppEnabled,
+    notificationsQuery,
+    notificationsErrorState,
+    notificationsCount,
+    sections,
+    readFilter,
+    setReadFilter,
+    moduleOptions,
+    moduleFilter,
+    handleModuleFilterChange,
+    unreadCount,
+    readCount,
+    handleNotificationPress,
+    handleMarkAllRead,
+    markAllPending,
+    preferencesOpen,
+    setPreferencesOpen,
+    picker,
+    openPicker,
+    closeHandlerFor,
+    handlePreferenceToggle,
+  } = useNotificationsScreen()
 
   usePageHeader(
     {
       variant: "secondary",
       title: "Notificaciones",
-      actions: headerMenu,
+      actions: (
+        <NotificationHeaderMenu
+          markAllPending={markAllPending}
+          canMarkAll={notificationsCount > 0}
+          onMarkAllRead={handleMarkAllRead}
+          onOpenPreferences={() => setPreferencesOpen(true)}
+        />
+      ),
     },
-    [headerMenu]
+    [handleMarkAllRead, markAllPending, notificationsCount, setPreferencesOpen]
   )
 
   const preferencesSheet = (
     <NotificationPreferencesSheet
-      open={prefsOpen}
+      open={preferencesOpen}
       quietHoursOpen={picker === "quiet-hours"}
-      onOpenChange={setPrefsOpen}
+      onOpenChange={setPreferencesOpen}
       onQuietHoursOpenChange={(next) => {
         if (next) {
           openPicker("quiet-hours")
@@ -208,42 +78,21 @@ function NotificationsScreenBody() {
     />
   )
 
-  if (!isInAppEnabled) {
-    return (
-      <div className="mx-auto flex max-w-2xl flex-col gap-4 p-4 pb-16 md:px-6">
-        <div className="flex flex-col items-center justify-center gap-4 px-6 py-16">
-          <p className="text-center text-muted-foreground">
-            Las notificaciones in-app están desactivadas en tus preferencias.
-          </p>
-          <Button variant="outline" onClick={() => setPrefsOpen(true)}>
-            <SettingsIcon className="size-4 shrink-0" />
-            Configurar notificaciones
-          </Button>
-        </div>
-        {preferencesSheet}
-      </div>
-    )
-  }
+  const screenState = resolveNotificationsScreenState({
+    isInAppEnabled,
+    isLoading: notificationsQuery.isLoading,
+    errorState: notificationsErrorState,
+  })
 
-  if (notificationsQuery.isLoading) {
+  if (screenState !== "ready") {
     return (
-      <div className="mx-auto flex max-w-2xl flex-col gap-4 p-4 pb-16 md:px-6">
-        <NotificationListSkeleton />
-        {preferencesSheet}
-      </div>
-    )
-  }
-
-  if (notificationsQuery.isError) {
-    return (
-      <div className="mx-auto flex max-w-2xl flex-col gap-4 p-4 pb-16 md:px-6">
-        <ErrorState
-          message={ERROR_MESSAGES.loadHint}
-          onRetry={() => void notificationsQuery.refetch()}
-          isRetrying={notificationsQuery.isFetching}
-        />
-        {preferencesSheet}
-      </div>
+      <NotificationsBlockedState
+        state={screenState}
+        preferencesSheet={preferencesSheet}
+        onOpenPreferences={() => setPreferencesOpen(true)}
+        onRetry={() => void notificationsQuery.refetch()}
+        isRetrying={notificationsQuery.isFetching}
+      />
     )
   }
 
@@ -256,11 +105,7 @@ function NotificationsScreenBody() {
         moduleOptions={moduleOptions}
         moduleFilter={moduleFilter}
         onReadFilterChange={setReadFilter}
-        onModuleFilterChange={(slug) =>
-          setRequestedModuleFilter((current) =>
-            current === slug ? null : slug
-          )
-        }
+        onModuleFilterChange={handleModuleFilterChange}
       />
 
       {sections.length === 0 ? (
@@ -275,16 +120,12 @@ function NotificationsScreenBody() {
         />
       )}
 
-      {hasNextPage || notificationsQuery.isFetchingNextPage ? (
-        <div
-          ref={loadMoreRef}
-          className="flex h-10 items-center justify-center"
-        >
-          {notificationsQuery.isFetchingNextPage ? (
-            <Spinner className="size-4" />
-          ) : null}
-        </div>
-      ) : null}
+      <NotificationLoadMore
+        hasNextPage={notificationsQuery.hasNextPage}
+        isFetchingNextPage={notificationsQuery.isFetchingNextPage}
+        hasError={Boolean(notificationsQuery.error)}
+        onLoadMore={() => void notificationsQuery.fetchNextPage()}
+      />
 
       {preferencesSheet}
     </div>

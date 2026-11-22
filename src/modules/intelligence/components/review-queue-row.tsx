@@ -16,6 +16,7 @@ import { SummaryItem } from "@/src/shared/components/data-display/summary"
 import { Badge } from "@/src/shared/components/ui/badge"
 import { Button } from "@/src/shared/components/ui/button"
 import { formatDateTime } from "@/src/shared/lib/date-format"
+import { useFormatLocale } from "@/src/modules/settings/hooks/use-format-locale"
 
 const REVIEW_STATUS_LABELS: Record<AiReviewStatus, string> = {
   PENDING: "Pendiente",
@@ -49,6 +50,7 @@ export function ReviewQueueRow({
   onOpenMessage,
   onReview,
 }: ReviewQueueRowProps) {
+  const formatLocale = useFormatLocale()
   const reviewed = message.status !== "PENDING"
   const verification = message.verification
   const semanticType = message.semanticType
@@ -65,7 +67,8 @@ export function ReviewQueueRow({
       description={
         <span className="flex flex-col gap-0.5">
           <span>
-            {message.fromAddress} · {formatDateTime(message.receivedAt)} · #
+            {message.fromAddress} ·{" "}
+            {formatDateTime(message.receivedAt, formatLocale)} · #
             {shortMessageId(message.id)}
           </span>
           <span>
@@ -73,7 +76,7 @@ export function ReviewQueueRow({
           </span>
           {verification ? (
             <span className="text-foreground">
-              {describeReviewVerification(verification)}
+              {describeReviewVerification(verification, formatLocale)}
             </span>
           ) : null}
         </span>
@@ -111,7 +114,8 @@ export function ReviewQueueRow({
 }
 
 function describeReviewVerification(
-  verification: AiReviewVerification
+  verification: AiReviewVerification,
+  locale: string
 ): string {
   const labels = verification.labels
     ? describeVerificationPayload(verification.labels)
@@ -119,7 +123,7 @@ function describeReviewVerification(
   return [
     labels,
     verification.notes,
-    `Verificado ${formatDateTime(verification.createdAt)}`,
+    `Verificado ${formatDateTime(verification.createdAt, locale)}`,
   ]
     .filter(Boolean)
     .join(" · ")

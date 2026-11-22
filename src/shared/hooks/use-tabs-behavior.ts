@@ -6,7 +6,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { getTabSwipeDirection } from "@/src/shared/lib/tab-swipe"
 import { withTabQuery } from "@/src/shared/lib/tab-query"
 
-const TAB_QUERY_KEY = "tab"
+export const TAB_QUERY_KEY = "tab"
 const TAB_MEMORY_PREFIX = "personal-os:tab:"
 
 type TabsRootProps = TabsPrimitive.Root.Props

@@ -268,4 +268,36 @@ export const estadosDocs: readonly GalleryComponentMeta[] = [
       },
     ],
   },
+  {
+    id: "module-coming-soon",
+    name: "ModuleComingSoon",
+    category: "estados",
+    kind: "domain",
+    description:
+      "Estado de un módulo activo cuyas pantallas todavía no existen, con acceso a Ajustes.",
+    whenToUse:
+      "La ruta de un módulo que aún no tiene sus vistas y que el usuario puede configurar en Ajustes.",
+    whenNotToUse:
+      "Un vacío por falta de datos: Empty. Un módulo apagado del todo.",
+    importPath: "@/src/shared/components/feedback/module-coming-soon",
+    snippet: `import { ModuleComingSoon } from "@/src/shared/components/feedback/module-coming-soon"
+
+<ModuleComingSoon slug="agenda" />`,
+    subcomponents: [],
+    anatomy: "<ModuleComingSoon slug />",
+    variants: [
+      {
+        name: "slug",
+        values: "módulo del registro, que aporta icono, color y etiqueta",
+      },
+    ],
+    props: [
+      {
+        name: "slug",
+        type: "ModuleSlug",
+        description:
+          "Módulo al que le faltan las pantallas; de ahí salen el icono, el color y el nombre.",
+      },
+    ],
+  },
 ]

@@ -6,6 +6,7 @@ import {
   RETIRED_PUBLIC_PATHS,
   landingUrl,
 } from "./src/shared/constants/landing.mjs"
+import { staticSecurityHeaders } from "./src/config/security-headers.mjs"
 
 const sideroomRequire = sideroomCreateRequire(import.meta.url)
 
@@ -80,9 +81,20 @@ const nextConfig = {
     }))
   },
 
+  // La CSP no va aquí: lleva un nonce por petición y la pone `proxy.ts`.
+  headers() {
+    return [
+      {
+        source: "/(.*)",
+        headers: staticSecurityHeaders({
+          isProduction: process.env.NODE_ENV === "production",
+        }),
+      },
+    ]
+  },
+
   experimental: {
     agentUpgrade: "security",
-    optimizePackageImports: ["@hugeicons/core-free-icons"],
   },
 
   images: {

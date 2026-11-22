@@ -252,4 +252,57 @@ import { TimePairWheels } from "@/src/shared/components/forms/wheel-picker"
       },
     ],
   },
+  {
+    id: "day-list-field",
+    name: "DayListField",
+    category: "selectores",
+    kind: "domain",
+    description:
+      "Lista de días del mes: cada día abre su rueda y la lista suma o quita días.",
+    whenToUse:
+      "Los días de pago de un ingreso fijo o de un gasto que cae en varios días.",
+    whenNotToUse:
+      "Un solo día: FinanceDateField. Una fecha concreta: WheelField con DateWheels.",
+    importPath: "@/src/shared/components/forms/day-list-field",
+    snippet: `import { DayListField } from "@/src/shared/components/forms/day-list-field"
+
+<DayListField
+  label="Días de pago"
+  icon={CalendarDaysIcon}
+  value={days}
+  onChange={setDays}
+/>`,
+    subcomponents: [],
+    anatomy:
+      "<DayListField label value onChange icon min max error disabled />",
+    variants: [
+      {
+        name: "states",
+        values: "un día, varios días, sin días libres, invalid, disabled",
+      },
+      { name: "min / max", values: "rango de días permitido" },
+    ],
+    props: [
+      {
+        name: "value / onChange",
+        type: "string / (value: string) => void",
+        description: "Días separados por coma o espacio.",
+      },
+      {
+        name: "label",
+        type: "string",
+        description: "Etiqueta del campo.",
+      },
+      {
+        name: "icon",
+        type: "LucideIcon",
+        description: "Icono líder; por defecto, el de calendario.",
+      },
+      {
+        name: "error",
+        type: "string",
+        description: "Error bajo la lista de días.",
+      },
+    ],
+  },
 ]

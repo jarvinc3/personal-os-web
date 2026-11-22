@@ -9,6 +9,7 @@ import {
   Clock3,
   Eraser,
   Focus,
+  GitCompareArrows,
   Inbox,
   ListFilter,
   RotateCcw,
@@ -54,6 +55,7 @@ import { useFormatLocale } from "@/src/modules/settings/hooks/use-format-locale"
 import { SegmentedControl } from "@/src/shared/components/forms/segmented-control"
 import { SummaryItem } from "@/src/shared/components/data-display/summary"
 import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
+import { InfiniteListErrorFooter } from "@/src/shared/components/feedback/infinite-list-error-footer"
 import { Badge } from "@/src/shared/components/ui/badge"
 import { Button } from "@/src/shared/components/ui/button"
 import { Checkbox } from "@/src/shared/components/ui/checkbox"
@@ -67,6 +69,7 @@ import {
 } from "@/src/shared/components/ui/empty"
 import { Skeleton } from "@/src/shared/components/ui/skeleton"
 import { appToast } from "@/src/shared/lib/app-toast"
+import { resolveInfiniteListErrorState } from "@/src/shared/lib/infinite-list-error"
 import {
   analysisRunModeLabel,
   analysisRunStatusLabel,
@@ -143,6 +146,10 @@ export function AiEvidenceSection({
     [reviewQueueQuery.data?.pages]
   )
   const { fetchNextPage, hasNextPage, isFetchingNextPage } = reviewQueueQuery
+  const reviewQueueErrorState = resolveInfiniteListErrorState({
+    hasError: reviewQueueQuery.isError,
+    itemCount: messages.length,
+  })
   const reviewedMessage = messages.find(
     (message) => message.id === review.sheetId
   )
@@ -352,30 +359,6 @@ export function AiEvidenceSection({
               key={run.id}
               className="flex items-center gap-2 rounded-lg border px-2"
             >
-              <Button
-                type="button"
-                variant={
-                  selectedRunIds.includes(run.id) ? "secondary" : "ghost"
-                }
-                size="sm"
-                aria-pressed={selectedRunIds.includes(run.id)}
-                aria-label={`Seleccionar análisis ${run.id} para comparar`}
-                onClick={() =>
-                  setSelectedRunIds((current) =>
-                    current.includes(run.id)
-                      ? current.filter((id) => id !== run.id)
-                      : current.length < 2
-                        ? [...current, run.id]
-                        : [current[1], run.id]
-                  )
-                }
-              >
-                {selectedRunIds.includes(run.id) ? (
-                  <Check aria-hidden="true" />
-                ) : (
-                  "Comparar"
-                )}
-              </Button>
               <div className="min-w-0 flex-1">
                 <SummaryItem
                   key={run.id}
@@ -384,7 +367,7 @@ export function AiEvidenceSection({
                   icon={Clock3}
                   value={
                     run.completedAt
-                      ? formatDateTime(run.completedAt)
+                      ? formatDateTime(run.completedAt, formatLocale)
                       : "En curso"
                   }
                   isLast={index === runsQuery.data!.length - 1}
@@ -396,6 +379,35 @@ export function AiEvidenceSection({
                     {formatRunMetrics(run.metrics)}
                   </p>
                 ) : null}
+              </div>
+              <div className="flex shrink-0 flex-col items-end gap-1">
+                <Button
+                  type="button"
+                  variant={
+                    selectedRunIds.includes(run.id) ? "secondary" : "ghost"
+                  }
+                  size="sm"
+                  aria-pressed={selectedRunIds.includes(run.id)}
+                  aria-label={`Seleccionar análisis ${run.id} para comparar`}
+                  onClick={() =>
+                    setSelectedRunIds((current) =>
+                      current.includes(run.id)
+                        ? current.filter((id) => id !== run.id)
+                        : current.length < 2
+                          ? [...current, run.id]
+                          : [current[1], run.id]
+                    )
+                  }
+                >
+                  {selectedRunIds.includes(run.id) ? (
+                    <Check aria-hidden="true" />
+                  ) : (
+                    <>
+                      <GitCompareArrows aria-hidden="true" />
+                      Comparar
+                    </>
+                  )}
+                </Button>
                 {run.mode === "EVALUATE" && run.status === "COMPLETED" ? (
                   <Button
                     type="button"
@@ -411,6 +423,7 @@ export function AiEvidenceSection({
                       })
                     }
                   >
+                    <RotateCcw aria-hidden="true" />
                     Reejecutar
                   </Button>
                 ) : null}
@@ -553,7 +566,7 @@ export function AiEvidenceSection({
             <Skeleton className="h-16 w-full" />
             <Skeleton className="h-16 w-full" />
           </div>
-        ) : reviewQueueQuery.isError ? (
+        ) : reviewQueueErrorState === "full" ? (
           <Empty>
             <EmptyHeader>
               <EmptyMedia variant="icon">
@@ -614,11 +627,19 @@ export function AiEvidenceSection({
                 <div key={message.id}>{row}</div>
               )
             })}
-            <InfiniteListSentinel
-              hasNextPage={Boolean(hasNextPage)}
-              isFetchingNextPage={isFetchingNextPage}
-              onLoadMore={loadMore}
-            />
+            {reviewQueueErrorState === "inline" ? (
+              <InfiniteListErrorFooter
+                title="No se pudieron cargar más correos"
+                isRetrying={isFetchingNextPage}
+                onRetry={loadMore}
+              />
+            ) : (
+              <InfiniteListSentinel
+                hasNextPage={Boolean(hasNextPage)}
+                isFetchingNextPage={isFetchingNextPage}
+                onLoadMore={loadMore}
+              />
+            )}
           </>
         )}
       </div>

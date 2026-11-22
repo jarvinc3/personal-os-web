@@ -28,6 +28,18 @@ export type CardCreditFacts = CardUtilization & {
 }
 
 /**
+ * Amount a card shows for one currency: the available credit the API projects
+ * for a credit card, or the balance for a debit card. The utilization bar and
+ * the product rows read this value; the hero uses `cardHeroBalance` to show
+ * the debt when a credit card is overspent.
+ */
+export function cardDisplayAmount(
+  balance: FinanceCardDisplayBalance
+): number | null {
+  return parseFinanceMoney(balance.availableCredit ?? balance.balance)
+}
+
+/**
  * A negative available credit means the card owes more than its limit, so the
  * debt grows and the utilization goes past 100% instead of stopping there.
  */
@@ -55,9 +67,7 @@ export function cardUtilization(input: {
 export function cardCreditFacts(
   balance: FinanceCardDisplayBalance
 ): CardCreditFacts | null {
-  const available = parseFinanceMoney(
-    balance.availableCredit ?? balance.balance
-  )
+  const available = cardDisplayAmount(balance)
   const creditLimit = parseFinanceMoney(balance.creditLimit ?? null)
   if (available === null || creditLimit === null) {
     return null
@@ -67,6 +77,33 @@ export function cardCreditFacts(
     return null
   }
   return { available, creditLimit, ...utilization }
+}
+
+export type CardHeroBalance = {
+  kind: "balance" | "available" | "debt"
+  amount: number | null
+}
+
+/**
+ * Amount the card face shows in its hero: the balance of a debit card, or the
+ * available credit of a credit card. An overspent card shows its debt instead
+ * of a negative available credit when its limit lets us compute it.
+ */
+export function cardHeroBalance(
+  balance: FinanceCardDisplayBalance,
+  cardType: FinanceCard["type"]
+): CardHeroBalance {
+  const available = cardDisplayAmount(balance)
+  if (cardType !== "CREDIT") {
+    return { kind: "balance", amount: available }
+  }
+  if (available !== null && available < 0) {
+    const facts = cardCreditFacts(balance)
+    if (facts) {
+      return { kind: "debt", amount: facts.debt }
+    }
+  }
+  return { kind: "available", amount: available }
 }
 
 export function resolveCardDisplayBalances(

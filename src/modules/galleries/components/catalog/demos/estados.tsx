@@ -8,6 +8,7 @@ import {
   ListSkeleton,
 } from "@/src/shared/components/feedback/list-skeleton"
 import { LoadingView } from "@/src/shared/components/feedback/loading-view"
+import { ModuleComingSoon } from "@/src/shared/components/feedback/module-coming-soon"
 import { Button } from "@/src/shared/components/ui/button"
 import {
   EMPTY_COMPACT_CLASS_NAME,
@@ -158,6 +159,12 @@ export const estadosDemos: GalleryDemoMap = {
           Cargando
         </Button>
       ),
+    },
+  ],
+  "module-coming-soon": [
+    {
+      label: "App activa sin sus pantallas",
+      node: <ModuleComingSoon slug="agenda" />,
     },
   ],
 }

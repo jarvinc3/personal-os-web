@@ -2,6 +2,10 @@
 
 import { getSupabaseBrowserClient } from "@/src/config/supabase/client"
 import { resolveNotificationsSocketUrl } from "@/src/modules/notifications/lib/notifications-socket-url"
+import {
+  createNotificationsSocketSubscriptions,
+  type NotificationsSocketHandler,
+} from "@/src/modules/notifications/lib/notifications-socket-subscriptions"
 import { useAppStore } from "@/src/shared/store/app-store"
 import {
   createContext,
@@ -17,8 +21,6 @@ import { io, type Socket } from "socket.io-client"
 
 export type NotificationsSocketStatus =
   "connecting" | "connected" | "disconnected"
-
-type NotificationsSocketHandler = (payload: unknown) => void
 
 type NotificationsSocketContextValue = {
   status: NotificationsSocketStatus
@@ -44,7 +46,7 @@ export function NotificationsSocketProvider({
   const socketUserIdRef = useRef<string | null>(null)
   const reconnectAttemptsRef = useRef(0)
   const tokenRef = useRef<string | null>(token)
-  const handlersRef = useRef(new Map<string, Set<NotificationsSocketHandler>>())
+  const [subscriptions] = useState(createNotificationsSocketSubscriptions)
 
   const reconnectWithFreshToken = useCallback(async (socket: Socket) => {
     try {
@@ -68,11 +70,7 @@ export function NotificationsSocketProvider({
       transports: ["websocket"],
     })
 
-    for (const [event, handlers] of handlersRef.current) {
-      for (const handler of handlers) {
-        socket.on(event, handler)
-      }
-    }
+    subscriptions.attach(socket)
 
     socket.on("connect", () => {
       reconnectAttemptsRef.current = 0
@@ -95,27 +93,12 @@ export function NotificationsSocketProvider({
     socket.io.on("reconnect_attempt", () => setStatus("connecting"))
 
     return socket
-  }, [reconnectWithFreshToken])
+  }, [reconnectWithFreshToken, subscriptions])
 
   const subscribe = useCallback(
-    (event: string, handler: NotificationsSocketHandler) => {
-      let handlers = handlersRef.current.get(event)
-      if (!handlers) {
-        handlers = new Set()
-        handlersRef.current.set(event, handlers)
-      }
-      handlers.add(handler)
-      socketRef.current?.on(event, handler)
-
-      return () => {
-        handlers?.delete(handler)
-        if (handlers?.size === 0) {
-          handlersRef.current.delete(event)
-        }
-        socketRef.current?.off(event, handler)
-      }
-    },
-    []
+    (event: string, handler: NotificationsSocketHandler) =>
+      subscriptions.subscribe(event, handler),
+    [subscriptions]
   )
 
   useEffect(() => {

@@ -1,6 +1,7 @@
 "use client"
 
 import { useWebPushPermissions } from "@/src/modules/notifications/hooks/use-web-push-permissions"
+import { resolveDevicePushRow } from "@/src/modules/notifications/lib/device-push-row"
 import { SETTINGS_REGISTRY } from "@/src/modules/settings"
 import { SettingsRow } from "@/src/shared/components/settings/settings-section"
 import { appToast } from "@/src/shared/lib/app-toast"
@@ -67,91 +68,41 @@ export function DevicePushSettingsRow({
     []
   )
 
-  const pushDeviceRow = (() => {
-    if (permissionStatus === "unsupported") {
-      return {
-        value: "No compatible con este navegador",
-        disabled: true,
-        showChevron: false,
-        onPress: undefined,
-      }
+  const row = resolveDevicePushRow({
+    permissionStatus,
+    pushToken,
+    isRequesting,
+    registrationError,
+  })
+
+  const handlePress = () => {
+    if (row.state === "vapid-not-configured") {
+      appToast.error({
+        text1: "Push no configurado",
+        text2: "Configura las claves VAPID en backend y frontend.",
+      })
+      return
     }
-    if (permissionStatus === "granted" && pushToken) {
-      return {
-        value: "Activo",
-        disabled: true,
-        showChevron: false,
-        onPress: undefined,
-      }
+    if (row.state === "denied") {
+      appToast.info({
+        text1: "Permiso bloqueado",
+        text2:
+          "Abre la configuración del sitio en tu navegador y permite notificaciones.",
+      })
+      return
     }
-    if (
-      permissionStatus === "granted" &&
-      registrationError === "vapid-not-configured"
-    ) {
-      return {
-        value: "VAPID no configurado",
-        disabled: false,
-        showChevron: true,
-        onPress: () => {
-          appToast.error({
-            text1: "Push no configurado",
-            text2: "Configura las claves VAPID en backend y frontend.",
-          })
-        },
-      }
+    if (row.state === "retry-registration" || row.state === "request") {
+      void requestPermission().then(handlePushPermissionResult)
     }
-    if (
-      permissionStatus === "granted" &&
-      registrationError === "push-service-unavailable"
-    ) {
-      return {
-        value: "Servicio push no disponible",
-        disabled: true,
-        showChevron: false,
-        onPress: undefined,
-      }
-    }
-    if (permissionStatus === "granted" && !pushToken) {
-      return {
-        value: isRequesting ? "Registrando..." : "Reintentar registro",
-        disabled: isRequesting,
-        showChevron: true,
-        onPress: () => {
-          void requestPermission().then(handlePushPermissionResult)
-        },
-      }
-    }
-    if (permissionStatus === "denied") {
-      return {
-        value: "Permiso denegado",
-        disabled: false,
-        showChevron: true,
-        onPress: () => {
-          appToast.info({
-            text1: "Permiso bloqueado",
-            text2:
-              "Abre la configuración del sitio en tu navegador y permite notificaciones.",
-          })
-        },
-      }
-    }
-    return {
-      value: isRequesting ? "Solicitando..." : "Activar en el navegador",
-      disabled: isRequesting,
-      showChevron: true,
-      onPress: () => {
-        void requestPermission().then(handlePushPermissionResult)
-      },
-    }
-  })()
+  }
 
   return (
     <SettingsRow
       label="Permisos de notificaciones"
-      value={pushDeviceRow.value}
-      disabled={pushDeviceRow.disabled}
-      showChevron={pushDeviceRow.showChevron}
-      onPress={pushDeviceRow.onPress}
+      value={row.value}
+      disabled={row.disabled}
+      showChevron={row.showChevron}
+      onPress={row.showChevron ? handlePress : undefined}
       isLast={isLast}
       accentColor={accentColor}
       {...SETTINGS_REGISTRY.notifications.rows.devicePush}

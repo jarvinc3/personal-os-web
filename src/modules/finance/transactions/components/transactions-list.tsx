@@ -84,7 +84,8 @@ export function FinanceTransactionsList({
   enabled,
   display,
 }: FinanceTransactionsListProps) {
-  const [range, setRange] = useState(() => initialMonthRange())
+  const [now] = useState(() => new Date())
+  const [range, setRange] = useState(() => initialMonthRange(now))
   const [landingMonthKey] = useState(() => monthKeyFromDate(new Date()))
   const [activeMonthKey, setActiveMonthKey] =
     useState<MonthKey>(landingMonthKey)
@@ -99,7 +100,7 @@ export function FinanceTransactionsList({
     const parsed = parseMonthKey(activeMonthKey)
     const active = new Date(parsed.year, parsed.month - 1, 1)
     setRange((current) => {
-      const next = extendMonthRange(current, active)
+      const next = extendMonthRange({ range: current, active, now })
       if (
         next.from.getTime() === current.from.getTime() &&
         next.to.getTime() === current.to.getTime()
@@ -178,21 +179,24 @@ export function FinanceTransactionsList({
   )
   const activeMonth = timeline.find((month) => month.key === activeMonthKey)
 
-  const applyActiveMonth = useCallback((key: MonthKey) => {
-    setActiveMonthKey(key)
-    const parsed = parseMonthKey(key)
-    const active = new Date(parsed.year, parsed.month - 1, 1)
-    setRange((current) => {
-      const next = extendMonthRange(current, active)
-      if (
-        next.from.getTime() === current.from.getTime() &&
-        next.to.getTime() === current.to.getTime()
-      ) {
-        return current
-      }
-      return next
-    })
-  }, [])
+  const applyActiveMonth = useCallback(
+    (key: MonthKey) => {
+      setActiveMonthKey(key)
+      const parsed = parseMonthKey(key)
+      const active = new Date(parsed.year, parsed.month - 1, 1)
+      setRange((current) => {
+        const next = extendMonthRange({ range: current, active, now })
+        if (
+          next.from.getTime() === current.from.getTime() &&
+          next.to.getTime() === current.to.getTime()
+        ) {
+          return current
+        }
+        return next
+      })
+    },
+    [now]
+  )
 
   const markUserTookOver = useCallback(() => {
     if (userTookOverRef.current) {
@@ -423,11 +427,13 @@ export function FinanceTransactionsList({
           locale={display.locale}
           onSelect={scrollToMonth}
         />
-        <MonthFlowSummary
-          income={activeMonth?.totals.income}
-          expenses={activeMonth?.totals.expenses}
-          display={display}
-        />
+        <div className="mx-2 md:mx-0">
+          <MonthFlowSummary
+            income={activeMonth?.totals.income}
+            expenses={activeMonth?.totals.expenses}
+            display={display}
+          />
+        </div>
       </div>
 
       {timelineQuery.isError ? (

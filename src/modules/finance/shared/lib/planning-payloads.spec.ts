@@ -67,6 +67,25 @@ describe("buildLoanBody", () => {
     nextDueDate: "2026-10-01",
   }
 
+  it("omits the name on a create without one and clears it on an update", () => {
+    const created = buildLoanBody({ ...base, interestRatePercent: "12" })
+    assert.equal(created.ok, true)
+    if (!created.ok) {
+      return
+    }
+    assert.equal("name" in created.body, false)
+
+    const updated = buildLoanBody(
+      { ...base, interestRatePercent: "12" },
+      { isUpdate: true }
+    )
+    assert.equal(updated.ok, true)
+    if (!updated.ok) {
+      return
+    }
+    assert.equal(updated.body.name, "")
+  })
+
   it("sends interestRate as number 0.12 when the UI is 12%", () => {
     const result = buildLoanBody({ ...base, interestRatePercent: "12" })
     assert.equal(result.ok, true)
