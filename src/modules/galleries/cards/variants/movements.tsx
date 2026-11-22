@@ -170,14 +170,13 @@ export const movementVariants: readonly GalleryVariant[] = [
   },
 ]
 
-/** Composición del detalle de movimiento; borrador hasta #283 (#272). */
+/** Composición del detalle de movimiento, referencia vigente (#272). */
 export const movementDetailVariants: readonly GalleryVariant[] = [
   {
     id: "detalle-movimiento",
     label: "Encabezado y cards compactas",
-    propLabel: "Composición (borrador)",
+    propLabel: "Composición",
     height: "≈ 420 px",
-    isDraft: true,
     render: ({ display, notifyTap }) => (
       <MovementDetailPreview
         transaction={galleryGroceryMovement}
