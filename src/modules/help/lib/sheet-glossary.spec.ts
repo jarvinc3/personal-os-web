@@ -5,7 +5,7 @@ import { HELP_TERMS } from "@/src/modules/help/constants/glossary"
 import { SHEET_GLOSSARY_TERMS } from "@/src/modules/help/constants/sheet-terms"
 import {
   glossarySlugsForSheet,
-  sheetGlossaryPickerKey,
+  glossaryPickerKey,
 } from "@/src/modules/help/lib/sheet-glossary"
 
 const KEBAB_CASE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
@@ -48,8 +48,12 @@ describe("sheet glossary map", () => {
 describe("sheet glossary picker", () => {
   it("names the nested sheet after the parent", () => {
     assert.equal(
-      sheetGlossaryPickerKey("account-sheet"),
+      glossaryPickerKey("account-sheet"),
       "sheet-glossary:account-sheet"
     )
+  })
+
+  it("uses the same scheme for a single term", () => {
+    assert.equal(glossaryPickerKey("saldo"), "sheet-glossary:saldo")
   })
 })

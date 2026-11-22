@@ -13,9 +13,8 @@ export type AgentConversationAction = AiSchemas["AiConversationActionDto"]
 type ContractInvocationContext = AiSchemas["AiInvocationContextDto"]
 type ContractInvocationEntityRef = AiSchemas["AiInvocationEntityRefDto"]
 
-/** El contrato no enumera `institution`, aunque el back sí la resuelve. */
-export type AgentInvocationEntityType =
-  ContractInvocationEntityRef["type"] | "institution"
+/** Tipo de entidad del contexto que el contrato publica y el API acepta. */
+export type AgentInvocationEntityType = ContractInvocationEntityRef["type"]
 
 export type AgentInvocationEntityRef = {
   type: AgentInvocationEntityType
@@ -29,9 +28,11 @@ export type AgentInvocationContext = Omit<
   entityRef?: AgentInvocationEntityRef
 }
 
-/** El contrato versionado aún no publica `clientMessageId` ni `stream`. */
-export type AgentSendMessageBody = {
-  content: string
+/** El contrato ya publica el envío; el cliente fija `stream` y el id del turno. */
+export type AgentSendMessageBody = Omit<
+  AiSchemas["SendAiConversationMessageDto"],
+  "clientMessageId" | "stream" | "context"
+> & {
   clientMessageId: string
   stream: true
   context?: AgentInvocationContext

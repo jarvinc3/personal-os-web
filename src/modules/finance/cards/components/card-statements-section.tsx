@@ -161,6 +161,12 @@ export function CardStatementsSection({
               </p>
             </article>
           ) : null}
+          {statements.length > 0 ? (
+            <p className="px-1 text-xs text-muted-foreground">
+              Los cortes son acumulativos: el saldo de cada uno incluye el
+              anterior y sus restantes no se suman como deudas.
+            </p>
+          ) : null}
           {statements.map((statement) => {
             const moneyDisplay = { ...display, currency: statement.currency }
             return (
@@ -205,7 +211,7 @@ export function CardStatementsSection({
                     {formatFinanceMoney(statement.paidAmount, moneyDisplay)}
                   </span>
                   <span>
-                    Restante{" "}
+                    Saldo del corte{" "}
                     {formatFinanceMoney(statement.remaining, moneyDisplay)}
                   </span>
                 </div>
