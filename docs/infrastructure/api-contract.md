@@ -60,7 +60,7 @@ type BalanceSheet =
 - Cuando el contrato todavía no describe un campo que el back ya acepta, el cliente lo declara en un alias local del tipo generado. Es el caso de `relevance` y `notes` en las verificaciones y de `templateFingerprint` como texto en la verificación por grupo.
 - Los montos son texto decimal (`string`); `null` significa "sin datos". Ver [ADR-002](../decisions/ADR-002-money-strings.md).
 
-El contrato versionado todavía no publica `clientMessageId` ni `stream` del envío de mensajes del agente (back #421). El overlay los declara como alias local en `src/modules/intelligence/types/agent-chat.types.ts` y los elimina cuando la copia OpenAPI se sincronice.
+El contrato ya publica `clientMessageId` y `stream` del envío de mensajes del agente. El cliente toma el cuerpo de `SendAiConversationMessageDto`, fija `stream: true` y exige `clientMessageId` en `AgentSendMessageBody`, y conserva el contexto local para el tipo de entidad `institution` que el contrato todavía no enumera.
 
 ## Cobertura del contrato
 
