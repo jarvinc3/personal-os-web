@@ -1073,6 +1073,10 @@ function SidebarMenuSample() {
   )
 }
 
+/**
+ * Abre el drawer móvil al montar: en un viewport angosto el componente dibuja
+ * esa presentación y, sin abrirla, el ejemplo quedaría vacío.
+ */
 function OpenMobileSidebar() {
   const { isMobile, setOpenMobile } = useSidebar()
 

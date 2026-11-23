@@ -14,12 +14,10 @@ function DropdownMenuPortal({
   container,
   ...props
 }: MenuPrimitive.Portal.Props) {
-  const portalContainer = usePortalContainer()
-
   return (
     <MenuPrimitive.Portal
       data-slot="dropdown-menu-portal"
-      container={container ?? portalContainer ?? undefined}
+      container={usePortalContainer(container)}
       {...props}
     />
   )

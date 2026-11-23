@@ -1,6 +1,19 @@
 "use client"
 
-import { createContext, useContext, type ReactNode } from "react"
+import {
+  createContext,
+  useContext,
+  type ReactNode,
+  type RefObject,
+} from "react"
+
+/** Lo que acepta el `container` del portal de Base UI. */
+export type PortalContainerProp =
+  | HTMLElement
+  | ShadowRoot
+  | RefObject<HTMLElement | ShadowRoot | null>
+  | null
+  | undefined
 
 const PortalContainerContext = createContext<HTMLElement | null>(null)
 
@@ -23,6 +36,13 @@ export function PortalContainerProvider({
   )
 }
 
-export function usePortalContainer(): HTMLElement | null {
-  return useContext(PortalContainerContext)
+/**
+ * Contenedor del portal: gana el explícito y, si no hay, el del proveedor.
+ * Sin ninguno, el primitivo usa `document.body`.
+ */
+export function usePortalContainer(
+  container?: PortalContainerProp
+): PortalContainerProp {
+  const inheritedContainer = useContext(PortalContainerContext)
+  return container ?? inheritedContainer
 }

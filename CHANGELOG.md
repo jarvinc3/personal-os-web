@@ -12,6 +12,8 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Cambiado
 
+- Interno: la galería de variantes resuelve el contenedor del portal en una sola función que usan los seis wrappers de overlay, da nombre al tipo de los ejemplos por grupo y arma sus dos pruebas con una sola lista de fichas cubiertas. Sin cambio visible (#613).
+
 - La ficha de la galería dice «No tiene una composición anidada» y no pinta el árbol cuando la anatomía no tiene hijos; las fichas con hijos conservan el árbol completo (#607).
 - La sección Variantes y estados pinta también las variantes y los estados de entradas, selectores y overlays (30 fichas): campos con su tipo, su error, su estado deshabilitado y su modo de entrada, casillas marcadas e indeterminadas, ruedas de hora y listas de días, y cada hoja, diálogo, menú, tooltip y paleta abiertos dentro de su recuadro. Los portales de esos componentes aceptan un contenedor propio, así el overlay se monta en su ejemplo y no tapa la galería (#601).
 - #610: el CI corre en los runners de GitHub (`ubuntu-latest`) en lugar de los runners self-hosted de la PC de casa, ahora que los repos son públicos. Mismas validaciones; el job `contract` lee el `swagger-spec.json` de `personal-os-back` sin `BACK_REPO_TOKEN` y un push nuevo a un PR cancela su corrida anterior sin cancelar los push a `develop`.

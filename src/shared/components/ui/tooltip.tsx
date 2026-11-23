@@ -38,10 +38,8 @@ function TooltipContent({
     TooltipPrimitive.Positioner.Props,
     "align" | "alignOffset" | "side" | "sideOffset"
   >) {
-  const portalContainer = usePortalContainer()
-
   return (
-    <TooltipPrimitive.Portal container={portalContainer ?? undefined}>
+    <TooltipPrimitive.Portal container={usePortalContainer()}>
       <TooltipPrimitive.Positioner
         align={align}
         alignOffset={alignOffset}
