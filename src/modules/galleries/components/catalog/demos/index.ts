@@ -10,7 +10,10 @@ import {
   encabezadosDemos,
   encabezadosVariantDemos,
 } from "@/src/modules/galleries/components/catalog/demos/encabezados"
-import { entradasDemos } from "@/src/modules/galleries/components/catalog/demos/entradas"
+import {
+  entradasDemos,
+  entradasVariantDemos,
+} from "@/src/modules/galleries/components/catalog/demos/entradas"
 import {
   estadosDemos,
   estadosVariantDemos,
@@ -31,8 +34,14 @@ import {
   montosDemos,
   montosVariantDemos,
 } from "@/src/modules/galleries/components/catalog/demos/montos"
-import { overlaysDemos } from "@/src/modules/galleries/components/catalog/demos/overlays"
-import { selectoresDemos } from "@/src/modules/galleries/components/catalog/demos/selectores"
+import {
+  overlaysDemos,
+  overlaysVariantDemos,
+} from "@/src/modules/galleries/components/catalog/demos/overlays"
+import {
+  selectoresDemos,
+  selectoresVariantDemos,
+} from "@/src/modules/galleries/components/catalog/demos/selectores"
 import {
   tabsDemos,
   tabsVariantDemos,
@@ -60,7 +69,10 @@ export const GALLERY_DEMOS: GalleryDemoMap = {
 
 /** Ejemplos pintados de variantes y estados, por ficha y por grupo. */
 export const GALLERY_VARIANT_DEMOS: GalleryVariantDemoMap = {
+  ...entradasVariantDemos,
+  ...selectoresVariantDemos,
   ...accionesVariantDemos,
+  ...overlaysVariantDemos,
   ...tabsVariantDemos,
   ...listasVariantDemos,
   ...encabezadosVariantDemos,

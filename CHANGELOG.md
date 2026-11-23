@@ -12,6 +12,8 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Cambiado
 
+- La sección Variantes y estados pinta también las variantes y los estados de entradas, selectores y overlays (30 fichas): campos con su tipo, su error, su estado deshabilitado y su modo de entrada, casillas marcadas e indeterminadas, ruedas de hora y listas de días, y cada hoja, diálogo, menú, tooltip y paleta abiertos dentro de su recuadro. Los portales de esos componentes aceptan un contenedor propio, así el overlay se monta en su ejemplo y no tapa la galería (#601).
+
 - La sección Variantes y estados pinta también las variantes y los estados de listas, encabezados, montos y estados (26 fichas): filas de Item con sus tamaños y su estado deshabilitado por el padre, acordeón abierto y cerrado, avatar con imagen o iniciales, montos con su tono y su signo, campos de monto y fecha con su error, y los estados vacío, carga, error y reintento (#600).
 
 - La sección Variantes y estados de la galería de Ajustes → Apariencia pinta cada variante y cada estado con el componente real y su etiqueta en las 20 fichas de acciones, avisos, tabs, estructura y gráficos, y deja la tabla de propiedades como resumen. Los estados que solo existen al interactuar (hover, focus, copiado) siguen solo en la tabla; una ficha sin ejemplos muestra solo su tabla (#599).

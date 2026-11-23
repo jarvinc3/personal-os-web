@@ -14,7 +14,10 @@ const DEMOS_DIR = join(
 
 /** Categorías que ya pintan sus variantes; crece una ola por issue. */
 const COVERED_CATEGORIES: readonly ComponentGallerySectionId[] = [
+  "entradas",
+  "selectores",
   "acciones",
+  "overlays",
   "avisos",
   "tabs",
   "listas",
