@@ -90,6 +90,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarProvider,
+  SidebarTrigger,
   useSidebar,
 } from "@/src/shared/components/ui/sidebar"
 import {
@@ -1227,8 +1228,8 @@ function SidebarExample({
   mobile = false,
 }: SidebarExampleProps) {
   return (
-    <div className="relative flex h-96 w-full max-w-sm overflow-hidden rounded-xl border border-border/70 bg-background">
-      <SidebarProvider defaultOpen={open} className="h-full min-h-0">
+    <div className="gallery-sidebar-embed relative flex h-96 w-full max-w-sm overflow-hidden rounded-xl border border-border/70 bg-background">
+      <SidebarProvider defaultOpen={open} className="h-full min-h-0 w-full">
         <div className={mobile ? "md:hidden" : undefined}>
           <Sidebar collapsible={collapsible} variant={variant}>
             <SidebarContent>
@@ -1239,7 +1240,19 @@ function SidebarExample({
             </SidebarContent>
           </Sidebar>
         </div>
-        {mobile ? <MobileSidebarTrigger /> : null}
+        <div className="flex min-h-0 flex-1 flex-col">
+          <div className="flex items-center gap-2 border-b border-border/70 px-2 py-1.5">
+            <SidebarTrigger />
+            <span className="text-xs text-muted-foreground">Vista</span>
+          </div>
+          <div className="flex-1 p-3 text-xs text-muted-foreground">
+            {mobile ? (
+              <MobileSidebarTrigger />
+            ) : (
+              <p>El contenido de la vista va aquí.</p>
+            )}
+          </div>
+        </div>
       </SidebarProvider>
     </div>
   )

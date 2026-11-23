@@ -82,6 +82,12 @@ body {
   position: relative;
 }
 
+/* Galería: el sidebar real vive dentro de su recuadro y no cubre la app. */
+.gallery-sidebar-embed [data-slot="sidebar-container"] {
+  position: absolute;
+  height: 100%;
+}
+
 /* ─── Scrollbar hide (for vaul drawer) ───────────────────────── */
 .scrollbar-hide {
   -ms-overflow-style: none;
