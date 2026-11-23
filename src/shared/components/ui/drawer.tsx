@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { usePortalContainer } from "@/src/shared/context/portal-container"
+import { useIsMobile } from "@/src/shared/hooks/use-mobile"
 import { Drawer as DrawerPrimitive } from "@base-ui/react/drawer"
 import { cn } from "@/src/shared/lib/utils"
 
@@ -28,15 +29,22 @@ function Drawer({
   modal = true,
   showSwipeHandle = false,
   snapPoints,
-  swipeDirection = "down",
+  swipeDirection,
   ...props
 }: DrawerPrimitive.Root.Props & {
   showSwipeHandle?: boolean
 }) {
+  const isMobile = useIsMobile()
   const hasSnapPoints = snapPoints != null && snapPoints.length > 0
+  const resolvedSwipeDirection = swipeDirection ?? (isMobile ? "down" : "right")
   const contextValue = React.useMemo(
-    () => ({ hasSnapPoints, modal, showSwipeHandle, swipeDirection }),
-    [hasSnapPoints, modal, showSwipeHandle, swipeDirection]
+    () => ({
+      hasSnapPoints,
+      modal,
+      showSwipeHandle,
+      swipeDirection: resolvedSwipeDirection,
+    }),
+    [hasSnapPoints, modal, showSwipeHandle, resolvedSwipeDirection]
   )
 
   return (
@@ -45,7 +53,7 @@ function Drawer({
         data-slot="drawer"
         modal={modal}
         snapPoints={snapPoints}
-        swipeDirection={swipeDirection}
+        swipeDirection={resolvedSwipeDirection}
         {...props}
       />
     </DrawerContext.Provider>

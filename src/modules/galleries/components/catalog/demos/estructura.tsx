@@ -9,6 +9,7 @@ import {
 import {
   CodeBlock,
   CodeBlockContent,
+  CodeBlockLine,
 } from "@/src/shared/components/ui/code-block"
 import { ScrollArea, ScrollBar } from "@/src/shared/components/ui/scroll-area"
 import { Separator } from "@/src/shared/components/ui/separator"
@@ -334,6 +335,47 @@ export const estructuraVariantDemos: GalleryVariantDemoMap = {
           <CodeBlock size="sm" className="w-full max-w-xs">
             <CodeBlockContent lineNumbers>
               {'const total = "1850.00"\nconst moneda = "DOP"'}
+            </CodeBlockContent>
+          </CodeBlock>
+        ),
+      },
+    ],
+    "variant (Line)": [
+      {
+        label: "added",
+        node: (
+          <CodeBlock size="sm" className="w-full max-w-xs">
+            <CodeBlockContent>
+              <CodeBlockLine>{'const total = "1850.00"'}</CodeBlockLine>
+              <CodeBlockLine variant="added">
+                {'const moneda = "DOP"'}
+              </CodeBlockLine>
+            </CodeBlockContent>
+          </CodeBlock>
+        ),
+      },
+      {
+        label: "removed",
+        node: (
+          <CodeBlock size="sm" className="w-full max-w-xs">
+            <CodeBlockContent>
+              <CodeBlockLine>{'const total = "1850.00"'}</CodeBlockLine>
+              <CodeBlockLine variant="removed">
+                {'const moneda = "USD"'}
+              </CodeBlockLine>
+            </CodeBlockContent>
+          </CodeBlock>
+        ),
+      },
+      {
+        label: "highlighted",
+        node: (
+          <CodeBlock size="sm" className="w-full max-w-xs">
+            <CodeBlockContent>
+              <CodeBlockLine>{'const total = "1850.00"'}</CodeBlockLine>
+              <CodeBlockLine variant="highlighted">
+                {'const moneda = "DOP"'}
+              </CodeBlockLine>
             </CodeBlockContent>
           </CodeBlock>
         ),

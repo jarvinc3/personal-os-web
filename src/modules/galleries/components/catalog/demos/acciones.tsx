@@ -527,6 +527,15 @@ export const accionesVariantDemos: GalleryVariantDemoMap = {
     ],
     size: [
       {
+        label: "xs",
+        node: (
+          <Button size="xs">
+            <PlusIcon />
+            Extra pequeño
+          </Button>
+        ),
+      },
+      {
         label: "sm",
         node: (
           <Button size="sm">
@@ -557,6 +566,14 @@ export const accionesVariantDemos: GalleryVariantDemoMap = {
         label: "icon",
         node: (
           <Button size="icon" aria-label="Más acciones">
+            <EllipsisVerticalIcon />
+          </Button>
+        ),
+      },
+      {
+        label: "icon-xs",
+        node: (
+          <Button size="icon-xs" aria-label="Más acciones">
             <EllipsisVerticalIcon />
           </Button>
         ),

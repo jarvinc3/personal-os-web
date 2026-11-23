@@ -263,7 +263,7 @@ const sheet = useSheetParam(FINANCE_SHEET_KEYS.category)
   DrawerTitle,
 } from "@/src/shared/components/ui/drawer"
 
-<Drawer open={open} onOpenChange={setOpen} swipeDirection="down">
+<Drawer open={open} onOpenChange={setOpen}>
   <DrawerContent>
     <DrawerHeader>
       <DrawerTitle>Título</DrawerTitle>
@@ -295,6 +295,8 @@ const sheet = useSheetParam(FINANCE_SHEET_KEYS.category)
     ],
     variants: [
       { name: "swipeDirection", values: "down, up, left, right" },
+      { name: "modal", values: "true, false" },
+      { name: "anidado", values: "un drawer sobre otro" },
       { name: "showSwipeHandle / snapPoints", values: "opcionales" },
     ],
     props: [
@@ -306,7 +308,25 @@ const sheet = useSheetParam(FINANCE_SHEET_KEYS.category)
       {
         name: "swipeDirection",
         type: '"down" | "up" | "left" | "right"',
-        description: "Lado del que entra y gesto que lo cierra.",
+        description:
+          "Lado del que entra y gesto que lo cierra. Por defecto, derecha en escritorio y abajo en móvil.",
+      },
+      {
+        name: "modal",
+        type: 'boolean | "trap-focus"',
+        description: "Con false, la página sigue interactiva detrás del panel.",
+      },
+      {
+        name: "snapPoints",
+        type: "(number | string)[]",
+        description:
+          "Alturas donde se detiene el panel: fracciones de 0 a 1 o medidas en px/rem.",
+      },
+      {
+        name: "showSwipeHandle",
+        type: "boolean",
+        description:
+          "Muestra el tirador que permite arrastrar entre puntos de anclaje.",
       },
     ],
   },
@@ -624,6 +644,8 @@ const sheet = useSheetParam(FINANCE_SHEET_KEYS.category)
       { name: "collapsible", values: "offcanvas, icon, none" },
       { name: "variant", values: "sidebar, floating, inset" },
       { name: "mobile", values: "Drawer lateral" },
+      { name: "variant (MenuButton)", values: "default, outline" },
+      { name: "size (MenuButton)", values: "default, sm, lg" },
     ],
     props: [
       {
@@ -640,6 +662,16 @@ const sheet = useSheetParam(FINANCE_SHEET_KEYS.category)
         name: "isActive (MenuButton)",
         type: "boolean",
         description: "Marca la ruta activa.",
+      },
+      {
+        name: "variant (SidebarMenuButton)",
+        type: '"default" | "outline"',
+        description: "Aspecto del botón de cada entrada del menú.",
+      },
+      {
+        name: "size (SidebarMenuButton)",
+        type: '"default" | "sm" | "lg"',
+        description: "Alto del botón de cada entrada del menú.",
       },
     ],
   },

@@ -1,4 +1,5 @@
 import { useState } from "react"
+import Image from "next/image"
 import Link from "next/link"
 import {
   BellIcon,
@@ -554,6 +555,50 @@ export const listasVariantDemos: GalleryVariantDemoMap = {
               </ItemContent>
             </Item>
           </div>
+        ),
+      },
+    ],
+    "variant (Media)": [
+      {
+        label: "default",
+        node: (
+          <Item className="w-full max-w-sm">
+            <ItemMedia>
+              <BellIcon />
+            </ItemMedia>
+            <ItemContent>
+              <ItemTitle>Sin fondo</ItemTitle>
+              <ItemDescription>La media queda desnuda</ItemDescription>
+            </ItemContent>
+          </Item>
+        ),
+      },
+      {
+        label: "icon",
+        node: (
+          <Item className="w-full max-w-sm">
+            <ItemMedia variant="icon">
+              <BellIcon />
+            </ItemMedia>
+            <ItemContent>
+              <ItemTitle>Con fondo</ItemTitle>
+              <ItemDescription>Icono dentro de un círculo</ItemDescription>
+            </ItemContent>
+          </Item>
+        ),
+      },
+      {
+        label: "image",
+        node: (
+          <Item className="w-full max-w-sm">
+            <ItemMedia variant="image">
+              <Image src="/images/image.png" alt="" width={40} height={40} />
+            </ItemMedia>
+            <ItemContent>
+              <ItemTitle>Con imagen</ItemTitle>
+              <ItemDescription>Miniatura recortada</ItemDescription>
+            </ItemContent>
+          </Item>
         ),
       },
     ],

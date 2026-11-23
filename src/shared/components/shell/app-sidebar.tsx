@@ -10,6 +10,7 @@ import {
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
@@ -289,22 +290,24 @@ function NavMainCollapsibleItem({
             sideOffset={8}
             className="min-w-48"
           >
-            <DropdownMenuLabel>{item.title}</DropdownMenuLabel>
-            {sections.map((section) => (
-              <DropdownMenuItem
-                key={section.href}
-                render={<Link href={section.href} className="relative" />}
-                className={
-                  isModuleSectionActive(section, pathname)
-                    ? "bg-accent text-accent-foreground"
-                    : undefined
-                }
-              >
-                {section.icon && <section.icon />}
-                <span>{section.label}</span>
-                <LinkPendingOverlay />
-              </DropdownMenuItem>
-            ))}
+            <DropdownMenuGroup>
+              <DropdownMenuLabel>{item.title}</DropdownMenuLabel>
+              {sections.map((section) => (
+                <DropdownMenuItem
+                  key={section.href}
+                  render={<Link href={section.href} className="relative" />}
+                  className={
+                    isModuleSectionActive(section, pathname)
+                      ? "bg-accent text-accent-foreground"
+                      : undefined
+                  }
+                >
+                  {section.icon && <section.icon />}
+                  <span>{section.label}</span>
+                  <LinkPendingOverlay />
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuGroup>
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>

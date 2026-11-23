@@ -173,6 +173,7 @@ export const estructuraDocs: readonly GalleryComponentMeta[] = [
     variants: [
       { name: "variant", values: "default, destructive" },
       { name: "size", values: "default, sm" },
+      { name: "variant (Line)", values: "added, removed, highlighted" },
       { name: "states", values: "copiado, con wrap, con números de línea" },
     ],
     props: [
@@ -190,6 +191,11 @@ export const estructuraDocs: readonly GalleryComponentMeta[] = [
         name: "value (CopyButton)",
         type: "string",
         description: "Texto que se copia al portapapeles.",
+      },
+      {
+        name: "variant (CodeBlockLine)",
+        type: '"default" | "added" | "removed" | "highlighted"',
+        description: "Marca una línea como agregada, quitada o resaltada.",
       },
     ],
   },

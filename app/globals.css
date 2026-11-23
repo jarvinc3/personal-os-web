@@ -78,6 +78,10 @@
   }
 }
 
+body {
+  position: relative;
+}
+
 /* ─── Scrollbar hide (for vaul drawer) ───────────────────────── */
 .scrollbar-hide {
   -ms-overflow-style: none;

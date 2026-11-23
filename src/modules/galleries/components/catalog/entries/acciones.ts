@@ -27,7 +27,10 @@ import { SaveIcon } from "lucide-react"
         name: "variant",
         values: "default, outline, secondary, ghost, destructive, link",
       },
-      { name: "size", values: "sm, default, lg, icon, icon-sm, icon-lg" },
+      {
+        name: "size",
+        values: "xs, sm, default, lg, icon, icon-xs, icon-sm, icon-lg",
+      },
       { name: "states", values: "normal, hover, focus, pending, disabled" },
     ],
     props: [

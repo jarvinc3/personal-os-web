@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import {
   BellIcon,
   CopyIcon,
@@ -6,9 +6,12 @@ import {
   FileTextIcon,
   HomeIcon,
   LandmarkIcon,
+  LayersIcon,
   PanelBottomIcon,
+  PanelLeftIcon,
   PencilIcon,
   SaveIcon,
+  SearchIcon,
   SettingsIcon,
   StoreIcon,
   Trash2Icon,
@@ -16,7 +19,6 @@ import {
 } from "lucide-react"
 
 import { simulatedTap } from "@/src/modules/galleries/components/simulated-tap"
-import { OverlayFrame } from "@/src/modules/galleries/components/overlay-frame"
 import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import { ConfirmDialog } from "@/src/shared/components/feedback/confirm-dialog"
 import { Button } from "@/src/shared/components/ui/button"
@@ -60,6 +62,7 @@ import {
   DrawerFooter,
   DrawerHeader,
   DrawerTitle,
+  DrawerTrigger,
 } from "@/src/shared/components/ui/drawer"
 import {
   DropdownMenu,
@@ -94,6 +97,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/src/shared/components/ui/tooltip"
+import { useIsMobile } from "@/src/shared/hooks/use-mobile"
+import { usePicker } from "@/src/shared/hooks/use-picker"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 
 import type {
@@ -106,6 +111,10 @@ const EDIT_SHEET_ID = "editar"
 const FLOATING_SHEET_ID = "flotante"
 const WIDE_SHEET_ID = "ancha"
 const DRAWER_SHEET_ID = "drawer"
+
+const NESTED_PICKER_NONE = "none"
+const NESTED_PICKER_OPEN = "anidado"
+type NestedPicker = typeof NESTED_PICKER_NONE | typeof NESTED_PICKER_OPEN
 
 function BottomSheetDemo() {
   const { open, sheetId, setOpen } = useSheetParam(SHEET_PARAM)
@@ -236,11 +245,7 @@ function DrawerDemo() {
         <PanelBottomIcon />
         Abrir drawer
       </Button>
-      <Drawer
-        open={drawerOpen}
-        onOpenChange={(next) => setOpen(next)}
-        swipeDirection="down"
-      >
+      <Drawer open={drawerOpen} onOpenChange={(next) => setOpen(next)}>
         <DrawerContent>
           <DrawerHeader>
             <DrawerTitle>Drawer de ejemplo</DrawerTitle>
@@ -498,7 +503,6 @@ const drawerOpen = open && sheetId === "drawer"
   <Drawer
     open={drawerOpen}
     onOpenChange={(next) => setOpen(next)}
-    swipeDirection="down"
   >
     <DrawerContent>
       <DrawerHeader>
@@ -575,8 +579,8 @@ const drawerOpen = open && sheetId === "drawer"
     Más
   </DropdownMenuTrigger>
   <DropdownMenuContent>
-    <DropdownMenuLabel>Acciones</DropdownMenuLabel>
     <DropdownMenuGroup>
+      <DropdownMenuLabel>Acciones</DropdownMenuLabel>
       <DropdownMenuItem onClick={() => simulatedTap("Editar")}>
         <PencilIcon />
         Editar
@@ -604,8 +608,8 @@ const drawerOpen = open && sheetId === "drawer"
             Más
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            <DropdownMenuLabel>Acciones</DropdownMenuLabel>
             <DropdownMenuGroup>
+              <DropdownMenuLabel>Acciones</DropdownMenuLabel>
               <DropdownMenuItem onClick={() => simulatedTap("Editar")}>
                 <PencilIcon />
                 Editar
@@ -784,6 +788,7 @@ const drawerOpen = open && sheetId === "drawer"
 }
 
 type SheetExampleProps = {
+  id: string
   variant?: "default" | "floating"
   size?: "default" | "wide"
   pending?: boolean
@@ -791,24 +796,31 @@ type SheetExampleProps = {
 }
 
 function SheetExample({
+  id,
   variant = "default",
   size = "default",
   pending = false,
   title = "Editar comercio",
 }: SheetExampleProps) {
+  const { open, sheetId, setOpen } = useSheetParam(SHEET_PARAM)
+
   return (
-    <OverlayFrame>
+    <>
+      <Button variant="outline" onClick={() => setOpen(true, id)}>
+        <PanelBottomIcon />
+        Abrir hoja
+      </Button>
       <BottomSheet
-        open
+        open={open && sheetId === id}
         variant={variant}
         size={size}
         pending={pending}
-        onOpenChange={() => {}}
+        onOpenChange={(next) => setOpen(next)}
         title={title}
         description="Los cambios se guardan al confirmar."
         actions={{
           submit: (
-            <Button>
+            <Button onClick={() => setOpen(false)}>
               <SaveIcon />
               Guardar
             </Button>
@@ -819,7 +831,7 @@ function SheetExample({
           El contenido de la hoja vive aquí.
         </p>
       </BottomSheet>
-    </OverlayFrame>
+    </>
   )
 }
 
@@ -838,51 +850,79 @@ function ConfirmExample({
   wide = false,
   title = "¿Eliminar el movimiento?",
 }: ConfirmExampleProps) {
+  const [open, setOpen] = useState(false)
+
   return (
-    <OverlayFrame>
+    <>
+      <Button
+        variant={tone === "danger" ? "destructive" : "outline"}
+        onClick={() => setOpen(true)}
+      >
+        <Trash2Icon />
+        Abrir confirmación
+      </Button>
       <ConfirmDialog
-        open
-        onOpenChange={() => {}}
+        open={open}
+        onOpenChange={setOpen}
         tone={tone}
         icon={Trash2Icon}
         title={title}
         description="Se quitará de la lista y del saldo de la cuenta."
         confirmLabel="Eliminar"
         confirmIcon={Trash2Icon}
-        onConfirm={() => {}}
+        onConfirm={() => simulatedTap("Eliminar movimiento")}
         pending={pending}
         confirmDisabled={confirmDisabled}
         wide={wide}
       />
-    </OverlayFrame>
+    </>
   )
 }
 
-function DrawerExample({
-  swipeDirection = "down",
-  showSwipeHandle = false,
-  snapPoints,
-}: {
+type DrawerExampleProps = {
+  id: string
   swipeDirection?: "down" | "up" | "left" | "right"
   showSwipeHandle?: boolean
-  snapPoints?: number[]
-}) {
+  snapPoints?: (number | string)[]
+  modal?: boolean
+  disablePointerDismissal?: boolean
+}
+
+function DrawerExample({
+  id,
+  swipeDirection,
+  showSwipeHandle = false,
+  snapPoints,
+  modal = true,
+  disablePointerDismissal = false,
+}: DrawerExampleProps) {
+  const { open, sheetId, setOpen } = useSheetParam(SHEET_PARAM)
+  const directionDescription = swipeDirection
+    ? `Se abre hacia ${swipeDirection}.`
+    : "Se abre desde el borde que toca: derecha en escritorio y abajo en móvil."
+  const description = modal
+    ? directionDescription
+    : "No bloquea la página: el fondo sigue interactivo."
+
   return (
-    <OverlayFrame>
+    <>
+      <Button variant="outline" onClick={() => setOpen(true, id)}>
+        <PanelBottomIcon />
+        Abrir drawer
+      </Button>
       <Drawer
-        open
-        modal={false}
+        open={open && sheetId === id}
         swipeDirection={swipeDirection}
         showSwipeHandle={showSwipeHandle}
         snapPoints={snapPoints}
-        onOpenChange={() => {}}
+        modal={modal}
+        disablePointerDismissal={disablePointerDismissal}
+        onOpenChange={(next) => setOpen(next)}
       >
         <DrawerContent>
           <DrawerHeader>
             <DrawerTitle>Drawer de ejemplo</DrawerTitle>
-            <DrawerDescription>
-              Se abre hacia {swipeDirection}.
-            </DrawerDescription>
+            <DrawerDescription>{description}</DrawerDescription>
           </DrawerHeader>
           <div className="px-4 pb-4 text-sm text-muted-foreground">
             El contenido del panel vive aquí.
@@ -894,7 +934,73 @@ function DrawerExample({
           </DrawerFooter>
         </DrawerContent>
       </Drawer>
-    </OverlayFrame>
+    </>
+  )
+}
+
+function NestedDrawerExample({ id }: { id: string }) {
+  const { open, sheetId, setOpen } = useSheetParam(SHEET_PARAM)
+  const { picker, openPicker, closeHandlerFor } =
+    usePicker<NestedPicker>(NESTED_PICKER_NONE)
+  const isMobile = useIsMobile()
+
+  return (
+    <>
+      <Button variant="outline" onClick={() => setOpen(true, id)}>
+        <PanelBottomIcon />
+        Abrir drawer
+      </Button>
+      <Drawer
+        open={open && sheetId === id}
+        showSwipeHandle={isMobile}
+        onOpenChange={(next) => setOpen(next)}
+      >
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle>Drawer principal</DrawerTitle>
+            <DrawerDescription>
+              Abre otro drawer encima: el primero queda montado detrás.
+            </DrawerDescription>
+          </DrawerHeader>
+          <div className="px-4 pb-4 text-sm text-muted-foreground">
+            Los drawers se apilan en el orden en que se abren.
+          </div>
+          <DrawerFooter>
+            <Drawer
+              open={picker === NESTED_PICKER_OPEN}
+              onOpenChange={closeHandlerFor(NESTED_PICKER_OPEN)}
+            >
+              <DrawerTrigger
+                render={<Button variant="outline" />}
+                onClick={() => openPicker(NESTED_PICKER_OPEN)}
+              >
+                <LayersIcon />
+                Abrir drawer anidado
+              </DrawerTrigger>
+              <DrawerContent>
+                <DrawerHeader>
+                  <DrawerTitle>Drawer anidado</DrawerTitle>
+                  <DrawerDescription>
+                    Se cierra solo; el drawer principal sigue abierto.
+                  </DrawerDescription>
+                </DrawerHeader>
+                <div className="px-4 pb-4 text-sm text-muted-foreground">
+                  El panel de abajo asoma como una pila.
+                </div>
+                <DrawerFooter>
+                  <DrawerClose render={<Button variant="outline" />}>
+                    Cerrar
+                  </DrawerClose>
+                </DrawerFooter>
+              </DrawerContent>
+            </Drawer>
+            <DrawerClose render={<Button variant="outline" />}>
+              Cerrar
+            </DrawerClose>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
+    </>
   )
 }
 
@@ -908,34 +1014,32 @@ function MenuExample({
   disabled?: boolean
 }) {
   return (
-    <OverlayFrame className="h-64" confine={false}>
-      <DropdownMenu defaultOpen>
-        <DropdownMenuTrigger render={<Button variant="outline" />}>
-          <EllipsisVerticalIcon />
-          Más
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-52">
-          <DropdownMenuGroup>
-            <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-            <DropdownMenuItem>
-              <PencilIcon />
-              Editar
-            </DropdownMenuItem>
-            <DropdownMenuCheckboxItem checked={checked}>
-              Destacar
-            </DropdownMenuCheckboxItem>
-            <DropdownMenuItem variant={destructive ? "destructive" : "default"}>
-              <Trash2Icon />
-              Eliminar
-            </DropdownMenuItem>
-            <DropdownMenuItem disabled={disabled}>
-              <CopyIcon />
-              Duplicar
-            </DropdownMenuItem>
-          </DropdownMenuGroup>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </OverlayFrame>
+    <DropdownMenu>
+      <DropdownMenuTrigger render={<Button variant="outline" />}>
+        <EllipsisVerticalIcon />
+        Más
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className="w-52">
+        <DropdownMenuGroup>
+          <DropdownMenuLabel>Acciones</DropdownMenuLabel>
+          <DropdownMenuItem>
+            <PencilIcon />
+            Editar
+          </DropdownMenuItem>
+          <DropdownMenuCheckboxItem checked={checked}>
+            Destacar
+          </DropdownMenuCheckboxItem>
+          <DropdownMenuItem variant={destructive ? "destructive" : "default"}>
+            <Trash2Icon />
+            Eliminar
+          </DropdownMenuItem>
+          <DropdownMenuItem disabled={disabled}>
+            <CopyIcon />
+            Duplicar
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }
 
@@ -947,27 +1051,29 @@ function AlertExample({
   actionVariant?: "default" | "destructive" | "outline"
 }) {
   return (
-    <OverlayFrame>
-      <AlertDialog open onOpenChange={() => {}}>
-        <AlertDialogContent size={size}>
-          <AlertDialogHeader>
-            <AlertDialogMedia>
-              <Trash2Icon />
-            </AlertDialogMedia>
-            <AlertDialogTitle>¿Eliminar el movimiento?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Se quitará de la lista y del saldo de la cuenta.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction variant={actionVariant}>
-              Eliminar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </OverlayFrame>
+    <AlertDialog>
+      <AlertDialogTrigger render={<Button variant="destructive" />}>
+        <Trash2Icon />
+        Eliminar
+      </AlertDialogTrigger>
+      <AlertDialogContent size={size}>
+        <AlertDialogHeader>
+          <AlertDialogMedia>
+            <Trash2Icon />
+          </AlertDialogMedia>
+          <AlertDialogTitle>¿Eliminar el movimiento?</AlertDialogTitle>
+          <AlertDialogDescription>
+            Se quitará de la lista y del saldo de la cuenta.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+          <AlertDialogAction variant={actionVariant}>
+            Eliminar
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   )
 }
 
@@ -977,27 +1083,29 @@ function DialogExample({
   showCloseButton?: boolean
 }) {
   return (
-    <OverlayFrame>
-      <Dialog open onOpenChange={() => {}}>
-        <DialogContent showCloseButton={showCloseButton}>
-          <DialogHeader>
-            <DialogTitle>Renombrar etiqueta</DialogTitle>
-            <DialogDescription>
-              El nombre cambia en todas partes.
-            </DialogDescription>
-          </DialogHeader>
-          <p className="text-sm text-muted-foreground">
-            Un formulario corto puede vivir aquí.
-          </p>
-          <DialogFooter>
-            <Button>
-              <SaveIcon />
-              Guardar
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </OverlayFrame>
+    <Dialog>
+      <DialogTrigger render={<Button variant="outline" />}>
+        <PencilIcon />
+        Renombrar
+      </DialogTrigger>
+      <DialogContent showCloseButton={showCloseButton}>
+        <DialogHeader>
+          <DialogTitle>Renombrar etiqueta</DialogTitle>
+          <DialogDescription>
+            El nombre cambia en todas partes.
+          </DialogDescription>
+        </DialogHeader>
+        <p className="text-sm text-muted-foreground">
+          Un formulario corto puede vivir aquí.
+        </p>
+        <DialogFooter>
+          <Button>
+            <SaveIcon />
+            Guardar
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 }
 
@@ -1009,22 +1117,18 @@ function PopoverExample({
   align: "start" | "center" | "end"
 }) {
   return (
-    <OverlayFrame className="flex items-center justify-center" confine={false}>
-      <Popover defaultOpen>
-        <PopoverTrigger render={<Button variant="outline" />}>
-          <SettingsIcon />
-          Ajustes rápidos
-        </PopoverTrigger>
-        <PopoverContent side={side} align={align}>
-          <PopoverHeader>
-            <PopoverTitle>Densidad de la lista</PopoverTitle>
-            <PopoverDescription>
-              Se aplica solo a esta vista.
-            </PopoverDescription>
-          </PopoverHeader>
-        </PopoverContent>
-      </Popover>
-    </OverlayFrame>
+    <Popover>
+      <PopoverTrigger render={<Button variant="outline" />}>
+        <SettingsIcon />
+        Ajustes rápidos
+      </PopoverTrigger>
+      <PopoverContent side={side} align={align}>
+        <PopoverHeader>
+          <PopoverTitle>Densidad de la lista</PopoverTitle>
+          <PopoverDescription>Se aplica solo a esta vista.</PopoverDescription>
+        </PopoverHeader>
+      </PopoverContent>
+    </Popover>
   )
 }
 
@@ -1034,37 +1138,44 @@ function TooltipExample({
   side: "top" | "bottom" | "left" | "right"
 }) {
   return (
-    <OverlayFrame className="flex items-center justify-center" confine={false}>
-      <TooltipProvider>
-        <Tooltip defaultOpen>
-          <TooltipTrigger render={<Button variant="outline" size="icon" />}>
-            <PencilIcon />
-            <span className="sr-only">Editar</span>
-          </TooltipTrigger>
-          <TooltipContent side={side}>Editar</TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-    </OverlayFrame>
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger render={<Button variant="outline" size="icon" />}>
+          <PencilIcon />
+          <span className="sr-only">Editar</span>
+        </TooltipTrigger>
+        <TooltipContent side={side}>Editar</TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   )
 }
 
-function SidebarMenuSample() {
+type SidebarMenuButtonVariant = "default" | "outline"
+type SidebarMenuButtonSize = "default" | "sm" | "lg"
+
+function SidebarMenuSample({
+  buttonVariant,
+  buttonSize,
+}: {
+  buttonVariant?: SidebarMenuButtonVariant
+  buttonSize?: SidebarMenuButtonSize
+}) {
   return (
     <SidebarMenu>
       <SidebarMenuItem>
-        <SidebarMenuButton isActive>
+        <SidebarMenuButton variant={buttonVariant} size={buttonSize} isActive>
           <HomeIcon />
           <span>Inicio</span>
         </SidebarMenuButton>
       </SidebarMenuItem>
       <SidebarMenuItem>
-        <SidebarMenuButton>
+        <SidebarMenuButton variant={buttonVariant} size={buttonSize}>
           <LandmarkIcon />
           <span>Finanzas</span>
         </SidebarMenuButton>
       </SidebarMenuItem>
       <SidebarMenuItem>
-        <SidebarMenuButton>
+        <SidebarMenuButton variant={buttonVariant} size={buttonSize}>
           <SettingsIcon />
           <span>Ajustes</span>
         </SidebarMenuButton>
@@ -1073,72 +1184,121 @@ function SidebarMenuSample() {
   )
 }
 
-/**
- * Abre el drawer móvil al montar: en un viewport angosto el componente dibuja
- * esa presentación y, sin abrirla, el ejemplo quedaría vacío.
- */
-function OpenMobileSidebar() {
+function MobileSidebarTrigger() {
   const { isMobile, setOpenMobile } = useSidebar()
 
-  useEffect(() => {
-    if (isMobile) {
-      setOpenMobile(true)
-    }
-  }, [isMobile, setOpenMobile])
+  if (!isMobile) {
+    return (
+      <p className="text-xs text-muted-foreground">
+        El drawer lateral se abre en pantallas angostas.
+      </p>
+    )
+  }
 
-  return null
+  return (
+    <Button variant="outline" onClick={() => setOpenMobile(true)}>
+      <PanelLeftIcon />
+      Abrir menú lateral
+    </Button>
+  )
+}
+
+type SidebarExampleProps = {
+  collapsible?: "offcanvas" | "icon" | "none"
+  variant?: "sidebar" | "floating" | "inset"
+  buttonVariant?: SidebarMenuButtonVariant
+  buttonSize?: SidebarMenuButtonSize
+  open?: boolean
+  mobile?: boolean
 }
 
 function SidebarExample({
   collapsible = "offcanvas",
   variant = "floating",
+  buttonVariant,
+  buttonSize,
   open = true,
-}: {
-  collapsible?: "offcanvas" | "icon" | "none"
-  variant?: "sidebar" | "floating" | "inset"
-  open?: boolean
-}) {
+  mobile = false,
+}: SidebarExampleProps) {
   return (
-    <OverlayFrame className="h-96">
+    <div className="relative flex h-96 w-full max-w-sm overflow-hidden rounded-xl border border-border/70 bg-background">
       <SidebarProvider defaultOpen={open} className="h-full min-h-0">
-        <OpenMobileSidebar />
-        <Sidebar collapsible={collapsible} variant={variant}>
-          <SidebarContent>
-            <SidebarMenuSample />
-          </SidebarContent>
-        </Sidebar>
+        <div className={mobile ? "md:hidden" : undefined}>
+          <Sidebar collapsible={collapsible} variant={variant}>
+            <SidebarContent>
+              <SidebarMenuSample
+                buttonVariant={buttonVariant}
+                buttonSize={buttonSize}
+              />
+            </SidebarContent>
+          </Sidebar>
+        </div>
+        {mobile ? <MobileSidebarTrigger /> : null}
       </SidebarProvider>
-    </OverlayFrame>
+    </div>
+  )
+}
+
+function CommandDialogExample() {
+  const [open, setOpen] = useState(false)
+
+  return (
+    <>
+      <Button variant="outline" onClick={() => setOpen(true)}>
+        <SearchIcon />
+        Abrir paleta
+      </Button>
+      <CommandDialog open={open} onOpenChange={setOpen}>
+        <Command>
+          <CommandInput
+            placeholder="Buscar una acción"
+            aria-label="Buscar una acción"
+          />
+          <CommandList>
+            <CommandEmpty>Sin resultados</CommandEmpty>
+            <CommandGroup heading="Ir a">
+              <CommandItem>
+                <HomeIcon />
+                Inicio
+              </CommandItem>
+              <CommandItem>
+                <LandmarkIcon />
+                Finanzas
+              </CommandItem>
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </CommandDialog>
+    </>
   )
 }
 
 export const overlaysVariantDemos: GalleryVariantDemoMap = {
   "bottom-sheet": {
     variant: [
-      { label: "default", node: <SheetExample /> },
+      { label: "default", node: <SheetExample id="hoja-default" /> },
       {
         label: "floating",
         node: (
-          <SheetExample variant="floating" title="Sincronización completada" />
+          <SheetExample
+            id="hoja-flotante"
+            variant="floating"
+            title="Sincronización completada"
+          />
         ),
       },
     ],
     size: [
-      { label: "default", node: <SheetExample /> },
-      { label: "wide", node: <SheetExample size="wide" title="Panel ancho" /> },
+      { label: "default", node: <SheetExample id="hoja-tamano-default" /> },
+      {
+        label: "wide",
+        node: <SheetExample id="hoja-ancha" size="wide" title="Panel ancho" />,
+      },
     ],
     states: [
-      { label: "open", node: <SheetExample /> },
-      { label: "pending", node: <SheetExample pending /> },
-      {
-        label: "closed",
-        node: (
-          <Button variant="outline">
-            <StoreIcon />
-            Abrir hoja de edición
-          </Button>
-        ),
-      },
+      { label: "open", node: <SheetExample id="hoja-abierta" /> },
+      { label: "pending", node: <SheetExample id="hoja-pendiente" pending /> },
+      { label: "closed", node: <SheetExample id="hoja-cerrada" /> },
     ],
   },
   "confirm-dialog": {
@@ -1184,16 +1344,57 @@ export const overlaysVariantDemos: GalleryVariantDemoMap = {
   },
   drawer: {
     swipeDirection: [
-      { label: "down", node: <DrawerExample swipeDirection="down" /> },
-      { label: "up", node: <DrawerExample swipeDirection="up" /> },
-      { label: "left", node: <DrawerExample swipeDirection="left" /> },
-      { label: "right", node: <DrawerExample swipeDirection="right" /> },
+      {
+        label: "down",
+        node: <DrawerExample id="drawer-abajo" swipeDirection="down" />,
+      },
+      {
+        label: "up",
+        node: <DrawerExample id="drawer-arriba" swipeDirection="up" />,
+      },
+      {
+        label: "left",
+        node: <DrawerExample id="drawer-izquierda" swipeDirection="left" />,
+      },
+      {
+        label: "right",
+        node: <DrawerExample id="drawer-derecha" swipeDirection="right" />,
+      },
+    ],
+    modal: [
+      { label: "true", node: <DrawerExample id="drawer-modal" /> },
+      {
+        label: "false",
+        node: (
+          <DrawerExample
+            id="drawer-sin-modal"
+            modal={false}
+            disablePointerDismissal
+          />
+        ),
+      },
+    ],
+    anidado: [
+      {
+        label: "un drawer sobre otro",
+        node: <NestedDrawerExample id="drawer-anidado" />,
+      },
     ],
     "showSwipeHandle / snapPoints": [
-      { label: "con tirador", node: <DrawerExample showSwipeHandle /> },
       {
-        label: "con puntos de anclaje",
-        node: <DrawerExample snapPoints={[0.5, 1]} />,
+        label: "con tirador",
+        node: <DrawerExample id="drawer-tirador" showSwipeHandle />,
+      },
+      {
+        label: "con puntos de anclaje y tirador",
+        node: (
+          <DrawerExample
+            id="drawer-anclaje"
+            swipeDirection="down"
+            snapPoints={[0.5, 1]}
+            showSwipeHandle
+          />
+        ),
       },
     ],
   },
@@ -1221,15 +1422,7 @@ export const overlaysVariantDemos: GalleryVariantDemoMap = {
     ],
     estados: [
       { label: "open", node: <MenuExample /> },
-      {
-        label: "closed",
-        node: (
-          <Button variant="outline">
-            <EllipsisVerticalIcon />
-            Más
-          </Button>
-        ),
-      },
+      { label: "closed", node: <MenuExample /> },
       { label: "checked", node: <MenuExample checked /> },
       { label: "disabled", node: <MenuExample disabled /> },
     ],
@@ -1238,31 +1431,7 @@ export const overlaysVariantDemos: GalleryVariantDemoMap = {
     CommandDialog: [
       {
         label: "paleta modal con título accesible",
-        node: (
-          <OverlayFrame>
-            <CommandDialog open onOpenChange={() => {}}>
-              <Command>
-                <CommandInput
-                  placeholder="Buscar una acción"
-                  aria-label="Buscar una acción"
-                />
-                <CommandList>
-                  <CommandEmpty>Sin resultados</CommandEmpty>
-                  <CommandGroup heading="Ir a">
-                    <CommandItem>
-                      <HomeIcon />
-                      Inicio
-                    </CommandItem>
-                    <CommandItem>
-                      <LandmarkIcon />
-                      Finanzas
-                    </CommandItem>
-                  </CommandGroup>
-                </CommandList>
-              </Command>
-            </CommandDialog>
-          </OverlayFrame>
-        ),
+        node: <CommandDialogExample />,
       },
     ],
   },
@@ -1289,8 +1458,17 @@ export const overlaysVariantDemos: GalleryVariantDemoMap = {
     mobile: [
       {
         label: "Drawer lateral",
-        node: <SidebarExample collapsible="offcanvas" />,
+        node: <SidebarExample collapsible="offcanvas" mobile />,
       },
+    ],
+    "variant (MenuButton)": [
+      { label: "default", node: <SidebarExample buttonVariant="default" /> },
+      { label: "outline", node: <SidebarExample buttonVariant="outline" /> },
+    ],
+    "size (MenuButton)": [
+      { label: "default", node: <SidebarExample buttonSize="default" /> },
+      { label: "sm", node: <SidebarExample buttonSize="sm" /> },
+      { label: "lg", node: <SidebarExample buttonSize="lg" /> },
     ],
   },
   tooltip: {

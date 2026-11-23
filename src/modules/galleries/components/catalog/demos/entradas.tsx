@@ -1,4 +1,5 @@
 import { useState } from "react"
+import Image from "next/image"
 import {
   BellIcon,
   FileTextIcon,
@@ -42,6 +43,7 @@ import { Input } from "@/src/shared/components/ui/input"
 import {
   InputGroup,
   InputGroupAddon,
+  InputGroupButton,
   InputGroupInput,
 } from "@/src/shared/components/ui/input-group"
 import { Label } from "@/src/shared/components/ui/label"
@@ -1172,6 +1174,62 @@ export const entradasVariantDemos: GalleryVariantDemoMap = {
         ),
       },
     ],
+    "size (Button)": [
+      {
+        label: "xs",
+        node: (
+          <InputGroup className="h-10 w-full max-w-sm">
+            <InputGroupInput placeholder="Buscar" aria-label="Buscar" />
+            <InputGroupAddon align="inline-end">
+              <InputGroupButton size="xs">
+                <SearchIcon />
+                Buscar
+              </InputGroupButton>
+            </InputGroupAddon>
+          </InputGroup>
+        ),
+      },
+      {
+        label: "sm",
+        node: (
+          <InputGroup className="h-10 w-full max-w-sm">
+            <InputGroupInput placeholder="Buscar" aria-label="Buscar" />
+            <InputGroupAddon align="inline-end">
+              <InputGroupButton size="sm">
+                <SearchIcon />
+                Buscar
+              </InputGroupButton>
+            </InputGroupAddon>
+          </InputGroup>
+        ),
+      },
+      {
+        label: "icon-xs",
+        node: (
+          <InputGroup className="h-10 w-full max-w-sm">
+            <InputGroupInput placeholder="Buscar" aria-label="Buscar" />
+            <InputGroupAddon align="inline-end">
+              <InputGroupButton size="icon-xs" aria-label="Buscar">
+                <SearchIcon />
+              </InputGroupButton>
+            </InputGroupAddon>
+          </InputGroup>
+        ),
+      },
+      {
+        label: "icon-sm",
+        node: (
+          <InputGroup className="h-10 w-full max-w-sm">
+            <InputGroupInput placeholder="Buscar" aria-label="Buscar" />
+            <InputGroupAddon align="inline-end">
+              <InputGroupButton size="icon-sm" aria-label="Buscar">
+                <SearchIcon />
+              </InputGroupButton>
+            </InputGroupAddon>
+          </InputGroup>
+        ),
+      },
+    ],
   },
   "form-text-field": {
     states: [
@@ -1534,6 +1592,38 @@ export const entradasVariantDemos: GalleryVariantDemoMap = {
               <AttachmentDescription>
                 {ATTACHMENT_FILE.description}
               </AttachmentDescription>
+            </AttachmentContent>
+          </Attachment>
+        ),
+      },
+    ],
+    "variant (Media)": [
+      {
+        label: "icon",
+        node: (
+          <Attachment className="w-full max-w-sm">
+            <AttachmentMedia>
+              <FileTextIcon />
+            </AttachmentMedia>
+            <AttachmentContent>
+              <AttachmentTitle>{ATTACHMENT_FILE.title}</AttachmentTitle>
+              <AttachmentDescription>
+                {ATTACHMENT_FILE.description}
+              </AttachmentDescription>
+            </AttachmentContent>
+          </Attachment>
+        ),
+      },
+      {
+        label: "image",
+        node: (
+          <Attachment className="w-full max-w-sm">
+            <AttachmentMedia variant="image">
+              <Image src="/images/image.png" alt="" width={40} height={40} />
+            </AttachmentMedia>
+            <AttachmentContent>
+              <AttachmentTitle>captura.png</AttachmentTitle>
+              <AttachmentDescription>Imagen · 204 KB</AttachmentDescription>
             </AttachmentContent>
           </Attachment>
         ),

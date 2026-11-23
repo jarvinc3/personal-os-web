@@ -364,6 +364,7 @@ import { Label } from "@/src/shared/components/ui/label"
         name: "align",
         values: "inline-start, inline-end, block-start, block-end",
       },
+      { name: "size (Button)", values: "xs, sm, icon-xs, icon-sm" },
       { name: "states", values: "normal, focus, invalid, disabled" },
     ],
     props: [
@@ -376,6 +377,11 @@ import { Label } from "@/src/shared/components/ui/label"
         name: "className",
         type: "string",
         description: "Alto y ancho del grupo.",
+      },
+      {
+        name: "size (InputGroupButton)",
+        type: '"xs" | "sm" | "icon-xs" | "icon-sm"',
+        description: "Alto del botón que vive dentro del grupo.",
       },
     ],
   },
@@ -554,6 +560,7 @@ import { Label } from "@/src/shared/components/ui/label"
       { name: "state", values: "idle, uploading, processing, error, done" },
       { name: "size", values: "default, sm, xs" },
       { name: "orientation", values: "horizontal, vertical" },
+      { name: "variant (Media)", values: "icon, image" },
     ],
     props: [
       {
@@ -570,6 +577,11 @@ import { Label } from "@/src/shared/components/ui/label"
         name: "orientation",
         type: '"horizontal" | "vertical"',
         description: "Fila compacta o tarjeta de archivo.",
+      },
+      {
+        name: "variant (AttachmentMedia)",
+        type: '"icon" | "image"',
+        description: "Icono del tipo de archivo o una miniatura de imagen.",
       },
     ],
   },
