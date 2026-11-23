@@ -26,7 +26,7 @@ type UseWipeBranchSelectionInput = {
 }
 
 export type WipeBranchSelection = {
-  dataBranches: ReturnType<typeof useDataBranches>
+  branchesQuery: ReturnType<typeof useDataBranches>
   branches: DataBranch[]
   sections: WipeSection[]
   appliedRows: WipeRow[]
@@ -47,11 +47,11 @@ export function useWipeBranchSelection({
   onBalancesDeselected,
   onSelectionChanged,
 }: UseWipeBranchSelectionInput): WipeBranchSelection {
-  const dataBranches = useDataBranches()
+  const branchesQuery = useDataBranches()
   const formatLocale = useFormatLocale()
   const [selected, setSelected] = useState<string[]>([])
 
-  const groups = dataBranches.data ?? []
+  const groups = branchesQuery.data ?? []
   const branches = branchesOf(groups, app)
   const { selectedIds, appliedIds, appliedBranches, expectedCounts } =
     resolveWipeSelection({ branches, selected })
@@ -101,7 +101,7 @@ export function useWipeBranchSelection({
   }
 
   return {
-    dataBranches,
+    branchesQuery,
     branches,
     sections,
     appliedRows,

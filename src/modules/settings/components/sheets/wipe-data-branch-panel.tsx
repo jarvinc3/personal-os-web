@@ -16,7 +16,7 @@ import { Skeleton } from "@/src/shared/components/ui/skeleton"
 import { Eraser } from "lucide-react"
 
 type WipeDataBranchPanelProps = {
-  dataBranches: DataBranchesQuery
+  branchesQuery: DataBranchesQuery
   branches: DataBranch[]
   sections: WipeSection[]
   appliedIds: readonly string[]
@@ -31,7 +31,7 @@ type WipeDataBranchPanelProps = {
 }
 
 export function WipeDataBranchPanel({
-  dataBranches,
+  branchesQuery,
   branches,
   sections,
   appliedIds,
@@ -44,7 +44,7 @@ export function WipeDataBranchPanel({
   onToggleBranch,
   onPickInstitution,
 }: WipeDataBranchPanelProps) {
-  if (dataBranches.isPending) {
+  if (branchesQuery.isPending) {
     return (
       <div className="flex flex-col gap-2" aria-hidden>
         {Array.from({ length: 4 }, (_, index) => (
@@ -54,12 +54,12 @@ export function WipeDataBranchPanel({
     )
   }
 
-  if (dataBranches.isError) {
+  if (branchesQuery.isError) {
     return (
       <ErrorState
         message="No se pudieron cargar las ramas de datos."
-        onRetry={() => void dataBranches.refetch()}
-        isRetrying={dataBranches.isFetching}
+        onRetry={() => void branchesQuery.refetch()}
+        isRetrying={branchesQuery.isFetching}
       />
     )
   }

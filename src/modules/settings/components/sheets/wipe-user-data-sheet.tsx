@@ -81,7 +81,7 @@ export function WipeUserDataView({
         ) : null}
 
         <WipeDataBranchPanel
-          dataBranches={selection.dataBranches}
+          branchesQuery={selection.branchesQuery}
           branches={selection.branches}
           sections={selection.sections}
           appliedIds={selection.appliedIds}

@@ -50,6 +50,9 @@ export type UsageChartRow = {
 type UsageChartProps = {
   rows: UsageChartRow[]
   periodLabel: string
+}
+
+type UsageLocaleChartProps = UsageChartProps & {
   locale: string
 }
 
@@ -93,7 +96,7 @@ export function UsageTokensChart({
   rows,
   periodLabel,
   locale,
-}: UsageChartProps) {
+}: UsageLocaleChartProps) {
   return (
     <UsageChartCard
       title="Tokens"
@@ -146,7 +149,11 @@ export function UsageTokensChart({
   )
 }
 
-export function UsageCostChart({ rows, periodLabel, locale }: UsageChartProps) {
+export function UsageCostChart({
+  rows,
+  periodLabel,
+  locale,
+}: UsageLocaleChartProps) {
   return (
     <UsageChartCard
       title="Costo estimado"
