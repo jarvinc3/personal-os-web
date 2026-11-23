@@ -8,6 +8,11 @@ type PreferencePatch = Parameters<
   ReturnType<typeof useProfile>["updatePreferences"]
 >[0]
 
+export type NotificationPreferenceToggle = (
+  patch: PreferencePatch,
+  successMessage: string
+) => Promise<void>
+
 export function useNotificationPreferenceToggle() {
   const { savePreferences } = useProfile()
 
