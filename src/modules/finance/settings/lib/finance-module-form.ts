@@ -32,6 +32,93 @@ function hasInvalidPayDay(value: string): boolean {
     })
 }
 
+function validateMonthStartDay(
+  values: { monthStartDay: string },
+  ctx: z.RefinementCtx
+): void {
+  const monthStartDay = Number(values.monthStartDay)
+  if (
+    !Number.isInteger(monthStartDay) ||
+    monthStartDay < 1 ||
+    monthStartDay > 28
+  ) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["monthStartDay"],
+      message: "Del 1 al 28",
+    })
+  }
+}
+
+function validateCardDueDays(
+  values: { cardDueDate: boolean; cardDueDaysBefore: string },
+  ctx: z.RefinementCtx
+): void {
+  if (!values.cardDueDate) {
+    return
+  }
+  const dueDays = Number(values.cardDueDaysBefore)
+  if (!Number.isInteger(dueDays) || dueDays < 0 || dueDays > 30) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["cardDueDaysBefore"],
+      message: "De 0 a 30 días",
+    })
+  }
+}
+
+function validateSubscriptionDays(
+  values: { subscriptionReminderDays: string },
+  ctx: z.RefinementCtx
+): void {
+  const subscriptionDays = Number(values.subscriptionReminderDays)
+  if (
+    !Number.isInteger(subscriptionDays) ||
+    subscriptionDays < 1 ||
+    subscriptionDays > 30
+  ) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["subscriptionReminderDays"],
+      message: "De 1 a 30 días",
+    })
+  }
+}
+
+function validateFixedIncome(
+  values: {
+    fixedIncomeEnabled: boolean
+    fixedIncomeAmount: string
+    fixedIncomePayDays: string
+  },
+  ctx: z.RefinementCtx
+): void {
+  if (!values.fixedIncomeEnabled) {
+    return
+  }
+  const amount = Number(values.fixedIncomeAmount)
+  if (!Number.isFinite(amount) || amount <= 0) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["fixedIncomeAmount"],
+      message: "Monto mayor que 0",
+    })
+  }
+  if (hasInvalidPayDay(values.fixedIncomePayDays)) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["fixedIncomePayDays"],
+      message: "Días del 1 al 31",
+    })
+  } else if (parsePayDays(values.fixedIncomePayDays).length === 0) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["fixedIncomePayDays"],
+      message: "Pon al menos un día de pago",
+    })
+  }
+}
+
 export const financeModuleSchema = z
   .object({
     weekStartsOn: z.enum(["0", "1"]),
@@ -63,67 +150,10 @@ export const financeModuleSchema = z
     subscriptionGroupBy: z.enum(["category", "provider", "none"]),
   })
   .superRefine((values, ctx) => {
-    const monthStartDay = Number(values.monthStartDay)
-    if (
-      !Number.isInteger(monthStartDay) ||
-      monthStartDay < 1 ||
-      monthStartDay > 28
-    ) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["monthStartDay"],
-        message: "Del 1 al 28",
-      })
-    }
-
-    if (values.cardDueDate) {
-      const dueDays = Number(values.cardDueDaysBefore)
-      if (!Number.isInteger(dueDays) || dueDays < 0 || dueDays > 30) {
-        ctx.addIssue({
-          code: "custom",
-          path: ["cardDueDaysBefore"],
-          message: "De 0 a 30 días",
-        })
-      }
-    }
-
-    const subscriptionDays = Number(values.subscriptionReminderDays)
-    if (
-      !Number.isInteger(subscriptionDays) ||
-      subscriptionDays < 1 ||
-      subscriptionDays > 30
-    ) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["subscriptionReminderDays"],
-        message: "De 1 a 30 días",
-      })
-    }
-
-    if (!values.fixedIncomeEnabled) {
-      return
-    }
-    const amount = Number(values.fixedIncomeAmount)
-    if (!Number.isFinite(amount) || amount <= 0) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["fixedIncomeAmount"],
-        message: "Monto mayor que 0",
-      })
-    }
-    if (hasInvalidPayDay(values.fixedIncomePayDays)) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["fixedIncomePayDays"],
-        message: "Días del 1 al 31",
-      })
-    } else if (parsePayDays(values.fixedIncomePayDays).length === 0) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["fixedIncomePayDays"],
-        message: "Pon al menos un día de pago",
-      })
-    }
+    validateMonthStartDay(values, ctx)
+    validateCardDueDays(values, ctx)
+    validateSubscriptionDays(values, ctx)
+    validateFixedIncome(values, ctx)
   })
 
 export type FinanceModuleFormValues = z.infer<typeof financeModuleSchema>

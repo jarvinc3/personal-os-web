@@ -21,24 +21,56 @@ type ToCardFormValuesInput = {
   prefill?: CardFormPrefill
 }
 
+type CardIdentity = Pick<
+  CardFormValues,
+  "name" | "type" | "institutionId" | "accountId" | "network" | "lastFour"
+>
+
+function identityFromCard(
+  card: FinanceCard,
+  defaultInstitutionId: string
+): CardIdentity {
+  return {
+    name: card.name,
+    type: card.type,
+    institutionId: card.institutionId ?? defaultInstitutionId,
+    accountId: card.accountId ?? CATALOG_NONE,
+    network: card.network ?? "VISA",
+    lastFour: card.lastFour ?? "",
+  }
+}
+
+function identityFromPrefill(
+  prefill: CardFormPrefill,
+  defaultInstitutionId: string
+): CardIdentity {
+  return {
+    name: prefill.name ?? "",
+    type: prefill.type ?? "CREDIT",
+    institutionId: defaultInstitutionId,
+    accountId: prefill.accountId ?? CATALOG_NONE,
+    network: prefill.network ?? "VISA",
+    lastFour: prefill.lastFour ?? "",
+  }
+}
+
 export function toCardFormValues({
   card,
   defaultCurrency,
   defaultInstitutionId,
   prefill = {},
 }: ToCardFormValuesInput): CardFormValues {
+  const identity = card
+    ? identityFromCard(card, defaultInstitutionId)
+    : identityFromPrefill(prefill, defaultInstitutionId)
+  const currency = card?.balances[0]?.currency ?? defaultCurrency
   return {
-    name: card?.name ?? prefill.name ?? "",
-    type: card?.type ?? prefill.type ?? "CREDIT",
-    institutionId: card?.institutionId ?? defaultInstitutionId,
-    accountId: card?.accountId ?? prefill.accountId ?? CATALOG_NONE,
-    network: card?.network ?? prefill.network ?? "VISA",
-    lastFour: card?.lastFour ?? prefill.lastFour ?? "",
+    ...identity,
     statementClosingDay: card?.statementClosingDay
       ? String(card.statementClosingDay)
       : "",
     paymentDueDay: card?.paymentDueDay ? String(card.paymentDueDay) : "",
     color: card?.color ?? "",
-    balances: [emptyBalanceRow(card?.balances[0]?.currency ?? defaultCurrency)],
+    balances: [emptyBalanceRow(currency)],
   }
 }
