@@ -76,6 +76,72 @@ export type SubscriptionDraft = {
   sourcePatternId: string
 }
 
+function basicsFromSubscription(
+  subscription: FinanceSubscription,
+  draft: SubscriptionDraft | undefined
+): Pick<
+  SubscriptionFormValues,
+  "name" | "amount" | "currency" | "sourcePatternId"
+> {
+  return {
+    name: subscription.name,
+    amount: subscription.amount,
+    currency: subscription.currency,
+    sourcePatternId:
+      subscription.sourcePatternId ?? draft?.sourcePatternId ?? "",
+  }
+}
+
+function basicsFromDraft(
+  draft: SubscriptionDraft | undefined,
+  defaultCurrency: string
+): Pick<
+  SubscriptionFormValues,
+  "name" | "amount" | "currency" | "sourcePatternId"
+> {
+  return {
+    name: draft?.name ?? "",
+    amount: draft?.amount ?? "",
+    currency: draft?.currency ?? defaultCurrency,
+    sourcePatternId: draft?.sourcePatternId ?? "",
+  }
+}
+
+function subscriptionBasics(
+  subscription: FinanceSubscription | null,
+  draft: SubscriptionDraft | undefined,
+  defaultCurrency: string
+): Pick<
+  SubscriptionFormValues,
+  "name" | "amount" | "currency" | "sourcePatternId"
+> {
+  if (subscription) {
+    return basicsFromSubscription(subscription, draft)
+  }
+  return basicsFromDraft(draft, defaultCurrency)
+}
+
+function subscriptionDates(
+  subscription: FinanceSubscription | null
+): Pick<SubscriptionFormValues, "anchorDate" | "trialEndsAt"> {
+  return {
+    anchorDate: subscription
+      ? toDateInput(subscription.anchorDate)
+      : todayInput(),
+    trialEndsAt: toDateInput(subscription?.trialEndsAt),
+  }
+}
+
+function subscriptionLinks(
+  subscription: FinanceSubscription | null
+): Pick<SubscriptionFormValues, "cardId" | "accountId" | "categoryId"> {
+  return {
+    cardId: subscription?.cardId ?? CATALOG_NONE,
+    accountId: subscription?.accountId ?? CATALOG_NONE,
+    categoryId: subscription?.categoryId ?? CATALOG_NONE,
+  }
+}
+
 export function toSubscriptionFormValues(
   subscription: FinanceSubscription | null,
   options: {
@@ -84,26 +150,14 @@ export function toSubscriptionFormValues(
   }
 ): SubscriptionFormValues {
   return {
-    name: subscription?.name ?? options.draft?.name ?? "",
+    ...subscriptionBasics(subscription, options.draft, options.defaultCurrency),
     domain: subscription?.domain ?? "",
-    amount: subscription?.amount ?? options.draft?.amount ?? "",
-    currency:
-      subscription?.currency ??
-      options.draft?.currency ??
-      options.defaultCurrency,
     billingCycle: subscription?.billingCycle ?? "MONTHLY",
     billingInterval: String(subscription?.billingInterval ?? 1),
-    anchorDate: subscription
-      ? toDateInput(subscription.anchorDate)
-      : todayInput(),
-    trialEndsAt: toDateInput(subscription?.trialEndsAt),
-    cardId: subscription?.cardId ?? CATALOG_NONE,
-    accountId: subscription?.accountId ?? CATALOG_NONE,
-    categoryId: subscription?.categoryId ?? CATALOG_NONE,
+    ...subscriptionDates(subscription),
+    ...subscriptionLinks(subscription),
     manageUrl: subscription?.manageUrl ?? "",
     notes: subscription?.notes ?? "",
-    sourcePatternId:
-      subscription?.sourcePatternId ?? options.draft?.sourcePatternId ?? "",
   }
 }
 

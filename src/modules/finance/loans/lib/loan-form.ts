@@ -71,6 +71,88 @@ export type LoanFormValues = z.infer<typeof loanSchema>
 
 export const LOAN_WIZARD_TERMS = [12, 24, 36, 48, 60] as const
 
+function validateWizardParties(
+  values: {
+    who: "BANK" | "PERSON"
+    institutionId: string
+    lenderName: string
+  },
+  ctx: z.RefinementCtx
+): void {
+  if (values.who === "BANK" && values.institutionId === CATALOG_NONE) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["institutionId"],
+      message: "Elige la institución",
+    })
+  }
+  if (values.who === "PERSON" && values.lenderName.trim() === "") {
+    ctx.addIssue({
+      code: "custom",
+      path: ["lenderName"],
+      message: "Prestamista obligatorio",
+    })
+  }
+}
+
+function validateWizardAmount(
+  values: { amount: string },
+  ctx: z.RefinementCtx
+): void {
+  const amount = parseFinanceMoney(values.amount)
+  if (amount !== null && amount <= 0) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["amount"],
+      message: "El monto debe ser mayor que cero",
+    })
+  }
+}
+
+function validateWizardPeriods(
+  values: { periods: string },
+  ctx: z.RefinementCtx
+): void {
+  const periods = Number(values.periods)
+  if (!Number.isInteger(periods) || periods < 1) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["periods"],
+      message: "El plazo debe ser al menos 1",
+    })
+  }
+}
+
+function validateWizardFigure(
+  values: {
+    known: "RATE" | "INSTALLMENT"
+    installment: string
+    ratePercent: string
+  },
+  ctx: z.RefinementCtx
+): void {
+  if (values.known === "INSTALLMENT") {
+    const installment = parseFinanceMoney(values.installment)
+    if (installment !== null && installment <= 0) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["installment"],
+        message: "La cuota debe ser mayor que cero",
+      })
+    }
+    return
+  }
+  const percent =
+    values.ratePercent.trim() === "" ? 0 : Number(values.ratePercent)
+  if (!Number.isFinite(percent) || percent < 0) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["ratePercent"],
+      message: "La tasa no es válida",
+    })
+  }
+}
+
 export const loanWizardSchema = z
   .object({
     who: z.enum(["BANK", "PERSON"]),
@@ -92,56 +174,10 @@ export const loanWizardSchema = z
     notes: z.string().max(500),
   })
   .superRefine((values, ctx) => {
-    if (values.who === "BANK" && values.institutionId === CATALOG_NONE) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["institutionId"],
-        message: "Elige la institución",
-      })
-    }
-    if (values.who === "PERSON" && values.lenderName.trim() === "") {
-      ctx.addIssue({
-        code: "custom",
-        path: ["lenderName"],
-        message: "Prestamista obligatorio",
-      })
-    }
-    const amount = parseFinanceMoney(values.amount)
-    if (amount !== null && amount <= 0) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["amount"],
-        message: "El monto debe ser mayor que cero",
-      })
-    }
-    const periods = Number(values.periods)
-    if (!Number.isInteger(periods) || periods < 1) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["periods"],
-        message: "El plazo debe ser al menos 1",
-      })
-    }
-    if (values.known === "INSTALLMENT") {
-      const installment = parseFinanceMoney(values.installment)
-      if (installment !== null && installment <= 0) {
-        ctx.addIssue({
-          code: "custom",
-          path: ["installment"],
-          message: "La cuota debe ser mayor que cero",
-        })
-      }
-    } else {
-      const percent =
-        values.ratePercent.trim() === "" ? 0 : Number(values.ratePercent)
-      if (!Number.isFinite(percent) || percent < 0) {
-        ctx.addIssue({
-          code: "custom",
-          path: ["ratePercent"],
-          message: "La tasa no es válida",
-        })
-      }
-    }
+    validateWizardParties(values, ctx)
+    validateWizardAmount(values, ctx)
+    validateWizardPeriods(values, ctx)
+    validateWizardFigure(values, ctx)
   })
 
 export type LoanWizardValues = z.infer<typeof loanWizardSchema>
@@ -150,30 +186,44 @@ export type LoanWizardValues = z.infer<typeof loanWizardSchema>
  * Reads the wizard fields an AI reply or a shared link can carry in the URL.
  * Unknown or empty values are left out so the wizard keeps its own defaults.
  */
-export function loanWizardPrefill(params: {
+function readParam(
+  params: { get(name: string): string | null },
+  name: string
+): string | undefined {
+  const value = params.get(name)?.trim()
+  return value ? value : undefined
+}
+
+function prefillAmountFields(params: {
   get(name: string): string | null
 }): Partial<LoanWizardValues> {
   const prefill: Partial<LoanWizardValues> = {}
-
-  const amount = params.get("amount")?.trim()
+  const amount = readParam(params, "amount")
   if (amount) {
     prefill.amount = amount
   }
-  const periods = params.get("periods")?.trim()
+  const periods = readParam(params, "periods")
   if (periods) {
     prefill.periods = periods
   }
-  const ratePercent = params.get("ratePercent")?.trim()
+  const ratePercent = readParam(params, "ratePercent")
   if (ratePercent) {
     prefill.ratePercent = ratePercent
     prefill.known = "RATE"
   }
-  const installment = params.get("installment")?.trim()
+  const installment = readParam(params, "installment")
   if (installment) {
     prefill.installment = installment
     prefill.known = "INSTALLMENT"
   }
-  const lenderName = params.get("lenderName")?.trim()
+  return prefill
+}
+
+function prefillIdentityFields(params: {
+  get(name: string): string | null
+}): Partial<LoanWizardValues> {
+  const prefill: Partial<LoanWizardValues> = {}
+  const lenderName = readParam(params, "lenderName")
   if (lenderName) {
     prefill.lenderName = lenderName
     prefill.who = "PERSON"
@@ -186,6 +236,18 @@ export function loanWizardPrefill(params: {
   if (who === "BANK" || who === "PERSON") {
     prefill.who = who
   }
-
   return prefill
+}
+
+/**
+ * Reads the wizard fields an AI reply or a shared link can carry in the URL.
+ * Unknown or empty values are left out so the wizard keeps its own defaults.
+ */
+export function loanWizardPrefill(params: {
+  get(name: string): string | null
+}): Partial<LoanWizardValues> {
+  return {
+    ...prefillAmountFields(params),
+    ...prefillIdentityFields(params),
+  }
 }
