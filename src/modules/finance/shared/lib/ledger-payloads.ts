@@ -1,5 +1,16 @@
-import { CATALOG_NONE } from "@/src/modules/finance/shared/constants/catalog"
+import type { PayloadResult } from "./ledger-fields.ts"
+import { optionalId, optionalTrimmed } from "./ledger-fields.ts"
+import { xorTarget } from "./ledger-target.ts"
 import { parseFinanceMoney } from "./money.ts"
+
+export type { PayloadResult } from "./ledger-fields.ts"
+export {
+  buildLedgerTargetOptions,
+  encodeLedgerTarget,
+  splitLedgerTarget,
+} from "./ledger-target.ts"
+export type { CreateTransferBody } from "./transfer-payloads.ts"
+export { buildCreateTransferBody } from "./transfer-payloads.ts"
 
 export type CreateTransactionBody = {
   accountId?: string
@@ -13,23 +24,6 @@ export type CreateTransactionBody = {
   notes?: string | null
   categoryId?: string | null
   status?: "PENDING" | "CONFIRMED"
-}
-
-export type CreateTransferBody = {
-  fromAccountId?: string
-  toAccountId?: string
-  toCardId?: string
-  amount: number
-  currency?: string
-  transactionDate: string
-  description?: string
-  notes?: string
-  status?: "PENDING" | "CONFIRMED"
-  rail?: string
-  fee?: { amount: number }
-  destinationPending?: boolean
-  exchangeRate?: number
-  receivedAmount?: number
 }
 
 export type CreateCardPaymentBody = {
@@ -54,81 +48,78 @@ export type UpdateTransactionMetadataBody = {
 export type UpdateTransactionBody =
   CreateTransactionBody | UpdateTransactionMetadataBody
 
-export type PayloadResult<T> =
-  { ok: true; body: T } | { ok: false; error: string }
-
-function optionalTrimmed(value: string | undefined): string | undefined {
-  const trimmed = value?.trim()
-  return trimmed ? trimmed : undefined
+type TransactionFieldsInput = {
+  currency?: string
+  merchant?: string
+  description?: string
+  notes?: string
+  categoryId?: string
+  status?: string
 }
 
-function optionalId(value: string | undefined): string | undefined {
+function optionalTextField(
+  value: string | undefined,
+  isUpdate: boolean
+): string | null | undefined {
   const trimmed = optionalTrimmed(value)
-  if (!trimmed || trimmed === CATALOG_NONE) {
-    return undefined
+  if (trimmed) {
+    return trimmed
   }
-  return trimmed
+  return isUpdate ? null : undefined
 }
 
-export function encodeLedgerTarget(
-  kind: "account" | "card",
-  id: string
-): string {
-  return `${kind}:${id}`
+function optionalIdField(
+  value: string | undefined,
+  isUpdate: boolean
+): string | null | undefined {
+  const id = optionalId(value)
+  if (id) {
+    return id
+  }
+  return isUpdate ? null : undefined
 }
 
-export function splitLedgerTarget(value: string | undefined): {
-  accountId?: string
-  cardId?: string
-} {
-  const trimmed = optionalTrimmed(value)
-  if (!trimmed || trimmed === CATALOG_NONE) {
-    return {}
-  }
-  if (trimmed.startsWith("account:")) {
-    const accountId = trimmed.slice("account:".length)
-    return accountId ? { accountId } : {}
-  }
-  if (trimmed.startsWith("card:")) {
-    const cardId = trimmed.slice("card:".length)
-    return cardId ? { cardId } : {}
-  }
-  return {}
-}
-
-export function buildLedgerTargetOptions(
-  accounts: { id: string; name: string }[],
-  cards: { id: string; name: string }[]
-): { value: string; label: string }[] {
-  return [
-    { value: CATALOG_NONE, label: "Elige cuenta o tarjeta" },
-    ...accounts.map((account) => ({
-      value: encodeLedgerTarget("account", account.id),
-      label: `Cuenta · ${account.name}`,
-    })),
-    ...cards.map((card) => ({
-      value: encodeLedgerTarget("card", card.id),
-      label: `Tarjeta · ${card.name}`,
-    })),
-  ]
-}
-
-function xorTarget(
-  accountId: string | undefined,
-  cardId: string | undefined,
-  label: string
-): PayloadResult<{ accountId?: string; cardId?: string }> {
-  const account = optionalId(accountId)
-  const card = optionalId(cardId)
-  if (Boolean(account) === Boolean(card)) {
-    return {
-      ok: false,
-      error: `Elige una cuenta o una tarjeta para ${label}, no ambas ni ninguna`,
-    }
-  }
+function transactionMetaFields(
+  input: TransactionFieldsInput,
+  isUpdate: boolean
+): Pick<CreateTransactionBody, "currency" | "categoryId" | "status"> {
+  const currency = optionalTrimmed(input.currency)?.toUpperCase()
+  const categoryId = optionalIdField(input.categoryId, isUpdate)
+  const status =
+    input.status === "PENDING" || input.status === "CONFIRMED"
+      ? input.status
+      : undefined
   return {
-    ok: true,
-    body: account ? { accountId: account } : { cardId: card },
+    ...(currency ? { currency } : {}),
+    ...(categoryId !== undefined ? { categoryId } : {}),
+    ...(status ? { status } : {}),
+  }
+}
+
+function transactionTextFields(
+  input: TransactionFieldsInput,
+  isUpdate: boolean
+): Pick<CreateTransactionBody, "merchant" | "description" | "notes"> {
+  const merchant = optionalTextField(input.merchant, isUpdate)
+  const description = optionalTextField(input.description, isUpdate)
+  const notes = optionalTextField(input.notes, isUpdate)
+  return {
+    ...(merchant !== undefined ? { merchant } : {}),
+    ...(description !== undefined ? { description } : {}),
+    ...(notes !== undefined ? { notes } : {}),
+  }
+}
+
+function transactionFields(
+  input: TransactionFieldsInput,
+  isUpdate: boolean
+): Pick<
+  CreateTransactionBody,
+  "currency" | "merchant" | "description" | "notes" | "categoryId" | "status"
+> {
+  return {
+    ...transactionMetaFields(input, isUpdate),
+    ...transactionTextFields(input, isUpdate),
   }
 }
 
@@ -173,37 +164,7 @@ export function buildCreateTransactionBody(
     amount,
     transactionDate: date,
     ...target.body,
-  }
-  const currency = optionalTrimmed(input.currency)?.toUpperCase()
-  if (currency) {
-    body.currency = currency
-  }
-  const merchant = optionalTrimmed(input.merchant)
-  if (merchant) {
-    body.merchant = merchant
-  } else if (isUpdate) {
-    body.merchant = null
-  }
-  const description = optionalTrimmed(input.description)
-  if (description) {
-    body.description = description
-  } else if (isUpdate) {
-    body.description = null
-  }
-  const notes = optionalTrimmed(input.notes)
-  if (notes) {
-    body.notes = notes
-  } else if (isUpdate) {
-    body.notes = null
-  }
-  const categoryId = optionalId(input.categoryId)
-  if (categoryId) {
-    body.categoryId = categoryId
-  } else if (isUpdate) {
-    body.categoryId = null
-  }
-  if (input.status === "PENDING" || input.status === "CONFIRMED") {
-    body.status = input.status
+    ...transactionFields(input, isUpdate),
   }
   return { ok: true, body }
 }
@@ -256,103 +217,6 @@ export function buildCreateCardPaymentBody(input: {
   const notes = optionalTrimmed(input.notes)
   if (notes) {
     body.notes = notes
-  }
-  return { ok: true, body }
-}
-
-export function buildCreateTransferBody(input: {
-  fromAccountId?: string
-  toAccountId?: string
-  toCardId?: string
-  amount: string
-  currency?: string
-  transactionDate: string
-  description?: string
-  notes?: string
-  status?: string
-  rail?: string
-  feeAmount?: string
-  destinationPending?: boolean
-  exchangeRate?: string
-  receivedAmount?: string
-}): PayloadResult<CreateTransferBody> {
-  const amount = parseFinanceMoney(input.amount)
-  if (amount === null) {
-    return { ok: false, error: "Monto inválido" }
-  }
-  const date = optionalTrimmed(input.transactionDate)
-  if (!date) {
-    return { ok: false, error: "Fecha obligatoria" }
-  }
-  // A transfer always leaves an account: a card is a spending instrument, not
-  // an origin the bank would accept.
-  const fromAccountId = optionalId(input.fromAccountId)
-  if (!fromAccountId) {
-    return { ok: false, error: "Elige una cuenta de origen" }
-  }
-  const to = xorTarget(input.toAccountId, input.toCardId, "el destino")
-  if (!to.ok) {
-    return { ok: false, error: to.error }
-  }
-  if (fromAccountId === to.body.accountId) {
-    return { ok: false, error: "Origen y destino tienen que ser distintos" }
-  }
-
-  const body: CreateTransferBody = {
-    amount,
-    transactionDate: date,
-    fromAccountId,
-  }
-  if (to.body.accountId) {
-    body.toAccountId = to.body.accountId
-  }
-  if (to.body.cardId) {
-    body.toCardId = to.body.cardId
-  }
-  const currency = optionalTrimmed(input.currency)?.toUpperCase()
-  if (currency) {
-    body.currency = currency
-  }
-  const description = optionalTrimmed(input.description)
-  if (description) {
-    body.description = description
-  }
-  const notes = optionalTrimmed(input.notes)
-  if (notes) {
-    body.notes = notes
-  }
-  if (input.status === "PENDING" || input.status === "CONFIRMED") {
-    body.status = input.status
-  }
-  if (input.rail) {
-    body.rail = input.rail
-  }
-  if (input.destinationPending) {
-    body.destinationPending = true
-  }
-  const exchangeRate = optionalTrimmed(input.exchangeRate)
-  if (exchangeRate) {
-    const parsedRate = parseFinanceMoney(exchangeRate)
-    if (parsedRate === null || parsedRate <= 0) {
-      return { ok: false, error: "Tasa inválida" }
-    }
-    body.exchangeRate = parsedRate
-  }
-  const receivedAmount = optionalTrimmed(input.receivedAmount)
-  if (receivedAmount) {
-    const parsedReceived = parseFinanceMoney(receivedAmount)
-    if (parsedReceived === null || parsedReceived <= 0) {
-      return { ok: false, error: "Monto recibido inválido" }
-    }
-    body.receivedAmount = parsedReceived
-  }
-  const feeAmount = optionalTrimmed(input.feeAmount)
-  if (feeAmount) {
-    const parsedFee = parseFinanceMoney(feeAmount)
-    if (parsedFee === null || parsedFee <= 0) {
-      return { ok: false, error: "Monto de comisión inválido" }
-    }
-    body.fee = { amount: parsedFee }
   }
   return { ok: true, body }
 }
