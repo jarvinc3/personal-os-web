@@ -22,7 +22,10 @@ import {
 import { Skeleton } from "@/src/shared/components/ui/skeleton"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 
-import type { GalleryDemoMap } from "@/src/modules/galleries/components/catalog/types"
+import type {
+  GalleryDemoMap,
+  GalleryVariantDemoMap,
+} from "@/src/modules/galleries/components/catalog/types"
 
 export const estadosDemos: GalleryDemoMap = {
   "icon-badge": [
@@ -266,4 +269,215 @@ export const estadosDemos: GalleryDemoMap = {
       node: <ModuleComingSoon slug="agenda" />,
     },
   ],
+}
+
+export const estadosVariantDemos: GalleryVariantDemoMap = {
+  "icon-badge": {
+    tone: [
+      {
+        label: "primary",
+        node: <IconBadge icon={WalletIcon} tone="primary" />,
+      },
+      {
+        label: "success",
+        node: <IconBadge icon={WalletIcon} tone="success" />,
+      },
+      {
+        label: "warning",
+        node: <IconBadge icon={WalletIcon} tone="warning" />,
+      },
+      { label: "info", node: <IconBadge icon={WalletIcon} tone="info" /> },
+      {
+        label: "destructive",
+        node: <IconBadge icon={WalletIcon} tone="destructive" />,
+      },
+      { label: "muted", node: <IconBadge icon={WalletIcon} tone="muted" /> },
+    ],
+    color: [
+      {
+        label: "acento de una entidad o categoría",
+        node: <IconBadge icon={WalletIcon} color="#0f766e" />,
+      },
+    ],
+    size: [
+      {
+        label: "48",
+        node: <IconBadge icon={WalletIcon} tone="primary" size={48} />,
+      },
+      {
+        label: "32",
+        node: <IconBadge icon={WalletIcon} tone="primary" size={32} />,
+      },
+    ],
+  },
+  empty: {
+    "variant (EmptyMedia)": [
+      {
+        label: "default",
+        node: (
+          <Empty className="w-full max-w-sm border p-6">
+            <EmptyHeader>
+              <EmptyMedia>
+                <WalletIcon />
+              </EmptyMedia>
+              <EmptyTitle>Sin cuentas todavía</EmptyTitle>
+            </EmptyHeader>
+          </Empty>
+        ),
+      },
+      {
+        label: "icon",
+        node: (
+          <Empty className="w-full max-w-sm border p-6">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <WalletIcon />
+              </EmptyMedia>
+              <EmptyTitle>Sin cuentas todavía</EmptyTitle>
+            </EmptyHeader>
+          </Empty>
+        ),
+      },
+    ],
+    size: [
+      {
+        label: "normal",
+        node: (
+          <Empty className="w-full max-w-sm border p-6">
+            <EmptyHeader>
+              <EmptyTitle>Sin resultados</EmptyTitle>
+              <EmptyDescription>
+                Prueba con otro nombre o con un monto menor.
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
+        ),
+      },
+      {
+        label: "compacta con EMPTY_COMPACT_CLASS_NAME",
+        node: (
+          <Empty
+            className={`${EMPTY_COMPACT_CLASS_NAME} w-full max-w-sm border`}
+          >
+            <EmptyHeader>
+              <EmptyTitle>Ningún país coincide</EmptyTitle>
+            </EmptyHeader>
+          </Empty>
+        ),
+      },
+    ],
+  },
+  skeleton: {
+    className: [
+      {
+        label: "línea",
+        node: <Skeleton className="h-4 w-32" />,
+      },
+      {
+        label: "bloque",
+        node: <Skeleton className="h-20 w-full max-w-sm rounded-2xl" />,
+      },
+      {
+        label: "círculo",
+        node: <Skeleton className="size-10 rounded-full" />,
+      },
+    ],
+  },
+  "list-skeleton": {
+    rows: [
+      {
+        label: "3",
+        node: (
+          <div className="w-full max-w-sm rounded-2xl border border-border">
+            <ListSkeleton rows={3} />
+          </div>
+        ),
+      },
+      {
+        label: "5",
+        node: (
+          <div className="w-full max-w-sm rounded-2xl border border-border">
+            <ListSkeleton rows={5} />
+          </div>
+        ),
+      },
+    ],
+  },
+  "card-skeleton": {
+    height: [
+      { label: "16", node: <CardSkeleton height={16} /> },
+      { label: "28", node: <CardSkeleton height={28} /> },
+      { label: "40", node: <CardSkeleton height={40} /> },
+    ],
+  },
+  "loading-view": {
+    variant: [
+      {
+        label: "screen",
+        node: (
+          <div className="h-[70vh] w-full max-w-sm overflow-hidden rounded-2xl border border-border">
+            <LoadingView variant="screen" />
+          </div>
+        ),
+      },
+      {
+        label: "inline",
+        node: (
+          <div className="w-full max-w-sm rounded-2xl border border-border">
+            <LoadingView variant="inline" />
+          </div>
+        ),
+      },
+    ],
+  },
+  "error-state": {
+    states: [
+      {
+        label: "error",
+        node: (
+          <div className="w-full max-w-sm rounded-2xl border border-border">
+            <ErrorState
+              message="El servidor no respondió."
+              onRetry={() => simulatedTap("Reintentar")}
+            />
+          </div>
+        ),
+      },
+      {
+        label: "reintentando",
+        node: (
+          <div className="w-full max-w-sm rounded-2xl border border-border">
+            <ErrorState
+              message="El servidor no respondió."
+              onRetry={() => simulatedTap("Reintentar")}
+              isRetrying
+            />
+          </div>
+        ),
+      },
+    ],
+  },
+  spinner: {
+    className: [
+      {
+        label: "en un botón",
+        node: (
+          <Button disabled size="sm">
+            <Spinner />
+            Cargando
+          </Button>
+        ),
+      },
+      {
+        label: "tamaño y color del contexto",
+        node: <Spinner className="size-6 text-primary" />,
+      },
+    ],
+  },
+  "module-coming-soon": {
+    slug: [
+      { label: "agenda", node: <ModuleComingSoon slug="agenda" /> },
+      { label: "health", node: <ModuleComingSoon slug="health" /> },
+    ],
+  },
 }

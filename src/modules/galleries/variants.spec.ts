@@ -17,8 +17,12 @@ const COVERED_CATEGORIES: readonly ComponentGallerySectionId[] = [
   "acciones",
   "avisos",
   "tabs",
-  "estructura",
+  "listas",
+  "encabezados",
+  "estados",
+  "montos",
   "graficos",
+  "estructura",
 ]
 
 /** Claves de primer nivel del mapa de variantes: el id de cada ficha. */

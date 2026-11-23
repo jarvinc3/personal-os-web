@@ -266,7 +266,7 @@ import { FileTextIcon } from "lucide-react"
       },
     ],
     variants: [
-      { name: "openMultiple", values: "false, true" },
+      { name: "multiple", values: "false, true" },
       { name: "states", values: "open, closed, disabled" },
     ],
     props: [
@@ -276,7 +276,7 @@ import { FileTextIcon } from "lucide-react"
         description: "Paneles abiertos al montar.",
       },
       {
-        name: "openMultiple",
+        name: "multiple",
         type: "boolean",
         description: "Permite más de un panel abierto.",
       },
