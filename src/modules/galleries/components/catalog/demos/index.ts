@@ -6,9 +6,15 @@ import {
   avisosDemos,
   avisosVariantDemos,
 } from "@/src/modules/galleries/components/catalog/demos/avisos"
-import { encabezadosDemos } from "@/src/modules/galleries/components/catalog/demos/encabezados"
+import {
+  encabezadosDemos,
+  encabezadosVariantDemos,
+} from "@/src/modules/galleries/components/catalog/demos/encabezados"
 import { entradasDemos } from "@/src/modules/galleries/components/catalog/demos/entradas"
-import { estadosDemos } from "@/src/modules/galleries/components/catalog/demos/estados"
+import {
+  estadosDemos,
+  estadosVariantDemos,
+} from "@/src/modules/galleries/components/catalog/demos/estados"
 import {
   estructuraDemos,
   estructuraVariantDemos,
@@ -17,8 +23,14 @@ import {
   graficosDemos,
   graficosVariantDemos,
 } from "@/src/modules/galleries/components/catalog/demos/graficos"
-import { listasDemos } from "@/src/modules/galleries/components/catalog/demos/listas"
-import { montosDemos } from "@/src/modules/galleries/components/catalog/demos/montos"
+import {
+  listasDemos,
+  listasVariantDemos,
+} from "@/src/modules/galleries/components/catalog/demos/listas"
+import {
+  montosDemos,
+  montosVariantDemos,
+} from "@/src/modules/galleries/components/catalog/demos/montos"
 import { overlaysDemos } from "@/src/modules/galleries/components/catalog/demos/overlays"
 import { selectoresDemos } from "@/src/modules/galleries/components/catalog/demos/selectores"
 import {
@@ -50,7 +62,11 @@ export const GALLERY_DEMOS: GalleryDemoMap = {
 export const GALLERY_VARIANT_DEMOS: GalleryVariantDemoMap = {
   ...accionesVariantDemos,
   ...tabsVariantDemos,
+  ...listasVariantDemos,
+  ...encabezadosVariantDemos,
+  ...estadosVariantDemos,
   ...avisosVariantDemos,
+  ...montosVariantDemos,
   ...graficosVariantDemos,
   ...estructuraVariantDemos,
 }

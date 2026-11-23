@@ -18,7 +18,10 @@ import {
   CollapsibleTrigger,
 } from "@/src/shared/components/ui/collapsible"
 
-import type { GalleryDemoMap } from "@/src/modules/galleries/components/catalog/types"
+import type {
+  GalleryDemoMap,
+  GalleryVariantDemoMap,
+} from "@/src/modules/galleries/components/catalog/types"
 
 export const encabezadosDemos: GalleryDemoMap = {
   "summary-section": [
@@ -258,4 +261,274 @@ export const encabezadosDemos: GalleryDemoMap = {
       ),
     },
   ],
+}
+
+function CollapsibleSample({ defaultOpen }: { defaultOpen?: boolean }) {
+  return (
+    <Collapsible defaultOpen={defaultOpen} className="w-full max-w-sm">
+      <CollapsibleTrigger
+        render={<Button variant="outline" className="w-full justify-between" />}
+      >
+        Detalle del cálculo
+        <ChevronDownIcon />
+      </CollapsibleTrigger>
+      <CollapsibleContent className="pt-2">
+        <p className="text-sm text-muted-foreground">
+          El saldo inicial más los ingresos menos los gastos del mes.
+        </p>
+      </CollapsibleContent>
+    </Collapsible>
+  )
+}
+
+export const encabezadosVariantDemos: GalleryVariantDemoMap = {
+  "summary-section": {
+    collapsible: [
+      {
+        label: "false",
+        node: (
+          <div className="w-full max-w-sm">
+            <SummarySection
+              title="Resumen del mes"
+              subtitle="Actualizado hoy"
+              icon={FileTextIcon}
+            >
+              <div className="p-3 pt-0">
+                <p className="text-sm text-muted-foreground">
+                  12 movimientos este mes.
+                </p>
+              </div>
+            </SummarySection>
+          </div>
+        ),
+      },
+      {
+        label: "true con defaultOpen",
+        node: (
+          <div className="w-full max-w-sm">
+            <SummarySection
+              title="Etiquetas"
+              subtitle="Seis activas"
+              icon={TagsIcon}
+              collapsible
+              defaultOpen
+              right={<Badge variant="secondary">6</Badge>}
+            >
+              <SummaryItem title="Fijas" value="3" icon={TagsIcon} isLast />
+            </SummarySection>
+          </div>
+        ),
+      },
+    ],
+    color: [
+      {
+        label: "acento del módulo en icono y fondo",
+        node: (
+          <div className="w-full max-w-sm">
+            <SummarySection
+              title="Resumen del mes"
+              icon={FileTextIcon}
+              color={GALLERY_ACCENT}
+            >
+              <div className="p-3 pt-0">
+                <p className="text-sm text-muted-foreground">
+                  12 movimientos este mes.
+                </p>
+              </div>
+            </SummarySection>
+          </div>
+        ),
+      },
+    ],
+  },
+  "summary-group": {
+    description: [
+      {
+        label: "opcional",
+        node: (
+          <div className="w-full max-w-sm">
+            <SummaryGroup title="Saldo inicial">
+              <SummaryItem
+                title="Movimientos del mes"
+                value="DOP $8,000.00"
+                icon={TagsIcon}
+                isLast
+              />
+            </SummaryGroup>
+          </div>
+        ),
+      },
+      {
+        label: "debajo del título",
+        node: (
+          <div className="w-full max-w-sm">
+            <SummaryGroup
+              title="Saldo inicial"
+              description="Antes de los movimientos de este mes"
+            >
+              <SummaryItem
+                title="Movimientos del mes"
+                value="DOP $8,000.00"
+                icon={TagsIcon}
+                isLast
+              />
+            </SummaryGroup>
+          </div>
+        ),
+      },
+    ],
+  },
+  "settings-section": {
+    bare: [
+      {
+        label: "false (card propia)",
+        node: (
+          <SettingsSection
+            title="Datos"
+            description="Exporta o elimina tu información"
+            className="w-full max-w-sm"
+          >
+            <SummaryItem
+              title="Exportar mis datos"
+              value="JSON"
+              icon={FileTextIcon}
+              isLast
+            />
+          </SettingsSection>
+        ),
+      },
+      {
+        label: "true (sin card)",
+        node: (
+          <SettingsSection
+            title="Datos"
+            bare
+            className="w-full max-w-sm rounded-2xl border border-border p-2"
+          >
+            <SummaryItem
+              title="Exportar mis datos"
+              value="JSON"
+              icon={FileTextIcon}
+              isLast
+            />
+          </SettingsSection>
+        ),
+      },
+    ],
+    headerTrailing: [
+      {
+        label: "acción a la derecha del título",
+        node: (
+          <SettingsSection
+            title="Datos"
+            description="Exporta o elimina tu información"
+            className="w-full max-w-sm"
+            headerTrailing={
+              <Button
+                size="icon-sm"
+                variant="ghost"
+                aria-label="Ver todo"
+                onClick={() => simulatedTap("Ver todo")}
+              >
+                <PlusIcon />
+              </Button>
+            }
+          >
+            <SummaryItem
+              title="Exportar mis datos"
+              value="JSON"
+              icon={FileTextIcon}
+              isLast
+            />
+          </SettingsSection>
+        ),
+      },
+    ],
+  },
+  "detail-header": {
+    badge: [
+      {
+        label: "sin insignia",
+        node: (
+          <div
+            className="flex w-full max-w-sm flex-col rounded-2xl p-4 text-white"
+            style={{ backgroundColor: GALLERY_ACCENT }}
+          >
+            <DetailHeader
+              media={<BrandLogo name="Institución Ejemplo" size={48} />}
+              title="Banco Ejemplo"
+              subtitle="Cuenta principal"
+            />
+          </div>
+        ),
+      },
+      {
+        label: "con label y variant",
+        node: (
+          <div
+            className="flex w-full max-w-sm flex-col rounded-2xl p-4 text-white"
+            style={{ backgroundColor: GALLERY_ACCENT }}
+          >
+            <DetailHeader
+              media={<BrandLogo name="Cuenta Ejemplo" size={48} />}
+              title="Ahorro programado"
+              badge={{ label: "Activa", variant: "success" }}
+              subtitle="Ahorro · DOP"
+            />
+          </div>
+        ),
+      },
+    ],
+    media: [
+      {
+        label: "BrandLogo u otro nodo de 48 px",
+        node: (
+          <div
+            className="flex w-full max-w-sm flex-col rounded-2xl p-4 text-white"
+            style={{ backgroundColor: GALLERY_ACCENT }}
+          >
+            <DetailHeader
+              media={<BrandLogo name="Banco Ejemplo" size={48} />}
+              title="Banco Ejemplo"
+              subtitle="Cuenta principal"
+            />
+          </div>
+        ),
+      },
+    ],
+  },
+  collapsible: {
+    defaultOpen: [
+      { label: "false", node: <CollapsibleSample /> },
+      { label: "true", node: <CollapsibleSample defaultOpen /> },
+    ],
+    states: [
+      { label: "open", node: <CollapsibleSample defaultOpen /> },
+      { label: "closed", node: <CollapsibleSample /> },
+      {
+        label: "disabled",
+        node: (
+          <Collapsible disabled className="w-full max-w-sm">
+            <CollapsibleTrigger
+              render={
+                <Button
+                  variant="outline"
+                  className="w-full justify-between"
+                  disabled
+                />
+              }
+            >
+              Detalle del cálculo
+              <ChevronDownIcon />
+            </CollapsibleTrigger>
+            <CollapsibleContent className="pt-2">
+              <p className="text-sm text-muted-foreground">
+                El saldo inicial más los ingresos menos los gastos del mes.
+              </p>
+            </CollapsibleContent>
+          </Collapsible>
+        ),
+      },
+    ],
+  },
 }
