@@ -98,6 +98,66 @@ function budgetCategoryIds(input: BudgetCategoryIdsInput): string[] {
   return []
 }
 
+function budgetPeriodError(periodType: string): string | null {
+  return PERIODS.includes(periodType as CreateBudgetPeriod)
+    ? null
+    : "Periodo inválido"
+}
+
+function budgetDates(input: {
+  periodStart: string
+  periodEnd: string
+}): PayloadResult<{ periodStart: string; periodEnd: string }> {
+  const periodStart = input.periodStart.trim()
+  const periodEnd = input.periodEnd.trim()
+  if (!periodStart || !periodEnd) {
+    return { ok: false, error: "Fechas obligatorias" }
+  }
+  if (periodStart > periodEnd) {
+    return {
+      ok: false,
+      error: "El fin del periodo no puede ser anterior al inicio",
+    }
+  }
+  return { ok: true, body: { periodStart, periodEnd } }
+}
+
+function budgetThreshold(
+  raw: string | undefined
+): PayloadResult<number | undefined> {
+  const thresholdRaw = raw?.trim()
+  if (!thresholdRaw) {
+    return { ok: true, body: undefined }
+  }
+  const alertThresholdPct = Number(thresholdRaw)
+  if (!Number.isFinite(alertThresholdPct)) {
+    return { ok: false, error: "Umbral inválido" }
+  }
+  if (alertThresholdPct < 0 || alertThresholdPct > 100) {
+    return { ok: false, error: "El umbral debe estar entre 0 y 100" }
+  }
+  return { ok: true, body: alertThresholdPct }
+}
+
+function applyBudgetOptionals(
+  body: CreateBudgetBody,
+  input: {
+    includeChildren?: boolean
+    rollover?: "NONE" | "SURPLUS" | "SURPLUS_AND_DEFICIT"
+    recurring?: boolean
+  }
+): void {
+  if (input.includeChildren !== undefined) {
+    body.includeChildren = input.includeChildren
+  }
+  if (input.rollover) {
+    body.rollover = input.rollover
+  }
+  if (input.recurring !== undefined) {
+    body.recurring = input.recurring
+  }
+}
+
 export function buildCreateBudgetBody(input: {
   categoryId?: string
   categoryIds?: string[]
@@ -110,55 +170,37 @@ export function buildCreateBudgetBody(input: {
   rollover?: "NONE" | "SURPLUS" | "SURPLUS_AND_DEFICIT"
   recurring?: boolean
 }): PayloadResult<CreateBudgetBody> {
-  if (!PERIODS.includes(input.periodType as CreateBudgetPeriod)) {
-    return { ok: false, error: "Periodo inválido" }
+  const periodError = budgetPeriodError(input.periodType)
+  if (periodError) {
+    return { ok: false, error: periodError }
   }
   const categoryIds = budgetCategoryIds(input)
   if (categoryIds.length === 0) {
     return { ok: false, error: "Elige una categoría" }
   }
-  const periodStart = input.periodStart.trim()
-  const periodEnd = input.periodEnd.trim()
-  if (!periodStart || !periodEnd) {
-    return { ok: false, error: "Fechas obligatorias" }
-  }
-  if (periodStart > periodEnd) {
-    return {
-      ok: false,
-      error: "El fin del periodo no puede ser anterior al inicio",
-    }
+  const dates = budgetDates(input)
+  if (!dates.ok) {
+    return dates
   }
   const amountLimit = parseFinanceMoney(input.amountLimit)
   if (amountLimit === null) {
     return { ok: false, error: "Tope inválido" }
   }
+  const threshold = budgetThreshold(input.alertThresholdPct)
+  if (!threshold.ok) {
+    return threshold
+  }
   const body: CreateBudgetBody = {
     categoryIds,
     categoryId: categoryIds[0],
     periodType: input.periodType as CreateBudgetPeriod,
-    periodStart,
-    periodEnd,
+    periodStart: dates.body.periodStart,
+    periodEnd: dates.body.periodEnd,
     amountLimit,
   }
-  if (input.includeChildren !== undefined) {
-    body.includeChildren = input.includeChildren
-  }
-  if (input.rollover) {
-    body.rollover = input.rollover
-  }
-  if (input.recurring !== undefined) {
-    body.recurring = input.recurring
-  }
-  const thresholdRaw = input.alertThresholdPct?.trim()
-  if (thresholdRaw) {
-    const alertThresholdPct = Number(thresholdRaw)
-    if (!Number.isFinite(alertThresholdPct)) {
-      return { ok: false, error: "Umbral inválido" }
-    }
-    if (alertThresholdPct < 0 || alertThresholdPct > 100) {
-      return { ok: false, error: "El umbral debe estar entre 0 y 100" }
-    }
-    body.alertThresholdPct = alertThresholdPct
+  applyBudgetOptionals(body, input)
+  if (threshold.body !== undefined) {
+    body.alertThresholdPct = threshold.body
   }
   return { ok: true, body }
 }

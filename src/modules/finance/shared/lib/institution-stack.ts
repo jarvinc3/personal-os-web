@@ -1,6 +1,10 @@
 import { countLabel } from "./count-label.ts"
 import { formatFinanceMoney, type FinanceMoneyDisplay } from "./money.ts"
 import { isCashInstitution } from "./cash.ts"
+import {
+  accountIrregularities,
+  productIrregularities,
+} from "./institution-irregularities.ts"
 import type {
   FinanceAccount,
   FinanceBalanceDrift,
@@ -127,38 +131,7 @@ export function formatStackItemBalance(
   return formatFinanceMoney(item.netWorth, display)
 }
 
-function hasDriftForProduct(
-  drifts: readonly FinanceBalanceDrift[],
-  target: { accountId?: string | null; cardId?: string | null }
-): boolean {
-  return drifts.some(
-    (drift) =>
-      (target.accountId !== undefined &&
-        target.accountId !== null &&
-        drift.accountId === target.accountId) ||
-      (target.cardId !== undefined &&
-        target.cardId !== null &&
-        drift.cardId === target.cardId)
-  )
-}
-
-function hasPendingReconciliationForProduct(
-  reconciliationItems: readonly FinanceReconciliationStatusItem[],
-  target: { accountId?: string | null; cardId?: string | null }
-): boolean {
-  return reconciliationItems.some(
-    (item) =>
-      !item.reconciled &&
-      ((target.accountId !== undefined &&
-        target.accountId !== null &&
-        item.accountId === target.accountId) ||
-        (target.cardId !== undefined &&
-          target.cardId !== null &&
-          item.cardId === target.cardId))
-  )
-}
-
-export function buildInstitutionStackItems(input: {
+type InstitutionStackInput = {
   institutions: FinanceInstitution[]
   accounts: FinanceAccount[]
   cards: FinanceCard[]
@@ -167,7 +140,117 @@ export function buildInstitutionStackItems(input: {
   cash?: FinanceCashSummary
   drifts?: readonly FinanceBalanceDrift[]
   reconciliationItems?: readonly FinanceReconciliationStatusItem[]
-}): InstitutionStackItem[] {
+}
+
+type InstitutionProducts = {
+  accounts: FinanceAccount[]
+  cards: FinanceCard[]
+  loans: FinanceLoan[]
+}
+
+function productGroups(
+  input: {
+    accounts: FinanceAccount[]
+    cards: FinanceCard[]
+    loans: FinanceLoan[]
+  },
+  institutionId: string
+): InstitutionProducts {
+  return {
+    accounts: input.accounts.filter(
+      (account) => account.institutionId === institutionId
+    ),
+    cards: input.cards.filter((card) => card.institutionId === institutionId),
+    loans: input.loans.filter((loan) => loan.institutionId === institutionId),
+  }
+}
+
+type PositionFields = {
+  status: FinanceBalanceSheetStatus
+  netWorth: string | null
+  totalAssets: string
+  totalLiabilities: string | null
+  issues: FinanceBalanceSheetIssue[]
+  currencyTotals: FinanceBalanceSheetCurrencySlice[]
+}
+
+const EMPTY_POSITION: PositionFields = {
+  status: "INCOMPLETE",
+  netWorth: null,
+  totalAssets: "0",
+  totalLiabilities: null,
+  issues: [],
+  currencyTotals: [],
+}
+
+function positionFields(
+  position: InstitutionBalancePosition | undefined
+): PositionFields {
+  if (!position) {
+    return EMPTY_POSITION
+  }
+  return {
+    status: position.status,
+    netWorth: position.netWorth,
+    totalAssets: position.totalAssets,
+    totalLiabilities: position.totalLiabilities,
+    issues: position.issues,
+    currencyTotals: position.byCurrency ?? [],
+  }
+}
+
+function institutionStackItem(input: {
+  stack: InstitutionStackInput
+  institution: FinanceInstitution
+  products: InstitutionProducts
+  position: InstitutionBalancePosition | undefined
+}): Extract<InstitutionStackItem, { kind: "institution" }> {
+  return {
+    kind: "institution",
+    id: input.institution.id,
+    institution: input.institution,
+    accounts: input.products.accounts,
+    cards: input.products.cards,
+    loans: input.products.loans,
+    counts: {
+      accounts: input.products.accounts.length,
+      cards: input.products.cards.length,
+      loans: input.products.loans.length,
+    },
+    ...positionFields(input.position),
+    cash: isCashInstitution(input.institution)
+      ? (input.stack.cash ?? null)
+      : null,
+    irregularities: productIrregularities(input.stack, input.products),
+  }
+}
+
+function cashStackItem(
+  input: InstitutionStackInput,
+  account: FinanceAccount
+): Extract<InstitutionStackItem, { kind: "cash" }> {
+  return {
+    kind: "cash",
+    id: account.id,
+    account,
+    balance: account.balance,
+    currencyTotals: [
+      {
+        currency: account.currency,
+        assets: account.balance,
+        available: account.balance,
+        receivables: "0",
+        liabilities: "0",
+        netWorth: account.balance,
+      },
+    ],
+    irregularities: accountIrregularities(input, account),
+  }
+}
+
+export function buildInstitutionStackItems(
+  input: InstitutionStackInput
+): InstitutionStackItem[] {
   const activeInstitutions = input.institutions.filter((item) => item.isActive)
   const activeAccounts = input.accounts.filter((item) => item.isActive)
   const activeCards = input.cards.filter((item) => item.isActive)
@@ -179,93 +262,20 @@ export function buildInstitutionStackItems(input: {
     ])
   )
 
-  const institutionItems: InstitutionStackItem[] = activeInstitutions.map(
-    (institution) => {
-      const accounts = activeAccounts.filter(
-        (account) => account.institutionId === institution.id
-      )
-      const cards = activeCards.filter(
-        (card) => card.institutionId === institution.id
-      )
-      const loans = activeLoans.filter(
-        (loan) => loan.institutionId === institution.id
-      )
-      const position = positionsById.get(institution.id)
-      const irregularities = {
-        drift:
-          accounts.some((account) =>
-            hasDriftForProduct(input.drifts ?? [], {
-              accountId: account.id,
-            })
-          ) ||
-          cards.some((card) =>
-            hasDriftForProduct(input.drifts ?? [], { cardId: card.id })
-          ),
-        reconciliation:
-          accounts.some((account) =>
-            hasPendingReconciliationForProduct(
-              input.reconciliationItems ?? [],
-              { accountId: account.id }
-            )
-          ) ||
-          cards.some((card) =>
-            hasPendingReconciliationForProduct(
-              input.reconciliationItems ?? [],
-              { cardId: card.id }
-            )
-          ),
-      }
-      return {
-        kind: "institution",
-        id: institution.id,
-        institution,
-        accounts,
-        cards,
-        loans,
-        counts: {
-          accounts: accounts.length,
-          cards: cards.length,
-          loans: loans.length,
-        },
-        status: position?.status ?? "INCOMPLETE",
-        netWorth: position?.netWorth ?? null,
-        totalAssets: position?.totalAssets ?? "0",
-        totalLiabilities: position?.totalLiabilities ?? null,
-        issues: position?.issues ?? [],
-        cash: isCashInstitution(institution) ? (input.cash ?? null) : null,
-        currencyTotals: position?.byCurrency ?? [],
-        irregularities,
-      }
-    }
+  const institutionItems = activeInstitutions.map((institution) =>
+    institutionStackItem({
+      stack: input,
+      institution,
+      products: productGroups(
+        { accounts: activeAccounts, cards: activeCards, loans: activeLoans },
+        institution.id
+      ),
+      position: positionsById.get(institution.id),
+    })
   )
-
-  const cashItems: InstitutionStackItem[] = activeAccounts
+  const cashItems = activeAccounts
     .filter((account) => account.type === "CASH" && !account.institutionId)
-    .map((account) => ({
-      kind: "cash" as const,
-      id: account.id,
-      account,
-      balance: account.balance,
-      currencyTotals: [
-        {
-          currency: account.currency,
-          assets: account.balance,
-          available: account.balance,
-          receivables: "0",
-          liabilities: "0",
-          netWorth: account.balance,
-        },
-      ],
-      irregularities: {
-        drift: hasDriftForProduct(input.drifts ?? [], {
-          accountId: account.id,
-        }),
-        reconciliation: hasPendingReconciliationForProduct(
-          input.reconciliationItems ?? [],
-          { accountId: account.id }
-        ),
-      },
-    }))
+    .map((account) => cashStackItem(input, account))
 
   return [...institutionItems, ...cashItems]
 }
