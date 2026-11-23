@@ -1,31 +1,23 @@
 "use client"
 
 import { useAuth } from "@/src/modules/auth"
-import { AuthServiceError } from "@/src/modules/auth"
+import { DeleteAccountConfirmAction } from "@/src/modules/settings/components/sheets/delete-account-confirm-action"
+import { DeleteAccountConfirmDialog } from "@/src/modules/settings/components/sheets/delete-account-confirm-dialog"
+import { useAuthConfirmMode } from "@/src/modules/settings/hooks/use-auth-confirm-mode"
 import { useDeleteAccount } from "@/src/modules/settings/hooks/use-delete-account"
-import { reauthenticateWithPassword } from "@/src/modules/settings/hooks/use-wipe-user-data"
-import {
-  fetchCurrentAuthIdentities,
-  hasEmailPasswordProvider,
-  isGoogleOnlyAccount,
-} from "@/src/modules/settings/lib/auth-providers"
+import { useReauthPassword } from "@/src/modules/settings/hooks/use-reauth-password"
 import { setPendingAccountDeletion } from "@/src/modules/settings/lib/pending-account-deletion"
-import { resolveReauthConfirmMode } from "@/src/modules/settings/lib/wipe-confirm"
 import type { SettingsSheetProps } from "@/src/modules/settings/types/sheet.types"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
-import { ConfirmDialog } from "@/src/shared/components/feedback/confirm-dialog"
-import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import {
   Alert,
   AlertDescription,
   AlertTitle,
 } from "@/src/shared/components/ui/alert"
-import { Button } from "@/src/shared/components/ui/button"
-import { Spinner } from "@/src/shared/components/ui/spinner"
-import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
-import { AlertTriangle, KeyRound, Trash2 } from "lucide-react"
-import { useCallback, useEffect, useRef, useState } from "react"
+import { AlertTriangle } from "lucide-react"
+import { useState } from "react"
 
 const DELETED_DATA_ITEMS = [
   "Perfil, preferencias y configuración de apps",
@@ -45,113 +37,38 @@ export function DeleteAccountSheet({
 }: DeleteAccountSheetProps) {
   const { deleteAfterReauth } = useDeleteAccount()
   const { loginWithGoogleMutation } = useAuth()
-
-  const [password, setPassword] = useState("")
-  const [passwordError, setPasswordError] = useState<string>()
-  const [verifiedPassword, setVerifiedPassword] = useState<string | null>(null)
-  const [isVerifyingPassword, setIsVerifyingPassword] = useState(false)
+  const password = useReauthPassword(email)
   const [alertOpen, setAlertOpen] = useState(false)
-  const passwordRef = useRef("")
-  const passwordVerified =
-    verifiedPassword !== null && verifiedPassword === password.trim()
   const [sessionOpen, setSessionOpen] = useState(open)
   if (open !== sessionOpen) {
     setSessionOpen(open)
     if (open) {
-      setPassword("")
-      setPasswordError(undefined)
-      setVerifiedPassword(null)
+      password.clearPassword()
       setAlertOpen(false)
     }
   }
-  const [canDeleteInApp, setCanDeleteInApp] = useState<boolean | null>(null)
-  const [isGoogleOnly, setIsGoogleOnly] = useState(false)
-  const [isLoadingProviders, setIsLoadingProviders] = useState(false)
-
-  const loadAuthProviders = useCallback(async () => {
-    setIsLoadingProviders(true)
-    try {
-      const { identities } = await fetchCurrentAuthIdentities()
-      if (!identities?.length) {
-        setCanDeleteInApp(Boolean(email))
-        setIsGoogleOnly(false)
-        return
-      }
-      setCanDeleteInApp(hasEmailPasswordProvider(identities))
-      setIsGoogleOnly(isGoogleOnlyAccount(identities))
-    } catch {
-      setCanDeleteInApp(Boolean(email))
-      setIsGoogleOnly(false)
-    } finally {
-      setIsLoadingProviders(false)
-    }
-  }, [email])
-
-  useEffect(() => {
-    if (!open) {
-      return
-    }
-    passwordRef.current = ""
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    void loadAuthProviders()
-  }, [open, loadAuthProviders])
-
-  const clearPassword = () => {
-    setPassword("")
-    passwordRef.current = ""
-    setPasswordError(undefined)
-    setVerifiedPassword(null)
-  }
+  const confirmMode = useAuthConfirmMode({ email, active: open })
 
   const handleContinue = () => {
-    clearPassword()
+    password.clearPassword()
     onOpenChange(false)
     setAlertOpen(true)
   }
 
-  const handlePasswordChange = (value: string) => {
-    passwordRef.current = value
-    setPassword(value)
-    setVerifiedPassword(null)
-    setPasswordError(undefined)
-  }
-
-  const handlePasswordBlur = async () => {
-    const current = passwordRef.current.trim()
-    if (!current) {
-      setVerifiedPassword(null)
-      return
-    }
-    setIsVerifyingPassword(true)
-    try {
-      await reauthenticateWithPassword(email, current)
-      if (passwordRef.current.trim() !== current) {
-        return
-      }
-      setVerifiedPassword(current)
-      setPasswordError(undefined)
-    } catch (error) {
-      if (passwordRef.current.trim() !== current) {
-        return
-      }
-      setVerifiedPassword(null)
-      setPasswordError(
-        error instanceof AuthServiceError
-          ? error.message
-          : "La contraseña no es correcta."
-      )
-    } finally {
-      setIsVerifyingPassword(false)
-    }
-  }
-
   const handleConfirmDelete = () => {
-    if (!passwordVerified) {
+    if (!password.isVerified) {
       return
     }
     deleteAfterReauth.mutate(undefined, {
       onSettled: () => setAlertOpen(false),
     })
+  }
+
+  const handleAlertOpenChange = (next: boolean) => {
+    setAlertOpen(next)
+    if (!next && !deleteAfterReauth.isPending) {
+      password.clearPassword()
+    }
   }
 
   const handleGoogleReauth = () => {
@@ -160,45 +77,15 @@ export function DeleteAccountSheet({
     loginWithGoogleMutation.mutate({ next: APP_ROUTES.app.settings })
   }
 
-  const confirmMode = resolveReauthConfirmMode({
-    isLoadingProviders,
-    canConfirmInApp: canDeleteInApp,
-    isGoogleOnly,
-  })
-
-  const confirmAction =
-    confirmMode === "pending" ? (
-      <Button variant="destructive" className="flex-1" disabled>
-        <Spinner data-icon="inline-start" />
-        Continuar
-      </Button>
-    ) : confirmMode === "google" ? (
-      <Button
-        variant="destructive"
-        className="flex-1"
-        disabled={loginWithGoogleMutation.isPending}
-        onClick={handleGoogleReauth}
-      >
-        {loginWithGoogleMutation.isPending ? (
-          <Spinner data-icon="inline-start" />
-        ) : (
-          <Trash2 data-icon="inline-start" />
-        )}
-        {loginWithGoogleMutation.isPending
-          ? "Confirmando con Google..."
-          : "Confirmar con Google"}
-      </Button>
-    ) : confirmMode === "password" ? (
-      <Button
-        variant="destructive"
-        className="flex-1"
-        disabled={deleteAfterReauth.isPending}
-        onClick={handleContinue}
-      >
-        <Trash2 data-icon="inline-start" />
-        Continuar
-      </Button>
-    ) : null
+  const confirmAction = (
+    <DeleteAccountConfirmAction
+      mode={confirmMode}
+      isGooglePending={loginWithGoogleMutation.isPending}
+      isDeletePending={deleteAfterReauth.isPending}
+      onGoogleReauth={handleGoogleReauth}
+      onContinue={handleContinue}
+    />
+  )
 
   return (
     <>
@@ -246,45 +133,14 @@ export function DeleteAccountSheet({
         ) : null}
       </BottomSheet>
 
-      <ConfirmDialog
+      <DeleteAccountConfirmDialog
         open={alertOpen}
-        onOpenChange={(next) => {
-          setAlertOpen(next)
-          if (!next && !deleteAfterReauth.isPending) {
-            clearPassword()
-          }
-        }}
-        tone="danger"
-        icon={Trash2}
-        wide
-        title="¿Eliminar tu cuenta permanentemente?"
-        description={`Se borrarán todos los datos asociados a ${email}. Esta acción no se puede deshacer.`}
-        confirmLabel="Eliminar cuenta"
-        confirmIcon={Trash2}
-        pending={deleteAfterReauth.isPending}
-        pendingLabel="Eliminando..."
-        confirmDisabled={!passwordVerified || isVerifyingPassword}
+        onOpenChange={handleAlertOpenChange}
+        email={email}
+        deletePending={deleteAfterReauth.isPending}
+        password={password}
         onConfirm={handleConfirmDelete}
-      >
-        <SummarySection title="Confirma tu contraseña" icon={KeyRound}>
-          <FormTextField
-            icon={KeyRound}
-            label="Contraseña"
-            type="password"
-            autoComplete="current-password"
-            value={password}
-            onChange={handlePasswordChange}
-            onBlur={() => void handlePasswordBlur()}
-            disabled={deleteAfterReauth.isPending || isVerifyingPassword}
-            error={passwordError}
-            invalid={Boolean(passwordError)}
-          />
-          <div className="rounded-2xl bg-muted px-4 py-3">
-            <p className="text-xs text-muted-foreground">Cuenta</p>
-            <p className="mt-1 text-sm text-muted-foreground">{email}</p>
-          </div>
-        </SummarySection>
-      </ConfirmDialog>
+      />
     </>
   )
 }

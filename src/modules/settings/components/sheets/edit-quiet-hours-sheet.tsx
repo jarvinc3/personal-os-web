@@ -81,7 +81,7 @@ export function EditQuietHoursSheet({
           <Button
             disabled={!isDirty || updateProfileMutation.isPending}
             className="flex-1"
-            onClick={handleSave}
+            onClick={() => void handleSave()}
           >
             {updateProfileMutation.isPending ? (
               <Spinner data-icon="inline-start" />
