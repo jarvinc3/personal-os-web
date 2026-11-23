@@ -9,8 +9,19 @@ import {
   readPendingDataWipe,
   type PendingDataWipe,
 } from "@/src/modules/settings/lib/pending-data-wipe"
-import { ConfirmDialog } from "@/src/shared/components/feedback/confirm-dialog"
-import { Trash2Icon } from "lucide-react"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+} from "@/src/shared/components/ui/alert-dialog"
+import { Spinner } from "@/src/shared/components/ui/spinner"
+import { Trash2Icon, XIcon } from "lucide-react"
 import { useState } from "react"
 
 function expectedCounts(pendingWipe: PendingDataWipe): Record<string, number> {
@@ -54,31 +65,56 @@ export function PendingDataWipeHandler() {
   }
 
   return (
-    <ConfirmDialog
+    <AlertDialog
       open={confirmOpen}
-      onOpenChange={(open) => !open && handleCancel()}
-      tone="danger"
-      icon={Trash2Icon}
-      title="¿Vaciar los datos seleccionados?"
-      description="Confirmaste tu identidad con Google. Esto no se puede deshacer. Se vaciarán:"
-      confirmLabel="Vaciar datos"
-      confirmIcon={Trash2Icon}
-      pending={wipeAfterReauth.isPending}
-      pendingLabel="Vaciando..."
-      onConfirm={handleConfirm}
+      onOpenChange={(open) => {
+        if (!open && !wipeAfterReauth.isPending) {
+          handleCancel()
+        }
+      }}
     >
-      <ul className="flex max-h-60 flex-col gap-2 overflow-y-auto pr-1">
-        {pendingWipe?.branches.map((branch) => (
-          <li key={branch.id} className="text-sm text-muted-foreground">
-            • {branch.label} ·{" "}
-            {formatBranchCount({
-              branchId: branch.id,
-              count: branch.count,
-              locale: formatLocale,
-            })}
-          </li>
-        ))}
-      </ul>
-    </ConfirmDialog>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogMedia className="bg-destructive/10 text-destructive">
+            <Trash2Icon aria-hidden="true" />
+          </AlertDialogMedia>
+          <AlertDialogTitle>¿Vaciar los datos seleccionados?</AlertDialogTitle>
+          <AlertDialogDescription>
+            Confirmaste tu identidad con Google. Esto no se puede deshacer. Se
+            vaciarán:
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <ul className="flex max-h-60 flex-col gap-2 overflow-y-auto pr-1">
+          {pendingWipe?.branches.map((branch) => (
+            <li key={branch.id} className="text-sm text-muted-foreground">
+              • {branch.label} ·{" "}
+              {formatBranchCount({
+                branchId: branch.id,
+                count: branch.count,
+                locale: formatLocale,
+              })}
+            </li>
+          ))}
+        </ul>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={wipeAfterReauth.isPending}>
+            <XIcon className="size-4 shrink-0" aria-hidden="true" />
+            Cancelar
+          </AlertDialogCancel>
+          <AlertDialogAction
+            variant="destructive"
+            disabled={wipeAfterReauth.isPending}
+            onClick={handleConfirm}
+          >
+            {wipeAfterReauth.isPending ? (
+              <Spinner data-icon="inline-start" />
+            ) : (
+              <Trash2Icon className="size-4 shrink-0" aria-hidden="true" />
+            )}
+            {wipeAfterReauth.isPending ? "Vaciando..." : "Vaciar datos"}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   )
 }

@@ -26,8 +26,18 @@ import {
   type EmailImportPeriodChoice,
 } from "@/src/modules/intelligence/email-connect"
 import { useFormatLocale } from "@/src/modules/settings/hooks/use-format-locale"
-import { ConfirmDialog } from "@/src/shared/components/feedback/confirm-dialog"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+} from "@/src/shared/components/ui/alert-dialog"
 import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import {
   SegmentedControl,
@@ -230,20 +240,35 @@ function GmailConnectSheetForm({
           />
         </SummarySection>
       </BottomSheet>
-      <ConfirmDialog
-        open={discardOpen}
-        onOpenChange={setDiscardOpen}
-        tone="danger"
-        icon={TriangleAlertIcon}
-        title="¿Descartar los cambios?"
-        description="Se pierden el período y el filtro que escribiste."
-        confirmLabel="Descartar"
-        confirmIcon={Trash2Icon}
-        onConfirm={() => {
-          setDiscardOpen(false)
-          onOpenChange(false)
-        }}
-      />
+      <AlertDialog open={discardOpen} onOpenChange={setDiscardOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogMedia className="bg-destructive/10 text-destructive">
+              <TriangleAlertIcon aria-hidden="true" />
+            </AlertDialogMedia>
+            <AlertDialogTitle>¿Descartar los cambios?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Se pierden el período y el filtro que escribiste.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>
+              <XIcon className="size-4 shrink-0" aria-hidden="true" />
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              onClick={() => {
+                setDiscardOpen(false)
+                onOpenChange(false)
+              }}
+            >
+              <Trash2Icon className="size-4 shrink-0" aria-hidden="true" />
+              Descartar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   )
 }

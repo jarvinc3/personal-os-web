@@ -6,8 +6,19 @@ import {
   clearPendingAccountDeletion,
   PENDING_ACCOUNT_DELETION_KEY,
 } from "@/src/modules/settings/lib/pending-account-deletion"
-import { ConfirmDialog } from "@/src/shared/components/feedback/confirm-dialog"
-import { Trash2Icon } from "lucide-react"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+} from "@/src/shared/components/ui/alert-dialog"
+import { Spinner } from "@/src/shared/components/ui/spinner"
+import { Trash2Icon, XIcon } from "lucide-react"
 import { useState } from "react"
 
 function readPendingAccountDeletion(): boolean {
@@ -38,19 +49,46 @@ export function PendingAccountDeletionHandler() {
   }
 
   return (
-    <ConfirmDialog
+    <AlertDialog
       open={confirmOpen}
-      onOpenChange={(open) => !open && handleCancel()}
-      tone="danger"
-      icon={Trash2Icon}
-      wide
-      title="¿Eliminar tu cuenta permanentemente?"
-      description="Confirmaste tu identidad con Google. Esta acción borrará todos tus datos y no se puede deshacer."
-      confirmLabel="Eliminar cuenta"
-      confirmIcon={Trash2Icon}
-      pending={deleteAfterReauth.isPending}
-      pendingLabel="Eliminando..."
-      onConfirm={handleConfirm}
-    />
+      onOpenChange={(open) => {
+        if (!open && !deleteAfterReauth.isPending) {
+          handleCancel()
+        }
+      }}
+    >
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogMedia className="bg-destructive/10 text-destructive">
+            <Trash2Icon aria-hidden="true" />
+          </AlertDialogMedia>
+          <AlertDialogTitle>
+            ¿Eliminar tu cuenta permanentemente?
+          </AlertDialogTitle>
+          <AlertDialogDescription>
+            Confirmaste tu identidad con Google. Esta acción borrará todos tus
+            datos y no se puede deshacer.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={deleteAfterReauth.isPending}>
+            <XIcon className="size-4 shrink-0" aria-hidden="true" />
+            Cancelar
+          </AlertDialogCancel>
+          <AlertDialogAction
+            variant="destructive"
+            disabled={deleteAfterReauth.isPending}
+            onClick={handleConfirm}
+          >
+            {deleteAfterReauth.isPending ? (
+              <Spinner data-icon="inline-start" />
+            ) : (
+              <Trash2Icon className="size-4 shrink-0" aria-hidden="true" />
+            )}
+            {deleteAfterReauth.isPending ? "Eliminando..." : "Eliminar cuenta"}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   )
 }

@@ -22,7 +22,17 @@ import type { FinanceReceivable } from "@/src/modules/finance/shared/types/entit
 import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import { SheetHelpAction } from "@/src/modules/help"
-import { ConfirmDialog } from "@/src/shared/components/feedback/confirm-dialog"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+} from "@/src/shared/components/ui/alert-dialog"
 import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import { Badge } from "@/src/shared/components/ui/badge"
 import { Button, buttonVariants } from "@/src/shared/components/ui/button"
@@ -44,6 +54,7 @@ import {
   MessageCircleIcon,
   ShieldCheckIcon,
   UserIcon,
+  XIcon,
 } from "lucide-react"
 import { useMemo, useState } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
@@ -297,19 +308,44 @@ export function ReceivableShareSheet({
         ) : null}
       </BottomSheet>
 
-      <ConfirmDialog
+      <AlertDialog
         open={confirmRevoke}
-        onOpenChange={setConfirmRevoke}
-        tone="danger"
-        icon={BanIcon}
-        title="¿Revocar el link?"
-        description="Quien lo tenga abierto dejará de ver los cobros."
-        confirmLabel="Revocar"
-        confirmIcon={BanIcon}
-        pending={revokeShare.isPending}
-        pendingLabel="Revocando..."
-        onConfirm={() => void onRevokeLink()}
-      />
+        onOpenChange={(open) => {
+          if (!revokeShare.isPending) {
+            setConfirmRevoke(open)
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogMedia className="bg-destructive/10 text-destructive">
+              <BanIcon aria-hidden="true" />
+            </AlertDialogMedia>
+            <AlertDialogTitle>¿Revocar el link?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Quien lo tenga abierto dejará de ver los cobros.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={revokeShare.isPending}>
+              <XIcon className="size-4 shrink-0" aria-hidden="true" />
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              disabled={revokeShare.isPending}
+              onClick={() => void onRevokeLink()}
+            >
+              {revokeShare.isPending ? (
+                <Spinner data-icon="inline-start" />
+              ) : (
+                <BanIcon className="size-4 shrink-0" aria-hidden="true" />
+              )}
+              {revokeShare.isPending ? "Revocando..." : "Revocar"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   )
 }

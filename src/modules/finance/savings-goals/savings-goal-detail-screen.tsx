@@ -31,10 +31,21 @@ import {
 } from "@/src/modules/finance/shared/lib/money"
 import { formatCalendarDate } from "@/src/modules/finance/shared/lib/ledger-form"
 import { amountRatioPct } from "@/src/modules/finance/shared/lib/planning-lists"
-import { DeleteRecordDialog } from "@/src/modules/finance/shared/components/delete-record-dialog"
 import { RecordOptionsSheet } from "@/src/modules/finance/shared/components/record-options-sheet"
 import { LoadingView } from "@/src/shared/components/feedback/loading-view"
 import { Button } from "@/src/shared/components/ui/button"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+} from "@/src/shared/components/ui/alert-dialog"
+import { Spinner } from "@/src/shared/components/ui/spinner"
 import {
   Empty,
   EmptyDescription,
@@ -60,6 +71,7 @@ import {
   PlusIcon,
   Trash2Icon,
   WalletIcon,
+  XIcon,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useMemo, useState } from "react"
@@ -481,31 +493,89 @@ function SavingsGoalDetailScreenBody({
         ]}
       />
 
-      <DeleteRecordDialog
+      <AlertDialog
         open={confirmGoalOpen}
-        onOpenChange={setConfirmGoalOpen}
-        recordName={goal.name}
-        pending={deleteGoal.isPending}
-        consequences="Se borran sus aportes. No se puede deshacer."
-        onConfirm={() => void onDeleteGoal()}
-      />
+        onOpenChange={(open) => {
+          if (!open && !deleteGoal.isPending) {
+            setConfirmGoalOpen(false)
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogMedia className="bg-destructive/10 text-destructive">
+              <Trash2Icon aria-hidden="true" />
+            </AlertDialogMedia>
+            <AlertDialogTitle>¿Eliminar “{goal.name}”?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Se borran sus aportes. No se puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteGoal.isPending}>
+              <XIcon className="size-4 shrink-0" aria-hidden="true" />
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              disabled={deleteGoal.isPending}
+              onClick={() => void onDeleteGoal()}
+            >
+              {deleteGoal.isPending ? (
+                <Spinner data-icon="inline-start" />
+              ) : (
+                <Trash2Icon className="size-4 shrink-0" aria-hidden="true" />
+              )}
+              {deleteGoal.isPending ? "Eliminando..." : "Eliminar"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
-      <DeleteRecordDialog
+      <AlertDialog
         open={pendingContributionId !== null}
         onOpenChange={(nextOpen) => {
-          if (!nextOpen) {
+          if (!nextOpen && !deleteContribution.isPending) {
             setPendingContributionId(null)
           }
         }}
-        recordName={
-          pendingContribution
-            ? formatFinanceMoney(pendingContribution.amount, money)
-            : "el aporte"
-        }
-        pending={deleteContribution.isPending}
-        consequences="El saldo de la meta baja. No se puede deshacer."
-        onConfirm={() => void removeContribution()}
-      />
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogMedia className="bg-destructive/10 text-destructive">
+              <Trash2Icon aria-hidden="true" />
+            </AlertDialogMedia>
+            <AlertDialogTitle>
+              ¿Eliminar “
+              {pendingContribution
+                ? formatFinanceMoney(pendingContribution.amount, money)
+                : "el aporte"}
+              ”?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              El saldo de la meta baja. No se puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteContribution.isPending}>
+              <XIcon className="size-4 shrink-0" aria-hidden="true" />
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              disabled={deleteContribution.isPending}
+              onClick={() => void removeContribution()}
+            >
+              {deleteContribution.isPending ? (
+                <Spinner data-icon="inline-start" />
+              ) : (
+                <Trash2Icon className="size-4 shrink-0" aria-hidden="true" />
+              )}
+              {deleteContribution.isPending ? "Eliminando..." : "Eliminar"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   )
 }

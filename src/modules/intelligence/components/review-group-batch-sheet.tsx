@@ -26,7 +26,17 @@ import type {
   AiReviewGroupVerificationResult,
 } from "@/src/modules/intelligence/types/intelligence.types"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
-import { ConfirmDialog } from "@/src/shared/components/feedback/confirm-dialog"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+} from "@/src/shared/components/ui/alert-dialog"
 import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import { Badge } from "@/src/shared/components/ui/badge"
 import { Button } from "@/src/shared/components/ui/button"
@@ -243,36 +253,56 @@ function ReviewGroupBatchSheetBody({
         </div>
       ) : null}
 
-      <ConfirmDialog
+      <AlertDialog
         open={requestedVerdict !== null}
         onOpenChange={(nextOpen) => {
-          if (!nextOpen) {
+          if (!nextOpen && !pending) {
             setRequestedVerdict(null)
           }
         }}
-        icon={requestedVerdict === "CORRECTED" ? Pencil : Check}
-        title={
-          group
-            ? `¿Verificar ${countLabel(verifiable, "correo", "correos")} de ${group.fromAddress}?`
-            : "¿Verificar el lote?"
-        }
-        description={
-          <>
-            {requestedVerdict === "CORRECTED"
-              ? `Se registra la corrección con las etiquetas elegidas en ${countLabel(verifiable, "correo pendiente", "correos pendientes")}. `
-              : `Se registra la verificación en ${countLabel(verifiable, "correo pendiente", "correos pendientes")}. `}
-            {group && group.pendingHoldout > 0
-              ? `${countLabel(group.pendingHoldout, "HOLDOUT queda", "HOLDOUT quedan")} fuera del lote y siguen en la cola individual. `
-              : null}
-            La verificación no se puede deshacer.
-          </>
-        }
-        confirmLabel="Verificar"
-        confirmIcon={Check}
-        pending={pending}
-        pendingLabel="Verificando..."
-        onConfirm={confirmBatch}
-      />
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogMedia className="bg-muted text-muted-foreground">
+              {requestedVerdict === "CORRECTED" ? (
+                <Pencil aria-hidden="true" />
+              ) : (
+                <Check aria-hidden="true" />
+              )}
+            </AlertDialogMedia>
+            <AlertDialogTitle>
+              {group
+                ? `¿Verificar ${countLabel(verifiable, "correo", "correos")} de ${group.fromAddress}?`
+                : "¿Verificar el lote?"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {requestedVerdict === "CORRECTED"
+                ? `Se registra la corrección con las etiquetas elegidas en ${countLabel(verifiable, "correo pendiente", "correos pendientes")}. `
+                : `Se registra la verificación en ${countLabel(verifiable, "correo pendiente", "correos pendientes")}. `}
+              {group && group.pendingHoldout > 0
+                ? `${countLabel(group.pendingHoldout, "HOLDOUT queda", "HOLDOUT quedan")} fuera del lote y siguen en la cola individual. `
+                : null}
+              La verificación no se puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={pending}>
+              <X className="size-4 shrink-0" aria-hidden="true" />
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction disabled={pending} onClick={confirmBatch}>
+              {pending ? (
+                <Spinner data-icon="inline-start" />
+              ) : requestedVerdict === "CORRECTED" ? (
+                <Pencil className="size-4 shrink-0" aria-hidden="true" />
+              ) : (
+                <Check className="size-4 shrink-0" aria-hidden="true" />
+              )}
+              {pending ? "Verificando..." : "Verificar"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </BottomSheet>
   )
 }

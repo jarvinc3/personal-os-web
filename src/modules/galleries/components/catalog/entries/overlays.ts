@@ -11,7 +11,7 @@ export const overlaysDocs: readonly GalleryComponentMeta[] = [
     whenToUse:
       "Edición o contenido secundario en cualquier módulo, con su URL y su cierre por Atrás.",
     whenNotToUse:
-      "Una confirmación: ConfirmDialog. Una vista que merece ruta propia: pantalla.",
+      "Una confirmación: AlertDialog. Una vista que merece ruta propia: pantalla.",
     importPath: "@/src/shared/components/sheets/bottom-sheet",
     snippet: `import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 
@@ -56,54 +56,6 @@ const sheet = useSheetParam(FINANCE_SHEET_KEYS.category)
     ],
   },
   {
-    id: "confirm-dialog",
-    name: "ConfirmDialog",
-    category: "overlays",
-    kind: "domain",
-    description:
-      "Confirmación de una acción destructiva o difícil de deshacer, con su tono.",
-    whenToUse: "Antes de borrar, vaciar, reemplazar o recalcular datos.",
-    whenNotToUse:
-      "Navegación, abrir un sheet o un alta reversible. Un AlertDialog simple puede cubrir el caso.",
-    importPath: "@/src/shared/components/feedback/confirm-dialog",
-    snippet: `import { ConfirmDialog } from "@/src/shared/components/feedback/confirm-dialog"
-
-<ConfirmDialog
-  open={open}
-  onOpenChange={setOpen}
-  title="¿Eliminar el movimiento?"
-  description="Se quitará de la lista y del saldo de la cuenta."
-  confirmLabel="Eliminar"
-  confirmIcon={Trash2Icon}
-  tone="danger"
-  onConfirm={onConfirm}
-/>`,
-    subcomponents: [],
-    anatomy: [{ name: "ConfirmDialog" }],
-    variants: [
-      { name: "tone", values: "default, danger" },
-      { name: "states", values: "normal, pending, disabled" },
-      { name: "wide", values: "false, true para un diálogo con formulario" },
-    ],
-    props: [
-      {
-        name: "title / description",
-        type: "ReactNode",
-        description: "Pregunta y consecuencia de la acción.",
-      },
-      {
-        name: "confirmLabel / confirmIcon",
-        type: "ReactNode / LucideIcon",
-        description: "Verbo real de la acción y su icono.",
-      },
-      {
-        name: "pending",
-        type: "boolean",
-        description: "Deshabilita ambos botones mientras corre la acción.",
-      },
-    ],
-  },
-  {
     id: "alert-dialog",
     name: "AlertDialog",
     category: "overlays",
@@ -111,9 +63,9 @@ const sheet = useSheetParam(FINANCE_SHEET_KEYS.category)
     description:
       "Diálogo modal de confirmación con acción y cancelar, sin ruta.",
     whenToUse:
-      "Una confirmación puntual armada a mano, con su título y su consecuencia.",
+      "Toda confirmación de una acción destructiva o difícil de deshacer: título en pregunta, consecuencia, icono y pending.",
     whenNotToUse:
-      "Una confirmación de Finanzas: ConfirmDialog ya reúne el patrón. Una edición: BottomSheet.",
+      "Navegación, abrir una hoja o un alta reversible. Una edición: BottomSheet.",
     importPath: "@/src/shared/components/ui/alert-dialog",
     snippet: `import {
   AlertDialog,
@@ -127,18 +79,34 @@ const sheet = useSheetParam(FINANCE_SHEET_KEYS.category)
   AlertDialogTrigger,
 } from "@/src/shared/components/ui/alert-dialog"
 
-<AlertDialog>
-  <AlertDialogTrigger render={<Button variant="destructive" />}>
-    Eliminar
-  </AlertDialogTrigger>
+<AlertDialog open={open} onOpenChange={setOpen}>
   <AlertDialogContent>
     <AlertDialogHeader>
+      <AlertDialogMedia className="bg-destructive/10 text-destructive">
+        <Trash2Icon />
+      </AlertDialogMedia>
       <AlertDialogTitle>¿Eliminar el movimiento?</AlertDialogTitle>
-      <AlertDialogDescription>No se puede deshacer.</AlertDialogDescription>
+      <AlertDialogDescription>
+        Se quitará de la lista y del saldo de la cuenta. No se puede deshacer.
+      </AlertDialogDescription>
     </AlertDialogHeader>
     <AlertDialogFooter>
-      <AlertDialogCancel>Cancelar</AlertDialogCancel>
-      <AlertDialogAction variant="destructive">Eliminar</AlertDialogAction>
+      <AlertDialogCancel disabled={pending}>
+        <XIcon className="size-4 shrink-0" aria-hidden="true" />
+        Cancelar
+      </AlertDialogCancel>
+      <AlertDialogAction
+        variant="destructive"
+        disabled={pending}
+        onClick={onConfirm}
+      >
+        {pending ? (
+          <Spinner data-icon="inline-start" />
+        ) : (
+          <Trash2Icon className="size-4 shrink-0" aria-hidden="true" />
+        )}
+        {pending ? "Eliminando..." : "Eliminar"}
+      </AlertDialogAction>
     </AlertDialogFooter>
   </AlertDialogContent>
 </AlertDialog>`,
@@ -171,12 +139,26 @@ const sheet = useSheetParam(FINANCE_SHEET_KEYS.category)
     variants: [
       { name: "size (Content)", values: "default, sm" },
       { name: "variant (Action)", values: "default, destructive, outline" },
+      { name: "states", values: "normal, pending" },
     ],
     props: [
       {
         name: "open / onOpenChange",
         type: "boolean / (open: boolean) => void",
-        description: "Estado del diálogo; Esc y Cancelar cierran.",
+        description:
+          "Estado del diálogo; Esc y Cancelar cierran, un clic fuera no. Con pending, el cambio se ignora.",
+      },
+      {
+        name: "AlertDialogMedia",
+        type: "ReactNode",
+        description:
+          "Icono grande del encabezado; en una acción destructiva lleva bg-destructive/10 y text-destructive.",
+      },
+      {
+        name: "pending",
+        type: "boolean",
+        description:
+          "Deshabilita Cancelar y la acción, y cambia el icono de la acción por Spinner.",
       },
     ],
   },

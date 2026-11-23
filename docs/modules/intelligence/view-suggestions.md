@@ -13,7 +13,7 @@ La fila muestra hasta tres sugerencias activas del back para la vista actual. Co
 ## Ocultar y descartar
 
 - **Ocultar la fila:** la X de la barra guarda una marca por ruta y vista en `sessionStorage` (`personal-os:view-suggestions-hidden:…`). Vale solo para esa pestaña y esa vista. Al abrir el overlay, las sugerencias siguen visibles.
-- **Descartar una sugerencia:** la X de un badge dentro del overlay abre el `ConfirmDialog` «¿Descartar esta sugerencia?» con Cancelar y Descartar. Cancelar no cambia nada. Descartar llama al `DELETE`, quita la sugerencia de todas las cachés de la fila y el back no la vuelve a generar para esa vista.
+- **Descartar una sugerencia:** la X de un badge dentro del overlay abre el `AlertDialog` «¿Descartar esta sugerencia?» con Cancelar y Descartar. Cancelar no cambia nada. Descartar llama al `DELETE`, quita la sugerencia de todas las cachés de la fila y el back no la vuelve a generar para esa vista.
 - Un fallo al descartar deja el diálogo abierto, muestra un toast y permite reintentar.
 - Un fallo al cargar sugerencias deja la fila vacía sin bloquear el chat ni el resto de la vista.
 
@@ -27,7 +27,7 @@ La fila muestra hasta tres sugerencias activas del back para la vista actual. Co
 - `view-suggestions-row.tsx` — fila reutilizable, scroll, fundido, badges y X.
 - `src/modules/intelligence/hooks/use-view-suggestions.ts` — consulta, descarte e invalidación de caché.
 - `src/modules/intelligence/lib/view-suggestions.ts` — alcance, query string y `sessionStorage`, con su spec.
-- `agent-chat-overlay.tsx` — fila interior, prefill desde `?suggestion=` y `ConfirmDialog`.
+- `agent-chat-overlay.tsx` — fila interior, prefill desde `?suggestion=` y `AlertDialog`.
 - `agent-chat-host.tsx` — decide cuándo se ve la fila exterior y abre el overlay desde un badge.
 
 Back: [personal-os-back#358](https://github.com/jarvinc3/personal-os-back/issues/358).

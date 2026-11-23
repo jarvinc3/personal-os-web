@@ -17,7 +17,7 @@ Productos tiene el atajo **Detectados en correos** (`/finance/products/email-pro
 - El dinero usa `FinanceMoneyField` (teclado y calculadora) y la moneda, `FinanceCurrencyPickerSheet` (con bandera). No hay inputs de monto genéricos.
 - Cuenta o tarjeta se elige con `DestinationPickerSheet` desde un `DestinationTrigger`, no en un `<select>`.
 - Cerrar con cambios sin guardar pide confirmación con `useDiscardChanges` (`shared/hooks/use-discard-changes.tsx`); un guardado con éxito cierra directo.
-- Las acciones de un registro viven en el ⋮ del detalle (`RecordOptionsSheet`). "Eliminar" es el último ítem, en rojo, y confirma con `DeleteRecordDialog`.
+- Las acciones de un registro viven en el ⋮ del detalle (`RecordOptionsSheet`). "Eliminar" es el último ítem, en rojo, y confirma con un `AlertDialog`.
 - Tras eliminar, un toast con "Deshacer" (`showUndoToast`) llama al `POST <entidad>/:id/restore` durante unos segundos. La respuesta del `DELETE` trae `undoId`, que para una transferencia es el `transferGroupId`.
 - Los errores del API pasan por `financeErrorMessage` (`shared/lib/finance-error.ts`), que traduce el `message` del servidor. El detalle de validación no se muestra crudo.
 

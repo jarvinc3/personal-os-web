@@ -20,7 +20,17 @@ import {
 import type { SemanticRoute } from "@/src/modules/intelligence/review-labels"
 import type { AiReviewSelectionVerificationInput } from "@/src/modules/intelligence/types/intelligence.types"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
-import { ConfirmDialog } from "@/src/shared/components/feedback/confirm-dialog"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+} from "@/src/shared/components/ui/alert-dialog"
 import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import { Badge } from "@/src/shared/components/ui/badge"
 import { Button } from "@/src/shared/components/ui/button"
@@ -185,26 +195,49 @@ function ReviewSelectionSheetBody({
         </SummarySection>
       </div>
 
-      <ConfirmDialog
+      <AlertDialog
         open={requestedVerdict !== null}
         onOpenChange={(nextOpen) => {
-          if (!nextOpen) {
+          if (!nextOpen && !pending) {
             setRequestedVerdict(null)
           }
         }}
-        icon={requestedVerdict === "CORRECTED" ? PencilIcon : CheckCircle2Icon}
-        title={`¿Verificar ${messageIds.length} ${messageIds.length === 1 ? "correo" : "correos"}?`}
-        description={
-          requestedVerdict === "CORRECTED"
-            ? "Se guardarán las etiquetas elegidas en cada correo seleccionado. La verificación no se puede deshacer."
-            : "Se confirmará la clasificación actual de cada correo seleccionado. La verificación no se puede deshacer."
-        }
-        confirmLabel="Verificar"
-        confirmIcon={CheckIcon}
-        pending={pending}
-        pendingLabel="Verificando..."
-        onConfirm={confirmSelection}
-      />
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogMedia className="bg-muted text-muted-foreground">
+              {requestedVerdict === "CORRECTED" ? (
+                <PencilIcon aria-hidden="true" />
+              ) : (
+                <CheckCircle2Icon aria-hidden="true" />
+              )}
+            </AlertDialogMedia>
+            <AlertDialogTitle>
+              ¿Verificar {messageIds.length}{" "}
+              {messageIds.length === 1 ? "correo" : "correos"}?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {requestedVerdict === "CORRECTED"
+                ? "Se guardarán las etiquetas elegidas en cada correo seleccionado. La verificación no se puede deshacer."
+                : "Se confirmará la clasificación actual de cada correo seleccionado. La verificación no se puede deshacer."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={pending}>
+              <XIcon className="size-4 shrink-0" aria-hidden="true" />
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction disabled={pending} onClick={confirmSelection}>
+              {pending ? (
+                <Spinner data-icon="inline-start" />
+              ) : (
+                <CheckIcon className="size-4 shrink-0" aria-hidden="true" />
+              )}
+              {pending ? "Verificando..." : "Verificar"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </BottomSheet>
   )
 }

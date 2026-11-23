@@ -3,7 +3,6 @@
 import { FinanceGate } from "@/src/modules/finance/finance-gate"
 import { ErrorState } from "@/src/shared/components/feedback/error-state"
 import { MissingRecord } from "@/src/modules/finance/shared/components/layout/missing-record"
-import { DeleteRecordDialog } from "@/src/modules/finance/shared/components/delete-record-dialog"
 import { RecordOptionsSheet } from "@/src/modules/finance/shared/components/record-options-sheet"
 import { showUndoToast } from "@/src/modules/finance/shared/components/undo-toast"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
@@ -46,8 +45,19 @@ import { TransactionDetailLinks } from "@/src/modules/finance/transactions/compo
 import { TransactionReversalNotice } from "@/src/modules/finance/transactions/components/transaction-reversal-notice"
 import { canEditTransaction } from "@/src/modules/finance/transactions/lib/transaction-edit"
 import { LoadingView } from "@/src/shared/components/feedback/loading-view"
-import { ConfirmDialog } from "@/src/shared/components/feedback/confirm-dialog"
 import { Button } from "@/src/shared/components/ui/button"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+} from "@/src/shared/components/ui/alert-dialog"
+import { Spinner } from "@/src/shared/components/ui/spinner"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
@@ -63,6 +73,7 @@ import {
   RotateCcwIcon,
   Trash2Icon,
   UnlinkIcon,
+  XIcon,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useMemo, useState } from "react"
@@ -419,77 +430,236 @@ function TransactionDetailScreenBody({
         options={options}
       />
 
-      <DeleteRecordDialog
+      <AlertDialog
         open={confirmOpen}
-        onOpenChange={setConfirmOpen}
-        recordName={tx.description ?? tx.merchant ?? "Movimiento"}
-        pending={deleteMutation.isPending}
-        consequences={`Se elimina ${formatFinanceMoney(tx.amount, {
-          ...display,
-          currency: tx.currency,
-        })}. El saldo de la cuenta se corrige y no se puede deshacer.`}
-        onConfirm={() => void onDelete()}
-      />
+        onOpenChange={(open) => {
+          if (!open && !deleteMutation.isPending) {
+            setConfirmOpen(false)
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogMedia className="bg-destructive/10 text-destructive">
+              <Trash2Icon aria-hidden="true" />
+            </AlertDialogMedia>
+            <AlertDialogTitle>
+              ¿Eliminar “{tx.description ?? tx.merchant ?? "Movimiento"}”?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {`Se elimina ${formatFinanceMoney(tx.amount, {
+                ...display,
+                currency: tx.currency,
+              })}. El saldo de la cuenta se corrige y no se puede deshacer.`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteMutation.isPending}>
+              <XIcon className="size-4 shrink-0" aria-hidden="true" />
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              disabled={deleteMutation.isPending}
+              onClick={() => void onDelete()}
+            >
+              {deleteMutation.isPending ? (
+                <Spinner data-icon="inline-start" />
+              ) : (
+                <Trash2Icon className="size-4 shrink-0" aria-hidden="true" />
+              )}
+              {deleteMutation.isPending ? "Eliminando..." : "Eliminar"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
-      <ConfirmDialog
+      <AlertDialog
         open={unconfirmOpen}
-        onOpenChange={setUnconfirmOpen}
-        icon={ClockIcon}
-        title="¿Marcar como pendiente?"
-        description={`${formattedAmount} deja de contar en el saldo de ${affectedAccountLabel} hasta que se confirme otra vez.`}
-        confirmLabel="Marcar pendiente"
-        confirmIcon={ClockIcon}
-        pending={
-          unconfirmMutation.isPending || unconfirmTransferMutation.isPending
-        }
-        pendingLabel="Marcando..."
-        onConfirm={() => {
-          setUnconfirmOpen(false)
-          void onUnconfirm()
+        onOpenChange={(open) => {
+          if (
+            !unconfirmMutation.isPending &&
+            !unconfirmTransferMutation.isPending
+          ) {
+            setUnconfirmOpen(open)
+          }
         }}
-      />
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogMedia className="bg-muted text-muted-foreground">
+              <ClockIcon aria-hidden="true" />
+            </AlertDialogMedia>
+            <AlertDialogTitle>¿Marcar como pendiente?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {formattedAmount} deja de contar en el saldo de{" "}
+              {affectedAccountLabel} hasta que se confirme otra vez.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              disabled={
+                unconfirmMutation.isPending ||
+                unconfirmTransferMutation.isPending
+              }
+            >
+              <XIcon className="size-4 shrink-0" aria-hidden="true" />
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              disabled={
+                unconfirmMutation.isPending ||
+                unconfirmTransferMutation.isPending
+              }
+              onClick={() => {
+                setUnconfirmOpen(false)
+                void onUnconfirm()
+              }}
+            >
+              {unconfirmMutation.isPending ||
+              unconfirmTransferMutation.isPending ? (
+                <Spinner data-icon="inline-start" />
+              ) : (
+                <ClockIcon className="size-4 shrink-0" aria-hidden="true" />
+              )}
+              {unconfirmMutation.isPending ||
+              unconfirmTransferMutation.isPending
+                ? "Marcando..."
+                : "Marcar pendiente"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
-      <ConfirmDialog
+      <AlertDialog
         open={reverseOpen}
-        onOpenChange={setReverseOpen}
-        icon={RotateCcwIcon}
-        title="¿Reversar el movimiento?"
-        description={`Se crea el asiento contrario de ${formattedAmount}. El saldo de ${affectedAccountLabel} se corrige y no se puede deshacer.`}
-        confirmLabel="Reversar"
-        confirmIcon={RotateCcwIcon}
-        pending={reverseMutation.isPending || reverseTransferMutation.isPending}
-        pendingLabel="Reversando..."
-        onConfirm={() => {
-          setReverseOpen(false)
-          void onReverse()
+        onOpenChange={(open) => {
+          if (
+            !reverseMutation.isPending &&
+            !reverseTransferMutation.isPending
+          ) {
+            setReverseOpen(open)
+          }
         }}
-      />
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogMedia className="bg-muted text-muted-foreground">
+              <RotateCcwIcon aria-hidden="true" />
+            </AlertDialogMedia>
+            <AlertDialogTitle>¿Reversar el movimiento?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Se crea el asiento contrario de {formattedAmount}. El saldo de{" "}
+              {affectedAccountLabel} se corrige y no se puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              disabled={
+                reverseMutation.isPending || reverseTransferMutation.isPending
+              }
+            >
+              <XIcon className="size-4 shrink-0" aria-hidden="true" />
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              disabled={
+                reverseMutation.isPending || reverseTransferMutation.isPending
+              }
+              onClick={() => {
+                setReverseOpen(false)
+                void onReverse()
+              }}
+            >
+              {reverseMutation.isPending ||
+              reverseTransferMutation.isPending ? (
+                <Spinner data-icon="inline-start" />
+              ) : (
+                <RotateCcwIcon className="size-4 shrink-0" aria-hidden="true" />
+              )}
+              {reverseMutation.isPending || reverseTransferMutation.isPending
+                ? "Reversando..."
+                : "Reversar"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
-      <ConfirmDialog
+      <AlertDialog
         open={mergeOpen}
-        onOpenChange={setMergeOpen}
-        icon={GitMergeIcon}
-        title="¿Unir los movimientos?"
-        description="Los dos movimientos se unen en uno. No se puede deshacer."
-        confirmLabel="Unir"
-        confirmIcon={GitMergeIcon}
-        pending={mergeMutation.isPending}
-        pendingLabel="Uniendo..."
-        onConfirm={() => void onMerge()}
-      />
+        onOpenChange={(open) => {
+          if (!mergeMutation.isPending) {
+            setMergeOpen(open)
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogMedia className="bg-muted text-muted-foreground">
+              <GitMergeIcon aria-hidden="true" />
+            </AlertDialogMedia>
+            <AlertDialogTitle>¿Unir los movimientos?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Los dos movimientos se unen en uno. No se puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={mergeMutation.isPending}>
+              <XIcon className="size-4 shrink-0" aria-hidden="true" />
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              disabled={mergeMutation.isPending}
+              onClick={() => void onMerge()}
+            >
+              {mergeMutation.isPending ? (
+                <Spinner data-icon="inline-start" />
+              ) : (
+                <GitMergeIcon className="size-4 shrink-0" aria-hidden="true" />
+              )}
+              {mergeMutation.isPending ? "Uniendo..." : "Unir"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
-      <ConfirmDialog
+      <AlertDialog
         open={unlinkOpen}
-        onOpenChange={setUnlinkOpen}
-        icon={UnlinkIcon}
-        title="¿Quitar el vínculo?"
-        description="El movimiento deja de estar ligado a la planificación."
-        confirmLabel="Quitar"
-        confirmIcon={UnlinkIcon}
-        pending={unlinkMutation.isPending}
-        pendingLabel="Quitando..."
-        onConfirm={() => void onUnlink()}
-      />
+        onOpenChange={(open) => {
+          if (!unlinkMutation.isPending) {
+            setUnlinkOpen(open)
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogMedia className="bg-muted text-muted-foreground">
+              <UnlinkIcon aria-hidden="true" />
+            </AlertDialogMedia>
+            <AlertDialogTitle>¿Quitar el vínculo?</AlertDialogTitle>
+            <AlertDialogDescription>
+              El movimiento deja de estar ligado a la planificación.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={unlinkMutation.isPending}>
+              <XIcon className="size-4 shrink-0" aria-hidden="true" />
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              disabled={unlinkMutation.isPending}
+              onClick={() => void onUnlink()}
+            >
+              {unlinkMutation.isPending ? (
+                <Spinner data-icon="inline-start" />
+              ) : (
+                <UnlinkIcon className="size-4 shrink-0" aria-hidden="true" />
+              )}
+              {unlinkMutation.isPending ? "Quitando..." : "Quitar"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <LinkTransactionSheet
         open={linkOpen}

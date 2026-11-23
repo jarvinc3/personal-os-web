@@ -22,7 +22,7 @@ import type {
   FinanceCategory,
   FinanceCategoryType,
 } from "@/src/modules/finance/shared/types/entities"
-import { DeleteRecordDialog } from "@/src/modules/finance/shared/components/delete-record-dialog"
+import { RecordOptionsSheet } from "@/src/modules/finance/shared/components/record-options-sheet"
 import { CategoryPickerSheet } from "@/src/modules/finance/shared/components/pickers/category-picker-sheet"
 import { CategoryTrigger } from "@/src/modules/finance/shared/components/pickers/category-trigger"
 import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
@@ -30,6 +30,17 @@ import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet
 import { SheetHelpAction } from "@/src/modules/help"
 import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import { Button } from "@/src/shared/components/ui/button"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+} from "@/src/shared/components/ui/alert-dialog"
 import { ColorPickerSwatch } from "@/src/shared/components/forms/color-picker"
 import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
 import { Label } from "@/src/shared/components/ui/label"
@@ -48,6 +59,7 @@ import {
   PaletteIcon,
   SaveIcon,
   TrashIcon,
+  XIcon,
 } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
@@ -400,14 +412,47 @@ export function CategorySheet({
 
       {discardChangesDialog}
 
-      <DeleteRecordDialog
+      <AlertDialog
         open={confirmOpen}
-        onOpenChange={setConfirmOpen}
-        recordName={category?.name ?? "esta categoría"}
-        pending={deleteMutation.isPending}
-        consequences="Los movimientos que la usan quedan sin categoría. No se puede deshacer."
-        onConfirm={() => void onDelete()}
-      />
+        onOpenChange={(open) => {
+          if (!open && !deleteMutation.isPending) {
+            setConfirmOpen(false)
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogMedia className="bg-destructive/10 text-destructive">
+              <TrashIcon aria-hidden="true" />
+            </AlertDialogMedia>
+            <AlertDialogTitle>
+              ¿Eliminar “{category?.name ?? "esta categoría"}”?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Los movimientos que la usan quedan sin categoría. No se puede
+              deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteMutation.isPending}>
+              <XIcon className="size-4 shrink-0" aria-hidden="true" />
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              disabled={deleteMutation.isPending}
+              onClick={() => void onDelete()}
+            >
+              {deleteMutation.isPending ? (
+                <Spinner data-icon="inline-start" />
+              ) : (
+                <TrashIcon className="size-4 shrink-0" aria-hidden="true" />
+              )}
+              {deleteMutation.isPending ? "Eliminando..." : "Eliminar"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <CategoryPickerSheet
         open={picker === "parent"}

@@ -4,7 +4,7 @@ Rutas: `/finance/transactions` (lista paginada), `/finance/transactions/new`, `/
 
 GET paginado con filtros del DTO. Detalle GET `:id`. Create DEBIT/CREDIT, transfers `POST /transfers` (nunca `type: TRANSFER` en create), PATCH, confirm, reverse, DELETE. La edición de una transferencia usa `PATCH /transfers/:id`.
 
-Copy “Completado” = `CONFIRMED`. La etiqueta del destino sigue al tipo: “Desde” en un gasto, “Destino” en un ingreso. Las acciones del detalle viven en el ⋮ (`RecordOptionsSheet`): "Editar movimiento" o "Editar transferencia" navega a `/edit`, y "Eliminar" confirma con `DeleteRecordDialog`.
+Copy “Completado” = `CONFIRMED`. La etiqueta del destino sigue al tipo: “Desde” en un gasto, “Destino” en un ingreso. Las acciones del detalle viven en el ⋮ (`RecordOptionsSheet`): "Editar movimiento" o "Editar transferencia" navega a `/edit`, y "Eliminar" confirma con un `AlertDialog`.
 
 Alta guiada (solo en crear): la categoría abre primero; al elegirla, el monto toma el foco con el modo guardado en `module_config.finance.amountEntry` (teclado o calculadora persistente); al confirmar el monto abre el selector de cuenta o tarjeta. En una transferencia el orden es origen, destino y monto.
 

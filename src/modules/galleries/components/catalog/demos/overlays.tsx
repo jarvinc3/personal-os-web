@@ -16,11 +16,11 @@ import {
   StoreIcon,
   Trash2Icon,
   WalletIcon,
+  XIcon,
 } from "lucide-react"
 
 import { simulatedTap } from "@/src/modules/galleries/components/simulated-tap"
 import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
-import { ConfirmDialog } from "@/src/shared/components/feedback/confirm-dialog"
 import { Button } from "@/src/shared/components/ui/button"
 import {
   AlertDialog,
@@ -74,6 +74,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/src/shared/components/ui/dropdown-menu"
+import { Spinner } from "@/src/shared/components/ui/spinner"
 import {
   Popover,
   PopoverContent,
@@ -211,30 +212,6 @@ function BottomSheetDemo() {
   )
 }
 
-function ConfirmDialogDemo() {
-  const [open, setOpen] = useState(false)
-
-  return (
-    <>
-      <Button variant="destructive" onClick={() => setOpen(true)}>
-        <Trash2Icon />
-        Abrir confirmación
-      </Button>
-      <ConfirmDialog
-        open={open}
-        onOpenChange={setOpen}
-        tone="danger"
-        icon={Trash2Icon}
-        title="¿Eliminar el movimiento?"
-        description="Se quitará de la lista y del saldo de la cuenta."
-        confirmLabel="Eliminar"
-        confirmIcon={Trash2Icon}
-        onConfirm={() => simulatedTap("Eliminar movimiento")}
-      />
-    </>
-  )
-}
-
 function DrawerDemo() {
   const { open, sheetId, setOpen } = useSheetParam(SHEET_PARAM)
   const drawerOpen = open && sheetId === DRAWER_SHEET_ID
@@ -343,33 +320,6 @@ const [name, setName] = useState("Comercio Ejemplo")
       node: <BottomSheetDemo />,
     },
   ],
-  "confirm-dialog": [
-    {
-      label: "Confirmación destructiva",
-      code: `
-const [open, setOpen] = useState(false)
-
-<>
-  <Button variant="destructive" onClick={() => setOpen(true)}>
-    <Trash2Icon />
-    Abrir confirmación
-  </Button>
-  <ConfirmDialog
-    open={open}
-    onOpenChange={setOpen}
-    tone="danger"
-    icon={Trash2Icon}
-    title="¿Eliminar el movimiento?"
-    description="Se quitará de la lista y del saldo de la cuenta."
-    confirmLabel="Eliminar"
-    confirmIcon={Trash2Icon}
-    onConfirm={() => simulatedTap("Eliminar movimiento")}
-  />
-</>
-`,
-      node: <ConfirmDialogDemo />,
-    },
-  ],
   "alert-dialog": [
     {
       label: "Confirmación destructiva",
@@ -429,6 +379,65 @@ const [open, setOpen] = useState(false)
           </AlertDialogContent>
         </AlertDialog>
       ),
+    },
+    {
+      label: "Confirmación de producto",
+      code: `
+<AlertDialog>
+  <AlertDialogTrigger render={<Button variant="destructive" />}>
+    <Trash2Icon />
+    Abrir confirmación
+  </AlertDialogTrigger>
+  <AlertDialogContent>
+    <AlertDialogHeader>
+      <AlertDialogMedia className="bg-destructive/10 text-destructive">
+        <Trash2Icon />
+      </AlertDialogMedia>
+      <AlertDialogTitle>¿Eliminar el movimiento?</AlertDialogTitle>
+      <AlertDialogDescription>
+        Se quitará de la lista y del saldo de la cuenta. No se puede deshacer.
+      </AlertDialogDescription>
+    </AlertDialogHeader>
+    <AlertDialogFooter>
+      <AlertDialogCancel disabled={pending}>
+        <XIcon className="size-4 shrink-0" aria-hidden="true" />
+        Cancelar
+      </AlertDialogCancel>
+      <AlertDialogAction
+        variant="destructive"
+        disabled={pending}
+        onClick={confirm}
+      >
+        {pending ? (
+          <Spinner data-icon="inline-start" />
+        ) : (
+          <Trash2Icon className="size-4 shrink-0" aria-hidden="true" />
+        )}
+        {pending ? "Eliminando..." : "Eliminar"}
+      </AlertDialogAction>
+    </AlertDialogFooter>
+  </AlertDialogContent>
+</AlertDialog>
+`,
+      node: <ConfirmCompositionExample />,
+    },
+    {
+      label: "Mientras la acción corre",
+      code: `
+<AlertDialogContent>
+  <AlertDialogFooter>
+    <AlertDialogCancel disabled>
+      <XIcon className="size-4 shrink-0" aria-hidden="true" />
+      Cancelar
+    </AlertDialogCancel>
+    <AlertDialogAction variant="destructive" disabled>
+      <Spinner data-icon="inline-start" />
+      Eliminando...
+    </AlertDialogAction>
+  </AlertDialogFooter>
+</AlertDialogContent>
+`,
+      node: <ConfirmCompositionExample pending />,
     },
   ],
   dialog: [
@@ -835,50 +844,6 @@ function SheetExample({
   )
 }
 
-type ConfirmExampleProps = {
-  tone?: "default" | "danger"
-  pending?: boolean
-  confirmDisabled?: boolean
-  wide?: boolean
-  title?: string
-}
-
-function ConfirmExample({
-  tone = "default",
-  pending = false,
-  confirmDisabled = false,
-  wide = false,
-  title = "¿Eliminar el movimiento?",
-}: ConfirmExampleProps) {
-  const [open, setOpen] = useState(false)
-
-  return (
-    <>
-      <Button
-        variant={tone === "danger" ? "destructive" : "outline"}
-        onClick={() => setOpen(true)}
-      >
-        <Trash2Icon />
-        Abrir confirmación
-      </Button>
-      <ConfirmDialog
-        open={open}
-        onOpenChange={setOpen}
-        tone={tone}
-        icon={Trash2Icon}
-        title={title}
-        description="Se quitará de la lista y del saldo de la cuenta."
-        confirmLabel="Eliminar"
-        confirmIcon={Trash2Icon}
-        onConfirm={() => simulatedTap("Eliminar movimiento")}
-        pending={pending}
-        confirmDisabled={confirmDisabled}
-        wide={wide}
-      />
-    </>
-  )
-}
-
 type DrawerExampleProps = {
   id: string
   swipeDirection?: "down" | "up" | "left" | "right"
@@ -1040,6 +1005,47 @@ function MenuExample({
         </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>
+  )
+}
+
+function ConfirmCompositionExample({ pending = false }: { pending?: boolean }) {
+  return (
+    <AlertDialog>
+      <AlertDialogTrigger render={<Button variant="destructive" />}>
+        <Trash2Icon />
+        Abrir confirmación
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogMedia className="bg-destructive/10 text-destructive">
+            <Trash2Icon />
+          </AlertDialogMedia>
+          <AlertDialogTitle>¿Eliminar el movimiento?</AlertDialogTitle>
+          <AlertDialogDescription>
+            Se quitará de la lista y del saldo de la cuenta. No se puede
+            deshacer.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={pending}>
+            <XIcon className="size-4 shrink-0" aria-hidden="true" />
+            Cancelar
+          </AlertDialogCancel>
+          <AlertDialogAction
+            variant="destructive"
+            disabled={pending}
+            onClick={() => simulatedTap("Eliminar movimiento")}
+          >
+            {pending ? (
+              <Spinner data-icon="inline-start" />
+            ) : (
+              <Trash2Icon className="size-4 shrink-0" aria-hidden="true" />
+            )}
+            {pending ? "Eliminando..." : "Eliminar"}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   )
 }
 
@@ -1301,27 +1307,6 @@ export const overlaysVariantDemos: GalleryVariantDemoMap = {
       { label: "closed", node: <SheetExample id="hoja-cerrada" /> },
     ],
   },
-  "confirm-dialog": {
-    tone: [
-      { label: "default", node: <ConfirmExample title="¿Cerrar el mes?" /> },
-      { label: "danger", node: <ConfirmExample tone="danger" /> },
-    ],
-    states: [
-      { label: "normal", node: <ConfirmExample /> },
-      { label: "pending", node: <ConfirmExample pending /> },
-      {
-        label: "disabled",
-        node: <ConfirmExample confirmDisabled />,
-      },
-    ],
-    wide: [
-      { label: "false", node: <ConfirmExample /> },
-      {
-        label: "true para un diálogo con formulario",
-        node: <ConfirmExample wide />,
-      },
-    ],
-  },
   "alert-dialog": {
     "size (Content)": [
       { label: "default", node: <AlertExample /> },
@@ -1334,6 +1319,10 @@ export const overlaysVariantDemos: GalleryVariantDemoMap = {
         node: <AlertExample actionVariant="destructive" />,
       },
       { label: "outline", node: <AlertExample actionVariant="outline" /> },
+    ],
+    states: [
+      { label: "normal", node: <ConfirmCompositionExample /> },
+      { label: "pending", node: <ConfirmCompositionExample pending /> },
     ],
   },
   dialog: {

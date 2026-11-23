@@ -4,11 +4,21 @@ import {
   useDeleteKnowledge,
   useExportKnowledge,
 } from "@/src/modules/intelligence/hooks/use-knowledge"
-import { ConfirmDialog } from "@/src/shared/components/feedback/confirm-dialog"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+} from "@/src/shared/components/ui/alert-dialog"
 import { Button } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
-import { Database, Download, Trash2 } from "lucide-react"
+import { Database, Download, Trash2, XIcon } from "lucide-react"
 import { useState } from "react"
 
 const DELETE_CONSEQUENCES = [
@@ -66,33 +76,57 @@ export function KnowledgeDataActions({
         </p>
       </SummarySection>
 
-      <ConfirmDialog
+      <AlertDialog
         open={deleteOpen}
-        onOpenChange={setDeleteOpen}
-        tone="danger"
-        icon={Trash2}
-        wide
-        title="¿Borrar todos tus datos de IA?"
-        description={`Es inmediato y no se puede deshacer. Se borrarán tus ${personalKnowledgeCount} ${personalKnowledgeCount === 1 ? "elemento" : "elementos"} de conocimiento personal —los que ves y los que están en revisión— y también:`}
-        confirmLabel="Borrar datos de IA"
-        confirmIcon={Trash2}
-        pending={deleteMutation.isPending}
-        pendingLabel="Borrando..."
-        onConfirm={() =>
-          deleteMutation.mutate(undefined, {
-            onSuccess: () => setDeleteOpen(false),
-          })
-        }
+        onOpenChange={(open) => {
+          if (!deleteMutation.isPending) {
+            setDeleteOpen(open)
+          }
+        }}
       >
-        <ul className="flex max-h-60 list-disc flex-col gap-2 overflow-y-auto pl-5 text-sm text-muted-foreground">
-          {DELETE_CONSEQUENCES.map((consequence) => (
-            <li key={consequence}>{consequence}</li>
-          ))}
-        </ul>
-        <p className="text-xs leading-relaxed text-muted-foreground">
-          Tus verificaciones y observaciones quedan anonimizadas, no se borran.
-        </p>
-      </ConfirmDialog>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogMedia className="bg-destructive/10 text-destructive">
+              <Trash2 aria-hidden="true" />
+            </AlertDialogMedia>
+            <AlertDialogTitle>¿Borrar todos tus datos de IA?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {`Es inmediato y no se puede deshacer. Se borrarán tus ${personalKnowledgeCount} ${personalKnowledgeCount === 1 ? "elemento" : "elementos"} de conocimiento personal —los que ves y los que están en revisión— y también:`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <ul className="flex max-h-60 list-disc flex-col gap-2 overflow-y-auto pl-5 text-sm text-muted-foreground">
+            {DELETE_CONSEQUENCES.map((consequence) => (
+              <li key={consequence}>{consequence}</li>
+            ))}
+          </ul>
+          <p className="text-xs leading-relaxed text-muted-foreground">
+            Tus verificaciones y observaciones quedan anonimizadas, no se
+            borran.
+          </p>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteMutation.isPending}>
+              <XIcon className="size-4 shrink-0" aria-hidden="true" />
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              disabled={deleteMutation.isPending}
+              onClick={() =>
+                deleteMutation.mutate(undefined, {
+                  onSuccess: () => setDeleteOpen(false),
+                })
+              }
+            >
+              {deleteMutation.isPending ? (
+                <Spinner data-icon="inline-start" />
+              ) : (
+                <Trash2 className="size-4 shrink-0" aria-hidden="true" />
+              )}
+              {deleteMutation.isPending ? "Borrando..." : "Borrar datos de IA"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   )
 }

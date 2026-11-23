@@ -33,8 +33,19 @@ import {
   AlertDescription,
   AlertTitle,
 } from "@/src/shared/components/ui/alert"
-import { ConfirmDialog } from "@/src/shared/components/feedback/confirm-dialog"
 import { Button } from "@/src/shared/components/ui/button"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+} from "@/src/shared/components/ui/alert-dialog"
+import { Spinner } from "@/src/shared/components/ui/spinner"
 import {
   Tabs,
   TabsContent,
@@ -51,6 +62,7 @@ import {
   PauseIcon,
   PencilIcon,
   WalletIcon,
+  XIcon,
 } from "lucide-react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
@@ -284,46 +296,100 @@ function SubscriptionDetailBody({
         subscription={subscription}
       />
 
-      <ConfirmDialog
+      <AlertDialog
         open={pauseOpen}
-        onOpenChange={setPauseOpen}
-        icon={PauseIcon}
-        title={`¿Pausar ${subscription.name}?`}
-        description="Mientras esté pausada no se registrarán cobros ni recordatorios. Puedes reanudarla cuando quieras."
-        cancelLabel="Volver"
-        confirmLabel="Pausar suscripción"
-        confirmIcon={PauseIcon}
-        pending={pauseMutation.isPending}
-        pendingLabel="Pausando..."
-        onConfirm={() => {
-          void runStatusAction(
-            () => pauseMutation.mutateAsync(subscription.id),
-            "Suscripción pausada"
-          )
-          setPauseOpen(false)
+        onOpenChange={(open) => {
+          if (!pauseMutation.isPending) {
+            setPauseOpen(open)
+          }
         }}
-      />
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogMedia className="bg-muted text-muted-foreground">
+              <PauseIcon aria-hidden="true" />
+            </AlertDialogMedia>
+            <AlertDialogTitle>¿Pausar {subscription.name}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Mientras esté pausada no se registrarán cobros ni recordatorios.
+              Puedes reanudarla cuando quieras.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={pauseMutation.isPending}>
+              <XIcon className="size-4 shrink-0" aria-hidden="true" />
+              Volver
+            </AlertDialogCancel>
+            <AlertDialogAction
+              disabled={pauseMutation.isPending}
+              onClick={() => {
+                void runStatusAction(
+                  () => pauseMutation.mutateAsync(subscription.id),
+                  "Suscripción pausada"
+                )
+                setPauseOpen(false)
+              }}
+            >
+              {pauseMutation.isPending ? (
+                <Spinner data-icon="inline-start" />
+              ) : (
+                <PauseIcon className="size-4 shrink-0" aria-hidden="true" />
+              )}
+              {pauseMutation.isPending ? "Pausando..." : "Pausar suscripción"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
-      <ConfirmDialog
+      <AlertDialog
         open={cancelOpen}
-        onOpenChange={setCancelOpen}
-        tone="danger"
-        icon={CircleSlashIcon}
-        title={`¿Cancelar ${subscription.name}?`}
-        description="Se conserva el historial de pagos. Puedes reactivarla más tarde."
-        cancelLabel="Volver"
-        confirmLabel="Cancelar suscripción"
-        confirmIcon={CircleSlashIcon}
-        pending={cancelMutation.isPending}
-        pendingLabel="Cancelando..."
-        onConfirm={() => {
-          void runStatusAction(
-            () => cancelMutation.mutateAsync(subscription.id),
-            "Suscripción cancelada"
-          )
-          setCancelOpen(false)
+        onOpenChange={(open) => {
+          if (!cancelMutation.isPending) {
+            setCancelOpen(open)
+          }
         }}
-      />
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogMedia className="bg-destructive/10 text-destructive">
+              <CircleSlashIcon aria-hidden="true" />
+            </AlertDialogMedia>
+            <AlertDialogTitle>¿Cancelar {subscription.name}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Se conserva el historial de pagos. Puedes reactivarla más tarde.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={cancelMutation.isPending}>
+              <XIcon className="size-4 shrink-0" aria-hidden="true" />
+              Volver
+            </AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              disabled={cancelMutation.isPending}
+              onClick={() => {
+                void runStatusAction(
+                  () => cancelMutation.mutateAsync(subscription.id),
+                  "Suscripción cancelada"
+                )
+                setCancelOpen(false)
+              }}
+            >
+              {cancelMutation.isPending ? (
+                <Spinner data-icon="inline-start" />
+              ) : (
+                <CircleSlashIcon
+                  className="size-4 shrink-0"
+                  aria-hidden="true"
+                />
+              )}
+              {cancelMutation.isPending
+                ? "Cancelando..."
+                : "Cancelar suscripción"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   )
 }

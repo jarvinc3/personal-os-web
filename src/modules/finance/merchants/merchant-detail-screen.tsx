@@ -50,9 +50,20 @@ import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { useEventSheet } from "@/src/shared/hooks/use-event-sheet"
 import { LoadingView } from "@/src/shared/components/feedback/loading-view"
-import { ConfirmDialog } from "@/src/shared/components/feedback/confirm-dialog"
 import { FormTextField } from "@/src/shared/components/forms/form-text-field"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+} from "@/src/shared/components/ui/alert-dialog"
 import { Button } from "@/src/shared/components/ui/button"
+import { Spinner } from "@/src/shared/components/ui/spinner"
 import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { API_ENDPOINTS } from "@/src/shared/constants/api-endpoints"
@@ -416,19 +427,47 @@ function MerchantDetailBody({ merchantId }: { merchantId: string }) {
         />
       </BottomSheet>
 
-      <ConfirmDialog
+      <AlertDialog
         open={mergeTarget !== null}
-        onOpenChange={(open) => !open && setMergeTarget(null)}
-        tone="danger"
-        icon={GitMergeIcon}
-        title={`¿Unir ${merchant.name} en ${mergeTarget?.name}?`}
-        description={`Los movimientos de ${merchant.name} pasarán a ${mergeTarget?.name}. El comercio original desaparece. No se puede deshacer.`}
-        confirmLabel="Unir"
-        confirmIcon={GitMergeIcon}
-        pending={mergeMutation.isPending}
-        pendingLabel="Uniendo..."
-        onConfirm={() => void confirmMerge()}
-      />
+        onOpenChange={(open) => {
+          if (!open && !mergeMutation.isPending) {
+            setMergeTarget(null)
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogMedia className="bg-destructive/10 text-destructive">
+              <GitMergeIcon aria-hidden="true" />
+            </AlertDialogMedia>
+            <AlertDialogTitle>
+              ¿Unir {merchant.name} en {mergeTarget?.name}?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Los movimientos de {merchant.name} pasarán a {mergeTarget?.name}.
+              El comercio original desaparece. No se puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={mergeMutation.isPending}>
+              <XIcon className="size-4 shrink-0" aria-hidden="true" />
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              disabled={mergeMutation.isPending}
+              onClick={() => void confirmMerge()}
+            >
+              {mergeMutation.isPending ? (
+                <Spinner data-icon="inline-start" />
+              ) : (
+                <GitMergeIcon className="size-4 shrink-0" aria-hidden="true" />
+              )}
+              {mergeMutation.isPending ? "Uniendo..." : "Unir"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

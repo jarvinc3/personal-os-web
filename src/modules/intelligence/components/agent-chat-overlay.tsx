@@ -41,7 +41,16 @@ import type {
 import type { ViewSuggestion } from "@/src/modules/intelligence/types/view-suggestions.types"
 import { AGENT_CHAT_HISTORY_PICKER } from "@/src/modules/intelligence/constants/agent-chat"
 import { useTabBarVisible } from "@/src/shared/context/tab-bar-context"
-import { ConfirmDialog } from "@/src/shared/components/feedback/confirm-dialog"
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+} from "@/src/shared/components/ui/alert-dialog"
 import { Badge } from "@/src/shared/components/ui/badge"
 import { Button } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
@@ -707,29 +716,46 @@ export function AgentChatOverlay({
         onNewChat={handleNewChat}
       />
 
-      <ConfirmDialog
+      <AlertDialog
         open={dismissTarget !== null}
         onOpenChange={(open) => {
-          if (!open) {
+          if (!open && !dismissSuggestion.isPending) {
             setDismissTarget(null)
           }
         }}
-        title="¿Descartar esta sugerencia?"
-        description={
-          dismissTarget
-            ? `«${dismissTarget.label}» dejará de aparecer en esta vista.`
-            : ""
-        }
-        confirmLabel="Descartar"
-        confirmIcon={Trash2Icon}
-        icon={SparklesIcon}
-        tone="danger"
-        layerClassName="z-[100]"
-        pending={dismissSuggestion.isPending}
-        pendingLabel="Descartando..."
-        closeOnConfirm={false}
-        onConfirm={() => void confirmDismissSuggestion()}
-      />
+      >
+        <AlertDialogContent layerClassName="z-[100]">
+          <AlertDialogHeader>
+            <AlertDialogMedia className="bg-destructive/10 text-destructive">
+              <SparklesIcon aria-hidden="true" />
+            </AlertDialogMedia>
+            <AlertDialogTitle>¿Descartar esta sugerencia?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {dismissTarget
+                ? `«${dismissTarget.label}» dejará de aparecer en esta vista.`
+                : ""}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={dismissSuggestion.isPending}>
+              <XIcon className="size-4 shrink-0" aria-hidden="true" />
+              Cancelar
+            </AlertDialogCancel>
+            <Button
+              variant="destructive"
+              disabled={dismissSuggestion.isPending}
+              onClick={() => void confirmDismissSuggestion()}
+            >
+              {dismissSuggestion.isPending ? (
+                <Spinner data-icon="inline-start" />
+              ) : (
+                <Trash2Icon className="size-4 shrink-0" aria-hidden="true" />
+              )}
+              {dismissSuggestion.isPending ? "Descartando..." : "Descartar"}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   )
 }
