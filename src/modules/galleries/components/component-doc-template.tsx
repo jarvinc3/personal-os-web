@@ -15,7 +15,10 @@ import type {
   GalleryVariantDemo,
 } from "@/src/modules/galleries/components/catalog/types"
 import { HighlightedCode } from "@/src/modules/galleries/components/highlighted-code"
-import { anatomyTree } from "@/src/modules/galleries/lib/anatomy"
+import {
+  anatomyTree,
+  hasAnatomyChildren,
+} from "@/src/modules/galleries/lib/anatomy"
 import { splitSnippet } from "@/src/modules/galleries/lib/snippet"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { Badge } from "@/src/shared/components/ui/badge"
@@ -101,6 +104,7 @@ function VariantDemoGroup({
  */
 export function ComponentDocTemplate({ doc }: { doc: GalleryComponentDoc }) {
   const { importCode, usageCode } = splitSnippet(doc.snippet)
+  const hasNestedComposition = hasAnatomyChildren(doc.anatomy)
 
   return (
     <div className="flex flex-col gap-4">
@@ -167,9 +171,15 @@ export function ComponentDocTemplate({ doc }: { doc: GalleryComponentDoc }) {
               ))}
             </div>
           ) : null}
-          <pre className="w-full min-w-0 overflow-x-auto rounded-md bg-muted p-3 font-mono text-[0.7rem] leading-relaxed text-muted-foreground">
-            {anatomyTree(doc.anatomy)}
-          </pre>
+          {hasNestedComposition ? (
+            <pre className="w-full min-w-0 overflow-x-auto rounded-md bg-muted p-3 font-mono text-[0.7rem] leading-relaxed text-muted-foreground">
+              {anatomyTree(doc.anatomy)}
+            </pre>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              No tiene una composición anidada.
+            </p>
+          )}
         </div>
       </SummarySection>
 

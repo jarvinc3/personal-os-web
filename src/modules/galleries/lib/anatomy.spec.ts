@@ -1,7 +1,10 @@
 import assert from "node:assert/strict"
 import { describe, it } from "node:test"
 
-import { anatomyTree } from "@/src/modules/galleries/lib/anatomy"
+import {
+  anatomyTree,
+  hasAnatomyChildren,
+} from "@/src/modules/galleries/lib/anatomy"
 
 describe("árbol de composición de la galería", () => {
   it("dibuja un componente sin hijos como una sola línea", () => {
@@ -55,5 +58,17 @@ describe("árbol de composición de la galería", () => {
       anatomyTree([{ name: "Card" }, { name: "CardHeader" }]),
       "Card\nCardHeader"
     )
+  })
+
+  it("distingue una raíz sin hijos de un árbol con composición", () => {
+    assert.equal(hasAnatomyChildren([{ name: "Button" }]), false)
+    assert.equal(
+      hasAnatomyChildren([{ name: "Tabs", children: [{ name: "TabsList" }] }]),
+      true
+    )
+  })
+
+  it("trata una anatomía vacía como sin hijos", () => {
+    assert.equal(hasAnatomyChildren([]), false)
   })
 })
