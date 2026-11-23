@@ -41,7 +41,7 @@ export function NotificationPreferencesSheet({
       >
         <SettingsSection title="Canales" bare>
           <NotificationChannelSettings
-            preferences={preferences}
+            channels={preferences.notifications.channels}
             onPreferenceToggle={onPreferenceToggle}
           />
           <NotificationQuietHoursSettings

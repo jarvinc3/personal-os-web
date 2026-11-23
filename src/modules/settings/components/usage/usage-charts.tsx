@@ -78,7 +78,7 @@ function UsagePeriodCharts({ rows, period, locale }: UsagePeriodChartsProps) {
           Cada barra suma la misma hora (UTC) de todos los días del rango.
         </p>
       ) : null}
-      <UsageCallsChart rows={rows} periodLabel={periodLabel} locale={locale} />
+      <UsageCallsChart rows={rows} periodLabel={periodLabel} />
       <UsageTokensChart rows={rows} periodLabel={periodLabel} locale={locale} />
       <UsageCostChart rows={rows} periodLabel={periodLabel} locale={locale} />
     </>

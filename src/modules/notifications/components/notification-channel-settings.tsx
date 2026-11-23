@@ -5,22 +5,24 @@ import { deactivatePushTokenIfPresent } from "@/src/modules/notifications/lib/de
 import { SETTINGS_REGISTRY, useProfile } from "@/src/modules/settings"
 import { SettingsRow } from "@/src/shared/components/settings/settings-section"
 
-type NotificationPreferences = ReturnType<typeof useProfile>["preferences"]
+type NotificationChannels = ReturnType<
+  typeof useProfile
+>["preferences"]["notifications"]["channels"]
 
 type NotificationChannelSettingsProps = {
-  preferences: NotificationPreferences
+  channels: NotificationChannels
   onPreferenceToggle: NotificationPreferenceToggle
 }
 
 export function NotificationChannelSettings({
-  preferences,
+  channels,
   onPreferenceToggle,
 }: NotificationChannelSettingsProps) {
   return (
     <>
       <SettingsRow
         label="Push"
-        switchValue={preferences.notifications.channels.push}
+        switchValue={channels.push}
         onSwitchChange={(checked) => {
           if (!checked) {
             void deactivatePushTokenIfPresent()
@@ -40,7 +42,7 @@ export function NotificationChannelSettings({
       />
       <SettingsRow
         label="Email"
-        switchValue={preferences.notifications.channels.email}
+        switchValue={channels.email}
         onSwitchChange={(checked) =>
           void onPreferenceToggle(
             {
@@ -57,7 +59,7 @@ export function NotificationChannelSettings({
       />
       <SettingsRow
         label="In-App"
-        switchValue={preferences.notifications.channels.inApp}
+        switchValue={channels.inApp}
         onSwitchChange={(checked) =>
           void onPreferenceToggle(
             {
