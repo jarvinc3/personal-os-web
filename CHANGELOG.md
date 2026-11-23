@@ -12,6 +12,8 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Cambiado
 
+- Interno: los sheets de Ajustes del vaciado de datos, la eliminación de cuenta y la edición de cuenta, el horario silencioso y las gráficas de Uso reparten su estado y su marcado en hooks y bloques con nombre. Sin cambio visible ni de contrato (#589).
+
 - Interno: la galería de variantes resuelve el contenedor del portal en una sola función que usan los seis wrappers de overlay, da nombre al tipo de los ejemplos por grupo y arma sus dos pruebas con una sola lista de fichas cubiertas. Sin cambio visible (#613).
 
 - La ficha de la galería dice «No tiene una composición anidada» y no pinta el árbol cuando la anatomía no tiene hijos; las fichas con hijos conservan el árbol completo (#607).

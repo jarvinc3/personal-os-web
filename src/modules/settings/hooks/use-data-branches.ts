@@ -8,6 +8,8 @@ import { useQuery } from "@tanstack/react-query"
 
 export const DATA_BRANCHES_QUERY_KEY = ["users", "data-branches"] as const
 
+export type DataBranchesQuery = ReturnType<typeof useDataBranches>
+
 /** Branches and counts the back offers today; the client never invents them. */
 export function useDataBranches(enabled = true) {
   const session = useAppStore((state) => state.session)
