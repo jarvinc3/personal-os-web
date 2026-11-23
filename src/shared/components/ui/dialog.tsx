@@ -17,12 +17,10 @@ function DialogTrigger({ ...props }: DialogPrimitive.Trigger.Props) {
 }
 
 function DialogPortal({ container, ...props }: DialogPrimitive.Portal.Props) {
-  const portalContainer = usePortalContainer()
-
   return (
     <DialogPrimitive.Portal
       data-slot="dialog-portal"
-      container={container ?? portalContainer ?? undefined}
+      container={usePortalContainer(container)}
       {...props}
     />
   )

@@ -21,12 +21,10 @@ function AlertDialogPortal({
   container,
   ...props
 }: AlertDialogPrimitive.Portal.Props) {
-  const portalContainer = usePortalContainer()
-
   return (
     <AlertDialogPrimitive.Portal
       data-slot="alert-dialog-portal"
-      container={container ?? portalContainer ?? undefined}
+      container={usePortalContainer(container)}
       {...props}
     />
   )

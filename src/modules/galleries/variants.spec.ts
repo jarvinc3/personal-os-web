@@ -5,6 +5,7 @@ import { test } from "node:test"
 import { fileURLToPath } from "node:url"
 
 import { GALLERY_METAS_BY_CATEGORY } from "./components/catalog/manifest.ts"
+import type { GalleryComponentMeta } from "./components/catalog/types.ts"
 import type { ComponentGallerySectionId } from "./components/sections.ts"
 
 const DEMOS_DIR = join(
@@ -64,7 +65,16 @@ function keyedBlocks(source: string, key: RegExp): Map<string, string> {
   return blocks
 }
 
-test("cada ficha cubierta pinta cada grupo de variantes con su etiqueta", () => {
+type CoveredFicha = {
+  category: ComponentGallerySectionId
+  meta: GalleryComponentMeta
+  groups: Map<string, string>
+}
+
+/** Cada ficha cubierta con su fuente ya partida por grupo de variantes. */
+function coveredFichas(): CoveredFicha[] {
+  const covered: CoveredFicha[] = []
+
   for (const category of COVERED_CATEGORIES) {
     const fichas = keyedBlocks(variantSource(category), FICHA_KEY)
 
@@ -75,50 +85,47 @@ test("cada ficha cubierta pinta cada grupo de variantes con su etiqueta", () => 
         `${category}/${meta.id} no declara ejemplos de variantes`
       )
 
-      const groups = keyedBlocks(ficha, GROUP_KEY)
-      for (const variant of meta.variants) {
-        const group = groups.get(variant.name)
-        assert.ok(
-          group,
-          `${category}/${meta.id} no pinta el grupo ${variant.name}`
-        )
+      covered.push({ category, meta, groups: keyedBlocks(ficha, GROUP_KEY) })
+    }
+  }
 
-        const labels = [...group.matchAll(LABEL)].map((match) => match[1])
-        assert.ok(
-          labels.length > 0,
-          `${category}/${meta.id}/${variant.name} no tiene ejemplos pintados`
-        )
-        assert.ok(
-          labels.every((label) => label.trim().length > 0),
-          `${category}/${meta.id}/${variant.name} tiene una etiqueta vacía`
-        )
-        assert.equal(
-          new Set(labels).size,
-          labels.length,
-          `${category}/${meta.id}/${variant.name} repite una etiqueta`
-        )
-      }
+  return covered
+}
+
+test("cada ficha cubierta pinta cada grupo de variantes con su etiqueta", () => {
+  for (const { category, meta, groups } of coveredFichas()) {
+    for (const variant of meta.variants) {
+      const group = groups.get(variant.name)
+      assert.ok(
+        group,
+        `${category}/${meta.id} no pinta el grupo ${variant.name}`
+      )
+
+      const labels = [...group.matchAll(LABEL)].map((match) => match[1])
+      assert.ok(
+        labels.length > 0,
+        `${category}/${meta.id}/${variant.name} no tiene ejemplos pintados`
+      )
+      assert.ok(
+        labels.every((label) => label.trim().length > 0),
+        `${category}/${meta.id}/${variant.name} tiene una etiqueta vacía`
+      )
+      assert.equal(
+        new Set(labels).size,
+        labels.length,
+        `${category}/${meta.id}/${variant.name} repite una etiqueta`
+      )
     }
   }
 })
 
 test("los ejemplos de variantes usan los grupos declarados por su ficha", () => {
-  for (const category of COVERED_CATEGORIES) {
-    const fichas = keyedBlocks(variantSource(category), FICHA_KEY)
-
-    for (const meta of GALLERY_METAS_BY_CATEGORY[category]) {
-      const ficha = fichas.get(meta.id)
+  for (const { category, meta, groups } of coveredFichas()) {
+    for (const groupName of groups.keys()) {
       assert.ok(
-        ficha,
-        `${category}/${meta.id} no declara ejemplos de variantes`
+        meta.variants.some((variant) => variant.name === groupName),
+        `${category}/${meta.id} pinta un grupo inexistente: ${groupName}`
       )
-
-      for (const groupName of keyedBlocks(ficha, GROUP_KEY).keys()) {
-        assert.ok(
-          meta.variants.some((variant) => variant.name === groupName),
-          `${category}/${meta.id} pinta un grupo inexistente: ${groupName}`
-        )
-      }
     }
   }
 })

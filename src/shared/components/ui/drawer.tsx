@@ -57,12 +57,10 @@ function DrawerTrigger({ ...props }: DrawerPrimitive.Trigger.Props) {
 }
 
 function DrawerPortal({ container, ...props }: DrawerPrimitive.Portal.Props) {
-  const portalContainer = usePortalContainer()
-
   return (
     <DrawerPrimitive.Portal
       data-slot="drawer-portal"
-      container={container ?? portalContainer ?? undefined}
+      container={usePortalContainer(container)}
       {...props}
     />
   )
