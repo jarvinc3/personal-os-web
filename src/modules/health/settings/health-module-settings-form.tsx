@@ -1,31 +1,19 @@
 "use client"
 
+import { HealthPreferencesSection } from "@/src/modules/health/settings/components/preferences-section"
+import { HealthUnitsSection } from "@/src/modules/health/settings/components/units-section"
 import { ModuleSheetEnableRow } from "@/src/modules/settings/components/profile-ui"
 import { useModuleSheetEnable } from "@/src/modules/settings/hooks/use-module-sheet-enable"
 import { useProfileSheetFormSync } from "@/src/modules/settings/hooks/use-profile-sheet"
 import { useUserModuleConfig } from "@/src/modules/settings/hooks/use-user-module-config"
-import { OptionRow } from "@/src/shared/components/forms/option-row"
-import { SwitchFieldRow } from "@/src/shared/components/forms/switch-field-row"
 import { FormScreen } from "@/src/shared/components/forms/form-screen"
-import {
-  RadioGroup,
-  RadioGroupItem,
-} from "@/src/shared/components/ui/radio-group"
-import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { getModule } from "@/src/shared/constants/module-registry"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import {
-  CalendarDays,
-  EyeOff,
-  HeartPulse,
-  Ruler,
-  SaveIcon,
-  Target,
-} from "lucide-react"
+import { SaveIcon } from "lucide-react"
 import { useEffect, useMemo } from "react"
-import { Controller, useForm, useWatch } from "react-hook-form"
+import { useForm } from "react-hook-form"
 import {
   healthModuleSchema,
   type HealthModuleFormValues,
@@ -53,8 +41,6 @@ export function HealthModuleSettingsForm({ onDone }: { onDone: () => void }) {
       weeklySummary: config.notifications.weeklySummary,
     },
   })
-
-  const units = useWatch({ control, name: "units" })
 
   const formValues = useMemo(
     () => ({
@@ -123,75 +109,8 @@ export function HealthModuleSettingsForm({ onDone }: { onDone: () => void }) {
         disabled={updateMutation.isPending}
       />
 
-      <SummarySection title="Unidades" icon={Ruler}>
-        <RadioGroup
-          value={units}
-          onValueChange={(v) =>
-            setValue("units", v as HealthModuleFormValues["units"], {
-              shouldDirty: true,
-            })
-          }
-        >
-          <OptionRow
-            icon={Ruler}
-            iconColor={MODULE_ACCENT}
-            label="Métrico"
-            selected={units === "metric"}
-            onPress={() => setValue("units", "metric", { shouldDirty: true })}
-            trailing={<RadioGroupItem value="metric" />}
-          />
-          <OptionRow
-            icon={Ruler}
-            iconColor={MODULE_ACCENT}
-            label="Imperial"
-            selected={units === "imperial"}
-            onPress={() => setValue("units", "imperial", { shouldDirty: true })}
-            trailing={<RadioGroupItem value="imperial" />}
-          />
-        </RadioGroup>
-      </SummarySection>
-
-      <SummarySection title="Preferencias" icon={HeartPulse}>
-        <Controller
-          control={control}
-          name="hideSensitiveMetrics"
-          render={({ field }) => (
-            <SwitchFieldRow
-              icon={EyeOff}
-              iconColor={MODULE_ACCENT}
-              label="Ocultar métricas sensibles"
-              checked={field.value}
-              onCheckedChange={field.onChange}
-            />
-          )}
-        />
-        <Controller
-          control={control}
-          name="goalReminders"
-          render={({ field }) => (
-            <SwitchFieldRow
-              icon={Target}
-              iconColor={MODULE_ACCENT}
-              label="Recordatorios de metas"
-              checked={field.value}
-              onCheckedChange={field.onChange}
-            />
-          )}
-        />
-        <Controller
-          control={control}
-          name="weeklySummary"
-          render={({ field }) => (
-            <SwitchFieldRow
-              icon={CalendarDays}
-              iconColor={MODULE_ACCENT}
-              label="Resumen semanal"
-              checked={field.value}
-              onCheckedChange={field.onChange}
-            />
-          )}
-        />
-      </SummarySection>
+      <HealthUnitsSection control={control} setValue={setValue} />
+      <HealthPreferencesSection control={control} />
     </FormScreen>
   )
 }
