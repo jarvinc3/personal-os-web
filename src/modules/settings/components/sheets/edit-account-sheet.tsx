@@ -1,28 +1,26 @@
 "use client"
 
-import { AVATAR_OPTIONS } from "@/src/modules/settings/constants/avatar-options"
-import { SETTINGS_REGISTRY } from "@/src/modules/settings/constants/settings-metadata"
+import { EditAccountAvatarSection } from "@/src/modules/settings/components/sheets/edit-account-avatar-section"
 import { useProfile } from "@/src/modules/settings/hooks/use-profile"
 import { useProfileSheetFormSync } from "@/src/modules/settings/hooks/use-profile-sheet"
+import {
+  buildProfilePatch,
+  editAccountSchema,
+  type EditAccountFormValues,
+} from "@/src/modules/settings/lib/edit-account-form"
 import type { UpdateProfilePayload } from "@/src/modules/settings/types/profile.types"
 import type { SettingsSheetProps } from "@/src/modules/settings/types/sheet.types"
 import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import { FormTextField } from "@/src/shared/components/forms/form-text-field"
-import { ChoiceGrid } from "@/src/shared/components/forms/choice-grid"
 import { Button } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Contact, Contact2, UserIcon } from "lucide-react"
-import Image from "next/image"
+import { Contact, UserIcon } from "lucide-react"
 import { useMemo, useState } from "react"
 import { Controller, useForm } from "react-hook-form"
-import {
-  editAccountSchema,
-  type EditAccountFormValues,
-} from "@/src/modules/settings/lib/edit-account-form"
 
 type EditAccountSheetProps = SettingsSheetProps & {
   email: string
@@ -73,14 +71,12 @@ export function EditAccountSheet({
   )
 
   const onSubmit = submitForm(async (values) => {
-    const payload: UpdateProfilePayload = {}
-
-    if (values.fullName !== savedFullName) {
-      payload.fullName = values.fullName
-    }
-    if (isAvatarDirty && selectedAvatarUrl) {
-      payload.avatarUrl = selectedAvatarUrl
-    }
+    const payload: UpdateProfilePayload = buildProfilePatch({
+      values,
+      savedFullName,
+      selectedAvatarUrl,
+      isAvatarDirty,
+    })
 
     if (Object.keys(payload).length === 0) {
       return
@@ -108,7 +104,7 @@ export function EditAccountSheet({
           <Button
             disabled={!canSave || updateProfileMutation.isPending}
             className="flex-1"
-            onClick={onSubmit}
+            onClick={() => void onSubmit()}
           >
             {updateProfileMutation.isPending ? (
               <Spinner data-icon="inline-start" />
@@ -140,29 +136,10 @@ export function EditAccountSheet({
         </div>
       </SummarySection>
 
-      <SummarySection title="Avatar" icon={Contact2}>
-        <ChoiceGrid
-          value={selectedAvatarUrl}
-          onValueChange={setSelectedAvatarUrl}
-          ariaLabel="Avatar"
-          accentColor={SETTINGS_REGISTRY.account.accent}
-          columns={4}
-          options={AVATAR_OPTIONS.map((avatar) => ({
-            value: avatar.url,
-            label: `Avatar ${Number(avatar.id) + 1}`,
-            media: (
-              <Image
-                src={avatar.url}
-                alt=""
-                width={80}
-                height={80}
-                className="size-full object-cover"
-                unoptimized
-              />
-            ),
-          }))}
-        />
-      </SummarySection>
+      <EditAccountAvatarSection
+        value={selectedAvatarUrl}
+        onChange={setSelectedAvatarUrl}
+      />
     </BottomSheet>
   )
 }
