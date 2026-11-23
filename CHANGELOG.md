@@ -17,6 +17,8 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 - Interno: la hoja de preferencias de Notificaciones separa las filas de canales y de horario silencioso en bloques con nombre. Sin cambio visible ni de contrato (#590).
 
+- Interno: los formularios de ajustes de Agenda, Salud y Proyectos separan sus secciones de vista o unidades y de preferencias en bloques con nombre. Sin cambio visible ni de contrato (#591).
+
 - Interno: la galería de variantes resuelve el contenedor del portal en una sola función que usan los seis wrappers de overlay, da nombre al tipo de los ejemplos por grupo y arma sus dos pruebas con una sola lista de fichas cubiertas. Sin cambio visible (#613).
 
 - La ficha de la galería dice «No tiene una composición anidada» y no pinta el árbol cuando la anatomía no tiene hijos; las fichas con hijos conservan el árbol completo (#607).
