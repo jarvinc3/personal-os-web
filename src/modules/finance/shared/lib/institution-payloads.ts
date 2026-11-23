@@ -1,5 +1,5 @@
 import type { PayloadResult } from "./catalog-fields.ts"
-import { optionalTrimmed } from "./catalog-fields.ts"
+import { optionalTrimmed, optionalUpdateField } from "./catalog-fields.ts"
 
 export type CreateInstitutionBody = {
   name: string
@@ -26,8 +26,7 @@ function institutionSortOrder(
   return { ok: true, body: parsed }
 }
 
-function applyInstitutionFields(
-  body: CreateInstitutionBody,
+function institutionOptionFields(
   input: {
     color?: string
     country?: string
@@ -36,31 +35,26 @@ function applyInstitutionFields(
     domain?: string
   },
   isUpdate: boolean
-): void {
-  const color = optionalTrimmed(input.color)
-  if (color) {
-    body.color = color
-  } else if (isUpdate) {
-    body.color = null
-  }
+): Pick<
+  CreateInstitutionBody,
+  "color" | "country" | "type" | "shortName" | "domain"
+> {
+  const color = optionalUpdateField(optionalTrimmed(input.color), isUpdate)
   const country = optionalTrimmed(input.country)?.toUpperCase()
-  if (country) {
-    body.country = country
-  }
-  if (input.type) {
-    body.type = input.type
-  }
-  const shortName = optionalTrimmed(input.shortName)
-  if (shortName) {
-    body.shortName = shortName
-  } else if (isUpdate) {
-    body.shortName = null
-  }
-  const domain = optionalTrimmed(input.domain)?.toLowerCase()
-  if (domain) {
-    body.domain = domain
-  } else if (isUpdate) {
-    body.domain = null
+  const shortName = optionalUpdateField(
+    optionalTrimmed(input.shortName),
+    isUpdate
+  )
+  const domain = optionalUpdateField(
+    optionalTrimmed(input.domain)?.toLowerCase(),
+    isUpdate
+  )
+  return {
+    ...(color !== undefined ? { color } : {}),
+    ...(country ? { country } : {}),
+    ...(input.type ? { type: input.type } : {}),
+    ...(shortName !== undefined ? { shortName } : {}),
+    ...(domain !== undefined ? { domain } : {}),
   }
 }
 
@@ -81,16 +75,16 @@ export function buildCreateInstitutionBody(
     return { ok: false, error: "Nombre obligatorio" }
   }
 
-  const body: CreateInstitutionBody = { name }
-  applyInstitutionFields(body, input, options?.isUpdate === true)
-
   const sortOrder = institutionSortOrder(input.sortOrder)
   if (!sortOrder.ok) {
     return sortOrder
   }
-  if (sortOrder.body !== undefined) {
-    body.sortOrder = sortOrder.body
+  return {
+    ok: true,
+    body: {
+      name,
+      ...institutionOptionFields(input, options?.isUpdate === true),
+      ...(sortOrder.body !== undefined ? { sortOrder: sortOrder.body } : {}),
+    },
   }
-
-  return { ok: true, body }
 }

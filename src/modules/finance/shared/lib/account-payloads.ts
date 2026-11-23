@@ -1,5 +1,10 @@
 import type { PayloadResult } from "./catalog-fields.ts"
-import { digitsOnly, optionalId, optionalTrimmed } from "./catalog-fields.ts"
+import {
+  digitsOnly,
+  optionalId,
+  optionalTrimmed,
+  optionalUpdateField,
+} from "./catalog-fields.ts"
 
 type FinanceAccountType = "CHECKING" | "SAVINGS" | "CASH" | "INVESTMENT"
 
@@ -67,8 +72,20 @@ function accountNumberFields(
   return { ok: true, body: { accountNumber } }
 }
 
-function applyAccountOptions(
-  body: CreateAccountBody,
+function defaultForInstitutionField(
+  input: { type: FinanceAccountType; isDefaultForInstitution?: boolean },
+  isUpdate: boolean
+): boolean | undefined {
+  if (input.type === "CASH") {
+    return undefined
+  }
+  if (input.isDefaultForInstitution) {
+    return true
+  }
+  return isUpdate ? false : undefined
+}
+
+function accountOptionFields(
   input: {
     type: FinanceAccountType
     currency?: string
@@ -76,23 +93,14 @@ function applyAccountOptions(
     isDefaultForInstitution?: boolean
   },
   isUpdate: boolean
-): void {
+): Pick<CreateAccountBody, "currency" | "color" | "isDefaultForInstitution"> {
   const currency = optionalTrimmed(input.currency)?.toUpperCase()
-  if (currency) {
-    body.currency = currency
-  }
-
-  const color = optionalTrimmed(input.color)
-  if (color) {
-    body.color = color
-  } else if (isUpdate) {
-    body.color = null
-  }
-
-  if (input.type !== "CASH" && input.isDefaultForInstitution) {
-    body.isDefaultForInstitution = true
-  } else if (isUpdate && input.type !== "CASH") {
-    body.isDefaultForInstitution = Boolean(input.isDefaultForInstitution)
+  const color = optionalUpdateField(optionalTrimmed(input.color), isUpdate)
+  const isDefault = defaultForInstitutionField(input, isUpdate)
+  return {
+    ...(currency ? { currency } : {}),
+    ...(color !== undefined ? { color } : {}),
+    ...(isDefault !== undefined ? { isDefaultForInstitution: isDefault } : {}),
   }
 }
 
@@ -128,12 +136,14 @@ export function buildCreateAccountBody(
     return numbers
   }
 
-  const body: CreateAccountBody = {
-    name,
-    type: input.type,
-    ...(institution.body ? { institutionId: institution.body } : {}),
-    ...numbers.body,
+  return {
+    ok: true,
+    body: {
+      name,
+      type: input.type,
+      ...(institution.body ? { institutionId: institution.body } : {}),
+      ...numbers.body,
+      ...accountOptionFields(input, isUpdate),
+    },
   }
-  applyAccountOptions(body, input, isUpdate)
-  return { ok: true, body }
 }

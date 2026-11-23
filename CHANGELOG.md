@@ -12,6 +12,8 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Cambiado
 
+- Interno: los armadores de cuenta, institución y tarjeta del catálogo devuelven sus campos opcionales en vez de escribir en el cuerpo recibido; la composición queda en el armador y el resultado es el mismo (#620).
+
 - Interno: los armadores de formulario de Finanzas se parten por intención: identidad de tarjeta, datos de suscripción, campos y validaciones del asistente de préstamo, y validaciones de Ajustes. Mismos valores, mismos mensajes y mismos cuerpos (#584).
 
 - Interno: los payloads y consultas compartidas de Finanzas se parten por responsabilidad —cuenta, institución, tarjeta, categoría, transacción, transferencia, meta, préstamo, cobro y consulta de movimientos— con las mismas validaciones y los mismos cuerpos. La pila de instituciones separa sus índices e irregularidades. Sin cambio visible ni de contrato (#583).
