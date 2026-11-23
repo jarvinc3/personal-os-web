@@ -26,7 +26,7 @@ Para actualizar el contrato: `pnpm api:contract && pnpm api:generate`, revisá e
 
 ## Gate de deriva en el CI
 
-El job `contract` corre en cada PR y en cada push a `develop`. Clona `personal-os-back` en `develop` con el secreto de solo lectura **`BACK_REPO_TOKEN`** (creado por el owner del repo; el job no lo crea), lee su `swagger-spec.json` y ejecuta `pnpm api:contract:check`. Si la copia versionada no coincide, el job falla y lista las diferencias, por ejemplo:
+El job `contract` corre en cada PR y en cada push a `develop`. Clona `personal-os-back` en `develop` (el repo es público, así que el checkout usa el `GITHUB_TOKEN` por defecto y no necesita un secreto propio), lee su `swagger-spec.json` y ejecuta `pnpm api:contract:check`. Si la copia versionada no coincide, el job falla y lista las diferencias, por ejemplo:
 
 ```text
 ruta solo en la copia versionada: /api/ai/chat
@@ -36,7 +36,7 @@ esquema cambió en el back: BudgetDto
 
 Cómo se arregla: `pnpm api:contract && pnpm api:generate` en la rama del PR, revisar el diff y commitear los dos archivos con los ajustes de tipos que el contrato nuevo exija.
 
-Sin el secreto el job falla con un mensaje que lo nombra: un gate apagado no puede pasar por verde. Si `personal-os-back` cambia y la copia no se regenera, el cliente sigue enviando el nombre viejo y el API responde 400 porque el `ValidationPipe` del back usa `forbidNonWhitelisted` (le pasó a los correos con `limit`, [personal-os-back#436](https://github.com/jarvinc3/personal-os-back/issues/436)).
+Si el checkout del back falla, el job falla: un gate apagado no puede pasar por verde. Si `personal-os-back` cambia y la copia no se regenera, el cliente sigue enviando el nombre viejo y el API responde 400 porque el `ValidationPipe` del back usa `forbidNonWhitelisted` (le pasó a los correos con `limit`, [personal-os-back#436](https://github.com/jarvinc3/personal-os-back/issues/436)).
 
 ## Cómo se consumen
 
