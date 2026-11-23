@@ -27,7 +27,10 @@ import {
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { cn } from "@/src/shared/lib/utils"
 
-import type { GalleryDemoMap } from "@/src/modules/galleries/components/catalog/types"
+import type {
+  GalleryDemoMap,
+  GalleryVariantDemoMap,
+} from "@/src/modules/galleries/components/catalog/types"
 
 type Flow = "expense" | "income"
 
@@ -475,4 +478,477 @@ const FLOW_SEGMENTS = [
       ),
     },
   ],
+}
+
+export const accionesVariantDemos: GalleryVariantDemoMap = {
+  button: {
+    variant: [
+      { label: "default", node: <Button>Guardar</Button> },
+      {
+        label: "outline",
+        node: (
+          <Button variant="outline">
+            <PencilIcon />
+            Editar
+          </Button>
+        ),
+      },
+      {
+        label: "secondary",
+        node: (
+          <Button variant="secondary">
+            <PlusIcon />
+            Agregar
+          </Button>
+        ),
+      },
+      {
+        label: "ghost",
+        node: (
+          <Button variant="ghost">
+            <EllipsisVerticalIcon />
+            Más
+          </Button>
+        ),
+      },
+      {
+        label: "destructive",
+        node: (
+          <Button variant="destructive">
+            <Trash2Icon />
+            Eliminar
+          </Button>
+        ),
+      },
+      {
+        label: "link",
+        node: <Button variant="link">Ver detalle</Button>,
+      },
+    ],
+    size: [
+      {
+        label: "sm",
+        node: (
+          <Button size="sm">
+            <PlusIcon />
+            Pequeño
+          </Button>
+        ),
+      },
+      {
+        label: "default",
+        node: (
+          <Button>
+            <PlusIcon />
+            Mediano
+          </Button>
+        ),
+      },
+      {
+        label: "lg",
+        node: (
+          <Button size="lg">
+            <PlusIcon />
+            Grande
+          </Button>
+        ),
+      },
+      {
+        label: "icon",
+        node: (
+          <Button size="icon" aria-label="Más acciones">
+            <EllipsisVerticalIcon />
+          </Button>
+        ),
+      },
+      {
+        label: "icon-sm",
+        node: (
+          <Button size="icon-sm" aria-label="Editar">
+            <PencilIcon />
+          </Button>
+        ),
+      },
+      {
+        label: "icon-lg",
+        node: (
+          <Button size="icon-lg" variant="destructive" aria-label="Eliminar">
+            <Trash2Icon />
+          </Button>
+        ),
+      },
+    ],
+    states: [
+      { label: "normal", node: <Button>Guardar</Button> },
+      {
+        label: "pending",
+        node: (
+          <Button disabled>
+            <Spinner />
+            Guardando
+          </Button>
+        ),
+      },
+      {
+        label: "disabled",
+        node: (
+          <Button variant="outline" disabled>
+            <SaveIcon />
+            Deshabilitado
+          </Button>
+        ),
+      },
+    ],
+  },
+  "button-group": {
+    orientation: [
+      {
+        label: "horizontal",
+        node: (
+          <ButtonGroup>
+            <Button variant="outline">
+              <PencilIcon />
+              Editar
+            </Button>
+            <Button variant="outline" aria-label="Más acciones">
+              <EllipsisVerticalIcon />
+            </Button>
+          </ButtonGroup>
+        ),
+      },
+      {
+        label: "vertical",
+        node: (
+          <ButtonGroup orientation="vertical">
+            <Button variant="outline">
+              <ArrowUpRightIcon />
+              Subir
+            </Button>
+            <Button variant="outline">
+              <ArrowDownLeftIcon />
+              Bajar
+            </Button>
+          </ButtonGroup>
+        ),
+      },
+    ],
+  },
+  toggle: {
+    variant: [
+      {
+        label: "default",
+        node: (
+          <Toggle aria-label="Favorito">
+            <SaveIcon />
+          </Toggle>
+        ),
+      },
+      {
+        label: "outline",
+        node: (
+          <Toggle variant="outline" aria-label="Favorito">
+            <SaveIcon />
+          </Toggle>
+        ),
+      },
+    ],
+    size: [
+      {
+        label: "sm",
+        node: (
+          <Toggle size="sm" aria-label="Favorito pequeño">
+            <SaveIcon />
+          </Toggle>
+        ),
+      },
+      {
+        label: "default",
+        node: (
+          <Toggle aria-label="Favorito">
+            <SaveIcon />
+          </Toggle>
+        ),
+      },
+      {
+        label: "lg",
+        node: (
+          <Toggle size="lg" aria-label="Favorito grande">
+            <SaveIcon />
+          </Toggle>
+        ),
+      },
+    ],
+    states: [
+      {
+        label: "pressed",
+        node: (
+          <Toggle defaultPressed aria-label="Favorito activo">
+            <SaveIcon />
+          </Toggle>
+        ),
+      },
+      {
+        label: "unpressed",
+        node: (
+          <Toggle aria-label="Añadir a favoritos">
+            <SaveIcon />
+          </Toggle>
+        ),
+      },
+      {
+        label: "disabled",
+        node: (
+          <Toggle disabled aria-label="Favorito deshabilitado">
+            <SaveIcon />
+          </Toggle>
+        ),
+      },
+    ],
+  },
+  "toggle-group": {
+    multiple: [
+      {
+        label: "false (exclusivo)",
+        node: (
+          <ToggleGroup
+            defaultValue={["expense"]}
+            aria-label="Tipo de movimiento"
+          >
+            <ToggleGroupItem value="expense" aria-label="Gasto">
+              <ArrowDownLeftIcon />
+              Gasto
+            </ToggleGroupItem>
+            <ToggleGroupItem value="income" aria-label="Ingreso">
+              <ArrowUpRightIcon />
+              Ingreso
+            </ToggleGroupItem>
+          </ToggleGroup>
+        ),
+      },
+      {
+        label: "true",
+        node: (
+          <ToggleGroup
+            multiple
+            defaultValue={["saving", "fixed"]}
+            aria-label="Etiquetas"
+          >
+            <ToggleGroupItem value="saving">Ahorro</ToggleGroupItem>
+            <ToggleGroupItem value="fixed">Fijo</ToggleGroupItem>
+            <ToggleGroupItem value="variable">Variable</ToggleGroupItem>
+          </ToggleGroup>
+        ),
+      },
+    ],
+    variant: [
+      {
+        label: "default",
+        node: (
+          <ToggleGroup defaultValue={["one"]} aria-label="Rango">
+            <ToggleGroupItem value="one">Uno</ToggleGroupItem>
+            <ToggleGroupItem value="two">Dos</ToggleGroupItem>
+          </ToggleGroup>
+        ),
+      },
+      {
+        label: "outline",
+        node: (
+          <ToggleGroup
+            variant="outline"
+            defaultValue={["one"]}
+            aria-label="Rango"
+          >
+            <ToggleGroupItem value="one">Uno</ToggleGroupItem>
+            <ToggleGroupItem value="two">Dos</ToggleGroupItem>
+          </ToggleGroup>
+        ),
+      },
+    ],
+    size: [
+      {
+        label: "sm",
+        node: (
+          <ToggleGroup size="sm" aria-label="Rango pequeño">
+            <ToggleGroupItem value="one">Uno</ToggleGroupItem>
+            <ToggleGroupItem value="two">Dos</ToggleGroupItem>
+          </ToggleGroup>
+        ),
+      },
+      {
+        label: "default",
+        node: (
+          <ToggleGroup aria-label="Rango">
+            <ToggleGroupItem value="one">Uno</ToggleGroupItem>
+            <ToggleGroupItem value="two">Dos</ToggleGroupItem>
+          </ToggleGroup>
+        ),
+      },
+      {
+        label: "lg",
+        node: (
+          <ToggleGroup size="lg" aria-label="Rango grande">
+            <ToggleGroupItem value="one">Uno</ToggleGroupItem>
+            <ToggleGroupItem value="two">Dos</ToggleGroupItem>
+          </ToggleGroup>
+        ),
+      },
+    ],
+    states: [
+      {
+        label: "pressed",
+        node: (
+          <ToggleGroup defaultValue={["one"]} aria-label="Rango pulsado">
+            <ToggleGroupItem value="one">Uno</ToggleGroupItem>
+            <ToggleGroupItem value="two">Dos</ToggleGroupItem>
+          </ToggleGroup>
+        ),
+      },
+      {
+        label: "unpressed",
+        node: (
+          <ToggleGroup aria-label="Rango sin pulsar">
+            <ToggleGroupItem value="one">Uno</ToggleGroupItem>
+            <ToggleGroupItem value="two">Dos</ToggleGroupItem>
+          </ToggleGroup>
+        ),
+      },
+      {
+        label: "disabled",
+        node: (
+          <ToggleGroup
+            disabled
+            defaultValue={["one"]}
+            aria-label="Deshabilitado"
+          >
+            <ToggleGroupItem value="one">Uno</ToggleGroupItem>
+            <ToggleGroupItem value="two">Dos</ToggleGroupItem>
+          </ToggleGroup>
+        ),
+      },
+    ],
+  },
+  "segmented-control": {
+    size: [
+      {
+        label: "sm",
+        node: (
+          <SegmentedControl<Flow>
+            value="expense"
+            onChange={() => {}}
+            size="sm"
+            options={FLOW_SEGMENTS}
+          />
+        ),
+      },
+      {
+        label: "lg",
+        node: (
+          <SegmentedControl<Flow>
+            value="expense"
+            onChange={() => {}}
+            size="lg"
+            options={FLOW_SEGMENTS}
+          />
+        ),
+      },
+    ],
+    orientation: [
+      {
+        label: "horizontal",
+        node: (
+          <SegmentedControl<Flow>
+            value="expense"
+            onChange={() => {}}
+            options={FLOW_SEGMENTS}
+          />
+        ),
+      },
+      {
+        label: "vertical",
+        node: (
+          <SegmentedControl<Flow>
+            value="expense"
+            onChange={() => {}}
+            orientation="vertical"
+            options={FLOW_SEGMENTS}
+          />
+        ),
+      },
+    ],
+    states: [
+      {
+        label: "normal",
+        node: (
+          <SegmentedControl<string>
+            value=""
+            onChange={() => {}}
+            ariaLabel="Tipo de movimiento"
+            options={FLOW_SEGMENTS}
+          />
+        ),
+      },
+      {
+        label: "selected",
+        node: (
+          <SegmentedControl<Flow>
+            value="income"
+            onChange={() => {}}
+            ariaLabel="Tipo de movimiento"
+            options={FLOW_SEGMENTS}
+          />
+        ),
+      },
+      {
+        label: "disabled",
+        node: (
+          <SegmentedControl<Flow>
+            value="expense"
+            onChange={() => {}}
+            disabled
+            ariaLabel="Tipo de movimiento"
+            options={FLOW_SEGMENTS}
+          />
+        ),
+      },
+      {
+        label: "invalid",
+        node: (
+          <SegmentedControl<string>
+            value=""
+            onChange={() => {}}
+            ariaLabel="Tipo de movimiento"
+            error="Elige gasto o ingreso"
+            options={FLOW_SEGMENTS}
+          />
+        ),
+      },
+    ],
+  },
+  "pending-surface": {
+    states: [
+      {
+        label: "idle",
+        node: (
+          <div className="relative overflow-hidden rounded-lg">
+            <Button variant="outline">
+              <ChevronRightIcon />
+              Abrir detalle
+            </Button>
+          </div>
+        ),
+      },
+      {
+        label: "pending",
+        node: (
+          <div className="relative overflow-hidden rounded-lg">
+            <Button variant="outline">
+              <ChevronRightIcon />
+              Abrir detalle
+            </Button>
+            <PendingSurface />
+          </div>
+        ),
+      },
+    ],
+  },
 }

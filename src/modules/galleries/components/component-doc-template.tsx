@@ -10,7 +10,10 @@ import {
   SlidersHorizontalIcon,
 } from "lucide-react"
 
-import type { GalleryComponentDoc } from "@/src/modules/galleries/components/catalog/types"
+import type {
+  GalleryComponentDoc,
+  GalleryVariantDemo,
+} from "@/src/modules/galleries/components/catalog/types"
 import { HighlightedCode } from "@/src/modules/galleries/components/highlighted-code"
 import { anatomyTree } from "@/src/modules/galleries/lib/anatomy"
 import { splitSnippet } from "@/src/modules/galleries/lib/snippet"
@@ -63,6 +66,30 @@ function PreviewFrame({
       <p className="text-xs font-medium text-muted-foreground">{label}</p>
       <div className="flex min-w-0 flex-col gap-3 rounded-xl border border-border/70 p-3">
         {children}
+      </div>
+    </div>
+  )
+}
+
+function VariantDemoGroup({
+  name,
+  demos,
+}: {
+  name: string
+  demos: readonly GalleryVariantDemo[]
+}) {
+  return (
+    <div className="flex min-w-0 flex-col gap-2">
+      <p className="font-mono text-xs font-medium">{name}</p>
+      <div className="flex flex-col divide-y divide-border/60 rounded-xl border border-border/70">
+        {demos.map((demo) => (
+          <div key={demo.label} className="flex min-w-0 flex-col gap-1.5 p-2">
+            <p className="text-xs text-muted-foreground">{demo.label}</p>
+            <div className="flex min-w-0 flex-wrap items-center gap-2">
+              {demo.node}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   )
@@ -147,27 +174,39 @@ export function ComponentDocTemplate({ doc }: { doc: GalleryComponentDoc }) {
       </SummarySection>
 
       <SummarySection title="Variantes y estados" icon={SlidersHorizontalIcon}>
-        <div className="overflow-x-auto p-2">
-          <table className="w-full min-w-0 text-left text-sm">
-            <thead className="text-xs text-muted-foreground">
-              <tr>
-                <th className="py-1 pr-3 font-medium">Propiedad</th>
-                <th className="py-1 font-medium">Valores</th>
-              </tr>
-            </thead>
-            <tbody>
-              {doc.variants.map((variant) => (
-                <tr key={variant.name} className="border-t border-border/60">
-                  <td className="py-2 pr-3 align-top font-mono text-xs">
-                    {variant.name}
-                  </td>
-                  <td className="py-2 align-top text-muted-foreground">
-                    {variant.values}
-                  </td>
+        <div className="flex flex-col gap-4 p-2">
+          {doc.variants.map((variant) => {
+            const demos = doc.variantDemos[variant.name] ?? []
+            return demos.length > 0 ? (
+              <VariantDemoGroup
+                key={variant.name}
+                name={variant.name}
+                demos={demos}
+              />
+            ) : null
+          })}
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-0 text-left text-sm">
+              <thead className="text-xs text-muted-foreground">
+                <tr>
+                  <th className="py-1 pr-3 font-medium">Propiedad</th>
+                  <th className="py-1 font-medium">Valores</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {doc.variants.map((variant) => (
+                  <tr key={variant.name} className="border-t border-border/60">
+                    <td className="py-2 pr-3 align-top font-mono text-xs">
+                      {variant.name}
+                    </td>
+                    <td className="py-2 align-top text-muted-foreground">
+                      {variant.values}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </SummarySection>
 

@@ -12,6 +12,8 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Cambiado
 
+- La sección Variantes y estados de la galería de Ajustes → Apariencia pinta cada variante y cada estado con el componente real y su etiqueta en las 20 fichas de acciones, avisos, tabs, estructura y gráficos, y deja la tabla de propiedades como resumen. Los estados que solo existen al interactuar (hover, focus, copiado) siguen solo en la tabla; una ficha sin ejemplos muestra solo su tabla (#599).
+
 - La búsqueda de la galería de Ajustes → Apariencia resalta el fragmento que coincide en el nombre y la descripción de cada resultado, con el mismo criterio que el filtro (sin acentos ni mayúsculas), y cada categoría tiene su propio buscador con su estado vacío y su contador «N de M fichas» (#597).
 
 - La ficha de la galería de Ajustes → Apariencia muestra el código exacto de cada ejemplo (tab Código), separa la importación del uso en dos bloques con su propio botón de copiar y dibuja la composición como árbol de texto monoespaciado (#598).

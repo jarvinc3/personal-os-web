@@ -1,3 +1,5 @@
+import { CheckIcon, PlusIcon } from "lucide-react"
+
 import { simulatedTap } from "@/src/modules/galleries/components/simulated-tap"
 import {
   GALLERY_ACCENT,
@@ -13,7 +15,10 @@ import {
   TabsTrigger,
 } from "@/src/shared/components/ui/tabs"
 
-import type { GalleryDemoMap } from "@/src/modules/galleries/components/catalog/types"
+import type {
+  GalleryDemoMap,
+  GalleryVariantDemoMap,
+} from "@/src/modules/galleries/components/catalog/types"
 
 export const tabsDemos: GalleryDemoMap = {
   tabs: [
@@ -171,4 +176,226 @@ export const tabsDemos: GalleryDemoMap = {
       ),
     },
   ],
+}
+
+export const tabsVariantDemos: GalleryVariantDemoMap = {
+  tabs: {
+    "variant (TabsList)": [
+      {
+        label: "default",
+        node: (
+          <Tabs defaultValue="gastos">
+            <TabsList>
+              <TabsTrigger value="gastos">Gastos</TabsTrigger>
+              <TabsTrigger value="ingresos">Ingresos</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        ),
+      },
+      {
+        label: "line",
+        node: (
+          <Tabs defaultValue="gastos">
+            <TabsList variant="line">
+              <TabsTrigger value="gastos">Gastos</TabsTrigger>
+              <TabsTrigger value="ingresos">Ingresos</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        ),
+      },
+    ],
+    orientation: [
+      {
+        label: "horizontal",
+        node: (
+          <Tabs defaultValue="gastos">
+            <TabsList>
+              <TabsTrigger value="gastos">Gastos</TabsTrigger>
+              <TabsTrigger value="ingresos">Ingresos</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        ),
+      },
+      {
+        label: "vertical",
+        node: (
+          <Tabs orientation="vertical" defaultValue="gastos">
+            <TabsList>
+              <TabsTrigger value="gastos">Gastos</TabsTrigger>
+              <TabsTrigger value="ingresos">Ingresos</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        ),
+      },
+    ],
+    states: [
+      {
+        label: "active",
+        node: (
+          <Tabs defaultValue="gastos">
+            <TabsList>
+              <TabsTrigger value="gastos">Gastos</TabsTrigger>
+              <TabsTrigger value="ingresos">Ingresos</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        ),
+      },
+      {
+        label: "inactive",
+        node: (
+          <Tabs value="">
+            <TabsList>
+              <TabsTrigger value="gastos">Gastos</TabsTrigger>
+              <TabsTrigger value="ingresos">Ingresos</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        ),
+      },
+      {
+        label: "disabled",
+        node: (
+          <Tabs defaultValue="gastos">
+            <TabsList>
+              <TabsTrigger value="gastos">Gastos</TabsTrigger>
+              <TabsTrigger value="ingresos" disabled>
+                Ingresos
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        ),
+      },
+    ],
+  },
+  badge: {
+    variant: [
+      { label: "default", node: <Badge>Default</Badge> },
+      {
+        label: "secondary",
+        node: <Badge variant="secondary">Secondary</Badge>,
+      },
+      { label: "success", node: <Badge variant="success">Al día</Badge> },
+      { label: "warning", node: <Badge variant="warning">Por vencer</Badge> },
+      { label: "info", node: <Badge variant="info">Nuevo</Badge> },
+      { label: "danger", node: <Badge variant="danger">Vencido</Badge> },
+      {
+        label: "tinted",
+        node: (
+          <Badge variant="tinted" className="bg-accent">
+            Tinted
+          </Badge>
+        ),
+      },
+      { label: "outline", node: <Badge variant="outline">Outline</Badge> },
+      {
+        label: "destructive",
+        node: <Badge variant="destructive">Falló</Badge>,
+      },
+      { label: "ghost", node: <Badge variant="ghost">Ghost</Badge> },
+      {
+        label: "link",
+        node: (
+          <Badge variant="link">
+            <PlusIcon />
+            Link
+          </Badge>
+        ),
+      },
+    ],
+  },
+  "category-card": {
+    variant: [
+      {
+        label: "default",
+        node: (
+          <CategoryCard
+            name="Mercado"
+            icon={null}
+            color={GALLERY_ACCENT}
+            isSystem={false}
+            onPress={simulatedTap}
+          />
+        ),
+      },
+      {
+        label: "pick",
+        node: (
+          <CategoryCard
+            name="Nueva categoría"
+            icon={null}
+            isSystem={false}
+            variant="pick"
+            leading={<PlusIcon className="size-5" />}
+            onPress={simulatedTap}
+          />
+        ),
+      },
+      {
+        label: "chip",
+        node: (
+          <CategoryCard
+            name="Mercado"
+            icon={null}
+            color={GALLERY_ACCENT}
+            isSystem={false}
+            amount={formatFinanceMoney("1250.00", GALLERY_DISPLAY)}
+            variant="chip"
+            onPress={simulatedTap}
+          />
+        ),
+      },
+      {
+        label: "inline",
+        node: (
+          <CategoryCard
+            name="Mercado"
+            icon={null}
+            color={GALLERY_ACCENT}
+            isSystem={false}
+            amount={formatFinanceMoney("1250.00", GALLERY_DISPLAY)}
+            variant="inline"
+          />
+        ),
+      },
+    ],
+    states: [
+      {
+        label: "normal",
+        node: (
+          <CategoryCard
+            name="Mercado"
+            icon={null}
+            color={GALLERY_ACCENT}
+            isSystem={false}
+            onPress={simulatedTap}
+          />
+        ),
+      },
+      {
+        label: "selected",
+        node: (
+          <CategoryCard
+            name="Mercado"
+            icon={null}
+            color={GALLERY_ACCENT}
+            isSystem={false}
+            leading={<CheckIcon className="size-4 text-primary" aria-hidden />}
+            onPress={simulatedTap}
+          />
+        ),
+      },
+      {
+        label: "disabled",
+        node: (
+          <CategoryCard
+            name="Mercado"
+            icon={null}
+            color={GALLERY_ACCENT}
+            isSystem={false}
+            disabled
+            onPress={simulatedTap}
+          />
+        ),
+      },
+    ],
+  },
 }

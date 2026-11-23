@@ -27,6 +27,15 @@ export type GalleryVariantGroup = {
   values: string
 }
 
+/**
+ * Un ejemplo pintado de una variante o un estado. La etiqueta nombra lo que
+ * muestra; el nodo es el componente real.
+ */
+export type GalleryVariantDemo = {
+  label: string
+  node: ReactNode
+}
+
 /** Una prop principal, con tipo y para qué sirve. */
 export type GalleryProp = {
   name: string
@@ -59,7 +68,15 @@ export type GalleryComponentMeta = {
 /** Metadatos más la vista previa que se pinta en la página del componente. */
 export type GalleryComponentDoc = GalleryComponentMeta & {
   demos: readonly GalleryDemoItem[]
+  /** Ejemplos pintados por el `name` de cada grupo de variantes. */
+  variantDemos: Record<string, readonly GalleryVariantDemo[]>
 }
 
 /** Demos de una categoría, indexados por el id del componente. */
 export type GalleryDemoMap = Record<string, readonly GalleryDemoItem[]>
+
+/** Ejemplos de variantes de una categoría, por ficha y por grupo. */
+export type GalleryVariantDemoMap = Record<
+  string,
+  Record<string, readonly GalleryVariantDemo[]>
+>

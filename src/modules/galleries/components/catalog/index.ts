@@ -1,4 +1,7 @@
-import { GALLERY_DEMOS } from "@/src/modules/galleries/components/catalog/demos"
+import {
+  GALLERY_DEMOS,
+  GALLERY_VARIANT_DEMOS,
+} from "@/src/modules/galleries/components/catalog/demos"
 import {
   GALLERY_COMPONENT_METAS,
   galleryMetasInCategory,
@@ -16,7 +19,11 @@ export const GALLERY_COMPONENTS: readonly GalleryComponentDoc[] =
     if (!demos) {
       throw new Error(`La ficha ${meta.id} no tiene demos`)
     }
-    return { ...meta, demos }
+    return {
+      ...meta,
+      demos,
+      variantDemos: GALLERY_VARIANT_DEMOS[meta.id] ?? {},
+    }
   })
 
 export function galleryComponentsInCategory(
