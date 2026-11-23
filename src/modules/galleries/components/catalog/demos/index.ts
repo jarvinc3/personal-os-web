@@ -1,16 +1,34 @@
-import { accionesDemos } from "@/src/modules/galleries/components/catalog/demos/acciones"
-import { avisosDemos } from "@/src/modules/galleries/components/catalog/demos/avisos"
+import {
+  accionesDemos,
+  accionesVariantDemos,
+} from "@/src/modules/galleries/components/catalog/demos/acciones"
+import {
+  avisosDemos,
+  avisosVariantDemos,
+} from "@/src/modules/galleries/components/catalog/demos/avisos"
 import { encabezadosDemos } from "@/src/modules/galleries/components/catalog/demos/encabezados"
 import { entradasDemos } from "@/src/modules/galleries/components/catalog/demos/entradas"
 import { estadosDemos } from "@/src/modules/galleries/components/catalog/demos/estados"
-import { estructuraDemos } from "@/src/modules/galleries/components/catalog/demos/estructura"
-import { graficosDemos } from "@/src/modules/galleries/components/catalog/demos/graficos"
+import {
+  estructuraDemos,
+  estructuraVariantDemos,
+} from "@/src/modules/galleries/components/catalog/demos/estructura"
+import {
+  graficosDemos,
+  graficosVariantDemos,
+} from "@/src/modules/galleries/components/catalog/demos/graficos"
 import { listasDemos } from "@/src/modules/galleries/components/catalog/demos/listas"
 import { montosDemos } from "@/src/modules/galleries/components/catalog/demos/montos"
 import { overlaysDemos } from "@/src/modules/galleries/components/catalog/demos/overlays"
 import { selectoresDemos } from "@/src/modules/galleries/components/catalog/demos/selectores"
-import { tabsDemos } from "@/src/modules/galleries/components/catalog/demos/tabs"
-import type { GalleryDemoMap } from "@/src/modules/galleries/components/catalog/types"
+import {
+  tabsDemos,
+  tabsVariantDemos,
+} from "@/src/modules/galleries/components/catalog/demos/tabs"
+import type {
+  GalleryDemoMap,
+  GalleryVariantDemoMap,
+} from "@/src/modules/galleries/components/catalog/types"
 
 /** Todos los demos, indexados por el id del componente. */
 export const GALLERY_DEMOS: GalleryDemoMap = {
@@ -26,4 +44,13 @@ export const GALLERY_DEMOS: GalleryDemoMap = {
   ...montosDemos,
   ...graficosDemos,
   ...estructuraDemos,
+}
+
+/** Ejemplos pintados de variantes y estados, por ficha y por grupo. */
+export const GALLERY_VARIANT_DEMOS: GalleryVariantDemoMap = {
+  ...accionesVariantDemos,
+  ...tabsVariantDemos,
+  ...avisosVariantDemos,
+  ...graficosVariantDemos,
+  ...estructuraVariantDemos,
 }
