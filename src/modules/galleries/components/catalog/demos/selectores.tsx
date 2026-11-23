@@ -18,12 +18,16 @@ import { OptionRow } from "@/src/shared/components/forms/option-row"
 import { SelectField } from "@/src/shared/components/forms/select-field"
 import { TimePairWheels } from "@/src/shared/components/forms/wheel-picker"
 import { WheelField } from "@/src/shared/components/forms/wheel-field"
+import { Button } from "@/src/shared/components/ui/button"
 import {
   GALLERY_ACCENT,
   GALLERY_TIME,
 } from "@/src/modules/galleries/components/mock/values"
 
-import type { GalleryDemoMap } from "@/src/modules/galleries/components/catalog/types"
+import type {
+  GalleryDemoMap,
+  GalleryVariantDemoMap,
+} from "@/src/modules/galleries/components/catalog/types"
 
 type MovementKind = "expense" | "income" | "transfer"
 
@@ -383,4 +387,456 @@ const [days, setDays] = useState("1, 15")
       node: <DayListFieldDemo />,
     },
   ],
+}
+
+export const selectoresVariantDemos: GalleryVariantDemoMap = {
+  "option-row": {
+    states: [
+      {
+        label: "normal",
+        node: (
+          <OptionRow
+            label="Tema claro"
+            description="Siempre claro"
+            icon={SunIcon}
+            iconColor={GALLERY_ACCENT}
+            accentColor={GALLERY_ACCENT}
+          />
+        ),
+      },
+      {
+        label: "selected",
+        node: (
+          <OptionRow
+            label="Tema claro"
+            description="Siempre claro"
+            icon={SunIcon}
+            iconColor={GALLERY_ACCENT}
+            accentColor={GALLERY_ACCENT}
+            selected
+          />
+        ),
+      },
+      {
+        label: "disabled por el padre",
+        node: (
+          <div aria-disabled="true" className="pointer-events-none opacity-50">
+            <OptionRow
+              label="Tema oscuro"
+              description="Sigue al sistema"
+              icon={MoonIcon}
+            />
+          </div>
+        ),
+      },
+    ],
+    accentColor: [
+      {
+        label: "color del módulo en el borde elegido",
+        node: (
+          <OptionRow
+            label="Tema claro"
+            description="Siempre claro"
+            icon={SunIcon}
+            iconColor={GALLERY_ACCENT}
+            accentColor={GALLERY_ACCENT}
+            selected
+          />
+        ),
+      },
+    ],
+  },
+  "choice-grid": {
+    columns: [
+      {
+        label: "2",
+        node: (
+          <ChoiceGrid
+            value="expense"
+            onValueChange={() => {}}
+            options={MOVEMENT_KINDS}
+            ariaLabel="Tipo de movimiento en dos columnas"
+            accentColor={GALLERY_ACCENT}
+            columns={2}
+          />
+        ),
+      },
+      {
+        label: "3",
+        node: (
+          <ChoiceGrid
+            value="expense"
+            onValueChange={() => {}}
+            options={MOVEMENT_KINDS}
+            ariaLabel="Tipo de movimiento en tres columnas"
+            accentColor={GALLERY_ACCENT}
+            columns={3}
+          />
+        ),
+      },
+      {
+        label: "4",
+        node: (
+          <ChoiceGrid
+            value="expense"
+            onValueChange={() => {}}
+            options={MOVEMENT_KINDS}
+            ariaLabel="Tipo de movimiento en cuatro columnas"
+            accentColor={GALLERY_ACCENT}
+            columns={4}
+          />
+        ),
+      },
+    ],
+    media: [
+      {
+        label: "icono por opción",
+        node: (
+          <ChoiceGrid
+            value="expense"
+            onValueChange={() => {}}
+            options={MOVEMENT_KINDS}
+            ariaLabel="Tipo de movimiento"
+            accentColor={GALLERY_ACCENT}
+          />
+        ),
+      },
+      {
+        label: "una media propia",
+        node: (
+          <ChoiceGrid
+            value="avatar-0"
+            onValueChange={() => {}}
+            ariaLabel="Avatar"
+            accentColor={GALLERY_ACCENT}
+            columns={4}
+            options={AVATAR_SWATCHES.map((swatch) => ({
+              value: swatch.value,
+              label: swatch.label,
+              media: (
+                <span
+                  className="flex size-full items-center justify-center text-xs font-semibold text-white"
+                  style={{ backgroundColor: swatch.color }}
+                >
+                  {swatch.label.slice(0, 2)}
+                </span>
+              ),
+            }))}
+          />
+        ),
+      },
+    ],
+    states: [
+      {
+        label: "normal",
+        node: (
+          <ChoiceGrid<string>
+            value=""
+            onValueChange={() => {}}
+            options={MOVEMENT_KINDS}
+            ariaLabel="Tipo de movimiento sin elegir"
+            accentColor={GALLERY_ACCENT}
+          />
+        ),
+      },
+      {
+        label: "selected",
+        node: (
+          <ChoiceGrid
+            value="transfer"
+            onValueChange={() => {}}
+            options={MOVEMENT_KINDS}
+            ariaLabel="Tipo de movimiento elegido"
+            accentColor={GALLERY_ACCENT}
+          />
+        ),
+      },
+      {
+        label: "disabled",
+        node: (
+          <ChoiceGrid
+            value="expense"
+            onValueChange={() => {}}
+            options={MOVEMENT_KINDS}
+            ariaLabel="Tipo de movimiento deshabilitado"
+            accentColor={GALLERY_ACCENT}
+            disabled
+          />
+        ),
+      },
+    ],
+  },
+  "select-field": {
+    states: [
+      {
+        label: "normal",
+        node: (
+          <SelectField
+            label="Densidad"
+            value="comoda"
+            onChange={() => {}}
+            icon={SlidersHorizontalIcon}
+            options={DENSITIES}
+          />
+        ),
+      },
+      {
+        label: "invalid",
+        node: (
+          <SelectField
+            label="Densidad"
+            value=""
+            onChange={() => {}}
+            icon={SlidersHorizontalIcon}
+            options={DENSITIES}
+            error="Elige una densidad"
+          />
+        ),
+      },
+      {
+        label: "disabled",
+        node: (
+          <SelectField
+            label="Densidad fija"
+            value="comoda"
+            onChange={() => {}}
+            icon={SlidersHorizontalIcon}
+            options={DENSITIES}
+            disabled
+          />
+        ),
+      },
+    ],
+    mark: [
+      {
+        label: "ReactNode opcional junto a cada opción",
+        node: (
+          <SelectField
+            label="Densidad"
+            value="comoda"
+            onChange={() => {}}
+            icon={SlidersHorizontalIcon}
+            options={DENSITIES.map((density) => ({
+              ...density,
+              mark: <MoonIcon className="size-3.5" />,
+            }))}
+          />
+        ),
+      },
+    ],
+  },
+  "color-picker-swatch": {
+    variant: [
+      {
+        label: "circle",
+        node: (
+          <ColorPickerSwatch
+            id="variant-color-circle"
+            variant="circle"
+            defaultColor={GALLERY_ACCENT}
+          />
+        ),
+      },
+      {
+        label: "square",
+        node: (
+          <ColorPickerSwatch
+            id="variant-color-square"
+            variant="square"
+            defaultColor="#9333ea"
+          />
+        ),
+      },
+    ],
+    states: [
+      {
+        label: "normal",
+        node: (
+          <ColorPickerSwatch
+            id="variant-color-normal"
+            variant="circle"
+            defaultColor={GALLERY_ACCENT}
+          />
+        ),
+      },
+      {
+        label: "disabled",
+        node: (
+          <ColorPickerSwatch
+            id="variant-color-disabled"
+            variant="circle"
+            defaultColor="#64748b"
+            disabled
+          />
+        ),
+      },
+    ],
+  },
+  "wheel-field": {
+    valueLabel: [
+      {
+        label: "texto de la fila cerrada",
+        node: (
+          <WheelField label="Hora" valueLabel={GALLERY_TIME} icon={ClockIcon}>
+            <TimePairWheels
+              value={GALLERY_TIME}
+              minuteStep={5}
+              onChange={() => {}}
+            />
+          </WheelField>
+        ),
+      },
+    ],
+    aside: [
+      {
+        label: "control junto al disparador",
+        node: (
+          <WheelField
+            label="Hora"
+            valueLabel={GALLERY_TIME}
+            icon={ClockIcon}
+            aside={
+              <Button
+                size="icon-sm"
+                variant="ghost"
+                aria-label="Marcar como ahora"
+              >
+                <ClockIcon />
+              </Button>
+            }
+          >
+            <TimePairWheels
+              value={GALLERY_TIME}
+              minuteStep={5}
+              onChange={() => {}}
+            />
+          </WheelField>
+        ),
+      },
+    ],
+  },
+  "time-pair-wheels": {
+    minuteStep: [
+      {
+        label: "1",
+        node: (
+          <TimePairWheels
+            value={GALLERY_TIME}
+            minuteStep={1}
+            onChange={() => {}}
+          />
+        ),
+      },
+      {
+        label: "5",
+        node: (
+          <TimePairWheels
+            value={GALLERY_TIME}
+            minuteStep={5}
+            onChange={() => {}}
+          />
+        ),
+      },
+      {
+        label: "10",
+        node: (
+          <TimePairWheels
+            value={GALLERY_TIME}
+            minuteStep={10}
+            onChange={() => {}}
+          />
+        ),
+      },
+    ],
+    value: [
+      {
+        label: "09:30",
+        node: (
+          <TimePairWheels value="09:30" minuteStep={5} onChange={() => {}} />
+        ),
+      },
+      {
+        label: "21:05",
+        node: (
+          <TimePairWheels value="21:05" minuteStep={5} onChange={() => {}} />
+        ),
+      },
+    ],
+  },
+  "day-list-field": {
+    states: [
+      {
+        label: "un día",
+        node: (
+          <DayListField
+            label="Días de pago"
+            icon={CalendarDaysIcon}
+            value="15"
+            onChange={() => {}}
+          />
+        ),
+      },
+      {
+        label: "varios días",
+        node: (
+          <DayListField
+            label="Días de pago"
+            icon={CalendarDaysIcon}
+            value="1, 15"
+            onChange={() => {}}
+          />
+        ),
+      },
+      {
+        label: "sin días libres",
+        node: (
+          <DayListField
+            label="Días de pago"
+            icon={CalendarDaysIcon}
+            value=""
+            onChange={() => {}}
+          />
+        ),
+      },
+      {
+        label: "invalid",
+        node: (
+          <DayListField
+            label="Días de pago"
+            icon={CalendarDaysIcon}
+            value="32"
+            onChange={() => {}}
+            error="Elige un día entre 1 y 31"
+          />
+        ),
+      },
+      {
+        label: "disabled",
+        node: (
+          <DayListField
+            label="Días de pago"
+            icon={CalendarDaysIcon}
+            value="1, 15"
+            onChange={() => {}}
+            disabled
+          />
+        ),
+      },
+    ],
+    "min / max": [
+      {
+        label: "rango de días permitido",
+        node: (
+          <DayListField
+            label="Días de pago"
+            icon={CalendarDaysIcon}
+            value="10"
+            onChange={() => {}}
+            min={1}
+            max={15}
+          />
+        ),
+      },
+    ],
+  },
 }

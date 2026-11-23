@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { usePortalContainer } from "@/src/shared/context/portal-container"
 import { Menu as MenuPrimitive } from "@base-ui/react/menu"
 import { cn } from "@/src/shared/lib/utils"
 import { ChevronRightIcon, CheckIcon } from "lucide-react"
@@ -9,8 +10,19 @@ function DropdownMenu({ ...props }: MenuPrimitive.Root.Props) {
   return <MenuPrimitive.Root data-slot="dropdown-menu" {...props} />
 }
 
-function DropdownMenuPortal({ ...props }: MenuPrimitive.Portal.Props) {
-  return <MenuPrimitive.Portal data-slot="dropdown-menu-portal" {...props} />
+function DropdownMenuPortal({
+  container,
+  ...props
+}: MenuPrimitive.Portal.Props) {
+  const portalContainer = usePortalContainer()
+
+  return (
+    <MenuPrimitive.Portal
+      data-slot="dropdown-menu-portal"
+      container={container ?? portalContainer ?? undefined}
+      {...props}
+    />
+  )
 }
 
 function DropdownMenuTrigger({ ...props }: MenuPrimitive.Trigger.Props) {
