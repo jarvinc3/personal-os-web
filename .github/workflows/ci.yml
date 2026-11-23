@@ -1,8 +1,8 @@
 name: CI
 
-# Los jobs corren en la PC de casa (runner self-hosted de Windows) mientras
-# GitHub Actions está bloqueado por facturación. El runner es dedicado:
-# conserva node_modules entre corridas y usa el store de pnpm de la máquina.
+# Los jobs corren en los runners de GitHub (ubuntu-latest): el repo es público
+# y esos runners no consumen minutos. Los PRs de fork necesitan aprobación del
+# owner antes de correr (ajuste de Actions del repo).
 on:
   push:
     branches: [main, master, develop]
@@ -16,20 +16,14 @@ permissions:
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
-
-env:
-  # Evita CRLF en el checkout de Windows sin tocar la config global de git
-  GIT_CONFIG_COUNT: "2"
-  GIT_CONFIG_KEY_0: core.autocrlf
-  GIT_CONFIG_VALUE_0: "false"
-  GIT_CONFIG_KEY_1: core.longpaths
-  GIT_CONFIG_VALUE_1: "true"
+  # Un push nuevo a un PR cancela su corrida anterior; los push a develop y
+  # master siempre terminan.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   changes:
     if: github.event_name == 'pull_request'
-    runs-on: [self-hosted, personal-os]
+    runs-on: ubuntu-latest
     timeout-minutes: 5
     outputs:
       code: ${{ steps.filter.outputs.code }}
@@ -52,20 +46,10 @@ jobs:
             core.setOutput('code', String(code));
 
   checks:
-    runs-on: [self-hosted, personal-os]
+    runs-on: ubuntu-latest
     timeout-minutes: 30
-    defaults:
-      run:
-        shell: pwsh
     steps:
-      # Conserva node_modules entre corridas para evitar los hardlinks lentos de
-      # Windows; el resto del workspace se limpia.
       - uses: actions/checkout@v4
-        with:
-          clean: false
-
-      - name: Limpiar el workspace salvo node_modules
-        run: git clean -fdx -e node_modules
 
       - uses: pnpm/action-setup@v4
         with:
@@ -74,9 +58,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
+          cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile --store-dir "$env:LOCALAPPDATA\pnpm\store"
+        run: pnpm install --frozen-lockfile
 
       - name: Audit production dependencies (non-blocking)
         continue-on-error: true
@@ -99,35 +84,17 @@ jobs:
   # parámetro o un esquema y la copia no se regenera, el cliente sigue enviando
   # el nombre viejo y el API responde 400 (pasó con personal-os-back#436).
   contract:
-    runs-on: [self-hosted, personal-os]
-    # El runner es una sola PC y comparte turno con otros jobs: 10 minutos
-    # cancelaban el job en los pasos de cierre cuando la máquina iba cargada.
+    runs-on: ubuntu-latest
     timeout-minutes: 20
-    defaults:
-      run:
-        shell: pwsh
     steps:
       - uses: actions/checkout@v4
-        with:
-          clean: false
-
-      - name: Limpiar el workspace salvo node_modules
-        run: git clean -fdx -e node_modules
-
-      - name: Comprobar el secreto BACK_REPO_TOKEN
-        env:
-          BACK_REPO_TOKEN: ${{ secrets.BACK_REPO_TOKEN }}
-        run: |
-          if (-not $env:BACK_REPO_TOKEN) {
-            throw 'Falta el secreto BACK_REPO_TOKEN en este repo. El gate del contrato OpenAPI necesita un token de solo lectura de personal-os-back para leer su swagger-spec.json. Créalo en Settings > Secrets and variables > Actions y vuelve a correr el job.'
-          }
 
       - name: Traer el contrato vigente del back
         uses: actions/checkout@v4
         with:
           repository: jarvinc3/personal-os-back
           ref: develop
-          token: ${{ secrets.BACK_REPO_TOKEN }}
+          # personal-os-back es público: el checkout no necesita token propio.
           path: .back-contract
           sparse-checkout: swagger-spec.json
           sparse-checkout-cone-mode: false
@@ -149,18 +116,10 @@ jobs:
   build:
     needs: changes
     if: always() && (github.event_name != 'pull_request' || needs.changes.outputs.code == 'true')
-    runs-on: [self-hosted, personal-os]
+    runs-on: ubuntu-latest
     timeout-minutes: 30
-    defaults:
-      run:
-        shell: pwsh
     steps:
       - uses: actions/checkout@v4
-        with:
-          clean: false
-
-      - name: Limpiar el workspace salvo node_modules
-        run: git clean -fdx -e node_modules
 
       - uses: pnpm/action-setup@v4
         with:
@@ -169,9 +128,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
+          cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile --store-dir "$env:LOCALAPPDATA\pnpm\store"
+        run: pnpm install --frozen-lockfile
 
       - name: Build
         run: pnpm run build
@@ -187,11 +147,8 @@ jobs:
   test:
     needs: [checks, build]
     if: always() && needs.checks.result == 'success' && (needs.build.result == 'success' || needs.build.result == 'skipped')
-    runs-on: [self-hosted, personal-os]
+    runs-on: ubuntu-latest
     timeout-minutes: 5
-    defaults:
-      run:
-        shell: pwsh
     steps:
       - name: Confirmar checks y build
         run: echo "Checks y build completados"
