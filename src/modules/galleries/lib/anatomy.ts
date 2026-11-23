@@ -22,6 +22,12 @@ function nodeLines(
   })
 }
 
+export function hasAnatomyChildren(
+  nodes: readonly GalleryAnatomyNode[]
+): boolean {
+  return nodes.some((node) => (node.children?.length ?? 0) > 0)
+}
+
 /**
  * Dibuja la composición como árbol de texto: una línea por elemento, con la
  * raíz sin rama y sus hijos colgando con `├──`, `│` y `└──`.
