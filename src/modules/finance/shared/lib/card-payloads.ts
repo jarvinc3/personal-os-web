@@ -1,6 +1,10 @@
 import { FINANCE_QUICK_CURRENCIES } from "./finance-currency.ts"
 import type { PayloadResult } from "./catalog-fields.ts"
-import { optionalId, optionalTrimmed } from "./catalog-fields.ts"
+import {
+  optionalId,
+  optionalTrimmed,
+  optionalUpdateField,
+} from "./catalog-fields.ts"
 import { parseFinanceMoney } from "./money.ts"
 
 type FinanceCardType = "CREDIT" | "DEBIT"
@@ -44,8 +48,12 @@ function parseOptionalDay(
   return { ok: true, value: day }
 }
 
-function applyCardFields(
-  body: CreateCardBody,
+type CardOptionFields = Pick<
+  CreateCardBody,
+  "accountId" | "network" | "statementClosingDay" | "paymentDueDay" | "color"
+>
+
+function cardOptionFields(
   input: {
     type: FinanceCardType
     accountId?: string
@@ -55,44 +63,38 @@ function applyCardFields(
     color?: string
   },
   isUpdate: boolean
-): PayloadResult<void> {
+): PayloadResult<CardOptionFields> {
+  const fields: CardOptionFields = {}
   if (input.type === "DEBIT") {
     const accountId = optionalId(input.accountId)
     if (!accountId) {
       return { ok: false, error: "Las tarjetas de débito requieren una cuenta" }
     }
-    body.accountId = accountId
+    fields.accountId = accountId
   }
-
   const network = optionalId(input.network)
   if (network) {
-    body.network = network as FinanceCardNetwork
+    fields.network = network as FinanceCardNetwork
   }
-
   const closing = parseOptionalDay(input.statementClosingDay)
   if (closing.ok === false) {
     return closing
   }
   if (closing.value !== undefined) {
-    body.statementClosingDay = closing.value
+    fields.statementClosingDay = closing.value
   }
-
   const due = parseOptionalDay(input.paymentDueDay)
   if (due.ok === false) {
     return due
   }
   if (due.value !== undefined) {
-    body.paymentDueDay = due.value
+    fields.paymentDueDay = due.value
   }
-
-  const color = optionalTrimmed(input.color)
-  if (color) {
-    body.color = color
-  } else if (isUpdate) {
-    body.color = null
+  const color = optionalUpdateField(optionalTrimmed(input.color), isUpdate)
+  if (color !== undefined) {
+    fields.color = color
   }
-
-  return { ok: true, body: undefined }
+  return { ok: true, body: fields }
 }
 
 export function buildCreateCardBody(
@@ -124,18 +126,20 @@ export function buildCreateCardBody(
     return { ok: false, error: "Últimos 4 dígitos obligatorios" }
   }
 
-  const body: CreateCardBody = {
-    institutionId,
-    name,
-    type: input.type,
-    lastFour,
-  }
-  const fields = applyCardFields(body, input, options?.isUpdate === true)
+  const fields = cardOptionFields(input, options?.isUpdate === true)
   if (!fields.ok) {
     return fields
   }
-
-  return { ok: true, body }
+  return {
+    ok: true,
+    body: {
+      institutionId,
+      name,
+      type: input.type,
+      lastFour,
+      ...fields.body,
+    },
+  }
 }
 
 export function buildCardBalanceBody(

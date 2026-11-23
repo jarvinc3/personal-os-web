@@ -19,3 +19,13 @@ export function optionalId(value: string | undefined): string | undefined {
 export function digitsOnly(value: string | undefined): string {
   return (value ?? "").replace(/\D/g, "")
 }
+
+export function optionalUpdateField<T>(
+  value: T | undefined,
+  isUpdate: boolean
+): T | null | undefined {
+  if (value !== undefined) {
+    return value
+  }
+  return isUpdate ? null : undefined
+}
