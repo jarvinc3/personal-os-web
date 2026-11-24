@@ -1,6 +1,9 @@
 "use client"
 
-import { SegmentedControl } from "@/src/shared/components/forms/segmented-control"
+import {
+  ToggleGroup,
+  ToggleGroupItem,
+} from "@/src/shared/components/ui/toggle-group"
 import { format } from "date-fns"
 import {
   ArrowDownCircleIcon,
@@ -252,38 +255,90 @@ export function LoanWizardDetailsStep({
           control={control}
           name="freq"
           render={({ field }) => (
-            <SegmentedControl
-              label="Frecuencia"
-              value={field.value}
-              onChange={(value) =>
-                field.onChange(value as FinanceInstallmentFreq)
-              }
-              options={FREQ_OPTIONS}
-            />
+            <Field className="gap-1">
+              <FieldLabel>Frecuencia</FieldLabel>
+              <ToggleGroup
+                value={[field.value]}
+                onValueChange={(next) => {
+                  if (next.length > 0) {
+                    field.onChange(next[0])
+                  }
+                }}
+                variant="outline"
+                size="sm"
+                aria-label="Frecuencia"
+              >
+                {FREQ_OPTIONS.map((option) => (
+                  <ToggleGroupItem
+                    key={option.value}
+                    value={option.value}
+                    className="rounded-full"
+                  >
+                    {option.label}
+                  </ToggleGroupItem>
+                ))}
+              </ToggleGroup>
+            </Field>
           )}
         />
         <Controller
           control={control}
           name="periods"
           render={({ field }) => (
-            <SegmentedControl
-              label="Plazo"
-              value={field.value}
-              onChange={field.onChange}
-              options={TERM_OPTIONS}
-            />
+            <Field className="gap-1">
+              <FieldLabel>Plazo</FieldLabel>
+              <ToggleGroup
+                value={[field.value]}
+                onValueChange={(next) => {
+                  if (next.length > 0) {
+                    field.onChange(next[0])
+                  }
+                }}
+                variant="outline"
+                size="sm"
+                aria-label="Plazo"
+              >
+                {TERM_OPTIONS.map((option) => (
+                  <ToggleGroupItem
+                    key={option.value}
+                    value={option.value}
+                    className="rounded-full"
+                  >
+                    {option.label}
+                  </ToggleGroupItem>
+                ))}
+              </ToggleGroup>
+            </Field>
           )}
         />
         <Controller
           control={control}
           name="known"
           render={({ field }) => (
-            <SegmentedControl
-              label="Conoces"
-              value={field.value}
-              onChange={field.onChange}
-              options={KNOWN_OPTIONS}
-            />
+            <Field className="gap-1">
+              <FieldLabel>Conoces</FieldLabel>
+              <ToggleGroup
+                value={[field.value]}
+                onValueChange={(next) => {
+                  if (next.length > 0) {
+                    field.onChange(next[0])
+                  }
+                }}
+                variant="outline"
+                size="sm"
+                aria-label="Conoces"
+              >
+                {KNOWN_OPTIONS.map((option) => (
+                  <ToggleGroupItem
+                    key={option.value}
+                    value={option.value}
+                    className="rounded-full"
+                  >
+                    {option.label}
+                  </ToggleGroupItem>
+                ))}
+              </ToggleGroup>
+            </Field>
           )}
         />
         {known === "RATE" ? (
@@ -412,14 +467,30 @@ export function LoanWizardDetailsStep({
           control={control}
           name="rateType"
           render={({ field }) => (
-            <SegmentedControl
-              label="Tipo de tasa"
-              value={field.value}
-              onChange={(value) =>
-                field.onChange(value as "FIXED" | "VARIABLE")
-              }
-              options={RATE_TYPE_OPTIONS}
-            />
+            <Field className="gap-1">
+              <FieldLabel>Tipo de tasa</FieldLabel>
+              <ToggleGroup
+                value={[field.value]}
+                onValueChange={(next) => {
+                  if (next.length > 0) {
+                    field.onChange(next[0])
+                  }
+                }}
+                variant="outline"
+                size="sm"
+                aria-label="Tipo de tasa"
+              >
+                {RATE_TYPE_OPTIONS.map((option) => (
+                  <ToggleGroupItem
+                    key={option.value}
+                    value={option.value}
+                    className="rounded-full"
+                  >
+                    {option.label}
+                  </ToggleGroupItem>
+                ))}
+              </ToggleGroup>
+            </Field>
           )}
         />
         <Controller

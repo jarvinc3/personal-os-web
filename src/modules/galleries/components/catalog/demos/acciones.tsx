@@ -10,14 +10,13 @@ import {
   PlusIcon,
   SaveIcon,
   Trash2Icon,
-  type LucideIcon,
 } from "lucide-react"
 
 import { simulatedTap } from "@/src/modules/galleries/components/simulated-tap"
-import { SegmentedControl } from "@/src/shared/components/forms/segmented-control"
 import { PendingSurface } from "@/src/shared/components/shell/navigation-pending"
 import { Button, buttonVariants } from "@/src/shared/components/ui/button"
 import { ButtonGroup } from "@/src/shared/components/ui/button-group"
+import { Field, FieldLabel } from "@/src/shared/components/ui/field"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { Toggle } from "@/src/shared/components/ui/toggle"
 import {
@@ -32,38 +31,61 @@ import type {
   GalleryVariantDemoMap,
 } from "@/src/modules/galleries/components/catalog/types"
 
-type Flow = "expense" | "income"
-
-type FlowSegment = { value: Flow; label: string; icon: LucideIcon }
-
-const FLOW_SEGMENTS: FlowSegment[] = [
+const PILL_OPTIONS = [
   { value: "expense", label: "Gasto", icon: ArrowDownLeftIcon },
   { value: "income", label: "Ingreso", icon: ArrowUpRightIcon },
-]
+] as const
 
-function SegmentedControlDemo() {
-  const [flow, setFlow] = useState<Flow>("expense")
+function SegmentedPillsDemo() {
+  const [flow, setFlow] = useState<"expense" | "income">("expense")
 
   return (
     <div className="flex w-full flex-col gap-3">
-      <SegmentedControl<Flow>
-        value={flow}
-        onChange={setFlow}
-        options={FLOW_SEGMENTS}
-      />
-      <SegmentedControl<Flow>
-        value="income"
-        onChange={() => {}}
+      <Field className="gap-1">
+        <FieldLabel>Tipo</FieldLabel>
+        <ToggleGroup
+          value={[flow]}
+          onValueChange={(next) => {
+            if (next.length > 0) {
+              setFlow(next[0])
+            }
+          }}
+          variant="outline"
+          size="sm"
+          aria-label="Tipo"
+        >
+          {PILL_OPTIONS.map((option) => {
+            const OptionIcon = option.icon
+            return (
+              <ToggleGroupItem
+                key={option.value}
+                value={option.value}
+                className="rounded-full"
+              >
+                <OptionIcon />
+                {option.label}
+              </ToggleGroupItem>
+            )
+          })}
+        </ToggleGroup>
+      </Field>
+      <ToggleGroup
+        defaultValue={["income"]}
+        variant="outline"
         size="lg"
-        fullWidth
-        options={FLOW_SEGMENTS}
-      />
-      <SegmentedControl<Flow>
-        value="expense"
-        onChange={() => {}}
-        disabled
-        options={FLOW_SEGMENTS}
-      />
+        aria-label="Tipo, píldoras anchas"
+        className="w-full"
+      >
+        {PILL_OPTIONS.map((option) => (
+          <ToggleGroupItem
+            key={option.value}
+            value={option.value}
+            className="h-11 flex-1 rounded-full text-base"
+          >
+            {option.label}
+          </ToggleGroupItem>
+        ))}
+      </ToggleGroup>
     </div>
   )
 }
@@ -399,36 +421,41 @@ export const accionesDemos: GalleryDemoMap = {
         </div>
       ),
     },
-  ],
-  "segmented-control": [
     {
-      label: "sm, lg y deshabilitado",
+      label: "Píldoras de una sola elección",
       code: `
 const [flow, setFlow] = useState("expense")
 
-const FLOW_SEGMENTS = [
-  { value: "expense", label: "Gasto", icon: ArrowDownLeftIcon },
-  { value: "income", label: "Ingreso", icon: ArrowUpRightIcon },
-]
-
-<div className="flex w-full flex-col gap-3">
-  <SegmentedControl value={flow} onChange={setFlow} options={FLOW_SEGMENTS} />
-  <SegmentedControl
-    value="income"
-    onChange={() => {}}
-    size="lg"
-    fullWidth
-    options={FLOW_SEGMENTS}
-  />
-  <SegmentedControl
-    value="expense"
-    onChange={() => {}}
-    disabled
-    options={FLOW_SEGMENTS}
-  />
-</div>
+<Field className="gap-1">
+  <FieldLabel>Tipo</FieldLabel>
+  <ToggleGroup
+    value={[flow]}
+    onValueChange={(next) => {
+      if (next.length > 0) {
+        setFlow(next[0])
+      }
+    }}
+    variant="outline"
+    size="sm"
+    aria-label="Tipo"
+  >
+    {PILL_OPTIONS.map((option) => {
+      const OptionIcon = option.icon
+      return (
+        <ToggleGroupItem
+          key={option.value}
+          value={option.value}
+          className="rounded-full"
+        >
+          <OptionIcon />
+          {option.label}
+        </ToggleGroupItem>
+      )
+    })}
+  </ToggleGroup>
+</Field>
 `,
-      node: <SegmentedControlDemo />,
+      node: <SegmentedPillsDemo />,
     },
   ],
   "pending-surface": [
@@ -840,103 +867,6 @@ export const accionesVariantDemos: GalleryVariantDemoMap = {
             <ToggleGroupItem value="one">Uno</ToggleGroupItem>
             <ToggleGroupItem value="two">Dos</ToggleGroupItem>
           </ToggleGroup>
-        ),
-      },
-    ],
-  },
-  "segmented-control": {
-    size: [
-      {
-        label: "sm",
-        node: (
-          <SegmentedControl<Flow>
-            value="expense"
-            onChange={() => {}}
-            size="sm"
-            options={FLOW_SEGMENTS}
-          />
-        ),
-      },
-      {
-        label: "lg",
-        node: (
-          <SegmentedControl<Flow>
-            value="expense"
-            onChange={() => {}}
-            size="lg"
-            options={FLOW_SEGMENTS}
-          />
-        ),
-      },
-    ],
-    orientation: [
-      {
-        label: "horizontal",
-        node: (
-          <SegmentedControl<Flow>
-            value="expense"
-            onChange={() => {}}
-            options={FLOW_SEGMENTS}
-          />
-        ),
-      },
-      {
-        label: "vertical",
-        node: (
-          <SegmentedControl<Flow>
-            value="expense"
-            onChange={() => {}}
-            orientation="vertical"
-            options={FLOW_SEGMENTS}
-          />
-        ),
-      },
-    ],
-    states: [
-      {
-        label: "normal",
-        node: (
-          <SegmentedControl<string>
-            value=""
-            onChange={() => {}}
-            ariaLabel="Tipo de movimiento"
-            options={FLOW_SEGMENTS}
-          />
-        ),
-      },
-      {
-        label: "selected",
-        node: (
-          <SegmentedControl<Flow>
-            value="income"
-            onChange={() => {}}
-            ariaLabel="Tipo de movimiento"
-            options={FLOW_SEGMENTS}
-          />
-        ),
-      },
-      {
-        label: "disabled",
-        node: (
-          <SegmentedControl<Flow>
-            value="expense"
-            onChange={() => {}}
-            disabled
-            ariaLabel="Tipo de movimiento"
-            options={FLOW_SEGMENTS}
-          />
-        ),
-      },
-      {
-        label: "invalid",
-        node: (
-          <SegmentedControl<string>
-            value=""
-            onChange={() => {}}
-            ariaLabel="Tipo de movimiento"
-            error="Elige gasto o ingreso"
-            options={FLOW_SEGMENTS}
-          />
         ),
       },
     ],

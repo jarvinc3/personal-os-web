@@ -40,9 +40,9 @@ import {
 } from "@/src/shared/components/ui/alert-dialog"
 import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import {
-  SegmentedControl,
-  type SegmentOption,
-} from "@/src/shared/components/forms/segmented-control"
+  ToggleGroup,
+  ToggleGroupItem,
+} from "@/src/shared/components/ui/toggle-group"
 import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { Button } from "@/src/shared/components/ui/button"
@@ -108,7 +108,7 @@ function GmailConnectSheetForm({
     { choice, senderFilter: sender },
     { choice: initialChoice, senderFilter: initialSender }
   )
-  const periodOptions: SegmentOption<PeriodValue>[] = [
+  const periodOptions = [
     ...(reconnect
       ? [
           {
@@ -208,15 +208,34 @@ function GmailConnectSheetForm({
         }}
       >
         <SummarySection title="Período de importación" icon={CalendarDays}>
-          <SegmentedControl
-            ariaLabel="Período de importación"
-            value={choice}
-            onChange={setChoice}
-            options={periodOptions}
+          <ToggleGroup
+            value={[choice]}
+            onValueChange={(next) => {
+              if (next.length > 0) {
+                setChoice(next[0])
+              }
+            }}
+            variant="outline"
+            size="sm"
             orientation="vertical"
-            fullWidth
+            aria-label="Período de importación"
             disabled={pending}
-          />
+            className="w-full flex-col items-stretch"
+          >
+            {periodOptions.map((option) => {
+              const OptionIcon = option.icon
+              return (
+                <ToggleGroupItem
+                  key={option.value}
+                  value={option.value}
+                  className="h-11 w-full flex-none justify-start rounded-full text-base"
+                >
+                  <OptionIcon />
+                  {option.label}
+                </ToggleGroupItem>
+              )
+            })}
+          </ToggleGroup>
           {reconnect && currentStart ? (
             <p className="px-1 text-sm text-muted-foreground">
               Hoy importas desde el {currentStart}. Un período nuevo mueve el

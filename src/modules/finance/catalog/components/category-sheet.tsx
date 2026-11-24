@@ -3,7 +3,10 @@
 import { CategoryCard } from "@/src/modules/finance/shared/components/category-card"
 import { CategoryEmojiField } from "@/src/modules/finance/catalog/components/category-emoji-field"
 import { suggestCategoryEmojis } from "@/src/modules/finance/catalog/components/category-emoji-catalog"
-import { SegmentedControl } from "@/src/shared/components/forms/segmented-control"
+import {
+  ToggleGroup,
+  ToggleGroupItem,
+} from "@/src/shared/components/ui/toggle-group"
 import { CATALOG_NONE } from "@/src/modules/finance/shared/constants/catalog"
 import {
   useCreateCategory,
@@ -272,14 +275,28 @@ export function CategorySheet({
           control={control}
           name="type"
           render={({ field }) => (
-            <SegmentedControl
-              value={field.value}
-              onChange={field.onChange}
-              options={TYPE_OPTIONS}
-              disabled={typeLocked}
+            <ToggleGroup
+              value={[field.value]}
+              onValueChange={(next) => {
+                if (next.length > 0) {
+                  field.onChange(next[0])
+                }
+              }}
+              variant="outline"
               size="lg"
-              fullWidth
-            />
+              disabled={typeLocked}
+              className="w-full"
+            >
+              {TYPE_OPTIONS.map((option) => (
+                <ToggleGroupItem
+                  key={option.value}
+                  value={option.value}
+                  className="h-11 flex-1 rounded-full text-base"
+                >
+                  {option.label}
+                </ToggleGroupItem>
+              ))}
+            </ToggleGroup>
           )}
         />
         {isEdit && !isSystem ? (

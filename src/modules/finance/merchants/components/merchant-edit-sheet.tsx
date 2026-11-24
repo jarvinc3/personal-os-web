@@ -10,7 +10,10 @@ import {
 import { BrandPicker } from "@/src/modules/finance/shared/components/brand-picker"
 import { CategoryTrigger } from "@/src/modules/finance/shared/components/pickers/category-trigger"
 import { CategoryPickerSheet } from "@/src/modules/finance/shared/components/pickers/category-picker-sheet"
-import { SegmentedControl } from "@/src/shared/components/forms/segmented-control"
+import {
+  ToggleGroup,
+  ToggleGroupItem,
+} from "@/src/shared/components/ui/toggle-group"
 import { CATALOG_NONE } from "@/src/modules/finance/shared/constants/catalog"
 import { useCategories } from "@/src/modules/finance/shared/hooks/use-categories"
 import { useDiscardChanges } from "@/src/modules/finance/shared/hooks/use-discard-changes"
@@ -458,14 +461,30 @@ export function MerchantEditSheet({
         </SummarySection>
 
         <SummarySection title="Categoría" icon={StoreIcon}>
-          <SegmentedControl
-            value={categoryType}
-            onChange={(next) => {
-              setPickedType(next)
+          <ToggleGroup
+            value={[categoryType]}
+            onValueChange={(next) => {
+              if (next.length === 0) {
+                return
+              }
+              const nextType = next[0]
+              setPickedType(nextType)
               setValue("categoryId", CATALOG_NONE, { shouldDirty: true })
             }}
-            options={CATEGORY_TYPE_OPTIONS}
-          />
+            variant="outline"
+            size="sm"
+            aria-label="Tipo de categoría"
+          >
+            {CATEGORY_TYPE_OPTIONS.map((option) => (
+              <ToggleGroupItem
+                key={option.value}
+                value={option.value}
+                className="rounded-full"
+              >
+                {option.label}
+              </ToggleGroupItem>
+            ))}
+          </ToggleGroup>
 
           <Field className="gap-1">
             <FieldLabel className="flex items-center gap-2 text-sm text-muted-foreground">

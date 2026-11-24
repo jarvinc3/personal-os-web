@@ -1,6 +1,9 @@
 "use client"
 
-import { SegmentedControl } from "@/src/shared/components/forms/segmented-control"
+import {
+  ToggleGroup,
+  ToggleGroupItem,
+} from "@/src/shared/components/ui/toggle-group"
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
   CalendarIcon,
@@ -308,14 +311,30 @@ export function LoanEditForm({
             control={control}
             name="installmentFreq"
             render={({ field }) => (
-              <SegmentedControl
-                label="Frecuencia"
-                value={field.value}
-                onChange={(value) =>
-                  field.onChange(value as FinanceInstallmentFreq)
-                }
-                options={FREQ_OPTIONS}
-              />
+              <Field className="gap-1">
+                <FieldLabel>Frecuencia</FieldLabel>
+                <ToggleGroup
+                  value={[field.value]}
+                  onValueChange={(next) => {
+                    if (next.length > 0) {
+                      field.onChange(next[0])
+                    }
+                  }}
+                  variant="outline"
+                  size="sm"
+                  aria-label="Frecuencia"
+                >
+                  {FREQ_OPTIONS.map((option) => (
+                    <ToggleGroupItem
+                      key={option.value}
+                      value={option.value}
+                      className="rounded-full"
+                    >
+                      {option.label}
+                    </ToggleGroupItem>
+                  ))}
+                </ToggleGroup>
+              </Field>
             )}
           />
           <Controller

@@ -52,7 +52,10 @@ import {
   type ReviewQueueTab,
 } from "@/src/modules/intelligence/review-queue-filters"
 import { useFormatLocale } from "@/src/modules/settings/hooks/use-format-locale"
-import { SegmentedControl } from "@/src/shared/components/forms/segmented-control"
+import {
+  ToggleGroup,
+  ToggleGroupItem,
+} from "@/src/shared/components/ui/toggle-group"
 import { SummaryItem } from "@/src/shared/components/data-display/summary"
 import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
 import { InfiniteListErrorFooter } from "@/src/shared/components/feedback/infinite-list-error-footer"
@@ -449,13 +452,32 @@ export function AiEvidenceSection({
 
   return (
     <div className="flex flex-col gap-3">
-      <SegmentedControl
-        ariaLabel="Correos pendientes o revisados"
-        value={filters.tab}
-        onChange={(tab) => changeFilters({ tab })}
-        options={TAB_OPTIONS}
-        fullWidth
-      />
+      <ToggleGroup
+        value={[filters.tab]}
+        onValueChange={(next) => {
+          if (next.length > 0) {
+            changeFilters({ tab: next[0] })
+          }
+        }}
+        variant="outline"
+        size="sm"
+        aria-label="Correos pendientes o revisados"
+        className="w-full"
+      >
+        {TAB_OPTIONS.map((option) => {
+          const OptionIcon = option.icon
+          return (
+            <ToggleGroupItem
+              key={option.value}
+              value={option.value}
+              className="h-11 flex-1 rounded-full text-base"
+            >
+              <OptionIcon />
+              {option.label}
+            </ToggleGroupItem>
+          )
+        })}
+      </ToggleGroup>
 
       <div className="flex flex-wrap items-center gap-2">
         <Button

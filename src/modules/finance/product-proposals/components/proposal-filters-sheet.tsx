@@ -1,6 +1,10 @@
 "use client"
 
-import { SegmentedControl } from "@/src/shared/components/forms/segmented-control"
+import { Field, FieldLabel } from "@/src/shared/components/ui/field"
+import {
+  ToggleGroup,
+  ToggleGroupItem,
+} from "@/src/shared/components/ui/toggle-group"
 import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import { PROPOSAL_STATUS_LABEL } from "@/src/modules/finance/product-proposals/lib/proposal-status"
 import {
@@ -50,16 +54,32 @@ export function ProposalFiltersSheet({
       description="Elige el estado que quieres ver"
       closeLabel="Cerrar"
     >
-      <SegmentedControl
-        label="Estado"
-        ariaLabel="Estado de las propuestas"
-        orientation="vertical"
-        size="lg"
-        fullWidth
-        value={status}
-        onChange={onChange}
-        options={STATUS_OPTIONS}
-      />
+      <Field className="gap-1">
+        <FieldLabel>Estado</FieldLabel>
+        <ToggleGroup
+          value={[status]}
+          onValueChange={(next) => {
+            if (next.length > 0) {
+              onChange(next[0])
+            }
+          }}
+          variant="outline"
+          size="lg"
+          orientation="vertical"
+          aria-label="Estado"
+          className="w-full flex-col items-stretch"
+        >
+          {STATUS_OPTIONS.map((option) => (
+            <ToggleGroupItem
+              key={option.value}
+              value={option.value}
+              className="h-11 w-full flex-none justify-start rounded-full text-base"
+            >
+              {option.label}
+            </ToggleGroupItem>
+          ))}
+        </ToggleGroup>
+      </Field>
     </BottomSheet>
   )
 }

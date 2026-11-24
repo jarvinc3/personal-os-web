@@ -1,7 +1,10 @@
 "use client"
 
 import { CategoryTrigger } from "@/src/modules/finance/shared/components/pickers/category-trigger"
-import { SegmentedControl } from "@/src/shared/components/forms/segmented-control"
+import {
+  ToggleGroup,
+  ToggleGroupItem,
+} from "@/src/shared/components/ui/toggle-group"
 import { FinanceFormScreen } from "@/src/modules/finance/shared/components/forms/form-screen"
 import type { FinanceMoneyFieldHandle } from "@/src/modules/finance/shared/components/forms/money-field"
 import { CATALOG_NONE } from "@/src/modules/finance/shared/constants/catalog"
@@ -554,18 +557,36 @@ export function TransactionForm({
           control={control}
           name="type"
           render={({ field }) => (
-            <SegmentedControl
-              value={field.value}
-              onChange={(next) => {
-                field.onChange(next)
-                onTypeChange?.(next)
-                clearIncompatibleCategory(next)
+            <ToggleGroup
+              value={[field.value]}
+              onValueChange={(next) => {
+                if (next.length === 0) {
+                  return
+                }
+                const nextType = next[0]
+                field.onChange(nextType)
+                onTypeChange?.(nextType)
+                clearIncompatibleCategory(nextType)
               }}
-              options={TYPE_OPTIONS}
+              variant="outline"
               size="lg"
-              fullWidth
               disabled={locked}
-            />
+              className="w-full"
+            >
+              {TYPE_OPTIONS.map((option) => {
+                const OptionIcon = option.icon
+                return (
+                  <ToggleGroupItem
+                    key={option.value}
+                    value={option.value}
+                    className="h-11 flex-1 rounded-full text-base"
+                  >
+                    <OptionIcon />
+                    {option.label}
+                  </ToggleGroupItem>
+                )
+              })}
+            </ToggleGroup>
           )}
         />
 

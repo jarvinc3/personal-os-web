@@ -6,7 +6,10 @@ import {
   InstitutionTrigger,
 } from "@/src/modules/finance/shared/components/pickers/institution-picker"
 import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
-import { SegmentedControl } from "@/src/shared/components/forms/segmented-control"
+import {
+  ToggleGroup,
+  ToggleGroupItem,
+} from "@/src/shared/components/ui/toggle-group"
 import { AccountProductRow } from "@/src/modules/finance/shared/components/product-rows"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
@@ -426,12 +429,30 @@ export function AccountSheet({
               control={control}
               name="type"
               render={({ field }) => (
-                <SegmentedControl
-                  label="Tipo"
-                  value={field.value}
-                  onChange={changeType}
-                  options={typeOptions}
-                />
+                <Field className="gap-1">
+                  <FieldLabel>Tipo</FieldLabel>
+                  <ToggleGroup
+                    value={[field.value]}
+                    onValueChange={(next) => {
+                      if (next.length > 0) {
+                        changeType(next[0])
+                      }
+                    }}
+                    variant="outline"
+                    size="sm"
+                    aria-label="Tipo"
+                  >
+                    {typeOptions.map((option) => (
+                      <ToggleGroupItem
+                        key={option.value}
+                        value={option.value}
+                        className="rounded-full"
+                      >
+                        {option.label}
+                      </ToggleGroupItem>
+                    ))}
+                  </ToggleGroup>
+                </Field>
               )}
             />
           ) : null}

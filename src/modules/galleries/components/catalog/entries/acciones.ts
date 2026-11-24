@@ -136,7 +136,7 @@ import { SaveIcon } from "lucide-react"
     description:
       "Grupo de toggles con selección exclusiva o múltiple; el activo lleva el color primario.",
     whenToUse:
-      "Un filtro de dos a cinco opciones dentro de un formulario o una vista.",
+      "Un filtro de dos a cinco opciones dentro de un formulario o una vista; con `Field` y `FieldLabel` cubre también el antiguo `SegmentedControl` (ítems `rounded-full`).",
     whenNotToUse: "Navegación con paneles: Tabs. Un catálogo largo: su hoja.",
     importPath: "@/src/shared/components/ui/toggle-group",
     snippet: `import {
@@ -171,51 +171,6 @@ import { SaveIcon } from "lucide-react"
         name: "multiple",
         type: "boolean",
         description: "Permite más de un ítem pulsado.",
-      },
-    ],
-  },
-  {
-    id: "segmented-control",
-    name: "SegmentedControl",
-    category: "acciones",
-    kind: "domain",
-    description:
-      "Píldoras de elección exclusiva con icono y estado primario, sobre ToggleGroup.",
-    whenToUse:
-      "Un filtro corto dentro de un formulario o una pantalla, con dos a cinco opciones.",
-    whenNotToUse:
-      "Navegación con paneles: Tabs. La Ola 1 lo reemplaza por ToggleGroup directo.",
-    importPath: "@/src/shared/components/forms/segmented-control",
-    snippet: `import { SegmentedControl } from "@/src/shared/components/forms/segmented-control"
-
-<SegmentedControl value={value} onChange={setValue} options={options} />`,
-    subcomponents: [],
-    anatomy: [{ name: "SegmentedControl" }],
-    variants: [
-      { name: "size", values: "sm, lg" },
-      { name: "orientation", values: "horizontal, vertical" },
-      { name: "states", values: "normal, selected, disabled, invalid" },
-    ],
-    props: [
-      {
-        name: "options",
-        type: "{ value, label, icon? }[]",
-        description: "Segmentos disponibles.",
-      },
-      {
-        name: "value / onChange",
-        type: "T / (value: T) => void",
-        description: "Opción elegida.",
-      },
-      {
-        name: "size",
-        type: '"sm" | "lg"',
-        description: "Altura de las píldoras.",
-      },
-      {
-        name: "fullWidth",
-        type: "boolean",
-        description: "Reparte los segmentos en todo el ancho.",
       },
     ],
   },

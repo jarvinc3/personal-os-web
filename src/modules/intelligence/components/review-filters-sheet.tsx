@@ -23,7 +23,11 @@ import {
 } from "@/src/modules/intelligence/review-labels"
 import { useFormatLocale } from "@/src/modules/settings/hooks/use-format-locale"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
-import { SegmentedControl } from "@/src/shared/components/forms/segmented-control"
+import { Field, FieldLabel } from "@/src/shared/components/ui/field"
+import {
+  ToggleGroup,
+  ToggleGroupItem,
+} from "@/src/shared/components/ui/toggle-group"
 import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import { SelectField } from "@/src/shared/components/forms/select-field"
 import { SwitchFieldRow } from "@/src/shared/components/forms/switch-field-row"
@@ -195,14 +199,36 @@ function ReviewFiltersSheetForm({
             }
             options={PARTITION_OPTIONS}
           />
-          <SegmentedControl
-            label="Orden"
-            value={draft.order}
-            onChange={(order) => patchDraft({ order })}
-            options={ORDER_OPTIONS}
-            orientation="vertical"
-            fullWidth
-          />
+          <Field className="gap-1">
+            <FieldLabel>Orden</FieldLabel>
+            <ToggleGroup
+              value={[draft.order]}
+              onValueChange={(next) => {
+                if (next.length > 0) {
+                  patchDraft({ order: next[0] })
+                }
+              }}
+              variant="outline"
+              size="sm"
+              orientation="vertical"
+              aria-label="Orden"
+              className="w-full flex-col items-stretch"
+            >
+              {ORDER_OPTIONS.map((option) => {
+                const OptionIcon = option.icon
+                return (
+                  <ToggleGroupItem
+                    key={option.value}
+                    value={option.value}
+                    className="h-11 w-full flex-none justify-start rounded-full text-base"
+                  >
+                    <OptionIcon />
+                    {option.label}
+                  </ToggleGroupItem>
+                )
+              })}
+            </ToggleGroup>
+          </Field>
         </SummarySection>
 
         <SummarySection title="Correo" icon={MailIcon}>

@@ -1,6 +1,9 @@
 "use client"
 
-import { SegmentedControl } from "@/src/shared/components/forms/segmented-control"
+import {
+  ToggleGroup,
+  ToggleGroupItem,
+} from "@/src/shared/components/ui/toggle-group"
 import { FinanceDateField } from "@/src/modules/finance/shared/components/forms/date-field"
 import { FinanceHelpText } from "@/src/modules/finance/shared/components/forms/form-blocks"
 import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
@@ -208,15 +211,30 @@ export function CardPaymentSheet({
       >
         <SummarySection title="Pago" icon={CreditCardIcon}>
           {currencies.length > 1 ? (
-            <SegmentedControl
-              label="Moneda"
-              value={currency}
-              onChange={setCurrency}
-              options={currencies.map((code) => ({
-                value: code,
-                label: code,
-              }))}
-            />
+            <Field className="gap-1">
+              <FieldLabel>Moneda</FieldLabel>
+              <ToggleGroup
+                value={[currency]}
+                onValueChange={(next) => {
+                  if (next.length > 0) {
+                    setCurrency(next[0])
+                  }
+                }}
+                variant="outline"
+                size="sm"
+                aria-label="Moneda"
+              >
+                {currencies.map((code) => (
+                  <ToggleGroupItem
+                    key={code}
+                    value={code}
+                    className="rounded-full"
+                  >
+                    {code}
+                  </ToggleGroupItem>
+                ))}
+              </ToggleGroup>
+            </Field>
           ) : null}
           <FinanceMoneyField
             calculatorKey="card-payment-amount"

@@ -12,7 +12,11 @@ import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { useUserTimeZone } from "@/src/modules/settings/hooks/use-user-time-zone"
 import { FinanceDateField } from "@/src/modules/finance/shared/components/forms/date-field"
-import { SegmentedControl } from "@/src/shared/components/forms/segmented-control"
+import { Field, FieldLabel } from "@/src/shared/components/ui/field"
+import {
+  ToggleGroup,
+  ToggleGroupItem,
+} from "@/src/shared/components/ui/toggle-group"
 import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
 import { CategoryPickerSheet } from "@/src/modules/finance/shared/components/pickers/category-picker-sheet"
 import { CategoryTrigger } from "@/src/modules/finance/shared/components/pickers/category-trigger"
@@ -152,13 +156,31 @@ export function QuickEntryPreviewSheet({
         }
       >
         <div className="flex flex-col gap-4">
-          <SegmentedControl
-            label="Tipo"
-            value={type}
-            onChange={setType}
-            options={TYPE_OPTIONS}
-            fullWidth
-          />
+          <Field className="gap-1">
+            <FieldLabel>Tipo</FieldLabel>
+            <ToggleGroup
+              value={[type]}
+              onValueChange={(next) => {
+                if (next.length > 0) {
+                  setType(next[0])
+                }
+              }}
+              variant="outline"
+              size="sm"
+              aria-label="Tipo"
+              className="w-full"
+            >
+              {TYPE_OPTIONS.map((option) => (
+                <ToggleGroupItem
+                  key={option.value}
+                  value={option.value}
+                  className="h-11 flex-1 rounded-full text-base"
+                >
+                  {option.label}
+                </ToggleGroupItem>
+              ))}
+            </ToggleGroup>
+          </Field>
 
           <FinanceMoneyField
             calculatorKey="quick-entry-amount"

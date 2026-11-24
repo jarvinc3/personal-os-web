@@ -1,6 +1,9 @@
 "use client"
 
-import { SegmentedControl } from "@/src/shared/components/forms/segmented-control"
+import {
+  ToggleGroup,
+  ToggleGroupItem,
+} from "@/src/shared/components/ui/toggle-group"
 import {
   FinanceDateField,
   formatFinanceDateLabel,
@@ -32,8 +35,6 @@ import { previousMonthsBounds } from "@/src/modules/finance/shared/lib/month-win
 import { visibleTransactionTotals } from "@/src/modules/finance/shared/lib/transactions-query"
 import type {
   FinanceBudget,
-  FinanceBudgetPeriod,
-  FinanceBudgetRollover,
   FinanceCategory,
 } from "@/src/modules/finance/shared/types/entities"
 import {
@@ -350,13 +351,36 @@ export function BudgetSheet({
             control={control}
             name="alertThresholdPct"
             render={({ field }) => (
-              <SegmentedControl
-                label="Avisarme al"
-                value={field.value}
-                onChange={field.onChange}
-                options={THRESHOLD_OPTIONS}
-                error={errors.alertThresholdPct?.message}
-              />
+              <Field
+                data-invalid={errors.alertThresholdPct ? true : undefined}
+                className="gap-1"
+              >
+                <FieldLabel>Avisarme al</FieldLabel>
+                <ToggleGroup
+                  value={[field.value]}
+                  onValueChange={(next) => {
+                    if (next.length > 0) {
+                      field.onChange(next[0])
+                    }
+                  }}
+                  variant="outline"
+                  size="sm"
+                  aria-label="Avisarme al"
+                >
+                  {THRESHOLD_OPTIONS.map((option) => (
+                    <ToggleGroupItem
+                      key={option.value}
+                      value={option.value}
+                      className="rounded-full"
+                    >
+                      {option.label}
+                    </ToggleGroupItem>
+                  ))}
+                </ToggleGroup>
+                {errors.alertThresholdPct?.message ? (
+                  <FieldError>{errors.alertThresholdPct.message}</FieldError>
+                ) : null}
+              </Field>
             )}
           />
         </SummarySection>
@@ -366,14 +390,30 @@ export function BudgetSheet({
             control={control}
             name="periodType"
             render={({ field }) => (
-              <SegmentedControl
-                label="Tipo"
-                value={field.value}
-                onChange={(value) =>
-                  field.onChange(value as FinanceBudgetPeriod)
-                }
-                options={PERIOD_OPTIONS}
-              />
+              <Field className="gap-1">
+                <FieldLabel>Tipo</FieldLabel>
+                <ToggleGroup
+                  value={[field.value]}
+                  onValueChange={(next) => {
+                    if (next.length > 0) {
+                      field.onChange(next[0])
+                    }
+                  }}
+                  variant="outline"
+                  size="sm"
+                  aria-label="Tipo"
+                >
+                  {PERIOD_OPTIONS.map((option) => (
+                    <ToggleGroupItem
+                      key={option.value}
+                      value={option.value}
+                      className="rounded-full"
+                    >
+                      {option.label}
+                    </ToggleGroupItem>
+                  ))}
+                </ToggleGroup>
+              </Field>
             )}
           />
           {isCustom ? (
@@ -446,14 +486,30 @@ export function BudgetSheet({
             control={control}
             name="rollover"
             render={({ field }) => (
-              <SegmentedControl
-                label="Arrastre"
-                value={field.value}
-                onChange={(value) =>
-                  field.onChange(value as FinanceBudgetRollover)
-                }
-                options={ROLLOVER_OPTIONS}
-              />
+              <Field className="gap-1">
+                <FieldLabel>Arrastre</FieldLabel>
+                <ToggleGroup
+                  value={[field.value]}
+                  onValueChange={(next) => {
+                    if (next.length > 0) {
+                      field.onChange(next[0])
+                    }
+                  }}
+                  variant="outline"
+                  size="sm"
+                  aria-label="Arrastre"
+                >
+                  {ROLLOVER_OPTIONS.map((option) => (
+                    <ToggleGroupItem
+                      key={option.value}
+                      value={option.value}
+                      className="rounded-full"
+                    >
+                      {option.label}
+                    </ToggleGroupItem>
+                  ))}
+                </ToggleGroup>
+              </Field>
             )}
           />
         </SummarySection>

@@ -1,6 +1,9 @@
 "use client"
 
-import { SegmentedControl } from "@/src/shared/components/forms/segmented-control"
+import {
+  ToggleGroup,
+  ToggleGroupItem,
+} from "@/src/shared/components/ui/toggle-group"
 import { useCategories } from "@/src/modules/finance/shared/hooks/use-categories"
 import { useRecurring } from "@/src/modules/finance/shared/hooks/use-recurring"
 import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
@@ -49,12 +52,27 @@ export function RecurringArchiveSheet({
       title="Bandeja de recurrentes"
       description="Cobros ya confirmados o descartados."
     >
-      <SegmentedControl
-        value={tab}
-        onChange={setTab}
-        options={ARCHIVE_TABS}
-        fullWidth
-      />
+      <ToggleGroup
+        value={[tab]}
+        onValueChange={(next) => {
+          if (next.length > 0) {
+            setTab(next[0])
+          }
+        }}
+        variant="outline"
+        size="sm"
+        className="w-full"
+      >
+        {ARCHIVE_TABS.map((option) => (
+          <ToggleGroupItem
+            key={option.value}
+            value={option.value}
+            className="h-11 flex-1 rounded-full text-base"
+          >
+            {option.label}
+          </ToggleGroupItem>
+        ))}
+      </ToggleGroup>
       {query.isPending && !query.data ? (
         <div className="flex justify-center py-6">
           <Spinner />

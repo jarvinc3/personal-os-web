@@ -1,6 +1,10 @@
 "use client"
 
-import { SegmentedControl } from "@/src/shared/components/forms/segmented-control"
+import { Field, FieldLabel } from "@/src/shared/components/ui/field"
+import {
+  ToggleGroup,
+  ToggleGroupItem,
+} from "@/src/shared/components/ui/toggle-group"
 import { CategoryPickerSheet } from "@/src/modules/finance/shared/components/pickers/category-picker-sheet"
 import { DestinationPickerSheet } from "@/src/modules/finance/shared/components/pickers/destination-picker-sheet"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
@@ -145,20 +149,56 @@ export function SubscriptionFiltersSheet({
           onChange={(value) => onChange({ ...filters, q: value })}
           placeholder="Buscar suscripción"
         />
-        <SegmentedControl
-          label="Estado"
-          value={filters.status}
-          onChange={(value) => onChange({ ...filters, status: value })}
-          options={STATUS_OPTIONS}
-          fullWidth
-        />
-        <SegmentedControl
-          label="Frecuencia"
-          value={filters.frequency}
-          onChange={(value) => onChange({ ...filters, frequency: value })}
-          options={FREQUENCY_OPTIONS}
-          fullWidth
-        />
+        <Field className="gap-1">
+          <FieldLabel>Estado</FieldLabel>
+          <ToggleGroup
+            value={[filters.status]}
+            onValueChange={(next) => {
+              if (next.length > 0) {
+                onChange({ ...filters, status: next[0] })
+              }
+            }}
+            variant="outline"
+            size="sm"
+            aria-label="Estado"
+            className="w-full"
+          >
+            {STATUS_OPTIONS.map((option) => (
+              <ToggleGroupItem
+                key={option.value}
+                value={option.value}
+                className="h-11 flex-1 rounded-full text-base"
+              >
+                {option.label}
+              </ToggleGroupItem>
+            ))}
+          </ToggleGroup>
+        </Field>
+        <Field className="gap-1">
+          <FieldLabel>Frecuencia</FieldLabel>
+          <ToggleGroup
+            value={[filters.frequency]}
+            onValueChange={(next) => {
+              if (next.length > 0) {
+                onChange({ ...filters, frequency: next[0] })
+              }
+            }}
+            variant="outline"
+            size="sm"
+            aria-label="Frecuencia"
+            className="w-full"
+          >
+            {FREQUENCY_OPTIONS.map((option) => (
+              <ToggleGroupItem
+                key={option.value}
+                value={option.value}
+                className="h-11 flex-1 rounded-full text-base"
+              >
+                {option.label}
+              </ToggleGroupItem>
+            ))}
+          </ToggleGroup>
+        </Field>
         <SettingsSection title="Filtros">
           <SettingsRow
             icon={CreditCardIcon}

@@ -1,6 +1,10 @@
 "use client"
 
-import { SegmentedControl } from "@/src/shared/components/forms/segmented-control"
+import { Field, FieldLabel } from "@/src/shared/components/ui/field"
+import {
+  ToggleGroup,
+  ToggleGroupItem,
+} from "@/src/shared/components/ui/toggle-group"
 import { FinanceDateField } from "@/src/modules/finance/shared/components/forms/date-field"
 import { FinanceHelpText } from "@/src/modules/finance/shared/components/forms/form-blocks"
 import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
@@ -186,14 +190,30 @@ export function ReceivableSheet({
               control={control}
               name="status"
               render={({ field }) => (
-                <SegmentedControl
-                  label="Estado"
-                  value={field.value}
-                  onChange={(value) =>
-                    field.onChange(value as FinanceReceivableStatus)
-                  }
-                  options={STATUS_OPTIONS}
-                />
+                <Field className="gap-1">
+                  <FieldLabel>Estado</FieldLabel>
+                  <ToggleGroup
+                    value={[field.value]}
+                    onValueChange={(next) => {
+                      if (next.length > 0) {
+                        field.onChange(next[0])
+                      }
+                    }}
+                    variant="outline"
+                    size="sm"
+                    aria-label="Estado"
+                  >
+                    {STATUS_OPTIONS.map((option) => (
+                      <ToggleGroupItem
+                        key={option.value}
+                        value={option.value}
+                        className="rounded-full"
+                      >
+                        {option.label}
+                      </ToggleGroupItem>
+                    ))}
+                  </ToggleGroup>
+                </Field>
               )}
             />
           ) : null}

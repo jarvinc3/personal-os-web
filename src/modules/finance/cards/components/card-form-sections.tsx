@@ -5,12 +5,16 @@ import {
   FINANCE_CARD_NETWORKS,
   CATALOG_NONE,
 } from "@/src/modules/finance/shared/constants/catalog"
-import { SegmentedControl } from "@/src/shared/components/forms/segmented-control"
 import type { CardFormValues } from "@/src/modules/finance/cards/lib/card-form"
 import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import { ColorPickerSwatch } from "@/src/shared/components/forms/color-picker"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
+import { Field, FieldLabel } from "@/src/shared/components/ui/field"
 import { Label } from "@/src/shared/components/ui/label"
+import {
+  ToggleGroup,
+  ToggleGroupItem,
+} from "@/src/shared/components/ui/toggle-group"
 import { CalendarDays, CircleAlert } from "lucide-react"
 import { Controller, type Control, type FieldErrors } from "react-hook-form"
 
@@ -81,12 +85,30 @@ export function CardOptionalDetailsSection({
         control={control}
         name="network"
         render={({ field }) => (
-          <SegmentedControl
-            label="Red"
-            value={field.value === CATALOG_NONE ? "VISA" : field.value}
-            onChange={field.onChange}
-            options={NETWORK_OPTIONS}
-          />
+          <Field className="gap-1">
+            <FieldLabel>Red</FieldLabel>
+            <ToggleGroup
+              value={[field.value === CATALOG_NONE ? "VISA" : field.value]}
+              onValueChange={(next) => {
+                if (next.length > 0) {
+                  field.onChange(next[0])
+                }
+              }}
+              variant="outline"
+              size="sm"
+              aria-label="Red"
+            >
+              {NETWORK_OPTIONS.map((option) => (
+                <ToggleGroupItem
+                  key={option.value}
+                  value={option.value}
+                  className="rounded-full"
+                >
+                  {option.label}
+                </ToggleGroupItem>
+              ))}
+            </ToggleGroup>
+          </Field>
         )}
       />
       <Controller

@@ -25,7 +25,10 @@ import { DestinationPickerSheet } from "@/src/modules/finance/shared/components/
 import { FinanceCurrencyPickerSheet } from "@/src/modules/finance/shared/components/pickers/finance-currency-picker-sheet"
 import { FinanceDateField } from "@/src/modules/finance/shared/components/forms/date-field"
 import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
-import { SegmentedControl } from "@/src/shared/components/forms/segmented-control"
+import {
+  ToggleGroup,
+  ToggleGroupItem,
+} from "@/src/shared/components/ui/toggle-group"
 import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
 import { useCards } from "@/src/modules/finance/shared/hooks/use-cards"
 import { useDiscardChanges } from "@/src/modules/finance/shared/hooks/use-discard-changes"
@@ -260,12 +263,30 @@ export function SubscriptionSheet({
             control={control}
             name="billingCycle"
             render={({ field }) => (
-              <SegmentedControl
-                label="Ciclo"
-                value={field.value}
-                onChange={field.onChange}
-                options={BILLING_CYCLE_OPTIONS}
-              />
+              <Field className="gap-1">
+                <FieldLabel>Ciclo</FieldLabel>
+                <ToggleGroup
+                  value={[field.value]}
+                  onValueChange={(next) => {
+                    if (next.length > 0) {
+                      field.onChange(next[0])
+                    }
+                  }}
+                  variant="outline"
+                  size="sm"
+                  aria-label="Ciclo"
+                >
+                  {BILLING_CYCLE_OPTIONS.map((option) => (
+                    <ToggleGroupItem
+                      key={option.value}
+                      value={option.value}
+                      className="rounded-full"
+                    >
+                      {option.label}
+                    </ToggleGroupItem>
+                  ))}
+                </ToggleGroup>
+              </Field>
             )}
           />
           <Controller

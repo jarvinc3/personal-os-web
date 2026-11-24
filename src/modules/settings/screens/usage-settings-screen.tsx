@@ -20,7 +20,10 @@ import {
   resolveUsageRangeDays,
 } from "@/src/modules/settings/lib/usage-range"
 import { SettingsGate } from "@/src/modules/settings/settings-gate"
-import { SegmentedControl } from "@/src/shared/components/forms/segmented-control"
+import {
+  ToggleGroup,
+  ToggleGroupItem,
+} from "@/src/shared/components/ui/toggle-group"
 import { DEFAULT_LOCALE } from "@/src/shared/constants/locales"
 import { CalendarDaysIcon, CalendarRangeIcon, SunIcon } from "lucide-react"
 import { useMemo, useState } from "react"
@@ -72,13 +75,32 @@ function UsageSettingsScreenBody() {
 
   return (
     <SettingsSecondaryPage title="Uso">
-      <SegmentedControl
-        ariaLabel="Rango de uso"
-        value={String(days) as UsageRangeValue}
-        onChange={handleRangeChange}
-        options={USAGE_RANGE_OPTIONS}
-        fullWidth
-      />
+      <ToggleGroup
+        value={[String(days) as UsageRangeValue]}
+        onValueChange={(next) => {
+          if (next.length > 0) {
+            handleRangeChange(next[0])
+          }
+        }}
+        variant="outline"
+        size="sm"
+        aria-label="Rango de uso"
+        className="w-full"
+      >
+        {USAGE_RANGE_OPTIONS.map((option) => {
+          const OptionIcon = option.icon
+          return (
+            <ToggleGroupItem
+              key={option.value}
+              value={option.value}
+              className="h-11 flex-1 rounded-full text-base"
+            >
+              <OptionIcon />
+              {option.label}
+            </ToggleGroupItem>
+          )
+        })}
+      </ToggleGroup>
 
       {usageQuery.isPending ? <UsageStateView state="loading" /> : null}
 
