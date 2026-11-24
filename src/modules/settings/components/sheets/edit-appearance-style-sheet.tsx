@@ -9,8 +9,15 @@ import {
   applyStyleToDocument,
   type AppearanceStyleId,
 } from "@/src/shared/appearance"
-import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { SheetBody } from "@/src/shared/components/sheets/sheet-body"
+import { SheetHeader } from "@/src/shared/components/sheets/sheet-header"
+import { SHEET_FOOTER_CLASS } from "@/src/shared/components/sheets/sheet-layout"
 import { Button } from "@/src/shared/components/ui/button"
+import {
+  Drawer,
+  DrawerContent,
+  DrawerFooter,
+} from "@/src/shared/components/ui/drawer"
 import {
   RadioGroup,
   RadioGroupItem,
@@ -18,7 +25,7 @@ import {
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { appToast } from "@/src/shared/lib/app-toast"
-import { LayersIcon, SaveIcon } from "lucide-react"
+import { LayersIcon, SaveIcon, XIcon } from "lucide-react"
 
 export function EditAppearanceStyleSheet({
   open,
@@ -55,55 +62,68 @@ export function EditAppearanceStyleSheet({
   }
 
   return (
-    <BottomSheet
-      open={open}
-      onOpenChange={handleOpenChange}
-      title="Estilo visual"
-      description="Formas, bordes y sombras de la interfaz."
-      actions={{
-        submit: (
-          <Button
-            className="flex-1"
-            disabled={!draft.isDirty || updateProfileMutation.isPending}
-            onClick={handleSave}
-          >
-            {updateProfileMutation.isPending ? (
-              <Spinner data-icon="inline-start" />
-            ) : (
-              <SaveIcon className="size-4 shrink-0" />
-            )}
-            {updateProfileMutation.isPending ? "Guardando..." : "Guardar"}
-          </Button>
-        ),
-      }}
-    >
-      <SummarySection title="Estilos disponibles" icon={LayersIcon}>
-        <RadioGroup
-          aria-label="Estilo visual"
-          value={draft.value}
-          onValueChange={(value) => {
-            draft.change(value as AppearanceStyleId)
-          }}
-          className="gap-3"
-        >
-          {APPEARANCE_STYLES.map((style) => (
-            <RadioGroupItem
-              key={style.id}
-              value={style.id}
-              aria-label={style.label}
-              className="relative flex aspect-auto h-auto w-full flex-col items-stretch gap-3 rounded-2xl border border-border bg-card p-3 text-left after:hidden **:data-[slot=radio-group-indicator]:hidden data-checked:border-primary data-checked:bg-card data-checked:text-foreground dark:data-checked:bg-card"
+    <Drawer open={open} onOpenChange={handleOpenChange}>
+      <DrawerContent>
+        <SheetHeader
+          title="Estilo visual"
+          description="Formas, bordes y sombras de la interfaz."
+          pending={updateProfileMutation.isPending}
+        />
+        <SheetBody pending={updateProfileMutation.isPending}>
+          <SummarySection title="Estilos disponibles" icon={LayersIcon}>
+            <RadioGroup
+              aria-label="Estilo visual"
+              value={draft.value}
+              onValueChange={(value) => {
+                draft.change(value as AppearanceStyleId)
+              }}
+              className="gap-3"
             >
-              <AppearanceStylePreview style={style.id} />
-              <span className="flex flex-col gap-0.5">
-                <span className="text-sm font-medium">{style.label}</span>
-                <span className="text-xs text-muted-foreground">
-                  {style.description}
-                </span>
-              </span>
-            </RadioGroupItem>
-          ))}
-        </RadioGroup>
-      </SummarySection>
-    </BottomSheet>
+              {APPEARANCE_STYLES.map((style) => (
+                <RadioGroupItem
+                  key={style.id}
+                  value={style.id}
+                  aria-label={style.label}
+                  className="relative flex aspect-auto h-auto w-full flex-col items-stretch gap-3 rounded-2xl border border-border bg-card p-3 text-left after:hidden **:data-[slot=radio-group-indicator]:hidden data-checked:border-primary data-checked:bg-card data-checked:text-foreground dark:data-checked:bg-card"
+                >
+                  <AppearanceStylePreview style={style.id} />
+                  <span className="flex flex-col gap-0.5">
+                    <span className="text-sm font-medium">{style.label}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {style.description}
+                    </span>
+                  </span>
+                </RadioGroupItem>
+              ))}
+            </RadioGroup>
+          </SummarySection>
+        </SheetBody>
+        {!updateProfileMutation.isPending ? (
+          <DrawerFooter className={SHEET_FOOTER_CLASS}>
+            <Button
+              type="button"
+              variant="outline"
+              className="flex-1"
+              onClick={() => handleOpenChange(false)}
+            >
+              <XIcon className="size-4 shrink-0" aria-hidden="true" />
+              Cancelar
+            </Button>
+            <Button
+              className="flex-1"
+              disabled={!draft.isDirty || updateProfileMutation.isPending}
+              onClick={handleSave}
+            >
+              {updateProfileMutation.isPending ? (
+                <Spinner data-icon="inline-start" />
+              ) : (
+                <SaveIcon className="size-4 shrink-0" />
+              )}
+              {updateProfileMutation.isPending ? "Guardando..." : "Guardar"}
+            </Button>
+          </DrawerFooter>
+        ) : null}
+      </DrawerContent>
+    </Drawer>
   )
 }

@@ -9,14 +9,22 @@ import { useReauthPassword } from "@/src/modules/settings/hooks/use-reauth-passw
 import { setPendingAccountDeletion } from "@/src/modules/settings/lib/pending-account-deletion"
 import type { SettingsSheetProps } from "@/src/modules/settings/types/sheet.types"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
-import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { SheetBody } from "@/src/shared/components/sheets/sheet-body"
+import { SheetHeader } from "@/src/shared/components/sheets/sheet-header"
+import { SHEET_FOOTER_CLASS } from "@/src/shared/components/sheets/sheet-layout"
 import {
   Alert,
   AlertDescription,
   AlertTitle,
 } from "@/src/shared/components/ui/alert"
+import { Button } from "@/src/shared/components/ui/button"
+import {
+  Drawer,
+  DrawerContent,
+  DrawerFooter,
+} from "@/src/shared/components/ui/drawer"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
-import { AlertTriangle } from "lucide-react"
+import { AlertTriangle, XIcon } from "lucide-react"
 import { useState } from "react"
 
 const DELETED_DATA_ITEMS = [
@@ -89,49 +97,63 @@ export function DeleteAccountSheet({
 
   return (
     <>
-      <BottomSheet
-        open={open}
-        onOpenChange={onOpenChange}
-        title="Eliminar cuenta"
-        description="Esta acción es permanente e irreversible."
-        actions={{ submit: confirmAction }}
-      >
-        <SummarySection title="Se eliminará" icon={AlertTriangle}>
-          <ul className="flex flex-col gap-2">
-            {DELETED_DATA_ITEMS.map((item) => (
-              <li
-                key={item}
-                className="text-sm leading-relaxed text-muted-foreground"
-              >
-                • {item}
-              </li>
-            ))}
-          </ul>
-        </SummarySection>
+      <Drawer open={open} onOpenChange={onOpenChange}>
+        <DrawerContent>
+          <SheetHeader
+            title="Eliminar cuenta"
+            description="Esta acción es permanente e irreversible."
+          />
+          <SheetBody>
+            <SummarySection title="Se eliminará" icon={AlertTriangle}>
+              <ul className="flex flex-col gap-2">
+                {DELETED_DATA_ITEMS.map((item) => (
+                  <li
+                    key={item}
+                    className="text-sm leading-relaxed text-muted-foreground"
+                  >
+                    • {item}
+                  </li>
+                ))}
+              </ul>
+            </SummarySection>
 
-        {confirmMode === "google" ? (
-          <Alert variant="destructive" className="mt-2">
-            <AlertTriangle />
-            <AlertTitle>Cuenta vinculada con Google</AlertTitle>
-            <AlertDescription>
-              Confirma tu identidad con Google para eliminar la cuenta. Serás
-              redirigido a Google y, al volver, podrás confirmar la eliminación
-              definitiva.
-            </AlertDescription>
-          </Alert>
-        ) : null}
+            {confirmMode === "google" ? (
+              <Alert variant="destructive" className="mt-2">
+                <AlertTriangle />
+                <AlertTitle>Cuenta vinculada con Google</AlertTitle>
+                <AlertDescription>
+                  Confirma tu identidad con Google para eliminar la cuenta.
+                  Serás redirigido a Google y, al volver, podrás confirmar la
+                  eliminación definitiva.
+                </AlertDescription>
+              </Alert>
+            ) : null}
 
-        {confirmMode === "unavailable" ? (
-          <Alert variant="destructive" className="mt-2">
-            <AlertTriangle />
-            <AlertTitle>No se puede confirmar</AlertTitle>
-            <AlertDescription>
-              Esta sesión no tiene contraseña ni un acceso solo con Google, así
-              que la cuenta no se puede eliminar desde aquí.
-            </AlertDescription>
-          </Alert>
-        ) : null}
-      </BottomSheet>
+            {confirmMode === "unavailable" ? (
+              <Alert variant="destructive" className="mt-2">
+                <AlertTriangle />
+                <AlertTitle>No se puede confirmar</AlertTitle>
+                <AlertDescription>
+                  Esta sesión no tiene contraseña ni un acceso solo con Google,
+                  así que la cuenta no se puede eliminar desde aquí.
+                </AlertDescription>
+              </Alert>
+            ) : null}
+          </SheetBody>
+          <DrawerFooter className={SHEET_FOOTER_CLASS}>
+            <Button
+              type="button"
+              variant="outline"
+              className="flex-1"
+              onClick={() => onOpenChange(false)}
+            >
+              <XIcon className="size-4 shrink-0" aria-hidden="true" />
+              Cancelar
+            </Button>
+            {confirmAction}
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
 
       <DeleteAccountConfirmDialog
         open={alertOpen}

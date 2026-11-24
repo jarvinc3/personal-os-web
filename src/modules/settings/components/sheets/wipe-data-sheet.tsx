@@ -2,7 +2,16 @@
 
 import { WipeUserDataView } from "@/src/modules/settings/components/sheets/wipe-user-data-sheet"
 import type { SettingsSheetProps } from "@/src/modules/settings/types/sheet.types"
-import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { SheetBody } from "@/src/shared/components/sheets/sheet-body"
+import { SheetHeader } from "@/src/shared/components/sheets/sheet-header"
+import { SHEET_FOOTER_CLASS } from "@/src/shared/components/sheets/sheet-layout"
+import { Button } from "@/src/shared/components/ui/button"
+import {
+  Drawer,
+  DrawerContent,
+  DrawerFooter,
+} from "@/src/shared/components/ui/drawer"
+import { XIcon } from "lucide-react"
 
 type WipeDataSheetProps = SettingsSheetProps & {
   email: string
@@ -21,17 +30,28 @@ export function WipeDataSheet({
   app,
 }: WipeDataSheetProps) {
   return (
-    <BottomSheet
-      open={open}
-      onOpenChange={onOpenChange}
-      title={title}
-      description={description}
-    >
-      <WipeUserDataView
-        email={email}
-        app={app}
-        onWiped={() => onOpenChange(false)}
-      />
-    </BottomSheet>
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent>
+        <SheetHeader title={title} description={description} />
+        <SheetBody>
+          <WipeUserDataView
+            email={email}
+            app={app}
+            onWiped={() => onOpenChange(false)}
+          />
+        </SheetBody>
+        <DrawerFooter className={SHEET_FOOTER_CLASS}>
+          <Button
+            type="button"
+            variant="outline"
+            className="flex-1"
+            onClick={() => onOpenChange(false)}
+          >
+            <XIcon className="size-4 shrink-0" aria-hidden="true" />
+            Cancelar
+          </Button>
+        </DrawerFooter>
+      </DrawerContent>
+    </Drawer>
   )
 }
