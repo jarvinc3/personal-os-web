@@ -37,9 +37,16 @@ import {
   AlertDialogMedia,
   AlertDialogTitle,
 } from "@/src/shared/components/ui/alert-dialog"
-import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { SheetBody } from "@/src/shared/components/sheets/sheet-body"
+import { SheetHeader } from "@/src/shared/components/sheets/sheet-header"
+import { SHEET_FOOTER_CLASS } from "@/src/shared/components/sheets/sheet-layout"
 import { Badge } from "@/src/shared/components/ui/badge"
 import { Button } from "@/src/shared/components/ui/button"
+import {
+  Drawer,
+  DrawerContent,
+  DrawerFooter,
+} from "@/src/shared/components/ui/drawer"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { Check, CheckCircle2, FileText, Pencil, X } from "lucide-react"
 
@@ -145,164 +152,173 @@ function ReviewGroupBatchSheetBody({
   )
 
   return (
-    <BottomSheet
-      open={open}
-      onOpenChange={onOpenChange}
-      showClose={false}
-      pending={open && group === null && result === null}
-      title="Etiquetar grupo"
-      description={
-        group
-          ? `${group.fromAddress} · ${countLabel(group.total, "correo", "correos")}`
-          : undefined
-      }
-      actions={{
-        close: closeAction,
-        submit: result ? undefined : (
-          <div className="flex w-full gap-2">
-            <Button
-              type="button"
-              className="flex-1"
-              onClick={() => setRequestedVerdict("CONFIRMED")}
-              disabled={pending || verifiable === 0}
-            >
-              {pendingVerdict === "CONFIRMED" ? (
-                <Spinner data-icon="inline-start" />
-              ) : (
-                <Check data-icon="inline-start" />
-              )}
-              Confirmar
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              className="flex-1"
-              onClick={() => setRequestedVerdict("CORRECTED")}
-              disabled={
-                pending || verifiable === 0 || !canCorrectReviewGroup(values)
-              }
-            >
-              {pendingVerdict === "CORRECTED" ? (
-                <Spinner data-icon="inline-start" />
-              ) : (
-                <Pencil data-icon="inline-start" />
-              )}
-              Corregir
-            </Button>
-          </div>
-        ),
-      }}
-    >
-      {result ? (
-        <SummarySection title="Resultado del lote" icon={CheckCircle2}>
-          <ul className="flex flex-col gap-1 p-2 text-sm" aria-live="polite">
-            {reviewGroupBatchResultLines(result).map((line) => (
-              <li key={line}>{line}</li>
-            ))}
-          </ul>
-        </SummarySection>
-      ) : group ? (
-        <div className="flex flex-col gap-4">
-          <SummarySection title="Asuntos de muestra" icon={FileText}>
-            <ul className="list-disc py-2 pr-2 pl-6 text-sm text-muted-foreground">
-              {group.sampleSubjects.map((subject) => (
-                <li key={subject} className="wrap-break-word">
-                  {subject || "(sin asunto)"}
-                </li>
-              ))}
-            </ul>
-          </SummarySection>
-          <div className="flex flex-wrap gap-2">
-            <Badge variant="secondary">
-              {countLabel(verifiable, "por verificar", "por verificar")}
-            </Badge>
-            {group.pendingHoldout > 0 ? (
-              <Badge variant="warning">
-                {countLabel(
-                  group.pendingHoldout,
-                  "HOLDOUT fuera",
-                  "HOLDOUT fuera"
-                )}
-              </Badge>
-            ) : null}
-            {canBatchReviewGroup(group) ? null : (
-              <span className="text-xs text-muted-foreground">
-                Solo quedan HOLDOUT: se revisan uno a uno en la cola.
-              </span>
-            )}
-          </div>
-          <ReviewLabelFields
-            fieldId="review-group"
-            relevance={values.relevance}
-            semanticType={values.semanticType}
-            routes={values.routes}
-            semanticTypes={REVIEW_GROUP_SEMANTIC_TYPES}
-            relevanceError={errors.relevance?.message}
-            semanticTypeError={errors.semanticType?.message}
-            onRelevanceChange={(relevance) =>
-              setValue("relevance", relevance, { shouldDirty: true })
-            }
-            onSemanticTypeChange={selectSemanticType}
-            onToggleRoute={toggleRoute}
-          />
-          <p className="text-xs text-muted-foreground">
-            Confirmar registra el acierto del sistema sin cambiar etiquetas.
-            Corregir exige relevancia o tipo y guarda los dominios marcados en
-            todos los pendientes fuera de HOLDOUT.
-          </p>
-        </div>
-      ) : null}
-
-      <AlertDialog
-        open={requestedVerdict !== null}
-        onOpenChange={(nextOpen) => {
-          if (!nextOpen && !pending) {
-            setRequestedVerdict(null)
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent>
+        <SheetHeader
+          title="Etiquetar grupo"
+          description={
+            group
+              ? `${group.fromAddress} · ${countLabel(group.total, "correo", "correos")}`
+              : undefined
           }
-        }}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogMedia className="bg-muted text-muted-foreground">
-              {requestedVerdict === "CORRECTED" ? (
-                <Pencil aria-hidden="true" />
-              ) : (
-                <Check aria-hidden="true" />
-              )}
-            </AlertDialogMedia>
-            <AlertDialogTitle>
-              {group
-                ? `¿Verificar ${countLabel(verifiable, "correo", "correos")} de ${group.fromAddress}?`
-                : "¿Verificar el lote?"}
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              {requestedVerdict === "CORRECTED"
-                ? `Se registra la corrección con las etiquetas elegidas en ${countLabel(verifiable, "correo pendiente", "correos pendientes")}. `
-                : `Se registra la verificación en ${countLabel(verifiable, "correo pendiente", "correos pendientes")}. `}
-              {group && group.pendingHoldout > 0
-                ? `${countLabel(group.pendingHoldout, "HOLDOUT queda", "HOLDOUT quedan")} fuera del lote y siguen en la cola individual. `
-                : null}
-              La verificación no se puede deshacer.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={pending}>
-              <X className="size-4 shrink-0" aria-hidden="true" />
-              Cancelar
-            </AlertDialogCancel>
-            <AlertDialogAction disabled={pending} onClick={confirmBatch}>
-              {pending ? (
-                <Spinner data-icon="inline-start" />
-              ) : requestedVerdict === "CORRECTED" ? (
-                <Pencil className="size-4 shrink-0" aria-hidden="true" />
-              ) : (
-                <Check className="size-4 shrink-0" aria-hidden="true" />
-              )}
-              {pending ? "Verificando..." : "Verificar"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </BottomSheet>
+          pending={open && group === null && result === null}
+        />
+        <SheetBody pending={open && group === null && result === null}>
+          {result ? (
+            <SummarySection title="Resultado del lote" icon={CheckCircle2}>
+              <ul
+                className="flex flex-col gap-1 p-2 text-sm"
+                aria-live="polite"
+              >
+                {reviewGroupBatchResultLines(result).map((line) => (
+                  <li key={line}>{line}</li>
+                ))}
+              </ul>
+            </SummarySection>
+          ) : group ? (
+            <div className="flex flex-col gap-4">
+              <SummarySection title="Asuntos de muestra" icon={FileText}>
+                <ul className="list-disc py-2 pr-2 pl-6 text-sm text-muted-foreground">
+                  {group.sampleSubjects.map((subject) => (
+                    <li key={subject} className="wrap-break-word">
+                      {subject || "(sin asunto)"}
+                    </li>
+                  ))}
+                </ul>
+              </SummarySection>
+              <div className="flex flex-wrap gap-2">
+                <Badge variant="secondary">
+                  {countLabel(verifiable, "por verificar", "por verificar")}
+                </Badge>
+                {group.pendingHoldout > 0 ? (
+                  <Badge variant="warning">
+                    {countLabel(
+                      group.pendingHoldout,
+                      "HOLDOUT fuera",
+                      "HOLDOUT fuera"
+                    )}
+                  </Badge>
+                ) : null}
+                {canBatchReviewGroup(group) ? null : (
+                  <span className="text-xs text-muted-foreground">
+                    Solo quedan HOLDOUT: se revisan uno a uno en la cola.
+                  </span>
+                )}
+              </div>
+              <ReviewLabelFields
+                fieldId="review-group"
+                relevance={values.relevance}
+                semanticType={values.semanticType}
+                routes={values.routes}
+                semanticTypes={REVIEW_GROUP_SEMANTIC_TYPES}
+                relevanceError={errors.relevance?.message}
+                semanticTypeError={errors.semanticType?.message}
+                onRelevanceChange={(relevance) =>
+                  setValue("relevance", relevance, { shouldDirty: true })
+                }
+                onSemanticTypeChange={selectSemanticType}
+                onToggleRoute={toggleRoute}
+              />
+              <p className="text-xs text-muted-foreground">
+                Confirmar registra el acierto del sistema sin cambiar etiquetas.
+                Corregir exige relevancia o tipo y guarda los dominios marcados
+                en todos los pendientes fuera de HOLDOUT.
+              </p>
+            </div>
+          ) : null}
+
+          <AlertDialog
+            open={requestedVerdict !== null}
+            onOpenChange={(nextOpen) => {
+              if (!nextOpen && !pending) {
+                setRequestedVerdict(null)
+              }
+            }}
+          >
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogMedia className="bg-muted text-muted-foreground">
+                  {requestedVerdict === "CORRECTED" ? (
+                    <Pencil aria-hidden="true" />
+                  ) : (
+                    <Check aria-hidden="true" />
+                  )}
+                </AlertDialogMedia>
+                <AlertDialogTitle>
+                  {group
+                    ? `¿Verificar ${countLabel(verifiable, "correo", "correos")} de ${group.fromAddress}?`
+                    : "¿Verificar el lote?"}
+                </AlertDialogTitle>
+                <AlertDialogDescription>
+                  {requestedVerdict === "CORRECTED"
+                    ? `Se registra la corrección con las etiquetas elegidas en ${countLabel(verifiable, "correo pendiente", "correos pendientes")}. `
+                    : `Se registra la verificación en ${countLabel(verifiable, "correo pendiente", "correos pendientes")}. `}
+                  {group && group.pendingHoldout > 0
+                    ? `${countLabel(group.pendingHoldout, "HOLDOUT queda", "HOLDOUT quedan")} fuera del lote y siguen en la cola individual. `
+                    : null}
+                  La verificación no se puede deshacer.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel disabled={pending}>
+                  <X className="size-4 shrink-0" aria-hidden="true" />
+                  Cancelar
+                </AlertDialogCancel>
+                <AlertDialogAction disabled={pending} onClick={confirmBatch}>
+                  {pending ? (
+                    <Spinner data-icon="inline-start" />
+                  ) : requestedVerdict === "CORRECTED" ? (
+                    <Pencil className="size-4 shrink-0" aria-hidden="true" />
+                  ) : (
+                    <Check className="size-4 shrink-0" aria-hidden="true" />
+                  )}
+                  {pending ? "Verificando..." : "Verificar"}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </SheetBody>
+        {!(open && group === null && result === null) ? (
+          <DrawerFooter className={SHEET_FOOTER_CLASS}>
+            {closeAction}
+            {result ? null : (
+              <div className="flex w-full gap-2">
+                <Button
+                  type="button"
+                  className="flex-1"
+                  onClick={() => setRequestedVerdict("CONFIRMED")}
+                  disabled={pending || verifiable === 0}
+                >
+                  {pendingVerdict === "CONFIRMED" ? (
+                    <Spinner data-icon="inline-start" />
+                  ) : (
+                    <Check data-icon="inline-start" />
+                  )}
+                  Confirmar
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => setRequestedVerdict("CORRECTED")}
+                  disabled={
+                    pending ||
+                    verifiable === 0 ||
+                    !canCorrectReviewGroup(values)
+                  }
+                >
+                  {pendingVerdict === "CORRECTED" ? (
+                    <Spinner data-icon="inline-start" />
+                  ) : (
+                    <Pencil data-icon="inline-start" />
+                  )}
+                  Corregir
+                </Button>
+              </div>
+            )}
+          </DrawerFooter>
+        ) : null}
+      </DrawerContent>
+    </Drawer>
   )
 }

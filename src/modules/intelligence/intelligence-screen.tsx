@@ -10,9 +10,16 @@ import { GmailConnectSheet } from "@/src/modules/intelligence/components/gmail-c
 import { emailImportScopeLabel } from "@/src/modules/intelligence/email-connect"
 import { useFormatLocale } from "@/src/modules/settings/hooks/use-format-locale"
 import { appToast } from "@/src/shared/lib/app-toast"
-import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { SheetBody } from "@/src/shared/components/sheets/sheet-body"
+import { SheetHeader } from "@/src/shared/components/sheets/sheet-header"
+import { SHEET_FOOTER_CLASS } from "@/src/shared/components/sheets/sheet-layout"
 import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
 import { Button } from "@/src/shared/components/ui/button"
+import {
+  Drawer,
+  DrawerContent,
+  DrawerFooter,
+} from "@/src/shared/components/ui/drawer"
 import {
   Empty,
   EmptyDescription,
@@ -1037,20 +1044,151 @@ function IntelligenceMessageDetail({
     ? latestBySequence(data.provenance.verifications)
     : undefined
   const lastClassification = latestBySequence(classificationObservations)
+  const titleRef = useRef<HTMLHeadingElement>(null)
 
   return (
-    <BottomSheet
-      open={open}
-      onOpenChange={onOpenChange}
-      focusTitleOnOpen
-      title={data?.subject ?? "Detalle del mensaje"}
-      description={
-        data
-          ? `${data.fromAddress} · ${formatDateTime(data.receivedAt, formatLocale)} · #${shortMessageId(data.id)}`
-          : undefined
-      }
-      actions={{
-        close: (
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent initialFocus={titleRef}>
+        <SheetHeader
+          title={data?.subject ?? "Detalle del mensaje"}
+          description={
+            data
+              ? `${data.fromAddress} · ${formatDateTime(data.receivedAt, formatLocale)} · #${shortMessageId(data.id)}`
+              : undefined
+          }
+          titleRef={titleRef}
+          titleTabIndex={-1}
+        />
+        <SheetBody>
+          {isPending ? (
+            <div className="flex flex-col gap-2 p-2">
+              <Skeleton className="h-6 w-2/3" />
+              <Skeleton className="h-32 w-full" />
+            </div>
+          ) : null}
+          {!isPending && (isError || !data) ? (
+            <Empty>
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <AlertCircle aria-hidden="true" />
+                </EmptyMedia>
+                <EmptyTitle>No se pudo cargar el mensaje</EmptyTitle>
+                <EmptyDescription>
+                  El contenido no está disponible ahora.
+                </EmptyDescription>
+              </EmptyHeader>
+              <Button type="button" onClick={() => void refetch()}>
+                <RefreshCw aria-hidden="true" /> Reintentar
+              </Button>
+            </Empty>
+          ) : null}
+          {!isPending && !isError && data ? (
+            <div className="flex flex-col gap-4 p-2">
+              <SummarySection
+                title="Resumen"
+                subtitle="Qué pasó con este correo, en una línea."
+                icon={ShieldCheck}
+              >
+                <SummaryItem
+                  title="Clasificación automática"
+                  description={
+                    lastClassification
+                      ? `${classificationTypeLabel(lastClassification.payload)} · ${classificationRouteLabel(lastClassification.payload)}`
+                      : "Todavía no tiene clasificación automática."
+                  }
+                  icon={BrainCircuit}
+                />
+                <SummaryItem
+                  title="Revisión de una persona"
+                  description={
+                    lastVerification
+                      ? `${verificationVerdictLabel(lastVerification.verdict)} por ${verifierActorLabel(lastVerification.verifierRole)} · ${formatDateTime(lastVerification.createdAt, formatLocale)}`
+                      : "Todavía sin revisión de una persona."
+                  }
+                  icon={CheckCircle2}
+                  isLast
+                />
+              </SummarySection>
+              <SummarySection
+                title="Detalles técnicos"
+                subtitle="Las tres versiones del texto y de dónde salieron."
+                icon={FileText}
+                collapsible
+              >
+                <MessageRepresentation
+                  title="Canónica"
+                  description="Texto normalizado que usa la clasificación."
+                  value={data.content?.canonicalBody}
+                />
+                <MessageRepresentation
+                  title="Saneada"
+                  description="Sin datos personales que se puedan reutilizar."
+                  value={data.content?.sanitizedBody}
+                />
+                <MessageRepresentation
+                  title="Cruda"
+                  description="Cuerpo original tal como llegó, con retención limitada."
+                  value={data.content?.rawBody}
+                  scrolls
+                />
+              </SummarySection>
+              <SummarySection
+                title="Clasificación del mensaje"
+                subtitle="Propuesta para revisión; no crea movimientos en Finanzas."
+              >
+                {classificationObservations.map((item) => (
+                  <SummaryItem
+                    key={`classification-${item.sequence}`}
+                    title={`Ruta ${classificationRouteLabel(item.payload)} · ${classificationTypeLabel(item.payload)}`}
+                    description={describeClassification(item.payload)}
+                    icon={BrainCircuit}
+                  />
+                ))}
+                {!classificationObservations.length ? (
+                  <p className="px-2 text-sm text-muted-foreground">
+                    Este mensaje aún no tiene una clasificación.
+                  </p>
+                ) : null}
+              </SummarySection>
+              <EmailSignalSection message={data} />
+              <SummarySection
+                title="Procedencia y verificaciones"
+                subtitle="Registros que no se editan ni se borran, ligados al correo original."
+              >
+                {data.provenance.observations.map((observation) => (
+                  <SummaryItem
+                    key={`observation-${observation.sequence}`}
+                    title={`Observación ${observation.sequence} · ${observationTypeLabel(observation.knowledgeType)}`}
+                    description={`${knowledgeScopeLabel(observation.proposedScope)} · ${observation.knowledgeKey}`}
+                    icon={BrainCircuit}
+                  />
+                ))}
+                {data.provenance.verifications.map((verification, index) => (
+                  <SummaryItem
+                    key={`verification-${verification.sequence}`}
+                    title={`Verificación ${verification.sequence}`}
+                    description={describeVerification({
+                      verdict: verification.verdict,
+                      verifierRole: verification.verifierRole,
+                      isGroundTruth: verification.isGroundTruth,
+                      notes: verification.notes,
+                      correctedPayload: verification.correctedPayload,
+                    })}
+                    icon={CheckCircle2}
+                    isLast={index === data.provenance.verifications.length - 1}
+                  />
+                ))}
+                {!data.provenance.observations.length &&
+                !data.provenance.verifications.length ? (
+                  <p className="px-2 text-sm text-muted-foreground">
+                    Este correo aún no tiene observaciones ni verificaciones.
+                  </p>
+                ) : null}
+              </SummarySection>
+            </div>
+          ) : null}
+        </SheetBody>
+        <DrawerFooter className={SHEET_FOOTER_CLASS}>
           <Button
             type="button"
             variant="outline"
@@ -1059,137 +1197,9 @@ function IntelligenceMessageDetail({
           >
             <X aria-hidden="true" /> Cerrar
           </Button>
-        ),
-      }}
-    >
-      {isPending ? (
-        <div className="flex flex-col gap-2 p-2">
-          <Skeleton className="h-6 w-2/3" />
-          <Skeleton className="h-32 w-full" />
-        </div>
-      ) : null}
-      {!isPending && (isError || !data) ? (
-        <Empty>
-          <EmptyHeader>
-            <EmptyMedia variant="icon">
-              <AlertCircle aria-hidden="true" />
-            </EmptyMedia>
-            <EmptyTitle>No se pudo cargar el mensaje</EmptyTitle>
-            <EmptyDescription>
-              El contenido no está disponible ahora.
-            </EmptyDescription>
-          </EmptyHeader>
-          <Button type="button" onClick={() => void refetch()}>
-            <RefreshCw aria-hidden="true" /> Reintentar
-          </Button>
-        </Empty>
-      ) : null}
-      {!isPending && !isError && data ? (
-        <div className="flex flex-col gap-4 p-2">
-          <SummarySection
-            title="Resumen"
-            subtitle="Qué pasó con este correo, en una línea."
-            icon={ShieldCheck}
-          >
-            <SummaryItem
-              title="Clasificación automática"
-              description={
-                lastClassification
-                  ? `${classificationTypeLabel(lastClassification.payload)} · ${classificationRouteLabel(lastClassification.payload)}`
-                  : "Todavía no tiene clasificación automática."
-              }
-              icon={BrainCircuit}
-            />
-            <SummaryItem
-              title="Revisión de una persona"
-              description={
-                lastVerification
-                  ? `${verificationVerdictLabel(lastVerification.verdict)} por ${verifierActorLabel(lastVerification.verifierRole)} · ${formatDateTime(lastVerification.createdAt, formatLocale)}`
-                  : "Todavía sin revisión de una persona."
-              }
-              icon={CheckCircle2}
-              isLast
-            />
-          </SummarySection>
-          <SummarySection
-            title="Detalles técnicos"
-            subtitle="Las tres versiones del texto y de dónde salieron."
-            icon={FileText}
-            collapsible
-          >
-            <MessageRepresentation
-              title="Canónica"
-              description="Texto normalizado que usa la clasificación."
-              value={data.content?.canonicalBody}
-            />
-            <MessageRepresentation
-              title="Saneada"
-              description="Sin datos personales que se puedan reutilizar."
-              value={data.content?.sanitizedBody}
-            />
-            <MessageRepresentation
-              title="Cruda"
-              description="Cuerpo original tal como llegó, con retención limitada."
-              value={data.content?.rawBody}
-              scrolls
-            />
-          </SummarySection>
-          <SummarySection
-            title="Clasificación del mensaje"
-            subtitle="Propuesta para revisión; no crea movimientos en Finanzas."
-          >
-            {classificationObservations.map((item) => (
-              <SummaryItem
-                key={`classification-${item.sequence}`}
-                title={`Ruta ${classificationRouteLabel(item.payload)} · ${classificationTypeLabel(item.payload)}`}
-                description={describeClassification(item.payload)}
-                icon={BrainCircuit}
-              />
-            ))}
-            {!classificationObservations.length ? (
-              <p className="px-2 text-sm text-muted-foreground">
-                Este mensaje aún no tiene una clasificación.
-              </p>
-            ) : null}
-          </SummarySection>
-          <EmailSignalSection message={data} />
-          <SummarySection
-            title="Procedencia y verificaciones"
-            subtitle="Registros que no se editan ni se borran, ligados al correo original."
-          >
-            {data.provenance.observations.map((observation) => (
-              <SummaryItem
-                key={`observation-${observation.sequence}`}
-                title={`Observación ${observation.sequence} · ${observationTypeLabel(observation.knowledgeType)}`}
-                description={`${knowledgeScopeLabel(observation.proposedScope)} · ${observation.knowledgeKey}`}
-                icon={BrainCircuit}
-              />
-            ))}
-            {data.provenance.verifications.map((verification, index) => (
-              <SummaryItem
-                key={`verification-${verification.sequence}`}
-                title={`Verificación ${verification.sequence}`}
-                description={describeVerification({
-                  verdict: verification.verdict,
-                  verifierRole: verification.verifierRole,
-                  isGroundTruth: verification.isGroundTruth,
-                  notes: verification.notes,
-                  correctedPayload: verification.correctedPayload,
-                })}
-                icon={CheckCircle2}
-                isLast={index === data.provenance.verifications.length - 1}
-              />
-            ))}
-            {!data.provenance.observations.length &&
-            !data.provenance.verifications.length ? (
-              <p className="px-2 text-sm text-muted-foreground">
-                Este correo aún no tiene observaciones ni verificaciones.
-              </p>
-            ) : null}
-          </SummarySection>
-        </div>
-      ) : null}
-    </BottomSheet>
+        </DrawerFooter>
+      </DrawerContent>
+    </Drawer>
   )
 }
 

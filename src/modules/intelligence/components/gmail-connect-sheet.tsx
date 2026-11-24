@@ -53,9 +53,16 @@ import {
   ToggleGroup,
   ToggleGroupItem,
 } from "@/src/shared/components/ui/toggle-group"
-import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { SheetBody } from "@/src/shared/components/sheets/sheet-body"
+import { SheetHeader } from "@/src/shared/components/sheets/sheet-header"
+import { SHEET_FOOTER_CLASS } from "@/src/shared/components/sheets/sheet-layout"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { Button } from "@/src/shared/components/ui/button"
+import {
+  Drawer,
+  DrawerContent,
+  DrawerFooter,
+} from "@/src/shared/components/ui/drawer"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 
 type GmailConnectSheetProps = {
@@ -168,21 +175,97 @@ function GmailConnectSheetForm({
 
   return (
     <>
-      <BottomSheet
+      <Drawer
         open={open}
         onOpenChange={(nextOpen) => {
           if (!nextOpen) {
             requestClose()
           }
         }}
-        title={reconnect ? "Reconectar Gmail" : "Conectar Gmail"}
-        description={
-          reconnect
-            ? "Elige si mantienes el período actual o mueves el inicio de la importación."
-            : "Elige desde cuándo importar tus correos."
-        }
-        actions={{
-          close: (
+      >
+        <DrawerContent>
+          <SheetHeader
+            title={reconnect ? "Reconectar Gmail" : "Conectar Gmail"}
+            description={
+              reconnect
+                ? "Elige si mantienes el período actual o mueves el inicio de la importación."
+                : "Elige desde cuándo importar tus correos."
+            }
+          />
+          <SheetBody>
+            <SummarySection title="Período de importación" icon={CalendarDays}>
+              <ToggleGroup
+                value={[choice]}
+                onValueChange={(next) => {
+                  if (next.length > 0) {
+                    setChoice(next[0])
+                  }
+                }}
+                variant="outline"
+                size="sm"
+                orientation="vertical"
+                aria-label="Período de importación"
+                disabled={pending}
+                className="w-full flex-col items-stretch"
+              >
+                {periodOptions.map((option) => {
+                  const OptionIcon = option.icon
+                  return (
+                    <ToggleGroupItem
+                      key={option.value}
+                      value={option.value}
+                      className="h-11 w-full flex-none justify-start rounded-full text-base"
+                    >
+                      <OptionIcon />
+                      {option.label}
+                    </ToggleGroupItem>
+                  )
+                })}
+              </ToggleGroup>
+              {reconnect && currentStart ? (
+                <p className="px-1 text-sm text-muted-foreground">
+                  Hoy importas desde el {currentStart}. Un período nuevo mueve
+                  el inicio hacia adelante; el correo ya importado no se borra.
+                </p>
+              ) : null}
+            </SummarySection>
+
+            <SummarySection title="Remitente" icon={GlobeIcon}>
+              <Field
+                data-invalid={senderError ? true : undefined}
+                data-disabled={pending ? true : undefined}
+                className="gap-0.5"
+              >
+                <FieldLabel
+                  htmlFor="gmail-sender-domain"
+                  className="pl-2 text-sm text-muted-foreground"
+                >
+                  Solo este dominio
+                </FieldLabel>
+                <InputGroup className="h-10 overflow-hidden px-1">
+                  <InputGroupAddon align="inline-start">
+                    <GlobeIcon className="text-muted-foreground" />
+                  </InputGroupAddon>
+                  <InputGroupInput
+                    id="gmail-sender-domain"
+                    value={sender}
+                    onChange={(event) => setSender(event.target.value)}
+                    onBlur={() => setSenderTouched(true)}
+                    disabled={pending}
+                    maxLength={SENDER_FILTER_MAX_LENGTH}
+                    placeholder="bhd.com.do"
+                    aria-invalid={senderError ? true : undefined}
+                  />
+                </InputGroup>
+                <FieldDescription>
+                  Limita la importación a ese dominio y sus subdominios. Déjalo
+                  vacío para importar de todos.
+                </FieldDescription>
+                {senderError ? <FieldError>{senderError}</FieldError> : null}
+              </Field>
+            </SummarySection>
+          </SheetBody>
+          <DrawerFooter className={SHEET_FOOTER_CLASS}>
             <Button
               type="button"
               variant="outline"
@@ -193,8 +276,6 @@ function GmailConnectSheetForm({
               <XIcon className="size-4 shrink-0" aria-hidden="true" />
               Cancelar
             </Button>
-          ),
-          submit: (
             <Button
               type="button"
               className="flex-1"
@@ -214,81 +295,9 @@ function GmailConnectSheetForm({
                   ? "Reconectar"
                   : "Conectar"}
             </Button>
-          ),
-        }}
-      >
-        <SummarySection title="Período de importación" icon={CalendarDays}>
-          <ToggleGroup
-            value={[choice]}
-            onValueChange={(next) => {
-              if (next.length > 0) {
-                setChoice(next[0])
-              }
-            }}
-            variant="outline"
-            size="sm"
-            orientation="vertical"
-            aria-label="Período de importación"
-            disabled={pending}
-            className="w-full flex-col items-stretch"
-          >
-            {periodOptions.map((option) => {
-              const OptionIcon = option.icon
-              return (
-                <ToggleGroupItem
-                  key={option.value}
-                  value={option.value}
-                  className="h-11 w-full flex-none justify-start rounded-full text-base"
-                >
-                  <OptionIcon />
-                  {option.label}
-                </ToggleGroupItem>
-              )
-            })}
-          </ToggleGroup>
-          {reconnect && currentStart ? (
-            <p className="px-1 text-sm text-muted-foreground">
-              Hoy importas desde el {currentStart}. Un período nuevo mueve el
-              inicio hacia adelante; el correo ya importado no se borra.
-            </p>
-          ) : null}
-        </SummarySection>
-
-        <SummarySection title="Remitente" icon={GlobeIcon}>
-          <Field
-            data-invalid={senderError ? true : undefined}
-            data-disabled={pending ? true : undefined}
-            className="gap-0.5"
-          >
-            <FieldLabel
-              htmlFor="gmail-sender-domain"
-              className="pl-2 text-sm text-muted-foreground"
-            >
-              Solo este dominio
-            </FieldLabel>
-            <InputGroup className="h-10 overflow-hidden px-1">
-              <InputGroupAddon align="inline-start">
-                <GlobeIcon className="text-muted-foreground" />
-              </InputGroupAddon>
-              <InputGroupInput
-                id="gmail-sender-domain"
-                value={sender}
-                onChange={(event) => setSender(event.target.value)}
-                onBlur={() => setSenderTouched(true)}
-                disabled={pending}
-                maxLength={SENDER_FILTER_MAX_LENGTH}
-                placeholder="bhd.com.do"
-                aria-invalid={senderError ? true : undefined}
-              />
-            </InputGroup>
-            <FieldDescription>
-              Limita la importación a ese dominio y sus subdominios. Déjalo
-              vacío para importar de todos.
-            </FieldDescription>
-            {senderError ? <FieldError>{senderError}</FieldError> : null}
-          </Field>
-        </SummarySection>
-      </BottomSheet>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
       <AlertDialog open={discardOpen} onOpenChange={setDiscardOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>

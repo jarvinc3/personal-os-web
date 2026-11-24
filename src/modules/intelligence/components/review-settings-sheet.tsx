@@ -17,8 +17,15 @@ import {
   WheelPicker,
   WheelPickerWrapper,
 } from "@/src/shared/components/forms/wheel-picker"
-import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { SheetBody } from "@/src/shared/components/sheets/sheet-body"
+import { SheetHeader } from "@/src/shared/components/sheets/sheet-header"
+import { SHEET_FOOTER_CLASS } from "@/src/shared/components/sheets/sheet-layout"
 import { Button } from "@/src/shared/components/ui/button"
+import {
+  Drawer,
+  DrawerContent,
+  DrawerFooter,
+} from "@/src/shared/components/ui/drawer"
 import { appToast } from "@/src/shared/lib/app-toast"
 
 const CONFIDENCE_OPTIONS = Array.from({ length: 101 }, (_, percent) => ({
@@ -95,13 +102,59 @@ function ReviewSettingsSheetForm({
   }
 
   return (
-    <BottomSheet
-      open={open}
-      onOpenChange={onOpenChange}
-      title="Ajustes de revisión"
-      description="Controla cuándo un correo necesita revisión humana."
-      actions={{
-        close: (
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent>
+        <SheetHeader
+          title="Ajustes de revisión"
+          description="Controla cuándo un correo necesita revisión humana."
+        />
+        <SheetBody>
+          <SummarySection
+            title="Clasificación del correo"
+            icon={BrainCircuitIcon}
+          >
+            <WheelField
+              label="Umbral de confianza para revisar"
+              valueLabel={`${thresholdPercent} %`}
+              icon={GaugeIcon}
+            >
+              <WheelPickerWrapper className="flex w-full justify-center">
+                <div
+                  role="group"
+                  aria-label="Umbral de confianza en porcentaje"
+                >
+                  <WheelPicker
+                    value={String(thresholdPercent)}
+                    onValueChange={(value) =>
+                      setThresholdPercent(Number(value))
+                    }
+                    options={CONFIDENCE_OPTIONS}
+                    visibleCount={9}
+                  />
+                </div>
+              </WheelPickerWrapper>
+            </WheelField>
+            <SwitchFieldRow
+              label="Aceptar remitentes verificados"
+              description="Los remitentes estables podrán pasar sin revisión manual."
+              checked={acceptVerifiedSenders}
+              onCheckedChange={setAcceptVerifiedSenders}
+              icon={ShieldCheckIcon}
+            />
+            <p className="text-xs text-muted-foreground">
+              Los correos HOLDOUT conservan el umbral fijo y no se autoaceptan
+              por remitente.
+            </p>
+            {!canSave ? (
+              <p role="status" className="text-xs text-muted-foreground">
+                {loadFailed
+                  ? "No se pudieron cargar tus ajustes de revisión."
+                  : "Cargando tus ajustes de revisión…"}
+              </p>
+            ) : null}
+          </SummarySection>
+        </SheetBody>
+        <DrawerFooter className={SHEET_FOOTER_CLASS}>
           <Button
             type="button"
             variant="outline"
@@ -111,8 +164,6 @@ function ReviewSettingsSheetForm({
           >
             <XIcon data-icon="inline-start" /> Cancelar
           </Button>
-        ),
-        submit: (
           <Button
             type="button"
             className="flex-1"
@@ -121,45 +172,8 @@ function ReviewSettingsSheetForm({
           >
             <CheckIcon data-icon="inline-start" /> Guardar
           </Button>
-        ),
-      }}
-    >
-      <SummarySection title="Clasificación del correo" icon={BrainCircuitIcon}>
-        <WheelField
-          label="Umbral de confianza para revisar"
-          valueLabel={`${thresholdPercent} %`}
-          icon={GaugeIcon}
-        >
-          <WheelPickerWrapper className="flex w-full justify-center">
-            <div role="group" aria-label="Umbral de confianza en porcentaje">
-              <WheelPicker
-                value={String(thresholdPercent)}
-                onValueChange={(value) => setThresholdPercent(Number(value))}
-                options={CONFIDENCE_OPTIONS}
-                visibleCount={9}
-              />
-            </div>
-          </WheelPickerWrapper>
-        </WheelField>
-        <SwitchFieldRow
-          label="Aceptar remitentes verificados"
-          description="Los remitentes estables podrán pasar sin revisión manual."
-          checked={acceptVerifiedSenders}
-          onCheckedChange={setAcceptVerifiedSenders}
-          icon={ShieldCheckIcon}
-        />
-        <p className="text-xs text-muted-foreground">
-          Los correos HOLDOUT conservan el umbral fijo y no se autoaceptan por
-          remitente.
-        </p>
-        {!canSave ? (
-          <p role="status" className="text-xs text-muted-foreground">
-            {loadFailed
-              ? "No se pudieron cargar tus ajustes de revisión."
-              : "Cargando tus ajustes de revisión…"}
-          </p>
-        ) : null}
-      </SummarySection>
-    </BottomSheet>
+        </DrawerFooter>
+      </DrawerContent>
+    </Drawer>
   )
 }
