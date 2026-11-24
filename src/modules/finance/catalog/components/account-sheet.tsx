@@ -37,7 +37,9 @@ import type {
   FinanceCashSummary,
   FinanceInstitution,
 } from "@/src/modules/finance/shared/types/entities"
-import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { SheetBody } from "@/src/shared/components/sheets/sheet-body"
+import { SheetHeader } from "@/src/shared/components/sheets/sheet-header"
+import { SHEET_FOOTER_CLASS } from "@/src/shared/components/sheets/sheet-layout"
 import {
   InputGroup,
   InputGroupAddon,
@@ -45,6 +47,11 @@ import {
 } from "@/src/shared/components/ui/input-group"
 import { SwitchFieldRow } from "@/src/shared/components/forms/switch-field-row"
 import { Button } from "@/src/shared/components/ui/button"
+import {
+  Drawer,
+  DrawerContent,
+  DrawerFooter,
+} from "@/src/shared/components/ui/drawer"
 import {
   Field,
   FieldDescription,
@@ -60,7 +67,14 @@ import { appToast } from "@/src/shared/lib/app-toast"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
 import { usePicker } from "@/src/shared/hooks/use-picker"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { HashIcon, LandmarkIcon, Palette, SaveIcon, Star } from "lucide-react"
+import {
+  HashIcon,
+  LandmarkIcon,
+  Palette,
+  SaveIcon,
+  Star,
+  XIcon,
+} from "lucide-react"
 import { useEffect, useMemo, useRef } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import {
@@ -385,246 +399,262 @@ export function AccountSheet({
 
   return (
     <>
-      <BottomSheet
-        open={open}
-        onOpenChange={requestOpenChange}
-        helpAction={<SheetHelpAction sheetKey={FINANCE_SHEET_KEYS.account} />}
-        pending={pending}
-        title={isEdit ? "Editar cuenta" : "Nueva cuenta"}
-        description={
-          isEdit
-            ? "El saldo se actualiza con los movimientos. Usa Ajustar saldo para cambiarlo."
-            : hasInstitutions
-              ? "El saldo inicial es opcional y se puede cambiar después con Ajustar saldo."
-              : "Crea una institución bancaria antes de agregar una cuenta."
-        }
-        actions={{
-          submit: (
-            <Button
-              key="submit"
-              disabled={isPending || (!isEdit && !hasInstitutions)}
-              className="flex-1"
-              onClick={onSubmit}
-            >
-              {isPending ? (
-                <Spinner data-icon="inline-start" />
-              ) : (
-                <SaveIcon className="size-4 shrink-0" />
-              )}
-              {isPending ? "Guardando..." : "Guardar"}
-            </Button>
-          ),
-        }}
-      >
-        <SummarySection title="Cuenta" icon={LandmarkIcon}>
-          <AccountProductRow account={previewAccount} display={display} />
-          <Controller
-            control={control}
-            name="name"
-            render={({ field }) => (
-              <Field
-                data-invalid={errors.name ? true : undefined}
-                className="gap-0.5"
-              >
-                <FieldLabel
-                  htmlFor="account-name"
-                  className="pl-2 text-sm text-muted-foreground"
-                >
-                  Nombre
-                </FieldLabel>
-                <InputGroup className="h-10 overflow-hidden px-1">
-                  <InputGroupAddon align="inline-start">
-                    <LandmarkIcon className="text-muted-foreground" />
-                  </InputGroupAddon>
-                  <InputGroupInput
-                    id="account-name"
-                    value={field.value}
-                    onChange={(event) => field.onChange(event.target.value)}
-                    onBlur={field.onBlur}
-                    placeholder="Cuenta nómina"
-                    aria-invalid={errors.name ? true : undefined}
-                  />
-                </InputGroup>
-                {errors.name?.message ? (
-                  <FieldError>{errors.name.message}</FieldError>
-                ) : null}
-              </Field>
-            )}
+      <Drawer open={open} onOpenChange={requestOpenChange}>
+        <DrawerContent>
+          <SheetHeader
+            title={isEdit ? "Editar cuenta" : "Nueva cuenta"}
+            description={
+              isEdit
+                ? "El saldo se actualiza con los movimientos. Usa Ajustar saldo para cambiarlo."
+                : hasInstitutions
+                  ? "El saldo inicial es opcional y se puede cambiar después con Ajustar saldo."
+                  : "Crea una institución bancaria antes de agregar una cuenta."
+            }
+            pending={pending}
+            actions={<SheetHelpAction sheetKey={FINANCE_SHEET_KEYS.account} />}
           />
-          {!lockType ? (
-            <Controller
-              control={control}
-              name="type"
-              render={({ field }) => (
-                <Field className="gap-1">
-                  <FieldLabel>Tipo</FieldLabel>
-                  <ToggleGroup
-                    value={[field.value]}
-                    onValueChange={(next) => {
-                      if (next.length > 0) {
-                        changeType(next[0])
-                      }
-                    }}
-                    variant="outline"
-                    size="sm"
-                    aria-label="Tipo"
-                  >
-                    {typeOptions.map((option) => (
-                      <ToggleGroupItem
-                        key={option.value}
-                        value={option.value}
-                        className="rounded-full"
-                      >
-                        {option.label}
-                      </ToggleGroupItem>
-                    ))}
-                  </ToggleGroup>
-                </Field>
-              )}
-            />
-          ) : null}
-          {accountType !== "CASH" ? (
-            <>
-              <Field className="gap-1">
-                <FieldLabel className="text-sm text-muted-foreground">
-                  Institución
-                </FieldLabel>
-                <InstitutionTrigger
-                  institution={selectedInstitution}
-                  placeholder={
-                    hasInstitutions
-                      ? "Elige la institución"
-                      : "Crea una institución primero"
-                  }
-                  disabled={!hasInstitutions}
-                  onClick={() => openPicker("institution")}
-                />
-                {errors.institutionId?.message ? (
-                  <FieldError>{errors.institutionId.message}</FieldError>
-                ) : null}
-              </Field>
+          <SheetBody pending={pending}>
+            <SummarySection title="Cuenta" icon={LandmarkIcon}>
+              <AccountProductRow account={previewAccount} display={display} />
               <Controller
                 control={control}
-                name="accountNumber"
+                name="name"
                 render={({ field }) => (
                   <Field
-                    data-invalid={errors.accountNumber ? true : undefined}
+                    data-invalid={errors.name ? true : undefined}
                     className="gap-0.5"
                   >
                     <FieldLabel
-                      htmlFor="account-number"
+                      htmlFor="account-name"
                       className="pl-2 text-sm text-muted-foreground"
                     >
-                      Número de cuenta
+                      Nombre
                     </FieldLabel>
                     <InputGroup className="h-10 overflow-hidden px-1">
                       <InputGroupAddon align="inline-start">
-                        <HashIcon className="text-muted-foreground" />
+                        <LandmarkIcon className="text-muted-foreground" />
                       </InputGroupAddon>
                       <InputGroupInput
-                        id="account-number"
+                        id="account-name"
                         value={field.value}
                         onChange={(event) => field.onChange(event.target.value)}
                         onBlur={field.onBlur}
-                        placeholder={
-                          isEdit && account?.accountNumberLast4
-                            ? `Deja vacío para conservar •••• ${account.accountNumberLast4}`
-                            : "0123456789"
-                        }
-                        aria-invalid={errors.accountNumber ? true : undefined}
+                        placeholder="Cuenta nómina"
+                        aria-invalid={errors.name ? true : undefined}
                       />
                     </InputGroup>
-                    {lastFourOnly && !isEdit ? (
-                      <FieldDescription>
-                        Basta con los últimos 4 dígitos; el número completo es
-                        opcional.
-                      </FieldDescription>
-                    ) : null}
-                    {errors.accountNumber?.message ? (
-                      <FieldError>{errors.accountNumber.message}</FieldError>
+                    {errors.name?.message ? (
+                      <FieldError>{errors.name.message}</FieldError>
                     ) : null}
                   </Field>
                 )}
               />
+              {!lockType ? (
+                <Controller
+                  control={control}
+                  name="type"
+                  render={({ field }) => (
+                    <Field className="gap-1">
+                      <FieldLabel>Tipo</FieldLabel>
+                      <ToggleGroup
+                        value={[field.value]}
+                        onValueChange={(next) => {
+                          if (next.length > 0) {
+                            changeType(next[0])
+                          }
+                        }}
+                        variant="outline"
+                        size="sm"
+                        aria-label="Tipo"
+                      >
+                        {typeOptions.map((option) => (
+                          <ToggleGroupItem
+                            key={option.value}
+                            value={option.value}
+                            className="rounded-full"
+                          >
+                            {option.label}
+                          </ToggleGroupItem>
+                        ))}
+                      </ToggleGroup>
+                    </Field>
+                  )}
+                />
+              ) : null}
+              {accountType !== "CASH" ? (
+                <>
+                  <Field className="gap-1">
+                    <FieldLabel className="text-sm text-muted-foreground">
+                      Institución
+                    </FieldLabel>
+                    <InstitutionTrigger
+                      institution={selectedInstitution}
+                      placeholder={
+                        hasInstitutions
+                          ? "Elige la institución"
+                          : "Crea una institución primero"
+                      }
+                      disabled={!hasInstitutions}
+                      onClick={() => openPicker("institution")}
+                    />
+                    {errors.institutionId?.message ? (
+                      <FieldError>{errors.institutionId.message}</FieldError>
+                    ) : null}
+                  </Field>
+                  <Controller
+                    control={control}
+                    name="accountNumber"
+                    render={({ field }) => (
+                      <Field
+                        data-invalid={errors.accountNumber ? true : undefined}
+                        className="gap-0.5"
+                      >
+                        <FieldLabel
+                          htmlFor="account-number"
+                          className="pl-2 text-sm text-muted-foreground"
+                        >
+                          Número de cuenta
+                        </FieldLabel>
+                        <InputGroup className="h-10 overflow-hidden px-1">
+                          <InputGroupAddon align="inline-start">
+                            <HashIcon className="text-muted-foreground" />
+                          </InputGroupAddon>
+                          <InputGroupInput
+                            id="account-number"
+                            value={field.value}
+                            onChange={(event) =>
+                              field.onChange(event.target.value)
+                            }
+                            onBlur={field.onBlur}
+                            placeholder={
+                              isEdit && account?.accountNumberLast4
+                                ? `Deja vacío para conservar •••• ${account.accountNumberLast4}`
+                                : "0123456789"
+                            }
+                            aria-invalid={
+                              errors.accountNumber ? true : undefined
+                            }
+                          />
+                        </InputGroup>
+                        {lastFourOnly && !isEdit ? (
+                          <FieldDescription>
+                            Basta con los últimos 4 dígitos; el número completo
+                            es opcional.
+                          </FieldDescription>
+                        ) : null}
+                        {errors.accountNumber?.message ? (
+                          <FieldError>
+                            {errors.accountNumber.message}
+                          </FieldError>
+                        ) : null}
+                      </Field>
+                    )}
+                  />
+                  <Controller
+                    control={control}
+                    name="isDefaultForInstitution"
+                    render={({ field }) => (
+                      <SwitchFieldRow
+                        icon={Star}
+                        iconColor={getModule("finance").accent}
+                        label="Cuenta predeterminada"
+                        description="Se usa cuando el correo del banco no trae dígitos de cuenta."
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    )}
+                  />
+                </>
+              ) : null}
+              {!isEdit ? (
+                <Controller
+                  control={control}
+                  name="initialBalance"
+                  render={({ field }) => (
+                    <FinanceMoneyField
+                      calculatorKey="account-opening-balance"
+                      label="Saldo inicial"
+                      amount={field.value}
+                      onAmountChange={field.onChange}
+                      onAmountCommit={(next) => {
+                        field.onChange(next)
+                        void trigger("initialBalance")
+                      }}
+                      onAmountBlur={field.onBlur}
+                      amountError={errors.initialBalance?.message}
+                      currency={accountCurrency || defaultCurrency}
+                      onCurrencyPress={() => openPicker("currency")}
+                    />
+                  )}
+                />
+              ) : null}
+            </SummarySection>
+
+            <SummarySection title="Apariencia" icon={Palette}>
               <Controller
                 control={control}
-                name="isDefaultForInstitution"
+                name="color"
                 render={({ field }) => (
-                  <SwitchFieldRow
-                    icon={Star}
-                    iconColor={getModule("finance").accent}
-                    label="Cuenta predeterminada"
-                    description="Se usa cuando el correo del banco no trae dígitos de cuenta."
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
+                  <div className="flex flex-col gap-2">
+                    <Label htmlFor="account-color">Color</Label>
+                    <ColorPickerSwatch
+                      id="account-color"
+                      variant="button"
+                      value={field.value}
+                      onChange={field.onChange}
+                    />
+                  </div>
                 )}
               />
-            </>
+            </SummarySection>
+          </SheetBody>
+          {!pending ? (
+            <DrawerFooter className={SHEET_FOOTER_CLASS}>
+              <Button
+                type="button"
+                variant="outline"
+                className="flex-1"
+                onClick={() => requestOpenChange(false)}
+              >
+                <XIcon className="size-4 shrink-0" aria-hidden="true" />
+                Cancelar
+              </Button>
+              <Button
+                disabled={isPending || (!isEdit && !hasInstitutions)}
+                className="flex-1"
+                onClick={onSubmit}
+              >
+                {isPending ? (
+                  <Spinner data-icon="inline-start" />
+                ) : (
+                  <SaveIcon className="size-4 shrink-0" />
+                )}
+                {isPending ? "Guardando..." : "Guardar"}
+              </Button>
+            </DrawerFooter>
           ) : null}
-          {!isEdit ? (
-            <Controller
-              control={control}
-              name="initialBalance"
-              render={({ field }) => (
-                <FinanceMoneyField
-                  calculatorKey="account-opening-balance"
-                  label="Saldo inicial"
-                  amount={field.value}
-                  onAmountChange={field.onChange}
-                  onAmountCommit={(next) => {
-                    field.onChange(next)
-                    void trigger("initialBalance")
-                  }}
-                  onAmountBlur={field.onBlur}
-                  amountError={errors.initialBalance?.message}
-                  currency={accountCurrency || defaultCurrency}
-                  onCurrencyPress={() => openPicker("currency")}
-                />
-              )}
-            />
-          ) : null}
-        </SummarySection>
+        </DrawerContent>
+        <InstitutionPickerSheet
+          open={picker === "institution"}
+          onOpenChange={closeHandlerFor("institution")}
+          institutions={institutions}
+          value={institutionId}
+          onSelect={(next) =>
+            setValue("institutionId", next, { shouldValidate: true })
+          }
+        />
 
-        <SummarySection title="Apariencia" icon={Palette}>
-          <Controller
-            control={control}
-            name="color"
-            render={({ field }) => (
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="account-color">Color</Label>
-                <ColorPickerSwatch
-                  id="account-color"
-                  variant="button"
-                  value={field.value}
-                  onChange={field.onChange}
-                />
-              </div>
-            )}
-          />
-        </SummarySection>
-      </BottomSheet>
+        <FinanceCurrencyPickerSheet
+          open={picker === "currency"}
+          onOpenChange={closeHandlerFor("currency")}
+          value={accountCurrency || defaultCurrency}
+          onSelect={(next) =>
+            setValue("currency", next, { shouldValidate: true })
+          }
+        />
+      </Drawer>
 
       {discardChangesDialog}
-
-      <InstitutionPickerSheet
-        open={picker === "institution"}
-        onOpenChange={closeHandlerFor("institution")}
-        institutions={institutions}
-        value={institutionId}
-        onSelect={(next) =>
-          setValue("institutionId", next, { shouldValidate: true })
-        }
-      />
-
-      <FinanceCurrencyPickerSheet
-        open={picker === "currency"}
-        onOpenChange={closeHandlerFor("currency")}
-        value={accountCurrency || defaultCurrency}
-        onSelect={(next) =>
-          setValue("currency", next, { shouldValidate: true })
-        }
-      />
     </>
   )
 }

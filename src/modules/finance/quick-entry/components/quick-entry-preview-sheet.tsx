@@ -287,27 +287,26 @@ export function QuickEntryPreviewSheet({
             </Button>
           </DrawerFooter>
         </DrawerContent>
+        {/* La vista previa se cierra sola al recargar: el selector no vive sin ella. */}
+        <CategoryPickerSheet
+          open={open && picker === "category"}
+          onOpenChange={closeHandlerFor("category")}
+          categories={categories}
+          categoryType={type === "DEBIT" ? "EXPENSE" : "INCOME"}
+          value={categoryId}
+          onSelect={setCategoryId}
+        />
+
+        <DestinationPickerSheet
+          open={open && picker === "destination"}
+          onOpenChange={closeHandlerFor("destination")}
+          institutions={institutions}
+          accounts={accounts}
+          cards={cards}
+          display={display}
+          onSelect={setDestination}
+        />
       </Drawer>
-
-      {/* La vista previa se cierra sola al recargar: el selector no vive sin ella. */}
-      <CategoryPickerSheet
-        open={open && picker === "category"}
-        onOpenChange={closeHandlerFor("category")}
-        categories={categories}
-        categoryType={type === "DEBIT" ? "EXPENSE" : "INCOME"}
-        value={categoryId}
-        onSelect={setCategoryId}
-      />
-
-      <DestinationPickerSheet
-        open={open && picker === "destination"}
-        onOpenChange={closeHandlerFor("destination")}
-        institutions={institutions}
-        accounts={accounts}
-        cards={cards}
-        display={display}
-        onSelect={setDestination}
-      />
     </>
   )
 }

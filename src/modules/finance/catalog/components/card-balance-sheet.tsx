@@ -25,8 +25,15 @@ import {
   type FinanceMoneyDisplay,
 } from "@/src/modules/finance/shared/lib/money"
 import type { FinanceCard } from "@/src/modules/finance/shared/types/entities"
-import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { SheetBody } from "@/src/shared/components/sheets/sheet-body"
+import { SheetHeader } from "@/src/shared/components/sheets/sheet-header"
+import { SHEET_FOOTER_CLASS } from "@/src/shared/components/sheets/sheet-layout"
 import { Button } from "@/src/shared/components/ui/button"
+import {
+  Drawer,
+  DrawerContent,
+  DrawerFooter,
+} from "@/src/shared/components/ui/drawer"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -275,188 +282,199 @@ function CardBalanceSheetForm({
 
   return (
     <>
-      <BottomSheet
-        open={open}
-        onOpenChange={requestOpenChange}
-        helpAction={
-          <SheetHelpAction sheetKey={FINANCE_SHEET_KEYS.cardBalance} />
-        }
-        pending={pending || saving}
-        title={card ? `Saldos · ${card.name}` : "Saldos de tarjeta"}
-        description="El saldo nuevo queda como un reajuste. El límite de crédito se guarda aparte."
-        actions={{
-          submit: (
-            <Button
-              disabled={saving || !card}
-              className="flex-1"
-              onClick={onSubmit}
-            >
-              {saving ? (
-                <Spinner data-icon="inline-start" />
-              ) : (
-                <SaveIcon className="size-4 shrink-0" />
-              )}
-              {saving ? "Guardando..." : "Guardar"}
-            </Button>
-          ),
-        }}
-      >
-        <SummarySection title="Monedas" icon={WalletIcon}>
-          {(card?.balances ?? []).map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              onClick={() => selectExisting(item.currency)}
-              className={cn(
-                "flex w-full items-center justify-between rounded-xl border px-3 py-2 text-left text-sm",
-                !isAdding && mode.currency === item.currency
-                  ? "border-primary bg-primary/10"
-                  : "border-border bg-card"
-              )}
-            >
-              <span className="font-medium">{item.currency}</span>
-              <span className="text-muted-foreground tabular-nums">
-                {formatFinanceMoney(item.balance, {
-                  currency: item.currency,
-                  showCents: display?.showCents ?? true,
-                  compactNumbers: display?.compactNumbers ?? false,
-                  locale: formatLocale,
-                })}
-              </span>
-            </button>
-          ))}
-          {canAddCurrency ? (
-            <Button type="button" variant="outline" onClick={startAdd}>
-              <PlusIcon />
-              Agregar moneda
-            </Button>
-          ) : null}
-        </SummarySection>
-
-        <SummarySection
-          title={isAdding ? "Nueva moneda" : `Editar ${mode.currency}`}
-          icon={WalletIcon}
-        >
-          <Controller
-            control={control}
-            name="balance"
-            render={({ field }) => (
-              <FinanceMoneyField
-                calculatorKey="card-balance-amount"
-                label="Saldo"
-                amount={field.value}
-                onAmountChange={field.onChange}
-                onAmountCommit={(next) => {
-                  field.onChange(next)
-                  void trigger("balance")
-                }}
-                onAmountBlur={field.onBlur}
-                amountError={errors.balance?.message}
-                currency={selectedCurrency || defaultCurrency}
-                onCurrencyPress={
-                  isAdding ? () => openPicker("currency") : undefined
-                }
-              />
-            )}
+      <Drawer open={open} onOpenChange={requestOpenChange}>
+        <DrawerContent>
+          <SheetHeader
+            title={card ? `Saldos · ${card.name}` : "Saldos de tarjeta"}
+            description="El saldo nuevo queda como un reajuste. El límite de crédito se guarda aparte."
+            pending={pending || saving}
+            actions={
+              <SheetHelpAction sheetKey={FINANCE_SHEET_KEYS.cardBalance} />
+            }
           />
-          {!isAdding && difference !== null && difference !== 0 ? (
-            <p className="px-1 text-sm text-muted-foreground">
-              Ajuste{" "}
-              <span className="font-medium text-foreground tabular-nums">
-                {formatFinanceMoney(difference, {
-                  currency: selectedCurrency || defaultCurrency,
-                  showCents: display?.showCents ?? true,
-                  compactNumbers: display?.compactNumbers ?? false,
-                  locale: formatLocale,
-                  leadingSign: true,
-                })}
-              </span>
-            </p>
-          ) : null}
-          {card?.type === "CREDIT" ? (
-            <Controller
-              control={control}
-              name="creditLimit"
-              render={({ field }) => (
-                <FinanceMoneyField
-                  calculatorKey="card-credit-limit"
-                  label="Límite de crédito"
-                  amount={field.value}
-                  onAmountChange={field.onChange}
-                  onAmountCommit={(next) => {
-                    field.onChange(next)
-                    void trigger("creditLimit")
-                  }}
-                  onAmountBlur={field.onBlur}
-                  amountError={errors.creditLimit?.message}
-                  currency={selectedCurrency || defaultCurrency}
+          <SheetBody pending={pending || saving}>
+            <SummarySection title="Monedas" icon={WalletIcon}>
+              {(card?.balances ?? []).map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => selectExisting(item.currency)}
+                  className={cn(
+                    "flex w-full items-center justify-between rounded-xl border px-3 py-2 text-left text-sm",
+                    !isAdding && mode.currency === item.currency
+                      ? "border-primary bg-primary/10"
+                      : "border-border bg-card"
+                  )}
+                >
+                  <span className="font-medium">{item.currency}</span>
+                  <span className="text-muted-foreground tabular-nums">
+                    {formatFinanceMoney(item.balance, {
+                      currency: item.currency,
+                      showCents: display?.showCents ?? true,
+                      compactNumbers: display?.compactNumbers ?? false,
+                      locale: formatLocale,
+                    })}
+                  </span>
+                </button>
+              ))}
+              {canAddCurrency ? (
+                <Button type="button" variant="outline" onClick={startAdd}>
+                  <PlusIcon />
+                  Agregar moneda
+                </Button>
+              ) : null}
+            </SummarySection>
+
+            <SummarySection
+              title={isAdding ? "Nueva moneda" : `Editar ${mode.currency}`}
+              icon={WalletIcon}
+            >
+              <Controller
+                control={control}
+                name="balance"
+                render={({ field }) => (
+                  <FinanceMoneyField
+                    calculatorKey="card-balance-amount"
+                    label="Saldo"
+                    amount={field.value}
+                    onAmountChange={field.onChange}
+                    onAmountCommit={(next) => {
+                      field.onChange(next)
+                      void trigger("balance")
+                    }}
+                    onAmountBlur={field.onBlur}
+                    amountError={errors.balance?.message}
+                    currency={selectedCurrency || defaultCurrency}
+                    onCurrencyPress={
+                      isAdding ? () => openPicker("currency") : undefined
+                    }
+                  />
+                )}
+              />
+              {!isAdding && difference !== null && difference !== 0 ? (
+                <p className="px-1 text-sm text-muted-foreground">
+                  Ajuste{" "}
+                  <span className="font-medium text-foreground tabular-nums">
+                    {formatFinanceMoney(difference, {
+                      currency: selectedCurrency || defaultCurrency,
+                      showCents: display?.showCents ?? true,
+                      compactNumbers: display?.compactNumbers ?? false,
+                      locale: formatLocale,
+                      leadingSign: true,
+                    })}
+                  </span>
+                </p>
+              ) : null}
+              {card?.type === "CREDIT" ? (
+                <Controller
+                  control={control}
+                  name="creditLimit"
+                  render={({ field }) => (
+                    <FinanceMoneyField
+                      calculatorKey="card-credit-limit"
+                      label="Límite de crédito"
+                      amount={field.value}
+                      onAmountChange={field.onChange}
+                      onAmountCommit={(next) => {
+                        field.onChange(next)
+                        void trigger("creditLimit")
+                      }}
+                      onAmountBlur={field.onBlur}
+                      amountError={errors.creditLimit?.message}
+                      currency={selectedCurrency || defaultCurrency}
+                    />
+                  )}
                 />
-              )}
-            />
+              ) : null}
+              {!isAdding ? (
+                <Button
+                  type="button"
+                  variant="destructive"
+                  disabled={saving}
+                  onClick={() => setConfirmDeleteOpen(true)}
+                >
+                  <TrashIcon className="size-4 shrink-0" />
+                  {`Eliminar ${mode.currency}`}
+                </Button>
+              ) : null}
+            </SummarySection>
+          </SheetBody>
+          {!pending && !saving ? (
+            <DrawerFooter className={SHEET_FOOTER_CLASS}>
+              <Button
+                type="button"
+                variant="outline"
+                className="flex-1"
+                onClick={() => requestOpenChange(false)}
+              >
+                <XIcon className="size-4 shrink-0" aria-hidden="true" />
+                Cancelar
+              </Button>
+              <Button
+                disabled={saving || !card}
+                className="flex-1"
+                onClick={onSubmit}
+              >
+                {saving ? (
+                  <Spinner data-icon="inline-start" />
+                ) : (
+                  <SaveIcon className="size-4 shrink-0" />
+                )}
+                {saving ? "Guardando..." : "Guardar"}
+              </Button>
+            </DrawerFooter>
           ) : null}
-          {!isAdding ? (
-            <Button
-              type="button"
-              variant="destructive"
-              disabled={saving}
-              onClick={() => setConfirmDeleteOpen(true)}
-            >
-              <TrashIcon className="size-4 shrink-0" />
-              {`Eliminar ${mode.currency}`}
-            </Button>
-          ) : null}
-        </SummarySection>
-      </BottomSheet>
+        </DrawerContent>
+        {discardChangesDialog}
 
-      {discardChangesDialog}
+        <AlertDialog
+          open={confirmDeleteOpen}
+          onOpenChange={(open) => {
+            if (!deleteBalanceMutation.isPending) {
+              setConfirmDeleteOpen(open)
+            }
+          }}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogMedia className="bg-destructive/10 text-destructive">
+                <TrashIcon aria-hidden="true" />
+              </AlertDialogMedia>
+              <AlertDialogTitle>¿Eliminar {mode.currency}?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Se quita ese saldo de la tarjeta. No se puede deshacer.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={deleteBalanceMutation.isPending}>
+                <XIcon className="size-4 shrink-0" aria-hidden="true" />
+                Cancelar
+              </AlertDialogCancel>
+              <AlertDialogAction
+                variant="destructive"
+                disabled={deleteBalanceMutation.isPending}
+                onClick={() => void deleteCurrency()}
+              >
+                {deleteBalanceMutation.isPending ? (
+                  <Spinner data-icon="inline-start" />
+                ) : (
+                  <TrashIcon className="size-4 shrink-0" aria-hidden="true" />
+                )}
+                {deleteBalanceMutation.isPending ? "Eliminando..." : "Eliminar"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
 
-      <AlertDialog
-        open={confirmDeleteOpen}
-        onOpenChange={(open) => {
-          if (!deleteBalanceMutation.isPending) {
-            setConfirmDeleteOpen(open)
+        <FinanceCurrencyPickerSheet
+          open={picker === "currency"}
+          onOpenChange={closeHandlerFor("currency")}
+          value={selectedCurrency || defaultCurrency}
+          onSelect={(next) =>
+            setValue("currency", next, { shouldValidate: true })
           }
-        }}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogMedia className="bg-destructive/10 text-destructive">
-              <TrashIcon aria-hidden="true" />
-            </AlertDialogMedia>
-            <AlertDialogTitle>¿Eliminar {mode.currency}?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Se quita ese saldo de la tarjeta. No se puede deshacer.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleteBalanceMutation.isPending}>
-              <XIcon className="size-4 shrink-0" aria-hidden="true" />
-              Cancelar
-            </AlertDialogCancel>
-            <AlertDialogAction
-              variant="destructive"
-              disabled={deleteBalanceMutation.isPending}
-              onClick={() => void deleteCurrency()}
-            >
-              {deleteBalanceMutation.isPending ? (
-                <Spinner data-icon="inline-start" />
-              ) : (
-                <TrashIcon className="size-4 shrink-0" aria-hidden="true" />
-              )}
-              {deleteBalanceMutation.isPending ? "Eliminando..." : "Eliminar"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      <FinanceCurrencyPickerSheet
-        open={picker === "currency"}
-        onOpenChange={closeHandlerFor("currency")}
-        value={selectedCurrency || defaultCurrency}
-        onSelect={(next) =>
-          setValue("currency", next, { shouldValidate: true })
-        }
-      />
+        />
+      </Drawer>
     </>
   )
 }

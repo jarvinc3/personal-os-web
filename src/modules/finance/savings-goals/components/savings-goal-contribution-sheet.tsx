@@ -24,10 +24,17 @@ import {
 import { monthlySavingsSuggestion } from "@/src/modules/finance/shared/lib/planning-lists"
 import { buildSavingsGoalContributionBody } from "@/src/modules/finance/shared/lib/planning-payloads"
 import { defaultContributionAccountId } from "@/src/modules/finance/savings-goals/lib/contribution-account"
-import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { SheetBody } from "@/src/shared/components/sheets/sheet-body"
+import { SheetHeader } from "@/src/shared/components/sheets/sheet-header"
+import { SHEET_FOOTER_CLASS } from "@/src/shared/components/sheets/sheet-layout"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import { SheetHelpAction } from "@/src/modules/help"
 import { Button } from "@/src/shared/components/ui/button"
+import {
+  Drawer,
+  DrawerContent,
+  DrawerFooter,
+} from "@/src/shared/components/ui/drawer"
 import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
 import {
   InputGroup,
@@ -48,6 +55,7 @@ import {
   SaveIcon,
   SparklesIcon,
   TargetIcon,
+  XIcon,
 } from "lucide-react"
 import { useEffect, useMemo } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
@@ -232,249 +240,260 @@ export function SavingsGoalContributionSheet({
 
   return (
     <>
-      <BottomSheet
-        open={open}
-        onOpenChange={requestOpenChange}
-        helpAction={
-          <SheetHelpAction
-            sheetKey={
+      <Drawer open={open} onOpenChange={requestOpenChange}>
+        <DrawerContent>
+          <SheetHeader
+            title={isWithdrawal ? "Retirar dinero" : "Registrar aporte"}
+            description={
               isWithdrawal
-                ? FINANCE_SHEET_KEYS.savingsWithdrawal
-                : FINANCE_SHEET_KEYS.savingsContribution
+                ? goalName
+                  ? `El dinero sale de la cuenta de ${goalName}.`
+                  : "El dinero sale de la cuenta de la meta."
+                : goalName
+                  ? `Se suma al avance de ${goalName}.`
+                  : "Se suma al avance de la meta."
+            }
+            pending={pending}
+            actions={
+              <SheetHelpAction
+                sheetKey={
+                  isWithdrawal
+                    ? FINANCE_SHEET_KEYS.savingsWithdrawal
+                    : FINANCE_SHEET_KEYS.savingsContribution
+                }
+              />
             }
           />
-        }
-        pending={pending}
-        title={isWithdrawal ? "Retirar dinero" : "Registrar aporte"}
-        description={
-          isWithdrawal
-            ? goalName
-              ? `El dinero sale de la cuenta de ${goalName}.`
-              : "El dinero sale de la cuenta de la meta."
-            : goalName
-              ? `Se suma al avance de ${goalName}.`
-              : "Se suma al avance de la meta."
-        }
-        actions={{
-          submit: (
-            <Button
-              type="button"
-              disabled={createMutation.isPending || exceedsFreeBalance}
-              className="flex-1"
-              onClick={onSubmit}
+          <SheetBody pending={pending}>
+            <SummarySection
+              title={isWithdrawal ? "Retiro" : "Aporte"}
+              icon={PiggyBankIcon}
             >
-              {createMutation.isPending ? (
-                <Spinner data-icon="inline-start" />
-              ) : isWithdrawal ? (
-                <BanknoteIcon className="size-4 shrink-0" />
-              ) : (
-                <SaveIcon className="size-4 shrink-0" />
-              )}
-              {isWithdrawal ? "Retirar" : "Registrar"}
-            </Button>
-          ),
-        }}
-      >
-        <SummarySection
-          title={isWithdrawal ? "Retiro" : "Aporte"}
-          icon={PiggyBankIcon}
-        >
-          <Controller
-            control={control}
-            name="amount"
-            render={({ field }) => (
-              <FinanceMoneyField
-                calculatorKey="savings-contribution-amount"
-                label="Monto"
-                amount={field.value}
-                onAmountChange={field.onChange}
-                onAmountCommit={(next) => {
-                  field.onChange(next)
-                  void trigger("amount")
-                }}
-                onAmountBlur={field.onBlur}
-                amountError={errors.amount?.message}
-                currency={goalCurrency}
-              />
-            )}
-          />
-          {originFreeBalance !== null ? (
-            <p className="text-xs text-muted-foreground">
-              {`Saldo libre en ${originAccount?.name ?? "la cuenta"}: ${formatFinanceMoney(originFreeBalance, display)}`}
-            </p>
-          ) : null}
-          {exceedsFreeBalance ? (
-            <p className="flex items-start gap-1.5 text-xs text-destructive">
-              <CircleAlertIcon className="mt-px size-3.5 shrink-0" />
-              El monto supera el saldo libre de esa cuenta. Baja el monto o
-              elige otra cuenta de origen.
-            </p>
-          ) : null}
-          {withdrawalExceeds ? (
-            <p className="flex items-start gap-1.5 text-xs text-destructive">
-              <CircleAlertIcon className="mt-px size-3.5 shrink-0" />
-              Solo puedes retirar hasta{" "}
-              {formatFinanceMoney(currentAmount ?? "0", display)}.
-            </p>
-          ) : null}
-          {surplusAfterContribution !== null ? (
-            <p className="flex items-start gap-1.5 text-xs text-amber-600 dark:text-amber-500">
-              <CircleAlertIcon className="mt-px size-3.5 shrink-0" />
-              Este aporte deja{" "}
-              {formatFinanceMoney(surplusAfterContribution, display)} por encima
-              de la meta.
-            </p>
-          ) : null}
-          {isWithdrawal ? (
-            <div className="flex flex-wrap gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() =>
-                  setValue("amount", currentAmount ?? "0", {
-                    shouldValidate: true,
-                  })
-                }
-              >
-                <TargetIcon className="size-4 shrink-0" />
-                {`Todo ${formatFinanceMoney(currentAmount ?? "0", display)}`}
-              </Button>
-            </div>
-          ) : remaining !== null && remaining > 0 ? (
-            <div className="flex flex-wrap gap-2">
-              {suggestion ? (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() =>
-                    setValue(
-                      "amount",
-                      String(Math.round(suggestion.monthlyAmount)),
-                      {
-                        shouldValidate: true,
-                      }
-                    )
-                  }
-                >
-                  <SparklesIcon className="size-4 shrink-0" />
-                  {`Sugerido ${formatFinanceMoney(suggestion.monthlyAmount, display)}`}
-                </Button>
-              ) : null}
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() =>
-                  setValue("amount", String(Math.round(remaining)), {
-                    shouldValidate: true,
-                  })
-                }
-              >
-                <TargetIcon className="size-4 shrink-0" />
-                {`Lo que falta ${formatFinanceMoney(remaining, display)}`}
-              </Button>
-            </div>
-          ) : null}
-          <Controller
-            control={control}
-            name="accountId"
-            render={({ field }) => (
-              <Field className="gap-1">
-                <FieldLabel className="text-sm text-muted-foreground">
-                  {isWithdrawal ? "Cuenta de destino" : "Cuenta de origen"}
-                </FieldLabel>
-                <DestinationTrigger
-                  destination={
-                    field.value
-                      ? encodeLedgerTarget("account", field.value)
-                      : CATALOG_NONE
-                  }
-                  accounts={activeAccounts}
-                  cards={[]}
-                  display={display}
-                  placeholder={
-                    isWithdrawal
-                      ? "Elige la cuenta que recibe"
-                      : "Elige la cuenta"
-                  }
-                  onClick={() => openPicker("account")}
-                />
-                {errors.accountId?.message ? (
-                  <FieldError>{errors.accountId.message}</FieldError>
-                ) : null}
-              </Field>
-            )}
-          />
-          <Controller
-            control={control}
-            name="contributedAt"
-            render={({ field }) => (
-              <FinanceDateField
-                label="Fecha"
-                value={field.value}
-                onChange={field.onChange}
-                optional
-              />
-            )}
-          />
-          <Controller
-            control={control}
-            name="notes"
-            render={({ field }) => (
-              <Field
-                data-invalid={errors.notes ? true : undefined}
-                className="gap-0.5"
-              >
-                <FieldLabel
-                  htmlFor="contribution-notes"
-                  className="pl-2 text-sm text-muted-foreground"
-                >
-                  Nota
-                </FieldLabel>
-                <InputGroup className="h-10 overflow-hidden px-1">
-                  <InputGroupAddon align="inline-start">
-                    <NotebookPenIcon className="text-muted-foreground" />
-                  </InputGroupAddon>
-                  <InputGroupInput
-                    id="contribution-notes"
-                    value={field.value}
-                    onChange={(event) => field.onChange(event.target.value)}
-                    onBlur={field.onBlur}
-                    aria-invalid={errors.notes ? true : undefined}
+              <Controller
+                control={control}
+                name="amount"
+                render={({ field }) => (
+                  <FinanceMoneyField
+                    calculatorKey="savings-contribution-amount"
+                    label="Monto"
+                    amount={field.value}
+                    onAmountChange={field.onChange}
+                    onAmountCommit={(next) => {
+                      field.onChange(next)
+                      void trigger("amount")
+                    }}
+                    onAmountBlur={field.onBlur}
+                    amountError={errors.amount?.message}
+                    currency={goalCurrency}
                   />
-                </InputGroup>
-                {errors.notes?.message ? (
-                  <FieldError>{errors.notes.message}</FieldError>
-                ) : null}
-              </Field>
-            )}
-          />
-          <FinanceHelpText>
-            {isWithdrawal
-              ? "El retiro mueve el dinero a la cuenta elegida. No cuenta como ingreso ni gasto."
-              : "El origen es la cuenta de donde sale el dinero; la cuenta de la meta es donde queda apartado, y el aporte no lo gasta: sigue en su saldo."}
-          </FinanceHelpText>
-        </SummarySection>
-      </BottomSheet>
+                )}
+              />
+              {originFreeBalance !== null ? (
+                <p className="text-xs text-muted-foreground">
+                  {`Saldo libre en ${originAccount?.name ?? "la cuenta"}: ${formatFinanceMoney(originFreeBalance, display)}`}
+                </p>
+              ) : null}
+              {exceedsFreeBalance ? (
+                <p className="flex items-start gap-1.5 text-xs text-destructive">
+                  <CircleAlertIcon className="mt-px size-3.5 shrink-0" />
+                  El monto supera el saldo libre de esa cuenta. Baja el monto o
+                  elige otra cuenta de origen.
+                </p>
+              ) : null}
+              {withdrawalExceeds ? (
+                <p className="flex items-start gap-1.5 text-xs text-destructive">
+                  <CircleAlertIcon className="mt-px size-3.5 shrink-0" />
+                  Solo puedes retirar hasta{" "}
+                  {formatFinanceMoney(currentAmount ?? "0", display)}.
+                </p>
+              ) : null}
+              {surplusAfterContribution !== null ? (
+                <p className="flex items-start gap-1.5 text-xs text-amber-600 dark:text-amber-500">
+                  <CircleAlertIcon className="mt-px size-3.5 shrink-0" />
+                  Este aporte deja{" "}
+                  {formatFinanceMoney(surplusAfterContribution, display)} por
+                  encima de la meta.
+                </p>
+              ) : null}
+              {isWithdrawal ? (
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      setValue("amount", currentAmount ?? "0", {
+                        shouldValidate: true,
+                      })
+                    }
+                  >
+                    <TargetIcon className="size-4 shrink-0" />
+                    {`Todo ${formatFinanceMoney(currentAmount ?? "0", display)}`}
+                  </Button>
+                </div>
+              ) : remaining !== null && remaining > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {suggestion ? (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        setValue(
+                          "amount",
+                          String(Math.round(suggestion.monthlyAmount)),
+                          {
+                            shouldValidate: true,
+                          }
+                        )
+                      }
+                    >
+                      <SparklesIcon className="size-4 shrink-0" />
+                      {`Sugerido ${formatFinanceMoney(suggestion.monthlyAmount, display)}`}
+                    </Button>
+                  ) : null}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      setValue("amount", String(Math.round(remaining)), {
+                        shouldValidate: true,
+                      })
+                    }
+                  >
+                    <TargetIcon className="size-4 shrink-0" />
+                    {`Lo que falta ${formatFinanceMoney(remaining, display)}`}
+                  </Button>
+                </div>
+              ) : null}
+              <Controller
+                control={control}
+                name="accountId"
+                render={({ field }) => (
+                  <Field className="gap-1">
+                    <FieldLabel className="text-sm text-muted-foreground">
+                      {isWithdrawal ? "Cuenta de destino" : "Cuenta de origen"}
+                    </FieldLabel>
+                    <DestinationTrigger
+                      destination={
+                        field.value
+                          ? encodeLedgerTarget("account", field.value)
+                          : CATALOG_NONE
+                      }
+                      accounts={activeAccounts}
+                      cards={[]}
+                      display={display}
+                      placeholder={
+                        isWithdrawal
+                          ? "Elige la cuenta que recibe"
+                          : "Elige la cuenta"
+                      }
+                      onClick={() => openPicker("account")}
+                    />
+                    {errors.accountId?.message ? (
+                      <FieldError>{errors.accountId.message}</FieldError>
+                    ) : null}
+                  </Field>
+                )}
+              />
+              <Controller
+                control={control}
+                name="contributedAt"
+                render={({ field }) => (
+                  <FinanceDateField
+                    label="Fecha"
+                    value={field.value}
+                    onChange={field.onChange}
+                    optional
+                  />
+                )}
+              />
+              <Controller
+                control={control}
+                name="notes"
+                render={({ field }) => (
+                  <Field
+                    data-invalid={errors.notes ? true : undefined}
+                    className="gap-0.5"
+                  >
+                    <FieldLabel
+                      htmlFor="contribution-notes"
+                      className="pl-2 text-sm text-muted-foreground"
+                    >
+                      Nota
+                    </FieldLabel>
+                    <InputGroup className="h-10 overflow-hidden px-1">
+                      <InputGroupAddon align="inline-start">
+                        <NotebookPenIcon className="text-muted-foreground" />
+                      </InputGroupAddon>
+                      <InputGroupInput
+                        id="contribution-notes"
+                        value={field.value}
+                        onChange={(event) => field.onChange(event.target.value)}
+                        onBlur={field.onBlur}
+                        aria-invalid={errors.notes ? true : undefined}
+                      />
+                    </InputGroup>
+                    {errors.notes?.message ? (
+                      <FieldError>{errors.notes.message}</FieldError>
+                    ) : null}
+                  </Field>
+                )}
+              />
+              <FinanceHelpText>
+                {isWithdrawal
+                  ? "El retiro mueve el dinero a la cuenta elegida. No cuenta como ingreso ni gasto."
+                  : "El origen es la cuenta de donde sale el dinero; la cuenta de la meta es donde queda apartado, y el aporte no lo gasta: sigue en su saldo."}
+              </FinanceHelpText>
+            </SummarySection>
+          </SheetBody>
+          {!pending ? (
+            <DrawerFooter className={SHEET_FOOTER_CLASS}>
+              <Button
+                type="button"
+                variant="outline"
+                className="flex-1"
+                onClick={() => requestOpenChange(false)}
+              >
+                <XIcon className="size-4 shrink-0" aria-hidden="true" />
+                Cancelar
+              </Button>
+              <Button
+                type="button"
+                disabled={createMutation.isPending || exceedsFreeBalance}
+                className="flex-1"
+                onClick={onSubmit}
+              >
+                {createMutation.isPending ? (
+                  <Spinner data-icon="inline-start" />
+                ) : isWithdrawal ? (
+                  <BanknoteIcon className="size-4 shrink-0" />
+                ) : (
+                  <SaveIcon className="size-4 shrink-0" />
+                )}
+                {isWithdrawal ? "Retirar" : "Registrar"}
+              </Button>
+            </DrawerFooter>
+          ) : null}
+        </DrawerContent>
+        <DestinationPickerSheet
+          open={picker === "account"}
+          onOpenChange={closeHandlerFor("account")}
+          institutions={institutions}
+          accounts={activeAccounts}
+          cards={[]}
+          display={display}
+          accountsOnly
+          onSelect={(next) =>
+            setValue("accountId", splitLedgerTarget(next).accountId ?? "", {
+              shouldValidate: true,
+            })
+          }
+        />
+      </Drawer>
 
       {discardChangesDialog}
-
-      <DestinationPickerSheet
-        open={picker === "account"}
-        onOpenChange={closeHandlerFor("account")}
-        institutions={institutions}
-        accounts={activeAccounts}
-        cards={[]}
-        display={display}
-        accountsOnly
-        onSelect={(next) =>
-          setValue("accountId", splitLedgerTarget(next).accountId ?? "", {
-            shouldValidate: true,
-          })
-        }
-      />
     </>
   )
 }

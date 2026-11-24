@@ -3,7 +3,9 @@
 import { ApiError } from "@/src/config/api-client"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import { useUploadStatementImport } from "@/src/modules/finance/shared/hooks/use-statement-import"
-import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { SheetBody } from "@/src/shared/components/sheets/sheet-body"
+import { SheetHeader } from "@/src/shared/components/sheets/sheet-header"
+import { SHEET_FOOTER_CLASS } from "@/src/shared/components/sheets/sheet-layout"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import { SheetHelpAction } from "@/src/modules/help"
 import { Field, FieldLabel } from "@/src/shared/components/ui/field"
@@ -13,9 +15,14 @@ import {
   InputGroupInput,
 } from "@/src/shared/components/ui/input-group"
 import { Button } from "@/src/shared/components/ui/button"
+import {
+  Drawer,
+  DrawerContent,
+  DrawerFooter,
+} from "@/src/shared/components/ui/drawer"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { appToast } from "@/src/shared/lib/app-toast"
-import { ArrowRightIcon, FileUpIcon, KeyRound } from "lucide-react"
+import { ArrowRightIcon, FileUpIcon, KeyRound, XIcon } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useRef, useState } from "react"
 import { useEventSheet } from "@/src/shared/hooks/use-event-sheet"
@@ -70,6 +77,13 @@ export function StatementImportButton({
     }
   }
 
+  function handlePasswordOpenChange(next: boolean) {
+    passwordSheet.onOpenChange(next)
+    if (!next) {
+      setPassword("")
+    }
+  }
+
   return (
     <>
       <input
@@ -96,21 +110,49 @@ export function StatementImportButton({
         <FileUpIcon className="size-4 shrink-0" />
         {upload.isPending ? "Leyendo el PDF..." : label}
       </Button>
-      <BottomSheet
-        open={passwordSheet.open}
-        onOpenChange={(open) => {
-          passwordSheet.onOpenChange(open)
-          if (!open) {
-            setPassword("")
-          }
-        }}
-        helpAction={
-          <SheetHelpAction sheetKey={FINANCE_SHEET_KEYS.statementPassword} />
-        }
-        title="PDF con clave"
-        description="Escríbela para leer el estado de cuenta. No la guardamos."
-        actions={{
-          submit: (
+      <Drawer open={passwordSheet.open} onOpenChange={handlePasswordOpenChange}>
+        <DrawerContent>
+          <SheetHeader
+            title="PDF con clave"
+            description="Escríbela para leer el estado de cuenta. No la guardamos."
+            actions={
+              <SheetHelpAction
+                sheetKey={FINANCE_SHEET_KEYS.statementPassword}
+              />
+            }
+          />
+          <SheetBody>
+            <Field className="gap-0.5">
+              <FieldLabel
+                htmlFor="statement-pdf-password"
+                className="pl-2 text-sm text-muted-foreground"
+              >
+                Clave del PDF
+              </FieldLabel>
+              <InputGroup className="h-10 overflow-hidden px-1">
+                <InputGroupAddon align="inline-start">
+                  <KeyRound className="text-muted-foreground" />
+                </InputGroupAddon>
+                <InputGroupInput
+                  id="statement-pdf-password"
+                  type="password"
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  autoComplete="off"
+                />
+              </InputGroup>
+            </Field>
+          </SheetBody>
+          <DrawerFooter className={SHEET_FOOTER_CLASS}>
+            <Button
+              type="button"
+              variant="outline"
+              className="flex-1"
+              onClick={() => handlePasswordOpenChange(false)}
+            >
+              <XIcon className="size-4 shrink-0" aria-hidden="true" />
+              Cancelar
+            </Button>
             <Button
               type="button"
               disabled={upload.isPending || password.trim().length === 0}
@@ -123,30 +165,9 @@ export function StatementImportButton({
               <ArrowRightIcon className="size-4 shrink-0" />
               Continuar
             </Button>
-          ),
-        }}
-      >
-        <Field className="gap-0.5">
-          <FieldLabel
-            htmlFor="statement-pdf-password"
-            className="pl-2 text-sm text-muted-foreground"
-          >
-            Clave del PDF
-          </FieldLabel>
-          <InputGroup className="h-10 overflow-hidden px-1">
-            <InputGroupAddon align="inline-start">
-              <KeyRound className="text-muted-foreground" />
-            </InputGroupAddon>
-            <InputGroupInput
-              id="statement-pdf-password"
-              type="password"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              autoComplete="off"
-            />
-          </InputGroup>
-        </Field>
-      </BottomSheet>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
     </>
   )
 }

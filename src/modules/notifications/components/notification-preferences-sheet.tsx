@@ -86,12 +86,11 @@ export function NotificationPreferencesSheet({
             </Button>
           </DrawerFooter>
         </DrawerContent>
+        <EditQuietHoursSheet
+          open={quietHoursOpen}
+          onOpenChange={onQuietHoursOpenChange}
+        />
       </Drawer>
-
-      <EditQuietHoursSheet
-        open={quietHoursOpen}
-        onOpenChange={onQuietHoursOpenChange}
-      />
     </>
   )
 }

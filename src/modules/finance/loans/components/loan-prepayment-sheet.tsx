@@ -29,17 +29,29 @@ import {
   buildLoanPrepaymentBody,
   type LoanPrepaymentMode,
 } from "@/src/modules/finance/shared/lib/planning-payloads"
-import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { SheetBody } from "@/src/shared/components/sheets/sheet-body"
+import { SheetHeader } from "@/src/shared/components/sheets/sheet-header"
+import { SHEET_FOOTER_CLASS } from "@/src/shared/components/sheets/sheet-layout"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import { SheetHelpAction } from "@/src/modules/help"
 import { Button } from "@/src/shared/components/ui/button"
+import {
+  Drawer,
+  DrawerContent,
+  DrawerFooter,
+} from "@/src/shared/components/ui/drawer"
 import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { API_ENDPOINTS } from "@/src/shared/constants/api-endpoints"
 import { usePicker } from "@/src/shared/hooks/use-picker"
 import { appToast } from "@/src/shared/lib/app-toast"
-import { CalendarClockIcon, CoinsIcon, HandCoinsIcon } from "lucide-react"
+import {
+  CalendarClockIcon,
+  CoinsIcon,
+  HandCoinsIcon,
+  XIcon,
+} from "lucide-react"
 import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 
@@ -133,105 +145,120 @@ export function LoanPrepaymentSheet({
 
   return (
     <>
-      <BottomSheet
-        open={open}
-        onOpenChange={onOpenChange}
-        helpAction={
-          <SheetHelpAction sheetKey={FINANCE_SHEET_KEYS.loanPrepayment} />
-        }
-        pending={prepayment.isPending}
-        title="Abonar a capital"
-        description={`Reduce la deuda de ${lenderName}.`}
-        actions={{
-          submit: (
-            <Button
-              type="button"
-              disabled={prepayment.isPending}
-              className="flex-1"
-              onClick={() => void onSubmit()}
-            >
-              {prepayment.isPending ? (
-                <Spinner data-icon="inline-start" />
-              ) : null}
-              Abonar
-            </Button>
-          ),
-        }}
-      >
-        <SummarySection title="Abono" icon={HandCoinsIcon}>
-          <FinanceMoneyField
-            calculatorKey="loan-prepayment-amount"
-            label="Monto"
-            amount={amount}
-            onAmountChange={setAmount}
-            onAmountCommit={(next) => setAmount(next)}
-            amountError={amountError ?? undefined}
-            currency={currency}
+      <Drawer open={open} onOpenChange={onOpenChange}>
+        <DrawerContent>
+          <SheetHeader
+            title="Abonar a capital"
+            description={`Reduce la deuda de ${lenderName}.`}
+            pending={prepayment.isPending}
+            actions={
+              <SheetHelpAction sheetKey={FINANCE_SHEET_KEYS.loanPrepayment} />
+            }
           />
-          <div className="flex flex-wrap gap-2">
-            <Button
-              type="button"
-              variant={mode === "REDUCE_TERM" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setMode("REDUCE_TERM")}
-            >
-              <CalendarClockIcon className="size-4 shrink-0" />
-              Reducir plazo
-            </Button>
-            <Button
-              type="button"
-              variant={mode === "REDUCE_INSTALLMENT" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setMode("REDUCE_INSTALLMENT")}
-            >
-              <CoinsIcon className="size-4 shrink-0" />
-              Reducir cuota
-            </Button>
-          </div>
-          <FinanceHelpText>{PREPAYMENT_MODE_EXPLANATION[mode]}</FinanceHelpText>
-          <Field className="gap-1">
-            <FieldLabel className="text-sm text-muted-foreground">
-              Cuenta de origen
-            </FieldLabel>
-            <DestinationTrigger
-              destination={
-                effectiveAccountId
-                  ? encodeLedgerTarget("account", effectiveAccountId)
-                  : CATALOG_NONE
-              }
-              accounts={accounts}
-              cards={[]}
-              display={display}
-              placeholder="Elige la cuenta"
-              onClick={() => openPicker("account")}
-            />
-            {accounts.length === 0 ? (
-              <FieldError>Necesitas una cuenta activa.</FieldError>
-            ) : null}
-          </Field>
-          {previewLines.map((line) => (
-            <FinanceHelpText key={line}>{line}</FinanceHelpText>
-          ))}
-          {penalty > 0 ? (
-            <FinanceHelpText>
-              {`Penalidad estimada ${formatFinanceMoney(penalty, display)}`}
-            </FinanceHelpText>
+          <SheetBody pending={prepayment.isPending}>
+            <SummarySection title="Abono" icon={HandCoinsIcon}>
+              <FinanceMoneyField
+                calculatorKey="loan-prepayment-amount"
+                label="Monto"
+                amount={amount}
+                onAmountChange={setAmount}
+                onAmountCommit={(next) => setAmount(next)}
+                amountError={amountError ?? undefined}
+                currency={currency}
+              />
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  type="button"
+                  variant={mode === "REDUCE_TERM" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setMode("REDUCE_TERM")}
+                >
+                  <CalendarClockIcon className="size-4 shrink-0" />
+                  Reducir plazo
+                </Button>
+                <Button
+                  type="button"
+                  variant={
+                    mode === "REDUCE_INSTALLMENT" ? "default" : "outline"
+                  }
+                  size="sm"
+                  onClick={() => setMode("REDUCE_INSTALLMENT")}
+                >
+                  <CoinsIcon className="size-4 shrink-0" />
+                  Reducir cuota
+                </Button>
+              </div>
+              <FinanceHelpText>
+                {PREPAYMENT_MODE_EXPLANATION[mode]}
+              </FinanceHelpText>
+              <Field className="gap-1">
+                <FieldLabel className="text-sm text-muted-foreground">
+                  Cuenta de origen
+                </FieldLabel>
+                <DestinationTrigger
+                  destination={
+                    effectiveAccountId
+                      ? encodeLedgerTarget("account", effectiveAccountId)
+                      : CATALOG_NONE
+                  }
+                  accounts={accounts}
+                  cards={[]}
+                  display={display}
+                  placeholder="Elige la cuenta"
+                  onClick={() => openPicker("account")}
+                />
+                {accounts.length === 0 ? (
+                  <FieldError>Necesitas una cuenta activa.</FieldError>
+                ) : null}
+              </Field>
+              {previewLines.map((line) => (
+                <FinanceHelpText key={line}>{line}</FinanceHelpText>
+              ))}
+              {penalty > 0 ? (
+                <FinanceHelpText>
+                  {`Penalidad estimada ${formatFinanceMoney(penalty, display)}`}
+                </FinanceHelpText>
+              ) : null}
+            </SummarySection>
+          </SheetBody>
+          {!prepayment.isPending ? (
+            <DrawerFooter className={SHEET_FOOTER_CLASS}>
+              <Button
+                type="button"
+                variant="outline"
+                className="flex-1"
+                onClick={() => onOpenChange(false)}
+              >
+                <XIcon className="size-4 shrink-0" aria-hidden="true" />
+                Cancelar
+              </Button>
+              <Button
+                type="button"
+                disabled={prepayment.isPending}
+                className="flex-1"
+                onClick={() => void onSubmit()}
+              >
+                {prepayment.isPending ? (
+                  <Spinner data-icon="inline-start" />
+                ) : null}
+                Abonar
+              </Button>
+            </DrawerFooter>
           ) : null}
-        </SummarySection>
-      </BottomSheet>
-
-      <DestinationPickerSheet
-        open={picker === "account"}
-        onOpenChange={closeHandlerFor("account")}
-        institutions={institutions}
-        accounts={accounts}
-        cards={[]}
-        display={display}
-        accountsOnly
-        onSelect={(next) =>
-          setAccountId(splitLedgerTarget(next).accountId ?? "")
-        }
-      />
+        </DrawerContent>
+        <DestinationPickerSheet
+          open={picker === "account"}
+          onOpenChange={closeHandlerFor("account")}
+          institutions={institutions}
+          accounts={accounts}
+          cards={[]}
+          display={display}
+          accountsOnly
+          onSelect={(next) =>
+            setAccountId(splitLedgerTarget(next).accountId ?? "")
+          }
+        />
+      </Drawer>
     </>
   )
 }

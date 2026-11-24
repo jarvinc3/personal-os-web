@@ -1,7 +1,7 @@
 "use client"
 
 import { zodResolver } from "@hookform/resolvers/zod"
-import { HandCoinsIcon, SaveIcon } from "lucide-react"
+import { HandCoinsIcon, SaveIcon, XIcon } from "lucide-react"
 import { useMemo } from "react"
 import { Controller, useForm } from "react-hook-form"
 import { z } from "zod"
@@ -22,10 +22,17 @@ import {
 } from "@/src/modules/finance/shared/lib/ledger-form"
 import { useUserTimeZone } from "@/src/modules/settings/hooks/use-user-time-zone"
 import type { FinanceSubscription } from "@/src/modules/finance/shared/types/entities"
-import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { SheetBody } from "@/src/shared/components/sheets/sheet-body"
+import { SheetHeader } from "@/src/shared/components/sheets/sheet-header"
+import { SHEET_FOOTER_CLASS } from "@/src/shared/components/sheets/sheet-layout"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import { SheetHelpAction } from "@/src/modules/help"
 import { Button } from "@/src/shared/components/ui/button"
+import {
+  Drawer,
+  DrawerContent,
+  DrawerFooter,
+} from "@/src/shared/components/ui/drawer"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { appToast } from "@/src/shared/lib/app-toast"
@@ -144,68 +151,81 @@ export function SubscriptionPaymentSheet({
   })
 
   return (
-    <BottomSheet
-      open={open}
-      onOpenChange={onOpenChange}
-      helpAction={
-        <SheetHelpAction sheetKey={FINANCE_SHEET_KEYS.subscriptionPayment} />
-      }
-      pending={saving}
-      title="Registrar pago"
-      description={
-        paymentTargetName
-          ? `Crea el gasto en ${paymentTargetName} y avanza el próximo cobro.`
-          : "Asigna una cuenta o tarjeta a la suscripción para registrar el pago."
-      }
-      actions={{
-        submit: (
-          <Button
-            key="submit"
-            className="flex-1"
-            disabled={saving || !paymentTarget}
-            onClick={onSubmit}
-          >
-            {saving ? (
-              <Spinner data-icon="inline-start" />
-            ) : (
-              <SaveIcon className="size-4 shrink-0" />
-            )}
-            {saving ? "Guardando..." : "Guardar"}
-          </Button>
-        ),
-      }}
-    >
-      <SummarySection title="Pago" icon={HandCoinsIcon}>
-        <Controller
-          control={control}
-          name="amount"
-          render={({ field }) => (
-            <FinanceMoneyField
-              calculatorKey="subscription-payment-amount"
-              amount={field.value}
-              onAmountChange={field.onChange}
-              onAmountCommit={field.onChange}
-              amountError={errors.amount?.message}
-              currency={subscription.currency}
-              disabled={saving}
-              entryMode={amountEntry}
-              onEntryModeChange={setAmountEntry}
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent>
+        <SheetHeader
+          title="Registrar pago"
+          description={
+            paymentTargetName
+              ? `Crea el gasto en ${paymentTargetName} y avanza el próximo cobro.`
+              : "Asigna una cuenta o tarjeta a la suscripción para registrar el pago."
+          }
+          pending={saving}
+          actions={
+            <SheetHelpAction
+              sheetKey={FINANCE_SHEET_KEYS.subscriptionPayment}
             />
-          )}
+          }
         />
-        <Controller
-          control={control}
-          name="paidAt"
-          render={({ field }) => (
-            <FinanceDateField
-              label="Fecha del pago"
-              value={field.value}
-              onChange={field.onChange}
-              error={errors.paidAt?.message}
+        <SheetBody pending={saving}>
+          <SummarySection title="Pago" icon={HandCoinsIcon}>
+            <Controller
+              control={control}
+              name="amount"
+              render={({ field }) => (
+                <FinanceMoneyField
+                  calculatorKey="subscription-payment-amount"
+                  amount={field.value}
+                  onAmountChange={field.onChange}
+                  onAmountCommit={field.onChange}
+                  amountError={errors.amount?.message}
+                  currency={subscription.currency}
+                  disabled={saving}
+                  entryMode={amountEntry}
+                  onEntryModeChange={setAmountEntry}
+                />
+              )}
             />
-          )}
-        />
-      </SummarySection>
-    </BottomSheet>
+            <Controller
+              control={control}
+              name="paidAt"
+              render={({ field }) => (
+                <FinanceDateField
+                  label="Fecha del pago"
+                  value={field.value}
+                  onChange={field.onChange}
+                  error={errors.paidAt?.message}
+                />
+              )}
+            />
+          </SummarySection>
+        </SheetBody>
+        {!saving ? (
+          <DrawerFooter className={SHEET_FOOTER_CLASS}>
+            <Button
+              type="button"
+              variant="outline"
+              className="flex-1"
+              onClick={() => onOpenChange(false)}
+            >
+              <XIcon className="size-4 shrink-0" aria-hidden="true" />
+              Cancelar
+            </Button>
+            <Button
+              className="flex-1"
+              disabled={saving || !paymentTarget}
+              onClick={onSubmit}
+            >
+              {saving ? (
+                <Spinner data-icon="inline-start" />
+              ) : (
+                <SaveIcon className="size-4 shrink-0" />
+              )}
+              {saving ? "Guardando..." : "Guardar"}
+            </Button>
+          </DrawerFooter>
+        ) : null}
+      </DrawerContent>
+    </Drawer>
   )
 }

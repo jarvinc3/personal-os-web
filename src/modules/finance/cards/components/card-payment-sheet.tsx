@@ -39,8 +39,15 @@ import {
   formatFinanceMoney,
   parseFinanceMoney,
 } from "@/src/modules/finance/shared/lib/money"
-import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { SheetBody } from "@/src/shared/components/sheets/sheet-body"
+import { SheetHeader } from "@/src/shared/components/sheets/sheet-header"
+import { SHEET_FOOTER_CLASS } from "@/src/shared/components/sheets/sheet-layout"
 import { Button } from "@/src/shared/components/ui/button"
+import {
+  Drawer,
+  DrawerContent,
+  DrawerFooter,
+} from "@/src/shared/components/ui/drawer"
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -184,134 +191,145 @@ export function CardPaymentSheet({
 
   return (
     <>
-      <BottomSheet
-        open={open}
-        onOpenChange={onOpenChange}
-        helpAction={
-          <SheetHelpAction sheetKey={FINANCE_SHEET_KEYS.cardPayment} />
-        }
-        pending={createMutation.isPending}
-        title="Pagar tarjeta"
-        description={`Sale de tu cuenta y sube el disponible de ${cardName}.`}
-        actions={{
-          submit: (
-            <Button
-              type="button"
-              disabled={createMutation.isPending}
-              className="flex-1"
-              onClick={() => void onSubmit()}
-            >
-              {createMutation.isPending ? (
-                <Spinner data-icon="inline-start" />
-              ) : null}
-              Pagar
-            </Button>
-          ),
-        }}
-      >
-        <SummarySection title="Pago" icon={CreditCardIcon}>
-          {currencies.length > 1 ? (
-            <Field className="gap-1">
-              <FieldLabel>Moneda</FieldLabel>
-              <ToggleGroup
-                value={[currency]}
-                onValueChange={(next) => {
-                  if (next.length > 0) {
-                    setCurrency(next[0])
-                  }
-                }}
-                variant="outline"
-                size="sm"
-                aria-label="Moneda"
-              >
-                {currencies.map((code) => (
-                  <ToggleGroupItem
-                    key={code}
-                    value={code}
-                    className="rounded-full"
+      <Drawer open={open} onOpenChange={onOpenChange}>
+        <DrawerContent>
+          <SheetHeader
+            title="Pagar tarjeta"
+            description={`Sale de tu cuenta y sube el disponible de ${cardName}.`}
+            pending={createMutation.isPending}
+            actions={
+              <SheetHelpAction sheetKey={FINANCE_SHEET_KEYS.cardPayment} />
+            }
+          />
+          <SheetBody pending={createMutation.isPending}>
+            <SummarySection title="Pago" icon={CreditCardIcon}>
+              {currencies.length > 1 ? (
+                <Field className="gap-1">
+                  <FieldLabel>Moneda</FieldLabel>
+                  <ToggleGroup
+                    value={[currency]}
+                    onValueChange={(next) => {
+                      if (next.length > 0) {
+                        setCurrency(next[0])
+                      }
+                    }}
+                    variant="outline"
+                    size="sm"
+                    aria-label="Moneda"
                   >
-                    {code}
-                  </ToggleGroupItem>
-                ))}
-              </ToggleGroup>
-            </Field>
+                    {currencies.map((code) => (
+                      <ToggleGroupItem
+                        key={code}
+                        value={code}
+                        className="rounded-full"
+                      >
+                        {code}
+                      </ToggleGroupItem>
+                    ))}
+                  </ToggleGroup>
+                </Field>
+              ) : null}
+              <FinanceMoneyField
+                calculatorKey="card-payment-amount"
+                label="Monto"
+                amount={amount}
+                onAmountChange={setAmount}
+                onAmountCommit={(next) => setAmount(next)}
+                amountError={amountError ?? undefined}
+                currency={currency}
+              />
+              <div className="flex flex-wrap gap-2">
+                {minimum !== null && minimum > 0 ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setAmount(String(minimum))}
+                  >
+                    <CoinsIcon className="size-4 shrink-0" />
+                    {`Pago mínimo ${formatFinanceMoney(minimum, display)}`}
+                  </Button>
+                ) : null}
+                {closing !== null && closing > 0 ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setAmount(String(closing))}
+                  >
+                    <WalletIcon className="size-4 shrink-0" />
+                    {`Balance al corte ${formatFinanceMoney(closing, display)}`}
+                  </Button>
+                ) : null}
+              </div>
+              <Field className="gap-1">
+                <FieldLabel className="text-sm text-muted-foreground">
+                  Cuenta de origen
+                </FieldLabel>
+                <DestinationTrigger
+                  destination={
+                    effectiveAccountId
+                      ? encodeLedgerTarget("account", effectiveAccountId)
+                      : CATALOG_NONE
+                  }
+                  accounts={accounts}
+                  cards={[]}
+                  display={display}
+                  placeholder="Elige la cuenta"
+                  onClick={() => openPicker("account")}
+                />
+                {accounts.length === 0 ? (
+                  <FieldError>Necesitas una cuenta activa.</FieldError>
+                ) : null}
+              </Field>
+              <FinanceDateField
+                label="Fecha"
+                value={transactionDate}
+                onChange={setTransactionDate}
+              />
+              <FinanceHelpText>
+                El pago no cuenta como gasto: solo mueve dinero a la tarjeta.
+              </FinanceHelpText>
+            </SummarySection>
+          </SheetBody>
+          {!createMutation.isPending ? (
+            <DrawerFooter className={SHEET_FOOTER_CLASS}>
+              <Button
+                type="button"
+                variant="outline"
+                className="flex-1"
+                onClick={() => onOpenChange(false)}
+              >
+                <XIcon className="size-4 shrink-0" aria-hidden="true" />
+                Cancelar
+              </Button>
+              <Button
+                type="button"
+                disabled={createMutation.isPending}
+                className="flex-1"
+                onClick={() => void onSubmit()}
+              >
+                {createMutation.isPending ? (
+                  <Spinner data-icon="inline-start" />
+                ) : null}
+                Pagar
+              </Button>
+            </DrawerFooter>
           ) : null}
-          <FinanceMoneyField
-            calculatorKey="card-payment-amount"
-            label="Monto"
-            amount={amount}
-            onAmountChange={setAmount}
-            onAmountCommit={(next) => setAmount(next)}
-            amountError={amountError ?? undefined}
-            currency={currency}
-          />
-          <div className="flex flex-wrap gap-2">
-            {minimum !== null && minimum > 0 ? (
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => setAmount(String(minimum))}
-              >
-                <CoinsIcon className="size-4 shrink-0" />
-                {`Pago mínimo ${formatFinanceMoney(minimum, display)}`}
-              </Button>
-            ) : null}
-            {closing !== null && closing > 0 ? (
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => setAmount(String(closing))}
-              >
-                <WalletIcon className="size-4 shrink-0" />
-                {`Balance al corte ${formatFinanceMoney(closing, display)}`}
-              </Button>
-            ) : null}
-          </div>
-          <Field className="gap-1">
-            <FieldLabel className="text-sm text-muted-foreground">
-              Cuenta de origen
-            </FieldLabel>
-            <DestinationTrigger
-              destination={
-                effectiveAccountId
-                  ? encodeLedgerTarget("account", effectiveAccountId)
-                  : CATALOG_NONE
-              }
-              accounts={accounts}
-              cards={[]}
-              display={display}
-              placeholder="Elige la cuenta"
-              onClick={() => openPicker("account")}
-            />
-            {accounts.length === 0 ? (
-              <FieldError>Necesitas una cuenta activa.</FieldError>
-            ) : null}
-          </Field>
-          <FinanceDateField
-            label="Fecha"
-            value={transactionDate}
-            onChange={setTransactionDate}
-          />
-          <FinanceHelpText>
-            El pago no cuenta como gasto: solo mueve dinero a la tarjeta.
-          </FinanceHelpText>
-        </SummarySection>
-      </BottomSheet>
-
-      <DestinationPickerSheet
-        open={picker === "account"}
-        onOpenChange={closeHandlerFor("account")}
-        institutions={institutions}
-        accounts={accounts}
-        cards={[]}
-        display={display}
-        accountsOnly
-        onSelect={(next) =>
-          setAccountId(splitLedgerTarget(next).accountId ?? "")
-        }
-      />
+        </DrawerContent>
+        <DestinationPickerSheet
+          open={picker === "account"}
+          onOpenChange={closeHandlerFor("account")}
+          institutions={institutions}
+          accounts={accounts}
+          cards={[]}
+          display={display}
+          accountsOnly
+          onSelect={(next) =>
+            setAccountId(splitLedgerTarget(next).accountId ?? "")
+          }
+        />
+      </Drawer>
 
       <AlertDialog
         open={pendingDuplicate !== null}

@@ -13,14 +13,21 @@ import {
   type FinanceMoneyDisplay,
 } from "@/src/modules/finance/shared/lib/money"
 import type { FinanceAccount } from "@/src/modules/finance/shared/types/entities"
-import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { SheetBody } from "@/src/shared/components/sheets/sheet-body"
+import { SheetHeader } from "@/src/shared/components/sheets/sheet-header"
+import { SHEET_FOOTER_CLASS } from "@/src/shared/components/sheets/sheet-layout"
 import { Button } from "@/src/shared/components/ui/button"
+import {
+  Drawer,
+  DrawerContent,
+  DrawerFooter,
+} from "@/src/shared/components/ui/drawer"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { SaveIcon, ScaleIcon } from "lucide-react"
+import { SaveIcon, ScaleIcon, XIcon } from "lucide-react"
 import { useEffect, useMemo } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import {
@@ -96,75 +103,89 @@ export function AccountBalanceSheet({
 
   return (
     <>
-      <BottomSheet
-        open={open}
-        onOpenChange={requestOpenChange}
-        helpAction={
-          <SheetHelpAction sheetKey={FINANCE_SHEET_KEYS.accountBalance} />
-        }
-        pending={mutation.isPending}
-        title={account ? `Ajustar saldo · ${account.name}` : "Ajustar saldo"}
-        description="El cambio queda como un reajuste. No cuenta como ingreso ni gasto."
-        actions={{
-          submit: (
-            <Button
-              className="flex-1"
-              disabled={mutation.isPending || !account}
-              onClick={onSubmit}
-            >
-              {mutation.isPending ? (
-                <Spinner data-icon="inline-start" />
-              ) : (
-                <SaveIcon className="size-4 shrink-0" />
-              )}
-              {mutation.isPending ? "Guardando..." : "Guardar"}
-            </Button>
-          ),
-        }}
-      >
-        <SummarySection title="Saldo" icon={ScaleIcon}>
-          <p className="px-1 text-sm text-muted-foreground">
-            Saldo actual{" "}
-            <span className="font-medium text-foreground tabular-nums">
-              {formatFinanceMoney(account?.balance, {
-                ...display,
-                currency: account?.currency ?? display.currency,
-              })}
-            </span>
-          </p>
-          {difference !== null && difference !== 0 ? (
-            <p className="px-1 text-sm text-muted-foreground">
-              Ajuste{" "}
-              <span className="font-medium text-foreground tabular-nums">
-                {formatFinanceMoney(difference, {
-                  ...display,
-                  currency: account?.currency ?? display.currency,
-                  leadingSign: true,
-                })}
-              </span>
-            </p>
-          ) : null}
-          <Controller
-            control={control}
-            name="balance"
-            render={({ field }) => (
-              <FinanceMoneyField
-                calculatorKey="account-balance-amount"
-                label="Saldo nuevo"
-                amount={field.value}
-                onAmountChange={field.onChange}
-                onAmountCommit={(next) => {
-                  field.onChange(next)
-                  void trigger("balance")
-                }}
-                onAmountBlur={field.onBlur}
-                amountError={errors.balance?.message}
-                currency={account?.currency ?? display.currency}
-              />
-            )}
+      <Drawer open={open} onOpenChange={requestOpenChange}>
+        <DrawerContent>
+          <SheetHeader
+            title={
+              account ? `Ajustar saldo · ${account.name}` : "Ajustar saldo"
+            }
+            description="El cambio queda como un reajuste. No cuenta como ingreso ni gasto."
+            pending={mutation.isPending}
+            actions={
+              <SheetHelpAction sheetKey={FINANCE_SHEET_KEYS.accountBalance} />
+            }
           />
-        </SummarySection>
-      </BottomSheet>
+          <SheetBody pending={mutation.isPending}>
+            <SummarySection title="Saldo" icon={ScaleIcon}>
+              <p className="px-1 text-sm text-muted-foreground">
+                Saldo actual{" "}
+                <span className="font-medium text-foreground tabular-nums">
+                  {formatFinanceMoney(account?.balance, {
+                    ...display,
+                    currency: account?.currency ?? display.currency,
+                  })}
+                </span>
+              </p>
+              {difference !== null && difference !== 0 ? (
+                <p className="px-1 text-sm text-muted-foreground">
+                  Ajuste{" "}
+                  <span className="font-medium text-foreground tabular-nums">
+                    {formatFinanceMoney(difference, {
+                      ...display,
+                      currency: account?.currency ?? display.currency,
+                      leadingSign: true,
+                    })}
+                  </span>
+                </p>
+              ) : null}
+              <Controller
+                control={control}
+                name="balance"
+                render={({ field }) => (
+                  <FinanceMoneyField
+                    calculatorKey="account-balance-amount"
+                    label="Saldo nuevo"
+                    amount={field.value}
+                    onAmountChange={field.onChange}
+                    onAmountCommit={(next) => {
+                      field.onChange(next)
+                      void trigger("balance")
+                    }}
+                    onAmountBlur={field.onBlur}
+                    amountError={errors.balance?.message}
+                    currency={account?.currency ?? display.currency}
+                  />
+                )}
+              />
+            </SummarySection>
+          </SheetBody>
+          {!mutation.isPending ? (
+            <DrawerFooter className={SHEET_FOOTER_CLASS}>
+              <Button
+                type="button"
+                variant="outline"
+                className="flex-1"
+                onClick={() => requestOpenChange(false)}
+              >
+                <XIcon className="size-4 shrink-0" aria-hidden="true" />
+                Cancelar
+              </Button>
+              <Button
+                className="flex-1"
+                disabled={mutation.isPending || !account}
+                onClick={onSubmit}
+              >
+                {mutation.isPending ? (
+                  <Spinner data-icon="inline-start" />
+                ) : (
+                  <SaveIcon className="size-4 shrink-0" />
+                )}
+                {mutation.isPending ? "Guardando..." : "Guardar"}
+              </Button>
+            </DrawerFooter>
+          ) : null}
+        </DrawerContent>
+      </Drawer>
 
       {discardChangesDialog}
     </>

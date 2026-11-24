@@ -28,7 +28,9 @@ import type {
 import { RecordOptionsSheet } from "@/src/modules/finance/shared/components/record-options-sheet"
 import { CategoryPickerSheet } from "@/src/modules/finance/shared/components/pickers/category-picker-sheet"
 import { CategoryTrigger } from "@/src/modules/finance/shared/components/pickers/category-trigger"
-import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { SheetBody } from "@/src/shared/components/sheets/sheet-body"
+import { SheetHeader } from "@/src/shared/components/sheets/sheet-header"
+import { SHEET_FOOTER_CLASS } from "@/src/shared/components/sheets/sheet-layout"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import { SheetHelpAction } from "@/src/modules/help"
 import {
@@ -37,6 +39,11 @@ import {
   InputGroupInput,
 } from "@/src/shared/components/ui/input-group"
 import { Button } from "@/src/shared/components/ui/button"
+import {
+  Drawer,
+  DrawerContent,
+  DrawerFooter,
+} from "@/src/shared/components/ui/drawer"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -245,269 +252,288 @@ export function CategorySheet({
 
   return (
     <>
-      <BottomSheet
-        open={open}
-        onOpenChange={requestOpenChange}
-        helpAction={<SheetHelpAction sheetKey={FINANCE_SHEET_KEYS.category} />}
-        pending={pending}
-        title={
-          isEdit
-            ? isSystem
-              ? "Categoría del sistema"
-              : "Editar categoría"
-            : "Nueva categoría"
-        }
-        description={
-          isSystem
-            ? "Esta categoría viene con el sistema. No se puede editar ni eliminar."
-            : undefined
-        }
-        actions={{
-          submit: isSystem ? undefined : (
-            <Button disabled={isPending} className="flex-1" onClick={onSubmit}>
-              {isPending ? (
-                <Spinner data-icon="inline-start" />
-              ) : (
-                <SaveIcon className="size-4 shrink-0" />
-              )}
-              {isPending ? "Guardando..." : "Guardar"}
-            </Button>
-          ),
-        }}
-      >
-        <Controller
-          control={control}
-          name="type"
-          render={({ field }) => (
-            <ToggleGroup
-              value={[field.value]}
-              onValueChange={(next) => {
-                if (next.length > 0) {
-                  field.onChange(next[0])
-                }
-              }}
-              variant="outline"
-              size="lg"
-              disabled={typeLocked}
-              className="w-full"
-            >
-              {TYPE_OPTIONS.map((option) => (
-                <ToggleGroupItem
-                  key={option.value}
-                  value={option.value}
-                  className="h-11 flex-1 rounded-full text-base"
+      <Drawer open={open} onOpenChange={requestOpenChange}>
+        <DrawerContent>
+          <SheetHeader
+            title={
+              isEdit
+                ? isSystem
+                  ? "Categoría del sistema"
+                  : "Editar categoría"
+                : "Nueva categoría"
+            }
+            description={
+              isSystem
+                ? "Esta categoría viene con el sistema. No se puede editar ni eliminar."
+                : undefined
+            }
+            pending={pending}
+            actions={<SheetHelpAction sheetKey={FINANCE_SHEET_KEYS.category} />}
+          />
+          <SheetBody pending={pending}>
+            <Controller
+              control={control}
+              name="type"
+              render={({ field }) => (
+                <ToggleGroup
+                  value={[field.value]}
+                  onValueChange={(next) => {
+                    if (next.length > 0) {
+                      field.onChange(next[0])
+                    }
+                  }}
+                  variant="outline"
+                  size="lg"
+                  disabled={typeLocked}
+                  className="w-full"
                 >
-                  {option.label}
-                </ToggleGroupItem>
-              ))}
-            </ToggleGroup>
-          )}
-        />
-        {isEdit && !isSystem ? (
-          <p className="text-xs text-muted-foreground">
-            El tipo no cambia: los movimientos ya registrados lo usan.
-          </p>
-        ) : null}
-
-        <CategoryCard
-          name={categoryName}
-          icon={categoryIcon}
-          color={categoryColor}
-          isSystem={isSystem}
-          className="pr-4"
-        />
-
-        <SummarySection title="Datos" icon={ContactRoundIcon}>
-          <div data-emoji-panel-host className="flex flex-col gap-2">
-            <div className="flex items-start gap-2">
-              <div className="min-w-0 flex-1">
-                <Controller
-                  control={control}
-                  name="name"
-                  render={({ field }) => (
-                    <Field
-                      data-invalid={errors.name ? true : undefined}
-                      data-disabled={isSystem ? true : undefined}
-                      className="gap-0.5"
+                  {TYPE_OPTIONS.map((option) => (
+                    <ToggleGroupItem
+                      key={option.value}
+                      value={option.value}
+                      className="h-11 flex-1 rounded-full text-base"
                     >
-                      <FieldLabel
-                        htmlFor="category-name"
-                        className="pl-2 text-sm text-muted-foreground"
-                      >
-                        Nombre
-                      </FieldLabel>
-                      <InputGroup className="h-10 overflow-hidden px-1">
-                        <InputGroupAddon align="inline-start">
-                          <ContactRoundIcon className="text-muted-foreground" />
-                        </InputGroupAddon>
-                        <InputGroupInput
-                          id="category-name"
+                      {option.label}
+                    </ToggleGroupItem>
+                  ))}
+                </ToggleGroup>
+              )}
+            />
+            {isEdit && !isSystem ? (
+              <p className="text-xs text-muted-foreground">
+                El tipo no cambia: los movimientos ya registrados lo usan.
+              </p>
+            ) : null}
+
+            <CategoryCard
+              name={categoryName}
+              icon={categoryIcon}
+              color={categoryColor}
+              isSystem={isSystem}
+              className="pr-4"
+            />
+
+            <SummarySection title="Datos" icon={ContactRoundIcon}>
+              <div data-emoji-panel-host className="flex flex-col gap-2">
+                <div className="flex items-start gap-2">
+                  <div className="min-w-0 flex-1">
+                    <Controller
+                      control={control}
+                      name="name"
+                      render={({ field }) => (
+                        <Field
+                          data-invalid={errors.name ? true : undefined}
+                          data-disabled={isSystem ? true : undefined}
+                          className="gap-0.5"
+                        >
+                          <FieldLabel
+                            htmlFor="category-name"
+                            className="pl-2 text-sm text-muted-foreground"
+                          >
+                            Nombre
+                          </FieldLabel>
+                          <InputGroup className="h-10 overflow-hidden px-1">
+                            <InputGroupAddon align="inline-start">
+                              <ContactRoundIcon className="text-muted-foreground" />
+                            </InputGroupAddon>
+                            <InputGroupInput
+                              id="category-name"
+                              value={field.value}
+                              onChange={(event) =>
+                                field.onChange(event.target.value)
+                              }
+                              onBlur={field.onBlur}
+                              placeholder="Supermercado"
+                              disabled={isSystem}
+                              aria-invalid={errors.name ? true : undefined}
+                            />
+                          </InputGroup>
+                          {errors.name?.message ? (
+                            <FieldError>{errors.name.message}</FieldError>
+                          ) : null}
+                        </Field>
+                      )}
+                    />
+                  </div>
+                  <div className="w-14 shrink-0">
+                    <Controller
+                      control={control}
+                      name="icon"
+                      render={({ field }) => (
+                        <CategoryEmojiField
                           value={field.value}
-                          onChange={(event) =>
-                            field.onChange(event.target.value)
-                          }
+                          onChange={field.onChange}
                           onBlur={field.onBlur}
-                          placeholder="Supermercado"
+                          error={errors.icon?.message}
                           disabled={isSystem}
-                          aria-invalid={errors.name ? true : undefined}
                         />
-                      </InputGroup>
-                      {errors.name?.message ? (
-                        <FieldError>{errors.name.message}</FieldError>
-                      ) : null}
-                    </Field>
-                  )}
-                />
+                      )}
+                    />
+                  </div>
+                </div>
+                {emojiSuggestions.length > 0 ? (
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <span className="text-xs text-muted-foreground">
+                      Sugeridos
+                    </span>
+                    {emojiSuggestions.map((emoji) => (
+                      <button
+                        key={emoji}
+                        type="button"
+                        aria-label={`Usar ${emoji}`}
+                        className={cn(
+                          "flex size-8 items-center justify-center rounded-full border border-border text-base",
+                          PRESSABLE_CLASS
+                        )}
+                        onClick={() =>
+                          setValue("icon", emoji, { shouldValidate: true })
+                        }
+                      >
+                        {emoji}
+                      </button>
+                    ))}
+                  </div>
+                ) : null}
               </div>
-              <div className="w-14 shrink-0">
-                <Controller
-                  control={control}
-                  name="icon"
-                  render={({ field }) => (
-                    <CategoryEmojiField
+              <Field className="gap-1">
+                <FieldLabel className="text-sm text-muted-foreground">
+                  Categoría padre
+                </FieldLabel>
+                <CategoryTrigger
+                  category={selectedParent}
+                  placeholder="Sin padre"
+                  disabled={isSystem}
+                  onClick={() => openPicker("parent")}
+                />
+                {errors.parentId?.message ? (
+                  <FieldError>{errors.parentId.message}</FieldError>
+                ) : null}
+              </Field>
+            </SummarySection>
+
+            <SummarySection title="Apariencia" icon={PaletteIcon}>
+              <Controller
+                control={control}
+                name="color"
+                render={({ field }) => (
+                  <div className="flex flex-col gap-2">
+                    <Label htmlFor="category-color">Color</Label>
+                    <ColorPickerSwatch
+                      id="category-color"
+                      variant="button"
                       value={field.value}
                       onChange={field.onChange}
-                      onBlur={field.onBlur}
-                      error={errors.icon?.message}
                       disabled={isSystem}
                     />
+                  </div>
+                )}
+              />
+            </SummarySection>
+
+            <Separator />
+
+            {isEdit && !isSystem && (
+              <Button
+                variant="destructive"
+                size="lg"
+                disabled={isPending}
+                className="flex-1 py-2"
+                onClick={() => setConfirmOpen(true)}
+              >
+                {isPending ? (
+                  <Spinner data-icon="inline-start" />
+                ) : (
+                  <TrashIcon className="size-4" />
+                )}
+                {isPending ? "Eliminando..." : "Eliminar categoría"}
+              </Button>
+            )}
+          </SheetBody>
+          {!pending ? (
+            <DrawerFooter className={SHEET_FOOTER_CLASS}>
+              <Button
+                type="button"
+                variant="outline"
+                className="flex-1"
+                onClick={() => requestOpenChange(false)}
+              >
+                <XIcon className="size-4 shrink-0" aria-hidden="true" />
+                Cancelar
+              </Button>
+              {!isSystem ? (
+                <Button
+                  disabled={isPending}
+                  className="flex-1"
+                  onClick={onSubmit}
+                >
+                  {isPending ? (
+                    <Spinner data-icon="inline-start" />
+                  ) : (
+                    <SaveIcon className="size-4 shrink-0" />
                   )}
-                />
-              </div>
-            </div>
-            {emojiSuggestions.length > 0 ? (
-              <div className="flex flex-wrap items-center gap-1.5">
-                <span className="text-xs text-muted-foreground">Sugeridos</span>
-                {emojiSuggestions.map((emoji) => (
-                  <button
-                    key={emoji}
-                    type="button"
-                    aria-label={`Usar ${emoji}`}
-                    className={cn(
-                      "flex size-8 items-center justify-center rounded-full border border-border text-base",
-                      PRESSABLE_CLASS
-                    )}
-                    onClick={() =>
-                      setValue("icon", emoji, { shouldValidate: true })
-                    }
-                  >
-                    {emoji}
-                  </button>
-                ))}
-              </div>
-            ) : null}
-          </div>
-          <Field className="gap-1">
-            <FieldLabel className="text-sm text-muted-foreground">
-              Categoría padre
-            </FieldLabel>
-            <CategoryTrigger
-              category={selectedParent}
-              placeholder="Sin padre"
-              disabled={isSystem}
-              onClick={() => openPicker("parent")}
-            />
-            {errors.parentId?.message ? (
-              <FieldError>{errors.parentId.message}</FieldError>
-            ) : null}
-          </Field>
-        </SummarySection>
+                  {isPending ? "Guardando..." : "Guardar"}
+                </Button>
+              ) : null}
+            </DrawerFooter>
+          ) : null}
+        </DrawerContent>
+        {discardChangesDialog}
 
-        <SummarySection title="Apariencia" icon={PaletteIcon}>
-          <Controller
-            control={control}
-            name="color"
-            render={({ field }) => (
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="category-color">Color</Label>
-                <ColorPickerSwatch
-                  id="category-color"
-                  variant="button"
-                  value={field.value}
-                  onChange={field.onChange}
-                  disabled={isSystem}
-                />
-              </div>
-            )}
-          />
-        </SummarySection>
+        <AlertDialog
+          open={confirmOpen}
+          onOpenChange={(open) => {
+            if (!open && !deleteMutation.isPending) {
+              setConfirmOpen(false)
+            }
+          }}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogMedia className="bg-destructive/10 text-destructive">
+                <TrashIcon aria-hidden="true" />
+              </AlertDialogMedia>
+              <AlertDialogTitle>
+                ¿Eliminar “{category?.name ?? "esta categoría"}”?
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                Los movimientos que la usan quedan sin categoría. No se puede
+                deshacer.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={deleteMutation.isPending}>
+                <XIcon className="size-4 shrink-0" aria-hidden="true" />
+                Cancelar
+              </AlertDialogCancel>
+              <AlertDialogAction
+                variant="destructive"
+                disabled={deleteMutation.isPending}
+                onClick={() => void onDelete()}
+              >
+                {deleteMutation.isPending ? (
+                  <Spinner data-icon="inline-start" />
+                ) : (
+                  <TrashIcon className="size-4 shrink-0" aria-hidden="true" />
+                )}
+                {deleteMutation.isPending ? "Eliminando..." : "Eliminar"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
 
-        <Separator />
-
-        {isEdit && !isSystem && (
-          <Button
-            variant="destructive"
-            size="lg"
-            disabled={isPending}
-            className="flex-1 py-2"
-            onClick={() => setConfirmOpen(true)}
-          >
-            {isPending ? (
-              <Spinner data-icon="inline-start" />
-            ) : (
-              <TrashIcon className="size-4" />
-            )}
-            {isPending ? "Eliminando..." : "Eliminar categoría"}
-          </Button>
-        )}
-      </BottomSheet>
-
-      {discardChangesDialog}
-
-      <AlertDialog
-        open={confirmOpen}
-        onOpenChange={(open) => {
-          if (!open && !deleteMutation.isPending) {
-            setConfirmOpen(false)
+        <CategoryPickerSheet
+          open={picker === "parent"}
+          onOpenChange={closeHandlerFor("parent")}
+          categories={categories}
+          categoryType={selectedType}
+          onlyParents
+          excludeIds={excludeParentIds}
+          noneLabel="Sin padre"
+          onSelect={(next) =>
+            setValue("parentId", next, { shouldValidate: true })
           }
-        }}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogMedia className="bg-destructive/10 text-destructive">
-              <TrashIcon aria-hidden="true" />
-            </AlertDialogMedia>
-            <AlertDialogTitle>
-              ¿Eliminar “{category?.name ?? "esta categoría"}”?
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              Los movimientos que la usan quedan sin categoría. No se puede
-              deshacer.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleteMutation.isPending}>
-              <XIcon className="size-4 shrink-0" aria-hidden="true" />
-              Cancelar
-            </AlertDialogCancel>
-            <AlertDialogAction
-              variant="destructive"
-              disabled={deleteMutation.isPending}
-              onClick={() => void onDelete()}
-            >
-              {deleteMutation.isPending ? (
-                <Spinner data-icon="inline-start" />
-              ) : (
-                <TrashIcon className="size-4 shrink-0" aria-hidden="true" />
-              )}
-              {deleteMutation.isPending ? "Eliminando..." : "Eliminar"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      <CategoryPickerSheet
-        open={picker === "parent"}
-        onOpenChange={closeHandlerFor("parent")}
-        categories={categories}
-        categoryType={selectedType}
-        onlyParents
-        excludeIds={excludeParentIds}
-        noneLabel="Sin padre"
-        onSelect={(next) =>
-          setValue("parentId", next, { shouldValidate: true })
-        }
-      />
+        />
+      </Drawer>
     </>
   )
 }
