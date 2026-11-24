@@ -1,9 +1,16 @@
 "use client"
 
-import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
-
+import { SheetBody } from "@/src/shared/components/sheets/sheet-body"
+import { SheetHeader } from "@/src/shared/components/sheets/sheet-header"
+import { SHEET_FOOTER_CLASS } from "@/src/shared/components/sheets/sheet-layout"
+import { Button } from "@/src/shared/components/ui/button"
+import {
+  Drawer,
+  DrawerContent,
+  DrawerFooter,
+} from "@/src/shared/components/ui/drawer"
 import { cn } from "@/src/shared/lib/utils"
-import { Bell, MonitorPlay, PanelsTopLeft, Play } from "lucide-react"
+import { Bell, MonitorPlay, PanelsTopLeft, Play, XIcon } from "lucide-react"
 
 const STEPS = [
   {
@@ -39,36 +46,49 @@ export function KeepAwakeHelpSheet({
   onOpenChange,
 }: KeepAwakeHelpSheetProps) {
   return (
-    <BottomSheet
-      closeLabel="Cerrar"
-      open={open}
-      onOpenChange={onOpenChange}
-      title="Cómo funciona"
-      description="Keep Awake mantiene la pantalla despierta en esta ventana."
-    >
-      {STEPS.map((step, index) => {
-        const Icon = step.icon
-        const isLast = index === STEPS.length - 1
-        return (
-          <div
-            key={step.title}
-            className={cn(
-              "flex items-start gap-3 py-3",
-              !isLast && "border-b border-border/60"
-            )}
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent>
+        <SheetHeader
+          title="Cómo funciona"
+          description="Keep Awake mantiene la pantalla despierta en esta ventana."
+        />
+        <SheetBody>
+          {STEPS.map((step, index) => {
+            const Icon = step.icon
+            const isLast = index === STEPS.length - 1
+            return (
+              <div
+                key={step.title}
+                className={cn(
+                  "flex items-start gap-3 py-3",
+                  !isLast && "border-b border-border/60"
+                )}
+              >
+                <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted">
+                  <Icon className="size-5 text-muted-foreground" aria-hidden />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium">{step.title}</p>
+                  <p className="text-xs leading-relaxed text-muted-foreground">
+                    {step.description}
+                  </p>
+                </div>
+              </div>
+            )
+          })}
+        </SheetBody>
+        <DrawerFooter className={SHEET_FOOTER_CLASS}>
+          <Button
+            type="button"
+            variant="outline"
+            className="flex-1"
+            onClick={() => onOpenChange(false)}
           >
-            <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted">
-              <Icon className="size-5 text-muted-foreground" aria-hidden />
-            </span>
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium">{step.title}</p>
-              <p className="text-xs leading-relaxed text-muted-foreground">
-                {step.description}
-              </p>
-            </div>
-          </div>
-        )
-      })}
-    </BottomSheet>
+            <XIcon className="size-4 shrink-0" aria-hidden="true" />
+            Cerrar
+          </Button>
+        </DrawerFooter>
+      </DrawerContent>
+    </Drawer>
   )
 }

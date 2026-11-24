@@ -1,7 +1,14 @@
 "use client"
 
-import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { SheetBody } from "@/src/shared/components/sheets/sheet-body"
+import { SheetHeader } from "@/src/shared/components/sheets/sheet-header"
+import { SHEET_FOOTER_CLASS } from "@/src/shared/components/sheets/sheet-layout"
 import { Button } from "@/src/shared/components/ui/button"
+import {
+  Drawer,
+  DrawerContent,
+  DrawerFooter,
+} from "@/src/shared/components/ui/drawer"
 import { PRESSABLE_CLASS } from "@/src/shared/lib/utils"
 import { formatElapsed } from "@/src/modules/keep-awake/lib/format-elapsed"
 import { appToast } from "@/src/shared/lib/app-toast"
@@ -23,6 +30,7 @@ import {
   Pause,
   Square,
   Timer,
+  XIcon,
 } from "lucide-react"
 import { useSyncExternalStore } from "react"
 import { useFormatLocale } from "@/src/modules/settings/hooks/use-format-locale"
@@ -81,67 +89,83 @@ export function KeepAwakeHistorySheet({
   const visible = entries.slice(0, 8)
 
   return (
-    <BottomSheet
-      closeLabel="Cerrar"
-      open={open}
-      onOpenChange={onOpenChange}
-      title="Historial"
-      description="Sesiones cerradas recientes."
-    >
-      {visible.length === 0 && (
-        <div className="flex flex-col items-center gap-2 px-4 py-8 text-center">
-          <span className="flex size-10 items-center justify-center rounded-full bg-muted">
-            <ClockIcon className="size-5 text-muted-foreground" aria-hidden />
-          </span>
-          <p className="text-sm font-medium">Sin sesiones recientes</p>
-          <p className="text-xs text-muted-foreground">
-            Las sesiones cerradas aparecerán aquí.
-          </p>
-        </div>
-      )}
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent>
+        <SheetHeader
+          title="Historial"
+          description="Sesiones cerradas recientes."
+        />
+        <SheetBody>
+          {visible.length === 0 && (
+            <div className="flex flex-col items-center gap-2 px-4 py-8 text-center">
+              <span className="flex size-10 items-center justify-center rounded-full bg-muted">
+                <ClockIcon
+                  className="size-5 text-muted-foreground"
+                  aria-hidden
+                />
+              </span>
+              <p className="text-sm font-medium">Sin sesiones recientes</p>
+              <p className="text-xs text-muted-foreground">
+                Las sesiones cerradas aparecerán aquí.
+              </p>
+            </div>
+          )}
 
-      <div className="flex flex-col">
-        {visible.map((entry, index) => {
-          const Icon = historyReasonIcon(entry.endReason)
-          const color = historyReasonColor(entry.endReason)
-          return (
-            <SummaryItem
-              key={entry.id}
-              title={formatElapsed(entry.durationSeconds)}
-              description={`${formatRange(entry, locale)} · ${historyEndReasonLabel(entry.endReason)}`}
-              leading={<Icon className="size-5" style={{ color }} />}
-              accentColor={color}
-              isLast={index === visible.length - 1}
-              trailing={
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon-sm"
-                  className={PRESSABLE_CLASS}
-                  aria-label={`Copiar ${formatElapsed(entry.durationSeconds)}`}
-                  onClick={() => {
-                    const text = formatElapsed(entry.durationSeconds)
-                    void navigator.clipboard.writeText(text).then(
-                      () =>
-                        appToast.success({
-                          text1: "Duración copiada",
-                          text2: text,
-                        }),
-                      () =>
-                        appToast.error({
-                          text1: "No se pudo copiar",
-                          text2: text,
-                        })
-                    )
-                  }}
-                >
-                  <Copy className="size-4" aria-hidden />
-                </Button>
-              }
-            />
-          )
-        })}
-      </div>
-    </BottomSheet>
+          <div className="flex flex-col">
+            {visible.map((entry, index) => {
+              const Icon = historyReasonIcon(entry.endReason)
+              const color = historyReasonColor(entry.endReason)
+              return (
+                <SummaryItem
+                  key={entry.id}
+                  title={formatElapsed(entry.durationSeconds)}
+                  description={`${formatRange(entry, locale)} · ${historyEndReasonLabel(entry.endReason)}`}
+                  leading={<Icon className="size-5" style={{ color }} />}
+                  accentColor={color}
+                  isLast={index === visible.length - 1}
+                  trailing={
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon-sm"
+                      className={PRESSABLE_CLASS}
+                      aria-label={`Copiar ${formatElapsed(entry.durationSeconds)}`}
+                      onClick={() => {
+                        const text = formatElapsed(entry.durationSeconds)
+                        void navigator.clipboard.writeText(text).then(
+                          () =>
+                            appToast.success({
+                              text1: "Duración copiada",
+                              text2: text,
+                            }),
+                          () =>
+                            appToast.error({
+                              text1: "No se pudo copiar",
+                              text2: text,
+                            })
+                        )
+                      }}
+                    >
+                      <Copy className="size-4" aria-hidden />
+                    </Button>
+                  }
+                />
+              )
+            })}
+          </div>
+        </SheetBody>
+        <DrawerFooter className={SHEET_FOOTER_CLASS}>
+          <Button
+            type="button"
+            variant="outline"
+            className="flex-1"
+            onClick={() => onOpenChange(false)}
+          >
+            <XIcon className="size-4 shrink-0" aria-hidden="true" />
+            Cerrar
+          </Button>
+        </DrawerFooter>
+      </DrawerContent>
+    </Drawer>
   )
 }

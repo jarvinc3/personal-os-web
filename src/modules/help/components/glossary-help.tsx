@@ -11,11 +11,18 @@ import {
   glossaryPickerKey,
 } from "@/src/modules/help/lib/sheet-glossary"
 import type { HelpTerm } from "@/src/modules/help/types/help.types"
-import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { SheetBody } from "@/src/shared/components/sheets/sheet-body"
+import { SheetHeader } from "@/src/shared/components/sheets/sheet-header"
+import { SHEET_FOOTER_CLASS } from "@/src/shared/components/sheets/sheet-layout"
 import { Button } from "@/src/shared/components/ui/button"
+import {
+  Drawer,
+  DrawerContent,
+  DrawerFooter,
+} from "@/src/shared/components/ui/drawer"
 import { usePicker } from "@/src/shared/hooks/use-picker"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
-import { BookOpenIcon, HelpCircleIcon } from "lucide-react"
+import { BookOpenIcon, HelpCircleIcon, XIcon } from "lucide-react"
 import Link from "next/link"
 
 type GlossaryTermDefinitionProps = {
@@ -57,7 +64,6 @@ type GlossaryTermsDialogProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
   closeLabel?: string
-  showHeaderAgentTrigger?: boolean
   showAgentButton?: boolean
 }
 
@@ -66,7 +72,6 @@ function GlossaryTermsDialog({
   open,
   onOpenChange,
   closeLabel = "Cerrar",
-  showHeaderAgentTrigger = true,
   showAgentButton = false,
 }: GlossaryTermsDialogProps) {
   const terms = glossaryTermsForSlugs(slugs)
@@ -76,34 +81,48 @@ function GlossaryTermsDialog({
   const singleTerm = terms.length === 1
 
   return (
-    <BottomSheet
-      closeLabel={closeLabel}
-      open={open}
-      onOpenChange={onOpenChange}
-      title={singleTerm ? terms[0].term : "Glosario"}
-      description={
-        singleTerm ? "Glosario" : "Definiciones de los conceptos de esta hoja"
-      }
-      showAgentTrigger={showHeaderAgentTrigger}
-    >
-      <div className="flex flex-col gap-4">
-        {terms.map((term) => (
-          <GlossaryTermDefinition
-            key={term.slug}
-            term={term}
-            showTermTitle={!singleTerm}
-            onNavigate={() => onOpenChange(false)}
-          />
-        ))}
-        {showAgentButton ? (
-          <AgentChatTriggerButton
-            withLabel
-            label="Preguntar al agente"
-            className="w-full"
-          />
-        ) : null}
-      </div>
-    </BottomSheet>
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent>
+        <SheetHeader
+          title={singleTerm ? terms[0].term : "Glosario"}
+          description={
+            singleTerm
+              ? "Glosario"
+              : "Definiciones de los conceptos de esta hoja"
+          }
+        />
+        <SheetBody>
+          <div className="flex flex-col gap-4">
+            {terms.map((term) => (
+              <GlossaryTermDefinition
+                key={term.slug}
+                term={term}
+                showTermTitle={!singleTerm}
+                onNavigate={() => onOpenChange(false)}
+              />
+            ))}
+            {showAgentButton ? (
+              <AgentChatTriggerButton
+                withLabel
+                label="Preguntar al agente"
+                className="w-full"
+              />
+            ) : null}
+          </div>
+        </SheetBody>
+        <DrawerFooter className={SHEET_FOOTER_CLASS}>
+          <Button
+            type="button"
+            variant="outline"
+            className="flex-1"
+            onClick={() => onOpenChange(false)}
+          >
+            <XIcon className="size-4 shrink-0" aria-hidden="true" />
+            {closeLabel}
+          </Button>
+        </DrawerFooter>
+      </DrawerContent>
+    </Drawer>
   )
 }
 
@@ -167,7 +186,6 @@ function SheetGlossaryDialog({
       slugs={slugs}
       open={open}
       onOpenChange={onOpenChange}
-      showHeaderAgentTrigger={false}
       showAgentButton
     />
   )
